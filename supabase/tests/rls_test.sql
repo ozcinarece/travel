@@ -33,8 +33,9 @@ grant execute on function pg_temp.as_user(uuid, boolean), pg_temp.hata_bekle(tex
 set role authenticated;
 select pg_temp.as_user(:A);
 insert into public.profiles (id, name, username) values (:A, 'Ece', 'ece');
-insert into public.trips (owner_id, city_place_id, city_label, lat, lng, tz, start_date, end_date)
-values (:A, 'ChIJ-roma', 'Roma', 41.9, 12.49, 'Europe/Rome', '2026-10-12', '2026-10-15');
+insert into public.trips (owner_id, city_place_id, city_label, country_code, lat, lng, tz, start_date, end_date)
+values (:A, 'ChIJ-roma', 'Roma', 'IT', 41.9, 12.49, 'Europe/Rome', '2026-10-12', '2026-10-15');
+select pg_temp.hata_bekle($$update public.trips set country_code = 'ita'$$, '23514');
 
 do $$
 declare s record;
@@ -172,6 +173,8 @@ do $$
 begin
   assert (select owner_id from public.trips) = 'bbbbbbbb-0000-0000-0000-000000000002', 'sahiplik B''ye geçmeli';
   assert (select role from public.members where user_id = 'bbbbbbbb-0000-0000-0000-000000000002') = 'owner', 'B sahip rolünde';
+  assert (select count(*) from public.members where role = 'owner') = 1, 'tek sahip kalmalı';
+  assert not exists (select 1 from public.members where user_id = 'aaaaaaaa-0000-0000-0000-000000000001'), 'A üyelikten çıkmalı';
   assert (select invite_token from public.trips) <> current_setting('test.token'), 'token yenilendi';
 end $$;
 

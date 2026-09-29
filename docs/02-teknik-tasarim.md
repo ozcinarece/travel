@@ -98,7 +98,7 @@ Google'ın tip sayfasına bu ortamdan erişemedim. Tip adları Sprint 2 başınd
 
 ## 5. Veri modeli ve hesaplama kuralları (PRD v0.2 §5, §8 ile uyumlu)
 
-- PRD §8'deki `users` tablosu `profiles` adıyla açıldı (Supabase'in `auth.users`'ıyla karışmasın diye). `trips.city_name`/`country` yerine kullanıcının düzenleyebildiği `city_label` tutulur (T1, `hotel_label` ile aynı mantık).
+- PRD §8'deki `users` tablosu `profiles` adıyla açıldı (Supabase'in `auth.users`'ıyla karışmasın diye). `trips.city_name`/`country` yerine kullanıcının düzenleyebildiği `city_label` tutulur (T1, `hotel_label` ile aynı mantık). Ülke için `country_code` (ISO 3166-1 alpha-2, Autocomplete adres bileşenlerinden) tutulur; v2 Haritam buna dayanır.
 - `trips.tz`: IANA saat dilimi. "Bugün", mini-çubuk ve 08:00 bildirimi seyahat şehrinin saatiyle hesaplanır.
 - `stops.trip_id`: Realtime filtresi `trip_id=eq.X` ile çalışsın diye.
 - `stops.order_key`: **kesirli sıra anahtarı** (metin). Sürükle-bırak tek satır yazar, eşzamanlı sıralama çakışmaz.

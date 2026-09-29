@@ -28,6 +28,9 @@ create table public.trips (
   owner_id uuid references auth.users (id) on delete set null,
   city_place_id text not null,
   city_label text not null check (char_length(city_label) between 1 and 80),
+  -- ISO 3166-1 alpha-2; Autocomplete adres bileşenlerinden gelir, Google içeriği sayılmaz.
+  -- v2 Haritam'ın ülke görünümü buna dayanır.
+  country_code text check (country_code ~ '^[A-Z]{2}$'),
   lat double precision not null,
   lng double precision not null,
   google_fetched_at timestamptz not null default now(),
@@ -382,6 +385,8 @@ begin
     else
       update public.members set role = 'owner' where trip_id = s.trip_id and user_id = varis;
       update public.trips set owner_id = varis where id = s.trip_id;
+      -- Silinen hesap üyelikten çıkar; seyahatte tek sahip kalır.
+      delete from public.members where trip_id = s.trip_id and user_id = auth.uid();
     end if;
   end loop;
 end;
