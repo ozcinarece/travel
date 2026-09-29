@@ -1,36 +1,31 @@
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 
+import { DavetLinkAlani } from '@/components/DavetLinkAlani';
 import { Buton } from '@/components/ui/Buton';
 import { t } from '@/i18n';
-import { davetTokeni } from '@/lib/davetLinki';
 import { bosluk, renk, yazi } from '@/theme';
 
-// PRD 0.5: seyahati olmayan kullanıcı bunu görür. KK2: "İlk seyahatini planla" → 3.2, davet → link alanı.
-export function BosDurum() {
-  const [alanAcik, setAlanAcik] = useState(false);
-  const [metin, setMetin] = useState('');
-  const [hatali, setHatali] = useState(false);
+type Props = {
+  /** PRD 0.3 KK2: "bu ay" cevabı verildiyse kart daha büyük gösterilir. */
+  buyuk?: boolean;
+};
 
-  const katil = () => {
-    const token = davetTokeni(metin);
-    if (!token) {
-      setHatali(true);
-      return;
-    }
-    router.push({ pathname: '/r/[token]', params: { token } });
-  };
+// PRD 0.5: seyahati olmayan kullanıcı bunu görür. KK2: "İlk seyahatini planla" → 3.2, davet → link alanı.
+export function BosDurum({ buyuk }: Props) {
+  const [alanAcik, setAlanAcik] = useState(false);
 
   return (
-    <View style={s.kart}>
+    <View style={[s.kart, buyuk && s.kartBuyuk]}>
       <View style={{ gap: 6 }}>
-        <Text style={s.baslik}>{t('seyahatler.bos.baslik')}</Text>
+        <Text style={[s.baslik, buyuk && s.baslikBuyuk]}>{t('seyahatler.bos.baslik')}</Text>
         <Text style={s.alt}>{t('seyahatler.bos.alt')}</Text>
       </View>
       <Buton
         baslik={t('seyahatler.bos.planla')}
         onPress={() => router.push('/(tabs)/yeni')}
+        stil={buyuk ? s.butonBuyuk : undefined}
         ikon={
           <View style={s.arti}>
             <Text style={s.artiIsaret}>+</Text>
@@ -38,30 +33,7 @@ export function BosDurum() {
         }
       />
       {alanAcik ? (
-        <View style={{ gap: 8 }}>
-          <View style={[s.linkKutu, hatali && s.linkKutuHata]}>
-            <TextInput
-              accessibilityLabel={t('seyahatler.bos.davet')}
-              autoFocus
-              autoCapitalize="none"
-              autoCorrect={false}
-              keyboardType="url"
-              placeholder={t('seyahatler.bos.davetYer')}
-              placeholderTextColor={renk.soluk}
-              value={metin}
-              onChangeText={(v) => {
-                setMetin(v);
-                setHatali(false);
-              }}
-              onSubmitEditing={katil}
-              style={s.linkGirdi}
-            />
-            <Pressable accessibilityRole="button" onPress={katil} hitSlop={8}>
-              <Text style={s.linkGit}>{t('seyahatler.bos.davetGit')}</Text>
-            </Pressable>
-          </View>
-          {hatali ? <Text style={s.hata}>{t('seyahatler.bos.davetHata')}</Text> : null}
-        </View>
+        <DavetLinkAlani onToken={(token) => router.push({ pathname: '/r/[token]', params: { token } })} />
       ) : (
         <Pressable accessibilityRole="button" onPress={() => setAlanAcik(true)} hitSlop={8}>
           <Text style={s.davet}>{t('seyahatler.bos.davet')}</Text>
@@ -81,7 +53,10 @@ const s = StyleSheet.create({
     backgroundColor: renk.yuzey,
     gap: 14,
   },
+  kartBuyuk: { padding: 24, paddingVertical: 30, gap: 18 },
   baslik: { fontFamily: yazi.ekstra, fontSize: 22, letterSpacing: -0.7, lineHeight: 25, color: renk.metin },
+  baslikBuyuk: { fontSize: 28, lineHeight: 31, letterSpacing: -0.9 },
+  butonBuyuk: { height: 58 },
   alt: { fontFamily: yazi.normal, fontSize: 13, lineHeight: 20, color: renk.ikincil },
   arti: {
     width: 24,
@@ -94,19 +69,4 @@ const s = StyleSheet.create({
   },
   artiIsaret: { fontFamily: yazi.kalin, fontSize: 16, lineHeight: 18, color: renk.zemin },
   davet: { fontFamily: yazi.kalin, fontSize: 13, textAlign: 'center', color: renk.metin, paddingVertical: 4 },
-  linkKutu: {
-    height: 50,
-    paddingHorizontal: 14,
-    borderRadius: 14,
-    backgroundColor: renk.zemin,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    borderWidth: 1.5,
-    borderColor: 'transparent',
-  },
-  linkKutuHata: { borderColor: renk.uyari },
-  linkGirdi: { flex: 1, fontFamily: yazi.yari, fontSize: 14, color: renk.metin, paddingVertical: 0 },
-  linkGit: { fontFamily: yazi.kalin, fontSize: 13, color: renk.metin },
-  hata: { fontFamily: yazi.yari, fontSize: 11, color: renk.uyari },
 });

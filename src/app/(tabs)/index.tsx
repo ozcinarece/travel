@@ -1,4 +1,4 @@
-import { Link } from 'expo-router';
+import { Link, Redirect } from 'expo-router';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -13,6 +13,9 @@ import { bosluk, renk, yazi } from '@/theme';
 export default function SeyahatlerEkrani() {
   const profil = useProfil();
   const seyahatler = useSeyahatler();
+
+  // 0.3 bir kez gösterilir: profil var ama yönlendirme damgası yoksa oraya.
+  if (profil.data && !profil.data.onboarding_done_at) return <Redirect href="/ilk-seyahat" />;
 
   return (
     <SafeAreaView style={s.ekran}>
@@ -39,7 +42,7 @@ export default function SeyahatlerEkrani() {
           ))}
         </View>
       ) : (
-        <BosDurum />
+        <BosDurum buyuk={profil.data?.next_trip_window === 'bu_ay'} />
       )}
     </SafeAreaView>
   );
