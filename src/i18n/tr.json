@@ -1,18 +1,73 @@
 {
+  "genel": {
+    "geri": "Geri"
+  },
   "sekme": {
     "seyahatler": "Seyahatler",
     "yeni": "Yeni",
     "profil": "Profil"
   },
+  "giris": {
+    "baslik": "Arkadaşlarınla\nharitada plan kur,\nsaat saat gez.",
+    "alt": "Mekanları seç, günlere dağıt, program kendini kursun. Herkes linkle katılır, kimse uygulama indirmek zorunda değil.",
+    "apple": "Apple ile devam et",
+    "google": "Google ile devam et",
+    "kosullar": "Devam ederek Kullanım Koşulları'nı kabul edersin.",
+    "hata": "Giriş tamamlanamadı. Tekrar dener misin?",
+    "onizleme": {
+      "durum": "● Şu an seyahatte",
+      "durak1": "Forum Romanum",
+      "sure1": "· 1 sa",
+      "yuruyus": "18 dk yürüyüş",
+      "durak2": "Pantheon",
+      "ekleyen": "· Ayşe ekledi"
+    }
+  },
+  "profilKur": {
+    "baslik": "Sen kimsin?",
+    "alt": "1/2 · Arkadaşların seni böyle bulur",
+    "fotoEkle": "Fotoğraf ekle",
+    "fotoDegistir": "Fotoğrafı değiştir",
+    "fotoHata": "Fotoğraf yüklenemedi.",
+    "ad": "Ad",
+    "kullaniciAdi": "Kullanıcı adı",
+    "kontrol": "Kontrol ediliyor…",
+    "musait": "Müsait",
+    "alinmis": "Alınmış",
+    "kural": "3–24 karakter: küçük harf, rakam, nokta, alt çizgi",
+    "gizlilikBaslik": "Haritanı kimler görsün?",
+    "gizlilik": {
+      "friends": "Arkadaşlarım",
+      "everyone": "Herkes",
+      "me": "Sadece ben"
+    },
+    "gizlilikNot": "Sonra profilinden değiştirebilirsin.",
+    "devam": "Devam",
+    "hata": "Kaydedilemedi. Tekrar dener misin?"
+  },
   "seyahatler": {
     "baslik": "Seyahatler",
-    "bos": "Henüz seyahatin yok"
+    "bos": {
+      "baslik": "Henüz seyahatin yok",
+      "alt": "İlk planı 3 dakikada kurarsın: şehir, otel, birkaç mekan. Gerisini harita halleder.",
+      "planla": "İlk seyahatini planla",
+      "davet": "Davet linkin mi var? Yapıştır",
+      "davetYer": "Linki buraya yapıştır",
+      "davetGit": "Katıl",
+      "davetHata": "Bu link tanınmadı. Biçim: …/r/xxxxxxxx"
+    },
+    "tarihsiz": "Tarih seçilmedi"
   },
   "yeni": {
     "baslik": "Nereye?"
   },
   "profil": {
-    "baslik": "Profil"
+    "baslik": "Profil",
+    "cikis": "Çıkış"
+  },
+  "davet": {
+    "yakinda": "Davetle katılım yakında hazır olacak.",
+    "token": "Davet kodu: {token}"
   },
   "harita": {
     "anahtarYok": "Harita anahtarı tanımlı değil"

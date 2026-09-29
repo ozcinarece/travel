@@ -27,7 +27,7 @@ Tasarım (21 ekran, tıklanabilir): https://claude.ai/artifact/46jh8ggGczM7VDTVH
 - [x] PRD v1 v0.2
 - [x] Teknik tasarım notu v0.2 (onaylandı)
 - [ ] Prototip testi (5 kişi)
-- [ ] Sprint 1 — kurulum PR'ı açık
+- [ ] Sprint 1 — kurulum birleşti; 0.1 / 0.2 / 0.5 PR'ı açık
 
 ## Geliştirme
 
@@ -38,3 +38,5 @@ npx expo start               # web: w · native: EAS development build gerekir (
 npm run typecheck && npm run lint && npm test
 npm run db:test              # Postgres 16 ile migration + RLS testleri
 ```
+
+Supabase tarafında bir kez: `supabase/migrations/*.sql` dosyaları sırayla SQL Editor'den çalıştırılır; Auth → Providers'ta Google ve **Anonymous sign-ins** açılır; Auth → URL Configuration → Redirect URLs'e `gezi://giris` ve web kökü + `/giris` eklenir.
