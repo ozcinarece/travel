@@ -27,4 +27,14 @@ Tasarım (21 ekran, tıklanabilir): https://claude.ai/artifact/46jh8ggGczM7VDTVH
 - [x] PRD v1 v0.2
 - [x] Teknik tasarım notu v0.2 (onaylandı)
 - [ ] Prototip testi (5 kişi)
-- [ ] Sprint 1
+- [ ] Sprint 1 — kurulum PR'ı açık
+
+## Geliştirme
+
+```bash
+npm install
+cp .env.example .env.local   # anahtarları doldur
+npx expo start               # web: w · native: EAS development build gerekir (Expo Go değil)
+npm run typecheck && npm run lint && npm test
+npm run db:test              # Postgres 16 ile migration + RLS testleri
+```

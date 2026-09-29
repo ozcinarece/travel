@@ -26,16 +26,16 @@ Değişiklik: v0.2'de incelemedeki T1, T2, T5, T7, T8 ve T11 kararları işlendi
 ## 2. Klasör yapısı
 
 ```
-app/                          Expo Router: dosya = rota (native + web)
-  (auth)/giris.tsx, profil-kur.tsx, ilk-seyahat.tsx
-  (tabs)/index.tsx            3.1 Seyahatler / 0.5 boş durum
-  (tabs)/yeni.tsx, profil.tsx
-  yeni/nereye.tsx, otel.tsx   3.2, 3.3
-  trip/[id]/_layout.tsx       seyahat içi alt menü + mini-çubuk
-  trip/[id]/kesfet.tsx, gunler.tsx, program.tsx, mekan/[placeId].tsx
-  r/[token].tsx               3.10 davet (web + universal link hedefi)
 src/
-  components/harita/          Harita.native.tsx · Harita.web.tsx · Pin · YurumeDairesi
+  app/                        Expo Router (SDK 57 şablonu rotaları src/app'te tutar): dosya = rota
+    (auth)/giris.tsx, profil-kur.tsx, ilk-seyahat.tsx
+    (tabs)/index.tsx          3.1 Seyahatler / 0.5 boş durum
+    (tabs)/yeni.tsx, profil.tsx
+    yeni/nereye.tsx, otel.tsx 3.2, 3.3
+    trip/[id]/_layout.tsx     seyahat içi alt menü + mini-çubuk
+    trip/[id]/kesfet.tsx, gunler.tsx, program.tsx, mekan/[placeId].tsx
+    r/[token].tsx             3.10 davet (web + universal link hedefi)
+  components/harita/          Harita.native.tsx · Harita.web.tsx · tipler.ts
   features/                   trips · places · days · members (sorgu + mutasyon hook'ları)
   schedule/                   siralama.ts · tempo.ts · kaydir.ts · acilis.ts  (+ __tests__)
   google/                     autocomplete.ts (oturum token'ı) · alanMaskeleri.ts
@@ -98,6 +98,7 @@ Google'ın tip sayfasına bu ortamdan erişemedim. Tip adları Sprint 2 başınd
 
 ## 5. Veri modeli ve hesaplama kuralları (PRD v0.2 §5, §8 ile uyumlu)
 
+- PRD §8'deki `users` tablosu `profiles` adıyla açıldı (Supabase'in `auth.users`'ıyla karışmasın diye). `trips.city_name`/`country` yerine kullanıcının düzenleyebildiği `city_label` tutulur (T1, `hotel_label` ile aynı mantık). Ülke için `country_code` (ISO 3166-1 alpha-2, Autocomplete adres bileşenlerinden) tutulur; v2 Haritam buna dayanır.
 - `trips.tz`: IANA saat dilimi. "Bugün", mini-çubuk ve 08:00 bildirimi seyahat şehrinin saatiyle hesaplanır.
 - `stops.trip_id`: Realtime filtresi `trip_id=eq.X` ile çalışsın diye.
 - `stops.order_key`: **kesirli sıra anahtarı** (metin). Sürükle-bırak tek satır yazar, eşzamanlı sıralama çakışmaz.
