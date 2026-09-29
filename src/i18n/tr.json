@@ -1,0 +1,20 @@
+{
+  "sekme": {
+    "seyahatler": "Seyahatler",
+    "yeni": "Yeni",
+    "profil": "Profil"
+  },
+  "seyahatler": {
+    "baslik": "Seyahatler",
+    "bos": "Henüz seyahatin yok"
+  },
+  "yeni": {
+    "baslik": "Nereye?"
+  },
+  "profil": {
+    "baslik": "Profil"
+  },
+  "harita": {
+    "anahtarYok": "Harita anahtarı tanımlı değil"
+  }
+}
