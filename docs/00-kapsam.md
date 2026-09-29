@@ -1,6 +1,6 @@
 # Kapsam Dokümanı — Gezi Planlayıcı (çalışma adı)
 
-Sürüm: 0.1 · Tarih: 29 Eylül 2026 · Sahip: Ece (ürün) · Durum: v1 kesimi onaylandı
+Sürüm: 0.2 · Tarih: 29 Eylül 2026 · Sahip: Ece (ürün) · Durum: v1 kesimi onaylandı, teknik tasarım notu incelendi
 
 Tasarım kanvası: https://claude.ai/artifact/46jh8ggGczM7VDTVHyzRQT (21 ekran, tıklanabilir akış)
 
@@ -94,12 +94,12 @@ Yapay zeka ile otomatik plan üretimi · sesli rehber · çevrimdışı mod · a
 - Aktivasyon: kayıt olan kullanıcının %60'ı ilk oturumda en az 3 mekanlı bir seyahat oluşturur.
 - Grup: seyahatlerin %40'ında en az bir ek üye linkle katılır.
 - Program kullanımı: seyahat günlerinde kullanıcıların %50'si Program ekranını açar ve en az bir "Vardık" işaretler.
-- Teknik: Program ekranı hesaplaması 500 ms altında; Google Places maliyeti kullanıcı başına ayda 0,05 $ altında.
+- Teknik: Program ekranı hesaplaması 500 ms altında; Google Places + Routes maliyeti kullanıcı başına ayda 0,50 $ altında (Sprint 3 sonunda ölçülür).
 
 ## 7. Teknik çerçeve (öneri, PRD'de detaylanır)
 
-- İstemci: React Native + Expo (iOS + Android tek kod). Davet linki için Expo Web ya da ayrı hafif web istemcisi.
-- Arka uç: Supabase (Postgres + Auth + Realtime). Eşzamanlı düzenleme Realtime ile, son yazan kazanır.
+- İstemci: React Native + Expo + Expo Router + TypeScript (iOS, Android ve davet linki için web aynı kod). Harita iOS'ta da Google sağlayıcısı; EAS development build.
+- Arka uç: Supabase (Postgres + Auth + Realtime + Edge Functions). Google çağrıları Edge Function'dan, anahtarlar sunucuda. Eşzamanlı düzenleme Realtime ile, son yazan kazanır.
 - Harita ve mekan: Google Maps Platform — Maps SDK, Places API (New), Routes API (yürüyüş süreleri).
 - Yapay zeka: v1'de yok.
 
@@ -114,7 +114,7 @@ Yapay zeka ile otomatik plan üretimi · sesli rehber · çevrimdışı mod · a
 
 ## 9. Sonraki adımlar
 
-1. V1 PRD (bu depoda `01-prd-v1.md`) — geliştiriciye teslim
-2. 5 kişilik prototip testi — kanvastaki Play akışıyla
-3. Teknik tasarım notu — geliştirici yazar, ürün onaylar
+1. ~~V1 PRD~~ — teslim edildi, v0.2
+2. ~~Teknik tasarım notu~~ — `02-teknik-tasarim.md`, inceleme `03-inceleme-teknik-tasarim.md`
+3. 5 kişilik prototip testi — kanvastaki Play akışıyla
 4. Sprint planı — ekran bazlı, PRD kabul kriterleriyle
