@@ -34,3 +34,28 @@ grant execute on all functions in schema auth to anon, authenticated, service_ro
 alter default privileges in schema public grant all on tables to anon, authenticated, service_role;
 alter default privileges in schema public grant all on sequences to anon, authenticated, service_role;
 alter default privileges in schema public grant execute on functions to anon, authenticated, service_role;
+
+-- Storage taklidi: kova/nesne tabloları, foldername() ve RLS (avatars politikaları için).
+create schema storage;
+create table storage.buckets (
+  id text primary key,
+  name text not null,
+  public boolean not null default false,
+  file_size_limit bigint,
+  allowed_mime_types text[]
+);
+create table storage.objects (
+  id uuid primary key default gen_random_uuid(),
+  bucket_id text references storage.buckets (id),
+  name text not null,
+  owner uuid,
+  owner_id text,
+  metadata jsonb,
+  created_at timestamptz not null default now()
+);
+alter table storage.objects enable row level security;
+create function storage.foldername(name text) returns text[]
+language sql immutable
+as $$ select (string_to_array(name, '/'))[1:array_length(string_to_array(name, '/'), 1) - 1] $$;
+grant usage on schema storage to anon, authenticated, service_role;
+grant all on storage.buckets, storage.objects to anon, authenticated, service_role;

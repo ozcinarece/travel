@@ -185,4 +185,32 @@ begin
   assert (select count(*) from public.places) = 0 and (select count(*) from public.changes) = 0, 'cascade';
 end $$;
 
+-- 10 ── Avatar deposu: yalnızca kendi klasörüne yazılır, misafir yazamaz, herkes okur
+set role authenticated;
+select pg_temp.as_user(:A);
+insert into storage.objects (bucket_id, name, owner)
+values ('avatars', 'aaaaaaaa-0000-0000-0000-000000000001/avatar.jpg', :A);
+select pg_temp.hata_bekle(
+  $$insert into storage.objects (bucket_id, name) values ('avatars', 'bbbbbbbb-0000-0000-0000-000000000002/avatar.jpg')$$,
+  '42501');
+select pg_temp.hata_bekle(
+  $$insert into storage.objects (bucket_id, name) values ('avatars', 'avatar.jpg')$$,
+  '42501');
+update storage.objects set metadata = '{"v": 2}' where name like 'aaaaaaaa%';
+select pg_temp.as_user(:G, true);
+select pg_temp.hata_bekle(
+  $$insert into storage.objects (bucket_id, name) values ('avatars', '99999999-0000-0000-0000-000000000003/avatar.jpg')$$,
+  '42501');
+-- delete/update politikaları satırı görünmez kılar, hata vermez: silme etkisiz kalmalı.
+delete from storage.objects where name like 'aaaaaaaa%';
+update storage.objects set metadata = '{"v": 3}' where name like 'aaaaaaaa%';
+do $$
+begin
+  assert (select metadata from storage.objects where name like 'aaaaaaaa%') = '{"v": 2}', 'misafir başkasının avatarını değiştiremez';
+end $$;
+set role anon;
+select pg_temp.as_user(null);
+do $$ begin assert (select count(*) from storage.objects where bucket_id = 'avatars') = 1, 'avatar herkese okunur'; end $$;
+reset role;
+
 \echo 'rls_test: TÜM TESTLER GEÇTİ'

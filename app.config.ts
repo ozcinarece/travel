@@ -2,6 +2,8 @@ import type { ExpoConfig } from 'expo/config';
 
 // Anahtarlar ve alan adı ortam değişkeninden gelir (bkz. .env.example); repoya yazılmaz.
 const appDomain = process.env.APP_DOMAIN;
+// Apple girişi Apple Developer hesabı gelene kadar kapalı; açılınca iOS yetkisi ve eklentisi devreye girer.
+const appleAcik = process.env.EXPO_PUBLIC_APPLE_SIGN_IN === '1';
 
 const config: ExpoConfig = {
   name: 'gezi',
@@ -14,7 +16,7 @@ const config: ExpoConfig = {
   ios: {
     icon: './assets/expo.icon',
     bundleIdentifier: process.env.IOS_BUNDLE_ID ?? 'app.gezi.dev',
-    usesAppleSignIn: true,
+    usesAppleSignIn: appleAcik,
     associatedDomains: appDomain ? [`applinks:${appDomain}`] : [],
   },
   android: {
@@ -60,6 +62,14 @@ const config: ExpoConfig = {
         androidGoogleMapsApiKey: process.env.GOOGLE_MAPS_ANDROID_KEY,
       },
     ],
+    [
+      'expo-image-picker',
+      {
+        photosPermission: 'Profil fotoğrafın için galerine erişmek istiyoruz.',
+        cameraPermission: false,
+      },
+    ],
+    ...(appleAcik ? ['expo-apple-authentication'] : []),
   ],
   experiments: {
     typedRoutes: true,
