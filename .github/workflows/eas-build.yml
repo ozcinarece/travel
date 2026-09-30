@@ -21,6 +21,9 @@ on:
         default: ''
         type: string
 
+permissions:
+  contents: write
+
 jobs:
   derleme:
     runs-on: ubuntu-latest
@@ -112,3 +115,17 @@ jobs:
           echo "Imza SHA-1: $SHA1"
           echo "- APK indirme: $URL" >> "$GITHUB_STEP_SUMMARY"
           echo "- İmza SHA-1: \`$SHA1\` (paket: \`app.gezi.dev\`)" >> "$GITHUB_STEP_SUMMARY"
+
+      # APK GitHub Releases'e de konur: expo.dev indirmesi telefonda takılırsa buradan iner.
+      - name: APK'yı GitHub Release'e ekle (Android)
+        if: inputs.platform == 'android'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          ETIKET="android-${{ inputs.profile }}-${{ steps.derleme.outputs.id }}"
+          cp uygulama.apk "gezi-${{ inputs.profile }}.apk"
+          gh release create "$ETIKET" "gezi-${{ inputs.profile }}.apk" \
+            --title "Android ${{ inputs.profile }} $(date -u +%Y-%m-%d)" \
+            --notes "EAS derlemesi ${{ steps.derleme.outputs.id }} · paket app.gezi.dev · imza SHA-1 $(grep -m1 -i 'SHA-1 digest' sertifika.txt | sed 's/.*: *//')" \
+            --prerelease 2>/dev/null || gh release upload "$ETIKET" "gezi-${{ inputs.profile }}.apk" --clobber
+          echo "- Release: https://github.com/${{ github.repository }}/releases/tag/$ETIKET" >> "$GITHUB_STEP_SUMMARY"
