@@ -98,12 +98,17 @@ jobs:
           echo "::error::3 saatte bitmedi"; exit 1
 
       # Android: imza SHA-1'i APK'dan okunur (Google Cloud Android anahtar kısıtı için).
+      # APK'lar v2/v3 imza şeması kullanır; keytool okuyamaz, apksigner (Android SDK build-tools) gerekir.
       - name: SHA-1 (Android)
         if: inputs.platform == 'android'
         run: |
           URL=$(node -e "const d=require('./durum.json'); console.log(d.artifacts.buildUrl||d.artifacts.applicationArchiveUrl)")
+          echo "APK indirme: $URL"
           curl -sSL "$URL" -o uygulama.apk
-          keytool -printcert -jarfile uygulama.apk | tee sertifika.txt
-          SHA1=$(grep -m1 'SHA1:' sertifika.txt | sed 's/.*SHA1: *//')
+          APKSIGNER=$(ls -d "${ANDROID_HOME:-$ANDROID_SDK_ROOT}"/build-tools/*/apksigner 2>/dev/null | sort -V | tail -1)
+          if [ -z "$APKSIGNER" ]; then echo "::error::apksigner bulunamadı"; exit 1; fi
+          "$APKSIGNER" verify --print-certs uygulama.apk | tee sertifika.txt
+          SHA1=$(grep -m1 -i 'SHA-1 digest' sertifika.txt | sed 's/.*: *//' | tr -d '[:space:]' | sed 's/../&:/g; s/:$//' | tr 'a-f' 'A-F')
+          echo "Imza SHA-1: $SHA1"
           echo "- APK indirme: $URL" >> "$GITHUB_STEP_SUMMARY"
           echo "- İmza SHA-1: \`$SHA1\` (paket: \`app.gezi.dev\`)" >> "$GITHUB_STEP_SUMMARY"
