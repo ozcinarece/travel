@@ -47,3 +47,7 @@ EAS projesi `@eceoz1/gezi`. Derleme GitHub Actions'tan alınır: **Actions → e
 
 Gerekli GitHub secret'ları: `EXPO_TOKEN` (expo.dev → hesap ayarları → Access tokens), `GOOGLE_MAPS_ANDROID_KEY`. Supabase URL ve publishable anahtar `eas.json` içinde (herkese açık değerler); Google sunucu anahtarı yalnızca Supabase secret'ıdır, derlemeye girmez.
 
+### Expo Go ile test (APK indirmeden)
+
+**Actions → eas-update → Run workflow** (hedef `expo-go`). Play Store'dan Expo Go kurulur, eceoz1 ile giriş yapılır; Projects → gezi → `expo-go` dalındaki son güncelleme dokunarak açılır. Google girişi için Supabase Redirect URLs'e `exp://**` eklenir. Yerel derlemeye JS güncellemesi göndermek için hedef `native` (preview kanalı).
+

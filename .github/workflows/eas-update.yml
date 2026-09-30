@@ -1,0 +1,50 @@
+name: eas-update
+
+# JS paketini EAS Update ile yayınlar. Varsayılan hedef Expo Go (Play Store'dan kurulur, APK indirmesi gerekmez):
+# Expo Go'da eceoz1 ile giriş → gezi → "expo-go" dalı. Yerel derlemeler için hedef "native" (preview kanalı).
+on:
+  workflow_dispatch:
+    inputs:
+      hedef:
+        description: expo-go (Expo Go çalışma zamanı) ya da native (yerel derleme kanalı)
+        default: expo-go
+        type: choice
+        options: [expo-go, native]
+      mesaj:
+        description: güncelleme mesajı
+        default: ''
+        type: string
+
+jobs:
+  yayin:
+    runs-on: ubuntu-latest
+    env:
+      EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+      # Herkese açık istemci değerleri (eas.json preview profiliyle aynı).
+      EXPO_PUBLIC_SUPABASE_URL: https://xwqeobelyeuzoxyuvauw.supabase.co
+      EXPO_PUBLIC_SUPABASE_ANON_KEY: sb_publishable_XB3vg3rrcdIK9Bafkv-Uug_G-5IEyyN
+      EXPO_PUBLIC_APPLE_SIGN_IN: '0'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Ön koşul
+        run: |
+          if [ -z "$EXPO_TOKEN" ]; then echo "::error::EXPO_TOKEN secret'ı tanımlı değil"; exit 1; fi
+      - name: EAS Update
+        run: |
+          MESAJ="${{ inputs.mesaj }}"
+          [ -z "$MESAJ" ] && MESAJ="$(git log -1 --format=%s)"
+          if [ "${{ inputs.hedef }}" = "expo-go" ]; then
+            export EXPO_GO_UPDATE=1
+            DAL=expo-go
+          else
+            DAL=preview
+          fi
+          npx eas-cli update --branch "$DAL" --message "$MESAJ" --platform android --non-interactive --json | tee guncelleme.json
+          echo "### EAS Update ($DAL)" >> "$GITHUB_STEP_SUMMARY"
+          node -e "const g=require('./guncelleme.json'); for (const u of g) console.log('- '+u.platform+': '+u.id+' · runtime '+u.runtimeVersion)" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Expo Go: uygulamada eceoz1 ile giriş → gezi → $DAL dalı" >> "$GITHUB_STEP_SUMMARY"
