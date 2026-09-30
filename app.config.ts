@@ -7,6 +7,9 @@ const appleAcik = process.env.EXPO_PUBLIC_APPLE_SIGN_IN === '1';
 
 // EAS projesi: @eceoz1/gezi (https://expo.dev/accounts/eceoz1/projects/gezi). Kimlik gizli değildir.
 const easProjectId = process.env.EAS_PROJECT_ID ?? 'ce63656a-1090-42c8-9de9-8c9a8388a3fe';
+// EAS Update: EXPO_GO_UPDATE=1 ile yayınlanan güncelleme Expo Go'nun çalışma zamanına (exposdk:57.0.0) gider;
+// yerel derlemeler uygulama sürümüne bağlı çalışma zamanı kullanır.
+const expoGoIcin = process.env.EXPO_GO_UPDATE === '1';
 
 const config: ExpoConfig = {
   name: 'gezi',
@@ -80,6 +83,8 @@ const config: ExpoConfig = {
     reactCompiler: true,
   },
   extra: { eas: { projectId: easProjectId } },
+  updates: { url: `https://u.expo.dev/${easProjectId}` },
+  runtimeVersion: expoGoIcin ? 'exposdk:57.0.0' : { policy: 'appVersion' },
 };
 
 export default config;
