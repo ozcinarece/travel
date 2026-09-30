@@ -36,7 +36,7 @@ function Kok() {
   }, [yuklendi]);
   if (!yuklendi) return null;
 
-  // Hesap + profil tamamsa sekmeler; değilse giriş akışı (0.1 → 0.2).
+  // Hesap + profil tamamsa uygulama; değilse giriş akışı (0.1 → 0.2). 0.3 sekmelerden yönlendirilir.
   const girisTamam = hesapli && !!profil.data;
   return (
     <Stack screenOptions={{ headerShown: false }}>
@@ -45,6 +45,8 @@ function Kok() {
       </Stack.Protected>
       <Stack.Protected guard={girisTamam}>
         <Stack.Screen name="(tabs)" />
+        <Stack.Screen name="ilk-seyahat" />
+        <Stack.Screen name="hesap-sil" />
       </Stack.Protected>
       <Stack.Screen name="r/[token]" />
     </Stack>

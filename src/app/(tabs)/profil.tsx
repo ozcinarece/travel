@@ -1,4 +1,5 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { Link } from 'expo-router';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { EkranBasligi } from '@/components/EkranBasligi';
@@ -9,7 +10,7 @@ import { useProfil } from '@/features/profil/sorgular';
 import { t } from '@/i18n';
 import { bosluk, renk, yazi } from '@/theme';
 
-// PRD §4 v1 Profil: ad, kullanıcı adı, çıkış, hesap silme. Hesap silme (önizlemeli) ayrı PR'da.
+// PRD §4 v1 Profil: ad, kullanıcı adı, çıkış, hesap silme (önizlemeli, ayrı ekran).
 export default function ProfilEkrani() {
   const profil = useProfil();
   return (
@@ -26,6 +27,11 @@ export default function ProfilEkrani() {
       ) : null}
       <View style={s.altKisim}>
         <Buton baslik={t('profil.cikis')} tur="ikincil" onPress={cikis} />
+        <Link href="/hesap-sil" asChild>
+          <Pressable accessibilityRole="button" hitSlop={10} style={s.silSatir}>
+            <Text style={s.sil}>{t('profil.hesapSil')}</Text>
+          </Pressable>
+        </Link>
       </View>
     </SafeAreaView>
   );
@@ -36,5 +42,7 @@ const s = StyleSheet.create({
   kimlik: { flexDirection: 'row', alignItems: 'center', gap: 16, paddingHorizontal: bosluk.kenar, paddingTop: 18 },
   ad: { fontFamily: yazi.ekstra, fontSize: 26, letterSpacing: -0.8, lineHeight: 28, color: renk.metin },
   kullaniciAdi: { fontFamily: yazi.kalin, fontSize: 15, color: renk.ikincil },
-  altKisim: { marginTop: 'auto', paddingHorizontal: bosluk.kenar, paddingBottom: 16 },
+  altKisim: { marginTop: 'auto', paddingHorizontal: bosluk.kenar, paddingBottom: 16, gap: 8 },
+  silSatir: { alignItems: 'center', paddingVertical: 10 },
+  sil: { fontFamily: yazi.kalin, fontSize: 13, color: renk.uyari },
 });

@@ -1,6 +1,7 @@
 {
   "genel": {
-    "geri": "Geri"
+    "geri": "Geri",
+    "vazgec": "Vazgeç"
   },
   "sekme": {
     "seyahatler": "Seyahatler",
@@ -45,16 +46,30 @@
     "devam": "Devam",
     "hata": "Kaydedilemedi. Tekrar dener misin?"
   },
+  "ilkSeyahat": {
+    "baslik": "İlk seyahatin",
+    "alt": "2/2 · Nereden başlamak istersin?",
+    "yeni": "Yeni seyahat planla",
+    "yeniAlt": "Şehri seç, mekanları haritada işaretle",
+    "davet": "Davet linkim var",
+    "davetAlt": "Arkadaşının planına katıl; her şey hazır",
+    "soru": "Sonraki seyahatin ne zaman?",
+    "pencere": {
+      "bu_ay": "Bu ay",
+      "uc_ay": "1–3 ay",
+      "bilmiyorum": "Belli değil"
+    },
+    "not": "Ana ekranı buna göre düzenleriz; yakın seyahat varsa planlama öne çıkar.",
+    "atla": "Şimdilik atla",
+    "hata": "Kaydedilemedi. Tekrar dener misin?"
+  },
   "seyahatler": {
     "baslik": "Seyahatler",
     "bos": {
       "baslik": "Henüz seyahatin yok",
       "alt": "İlk planı 3 dakikada kurarsın: şehir, otel, birkaç mekan. Gerisini harita halleder.",
       "planla": "İlk seyahatini planla",
-      "davet": "Davet linkin mi var? Yapıştır",
-      "davetYer": "Linki buraya yapıştır",
-      "davetGit": "Katıl",
-      "davetHata": "Bu link tanınmadı. Biçim: …/r/xxxxxxxx"
+      "davet": "Davet linkin mi var? Yapıştır"
     },
     "tarihsiz": "Tarih seçilmedi"
   },
@@ -63,11 +78,32 @@
   },
   "profil": {
     "baslik": "Profil",
-    "cikis": "Çıkış"
+    "cikis": "Çıkış",
+    "hesapSil": "Hesabı sil"
+  },
+  "hesapSil": {
+    "baslik": "Hesabı sil",
+    "aciklama": "Hesabın, profilin ve fotoğrafın kalıcı olarak silinir. Bu işlem geri alınamaz.",
+    "sahipBaslik": "Sahibi olduğun seyahatler",
+    "sahipYok": "Sahibi olduğun seyahat yok.",
+    "devir": "Sahipliği {ad} alır",
+    "silinir": "Silinir (başka üye yok)",
+    "uyeNot": "Üyesi olduğun diğer planlardan çıkarsın; eklediğin mekanlar ve notlar planlarda kalır.",
+    "onayBaslik": "Hesabın silinsin mi?",
+    "onayMetin": "Bu işlem geri alınamaz.",
+    "onayla": "Sil",
+    "dugme": "Hesabımı kalıcı olarak sil",
+    "hata": "Silinemedi. Tekrar dener misin?",
+    "onizlemeHata": "Seyahatler yüklenemedi; bağlantını kontrol edip tekrar dene."
   },
   "davet": {
     "yakinda": "Davetle katılım yakında hazır olacak.",
-    "token": "Davet kodu: {token}"
+    "token": "Davet kodu: {token}",
+    "alan": {
+      "yer": "Linki buraya yapıştır",
+      "git": "Katıl",
+      "hata": "Bu link tanınmadı. Biçim: …/r/xxxxxxxx"
+    }
   },
   "harita": {
     "anahtarYok": "Harita anahtarı tanımlı değil"

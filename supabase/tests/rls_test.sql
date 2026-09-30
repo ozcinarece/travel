@@ -33,6 +33,9 @@ grant execute on function pg_temp.as_user(uuid, boolean), pg_temp.hata_bekle(tex
 set role authenticated;
 select pg_temp.as_user(:A);
 insert into public.profiles (id, name, username) values (:A, 'Ece', 'ece');
+-- 0.3 yönlendirme cevabı ve damgası kendi satırına yazılır
+update public.profiles set next_trip_window = 'bu_ay', onboarding_done_at = now() where id = auth.uid();
+do $$ begin assert (select next_trip_window from public.profiles where id = auth.uid()) = 'bu_ay', 'yönlendirme cevabı kaydedilir'; end $$;
 insert into public.trips (owner_id, city_place_id, city_label, country_code, lat, lng, tz, start_date, end_date)
 values (:A, 'ChIJ-roma', 'Roma', 'IT', 41.9, 12.49, 'Europe/Rome', '2026-10-12', '2026-10-15');
 select pg_temp.hata_bekle($$update public.trips set country_code = 'ita'$$, '23514');
@@ -166,11 +169,27 @@ delete from public.members where user_id = :A;
 do $$ begin assert (select count(*) from public.members) = 3, 'sahip kendini silememeli'; end $$;
 select public.rotate_invite_token(id) from public.trips;
 
--- 8 ── Hesap silme hazırlığı: sahiplik misafir olmayan en eski üyeye (B) geçer
-select public.prepare_account_deletion();
+-- 8 ── Hesap silme: önce önizleme (A sahip → Deniz'e devir), sonra silme; auth kaydı gider, sahiplik B'ye geçer
+do $$
+declare o record;
+begin
+  select * into o from public.account_deletion_preview();
+  assert o.outcome = 'transfer' and o.new_owner_name = 'Deniz',
+    'önizleme Deniz''e devir olmalı, gelen: ' || coalesce(o.outcome, 'null') || '/' || coalesce(o.new_owner_name, 'null');
+  assert (select count(*) from public.account_deletion_preview()) = 1, 'önizlemede tek seyahat';
+end $$;
+select pg_temp.as_user(:G, true);
+do $$ begin assert (select count(*) from public.account_deletion_preview()) = 0, 'misafir sahip değil, önizleme boş'; end $$;
+select pg_temp.as_user(:A);
+select public.delete_account();
 reset role;
 do $$
 begin
+  assert not exists (select 1 from auth.users where id = 'aaaaaaaa-0000-0000-0000-000000000001'), 'auth kaydı silinmeli';
+  assert not exists (select 1 from public.profiles where id = 'aaaaaaaa-0000-0000-0000-000000000001'), 'profil silinmeli';
+  assert (select added_by from public.places where place_id = 'ChIJ-kolezyum') is null, 'A''nın mekanı kalır, ekleyen boşalır';
+  assert exists (select 1 from public.changes where field = 'ownership_transferred' and old = '"Ece"' and new = '"Deniz"'),
+    'sahiplik devri adlarla kaydedilmeli';
   assert (select owner_id from public.trips) = 'bbbbbbbb-0000-0000-0000-000000000002', 'sahiplik B''ye geçmeli';
   assert (select role from public.members where user_id = 'bbbbbbbb-0000-0000-0000-000000000002') = 'owner', 'B sahip rolünde';
   assert (select count(*) from public.members where role = 'owner') = 1, 'tek sahip kalmalı';

@@ -3,21 +3,24 @@ import { ActivityIndicator, Pressable, StyleSheet, Text, type StyleProp, type Vi
 
 import { minDokunma, renk, yazi } from '@/theme';
 
+type Tur = 'birincil' | 'ikincil' | 'tehlike';
+
 type Props = {
   baslik: string;
   onPress: () => void;
-  tur?: 'birincil' | 'ikincil';
+  tur?: Tur;
   pasif?: boolean;
   yukleniyor?: boolean;
   ikon?: ReactNode;
   stil?: StyleProp<ViewStyle>;
 };
 
-// Kanvastaki hap buton: 52 yüksek, tam yuvarlak; siyah (birincil) ya da gri yüzey (ikincil).
+const ZEMIN: Record<Tur, string> = { birincil: renk.metin, ikincil: renk.yuzey, tehlike: renk.uyari };
+const METIN: Record<Tur, string> = { birincil: renk.zemin, ikincil: renk.metin, tehlike: renk.zemin };
+
+// Kanvastaki hap buton: 52 yüksek, tam yuvarlak; siyah (birincil), gri yüzey (ikincil), turuncu-kırmızı (tehlike).
 export function Buton({ baslik, onPress, tur = 'birincil', pasif, yukleniyor, ikon, stil }: Props) {
-  const birincil = tur === 'birincil';
   const kapali = !!pasif || !!yukleniyor;
-  const metinRengi = birincil ? renk.zemin : renk.metin;
   return (
     <Pressable
       accessibilityRole="button"
@@ -26,17 +29,17 @@ export function Buton({ baslik, onPress, tur = 'birincil', pasif, yukleniyor, ik
       onPress={onPress}
       style={({ pressed }) => [
         s.kap,
-        birincil ? s.birincil : s.ikincil,
+        { backgroundColor: ZEMIN[tur] },
         pasif && s.pasif,
         pressed && s.basili,
         stil,
       ]}>
       {yukleniyor ? (
-        <ActivityIndicator color={metinRengi} />
+        <ActivityIndicator color={METIN[tur]} />
       ) : (
         <>
           {ikon}
-          <Text style={[s.metin, { color: metinRengi }]}>{baslik}</Text>
+          <Text style={[s.metin, { color: METIN[tur] }]}>{baslik}</Text>
         </>
       )}
     </Pressable>
@@ -54,8 +57,6 @@ const s = StyleSheet.create({
     justifyContent: 'center',
     gap: 10,
   },
-  birincil: { backgroundColor: renk.metin },
-  ikincil: { backgroundColor: renk.yuzey },
   pasif: { opacity: 0.4 },
   basili: { opacity: 0.85 },
   metin: { fontFamily: yazi.kalin, fontSize: 14 },
