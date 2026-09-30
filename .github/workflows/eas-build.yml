@@ -1,0 +1,98 @@
+name: eas-build
+
+# Elle tetiklenir: Actions → eas-build → Run workflow. Android "preview" (internal dağıtım, APK) varsayılan.
+# Gerekli GitHub secret'ları: EXPO_TOKEN (expo.dev → hesap → Access tokens), GOOGLE_MAPS_ANDROID_KEY.
+# Supabase URL + publishable anahtar eas.json'da (herkese açık değerler). Google sunucu anahtarı burada YOK.
+on:
+  workflow_dispatch:
+    inputs:
+      profile:
+        description: eas.json derleme profili
+        default: preview
+        type: choice
+        options: [preview, development, production]
+      platform:
+        description: platform
+        default: android
+        type: choice
+        options: [android, ios]
+
+jobs:
+  derleme:
+    runs-on: ubuntu-latest
+    env:
+      EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+      EAS_PROJECT_ID: ${{ vars.EAS_PROJECT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+
+      - name: Ön koşul
+        run: |
+          if [ -z "$EXPO_TOKEN" ]; then echo "::error::EXPO_TOKEN secret'ı tanımlı değil"; exit 1; fi
+
+      # İlk çalıştırmada @eceoz1/gezi projesini oluşturur/bağlar. app.config.ts dinamik olduğu için eas init
+      # kimliği dosyaya yazamaz ve hata verir; kimlik çıktıdan alınıp bu iş için ortama konur.
+      - name: EAS projesini bağla
+        if: env.EAS_PROJECT_ID == ''
+        run: |
+          CIKTI=$(npx eas-cli init --account eceoz1 --non-interactive --force 2>&1 || true)
+          echo "$CIKTI"
+          ID=$(echo "$CIKTI" | grep -oE '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}' | head -1)
+          if [ -z "$ID" ]; then echo "::error::EAS proje kimliği alınamadı"; exit 1; fi
+          echo "EAS_PROJECT_ID=$ID" >> "$GITHUB_ENV"
+          echo "### EAS projesi" >> "$GITHUB_STEP_SUMMARY"
+          echo "- projectId: \`$ID\` → app.config.ts'e varsayılan olarak yazılmalı (ya da repo değişkeni EAS_PROJECT_ID)" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Proje bilgisi
+        run: npx eas-cli project:info --non-interactive
+
+      # Gizli değerler EAS ortam değişkeni olarak profilin ortamına yazılır (derleme sunucusunda okunur).
+      - name: EAS ortam değişkenleri
+        if: inputs.platform == 'android'
+        env:
+          GOOGLE_MAPS_ANDROID_KEY: ${{ secrets.GOOGLE_MAPS_ANDROID_KEY }}
+        run: |
+          if [ -z "$GOOGLE_MAPS_ANDROID_KEY" ]; then echo "::warning::GOOGLE_MAPS_ANDROID_KEY secret'ı yok; harita boş açılır"; exit 0; fi
+          npx eas-cli env:create "${{ inputs.profile }}" --name GOOGLE_MAPS_ANDROID_KEY --value "$GOOGLE_MAPS_ANDROID_KEY" \
+            --visibility sensitive --scope project --force --non-interactive
+
+      - name: EAS derleme
+        id: derleme
+        run: |
+          npx eas-cli build --platform "${{ inputs.platform }}" --profile "${{ inputs.profile }}" \
+            --non-interactive --no-wait --json > derleme.json
+          cat derleme.json
+          ID=$(node -e "const b=require('./derleme.json'); console.log((Array.isArray(b)?b[0]:b).id)")
+          echo "id=$ID" >> "$GITHUB_OUTPUT"
+          echo "### Derleme" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Sayfa / kurulum linki: https://expo.dev/accounts/eceoz1/projects/gezi/builds/$ID" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Derlemeyi bekle
+        run: |
+          for i in $(seq 1 90); do
+            npx eas-cli build:view "${{ steps.derleme.outputs.id }}" --json > durum.json 2>/dev/null || true
+            DURUM=$(node -e "try{console.log(require('./durum.json').status)}catch{console.log('?')}")
+            echo "[$i] $DURUM"
+            case "$DURUM" in
+              FINISHED) exit 0 ;;
+              ERRORED|CANCELED) echo "::error::derleme $DURUM"; cat durum.json; exit 1 ;;
+            esac
+            sleep 20
+          done
+          echo "::error::30 dakikada bitmedi"; exit 1
+
+      # Android: imza SHA-1'i APK'dan okunur (Google Cloud Android anahtar kısıtı için).
+      - name: SHA-1 (Android)
+        if: inputs.platform == 'android'
+        run: |
+          URL=$(node -e "const d=require('./durum.json'); console.log(d.artifacts.buildUrl||d.artifacts.applicationArchiveUrl)")
+          curl -sSL "$URL" -o uygulama.apk
+          keytool -printcert -jarfile uygulama.apk | tee sertifika.txt
+          SHA1=$(grep -m1 'SHA1:' sertifika.txt | sed 's/.*SHA1: *//')
+          echo "- APK indirme: $URL" >> "$GITHUB_STEP_SUMMARY"
+          echo "- İmza SHA-1: \`$SHA1\` (paket: \`app.gezi.dev\`)" >> "$GITHUB_STEP_SUMMARY"

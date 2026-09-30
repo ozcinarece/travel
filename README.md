@@ -49,3 +49,10 @@ supabase functions deploy places-autocomplete
 supabase functions deploy places-light
 # yerelde: supabase functions serve --env-file supabase/functions/.env.local
 ```
+
+## Telefon derlemesi (EAS)
+
+EAS projesi `@eceoz1/gezi`. Derleme GitHub Actions'tan alınır: **Actions → eas-build → Run workflow** (varsayılan Android `preview`, internal dağıtım APK). İş bitince özet sayfasında kurulum linki ve Android imza **SHA-1**'i yazar; SHA-1 Google Cloud'daki Android anahtar kısıtına eklenir.
+
+Gerekli GitHub secret'ları: `EXPO_TOKEN` (expo.dev → hesap ayarları → Access tokens), `GOOGLE_MAPS_ANDROID_KEY`. Supabase URL ve publishable anahtar `eas.json` içinde (herkese açık değerler); Google sunucu anahtarı yalnızca Supabase secret'ıdır, derlemeye girmez.
+
