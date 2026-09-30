@@ -16,6 +16,10 @@ on:
         default: android
         type: choice
         options: [android, ios]
+      build_id:
+        description: Var olan bir EAS derlemesinin kimliği (verilirse yeni derleme başlatılmaz, yalnızca beklenir ve SHA-1 çıkarılır)
+        default: ''
+        type: string
 
 jobs:
   derleme:
@@ -53,7 +57,7 @@ jobs:
 
       # Gizli değerler EAS ortam değişkeni olarak profilin ortamına yazılır (derleme sunucusunda okunur).
       - name: EAS ortam değişkenleri
-        if: inputs.platform == 'android'
+        if: inputs.platform == 'android' && inputs.build_id == ''
         env:
           GOOGLE_MAPS_ANDROID_KEY: ${{ secrets.GOOGLE_MAPS_ANDROID_KEY }}
         run: |
@@ -64,6 +68,11 @@ jobs:
       - name: EAS derleme
         id: derleme
         run: |
+          if [ -n "${{ inputs.build_id }}" ]; then
+            echo "id=${{ inputs.build_id }}" >> "$GITHUB_OUTPUT"
+            echo "Var olan derleme izleniyor: ${{ inputs.build_id }}"
+            exit 0
+          fi
           npx eas-cli build --platform "${{ inputs.platform }}" --profile "${{ inputs.profile }}" \
             --non-interactive --no-wait --json > derleme.json
           cat derleme.json
@@ -72,9 +81,11 @@ jobs:
           echo "### Derleme" >> "$GITHUB_STEP_SUMMARY"
           echo "- Sayfa / kurulum linki: https://expo.dev/accounts/eceoz1/projects/gezi/builds/$ID" >> "$GITHUB_STEP_SUMMARY"
 
+      # EAS ücretsiz kuyruğu uzun sürebilir: 3 saate kadar beklenir (iş zaman aşımı 200 dk).
       - name: Derlemeyi bekle
+        timeout-minutes: 200
         run: |
-          for i in $(seq 1 90); do
+          for i in $(seq 1 360); do
             npx eas-cli build:view "${{ steps.derleme.outputs.id }}" --json > durum.json 2>/dev/null || true
             DURUM=$(node -e "try{console.log(require('./durum.json').status)}catch{console.log('?')}")
             echo "[$i] $DURUM"
@@ -82,9 +93,9 @@ jobs:
               FINISHED) exit 0 ;;
               ERRORED|CANCELED) echo "::error::derleme $DURUM"; cat durum.json; exit 1 ;;
             esac
-            sleep 20
+            sleep 30
           done
-          echo "::error::30 dakikada bitmedi"; exit 1
+          echo "::error::3 saatte bitmedi"; exit 1
 
       # Android: imza SHA-1'i APK'dan okunur (Google Cloud Android anahtar kısıtı için).
       - name: SHA-1 (Android)

@@ -5,9 +5,8 @@ const appDomain = process.env.APP_DOMAIN;
 // Apple girişi Apple Developer hesabı gelene kadar kapalı; açılınca iOS yetkisi ve eklentisi devreye girer.
 const appleAcik = process.env.EXPO_PUBLIC_APPLE_SIGN_IN === '1';
 
-// EAS projesi: @eceoz1/gezi. Proje kimliği ilk `eas init`ten sonra buraya varsayılan olarak yazılır;
-// o zamana kadar CI EAS_PROJECT_ID ile geçer.
-const easProjectId = process.env.EAS_PROJECT_ID;
+// EAS projesi: @eceoz1/gezi (https://expo.dev/accounts/eceoz1/projects/gezi). Kimlik gizli değildir.
+const easProjectId = process.env.EAS_PROJECT_ID ?? 'ce63656a-1090-42c8-9de9-8c9a8388a3fe';
 
 const config: ExpoConfig = {
   name: 'gezi',
@@ -80,7 +79,7 @@ const config: ExpoConfig = {
     typedRoutes: true,
     reactCompiler: true,
   },
-  extra: easProjectId ? { eas: { projectId: easProjectId } } : undefined,
+  extra: { eas: { projectId: easProjectId } },
 };
 
 export default config;
