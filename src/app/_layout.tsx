@@ -47,6 +47,8 @@ function Kok() {
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="ilk-seyahat" />
         <Stack.Screen name="hesap-sil" />
+        <Stack.Screen name="yeni/otel" />
+        <Stack.Screen name="seyahat/[id]" />
       </Stack.Protected>
       <Stack.Screen name="r/[token]" />
     </Stack>

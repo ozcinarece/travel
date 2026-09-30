@@ -71,10 +71,40 @@
       "planla": "İlk seyahatini planla",
       "davet": "Davet linkin mi var? Yapıştır"
     },
-    "tarihsiz": "Tarih seçilmedi"
+    "tarihsiz": "tarih yok",
+    "aktif": {
+      "durum": "Şu an seyahatte",
+      "gun": "{n}. gün",
+      "siradaki": "Sıradaki",
+      "programYok": "Program yakında hazır",
+      "ac": "Programı aç"
+    },
+    "yaklasan": "Yaklaşan",
+    "gecmis": "Geçmiş",
+    "gecmisSayi": "{n} seyahat",
+    "kisi": "{n} kişi",
+    "otelYok": "otel seçilmedi",
+    "davetEden": "{ad} davet etti",
+    "mekan": "{n} mekan",
+    "hata": "Seyahatler yüklenemedi; bağlantını kontrol edip aşağı çek."
   },
   "yeni": {
-    "baslik": "Nereye?"
+    "baslik": "Nereye?",
+    "alt": "Yeni seyahat · 1/2",
+    "ara": "Şehir ara",
+    "araYer": "Şehir adı yaz",
+    "araHata": "Arama şu an yapılamıyor. Tekrar dene.",
+    "sonucYok": "Sonuç yok",
+    "secimHata": "Şehir bilgisi alınamadı. Tekrar dene.",
+    "tarihler": "Tarihler",
+    "gidis": "Gidiş",
+    "donus": "Dönüş",
+    "sec": "Seç",
+    "tarihNot": "Tarihi sonra da girebilirsin.",
+    "kimlerle": "Kimlerle",
+    "kimlerleNot": "Linkle davet et; uygulama gerekmez. Davet linki bir sonraki adımda hazır olur.",
+    "devam": "Devam · otel",
+    "hata": "Seyahat oluşturulamadı. Tekrar dener misin?"
   },
   "profil": {
     "baslik": "Profil",
@@ -107,5 +137,25 @@
   },
   "harita": {
     "anahtarYok": "Harita anahtarı tanımlı değil"
+  },
+  "takvim": {
+    "baslikGidis": "Gidiş günü seç",
+    "baslikDonus": "Dönüş günü seç",
+    "oncekiAy": "Önceki ay",
+    "sonrakiAy": "Sonraki ay",
+    "temizle": "Temizle",
+    "tamam": "Tamam"
+  },
+  "otel": {
+    "baslik": "Otel",
+    "alt": "Yeni seyahat · 2/2",
+    "yakinda": "Otel seçimi bir sonraki sürümde geliyor. Seyahatin kaydedildi; oteli sonra da ekleyebilirsin.",
+    "seyahatlere": "Seyahate git"
+  },
+  "seyahat": {
+    "yakinda": "Keşfet, günler ve program ekranları sırada."
+  },
+  "yerler": {
+    "atif": "Google"
   }
 }
