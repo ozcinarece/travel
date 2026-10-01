@@ -7,13 +7,12 @@ import type { SeyahatOzet } from '@/lib/tipler';
 import { gunSayisi, kacinciGun } from '@/lib/zaman';
 import { minDokunma, renk, yazi } from '@/theme';
 
-type Props = { seyahat: SeyahatOzet; onAc: () => void };
+type Props = { seyahat: SeyahatOzet; onAc: () => void; siradaki?: string | null; bitti?: boolean };
 
 const KOYU_AVATAR = ['#ff5a1f', '#4c6ef5', '#8a8a8a'];
 
-// PRD 3.1 KK1: aktif seyahat kartı — şehir, gün ilerlemesi, sıradaki durak, play → 3.7.
-// "Sıradaki" 3.7 (Sprint 2) gelene kadar iskelettir; program yokken metin bunu söyler.
-export function AktifKart({ seyahat, onAc }: Props) {
+// PRD 3.1 KK1: aktif seyahat kartı — şehir, gün ilerlemesi, sıradaki durak + saati (3.7 programından), play → 3.7.
+export function AktifKart({ seyahat, onAc, siradaki, bitti }: Props) {
   const toplam = gunSayisi(seyahat.start_date, seyahat.end_date);
   const gun = kacinciGun(seyahat) ?? 1;
   const uyeler = seyahat.members.slice(0, 3);
@@ -51,7 +50,9 @@ export function AktifKart({ seyahat, onAc }: Props) {
       <View style={s.altSatir}>
         <View>
           <Text style={s.siradakiEtiket}>{t('seyahatler.aktif.siradaki')}</Text>
-          <Text style={s.siradaki}>{t('seyahatler.aktif.programYok')}</Text>
+          <Text style={s.siradaki} numberOfLines={1}>
+            {siradaki ?? (bitti ? t('seyahatler.aktif.bitti') : t('seyahatler.aktif.siradakiYok'))}
+          </Text>
         </View>
         <Pressable accessibilityRole="button" accessibilityLabel={t('seyahatler.aktif.ac')} onPress={onAc} style={s.oynat}>
           <Text style={s.oynatIsaret}>▶</Text>

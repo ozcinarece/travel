@@ -34,3 +34,10 @@ export function kacinciGun(seyahat: Tarihli, an: Date = new Date()): number | nu
   if (!aktifMi(seyahat, an)) return null;
   return gunSayisi(seyahat.start_date, yerelTarih(an, seyahat.tz));
 }
+
+/** Verilen anın IANA dilimindeki saati, gün başından dakika olarak (0–1439). */
+export function yerelSaatDk(an: Date, tz: string): number {
+  const parcalar = new Intl.DateTimeFormat('en-GB', { timeZone: tz, hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).formatToParts(an);
+  const al = (tip: string) => Number(parcalar.find((p) => p.type === tip)?.value ?? 0);
+  return al('hour') * 60 + al('minute');
+}

@@ -36,8 +36,8 @@ src/
     trip/[id]/kesfet.tsx, gunler.tsx, program.tsx, mekan/[placeId].tsx
     r/[token].tsx             3.10 davet (web + universal link hedefi)
   components/harita/          HaritaEkrani.tsx (tam ekran kabuk: 3.3 · 3.4 · 3.5) · Harita.native.tsx · Harita.web.tsx · PinIcerigi.tsx · haritaStili.ts (açık tema, #17) · geo.ts · tipler.ts
-  features/                   seyahatler · mekanlar · gunler (days+stops) · yerler · profil (sorgu + mutasyon hook'ları)
-  schedule/                   siralama.ts (NN + 2-opt) · tempo.ts (§5.3 + 3.5 kestirim) · sira.ts (kesirli order_key) · kaydir.ts · acilis.ts (3.7)  (+ __tests__)
+  features/                   seyahatler · mekanlar · gunler (days+stops) · program (route-matrix, changes, useGunProgrami/useAktifProgram) · yerler · profil
+  schedule/                   siralama.ts (NN + 2-opt) · tempo.ts (§5.3 + kestirim) · sira.ts (kesirli order_key) · program.ts (3.7 zaman çizelgesi, KK7 varış, T7 en ucuz ekleme) · acilis.ts (KK5) · kaydir.ts (§5.4 mini-çubuk, KK8)  (+ __tests__)
   google/                     autocomplete.ts (oturum token'ı) · alanMaskeleri.ts
   lib/                        supabase.ts · analytics.ts · zaman.ts (seyahat saat dilimi)
   i18n/tr.json
@@ -57,8 +57,9 @@ Fonksiyonlar (`supabase/functions/`), gizli değer `GOOGLE_SERVER_KEY` (Supabase
 - `places-light` — `{ids≤25, sehir?, sessionToken?}` → `{yerler:[HafifYer]}`. Hafif maske; `sehir: true` ile şehir maskesi (`timeZone` + `addressComponents` → `trips.tz`, `trips.country_code`; puan istenmez). Cevap izolat belleğinde 24 sa; veritabanına yazılmaz (PRD §7).
 - `resolve-link` — `{url, merkez?}` → `{yer: HafifYer, kaynak: 'place_id'|'arama'|'koordinat'}`; 422 `{hata: 'desteklenmeyen_link'|'cozulemedi'}`. Yalnızca Google Maps (T8); kısa link sunucuda takip edilir, `place_id` varsa hafif Details, ad+koordinat varsa Text Search (1 sonuç, 500 m yanlılık), yalnız koordinat varsa koordinat döner. Ayrıştırıcı `_shared/mapsLink.ts` (Jest ile test edilir).
 - `places-nearby` — `{merkez:{lat,lng}, yaricapM 500–15000, cip:'otel'|'populer'|'yemek'|'sanat'|'manzara', enFazla≤20}` → `{yerler:[HafifYer]}`. Nearby Search (New), `rankPreference: POPULARITY`. `otel` = `lodging` (#17, en fazla 12, görünür alan için; yalnız düğmeyle tetiklenir, kaydırmada otomatik çağrı yok). Cevap izolat belleğinde 24 sa (çip, 0,01° hücre, yarıçap, adet); veritabanına yazılmaz.
-- `places-full` — `{id, tz?}` → `{yer: TamYer}`; PRD 3.8 KK6 maskesi + konum; ilk fotoğraf Place Photo (`skipHttpRedirect`) ile sunucuda URI'ye çevrilir, anahtar istemciye gitmez; yorumlar en fazla 5, önbellek yok.
-- Sırada: `route-matrix` (3.7).
+- `places-light` `saatler: true` — hafif maskeye `regularOpeningHours.periods` eklenir (`periyotlar`: gun 0 = Pazar, "HH:MM"; boş dizi = hep açık, null = bilinmiyor); yalnız programdaki duraklar için (3.7 KK5; §7 açık noktası böyle kapandı).
+- `places-full` — `{id, tz?}` → `{yer: TamYer}`. PRD 3.8 KK6 maskesi + konum; ilk fotoğraf Place Photo (`skipHttpRedirect`) ile sunucuda URI'ye çevrilir, anahtar istemciye gitmez; yorumlar en fazla 5, önbellek yok.
+- `route-matrix` — `{trip_id, noktalar:[{key, lat, lng}] ≤ 25}` → `{bacaklar:[{from_key, to_key, seconds, meters}], eksik?}`. Routes `computeRouteMatrix` WALK; `key` = place_id | 'hotel'. Çağıranın JWT'siyle üyelik (RLS) doğrulanır; `walk_cache` (≤ 30 gün) service_role ile okunur/yazılır; yalnız eksik satır × sütun kesişimi Google'a sorulur (T9). Google hatasında eldeki bacaklar `eksik: true` ile döner, istemci kestirime düşer (3.7 KK10).
 
 **3.4 açık noktası (PR #13 notu).** `resolve-link` yalnız koordinat döndürdüğünde `place_id` boş kalır; `places.place_id` boş olamaz. Karar: Keşfet'te 'koordinat' sonucu haritayı o noktaya götürür ve "mekanı adıyla ara" mesajı verir, listeye eklenmez (Nearby ile eşleme yapılmaz).
 

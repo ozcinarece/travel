@@ -79,7 +79,10 @@
       "gun": "{n}. gün",
       "siradaki": "Sıradaki",
       "programYok": "Program yakında hazır",
-      "ac": "Programı aç"
+      "ac": "Programı aç",
+      "siradakiSaat": "{ad} · {saat}",
+      "siradakiYok": "Bugün durak yok",
+      "bitti": "Bugünün programı bitti"
     },
     "yaklasan": "Yaklaşan",
     "gecmis": "Geçmiş",
@@ -88,7 +91,8 @@
     "otelYok": "otel seçilmedi",
     "davetEden": "{ad} davet etti",
     "mekan": "{n} mekan",
-    "hata": "Seyahatler yüklenemedi; bağlantını kontrol edip aşağı çek."
+    "hata": "Seyahatler yüklenemedi; bağlantını kontrol edip aşağı çek.",
+    "sen": "Sen"
   },
   "yeni": {
     "baslik": "Nereye?",
@@ -188,8 +192,6 @@
       "program": "Program",
       "grup": "Grup"
     },
-    "gunlerYakinda": "Günlere dağıtma Sprint 3'te geliyor.",
-    "programYakinda": "Program Sprint 3'te geliyor.",
     "grup": {
       "baslik": "Grup",
       "uyeler": "Üyeler",
@@ -257,14 +259,18 @@
     "baskaGun": "Başka güne al",
     "atla": "Atla",
     "cikar": "Plandan çıkar",
-    "sprint3": "Günler ve program Sprint 3'te.",
     "cikarBaslik": "Plandan çıkarılsın mı?",
     "cikarMetin": "Mekan listeden silinir; notlar da gider.",
     "cikarOnay": "Çıkar",
     "listeyeEkle": "Listeye ekle",
     "listede": "Listede",
     "ekleHata": "Eklenemedi.",
-    "kaydetHata": "Kaydedilemedi."
+    "kaydetHata": "Kaydedilemedi.",
+    "gunSaat": "{n}. gün · {saat}",
+    "gunAtandi": "{n}. gün",
+    "atlandi": "Atlandı",
+    "atlamaGeri": "Atlamayı geri al",
+    "gunSecBaslik": "Hangi güne?"
   },
   "gunler": {
     "baslik": "Günlere dağıt",
@@ -300,5 +306,64 @@
     "devam": "Devam",
     "hata": "Kaydedilemedi. Tekrar dene.",
     "kestirimNot": "Yürüyüş süreleri kestirimdir; gerçek süreler programda."
+  },
+  "program": {
+    "baslik": "{n}. gün",
+    "altBugun": "{tarih} · şu an {saat}",
+    "altTarih": "{tarih}",
+    "altTarihsiz": "tarih yok",
+    "altDuzenle": "{tarih} · sürükleyip sırala",
+    "gunSec": "{n}. gün",
+    "bos": "Bu günde durak yok. Günler sekmesinden pinlere dokunarak ekle.",
+    "yuruyus": "{n} dk yürüyüş",
+    "yuruyusKisa": "{dk} dk · {mesafe}",
+    "yuruyusUzun": "40+ dk · toplu taşıma önerilir",
+    "oteleDonus": "{n} dk otele",
+    "kestirim": "~",
+    "siradaki": "SIRADAKİ",
+    "buradasin": "BURADASIN",
+    "atlandi": "Atlandı",
+    "yolTarifi": "Yol tarifi",
+    "vardik": "Vardık",
+    "vardikGeri": "Varışı geri al",
+    "kapaliGun": "Bugün kapalı",
+    "kapaliSaat": "Bu saatte kapalı, {saat}'te açılır",
+    "kapaliSaatBelirsiz": "Bu saatte kapalı",
+    "kapaliHafta": "{gunler} kapalı",
+    "baskaGuneAl": "Başka güne al",
+    "guneAl": "{n}. güne al",
+    "menuAtla": "Atla",
+    "menuAtlama": "Atlamayı geri al",
+    "menuCikar": "Plandan çıkar",
+    "menuCikarMetin": "Durak bu günden çıkar; mekan listede kalır.",
+    "menuBaslik": "{ad}",
+    "duzenle": "Düzenle",
+    "bitti": "Bitti",
+    "enKisa": "En kısa rotaya diz",
+    "baslangic": "Başlangıç {saat}",
+    "gunBitisi": "Gün bitişi",
+    "toplamYuruyus": "Yürüyüş",
+    "azalt": "Süreyi azalt",
+    "artir": "Süreyi artır",
+    "surukle": "Sürükle",
+    "yukari": "Yukarı taşı",
+    "asagi": "Aşağı taşı",
+    "programiGor": "Programı gör",
+    "hata": "Kaydedilemedi. Tekrar dene.",
+    "yuruyusHata": "Yürüyüş süreleri alınamadı; kestirim gösteriliyor.",
+    "cubuk": {
+      "yuruyus": "{ad}'a {n} dk",
+      "gec": "{n} dk geç",
+      "uzun": "{ad}'da {n} dk uzun kaldınız",
+      "bitis": "Gün bitişi {eski} → {yeni}",
+      "kaydir": "Kaydır",
+      "atla": "Atla",
+      "koru": "Planı koru"
+    },
+    "grup": {
+      "degisiklikler": "Son değişiklikler",
+      "degisiklikYok": "Henüz değişiklik yok",
+      "davetYakinda": "Davet linki 3.10 ile geliyor."
+    }
   }
 }

@@ -13,6 +13,7 @@ import { t } from '@/i18n';
 import { sureMetni } from '@/lib/kategori';
 import { GUNLER, haftaGunu } from '@/lib/takvim';
 import type { Durak, Gun, Mekan, Seyahat } from '@/lib/tipler';
+import { enUcuzEklemeIndeksi } from '@/schedule/program';
 import { enYakinGun, tempoHesapla, type TempoSonucu } from '@/schedule/tempo';
 import { bosluk, gunRengi, renk, yazi } from '@/theme';
 
@@ -132,7 +133,19 @@ function Gunler({ seyahat, gunler, duraklar, mekanlar }: { seyahat: Seyahat; gun
     setHata(null);
     try {
       if (mevcut && mevcut.day_id === seciliGun.id) await kaldir.mutateAsync(mevcut.id);
-      else await ata.mutateAsync({ mekan, gunId: seciliGun.id, mevcut, gunDuraklari: duraklar.filter((d) => d.day_id === seciliGun.id) });
+      else {
+        const gunDuraklari = duraklar.filter((d) => d.day_id === seciliGun.id).sort((a, b) => (a.order_key < b.order_key ? -1 : 1));
+        // T7: elle sıralanmış günde yeni durak en ucuz noktaya (kestirimle); otomatik günde sıra 3.7'de yeniden hesaplanır.
+        const ekleIndeksi = seciliGun.order_manual
+          ? enUcuzEklemeIndeksi(
+              gunDuraklari.filter((d) => !d.skipped).map((d) => mekanIle.get(d.place_ref)).filter((m): m is Mekan => !!m).map((m) => ({ key: m.place_id, konum: { lat: m.lat, lng: m.lng } })),
+              { key: mekan.place_id, konum: { lat: mekan.lat, lng: mekan.lng } },
+              otel,
+              () => null,
+            )
+          : undefined;
+        await ata.mutateAsync({ mekan, gunId: seciliGun.id, mevcut, gunDuraklari, ekleIndeksi });
+      }
     } catch {
       setHata(t('gunler.hata'));
     }
