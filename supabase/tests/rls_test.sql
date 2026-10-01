@@ -36,8 +36,10 @@ insert into public.profiles (id, name, username) values (:A, 'Ece', 'ece');
 -- 0.3 yönlendirme cevabı ve damgası kendi satırına yazılır
 update public.profiles set next_trip_window = 'bu_ay', onboarding_done_at = now() where id = auth.uid();
 do $$ begin assert (select next_trip_window from public.profiles where id = auth.uid()) = 'bu_ay', 'yönlendirme cevabı kaydedilir'; end $$;
+-- İstemci gibi RETURNING ile: dönen satır SELECT politikasından geçmeli (tetikleyici henüz üye yazmadan).
 insert into public.trips (owner_id, city_place_id, city_label, country_code, lat, lng, tz, start_date, end_date)
-values (:A, 'ChIJ-roma', 'Roma', 'IT', 41.9, 12.49, 'Europe/Rome', '2026-10-12', '2026-10-15');
+values (:A, 'ChIJ-roma', 'Roma', 'IT', 41.9, 12.49, 'Europe/Rome', '2026-10-12', '2026-10-15')
+returning id;
 select pg_temp.hata_bekle($$update public.trips set country_code = 'ita'$$, '23514');
 
 do $$
