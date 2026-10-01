@@ -14,7 +14,7 @@ type Props = {
   onKoru: () => void;
 };
 
-/** PRD §5.4 mini-çubuk: yalnız 3.1 ve 3.7'de, alt menünün hemen üstünde. */
+/** PRD §5.4 mini-çubuk: yalnız 3.1 ve 3.7'de, alt menünün hemen üstünde. Yürüyüş (a) durumunda yalnız Atla ve × (ürün kararı, PR #23). */
 export function MiniCubuk({ cubuk, adi, onKaydir, onAtla, onKoru }: Props) {
   const baslik =
     cubuk.tur === 'yuruyus'
@@ -42,11 +42,13 @@ export function MiniCubuk({ cubuk, adi, onKaydir, onAtla, onKoru }: Props) {
         ) : null}
       </View>
       <View style={s.dugmeler}>
-        <Pressable accessibilityRole="button" onPress={onKaydir} style={[s.dugme, s.dugmeSiyah]}>
-          <Text style={[s.dugmeMetin, { color: renk.zemin }]}>{t('program.cubuk.kaydir')}</Text>
-        </Pressable>
-        <Pressable accessibilityRole="button" onPress={onAtla} style={s.dugme}>
-          <Text style={s.dugmeMetin}>{t('program.cubuk.atla')}</Text>
+        {cubuk.tur === 'uzun' ? (
+          <Pressable accessibilityRole="button" onPress={onKaydir} style={[s.dugme, s.dugmeSiyah]}>
+            <Text style={[s.dugmeMetin, { color: renk.zemin }]}>{t('program.cubuk.kaydir')}</Text>
+          </Pressable>
+        ) : null}
+        <Pressable accessibilityRole="button" onPress={onAtla} style={[s.dugme, cubuk.tur === 'yuruyus' && s.dugmeSiyah]}>
+          <Text style={[s.dugmeMetin, cubuk.tur === 'yuruyus' && { color: renk.zemin }]}>{t('program.cubuk.atla')}</Text>
         </Pressable>
         <Pressable accessibilityRole="button" accessibilityLabel={t('program.cubuk.koru')} onPress={onKoru} hitSlop={8} style={s.kapat}>
           <Text style={s.kapatMetin}>×</Text>

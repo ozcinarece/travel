@@ -248,10 +248,8 @@ function Program({ seyahat, gunler, duraklar, mekanlar, gunParam }: { seyahat: S
       const d = gunDurak.find((x) => x.id === cubuk.durakId);
       const satir = satirIle(cubuk.durakId);
       if (d && satir) durakGuncelle.mutateAsync({ id: d.id, minutes: kaydirSuresi(satir.varisDk, prog.simdiDk) }).catch(() => setHata(t('program.hata')));
-    } else {
-      // Yürüyüşte "Kaydır": planı gecikme kadar kaydırmak için yapılacak bir şey yok — canlı saatler zaten kaymış durumda.
-      setKorunan(`${cubuk.tur}:${cubuk.hedefId}`);
     }
+    // Yürüyüş (a) durumunda Kaydır düğmesi yok (ürün kararı): canlı saatler zaten kaymış durumda.
   };
   const cubukAtla = () => {
     if (!cubuk) return;
@@ -265,6 +263,7 @@ function Program({ seyahat, gunler, duraklar, mekanlar, gunParam }: { seyahat: S
     ? [
         { etiket: t('program.baskaGuneAl'), onPress: () => setGunSecDurak(menuDurak), pasif: gunler.length < 2 },
         { etiket: menuDurak.skipped ? t('program.menuAtlama') : t('program.menuAtla'), onPress: () => atla(menuDurak) },
+        // "Günden çıkar": durak günden çıkar, mekan havuzda kalır (3.8'deki "Plandan çıkar" mekanı siler).
         { etiket: t('program.menuCikar'), onPress: () => cikar(menuDurak), tehlike: true },
       ]
     : [];

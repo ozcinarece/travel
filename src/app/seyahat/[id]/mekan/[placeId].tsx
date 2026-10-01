@@ -103,7 +103,7 @@ export default function MekanDetayEkrani() {
 
   const cikar = async () => {
     if (!mekan) return;
-    const onay = await onayIste(t('mekan.cikarBaslik'), t('mekan.cikarMetin'), t('mekan.cikarOnay'), t('genel.vazgec'));
+    const onay = await onayIste(t('mekan.cikarBaslik'), t('mekan.cikarMetin', { ad: yer.data?.ad ?? '' }), t('mekan.cikarOnay'), t('genel.vazgec'));
     if (!onay) return;
     try {
       await sil.mutateAsync(mekan.id);
