@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { useOturum } from '@/lib/oturum';
 import { supabase } from '@/lib/supabase';
-import type { SeyahatOzet, YeniSeyahat } from '@/lib/tipler';
+import type { OtelSecimi, Seyahat, SeyahatOzet, YeniSeyahat } from '@/lib/tipler';
 
 /** Üyesi olunan seyahatler (RLS süzer) + üyeler + mekan sayısı. Aktif/yaklaşan/geçmiş ayrımı ekranda (3.1). */
 export function useSeyahatler() {
@@ -53,5 +53,54 @@ export function useSeyahatOlustur() {
       return data.id as string;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['seyahatler'] }),
+  });
+}
+
+/** Tek seyahat (RLS üyeyi süzer). */
+export function useSeyahat(id: string | undefined) {
+  const { hesapli } = useOturum();
+  return useQuery({
+    queryKey: ['seyahat', id],
+    enabled: hesapli && !!id,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('trips')
+        .select('id, city_label, country_code, lat, lng, tz, start_date, end_date, hotel_place_id, hotel_lat, hotel_lng, hotel_label')
+        .eq('id', id!)
+        .single();
+      if (error) throw error;
+      return data as Seyahat;
+    },
+  });
+}
+
+/**
+ * PRD 3.3: oteli kaydeder (null → otel yok, KK4). Google'dan yalnızca place_id + konum tutulur;
+ * ad kullanıcının düzenleyebildiği etikettir (hotel_label). KK5: 3.7'den değiştirme aynı mutasyonu kullanır.
+ */
+export function useOtelKaydet(seyahatId: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (otel: OtelSecimi | null) => {
+      const { error } = await supabase
+        .from('trips')
+        .update(
+          otel
+            ? {
+                hotel_place_id: otel.place_id,
+                hotel_lat: otel.lat,
+                hotel_lng: otel.lng,
+                hotel_label: otel.ad.slice(0, 80) || null,
+                hotel_fetched_at: new Date().toISOString(),
+              }
+            : { hotel_place_id: null, hotel_lat: null, hotel_lng: null, hotel_label: null, hotel_fetched_at: null },
+        )
+        .eq('id', seyahatId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['seyahat', seyahatId] });
+      qc.invalidateQueries({ queryKey: ['seyahatler'] });
+    },
   });
 }

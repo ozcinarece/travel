@@ -143,3 +143,37 @@ export async function hafifDetay(placeId: string, secenek: { sehir?: boolean; ot
     ulke_kodu: ulke && /^[A-Z]{2}$/.test(ulke) ? ulke : null,
   };
 }
+
+// ---------------------------------------------------------------- Text Search (link çözme)
+
+/** Metin araması (New): ad + konum ipucuyla tek sonuç. Yalnızca resolve-link kullanır (PRD §7 maliyet notu). */
+export async function metinAra(secenek: {
+  metin: string;
+  merkez?: { lat: number; lng: number };
+  yaricapM?: number;
+}): Promise<HafifYer | null> {
+  const govde: Record<string, unknown> = { textQuery: secenek.metin, languageCode: DIL, maxResultCount: 1 };
+  if (secenek.merkez) {
+    govde.locationBias = {
+      circle: { center: { latitude: secenek.merkez.lat, longitude: secenek.merkez.lng }, radius: secenek.yaricapM ?? 500 },
+    };
+  }
+  const cevap = await istek<{ places?: DetailsCevap[] }>('places:searchText', {
+    govde,
+    maske: 'places.id,places.location,places.displayName,places.primaryType',
+  });
+  const d = cevap.places?.[0];
+  if (!d) return null;
+  return {
+    place_id: d.id,
+    ad: d.displayName?.text ?? '',
+    lat: d.location?.latitude ?? 0,
+    lng: d.location?.longitude ?? 0,
+    primary_type: d.primaryType ?? null,
+    tz: null,
+    puan: null,
+    puan_sayisi: null,
+    acik: null,
+    ulke_kodu: null,
+  };
+}

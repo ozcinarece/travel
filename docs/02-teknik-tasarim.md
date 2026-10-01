@@ -55,7 +55,8 @@ docs/
 Fonksiyonlar (`supabase/functions/`), gizli değer `GOOGLE_SERVER_KEY` (Supabase secret):
 - `places-autocomplete` — `{input, sessionToken, tur: 'cities'|'lodging'|yok, merkez?, limit≤5}` → `{oneriler:[{place_id, ana, ikincil, tipler}]}`. Oturum token'ı istemcide üretilir (`yeniOturumJetonu`), seçimdeki `places-light` çağrısıyla kapanır; her seçimden sonra yeni token. Önbellek yok.
 - `places-light` — `{ids≤25, sehir?, sessionToken?}` → `{yerler:[HafifYer]}`. Hafif maske; `sehir: true` ile şehir maskesi (`timeZone` + `addressComponents` → `trips.tz`, `trips.country_code`; puan istenmez). Cevap izolat belleğinde 24 sa; veritabanına yazılmaz (PRD §7).
-- Sırada: `resolve-link` (3.3/3.4), `places-nearby` (3.4), `route-matrix` (3.7), `places-full` (3.8).
+- `resolve-link` — `{url, merkez?}` → `{yer: HafifYer, kaynak: 'place_id'|'arama'|'koordinat'}`; 422 `{hata: 'desteklenmeyen_link'|'cozulemedi'}`. Yalnızca Google Maps (T8); kısa link sunucuda takip edilir, `place_id` varsa hafif Details, ad+koordinat varsa Text Search (1 sonuç, 500 m yanlılık), yalnız koordinat varsa koordinat döner. Ayrıştırıcı `_shared/mapsLink.ts` (Jest ile test edilir).
+- Sırada: `places-nearby` (3.4), `route-matrix` (3.7), `places-full` (3.8).
 
 İki Details maskesi var (T2):
 - **Hafif:** `id,location,displayName,primaryType,timeZone,rating,userRatingCount,currentOpeningHours.openNow`. Seçimde ve listelerde kullanılır.
@@ -67,7 +68,7 @@ Fonksiyonlar (`supabase/functions/`), gizli değer `GOOGLE_SERVER_KEY` (Supabase
 | 3.1, 3.4 liste, 3.7 program | `places-light` fonksiyonu: **toplu hafif Details** | Bir istekte N `place_id` alır. Ekranda ad, puan ve açık/kapalı bilgisini canlı gösterir. | İstemci belleği 24 sa + Edge Function 24 sa |
 | 3.4 öneri çipleri | Nearby Search (New), `maxResultCount` 20 | Hafif maskenin karşılığı | Bellekte, (çip, harita hücresi) anahtarıyla, 24 sa |
 | 3.4 kart fotoğrafı | Place Photo (400 px) | Yalnızca ekranda görünen kart için, tembel yükleme | Görsel önbelleği, oturum boyunca |
-| 3.4 link yapıştırma | `resolve-link` fonksiyonu | Yalnızca Google Maps linkleri: `maps.app.goo.gl`, `google.com/maps/...`. Kısa link sunucuda takip edilir; `place_id`, `ftid` ya da koordinat+ad ayrıştırılır; gerekirse Text Search (New). Booking ve Instagram linkleri v2 (T8). | — |
+| 3.3 / 3.4 link yapıştırma | `resolve-link` fonksiyonu | Yalnızca Google Maps linkleri: `maps.app.goo.gl`, `google.com/maps/...`. Kısa link sunucuda takip edilir; `place_id`, `ftid` ya da koordinat+ad ayrıştırılır; gerekirse Text Search (New). Booking ve Instagram linkleri v2 (T8). | — |
 | 3.7 açılış saati kontrolü | `places-light` + `regularOpeningHours` | Bkz. §7 açık nokta | İstemci belleği 24 sa + Edge Function 24 sa |
 | 3.8 mekan detayı | **Tam** Details | Yorumlar hiçbir yerde saklanmaz | Yok |
 | 3.5 tempo paneli (canlı) | **Çağrı yok** | Kuş uçuşu mesafe × 1,3 dolambaç ÷ 4,5 km/sa (PRD 3.5 KK5) | — |
