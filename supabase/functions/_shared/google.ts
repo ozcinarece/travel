@@ -178,21 +178,27 @@ export async function metinAra(secenek: {
   };
 }
 
-// ---------------------------------------------------------------- Nearby Search (3.4 öneri çipleri)
+// ---------------------------------------------------------------- Nearby Search (3.3 otel adayları, 3.4 öneri çipleri)
 
-/** PRD 3.4 KK4 / teknik not T8: çip → Places (New) tipleri. Geçerlilik ilk canlı testte doğrulanır. */
+/** Çip → Places (New) tipleri. 3.4 çipleri PRD KK4 / teknik not T8; `otel` #17 (lodging). Geçerlilik ilk canlı testte doğrulanır. */
 export const CIP_TIPLERI: Record<string, string[]> = {
+  otel: ['lodging'],
   populer: ['tourist_attraction'],
   yemek: ['restaurant'],
   sanat: ['museum', 'art_gallery'],
   manzara: ['park', 'tourist_attraction'],
 };
 
-export async function yakinAra(secenek: { merkez: { lat: number; lng: number }; yaricapM: number; tipler: string[] }): Promise<HafifYer[]> {
+export async function yakinAra(secenek: {
+  merkez: { lat: number; lng: number };
+  yaricapM: number;
+  tipler: string[];
+  enFazla?: number;
+}): Promise<HafifYer[]> {
   const cevap = await istek<{ places?: DetailsCevap[] }>('places:searchNearby', {
     govde: {
       includedTypes: secenek.tipler,
-      maxResultCount: 20,
+      maxResultCount: Math.min(Math.max(secenek.enFazla ?? 20, 1), 20),
       rankPreference: 'POPULARITY',
       languageCode: DIL,
       locationRestriction: {

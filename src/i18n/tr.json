@@ -1,7 +1,8 @@
 {
   "genel": {
     "geri": "Geri",
-    "vazgec": "Vazgeç"
+    "vazgec": "Vazgeç",
+    "yukleniyor": "Yükleniyor…"
   },
   "sekme": {
     "seyahatler": "Seyahatler",
@@ -159,8 +160,8 @@
     "araHata": "Arama şu an yapılamıyor. Tekrar dene.",
     "secimHata": "Otel bilgisi alınamadı. Tekrar dene.",
     "sonucYok": "Sonuç yok",
-    "daire": "Daire: 20 dk yürüyüş",
-    "surukleNot": "Pini sürükleyerek yerini düzeltebilirsin.",
+    "daire": "20 dk yürüyüş dairesi",
+    "surukleNot": "pini sürükleyerek taşı",
     "herGun": "Her gün buradan başlar, burada biter",
     "adsiz": "Otelim",
     "yokBaslik": "Otelim henüz yok",
@@ -169,7 +170,15 @@
     "devam": "Mekanları seç",
     "kaydetHata": "Kaydedilemedi. Tekrar dener misin?",
     "yukleniyor": "Seyahat yükleniyor…",
-    "bulunamadi": "Seyahat bulunamadı."
+    "bulunamadi": "Seyahat bulunamadı.",
+    "bolgeOtelleri": "Bu bölgedeki otelleri göster",
+    "bolgedeAra": "Bu bölgede ara",
+    "bolgeHata": "Oteller şu an alınamıyor. Tekrar dene.",
+    "bolgeBos": "Bu bölgede otel bulunamadı; haritayı kaydırıp tekrar dene.",
+    "adaySayisi": "{n} otel haritada · birine dokun",
+    "bunuSec": "Bunu seç",
+    "atif": "Otel verisi: Google",
+    "puanYok": "puan yok"
   },
   "seyahat": {
     "yakinda": "Bu ekran sırada.",

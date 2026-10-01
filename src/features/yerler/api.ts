@@ -107,7 +107,7 @@ export function useOtelOnerileri(girdi: string, oturum: string, merkez: Merkez |
   return useOneriler('otel-oneri', girdi, oturum, 'lodging', merkez, etkin);
 }
 
-export type OneriCipi = 'populer' | 'yemek' | 'sanat' | 'manzara';
+export type OneriCipi = 'otel' | 'populer' | 'yemek' | 'sanat' | 'manzara';
 export const ONERI_CIPLERI: OneriCipi[] = ['populer', 'yemek', 'sanat', 'manzara'];
 
 /** PRD 3.4 KK4: çip önerileri (Nearby Search, POPULARITY). Edge Function 24 sa önbellekler; istemci 1 sa. */
@@ -117,10 +117,7 @@ export function useYakinOneriler(cip: OneriCipi | null, merkez: Merkez | undefin
     enabled: !!cip && !!merkez,
     staleTime: 60 * 60 * 1000,
     retry: 1,
-    queryFn: async () => {
-      const cevap = await cagir<{ yerler: HafifYer[] }>('places-nearby', { merkez, yaricapM: merkez?.yaricapM ?? 3000, cip });
-      return cevap.yerler;
-    },
+    queryFn: () => yakinYerler({ cip: cip!, merkez: merkez! }),
   });
 }
 
@@ -171,4 +168,13 @@ export function useTamYer(placeId: string | undefined, tz?: string) {
     retry: 1,
     queryFn: async () => (await cagir<{ yer: TamYer }>('places-full', { id: placeId, tz })).yer,
   });
+/** Nearby Search (New) — tek çağrı, önbellek Edge Function'da 24 sa. Cevap yalnız bellekte tutulur (PRD §7). */
+export async function yakinYerler(secenek: { cip: OneriCipi; merkez: Merkez; enFazla?: number }): Promise<HafifYer[]> {
+  const cevap = await cagir<{ yerler: HafifYer[] }>('places-nearby', {
+    merkez: { lat: secenek.merkez.lat, lng: secenek.merkez.lng },
+    yaricapM: secenek.merkez.yaricapM ?? 3000,
+    cip: secenek.cip,
+    enFazla: secenek.enFazla,
+  });
+  return cevap.yerler;
 }

@@ -35,7 +35,7 @@ src/
     trip/[id]/_layout.tsx     seyahat içi alt menü + mini-çubuk
     trip/[id]/kesfet.tsx, gunler.tsx, program.tsx, mekan/[placeId].tsx
     r/[token].tsx             3.10 davet (web + universal link hedefi)
-  components/harita/          Harita.native.tsx · Harita.web.tsx · tipler.ts
+  components/harita/          HaritaEkrani.tsx (tam ekran kabuk: 3.3 · 3.4 · 3.5) · Harita.native.tsx · Harita.web.tsx · PinIcerigi.tsx · haritaStili.ts (açık tema, #17) · geo.ts · tipler.ts
   features/                   trips · places · days · members (sorgu + mutasyon hook'ları)
   schedule/                   siralama.ts · tempo.ts · kaydir.ts · acilis.ts  (+ __tests__)
   google/                     autocomplete.ts (oturum token'ı) · alanMaskeleri.ts
@@ -56,7 +56,7 @@ Fonksiyonlar (`supabase/functions/`), gizli değer `GOOGLE_SERVER_KEY` (Supabase
 - `places-autocomplete` — `{input, sessionToken, tur: 'cities'|'lodging'|yok, merkez?, limit≤5}` → `{oneriler:[{place_id, ana, ikincil, tipler}]}`. Oturum token'ı istemcide üretilir (`yeniOturumJetonu`), seçimdeki `places-light` çağrısıyla kapanır; her seçimden sonra yeni token. Önbellek yok.
 - `places-light` — `{ids≤25, sehir?, sessionToken?}` → `{yerler:[HafifYer]}`. Hafif maske; `sehir: true` ile şehir maskesi (`timeZone` + `addressComponents` → `trips.tz`, `trips.country_code`; puan istenmez). Cevap izolat belleğinde 24 sa; veritabanına yazılmaz (PRD §7).
 - `resolve-link` — `{url, merkez?}` → `{yer: HafifYer, kaynak: 'place_id'|'arama'|'koordinat'}`; 422 `{hata: 'desteklenmeyen_link'|'cozulemedi'}`. Yalnızca Google Maps (T8); kısa link sunucuda takip edilir, `place_id` varsa hafif Details, ad+koordinat varsa Text Search (1 sonuç, 500 m yanlılık), yalnız koordinat varsa koordinat döner. Ayrıştırıcı `_shared/mapsLink.ts` (Jest ile test edilir).
-- `places-nearby` — `{merkez, yaricapM (500–15000), cip: populer|yemek|sanat|manzara}` → `{yerler: HafifYer[]}`; Nearby Search (New), `rankPreference: POPULARITY`, 20 sonuç; (çip, 0,01° hücre, yarıçap) anahtarıyla 24 sa bellek önbelleği. Çip→tip eşlemesi `_shared/google.ts` `CIP_TIPLERI`.
+- `places-nearby` — `{merkez:{lat,lng}, yaricapM 500–15000, cip:'otel'|'populer'|'yemek'|'sanat'|'manzara', enFazla≤20}` → `{yerler:[HafifYer]}`. Nearby Search (New), `rankPreference: POPULARITY`. `otel` = `lodging` (#17, en fazla 12, görünür alan için; yalnız düğmeyle tetiklenir, kaydırmada otomatik çağrı yok). Cevap izolat belleğinde 24 sa (çip, 0,01° hücre, yarıçap, adet); veritabanına yazılmaz.
 - `places-full` — `{id, tz?}` → `{yer: TamYer}`; PRD 3.8 KK6 maskesi + konum; ilk fotoğraf Place Photo (`skipHttpRedirect`) ile sunucuda URI'ye çevrilir, anahtar istemciye gitmez; yorumlar en fazla 5, önbellek yok.
 - Sırada: `route-matrix` (3.7).
 
@@ -70,7 +70,7 @@ Fonksiyonlar (`supabase/functions/`), gizli değer `GOOGLE_SERVER_KEY` (Supabase
 |---|---|---|---|
 | 3.2 şehir, 3.3 otel, 3.4 arama | `places-autocomplete` + seçimde `places-light` | Seçim oturumu kapatır. Şehirde `timeZone` → `trips.tz`, ülke bileşeni → `trips.country_code`. | DB: `place_id`, `lat`/`lng`, `primary_type` (§3.1) |
 | 3.1, 3.4 liste, 3.7 program | `places-light` fonksiyonu: **toplu hafif Details** | Bir istekte N `place_id` alır. Ekranda ad, puan ve açık/kapalı bilgisini canlı gösterir. | İstemci belleği 24 sa + Edge Function 24 sa |
-| 3.4 öneri çipleri | Nearby Search (New), `maxResultCount` 20 | Hafif maskenin karşılığı | Bellekte, (çip, harita hücresi) anahtarıyla, 24 sa |
+| 3.4 öneri çipleri · 3.3 otel adayları (#17) | Nearby Search (New), `maxResultCount` 20 (otel: 12) | Hafif maskenin karşılığı; otel adayları düğmeyle ("Bu bölgedeki otelleri göster" / "Bu bölgede ara"), kaydırmada çağrı yok | Bellekte, (çip, harita hücresi) anahtarıyla, 24 sa |
 | 3.4 kart fotoğrafı | Place Photo (400 px) | Yalnızca ekranda görünen kart için, tembel yükleme | Görsel önbelleği, oturum boyunca |
 | 3.3 / 3.4 link yapıştırma | `resolve-link` fonksiyonu | Yalnızca Google Maps linkleri: `maps.app.goo.gl`, `google.com/maps/...`. Kısa link sunucuda takip edilir; `place_id`, `ftid` ya da koordinat+ad ayrıştırılır; gerekirse Text Search (New). Booking ve Instagram linkleri v2 (T8). | — |
 | 3.7 açılış saati kontrolü | `places-light` + `regularOpeningHours` | Bkz. §7 açık nokta | İstemci belleği 24 sa + Edge Function 24 sa |
