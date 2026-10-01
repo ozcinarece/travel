@@ -33,6 +33,8 @@ Deno.serve(async (istek) => {
 
   try {
     const acik = kisaLinkMi(url) ? await kisaLinkiTakipEt(url) : url;
+    // Kısa linkin açılımı da Google Maps alanında olmalı (başka alana yönlenen link çözülmez).
+    if (!googleMapsLinkiMi(acik) || kisaLinkMi(acik)) return json({ hata: 'desteklenmeyen_link' }, 422);
     const ayr = haritaLinkiAyristir(acik);
     if (!ayr) return json({ hata: 'cozulemedi' }, 422);
 
