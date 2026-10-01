@@ -16,12 +16,36 @@ export type Profil = {
   created_at: string;
 };
 
+export type UyeOzet = { user_id: string; role: 'owner' | 'member'; display_name: string; guest: boolean };
+
+/** 3.1 listesi için seyahat + üyeler + mekan sayısı (tek sorgu, RLS süzer). */
 export type SeyahatOzet = {
   id: string;
   city_label: string;
   start_date: string | null;
   end_date: string | null;
   tz: string;
+  hotel_place_id: string | null;
+  created_at: string;
+  members: UyeOzet[];
+  places: { count: number }[];
+};
+
+/** 3.2'de seçilen şehir; trips satırına dönüşür (Google'dan yalnızca place_id, konum, tz, ülke kodu). */
+export type SehirSecimi = {
+  place_id: string;
+  ad: string;
+  ikincil: string;
+  lat: number;
+  lng: number;
+  tz: string;
+  country_code: string | null;
+};
+
+export type YeniSeyahat = {
+  sehir: SehirSecimi;
+  start_date: string | null;
+  end_date: string | null;
 };
 
 // account_deletion_preview() satırı

@@ -41,6 +41,15 @@ npm run db:test              # Postgres 16 ile migration + RLS testleri
 
 Supabase tarafında bir kez: `supabase/migrations/*.sql` dosyaları sırayla SQL Editor'den çalıştırılır; Auth → Providers'ta Google ve **Anonymous sign-ins** açılır; Auth → URL Configuration → Redirect URLs'e `gezi://giris` ve web kökü + `/giris` eklenir.
 
+Edge Function'lar (`supabase/functions/`): Google sunucu anahtarı yalnızca burada yaşar, istemciye girmez.
+
+```sh
+supabase secrets set GOOGLE_SERVER_KEY=...      # bir kez (Places New, Routes, Geocoding etkin anahtar)
+supabase functions deploy places-autocomplete
+supabase functions deploy places-light
+# yerelde: supabase functions serve --env-file supabase/functions/.env.local
+```
+
 ## Telefon derlemesi (EAS)
 
 EAS projesi `@eceoz1/gezi`. Derleme GitHub Actions'tan alınır: **Actions → eas-build → Run workflow** (varsayılan Android `preview`, internal dağıtım APK). İş bitince özet sayfasında kurulum linki ve Android imza **SHA-1**'i yazar; SHA-1 Google Cloud'daki Android anahtar kısıtına eklenir.

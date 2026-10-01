@@ -1,8 +1,8 @@
 # Teknik Tasarım Notu — Gezi Planlayıcı v1
 
-Sürüm: 0.2 · Tarih: 29 Eylül 2026 · Yazan: geliştirici · Onay: Ece (ürün) · Durum: onaylandı (değişiklik isteğiyle, `03-inceleme-teknik-tasarim.md`)
+Sürüm: 0.3 · Tarih: 30 Eylül 2026 · Yazan: geliştirici · Onay: Ece (ürün) · Durum: onaylandı (değişiklik isteğiyle, `03-inceleme-teknik-tasarim.md`)
 Dayanak: `00-kapsam.md` v0.2, `01-prd-v1.md` v0.2
-Değişiklik: v0.2'de incelemedeki T1, T2, T5, T7, T8 ve T11 kararları işlendi, Sprint 1 tahmini 14 güne çekildi.
+Değişiklik: v0.2'de incelemedeki T1, T2, T5, T7, T8 ve T11 kararları işlendi, Sprint 1 tahmini 14 güne çekildi. v0.3: Autocomplete de Edge Function'a alındı (ürün onayı, PR #4 incelemesi); §3'te ilk iki fonksiyon tanımlandı.
 
 ---
 
@@ -50,7 +50,12 @@ docs/
 
 ## 3. Google Places / Routes çağrı planı ve önbellek
 
-İlke: **anahtarlar ve alan maskeleri sunucuda**. İstemci doğrudan yalnızca iki şeyi kullanır: Maps SDK / Maps JS (uygulama kimliğine ya da referrer'a kısıtlı anahtarla) ve Autocomplete (tuş başına gecikme olmasın diye, oturum token'ıyla). Diğer bütün Places ve Routes çağrıları Supabase Edge Function üzerinden gider. Bu sayede maske sabit kalır, kota ve maliyet tek yerden izlenir, kısa linkler sunucuda çözülür.
+İlke: **anahtarlar ve alan maskeleri sunucuda**. İstemci doğrudan yalnızca Maps SDK / Maps JS'i kullanır (uygulama kimliğine ya da referrer'a kısıtlı anahtarla). **Autocomplete dahil** bütün Places ve Routes çağrıları Supabase Edge Function üzerinden gider (v0.3; başta Autocomplete istemcideydi, tek sunucu anahtarıyla kota ve maliyetin tek yerden izlenmesi için sunucuya alındı — 300 ms debounce ile gecikme hissedilmiyor). Bu sayede maske sabit kalır, kısa linkler sunucuda çözülür, istemci paketinde yalnızca kısıtlı harita anahtarı bulunur.
+
+Fonksiyonlar (`supabase/functions/`), gizli değer `GOOGLE_SERVER_KEY` (Supabase secret):
+- `places-autocomplete` — `{input, sessionToken, tur: 'cities'|'lodging'|yok, merkez?, limit≤5}` → `{oneriler:[{place_id, ana, ikincil, tipler}]}`. Oturum token'ı istemcide üretilir (`yeniOturumJetonu`), seçimdeki `places-light` çağrısıyla kapanır; her seçimden sonra yeni token. Önbellek yok.
+- `places-light` — `{ids≤25, sehir?, sessionToken?}` → `{yerler:[HafifYer]}`. Hafif maske; `sehir: true` ile şehir maskesi (`timeZone` + `addressComponents` → `trips.tz`, `trips.country_code`; puan istenmez). Cevap izolat belleğinde 24 sa; veritabanına yazılmaz (PRD §7).
+- Sırada: `resolve-link` (3.3/3.4), `places-nearby` (3.4), `route-matrix` (3.7), `places-full` (3.8).
 
 İki Details maskesi var (T2):
 - **Hafif:** `id,location,displayName,primaryType,timeZone,rating,userRatingCount,currentOpeningHours.openNow`. Seçimde ve listelerde kullanılır.
@@ -58,7 +63,7 @@ docs/
 
 | Nerede | Çağrı | Alan maskesi / not | Önbellek |
 |---|---|---|---|
-| 3.2 şehir, 3.3 otel, 3.4 arama | Autocomplete (New) + seçimde **hafif Details** | Seçim oturumu kapatır. `timeZone` → `trips.tz`. | DB: `place_id`, `lat`/`lng`, `primary_type` (§3.1) |
+| 3.2 şehir, 3.3 otel, 3.4 arama | `places-autocomplete` + seçimde `places-light` | Seçim oturumu kapatır. Şehirde `timeZone` → `trips.tz`, ülke bileşeni → `trips.country_code`. | DB: `place_id`, `lat`/`lng`, `primary_type` (§3.1) |
 | 3.1, 3.4 liste, 3.7 program | `places-light` fonksiyonu: **toplu hafif Details** | Bir istekte N `place_id` alır. Ekranda ad, puan ve açık/kapalı bilgisini canlı gösterir. | İstemci belleği 24 sa + Edge Function 24 sa |
 | 3.4 öneri çipleri | Nearby Search (New), `maxResultCount` 20 | Hafif maskenin karşılığı | Bellekte, (çip, harita hücresi) anahtarıyla, 24 sa |
 | 3.4 kart fotoğrafı | Place Photo (400 px) | Yalnızca ekranda görünen kart için, tembel yükleme | Görsel önbelleği, oturum boyunca |
