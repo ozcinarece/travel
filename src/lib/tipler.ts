@@ -79,3 +79,27 @@ export type SilmeOnizleme = {
   outcome: 'transfer' | 'delete';
   new_owner_name: string | null;
 };
+
+/** places satırı (seyahatin mekan havuzu). Ad/puan saklanmaz; places-light ile canlı gelir. */
+export type Mekan = {
+  id: string;
+  trip_id: string;
+  place_id: string;
+  primary_type: string | null;
+  lat: number;
+  lng: number;
+  google_fetched_at: string;
+  default_minutes: number;
+  added_by: string | null;
+  note: string | null;
+  created_at: string;
+};
+
+export type Uye = {
+  trip_id: string;
+  user_id: string;
+  guest: boolean;
+  display_name: string;
+  role: 'owner' | 'member';
+  joined_at: string;
+};

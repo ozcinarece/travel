@@ -4,8 +4,10 @@ export type HaritaPini = {
   id: string;
   konum: Konum;
   renk: string;
-  /** Pin üstündeki etiket: durak sırası ya da "?" (güne atanmamış). */
+  /** Pin üstündeki etiket: durak sırası ya da "?" (güne atanmamış); öneri pininde mekan adı. */
   etiket?: string;
+  /** durak: numaralı yuvarlak · oneri: beyaz hap "+ ad" (3.4 KK5) · otel: ev simgesi · varsayılan: standart iğne. */
+  tur?: 'durak' | 'oneri' | 'otel';
   surukle?: boolean;
 };
 

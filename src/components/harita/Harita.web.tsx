@@ -39,7 +39,9 @@ export function Harita({ merkez, zoom = 14, pinler = [], daireler = [], onPinBas
           <Marker
             key={p.id}
             position={p.konum}
-            label={p.etiket}
+            // Web'de özel görünüm yok: öneri pini "+ ad", durak numarası etiket olarak.
+            label={p.tur === 'oneri' ? `+ ${p.etiket ?? ''}` : p.etiket}
+            title={p.etiket}
             draggable={p.surukle}
             onClick={() => onPinBas?.(p.id)}
             onDragEnd={(e) => {

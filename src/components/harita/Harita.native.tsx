@@ -1,6 +1,7 @@
 import MapView, { Circle, Marker, PROVIDER_GOOGLE } from 'react-native-maps';
 import { StyleSheet } from 'react-native';
 
+import { PinIcerigi } from './PinIcerigi';
 import type { HaritaProps } from './tipler';
 
 // Google zoom → enlem aralığı (yaklaşık): 360 / 2^zoom.
@@ -36,7 +37,9 @@ export function Harita({ merkez, zoom = 14, pinler = [], daireler = [], onPinBas
           key={p.id}
           coordinate={{ latitude: p.konum.lat, longitude: p.konum.lng }}
           pinColor={p.renk}
-          title={p.etiket}
+          title={p.tur ? undefined : p.etiket}
+          anchor={p.tur === 'oneri' ? { x: 0.1, y: 0.5 } : { x: 0.5, y: 0.5 }}
+          tracksViewChanges={false}
           draggable={p.surukle}
           onPress={() => onPinBas?.(p.id)}
           onDragEnd={(e) =>
@@ -44,8 +47,9 @@ export function Harita({ merkez, zoom = 14, pinler = [], daireler = [], onPinBas
               lat: e.nativeEvent.coordinate.latitude,
               lng: e.nativeEvent.coordinate.longitude,
             })
-          }
-        />
+          }>
+          {p.tur ? <PinIcerigi pin={p} /> : null}
+        </Marker>
       ))}
     </MapView>
   );

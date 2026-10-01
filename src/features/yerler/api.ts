@@ -86,7 +86,7 @@ export async function hafifYerler(ids: string[], secenek: { sehir?: boolean; otu
   return cevap.yerler;
 }
 
-function useOneriler(anahtar: string, girdi: string, oturum: string, tur: 'cities' | 'lodging', merkez?: Merkez, etkin = true) {
+export function useOneriler(anahtar: string, girdi: string, oturum: string, tur: 'cities' | 'lodging' | undefined, merkez?: Merkez, etkin = true) {
   const gecikmis = useGecikmeli(girdi.trim(), 300);
   return useQuery({
     queryKey: [anahtar, gecikmis, oturum, merkez?.lat, merkez?.lng],
@@ -105,4 +105,70 @@ export function useSehirOnerileri(girdi: string, oturum: string) {
 /** PRD 3.3 KK1: otel araması (lodging), seyahat şehri çevresine yanlı; link yapıştırıldığında kapalı. */
 export function useOtelOnerileri(girdi: string, oturum: string, merkez: Merkez | undefined, etkin: boolean) {
   return useOneriler('otel-oneri', girdi, oturum, 'lodging', merkez, etkin);
+}
+
+export type OneriCipi = 'populer' | 'yemek' | 'sanat' | 'manzara';
+export const ONERI_CIPLERI: OneriCipi[] = ['populer', 'yemek', 'sanat', 'manzara'];
+
+/** PRD 3.4 KK4: çip önerileri (Nearby Search, POPULARITY). Edge Function 24 sa önbellekler; istemci 1 sa. */
+export function useYakinOneriler(cip: OneriCipi | null, merkez: Merkez | undefined) {
+  return useQuery({
+    queryKey: ['yakin-oneri', cip, merkez?.lat.toFixed(3), merkez?.lng.toFixed(3)],
+    enabled: !!cip && !!merkez,
+    staleTime: 60 * 60 * 1000,
+    retry: 1,
+    queryFn: async () => {
+      const cevap = await cagir<{ yerler: HafifYer[] }>('places-nearby', { merkez, yaricapM: merkez?.yaricapM ?? 3000, cip });
+      return cevap.yerler;
+    },
+  });
+}
+
+/** Liste ekranları için toplu hafif Details; istemci belleğinde 24 sa (PRD §7). Harita üstünde ad/puan canlı gösterilir. */
+export function useHafifYerler(ids: string[]) {
+  const sirali = [...new Set(ids)].sort();
+  return useQuery({
+    queryKey: ['hafif-yerler', sirali],
+    enabled: sirali.length > 0,
+    staleTime: 24 * 60 * 60 * 1000,
+    gcTime: 24 * 60 * 60 * 1000,
+    retry: 1,
+    queryFn: async () => {
+      // Edge Function istek başına 25 kimlik alır.
+      const parcalar: string[][] = [];
+      for (let i = 0; i < sirali.length; i += 25) parcalar.push(sirali.slice(i, i + 25));
+      const sonuc = await Promise.all(parcalar.map((p) => hafifYerler(p)));
+      const harita: Record<string, HafifYer> = {};
+      for (const y of sonuc.flat()) harita[y.place_id] = y;
+      return harita;
+    },
+  });
+}
+
+export type TamYer = {
+  place_id: string;
+  ad: string;
+  lat: number;
+  lng: number;
+  primary_type: string | null;
+  puan: number | null;
+  puan_sayisi: number | null;
+  acik: boolean | null;
+  kapanis: string | null;
+  saatler: string[];
+  foto_uri: string | null;
+  google_maps_uri: string | null;
+  yorumlar: { yazar: string; puan: number | null; metin: string; zaman: string }[];
+};
+
+/** PRD 3.8 KK6: tam Details yalnızca detay ekranında; istemcide önbellek yok (yorumlar saklanmaz). */
+export function useTamYer(placeId: string | undefined, tz?: string) {
+  return useQuery({
+    queryKey: ['tam-yer', placeId],
+    enabled: !!placeId,
+    staleTime: 0,
+    gcTime: 0,
+    retry: 1,
+    queryFn: async () => (await cagir<{ yer: TamYer }>('places-full', { id: placeId, tz })).yer,
+  });
 }
