@@ -38,7 +38,14 @@ export function useKullaniciAdiMusait(aday: string) {
     },
   });
   // Kullanıcı hâlâ yazıyorsa (gecikmiş ≠ aday) sonuç eskidir.
-  return { guncel: gecikmis === aday, gecerli, musait: sorgu.data, kontrolEdiliyor: sorgu.isFetching };
+  return {
+    guncel: gecikmis === aday,
+    gecerli,
+    musait: sorgu.data,
+    kontrolEdiliyor: sorgu.isFetching,
+    hata: sorgu.isError,
+    yenidenDene: () => sorgu.refetch(),
+  };
 }
 
 export type YeniProfil = {

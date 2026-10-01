@@ -44,7 +44,8 @@
     },
     "gizlilikNot": "Sonra profilinden değiştirebilirsin.",
     "devam": "Devam",
-    "hata": "Kaydedilemedi. Tekrar dener misin?"
+    "hata": "Kaydedilemedi. Tekrar dener misin?",
+    "kontrolHata": "Kontrol yapılamadı. Bağlantını kontrol et; sorun sürerse veritabanı kurulumu eksik olabilir."
   },
   "ilkSeyahat": {
     "baslik": "İlk seyahatin",

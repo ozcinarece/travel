@@ -30,10 +30,10 @@ export default function ProfilKurEkrani() {
   const [fotoMesgul, setFotoMesgul] = useState(false);
   const [hata, setHata] = useState<string | null>(null);
 
-  const { guncel, gecerli, musait, kontrolEdiliyor } = useKullaniciAdiMusait(kullaniciAdi);
+  const { guncel, gecerli, musait, kontrolEdiliyor, hata: kontrolHatasi } = useKullaniciAdiMusait(kullaniciAdi);
   const olustur = useProfilOlustur();
 
-  const durum = kullaniciAdiDurumu({ kullaniciAdi, guncel, gecerli, musait, kontrolEdiliyor });
+  const durum = kullaniciAdiDurumu({ kullaniciAdi, guncel, gecerli, musait, kontrolEdiliyor, hata: kontrolHatasi });
   const hazir = ad.trim().length > 0 && durum.tur === 'musait' && !olustur.isPending;
 
   const fotoSec = async () => {
@@ -128,7 +128,7 @@ export default function ProfilKurEkrani() {
   );
 }
 
-type Durum = { tur: 'bos' | 'gecersiz' | 'kontrol' | 'musait' | 'alinmis'; metin?: string; renk?: string };
+type Durum = { tur: 'bos' | 'gecersiz' | 'kontrol' | 'musait' | 'alinmis' | 'hata'; metin?: string; renk?: string };
 
 function kullaniciAdiDurumu(g: {
   kullaniciAdi: string;
@@ -136,12 +136,15 @@ function kullaniciAdiDurumu(g: {
   gecerli: boolean;
   musait: boolean | undefined;
   kontrolEdiliyor: boolean;
+  hata: boolean;
 }): Durum {
   if (g.kullaniciAdi.length === 0) return { tur: 'bos' };
   if (!g.guncel || g.kontrolEdiliyor) return { tur: 'kontrol', metin: t('profilKur.kontrol'), renk: renk.ikincil };
   if (!g.gecerli) return { tur: 'gecersiz', metin: t('profilKur.kural'), renk: renk.ikincil };
   if (g.musait === true) return { tur: 'musait', metin: t('profilKur.musait'), renk: renk.basari };
   if (g.musait === false) return { tur: 'alinmis', metin: t('profilKur.alinmis'), renk: renk.uyari };
+  // İstek hata aldıysa (ağ, eksik migration, yetki) sonsuz "kontrol ediliyor" yerine söyle.
+  if (g.hata) return { tur: 'hata', metin: t('profilKur.kontrolHata'), renk: renk.uyari };
   return { tur: 'kontrol', metin: t('profilKur.kontrol'), renk: renk.ikincil };
 }
 
