@@ -74,6 +74,18 @@ export type Durak = {
   skipped: boolean;
 };
 
+/** changes satırı (PRD §5.5; 3.7 KK9 son değişiklikler). */
+export type Degisiklik = {
+  id: number;
+  user_id: string | null;
+  entity: string;
+  entity_id: string;
+  field: string | null;
+  old: unknown;
+  new: unknown;
+  at: string;
+};
+
 /** 3.3'te seçilen otel; place_id yalnız koordinattan geldiyse boş. */
 export type OtelSecimi = {
   place_id: string | null;

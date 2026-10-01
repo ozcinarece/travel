@@ -5,7 +5,7 @@ import { useOturum } from '@/lib/oturum';
 import { supabase } from '@/lib/supabase';
 import { tarihEkle } from '@/lib/takvim';
 import type { Durak, Gun, Mekan } from '@/lib/tipler';
-import { sonAnahtar } from '@/schedule/sira';
+import { arasindaAnahtar, sonAnahtar } from '@/schedule/sira';
 
 export function useGunler(seyahatId: string | undefined) {
   const { session } = useOturum();
@@ -35,13 +35,27 @@ export function useDuraklar(seyahatId: string | undefined) {
 
 /**
  * 3.5 KK2: mekanı güne atar. Zaten başka güne atanmışsa günü değiştirir (place_ref tekil);
- * süre mekanın §6 varsayılanı, sıra anahtarı günün sonuna.
+ * süre mekanın §6 varsayılanı. Sıra: günün sonuna; `ekleIndeksi` verilirse (T7, elle sıralanmış gün) o noktaya.
  */
 export function useDuragaAta(seyahatId: string) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async ({ mekan, gunId, mevcut, gunDuraklari }: { mekan: Mekan; gunId: string; mevcut: Durak | undefined; gunDuraklari: Durak[] }) => {
-      const order_key = sonAnahtar(gunDuraklari.map((d) => d.order_key));
+    mutationFn: async ({
+      mekan,
+      gunId,
+      mevcut,
+      gunDuraklari,
+      ekleIndeksi,
+    }: {
+      mekan: Mekan;
+      gunId: string;
+      mevcut: Durak | undefined;
+      gunDuraklari: Durak[];
+      ekleIndeksi?: number;
+    }) => {
+      const sirali = [...gunDuraklari].sort((a, b) => (a.order_key < b.order_key ? -1 : 1));
+      const order_key =
+        ekleIndeksi === undefined ? sonAnahtar(sirali.map((d) => d.order_key)) : arasindaAnahtar(sirali[ekleIndeksi - 1]?.order_key, sirali[ekleIndeksi]?.order_key);
       if (mevcut) {
         const { error } = await supabase.from('stops').update({ day_id: gunId, order_key }).eq('id', mevcut.id);
         if (error) throw error;

@@ -4,15 +4,21 @@ import { useState } from 'react';
 import { ActivityIndicator, Linking, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { SecimMenusu } from '@/components/program/SecimMenusu';
 import { Buton } from '@/components/ui/Buton';
 import { Avatar } from '@/components/ui/Avatar';
+import { useDuraklar, useGunler } from '@/features/gunler/sorgular';
 import { useMekanEkle, useMekanGuncelle, useMekanSil, useMekanlar, useUyeler } from '@/features/mekanlar/sorgular';
+import { matrisNoktalari, useDurakGuncelle, useYuruyusMatrisi } from '@/features/program/sorgular';
+import { gunDuraklari, useGunProgrami, useSimdi } from '@/features/program/useProgram';
 import { useSeyahat } from '@/features/seyahatler/sorgular';
 import { useTamYer } from '@/features/yerler/api';
 import { t } from '@/i18n';
 import { kategoriEtiketi, sureMetni, varsayilanDakika } from '@/lib/kategori';
 import { onayIste } from '@/lib/onay';
 import { useOturum } from '@/lib/oturum';
+import { arasindaAnahtar } from '@/schedule/sira';
+import { dakikaSaat } from '@/schedule/tempo';
 import { bosluk, minDokunma, renk, yazi } from '@/theme';
 
 // PRD 3.8 Mekan detayı: tam Details (yalnız burada), kim ekledi + not, süre −/+, yol tarifi, ··· menüsü.
@@ -29,9 +35,46 @@ export default function MekanDetayEkrani() {
   const ekle = useMekanEkle(id ?? '');
   const [notTaslak, setNotTaslak] = useState<string | null>(null);
   const [menuAcik, setMenuAcik] = useState(false);
+  const [gunSecAcik, setGunSecAcik] = useState(false);
   const [hata, setHata] = useState<string | null>(null);
 
   const mekan = mekanlar.data?.find((m) => m.place_id === placeId);
+
+  // 3.7 ile: güne atanmışsa "N. gün · HH:MM" (o günün programından), menüde Başka güne al / Atla.
+  const gunler = useGunler(id);
+  const duraklar = useDuraklar(id);
+  const durakGuncelle = useDurakGuncelle(id ?? '');
+  const durak = mekan ? duraklar.data?.find((d) => d.place_ref === mekan.id) : undefined;
+  const gun = durak ? gunler.data?.find((g) => g.id === durak.day_id) : undefined;
+  const otel = seyahat.data && seyahat.data.hotel_lat !== null && seyahat.data.hotel_lng !== null ? { lat: seyahat.data.hotel_lat, lng: seyahat.data.hotel_lng } : null;
+  const gunMekanlari = gun ? gunDuraklari(gun, duraklar.data ?? []).map((d) => mekanlar.data?.find((m) => m.id === d.place_ref)).filter((m): m is NonNullable<typeof m> => !!m) : [];
+  const matris = useYuruyusMatrisi(gun ? id : undefined, matrisNoktalari(otel, gunMekanlari));
+  const an = useSimdi(false);
+  const prog = useGunProgrami({ seyahat: seyahat.data, gun, duraklar: duraklar.data ?? [], mekanlar: mekanlar.data ?? [], yuruyus: matris.yuruyus, an });
+  const satir = durak ? prog?.canli.satirlar.find((x) => x.durak.id === durak.id) : undefined;
+  const gunMetni = gun
+    ? durak?.skipped
+      ? `${t('mekan.gunAtandi', { n: gun.index })} · ${t('mekan.atlandi')}`
+      : satir
+        ? t('mekan.gunSaat', { n: gun.index, saat: dakikaSaat(satir.varisDk) })
+        : t('mekan.gunAtandi', { n: gun.index })
+    : t('mekan.gunAtanmadi');
+
+  const baskaGuneAl = async (hedefId: string) => {
+    if (!durak) return;
+    const hedefDuraklar = (duraklar.data ?? []).filter((d) => d.day_id === hedefId).sort((a, b) => (a.order_key < b.order_key ? -1 : 1));
+    try {
+      await durakGuncelle.mutateAsync({
+        id: durak.id,
+        day_id: hedefId,
+        order_key: arasindaAnahtar(hedefDuraklar[hedefDuraklar.length - 1]?.order_key, undefined),
+        arrived_at: null,
+        arrived_by: null,
+      });
+    } catch {
+      setHata(t('mekan.kaydetHata'));
+    }
+  };
   const ekleyen = mekan ? uyeler.data?.find((u) => u.user_id === mekan.added_by) : undefined;
   const sahip = uyeler.data?.find((u) => u.user_id === session?.user.id)?.role === 'owner';
   const notDuzenler = !!mekan && (mekan.added_by === session?.user.id || sahip);
@@ -60,8 +103,7 @@ export default function MekanDetayEkrani() {
 
   const cikar = async () => {
     if (!mekan) return;
-    setMenuAcik(false);
-    const onay = await onayIste(t('mekan.cikarBaslik'), t('mekan.cikarMetin'), t('mekan.cikarOnay'), t('genel.vazgec'));
+    const onay = await onayIste(t('mekan.cikarBaslik'), t('mekan.cikarMetin', { ad: yer.data?.ad ?? '' }), t('mekan.cikarOnay'), t('genel.vazgec'));
     if (!onay) return;
     try {
       await sil.mutateAsync(mekan.id);
@@ -105,7 +147,7 @@ export default function MekanDetayEkrani() {
           <>
             <View style={s.baslikKutu}>
               <Text style={s.ustMetin}>
-                {kategoriEtiketi(yer.data.primary_type)} · {t('mekan.gunAtanmadi')}
+                {kategoriEtiketi(yer.data.primary_type)} · {gunMetni}
               </Text>
               <Text style={s.baslik}>{yer.data.ad}</Text>
               <View style={s.puanSatir}>
@@ -230,15 +272,26 @@ export default function MekanDetayEkrani() {
 
       <View style={s.altKisim}>
         {hata ? <Text style={s.hata}>{hata}</Text> : null}
-        {menuAcik && mekan ? (
-          <View style={s.menu}>
-            <Text style={s.menuPasif}>{t('mekan.baskaGun')} · {t('mekan.sprint3')}</Text>
-            <Text style={s.menuPasif}>{t('mekan.atla')} · {t('mekan.sprint3')}</Text>
-            <Pressable accessibilityRole="button" onPress={cikar} style={s.menuSatir}>
-              <Text style={s.menuTehlike}>{t('mekan.cikar')}</Text>
-            </Pressable>
-          </View>
-        ) : null}
+        <SecimMenusu
+          acik={menuAcik && !!mekan}
+          baslik={yer.data?.ad}
+          onKapat={() => setMenuAcik(false)}
+          secenekler={[
+            { etiket: t('mekan.baskaGun'), onPress: () => setGunSecAcik(true), pasif: !durak || (gunler.data?.length ?? 0) < 2 },
+            {
+              etiket: durak?.skipped ? t('mekan.atlamaGeri') : t('mekan.atla'),
+              onPress: () => durak && durakGuncelle.mutateAsync({ id: durak.id, skipped: !durak.skipped }).catch(() => setHata(t('mekan.kaydetHata'))),
+              pasif: !durak,
+            },
+            { etiket: t('mekan.cikar'), onPress: cikar, tehlike: true },
+          ]}
+        />
+        <SecimMenusu
+          acik={gunSecAcik}
+          baslik={t('mekan.gunSecBaslik')}
+          onKapat={() => setGunSecAcik(false)}
+          secenekler={(gunler.data ?? []).filter((g) => g.id !== durak?.day_id).map((g) => ({ etiket: t('mekan.gunAtandi', { n: g.index }), onPress: () => baskaGuneAl(g.id) }))}
+        />
         <View style={s.altSatir}>
           {mekan ? (
             <Pressable accessibilityRole="button" accessibilityLabel={t('mekan.menu')} onPress={() => setMenuAcik((a) => !a)} style={s.menuDugme}>
@@ -293,9 +346,5 @@ const s = StyleSheet.create({
   altSatir: { flexDirection: 'row', gap: 10 },
   menuDugme: { width: 56, height: 50, minHeight: minDokunma, borderRadius: 999, backgroundColor: renk.yuzey, alignItems: 'center', justifyContent: 'center' },
   menuDugmeMetin: { fontFamily: yazi.kalin, fontSize: 16, color: renk.metin },
-  menu: { borderRadius: 16, backgroundColor: renk.yuzey, padding: 8 },
-  menuSatir: { paddingVertical: 12, paddingHorizontal: 12, minHeight: minDokunma, justifyContent: 'center' },
-  menuPasif: { fontFamily: yazi.normal, fontSize: 13, color: renk.soluk, paddingVertical: 12, paddingHorizontal: 12 },
-  menuTehlike: { fontFamily: yazi.kalin, fontSize: 14, color: renk.uyari },
   hata: { fontFamily: yazi.yari, fontSize: 12, textAlign: 'center', color: renk.uyari, paddingHorizontal: bosluk.kenar },
 });

@@ -18,6 +18,8 @@ export type HafifYer = {
   puan_sayisi: number | null;
   acik: boolean | null;
   ulke_kodu: string | null;
+  /** Yalnız `saatler: true` ile: haftalık periyotlar (gun 0 = Pazar); boş dizi = her zaman açık; null = bilinmiyor. */
+  periyotlar?: { gun: number; ac: string; kapaGun: number; kapa: string }[] | null;
 };
 
 const HARFLER = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -76,11 +78,12 @@ export function linkGibiMi(metin: string): boolean {
   return /^(https?:\/\/|geo:|maps\.app\.goo\.gl|goo\.gl\/|www\.google\.|maps\.google\.)/i.test(metin.trim());
 }
 
-export async function hafifYerler(ids: string[], secenek: { sehir?: boolean; oturum?: string } = {}): Promise<HafifYer[]> {
+export async function hafifYerler(ids: string[], secenek: { sehir?: boolean; oturum?: string; saatler?: boolean } = {}): Promise<HafifYer[]> {
   if (ids.length === 0) return [];
   const cevap = await cagir<{ yerler: HafifYer[] }>('places-light', {
     ids,
     sehir: secenek.sehir,
+    saatler: secenek.saatler,
     sessionToken: secenek.oturum,
   });
   return cevap.yerler;
@@ -122,10 +125,11 @@ export function useYakinOneriler(cip: OneriCipi | null, merkez: Merkez | undefin
 }
 
 /** Liste ekranları için toplu hafif Details; istemci belleğinde 24 sa (PRD §7). Harita üstünde ad/puan canlı gösterilir. */
-export function useHafifYerler(ids: string[]) {
+export function useHafifYerler(ids: string[], secenek: { saatler?: boolean } = {}) {
   const sirali = [...new Set(ids)].sort();
+  const saatler = !!secenek.saatler;
   return useQuery({
-    queryKey: ['hafif-yerler', sirali],
+    queryKey: ['hafif-yerler', saatler ? 'saatli' : 'hafif', sirali],
     enabled: sirali.length > 0,
     staleTime: 24 * 60 * 60 * 1000,
     gcTime: 24 * 60 * 60 * 1000,
@@ -134,7 +138,7 @@ export function useHafifYerler(ids: string[]) {
       // Edge Function istek başına 25 kimlik alır.
       const parcalar: string[][] = [];
       for (let i = 0; i < sirali.length; i += 25) parcalar.push(sirali.slice(i, i + 25));
-      const sonuc = await Promise.all(parcalar.map((p) => hafifYerler(p)));
+      const sonuc = await Promise.all(parcalar.map((p) => hafifYerler(p, { saatler })));
       const harita: Record<string, HafifYer> = {};
       for (const y of sonuc.flat()) harita[y.place_id] = y;
       return harita;

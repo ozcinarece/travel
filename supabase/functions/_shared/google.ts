@@ -94,6 +94,8 @@ export async function otomatikTamamla(secenek: {
 
 /** PRD §7: liste/seçim için HAFİF maske; tam Details yalnızca 3.8'de (ayrı fonksiyon). */
 const HAFIF_MASKE = 'id,location,displayName,primaryType,timeZone,rating,userRatingCount,currentOpeningHours.openNow';
+/** 3.7 KK5 (§7 açık nokta): program açılış kontrolü için haftalık periyotlar da istenir; yalnız stops için. */
+const SAATLI_MASKE = `${HAFIF_MASKE},regularOpeningHours.periods`;
 /** Şehir seçimi: puan gerekmez; saat dilimi ve ülke kodu gerekir (trips.tz, trips.country_code). */
 const SEHIR_MASKE = 'id,location,displayName,primaryType,timeZone,addressComponents';
 
@@ -109,6 +111,8 @@ export type HafifYer = {
   acik: boolean | null;
   /** ISO 3166-1 alpha-2; yalnızca şehir maskesinde dolar. */
   ulke_kodu: string | null;
+  /** Haftalık açılış periyotları (yalnız `saatler: true`); gun 0 = Pazar … 6 = Cumartesi, "HH:MM". Boş dizi = her zaman açık. */
+  periyotlar?: { gun: number; ac: string; kapaGun: number; kapa: string }[] | null;
 };
 
 type DetailsCevap = {
@@ -120,16 +124,29 @@ type DetailsCevap = {
   rating?: number;
   userRatingCount?: number;
   currentOpeningHours?: { openNow?: boolean };
+  regularOpeningHours?: { periods?: { open?: GunSaat; close?: GunSaat }[] };
   addressComponents?: { shortText?: string; types?: string[] }[];
 };
 
-export async function hafifDetay(placeId: string, secenek: { sehir?: boolean; oturum?: string }): Promise<HafifYer> {
+type GunSaat = { day?: number; hour?: number; minute?: number };
+
+function hhmm(g?: GunSaat) {
+  return `${String(g?.hour ?? 0).padStart(2, '0')}:${String(g?.minute ?? 0).padStart(2, '0')}`;
+}
+
+export async function hafifDetay(placeId: string, secenek: { sehir?: boolean; oturum?: string; saatler?: boolean }): Promise<HafifYer> {
   const parametreler = new URLSearchParams({ languageCode: DIL });
   if (secenek.oturum) parametreler.set('sessionToken', secenek.oturum);
   const d = await istek<DetailsCevap>(`places/${encodeURIComponent(placeId)}?${parametreler}`, {
-    maske: secenek.sehir ? SEHIR_MASKE : HAFIF_MASKE,
+    maske: secenek.sehir ? SEHIR_MASKE : secenek.saatler ? SAATLI_MASKE : HAFIF_MASKE,
   });
   const ulke = d.addressComponents?.find((b) => b.types?.includes('country'))?.shortText ?? null;
+  const periyotlar = secenek.saatler
+    ? (d.regularOpeningHours?.periods ?? [])
+        .filter((p) => p.open?.day !== undefined)
+        // Kapanışı olmayan periyot (7/24 açık) → boş dizi ile temsil edilir.
+        .map((p) => ({ gun: p.open!.day!, ac: hhmm(p.open), kapaGun: p.close?.day ?? p.open!.day!, kapa: p.close ? hhmm(p.close) : '24:00' }))
+    : undefined;
   return {
     place_id: d.id,
     ad: d.displayName?.text ?? '',
@@ -141,6 +158,7 @@ export async function hafifDetay(placeId: string, secenek: { sehir?: boolean; ot
     puan_sayisi: d.userRatingCount ?? null,
     acik: d.currentOpeningHours?.openNow ?? null,
     ulke_kodu: ulke && /^[A-Z]{2}$/.test(ulke) ? ulke : null,
+    periyotlar: secenek.saatler ? (d.regularOpeningHours ? periyotlar! : null) : undefined,
   };
 }
 
