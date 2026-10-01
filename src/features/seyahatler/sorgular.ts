@@ -65,7 +65,7 @@ export function useSeyahat(id: string | undefined) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('trips')
-        .select('id, city_label, country_code, lat, lng, tz, start_date, end_date, hotel_place_id, hotel_lat, hotel_lng, hotel_label')
+        .select('id, city_label, country_code, lat, lng, tz, start_date, end_date, hotel_place_id, hotel_lat, hotel_lng, hotel_label, day_start, day_end')
         .eq('id', id!)
         .single();
       if (error) throw error;

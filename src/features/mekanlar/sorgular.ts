@@ -83,7 +83,7 @@ export function useMekanSil(seyahatId: string) {
 }
 
 /**
- * PRD §5.5 / 3.4 KK8: seyahat açıkken places, stops, members Realtime aboneliği;
+ * PRD §5.5 / 3.4 KK8: seyahat açıkken places, stops, days, members Realtime aboneliği;
  * her değişiklikte ilgili sorgu yenilenir (2 sn içinde ekran güncellenir).
  */
 export function useSeyahatCanli(seyahatId: string | undefined) {
@@ -98,6 +98,9 @@ export function useSeyahatCanli(seyahatId: string | undefined) {
       )
       .on('postgres_changes', { event: '*', schema: 'public', table: 'stops', filter: `trip_id=eq.${seyahatId}` }, () =>
         qc.invalidateQueries({ queryKey: ['duraklar', seyahatId] }),
+      )
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'days', filter: `trip_id=eq.${seyahatId}` }, () =>
+        qc.invalidateQueries({ queryKey: ['gunler', seyahatId] }),
       )
       .on('postgres_changes', { event: '*', schema: 'public', table: 'members', filter: `trip_id=eq.${seyahatId}` }, () =>
         qc.invalidateQueries({ queryKey: ['uyeler', seyahatId] }),

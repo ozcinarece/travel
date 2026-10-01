@@ -36,8 +36,8 @@ src/
     trip/[id]/kesfet.tsx, gunler.tsx, program.tsx, mekan/[placeId].tsx
     r/[token].tsx             3.10 davet (web + universal link hedefi)
   components/harita/          HaritaEkrani.tsx (tam ekran kabuk: 3.3 · 3.4 · 3.5) · Harita.native.tsx · Harita.web.tsx · PinIcerigi.tsx · haritaStili.ts (açık tema, #17) · geo.ts · tipler.ts
-  features/                   trips · places · days · members (sorgu + mutasyon hook'ları)
-  schedule/                   siralama.ts · tempo.ts · kaydir.ts · acilis.ts  (+ __tests__)
+  features/                   seyahatler · mekanlar · gunler (days+stops) · yerler · profil (sorgu + mutasyon hook'ları)
+  schedule/                   siralama.ts (NN + 2-opt) · tempo.ts (§5.3 + 3.5 kestirim) · sira.ts (kesirli order_key) · kaydir.ts · acilis.ts (3.7)  (+ __tests__)
   google/                     autocomplete.ts (oturum token'ı) · alanMaskeleri.ts
   lib/                        supabase.ts · analytics.ts · zaman.ts (seyahat saat dilimi)
   i18n/tr.json
