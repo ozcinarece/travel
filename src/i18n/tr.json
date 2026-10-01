@@ -148,10 +148,28 @@
     "tamam": "Tamam"
   },
   "otel": {
-    "baslik": "Otel",
-    "alt": "Yeni seyahat · 2/2",
-    "yakinda": "Otel seçimi bir sonraki sürümde geliyor. Seyahatin kaydedildi; oteli sonra da ekleyebilirsin.",
-    "seyahatlere": "Seyahate git"
+    "baslik": "Nerede kalıyorsun?",
+    "alt": "{sehir} · 2/2",
+    "ara": "Otel ara",
+    "araYer": "Otel adı ya da Google Maps linki",
+    "linkCoz": "Link",
+    "linkCozuluyor": "Çözülüyor…",
+    "linkHata": "Bu link tanınmadı. Şimdilik yalnızca Google Maps linkleri; otelini aramayı dene.",
+    "linkDesteksiz": "Şimdilik yalnızca Google Maps linkleri çözülüyor; Booking linki yerine otelin adını ara.",
+    "araHata": "Arama şu an yapılamıyor. Tekrar dene.",
+    "secimHata": "Otel bilgisi alınamadı. Tekrar dene.",
+    "sonucYok": "Sonuç yok",
+    "daire": "Daire: 20 dk yürüyüş",
+    "surukleNot": "Pini sürükleyerek yerini düzeltebilirsin.",
+    "herGun": "Her gün buradan başlar, burada biter",
+    "adsiz": "Otelim",
+    "yokBaslik": "Otelim henüz yok",
+    "yokAlt": "Mekanları seç, bölge önereyim",
+    "atla": "Atla",
+    "devam": "Mekanları seç",
+    "kaydetHata": "Kaydedilemedi. Tekrar dener misin?",
+    "yukleniyor": "Seyahat yükleniyor…",
+    "bulunamadi": "Seyahat bulunamadı."
   },
   "seyahat": {
     "yakinda": "Keşfet, günler ve program ekranları sırada."

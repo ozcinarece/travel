@@ -31,6 +31,30 @@ export type SeyahatOzet = {
   places: { count: number }[];
 };
 
+/** Tek seyahat (3.3 ve seyahat içi ekranlar). */
+export type Seyahat = {
+  id: string;
+  city_label: string;
+  country_code: string | null;
+  lat: number;
+  lng: number;
+  tz: string;
+  start_date: string | null;
+  end_date: string | null;
+  hotel_place_id: string | null;
+  hotel_lat: number | null;
+  hotel_lng: number | null;
+  hotel_label: string | null;
+};
+
+/** 3.3'te seçilen otel; place_id yalnız koordinattan geldiyse boş. */
+export type OtelSecimi = {
+  place_id: string | null;
+  ad: string;
+  lat: number;
+  lng: number;
+};
+
 /** 3.2'de seçilen şehir; trips satırına dönüşür (Google'dan yalnızca place_id, konum, tz, ülke kodu). */
 export type SehirSecimi = {
   place_id: string;
