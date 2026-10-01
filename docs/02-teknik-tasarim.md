@@ -57,7 +57,10 @@ Fonksiyonlar (`supabase/functions/`), gizli değer `GOOGLE_SERVER_KEY` (Supabase
 - `places-light` — `{ids≤25, sehir?, sessionToken?}` → `{yerler:[HafifYer]}`. Hafif maske; `sehir: true` ile şehir maskesi (`timeZone` + `addressComponents` → `trips.tz`, `trips.country_code`; puan istenmez). Cevap izolat belleğinde 24 sa; veritabanına yazılmaz (PRD §7).
 - `resolve-link` — `{url, merkez?}` → `{yer: HafifYer, kaynak: 'place_id'|'arama'|'koordinat'}`; 422 `{hata: 'desteklenmeyen_link'|'cozulemedi'}`. Yalnızca Google Maps (T8); kısa link sunucuda takip edilir, `place_id` varsa hafif Details, ad+koordinat varsa Text Search (1 sonuç, 500 m yanlılık), yalnız koordinat varsa koordinat döner. Ayrıştırıcı `_shared/mapsLink.ts` (Jest ile test edilir).
 - `places-nearby` — `{merkez:{lat,lng}, yaricapM 500–15000, cip:'otel'|'populer'|'yemek'|'sanat'|'manzara', enFazla≤20}` → `{yerler:[HafifYer]}`. Nearby Search (New), `rankPreference: POPULARITY`. `otel` = `lodging` (#17, en fazla 12, görünür alan için; yalnız düğmeyle tetiklenir, kaydırmada otomatik çağrı yok). Cevap izolat belleğinde 24 sa (çip, 0,01° hücre, yarıçap, adet); veritabanına yazılmaz.
-- Sırada: `route-matrix` (3.7), `places-full` (3.8).
+- `places-full` — `{id, tz?}` → `{yer: TamYer}`; PRD 3.8 KK6 maskesi + konum; ilk fotoğraf Place Photo (`skipHttpRedirect`) ile sunucuda URI'ye çevrilir, anahtar istemciye gitmez; yorumlar en fazla 5, önbellek yok.
+- Sırada: `route-matrix` (3.7).
+
+**3.4 açık noktası (PR #13 notu).** `resolve-link` yalnız koordinat döndürdüğünde `place_id` boş kalır; `places.place_id` boş olamaz. Karar: Keşfet'te 'koordinat' sonucu haritayı o noktaya götürür ve "mekanı adıyla ara" mesajı verir, listeye eklenmez (Nearby ile eşleme yapılmaz).
 
 İki Details maskesi var (T2):
 - **Hafif:** `id,location,displayName,primaryType,timeZone,rating,userRatingCount,currentOpeningHours.openNow`. Seçimde ve listelerde kullanılır.

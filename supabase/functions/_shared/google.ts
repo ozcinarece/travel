@@ -220,3 +220,86 @@ export async function yakinAra(secenek: {
     ulke_kodu: null,
   }));
 }
+
+// ---------------------------------------------------------------- Tam Details (yalnız 3.8)
+
+/** PRD 3.8 KK6 maskesi + konum. Yorumlar ve fotoğraflar hiçbir yerde saklanmaz. */
+const TAM_MASKE =
+  'id,displayName,location,rating,userRatingCount,currentOpeningHours,regularOpeningHours,photos,reviews,googleMapsUri,primaryType';
+
+export type TamYer = {
+  place_id: string;
+  ad: string;
+  lat: number;
+  lng: number;
+  primary_type: string | null;
+  puan: number | null;
+  puan_sayisi: number | null;
+  acik: boolean | null;
+  /** Bugünkü kapanış ("19:15") — currentOpeningHours.nextCloseTime'dan. */
+  kapanis: string | null;
+  /** Haftalık satırlar ("Pazartesi: 08:30–19:15"). */
+  saatler: string[];
+  foto_uri: string | null;
+  google_maps_uri: string | null;
+  yorumlar: { yazar: string; puan: number | null; metin: string; zaman: string }[];
+};
+
+type TamCevap = DetailsCevap & {
+  currentOpeningHours?: { openNow?: boolean; nextCloseTime?: string; weekdayDescriptions?: string[] };
+  regularOpeningHours?: { weekdayDescriptions?: string[] };
+  photos?: { name: string }[];
+  googleMapsUri?: string;
+  reviews?: {
+    rating?: number;
+    relativePublishTimeDescription?: string;
+    text?: { text: string };
+    originalText?: { text: string };
+    authorAttribution?: { displayName?: string };
+  }[];
+};
+
+/** Place Photo (New): yönlendirme atlanıp fotoğraf URI'si alınır; anahtar istemciye gitmez. */
+async function fotoUri(ad: string, genislik = 800): Promise<string | null> {
+  const cevap = await fetch(`${KOK}/${ad}/media?maxWidthPx=${genislik}&skipHttpRedirect=true`, {
+    headers: { 'x-goog-api-key': anahtar() },
+  });
+  if (!cevap.ok) return null;
+  const j = (await cevap.json()) as { photoUri?: string };
+  return j.photoUri ?? null;
+}
+
+export async function tamDetay(placeId: string, tz?: string): Promise<TamYer> {
+  const d = await istek<TamCevap>(`places/${encodeURIComponent(placeId)}?languageCode=${DIL}`, { maske: TAM_MASKE });
+  const foto = d.photos?.[0]?.name ? await fotoUri(d.photos[0].name) : null;
+  let kapanis: string | null = null;
+  if (d.currentOpeningHours?.nextCloseTime) {
+    try {
+      kapanis = new Intl.DateTimeFormat('tr-TR', { hour: '2-digit', minute: '2-digit', timeZone: tz }).format(
+        new Date(d.currentOpeningHours.nextCloseTime),
+      );
+    } catch {
+      kapanis = null;
+    }
+  }
+  return {
+    place_id: d.id,
+    ad: d.displayName?.text ?? '',
+    lat: d.location?.latitude ?? 0,
+    lng: d.location?.longitude ?? 0,
+    primary_type: d.primaryType ?? null,
+    puan: d.rating ?? null,
+    puan_sayisi: d.userRatingCount ?? null,
+    acik: d.currentOpeningHours?.openNow ?? null,
+    kapanis,
+    saatler: d.regularOpeningHours?.weekdayDescriptions ?? d.currentOpeningHours?.weekdayDescriptions ?? [],
+    foto_uri: foto,
+    google_maps_uri: d.googleMapsUri ?? null,
+    yorumlar: (d.reviews ?? []).slice(0, 5).map((y) => ({
+      yazar: y.authorAttribution?.displayName ?? '',
+      puan: y.rating ?? null,
+      metin: y.text?.text ?? y.originalText?.text ?? '',
+      zaman: y.relativePublishTimeDescription ?? '',
+    })),
+  };
+}
