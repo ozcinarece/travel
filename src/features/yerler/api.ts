@@ -106,3 +106,16 @@ export function useSehirOnerileri(girdi: string, oturum: string) {
 export function useOtelOnerileri(girdi: string, oturum: string, merkez: Merkez | undefined, etkin: boolean) {
   return useOneriler('otel-oneri', girdi, oturum, 'lodging', merkez, etkin);
 }
+
+export type OneriCipi = 'otel' | 'populer' | 'yemek' | 'sanat' | 'manzara';
+
+/** Nearby Search (New) — tek çağrı, önbellek Edge Function'da 24 sa. Cevap yalnız bellekte tutulur (PRD §7). */
+export async function yakinYerler(secenek: { cip: OneriCipi; merkez: Merkez; enFazla?: number }): Promise<HafifYer[]> {
+  const cevap = await cagir<{ yerler: HafifYer[] }>('places-nearby', {
+    merkez: { lat: secenek.merkez.lat, lng: secenek.merkez.lng },
+    yaricapM: secenek.merkez.yaricapM ?? 3000,
+    cip: secenek.cip,
+    enFazla: secenek.enFazla,
+  });
+  return cevap.yerler;
+}

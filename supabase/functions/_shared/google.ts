@@ -177,3 +177,46 @@ export async function metinAra(secenek: {
     ulke_kodu: null,
   };
 }
+
+// ---------------------------------------------------------------- Nearby Search (3.3 otel adayları, 3.4 öneri çipleri)
+
+/** Çip → Places (New) tipleri. 3.4 çipleri PRD KK4 / teknik not T8; `otel` #17 (lodging). Geçerlilik ilk canlı testte doğrulanır. */
+export const CIP_TIPLERI: Record<string, string[]> = {
+  otel: ['lodging'],
+  populer: ['tourist_attraction'],
+  yemek: ['restaurant'],
+  sanat: ['museum', 'art_gallery'],
+  manzara: ['park', 'tourist_attraction'],
+};
+
+export async function yakinAra(secenek: {
+  merkez: { lat: number; lng: number };
+  yaricapM: number;
+  tipler: string[];
+  enFazla?: number;
+}): Promise<HafifYer[]> {
+  const cevap = await istek<{ places?: DetailsCevap[] }>('places:searchNearby', {
+    govde: {
+      includedTypes: secenek.tipler,
+      maxResultCount: Math.min(Math.max(secenek.enFazla ?? 20, 1), 20),
+      rankPreference: 'POPULARITY',
+      languageCode: DIL,
+      locationRestriction: {
+        circle: { center: { latitude: secenek.merkez.lat, longitude: secenek.merkez.lng }, radius: Math.min(secenek.yaricapM, 50_000) },
+      },
+    },
+    maske: 'places.id,places.location,places.displayName,places.primaryType,places.rating,places.userRatingCount,places.currentOpeningHours.openNow',
+  });
+  return (cevap.places ?? []).map((d) => ({
+    place_id: d.id,
+    ad: d.displayName?.text ?? '',
+    lat: d.location?.latitude ?? 0,
+    lng: d.location?.longitude ?? 0,
+    primary_type: d.primaryType ?? null,
+    tz: null,
+    puan: d.rating ?? null,
+    puan_sayisi: d.userRatingCount ?? null,
+    acik: d.currentOpeningHours?.openNow ?? null,
+    ulke_kodu: null,
+  }));
+}
