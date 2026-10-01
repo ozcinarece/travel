@@ -168,6 +168,8 @@ export function useTamYer(placeId: string | undefined, tz?: string) {
     retry: 1,
     queryFn: async () => (await cagir<{ yer: TamYer }>('places-full', { id: placeId, tz })).yer,
   });
+}
+
 /** Nearby Search (New) — tek çağrı, önbellek Edge Function'da 24 sa. Cevap yalnız bellekte tutulur (PRD §7). */
 export async function yakinYerler(secenek: { cip: OneriCipi; merkez: Merkez; enFazla?: number }): Promise<HafifYer[]> {
   const cevap = await cagir<{ yerler: HafifYer[] }>('places-nearby', {

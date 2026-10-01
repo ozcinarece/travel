@@ -1,10 +1,9 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { Harita } from '@/components/harita/Harita';
-import type { HaritaPini } from '@/components/harita/tipler';
+import { HaritaEkrani } from '@/components/harita/HaritaEkrani';
+import type { HaritaOdagi, HaritaPini } from '@/components/harita/tipler';
 import { Avatar } from '@/components/ui/Avatar';
 import { GoogleAtfi } from '@/components/yerler/GoogleAtfi';
 import { useMekanEkle, useMekanlar, useUyeler } from '@/features/mekanlar/sorgular';
@@ -23,9 +22,9 @@ import {
 import { t } from '@/i18n';
 import { kategoriEtiketi, sureMetni, varsayilanDakika } from '@/lib/kategori';
 import type { Mekan, Seyahat } from '@/lib/tipler';
-import { bosluk, minDokunma, renk, yazi } from '@/theme';
+import { bosluk, renk, yazi } from '@/theme';
 
-// PRD 3.4 Keşfet: tam ekran harita; üstte arama + çipler; altta öneri kartları; en altta liste çubuğu.
+// PRD 3.4 Keşfet: HaritaEkrani kabuğu (#17) — üstte şehir hapı + üyeler, arama, çipler; altta öneri kartları; en altta liste çubuğu.
 export default function KesfetEkrani() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const seyahat = useSeyahat(id);
@@ -42,7 +41,6 @@ export default function KesfetEkrani() {
 type Kart = HafifYer & { eklendi?: Mekan };
 
 function Kesfet({ seyahat }: { seyahat: Seyahat }) {
-  const ust = useSafeAreaInsets().top;
   const mekanlar = useMekanlar(seyahat.id);
   const uyeler = useUyeler(seyahat.id);
   const ekle = useMekanEkle(seyahat.id);
@@ -53,12 +51,8 @@ function Kesfet({ seyahat }: { seyahat: Seyahat }) {
   const [secili, setSecili] = useState<HafifYer | null>(null);
   const [mesgul, setMesgul] = useState(false);
   const [hata, setHata] = useState<string | null>(null);
-  const [odak, setOdak] = useState<{ lat: number; lng: number; zoom: number; anahtar: string }>({
-    lat: seyahat.hotel_lat ?? seyahat.lat,
-    lng: seyahat.hotel_lng ?? seyahat.lng,
-    zoom: 13,
-    anahtar: 'ilk',
-  });
+  const [odak, setOdak] = useState<HaritaOdagi | undefined>();
+  const odakla = (lat: number, lng: number, zoom: number) => setOdak((o) => ({ konum: { lat, lng }, zoom, sayac: (o?.sayac ?? 0) + 1 }));
 
   // KK2: Autocomplete şehir merkezine 15 km yanlı. KK4: çip önerileri otel ya da şehir merkezi çevresinde.
   const merkez = { lat: seyahat.lat, lng: seyahat.lng, yaricapM: 15_000 };
@@ -98,7 +92,7 @@ function Kesfet({ seyahat }: { seyahat: Seyahat }) {
       const [yer] = await hafifYerler([placeId], { oturum: jeton });
       if (!yer) throw new Error('yer yok');
       setSecili({ ...yer, ad: yer.ad || ad });
-      setOdak({ lat: yer.lat, lng: yer.lng, zoom: 16, anahtar: yer.place_id });
+      odakla(yer.lat, yer.lng, 16);
       setSorgu(yer.ad || ad);
       setJeton(yeniOturumJetonu());
     } catch {
@@ -115,12 +109,12 @@ function Kesfet({ seyahat }: { seyahat: Seyahat }) {
       const { yer, kaynak } = await linkCoz(sorgu.trim(), merkez);
       // places.place_id boş olamaz: yalnız koordinat çözüldüyse eklenemez (PR #13 notu).
       if (kaynak === 'koordinat' || !yer.place_id) {
-        setOdak({ lat: yer.lat, lng: yer.lng, zoom: 16, anahtar: `k:${yer.lat},${yer.lng}` });
+        odakla(yer.lat, yer.lng, 16);
         setHata(t('kesfet.koordinatMekan'));
         return;
       }
       setSecili(yer);
-      setOdak({ lat: yer.lat, lng: yer.lng, zoom: 16, anahtar: yer.place_id });
+      odakla(yer.lat, yer.lng, 16);
       setSorgu(yer.ad);
     } catch (e) {
       setHata((e as Error).message === 'desteklenmeyen_link' ? t('kesfet.linkDesteksiz') : t('kesfet.linkHata'));
@@ -157,31 +151,20 @@ function Kesfet({ seyahat }: { seyahat: Seyahat }) {
   const sonEkleyenSayi = sonEkleyen ? havuz.filter((m) => m.added_by === sonEkleyen.added_by).length : 0;
 
   return (
-    <View style={s.ekran}>
-      <Harita
-        key={odak.anahtar}
-        merkez={{ lat: odak.lat, lng: odak.lng }}
-        zoom={odak.zoom}
-        pinler={pinler}
-        onPinBas={pinBas}
-      />
-
-      {/* Üst katman: geri, üyeler, arama, çipler */}
-      <View style={[s.ust, { paddingTop: ust + 8 }]} pointerEvents="box-none">
-        <View style={s.ustSatir} pointerEvents="box-none">
-          <Pressable accessibilityRole="button" onPress={() => router.replace('/(tabs)')} style={s.geri}>
-            <Text style={s.geriMetin}>‹ {seyahat.city_label}</Text>
-          </Pressable>
-          <View style={s.avatarlar}>
-            {(uyeler.data ?? []).slice(0, 3).map((u, i) => (
-              <View key={u.user_id} style={[s.avatarCerceve, i > 0 && { marginLeft: -8 }]}>
-                <Avatar ad={u.display_name} boyut={24} arkaPlan={['#0f0f0f', '#ff5a1f', '#4c6ef5'][i % 3]} />
-              </View>
-            ))}
-          </View>
+    <HaritaEkrani
+      baslik={seyahat.city_label}
+      geri={() => router.replace('/(tabs)')}
+      sagUst={
+        <View style={s.avatarlar}>
+          {(uyeler.data ?? []).slice(0, 3).map((u, i) => (
+            <View key={u.user_id} style={[s.avatarCerceve, i > 0 && { marginLeft: -8 }]}>
+              <Avatar ad={u.display_name} boyut={24} arkaPlan={['#0f0f0f', '#ff5a1f', '#4c6ef5'][i % 3]} />
+            </View>
+          ))}
         </View>
-
-        <View style={s.arama}>
+      }
+      arama={
+        <>
           <Text style={s.buyutec}>⌕</Text>
           <TextInput
             accessibilityLabel={t('kesfet.ara')}
@@ -201,10 +184,11 @@ function Kesfet({ seyahat }: { seyahat: Seyahat }) {
               <Text style={s.linkDugme}>{t('kesfet.linkCoz')}</Text>
             </Pressable>
           ) : null}
-        </View>
-
-        {aramaAcik && !secili ? (
-          <View style={s.sonuclar}>
+        </>
+      }
+      ustEk={
+        aramaAcik && !secili ? (
+          <View style={[s.sonuclar, s.golge]}>
             {oneriler.isError ? <Text style={s.hataMetin}>{t('kesfet.araHata')}</Text> : null}
             {oneriler.data?.length === 0 ? <Text style={s.bos}>{t('kesfet.sonucYok')}</Text> : null}
             {oneriler.data?.map((o) => (
@@ -220,7 +204,12 @@ function Kesfet({ seyahat }: { seyahat: Seyahat }) {
             {oneriler.data && oneriler.data.length > 0 ? <GoogleAtfi /> : null}
           </View>
         ) : (
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={s.cipler} keyboardShouldPersistTaps="handled">
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            style={s.ciplerKaydirma}
+            contentContainerStyle={s.cipler}
+            keyboardShouldPersistTaps="handled">
             {ONERI_CIPLERI.map((c) => {
               const aktif = cip === c && !secili;
               return (
@@ -232,62 +221,69 @@ function Kesfet({ seyahat }: { seyahat: Seyahat }) {
                     setSecili(null);
                     setCip(c);
                   }}
-                  style={[s.cip, aktif && s.cipAktif]}>
+                  style={[s.cip, s.golge, aktif && s.cipAktif]}>
                   <Text style={[s.cipMetin, aktif && s.cipMetinAktif]}>{t(`kesfet.cip.${c}`)}</Text>
                 </Pressable>
               );
             })}
           </ScrollView>
-        )}
-      </View>
+        )
+      }
+      altSerbest={
+        <View style={s.alt} pointerEvents="box-none">
+          {hata ? (
+            <View style={s.hataKutu}>
+              <Text style={s.hataMetin}>{hata}</Text>
+            </View>
+          ) : null}
+          {yakin.isError && !secili ? (
+            <View style={s.hataKutu}>
+              <Text style={s.hataMetin}>{t('kesfet.oneriHata')}</Text>
+            </View>
+          ) : null}
+          {kartlar.length > 0 ? (
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={s.kartlar} keyboardShouldPersistTaps="handled">
+              {kartlar.map((k) => (
+                <MekanKarti
+                  key={k.place_id}
+                  kart={k}
+                  ekleyenAd={k.eklendi ? uyeAdi(k.eklendi.added_by) : ''}
+                  mesgul={ekle.isPending}
+                  onEkle={() => listeyeEkle(k)}
+                  onAc={() =>
+                    router.push({ pathname: '/seyahat/[id]/mekan/[placeId]', params: { id: seyahat.id, placeId: k.place_id } })
+                  }
+                />
+              ))}
+            </ScrollView>
+          ) : yakin.isFetching && !secili ? (
+            <ActivityIndicator color={renk.metin} style={{ marginBottom: 12 }} />
+          ) : null}
 
-      {/* Alt katman: kartlar + liste çubuğu */}
-      <View style={s.alt} pointerEvents="box-none">
-        {hata ? (
-          <View style={s.hataKutu}>
-            <Text style={s.hataMetin}>{hata}</Text>
+          <View style={[s.cubuk, s.golge]}>
+            <View style={{ flex: 1 }}>
+              <Text style={s.cubukBaslik}>{havuz.length > 0 ? t('kesfet.listede', { n: havuz.length }) : t('kesfet.listedeBos')}</Text>
+              {sonEkleyen && uyeAdi(sonEkleyen.added_by) ? (
+                <Text style={s.cubukAlt}>{t('kesfet.sonEkleyen', { ad: uyeAdi(sonEkleyen.added_by), n: sonEkleyenSayi })}</Text>
+              ) : null}
+            </View>
+            <Pressable
+              accessibilityRole="button"
+              onPress={() => router.push({ pathname: '/seyahat/[id]/(sekmeler)/gunler', params: { id: seyahat.id } })}
+              style={s.cubukDugme}>
+              <Text style={s.cubukDugmeMetin}>{t('kesfet.gunlereDagit')} →</Text>
+            </Pressable>
           </View>
-        ) : null}
-        {yakin.isError && !secili ? (
-          <View style={s.hataKutu}>
-            <Text style={s.hataMetin}>{t('kesfet.oneriHata')}</Text>
-          </View>
-        ) : null}
-        {kartlar.length > 0 ? (
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={s.kartlar} keyboardShouldPersistTaps="handled">
-            {kartlar.map((k) => (
-              <MekanKarti
-                key={k.place_id}
-                kart={k}
-                ekleyenAd={k.eklendi ? uyeAdi(k.eklendi.added_by) : ''}
-                mesgul={ekle.isPending}
-                onEkle={() => listeyeEkle(k)}
-                onAc={() =>
-                  router.push({ pathname: '/seyahat/[id]/mekan/[placeId]', params: { id: seyahat.id, placeId: k.place_id } })
-                }
-              />
-            ))}
-          </ScrollView>
-        ) : yakin.isFetching && !secili ? (
-          <ActivityIndicator color={renk.metin} style={{ marginBottom: 12 }} />
-        ) : null}
-
-        <View style={s.cubuk}>
-          <View style={{ flex: 1 }}>
-            <Text style={s.cubukBaslik}>{havuz.length > 0 ? t('kesfet.listede', { n: havuz.length }) : t('kesfet.listedeBos')}</Text>
-            {sonEkleyen && uyeAdi(sonEkleyen.added_by) ? (
-              <Text style={s.cubukAlt}>{t('kesfet.sonEkleyen', { ad: uyeAdi(sonEkleyen.added_by), n: sonEkleyenSayi })}</Text>
-            ) : null}
-          </View>
-          <Pressable
-            accessibilityRole="button"
-            onPress={() => router.push({ pathname: '/seyahat/[id]/(sekmeler)/gunler', params: { id: seyahat.id } })}
-            style={s.cubukDugme}>
-            <Text style={s.cubukDugmeMetin}>{t('kesfet.gunlereDagit')} →</Text>
-          </Pressable>
         </View>
-      </View>
-    </View>
+      }
+      harita={{
+        merkez: { lat: seyahat.hotel_lat ?? seyahat.lat, lng: seyahat.hotel_lng ?? seyahat.lng },
+        zoom: 13,
+        pinler,
+        odak,
+        onPinBas: pinBas,
+      }}
+    />
   );
 }
 
@@ -349,13 +345,9 @@ function MekanKarti({
 const s = StyleSheet.create({
   ekran: { flex: 1, backgroundColor: renk.yuzey },
   ortala: { alignItems: 'center', justifyContent: 'center' },
-  ust: { position: 'absolute', left: 0, right: 0, top: 0, paddingHorizontal: bosluk.kenar, gap: 10 },
-  ustSatir: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  geri: { height: 36, paddingHorizontal: 12, borderRadius: 999, backgroundColor: renk.zemin, justifyContent: 'center', minWidth: minDokunma },
-  geriMetin: { fontFamily: yazi.kalin, fontSize: 13, color: renk.metin },
+  golge: { shadowColor: renk.metin, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.12, shadowRadius: 10, elevation: 4 },
   avatarlar: { flexDirection: 'row' },
   avatarCerceve: { borderWidth: 2, borderColor: renk.zemin, borderRadius: 14 },
-  arama: { height: 48, paddingHorizontal: 16, borderRadius: 14, backgroundColor: renk.zemin, flexDirection: 'row', alignItems: 'center', gap: 10 },
   buyutec: { fontSize: 18, color: renk.ikincil },
   girdi: { flex: 1, fontFamily: yazi.yari, fontSize: 14, color: renk.metin, paddingVertical: 0 },
   linkDugme: { fontFamily: yazi.kalin, fontSize: 12, color: renk.vurgu, paddingVertical: 8 },
@@ -364,12 +356,13 @@ const s = StyleSheet.create({
   sonucAna: { fontFamily: yazi.kalin, fontSize: 14, color: renk.metin },
   sonucAlt: { fontFamily: yazi.normal, fontSize: 12, color: renk.ikincil },
   bos: { fontFamily: yazi.normal, fontSize: 13, color: renk.ikincil, paddingVertical: 10 },
-  cipler: { gap: 8, paddingRight: bosluk.kenar },
+  ciplerKaydirma: { marginHorizontal: -bosluk.kenar },
+  cipler: { gap: 8, paddingHorizontal: bosluk.kenar },
   cip: { paddingHorizontal: 12, paddingVertical: 8, borderRadius: 999, backgroundColor: renk.zemin },
   cipAktif: { backgroundColor: renk.metin },
   cipMetin: { fontFamily: yazi.kalin, fontSize: 12, color: renk.metin },
   cipMetinAktif: { color: renk.zemin },
-  alt: { position: 'absolute', left: 0, right: 0, bottom: 0, gap: 12, paddingBottom: 14 },
+  alt: { gap: 12, paddingBottom: 14 },
   kartlar: { paddingHorizontal: bosluk.kenar, gap: 12 },
   kart: { width: 246, padding: 14, borderRadius: 18, backgroundColor: renk.zemin, gap: 8 },
   kartUst: { flexDirection: 'row', alignItems: 'flex-start', gap: 10 },
