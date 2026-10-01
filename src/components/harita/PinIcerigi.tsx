@@ -7,7 +7,7 @@ import type { HaritaPini } from './tipler';
 
 /**
  * Özel pin görünümleri (kanvas): durak = numaralı siyah daire, öneri = beyaz hap "+ ad",
- * otel = siyah kare ev, aday = beyaz hap "★ puan · ad" (seçiliyse siyah).
+ * otel = siyah kare ev, aday = beyaz hap "★ puan · ad" (seçiliyse siyah), bos = beyaz daire "?".
  */
 export function PinIcerigi({ pin }: { pin: HaritaPini }) {
   if (pin.tur === 'oneri') {
@@ -37,6 +37,13 @@ export function PinIcerigi({ pin }: { pin: HaritaPini }) {
       </View>
     );
   }
+  if (pin.tur === 'bos') {
+    return (
+      <View style={[s.durak, s.bos]}>
+        <Text style={[s.durakMetin, { color: renk.metin }]}>?</Text>
+      </View>
+    );
+  }
   if (pin.tur === 'otel') {
     return (
       <View style={[s.otel, { backgroundColor: pin.renk }]}>
@@ -53,6 +60,7 @@ export function PinIcerigi({ pin }: { pin: HaritaPini }) {
 
 const s = StyleSheet.create({
   durak: { width: 30, height: 30, borderRadius: 15, borderWidth: 2, borderColor: renk.zemin, alignItems: 'center', justifyContent: 'center' },
+  bos: { backgroundColor: renk.zemin, borderColor: renk.metin },
   durakMetin: { fontFamily: yazi.ekstra, fontSize: 12, color: renk.zemin },
   hap: { flexDirection: 'row', alignItems: 'center', gap: 6, height: 32, paddingLeft: 5, paddingRight: 10, borderRadius: 999, backgroundColor: renk.zemin, maxWidth: 180 },
   hapArti: { width: 22, height: 22, borderRadius: 11, backgroundColor: renk.metin, alignItems: 'center', justifyContent: 'center' },

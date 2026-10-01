@@ -49,13 +49,13 @@ export function Harita({ merkez, zoom = 14, pinler = [], daireler = [], odak, on
       ))}
       {pinler.map((p) => (
         <Marker
-          key={p.id}
+          // Görünüm değişince (renk/etiket/seçim) işaretçi yeniden kurulur; izleme kapalı kalır (Android bitmap önbelleği).
+          key={`${p.id}:${p.tur ?? ''}:${p.renk}:${p.etiket ?? ''}:${p.secili ? 1 : 0}`}
           coordinate={{ latitude: p.konum.lat, longitude: p.konum.lng }}
           pinColor={p.renk}
           title={p.tur ? undefined : p.etiket}
           anchor={p.tur === 'oneri' || p.tur === 'aday' ? { x: 0.1, y: 0.5 } : { x: 0.5, y: 0.5 }}
-          // Seçili aday hap rengini değiştirir: görünüm yeniden çizilsin diye izleme açık.
-          tracksViewChanges={p.tur === 'aday'}
+          tracksViewChanges={false}
           zIndex={p.secili || p.tur === 'otel' ? 2 : 1}
           draggable={p.surukle}
           onPress={() => onPinBas?.(p.id)}

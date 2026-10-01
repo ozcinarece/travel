@@ -265,5 +265,40 @@
     "listede": "Listede",
     "ekleHata": "Eklenemedi.",
     "kaydetHata": "Kaydedilemedi."
+  },
+  "gunler": {
+    "baslik": "Günlere dağıt",
+    "bosta": "{n} boşta",
+    "bostaYok": "Hepsi dağıtıldı",
+    "ipucu": "Gün seç, sonra pinlere dokun",
+    "gunAdi": "{n}. gün",
+    "durakSayisi": "{n} durak",
+    "durakYok": "0",
+    "gunEkle": "+ gün",
+    "gunSilBaslik": "{gun} silinsin mi?",
+    "gunSilMetin": "{n} durak boşa düşer; mekanlar silinmez.",
+    "gunSilMetinBos": "Bu günde durak yok.",
+    "sil": "Sil",
+    "sonGun": "Son gün silinemez.",
+    "tempo": {
+      "rahat": "Rahat",
+      "normal": "Normal",
+      "yogun": "Yoğun"
+    },
+    "ozet": "{n} durak · {gezi} gezi + {yuruyus} yürüyüş",
+    "ozetBos": "Henüz durak yok",
+    "saatler": "{bas} → {bit}",
+    "sigar": "{n} durak daha sığar.",
+    "sigarBir": "1 durak daha sığar.",
+    "sigmaz": "Gün dolu; bir durağı başka güne al.",
+    "yogunOneri": "{ad} tek başına {sure}; bir durağı başka güne al.",
+    "bostaYakin": "Boştaki {ad} {gun} güne yakın.",
+    "bostaYakinKisa": "{gun}. güne yakın",
+    "programaGec": "Programa geç",
+    "uyariBaslik": "{n} mekan hiçbir günde değil",
+    "uyariMetin": "Devam edilsin mi?",
+    "devam": "Devam",
+    "hata": "Kaydedilemedi. Tekrar dene.",
+    "kestirimNot": "Yürüyüş süreleri kestirimdir; gerçek süreler programda."
   }
 }

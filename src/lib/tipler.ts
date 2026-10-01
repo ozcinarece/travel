@@ -45,6 +45,33 @@ export type Seyahat = {
   hotel_lat: number | null;
   hotel_lng: number | null;
   hotel_label: string | null;
+  /** "HH:MM:SS" (Postgres time) — §5.3 gün başlangıcı/bitişi varsayılanları. */
+  day_start: string;
+  day_end: string;
+};
+
+/** days satırı (PRD §8). Tarihsiz seyahatte date null. */
+export type Gun = {
+  id: string;
+  trip_id: string;
+  index: number;
+  date: string | null;
+  start_time: string | null;
+  end_time: string | null;
+  order_manual: boolean;
+};
+
+/** stops satırı: güne atanmış mekan. place_ref → places.id. */
+export type Durak = {
+  id: string;
+  trip_id: string;
+  day_id: string;
+  place_ref: string;
+  order_key: string;
+  minutes: number;
+  arrived_at: string | null;
+  arrived_by: string | null;
+  skipped: boolean;
 };
 
 /** 3.3'te seçilen otel; place_id yalnız koordinattan geldiyse boş. */

@@ -10,9 +10,10 @@ export type HaritaPini = {
   puan?: number | null;
   /**
    * durak: numaralı yuvarlak · oneri: beyaz hap "+ ad" (3.4 KK5) · otel: ev simgesi ·
-   * aday: beyaz hap "★ puan · ad" (3.3 haritadan otel seçme, #17) · varsayılan: standart iğne.
+   * aday: beyaz hap "★ puan · ad" (3.3 haritadan otel seçme, #17) · bos: beyaz daire "?" (3.5 güne atanmamış) ·
+   * varsayılan: standart iğne.
    */
-  tur?: 'durak' | 'oneri' | 'otel' | 'aday';
+  tur?: 'durak' | 'oneri' | 'otel' | 'aday' | 'bos';
   /** Vurgulu aday (seçili kart): siyah hap. */
   secili?: boolean;
   surukle?: boolean;
