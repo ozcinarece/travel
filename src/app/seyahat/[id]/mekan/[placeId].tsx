@@ -11,6 +11,7 @@ import { useDuraklar, useGunler } from '@/features/gunler/sorgular';
 import { useMekanEkle, useMekanGuncelle, useMekanSil, useMekanlar, useUyeler } from '@/features/mekanlar/sorgular';
 import { matrisNoktalari, useDurakGuncelle, useYuruyusMatrisi } from '@/features/program/sorgular';
 import { gunDuraklari, useGunProgrami, useSimdi } from '@/features/program/useProgram';
+import { useSeyahatId } from '@/features/seyahatler/baglam';
 import { useSeyahat } from '@/features/seyahatler/sorgular';
 import { useTamYer } from '@/features/yerler/api';
 import { t } from '@/i18n';
@@ -23,7 +24,8 @@ import { bosluk, minDokunma, renk, yazi } from '@/theme';
 
 // PRD 3.8 Mekan detayı: tam Details (yalnız burada), kim ekledi + not, süre −/+, yol tarifi, ··· menüsü.
 export default function MekanDetayEkrani() {
-  const { id, placeId } = useLocalSearchParams<{ id: string; placeId: string }>();
+  const id = useSeyahatId();
+  const { placeId } = useLocalSearchParams<{ placeId: string }>();
   const ust = useSafeAreaInsets().top;
   const { session } = useOturum();
   const seyahat = useSeyahat(id);

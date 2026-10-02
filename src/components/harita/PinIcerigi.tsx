@@ -12,7 +12,7 @@ import type { HaritaPini } from './tipler';
 export function PinIcerigi({ pin }: { pin: HaritaPini }) {
   if (pin.tur === 'oneri') {
     return (
-      <View style={s.hap}>
+      <View style={s.hap} collapsable={false}>
         <View style={s.hapArti}>
           <Text style={s.hapArtiMetin}>+</Text>
         </View>
@@ -25,7 +25,7 @@ export function PinIcerigi({ pin }: { pin: HaritaPini }) {
   if (pin.tur === 'aday') {
     const puan = puanMetni(pin.puan);
     return (
-      <View style={[s.hap, s.adayHap, pin.secili && s.adaySecili]}>
+      <View style={[s.hap, s.adayHap, pin.secili && s.adaySecili]} collapsable={false}>
         {puan ? (
           <Text style={[s.yildiz, pin.secili && { color: renk.zemin }]}>
             ★ <Text style={[s.hapMetin, pin.secili && { color: renk.zemin }]}>{puan} ·</Text>
@@ -39,20 +39,20 @@ export function PinIcerigi({ pin }: { pin: HaritaPini }) {
   }
   if (pin.tur === 'bos') {
     return (
-      <View style={[s.durak, s.bos]}>
+      <View style={[s.durak, s.bos]} collapsable={false}>
         <Text style={[s.durakMetin, { color: renk.metin }]}>?</Text>
       </View>
     );
   }
   if (pin.tur === 'otel') {
     return (
-      <View style={[s.otel, { backgroundColor: pin.renk }]}>
+      <View style={[s.otel, { backgroundColor: pin.renk }]} collapsable={false}>
         <Text style={s.otelMetin}>⌂</Text>
       </View>
     );
   }
   return (
-    <View style={[s.durak, { backgroundColor: pin.renk }]}>
+    <View style={[s.durak, { backgroundColor: pin.renk }]} collapsable={false}>
       <Text style={s.durakMetin}>{pin.etiket ?? ''}</Text>
     </View>
   );

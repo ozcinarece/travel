@@ -1,11 +1,11 @@
-import { useEffect, useRef } from 'react';
-import { StyleSheet } from 'react-native';
+import { useEffect, useRef, useState } from 'react';
+import { StyleSheet, View } from 'react-native';
 import MapView, { Circle, Marker, PROVIDER_GOOGLE } from 'react-native-maps';
 
 import { bolgeHesapla, zoomDelta } from './geo';
 import { ACIK_HARITA_STILI } from './haritaStili';
 import { PinIcerigi } from './PinIcerigi';
-import type { HaritaProps } from './tipler';
+import type { HaritaPini, HaritaProps } from './tipler';
 
 export function Harita({ merkez, zoom = 14, pinler = [], daireler = [], odak, onPinBas, onPinSuruklendi, onBolgeDegisti }: HaritaProps) {
   const ref = useRef<MapView>(null);
@@ -48,26 +48,54 @@ export function Harita({ merkez, zoom = 14, pinler = [], daireler = [], odak, on
         />
       ))}
       {pinler.map((p) => (
-        <Marker
-          // Görünüm değişince (renk/etiket/seçim) işaretçi yeniden kurulur; izleme kapalı kalır (Android bitmap önbelleği).
+        <OzelIsaretci
+          // Görünüm değişince (renk/etiket/seçim) işaretçi yeniden kurulur ve anlık görüntüsü yeniden alınır.
           key={`${p.id}:${p.tur ?? ''}:${p.renk}:${p.etiket ?? ''}:${p.secili ? 1 : 0}`}
-          coordinate={{ latitude: p.konum.lat, longitude: p.konum.lng }}
-          pinColor={p.renk}
-          title={p.tur ? undefined : p.etiket}
-          anchor={p.tur === 'oneri' || p.tur === 'aday' ? { x: 0.1, y: 0.5 } : { x: 0.5, y: 0.5 }}
-          tracksViewChanges={false}
-          zIndex={p.secili || p.tur === 'otel' ? 2 : 1}
-          draggable={p.surukle}
-          onPress={() => onPinBas?.(p.id)}
-          onDragEnd={(e) =>
-            onPinSuruklendi?.(p.id, {
-              lat: e.nativeEvent.coordinate.latitude,
-              lng: e.nativeEvent.coordinate.longitude,
-            })
-          }>
-          {p.tur ? <PinIcerigi pin={p} /> : null}
-        </Marker>
+          pin={p}
+          onPinBas={onPinBas}
+          onPinSuruklendi={onPinSuruklendi}
+        />
       ))}
     </MapView>
+  );
+}
+
+/**
+ * #24: Android, özel işaretçi görünümünü bitmap'e çevirir. `tracksViewChanges` baştan kapalıysa metin yerleşmeden
+ * boş bir dikdörtgen yakalanır. Çözüm: içerik yerleşene kadar izleme açık, kısa bir gecikmeyle kapatılır
+ * (sürekli açık kalması harita kaydırmada performansı düşürür).
+ */
+function OzelIsaretci({ pin: p, onPinBas, onPinSuruklendi }: { pin: HaritaPini } & Pick<HaritaProps, 'onPinBas' | 'onPinSuruklendi'>) {
+  const [izle, setIzle] = useState(!!p.tur);
+  const zamanlayici = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => () => {
+    if (zamanlayici.current) clearTimeout(zamanlayici.current);
+  }, []);
+  const yerlesti = () => {
+    if (zamanlayici.current) clearTimeout(zamanlayici.current);
+    zamanlayici.current = setTimeout(() => setIzle(false), 600);
+  };
+  return (
+    <Marker
+      coordinate={{ latitude: p.konum.lat, longitude: p.konum.lng }}
+      pinColor={p.renk}
+      title={p.tur ? undefined : p.etiket}
+      anchor={p.tur === 'oneri' || p.tur === 'aday' ? { x: 0.1, y: 0.5 } : { x: 0.5, y: 0.5 }}
+      tracksViewChanges={izle}
+      zIndex={p.secili || p.tur === 'otel' ? 2 : 1}
+      draggable={p.surukle}
+      onPress={() => onPinBas?.(p.id)}
+      onDragEnd={(e) =>
+        onPinSuruklendi?.(p.id, {
+          lat: e.nativeEvent.coordinate.latitude,
+          lng: e.nativeEvent.coordinate.longitude,
+        })
+      }>
+      {p.tur ? (
+        <View collapsable={false} onLayout={yerlesti}>
+          <PinIcerigi pin={p} />
+        </View>
+      ) : null}
+    </Marker>
   );
 }

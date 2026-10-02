@@ -1,13 +1,15 @@
-import { router, useLocalSearchParams } from 'expo-router';
+import { router } from 'expo-router';
 import { useMemo, useState } from 'react';
-import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { BilgiHapi, HaritaEkrani } from '@/components/harita/HaritaEkrani';
 import type { HaritaPini } from '@/components/harita/tipler';
 import { Buton } from '@/components/ui/Buton';
 import { useDuragaAta, useDurakKaldir, useGunEkle, useGunler, useGunSil, useDuraklar } from '@/features/gunler/sorgular';
 import { useMekanlar } from '@/features/mekanlar/sorgular';
+import { useSeyahatId } from '@/features/seyahatler/baglam';
 import { useSeyahat } from '@/features/seyahatler/sorgular';
+import { SeyahatYukleme } from '@/components/seyahatler/SeyahatYukleme';
 import { useHafifYerler } from '@/features/yerler/api';
 import { t } from '@/i18n';
 import { sureMetni } from '@/lib/kategori';
@@ -26,17 +28,13 @@ const YURUME_YARICAPI_M = 1500;
  * KK5 tempo kestirimle (Routes çağrısı yok); KK6 boştaki için en yakın gün; KK7 gün ekle/sil; KK8 Programa geç + uyarı.
  */
 export default function GunlerEkrani() {
-  const { id } = useLocalSearchParams<{ id: string }>();
+  const id = useSeyahatId();
   const seyahat = useSeyahat(id);
   const gunler = useGunler(id);
   const duraklar = useDuraklar(id);
   const mekanlar = useMekanlar(id);
   if (!id || !seyahat.data || !gunler.data || !duraklar.data || !mekanlar.data) {
-    return (
-      <View style={[s.ortala, { flex: 1, backgroundColor: renk.yuzey }]}>
-        <ActivityIndicator color={renk.metin} />
-      </View>
-    );
+    return <SeyahatYukleme sorgular={[seyahat, gunler, duraklar, mekanlar]} kimlikYok={!id} />;
   }
   return <Gunler key={id} seyahat={seyahat.data} gunler={gunler.data} duraklar={duraklar.data} mekanlar={mekanlar.data} />;
 }

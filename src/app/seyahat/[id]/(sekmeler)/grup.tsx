@@ -1,4 +1,3 @@
-import { useLocalSearchParams } from 'expo-router';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -6,6 +5,7 @@ import { EkranBasligi } from '@/components/EkranBasligi';
 import { Avatar } from '@/components/ui/Avatar';
 import { useMekanlar, useUyeler } from '@/features/mekanlar/sorgular';
 import { useDegisiklikler } from '@/features/program/sorgular';
+import { useSeyahatId } from '@/features/seyahatler/baglam';
 import { useHafifYerler } from '@/features/yerler/api';
 import { t } from '@/i18n';
 import type { Degisiklik } from '@/lib/tipler';
@@ -13,7 +13,7 @@ import { bosluk, renk, yazi } from '@/theme';
 
 // PRD 3.7 KK9: üyeler, davet linki (3.10'da), son 10 değişiklik (kim, ne, ne zaman).
 export default function GrupEkrani() {
-  const { id } = useLocalSearchParams<{ id: string }>();
+  const id = useSeyahatId();
   const uyeler = useUyeler(id);
   const degisiklikler = useDegisiklikler(id);
   const mekanlar = useMekanlar(id);
