@@ -199,7 +199,10 @@
       "misafir": "misafir",
       "davet": "Davet linki",
       "kopyalandi": "Kopyalandı"
-    }
+    },
+    "yuklenemedi": "Seyahat yüklenemedi. Bağlantını kontrol edip tekrar dene.",
+    "tekrarDene": "Tekrar dene",
+    "bulunamadi": "Seyahat bulunamadı."
   },
   "yerler": {
     "atif": "Google"

@@ -1,6 +1,6 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { ActivityIndicator, Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { MiniCubuk } from '@/components/program/MiniCubuk';
@@ -12,7 +12,9 @@ import { useDuraklar, useDurakKaldir, useGunler } from '@/features/gunler/sorgul
 import { useMekanlar, useUyeler } from '@/features/mekanlar/sorgular';
 import { matrisNoktalari, useDurakGuncelle, useGunGuncelle, useSiraYaz, useYuruyusMatrisi } from '@/features/program/sorgular';
 import { gunDuraklari, saatKisa, useGunProgrami, useSimdi } from '@/features/program/useProgram';
+import { useSeyahatId } from '@/features/seyahatler/baglam';
 import { useSeyahat } from '@/features/seyahatler/sorgular';
+import { SeyahatYukleme } from '@/components/seyahatler/SeyahatYukleme';
 import { useHafifYerler } from '@/features/yerler/api';
 import { t } from '@/i18n';
 import { sureMetni } from '@/lib/kategori';
@@ -37,17 +39,14 @@ const SATIR_YUKSEKLIGI = 84;
  * KK8 mini-çubuk (Kaydır/Atla/Planı koru); KK9 üye avatarları → Grup; KK10 iskelet (kestirim) yürüyüş süreleri.
  */
 export default function ProgramEkrani() {
-  const { id, gun: gunParam } = useLocalSearchParams<{ id: string; gun?: string }>();
+  const id = useSeyahatId();
+  const { gun: gunParam } = useLocalSearchParams<{ gun?: string }>();
   const seyahat = useSeyahat(id);
   const gunler = useGunler(id);
   const duraklar = useDuraklar(id);
   const mekanlar = useMekanlar(id);
   if (!id || !seyahat.data || !gunler.data || !duraklar.data || !mekanlar.data) {
-    return (
-      <View style={[s.ekran, s.ortala]}>
-        <ActivityIndicator color={renk.metin} />
-      </View>
-    );
+    return <SeyahatYukleme sorgular={[seyahat, gunler, duraklar, mekanlar]} kimlikYok={!id} />;
   }
   return <Program key={id} seyahat={seyahat.data} gunler={gunler.data} duraklar={duraklar.data} mekanlar={mekanlar.data} gunParam={gunParam} />;
 }

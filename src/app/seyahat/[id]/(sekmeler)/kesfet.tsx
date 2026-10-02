@@ -1,4 +1,4 @@
-import { router, useLocalSearchParams } from 'expo-router';
+import { router } from 'expo-router';
 import { useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 
@@ -7,7 +7,9 @@ import type { HaritaOdagi, HaritaPini } from '@/components/harita/tipler';
 import { Avatar } from '@/components/ui/Avatar';
 import { GoogleAtfi } from '@/components/yerler/GoogleAtfi';
 import { useMekanEkle, useMekanlar, useUyeler } from '@/features/mekanlar/sorgular';
+import { useSeyahatId } from '@/features/seyahatler/baglam';
 import { useSeyahat } from '@/features/seyahatler/sorgular';
+import { SeyahatYukleme } from '@/components/seyahatler/SeyahatYukleme';
 import {
   hafifYerler,
   linkCoz,
@@ -26,15 +28,9 @@ import { bosluk, renk, yazi } from '@/theme';
 
 // PRD 3.4 Keşfet: HaritaEkrani kabuğu (#17) — üstte şehir hapı + üyeler, arama, çipler; altta öneri kartları; en altta liste çubuğu.
 export default function KesfetEkrani() {
-  const { id } = useLocalSearchParams<{ id: string }>();
+  const id = useSeyahatId();
   const seyahat = useSeyahat(id);
-  if (!seyahat.data || !id) {
-    return (
-      <View style={[s.ekran, s.ortala]}>
-        <ActivityIndicator color={renk.metin} />
-      </View>
-    );
-  }
+  if (!seyahat.data || !id) return <SeyahatYukleme sorgular={[seyahat]} kimlikYok={!id} />;
   return <Kesfet key={id} seyahat={seyahat.data} />;
 }
 
