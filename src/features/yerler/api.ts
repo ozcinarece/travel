@@ -20,6 +20,8 @@ export type HafifYer = {
   ulke_kodu: string | null;
   /** Yalnız `saatler: true` ile: haftalık periyotlar (gun 0 = Pazar); boş dizi = her zaman açık; null = bilinmiyor. */
   periyotlar?: { gun: number; ac: string; kapaGun: number; kapa: string }[] | null;
+  /** Yalnız `foto: true` ile (#29 önizleme): ilk fotoğraf, 400 px. */
+  foto_uri?: string | null;
 };
 
 const HARFLER = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -78,12 +80,13 @@ export function linkGibiMi(metin: string): boolean {
   return /^(https?:\/\/|geo:|maps\.app\.goo\.gl|goo\.gl\/|www\.google\.|maps\.google\.)/i.test(metin.trim());
 }
 
-export async function hafifYerler(ids: string[], secenek: { sehir?: boolean; oturum?: string; saatler?: boolean } = {}): Promise<HafifYer[]> {
+export async function hafifYerler(ids: string[], secenek: { sehir?: boolean; oturum?: string; saatler?: boolean; foto?: boolean } = {}): Promise<HafifYer[]> {
   if (ids.length === 0) return [];
   const cevap = await cagir<{ yerler: HafifYer[] }>('places-light', {
     ids,
     sehir: secenek.sehir,
     saatler: secenek.saatler,
+    foto: secenek.foto,
     sessionToken: secenek.oturum,
   });
   return cevap.yerler;
@@ -113,14 +116,37 @@ export function useOtelOnerileri(girdi: string, oturum: string, merkez: Merkez |
 export type OneriCipi = 'otel' | 'populer' | 'yemek' | 'sanat' | 'manzara';
 export const ONERI_CIPLERI: OneriCipi[] = ['populer', 'yemek', 'sanat', 'manzara'];
 
-/** PRD 3.4 KK4: çip önerileri (Nearby Search, POPULARITY). Edge Function 24 sa önbellekler; istemci 1 sa. */
+/** PRD 3.4 KK4 / #28: çip önerileri görünür bölge için (Nearby Search, POPULARITY). Edge Function 24 sa önbellekler; istemci 1 sa. */
 export function useYakinOneriler(cip: OneriCipi | null, merkez: Merkez | undefined) {
   return useQuery({
-    queryKey: ['yakin-oneri', cip, merkez?.lat.toFixed(3), merkez?.lng.toFixed(3)],
+    queryKey: ['yakin-oneri', cip, merkez?.lat.toFixed(3), merkez?.lng.toFixed(3), Math.round((merkez?.yaricapM ?? 3000) / 100)],
     enabled: !!cip && !!merkez,
     staleTime: 60 * 60 * 1000,
     retry: 1,
     queryFn: () => yakinYerler({ cip: cip!, merkez: merkez! }),
+  });
+}
+
+/** #29: önizleme kartı — tek mekan, ilk fotoğrafla (fotoğraf başına fatura; yalnız kart açıkken). */
+export function useOnizleme(placeId: string | undefined) {
+  return useQuery({
+    queryKey: ['onizleme', placeId],
+    enabled: !!placeId,
+    staleTime: 24 * 60 * 60 * 1000,
+    retry: 1,
+    queryFn: async () => (await hafifYerler([placeId!], { foto: true }))[0] ?? null,
+  });
+}
+
+/** #31: Place Photo adı → URI (places-photo, 24 sa önbellek); yalnız görünür sayfa için çağrılır. */
+export function usePlaceFoto(ad: string | undefined, genislik = 800) {
+  return useQuery({
+    queryKey: ['place-foto', ad, genislik],
+    enabled: !!ad,
+    staleTime: 24 * 60 * 60 * 1000,
+    gcTime: 24 * 60 * 60 * 1000,
+    retry: 1,
+    queryFn: async () => (await cagir<{ uri: string | null }>('places-photo', { ad, genislik })).uri,
   });
 }
 
@@ -158,6 +184,8 @@ export type TamYer = {
   kapanis: string | null;
   saatler: string[];
   foto_uri: string | null;
+  /** #31: en fazla 5 fotoğraf (ad + Google atfı); URI'ler tembel (usePlaceFoto). */
+  fotolar: { ad: string; yazar: string | null }[];
   google_maps_uri: string | null;
   yorumlar: { yazar: string; puan: number | null; metin: string; zaman: string }[];
 };

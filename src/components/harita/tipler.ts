@@ -46,6 +46,8 @@ export type HaritaProps = {
   cizgiler?: HaritaCizgisi[];
   odak?: HaritaOdagi;
   onPinBas?: (id: string) => void;
+  /** Pin dışında haritaya dokunma (#29: önizleme kartını kapatır). */
+  onHaritaBas?: () => void;
   onPinSuruklendi?: (id: string, konum: Konum) => void;
   /** Kullanıcı ya da animasyon durduğunda görünür alan (#17: "Bu bölgede ara" için). */
   onBolgeDegisti?: (bolge: HaritaBolgesi) => void;

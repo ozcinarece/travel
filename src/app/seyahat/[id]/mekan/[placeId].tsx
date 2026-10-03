@@ -6,6 +6,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { SecimMenusu } from '@/components/program/SecimMenusu';
 import { Buton } from '@/components/ui/Buton';
+import { FotoGalerisi } from '@/components/yerler/FotoGalerisi';
 import { Avatar } from '@/components/ui/Avatar';
 import { useDuraklar, useGunler } from '@/features/gunler/sorgular';
 import { useMekanEkle, useMekanGuncelle, useMekanSil, useMekanlar, useUyeler } from '@/features/mekanlar/sorgular';
@@ -21,6 +22,8 @@ import { useOturum } from '@/lib/oturum';
 import { arasindaAnahtar } from '@/schedule/sira';
 import { dakikaSaat } from '@/schedule/tempo';
 import { bosluk, minDokunma, renk, yazi } from '@/theme';
+
+const FOTO_YUKSEKLIK = 240;
 
 // PRD 3.8 Mekan detayı: tam Details (yalnız burada), kim ekledi + not, süre −/+, yol tarifi, ··· menüsü.
 export default function MekanDetayEkrani() {
@@ -126,7 +129,10 @@ export default function MekanDetayEkrani() {
     <View style={s.ekran}>
       <ScrollView contentContainerStyle={s.icerik}>
         <View style={s.foto}>
-          {yer.data?.foto_uri ? (
+          {yer.data && yer.data.fotolar.length > 0 ? (
+            // #31: kaydırmalı galeri (≤ 5), atıf her fotoğrafın altında.
+            <FotoGalerisi fotolar={yer.data.fotolar} ilkUri={yer.data.foto_uri} yukseklik={FOTO_YUKSEKLIK} />
+          ) : yer.data?.foto_uri ? (
             <Image source={{ uri: yer.data.foto_uri }} style={StyleSheet.absoluteFill} contentFit="cover" />
           ) : (
             <Text style={s.fotoYok}>{yer.isPending ? '' : t('mekan.fotoYok')}</Text>
@@ -134,11 +140,6 @@ export default function MekanDetayEkrani() {
           <Pressable accessibilityRole="button" accessibilityLabel={t('genel.geri')} onPress={() => router.back()} style={[s.geri, { top: ust + 8 }]}>
             <Text style={s.geriIsaret}>‹</Text>
           </Pressable>
-          {yer.data?.foto_uri ? (
-            <View style={[s.atif, { top: ust + 14 }]}>
-              <Text style={s.atifMetin}>{t('yerler.atif')}</Text>
-            </View>
-          ) : null}
         </View>
 
         {yer.isPending ? (
@@ -310,12 +311,10 @@ export default function MekanDetayEkrani() {
 const s = StyleSheet.create({
   ekran: { flex: 1, backgroundColor: renk.zemin },
   icerik: { paddingBottom: 24 },
-  foto: { height: 240, backgroundColor: '#d9d9d6', alignItems: 'center', justifyContent: 'center' },
+  foto: { height: FOTO_YUKSEKLIK, backgroundColor: '#d9d9d6', alignItems: 'center', justifyContent: 'center' },
   fotoYok: { fontFamily: yazi.yari, fontSize: 12, color: renk.ikincil },
   geri: { position: 'absolute', left: bosluk.kenar, width: 36, height: 36, borderRadius: 18, backgroundColor: renk.zemin, alignItems: 'center', justifyContent: 'center' },
   geriIsaret: { fontFamily: yazi.kalin, fontSize: 24, lineHeight: 26, color: renk.metin, marginTop: -2 },
-  atif: { position: 'absolute', right: bosluk.kenar, paddingHorizontal: 10, paddingVertical: 5, borderRadius: 999, backgroundColor: renk.zemin },
-  atifMetin: { fontFamily: yazi.kalin, fontSize: 11, color: renk.ikincil },
   baslikKutu: { paddingHorizontal: bosluk.kenar, paddingTop: 16, gap: 6 },
   ustMetin: { fontFamily: yazi.normal, fontSize: 12, color: renk.ikincil },
   baslik: { fontFamily: yazi.ekstra, fontSize: 28, letterSpacing: -0.9, lineHeight: 30, color: renk.metin },

@@ -96,6 +96,8 @@ export async function otomatikTamamla(secenek: {
 const HAFIF_MASKE = 'id,location,displayName,primaryType,timeZone,rating,userRatingCount,currentOpeningHours.openNow';
 /** 3.7 KK5 (§7 açık nokta): program açılış kontrolü için haftalık periyotlar da istenir; yalnız stops için. */
 const SAATLI_MASKE = `${HAFIF_MASKE},regularOpeningHours.periods`;
+/** #29: önizleme kartı için ilk fotoğraf adı (photos alanı Enterprise maskesine ek maliyet getirmez; Photo çağrısı ayrı). */
+const FOTOLU_MASKE = `${HAFIF_MASKE},photos`;
 /** Şehir seçimi: puan gerekmez; saat dilimi ve ülke kodu gerekir (trips.tz, trips.country_code). */
 const SEHIR_MASKE = 'id,location,displayName,primaryType,timeZone,addressComponents';
 
@@ -113,6 +115,8 @@ export type HafifYer = {
   ulke_kodu: string | null;
   /** Haftalık açılış periyotları (yalnız `saatler: true`); gun 0 = Pazar … 6 = Cumartesi, "HH:MM". Boş dizi = her zaman açık. */
   periyotlar?: { gun: number; ac: string; kapaGun: number; kapa: string }[] | null;
+  /** İlk fotoğraf (yalnız `foto: true`, #29 önizleme kartı); yoksa null. */
+  foto_uri?: string | null;
 };
 
 type DetailsCevap = {
@@ -126,6 +130,7 @@ type DetailsCevap = {
   currentOpeningHours?: { openNow?: boolean };
   regularOpeningHours?: { periods?: { open?: GunSaat; close?: GunSaat }[] };
   addressComponents?: { shortText?: string; types?: string[] }[];
+  photos?: { name: string }[];
 };
 
 type GunSaat = { day?: number; hour?: number; minute?: number };
@@ -134,12 +139,13 @@ function hhmm(g?: GunSaat) {
   return `${String(g?.hour ?? 0).padStart(2, '0')}:${String(g?.minute ?? 0).padStart(2, '0')}`;
 }
 
-export async function hafifDetay(placeId: string, secenek: { sehir?: boolean; oturum?: string; saatler?: boolean }): Promise<HafifYer> {
+export async function hafifDetay(placeId: string, secenek: { sehir?: boolean; oturum?: string; saatler?: boolean; foto?: boolean }): Promise<HafifYer> {
   const parametreler = new URLSearchParams({ languageCode: DIL });
   if (secenek.oturum) parametreler.set('sessionToken', secenek.oturum);
   const d = await istek<DetailsCevap>(`places/${encodeURIComponent(placeId)}?${parametreler}`, {
-    maske: secenek.sehir ? SEHIR_MASKE : secenek.saatler ? SAATLI_MASKE : HAFIF_MASKE,
+    maske: secenek.sehir ? SEHIR_MASKE : secenek.saatler ? SAATLI_MASKE : secenek.foto ? FOTOLU_MASKE : HAFIF_MASKE,
   });
+  const foto = secenek.foto ? (d.photos?.[0]?.name ? await fotoUri(d.photos[0].name, 400) : null) : undefined;
   const ulke = d.addressComponents?.find((b) => b.types?.includes('country'))?.shortText ?? null;
   const periyotlar = secenek.saatler
     ? (d.regularOpeningHours?.periods ?? [])
@@ -159,6 +165,7 @@ export async function hafifDetay(placeId: string, secenek: { sehir?: boolean; ot
     acik: d.currentOpeningHours?.openNow ?? null,
     ulke_kodu: ulke && /^[A-Z]{2}$/.test(ulke) ? ulke : null,
     periyotlar: secenek.saatler ? (d.regularOpeningHours ? periyotlar! : null) : undefined,
+    foto_uri: foto,
   };
 }
 
@@ -258,7 +265,10 @@ export type TamYer = {
   kapanis: string | null;
   /** Haftalık satırlar ("Pazartesi: 08:30–19:15"). */
   saatler: string[];
+  /** İlk fotoğrafın çözülmüş URI'si (hemen gösterim). */
   foto_uri: string | null;
+  /** #31: en fazla 5 fotoğraf — adı (places-photo ile tembel çözülür) ve Google atfı (yazar). */
+  fotolar: { ad: string; yazar: string | null }[];
   google_maps_uri: string | null;
   yorumlar: { yazar: string; puan: number | null; metin: string; zaman: string }[];
 };
@@ -266,7 +276,7 @@ export type TamYer = {
 type TamCevap = DetailsCevap & {
   currentOpeningHours?: { openNow?: boolean; nextCloseTime?: string; weekdayDescriptions?: string[] };
   regularOpeningHours?: { weekdayDescriptions?: string[] };
-  photos?: { name: string }[];
+  photos?: { name: string; authorAttributions?: { displayName?: string }[] }[];
   googleMapsUri?: string;
   reviews?: {
     rating?: number;
@@ -277,8 +287,8 @@ type TamCevap = DetailsCevap & {
   }[];
 };
 
-/** Place Photo (New): yönlendirme atlanıp fotoğraf URI'si alınır; anahtar istemciye gitmez. */
-async function fotoUri(ad: string, genislik = 800): Promise<string | null> {
+/** Place Photo (New): yönlendirme atlanıp fotoğraf URI'si alınır; anahtar istemciye gitmez. Fotoğraf başına faturalanır. */
+export async function fotoUri(ad: string, genislik = 800): Promise<string | null> {
   const cevap = await fetch(`${KOK}/${ad}/media?maxWidthPx=${genislik}&skipHttpRedirect=true`, {
     headers: { 'x-goog-api-key': anahtar() },
   });
@@ -312,6 +322,7 @@ export async function tamDetay(placeId: string, tz?: string): Promise<TamYer> {
     kapanis,
     saatler: d.regularOpeningHours?.weekdayDescriptions ?? d.currentOpeningHours?.weekdayDescriptions ?? [],
     foto_uri: foto,
+    fotolar: (d.photos ?? []).slice(0, 5).map((f) => ({ ad: f.name, yazar: f.authorAttributions?.[0]?.displayName ?? null })),
     google_maps_uri: d.googleMapsUri ?? null,
     yorumlar: (d.reviews ?? []).slice(0, 5).map((y) => ({
       yazar: y.authorAttribution?.displayName ?? '',

@@ -217,7 +217,7 @@
       "sanat": "Sanat",
       "manzara": "Manzara"
     },
-    "ekle": "Listeye ekle",
+    "ekle": "+ Listeye ekle",
     "eklendi": "Listede",
     "ekleyen": "{ad} ekledi",
     "yorum": "{n} yorum",
@@ -234,7 +234,11 @@
     "linkDesteksiz": "Bu link türü henüz desteklenmiyor.",
     "koordinatMekan": "Linkte mekan değil yalnızca konum var; mekanı adıyla ara.",
     "ekleHata": "Eklenemedi. Tekrar dene.",
-    "secimHata": "Mekan bilgisi alınamadı."
+    "secimHata": "Mekan bilgisi alınamadı.",
+    "bolgedeAra": "Bu bölgede ara",
+    "bolgeBos": "Bu bölgede öneri yok; haritayı kaydırıp \"Bu bölgede ara\"ya dokun.",
+    "listedeCikar": "Listede ✓ · Çıkar",
+    "detay": "Detay"
   },
   "mekan": {
     "yukleniyor": "Mekan yükleniyor…",
@@ -273,7 +277,9 @@
     "gunAtandi": "{n}. gün",
     "atlandi": "Atlandı",
     "atlamaGeri": "Atlamayı geri al",
-    "gunSecBaslik": "Hangi güne?"
+    "gunSecBaslik": "Hangi güne?",
+    "fotoSayac": "{i}/{n}",
+    "fotoAtif": "Fotoğraf: {yazar} · Google"
   },
   "gunler": {
     "baslik": "Günlere dağıt",

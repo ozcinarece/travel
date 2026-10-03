@@ -40,7 +40,7 @@ function Cizgi({ cizgi }: { cizgi: HaritaCizgisi }) {
   return null;
 }
 
-export function Harita({ merkez, zoom = 14, pinler = [], daireler = [], cizgiler = [], odak, onPinBas, onPinSuruklendi, onBolgeDegisti }: HaritaProps) {
+export function Harita({ merkez, zoom = 14, pinler = [], daireler = [], cizgiler = [], odak, onPinBas, onHaritaBas, onPinSuruklendi, onBolgeDegisti }: HaritaProps) {
   const ekran = useWindowDimensions();
   const [bolge, setBolge] = useState<HaritaBolgesi>(() => bolgeHesapla(merkez, zoomDelta(zoom), zoomDelta(zoom)));
   const gizli = useMemo(() => gizliEtiketler(pinler, bolge, { genislik: ekran.width, yukseklik: ekran.height }), [pinler, bolge, ekran.width, ekran.height]);
@@ -65,6 +65,7 @@ export function Harita({ merkez, zoom = 14, pinler = [], daireler = [], cizgiler
         mapId="GEZI_ACIK"
         disableDefaultUI
         gestureHandling="greedy"
+        onClick={() => onHaritaBas?.()}
         onIdle={(e) => {
           const b = e.map.getBounds();
           const c = e.map.getCenter();

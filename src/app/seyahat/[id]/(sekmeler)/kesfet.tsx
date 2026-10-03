@@ -1,12 +1,14 @@
+import { Image } from 'expo-image';
 import { router } from 'expo-router';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 
-import { HaritaEkrani } from '@/components/harita/HaritaEkrani';
-import type { HaritaOdagi, HaritaPini } from '@/components/harita/tipler';
+import { bolgedenUzaklasti } from '@/components/harita/geo';
+import { EylemHapi, HaritaEkrani } from '@/components/harita/HaritaEkrani';
+import type { HaritaBolgesi, HaritaOdagi, HaritaPini } from '@/components/harita/tipler';
 import { Avatar } from '@/components/ui/Avatar';
 import { GoogleAtfi } from '@/components/yerler/GoogleAtfi';
-import { useMekanEkle, useMekanlar, useUyeler } from '@/features/mekanlar/sorgular';
+import { useMekanEkle, useMekanlar, useMekanSil, useUyeler } from '@/features/mekanlar/sorgular';
 import { useSeyahatId } from '@/features/seyahatler/baglam';
 import { useSeyahat } from '@/features/seyahatler/sorgular';
 import { SeyahatYukleme } from '@/components/seyahatler/SeyahatYukleme';
@@ -17,6 +19,7 @@ import {
   ONERI_CIPLERI,
   useHafifYerler,
   useOneriler,
+  useOnizleme,
   useYakinOneriler,
   yeniOturumJetonu,
   type HafifYer,
@@ -25,7 +28,7 @@ import {
 import { t } from '@/i18n';
 import { kategoriEtiketi, sureMetni, varsayilanDakika } from '@/lib/kategori';
 import type { Mekan, Seyahat } from '@/lib/tipler';
-import { bosluk, renk, yazi } from '@/theme';
+import { bosluk, minDokunma, renk, yazi } from '@/theme';
 
 // PRD 3.4 Keşfet: HaritaEkrani kabuğu (#17) — üstte şehir hapı + üyeler, arama, çipler; altta öneri kartları; en altta liste çubuğu.
 export default function KesfetEkrani() {
@@ -35,53 +38,85 @@ export default function KesfetEkrani() {
   return <Kesfet key={id} seyahat={seyahat.data} />;
 }
 
-type Kart = HafifYer & { eklendi?: Mekan };
+/** #29: önizleme kartındaki mekan — çip önerisinden, arama sonucundan ya da listedeki pinden. */
+type Secim = { place_id: string; kaynak: 'oneri' | 'arama' | 'liste' };
 
 function Kesfet({ seyahat }: { seyahat: Seyahat }) {
   const mekanlar = useMekanlar(seyahat.id);
   const uyeler = useUyeler(seyahat.id);
   const ekle = useMekanEkle(seyahat.id);
+  const sil = useMekanSil(seyahat.id);
 
   const [sorgu, setSorgu] = useState('');
   const [jeton, setJeton] = useState(yeniOturumJetonu);
-  const [cip, setCip] = useState<OneriCipi | null>('populer');
-  const [secili, setSecili] = useState<HafifYer | null>(null);
+  const [cip, setCip] = useState<OneriCipi>('populer');
+  const [aramaSonucu, setAramaSonucu] = useState<HafifYer | null>(null);
+  const [secim, setSecim] = useState<Secim | null>(null);
   const [mesgul, setMesgul] = useState(false);
   const [hata, setHata] = useState<string | null>(null);
   const [odak, setOdak] = useState<HaritaOdagi | undefined>();
   const odakla = (lat: number, lng: number, zoom: number) => setOdak((o) => ({ konum: { lat, lng }, zoom, sayac: (o?.sayac ?? 0) + 1 }));
 
-  // KK2: Autocomplete şehir merkezine 15 km yanlı. KK4: çip önerileri otel ya da şehir merkezi çevresinde.
-  const merkez = { lat: seyahat.lat, lng: seyahat.lng, yaricapM: 15_000 };
+  // #28: öneriler görünür bölge için. İlk açılış şehir (ya da otel) merkezi; kaydırınca "Bu bölgede ara" ile elle yenilenir.
+  const ilkMerkez = useMemo(
+    () => ({ lat: seyahat.hotel_lat ?? seyahat.lat, lng: seyahat.hotel_lng ?? seyahat.lng }),
+    [seyahat.hotel_lat, seyahat.hotel_lng, seyahat.lat, seyahat.lng],
+  );
+  const [bolge, setBolge] = useState<HaritaBolgesi | null>(null);
+  const [aramaBolgesi, setAramaBolgesi] = useState<HaritaBolgesi>({ merkez: ilkMerkez, yaricapM: 3000, latDelta: 0.05, lngDelta: 0.05 });
+  const uzaklasti = !!bolge && bolgedenUzaklasti(bolge, aramaBolgesi);
+  const buBolgedeAra = () => {
+    if (bolge) setAramaBolgesi(bolge);
+  };
+  const cipSec = (c: OneriCipi) => {
+    setCip(c);
+    setAramaSonucu(null);
+    setSecim(null);
+    // Çip değişince görünür alan için yeniden arar.
+    if (bolge) setAramaBolgesi(bolge);
+  };
+
+  // KK2: Autocomplete görünür alan merkezine 15 km yanlı (#28).
+  const aramaMerkezi = { lat: (bolge ?? aramaBolgesi).merkez.lat, lng: (bolge ?? aramaBolgesi).merkez.lng, yaricapM: 15_000 };
   const linkMi = linkGibiMi(sorgu);
-  const aramaAcik = !linkMi && sorgu.trim().length >= 2;
-  const oneriler = useOneriler('mekan-oneri', sorgu, jeton, undefined, merkez, aramaAcik);
-  const yakin = useYakinOneriler(aramaAcik || secili ? null : cip, {
-    lat: seyahat.hotel_lat ?? seyahat.lat,
-    lng: seyahat.hotel_lng ?? seyahat.lng,
-    yaricapM: 3000,
-  });
+  const aramaAcik = !linkMi && sorgu.trim().length >= 2 && !aramaSonucu;
+  const oneriler = useOneriler('mekan-oneri', sorgu, jeton, undefined, aramaMerkezi, aramaAcik);
+  const yakin = useYakinOneriler(cip, { lat: aramaBolgesi.merkez.lat, lng: aramaBolgesi.merkez.lng, yaricapM: aramaBolgesi.yaricapM });
 
   const havuz = mekanlar.data ?? [];
   // #30: listedeki pinlerin altında ad etiketi (canlı ad, PRD §7).
   const havuzAdlari = useHafifYerler(havuz.map((m) => m.place_id));
   const uyeAdi = (uid: string | null) => uyeler.data?.find((u) => u.user_id === uid)?.display_name ?? '';
+  const oneriListesi: HafifYer[] = yakin.data ?? [];
 
-  // Kartlar: seçili arama sonucu > çip önerileri. Listede olanlar işaretlenir (KK5).
-  const kartlar: Kart[] = (secili ? [secili] : (yakin.data ?? [])).map((y) => ({
-    ...y,
-    eklendi: havuz.find((m) => m.place_id === y.place_id),
-  }));
+  // #29: seçili mekanın kart verisi — önizleme (ilk fotoğrafla), yoksa elimizdeki hafif veri.
+  const onizleme = useOnizleme(secim?.place_id);
+  const seciliHafif: HafifYer | null = secim
+    ? onizleme.data ??
+      (aramaSonucu && aramaSonucu.place_id === secim.place_id ? aramaSonucu : null) ??
+      oneriListesi.find((y) => y.place_id === secim.place_id) ??
+      havuzAdlari.data?.[secim.place_id] ??
+      null
+    : null;
+  const seciliMekan = secim ? havuz.find((m) => m.place_id === secim.place_id) : undefined;
 
   const pinler: HaritaPini[] = [
     ...(seyahat.hotel_lat !== null && seyahat.hotel_lng !== null
       ? [{ id: 'otel', konum: { lat: seyahat.hotel_lat, lng: seyahat.hotel_lng }, renk: renk.metin, tur: 'otel' as const }]
       : []),
-    // KK5: havuzdaki mekan güne atanana kadar "?" (3.5'te numaralanır).
-    ...havuz.map((m) => ({ id: `m:${m.id}`, konum: { lat: m.lat, lng: m.lng }, renk: renk.metin, etiket: '?', ad: havuzAdlari.data?.[m.place_id]?.ad, tur: 'durak' as const })),
-    ...kartlar
-      .filter((k) => !k.eklendi)
-      .map((k) => ({ id: `o:${k.place_id}`, konum: { lat: k.lat, lng: k.lng }, renk: renk.metin, ad: k.ad, tur: 'oneri' as const })),
+    // KK5: havuzdaki mekan güne atanana kadar "?" (Program > Harita'da numaralanır).
+    ...havuz.map((m) => ({
+      id: `m:${m.place_id}`,
+      konum: { lat: m.lat, lng: m.lng },
+      renk: renk.metin,
+      etiket: '?',
+      ad: havuzAdlari.data?.[m.place_id]?.ad,
+      tur: 'durak' as const,
+      secili: secim?.place_id === m.place_id,
+    })),
+    ...[...(aramaSonucu ? [aramaSonucu] : []), ...oneriListesi]
+      .filter((y, i, dizi) => !havuz.some((m) => m.place_id === y.place_id) && dizi.findIndex((x) => x.place_id === y.place_id) === i)
+      .map((y) => ({ id: `o:${y.place_id}`, konum: { lat: y.lat, lng: y.lng }, renk: renk.metin, ad: y.ad, tur: 'oneri' as const, secili: secim?.place_id === y.place_id })),
   ];
 
   const sec = async (placeId: string, ad: string) => {
@@ -90,7 +125,8 @@ function Kesfet({ seyahat }: { seyahat: Seyahat }) {
     try {
       const [yer] = await hafifYerler([placeId], { oturum: jeton });
       if (!yer) throw new Error('yer yok');
-      setSecili({ ...yer, ad: yer.ad || ad });
+      setAramaSonucu({ ...yer, ad: yer.ad || ad });
+      setSecim({ place_id: yer.place_id, kaynak: 'arama' });
       odakla(yer.lat, yer.lng, 16);
       setSorgu(yer.ad || ad);
       setJeton(yeniOturumJetonu());
@@ -105,14 +141,15 @@ function Kesfet({ seyahat }: { seyahat: Seyahat }) {
     setHata(null);
     setMesgul(true);
     try {
-      const { yer, kaynak } = await linkCoz(sorgu.trim(), merkez);
+      const { yer, kaynak } = await linkCoz(sorgu.trim(), aramaMerkezi);
       // places.place_id boş olamaz: yalnız koordinat çözüldüyse eklenemez (PR #13 notu).
       if (kaynak === 'koordinat' || !yer.place_id) {
         odakla(yer.lat, yer.lng, 16);
         setHata(t('kesfet.koordinatMekan'));
         return;
       }
-      setSecili(yer);
+      setAramaSonucu(yer);
+      setSecim({ place_id: yer.place_id, kaynak: 'arama' });
       odakla(yer.lat, yer.lng, 16);
       setSorgu(yer.ad);
     } catch (e) {
@@ -124,27 +161,37 @@ function Kesfet({ seyahat }: { seyahat: Seyahat }) {
 
   const yaz = (metin: string) => {
     setSorgu(metin);
-    if (secili) setSecili(null);
+    if (aramaSonucu) {
+      setAramaSonucu(null);
+      setSecim(null);
+    }
   };
 
-  const listeyeEkle = async (k: Kart) => {
+  // #29 KK: kart'tan ekle; eklenince pin dolu/numaralı olur, düğme "Listede ✓ · Çıkar"a döner.
+  const listeyeEkle = async (y: HafifYer) => {
     setHata(null);
     try {
-      await ekle.mutateAsync({ place_id: k.place_id, primary_type: k.primary_type, lat: k.lat, lng: k.lng });
+      await ekle.mutateAsync({ place_id: y.place_id, primary_type: y.primary_type, lat: y.lat, lng: y.lng });
+    } catch {
+      setHata(t('kesfet.ekleHata'));
+    }
+  };
+  const listedenCikar = async (m: Mekan) => {
+    setHata(null);
+    try {
+      await sil.mutateAsync(m.id);
     } catch {
       setHata(t('kesfet.ekleHata'));
     }
   };
 
+  // #29: pine dokunmak seçimdir (ekleme karttan). #32: harita kaymaz.
   const pinBas = (pinId: string) => {
-    if (pinId.startsWith('m:')) {
-      const m = havuz.find((x) => `m:${x.id}` === pinId);
-      if (m) router.push({ pathname: '/seyahat/[id]/mekan/[placeId]', params: { id: seyahat.id, placeId: m.place_id } });
-    } else if (pinId.startsWith('o:')) {
-      const k = kartlar.find((x) => `o:${x.place_id}` === pinId);
-      if (k) listeyeEkle(k);
-    }
+    if (pinId === 'otel') return;
+    const placeId = pinId.slice(2);
+    setSecim({ place_id: placeId, kaynak: pinId.startsWith('m:') ? 'liste' : 'oneri' });
   };
+  const detayAc = (placeId: string) => router.push({ pathname: '/seyahat/[id]/mekan/[placeId]', params: { id: seyahat.id, placeId } });
 
   const sonEkleyen = havuz.length > 0 ? havuz[havuz.length - 1] : null;
   const sonEkleyenSayi = sonEkleyen ? havuz.filter((m) => m.added_by === sonEkleyen.added_by).length : 0;
@@ -186,7 +233,7 @@ function Kesfet({ seyahat }: { seyahat: Seyahat }) {
         </>
       }
       ustEk={
-        aramaAcik && !secili ? (
+        aramaAcik ? (
           <View style={[s.sonuclar, s.golge]}>
             {oneriler.isError ? <Text style={s.hataMetin}>{t('kesfet.araHata')}</Text> : null}
             {oneriler.data?.length === 0 ? <Text style={s.bos}>{t('kesfet.sonucYok')}</Text> : null}
@@ -203,29 +250,24 @@ function Kesfet({ seyahat }: { seyahat: Seyahat }) {
             {oneriler.data && oneriler.data.length > 0 ? <GoogleAtfi /> : null}
           </View>
         ) : (
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            style={s.ciplerKaydirma}
-            contentContainerStyle={s.cipler}
-            keyboardShouldPersistTaps="handled">
-            {ONERI_CIPLERI.map((c) => {
-              const aktif = cip === c && !secili;
-              return (
-                <Pressable
-                  key={c}
-                  accessibilityRole="button"
-                  accessibilityState={{ selected: aktif }}
-                  onPress={() => {
-                    setSecili(null);
-                    setCip(c);
-                  }}
-                  style={[s.cip, s.golge, aktif && s.cipAktif]}>
-                  <Text style={[s.cipMetin, aktif && s.cipMetinAktif]}>{t(`kesfet.cip.${c}`)}</Text>
-                </Pressable>
-              );
-            })}
-          </ScrollView>
+          <>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              style={s.ciplerKaydirma}
+              contentContainerStyle={s.cipler}
+              keyboardShouldPersistTaps="handled">
+              {ONERI_CIPLERI.map((c) => {
+                const aktif = cip === c;
+                return (
+                  <Pressable key={c} accessibilityRole="button" accessibilityState={{ selected: aktif }} onPress={() => cipSec(c)} style={[s.cip, s.golge, aktif && s.cipAktif]}>
+                    <Text style={[s.cipMetin, aktif && s.cipMetinAktif]}>{t(`kesfet.cip.${c}`)}</Text>
+                  </Pressable>
+                );
+              })}
+            </ScrollView>
+            {uzaklasti || yakin.isFetching ? <EylemHapi metin={t('kesfet.bolgedeAra')} onPress={buBolgedeAra} yukleniyor={yakin.isFetching} /> : null}
+          </>
         )
       }
       altSerbest={
@@ -235,28 +277,25 @@ function Kesfet({ seyahat }: { seyahat: Seyahat }) {
               <Text style={s.hataMetin}>{hata}</Text>
             </View>
           ) : null}
-          {yakin.isError && !secili ? (
+          {yakin.isError ? (
             <View style={s.hataKutu}>
               <Text style={s.hataMetin}>{t('kesfet.oneriHata')}</Text>
             </View>
           ) : null}
-          {kartlar.length > 0 ? (
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={s.kartlar} keyboardShouldPersistTaps="handled">
-              {kartlar.map((k) => (
-                <MekanKarti
-                  key={k.place_id}
-                  kart={k}
-                  ekleyenAd={k.eklendi ? uyeAdi(k.eklendi.added_by) : ''}
-                  mesgul={ekle.isPending}
-                  onEkle={() => listeyeEkle(k)}
-                  onAc={() =>
-                    router.push({ pathname: '/seyahat/[id]/mekan/[placeId]', params: { id: seyahat.id, placeId: k.place_id } })
-                  }
-                />
-              ))}
-            </ScrollView>
-          ) : yakin.isFetching && !secili ? (
-            <ActivityIndicator color={renk.metin} style={{ marginBottom: 12 }} />
+          {!yakin.isError && !yakin.isFetching && oneriListesi.length === 0 && !aramaSonucu ? <Text style={s.bosOneri}>{t('kesfet.bolgeBos')}</Text> : null}
+
+          {secim ? (
+            <OnizlemeKarti
+              yer={seciliHafif}
+              yukleniyor={onizleme.isPending && !seciliHafif}
+              mekan={seciliMekan}
+              ekleyenAd={seciliMekan ? uyeAdi(seciliMekan.added_by) : ''}
+              mesgul={ekle.isPending || sil.isPending}
+              onEkle={() => seciliHafif && listeyeEkle(seciliHafif)}
+              onCikar={() => seciliMekan && listedenCikar(seciliMekan)}
+              onDetay={() => detayAc(secim.place_id)}
+              onKapat={() => setSecim(null)}
+            />
           ) : null}
 
           <View style={[s.cubuk, s.golge]}>
@@ -276,68 +315,90 @@ function Kesfet({ seyahat }: { seyahat: Seyahat }) {
         </View>
       }
       harita={{
-        merkez: { lat: seyahat.hotel_lat ?? seyahat.lat, lng: seyahat.hotel_lng ?? seyahat.lng },
+        merkez: ilkMerkez,
         zoom: 13,
         pinler,
         odak,
         onPinBas: pinBas,
+        onHaritaBas: () => setSecim(null),
+        onBolgeDegisti: setBolge,
       }}
     />
   );
 }
 
-// PRD 3.4 KK6: ad, kategori, varsayılan süre, puan, yorum sayısı, açık/kapalı, Google atfı; KK7 ekleyenin baş harfi.
-function MekanKarti({
-  kart,
+// #29: tek önizleme kartı — ad, kategori, ★ puan + yorum, açık/kapalı, varsayılan süre, 1 fotoğraf; "+ Listeye ekle" / "Listede ✓ · Çıkar" ve "Detay".
+function OnizlemeKarti({
+  yer,
+  yukleniyor,
+  mekan,
   ekleyenAd,
   mesgul,
   onEkle,
-  onAc,
+  onCikar,
+  onDetay,
+  onKapat,
 }: {
-  kart: Kart;
+  yer: HafifYer | null;
+  yukleniyor: boolean;
+  mekan: Mekan | undefined;
   ekleyenAd: string;
   mesgul: boolean;
   onEkle: () => void;
-  onAc: () => void;
+  onCikar: () => void;
+  onDetay: () => void;
+  onKapat: () => void;
 }) {
-  const dakika = kart.eklendi?.default_minutes ?? varsayilanDakika(kart.primary_type);
+  const dakika = mekan?.default_minutes ?? varsayilanDakika(yer?.primary_type);
   return (
-    <Pressable accessibilityRole="button" onPress={onAc} style={s.kart}>
+    <View style={[s.kart, s.golge]}>
       <View style={s.kartUst}>
-        <View style={{ flex: 1, gap: 2 }}>
-          <Text style={s.kartAd} numberOfLines={1}>
-            {kart.ad}
-          </Text>
-          <Text style={s.kartAlt} numberOfLines={1}>
-            {kategoriEtiketi(kart.primary_type)} · {sureMetni(dakika)}
-            {kart.puan !== null ? ` · ★ ${kart.puan.toLocaleString('tr-TR')}` : ''}
-          </Text>
+        {yer?.foto_uri ? <Image source={{ uri: yer.foto_uri }} style={s.kartFoto} contentFit="cover" /> : null}
+        <View style={{ flex: 1, minWidth: 0, gap: 2 }}>
+          {yer ? (
+            <>
+              <Text style={s.kartAd} numberOfLines={2}>
+                {yer.ad}
+              </Text>
+              <Text style={s.kartAlt} numberOfLines={1}>
+                {kategoriEtiketi(yer.primary_type)} · {sureMetni(dakika)}
+                {yer.puan !== null ? ` · ★ ${yer.puan.toLocaleString('tr-TR')}` : ''}
+              </Text>
+              <Text style={s.kartAlt} numberOfLines={1}>
+                {yer.puan_sayisi !== null ? `${t('kesfet.yorum', { n: yer.puan_sayisi.toLocaleString('tr-TR') })} · ` : ''}
+                {yer.acik === true ? `${t('kesfet.acik')} · ` : yer.acik === false ? `${t('kesfet.kapali')} · ` : ''}
+                {t('yerler.atif')}
+              </Text>
+              {mekan && ekleyenAd ? (
+                <View style={s.ekleyen}>
+                  <Avatar ad={ekleyenAd} boyut={18} arkaPlan={renk.vurgu} />
+                  <Text style={s.ekleyenMetin}>{t('kesfet.ekleyen', { ad: ekleyenAd })}</Text>
+                </View>
+              ) : null}
+            </>
+          ) : (
+            <Text style={s.kartAlt}>{yukleniyor ? '…' : t('kesfet.secimHata')}</Text>
+          )}
         </View>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={kart.eklendi ? t('kesfet.eklendi') : t('kesfet.ekle')}
-          disabled={!!kart.eklendi || mesgul}
-          onPress={onEkle}
-          style={[s.arti, kart.eklendi && s.artiEklendi]}>
-          <Text style={[s.artiMetin, kart.eklendi && { color: renk.zemin }]}>{kart.eklendi ? '✓' : '+'}</Text>
+        <Pressable accessibilityRole="button" accessibilityLabel={t('genel.vazgec')} onPress={onKapat} hitSlop={8} style={s.kapat}>
+          <Text style={s.kapatMetin}>×</Text>
         </Pressable>
       </View>
-      <View style={s.kartAltSatir}>
-        {kart.eklendi && ekleyenAd ? (
-          <View style={s.ekleyen}>
-            <Avatar ad={ekleyenAd} boyut={20} arkaPlan={renk.vurgu} />
-            <Text style={s.ekleyenMetin}>{t('kesfet.ekleyen', { ad: ekleyenAd })}</Text>
-          </View>
+      <View style={s.kartDugmeler}>
+        {mekan ? (
+          <Pressable accessibilityRole="button" disabled={mesgul} onPress={onCikar} style={[s.kartDugme, s.kartDugmeGri]}>
+            <Text style={s.kartDugmeMetin}>{t('kesfet.listedeCikar')}</Text>
+          </Pressable>
         ) : (
-          <Text style={s.kartAlt} numberOfLines={1}>
-            {kart.puan_sayisi !== null ? `${t('kesfet.yorum', { n: kart.puan_sayisi.toLocaleString('tr-TR') })} · ` : ''}
-            {kart.acik === true ? t('kesfet.acik') : kart.acik === false ? t('kesfet.kapali') : ''}
-            {kart.acik !== null ? ' · ' : ''}
-            {t('yerler.atif')}
-          </Text>
+          <Pressable accessibilityRole="button" disabled={mesgul || !yer} onPress={onEkle} style={[s.kartDugme, s.kartDugmeSiyah, (mesgul || !yer) && { opacity: 0.5 }]}>
+            <Text style={[s.kartDugmeMetin, { color: renk.zemin }]}>{t('kesfet.ekle')}</Text>
+          </Pressable>
         )}
+        <Pressable accessibilityRole="button" onPress={onDetay} style={[s.kartDugme, s.kartDugmeGri]}>
+          <Text style={s.kartDugmeMetin}>{t('kesfet.detay')}</Text>
+        </Pressable>
       </View>
-    </Pressable>
+    </View>
   );
 }
 
@@ -362,16 +423,20 @@ const s = StyleSheet.create({
   cipMetin: { fontFamily: yazi.kalin, fontSize: 12, color: renk.metin },
   cipMetinAktif: { color: renk.zemin },
   alt: { gap: 12, paddingBottom: 14 },
-  kartlar: { paddingHorizontal: bosluk.kenar, gap: 12 },
-  kart: { width: 246, padding: 14, borderRadius: 18, backgroundColor: renk.zemin, gap: 8 },
-  kartUst: { flexDirection: 'row', alignItems: 'flex-start', gap: 10 },
+  bosOneri: { fontFamily: yazi.normal, fontSize: 12, color: renk.ikincil, textAlign: 'center', paddingHorizontal: bosluk.kenar },
+  kart: { marginHorizontal: bosluk.kenar, padding: 14, borderRadius: 18, backgroundColor: renk.zemin, gap: 10 },
+  kartUst: { flexDirection: 'row', alignItems: 'flex-start', gap: 12 },
+  kartFoto: { width: 72, height: 72, borderRadius: 12, backgroundColor: renk.yuzey },
   kartAd: { fontFamily: yazi.ekstra, fontSize: 17, letterSpacing: -0.3, color: renk.metin },
   kartAlt: { fontFamily: yazi.normal, fontSize: 12, color: renk.ikincil },
-  kartAltSatir: { minHeight: 20, justifyContent: 'center' },
-  arti: { width: 40, height: 40, borderRadius: 20, backgroundColor: renk.yuzey, alignItems: 'center', justifyContent: 'center' },
-  artiEklendi: { backgroundColor: renk.metin },
-  artiMetin: { fontFamily: yazi.ekstra, fontSize: 20, lineHeight: 22, color: renk.metin },
-  ekleyen: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  kapat: { width: 28, height: 28, alignItems: 'center', justifyContent: 'center' },
+  kapatMetin: { fontFamily: yazi.kalin, fontSize: 18, color: renk.ikincil },
+  kartDugmeler: { flexDirection: 'row', gap: 8 },
+  kartDugme: { height: 40, paddingHorizontal: 16, borderRadius: 999, justifyContent: 'center', minHeight: minDokunma },
+  kartDugmeSiyah: { backgroundColor: renk.metin, flex: 1, alignItems: 'center' },
+  kartDugmeGri: { backgroundColor: renk.yuzey, flex: 1, alignItems: 'center' },
+  kartDugmeMetin: { fontFamily: yazi.kalin, fontSize: 13, color: renk.metin },
+  ekleyen: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingTop: 2 },
   ekleyenMetin: { fontFamily: yazi.kalin, fontSize: 12, color: renk.metin },
   cubuk: { marginHorizontal: bosluk.kenar, height: 56, paddingLeft: 16, paddingRight: 6, borderRadius: 999, backgroundColor: renk.metin, flexDirection: 'row', alignItems: 'center', gap: 10 },
   cubukBaslik: { fontFamily: yazi.kalin, fontSize: 13, color: renk.zemin },
