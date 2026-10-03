@@ -1,23 +1,37 @@
 # Proje Planı — v1 yayına kadar
 
-Sürüm: 0.1 · Tarih: 3 Ekim 2026 (Cumartesi) · Sahip: Ece
+Sürüm: 0.2 · Tarih: 4 Ekim 2026 (Pazar) · Sahip: Ece
+Değişiklik v0.2: M1 planın 4 gün önünde tamamlandı. Ürün kararı: davet linki (3.10) ertelendi, 5–9 Ekim haftası planlama çekirdeğini derinleştirmeye ayrıldı; M2 ve sonrası bir hafta kaydı.
 Varsayımlar: geliştirici hafta içi her gün çalışır, günde 1–2 PR; ürün incelemesi aynı gün; cihaz testi akşam/hafta sonu Ece'de. Tarihler kayarsa plan haftalık güncellenir; kilometre taşları sabit kalmaya çalışır.
 
 ## Kilometre taşları
 
 | Tarih | Kilometre taşı | Ölçüt |
 |---|---|---|
-| 9 Eki Cum | **M1 · Çekirdek temiz** | #24–#34 kapalı, tek cihazda uçtan uca akış hatasız |
-| 16 Eki Cum | **M2 · v1 özellik tamam** | 3.10 davet linki tarayıcıda çalışıyor, iki cihazla ortak düzenleme |
-| 23 Eki Cum | **M3 · 5 kişi testi bitti** | Bulgular issue'da, kritik olanlar kapalı |
-| 30 Eki Cum | **M4 · Mağazaya hazır** | İsim, logo, gizlilik politikası, mağaza metinleri, Apple/Play hesapları |
-| 6 Kas Cum | **M5 · Kapalı beta** | TestFlight + Play internal, 20 kişi |
-| 13 Kas Cum | **M6 · Mağaza gönderimi** | İki mağazaya inceleme için gönderildi |
-| 20 Kas Cum | **M7 · v1 yayında** | Mağazada; v2 planı onaylı |
+| ~~9 Eki~~ 4 Eki | **M1 · Çekirdek temiz** ✅ | #24–#38 birleşti |
+| 9 Eki Cum | **M1b · Planlama derin** | Keşfet → Program → gezi günü akışı ikinci cihaz testinden geçti, yeni bulgular kapalı |
+| 23 Eki Cum | **M2 · v1 özellik tamam** | 3.10 davet linki tarayıcıda çalışıyor, iki cihazla ortak düzenleme |
+| 30 Eki Cum | **M3 · 5 kişi testi bitti** | Bulgular issue'da, kritik olanlar kapalı |
+| 6 Kas Cum | **M4 · Mağazaya hazır** | İsim, logo, gizlilik politikası, mağaza metinleri, Apple/Play hesapları |
+| 13 Kas Cum | **M5 · Kapalı beta** | TestFlight + Play internal, 20 kişi |
+| 20 Kas Cum | **M6 · Mağaza gönderimi** | İki mağazaya inceleme için gönderildi |
+| 27 Kas Cum | **M7 · v1 yayında** | Mağazada; v2 planı onaylı |
 
 ## Haftalık plan
 
-### Hafta 1 · 5–9 Ekim — Hatalar ve bilgi mimarisi
+### Hafta 1 · 5–9 Ekim — Planlama çekirdeğini derinleştirme (M1b)
+
+M1 işleri (#24–#38) 4 Ekim'de bitti. Bu hafta yeni özellik yok; ürün cihazda derin test yapar, bulgular issue olur, geliştirici aynı gün kapatır.
+
+| Gün | Geliştirici | Ürün (Ece) |
+|---|---|---|
+| Pzt 5 | Hafta sonu bulguları | Keşfet derin test: 3 farklı şehir (İstanbul, Roma, küçük bir şehir), 15+ mekan, filtreler, link yapıştırma |
+| Sal 6 | Bulgular | Program › Harita derin test: 4 gün, 20 mekan, taksi bacağı, gün taşıma, tempo doğruluğu |
+| Çar 7 | Bulgular | Çizelge derin test: sürükle-bırak, süre ayarı, kapalı mekan, otel değiştirme |
+| Per 8 | Bulgular | Gerçek gezi provası: bugünün tarihiyle İstanbul'da 3 saat, Vardık/Kaydır/Atla, mini-çubuk |
+| Cum 9 | Son düzeltmeler, derleme | **M1b kontrolü**; haftanın özeti ve karar: davet linkine geçilir mi |
+
+### (Eski) Hafta 1 — tamamlandı
 | Gün | Geliştirici | Ürün (Ece) |
 |---|---|---|
 | Pzt 5 | #24 pin çizimi, #25 Atla sonsuz yükleme, #26 ikonlar → tek PR, derleme | Akşam: otel ekranı + Atla yolu + ikonlar testi |
@@ -27,7 +41,7 @@ Varsayımlar: geliştirici hafta içi her gün çalışır, günde 1–2 PR; ür
 | Cum 9 | #31 fotoğraf galerisi; küçük düzeltmeler | **M1 kontrolü:** Roma seyahatini baştan sona kur (otel, 8 mekan, 3 gün, program) |
 | Hafta sonu | — | Bugünün tarihiyle İstanbul'da 2 saatlik gerçek "gezi": Vardık, Kaydır, mini-çubuk |
 
-### Hafta 2 · 12–16 Ekim — Davet linki ve Sprint 4
+### Hafta 2 · 12–16 Ekim — Davet linki ve Sprint 4 (M1b onayına bağlı)
 | Gün | Geliştirici | Ürün (Ece) |
 |---|---|---|
 | Pzt 12 | 3.10 web istemci: `/r/{token}` sayfası, `invite_preview`, `join_trip` | **Alan adı al** (sabah) → DNS'i geliştiriciye ver |

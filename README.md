@@ -28,7 +28,8 @@ Tasarım (21 ekran, tıklanabilir): https://claude.ai/artifact/46jh8ggGczM7VDTVH
 - [x] PRD v1 v0.2
 - [x] Teknik tasarım notu v0.2 (onaylandı)
 - [ ] Prototip testi (5 kişi)
-- [ ] Sprint 1 — kurulum birleşti; 0.1 / 0.2 / 0.5 PR'ı açık
+- [x] Sprint 1–3 (çekirdek) · M1 ✅ 4 Eki
+- [ ] M1b planlama derinleştirme (5–9 Eki) — kurulum birleşti; 0.1 / 0.2 / 0.5 PR'ı açık
 
 ## Geliştirme
 
