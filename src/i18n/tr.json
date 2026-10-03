@@ -314,7 +314,8 @@
     "uyariMetin": "Devam edilsin mi?",
     "devam": "Devam",
     "hata": "Kaydedilemedi. Tekrar dene.",
-    "kestirimNot": "Yürüyüş süreleri kestirimdir; gerçek süreler programda."
+    "kestirimNot": "Süreler Google yürüyüş ve araç rotalarından; ~ kestirim. 40 dk üstü bacaklar araçla.",
+    "taksi": "{sure} taksi"
   },
   "program": {
     "baslik": "{n}. gün",
@@ -326,7 +327,7 @@
     "bos": "Bu günde durak yok. Günler sekmesinden pinlere dokunarak ekle.",
     "yuruyus": "{n} dk yürüyüş",
     "yuruyusKisa": "{dk} dk · {mesafe}",
-    "yuruyusUzun": "40+ dk · toplu taşıma önerilir",
+    "yuruyusUzun": "40+ dk",
     "oteleDonus": "{n} dk otele",
     "kestirim": "~",
     "siradaki": "SIRADAKİ",
@@ -344,7 +345,7 @@
     "menuAtla": "Atla",
     "menuAtlama": "Atlamayı geri al",
     "menuCikar": "Günden çıkar",
-    "menuCikarMetin": "Durak bu günden çıkar; mekan listede kalır (\"?\" pini).",
+    "menuCikarMetin": "Durak bu günden çıkar; mekan listede kalır (ikonlu pin).",
     "menuBaslik": "{ad}",
     "duzenle": "Düzenle",
     "bitti": "Bitti",
@@ -379,6 +380,10 @@
       "cizelge": "Çizelge"
     },
     "sekmeBaslik": "Program",
-    "cizelgeyeGec": "Çizelgeye geç"
+    "cizelgeyeGec": "Çizelgeye geç",
+    "taksi": "{n} dk taksi",
+    "taksiYolTarifi": "Yol tarifi",
+    "oteleDonusTaksi": "{n} dk taksiyle otele",
+    "toplamTaksi": "Taksi"
   }
 }

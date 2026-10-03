@@ -7,13 +7,16 @@ import type { HaritaCizgisi, HaritaPini } from '@/components/harita/tipler';
 import { GunCipleri } from '@/components/program/GunCipleri';
 import { Buton } from '@/components/ui/Buton';
 import { useDuragaAta, useDurakKaldir, useGunEkle, useGunSil } from '@/features/gunler/sorgular';
+import { bacakKaynagi, bacakListesi, matrisNoktalari, useRotaBacaklari, useYuruyusMatrisi, type MatrisNoktasi } from '@/features/program/sorgular';
 import { useHafifYerler } from '@/features/yerler/api';
 import { t } from '@/i18n';
 import { sureMetni } from '@/lib/kategori';
+import { pinIkonu } from '@/lib/pinIkonu';
+import { polylineCoz } from '@/lib/polyline';
 import { GUNLER, haftaGunu } from '@/lib/takvim';
 import type { Durak, Gun, Mekan, Seyahat } from '@/lib/tipler';
 import { enUcuzEklemeIndeksi } from '@/schedule/program';
-import { enYakinGun, tempoHesapla, type TempoSonucu } from '@/schedule/tempo';
+import { enYakinGun, kestirimYuruyusSn, bacakModu, tempoHesapla, type BacakKaynagi, type TempoSonucu } from '@/schedule/tempo';
 import { gunRengi, renk, yazi } from '@/theme';
 
 // PRD 3.3 KK3: 20 dk yürüyüş ≈ 1,5 km.
@@ -68,13 +71,63 @@ export function GunlerHaritasi({ seyahat, gunler, duraklar, mekanlar, seciliGun,
   const adlar = useHafifYerler(mekanlar.map((m) => m.place_id));
   const adi = (m: Mekan | undefined) => (m ? (adlar.data?.[m.place_id]?.ad ?? '…') : '…');
 
-  // KK5: her gün için tempo (kestirim). Gün başlangıcı/bitişi: days.* yoksa trips.day_*.
+  // #33: tempo paneli çizelgeyle aynı yürüyüş matrisini kullanır (atanmış duraklar + otel, ≤ 25 nokta); gelene kadar kestirim "~".
+  const atanmisMekanlar = useMemo(() => {
+    const atanan = new Set(duraklar.filter((d) => !d.skipped).map((d) => d.place_ref));
+    return mekanlar.filter((m) => atanan.has(m.id)).slice(0, 24);
+  }, [duraklar, mekanlar]);
+  const matris = useYuruyusMatrisi(seyahat.id, matrisNoktalari(otel, atanmisMekanlar));
+
+  // Seçili günün §5.1 sırası (ya da elle sırası) → gerçek rota bacakları (route-legs; yalnız seçili gün, maliyet).
+  const konumKey = useMemo(() => {
+    const k = new Map<string, string>();
+    if (otel) k.set(`${otel.lat},${otel.lng}`, 'hotel');
+    for (const m of mekanlar) k.set(`${m.lat},${m.lng}`, m.place_id);
+    return k;
+  }, [mekanlar, otel]);
+  const seciliSira = useMemo(() => {
+    if (!seciliGun) return [] as Mekan[];
+    const sirali = duraklar
+      .filter((d) => d.day_id === seciliGun.id && !d.skipped)
+      .sort((a, b) => (a.order_key < b.order_key ? -1 : 1))
+      .map((d) => mekanIle.get(d.place_ref))
+      .filter((m): m is Mekan => !!m);
+    if (seciliGun.order_manual || sirali.length < 2) return sirali;
+    // Otomatik günde §5.1 sırası (gerçek yürüyüşle, 3.7 ile aynı).
+    const tp = tempoHesapla({
+      duraklar: sirali.map((m) => ({ id: m.id, konum: { lat: m.lat, lng: m.lng }, dakika: 0 })),
+      otel,
+      baslangic: '09:00',
+      bitis: '20:00',
+      yuruyusSn: (a, b) => matris.yuruyus(konumKey.get(`${a.lat},${a.lng}`) ?? '', konumKey.get(`${b.lat},${b.lng}`) ?? '')?.sn ?? kestirimYuruyusSn(a, b),
+    });
+    return tp.sira.map((id) => mekanIle.get(id)).filter((m): m is Mekan => !!m);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [seciliGun?.id, seciliGun?.order_manual, duraklar, mekanlar, otel, matris.yuruyus, konumKey]);
+  const seciliNoktalar: MatrisNoktasi[] = useMemo(() => {
+    const n = seciliSira.map((m) => ({ key: m.place_id, lat: m.lat, lng: m.lng }));
+    return otel && n.length > 0 ? [{ key: 'hotel', ...otel }, ...n, { key: 'hotel', ...otel }] : n;
+  }, [seciliSira, otel]);
+  const rota = useRotaBacaklari(seyahat.id, bacakListesi(seciliNoktalar));
+
+  // Matris + gerçek bacaklar → tempo kaynağı (konumdan anahtara).
+  const kaynak = useMemo(() => bacakKaynagi(matris.yuruyus, rota.rotalar), [matris.yuruyus, rota.rotalar]);
+  const bacak: BacakKaynagi = useMemo(
+    () => (a, b) => {
+      const c = kaynak(konumKey.get(`${a.lat},${a.lng}`) ?? '', konumKey.get(`${b.lat},${b.lng}`) ?? '');
+      return c ? { yuruyusSn: c.sn, taksiSn: c.taksi?.sn ?? null, kestirim: false } : { yuruyusSn: kestirimYuruyusSn(a, b), taksiSn: null, kestirim: true };
+    },
+    [kaynak, konumKey],
+  );
+
+  // KK5: her gün için tempo. Gün başlangıcı/bitişi: days.* yoksa trips.day_*. Elle sıralanmış günde mevcut sıra.
   const tempolar = useMemo(() => {
     const mekanIle = new Map(mekanlar.map((m) => [m.id, m]));
     const sonuc = new Map<string, TempoSonucu>();
     for (const g of gunler) {
       const gunDuraklari = duraklar
         .filter((d) => d.day_id === g.id && !d.skipped)
+        .sort((a, b) => (a.order_key < b.order_key ? -1 : 1))
         .map((d) => ({ durak: d, mekan: mekanIle.get(d.place_ref) }))
         .filter((x): x is { durak: Durak; mekan: Mekan } => !!x.mekan);
       sonuc.set(
@@ -84,11 +137,13 @@ export function GunlerHaritasi({ seyahat, gunler, duraklar, mekanlar, seciliGun,
           otel,
           baslangic: saat(g.start_time, saat(seyahat.day_start, '09:00')),
           bitis: saat(g.end_time, saat(seyahat.day_end, '20:00')),
+          bacak,
+          sira: g.order_manual ? gunDuraklari.map(({ mekan }) => mekan.id) : undefined,
         }),
       );
     }
     return sonuc;
-  }, [gunler, duraklar, mekanlar, otel, seyahat.day_start, seyahat.day_end]);
+  }, [gunler, duraklar, mekanlar, otel, seyahat.day_start, seyahat.day_end, bacak]);
 
   // KK6: ilk boştaki mekan için en yakın gün.
   const bostaOneri = useMemo(() => {
@@ -110,27 +165,50 @@ export function GunlerHaritasi({ seyahat, gunler, duraklar, mekanlar, seciliGun,
     return gunId ? { mekan: ilk, gunIndex: gunler.find((g) => g.id === gunId)?.index ?? 1 } : null;
   }, [duraklar, gunler, mekanlar]);
 
+  // #30: pin numarası = gün içi sıra (§5.1 ya da elle), gün numarası değil; rota çizgisiyle okunur.
+  const gunSiralari = new Map<string, number>();
+  for (const g of gunler) tempolar.get(g.id)?.sira.forEach((mekanId, i) => gunSiralari.set(mekanId, i + 1));
+
   const pinler: HaritaPini[] = [
     ...(otel ? [{ id: 'otel', tur: 'otel' as const, konum: otel, renk: renk.metin }] : []),
     ...mekanlar.map((m) => {
       const d = durakIle.get(m.id);
       const idx = d ? gunIndex.get(d.day_id) : undefined;
-      return idx
-        ? { id: `m:${m.id}`, tur: 'durak' as const, konum: { lat: m.lat, lng: m.lng }, renk: gunRengi(idx), etiket: String(idx), ad: adi(m) }
-        : { id: `m:${m.id}`, tur: 'bos' as const, konum: { lat: m.lat, lng: m.lng }, renk: renk.metin, etiket: '?', ad: adi(m) };
+      const hafif = adlar.data?.[m.place_id];
+      const ortak = { id: `m:${m.id}`, konum: { lat: m.lat, lng: m.lng }, ad: adi(m), puan: hafif?.puan ?? null, yorumSayisi: hafif?.puan_sayisi ?? null };
+      // #30: atanmış = gün renginde daire + sıra numarası (gün içi sıra); atanmamış = beyaz daire + kategori ikonu.
+      if (idx) {
+        const sira = gunSiralari.get(m.id);
+        return { ...ortak, tur: 'durak' as const, renk: gunRengi(idx), etiket: sira ? String(sira) : '' };
+      }
+      return { ...ortak, tur: 'bos' as const, renk: renk.metin, ikon: pinIkonu(m.primary_type) };
     }),
   ];
 
-  // #33: gün rotası çizgisi — otel → §5.1 sırası → otel; seçili gün tam renk, diğerleri %30.
-  const cizgiler: HaritaCizgisi[] = gunler
-    .map((g): HaritaCizgisi | null => {
-      const tp = tempolar.get(g.id);
-      if (!tp || tp.sira.length === 0) return null;
+  // #33: rota çizgileri. Seçili gün: bacak bacak GERÇEK yol (polyline), araç bacağı kesikli + "🚕 9 dk", yürüyüş "🚶 12 dk";
+  // gelene kadar kuş uçuşu. Diğer günler: kuş uçuşu, %30 opaklık (maliyet).
+  const cizgiler: HaritaCizgisi[] = gunler.flatMap((g): HaritaCizgisi[] => {
+    const tp = tempolar.get(g.id);
+    if (!tp || tp.sira.length === 0) return [];
+    const rengi = gunRengi(g.index);
+    if (g.id !== seciliGun?.id) {
       const noktalar = tp.sira.map((mekanId) => mekanIle.get(mekanId)).filter((m): m is Mekan => !!m).map((m) => ({ lat: m.lat, lng: m.lng }));
       const yol = otel ? [otel, ...noktalar, otel] : noktalar;
-      return yol.length >= 2 ? { id: `rota:${g.id}`, noktalar: yol, renk: gunRengi(g.index), opaklik: g.id === seciliGun?.id ? 0.9 : 0.3 } : null;
-    })
-    .filter((c): c is HaritaCizgisi => !!c);
+      return yol.length >= 2 ? [{ id: `rota:${g.id}`, noktalar: yol, renk: rengi, opaklik: 0.3 }] : [];
+    }
+    return bacakListesi(seciliNoktalar).map((b, i): HaritaCizgisi => {
+      const r = rota.rotalar[`${b.from.key}>${b.to.key}`];
+      const a = { lat: b.from.lat, lng: b.from.lng };
+      const z = { lat: b.to.lat, lng: b.to.lng };
+      if (r) {
+        const taksi = r.mode === 'DRIVE' && r.drive_seconds;
+        const dk = Math.max(1, Math.round((taksi ? r.drive_seconds! : r.seconds) / 60));
+        return { id: `rota:${g.id}:${i}`, noktalar: polylineCoz(r.polyline), renk: rengi, opaklik: 0.9, kesik: !!taksi, etiket: `${taksi ? '🚕' : '🚶'} ${dk} dk` };
+      }
+      const m = bacakModu(a, z, bacak(a, z));
+      return { id: `rota:${g.id}:${i}`, noktalar: [a, z], renk: rengi, opaklik: 0.9, kesik: m.mod === 'taksi', etiket: `${m.mod === 'taksi' ? '🚕' : '🚶'} ~${Math.max(1, Math.round(m.sn / 60))} dk` };
+    });
+  });
 
   // KK2: seçili güne ata; aynı güne atalıysa kaldır; başka güne atalıysa seçili güne taşı.
   const pinBas = async (pinId: string) => {
@@ -256,7 +334,9 @@ export function GunlerHaritasi({ seyahat, gunler, duraklar, mekanlar, seciliGun,
                   <View style={s.kartSatir}>
                     <Text style={s.kartAlt}>
                       {tp.durakSayisi > 0
-                        ? t('gunler.ozet', { n: tp.durakSayisi, gezi: sureMetni(tp.geziDk), yuruyus: sureMetni(tp.yuruyusDk) })
+                        ? `${t('gunler.ozet', { n: tp.durakSayisi, gezi: sureMetni(tp.geziDk), yuruyus: `${tp.kestirim ? '~' : ''}${sureMetni(tp.yuruyusDk)}` })}${
+                            tp.taksiDk > 0 ? ` + ${tp.kestirim ? '~' : ''}${t('gunler.taksi', { sure: sureMetni(tp.taksiDk) })}` : ''
+                          }`
                         : t('gunler.ozetBos')}
                     </Text>
                     <Text style={s.kartAlt}>{t('gunler.saatler', { bas: tp.baslangic, bit: tp.bitis })}</Text>
@@ -267,7 +347,7 @@ export function GunlerHaritasi({ seyahat, gunler, duraklar, mekanlar, seciliGun,
                 </Pressable>
               );
             })}
-            <Text style={s.not}>{t('gunler.kestirimNot')}</Text>
+            <Text style={s.not}>{matris.hata || rota.hata ? t('program.yuruyusHata') : t('gunler.kestirimNot')}</Text>
           </ScrollView>
           {hata ? <Text style={s.hata}>{hata}</Text> : null}
           <Buton baslik={t('gunler.programaGec')} onPress={programaGec} stil={{ height: 50 }} />

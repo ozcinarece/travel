@@ -72,3 +72,38 @@ describe('tempo', () => {
     expect(enYakinGun(a, [{ id: 'g1', duraklar: [] }])).toBeNull();
   });
 });
+
+describe('tempo #33 taksi bacağı', () => {
+  const otel = { lat: 41.9, lng: 12.5 };
+  const yakin = { lat: 41.905, lng: 12.5 }; // ~550 m
+  const uzak = { lat: 41.95, lng: 12.5 }; // ~5,5 km → yürüyüş > 40 dk
+  it('40 dk üstü bacak taksi sayılır; kestirimde bayrak kalkar', () => {
+    const s = tempoHesapla({ duraklar: [{ id: 'u', konum: uzak, dakika: 60 }], otel, baslangic: '09:00', bitis: '20:00' });
+    expect(s.taksiDk).toBeGreaterThan(10);
+    expect(s.yuruyusDk).toBe(0);
+    expect(s.kestirim).toBe(true);
+  });
+  it('gerçek matris: yürüyüş ve taksi ayrı toplanır, verilen sıra korunur', () => {
+    const bacak = (a: { lat: number }, b: { lat: number }) => {
+      const uzakMi = Math.abs(a.lat - b.lat) > 0.02;
+      return uzakMi ? { yuruyusSn: 70 * 60, taksiSn: 9 * 60, kestirim: false } : { yuruyusSn: 8 * 60, taksiSn: null, kestirim: false };
+    };
+    const s = tempoHesapla({
+      duraklar: [
+        { id: 'y', konum: yakin, dakika: 60 },
+        { id: 'u', konum: uzak, dakika: 60 },
+      ],
+      otel,
+      baslangic: '09:00',
+      bitis: '20:00',
+      bacak,
+      sira: ['u', 'y'],
+    });
+    expect(s.sira).toEqual(['u', 'y']);
+    // otel→u taksi 9, u→y taksi 9, y→otel yürüyüş 8
+    expect(s.taksiDk).toBe(18);
+    expect(s.yuruyusDk).toBe(8);
+    expect(s.kestirim).toBe(false);
+    expect(s.bitis).toBe('11:26');
+  });
+});

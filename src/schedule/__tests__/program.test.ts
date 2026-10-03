@@ -63,6 +63,21 @@ describe('programHesapla', () => {
     expect(p.satirlar[1].durum).toBe('siradaki');
   });
 
+  it('#33: 40 dk üstü bacak taksi; araç süresi varsa gerçek, yoksa kestirim', () => {
+    const uzak = d('d1', 30, { konum: { lat: 41.95, lng: 12.5 } });
+    const gercek = programHesapla({ baslangic: '09:00', duraklar: [uzak], otel, yuruyus: () => ({ sn: 70 * 60, m: 5500, taksi: { sn: 9 * 60, m: 6000 } }), simdiDk: null });
+    expect(gercek.satirlar[0].yuruyus).toEqual({ sn: 540, m: 6000, kestirim: false, mod: 'taksi' });
+    expect(gercek.satirlar[0].varisDk).toBe(549);
+    expect(gercek.taksiSn).toBe(540 * 2); // dönüş de taksi
+    expect(gercek.yuruyusSn).toBe(0);
+    const tahmin = programHesapla({ baslangic: '09:00', duraklar: [uzak], otel, yuruyus: () => ({ sn: 70 * 60, m: 5500 }), simdiDk: null });
+    expect(tahmin.satirlar[0].yuruyus?.mod).toBe('taksi');
+    expect(tahmin.satirlar[0].yuruyus?.kestirim).toBe(true);
+    expect(tahmin.kestirimVar).toBe(true);
+    const kisa = programHesapla({ baslangic: '09:00', duraklar: [d('d1', 30)], otel, yuruyus: sabit, simdiDk: null });
+    expect(kisa.satirlar[0].yuruyus?.mod).toBe('yuruyus');
+  });
+
   it('otelsiz günde ilk durağa yürüyüş yok', () => {
     const p = programHesapla({ baslangic: '09:00', duraklar: [d('d1', 30)], otel: null, yuruyus: sabit, simdiDk: null });
     expect(p.satirlar[0].yuruyus).toBeNull();

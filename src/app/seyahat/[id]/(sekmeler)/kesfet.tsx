@@ -3,7 +3,7 @@ import { router } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 
-import { bolgedenUzaklasti } from '@/components/harita/geo';
+import { bolgedenUzaklasti, bolgeHesapla } from '@/components/harita/geo';
 import { EylemHapi, HaritaEkrani } from '@/components/harita/HaritaEkrani';
 import type { HaritaBolgesi, HaritaOdagi, HaritaPini } from '@/components/harita/tipler';
 import { Avatar } from '@/components/ui/Avatar';
@@ -26,6 +26,7 @@ import {
   type OneriCipi,
 } from '@/features/yerler/api';
 import { t } from '@/i18n';
+import { pinIkonu } from '@/lib/pinIkonu';
 import { kategoriEtiketi, sureMetni, varsayilanDakika } from '@/lib/kategori';
 import type { Mekan, Seyahat } from '@/lib/tipler';
 import { bosluk, minDokunma, renk, yazi } from '@/theme';
@@ -63,7 +64,7 @@ function Kesfet({ seyahat }: { seyahat: Seyahat }) {
     [seyahat.hotel_lat, seyahat.hotel_lng, seyahat.lat, seyahat.lng],
   );
   const [bolge, setBolge] = useState<HaritaBolgesi | null>(null);
-  const [aramaBolgesi, setAramaBolgesi] = useState<HaritaBolgesi>({ merkez: ilkMerkez, yaricapM: 3000, latDelta: 0.05, lngDelta: 0.05 });
+  const [aramaBolgesi, setAramaBolgesi] = useState<HaritaBolgesi>(() => bolgeHesapla(ilkMerkez, 0.05, 0.05));
   const uzaklasti = !!bolge && bolgedenUzaklasti(bolge, aramaBolgesi);
   const buBolgedeAra = () => {
     if (bolge) setAramaBolgesi(bolge);
@@ -104,19 +105,31 @@ function Kesfet({ seyahat }: { seyahat: Seyahat }) {
     ...(seyahat.hotel_lat !== null && seyahat.hotel_lng !== null
       ? [{ id: 'otel', konum: { lat: seyahat.hotel_lat, lng: seyahat.hotel_lng }, renk: renk.metin, tur: 'otel' as const }]
       : []),
-    // KK5: havuzdaki mekan güne atanana kadar "?" (Program > Harita'da numaralanır).
+    // #30: listeye eklenen = siyah daire + tik (Program > Harita'da numaralanır); altında ad, yakınken ★ puan · yorum.
     ...havuz.map((m) => ({
       id: `m:${m.place_id}`,
       konum: { lat: m.lat, lng: m.lng },
       renk: renk.metin,
-      etiket: '?',
       ad: havuzAdlari.data?.[m.place_id]?.ad,
-      tur: 'durak' as const,
+      puan: havuzAdlari.data?.[m.place_id]?.puan ?? null,
+      yorumSayisi: havuzAdlari.data?.[m.place_id]?.puan_sayisi ?? null,
+      tur: 'listede' as const,
       secili: secim?.place_id === m.place_id,
     })),
+    // #30: öneri = beyaz daire + kategori ikonu (primaryType).
     ...[...(aramaSonucu ? [aramaSonucu] : []), ...oneriListesi]
       .filter((y, i, dizi) => !havuz.some((m) => m.place_id === y.place_id) && dizi.findIndex((x) => x.place_id === y.place_id) === i)
-      .map((y) => ({ id: `o:${y.place_id}`, konum: { lat: y.lat, lng: y.lng }, renk: renk.metin, ad: y.ad, tur: 'oneri' as const, secili: secim?.place_id === y.place_id })),
+      .map((y) => ({
+        id: `o:${y.place_id}`,
+        konum: { lat: y.lat, lng: y.lng },
+        renk: renk.metin,
+        ad: y.ad,
+        ikon: pinIkonu(y.primary_type),
+        puan: y.puan,
+        yorumSayisi: y.puan_sayisi,
+        tur: 'oneri' as const,
+        secili: secim?.place_id === y.place_id,
+      })),
   ];
 
   const sec = async (placeId: string, ad: string) => {
