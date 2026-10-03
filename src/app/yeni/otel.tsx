@@ -135,7 +135,7 @@ function OtelFormu({ trip, sehir }: { trip: string; sehir: Seyahat }) {
 
   // #17 KK3: görünür alanda lodging ara; kaydırmada otomatik yenilenmez, düğmeyle.
   const bolgedeAra = async () => {
-    const hedef = bolge ?? { merkez: { lat: sehir.lat, lng: sehir.lng }, yaricapM: 3000 };
+    const hedef: HaritaBolgesi = bolge ?? { merkez: { lat: sehir.lat, lng: sehir.lng }, yaricapM: 3000, latDelta: 0.05, lngDelta: 0.05 };
     setAdayNot(null);
     setAdayMesgul(true);
     try {

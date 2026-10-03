@@ -3,7 +3,7 @@ import { useMemo, useState } from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { BilgiHapi, HaritaEkrani } from '@/components/harita/HaritaEkrani';
-import type { HaritaPini } from '@/components/harita/tipler';
+import type { HaritaCizgisi, HaritaPini } from '@/components/harita/tipler';
 import { Buton } from '@/components/ui/Buton';
 import { useDuragaAta, useDurakKaldir, useGunEkle, useGunler, useGunSil, useDuraklar } from '@/features/gunler/sorgular';
 import { useMekanlar } from '@/features/mekanlar/sorgular';
@@ -117,10 +117,21 @@ function Gunler({ seyahat, gunler, duraklar, mekanlar }: { seyahat: Seyahat; gun
       const d = durakIle.get(m.id);
       const idx = d ? gunIndex.get(d.day_id) : undefined;
       return idx
-        ? { id: `m:${m.id}`, tur: 'durak' as const, konum: { lat: m.lat, lng: m.lng }, renk: gunRengi(idx), etiket: String(idx) }
-        : { id: `m:${m.id}`, tur: 'bos' as const, konum: { lat: m.lat, lng: m.lng }, renk: renk.metin, etiket: '?' };
+        ? { id: `m:${m.id}`, tur: 'durak' as const, konum: { lat: m.lat, lng: m.lng }, renk: gunRengi(idx), etiket: String(idx), ad: adi(m) }
+        : { id: `m:${m.id}`, tur: 'bos' as const, konum: { lat: m.lat, lng: m.lng }, renk: renk.metin, etiket: '?', ad: adi(m) };
     }),
   ];
+
+  // #33: gün rotası çizgisi — otel → §5.1 sırası → otel; seçili gün tam renk, diğerleri %30.
+  const cizgiler: HaritaCizgisi[] = gunler
+    .map((g): HaritaCizgisi | null => {
+      const tp = tempolar.get(g.id);
+      if (!tp || tp.sira.length === 0) return null;
+      const noktalar = tp.sira.map((mekanId) => mekanIle.get(mekanId)).filter((m): m is Mekan => !!m).map((m) => ({ lat: m.lat, lng: m.lng }));
+      const yol = otel ? [otel, ...noktalar, otel] : noktalar;
+      return yol.length >= 2 ? { id: `rota:${g.id}`, noktalar: yol, renk: gunRengi(g.index), opaklik: g.id === seciliGun?.id ? 0.9 : 0.3 } : null;
+    })
+    .filter((c): c is HaritaCizgisi => !!c);
 
   // KK2: seçili güne ata; aynı güne atalıysa kaldır; başka güne atalıysa seçili güne taşı.
   const pinBas = async (pinId: string) => {
@@ -278,6 +289,7 @@ function Gunler({ seyahat, gunler, duraklar, mekanlar }: { seyahat: Seyahat; gun
         merkez,
         zoom: otel ? 14 : 13,
         pinler,
+        cizgiler,
         daireler: otel ? [{ id: 'yurume', merkez: otel, yaricapM: YURUME_YARICAPI_M, renk: renk.metin }] : [],
         onPinBas: pinBas,
       }}
