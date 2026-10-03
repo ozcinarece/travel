@@ -268,7 +268,7 @@ function Kesfet({ seyahat }: { seyahat: Seyahat }) {
             </View>
             <Pressable
               accessibilityRole="button"
-              onPress={() => router.push({ pathname: '/seyahat/[id]/(sekmeler)/gunler', params: { id: seyahat.id } })}
+              onPress={() => router.navigate({ pathname: '/seyahat/[id]/(sekmeler)/program', params: { id: seyahat.id, gorunum: 'harita' } })}
               style={s.cubukDugme}>
               <Text style={s.cubukDugmeMetin}>{t('kesfet.gunlereDagit')} →</Text>
             </Pressable>
