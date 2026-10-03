@@ -12,6 +12,7 @@ Ortak seyahat planı: mekanlar haritada seçilir, günlere haritada dağıtılı
 | [docs/01-prd-v1.md](docs/01-prd-v1.md) | V1 gereksinimleri: ekran ekran kabul kriterleri, hesaplama kuralları, Google Places kısıtları, veri modeli, sprint planı |
 | [docs/02-teknik-tasarim.md](docs/02-teknik-tasarim.md) | Teknik tasarım notu (geliştirici) |
 | [docs/03-inceleme-teknik-tasarim.md](docs/03-inceleme-teknik-tasarim.md) | Teknik tasarım notunun ürün incelemesi ve kararlar |
+| [docs/04-proje-plani.md](docs/04-proje-plani.md) | Tarihli proje planı: kilometre taşları M1–M7, haftalık plan, Ece'nin işleri |
 
 Tasarım (21 ekran, tıklanabilir): https://claude.ai/artifact/46jh8ggGczM7VDTVHyzRQT
 
