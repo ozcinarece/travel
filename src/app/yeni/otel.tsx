@@ -4,7 +4,7 @@ import { ActivityIndicator, Pressable, StyleSheet, Text, TextInput, View } from 
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { EkranBasligi } from '@/components/EkranBasligi';
-import { bolgedenUzaklasti } from '@/components/harita/geo';
+import { bolgedenUzaklasti, bolgeHesapla } from '@/components/harita/geo';
 import { BilgiHapi, EylemHapi, HaritaEkrani } from '@/components/harita/HaritaEkrani';
 import type { HaritaBolgesi, HaritaOdagi, HaritaPini } from '@/components/harita/tipler';
 import { Buton } from '@/components/ui/Buton';
@@ -135,7 +135,7 @@ function OtelFormu({ trip, sehir }: { trip: string; sehir: Seyahat }) {
 
   // #17 KK3: görünür alanda lodging ara; kaydırmada otomatik yenilenmez, düğmeyle.
   const bolgedeAra = async () => {
-    const hedef: HaritaBolgesi = bolge ?? { merkez: { lat: sehir.lat, lng: sehir.lng }, yaricapM: 3000, latDelta: 0.05, lngDelta: 0.05 };
+    const hedef: HaritaBolgesi = bolge ?? bolgeHesapla({ lat: sehir.lat, lng: sehir.lng }, 0.05, 0.05);
     setAdayNot(null);
     setAdayMesgul(true);
     try {

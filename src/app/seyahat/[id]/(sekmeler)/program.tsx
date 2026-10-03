@@ -13,7 +13,7 @@ import { Avatar } from '@/components/ui/Avatar';
 import { Buton } from '@/components/ui/Buton';
 import { useDuraklar, useDurakKaldir, useGunEkle, useGunler, useGunSil } from '@/features/gunler/sorgular';
 import { useMekanlar, useUyeler } from '@/features/mekanlar/sorgular';
-import { matrisNoktalari, useDurakGuncelle, useGunGuncelle, useSiraYaz, useYuruyusMatrisi } from '@/features/program/sorgular';
+import { bacakKaynagi, bacakListesi, matrisNoktalari, useDurakGuncelle, useGunGuncelle, useRotaBacaklari, useSiraYaz, useYuruyusMatrisi, type MatrisNoktasi } from '@/features/program/sorgular';
 import { gunDuraklari, saatKisa, useGunProgrami, useSimdi } from '@/features/program/useProgram';
 import { useSeyahatId } from '@/features/seyahatler/baglam';
 import { useSeyahat } from '@/features/seyahatler/sorgular';
@@ -206,8 +206,20 @@ function Cizelge({
   };
 
   const matris = useYuruyusMatrisi(seyahat.id, matrisNoktalari(otel, gunMekanlari));
+  // #33: günün bacakları için gerçek yol (araç süresi 40 dk üstü bacaklarda); 3.5 ile aynı önbellek.
+  const rotaNoktalari = useMemo((): MatrisNoktasi[] => {
+    const n = gunDurak
+      .filter((d) => !d.skipped)
+      .map((d) => mekanIle.get(d.place_ref))
+      .filter((m): m is Mekan => !!m)
+      .map((m) => ({ key: m.place_id, lat: m.lat, lng: m.lng }));
+    return otel && n.length > 0 ? [{ key: 'hotel', ...otel }, ...n, { key: 'hotel', ...otel }] : n;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [gunDurak, mekanIle, otel?.lat, otel?.lng]);
+  const rota = useRotaBacaklari(seyahat.id, bacakListesi(rotaNoktalari));
+  const yuruyusKaynagi = useMemo(() => bacakKaynagi(matris.yuruyus, rota.rotalar), [matris.yuruyus, rota.rotalar]);
   const an = useSimdi(true);
-  const prog = useGunProgrami({ seyahat, gun, duraklar, mekanlar, yuruyus: matris.yuruyus, an, yolaCikilanlar });
+  const prog = useGunProgrami({ seyahat, gun, duraklar, mekanlar, yuruyus: yuruyusKaynagi, an, yolaCikilanlar });
 
   // T7: elle sıralanmamış günde §5.1 sırası gerçek yürüyüşle hesaplanır ve farklıysa yazılır (herkes aynı sırayı görür).
   const sonYazilan = useRef('');
@@ -297,13 +309,16 @@ function Cizelge({
     }
   };
 
-  const yolTarifi = (d: Durak) => {
+  // #33: araç bacağında Google Maps araç moduyla açılır.
+  const yolTarifi = (d: Durak, mod: 'yuruyus' | 'taksi' = 'yuruyus') => {
     const m = mekanIle.get(d.place_ref);
     if (!m) return;
     // §5.4 (a): Yol tarifi'ne basınca bulunulan duraktan ayrılmış sayılır.
     const buradasin = satirlar.find((x) => x.durum === 'buradasin');
     if (buradasin) setYolaCikilanlar((e) => new Set([...e, buradasin.durak.id]));
-    Linking.openURL(`https://www.google.com/maps/dir/?api=1&destination=${m.lat},${m.lng}&destination_place_id=${encodeURIComponent(m.place_id)}&travelmode=walking`);
+    Linking.openURL(
+      `https://www.google.com/maps/dir/?api=1&destination=${m.lat},${m.lng}&destination_place_id=${encodeURIComponent(m.place_id)}&travelmode=${mod === 'taksi' ? 'driving' : 'walking'}`,
+    );
   };
 
   // KK4 menü: Başka güne al / Atla / Plandan çıkar (durak günden çıkar, mekan listede kalır).
@@ -376,7 +391,7 @@ function Cizelge({
       : t('program.altTarih', { tarih: gunBasligi(gun) });
   // #34: Çizelge'de gün başlığında tek satır tempo etiketi (gerçek yürüyüşle).
   const gunDk = Math.max(1, saatDakika(saatKisa(gun.end_time, saatKisa(seyahat.day_end, '20:00'))) - prog.canli.baslangicDk);
-  const tempo = gunDurak.length > 0 ? tempoEtiketi((gunDurak.filter((d) => !d.skipped).reduce((t, d) => t + d.minutes, 0) + Math.round(prog.canli.yuruyusSn / 60)) / gunDk) : null;
+  const tempo = gunDurak.length > 0 ? tempoEtiketi((gunDurak.filter((d) => !d.skipped).reduce((t, d) => t + d.minutes, 0) + Math.round((prog.canli.yuruyusSn + prog.canli.taksiSn) / 60)) / gunDk) : null;
 
   // 3.5 KK7 (Çizelge'den de): gün sil — uzun basınca onay.
   const gunuSil = (g: Gun) => {
@@ -509,6 +524,12 @@ function Cizelge({
               <Text style={s.ozetKalin}>
                 {Math.round(prog.canli.yuruyusSn / 60)} dk · {mesafeMetni(prog.canli.yuruyusM)}
               </Text>
+              {prog.canli.taksiSn > 0 ? (
+                <>
+                  {' · '}
+                  {t('program.toplamTaksi')} <Text style={s.ozetKalin}>{Math.round(prog.canli.taksiSn / 60)} dk</Text>
+                </>
+              ) : null}
             </Text>
           </View>
           <Buton baslik={t('program.programiGor')} onPress={() => setDuzenle(false)} stil={{ height: 50, marginTop: 10 }} />
@@ -529,12 +550,24 @@ function Cizelge({
             return (
               <View key={d.id}>
                 {satir.yuruyus && i > 0 ? (
-                  <View style={s.yuruyusSatir}>
-                    <View style={s.noktaCizgi} />
-                    <Text style={s.yuruyusMetin}>
-                      🚶 {matris.yukleniyor && satir.yuruyus.kestirim ? '…' : yuruyusDk(satir.yuruyus) > 40 ? t('program.yuruyusUzun') : `${t('program.yuruyus', { n: yuruyusDk(satir.yuruyus) })}${satir.yuruyus.kestirim ? ' ~' : ''}`}
-                    </Text>
-                  </View>
+                  satir.yuruyus.mod === 'taksi' ? (
+                    // #33: 40 dk üstü bacak araçla — "🚕 9 dk · Yol tarifi" Google Maps'i araç moduyla açar.
+                    <Pressable accessibilityRole="button" onPress={() => yolTarifi(durak, 'taksi')} style={s.yuruyusSatir}>
+                      <View style={s.noktaCizgi} />
+                      <Text style={s.yuruyusMetin}>
+                        🚕 {(matris.yukleniyor || rota.yukleniyor) && satir.yuruyus.kestirim ? '…' : `${t('program.taksi', { n: yuruyusDk(satir.yuruyus) })}${satir.yuruyus.kestirim ? ' ~' : ''}`}
+                        {' · '}
+                        <Text style={s.yuruyusBaglanti}>{t('program.taksiYolTarifi')}</Text>
+                      </Text>
+                    </Pressable>
+                  ) : (
+                    <View style={s.yuruyusSatir}>
+                      <View style={s.noktaCizgi} />
+                      <Text style={s.yuruyusMetin}>
+                        🚶 {matris.yukleniyor && satir.yuruyus.kestirim ? '…' : `${t('program.yuruyus', { n: yuruyusDk(satir.yuruyus) })}${satir.yuruyus.kestirim ? ' ~' : ''}`}
+                      </Text>
+                    </View>
+                  )
                 ) : null}
                 <View style={s.satir}>
                   <View style={s.saatSutun}>
@@ -624,7 +657,7 @@ function Cizelge({
             <View style={s.yuruyusSatir}>
               <View style={s.noktaCizgi} />
               <Text style={s.yuruyusMetin}>
-                🏠 {t('program.oteleDonus', { n: yuruyusDk(prog.canli.oteleDonus) })}
+                {prog.canli.oteleDonus.mod === 'taksi' ? '🚕' : '🏠'} {t(prog.canli.oteleDonus.mod === 'taksi' ? 'program.oteleDonusTaksi' : 'program.oteleDonus', { n: yuruyusDk(prog.canli.oteleDonus) })}
                 {prog.canli.oteleDonus.kestirim ? ' ~' : ''} · {dakikaSaat(prog.canli.bitisDk)}
               </Text>
             </View>
@@ -684,6 +717,7 @@ const s = StyleSheet.create({
   yuruyusSatir: { flexDirection: 'row', alignItems: 'center', gap: 8, height: 30, paddingLeft: 64 },
   noktaCizgi: { width: 2, height: '100%', borderLeftWidth: 2, borderLeftColor: '#c4c4c4', borderStyle: 'dotted' },
   yuruyusMetin: { fontFamily: yazi.normal, fontSize: 12, color: renk.ikincil },
+  yuruyusBaglanti: { fontFamily: yazi.kalin, color: renk.metin },
   siyahKart: { flex: 1, padding: 14, borderRadius: 18, backgroundColor: renk.metin, gap: 10 },
   kartUst: { flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between', gap: 10 },
   kartAd: { fontFamily: yazi.ekstra, fontSize: 18, letterSpacing: -0.4, color: renk.zemin },

@@ -63,6 +63,7 @@ Fonksiyonlar (`supabase/functions/`), gizli değer `GOOGLE_SERVER_KEY` (Supabase
 - `places-photo` — `{ad: 'places/…/photos/…', genislik≤1600}` → `{uri}`. Galeri sayfası görünür olunca çağrılır; 24 sa bellek önbelleği. Fotoğraf başına faturalanır.
 - `places-light` `foto: true` — yalnız tek kimlikle: hafif maske + ilk fotoğraf (400 px) — #29 önizleme kartı.
 - `route-matrix` — `{trip_id, noktalar:[{key, lat, lng}] ≤ 25}` → `{bacaklar:[{from_key, to_key, seconds, meters}], eksik?}`. Routes `computeRouteMatrix` WALK; `key` = place_id | 'hotel'. Çağıranın JWT'siyle üyelik (RLS) doğrulanır; `walk_cache` (≤ 30 gün) service_role ile okunur/yazılır; yalnız eksik satır × sütun kesişimi Google'a sorulur (T9). Google hatasında eldeki bacaklar `eksik: true` ile döner, istemci kestirime düşer (3.7 KK10).
+- `route-legs` (#33) — `{trip_id, bacaklar:[{from:{key,lat,lng}, to:{key,lat,lng}}] ≤ 12}` → `{bacaklar:[{from_key, to_key, seconds, meters, mode:'WALK'|'DRIVE', polyline, drive_seconds, drive_meters}], eksik?}`. Routes `computeRoutes` WALK ile her bacağın **gerçek yolu** (`encodedPolyline`); yürüyüş > 40 dk ise aynı bacak DRIVE ile de alınır (`mode: 'DRIVE'`, polyline araç yolu, araç süresi `drive_*`; `seconds/meters` yürüyüş değeri olarak kalır — sıralama/tempo onunla). Aynı `walk_cache` satırına `polyline`, `mode`, `drive_seconds`, `drive_meters` yazılır (≤ 30 gün); yalnız polyline'ı eksik bacaklar Google'a sorulur. İstemci yalnız **seçili günün** bacaklarını ister (3.5 harita çizgisi + 3.7 araç satırı); diğer günler kuş uçuşu. Maliyet: gün başına 6–8 çağrı.
 
 **3.4 açık noktası (PR #13 notu).** `resolve-link` yalnız koordinat döndürdüğünde `place_id` boş kalır; `places.place_id` boş olamaz. Karar: Keşfet'te 'koordinat' sonucu haritayı o noktaya götürür ve "mekanı adıyla ara" mesajı verir, listeye eklenmez (Nearby ile eşleme yapılmaz).
 
@@ -80,7 +81,8 @@ Fonksiyonlar (`supabase/functions/`), gizli değer `GOOGLE_SERVER_KEY` (Supabase
 | 3.7 açılış saati kontrolü | `places-light` + `regularOpeningHours` | Bkz. §7 açık nokta | İstemci belleği 24 sa + Edge Function 24 sa |
 | 3.8 mekan detayı | **Tam** Details | Yorumlar hiçbir yerde saklanmaz | Yok |
 | 3.5 tempo paneli (canlı) | **Çağrı yok** | Kuş uçuşu mesafe × 1,3 dolambaç ÷ 4,5 km/sa (PRD 3.5 KK5) | — |
-| 3.7 program | Routes `computeRouteMatrix` WALK | **Gün bazlı**: o günün durakları + otel. Yeni durakta yalnızca eksik satır ve sütun istenir. | `walk_cache`, `fetched_at` ile ≤ 30 gün |
+| 3.7 program | Routes `computeRouteMatrix` WALK | **Gün bazlı**: o günün durakları + otel. Yeni durakta yalnızca eksik satır ve sütun istenir. 3.5 tempo paneli aynı matrisi kullanır (atanmış duraklar + otel). | `walk_cache`, `fetched_at` ile ≤ 30 gün |
+| 3.5 / 3.7 gerçek rota (#33) | Routes `computeRoutes` WALK (+ DRIVE, 40 dk üstü) | Yalnız seçili günün bacakları; sıra değişince yalnız yeni bacaklar. | `walk_cache.polyline/mode/drive_*`, ≤ 30 gün |
 | 3.3 otel yoksa (§5.2) | Geocoding reverse | Ağırlık merkezi → semt adı | Bellekte |
 
 **3.1 Saklama kuralı (T1).** Veritabanında Google'dan gelen yalnızca şunlar tutulur:

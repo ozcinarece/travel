@@ -13,10 +13,27 @@ export function mesafeM(a: Konum, b: Konum): number {
 }
 
 /** Enlem/boylam aralığından görünür bölge: kısa kenarın yarısı kadar yarıçap. */
-export function bolgeHesapla(merkez: Konum, latDelta: number, lngDelta: number): HaritaBolgesi {
+export function bolgeHesapla(merkez: Konum, latDelta: number, lngDelta: number, zoom?: number): HaritaBolgesi {
   const yukseklik = latDelta * ENLEM_DERECE_M;
   const genislik = lngDelta * ENLEM_DERECE_M * Math.cos((merkez.lat * Math.PI) / 180);
-  return { merkez, yaricapM: Math.max(50, Math.min(yukseklik, genislik) / 2), latDelta, lngDelta };
+  return { merkez, yaricapM: Math.max(50, Math.min(yukseklik, genislik) / 2), latDelta, lngDelta, zoom: zoom ?? deltaZoom(latDelta) };
+}
+
+/** Enlem aralığı → yaklaşık Google zoom'u (zoomDelta'nın tersi). */
+export function deltaZoom(latDelta: number): number {
+  return latDelta > 0 ? Math.log2(360 / latDelta) : 20;
+}
+
+// ---------------------------------------------------------------- #30 puan satırı
+
+/** Puan + yorum satırının göründüğü yakınlık (Google zoom). */
+export const DETAY_ZOOM = 16;
+
+/** "★ 4,8 · 312K" satırı: yalnız seçili pinde ya da zoom ≥ 16'da (#30). Ad yoksa ya da puan yoksa yok. */
+export function detayGoster(p: HaritaPini, zoom: number): boolean {
+  if (!p.ad || p.puan === null || p.puan === undefined) return false;
+  if (p.tur === 'aday' || p.tur === 'otel' || p.tur === 'etiket') return false;
+  return !!p.secili || zoom >= DETAY_ZOOM;
 }
 
 // ---------------------------------------------------------------- #30 pin etiketleri
@@ -29,10 +46,11 @@ export function kisaAd(ad: string): string {
   return t.length <= ETIKET_EN_FAZLA ? t : `${t.slice(0, ETIKET_EN_FAZLA - 1).trimEnd()}…`;
 }
 
-/** Çakışma önceliği: seçili > listede (durak/bos) > öneri. */
+/** Çakışma önceliği: seçili > listede/atanmış (durak/listede/bos) > öneri > rota bacağı etiketi. */
 export function etiketOnceligi(p: HaritaPini): number {
+  if (p.tur === 'etiket') return 0;
   if (p.secili) return 3;
-  if (p.tur === 'durak' || p.tur === 'bos') return 2;
+  if (p.tur === 'durak' || p.tur === 'listede' || p.tur === 'bos') return 2;
   return 1;
 }
 
@@ -44,12 +62,22 @@ export function pinCapi(p: HaritaPini): number {
 }
 
 const ETIKET_YUKSEKLIK = 16;
+/** İkinci satır (★ puan · yorum) ile etiket yüksekliği. */
+const DETAY_YUKSEKLIK = 30;
 const HARF_PX = 6.5;
+/** Bacak etiketi hapı ("🚶 12 dk"): yükseklik ve karakter genişliği. */
+const HAP_YUKSEKLIK = 22;
+const HAP_HARF_PX = 7;
+
+export function etiketYuksekligi(detay: boolean): number {
+  return detay ? DETAY_YUKSEKLIK : ETIKET_YUKSEKLIK;
+}
 
 /**
  * Hangi pinlerin etiketi gizlenmeli? Etiket kutuları ekran pikseline çevrilir (görünür bölge + ekran boyutu),
  * yüksek öncelikli olandan başlanır, önceden yerleşen bir kutuyla çakışan etiket gizlenir (kutu-çakışma; kümeleme v2).
- * Yakınlaşınca aralık büyür, gizlenenler kendiliğinden geri gelir.
+ * Yakınlaşınca aralık büyür, gizlenenler kendiliğinden geri gelir. Zoom ≥ 16'da (ya da seçili pinde) kutu iki satırdır
+ * (ad + ★ puan · yorum). `etiket` türü pinler (rota bacağı hapları) en düşük önceliklidir ve hapın kendisi kutudur.
  */
 export function gizliEtiketler(pinler: HaritaPini[], bolge: HaritaBolgesi | null, ekran: { genislik: number; yukseklik: number }): Set<string> {
   const gizli = new Set<string>();
@@ -59,15 +87,22 @@ export function gizliEtiketler(pinler: HaritaPini[], bolge: HaritaBolgesi | null
   type Kutu = { x1: number; y1: number; x2: number; y2: number };
   const yerlesen: Kutu[] = [];
   const sirali = pinler
-    .filter((p) => p.ad)
+    .filter((p) => (p.tur === 'etiket' ? !!p.etiket : !!p.ad))
     .map((p) => ({ p, oncelik: etiketOnceligi(p) }))
     .sort((a, b) => b.oncelik - a.oncelik || a.p.id.localeCompare(b.p.id));
   for (const { p } of sirali) {
     const cx = (p.konum.lng - bolge.merkez.lng) * pxLng;
     const cy = -(p.konum.lat - bolge.merkez.lat) * pxLat;
-    const en = Math.min(kisaAd(p.ad!).length, ETIKET_EN_FAZLA) * HARF_PX + 12;
-    const ust = cy + pinCapi(p) / 2 + 2;
-    const kutu: Kutu = { x1: cx - en / 2, y1: ust, x2: cx + en / 2, y2: ust + ETIKET_YUKSEKLIK };
+    let kutu: Kutu;
+    if (p.tur === 'etiket') {
+      const en = (p.etiket?.length ?? 0) * HAP_HARF_PX + 16;
+      kutu = { x1: cx - en / 2, y1: cy - HAP_YUKSEKLIK / 2, x2: cx + en / 2, y2: cy + HAP_YUKSEKLIK / 2 };
+    } else {
+      const detay = detayGoster(p, bolge.zoom);
+      const en = Math.max(Math.min(kisaAd(p.ad!).length, ETIKET_EN_FAZLA), detay ? 11 : 0) * HARF_PX + 12;
+      const ust = cy + pinCapi(p) / 2 + 2;
+      kutu = { x1: cx - en / 2, y1: ust, x2: cx + en / 2, y2: ust + etiketYuksekligi(detay) };
+    }
     const cakisiyor = yerlesen.some((k) => kutu.x1 < k.x2 && kutu.x2 > k.x1 && kutu.y1 < k.y2 && kutu.y2 > k.y1);
     if (cakisiyor) gizli.add(p.id);
     else yerlesen.push(kutu);
@@ -75,10 +110,10 @@ export function gizliEtiketler(pinler: HaritaPini[], bolge: HaritaBolgesi | null
   return gizli;
 }
 
-/** İşaretçi çapası: daire merkezi, etiket dairenin altında (daire + 2 px + 16 px etiket). */
-export function pinCapasi(p: HaritaPini): { x: number; y: number } {
+/** İşaretçi çapası: daire merkezi, etiket dairenin altında (daire + 2 px + etiket kutusu). */
+export function pinCapasi(p: HaritaPini, detay = false): { x: number; y: number } {
   const d = pinCapi(p);
-  return { x: 0.5, y: d / 2 / (d + 2 + ETIKET_YUKSEKLIK) };
+  return { x: 0.5, y: d / 2 / (d + 2 + etiketYuksekligi(detay)) };
 }
 
 /** Google zoom → enlem aralığı (yaklaşık): 360 / 2^zoom. */

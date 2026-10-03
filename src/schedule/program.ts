@@ -3,7 +3,7 @@
 // KK10: yürüyüş süresi önbellekte yoksa kestirim kullanılır ve satır `kestirim` olarak işaretlenir.
 import type { Konum } from '@/components/harita/tipler';
 
-import { dakikaSaat, kestirimYuruyusSn, saatDakika } from './tempo';
+import { bacakModu, dakikaSaat, kestirimYuruyusSn, saatDakika } from './tempo';
 
 export const UZUN_KALMA_PAYI_DK = 10;
 
@@ -18,9 +18,13 @@ export type ProgramDuragi = {
   skipped: boolean;
 };
 
-export type Yuruyus = { sn: number; m: number; kestirim: boolean };
-/** Önbellekten bacak; yoksa null (kestirime düşülür). Anahtarlar place_id ya da 'hotel'. */
-export type YuruyusKaynagi = (fromKey: string, toKey: string) => { sn: number; m: number } | null;
+/** Bacak: `mod` yürüyüş ya da (#33, 40 dk üstü) taksi; sn/m seçilen moda ait. */
+export type Yuruyus = { sn: number; m: number; kestirim: boolean; mod: 'yuruyus' | 'taksi' };
+/**
+ * Önbellekten bacak; yoksa null (kestirime düşülür). Anahtarlar place_id ya da 'hotel'.
+ * `taksi`: route-legs'ten araç süresi (yalnız 40 dk üstü bacaklarda gelir); yoksa kestirim.
+ */
+export type YuruyusKaynagi = (fromKey: string, toKey: string) => { sn: number; m: number; taksi?: { sn: number; m: number } | null } | null;
 
 export type DurakDurumu = 'gecildi' | 'buradasin' | 'siradaki' | 'bekliyor' | 'atlandi';
 
@@ -39,8 +43,12 @@ export type Program = {
   /** Son ayrılış + (otel varsa) otele dönüş yürüyüşü. */
   bitisDk: number;
   oteleDonus: Yuruyus | null;
+  /** Yalnız yürünen bacaklar. */
   yuruyusSn: number;
   yuruyusM: number;
+  /** Araç bacakları (#33). */
+  taksiSn: number;
+  taksiM: number;
   kestirimVar: boolean;
 };
 
@@ -58,9 +66,14 @@ export function programHesapla(secenek: {
   const yolaCikilanlar = secenek.yolaCikilanlar ?? new Set<string>();
   const bacak = (aKey: string, aKonum: Konum, bKey: string, bKonum: Konum): Yuruyus => {
     const c = secenek.yuruyus(aKey, bKey);
-    if (c) return { sn: c.sn, m: c.m, kestirim: false };
-    const sn = kestirimYuruyusSn(aKonum, bKonum);
-    return { sn, m: Math.round((sn * 4500) / 3600 / 1.3), kestirim: true };
+    const yuruyusSn = c ? c.sn : kestirimYuruyusSn(aKonum, bKonum);
+    const m = bacakModu(aKonum, bKonum, { yuruyusSn, taksiSn: c?.taksi?.sn ?? null, kestirim: !c });
+    if (m.mod === 'taksi') {
+      // Araç mesafesi: gerçek varsa o; yoksa kuş uçuşu × 1,4.
+      const metre = c?.taksi?.m ?? Math.round(((m.sn - 180) * 25_000) / 3600);
+      return { sn: m.sn, m: Math.max(0, metre), kestirim: m.kestirim, mod: 'taksi' };
+    }
+    return c ? { sn: c.sn, m: c.m, kestirim: false, mod: 'yuruyus' } : { sn: yuruyusSn, m: Math.round((yuruyusSn * 4500) / 3600 / 1.3), kestirim: true, mod: 'yuruyus' };
   };
 
   const baslangicDk = saatDakika(secenek.baslangic);
@@ -70,7 +83,19 @@ export function programHesapla(secenek: {
   let saat = baslangicDk;
   let yuruyusSn = 0;
   let yuruyusM = 0;
+  let taksiSn = 0;
+  let taksiM = 0;
   let kestirimVar = false;
+  const topla = (y: Yuruyus) => {
+    if (y.mod === 'taksi') {
+      taksiSn += y.sn;
+      taksiM += y.m;
+    } else {
+      yuruyusSn += y.sn;
+      yuruyusM += y.m;
+    }
+    if (y.kestirim) kestirimVar = true;
+  };
 
   // Son "Vardık" işaretli durağın indeksi: ondan öncekiler geçilmiş sayılır.
   const sonVarilan = duraklar.reduce((son, d, i) => (!d.skipped && d.varildiDk !== null ? i : son), -1);
@@ -83,9 +108,7 @@ export function programHesapla(secenek: {
     let y: Yuruyus | null = null;
     if (oncekiKey && oncekiKonum) {
       y = bacak(oncekiKey, oncekiKonum, d.key, d.konum);
-      yuruyusSn += y.sn;
-      yuruyusM += y.m;
-      if (y.kestirim) kestirimVar = true;
+      topla(y);
     }
     const planVaris = saat + (y ? Math.round(y.sn / 60) : 0);
     const varisDk = d.varildiDk ?? planVaris;
@@ -119,12 +142,10 @@ export function programHesapla(secenek: {
   let oteleDonus: Yuruyus | null = null;
   if (otel && oncekiKey && oncekiKey !== 'hotel' && oncekiKonum) {
     oteleDonus = bacak(oncekiKey, oncekiKonum, 'hotel', otel);
-    yuruyusSn += oteleDonus.sn;
-    yuruyusM += oteleDonus.m;
-    if (oteleDonus.kestirim) kestirimVar = true;
+    topla(oteleDonus);
   }
   const bitisDk = saat + (oteleDonus ? Math.round(oteleDonus.sn / 60) : 0);
-  return { satirlar, baslangicDk, bitisDk, oteleDonus, yuruyusSn, yuruyusM, kestirimVar };
+  return { satirlar, baslangicDk, bitisDk, oteleDonus, yuruyusSn, yuruyusM, taksiSn, taksiM, kestirimVar };
 }
 
 /** "09:00 – 10:30" gibi. */
@@ -132,7 +153,7 @@ export function saatAraligi(varisDk: number, ayrilisDk: number) {
   return `${dakikaSaat(varisDk)} – ${dakikaSaat(ayrilisDk)}`;
 }
 
-/** Yürüyüş bacağı metni: "12 dk · 900 m" (KK: 40+ dk'da toplu taşıma önerisi çağıran ekler). */
+/** Bacak süresi, dakika (en az 1). Taksi bacağında araç süresi (#33). */
 export function yuruyusDk(y: Yuruyus): number {
   return Math.max(1, Math.round(y.sn / 60));
 }

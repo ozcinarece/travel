@@ -42,3 +42,38 @@ export async function yuruyusMatrisi(kaynaklar: Nokta[], hedefler: Nokta[]): Pro
   }
   return sonuc;
 }
+
+// ---------------------------------------------------------------- #33 gerçek rota (computeRoutes)
+
+export type RotaModu = 'WALK' | 'DRIVE';
+export type RotaBacagi = { seconds: number; meters: number; polyline: string };
+
+type RotaCevabi = { routes?: { duration?: string; distanceMeters?: number; polyline?: { encodedPolyline?: string } }[] };
+
+/** Tek bacak için gerçek yol: süre, mesafe ve kodlu polyline. Rota yoksa null. */
+export async function rotaBacagi(a: Nokta, b: Nokta, mod: RotaModu): Promise<RotaBacagi | null> {
+  const anahtar = Deno.env.get('GOOGLE_SERVER_KEY');
+  if (!anahtar) throw new Error('GOOGLE_SERVER_KEY tanımlı değil');
+  const nokta = (n: Nokta) => ({ location: { latLng: { latitude: n.lat, longitude: n.lng } } });
+  const cevap = await fetch('https://routes.googleapis.com/directions/v2:computeRoutes', {
+    method: 'POST',
+    headers: {
+      'content-type': 'application/json',
+      'x-goog-api-key': anahtar,
+      'x-goog-fieldmask': 'routes.duration,routes.distanceMeters,routes.polyline.encodedPolyline',
+    },
+    body: JSON.stringify({
+      origin: nokta(a),
+      destination: nokta(b),
+      travelMode: mod,
+      ...(mod === 'DRIVE' ? { routingPreference: 'TRAFFIC_UNAWARE' } : {}),
+      polylineQuality: 'OVERVIEW',
+    }),
+  });
+  if (!cevap.ok) throw new GoogleHatasi(cevap.status, (await cevap.text()).slice(0, 300));
+  const r = ((await cevap.json()) as RotaCevabi).routes?.[0];
+  if (!r?.polyline?.encodedPolyline) return null;
+  const sn = Math.round(Number((r.duration ?? '0s').replace('s', '')));
+  if (!Number.isFinite(sn) || sn <= 0) return null;
+  return { seconds: sn, meters: Math.round(r.distanceMeters ?? 0), polyline: r.polyline.encodedPolyline };
+}

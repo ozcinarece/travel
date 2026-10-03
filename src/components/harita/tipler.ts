@@ -1,22 +1,29 @@
+import type { PinIkonu } from '@/lib/pinIkonu';
+
 export type Konum = { lat: number; lng: number };
 
 export type HaritaPini = {
   id: string;
   konum: Konum;
   renk: string;
-  /** Daire içindeki etiket: durak sırası ya da "?" (güne atanmamış); aday pininde mekan adı. */
+  /** Daire içindeki metin (durak sırası); aday pininde mekan adı; `etiket` türünde hap metni ("🚶 12 dk"). */
   etiket?: string;
-  /** #30: pinin ALTINDA küçük ad etiketi (≤ 18 karakter, kısaltılır); durak/oneri/bos türlerinde. */
+  /** #30: pinin ALTINDA kısa ad etiketi (≤ 18 karakter, kısaltılır); durak/listede/oneri/bos türlerinde. */
   ad?: string;
-  /** Aday pininde ★ puan (yoksa yalnız ad). */
+  /** Daire içindeki kategori ikonu (oneri/bos); yoksa 'pin'. */
+  ikon?: PinIkonu;
+  /** ★ puan: aday hapında; diğer türlerde ad etiketinin ikinci satırında (seçili ya da zoom ≥ 16, #30). */
   puan?: number | null;
+  /** Google yorum sayısı; puanla birlikte "★ 4,8 · 312K". */
+  yorumSayisi?: number | null;
   /**
-   * durak: numaralı yuvarlak · oneri: beyaz hap "+ ad" (3.4 KK5) · otel: ev simgesi ·
-   * aday: beyaz hap "★ puan · ad" (3.3 haritadan otel seçme, #17) · bos: beyaz daire "?" (3.5 güne atanmamış) ·
+   * durak: gün renginde dolu daire + sıra numarası (3.5) · listede: siyah daire + tik (3.4, listeye eklenmiş) ·
+   * oneri: beyaz daire + kategori ikonu (3.4 öneri) · bos: beyaz daire + kategori ikonu (3.5 güne atanmamış) ·
+   * otel: siyah kare + ev · aday: beyaz hap "★ puan · ad" (3.3) · etiket: küçük beyaz hap (rota bacağı süresi, #33) ·
    * varsayılan: standart iğne.
    */
-  tur?: 'durak' | 'oneri' | 'otel' | 'aday' | 'bos';
-  /** Vurgulu aday (seçili kart): siyah hap. */
+  tur?: 'durak' | 'listede' | 'oneri' | 'otel' | 'aday' | 'bos' | 'etiket';
+  /** Vurgulu (seçili) pin: büyük daire; aday için siyah hap. */
   secili?: boolean;
   surukle?: boolean;
 };
@@ -28,11 +35,22 @@ export type HaritaDairesi = {
   renk: string;
 };
 
-/** Görünür alan: merkez + yarıçap (görünen kenarların kısasının yarısı, metre) + derece aralıkları (etiket çakışması için). */
-export type HaritaBolgesi = { merkez: Konum; yaricapM: number; latDelta: number; lngDelta: number };
+/** Görünür alan: merkez + yarıçap (görünen kenarların kısasının yarısı, metre) + derece aralıkları + yaklaşık Google zoom'u. */
+export type HaritaBolgesi = { merkez: Konum; yaricapM: number; latDelta: number; lngDelta: number; zoom: number };
 
-/** #33: gün rotası çizgisi (düz hat, kuş uçuşu). */
-export type HaritaCizgisi = { id: string; noktalar: Konum[]; renk: string; /** 0–1; seçili gün 1, diğerleri 0,3. */ opaklik?: number };
+/**
+ * #33: rota çizgisi. Gerçek yol (Routes polyline) ya da kuş uçuşu.
+ * `kesik`: araç bacağı (🚕) kesikli çizilir. `etiket`: bacağın ortasında küçük hap ("🚶 12 dk"); çakışırsa gizlenir.
+ */
+export type HaritaCizgisi = {
+  id: string;
+  noktalar: Konum[];
+  renk: string;
+  /** 0–1; seçili gün 1, diğerleri 0,3. */
+  opaklik?: number;
+  kesik?: boolean;
+  etiket?: string;
+};
 
 /** Kamerayı programla taşıma isteği; `sayac` her değişimde yeni animasyon (aynı konuma yeniden gidebilmek için). */
 export type HaritaOdagi = { konum: Konum; zoom: number; sayac: number };
