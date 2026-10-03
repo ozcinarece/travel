@@ -13,7 +13,7 @@ function saydam(hex: string, opaklik: number) {
   return hex.length === 7 ? `${hex}${a}` : hex;
 }
 
-export function Harita({ merkez, zoom = 14, pinler = [], daireler = [], cizgiler = [], odak, onPinBas, onPinSuruklendi, onBolgeDegisti }: HaritaProps) {
+export function Harita({ merkez, zoom = 14, pinler = [], daireler = [], cizgiler = [], odak, onPinBas, onHaritaBas, onPinSuruklendi, onBolgeDegisti }: HaritaProps) {
   const ref = useRef<MapView>(null);
   const ekran = useWindowDimensions();
   const [bolge, setBolge] = useState<HaritaBolgesi>(() => bolgeHesapla(merkez, zoomDelta(zoom), zoomDelta(zoom)));
@@ -47,6 +47,9 @@ export function Harita({ merkez, zoom = 14, pinler = [], daireler = [], cizgiler
       showsPointsOfInterests={false}
       // #32: pine dokunmak haritayı kaydırmaz.
       moveOnMarkerPress={false}
+      onPress={(e) => {
+        if (e.nativeEvent.action !== 'marker-press') onHaritaBas?.();
+      }}
       onRegionChangeComplete={(b) => {
         const yeni = bolgeHesapla({ lat: b.latitude, lng: b.longitude }, b.latitudeDelta, b.longitudeDelta);
         setBolge(yeni);
