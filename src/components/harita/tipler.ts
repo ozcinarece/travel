@@ -4,8 +4,10 @@ export type HaritaPini = {
   id: string;
   konum: Konum;
   renk: string;
-  /** Pin üstündeki etiket: durak sırası ya da "?" (güne atanmamış); öneri/aday pininde mekan adı. */
+  /** Daire içindeki etiket: durak sırası ya da "?" (güne atanmamış); aday pininde mekan adı. */
   etiket?: string;
+  /** #30: pinin ALTINDA küçük ad etiketi (≤ 18 karakter, kısaltılır); durak/oneri/bos türlerinde. */
+  ad?: string;
   /** Aday pininde ★ puan (yoksa yalnız ad). */
   puan?: number | null;
   /**
@@ -26,8 +28,11 @@ export type HaritaDairesi = {
   renk: string;
 };
 
-/** Görünür alan: merkez + yarıçap (görünen kenarların kısasının yarısı, metre). */
-export type HaritaBolgesi = { merkez: Konum; yaricapM: number };
+/** Görünür alan: merkez + yarıçap (görünen kenarların kısasının yarısı, metre) + derece aralıkları (etiket çakışması için). */
+export type HaritaBolgesi = { merkez: Konum; yaricapM: number; latDelta: number; lngDelta: number };
+
+/** #33: gün rotası çizgisi (düz hat, kuş uçuşu). */
+export type HaritaCizgisi = { id: string; noktalar: Konum[]; renk: string; /** 0–1; seçili gün 1, diğerleri 0,3. */ opaklik?: number };
 
 /** Kamerayı programla taşıma isteği; `sayac` her değişimde yeni animasyon (aynı konuma yeniden gidebilmek için). */
 export type HaritaOdagi = { konum: Konum; zoom: number; sayac: number };
@@ -38,6 +43,7 @@ export type HaritaProps = {
   zoom?: number;
   pinler?: HaritaPini[];
   daireler?: HaritaDairesi[];
+  cizgiler?: HaritaCizgisi[];
   odak?: HaritaOdagi;
   onPinBas?: (id: string) => void;
   onPinSuruklendi?: (id: string, konum: Konum) => void;

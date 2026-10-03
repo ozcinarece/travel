@@ -15,6 +15,7 @@ import {
   linkCoz,
   linkGibiMi,
   ONERI_CIPLERI,
+  useHafifYerler,
   useOneriler,
   useYakinOneriler,
   yeniOturumJetonu,
@@ -62,6 +63,8 @@ function Kesfet({ seyahat }: { seyahat: Seyahat }) {
   });
 
   const havuz = mekanlar.data ?? [];
+  // #30: listedeki pinlerin altında ad etiketi (canlı ad, PRD §7).
+  const havuzAdlari = useHafifYerler(havuz.map((m) => m.place_id));
   const uyeAdi = (uid: string | null) => uyeler.data?.find((u) => u.user_id === uid)?.display_name ?? '';
 
   // Kartlar: seçili arama sonucu > çip önerileri. Listede olanlar işaretlenir (KK5).
@@ -75,10 +78,10 @@ function Kesfet({ seyahat }: { seyahat: Seyahat }) {
       ? [{ id: 'otel', konum: { lat: seyahat.hotel_lat, lng: seyahat.hotel_lng }, renk: renk.metin, tur: 'otel' as const }]
       : []),
     // KK5: havuzdaki mekan güne atanana kadar "?" (3.5'te numaralanır).
-    ...havuz.map((m) => ({ id: `m:${m.id}`, konum: { lat: m.lat, lng: m.lng }, renk: renk.metin, etiket: '?', tur: 'durak' as const })),
+    ...havuz.map((m) => ({ id: `m:${m.id}`, konum: { lat: m.lat, lng: m.lng }, renk: renk.metin, etiket: '?', ad: havuzAdlari.data?.[m.place_id]?.ad, tur: 'durak' as const })),
     ...kartlar
       .filter((k) => !k.eklendi)
-      .map((k) => ({ id: `o:${k.place_id}`, konum: { lat: k.lat, lng: k.lng }, renk: renk.zemin, etiket: k.ad, tur: 'oneri' as const })),
+      .map((k) => ({ id: `o:${k.place_id}`, konum: { lat: k.lat, lng: k.lng }, renk: renk.metin, ad: k.ad, tur: 'oneri' as const })),
   ];
 
   const sec = async (placeId: string, ad: string) => {

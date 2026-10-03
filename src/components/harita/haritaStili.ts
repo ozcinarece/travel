@@ -5,8 +5,10 @@ export const ACIK_HARITA_STILI = [
   { elementType: 'labels.text.fill', stylers: [{ color: '#6e6e6e' }] },
   { elementType: 'labels.text.stroke', stylers: [{ color: '#ffffff' }] },
   { featureType: 'administrative', elementType: 'geometry', stylers: [{ visibility: 'off' }] },
-  { featureType: 'poi', elementType: 'labels.icon', stylers: [{ visibility: 'off' }] },
-  { featureType: 'poi', elementType: 'labels.text.fill', stylers: [{ color: '#8a8a8a' }] },
+  // #30: Google POI etiketleri sade — işletmeler kapalı, yalnız turistik yerlerin metni açık (bizim etiketlerle karışmasın).
+  { featureType: 'poi', elementType: 'labels', stylers: [{ visibility: 'off' }] },
+  { featureType: 'poi.attraction', elementType: 'labels.text', stylers: [{ visibility: 'on' }] },
+  { featureType: 'poi.attraction', elementType: 'labels.text.fill', stylers: [{ color: '#8a8a8a' }] },
   { featureType: 'poi.business', stylers: [{ visibility: 'off' }] },
   { featureType: 'poi.park', elementType: 'geometry', stylers: [{ color: '#e3e9e2' }] },
   { featureType: 'road', elementType: 'geometry', stylers: [{ color: '#ffffff' }] },
