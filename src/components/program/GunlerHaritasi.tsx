@@ -1,15 +1,12 @@
 import { router } from 'expo-router';
-import { useMemo, useState } from 'react';
+import { useMemo, useState, type ReactNode } from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { BilgiHapi, HaritaEkrani } from '@/components/harita/HaritaEkrani';
 import type { HaritaCizgisi, HaritaPini } from '@/components/harita/tipler';
+import { GunCipleri } from '@/components/program/GunCipleri';
 import { Buton } from '@/components/ui/Buton';
-import { useDuragaAta, useDurakKaldir, useGunEkle, useGunler, useGunSil, useDuraklar } from '@/features/gunler/sorgular';
-import { useMekanlar } from '@/features/mekanlar/sorgular';
-import { useSeyahatId } from '@/features/seyahatler/baglam';
-import { useSeyahat } from '@/features/seyahatler/sorgular';
-import { SeyahatYukleme } from '@/components/seyahatler/SeyahatYukleme';
+import { useDuragaAta, useDurakKaldir, useGunEkle, useGunSil } from '@/features/gunler/sorgular';
 import { useHafifYerler } from '@/features/yerler/api';
 import { t } from '@/i18n';
 import { sureMetni } from '@/lib/kategori';
@@ -17,28 +14,17 @@ import { GUNLER, haftaGunu } from '@/lib/takvim';
 import type { Durak, Gun, Mekan, Seyahat } from '@/lib/tipler';
 import { enUcuzEklemeIndeksi } from '@/schedule/program';
 import { enYakinGun, tempoHesapla, type TempoSonucu } from '@/schedule/tempo';
-import { bosluk, gunRengi, renk, yazi } from '@/theme';
+import { gunRengi, renk, yazi } from '@/theme';
 
 // PRD 3.3 KK3: 20 dk yürüyüş ≈ 1,5 km.
 const YURUME_YARICAPI_M = 1500;
 
 /**
- * PRD 3.5 Günlere dağıt — HaritaEkrani kabuğu. KK1 gün çipleri + "N boşta" + tempo paneli;
- * KK2 gün seç → pine dokun (ata / kaldır); KK3 gün renkleri; KK4 otel pini + daire sabit;
- * KK5 tempo kestirimle (Routes çağrısı yok); KK6 boştaki için en yakın gün; KK7 gün ekle/sil; KK8 Programa geç + uyarı.
+ * PRD 3.5 Günlere dağıt — #34 ile Program sekmesinin **Harita** görünümü (HaritaEkrani kabuğu).
+ * KK1 gün çipleri + "N boşta" + tempo paneli; KK2 gün seç → pine dokun (ata / kaldır); KK3 gün renkleri;
+ * KK4 otel pini + daire sabit; KK5 tempo kestirimle; KK6 boştaki için en yakın gün; KK7 gün ekle/sil;
+ * KK8 "Çizelgeye geç" + boşta uyarısı. #33 gün rota çizgileri.
  */
-export default function GunlerEkrani() {
-  const id = useSeyahatId();
-  const seyahat = useSeyahat(id);
-  const gunler = useGunler(id);
-  const duraklar = useDuraklar(id);
-  const mekanlar = useMekanlar(id);
-  if (!id || !seyahat.data || !gunler.data || !duraklar.data || !mekanlar.data) {
-    return <SeyahatYukleme sorgular={[seyahat, gunler, duraklar, mekanlar]} kimlikYok={!id} />;
-  }
-  return <Gunler key={id} seyahat={seyahat.data} gunler={gunler.data} duraklar={duraklar.data} mekanlar={mekanlar.data} />;
-}
-
 /** Gün adı: tarihliyse hafta günü ("Pazartesi"), değilse "1. gün". */
 function gunAdi(gun: Gun): string {
   return gun.date ? GUNLER[haftaGunu(gun.date)] : t('gunler.gunAdi', { n: gun.index });
@@ -47,15 +33,28 @@ function gunAdi(gun: Gun): string {
 /** Postgres time "09:00:00" → "09:00". */
 const saat = (tm: string | null | undefined, varsayilan: string) => (tm ? tm.slice(0, 5) : varsayilan);
 
-function Gunler({ seyahat, gunler, duraklar, mekanlar }: { seyahat: Seyahat; gunler: Gun[]; duraklar: Durak[]; mekanlar: Mekan[] }) {
+export type GunlerHaritasiProps = {
+  seyahat: Seyahat;
+  gunler: Gun[];
+  duraklar: Durak[];
+  mekanlar: Mekan[];
+  seciliGun: Gun | undefined;
+  onGunSec: (id: string | null) => void;
+  /** Gün çiplerinin altına yerleşen görünüm anahtarı (#34). */
+  gorunumAnahtari: ReactNode;
+  /** Sağ üst: üye avatarları. */
+  sagUst?: ReactNode;
+  onCizelgeyeGec: () => void;
+};
+
+export function GunlerHaritasi({ seyahat, gunler, duraklar, mekanlar, seciliGun, onGunSec, gorunumAnahtari, sagUst, onCizelgeyeGec }: GunlerHaritasiProps) {
   const ata = useDuragaAta(seyahat.id);
   const kaldir = useDurakKaldir(seyahat.id);
   const gunEkle = useGunEkle(seyahat.id);
   const gunSil = useGunSil(seyahat.id);
-  const [seciliGunId, setSeciliGunId] = useState<string | null>(null);
   const [hata, setHata] = useState<string | null>(null);
-
-  const seciliGun = gunler.find((g) => g.id === seciliGunId) ?? gunler[0];
+  const setSeciliGunId = onGunSec;
+  const seciliGunId = seciliGun?.id ?? null;
   const otel = useMemo(
     () => (seyahat.hotel_lat !== null && seyahat.hotel_lng !== null ? { lat: seyahat.hotel_lat, lng: seyahat.hotel_lng } : null),
     [seyahat.hotel_lat, seyahat.hotel_lng],
@@ -180,9 +179,9 @@ function Gunler({ seyahat, gunler, duraklar, mekanlar }: { seyahat: Seyahat; gun
     ]);
   };
 
-  // KK8: Programa geç; boşta mekan varsa uyarı.
+  // KK8: Çizelgeye geç; boşta mekan varsa uyarı.
   const programaGec = () => {
-    const git = () => router.push({ pathname: '/seyahat/[id]/(sekmeler)/program', params: { id: seyahat.id } });
+    const git = onCizelgeyeGec;
     if (bostakiler.length === 0) return git();
     Alert.alert(t('gunler.uyariBaslik', { n: bostakiler.length }), t('gunler.uyariMetin'), [
       { text: t('genel.vazgec'), style: 'cancel' },
@@ -194,41 +193,30 @@ function Gunler({ seyahat, gunler, duraklar, mekanlar }: { seyahat: Seyahat; gun
 
   return (
     <HaritaEkrani
-      baslik={t('gunler.baslik')}
-      geri={() => router.navigate({ pathname: '/seyahat/[id]/(sekmeler)/kesfet', params: { id: seyahat.id } })}
-      sagUst={<BilgiHapi metin={bostakiler.length > 0 ? t('gunler.bosta', { n: bostakiler.length }) : t('gunler.bostaYok')} />}
+      baslik={t('program.sekmeBaslik')}
+      geri={() => router.replace('/(tabs)')}
+      sagUst={
+        <View style={s.sagUst}>
+          <BilgiHapi metin={bostakiler.length > 0 ? t('gunler.bosta', { n: bostakiler.length }) : t('gunler.bostaYok')} />
+          {sagUst}
+        </View>
+      }
       ustEk={
         <>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={s.ciplerKaydirma} contentContainerStyle={s.cipler}>
-            {gunler.map((g) => {
-              const aktif = g.id === seciliGun?.id;
-              const rengi = gunRengi(g.index);
-              const n = duraklar.filter((d) => d.day_id === g.id).length;
-              return (
-                <Pressable
-                  key={g.id}
-                  accessibilityRole="button"
-                  accessibilityState={{ selected: aktif }}
-                  accessibilityLabel={`${gunAdi(g)} · ${t('gunler.durakSayisi', { n })}`}
-                  onPress={() => setSeciliGunId(g.id)}
-                  onLongPress={() => gunuSil(g)}
-                  style={[s.cip, s.golge, aktif ? { backgroundColor: rengi, borderColor: rengi } : { borderColor: rengi }]}>
-                  <View style={[s.cipNumara, aktif ? { backgroundColor: renk.zemin } : { backgroundColor: rengi }]}>
-                    <Text style={[s.cipNumaraMetin, { color: aktif ? rengi : renk.zemin }]}>{g.index}</Text>
-                  </View>
-                  <Text style={[s.cipMetin, aktif && { color: renk.zemin }]}>{n > 0 ? t('gunler.durakSayisi', { n }) : t('gunler.durakYok')}</Text>
-                </Pressable>
-              );
-            })}
-            <Pressable
-              accessibilityRole="button"
-              disabled={gunEkle.isPending}
-              onPress={() => gunEkle.mutateAsync({ gunler, startDate: seyahat.start_date }).catch(() => setHata(t('gunler.hata')))}
-              style={[s.cip, s.golge, s.cipEkle]}>
-              <Text style={s.cipMetin}>{t('gunler.gunEkle')}</Text>
-            </Pressable>
-          </ScrollView>
-          <Text style={s.ipucu}>{t('gunler.ipucu')}</Text>
+          <GunCipleri
+            gunler={gunler}
+            duraklar={duraklar}
+            seciliId={seciliGun?.id}
+            onSec={(id) => setSeciliGunId(id)}
+            onUzunBas={gunuSil}
+            onEkle={() => gunEkle.mutateAsync({ gunler, startDate: seyahat.start_date }).catch(() => setHata(t('gunler.hata')))}
+            ekleniyor={gunEkle.isPending}
+            yuzen
+          />
+          <View style={s.anahtarSatir}>
+            {gorunumAnahtari}
+            <Text style={s.ipucu}>{t('gunler.ipucu')}</Text>
+          </View>
         </>
       }
       altPanel={
@@ -303,14 +291,9 @@ const ETIKET_METIN = { rahat: { color: renk.basari }, normal: { color: renk.ikin
 const s = StyleSheet.create({
   ortala: { alignItems: 'center', justifyContent: 'center' },
   golge: { shadowColor: renk.metin, shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 8, elevation: 3 },
-  ciplerKaydirma: { marginHorizontal: -bosluk.kenar },
-  cipler: { gap: 8, paddingHorizontal: bosluk.kenar },
-  cip: { flexDirection: 'row', alignItems: 'center', gap: 6, height: 36, paddingLeft: 5, paddingRight: 12, borderRadius: 999, backgroundColor: renk.zemin, borderWidth: 1.5 },
-  cipEkle: { borderColor: renk.ayrac, paddingLeft: 12 },
-  cipNumara: { width: 26, height: 26, borderRadius: 13, alignItems: 'center', justifyContent: 'center' },
-  cipNumaraMetin: { fontFamily: yazi.ekstra, fontSize: 11 },
-  cipMetin: { fontFamily: yazi.kalin, fontSize: 12, color: renk.metin },
-  ipucu: { fontFamily: yazi.normal, fontSize: 11, color: renk.ikincil, paddingLeft: 4 },
+  sagUst: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  anahtarSatir: { flexDirection: 'row', alignItems: 'center', gap: 10, flexWrap: 'wrap' },
+  ipucu: { fontFamily: yazi.normal, fontSize: 11, color: renk.ikincil, flexShrink: 1 },
   panelKaydirma: { maxHeight: 290 },
   panelIcerik: { gap: 8 },
   kart: { padding: 12, paddingHorizontal: 14, borderRadius: 16, backgroundColor: renk.yuzey, gap: 6, borderWidth: 1.5, borderColor: renk.yuzey },

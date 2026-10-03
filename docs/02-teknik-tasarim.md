@@ -37,6 +37,7 @@ src/
     r/[token].tsx             3.10 davet (web + universal link hedefi)
   components/harita/          HaritaEkrani.tsx (tam ekran kabuk: 3.3 · 3.4 · 3.5) · Harita.native.tsx · Harita.web.tsx · PinIcerigi.tsx · haritaStili.ts (açık tema, #17) · geo.ts · tipler.ts
   features/                   seyahatler · mekanlar · gunler (days+stops) · program (route-matrix, changes, useGunProgrami/useAktifProgram) · yerler · profil
+  components/program/         GunlerHaritasi.tsx (3.5, Program > Harita görünümü) · GunCipleri · GorunumAnahtari · MiniCubuk · SurukleListe · SecimMenusu (#34)
   schedule/                   siralama.ts (NN + 2-opt) · tempo.ts (§5.3 + kestirim) · sira.ts (kesirli order_key) · program.ts (3.7 zaman çizelgesi, KK7 varış, T7 en ucuz ekleme) · acilis.ts (KK5) · kaydir.ts (§5.4 mini-çubuk, KK8)  (+ __tests__)
   google/                     autocomplete.ts (oturum token'ı) · alanMaskeleri.ts
   lib/                        supabase.ts · analytics.ts · zaman.ts (seyahat saat dilimi)

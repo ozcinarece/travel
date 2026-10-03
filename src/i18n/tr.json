@@ -303,7 +303,7 @@
     "yogunOneri": "{ad} tek başına {sure}; bir durağı başka güne al.",
     "bostaYakin": "Boştaki {ad} {gun} güne yakın.",
     "bostaYakinKisa": "{gun}. güne yakın",
-    "programaGec": "Programa geç",
+    "programaGec": "Çizelgeye geç",
     "uyariBaslik": "{n} mekan hiçbir günde değil",
     "uyariMetin": "Devam edilsin mi?",
     "devam": "Devam",
@@ -367,6 +367,12 @@
       "degisiklikler": "Son değişiklikler",
       "degisiklikYok": "Henüz değişiklik yok",
       "davetYakinda": "Davet linki 3.10 ile geliyor."
-    }
+    },
+    "gorunum": {
+      "harita": "Harita",
+      "cizelge": "Çizelge"
+    },
+    "sekmeBaslik": "Program",
+    "cizelgeyeGec": "Çizelgeye geç"
   }
 }
