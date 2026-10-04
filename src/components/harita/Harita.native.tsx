@@ -80,13 +80,14 @@ export function Harita({ merkez, zoom = 14, pinler = [], daireler = [], cizgiler
         />
       ))}
       {tumPinler.map((p) => {
-        const detay = detayGoster(p, bolge.zoom);
+        // #40: çakışmada önce puan satırı düşer (gizli.detay), sonra ad (gizli.etiket).
+        const detay = detayGoster(p, bolge.zoom) && !gizli.detay.has(p.id);
         return (
           <OzelIsaretci
             // Görünüm değişince (renk/etiket/seçim/ad görünürlüğü/detay) işaretçi yeniden kurulur ve anlık görüntüsü yeniden alınır.
-            key={`${p.id}:${p.tur ?? ''}:${p.renk}:${p.etiket ?? ''}:${p.ikon ?? ''}:${p.secili ? 1 : 0}:${p.ad && !gizli.has(p.id) ? 'a' : ''}:${detay ? 'd' : ''}:${p.tur === 'etiket' && gizli.has(p.id) ? 'g' : ''}`}
+            key={`${p.id}:${p.tur ?? ''}:${p.renk}:${p.etiket ?? ''}:${p.ikon ?? ''}:${p.secili ? 1 : 0}:${p.ad && !gizli.etiket.has(p.id) ? 'a' : ''}:${detay ? 'd' : ''}:${p.tur === 'etiket' && gizli.etiket.has(p.id) ? 'g' : ''}`}
             pin={p}
-            etiketGizli={gizli.has(p.id)}
+            etiketGizli={gizli.etiket.has(p.id)}
             detay={detay}
             onPinBas={onPinBas}
             onPinSuruklendi={onPinSuruklendi}

@@ -48,13 +48,13 @@ describe('geo', () => {
     });
     // 20 px arayla: etiketler (~70 px) çakışır → öneri gizlenir, durak kalır.
     const yakin = [pin('a', 0, 'oneri'), pin('b', 0.0005, 'durak')];
-    expect([...gizliEtiketler(yakin, bolge, ekran)]).toEqual(['a']);
+    expect([...gizliEtiketler(yakin, bolge, ekran).etiket]).toEqual(['a']);
     // Seçili öneri durağı yener.
-    expect([...gizliEtiketler([pin('a', 0, 'oneri', true), pin('b', 0.0005, 'durak')], bolge, ekran)]).toEqual(['b']);
+    expect([...gizliEtiketler([pin('a', 0, 'oneri', true), pin('b', 0.0005, 'durak')], bolge, ekran).etiket]).toEqual(['b']);
     // 200 px arayla çakışma yok.
-    expect(gizliEtiketler([pin('a', 0, 'oneri'), pin('b', 0.005, 'durak')], bolge, ekran).size).toBe(0);
+    expect(gizliEtiketler([pin('a', 0, 'oneri'), pin('b', 0.005, 'durak')], bolge, ekran).etiket.size).toBe(0);
     // Yakınlaşınca (aralık 10 kat küçük) aynı pinler artık çakışmaz.
-    expect(gizliEtiketler(yakin, { ...bolge, latDelta: 0.002, lngDelta: 0.001 }, ekran).size).toBe(0);
+    expect(gizliEtiketler(yakin, { ...bolge, latDelta: 0.002, lngDelta: 0.001, zoom: 13 }, ekran).etiket.size).toBe(0);
   });
 
   it('pinCapasi daire merkezini çapa yapar; detay satırıyla kutu uzar', () => {
@@ -70,9 +70,10 @@ describe('geo', () => {
     expect(bolgeHesapla(roma, 0.02, 0.02, 15.5).zoom).toBe(15.5);
   });
 
-  it('detayGoster: seçili ya da zoom ≥ 16, puan ve ad varsa', () => {
+  it('detayGoster: seçili ya da zoom ≥ 14 (#40), puan ve ad varsa', () => {
     const p: HaritaPini = { id: 'x', konum: roma, renk: '#000', tur: 'oneri', ad: 'Pantheon', puan: 4.8 };
-    expect(detayGoster(p, 14)).toBe(false);
+    expect(detayGoster(p, 13.9)).toBe(false);
+    expect(detayGoster(p, 14)).toBe(true);
     expect(detayGoster(p, 16)).toBe(true);
     expect(detayGoster({ ...p, secili: true }, 12)).toBe(true);
     expect(detayGoster({ ...p, puan: null }, 17)).toBe(false);
@@ -84,7 +85,23 @@ describe('geo', () => {
     const ekran = { genislik: 400, yukseklik: 800 };
     const pin: HaritaPini = { id: 'p', konum: roma, renk: '#000', tur: 'durak', ad: 'Pantheon' };
     const hap: HaritaPini = { id: 'h', konum: { lat: roma.lat - 0.0003, lng: roma.lng }, renk: '#000', tur: 'etiket', etiket: '🚶 12 dk' };
-    expect([...gizliEtiketler([hap, pin], bolge, ekran)]).toEqual(['h']);
-    expect(gizliEtiketler([{ ...hap, konum: { lat: roma.lat - 0.005, lng: roma.lng } }, pin], bolge, ekran).size).toBe(0);
+    expect([...gizliEtiketler([hap, pin], bolge, ekran).etiket]).toEqual(['h']);
+    expect(gizliEtiketler([{ ...hap, konum: { lat: roma.lat - 0.005, lng: roma.lng } }, pin], bolge, ekran).etiket.size).toBe(0);
+  });
+
+  it('#40: çakışmada önce puan satırı düşer, ad kalır; hâlâ çakışırsa ad da gizlenir', () => {
+    // Zoom 15: detay açık. İki pin dikeyde yakın: üsttekinin iki satırlı kutusu alttakinin dairesine değil etiketine çarpar.
+    const bolge = { merkez: roma, yaricapM: 1000, latDelta: 0.02, lngDelta: 0.01, zoom: 15 };
+    const ekran = { genislik: 400, yukseklik: 800 };
+    const ust: HaritaPini = { id: 'ust', konum: roma, renk: '#000', tur: 'durak', ad: 'Pantheon', puan: 4.8 };
+    // 20 px yukarıda öneri: iki satırlı kutusu (30 px) durağın etiketine çarpar, tek satır (16 px) sığar → yalnız puan satırı gizlenir.
+    const alt: HaritaPini = { id: 'alt', konum: { lat: roma.lat + 0.0005, lng: roma.lng }, renk: '#000', tur: 'oneri', ad: 'Kafe', puan: 4.2 };
+    const g = gizliEtiketler([ust, alt], bolge, ekran);
+    expect(g.etiket.size).toBe(0);
+    expect([...g.detay]).toEqual(['alt']);
+    // 10 px yukarıda: tek satır da çakışır → düşük öncelikli önerinin adı da gizlenir.
+    const g2 = gizliEtiketler([ust, { ...alt, konum: { lat: roma.lat + 0.00025, lng: roma.lng } }], bolge, ekran);
+    expect([...g2.etiket]).toEqual(['alt']);
+    expect(g2.detay.size).toBe(0);
   });
 });
