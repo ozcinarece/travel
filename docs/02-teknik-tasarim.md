@@ -33,11 +33,11 @@ src/
     (tabs)/yeni.tsx, profil.tsx
     yeni/nereye.tsx, otel.tsx 3.2, 3.3
     trip/[id]/_layout.tsx     seyahat içi alt menü + mini-çubuk
-    trip/[id]/kesfet.tsx, gunler.tsx, program.tsx, mekan/[placeId].tsx
+    trip/[id]/kesfet.tsx, program.tsx (#42: tek ekran — harita + alt panel; çizelge panelde), mekan/[placeId].tsx
     r/[token].tsx             3.10 davet (web + universal link hedefi)
   components/harita/          HaritaEkrani.tsx (tam ekran kabuk: 3.3 · 3.4 · 3.5) · Harita.native.tsx · Harita.web.tsx · PinIcerigi.tsx · haritaStili.ts (açık tema, #17) · geo.ts · tipler.ts
-  features/                   seyahatler · mekanlar · gunler (days+stops) · program (route-matrix, route-legs, changes, useGunProgrami/useAktifProgram, useProgramVerisi: Harita+Çizelge ortak matris/rota/tempo) · yerler · profil
-  components/program/         GunlerHaritasi.tsx (3.5, Program > Harita görünümü, katlanır tempo paneli) · ProgramUstu + GorunumAnahtari + GunKartlari (#39 ortak başlık) · MiniCubuk · SurukleListe · SecimMenusu (#34)
+  features/                   seyahatler · mekanlar · gunler (days+stops) · program (route-matrix, route-legs, changes, useGunProgrami/useAktifProgram, useProgramVerisi: matris/rota/tempo, haritaVerisi: pin+çizgi) · konum (useKonum: expo-location ön plan, #42) · yerler · profil
+  components/program/         CizelgeListesi (3.7 liste, alt panelin açık hâli) · PinPaneli (#42 pine dokununca gün atama/süre/detay) · GunKartlari + ProgramUstu (#42 üst blok) · MiniCubuk · SurukleListe · SecimMenusu
   schedule/                   siralama.ts (NN + 2-opt) · tempo.ts (§5.3 + kestirim) · sira.ts (kesirli order_key) · program.ts (3.7 zaman çizelgesi, KK7 varış, T7 en ucuz ekleme) · acilis.ts (KK5) · kaydir.ts (§5.4 mini-çubuk, KK8)  (+ __tests__)
   google/                     autocomplete.ts (oturum token'ı) · alanMaskeleri.ts
   lib/                        supabase.ts · analytics.ts · zaman.ts (seyahat saat dilimi)
@@ -120,7 +120,7 @@ Google'ın tip sayfasına bu ortamdan erişemedim. Tip adları Sprint 2 başınd
 - `stops.order_key`: **kesirli sıra anahtarı** (metin). Sürükle-bırak tek satır yazar, eşzamanlı sıralama çakışmaz.
 - **Otomatik ve elle sıra (T7).** `days.order_manual=false` iken her durak eklemede §5.1 (NN + 2-opt) yeniden çalışır. Kullanıcı bir kez sürükledi mi `order_manual=true` olur ve yeni durak en ucuz ekleme noktasına girer; mevcut sıra korunur. "En kısa rotaya diz" düğmesi `order_manual`'ı sıfırlar ve §5.1'i çalıştırır. Otel değişince yalnızca saatler yeniden hesaplanır.
 - **Tempo (T5).** `doluluk = (Σ kalınacak süre + Σ yürüyüş) / (gün bitişi − gün başlangıcı)`. Yürüyüş otel → ilk durak ve son durak → otel bacaklarını içerir (otel yoksa ilk duraktan son durağa kadar). Gün bitişi varsayılanı `trips.day_end` = 20:00. Son gün için kullanıcı `days.end_time`'ı dönüş saatine göre düşürür, ayrı alan yok. Hesap `src/schedule/tempo.ts`'te; 3.5 kestirim, 3.7 gerçek matris süresiyle aynı fonksiyonu çağırır.
-- **"Vardık" (T11).** Seyahat düzeyindedir: herhangi bir üye işaretler, herkeste görünür. `stops.arrived_at` + `stops.arrived_by` yazılır, `changes` akışında "Mert: Forum Romanum'a vardık" olarak görünür. Kaydır / Atla / Planı koru seçimi de herkese uygulanır. Kişi bazlı ilerleme v2.
+- **"Tamamlandı" (T11, #43).** Seyahat düzeyindedir: herhangi bir üye işaretler, herkeste görünür. `stops.completed_at` + `stops.completed_by` yazılır; sonraki saatler tamamlanma anı + yürüyüşle akar. Dokunulmazsa planlanan bitiş + 10 dk geçince istemci `completed_at = planlanan bitiş`, `auto_completed = true` yazar (bildirim yok; uzun bas → geri al). Konum 60 m içine girince `arrived_at`/`arrived_by` sessizce yazılır (istatistik). Kaydır / Atla / Planı koru seçimi de herkese uygulanır. Kişi bazlı ilerleme v2.
 - `changes` tablosu istemciden değil **Postgres tetikleyicisinden** yazılır. Hiçbir yazma işlemi kayıtsız kalmaz.
 
 ## 6. Sprint 1 tahmini

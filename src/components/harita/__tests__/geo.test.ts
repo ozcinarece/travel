@@ -62,6 +62,7 @@ describe('geo', () => {
     expect(c.x).toBe(0.5);
     expect(c.y).toBeCloseTo(11 / 40);
     expect(pinCapasi({ id: 'x', konum: roma, renk: '#000', tur: 'durak' }, true).y).toBeCloseTo(11 / 54);
+    expect(pinCapasi({ id: 'x', konum: roma, renk: '#000', tur: 'durak', secili: true }).y).toBeCloseTo(16 / 50);
   });
 
   it('deltaZoom zoomDelta\'nın tersidir; bolgeHesapla zoom üretir', () => {

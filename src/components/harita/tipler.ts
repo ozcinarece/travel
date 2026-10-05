@@ -20,11 +20,15 @@ export type HaritaPini = {
    * durak: gün renginde dolu daire + sıra numarası (3.5) · listede: siyah daire + tik (3.4, listeye eklenmiş) ·
    * oneri: beyaz daire + kategori ikonu (3.4 öneri) · bos: beyaz daire + kategori ikonu (3.5 güne atanmamış) ·
    * otel: siyah kare + ev · aday: beyaz hap "★ puan · ad" (3.3) · etiket: küçük beyaz hap (rota bacağı süresi, #33) ·
-   * varsayılan: standart iğne.
+   * konum: kullanıcının yeri (mavi nokta, #42) · varsayılan: standart iğne.
    */
-  tur?: 'durak' | 'listede' | 'oneri' | 'otel' | 'aday' | 'bos' | 'etiket';
-  /** Vurgulu (seçili) pin: büyük daire; aday için siyah hap. */
+  tur?: 'durak' | 'listede' | 'oneri' | 'otel' | 'aday' | 'bos' | 'etiket' | 'konum';
+  /** Vurgulu (seçili) pin: büyük daire; aday için siyah hap. #42 KK5: Program'da ayrıca turuncu halka. */
   secili?: boolean;
+  /** #42 KK5: seçili güne ait olmayan pinler soluk (0–1; varsayılan 1). */
+  opaklik?: number;
+  /** #42 KK7: tamamlanan durak — yeşil daire + tik. */
+  tamam?: boolean;
   surukle?: boolean;
 };
 

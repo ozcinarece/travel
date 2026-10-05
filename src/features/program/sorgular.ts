@@ -113,6 +113,9 @@ export function useDurakGuncelle(seyahatId: string) {
       skipped?: boolean;
       arrived_at?: string | null;
       arrived_by?: string | null;
+      completed_at?: string | null;
+      completed_by?: string | null;
+      auto_completed?: boolean;
       day_id?: string;
       order_key?: string;
     }) => {

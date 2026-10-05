@@ -69,8 +69,13 @@ export type Durak = {
   place_ref: string;
   order_key: string;
   minutes: number;
+  /** Konumla sessizce yazılan varış (istatistik; zamanlamayı etkilemez, #43 KK4). */
   arrived_at: string | null;
   arrived_by: string | null;
+  /** #43: tamamlanma anı — "Tamamlandı" düğmesi ya da otomatik (planlanan bitiş + 10 dk). */
+  completed_at: string | null;
+  completed_by: string | null;
+  auto_completed: boolean;
   skipped: boolean;
 };
 

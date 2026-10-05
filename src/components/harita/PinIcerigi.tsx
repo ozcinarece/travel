@@ -35,6 +35,13 @@ export function PinIcerigi({ pin, etiketGizli, detay = false }: { pin: HaritaPin
       </View>
     );
   }
+  if (pin.tur === 'konum') {
+    return (
+      <View style={s.konumHalka} collapsable={false}>
+        <View style={s.konumNokta} />
+      </View>
+    );
+  }
   if (pin.tur === 'otel') {
     return (
       <View style={[s.otel, { backgroundColor: pin.renk }]} collapsable={false}>
@@ -43,14 +50,20 @@ export function PinIcerigi({ pin, etiketGizli, detay = false }: { pin: HaritaPin
     );
   }
   const cap = pinCapi(pin);
-  const daire = { width: cap, height: cap, borderRadius: cap / 2 };
-  const ikonBoyut = Math.round(cap * 0.62);
+  // Seçili pin: turuncu halka (3 px) dairenin kenarıdır (#42 KK5).
+  const daire = { width: cap, height: cap, borderRadius: cap / 2, ...(pin.secili ? { borderWidth: 3, borderColor: renk.vurgu } : {}) };
+  const ikonBoyut = Math.round((pin.secili ? cap - 6 : cap) * 0.62);
   const puan = puanMetni(pin.puan);
   const yorum = yorumKisa(pin.yorumSayisi);
   return (
     <View style={s.sutun} collapsable={false}>
-      {pin.tur === 'oneri' || pin.tur === 'bos' ? (
-        <View style={[s.daire, daire, s.beyaz]} collapsable={false}>
+      {pin.tamam ? (
+        // #42 KK7: tamamlanan durak yeşil + tik.
+        <View style={[s.daire, daire, { backgroundColor: renk.basari }]} collapsable={false}>
+          <Ikon ad="tik" boyut={ikonBoyut} renk={renk.zemin} kalinlik={2.4} />
+        </View>
+      ) : pin.tur === 'oneri' || pin.tur === 'bos' ? (
+        <View style={[s.daire, daire, s.beyaz, pin.secili && { borderWidth: 3, borderColor: renk.vurgu }]} collapsable={false}>
           <Ikon ad={pin.ikon ?? 'pin'} boyut={ikonBoyut} renk={renk.metin} kalinlik={2.2} />
         </View>
       ) : pin.tur === 'listede' ? (
@@ -99,4 +112,6 @@ const s = StyleSheet.create({
   bacakHap: { height: 22, paddingHorizontal: 8, borderRadius: 11, backgroundColor: renk.zemin, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: renk.ayrac },
   bacakMetin: { fontFamily: yazi.kalin, fontSize: 11, lineHeight: 14, color: renk.metin },
   gorunmez: { opacity: 0 },
+  konumHalka: { width: 22, height: 22, borderRadius: 11, backgroundColor: 'rgba(66,133,244,0.25)', alignItems: 'center', justifyContent: 'center' },
+  konumNokta: { width: 14, height: 14, borderRadius: 7, backgroundColor: '#4285f4', borderWidth: 2.5, borderColor: renk.zemin },
 });
