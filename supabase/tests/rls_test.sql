@@ -145,6 +145,9 @@ select pg_temp.hata_bekle(
   $$update public.stops set minutes = 50$$,
   '23514');
 update public.stops set arrived_at = now(), arrived_by = auth.uid();
+-- #43: Tamamlandı (üye yazar) ve otomatik tamamlanma bayrağı.
+update public.stops set completed_at = now(), completed_by = auth.uid(), auto_completed = false;
+update public.stops set completed_at = null, completed_by = null, auto_completed = true;
 select pg_temp.hata_bekle(
   $$insert into public.walk_cache (trip_id, from_key, to_key, seconds, meters)
     select id, 'hotel', 'x', 60, 80 from public.trips$$,
@@ -158,7 +161,9 @@ begin
   assert exists (select 1 from public.changes where entity = 'places' and field = 'default_minutes' and new = '120'),
     'alan bazlı güncelleme kaydı';
   assert exists (select 1 from public.changes where entity = 'stops' and field = 'arrived_at'
-                 and user_id = 'bbbbbbbb-0000-0000-0000-000000000002'), 'Vardık kaydı';
+                 and user_id = 'bbbbbbbb-0000-0000-0000-000000000002'), 'varış kaydı';
+  assert exists (select 1 from public.changes where entity = 'stops' and field = 'completed_at'
+                 and user_id = 'bbbbbbbb-0000-0000-0000-000000000002'), 'Tamamlandı kaydı';
 end $$;
 select pg_temp.hata_bekle(
   $$insert into public.changes (trip_id, entity, entity_id) select id, 'x', 'y' from public.trips$$,

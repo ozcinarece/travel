@@ -29,9 +29,9 @@ export type GunProgrami = {
   gun: Gun;
   bugun: boolean;
   simdiDk: number | null;
-  /** Varış işaretleri olmadan (eski bitiş). */
+  /** Tamamlanma işaretleri olmadan (plan bitişi). */
   plan: Program;
-  /** Varış işaretleriyle (KK7). */
+  /** Tamamlanmalarla (KK7, #43) ve otomatik tamamlanmayla (KK8). */
   canli: Program;
   cubuk: MiniCubuk | null;
   otel: Konum | null;
@@ -44,16 +44,17 @@ export function useGunProgrami(secenek: {
   mekanlar: Mekan[];
   yuruyus: YuruyusKaynagi;
   an: Date;
-  yolaCikilanlar?: Set<string>;
+  /** Konumla: kullanıcının 60 m içinde olduğu durağın kimliği (#43 KK4). */
+  buradaId?: string | null;
 }): GunProgrami | null {
-  const { seyahat, gun, duraklar, mekanlar, yuruyus, an, yolaCikilanlar } = secenek;
+  const { seyahat, gun, duraklar, mekanlar, yuruyus, an, buradaId } = secenek;
   return useMemo(() => {
     if (!seyahat || !gun) return null;
     const otel = seyahat.hotel_lat !== null && seyahat.hotel_lng !== null ? { lat: seyahat.hotel_lat, lng: seyahat.hotel_lng } : null;
     const bugun = !!gun.date && gun.date === yerelTarih(an, seyahat.tz);
     const simdiDk = bugun ? yerelSaatDk(an, seyahat.tz) : null;
     const mekanIle = new Map(mekanlar.map((m) => [m.id, m]));
-    const yap = (varisla: boolean): ProgramDuragi[] =>
+    const yap = (tamamlanmayla: boolean): ProgramDuragi[] =>
       gunDuraklari(gun, duraklar)
         .map((d) => ({ d, m: mekanIle.get(d.place_ref) }))
         .filter((x): x is { d: Durak; m: Mekan } => !!x.m)
@@ -62,13 +63,13 @@ export function useGunProgrami(secenek: {
           key: m.place_id,
           konum: { lat: m.lat, lng: m.lng },
           dakika: d.minutes,
-          varildiDk: varisla && d.arrived_at ? yerelSaatDk(new Date(d.arrived_at), seyahat.tz) : null,
+          tamamlandiDk: tamamlanmayla && d.completed_at ? yerelSaatDk(new Date(d.completed_at), seyahat.tz) : null,
           skipped: d.skipped,
         }));
     const baslangic = saatKisa(gun.start_time, saatKisa(seyahat.day_start, '09:00'));
     const plan = programHesapla({ baslangic, duraklar: yap(false), otel, yuruyus, simdiDk: null });
-    const canli = programHesapla({ baslangic, duraklar: yap(true), otel, yuruyus, simdiDk, yolaCikilanlar });
-    const cubuk = simdiDk !== null ? miniCubuk(plan, canli, simdiDk) : null;
+    const canli = programHesapla({ baslangic, duraklar: yap(true), otel, yuruyus, simdiDk, buradaId: buradaId ?? null });
+    const cubuk = simdiDk !== null ? miniCubuk(plan, canli, simdiDk, buradaId ?? null) : null;
     return { gun, bugun, simdiDk, plan, canli, cubuk, otel };
-  }, [seyahat, gun, duraklar, mekanlar, yuruyus, an, yolaCikilanlar]);
+  }, [seyahat, gun, duraklar, mekanlar, yuruyus, an, buradaId]);
 }

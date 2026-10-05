@@ -85,7 +85,7 @@ export function Harita({ merkez, zoom = 14, pinler = [], daireler = [], cizgiler
         return (
           <OzelIsaretci
             // Görünüm değişince (renk/etiket/seçim/ad görünürlüğü/detay) işaretçi yeniden kurulur ve anlık görüntüsü yeniden alınır.
-            key={`${p.id}:${p.tur ?? ''}:${p.renk}:${p.etiket ?? ''}:${p.ikon ?? ''}:${p.secili ? 1 : 0}:${p.ad && !gizli.etiket.has(p.id) ? 'a' : ''}:${detay ? 'd' : ''}:${p.tur === 'etiket' && gizli.etiket.has(p.id) ? 'g' : ''}`}
+            key={`${p.id}:${p.tur ?? ''}:${p.renk}:${p.etiket ?? ''}:${p.ikon ?? ''}:${p.secili ? 1 : 0}:${p.tamam ? 't' : ''}:${p.ad && !gizli.etiket.has(p.id) ? 'a' : ''}:${detay ? 'd' : ''}:${p.tur === 'etiket' && gizli.etiket.has(p.id) ? 'g' : ''}`}
             pin={p}
             etiketGizli={gizli.etiket.has(p.id)}
             detay={detay}
@@ -122,8 +122,9 @@ function OzelIsaretci({
     if (zamanlayici.current) clearTimeout(zamanlayici.current);
     zamanlayici.current = setTimeout(() => setIzle(false), 600);
   };
-  const capa = p.tur === 'aday' ? { x: 0.1, y: 0.5 } : p.tur === 'otel' || p.tur === 'etiket' || !p.tur ? { x: 0.5, y: 0.5 } : pinCapasi(p, detay);
-  const bacak = p.tur === 'etiket';
+  const capa = p.tur === 'aday' ? { x: 0.1, y: 0.5 } : p.tur === 'otel' || p.tur === 'etiket' || p.tur === 'konum' || !p.tur ? { x: 0.5, y: 0.5 } : pinCapasi(p, detay);
+  // Bacak etiketi ve kullanıcı konumu dokunulamaz.
+  const bacak = p.tur === 'etiket' || p.tur === 'konum';
   return (
     <Marker
       coordinate={{ latitude: p.konum.lat, longitude: p.konum.lng }}
@@ -132,7 +133,9 @@ function OzelIsaretci({
       anchor={capa}
       tracksViewChanges={izle}
       tappable={!bacak}
-      zIndex={p.secili ? 3 : p.tur === 'otel' ? 2 : bacak ? 0 : 1}
+      // #42 KK5: seçili güne ait olmayan pinler soluk.
+      opacity={p.opaklik ?? 1}
+      zIndex={p.tur === 'konum' ? 4 : p.secili ? 3 : p.tur === 'otel' ? 2 : bacak ? 0 : 1}
       draggable={p.surukle}
       onPress={() => {
         if (!bacak) onPinBas?.(p.id);

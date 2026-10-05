@@ -75,6 +75,9 @@ export default function MekanDetayEkrani() {
         order_key: arasindaAnahtar(hedefDuraklar[hedefDuraklar.length - 1]?.order_key, undefined),
         arrived_at: null,
         arrived_by: null,
+        completed_at: null,
+        completed_by: null,
+        auto_completed: false,
       });
     } catch {
       setHata(t('mekan.kaydetHata'));

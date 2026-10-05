@@ -98,7 +98,7 @@ export function Harita({ merkez, zoom = 14, pinler = [], daireler = [], cizgiler
         ))}
         {tumPinler.map((p) => {
           const detay = detayGoster(p, bolge.zoom) && !gizli.detay.has(p.id);
-          const bacak = p.tur === 'etiket';
+          const bacak = p.tur === 'etiket' || p.tur === 'konum';
           const capa =
             p.tur === 'aday' ? ['10%', '50%'] : p.tur === 'otel' || bacak ? ['50%', '50%'] : (({ x, y }) => [`${x * 100}%`, `${y * 100}%`])(pinCapasi(p, detay));
           return p.tur ? (
@@ -106,7 +106,7 @@ export function Harita({ merkez, zoom = 14, pinler = [], daireler = [], cizgiler
               key={p.id}
               position={p.konum}
               draggable={p.surukle}
-              zIndex={p.secili ? 3 : p.tur === 'otel' ? 2 : bacak ? 0 : 1}
+              zIndex={p.tur === 'konum' ? 4 : p.secili ? 3 : p.tur === 'otel' ? 2 : bacak ? 0 : 1}
               anchorPoint={capa as [string, string]}
               clickable={!bacak}
               onClick={() => {
@@ -116,7 +116,9 @@ export function Harita({ merkez, zoom = 14, pinler = [], daireler = [], cizgiler
                 const konum = e.latLng;
                 if (konum) onPinSuruklendi?.(p.id, { lat: konum.lat(), lng: konum.lng() });
               }}>
-              <PinIcerigi pin={p} etiketGizli={gizli.etiket.has(p.id)} detay={detay} />
+              <View style={{ opacity: p.opaklik ?? 1 }}>
+                <PinIcerigi pin={p} etiketGizli={gizli.etiket.has(p.id)} detay={detay} />
+              </View>
             </AdvancedMarker>
           ) : (
             <Marker

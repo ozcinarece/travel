@@ -57,7 +57,11 @@ export function useDuragaAta(seyahatId: string) {
       const order_key =
         ekleIndeksi === undefined ? sonAnahtar(sirali.map((d) => d.order_key)) : arasindaAnahtar(sirali[ekleIndeksi - 1]?.order_key, sirali[ekleIndeksi]?.order_key);
       if (mevcut) {
-        const { error } = await supabase.from('stops').update({ day_id: gunId, order_key }).eq('id', mevcut.id);
+        // Gün değişince varış/tamamlanma sıfırlanır (#43).
+        const { error } = await supabase
+          .from('stops')
+          .update({ day_id: gunId, order_key, arrived_at: null, arrived_by: null, completed_at: null, completed_by: null, auto_completed: false })
+          .eq('id', mevcut.id);
         if (error) throw error;
         return;
       }

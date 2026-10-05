@@ -1,5 +1,6 @@
 // PRD 3.7: günün zaman çizelgesi. Sıralı duraklar + yürüyüş bacakları → varış/ayrılış saatleri.
-// KK7: "Vardık" işaretli durakta sonraki saatler arrived_at + süre + yürüyüş ile yeniden hesaplanır.
+// KK7 (#43): "Tamamlandı" işaretli durakta sonraki saatler completed_at + yürüyüş ile yeniden hesaplanır (ayrılış anı).
+// KK8 (#43): dokunulmadıysa planlanan bitiş + 10 dk geçince durak otomatik tamamlanmış sayılır (planlanan bitişle).
 // KK10: yürüyüş süresi önbellekte yoksa kestirim kullanılır ve satır `kestirim` olarak işaretlenir.
 import type { Konum } from '@/components/harita/tipler';
 
@@ -13,8 +14,8 @@ export type ProgramDuragi = {
   key: string;
   konum: Konum;
   dakika: number;
-  /** Seyahat dilimine göre gün başından dakika; "Vardık" işaretlenmemişse null. */
-  varildiDk: number | null;
+  /** #43: tamamlanma anı (seyahat dilimine göre gün başından dakika); yoksa null. */
+  tamamlandiDk: number | null;
   skipped: boolean;
 };
 
@@ -26,15 +27,19 @@ export type Yuruyus = { sn: number; m: number; kestirim: boolean; mod: 'yuruyus'
  */
 export type YuruyusKaynagi = (fromKey: string, toKey: string) => { sn: number; m: number; taksi?: { sn: number; m: number } | null } | null;
 
+/** gecildi = tamamlandı (elle ya da otomatik) · buradasin = sıradaki durak, kullanıcı 60 m içinde (konum) · siradaki · bekliyor · atlandi. */
 export type DurakDurumu = 'gecildi' | 'buradasin' | 'siradaki' | 'bekliyor' | 'atlandi';
 
 export type ProgramSatiri = {
   durak: ProgramDuragi;
   varisDk: number;
+  /** Tamamlanan durakta gerçek tamamlanma anı; diğerlerinde planlanan bitiş. */
   ayrilisDk: number;
   /** Önceki noktadan (otel ya da önceki durak) bu durağa yürüyüş; atlanan durakta null. */
   yuruyus: Yuruyus | null;
   durum: DurakDurumu;
+  /** #43 KK8: planlanan bitiş + 10 dk geçtiği için (henüz yazılmamış olsa da) otomatik tamamlanmış sayıldı. */
+  otomatik: boolean;
 };
 
 export type Program = {
@@ -50,6 +55,9 @@ export type Program = {
   taksiSn: number;
   taksiM: number;
   kestirimVar: boolean;
+  /** Tamamlanan (gecildi) / atlanmamış durak sayısı — ilerleme çubuğu (#42). */
+  tamamlanan: number;
+  toplam: number;
 };
 
 export function programHesapla(secenek: {
@@ -59,11 +67,11 @@ export function programHesapla(secenek: {
   yuruyus: YuruyusKaynagi;
   /** Bugünün programıysa seyahat dilimindeki şu an (dakika); değilse null. */
   simdiDk: number | null;
-  /** Kullanıcının "Yol tarifi"ne bastığı duraklar: süre dolmasa da ayrılmış sayılır (§5.4 a). */
-  yolaCikilanlar?: Set<string>;
+  /** Konumla: kullanıcının 60 m içinde olduğu durak (#43 KK4); yoksa null. */
+  buradaId?: string | null;
 }): Program {
   const { duraklar, otel, simdiDk } = secenek;
-  const yolaCikilanlar = secenek.yolaCikilanlar ?? new Set<string>();
+  const buradaId = secenek.buradaId ?? null;
   const bacak = (aKey: string, aKonum: Konum, bKey: string, bKonum: Konum): Yuruyus => {
     const c = secenek.yuruyus(aKey, bKey);
     const yuruyusSn = c ? c.sn : kestirimYuruyusSn(aKonum, bKonum);
@@ -97,46 +105,42 @@ export function programHesapla(secenek: {
     if (y.kestirim) kestirimVar = true;
   };
 
-  // Son "Vardık" işaretli durağın indeksi: ondan öncekiler geçilmiş sayılır.
-  const sonVarilan = duraklar.reduce((son, d, i) => (!d.skipped && d.varildiDk !== null ? i : son), -1);
-
-  duraklar.forEach((d, i) => {
+  let tamamlanan = 0;
+  let toplam = 0;
+  let siradakiVerildi = false;
+  for (const d of duraklar) {
     if (d.skipped) {
-      satirlar.push({ durak: d, varisDk: saat, ayrilisDk: saat, yuruyus: null, durum: 'atlandi' });
-      return;
+      satirlar.push({ durak: d, varisDk: saat, ayrilisDk: saat, yuruyus: null, durum: 'atlandi', otomatik: false });
+      continue;
     }
+    toplam++;
     let y: Yuruyus | null = null;
     if (oncekiKey && oncekiKonum) {
       y = bacak(oncekiKey, oncekiKonum, d.key, d.konum);
       topla(y);
     }
-    const planVaris = saat + (y ? Math.round(y.sn / 60) : 0);
-    const varisDk = d.varildiDk ?? planVaris;
-    const ayrilisDk = varisDk + d.dakika;
-
+    const varisDk = saat + (y ? Math.round(y.sn / 60) : 0);
+    const planAyrilis = varisDk + d.dakika;
+    let ayrilisDk = planAyrilis;
     let durum: DurakDurumu = 'bekliyor';
-    if (simdiDk !== null) {
-      if (i < sonVarilan) durum = 'gecildi';
-      else if (d.varildiDk !== null) durum = 'buradasin';
+    let otomatik = false;
+    if (d.tamamlandiDk !== null) {
+      // KK7: tamamlanma anı ayrılış anıdır; sonrakiler buradan akar.
+      ayrilisDk = d.tamamlandiDk;
+      durum = 'gecildi';
+    } else if (simdiDk !== null && simdiDk > planAyrilis + UZUN_KALMA_PAYI_DK) {
+      // KK8: dokunulmadı, pay da geçti → planlanan bitişle otomatik tamamlanmış sayılır; program plana göre akar.
+      durum = 'gecildi';
+      otomatik = true;
+    } else if (simdiDk !== null && !siradakiVerildi) {
+      durum = buradaId === d.id ? 'buradasin' : 'siradaki';
+      siradakiVerildi = true;
     }
-    satirlar.push({ durak: d, varisDk, ayrilisDk, yuruyus: y, durum });
+    if (durum === 'gecildi') tamamlanan++;
+    satirlar.push({ durak: d, varisDk, ayrilisDk, yuruyus: y, durum, otomatik });
     saat = ayrilisDk;
     oncekiKey = d.key;
     oncekiKonum = d.konum;
-  });
-
-  // "Buradasın"dan sonraki ilk bekleyen durak sıradakidir; hiç varış yoksa ilk bekleyen.
-  if (simdiDk !== null) {
-    const buradasin = satirlar.findIndex((s) => s.durum === 'buradasin');
-    const ilkBekleyen = satirlar.findIndex((s, i) => s.durum === 'bekliyor' && i > buradasin);
-    if (ilkBekleyen >= 0) satirlar[ilkBekleyen].durum = 'siradaki';
-    // §5.4: süre dolunca yürüyüş başlamış sayılır (a); 10 dk'yı aşınca hâlâ oradasın kabul edilir (b, KK8) —
-    // "Yol tarifi"ne basıldıysa her durumda ayrılmış sayılır.
-    if (buradasin >= 0 && ilkBekleyen >= 0) {
-      const b = satirlar[buradasin];
-      const gecti = simdiDk - b.ayrilisDk;
-      if (yolaCikilanlar.has(b.durak.id) || (gecti >= 0 && gecti <= UZUN_KALMA_PAYI_DK)) b.durum = 'gecildi';
-    }
   }
 
   let oteleDonus: Yuruyus | null = null;
@@ -145,7 +149,7 @@ export function programHesapla(secenek: {
     topla(oteleDonus);
   }
   const bitisDk = saat + (oteleDonus ? Math.round(oteleDonus.sn / 60) : 0);
-  return { satirlar, baslangicDk, bitisDk, oteleDonus, yuruyusSn, yuruyusM, taksiSn, taksiM, kestirimVar };
+  return { satirlar, baslangicDk, bitisDk, oteleDonus, yuruyusSn, yuruyusM, taksiSn, taksiM, kestirimVar, tamamlanan, toplam };
 }
 
 /** "09:00 – 10:30" gibi. */

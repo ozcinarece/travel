@@ -54,9 +54,9 @@ export function etiketOnceligi(p: HaritaPini): number {
   return 1;
 }
 
-/** Daire çapı (px) — PinIcerigi ile aynı sayılar. */
+/** Daire çapı (px) — PinIcerigi ile aynı sayılar. Seçili: büyük daire + turuncu halka (#42 KK5), halka dahil. */
 export function pinCapi(p: HaritaPini): number {
-  if (p.secili) return 28;
+  if (p.secili) return 32;
   if (p.tur === 'oneri') return 18;
   return 22;
 }

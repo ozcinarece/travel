@@ -1,6 +1,6 @@
 import { describe, expect, it } from '@jest/globals';
 
-import { aktifMi, gunSayisi, kacinciGun, yerelTarih } from '../zaman';
+import { aktifMi, gunSayisi, kacinciGun, yerelTarih, yerelAn } from '../zaman';
 
 const roma = { start_date: '2026-10-12', end_date: '2026-10-15', tz: 'Europe/Rome' };
 
@@ -52,5 +52,16 @@ describe('kacinciGun', () => {
 
   it('aralık dışında null döner', () => {
     expect(kacinciGun(roma, new Date('2026-10-20T10:00:00Z'))).toBeNull();
+  });
+});
+
+describe('yerelAn', () => {
+  it('seyahat dilimindeki tarih + dakikayı UTC ana çevirir', () => {
+    // Roma yaz saati (UTC+2): 2026-07-10 10:30 → 08:30Z.
+    expect(yerelAn('2026-07-10', 630, 'Europe/Rome').toISOString()).toBe('2026-07-10T08:30:00.000Z');
+    // İstanbul (UTC+3): 2026-10-05 00:10 → 04 Eki 21:10Z (gün sınırı).
+    expect(yerelAn('2026-10-05', 10, 'Europe/Istanbul').toISOString()).toBe('2026-10-04T21:10:00.000Z');
+    // Batı yarımküre: New York (UTC-4): 2026-10-05 23:50 → 06 Eki 03:50Z.
+    expect(yerelAn('2026-10-05', 1430, 'America/New_York').toISOString()).toBe('2026-10-06T03:50:00.000Z');
   });
 });

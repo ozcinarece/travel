@@ -76,6 +76,15 @@ const config: ExpoConfig = {
         cameraPermission: false,
       },
     ],
+    [
+      // #42 KK7: gezi gününde canlı ilerleme için ön plan konumu; arka plan izni v1'de istenmez.
+      'expo-location',
+      {
+        locationWhenInUsePermission: 'Gezi günü haritada yerini ve sıradaki durağa kalan süreyi göstermek için konumunu kullanıyoruz.',
+        isAndroidBackgroundLocationEnabled: false,
+        isIosBackgroundLocationEnabled: false,
+      },
+    ],
     ...(appleAcik ? ['expo-apple-authentication'] : []),
   ],
   experiments: {

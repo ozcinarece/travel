@@ -10,7 +10,7 @@ const d = (id: string, dakika: number, ek: Partial<ProgramDuragi> = {}): Program
   key: id,
   konum: { lat: 41.9 + Number(id.slice(1)) * 0.005, lng: 12.5 },
   dakika,
-  varildiDk: null,
+  tamamlandiDk: null,
   skipped: false,
   ...ek,
 });
@@ -42,25 +42,46 @@ describe('programHesapla', () => {
     expect(p.satirlar[1].varisDk).toBe(550);
   });
 
-  it('KK7: varış işareti sonrakileri kaydırır; durumlar', () => {
-    // d1'e 09:30'da varıldı (plan 09:10), 60 dk kalınacak → ayrılış 10:30, d2 varış 10:40.
+  it('#43 KK7: Tamamlandı anı ayrılış anıdır; sonrakiler oradan akar', () => {
+    // d1 plan 09:10–10:10; 10:30'da tamamlandı → d2 varış 10:40.
     const p = programHesapla({
       baslangic: '09:00',
-      duraklar: [d('d1', 60, { varildiDk: 570 }), d('d2', 30), d('d3', 30)],
+      duraklar: [d('d1', 60, { tamamlandiDk: 630 }), d('d2', 30), d('d3', 30)],
       otel,
       yuruyus: sabit,
-      simdiDk: 600,
+      simdiDk: 633,
     });
-    expect(p.satirlar[0].durum).toBe('buradasin');
+    expect(p.satirlar[0].durum).toBe('gecildi');
+    expect(p.satirlar[0].ayrilisDk).toBe(630);
+    expect(p.satirlar[0].otomatik).toBe(false);
     expect(p.satirlar[1].durum).toBe('siradaki');
     expect(p.satirlar[1].varisDk).toBe(640);
     expect(p.satirlar[2].durum).toBe('bekliyor');
+    expect(p.tamamlanan).toBe(1);
+    expect(p.toplam).toBe(3);
   });
 
-  it('süre dolunca yürüyüş başlamış sayılır: önceki geçildi', () => {
-    const p = programHesapla({ baslangic: '09:00', duraklar: [d('d1', 30, { varildiDk: 550 }), d('d2', 30)], otel, yuruyus: sabit, simdiDk: 585 });
-    expect(p.satirlar[0].durum).toBe('gecildi');
-    expect(p.satirlar[1].durum).toBe('siradaki');
+  it('#43 KK8: planlanan bitiş + 10 dk geçince otomatik tamamlanır; pay içinde sıradaki kalır', () => {
+    // d1 plan 09:10–09:40. 09:48: hâlâ sıradaki. 09:51: otomatik tamamlandı, d2 varış 09:50 planına göre akar.
+    const payIcinde = programHesapla({ baslangic: '09:00', duraklar: [d('d1', 30), d('d2', 30)], otel, yuruyus: sabit, simdiDk: 588 });
+    expect(payIcinde.satirlar[0].durum).toBe('siradaki');
+    const sonra = programHesapla({ baslangic: '09:00', duraklar: [d('d1', 30), d('d2', 30)], otel, yuruyus: sabit, simdiDk: 591 });
+    expect(sonra.satirlar[0].durum).toBe('gecildi');
+    expect(sonra.satirlar[0].otomatik).toBe(true);
+    expect(sonra.satirlar[0].ayrilisDk).toBe(580);
+    expect(sonra.satirlar[1].durum).toBe('siradaki');
+    expect(sonra.satirlar[1].varisDk).toBe(590);
+  });
+
+  it('#43 KK4: konum sıradaki durağın 60 m içindeyse "buradasin"', () => {
+    const p = programHesapla({ baslangic: '09:00', duraklar: [d('d1', 30), d('d2', 30)], otel, yuruyus: sabit, simdiDk: 560, buradaId: 'd1' });
+    expect(p.satirlar[0].durum).toBe('buradasin');
+    expect(p.satirlar[1].durum).toBe('bekliyor');
+  });
+
+  it('seyahat günü değilse durumlar bekliyor', () => {
+    const p = programHesapla({ baslangic: '09:00', duraklar: [d('d1', 30)], otel, yuruyus: sabit, simdiDk: null });
+    expect(p.satirlar[0].durum).toBe('bekliyor');
   });
 
   it('#33: 40 dk üstü bacak taksi; araç süresi varsa gerçek, yoksa kestirim', () => {
@@ -127,18 +148,25 @@ describe('miniCubuk', () => {
   const duraklar = [d('d1', 60), d('d2', 30), d('d3', 30)];
   const plan = programHesapla({ baslangic: '09:00', duraklar, otel, yuruyus: sabit, simdiDk: null });
 
-  it('uzun kalma: 10 dk payı aşılınca', () => {
-    const canli = programHesapla({ baslangic: '09:00', duraklar: [d('d1', 60, { varildiDk: 550 }), d('d2', 30), d('d3', 30)], otel, yuruyus: sabit, simdiDk: 635 });
-    const m = miniCubuk(plan, canli, 635);
+  it('uzun kalma (#43 b): konum hâlâ otomatik tamamlanan durakta', () => {
+    // d1 plan 09:10–10:10; şimdi 10:35, kullanıcı hâlâ d1'de → 25 dk uzun.
+    const canli = programHesapla({ baslangic: '09:00', duraklar, otel, yuruyus: sabit, simdiDk: 635, buradaId: 'd1' });
+    const m = miniCubuk(plan, canli, 635, 'd1');
     expect(m).toEqual({ tur: 'uzun', durakId: 'd1', uzunDk: 25, eskiBitisDk: plan.bitisDk, yeniBitisDk: canli.bitisDk + 25 });
-    expect(miniCubuk(plan, programHesapla({ baslangic: '09:00', duraklar: [d('d1', 60, { varildiDk: 550 })], otel, yuruyus: sabit, simdiDk: 615 }), 615)).toBeNull();
+    // Konum yoksa uzun kalma bilinemez; 10:25'te d1 otomatik tamamlandı (10:10), d2'ye yürüyüş 10 dk + pay 10 dk henüz dolmadı → çubuk yok.
+    expect(miniCubuk(plan, programHesapla({ baslangic: '09:00', duraklar, otel, yuruyus: sabit, simdiDk: 625 }), 625)).toBeNull();
+    // Pay içinde (10:15) çubuk yok.
+    expect(miniCubuk(plan, programHesapla({ baslangic: '09:00', duraklar, otel, yuruyus: sabit, simdiDk: 615, buradaId: 'd1' }), 615, 'd1')).toBeNull();
   });
 
-  it('yürüyüş: önceki geçildi, sıradakine kalan dk ve gecikme', () => {
-    // d1'e 09:30 varıldı (plan 09:10) → 20 dk geç; 10:30'da çıkıldı, şimdi 10:33.
-    const canli = programHesapla({ baslangic: '09:00', duraklar: [d('d1', 60, { varildiDk: 570 }), d('d2', 30), d('d3', 30)], otel, yuruyus: sabit, simdiDk: 633 });
-    const m = miniCubuk(plan, canli, 633);
-    expect(m).toEqual({ tur: 'yuruyus', hedefId: 'd2', kalanDk: 7, gecikmeDk: 20 });
+  it('yürüyüş gecikmesi (#43 a): önceki tamamlandı, sıradakine yürüyüş + 10 dk içinde varılmadı', () => {
+    // d1 10:30'da tamamlandı (plan 10:10); d2'ye yürüyüş 10 dk → 10:40 varış; 10:51'de hâlâ yolda → çubuk.
+    const duraklar2 = [d('d1', 60, { tamamlandiDk: 630 }), d('d2', 30), d('d3', 30)];
+    expect(miniCubuk(plan, programHesapla({ baslangic: '09:00', duraklar: duraklar2, otel, yuruyus: sabit, simdiDk: 645 }), 645)).toBeNull();
+    const canli = programHesapla({ baslangic: '09:00', duraklar: duraklar2, otel, yuruyus: sabit, simdiDk: 651 });
+    const m = miniCubuk(plan, canli, 651);
+    // Planlanan varış 10:20 (otel→d1 10 dk, d1 60 dk, d1→d2 10 dk) → 31 dk gecikme; kalan yürüyüş bilinmiyor → bacak süresi.
+    expect(m).toEqual({ tur: 'yuruyus', hedefId: 'd2', kalanDk: 10, gecikmeDk: 31 });
   });
 
   it('kaydirSuresi 15 dk adımına yukarı yuvarlar', () => {

@@ -3,17 +3,12 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { t } from '@/i18n';
 import { AYLAR_KISA, GUNLER_KISA, haftaGunu, parcala } from '@/lib/takvim';
 import type { Durak, Gun } from '@/lib/tipler';
-import type { TempoEtiketi } from '@/schedule/tempo';
 import { bosluk, gunRengi, renk, yazi } from '@/theme';
-
-export type KartEtiketi = TempoEtiketi | 'bos';
 
 type Props = {
   gunler: Gun[];
   duraklar: Durak[];
   seciliId: string | undefined;
-  /** Gün kimliği → tempo etiketi (Rahat/Normal/Yoğun/Boş). */
-  etiketler: Map<string, KartEtiketi>;
   /** Bugünün indeksi (aktif seyahatte turuncu çerçeve). */
   bugunIndex?: number | null;
   onSec: (id: string) => void;
@@ -30,26 +25,25 @@ export function kisaGunTarihi(tarih: string): string {
 }
 
 /**
- * #39 KK3: yatay kaydırmalı gün kartları — "N. gün", gün rengi noktası, kısa tarih, durak sayısı, tempo etiketi.
- * Seçili kart siyah zemin; sonda "+" kartı (gün ekle); karta uzun bas → Günü sil. Harita ve Çizelge aynı bileşeni kullanır.
+ * #42 KK3–4: yatay gün kartları — yalnız renk noktası, "N. gün", kısa tarih, durak sayısı (tempo etiketi yok).
+ * Seçili kart siyah; diğerleri %55 soluk. Sonda "+" kartı (gün ekle); karta uzun bas → Günü sil.
  */
-export function GunKartlari({ gunler, duraklar, seciliId, etiketler, bugunIndex, onSec, onUzunBas, onEkle, ekleniyor }: Props) {
+export function GunKartlari({ gunler, duraklar, seciliId, bugunIndex, onSec, onUzunBas, onEkle, ekleniyor }: Props) {
   return (
     <ScrollView horizontal showsHorizontalScrollIndicator={false} style={s.kaydirma} contentContainerStyle={s.kartlar} keyboardShouldPersistTaps="handled">
       {gunler.map((g) => {
         const aktif = g.id === seciliId;
         const rengi = gunRengi(g.index);
         const n = duraklar.filter((d) => d.day_id === g.id).length;
-        const etiket = etiketler.get(g.id) ?? 'bos';
         return (
           <Pressable
             key={g.id}
             accessibilityRole="button"
             accessibilityState={{ selected: aktif }}
-            accessibilityLabel={`${t('program.gunSec', { n: g.index })} · ${t('gunler.durakSayisi', { n })} · ${t(`gunler.tempo.${etiket}`)}`}
+            accessibilityLabel={`${t('program.gunSec', { n: g.index })} · ${t('gunler.durakSayisi', { n })}`}
             onPress={() => onSec(g.id)}
             onLongPress={onUzunBas ? () => onUzunBas(g) : undefined}
-            style={[s.kart, s.golge, aktif && s.kartAktif, !aktif && g.index === bugunIndex && { borderColor: renk.vurgu }]}>
+            style={[s.kart, s.golge, aktif ? s.kartAktif : s.kartSoluk, !aktif && g.index === bugunIndex && { borderColor: renk.vurgu }]}>
             <View style={s.ustSatir}>
               <View style={[s.nokta, { backgroundColor: rengi }, aktif && { borderColor: renk.metin }]} />
               <Text style={[s.baslik, aktif && s.acik]} numberOfLines={1}>
@@ -60,7 +54,6 @@ export function GunKartlari({ gunler, duraklar, seciliId, etiketler, bugunIndex,
               {g.date ? `${kisaGunTarihi(g.date)} · ` : ''}
               {n > 0 ? t('gunler.durakSayisi', { n }) : t('gunler.durakYokKart')}
             </Text>
-            <Text style={[s.etiket, ETIKET_RENK[etiket], aktif && ETIKET_RENK_AKTIF[etiket]]}>{t(`gunler.tempo.${etiket}`)}</Text>
           </Pressable>
         );
       })}
@@ -73,24 +66,12 @@ export function GunKartlari({ gunler, duraklar, seciliId, etiketler, bugunIndex,
   );
 }
 
-const ETIKET_RENK = {
-  rahat: { color: renk.basari },
-  normal: { color: renk.ikincil },
-  yogun: { color: renk.uyari },
-  bos: { color: renk.soluk },
-} as const;
-const ETIKET_RENK_AKTIF = {
-  rahat: { color: '#7fd6a0' },
-  normal: { color: '#c4c4c4' },
-  yogun: { color: '#ff9a6b' },
-  bos: { color: '#8a8a8a' },
-} as const;
-
 const s = StyleSheet.create({
   kaydirma: { marginHorizontal: -bosluk.kenar },
   kartlar: { gap: 8, paddingHorizontal: bosluk.kenar, paddingVertical: 2 },
-  kart: { width: 128, height: 76, paddingHorizontal: 12, paddingVertical: 10, borderRadius: 16, backgroundColor: renk.zemin, borderWidth: 1.5, borderColor: renk.zemin, justifyContent: 'space-between' },
+  kart: { width: 124, height: 58, paddingHorizontal: 12, paddingVertical: 9, borderRadius: 14, backgroundColor: renk.zemin, borderWidth: 1.5, borderColor: renk.zemin, justifyContent: 'space-between' },
   kartAktif: { backgroundColor: renk.metin, borderColor: renk.metin },
+  kartSoluk: { opacity: 0.55 },
   golge: { shadowColor: renk.metin, shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 8, elevation: 3 },
   ustSatir: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   nokta: { width: 10, height: 10, borderRadius: 5, borderWidth: 1.5, borderColor: renk.zemin },
@@ -98,7 +79,6 @@ const s = StyleSheet.create({
   acik: { color: renk.zemin },
   acikSoluk: { color: '#a3a3a3' },
   alt: { fontFamily: yazi.normal, fontSize: 11, color: renk.ikincil },
-  etiket: { fontFamily: yazi.kalin, fontSize: 11 },
-  ekle: { width: 56, alignItems: 'center', justifyContent: 'center', borderColor: renk.ayrac },
+  ekle: { width: 48, alignItems: 'center', justifyContent: 'center', borderColor: renk.ayrac, opacity: 1 },
   ekleIsaret: { fontFamily: yazi.kalin, fontSize: 24, lineHeight: 26, color: renk.metin },
 });

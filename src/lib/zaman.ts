@@ -41,3 +41,15 @@ export function yerelSaatDk(an: Date, tz: string): number {
   const al = (tip: string) => Number(parcalar.find((p) => p.type === tip)?.value ?? 0);
   return al('hour') * 60 + al('minute');
 }
+
+/** Seyahat dilimindeki (tarih, gün başından dakika) → UTC an. DST kenarlarında bir düzeltme adımı yeter. */
+export function yerelAn(tarih: string, dk: number, tz: string): Date {
+  const [y, a, g] = tarih.split('-').map(Number);
+  const tahmin = new Date(Date.UTC(y, a - 1, g, Math.floor(dk / 60), dk % 60));
+  const gorunen = yerelSaatDk(tahmin, tz);
+  const gorunenTarih = yerelTarih(tahmin, tz);
+  let fark = gorunen - dk;
+  if (gorunenTarih > tarih) fark += 1440;
+  else if (gorunenTarih < tarih) fark -= 1440;
+  return new Date(tahmin.getTime() - fark * 60_000);
+}
