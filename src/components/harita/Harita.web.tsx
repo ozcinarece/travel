@@ -97,7 +97,7 @@ export function Harita({ merkez, zoom = 14, pinler = [], daireler = [], cizgiler
           />
         ))}
         {tumPinler.map((p) => {
-          const detay = detayGoster(p, bolge.zoom);
+          const detay = detayGoster(p, bolge.zoom) && !gizli.detay.has(p.id);
           const bacak = p.tur === 'etiket';
           const capa =
             p.tur === 'aday' ? ['10%', '50%'] : p.tur === 'otel' || bacak ? ['50%', '50%'] : (({ x, y }) => [`${x * 100}%`, `${y * 100}%`])(pinCapasi(p, detay));
@@ -116,7 +116,7 @@ export function Harita({ merkez, zoom = 14, pinler = [], daireler = [], cizgiler
                 const konum = e.latLng;
                 if (konum) onPinSuruklendi?.(p.id, { lat: konum.lat(), lng: konum.lng() });
               }}>
-              <PinIcerigi pin={p} etiketGizli={gizli.has(p.id)} detay={detay} />
+              <PinIcerigi pin={p} etiketGizli={gizli.etiket.has(p.id)} detay={detay} />
             </AdvancedMarker>
           ) : (
             <Marker

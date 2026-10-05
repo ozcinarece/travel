@@ -19,7 +19,9 @@ export type IkonAdi =
   | 'kare'
   | 'pin'
   | 'tik'
-  | 'ev';
+  | 'ev'
+  // #39 görünüm anahtarı
+  | 'dunya';
 
 type Props = { ad: IkonAdi; boyut?: number; renk: ColorValue; kalinlik?: number };
 
@@ -105,6 +107,11 @@ export function Ikon({ ad, boyut = 24, renk, kalinlik = 2 }: Props) {
         </>
       ) : ad === 'tik' ? (
         <Path d="M5 12.5l4.5 4.5L19 7.5" {...ortak} strokeWidth={kalinlik + 0.6} />
+      ) : ad === 'dunya' ? (
+        <>
+          <Circle cx={12} cy={12} r={9} {...ortak} />
+          <Path d="M3 12h18M12 3c2.8 3 4 6 4 9s-1.2 6-4 9c-2.8-3-4-6-4-9s1.2-6 4-9z" {...ortak} />
+        </>
       ) : ad === 'ev' ? (
         <>
           <Path d="M3.5 11L12 4l8.5 7" {...ortak} />

@@ -39,17 +39,7 @@ export function HaritaEkrani({ baslik, geri, sagUst, arama, ustEk, altNot, altSe
 
       <View style={[s.ust, { paddingTop: kenar.top + 12 }]} pointerEvents="box-none">
         <View style={s.ustSatir} pointerEvents="box-none">
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={t('genel.geri')}
-            onPress={geri}
-            hitSlop={8}
-            style={({ pressed }) => [s.geriHap, s.golge, pressed && { opacity: 0.8 }]}>
-            <Text style={s.geriIsaret}>‹</Text>
-            <Text style={s.geriMetin} numberOfLines={1}>
-              {baslik}
-            </Text>
-          </Pressable>
+          <GeriHapi baslik={baslik} onPress={geri} />
           {sagUst}
         </View>
         {arama ? <View style={[s.arama, s.golge]}>{arama}</View> : null}
@@ -62,6 +52,23 @@ export function HaritaEkrani({ baslik, geri, sagUst, arama, ustEk, altNot, altSe
         {altPanel ? <View style={[s.panel, s.panelGolge]}>{altPanel}</View> : null}
       </View>
     </View>
+  );
+}
+
+/** Sol üst beyaz geri hapı ("‹ İstanbul"); #39 ile Çizelge de kullanır. */
+export function GeriHapi({ baslik, onPress }: { baslik: string; onPress: () => void }) {
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={t('genel.geri')}
+      onPress={onPress}
+      hitSlop={8}
+      style={({ pressed }) => [s.geriHap, s.golge, pressed && { opacity: 0.8 }]}>
+      <Text style={s.geriIsaret}>‹</Text>
+      <Text style={s.geriMetin} numberOfLines={1}>
+        {baslik}
+      </Text>
+    </Pressable>
   );
 }
 

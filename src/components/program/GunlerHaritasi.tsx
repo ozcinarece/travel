@@ -1,40 +1,24 @@
 import { router } from 'expo-router';
 import { useMemo, useState, type ReactNode } from 'react';
-import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, PanResponder, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
-import { BilgiHapi, HaritaEkrani } from '@/components/harita/HaritaEkrani';
+import { HaritaEkrani } from '@/components/harita/HaritaEkrani';
 import type { HaritaCizgisi, HaritaPini } from '@/components/harita/tipler';
-import { GunCipleri } from '@/components/program/GunCipleri';
-import { Buton } from '@/components/ui/Buton';
-import { useDuragaAta, useDurakKaldir, useGunEkle, useGunSil } from '@/features/gunler/sorgular';
-import { bacakKaynagi, bacakListesi, matrisNoktalari, useRotaBacaklari, useYuruyusMatrisi, type MatrisNoktasi } from '@/features/program/sorgular';
+import { useDuragaAta, useDurakKaldir } from '@/features/gunler/sorgular';
+import { bacakListesi } from '@/features/program/sorgular';
+import type { ProgramVerisi } from '@/features/program/useProgramVerisi';
 import { useHafifYerler } from '@/features/yerler/api';
 import { t } from '@/i18n';
 import { sureMetni } from '@/lib/kategori';
 import { pinIkonu } from '@/lib/pinIkonu';
 import { polylineCoz } from '@/lib/polyline';
-import { GUNLER, haftaGunu } from '@/lib/takvim';
 import type { Durak, Gun, Mekan, Seyahat } from '@/lib/tipler';
 import { enUcuzEklemeIndeksi } from '@/schedule/program';
-import { enYakinGun, kestirimYuruyusSn, bacakModu, tempoHesapla, type BacakKaynagi, type TempoSonucu } from '@/schedule/tempo';
+import { bacakModu, enYakinGun } from '@/schedule/tempo';
 import { gunRengi, renk, yazi } from '@/theme';
 
 // PRD 3.3 KK3: 20 dk yürüyüş ≈ 1,5 km.
 const YURUME_YARICAPI_M = 1500;
-
-/**
- * PRD 3.5 Günlere dağıt — #34 ile Program sekmesinin **Harita** görünümü (HaritaEkrani kabuğu).
- * KK1 gün çipleri + "N boşta" + tempo paneli; KK2 gün seç → pine dokun (ata / kaldır); KK3 gün renkleri;
- * KK4 otel pini + daire sabit; KK5 tempo kestirimle; KK6 boştaki için en yakın gün; KK7 gün ekle/sil;
- * KK8 "Çizelgeye geç" + boşta uyarısı. #33 gün rota çizgileri.
- */
-/** Gün adı: tarihliyse hafta günü ("Pazartesi"), değilse "1. gün". */
-function gunAdi(gun: Gun): string {
-  return gun.date ? GUNLER[haftaGunu(gun.date)] : t('gunler.gunAdi', { n: gun.index });
-}
-
-/** Postgres time "09:00:00" → "09:00". */
-const saat = (tm: string | null | undefined, varsayilan: string) => (tm ? tm.slice(0, 5) : varsayilan);
 
 export type GunlerHaritasiProps = {
   seyahat: Seyahat;
@@ -43,111 +27,38 @@ export type GunlerHaritasiProps = {
   mekanlar: Mekan[];
   seciliGun: Gun | undefined;
   onGunSec: (id: string | null) => void;
-  /** Gün çiplerinin altına yerleşen görünüm anahtarı (#34). */
-  gorunumAnahtari: ReactNode;
+  /** Paylaşılan veri: matris, gerçek rota, tempolar (#39, useProgramVerisi). */
+  verisi: ProgramVerisi;
+  /** #39 KK1–4: anahtar + gün kartları + ipucu (ProgramUstu). */
+  ustEk: ReactNode;
   /** Sağ üst: üye avatarları. */
   sagUst?: ReactNode;
   onCizelgeyeGec: () => void;
 };
 
-export function GunlerHaritasi({ seyahat, gunler, duraklar, mekanlar, seciliGun, onGunSec, gorunumAnahtari, sagUst, onCizelgeyeGec }: GunlerHaritasiProps) {
+/**
+ * PRD 3.5 Günlere dağıt — Program sekmesinin **Harita** görünümü (HaritaEkrani kabuğu). #39 v0.4:
+ * üstte ortak başlık (ProgramUstu), altta **katlanır** tempo paneli (varsayılan katlı: tek satır özet + çubuk + ok;
+ * tutamaktan yukarı çekilince tam panel). Harita ekranın en az %65'i. KK2 gün seç → pine dokun (ata / kaldır);
+ * KK3 gün renkleri; KK4 otel pini + daire; KK6 boştaki için en yakın gün. #30 ikonlu pinler, #33 gerçek rota + taksi bacağı.
+ */
+export function GunlerHaritasi({ seyahat, gunler, duraklar, mekanlar, seciliGun, onGunSec, verisi, ustEk, sagUst, onCizelgeyeGec }: GunlerHaritasiProps) {
   const ata = useDuragaAta(seyahat.id);
   const kaldir = useDurakKaldir(seyahat.id);
-  const gunEkle = useGunEkle(seyahat.id);
-  const gunSil = useGunSil(seyahat.id);
   const [hata, setHata] = useState<string | null>(null);
-  const setSeciliGunId = onGunSec;
-  const seciliGunId = seciliGun?.id ?? null;
-  const otel = useMemo(
-    () => (seyahat.hotel_lat !== null && seyahat.hotel_lng !== null ? { lat: seyahat.hotel_lat, lng: seyahat.hotel_lng } : null),
-    [seyahat.hotel_lat, seyahat.hotel_lng],
-  );
-  const mekanIle = new Map(mekanlar.map((m) => [m.id, m]));
+  const [panelAcik, setPanelAcik] = useState(false);
+  const { otel, tempolar, rotalar, bacak, seciliNoktalar } = verisi;
+  const mekanIle = useMemo(() => new Map(mekanlar.map((m) => [m.id, m])), [mekanlar]);
   const durakIle = new Map(duraklar.map((d) => [d.place_ref, d]));
   const gunIndex = new Map(gunler.map((g) => [g.id, g.index]));
   const bostakiler = mekanlar.filter((m) => !durakIle.has(m.id));
 
-  // Adlar canlı (PRD §7): tempo önerileri ve boşta önerisi için.
+  // Adlar canlı (PRD §7): pin etiketleri, tempo önerileri ve boşta önerisi için.
   const adlar = useHafifYerler(mekanlar.map((m) => m.place_id));
   const adi = (m: Mekan | undefined) => (m ? (adlar.data?.[m.place_id]?.ad ?? '…') : '…');
 
-  // #33: tempo paneli çizelgeyle aynı yürüyüş matrisini kullanır (atanmış duraklar + otel, ≤ 25 nokta); gelene kadar kestirim "~".
-  const atanmisMekanlar = useMemo(() => {
-    const atanan = new Set(duraklar.filter((d) => !d.skipped).map((d) => d.place_ref));
-    return mekanlar.filter((m) => atanan.has(m.id)).slice(0, 24);
-  }, [duraklar, mekanlar]);
-  const matris = useYuruyusMatrisi(seyahat.id, matrisNoktalari(otel, atanmisMekanlar));
-
-  // Seçili günün §5.1 sırası (ya da elle sırası) → gerçek rota bacakları (route-legs; yalnız seçili gün, maliyet).
-  const konumKey = useMemo(() => {
-    const k = new Map<string, string>();
-    if (otel) k.set(`${otel.lat},${otel.lng}`, 'hotel');
-    for (const m of mekanlar) k.set(`${m.lat},${m.lng}`, m.place_id);
-    return k;
-  }, [mekanlar, otel]);
-  const seciliSira = useMemo(() => {
-    if (!seciliGun) return [] as Mekan[];
-    const sirali = duraklar
-      .filter((d) => d.day_id === seciliGun.id && !d.skipped)
-      .sort((a, b) => (a.order_key < b.order_key ? -1 : 1))
-      .map((d) => mekanIle.get(d.place_ref))
-      .filter((m): m is Mekan => !!m);
-    if (seciliGun.order_manual || sirali.length < 2) return sirali;
-    // Otomatik günde §5.1 sırası (gerçek yürüyüşle, 3.7 ile aynı).
-    const tp = tempoHesapla({
-      duraklar: sirali.map((m) => ({ id: m.id, konum: { lat: m.lat, lng: m.lng }, dakika: 0 })),
-      otel,
-      baslangic: '09:00',
-      bitis: '20:00',
-      yuruyusSn: (a, b) => matris.yuruyus(konumKey.get(`${a.lat},${a.lng}`) ?? '', konumKey.get(`${b.lat},${b.lng}`) ?? '')?.sn ?? kestirimYuruyusSn(a, b),
-    });
-    return tp.sira.map((id) => mekanIle.get(id)).filter((m): m is Mekan => !!m);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [seciliGun?.id, seciliGun?.order_manual, duraklar, mekanlar, otel, matris.yuruyus, konumKey]);
-  const seciliNoktalar: MatrisNoktasi[] = useMemo(() => {
-    const n = seciliSira.map((m) => ({ key: m.place_id, lat: m.lat, lng: m.lng }));
-    return otel && n.length > 0 ? [{ key: 'hotel', ...otel }, ...n, { key: 'hotel', ...otel }] : n;
-  }, [seciliSira, otel]);
-  const rota = useRotaBacaklari(seyahat.id, bacakListesi(seciliNoktalar));
-
-  // Matris + gerçek bacaklar → tempo kaynağı (konumdan anahtara).
-  const kaynak = useMemo(() => bacakKaynagi(matris.yuruyus, rota.rotalar), [matris.yuruyus, rota.rotalar]);
-  const bacak: BacakKaynagi = useMemo(
-    () => (a, b) => {
-      const c = kaynak(konumKey.get(`${a.lat},${a.lng}`) ?? '', konumKey.get(`${b.lat},${b.lng}`) ?? '');
-      return c ? { yuruyusSn: c.sn, taksiSn: c.taksi?.sn ?? null, kestirim: false } : { yuruyusSn: kestirimYuruyusSn(a, b), taksiSn: null, kestirim: true };
-    },
-    [kaynak, konumKey],
-  );
-
-  // KK5: her gün için tempo. Gün başlangıcı/bitişi: days.* yoksa trips.day_*. Elle sıralanmış günde mevcut sıra.
-  const tempolar = useMemo(() => {
-    const mekanIle = new Map(mekanlar.map((m) => [m.id, m]));
-    const sonuc = new Map<string, TempoSonucu>();
-    for (const g of gunler) {
-      const gunDuraklari = duraklar
-        .filter((d) => d.day_id === g.id && !d.skipped)
-        .sort((a, b) => (a.order_key < b.order_key ? -1 : 1))
-        .map((d) => ({ durak: d, mekan: mekanIle.get(d.place_ref) }))
-        .filter((x): x is { durak: Durak; mekan: Mekan } => !!x.mekan);
-      sonuc.set(
-        g.id,
-        tempoHesapla({
-          duraklar: gunDuraklari.map(({ durak, mekan }) => ({ id: mekan.id, konum: { lat: mekan.lat, lng: mekan.lng }, dakika: durak.minutes })),
-          otel,
-          baslangic: saat(g.start_time, saat(seyahat.day_start, '09:00')),
-          bitis: saat(g.end_time, saat(seyahat.day_end, '20:00')),
-          bacak,
-          sira: g.order_manual ? gunDuraklari.map(({ mekan }) => mekan.id) : undefined,
-        }),
-      );
-    }
-    return sonuc;
-  }, [gunler, duraklar, mekanlar, otel, seyahat.day_start, seyahat.day_end, bacak]);
-
   // KK6: ilk boştaki mekan için en yakın gün.
   const bostaOneri = useMemo(() => {
-    const mekanIle = new Map(mekanlar.map((m) => [m.id, m]));
     const atanan = new Set(duraklar.map((d) => d.place_ref));
     const ilk = mekanlar.find((m) => !atanan.has(m.id));
     if (!ilk) return null;
@@ -163,9 +74,9 @@ export function GunlerHaritasi({ seyahat, gunler, duraklar, mekanlar, seciliGun,
       })),
     );
     return gunId ? { mekan: ilk, gunIndex: gunler.find((g) => g.id === gunId)?.index ?? 1 } : null;
-  }, [duraklar, gunler, mekanlar]);
+  }, [duraklar, gunler, mekanlar, mekanIle]);
 
-  // #30: pin numarası = gün içi sıra (§5.1 ya da elle), gün numarası değil; rota çizgisiyle okunur.
+  // #30: pin numarası = gün içi sıra (§5.1 ya da elle); rota çizgisiyle okunur.
   const gunSiralari = new Map<string, number>();
   for (const g of gunler) tempolar.get(g.id)?.sira.forEach((mekanId, i) => gunSiralari.set(mekanId, i + 1));
 
@@ -176,7 +87,6 @@ export function GunlerHaritasi({ seyahat, gunler, duraklar, mekanlar, seciliGun,
       const idx = d ? gunIndex.get(d.day_id) : undefined;
       const hafif = adlar.data?.[m.place_id];
       const ortak = { id: `m:${m.id}`, konum: { lat: m.lat, lng: m.lng }, ad: adi(m), puan: hafif?.puan ?? null, yorumSayisi: hafif?.puan_sayisi ?? null };
-      // #30: atanmış = gün renginde daire + sıra numarası (gün içi sıra); atanmamış = beyaz daire + kategori ikonu.
       if (idx) {
         const sira = gunSiralari.get(m.id);
         return { ...ortak, tur: 'durak' as const, renk: gunRengi(idx), etiket: sira ? String(sira) : '' };
@@ -185,8 +95,7 @@ export function GunlerHaritasi({ seyahat, gunler, duraklar, mekanlar, seciliGun,
     }),
   ];
 
-  // #33: rota çizgileri. Seçili gün: bacak bacak GERÇEK yol (polyline), araç bacağı kesikli + "🚕 9 dk", yürüyüş "🚶 12 dk";
-  // gelene kadar kuş uçuşu. Diğer günler: kuş uçuşu, %30 opaklık (maliyet).
+  // #33: seçili gün bacak bacak gerçek yol (araç bacağı kesikli + 🚕); gelene kadar kuş uçuşu. Diğer günler kuş uçuşu %30.
   const cizgiler: HaritaCizgisi[] = gunler.flatMap((g): HaritaCizgisi[] => {
     const tp = tempolar.get(g.id);
     if (!tp || tp.sira.length === 0) return [];
@@ -197,7 +106,7 @@ export function GunlerHaritasi({ seyahat, gunler, duraklar, mekanlar, seciliGun,
       return yol.length >= 2 ? [{ id: `rota:${g.id}`, noktalar: yol, renk: rengi, opaklik: 0.3 }] : [];
     }
     return bacakListesi(seciliNoktalar).map((b, i): HaritaCizgisi => {
-      const r = rota.rotalar[`${b.from.key}>${b.to.key}`];
+      const r = rotalar[`${b.from.key}>${b.to.key}`];
       const a = { lat: b.from.lat, lng: b.from.lng };
       const z = { lat: b.to.lat, lng: b.to.lng };
       if (r) {
@@ -221,13 +130,13 @@ export function GunlerHaritasi({ seyahat, gunler, duraklar, mekanlar, seciliGun,
       if (mevcut && mevcut.day_id === seciliGun.id) await kaldir.mutateAsync(mevcut.id);
       else {
         const gunDuraklari = duraklar.filter((d) => d.day_id === seciliGun.id).sort((a, b) => (a.order_key < b.order_key ? -1 : 1));
-        // T7: elle sıralanmış günde yeni durak en ucuz noktaya (kestirimle); otomatik günde sıra 3.7'de yeniden hesaplanır.
+        // T7: elle sıralanmış günde yeni durak en ucuz noktaya; otomatik günde sıra 3.7'de yeniden hesaplanır.
         const ekleIndeksi = seciliGun.order_manual
           ? enUcuzEklemeIndeksi(
               gunDuraklari.filter((d) => !d.skipped).map((d) => mekanIle.get(d.place_ref)).filter((m): m is Mekan => !!m).map((m) => ({ key: m.place_id, konum: { lat: m.lat, lng: m.lng } })),
               { key: mekan.place_id, konum: { lat: mekan.lat, lng: mekan.lng } },
               otel,
-              () => null,
+              verisi.yuruyus,
             )
           : undefined;
         await ata.mutateAsync({ mekan, gunId: seciliGun.id, mevcut, gunDuraklari, ekleIndeksi });
@@ -235,26 +144,6 @@ export function GunlerHaritasi({ seyahat, gunler, duraklar, mekanlar, seciliGun,
     } catch {
       setHata(t('gunler.hata'));
     }
-  };
-
-  // KK7: gün sil — uzun basınca onay; durakları boşa düşer.
-  const gunuSil = (gun: Gun) => {
-    if (gunler.length <= 1) {
-      Alert.alert(t('gunler.sonGun'));
-      return;
-    }
-    const n = duraklar.filter((d) => d.day_id === gun.id).length;
-    Alert.alert(t('gunler.gunSilBaslik', { gun: gunAdi(gun) }), n > 0 ? t('gunler.gunSilMetin', { n }) : t('gunler.gunSilMetinBos'), [
-      { text: t('genel.vazgec'), style: 'cancel' },
-      {
-        text: t('gunler.sil'),
-        style: 'destructive',
-        onPress: () => {
-          if (seciliGunId === gun.id) setSeciliGunId(null);
-          gunSil.mutateAsync({ gun, gunler, startDate: seyahat.start_date }).catch(() => setHata(t('gunler.hata')));
-        },
-      },
-    ]);
   };
 
   // KK8: Çizelgeye geç; boşta mekan varsa uyarı.
@@ -267,90 +156,133 @@ export function GunlerHaritasi({ seyahat, gunler, duraklar, mekanlar, seciliGun,
     ]);
   };
 
+  // #39 KK6: tutamak — dokun → aç/kapat; yukarı çek → aç, aşağı çek → kapat.
+  const tutamak = useMemo(
+    () =>
+      PanResponder.create({
+        onMoveShouldSetPanResponder: (_, g) => Math.abs(g.dy) > 6 && Math.abs(g.dy) > Math.abs(g.dx),
+        onPanResponderRelease: (_, g) => {
+          if (g.dy < -20) setPanelAcik(true);
+          else if (g.dy > 20) setPanelAcik(false);
+          else setPanelAcik((a) => !a);
+        },
+      }),
+    [],
+  );
+
   const merkez = otel ?? { lat: seyahat.lat, lng: seyahat.lng };
+  const seciliTempo = seciliGun ? tempolar.get(seciliGun.id) : undefined;
+  const oneriMetni = (g: Gun) => {
+    const tp = tempolar.get(g.id);
+    if (!tp) return '';
+    const oneri =
+      tp.etiket === 'yogun' && tp.enUzun
+        ? t('gunler.yogunOneri', { ad: adi(mekanIle.get(tp.enUzun.id)), sure: sureMetni(tp.enUzun.dakika) })
+        : tp.etiket === 'rahat' && tp.durakSayisi > 0
+          ? tp.sigar >= 2
+            ? t('gunler.sigar', { n: tp.sigar })
+            : tp.sigar === 1
+              ? t('gunler.sigarBir')
+              : t('gunler.sigmaz')
+          : '';
+    const yakin = bostaOneri && bostaOneri.gunIndex === g.index ? t('gunler.bostaYakin', { ad: adi(bostaOneri.mekan), gun: `${g.index}.` }) : '';
+    return [oneri, yakin].filter(Boolean).join(' · ');
+  };
+  const k = (tp: NonNullable<typeof seciliTempo>) => (tp.kestirim ? '~' : '');
 
   return (
     <HaritaEkrani
-      baslik={t('program.sekmeBaslik')}
+      baslik={seyahat.city_label}
       geri={() => router.replace('/(tabs)')}
-      sagUst={
-        <View style={s.sagUst}>
-          <BilgiHapi metin={bostakiler.length > 0 ? t('gunler.bosta', { n: bostakiler.length }) : t('gunler.bostaYok')} />
-          {sagUst}
-        </View>
-      }
-      ustEk={
-        <>
-          <GunCipleri
-            gunler={gunler}
-            duraklar={duraklar}
-            seciliId={seciliGun?.id}
-            onSec={(id) => setSeciliGunId(id)}
-            onUzunBas={gunuSil}
-            onEkle={() => gunEkle.mutateAsync({ gunler, startDate: seyahat.start_date }).catch(() => setHata(t('gunler.hata')))}
-            ekleniyor={gunEkle.isPending}
-            yuzen
-          />
-          <View style={s.anahtarSatir}>
-            {gorunumAnahtari}
-            <Text style={s.ipucu}>{t('gunler.ipucu')}</Text>
-          </View>
-        </>
-      }
+      sagUst={sagUst}
+      ustEk={ustEk}
       altPanel={
         <>
-          <ScrollView style={s.panelKaydirma} contentContainerStyle={s.panelIcerik} showsVerticalScrollIndicator={false}>
-            {gunler.map((g) => {
-              const tp = tempolar.get(g.id);
-              if (!tp) return null;
-              const rengi = gunRengi(g.index);
-              const oneri =
-                tp.etiket === 'yogun' && tp.enUzun
-                  ? t('gunler.yogunOneri', { ad: adi(mekanIle.get(tp.enUzun.id)), sure: sureMetni(tp.enUzun.dakika) })
-                  : tp.etiket === 'rahat' && tp.durakSayisi > 0
-                    ? tp.sigar >= 2
-                      ? t('gunler.sigar', { n: tp.sigar })
-                      : tp.sigar === 1
-                        ? t('gunler.sigarBir')
-                        : t('gunler.sigmaz')
-                    : '';
-              const yakin = bostaOneri && bostaOneri.gunIndex === g.index ? t('gunler.bostaYakin', { ad: adi(bostaOneri.mekan), gun: `${g.index}.` }) : '';
-              return (
-                <Pressable key={g.id} accessibilityRole="button" onPress={() => setSeciliGunId(g.id)} style={[s.kart, g.id === seciliGun?.id && s.kartSecili]}>
-                  <View style={s.kartUst}>
-                    <View style={s.kartBaslik}>
-                      <View style={[s.kartNumara, { backgroundColor: rengi }]}>
-                        <Text style={s.kartNumaraMetin}>{g.index}</Text>
+          {/* KK5: katlı özet — tutamak, tek satır, kısa ilerleme çubuğu, ok; altında bir satır öneri. */}
+          <View {...tutamak.panHandlers} accessibilityRole="button" accessibilityLabel={panelAcik ? t('gunler.paneliKapat') : t('gunler.paneliAc')} style={s.tutamakAlan}>
+            <View style={s.tutamakCizgi} />
+            {seciliGun ? (
+              <View style={s.ozetSatir}>
+                <View style={{ flex: 1, minWidth: 0, gap: 6 }}>
+                  <Text style={s.ozet} numberOfLines={1}>
+                    {seciliTempo && seciliTempo.durakSayisi > 0
+                      ? `${t('gunler.ozetKisa', {
+                          gun: seciliGun.index,
+                          tempo: t(`gunler.tempo.${seciliTempo.etiket}`),
+                          n: seciliTempo.durakSayisi,
+                          gezi: sureMetni(seciliTempo.geziDk),
+                          yuruyus: `${k(seciliTempo)}${sureMetni(seciliTempo.yuruyusDk)}`,
+                        })}${seciliTempo.taksiDk > 0 ? t('gunler.ozetKisaTaksi', { taksi: `${k(seciliTempo)}${sureMetni(seciliTempo.taksiDk)}` }) : ''} · ${seciliTempo.baslangic} → ${seciliTempo.bitis}`
+                      : t('gunler.ozetKisaBos', { gun: seciliGun.index })}
+                  </Text>
+                  <View style={s.cubukKisa}>
+                    <View
+                      style={[
+                        s.cubukDolu,
+                        {
+                          width: `${Math.min(100, Math.round((seciliTempo?.doluluk ?? 0) * 100))}%`,
+                          backgroundColor: seciliTempo?.etiket === 'yogun' ? renk.vurgu : gunRengi(seciliGun.index),
+                        },
+                      ]}
+                    />
+                  </View>
+                </View>
+                <Text style={s.ok}>{panelAcik ? '⌄' : '⌃'}</Text>
+              </View>
+            ) : null}
+            {seciliGun && !panelAcik ? (
+              <Text style={s.oneri} numberOfLines={1}>
+                {oneriMetni(seciliGun) || t('gunler.ipucu')}
+              </Text>
+            ) : null}
+          </View>
+
+          {panelAcik ? (
+            <>
+              <ScrollView style={s.panelKaydirma} contentContainerStyle={s.panelIcerik} showsVerticalScrollIndicator={false}>
+                {gunler.map((g) => {
+                  const tp = tempolar.get(g.id);
+                  if (!tp) return null;
+                  const rengi = gunRengi(g.index);
+                  const oneri = oneriMetni(g);
+                  return (
+                    <Pressable key={g.id} accessibilityRole="button" onPress={() => onGunSec(g.id)} style={[s.kart, g.id === seciliGun?.id && s.kartSecili]}>
+                      <View style={s.kartUst}>
+                        <View style={s.kartBaslik}>
+                          <View style={[s.kartNumara, { backgroundColor: rengi }]}>
+                            <Text style={s.kartNumaraMetin}>{g.index}</Text>
+                          </View>
+                          <Text style={s.kartAd}>{t('program.gunSec', { n: g.index })}</Text>
+                        </View>
+                        <View style={[s.etiket, ETIKET_ZEMIN[tp.etiket]]}>
+                          <Text style={[s.etiketMetin, ETIKET_METIN[tp.etiket]]}>{t(`gunler.tempo.${tp.durakSayisi > 0 ? tp.etiket : 'bos'}`)}</Text>
+                        </View>
                       </View>
-                      <Text style={s.kartAd}>{gunAdi(g)}</Text>
-                    </View>
-                    <View style={[s.etiket, ETIKET_ZEMIN[tp.etiket]]}>
-                      <Text style={[s.etiketMetin, ETIKET_METIN[tp.etiket]]}>{t(`gunler.tempo.${tp.etiket}`)}</Text>
-                    </View>
-                  </View>
-                  <View style={s.cubuk}>
-                    <View style={[s.cubukDolu, { width: `${Math.min(100, Math.round(tp.doluluk * 100))}%`, backgroundColor: tp.etiket === 'yogun' ? renk.vurgu : rengi }]} />
-                  </View>
-                  <View style={s.kartSatir}>
-                    <Text style={s.kartAlt}>
-                      {tp.durakSayisi > 0
-                        ? `${t('gunler.ozet', { n: tp.durakSayisi, gezi: sureMetni(tp.geziDk), yuruyus: `${tp.kestirim ? '~' : ''}${sureMetni(tp.yuruyusDk)}` })}${
-                            tp.taksiDk > 0 ? ` + ${tp.kestirim ? '~' : ''}${t('gunler.taksi', { sure: sureMetni(tp.taksiDk) })}` : ''
-                          }`
-                        : t('gunler.ozetBos')}
-                    </Text>
-                    <Text style={s.kartAlt}>{t('gunler.saatler', { bas: tp.baslangic, bit: tp.bitis })}</Text>
-                  </View>
-                  {oneri || yakin ? (
-                    <Text style={[s.oneri, tp.etiket === 'yogun' && { color: renk.uyari }]}>{[oneri, yakin].filter(Boolean).join(' ')}</Text>
-                  ) : null}
-                </Pressable>
-              );
-            })}
-            <Text style={s.not}>{matris.hata || rota.hata ? t('program.yuruyusHata') : t('gunler.kestirimNot')}</Text>
-          </ScrollView>
+                      <View style={s.cubuk}>
+                        <View style={[s.cubukDolu, { width: `${Math.min(100, Math.round(tp.doluluk * 100))}%`, backgroundColor: tp.etiket === 'yogun' ? renk.vurgu : rengi }]} />
+                      </View>
+                      <View style={s.kartSatir}>
+                        <Text style={s.kartAlt}>
+                          {tp.durakSayisi > 0
+                            ? `${t('gunler.ozet', { n: tp.durakSayisi, gezi: sureMetni(tp.geziDk), yuruyus: `${k(tp)}${sureMetni(tp.yuruyusDk)}` })}${
+                                tp.taksiDk > 0 ? ` + ${k(tp)}${t('gunler.taksi', { sure: sureMetni(tp.taksiDk) })}` : ''
+                              }`
+                            : t('gunler.ozetBos')}
+                        </Text>
+                        <Text style={s.kartAlt}>{t('gunler.saatler', { bas: tp.baslangic, bit: tp.bitis })}</Text>
+                      </View>
+                      {oneri ? <Text style={[s.oneri, { textAlign: 'left' }, tp.etiket === 'yogun' && { color: renk.uyari }]}>{oneri}</Text> : null}
+                    </Pressable>
+                  );
+                })}
+                <Text style={s.not}>{verisi.matrisHata || verisi.rotaHata ? t('program.yuruyusHata') : t('gunler.kestirimNot')}</Text>
+              </ScrollView>
+              <Pressable accessibilityRole="button" onPress={programaGec} style={s.gecDugme}>
+                <Text style={s.gecMetin}>{t('gunler.programaGec')} →</Text>
+              </Pressable>
+            </>
+          ) : null}
           {hata ? <Text style={s.hata}>{hata}</Text> : null}
-          <Buton baslik={t('gunler.programaGec')} onPress={programaGec} stil={{ height: 50 }} />
         </>
       }
       harita={{
@@ -369,12 +301,15 @@ const ETIKET_ZEMIN = { rahat: { backgroundColor: '#e6f4ec' }, normal: { backgrou
 const ETIKET_METIN = { rahat: { color: renk.basari }, normal: { color: renk.ikincil }, yogun: { color: renk.uyari } } as const;
 
 const s = StyleSheet.create({
-  ortala: { alignItems: 'center', justifyContent: 'center' },
-  golge: { shadowColor: renk.metin, shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 8, elevation: 3 },
-  sagUst: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  anahtarSatir: { flexDirection: 'row', alignItems: 'center', gap: 10, flexWrap: 'wrap' },
-  ipucu: { fontFamily: yazi.normal, fontSize: 11, color: renk.ikincil, flexShrink: 1 },
-  panelKaydirma: { maxHeight: 290 },
+  tutamakAlan: { gap: 8, paddingBottom: 2 },
+  tutamakCizgi: { alignSelf: 'center', width: 40, height: 4, borderRadius: 2, backgroundColor: renk.ayrac, marginTop: -6 },
+  ozetSatir: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  ozet: { fontFamily: yazi.kalin, fontSize: 12, color: renk.metin },
+  cubukKisa: { height: 4, borderRadius: 2, backgroundColor: '#e0e0e0', overflow: 'hidden', width: '60%' },
+  ok: { fontFamily: yazi.kalin, fontSize: 18, lineHeight: 20, color: renk.ikincil, width: 20, textAlign: 'center' },
+  oneri: { fontFamily: yazi.yari, fontSize: 12, color: renk.metin },
+  // Harita ekranın en az %65'i: açık panel sınırlı yükseklikte kayar.
+  panelKaydirma: { maxHeight: 220 },
   panelIcerik: { gap: 8 },
   kart: { padding: 12, paddingHorizontal: 14, borderRadius: 16, backgroundColor: renk.yuzey, gap: 6, borderWidth: 1.5, borderColor: renk.yuzey },
   kartSecili: { borderColor: renk.metin },
@@ -389,7 +324,8 @@ const s = StyleSheet.create({
   cubukDolu: { height: '100%' },
   kartSatir: { flexDirection: 'row', justifyContent: 'space-between', gap: 8 },
   kartAlt: { fontFamily: yazi.normal, fontSize: 11, color: renk.ikincil },
-  oneri: { fontFamily: yazi.yari, fontSize: 12, color: renk.metin },
   not: { fontFamily: yazi.normal, fontSize: 10, color: renk.soluk, textAlign: 'center', paddingTop: 2 },
+  gecDugme: { alignSelf: 'center', height: 36, paddingHorizontal: 16, borderRadius: 999, backgroundColor: renk.yuzey, justifyContent: 'center' },
+  gecMetin: { fontFamily: yazi.kalin, fontSize: 12, color: renk.metin },
   hata: { fontFamily: yazi.yari, fontSize: 12, textAlign: 'center', color: renk.uyari },
 });

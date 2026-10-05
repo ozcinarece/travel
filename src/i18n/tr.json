@@ -298,7 +298,8 @@
     "tempo": {
       "rahat": "Rahat",
       "normal": "Normal",
-      "yogun": "Yoğun"
+      "yogun": "Yoğun",
+      "bos": "Boş"
     },
     "ozet": "{n} durak · {gezi} gezi + {yuruyus} yürüyüş",
     "ozetBos": "Henüz durak yok",
@@ -315,7 +316,16 @@
     "devam": "Devam",
     "hata": "Kaydedilemedi. Tekrar dene.",
     "kestirimNot": "Süreler Google yürüyüş ve araç rotalarından; ~ kestirim. 40 dk üstü bacaklar araçla.",
-    "taksi": "{sure} taksi"
+    "taksi": "{sure} taksi",
+    "durakYokKart": "durak yok",
+    "gunuSil": "Günü sil",
+    "ipucuHarita": "Güne dokun, sonra pinlere dokun · {n} mekan boşta",
+    "ipucuHaritaBostaYok": "Güne dokun, sonra pinlere dokun · hepsi dağıtıldı",
+    "ozetKisa": "{gun}. gün · {tempo} · {n} durak · {gezi} gezi + {yuruyus} 🚶",
+    "ozetKisaTaksi": " + {taksi} 🚕",
+    "ozetKisaBos": "{gun}. gün · Boş · henüz durak yok",
+    "paneliAc": "Tempo panelini aç",
+    "paneliKapat": "Tempo panelini kapat"
   },
   "program": {
     "baslik": "{n}. gün",
@@ -384,6 +394,10 @@
     "taksi": "{n} dk taksi",
     "taksiYolTarifi": "Yol tarifi",
     "oteleDonusTaksi": "{n} dk taksiyle otele",
-    "toplamTaksi": "Taksi"
+    "toplamTaksi": "Taksi",
+    "ipucuCizelge": "Sıralamak için Düzenle · karta uzun bas: seçenekler",
+    "ipucuCizelgeSimdi": " · Şu an {saat}",
+    "basBit": "Başlangıç {bas} · Bitiş {bit}",
+    "kisaRota": "Kısa rota"
   }
 }
