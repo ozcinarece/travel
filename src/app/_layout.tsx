@@ -12,8 +12,10 @@ import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
 
 import { useProfil } from '@/features/profil/sorgular';
+import { hataRaporunuBaslat, hataRaporuyla } from '@/lib/hataRaporu';
 import { OturumSaglayici, useOturum } from '@/lib/oturum';
 
+hataRaporunuBaslat();
 SplashScreen.preventAutoHideAsync();
 
 const queryClient = new QueryClient();
@@ -55,7 +57,7 @@ function Kok() {
   );
 }
 
-export default function KokLayout() {
+function KokLayout() {
   return (
     <QueryClientProvider client={queryClient}>
       <OturumSaglayici>
@@ -64,3 +66,5 @@ export default function KokLayout() {
     </QueryClientProvider>
   );
 }
+
+export default hataRaporuyla(KokLayout);

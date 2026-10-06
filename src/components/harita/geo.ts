@@ -156,3 +156,15 @@ export function bolgedenUzaklasti(simdi: HaritaBolgesi, arama: HaritaBolgesi): b
   const oran = simdi.yaricapM / arama.yaricapM;
   return oran > 1.4 || oran < 1 / 1.4;
 }
+
+/** Harita dolgusu (mapPadding, dp). Sabit nesne: hazır değilken prop hiç değişmez, native taraf çağrılmaz. */
+export const SIFIR_DOLGU = Object.freeze({ top: 0, right: 0, bottom: 0, left: 0 });
+
+/**
+ * #49: Android'de mapPadding, GoogleMap hazır olmadan değişirse native çöküş (NullPointerException) olur.
+ * Harita hazır değilken ya da alt boşluk geçersizken hep aynı sıfır nesnesi döner.
+ */
+export function haritaDolgusu(hazir: boolean, altBosluk: number) {
+  if (!hazir || !Number.isFinite(altBosluk) || altBosluk <= 0) return SIFIR_DOLGU;
+  return { top: 0, right: 0, bottom: Math.round(altBosluk), left: 0 };
+}

@@ -1,6 +1,6 @@
 import { describe, expect, it } from '@jest/globals';
 
-import { bolgedenUzaklasti, bolgeHesapla, deltaZoom, detayGoster, gizliEtiketler, kisaAd, mesafeM, pinCapasi, zoomDelta } from '../geo';
+import { bolgedenUzaklasti, bolgeHesapla, deltaZoom, detayGoster, gizliEtiketler, haritaDolgusu, kisaAd, mesafeM, pinCapasi, SIFIR_DOLGU, zoomDelta } from '../geo';
 import type { HaritaPini } from '../tipler';
 
 const roma = { lat: 41.9028, lng: 12.4964 };
@@ -104,5 +104,18 @@ describe('geo', () => {
     const g2 = gizliEtiketler([ust, { ...alt, konum: { lat: roma.lat + 0.00025, lng: roma.lng } }], bolge, ekran);
     expect([...g2.etiket]).toEqual(['alt']);
     expect(g2.detay.size).toBe(0);
+  });
+
+  // #49: Android'de harita hazır olmadan mapPadding değişmez (native çöküş).
+  it('haritaDolgusu: hazır değilken hep aynı sıfır nesnesi', () => {
+    expect(haritaDolgusu(false, 240)).toBe(SIFIR_DOLGU);
+    expect(haritaDolgusu(false, 0)).toBe(SIFIR_DOLGU);
+    expect(haritaDolgusu(true, 0)).toBe(SIFIR_DOLGU);
+    expect(haritaDolgusu(true, Number.NaN)).toBe(SIFIR_DOLGU);
+    expect(haritaDolgusu(true, -5)).toBe(SIFIR_DOLGU);
+  });
+
+  it('haritaDolgusu: hazırken alt boşluk (tam sayı)', () => {
+    expect(haritaDolgusu(true, 212.6)).toEqual({ top: 0, right: 0, bottom: 213, left: 0 });
   });
 });
