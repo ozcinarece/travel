@@ -21,7 +21,16 @@ export type IkonAdi =
   | 'tik'
   | 'ev'
   // #39 görünüm anahtarı
-  | 'dunya';
+  | 'dunya'
+  // #47 B5: emoji yerine çizgi ikonlar
+  | 'harita'
+  | 'yurume'
+  | 'taksi'
+  | 'yukari'
+  | 'asagi'
+  | 'daha'
+  | 'genislet'
+  | 'daralt';
 
 type Props = { ad: IkonAdi; boyut?: number; renk: ColorValue; kalinlik?: number };
 
@@ -112,6 +121,35 @@ export function Ikon({ ad, boyut = 24, renk, kalinlik = 2 }: Props) {
           <Circle cx={12} cy={12} r={9} {...ortak} />
           <Path d="M3 12h18M12 3c2.8 3 4 6 4 9s-1.2 6-4 9c-2.8-3-4-6-4-9s1.2-6 4-9z" {...ortak} />
         </>
+      ) : ad === 'harita' ? (
+        // Katlanmış harita.
+        <Path d="M9 4L3 6.5v13.5l6-2.5 6 2.5 6-2.5V4l-6 2.5L9 4zM9 4v13.5M15 6.5V20" {...ortak} />
+      ) : ad === 'yurume' ? (
+        <>
+          <Circle cx={13} cy={4.5} r={1.8} {...ortak} />
+          <Path d="M10 21l2-6 2.5 2.5V21M12 15l-1-5 3-1.5 2 3.5h2.5M11 10l-3 2v3" {...ortak} />
+        </>
+      ) : ad === 'taksi' ? (
+        <>
+          <Path d="M5 16V12l2-5h10l2 5v4M3.5 16h17v3h-17z" {...ortak} />
+          <Circle cx={7.5} cy={19} r={1} {...ortak} />
+          <Circle cx={16.5} cy={19} r={1} {...ortak} />
+          <Path d="M10 4h4" {...ortak} />
+        </>
+      ) : ad === 'yukari' ? (
+        <Path d="M6 15l6-6 6 6" {...ortak} />
+      ) : ad === 'asagi' ? (
+        <Path d="M6 9l6 6 6-6" {...ortak} />
+      ) : ad === 'daha' ? (
+        <>
+          <Circle cx={5.5} cy={12} r={1.3} {...ortak} fill={renk} />
+          <Circle cx={12} cy={12} r={1.3} {...ortak} fill={renk} />
+          <Circle cx={18.5} cy={12} r={1.3} {...ortak} fill={renk} />
+        </>
+      ) : ad === 'genislet' ? (
+        <Path d="M14 4h6v6M20 4l-7 7M10 20H4v-6M4 20l7-7" {...ortak} />
+      ) : ad === 'daralt' ? (
+        <Path d="M20 10h-6V4M14 10l7-7M4 14h6v6M10 14l-7 7" {...ortak} />
       ) : ad === 'ev' ? (
         <>
           <Path d="M3.5 11L12 4l8.5 7" {...ortak} />

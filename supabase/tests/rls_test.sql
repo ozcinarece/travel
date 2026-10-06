@@ -148,7 +148,7 @@ update public.stops set arrived_at = now(), arrived_by = auth.uid();
 -- #43: Tamamlandı (üye yazar) ve otomatik tamamlanma bayrağı.
 update public.stops set completed_at = now(), completed_by = auth.uid(), auto_completed = false;
 update public.stops set completed_at = null, completed_by = null, auto_completed = true;
--- #45: puanlama — üye kendi puanını yazar; etiket listesi sınırlı; başkası adına yazamaz; ipuçları ≥ 3 kişi.
+-- #45: puanlama — üye kendi puanını yazar; etiket listesi sınırlı; başkası adına yazamaz.
 insert into public.stop_ratings (trip_id, place_ref, stars, tags, note)
 select p.trip_id, p.id, 5, array['sakin', 'fotograf'], 'sabah erken git' from public.places p where p.place_id = 'ChIJ-kolezyum';
 select pg_temp.hata_bekle(
@@ -162,7 +162,7 @@ select pg_temp.hata_bekle(
 update public.stop_ratings set stars = 4 where user_id = auth.uid();
 do $$ begin
   assert (select count(*) from public.stop_ratings) = 1, 'üye seyahatin puanını görür';
-  assert (select count(*) from public.mekan_ipuclari('ChIJ-kolezyum')) = 0, 'tek kişilik etiket ipucu olmaz';
+  assert to_regprocedure('public.mekan_ipuclari(text)') is null, '#47: ipucu RPC kaldırıldı';
 end $$;
 select pg_temp.hata_bekle(
   $$insert into public.walk_cache (trip_id, from_key, to_key, seconds, meters)

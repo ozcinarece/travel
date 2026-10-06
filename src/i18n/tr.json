@@ -388,7 +388,6 @@
     "ozetGunTaksi": " + {taksi} 🚕",
     "ozetGunSaat": " · {bas} → {bit}",
     "ozetGunBos": "{gun}. gün · henüz durak yok",
-    "tempoBaslik": "{tempo} · {sure}",
     "ipucu": "Güne dokun, pine dokun · {n} mekan boşta",
     "ipucuBostaYok": "Güne dokun, pine dokun · hepsi dağıtıldı",
     "ipucuBugun": "Sıradaki durağı tamamla · panelde çizelge",
@@ -424,21 +423,9 @@
       "google": "Google'da da yorumla",
       "sonra": "Sonra",
       "kaydet": "Kaydet",
-      "hata": "Kaydedilemedi. Tekrar dene.",
-      "etiket": {
-        "sakin": "Sakin",
-        "sabah": "Sabah iyi",
-        "kalabalik": "Kalabalık",
-        "fotograf": "Fotoğraflık",
-        "tekrar": "Tekrar gelirim"
-      },
-      "ipucu": {
-        "sakin": "🍃 Sakin · {n} kişi",
-        "sabah": "🌅 Sabah iyi · {n} kişi",
-        "kalabalik": "⏳ Kalabalık · {n} kişi",
-        "fotograf": "📷 Fotoğraflık · {n} kişi",
-        "tekrar": "🔁 Tekrar gelinir · {n} kişi"
-      }
-    }
+      "hata": "Kaydedilemedi. Tekrar dene."
+    },
+    "ilerlemeBittiPuan": "Bugünün programı bitti · {n}/{n} · puanlamadığın {k} durak var",
+    "ilkiniPuanla": "☆ İlkini puanla"
   }
 }

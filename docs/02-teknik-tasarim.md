@@ -36,8 +36,8 @@ src/
     trip/[id]/kesfet.tsx, program.tsx (#42: tek ekran — harita + alt panel; çizelge panelde), mekan/[placeId].tsx
     r/[token].tsx             3.10 davet (web + universal link hedefi)
   components/harita/          HaritaEkrani.tsx (tam ekran kabuk: 3.3 · 3.4 · 3.5) · Harita.native.tsx · Harita.web.tsx · PinIcerigi.tsx · haritaStili.ts (açık tema, #17) · geo.ts · tipler.ts
-  features/                   seyahatler · mekanlar · gunler (days+stops) · program (route-matrix, route-legs, changes, useGunProgrami/useAktifProgram, useProgramVerisi: matris/rota/tempo, haritaVerisi: pin+çizgi) · konum (useKonum: expo-location ön plan, #42) · puanlar (stop_ratings, mekan_ipuclari RPC, #45) · yerler · profil
-  components/program/         CizelgeListesi (3.7 kompakt liste, alt panelin yarı açık / tam ekran hâli, #45) · PinPaneli (#45 gün daireleri + süre, "Bilmen gerekenler") · PuanSayfasi (#45 tamamlanan durak puanı) · GunKartlari + ProgramUstu · MiniCubuk · SurukleListe · SecimMenusu
+  features/                   seyahatler · mekanlar · gunler (days+stops) · program (route-matrix, route-legs, changes, useGunProgrami/useAktifProgram, useProgramVerisi: matris/rota/tempo, haritaVerisi: pin+çizgi) · konum (useKonum: expo-location ön plan, #42) · puanlar (stop_ratings, #45; ipucu RPC #47 ile kaldırıldı) · yerler · profil
+  components/program/         CizelgeListesi (3.7 kompakt liste, alt panelin yarı açık / tam ekran hâli, #45) · PinPaneli (#45 gün daireleri + süre, "Bilmen gerekenler") · PuanSayfasi (#45 tamamlanan durak puanı; #47: yıldız + not, etiket yok) · GunKartlari + ProgramUstu · MiniCubuk · SurukleListe · SecimMenusu
   components/ui/UygulamaMenusu  #45: seyahat içinde de uygulama alt menüsü (seyahat içi Keşfet · Program · Grup menüsü kalktı)
   schedule/                   siralama.ts (NN + 2-opt) · tempo.ts (§5.3 + kestirim) · sira.ts (kesirli order_key) · program.ts (3.7 zaman çizelgesi, KK7 varış, T7 en ucuz ekleme) · acilis.ts (KK5) · kaydir.ts (§5.4 mini-çubuk, KK8)  (+ __tests__)
   google/                     autocomplete.ts (oturum token'ı) · alanMaskeleri.ts

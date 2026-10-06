@@ -125,8 +125,9 @@ export function programHesapla(secenek: {
     let durum: DurakDurumu = 'bekliyor';
     let otomatik = false;
     if (d.tamamlandiDk !== null) {
-      // KK7: tamamlanma anı ayrılış anıdır; sonrakiler buradan akar.
-      ayrilisDk = d.tamamlandiDk;
+      // KK7: tamamlanma anı ayrılış anıdır; sonrakiler buradan akar. #47 C8: liste her zaman artan — tamamlanma
+      // hesaplanan başlangıçtan önceyse (art arda "Bitti") ayrılış başlangıca sabitlenir, saat geriye gitmez.
+      ayrilisDk = Math.max(varisDk, d.tamamlandiDk);
       durum = 'gecildi';
     } else if (simdiDk !== null && simdiDk > planAyrilis + UZUN_KALMA_PAYI_DK) {
       // KK8: dokunulmadı, pay da geçti → planlanan bitişle otomatik tamamlanmış sayılır; program plana göre akar.

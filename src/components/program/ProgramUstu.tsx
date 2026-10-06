@@ -8,14 +8,20 @@ export function ProgramUstu({ kartlar, ipucu }: { kartlar: ReactNode; ipucu: str
   return (
     <View style={s.kap}>
       {kartlar}
-      <Text style={s.ipucu} numberOfLines={1}>
-        {ipucu}
-      </Text>
+      {/* #47 C11: ipucu gün kartlarının altında, beyaz yarı saydam hap; boşsa gösterilmez. */}
+      {ipucu ? (
+        <View style={s.hap} pointerEvents="none">
+          <Text style={s.ipucu} numberOfLines={1}>
+            {ipucu}
+          </Text>
+        </View>
+      ) : null}
     </View>
   );
 }
 
 const s = StyleSheet.create({
   kap: { gap: 8 },
-  ipucu: { fontFamily: yazi.yari, fontSize: 12, color: renk.ikincil, textAlign: 'center' },
+  hap: { alignSelf: 'center', paddingHorizontal: 12, paddingVertical: 4, borderRadius: 999, backgroundColor: 'rgba(255,255,255,0.85)' },
+  ipucu: { fontFamily: yazi.yari, fontSize: 11, color: renk.ikincil, textAlign: 'center' },
 });

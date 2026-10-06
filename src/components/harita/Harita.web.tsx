@@ -45,6 +45,7 @@ function Cizgi({ cizgi }: { cizgi: HaritaCizgisi }) {
   return null;
 }
 
+// Web'de `altBosluk` yok sayılır (Maps JS logosu konumlanmaz; panel web'de ikincil).
 export function Harita({ merkez, zoom = 14, pinler = [], daireler = [], cizgiler = [], odak, onPinBas, onHaritaBas, onPinSuruklendi, onBolgeDegisti }: HaritaProps) {
   const ekran = useWindowDimensions();
   const [bolge, setBolge] = useState<HaritaBolgesi>(() => bolgeHesapla(merkez, zoomDelta(zoom), zoomDelta(zoom)));

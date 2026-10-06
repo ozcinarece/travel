@@ -14,7 +14,7 @@ function saydam(hex: string, opaklik: number) {
   return hex.length === 7 ? `${hex}${a}` : hex;
 }
 
-export function Harita({ merkez, zoom = 14, pinler = [], daireler = [], cizgiler = [], odak, onPinBas, onHaritaBas, onPinSuruklendi, onBolgeDegisti }: HaritaProps) {
+export function Harita({ merkez, zoom = 14, pinler = [], daireler = [], cizgiler = [], odak, onPinBas, onHaritaBas, onPinSuruklendi, onBolgeDegisti, altBosluk = 0 }: HaritaProps) {
   const ref = useRef<MapView>(null);
   const ekran = useWindowDimensions();
   const [bolge, setBolge] = useState<HaritaBolgesi>(() => bolgeHesapla(merkez, zoomDelta(zoom), zoomDelta(zoom)));
@@ -47,6 +47,8 @@ export function Harita({ merkez, zoom = 14, pinler = [], daireler = [], cizgiler
       userInterfaceStyle="light"
       customMapStyle={ACIK_HARITA_STILI}
       toolbarEnabled={false}
+      // #47 A1: harita görünür alanı panelin üstünde biter; Google logosu panelin üstünde kalır.
+      mapPadding={{ top: 0, right: 0, bottom: altBosluk, left: 0 }}
       showsPointsOfInterests={false}
       // #32: pine dokunmak haritayı kaydırmaz.
       moveOnMarkerPress={false}
@@ -85,7 +87,7 @@ export function Harita({ merkez, zoom = 14, pinler = [], daireler = [], cizgiler
         return (
           <OzelIsaretci
             // Görünüm değişince (renk/etiket/seçim/ad görünürlüğü/detay) işaretçi yeniden kurulur ve anlık görüntüsü yeniden alınır.
-            key={`${p.id}:${p.tur ?? ''}:${p.renk}:${p.etiket ?? ''}:${p.ikon ?? ''}:${p.secili ? 1 : 0}:${p.tamam ? 't' : ''}:${p.ad && !gizli.etiket.has(p.id) ? 'a' : ''}:${detay ? 'd' : ''}:${p.tur === 'etiket' && gizli.etiket.has(p.id) ? 'g' : ''}`}
+            key={`${p.id}:${p.tur ?? ''}:${p.renk}:${p.etiket ?? ''}:${p.ikon ?? ''}:${p.etiketIkon ?? ''}:${p.secili ? 1 : 0}:${p.tamam ? 't' : ''}:${p.ad && !gizli.etiket.has(p.id) ? 'a' : ''}:${detay ? 'd' : ''}:${p.tur === 'etiket' && gizli.etiket.has(p.id) ? 'g' : ''}`}
             pin={p}
             etiketGizli={gizli.etiket.has(p.id)}
             detay={detay}
