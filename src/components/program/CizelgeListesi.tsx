@@ -1,7 +1,7 @@
-import { router } from 'expo-router';
+import { Image } from 'expo-image';
+import type { ReactNode } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
-import { Avatar } from '@/components/ui/Avatar';
 import type { GunProgrami } from '@/features/program/useProgram';
 import type { HafifYer } from '@/features/yerler/api';
 import { t } from '@/i18n';
@@ -9,7 +9,7 @@ import { sureMetni } from '@/lib/kategori';
 import { GUNLER_KISA, haftaGunu } from '@/lib/takvim';
 import type { Durak, Gun, Mekan, Seyahat } from '@/lib/tipler';
 import { acilisDurumu, kapaliGunler } from '@/schedule/acilis';
-import { saatAraligi, yuruyusDk, type ProgramSatiri } from '@/schedule/program';
+import { saatAraligi, yuruyusDk } from '@/schedule/program';
 import { dakikaSaat } from '@/schedule/tempo';
 import { minDokunma, renk, yazi } from '@/theme';
 
@@ -40,6 +40,14 @@ export type CizelgeListesiProps = {
   duzenle: boolean;
   baslangicSaati: string;
   onTamamla: (d: Durak, geriAl?: boolean) => void;
+  /** #45: tamamlanan satıra dokununca puanlama sayfası. */
+  onPuanla: (d: Durak) => void;
+  /** Gelecek satıra dokununca mekan detayı (3.8). */
+  onDetay: (d: Durak) => void;
+  /** Kendi puanım (mekan places.id → puan); yoksa null. */
+  puanim: (mekanId: string) => { stars: number } | null;
+  /** Sıradaki durağın ilk Google fotoğrafı (52 px kart). */
+  siradakiFoto: string | null | undefined;
   onYolTarifi: (d: Durak, mod?: 'yuruyus' | 'taksi') => void;
   onMenu: (d: Durak) => void;
   onGunSec: (d: Durak) => void;
@@ -49,15 +57,16 @@ export type CizelgeListesiProps = {
 };
 
 /**
- * PRD 3.7 çizelge listesi — #42 ile Program alt panelinin açık hâli. KK1–KK10 (PR #23) + #43 "Tamamlandı":
- * sıradaki durak kartında ✓ Tamamlandı (turuncu) ve "Planlanan bitiş HH:MM · dokunmazsan otomatik tamamlanır";
- * tamamlananlar üstü çizili + ✓ saat; bugün duraklar arasında mavi "Şu an yolda · N dk kaldı" / "Şu an X'de".
+ * PRD 3.7 çizelge listesi — Program alt panelinin yarı açık / tam ekran hâli. #45 §4 kompakt satırlar:
+ * saat · ince ray üstünde nokta (tamamlanan yeşil ✓, sıradaki turuncu halka, gelecek boş) · ad · süre; yürüyüş/taksi iki
+ * satır arasında küçük metin, yoldaysa mavi "Şu an yolda · N dk kaldı". Sıradaki durak gri zeminli tek satır kart
+ * (52 px foto, "süre · bitiş", turuncu "Bitti"; dokun → Yol tarifi, uzun bas → menü). Tamamlanan üstü çizili değil,
+ * yanında "☆ puanla" ya da verilen yıldızlar; dokununca puanlama sayfası.
  */
 export function CizelgeListesi(p: CizelgeListesiProps) {
-  const { seyahat, gun, gunler, gunDurak, mekanIle, yerler, uyeAdi, prog, duzenle } = p;
+  const { gun, gunler, gunDurak, mekanIle, yerler, uyeAdi, prog, duzenle } = p;
   const satirlar = prog.canli.satirlar;
   const satirIle = (durakId: string) => satirlar.find((x) => x.durak.id === durakId);
-  const ac = (m: Mekan | undefined) => m && router.push({ pathname: '/seyahat/[id]/mekan/[placeId]', params: { id: seyahat.id, placeId: m.place_id } });
 
   if (gunDurak.length === 0) return <Text style={s.bos}>{t('program.bos')}</Text>;
 
@@ -135,19 +144,6 @@ export function CizelgeListesi(p: CizelgeListesiProps) {
     );
   }
 
-  const siradaki = satirlar.find((x) => x.durum === 'siradaki' || x.durum === 'buradasin');
-  // #42 KK8: önceki tamamlandı, sıradakine yürüyüş sürüyor → mavi satır (konum yoksa da plana göre).
-  const yoldaSatiri = (satir: ProgramSatiri, i: number) => {
-    if (!prog.bugun || prog.simdiDk === null || !siradaki || satir.durak.id !== siradaki.durak.id || i === 0) return null;
-    const onceki = satirlar.slice(0, i).reverse().find((x) => x.durum === 'gecildi');
-    if (!onceki) return null;
-    if (satir.durum === 'buradasin') {
-      const m = mekanIle.get(satir.durak.id) ?? mekanIle.get(gunDurak.find((x) => x.id === satir.durak.id)?.place_ref ?? '');
-      return <Text style={s.yolda}>{t('program.suAnBurada', { ad: (m && yerler?.[m.place_id]?.ad) || '…' })}</Text>;
-    }
-    const kalan = Math.max(0, satir.varisDk - prog.simdiDk);
-    return <Text style={s.yolda}>{p.buradaId === undefined || kalan > 0 ? t('program.suAnYolda', { n: kalan }) : t('program.suAnYoldaGec')}</Text>;
-  };
 
   return (
     <ScrollView contentContainerStyle={s.icerik} nestedScrollEnabled>
@@ -161,114 +157,121 @@ export function CizelgeListesi(p: CizelgeListesiProps) {
         const kapali = acilis && acilis.durum !== 'acik' && acilis.durum !== 'bilinmiyor' && satir.durum !== 'atlandi' && satir.durum !== 'gecildi';
         const haftaKapali = !gun.date ? kapaliGunler(yer?.periyotlar) : [];
         const uzunBas = () => p.onMenu(durak);
-        const aktifKart = satir.durum === 'siradaki' || satir.durum === 'buradasin';
-        return (
-          <View key={d.id}>
-            {satir.yuruyus && i > 0 ? (
-              satir.yuruyus.mod === 'taksi' ? (
-                // #33: 40 dk üstü bacak araçla — "🚕 9 dk · Yol tarifi" Google Maps'i araç moduyla açar.
-                <Pressable accessibilityRole="button" onPress={() => p.onYolTarifi(durak, 'taksi')} style={s.yuruyusSatir}>
-                  <View style={s.noktaCizgi} />
-                  <Text style={s.yuruyusMetin}>
-                    🚕 {(p.matrisYukleniyor || p.rotaYukleniyor) && satir.yuruyus.kestirim ? '…' : `${t('program.taksi', { n: yuruyusDk(satir.yuruyus) })}${satir.yuruyus.kestirim ? ' ~' : ''}`}
-                    {' · '}
-                    <Text style={s.yuruyusBaglanti}>{t('program.taksiYolTarifi')}</Text>
+        const aktif = satir.durum === 'siradaki' || satir.durum === 'buradasin';
+        const tamam = satir.durum === 'gecildi';
+        const puan = m ? p.puanim(m.id) : null;
+        // #45 §4: iki satır arasında küçük yürüyüş/taksi metni; yoldaysa mavi.
+        let ara: ReactNode = null;
+        if (satir.yuruyus && i > 0) {
+          const onceki = satirlar.slice(0, i).reverse().find((x) => x.durum === 'gecildi');
+          const yolda = prog.bugun && prog.simdiDk !== null && aktif && !!onceki && satir.durum !== 'buradasin';
+          const dk = yuruyusDk(satir.yuruyus);
+          const yukleniyor = (satir.yuruyus.mod === 'taksi' ? p.matrisYukleniyor || p.rotaYukleniyor : p.matrisYukleniyor) && satir.yuruyus.kestirim;
+          const metin = `${satir.yuruyus.mod === 'taksi' ? '🚕' : '🚶'} ${yukleniyor ? '…' : `${dk} dk${satir.yuruyus.kestirim ? ' ~' : ''}`}`;
+          ara = (
+            <View style={s.araSatir}>
+              <View style={s.ray} />
+              {yolda ? (
+                <Text style={s.yolda}>{Math.max(0, satir.varisDk - prog.simdiDk!) > 0 ? t('program.suAnYolda', { n: Math.max(0, satir.varisDk - prog.simdiDk!) }) : t('program.suAnYoldaGec')}</Text>
+              ) : satir.yuruyus.mod === 'taksi' ? (
+                <Pressable accessibilityRole="button" onPress={() => p.onYolTarifi(durak, 'taksi')} hitSlop={6}>
+                  <Text style={s.araMetin}>
+                    {metin} · <Text style={s.araBaglanti}>{t('program.taksiYolTarifi')}</Text>
                   </Text>
                 </Pressable>
               ) : (
-                <View style={s.yuruyusSatir}>
-                  <View style={s.noktaCizgi} />
-                  <Text style={s.yuruyusMetin}>
-                    🚶 {p.matrisYukleniyor && satir.yuruyus.kestirim ? '…' : `${t('program.yuruyus', { n: yuruyusDk(satir.yuruyus) })}${satir.yuruyus.kestirim ? ' ~' : ''}`}
+                <Text style={s.araMetin}>{metin}</Text>
+              )}
+            </View>
+          );
+        }
+        return (
+          <View key={d.id}>
+            {ara}
+            {aktif ? (
+              // Sıradaki durak: gri zeminli tek satır kart — 52 px foto, ad, "süre · bitiş", turuncu "Bitti".
+              <Pressable accessibilityRole="button" onPress={() => p.onYolTarifi(durak)} onLongPress={uzunBas} style={s.aktifKart}>
+                <Text style={[s.saat, s.saatKalin]}>{dakikaSaat(satir.varisDk)}</Text>
+                {p.siradakiFoto ? (
+                  <View>
+                    <Image source={{ uri: p.siradakiFoto }} style={s.foto} contentFit="cover" />
+                    <Text style={s.atif}>Google</Text>
+                  </View>
+                ) : (
+                  <View style={[s.nokta, s.noktaSiradaki]} />
+                )}
+                <View style={{ flex: 1, minWidth: 0 }}>
+                  <Text style={s.adKalin} numberOfLines={1}>
+                    {ad}
+                  </Text>
+                  <Text style={s.alt} numberOfLines={1}>
+                    {satir.durum === 'buradasin' ? `${t('program.buradasin')} · ` : ''}
+                    {t('program.sureBitis', { sure: sureMetni(durak.minutes), saat: dakikaSaat(satir.ayrilisDk) })}
                   </Text>
                 </View>
-              )
-            ) : null}
-            {yoldaSatiri(satir, i)}
-            <View style={s.satir}>
-              <View style={s.saatSutun}>
-                <Text style={[s.saat, aktifKart && s.saatBuyuk, satir.durum === 'gecildi' && s.soluk]}>{satir.durum === 'atlandi' ? '—' : dakikaSaat(satir.varisDk)}</Text>
-                {satir.durum === 'siradaki' ? <Text style={s.siradakiEtiket}>{t('program.siradaki')}</Text> : null}
-                {satir.durum === 'buradasin' ? <Text style={s.siradakiEtiket}>{t('program.buradasin')}</Text> : null}
-              </View>
-              {aktifKart ? (
-                <Pressable accessibilityRole="button" onPress={() => ac(m)} onLongPress={uzunBas} style={s.siyahKart}>
-                  <View style={s.kartUst}>
-                    <View style={{ flex: 1, minWidth: 0, gap: 2 }}>
-                      <Text style={s.kartAd} numberOfLines={2}>
-                        {ad}
-                      </Text>
-                      <Text style={s.kartAlt} numberOfLines={1}>
-                        {sureMetni(durak.minutes)}
-                        {yer?.puan !== null && yer?.puan !== undefined ? ` · ★ ${yer.puan.toLocaleString('tr-TR')}` : ''}
-                        {yer?.acik === true ? ` · ${t('mekan.acik')}` : yer?.acik === false ? ` · ${t('mekan.kapali')}` : ''}
-                      </Text>
+                {prog.bugun ? (
+                  <Pressable accessibilityRole="button" onPress={() => p.onTamamla(durak)} hitSlop={6} style={s.bittiDugme}>
+                    <Text style={s.bittiMetin}>{t('program.bitti')}</Text>
+                  </Pressable>
+                ) : null}
+              </Pressable>
+            ) : (
+              <Pressable
+                accessibilityRole="button"
+                onPress={() => (tamam && m ? p.onPuanla(durak) : p.onDetay(durak))}
+                onLongPress={uzunBas}
+                style={[s.satir, kapali && s.satirKapali]}>
+                <Text style={[s.saat, satir.durum === 'atlandi' && s.soluk]}>{satir.durum === 'atlandi' ? '—' : dakikaSaat(satir.varisDk)}</Text>
+                <View style={s.noktaKap}>
+                  <View style={s.rayTam} />
+                  {tamam ? (
+                    <View style={[s.nokta, s.noktaTamam]}>
+                      <Text style={s.tik}>✓</Text>
                     </View>
-                    {m?.added_by ? <Avatar ad={uyeAdi(m.added_by) || '?'} boyut={24} arkaPlan="#4c6ef5" /> : null}
-                  </View>
-                  {m?.note ? (
-                    <Text style={s.kartNot} numberOfLines={2}>
-                      {`“${m.note}”`} <Text style={s.kartNotKim}>— {uyeAdi(m.added_by)}</Text>
-                    </Text>
+                  ) : (
+                    <View style={[s.nokta, satir.durum === 'atlandi' && { borderColor: renk.soluk }]} />
+                  )}
+                </View>
+                <View style={{ flex: 1, minWidth: 0, flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                  <Text style={[s.ad, satir.durum === 'atlandi' && [s.soluk, s.cizili]]} numberOfLines={1}>
+                    {ad}
+                  </Text>
+                  {tamam ? (
+                    puan ? (
+                      <Text style={s.yildizlar}>{'★'.repeat(puan.stars)}</Text>
+                    ) : (
+                      <Text style={s.puanla}>{t('program.puanla')}</Text>
+                    )
                   ) : null}
-                  <View style={s.kartDugmeler}>
-                    <Pressable accessibilityRole="button" onPress={() => p.onYolTarifi(durak)} style={s.kartDugmeBeyaz}>
-                      <Text style={s.kartDugmeBeyazMetin}>{t('program.yolTarifi')}</Text>
-                    </Pressable>
-                    {prog.bugun ? (
-                      // #43 KK1: ✓ Tamamlandı (turuncu) + planlanan bitiş notu.
-                      <Pressable accessibilityRole="button" onPress={() => p.onTamamla(durak)} style={s.kartDugmeTuruncu}>
-                        <Text style={s.kartDugmeTuruncuMetin}>✓ {t('program.tamamlandi')}</Text>
-                      </Pressable>
-                    ) : null}
-                  </View>
-                  {prog.bugun ? <Text style={s.kartNotKim}>{t('program.tamamlandiAlt', { saat: dakikaSaat(satir.ayrilisDk) })}</Text> : null}
-                </Pressable>
-              ) : kapali ? (
-                <Pressable accessibilityRole="button" onPress={() => ac(m)} onLongPress={uzunBas} style={s.kapaliKart}>
-                  <View style={{ flex: 1, minWidth: 0, gap: 2 }}>
-                    <Text style={s.ad} numberOfLines={1}>
-                      {ad}
-                    </Text>
+                  {kapali ? (
                     <Text style={s.kapaliMetin} numberOfLines={1}>
                       {acilis!.durum === 'kapali_gun'
                         ? t('program.kapaliGun')
                         : acilis!.durum === 'kapali_saat' && acilis!.sonrakiAcilis
                           ? t('program.kapaliSaat', { saat: acilis!.sonrakiAcilis })
                           : t('program.kapaliSaatBelirsiz')}
-                      {m?.added_by ? ` · ${uyeAdi(m.added_by)}` : ''}
                     </Text>
-                  </View>
-                  {gunler.length > 1 ? (
-                    <Pressable accessibilityRole="button" onPress={() => p.onGunSec(durak)} style={s.kapaliDugme}>
-                      <Text style={s.kapaliDugmeMetin}>{t('program.baskaGuneAl')}</Text>
-                    </Pressable>
+                  ) : haftaKapali.length > 0 ? (
+                    <Text style={s.alt} numberOfLines={1}>
+                      {t('program.kapaliHafta', { gunler: haftaKapali.map((g) => GUNLER_KISA[(g + 6) % 7]).join(', ') })}
+                    </Text>
                   ) : null}
-                </Pressable>
-              ) : (
-                <Pressable accessibilityRole="button" onPress={() => ac(m)} onLongPress={uzunBas} style={s.duzSatir}>
-                  <View style={{ flex: 1, minWidth: 0, gap: 2 }}>
-                    <Text style={[s.ad, (satir.durum === 'gecildi' || satir.durum === 'atlandi') && s.cizili, satir.durum === 'gecildi' && s.soluk]} numberOfLines={1}>
-                      {ad}
-                    </Text>
-                    <Text style={[s.satirAlt, satir.durum === 'gecildi' && s.soluk]} numberOfLines={1}>
-                      {satir.durum === 'atlandi' ? t('program.atlandi') : satir.durum === 'gecildi' ? `✓ ${dakikaSaat(satir.ayrilisDk)}${satir.otomatik ? ` · ${t('program.otomatik')}` : ''}` : sureMetni(durak.minutes)}
-                      {m?.added_by ? ` · ${uyeAdi(m.added_by)}` : ''}
-                      {haftaKapali.length > 0 ? ` · ${t('program.kapaliHafta', { gunler: haftaKapali.map((g) => GUNLER_KISA[(g + 6) % 7]).join(', ') })}` : ''}
-                      {m?.note ? ` · “${m.note}”` : ''}
-                    </Text>
-                  </View>
-                  {satir.durum === 'gecildi' ? <Text style={s.tik}>✓</Text> : null}
-                </Pressable>
-              )}
-            </View>
+                </View>
+                <Text style={s.sure}>{satir.durum === 'atlandi' ? t('program.atlandi') : sureMetni(durak.minutes)}</Text>
+                {kapali && gunler.length > 1 ? (
+                  <Pressable accessibilityRole="button" onPress={() => p.onGunSec(durak)} hitSlop={6} style={s.kapaliDugme}>
+                    <Text style={s.kapaliDugmeMetin}>{t('program.baskaGuneAl')}</Text>
+                  </Pressable>
+                ) : null}
+              </Pressable>
+            )}
           </View>
         );
       })}
       {prog.canli.oteleDonus ? (
-        <View style={s.yuruyusSatir}>
-          <View style={s.noktaCizgi} />
-          <Text style={s.yuruyusMetin}>
+        <View style={s.araSatir}>
+          <View style={s.ray} />
+          <Text style={s.araMetin}>
             {prog.canli.oteleDonus.mod === 'taksi' ? '🚕' : '🏠'}{' '}
             {t(prog.canli.oteleDonus.mod === 'taksi' ? 'program.oteleDonusTaksi' : 'program.oteleDonus', { n: yuruyusDk(prog.canli.oteleDonus) })}
             {prog.canli.oteleDonus.kestirim ? ' ~' : ''} · {dakikaSaat(prog.canli.bitisDk)}
@@ -279,40 +282,43 @@ export function CizelgeListesi(p: CizelgeListesiProps) {
   );
 }
 
+const RAY_X = 50 + 10 + 9;
+
 const s = StyleSheet.create({
   bos: { fontFamily: yazi.normal, fontSize: 14, color: renk.ikincil, paddingTop: 12 },
   icerik: { paddingTop: 6, paddingBottom: 24 },
-  satir: { flexDirection: 'row', gap: 14, alignItems: 'flex-start' },
-  saatSutun: { width: 50, alignItems: 'flex-end', paddingTop: 12 },
-  saat: { fontFamily: yazi.kalin, fontSize: 14, color: renk.metin },
-  saatBuyuk: { fontFamily: yazi.ekstra, fontSize: 16 },
+  // #45 §4: kompakt satır (~36 px): saat · ray üstünde nokta · ad · süre.
+  satir: { flexDirection: 'row', alignItems: 'center', gap: 10, minHeight: 36 },
+  satirKapali: { backgroundColor: renk.uyariZemin, borderRadius: 10, paddingRight: 6 },
+  saat: { width: 50, textAlign: 'right', fontFamily: yazi.kalin, fontSize: 13, color: renk.metin },
+  saatKalin: { fontFamily: yazi.ekstra },
   soluk: { color: renk.soluk },
-  siradakiEtiket: { fontFamily: yazi.kalin, fontSize: 10, color: renk.vurgu },
-  duzSatir: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 10, minHeight: minDokunma },
-  ad: { fontFamily: yazi.kalin, fontSize: 15, color: renk.metin },
+  noktaKap: { width: 18, height: 36, alignItems: 'center', justifyContent: 'center' },
+  rayTam: { position: 'absolute', top: 0, bottom: 0, width: 2, backgroundColor: renk.ayrac },
+  ray: { position: 'absolute', left: RAY_X - 1, top: 0, bottom: 0, width: 2, backgroundColor: renk.ayrac },
+  nokta: { width: 14, height: 14, borderRadius: 7, borderWidth: 2, borderColor: renk.ikincil, backgroundColor: renk.zemin, alignItems: 'center', justifyContent: 'center' },
+  noktaTamam: { backgroundColor: renk.basari, borderColor: renk.basari },
+  noktaSiradaki: { borderColor: renk.vurgu, borderWidth: 3 },
+  tik: { fontFamily: yazi.ekstra, fontSize: 8, lineHeight: 10, color: renk.zemin },
+  ad: { fontFamily: yazi.yari, fontSize: 14, color: renk.metin, flexShrink: 1 },
+  adKalin: { fontFamily: yazi.ekstra, fontSize: 15, color: renk.metin },
   cizili: { textDecorationLine: 'line-through' },
-  satirAlt: { fontFamily: yazi.normal, fontSize: 12, color: renk.ikincil },
-  tik: { fontFamily: yazi.kalin, fontSize: 16, color: renk.basari },
-  yuruyusSatir: { flexDirection: 'row', alignItems: 'center', gap: 8, height: 30, paddingLeft: 64 },
-  noktaCizgi: { width: 2, height: '100%', borderLeftWidth: 2, borderLeftColor: '#c4c4c4', borderStyle: 'dotted' },
-  yuruyusMetin: { fontFamily: yazi.normal, fontSize: 12, color: renk.ikincil },
-  yuruyusBaglanti: { fontFamily: yazi.kalin, color: renk.metin },
-  yolda: { fontFamily: yazi.kalin, fontSize: 12, color: '#2563eb', paddingLeft: 64, paddingBottom: 6 },
-  siyahKart: { flex: 1, padding: 14, borderRadius: 18, backgroundColor: renk.metin, gap: 10 },
-  kartUst: { flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between', gap: 10 },
-  kartAd: { fontFamily: yazi.ekstra, fontSize: 18, letterSpacing: -0.4, color: renk.zemin },
-  kartAlt: { fontFamily: yazi.normal, fontSize: 12, color: '#a3a3a3' },
-  kartNot: { fontFamily: yazi.normal, fontSize: 13, color: '#d4d4d4' },
-  kartNotKim: { fontFamily: yazi.normal, fontSize: 11, color: '#8a8a8a' },
-  kartDugmeler: { flexDirection: 'row', gap: 8, flexWrap: 'wrap' },
-  kartDugmeBeyaz: { height: 36, paddingHorizontal: 14, borderRadius: 999, backgroundColor: renk.zemin, justifyContent: 'center' },
-  kartDugmeBeyazMetin: { fontFamily: yazi.kalin, fontSize: 12, color: renk.metin },
-  kartDugmeTuruncu: { height: 36, paddingHorizontal: 14, borderRadius: 999, backgroundColor: renk.vurgu, justifyContent: 'center' },
-  kartDugmeTuruncuMetin: { fontFamily: yazi.kalin, fontSize: 12, color: renk.zemin },
-  kapaliKart: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 10, padding: 10, paddingHorizontal: 12, borderRadius: 14, backgroundColor: renk.uyariZemin },
-  kapaliMetin: { fontFamily: yazi.yari, fontSize: 12, color: renk.uyari },
-  kapaliDugme: { height: 32, paddingHorizontal: 12, borderRadius: 999, backgroundColor: renk.uyari, justifyContent: 'center' },
-  kapaliDugmeMetin: { fontFamily: yazi.kalin, fontSize: 11, color: renk.zemin },
+  alt: { fontFamily: yazi.normal, fontSize: 12, color: renk.ikincil },
+  sure: { fontFamily: yazi.normal, fontSize: 12, color: renk.ikincil },
+  puanla: { fontFamily: yazi.normal, fontSize: 11, color: renk.soluk },
+  yildizlar: { fontFamily: yazi.kalin, fontSize: 11, color: renk.vurgu },
+  araSatir: { minHeight: 22, justifyContent: 'center', paddingLeft: RAY_X + 12 },
+  araMetin: { fontFamily: yazi.normal, fontSize: 11, color: renk.ikincil },
+  araBaglanti: { fontFamily: yazi.kalin, color: renk.metin },
+  yolda: { fontFamily: yazi.kalin, fontSize: 12, color: '#2563eb' },
+  aktifKart: { flexDirection: 'row', alignItems: 'center', gap: 10, padding: 8, paddingLeft: 0, borderRadius: 14, backgroundColor: renk.yuzey, marginVertical: 2 },
+  foto: { width: 52, height: 52, borderRadius: 10, backgroundColor: renk.ayrac },
+  atif: { position: 'absolute', bottom: 2, left: 4, fontFamily: yazi.kalin, fontSize: 8, color: renk.zemin },
+  bittiDugme: { height: 34, paddingHorizontal: 14, borderRadius: 999, backgroundColor: renk.vurgu, justifyContent: 'center' },
+  bittiMetin: { fontFamily: yazi.kalin, fontSize: 12, color: renk.zemin },
+  kapaliMetin: { fontFamily: yazi.yari, fontSize: 11, color: renk.uyari, flexShrink: 1 },
+  kapaliDugme: { height: 28, paddingHorizontal: 10, borderRadius: 999, backgroundColor: renk.uyari, justifyContent: 'center' },
+  kapaliDugmeMetin: { fontFamily: yazi.kalin, fontSize: 10, color: renk.zemin },
   araclar: { flexDirection: 'row', gap: 8, paddingBottom: 12, flexWrap: 'wrap' },
   arac: { height: 36, paddingHorizontal: 14, borderRadius: 999, backgroundColor: renk.yuzey, flexDirection: 'row', alignItems: 'center', gap: 6 },
   aracMetin: { fontFamily: yazi.kalin, fontSize: 13, color: renk.metin },
@@ -324,6 +330,7 @@ const s = StyleSheet.create({
   tutamacMetin: { fontFamily: yazi.kalin, fontSize: 16, color: '#c4c4c4' },
   numara: { width: 30, height: 30, borderRadius: 15, backgroundColor: renk.metin, alignItems: 'center', justifyContent: 'center' },
   numaraMetin: { fontFamily: yazi.ekstra, fontSize: 13, color: renk.zemin },
+  satirAlt: { fontFamily: yazi.normal, fontSize: 12, color: renk.ikincil },
   sureKontrol: { flexDirection: 'row', alignItems: 'center', height: 36, borderRadius: 999, backgroundColor: renk.yuzey, paddingHorizontal: 2 },
   sureDugme: { width: 32, height: 32, borderRadius: 16, alignItems: 'center', justifyContent: 'center' },
   sureIsaret: { fontFamily: yazi.kalin, fontSize: 16, color: renk.metin },

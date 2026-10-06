@@ -22,6 +22,8 @@ export type HafifYer = {
   periyotlar?: { gun: number; ac: string; kapaGun: number; kapa: string }[] | null;
   /** Yalnız `foto: true` ile (#29 önizleme): ilk fotoğraf, 400 px. */
   foto_uri?: string | null;
+  /** Yalnız `ozet: true` ile (#45 pin paneli): Google editoryal özeti. */
+  ozet?: string | null;
 };
 
 const HARFLER = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -80,13 +82,14 @@ export function linkGibiMi(metin: string): boolean {
   return /^(https?:\/\/|geo:|maps\.app\.goo\.gl|goo\.gl\/|www\.google\.|maps\.google\.)/i.test(metin.trim());
 }
 
-export async function hafifYerler(ids: string[], secenek: { sehir?: boolean; oturum?: string; saatler?: boolean; foto?: boolean } = {}): Promise<HafifYer[]> {
+export async function hafifYerler(ids: string[], secenek: { sehir?: boolean; oturum?: string; saatler?: boolean; foto?: boolean; ozet?: boolean } = {}): Promise<HafifYer[]> {
   if (ids.length === 0) return [];
   const cevap = await cagir<{ yerler: HafifYer[] }>('places-light', {
     ids,
     sehir: secenek.sehir,
     saatler: secenek.saatler,
     foto: secenek.foto,
+    ozet: secenek.ozet,
     sessionToken: secenek.oturum,
   });
   return cevap.yerler;
@@ -135,6 +138,18 @@ export function useOnizleme(placeId: string | undefined) {
     staleTime: 24 * 60 * 60 * 1000,
     retry: 1,
     queryFn: async () => (await hafifYerler([placeId!], { foto: true }))[0] ?? null,
+  });
+}
+
+/** #45: pin paneli — tek mekan, ilk fotoğraf + editoryal özet (pahalı SKU; yalnız panel açıkken, 24 sa). */
+export function useMekanOzeti(placeId: string | undefined) {
+  return useQuery({
+    queryKey: ['mekan-ozeti', placeId],
+    enabled: !!placeId,
+    staleTime: 24 * 60 * 60 * 1000,
+    gcTime: 24 * 60 * 60 * 1000,
+    retry: 1,
+    queryFn: async () => (await hafifYerler([placeId!], { foto: true, ozet: true }))[0] ?? null,
   });
 }
 

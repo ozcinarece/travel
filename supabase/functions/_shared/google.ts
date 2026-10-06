@@ -98,6 +98,8 @@ const HAFIF_MASKE = 'id,location,displayName,primaryType,timeZone,rating,userRat
 const SAATLI_MASKE = `${HAFIF_MASKE},regularOpeningHours.periods`;
 /** #29: önizleme kartı için ilk fotoğraf adı (photos alanı Enterprise maskesine ek maliyet getirmez; Photo çağrısı ayrı). */
 const FOTOLU_MASKE = `${HAFIF_MASKE},photos`;
+/** #45: pin paneli "Bilmen gerekenler" — editorialSummary daha pahalı SKU'da; yalnız pin paneli açılınca, tek mekan. */
+const OZETLI_MASKE = `${FOTOLU_MASKE},editorialSummary`;
 /** Şehir seçimi: puan gerekmez; saat dilimi ve ülke kodu gerekir (trips.tz, trips.country_code). */
 const SEHIR_MASKE = 'id,location,displayName,primaryType,timeZone,addressComponents';
 
@@ -117,6 +119,8 @@ export type HafifYer = {
   periyotlar?: { gun: number; ac: string; kapaGun: number; kapa: string }[] | null;
   /** İlk fotoğraf (yalnız `foto: true`, #29 önizleme kartı); yoksa null. */
   foto_uri?: string | null;
+  /** #45: Google editoryal özeti (yalnız `ozet: true`); yoksa null. */
+  ozet?: string | null;
 };
 
 type DetailsCevap = {
@@ -131,6 +135,7 @@ type DetailsCevap = {
   regularOpeningHours?: { periods?: { open?: GunSaat; close?: GunSaat }[] };
   addressComponents?: { shortText?: string; types?: string[] }[];
   photos?: { name: string }[];
+  editorialSummary?: { text?: string };
 };
 
 type GunSaat = { day?: number; hour?: number; minute?: number };
@@ -139,11 +144,11 @@ function hhmm(g?: GunSaat) {
   return `${String(g?.hour ?? 0).padStart(2, '0')}:${String(g?.minute ?? 0).padStart(2, '0')}`;
 }
 
-export async function hafifDetay(placeId: string, secenek: { sehir?: boolean; oturum?: string; saatler?: boolean; foto?: boolean }): Promise<HafifYer> {
+export async function hafifDetay(placeId: string, secenek: { sehir?: boolean; oturum?: string; saatler?: boolean; foto?: boolean; ozet?: boolean }): Promise<HafifYer> {
   const parametreler = new URLSearchParams({ languageCode: DIL });
   if (secenek.oturum) parametreler.set('sessionToken', secenek.oturum);
   const d = await istek<DetailsCevap>(`places/${encodeURIComponent(placeId)}?${parametreler}`, {
-    maske: secenek.sehir ? SEHIR_MASKE : secenek.saatler ? SAATLI_MASKE : secenek.foto ? FOTOLU_MASKE : HAFIF_MASKE,
+    maske: secenek.sehir ? SEHIR_MASKE : secenek.saatler ? SAATLI_MASKE : secenek.foto ? (secenek.ozet ? OZETLI_MASKE : FOTOLU_MASKE) : HAFIF_MASKE,
   });
   const foto = secenek.foto ? (d.photos?.[0]?.name ? await fotoUri(d.photos[0].name, 400) : null) : undefined;
   const ulke = d.addressComponents?.find((b) => b.types?.includes('country'))?.shortText ?? null;
@@ -166,6 +171,7 @@ export async function hafifDetay(placeId: string, secenek: { sehir?: boolean; ot
     ulke_kodu: ulke && /^[A-Z]{2}$/.test(ulke) ? ulke : null,
     periyotlar: secenek.saatler ? (d.regularOpeningHours ? periyotlar! : null) : undefined,
     foto_uri: foto,
+    ...(secenek.foto && secenek.ozet ? { ozet: d.editorialSummary?.text?.trim() || null } : {}),
   };
 }
 
