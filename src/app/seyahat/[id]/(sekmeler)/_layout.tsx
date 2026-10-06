@@ -1,24 +1,16 @@
 import { Tabs } from 'expo-router';
 
-import { Ikon } from '@/components/ui/Ikon';
-import { t } from '@/i18n';
-import { renk, yazi } from '@/theme';
+import { UygulamaMenusu } from '@/components/ui/UygulamaMenusu';
 
-// PRD §4 (#34 ile v0.3): seyahat açıkken alt menü Keşfet · Program · Grup. Program = Harita | Çizelge görünümü.
+// #45 §1: seyahat içi alt menü (Keşfet · Program · Grup) kalktı; altta uygulama menüsü (Seyahatler seçili) görünür.
+// Ekranlar sekme olarak kalır (durum korunur): Keşfet'e "‹ Şehir" hapı ve haritadaki "+" ile, Grup'a avatarlarla,
+// Program'a Keşfet'teki "Programa geç" ile gidilir.
 export default function SeyahatSekmeleri() {
   return (
-    <Tabs
-      initialRouteName="kesfet"
-      screenOptions={{
-        headerShown: false,
-        tabBarActiveTintColor: renk.metin,
-        tabBarInactiveTintColor: renk.soluk,
-        tabBarLabelStyle: { fontFamily: yazi.yari, fontSize: 10 },
-        tabBarStyle: { borderTopColor: renk.ayrac, backgroundColor: renk.zemin },
-      }}>
-      <Tabs.Screen name="kesfet" options={{ title: t('seyahat.sekme.kesfet'), tabBarIcon: ({ color }) => <Ikon ad="kesfet" renk={color} /> }} />
-      <Tabs.Screen name="program" options={{ title: t('seyahat.sekme.program'), tabBarIcon: ({ color }) => <Ikon ad="program" renk={color} /> }} />
-      <Tabs.Screen name="grup" options={{ title: t('seyahat.sekme.grup'), tabBarIcon: ({ color }) => <Ikon ad="grup" renk={color} /> }} />
+    <Tabs initialRouteName="kesfet" screenOptions={{ headerShown: false }} tabBar={() => <UygulamaMenusu />}>
+      <Tabs.Screen name="kesfet" />
+      <Tabs.Screen name="program" />
+      <Tabs.Screen name="grup" />
     </Tabs>
   );
 }

@@ -24,6 +24,8 @@ type Props = {
   altSerbest?: ReactNode;
   /** Alttaki beyaz, üstten yuvarlak panel (kart + düğmeler). Yoksa panel çizilmez. */
   altPanel?: ReactNode;
+  /** #45: üst katmanın (geri hapı + ustEk) yüksekliği; tam ekran panel bunun altından başlar. */
+  onUstYukseklik?: (yukseklik: number) => void;
   harita: HaritaProps;
 };
 
@@ -31,13 +33,13 @@ type Props = {
  * #17 KK2: tam ekran harita kabuğu — 3.3 Otel, 3.4 Keşfet ve 3.5 bunu paylaşır.
  * Harita ekranın tamamını kaplar; üstte ve altta yüzen katmanlar dokunuşu yalnız kendi alanlarında yakalar.
  */
-export function HaritaEkrani({ baslik, geri, sagUst, arama, ustEk, altNot, altSerbest, altPanel, harita }: Props) {
+export function HaritaEkrani({ baslik, geri, sagUst, arama, ustEk, altNot, altSerbest, altPanel, onUstYukseklik, harita }: Props) {
   const kenar = useSafeAreaInsets();
   return (
     <View style={s.ekran}>
       <Harita {...harita} />
 
-      <View style={[s.ust, { paddingTop: kenar.top + 12 }]} pointerEvents="box-none">
+      <View style={[s.ust, { paddingTop: kenar.top + 12 }]} pointerEvents="box-none" onLayout={onUstYukseklik ? (e) => onUstYukseklik(e.nativeEvent.layout.height) : undefined}>
         <View style={s.ustSatir} pointerEvents="box-none">
           <GeriHapi baslik={baslik} onPress={geri} />
           {sagUst}

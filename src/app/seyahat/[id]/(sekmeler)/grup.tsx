@@ -1,3 +1,4 @@
+import { router } from 'expo-router';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -28,7 +29,8 @@ export default function GrupEkrani() {
   return (
     <SafeAreaView style={s.ekran}>
       <ScrollView contentContainerStyle={{ paddingBottom: 24 }}>
-        <EkranBasligi baslik={t('seyahat.grup.baslik')} />
+        {/* #45: seyahat içi alt menü kalktı; Grup'a avatarlarla gelinir, geri Program'a döner. */}
+        <EkranBasligi baslik={t('seyahat.grup.baslik')} geri={() => id && router.navigate({ pathname: '/seyahat/[id]/(sekmeler)/program', params: { id } })} />
         <Text style={s.bolum}>{t('seyahat.grup.uyeler')}</Text>
         {uyeler.data?.map((u) => (
           <View key={u.user_id} style={s.satir}>
@@ -72,6 +74,7 @@ function degisiklikMetni(d: Degisiklik, mekanAdi: (placesId: string | null | und
       if (ekle) return `${mekanAdi(ref)} mekanını bir güne ekledi`;
       if (sil) return 'bir durağı günden çıkardı';
       if (d.field === 'arrived_at') return d.new ? 'bir durağa vardı' : 'varış işaretini geri aldı';
+      if (d.field === 'completed_at') return d.new ? 'bir durağı tamamladı' : 'tamamlamayı geri aldı';
       if (d.field === 'skipped') return d.new ? 'bir durağı atladı' : 'atlamayı geri aldı';
       if (d.field === 'day_id') return 'bir durağı başka güne aldı';
       if (d.field === 'order_key') return 'sırayı değiştirdi';

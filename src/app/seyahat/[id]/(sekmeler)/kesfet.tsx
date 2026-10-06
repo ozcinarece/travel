@@ -214,13 +214,19 @@ function Kesfet({ seyahat }: { seyahat: Seyahat }) {
       baslik={seyahat.city_label}
       geri={() => router.replace('/(tabs)')}
       sagUst={
-        <View style={s.avatarlar}>
+        // #45: Grup'a erişim avatarlardan (seyahat içi alt menü kalktı).
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={t('seyahat.grup.baslik')}
+          hitSlop={8}
+          onPress={() => router.navigate({ pathname: '/seyahat/[id]/(sekmeler)/grup', params: { id: seyahat.id } })}
+          style={s.avatarlar}>
           {(uyeler.data ?? []).slice(0, 3).map((u, i) => (
             <View key={u.user_id} style={[s.avatarCerceve, i > 0 && { marginLeft: -8 }]}>
               <Avatar ad={u.display_name} boyut={24} arkaPlan={['#0f0f0f', '#ff5a1f', '#4c6ef5'][i % 3]} />
             </View>
           ))}
-        </View>
+        </Pressable>
       }
       arama={
         <>
