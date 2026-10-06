@@ -18,6 +18,7 @@ Değişiklik: v0.2'de incelemedeki T1, T2, T5, T7, T8 ve T11 kararları işlendi
 | Arka uç | **Supabase**: Postgres, Auth, Realtime, Edge Functions, pg_cron | Kapsamdaki gerekçe geçerli. Ayrıca misafir kullanıcı için **anonim oturum** desteği var (§4). |
 | Veri erişimi | `@supabase/supabase-js` + TanStack Query | Ekranlar önbellekten açılır. Realtime olayları sorgu önbelleğini günceller. |
 | Hesaplama | Saf TS modülü `src/schedule/` (istemcide) | Sıralama (NN + 2-opt), tempo ve kaydırma hesapları ağ kullanmaz. 20 durakta ≪ 500 ms. Birim testlidir. |
+| Çökme raporlama | `@sentry/react-native` (#49, M4'ten öne alındı) | Yalnız native; DSN `EXPO_PUBLIC_SENTRY_DSN` (EAS ortamına `eas-build.yml` repo değişkeni/secret'ı `SENTRY_DSN`'den yazar), boşsa kapalı. PII yok, performans izleme kapalı. Kaynak haritası yüklemesi (Sentry config eklentisi + auth token) sonraya. |
 | Analitik | PostHog (AB bölgesi) | §10 olayları. KVKK açısından veri AB'de kalır. |
 | CI/CD | GitHub Actions | Her PR'da `tsc` + ESLint + Jest çalışır. `main`'e her birleştirmede EAS Update (preview kanalı) ve web dağıtımı yapılır. Mağaza derlemeleri elle tetiklenen EAS Build ile alınır. |
 

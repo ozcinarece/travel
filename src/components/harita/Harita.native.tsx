@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { StyleSheet, View, useWindowDimensions } from 'react-native';
 import MapView, { Circle, Marker, Polyline, PROVIDER_GOOGLE } from 'react-native-maps';
 
-import { bolgeHesapla, detayGoster, gizliEtiketler, pinCapasi, zoomDelta } from './geo';
+import { bolgeHesapla, detayGoster, gizliEtiketler, haritaDolgusu, pinCapasi, zoomDelta } from './geo';
 import { ACIK_HARITA_STILI } from './haritaStili';
 import { PinIcerigi } from './PinIcerigi';
 import { bacakEtiketPinleri } from './rota';
@@ -18,6 +18,10 @@ export function Harita({ merkez, zoom = 14, pinler = [], daireler = [], cizgiler
   const ref = useRef<MapView>(null);
   const ekran = useWindowDimensions();
   const [bolge, setBolge] = useState<HaritaBolgesi>(() => bolgeHesapla(merkez, zoomDelta(zoom), zoomDelta(zoom)));
+  // #49: Android'de GoogleMap hazır olmadan değişen mapPadding native çöküşe yol açar (react-native-maps 1.27
+  // applyBaseMapPadding → null map.setPadding). Dolgu yalnız onMapReady'den sonra gönderilir.
+  const [hazir, setHazir] = useState(false);
+  const dolgu = useMemo(() => haritaDolgusu(hazir, altBosluk), [hazir, altBosluk]);
 
   // Odak değişince kamera animasyonla gider; initialRegion yalnız ilk kurulumda okunur.
   useEffect(() => {
@@ -48,7 +52,8 @@ export function Harita({ merkez, zoom = 14, pinler = [], daireler = [], cizgiler
       customMapStyle={ACIK_HARITA_STILI}
       toolbarEnabled={false}
       // #47 A1: harita görünür alanı panelin üstünde biter; Google logosu panelin üstünde kalır.
-      mapPadding={{ top: 0, right: 0, bottom: altBosluk, left: 0 }}
+      mapPadding={dolgu}
+      onMapReady={() => setHazir(true)}
       showsPointsOfInterests={false}
       // #32: pine dokunmak haritayı kaydırmaz.
       moveOnMarkerPress={false}

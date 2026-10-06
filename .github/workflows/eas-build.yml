@@ -68,6 +68,16 @@ jobs:
           npx eas-cli env:create "${{ inputs.profile }}" --name GOOGLE_MAPS_ANDROID_KEY --value "$GOOGLE_MAPS_ANDROID_KEY" \
             --visibility sensitive --scope project --force --non-interactive
 
+      # #49: çökme raporlama. DSN gizli değildir (istemci paketine girer); repo değişkeni ya da secret'ı SENTRY_DSN.
+      - name: Sentry DSN
+        if: inputs.build_id == ''
+        env:
+          SENTRY_DSN: ${{ vars.SENTRY_DSN || secrets.SENTRY_DSN }}
+        run: |
+          if [ -z "$SENTRY_DSN" ]; then echo "::notice::SENTRY_DSN yok; çökme raporlama kapalı derlenir"; exit 0; fi
+          npx eas-cli env:create "${{ inputs.profile }}" --name EXPO_PUBLIC_SENTRY_DSN --value "$SENTRY_DSN" \
+            --visibility plaintext --scope project --force --non-interactive
+
       - name: EAS derleme
         id: derleme
         run: |
