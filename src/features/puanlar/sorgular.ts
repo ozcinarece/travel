@@ -1,4 +1,4 @@
-// #45: tamamlanan durak puanları (stop_ratings) ve gezgin ipuçları (mekan_ipuclari RPC).
+// #45: tamamlanan durak puanları (stop_ratings). #47: gezgin ipuçları ve hızlı etiketler kaldırıldı.
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { useOturum } from '@/lib/oturum';
@@ -37,31 +37,17 @@ export function usePuanlar(seyahatId: string | undefined) {
 export function usePuanKaydet(seyahatId: string) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (p: { place_ref: string; stars: number; tags: PuanEtiketi[]; note: string | null }) => {
+    // #47 E15: hızlı etiketler UI'dan çıktı; tags sütunu boş yazılır.
+    mutationFn: async (p: { place_ref: string; stars: number; note: string | null }) => {
       const { error } = await supabase
         .from('stop_ratings')
-        .upsert({ trip_id: seyahatId, ...p, note: p.note?.trim() || null }, { onConflict: 'place_ref,user_id' });
+        .upsert({ trip_id: seyahatId, ...p, tags: [], note: p.note?.trim() || null }, { onConflict: 'place_ref,user_id' });
       if (error) throw error;
     },
     onSettled: () => qc.invalidateQueries({ queryKey: ['puanlar', seyahatId] }),
   });
 }
 
-/** Pin paneli ipuçları: tüm kullanıcıların etiket toplamı (≥ 3 kişi), aynı Google mekanı için. */
-export function useMekanIpuclari(placeId: string | undefined) {
-  const { session } = useOturum();
-  return useQuery({
-    queryKey: ['mekan-ipuclari', placeId],
-    enabled: !!session && !!placeId,
-    staleTime: 60 * 60 * 1000,
-    retry: 1,
-    queryFn: async () => {
-      const { data, error } = await supabase.rpc('mekan_ipuclari', { p_place_id: placeId! });
-      if (error) throw error;
-      return (data ?? []) as { tag: PuanEtiketi; kisi: number }[];
-    },
-  });
-}
 
 /** Google'da yorum yazma derin linki. */
 export function googleYorumLinki(placeId: string) {

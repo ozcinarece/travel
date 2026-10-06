@@ -1,5 +1,6 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
+import { Ikon } from '@/components/ui/Ikon';
 import { t } from '@/i18n';
 import type { MiniCubuk as MiniCubukVerisi } from '@/schedule/kaydir';
 import { dakikaSaat } from '@/schedule/tempo';
@@ -29,7 +30,7 @@ export function MiniCubuk({ cubuk, adi, onKaydir, onAtla, onKoru }: Props) {
   return (
     <View style={s.kap} accessibilityRole="summary">
       <View style={s.ikon}>
-        <Text style={s.ikonMetin}>🚶</Text>
+        <Ikon ad="yurume" boyut={20} renk={renk.zemin} kalinlik={2.2} />
       </View>
       <View style={{ flex: 1, minWidth: 0 }}>
         <Text style={s.baslik} numberOfLines={1}>
@@ -61,7 +62,6 @@ export function MiniCubuk({ cubuk, adi, onKaydir, onAtla, onKoru }: Props) {
 const s = StyleSheet.create({
   kap: { marginHorizontal: 12, marginBottom: 8, flexDirection: 'row', alignItems: 'center', gap: 10, minHeight: 54, paddingLeft: 12, paddingRight: 6, borderRadius: 14, backgroundColor: renk.yuzey },
   ikon: { width: 34, height: 34, borderRadius: 10, backgroundColor: renk.vurgu, alignItems: 'center', justifyContent: 'center' },
-  ikonMetin: { fontSize: 16 },
   baslik: { fontFamily: yazi.kalin, fontSize: 13, color: renk.metin },
   alt: { fontFamily: yazi.normal, fontSize: 11, color: renk.ikincil },
   dugmeler: { flexDirection: 'row', alignItems: 'center', gap: 4 },

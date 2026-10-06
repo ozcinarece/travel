@@ -5,11 +5,13 @@ export const ACIK_HARITA_STILI = [
   { elementType: 'labels.text.fill', stylers: [{ color: '#6e6e6e' }] },
   { elementType: 'labels.text.stroke', stylers: [{ color: '#ffffff' }] },
   { featureType: 'administrative', elementType: 'geometry', stylers: [{ visibility: 'off' }] },
-  // #30: Google POI etiketleri sade — işletmeler kapalı, yalnız turistik yerlerin metni açık (bizim etiketlerle karışmasın).
+  // #47 D13: Google POI etiketleri tamamen kapalı (attraction dahil — mekanlar bizim pinlerimiz); şehir adı kapalı,
+  // mahalle adları %50 saydam (bizim etiketlerle çakışmasın).
   { featureType: 'poi', elementType: 'labels', stylers: [{ visibility: 'off' }] },
-  { featureType: 'poi.attraction', elementType: 'labels.text', stylers: [{ visibility: 'on' }] },
-  { featureType: 'poi.attraction', elementType: 'labels.text.fill', stylers: [{ color: '#8a8a8a' }] },
   { featureType: 'poi.business', stylers: [{ visibility: 'off' }] },
+  { featureType: 'administrative.locality', elementType: 'labels', stylers: [{ visibility: 'off' }] },
+  { featureType: 'administrative.neighborhood', elementType: 'labels.text.fill', stylers: [{ color: '#6e6e6e80' }] },
+  { featureType: 'administrative.neighborhood', elementType: 'labels.text.stroke', stylers: [{ color: '#ffffff80' }] },
   { featureType: 'poi.park', elementType: 'geometry', stylers: [{ color: '#e3e9e2' }] },
   { featureType: 'road', elementType: 'geometry', stylers: [{ color: '#ffffff' }] },
   { featureType: 'road', elementType: 'geometry.stroke', stylers: [{ color: '#e6e6e3' }] },

@@ -87,7 +87,7 @@ export function programCizgileri(secenek: {
       const yol = otel ? [otel, ...noktalar, otel] : noktalar;
       return yol.length >= 2 ? [{ id: `rota:${g.id}`, noktalar: yol, renk: rengi, opaklik: 0.3 }] : [];
     }
-    // #33: seçili gün bacak bacak gerçek yol (araç bacağı kesikli + 🚕); gelene kadar kuş uçuşu.
+    // #33: seçili gün bacak bacak gerçek yol (araç bacağı kesikli, taksi ikonu); gelene kadar kuş uçuşu.
     return bacakListesi(seciliNoktalar).map((b, i): HaritaCizgisi => {
       const opaklik = i < gecilenBacak ? SOLUK_BACAK : 0.9;
       const r = rotalar[`${b.from.key}>${b.to.key}`];
@@ -96,7 +96,15 @@ export function programCizgileri(secenek: {
       if (r) {
         const taksi = r.mode === 'DRIVE' && r.drive_seconds;
         const dk = Math.max(1, Math.round((taksi ? r.drive_seconds! : r.seconds) / 60));
-        return { id: `rota:${g.id}:${i}`, noktalar: polylineCoz(r.polyline), renk: rengi, opaklik, kesik: !!taksi, etiket: i < gecilenBacak ? undefined : `${taksi ? '🚕' : '🚶'} ${dk} dk` };
+        return {
+          id: `rota:${g.id}:${i}`,
+          noktalar: polylineCoz(r.polyline),
+          renk: rengi,
+          opaklik,
+          kesik: !!taksi,
+          etiket: i < gecilenBacak ? undefined : `${dk} dk`,
+          etiketIkon: taksi ? 'taksi' : 'yurume',
+        };
       }
       const m = bacakModu(a, z, bacak(a, z));
       return {
@@ -105,7 +113,8 @@ export function programCizgileri(secenek: {
         renk: rengi,
         opaklik,
         kesik: m.mod === 'taksi',
-        etiket: i < gecilenBacak ? undefined : `${m.mod === 'taksi' ? '🚕' : '🚶'} ~${Math.max(1, Math.round(m.sn / 60))} dk`,
+        etiket: i < gecilenBacak ? undefined : `~${Math.max(1, Math.round(m.sn / 60))} dk`,
+        etiketIkon: m.mod === 'taksi' ? 'taksi' : 'yurume',
       };
     });
   });

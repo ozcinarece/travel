@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -26,6 +26,10 @@ type Props = {
   altPanel?: ReactNode;
   /** #45: üst katmanın (geri hapı + ustEk) yüksekliği; tam ekran panel bunun altından başlar. */
   onUstYukseklik?: (yukseklik: number) => void;
+  /** #47 A1: ekranın altında uygulama alt menüsü var — panel menüye yapışık (alt güvenli alanı menü karşılar). */
+  altMenuVar?: boolean;
+  /** #47 A2: panel tam ekran — üst katmanın (gün kartları) hemen altından başlar, köşesiz; arkada harita görünmez. */
+  panelTam?: boolean;
   harita: HaritaProps;
 };
 
@@ -33,13 +37,25 @@ type Props = {
  * #17 KK2: tam ekran harita kabuğu — 3.3 Otel, 3.4 Keşfet ve 3.5 bunu paylaşır.
  * Harita ekranın tamamını kaplar; üstte ve altta yüzen katmanlar dokunuşu yalnız kendi alanlarında yakalar.
  */
-export function HaritaEkrani({ baslik, geri, sagUst, arama, ustEk, altNot, altSerbest, altPanel, onUstYukseklik, harita }: Props) {
+export function HaritaEkrani({ baslik, geri, sagUst, arama, ustEk, altNot, altSerbest, altPanel, onUstYukseklik, altMenuVar, panelTam, harita }: Props) {
   const kenar = useSafeAreaInsets();
+  const [ustY, setUstY] = useState(0);
+  const [panelY, setPanelY] = useState(0);
+  const altDolgu = altMenuVar ? 0 : altPanel ? Math.max(kenar.bottom, 14) : kenar.bottom;
   return (
     <View style={s.ekran}>
-      <Harita {...harita} />
+      <Harita {...harita} altBosluk={altPanel && !panelTam ? panelY : 0} />
+      {/* #47 A2: tam ekranda harita şeridi görünmez (beyaz arka plan). */}
+      {panelTam ? <View style={[StyleSheet.absoluteFill, { backgroundColor: renk.zemin }]} /> : null}
 
-      <View style={[s.ust, { paddingTop: kenar.top + 12 }]} pointerEvents="box-none" onLayout={onUstYukseklik ? (e) => onUstYukseklik(e.nativeEvent.layout.height) : undefined}>
+      <View
+        style={[s.ust, { paddingTop: kenar.top + 12 }]}
+        pointerEvents="box-none"
+        onLayout={(e) => {
+          const h = e.nativeEvent.layout.height;
+          setUstY(h);
+          onUstYukseklik?.(h);
+        }}>
         <View style={s.ustSatir} pointerEvents="box-none">
           <GeriHapi baslik={baslik} onPress={geri} />
           {sagUst}
@@ -48,11 +64,20 @@ export function HaritaEkrani({ baslik, geri, sagUst, arama, ustEk, altNot, altSe
         {ustEk}
       </View>
 
-      <View style={[s.alt, altPanel ? { paddingBottom: Math.max(kenar.bottom, 14) } : { paddingBottom: kenar.bottom }]} pointerEvents="box-none">
-        {altSerbest}
-        {altNot ? <Text style={s.altNot}>{altNot}</Text> : null}
-        {altPanel ? <View style={[s.panel, s.panelGolge]}>{altPanel}</View> : null}
-      </View>
+      {panelTam && altPanel ? (
+        <View style={[s.panel, s.panelTam, { top: ustY, paddingBottom: altMenuVar ? 10 : Math.max(kenar.bottom, 14) }]}>{altPanel}</View>
+      ) : (
+        <View style={[s.alt, { paddingBottom: altPanel ? 0 : altDolgu }]} pointerEvents="box-none">
+          {altSerbest}
+          {altNot ? <Text style={s.altNot}>{altNot}</Text> : null}
+          {altPanel ? (
+            // #47 A1: panel alt menüye yapışık; harita dolgusu panel yüksekliği kadar (logo panelin üstünde).
+            <View style={[s.panel, s.panelGolge, { paddingBottom: altMenuVar ? 12 : altDolgu }]} onLayout={(e) => setPanelY(e.nativeEvent.layout.height)}>
+              {altPanel}
+            </View>
+          ) : null}
+        </View>
+      )}
     </View>
   );
 }
@@ -152,6 +177,7 @@ const s = StyleSheet.create({
     borderTopRightRadius: 24,
     backgroundColor: renk.zemin,
   },
+  panelTam: { position: 'absolute', left: 0, right: 0, bottom: 0, borderTopLeftRadius: 0, borderTopRightRadius: 0 },
   panelGolge: {
     shadowColor: renk.metin,
     shadowOffset: { width: 0, height: -8 },

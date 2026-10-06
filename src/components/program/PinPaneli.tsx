@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { Avatar } from '@/components/ui/Avatar';
-import type { PuanEtiketi } from '@/features/puanlar/sorgular';
+import { Ikon } from '@/components/ui/Ikon';
 import type { HafifYer } from '@/features/yerler/api';
 import { t } from '@/i18n';
 import { kategoriEtiketi, sureMetni } from '@/lib/kategori';
@@ -17,8 +17,6 @@ type Props = {
   yer: HafifYer | undefined;
   /** Google editoryal özeti (pahalı SKU; yalnız panel açıkken). */
   ozet: string | null | undefined;
-  /** Gezgin ipuçları (≥ 3 kişi). */
-  ipuclari: { tag: PuanEtiketi; kisi: number }[];
   ekleyenAd: string;
   dakika: number;
   gunler: Gun[];
@@ -36,14 +34,15 @@ type Props = {
 /**
  * #45 §6 pin paneli: ad, kategori · süre · açık/kapalı; ★ puan · yorum · ekleyen; küçük foto.
  * Tek satır: "Gün ① ② ③" (seçili dolu, gün renginde) + sağda süre −/+. "Bilmen gerekenler": 2 satır özet ("Devamı")
- * + gezgin ipuçları hapları. Aksiyonlar: Detay · Yol tarifi · ··· (Listeden çıkar).
+ * (Google özeti; ipucu hapları #47 ile kalktı). Aksiyonlar: Detay · Yol tarifi · ··· (Listeden çıkar).
  */
 export function PinPaneli(p: Props) {
   const { mekan, yer } = p;
   const [acik, setAcik] = useState(false);
   const puan = puanMetni(yer?.puan);
   const yorum = yorumKisa(yer?.puan_sayisi);
-  const bilgiVar = !!p.ozet || p.ipuclari.length > 0;
+  // #47 E16: "Bilmen gerekenler" yalnız Google özeti; özet yoksa kutu gizli.
+  const bilgiVar = !!p.ozet;
   return (
     <View style={s.kap}>
       <View style={s.ust}>
@@ -119,15 +118,6 @@ export function PinPaneli(p: Props) {
               <Text style={s.devami}>{acik ? t('program.pin.daha_az') : t('program.pin.devami')}</Text>
             </Pressable>
           ) : null}
-          {p.ipuclari.length > 0 ? (
-            <View style={s.ipuclari}>
-              {p.ipuclari.map((i) => (
-                <View key={i.tag} style={s.ipucu}>
-                  <Text style={s.ipucuMetin}>{t(`program.puan.ipucu.${i.tag}`, { n: i.kisi })}</Text>
-                </View>
-              ))}
-            </View>
-          ) : null}
         </View>
       ) : null}
 
@@ -139,7 +129,7 @@ export function PinPaneli(p: Props) {
           <Text style={s.dugmeMetin}>{t('program.pin.yolTarifi')}</Text>
         </Pressable>
         <Pressable accessibilityRole="button" accessibilityLabel={t('program.pin.diger')} onPress={p.onDiger} style={[s.dugme, s.dugmeKucuk]}>
-          <Text style={s.dugmeMetin}>···</Text>
+          <Ikon ad="daha" boyut={20} renk={renk.metin} kalinlik={2.2} />
         </Pressable>
       </View>
     </View>
@@ -169,9 +159,6 @@ const s = StyleSheet.create({
   bilgiBaslik: { fontFamily: yazi.kalin, fontSize: 12, color: renk.ikincil },
   ozet: { fontFamily: yazi.normal, fontSize: 13, lineHeight: 18, color: renk.metin },
   devami: { fontFamily: yazi.kalin, fontSize: 12, color: renk.metin, marginTop: 2 },
-  ipuclari: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
-  ipucu: { height: 28, paddingHorizontal: 10, borderRadius: 999, backgroundColor: renk.zemin, justifyContent: 'center' },
-  ipucuMetin: { fontFamily: yazi.yari, fontSize: 11, color: renk.metin },
   dugmeler: { flexDirection: 'row', gap: 8 },
   dugme: { flex: 1, height: 40, borderRadius: 999, backgroundColor: renk.yuzey, alignItems: 'center', justifyContent: 'center' },
   dugmeKucuk: { flex: 0, width: 52 },

@@ -29,6 +29,7 @@ export function PinIcerigi({ pin, etiketGizli, detay = false }: { pin: HaritaPin
   if (pin.tur === 'etiket') {
     return (
       <View style={[s.bacakHap, etiketGizli && s.gorunmez]} collapsable={false}>
+        {pin.etiketIkon ? <Ikon ad={pin.etiketIkon} boyut={13} renk={renk.metin} kalinlik={2.2} /> : null}
         <Text style={s.bacakMetin} numberOfLines={1}>
           {pin.etiket}
         </Text>
@@ -52,7 +53,7 @@ export function PinIcerigi({ pin, etiketGizli, detay = false }: { pin: HaritaPin
   const cap = pinCapi(pin);
   // Seçili pin: turuncu halka (3 px) dairenin kenarıdır (#42 KK5).
   const daire = { width: cap, height: cap, borderRadius: cap / 2, ...(pin.secili ? { borderWidth: 3, borderColor: renk.vurgu } : {}) };
-  const ikonBoyut = Math.round((pin.secili ? cap - 6 : cap) * 0.62);
+  const ikonBoyut = pin.tamam && !pin.secili ? 16 : Math.round((pin.secili ? cap - 6 : cap) * 0.62);
   const puan = puanMetni(pin.puan);
   const yorum = yorumKisa(pin.yorumSayisi);
   return (
@@ -78,7 +79,8 @@ export function PinIcerigi({ pin, etiketGizli, detay = false }: { pin: HaritaPin
       <View style={[s.etiketKutu, { height: etiketYuksekligi(detay) }]}>
         {pin.ad && !etiketGizli ? (
           <View style={s.etiketZemin}>
-            <Text style={s.etiket} numberOfLines={1}>
+            {/* #47 D14: tamamlanan pin de adını gösterir (gri). */}
+            <Text style={[s.etiket, pin.tamam && { color: renk.ikincil }]} numberOfLines={1}>
               {kisaAd(pin.ad)}
             </Text>
             {detay && puan ? (
@@ -109,7 +111,7 @@ const s = StyleSheet.create({
   hapMetin: { fontFamily: yazi.kalin, fontSize: 12, color: renk.metin },
   yildiz: { fontFamily: yazi.kalin, fontSize: 11, color: renk.vurgu },
   otel: { width: 34, height: 34, borderRadius: 10, alignItems: 'center', justifyContent: 'center' },
-  bacakHap: { height: 22, paddingHorizontal: 8, borderRadius: 11, backgroundColor: renk.zemin, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: renk.ayrac },
+  bacakHap: { flexDirection: 'row', gap: 3, height: 22, paddingHorizontal: 8, borderRadius: 11, backgroundColor: renk.zemin, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: renk.ayrac },
   bacakMetin: { fontFamily: yazi.kalin, fontSize: 11, lineHeight: 14, color: renk.metin },
   gorunmez: { opacity: 0 },
   konumHalka: { width: 22, height: 22, borderRadius: 11, backgroundColor: 'rgba(66,133,244,0.25)', alignItems: 'center', justifyContent: 'center' },

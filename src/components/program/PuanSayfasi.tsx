@@ -2,7 +2,7 @@ import { Image } from 'expo-image';
 import { useState } from 'react';
 import { KeyboardAvoidingView, Linking, Modal, Platform, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 
-import { googleYorumLinki, PUAN_ETIKETLERI, type Puan, type PuanEtiketi } from '@/features/puanlar/sorgular';
+import { googleYorumLinki, type Puan } from '@/features/puanlar/sorgular';
 import { t } from '@/i18n';
 import { renk, yazi } from '@/theme';
 
@@ -17,26 +17,24 @@ type Props = {
   kalinanDk: number;
   mevcut: Puan | null;
   kaydediliyor: boolean;
-  onKaydet: (p: { stars: number; tags: PuanEtiketi[]; note: string | null }) => Promise<void>;
+  onKaydet: (p: { stars: number; note: string | null }) => Promise<void>;
   onKapat: () => void;
 };
 
 /**
- * #45 §5: tamamlanan durağı puanlama alt sayfası — küçük foto, ad, "✓ Tamamlandı · bas–bit · N dk kaldınız"; 5 yıldız;
- * hızlı etiketler (çoklu); kısa not (arkadaşlar görür); "Google'da da yorumla" derin linki; Sonra / Kaydet.
+ * #45 §5 (#47 E15): tamamlanan durağı puanlama alt sayfası — küçük foto, ad, "✓ Tamamlandı · bas–bit · N dk kaldınız";
+ * 5 yıldız; kısa not (arkadaşlar görür); "Google'da da yorumla" derin linki; Sonra / Kaydet. Hızlı etiketler kaldırıldı.
  * "Fotoğraf ekle" v1'de yok (v2: depolama + moderasyon).
  */
 export function PuanSayfasi(p: Props) {
   // Her açılışta mevcut puandan başlar (anahtar ile yeniden kurulur, bkz. çağıran).
   const [yildiz, setYildiz] = useState(p.mevcut?.stars ?? 0);
-  const [etiketler, setEtiketler] = useState<PuanEtiketi[]>(p.mevcut?.tags ?? []);
   const [not, setNot] = useState(p.mevcut?.note ?? '');
   const [hata, setHata] = useState(false);
-  const degistir = (e: PuanEtiketi) => setEtiketler((l) => (l.includes(e) ? l.filter((x) => x !== e) : [...l, e]));
   const kaydet = async () => {
     setHata(false);
     try {
-      await p.onKaydet({ stars: yildiz, tags: etiketler, note: not.trim() || null });
+      await p.onKaydet({ stars: yildiz, note: not.trim() || null });
       p.onKapat();
     } catch {
       setHata(true);
@@ -66,16 +64,6 @@ export function PuanSayfasi(p: Props) {
             ))}
           </View>
 
-          <View style={s.etiketler}>
-            {PUAN_ETIKETLERI.map((e) => {
-              const secili = etiketler.includes(e);
-              return (
-                <Pressable key={e} accessibilityRole="checkbox" accessibilityState={{ checked: secili }} onPress={() => degistir(e)} style={[s.etiket, secili && s.etiketSecili]}>
-                  <Text style={[s.etiketMetin, secili && { color: renk.zemin }]}>{t(`program.puan.etiket.${e}`)}</Text>
-                </Pressable>
-              );
-            })}
-          </View>
 
           <TextInput
             value={not}
@@ -121,10 +109,6 @@ const s = StyleSheet.create({
   baslik: { fontFamily: yazi.kalin, fontSize: 13, color: renk.ikincil },
   yildizlar: { flexDirection: 'row', gap: 10, marginTop: -6 },
   yildiz: { fontSize: 34, lineHeight: 38, color: renk.ayrac },
-  etiketler: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  etiket: { height: 34, paddingHorizontal: 14, borderRadius: 999, backgroundColor: renk.yuzey, justifyContent: 'center' },
-  etiketSecili: { backgroundColor: renk.metin },
-  etiketMetin: { fontFamily: yazi.kalin, fontSize: 12, color: renk.metin },
   not: { minHeight: 64, borderRadius: 14, backgroundColor: renk.yuzey, padding: 12, fontFamily: yazi.normal, fontSize: 14, color: renk.metin, textAlignVertical: 'top' },
   google: { fontFamily: yazi.kalin, fontSize: 13, color: '#2563eb' },
   hata: { fontFamily: yazi.yari, fontSize: 12, color: renk.uyari },

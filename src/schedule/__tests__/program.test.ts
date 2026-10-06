@@ -61,6 +61,22 @@ describe('programHesapla', () => {
     expect(p.toplam).toBe(3);
   });
 
+  it('#47 C8: art arda Bitti — saatler geriye gitmez, bitiş son durak + otele dönüş', () => {
+    // d1 09:10 başlar, 09:05'te "tamamlandı" yazılmış (başlangıçtan önce) → ayrılış 09:10'a sabitlenir; d2 09:20.
+    const p = programHesapla({
+      baslangic: '09:00',
+      duraklar: [d('d1', 60, { tamamlandiDk: 545 }), d('d2', 45, { tamamlandiDk: 548 }), d('d3', 30)],
+      otel,
+      yuruyus: sabit,
+      simdiDk: 600,
+    });
+    const varislar = p.satirlar.map((x) => x.varisDk);
+    expect(varislar).toEqual([...varislar].sort((a, b) => a - b));
+    for (const x of p.satirlar) expect(x.ayrilisDk).toBeGreaterThanOrEqual(x.varisDk);
+    expect(p.satirlar[1].varisDk).toBe(560);
+    expect(p.bitisDk).toBe(p.satirlar[2].ayrilisDk + 10);
+  });
+
   it('#43 KK8: planlanan bitiş + 10 dk geçince otomatik tamamlanır; pay içinde sıradaki kalır', () => {
     // d1 plan 09:10–09:40. 09:48: hâlâ sıradaki. 09:51: otomatik tamamlandı, d2 varış 09:50 planına göre akar.
     const payIcinde = programHesapla({ baslangic: '09:00', duraklar: [d('d1', 30), d('d2', 30)], otel, yuruyus: sabit, simdiDk: 588 });

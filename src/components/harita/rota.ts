@@ -9,7 +9,7 @@ export function bacakEtiketPinleri(cizgiler: HaritaCizgisi[]): HaritaPini[] {
     if (!c.etiket) continue;
     const orta = cizgiOrtasi(c.noktalar);
     if (!orta) continue;
-    pinler.push({ id: `bacak:${c.id}`, konum: orta, renk: c.renk, tur: 'etiket', etiket: c.etiket });
+    pinler.push({ id: `bacak:${c.id}`, konum: orta, renk: c.renk, tur: 'etiket', etiket: c.etiket, etiketIkon: c.etiketIkon });
   }
   return pinler;
 }

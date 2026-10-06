@@ -12,6 +12,8 @@ export type HaritaPini = {
   ad?: string;
   /** Daire içindeki kategori ikonu (oneri/bos); yoksa 'pin'. */
   ikon?: PinIkonu;
+  /** #47 B5: `etiket` türü hapta metnin önündeki çizgi ikon. */
+  etiketIkon?: 'yurume' | 'taksi';
   /** ★ puan: aday hapında; diğer türlerde ad etiketinin ikinci satırında (seçili ya da zoom ≥ 16, #30). */
   puan?: number | null;
   /** Google yorum sayısı; puanla birlikte "★ 4,8 · 312K". */
@@ -54,6 +56,8 @@ export type HaritaCizgisi = {
   opaklik?: number;
   kesik?: boolean;
   etiket?: string;
+  /** #47 B5: bacak hapında ikon (emoji yerine). */
+  etiketIkon?: 'yurume' | 'taksi';
 };
 
 /** Kamerayı programla taşıma isteği; `sayac` her değişimde yeni animasyon (aynı konuma yeniden gidebilmek için). */
@@ -73,4 +77,6 @@ export type HaritaProps = {
   onPinSuruklendi?: (id: string, konum: Konum) => void;
   /** Kullanıcı ya da animasyon durduğunda görünür alan (#17: "Bu bölgede ara" için). */
   onBolgeDegisti?: (bolge: HaritaBolgesi) => void;
+  /** #47 A1: alt paneli kadar harita dolgusu (Google logosu panelin üstünde kalır). */
+  altBosluk?: number;
 };
