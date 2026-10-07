@@ -271,13 +271,14 @@ function ProgramSekmesi({ seyahat, gunler, duraklar, mekanlar, gunParam }: { sey
       if (!gun.order_manual) await gunGuncelle.mutateAsync({ id: gun.id, order_manual: true });
     });
   };
-  // #53 §6: boştaki pine dokununca seçili günün sonuna eklenir; altta "güne eklendi" kartı.
+  // #53 §6: boştaki pine dokununca seçili güne eklenir; altta "güne eklendi · N. sıra" kartı (canlı sıra).
+  // Ürün kararı: otomatik günde order_manual false kalır (§5.1 en uygun yere koyar), elle sıralı günde en ucuz
+  // ekleme noktası (T7) — guneAta ile aynı kural; "sona ekle" sözü verilmez.
   const hizliEkle = (mekan: Mekan) => {
     if (!gun) return;
-    const hedefDuraklar = duraklar.filter((d) => d.day_id === gun.id);
     setSeciliMekanId(null);
     setEklenen({ mekanId: mekan.id, gunId: gun.id });
-    guvenli(() => ata.mutateAsync({ mekan, gunId: gun.id, mevcut: undefined, gunDuraklari: hedefDuraklar }));
+    guneAta(mekan, gun);
   };
   const eklemeyiGeriAl = () => {
     const d = eklenen ? durakIle.get(eklenen.mekanId) : undefined;
