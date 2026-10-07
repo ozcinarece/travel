@@ -136,6 +136,52 @@ describe('enUcuzEklemeIndeksi', () => {
   });
 });
 
+// #51: 7/24, gece yarısını geçen, haftada bir gün kapalı, saat bilgisi yok.
+describe('acilisDurumu (#51)', () => {
+  const p = (gun: number, ac: string, kapaGun: number, kapa: string) => ({ gun, ac, kapaGun, kapa });
+
+  it('7/24 açık (tek periyot, kapanış yok) her gün her saatte açık', () => {
+    const hep = [p(0, '00:00', 0, '24:00')];
+    for (let g = 0; g < 7; g++) {
+      expect(acilisDurumu(hep, g, 0)).toEqual({ durum: 'acik' });
+      expect(acilisDurumu(hep, g, 23 * 60 + 30)).toEqual({ durum: 'acik' });
+    }
+    expect(kapaliGunler(hep)).toEqual([]);
+  });
+
+  it('7/24 açık (her gün 00:00 → ertesi gün 00:00) kapalı gün üretmez', () => {
+    const hep = [0, 1, 2, 3, 4, 5, 6].map((g) => p(g, '00:00', (g + 1) % 7, '00:00'));
+    expect(acilisDurumu(hep, 3, 720)).toEqual({ durum: 'acik' });
+    expect(kapaliGunler(hep)).toEqual([]);
+  });
+
+  it('gece yarısını geçen periyot (Cuma 18:00 → Cumartesi 02:00)', () => {
+    const bar = [p(5, '18:00', 6, '02:00')];
+    expect(acilisDurumu(bar, 5, 23 * 60)).toEqual({ durum: 'acik' });
+    expect(acilisDurumu(bar, 6, 60)).toEqual({ durum: 'acik' });
+    expect(acilisDurumu(bar, 6, 3 * 60)).toEqual({ durum: 'kapali_saat', sonrakiAcilis: null });
+    expect(acilisDurumu(bar, 5, 17 * 60)).toEqual({ durum: 'kapali_saat', sonrakiAcilis: '18:00' });
+  });
+
+  it('Cumartesi → Pazar sarkan periyot haftayı sarar', () => {
+    const bar = [p(6, '20:00', 0, '03:00')];
+    expect(acilisDurumu(bar, 0, 120)).toEqual({ durum: 'acik' });
+  });
+
+  it('haftada bir gün (Pazartesi) kapalı', () => {
+    const muze = [0, 2, 3, 4, 5, 6].map((g) => p(g, '09:00', g, '19:00'));
+    expect(acilisDurumu(muze, 1, 600)).toEqual({ durum: 'kapali_gun' });
+    expect(acilisDurumu(muze, 2, 600)).toEqual({ durum: 'acik' });
+    expect(kapaliGunler(muze)).toEqual([1]);
+  });
+
+  it('saat bilgisi yoksa kontrol yapılmaz', () => {
+    expect(acilisDurumu(null, 2, 600)).toEqual({ durum: 'bilinmiyor' });
+    expect(acilisDurumu(undefined, 2, 600)).toEqual({ durum: 'bilinmiyor' });
+    expect(kapaliGunler(null)).toEqual([]);
+  });
+});
+
 describe('acilisDurumu', () => {
   // Pzt–Cum 09:00–18:00, Cmt 10:00–14:00; Pazar kapalı.
   const periyotlar = [

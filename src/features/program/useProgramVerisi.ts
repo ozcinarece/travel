@@ -55,25 +55,16 @@ export function useProgramVerisi(secenek: { seyahat: Seyahat; gunler: Gun[]; dur
     return k;
   }, [mekanlar, otel]);
 
-  // Seçili günün sırası: elle sıralı günde order_key; otomatik günde §5.1 (gerçek yürüyüşle, 3.7 ile aynı).
+  // #51: tek sıra kaynağı order_key — liste, pin numaraları ve rota bacakları aynı sırayı kullanır. Otomatik günde
+  // order_key zaten §5.1 sırasına yazılır (Program ekranı); ayrı bir yeniden sıralama haritayı listeden ayırıyordu.
   const seciliSira = useMemo(() => {
     if (!seciliGun) return [] as Mekan[];
-    const sirali = duraklar
+    return duraklar
       .filter((d) => d.day_id === seciliGun.id && !d.skipped)
       .sort((a, b) => (a.order_key < b.order_key ? -1 : 1))
       .map((d) => mekanIle.get(d.place_ref))
       .filter((m): m is Mekan => !!m);
-    if (seciliGun.order_manual || sirali.length < 2) return sirali;
-    const tp = tempoHesapla({
-      duraklar: sirali.map((m) => ({ id: m.id, konum: { lat: m.lat, lng: m.lng }, dakika: 0 })),
-      otel,
-      baslangic: '09:00',
-      bitis: '20:00',
-      yuruyusSn: (a, b) => matris.yuruyus(konumKey.get(`${a.lat},${a.lng}`) ?? '', konumKey.get(`${b.lat},${b.lng}`) ?? '')?.sn ?? kestirimYuruyusSn(a, b),
-    });
-    return tp.sira.map((id) => mekanIle.get(id)).filter((m): m is Mekan => !!m);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [seciliGun, duraklar, mekanIle, otel, matris.yuruyus, konumKey]);
+  }, [seciliGun, duraklar, mekanIle]);
   const seciliNoktalar = useMemo((): MatrisNoktasi[] => {
     const n = seciliSira.map((m) => ({ key: m.place_id, lat: m.lat, lng: m.lng }));
     return otel && n.length > 0 ? [{ key: 'hotel', ...otel }, ...n, { key: 'hotel', ...otel }] : n;
@@ -106,7 +97,8 @@ export function useProgramVerisi(secenek: { seyahat: Seyahat; gunler: Gun[]; dur
           baslangic: saat(g.start_time, saat(seyahat.day_start, '09:00')),
           bitis: saat(g.end_time, saat(seyahat.day_end, '20:00')),
           bacak,
-          sira: g.order_manual ? gunDuraklari.map(({ mekan }) => mekan.id) : undefined,
+          // #51: sıra hep order_key (otomatik günde order_key §5.1 sırasına yazılır).
+          sira: gunDuraklari.map(({ mekan }) => mekan.id),
         }),
       );
     }

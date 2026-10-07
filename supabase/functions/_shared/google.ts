@@ -152,11 +152,12 @@ export async function hafifDetay(placeId: string, secenek: { sehir?: boolean; ot
   });
   const foto = secenek.foto ? (d.photos?.[0]?.name ? await fotoUri(d.photos[0].name, 400) : null) : undefined;
   const ulke = d.addressComponents?.find((b) => b.types?.includes('country'))?.shortText ?? null;
+  const hamPeriyotlar = (d.regularOpeningHours?.periods ?? []).filter((p) => p.open?.day !== undefined);
+  // #51: kapanışı olmayan periyot (Places'te 7/24 açık) → boş dizi = her zaman açık.
   const periyotlar = secenek.saatler
-    ? (d.regularOpeningHours?.periods ?? [])
-        .filter((p) => p.open?.day !== undefined)
-        // Kapanışı olmayan periyot (7/24 açık) → boş dizi ile temsil edilir.
-        .map((p) => ({ gun: p.open!.day!, ac: hhmm(p.open), kapaGun: p.close?.day ?? p.open!.day!, kapa: p.close ? hhmm(p.close) : '24:00' }))
+    ? hamPeriyotlar.some((p) => !p.close)
+      ? []
+      : hamPeriyotlar.map((p) => ({ gun: p.open!.day!, ac: hhmm(p.open), kapaGun: p.close!.day ?? p.open!.day!, kapa: hhmm(p.close) }))
     : undefined;
   return {
     place_id: d.id,

@@ -87,17 +87,24 @@ export function programCizgileri(secenek: {
       const yol = otel ? [otel, ...noktalar, otel] : noktalar;
       return yol.length >= 2 ? [{ id: `rota:${g.id}`, noktalar: yol, renk: rengi, opaklik: 0.3 }] : [];
     }
-    // #33: seçili gün bacak bacak gerçek yol (araç bacağı kesikli, taksi ikonu); gelene kadar kuş uçuşu.
+    // #33: seçili gün bacak bacak gerçek yol (araç bacağı kesikli, taksi ikonu); gelene kadar kuş uçuşu kesikli.
+    // #51: kimlik bacağın uçlarından (from>to) ve kaynağından türer — sıra değişince eski çizgi/etiket yeniden
+    // kullanılmaz (Android Polyline/Marker eski koordinatta kalıyordu); aynı çift iki kez geçerse sıra no ayırır.
+    const gorulen = new Map<string, number>();
     return bacakListesi(seciliNoktalar).map((b, i): HaritaCizgisi => {
       const opaklik = i < gecilenBacak ? SOLUK_BACAK : 0.9;
-      const r = rotalar[`${b.from.key}>${b.to.key}`];
+      const cift = `${b.from.key}>${b.to.key}`;
+      const tekrar = gorulen.get(cift) ?? 0;
+      gorulen.set(cift, tekrar + 1);
+      const kimlik = `rota:${g.id}:${cift}${tekrar ? `#${tekrar}` : ''}`;
+      const r = rotalar[cift];
       const a = { lat: b.from.lat, lng: b.from.lng };
       const z = { lat: b.to.lat, lng: b.to.lng };
       if (r) {
         const taksi = r.mode === 'DRIVE' && r.drive_seconds;
         const dk = Math.max(1, Math.round((taksi ? r.drive_seconds! : r.seconds) / 60));
         return {
-          id: `rota:${g.id}:${i}`,
+          id: `${kimlik}:yol`,
           noktalar: polylineCoz(r.polyline),
           renk: rengi,
           opaklik,
@@ -108,11 +115,12 @@ export function programCizgileri(secenek: {
       }
       const m = bacakModu(a, z, bacak(a, z));
       return {
-        id: `rota:${g.id}:${i}`,
+        id: `${kimlik}:kus`,
         noktalar: [a, z],
         renk: rengi,
         opaklik,
-        kesik: m.mod === 'taksi',
+        // Gerçek yol gelene kadar kuş uçuşu: her zaman kesikli.
+        kesik: true,
         etiket: i < gecilenBacak ? undefined : `~${Math.max(1, Math.round(m.sn / 60))} dk`,
         etiketIkon: m.mod === 'taksi' ? 'taksi' : 'yurume',
       };

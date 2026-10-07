@@ -336,6 +336,8 @@ function ProgramSekmesi({ seyahat, gunler, duraklar, mekanlar, gunParam }: { sey
   const tutamak = useMemo(
     () =>
       PanResponder.create({
+        // #51: tutamak + özet + ok dokunmaya da tepki verir (katlı ↔ yarı açık); sürükleme yukarı/aşağı.
+        onStartShouldSetPanResponder: () => true,
         onMoveShouldSetPanResponder: (_, g) => Math.abs(g.dy) > 6 && Math.abs(g.dy) > Math.abs(g.dx),
         onPanResponderRelease: (_, g) => {
           if (g.dy < -20) setPanel((h) => (h === 'katli' && g.dy > -220 ? 'yari' : 'tam'));
