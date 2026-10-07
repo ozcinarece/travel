@@ -29,6 +29,8 @@ export type SeyahatOzet = {
   created_at: string;
   members: UyeOzet[];
   places: { count: number }[];
+  /** #56: seyahatin otelleri (sayı); eski önbellekte olmayabilir. */
+  stays?: { count: number }[];
 };
 
 /** Tek seyahat (3.3 ve seyahat içi ekranlar). */
@@ -59,6 +61,9 @@ export type Gun = {
   start_time: string | null;
   end_time: string | null;
   order_manual: boolean;
+  /** #56: günün başlangıç / bitiş oteli (stays.id); null = otel yok. */
+  start_stay_id: string | null;
+  end_stay_id: string | null;
 };
 
 /** stops satırı: güne atanmış mekan. place_ref → places.id. */

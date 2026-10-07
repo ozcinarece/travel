@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { useOturum } from '@/lib/oturum';
+import { tumGunlereOtel } from '@/features/konaklama/sorgular';
 import { supabase } from '@/lib/supabase';
 import type { OtelSecimi, Seyahat, SeyahatOzet, YeniSeyahat } from '@/lib/tipler';
 
@@ -14,7 +15,7 @@ export function useSeyahatler() {
       const { data, error } = await supabase
         .from('trips')
         .select(
-          'id, city_label, start_date, end_date, tz, hotel_place_id, created_at, members(user_id, role, display_name, guest), places(count)',
+          'id, city_label, start_date, end_date, tz, hotel_place_id, created_at, members(user_id, role, display_name, guest), places(count), stays(count)',
         )
         .order('start_date', { ascending: true, nullsFirst: false })
         .order('created_at', { ascending: false });
@@ -97,9 +98,13 @@ export function useOtelKaydet(seyahatId: string) {
         )
         .eq('id', seyahatId);
       if (error) throw error;
+      // #56: otel artık gün bazında (stays); 3.3 seçimi tüm günlere uygulanır. trips.hotel_* eski derlemeler için yazılır.
+      await tumGunlereOtel(seyahatId, otel);
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['seyahat', seyahatId] });
+      qc.invalidateQueries({ queryKey: ['gunler', seyahatId] });
+      qc.invalidateQueries({ queryKey: ['konaklamalar', seyahatId] });
       qc.invalidateQueries({ queryKey: ['seyahatler'] });
     },
   });

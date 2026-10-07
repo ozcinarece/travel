@@ -1,6 +1,7 @@
 // PRD 3.5 Günlere dağıt: days + stops sorgu ve mutasyonları. Yazmalar satır bazlı, son yazan kazanır (§5.5).
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
+import { yeniGunUclari } from '@/features/konaklama/plan';
 import { useOturum } from '@/lib/oturum';
 import { supabase } from '@/lib/supabase';
 import { tarihEkle } from '@/lib/takvim';
@@ -100,6 +101,8 @@ export function useGunEkle(seyahatId: string) {
         trip_id: seyahatId,
         index,
         date: startDate ? tarihEkle(startDate, index - 1) : null,
+        // #56: yeni gün son günün bitiş otelinden başlar ve oraya döner.
+        ...yeniGunUclari(gunler),
       });
       if (error) throw error;
     },

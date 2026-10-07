@@ -1,7 +1,6 @@
 // PRD 3.7 Program: yürüyüş matrisi (route-matrix), durak/gün güncellemeleri, değişiklik akışı (KK9).
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
-import type { Konum } from '@/components/harita/tipler';
 import { useOturum } from '@/lib/oturum';
 import { supabase } from '@/lib/supabase';
 import type { Degisiklik } from '@/lib/tipler';
@@ -171,9 +170,10 @@ export function useDegisiklikler(seyahatId: string | undefined, etkin = true) {
   });
 }
 
-/** Matris noktaları: otel ('hotel') + durakların mekanları (place_id). */
-export function matrisNoktalari(otel: Konum | null, mekanlar: { place_id: string; lat: number; lng: number }[]): MatrisNoktasi[] {
-  const n: MatrisNoktasi[] = otel ? [{ key: 'hotel', lat: otel.lat, lng: otel.lng }] : [];
+/** Matris noktaları: günlerin otelleri (stay:<id>, #56) + durakların mekanları (place_id). */
+export function matrisNoktalari(oteller: MatrisNoktasi[], mekanlar: { place_id: string; lat: number; lng: number }[]): MatrisNoktasi[] {
+  const n: MatrisNoktasi[] = [];
+  for (const o of oteller) if (!n.some((x) => x.key === o.key)) n.push({ key: o.key, lat: o.lat, lng: o.lng });
   for (const m of mekanlar) n.push({ key: m.place_id, lat: m.lat, lng: m.lng });
   return n;
 }

@@ -42,6 +42,9 @@ export type CizelgeListesiProps = {
   buradaId: string | null | undefined;
   duzenle: boolean;
   baslangicSaati: string;
+  /** #56: listenin ilk (Başlangıç) ve son (Bitiş / Otele dönüş) satırı. */
+  bas?: ReactNode;
+  son?: ReactNode;
   onTamamla: (d: Durak, geriAl?: boolean) => void;
   /** #45: tamamlanan satıra dokununca puanlama sayfası. */
   onPuanla: (d: Durak) => void;
@@ -74,7 +77,13 @@ export function CizelgeListesi(p: CizelgeListesiProps) {
   const satirlar = prog.canli.satirlar;
   const satirIle = (durakId: string) => satirlar.find((x) => x.durak.id === durakId);
 
-  if (gunDurak.length === 0) return <Text style={s.bos}>{t('program.bos')}</Text>;
+  if (gunDurak.length === 0)
+    return (
+      <View>
+        {p.bas}
+        <Text style={s.bos}>{t('program.bos')}</Text>
+      </View>
+    );
 
   if (duzenle) {
     return (
@@ -153,6 +162,7 @@ export function CizelgeListesi(p: CizelgeListesiProps) {
 
   return (
     <ScrollView contentContainerStyle={s.icerik} nestedScrollEnabled scrollEventThrottle={16} onScroll={sayfaKaydirma}>
+      {p.bas ? <View style={{ marginBottom: 4 }}>{p.bas}</View> : null}
       {satirlar.map((satir, i) => {
         const d = satir.durak;
         const durak = gunDurak.find((x) => x.id === d.id)!;
@@ -298,6 +308,7 @@ export function CizelgeListesi(p: CizelgeListesiProps) {
           </View>
         </View>
       ) : null}
+      {p.son ? <View style={{ marginTop: 4 }}>{p.son}</View> : null}
     </ScrollView>
   );
 }

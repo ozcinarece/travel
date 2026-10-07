@@ -9,6 +9,8 @@ import type { HaritaBolgesi, HaritaOdagi, HaritaPini } from '@/components/harita
 import { Avatar } from '@/components/ui/Avatar';
 import { Ikon } from '@/components/ui/Ikon';
 import { GoogleAtfi } from '@/components/yerler/GoogleAtfi';
+import type { Konaklama } from '@/features/konaklama/plan';
+import { useKonaklamalar } from '@/features/konaklama/sorgular';
 import { useMekanEkle, useMekanlar, useMekanSil, useUyeler } from '@/features/mekanlar/sorgular';
 import { useSeyahatId } from '@/features/seyahatler/baglam';
 import { useSeyahat } from '@/features/seyahatler/sorgular';
@@ -36,14 +38,15 @@ import { bosluk, minDokunma, renk, yazi } from '@/theme';
 export default function KesfetEkrani() {
   const id = useSeyahatId();
   const seyahat = useSeyahat(id);
-  if (!seyahat.data || !id) return <SeyahatYukleme sorgular={[seyahat]} kimlikYok={!id} />;
-  return <Kesfet key={id} seyahat={seyahat.data} />;
+  const konaklamalar = useKonaklamalar(id);
+  if (!seyahat.data || !konaklamalar.data || !id) return <SeyahatYukleme sorgular={[seyahat, konaklamalar]} kimlikYok={!id} />;
+  return <Kesfet key={id} seyahat={seyahat.data} konaklamalar={konaklamalar.data} />;
 }
 
 /** #29: önizleme kartındaki mekan — çip önerisinden, arama sonucundan ya da listedeki pinden. */
 type Secim = { place_id: string; kaynak: 'oneri' | 'arama' | 'liste' };
 
-function Kesfet({ seyahat }: { seyahat: Seyahat }) {
+function Kesfet({ seyahat, konaklamalar }: { seyahat: Seyahat; konaklamalar: Konaklama[] }) {
   const mekanlar = useMekanlar(seyahat.id);
   const uyeler = useUyeler(seyahat.id);
   const ekle = useMekanEkle(seyahat.id);
@@ -60,9 +63,11 @@ function Kesfet({ seyahat }: { seyahat: Seyahat }) {
   const odakla = (lat: number, lng: number, zoom: number) => setOdak((o) => ({ konum: { lat, lng }, zoom, sayac: (o?.sayac ?? 0) + 1 }));
 
   // #28: öneriler görünür bölge için. İlk açılış şehir (ya da otel) merkezi; kaydırınca "Bu bölgede ara" ile elle yenilenir.
+  // #56: otel gün bazında (stays); ilk eklenen otel merkez.
+  const ilkOtel = konaklamalar[0];
   const ilkMerkez = useMemo(
-    () => ({ lat: seyahat.hotel_lat ?? seyahat.lat, lng: seyahat.hotel_lng ?? seyahat.lng }),
-    [seyahat.hotel_lat, seyahat.hotel_lng, seyahat.lat, seyahat.lng],
+    () => ({ lat: ilkOtel?.lat ?? seyahat.lat, lng: ilkOtel?.lng ?? seyahat.lng }),
+    [ilkOtel?.lat, ilkOtel?.lng, seyahat.lat, seyahat.lng],
   );
   const [bolge, setBolge] = useState<HaritaBolgesi | null>(null);
   const [aramaBolgesi, setAramaBolgesi] = useState<HaritaBolgesi>(() => bolgeHesapla(ilkMerkez, 0.05, 0.05));
@@ -103,9 +108,7 @@ function Kesfet({ seyahat }: { seyahat: Seyahat }) {
   const seciliMekan = secim ? havuz.find((m) => m.place_id === secim.place_id) : undefined;
 
   const pinler: HaritaPini[] = [
-    ...(seyahat.hotel_lat !== null && seyahat.hotel_lng !== null
-      ? [{ id: 'otel', konum: { lat: seyahat.hotel_lat, lng: seyahat.hotel_lng }, renk: renk.metin, tur: 'otel' as const }]
-      : []),
+    ...konaklamalar.map((k) => ({ id: `otel:${k.id}`, konum: { lat: k.lat, lng: k.lng }, renk: renk.metin, tur: 'otel' as const })),
     // #30: listeye eklenen = siyah daire + tik (Program > Harita'da numaralanır); altında ad, yakınken ★ puan · yorum.
     ...havuz.map((m) => ({
       id: `m:${m.place_id}`,
@@ -201,7 +204,7 @@ function Kesfet({ seyahat }: { seyahat: Seyahat }) {
 
   // #29: pine dokunmak seçimdir (ekleme karttan). #32: harita kaymaz.
   const pinBas = (pinId: string) => {
-    if (pinId === 'otel') return;
+    if (pinId.startsWith('otel:')) return;
     const placeId = pinId.slice(2);
     setSecim({ place_id: placeId, kaynak: pinId.startsWith('m:') ? 'liste' : 'oneri' });
   };

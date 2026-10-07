@@ -8,7 +8,9 @@ import { HaritaEkrani } from '@/components/harita/HaritaEkrani';
 import type { HaritaSigdirma } from '@/components/harita/tipler';
 import { CizelgeListesi } from '@/components/program/CizelgeListesi';
 import { GunKartlari, gunEtiketKisa, gunEtiketUzun } from '@/components/program/GunKartlari';
+import { GunOteliSayfasi } from '@/components/program/GunOteliSayfasi';
 import { MiniCubuk } from '@/components/program/MiniCubuk';
+import { OtelUcSatiri } from '@/components/program/OtelUcSatiri';
 import { PinPaneli } from '@/components/program/PinPaneli';
 import { PuanSayfasi } from '@/components/program/PuanSayfasi';
 import { SecimMenusu, type SecimSecenegi } from '@/components/program/SecimMenusu';
@@ -16,6 +18,8 @@ import { SiralaListesi, type SiralaSatiri } from '@/components/program/SiralaLis
 import { SeyahatYukleme } from '@/components/seyahatler/SeyahatYukleme';
 import { Avatar } from '@/components/ui/Avatar';
 import { Ikon } from '@/components/ui/Ikon';
+import type { Konaklama } from '@/features/konaklama/plan';
+import { useGunOteliKaydet, useKonaklamalar } from '@/features/konaklama/sorgular';
 import { useDuragaAta, useDuraklar, useDurakKaldir, useGunEkle, useGunler, useGunSil } from '@/features/gunler/sorgular';
 import { useKonum, yakinDurakId } from '@/features/konum/useKonum';
 import { useMekanGuncelle, useMekanlar, useMekanSil, useUyeler } from '@/features/mekanlar/sorgular';
@@ -62,10 +66,21 @@ export default function ProgramEkrani() {
   const gunler = useGunler(id);
   const duraklar = useDuraklar(id);
   const mekanlar = useMekanlar(id);
-  if (!id || !seyahat.data || !gunler.data || !duraklar.data || !mekanlar.data) {
-    return <SeyahatYukleme sorgular={[seyahat, gunler, duraklar, mekanlar]} kimlikYok={!id} />;
+  const konaklamalar = useKonaklamalar(id);
+  if (!id || !seyahat.data || !gunler.data || !duraklar.data || !mekanlar.data || !konaklamalar.data) {
+    return <SeyahatYukleme sorgular={[seyahat, gunler, duraklar, mekanlar, konaklamalar]} kimlikYok={!id} />;
   }
-  return <ProgramSekmesi key={id} seyahat={seyahat.data} gunler={gunler.data} duraklar={duraklar.data} mekanlar={mekanlar.data} gunParam={gunParam} />;
+  return (
+    <ProgramSekmesi
+      key={id}
+      seyahat={seyahat.data}
+      gunler={gunler.data}
+      duraklar={duraklar.data}
+      mekanlar={mekanlar.data}
+      konaklamalar={konaklamalar.data}
+      gunParam={gunParam}
+    />
+  );
 }
 
 /** "Pazartesi 12 Ekim" / "1. gün". */
@@ -75,7 +90,21 @@ function gunBasligi(gun: Gun): string {
   return `${GUNLER[haftaGunu(gun.date)]} ${g} ${AYLAR[ay - 1]}`;
 }
 
-function ProgramSekmesi({ seyahat, gunler, duraklar, mekanlar, gunParam }: { seyahat: Seyahat; gunler: Gun[]; duraklar: Durak[]; mekanlar: Mekan[]; gunParam?: string }) {
+function ProgramSekmesi({
+  seyahat,
+  gunler,
+  duraklar,
+  mekanlar,
+  konaklamalar,
+  gunParam,
+}: {
+  seyahat: Seyahat;
+  gunler: Gun[];
+  duraklar: Durak[];
+  mekanlar: Mekan[];
+  konaklamalar: Konaklama[];
+  gunParam?: string;
+}) {
   const { session } = useOturum();
   const ekran = useWindowDimensions();
   const uyeler = useUyeler(seyahat.id);
@@ -96,6 +125,9 @@ function ProgramSekmesi({ seyahat, gunler, duraklar, mekanlar, gunParam }: { sey
   const [puanDurakId, setPuanDurakId] = useState<string | null>(null);
   const [pinMenuAcik, setPinMenuAcik] = useState(false);
   const [listeMenuAcik, setListeMenuAcik] = useState(false);
+  // #56 §2: günün oteli alt sayfası.
+  const [otelSayfasi, setOtelSayfasi] = useState(false);
+  const gunOteliKaydet = useGunOteliKaydet(seyahat.id);
   const [seciliMekanId, setSeciliMekanId] = useState<string | null>(null);
   const [duzenle, setDuzenle] = useState(false);
   const [menuDurak, setMenuDurak] = useState<Durak | null>(null);
@@ -112,8 +144,10 @@ function ProgramSekmesi({ seyahat, gunler, duraklar, mekanlar, gunParam }: { sey
   const [onceBitis, setOnceBitis] = useState<{ gunId: string; dk: number } | null>(null);
   const qc = useQueryClient();
 
-  const verisi = useProgramVerisi({ seyahat, gunler, duraklar, mekanlar, seciliGun: gun });
-  const { otel } = verisi;
+  const verisi = useProgramVerisi({ seyahat, gunler, duraklar, mekanlar, seciliGun: gun, konaklamalar });
+  // #56: seçili günün başlangıç (otel) ve bitiş noktası.
+  const { otel, seciliUclar } = verisi;
+  const bitisOtel = seciliUclar.bitis ? { lat: seciliUclar.bitis.lat, lng: seciliUclar.bitis.lng } : null;
   const mekanIle = useMemo(() => new Map(mekanlar.map((m) => [m.id, m])), [mekanlar]);
   const durakIle = useMemo(() => new Map(duraklar.map((d) => [d.place_ref, d])), [duraklar]);
   const gunDurak = useMemo(() => (gun ? gunDuraklari(gun, duraklar) : []), [gun, duraklar]);
@@ -143,7 +177,7 @@ function ProgramSekmesi({ seyahat, gunler, duraklar, mekanlar, gunParam }: { sey
     () => (konum ? yakinDurakId(konum, gunDurak.filter((d) => !d.skipped).map((d) => ({ id: d.id, konum: mekanIle.get(d.place_ref) ?? { lat: 0, lng: 0 } }))) : null),
     [konum, gunDurak, mekanIle],
   );
-  const prog = useGunProgrami({ seyahat, gun, duraklar, mekanlar, yuruyus: verisi.yuruyus, an, buradaId: konum ? buradaId : undefined });
+  const prog = useGunProgrami({ seyahat, gun, duraklar, mekanlar, yuruyus: verisi.yuruyus, an, buradaId: konum ? buradaId : undefined, uclar: seciliUclar });
 
   // T7: elle sıralanmamış günde §5.1 sırası gerçek yürüyüşle hesaplanır ve farklıysa yazılır (herkes aynı sırayı görür).
   const sonYazilan = useRef('');
@@ -152,10 +186,12 @@ function ProgramSekmesi({ seyahat, gunler, duraklar, mekanlar, gunParam }: { sey
     const aktifler = gunDurak.filter((d) => !d.skipped);
     const noktalar = aktifler.map((d) => mekanIle.get(d.place_ref)).filter((m): m is Mekan => !!m);
     if (noktalar.length !== aktifler.length) return;
-    const key = (i: number) => (i < 0 ? 'hotel' : noktalar[i].place_id);
-    const konumu = (i: number) => (i < 0 ? otel! : { lat: noktalar[i].lat, lng: noktalar[i].lng });
+    // #56: -1 günün başlangıç oteli, -2 (taşınma günü) bitiş oteli.
+    const { baslangic: bas, bitis: bit } = seciliUclar;
+    const key = (i: number) => (i === -2 ? bit!.key : i < 0 ? bas!.key : noktalar[i].place_id);
+    const konumu = (i: number) => (i === -2 ? bit! : i < 0 ? bas! : { lat: noktalar[i].lat, lng: noktalar[i].lng });
     const mesafe = (a: number, b: number) => verisi.yuruyus(key(a), key(b))?.sn ?? kestirimYuruyusSn(konumu(a), konumu(b));
-    const sira = varsayilanSira(noktalar.length, mesafe, !!otel);
+    const sira = varsayilanSira(noktalar.length, mesafe, !!bas, !bit ? 'yok' : bas && bas.key === bit.key ? 'ayni' : 'ayri');
     const hedef = sira.map((i) => aktifler[i].id);
     const mevcut = aktifler.map((d) => d.id);
     const imza = `${gun.id}:${hedef.join(',')}`;
@@ -169,7 +205,7 @@ function ProgramSekmesi({ seyahat, gunler, duraklar, mekanlar, gunParam }: { sey
     });
     siraYaz.mutateAsync(guncellemeler).catch(() => setHata(t('program.hata')));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [gun?.id, gun?.order_manual, verisi.matrisYukleniyor, gunDurak.map((d) => `${d.id}:${d.skipped}`).join(',')]);
+  }, [gun?.id, gun?.order_manual, verisi.matrisYukleniyor, gunDurak.map((d) => `${d.id}:${d.skipped}`).join(','), seciliUclar.baslangic?.key, seciliUclar.bitis?.key]);
 
   // #43 KK8: otomatik tamamlanma yazımı — planlanan bitişle, bir kez.
   const otomatikYazilan = useRef(new Set<string>());
@@ -231,13 +267,15 @@ function ProgramSekmesi({ seyahat, gunler, duraklar, mekanlar, gunParam }: { sey
     const mevcut = durakIle.get(mekan.id);
     if (mevcut && mevcut.day_id === hedef.id) return;
     const hedefDuraklar = duraklar.filter((d) => d.day_id === hedef.id).sort((a, b) => (a.order_key < b.order_key ? -1 : 1));
-    // T7: elle sıralanmış günde en ucuz noktaya; otomatik günde sıra 3.7 akışında yeniden hesaplanır.
+    // T7: elle sıralanmış günde en ucuz noktaya (o günün başlangıç/bitiş oteliyle, #56); otomatik günde sıra 3.7 akışında.
+    const hu = verisi.gunUclari.get(hedef.id);
     const ekleIndeksi = hedef.order_manual
       ? enUcuzEklemeIndeksi(
           hedefDuraklar.filter((d) => !d.skipped).map((d) => mekanIle.get(d.place_ref)).filter((m): m is Mekan => !!m).map((m) => ({ key: m.place_id, konum: { lat: m.lat, lng: m.lng } })),
           { key: mekan.place_id, konum: { lat: mekan.lat, lng: mekan.lng } },
-          otel,
+          hu?.baslangic ? { lat: hu.baslangic.lat, lng: hu.baslangic.lng } : null,
           verisi.yuruyus,
+          { otelKey: hu?.baslangic?.key, bitis: hu?.bitis ? { key: hu.bitis.key, konum: { lat: hu.bitis.lat, lng: hu.bitis.lng } } : null },
         )
       : undefined;
     return guvenli(() => ata.mutateAsync({ mekan, gunId: hedef.id, mevcut, gunDuraklari: hedefDuraklar, ekleIndeksi }));
@@ -411,15 +449,15 @@ function ProgramSekmesi({ seyahat, gunler, duraklar, mekanlar, gunParam }: { sey
   // Geçilen bacak sayısı: baştan ardışık tamamlanan (atlanmamış) durak sayısı.
   let gecilenBacak = 0;
   if (prog?.bugun) for (const x of satirlar.filter((y) => y.durum !== 'atlandi')) if (x.durum === 'gecildi') gecilenBacak++; else break;
-  const pinler = programPinleri({ otel, mekanlar, duraklar, gunler, tempolar: verisi.tempolar, adlar: yerler.data, seciliGunId: gun?.id, seciliMekanId, tamamlananMekanIds, konum });
-  const cizgiler = programCizgileri({ otel, mekanIle, gunler, tempolar: verisi.tempolar, seciliGunId: gun?.id, seciliNoktalar: verisi.seciliNoktalar, rotalar: verisi.rotalar, bacak: verisi.bacak, gecilenBacak });
+  const pinler = programPinleri({ gunUclari: verisi.gunUclari, mekanlar, duraklar, gunler, tempolar: verisi.tempolar, adlar: yerler.data, seciliGunId: gun?.id, seciliMekanId, tamamlananMekanIds, konum });
+  const cizgiler = programCizgileri({ gunUclari: verisi.gunUclari, mekanIle, gunler, tempolar: verisi.tempolar, seciliGunId: gun?.id, seciliNoktalar: verisi.seciliNoktalar, rotalar: verisi.rotalar, bacak: verisi.bacak, gecilenBacak });
 
   // #55 §A5: gün seçilince ve panel hal değiştirince harita otel + günün duraklarını sığdırır; kenar boşluğu üstte
   // başlık + gün seçici, altta panel (harita dolgusu zaten panel yüksekliği kadar).
   const sigdirImza = gun && panel !== 'tam' ? `${gun.id}:${panel}:${ustYukseklik}:${gunMekanlari.map((m) => m.id).join(',')}` : '';
   const sigdirma = useMemo((): HaritaSigdirma | undefined => {
     if (!sigdirImza) return undefined;
-    const noktalar = [...(otel ? [otel] : []), ...gunMekanlari.map((m) => ({ lat: m.lat, lng: m.lng }))];
+    const noktalar = [...(otel ? [otel] : []), ...gunMekanlari.map((m) => ({ lat: m.lat, lng: m.lng })), ...(bitisOtel ? [bitisOtel] : [])];
     return noktalar.length ? { noktalar, ust: ustYukseklik + 16, alt: 24 } : undefined;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sigdirImza]);
@@ -528,6 +566,24 @@ function ProgramSekmesi({ seyahat, gunler, duraklar, mekanlar, gunParam }: { sey
     />
   ) : undefined;
 
+  // #56 §1: listenin Başlangıç / Bitiş satırları (otel yoksa kesikli "+ Otel ekle").
+  const bitisSaati = prog ? dakikaSaat(prog.canli.bitisDk) : '';
+  const otelAdi = (u: typeof seciliUclar.baslangic) => (u ? (u.konaklama.label ?? t('otel.adsiz')) : null);
+  const otelAc = () => setOtelSayfasi(true);
+  const basOtelSatiri = <OtelUcSatiri tur="baslangic" ad={otelAdi(seciliUclar.baslangic)} saat={baslangicSaati} onPress={otelAc} />;
+  const sonOtelSatiri =
+    !seciliUclar.baslangic && !seciliUclar.bitis ? undefined : (
+      <OtelUcSatiri
+        tur={seciliUclar.bitis && seciliUclar.bitis.key === seciliUclar.baslangic?.key ? 'donus' : 'bitis'}
+        ad={otelAdi(seciliUclar.bitis)}
+        saat={bitisSaati}
+        onPress={otelAc}
+      />
+    );
+  const gunMerkezi = gunMekanlari.length
+    ? { lat: gunMekanlari.reduce((a, m) => a + m.lat, 0) / gunMekanlari.length, lng: gunMekanlari.reduce((a, m) => a + m.lng, 0) / gunMekanlari.length }
+    : null;
+
   // #55 §B7: alt sayfa — üst şerit (her halde görünür, sabit yükseklik) + gövde.
   const ustBaslikMetni = gun && prog ? (panel === 'tam' ? t('program.panelBaslik', { gun: gunEtiketKisa(gun), bas: baslangicSaati, bit: dakikaSaat(prog.canli.bitisDk) }) : t('program.bitisBaslik', { gun: gunEtiketKisa(gun), bit: dakikaSaat(prog.canli.bitisDk) })) : '';
   // #55 §A4: başlık tek satıra sığmazsa "≡ tutup sürükle" ipucu gizlenir (kaba ölçü: harf ~7,5 px + düğmeler).
@@ -594,12 +650,15 @@ function ProgramSekmesi({ seyahat, gunler, duraklar, mekanlar, gunParam }: { sey
         {verisi.matrisHata ? <Text style={s.uyariMetin}>{t('program.yuruyusHata')}</Text> : null}
         {hata ? <Text style={s.hata}>{hata}</Text> : null}
         {siralaSatirlari.length === 0 ? (
-          <Text style={s.uyariMetin}>{t('program.ozetGunBos', { gun: gunEtiketKisa(gun) })}</Text>
+          <>
+            {basOtelSatiri}
+            <Text style={s.uyariMetin}>{t('program.ozetGunBos', { gun: gunEtiketKisa(gun) })}</Text>
+          </>
         ) : (
           <SiralaListesi
             satirlar={siralaSatirlari}
-            basSatiri={otel ? t('program.otelSaat', { saat: baslangicSaati }) : t('program.baslangicSaat', { saat: baslangicSaati })}
-            basIkon={otel ? 'ev' : 'program'}
+            bas={basOtelSatiri}
+            son={sonOtelSatiri}
             yukseklik={Math.max(120, yukseklik - (verisi.matrisHata ? 20 : 0) - (hata ? 20 : 0))}
             numaraRengi={gunRengi(gun.index)}
             onTasi={siralaTasi}
@@ -634,6 +693,8 @@ function ProgramSekmesi({ seyahat, gunler, duraklar, mekanlar, gunParam }: { sey
             buradaId={konum ? buradaId : undefined}
             duzenle={duzenle}
             baslangicSaati={baslangicSaati}
+            bas={basOtelSatiri}
+            son={sonOtelSatiri}
             onTamamla={tamamla}
             onPuanla={(d) => setPuanDurakId(d.id)}
             onDetay={(d) => detayAc(d.place_ref)}
@@ -775,6 +836,8 @@ function ProgramSekmesi({ seyahat, gunler, duraklar, mekanlar, gunParam }: { sey
           daireler: otel ? [{ id: 'yurume', merkez: otel, yaricapM: YURUME_YARICAPI_M, renk: renk.metin }] : [],
           // KK6: pine dokununca harita kaymaz (Harita bileşeni), panel pin paneline döner.
           onPinBas: (pinId) => {
+            // #56: ev pinine dokununca günün oteli alt sayfası.
+            if (pinId.startsWith('otel:')) return otelAc();
             if (!pinId.startsWith('m:')) return;
             const mekanId = pinId.slice(2);
             const m = mekanIle.get(mekanId);
@@ -807,6 +870,7 @@ function ProgramSekmesi({ seyahat, gunler, duraklar, mekanlar, gunParam }: { sey
             ? [
                 { etiket: duzenle ? t('program.bitti') : t('program.duzenle'), onPress: () => setDuzenle((d) => !d) },
                 { etiket: t('program.kisaRota'), onPress: enKisaRotayaDiz, pasif: !gun.order_manual },
+                { etiket: t('gunOteli.menu'), onPress: otelAc },
               ]
             : []
         }
@@ -818,6 +882,18 @@ function ProgramSekmesi({ seyahat, gunler, duraklar, mekanlar, gunParam }: { sey
         secenekler={seciliMekan ? [{ etiket: t('program.pin.listedenCikar'), onPress: () => listedenCikar(seciliMekan), tehlike: true }] : []}
         onKapat={() => setPinMenuAcik(false)}
       />
+      {otelSayfasi && gun ? (
+        <GunOteliSayfasi
+          key={gun.id}
+          seyahat={seyahat}
+          gun={gun}
+          gunler={gunler}
+          konaklamalar={konaklamalar}
+          referans={gunMerkezi}
+          onKapat={() => setOtelSayfasi(false)}
+          onKaydet={(v) => gunOteliKaydet.mutateAsync({ gunler, konaklamalar, gunId: gun.id, ...v })}
+        />
+      ) : null}
       {puanDurak && puanMekan && puanSatir ? (
         <PuanSayfasi
           key={puanDurak.id}

@@ -8,6 +8,7 @@ import { SecimMenusu } from '@/components/program/SecimMenusu';
 import { Buton } from '@/components/ui/Buton';
 import { FotoGalerisi } from '@/components/yerler/FotoGalerisi';
 import { Avatar } from '@/components/ui/Avatar';
+import { ucListesi, useGunUclari } from '@/features/konaklama/sorgular';
 import { useDuraklar, useGunler } from '@/features/gunler/sorgular';
 import { useMekanEkle, useMekanGuncelle, useMekanSil, useMekanlar, useUyeler } from '@/features/mekanlar/sorgular';
 import { matrisNoktalari, useDurakGuncelle, useYuruyusMatrisi } from '@/features/program/sorgular';
@@ -51,11 +52,11 @@ export default function MekanDetayEkrani() {
   const durakGuncelle = useDurakGuncelle(id ?? '');
   const durak = mekan ? duraklar.data?.find((d) => d.place_ref === mekan.id) : undefined;
   const gun = durak ? gunler.data?.find((g) => g.id === durak.day_id) : undefined;
-  const otel = seyahat.data && seyahat.data.hotel_lat !== null && seyahat.data.hotel_lng !== null ? { lat: seyahat.data.hotel_lat, lng: seyahat.data.hotel_lng } : null;
+  const uclar = useGunUclari(id, gun);
   const gunMekanlari = gun ? gunDuraklari(gun, duraklar.data ?? []).map((d) => mekanlar.data?.find((m) => m.id === d.place_ref)).filter((m): m is NonNullable<typeof m> => !!m) : [];
-  const matris = useYuruyusMatrisi(gun ? id : undefined, matrisNoktalari(otel, gunMekanlari));
+  const matris = useYuruyusMatrisi(gun ? id : undefined, matrisNoktalari(ucListesi(uclar), gunMekanlari));
   const an = useSimdi(false);
-  const prog = useGunProgrami({ seyahat: seyahat.data, gun, duraklar: duraklar.data ?? [], mekanlar: mekanlar.data ?? [], yuruyus: matris.yuruyus, an });
+  const prog = useGunProgrami({ seyahat: seyahat.data, gun, duraklar: duraklar.data ?? [], mekanlar: mekanlar.data ?? [], yuruyus: matris.yuruyus, an, uclar });
   const satir = durak ? prog?.canli.satirlar.find((x) => x.durak.id === durak.id) : undefined;
   const gunMetni = gun
     ? durak?.skipped

@@ -18,6 +18,29 @@ const d = (id: string, dakika: number, ek: Partial<ProgramDuragi> = {}): Program
 const sabit = () => ({ sn: 600, m: 800 });
 
 describe('programHesapla', () => {
+  // #56: günün başlangıç ve bitiş noktası ayrı (taşınma günü); anahtarlar stay:<id>.
+  it('#56 taşınma günü: son duraktan yeni otele geçiş bitişe eklenir, anahtarlar ayrı', () => {
+    const yeni = { lat: otel.lat + 0.01, lng: otel.lng };
+    const sorulan: string[] = [];
+    const kaynak = (a: string, b: string) => {
+      sorulan.push(`${a}>${b}`);
+      return sabit();
+    };
+    const p = programHesapla({ baslangic: '09:00', duraklar: [d('d1', 60)], otel, bitisOtel: yeni, otelKey: 'stay:A', bitisKey: 'stay:B', yuruyus: kaynak, simdiDk: null });
+    expect(sorulan).toEqual(['stay:A>d1', 'd1>stay:B']);
+    expect(p.oteleDonus).not.toBeNull();
+    expect(p.bitisDk).toBe(540 + 10 + 60 + 10);
+  });
+
+  it('#56 otelsiz gün: ilk duraktan başlar, son durakta biter; bitiş oteli varsa yalnız son bacak', () => {
+    const otelsiz = programHesapla({ baslangic: '09:00', duraklar: [d('d1', 60), d('d2', 30)], otel: null, yuruyus: sabit, simdiDk: null });
+    expect(otelsiz.satirlar[0].yuruyus).toBeNull();
+    expect(otelsiz.oteleDonus).toBeNull();
+    expect(otelsiz.bitisDk).toBe(540 + 60 + 10 + 30);
+    const sonaOtel = programHesapla({ baslangic: '09:00', duraklar: [d('d1', 60)], otel: null, bitisOtel: otel, bitisKey: 'stay:B', yuruyus: sabit, simdiDk: null });
+    expect(sonaOtel.oteleDonus).not.toBeNull();
+  });
+
   it('saatleri sırayla toplar, otele dönüşü ekler', () => {
     const p = programHesapla({ baslangic: '09:00', duraklar: [d('d1', 90), d('d2', 60)], otel, yuruyus: sabit, simdiDk: null });
     expect(p.satirlar.map((s) => [s.varisDk, s.ayrilisDk])).toEqual([

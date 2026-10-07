@@ -2,7 +2,7 @@
 import { mesafeM } from '@/components/harita/geo';
 import type { Konum } from '@/components/harita/tipler';
 
-import { varsayilanSira } from './siralama';
+import { varsayilanSira, type Bitis } from './siralama';
 
 export type TempoDuragi = { id: string; konum: Konum; dakika: number };
 
@@ -79,7 +79,10 @@ export function tempoEtiketi(doluluk: number): TempoEtiketi {
  */
 export function tempoHesapla(secenek: {
   duraklar: TempoDuragi[];
+  /** Günün başlangıç noktası (otel); null = ilk duraktan başla. */
   otel: Konum | null;
+  /** #56 günün bitiş noktası; verilmezse başlangıca dönüş (otel varsa). null = son durakta bit. */
+  bitisOtel?: Konum | null;
   baslangic: string;
   bitis: string;
   /** Eski imza (testler, kestirim): yalnız yürüyüş saniyesi. */
@@ -89,20 +92,23 @@ export function tempoHesapla(secenek: {
   sira?: string[];
 }): TempoSonucu {
   const { duraklar, otel } = secenek;
+  const bitisOtel = secenek.bitisOtel === undefined ? otel : secenek.bitisOtel;
+  // #56: bitiş başlangıçla aynı konumdaysa dönüş (-1), farklıysa taşınma (-2), yoksa son durak.
+  const bitis: Bitis = !bitisOtel ? 'yok' : otel && bitisOtel.lat === otel.lat && bitisOtel.lng === otel.lng ? 'ayni' : 'ayri';
   const bacak: BacakKaynagi =
     secenek.bacak ??
     (secenek.yuruyusSn
       ? (a, b) => ({ yuruyusSn: secenek.yuruyusSn!(a, b), taksiSn: null, kestirim: false })
       : (a, b) => ({ yuruyusSn: kestirimYuruyusSn(a, b), taksiSn: null, kestirim: true }));
-  const konum = (i: number): Konum => (i < 0 ? otel! : duraklar[i].konum);
+  const konum = (i: number): Konum => (i === -2 ? bitisOtel! : i < 0 ? otel! : duraklar[i].konum);
   const mesafe = (a: number, b: number) => bacak(konum(a), konum(b)).yuruyusSn;
   const verilen = secenek.sira?.map((id) => duraklar.findIndex((d) => d.id === id)).filter((i) => i >= 0);
-  const siraIdx = verilen && verilen.length === duraklar.length ? verilen : varsayilanSira(duraklar.length, mesafe, !!otel);
+  const siraIdx = verilen && verilen.length === duraklar.length ? verilen : varsayilanSira(duraklar.length, mesafe, !!otel, bitis);
   let yuruyusSn = 0;
   let taksiSn = 0;
   let kestirim = false;
   if (duraklar.length > 0) {
-    const yol = otel ? [-1, ...siraIdx, -1] : siraIdx;
+    const yol = [...(otel ? [-1] : []), ...siraIdx, ...(bitis === 'yok' ? [] : [bitis === 'ayri' ? -2 : -1])];
     for (let i = 1; i < yol.length; i++) {
       const a = konum(yol[i - 1]);
       const b = konum(yol[i]);
