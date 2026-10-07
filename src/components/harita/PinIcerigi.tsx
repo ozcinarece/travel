@@ -9,9 +9,9 @@ import { etiketYuksekligi, kisaAd, pinCapi } from './geo';
 import type { HaritaPini } from './tipler';
 
 /**
- * Pin görünümleri (#30, 3 Ekim mockup): küçük daire + ALTINDA kısa ad etiketi (+ ★ puan · yorum satırı, `detay`).
- * durak = gün renginde dolu daire + sıra numarası · listede = siyah daire + tik · oneri / bos = beyaz daire, siyah kenar,
- * kategori ikonu · seçili = büyük daire · otel = siyah kare + ev · aday (3.3) = beyaz hap "★ puan · ad" ·
+ * Pin görünümleri (#53, 7 Ekim mockup): 40 px daire (küçük 32 px) + ALTINDA kısa ad (+ ★ puan · yorum satırı, `detay`).
+ * durak = siyah daire + sıra numarası · listede = siyah daire + ✓ · oneri / bos = beyaz daire, kategori renginde kenar ve
+ * ikon · seçili = turuncu halka · otel = siyah kare + ev · aday (3.3) = beyaz hap "★ puan · ad" ·
  * etiket (#33) = küçük beyaz hap (rota bacağı süresi). `etiketGizli` çakışma kuralıyla gelir (geo.gizliEtiketler).
  */
 export function PinIcerigi({ pin, etiketGizli, detay = false }: { pin: HaritaPini; etiketGizli?: boolean; detay?: boolean }) {
@@ -51,11 +51,12 @@ export function PinIcerigi({ pin, etiketGizli, detay = false }: { pin: HaritaPin
     );
   }
   const cap = pinCapi(pin);
-  // Seçili pin: turuncu halka (3 px) dairenin kenarıdır (#42 KK5).
+  // #53: seçili = turuncu halka (3 px, dairenin kenarı).
   const daire = { width: cap, height: cap, borderRadius: cap / 2, ...(pin.secili ? { borderWidth: 3, borderColor: renk.vurgu } : {}) };
-  const ikonBoyut = pin.tamam && !pin.secili ? 16 : Math.round((pin.secili ? cap - 6 : cap) * 0.62);
+  const ikonBoyut = pin.kucuk ? 16 : 20;
   const puan = puanMetni(pin.puan);
   const yorum = yorumKisa(pin.yorumSayisi);
+  const kRenk = pin.kategoriRenk ?? renk.metin;
   return (
     <View style={s.sutun} collapsable={false}>
       {pin.tamam ? (
@@ -64,16 +65,19 @@ export function PinIcerigi({ pin, etiketGizli, detay = false }: { pin: HaritaPin
           <Ikon ad="tik" boyut={ikonBoyut} renk={renk.zemin} kalinlik={2.4} />
         </View>
       ) : pin.tur === 'oneri' || pin.tur === 'bos' ? (
-        <View style={[s.daire, daire, s.beyaz, pin.secili && { borderWidth: 3, borderColor: renk.vurgu }]} collapsable={false}>
-          <Ikon ad={pin.ikon ?? 'pin'} boyut={ikonBoyut} renk={renk.metin} kalinlik={2.2} />
+        // #53: beyaz daire, kategori renginde 2,5 px kenar, kategori ikonu.
+        <View style={[s.daire, daire, s.beyaz, { borderColor: kRenk }, pin.secili && { borderWidth: 3, borderColor: renk.vurgu }]} collapsable={false}>
+          <Ikon ad={pin.ikon ?? 'kamera'} boyut={ikonBoyut} renk={kRenk} kalinlik={2.1} />
         </View>
       ) : pin.tur === 'listede' ? (
-        <View style={[s.daire, daire, { backgroundColor: pin.renk }]} collapsable={false}>
+        // #53: listede = siyah daire + beyaz ✓.
+        <View style={[s.daire, daire, { backgroundColor: renk.metin }]} collapsable={false}>
           <Ikon ad="tik" boyut={ikonBoyut} renk={renk.zemin} kalinlik={2.4} />
         </View>
       ) : (
-        <View style={[s.daire, daire, { backgroundColor: pin.renk }]} collapsable={false}>
-          <Text style={s.daireMetin}>{pin.etiket ?? ''}</Text>
+        // #53: güne atanmış = siyah daire + sıra numarası.
+        <View style={[s.daire, daire, { backgroundColor: renk.metin }]} collapsable={false}>
+          <Text style={[s.daireMetin, pin.kucuk && { fontSize: 13 }]}>{pin.etiket ?? ''}</Text>
         </View>
       )}
       <View style={[s.etiketKutu, { height: etiketYuksekligi(detay) }]}>
@@ -99,13 +103,14 @@ export function PinIcerigi({ pin, etiketGizli, detay = false }: { pin: HaritaPin
 const s = StyleSheet.create({
   sutun: { alignItems: 'center', width: 140 },
   daire: { borderWidth: 2, borderColor: renk.zemin, alignItems: 'center', justifyContent: 'center' },
-  beyaz: { backgroundColor: renk.zemin, borderColor: renk.metin, borderWidth: 1.5 },
-  daireMetin: { fontFamily: yazi.ekstra, fontSize: 11, color: renk.zemin },
+  beyaz: { backgroundColor: renk.zemin, borderWidth: 2.5 },
+  daireMetin: { fontFamily: yazi.ekstra, fontSize: 15, color: renk.zemin },
   // Etiket yüksekliği sabit (16 / detaylı 30) ki çapa hesabı (geo.pinCapasi) gizli/görünür fark etmesin.
   etiketKutu: { marginTop: 2, justifyContent: 'center', alignItems: 'center' },
-  etiketZemin: { paddingHorizontal: 5, borderRadius: 7, backgroundColor: 'rgba(255,255,255,0.88)', alignItems: 'center' },
-  etiket: { fontFamily: yazi.kalin, fontSize: 11, lineHeight: 14, color: renk.metin },
-  detay: { fontFamily: yazi.yari, fontSize: 10, lineHeight: 13, color: renk.ikincil },
+  // #53: ad 11 px, beyaz hale (kutu yok).
+  etiketZemin: { paddingHorizontal: 4, alignItems: 'center' },
+  etiket: { fontFamily: yazi.kalin, fontSize: 11, lineHeight: 14, color: renk.metin, textShadowColor: '#ffffff', textShadowRadius: 3, textShadowOffset: { width: 0, height: 0 } },
+  detay: { fontFamily: yazi.yari, fontSize: 10, lineHeight: 13, color: renk.ikincil, textShadowColor: '#ffffff', textShadowRadius: 3, textShadowOffset: { width: 0, height: 0 } },
   hap: { flexDirection: 'row', alignItems: 'center', gap: 4, height: 30, paddingHorizontal: 8, paddingRight: 10, borderRadius: 999, backgroundColor: renk.zemin, maxWidth: 200 },
   hapSecili: { backgroundColor: renk.metin },
   hapMetin: { fontFamily: yazi.kalin, fontSize: 12, color: renk.metin },

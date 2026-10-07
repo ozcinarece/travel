@@ -1,6 +1,6 @@
 import { describe, expect, it } from '@jest/globals';
 
-import { bolgedenUzaklasti, bolgeHesapla, deltaZoom, detayGoster, gizliEtiketler, haritaDolgusu, kisaAd, mesafeM, pinCapasi, SIFIR_DOLGU, zoomDelta } from '../geo';
+import { sigdir, bolgedenUzaklasti, bolgeHesapla, deltaZoom, detayGoster, gizliEtiketler, haritaDolgusu, kisaAd, mesafeM, pinCapasi, SIFIR_DOLGU, zoomDelta } from '../geo';
 import type { HaritaPini } from '../tipler';
 
 const roma = { lat: 41.9028, lng: 12.4964 };
@@ -60,9 +60,11 @@ describe('geo', () => {
   it('pinCapasi daire merkezini çapa yapar; detay satırıyla kutu uzar', () => {
     const c = pinCapasi({ id: 'x', konum: roma, renk: '#000', tur: 'durak' });
     expect(c.x).toBe(0.5);
-    expect(c.y).toBeCloseTo(11 / 40);
-    expect(pinCapasi({ id: 'x', konum: roma, renk: '#000', tur: 'durak' }, true).y).toBeCloseTo(11 / 54);
-    expect(pinCapasi({ id: 'x', konum: roma, renk: '#000', tur: 'durak', secili: true }).y).toBeCloseTo(16 / 50);
+    // #53: 40 px daire (+2 boşluk +16 etiket); küçük 32 px; seçili de 40 px (halka kenarda).
+    expect(c.y).toBeCloseTo(20 / 58);
+    expect(pinCapasi({ id: 'x', konum: roma, renk: '#000', tur: 'durak' }, true).y).toBeCloseTo(20 / 72);
+    expect(pinCapasi({ id: 'x', konum: roma, renk: '#000', tur: 'durak', secili: true }).y).toBeCloseTo(20 / 58);
+    expect(pinCapasi({ id: 'x', konum: roma, renk: '#000', tur: 'durak', kucuk: true }).y).toBeCloseTo(16 / 50);
   });
 
   it('deltaZoom zoomDelta\'nın tersidir; bolgeHesapla zoom üretir', () => {
@@ -117,5 +119,18 @@ describe('geo', () => {
 
   it('haritaDolgusu: hazırken alt boşluk (tam sayı)', () => {
     expect(haritaDolgusu(true, 212.6)).toEqual({ top: 0, right: 0, bottom: 213, left: 0 });
+  });
+
+  // #53 §5: yarı açık panelde harita rotayı sığdırır.
+  it('sigdir: merkez ortada, geniş alan daha uzak zoom, 11–16 arası', () => {
+    const noktalar = [roma, { lat: 41.89, lng: 12.48 }, { lat: 41.91, lng: 12.5 }];
+    const a = sigdir(noktalar, { genislik: 390, yukseklik: 300 })!;
+    expect(a.konum.lat).toBeCloseTo(41.9, 2);
+    expect(a.zoom).toBeGreaterThanOrEqual(11);
+    expect(a.zoom).toBeLessThanOrEqual(16);
+    const genis = sigdir([...noktalar, { lat: 41.95, lng: 12.6 }], { genislik: 390, yukseklik: 300 })!;
+    expect(genis.zoom).toBeLessThan(a.zoom);
+    expect(sigdir([], { genislik: 390, yukseklik: 300 })).toBeNull();
+    expect(sigdir([roma], { genislik: 390, yukseklik: 300 })!.zoom).toBe(15);
   });
 });

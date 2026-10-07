@@ -7,6 +7,7 @@ import { bolgedenUzaklasti, bolgeHesapla } from '@/components/harita/geo';
 import { EylemHapi, HaritaEkrani } from '@/components/harita/HaritaEkrani';
 import type { HaritaBolgesi, HaritaOdagi, HaritaPini } from '@/components/harita/tipler';
 import { Avatar } from '@/components/ui/Avatar';
+import { Ikon } from '@/components/ui/Ikon';
 import { GoogleAtfi } from '@/components/yerler/GoogleAtfi';
 import { useMekanEkle, useMekanlar, useMekanSil, useUyeler } from '@/features/mekanlar/sorgular';
 import { useSeyahatId } from '@/features/seyahatler/baglam';
@@ -26,7 +27,7 @@ import {
   type OneriCipi,
 } from '@/features/yerler/api';
 import { t } from '@/i18n';
-import { pinIkonu } from '@/lib/pinIkonu';
+import { kategoriPini, yorumKisa } from '@/lib/pinIkonu';
 import { kategoriEtiketi, sureMetni, varsayilanDakika } from '@/lib/kategori';
 import type { Mekan, Seyahat } from '@/lib/tipler';
 import { bosluk, minDokunma, renk, yazi } from '@/theme';
@@ -116,7 +117,7 @@ function Kesfet({ seyahat }: { seyahat: Seyahat }) {
       tur: 'listede' as const,
       secili: secim?.place_id === m.place_id,
     })),
-    // #30: öneri = beyaz daire + kategori ikonu (primaryType).
+    // #53: öneri = beyaz daire, kategori renginde kenar + ikon (primaryType).
     ...[...(aramaSonucu ? [aramaSonucu] : []), ...oneriListesi]
       .filter((y, i, dizi) => !havuz.some((m) => m.place_id === y.place_id) && dizi.findIndex((x) => x.place_id === y.place_id) === i)
       .map((y) => ({
@@ -124,7 +125,7 @@ function Kesfet({ seyahat }: { seyahat: Seyahat }) {
         konum: { lat: y.lat, lng: y.lng },
         renk: renk.metin,
         ad: y.ad,
-        ikon: pinIkonu(y.primary_type),
+        ...kategoriPini(y.primary_type),
         puan: y.puan,
         yorumSayisi: y.puan_sayisi,
         tur: 'oneri' as const,
@@ -369,55 +370,47 @@ function OnizlemeKarti({
   onKapat: () => void;
 }) {
   const dakika = mekan?.default_minutes ?? varsayilanDakika(yer?.primary_type);
+  const yorum = yorumKisa(yer?.puan_sayisi);
+  // #53 §7: tek satır — 60 px foto · ad · "tür · süre · ★ puan · yorum" · siyah + (listeye ekle). Karta dokununca Detay.
   return (
-    <View style={[s.kart, s.golge]}>
-      <View style={s.kartUst}>
-        {yer?.foto_uri ? <Image source={{ uri: yer.foto_uri }} style={s.kartFoto} contentFit="cover" /> : null}
-        <View style={{ flex: 1, minWidth: 0, gap: 2 }}>
-          {yer ? (
-            <>
-              <Text style={s.kartAd} numberOfLines={2}>
-                {yer.ad}
-              </Text>
-              <Text style={s.kartAlt} numberOfLines={1}>
-                {kategoriEtiketi(yer.primary_type)} · {sureMetni(dakika)}
-                {yer.puan !== null ? ` · ★ ${yer.puan.toLocaleString('tr-TR')}` : ''}
-              </Text>
-              <Text style={s.kartAlt} numberOfLines={1}>
-                {yer.puan_sayisi !== null ? `${t('kesfet.yorum', { n: yer.puan_sayisi.toLocaleString('tr-TR') })} · ` : ''}
-                {yer.acik === true ? `${t('kesfet.acik')} · ` : yer.acik === false ? `${t('kesfet.kapali')} · ` : ''}
-                {t('yerler.atif')}
-              </Text>
-              {mekan && ekleyenAd ? (
-                <View style={s.ekleyen}>
-                  <Avatar ad={ekleyenAd} boyut={18} arkaPlan={renk.vurgu} />
-                  <Text style={s.ekleyenMetin}>{t('kesfet.ekleyen', { ad: ekleyenAd })}</Text>
-                </View>
-              ) : null}
-            </>
-          ) : (
-            <Text style={s.kartAlt}>{yukleniyor ? '…' : t('kesfet.secimHata')}</Text>
-          )}
-        </View>
-        <Pressable accessibilityRole="button" accessibilityLabel={t('genel.vazgec')} onPress={onKapat} hitSlop={8} style={s.kapat}>
-          <Text style={s.kapatMetin}>×</Text>
-        </Pressable>
-      </View>
-      <View style={s.kartDugmeler}>
-        {mekan ? (
-          <Pressable accessibilityRole="button" disabled={mesgul} onPress={onCikar} style={[s.kartDugme, s.kartDugmeGri]}>
-            <Text style={s.kartDugmeMetin}>{t('kesfet.listedeCikar')}</Text>
-          </Pressable>
+    <Pressable accessibilityRole="button" onPress={onDetay} style={[s.kart, s.golge]}>
+      {yer?.foto_uri ? <Image source={{ uri: yer.foto_uri }} style={s.kartFoto} contentFit="cover" /> : <View style={s.kartFoto} />}
+      <View style={{ flex: 1, minWidth: 0, gap: 2 }}>
+        {yer ? (
+          <>
+            <Text style={s.kartAd} numberOfLines={1}>
+              {yer.ad}
+            </Text>
+            <Text style={s.kartAlt} numberOfLines={1}>
+              {kategoriEtiketi(yer.primary_type)} · {sureMetni(dakika)}
+              {yer.puan !== null ? ` · ★ ${yer.puan.toLocaleString('tr-TR')}` : ''}
+              {yorum ? ` · ${yorum}` : ''}
+            </Text>
+            <Text style={s.kartAtif} numberOfLines={1}>
+              {mekan && ekleyenAd ? `${t('kesfet.ekleyen', { ad: ekleyenAd })} · ` : ''}
+              {t('yerler.atif')}
+            </Text>
+          </>
         ) : (
-          <Pressable accessibilityRole="button" disabled={mesgul || !yer} onPress={onEkle} style={[s.kartDugme, s.kartDugmeSiyah, (mesgul || !yer) && { opacity: 0.5 }]}>
-            <Text style={[s.kartDugmeMetin, { color: renk.zemin }]}>{t('kesfet.ekle')}</Text>
-          </Pressable>
+          <Text style={s.kartAlt}>{yukleniyor ? '…' : t('kesfet.secimHata')}</Text>
         )}
-        <Pressable accessibilityRole="button" onPress={onDetay} style={[s.kartDugme, s.kartDugmeGri]}>
-          <Text style={s.kartDugmeMetin}>{t('kesfet.detay')}</Text>
-        </Pressable>
       </View>
-    </View>
+      {mekan ? (
+        <Pressable accessibilityRole="button" accessibilityLabel={t('kesfet.listedeCikar')} disabled={mesgul} onPress={onCikar} hitSlop={6} style={[s.artiDugme, s.listedeDugme]}>
+          <Ikon ad="tik" boyut={20} renk={renk.zemin} kalinlik={2.6} />
+        </Pressable>
+      ) : (
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={t('kesfet.ekle')}
+          disabled={mesgul || !yer}
+          onPress={onEkle}
+          hitSlop={6}
+          style={[s.artiDugme, (mesgul || !yer) && { opacity: 0.5 }]}>
+          <Ikon ad="yeni" boyut={24} renk={renk.zemin} kalinlik={2.2} />
+        </Pressable>
+      )}
+    </Pressable>
   );
 }
 
@@ -443,11 +436,14 @@ const s = StyleSheet.create({
   cipMetinAktif: { color: renk.zemin },
   alt: { gap: 12, paddingBottom: 14 },
   bosOneri: { fontFamily: yazi.normal, fontSize: 12, color: renk.ikincil, textAlign: 'center', paddingHorizontal: bosluk.kenar },
-  kart: { marginHorizontal: bosluk.kenar, padding: 14, borderRadius: 18, backgroundColor: renk.zemin, gap: 10 },
-  kartUst: { flexDirection: 'row', alignItems: 'flex-start', gap: 12 },
-  kartFoto: { width: 72, height: 72, borderRadius: 12, backgroundColor: renk.yuzey },
-  kartAd: { fontFamily: yazi.ekstra, fontSize: 17, letterSpacing: -0.3, color: renk.metin },
+  kart: { marginHorizontal: bosluk.kenar, padding: 10, borderRadius: 18, backgroundColor: renk.zemin, flexDirection: 'row', alignItems: 'center', gap: 12 },
+  kartFoto: { width: 60, height: 60, borderRadius: 12, backgroundColor: renk.yuzey },
+  kartAd: { fontFamily: yazi.ekstra, fontSize: 15, letterSpacing: -0.2, color: renk.metin },
   kartAlt: { fontFamily: yazi.normal, fontSize: 12, color: renk.ikincil },
+  kartAtif: { fontFamily: yazi.normal, fontSize: 10, color: renk.soluk },
+  artiDugme: { width: 44, height: 44, borderRadius: 22, backgroundColor: renk.metin, alignItems: 'center', justifyContent: 'center' },
+  // Listede: siyah daire + beyaz ✓ (pinle aynı dil); dokununca listeden çıkar.
+  listedeDugme: { backgroundColor: renk.metin },
   kapat: { width: 28, height: 28, alignItems: 'center', justifyContent: 'center' },
   kapatMetin: { fontFamily: yazi.kalin, fontSize: 18, color: renk.ikincil },
   kartDugmeler: { flexDirection: 'row', gap: 8 },

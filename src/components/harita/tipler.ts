@@ -12,6 +12,10 @@ export type HaritaPini = {
   ad?: string;
   /** Daire içindeki kategori ikonu (oneri/bos); yoksa 'pin'. */
   ikon?: PinIkonu;
+  /** #53: kategori rengi — oneri/bos dairesinin kenarı ve ikonu. */
+  kategoriRenk?: string;
+  /** #53: küçük pin (32 px; Program'da yarı açık panel). Varsayılan 40 px. */
+  kucuk?: boolean;
   /** #47 B5: `etiket` türü hapta metnin önündeki çizgi ikon. */
   etiketIkon?: 'yurume' | 'taksi';
   /** ★ puan: aday hapında; diğer türlerde ad etiketinin ikinci satırında (seçili ya da zoom ≥ 16, #30). */

@@ -14,6 +14,7 @@ Değişiklik: v0.2'de incelemedeki T1, T2, T5, T7, T8 ve T11 kararları işlendi
 |---|---|---|
 | İstemci | **Expo (SDK güncel) + Expo Router + TypeScript** | iOS, Android ve web tek kod tabanından çıkar. Davet linki (3.10) aynı rotaları tarayıcıda açar. |
 | Harita (native) | `react-native-maps`, **iOS'ta da `PROVIDER_GOOGLE`** | Google Places verisini Google dışı bir haritada göstermek şartlara aykırı. iOS varsayılanı Apple Maps olduğu için bu seçim zorunlu. Bu yüzden Expo Go kullanılamaz, **EAS development build** gerekir. |
+| Harita görünümü (#53) | `haritaStili.ts` + `pinIkonu.ts` | Tek stil tüm haritalarda (bina blokları ve POI kapalı, **yalnız 6 haneli renk** — test korur). Pin: 40 px (yarı açık Program panelinde 32 px), kategori `primaryType` → renk + ikon (`KATEGORI_PIN`). |
 | Harita (web) | `@vis.gl/react-google-maps` (Maps JS API) | Aynı `<Harita>` arayüzü `.native.tsx` / `.web.tsx` olarak iki uygulamayla sağlanır. |
 | Arka uç | **Supabase**: Postgres, Auth, Realtime, Edge Functions, pg_cron | Kapsamdaki gerekçe geçerli. Ayrıca misafir kullanıcı için **anonim oturum** desteği var (§4). |
 | Veri erişimi | `@supabase/supabase-js` + TanStack Query | Ekranlar önbellekten açılır. Realtime olayları sorgu önbelleğini günceller. |

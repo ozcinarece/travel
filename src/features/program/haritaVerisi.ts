@@ -1,7 +1,7 @@
 // #42: Program tek ekran haritasının pin ve çizgi verisi (saf fonksiyonlar).
 import type { HaritaCizgisi, HaritaPini, Konum } from '@/components/harita/tipler';
 import type { HafifYer } from '@/features/yerler/api';
-import { pinIkonu } from '@/lib/pinIkonu';
+import { kategoriPini } from '@/lib/pinIkonu';
 import { polylineCoz } from '@/lib/polyline';
 import type { Durak, Gun, Mekan } from '@/lib/tipler';
 import { bacakModu, type BacakKaynagi, type TempoSonucu } from '@/schedule/tempo';
@@ -28,8 +28,10 @@ export function programPinleri(secenek: {
   tamamlananMekanIds: Set<string>;
   /** Kullanıcı konumu (yalnız seyahat gününde). */
   konum: Konum | null;
+  /** #53: yarı açık panelde pinler 32 px. */
+  kucuk?: boolean;
 }): HaritaPini[] {
-  const { otel, mekanlar, duraklar, gunler, tempolar, adlar, seciliGunId, seciliMekanId, tamamlananMekanIds, konum } = secenek;
+  const { otel, mekanlar, duraklar, gunler, tempolar, adlar, seciliGunId, seciliMekanId, tamamlananMekanIds, konum, kucuk } = secenek;
   const durakIle = new Map(duraklar.map((d) => [d.place_ref, d]));
   const gunIndex = new Map(gunler.map((g) => [g.id, g.index]));
   // #30: pin numarası = gün içi sıra (§5.1 ya da elle); rota çizgisiyle okunur.
@@ -51,6 +53,7 @@ export function programPinleri(secenek: {
       puan: hafif?.puan ?? null,
       yorumSayisi: hafif?.puan_sayisi ?? null,
       secili,
+      kucuk,
       // KK5: seçili günün pinleri tam renk; diğer günler ve atanmamışlar soluk (seçili pin hariç).
       opaklik: seciliGunde || secili ? 1 : SOLUK_PIN,
     };
@@ -58,7 +61,7 @@ export function programPinleri(secenek: {
       const sira = gunSiralari.get(m.id);
       pinler.push({ ...ortak, tur: 'durak', renk: gunRengi(idx), etiket: sira ? String(sira) : '', tamam: seciliGunde && tamamlananMekanIds.has(m.id) });
     } else {
-      pinler.push({ ...ortak, tur: 'bos', renk: renk.metin, ikon: pinIkonu(m.primary_type) });
+      pinler.push({ ...ortak, tur: 'bos', renk: renk.metin, ...kategoriPini(m.primary_type) });
     }
   }
   if (konum) pinler.push({ id: 'konum', tur: 'konum', konum, renk: '#4285f4' });
