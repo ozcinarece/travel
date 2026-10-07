@@ -1,7 +1,7 @@
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { t } from '@/i18n';
-import { AYLAR_KISA, GUNLER_KISA, haftaGunu, parcala } from '@/lib/takvim';
+import { AYLAR, AYLAR_KISA, GUNLER, GUNLER_KISA, haftaGunu, parcala } from '@/lib/takvim';
 import type { Durak, Gun } from '@/lib/tipler';
 import { gunRengi, renk, yazi } from '@/theme';
 
@@ -24,10 +24,25 @@ export function kisaGunTarihi(tarih: string): string {
   return `${GUNLER_KISA[haftaGunu(tarih)]} ${gun} ${AYLAR_KISA[ay - 1]}`;
 }
 
-/** #53 §4: hücre alt satırı — tarihli "Cmt 10", tarihsiz "5 durak" / "boş". */
-export function gunHucreAlti(gun: Gun, durakSayisi: number): string {
-  if (gun.date) return `${GUNLER_KISA[haftaGunu(gun.date)]} ${parcala(gun.date).gun}`;
-  return durakSayisi > 0 ? t('gunler.durakSayisi', { n: durakSayisi }) : t('gunler.bosKisa');
+/** #55 §D12: kısa gün adı — tarihli "Cum 16 Eki", tarihsiz "1. gün" (panel başlığı). */
+export function gunEtiketKisa(gun: Gun): string {
+  return gun.date ? kisaGunTarihi(gun.date) : t('program.gunSec', { n: gun.index });
+}
+
+/** #55 §D12: uzun gün adı — tarihli "Cuma, 16 Ekim", tarihsiz "1. gün" (başlık alt satırı). */
+export function gunEtiketUzun(gun: Gun): string {
+  if (!gun.date) return t('program.gunSec', { n: gun.index });
+  const { ay, gun: g } = parcala(gun.date);
+  return `${GUNLER[haftaGunu(gun.date)]}, ${g} ${AYLAR[ay - 1]}`;
+}
+
+/** #55 §D12: hücre — tarihli üstte "Cum 16", altta "Eki"; tarihsiz üstte "1. gün", altta "5 durak" / "boş". */
+export function gunHucresi(gun: Gun, durakSayisi: number): { ust: string; alt: string } {
+  if (gun.date) {
+    const { ay, gun: g } = parcala(gun.date);
+    return { ust: `${GUNLER_KISA[haftaGunu(gun.date)]} ${g}`, alt: AYLAR_KISA[ay - 1] };
+  }
+  return { ust: t('program.gunSec', { n: gun.index }), alt: durakSayisi > 0 ? t('gunler.durakSayisi', { n: durakSayisi }) : t('gunler.bosKisa') };
 }
 
 /** 3 güne kadar şerit kaymaz (eşit genişlik); 4+ günde yatay kayar. */
@@ -45,6 +60,7 @@ export function GunKartlari({ gunler, duraklar, seciliId, bugunIndex, onSec, onU
     const aktif = g.id === seciliId;
     const rengi = gunRengi(g.index);
     const n = duraklar.filter((d) => d.day_id === g.id).length;
+    const hucre = gunHucresi(g, n);
     return (
       <Pressable
         key={g.id}
@@ -56,9 +72,9 @@ export function GunKartlari({ gunler, duraklar, seciliId, bugunIndex, onSec, onU
         style={[s.hucre, kayar ? { width: KAYAN_HUCRE } : { flex: 1 }, aktif && s.hucreAktif]}>
         <View style={s.ustSatir}>
           <View style={[s.nokta, { backgroundColor: rengi }, !aktif && { opacity: 0.5 }]} />
-          <Text style={[s.baslik, !aktif && s.soluk]}>{t('program.gunSec', { n: g.index })}</Text>
+          <Text style={[s.baslik, !aktif && s.soluk]}>{hucre.ust}</Text>
         </View>
-        <Text style={[s.alt, g.index === bugunIndex && { color: renk.vurgu }]}>{gunHucreAlti(g, n)}</Text>
+        <Text style={[s.alt, g.index === bugunIndex && { color: renk.vurgu }]}>{hucre.alt}</Text>
         {aktif ? <View style={[s.cizgi, { backgroundColor: rengi }]} /> : null}
       </Pressable>
     );

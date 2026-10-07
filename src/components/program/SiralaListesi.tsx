@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Animated, PanResponder, Pressable, ScrollView, StyleSheet, Text, View, type PanResponderInstance } from 'react-native';
 
+import { useSayfaKaydirma } from '@/components/harita/AltSayfa';
 import { Ikon, type IkonAdi } from '@/components/ui/Ikon';
 import { t } from '@/i18n';
 import { renk, yazi } from '@/theme';
@@ -11,8 +12,8 @@ export type SiralaSatiri = {
   ad: string;
   ikon: IkonAdi;
   ikonRenk: string;
-  /** "1 sa 30 dk" */
-  sure: string;
+  /** #55 §C9: adın altında "09:00 – 09:45 · 45 dk". */
+  saat: string;
   /** Sıra numarası (atlananda null). */
   numara: number | null;
   tamam?: boolean;
@@ -21,24 +22,43 @@ export type SiralaSatiri = {
   bacak?: { metin: string; ikon: 'yurume' | 'taksi' };
 };
 
-/** Durak satırı 44 px + üstündeki yürüyüş satırı 16 px = bir yuva. */
-export const DURAK_YUKSEKLIK = 44;
+/** #55 §C8: durak satırı en az 44 px (ad 2 satıra kadar); üstündeki yürüyüş satırı 16 px. */
+export const DURAK_EN_AZ = 44;
 export const ARA_YUKSEKLIK = 16;
-export const YUVA = DURAK_YUKSEKLIK + ARA_YUKSEKLIK;
 const BAS_YUKSEKLIK = 32;
 /** Kenara bu kadar yaklaşınca liste kendiliğinden kayar. */
 const KENAR_PAYI = 48;
 const KAYMA_HIZI = 7;
 
-/** Sürüklenen satırın bırakılacağı sıra (0..n-1): başlangıç + yuva cinsinden kayma, sınırlı. */
-export function hedefSira(baslangic: number, kayma: number, adet: number): number {
-  return Math.max(0, Math.min(adet - 1, baslangic + Math.round(kayma / YUVA)));
+/** Ölçülen yuva (yürüyüş satırı + durak satırı): içerikteki y ve yükseklik. */
+export type Yuva = { y: number; h: number };
+
+/** Sürüklenen satırın bırakılacağı sıra: tutulan yuvanın merkezi + kayma, merkezi en yakın yuva. */
+export function hedefSira(baslangic: number, kayma: number, yuvalar: Yuva[]): number {
+  const k = yuvalar[baslangic];
+  if (!k) return baslangic;
+  const merkez = k.y + k.h / 2 + kayma;
+  let en = baslangic;
+  let fark = Infinity;
+  yuvalar.forEach((y, i) => {
+    const d = Math.abs(y.y + y.h / 2 - merkez);
+    if (d < fark) {
+      fark = d;
+      en = i;
+    }
+  });
+  return en;
 }
 
-/** Bırakma çizgisinin listedeki y'si: yukarı taşırken hedefin üstü, aşağı taşırken altı. */
-export function birakmaCizgisiY(baslangic: number, hedef: number): number {
-  const yuva = hedef > baslangic ? hedef + 1 : hedef;
-  return BAS_YUKSEKLIK + yuva * YUVA + ARA_YUKSEKLIK / 2 - 1.5;
+/** Bırakma çizgisinin y'si: yukarı taşırken hedefin üstündeki yürüyüş satırında, aşağı taşırken hedefin altında. */
+export function birakmaCizgisiY(baslangic: number, hedef: number, yuvalar: Yuva[]): number {
+  const y = yuvalar[hedef];
+  if (!y) return 0;
+  if (hedef > baslangic) {
+    const sonraki = yuvalar[hedef + 1];
+    return (sonraki ? sonraki.y : y.y + y.h) + ARA_YUKSEKLIK / 2 - 1.5;
+  }
+  return y.y + ARA_YUKSEKLIK / 2 - 1.5;
 }
 
 type Props = {
@@ -49,19 +69,29 @@ type Props = {
   yukseklik: number;
   onTasi: (from: number, to: number) => void;
   onSatirBas: (id: string) => void;
+  /** #55 §C10: satıra (≡ dışında) uzun basma. */
+  onUzunBas?: (id: string) => void;
+  /** #55 §D11: numara dairesi gün renginde. */
+  numaraRengi?: string;
 };
 
 /**
- * #53 §5 yarı açık panel listesi: "Otel · 09:00", sonra 44 px durak satırları (numara · kategori ikonu · ad · süre · ≡),
- * aralarda 16 px yürüyüş satırı. Sürükleme yalnız ≡'den: tutulan satır kalkar (turuncu kenar, gölge), bırakılacak yer
+ * #53 §5 / #55 §C yarı açık panel listesi: "Başlangıç · 09:00", sonra en az 44 px durak satırları (numara · kategori
+ * ikonu · ad [2 satır] + "09:00 – 09:45 · 45 dk" · ≡), aralarda 16 px yürüyüş satırı. Satıra uzun bas → menü. Sürükleme yalnız ≡'den: tutulan satır kalkar (turuncu kenar, gölge), bırakılacak yer
  * turuncu 3 px çizgi; kenara yaklaşınca liste kendiliğinden kayar.
  */
-export function SiralaListesi({ satirlar, basSatiri, basIkon, yukseklik, onTasi, onSatirBas }: Props) {
+export function SiralaListesi({ satirlar, basSatiri, basIkon, yukseklik, onTasi, onSatirBas, onUzunBas, numaraRengi = renk.metin }: Props) {
   const [surukle, setSurukle] = useState<{ index: number; hedef: number } | null>(null);
+  // Satır yükseklikleri içeriğe göre (ad 2 satır) — yuvalar ölçülür.
+  const [yuvalar, setYuvalar] = useState<Yuva[]>([]);
+  const sayfaKaydirma = useSayfaKaydirma();
   const [kayma] = useState(() => new Animated.Value(0));
   const kaydirici = useRef<ScrollView>(null);
   const kabRef = useRef<View>(null);
-  const durum = useRef({ kaydirY: 0, baslangicKaydir: 0, dy: 0, pageY: 0, kabUst: 0, kabAlt: 0, index: -1, hedef: -1, hiz: 0 });
+  const durum = useRef({ kaydirY: 0, baslangicKaydir: 0, dy: 0, pageY: 0, kabUst: 0, kabAlt: 0, index: -1, hedef: -1, hiz: 0, yuvalar: [] as Yuva[], icerikH: 0 });
+  useEffect(() => {
+    durum.current.yuvalar = yuvalar;
+  }, [yuvalar]);
   const zamanlayici = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const guncelle = () => {
@@ -69,7 +99,7 @@ export function SiralaListesi({ satirlar, basSatiri, basIkon, yukseklik, onTasi,
     if (d.index < 0) return;
     const etkin = d.dy + (d.kaydirY - d.baslangicKaydir);
     kayma.setValue(etkin);
-    const hedef = hedefSira(d.index, etkin, satirlar.length);
+    const hedef = hedefSira(d.index, etkin, d.yuvalar);
     if (hedef !== d.hedef) {
       d.hedef = hedef;
       setSurukle({ index: d.index, hedef });
@@ -98,7 +128,7 @@ export function SiralaListesi({ satirlar, basSatiri, basIkon, yukseklik, onTasi,
     // Otomatik kaydırma: parmak kenara yakınken liste kayar, sürüklenen satır parmakta kalır.
     zamanlayici.current = setInterval(() => {
       if (!d.hiz) return;
-      const enFazla = Math.max(0, BAS_YUKSEKLIK + satirlar.length * YUVA + 8 - yukseklik);
+      const enFazla = Math.max(0, d.icerikH - yukseklik);
       const yeni = Math.max(0, Math.min(enFazla, d.kaydirY + d.hiz));
       if (yeni === d.kaydirY) return;
       d.kaydirY = yeni;
@@ -159,6 +189,10 @@ export function SiralaListesi({ satirlar, basSatiri, basIkon, yukseklik, onTasi,
         scrollEventThrottle={16}
         onScroll={(e) => {
           durum.current.kaydirY = e.nativeEvent.contentOffset.y;
+          sayfaKaydirma(e);
+        }}
+        onContentSizeChange={(_w, h) => {
+          durum.current.icerikH = h;
         }}
         contentContainerStyle={{ paddingBottom: 8 }}>
         <View style={s.basSatir}>
@@ -169,7 +203,18 @@ export function SiralaListesi({ satirlar, basSatiri, basIkon, yukseklik, onTasi,
           const tutulan = surukle?.index === i;
           return (
             // Tutulan satır sonraki kardeşlerin üstünde çizilsin (zIndex dış kapta).
-            <View key={x.id} style={tutulan ? { zIndex: 10, elevation: 10 } : undefined}>
+            <View
+              key={x.id}
+              style={tutulan ? { zIndex: 10, elevation: 10 } : undefined}
+              onLayout={(e) => {
+                const { y, height } = e.nativeEvent.layout;
+                setYuvalar((eski) => {
+                  if (eski[i]?.y === y && eski[i]?.h === height) return eski;
+                  const yeni = eski.slice(0, satirlar.length);
+                  yeni[i] = { y, h: height };
+                  return yeni;
+                });
+              }}>
               <View style={s.ara}>
                 {x.bacak && !tutulan ? (
                   <>
@@ -179,29 +224,52 @@ export function SiralaListesi({ satirlar, basSatiri, basIkon, yukseklik, onTasi,
                 ) : null}
               </View>
               <Animated.View style={[tutulan && [s.tutulan, { transform: [{ translateY: kayma }] }]]}>
-                <SiraSatiri satir={x} tutamac={tutamaclar[i]} onBas={() => onSatirBas(x.id)} />
+                <SiraSatiri
+                  satir={x}
+                  numaraRengi={numaraRengi}
+                  tutamac={tutamaclar[i]}
+                  onBas={() => onSatirBas(x.id)}
+                  onUzunBas={onUzunBas ? () => onUzunBas(x.id) : undefined}
+                />
               </Animated.View>
             </View>
           );
         })}
-        {surukle && surukle.hedef !== surukle.index ? <View pointerEvents="none" style={[s.birakmaCizgisi, { top: birakmaCizgisiY(surukle.index, surukle.hedef) }]} /> : null}
+        {surukle && surukle.hedef !== surukle.index ? <View pointerEvents="none" style={[s.birakmaCizgisi, { top: birakmaCizgisiY(surukle.index, surukle.hedef, yuvalar) }]} /> : null}
       </ScrollView>
     </View>
   );
 }
 
-function SiraSatiri({ satir, tutamac, onBas }: { satir: SiralaSatiri; tutamac: PanResponderInstance | undefined; onBas: () => void }) {
+function SiraSatiri({
+  satir,
+  numaraRengi,
+  tutamac,
+  onBas,
+  onUzunBas,
+}: {
+  satir: SiralaSatiri;
+  numaraRengi: string;
+  tutamac: PanResponderInstance | undefined;
+  onBas: () => void;
+  onUzunBas?: () => void;
+}) {
   return (
     <View style={s.satir}>
-      <Pressable accessibilityRole="button" onPress={onBas} style={s.satirIc}>
-        <View style={[s.numara, satir.tamam && { backgroundColor: renk.basari }, satir.atlandi && { backgroundColor: renk.ayrac }]}>
+      <Pressable accessibilityRole="button" onPress={onBas} onLongPress={onUzunBas} delayLongPress={350} style={s.satirIc}>
+        <View style={[s.numara, { backgroundColor: numaraRengi }, satir.tamam && { backgroundColor: renk.basari }, satir.atlandi && { backgroundColor: renk.ayrac }]}>
           {satir.tamam ? <Ikon ad="tik" boyut={14} renk={renk.zemin} kalinlik={2.6} /> : <Text style={s.numaraMetin}>{satir.numara ?? '–'}</Text>}
         </View>
         <Ikon ad={satir.ikon} boyut={18} renk={satir.ikonRenk} kalinlik={2.1} />
-        <Text style={[s.ad, satir.atlandi && s.cizili]} numberOfLines={1}>
-          {satir.ad}
-        </Text>
-        <Text style={s.sure}>{satir.sure}</Text>
+        {/* #55 §C8–9: ad en fazla 2 satır (kesilmez), altında saat aralığı + süre. */}
+        <View style={s.adKutu}>
+          <Text style={[s.ad, satir.atlandi && s.cizili]} numberOfLines={2}>
+            {satir.ad}
+          </Text>
+          <Text style={s.saat} numberOfLines={1}>
+            {satir.saat}
+          </Text>
+        </View>
       </Pressable>
       <View {...tutamac?.panHandlers} accessibilityRole="adjustable" accessibilityLabel={t('program.surukle')} style={s.tutamac} hitSlop={6}>
         <Ikon ad="tutamac" boyut={20} renk={renk.ikincil} kalinlik={2.2} />
@@ -215,14 +283,15 @@ const s = StyleSheet.create({
   basMetin: { fontFamily: yazi.kalin, fontSize: 13, color: renk.ikincil },
   ara: { height: ARA_YUKSEKLIK, flexDirection: 'row', alignItems: 'center', gap: 4, paddingLeft: 48 },
   araMetin: { fontFamily: yazi.normal, fontSize: 11, lineHeight: 14, color: renk.ikincil },
-  satir: { height: DURAK_YUKSEKLIK, flexDirection: 'row', alignItems: 'center', borderRadius: 12, backgroundColor: renk.zemin },
-  satirIc: { flex: 1, minWidth: 0, flexDirection: 'row', alignItems: 'center', gap: 10, paddingLeft: 4, height: '100%' },
+  satir: { minHeight: DURAK_EN_AZ, flexDirection: 'row', alignItems: 'center', borderRadius: 12, backgroundColor: renk.zemin },
+  satirIc: { flex: 1, minWidth: 0, flexDirection: 'row', alignItems: 'center', gap: 10, paddingLeft: 4, paddingVertical: 4 },
+  adKutu: { flex: 1, minWidth: 0 },
   numara: { width: 28, height: 28, borderRadius: 14, backgroundColor: renk.metin, alignItems: 'center', justifyContent: 'center' },
   numaraMetin: { fontFamily: yazi.ekstra, fontSize: 13, color: renk.zemin },
-  ad: { flex: 1, minWidth: 0, fontFamily: yazi.kalin, fontSize: 14, color: renk.metin },
+  ad: { fontFamily: yazi.kalin, fontSize: 14, lineHeight: 18, color: renk.metin },
+  saat: { fontFamily: yazi.normal, fontSize: 11, lineHeight: 14, color: renk.ikincil },
   cizili: { textDecorationLine: 'line-through', color: renk.soluk },
-  sure: { fontFamily: yazi.normal, fontSize: 12, color: renk.ikincil },
-  tutamac: { width: 44, height: DURAK_YUKSEKLIK, alignItems: 'center', justifyContent: 'center' },
+  tutamac: { width: 44, minHeight: DURAK_EN_AZ, alignSelf: 'stretch', alignItems: 'center', justifyContent: 'center' },
   tutulan: {
     zIndex: 10,
     borderRadius: 12,

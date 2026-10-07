@@ -28,10 +28,8 @@ export function programPinleri(secenek: {
   tamamlananMekanIds: Set<string>;
   /** Kullanıcı konumu (yalnız seyahat gününde). */
   konum: Konum | null;
-  /** #53: yarı açık panelde pinler 32 px. */
-  kucuk?: boolean;
 }): HaritaPini[] {
-  const { otel, mekanlar, duraklar, gunler, tempolar, adlar, seciliGunId, seciliMekanId, tamamlananMekanIds, konum, kucuk } = secenek;
+  const { otel, mekanlar, duraklar, gunler, tempolar, adlar, seciliGunId, seciliMekanId, tamamlananMekanIds, konum } = secenek;
   const durakIle = new Map(duraklar.map((d) => [d.place_ref, d]));
   const gunIndex = new Map(gunler.map((g) => [g.id, g.index]));
   // #30: pin numarası = gün içi sıra (§5.1 ya da elle); rota çizgisiyle okunur.
@@ -53,7 +51,6 @@ export function programPinleri(secenek: {
       puan: hafif?.puan ?? null,
       yorumSayisi: hafif?.puan_sayisi ?? null,
       secili,
-      kucuk,
       // KK5: seçili günün pinleri tam renk; diğer günler ve atanmamışlar soluk (seçili pin hariç).
       opaklik: seciliGunde || secili ? 1 : SOLUK_PIN,
     };
@@ -88,7 +85,8 @@ export function programCizgileri(secenek: {
     if (g.id !== seciliGunId) {
       const noktalar = tp.sira.map((mekanId) => mekanIle.get(mekanId)).filter((m): m is Mekan => !!m).map((m) => ({ lat: m.lat, lng: m.lng }));
       const yol = otel ? [otel, ...noktalar, otel] : noktalar;
-      return yol.length >= 2 ? [{ id: `rota:${g.id}`, noktalar: yol, renk: rengi, opaklik: 0.3 }] : [];
+      // #55 §D11: diğer günlerin rotası %35.
+      return yol.length >= 2 ? [{ id: `rota:${g.id}`, noktalar: yol, renk: rengi, opaklik: 0.35 }] : [];
     }
     // #33: seçili gün bacak bacak gerçek yol (araç bacağı kesikli, taksi ikonu); gelene kadar kuş uçuşu kesikli.
     // #51: kimlik bacağın uçlarından (from>to) ve kaynağından türer — sıra değişince eski çizgi/etiket yeniden

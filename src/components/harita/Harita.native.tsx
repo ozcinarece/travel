@@ -2,11 +2,11 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { StyleSheet, View, useWindowDimensions } from 'react-native';
 import MapView, { Circle, Marker, Polyline, PROVIDER_GOOGLE } from 'react-native-maps';
 
-import { bolgeHesapla, detayGoster, gizliEtiketler, haritaDolgusu, pinCapasi, zoomDelta } from './geo';
+import { bolgeHesapla, detayGoster, gizliEtiketler, haritaDolgusu, kumeHesapla, pinCapasi, pinCapi, zoomDelta } from './geo';
 import { ACIK_HARITA_STILI } from './haritaStili';
 import { PinIcerigi } from './PinIcerigi';
 import { bacakEtiketPinleri } from './rota';
-import type { HaritaBolgesi, HaritaPini, HaritaProps } from './tipler';
+import type { HaritaBolgesi, HaritaPini, HaritaProps, Konum } from './tipler';
 
 /** "#rrggbb" + opaklık → "#rrggbbaa". */
 function saydam(hex: string, opaklik: number) {
@@ -14,7 +14,22 @@ function saydam(hex: string, opaklik: number) {
   return hex.length === 7 ? `${hex}${a}` : hex;
 }
 
-export function Harita({ merkez, zoom = 14, pinler = [], daireler = [], cizgiler = [], odak, onPinBas, onHaritaBas, onPinSuruklendi, onBolgeDegisti, altBosluk = 0 }: HaritaProps) {
+export function Harita({
+  merkez,
+  zoom = 14,
+  pinler = [],
+  daireler = [],
+  cizgiler = [],
+  odak,
+  onPinBas,
+  onHaritaBas,
+  onPinSuruklendi,
+  onBolgeDegisti,
+  altBosluk = 0,
+  ustBosluk = 0,
+  sigdir,
+  onPinUzunBas,
+}: HaritaProps) {
   const ref = useRef<MapView>(null);
   const ekran = useWindowDimensions();
   const [bolge, setBolge] = useState<HaritaBolgesi>(() => bolgeHesapla(merkez, zoomDelta(zoom), zoomDelta(zoom)));
@@ -30,10 +45,53 @@ export function Harita({ merkez, zoom = 14, pinler = [], daireler = [], cizgiler
     ref.current?.animateToRegion({ latitude: odak.konum.lat, longitude: odak.konum.lng, latitudeDelta: d, longitudeDelta: d }, 450);
   }, [odak]);
 
-  // #33: bacak etiketleri ("🚶 12 dk") pin gibi çizilir; çakışma kuralına en düşük öncelikle girer.
+  const sigdirKamera = (noktalar: Konum[], kenar: { top: number; right: number; bottom: number; left: number }) => {
+    if (noktalar.length === 1) {
+      const d = zoomDelta(15);
+      ref.current?.animateToRegion({ latitude: noktalar[0].lat, longitude: noktalar[0].lng, latitudeDelta: d, longitudeDelta: d }, 450);
+      return;
+    }
+    ref.current?.fitToCoordinates(
+      noktalar.map((n) => ({ latitude: n.lat, longitude: n.lng })),
+      { edgePadding: kenar, animated: true },
+    );
+  };
+  // #55 §A5: noktaları sığdır — harita hazır olunca (fitToCoordinates; dolgu panel yüksekliğini zaten içerir).
+  useEffect(() => {
+    if (!sigdir || !hazir || sigdir.noktalar.length === 0) return;
+    sigdirKamera(sigdir.noktalar, { top: sigdir.ust, right: 48, bottom: sigdir.alt, left: 48 });
+  }, [sigdir, hazir]);
+
+  // #33: bacak etiketleri ("12 dk") pin gibi çizilir; çakışma kuralına en düşük öncelikle girer.
   const tumPinler = useMemo(() => [...pinler, ...bacakEtiketPinleri(cizgiler)], [pinler, cizgiler]);
-  // #30: çakışan etiketler gizlenir (öncelik: seçili > listede > öneri > bacak); yakınlaşınca geri gelir.
-  const gizli = useMemo(() => gizliEtiketler(tumPinler, bolge, { genislik: ekran.width, yukseklik: ekran.height }), [tumPinler, bolge, ekran.width, ekran.height]);
+  const olcu = useMemo(() => ({ genislik: ekran.width, yukseklik: ekran.height }), [ekran.width, ekran.height]);
+  // #55 §A2: üst üste binen pinler kümelenir ("+N"); kalanların etiketleri çakışma kuralıyla (daireler de engel).
+  const kume = useMemo(() => kumeHesapla(tumPinler, bolge, olcu), [tumPinler, bolge, olcu]);
+  const gorunen = useMemo(
+    () => tumPinler.filter((p) => !kume.gizli.has(p.id)).map((p) => (kume.rozet.has(p.id) ? { ...p, kumeSayisi: kume.rozet.get(p.id) } : p)),
+    [tumPinler, kume],
+  );
+  const gizli = useMemo(() => gizliEtiketler(gorunen, bolge, olcu, ustBosluk), [gorunen, bolge, olcu, ustBosluk]);
+  const pinBas = (id: string) => {
+    const uyeler = kume.uyeler.get(id);
+    // Küme başına dokununca üyelerine yakınlaşılır; tek pinde normal seçim.
+    if (uyeler) sigdirKamera(uyeler, { top: 160 + ustBosluk, right: 80, bottom: 160, left: 80 });
+    else onPinBas?.(id);
+  };
+  // #55 §C10: Marker'da uzun basma yok — haritaya uzun basılan noktaya ~28 px içindeki en yakın pin.
+  const uzunBas = (k: { latitude: number; longitude: number }) => {
+    if (!onPinUzunBas || bolge.latDelta <= 0) return;
+    const pxLat = olcu.yukseklik / bolge.latDelta;
+    const pxLng = olcu.genislik / bolge.lngDelta;
+    let enYakin: { id: string; d: number } | null = null;
+    for (const p of gorunen) {
+      if (p.tur === 'etiket' || p.tur === 'konum' || p.tur === 'otel') continue;
+      // Pin dairesi çapanın üstünde değil, merkezinde (pinCapasi daire merkezi).
+      const d = Math.hypot((p.konum.lng - k.longitude) * pxLng, (p.konum.lat - k.latitude) * pxLat);
+      if (d <= Math.max(28, pinCapi(p) / 2 + 6) && (!enYakin || d < enYakin.d)) enYakin = { id: p.id, d };
+    }
+    if (enYakin) onPinUzunBas(enYakin.id);
+  };
 
   return (
     <MapView
@@ -62,6 +120,7 @@ export function Harita({ merkez, zoom = 14, pinler = [], daireler = [], cizgiler
       onPress={(e) => {
         if (e.nativeEvent.action !== 'marker-press') onHaritaBas?.();
       }}
+      onLongPress={(e) => uzunBas(e.nativeEvent.coordinate)}
       onRegionChangeComplete={(b) => {
         const yeni = bolgeHesapla({ lat: b.latitude, lng: b.longitude }, b.latitudeDelta, b.longitudeDelta);
         setBolge(yeni);
@@ -88,17 +147,17 @@ export function Harita({ merkez, zoom = 14, pinler = [], daireler = [], cizgiler
           lineDashPattern={[6, 6]}
         />
       ))}
-      {tumPinler.map((p) => {
+      {gorunen.map((p) => {
         // #40: çakışmada önce puan satırı düşer (gizli.detay), sonra ad (gizli.etiket).
         const detay = detayGoster(p, bolge.zoom) && !gizli.detay.has(p.id);
         return (
           <OzelIsaretci
             // Görünüm değişince (renk/etiket/seçim/ad görünürlüğü/detay) işaretçi yeniden kurulur ve anlık görüntüsü yeniden alınır.
-            key={`${p.id}:${p.tur ?? ''}:${p.renk}:${p.etiket ?? ''}:${p.ikon ?? ''}:${p.etiketIkon ?? ''}:${p.secili ? 1 : 0}:${p.tamam ? 't' : ''}:${p.ad && !gizli.etiket.has(p.id) ? 'a' : ''}:${detay ? 'd' : ''}:${p.tur === 'etiket' && gizli.etiket.has(p.id) ? 'g' : ''}`}
+            key={`${p.id}:${p.tur ?? ''}:${p.renk}:${p.etiket ?? ''}:${p.ikon ?? ''}:${p.etiketIkon ?? ''}:${p.secili ? 1 : 0}:${p.tamam ? 't' : ''}:${p.ad && !gizli.etiket.has(p.id) ? 'a' : ''}:${detay ? 'd' : ''}:${p.tur === 'etiket' && gizli.etiket.has(p.id) ? 'g' : ''}:${p.kumeSayisi ?? ''}`}
             pin={p}
             etiketGizli={gizli.etiket.has(p.id)}
             detay={detay}
-            onPinBas={onPinBas}
+            onPinBas={pinBas}
             onPinSuruklendi={onPinSuruklendi}
           />
         );

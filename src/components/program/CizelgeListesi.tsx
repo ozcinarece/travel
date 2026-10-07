@@ -2,6 +2,7 @@ import { Image } from 'expo-image';
 import type { ReactNode } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 
+import { useSayfaKaydirma } from '@/components/harita/AltSayfa';
 import { Ikon } from '@/components/ui/Ikon';
 
 import type { GunProgrami } from '@/features/program/useProgram';
@@ -68,6 +69,8 @@ export type CizelgeListesiProps = {
 export function CizelgeListesi(p: CizelgeListesiProps) {
   const { gun, gunler, gunDurak, mekanIle, yerler, uyeAdi, prog, duzenle } = p;
   const dar = useWindowDimensions().width < 380;
+  // #55 §B7: liste en üstteyken aşağı çekmek alt sayfayı indirir.
+  const sayfaKaydirma = useSayfaKaydirma();
   const satirlar = prog.canli.satirlar;
   const satirIle = (durakId: string) => satirlar.find((x) => x.durak.id === durakId);
 
@@ -75,7 +78,7 @@ export function CizelgeListesi(p: CizelgeListesiProps) {
 
   if (duzenle) {
     return (
-      <ScrollView contentContainerStyle={s.icerik} keyboardShouldPersistTaps="handled" nestedScrollEnabled>
+      <ScrollView contentContainerStyle={s.icerik} keyboardShouldPersistTaps="handled" nestedScrollEnabled scrollEventThrottle={16} onScroll={sayfaKaydirma}>
         <View style={s.araclar}>
           <View style={s.arac}>
             <Pressable accessibilityRole="button" accessibilityLabel="−15" onPress={() => p.onBaslangic(-15)} hitSlop={8} style={s.aracAdim}>
@@ -149,7 +152,7 @@ export function CizelgeListesi(p: CizelgeListesiProps) {
 
 
   return (
-    <ScrollView contentContainerStyle={s.icerik} nestedScrollEnabled>
+    <ScrollView contentContainerStyle={s.icerik} nestedScrollEnabled scrollEventThrottle={16} onScroll={sayfaKaydirma}>
       {satirlar.map((satir, i) => {
         const d = satir.durak;
         const durak = gunDurak.find((x) => x.id === d.id)!;
@@ -209,7 +212,7 @@ export function CizelgeListesi(p: CizelgeListesiProps) {
                   <View style={[s.nokta, s.noktaSiradaki]} />
                 )}
                 <View style={{ flex: 1, minWidth: 0 }}>
-                  <Text style={s.adKalin} numberOfLines={1}>
+                  <Text style={s.adKalin} numberOfLines={2}>
                     {ad}
                   </Text>
                   <Text style={s.alt} numberOfLines={1}>
@@ -240,25 +243,37 @@ export function CizelgeListesi(p: CizelgeListesiProps) {
                     <View style={[s.nokta, satir.durum === 'atlandi' && { borderColor: renk.soluk }]} />
                   )}
                 </View>
-                <View style={{ flex: 1, minWidth: 0, flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                  {/* #47 A4: ad en az %60 genişlik; dar ekranda "☆ puanla" yerine yalnız "☆". */}
-                  <Text style={[s.ad, satir.durum === 'atlandi' && [s.soluk, s.cizili]]} numberOfLines={1}>
-                    {ad}
+                {/* #55 §C8–9 / §A3: ad 2 satıra kadar; altında saat aralığı + süre; kapalı uyarısı üçüncü satırda. */}
+                <View style={{ flex: 1, minWidth: 0, paddingVertical: 4 }}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                    <Text style={[s.ad, satir.durum === 'atlandi' && [s.soluk, s.cizili]]} numberOfLines={2}>
+                      {ad}
+                    </Text>
+                    {tamam ? (
+                      puan ? (
+                        <Text style={s.yildizlar}>{'★'.repeat(puan.stars)}</Text>
+                      ) : (
+                        <Text style={s.puanla}>{dar ? '☆' : t('program.puanla')}</Text>
+                      )
+                    ) : null}
+                  </View>
+                  <Text style={s.alt} numberOfLines={1}>
+                    {satir.durum === 'atlandi'
+                      ? t('program.atlandi')
+                      : t('program.saatAraligi', { bas: dakikaSaat(satir.varisDk), bit: dakikaSaat(satir.ayrilisDk), sure: sureMetni(durak.minutes) })}
                   </Text>
-                  {tamam ? (
-                    puan ? (
-                      <Text style={s.yildizlar}>{'★'.repeat(puan.stars)}</Text>
-                    ) : (
-                      <Text style={s.puanla}>{dar ? '☆' : t('program.puanla')}</Text>
-                    )
-                  ) : null}
                   {kapali ? (
-                    <Text style={s.kapaliMetin} numberOfLines={1}>
+                    <Text style={s.kapaliMetin} numberOfLines={2}>
                       {acilis!.durum === 'kapali_gun'
-                        ? t('program.kapaliGun')
+                        ? t('program.kapaliGunKisa', { gun: GUNLER_KISA[(googleGunu(gun.date!) + 6) % 7] })
                         : acilis!.durum === 'kapali_saat' && acilis!.sonrakiAcilis
                           ? t('program.kapaliSaat', { saat: acilis!.sonrakiAcilis })
                           : t('program.kapaliSaatBelirsiz')}
+                      {gunler.length > 1 ? (
+                        <Text accessibilityRole="button" onPress={() => p.onGunSec(durak)} style={s.kapaliBaglanti}>
+                          {` · ${t('program.baskaGuneAl')}`}
+                        </Text>
+                      ) : null}
                     </Text>
                   ) : haftaKapali.length > 0 ? (
                     <Text style={s.alt} numberOfLines={1}>
@@ -266,12 +281,6 @@ export function CizelgeListesi(p: CizelgeListesiProps) {
                     </Text>
                   ) : null}
                 </View>
-                <Text style={s.sure}>{satir.durum === 'atlandi' ? t('program.atlandi') : sureMetni(durak.minutes)}</Text>
-                {kapali && gunler.length > 1 ? (
-                  <Pressable accessibilityRole="button" onPress={() => p.onGunSec(durak)} hitSlop={6} style={s.kapaliDugme}>
-                    <Text style={s.kapaliDugmeMetin}>{t('program.baskaGuneAl')}</Text>
-                  </Pressable>
-                ) : null}
               </Pressable>
             )}
           </View>
@@ -300,23 +309,23 @@ const s = StyleSheet.create({
   icerik: { paddingTop: 4, paddingBottom: 8 },
   // #45 §4: kompakt satır (~36 px): saat · ray üstünde nokta · ad · süre.
   // #47 A3: durak satırı 38 px, aradaki yürüyüş satırı 20 px.
-  satir: { flexDirection: 'row', alignItems: 'center', gap: 10, height: 38 },
+  // #55 §C8: satır en az 44 px, içeriğe göre uzar (ad 2 satır + saat + kapalı uyarısı).
+  satir: { flexDirection: 'row', alignItems: 'center', gap: 10, minHeight: 44 },
   satirKapali: { backgroundColor: renk.uyariZemin, borderRadius: 10, paddingRight: 6 },
   saat: { width: 50, textAlign: 'right', fontFamily: yazi.kalin, fontSize: 13, color: renk.metin },
   saatKalin: { fontFamily: yazi.ekstra },
   soluk: { color: renk.soluk },
-  noktaKap: { width: 18, height: 38, alignItems: 'center', justifyContent: 'center' },
+  noktaKap: { width: 18, alignSelf: 'stretch', minHeight: 44, alignItems: 'center', justifyContent: 'center' },
   rayTam: { position: 'absolute', top: 0, bottom: 0, width: 2, backgroundColor: renk.ayrac },
   ray: { position: 'absolute', left: RAY_X - 1, top: 0, bottom: 0, width: 2, backgroundColor: renk.ayrac },
   nokta: { width: 14, height: 14, borderRadius: 7, borderWidth: 2, borderColor: renk.ikincil, backgroundColor: renk.zemin, alignItems: 'center', justifyContent: 'center' },
   noktaTamam: { backgroundColor: renk.basari, borderColor: renk.basari },
   noktaSiradaki: { borderColor: renk.vurgu, borderWidth: 3 },
   tik: { fontFamily: yazi.ekstra, fontSize: 8, lineHeight: 10, color: renk.zemin },
-  ad: { fontFamily: yazi.yari, fontSize: 14, color: renk.metin, flexShrink: 1, minWidth: '60%' },
+  ad: { fontFamily: yazi.yari, fontSize: 14, lineHeight: 18, color: renk.metin, flexShrink: 1 },
   adKalin: { fontFamily: yazi.ekstra, fontSize: 15, color: renk.metin },
   cizili: { textDecorationLine: 'line-through' },
   alt: { fontFamily: yazi.normal, fontSize: 12, color: renk.ikincil },
-  sure: { fontFamily: yazi.normal, fontSize: 12, color: renk.ikincil },
   puanla: { fontFamily: yazi.normal, fontSize: 11, color: renk.soluk, flexShrink: 0 },
   yildizlar: { fontFamily: yazi.kalin, fontSize: 11, color: renk.vurgu },
   araSatir: { height: 20, justifyContent: 'center', paddingLeft: RAY_X + 12 },
@@ -329,9 +338,8 @@ const s = StyleSheet.create({
   atif: { position: 'absolute', bottom: 2, left: 4, fontFamily: yazi.kalin, fontSize: 8, color: renk.zemin },
   bittiDugme: { height: 34, paddingHorizontal: 14, borderRadius: 999, backgroundColor: renk.vurgu, justifyContent: 'center' },
   bittiMetin: { fontFamily: yazi.kalin, fontSize: 12, color: renk.zemin },
-  kapaliMetin: { fontFamily: yazi.yari, fontSize: 11, color: renk.uyari, flexShrink: 1 },
-  kapaliDugme: { height: 28, paddingHorizontal: 10, borderRadius: 999, backgroundColor: renk.uyari, justifyContent: 'center' },
-  kapaliDugmeMetin: { fontFamily: yazi.kalin, fontSize: 10, color: renk.zemin },
+  kapaliMetin: { fontFamily: yazi.yari, fontSize: 11, lineHeight: 14, color: renk.vurgu },
+  kapaliBaglanti: { fontFamily: yazi.kalin, textDecorationLine: 'underline' },
   araclar: { flexDirection: 'row', gap: 8, paddingBottom: 12, flexWrap: 'wrap' },
   arac: { height: 36, paddingHorizontal: 14, borderRadius: 999, backgroundColor: renk.yuzey, flexDirection: 'row', alignItems: 'center', gap: 6 },
   aracMetin: { fontFamily: yazi.kalin, fontSize: 13, color: renk.metin },

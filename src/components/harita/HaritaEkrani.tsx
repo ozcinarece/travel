@@ -5,6 +5,8 @@ import Svg, { Defs, LinearGradient, Rect, Stop } from 'react-native-svg';
 
 import { Ikon } from '@/components/ui/Ikon';
 
+import { AltSayfa, type SayfaHali } from './AltSayfa';
+
 import { t } from '@/i18n';
 import { bosluk, renk, yazi } from '@/theme';
 
@@ -38,8 +40,17 @@ type Props = {
    * haritanın üstünde 250 px yumuşak geçiş. Verilmezse eski "‹ Şehir" hapı.
    */
   altBaslik?: string;
+  /**
+   * #55 §B7: alt panel yerine üç durma noktalı alt sayfa. `govde(yukseklik)` sayfanın görünür gövde yüksekliğini alır.
+   * `ustunde`: sayfanın hemen üstünde yüzen içerik (sayfayla hareket eder).
+   */
+  altSayfa?: { hal: SayfaHali; onHal: (h: SayfaHali) => void; ust: ReactNode; govde: (yukseklik: number) => ReactNode; ustunde?: ReactNode };
   harita: HaritaProps;
 };
+
+/** #55 §B7: yarı açık sayfa ekranın ~%45'i. */
+const YARI_ORAN = 0.45;
+const SAYFA_UST_DOLGU = 10;
 
 /** #53 §3: haritanın üstündeki yumuşak geçiş (#f6f6f4 %98 → %0). */
 const GECIS_YUKSEKLIK = 250;
@@ -48,16 +59,27 @@ const GECIS_YUKSEKLIK = 250;
  * #17 KK2: tam ekran harita kabuğu — 3.3 Otel, 3.4 Keşfet ve 3.5 bunu paylaşır.
  * Harita ekranın tamamını kaplar; üstte ve altta yüzen katmanlar dokunuşu yalnız kendi alanlarında yakalar.
  */
-export function HaritaEkrani({ baslik, geri, sagUst, arama, ustEk, altNot, altSerbest, altPanel, onUstYukseklik, altMenuVar, panelTam, altBaslik, harita }: Props) {
+export function HaritaEkrani({ baslik, geri, sagUst, arama, ustEk, altNot, altSerbest, altPanel, onUstYukseklik, altMenuVar, panelTam, altBaslik, altSayfa, harita }: Props) {
   const kenar = useSafeAreaInsets();
   const [ustY, setUstY] = useState(0);
   const [panelY, setPanelY] = useState(0);
+  const [ekranH, setEkranH] = useState(0);
+  const [seritH, setSeritH] = useState(52);
   const altDolgu = altMenuVar ? 0 : altPanel ? Math.max(kenar.bottom, 14) : kenar.bottom;
+  // #55 §B7: sayfa yükseklikleri — katlı = üst şerit, yarı ≈ %45, tam = başlık alanının altından alta.
+  const sayfaAlt = altMenuVar ? 0 : kenar.bottom;
+  const yukseklik = {
+    katli: SAYFA_UST_DOLGU + seritH + sayfaAlt,
+    yari: Math.max(SAYFA_UST_DOLGU + seritH + 160, Math.round(ekranH * YARI_ORAN)),
+    tam: Math.max(SAYFA_UST_DOLGU + seritH + 200, ekranH - ustY),
+  };
+  const sayfaAcik = !!altSayfa && !altPanel;
+  const haritaAlt = sayfaAcik ? (altSayfa!.hal === 'tam' ? 0 : yukseklik[altSayfa!.hal]) : altPanel && !panelTam ? panelY : 0;
   return (
-    <View style={s.ekran}>
-      <Harita {...harita} altBosluk={altPanel && !panelTam ? panelY : 0} />
+    <View style={s.ekran} onLayout={(e) => setEkranH(e.nativeEvent.layout.height)}>
+      <Harita {...harita} altBosluk={haritaAlt} />
       {/* #47 A2: tam ekranda harita şeridi görünmez (beyaz arka plan). */}
-      {panelTam ? <View style={[StyleSheet.absoluteFill, { backgroundColor: renk.zemin }]} /> : null}
+      {panelTam || (sayfaAcik && altSayfa!.hal === 'tam') ? <View style={[StyleSheet.absoluteFill, { backgroundColor: renk.zemin }]} /> : null}
       {altBaslik !== undefined && !panelTam ? (
         <View style={s.gecis} pointerEvents="none">
           <Svg width="100%" height={GECIS_YUKSEKLIK}>
@@ -89,7 +111,25 @@ export function HaritaEkrani({ baslik, geri, sagUst, arama, ustEk, altNot, altSe
         {ustEk}
       </View>
 
-      {panelTam && altPanel ? (
+      {sayfaAcik && ekranH > 0 ? (
+        <AltSayfa
+          hal={altSayfa!.hal}
+          onHal={altSayfa!.onHal}
+          yukseklik={yukseklik}
+          ust={altSayfa!.ust}
+          onUstYukseklik={setSeritH}
+          ustunde={
+            altSayfa!.hal !== 'tam' && (altSerbest || altSayfa!.ustunde) ? (
+              <>
+                {altSerbest}
+                {altSayfa!.ustunde}
+              </>
+            ) : undefined
+          }
+          altDolgu={sayfaAlt}>
+          {altSayfa!.govde(yukseklik[altSayfa!.hal] - SAYFA_UST_DOLGU - seritH - sayfaAlt)}
+        </AltSayfa>
+      ) : panelTam && altPanel ? (
         <View style={[s.panel, s.panelTam, { top: ustY, paddingBottom: altMenuVar ? 10 : Math.max(kenar.bottom, 14) }]}>{altPanel}</View>
       ) : (
         <View style={[s.alt, { paddingBottom: altPanel ? 0 : altDolgu }]} pointerEvents="box-none">

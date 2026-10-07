@@ -2,13 +2,12 @@ import { useQueryClient } from '@tanstack/react-query';
 import { Image } from 'expo-image';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Alert, Linking, PanResponder, Pressable, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
+import { Alert, Linking, Pressable, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 
-import { sigdir } from '@/components/harita/geo';
 import { HaritaEkrani } from '@/components/harita/HaritaEkrani';
-import type { HaritaOdagi } from '@/components/harita/tipler';
+import type { HaritaSigdirma } from '@/components/harita/tipler';
 import { CizelgeListesi } from '@/components/program/CizelgeListesi';
-import { GunKartlari } from '@/components/program/GunKartlari';
+import { GunKartlari, gunEtiketKisa, gunEtiketUzun } from '@/components/program/GunKartlari';
 import { MiniCubuk } from '@/components/program/MiniCubuk';
 import { PinPaneli } from '@/components/program/PinPaneli';
 import { PuanSayfasi } from '@/components/program/PuanSayfasi';
@@ -41,12 +40,10 @@ import { enUcuzEklemeIndeksi, yuruyusDk } from '@/schedule/program';
 import { arasindaAnahtar } from '@/schedule/sira';
 import { varsayilanSira } from '@/schedule/siralama';
 import { dakikaSaat, kestirimYuruyusSn, saatDakika } from '@/schedule/tempo';
-import { minDokunma, renk, yazi } from '@/theme';
+import { gunRengi, minDokunma, renk, yazi } from '@/theme';
 
 // PRD 3.3 KK3: 20 dk yürüyüş ≈ 1,5 km.
 const YURUME_YARICAPI_M = 1500;
-/** #53 §5: yarı açık panel ekranın ~%45'i. */
-const SIRALA_ORANI = 0.45;
 /** #53 §6: "güne eklendi" kartı bu kadar sonra kendiliğinden kapanır. */
 const KART_SURESI_MS = 6000;
 
@@ -107,6 +104,10 @@ function ProgramSekmesi({ seyahat, gunler, duraklar, mekanlar, gunParam }: { sey
   const [hata, setHata] = useState<string | null>(null);
   // #53 §6: boştaki pine dokununca eklenen mekan (kart).
   const [eklenen, setEklenen] = useState<{ mekanId: string; gunId: string } | null>(null);
+  // #55 §A5–6: başlık + gün seçici yüksekliği (harita sığdırma ve hap gizleme payı).
+  const [ustYukseklik, setUstYukseklik] = useState(0);
+  // #55 §C10: planlama aşamasında uzun basılan durak / mekan (Başka güne al · Günden çıkar · Listeden sil).
+  const [uzunBasilan, setUzunBasilan] = useState<Mekan | null>(null);
   // #53 §5: sürükle-bırak öncesi gün bitişi (başlıkta "−22 dk" farkı).
   const [onceBitis, setOnceBitis] = useState<{ gunId: string; dk: number } | null>(null);
   const qc = useQueryClient();
@@ -361,27 +362,43 @@ function ProgramSekmesi({ seyahat, gunler, duraklar, mekanlar, gunParam }: { sey
       ? gunler.filter((g) => g.id !== gun.id).map((g) => ({ etiket: `${t('program.guneAl', { n: g.index })} · ${gunBasligi(g)}`, onPress: () => baskaGuneAl(gunSecDurak, g) }))
       : [];
 
+  // #55 §C10: planlama aşamasında (Bitti'ye basılmamış) durağa ya da pine uzun bas → Başka güne al · Günden çıkar ·
+  // Listeden sil. Tamamlanmış durakta eski menü (Tamamlamayı geri al vb.).
+  const uzunBas = (mekanId: string) => {
+    const m = mekanIle.get(mekanId);
+    if (!m) return;
+    const d = durakIle.get(mekanId);
+    if (d?.completed_at) {
+      setMenuDurak(d);
+      return;
+    }
+    setUzunBasilan(m);
+  };
+  const listedenSil = async (m: Mekan) => {
+    const onay = await onayIste(t('program.listedenSil'), t('program.listedenSilMetin', { ad: yerler.data?.[m.place_id]?.ad ?? '…' }), t('program.listedenSil'), t('genel.vazgec'));
+    if (!onay) return;
+    if (seciliMekanId === m.id) setSeciliMekanId(null);
+    guvenli(() => mekanSil.mutateAsync(m.id));
+  };
+  const uzunDurak = uzunBasilan ? durakIle.get(uzunBasilan.id) : undefined;
+  const uzunBasMenusu: SecimSecenegi[] = uzunBasilan
+    ? [
+        ...(uzunDurak
+          ? [
+              { etiket: `${t('program.baskaGuneAl')} ›`, onPress: () => setGunSecDurak(uzunDurak), pasif: gunler.length < 2 },
+              { etiket: t('program.menuCikar'), onPress: () => gundenCikar(uzunDurak) },
+            ]
+          : []),
+        { etiket: t('program.listedenSil'), onPress: () => listedenSil(uzunBasilan), tehlike: true },
+      ]
+    : [];
+
   const detayAc = (mekanId: string) => {
     const m = mekanIle.get(mekanId);
     if (m) router.push({ pathname: '/seyahat/[id]/mekan/[placeId]', params: { id: seyahat.id, placeId: m.place_id } });
   };
   const kesfeteGit = () => router.navigate({ pathname: '/seyahat/[id]/(sekmeler)/kesfet', params: { id: seyahat.id } });
 
-  // #45 §3: tutamak — dokun: katlı ↔ yarı; yukarı çek: bir hal yukarı (sonuna kadar çekmek tam ekran); aşağı çek: bir hal aşağı.
-  const tutamak = useMemo(
-    () =>
-      PanResponder.create({
-        // #51: tutamak + özet + ok dokunmaya da tepki verir (katlı ↔ yarı açık); sürükleme yukarı/aşağı.
-        onStartShouldSetPanResponder: () => true,
-        onMoveShouldSetPanResponder: (_, g) => Math.abs(g.dy) > 6 && Math.abs(g.dy) > Math.abs(g.dx),
-        onPanResponderRelease: (_, g) => {
-          if (g.dy < -20) setPanel((h) => (h === 'katli' && g.dy > -220 ? 'yari' : 'tam'));
-          else if (g.dy > 20) setPanel((h) => (h === 'tam' && g.dy < 220 ? 'yari' : 'katli'));
-          else setPanel((h) => (h === 'katli' ? 'yari' : 'katli'));
-        },
-      }),
-    [],
-  );
 
   // ---------------------------------------------------------------- harita
   const satirlar = useMemo(() => prog?.canli.satirlar ?? [], [prog]);
@@ -394,18 +411,16 @@ function ProgramSekmesi({ seyahat, gunler, duraklar, mekanlar, gunParam }: { sey
   // Geçilen bacak sayısı: baştan ardışık tamamlanan (atlanmamış) durak sayısı.
   let gecilenBacak = 0;
   if (prog?.bugun) for (const x of satirlar.filter((y) => y.durum !== 'atlandi')) if (x.durum === 'gecildi') gecilenBacak++; else break;
-  // #53 §1: yarı açık panelde pinler 32 px.
-  const pinler = programPinleri({ otel, mekanlar, duraklar, gunler, tempolar: verisi.tempolar, adlar: yerler.data, seciliGunId: gun?.id, seciliMekanId, tamamlananMekanIds, konum, kucuk: panel === 'yari' });
+  const pinler = programPinleri({ otel, mekanlar, duraklar, gunler, tempolar: verisi.tempolar, adlar: yerler.data, seciliGunId: gun?.id, seciliMekanId, tamamlananMekanIds, konum });
   const cizgiler = programCizgileri({ otel, mekanIle, gunler, tempolar: verisi.tempolar, seciliGunId: gun?.id, seciliNoktalar: verisi.seciliNoktalar, rotalar: verisi.rotalar, bacak: verisi.bacak, gecilenBacak });
 
-  // #53 §5: yarı açık panelde harita seçili günün rotasını sığdıracak şekilde yeniden ortalanır.
-  const sigdirImza = panel === 'yari' && gun ? `${gun.id}:${gunMekanlari.map((m) => m.id).join(',')}` : '';
-  // Yeni odak nesnesi = yeni kamera animasyonu; imza değişmedikçe aynı nesne kalır.
-  const odak = useMemo((): HaritaOdagi | undefined => {
+  // #55 §A5: gün seçilince ve panel hal değiştirince harita otel + günün duraklarını sığdırır; kenar boşluğu üstte
+  // başlık + gün seçici, altta panel (harita dolgusu zaten panel yüksekliği kadar).
+  const sigdirImza = gun && panel !== 'tam' ? `${gun.id}:${panel}:${ustYukseklik}:${gunMekanlari.map((m) => m.id).join(',')}` : '';
+  const sigdirma = useMemo((): HaritaSigdirma | undefined => {
     if (!sigdirImza) return undefined;
     const noktalar = [...(otel ? [otel] : []), ...gunMekanlari.map((m) => ({ lat: m.lat, lng: m.lng }))];
-    const kamera = sigdir(noktalar, { genislik: ekran.width - 48, yukseklik: Math.max(160, ekran.height * (1 - SIRALA_ORANI) - 190) });
-    return kamera ? { ...kamera, sayac: 0 } : undefined;
+    return noktalar.length ? { noktalar, ust: ustYukseklik + 16, alt: 24 } : undefined;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sigdirImza]);
 
@@ -446,15 +461,15 @@ function ProgramSekmesi({ seyahat, gunler, duraklar, mekanlar, gunParam }: { sey
         : t('program.ilerleme', { ad: adi(siradaki.durak.id), n: Math.max(0, siradaki.varisDk - prog.simdiDk) || (siradaki.yuruyus ? yuruyusDk(siradaki.yuruyus) : 0), k, n2: prog.canli.toplam });
     }
     // #53 §3: "1. gün · 5 durak · 09:00 → 14:40".
-    if (!tempo || tempo.durakSayisi === 0) return t('program.ozetGunBos', { gun: gun.index });
-    return t('program.baslikOzet', { gun: gun.index, n: tempo.durakSayisi, bas: tempo.baslangic, bit: dakikaSaat(prog.canli.bitisDk) });
+    // #55 §D12: tarihli seyahatte "Cuma, 16 Ekim · 4 durak · 09:00 → 13:36".
+    if (!tempo || tempo.durakSayisi === 0) return t('program.ozetGunBos', { gun: gunEtiketUzun(gun) });
+    return t('program.baslikOzet', { gun: gunEtiketUzun(gun), n: tempo.durakSayisi, bas: tempo.baslangic, bit: dakikaSaat(prog.canli.bitisDk) });
   };
   const bittiMi = !!prog?.bugun && prog.simdiDk !== null && prog.canli.toplam > 0 && !siradaki;
   // #53 §5: katlı panelin üst kenarında yeşil ilerleme çizgisi (tamamlanan/toplam; seyahat günü dışında boş).
   const ilerleme = prog?.bugun && prog.canli.toplam > 0 ? prog.canli.tamamlanan / prog.canli.toplam : 0;
   // #53 §5: sürükledikten sonra bitiş farkı ("−22 dk" yeşil / "+10 dk" kırmızı).
   const bitisFarki = gun && prog && onceBitis?.gunId === gun.id ? prog.canli.bitisDk - onceBitis.dk : 0;
-  const siralaYuksekligi = Math.max(180, Math.round(ekran.height * SIRALA_ORANI) - 96);
   // #53 §5: yarı açık liste satırları — numara · kategori ikonu · ad · süre; aralarda yürüyüş.
   let numara = 0;
   const siralaSatirlari: SiralaSatiri[] = satirlar.map((x) => {
@@ -468,7 +483,7 @@ function ProgramSekmesi({ seyahat, gunler, duraklar, mekanlar, gunParam }: { sey
       ad: (m && yerler.data?.[m.place_id]?.ad) || '…',
       ikon: kat.ikon,
       ikonRenk: kat.kategoriRenk,
-      sure: sureMetni(d?.minutes ?? 0),
+      saat: atlandi ? t('program.atlandi') : t('program.saatAraligi', { bas: dakikaSaat(x.varisDk), bit: dakikaSaat(x.ayrilisDk), sure: sureMetni(d?.minutes ?? 0) }),
       numara: atlandi ? null : numara,
       tamam: prog?.bugun ? x.durum === 'gecildi' : false,
       atlandi,
@@ -511,97 +526,100 @@ function ProgramSekmesi({ seyahat, gunler, duraklar, mekanlar, gunParam }: { sey
       onDiger={() => setPinMenuAcik(true)}
       onKapat={() => setSeciliMekanId(null)}
     />
-  ) : panel === 'katli' ? (
-    <>
-      {cubuk ? <MiniCubuk cubuk={cubuk} adi={adi} onKaydir={kaydir} onAtla={cubukAtla} onKoru={koru} /> : null}
-      {bittiMi && puanlanmamis.length > 0 ? (
-        <Pressable accessibilityRole="button" onPress={() => setPuanDurakId(puanlanmamis[0].durak.id)} style={s.puanlaHap}>
-          <Text style={s.puanlaHapMetin}>{t('program.ilkiniPuanla')}</Text>
-        </Pressable>
-      ) : null}
-      {/* #53 §5: katlı = 52 px tek satır "Sırayı gör ve düzenle" + ˄; üst kenarda 3 px yeşil ilerleme çizgisi. */}
-      <View {...tutamak.panHandlers} accessibilityRole="button" accessibilityLabel={t('program.paneliAc')} style={s.katliSatir}>
-        <View style={s.ilerlemeIz}>
-          <View style={[s.ilerlemeDolu, { width: `${Math.round(ilerleme * 100)}%` }]} />
-        </View>
-        <View style={s.katliIc}>
+  ) : undefined;
+
+  // #55 §B7: alt sayfa — üst şerit (her halde görünür, sabit yükseklik) + gövde.
+  const ustBaslikMetni = gun && prog ? (panel === 'tam' ? t('program.panelBaslik', { gun: gunEtiketKisa(gun), bas: baslangicSaati, bit: dakikaSaat(prog.canli.bitisDk) }) : t('program.bitisBaslik', { gun: gunEtiketKisa(gun), bit: dakikaSaat(prog.canli.bitisDk) })) : '';
+  // #55 §A4: başlık tek satıra sığmazsa "≡ tutup sürükle" ipucu gizlenir (kaba ölçü: harf ~7,5 px + düğmeler).
+  const ipucuSigar = ustBaslikMetni.length * 7.5 + (bitisFarki ? 70 : 0) + 120 + 2 * 46 + 40 < ekran.width;
+  const ustSerit = (
+    <View style={s.serit}>
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={panel === 'katli' ? t('program.paneliAc') : t('program.paneliKapat')}
+        onPress={() => setPanel((h) => (h === 'katli' ? 'yari' : 'katli'))}
+        hitSlop={8}
+        style={s.tutamakDokunma}>
+        {panel === 'katli' ? (
+          <View style={s.ilerlemeIz}>
+            <View style={[s.ilerlemeDolu, { width: `${Math.round(ilerleme * 100)}%` }]} />
+          </View>
+        ) : (
+          <View style={s.tutamakCizgi} />
+        )}
+      </Pressable>
+      {panel === 'katli' ? (
+        // #53 §5: katlı = "Sırayı gör ve düzenle" + ˄ (dokununca yarı açık).
+        <Pressable accessibilityRole="button" accessibilityLabel={t('program.paneliAc')} onPress={() => setPanel('yari')} style={s.seritSatir}>
           <Text style={s.katliMetin}>{t('program.sirayiGor')}</Text>
           <Ikon ad="yukari" boyut={20} renk={renk.metin} kalinlik={2.2} />
-        </View>
-      </View>
-      {hata ? <Text style={s.hata}>{hata}</Text> : null}
-    </>
-  ) : panel === 'yari' && gun && prog ? (
-    <>
-      <View {...tutamak.panHandlers} accessibilityRole="button" accessibilityLabel={t('program.paneliKapat')} style={s.tutamakAlan}>
-        <View style={s.tutamakCizgi} />
-      </View>
-      {/* #53 §5: "N. gün · bitiş HH:MM" (+ sıra değişince fark) · "≡ tutup sürükle" · ⤢. */}
-      <View style={s.listeBaslik}>
-        <Text style={[s.basBit, { flexShrink: 1 }]} numberOfLines={1}>
-          {t('program.bitisBaslik', { gun: gun.index, bit: dakikaSaat(prog.canli.bitisDk) })}
-          {bitisFarki ? <Text style={{ color: bitisFarki < 0 ? renk.basari : renk.uyari }}>{`  ${bitisFarki < 0 ? '−' : '+'}${sureMetni(Math.abs(bitisFarki))}`}</Text> : null}
-        </Text>
-        <View style={{ flex: 1 }} />
-        <View style={s.ipucuSurukle}>
-          <Ikon ad="tutamac" boyut={14} renk={renk.ikincil} kalinlik={2.2} />
-          <Text style={s.tempoMetin}>{t('program.surukleIpucu')}</Text>
-        </View>
-        <Pressable accessibilityRole="button" accessibilityLabel={t('program.diger')} onPress={() => setListeMenuAcik(true)} style={s.ikonDugme}>
-          <Ikon ad="daha" boyut={20} renk={renk.metin} kalinlik={2.2} />
         </Pressable>
-        <Pressable accessibilityRole="button" accessibilityLabel={t('program.tamEkran')} onPress={() => setPanel('tam')} style={s.ikonDugme}>
-          <Ikon ad="genislet" boyut={20} renk={renk.metin} kalinlik={2.2} />
-        </Pressable>
-      </View>
-      {verisi.matrisHata ? <Text style={s.uyariMetin}>{t('program.yuruyusHata')}</Text> : null}
-      {siralaSatirlari.length === 0 ? (
-        <Text style={s.uyariMetin}>{t('program.ozetGunBos', { gun: gun.index })}</Text>
       ) : (
-        <SiralaListesi
-          satirlar={siralaSatirlari}
-          basSatiri={otel ? t('program.otelSaat', { saat: baslangicSaati }) : t('program.baslangicSaat', { saat: baslangicSaati })}
-          basIkon={otel ? 'ev' : 'program'}
-          yukseklik={siralaYuksekligi}
-          onTasi={siralaTasi}
-          onSatirBas={(durakId) => {
-            const d = gunDurak.find((x) => x.id === durakId);
-            if (d) setSeciliMekanId(d.place_ref);
-          }}
-        />
-      )}
-      {hata ? <Text style={s.hata}>{hata}</Text> : null}
-    </>
-  ) : (
-    <>
-      <View {...tutamak.panHandlers} accessibilityRole="button" accessibilityLabel={t('program.paneliKapat')} style={s.tutamakAlan}>
-        <View style={s.tutamakCizgi} />
-      </View>
-      {cubuk ? <MiniCubuk cubuk={cubuk} adi={adi} onKaydir={kaydir} onAtla={cubukAtla} onKoru={koru} /> : null}
-      {gun && prog ? (
-        // #46/#48 tam ekran çizelge aynen: liste kalan alanı doldurur.
-        <View style={{ flex: 1 }}>
-          <View style={s.listeBaslik}>
-            <View style={{ flex: 1, minWidth: 0 }}>
-              <Text style={s.basBit} numberOfLines={1}>
-                {t('program.panelBaslik', { gun: gun.index, bas: baslangicSaati, bit: dakikaSaat(prog.canli.bitisDk) })}
-              </Text>
-              {tempo && tempo.durakSayisi > 0 ? <Text style={s.tempoMetin}>{sureMetni(tempo.geziDk + tempo.yuruyusDk + tempo.taksiDk)}</Text> : null}
-            </View>
-            {duzenle ? (
-              <Pressable accessibilityRole="button" onPress={() => setDuzenle(false)} style={[s.kucukDugme, s.kucukDugmeAktif]}>
-                <Text style={[s.kucukDugmeMetin, { color: renk.zemin }]}>{t('program.bitti')}</Text>
-              </Pressable>
+        <View style={s.seritSatir}>
+          <Text style={[s.basBit, { flexShrink: 1 }]} numberOfLines={1}>
+            {ustBaslikMetni}
+            {panel === 'yari' && bitisFarki ? (
+              <Text style={{ color: bitisFarki < 0 ? renk.basari : renk.uyari }}>{`  ${bitisFarki < 0 ? '−' : '+'}${sureMetni(Math.abs(bitisFarki))}`}</Text>
             ) : null}
-            <Pressable accessibilityRole="button" accessibilityLabel={t('program.diger')} onPress={() => setListeMenuAcik(true)} style={s.ikonDugme}>
-              <Ikon ad="daha" boyut={20} renk={renk.metin} kalinlik={2.2} />
+          </Text>
+          <View style={{ flex: 1 }} />
+          {panel === 'yari' && ipucuSigar ? (
+            <View style={s.ipucuSurukle}>
+              <Ikon ad="tutamac" boyut={14} renk={renk.ikincil} kalinlik={2.2} />
+              <Text style={s.tempoMetin}>{t('program.surukleIpucu')}</Text>
+            </View>
+          ) : null}
+          {panel === 'tam' && duzenle ? (
+            <Pressable accessibilityRole="button" onPress={() => setDuzenle(false)} style={[s.kucukDugme, s.kucukDugmeAktif]}>
+              <Text style={[s.kucukDugmeMetin, { color: renk.zemin }]}>{t('program.bitti')}</Text>
             </Pressable>
-            <Pressable accessibilityRole="button" accessibilityLabel={t('program.yariAcik')} onPress={() => setPanel('yari')} style={s.ikonDugme}>
-              <Ikon ad="daralt" boyut={20} renk={renk.metin} kalinlik={2.2} />
-            </Pressable>
-          </View>
-          {verisi.matrisHata ? <Text style={s.uyariMetin}>{t('program.yuruyusHata')}</Text> : null}
-          {bugun && izin === 'reddedildi' ? <Text style={s.uyariMetin}>{t('program.konumIzni')}</Text> : null}
+          ) : null}
+          <Pressable accessibilityRole="button" accessibilityLabel={t('program.diger')} onPress={() => setListeMenuAcik(true)} style={s.ikonDugme}>
+            <Ikon ad="daha" boyut={20} renk={renk.metin} kalinlik={2.2} />
+          </Pressable>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={panel === 'tam' ? t('program.yariAcik') : t('program.tamEkran')}
+            onPress={() => setPanel(panel === 'tam' ? 'yari' : 'tam')}
+            style={s.ikonDugme}>
+            <Ikon ad={panel === 'tam' ? 'daralt' : 'genislet'} boyut={20} renk={renk.metin} kalinlik={2.2} />
+          </Pressable>
+        </View>
+      )}
+    </View>
+  );
+  const govde = (yukseklik: number) =>
+    panel === 'katli' || !gun || !prog ? null : panel === 'yari' ? (
+      <>
+        {verisi.matrisHata ? <Text style={s.uyariMetin}>{t('program.yuruyusHata')}</Text> : null}
+        {hata ? <Text style={s.hata}>{hata}</Text> : null}
+        {siralaSatirlari.length === 0 ? (
+          <Text style={s.uyariMetin}>{t('program.ozetGunBos', { gun: gunEtiketKisa(gun) })}</Text>
+        ) : (
+          <SiralaListesi
+            satirlar={siralaSatirlari}
+            basSatiri={otel ? t('program.otelSaat', { saat: baslangicSaati }) : t('program.baslangicSaat', { saat: baslangicSaati })}
+            basIkon={otel ? 'ev' : 'program'}
+            yukseklik={Math.max(120, yukseklik - (verisi.matrisHata ? 20 : 0) - (hata ? 20 : 0))}
+            numaraRengi={gunRengi(gun.index)}
+            onTasi={siralaTasi}
+            onSatirBas={(durakId) => {
+              const d = gunDurak.find((x) => x.id === durakId);
+              if (d) setSeciliMekanId(d.place_ref);
+            }}
+            onUzunBas={(durakId) => {
+              const d = gunDurak.find((x) => x.id === durakId);
+              if (d) uzunBas(d.place_ref);
+            }}
+          />
+        )}
+      </>
+    ) : (
+      <View style={{ flex: 1, gap: 6 }}>
+        {tempo && tempo.durakSayisi > 0 ? <Text style={s.tempoMetin}>{sureMetni(tempo.geziDk + tempo.yuruyusDk + tempo.taksiDk)}</Text> : null}
+        {verisi.matrisHata ? <Text style={s.uyariMetin}>{t('program.yuruyusHata')}</Text> : null}
+        {bugun && izin === 'reddedildi' ? <Text style={s.uyariMetin}>{t('program.konumIzni')}</Text> : null}
+        <View style={{ flex: 1 }}>
           <CizelgeListesi
             seyahat={seyahat}
             gun={gun}
@@ -622,22 +640,21 @@ function ProgramSekmesi({ seyahat, gunler, duraklar, mekanlar, gunParam }: { sey
             puanim={puanim}
             siradakiFoto={siradakiFoto.data?.foto_uri}
             onYolTarifi={yolTarifi}
-            onMenu={setMenuDurak}
+            onMenu={(d) => (d.completed_at ? setMenuDurak(d) : uzunBas(d.place_ref))}
             onGunSec={setGunSecDurak}
             onTasi={tasi}
             onSure={sureDegistir}
             onBaslangic={baslangicDegistir}
           />
         </View>
-      ) : null}
-      {/* #53 §5: "Haritada gör" yarı açık hale döner. */}
-      <Pressable accessibilityRole="button" onPress={() => setPanel('yari')} style={s.haritadaGor}>
-        <Ikon ad="harita" boyut={18} renk={renk.zemin} kalinlik={2.2} />
-        <Text style={s.haritadaGorMetin}>{t('program.haritadaGor')}</Text>
-      </Pressable>
-      {hata ? <Text style={s.hata}>{hata}</Text> : null}
-    </>
-  );
+        {/* #53 §5: "Haritada gör" yarı açık hale döner. */}
+        <Pressable accessibilityRole="button" onPress={() => setPanel('yari')} style={s.haritadaGor}>
+          <Ikon ad="harita" boyut={18} renk={renk.zemin} kalinlik={2.2} />
+          <Text style={s.haritadaGorMetin}>{t('program.haritadaGor')}</Text>
+        </Pressable>
+        {hata ? <Text style={s.hata}>{hata}</Text> : null}
+      </View>
+    );
 
   // #53 §6: "güne eklendi" kartı — eklenen mekan, sırası ve gün bitişi; Geri al; Taşı: gün hapları.
   const eklenenMekan = eklenen ? mekanIle.get(eklenen.mekanId) : undefined;
@@ -702,7 +719,7 @@ function ProgramSekmesi({ seyahat, gunler, duraklar, mekanlar, gunParam }: { sey
           </View>
         }
         altMenuVar
-        panelTam={panel === 'tam' && !seciliMekan}
+        onUstYukseklik={setUstYukseklik}
         altSerbest={
           panel !== 'tam' && !seciliMekan ? (
             <>
@@ -713,9 +730,18 @@ function ProgramSekmesi({ seyahat, gunler, duraklar, mekanlar, gunParam }: { sey
                 </Pressable>
               </View>
               {panel === 'katli' ? eklendiKarti : null}
+              {panel === 'katli' && cubuk ? <MiniCubuk cubuk={cubuk} adi={adi} onKaydir={kaydir} onAtla={cubukAtla} onKoru={koru} /> : null}
+              {panel === 'katli' && bittiMi && puanlanmamis.length > 0 ? (
+                <View style={s.puanlaSatir} pointerEvents="box-none">
+                  <Pressable accessibilityRole="button" onPress={() => setPuanDurakId(puanlanmamis[0].durak.id)} style={[s.puanlaHap, s.golge]}>
+                    <Text style={s.puanlaHapMetin}>{t('program.ilkiniPuanla')}</Text>
+                  </Pressable>
+                </View>
+              ) : null}
             </>
           ) : null
         }
+        altSayfa={{ hal: panel, onHal: setPanel, ust: ustSerit, govde }}
         ustEk={
           <GunKartlari
             gunler={gunler}
@@ -739,7 +765,13 @@ function ProgramSekmesi({ seyahat, gunler, duraklar, mekanlar, gunParam }: { sey
           zoom: otel ? 14 : 13,
           pinler,
           cizgiler,
-          odak,
+          sigdir: sigdirma,
+          // #55 §A6: başlık alanına düşen rota hapları gizlenir.
+          ustBosluk: ustYukseklik,
+          // #55 §C10: pine uzun bas → menü.
+          onPinUzunBas: (pinId) => {
+            if (pinId.startsWith('m:')) uzunBas(pinId.slice(2));
+          },
           daireler: otel ? [{ id: 'yurume', merkez: otel, yaricapM: YURUME_YARICAPI_M, renk: renk.metin }] : [],
           // KK6: pine dokununca harita kaymaz (Harita bileşeni), panel pin paneline döner.
           onPinBas: (pinId) => {
@@ -761,6 +793,12 @@ function ProgramSekmesi({ seyahat, gunler, duraklar, mekanlar, gunParam }: { sey
         }}
       />
       <SecimMenusu acik={!!menuDurak} baslik={menuDurak ? adi(menuDurak.id) : undefined} secenekler={menuSecenekleri} onKapat={() => setMenuDurak(null)} />
+      <SecimMenusu
+        acik={!!uzunBasilan}
+        baslik={uzunBasilan ? (yerler.data?.[uzunBasilan.place_id]?.ad ?? undefined) : undefined}
+        secenekler={uzunBasMenusu}
+        onKapat={() => setUzunBasilan(null)}
+      />
       <SecimMenusu acik={!!gunSecDurak} baslik={t('mekan.gunSecBaslik')} secenekler={gunSecenekleri} onKapat={() => setGunSecDurak(null)} />
       <SecimMenusu
         acik={listeMenuAcik}
@@ -832,12 +870,14 @@ const s = StyleSheet.create({
   artiSatir: { alignItems: 'flex-end', paddingHorizontal: 16, paddingBottom: 10 },
   // #53 §8: 48 px.
   arti: { width: 48, height: 48, borderRadius: 24, backgroundColor: renk.metin, alignItems: 'center', justifyContent: 'center' },
-  // #53 §5 katlı panel.
-  katliSatir: { height: 52, justifyContent: 'center', marginTop: -6 },
-  ilerlemeIz: { position: 'absolute', top: 0, left: 0, right: 0, height: 3, borderRadius: 1.5, backgroundColor: renk.ayrac, overflow: 'hidden' },
+  // #55 §B7 alt sayfa üst şeridi: sabit yükseklik (tutamak / ilerleme + 44 px satır).
+  serit: { paddingHorizontal: 16 },
+  tutamakDokunma: { height: 10, justifyContent: 'center' },
+  seritSatir: { height: 44, flexDirection: 'row', alignItems: 'center', gap: 6 },
+  ilerlemeIz: { height: 3, borderRadius: 1.5, backgroundColor: renk.ayrac, overflow: 'hidden' },
   ilerlemeDolu: { height: '100%', backgroundColor: renk.basari },
-  katliIc: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingTop: 4 },
-  katliMetin: { fontFamily: yazi.kalin, fontSize: 14, color: renk.metin },
+  katliMetin: { flex: 1, fontFamily: yazi.kalin, fontSize: 14, color: renk.metin },
+  puanlaSatir: { alignItems: 'flex-start', paddingHorizontal: 16, paddingBottom: 8 },
   ipucuSurukle: { flexDirection: 'row', alignItems: 'center', gap: 3 },
   // #53 §6 "güne eklendi" kartı.
   eklendiKart: { marginHorizontal: 12, marginBottom: 8, padding: 12, gap: 10, borderRadius: 16, backgroundColor: renk.zemin },
