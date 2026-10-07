@@ -1,6 +1,9 @@
 import { useState, type ReactNode } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import Svg, { Defs, LinearGradient, Rect, Stop } from 'react-native-svg';
+
+import { Ikon } from '@/components/ui/Ikon';
 
 import { t } from '@/i18n';
 import { bosluk, renk, yazi } from '@/theme';
@@ -30,14 +33,22 @@ type Props = {
   altMenuVar?: boolean;
   /** #47 A2: panel tam ekran — üst katmanın (gün kartları) hemen altından başlar, köşesiz; arkada harita görünmez. */
   panelTam?: boolean;
+  /**
+   * #53 §3: büyük başlık — solda 36 px yuvarlak geri, yanında büyük `baslik` (şehir), altında bu satır (gün özeti);
+   * haritanın üstünde 250 px yumuşak geçiş. Verilmezse eski "‹ Şehir" hapı.
+   */
+  altBaslik?: string;
   harita: HaritaProps;
 };
+
+/** #53 §3: haritanın üstündeki yumuşak geçiş (#f6f6f4 %98 → %0). */
+const GECIS_YUKSEKLIK = 250;
 
 /**
  * #17 KK2: tam ekran harita kabuğu — 3.3 Otel, 3.4 Keşfet ve 3.5 bunu paylaşır.
  * Harita ekranın tamamını kaplar; üstte ve altta yüzen katmanlar dokunuşu yalnız kendi alanlarında yakalar.
  */
-export function HaritaEkrani({ baslik, geri, sagUst, arama, ustEk, altNot, altSerbest, altPanel, onUstYukseklik, altMenuVar, panelTam, harita }: Props) {
+export function HaritaEkrani({ baslik, geri, sagUst, arama, ustEk, altNot, altSerbest, altPanel, onUstYukseklik, altMenuVar, panelTam, altBaslik, harita }: Props) {
   const kenar = useSafeAreaInsets();
   const [ustY, setUstY] = useState(0);
   const [panelY, setPanelY] = useState(0);
@@ -47,6 +58,20 @@ export function HaritaEkrani({ baslik, geri, sagUst, arama, ustEk, altNot, altSe
       <Harita {...harita} altBosluk={altPanel && !panelTam ? panelY : 0} />
       {/* #47 A2: tam ekranda harita şeridi görünmez (beyaz arka plan). */}
       {panelTam ? <View style={[StyleSheet.absoluteFill, { backgroundColor: renk.zemin }]} /> : null}
+      {altBaslik !== undefined && !panelTam ? (
+        <View style={s.gecis} pointerEvents="none">
+          <Svg width="100%" height={GECIS_YUKSEKLIK}>
+            <Defs>
+              <LinearGradient id="ustGecis" x1="0" y1="0" x2="0" y2="1">
+                <Stop offset="0" stopColor="#f6f6f4" stopOpacity={0.98} />
+                <Stop offset="0.55" stopColor="#f6f6f4" stopOpacity={0.75} />
+                <Stop offset="1" stopColor="#f6f6f4" stopOpacity={0} />
+              </LinearGradient>
+            </Defs>
+            <Rect x="0" y="0" width="100%" height={GECIS_YUKSEKLIK} fill="url(#ustGecis)" />
+          </Svg>
+        </View>
+      ) : null}
 
       <View
         style={[s.ust, { paddingTop: kenar.top + 12 }]}
@@ -57,7 +82,7 @@ export function HaritaEkrani({ baslik, geri, sagUst, arama, ustEk, altNot, altSe
           onUstYukseklik?.(h);
         }}>
         <View style={s.ustSatir} pointerEvents="box-none">
-          <GeriHapi baslik={baslik} onPress={geri} />
+          {altBaslik !== undefined ? <BuyukBaslik baslik={baslik} alt={altBaslik} onGeri={geri} /> : <GeriHapi baslik={baslik} onPress={geri} />}
           {sagUst}
         </View>
         {arama ? <View style={[s.arama, s.golge]}>{arama}</View> : null}
@@ -99,6 +124,27 @@ export function GeriHapi({ baslik, onPress }: { baslik: string; onPress: () => v
   );
 }
 
+/** #53 §3: 36 px yuvarlak geri + büyük şehir adı (22 px) + altında gün özeti. */
+function BuyukBaslik({ baslik, alt, onGeri }: { baslik: string; alt: string; onGeri: () => void }) {
+  return (
+    <View style={s.buyukBaslik}>
+      <Pressable accessibilityRole="button" accessibilityLabel={t('genel.geri')} onPress={onGeri} hitSlop={8} style={({ pressed }) => [s.geriDaire, s.golge, pressed && { opacity: 0.8 }]}>
+        <Ikon ad="geri" boyut={20} renk={renk.metin} kalinlik={2.4} />
+      </Pressable>
+      <View style={{ flexShrink: 1 }}>
+        <Text style={s.sehir} numberOfLines={1}>
+          {baslik}
+        </Text>
+        {alt ? (
+          <Text style={s.sehirAlt} numberOfLines={1}>
+            {alt}
+          </Text>
+        ) : null}
+      </View>
+    </View>
+  );
+}
+
 /** Sağ üst bilgi hapı (kanvas: "Roma · 2/2"). */
 export function BilgiHapi({ metin }: { metin: string }) {
   return (
@@ -128,6 +174,11 @@ export function EylemHapi({ metin, onPress, yukleniyor }: { metin: string; onPre
 
 const s = StyleSheet.create({
   ekran: { flex: 1, backgroundColor: renk.yuzey },
+  gecis: { position: 'absolute', left: 0, right: 0, top: 0, height: GECIS_YUKSEKLIK },
+  buyukBaslik: { flexDirection: 'row', alignItems: 'center', gap: 10, flexShrink: 1 },
+  geriDaire: { width: 36, height: 36, borderRadius: 18, backgroundColor: renk.zemin, alignItems: 'center', justifyContent: 'center' },
+  sehir: { fontFamily: yazi.ekstra, fontSize: 22, lineHeight: 28, color: renk.metin },
+  sehirAlt: { fontFamily: yazi.yari, fontSize: 12, color: renk.ikincil },
   golge: {
     shadowColor: renk.metin,
     shadowOffset: { width: 0, height: 4 },

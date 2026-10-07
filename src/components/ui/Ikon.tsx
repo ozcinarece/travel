@@ -30,7 +30,14 @@ export type IkonAdi =
   | 'asagi'
   | 'daha'
   | 'genislet'
-  | 'daralt';
+  | 'daralt'
+  // #53 pin kategori ikonları (20 px) + sürükle tutamacı + geri
+  | 'kamera'
+  | 'ibadet'
+  | 'dag'
+  | 'canta'
+  | 'tutamac'
+  | 'geri';
 
 type Props = { ad: IkonAdi; boyut?: number; renk: ColorValue; kalinlik?: number };
 
@@ -150,6 +157,30 @@ export function Ikon({ ad, boyut = 24, renk, kalinlik = 2 }: Props) {
         <Path d="M14 4h6v6M20 4l-7 7M10 20H4v-6M4 20l7-7" {...ortak} />
       ) : ad === 'daralt' ? (
         <Path d="M20 10h-6V4M14 10l7-7M4 14h6v6M10 14l-7 7" {...ortak} />
+      ) : ad === 'kamera' ? (
+        <>
+          <Path d="M4 8h3l1.5-2.5h7L17 8h3v11H4V8z" {...ortak} />
+          <Circle cx={12} cy={13.5} r={3.5} {...ortak} />
+        </>
+      ) : ad === 'ibadet' ? (
+        // Kubbeli yapı + kule.
+        <>
+          <Path d="M5 20v-6a5 5 0 0 1 10 0v6M3 20h18M10 9V7M19 20V8l-1.5-3L16 8v12" {...ortak} />
+        </>
+      ) : ad === 'dag' ? (
+        <>
+          <Path d="M3 19l6.5-11 4 6.5 2-3L21 19H3z" {...ortak} />
+          <Circle cx={17.5} cy={6} r={1.5} {...ortak} />
+        </>
+      ) : ad === 'canta' ? (
+        <>
+          <Path d="M5 8h14l-1 12H6L5 8z" {...ortak} />
+          <Path d="M9 10V7a3 3 0 0 1 6 0v3" {...ortak} />
+        </>
+      ) : ad === 'tutamac' ? (
+        <Path d="M5 8h14M5 12h14M5 16h14" {...ortak} />
+      ) : ad === 'geri' ? (
+        <Path d="M15 5l-7 7 7 7" {...ortak} />
       ) : ad === 'ev' ? (
         <>
           <Path d="M3.5 11L12 4l8.5 7" {...ortak} />

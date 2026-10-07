@@ -54,13 +54,9 @@ export function etiketOnceligi(p: HaritaPini): number {
   return 1;
 }
 
-/** Daire çapı (px) — PinIcerigi ile aynı sayılar. Seçili: büyük daire + turuncu halka (#42 KK5), halka dahil. */
+/** Daire çapı (px) — PinIcerigi ile aynı sayılar. #53: 40 px (küçük 32 px); seçili turuncu halka dairenin kenarıdır. */
 export function pinCapi(p: HaritaPini): number {
-  if (p.secili) return 32;
-  // #47 B7: tamamlanan durak dairesi 30 px (✓ 16 px).
-  if (p.tamam) return 30;
-  if (p.tur === 'oneri') return 18;
-  return 22;
+  return p.kucuk ? 32 : 40;
 }
 
 const ETIKET_YUKSEKLIK = 16;
@@ -167,4 +163,23 @@ export const SIFIR_DOLGU = Object.freeze({ top: 0, right: 0, bottom: 0, left: 0 
 export function haritaDolgusu(hazir: boolean, altBosluk: number) {
   if (!hazir || !Number.isFinite(altBosluk) || altBosluk <= 0) return SIFIR_DOLGU;
   return { top: 0, right: 0, bottom: Math.round(altBosluk), left: 0 };
+}
+
+/**
+ * #53 §5: noktaları görünür alana sığdıran kamera (merkez + Google zoom). `alan`: haritanın panel ve başlık dışında
+ * kalan görünür kısmı (px). Web Mercator yaklaşımı; kenarlarda pay bırakılır, 11–16 arası sınırlanır.
+ */
+export function sigdir(noktalar: Konum[], alan: { genislik: number; yukseklik: number }, pay = 0.35): { konum: Konum; zoom: number } | null {
+  if (noktalar.length === 0) return null;
+  const latlar = noktalar.map((n) => n.lat);
+  const lnglar = noktalar.map((n) => n.lng);
+  const [g, k] = [Math.min(...latlar), Math.max(...latlar)];
+  const [b, d] = [Math.min(...lnglar), Math.max(...lnglar)];
+  const konum = { lat: (g + k) / 2, lng: (b + d) / 2 };
+  if (noktalar.length === 1) return { konum, zoom: 15 };
+  const cos = Math.cos((konum.lat * Math.PI) / 180);
+  const zLng = d - b > 0 ? Math.log2((alan.genislik * 360) / ((d - b) * 256)) : 20;
+  const zLat = k - g > 0 ? Math.log2((alan.yukseklik * 360 * cos) / ((k - g) * 256)) : 20;
+  const zoom = Math.max(11, Math.min(16, Math.min(zLng, zLat) - pay));
+  return { konum, zoom };
 }
