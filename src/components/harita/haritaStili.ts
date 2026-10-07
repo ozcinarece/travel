@@ -10,8 +10,9 @@ export const ACIK_HARITA_STILI = [
   { featureType: 'poi', elementType: 'labels', stylers: [{ visibility: 'off' }] },
   { featureType: 'poi.business', stylers: [{ visibility: 'off' }] },
   { featureType: 'administrative.locality', elementType: 'labels', stylers: [{ visibility: 'off' }] },
-  { featureType: 'administrative.neighborhood', elementType: 'labels.text.fill', stylers: [{ color: '#6e6e6e80' }] },
-  { featureType: 'administrative.neighborhood', elementType: 'labels.text.stroke', stylers: [{ color: '#ffffff80' }] },
+  // #51: Android stili 8 haneli hex'i #AARRGGBB okur (#ffffff80 → sarımsı); yalnız 6 haneli renk.
+  { featureType: 'administrative.neighborhood', elementType: 'labels.text.fill', stylers: [{ color: '#a3a3a3' }] },
+  { featureType: 'administrative.neighborhood', elementType: 'labels.text.stroke', stylers: [{ color: '#ffffff' }] },
   { featureType: 'poi.park', elementType: 'geometry', stylers: [{ color: '#e3e9e2' }] },
   { featureType: 'road', elementType: 'geometry', stylers: [{ color: '#ffffff' }] },
   { featureType: 'road', elementType: 'geometry.stroke', stylers: [{ color: '#e6e6e3' }] },

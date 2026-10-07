@@ -20,7 +20,11 @@ describe('kategori ve süre (PRD §6)', () => {
   it('süre metni', () => {
     expect(sureMetni(45)).toBe('45 dk');
     expect(sureMetni(60)).toBe('1 sa');
-    expect(sureMetni(75)).toBe('1,25 sa');
-    expect(sureMetni(90)).toBe('1,5 sa');
+    expect(sureMetni(75)).toBe('1 sa 15 dk');
+    expect(sureMetni(90)).toBe('1 sa 30 dk');
+    // #51: "3,75 sa" → "3 sa 45 dk"; "1,58 sa" → "1 sa 35 dk".
+    expect(sureMetni(225)).toBe('3 sa 45 dk');
+    expect(sureMetni(95)).toBe('1 sa 35 dk');
+    expect(sureMetni(120)).toBe('2 sa');
   });
 });

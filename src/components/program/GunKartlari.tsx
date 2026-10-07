@@ -46,11 +46,11 @@ export function GunKartlari({ gunler, duraklar, seciliId, bugunIndex, onSec, onU
             style={[s.kart, s.golge, aktif ? s.kartAktif : s.kartSoluk, !aktif && g.index === bugunIndex && { borderColor: renk.vurgu }]}>
             <View style={s.ustSatir}>
               <View style={[s.nokta, { backgroundColor: rengi }, aktif && { borderColor: renk.metin }]} />
-              <Text style={[s.baslik, aktif && s.acik]} numberOfLines={1}>
+              <Text style={[s.baslik, aktif && s.acik]}>
                 {t('program.gunSec', { n: g.index })}
               </Text>
             </View>
-            <Text style={[s.alt, aktif && s.acikSoluk]} numberOfLines={1}>
+            <Text style={[s.alt, aktif && s.acikSoluk]}>
               {g.date ? `${kisaGunTarihi(g.date)} · ` : ''}
               {n > 0 ? t('gunler.durakSayisi', { n }) : t('gunler.durakYokKart')}
             </Text>
@@ -69,13 +69,14 @@ export function GunKartlari({ gunler, duraklar, seciliId, bugunIndex, onSec, onU
 const s = StyleSheet.create({
   kaydirma: { marginHorizontal: -bosluk.kenar },
   kartlar: { gap: 8, paddingHorizontal: bosluk.kenar, paddingVertical: 2 },
-  kart: { width: 124, height: 58, paddingHorizontal: 12, paddingVertical: 9, borderRadius: 14, backgroundColor: renk.zemin, borderWidth: 1.5, borderColor: renk.zemin, justifyContent: 'space-between' },
+  // #51: genişlik içeriğe göre (en az 108 px); metin asla "…" ile kesilmez.
+  kart: { minWidth: 108, height: 58, paddingHorizontal: 12, paddingVertical: 9, borderRadius: 14, backgroundColor: renk.zemin, borderWidth: 1.5, borderColor: renk.zemin, justifyContent: 'space-between' },
   kartAktif: { backgroundColor: renk.metin, borderColor: renk.metin },
   kartSoluk: { opacity: 0.55 },
   golge: { shadowColor: renk.metin, shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 8, elevation: 3 },
   ustSatir: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   nokta: { width: 10, height: 10, borderRadius: 5, borderWidth: 1.5, borderColor: renk.zemin },
-  baslik: { fontFamily: yazi.ekstra, fontSize: 14, color: renk.metin, flexShrink: 1 },
+  baslik: { fontFamily: yazi.ekstra, fontSize: 14, color: renk.metin },
   acik: { color: renk.zemin },
   acikSoluk: { color: '#a3a3a3' },
   alt: { fontFamily: yazi.normal, fontSize: 11, color: renk.ikincil },

@@ -13,14 +13,30 @@ function dk(hhmm: string) {
   return s * 60 + d;
 }
 
+/**
+ * #51: Places 7/24 açık mekanı tek periyotla verir: `open {day 0, 00:00}`, `close` yok. Edge Function kapanışı olmayan
+ * periyodu `kapaGun = gun, kapa = '24:00'` yazıyordu (önbellekte de böyle) — bu biçim her zaman açık demektir.
+ */
+export function hepAcikMi(periyotlar: Periyot[]): boolean {
+  if (periyotlar.length !== 1) return false;
+  const [p] = periyotlar;
+  return p.kapaGun === p.gun && p.ac === '00:00' && p.kapa === '24:00';
+}
+
 /** Verilen hafta günü (0 = Pazar) için açık aralıklar, dakika cinsinden [başlangıç, bitiş). */
 export function gununAraliklari(periyotlar: Periyot[], gun: number): [number, number][] {
   const sonuc: [number, number][] = [];
   for (const p of periyotlar) {
-    if (p.gun === gun) sonuc.push([dk(p.ac), p.kapaGun === gun ? dk(p.kapa) : 24 * 60]);
-    else if (p.kapaGun === gun) sonuc.push([0, dk(p.kapa)]); // önceki günden sarkan (gece) periyot
+    const ac = dk(p.ac);
+    const kapa = dk(p.kapa);
+    // Aynı gün içinde kapanış açılıştan önceyse (ör. 18:00–02:00 ama kapanış günü yazılmamış) gece yarısını geçer.
+    const geceGecer = p.kapaGun !== p.gun || kapa <= ac;
+    const kapaGun = p.kapaGun !== p.gun ? p.kapaGun : geceGecer && kapa < 24 * 60 ? (p.gun + 1) % 7 : p.gun;
+    if (p.gun === gun) sonuc.push([ac, kapaGun === gun ? kapa : 24 * 60]);
+    if (kapaGun === gun && kapaGun !== p.gun) sonuc.push([0, kapa]); // önceki günden sarkan (gece) periyot
   }
-  return sonuc.sort((a, b) => a[0] - b[0]);
+  // Sıfır uzunluklu aralık (ör. ertesi gün 00:00 kapanış) açık sayılmaz.
+  return sonuc.filter(([a, b]) => b > a).sort((a, b) => a[0] - b[0]);
 }
 
 /**
@@ -29,7 +45,7 @@ export function gununAraliklari(periyotlar: Periyot[], gun: number): [number, nu
  */
 export function acilisDurumu(periyotlar: Periyot[] | null | undefined, gun: number, varisDk: number): AcilisDurumu {
   if (!periyotlar) return { durum: 'bilinmiyor' };
-  if (periyotlar.length === 0) return { durum: 'acik' };
+  if (periyotlar.length === 0 || hepAcikMi(periyotlar)) return { durum: 'acik' };
   const araliklar = gununAraliklari(periyotlar, gun);
   if (araliklar.length === 0) return { durum: 'kapali_gun' };
   if (araliklar.some(([a, b]) => varisDk >= a && varisDk < b)) return { durum: 'acik' };
@@ -40,6 +56,6 @@ export function acilisDurumu(periyotlar: Periyot[] | null | undefined, gun: numb
 
 /** Tarihsiz seyahat (KK5): yalnız haftalık bilgi — kapalı günlerin kısa adları. */
 export function kapaliGunler(periyotlar: Periyot[] | null | undefined): number[] {
-  if (!periyotlar || periyotlar.length === 0) return [];
+  if (!periyotlar || periyotlar.length === 0 || hepAcikMi(periyotlar)) return [];
   return [0, 1, 2, 3, 4, 5, 6].filter((g) => gununAraliklari(periyotlar, g).length === 0);
 }

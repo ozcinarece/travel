@@ -51,6 +51,8 @@ export function Harita({ merkez, zoom = 14, pinler = [], daireler = [], cizgiler
       userInterfaceStyle="light"
       customMapStyle={ACIK_HARITA_STILI}
       toolbarEnabled={false}
+      // #51: pusula üst haplarla çakışıyordu.
+      showsCompass={false}
       // #47 A1: harita görünür alanı panelin üstünde biter; Google logosu panelin üstünde kalır.
       mapPadding={dolgu}
       onMapReady={() => setHazir(true)}

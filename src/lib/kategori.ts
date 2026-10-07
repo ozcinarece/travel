@@ -70,8 +70,10 @@ export function kategoriEtiketi(primaryType: string | null | undefined): string 
 
 /** "1,25 sa" / "45 dk" (kanvas biçimi). */
 export function sureMetni(dakika: number): string {
-  if (dakika < 60) return `${dakika} dk`;
-  const sa = dakika / 60;
-  const metin = Number.isInteger(sa) ? String(sa) : sa.toFixed(2).replace(/0+$/, '').replace('.', ',');
-  return `${metin} sa`;
+  // #51: ondalık saat yok — "X sa Y dk" / "X sa" / "Y dk".
+  const d = Math.max(0, Math.round(dakika));
+  if (d < 60) return `${d} dk`;
+  const sa = Math.floor(d / 60);
+  const kalan = d % 60;
+  return kalan ? `${sa} sa ${kalan} dk` : `${sa} sa`;
 }
