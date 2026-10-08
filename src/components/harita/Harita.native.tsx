@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { PixelRatio, StyleSheet, View, useWindowDimensions } from 'react-native';
 import MapView, { Circle, Marker, Polyline, PROVIDER_GOOGLE } from 'react-native-maps';
 
-import { bolgeHesapla, detayGoster, etiketBolgesi, gizliEtiketler, haritaDolgusu, isaretciImzasi, izlemeGerekli, pinCapasi, pinCapi, zoomDelta } from './geo';
+import { bolgeHesapla, detayGoster, etiketBolgesi, haritaDolgusu, isaretciImzasi, izlemeGerekli, pinCapasi, pinCapi, pinSecimi, pinZ, zoomDelta } from './geo';
 import { ACIK_HARITA_STILI } from './haritaStili';
 import { PinIcerigi, pinPngAnahtari } from './PinIcerigi';
 import { PIN_IKONLARI } from './pinIkonlari';
@@ -26,16 +26,6 @@ const OK_PNG = PIN_IKONLARI['ok-ffffff'];
 
 /** #59 §B KK3 geliştirme sayacı: işaretçi kurulumu / bitmap yakalaması (yalnız __DEV__'de yazdırılır). */
 export const haritaSayaclari = { kurulum: 0, yakalama: 0 };
-
-/** Pinlerin üst üste binme sırası (#59 §A3): konum > seçili > otel > listede / güne atanmış > diğer > hap. */
-function pinZ(p: HaritaPini): number {
-  if (p.tur === 'konum') return 5;
-  if (p.secili) return 4;
-  if (p.tur === 'otel') return 3;
-  if (p.tur === 'durak' || p.tur === 'listede') return 2;
-  if (p.tur === 'etiket') return 0;
-  return 1;
-}
 
 export function Harita({
   merkez,
@@ -90,10 +80,11 @@ export function Harita({
   // #33: bacak etiketleri (#59: yalnız taksi "12 dk") pin gibi çizilir; çakışma kuralına en düşük öncelikle girer.
   const tumPinler = useMemo(() => [...pinler, ...bacakEtiketPinleri(cizgiler)], [pinler, cizgiler]);
   const olcu = useMemo(() => ({ genislik: ekran.width, yukseklik: ekran.height }), [ekran.width, ekran.height]);
-  // #59 §A: kümeleme yok; yakın pinler üst üste biner (beyaz kenar ayırır, z-sırası pinZ).
-  const gizli = useMemo(() => gizliEtiketler(tumPinler, etiketBolge, olcu, ustBosluk), [tumPinler, etiketBolge, olcu, ustBosluk]);
-  // Gizlenen hap hiç çizilmez (opaklıkla saklamak bitmap yakalaması isterdi).
-  const gorunen = useMemo(() => tumPinler.filter((p) => !(p.tur === 'etiket' && gizli.etiket.has(p.id))), [tumPinler, gizli]);
+  // #59 §A: kümeleme yok; yakın pinler üst üste biner (beyaz kenar ayırır, z-sırası pinZ). #61 §2: adı sığmayan öneri
+  // pini çizilmez. Gizlenen hap da hiç çizilmez (opaklıkla saklamak bitmap yakalaması isterdi).
+  const secim = useMemo(() => pinSecimi(tumPinler, etiketBolge, olcu, ustBosluk), [tumPinler, etiketBolge, olcu, ustBosluk]);
+  const gizli = secim.gizli;
+  const gorunen = useMemo(() => secim.pinler.filter((p) => !(p.tur === 'etiket' && gizli.etiket.has(p.id))), [secim, gizli]);
   // #59 §C: yön okları — zoom adımına göre; en fazla 40.
   const oklar = useMemo(() => yonOklari(cizgiler, pinler, etiketBolge, olcu), [cizgiler, pinler, etiketBolge, olcu]);
   // #55 §C10: Marker'da uzun basma yok — haritaya uzun basılan noktaya ~28 px içindeki en yakın pin.

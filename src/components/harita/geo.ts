@@ -65,9 +65,14 @@ export function etiketOnceligi(p: HaritaPini): number {
   return 20;
 }
 
-/** Daire çapı (px) — PinIcerigi ile aynı sayılar. #59 §A2: 28 px, seçili 34 px (siyah halka dairenin kenarıdır). */
+/**
+ * Daire çapı (px) — PinIcerigi ile aynı sayılar. #59 §A2: 28 px, seçili 34 px (siyah halka dairenin kenarıdır).
+ * #61 §5: seçili gün dışındaki (soluk) durak pini numarasız küçük nokta, 20 px.
+ */
 export function pinCapi(p: HaritaPini): number {
-  return p.secili ? 34 : 28;
+  if (p.secili) return 34;
+  if (p.tur === 'durak' && (p.opaklik ?? 1) < 1) return 20;
+  return 28;
 }
 /** #59 §A2: otel karesi ve konum halkası (px) — PinIcerigi ile aynı. */
 export const OTEL_KARE = 28;
@@ -171,6 +176,45 @@ export function gizliEtiketler(
     gizli.etiket.add(p.id);
   }
   return gizli;
+}
+
+/**
+ * #61 §2: Keşfet'te her görünen pinin adı okunmalı — adı çakışma yüzünden gizlenecek ÖNERİ pini hiç çizilmez
+ * (yakınlaşınca geri gelir). Listedekiler, duraklar ve diğer türler hep çizilir. Düşen pinler başka etiketleri
+ * engellemeyi bıraktığından hesap birkaç tur tekrarlanır.
+ */
+export function pinSecimi(
+  pinler: HaritaPini[],
+  bolge: HaritaBolgesi | null,
+  ekran: { genislik: number; yukseklik: number },
+  ustBosluk = 0,
+): { pinler: HaritaPini[]; gizli: GizliEtiketler } {
+  let kalan = pinler;
+  let gizli = gizliEtiketler(kalan, bolge, ekran, ustBosluk);
+  for (let tur = 0; tur < 4; tur++) {
+    const dusen = new Set(kalan.filter((p) => p.tur === 'oneri' && p.ad && gizli.etiket.has(p.id)).map((p) => p.id));
+    if (dusen.size === 0) break;
+    kalan = kalan.filter((p) => !dusen.has(p.id));
+    gizli = gizliEtiketler(kalan, bolge, ekran, ustBosluk);
+  }
+  return { pinler: kalan, gizli };
+}
+
+/**
+ * Pinlerin üst üste binme sırası (#59 §A3): konum > seçili > otel > seçili günün durakları (sıra no küçük üstte, #61 §5:
+ * üst üste binen duraklarda görünen numara ve altındaki ad aynı pine ait olsun) > listede / diğer gün durağı > diğer > hap.
+ */
+export function pinZ(p: HaritaPini): number {
+  if (p.tur === 'konum') return 50;
+  if (p.secili) return 40;
+  if (p.tur === 'otel') return 30;
+  if (p.tur === 'durak' && (p.opaklik ?? 1) >= 1) {
+    const sira = Number(p.etiket);
+    return 29 - (Number.isFinite(sira) && sira > 0 ? Math.min(sira, 19) : 19);
+  }
+  if (p.tur === 'durak' || p.tur === 'listede') return 9;
+  if (p.tur === 'etiket') return 0;
+  return 1;
 }
 
 /** İşaretçi çapası: daire merkezi, etiket dairenin altında (daire + 2 px + etiket kutusu). */

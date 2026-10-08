@@ -50,6 +50,8 @@ import { gunRengi, minDokunma, renk, yazi } from '@/theme';
 const YURUME_YARICAPI_M = 1500;
 /** #53 §6: "güne eklendi" kartı bu kadar sonra kendiliğinden kapanır. */
 const KART_SURESI_MS = 6000;
+/** #61 §5: sürükleme sonrası başlıktaki bitiş farkı bu kadar sonra kalkar. */
+const BITIS_FARKI_MS = 8000;
 
 /** #45 §3: alt panel üç hal. */
 type PanelHali = 'katli' | 'yari' | 'tam';
@@ -140,8 +142,13 @@ function ProgramSekmesi({
   const [ustYukseklik, setUstYukseklik] = useState(0);
   // #55 §C10: planlama aşamasında uzun basılan durak / mekan (Başka güne al · Günden çıkar · Listeden sil).
   const [uzunBasilan, setUzunBasilan] = useState<Mekan | null>(null);
-  // #53 §5: sürükle-bırak öncesi gün bitişi (başlıkta "−22 dk" farkı).
+  // #53 §5: sürükle-bırak öncesi gün bitişi (başlıkta "−22 dk" farkı); #61 §5: 8 sn sonra silinir (kalıcı "+1 dk" belirsizdi).
   const [onceBitis, setOnceBitis] = useState<{ gunId: string; dk: number } | null>(null);
+  useEffect(() => {
+    if (!onceBitis) return;
+    const z = setTimeout(() => setOnceBitis(null), BITIS_FARKI_MS);
+    return () => clearTimeout(z);
+  }, [onceBitis]);
   const qc = useQueryClient();
 
   const verisi = useProgramVerisi({ seyahat, gunler, duraklar, mekanlar, seciliGun: gun, konaklamalar });

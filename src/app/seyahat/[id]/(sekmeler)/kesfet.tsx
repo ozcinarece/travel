@@ -109,11 +109,12 @@ function Kesfet({ seyahat, konaklamalar }: { seyahat: Seyahat; konaklamalar: Kon
 
   const pinler: HaritaPini[] = [
     ...konaklamalar.map((k) => ({ id: `otel:${k.id}`, konum: { lat: k.lat, lng: k.lng }, renk: renk.metin, tur: 'otel' as const })),
-    // #30: listeye eklenen = siyah daire + tik (Program > Harita'da numaralanır); altında ad, yakınken ★ puan · yorum.
+    // #61 §4: listeye eklenen = kategori renginde dolu daire + beyaz kategori ikonu; altında ad (öncelikli), yakınken ★ puan · yorum.
     ...havuz.map((m) => ({
       id: `m:${m.place_id}`,
       konum: { lat: m.lat, lng: m.lng },
       renk: renk.metin,
+      ...kategoriPini(m.primary_type),
       ad: havuzAdlari.data?.[m.place_id]?.ad,
       puan: havuzAdlari.data?.[m.place_id]?.puan ?? null,
       yorumSayisi: havuzAdlari.data?.[m.place_id]?.puan_sayisi ?? null,

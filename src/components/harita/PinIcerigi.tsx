@@ -18,7 +18,9 @@ function pinIkonu(pin: HaritaPini): { ad: IkonAdi; renk: string } | null {
   if (pin.tur === 'otel') return { ad: 'ev', renk: renk.zemin };
   if (pin.tur === 'etiket') return pin.etiketIkon ? { ad: pin.etiketIkon, renk: renk.metin } : null;
   if (pin.tur === 'aday' || pin.tur === 'konum' || !pin.tur) return null;
-  if (pin.tamam || pin.tur === 'listede') return { ad: 'tik', renk: renk.zemin };
+  if (pin.tamam) return { ad: 'tik', renk: renk.zemin };
+  // #61 §4: listede = kategori renginde dolu daire + beyaz kategori ikonu (kategori yoksa siyah + ✓).
+  if (pin.tur === 'listede') return pin.ikon && pin.kategoriRenk ? { ad: pin.ikon, renk: renk.zemin } : { ad: 'tik', renk: renk.zemin };
   if (pin.tur === 'oneri' || pin.tur === 'bos') return { ad: pin.ikon ?? 'kamera', renk: pin.kategoriRenk ?? renk.metin };
   return null;
 }
@@ -106,14 +108,14 @@ export function PinIcerigi({ pin, etiketGizli, detay = false, onYuklendi }: { pi
           <PinIkonu ad={pin.ikon ?? 'kamera'} boyut={IKON_PX} renk={kRenk} kalinlik={2.1} onYuklendi={onYuklendi} />
         </View>
       ) : pin.tur === 'listede' ? (
-        // #53: listede = siyah daire + beyaz ✓.
-        <View style={[s.daire, daire, { backgroundColor: renk.metin }]} collapsable={false}>
-          <PinIkonu ad="tik" boyut={IKON_PX} renk={renk.zemin} kalinlik={2.4} onYuklendi={onYuklendi} />
+        // #61 §4: listede = kategori renginde dolu daire + beyaz kategori ikonu (kategori yoksa #53: siyah + ✓).
+        <View style={[s.daire, daire, { backgroundColor: pin.ikon && pin.kategoriRenk ? pin.kategoriRenk : renk.metin }]} collapsable={false}>
+          <PinIkonu ad={pin.ikon && pin.kategoriRenk ? pin.ikon : 'tik'} boyut={IKON_PX} renk={renk.zemin} kalinlik={pin.ikon && pin.kategoriRenk ? 2.1 : 2.4} onYuklendi={onYuklendi} />
         </View>
       ) : (
-        // #55 §D11: güne atanmış = gün renginde daire + sıra numarası (diğer günler opaklıkla %40).
+        // #55 §D11: güne atanmış = gün renginde daire + sıra numarası; #61 §5: diğer günler numarasız küçük nokta (%40).
         <View style={[s.daire, daire, { backgroundColor: pin.renk }]} collapsable={false}>
-          <Text style={s.daireMetin}>{pin.etiket ?? ''}</Text>
+          {pin.etiket ? <Text style={s.daireMetin}>{pin.etiket}</Text> : null}
         </View>
       )}
       <View style={[s.etiketKutu, { height: etiketYuksekligi(detay) }]}>

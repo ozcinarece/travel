@@ -1,6 +1,6 @@
 import { describe, expect, it } from '@jest/globals';
 
-import { etiketBolgesi, etiketOnceligi, isaretciImzasi, izlemeGerekli, sigdir, bolgedenUzaklasti, bolgeHesapla, deltaZoom, detayGoster, gizliEtiketler, haritaDolgusu, kisaAd, mesafeM, pinCapasi, SIFIR_DOLGU, zoomDelta } from '../geo';
+import { etiketBolgesi, etiketOnceligi, isaretciImzasi, izlemeGerekli, sigdir, bolgedenUzaklasti, bolgeHesapla, deltaZoom, detayGoster, gizliEtiketler, haritaDolgusu, kisaAd, mesafeM, pinCapasi, pinCapi, pinSecimi, SIFIR_DOLGU, zoomDelta } from '../geo';
 import type { HaritaPini } from '../tipler';
 
 const roma = { lat: 41.9028, lng: 12.4964 };
@@ -193,5 +193,42 @@ describe('geo', () => {
     const hap: HaritaPini = { id: 'h', konum: { lat: roma.lat + 300 / 40000, lng: roma.lng }, renk: '#000', tur: 'etiket', etiket: '4 dk' };
     expect(gizliEtiketler([hap], bolge, ekran, 180).etiket.has('h')).toBe(true);
     expect(gizliEtiketler([hap], bolge, ekran, 50).etiket.has('h')).toBe(false);
+  });
+});
+
+// #61 §2: adı sığmayan öneri pini çizilmez; listedekiler ve duraklar hep çizilir.
+describe('pinSecimi (#61)', () => {
+  const bolge = { merkez: roma, yaricapM: 1000, latDelta: 0.02, lngDelta: 0.01, zoom: 15 };
+  const ekran = { genislik: 400, yukseklik: 800 };
+  const p = (id: string, dLng: number, o: Partial<HaritaPini>): HaritaPini => ({ id, konum: { lat: roma.lat, lng: roma.lng + dLng }, renk: '#000', ad: `Yer ${id}`, ...o });
+  it('üst üste iki öneri: düşük öncelikli (id sırası) düşer, kalanın adı görünür', () => {
+    const s = pinSecimi([p('a', 0, { tur: 'oneri' }), p('b', 0.0001, { tur: 'oneri' })], bolge, ekran);
+    expect(s.pinler.map((x) => x.id)).toEqual(['a']);
+    expect(s.gizli.etiket.size).toBe(0);
+  });
+  it('listede pin önerinin üstünde: öneri düşer, listede kalır ve adı görünür', () => {
+    const s = pinSecimi([p('o', 0, { tur: 'oneri' }), p('l', 0.0001, { tur: 'listede' })], bolge, ekran);
+    expect(s.pinler.map((x) => x.id)).toEqual(['l']);
+    expect(s.gizli.etiket.has('l')).toBe(false);
+  });
+  it('çakışan iki listede pini: ikisi de çizilir, yalnız biri etiketsiz', () => {
+    const s = pinSecimi([p('l1', 0, { tur: 'listede' }), p('l2', 0.0001, { tur: 'listede' })], bolge, ekran);
+    expect(s.pinler).toHaveLength(2);
+    expect(s.gizli.etiket.size).toBe(1);
+  });
+  it('uzak pinler dokunulmaz; düşen pin başkasının etiketini engellemeyi bırakır (zincir)', () => {
+    // a (öneri, uzun adlı) b'nin etiketiyle çakışır → düşer; a'nın geniş etiketi kalkınca 80 px sağdaki c'nin etiketi yer bulur.
+    const s = pinSecimi(
+      [p('b', 0, { tur: 'listede' }), p('a', 0.0005, { tur: 'oneri', ad: 'Yer a uzun isim xx' }), p('c', 0.002, { tur: 'oneri' }), p('uzak', 0.01, { tur: 'oneri' })],
+      bolge,
+      ekran,
+    );
+    expect(s.pinler.map((x) => x.id).sort()).toEqual(['b', 'c', 'uzak']);
+    expect(s.gizli.etiket.size).toBe(0);
+  });
+  it('#61 §5: diğer günün durağı 20 px, seçili günün durağı 28, seçili 34', () => {
+    expect(pinCapi({ id: 'x', konum: roma, renk: '#000', tur: 'durak', opaklik: 0.4 })).toBe(20);
+    expect(pinCapi({ id: 'x', konum: roma, renk: '#000', tur: 'durak' })).toBe(28);
+    expect(pinCapi({ id: 'x', konum: roma, renk: '#000', tur: 'durak', opaklik: 0.4, secili: true })).toBe(34);
   });
 });
