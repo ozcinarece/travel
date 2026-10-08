@@ -1,6 +1,6 @@
 import { describe, expect, it } from '@jest/globals';
 
-import { etiketBolgesi, etiketOnceligi, isaretciImzasi, sigdir, bolgedenUzaklasti, bolgeHesapla, deltaZoom, detayGoster, gizliEtiketler, haritaDolgusu, kisaAd, mesafeM, pinCapasi, SIFIR_DOLGU, zoomDelta } from '../geo';
+import { etiketBolgesi, etiketOnceligi, isaretciImzasi, izlemeGerekli, sigdir, bolgedenUzaklasti, bolgeHesapla, deltaZoom, detayGoster, gizliEtiketler, haritaDolgusu, kisaAd, mesafeM, pinCapasi, SIFIR_DOLGU, zoomDelta } from '../geo';
 import type { HaritaPini } from '../tipler';
 
 const roma = { lat: 41.9028, lng: 12.4964 };
@@ -159,6 +159,21 @@ describe('geo', () => {
     const yakin = bolgeHesapla(roma, 0.01, 0.005);
     expect(etiketBolgesi(b1, yakin)).toBe(yakin);
     expect(etiketBolgesi(null, b1)).toBe(b1);
+  });
+
+  it('#59 §B: izleme imza yakalanınca kapanır; PNG yüklenmesi anahtara bağlı, imza değişince yeniden beklenmez', () => {
+    // İlk kurulum: ne imza yakalandı ne PNG yüklendi.
+    expect(izlemeGerekli('i1', null, 'kamera-3b6fe0', null)).toBe(true);
+    // İmza yakalandı ama PNG henüz yok → açık; PNG gelince kapanır.
+    expect(izlemeGerekli('i1', 'i1', 'kamera-3b6fe0', null)).toBe(true);
+    expect(izlemeGerekli('i1', 'i1', 'kamera-3b6fe0', 'kamera-3b6fe0')).toBe(false);
+    // İmza değişti (seçim / detay), PNG aynı: yalnız yakalama turu; yakalanınca kapanır (🔴 1).
+    expect(izlemeGerekli('i2', 'i1', 'kamera-3b6fe0', 'kamera-3b6fe0')).toBe(true);
+    expect(izlemeGerekli('i2', 'i2', 'kamera-3b6fe0', 'kamera-3b6fe0')).toBe(false);
+    // PNG değişti (bos → listede ✓): yeni PNG beklenir.
+    expect(izlemeGerekli('i3', 'i3', 'tik-ffffff', 'kamera-3b6fe0')).toBe(true);
+    // İkonsuz pin (numaralı durak): yalnız imza.
+    expect(izlemeGerekli('i1', 'i1', null, null)).toBe(false);
   });
 
   it('#59 §B: işaretçi imzası konum/opaklıktan bağımsız, görünümle değişir', () => {

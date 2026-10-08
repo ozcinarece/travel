@@ -53,24 +53,28 @@ function Cizgi({ cizgi }: { cizgi: HaritaCizgisi }) {
     if (!harita || !kutuphane) return;
     const opaklik = cizgi.opaklik ?? 1;
     const nokta = (renk: string, scale: number) => ({ icon: { path: kutuphane.SymbolPath.CIRCLE, strokeOpacity: 0, fillOpacity: opaklik, fillColor: renk, scale }, offset: '0', repeat: '11px' });
-    const katman = (renk: string, kalinlik: number, zIndex: number, simgeler?: Parameters<typeof kutuphane.Polyline>[0] extends infer O ? (O extends { icons?: infer I } ? I : never) : never) =>
+    // Yalnız renk katmanı noktalı (gölge ve beyaz kenar düz); oklar yürüyüş bacağında.
+    const katman = (renk: string, kalinlik: number, zIndex: number, secenek: { noktali?: boolean; oklar?: boolean; opaklik?: number }) =>
       new kutuphane.Polyline({
         map: harita,
         path: cizgi.noktalar,
         strokeColor: renk,
-        strokeOpacity: cizgi.kesik ? 0 : opaklik,
+        strokeOpacity: secenek.noktali ? 0 : (secenek.opaklik ?? opaklik),
         strokeWeight: kalinlik,
         zIndex,
-        icons: cizgi.kesik ? [nokta(renk, kalinlik / 2)] : simgeler,
+        icons: secenek.noktali
+          ? [nokta(renk, kalinlik / 2)]
+          : secenek.oklar
+            ? [{ icon: { path: kutuphane.SymbolPath.FORWARD_OPEN_ARROW, strokeColor: '#ffffff', strokeWeight: 2, scale: 2.2 }, offset: '22px', repeat: '45px' }]
+            : undefined,
       });
     const katmanlar = cizgi.ince
-      ? [katman(cizgi.renk, 3, 0)]
+      ? [katman(cizgi.renk, 3, 0, { noktali: cizgi.kesik })]
       : [
-          katman('#0f0f0f', 11, 1),
-          katman('#ffffff', 9, 2),
-          katman(cizgi.renk, 5.5, 3, opaklik >= 0.5 ? [{ icon: { path: kutuphane.SymbolPath.FORWARD_OPEN_ARROW, strokeColor: '#ffffff', strokeWeight: 2, scale: 2.2 }, offset: '22px', repeat: '45px' }] : undefined),
+          katman('#0f0f0f', 11, 1, { opaklik: 0.12 * opaklik }),
+          katman('#ffffff', 9, 2, {}),
+          katman(cizgi.renk, 5.5, 3, { noktali: cizgi.kesik, oklar: !cizgi.kesik && opaklik >= 0.5 }),
         ];
-    if (!cizgi.ince) katmanlar[0].setOptions({ strokeOpacity: cizgi.kesik ? 0 : 0.12 * opaklik });
     return () => katmanlar.forEach((k) => k.setMap(null));
   }, [harita, kutuphane, cizgi]);
   return null;

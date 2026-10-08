@@ -17,7 +17,12 @@ export const PIN_IKONLARI: Record<string, ImageRequireSource> = {
   'ok-ffffff': require('../../../assets/pin/ok-ffffff.png'),
 };
 
+/** "<ikon>-<rrggbb>" anahtarı. */
+export function pinIkonuAnahtari(ikon: string, renk: string): string {
+  return `${ikon}-${renk.replace('#', '').toLowerCase()}`;
+}
+
 /** Pin içi ikonun PNG'si; üretilmemiş (ikon, renk) çifti için undefined → SVG'ye düşülür. */
 export function pinIkonuPng(ikon: string, renk: string): ImageRequireSource | undefined {
-  return PIN_IKONLARI[`${ikon}-${renk.replace('#', '').toLowerCase()}`];
+  return PIN_IKONLARI[pinIkonuAnahtari(ikon, renk)];
 }

@@ -226,6 +226,15 @@ export function sigdir(noktalar: Konum[], alan: { genislik: number; yukseklik: n
 }
 
 /**
+ * #59 §B: Android bitmap izlemesi (tracksViewChanges) açık kalmalı mı? Görünüm imzası henüz yakalanmadıysa ya da pinin
+ * beklediği PNG ikon (varsa) henüz yüklenmediyse. Yüklenme PNG anahtarına bağlıdır, imzaya değil: imza değişip PNG aynı
+ * kalınca Image yeniden yüklenmez; yalnız 350 ms'lik yakalama turu çalışır.
+ */
+export function izlemeGerekli(imza: string, yakalanan: string | null, beklenenPng: string | null, yuklenenPng: string | null): boolean {
+  return yakalanan !== imza || (beklenenPng !== null && yuklenenPng !== beklenenPng);
+}
+
+/**
  * #59 §B: işaretçinin görünümünü belirleyen her şey — değişince Android bitmap'i yeniden alınır (işaretçi yeniden
  * KURULMAZ; anahtar yalnız pin kimliğidir). Konum, opaklık ve z-sırası native özelliktir, imzaya girmez.
  */

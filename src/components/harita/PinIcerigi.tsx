@@ -1,4 +1,3 @@
-import { useEffect } from 'react';
 import { Image, StyleSheet, Text, View } from 'react-native';
 
 import { Ikon, type IkonAdi } from '@/components/ui/Ikon';
@@ -7,25 +6,42 @@ import { puanMetni } from '@/lib/puan';
 import { renk, yazi } from '@/theme';
 
 import { etiketYuksekligi, kisaAd, KONUM_HALKA, OTEL_KARE, pinCapi } from './geo';
-import { pinIkonuPng } from './pinIkonlari';
+import { pinIkonuAnahtari, pinIkonuPng } from './pinIkonlari';
 import type { HaritaPini } from './tipler';
 
 /** #59 §A2: daire içi kategori ikonu 14 px; otel karesindeki ev 16 px. */
 const IKON_PX = 14;
 const EV_PX = 16;
 
+/** Pinin içindeki ikon (ad + renk); yoksa null. PNG anahtarı buradan türer (pinPngAnahtari). */
+function pinIkonu(pin: HaritaPini): { ad: IkonAdi; renk: string } | null {
+  if (pin.tur === 'otel') return { ad: 'ev', renk: renk.zemin };
+  if (pin.tur === 'etiket') return pin.etiketIkon ? { ad: pin.etiketIkon, renk: renk.metin } : null;
+  if (pin.tur === 'aday' || pin.tur === 'konum' || !pin.tur) return null;
+  if (pin.tamam || pin.tur === 'listede') return { ad: 'tik', renk: renk.zemin };
+  if (pin.tur === 'oneri' || pin.tur === 'bos') return { ad: pin.ikon ?? 'kamera', renk: pin.kategoriRenk ?? renk.metin };
+  return null;
+}
+
 /**
- * #59 §B: pin içi ikon önceden üretilmiş PNG (assets/pin, scripts/pin-ikonlari.mjs) — Android işaretçi bitmap'ini
- * alırken SVG'nin çizilmesini beklemek gerekmez; `onYuklendi` görüntü yüklenince (PNG yoksa hemen) çağrılır.
+ * #59 §B: pinin beklediği PNG ikon anahtarı ("kamera-3b6fe0"); ikon yoksa ya da PNG üretilmemişse (SVG'ye düşer) null.
+ * Harita.native, bitmap yakalamasını bu PNG'nin yüklenmesine bağlar — imzaya değil (imza değişince PNG yeniden yüklenmez).
  */
-function PinIkonu({ ad, renk: r, boyut, kalinlik, onYuklendi }: { ad: IkonAdi; renk: string; boyut: number; kalinlik: number; onYuklendi?: () => void }) {
+export function pinPngAnahtari(pin: HaritaPini): string | null {
+  const i = pinIkonu(pin);
+  if (!i) return null;
+  const anahtar = pinIkonuAnahtari(i.ad, i.renk);
+  return pinIkonuPng(i.ad, i.renk) ? anahtar : null;
+}
+
+/**
+ * Pin içi ikon önceden üretilmiş PNG (assets/pin, scripts/pin-ikonlari.mjs) — Android işaretçi bitmap'ini alırken
+ * SVG'nin çizilmesini beklemek gerekmez; `onYuklendi` görüntü yüklenince PNG anahtarıyla çağrılır. PNG yoksa SVG.
+ */
+function PinIkonu({ ad, renk: r, boyut, kalinlik, onYuklendi }: { ad: IkonAdi; renk: string; boyut: number; kalinlik: number; onYuklendi?: (pngAnahtari: string) => void }) {
   const png = pinIkonuPng(ad, r);
-  // PNG yoksa (üretilmemiş ikon/renk çifti) SVG çizilir; "yüklendi" yerleşimle sayılır.
-  useEffect(() => {
-    if (!png) onYuklendi?.();
-  }, [png, onYuklendi]);
   if (!png) return <Ikon ad={ad} boyut={boyut} renk={r} kalinlik={kalinlik} />;
-  return <Image source={png} style={{ width: boyut, height: boyut }} onLoad={onYuklendi} fadeDuration={0} />;
+  return <Image source={png} style={{ width: boyut, height: boyut }} onLoad={() => onYuklendi?.(pinIkonuAnahtari(ad, r))} fadeDuration={0} />;
 }
 
 /**
@@ -33,9 +49,9 @@ function PinIkonu({ ad, renk: r, boyut, kalinlik, onYuklendi }: { ad: IkonAdi; r
  * satırı, `detay`). durak = gün renginde daire + sıra numarası · listede = siyah daire + ✓ · oneri / bos = beyaz daire,
  * kategori renginde kenar ve ikon · seçili = siyah halka · otel = siyah kare + ev · aday (3.3) = beyaz hap "★ puan · ad" ·
  * etiket (#33) = küçük beyaz hap (taksi bacağı süresi). `etiketGizli` çakışma kuralıyla gelir (geo.gizliEtiketler).
- * `onYuklendi`: içerikteki PNG ikon yüklendi (Android bitmap yakalaması için, Harita.native).
+ * `onYuklendi(pngAnahtari)`: içerikteki PNG ikon yüklendi (Android bitmap yakalaması için, Harita.native).
  */
-export function PinIcerigi({ pin, etiketGizli, detay = false, onYuklendi }: { pin: HaritaPini; etiketGizli?: boolean; detay?: boolean; onYuklendi?: () => void }) {
+export function PinIcerigi({ pin, etiketGizli, detay = false, onYuklendi }: { pin: HaritaPini; etiketGizli?: boolean; detay?: boolean; onYuklendi?: (pngAnahtari: string) => void }) {
   if (pin.tur === 'aday') {
     const puan = puanMetni(pin.puan);
     return (
