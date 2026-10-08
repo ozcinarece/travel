@@ -1,6 +1,6 @@
 # Kapsam Dokümanı — Gezi Planlayıcı (çalışma adı)
 
-Sürüm: 0.2 · Tarih: 29 Eylül 2026 · Sahip: Ece (ürün) · Durum: v1 kesimi onaylandı, teknik tasarım notu incelendi
+Sürüm: 0.3 · Tarih: 8 Ekim 2026 · Sahip: Ece (ürün) · Durum: v1 çekirdeği kodda; PRD v0.3 ile güncellendi
 
 Tasarım kanvası: https://claude.ai/artifact/46jh8ggGczM7VDTVHyzRQT (21 ekran, tıklanabilir akış)
 
@@ -88,6 +88,15 @@ v1'de Program ekranı içinde sürükle-bırak sıralama vardır; ayrı "Gün i�
 ### Kapsam dışı (şimdilik)
 
 Yapay zeka ile otomatik plan üretimi · sesli rehber · çevrimdışı mod · ayrıl-buluş özelliği · ödeme / premium · rezervasyon ve komisyon · Google'a yorum yazdırma (API desteklemiyor; yalnızca derin link)
+
+### v0.3 kapsam değişiklikleri (8 Ekim)
+- **v1'e çekildi:** tamamlanan durağı puanlama (yıldız + not; etiket ve fotoğraf yok) · gün bazlı otel (başlangıç/bitiş, taşınma günü; #21'in bir kısmı) · canlı gezi günü (konum, Bitti, otomatik tamamlanma).
+- **Birleşti:** Günlere dağıt + Program → tek "Program" ekranı. Seyahat içi alt menü kalktı; uygulama tek alt menü (Seyahatler · Yeni · Profil).
+- **v1'den çıktı / ertelendi:** Grup ayrı ekran değil, Program'daki panel. Davet linki (3.10) M2'ye ertelendi.
+- **v2'de kalan:** Haritam, Profil (sosyal), Arkadaşlar, rozetler, gezi sonu ekranı, çok şehir (#20), şehirler arası ulaşım (#22), puanlamada etiket ve fotoğraf.
+
+### Açık konu — konumlanma (8 Ekim, ürün kararı bekliyor)
+Wanderlog planlama, ortak düzenleme ve haritayı ücretsiz sunuyor; fark buradan gelmez. Önerilen üç ayak: (1) **gezi günü deneyimi** (canlı program, otomatik tamamlanma, ücretsiz rota optimizasyonu), (2) **arkadaş ağı** (arkadaş puanları öneri sinyali; puanlama → Haritam → arkadaşın planı döngüsü), (3) **Türkiye ve Türkçe öncelik**. Karar verilirse arkadaş önerilerinin v1'e çekilmesi değerlendirilecek. 5 kişilik teste "Wanderlog kullandın mı, neden bıraktın?" ve "Gezi günü ne kullanıyorsun?" soruları eklenecek.
 
 ## 6. Başarı ölçütleri (v1 prototip testi ve ilk 100 kullanıcı)
 

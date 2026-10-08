@@ -1,201 +1,232 @@
 # V1 PRD — Gezi Planlayıcı
 
-Sürüm: 0.2 · Tarih: 29 Eylül 2026 · Sahip: Ece · Geliştirici: (atanacak)
-Değişiklik: v0.2 — teknik tasarım notu incelemesindeki T1–T11 kararları ve açık soruların cevapları işlendi (bkz. `03-inceleme-teknik-tasarim.md`).
-Kapsam: `00-kapsam.md` §5 v1 · Tasarım: https://claude.ai/artifact/46jh8ggGczM7VDTVHyzRQT
+Sürüm: 0.3 · Tarih: 8 Ekim 2026 · Sahip: Ece · Geliştirici: Claude Code
+Kapsam: `00-kapsam.md` §5 · Tasarım: https://claude.ai/artifact/46jh8ggGczM7VDTVHyzRQT · Plan: `04-proje-plani.md`
 
-Bu belge geliştiriciye teslim belgesidir. Her ekranın **kabul kriterleri** (KK) test edilebilir cümlelerdir; teslimat bu kriterlere göre kontrol edilir. "Olmalı" = zorunlu, "olabilir" = geliştirici takdiri.
+Değişiklik v0.3 — 29 Eylül–8 Ekim cihaz testleri ve mockup turlarının kararları işlendi (issue #17–#56, PR #18–#58). Başlıca değişiklikler: Günler ve Program tek ekran oldu (3.5); seyahat içi alt menü kalktı; "Vardık" yerine Tamamlandı + otomatik tamamlanma; tamamlanan durak puanlama v1'e girdi; otel gün bazında (başlangıç/bitiş, taşınma günü); yeni pin dili, harita stili ve gün paleti; tempo etiketleri arayüzden kaldırıldı. Ayrıntılı geçmiş §14'te.
+
+Bu belge geliştiriciye teslim belgesidir. Her ekranın **kabul kriterleri** (KK) test edilebilir cümlelerdir; teslimat bu kriterlere göre kontrol edilir. "Olmalı" = zorunlu, "olabilir" = geliştirici takdiri. Kanvas ile belge çelişirse **belge** geçerlidir.
 
 ---
 
 ## 1. Ürün özeti
 
-Kullanıcı bir şehir ve tarih seçer, otelini işaretler, haritada mekan seçer, mekanları günlere dağıtır. Sistem her gün için saat saat program üretir (otelden başlar, yürüme süreleri dahil, otele döner). Arkadaşlar linkle katılır, aynı planı düzenler. Gezi sırasında "Vardık" ile ilerleme işaretlenir, gecikmede program tek dokunuşla kaydırılır.
+Kullanıcı bir şehir ve tarih seçer, isterse otelini işaretler, haritada mekan seçer ve mekanları haritada günlere dağıtır. Sistem her gün için saat saat program üretir: günün başlangıç noktasından (otel) başlar, gerçek yürüme süreleriyle ilerler, bitiş noktasına (otel) döner. Arkadaşlar linkle katılır, aynı planı düzenler. Gezi günü konum, tamamlanan duraklar ve gecikmeler programı canlı tutar; biten durak tek dokunuşla puanlanır.
 
 ## 2. Roller
 
-- **Sahip:** seyahati oluşturan. Seyahati silebilir, üyeyi çıkarabilir.
-- **Üye:** linkle katılan. Mekan ekler/çıkarır, gün ve sıra değiştirir, süre ayarlar. Uygulamalı veya tarayıcılı olabilir.
-- **Misafir (tarayıcı):** hesap açmadan ad girerek katılan üye. Yaptıkları adıyla kaydedilir; sonradan hesap açarsa birleştirilir.
+- **Sahip:** seyahati oluşturan. Seyahati silebilir, üyeyi çıkarabilir. Hesabını silerse sahiplik en eski hesaplı üyeye devredilir; hesaplı üye yoksa seyahat silinir. Hesap silme ekranı hangi seyahatin kime devredileceğini ya da silineceğini **silmeden önce** gösterir.
+- **Üye:** linkle katılan. Mekan ekler/çıkarır, gün ve sıra değiştirir, süre ve otel ayarlar, durak tamamlar, puan verir.
+- **Misafir (tarayıcı):** hesap açmadan ad girerek katılan üye (Supabase anonim oturum). Sonradan hesap açarsa aynı cihazda `linkIdentity` ile birleşir; farklı cihaz v2.
 
 ## 3. Ekranlar ve kabul kriterleri
 
 ### 3.0 Giriş
 
 **0.1 Karşılama + hesap**
-- KK1 Apple ve Google ile giriş çalışır. Telefon (SMS OTP) v2.
-- KK2 Davet linkiyle gelen kullanıcı giriş yapmadan da 3.10'a ulaşır.
+- KK1 Google ile giriş. **Apple ile giriş kodda hazır, kapalı**; Apple Developer hesabı açılınca (mağaza öncesi, M4) etkinleşir. Telefon OTP v2.
+- KK2 Davet linkiyle gelen kullanıcı giriş yapmadan 3.10'a ulaşır.
 
-**0.2 Profilini kur**
-- KK1 Ad zorunlu, kullanıcı adı zorunlu ve benzersiz; müsaitlik yazarken kontrol edilir (debounce 300 ms).
-- KK2 Harita gizliliği seçimi kaydedilir (`arkadaşlarım` varsayılan). v1'de yalnızca saklanır, kullanılmaz.
-- KK3 Fotoğraf isteğe bağlı.
+**0.2 Profilini kur** — KK1 ad ve benzersiz kullanıcı adı zorunlu (müsaitlik 300 ms debounce). KK2 harita gizliliği seçimi saklanır (`arkadaşlarım` varsayılan; v1'de kullanılmaz). KK3 fotoğraf isteğe bağlı.
 
-**0.3 İlk seyahat yönlendirmesi**
-- KK1 İki kapı: "Yeni seyahat planla" → 3.2, "Davet linkim var" → link yapıştırma alanı → 3.10. ("Haritayı doldur" kapısı v1'de gösterilmez.)
-- KK2 "Sonraki seyahatin ne zaman?" cevabı kaydedilir; `bu ay` seçilirse 3.1'de "Yeni seyahat" kartı boş durumda daha büyük gösterilir.
-- KK3 Atlanabilir.
+**0.3 İlk seyahat yönlendirmesi** — KK1 iki kapı: Yeni seyahat → 3.2; Davet linkim var → 3.10. KK2 "Sonraki seyahatin ne zaman?" saklanır. KK3 atlanabilir.
 
-**0.5 Boş durum**
-- KK1 Seyahati olmayan kullanıcı 3.1 yerine bu ekranı görür.
-- KK2 "İlk seyahatini planla" → 3.2; "Davet linkin mi var?" → link alanı.
+**0.5 Boş durum** — seyahati olmayan kullanıcı 3.1 yerine görür; "İlk seyahatini planla" → 3.2.
 
 ### 3.1 Seyahatler
 
-- KK1 Aktif seyahat (bugün ∈ [gidiş, dönüş]) varsa üstte kart: şehir, gün ilerleme noktaları (toplam gün / geçen gün), "Sıradaki" durak adı ve saati, play tuşu → 3.7.
-- KK2 Aktif yoksa "Yaklaşan" listesi en üstte; gelecek seyahatler tarihe göre artan.
-- KK3 "Geçmiş" yatay kartlar: şehir, ay-yıl, mekan sayısı.
-- KK4 Gezi sırasında mini-çubuk (bkz. §5.4) bu ekranda görünür.
+- KK1 Aktif seyahat (bugün ∈ [gidiş, dönüş], `trips.tz`) üstte kart: şehir, gün ilerlemesi, sıradaki durak ve saati → 3.5. Program oluşmamışsa "Program yakında hazır".
+- KK2 Yaklaşan seyahatler tarihe göre artan; tarihsizler listenin sonunda.
+- KK3 Geçmiş: yatay kartlar, şehir · ay-yıl · mekan sayısı.
+- KK4 Gezi günü canlı satırı (§5.4) bu ekranda da görünür.
 
 ### 3.2 Nereye?
 
-- KK1 Şehir araması Google Places Autocomplete (types: `(cities)`, oturum token'ı ile). İlk 3 sonuç gösterilir.
-- KK2 Gidiş ve dönüş tarihleri isteğe bağlı; girilmezse seyahat "tarihsiz", gün sayısı 1 ile başlar ve 3.5'te artırılabilir.
+- KK1 Şehir araması Autocomplete (`(cities)`, oturum token'ı), Edge Function üzerinden. Seçimde `city_label`, `country_code` (ISO alpha-2), `tz` yazılır.
+- KK2 Tarihler isteğe bağlı; tarihsiz seyahat 1 günle başlar.
 - KK3 Devam → 3.3.
 
-### 3.3 Otel
+### 3.3 Otel (ilk kurulum)
 
-- KK1 Otel araması Places Autocomplete (types: `lodging`). Google Maps / Booking linki yapıştırılırsa URL'den `place_id` ya da koordinat çözülür; çözülemezse hata mesajı ve manuel arama.
-- KK2 Harita üstünde otel pini sürüklenerek taşınabilir.
-- KK3 Otel etrafında 20 dk yürüme yarıçapı (yaklaşık 1,5 km) kesikli daire ile gösterilir.
-- KK4 "Atla" → otel `null`; §5.2'deki bölge önerisi v1'de yalnızca metin olarak ("Seçtiğin mekanların ağırlık merkezi: Centro Storico") gösterilir, harita katmanı v2.
-- KK5 Otel sonradan 3.7 üst menüsünden değiştirilebilir; değişince tüm günler yeniden hesaplanır.
+- KK1 Tam ekran **açık tema** harita (cihaz temasından bağımsız, §5.7 stili). Üstte yüzen başlık ve arama; altta yüzen panel.
+- KK2 Arama: Autocomplete `lodging`, şehir çevresi. Google Maps linki çözülür (`resolve-link`); Booking/Instagram linki "Yalnızca Google Maps linkleri" mesajıyla reddedilir. Yalnız koordinat dönen link haritayı oraya götürür ve "mekanı adıyla ara" önerir.
+- KK3 "Bu bölgedeki otelleri göster": görünür alan için Nearby `lodging`, en fazla 12 pin; harita %30 kayınca / %40 ölçek değişince "Bu bölgede ara" hapı çıkar, otomatik yenileme yok.
+- KK4 Seçilen otel pini sürüklenebilir; çevresinde 20 dk (≈1,5 km) kesikli daire.
+- KK5 "Atla" → otel yok. Otel **her an** sonradan eklenebilir (3.5 KK13).
+- KK6 Burada seçilen otel `stays`'e yazılır ve **tüm günlere** başlangıç = bitiş olarak uygulanır.
 
 ### 3.4 Keşfet
 
-- KK1 Harita tam ekran; üstte arama, çipler; altta yatay öneri kartları; en altta "Listede N mekan · Günlere dağıt" çubuğu.
-- KK2 Arama: Places Autocomplete, şehir merkezine `locationBias` (yarıçap 15 km). Sonuç seçilince harita o noktaya kayar ve kart açılır.
-- KK3 Link yapıştırma: Google Maps paylaşım linki (`maps.app.goo.gl`, `google.com/maps/place/...`) çözülür → `place_id`. Booking ve Instagram linkleri v1'de desteklenmez; "Bu link türü henüz desteklenmiyor" mesajı.
-- KK4 Öneri çipleri v1: **Popüler** (Places Nearby Search (New), `rankPreference: POPULARITY`, tip: `tourist_attraction`), **Yemek** (`restaurant`), **Sanat** (`museum`, `art_gallery`), **Manzara** (`park`, `tourist_attraction`). Tip adları Places (New) geçerli tip listesine göre geliştirici tarafından doğrulanır. "Arkadaşların gitti" çipi v2.
-- KK5 Öneri pini üzerindeki "+" ya da karttaki "+" mekanı listeye ekler; listeye eklenen pin numaralanmaz, "?" (güne atanmamış) olarak görünür.
-- KK6 Her kartta: ad, kategori, varsayılan kalınacak süre (§6), Google puanı, yorum sayısı, açık/kapalı, "Google" atfı. Fotoğraf isteğe bağlı (Places Photo, 400 px).
-- KK7 Listeye eklenen mekan ekleyen kullanıcının `user_id`'siyle kaydedilir; kartta ekleyenin baş harfi görünür.
-- KK8 Bir üye mekan eklediğinde diğer üyelerin ekranı 2 sn içinde güncellenir (Realtime).
+- KK1 Harita tam ekran (§5.7). Üstte geri (→ 3.1), arama/link kutusu, çipler; altta `Listede N mekan · Programa geç` çubuğu (→ 3.5).
+- KK2 Arama Autocomplete, `locationBias` = görünür alan merkezi.
+- KK3 Çipler: **Popüler** (varsayılan, `tourist_attraction`), Yemek (`restaurant`), Sanat (`museum`, `art_gallery`), Manzara. Öneriler **görünür alan** için Nearby; "Bu bölgede ara" kuralı 3.3 KK3 ile aynı; çip değişince yeniden arar.
+- KK4 Pin dili §5.8: öneri = kategori pini; listede = siyah ✓.
+- KK5 Pine dokunma = **seçim**, ekleme değil: altta tek satır önizleme kartı — 60 px foto · ad · `tür · süre · ★ puan · yorum sayısı` · siyah **+** (listeye ekle). Listedeyse + yerine ✓ (dokununca listeden çıkar). Karta dokununca 3.8.
+- KK6 Eklenen mekan ekleyenin `user_id`'siyle kaydedilir; diğer üyelerde 2 sn içinde görünür (Realtime).
+- KK7 Haritada Google'ın mekan etiketleri kapalı; etiket çakışması ve küme §5.8.
 
-### 3.5 Günlere dağıt
+### 3.5 Program (eski 3.5 Günlere dağıt + 3.7 Program birleşti)
 
-- KK1 Harita tam ekran; üstte gün çipleri (1..N, her biri durak sayısıyla), "N boşta" sayacı; altta tempo paneli.
-- KK2 Etkileşim: bir gün çipi seçilir (varsayılan 1. gün), ardından pine dokununca pin o güne atanır ve gün rengine boyanır. Aynı pine tekrar dokununca atama kalkar ("?").
-- KK3 Gün renkleri sabit: 1 siyah `#0f0f0f`, 2 turuncu `#ff5a1f`, 3 mavi `#4c6ef5`, 4+ için palet devam eder (`#1f8a4c`, `#8a5cf6`, `#0ea5a5`).
-- KK4 Otel pini ve 20 dk dairesi haritada sabittir.
-- KK5 Tempo paneli **kestirimle** çalışır (kuş uçuşu mesafe × 1,3 ÷ 4,5 km/sa); Routes API çağrısı yapılmaz. Her gün için: gün adı, etiket (Rahat / Normal / Yoğun, §5.3), ilerleme çubuğu, "N durak · X sa gezi + Y dk yürüyüş", "başlangıç → bitiş" saati, bir satır öneri metni (§5.3).
-- KK6 Boşta pin varsa panelde en yakın günün adıyla "Boştaki *X* 1. güne yakın" önerisi gösterilir; öneri bağlayıcı değildir.
-- KK7 Gün ekle / gün sil çipler satırının sonunda; gün silinirse durakları boşa düşer.
-- KK8 "Programa geç" → 3.7. Boşta mekan varsa uyarı: "2 mekan hiçbir günde değil, devam edilsin mi?"
+Tek ekran: harita + üç durumlu alt panel. Ayrı "Çizelge" sekmesi ya da route yoktur.
 
-### 3.7 Program
+**Başlık ve gün seçici**
+- KK1 Üst satır: 36 px yuvarlak geri düğmesi (→ 3.4), büyük şehir adı, altında **seçili günün özeti**: tarihliyse `Cuma, 16 Ekim · 4 durak · 09:00 → 13:36`, tarihsizse `1. gün · …`. Sağda üye avatarları (→ Grup paneli, KK19). Arkada 250 px açık geçiş.
+- KK2 Gün seçici: tek beyaz şerit, eşit hücreler, 44–46 px. Tarihli: `Cum 16` / `Eki`; tarihsiz: `1. gün`. Renk noktası §5.9 paleti. **Seçili hücre** `#f1f1ef` zemin + gün renginde alt çizgi (siyah değil). Sonda `+` (gün ekle); hücreye uzun bas → Günü sil (durakları boşa düşer). Metin asla `…` ile kesilmez; 4+ gün kayar.
 
-- KK1 Üstte gün seçici (1..N). Her gün için: başlangıç saati (varsayılan 09:00, düzenlenebilir), duraklar sırayla, aralarda yürüme süresi ve mesafe, gün bitişi.
-- KK2 Varsayılan sıra §5.1'e göre hesaplanır. Kullanıcı durakları uzun basıp sürükleyerek yeniden sıralar; sıra değişince saatler anında yeniden hesaplanır. Kullanıcı bir kez sürüklediyse `days.order_manual=true` olur; sonraki duraklar en ucuz ekleme noktasına girer, otomatik sıralama bir daha çalışmaz. "En kısa rotaya diz" düğmesi `order_manual`'ı sıfırlar.
-- KK3 Her durakta süre −/+ (15 dk adım, min 15 dk, maks 8 sa).
-- KK4 Durak kartına uzun basınca menü: *Başka güne al (gün listesi)* · *Atla* · *Plandan çıkar*.
-- KK5 Açılış saati çakışması: durağın hesaplanan varış saati o günün açılış saatleri dışındaysa kart turuncu bantla işaretlenir: "Bugün kapalı" veya "Bu saatte kapalı, 14:00'te açılır". Bant üzerinde "Başka güne al" kısayolu. Kontrol seyahat şehrinin saat diliminde (`trips.tz`) yapılır. Tarihsiz seyahatte kontrol yapılmaz; kart yalnızca haftalık bilgi gösterir ("Pzt kapalı").
-- KK6 Gezi sırasında (bugün = seçili gün): geçilen duraklar üstü çizili, sıradaki durak siyah kart, kartta "Yol tarifi" (Google Maps'i yürüyüş moduyla açar) ve "Vardık".
-- KK7 "Vardık" seyahat düzeyindedir: herhangi bir üye işaretler, herkeste görünür; durağa `arrived_at = now`, `arrived_by = user_id` yazar. Kişi bazlı ilerleme v2. Sonraki durakların varış saatleri `now + kalınacak süre + yürüyüş` ile yeniden hesaplanır. Plan bitişi değiştiyse mini-çubuk (§5.4) görünür.
-- KK8 Bir durakta uzun kalındıysa (`now − arrived_at > minutes + 10 dk`) mini-çubuk "X'te N dk uzun kaldınız" gösterir; seçenekler: **Kaydır** (sonrakiler kayar), **Atla** (sıradaki durak çıkar, gerisi kayar), **Planı koru** (dokunma).
-- KK9 Sağ üstte üye avatarları; dokununca basit liste: üyeler, davet linki kopyala, son 10 değişiklik (kim, ne, ne zaman).
-- KK10 Hesaplama süresi 20 duraklı günde 500 ms altında; yürüyüş süreleri önbellekten gelmiyorsa iskelet gösterilir, hesaplanınca dolar.
+**Harita**
+- KK3 Seçili günün pinleri gün renginde numaralı; diğer günler kendi renginde %40; atanmamış mekanlar kategori pini. Ev pinleri: günlerin başlangıç/bitiş otelleri (aynı otel tek pin; seçili gün dışı %40).
+- KK4 Seçili günün rotası gerçek yol (§5.1), gün renginde; diğer günler %35. Bacak hapları (`🚶 12 dk` yerine SVG yürüyen kişi ikonu) bacak ortasında; başlık alanına düşen hap gizlenir.
+- KK5 Gün seçilince ve panel durum değiştirince harita günün otel + duraklarını sığdırır (üst/alt boşluk = başlık ve panel).
+- KK6 Pine dokunmak haritayı **kaydırmaz**.
+- KK7 **Atanmamış pine dokunma** (bir gün seçiliyken): mekan doğrudan o güne eklenir — gün otomatik sıralıysa en uygun noktaya, elle sıralıysa en ucuz ekleme noktasına (`order_manual` değişmez). Altta kart: küçük foto · ad · `✓ 1. güne eklendi · N. sıra · bitiş HH:MM` · Geri al; altında `Taşı: [gün hapları]`. 6 sn sonra ya da haritaya dokununca kapanır.
+- KK8 **Atanmış pine dokunma:** pin paneli — ad, kategori · süre · açık/kapalı; ★ puan · yorum sayısı · kim ekledi; küçük foto; tek satır `Gün ① ② ③` (dokununca taşır) + süre −/+; **Bilmen gerekenler** kutusu (Google `editorialSummary`, 2 satır + Devamı; özet yoksa kutu gizli); Detay · Yol tarifi · `···` (Listeden çıkar, onaylı).
+- KK9 Sağ altta 48 px siyah **+** → 3.4.
+
+**Alt panel** (snap noktaları: katlı 52 px · yarı açık %45 · tam ekran; yaylı, fling bir sonraki noktaya, liste en üstteyken listeden aşağı çekince iner; tutamak/oka dokunma katlı ↔ yarı açık)
+- KK10 **Katlı:** tek satır `Sırayı gör ve düzenle ˄`; üst kenarda 3 px ilerleme çizgisi (tamamlanan/toplam). Gezi günü canlı satır (§5.4) bu satırın yerini alır.
+- KK11 **Yarı açık:** başlık `Cum 16 Eki · bitiş 13:44` (sıra değişince fark `−22 dk`); sığarsa `≡ tutup sürükle` ipucu; `⤢` → tam ekran. Liste: Başlangıç satırı, duraklar, Bitiş satırı.
+  - Durak satırı (min 44 px): numara (gün renginde) · kategori ikonu · **ad (en fazla 2 satır, kesilmez)** · altında `09:00 – 09:45 · 45 dk` · sağda **≡**. Aralarda 16 px yürüyüş/taksi satırı.
+  - Kapalı mekan uyarısı adın altında ikinci satır: `Cum kapalı · Başka güne al` (§5.6).
+- KK12 **Sürükle-sırala:** yalnız ≡'den. Satır kalkar (turuncu kenar), bırakılacak yer turuncu çizgi; bırakınca numaralar, rota, saatler ve bitiş anında güncellenir, `order_manual = true`. Uzun listede otomatik kaydırma. `···` → `Kısa rota` (`order_manual` sıfırlar).
+- KK13 **Başlangıç/Bitiş satırları (otel):** otel varsa ev ikonu · ad · `Başlangıç · 09:00` · Değiştir; yoksa kesikli `Başlangıç: otel yok` + **+ Otel ekle**. Bitiş başlangıçla aynıysa tek satır `Otele dönüş · 13:44`. Dokununca **otel alt sayfası**: arama/link/`Haritadan` (3.3 haritası seçim modunda), seyahatin otelleri (radyo, gece sayısı, mesafe), `Otel yok`; `Yalnız bu gün` / `Bu gün ve sonrası` (varsayılan); `Gün sonunda başka otele geçiyorum` (taşınma günü: Sabah/Akşam seçimi); Kaydet'e kadar yazılmaz. Aynı sayfa `···` → `Oteli değiştir` ve ev pinine dokunarak da açılır. Kurallar §5.10.
+- KK14 **Tam ekran:** panel gün seçicinin altından başlar (harita şeridi kalmaz, köşe 0); aynı kompakt liste + `Haritada gör` (altta ortada) ve sağ üstte harita düğmesi; `⤡` yarı açığa döner.
+- KK15 **Uzun bas** (≡ dışında satıra ya da haritada pine), planlama aşamasındaki durakta: `Başka güne al ›` · `Günden çıkar` (havuzda kalır) · `Listeden sil` (onaylı, kırmızı). Tamamlanmış durakta: `Geri al` · `Puanla`.
+
+**Gezi günü (bugün = seçili gün, `trips.tz`)**
+- KK16 Kullanıcı konumu mavi nokta (`expo-location`, ön plan izni; yalnız seyahat günlerinde istenir, konum saklanmaz). Tamamlanan durak pini yeşil ✓, geçilen rota parçası soluk.
+- KK17 Sıradaki durak satırı gri kart: 52 px Google fotoğrafı (atıflı) · ad · `süre · bitiş HH:MM` · turuncu **Bitti**. Kurallar §5.4.
+- KK18 Tamamlanan durak: üstü çizili değil, yeşil ✓, adın yanında küçük gri `☆ puanla` → **puanlama sayfası**: küçük foto, ad, `✓ Tamamlandı · 09:00–09:52 · 52 dk kaldınız`, 5 yıldız, kısa not (üyeler görür), `Google'da da yorumla` (derin link), Sonra / Kaydet. Puan verilince `☆ puanla` yerine küçük yıldızlar. Gün bitince canlı satır `✓ Bugünün programı bitti · 6/6 · ☆ İlkini puanla`. Hızlı etiketler ve fotoğraf yükleme v1'de yok.
+
+**Grup**
+- KK19 Avatarlara dokununca panel: üyeler, davet linki kopyala/paylaş, son değişiklikler (kim, ne, ne zaman; tamamlama ve otel değişikliği dahil).
 
 ### 3.8 Mekan detayı
 
-- KK1 Üstte Google fotoğrafı (varsa), ad, kategori, gün ve saat.
-- KK2 Google puanı, yorum sayısı, açık/kapalı ve kapanış saati, "Google'da aç" linki. Yorumlar: en fazla 5, Places Details'ten canlı; yorumcu adı ve zaman; **saklanmaz**.
-- KK3 "Kim ekledi" ve ekleyenin notu (varsa). Not ekleme/düzenleme yalnızca ekleyen ve sahip.
-- KK4 Süre −/+; değişiklik programı anında etkiler.
-- KK5 Alt aksiyonlar: "Yol tarifi al", "···" menüsü: Başka güne al / Atla / Plandan çıkar.
-- KK6 **Tam** Place Details (yorumlar, fotoğraflar, tüm saatler) yalnızca bu ekranda çağrılır; maske: `id,displayName,rating,userRatingCount,currentOpeningHours,regularOpeningHours,photos,reviews,googleMapsUri,primaryType`. Diğer ekranlar **hafif** Details kullanır (§7).
+- KK1 Üstte kaydırmalı galeri, **en fazla 10** Google fotoğrafı (tembel yükleme, `3/10`, her fotoğrafta atıf).
+- KK2 Ad, kategori, ★ puan, yorum sayısı, açık/kapalı + kapanış, `Google'da aç`; Google yorumları en fazla 5, canlı.
+- KK3 Kim ekledi + not (ekleyen ve sahip düzenler). Süre −/+.
+- KK4 Aksiyonlar: Yol tarifi; mekan listede değilse `Listeye ekle`; `···` → Başka güne al · Günden çıkar · Listeden sil (onaylı).
+- KK5 Tam Details yalnız bu ekranda (§7).
 
-### 3.10 Davetle katılım (tarayıcı)
+### 3.10 Davetle katılım (tarayıcı) — **ertelendi, M2**
 
-- KK1 Link biçimi `https://{domain}/r/{token}`; token 8 karakter, seyahate özel, sahip iptal edebilir.
-- KK2 Sayfa: seyahat özeti (şehir, tarih, üye sayısı, mekan sayısı), ad alanı, "Plana katıl". Uygulama indirme zorunluluğu yok.
-- KK3 Katılınca Supabase anonim oturum açılır, `join_trip(token, ad)` RPC'si `members` satırını `guest=true` ile yazar; oturum `localStorage`'da kalır, aynı tarayıcıdan tekrar açınca ad sorulmaz. Misafir sonradan Apple/Google ile hesap açarsa aynı cihazda `linkIdentity` ile birleştirilir (`user_id` değişmez); farklı cihazda birleştirme v2.
-- KK4 Tarayıcıda Program (3.7) ve Keşfet (3.4) tam işlevli; Günlere dağıt (3.5) v1'de tarayıcıda salt okunur.
-- KK5 Uygulama yüklüyse link doğrudan uygulamayı açar (universal link / app link).
+v0.2 KK1–KK5 aynen geçerli. Ek: `join_trip` ve `invite_preview` için IP başına hız sınırı (API katmanı) yayından önce zorunlu; web'de harita stili Cloud Console `mapId` ile. Alan adı ürün tarafında.
 
-## 4. Seyahat içi navigasyon
+## 4. Navigasyon
 
-- Seyahat açıkken alt menü: **Keşfet · Günler · Program · Grup** (v1'de Grup = 3.7 KK9'daki panel; sekme ona açılır).
-- Sol üst "‹ Roma" → 3.1.
-- Uygulama seviyesi alt menü v1: **Seyahatler · Yeni · Profil**. Haritam sekmesi v1'de gizli; Profil v1'de yalnızca ad, kullanıcı adı, çıkış, hesap silme.
+- **Tek alt menü, her ekranda:** Seyahatler · Yeni · Profil. (Haritam v2'de eklenince 4 sekme.) Seyahat içi alt menü yoktur.
+- Akış: 3.1 → seyahat → 3.4 Keşfet ⇄ 3.5 Program (Keşfet'ten `Programa geç`, Program'dan geri düğmesi ya da +). Grup = Program'daki avatarlar.
+- v1 Profil: ad, kullanıcı adı, çıkış, hesap silme (devir önizlemeli).
 
-## 5. Hesaplama kuralları
+## 5. Kurallar
 
-### 5.1 Varsayılan sıra ve yürüyüş süreleri
-- Bir günün varsayılan sırası: otelden başlayarak **en yakın komşu** sezgisel yöntemi (nearest neighbour), sonra 2-opt iyileştirme (≤ 20 durak). Otel yoksa başlangıç günün ilk eklenen durağıdır.
-- Yürüyüş süreleri Routes API `computeRouteMatrix`, `travelMode: WALK`. Bir seyahat için tüm durak çiftleri (+ otel) tek matris çağrısında alınır ve seyahat süresince önbelleklenir; yeni durak eklenince yalnızca yeni satır/sütun istenir.
-- İki durak arası yürüyüş 40 dk'yı aşarsa program satırında "40+ dk · toplu taşıma önerilir" yazar; toplu taşıma hesabı v2.
+### 5.1 Sıra, yürüyüş ve rota
+- Tek sıra kaynağı `stops.order_key`; liste, pin numaraları ve çizgiler aynı sırayı okur.
+- Otomatik sıra: günün başlangıcından en yakın komşu + 2-opt (≤ 20 durak); `order_manual=true` iken yeni durak en ucuz ekleme noktasına.
+- Süreler: Routes `computeRouteMatrix` `WALK`, **gün bazlı**; önbellek `walk_cache` (çift bazlı, 30 gün).
+- Çizgi: seçili gün için her bacak `computeRoutes` polyline. Yürüyüş > 40 dk ise aynı bacak `DRIVE`, kesikli çizgi, `🚕 N dk` (çizelgede ayrı satır, Yol tarifi araç modunda). Diğer günler kuş uçuşu. Sıra değişince yalnız değişen bacaklar istenir; gelene kadar kesikli kuş uçuşu.
+- Matris anahtarları `place:<id>` / `stay:<id>`.
 
-### 5.2 Otel bölge önerisi (otel yoksa)
-- Seçili mekanların yürüme-süresi ağırlıklı merkezi; en yakın mahalle/semt adı Geocoding (reverse) ile. v1'de yalnızca metin.
+### 5.2 Otel bölge önerisi
+Otel yoksa seçili mekanların ağırlık merkezi + reverse geocoding; v1'de yalnız metin.
 
 ### 5.3 Tempo
-- `doluluk = (Σ kalınacak süre + Σ yürüyüş) / (gün bitişi − gün başlangıcı)`; yürüyüş otelden ilk durağa ve son duraktan otele dönüşü içerir. Gün bitişi varsayılan **20:00** (`trips.day_end`, düzenlenebilir); son gün için kullanıcı `days.end_time`'ı dönüş saatine göre düşürür, ayrı alan yoktur.
-- `< 0,60` Rahat · `0,60–0,85` Normal · `> 0,85` Yoğun.
-- Öneri metni: Rahat → "N durak daha sığar" (N = kalan süre / 75 dk, aşağı yuvarla); Yoğun → süresi en uzun durağın adıyla "X tek başına H sa; bir durağı başka güne al"; Normal → boş.
+Doluluk hesabı (`(Σ süre + Σ yürüyüş) / (bitiş − başlangıç)`, eşikler 0,60/0,85) motorda kalır ama **Rahat/Normal/Yoğun etiketi ve öneri metni arayüzde gösterilmez** (ürün kararı, 5 Ekim). Arayüzde yalnız süreler. Gün bitişi varsayılan 20:00.
 
-### 5.4 Mini-çubuk
-- Koşul: aktif seyahat ve (a) sıradaki durağa yürüyüş başlamış — önceki durakta "Vardık" sonrası süre dolduğunda ya da kullanıcı "Yol tarifi"ne bastığında — ya da (b) bir durakta 10+ dk uzun kalınmış (`now − arrived_at > minutes + 10 dk`).
-- İçerik: (a) "X'e N dk" + gecikme varsa "· N dk geç"; (b) "X'te N dk uzun kaldınız · gün bitişi HH:MM → HH:MM". Aksiyonlar: Kaydır / Atla / Planı koru.
-- Görünürlük: yalnızca 3.1 ve 3.7'de, alt menünün hemen üstünde. Tasarım kanvası başka ekranda gösteriyorsa bu belge geçerlidir.
+### 5.4 Tamamlama ve canlı satır
+- **Bitti/Tamamlandı:** `stops.completed_at = now`, `completed_by`; sonrakiler `max(planlanan başlangıç, önceki tamamlanma + yürüyüş)` ile yeniden hesaplanır; liste her zaman artan saatli.
+- **Otomatik tamamlanma:** planlanan bitiş + 10 dk geçince `completed_at = planlanan bitiş`, `auto_completed = true`; bildirim yok; uzun bas → Geri al.
+- Konum: durağın 60 m içine girince `arrived_at` sessizce yazılır (istatistik); `Şu an X'te` gösterilir.
+- **Canlı satır** (3.1 ve 3.5 katlı panel): yoldaysa `X'e N dk · sıradaki k/N` (+ gecikme); uzun kalındıysa `X'te N dk uzun kaldınız · bitiş HH:MM → HH:MM` + Kaydır / Atla / Planı koru. Konum yoksa yalnız yol durumu.
+- "Vardık" düğmesi yoktur.
 
 ### 5.5 Eşzamanlı düzenleme
-- Tüm yazma işlemleri satır bazlı; **son yazan kazanır**. Her yazma `changes` tablosuna kayıt düşer (kim, ne, eski → yeni, zaman).
-- Realtime aboneliği: seyahat açıkken `places`, `stops`, `members` tablolarına.
+Satır bazlı, son yazan kazanır; `changes` tetikleyiciyle (otel değişikliği, tamamlama, sahiplik devri dahil). Realtime: `places`, `stops`, `days`, `stays`, `members`, `stop_ratings`.
+
+### 5.6 Açılış saatleri
+- Kontrol `trips.tz`'de, tarihli seyahatte. Tarihsizde yalnız haftalık bilgi.
+- **7/24:** tek `open {day:0, hour:0, minute:0}` ve `close` yok → her zaman açık (önbellekteki eski biçim dahil). Gece yarısını geçen dönemler ertesi güne taşır. Saat bilgisi yoksa kontrol yok.
+
+### 5.7 Harita stili (tüm haritalar)
+Açık tema zorunlu. Bina blokları kapalı, `poi` tümü kapalı, şehir etiketi kapalı, mahalle adları açık gri, yollar ince beyaz; zemin `#f6f6f4`, park `#e6efe3`, su `#e3edf2`. Stil JSON'unda renkler 6 haneli. Pusula ve araç çubuğu kapalı.
+
+### 5.8 Pin ve etiket dili
+- Pin 32 px (seçili 38), ikon 16 px, numara 13 px; beyaz 2–2,5 px kenar.
+- Kategoriler (`primaryType` → kategori · renk · ikon): gezilecek yer `#3b6fe0` kamera · müze/sanat `#8a4fd6` sütunlu bina · ibadet `#6b7280` kubbeli yapı + kule · yemek `#e8590c` çatal-bıçak · kafe `#9a5b2e` fincan · park `#1f8a4c` ağaç · manzara `#0ea5e9` dağ · alışveriş `#c2185b` çanta · diğer → gezilecek yer. Tek tablo `KATEGORI_PIN`.
+- Durumlar: listede siyah ✓ · güne atanmış gün renginde numara · seçili **siyah halka** · seçili gün dışı %40.
+- Etiket: pin altında ad (11 px, beyaz hale); puan satırı zoom ≥ 14 ya da seçiliyken. Etiket kutuları ve pin daireleri ekranda ölçülür; çakışmada öncelik seçili > seçili günün durakları (küçük sıra önce) > listede > diğer günler > atanmamış > öneri > rota hapı; önce puan, sonra ad düşer. Üst üste pinler `+N` kümesi; dokununca yakınlaşır.
+
+### 5.9 Gün paleti
+`1 #2f6fed · 2 #f2783f · 3 #12a37a · 4 #8a4fd6 · 5 #e0457b · 6 #0ea5e9`, 7+ döngü. Gün seçici noktası/çizgisi, numaralı pinler, liste numaraları ve rota aynı palet. Siyah = seçim/eylem rengi.
+
+### 5.10 Gün bazlı otel
+- Her günün `start_stay_id`, `end_stay_id`'si (null = otel yok). Varsayılan: günün başlangıcı = önceki günün bitişi; bitiş = başlangıç. Yeni gün son günün bitiş otelinden başlar.
+- `Bu gün ve sonrası` seçili günden itibaren tüm günlere uygular; taşınma günü bitişi farklıdır ve ertesi gün oradan başlar.
+- Otelsiz gün ilk duraktan başlar, son durakta biter.
+- Tempo, rota, ilk/son bacak ve saatler günün kendi uçlarıyla (`otelPlani` saf fonksiyon).
+
+### 5.11 Süre biçimi
+Her yerde `X sa Y dk` / `Y dk`; ondalık saat yok. Yorum sayısı `1,2K`, `312K`.
 
 ## 6. Kalınacak süre varsayılanları
+v0.2 tablosu aynen. Kullanıcı −/+ ile 15 dk adımlarla değiştirir (min 15 dk, maks 8 sa).
 
-Google birincil kategori → dakika: `museum` 90 · `art_gallery` 60 · `tourist_attraction` 60 · `historical_landmark` 45 · `church`/`place_of_worship` 30 · `park` 45 · `viewpoint`/`scenic_point` 20 · `restaurant` 75 · `cafe` 45 · `bar` 90 · `bakery` 20 · `shopping_mall` 90 · `market` 45 · `zoo`/`aquarium` 120 · `amusement_park` 240 · diğer 45.
+## 7. Google Places ve Routes kısıtları
+- Veritabanında yalnız `place_id` ve enlem/boylam (≤ 30 gün); ad, puan, saat, fotoğraf saklanmaz. `stays.label` kullanıcı metnidir.
+- Hafif Details (seçim, listeler, pin paneli); **tam** Details yalnız 3.8. `editorialSummary` daha pahalı SKU: yalnız pin paneli açılınca, 24 sa önbellek.
+- Fotoğraflar: önizleme/sıradaki kart 1 adet, 3.8'de en fazla 10, tembel; atıf zorunlu.
+- Nearby: Keşfet önerileri ve 3.3 oteller, yalnız "Bu bölgede ara" ile.
+- Routes: matris gün bazlı; polyline yalnız seçili gün; önbellek çift bazlı.
+- Tüm çağrılar Edge Function'dan; anahtarlar sunucuda; istemcide yalnız Maps SDK.
+- Hedef maliyet kullanıcı başına ayda ≤ 0,50 $; M3 sonrası gerçek ölçümle güncellenir.
 
-## 7. Google Places kısıtları (uyulması zorunlu)
-
-- Yorumlar en fazla 5, canlı gösterilir, veritabanına yazılmaz.
-- Veritabanında yalnızca `place_id` (süresiz) ve enlem/boylam (≤ 30 gün, `google_fetched_at` ile) saklanır. Ad, puan, saat ve fotoğraf **saklanmaz**; ekranda canlı çekilir. Hafif Details sonuçları istemci belleğinde ve Edge Function tarafında en fazla 24 saat önbelleklenir. Liste ekranları için toplu hafif Details RPC'si kullanılır.
-- Google atfı ("Google" logosu/ibaresi) Google verisi içeren her kartta görünür.
-- Autocomplete oturum token'ı kullanılır. Seçimde ve listelerde **hafif** Details (`id,location,displayName,primaryType,timeZone,rating,userRatingCount,currentOpeningHours.openNow`); **tam** Details yalnızca 3.8'de.
-- Tüm Places ve Routes çağrıları Supabase Edge Function üzerinden; istemcide yalnızca Maps SDK / Maps JS ve Autocomplete. Anahtarlar sunucuda.
-- Route Matrix eleman başına faturalanır; matris **gün bazlı** (o günün durakları + otel) istenir, yeni durakta yalnızca eksik satır/sütun.
-- Tahmini maliyet (100 kullanıcı, kişi başı 2 seyahat, 15 mekan): Autocomplete ~600 oturum, Details ~3.000, Nearby ~800, Route Matrix ~200 çağrı → hedef kullanıcı başına ayda **≤ 0,50 $**; Sprint 3 sonunda gerçek maliyetle yeniden değerlendirilir.
-
-## 8. Veri modeli (Postgres)
+## 8. Veri modeli (Postgres, güncel)
 
 ```
-users        id, name, username(unique), photo_url, map_visibility(enum: friends|everyone|me), next_trip_window(enum), created_at
-trips        id, owner_id, city_place_id, city_name, country, lat, lng, tz(IANA), start_date, end_date, day_start(time, 09:00), day_end(time, 20:00), hotel_place_id, hotel_lat, hotel_lng, hotel_label(kullanıcı girişi), invite_token, created_at
-members      trip_id, user_id, guest(bool), display_name, joined_at, role(enum: owner|member)
-places       id, trip_id, place_id(google), primary_type, lat, lng, google_fetched_at, default_minutes, added_by, note, created_at   (ad/puan/saat saklanmaz, canlı çekilir)
-days         id, trip_id, index, date, start_time, end_time, order_manual(bool)
-stops        id, trip_id, day_id, place_id(fk places), order_key(kesirli sıra anahtarı, metin), minutes, arrived_at, arrived_by, skipped(bool)
-walk_cache   trip_id, from_key, to_key, seconds, meters, fetched_at   (key = place_id | 'hotel')
-changes      id, trip_id, user_id, entity, entity_id, field, old, new, at   (Postgres tetikleyicisiyle yazılır, istemciden değil)
+profiles     id, name, username(unique), photo_url, map_visibility, next_trip_window, created_at
+trips        id, owner_id, city_place_id, city_label, country_code, lat, lng, tz, start_date, end_date, day_start, day_end(20:00), invite_token, created_at
+             (hotel_* sütunları okunmuyor; bir sürüm sonra kaldırılacak)
+members      trip_id, user_id, guest, display_name, joined_at, role(owner|member)
+places       id, trip_id, place_id, primary_type, lat, lng, google_fetched_at, default_minutes, added_by, note, created_at
+stays        id, trip_id, place_id, lat, lng, label(≤80), google_fetched_at, created_by, created_at
+days         id, trip_id, index, date, start_time, end_time, order_manual, start_stay_id→stays, end_stay_id→stays
+stops        id, trip_id, day_id, place_ref→places(unique), order_key, minutes, arrived_at, arrived_by,
+             completed_at, completed_by, auto_completed, skipped
+stop_ratings id, trip_id, place_ref, user_id, stars(1–5), note, created_at   (üye başına mekan başına tek; tags sütunu kullanılmıyor)
+walk_cache   trip_id, from_key, to_key, walk_seconds, walk_meters, drive_seconds, polyline, mode, fetched_at
+changes      id, trip_id, user_id, entity, entity_id, field, old, new, at   (tetikleyici)
 ```
+RLS her tabloda `is_member(trip_id)`; `stays`'in aynı seyahate ait olduğu tetikleyiciyle denetlenir.
 
-Kural: RLS her tabloda `is_member(trip_id)`; misafir de gerçek `auth.uid()` taşır. `places` bir seyahatin havuzu, `stops` günlere atanmış hali. Güne atanmamış mekan = `places` var, `stops` yok.
-
-## 9. Bildirimler (v1 minimum)
-
-- Üye katıldı, mekan eklendi (günde en fazla 1 özet), seyahat günü sabahı 08:00 "Bugünün programı hazır" (yalnızca uygulama).
+## 9. Bildirimler (v1)
+Üye katıldı · mekan eklendi (günlük özet) · seyahat günü 08:00 "Bugünün programı hazır". Tamamlama ve otomatik tamamlama bildirim üretmez.
 
 ## 10. Analitik olayları
+`signup`, `trip_created`, `hotel_set{scope}`, `hotel_skipped`, `place_added{source: search|link|suggest|map_tap}`, `stop_assigned{source: tap|move}`, `stop_reordered{source: drag|short_route}`, `program_viewed{sheet}`, `stop_completed{auto}`, `stop_rated{stars}`, `shift_applied{kaydir|atla|koru}`, `invite_sent`, `invite_joined{guest}`.
 
-`signup`, `trip_created`, `hotel_set`, `hotel_skipped`, `place_added{source: search|link|suggest}`, `stop_assigned`, `program_viewed`, `arrived`, `shift_applied{kaydir|atla|koru}`, `invite_sent`, `invite_joined{guest}`.
-
-## 11. Erişilebilirlik ve platform
-
-- iOS 16+, Android 10+. Dinamik yazı boyutu desteklenir; dokunma hedefleri ≥ 44 pt.
-- Tarayıcı istemci: son 2 sürüm Safari / Chrome, mobil öncelikli.
-- Dil v1: Türkçe. Metinler `tr.json` dosyasında, ileride İngilizce eklenecek.
+## 11. Platform ve kalite
+- iOS 16+, Android 10+; dokunma hedefleri ≥ 44 pt; dinamik yazı.
+- EAS development build (Google harita sağlayıcısı); native modül eklenince tam derleme.
+- Çökme raporlama **Sentry** (PII yok, performans izleme kapalı; DSN ürün tarafında). Kaynak haritası yüklemesi M4.
+- Dil v1: Türkçe (`tr.json`).
 
 ## 12. Teslimat ve kabul
+1. Her ekran KK listesiyle kabul edilir; görsel değişiklikler ürünün cihaz turuyla kabul edilir (PR'da cihaz görüntüsü yoksa koşullu onay).
+2. Durum (8 Ekim): 0.x, 3.1–3.5, 3.8 kodda; #57/#58 birleşme aşamasında. Kalan v1: 3.10 (M2), §9, mağaza hazırlığı (M4). Takvim `04-proje-plani.md`.
+3. Kanvas referanstır; akış farkları kabul edilmez, piksel farkları ürün onayıyla.
 
-1. Geliştirici teknik tasarım notu yazar (1 sayfa: stack, klasör yapısı, API çağrı planı) → ürün onayı.
-2. Sprint 1 (≈ 14 iş günü): 0.1, 0.2, 0.3, 0.5, 3.1, 3.2, 3.3, v1 Profil (ad, kullanıcı adı, çıkış, hesap silme) · Sprint 2: 3.4, 3.8 · Sprint 3: 3.5, 3.7 · Sprint 4: 3.10, §5.4, §9. Analitik olayları ilgili ekranın sprintinde.
-   Bir sprintte başka sprinte bağımlı KK'ler (ör. 3.1 KK1/KK4, 3.3 KK5) iskelet olarak gelir, bağlı oldukları sprintte kabul edilir.
-3. Her ekran bu belgedeki KK listesiyle kabul edilir; eksik KK varsa ekran "tamamlanmadı" sayılır.
-4. Tasarım kanvasındaki ekranlar referanstır; piksel farkları ürün onayıyla kabul edilir, akış farkları edilmez.
+## 13. Kapanan sorular (v0.3)
+1. Giriş v1 testte Google; Apple mağaza öncesi.
+2. "Vardık" kalktı → Bitti + otomatik tamamlanma (#43).
+3. Günler + Program tek ekran, Harita|Çizelge anahtarı yok (#34, #42).
+4. Seyahat içi alt menü yok, tek alt menü (#45).
+5. Tempo etiketleri arayüzde yok (5 Ekim).
+6. Tamamlanan durak puanlama v1'de; etiketler ve ipucu hapları yok (#45, #47).
+7. Boştakine dokun = seçili güne ekle, sıralama otomatikse en uygun yere (#53, PR #54).
+8. Otel her an ve gün bazında, taşınma günü (#56).
+9. Gün paleti ve tarihli gün seçici (#55).
 
-## 13. Kapanan sorular (v0.2)
-
-1. Giriş: v1'de Apple + Google; telefon OTP v2.
-2. Misafir birleştirme: aynı cihazda `linkIdentity` ile otomatik; farklı cihaz v2.
-3. Gün bitişi varsayılanı 20:00; seyahat ayarından değiştirilir.
+## 14. Geçmiş
+- v0.1 · 29 Eyl — ilk sürüm.
+- v0.2 · 29 Eyl — teknik tasarım incelemesi T1–T11.
+- v0.3 · 8 Eki — cihaz testleri ve mockup turları (#17–#56).

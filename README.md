@@ -9,7 +9,7 @@ Ortak seyahat planı: mekanlar haritada seçilir, günlere haritada dağıtılı
 | Belge | İçerik |
 |---|---|
 | [docs/00-kapsam.md](docs/00-kapsam.md) | Vizyon, ürün ilkeleri, bilgi mimarisi, v1/v2 kesimi, başarı ölçütleri, riskler |
-| [docs/01-prd-v1.md](docs/01-prd-v1.md) | V1 gereksinimleri: ekran ekran kabul kriterleri, hesaplama kuralları, Google Places kısıtları, veri modeli, sprint planı |
+| [docs/01-prd-v1.md](docs/01-prd-v1.md) | V1 gereksinimleri (v0.3, 8 Ekim): ekran ekran kabul kriterleri, hesaplama kuralları, Google Places kısıtları, veri modeli, sprint planı |
 | [docs/02-teknik-tasarim.md](docs/02-teknik-tasarim.md) | Teknik tasarım notu (geliştirici) |
 | [docs/03-inceleme-teknik-tasarim.md](docs/03-inceleme-teknik-tasarim.md) | Teknik tasarım notunun ürün incelemesi ve kararlar |
 | [docs/04-proje-plani.md](docs/04-proje-plani.md) | Tarihli proje planı: kilometre taşları M1–M7, haftalık plan, Ece'nin işleri |
@@ -25,7 +25,7 @@ Tasarım (21 ekran, tıklanabilir): https://claude.ai/artifact/46jh8ggGczM7VDTVH
 ## Durum
 
 - [x] Kapsam v0.1
-- [x] PRD v1 v0.2
+- [x] PRD v1 v0.3
 - [x] Teknik tasarım notu v0.2 (onaylandı)
 - [ ] Prototip testi (5 kişi)
 - [x] Sprint 1–3 (çekirdek) · M1 ✅ 4 Eki
