@@ -5,8 +5,7 @@ import { Text, View, useWindowDimensions } from 'react-native';
 import { t } from '@/i18n';
 import { renk } from '@/theme';
 
-import { bolgeHesapla, detayGoster, etiketBolgesi, pinCapasi, pinSecimi, zoomDelta } from './geo';
-import { pinZ } from './Harita.native';
+import { bolgeHesapla, detayGoster, etiketBolgesi, pinCapasi, pinSecimi, pinZ, zoomDelta } from './geo';
 import { PinIcerigi } from './PinIcerigi';
 import { bacakEtiketPinleri } from './rota';
 import type { HaritaBolgesi, HaritaCizgisi, HaritaOdagi, HaritaProps, HaritaSigdirma } from './tipler';

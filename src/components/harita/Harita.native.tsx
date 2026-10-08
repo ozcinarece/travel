@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { PixelRatio, StyleSheet, View, useWindowDimensions } from 'react-native';
 import MapView, { Circle, Marker, Polyline, PROVIDER_GOOGLE } from 'react-native-maps';
 
-import { bolgeHesapla, detayGoster, etiketBolgesi, haritaDolgusu, isaretciImzasi, izlemeGerekli, pinCapasi, pinCapi, pinSecimi, zoomDelta } from './geo';
+import { bolgeHesapla, detayGoster, etiketBolgesi, haritaDolgusu, isaretciImzasi, izlemeGerekli, pinCapasi, pinCapi, pinSecimi, pinZ, zoomDelta } from './geo';
 import { ACIK_HARITA_STILI } from './haritaStili';
 import { PinIcerigi, pinPngAnahtari } from './PinIcerigi';
 import { PIN_IKONLARI } from './pinIkonlari';
@@ -26,23 +26,6 @@ const OK_PNG = PIN_IKONLARI['ok-ffffff'];
 
 /** #59 §B KK3 geliştirme sayacı: işaretçi kurulumu / bitmap yakalaması (yalnız __DEV__'de yazdırılır). */
 export const haritaSayaclari = { kurulum: 0, yakalama: 0 };
-
-/**
- * Pinlerin üst üste binme sırası (#59 §A3): konum > seçili > otel > seçili günün durakları (sıra no küçük üstte, #61 §5:
- * üst üste binen duraklarda görünen numara ve altındaki ad aynı pine ait olsun) > listede / diğer gün durağı > diğer > hap.
- */
-export function pinZ(p: HaritaPini): number {
-  if (p.tur === 'konum') return 50;
-  if (p.secili) return 40;
-  if (p.tur === 'otel') return 30;
-  if (p.tur === 'durak' && (p.opaklik ?? 1) >= 1) {
-    const sira = Number(p.etiket);
-    return 29 - (Number.isFinite(sira) && sira > 0 ? Math.min(sira, 19) : 19);
-  }
-  if (p.tur === 'durak' || p.tur === 'listede') return 9;
-  if (p.tur === 'etiket') return 0;
-  return 1;
-}
 
 export function Harita({
   merkez,
