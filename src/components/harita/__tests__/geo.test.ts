@@ -1,6 +1,6 @@
 import { describe, expect, it } from '@jest/globals';
 
-import { kumeHesapla, etiketOnceligi, sigdir, bolgedenUzaklasti, bolgeHesapla, deltaZoom, detayGoster, gizliEtiketler, haritaDolgusu, kisaAd, mesafeM, pinCapasi, SIFIR_DOLGU, zoomDelta } from '../geo';
+import { etiketBolgesi, etiketOnceligi, isaretciImzasi, sigdir, bolgedenUzaklasti, bolgeHesapla, deltaZoom, detayGoster, gizliEtiketler, haritaDolgusu, kisaAd, mesafeM, pinCapasi, SIFIR_DOLGU, zoomDelta } from '../geo';
 import type { HaritaPini } from '../tipler';
 
 const roma = { lat: 41.9028, lng: 12.4964 };
@@ -60,10 +60,10 @@ describe('geo', () => {
   it('pinCapasi daire merkezini çapa yapar; detay satırıyla kutu uzar', () => {
     const c = pinCapasi({ id: 'x', konum: roma, renk: '#000', tur: 'durak' });
     expect(c.x).toBe(0.5);
-    // #55: 32 px daire (+2 boşluk +16 etiket); seçili 38 px (halka kenarda).
-    expect(c.y).toBeCloseTo(16 / 50);
-    expect(pinCapasi({ id: 'x', konum: roma, renk: '#000', tur: 'durak' }, true).y).toBeCloseTo(16 / 64);
-    expect(pinCapasi({ id: 'x', konum: roma, renk: '#000', tur: 'durak', secili: true }).y).toBeCloseTo(19 / 56);
+    // #59: 28 px daire (+2 boşluk +16 etiket); seçili 34 px (halka kenarda).
+    expect(c.y).toBeCloseTo(14 / 46);
+    expect(pinCapasi({ id: 'x', konum: roma, renk: '#000', tur: 'durak' }, true).y).toBeCloseTo(14 / 60);
+    expect(pinCapasi({ id: 'x', konum: roma, renk: '#000', tur: 'durak', secili: true }).y).toBeCloseTo(17 / 52);
   });
 
   it('deltaZoom zoomDelta\'nın tersidir; bolgeHesapla zoom üretir', () => {
@@ -150,20 +150,25 @@ describe('geo', () => {
     expect(new Set(sirali).size).toBe(sirali.length);
   });
 
-  it('kumeHesapla: üst üste binen pinler tek pin + "+N"; uzaktakiler ayrı; yakınlaşınca dağılır', () => {
-    const bolge = { merkez: roma, yaricapM: 1000, latDelta: 0.02, lngDelta: 0.01, zoom: 14 };
-    const ekran = { genislik: 400, yukseklik: 800 };
-    const pin = (id: string, dLng: number, o: Partial<HaritaPini> = {}): HaritaPini => ({ id, konum: { lat: roma.lat, lng: roma.lng + dLng }, renk: '#000', tur: 'oneri', ...o });
-    // 4 px arayla üç pin: seçili günün durağı baş olur, diğer ikisi gizlenir.
-    const k = kumeHesapla([pin('a', 0), pin('b', 0.0001, { tur: 'durak', etiket: '1' }), pin('c', 0.0002), pin('uzak', 0.005)], bolge, ekran);
-    expect([...k.gizli].sort()).toEqual(['a', 'c']);
-    expect(k.rozet.get('b')).toBe(2);
-    expect(k.uyeler.get('b')).toHaveLength(3);
-    expect(k.rozet.has('uzak')).toBe(false);
-    // 100 kat yakınlaşınca (40 px aralık) küme yok.
-    expect(kumeHesapla([pin('a', 0), pin('b', 0.0001)], { ...bolge, latDelta: 0.0002, lngDelta: 0.0001, zoom: 20 }, ekran).gizli.size).toBe(0);
-    // Rota hapları ve konum kümelenmez.
-    expect(kumeHesapla([pin('a', 0), pin('h', 0, { tur: 'etiket', etiket: '4 dk' }), pin('k', 0, { tur: 'konum' })], bolge, ekran).gizli.size).toBe(0);
+  it('#59 §B: etiket bölgesi yalnız zoom adımında yenilenir; saf kaydırma aynı nesneyi döndürür', () => {
+    const b1 = bolgeHesapla(roma, 0.02, 0.01);
+    const kaydirilmis = bolgeHesapla({ lat: roma.lat + 0.01, lng: roma.lng + 0.02 }, 0.02, 0.01);
+    expect(etiketBolgesi(b1, kaydirilmis)).toBe(b1);
+    // Küçük zoom oynaması (< 0,125) da aynı adımda kalır; iki kat yakınlaşma yeni bölge.
+    expect(etiketBolgesi(b1, bolgeHesapla(roma, 0.0195, 0.00975))).toBe(b1);
+    const yakin = bolgeHesapla(roma, 0.01, 0.005);
+    expect(etiketBolgesi(b1, yakin)).toBe(yakin);
+    expect(etiketBolgesi(null, b1)).toBe(b1);
+  });
+
+  it('#59 §B: işaretçi imzası konum/opaklıktan bağımsız, görünümle değişir', () => {
+    const p: HaritaPini = { id: 'a', konum: roma, renk: '#000', tur: 'oneri', ad: 'Pantheon', ikon: 'kamera', kategoriRenk: '#3b6fe0', puan: 4.7 };
+    const imza = isaretciImzasi(p, false, false);
+    expect(isaretciImzasi({ ...p, konum: { lat: 1, lng: 2 }, opaklik: 0.4 }, false, false)).toBe(imza);
+    expect(isaretciImzasi(p, true, false)).not.toBe(imza);
+    expect(isaretciImzasi(p, false, true)).not.toBe(imza);
+    expect(isaretciImzasi({ ...p, secili: true }, false, false)).not.toBe(imza);
+    expect(isaretciImzasi({ ...p, tur: 'listede' }, false, false)).not.toBe(imza);
   });
 
   it('gizliEtiketler: başlık alanına düşen rota hapı gizlenir (#55 §A6)', () => {

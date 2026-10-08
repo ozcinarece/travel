@@ -6,7 +6,7 @@ import { kategoriPini } from '@/lib/pinIkonu';
 import { polylineCoz } from '@/lib/polyline';
 import type { Durak, Gun, Mekan } from '@/lib/tipler';
 import { bacakModu, type BacakKaynagi, type TempoSonucu } from '@/schedule/tempo';
-import { gunRengi, renk } from '@/theme';
+import { gunRengi, renk, rotaRengi } from '@/theme';
 
 import { bacakListesi, type MatrisNoktasi, type RotaHaritasi } from './sorgular';
 
@@ -107,16 +107,18 @@ export function programCizgileri(secenek: {
   return gunler.flatMap((g): HaritaCizgisi[] => {
     const tp = tempolar.get(g.id);
     if (!tp || tp.sira.length === 0) return [];
-    const rengi = gunRengi(g.index);
+    // #59 §C: çizgi koyu rota tonunda (pinler gün renginde).
+    const rengi = rotaRengi(g.index);
     if (g.id !== seciliGunId) {
       const noktalar = tp.sira.map((mekanId) => mekanIle.get(mekanId)).filter((m): m is Mekan => !!m).map((m) => ({ lat: m.lat, lng: m.lng }));
       const u = gunUclari.get(g.id);
       const uc = (n: GunUcNoktalari['baslangic'] | undefined) => (n ? [{ lat: n.lat, lng: n.lng }] : []);
       const yol = [...uc(u?.baslangic), ...noktalar, ...uc(u?.bitis)];
-      // #55 §D11: diğer günlerin rotası %35.
-      return yol.length >= 2 ? [{ id: `rota:${g.id}`, noktalar: yol, renk: rengi, opaklik: 0.35 }] : [];
+      // #59 §C: diğer günlerin rotası ince, %32.
+      return yol.length >= 2 ? [{ id: `rota:${g.id}`, noktalar: yol, renk: rengi, opaklik: 0.32, ince: true }] : [];
     }
-    // #33: seçili gün bacak bacak gerçek yol (araç bacağı kesikli, taksi ikonu); gelene kadar kuş uçuşu kesikli.
+    // #33: seçili gün bacak bacak gerçek yol (araç bacağı noktalı + "taksi 14 dk" hapı); gelene kadar kuş uçuşu kesikli.
+    // #59 §C: yürüyüş süre hapları haritada yok (panelde var) — `etiket` yalnız taksi bacağında.
     // #51: kimlik bacağın uçlarından (from>to) ve kaynağından türer — sıra değişince eski çizgi/etiket yeniden
     // kullanılmaz (Android Polyline/Marker eski koordinatta kalıyordu); aynı çift iki kez geçerse sıra no ayırır.
     const gorulen = new Map<string, number>();
@@ -138,7 +140,7 @@ export function programCizgileri(secenek: {
           renk: rengi,
           opaklik,
           kesik: !!taksi,
-          etiket: i < gecilenBacak ? undefined : `${dk} dk`,
+          etiket: i < gecilenBacak || !taksi ? undefined : `${dk} dk`,
           etiketIkon: taksi ? 'taksi' : 'yurume',
         };
       }
@@ -150,7 +152,7 @@ export function programCizgileri(secenek: {
         opaklik,
         // Gerçek yol gelene kadar kuş uçuşu: her zaman kesikli.
         kesik: true,
-        etiket: i < gecilenBacak ? undefined : `~${Math.max(1, Math.round(m.sn / 60))} dk`,
+        etiket: i < gecilenBacak || m.mod !== 'taksi' ? undefined : `~${Math.max(1, Math.round(m.sn / 60))} dk`,
         etiketIkon: m.mod === 'taksi' ? 'taksi' : 'yurume',
       };
     });

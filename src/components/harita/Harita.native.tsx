@@ -2,16 +2,36 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { StyleSheet, View, useWindowDimensions } from 'react-native';
 import MapView, { Circle, Marker, Polyline, PROVIDER_GOOGLE } from 'react-native-maps';
 
-import { bolgeHesapla, detayGoster, gizliEtiketler, haritaDolgusu, kumeHesapla, pinCapasi, pinCapi, zoomDelta } from './geo';
+import { bolgeHesapla, detayGoster, etiketBolgesi, gizliEtiketler, haritaDolgusu, isaretciImzasi, pinCapasi, pinCapi, zoomDelta } from './geo';
 import { ACIK_HARITA_STILI } from './haritaStili';
 import { PinIcerigi } from './PinIcerigi';
-import { bacakEtiketPinleri } from './rota';
-import type { HaritaBolgesi, HaritaPini, HaritaProps, Konum } from './tipler';
+import { PIN_IKONLARI } from './pinIkonlari';
+import { bacakEtiketPinleri, yonOklari } from './rota';
+import type { HaritaBolgesi, HaritaCizgisi, HaritaPini, HaritaProps, Konum } from './tipler';
 
 /** "#rrggbb" + opaklık → "#rrggbbaa". */
 function saydam(hex: string, opaklik: number) {
   const a = Math.round(Math.max(0, Math.min(1, opaklik)) * 255).toString(16).padStart(2, '0');
   return hex.length === 7 ? `${hex}${a}` : hex;
+}
+
+/** #59 §C (RouteSpec5): seçili gün üç katman — gölge 11 dp %12 · beyaz kenar 9 dp · renk 5,5 dp; diğer günler 3 dp. */
+const ROTA = { golge: 11, kenar: 9, cizgi: 5.5, ince: 3, golgeRenk: '#0f0f0f', golgeOpaklik: 0.12 } as const;
+/** Taksi bacağı: yuvarlak uçlu 1 px çizgi + 10 px boşluk = nokta dizisi. */
+const NOKTALI = [1, 10];
+const OK_PNG = PIN_IKONLARI['ok-ffffff'];
+
+/** #59 §B KK3 geliştirme sayacı: işaretçi kurulumu / bitmap yakalaması (yalnız __DEV__'de yazdırılır). */
+export const haritaSayaclari = { kurulum: 0, yakalama: 0 };
+
+/** Pinlerin üst üste binme sırası (#59 §A3): konum > seçili > otel > listede / güne atanmış > diğer > hap. */
+function pinZ(p: HaritaPini): number {
+  if (p.tur === 'konum') return 5;
+  if (p.secili) return 4;
+  if (p.tur === 'otel') return 3;
+  if (p.tur === 'durak' || p.tur === 'listede') return 2;
+  if (p.tur === 'etiket') return 0;
+  return 1;
 }
 
 export function Harita({
@@ -33,6 +53,8 @@ export function Harita({
   const ref = useRef<MapView>(null);
   const ekran = useWindowDimensions();
   const [bolge, setBolge] = useState<HaritaBolgesi>(() => bolgeHesapla(merkez, zoomDelta(zoom), zoomDelta(zoom)));
+  // #59 §B: etiket / ok hesabının bölgesi yalnız zoom adımı değişince yenilenir; saf kaydırma işaretçilere dokunmaz.
+  const [etiketBolge, setEtiketBolge] = useState<HaritaBolgesi>(bolge);
   // #49: Android'de GoogleMap hazır olmadan değişen mapPadding native çöküşe yol açar (react-native-maps 1.27
   // applyBaseMapPadding → null map.setPadding). Dolgu yalnız onMapReady'den sonra gönderilir.
   const [hazir, setHazir] = useState(false);
@@ -62,22 +84,15 @@ export function Harita({
     sigdirKamera(sigdir.noktalar, { top: sigdir.ust, right: 48, bottom: sigdir.alt, left: 48 });
   }, [sigdir, hazir]);
 
-  // #33: bacak etiketleri ("12 dk") pin gibi çizilir; çakışma kuralına en düşük öncelikle girer.
+  // #33: bacak etiketleri (#59: yalnız taksi "12 dk") pin gibi çizilir; çakışma kuralına en düşük öncelikle girer.
   const tumPinler = useMemo(() => [...pinler, ...bacakEtiketPinleri(cizgiler)], [pinler, cizgiler]);
   const olcu = useMemo(() => ({ genislik: ekran.width, yukseklik: ekran.height }), [ekran.width, ekran.height]);
-  // #55 §A2: üst üste binen pinler kümelenir ("+N"); kalanların etiketleri çakışma kuralıyla (daireler de engel).
-  const kume = useMemo(() => kumeHesapla(tumPinler, bolge, olcu), [tumPinler, bolge, olcu]);
-  const gorunen = useMemo(
-    () => tumPinler.filter((p) => !kume.gizli.has(p.id)).map((p) => (kume.rozet.has(p.id) ? { ...p, kumeSayisi: kume.rozet.get(p.id) } : p)),
-    [tumPinler, kume],
-  );
-  const gizli = useMemo(() => gizliEtiketler(gorunen, bolge, olcu, ustBosluk), [gorunen, bolge, olcu, ustBosluk]);
-  const pinBas = (id: string) => {
-    const uyeler = kume.uyeler.get(id);
-    // Küme başına dokununca üyelerine yakınlaşılır; tek pinde normal seçim.
-    if (uyeler) sigdirKamera(uyeler, { top: 160 + ustBosluk, right: 80, bottom: 160, left: 80 });
-    else onPinBas?.(id);
-  };
+  // #59 §A: kümeleme yok; yakın pinler üst üste biner (beyaz kenar ayırır, z-sırası pinZ).
+  const gizli = useMemo(() => gizliEtiketler(tumPinler, etiketBolge, olcu, ustBosluk), [tumPinler, etiketBolge, olcu, ustBosluk]);
+  // Gizlenen hap hiç çizilmez (opaklıkla saklamak bitmap yakalaması isterdi).
+  const gorunen = useMemo(() => tumPinler.filter((p) => !(p.tur === 'etiket' && gizli.etiket.has(p.id))), [tumPinler, gizli]);
+  // #59 §C: yön okları — zoom adımına göre; en fazla 40.
+  const oklar = useMemo(() => yonOklari(cizgiler, pinler, etiketBolge, olcu), [cizgiler, pinler, etiketBolge, olcu]);
   // #55 §C10: Marker'da uzun basma yok — haritaya uzun basılan noktaya ~28 px içindeki en yakın pin.
   const uzunBas = (k: { latitude: number; longitude: number }) => {
     if (!onPinUzunBas || bolge.latDelta <= 0) return;
@@ -124,18 +139,12 @@ export function Harita({
       onRegionChangeComplete={(b) => {
         const yeni = bolgeHesapla({ lat: b.latitude, lng: b.longitude }, b.latitudeDelta, b.longitudeDelta);
         setBolge(yeni);
+        setEtiketBolge((onceki) => etiketBolgesi(onceki, yeni));
         onBolgeDegisti?.(yeni);
+        if (__DEV__) console.log(`[harita] kurulum ${haritaSayaclari.kurulum} · yakalama ${haritaSayaclari.yakalama} · zoom ${yeni.zoom.toFixed(2)}`);
       }}>
       {cizgiler.map((c) => (
-        <Polyline
-          key={c.id}
-          coordinates={c.noktalar.map((n) => ({ latitude: n.lat, longitude: n.lng }))}
-          strokeColor={saydam(c.renk, c.opaklik ?? 1)}
-          strokeWidth={c.kesik ? 3 : 2.5}
-          // #33: araç bacağı kesikli.
-          lineDashPattern={c.kesik ? [10, 8] : undefined}
-          zIndex={0}
-        />
+        <RotaCizgisi key={c.id} cizgi={c} />
       ))}
       {daireler.map((d) => (
         <Circle
@@ -147,29 +156,51 @@ export function Harita({
           lineDashPattern={[6, 6]}
         />
       ))}
+      {oklar.map((o) => (
+        // #59 §C: ok görseli doğuya bakar; rotation saat yönünde, kuzeyden.
+        <Marker
+          key={o.id}
+          coordinate={{ latitude: o.konum.lat, longitude: o.konum.lng }}
+          image={OK_PNG}
+          flat
+          rotation={(o.aci - 90 + 360) % 360}
+          anchor={{ x: 0.5, y: 0.5 }}
+          tappable={false}
+          tracksViewChanges={false}
+          zIndex={0}
+        />
+      ))}
       {gorunen.map((p) => {
         // #40: çakışmada önce puan satırı düşer (gizli.detay), sonra ad (gizli.etiket).
-        const detay = detayGoster(p, bolge.zoom) && !gizli.detay.has(p.id);
-        return (
-          <OzelIsaretci
-            // Görünüm değişince (renk/etiket/seçim/ad görünürlüğü/detay) işaretçi yeniden kurulur ve anlık görüntüsü yeniden alınır.
-            key={`${p.id}:${p.tur ?? ''}:${p.renk}:${p.etiket ?? ''}:${p.ikon ?? ''}:${p.etiketIkon ?? ''}:${p.secili ? 1 : 0}:${p.tamam ? 't' : ''}:${p.ad && !gizli.etiket.has(p.id) ? 'a' : ''}:${detay ? 'd' : ''}:${p.tur === 'etiket' && gizli.etiket.has(p.id) ? 'g' : ''}:${p.kumeSayisi ?? ''}`}
-            pin={p}
-            etiketGizli={gizli.etiket.has(p.id)}
-            detay={detay}
-            onPinBas={pinBas}
-            onPinSuruklendi={onPinSuruklendi}
-          />
-        );
+        const detay = detayGoster(p, etiketBolge.zoom) && !gizli.detay.has(p.id);
+        return <OzelIsaretci key={p.id} pin={p} etiketGizli={gizli.etiket.has(p.id)} detay={detay} onPinBas={onPinBas} onPinSuruklendi={onPinSuruklendi} />;
       })}
     </MapView>
   );
 }
 
+/** #59 §C: üç katmanlı rota (gölge · beyaz kenar · renk); taksi noktalı; diğer günler tek ince çizgi. */
+function RotaCizgisi({ cizgi: c }: { cizgi: HaritaCizgisi }) {
+  const noktalar = useMemo(() => c.noktalar.map((n) => ({ latitude: n.lat, longitude: n.lng })), [c.noktalar]);
+  const opaklik = c.opaklik ?? 1;
+  const ortak = { coordinates: noktalar, lineCap: 'round' as const, lineJoin: 'round' as const, lineDashPattern: c.kesik ? NOKTALI : undefined };
+  if (c.ince) return <Polyline {...ortak} strokeColor={saydam(c.renk, opaklik)} strokeWidth={ROTA.ince} zIndex={0} />;
+  return (
+    <>
+      <Polyline {...ortak} strokeColor={saydam(ROTA.golgeRenk, ROTA.golgeOpaklik * opaklik)} strokeWidth={ROTA.golge} zIndex={1} />
+      <Polyline {...ortak} strokeColor={saydam('#ffffff', opaklik)} strokeWidth={ROTA.kenar} zIndex={2} />
+      <Polyline {...ortak} strokeColor={saydam(c.renk, opaklik)} strokeWidth={ROTA.cizgi} zIndex={3} />
+    </>
+  );
+}
+
+/** Görünüm değişince bitmap bu kadar ms sonra alınır (yerleşim + çizim payı). */
+const YAKALAMA_GECIKMESI_MS = 350;
+
 /**
- * #24: Android, özel işaretçi görünümünü bitmap'e çevirir. `tracksViewChanges` baştan kapalıysa metin yerleşmeden
- * boş bir dikdörtgen yakalanır. Çözüm: içerik yerleşene kadar izleme açık, kısa bir gecikmeyle kapatılır
- * (sürekli açık kalması harita kaydırmada performansı düşürür).
+ * #24: Android, özel işaretçi görünümünü bitmap'e çevirir; `tracksViewChanges` kapanırken o anki görünüm yakalanır.
+ * #59 §B: anahtar yalnız pin kimliği (kaydırma / yakınlaştırma işaretçiyi yeniden kurmaz). İzleme, görünüm imzası
+ * (geo.isaretciImzasi) değişince açılır; içerik yerleşip PNG ikon yüklenince kısa gecikmeyle kapanır → bitmap alınır.
  */
 function OzelIsaretci({
   pin: p,
@@ -178,17 +209,26 @@ function OzelIsaretci({
   onPinBas,
   onPinSuruklendi,
 }: { pin: HaritaPini; etiketGizli: boolean; detay: boolean } & Pick<HaritaProps, 'onPinBas' | 'onPinSuruklendi'>) {
-  const [izle, setIzle] = useState(!!p.tur);
-  const zamanlayici = useRef<ReturnType<typeof setTimeout> | null>(null);
-  useEffect(
-    () => () => {
-      if (zamanlayici.current) clearTimeout(zamanlayici.current);
-    },
-    [],
-  );
-  const yerlesti = () => {
-    if (zamanlayici.current) clearTimeout(zamanlayici.current);
-    zamanlayici.current = setTimeout(() => setIzle(false), 600);
+  const imza = isaretciImzasi(p, etiketGizli, detay);
+  // Bitmap'i alınmış (yakalanmış) görünümün imzası; ikonun yüklendiği imza.
+  const [yakalanan, setYakalanan] = useState<string | null>(null);
+  const [ikonYuklenen, setIkonYuklenen] = useState<string | null>(null);
+  const ikonVar = !!p.tur && p.tur !== 'konum' && p.tur !== 'aday' && p.tur !== 'durak' && (p.tur !== 'etiket' || !!p.etiketIkon);
+  const izle = !!p.tur && (yakalanan !== imza || (ikonVar && ikonYuklenen !== imza));
+  useEffect(() => {
+    haritaSayaclari.kurulum += 1;
+  }, []);
+  useEffect(() => {
+    if (!p.tur) return;
+    const z = setTimeout(() => {
+      setYakalanan(imza);
+      haritaSayaclari.yakalama += 1;
+    }, YAKALAMA_GECIKMESI_MS);
+    return () => clearTimeout(z);
+  }, [imza, p.tur]);
+  const ikonYuklendi = () => {
+    // onLoad çözümlemede gelir; bir kare sonra çizilmiş olur.
+    setTimeout(() => setIkonYuklenen(imza), 80);
   };
   const capa = p.tur === 'aday' ? { x: 0.1, y: 0.5 } : p.tur === 'otel' || p.tur === 'etiket' || p.tur === 'konum' || !p.tur ? { x: 0.5, y: 0.5 } : pinCapasi(p, detay);
   // Bacak etiketi ve kullanıcı konumu dokunulamaz.
@@ -203,7 +243,7 @@ function OzelIsaretci({
       tappable={!bacak}
       // #42 KK5: seçili güne ait olmayan pinler soluk.
       opacity={p.opaklik ?? 1}
-      zIndex={p.tur === 'konum' ? 4 : p.secili ? 3 : p.tur === 'otel' ? 2 : bacak ? 0 : 1}
+      zIndex={pinZ(p)}
       draggable={p.surukle}
       onPress={() => {
         if (!bacak) onPinBas?.(p.id);
@@ -215,8 +255,8 @@ function OzelIsaretci({
         })
       }>
       {p.tur ? (
-        <View collapsable={false} onLayout={yerlesti}>
-          <PinIcerigi pin={p} etiketGizli={etiketGizli} detay={detay} />
+        <View collapsable={false}>
+          <PinIcerigi pin={p} etiketGizli={etiketGizli} detay={detay} onYuklendi={ikonYuklendi} />
         </View>
       ) : null}
     </Marker>

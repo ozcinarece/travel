@@ -1,20 +1,41 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { useEffect } from 'react';
+import { Image, StyleSheet, Text, View } from 'react-native';
 
-import { Ikon } from '@/components/ui/Ikon';
+import { Ikon, type IkonAdi } from '@/components/ui/Ikon';
 import { yorumKisa } from '@/lib/pinIkonu';
 import { puanMetni } from '@/lib/puan';
 import { renk, yazi } from '@/theme';
 
-import { etiketYuksekligi, kisaAd, pinCapi } from './geo';
+import { etiketYuksekligi, kisaAd, KONUM_HALKA, OTEL_KARE, pinCapi } from './geo';
+import { pinIkonuPng } from './pinIkonlari';
 import type { HaritaPini } from './tipler';
 
+/** #59 §A2: daire içi kategori ikonu 14 px; otel karesindeki ev 16 px. */
+const IKON_PX = 14;
+const EV_PX = 16;
+
 /**
- * Pin görünümleri (#53, 7 Ekim mockup): 40 px daire (küçük 32 px) + ALTINDA kısa ad (+ ★ puan · yorum satırı, `detay`).
- * durak = siyah daire + sıra numarası · listede = siyah daire + ✓ · oneri / bos = beyaz daire, kategori renginde kenar ve
- * ikon · seçili = turuncu halka · otel = siyah kare + ev · aday (3.3) = beyaz hap "★ puan · ad" ·
- * etiket (#33) = küçük beyaz hap (rota bacağı süresi). `etiketGizli` çakışma kuralıyla gelir (geo.gizliEtiketler).
+ * #59 §B: pin içi ikon önceden üretilmiş PNG (assets/pin, scripts/pin-ikonlari.mjs) — Android işaretçi bitmap'ini
+ * alırken SVG'nin çizilmesini beklemek gerekmez; `onYuklendi` görüntü yüklenince (PNG yoksa hemen) çağrılır.
  */
-export function PinIcerigi({ pin, etiketGizli, detay = false }: { pin: HaritaPini; etiketGizli?: boolean; detay?: boolean }) {
+function PinIkonu({ ad, renk: r, boyut, kalinlik, onYuklendi }: { ad: IkonAdi; renk: string; boyut: number; kalinlik: number; onYuklendi?: () => void }) {
+  const png = pinIkonuPng(ad, r);
+  // PNG yoksa (üretilmemiş ikon/renk çifti) SVG çizilir; "yüklendi" yerleşimle sayılır.
+  useEffect(() => {
+    if (!png) onYuklendi?.();
+  }, [png, onYuklendi]);
+  if (!png) return <Ikon ad={ad} boyut={boyut} renk={r} kalinlik={kalinlik} />;
+  return <Image source={png} style={{ width: boyut, height: boyut }} onLoad={onYuklendi} fadeDuration={0} />;
+}
+
+/**
+ * Pin görünümleri (#53, 7 Ekim mockup; #59 §A2 ölçüler): 28 px daire (seçili 34) + ALTINDA kısa ad (+ ★ puan · yorum
+ * satırı, `detay`). durak = gün renginde daire + sıra numarası · listede = siyah daire + ✓ · oneri / bos = beyaz daire,
+ * kategori renginde kenar ve ikon · seçili = siyah halka · otel = siyah kare + ev · aday (3.3) = beyaz hap "★ puan · ad" ·
+ * etiket (#33) = küçük beyaz hap (taksi bacağı süresi). `etiketGizli` çakışma kuralıyla gelir (geo.gizliEtiketler).
+ * `onYuklendi`: içerikteki PNG ikon yüklendi (Android bitmap yakalaması için, Harita.native).
+ */
+export function PinIcerigi({ pin, etiketGizli, detay = false, onYuklendi }: { pin: HaritaPini; etiketGizli?: boolean; detay?: boolean; onYuklendi?: () => void }) {
   if (pin.tur === 'aday') {
     const puan = puanMetni(pin.puan);
     return (
@@ -29,7 +50,7 @@ export function PinIcerigi({ pin, etiketGizli, detay = false }: { pin: HaritaPin
   if (pin.tur === 'etiket') {
     return (
       <View style={[s.bacakHap, etiketGizli && s.gorunmez]} collapsable={false}>
-        {pin.etiketIkon ? <Ikon ad={pin.etiketIkon} boyut={13} renk={renk.metin} kalinlik={2.2} /> : null}
+        {pin.etiketIkon ? <PinIkonu ad={pin.etiketIkon} boyut={13} renk={renk.metin} kalinlik={2.2} onYuklendi={onYuklendi} /> : null}
         <Text style={s.bacakMetin} numberOfLines={1}>
           {pin.etiket}
         </Text>
@@ -46,15 +67,13 @@ export function PinIcerigi({ pin, etiketGizli, detay = false }: { pin: HaritaPin
   if (pin.tur === 'otel') {
     return (
       <View style={[s.otel, { backgroundColor: pin.renk }]} collapsable={false}>
-        <Ikon ad="ev" boyut={20} renk={renk.zemin} kalinlik={2.2} />
+        <PinIkonu ad="ev" boyut={EV_PX} renk={renk.zemin} kalinlik={2.2} onYuklendi={onYuklendi} />
       </View>
     );
   }
   const cap = pinCapi(pin);
   // #55 §D11: seçili = siyah halka (3 px, dairenin kenarı; turuncu 2. günle karışmasın).
   const daire = { width: cap, height: cap, borderRadius: cap / 2, ...(pin.secili ? { borderWidth: 3, borderColor: renk.metin } : {}) };
-  // #55 §A1: ikon 16 px.
-  const ikonBoyut = 16;
   const puan = puanMetni(pin.puan);
   const yorum = yorumKisa(pin.yorumSayisi);
   const kRenk = pin.kategoriRenk ?? renk.metin;
@@ -63,17 +82,17 @@ export function PinIcerigi({ pin, etiketGizli, detay = false }: { pin: HaritaPin
       {pin.tamam ? (
         // #42 KK7: tamamlanan durak yeşil + tik.
         <View style={[s.daire, daire, { backgroundColor: renk.basari }]} collapsable={false}>
-          <Ikon ad="tik" boyut={ikonBoyut} renk={renk.zemin} kalinlik={2.4} />
+          <PinIkonu ad="tik" boyut={IKON_PX} renk={renk.zemin} kalinlik={2.4} onYuklendi={onYuklendi} />
         </View>
       ) : pin.tur === 'oneri' || pin.tur === 'bos' ? (
         // #53: beyaz daire, kategori renginde 2,5 px kenar, kategori ikonu.
         <View style={[s.daire, daire, s.beyaz, { borderColor: kRenk }, pin.secili && { borderWidth: 3, borderColor: renk.metin }]} collapsable={false}>
-          <Ikon ad={pin.ikon ?? 'kamera'} boyut={ikonBoyut} renk={kRenk} kalinlik={2.1} />
+          <PinIkonu ad={pin.ikon ?? 'kamera'} boyut={IKON_PX} renk={kRenk} kalinlik={2.1} onYuklendi={onYuklendi} />
         </View>
       ) : pin.tur === 'listede' ? (
         // #53: listede = siyah daire + beyaz ✓.
         <View style={[s.daire, daire, { backgroundColor: renk.metin }]} collapsable={false}>
-          <Ikon ad="tik" boyut={ikonBoyut} renk={renk.zemin} kalinlik={2.4} />
+          <PinIkonu ad="tik" boyut={IKON_PX} renk={renk.zemin} kalinlik={2.4} onYuklendi={onYuklendi} />
         </View>
       ) : (
         // #55 §D11: güne atanmış = gün renginde daire + sıra numarası (diğer günler opaklıkla %40).
@@ -81,12 +100,6 @@ export function PinIcerigi({ pin, etiketGizli, detay = false }: { pin: HaritaPin
           <Text style={s.daireMetin}>{pin.etiket ?? ''}</Text>
         </View>
       )}
-      {pin.kumeSayisi ? (
-        // #55 §A2: küme rozeti "+N" (dairenin sağ üstü).
-        <View style={[s.rozet, { left: 70 + cap / 2 - 10 }]} pointerEvents="none">
-          <Text style={s.rozetMetin}>{`+${pin.kumeSayisi}`}</Text>
-        </View>
-      ) : null}
       <View style={[s.etiketKutu, { height: etiketYuksekligi(detay) }]}>
         {pin.ad && !etiketGizli ? (
           <View style={s.etiketZemin}>
@@ -122,12 +135,10 @@ const s = StyleSheet.create({
   hapSecili: { backgroundColor: renk.metin },
   hapMetin: { fontFamily: yazi.kalin, fontSize: 12, color: renk.metin },
   yildiz: { fontFamily: yazi.kalin, fontSize: 11, color: renk.vurgu },
-  otel: { width: 34, height: 34, borderRadius: 10, alignItems: 'center', justifyContent: 'center' },
+  otel: { width: OTEL_KARE, height: OTEL_KARE, borderRadius: 9, alignItems: 'center', justifyContent: 'center' },
   bacakHap: { flexDirection: 'row', gap: 3, height: 22, paddingHorizontal: 8, borderRadius: 11, backgroundColor: renk.zemin, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: renk.ayrac },
   bacakMetin: { fontFamily: yazi.kalin, fontSize: 11, lineHeight: 14, color: renk.metin },
   gorunmez: { opacity: 0 },
-  rozet: { position: 'absolute', top: 0, minWidth: 20, height: 18, paddingHorizontal: 4, borderRadius: 9, backgroundColor: renk.metin, borderWidth: 1.5, borderColor: renk.zemin, alignItems: 'center', justifyContent: 'center' },
-  rozetMetin: { fontFamily: yazi.ekstra, fontSize: 10, lineHeight: 12, color: renk.zemin },
-  konumHalka: { width: 22, height: 22, borderRadius: 11, backgroundColor: 'rgba(66,133,244,0.25)', alignItems: 'center', justifyContent: 'center' },
+  konumHalka: { width: KONUM_HALKA, height: KONUM_HALKA, borderRadius: KONUM_HALKA / 2, backgroundColor: 'rgba(66,133,244,0.25)', alignItems: 'center', justifyContent: 'center' },
   konumNokta: { width: 14, height: 14, borderRadius: 7, backgroundColor: '#4285f4', borderWidth: 2.5, borderColor: renk.zemin },
 });
