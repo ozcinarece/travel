@@ -1,4 +1,4 @@
-import { Image, StyleSheet, Text, View } from 'react-native';
+import { Image, StyleSheet, Text, View, type ImageRequireSource } from 'react-native';
 
 import { Ikon, type IkonAdi } from '@/components/ui/Ikon';
 import { yorumKisa } from '@/lib/pinIkonu';
@@ -6,7 +6,7 @@ import { puanMetni } from '@/lib/puan';
 import { renk, yazi } from '@/theme';
 
 import { etiketYuksekligi, kisaAd, KONUM_HALKA, OTEL_KARE, pinCapi } from './geo';
-import { pinIkonuAnahtari, pinIkonuPng } from './pinIkonlari';
+import { PIN_IKONLARI, pinIkonuAnahtari, pinIkonuPng } from './pinIkonlari';
 import type { HaritaPini } from './tipler';
 
 /** #59 §A2: daire içi kategori ikonu 14 px; otel karesindeki ev 16 px. */
@@ -37,6 +37,20 @@ export function pinPngAnahtari(pin: HaritaPini): string | null {
 }
 
 /**
+ * #61 §6: pinin TAM görseli (daire + ikon, scripts/pin-ikonlari.mjs) — Harita.native bunu Marker `image` olarak verir;
+ * Android görünüm yakalaması yapmaz, ikon ilk kareden yerindedir. Ad etiketi ayrı, yalnız metinli işaretçidir
+ * (`yalnizEtiket`). Görseli olmayan türler (numaralı durak, konum, aday, hap) görünüm olarak çizilir.
+ */
+export function pinGorseli(pin: HaritaPini): ImageRequireSource | undefined {
+  if (pin.tur === 'otel') return PIN_IKONLARI['otel-28'];
+  if (pin.tur !== 'oneri' && pin.tur !== 'bos' && pin.tur !== 'listede' && !(pin.tur === 'durak' && pin.tamam)) return undefined;
+  const cap = pinCapi(pin);
+  if (pin.tamam) return PIN_IKONLARI[`tamam-${cap}`];
+  if (pin.tur === 'listede') return pin.ikon && pin.kategoriRenk ? PIN_IKONLARI[`dolu-${pin.ikon}-${cap}`] : PIN_IKONLARI[`tik-${cap}`];
+  return PIN_IKONLARI[`daire-${pin.ikon ?? 'kamera'}-${cap}`];
+}
+
+/**
  * Pin içi ikon önceden üretilmiş PNG (assets/pin, scripts/pin-ikonlari.mjs) — Android işaretçi bitmap'ini alırken
  * SVG'nin çizilmesini beklemek gerekmez; `onYuklendi` görüntü yüklenince PNG anahtarıyla çağrılır. PNG yoksa SVG.
  */
@@ -53,7 +67,20 @@ function PinIkonu({ ad, renk: r, boyut, kalinlik, onYuklendi }: { ad: IkonAdi; r
  * etiket (#33) = küçük beyaz hap (taksi bacağı süresi). `etiketGizli` çakışma kuralıyla gelir (geo.gizliEtiketler).
  * `onYuklendi(pngAnahtari)`: içerikteki PNG ikon yüklendi (Android bitmap yakalaması için, Harita.native).
  */
-export function PinIcerigi({ pin, etiketGizli, detay = false, onYuklendi }: { pin: HaritaPini; etiketGizli?: boolean; detay?: boolean; onYuklendi?: (pngAnahtari: string) => void }) {
+export function PinIcerigi({
+  pin,
+  etiketGizli,
+  detay = false,
+  onYuklendi,
+  yalnizEtiket = false,
+}: {
+  pin: HaritaPini;
+  etiketGizli?: boolean;
+  detay?: boolean;
+  onYuklendi?: (pngAnahtari: string) => void;
+  /** #61 §6: daire ayrı `image` işaretçisinde; burada dairenin yerinde saydam boşluk + altında ad. */
+  yalnizEtiket?: boolean;
+}) {
   if (pin.tur === 'aday') {
     const puan = puanMetni(pin.puan);
     return (
@@ -97,7 +124,9 @@ export function PinIcerigi({ pin, etiketGizli, detay = false, onYuklendi }: { pi
   const kRenk = pin.kategoriRenk ?? renk.metin;
   return (
     <View style={s.sutun} collapsable={false}>
-      {pin.tamam ? (
+      {yalnizEtiket ? (
+        <View style={{ width: cap, height: cap }} />
+      ) : pin.tamam ? (
         // #42 KK7: tamamlanan durak yeşil + tik.
         <View style={[s.daire, daire, { backgroundColor: renk.basari }]} collapsable={false}>
           <PinIkonu ad="tik" boyut={IKON_PX} renk={renk.zemin} kalinlik={2.4} onYuklendi={onYuklendi} />

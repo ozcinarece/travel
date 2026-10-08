@@ -68,12 +68,15 @@ function Cizgi({ cizgi }: { cizgi: HaritaCizgisi }) {
             ? [{ icon: { path: kutuphane.SymbolPath.FORWARD_OPEN_ARROW, strokeColor: '#ffffff', strokeWeight: 2, scale: 2.2 }, offset: '22px', repeat: '45px' }]
             : undefined,
       });
+    // #61 §7: taksi bacağı düz sarı dolgu + koyu kenar; rotası gelmemiş kuş uçuşu noktalı.
+    const taksi = cizgi.kesik && cizgi.etiketIkon === 'taksi';
+    const kus = cizgi.kesik && !taksi;
     const katmanlar = cizgi.ince
       ? [katman(cizgi.renk, 3, 0, { noktali: cizgi.kesik })]
       : [
           katman('#0f0f0f', 11, 1, { opaklik: 0.12 * opaklik }),
-          katman('#ffffff', 9, 2, {}),
-          katman(cizgi.renk, 5.5, 3, { noktali: cizgi.kesik, oklar: !cizgi.kesik && opaklik >= 0.5 }),
+          katman(taksi ? '#1f1f1f' : '#ffffff', 9, 2, {}),
+          katman(taksi ? '#f5c518' : cizgi.renk, 5.5, 3, { noktali: kus, oklar: !cizgi.kesik && opaklik >= 0.5 }),
         ];
     return () => katmanlar.forEach((k) => k.setMap(null));
   }, [harita, kutuphane, cizgi]);

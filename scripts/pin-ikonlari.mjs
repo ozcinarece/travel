@@ -50,13 +50,11 @@ const istekler = [
   { ikon: 'ok', renk: BEYAZ, boyut: 12, kalinlik: 2.4, hale: true },
 ];
 
-function svgMetni({ ikon, renk, boyut, kalinlik, hale }) {
+/** 24×24 görünüm alanında ikonun iç öğeleri (Ikon.tsx yolları). */
+function ikonIci(ikon, renk, kalinlik) {
   const ortak = `stroke="${renk}" stroke-linecap="round" stroke-linejoin="round" fill="none"`;
-  const ogeler =
-    ikon === 'ok'
-      ? [{ tur: 'Path', oz: { d: 'M9 5l6 7-6 7' } }]
-      : ikonYollari(ikon);
-  const ic = ogeler
+  const ogeler = ikon === 'ok' ? [{ tur: 'Path', oz: { d: 'M9 5l6 7-6 7' } }] : ikonYollari(ikon);
+  return ogeler
     .map(({ tur, oz }) => {
       // Ikon.tsx: 'tik' kalınlığı +0,6; 'daha' dolgulu (burada kullanılmıyor).
       const sw = oz.strokeWidth ? (oz.strokeWidth.includes('kalinlik') ? kalinlik + 0.6 : Number(oz.strokeWidth)) : kalinlik;
@@ -65,11 +63,47 @@ function svgMetni({ ikon, renk, boyut, kalinlik, hale }) {
       return `<rect x="${oz.x}" y="${oz.y}" width="${oz.width}" height="${oz.height}" rx="${oz.rx ?? 0}" stroke-width="${sw}" ${ortak}/>`;
     })
     .join('');
+}
+
+function svgMetni({ ikon, renk, boyut, kalinlik, hale }) {
   const golge = hale ? `<filter id="h"><feDropShadow dx="0" dy="0" stdDeviation="0.6" flood-color="#0f0f0f" flood-opacity="0.35"/></filter>` : '';
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${boyut}" height="${boyut}" viewBox="0 0 24 24">${golge}<g${hale ? ' filter="url(#h)"' : ''}>${ic}</g></svg>`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${boyut}" height="${boyut}" viewBox="0 0 24 24">${golge}<g${hale ? ' filter="url(#h)"' : ''}>${ikonIci(ikon, renk, kalinlik)}</g></svg>`;
 }
 
 const dosyaAdi = (i) => `${i.ikon}-${i.renk.slice(1)}`;
+
+// ---- #61 §6: TAM pin görselleri (daire + ikon) — Android'de görünüm yakalaması yok (Marker `image`), ikon hep yerinde.
+// PinIcerigi ile aynı ölçüler: 28 px (seçili 34, siyah 3 px halka), beyaz 2 px kenar / kategori 2,5 px kenar, ikon 14.
+const SIYAH = '#0f0f0f';
+const YESIL = '#1f8a4c';
+/** { ad, cap, zemin, kenar, kenarKalinlik, ikon, ikonRenk, kare? } */
+const pinIstekleri = [];
+for (const secili of [false, true]) {
+  const cap = secili ? 34 : 28;
+  const halka = secili ? { kenar: SIYAH, kenarKalinlik: 3 } : null;
+  for (const k of kategoriler) {
+    // oneri / bos: beyaz zemin, kategori renginde kenar, kategori ikonu.
+    pinIstekleri.push({ ad: `daire-${k.ikon}-${cap}`, cap, zemin: BEYAZ, kenar: halka?.kenar ?? k.renk, kenarKalinlik: halka?.kenarKalinlik ?? 2.5, ikon: k.ikon, ikonRenk: k.renk });
+    // listede: kategori renginde dolu, beyaz ikon.
+    pinIstekleri.push({ ad: `dolu-${k.ikon}-${cap}`, cap, zemin: k.renk, kenar: halka?.kenar ?? BEYAZ, kenarKalinlik: halka?.kenarKalinlik ?? 2, ikon: k.ikon, ikonRenk: BEYAZ });
+  }
+  // listede (kategorisiz): siyah + ✓ · tamamlanan durak: yeşil + ✓.
+  pinIstekleri.push({ ad: `tik-${cap}`, cap, zemin: SIYAH, kenar: halka?.kenar ?? BEYAZ, kenarKalinlik: halka?.kenarKalinlik ?? 2, ikon: 'tik', ikonRenk: BEYAZ, kalinlik: 2.4 });
+  pinIstekleri.push({ ad: `tamam-${cap}`, cap, zemin: YESIL, kenar: halka?.kenar ?? BEYAZ, kenarKalinlik: halka?.kenarKalinlik ?? 2, ikon: 'tik', ikonRenk: BEYAZ, kalinlik: 2.4 });
+}
+// otel: 28 px siyah yuvarlak köşeli kare + beyaz ev 16.
+pinIstekleri.push({ ad: 'otel-28', cap: 28, zemin: SIYAH, kenar: SIYAH, kenarKalinlik: 0, ikon: 'ev', ikonRenk: BEYAZ, ikonPx: 16, kare: true });
+
+function pinSvg(i) {
+  const { cap } = i;
+  const ikonPx = i.ikonPx ?? 14;
+  const olcek = ikonPx / 24;
+  const kay = (cap - ikonPx) / 2;
+  const sekil = i.kare
+    ? `<rect x="0" y="0" width="${cap}" height="${cap}" rx="9" fill="${i.zemin}"/>`
+    : `<circle cx="${cap / 2}" cy="${cap / 2}" r="${(cap - i.kenarKalinlik) / 2}" fill="${i.zemin}" stroke="${i.kenar}" stroke-width="${i.kenarKalinlik}"/>`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${cap}" height="${cap}" viewBox="0 0 ${cap} ${cap}">${sekil}<g transform="translate(${kay} ${kay}) scale(${olcek})">${ikonIci(i.ikon, i.ikonRenk, i.kalinlik ?? 2.1)}</g></svg>`;
+}
 
 const cikti = join(kok, 'assets/pin');
 mkdirSync(cikti, { recursive: true });
@@ -77,17 +111,19 @@ const tarayici = await chromium.launch();
 for (const olcek of [1, 2, 3]) {
   const baglam = await tarayici.newContext({ deviceScaleFactor: olcek, viewport: { width: 200, height: 200 } });
   const sayfa = await baglam.newPage();
-  for (const i of istekler) {
-    await sayfa.setContent(`<body style="margin:0;background:transparent"><div id="k" style="display:inline-block;line-height:0">${svgMetni(i)}</div></body>`);
+  const ciz = async (svg, ad) => {
+    await sayfa.setContent(`<body style="margin:0;background:transparent"><div id="k" style="display:inline-block;line-height:0">${svg}</div></body>`);
     const png = await sayfa.locator('#k').screenshot({ omitBackground: true, type: 'png' });
-    writeFileSync(join(cikti, `${dosyaAdi(i)}${olcek === 1 ? '' : `@${olcek}x`}.png`), png);
-  }
+    writeFileSync(join(cikti, `${ad}${olcek === 1 ? '' : `@${olcek}x`}.png`), png);
+  };
+  for (const i of istekler) await ciz(svgMetni(i), dosyaAdi(i));
+  for (const i of pinIstekleri) await ciz(pinSvg(i), i.ad);
   await baglam.close();
 }
 await tarayici.close();
 
 // ---- Statik require haritası (Metro yalnız sabit yolları paketler).
-const satirlar = istekler.map((i) => `  '${dosyaAdi(i)}': require('../../../assets/pin/${dosyaAdi(i)}.png'),`).join('\n');
+const satirlar = [...istekler.map(dosyaAdi), ...pinIstekleri.map((i) => i.ad)].map((ad) => `  '${ad}': require('../../../assets/pin/${ad}.png'),`).join('\n');
 writeFileSync(
   join(kok, 'src/components/harita/pinIkonlari.ts'),
   `// ÜRETİLMİŞ DOSYA — scripts/pin-ikonlari.mjs (#59 B). Elle düzenleme; ikon/renk değişince betiği çalıştır.
@@ -109,4 +145,4 @@ export function pinIkonuPng(ikon: string, renk: string): ImageRequireSource | un
 }
 `,
 );
-console.log(`${istekler.length} ikon × 3 ölçek → assets/pin, src/components/harita/pinIkonlari.ts`);
+console.log(`${istekler.length} ikon + ${pinIstekleri.length} pin × 3 ölçek → assets/pin, src/components/harita/pinIkonlari.ts`);
