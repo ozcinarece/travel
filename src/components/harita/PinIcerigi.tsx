@@ -9,6 +9,10 @@ import { etiketYuksekligi, kisaAd, KONUM_HALKA, OTEL_KARE, pinCapi } from './geo
 import { PIN_IKONLARI, pinIkonuAnahtari, pinIkonuPng } from './pinIkonlari';
 import type { HaritaPini } from './tipler';
 
+/** #61 §7: taksi modu renkleri (gün renginden bağımsız): sarı dolgu, koyu kahve metin. */
+export const TAKSI_SARI = '#FAC775';
+export const TAKSI_METIN = '#412402';
+
 /** #59 §A2: daire içi kategori ikonu 14 px; otel karesindeki ev 16 px. */
 const IKON_PX = 14;
 const EV_PX = 16;
@@ -73,6 +77,7 @@ export function PinIcerigi({
   detay = false,
   onYuklendi,
   yalnizEtiket = false,
+  durt = false,
 }: {
   pin: HaritaPini;
   etiketGizli?: boolean;
@@ -80,6 +85,11 @@ export function PinIcerigi({
   onYuklendi?: (pngAnahtari: string) => void;
   /** #61 §6: daire ayrı `image` işaretçisinde; burada dairenin yerinde saydam boşluk + altında ad. */
   yalnizEtiket?: boolean;
+  /**
+   * #61 §6: PNG yüklendikten sonra görünümün boyutunu 1 px değiştirir — react-native-maps Android yalnız boyut değişince
+   * (update → updated++) bitmap'i yeniden alır; görüntü yüklenmesi boyut değiştirmediği için eski (boş) bitmap kalıyordu.
+   */
+  durt?: boolean;
 }) {
   if (pin.tur === 'aday') {
     const puan = puanMetni(pin.puan);
@@ -93,10 +103,12 @@ export function PinIcerigi({
     );
   }
   if (pin.tur === 'etiket') {
+    // #61 §7: taksi hapı sarı zemin, 1 px siyah kenar, koyu kahve metin (mod rengi); yürüyüş hapı beyaz.
+    const taksi = pin.etiketIkon === 'taksi';
     return (
-      <View style={[s.bacakHap, etiketGizli && s.gorunmez]} collapsable={false}>
+      <View style={[s.bacakHap, taksi && s.taksiHap, etiketGizli && s.gorunmez, durt && s.durtme]} collapsable={false}>
         {pin.etiketIkon ? <PinIkonu ad={pin.etiketIkon} boyut={13} renk={renk.metin} kalinlik={2.2} onYuklendi={onYuklendi} /> : null}
-        <Text style={s.bacakMetin} numberOfLines={1}>
+        <Text style={[s.bacakMetin, taksi && s.taksiMetin]} numberOfLines={1}>
           {pin.etiket}
         </Text>
       </View>
@@ -123,7 +135,7 @@ export function PinIcerigi({
   const yorum = yorumKisa(pin.yorumSayisi);
   const kRenk = pin.kategoriRenk ?? renk.metin;
   return (
-    <View style={s.sutun} collapsable={false}>
+    <View style={[s.sutun, durt && s.durtme]} collapsable={false}>
       {yalnizEtiket ? (
         <View style={{ width: cap, height: cap }} />
       ) : pin.tamam ? (
@@ -186,6 +198,9 @@ const s = StyleSheet.create({
   bacakHap: { flexDirection: 'row', gap: 3, height: 22, paddingHorizontal: 8, borderRadius: 11, backgroundColor: renk.zemin, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: renk.ayrac },
   bacakMetin: { fontFamily: yazi.kalin, fontSize: 11, lineHeight: 14, color: renk.metin },
   gorunmez: { opacity: 0 },
+  durtme: { paddingBottom: 1 },
+  taksiHap: { backgroundColor: TAKSI_SARI, borderColor: renk.metin },
+  taksiMetin: { color: TAKSI_METIN },
   konumHalka: { width: KONUM_HALKA, height: KONUM_HALKA, borderRadius: KONUM_HALKA / 2, backgroundColor: 'rgba(66,133,244,0.25)', alignItems: 'center', justifyContent: 'center' },
   konumNokta: { width: 14, height: 14, borderRadius: 7, backgroundColor: '#4285f4', borderWidth: 2.5, borderColor: renk.zemin },
 });

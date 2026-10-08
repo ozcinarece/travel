@@ -6,7 +6,7 @@ import { t } from '@/i18n';
 import { renk } from '@/theme';
 
 import { bolgeHesapla, detayGoster, etiketBolgesi, pinCapasi, pinSecimi, pinZ, zoomDelta } from './geo';
-import { PinIcerigi } from './PinIcerigi';
+import { PinIcerigi, TAKSI_SARI } from './PinIcerigi';
 import { bacakEtiketPinleri } from './rota';
 import type { HaritaBolgesi, HaritaCizgisi, HaritaOdagi, HaritaProps, HaritaSigdirma } from './tipler';
 
@@ -68,16 +68,27 @@ function Cizgi({ cizgi }: { cizgi: HaritaCizgisi }) {
             ? [{ icon: { path: kutuphane.SymbolPath.FORWARD_OPEN_ARROW, strokeColor: '#ffffff', strokeWeight: 2, scale: 2.2 }, offset: '22px', repeat: '45px' }]
             : undefined,
       });
-    // #61 §7: taksi bacağı düz sarı dolgu + koyu kenar; rotası gelmemiş kuş uçuşu noktalı.
+    // #61 §7: taksi bacağı sarı-siyah şerit (siyah 10 · sarı 6 · siyah kesikli 6, dash 10/14 px, icons ile); ok yok.
+    // Rotası gelmemiş yürüyüş kuş uçuşu noktalı.
     const taksi = cizgi.kesik && cizgi.etiketIkon === 'taksi';
     const kus = cizgi.kesik && !taksi;
+    const serit = () =>
+      new kutuphane.Polyline({
+        map: harita,
+        path: cizgi.noktalar,
+        strokeOpacity: 0,
+        zIndex: 3,
+        icons: [{ icon: { path: 'M 0,-1 0,1', strokeOpacity: opaklik, strokeColor: '#0f0f0f', strokeWeight: 6, scale: 5 }, offset: '0', repeat: '24px' }],
+      });
     const katmanlar = cizgi.ince
       ? [katman(cizgi.renk, 3, 0, { noktali: cizgi.kesik })]
-      : [
-          katman('#0f0f0f', 11, 1, { opaklik: 0.12 * opaklik }),
-          katman(taksi ? '#1f1f1f' : '#ffffff', 9, 2, {}),
-          katman(taksi ? '#f5c518' : cizgi.renk, 5.5, 3, { noktali: kus, oklar: !cizgi.kesik && opaklik >= 0.5 }),
-        ];
+      : taksi
+        ? [katman('#0f0f0f', 10, 1, {}), katman(TAKSI_SARI, 6, 2, {}), serit()]
+        : [
+            katman('#0f0f0f', 11, 1, { opaklik: 0.12 * opaklik }),
+            katman('#ffffff', 9, 2, {}),
+            katman(cizgi.renk, 5.5, 3, { noktali: kus, oklar: !cizgi.kesik && opaklik >= 0.5 }),
+          ];
     return () => katmanlar.forEach((k) => k.setMap(null));
   }, [harita, kutuphane, cizgi]);
   return null;
