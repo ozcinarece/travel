@@ -13,8 +13,8 @@ export const renk = {
   basari: '#1f8a4c',
 } as const;
 
-// PRD 3.5 KK3: gün renkleri sabit; 4. günden sonra palet döner.
-export const gunRenkleri = ['#0f0f0f', '#ff5a1f', '#4c6ef5', '#1f8a4c', '#8a5cf6', '#0ea5a5'] as const;
+// PRD 3.5 KK3 / #55 §D: gün renkleri sabit; 7. günden sonra palet döner. Siyah gün rengi değil (seçim/eylem rengi).
+export const gunRenkleri = ['#2f6fed', '#f2783f', '#12a37a', '#8a4fd6', '#e0457b', '#0ea5e9'] as const;
 
 export function gunRengi(gunIndex: number): string {
   return gunRenkleri[(gunIndex - 1) % gunRenkleri.length];

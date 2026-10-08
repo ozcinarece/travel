@@ -133,7 +133,7 @@ export default function MekanDetayEkrani() {
       <ScrollView contentContainerStyle={s.icerik}>
         <View style={s.foto}>
           {yer.data && yer.data.fotolar.length > 0 ? (
-            // #31: kaydırmalı galeri (≤ 5), atıf her fotoğrafın altında.
+            // #31, #55: kaydırmalı galeri (≤ 10, "3/10"), atıf her fotoğrafın altında.
             <FotoGalerisi fotolar={yer.data.fotolar} ilkUri={yer.data.foto_uri} yukseklik={FOTO_YUKSEKLIK} />
           ) : yer.data?.foto_uri ? (
             <Image source={{ uri: yer.data.foto_uri }} style={StyleSheet.absoluteFill} contentFit="cover" />

@@ -51,9 +51,10 @@ export function PinIcerigi({ pin, etiketGizli, detay = false }: { pin: HaritaPin
     );
   }
   const cap = pinCapi(pin);
-  // #53: seçili = turuncu halka (3 px, dairenin kenarı).
-  const daire = { width: cap, height: cap, borderRadius: cap / 2, ...(pin.secili ? { borderWidth: 3, borderColor: renk.vurgu } : {}) };
-  const ikonBoyut = pin.kucuk ? 16 : 20;
+  // #55 §D11: seçili = siyah halka (3 px, dairenin kenarı; turuncu 2. günle karışmasın).
+  const daire = { width: cap, height: cap, borderRadius: cap / 2, ...(pin.secili ? { borderWidth: 3, borderColor: renk.metin } : {}) };
+  // #55 §A1: ikon 16 px.
+  const ikonBoyut = 16;
   const puan = puanMetni(pin.puan);
   const yorum = yorumKisa(pin.yorumSayisi);
   const kRenk = pin.kategoriRenk ?? renk.metin;
@@ -66,7 +67,7 @@ export function PinIcerigi({ pin, etiketGizli, detay = false }: { pin: HaritaPin
         </View>
       ) : pin.tur === 'oneri' || pin.tur === 'bos' ? (
         // #53: beyaz daire, kategori renginde 2,5 px kenar, kategori ikonu.
-        <View style={[s.daire, daire, s.beyaz, { borderColor: kRenk }, pin.secili && { borderWidth: 3, borderColor: renk.vurgu }]} collapsable={false}>
+        <View style={[s.daire, daire, s.beyaz, { borderColor: kRenk }, pin.secili && { borderWidth: 3, borderColor: renk.metin }]} collapsable={false}>
           <Ikon ad={pin.ikon ?? 'kamera'} boyut={ikonBoyut} renk={kRenk} kalinlik={2.1} />
         </View>
       ) : pin.tur === 'listede' ? (
@@ -75,11 +76,17 @@ export function PinIcerigi({ pin, etiketGizli, detay = false }: { pin: HaritaPin
           <Ikon ad="tik" boyut={ikonBoyut} renk={renk.zemin} kalinlik={2.4} />
         </View>
       ) : (
-        // #53: güne atanmış = siyah daire + sıra numarası.
-        <View style={[s.daire, daire, { backgroundColor: renk.metin }]} collapsable={false}>
-          <Text style={[s.daireMetin, pin.kucuk && { fontSize: 13 }]}>{pin.etiket ?? ''}</Text>
+        // #55 §D11: güne atanmış = gün renginde daire + sıra numarası (diğer günler opaklıkla %40).
+        <View style={[s.daire, daire, { backgroundColor: pin.renk }]} collapsable={false}>
+          <Text style={s.daireMetin}>{pin.etiket ?? ''}</Text>
         </View>
       )}
+      {pin.kumeSayisi ? (
+        // #55 §A2: küme rozeti "+N" (dairenin sağ üstü).
+        <View style={[s.rozet, { left: 70 + cap / 2 - 10 }]} pointerEvents="none">
+          <Text style={s.rozetMetin}>{`+${pin.kumeSayisi}`}</Text>
+        </View>
+      ) : null}
       <View style={[s.etiketKutu, { height: etiketYuksekligi(detay) }]}>
         {pin.ad && !etiketGizli ? (
           <View style={s.etiketZemin}>
@@ -104,7 +111,7 @@ const s = StyleSheet.create({
   sutun: { alignItems: 'center', width: 140 },
   daire: { borderWidth: 2, borderColor: renk.zemin, alignItems: 'center', justifyContent: 'center' },
   beyaz: { backgroundColor: renk.zemin, borderWidth: 2.5 },
-  daireMetin: { fontFamily: yazi.ekstra, fontSize: 15, color: renk.zemin },
+  daireMetin: { fontFamily: yazi.ekstra, fontSize: 13, color: renk.zemin },
   // Etiket yüksekliği sabit (16 / detaylı 30) ki çapa hesabı (geo.pinCapasi) gizli/görünür fark etmesin.
   etiketKutu: { marginTop: 2, justifyContent: 'center', alignItems: 'center' },
   // #53: ad 11 px, beyaz hale (kutu yok).
@@ -119,6 +126,8 @@ const s = StyleSheet.create({
   bacakHap: { flexDirection: 'row', gap: 3, height: 22, paddingHorizontal: 8, borderRadius: 11, backgroundColor: renk.zemin, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: renk.ayrac },
   bacakMetin: { fontFamily: yazi.kalin, fontSize: 11, lineHeight: 14, color: renk.metin },
   gorunmez: { opacity: 0 },
+  rozet: { position: 'absolute', top: 0, minWidth: 20, height: 18, paddingHorizontal: 4, borderRadius: 9, backgroundColor: renk.metin, borderWidth: 1.5, borderColor: renk.zemin, alignItems: 'center', justifyContent: 'center' },
+  rozetMetin: { fontFamily: yazi.ekstra, fontSize: 10, lineHeight: 12, color: renk.zemin },
   konumHalka: { width: 22, height: 22, borderRadius: 11, backgroundColor: 'rgba(66,133,244,0.25)', alignItems: 'center', justifyContent: 'center' },
   konumNokta: { width: 14, height: 14, borderRadius: 7, backgroundColor: '#4285f4', borderWidth: 2.5, borderColor: renk.zemin },
 });

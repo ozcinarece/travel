@@ -1,6 +1,6 @@
 import { describe, expect, it } from '@jest/globals';
 
-import { sigdir, bolgedenUzaklasti, bolgeHesapla, deltaZoom, detayGoster, gizliEtiketler, haritaDolgusu, kisaAd, mesafeM, pinCapasi, SIFIR_DOLGU, zoomDelta } from '../geo';
+import { kumeHesapla, etiketOnceligi, sigdir, bolgedenUzaklasti, bolgeHesapla, deltaZoom, detayGoster, gizliEtiketler, haritaDolgusu, kisaAd, mesafeM, pinCapasi, SIFIR_DOLGU, zoomDelta } from '../geo';
 import type { HaritaPini } from '../tipler';
 
 const roma = { lat: 41.9028, lng: 12.4964 };
@@ -60,11 +60,10 @@ describe('geo', () => {
   it('pinCapasi daire merkezini çapa yapar; detay satırıyla kutu uzar', () => {
     const c = pinCapasi({ id: 'x', konum: roma, renk: '#000', tur: 'durak' });
     expect(c.x).toBe(0.5);
-    // #53: 40 px daire (+2 boşluk +16 etiket); küçük 32 px; seçili de 40 px (halka kenarda).
-    expect(c.y).toBeCloseTo(20 / 58);
-    expect(pinCapasi({ id: 'x', konum: roma, renk: '#000', tur: 'durak' }, true).y).toBeCloseTo(20 / 72);
-    expect(pinCapasi({ id: 'x', konum: roma, renk: '#000', tur: 'durak', secili: true }).y).toBeCloseTo(20 / 58);
-    expect(pinCapasi({ id: 'x', konum: roma, renk: '#000', tur: 'durak', kucuk: true }).y).toBeCloseTo(16 / 50);
+    // #55: 32 px daire (+2 boşluk +16 etiket); seçili 38 px (halka kenarda).
+    expect(c.y).toBeCloseTo(16 / 50);
+    expect(pinCapasi({ id: 'x', konum: roma, renk: '#000', tur: 'durak' }, true).y).toBeCloseTo(16 / 64);
+    expect(pinCapasi({ id: 'x', konum: roma, renk: '#000', tur: 'durak', secili: true }).y).toBeCloseTo(19 / 56);
   });
 
   it('deltaZoom zoomDelta\'nın tersidir; bolgeHesapla zoom üretir', () => {
@@ -93,17 +92,17 @@ describe('geo', () => {
   });
 
   it('#40: çakışmada önce puan satırı düşer, ad kalır; hâlâ çakışırsa ad da gizlenir', () => {
-    // Zoom 15: detay açık. İki pin dikeyde yakın: üsttekinin iki satırlı kutusu alttakinin dairesine değil etiketine çarpar.
+    // Zoom 15: detay açık; 1 px = 0,000025°. #55: etiket başka pinin DAİRESİNE de binemez.
     const bolge = { merkez: roma, yaricapM: 1000, latDelta: 0.02, lngDelta: 0.01, zoom: 15 };
     const ekran = { genislik: 400, yukseklik: 800 };
     const ust: HaritaPini = { id: 'ust', konum: roma, renk: '#000', tur: 'durak', ad: 'Pantheon', puan: 4.8 };
-    // 20 px yukarıda öneri: iki satırlı kutusu (30 px) durağın etiketine çarpar, tek satır (16 px) sığar → yalnız puan satırı gizlenir.
-    const alt: HaritaPini = { id: 'alt', konum: { lat: roma.lat + 0.0005, lng: roma.lng }, renk: '#000', tur: 'oneri', ad: 'Kafe', puan: 4.2 };
+    // 52 px yukarıda öneri: iki satırlı kutusu (30 px) durağın dairesine çarpar, tek satır (16 px) sığar → yalnız puan gizlenir.
+    const alt: HaritaPini = { id: 'alt', konum: { lat: roma.lat + 0.0013, lng: roma.lng }, renk: '#000', tur: 'oneri', ad: 'Kafe', puan: 4.2 };
     const g = gizliEtiketler([ust, alt], bolge, ekran);
     expect(g.etiket.size).toBe(0);
     expect([...g.detay]).toEqual(['alt']);
-    // 10 px yukarıda: tek satır da çakışır → düşük öncelikli önerinin adı da gizlenir.
-    const g2 = gizliEtiketler([ust, { ...alt, konum: { lat: roma.lat + 0.00025, lng: roma.lng } }], bolge, ekran);
+    // 40 px yukarıda: tek satır da dairenin üstüne biner → düşük öncelikli önerinin adı da gizlenir.
+    const g2 = gizliEtiketler([ust, { ...alt, konum: { lat: roma.lat + 0.001, lng: roma.lng } }], bolge, ekran);
     expect([...g2.etiket]).toEqual(['alt']);
     expect(g2.detay.size).toBe(0);
   });
@@ -132,5 +131,47 @@ describe('geo', () => {
     expect(genis.zoom).toBeLessThan(a.zoom);
     expect(sigdir([], { genislik: 390, yukseklik: 300 })).toBeNull();
     expect(sigdir([roma], { genislik: 390, yukseklik: 300 })!.zoom).toBe(15);
+  });
+
+  // #55 §A2: öncelik — seçili > seçili günün durakları (sıra no küçük önce) > listede > diğer günler > atanmamış > öneri.
+  it('etiketOnceligi: #55 sırası', () => {
+    const p = (o: Partial<HaritaPini>): HaritaPini => ({ id: 'x', konum: roma, renk: '#000', ...o });
+    const sirali = [
+      p({ tur: 'oneri', secili: true }),
+      p({ tur: 'durak', etiket: '1' }),
+      p({ tur: 'durak', etiket: '2' }),
+      p({ tur: 'listede' }),
+      p({ tur: 'durak', etiket: '1', opaklik: 0.4 }),
+      p({ tur: 'bos' }),
+      p({ tur: 'oneri' }),
+      p({ tur: 'etiket', etiket: '5 dk' }),
+    ].map(etiketOnceligi);
+    expect([...sirali].sort((a, b) => b - a)).toEqual(sirali);
+    expect(new Set(sirali).size).toBe(sirali.length);
+  });
+
+  it('kumeHesapla: üst üste binen pinler tek pin + "+N"; uzaktakiler ayrı; yakınlaşınca dağılır', () => {
+    const bolge = { merkez: roma, yaricapM: 1000, latDelta: 0.02, lngDelta: 0.01, zoom: 14 };
+    const ekran = { genislik: 400, yukseklik: 800 };
+    const pin = (id: string, dLng: number, o: Partial<HaritaPini> = {}): HaritaPini => ({ id, konum: { lat: roma.lat, lng: roma.lng + dLng }, renk: '#000', tur: 'oneri', ...o });
+    // 4 px arayla üç pin: seçili günün durağı baş olur, diğer ikisi gizlenir.
+    const k = kumeHesapla([pin('a', 0), pin('b', 0.0001, { tur: 'durak', etiket: '1' }), pin('c', 0.0002), pin('uzak', 0.005)], bolge, ekran);
+    expect([...k.gizli].sort()).toEqual(['a', 'c']);
+    expect(k.rozet.get('b')).toBe(2);
+    expect(k.uyeler.get('b')).toHaveLength(3);
+    expect(k.rozet.has('uzak')).toBe(false);
+    // 100 kat yakınlaşınca (40 px aralık) küme yok.
+    expect(kumeHesapla([pin('a', 0), pin('b', 0.0001)], { ...bolge, latDelta: 0.0002, lngDelta: 0.0001, zoom: 20 }, ekran).gizli.size).toBe(0);
+    // Rota hapları ve konum kümelenmez.
+    expect(kumeHesapla([pin('a', 0), pin('h', 0, { tur: 'etiket', etiket: '4 dk' }), pin('k', 0, { tur: 'konum' })], bolge, ekran).gizli.size).toBe(0);
+  });
+
+  it('gizliEtiketler: başlık alanına düşen rota hapı gizlenir (#55 §A6)', () => {
+    const bolge = { merkez: roma, yaricapM: 1000, latDelta: 0.02, lngDelta: 0.01, zoom: 14 };
+    const ekran = { genislik: 400, yukseklik: 800 };
+    // Ekranın üstünden 100 px aşağıda (merkezden 300 px yukarıda) bir hap; başlık 180 px.
+    const hap: HaritaPini = { id: 'h', konum: { lat: roma.lat + 300 / 40000, lng: roma.lng }, renk: '#000', tur: 'etiket', etiket: '4 dk' };
+    expect(gizliEtiketler([hap], bolge, ekran, 180).etiket.has('h')).toBe(true);
+    expect(gizliEtiketler([hap], bolge, ekran, 50).etiket.has('h')).toBe(false);
   });
 });

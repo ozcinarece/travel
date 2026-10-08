@@ -274,7 +274,7 @@ export type TamYer = {
   saatler: string[];
   /** İlk fotoğrafın çözülmüş URI'si (hemen gösterim). */
   foto_uri: string | null;
-  /** #31: en fazla 5 fotoğraf — adı (places-photo ile tembel çözülür) ve Google atfı (yazar). */
+  /** #31, #55: en fazla 10 fotoğraf (Places üst sınırı) — adı (places-photo ile tembel çözülür) ve Google atfı (yazar). */
   fotolar: { ad: string; yazar: string | null }[];
   google_maps_uri: string | null;
   yorumlar: { yazar: string; puan: number | null; metin: string; zaman: string }[];
@@ -329,7 +329,7 @@ export async function tamDetay(placeId: string, tz?: string): Promise<TamYer> {
     kapanis,
     saatler: d.regularOpeningHours?.weekdayDescriptions ?? d.currentOpeningHours?.weekdayDescriptions ?? [],
     foto_uri: foto,
-    fotolar: (d.photos ?? []).slice(0, 5).map((f) => ({ ad: f.name, yazar: f.authorAttributions?.[0]?.displayName ?? null })),
+    fotolar: (d.photos ?? []).slice(0, 10).map((f) => ({ ad: f.name, yazar: f.authorAttributions?.[0]?.displayName ?? null })),
     google_maps_uri: d.googleMapsUri ?? null,
     yorumlar: (d.reviews ?? []).slice(0, 5).map((y) => ({
       yazar: y.authorAttribution?.displayName ?? '',

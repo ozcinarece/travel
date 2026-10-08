@@ -11,7 +11,7 @@ type Foto = { ad: string; yazar: string | null };
 type Props = { fotolar: Foto[]; ilkUri: string | null; yukseklik: number };
 
 /**
- * #31: yatay kaydırmalı galeri — en fazla 5 Google fotoğrafı, sayfa göstergesi (1/5), her fotoğrafın altında atıf.
+ * #31, #55: yatay kaydırmalı galeri — en fazla 10 Google fotoğrafı, sayfa göstergesi ("3/10"), her fotoğrafın altında atıf.
  * Tembel: yalnız görünen ve komşu sayfaların URI'si istenir (fotoğraf başına fatura). İlk fotoğraf places-full'dan hazır gelir.
  */
 export function FotoGalerisi({ fotolar, ilkUri, yukseklik }: Props) {

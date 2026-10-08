@@ -199,7 +199,7 @@ export type TamYer = {
   kapanis: string | null;
   saatler: string[];
   foto_uri: string | null;
-  /** #31: en fazla 5 fotoğraf (ad + Google atfı); URI'ler tembel (usePlaceFoto). */
+  /** #31, #55: en fazla 10 fotoğraf (ad + Google atfı); URI'ler tembel (usePlaceFoto). */
   fotolar: { ad: string; yazar: string | null }[];
   google_maps_uri: string | null;
   yorumlar: { yazar: string; puan: number | null; metin: string; zaman: string }[];

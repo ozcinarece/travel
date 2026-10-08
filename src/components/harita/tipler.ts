@@ -14,8 +14,8 @@ export type HaritaPini = {
   ikon?: PinIkonu;
   /** #53: kategori rengi — oneri/bos dairesinin kenarı ve ikonu. */
   kategoriRenk?: string;
-  /** #53: küçük pin (32 px; Program'da yarı açık panel). Varsayılan 40 px. */
-  kucuk?: boolean;
+  /** #55 §A2: üst üste binen pinlerin kümesi — bu pin kümenin başıdır ("+N" rozeti, dokununca yakınlaşır). */
+  kumeSayisi?: number;
   /** #47 B5: `etiket` türü hapta metnin önündeki çizgi ikon. */
   etiketIkon?: 'yurume' | 'taksi';
   /** ★ puan: aday hapında; diğer türlerde ad etiketinin ikinci satırında (seçili ya da zoom ≥ 16, #30). */
@@ -67,6 +67,12 @@ export type HaritaCizgisi = {
 /** Kamerayı programla taşıma isteği; `sayac` her değişimde yeni animasyon (aynı konuma yeniden gidebilmek için). */
 export type HaritaOdagi = { konum: Konum; zoom: number; sayac: number };
 
+/**
+ * #55 §A5: noktaları görünür alana sığdır (fitToCoordinates). `ust` / `alt`: kenar boşlukları (px) — üstte başlık +
+ * gün seçici, altta harita dolgusunun (panel) üstüne ek pay. Yeni nesne = yeni sığdırma.
+ */
+export type HaritaSigdirma = { noktalar: Konum[]; ust: number; alt: number };
+
 export type HaritaProps = {
   merkez: Konum;
   /** Web'deki Google zoom seviyesiyle aynı ölçek. */
@@ -83,4 +89,10 @@ export type HaritaProps = {
   onBolgeDegisti?: (bolge: HaritaBolgesi) => void;
   /** #47 A1: alt paneli kadar harita dolgusu (Google logosu panelin üstünde kalır). */
   altBosluk?: number;
+  /** #55 §A6: ekranın üstünden bu kadar px (başlık alanı) içine düşen rota hapları gizlenir. */
+  ustBosluk?: number;
+  /** #55 §A5: verilince kamera bu noktaları sığdırır. */
+  sigdir?: HaritaSigdirma;
+  /** #55 §C10: pine uzun basma (haritada en yakın pin, ~28 px içinde). */
+  onPinUzunBas?: (id: string) => void;
 };

@@ -5,10 +5,10 @@ import { Text, View, useWindowDimensions } from 'react-native';
 import { t } from '@/i18n';
 import { renk } from '@/theme';
 
-import { bolgeHesapla, detayGoster, gizliEtiketler, pinCapasi, zoomDelta } from './geo';
+import { bolgeHesapla, detayGoster, gizliEtiketler, kumeHesapla, pinCapasi, zoomDelta } from './geo';
 import { PinIcerigi } from './PinIcerigi';
 import { bacakEtiketPinleri } from './rota';
-import type { HaritaBolgesi, HaritaCizgisi, HaritaOdagi, HaritaProps } from './tipler';
+import type { HaritaBolgesi, HaritaCizgisi, HaritaOdagi, HaritaProps, HaritaSigdirma } from './tipler';
 
 const anahtar = process.env.EXPO_PUBLIC_GOOGLE_MAPS_WEB_KEY;
 
@@ -19,6 +19,26 @@ function OdakGit({ odak }: { odak?: HaritaOdagi }) {
     harita.panTo(odak.konum);
     harita.setZoom(odak.zoom);
   }, [harita, odak]);
+  return null;
+}
+
+/** #55 §A5: noktaları sığdır (fitBounds, kenar boşluklarıyla). */
+function SigdirGit({ sigdir }: { sigdir?: HaritaSigdirma }) {
+  const harita = useMap();
+  useEffect(() => {
+    if (!sigdir || !harita || sigdir.noktalar.length === 0) return;
+    if (sigdir.noktalar.length === 1) {
+      harita.panTo(sigdir.noktalar[0]);
+      harita.setZoom(15);
+      return;
+    }
+    const lat = sigdir.noktalar.map((n) => n.lat);
+    const lng = sigdir.noktalar.map((n) => n.lng);
+    harita.fitBounds(
+      { south: Math.min(...lat), north: Math.max(...lat), west: Math.min(...lng), east: Math.max(...lng) },
+      { top: sigdir.ust, bottom: sigdir.alt, left: 48, right: 48 },
+    );
+  }, [harita, sigdir]);
   return null;
 }
 
@@ -45,12 +65,25 @@ function Cizgi({ cizgi }: { cizgi: HaritaCizgisi }) {
   return null;
 }
 
-// Web'de `altBosluk` yok sayılır (Maps JS logosu konumlanmaz; panel web'de ikincil).
-export function Harita({ merkez, zoom = 14, pinler = [], daireler = [], cizgiler = [], odak, onPinBas, onHaritaBas, onPinSuruklendi, onBolgeDegisti }: HaritaProps) {
+// Web'de `altBosluk` yok sayılır (Maps JS logosu konumlanmaz; panel web'de ikincil); uzun basma yok.
+export function Harita({ merkez, zoom = 14, pinler = [], daireler = [], cizgiler = [], odak, onPinBas, onHaritaBas, onPinSuruklendi, onBolgeDegisti, ustBosluk = 0, sigdir }: HaritaProps) {
   const ekran = useWindowDimensions();
   const [bolge, setBolge] = useState<HaritaBolgesi>(() => bolgeHesapla(merkez, zoomDelta(zoom), zoomDelta(zoom)));
   const tumPinler = useMemo(() => [...pinler, ...bacakEtiketPinleri(cizgiler)], [pinler, cizgiler]);
-  const gizli = useMemo(() => gizliEtiketler(tumPinler, bolge, { genislik: ekran.width, yukseklik: ekran.height }), [tumPinler, bolge, ekran.width, ekran.height]);
+  const olcu = useMemo(() => ({ genislik: ekran.width, yukseklik: ekran.height }), [ekran.width, ekran.height]);
+  // #55 §A2: kümeler ("+N"); küme başına dokununca yakınlaşılır.
+  const kume = useMemo(() => kumeHesapla(tumPinler, bolge, olcu), [tumPinler, bolge, olcu]);
+  const gorunen = useMemo(
+    () => tumPinler.filter((p) => !kume.gizli.has(p.id)).map((p) => (kume.rozet.has(p.id) ? { ...p, kumeSayisi: kume.rozet.get(p.id) } : p)),
+    [tumPinler, kume],
+  );
+  const gizli = useMemo(() => gizliEtiketler(gorunen, bolge, olcu, ustBosluk), [gorunen, bolge, olcu, ustBosluk]);
+  const [kumeSigdir, setKumeSigdir] = useState<HaritaSigdirma | undefined>(undefined);
+  const pinBas = (id: string) => {
+    const uyeler = kume.uyeler.get(id);
+    if (uyeler) setKumeSigdir({ noktalar: uyeler, ust: 160 + ustBosluk, alt: 160 });
+    else onPinBas?.(id);
+  };
 
   if (!anahtar) {
     return (
@@ -84,6 +117,8 @@ export function Harita({ merkez, zoom = 14, pinler = [], daireler = [], cizgiler
           onBolgeDegisti?.(yeni);
         }}>
         <OdakGit odak={odak} />
+        <SigdirGit sigdir={sigdir} />
+        <SigdirGit sigdir={kumeSigdir} />
         {cizgiler.map((c) => (
           <Cizgi key={c.id} cizgi={c} />
         ))}
@@ -97,7 +132,7 @@ export function Harita({ merkez, zoom = 14, pinler = [], daireler = [], cizgiler
             fillOpacity={0}
           />
         ))}
-        {tumPinler.map((p) => {
+        {gorunen.map((p) => {
           const detay = detayGoster(p, bolge.zoom) && !gizli.detay.has(p.id);
           const bacak = p.tur === 'etiket' || p.tur === 'konum';
           const capa =
@@ -111,7 +146,7 @@ export function Harita({ merkez, zoom = 14, pinler = [], daireler = [], cizgiler
               anchorPoint={capa as [string, string]}
               clickable={!bacak}
               onClick={() => {
-                if (!bacak) onPinBas?.(p.id);
+                if (!bacak) pinBas(p.id);
               }}
               onDragEnd={(e) => {
                 const konum = e.latLng;

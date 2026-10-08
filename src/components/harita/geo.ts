@@ -46,17 +46,28 @@ export function kisaAd(ad: string): string {
   return t.length <= ETIKET_EN_FAZLA ? t : `${t.slice(0, ETIKET_EN_FAZLA - 1).trimEnd()}…`;
 }
 
-/** Çakışma önceliği: seçili > listede/atanmış (durak/listede/bos) > öneri > rota bacağı etiketi. */
+/**
+ * #55 §A2 çakışma önceliği: seçili > seçili günün durakları (sıra no küçük önce) > listede (Keşfet) > diğer günler >
+ * atanmamış > öneri > rota bacağı hapı. Seçili gün = tam opak durak pini.
+ */
 export function etiketOnceligi(p: HaritaPini): number {
   if (p.tur === 'etiket') return 0;
-  if (p.secili) return 3;
-  if (p.tur === 'durak' || p.tur === 'listede' || p.tur === 'bos') return 2;
-  return 1;
+  if (p.secili) return 100;
+  if (p.tur === 'durak') {
+    if ((p.opaklik ?? 1) < 1) return 50;
+    const sira = Number(p.etiket);
+    return 80 - (Number.isFinite(sira) ? Math.min(sira, 99) * 0.1 : 9.9);
+  }
+  if (p.tur === 'listede') return 70;
+  if (p.tur === 'otel') return 60;
+  if (p.tur === 'bos') return 40;
+  if (p.tur === 'oneri') return 30;
+  return 20;
 }
 
-/** Daire çapı (px) — PinIcerigi ile aynı sayılar. #53: 40 px (küçük 32 px); seçili turuncu halka dairenin kenarıdır. */
+/** Daire çapı (px) — PinIcerigi ile aynı sayılar. #55 §A1: 32 px, seçili 38 px (siyah halka dairenin kenarıdır). */
 export function pinCapi(p: HaritaPini): number {
-  return p.kucuk ? 32 : 40;
+  return p.secili ? 38 : 32;
 }
 
 const ETIKET_YUKSEKLIK = 16;
@@ -85,14 +96,28 @@ export type GizliEtiketler = {
  * (ad + ★ puan · yorum); çakışırsa #40 gereği önce puan satırı düşer (tek satır dener), hâlâ çakışıyorsa ad da gizlenir.
  * `etiket` türü pinler (rota bacağı hapları) en düşük önceliklidir ve hapın kendisi kutudur.
  */
-export function gizliEtiketler(pinler: HaritaPini[], bolge: HaritaBolgesi | null, ekran: { genislik: number; yukseklik: number }): GizliEtiketler {
+export function gizliEtiketler(
+  pinler: HaritaPini[],
+  bolge: HaritaBolgesi | null,
+  ekran: { genislik: number; yukseklik: number },
+  /** #55 §A6: ekranın üstünden bu kadar px (başlık + gün seçici) içine düşen rota hapları gizlenir. */
+  ustBosluk = 0,
+): GizliEtiketler {
   const gizli: GizliEtiketler = { etiket: new Set(), detay: new Set() };
   if (!bolge || bolge.latDelta <= 0 || bolge.lngDelta <= 0) return gizli;
   const pxLat = ekran.yukseklik / bolge.latDelta;
   const pxLng = ekran.genislik / bolge.lngDelta;
-  type Kutu = { x1: number; y1: number; x2: number; y2: number };
-  const yerlesen: Kutu[] = [];
-  const cakisiyor = (kutu: Kutu) => yerlesen.some((k) => kutu.x1 < k.x2 && kutu.x2 > k.x1 && kutu.y1 < k.y2 && kutu.y2 > k.y1);
+  type Kutu = { x1: number; y1: number; x2: number; y2: number; pin?: string };
+  // #55 §A2: pin daireleri de engeldir — bir etiket başka bir pinin dairesinin üstüne binemez.
+  const yerlesen: Kutu[] = pinler
+    .filter((p) => p.tur !== 'etiket')
+    .map((p) => {
+      const cx = (p.konum.lng - bolge.merkez.lng) * pxLng;
+      const cy = -(p.konum.lat - bolge.merkez.lat) * pxLat;
+      const r = (p.tur === 'otel' ? 34 : p.tur === 'konum' ? 22 : pinCapi(p)) / 2;
+      return { x1: cx - r, y1: cy - r, x2: cx + r, y2: cy + r, pin: p.id };
+    });
+  const cakisiyor = (kutu: Kutu, sahip?: string) => yerlesen.some((k) => k.pin !== sahip && kutu.x1 < k.x2 && kutu.x2 > k.x1 && kutu.y1 < k.y2 && kutu.y2 > k.y1);
   const sirali = pinler
     .filter((p) => (p.tur === 'etiket' ? !!p.etiket : !!p.ad))
     .map((p) => ({ p, oncelik: etiketOnceligi(p) }))
@@ -103,7 +128,8 @@ export function gizliEtiketler(pinler: HaritaPini[], bolge: HaritaBolgesi | null
     if (p.tur === 'etiket') {
       const en = (p.etiket?.length ?? 0) * HAP_HARF_PX + 16;
       const kutu: Kutu = { x1: cx - en / 2, y1: cy - HAP_YUKSEKLIK / 2, x2: cx + en / 2, y2: cy + HAP_YUKSEKLIK / 2 };
-      if (cakisiyor(kutu)) gizli.etiket.add(p.id);
+      const basliktaKalir = kutu.y1 + ekran.yukseklik / 2 < ustBosluk;
+      if (basliktaKalir || cakisiyor(kutu)) gizli.etiket.add(p.id);
       else yerlesen.push(kutu);
       continue;
     }
@@ -115,13 +141,13 @@ export function gizliEtiketler(pinler: HaritaPini[], bolge: HaritaBolgesi | null
     };
     const detayli = detayGoster(p, bolge.zoom);
     const tam = kutuYap(detayli);
-    if (!cakisiyor(tam)) {
+    if (!cakisiyor(tam, p.id)) {
       yerlesen.push(tam);
       continue;
     }
     if (detayli) {
       const sade = kutuYap(false);
-      if (!cakisiyor(sade)) {
+      if (!cakisiyor(sade, p.id)) {
         gizli.detay.add(p.id);
         yerlesen.push(sade);
         continue;
@@ -182,4 +208,40 @@ export function sigdir(noktalar: Konum[], alan: { genislik: number; yukseklik: n
   const zLat = k - g > 0 ? Math.log2((alan.yukseklik * 360 * cos) / ((k - g) * 256)) : 20;
   const zoom = Math.max(11, Math.min(16, Math.min(zLng, zLat) - pay));
   return { konum, zoom };
+}
+
+export type Kumeler = {
+  /** Kümeye katılıp çizilmeyen pinler. */
+  gizli: Set<string>;
+  /** Küme başı → üye sayısı ("+N" rozeti). */
+  rozet: Map<string, number>;
+  /** Küme başı → kümenin tüm konumları (dokununca bunlara yakınlaşılır). */
+  uyeler: Map<string, Konum[]>;
+};
+
+/**
+ * #55 §A2: üst üste binen (aynı / çok yakın) pinler kümelenir — en öncelikli olan küme başıdır ve "+N" rozeti taşır,
+ * diğerleri çizilmez. Rota hapları, konum ve otel kümelenmez. Yakınlaşınca daireler ayrılır, küme kendiliğinden dağılır.
+ */
+export function kumeHesapla(pinler: HaritaPini[], bolge: HaritaBolgesi | null, ekran: { genislik: number; yukseklik: number }): Kumeler {
+  const sonuc: Kumeler = { gizli: new Set(), rozet: new Map(), uyeler: new Map() };
+  if (!bolge || bolge.latDelta <= 0 || bolge.lngDelta <= 0) return sonuc;
+  const pxLat = ekran.yukseklik / bolge.latDelta;
+  const pxLng = ekran.genislik / bolge.lngDelta;
+  const adaylar = pinler
+    .filter((p) => p.tur !== 'etiket' && p.tur !== 'konum' && p.tur !== 'otel')
+    .map((p) => ({ p, x: (p.konum.lng - bolge.merkez.lng) * pxLng, y: -(p.konum.lat - bolge.merkez.lat) * pxLat }))
+    .sort((a, b) => etiketOnceligi(b.p) - etiketOnceligi(a.p) || a.p.id.localeCompare(b.p.id));
+  const baslar: typeof adaylar = [];
+  for (const a of adaylar) {
+    const bas = baslar.find((b) => Math.hypot(a.x - b.x, a.y - b.y) < ((pinCapi(a.p) + pinCapi(b.p)) / 2) * 0.7);
+    if (!bas) {
+      baslar.push(a);
+      continue;
+    }
+    sonuc.gizli.add(a.p.id);
+    sonuc.rozet.set(bas.p.id, (sonuc.rozet.get(bas.p.id) ?? 0) + 1);
+    sonuc.uyeler.set(bas.p.id, [...(sonuc.uyeler.get(bas.p.id) ?? [bas.p.konum]), a.p.konum]);
+  }
+  return sonuc;
 }
