@@ -5,7 +5,7 @@ import type { TempoSonucu } from '@/schedule/tempo';
 
 import type { GunUcNoktalari, Konaklama } from '@/features/konaklama/plan';
 
-import { otelPinleri, programCizgileri } from '../haritaVerisi';
+import { otelPinleri, programCizgileri, rotaNoktalari } from '../haritaVerisi';
 import type { MatrisNoktasi, RotaHaritasi } from '../sorgular';
 
 // sorgular.ts → supabase istemcisi (AsyncStorage); saf fonksiyon testinde gerekmez (jest.mock yukarı taşınır).
@@ -56,7 +56,8 @@ describe('programCizgileri (#51)', () => {
     expect(e[1].kesik).toBe(true);
     expect(e[1].etiket).toBe('14 dk');
     expect(e[1].etiketIkon).toBe('taksi');
-    expect(d[1].noktalar.length).toBe(3);
+    // #61 §5: örnek polyline pinlerden çok uzakta (Kaliforniya) → sapma kontrolü düz çizgiye düşürür; yol kimliği kalır.
+    expect(d[1].noktalar).toEqual([{ lat: A.lat, lng: A.lng }, { lat: B.lat, lng: B.lng }]);
   });
 });
 
@@ -99,3 +100,52 @@ describe('programCizgileri diğer günler (#56)', () => {
     expect(c[0].noktalar).toEqual([{ lat: X.lat, lng: X.lng }, { lat: 41.85, lng: 12.4 }, { lat: Y.lat, lng: Y.lng }]);
   });
 });
+
+// #61 §5: Google yolu pinlere bağlanır; dolambaçlı / kopuk yolda düz çizgi.
+describe('rotaNoktalari (#61)', () => {
+  const a = { lat: 41.9, lng: 12.49 };
+  const z = { lat: 41.901, lng: 12.491 };
+  // Google örneği: (38.5,-120.2) → (40.7,-120.95) → (43.252,-126.453) — pinlerden çok uzak, 3 nokta.
+  it('uçları pinlerden uzak / dolambaçlı yol → düz çizgi', () => {
+    expect(rotaNoktalari(POLY, a, z)).toEqual([a, z]);
+  });
+  it('pinlere yakın yol: uçlara düz parça eklenir, yol korunur', () => {
+    // a'dan 10 m, z'den 10 m uzakta başlayıp biten iki noktalı yol.
+    const yol = kodla([
+      { lat: a.lat + 0.00009, lng: a.lng },
+      { lat: z.lat - 0.00009, lng: z.lng },
+    ]);
+    const n = rotaNoktalari(yol, a, z);
+    expect(n).toHaveLength(4);
+    expect(n[0]).toEqual(a);
+    expect(n[3]).toEqual(z);
+  });
+  it('yol tam pinlerde başlıyorsa ek nokta yok; boş polyline → düz çizgi', () => {
+    expect(rotaNoktalari(kodla([a, z]), a, z)).toHaveLength(2);
+    expect(rotaNoktalari('', a, z)).toEqual([a, z]);
+  });
+});
+
+/** Test yardımcısı: Google kodlu polyline (hassasiyet 1e-5). */
+function kodla(noktalar: { lat: number; lng: number }[]): string {
+  let s = '';
+  let lat = 0;
+  let lng = 0;
+  const sayi = (v: number) => {
+    let n = v < 0 ? ~(v << 1) : v << 1;
+    let c = '';
+    while (n >= 0x20) {
+      c += String.fromCharCode((0x20 | (n & 0x1f)) + 63);
+      n >>= 5;
+    }
+    return c + String.fromCharCode(n + 63);
+  };
+  for (const p of noktalar) {
+    const la = Math.round(p.lat * 1e5);
+    const ln = Math.round(p.lng * 1e5);
+    s += sayi(la - lat) + sayi(ln - lng);
+    lat = la;
+    lng = ln;
+  }
+  return s;
+}

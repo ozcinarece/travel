@@ -119,14 +119,32 @@ export function useOtelOnerileri(girdi: string, oturum: string, merkez: Merkez |
 export type OneriCipi = 'otel' | 'populer' | 'yemek' | 'sanat' | 'manzara';
 export const ONERI_CIPLERI: OneriCipi[] = ['populer', 'yemek', 'sanat', 'manzara'];
 
+/**
+ * #61 §1: aynı görünür bölge + aynı çip → aynı sonuç. İstek merkezi 0,002° (~200 m) ızgaraya, yarıçap 250 m adıma
+ * oturtulur (küçük kaydırma isteği değiştirmez; önbellek anahtarı da bu değerlerdir) ve sonuç puan × yorum sayısına göre
+ * sabit sıralanır (Google'ın POPULARITY sırası çağrıdan çağrıya oynuyordu).
+ */
+export const ONERI_IZGARASI = 0.002;
+export const ONERI_YARICAP_ADIMI_M = 250;
+export function oneriIstegi(merkez: Merkez): Merkez {
+  const yuvarla = (d: number) => Math.round(d / ONERI_IZGARASI) * ONERI_IZGARASI;
+  return { lat: yuvarla(merkez.lat), lng: yuvarla(merkez.lng), yaricapM: Math.max(ONERI_YARICAP_ADIMI_M, Math.round((merkez.yaricapM ?? 3000) / ONERI_YARICAP_ADIMI_M) * ONERI_YARICAP_ADIMI_M) };
+}
+/** Popülerlik puanı: puan × log10(yorum + 1); eşitlikte place_id (deterministik). */
+export function oneriSirala<T extends { place_id: string; puan: number | null; puan_sayisi: number | null }>(yerler: T[]): T[] {
+  const skor = (y: T) => (y.puan ?? 0) * Math.log10((y.puan_sayisi ?? 0) + 1);
+  return [...yerler].sort((a, b) => skor(b) - skor(a) || a.place_id.localeCompare(b.place_id));
+}
+
 /** PRD 3.4 KK4 / #28: çip önerileri görünür bölge için (Nearby Search, POPULARITY). Edge Function 24 sa önbellekler; istemci 1 sa. */
 export function useYakinOneriler(cip: OneriCipi | null, merkez: Merkez | undefined) {
+  const istek = merkez ? oneriIstegi(merkez) : undefined;
   return useQuery({
-    queryKey: ['yakin-oneri', cip, merkez?.lat.toFixed(3), merkez?.lng.toFixed(3), Math.round((merkez?.yaricapM ?? 3000) / 100)],
-    enabled: !!cip && !!merkez,
+    queryKey: ['yakin-oneri', cip, istek?.lat.toFixed(4), istek?.lng.toFixed(4), istek?.yaricapM],
+    enabled: !!cip && !!istek,
     staleTime: 60 * 60 * 1000,
     retry: 1,
-    queryFn: () => yakinYerler({ cip: cip!, merkez: merkez! }),
+    queryFn: async () => oneriSirala(await yakinYerler({ cip: cip!, merkez: istek! })),
   });
 }
 
@@ -172,6 +190,8 @@ export function useHafifYerler(ids: string[], secenek: { saatler?: boolean } = {
   return useQuery({
     queryKey: ['hafif-yerler', saatler ? 'saatli' : 'hafif', sirali],
     enabled: sirali.length > 0,
+    // #61 §3: kimlik kümesi değişince (listeye ekleme) eski adlar yeni cevap gelene kadar kalır — etiketler yok olmaz.
+    placeholderData: (onceki) => onceki,
     staleTime: 24 * 60 * 60 * 1000,
     gcTime: 24 * 60 * 60 * 1000,
     retry: 1,

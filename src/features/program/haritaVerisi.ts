@@ -1,4 +1,5 @@
 // #42: Program tek ekran haritasının pin ve çizgi verisi (saf fonksiyonlar).
+import { mesafeM } from '@/components/harita/geo';
 import type { HaritaCizgisi, HaritaPini, Konum } from '@/components/harita/tipler';
 import type { GunUcNoktalari } from '@/features/konaklama/plan';
 import type { HafifYer } from '@/features/yerler/api';
@@ -14,6 +15,26 @@ import { bacakListesi, type MatrisNoktasi, type RotaHaritasi } from './sorgular'
 export const SOLUK_PIN = 0.4;
 /** #42 KK7: geçilen rota parçası. */
 export const SOLUK_BACAK = 0.35;
+
+/**
+ * #61 §5: Google yolu en yakın yola "oturtur" — pin yoldan uzaktaysa polyline pine değmez, dolambaçlıysa (yakın iki
+ * POI arasında blok turu) pinlerden kopuk bir çizgi kalır. Çizgi uçlara düz parçayla bağlanır; yol kuş uçuşunun
+ * 3 katı + 150 m'den uzunsa (ya da uçları pinlerden 120 m'den uzaksa) düz çizgi kullanılır.
+ */
+export const SAPMA_ORANI = 3;
+export const SAPMA_PAYI_M = 150;
+export const UC_PAYI_M = 120;
+export function rotaNoktalari(polyline: string, a: Konum, z: Konum): Konum[] {
+  const yol = polylineCoz(polyline).filter((n) => Number.isFinite(n.lat) && Number.isFinite(n.lng));
+  if (yol.length < 2) return [a, z];
+  let uzunluk = 0;
+  for (let i = 1; i < yol.length; i++) uzunluk += mesafeM(yol[i - 1], yol[i]);
+  const kus = mesafeM(a, z);
+  const basUzak = mesafeM(a, yol[0]);
+  const sonUzak = mesafeM(yol[yol.length - 1], z);
+  if (uzunluk > kus * SAPMA_ORANI + SAPMA_PAYI_M || basUzak > UC_PAYI_M || sonUzak > UC_PAYI_M) return [a, z];
+  return [...(basUzak > 2 ? [a] : []), ...yol, ...(sonUzak > 2 ? [z] : [])];
+}
 
 export function programPinleri(secenek: {
   /** #56: her günün başlangıç / bitiş oteli. */
@@ -57,7 +78,8 @@ export function programPinleri(secenek: {
       opaklik: seciliGunde || secili ? 1 : SOLUK_PIN,
     };
     if (idx) {
-      const sira = gunSiralari.get(m.id);
+      // #61 §5: numara yalnız seçili günün pinlerinde (diğer günler numarasız küçük nokta; listeyle karışmasın).
+      const sira = seciliGunde ? gunSiralari.get(m.id) : undefined;
       pinler.push({ ...ortak, tur: 'durak', renk: gunRengi(idx), etiket: sira ? String(sira) : '', tamam: seciliGunde && tamamlananMekanIds.has(m.id) });
     } else {
       pinler.push({ ...ortak, tur: 'bos', renk: renk.metin, ...kategoriPini(m.primary_type) });
@@ -136,7 +158,7 @@ export function programCizgileri(secenek: {
         const dk = Math.max(1, Math.round((taksi ? r.drive_seconds! : r.seconds) / 60));
         return {
           id: `${kimlik}:yol`,
-          noktalar: polylineCoz(r.polyline),
+          noktalar: rotaNoktalari(r.polyline, a, z),
           renk: rengi,
           opaklik,
           kesik: !!taksi,

@@ -5,7 +5,8 @@ import { Text, View, useWindowDimensions } from 'react-native';
 import { t } from '@/i18n';
 import { renk } from '@/theme';
 
-import { bolgeHesapla, detayGoster, etiketBolgesi, gizliEtiketler, pinCapasi, zoomDelta } from './geo';
+import { bolgeHesapla, detayGoster, etiketBolgesi, pinCapasi, pinSecimi, zoomDelta } from './geo';
+import { pinZ } from './Harita.native';
 import { PinIcerigi } from './PinIcerigi';
 import { bacakEtiketPinleri } from './rota';
 import type { HaritaBolgesi, HaritaCizgisi, HaritaOdagi, HaritaProps, HaritaSigdirma } from './tipler';
@@ -88,8 +89,9 @@ export function Harita({ merkez, zoom = 14, pinler = [], daireler = [], cizgiler
   const olcu = useMemo(() => ({ genislik: ekran.width, yukseklik: ekran.height }), [ekran.width, ekran.height]);
   // #59 §A: kümeleme yok. #59 §B: etiket hesabı yalnız zoom adımında yenilenir.
   const [etiketBolge, setEtiketBolge] = useState<HaritaBolgesi>(bolge);
-  const gizli = useMemo(() => gizliEtiketler(tumPinler, etiketBolge, olcu, ustBosluk), [tumPinler, etiketBolge, olcu, ustBosluk]);
-  const gorunen = useMemo(() => tumPinler.filter((p) => !(p.tur === 'etiket' && gizli.etiket.has(p.id))), [tumPinler, gizli]);
+  const secim = useMemo(() => pinSecimi(tumPinler, etiketBolge, olcu, ustBosluk), [tumPinler, etiketBolge, olcu, ustBosluk]);
+  const gizli = secim.gizli;
+  const gorunen = useMemo(() => secim.pinler.filter((p) => !(p.tur === 'etiket' && gizli.etiket.has(p.id))), [secim, gizli]);
 
   if (!anahtar) {
     return (
@@ -148,7 +150,7 @@ export function Harita({ merkez, zoom = 14, pinler = [], daireler = [], cizgiler
               key={p.id}
               position={p.konum}
               draggable={p.surukle}
-              zIndex={p.tur === 'konum' ? 5 : p.secili ? 4 : p.tur === 'otel' ? 3 : p.tur === 'durak' || p.tur === 'listede' ? 2 : bacak ? 0 : 1}
+              zIndex={pinZ(p)}
               anchorPoint={capa as [string, string]}
               clickable={!bacak}
               onClick={() => {

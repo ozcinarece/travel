@@ -40,6 +40,8 @@ const BEYAZ = '#ffffff';
 /** Üretilecek ikonlar: ad, renk, px boyut, çizgi kalınlığı (PinIcerigi ile aynı). */
 const istekler = [
   ...kategoriler.map((k) => ({ ikon: k.ikon, renk: k.renk, boyut: 14, kalinlik: 2.1 })),
+  // #61 §4: listeye eklenen mekan = kategori renginde DOLU daire + beyaz kategori ikonu.
+  ...kategoriler.map((k) => ({ ikon: k.ikon, renk: BEYAZ, boyut: 14, kalinlik: 2.1 })),
   { ikon: 'tik', renk: BEYAZ, boyut: 14, kalinlik: 2.4 },
   { ikon: 'ev', renk: BEYAZ, boyut: 16, kalinlik: 2.2 },
   // Taksi bacağı hapı ("taksi 14 dk", #33/#59 C).
