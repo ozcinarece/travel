@@ -1,10 +1,10 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { PixelRatio, StyleSheet, View, useWindowDimensions } from 'react-native';
+import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
+import { Image, PixelRatio, StyleSheet, View, useWindowDimensions } from 'react-native';
 import MapView, { Circle, Marker, Polyline, PROVIDER_GOOGLE } from 'react-native-maps';
 
 import { bolgeHesapla, detayGoster, etiketBolgesi, haritaDolgusu, isaretciImzasi, izlemeGerekli, pinCapasi, pinCapi, pinSecimi, pinZ, zoomDelta } from './geo';
 import { ACIK_HARITA_STILI } from './haritaStili';
-import { PinIcerigi, pinPngAnahtari } from './PinIcerigi';
+import { PinIcerigi, pinGorseli, pinPngAnahtari, TAKSI_SARI } from './PinIcerigi';
 import { PIN_IKONLARI } from './pinIkonlari';
 import { bacakEtiketPinleri, yonOklari } from './rota';
 import type { HaritaBolgesi, HaritaCizgisi, HaritaPini, HaritaProps, Konum } from './tipler';
@@ -18,10 +18,48 @@ function saydam(hex: string, opaklik: number) {
 /** #59 §C (RouteSpec5): seçili gün üç katman — gölge 11 dp %12 · beyaz kenar 9 dp · renk 5,5 dp; diğer günler 3 dp. */
 const ROTA = { golge: 11, kenar: 9, cizgi: 5.5, ince: 3, golgeRenk: '#0f0f0f', golgeOpaklik: 0.12 } as const;
 /**
- * Taksi bacağı: yalnız renk katmanı noktalı (gölge ve beyaz kenar düz, RouteSpec5). Android'de yuvarlak uçlu parça Dot
- * olur (boyu çizgi kalınlığı kadar); boşluk ekran pikselidir → 7 dp piksele çevrilir (~1,3 nokta aralık).
+ * #61 §7: taksi bacağı sarı-siyah şerit (mod rengi, gün renginden bağımsız): siyah 10 dp kenar · sarı 6 dp dolgu ·
+ * siyah 6 dp kesikli şerit (10/14 dp; Android'de desen ekran pikseli olduğundan PixelRatio ile çevrilir). Ok yok.
+ * Rotası henüz gelmemiş yürüyüş kuş uçuşu kesikli (10/8 dp), gün renginde.
  */
-const NOKTALI = [1, Math.round(PixelRatio.get() * 7)];
+const TAKSI = { kenar: 10, dolgu: 6, serit: 6, siyah: '#0f0f0f', sari: TAKSI_SARI } as const;
+const dp = (v: number) => Math.round(PixelRatio.get() * v);
+const SERIT = [dp(10), dp(14)];
+const KESIKLI = [dp(10), dp(8)];
+
+/**
+ * #61 §6: tüm pin PNG'leri (daireler, ok, hap ikonları) harita kurulmadan önce Fresco belleğine alınır; `image`
+ * işaretçileri hazır olana kadar çizilmez (varsayılan kırmızı iğne görünmesin). Paket içi kaynaklar (şemasız ad)
+ * zaten eşzamanlı yüklenir; prefetch reddederse geçilir. En fazla 1,5 sn beklenir.
+ */
+let pinGorselleriHazir = false;
+let pinGorselleriSozu: Promise<void> | null = null;
+export function pinGorselleriniYukle(): Promise<void> {
+  if (!pinGorselleriSozu) {
+    const uriler = Object.values(PIN_IKONLARI)
+      .map((k) => Image.resolveAssetSource(k)?.uri)
+      .filter((u): u is string => !!u && /^(https?|file|asset|data):/.test(u));
+    const zamanAsimi = new Promise<void>((cozul) => setTimeout(cozul, 1500));
+    pinGorselleriSozu = Promise.race([Promise.allSettled(uriler.map((u) => Image.prefetch(u))).then(() => undefined), zamanAsimi]).then(() => {
+      pinGorselleriHazir = true;
+    });
+  }
+  return pinGorselleriSozu;
+}
+function usePinGorselleri(): boolean {
+  const [hazir, setHazir] = useState(pinGorselleriHazir);
+  useEffect(() => {
+    if (hazir) return;
+    let aktif = true;
+    pinGorselleriniYukle().then(() => {
+      if (aktif) setHazir(true);
+    });
+    return () => {
+      aktif = false;
+    };
+  }, [hazir]);
+  return hazir;
+}
 const OK_PNG = PIN_IKONLARI['ok-ffffff'];
 
 /** #59 §B KK3 geliştirme sayacı: işaretçi kurulumu / bitmap yakalaması (yalnız __DEV__'de yazdırılır). */
@@ -45,6 +83,7 @@ export function Harita({
 }: HaritaProps) {
   const ref = useRef<MapView>(null);
   const ekran = useWindowDimensions();
+  const gorsellerHazir = usePinGorselleri();
   const [bolge, setBolge] = useState<HaritaBolgesi>(() => bolgeHesapla(merkez, zoomDelta(zoom), zoomDelta(zoom)));
   // #59 §B: etiket / ok hesabının bölgesi yalnız zoom adımı değişince yenilenir; saf kaydırma işaretçilere dokunmaz.
   const [etiketBolge, setEtiketBolge] = useState<HaritaBolgesi>(bolge);
@@ -150,7 +189,8 @@ export function Harita({
           lineDashPattern={[6, 6]}
         />
       ))}
-      {oklar.map((o) => (
+      {gorsellerHazir &&
+        oklar.map((o) => (
         // #59 §C: ok görseli doğuya bakar; rotation saat yönünde, kuzeyden.
         <Marker
           key={o.id}
@@ -161,13 +201,34 @@ export function Harita({
           anchor={{ x: 0.5, y: 0.5 }}
           tappable={false}
           tracksViewChanges={false}
-          zIndex={0}
-        />
-      ))}
+            zIndex={0}
+          />
+        ))}
       {gorunen.map((p) => {
         // #40: çakışmada önce puan satırı düşer (gizli.detay), sonra ad (gizli.etiket).
         const detay = detayGoster(p, etiketBolge.zoom) && !gizli.detay.has(p.id);
-        return <OzelIsaretci key={p.id} pin={p} etiketGizli={gizli.etiket.has(p.id)} detay={detay} onPinBas={onPinBas} onPinSuruklendi={onPinSuruklendi} />;
+        const etiketGizli = gizli.etiket.has(p.id);
+        const gorsel = pinGorseli(p);
+        if (!gorsel) return <OzelIsaretci key={p.id} pin={p} etiketGizli={etiketGizli} detay={detay} onPinBas={onPinBas} onPinSuruklendi={onPinSuruklendi} />;
+        // #61 §6: daire hazır PNG (görünüm yakalaması yok); ad ayrı, yalnız metinli, dokunulamaz işaretçi. Görseller
+        // belleğe alınmadan hiç çizilmez.
+        if (!gorsellerHazir) return null;
+        return (
+          <Fragment key={p.id}>
+            <Marker
+              coordinate={{ latitude: p.konum.lat, longitude: p.konum.lng }}
+              image={gorsel}
+              anchor={{ x: 0.5, y: 0.5 }}
+              tracksViewChanges={false}
+              opacity={p.opaklik ?? 1}
+              zIndex={pinZ(p)}
+              draggable={p.surukle}
+              onPress={() => onPinBas?.(p.id)}
+              onDragEnd={(e) => onPinSuruklendi?.(p.id, { lat: e.nativeEvent.coordinate.latitude, lng: e.nativeEvent.coordinate.longitude })}
+            />
+            {p.ad && !etiketGizli ? <OzelIsaretci pin={p} etiketGizli={false} detay={detay} yalnizEtiket /> : null}
+          </Fragment>
+        );
       })}
     </MapView>
   );
@@ -178,8 +239,18 @@ function RotaCizgisi({ cizgi: c }: { cizgi: HaritaCizgisi }) {
   const noktalar = useMemo(() => c.noktalar.map((n) => ({ latitude: n.lat, longitude: n.lng })), [c.noktalar]);
   const opaklik = c.opaklik ?? 1;
   const ortak = { coordinates: noktalar, lineCap: 'round' as const, lineJoin: 'round' as const };
-  const desen = c.kesik ? NOKTALI : undefined;
+  // #61 §7: taksi (hap taşıyan kesik bacak) sarı-siyah şerit; rotası gelmemiş yürüyüş kuş uçuşu kesikli.
+  const taksi = c.kesik && c.etiketIkon === 'taksi';
+  const desen = c.kesik && !taksi ? KESIKLI : undefined;
   if (c.ince) return <Polyline {...ortak} lineDashPattern={desen} strokeColor={saydam(c.renk, opaklik)} strokeWidth={ROTA.ince} zIndex={0} />;
+  if (taksi)
+    return (
+      <>
+        <Polyline {...ortak} strokeColor={saydam(TAKSI.siyah, opaklik)} strokeWidth={TAKSI.kenar} zIndex={1} />
+        <Polyline {...ortak} strokeColor={saydam(TAKSI.sari, opaklik)} strokeWidth={TAKSI.dolgu} zIndex={2} />
+        <Polyline {...ortak} lineDashPattern={SERIT} strokeColor={saydam(TAKSI.siyah, opaklik)} strokeWidth={TAKSI.serit} zIndex={3} />
+      </>
+    );
   return (
     <>
       <Polyline {...ortak} strokeColor={saydam(ROTA.golgeRenk, ROTA.golgeOpaklik * opaklik)} strokeWidth={ROTA.golge} zIndex={1} />
@@ -204,9 +275,11 @@ function OzelIsaretci({
   detay,
   onPinBas,
   onPinSuruklendi,
-}: { pin: HaritaPini; etiketGizli: boolean; detay: boolean } & Pick<HaritaProps, 'onPinBas' | 'onPinSuruklendi'>) {
+  yalnizEtiket = false,
+}: { pin: HaritaPini; etiketGizli: boolean; detay: boolean; yalnizEtiket?: boolean } & Pick<HaritaProps, 'onPinBas' | 'onPinSuruklendi'>) {
   const imza = isaretciImzasi(p, etiketGizli, detay);
-  const beklenenPng = pinPngAnahtari(p);
+  // Yalnız etiket işaretçisi metinden ibaret: PNG beklenmez.
+  const beklenenPng = yalnizEtiket ? null : pinPngAnahtari(p);
   // Bitmap'i alınmış (yakalanmış) görünümün imzası; yüklenmiş PNG ikonun anahtarı.
   const [yakalanan, setYakalanan] = useState<string | null>(null);
   const [yuklenenPng, setYuklenenPng] = useState<string | null>(null);
@@ -223,12 +296,14 @@ function OzelIsaretci({
     return () => clearTimeout(z);
   }, [imza, p.tur]);
   const ikonYuklendi = (anahtar: string) => {
-    // onLoad çözümlemede gelir; bir kare sonra çizilmiş olur.
+    // onLoad çözümlemede gelir; bir kare sonra çizilmiş olur. Boyut değişmeden Android bitmap'i yenilemez (§6 teşhisi):
+    // yüklenen PNG anahtarı görünüme 1 px dürtme olarak yansır → yerleşim değişir → yeniden yakalanır.
     setTimeout(() => setYuklenenPng(anahtar), 80);
   };
+  const durt = yuklenenPng !== null && yuklenenPng === beklenenPng;
   const capa = p.tur === 'aday' ? { x: 0.1, y: 0.5 } : p.tur === 'otel' || p.tur === 'etiket' || p.tur === 'konum' || !p.tur ? { x: 0.5, y: 0.5 } : pinCapasi(p, detay);
-  // Bacak etiketi ve kullanıcı konumu dokunulamaz.
-  const bacak = p.tur === 'etiket' || p.tur === 'konum';
+  // Bacak etiketi, kullanıcı konumu ve yalnız-etiket işaretçisi dokunulamaz (dokunuş daire işaretçisine gider).
+  const bacak = p.tur === 'etiket' || p.tur === 'konum' || yalnizEtiket;
   return (
     <Marker
       coordinate={{ latitude: p.konum.lat, longitude: p.konum.lng }}
@@ -240,7 +315,7 @@ function OzelIsaretci({
       // #42 KK5: seçili güne ait olmayan pinler soluk.
       opacity={p.opaklik ?? 1}
       zIndex={pinZ(p)}
-      draggable={p.surukle}
+      draggable={!yalnizEtiket && p.surukle}
       onPress={() => {
         if (!bacak) onPinBas?.(p.id);
       }}
@@ -252,7 +327,7 @@ function OzelIsaretci({
       }>
       {p.tur ? (
         <View collapsable={false}>
-          <PinIcerigi pin={p} etiketGizli={etiketGizli} detay={detay} onYuklendi={ikonYuklendi} />
+          <PinIcerigi pin={p} etiketGizli={etiketGizli} detay={detay} onYuklendi={ikonYuklendi} yalnizEtiket={yalnizEtiket} durt={durt} />
         </View>
       ) : null}
     </Marker>

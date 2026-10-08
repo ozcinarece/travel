@@ -1,6 +1,6 @@
 import { describe, expect, it } from '@jest/globals';
 
-import { pinPngAnahtari } from '../PinIcerigi';
+import { pinGorseli, pinPngAnahtari } from '../PinIcerigi';
 import type { HaritaPini } from '../tipler';
 
 const roma = { lat: 41.9028, lng: 12.4964 };
@@ -24,5 +24,24 @@ describe('pinPngAnahtari', () => {
     expect(pinPngAnahtari(p({ tur: 'etiket', etiket: '4 dk' }))).toBeNull();
     // Üretilmemiş renk: SVG'ye düşer.
     expect(pinPngAnahtari(p({ tur: 'oneri', ikon: 'kamera', kategoriRenk: '#123456' }))).toBeNull();
+  });
+});
+
+// #61 §6: tam pin görseli (daire + ikon) — görünüm yakalaması gerektirmeyen `image` işaretçisi.
+describe('pinGorseli', () => {
+  it('kategori / listede / tamamlanan / otel için PNG; seçili 34 px sürümü', () => {
+    expect(pinGorseli(p({ tur: 'oneri', ikon: 'kamera', kategoriRenk: '#3b6fe0' }))).toBeDefined();
+    expect(pinGorseli(p({ tur: 'bos', ikon: 'agac', kategoriRenk: '#1f8a4c', secili: true }))).toBeDefined();
+    expect(pinGorseli(p({ tur: 'listede', ikon: 'muze', kategoriRenk: '#8a4fd6' }))).toBeDefined();
+    expect(pinGorseli(p({ tur: 'listede' }))).toBeDefined();
+    expect(pinGorseli(p({ tur: 'durak', etiket: '2', tamam: true }))).toBeDefined();
+    expect(pinGorseli(p({ tur: 'otel' }))).toBeDefined();
+  });
+  it('numaralı durak, konum, aday, hap ve bilinmeyen ikon görünüm olarak çizilir (undefined)', () => {
+    expect(pinGorseli(p({ tur: 'durak', etiket: '2' }))).toBeUndefined();
+    expect(pinGorseli(p({ tur: 'konum' }))).toBeUndefined();
+    expect(pinGorseli(p({ tur: 'aday', etiket: 'Otel' }))).toBeUndefined();
+    expect(pinGorseli(p({ tur: 'etiket', etiket: '4 dk', etiketIkon: 'taksi' }))).toBeUndefined();
+    expect(pinGorseli(p({ tur: 'oneri', ikon: 'pin' }))).toBeUndefined();
   });
 });
