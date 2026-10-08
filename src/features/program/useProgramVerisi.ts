@@ -3,6 +3,7 @@
 import { useMemo } from 'react';
 
 import type { Konum } from '@/components/harita/tipler';
+import { ucNoktalari, type GunUcNoktalari, type Konaklama } from '@/features/konaklama/plan';
 import type { Durak, Gun, Mekan, Seyahat } from '@/lib/tipler';
 import type { YuruyusKaynagi } from '@/schedule/program';
 import { kestirimYuruyusSn, tempoHesapla, type BacakKaynagi, type TempoEtiketi, type TempoSonucu } from '@/schedule/tempo';
@@ -13,8 +14,13 @@ import { bacakKaynagi, bacakListesi, matrisNoktalari, useRotaBacaklari, useYuruy
 const saat = (tm: string | null | undefined, varsayilan: string) => (tm ? tm.slice(0, 5) : varsayilan);
 
 export type ProgramVerisi = {
+  /** #56: seçili günün başlangıç oteli (yoksa null). */
   otel: Konum | null;
-  /** Yürüyüş matrisi + gerçek bacaklar (anahtar: place_id | 'hotel'). */
+  /** #56: seçili günün başlangıç / bitiş noktaları (anahtar + konum). */
+  seciliUclar: GunUcNoktalari;
+  /** #56: her günün başlangıç / bitiş noktaları. */
+  gunUclari: Map<string, GunUcNoktalari>;
+  /** Yürüyüş matrisi + gerçek bacaklar (anahtar: place_id | stay:<id>). */
   yuruyus: YuruyusKaynagi;
   matrisYukleniyor: boolean;
   matrisHata: boolean;
@@ -29,31 +35,47 @@ export type ProgramVerisi = {
   etiketler: Map<string, TempoEtiketi | 'bos'>;
   /** Seçili günün sıralı mekanları (atlananlar hariç). */
   seciliSira: Mekan[];
-  /** otel → seçili sıra → otel (route-legs noktaları). */
+  /** başlangıç oteli → seçili sıra → bitiş oteli (route-legs noktaları). */
   seciliNoktalar: MatrisNoktasi[];
 };
 
-export function useProgramVerisi(secenek: { seyahat: Seyahat; gunler: Gun[]; duraklar: Durak[]; mekanlar: Mekan[]; seciliGun: Gun | undefined }): ProgramVerisi {
-  const { seyahat, gunler, duraklar, mekanlar, seciliGun } = secenek;
-  const otel = useMemo(
-    () => (seyahat.hotel_lat !== null && seyahat.hotel_lng !== null ? { lat: seyahat.hotel_lat, lng: seyahat.hotel_lng } : null),
-    [seyahat.hotel_lat, seyahat.hotel_lng],
-  );
+export function useProgramVerisi(secenek: {
+  seyahat: Seyahat;
+  gunler: Gun[];
+  duraklar: Durak[];
+  mekanlar: Mekan[];
+  seciliGun: Gun | undefined;
+  /** #56: seyahatin otelleri (stays). */
+  konaklamalar: Konaklama[];
+}): ProgramVerisi {
+  const { seyahat, gunler, duraklar, mekanlar, seciliGun, konaklamalar } = secenek;
+  // #56: her günün başlangıç / bitiş oteli (days.start_stay_id / end_stay_id).
+  const gunUclari = useMemo(() => {
+    const k = new Map(konaklamalar.map((x) => [x.id, x]));
+    return new Map(gunler.map((g) => [g.id, ucNoktalari(g, k)]));
+  }, [gunler, konaklamalar]);
+  const seciliUclar = useMemo(() => (seciliGun ? (gunUclari.get(seciliGun.id) ?? BOS_UCLAR) : BOS_UCLAR), [seciliGun, gunUclari]);
+  const otel = useMemo(() => (seciliUclar.baslangic ? { lat: seciliUclar.baslangic.lat, lng: seciliUclar.baslangic.lng } : null), [seciliUclar]);
   const mekanIle = useMemo(() => new Map(mekanlar.map((m) => [m.id, m])), [mekanlar]);
 
-  // Tek matris: atanmış duraklar + otel (≤ 25 nokta); gelene kadar kestirim "~".
+  // Tek matris: günlerin otelleri + atanmış duraklar (≤ 25 nokta); gelene kadar kestirim "~".
+  const oteller = useMemo(() => {
+    const n: { key: string; lat: number; lng: number }[] = [];
+    for (const u of gunUclari.values()) for (const o of [u.baslangic, u.bitis]) if (o && !n.some((x) => x.key === o.key)) n.push(o);
+    return n.slice(0, 4);
+  }, [gunUclari]);
   const atanmisMekanlar = useMemo(() => {
     const atanan = new Set(duraklar.filter((d) => !d.skipped).map((d) => d.place_ref));
-    return mekanlar.filter((m) => atanan.has(m.id)).slice(0, 24);
-  }, [duraklar, mekanlar]);
-  const matris = useYuruyusMatrisi(seyahat.id, matrisNoktalari(otel, atanmisMekanlar));
+    return mekanlar.filter((m) => atanan.has(m.id)).slice(0, 25 - oteller.length);
+  }, [duraklar, mekanlar, oteller.length]);
+  const matris = useYuruyusMatrisi(seyahat.id, matrisNoktalari(oteller, atanmisMekanlar));
 
   const konumKey = useMemo(() => {
     const k = new Map<string, string>();
-    if (otel) k.set(`${otel.lat},${otel.lng}`, 'hotel');
+    for (const o of oteller) k.set(`${o.lat},${o.lng}`, o.key);
     for (const m of mekanlar) k.set(`${m.lat},${m.lng}`, m.place_id);
     return k;
-  }, [mekanlar, otel]);
+  }, [mekanlar, oteller]);
 
   // #51: tek sıra kaynağı order_key — liste, pin numaraları ve rota bacakları aynı sırayı kullanır. Otomatik günde
   // order_key zaten §5.1 sırasına yazılır (Program ekranı); ayrı bir yeniden sıralama haritayı listeden ayırıyordu.
@@ -67,8 +89,10 @@ export function useProgramVerisi(secenek: { seyahat: Seyahat; gunler: Gun[]; dur
   }, [seciliGun, duraklar, mekanIle]);
   const seciliNoktalar = useMemo((): MatrisNoktasi[] => {
     const n = seciliSira.map((m) => ({ key: m.place_id, lat: m.lat, lng: m.lng }));
-    return otel && n.length > 0 ? [{ key: 'hotel', ...otel }, ...n, { key: 'hotel', ...otel }] : n;
-  }, [seciliSira, otel]);
+    if (n.length === 0) return n;
+    const { baslangic: b, bitis: s } = seciliUclar;
+    return [...(b ? [{ key: b.key, lat: b.lat, lng: b.lng }] : []), ...n, ...(s ? [{ key: s.key, lat: s.lat, lng: s.lng }] : [])];
+  }, [seciliSira, seciliUclar]);
   const rota = useRotaBacaklari(seyahat.id, bacakListesi(seciliNoktalar));
 
   const yuruyus = useMemo(() => bacakKaynagi(matris.yuruyus, rota.rotalar), [matris.yuruyus, rota.rotalar]);
@@ -89,11 +113,13 @@ export function useProgramVerisi(secenek: { seyahat: Seyahat; gunler: Gun[]; dur
         .sort((a, b) => (a.order_key < b.order_key ? -1 : 1))
         .map((d) => ({ durak: d, mekan: mekanIle.get(d.place_ref) }))
         .filter((x): x is { durak: Durak; mekan: Mekan } => !!x.mekan);
+      const u = gunUclari.get(g.id);
       sonuc.set(
         g.id,
         tempoHesapla({
           duraklar: gunDuraklari.map(({ durak, mekan }) => ({ id: mekan.id, konum: { lat: mekan.lat, lng: mekan.lng }, dakika: durak.minutes })),
-          otel,
+          otel: u?.baslangic ? { lat: u.baslangic.lat, lng: u.baslangic.lng } : null,
+          bitisOtel: u?.bitis ? { lat: u.bitis.lat, lng: u.bitis.lng } : null,
           baslangic: saat(g.start_time, saat(seyahat.day_start, '09:00')),
           bitis: saat(g.end_time, saat(seyahat.day_end, '20:00')),
           bacak,
@@ -103,7 +129,7 @@ export function useProgramVerisi(secenek: { seyahat: Seyahat; gunler: Gun[]; dur
       );
     }
     return sonuc;
-  }, [gunler, duraklar, mekanIle, otel, seyahat.day_start, seyahat.day_end, bacak]);
+  }, [gunler, duraklar, mekanIle, gunUclari, seyahat.day_start, seyahat.day_end, bacak]);
 
   const etiketler = useMemo(() => {
     const e = new Map<string, TempoEtiketi | 'bos'>();
@@ -116,6 +142,8 @@ export function useProgramVerisi(secenek: { seyahat: Seyahat; gunler: Gun[]; dur
 
   return {
     otel,
+    seciliUclar,
+    gunUclari,
     yuruyus,
     matrisYukleniyor: matris.yukleniyor,
     matrisHata: matris.hata,
@@ -129,3 +157,5 @@ export function useProgramVerisi(secenek: { seyahat: Seyahat; gunler: Gun[]; dur
     seciliNoktalar,
   };
 }
+
+const BOS_UCLAR: GunUcNoktalari = { baslangic: null, bitis: null };

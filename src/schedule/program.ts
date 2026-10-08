@@ -63,7 +63,13 @@ export type Program = {
 export function programHesapla(secenek: {
   baslangic: string;
   duraklar: ProgramDuragi[];
+  /** Günün başlangıç noktası (otel); null = ilk duraktan başla. */
   otel: Konum | null;
+  /** #56 bitiş noktası; verilmezse başlangıca dönüş. null = son durakta biter. */
+  bitisOtel?: Konum | null;
+  /** #56 matris anahtarları (stay:<id>); varsayılan 'hotel'. */
+  otelKey?: string;
+  bitisKey?: string;
   yuruyus: YuruyusKaynagi;
   /** Bugünün programıysa seyahat dilimindeki şu an (dakika); değilse null. */
   simdiDk: number | null;
@@ -71,6 +77,9 @@ export function programHesapla(secenek: {
   buradaId?: string | null;
 }): Program {
   const { duraklar, otel, simdiDk } = secenek;
+  const bitisOtel = secenek.bitisOtel === undefined ? otel : secenek.bitisOtel;
+  const otelKey = secenek.otelKey ?? 'hotel';
+  const bitisKey = secenek.bitisKey ?? (secenek.bitisOtel === undefined ? otelKey : 'hotel');
   const buradaId = secenek.buradaId ?? null;
   const bacak = (aKey: string, aKonum: Konum, bKey: string, bKonum: Konum): Yuruyus => {
     const c = secenek.yuruyus(aKey, bKey);
@@ -86,7 +95,7 @@ export function programHesapla(secenek: {
 
   const baslangicDk = saatDakika(secenek.baslangic);
   const satirlar: ProgramSatiri[] = [];
-  let oncekiKey = otel ? 'hotel' : null;
+  let oncekiKey = otel ? otelKey : null;
   let oncekiKonum = otel;
   let saat = baslangicDk;
   let yuruyusSn = 0;
@@ -144,9 +153,11 @@ export function programHesapla(secenek: {
     oncekiKonum = d.konum;
   }
 
+  // Son duraktan günün bitiş noktasına (aynı otele dönüş ya da taşınma günü yeni otel, #56).
   let oteleDonus: Yuruyus | null = null;
-  if (otel && oncekiKey && oncekiKey !== 'hotel' && oncekiKonum) {
-    oteleDonus = bacak(oncekiKey, oncekiKonum, 'hotel', otel);
+  const enAzBirDurak = oncekiKey !== null && oncekiKey !== otelKey;
+  if (bitisOtel && oncekiKey && oncekiKonum && enAzBirDurak) {
+    oteleDonus = bacak(oncekiKey, oncekiKonum, bitisKey, bitisOtel);
     topla(oteleDonus);
   }
   const bitisDk = saat + (oteleDonus ? Math.round(oteleDonus.sn / 60) : 0);
@@ -167,15 +178,23 @@ export function yuruyusDk(y: Yuruyus): number {
  * T7: elle sıralanmış günde yeni durak en ucuz ekleme noktasına girer.
  * Dönen değer: yeni durağın gireceği indeks (0 = en başa).
  */
-export function enUcuzEklemeIndeksi(sira: { key: string; konum: Konum }[], yeni: { key: string; konum: Konum }, otel: Konum | null, yuruyus: YuruyusKaynagi): number {
+export function enUcuzEklemeIndeksi(
+  sira: { key: string; konum: Konum }[],
+  yeni: { key: string; konum: Konum },
+  otel: Konum | null,
+  yuruyus: YuruyusKaynagi,
+  /** #56: başlangıç anahtarı ve (varsa) günün bitiş noktası — sona eklemede son bacak da hesaba katılır. */
+  uclar?: { otelKey?: string; bitis?: { key: string; konum: Konum } | null },
+): number {
   const maliyet = (a: { key: string; konum: Konum }, b: { key: string; konum: Konum }) => yuruyus(a.key, b.key)?.sn ?? kestirimYuruyusSn(a.konum, b.konum);
-  const noktalar = otel ? [{ key: 'hotel', konum: otel }, ...sira] : sira;
+  const noktalar = otel ? [{ key: uclar?.otelKey ?? 'hotel', konum: otel }, ...sira] : sira;
+  const bitis = uclar?.bitis === undefined ? (otel ? noktalar[0] : null) : uclar.bitis;
   if (noktalar.length === 0) return 0;
   let enIyi = 0;
   let enKisa = Infinity;
   for (let i = 0; i <= sira.length; i++) {
     const once = noktalar[otel ? i : i - 1];
-    const sonra = sira[i];
+    const sonra = sira[i] ?? (sira.length > 0 || otel ? (bitis ?? undefined) : undefined);
     let ek = 0;
     if (once) ek += maliyet(once, yeni);
     if (sonra) ek += maliyet(yeni, sonra);

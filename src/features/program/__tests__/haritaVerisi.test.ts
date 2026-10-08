@@ -3,7 +3,9 @@ import { describe, expect, it, jest } from '@jest/globals';
 import type { Gun, Mekan } from '@/lib/tipler';
 import type { TempoSonucu } from '@/schedule/tempo';
 
-import { programCizgileri } from '../haritaVerisi';
+import type { GunUcNoktalari, Konaklama } from '@/features/konaklama/plan';
+
+import { otelPinleri, programCizgileri } from '../haritaVerisi';
 import type { MatrisNoktasi, RotaHaritasi } from '../sorgular';
 
 // sorgular.ts → supabase istemcisi (AsyncStorage); saf fonksiyon testinde gerekmez (jest.mock yukarı taşınır).
@@ -25,7 +27,7 @@ const POLY = '_p~iF~ps|U_ulLnnqC_mqNvxq`@';
 const rota = (from: string, to: string) => ({ from_key: from, to_key: to, seconds: 1980, meters: 2400, mode: 'WALK' as const, polyline: POLY, drive_seconds: null, drive_meters: null });
 
 function cizgiler(noktalar: MatrisNoktasi[], rotalar: RotaHaritasi) {
-  return programCizgileri({ otel, mekanIle: new Map<string, Mekan>(), gunler: [gun], tempolar, seciliGunId: 'g1', seciliNoktalar: noktalar, rotalar, bacak, gecilenBacak: 0 });
+  return programCizgileri({ gunUclari: new Map(), mekanIle: new Map<string, Mekan>(), gunler: [gun], tempolar, seciliGunId: 'g1', seciliNoktalar: noktalar, rotalar, bacak, gecilenBacak: 0 });
 }
 
 describe('programCizgileri (#51)', () => {
@@ -49,5 +51,43 @@ describe('programCizgileri (#51)', () => {
     expect(d[1].kesik).toBe(false);
     expect(d[1].etiket).toBe('33 dk');
     expect(d[1].noktalar.length).toBe(3);
+  });
+});
+
+// #56: gün bazlı otel — pinler ve diğer günlerin rotası.
+const kon = (id: string, lat: number, lng: number): Konaklama => ({ id, trip_id: 't', place_id: null, lat, lng, label: null });
+const uc = (k: Konaklama | null) => (k ? { key: `stay:${k.id}`, lat: k.lat, lng: k.lng, konaklama: k } : null);
+const X = kon('x', 41.9, 12.49);
+const Y = kon('y', 41.8, 12.3);
+const gunlerIki = [{ id: 'g1', index: 1 }, { id: 'g2', index: 2 }, { id: 'g3', index: 3 }] as unknown as Gun[];
+const uclar = new Map<string, GunUcNoktalari>([
+  ['g1', { baslangic: uc(X), bitis: uc(X) }],
+  ['g2', { baslangic: uc(X), bitis: uc(Y) }],
+  ['g3', { baslangic: uc(Y), bitis: uc(Y) }],
+]);
+
+describe('otelPinleri (#56)', () => {
+  it('aynı otel tek pin; seçili günün otelleri tam, diğerleri soluk', () => {
+    const p1 = otelPinleri(gunlerIki, uclar, 'g1');
+    expect(p1.map((p) => [p.id, p.opaklik])).toEqual([
+      ['otel:stay:x', 1],
+      ['otel:stay:y', 0.4],
+    ]);
+    // Taşınma günü iki otel de tam renk.
+    expect(otelPinleri(gunlerIki, uclar, 'g2').map((p) => p.opaklik)).toEqual([1, 1]);
+  });
+
+  it('otelsiz seyahatte pin yok', () => {
+    expect(otelPinleri(gunlerIki, new Map(), 'g1')).toEqual([]);
+  });
+});
+
+describe('programCizgileri diğer günler (#56)', () => {
+  it('rota günün kendi başlangıç ve bitiş otelini kullanır', () => {
+    const mekanIle = new Map<string, Mekan>([['a', { id: 'a', lat: 41.85, lng: 12.4 } as unknown as Mekan]]);
+    const tp = new Map<string, TempoSonucu>([['g2', { sira: ['a'] } as unknown as TempoSonucu]]);
+    const c = programCizgileri({ gunUclari: uclar, mekanIle, gunler: gunlerIki, tempolar: tp, seciliGunId: 'g1', seciliNoktalar: [], rotalar: {}, bacak, gecilenBacak: 0 });
+    expect(c).toHaveLength(1);
+    expect(c[0].noktalar).toEqual([{ lat: X.lat, lng: X.lng }, { lat: 41.85, lng: 12.4 }, { lat: Y.lat, lng: Y.lng }]);
   });
 });

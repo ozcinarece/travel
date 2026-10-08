@@ -86,7 +86,12 @@ function degisiklikMetni(d: Degisiklik, mekanAdi: (placesId: string | null | und
       if (sil) return 'bir günü sildi';
       if (d.field === 'start_time') return `gün başlangıcını ${String(d.new ?? '').slice(0, 5)} yaptı`;
       if (d.field === 'order_manual') return d.new ? 'sırayı elle düzenledi' : 'en kısa rotaya dizdi';
+      if (d.field === 'start_stay_id' || d.field === 'end_stay_id') return 'günün otelini değiştirdi';
       return 'günü değiştirdi';
+    case 'stays':
+      if (ekle) return 'bir otel ekledi';
+      if (sil) return 'bir oteli kaldırdı';
+      return 'bir oteli değiştirdi';
     case 'members':
       if (ekle) return 'katıldı';
       if (sil) return 'ayrıldı';

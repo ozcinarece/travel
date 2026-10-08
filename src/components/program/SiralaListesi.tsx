@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { Animated, PanResponder, Pressable, ScrollView, StyleSheet, Text, View, type PanResponderInstance } from 'react-native';
 
 import { useSayfaKaydirma } from '@/components/harita/AltSayfa';
@@ -25,7 +25,6 @@ export type SiralaSatiri = {
 /** #55 §C8: durak satırı en az 44 px (ad 2 satıra kadar); üstündeki yürüyüş satırı 16 px. */
 export const DURAK_EN_AZ = 44;
 export const ARA_YUKSEKLIK = 16;
-const BAS_YUKSEKLIK = 32;
 /** Kenara bu kadar yaklaşınca liste kendiliğinden kayar. */
 const KENAR_PAYI = 48;
 const KAYMA_HIZI = 7;
@@ -63,9 +62,9 @@ export function birakmaCizgisiY(baslangic: number, hedef: number, yuvalar: Yuva[
 
 type Props = {
   satirlar: SiralaSatiri[];
-  /** "Otel · 09:00" */
-  basSatiri: string;
-  basIkon: IkonAdi;
+  /** #56: ilk satır (Başlangıç) ve son satır (Bitiş / Otele dönüş). */
+  bas: ReactNode;
+  son?: ReactNode;
   yukseklik: number;
   onTasi: (from: number, to: number) => void;
   onSatirBas: (id: string) => void;
@@ -80,7 +79,7 @@ type Props = {
  * ikonu · ad [2 satır] + "09:00 – 09:45 · 45 dk" · ≡), aralarda 16 px yürüyüş satırı. Satıra uzun bas → menü. Sürükleme yalnız ≡'den: tutulan satır kalkar (turuncu kenar, gölge), bırakılacak yer
  * turuncu 3 px çizgi; kenara yaklaşınca liste kendiliğinden kayar.
  */
-export function SiralaListesi({ satirlar, basSatiri, basIkon, yukseklik, onTasi, onSatirBas, onUzunBas, numaraRengi = renk.metin }: Props) {
+export function SiralaListesi({ satirlar, bas, son, yukseklik, onTasi, onSatirBas, onUzunBas, numaraRengi = renk.metin }: Props) {
   const [surukle, setSurukle] = useState<{ index: number; hedef: number } | null>(null);
   // Satır yükseklikleri içeriğe göre (ad 2 satır) — yuvalar ölçülür.
   const [yuvalar, setYuvalar] = useState<Yuva[]>([]);
@@ -195,10 +194,7 @@ export function SiralaListesi({ satirlar, basSatiri, basIkon, yukseklik, onTasi,
           durum.current.icerikH = h;
         }}
         contentContainerStyle={{ paddingBottom: 8 }}>
-        <View style={s.basSatir}>
-          <Ikon ad={basIkon} boyut={16} renk={renk.ikincil} kalinlik={2.2} />
-          <Text style={s.basMetin}>{basSatiri}</Text>
-        </View>
+        {bas}
         {satirlar.map((x, i) => {
           const tutulan = surukle?.index === i;
           return (
@@ -235,6 +231,7 @@ export function SiralaListesi({ satirlar, basSatiri, basIkon, yukseklik, onTasi,
             </View>
           );
         })}
+        {son ? <View style={{ marginTop: 6 }}>{son}</View> : null}
         {surukle && surukle.hedef !== surukle.index ? <View pointerEvents="none" style={[s.birakmaCizgisi, { top: birakmaCizgisiY(surukle.index, surukle.hedef, yuvalar) }]} /> : null}
       </ScrollView>
     </View>
@@ -279,8 +276,6 @@ function SiraSatiri({
 }
 
 const s = StyleSheet.create({
-  basSatir: { height: BAS_YUKSEKLIK, flexDirection: 'row', alignItems: 'center', gap: 8, paddingLeft: 6 },
-  basMetin: { fontFamily: yazi.kalin, fontSize: 13, color: renk.ikincil },
   ara: { height: ARA_YUKSEKLIK, flexDirection: 'row', alignItems: 'center', gap: 4, paddingLeft: 48 },
   araMetin: { fontFamily: yazi.normal, fontSize: 11, lineHeight: 14, color: renk.ikincil },
   satir: { minHeight: DURAK_EN_AZ, flexDirection: 'row', alignItems: 'center', borderRadius: 12, backgroundColor: renk.zemin },

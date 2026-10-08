@@ -1,5 +1,6 @@
 // #42: Program tek ekran haritasının pin ve çizgi verisi (saf fonksiyonlar).
 import type { HaritaCizgisi, HaritaPini, Konum } from '@/components/harita/tipler';
+import type { GunUcNoktalari } from '@/features/konaklama/plan';
 import type { HafifYer } from '@/features/yerler/api';
 import { kategoriPini } from '@/lib/pinIkonu';
 import { polylineCoz } from '@/lib/polyline';
@@ -15,7 +16,8 @@ export const SOLUK_PIN = 0.4;
 export const SOLUK_BACAK = 0.35;
 
 export function programPinleri(secenek: {
-  otel: Konum | null;
+  /** #56: her günün başlangıç / bitiş oteli. */
+  gunUclari: Map<string, GunUcNoktalari>;
   mekanlar: Mekan[];
   duraklar: Durak[];
   gunler: Gun[];
@@ -29,7 +31,7 @@ export function programPinleri(secenek: {
   /** Kullanıcı konumu (yalnız seyahat gününde). */
   konum: Konum | null;
 }): HaritaPini[] {
-  const { otel, mekanlar, duraklar, gunler, tempolar, adlar, seciliGunId, seciliMekanId, tamamlananMekanIds, konum } = secenek;
+  const { gunUclari, mekanlar, duraklar, gunler, tempolar, adlar, seciliGunId, seciliMekanId, tamamlananMekanIds, konum } = secenek;
   const durakIle = new Map(duraklar.map((d) => [d.place_ref, d]));
   const gunIndex = new Map(gunler.map((g) => [g.id, g.index]));
   // #30: pin numarası = gün içi sıra (§5.1 ya da elle); rota çizgisiyle okunur.
@@ -37,7 +39,7 @@ export function programPinleri(secenek: {
   for (const g of gunler) tempolar.get(g.id)?.sira.forEach((mekanId, i) => gunSiralari.set(mekanId, i + 1));
 
   const pinler: HaritaPini[] = [];
-  if (otel) pinler.push({ id: 'otel', tur: 'otel', konum: otel, renk: renk.metin });
+  pinler.push(...otelPinleri(gunler, gunUclari, seciliGunId));
   for (const m of mekanlar) {
     const d = durakIle.get(m.id);
     const idx = d ? gunIndex.get(d.day_id) : undefined;
@@ -65,8 +67,32 @@ export function programPinleri(secenek: {
   return pinler;
 }
 
+/**
+ * #56 §6: her otel tek pin (aynı otel birden çok günde kullanılsa da). Seçili günün başlangıç / bitiş otelleri tam
+ * renk, diğer günlerinkiler soluk.
+ */
+export function otelPinleri(gunler: Gun[], gunUclari: Map<string, GunUcNoktalari>, seciliGunId: string | undefined): HaritaPini[] {
+  const oteller = new Map<string, { konum: Konum; secili: boolean }>();
+  for (const g of gunler) {
+    const u = gunUclari.get(g.id);
+    for (const n of [u?.baslangic, u?.bitis]) {
+      if (!n) continue;
+      const onceki = oteller.get(n.key);
+      const secili = g.id === seciliGunId || !!onceki?.secili;
+      oteller.set(n.key, { konum: { lat: n.lat, lng: n.lng }, secili });
+    }
+  }
+  return [...oteller].map(([key, o]) => ({
+    id: `otel:${key}`,
+    tur: 'otel' as const,
+    konum: o.konum,
+    renk: renk.metin,
+    opaklik: o.secili ? 1 : SOLUK_PIN,
+  }));
+}
+
 export function programCizgileri(secenek: {
-  otel: Konum | null;
+  gunUclari: Map<string, GunUcNoktalari>;
   mekanIle: Map<string, Mekan>;
   gunler: Gun[];
   tempolar: Map<string, TempoSonucu>;
@@ -77,14 +103,16 @@ export function programCizgileri(secenek: {
   /** #42 KK7: seçili günde geçilen bacak sayısı (otel→1 dahil); bu kadar bacak soluk çizilir. */
   gecilenBacak: number;
 }): HaritaCizgisi[] {
-  const { otel, mekanIle, gunler, tempolar, seciliGunId, seciliNoktalar, rotalar, bacak, gecilenBacak } = secenek;
+  const { gunUclari, mekanIle, gunler, tempolar, seciliGunId, seciliNoktalar, rotalar, bacak, gecilenBacak } = secenek;
   return gunler.flatMap((g): HaritaCizgisi[] => {
     const tp = tempolar.get(g.id);
     if (!tp || tp.sira.length === 0) return [];
     const rengi = gunRengi(g.index);
     if (g.id !== seciliGunId) {
       const noktalar = tp.sira.map((mekanId) => mekanIle.get(mekanId)).filter((m): m is Mekan => !!m).map((m) => ({ lat: m.lat, lng: m.lng }));
-      const yol = otel ? [otel, ...noktalar, otel] : noktalar;
+      const u = gunUclari.get(g.id);
+      const uc = (n: GunUcNoktalari['baslangic'] | undefined) => (n ? [{ lat: n.lat, lng: n.lng }] : []);
+      const yol = [...uc(u?.baslangic), ...noktalar, ...uc(u?.bitis)];
       // #55 §D11: diğer günlerin rotası %35.
       return yol.length >= 2 ? [{ id: `rota:${g.id}`, noktalar: yol, renk: rengi, opaklik: 0.35 }] : [];
     }

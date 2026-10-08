@@ -102,6 +102,9 @@ export function useSeyahatCanli(seyahatId: string | undefined) {
       .on('postgres_changes', { event: '*', schema: 'public', table: 'days', filter: `trip_id=eq.${seyahatId}` }, () =>
         qc.invalidateQueries({ queryKey: ['gunler', seyahatId] }),
       )
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'stays', filter: `trip_id=eq.${seyahatId}` }, () =>
+        qc.invalidateQueries({ queryKey: ['konaklamalar', seyahatId] }),
+      )
       .on('postgres_changes', { event: '*', schema: 'public', table: 'members', filter: `trip_id=eq.${seyahatId}` }, () =>
         qc.invalidateQueries({ queryKey: ['uyeler', seyahatId] }),
       )

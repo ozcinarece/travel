@@ -15,7 +15,7 @@ export function SeyahatSatiri({ seyahat, benimId, onPress }: Props) {
     seyahat.start_date && seyahat.end_date ? tarihAraligi(seyahat.start_date, seyahat.end_date) : t('seyahatler.tarihsiz'),
   ];
   if (seyahat.members.length > 1) parcalar.push(t('seyahatler.kisi', { n: seyahat.members.length }));
-  if (benimki && !seyahat.hotel_place_id) parcalar.push(t('seyahatler.otelYok'));
+  if (benimki && !(seyahat.stays?.[0]?.count ?? (seyahat.hotel_place_id ? 1 : 0))) parcalar.push(t('seyahatler.otelYok'));
   if (!benimki && sahip) parcalar.push(t('seyahatler.davetEden', { ad: sahip.display_name }));
 
   return (

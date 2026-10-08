@@ -2,6 +2,7 @@
 import { useMemo } from 'react';
 
 import { useDuraklar, useGunler } from '@/features/gunler/sorgular';
+import { ucListesi, useGunUclari } from '@/features/konaklama/sorgular';
 import { useMekanlar } from '@/features/mekanlar/sorgular';
 import { useSeyahat } from '@/features/seyahatler/sorgular';
 import { useHafifYerler } from '@/features/yerler/api';
@@ -27,10 +28,10 @@ export function useAktifProgram(ozet: SeyahatOzet | undefined) {
     () => (gun ? gunDuraklari(gun, duraklar.data ?? []).map((d) => mekanIle.get(d.place_ref)).filter((m): m is NonNullable<typeof m> => !!m) : []),
     [gun, duraklar.data, mekanIle],
   );
-  const otel = seyahat.data && seyahat.data.hotel_lat !== null && seyahat.data.hotel_lng !== null ? { lat: seyahat.data.hotel_lat, lng: seyahat.data.hotel_lng } : null;
-  const matris = useYuruyusMatrisi(id, matrisNoktalari(otel, gunMekanlari));
+  const uclar = useGunUclari(id, gun);
+  const matris = useYuruyusMatrisi(id, matrisNoktalari(ucListesi(uclar), gunMekanlari));
   const yerler = useHafifYerler(gunMekanlari.map((m) => m.place_id));
-  const prog = useGunProgrami({ seyahat: seyahat.data, gun, duraklar: duraklar.data ?? [], mekanlar: mekanlar.data ?? [], yuruyus: matris.yuruyus, an });
+  const prog = useGunProgrami({ seyahat: seyahat.data, gun, duraklar: duraklar.data ?? [], mekanlar: mekanlar.data ?? [], yuruyus: matris.yuruyus, an, uclar });
 
   const adi = (durakId: string) => {
     const d = duraklar.data?.find((x) => x.id === durakId);

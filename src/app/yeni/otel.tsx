@@ -9,6 +9,10 @@ import { BilgiHapi, EylemHapi, HaritaEkrani } from '@/components/harita/HaritaEk
 import type { HaritaBolgesi, HaritaOdagi, HaritaPini } from '@/components/harita/tipler';
 import { Buton } from '@/components/ui/Buton';
 import { GoogleAtfi } from '@/components/yerler/GoogleAtfi';
+import { useGunler } from '@/features/gunler/sorgular';
+import { haritaSeciminiTeslimEt } from '@/features/konaklama/haritaSecimi';
+import type { Konaklama } from '@/features/konaklama/plan';
+import { useKonaklamalar } from '@/features/konaklama/sorgular';
 import { useOtelKaydet, useSeyahat } from '@/features/seyahatler/sorgular';
 import {
   hafifYerler,
@@ -22,7 +26,7 @@ import {
 } from '@/features/yerler/api';
 import { t } from '@/i18n';
 import { puanMetni } from '@/lib/puan';
-import type { OtelSecimi, Seyahat } from '@/lib/tipler';
+import type { Gun, OtelSecimi, Seyahat } from '@/lib/tipler';
 import { minDokunma, renk, yazi } from '@/theme';
 
 // PRD 3.3 KK3: 20 dk yürüyüş ≈ 1,5 km.
@@ -40,10 +44,14 @@ type OtelGorunumu = OtelSecimi & { puan?: number | null };
  * (Nearby Search lodging ≤12, yalnız bellekte), kaydırınca "Bu bölgede ara" (otomatik yenileme yok).
  */
 export default function OtelEkrani() {
-  const { trip } = useLocalSearchParams<{ trip: string }>();
+  // #56: secim=1 → program "günün oteli" alt sayfasının "Haritadan" seçimi (yazmaz, seçimi geri teslim eder).
+  const { trip, secim } = useLocalSearchParams<{ trip: string; secim?: string }>();
   const seyahat = useSeyahat(trip);
+  const gunler = useGunler(trip);
+  const konaklamalar = useKonaklamalar(trip);
+  const secimModu = secim === '1';
 
-  if (seyahat.isPending) {
+  if (seyahat.isPending || (!secimModu && (gunler.isPending || konaklamalar.isPending))) {
     return (
       <SafeAreaView style={s.ekran}>
         <EkranBasligi baslik={t('otel.baslik')} geri={() => router.back()} />
@@ -60,18 +68,22 @@ export default function OtelEkrani() {
     );
   }
   // Form, seyahat yüklendikten sonra kurulur: mevcut otel (KK5) başlangıç durumu olur, effect gerekmez.
-  return <OtelFormu key={trip} trip={trip} sehir={seyahat.data} />;
+  const mevcut = secimModu ? null : ilkGununOteli(gunler.data ?? [], konaklamalar.data ?? []);
+  return <OtelFormu key={trip} trip={trip} sehir={seyahat.data} mevcut={mevcut} secimModu={secimModu} />;
 }
 
-function OtelFormu({ trip, sehir }: { trip: string; sehir: Seyahat }) {
+/** #56: KK5 mevcut otel = ilk günün başlangıç oteli (trips.hotel_* artık okunmaz). */
+function ilkGununOteli(gunler: Gun[], konaklamalar: Konaklama[]): OtelGorunumu | null {
+  const ilk = [...gunler].sort((a, b) => a.index - b.index)[0];
+  const k = ilk?.start_stay_id ? konaklamalar.find((x) => x.id === ilk.start_stay_id) : undefined;
+  return k ? { place_id: k.place_id, ad: k.label ?? t('otel.adsiz'), lat: k.lat, lng: k.lng } : null;
+}
+
+function OtelFormu({ trip, sehir, mevcut, secimModu }: { trip: string; sehir: Seyahat; mevcut: OtelGorunumu | null; secimModu: boolean }) {
   const kaydet = useOtelKaydet(trip);
-  const [sorgu, setSorgu] = useState(sehir.hotel_label ?? '');
+  const [sorgu, setSorgu] = useState(mevcut?.ad ?? '');
   const [jeton, setJeton] = useState(yeniOturumJetonu);
-  const [otel, setOtel] = useState<OtelGorunumu | null>(() =>
-    sehir.hotel_lat !== null && sehir.hotel_lng !== null
-      ? { place_id: sehir.hotel_place_id, ad: sehir.hotel_label ?? t('otel.adsiz'), lat: sehir.hotel_lat, lng: sehir.hotel_lng }
-      : null,
-  );
+  const [otel, setOtel] = useState<OtelGorunumu | null>(mevcut);
   const [odak, setOdak] = useState<HaritaOdagi | undefined>();
   const [mesgul, setMesgul] = useState(false);
   const [hata, setHata] = useState<string | null>(null);
@@ -153,6 +165,11 @@ function OtelFormu({ trip, sehir }: { trip: string; sehir: Seyahat }) {
 
   const bitir = async (secim: OtelSecimi | null) => {
     setHata(null);
+    if (secimModu) {
+      if (secim) haritaSeciminiTeslimEt({ place_id: secim.place_id, ad: secim.ad, lat: secim.lat, lng: secim.lng });
+      router.back();
+      return;
+    }
     try {
       await kaydet.mutateAsync(secim ? { place_id: secim.place_id, ad: secim.ad, lat: secim.lat, lng: secim.lng } : null);
       router.replace({ pathname: '/seyahat/[id]', params: { id: trip } });
@@ -179,9 +196,9 @@ function OtelFormu({ trip, sehir }: { trip: string; sehir: Seyahat }) {
 
   return (
     <HaritaEkrani
-      baslik={t('otel.baslik')}
+      baslik={secimModu ? t('gunOteli.haritaBaslik') : t('otel.baslik')}
       geri={() => (router.canGoBack() ? router.back() : router.replace('/(tabs)'))}
-      sagUst={<BilgiHapi metin={t('otel.alt', { sehir: sehir.city_label })} />}
+      sagUst={<BilgiHapi metin={secimModu ? t('gunOteli.haritaAlt') : t('otel.alt', { sehir: sehir.city_label })} />}
       arama={
         <>
           <Text style={s.buyutec}>⌕</Text>
@@ -280,7 +297,7 @@ function OtelFormu({ trip, sehir }: { trip: string; sehir: Seyahat }) {
           )}
           {adayNot && !otel ? <Text style={s.hata}>{adayNot}</Text> : null}
 
-          {!otel ? (
+          {!otel && !secimModu ? (
             <View style={s.yokKart}>
               <View style={{ flex: 1, gap: 2 }}>
                 <Text style={s.yokBaslik}>{t('otel.yokBaslik')}</Text>
@@ -291,7 +308,7 @@ function OtelFormu({ trip, sehir }: { trip: string; sehir: Seyahat }) {
           ) : null}
 
           {hata ? <Text style={s.hata}>{hata}</Text> : null}
-          <Buton baslik={t('otel.devam')} onPress={() => bitir(otel)} pasif={!otel} yukleniyor={kaydet.isPending} stil={s.devam} />
+          <Buton baslik={secimModu ? t('gunOteli.bunuKullan') : t('otel.devam')} onPress={() => bitir(otel)} pasif={!otel} yukleniyor={kaydet.isPending} stil={s.devam} />
         </>
       }
       harita={{

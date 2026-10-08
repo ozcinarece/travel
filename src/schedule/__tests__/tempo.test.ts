@@ -107,3 +107,18 @@ describe('tempo #33 taksi bacağı', () => {
     expect(s.bitis).toBe('11:26');
   });
 });
+
+// #56 gün bazlı otel: kestirimle (kuş uçuşu) ayrı bitiş noktası.
+describe('tempo #56 bitiş noktası', () => {
+  const otel = { lat: 41.9, lng: 12.5 };
+  const a = { lat: 41.905, lng: 12.5 };
+  it('#56 taşınma günü: bitiş başka otel; yürüyüş son durak → yeni otel bacağını içerir', () => {
+    const uzak = { lat: otel.lat + 0.02, lng: otel.lng };
+    const ortak = { duraklar: [{ id: 'a', konum: a, dakika: 60 }], otel, baslangic: '09:00', bitis: '20:00' };
+    const donus = tempoHesapla(ortak);
+    const tasinma = tempoHesapla({ ...ortak, bitisOtel: uzak });
+    expect(tasinma.yuruyusDk + tasinma.taksiDk).toBeGreaterThan(donus.yuruyusDk + donus.taksiDk);
+    const sonDurakta = tempoHesapla({ ...ortak, bitisOtel: null });
+    expect(sonDurakta.yuruyusDk).toBeLessThan(donus.yuruyusDk);
+  });
+});
