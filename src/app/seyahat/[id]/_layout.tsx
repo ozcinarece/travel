@@ -1,5 +1,7 @@
 import { Stack, useLocalSearchParams } from 'expo-router';
+import { useEffect } from 'react';
 
+import { pinGorselleriniYukle } from '@/components/harita/pinOnYukleme';
 import { useSeyahatCanli } from '@/features/mekanlar/sorgular';
 import { SeyahatIdSaglayici } from '@/features/seyahatler/baglam';
 
@@ -9,6 +11,10 @@ export default function SeyahatLayout() {
   const { id } = useLocalSearchParams<{ id: string | string[] }>();
   const kimlik = Array.isArray(id) ? id[0] : id;
   useSeyahatCanli(kimlik);
+  // #61 §6: pin PNG'leri sekmeye girmeden belleğe alınır; harita açıldığında bekleme olmaz.
+  useEffect(() => {
+    pinGorselleriniYukle();
+  }, []);
   return (
     <SeyahatIdSaglayici id={kimlik}>
       <Stack screenOptions={{ headerShown: false }}>
