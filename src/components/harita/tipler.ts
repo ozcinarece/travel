@@ -14,8 +14,6 @@ export type HaritaPini = {
   ikon?: PinIkonu;
   /** #53: kategori rengi — oneri/bos dairesinin kenarı ve ikonu. */
   kategoriRenk?: string;
-  /** #55 §A2: üst üste binen pinlerin kümesi — bu pin kümenin başıdır ("+N" rozeti, dokununca yakınlaşır). */
-  kumeSayisi?: number;
   /** #47 B5: `etiket` türü hapta metnin önündeki çizgi ikon. */
   etiketIkon?: 'yurume' | 'taksi';
   /** ★ puan: aday hapında; diğer türlerde ad etiketinin ikinci satırında (seçili ya da zoom ≥ 16, #30). */
@@ -55,10 +53,14 @@ export type HaritaBolgesi = { merkez: Konum; yaricapM: number; latDelta: number;
 export type HaritaCizgisi = {
   id: string;
   noktalar: Konum[];
+  /** #59 §C: koyu rota tonu (theme.rotaRengi); seçili günde üç katman (gölge · beyaz kenar · renk). */
   renk: string;
-  /** 0–1; seçili gün 1, diğerleri 0,3. */
+  /** 0–1; seçili gün 0,9 (geçilen bacak 0,35), diğer günler 0,32. */
   opaklik?: number;
+  /** #59 §C: taksi bacağı noktalı (beyaz kenarlı); gerçek yol gelmemiş kuş uçuşu da kesikli. */
   kesik?: boolean;
+  /** #59 §C: diğer günlerin rotası — 3 dp, kenarsız, oksuz. */
+  ince?: boolean;
   etiket?: string;
   /** #47 B5: bacak hapında ikon (emoji yerine). */
   etiketIkon?: 'yurume' | 'taksi';

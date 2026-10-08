@@ -5,7 +5,7 @@ import { Text, View, useWindowDimensions } from 'react-native';
 import { t } from '@/i18n';
 import { renk } from '@/theme';
 
-import { bolgeHesapla, detayGoster, gizliEtiketler, kumeHesapla, pinCapasi, zoomDelta } from './geo';
+import { bolgeHesapla, detayGoster, etiketBolgesi, gizliEtiketler, pinCapasi, zoomDelta } from './geo';
 import { PinIcerigi } from './PinIcerigi';
 import { bacakEtiketPinleri } from './rota';
 import type { HaritaBolgesi, HaritaCizgisi, HaritaOdagi, HaritaProps, HaritaSigdirma } from './tipler';
@@ -42,25 +42,40 @@ function SigdirGit({ sigdir }: { sigdir?: HaritaSigdirma }) {
   return null;
 }
 
-/** #33: Maps JS Polyline (kütüphanede hazır bileşen yok). Araç bacağı kesikli (simge tekrarıyla). */
+/**
+ * #33: Maps JS Polyline (kütüphanede hazır bileşen yok). #59 §C: seçili gün üç katman (gölge 11 · beyaz 9 · renk 5,5),
+ * yürüyüş bacağında beyaz yön okları (FORWARD_OPEN_ARROW, ~45 px), taksi bacağı noktalı; diğer günler 3 px ince.
+ */
 function Cizgi({ cizgi }: { cizgi: HaritaCizgisi }) {
   const harita = useMap();
   const kutuphane = useMapsLibrary('maps');
   useEffect(() => {
     if (!harita || !kutuphane) return;
     const opaklik = cizgi.opaklik ?? 1;
-    const p = new kutuphane.Polyline({
-      map: harita,
-      path: cizgi.noktalar,
-      strokeColor: cizgi.renk,
-      strokeOpacity: cizgi.kesik ? 0 : opaklik,
-      strokeWeight: cizgi.kesik ? 3 : 2.5,
-      zIndex: 0,
-      icons: cizgi.kesik
-        ? [{ icon: { path: 'M 0,-1 0,1', strokeOpacity: opaklik, strokeColor: cizgi.renk, scale: 3 }, offset: '0', repeat: '18px' }]
-        : undefined,
-    });
-    return () => p.setMap(null);
+    const nokta = (renk: string, scale: number) => ({ icon: { path: kutuphane.SymbolPath.CIRCLE, strokeOpacity: 0, fillOpacity: opaklik, fillColor: renk, scale }, offset: '0', repeat: '11px' });
+    // Yalnız renk katmanı noktalı (gölge ve beyaz kenar düz); oklar yürüyüş bacağında.
+    const katman = (renk: string, kalinlik: number, zIndex: number, secenek: { noktali?: boolean; oklar?: boolean; opaklik?: number }) =>
+      new kutuphane.Polyline({
+        map: harita,
+        path: cizgi.noktalar,
+        strokeColor: renk,
+        strokeOpacity: secenek.noktali ? 0 : (secenek.opaklik ?? opaklik),
+        strokeWeight: kalinlik,
+        zIndex,
+        icons: secenek.noktali
+          ? [nokta(renk, kalinlik / 2)]
+          : secenek.oklar
+            ? [{ icon: { path: kutuphane.SymbolPath.FORWARD_OPEN_ARROW, strokeColor: '#ffffff', strokeWeight: 2, scale: 2.2 }, offset: '22px', repeat: '45px' }]
+            : undefined,
+      });
+    const katmanlar = cizgi.ince
+      ? [katman(cizgi.renk, 3, 0, { noktali: cizgi.kesik })]
+      : [
+          katman('#0f0f0f', 11, 1, { opaklik: 0.12 * opaklik }),
+          katman('#ffffff', 9, 2, {}),
+          katman(cizgi.renk, 5.5, 3, { noktali: cizgi.kesik, oklar: !cizgi.kesik && opaklik >= 0.5 }),
+        ];
+    return () => katmanlar.forEach((k) => k.setMap(null));
   }, [harita, kutuphane, cizgi]);
   return null;
 }
@@ -71,19 +86,10 @@ export function Harita({ merkez, zoom = 14, pinler = [], daireler = [], cizgiler
   const [bolge, setBolge] = useState<HaritaBolgesi>(() => bolgeHesapla(merkez, zoomDelta(zoom), zoomDelta(zoom)));
   const tumPinler = useMemo(() => [...pinler, ...bacakEtiketPinleri(cizgiler)], [pinler, cizgiler]);
   const olcu = useMemo(() => ({ genislik: ekran.width, yukseklik: ekran.height }), [ekran.width, ekran.height]);
-  // #55 §A2: kümeler ("+N"); küme başına dokununca yakınlaşılır.
-  const kume = useMemo(() => kumeHesapla(tumPinler, bolge, olcu), [tumPinler, bolge, olcu]);
-  const gorunen = useMemo(
-    () => tumPinler.filter((p) => !kume.gizli.has(p.id)).map((p) => (kume.rozet.has(p.id) ? { ...p, kumeSayisi: kume.rozet.get(p.id) } : p)),
-    [tumPinler, kume],
-  );
-  const gizli = useMemo(() => gizliEtiketler(gorunen, bolge, olcu, ustBosluk), [gorunen, bolge, olcu, ustBosluk]);
-  const [kumeSigdir, setKumeSigdir] = useState<HaritaSigdirma | undefined>(undefined);
-  const pinBas = (id: string) => {
-    const uyeler = kume.uyeler.get(id);
-    if (uyeler) setKumeSigdir({ noktalar: uyeler, ust: 160 + ustBosluk, alt: 160 });
-    else onPinBas?.(id);
-  };
+  // #59 §A: kümeleme yok. #59 §B: etiket hesabı yalnız zoom adımında yenilenir.
+  const [etiketBolge, setEtiketBolge] = useState<HaritaBolgesi>(bolge);
+  const gizli = useMemo(() => gizliEtiketler(tumPinler, etiketBolge, olcu, ustBosluk), [tumPinler, etiketBolge, olcu, ustBosluk]);
+  const gorunen = useMemo(() => tumPinler.filter((p) => !(p.tur === 'etiket' && gizli.etiket.has(p.id))), [tumPinler, gizli]);
 
   if (!anahtar) {
     return (
@@ -114,11 +120,11 @@ export function Harita({ merkez, zoom = 14, pinler = [], daireler = [], cizgiler
           const sw = b.getSouthWest();
           const yeni = bolgeHesapla({ lat: c.lat(), lng: c.lng() }, ne.lat() - sw.lat(), ne.lng() - sw.lng(), e.map.getZoom() ?? undefined);
           setBolge(yeni);
+          setEtiketBolge((onceki) => etiketBolgesi(onceki, yeni));
           onBolgeDegisti?.(yeni);
         }}>
         <OdakGit odak={odak} />
         <SigdirGit sigdir={sigdir} />
-        <SigdirGit sigdir={kumeSigdir} />
         {cizgiler.map((c) => (
           <Cizgi key={c.id} cizgi={c} />
         ))}
@@ -133,7 +139,7 @@ export function Harita({ merkez, zoom = 14, pinler = [], daireler = [], cizgiler
           />
         ))}
         {gorunen.map((p) => {
-          const detay = detayGoster(p, bolge.zoom) && !gizli.detay.has(p.id);
+          const detay = detayGoster(p, etiketBolge.zoom) && !gizli.detay.has(p.id);
           const bacak = p.tur === 'etiket' || p.tur === 'konum';
           const capa =
             p.tur === 'aday' ? ['10%', '50%'] : p.tur === 'otel' || bacak ? ['50%', '50%'] : (({ x, y }) => [`${x * 100}%`, `${y * 100}%`])(pinCapasi(p, detay));
@@ -142,11 +148,11 @@ export function Harita({ merkez, zoom = 14, pinler = [], daireler = [], cizgiler
               key={p.id}
               position={p.konum}
               draggable={p.surukle}
-              zIndex={p.tur === 'konum' ? 4 : p.secili ? 3 : p.tur === 'otel' ? 2 : bacak ? 0 : 1}
+              zIndex={p.tur === 'konum' ? 5 : p.secili ? 4 : p.tur === 'otel' ? 3 : p.tur === 'durak' || p.tur === 'listede' ? 2 : bacak ? 0 : 1}
               anchorPoint={capa as [string, string]}
               clickable={!bacak}
               onClick={() => {
-                if (!bacak) pinBas(p.id);
+                if (!bacak) onPinBas?.(p.id);
               }}
               onDragEnd={(e) => {
                 const konum = e.latLng;

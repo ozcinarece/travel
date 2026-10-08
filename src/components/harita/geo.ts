@@ -65,9 +65,24 @@ export function etiketOnceligi(p: HaritaPini): number {
   return 20;
 }
 
-/** Daire çapı (px) — PinIcerigi ile aynı sayılar. #55 §A1: 32 px, seçili 38 px (siyah halka dairenin kenarıdır). */
+/** Daire çapı (px) — PinIcerigi ile aynı sayılar. #59 §A2: 28 px, seçili 34 px (siyah halka dairenin kenarıdır). */
 export function pinCapi(p: HaritaPini): number {
-  return p.secili ? 38 : 32;
+  return p.secili ? 34 : 28;
+}
+/** #59 §A2: otel karesi ve konum halkası (px) — PinIcerigi ile aynı. */
+export const OTEL_KARE = 28;
+export const KONUM_HALKA = 22;
+
+/**
+ * #59 §B: etiket çakışması yalnız yakınlığa bağlıdır (kaydırmada pinlerin piksel uzaklığı değişmez). Hesap, zoom'u
+ * 0,25 adıma yuvarlanmış bölgeyle yapılır; saf kaydırma aynı bölgeyi döndürür → hiçbir işaretçi değişmez.
+ */
+export const ETIKET_ZOOM_ADIMI = 0.25;
+export function etiketZoomu(zoom: number): number {
+  return Math.round(zoom / ETIKET_ZOOM_ADIMI) * ETIKET_ZOOM_ADIMI;
+}
+export function etiketBolgesi(onceki: HaritaBolgesi | null, yeni: HaritaBolgesi): HaritaBolgesi {
+  return onceki && etiketZoomu(onceki.zoom) === etiketZoomu(yeni.zoom) ? onceki : yeni;
 }
 
 const ETIKET_YUKSEKLIK = 16;
@@ -114,7 +129,7 @@ export function gizliEtiketler(
     .map((p) => {
       const cx = (p.konum.lng - bolge.merkez.lng) * pxLng;
       const cy = -(p.konum.lat - bolge.merkez.lat) * pxLat;
-      const r = (p.tur === 'otel' ? 34 : p.tur === 'konum' ? 22 : pinCapi(p)) / 2;
+      const r = (p.tur === 'otel' ? OTEL_KARE : p.tur === 'konum' ? KONUM_HALKA : pinCapi(p)) / 2;
       return { x1: cx - r, y1: cy - r, x2: cx + r, y2: cy + r, pin: p.id };
     });
   const cakisiyor = (kutu: Kutu, sahip?: string) => yerlesen.some((k) => k.pin !== sahip && kutu.x1 < k.x2 && kutu.x2 > k.x1 && kutu.y1 < k.y2 && kutu.y2 > k.y1);
@@ -210,38 +225,19 @@ export function sigdir(noktalar: Konum[], alan: { genislik: number; yukseklik: n
   return { konum, zoom };
 }
 
-export type Kumeler = {
-  /** Kümeye katılıp çizilmeyen pinler. */
-  gizli: Set<string>;
-  /** Küme başı → üye sayısı ("+N" rozeti). */
-  rozet: Map<string, number>;
-  /** Küme başı → kümenin tüm konumları (dokununca bunlara yakınlaşılır). */
-  uyeler: Map<string, Konum[]>;
-};
+/**
+ * #59 §B: Android bitmap izlemesi (tracksViewChanges) açık kalmalı mı? Görünüm imzası henüz yakalanmadıysa ya da pinin
+ * beklediği PNG ikon (varsa) henüz yüklenmediyse. Yüklenme PNG anahtarına bağlıdır, imzaya değil: imza değişip PNG aynı
+ * kalınca Image yeniden yüklenmez; yalnız 350 ms'lik yakalama turu çalışır.
+ */
+export function izlemeGerekli(imza: string, yakalanan: string | null, beklenenPng: string | null, yuklenenPng: string | null): boolean {
+  return yakalanan !== imza || (beklenenPng !== null && yuklenenPng !== beklenenPng);
+}
 
 /**
- * #55 §A2: üst üste binen (aynı / çok yakın) pinler kümelenir — en öncelikli olan küme başıdır ve "+N" rozeti taşır,
- * diğerleri çizilmez. Rota hapları, konum ve otel kümelenmez. Yakınlaşınca daireler ayrılır, küme kendiliğinden dağılır.
+ * #59 §B: işaretçinin görünümünü belirleyen her şey — değişince Android bitmap'i yeniden alınır (işaretçi yeniden
+ * KURULMAZ; anahtar yalnız pin kimliğidir). Konum, opaklık ve z-sırası native özelliktir, imzaya girmez.
  */
-export function kumeHesapla(pinler: HaritaPini[], bolge: HaritaBolgesi | null, ekran: { genislik: number; yukseklik: number }): Kumeler {
-  const sonuc: Kumeler = { gizli: new Set(), rozet: new Map(), uyeler: new Map() };
-  if (!bolge || bolge.latDelta <= 0 || bolge.lngDelta <= 0) return sonuc;
-  const pxLat = ekran.yukseklik / bolge.latDelta;
-  const pxLng = ekran.genislik / bolge.lngDelta;
-  const adaylar = pinler
-    .filter((p) => p.tur !== 'etiket' && p.tur !== 'konum' && p.tur !== 'otel')
-    .map((p) => ({ p, x: (p.konum.lng - bolge.merkez.lng) * pxLng, y: -(p.konum.lat - bolge.merkez.lat) * pxLat }))
-    .sort((a, b) => etiketOnceligi(b.p) - etiketOnceligi(a.p) || a.p.id.localeCompare(b.p.id));
-  const baslar: typeof adaylar = [];
-  for (const a of adaylar) {
-    const bas = baslar.find((b) => Math.hypot(a.x - b.x, a.y - b.y) < ((pinCapi(a.p) + pinCapi(b.p)) / 2) * 0.7);
-    if (!bas) {
-      baslar.push(a);
-      continue;
-    }
-    sonuc.gizli.add(a.p.id);
-    sonuc.rozet.set(bas.p.id, (sonuc.rozet.get(bas.p.id) ?? 0) + 1);
-    sonuc.uyeler.set(bas.p.id, [...(sonuc.uyeler.get(bas.p.id) ?? [bas.p.konum]), a.p.konum]);
-  }
-  return sonuc;
+export function isaretciImzasi(p: HaritaPini, etiketGizli: boolean, detay: boolean): string {
+  return [p.tur ?? '', p.renk, p.etiket ?? '', p.ikon ?? '', p.kategoriRenk ?? '', p.etiketIkon ?? '', p.secili ? 1 : 0, p.tamam ? 1 : 0, p.ad && !etiketGizli ? p.ad : '', detay ? 1 : 0, p.puan ?? '', p.yorumSayisi ?? ''].join('|');
 }

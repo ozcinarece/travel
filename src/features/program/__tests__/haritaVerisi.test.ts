@@ -49,7 +49,13 @@ describe('programCizgileri (#51)', () => {
     const d = cizgiler([H, A, B, C, H], rotalar);
     expect(d[1].id).toBe('rota:g1:A>B:yol');
     expect(d[1].kesik).toBe(false);
-    expect(d[1].etiket).toBe('33 dk');
+    // #59 §C: yürüyüş bacağında hap yok; taksi bacağında "33 dk".
+    expect(d[1].etiket).toBeUndefined();
+    const taksili: RotaHaritasi = { 'A>B': { ...rota('A', 'B'), mode: 'DRIVE', drive_seconds: 14 * 60 } };
+    const e = cizgiler([H, A, B, C, H], taksili);
+    expect(e[1].kesik).toBe(true);
+    expect(e[1].etiket).toBe('14 dk');
+    expect(e[1].etiketIkon).toBe('taksi');
     expect(d[1].noktalar.length).toBe(3);
   });
 });
@@ -88,6 +94,8 @@ describe('programCizgileri diğer günler (#56)', () => {
     const tp = new Map<string, TempoSonucu>([['g2', { sira: ['a'] } as unknown as TempoSonucu]]);
     const c = programCizgileri({ gunUclari: uclar, mekanIle, gunler: gunlerIki, tempolar: tp, seciliGunId: 'g1', seciliNoktalar: [], rotalar: {}, bacak, gecilenBacak: 0 });
     expect(c).toHaveLength(1);
+    expect(c[0].ince).toBe(true);
+    expect(c[0].renk).toBe('#cf5a22');
     expect(c[0].noktalar).toEqual([{ lat: X.lat, lng: X.lng }, { lat: 41.85, lng: 12.4 }, { lat: Y.lat, lng: Y.lng }]);
   });
 });

@@ -20,6 +20,13 @@ export function gunRengi(gunIndex: number): string {
   return gunRenkleri[(gunIndex - 1) % gunRenkleri.length];
 }
 
+/** #59 §C (RouteSpec5): rota çizgisi gün renginin ~%20 koyusu; pinler gün renginde kalır. */
+export const rotaRenkleri = ['#1f4fc2', '#cf5a22', '#0b7d5d', '#6e3fab', '#b83762', '#0b84ba'] as const;
+
+export function rotaRengi(gunIndex: number): string {
+  return rotaRenkleri[(gunIndex - 1) % rotaRenkleri.length];
+}
+
 export const yazi = {
   normal: 'PlusJakartaSans_400Regular',
   orta: 'PlusJakartaSans_500Medium',
