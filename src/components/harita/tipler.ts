@@ -31,6 +31,8 @@ export type HaritaPini = {
   secili?: boolean;
   /** #69: öne çıkan (şehrin en iyi %10'u) — sol üstte turuncu ★ rozeti; her zoom'da tam boy, adının altında ★ puan. */
   oneCikan?: boolean;
+  /** #73: zoom ≥ 16,5'te pin boyu kademesi (28 / 30 / 32 / 34 px); Harita zoom'a göre işaretler (geo.zoomaGorePinler). */
+  boy?: 28 | 30 | 32 | 34;
   /** #66: zoom < 13'te öneri pini küçük (20 px, adsız) — Harita zoom'a göre işaretler (geo.zoomaGorePinler). */
   kucuk?: boolean;
   /** #42 KK5: seçili güne ait olmayan pinler soluk (0–1; varsayılan 1). */

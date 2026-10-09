@@ -1,6 +1,7 @@
 import { describe, expect, it } from '@jest/globals';
 
-import { pinGorseli, pinPngAnahtari } from '../PinIcerigi';
+import { PIN_IKONLARI } from '../pinIkonlari';
+import { pinGorselAdi, pinGorseli, pinPngAnahtari } from '../PinIcerigi';
 import type { HaritaPini } from '../tipler';
 
 const roma = { lat: 41.9028, lng: 12.4964 };
@@ -59,5 +60,20 @@ describe('pinGorseli', () => {
     // #65: seçili numaralı durak görünüm (iğne), PNG yok.
     expect(pinGorseli(p({ tur: 'durak', etiket: '2', secili: true }))).toBeUndefined();
     expect(pinGorseli(p({ tur: 'oneri', ikon: 'pin' }))).toBeUndefined();
+  });
+
+  it('#73 A: boy kademesi PNG adına girer; seçili iğne 34 kademesinde igne34-; küçük pin boydan bağımsız', () => {
+    const o = p({ tur: 'oneri', ikon: 'kamera', kategoriRenk: '#3b6fe0' });
+    expect(pinGorselAdi(o)).toBe('daire-kamera-28');
+    expect(pinGorselAdi({ ...o, boy: 30 })).toBe('daire-kamera-30');
+    expect(pinGorselAdi({ ...o, boy: 34, oneCikan: true })).toBe('one-daire-kamera-34');
+    expect(pinGorselAdi({ ...o, boy: 32, secili: true })).toBe('igne-daire-kamera');
+    expect(pinGorselAdi({ ...o, boy: 34, secili: true })).toBe('igne34-daire-kamera');
+    expect(pinGorselAdi(p({ tur: 'listede', ikon: 'muze', kategoriRenk: '#8a4fd6', boy: 34, secili: true, oneCikan: true }))).toBe('igne34-one-dolu-muze');
+    expect(pinGorselAdi(p({ tur: 'listede', boy: 34 }))).toBe('tik-34');
+    expect(pinGorselAdi(p({ tur: 'otel', boy: 32 }))).toBe('otel-32');
+    expect(pinGorselAdi(p({ tur: 'durak', etiket: '2', tamam: true, boy: 34, secili: true }))).toBe('igne34-tamam');
+    expect(pinGorselAdi({ ...o, boy: 34, kucuk: true })).toBe('kucuk-kamera-20');
+    for (const ad of ['daire-kamera-30', 'one-dolu-agac-32', 'igne34-tik', 'otel-34']) expect(pinGorseli({ ...o, boy: 34 }) !== undefined && ad in PIN_IKONLARI).toBe(true);
   });
 });

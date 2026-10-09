@@ -2,11 +2,11 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { PixelRatio, StyleSheet, View, useWindowDimensions } from 'react-native';
 import MapView, { Circle, Marker, Polyline, PROVIDER_GOOGLE } from 'react-native-maps';
 
-import { bolgeHesapla, etiketBolgesi, gizliEtiketler, haritaDolgusu, IGNE, isaretciImzasi, izlemeGerekli, pinCapasi, pinCapi, pinZ, zoomaGorePinler, zoomDelta } from './geo';
+import { bolgeHesapla, enYakinPin, etiketBolgesi, gizliEtiketler, haritaDolgusu, isaretciImzasi, izlemeGerekli, pinCapasi, pinZ, zoomaGorePinler, zoomDelta } from './geo';
 import { ACIK_HARITA_STILI } from './haritaStili';
 import { dokunusuIletir, isaretciPlani } from './isaretciler';
 import { PinIcerigi, pinPngAnahtari } from './PinIcerigi';
-import { IGNE_CAPA, PIN_IKONLARI } from './pinIkonlari';
+import { IGNE_CAPA, IGNE_CAPA_34, PIN_IKONLARI } from './pinIkonlari';
 import { usePinGorselleri } from './pinOnYukleme';
 import { bacakEtiketPinleri, yonOklari } from './rota';
 import { dokunmaKaydet, isaretciSayilariniKaydet, taniSayaclari } from './tani';
@@ -99,20 +99,19 @@ export function Harita({
   };
   // #59 §C / #65: yön okları ~24 px aralık, en fazla 80 — zoom adımına göre.
   const oklar = useMemo(() => yonOklari(cizgiler, pinler, etiketBolge, olcu), [cizgiler, pinler, etiketBolge, olcu]);
-  // #55 §C10: Marker'da uzun basma yok — haritaya uzun basılan noktaya ~28 px içindeki en yakın pin.
+  // #73 B: dokunma — işaretçi ya da harita dokunuşunun koordinatından en yakın pin (merkeze ≤ 22 px; eşitlikte pinZ).
+  // Android'de işaretçi dokunuşunun koordinatı işaretçinin konumudur: o pin 0 px'te bulunur; ad işaretçisi de pinin
+  // konumunda olduğundan aynı pine düşer (ad işaretçisinin dokunuşu yutması böylece bitti). Pin yoksa harita dokunuşu.
+  const dokun = (k: { latitude: number; longitude: number }, isaretci: boolean) => {
+    const id = enYakinPin(gorunen, bolge, olcu, { lat: k.latitude, lng: k.longitude }, undefined, (p) => !dokunusuIletir(p));
+    if (id) pinBas(id);
+    else if (!isaretci) onHaritaBas?.();
+  };
+  // #55 §C10: Marker'da uzun basma yok — haritaya uzun basılan noktaya ~28 px içindeki en yakın pin (otel hariç).
   const uzunBas = (k: { latitude: number; longitude: number }) => {
-    if (!onPinUzunBas || bolge.latDelta <= 0) return;
-    const pxLat = olcu.yukseklik / bolge.latDelta;
-    const pxLng = olcu.genislik / bolge.lngDelta;
-    let enYakin: { id: string; d: number } | null = null;
-    for (const p of gorunen) {
-      if (p.tur === 'etiket' || p.tur === 'konum' || p.tur === 'otel') continue;
-      // Daire pinde merkez koordinatta; seçili iğnede baş merkezi ucun (koordinatın) 27 px üstünde (#67 incelemesi).
-      const basY = p.secili ? IGNE.boy - IGNE.en / 2 : 0;
-      const d = Math.hypot((p.konum.lng - k.longitude) * pxLng, (p.konum.lat - k.latitude) * pxLat + basY);
-      if (d <= Math.max(28, pinCapi(p) / 2 + 6) && (!enYakin || d < enYakin.d)) enYakin = { id: p.id, d };
-    }
-    if (enYakin) onPinUzunBas(enYakin.id);
+    if (!onPinUzunBas) return;
+    const id = enYakinPin(gorunen, bolge, olcu, { lat: k.latitude, lng: k.longitude }, 28, (p) => p.tur === 'etiket' || p.tur === 'konum' || p.tur === 'otel');
+    if (id) onPinUzunBas(id);
   };
 
   return (
@@ -139,9 +138,12 @@ export function Harita({
       showsPointsOfInterests={false}
       // #32: pine dokunmak haritayı kaydırmaz.
       moveOnMarkerPress={false}
+      // Android'de işaretçi dokunuşu haritanın onPress'ine değil onMarkerPress'e gelir (MapView.java onMarkerClick); iOS'ta
+      // onPress 'marker-press' ile de gelebilir → o durumda yalnız onMarkerPress işler (çift seçim olmasın).
       onPress={(e) => {
-        if (e.nativeEvent.action !== 'marker-press') onHaritaBas?.();
+        if (e.nativeEvent.action !== 'marker-press') dokun(e.nativeEvent.coordinate, false);
       }}
+      onMarkerPress={(e) => dokun(e.nativeEvent.coordinate, true)}
       onLongPress={(e) => uzunBas(e.nativeEvent.coordinate)}
       onRegionChangeComplete={(b) => {
         const yeni = bolgeHesapla({ lat: b.latitude, lng: b.longitude }, b.latitudeDelta, b.longitudeDelta);
@@ -182,9 +184,9 @@ export function Harita({
       {plan.map((i) => {
         // #40: çakışmada önce puan satırı düşer (gizli.detay), sonra ad (gizli.etiket).
         const p = i.pin;
-        if (i.tur === 'gorunum') return <OzelIsaretci key={i.anahtar} pin={p} etiketGizli={i.etiketGizli} detay={i.detay} onPinBas={pinBas} onPinSuruklendi={onPinSuruklendi} />;
-        // #71: ad işaretçisi pinin üstünde durur ve Android'de her işaretçi dokunulabilir (`tappable` yok) — dokunuşu pine iletir.
-        if (i.tur === 'ad') return <OzelIsaretci key={i.anahtar} pin={p} etiketGizli={false} detay={i.detay} yalnizEtiket onPinBas={pinBas} />;
+        if (i.tur === 'gorunum') return <OzelIsaretci key={i.anahtar} pin={p} etiketGizli={i.etiketGizli} detay={i.detay} onPinSuruklendi={onPinSuruklendi} />;
+        // #71 / #73: ad işaretçisinin dokunuşu da haritanın onPress'ine (marker-press, işaretçi konumu) düşer → en yakın pin.
+        if (i.tur === 'ad') return <OzelIsaretci key={i.anahtar} pin={p} etiketGizli={false} detay={i.detay} yalnizEtiket />;
         // #61 §6: daire hazır PNG (görünüm yakalaması yok); ad ayrı işaretçi. Anahtar görünüm durumunu taşır (#71).
         return (
           <Marker
@@ -192,12 +194,11 @@ export function Harita({
             coordinate={{ latitude: p.konum.lat, longitude: p.konum.lng }}
             image={i.gorsel}
             // #65: seçili iğnenin çapası ucu; dairelerde merkez.
-            anchor={p.secili ? IGNE_CAPA : { x: 0.5, y: 0.5 }}
+            anchor={p.secili ? (p.boy === 34 ? IGNE_CAPA_34 : IGNE_CAPA) : { x: 0.5, y: 0.5 }}
             tracksViewChanges={false}
             opacity={p.opaklik ?? 1}
             zIndex={pinZ(p)}
             draggable={p.surukle}
-            onPress={() => pinBas(p.id)}
             onDragEnd={(e) => onPinSuruklendi?.(p.id, { lat: e.nativeEvent.coordinate.latitude, lng: e.nativeEvent.coordinate.longitude })}
           />
         );
@@ -235,10 +236,9 @@ function OzelIsaretci({
   pin: p,
   etiketGizli,
   detay,
-  onPinBas,
   onPinSuruklendi,
   yalnizEtiket = false,
-}: { pin: HaritaPini; etiketGizli: boolean; detay: boolean; yalnizEtiket?: boolean } & Pick<HaritaProps, 'onPinBas' | 'onPinSuruklendi'>) {
+}: { pin: HaritaPini; etiketGizli: boolean; detay: boolean; yalnizEtiket?: boolean } & Pick<HaritaProps, 'onPinSuruklendi'>) {
   const imza = isaretciImzasi(p, etiketGizli, detay);
   // Yalnız etiket işaretçisi metinden ibaret: PNG beklenmez.
   const beklenenPng = yalnizEtiket ? null : pinPngAnahtari(p);
@@ -265,8 +265,7 @@ function OzelIsaretci({
   const durt = yuklenenPng !== null && yuklenenPng === beklenenPng;
   const capa =
     p.tur === 'aday' ? { x: 0.1, y: 0.5 } : p.tur === 'otel' || p.tur === 'etiket' || p.tur === 'konum' || !p.tur ? { x: 0.5, y: 0.5 } : yalnizEtiket && p.secili ? { x: 0.5, y: 0 } : pinCapasi(p, detay);
-  // #71: hangi işaretçi dokunuşu pine iletir — isaretciler.dokunusuIletir (ad işaretçisi dahil; Android'de `tappable` yok,
-  // ad işaretçisi pinin üstünde durduğundan dokunuşu o alıyordu ve yutuyordu).
+  // #73: dokunuş işaretçide değil haritanın onPress'inde çözülür (en yakın pin); `tappable` yalnız iOS'ta anlamlı.
   const bacak = !dokunusuIletir(p);
   return (
     <Marker
@@ -280,9 +279,6 @@ function OzelIsaretci({
       opacity={p.opaklik ?? 1}
       zIndex={pinZ(p)}
       draggable={!yalnizEtiket && p.surukle}
-      onPress={() => {
-        if (!bacak) onPinBas?.(p.id);
-      }}
       onDragEnd={(e) =>
         onPinSuruklendi?.(p.id, {
           lat: e.nativeEvent.coordinate.latitude,
