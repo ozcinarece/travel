@@ -51,6 +51,10 @@ describe('geo', () => {
     expect([...gizliEtiketler(yakin, bolge, ekran).etiket]).toEqual(['a']);
     // Seçili öneri durağı yener.
     expect([...gizliEtiketler([pin('a', 0, 'oneri', true), pin('b', 0.0005, 'durak')], bolge, ekran).etiket]).toEqual(['b']);
+    // #71 KK5: üst katmanın (ustBosluk) altında kalan ad gizlenir — pin ekranın üst 100 px'inde, üst katman 220 px.
+    const ustte = { ...pin('u', 0, 'oneri'), konum: { lat: roma.lat + 0.0075, lng: roma.lng } };
+    expect(gizliEtiketler([ustte], bolge, ekran, 220).etiket.has('u')).toBe(true);
+    expect(gizliEtiketler([ustte], bolge, ekran, 60).etiket.has('u')).toBe(false);
     // 200 px arayla çakışma yok.
     expect(gizliEtiketler([pin('a', 0, 'oneri'), pin('b', 0.005, 'durak')], bolge, ekran).etiket.size).toBe(0);
     // Yakınlaşınca (aralık 10 kat küçük) aynı pinler artık çakışmaz.

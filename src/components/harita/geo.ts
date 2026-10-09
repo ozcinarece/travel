@@ -152,7 +152,7 @@ export function gizliEtiketler(
   pinler: HaritaPini[],
   bolge: HaritaBolgesi | null,
   ekran: { genislik: number; yukseklik: number },
-  /** #55 §A6: ekranın üstünden bu kadar px (başlık + gün seçici) içine düşen rota hapları gizlenir. */
+  /** #55 §A6 / #71 KK5: ekranın üstünden bu kadar px (başlık, arama, çipler) içine düşen rota hapları VE ad etiketleri gizlenir. */
   ustBosluk = 0,
 ): GizliEtiketler {
   const gizli: GizliEtiketler = { etiket: new Set(), detay: new Set() };
@@ -192,6 +192,11 @@ export function gizliEtiketler(
     };
     const detayli = detayGoster(p, bolge.zoom);
     const tam = kutuYap(detayli);
+    // #71 KK5: üst katmanın (arama + çipler + hap) altında kalan ad çizilmez (seçili pin dahil).
+    if (tam.y1 + ekran.yukseklik / 2 < ustBosluk) {
+      gizli.etiket.add(p.id);
+      continue;
+    }
     // #65: seçili iğnenin adı ucun hemen altında — komşu pin dairesine binse de gizlenmez (en üstte çizilir, pinZ 40).
     if (p.secili || !cakisiyor(tam, p.id)) {
       yerlesen.push(tam);

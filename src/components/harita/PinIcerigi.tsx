@@ -44,16 +44,24 @@ export function pinPngAnahtari(pin: HaritaPini): string | null {
  * (`yalnizEtiket`). Görseli olmayan türler (numaralı durak, konum, aday, hap) görünüm olarak çizilir.
  */
 export function pinGorseli(pin: HaritaPini): ImageRequireSource | undefined {
-  if (pin.tur === 'otel') return PIN_IKONLARI['otel-28'];
+  const ad = pinGorselAdi(pin);
+  return ad ? PIN_IKONLARI[ad] : undefined;
+}
+
+/** Pinin tam PNG adı (assets/pin); #71: işaretçi anahtarına girer — görsel değişince işaretçi yeniden kurulur. */
+export function pinGorselAdi(pin: HaritaPini): string | undefined {
+  if (pin.tur === 'otel') return 'otel-28';
   if (pin.tur !== 'oneri' && pin.tur !== 'bos' && pin.tur !== 'listede' && !(pin.tur === 'durak' && pin.tamam)) return undefined;
   // #66: zoom < 13'te öneri küçük pin (20 px). #65: seçili = iğne (çapa ucu, IGNE_CAPA); değilse 28 px daire (çapa merkez).
-  if (pin.kucuk && pin.tur === 'oneri') return PIN_IKONLARI[`kucuk-${pin.ikon ?? 'kamera'}-20`];
+  if (pin.kucuk && pin.tur === 'oneri') return `kucuk-${pin.ikon ?? 'kamera'}-20`;
   // #69: öne çıkan = aynı görünüm + sol üstte ★ rozeti (`one-` öneki; iğnede `igne-one-`).
   const on = `${pin.secili ? 'igne-' : ''}${pin.oneCikan && (pin.tur === 'oneri' || pin.tur === 'listede') && !pin.tamam ? 'one-' : ''}`;
   const son = pin.secili ? '' : '-28';
-  if (pin.tamam) return PIN_IKONLARI[`${on}tamam${son}`];
-  if (pin.tur === 'listede') return pin.ikon && pin.kategoriRenk ? PIN_IKONLARI[`${on}dolu-${pin.ikon}${son}`] : PIN_IKONLARI[`${pin.secili ? 'igne-' : ''}tik${son}`];
-  return PIN_IKONLARI[`${on}daire-${pin.ikon ?? 'kamera'}${son}`];
+  let ad: string;
+  if (pin.tamam) ad = `${on}tamam${son}`;
+  else if (pin.tur === 'listede') ad = pin.ikon && pin.kategoriRenk ? `${on}dolu-${pin.ikon}${son}` : `${pin.secili ? 'igne-' : ''}tik${son}`;
+  else ad = `${on}daire-${pin.ikon ?? 'kamera'}${son}`;
+  return ad in PIN_IKONLARI ? ad : undefined;
 }
 
 /** İğne SVG'sinin yerleşim kutusundan dışa payı (siyah halka + küçük gölge). */

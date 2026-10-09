@@ -79,7 +79,8 @@ export function HaritaEkrani({ baslik, geri, sagUst, arama, aramaSag, ustEk, alt
   const haritaAlt = sayfaAcik ? (altSayfa!.hal === 'tam' ? 0 : yukseklik[altSayfa!.hal]) : altPanel && !panelTam ? panelY : 0;
   return (
     <View style={s.ekran} onLayout={(e) => setEkranH(e.nativeEvent.layout.height)}>
-      <Harita {...harita} altBosluk={haritaAlt} />
+      {/* #71 KK5: ekran kendi üst katman yüksekliğini vermezse ölçülen üst katman (başlık + arama + çipler) kullanılır. */}
+      <Harita {...harita} altBosluk={haritaAlt} ustBosluk={harita.ustBosluk ?? ustY} />
       {/* #47 A2: tam ekranda harita şeridi görünmez (beyaz arka plan). */}
       {panelTam || (sayfaAcik && altSayfa!.hal === 'tam') ? <View style={[StyleSheet.absoluteFill, { backgroundColor: renk.zemin }]} /> : null}
       {altBaslik !== undefined && !panelTam ? (

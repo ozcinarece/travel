@@ -1,13 +1,15 @@
-import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { PixelRatio, StyleSheet, View, useWindowDimensions } from 'react-native';
 import MapView, { Circle, Marker, Polyline, PROVIDER_GOOGLE } from 'react-native-maps';
 
-import { bolgeHesapla, detayGoster, etiketBolgesi, gizliEtiketler, haritaDolgusu, IGNE, isaretciImzasi, izlemeGerekli, pinCapasi, pinCapi, pinZ, zoomaGorePinler, zoomDelta } from './geo';
+import { bolgeHesapla, etiketBolgesi, gizliEtiketler, haritaDolgusu, IGNE, isaretciImzasi, izlemeGerekli, pinCapasi, pinCapi, pinZ, zoomaGorePinler, zoomDelta } from './geo';
 import { ACIK_HARITA_STILI } from './haritaStili';
-import { PinIcerigi, pinGorseli, pinPngAnahtari } from './PinIcerigi';
+import { isaretciPlani } from './isaretciler';
+import { PinIcerigi, pinPngAnahtari } from './PinIcerigi';
 import { IGNE_CAPA, PIN_IKONLARI } from './pinIkonlari';
 import { usePinGorselleri } from './pinOnYukleme';
 import { bacakEtiketPinleri, yonOklari } from './rota';
+import { dokunmaKaydet, isaretciSayilariniKaydet, taniSayaclari } from './tani';
 import type { HaritaBolgesi, HaritaCizgisi, HaritaPini, HaritaProps, Konum } from './tipler';
 
 /** "#rrggbb" + opaklık → "#rrggbbaa". */
@@ -85,6 +87,16 @@ export function Harita({
   // yalnız adı / puanı gizlenir. Gizlenen hap hiç çizilmez (opaklıkla saklamak bitmap yakalaması isterdi).
   const gizli = useMemo(() => gizliEtiketler(tumPinler, etiketBolge, olcu, ustBosluk), [tumPinler, etiketBolge, olcu, ustBosluk]);
   const gorunen = useMemo(() => tumPinler.filter((p) => !(p.tur === 'etiket' && gizli.etiket.has(p.id))), [tumPinler, gizli]);
+  // #71: işaretçi planı — anahtar görünüm durumunu içerir (PNG adı, seçili); her pin en fazla bir pin + bir ad işaretçisi.
+  const plan = useMemo(() => isaretciPlani(gorunen, gizli, etiketBolge.zoom, gorsellerHazir), [gorunen, gizli, etiketBolge.zoom, gorsellerHazir]);
+  // Tanı sayaçları render dışında (effect) yazılır.
+  useEffect(() => {
+    isaretciSayilariniKaydet(gorunen.length, plan);
+  }, [gorunen.length, plan]);
+  const pinBas = (id: string) => {
+    dokunmaKaydet(id);
+    onPinBas?.(id);
+  };
   // #59 §C / #65: yön okları ~24 px aralık, en fazla 80 — zoom adımına göre.
   const oklar = useMemo(() => yonOklari(cizgiler, pinler, etiketBolge, olcu), [cizgiler, pinler, etiketBolge, olcu]);
   // #55 §C10: Marker'da uzun basma yok — haritaya uzun basılan noktaya ~28 px içindeki en yakın pin.
@@ -133,10 +145,11 @@ export function Harita({
       onLongPress={(e) => uzunBas(e.nativeEvent.coordinate)}
       onRegionChangeComplete={(b) => {
         const yeni = bolgeHesapla({ lat: b.latitude, lng: b.longitude }, b.latitudeDelta, b.longitudeDelta);
+        taniSayaclari.bolgeOlayi += 1;
         setBolge(yeni);
         setEtiketBolge((onceki) => etiketBolgesi(onceki, yeni));
         onBolgeDegisti?.(yeni);
-        if (__DEV__) console.log(`[harita] kurulum ${haritaSayaclari.kurulum} · yakalama ${haritaSayaclari.yakalama} · zoom ${yeni.zoom.toFixed(2)}`);
+        if (__DEV__) console.log(`[harita] bölge olayı ${taniSayaclari.bolgeOlayi} · kurulum ${haritaSayaclari.kurulum} · yakalama ${haritaSayaclari.yakalama} · zoom ${yeni.zoom.toFixed(2)} · işaretçi ${gorunen.length}`);
       }}>
       {cizgiler.map((c) => (
         <RotaCizgisi key={c.id} cizgi={c} />
@@ -166,31 +179,27 @@ export function Harita({
             zIndex={0}
           />
         ))}
-      {gorunen.map((p) => {
+      {plan.map((i) => {
         // #40: çakışmada önce puan satırı düşer (gizli.detay), sonra ad (gizli.etiket).
-        const detay = detayGoster(p, etiketBolge.zoom) && !gizli.detay.has(p.id);
-        const etiketGizli = gizli.etiket.has(p.id);
-        const gorsel = pinGorseli(p);
-        if (!gorsel) return <OzelIsaretci key={p.id} pin={p} etiketGizli={etiketGizli} detay={detay} onPinBas={onPinBas} onPinSuruklendi={onPinSuruklendi} />;
-        // #61 §6: daire hazır PNG (görünüm yakalaması yok); ad ayrı, yalnız metinli, dokunulamaz işaretçi. Görseller
-        // belleğe alınmadan hiç çizilmez.
-        if (!gorsellerHazir) return null;
+        const p = i.pin;
+        if (i.tur === 'gorunum') return <OzelIsaretci key={i.anahtar} pin={p} etiketGizli={i.etiketGizli} detay={i.detay} onPinBas={pinBas} onPinSuruklendi={onPinSuruklendi} />;
+        // #71: ad işaretçisi pinin üstünde durur ve Android'de her işaretçi dokunulabilir (`tappable` yok) — dokunuşu pine iletir.
+        if (i.tur === 'ad') return <OzelIsaretci key={i.anahtar} pin={p} etiketGizli={false} detay={i.detay} yalnizEtiket onPinBas={pinBas} />;
+        // #61 §6: daire hazır PNG (görünüm yakalaması yok); ad ayrı işaretçi. Anahtar görünüm durumunu taşır (#71).
         return (
-          <Fragment key={p.id}>
-            <Marker
-              coordinate={{ latitude: p.konum.lat, longitude: p.konum.lng }}
-              image={gorsel}
-              // #65: seçili iğnenin çapası ucu; dairelerde merkez.
-              anchor={p.secili ? IGNE_CAPA : { x: 0.5, y: 0.5 }}
-              tracksViewChanges={false}
-              opacity={p.opaklik ?? 1}
-              zIndex={pinZ(p)}
-              draggable={p.surukle}
-              onPress={() => onPinBas?.(p.id)}
-              onDragEnd={(e) => onPinSuruklendi?.(p.id, { lat: e.nativeEvent.coordinate.latitude, lng: e.nativeEvent.coordinate.longitude })}
-            />
-            {p.ad && !etiketGizli ? <OzelIsaretci pin={p} etiketGizli={false} detay={detay} yalnizEtiket /> : null}
-          </Fragment>
+          <Marker
+            key={i.anahtar}
+            coordinate={{ latitude: p.konum.lat, longitude: p.konum.lng }}
+            image={i.gorsel}
+            // #65: seçili iğnenin çapası ucu; dairelerde merkez.
+            anchor={p.secili ? IGNE_CAPA : { x: 0.5, y: 0.5 }}
+            tracksViewChanges={false}
+            opacity={p.opaklik ?? 1}
+            zIndex={pinZ(p)}
+            draggable={p.surukle}
+            onPress={() => pinBas(p.id)}
+            onDragEnd={(e) => onPinSuruklendi?.(p.id, { lat: e.nativeEvent.coordinate.latitude, lng: e.nativeEvent.coordinate.longitude })}
+          />
         );
       })}
     </MapView>
@@ -256,8 +265,9 @@ function OzelIsaretci({
   const durt = yuklenenPng !== null && yuklenenPng === beklenenPng;
   const capa =
     p.tur === 'aday' ? { x: 0.1, y: 0.5 } : p.tur === 'otel' || p.tur === 'etiket' || p.tur === 'konum' || !p.tur ? { x: 0.5, y: 0.5 } : yalnizEtiket && p.secili ? { x: 0.5, y: 0 } : pinCapasi(p, detay);
-  // Bacak etiketi, kullanıcı konumu ve yalnız-etiket işaretçisi dokunulamaz (dokunuş daire işaretçisine gider).
-  const bacak = p.tur === 'etiket' || p.tur === 'konum' || yalnizEtiket;
+  // Bacak etiketi ve kullanıcı konumu dokunulamaz. #71: yalnız-etiket (ad) işaretçisi dokunuşu pine iletir — Android'de
+  // `tappable` yok, ad işaretçisi pinin üstünde durduğundan dokunuşu o alıyordu ve yutuyordu.
+  const bacak = p.tur === 'etiket' || p.tur === 'konum';
   return (
     <Marker
       coordinate={{ latitude: p.konum.lat, longitude: p.konum.lng }}

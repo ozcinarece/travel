@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 
 import { bolgeHesapla, zoomDelta } from '@/components/harita/geo';
+import { useTani } from '@/components/harita/tani';
 import { BilgiHapi, HaritaEkrani } from '@/components/harita/HaritaEkrani';
 import type { HaritaBolgesi, HaritaOdagi, HaritaPini } from '@/components/harita/tipler';
 import { Avatar } from '@/components/ui/Avatar';
@@ -53,6 +54,9 @@ function Kesfet({ seyahat, konaklamalar }: { seyahat: Seyahat; konaklamalar: Kon
   // #69: filtre durumu — hızlı filtreler ve filtre sayfası aynı durumu paylaşır (KK9).
   const [filtre, setFiltre] = useState<Filtre>(BOS_FILTRE);
   const [filtreAcik, setFiltreAcik] = useState(false);
+  // #71: tanı şeridi — filtre düğmesine uzun basınca açılır/kapanır (cihazda logcat olmadan sayaçlar).
+  const [taniAcik, setTaniAcik] = useState(__DEV__);
+  const tani = useTani(taniAcik);
   const [aramaSonucu, setAramaSonucu] = useState<HafifYer | null>(null);
   const [secim, setSecim] = useState<Secim | null>(null);
   const [mesgul, setMesgul] = useState(false);
@@ -315,6 +319,7 @@ function Kesfet({ seyahat, konaklamalar }: { seyahat: Seyahat; konaklamalar: Kon
           accessibilityRole="button"
           accessibilityLabel={t('kesfet.filtre.ac')}
           onPress={() => setFiltreAcik(true)}
+          onLongPress={() => setTaniAcik((a) => !a)}
           style={({ pressed }) => [s.filtreDugme, s.golge, filtreli && s.filtreDugmeAktif, pressed && { opacity: 0.85 }]}>
           <Ikon ad="filtre" boyut={18} renk={filtreli ? renk.zemin : renk.metin} kalinlik={2.2} />
           {filtreli ? (
@@ -372,6 +377,13 @@ function Kesfet({ seyahat, konaklamalar }: { seyahat: Seyahat; konaklamalar: Kon
       }
       altSerbest={
         <View style={s.alt} pointerEvents="box-none">
+          {tani ? (
+            <View style={s.tani} pointerEvents="none">
+              <Text style={s.taniMetin}>
+                {`tur ${tani.tur} · istek ${tani.istek} · hata ${tani.hata} · bölge ${tani.bolgeOlayi} · yükleniyor ${yakin.yukleniyor ? 'E' : 'H'}\nişaretçi ${tani.gorunen} (png ${tani.png} · ad ${tani.ad} · görünüm ${tani.gorunum}) · render ${tani.render}\ndokunma ${tani.dokunma}${tani.sonDokunma ? ` · son ${tani.sonDokunma.slice(0, 28)}` : ''} · liste ${oneriListesi.length} · gizli ${gizliSayi}`}
+              </Text>
+            </View>
+          ) : null}
           <FiltreSayfasi acik={filtreAcik} filtre={filtre} onFiltre={setFiltre} sayi={gecenler.length} onKapat={() => setFiltreAcik(false)} />
           {hata ? (
             <View style={s.hataKutu}>
@@ -662,6 +674,8 @@ const s = StyleSheet.create({
     justifyContent: 'center',
   },
   cubukDugmeMetin: { fontFamily: yazi.kalin, fontSize: 13, color: renk.metin },
+  tani: { marginHorizontal: bosluk.kenar, paddingHorizontal: 8, paddingVertical: 4, borderRadius: 8, backgroundColor: 'rgba(15,15,15,0.8)' },
+  taniMetin: { fontFamily: yazi.kalin, fontSize: 10, lineHeight: 14, color: renk.zemin },
   hataKutu: {
     marginHorizontal: bosluk.kenar,
     padding: 10,
