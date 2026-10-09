@@ -1,6 +1,6 @@
 # Pin ve ikon sistemi
 
-Sürüm 1.3 · 9 Ekim 2026 (seçili = iğne; listede = dolu + ✓ rozeti; taksi → araba, düz; yürüme okları sık) · Sahip: Ece (ürün)
+Sürüm 1.4 · 9 Ekim 2026 (pin düşürme kalktı, zoom'a göre küçük pin) · önceki: 1.3 (seçili = iğne; listede = dolu + ✓ rozeti; taksi → araba, düz; yürüme okları sık) · Sahip: Ece (ürün)
 
 Kanvastaki **"Pin ve ikon sistemi"** panosu (`PinSystem6`), haritadaki her işaretin tek kaynağıdır: https://claude.ai/artifact/46jh8ggGczM7VDTVHyzRQT
 
@@ -38,7 +38,17 @@ Diğer glifler: `tik` (`M5 12.5l4.5 4.5L19 7.5`, kalınlık +0,6) · `ev` · `ar
 
 Tüm pinlerde gölge: `0 2px 6px rgba(15,15,15,.22)`. Üst üste binme sırası: konum > seçili > otel > listede / durak > öneri > hap.
 
-**Ad etiketi:** 11 px kalın, beyaz hale; 18–20 karakterde kesilir. Yakınlaşınca altında ★ puan · yorum. Çakışmada önce puan satırı düşer. Adı sığmayan öneri pini çizilmez; listede, durak ve otel her zaman çizilir.
+**Ad etiketi:** 11 px kalın, beyaz hale; 18–20 karakterde kesilir. Yakınlaşınca altında ★ puan · yorum. Çakışmada önce puan satırı, sonra ad düşer. **Pin hiçbir zaman düşmez**, yalnız adı gizlenir.
+
+**Yakınlığa göre (Keşfet, kanvas `KesfetZoom7`):**
+
+| Zoom | Öneri pini | Ad | Puan |
+|---|---|---|---|
+| < 13 (şehir) | **küçük pin 20 px**: beyaz zemin, 1,5 px kategori kenarı, 11 px glif | yok | yok |
+| 13–15 (semt) | 28 px | çakışmıyorsa | yok |
+| ≥ 15 (sokak) | 28 px | çakışmıyorsa | ★ puan |
+
+Listede, durak, otel ve seçili pinler her zoom'da tam boyutta çizilir.
 
 ## 3. Rota çizgileri
 
