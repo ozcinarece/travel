@@ -21,6 +21,8 @@ type Props = {
   sagUst?: ReactNode;
   /** Arama kutusu (beyaz, 48 yüksek) — kabuk gölgeli kabı sağlar. */
   arama?: ReactNode;
+  /** #69: aramanın sağında kare düğme (filtre); kabuk yan yana dizer. */
+  aramaSag?: ReactNode;
   /** Aramanın altı: öneri listesi, çipler, "Bu bölgede ara" hapı. */
   ustEk?: ReactNode;
   /** Alt panelin hemen üstünde küçük sağa yaslı not (ör. "Otel verisi: Google"). */
@@ -59,7 +61,7 @@ const GECIS_YUKSEKLIK = 250;
  * #17 KK2: tam ekran harita kabuğu — 3.3 Otel, 3.4 Keşfet ve 3.5 bunu paylaşır.
  * Harita ekranın tamamını kaplar; üstte ve altta yüzen katmanlar dokunuşu yalnız kendi alanlarında yakalar.
  */
-export function HaritaEkrani({ baslik, geri, sagUst, arama, ustEk, altNot, altSerbest, altPanel, onUstYukseklik, altMenuVar, panelTam, altBaslik, altSayfa, harita }: Props) {
+export function HaritaEkrani({ baslik, geri, sagUst, arama, aramaSag, ustEk, altNot, altSerbest, altPanel, onUstYukseklik, altMenuVar, panelTam, altBaslik, altSayfa, harita }: Props) {
   const kenar = useSafeAreaInsets();
   const [ustY, setUstY] = useState(0);
   const [panelY, setPanelY] = useState(0);
@@ -107,7 +109,12 @@ export function HaritaEkrani({ baslik, geri, sagUst, arama, ustEk, altNot, altSe
           {altBaslik !== undefined ? <BuyukBaslik baslik={baslik} alt={altBaslik} onGeri={geri} /> : <GeriHapi baslik={baslik} onPress={geri} />}
           {sagUst}
         </View>
-        {arama ? <View style={[s.arama, s.golge]}>{arama}</View> : null}
+        {arama ? (
+          <View style={s.aramaSatir} pointerEvents="box-none">
+            <View style={[s.arama, s.golge, { flex: 1 }]}>{arama}</View>
+            {aramaSag}
+          </View>
+        ) : null}
         {ustEk}
       </View>
 
@@ -244,6 +251,7 @@ const s = StyleSheet.create({
   geriMetin: { fontFamily: yazi.kalin, fontSize: 13, color: renk.metin, flexShrink: 1 },
   bilgiHap: { height: 36, paddingHorizontal: 12, borderRadius: 999, backgroundColor: renk.zemin, justifyContent: 'center' },
   bilgiMetin: { fontFamily: yazi.kalin, fontSize: 12, color: renk.ikincil },
+  aramaSatir: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   arama: {
     height: 48,
     paddingHorizontal: 16,

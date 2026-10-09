@@ -79,6 +79,8 @@ describe('geo', () => {
     expect(detayGoster(p, 15)).toBe(true);
     expect(detayGoster(p, 16)).toBe(true);
     expect(detayGoster({ ...p, secili: true }, 12)).toBe(true);
+    // #69: öne çıkan pinin altında ★ puan her zoom'da.
+    expect(detayGoster({ ...p, oneCikan: true }, 12)).toBe(true);
     expect(detayGoster({ ...p, puan: null }, 17)).toBe(false);
     expect(detayGoster({ ...p, tur: 'aday' }, 17)).toBe(false);
   });
@@ -218,6 +220,8 @@ describe('pin düşürme yok, zoom\'a göre küçük pin (#66)', () => {
     expect(kucukPin(p('a', 0, { tur: 'oneri' }), 12.9)).toBe(true);
     expect(kucukPin(p('a', 0, { tur: 'oneri' }), 13)).toBe(false);
     expect(kucukPin(p('a', 0, { tur: 'oneri', secili: true }), 12)).toBe(false);
+    // #69: öne çıkan her zoom'da tam boy.
+    expect(kucukPin(p('a', 0, { tur: 'oneri', oneCikan: true }), 12)).toBe(false);
     expect(kucukPin(p('a', 0, { tur: 'listede' }), 12)).toBe(false);
     const [k, l] = zoomaGorePinler([p('a', 0, { tur: 'oneri', puan: 4.5 }), p('l', 0.001, { tur: 'listede' })], 12);
     expect(k).toMatchObject({ kucuk: true, puan: null });

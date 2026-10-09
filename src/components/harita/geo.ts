@@ -30,9 +30,9 @@ export function deltaZoom(latDelta: number): number {
 export const DETAY_ZOOM = 15;
 /** #66 (docs/05 §2, kanvas KesfetZoom7): bu zoom'un altında öneri pini 20 px küçük pin, adsız. */
 export const KUCUK_ZOOM = 13;
-/** Pinin küçük (20 px, adsız) çizileceği durum: seçili olmayan öneri, zoom < 13. */
+/** Pinin küçük (20 px, adsız) çizileceği durum: seçili ve öne çıkan (#69) olmayan öneri, zoom < 13. */
 export function kucukPin(p: HaritaPini, zoom: number): boolean {
-  return p.tur === 'oneri' && !p.secili && zoom < KUCUK_ZOOM;
+  return p.tur === 'oneri' && !p.secili && !p.oneCikan && zoom < KUCUK_ZOOM;
 }
 /** Zoom'a göre pinleri küçültür (`kucuk` işareti; ad ve puan düşer). Diğer türler olduğu gibi. */
 export function zoomaGorePinler(pinler: HaritaPini[], zoom: number): HaritaPini[] {
@@ -43,7 +43,8 @@ export function zoomaGorePinler(pinler: HaritaPini[], zoom: number): HaritaPini[
 export function detayGoster(p: HaritaPini, zoom: number): boolean {
   if (!p.ad || p.puan === null || p.puan === undefined) return false;
   if (p.tur === 'aday' || p.tur === 'otel' || p.tur === 'etiket') return false;
-  return !!p.secili || zoom >= DETAY_ZOOM;
+  // #69: öne çıkan pinin altında ★ puan her zoom'da.
+  return !!p.secili || !!p.oneCikan || zoom >= DETAY_ZOOM;
 }
 
 // ---------------------------------------------------------------- #30 pin etiketleri
@@ -71,7 +72,8 @@ export function etiketOnceligi(p: HaritaPini): number {
   if (p.tur === 'listede') return 70;
   if (p.tur === 'otel') return 60;
   if (p.tur === 'bos') return 40;
-  if (p.tur === 'oneri') return 30;
+  // #69: öne çıkan önerinin adı sıradan öneriyi yener.
+  if (p.tur === 'oneri') return p.oneCikan ? 35 : 30;
   return 20;
 }
 
@@ -222,7 +224,7 @@ export function pinZ(p: HaritaPini): number {
   }
   if (p.tur === 'durak' || p.tur === 'listede') return 9;
   if (p.tur === 'etiket') return 0;
-  return 1;
+  return p.oneCikan ? 5 : 1;
 }
 
 /**
@@ -295,5 +297,5 @@ export function izlemeGerekli(imza: string, yakalanan: string | null, beklenenPn
  * KURULMAZ; anahtar yalnız pin kimliğidir). Konum, opaklık ve z-sırası native özelliktir, imzaya girmez.
  */
 export function isaretciImzasi(p: HaritaPini, etiketGizli: boolean, detay: boolean): string {
-  return [p.tur ?? '', p.renk, p.etiket ?? '', p.ikon ?? '', p.kategoriRenk ?? '', p.etiketIkon ?? '', p.secili ? 1 : 0, p.kucuk ? 1 : 0, p.tamam ? 1 : 0, p.ad && !etiketGizli ? p.ad : '', detay ? 1 : 0, p.puan ?? '', p.yorumSayisi ?? ''].join('|');
+  return [p.tur ?? '', p.renk, p.etiket ?? '', p.ikon ?? '', p.kategoriRenk ?? '', p.etiketIkon ?? '', p.secili ? 1 : 0, p.kucuk ? 1 : 0, p.oneCikan ? 1 : 0, p.tamam ? 1 : 0, p.ad && !etiketGizli ? p.ad : '', detay ? 1 : 0, p.puan ?? '', p.yorumSayisi ?? ''].join('|');
 }

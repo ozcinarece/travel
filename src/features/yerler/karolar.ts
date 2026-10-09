@@ -92,7 +92,7 @@ export function gorunurKarolar(bolge: HaritaBolgesi): Karo[] {
   return karolar.sort((a, b) => uzaklik(a) - uzaklik(b) || a.anahtar.localeCompare(b.anahtar));
 }
 
-/** Çip + karo → önbellek anahtarı. */
+/** Tip kümesi (#69; eski adıyla çip) + karo → önbellek anahtarı. */
 export function karoOnbellekAnahtari(cip: OneriCipi, karo: Karo): string {
   return `${cip}|${karo.anahtar}`;
 }

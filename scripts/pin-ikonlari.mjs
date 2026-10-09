@@ -95,6 +95,11 @@ for (const k of kategoriler) {
   pinIstekleri.push({ ad: `dolu-${k.ikon}-28`, cap: 28, zemin: k.renk, kenar: BEYAZ, kenarKalinlik: 2, ikon: k.ikon, ikonRenk: BEYAZ, rozet: true });
   pinIstekleri.push({ ad: `igne-daire-${k.ikon}`, igne: true, zemin: BEYAZ, kenar: k.renk, kenarKalinlik: 2.5, ikon: k.ikon, ikonRenk: k.renk });
   pinIstekleri.push({ ad: `igne-dolu-${k.ikon}`, igne: true, zemin: k.renk, kenar: BEYAZ, kenarKalinlik: 2.5, ikon: k.ikon, ikonRenk: BEYAZ, rozet: true });
+  // #69 (docs/05 §2): öne çıkan — aynı görünüm + sol üstte turuncu ★ rozeti (öneri / listede, daire / iğne).
+  pinIstekleri.push({ ad: `one-daire-${k.ikon}-28`, cap: 28, zemin: BEYAZ, kenar: k.renk, kenarKalinlik: 2, ikon: k.ikon, ikonRenk: k.renk, yildiz: true });
+  pinIstekleri.push({ ad: `one-dolu-${k.ikon}-28`, cap: 28, zemin: k.renk, kenar: BEYAZ, kenarKalinlik: 2, ikon: k.ikon, ikonRenk: BEYAZ, rozet: true, yildiz: true });
+  pinIstekleri.push({ ad: `igne-one-daire-${k.ikon}`, igne: true, zemin: BEYAZ, kenar: k.renk, kenarKalinlik: 2.5, ikon: k.ikon, ikonRenk: k.renk, yildiz: true });
+  pinIstekleri.push({ ad: `igne-one-dolu-${k.ikon}`, igne: true, zemin: k.renk, kenar: BEYAZ, kenarKalinlik: 2.5, ikon: k.ikon, ikonRenk: BEYAZ, rozet: true, yildiz: true });
 }
 pinIstekleri.push({ ad: 'tik-28', cap: 28, zemin: SIYAH, kenar: BEYAZ, kenarKalinlik: 2, ikon: 'tik', ikonRenk: BEYAZ, kalinlik: 2.4 });
 pinIstekleri.push({ ad: 'tamam-28', cap: 28, zemin: YESIL, kenar: BEYAZ, kenarKalinlik: 2, ikon: 'tik', ikonRenk: BEYAZ, kalinlik: 2.4 });
@@ -106,6 +111,10 @@ const GOLGE = `<filter id="g" x="-50%" y="-50%" width="200%" height="200%"><feDr
 const IGNE_GOLGE = `<filter id="g" x="-50%" y="-50%" width="200%" height="200%"><feDropShadow dx="0" dy="4" stdDeviation="5" flood-color="#0f0f0f" flood-opacity="0.3"/></filter>`;
 const glif = (i, px, cx, cy) => `<g transform="translate(${cx - px / 2} ${cy - px / 2}) scale(${px / 24})">${ikonIci(i.ikon, i.ikonRenk, i.kalinlik ?? 2.1)}</g>`;
 /** ✓ rozeti: 15 px siyah daire, 1,5 px beyaz kenar, 9 px beyaz ✓; merkezi (cx, cy). */
+const TURUNCU = '#ff5a1f';
+const YILDIZ = 'M12 2l3 7 7 .6-5.3 4.6 1.7 7.1L12 17.6 5.6 21.3l1.7-7.1L2 9.6 9 9z';
+/** #69 ★ rozeti: 15 px turuncu daire, 1,5 px beyaz kenar, 8 px beyaz dolu yıldız; merkezi (cx, cy). */
+const yildizRozet = (cx, cy) => `<circle cx="${cx}" cy="${cy}" r="6.75" fill="${TURUNCU}" stroke="${BEYAZ}" stroke-width="1.5"/><g transform="translate(${cx - 4} ${cy - 4}) scale(${8 / 24})"><path d="${YILDIZ}" fill="${BEYAZ}"/></g>`;
 const rozet = (cx, cy) => `<circle cx="${cx}" cy="${cy}" r="6.75" fill="${SIYAH}" stroke="${BEYAZ}" stroke-width="1.5"/>${glif({ ikon: 'tik', ikonRenk: BEYAZ, kalinlik: 2.6 }, 9, cx, cy)}`;
 
 function pinSvg(i) {
@@ -118,7 +127,7 @@ function pinSvg(i) {
     const uc = IGNE_PAD + IGNE.boy; // uç y
     const r = IGNE.en / 2 - i.kenarKalinlik / 2;
     const yol = `M${cx} ${uc} C${cx - 6} ${uc - 9} ${cx - r} ${bas + 11} ${cx - r} ${bas} a${r} ${r} 0 1 1 ${2 * r} 0 C${cx + r} ${bas + 11} ${cx + 6} ${uc - 9} ${cx} ${uc} Z`;
-    const rz = i.rozet ? rozet(cx + 12, bas - 12) : '';
+    const rz = `${i.rozet ? rozet(cx + 12, bas - 12) : ''}${i.yildiz ? yildizRozet(cx - 12, bas - 12) : ''}`;
     return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">${IGNE_GOLGE}<g filter="url(#g)"><path d="${yol}" fill="${i.zemin}" stroke="${SIYAH}" stroke-width="${i.kenarKalinlik + 4}" stroke-linejoin="round"/><path d="${yol}" fill="${i.zemin}" stroke="${i.kenar}" stroke-width="${i.kenarKalinlik}" stroke-linejoin="round"/></g>${glif(i, 17, cx, bas)}${rz}</svg>`;
   }
   const { cap } = i;
@@ -127,7 +136,7 @@ function pinSvg(i) {
   const sekil = i.kare
     ? `<rect x="${PAD}" y="${PAD}" width="${cap}" height="${cap}" rx="9" fill="${i.zemin}"/>`
     : `<circle cx="${c}" cy="${c}" r="${(cap - i.kenarKalinlik) / 2}" fill="${i.zemin}" stroke="${i.kenar}" stroke-width="${i.kenarKalinlik}"/>`;
-  const rz = i.rozet ? rozet(c + 10, c - 10) : '';
+  const rz = `${i.rozet ? rozet(c + 10, c - 10) : ''}${i.yildiz ? yildizRozet(c - 10, c - 10) : ''}`;
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${W}" viewBox="0 0 ${W} ${W}">${GOLGE}<g filter="url(#g)">${sekil}</g>${glif(i, i.ikonPx ?? 14, c, c)}${rz}</svg>`;
 }
 
