@@ -263,7 +263,8 @@
     "koordinatMekan": "Linkte mekan değil yalnızca konum var; mekanı adıyla ara.",
     "ekleHata": "Eklenemedi. Tekrar dene.",
     "secimHata": "Mekan bilgisi alınamadı.",
-    "bolgeBos": "Bu bölgede öneri yok; haritayı kaydır ya da uzaklaş.",
+    "bolgeyiTara": "Bu bölgeyi tara",
+    "bolgeBos": "Bu bölgede öneri yok; haritayı kaydırıp \"Bu bölgeyi tara\"ya dokun.",
     "listedeCikar": "Listede ✓ · Çıkar",
     "detay": "Detay"
   },

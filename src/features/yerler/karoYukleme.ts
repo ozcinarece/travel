@@ -1,4 +1,4 @@
-// #66: Keşfet öneri yükleyicisi — görünür karolardan önbellekte olmayanlar kaydırma bittikten 400 ms sonra istenir;
+// #66 / #71: Keşfet öneri yükleyicisi — açılışta bir tur, sonra yalnız "Bu bölgeyi tara" ile; görünür karolardan önbellekte olmayanlar istenir;
 // sonuçlar seyahatin birikimli listesine eklenir. Karo önbelleği (tip kümesi + karo) geneldir; birikim SEYAHATE göre
 // ayrılır (#68 incelemesi 🔴3). İkisi de oturum boyu modül belleğinde: ekran yeniden açılsa da az önce görülen mekanlar
 // yerinde. Oturum başına karo isteği sayacı (__DEV__ konsolu + tur başına Sentry izi).
@@ -9,7 +9,7 @@ import type { HaritaBolgesi } from '@/components/harita/tipler';
 import { izBirak } from '@/lib/hataRaporu';
 
 import { yakinYerler, type HafifYer, type OneriCipi } from './api';
-import { birikimeEkle, birikimListesi, istenecekKarolar, KARO_EN_FAZLA_ISTEK, KARO_GECIKME_MS, karoOnbellekAnahtari, type Karo } from './karolar';
+import { birikimeEkle, birikimListesi, istenecekKarolar, KARO_EN_FAZLA_ISTEK, karoOnbellekAnahtari, type Karo } from './karolar';
 
 type Durum = 'yolda' | 'tamam';
 /** tipKümesi|karo → durum (yolda / tamam). Hatalı istek silinir → sıradaki turda yeniden denenir. */
@@ -90,21 +90,28 @@ export async function turBaslat(seyahatId: string, kumeler: OneriCipi[], bolge: 
 export type KaroOnerileri = {
   /** Seyahatin birikimli listesi (popülerlik sırasıyla; yalnız yeni mekan gelince yeniden hesaplanır). */
   yerler: HafifYer[];
-  /** En az bir karo turu yolda. */
+  /** Bir tarama turu yolda. */
   yukleniyor: boolean;
-  /** Son turda en az bir karo isteği başarısız oldu (30 sn sonra sıradaki kaydırmada yeniden denenir). */
+  /** Son turda en az bir karo isteği başarısız oldu (30 sn sonra sıradaki taramada yeniden denenir). */
   hata: boolean;
+  /** Son taranan görünür bölge ("Bu bölgeyi tara" düğmesi bundan uzaklaşınca çıkar); henüz tarama yoksa null. */
+  sonTaranan: HaritaBolgesi | null;
+  /** Kullanıcı dokunuşu: bu bölge için bir tur (o anki filtreye göre kümeler). Yolda tur varsa yok sayılır. */
+  tara: (bolge: HaritaBolgesi, kumeler: OneriCipi[]) => void;
 };
 
 /**
- * `kumeler`: istenecek tip kümeleri (#69: `['hepsi', ...seçili kategoriler]`). Küme listesi / seyahat değişince hemen,
- * bölge değişince 400 ms sonra yeni tur.
+ * #71 ürün kararı: otomatik yükleme yok. Keşfet açılınca ilk gerçek bölge için TEK tur; sonra harita kaydırılsa /
+ * yakınlaştırılsa / filtre değişse hiçbir istek atılmaz — kullanıcı "Bu bölgeyi tara"ya basınca `tara()` ile bir tur.
+ * `karoSayaci.tur` kullanıcı dokunuşu başına en fazla 1 artar.
  */
-export function useKaroOnerileri(seyahatId: string, kumeler: OneriCipi[], bolge: HaritaBolgesi | null): KaroOnerileri {
+export function useKaroOnerileri(seyahatId: string, ilkBolge: HaritaBolgesi | null): KaroOnerileri {
   const [surum, setSurum] = useState(() => birikimiAl(seyahatId).surum);
   const [yolda, setYolda] = useState(0);
   const [hata, setHata] = useState(false);
+  const [sonTaranan, setSonTaranan] = useState<HaritaBolgesi | null>(null);
   const canli = useRef(true);
+  const yoldaRef = useRef(false);
   useEffect(() => {
     canli.current = true;
     return () => {
@@ -112,34 +119,37 @@ export function useKaroOnerileri(seyahatId: string, kumeler: OneriCipi[], bolge:
     };
   }, []);
 
-  const yukle = useCallback((id: string, k: OneriCipi[], b: HaritaBolgesi) => {
-    setYolda((n) => n + 1);
-    turBaslat(id, k, b)
-      .then((s) => {
-        if (!canli.current) return;
-        setHata(s.hata);
-        setSurum(birikimiAl(id).surum);
-      })
-      .finally(() => {
-        if (canli.current) setYolda((n) => n - 1);
-      });
-  }, []);
+  const tara = useCallback(
+    (b: HaritaBolgesi, kumeler: OneriCipi[]) => {
+      if (yoldaRef.current) return;
+      yoldaRef.current = true;
+      setYolda((n) => n + 1);
+      setSonTaranan(b);
+      turBaslat(seyahatId, kumeler, b)
+        .then((s) => {
+          if (!canli.current) return;
+          setHata(s.hata);
+          setSurum(birikimiAl(seyahatId).surum);
+        })
+        .finally(() => {
+          yoldaRef.current = false;
+          if (canli.current) setYolda((n) => n - 1);
+        });
+    },
+    [seyahatId],
+  );
 
-  // Kaydırma / yakınlaştırma bitince 400 ms bekle; bu sürede yeni bölge gelirse öncekini iptal et. Küme / seyahat değişince hemen.
-  const kumeAnahtari = kumeler.join('+');
-  const oncekiAnahtar = useRef<string | null>(null);
+  // Açılış: ilk gerçek bölge gelince bir kez (`hepsi` kümesi); bölge sonradan değişse de yeniden tetiklenmez.
+  const ilkTur = useRef(false);
   useEffect(() => {
-    if (!bolge) return;
-    const anahtar = `${seyahatId}|${kumeAnahtari}`;
-    const hemen = oncekiAnahtar.current !== anahtar;
-    oncekiAnahtar.current = anahtar;
-    const z = setTimeout(() => yukle(seyahatId, kumeAnahtari.split('+') as OneriCipi[], bolge), hemen ? 0 : KARO_GECIKME_MS);
-    return () => clearTimeout(z);
-  }, [seyahatId, kumeAnahtari, bolge, yukle]);
+    if (!ilkBolge || ilkTur.current) return;
+    ilkTur.current = true;
+    tara(ilkBolge, ['hepsi']);
+  }, [ilkBolge, tara]);
 
   // Liste yalnız sürüm değişince yeniden sıralanır (#68 🔴2). Seyahat ekranı seyahat başına yeniden kurulur (key=id), bu
   // yüzden `seyahatId` bir kanca ömründe değişmez; yine de bağımlılıkta.
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const yerler = useMemo(() => birikimListesi(birikimiAl(seyahatId).yerler), [seyahatId, surum]);
-  return { yerler, yukleniyor: yolda > 0, hata };
+  return { yerler, yukleniyor: yolda > 0, hata, sonTaranan, tara };
 }
