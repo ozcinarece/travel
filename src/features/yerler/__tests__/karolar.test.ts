@@ -70,11 +70,11 @@ describe('karolar (#66)', () => {
   it('istenecekKarolar: önbellektekiler atlanır, en fazla 12', () => {
     const b = bolge(12);
     const hepsi = gorunurKarolar(b);
-    const istek = istenecekKarolar(b, 'populer', () => false);
+    const istek = istenecekKarolar(b, 'hepsi', () => false);
     expect(istek.length).toBe(Math.min(hepsi.length, KARO_EN_FAZLA_ISTEK));
-    const bilinen = new Set(istek.map((k) => karoOnbellekAnahtari('populer', k)));
-    const kalan = istenecekKarolar(b, 'populer', (a) => bilinen.has(a));
-    expect(kalan.every((k) => !bilinen.has(karoOnbellekAnahtari('populer', k)))).toBe(true);
+    const bilinen = new Set(istek.map((k) => karoOnbellekAnahtari('hepsi', k)));
+    const kalan = istenecekKarolar(b, 'hepsi', (a) => bilinen.has(a));
+    expect(kalan.every((k) => !bilinen.has(karoOnbellekAnahtari('hepsi', k)))).toBe(true);
     // Başka çip aynı karoları yeniden ister.
     expect(istenecekKarolar(b, 'yemek', (a) => bilinen.has(a)).length).toBe(istek.length);
   });

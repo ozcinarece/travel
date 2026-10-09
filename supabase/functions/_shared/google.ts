@@ -213,12 +213,25 @@ export async function metinAra(secenek: {
 // ---------------------------------------------------------------- Nearby Search (3.3 otel adayları, 3.4 öneri çipleri)
 
 /** Çip → Places (New) tipleri. 3.4 çipleri PRD KK4 / teknik not T8; `otel` #17 (lodging). Geçerlilik ilk canlı testte doğrulanır. */
+// #69 KK10: Keşfet çipleri kalktı — `hepsi` tek tip listesiyle karo isteği; kategori filtresinde o kategorinin kümesi de
+// istenir (Places API (New) Table A tipleri; includedTypes en çok 50).
+const KATEGORI_TIPLERI: Record<string, string[]> = {
+  gezilecek: ['tourist_attraction', 'historical_landmark', 'cultural_landmark', 'monument'],
+  muze: ['museum', 'art_gallery'],
+  ibadet: ['church', 'mosque', 'synagogue', 'hindu_temple'],
+  park: ['park', 'garden', 'botanical_garden', 'zoo', 'national_park'],
+  manzara: ['observation_deck'],
+  yemek: ['restaurant'],
+  kafe: ['cafe', 'coffee_shop', 'bakery'],
+  alisveris: ['shopping_mall', 'market'],
+};
 export const CIP_TIPLERI: Record<string, string[]> = {
   otel: ['lodging'],
+  hepsi: [...new Set(Object.values(KATEGORI_TIPLERI).flat())],
+  ...KATEGORI_TIPLERI,
+  // Eski istemciler (#69 öncesi çipler) bir sürüm daha kabul edilir; OTA'yı almamış istemci 400 almasın.
   populer: ['tourist_attraction'],
-  yemek: ['restaurant'],
   sanat: ['museum', 'art_gallery'],
-  manzara: ['park', 'tourist_attraction'],
 };
 
 export async function yakinAra(secenek: {

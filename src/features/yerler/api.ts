@@ -116,8 +116,12 @@ export function useOtelOnerileri(girdi: string, oturum: string, merkez: Merkez |
   return useOneriler('otel-oneri', girdi, oturum, 'lodging', merkez, etkin);
 }
 
-export type OneriCipi = 'otel' | 'populer' | 'yemek' | 'sanat' | 'manzara';
-export const ONERI_CIPLERI: OneriCipi[] = ['populer', 'yemek', 'sanat', 'manzara'];
+/**
+ * Nearby Search tip kümesi (Edge Function CIP_TIPLERI anahtarı). #69: Keşfet'te çip yok — karo istekleri `hepsi`
+ * (gezilecek + müze + ibadet + park + manzara + yemek + kafe + alışveriş) ile; kategori filtresi seçiliyse o kategoriye özel
+ * karo istekleri de atılır. `otel`: 3.3 otel adayları. Eski çipler (populer/yemek/sanat/manzara) kaldırıldı.
+ */
+export type OneriCipi = 'otel' | 'hepsi' | 'gezilecek' | 'muze' | 'ibadet' | 'yemek' | 'kafe' | 'park' | 'manzara' | 'alisveris';
 
 /** Popülerlik puanı: puan × log10(yorum + 1); eşitlikte place_id (deterministik). */
 export function oneriSirala<T extends { place_id: string; puan: number | null; puan_sayisi: number | null }>(yerler: T[]): T[] {

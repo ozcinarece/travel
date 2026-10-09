@@ -29,6 +29,8 @@ export type HaritaPini = {
   tur?: 'durak' | 'listede' | 'oneri' | 'otel' | 'aday' | 'bos' | 'etiket' | 'konum';
   /** Vurgulu (seçili) pin: büyük daire; aday için siyah hap. #42 KK5: Program'da ayrıca turuncu halka. */
   secili?: boolean;
+  /** #69: öne çıkan (şehrin en iyi %10'u) — sol üstte turuncu ★ rozeti; her zoom'da tam boy, adının altında ★ puan. */
+  oneCikan?: boolean;
   /** #66: zoom < 13'te öneri pini küçük (20 px, adsız) — Harita zoom'a göre işaretler (geo.zoomaGorePinler). */
   kucuk?: boolean;
   /** #42 KK5: seçili güne ait olmayan pinler soluk (0–1; varsayılan 1). */

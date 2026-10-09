@@ -26,6 +26,9 @@ export type IkonAdi =
   | 'harita'
   | 'yurume'
   | 'araba'
+  // #69: filtre düğmesi (kaydırıcılar) ve dolu yıldız (öne çıkan).
+  | 'filtre'
+  | 'yildiz'
   | 'yukari'
   | 'asagi'
   | 'daha'
@@ -143,6 +146,16 @@ export function Ikon({ ad, boyut = 24, renk, kalinlik = 2 }: Props) {
           <Circle cx={7.5} cy={19} r={1} {...ortak} />
           <Circle cx={16.5} cy={19} r={1} {...ortak} />
         </>
+      ) : ad === 'filtre' ? (
+        // #69 (kanvas KesfetFilter8): iki kaydırıcı.
+        <>
+          <Path d="M4 7h10M18 7h2M4 17h4M12 17h8" {...ortak} />
+          <Circle cx={16} cy={7} r={2} {...ortak} />
+          <Circle cx={10} cy={17} r={2} {...ortak} />
+        </>
+      ) : ad === 'yildiz' ? (
+        // #69: dolu yıldız (öne çıkan rozeti / hızlı filtre).
+        <Path d="M12 2l3 7 7 .6-5.3 4.6 1.7 7.1L12 17.6 5.6 21.3l1.7-7.1L2 9.6 9 9z" fill={renk} stroke="none" />
       ) : ad === 'yukari' ? (
         <Path d="M6 15l6-6 6 6" {...ortak} />
       ) : ad === 'asagi' ? (

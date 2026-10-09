@@ -48,10 +48,11 @@ export function pinGorseli(pin: HaritaPini): ImageRequireSource | undefined {
   if (pin.tur !== 'oneri' && pin.tur !== 'bos' && pin.tur !== 'listede' && !(pin.tur === 'durak' && pin.tamam)) return undefined;
   // #66: zoom < 13'te öneri küçük pin (20 px). #65: seçili = iğne (çapa ucu, IGNE_CAPA); değilse 28 px daire (çapa merkez).
   if (pin.kucuk && pin.tur === 'oneri') return PIN_IKONLARI[`kucuk-${pin.ikon ?? 'kamera'}-20`];
-  const on = pin.secili ? 'igne-' : '';
+  // #69: öne çıkan = aynı görünüm + sol üstte ★ rozeti (`one-` öneki; iğnede `igne-one-`).
+  const on = `${pin.secili ? 'igne-' : ''}${pin.oneCikan && (pin.tur === 'oneri' || pin.tur === 'listede') && !pin.tamam ? 'one-' : ''}`;
   const son = pin.secili ? '' : '-28';
   if (pin.tamam) return PIN_IKONLARI[`${on}tamam${son}`];
-  if (pin.tur === 'listede') return pin.ikon && pin.kategoriRenk ? PIN_IKONLARI[`${on}dolu-${pin.ikon}${son}`] : PIN_IKONLARI[`${on}tik${son}`];
+  if (pin.tur === 'listede') return pin.ikon && pin.kategoriRenk ? PIN_IKONLARI[`${on}dolu-${pin.ikon}${son}`] : PIN_IKONLARI[`${pin.secili ? 'igne-' : ''}tik${son}`];
   return PIN_IKONLARI[`${on}daire-${pin.ikon ?? 'kamera'}${son}`];
 }
 
@@ -89,6 +90,15 @@ function PngPin({ gorsel, secili, cap, onYuklendi }: { gorsel: ImageRequireSourc
   // İğnede görünen uç halkayla IGNE.halka kadar aşağıda: alt kenar boşluğu o kadar az negatif → kutu IGNE_GORUNEN_BOY.
   const altPay = secili ? -(pay - IGNE.halka) : -pay;
   return <Image source={gorsel} style={{ width: en, height: boy, marginHorizontal: -pay, marginTop: -pay, marginBottom: altPay }} fadeDuration={0} onLoad={onYuklendi} />;
+}
+
+/** #69 (docs/05 §2): öne çıkan rozeti — sol üstte 15 px turuncu daire, 1,5 px beyaz kenar, 8 px beyaz ★ (görünümlü işaretçi / web). */
+function YildizRozeti() {
+  return (
+    <View style={s.yildizRozet} pointerEvents="none">
+      <Ikon ad="yildiz" boyut={8} renk={renk.zemin} />
+    </View>
+  );
 }
 
 /**
@@ -198,11 +208,13 @@ export function PinIcerigi({
         // #53: beyaz daire, kategori renginde 2 px kenar, kategori ikonu. #66: küçük pin 20 px, 1,5 px kenar, 11 px glif.
         <View style={[s.daire, daire, s.beyaz, { borderColor: kRenk }, pin.kucuk && s.kucuk]} collapsable={false}>
           <PinIkonu ad={pin.ikon ?? 'kamera'} boyut={pin.kucuk ? 11 : IKON_PX} renk={kRenk} kalinlik={2.1} onYuklendi={onYuklendi} />
+          {pin.oneCikan ? <YildizRozeti /> : null}
         </View>
       ) : pin.tur === 'listede' ? (
         // #61 §4: listede = kategori renginde dolu daire + beyaz kategori ikonu (kategori yoksa #53: siyah + ✓).
         <View style={[s.daire, daire, { backgroundColor: pin.ikon && pin.kategoriRenk ? pin.kategoriRenk : renk.metin }]} collapsable={false}>
           <PinIkonu ad={pin.ikon && pin.kategoriRenk ? pin.ikon : 'tik'} boyut={IKON_PX} renk={renk.zemin} kalinlik={pin.ikon && pin.kategoriRenk ? 2.1 : 2.4} onYuklendi={onYuklendi} />
+          {pin.oneCikan ? <YildizRozeti /> : null}
         </View>
       ) : (
         // #55 §D11: güne atanmış = gün renginde daire + sıra numarası; #61 §5: diğer günler numarasız küçük nokta (%40).
@@ -235,6 +247,7 @@ const s = StyleSheet.create({
   daire: { borderWidth: 2, borderColor: renk.zemin, alignItems: 'center', justifyContent: 'center' },
   beyaz: { backgroundColor: renk.zemin, borderWidth: 2 },
   kucuk: { borderWidth: 1.5 },
+  yildizRozet: { position: 'absolute', left: -4, top: -4, width: 15, height: 15, borderRadius: 7.5, backgroundColor: renk.vurgu, borderWidth: 1.5, borderColor: renk.zemin, alignItems: 'center', justifyContent: 'center' },
   // #65: seçili iğne (görünüm): baş 38 (2,5 kenar + 2 siyah halka ≈ kenar 4,5 karma), uç 45° döndürülmüş kare.
   igne: { width: IGNE.en, height: IGNE_GORUNEN_BOY },
   igneSvg: { position: 'absolute', left: -IGNE_PAY, top: -IGNE_PAY },

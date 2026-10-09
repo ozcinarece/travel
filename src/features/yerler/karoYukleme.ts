@@ -1,17 +1,18 @@
 // #66: Keşfet öneri yükleyicisi — görünür karolardan önbellekte olmayanlar kaydırma bittikten 400 ms sonra istenir;
-// sonuçlar seyahatin birikimli listesine eklenir. Karo önbelleği (çip + karo) geneldir; birikim SEYAHATE göre ayrılır
-// (#68 incelemesi 🔴3: Roma'dan sonra Eskişehir'de Roma mekanları kalmasın). İkisi de oturum boyu modül belleğinde: ekran
-// yeniden açılsa da az önce görülen mekanlar yerinde. Oturum başına karo isteği sayacı (__DEV__ konsolu + tur başına Sentry izi).
+// sonuçlar seyahatin birikimli listesine eklenir. Karo önbelleği (tip kümesi + karo) geneldir; birikim SEYAHATE göre
+// ayrılır (#68 incelemesi 🔴3). İkisi de oturum boyu modül belleğinde: ekran yeniden açılsa da az önce görülen mekanlar
+// yerinde. Oturum başına karo isteği sayacı (__DEV__ konsolu + tur başına Sentry izi).
+// #69: çip yok — istekler `hepsi` kümesi + seçili kategori kümeleriyle (KK10); birikim kümeden bağımsız tek liste.
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import type { HaritaBolgesi } from '@/components/harita/tipler';
 import { izBirak } from '@/lib/hataRaporu';
 
 import { yakinYerler, type HafifYer, type OneriCipi } from './api';
-import { birikimeEkle, birikimListesi, istenecekKarolar, KARO_GECIKME_MS, karoOnbellekAnahtari, type Karo } from './karolar';
+import { birikimeEkle, birikimListesi, istenecekKarolar, KARO_EN_FAZLA_ISTEK, KARO_GECIKME_MS, karoOnbellekAnahtari, type Karo } from './karolar';
 
 type Durum = 'yolda' | 'tamam';
-/** çip|karo → durum (yolda / tamam). Hatalı istek silinir → sıradaki turda yeniden denenir. */
+/** tipKümesi|karo → durum (yolda / tamam). Hatalı istek silinir → sıradaki turda yeniden denenir. */
 const karoDurumu = new Map<string, Durum>();
 type Birikim = { yerler: Map<string, HafifYer>; surum: number };
 /** seyahat id → place_id → yer. `surum` her yeni mekanda artar (liste memo'su buna bağlı; #68 🔴2). */
@@ -42,12 +43,12 @@ export function birikimiAl(seyahatId: string): Birikim {
 }
 
 /** Karoyu ister; yeni gelen mekan sayısını döner. Hata fırlatır (durum geri alınır, sıradaki turda yeniden denenir). */
-async function karoyuGetir(seyahatId: string, cip: OneriCipi, karo: Karo): Promise<number> {
-  const anahtar = karoOnbellekAnahtari(cip, karo);
+async function karoyuGetir(seyahatId: string, kume: OneriCipi, karo: Karo): Promise<number> {
+  const anahtar = karoOnbellekAnahtari(kume, karo);
   karoDurumu.set(anahtar, 'yolda');
   karoSayaci.istek += 1;
   try {
-    const yerler = await yakinYerler({ cip, merkez: { lat: karo.merkez.lat, lng: karo.merkez.lng, yaricapM: karo.yaricapM } });
+    const yerler = await yakinYerler({ cip: kume, merkez: { lat: karo.merkez.lat, lng: karo.merkez.lng, yaricapM: karo.yaricapM } });
     karoDurumu.set(anahtar, 'tamam');
     const b = birikimiAl(seyahatId);
     const yeni = birikimeEkle(b.yerler, yerler);
@@ -64,32 +65,42 @@ async function karoyuGetir(seyahatId: string, cip: OneriCipi, karo: Karo): Promi
 export type TurSonucu = { istenen: number; yeni: number; hata: boolean };
 
 /**
- * Bir yükleme turu: görünür karolardan önbellekte / yolda olmayanlar (en fazla 12) istenir. Son hatadan sonra 30 sn
- * yeni tur açılmaz (`istenen: 0, hata: true`). Tur bitince tek Sentry izi.
+ * Bir yükleme turu: her küme için görünür karolardan önbellekte / yolda olmayanlar istenir; görünüm başına 12 karo sınırı
+ * kümelerin toplamına uygulanır (ilk küme — `hepsi` — önce). Son hatadan sonra 30 sn yeni tur açılmaz
+ * (`istenen: 0, hata: true`). Tur bitince tek Sentry izi.
  */
-export async function turBaslat(seyahatId: string, cip: OneriCipi, bolge: HaritaBolgesi, simdi = Date.now()): Promise<TurSonucu> {
+export async function turBaslat(seyahatId: string, kumeler: OneriCipi[], bolge: HaritaBolgesi, simdi = Date.now()): Promise<TurSonucu> {
   if (sonHataZamani && simdi - sonHataZamani < HATA_BEKLEME_MS) return { istenen: 0, yeni: 0, hata: true };
-  const karolar = istenecekKarolar(bolge, cip, (a) => karoDurumu.has(a));
-  if (karolar.length === 0) return { istenen: 0, yeni: 0, hata: false };
+  const istekler: { kume: OneriCipi; karo: Karo }[] = [];
+  for (const kume of kumeler) {
+    const kalan = KARO_EN_FAZLA_ISTEK - istekler.length;
+    if (kalan <= 0) break;
+    for (const karo of istenecekKarolar(bolge, kume, (a) => karoDurumu.has(a), kalan)) istekler.push({ kume, karo });
+  }
+  if (istekler.length === 0) return { istenen: 0, yeni: 0, hata: false };
   karoSayaci.tur += 1;
-  if (__DEV__) console.log(`[kesfet] ${cip} zoom ${bolge.zoom.toFixed(2)} → ${karolar.length} karo isteği (oturum toplamı ${karoSayaci.istek + karolar.length})`);
-  const sonuclar = await Promise.allSettled(karolar.map((k) => karoyuGetir(seyahatId, cip, k)));
+  if (__DEV__) console.log(`[kesfet] ${kumeler.join('+')} zoom ${bolge.zoom.toFixed(2)} → ${istekler.length} karo isteği (oturum toplamı ${karoSayaci.istek + istekler.length})`);
+  const sonuclar = await Promise.allSettled(istekler.map(({ kume, karo }) => karoyuGetir(seyahatId, kume, karo)));
   const yeni = sonuclar.reduce((t, s) => t + (s.status === 'fulfilled' ? s.value : 0), 0);
   const hata = sonuclar.some((s) => s.status === 'rejected');
-  izBirak('kesfet.karo', `tur ${karoSayaci.tur}: ${cip} ${karolar.length} karo, ${yeni} yeni mekan${hata ? ', hata var' : ''} (oturum ${karoSayaci.istek} istek)`, hata ? 'error' : 'info');
-  return { istenen: karolar.length, yeni, hata };
+  izBirak('kesfet.karo', `tur ${karoSayaci.tur}: ${kumeler.join('+')} ${istekler.length} karo, ${yeni} yeni mekan${hata ? ', hata var' : ''} (oturum ${karoSayaci.istek} istek)`, hata ? 'error' : 'info');
+  return { istenen: istekler.length, yeni, hata };
 }
 
 export type KaroOnerileri = {
   /** Seyahatin birikimli listesi (popülerlik sırasıyla; yalnız yeni mekan gelince yeniden hesaplanır). */
   yerler: HafifYer[];
-  /** En az bir karo isteği yolda. */
+  /** En az bir karo turu yolda. */
   yukleniyor: boolean;
   /** Son turda en az bir karo isteği başarısız oldu (30 sn sonra sıradaki kaydırmada yeniden denenir). */
   hata: boolean;
 };
 
-export function useKaroOnerileri(seyahatId: string, cip: OneriCipi, bolge: HaritaBolgesi | null): KaroOnerileri {
+/**
+ * `kumeler`: istenecek tip kümeleri (#69: `['hepsi', ...seçili kategoriler]`). Küme listesi / seyahat değişince hemen,
+ * bölge değişince 400 ms sonra yeni tur.
+ */
+export function useKaroOnerileri(seyahatId: string, kumeler: OneriCipi[], bolge: HaritaBolgesi | null): KaroOnerileri {
   const [surum, setSurum] = useState(() => birikimiAl(seyahatId).surum);
   const [yolda, setYolda] = useState(0);
   const [hata, setHata] = useState(false);
@@ -101,9 +112,9 @@ export function useKaroOnerileri(seyahatId: string, cip: OneriCipi, bolge: Harit
     };
   }, []);
 
-  const yukle = useCallback((id: string, c: OneriCipi, b: HaritaBolgesi) => {
+  const yukle = useCallback((id: string, k: OneriCipi[], b: HaritaBolgesi) => {
     setYolda((n) => n + 1);
-    turBaslat(id, c, b)
+    turBaslat(id, k, b)
       .then((s) => {
         if (!canli.current) return;
         setHata(s.hata);
@@ -114,16 +125,17 @@ export function useKaroOnerileri(seyahatId: string, cip: OneriCipi, bolge: Harit
       });
   }, []);
 
-  // Kaydırma / yakınlaştırma bitince 400 ms bekle; bu sürede yeni bölge gelirse öncekini iptal et. Çip / seyahat değişince hemen.
+  // Kaydırma / yakınlaştırma bitince 400 ms bekle; bu sürede yeni bölge gelirse öncekini iptal et. Küme / seyahat değişince hemen.
+  const kumeAnahtari = kumeler.join('+');
   const oncekiAnahtar = useRef<string | null>(null);
   useEffect(() => {
     if (!bolge) return;
-    const anahtar = `${seyahatId}|${cip}`;
+    const anahtar = `${seyahatId}|${kumeAnahtari}`;
     const hemen = oncekiAnahtar.current !== anahtar;
     oncekiAnahtar.current = anahtar;
-    const z = setTimeout(() => yukle(seyahatId, cip, bolge), hemen ? 0 : KARO_GECIKME_MS);
+    const z = setTimeout(() => yukle(seyahatId, kumeAnahtari.split('+') as OneriCipi[], bolge), hemen ? 0 : KARO_GECIKME_MS);
     return () => clearTimeout(z);
-  }, [seyahatId, cip, bolge, yukle]);
+  }, [seyahatId, kumeAnahtari, bolge, yukle]);
 
   // Liste yalnız sürüm değişince yeniden sıralanır (#68 🔴2). Seyahat ekranı seyahat başına yeniden kurulur (key=id), bu
   // yüzden `seyahatId` bir kanca ömründe değişmez; yine de bağımlılıkta.
