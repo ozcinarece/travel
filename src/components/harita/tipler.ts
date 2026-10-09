@@ -110,4 +110,6 @@ export type HaritaProps = {
    * diğer işaretçiler yeniden kurulmasın; yalnız eski ve yeni seçili pinin işaretçileri değişir. `pin.secili` da desteklenir.
    */
   seciliId?: string | null;
+  /** #79: verilirse harita `merkez`/`zoom` yerine bu bölgeden açılır (ekran yeniden kurulunca son görünür bölge). */
+  ilkBolge?: HaritaBolgesi | null;
 };

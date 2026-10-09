@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 
 import { bolgedenUzaklasti, bolgeHesapla, zoomDelta } from '@/components/harita/geo';
-import { medyan, secimSuresiKaydet, useTani } from '@/components/harita/tani';
+import { medyan, secimSuresiKaydet, taniSayaclari, useTani } from '@/components/harita/tani';
 import { EylemHapi, HaritaEkrani } from '@/components/harita/HaritaEkrani';
 import type { HaritaBolgesi, HaritaOdagi, HaritaPini } from '@/components/harita/tipler';
 import { Avatar } from '@/components/ui/Avatar';
@@ -18,10 +18,11 @@ import { useSeyahat } from '@/features/seyahatler/sorgular';
 import { SeyahatYukleme } from '@/components/seyahatler/SeyahatYukleme';
 import { FiltreSayfasi } from '@/components/kesfet/FiltreSayfasi';
 import { hafifYerler, linkCoz, linkGibiMi, useHafifYerler, useOneriler, useOnizleme, yeniOturumJetonu, type HafifYer, type OneriCipi } from '@/features/yerler/api';
-import { aktifFiltreSayisi, BOS_FILTRE, filtreAktif, filtredenGecer, filtreOzeti, type Filtre } from '@/features/yerler/filtre';
+import { aktifFiltreSayisi, filtreAktif, filtredenGecer, filtreOzeti } from '@/features/yerler/filtre';
 import { useOneCikanlar } from '@/features/yerler/oneCikan';
 import { gorunurOneriler } from '@/features/yerler/karolar';
 import { useKaroOnerileri } from '@/features/yerler/karoYukleme';
+import { kesfetDurumunuAl, useKesfetDurumu } from '@/features/yerler/kesfetDurumu';
 import { t } from '@/i18n';
 import { kategoriPini, yorumKisa } from '@/lib/pinIkonu';
 import { kategoriEtiketi, sureMetni, varsayilanDakika } from '@/lib/kategori';
@@ -40,9 +41,6 @@ export default function KesfetEkrani() {
 const ILK_ZOOM = 13;
 const ILK_BOLGE_BEKLEME_MS = 2000;
 
-/** #29: önizleme kartındaki mekan — çip önerisinden, arama sonucundan ya da listedeki pinden. */
-type Secim = { place_id: string; kaynak: 'oneri' | 'arama' | 'liste' };
-
 function Kesfet({ seyahat, konaklamalar }: { seyahat: Seyahat; konaklamalar: Konaklama[] }) {
   const mekanlar = useMekanlar(seyahat.id);
   const uyeler = useUyeler(seyahat.id);
@@ -51,14 +49,19 @@ function Kesfet({ seyahat, konaklamalar }: { seyahat: Seyahat; konaklamalar: Kon
 
   const [sorgu, setSorgu] = useState('');
   const [jeton, setJeton] = useState(yeniOturumJetonu);
-  // #69: filtre durumu — hızlı filtreler ve filtre sayfası aynı durumu paylaşır (KK9).
-  const [filtre, setFiltre] = useState<Filtre>(BOS_FILTRE);
+  // #69: filtre durumu — hızlı filtreler ve filtre sayfası aynı durumu paylaşır (KK9). #79 KK2: filtre, seçim ve son bölge
+  // seyahat belleğinde (kesfetDurumu): ekran yeniden kurulsa da aynı filtreyle süzülür, aynı bölgeden açılır.
+  const [filtre, setFiltre] = useKesfetDurumu(seyahat.id, 'filtre');
   const [filtreAcik, setFiltreAcik] = useState(false);
   // #71: tanı şeridi — filtre düğmesine uzun basınca açılır/kapanır (cihazda logcat olmadan sayaçlar).
   const [taniAcik, setTaniAcik] = useState(__DEV__);
   const tani = useTani(taniAcik);
+  // #79 KK5: ekranın kuruluş sayısı tanı şeridinde (1'den fazlaysa ekran yeniden mount olmuş demektir).
+  useEffect(() => {
+    taniSayaclari.kesfetKurulum += 1;
+  }, []);
   const [aramaSonucu, setAramaSonucu] = useState<HafifYer | null>(null);
-  const [secim, setSecim] = useState<Secim | null>(null);
+  const [secim, setSecim] = useKesfetDurumu(seyahat.id, 'secim');
   const [mesgul, setMesgul] = useState(false);
   const [hata, setHata] = useState<string | null>(null);
   const [odak, setOdak] = useState<HaritaOdagi | undefined>();
@@ -75,7 +78,9 @@ function Kesfet({ seyahat, konaklamalar }: { seyahat: Seyahat; konaklamalar: Kon
     [ilkOtel?.lat, ilkOtel?.lng, seyahat.lat, seyahat.lng],
   );
   const ilkBolge = useMemo(() => bolgeHesapla(ilkMerkez, zoomDelta(ILK_ZOOM), zoomDelta(ILK_ZOOM)), [ilkMerkez]);
-  const [bolge, setBolge] = useState<HaritaBolgesi | null>(null);
+  const [bolge, setBolge] = useKesfetDurumu(seyahat.id, 'bolge');
+  // #79 KK1: ekran yeniden kurulduysa harita son görünür bölgeden açılır (kamera aynı kalır); ilk açılışta şehir / otel merkezi.
+  const [baslangicBolge] = useState<HaritaBolgesi | null>(() => kesfetDurumunuAl(seyahat.id).bolge);
   // İlk tur gerçek görünür bölgeyi bekler (kare `ilkBolge` ile çift yükleme olmasın, #68 incelemesi); harita 2 sn içinde
   // bölge bildirmezse yedek olarak ilkBolge kullanılır.
   const [ilkBolgeYedek, setIlkBolgeYedek] = useState(false);
@@ -369,8 +374,6 @@ function Kesfet({ seyahat, konaklamalar }: { seyahat: Seyahat; konaklamalar: Kon
                 {t('kesfet.filtre.hizliYorum')}
               </HizliFiltre>
             </ScrollView>
-            {/* #71: "Bu bölgeyi tara" — son taranandan uzaklaşınca; basılınca düğmenin yerinde yükleme, tur bitince kaybolur. */}
-            {uzaklasti || yakin.yukleniyor ? <EylemHapi metin={t('kesfet.bolgeyiTara')} onPress={bolgeyiTara} yukleniyor={yakin.yukleniyor} /> : null}
             {filtreli ? (
               // #69 KK5: filtre açıkken "Şehrin öne çıkanları · 9 mekan gizli" hapı (dokunulmaz).
               <View style={s.yukleniyorSatir} pointerEvents="none">
@@ -379,6 +382,9 @@ function Kesfet({ seyahat, konaklamalar }: { seyahat: Seyahat; konaklamalar: Kon
                 </View>
               </View>
             ) : null}
+            {/* #71: "Bu bölgeyi tara" — son taranandan uzaklaşınca; basılınca düğmenin yerinde yükleme, tur bitince kaybolur.
+                #79 KK4: filtre hapı varsa düğme onun ALTINA iner (çakışmaz). */}
+            {uzaklasti || yakin.yukleniyor ? <EylemHapi metin={t('kesfet.bolgeyiTara')} onPress={bolgeyiTara} yukleniyor={yakin.yukleniyor} /> : null}
           </>
         )
       }
@@ -387,7 +393,7 @@ function Kesfet({ seyahat, konaklamalar }: { seyahat: Seyahat; konaklamalar: Kon
           {tani ? (
             <View style={s.tani} pointerEvents="none">
               <Text style={s.taniMetin}>
-                {`tur ${tani.tur} · istek ${tani.istek} · hata ${tani.hata} · bölge ${tani.bolgeOlayi} · yükleniyor ${yakin.yukleniyor ? 'E' : 'H'}\nişaretçi ${tani.gorunen} (png ${tani.png} · ad ${tani.ad} · görünüm ${tani.gorunum}) · render ${tani.render}\ndokunma ${tani.dokunma}${tani.sonDokunma ? ` · son ${tani.sonDokunma.slice(0, 28)}` : ''} · liste ${oneriListesi.length} · gizli ${gizliSayi}\nseçim: iğne ${tani.igneMs.at(-1) ?? '–'} ms · kart ${tani.kartMs.at(-1) ?? '–'} ms · medyan(10) iğne ${medyan(tani.igneMs)} / kart ${medyan(tani.kartMs)} · değişen işaretçi ${tani.sonDegisim}`}
+                {`tur ${tani.tur} · istek ${tani.istek} · hata ${tani.hata} · bölge ${tani.bolgeOlayi} · yükleniyor ${yakin.yukleniyor ? 'E' : 'H'}\nişaretçi ${tani.gorunen} (png ${tani.png} · ad ${tani.ad} · görünüm ${tani.gorunum}) · render ${tani.render}\ndokunma ${tani.dokunma}${tani.sonDokunma ? ` · son ${tani.sonDokunma.slice(0, 28)}` : ''} · liste ${oneriListesi.length} · gizli ${gizliSayi}\nseçim: iğne ${tani.igneMs.at(-1) ?? '–'} ms · kart ${tani.kartMs.at(-1) ?? '–'} ms · medyan(10) iğne ${medyan(tani.igneMs)} / kart ${medyan(tani.kartMs)} · değişen işaretçi ${tani.sonDegisim}\nkuruluş: keşfet ${tani.kesfetKurulum} · harita hazır ${tani.haritaHazir} · yeniden ${tani.haritaYenidenKurulum}`}
               </Text>
             </View>
           ) : null}
@@ -454,6 +460,7 @@ function Kesfet({ seyahat, konaklamalar }: { seyahat: Seyahat; konaklamalar: Kon
         onHaritaBas: () => setSecim(null),
         onBolgeDegisti: setBolge,
         seciliId,
+        ilkBolge: baslangicBolge,
       }}
     />
   );
