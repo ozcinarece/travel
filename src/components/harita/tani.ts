@@ -23,6 +23,11 @@ export const taniSayaclari = {
   dokunmaAni: 0,
   igneMs: [] as number[],
   kartMs: [] as number[],
+  /** #79: MapView onMapReady sayısı (aynı örnekten ikincisi = pencereye yeniden bağlanma) ve bunun üzerine yeniden kurulum sayısı. */
+  haritaHazir: 0,
+  haritaYenidenKurulum: 0,
+  /** #79: Keşfet ekranının kuruluş sayısı (1'den fazlaysa ekran yeniden mount oldu). */
+  kesfetKurulum: 0,
 };
 
 const simdi = () => (typeof performance !== 'undefined' && performance.now ? performance.now() : Date.now());
@@ -60,7 +65,7 @@ export function dokunmaKaydet(id: string) {
   if (__DEV__) console.log(`[harita] dokunma ${taniSayaclari.dokunma}: ${id}`);
 }
 
-export type TaniOzeti = { tur: number; istek: number; hata: number; bolgeOlayi: number; dokunma: number; sonDokunma: string; gorunen: number; png: number; ad: number; gorunum: number; render: number; sonDegisim: number; igneMs: number[]; kartMs: number[] };
+export type TaniOzeti = { tur: number; istek: number; hata: number; bolgeOlayi: number; dokunma: number; sonDokunma: string; gorunen: number; png: number; ad: number; gorunum: number; render: number; sonDegisim: number; igneMs: number[]; kartMs: number[]; haritaHazir: number; haritaYenidenKurulum: number; kesfetKurulum: number };
 
 export function taniOzeti(): TaniOzeti {
   return {
@@ -78,6 +83,9 @@ export function taniOzeti(): TaniOzeti {
     sonDegisim: taniSayaclari.sonDegisim,
     igneMs: [...taniSayaclari.igneMs],
     kartMs: [...taniSayaclari.kartMs],
+    haritaHazir: taniSayaclari.haritaHazir,
+    haritaYenidenKurulum: taniSayaclari.haritaYenidenKurulum,
+    kesfetKurulum: taniSayaclari.kesfetKurulum,
   };
 }
 

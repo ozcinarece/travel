@@ -11,6 +11,7 @@ import { usePinGorselleri } from './pinOnYukleme';
 import { bacakEtiketPinleri, yonOklari } from './rota';
 import { dokunmaKaydet, isaretciSayilariniKaydet, secimSuresiKaydet, taniSayaclari } from './tani';
 import type { HaritaBolgesi, HaritaCizgisi, HaritaPini, HaritaProps, Konum } from './tipler';
+import { yenidenKurulsunMu } from './yenidenKurulum';
 
 /** "#rrggbb" + opaklık → "#rrggbbaa". */
 function saydam(hex: string, opaklik: number) {
@@ -44,17 +45,41 @@ export function Harita({
   sigdir,
   onPinUzunBas,
   seciliId = null,
+  ilkBolge = null,
 }: HaritaProps) {
   const ref = useRef<MapView>(null);
   const ekran = useWindowDimensions();
   const gorsellerHazir = usePinGorselleri();
-  const [bolge, setBolge] = useState<HaritaBolgesi>(() => bolgeHesapla(merkez, zoomDelta(zoom), zoomDelta(zoom)));
+  const [bolge, setBolge] = useState<HaritaBolgesi>(() => ilkBolge ?? bolgeHesapla(merkez, zoomDelta(zoom), zoomDelta(zoom)));
+  // #79: MapView nesli ve o neslin açılış bölgesi — yeniden bağlanma (ikinci onMapReady) saptanınca harita o anki bölgeyle
+  // sıfırdan kurulur (yenidenKurulum.ts); initialRegion yalnız kurulumda okunur.
+  const [nesil, setNesil] = useState(0);
+  const [baslangic, setBaslangic] = useState<HaritaBolgesi>(bolge);
+  const sonHazirMs = useRef(0);
   // #59 §B: etiket / ok hesabının bölgesi yalnız zoom adımı değişince yenilenir; saf kaydırma işaretçilere dokunmaz.
   const [etiketBolge, setEtiketBolge] = useState<HaritaBolgesi>(bolge);
   // #49: Android'de GoogleMap hazır olmadan değişen mapPadding native çöküşe yol açar (react-native-maps 1.27
   // applyBaseMapPadding → null map.setPadding). Dolgu yalnız onMapReady'den sonra gönderilir.
   const [hazir, setHazir] = useState(false);
   const dolgu = useMemo(() => haritaDolgusu(hazir, altBosluk), [hazir, altBosluk]);
+  const haritaHazir = () => {
+    const simdi = Date.now();
+    taniSayaclari.haritaHazir += 1;
+    if (yenidenKurulsunMu(sonHazirMs.current, simdi)) {
+      // Aynı MapView örneğinden ikinci onMapReady: react-native-maps Android görünümü pencereye yeniden bağladı ve
+      // işaretçileri kendi kopyasından kurdu (React listesiyle ayrışır: kırmızı varsayılan iğne, hayalet pin, dokunulmayan
+      // pin — #79). Yeni nesil: MapView o anki bölgeyle sıfırdan kurulur, çocuklar React'ten yeniden eklenir.
+      taniSayaclari.haritaYenidenKurulum += 1;
+      if (__DEV__) console.log(`[harita] yeniden bağlanma (onMapReady ${taniSayaclari.haritaHazir}) → harita yeniden kuruluyor`);
+      sonHazirMs.current = 0;
+      setHazir(false);
+      setBaslangic(bolge);
+      setNesil((n) => n + 1);
+      return;
+    }
+    sonHazirMs.current = simdi;
+    setHazir(true);
+  };
 
   // Odak değişince kamera animasyonla gider; initialRegion yalnız ilk kurulumda okunur.
   useEffect(() => {
@@ -124,15 +149,16 @@ export function Harita({
 
   return (
     <MapView
+      key={nesil}
       ref={ref}
       // iOS'ta da Google: Places verisi Google haritası dışında gösterilemez.
       provider={PROVIDER_GOOGLE}
       style={StyleSheet.absoluteFill}
       initialRegion={{
-        latitude: merkez.lat,
-        longitude: merkez.lng,
-        latitudeDelta: zoomDelta(zoom),
-        longitudeDelta: zoomDelta(zoom),
+        latitude: baslangic.merkez.lat,
+        longitude: baslangic.merkez.lng,
+        latitudeDelta: baslangic.latDelta,
+        longitudeDelta: baslangic.lngDelta,
       }}
       // #17 KK1: cihaz temasından bağımsız açık harita (Android'de MapColorScheme.LIGHT, iOS'ta light).
       userInterfaceStyle="light"
@@ -142,7 +168,7 @@ export function Harita({
       showsCompass={false}
       // #47 A1: harita görünür alanı panelin üstünde biter; Google logosu panelin üstünde kalır.
       mapPadding={dolgu}
-      onMapReady={() => setHazir(true)}
+      onMapReady={haritaHazir}
       showsPointsOfInterests={false}
       // #32: pine dokunmak haritayı kaydırmaz.
       moveOnMarkerPress={false}
