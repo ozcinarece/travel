@@ -218,21 +218,26 @@ export function Harita({
   );
 }
 
-/** #59 §C / #65: üç katmanlı rota (gölge · beyaz kenar · renk) — yürüme ve araba aynı (araba düz, oksuz); diğer günler ve kuş uçuşu ince. */
+/**
+ * #59 §C / #65: üç katmanlı rota (gölge · beyaz kenar · renk) — yürüme ve araba aynı (araba düz, oksuz); diğer günler ve kuş
+ * uçuşu ince. #77: ince de aynı ÜÇ Polyline'dır (gölge ve kenar saydam) — ince ↔ kalın, kuş uçuşu ↔ gerçek yol geçişleri
+ * çizgiyi kaldırıp yeniden kurmak yerine aynı Polyline'ın özelliklerini günceller (Android'de kaldırılan çizgi hayalet kalabiliyordu).
+ */
 function RotaCizgisi({ cizgi: c }: { cizgi: HaritaCizgisi }) {
   const noktalar = useMemo(() => c.noktalar.map((n) => ({ latitude: n.lat, longitude: n.lng })), [c.noktalar]);
   const opaklik = c.opaklik ?? 1;
   const ortak = { coordinates: noktalar, lineCap: 'round' as const, lineJoin: 'round' as const };
   const desen = c.kesik ? KESIKLI : undefined;
-  if (c.ince) return <Polyline {...ortak} lineDashPattern={desen} strokeColor={saydam(c.renk, opaklik)} strokeWidth={ROTA.ince} zIndex={0} />;
+  const ince = !!c.ince;
   return (
     <>
-      <Polyline {...ortak} strokeColor={saydam(ROTA.golgeRenk, ROTA.golgeOpaklik * opaklik)} strokeWidth={ROTA.golge} zIndex={1} />
-      <Polyline {...ortak} strokeColor={saydam('#ffffff', opaklik)} strokeWidth={ROTA.kenar} zIndex={2} />
-      <Polyline {...ortak} lineDashPattern={desen} strokeColor={saydam(c.renk, opaklik)} strokeWidth={ROTA.cizgi} zIndex={3} />
+      <Polyline {...ortak} strokeColor={ince ? SAYDAM : saydam(ROTA.golgeRenk, ROTA.golgeOpaklik * opaklik)} strokeWidth={ROTA.golge} zIndex={ince ? 0 : 1} />
+      <Polyline {...ortak} strokeColor={ince ? SAYDAM : saydam('#ffffff', opaklik)} strokeWidth={ROTA.kenar} zIndex={ince ? 0 : 2} />
+      <Polyline {...ortak} lineDashPattern={desen} strokeColor={saydam(c.renk, opaklik)} strokeWidth={ince ? ROTA.ince : ROTA.cizgi} zIndex={ince ? 0 : 3} />
     </>
   );
 }
+const SAYDAM = '#00000000';
 
 /** Görünüm değişince bitmap bu kadar ms sonra alınır (yerleşim + çizim payı). */
 const YAKALAMA_GECIKMESI_MS = 350;

@@ -86,4 +86,29 @@ describe('isaretciPlani (#71)', () => {
     expect(digerleri(p1)).toEqual(digerleri(p0));
     expect(digerleri(p2)).toEqual(digerleri(p0));
   });
+
+  it('#77: Program durakları — gün değişince / seçilince görünümlü işaretçinin anahtarı değişir (eski bitmap kalmaz), sayı sabit, tekrar yok', () => {
+    const durak = (id: string, dLng: number, o: Partial<HaritaPini>): HaritaPini => ({ id, konum: { lat: roma.lat, lng: roma.lng + dLng }, renk: '#2f6fed', tur: 'durak', ad: `Yer ${id}`, puan: 4.5, ...o });
+    // Cmt seçili: numaralı 28 px; sonra Paz seçili: Cmt durakları numarasız 20 px %45.
+    const cmtSecili = [durak('m:a', 0, { etiket: '1' }), durak('m:b', 0.004, { etiket: '2' }), durak('m:c', 0.008, { etiket: '', opaklik: 0.45 })];
+    const pazSecili = [durak('m:a', 0, { etiket: '', opaklik: 0.45 }), durak('m:b', 0.004, { etiket: '', opaklik: 0.45 }), durak('m:c', 0.008, { etiket: '1' })];
+    const planla = (d: HaritaPini[], seciliId: string | null = null) => isaretciPlani(d, gizliEtiketler(d, bolge, ekran), bolge.zoom, true, seciliId);
+    const p1 = planla(cmtSecili);
+    const p2 = planla(pazSecili);
+    expect(p1.every((i) => i.tur === 'gorunum')).toBe(true);
+    expect(p1).toHaveLength(3);
+    expect(p2).toHaveLength(3);
+    // Her durağın anahtarı değişti → numaralı işaretçi kaldırılır, numarasız nokta kurulur.
+    for (const id of ['m:a', 'm:b', 'm:c']) expect(p1.find((i) => i.pin.id === id)?.anahtar).not.toBe(p2.find((i) => i.pin.id === id)?.anahtar);
+    expect(new Set(p2.map((i) => i.anahtar)).size).toBe(3);
+    // Seçim: m:a iğne olur — anahtarı değişir, diğerleri aynı kalır, işaretçi sayısı değişmez (KK5).
+    const p3 = planla(cmtSecili, 'm:a');
+    expect(p3).toHaveLength(3);
+    expect(p3.find((i) => i.pin.id === 'm:a')?.anahtar).not.toBe(p1.find((i) => i.pin.id === 'm:a')?.anahtar);
+    expect(p3.find((i) => i.pin.id === 'm:a')?.pin.secili).toBe(true);
+    expect(p3.filter((i) => i.pin.id !== 'm:a').map((i) => i.anahtar)).toEqual(p1.filter((i) => i.pin.id !== 'm:a').map((i) => i.anahtar));
+    expect(planFarki(p1, p3)).toBe(1);
+    // Program'da her durağın tek adı: görünüm işaretçisi adı kendi içinde taşır, ayrı ad işaretçisi yok (KK2).
+    expect(p1.filter((i) => i.tur === 'ad')).toHaveLength(0);
+  });
 });
