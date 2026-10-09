@@ -1,11 +1,12 @@
 import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
-import { Image, PixelRatio, StyleSheet, View, useWindowDimensions } from 'react-native';
+import { PixelRatio, StyleSheet, View, useWindowDimensions } from 'react-native';
 import MapView, { Circle, Marker, Polyline, PROVIDER_GOOGLE } from 'react-native-maps';
 
 import { bolgeHesapla, detayGoster, etiketBolgesi, haritaDolgusu, isaretciImzasi, izlemeGerekli, pinCapasi, pinCapi, pinSecimi, pinZ, zoomDelta } from './geo';
 import { ACIK_HARITA_STILI } from './haritaStili';
 import { PinIcerigi, pinGorseli, pinPngAnahtari, TAKSI_SARI } from './PinIcerigi';
 import { PIN_IKONLARI } from './pinIkonlari';
+import { usePinGorselleri } from './pinOnYukleme';
 import { bacakEtiketPinleri, yonOklari } from './rota';
 import type { HaritaBolgesi, HaritaCizgisi, HaritaPini, HaritaProps, Konum } from './tipler';
 
@@ -26,40 +27,6 @@ const TAKSI = { kenar: 10, dolgu: 6, serit: 6, siyah: '#0f0f0f', sari: TAKSI_SAR
 const dp = (v: number) => Math.round(PixelRatio.get() * v);
 const SERIT = [dp(10), dp(14)];
 const KESIKLI = [dp(10), dp(8)];
-
-/**
- * #61 §6: tüm pin PNG'leri (daireler, ok, hap ikonları) harita kurulmadan önce Fresco belleğine alınır; `image`
- * işaretçileri hazır olana kadar çizilmez (varsayılan kırmızı iğne görünmesin). Paket içi kaynaklar (şemasız ad)
- * zaten eşzamanlı yüklenir; prefetch reddederse geçilir. En fazla 1,5 sn beklenir.
- */
-let pinGorselleriHazir = false;
-let pinGorselleriSozu: Promise<void> | null = null;
-export function pinGorselleriniYukle(): Promise<void> {
-  if (!pinGorselleriSozu) {
-    const uriler = Object.values(PIN_IKONLARI)
-      .map((k) => Image.resolveAssetSource(k)?.uri)
-      .filter((u): u is string => !!u && /^(https?|file|asset|data):/.test(u));
-    const zamanAsimi = new Promise<void>((cozul) => setTimeout(cozul, 1500));
-    pinGorselleriSozu = Promise.race([Promise.allSettled(uriler.map((u) => Image.prefetch(u))).then(() => undefined), zamanAsimi]).then(() => {
-      pinGorselleriHazir = true;
-    });
-  }
-  return pinGorselleriSozu;
-}
-function usePinGorselleri(): boolean {
-  const [hazir, setHazir] = useState(pinGorselleriHazir);
-  useEffect(() => {
-    if (hazir) return;
-    let aktif = true;
-    pinGorselleriniYukle().then(() => {
-      if (aktif) setHazir(true);
-    });
-    return () => {
-      aktif = false;
-    };
-  }, [hazir]);
-  return hazir;
-}
 const OK_PNG = PIN_IKONLARI['ok-ffffff'];
 
 /** #59 §B KK3 geliştirme sayacı: işaretçi kurulumu / bitmap yakalaması (yalnız __DEV__'de yazdırılır). */
@@ -248,7 +215,8 @@ function RotaCizgisi({ cizgi: c }: { cizgi: HaritaCizgisi }) {
       <>
         <Polyline {...ortak} strokeColor={saydam(TAKSI.siyah, opaklik)} strokeWidth={TAKSI.kenar} zIndex={1} />
         <Polyline {...ortak} strokeColor={saydam(TAKSI.sari, opaklik)} strokeWidth={TAKSI.dolgu} zIndex={2} />
-        <Polyline {...ortak} lineDashPattern={SERIT} strokeColor={saydam(TAKSI.siyah, opaklik)} strokeWidth={TAKSI.serit} zIndex={3} />
+        {/* Şerit düz uçlu: yuvarlak uç her parçayı iki yandan 3 dp uzatıp 10/14'ü 16/8 yapıyordu. */}
+        <Polyline {...ortak} lineCap="butt" lineDashPattern={SERIT} strokeColor={saydam(TAKSI.siyah, opaklik)} strokeWidth={TAKSI.serit} zIndex={3} />
       </>
     );
   return (
