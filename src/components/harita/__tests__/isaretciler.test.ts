@@ -1,7 +1,7 @@
 import { describe, expect, it } from '@jest/globals';
 
 import { gizliEtiketler } from '../geo';
-import { isaretciPlani } from '../isaretciler';
+import { dokunusuIletir, isaretciPlani } from '../isaretciler';
 import type { HaritaPini } from '../tipler';
 
 const roma = { lat: 41.9028, lng: 12.4964 };
@@ -51,5 +51,17 @@ describe('isaretciPlani (#71)', () => {
     expect(plan(d).filter((i) => i.pin.id === 'o:a' && i.tur === 'png')).toHaveLength(1);
     const hazirDegil = isaretciPlani(d, gizliEtiketler(d, bolge, ekran), bolge.zoom, false);
     expect(hazirDegil.map((i) => i.tur)).toEqual(['gorunum']);
+  });
+
+  it('#71 KK2: öneri / küçük / listede / öne çıkan / seçili / durak / otel dokunuşu iletir (ad işaretçisi dahil); rota hapı ve konum iletmez', () => {
+    const turler: Partial<HaritaPini>[] = [{ tur: 'oneri' }, { tur: 'oneri', kucuk: true }, { tur: 'listede' }, { tur: 'oneri', oneCikan: true }, { tur: 'listede', secili: true }, { tur: 'durak', etiket: '1' }, { tur: 'otel' }, { tur: 'bos' }];
+    for (const o of turler) expect(dokunusuIletir(p('x', 0, o))).toBe(true);
+    expect(dokunusuIletir(p('e', 0, { tur: 'etiket', etiket: '12 dk' }))).toBe(false);
+    expect(dokunusuIletir(p('k', 0, { tur: 'konum' }))).toBe(false);
+    // Planın her pin ve ad işaretçisi aynı pine bağlı: dokunuş hangisine gelirse gelsin aynı kimlik.
+    const d = [p('o:a', 0, { tur: 'oneri' })];
+    const plan = isaretciPlani(d, gizliEtiketler(d, bolge, ekran), bolge.zoom, true);
+    expect(plan.map((i) => i.pin.id)).toEqual(['o:a', 'o:a']);
+    expect(plan.every((i) => dokunusuIletir(i.pin))).toBe(true);
   });
 });

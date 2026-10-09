@@ -11,8 +11,6 @@ export const KARO_ZOOM_EN_AZ = 11;
 export const KARO_ZOOM_EN_COK = 17;
 /** Bir görünümde (bir kaydırma / yakınlaştırma sonunda) istenecek en çok yeni karo; fazlası sıradaki kaydırmaya kalır. */
 export const KARO_EN_FAZLA_ISTEK = 12;
-/** Kaydırma / yakınlaştırma bittikten sonra karo isteğine kadar bekleme. */
-export const KARO_GECIKME_MS = 400;
 
 export type Karo = { anahtar: string; z: number; ix: number; iy: number; merkez: Konum; yaricapM: number };
 

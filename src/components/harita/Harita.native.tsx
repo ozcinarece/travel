@@ -4,7 +4,7 @@ import MapView, { Circle, Marker, Polyline, PROVIDER_GOOGLE } from 'react-native
 
 import { bolgeHesapla, etiketBolgesi, gizliEtiketler, haritaDolgusu, IGNE, isaretciImzasi, izlemeGerekli, pinCapasi, pinCapi, pinZ, zoomaGorePinler, zoomDelta } from './geo';
 import { ACIK_HARITA_STILI } from './haritaStili';
-import { isaretciPlani } from './isaretciler';
+import { dokunusuIletir, isaretciPlani } from './isaretciler';
 import { PinIcerigi, pinPngAnahtari } from './PinIcerigi';
 import { IGNE_CAPA, PIN_IKONLARI } from './pinIkonlari';
 import { usePinGorselleri } from './pinOnYukleme';
@@ -265,9 +265,9 @@ function OzelIsaretci({
   const durt = yuklenenPng !== null && yuklenenPng === beklenenPng;
   const capa =
     p.tur === 'aday' ? { x: 0.1, y: 0.5 } : p.tur === 'otel' || p.tur === 'etiket' || p.tur === 'konum' || !p.tur ? { x: 0.5, y: 0.5 } : yalnizEtiket && p.secili ? { x: 0.5, y: 0 } : pinCapasi(p, detay);
-  // Bacak etiketi ve kullanıcı konumu dokunulamaz. #71: yalnız-etiket (ad) işaretçisi dokunuşu pine iletir — Android'de
-  // `tappable` yok, ad işaretçisi pinin üstünde durduğundan dokunuşu o alıyordu ve yutuyordu.
-  const bacak = p.tur === 'etiket' || p.tur === 'konum';
+  // #71: hangi işaretçi dokunuşu pine iletir — isaretciler.dokunusuIletir (ad işaretçisi dahil; Android'de `tappable` yok,
+  // ad işaretçisi pinin üstünde durduğundan dokunuşu o alıyordu ve yutuyordu).
+  const bacak = !dokunusuIletir(p);
   return (
     <Marker
       coordinate={{ latitude: p.konum.lat, longitude: p.konum.lng }}

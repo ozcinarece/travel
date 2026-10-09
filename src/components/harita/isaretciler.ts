@@ -34,3 +34,12 @@ export function isaretciPlani(gorunen: HaritaPini[], gizli: GizliEtiketler, zoom
   }
   return plan;
 }
+
+/**
+ * #71 KK2: bu pinin işaretçisi (PNG, görünüm ya da yalnız-ad) dokunuşu `onPinBas`'a iletir mi? Rota hapı ve kullanıcı konumu
+ * hariç hepsi. Android `MapMarker`'da `tappable` olmadığından pinin üstündeki ad işaretçisi de iletmek ZORUNDA — yoksa
+ * dokunuş onda biter (Google Maps alttaki işaretçiye düşürmez).
+ */
+export function dokunusuIletir(p: HaritaPini): boolean {
+  return p.tur !== 'etiket' && p.tur !== 'konum';
+}

@@ -3,9 +3,9 @@ import { router } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 
-import { bolgeHesapla, zoomDelta } from '@/components/harita/geo';
+import { bolgedenUzaklasti, bolgeHesapla, zoomDelta } from '@/components/harita/geo';
 import { useTani } from '@/components/harita/tani';
-import { BilgiHapi, HaritaEkrani } from '@/components/harita/HaritaEkrani';
+import { EylemHapi, HaritaEkrani } from '@/components/harita/HaritaEkrani';
 import type { HaritaBolgesi, HaritaOdagi, HaritaPini } from '@/components/harita/tipler';
 import { Avatar } from '@/components/ui/Avatar';
 import { Ikon } from '@/components/ui/Ikon';
@@ -93,10 +93,15 @@ function Kesfet({ seyahat, konaklamalar }: { seyahat: Seyahat; konaklamalar: Kon
   const linkMi = linkGibiMi(sorgu);
   const aramaAcik = !linkMi && sorgu.trim().length >= 2 && !aramaSonucu;
   const oneriler = useOneriler('mekan-oneri', sorgu, jeton, undefined, aramaMerkezi, aramaAcik);
-  // #69 KK10: karo istekleri tek tip listesiyle (`hepsi`); kategori filtresi seçiliyse o kategorilere özel karo istekleri de
-  // atılır — 4+ kategori seçiliyse yalnız `hepsi` (her kategori görünüm başına ek bir tur demek; #70 incelemesi).
+  // #71 ürün kararı: açılışta tek tur; sonra yalnız "Bu bölgeyi tara" ile (filtre değişimi istek atmaz). #69 KK10: tarama o anki
+  // filtreye göre `hepsi` + seçili kategori kümeleri (4+ kategori seçiliyse yalnız `hepsi`).
   const kumeler = useMemo<OneriCipi[]>(() => ['hepsi', ...(filtre.kategoriler.length < 4 ? filtre.kategoriler : [])], [filtre.kategoriler]);
-  const yakin = useKaroOnerileri(seyahat.id, kumeler, bolge ?? (ilkBolgeYedek ? ilkBolge : null));
+  const yakin = useKaroOnerileri(seyahat.id, bolge ?? (ilkBolgeYedek ? ilkBolge : null));
+  // Görünür bölge son taranandan belirgin uzaklaştıysa (bolgedenUzaklasti) düğme çıkar.
+  const uzaklasti = !!bolge && !!yakin.sonTaranan && bolgedenUzaklasti(bolge, yakin.sonTaranan);
+  const bolgeyiTara = () => {
+    if (bolge) yakin.tara(bolge, kumeler);
+  };
 
   const havuz = useMemo(() => mekanlar.data ?? [], [mekanlar.data]);
   // #30: listedeki pinlerin altında ad etiketi (canlı ad, PRD §7).
@@ -360,16 +365,14 @@ function Kesfet({ seyahat, konaklamalar }: { seyahat: Seyahat; konaklamalar: Kon
                 {t('kesfet.filtre.hizliYorum')}
               </HizliFiltre>
             </ScrollView>
-            {yakin.yukleniyor || filtreli ? (
-              // #66 KK5: yüklenirken küçük, dokunulmaz gösterge. #69 KK5: filtre açıkken "Şehrin öne çıkanları · 9 mekan gizli" hapı;
-              // yükleme göstergesi ayrı (hap yanıp sönmez, #70 incelemesi).
+            {/* #71: "Bu bölgeyi tara" — son taranandan uzaklaşınca; basılınca düğmenin yerinde yükleme, tur bitince kaybolur. */}
+            {uzaklasti || yakin.yukleniyor ? <EylemHapi metin={t('kesfet.bolgeyiTara')} onPress={bolgeyiTara} yukleniyor={yakin.yukleniyor} /> : null}
+            {filtreli ? (
+              // #69 KK5: filtre açıkken "Şehrin öne çıkanları · 9 mekan gizli" hapı (dokunulmaz).
               <View style={s.yukleniyorSatir} pointerEvents="none">
-                {filtreli ? (
-                  <View style={[s.filtreOzet, s.golge]}>
-                    <Text style={s.filtreOzetMetin}>{filtreOzeti(filtre, gizliSayi)}</Text>
-                  </View>
-                ) : null}
-                {yakin.yukleniyor ? filtreli ? <ActivityIndicator size="small" color={renk.ikincil} /> : <BilgiHapi metin={t('genel.yukleniyor')} /> : null}
+                <View style={[s.filtreOzet, s.golge]}>
+                  <Text style={s.filtreOzetMetin}>{filtreOzeti(filtre, gizliSayi)}</Text>
+                </View>
               </View>
             ) : null}
           </>
