@@ -4,7 +4,7 @@
 // eskisi kaldırılır. Aynı place_id için en fazla bir pin + bir ad (KK1).
 import type { ImageRequireSource } from 'react-native';
 
-import { detayGoster, type GizliEtiketler } from './geo';
+import { detayGoster, isaretciImzasi, type GizliEtiketler } from './geo';
 import { pinGorselAdi, pinGorseli } from './PinIcerigi';
 import type { HaritaPini } from './tipler';
 
@@ -29,7 +29,10 @@ export function isaretciPlani(gorunen: HaritaPini[], gizli: GizliEtiketler, zoom
     const etiketGizli = gizli.etiket.has(p.id) && !p.secili;
     const gorsel = pinGorseli(p);
     if (!gorsel) {
-      plan.push({ tur: 'gorunum', anahtar: `${p.id}|g`, pin: p, detay, etiketGizli });
+      // #77: görünümlü işaretçinin anahtarı görünüm imzasını taşır (numara, renk, seçili, ad, puan…): görünüm değişince
+      // işaretçi yeniden kurulur, eskisi kaldırılır — Android'de yerinde ikon güncellemesi eski bitmap'i bırakıyordu
+      // (diğer güne geçince numaralı pin, seçilince altında kalan daire, çift ad).
+      plan.push({ tur: 'gorunum', anahtar: `${p.id}|g|${isaretciImzasi(p, etiketGizli, detay)}`, pin: p, detay, etiketGizli });
       continue;
     }
     // PNG işaretçileri görseller belleğe alınmadan hiç çizilmez (#61 §6).

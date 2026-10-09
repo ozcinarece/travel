@@ -34,20 +34,22 @@ describe('programCizgileri (#51)', () => {
   it('bacak kimliği sıradan değil uçlardan türer', () => {
     const once = cizgiler([H, A, B, C, H], {}).map((c) => c.id);
     const sonra = cizgiler([H, A, C, B, H], {}).map((c) => c.id);
-    expect(once).toEqual(['rota:g1:hotel>A:kus', 'rota:g1:A>B:kus', 'rota:g1:B>C:kus', 'rota:g1:C>hotel:kus']);
-    expect(sonra).toEqual(['rota:g1:hotel>A:kus', 'rota:g1:A>C:kus', 'rota:g1:C>B:kus', 'rota:g1:B>hotel:kus']);
+    // #77: kimlik rota gelsin gelmesin aynı (':kus' / ':yol' eki yok) — aynı Polyline yerinde güncellenir.
+    expect(once).toEqual(['rota:g1:hotel>A', 'rota:g1:A>B', 'rota:g1:B>C', 'rota:g1:C>hotel']);
+    expect(sonra).toEqual(['rota:g1:hotel>A', 'rota:g1:A>C', 'rota:g1:C>B', 'rota:g1:B>hotel']);
   });
 
   it('önbellekteki bacak gerçek yol, eksik bacak kuş uçuşu kesikli; etiket kendi bacağında', () => {
     const rotalar: RotaHaritasi = { 'A>B': rota('A', 'B') };
     const c = cizgiler([H, A, C, B, H], rotalar);
     // Yeni sırada A>B yok: eski bacağın polyline'ı kullanılmaz.
-    expect(c.every((x) => x.id.endsWith(':kus'))).toBe(true);
     expect(c.every((x) => x.kesik && x.ince)).toBe(true);
     expect(c[1].noktalar).toEqual([{ lat: A.lat, lng: A.lng }, { lat: C.lat, lng: C.lng }]);
 
     const d = cizgiler([H, A, B, C, H], rotalar);
-    expect(d[1].id).toBe('rota:g1:A>B:yol');
+    expect(d[1].id).toBe('rota:g1:A>B');
+    // Kuş uçuşundan gerçek yola geçişte kimlik değişmez (#77).
+    expect(d[1].id).toBe(c.find((x) => x.id === 'rota:g1:A>B')?.id ?? cizgiler([H, A, B, C, H], {})[1].id);
     expect(d[1].kesik).toBeFalsy();
     // #59 §C: yürüyüş bacağında hap yok; taksi bacağında "33 dk".
     expect(d[1].etiket).toBeUndefined();
@@ -93,13 +95,15 @@ describe('otelPinleri (#56)', () => {
 
 describe('programCizgileri diğer günler (#56)', () => {
   it('rota günün kendi başlangıç ve bitiş otelini kullanır', () => {
-    const mekanIle = new Map<string, Mekan>([['a', { id: 'a', lat: 41.85, lng: 12.4 } as unknown as Mekan]]);
+    const mekanIle = new Map<string, Mekan>([['a', { id: 'a', place_id: 'A', lat: 41.85, lng: 12.4 } as unknown as Mekan]]);
     const tp = new Map<string, TempoSonucu>([['g2', { sira: ['a'] } as unknown as TempoSonucu]]);
     const c = programCizgileri({ gunUclari: uclar, mekanIle, gunler: gunlerIki, tempolar: tp, seciliGunId: 'g1', seciliNoktalar: [], rotalar: {}, bacak, gecilenBacak: 0 });
-    expect(c).toHaveLength(1);
-    expect(c[0].ince).toBe(true);
-    expect(c[0].renk).toBe('#cf5a22');
-    expect(c[0].noktalar).toEqual([{ lat: X.lat, lng: X.lng }, { lat: 41.85, lng: 12.4 }, { lat: Y.lat, lng: Y.lng }]);
+    // #77: diğer gün de bacak bacak (otel → A, A → otel), kimlikler seçili günün matris anahtarlarıyla aynı biçimde.
+    expect(c).toHaveLength(2);
+    expect(c.map((x) => x.id)).toEqual(['rota:g2:stay:x>A', 'rota:g2:A>stay:y']);
+    expect(c.every((x) => x.ince && x.renk === '#cf5a22' && x.opaklik === 0.32)).toBe(true);
+    expect(c[0].noktalar).toEqual([{ lat: X.lat, lng: X.lng }, { lat: 41.85, lng: 12.4 }]);
+    expect(c[1].noktalar).toEqual([{ lat: 41.85, lng: 12.4 }, { lat: Y.lat, lng: Y.lng }]);
   });
 });
 

@@ -131,25 +131,32 @@ export function programCizgileri(secenek: {
     if (!tp || tp.sira.length === 0) return [];
     // #59 §C: çizgi koyu rota tonunda (pinler gün renginde).
     const rengi = rotaRengi(g.index);
+    // #77: çizgi kimliği her günde BACAK bazlı ve rota gelsin gelmesin aynı (`rota:<gün>:<from>><to>`): gün seçimi ya da rota
+    // gelişi işaretçiyi kaldırıp yeniden kurmak yerine aynı Polyline'ın özelliklerini günceller (Android'de kaldırılan çizgi
+    // hayalet kalabiliyordu). Anahtarlar seçili günün matris anahtarlarıyla aynı (mekan: place_id, otel: stay anahtarı).
+    const kimlikler = new Map<string, number>();
+    const kimlik = (fromKey: string, toKey: string) => {
+      const cift = `${fromKey}>${toKey}`;
+      const tekrar = kimlikler.get(cift) ?? 0;
+      kimlikler.set(cift, tekrar + 1);
+      return `rota:${g.id}:${cift}${tekrar ? `#${tekrar}` : ''}`;
+    };
     if (g.id !== seciliGunId) {
-      const noktalar = tp.sira.map((mekanId) => mekanIle.get(mekanId)).filter((m): m is Mekan => !!m).map((m) => ({ lat: m.lat, lng: m.lng }));
       const u = gunUclari.get(g.id);
-      const uc = (n: GunUcNoktalari['baslangic'] | undefined) => (n ? [{ lat: n.lat, lng: n.lng }] : []);
+      const uc = (n: GunUcNoktalari['baslangic'] | undefined) => (n ? [{ key: n.key, lat: n.lat, lng: n.lng }] : []);
+      const noktalar = tp.sira.map((mekanId) => mekanIle.get(mekanId)).filter((m): m is Mekan => !!m).map((m) => ({ key: m.place_id, lat: m.lat, lng: m.lng }));
       const yol = [...uc(u?.baslangic), ...noktalar, ...uc(u?.bitis)];
-      // #59 §C: diğer günlerin rotası ince, %32.
-      return yol.length >= 2 ? [{ id: `rota:${g.id}`, noktalar: yol, renk: rengi, opaklik: 0.32, ince: true }] : [];
+      // #59 §C: diğer günlerin rotası ince, %32 — bacak bacak düz çizgi.
+      return bacakListesi(yol).map((b) => ({ id: kimlik(b.from.key, b.to.key), noktalar: [{ lat: b.from.lat, lng: b.from.lng }, { lat: b.to.lat, lng: b.to.lng }], renk: rengi, opaklik: 0.32, ince: true }));
     }
     // #33: seçili gün bacak bacak gerçek yol; #65: araba bacağı yürümeyle aynı düz çizgi (ok yok) + "araba 14 dk" hapı;
     // rota gelene kadar kuş uçuşu ince kesikli. #59 §C: yürüyüş süre hapları haritada yok — `etiket` yalnız arabada.
     // #51: kimlik bacağın uçlarından (from>to) ve kaynağından türer — sıra değişince eski çizgi/etiket yeniden
     // kullanılmaz (Android Polyline/Marker eski koordinatta kalıyordu); aynı çift iki kez geçerse sıra no ayırır.
-    const gorulen = new Map<string, number>();
     return bacakListesi(seciliNoktalar).map((b, i): HaritaCizgisi => {
       const opaklik = i < gecilenBacak ? SOLUK_BACAK : 0.9;
       const cift = `${b.from.key}>${b.to.key}`;
-      const tekrar = gorulen.get(cift) ?? 0;
-      gorulen.set(cift, tekrar + 1);
-      const kimlik = `rota:${g.id}:${cift}${tekrar ? `#${tekrar}` : ''}`;
+      const id = kimlik(b.from.key, b.to.key);
       const r = rotalar[cift];
       const a = { lat: b.from.lat, lng: b.from.lng };
       const z = { lat: b.to.lat, lng: b.to.lng };
@@ -157,7 +164,7 @@ export function programCizgileri(secenek: {
         const taksi = r.mode === 'DRIVE' && r.drive_seconds;
         const dk = Math.max(1, Math.round((taksi ? r.drive_seconds! : r.seconds) / 60));
         return {
-          id: `${kimlik}:yol`,
+          id,
           noktalar: rotaNoktalari(r.polyline, a, z),
           renk: rengi,
           opaklik,
@@ -168,7 +175,7 @@ export function programCizgileri(secenek: {
       }
       const m = bacakModu(a, z, bacak(a, z));
       return {
-        id: `${kimlik}:kus`,
+        id,
         noktalar: [a, z],
         // docs/05 §3: rota gelene kadar GÜN renginde (rota tonu değil), 3 dp, kesikli.
         renk: gunRengi(g.index),
