@@ -17,7 +17,32 @@ export const taniSayaclari = {
   gorunumIsaretci: 0,
   /** Harita bileşeni render sayısı. */
   render: 0,
+  /** #75: son seçim değişiminde anahtarı değişen (kaldırılan + eklenen) işaretçi sayısı (hedef ≤ 4). */
+  sonDegisim: 0,
+  /** #75: dokunuş anı (ms, performance.now) ve dokunuş → iğne / kart süreleri (son 10). */
+  dokunmaAni: 0,
+  igneMs: [] as number[],
+  kartMs: [] as number[],
 };
+
+const simdi = () => (typeof performance !== 'undefined' && performance.now ? performance.now() : Date.now());
+
+/** #75: dokunuş → seçili iğnenin çizildiği ilk kare / kartın göründüğü ilk kare; son 10 ölçüm. */
+export function secimSuresiKaydet(tur: 'igne' | 'kart') {
+  if (!taniSayaclari.dokunmaAni) return;
+  const ms = Math.round(simdi() - taniSayaclari.dokunmaAni);
+  const dizi = tur === 'igne' ? taniSayaclari.igneMs : taniSayaclari.kartMs;
+  dizi.push(ms);
+  if (dizi.length > 10) dizi.shift();
+  if (__DEV__) console.log(`[harita] dokunuş → ${tur} ${ms} ms`);
+}
+
+export function medyan(dizi: number[]): number {
+  if (dizi.length === 0) return 0;
+  const s = [...dizi].sort((a, b) => a - b);
+  const o = Math.floor(s.length / 2);
+  return s.length % 2 ? s[o] : Math.round((s[o - 1] + s[o]) / 2);
+}
 
 export function isaretciSayilariniKaydet(gorunen: number, plan: { tur: 'png' | 'ad' | 'gorunum' }[]) {
   taniSayaclari.render += 1;
@@ -31,10 +56,11 @@ export function isaretciSayilariniKaydet(gorunen: number, plan: { tur: 'png' | '
 export function dokunmaKaydet(id: string) {
   taniSayaclari.dokunma += 1;
   taniSayaclari.sonDokunma = id;
+  taniSayaclari.dokunmaAni = simdi();
   if (__DEV__) console.log(`[harita] dokunma ${taniSayaclari.dokunma}: ${id}`);
 }
 
-export type TaniOzeti = { tur: number; istek: number; hata: number; bolgeOlayi: number; dokunma: number; sonDokunma: string; gorunen: number; png: number; ad: number; gorunum: number; render: number };
+export type TaniOzeti = { tur: number; istek: number; hata: number; bolgeOlayi: number; dokunma: number; sonDokunma: string; gorunen: number; png: number; ad: number; gorunum: number; render: number; sonDegisim: number; igneMs: number[]; kartMs: number[] };
 
 export function taniOzeti(): TaniOzeti {
   return {
@@ -49,6 +75,9 @@ export function taniOzeti(): TaniOzeti {
     ad: taniSayaclari.adIsaretci,
     gorunum: taniSayaclari.gorunumIsaretci,
     render: taniSayaclari.render,
+    sonDegisim: taniSayaclari.sonDegisim,
+    igneMs: [...taniSayaclari.igneMs],
+    kartMs: [...taniSayaclari.kartMs],
   };
 }
 

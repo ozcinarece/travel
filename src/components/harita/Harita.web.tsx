@@ -82,7 +82,7 @@ function Cizgi({ cizgi }: { cizgi: HaritaCizgisi }) {
 }
 
 // Web'de `altBosluk` yok sayılır (Maps JS logosu konumlanmaz; panel web'de ikincil); uzun basma yok.
-export function Harita({ merkez, zoom = 14, pinler = [], daireler = [], cizgiler = [], odak, onPinBas, onHaritaBas, onPinSuruklendi, onBolgeDegisti, ustBosluk = 0, sigdir }: HaritaProps) {
+export function Harita({ merkez, zoom = 14, pinler = [], daireler = [], cizgiler = [], odak, onPinBas, onHaritaBas, onPinSuruklendi, onBolgeDegisti, ustBosluk = 0, sigdir, seciliId = null }: HaritaProps) {
   const ekran = useWindowDimensions();
   const [bolge, setBolge] = useState<HaritaBolgesi>(() => bolgeHesapla(merkez, zoomDelta(zoom), zoomDelta(zoom)));
   const olcu = useMemo(() => ({ genislik: ekran.width, yukseklik: ekran.height }), [ekran.width, ekran.height]);
@@ -90,7 +90,8 @@ export function Harita({ merkez, zoom = 14, pinler = [], daireler = [], cizgiler
   const [etiketBolge, setEtiketBolge] = useState<HaritaBolgesi>(bolge);
   const tumPinler = useMemo(() => [...zoomaGorePinler(pinler, etiketBolge.zoom), ...bacakEtiketPinleri(cizgiler)], [pinler, cizgiler, etiketBolge.zoom]);
   const gizli = useMemo(() => gizliEtiketler(tumPinler, etiketBolge, olcu, ustBosluk), [tumPinler, etiketBolge, olcu, ustBosluk]);
-  const gorunen = useMemo(() => tumPinler.filter((p) => !(p.tur === 'etiket' && gizli.etiket.has(p.id))), [tumPinler, gizli]);
+  // #75: seçim listeden ayrı (`seciliId`); çakışma hesabı seçimle değişmez.
+  const gorunen = useMemo(() => tumPinler.filter((p) => !(p.tur === 'etiket' && gizli.etiket.has(p.id))).map((p) => (seciliId !== null && p.id === seciliId && !p.secili ? { ...p, secili: true } : p)), [tumPinler, gizli, seciliId]);
 
   if (!anahtar) {
     return (
@@ -160,7 +161,7 @@ export function Harita({ merkez, zoom = 14, pinler = [], daireler = [], cizgiler
                 if (konum) onPinSuruklendi?.(p.id, { lat: konum.lat(), lng: konum.lng() });
               }}>
               <View style={{ opacity: p.opaklik ?? 1 }}>
-                <PinIcerigi pin={p} etiketGizli={gizli.etiket.has(p.id)} detay={detay} />
+                <PinIcerigi pin={p} etiketGizli={gizli.etiket.has(p.id) && !p.secili} detay={detay} />
               </View>
             </AdvancedMarker>
           ) : (
