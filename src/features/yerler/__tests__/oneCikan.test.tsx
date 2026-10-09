@@ -11,8 +11,12 @@ const yer = (place_id: string, puan: number, n: number): HafifYer => ({ place_id
 
 // #70 incelemesi 🔴2: açılışta boş küme hemen dolar; dolu küme en fazla 10 sn'de bir değişir.
 describe('useOneCikanlar', () => {
-  beforeEach(() => jest.useFakeTimers());
-  afterEach(() => jest.useRealTimers());
+  beforeEach(() => {
+    jest.useFakeTimers();
+  });
+  afterEach(() => {
+    jest.useRealTimers();
+  });
 
   it('boş liste → ilk karolar gelince hemen ★; sonraki değişiklik 10 sn bekler', () => {
     const { result, rerender } = renderHook((yerler: HafifYer[]) => useOneCikanlar(yerler), { initialProps: [] as HafifYer[] });
