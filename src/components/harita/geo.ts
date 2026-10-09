@@ -70,9 +70,24 @@ export function etiketOnceligi(p: HaritaPini): number {
  * #61 §5: seçili gün dışındaki (soluk) durak pini numarasız küçük nokta, 20 px.
  */
 export function pinCapi(p: HaritaPini): number {
-  if (p.secili) return 34;
+  if (p.secili) return IGNE.en;
   if (p.tur === 'durak' && (p.opaklik ?? 1) < 1) return 20;
   return 28;
+}
+/**
+ * #65 (docs/05 §2): seçili pin iğne (damla) biçimi 38 × 46 px; çapa iğnenin UCU (konum), gövde ucun üstünde; ad etiketi
+ * ucun 4 px altında. Öneri / listede / tamamlandı PNG, numaralı durak görünüm.
+ */
+export const IGNE = { en: 38, boy: 46, etiketPayi: 4 } as const;
+/** Pinin ekran kutusu (engel): daire konumun ortasında; seçili iğne konumun üstünde. */
+export function pinKutusu(p: HaritaPini, cx: number, cy: number): { x1: number; y1: number; x2: number; y2: number } {
+  if (p.secili && p.tur !== 'etiket' && p.tur !== 'konum' && p.tur !== 'aday') return { x1: cx - IGNE.en / 2, y1: cy - IGNE.boy, x2: cx + IGNE.en / 2, y2: cy };
+  const r = (p.tur === 'otel' ? OTEL_KARE : p.tur === 'konum' ? KONUM_HALKA : pinCapi(p)) / 2;
+  return { x1: cx - r, y1: cy - r, x2: cx + r, y2: cy + r };
+}
+/** Ad etiketinin üst kenarı (px, konuma göre): daire altı + 2; seçili iğnede uç + 4. */
+export function etiketUstu(p: HaritaPini): number {
+  return p.secili ? IGNE.etiketPayi : pinCapi(p) / 2 + 2;
 }
 /** #59 §A2: otel karesi ve konum halkası (px) — PinIcerigi ile aynı. */
 export const OTEL_KARE = 28;
@@ -134,8 +149,7 @@ export function gizliEtiketler(
     .map((p) => {
       const cx = (p.konum.lng - bolge.merkez.lng) * pxLng;
       const cy = -(p.konum.lat - bolge.merkez.lat) * pxLat;
-      const r = (p.tur === 'otel' ? OTEL_KARE : p.tur === 'konum' ? KONUM_HALKA : pinCapi(p)) / 2;
-      return { x1: cx - r, y1: cy - r, x2: cx + r, y2: cy + r, pin: p.id };
+      return { ...pinKutusu(p, cx, cy), pin: p.id };
     });
   const cakisiyor = (kutu: Kutu, sahip?: string) => yerlesen.some((k) => k.pin !== sahip && kutu.x1 < k.x2 && kutu.x2 > k.x1 && kutu.y1 < k.y2 && kutu.y2 > k.y1);
   const sirali = pinler
@@ -154,14 +168,15 @@ export function gizliEtiketler(
       continue;
     }
     const adEn = Math.min(kisaAd(p.ad!).length, ETIKET_EN_FAZLA);
-    const ust = cy + pinCapi(p) / 2 + 2;
+    const ust = cy + etiketUstu(p);
     const kutuYap = (detay: boolean): Kutu => {
       const en = Math.max(adEn, detay ? 11 : 0) * HARF_PX + 12;
       return { x1: cx - en / 2, y1: ust, x2: cx + en / 2, y2: ust + etiketYuksekligi(detay) };
     };
     const detayli = detayGoster(p, bolge.zoom);
     const tam = kutuYap(detayli);
-    if (!cakisiyor(tam, p.id)) {
+    // #65: seçili iğnenin adı ucun hemen altında — komşu pin dairesine binse de gizlenmez (en üstte çizilir, pinZ 40).
+    if (p.secili || !cakisiyor(tam, p.id)) {
       yerlesen.push(tam);
       continue;
     }
@@ -217,8 +232,12 @@ export function pinZ(p: HaritaPini): number {
   return 1;
 }
 
-/** İşaretçi çapası: daire merkezi, etiket dairenin altında (daire + 2 px + etiket kutusu). */
+/**
+ * Görünümlü işaretçinin çapası: daire merkezi (etiket dairenin altında: daire + 2 px + etiket kutusu); seçili iğnede
+ * ucu (iğne + 4 px + etiket kutusu).
+ */
 export function pinCapasi(p: HaritaPini, detay = false): { x: number; y: number } {
+  if (p.secili) return { x: 0.5, y: IGNE.boy / (IGNE.boy + IGNE.etiketPayi + etiketYuksekligi(detay)) };
   const d = pinCapi(p);
   return { x: 0.5, y: d / 2 / (d + 2 + etiketYuksekligi(detay)) };
 }

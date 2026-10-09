@@ -63,7 +63,8 @@ describe('geo', () => {
     // #59: 28 px daire (+2 boşluk +16 etiket); seçili 34 px (halka kenarda).
     expect(c.y).toBeCloseTo(14 / 46);
     expect(pinCapasi({ id: 'x', konum: roma, renk: '#000', tur: 'durak' }, true).y).toBeCloseTo(14 / 60);
-    expect(pinCapasi({ id: 'x', konum: roma, renk: '#000', tur: 'durak', secili: true }).y).toBeCloseTo(17 / 52);
+    // #65: seçili iğne 38 × 46, çapa uç; etiket ucun 4 px altında.
+    expect(pinCapasi({ id: 'x', konum: roma, renk: '#000', tur: 'durak', secili: true }).y).toBeCloseTo(46 / 66);
   });
 
   it('deltaZoom zoomDelta\'nın tersidir; bolgeHesapla zoom üretir', () => {
@@ -229,6 +230,6 @@ describe('pinSecimi (#61)', () => {
   it('#61 §5: diğer günün durağı 20 px, seçili günün durağı 28, seçili 34', () => {
     expect(pinCapi({ id: 'x', konum: roma, renk: '#000', tur: 'durak', opaklik: 0.4 })).toBe(20);
     expect(pinCapi({ id: 'x', konum: roma, renk: '#000', tur: 'durak' })).toBe(28);
-    expect(pinCapi({ id: 'x', konum: roma, renk: '#000', tur: 'durak', opaklik: 0.4, secili: true })).toBe(34);
+    expect(pinCapi({ id: 'x', konum: roma, renk: '#000', tur: 'durak', opaklik: 0.4, secili: true })).toBe(38);
   });
 });

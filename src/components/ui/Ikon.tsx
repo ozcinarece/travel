@@ -25,7 +25,7 @@ export type IkonAdi =
   // #47 B5: emoji yerine çizgi ikonlar
   | 'harita'
   | 'yurume'
-  | 'taksi'
+  | 'araba'
   | 'yukari'
   | 'asagi'
   | 'daha'
@@ -136,12 +136,12 @@ export function Ikon({ ad, boyut = 24, renk, kalinlik = 2 }: Props) {
           <Circle cx={13} cy={4.5} r={1.8} {...ortak} />
           <Path d="M10 21l2-6 2.5 2.5V21M12 15l-1-5 3-1.5 2 3.5h2.5M11 10l-3 2v3" {...ortak} />
         </>
-      ) : ad === 'taksi' ? (
+      ) : ad === 'araba' ? (
+        // #65: uzun bacak modu "araba" (taksi glifinin çatı ışığı olmayan hali; docs/05 §4).
         <>
           <Path d="M5 16V12l2-5h10l2 5v4M3.5 16h17v3h-17z" {...ortak} />
           <Circle cx={7.5} cy={19} r={1} {...ortak} />
           <Circle cx={16.5} cy={19} r={1} {...ortak} />
-          <Path d="M10 4h4" {...ortak} />
         </>
       ) : ad === 'yukari' ? (
         <Path d="M6 15l6-6 6 6" {...ortak} />

@@ -184,7 +184,7 @@ export function CizelgeListesi(p: CizelgeListesiProps) {
           const dk = yuruyusDk(satir.yuruyus);
           const yukleniyor = (satir.yuruyus.mod === 'taksi' ? p.matrisYukleniyor || p.rotaYukleniyor : p.matrisYukleniyor) && satir.yuruyus.kestirim;
           const metin = yukleniyor ? '…' : `${dk} dk${satir.yuruyus.kestirim ? ' ~' : ''}`;
-          const ikon = <Ikon ad={satir.yuruyus.mod === 'taksi' ? 'taksi' : 'yurume'} boyut={12} renk={renk.ikincil} kalinlik={2.2} />;
+          const ikon = <Ikon ad={satir.yuruyus.mod === 'taksi' ? 'araba' : 'yurume'} boyut={12} renk={renk.ikincil} kalinlik={2.2} />;
           ara = (
             <View style={s.araSatir}>
               <View style={s.ray} />
@@ -300,7 +300,7 @@ export function CizelgeListesi(p: CizelgeListesiProps) {
         <View style={s.araSatir}>
           <View style={s.ray} />
           <View style={s.araIc}>
-            <Ikon ad={prog.canli.oteleDonus.mod === 'taksi' ? 'taksi' : 'ev'} boyut={12} renk={renk.ikincil} kalinlik={2.2} />
+            <Ikon ad={prog.canli.oteleDonus.mod === 'taksi' ? 'araba' : 'ev'} boyut={12} renk={renk.ikincil} kalinlik={2.2} />
             <Text style={s.araMetin}>
               {t(prog.canli.oteleDonus.mod === 'taksi' ? 'program.oteleDonusTaksi' : 'program.oteleDonus', { n: yuruyusDk(prog.canli.oteleDonus) })}
               {prog.canli.oteleDonus.kestirim ? ' ~' : ''} · {dakikaSaat(prog.canli.bitisDk)}

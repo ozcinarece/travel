@@ -532,7 +532,7 @@ function ProgramSekmesi({
       numara: atlandi ? null : numara,
       tamam: prog?.bugun ? x.durum === 'gecildi' : false,
       atlandi,
-      bacak: x.yuruyus ? { metin: `${yuruyusDk(x.yuruyus)} dk${x.yuruyus.kestirim ? ' ~' : ''}`, ikon: x.yuruyus.mod === 'taksi' ? 'taksi' : 'yurume' } : undefined,
+      bacak: x.yuruyus ? { metin: `${yuruyusDk(x.yuruyus)} dk${x.yuruyus.kestirim ? ' ~' : ''}`, ikon: x.yuruyus.mod === 'taksi' ? 'araba' : 'yurume' } : undefined,
     };
   });
   const siralaTasi = (from: number, to: number) => {

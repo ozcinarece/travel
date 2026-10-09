@@ -19,7 +19,7 @@ export type SiralaSatiri = {
   tamam?: boolean;
   atlandi?: boolean;
   /** Önceki noktadan bacak: "12 dk" + ikon; yoksa satır boş kalır. */
-  bacak?: { metin: string; ikon: 'yurume' | 'taksi' };
+  bacak?: { metin: string; ikon: 'yurume' | 'araba' };
 };
 
 /** #55 §C8: durak satırı en az 44 px (ad 2 satıra kadar); üstündeki yürüyüş satırı 16 px. */
