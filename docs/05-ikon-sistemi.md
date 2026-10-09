@@ -1,6 +1,6 @@
 # Pin ve ikon sistemi
 
-Sürüm 1.2 · 9 Ekim 2026 (seçili = iğne; listede = dolu + ✓ rozeti; taksi = kesikli rota çizgisi) · Sahip: Ece (ürün)
+Sürüm 1.3 · 9 Ekim 2026 (seçili = iğne; listede = dolu + ✓ rozeti; taksi → araba, düz; yürüme okları sık) · Sahip: Ece (ürün)
 
 Kanvastaki **"Pin ve ikon sistemi"** panosu (`PinSystem6`), haritadaki her işaretin tek kaynağıdır: https://claude.ai/artifact/46jh8ggGczM7VDTVHyzRQT
 
@@ -21,7 +21,7 @@ Yollar `src/components/ui/Ikon.tsx` ile birebir aynıdır. PNG'ler `scripts/pin-
 | Manzara | `#0ea5e9` | `dag` | `M3 19l6.5-11 4 6.5 2-3L21 19H3z` + daire (17.5, 6, r 1.5) |
 | Alışveriş | `#c2185b` | `canta` | `M5 8h14l-1 12H6L5 8z` · `M9 10V7a3 3 0 0 1 6 0v3` |
 
-Diğer glifler: `tik` (`M5 12.5l4.5 4.5L19 7.5`, kalınlık +0,6) · `ev` · `taksi` · yön oku `M9 5l6 7-6 7`.
+Diğer glifler: `tik` (`M5 12.5l4.5 4.5L19 7.5`, kalınlık +0,6) · `ev` · `araba` · yön oku `M9 5l6 7-6 7`.
 
 ## 2. Pin durumları
 
@@ -44,8 +44,8 @@ Tüm pinlerde gölge: `0 2px 6px rgba(15,15,15,.22)`. Üst üste binme sırası:
 
 | Tür | Katmanlar |
 |---|---|
-| Yürüme (seçili gün) | gölge 11 dp `#0f0f0f` %12 · beyaz 9 dp · rota tonu 5,5 dp; yuvarlak uç ve köşe; ~45 px aralıkla beyaz yön oku |
-| Taksi | yürümenin aynısı: gölge 11 · beyaz 9 (düz) · rota tonu 5,5 dp **kesikli 8/5 dp**, düz uç; ok yok |
+| Yürüme (seçili gün) | gölge 11 dp `#0f0f0f` %12 · beyaz 9 dp · rota tonu 5,5 dp; yuvarlak uç ve köşe; **~24 px aralıkla** beyaz yön oku (sık, Google'ın yürüme görünümüne yakın) |
+| Araba (uzun bacak, >40 dk yürüme) | yürümenin aynısı: gölge 11 · beyaz 9 · rota tonu 5,5 dp, **düz**, yön oku yok. Adı "araba"; taksi mi kendi aracı mı kullanıcı karar verir |
 | Diğer günler | rota tonu 3 dp, kenarsız, %32 |
 | Rota gelene kadar | gün rengi 3 dp, kesikli (kuş uçuşu) |
 
@@ -54,5 +54,5 @@ Gün renkleri (pinler): 1 `#2f6fed` · 2 `#f2783f` · 3 `#12a37a` · 4 `#8a4fd6`
 
 ## 4. Haplar
 
-- **Taksi süre hapı:** beyaz zemin, pin gölgesi, metin `#0f0f0f` 10,5 px / 800, solda rota tonunda taksi glifi 12 px. Yalnız taksi bacağında; yürüyüş süreleri haritada gösterilmez.
+- **Araba süre hapı:** beyaz zemin, pin gölgesi, metin `#0f0f0f` 10,5 px / 800, solda rota tonunda **araba** glifi 12 px (`taksi` glifinin çatı ışığı olmayan hali: `M5 16V12l2-5h10l2 5v4M3.5 16h17v3h-17z` + iki teker). Yalnız araba bacağında; yürüyüş süreleri haritada gösterilmez.
 - **Yön oku:** beyaz 12 px "›", düz (`flat`) işaretçi, rota yönünde döner.
