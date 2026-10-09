@@ -13,15 +13,20 @@ export type Isaretci =
   | { tur: 'ad'; anahtar: string; pin: HaritaPini; detay: boolean }
   | { tur: 'gorunum'; anahtar: string; pin: HaritaPini; detay: boolean; etiketGizli: boolean };
 
-export function isaretciPlani(gorunen: HaritaPini[], gizli: GizliEtiketler, zoom: number, gorsellerHazir: boolean): Isaretci[] {
+/**
+ * `seciliId` (#75): seçim pin listesinden ayrı gelir — listede ve `gizli` hesabında seçili yoktur; burada yalnız o pine
+ * `secili` işlenir (adı hep görünür, ★ satırı açık). Böylece seçim değişince yalnız eski + yeni seçilinin anahtarları değişir.
+ */
+export function isaretciPlani(gorunen: HaritaPini[], gizli: GizliEtiketler, zoom: number, gorsellerHazir: boolean, seciliId: string | null = null): Isaretci[] {
   const plan: Isaretci[] = [];
   const gorulen = new Set<string>();
-  for (const p of gorunen) {
+  for (const ham of gorunen) {
     // KK1: aynı kimlik iki kez gelirse (üst katman hatası) ikincisi çizilmez.
-    if (gorulen.has(p.id)) continue;
-    gorulen.add(p.id);
+    if (gorulen.has(ham.id)) continue;
+    gorulen.add(ham.id);
+    const p = seciliId !== null && ham.id === seciliId && !ham.secili ? { ...ham, secili: true } : ham;
     const detay = detayGoster(p, zoom) && !gizli.detay.has(p.id);
-    const etiketGizli = gizli.etiket.has(p.id);
+    const etiketGizli = gizli.etiket.has(p.id) && !p.secili;
     const gorsel = pinGorseli(p);
     if (!gorsel) {
       plan.push({ tur: 'gorunum', anahtar: `${p.id}|g`, pin: p, detay, etiketGizli });
@@ -42,4 +47,17 @@ export function isaretciPlani(gorunen: HaritaPini[], gizli: GizliEtiketler, zoom
  */
 export function dokunusuIletir(p: HaritaPini): boolean {
   return p.tur !== 'etiket' && p.tur !== 'konum';
+}
+
+/**
+ * #75 KK2: iki plan arasında yeniden kurulan / kaldırılan / eklenen işaretçi sayısı — anahtarı değişen (pin, tür) yuvaları
+ * (eski seçilinin pini ve adı, yeni seçilinin pini ve adı → en çok 4). Anahtarı aynı kalan işaretçiye dokunulmaz.
+ */
+export function planFarki(onceki: Isaretci[], yeni: Isaretci[]): number {
+  const a = new Set(onceki.map((i) => i.anahtar));
+  const b = new Set(yeni.map((i) => i.anahtar));
+  const yuvalar = new Set<string>();
+  for (const i of onceki) if (!b.has(i.anahtar)) yuvalar.add(`${i.pin.id}|${i.tur}`);
+  for (const i of yeni) if (!a.has(i.anahtar)) yuvalar.add(`${i.pin.id}|${i.tur}`);
+  return yuvalar.size;
 }

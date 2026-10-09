@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 
 import { bolgedenUzaklasti, bolgeHesapla, zoomDelta } from '@/components/harita/geo';
-import { useTani } from '@/components/harita/tani';
+import { medyan, secimSuresiKaydet, useTani } from '@/components/harita/tani';
 import { EylemHapi, HaritaEkrani } from '@/components/harita/HaritaEkrani';
 import type { HaritaBolgesi, HaritaOdagi, HaritaPini } from '@/components/harita/tipler';
 import { Avatar } from '@/components/ui/Avatar';
@@ -149,9 +149,14 @@ function Kesfet({ seyahat, konaklamalar }: { seyahat: Seyahat; konaklamalar: Kon
       yorumSayisi: y.puan_sayisi,
       tur: 'oneri' as const,
       oneCikan: oneCikan.has(y.place_id),
-      secili: secim?.place_id === y.place_id,
     }));
-  }, [gecenler, seciliOneri, havuzIdleri, aramaSonucu, bolge, secim?.place_id, oneCikan]);
+  }, [gecenler, seciliOneri, havuzIdleri, aramaSonucu, bolge, oneCikan]);
+  // #75: seçim pin listesinden ayrı (Harita `seciliId`): seçim değişince liste ve çakışma hesabı yeniden kurulmaz.
+  const seciliId = secim ? (havuzIdleri.has(secim.place_id) ? `m:${secim.place_id}` : `o:${secim.place_id}`) : null;
+  // #75: dokunuş → kart süresi (kart `secim` ile aynı render'da; commit sonrası ölçülür).
+  useEffect(() => {
+    if (secim) secimSuresiKaydet('kart');
+  }, [secim]);
   const gizliSayi = useMemo(() => {
     if (!filtreli) return 0;
     const gecen = new Set(gecenler.map((y) => y.place_id));
@@ -175,7 +180,6 @@ function Kesfet({ seyahat, konaklamalar }: { seyahat: Seyahat; konaklamalar: Kon
       puan: havuzAdlari.data?.[m.place_id]?.puan ?? null,
       yorumSayisi: havuzAdlari.data?.[m.place_id]?.puan_sayisi ?? null,
       tur: 'listede' as const,
-      secili: secim?.place_id === m.place_id,
       oneCikan: oneCikan.has(m.place_id),
     })),
     ...oneriPinleri,
@@ -383,7 +387,7 @@ function Kesfet({ seyahat, konaklamalar }: { seyahat: Seyahat; konaklamalar: Kon
           {tani ? (
             <View style={s.tani} pointerEvents="none">
               <Text style={s.taniMetin}>
-                {`tur ${tani.tur} · istek ${tani.istek} · hata ${tani.hata} · bölge ${tani.bolgeOlayi} · yükleniyor ${yakin.yukleniyor ? 'E' : 'H'}\nişaretçi ${tani.gorunen} (png ${tani.png} · ad ${tani.ad} · görünüm ${tani.gorunum}) · render ${tani.render}\ndokunma ${tani.dokunma}${tani.sonDokunma ? ` · son ${tani.sonDokunma.slice(0, 28)}` : ''} · liste ${oneriListesi.length} · gizli ${gizliSayi}`}
+                {`tur ${tani.tur} · istek ${tani.istek} · hata ${tani.hata} · bölge ${tani.bolgeOlayi} · yükleniyor ${yakin.yukleniyor ? 'E' : 'H'}\nişaretçi ${tani.gorunen} (png ${tani.png} · ad ${tani.ad} · görünüm ${tani.gorunum}) · render ${tani.render}\ndokunma ${tani.dokunma}${tani.sonDokunma ? ` · son ${tani.sonDokunma.slice(0, 28)}` : ''} · liste ${oneriListesi.length} · gizli ${gizliSayi}\nseçim: iğne ${tani.igneMs.at(-1) ?? '–'} ms · kart ${tani.kartMs.at(-1) ?? '–'} ms · medyan(10) iğne ${medyan(tani.igneMs)} / kart ${medyan(tani.kartMs)} · değişen işaretçi ${tani.sonDegisim}`}
               </Text>
             </View>
           ) : null}
@@ -449,6 +453,7 @@ function Kesfet({ seyahat, konaklamalar }: { seyahat: Seyahat; konaklamalar: Kon
         onPinBas: pinBas,
         onHaritaBas: () => setSecim(null),
         onBolgeDegisti: setBolge,
+        seciliId,
       }}
     />
   );

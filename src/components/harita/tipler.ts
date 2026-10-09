@@ -105,4 +105,9 @@ export type HaritaProps = {
   sigdir?: HaritaSigdirma;
   /** #55 §C10: pine uzun basma (haritada en yakın pin, ~28 px içinde). */
   onPinUzunBas?: (id: string) => void;
+  /**
+   * #75: seçili pinin kimliği — pin listesinden AYRI verilir ki seçim değişince liste, çakışma hesabı (gizliEtiketler) ve
+   * diğer işaretçiler yeniden kurulmasın; yalnız eski ve yeni seçili pinin işaretçileri değişir. `pin.secili` da desteklenir.
+   */
+  seciliId?: string | null;
 };

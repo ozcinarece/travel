@@ -1,7 +1,7 @@
 import { describe, expect, it } from '@jest/globals';
 
 import { gizliEtiketler } from '../geo';
-import { dokunusuIletir, isaretciPlani } from '../isaretciler';
+import { dokunusuIletir, isaretciPlani, planFarki } from '../isaretciler';
 import type { HaritaPini } from '../tipler';
 
 const roma = { lat: 41.9028, lng: 12.4964 };
@@ -63,5 +63,27 @@ describe('isaretciPlani (#71)', () => {
     const plan = isaretciPlani(d, gizliEtiketler(d, bolge, ekran), bolge.zoom, true);
     expect(plan.map((i) => i.pin.id)).toEqual(['o:a', 'o:a']);
     expect(plan.every((i) => dokunusuIletir(i.pin))).toBe(true);
+  });
+
+  it('#75: seçim listeden ayrı — 300 pinde seçim değişince anahtarı değişen işaretçi ≤ 4, gizli hesabı seçimsiz, seçilinin adı hep görünür', () => {
+    // 300 öneri, 10 px aralıkla (adlar çakışır → çoğu gizli).
+    const d = Array.from({ length: 300 }, (_, i) => p(`o:${i}`, (i % 20) * 0.00025, { tur: 'oneri', konum: { lat: roma.lat + Math.floor(i / 20) * 0.0005, lng: roma.lng + (i % 20) * 0.00025 } }));
+    const gizli = gizliEtiketler(d, bolge, ekran);
+    const p0 = isaretciPlani(d, gizli, bolge.zoom, true, null);
+    const p1 = isaretciPlani(d, gizli, bolge.zoom, true, 'o:7');
+    const p2 = isaretciPlani(d, gizli, bolge.zoom, true, 'o:150');
+    const p3 = isaretciPlani(d, gizli, bolge.zoom, true, null);
+    // Seçim: yeni seçili pin + adı (≤ 2 eklenen, ≤ 2 kaldırılan).
+    expect(planFarki(p0, p1)).toBeLessThanOrEqual(4);
+    expect(planFarki(p1, p2)).toBeLessThanOrEqual(4);
+    expect(planFarki(p2, p3)).toBeLessThanOrEqual(4);
+    // Seçilinin adı çakışsa da görünür (gizli.etiket'te olsa bile), iğne PNG'si ve 's' anahtarı.
+    expect(gizli.etiket.has('o:150')).toBe(true);
+    expect(p2.some((i) => i.tur === 'ad' && i.pin.id === 'o:150' && i.pin.secili)).toBe(true);
+    expect(p2.find((i) => i.tur === 'png' && i.pin.id === 'o:150')?.anahtar).toMatch(/\|igne-daire-muze\|s$/);
+    // Diğer pinlerin anahtarları seçimden etkilenmez.
+    const digerleri = (plan: typeof p0) => plan.filter((i) => i.pin.id !== 'o:7' && i.pin.id !== 'o:150').map((i) => i.anahtar);
+    expect(digerleri(p1)).toEqual(digerleri(p0));
+    expect(digerleri(p2)).toEqual(digerleri(p0));
   });
 });

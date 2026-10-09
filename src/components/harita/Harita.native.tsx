@@ -4,12 +4,12 @@ import MapView, { Circle, Marker, Polyline, PROVIDER_GOOGLE } from 'react-native
 
 import { bolgeHesapla, enYakinPin, etiketBolgesi, gizliEtiketler, haritaDolgusu, isaretciImzasi, izlemeGerekli, pinCapasi, pinZ, zoomaGorePinler, zoomDelta } from './geo';
 import { ACIK_HARITA_STILI } from './haritaStili';
-import { dokunusuIletir, isaretciPlani } from './isaretciler';
+import { dokunusuIletir, isaretciPlani, planFarki } from './isaretciler';
 import { PinIcerigi, pinPngAnahtari } from './PinIcerigi';
 import { IGNE_CAPA, IGNE_CAPA_34, PIN_IKONLARI } from './pinIkonlari';
 import { usePinGorselleri } from './pinOnYukleme';
 import { bacakEtiketPinleri, yonOklari } from './rota';
-import { dokunmaKaydet, isaretciSayilariniKaydet, taniSayaclari } from './tani';
+import { dokunmaKaydet, isaretciSayilariniKaydet, secimSuresiKaydet, taniSayaclari } from './tani';
 import type { HaritaBolgesi, HaritaCizgisi, HaritaPini, HaritaProps, Konum } from './tipler';
 
 /** "#rrggbb" + opaklık → "#rrggbbaa". */
@@ -43,6 +43,7 @@ export function Harita({
   ustBosluk = 0,
   sigdir,
   onPinUzunBas,
+  seciliId = null,
 }: HaritaProps) {
   const ref = useRef<MapView>(null);
   const ekran = useWindowDimensions();
@@ -88,11 +89,18 @@ export function Harita({
   const gizli = useMemo(() => gizliEtiketler(tumPinler, etiketBolge, olcu, ustBosluk), [tumPinler, etiketBolge, olcu, ustBosluk]);
   const gorunen = useMemo(() => tumPinler.filter((p) => !(p.tur === 'etiket' && gizli.etiket.has(p.id))), [tumPinler, gizli]);
   // #71: işaretçi planı — anahtar görünüm durumunu içerir (PNG adı, seçili); her pin en fazla bir pin + bir ad işaretçisi.
-  const plan = useMemo(() => isaretciPlani(gorunen, gizli, etiketBolge.zoom, gorsellerHazir), [gorunen, gizli, etiketBolge.zoom, gorsellerHazir]);
-  // Tanı sayaçları render dışında (effect) yazılır.
+  // #75: seçim (`seciliId`) yalnız burada işlenir — `tumPinler` / `gizli` seçimle değişmez, diğer işaretçiler aynı anahtarla kalır.
+  const plan = useMemo(() => isaretciPlani(gorunen, gizli, etiketBolge.zoom, gorsellerHazir, seciliId), [gorunen, gizli, etiketBolge.zoom, gorsellerHazir, seciliId]);
+  // Tanı sayaçları render dışında (effect) yazılır: işaretçi sayıları, plan farkı (#75 KK2) ve dokunuş → iğne süresi.
+  const oncekiPlan = useRef<typeof plan>([]);
   useEffect(() => {
+    taniSayaclari.sonDegisim = planFarki(oncekiPlan.current, plan);
+    oncekiPlan.current = plan;
     isaretciSayilariniKaydet(gorunen.length, plan);
-  }, [gorunen.length, plan]);
+    if (seciliId && taniSayaclari.sonDokunma === seciliId && taniSayaclari.dokunmaAni && plan.some((i) => i.tur !== 'ad' && i.pin.id === seciliId && i.pin.secili)) {
+      secimSuresiKaydet('igne');
+    }
+  }, [gorunen.length, plan, seciliId]);
   const pinBas = (id: string) => {
     dokunmaKaydet(id);
     onPinBas?.(id);
@@ -138,6 +146,9 @@ export function Harita({
       showsPointsOfInterests={false}
       // #32: pine dokunmak haritayı kaydırmaz.
       moveOnMarkerPress={false}
+      // #75 (ürün kararı): çift dokunmayla yakınlaştırma kapalı — Google Maps tek dokunuşu çift dokunma süresi kadar
+      // bekletiyordu; yakınlaştırma iki parmakla zaten var. İşaretçi dokunuşu (onMarkerPress) bu beklemeye girmez.
+      zoomTapEnabled={false}
       // Android'de işaretçi dokunuşu haritanın onPress'ine değil onMarkerPress'e gelir (MapView.java onMarkerClick); iOS'ta
       // onPress 'marker-press' ile de gelebilir → o durumda yalnız onMarkerPress işler (çift seçim olmasın).
       onPress={(e) => {
