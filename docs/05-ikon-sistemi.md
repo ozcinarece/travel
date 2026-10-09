@@ -1,6 +1,6 @@
 # Pin ve ikon sistemi
 
-Sürüm 1.0 · 9 Ekim 2026 · Sahip: Ece (ürün)
+Sürüm 1.1 · 9 Ekim 2026 (taksi: sarı-siyah şerit → kesikli rota çizgisi) · Sahip: Ece (ürün)
 
 Kanvastaki **"Pin ve ikon sistemi"** panosu (`PinSystem6`), haritadaki her işaretin tek kaynağıdır: https://claude.ai/artifact/46jh8ggGczM7VDTVHyzRQT
 
@@ -45,7 +45,7 @@ Tüm pinlerde gölge: `0 2px 6px rgba(15,15,15,.22)`. Üst üste binme sırası:
 | Tür | Katmanlar |
 |---|---|
 | Yürüme (seçili gün) | gölge 11 dp `#0f0f0f` %12 · beyaz 9 dp · rota tonu 5,5 dp; yuvarlak uç ve köşe; ~45 px aralıkla beyaz yön oku |
-| Taksi | siyah 10 dp · sarı `#FAC775` 6 dp · siyah şerit 6 dp, desen 10/14 dp, düz uç; ok yok |
+| Taksi | yürümenin aynısı: gölge 11 · beyaz 9 (düz) · rota tonu 5,5 dp **kesikli 8/5 dp**, düz uç; ok yok |
 | Diğer günler | rota tonu 3 dp, kenarsız, %32 |
 | Rota gelene kadar | gün rengi 3 dp, kesikli (kuş uçuşu) |
 
@@ -54,5 +54,5 @@ Gün renkleri (pinler): 1 `#2f6fed` · 2 `#f2783f` · 3 `#12a37a` · 4 `#8a4fd6`
 
 ## 4. Haplar
 
-- **Taksi süre hapı:** sarı `#FAC775` zemin, 1 px siyah kenar, metin `#412402` 10,5 px / 800, solda siyah taksi glifi 12 px. Yalnız taksi bacağında; yürüyüş süreleri haritada gösterilmez.
+- **Taksi süre hapı:** beyaz zemin, pin gölgesi, metin `#0f0f0f` 10,5 px / 800, solda rota tonunda taksi glifi 12 px. Yalnız taksi bacağında; yürüyüş süreleri haritada gösterilmez.
 - **Yön oku:** beyaz 12 px "›", düz (`flat`) işaretçi, rota yönünde döner.
