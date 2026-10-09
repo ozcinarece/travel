@@ -47,6 +47,11 @@ type Props = {
    * `ustunde`: sayfanın hemen üstünde yüzen içerik (sayfayla hareket eder).
    */
   altSayfa?: { hal: SayfaHali; onHal: (h: SayfaHali) => void; ust: ReactNode; govde: (yukseklik: number) => ReactNode; ustunde?: ReactNode };
+  /**
+   * #80: en üst katman (mekan paneli) — harita dolgusunu DEĞİŞTİRMEZ (kamera yerinde kalır, KK1); kendi konumunu kendi
+   * belirler (absoluteFill içinde alt sayfa). Dokunuşlar yalnız kendi alanında yakalanır.
+   */
+  ustKatman?: ReactNode;
   harita: HaritaProps;
 };
 
@@ -61,7 +66,7 @@ const GECIS_YUKSEKLIK = 250;
  * #17 KK2: tam ekran harita kabuğu — 3.3 Otel, 3.4 Keşfet ve 3.5 bunu paylaşır.
  * Harita ekranın tamamını kaplar; üstte ve altta yüzen katmanlar dokunuşu yalnız kendi alanlarında yakalar.
  */
-export function HaritaEkrani({ baslik, geri, sagUst, arama, aramaSag, ustEk, altNot, altSerbest, altPanel, onUstYukseklik, altMenuVar, panelTam, altBaslik, altSayfa, harita }: Props) {
+export function HaritaEkrani({ baslik, geri, sagUst, arama, aramaSag, ustEk, altNot, altSerbest, altPanel, onUstYukseklik, altMenuVar, panelTam, altBaslik, altSayfa, ustKatman, harita }: Props) {
   const kenar = useSafeAreaInsets();
   const [ustY, setUstY] = useState(0);
   const [panelY, setPanelY] = useState(0);
@@ -151,6 +156,11 @@ export function HaritaEkrani({ baslik, geri, sagUst, arama, aramaSag, ustEk, alt
           ) : null}
         </View>
       )}
+      {ustKatman ? (
+        <View style={StyleSheet.absoluteFill} pointerEvents="box-none">
+          {ustKatman}
+        </View>
+      ) : null}
     </View>
   );
 }

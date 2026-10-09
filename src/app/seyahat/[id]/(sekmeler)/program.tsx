@@ -11,7 +11,7 @@ import { GunKartlari, gunEtiketKisa, gunEtiketUzun } from '@/components/program/
 import { GunOteliSayfasi } from '@/components/program/GunOteliSayfasi';
 import { MiniCubuk } from '@/components/program/MiniCubuk';
 import { OtelUcSatiri } from '@/components/program/OtelUcSatiri';
-import { PinPaneli } from '@/components/program/PinPaneli';
+import { MekanPaneli } from '@/components/mekan/MekanPaneli';
 import { PuanSayfasi } from '@/components/program/PuanSayfasi';
 import { SecimMenusu, type SecimSecenegi } from '@/components/program/SecimMenusu';
 import { SiralaListesi, type SiralaSatiri } from '@/components/program/SiralaListesi';
@@ -30,7 +30,7 @@ import { useProgramVerisi } from '@/features/program/useProgramVerisi';
 import { useSeyahatId } from '@/features/seyahatler/baglam';
 import { useSeyahat } from '@/features/seyahatler/sorgular';
 import { usePuanKaydet, usePuanlar } from '@/features/puanlar/sorgular';
-import { useHafifYerler, useMekanOzeti, useOnizleme } from '@/features/yerler/api';
+import { useHafifYerler, useOnizleme } from '@/features/yerler/api';
 import { t } from '@/i18n';
 import { sureMetni } from '@/lib/kategori';
 import { onayIste } from '@/lib/onay';
@@ -125,7 +125,6 @@ function ProgramSekmesi({
   const gun = gunler.find((g) => g.id === seciliGunId) ?? gunler.find((g) => String(g.index) === gunParam) ?? gunler.find((g) => g.index === bugunIndex) ?? gunler[0];
   const [panel, setPanel] = useState<PanelHali>('katli');
   const [puanDurakId, setPuanDurakId] = useState<string | null>(null);
-  const [pinMenuAcik, setPinMenuAcik] = useState(false);
   const [listeMenuAcik, setListeMenuAcik] = useState(false);
   // #56 §2: günün oteli alt sayfası.
   const [otelSayfasi, setOtelSayfasi] = useState(false);
@@ -238,10 +237,8 @@ function ProgramSekmesi({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [buradaId]);
 
-  // Seçili mekan (pin paneli) — önizleme fotoğrafıyla. Mekan silinmişse panel kendiliğinden kapanır (türetilmiş).
+  // Seçili mekan (#80 mekan paneli). Mekan silinmişse panel kendiliğinden kapanır (türetilmiş).
   const seciliMekan = seciliMekanId ? mekanIle.get(seciliMekanId) : undefined;
-  // #45 §6: foto + editoryal özet yalnız pin paneli açıkken (pahalı SKU).
-  const mekanOzeti = useMekanOzeti(seciliMekan?.place_id);
   const puanlar = usePuanlar(seyahat.id);
   const puanKaydet = usePuanKaydet(seyahat.id);
   const puanim = (mekanId: string) => puanlar.data?.find((x) => x.place_ref === mekanId && x.user_id === session?.user.id) ?? null;
@@ -295,12 +292,6 @@ function ProgramSekmesi({
   const gundenCikar = async (d: Durak) => {
     const onay = await onayIste(t('program.menuCikar'), t('program.menuCikarMetin'), t('program.menuCikar'), t('genel.vazgec'));
     if (onay) guvenli(() => durakKaldir.mutateAsync(d.id));
-  };
-  const listedenCikar = async (m: Mekan) => {
-    const onay = await onayIste(t('program.pin.cikarBaslik'), t('program.pin.cikarMetin', { ad: yerler.data?.[m.place_id]?.ad ?? '…' }), t('mekan.cikarOnay'), t('genel.vazgec'));
-    if (!onay) return;
-    setSeciliMekanId(null);
-    guvenli(() => mekanSil.mutateAsync(m.id));
   };
   const tasi = async (from: number, to: number) => {
     if (!gun || from === to) return;
@@ -395,7 +386,7 @@ function ProgramSekmesi({
   // Uzun bas menüsü: Başka güne al / Atla / Günden çıkar (+ Tamamlamayı geri al, #43 KK3).
   const menuSecenekleri: SecimSecenegi[] = menuDurak
     ? [
-        { etiket: t('program.detay'), onPress: () => detayAc(menuDurak.place_ref) },
+        { etiket: t('program.detay'), onPress: () => paneliAc(menuDurak.place_ref) },
         ...(menuDurak.completed_at ? [{ etiket: t('program.tamamlamayiGeriAl'), onPress: () => tamamla(menuDurak, true) }] : []),
         { etiket: t('program.baskaGuneAl'), onPress: () => setGunSecDurak(menuDurak), pasif: gunler.length < 2 },
         { etiket: menuDurak.skipped ? t('program.menuAtlama') : t('program.menuAtla'), onPress: () => atla(menuDurak) },
@@ -438,9 +429,12 @@ function ProgramSekmesi({
       ]
     : [];
 
-  const detayAc = (mekanId: string) => {
-    const m = mekanIle.get(mekanId);
-    if (m) router.push({ pathname: '/seyahat/[id]/mekan/[placeId]', params: { id: seyahat.id, placeId: m.place_id } });
+  // #80 KK12: detay sayfası kalktı — liste satırı / menü "Detay" mekan panelini açar.
+  const paneliAc = (mekanId: string) => {
+    if (mekanIle.has(mekanId)) {
+      setEklenen(null);
+      setSeciliMekanId(mekanId);
+    }
   };
   const kesfeteGit = () => router.navigate({ pathname: '/seyahat/[id]/(sekmeler)/kesfet', params: { id: seyahat.id } });
 
@@ -550,28 +544,30 @@ function ProgramSekmesi({
   const puanFoto = useOnizleme(puanMekan?.place_id);
   const puanSatir = puanDurakId ? satirlar.find((x) => x.durak.id === puanDurakId) : undefined;
 
-  const altPanel = seciliMekan ? (
-    <PinPaneli
-      mekan={seciliMekan}
-      yer={mekanOzeti.data ?? yerler.data?.[seciliMekan.place_id]}
-      ozet={mekanOzeti.data?.ozet}
+  // #80: mekan paneli (kanvas PlacePanel9) en üst katmanda; harita dolgusu değişmez. CTA seçili güne göre: güne ekle / günden çıkar.
+  const seciliDurak = seciliMekan ? durakIle.get(seciliMekan.id) : undefined;
+  const seciliGunde = !!seciliDurak && !!gun && seciliDurak.day_id === gun.id;
+  const mekanPaneli = seciliMekan ? (
+    <MekanPaneli
+      placeId={seciliMekan.place_id}
+      tz={seyahat.tz}
+      hafif={yerler.data?.[seciliMekan.place_id]}
       ekleyenAd={uyeAdi(seciliMekan.added_by)}
-      dakika={durakIle.get(seciliMekan.id)?.minutes ?? seciliMekan.default_minutes}
-      gunler={gunler}
-      mevcutGunId={durakIle.get(seciliMekan.id)?.day_id ?? null}
-      mesgul={ata.isPending || mekanSil.isPending}
-      onGunSec={(g) => guneAta(seciliMekan, g)}
+      dakika={seciliDurak?.minutes ?? seciliMekan.default_minutes}
       onSure={(fark) => mekanSuresi(seciliMekan, fark)}
-      onDetay={() => detayAc(seciliMekan.id)}
+      baglam="program"
+      icinde={seciliGunde}
+      mesgul={ata.isPending || durakKaldir.isPending || mekanSil.isPending}
+      onCta={() => (seciliGunde && seciliDurak ? gundenCikar(seciliDurak) : gun && guneAta(seciliMekan, gun))}
       onYolTarifi={() =>
         Linking.openURL(
           `https://www.google.com/maps/dir/?api=1&destination=${seciliMekan.lat},${seciliMekan.lng}&destination_place_id=${encodeURIComponent(seciliMekan.place_id)}&travelmode=walking`,
         )
       }
-      onDiger={() => setPinMenuAcik(true)}
       onKapat={() => setSeciliMekanId(null)}
+      gunSecici={{ gunler, mevcutGunId: seciliDurak?.day_id ?? null, onGunSec: (g) => guneAta(seciliMekan, g) }}
     />
-  ) : undefined;
+  ) : null;
 
   // #56 §1: listenin Başlangıç / Bitiş satırları (otel yoksa kesikli "+ Otel ekle").
   const bitisSaati = prog ? dakikaSaat(prog.canli.bitisDk) : '';
@@ -704,7 +700,7 @@ function ProgramSekmesi({
             son={sonOtelSatiri}
             onTamamla={tamamla}
             onPuanla={(d) => setPuanDurakId(d.id)}
-            onDetay={(d) => detayAc(d.place_ref)}
+            onDetay={(d) => paneliAc(d.place_ref)}
             puanim={puanim}
             siradakiFoto={siradakiFoto.data?.foto_uri}
             onYolTarifi={yolTarifi}
@@ -827,7 +823,7 @@ function ProgramSekmesi({
             ekleniyor={gunEkle.isPending}
           />
         }
-        altPanel={altPanel}
+        ustKatman={mekanPaneli}
         harita={{
           merkez: otel ?? { lat: seyahat.lat, lng: seyahat.lng },
           zoom: otel ? 14 : 13,
@@ -882,12 +878,6 @@ function ProgramSekmesi({
             : []
         }
         onKapat={() => setListeMenuAcik(false)}
-      />
-      <SecimMenusu
-        acik={pinMenuAcik && !!seciliMekan}
-        baslik={seciliMekan ? (yerler.data?.[seciliMekan.place_id]?.ad ?? undefined) : undefined}
-        secenekler={seciliMekan ? [{ etiket: t('program.pin.listedenCikar'), onPress: () => listedenCikar(seciliMekan), tehlike: true }] : []}
-        onKapat={() => setPinMenuAcik(false)}
       />
       {otelSayfasi && gun ? (
         <GunOteliSayfasi

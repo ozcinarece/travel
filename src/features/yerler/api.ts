@@ -198,23 +198,45 @@ export type TamYer = {
   puan_sayisi: number | null;
   acik: boolean | null;
   kapanis: string | null;
+  /** #80: kapalıysa bir sonraki açılış ("Kapalı · yarın 09:00"). */
+  acilis: { gun: 'bugun' | 'yarin' | 'sonra'; saat: string } | null;
   saatler: string[];
+  /** #80 KK7: bugünün saat aralığı ("08:00–22:00"); bilinmiyorsa null. */
+  bugun: string | null;
+  adres: string | null;
+  /** #80 KK6 "Bilmen gerekenler". */
+  ozet: string | null;
   foto_uri: string | null;
   /** #31, #55: en fazla 10 fotoğraf (ad + Google atfı); URI'ler tembel (usePlaceFoto). */
   fotolar: { ad: string; yazar: string | null }[];
   google_maps_uri: string | null;
-  yorumlar: { yazar: string; puan: number | null; metin: string; zaman: string }[];
 };
 
-/** PRD 3.8 KK6: tam Details yalnızca detay ekranında; istemcide önbellek yok (yorumlar saklanmaz). */
+/** #80 KK10: tek Google yorumu; `yayin` ISO ("En yeni" sırası), `zaman` Google'ın göreli metni. */
+export type Yorum = { yazar: string; puan: number | null; metin: string; zaman: string; yayin: string | null };
+export type YorumOzeti = { place_id: string; puan: number | null; puan_sayisi: number | null; yorumlar: Yorum[] };
+
+/** #80 panel Genel sekmesi: fotoğraflar, saatler, adres, özet — yorumsuz; 24 sa bellek (Edge Function da 24 sa önbellekler). */
 export function useTamYer(placeId: string | undefined, tz?: string) {
   return useQuery({
-    queryKey: ['tam-yer', placeId],
+    queryKey: ['tam-yer', placeId, tz ?? null],
     enabled: !!placeId,
-    staleTime: 0,
-    gcTime: 0,
+    staleTime: 24 * 60 * 60 * 1000,
+    gcTime: 24 * 60 * 60 * 1000,
     retry: 1,
     queryFn: async () => (await cagir<{ yer: TamYer }>('places-full', { id: placeId, tz })).yer,
+  });
+}
+
+/** #80 KK8: yorumlar YALNIZ Yorumlar sekmesi açıkken istenir (`acik`); 24 sa bellek, DB'ye yazılmaz (PRD §7). */
+export function useYorumlar(placeId: string | undefined, acik: boolean) {
+  return useQuery({
+    queryKey: ['yorumlar', placeId],
+    enabled: !!placeId && acik,
+    staleTime: 24 * 60 * 60 * 1000,
+    gcTime: 24 * 60 * 60 * 1000,
+    retry: 1,
+    queryFn: async () => cagir<YorumOzeti>('places-reviews', { id: placeId }),
   });
 }
 

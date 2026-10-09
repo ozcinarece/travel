@@ -266,11 +266,16 @@ export async function yakinAra(secenek: {
   }));
 }
 
-// ---------------------------------------------------------------- Tam Details (yalnız 3.8)
+// ---------------------------------------------------------------- Tam Details (#80 mekan paneli · Genel)
 
-/** PRD 3.8 KK6 maskesi + konum. Yorumlar ve fotoğraflar hiçbir yerde saklanmaz. */
+/**
+ * #80: panelin Genel sekmesi — fotoğraflar (≤ 10), saatler, adres, editoryal özet. Yorumlar AYRI çağrıdır (`yorumDetay`,
+ * yalnız Yorumlar sekmesine dokununca). Fotoğraf adları ve saatler 24 sa bellek önbelleğinde; DB'ye yazılmaz (PRD §7).
+ */
 const TAM_MASKE =
-  'id,displayName,location,rating,userRatingCount,currentOpeningHours,regularOpeningHours,photos,reviews,googleMapsUri,primaryType';
+  'id,displayName,location,rating,userRatingCount,currentOpeningHours,regularOpeningHours,photos,googleMapsUri,primaryType,shortFormattedAddress,formattedAddress,editorialSummary';
+/** #80 KK8: yalnız yorumlar (+ puan özeti) — Yorumlar sekmesi açılınca; 24 sa önbellek, DB'ye yazılmaz. */
+const YORUM_MASKE = 'id,rating,userRatingCount,reviews';
 
 export type TamYer = {
   place_id: string;
@@ -283,29 +288,97 @@ export type TamYer = {
   acik: boolean | null;
   /** Bugünkü kapanış ("19:15") — currentOpeningHours.nextCloseTime'dan. */
   kapanis: string | null;
+  /** #80: kapalıysa bir sonraki açılış ("yarın 09:00" için gün + saat) — currentOpeningHours.nextOpenTime'dan. */
+  acilis: { gun: 'bugun' | 'yarin' | 'sonra'; saat: string } | null;
   /** Haftalık satırlar ("Pazartesi: 08:30–19:15"). */
   saatler: string[];
+  /** #80 KK7 "Bugün" satırı: bugünün saat aralığı ("08:00–22:00"); bilinmiyorsa null. */
+  bugun: string | null;
+  /** #80 KK7: kısa adres (yoksa tam adres). */
+  adres: string | null;
+  /** #80 KK6 "Bilmen gerekenler": Google editoryal özeti. */
+  ozet: string | null;
   /** İlk fotoğrafın çözülmüş URI'si (hemen gösterim). */
   foto_uri: string | null;
   /** #31, #55: en fazla 10 fotoğraf (Places üst sınırı) — adı (places-photo ile tembel çözülür) ve Google atfı (yazar). */
   fotolar: { ad: string; yazar: string | null }[];
   google_maps_uri: string | null;
-  yorumlar: { yazar: string; puan: number | null; metin: string; zaman: string }[];
 };
 
+/** #80 KK10: tek Google yorumu. `zaman` Google'ın göreli metni ("2 hafta önce"), `yayin` ISO (istemcide "En yeni" sırası). */
+export type Yorum = { yazar: string; puan: number | null; metin: string; zaman: string; yayin: string | null };
+export type YorumOzeti = { place_id: string; puan: number | null; puan_sayisi: number | null; yorumlar: Yorum[] };
+
 type TamCevap = DetailsCevap & {
-  currentOpeningHours?: { openNow?: boolean; nextCloseTime?: string; weekdayDescriptions?: string[] };
+  currentOpeningHours?: { openNow?: boolean; nextCloseTime?: string; nextOpenTime?: string; weekdayDescriptions?: string[] };
   regularOpeningHours?: { weekdayDescriptions?: string[] };
   photos?: { name: string; authorAttributions?: { displayName?: string }[] }[];
   googleMapsUri?: string;
+  shortFormattedAddress?: string;
+  formattedAddress?: string;
+};
+
+type YorumCevap = {
+  id: string;
+  rating?: number;
+  userRatingCount?: number;
   reviews?: {
     rating?: number;
     relativePublishTimeDescription?: string;
+    publishTime?: string;
     text?: { text: string };
     originalText?: { text: string };
     authorAttribution?: { displayName?: string };
   }[];
 };
+
+/** `tz`'de yerel saat ("09:00"); bozuk tarihte null. */
+function yerelSaat(iso: string, tz?: string): string | null {
+  try {
+    return new Intl.DateTimeFormat('tr-TR', { hour: '2-digit', minute: '2-digit', timeZone: tz }).format(new Date(iso));
+  } catch {
+    return null;
+  }
+}
+
+/** `tz`'de takvim günü (YYYY-MM-DD); bozuk tarihte null. */
+function yerelGun(iso: string | Date, tz?: string): string | null {
+  try {
+    return new Intl.DateTimeFormat('en-CA', { year: 'numeric', month: '2-digit', day: '2-digit', timeZone: tz }).format(new Date(iso));
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * #80 KK7: haftalık satırlardan bugünün saat aralığı. Google satırları Pazartesi'den başlar ("Pazartesi: 08:00–22:00");
+ * iki nokta sonrası alınır. Satır yoksa null.
+ */
+export function bugunSatiri(satirlar: string[], tz?: string, simdi = new Date()): string | null {
+  if (satirlar.length !== 7) return null;
+  let haftaGunu: number;
+  try {
+    const kisa = new Intl.DateTimeFormat('en-US', { weekday: 'short', timeZone: tz }).format(simdi);
+    haftaGunu = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].indexOf(kisa);
+  } catch {
+    return null;
+  }
+  if (haftaGunu < 0) return null;
+  const satir = satirlar[haftaGunu];
+  const i = satir.indexOf(':');
+  return (i >= 0 ? satir.slice(i + 1) : satir).trim() || null;
+}
+
+/** #80: bir sonraki açılış `tz`'de bugün mü, yarın mı, daha sonra mı? */
+export function acilisZamani(nextOpenTime: string | undefined, tz?: string, simdi = new Date()): TamYer['acilis'] {
+  if (!nextOpenTime) return null;
+  const saat = yerelSaat(nextOpenTime, tz);
+  const gun = yerelGun(nextOpenTime, tz);
+  const bugun = yerelGun(simdi, tz);
+  if (!saat || !gun || !bugun) return null;
+  const yarin = yerelGun(new Date(simdi.getTime() + 24 * 60 * 60 * 1000), tz);
+  return { gun: gun === bugun ? 'bugun' : gun === yarin ? 'yarin' : 'sonra', saat };
+}
 
 /** Place Photo (New): yönlendirme atlanıp fotoğraf URI'si alınır; anahtar istemciye gitmez. Fotoğraf başına faturalanır. */
 export async function fotoUri(ad: string, genislik = 800): Promise<string | null> {
@@ -320,16 +393,8 @@ export async function fotoUri(ad: string, genislik = 800): Promise<string | null
 export async function tamDetay(placeId: string, tz?: string): Promise<TamYer> {
   const d = await istek<TamCevap>(`places/${encodeURIComponent(placeId)}?languageCode=${DIL}`, { maske: TAM_MASKE });
   const foto = d.photos?.[0]?.name ? await fotoUri(d.photos[0].name) : null;
-  let kapanis: string | null = null;
-  if (d.currentOpeningHours?.nextCloseTime) {
-    try {
-      kapanis = new Intl.DateTimeFormat('tr-TR', { hour: '2-digit', minute: '2-digit', timeZone: tz }).format(
-        new Date(d.currentOpeningHours.nextCloseTime),
-      );
-    } catch {
-      kapanis = null;
-    }
-  }
+  const kapanis = d.currentOpeningHours?.nextCloseTime ? yerelSaat(d.currentOpeningHours.nextCloseTime, tz) : null;
+  const saatler = d.regularOpeningHours?.weekdayDescriptions ?? d.currentOpeningHours?.weekdayDescriptions ?? [];
   return {
     place_id: d.id,
     ad: d.displayName?.text ?? '',
@@ -340,15 +405,30 @@ export async function tamDetay(placeId: string, tz?: string): Promise<TamYer> {
     puan_sayisi: d.userRatingCount ?? null,
     acik: d.currentOpeningHours?.openNow ?? null,
     kapanis,
-    saatler: d.regularOpeningHours?.weekdayDescriptions ?? d.currentOpeningHours?.weekdayDescriptions ?? [],
+    acilis: d.currentOpeningHours?.openNow === false ? acilisZamani(d.currentOpeningHours?.nextOpenTime, tz) : null,
+    saatler,
+    bugun: bugunSatiri(saatler, tz),
+    adres: d.shortFormattedAddress?.trim() || d.formattedAddress?.trim() || null,
+    ozet: d.editorialSummary?.text?.trim() || null,
     foto_uri: foto,
     fotolar: (d.photos ?? []).slice(0, 10).map((f) => ({ ad: f.name, yazar: f.authorAttributions?.[0]?.displayName ?? null })),
     google_maps_uri: d.googleMapsUri ?? null,
+  };
+}
+
+/** #80 KK8: yalnız yorumlar — Google en fazla 5 verir (ek sayfa yok); puan özeti dağılım yerine (Google dağılım vermez). */
+export async function yorumDetay(placeId: string): Promise<YorumOzeti> {
+  const d = await istek<YorumCevap>(`places/${encodeURIComponent(placeId)}?languageCode=${DIL}`, { maske: YORUM_MASKE });
+  return {
+    place_id: d.id,
+    puan: d.rating ?? null,
+    puan_sayisi: d.userRatingCount ?? null,
     yorumlar: (d.reviews ?? []).slice(0, 5).map((y) => ({
       yazar: y.authorAttribution?.displayName ?? '',
       puan: y.rating ?? null,
       metin: y.text?.text ?? y.originalText?.text ?? '',
       zaman: y.relativePublishTimeDescription ?? '',
+      yayin: y.publishTime ?? null,
     })),
   };
 }
