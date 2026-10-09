@@ -1,6 +1,6 @@
 import { describe, expect, it } from '@jest/globals';
 
-import { etiketBolgesi, etiketOnceligi, isaretciImzasi, izlemeGerekli, sigdir, bolgedenUzaklasti, bolgeHesapla, deltaZoom, detayGoster, gizliEtiketler, haritaDolgusu, kisaAd, kucukPin, mesafeM, pinCapasi, pinCapi, SIFIR_DOLGU, zoomaGorePinler, zoomDelta } from '../geo';
+import { enYakinPin, etiketBolgesi, etiketOnceligi, isaretciImzasi, izlemeGerekli, sigdir, bolgedenUzaklasti, bolgeHesapla, deltaZoom, detayGoster, gizliEtiketler, haritaDolgusu, kisaAd, kucukPin, mesafeM, pinBoyu, pinCapasi, pinCapi, SIFIR_DOLGU, zoomaGorePinler, zoomDelta } from '../geo';
 import type { HaritaPini } from '../tipler';
 
 const roma = { lat: 41.9028, lng: 12.4964 };
@@ -239,5 +239,53 @@ describe('pin düşürme yok, zoom\'a göre küçük pin (#66)', () => {
     expect(pinCapi({ id: 'x', konum: roma, renk: '#000', tur: 'durak', opaklik: 0.4 })).toBe(20);
     expect(pinCapi({ id: 'x', konum: roma, renk: '#000', tur: 'durak' })).toBe(28);
     expect(pinCapi({ id: 'x', konum: roma, renk: '#000', tur: 'durak', opaklik: 0.4, secili: true })).toBe(38);
+  });
+
+  it('#73 A: pin boyu zoom kademeleri 28 / 30 / 32 / 34; zoomaGorePinler boyu işler, küçük pin ve hap dokunulmaz', () => {
+    expect([15, 16, 16.49, 16.5, 16.99, 17, 17.49, 17.5, 19].map(pinBoyu)).toEqual([28, 28, 28, 30, 30, 32, 32, 34, 34]);
+    const pinler: HaritaPini[] = [
+      { id: 'o', konum: roma, renk: '#000', tur: 'oneri', ad: 'A' },
+      { id: 'l', konum: roma, renk: '#000', tur: 'listede', secili: true },
+      { id: 'd', konum: roma, renk: '#000', tur: 'durak', etiket: '1' },
+      { id: 'h', konum: roma, renk: '#000', tur: 'etiket', etiket: '4 dk' },
+    ];
+    const z18 = zoomaGorePinler(pinler, 18);
+    expect(z18.map((p) => p.boy)).toEqual([34, 34, 34, undefined]);
+    expect(pinCapi(z18[0])).toBe(34);
+    // Seçili iğne 34 kademesinde 44 × 53; çapa görünen uç.
+    expect(pinCapi(z18[1])).toBe(44);
+    expect(pinCapasi(z18[1]).y).toBeCloseTo(56.25 / 76.25);
+    expect(pinCapasi(pinler[1]).y).toBeCloseTo(49.25 / 69.25);
+    // Zoom 15: boy yok (28), zoom 12: öneri küçük.
+    expect(zoomaGorePinler(pinler, 15).map((p) => p.boy)).toEqual([undefined, undefined, undefined, undefined]);
+    expect(zoomaGorePinler(pinler, 12)[0].kucuk).toBe(true);
+  });
+
+  it('#73 B: enYakinPin — 22 px içinde en yakın, dışında yok, eşitlikte pinZ; seçili iğnede baş merkezi; hap / konum sayılmaz', () => {
+    // 1 px = 0,000025° (400 × 800 ekran, 0,02° × 0,01°).
+    const bolge = { merkez: roma, yaricapM: 1000, latDelta: 0.02, lngDelta: 0.01, zoom: 15 };
+    const ekran = { genislik: 400, yukseklik: 800 };
+    const px = 0.000025;
+    const p = (id: string, dx: number, dy: number, o: Partial<HaritaPini> = {}): HaritaPini => ({ id, konum: { lat: roma.lat + dy * px, lng: roma.lng + dx * px }, renk: '#000', tur: 'oneri', ...o });
+    const a = p('a', 0, 0);
+    const b = p('b', 30, 0);
+    // 10 px sağda: a (10 px) b'den (20 px) yakın; 21 px: ikisi de aralıkta, b (9 px) yakın; 60 px: ikisi de 22 dışı.
+    expect(enYakinPin([a, b], bolge, ekran, { lat: roma.lat, lng: roma.lng + 10 * px })).toBe('a');
+    expect(enYakinPin([a, b], bolge, ekran, { lat: roma.lat, lng: roma.lng + 21 * px })).toBe('b');
+    expect(enYakinPin([a, b], bolge, ekran, { lat: roma.lat, lng: roma.lng + 60 * px })).toBeNull();
+    expect(enYakinPin([a], bolge, ekran, { lat: roma.lat + 22.5 * px, lng: roma.lng })).toBeNull();
+    expect(enYakinPin([a], bolge, ekran, { lat: roma.lat + 21.5 * px, lng: roma.lng })).toBe('a');
+    // Eşit uzaklıkta pinZ yüksek olan (listede 9 > öneri 1).
+    const l = p('l', 30, 0, { tur: 'listede' });
+    expect(enYakinPin([a, l], bolge, ekran, { lat: roma.lat, lng: roma.lng + 15 * px })).toBe('l');
+    // Seçili iğne: baş merkezi koordinatın 27 px üstünde — uca değil başa dokunulur.
+    const s = p('s', 0, 0, { secili: true });
+    expect(enYakinPin([s], bolge, ekran, { lat: roma.lat + 27 * px, lng: roma.lng })).toBe('s');
+    expect(enYakinPin([s], bolge, ekran, { lat: roma.lat - 10 * px, lng: roma.lng })).toBeNull();
+    // Hap ve konum sayılmaz; işaretçi dokunuşu (konum = pin konumu) 0 px → o pin.
+    expect(enYakinPin([p('h', 0, 0, { tur: 'etiket', etiket: '4 dk' }), p('k', 0, 0, { tur: 'konum' })], bolge, ekran, roma)).toBeNull();
+    expect(enYakinPin([a, b], bolge, ekran, b.konum)).toBe('b');
+    // Bölge yoksa seçim yok.
+    expect(enYakinPin([a], null, ekran, roma)).toBeNull();
   });
 });

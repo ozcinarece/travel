@@ -84,28 +84,42 @@ const YESIL = '#1f8a4c';
 const PAD = 8;
 const IGNE_PAD = 12;
 const IGNE = { en: 38, boy: 46 };
+/** #73 A: zoom ≥ 17,5 (pin 34) seçili iğne 44 × 53. */
+const IGNE_34 = { en: 44, boy: 53 };
+/** #73 A: yakınlaşınca pin boyu kademeleri (28 taban; 30 / 32 / 34 ek). Glif boyu oranla (28 → 14, 34 → 17). */
+const BOYLAR = [28, 30, 32, 34];
 /** Siyah dış halkanın yol ucundan dışa taşması ((2,5 + 4) / 2 px): görünen uç bu kadar aşağıda — çapa buna göre (#67 incelemesi). */
 const IGNE_HALKA = 3.25;
-/** { ad, cap, zemin, kenar, kenarKalinlik, ikon, ikonRenk, kare?, rozet?, igne? } */
+/** { ad, cap, zemin, kenar, kenarKalinlik, ikon, ikonRenk, kare?, rozet?, igne?, yildiz? } — igne: IGNE ya da IGNE_34 ölçüsü. */
 const pinIstekleri = [];
 for (const k of kategoriler) {
-  pinIstekleri.push({ ad: `daire-${k.ikon}-28`, cap: 28, zemin: BEYAZ, kenar: k.renk, kenarKalinlik: 2, ikon: k.ikon, ikonRenk: k.renk });
   // #66 (docs/05 §2, KesfetZoom7): zoom < 13 küçük öneri pini 20 px, 1,5 px kenar, 11 px glif.
   pinIstekleri.push({ ad: `kucuk-${k.ikon}-20`, cap: 20, zemin: BEYAZ, kenar: k.renk, kenarKalinlik: 1.5, ikon: k.ikon, ikonRenk: k.renk, ikonPx: 11 });
-  pinIstekleri.push({ ad: `dolu-${k.ikon}-28`, cap: 28, zemin: k.renk, kenar: BEYAZ, kenarKalinlik: 2, ikon: k.ikon, ikonRenk: BEYAZ, rozet: true });
-  pinIstekleri.push({ ad: `igne-daire-${k.ikon}`, igne: true, zemin: BEYAZ, kenar: k.renk, kenarKalinlik: 2.5, ikon: k.ikon, ikonRenk: k.renk });
-  pinIstekleri.push({ ad: `igne-dolu-${k.ikon}`, igne: true, zemin: k.renk, kenar: BEYAZ, kenarKalinlik: 2.5, ikon: k.ikon, ikonRenk: BEYAZ, rozet: true });
-  // #69 (docs/05 §2): öne çıkan — aynı görünüm + sol üstte turuncu ★ rozeti (öneri / listede, daire / iğne).
-  pinIstekleri.push({ ad: `one-daire-${k.ikon}-28`, cap: 28, zemin: BEYAZ, kenar: k.renk, kenarKalinlik: 2, ikon: k.ikon, ikonRenk: k.renk, yildiz: true });
-  pinIstekleri.push({ ad: `one-dolu-${k.ikon}-28`, cap: 28, zemin: k.renk, kenar: BEYAZ, kenarKalinlik: 2, ikon: k.ikon, ikonRenk: BEYAZ, rozet: true, yildiz: true });
-  pinIstekleri.push({ ad: `igne-one-daire-${k.ikon}`, igne: true, zemin: BEYAZ, kenar: k.renk, kenarKalinlik: 2.5, ikon: k.ikon, ikonRenk: k.renk, yildiz: true });
-  pinIstekleri.push({ ad: `igne-one-dolu-${k.ikon}`, igne: true, zemin: k.renk, kenar: BEYAZ, kenarKalinlik: 2.5, ikon: k.ikon, ikonRenk: BEYAZ, rozet: true, yildiz: true });
+  for (const cap of BOYLAR) {
+    const ikonPx = Math.round(14 * cap / 28);
+    pinIstekleri.push({ ad: `daire-${k.ikon}-${cap}`, cap, zemin: BEYAZ, kenar: k.renk, kenarKalinlik: 2, ikon: k.ikon, ikonRenk: k.renk, ikonPx });
+    pinIstekleri.push({ ad: `dolu-${k.ikon}-${cap}`, cap, zemin: k.renk, kenar: BEYAZ, kenarKalinlik: 2, ikon: k.ikon, ikonRenk: BEYAZ, ikonPx, rozet: true });
+    // #69 (docs/05 §2): öne çıkan — aynı görünüm + sol üstte turuncu ★ rozeti (öneri / listede).
+    pinIstekleri.push({ ad: `one-daire-${k.ikon}-${cap}`, cap, zemin: BEYAZ, kenar: k.renk, kenarKalinlik: 2, ikon: k.ikon, ikonRenk: k.renk, ikonPx, yildiz: true });
+    pinIstekleri.push({ ad: `one-dolu-${k.ikon}-${cap}`, cap, zemin: k.renk, kenar: BEYAZ, kenarKalinlik: 2, ikon: k.ikon, ikonRenk: BEYAZ, ikonPx, rozet: true, yildiz: true });
+  }
+  for (const [on, igne] of [['igne-', IGNE], ['igne34-', IGNE_34]]) {
+    pinIstekleri.push({ ad: `${on}daire-${k.ikon}`, igne, zemin: BEYAZ, kenar: k.renk, kenarKalinlik: 2.5, ikon: k.ikon, ikonRenk: k.renk });
+    pinIstekleri.push({ ad: `${on}dolu-${k.ikon}`, igne, zemin: k.renk, kenar: BEYAZ, kenarKalinlik: 2.5, ikon: k.ikon, ikonRenk: BEYAZ, rozet: true });
+    pinIstekleri.push({ ad: `${on}one-daire-${k.ikon}`, igne, zemin: BEYAZ, kenar: k.renk, kenarKalinlik: 2.5, ikon: k.ikon, ikonRenk: k.renk, yildiz: true });
+    pinIstekleri.push({ ad: `${on}one-dolu-${k.ikon}`, igne, zemin: k.renk, kenar: BEYAZ, kenarKalinlik: 2.5, ikon: k.ikon, ikonRenk: BEYAZ, rozet: true, yildiz: true });
+  }
 }
-pinIstekleri.push({ ad: 'tik-28', cap: 28, zemin: SIYAH, kenar: BEYAZ, kenarKalinlik: 2, ikon: 'tik', ikonRenk: BEYAZ, kalinlik: 2.4 });
-pinIstekleri.push({ ad: 'tamam-28', cap: 28, zemin: YESIL, kenar: BEYAZ, kenarKalinlik: 2, ikon: 'tik', ikonRenk: BEYAZ, kalinlik: 2.4 });
-pinIstekleri.push({ ad: 'igne-tik', igne: true, zemin: SIYAH, kenar: BEYAZ, kenarKalinlik: 2.5, ikon: 'tik', ikonRenk: BEYAZ, kalinlik: 2.4 });
-pinIstekleri.push({ ad: 'igne-tamam', igne: true, zemin: YESIL, kenar: BEYAZ, kenarKalinlik: 2.5, ikon: 'tik', ikonRenk: BEYAZ, kalinlik: 2.4 });
-pinIstekleri.push({ ad: 'otel-28', cap: 28, zemin: SIYAH, kenar: SIYAH, kenarKalinlik: 0, ikon: 'ev', ikonRenk: BEYAZ, ikonPx: 16, kare: true });
+for (const cap of BOYLAR) {
+  const ikonPx = Math.round(14 * cap / 28);
+  pinIstekleri.push({ ad: `tik-${cap}`, cap, zemin: SIYAH, kenar: BEYAZ, kenarKalinlik: 2, ikon: 'tik', ikonRenk: BEYAZ, ikonPx, kalinlik: 2.4 });
+  pinIstekleri.push({ ad: `tamam-${cap}`, cap, zemin: YESIL, kenar: BEYAZ, kenarKalinlik: 2, ikon: 'tik', ikonRenk: BEYAZ, ikonPx, kalinlik: 2.4 });
+  pinIstekleri.push({ ad: `otel-${cap}`, cap, zemin: SIYAH, kenar: SIYAH, kenarKalinlik: 0, ikon: 'ev', ikonRenk: BEYAZ, ikonPx: Math.round(16 * cap / 28), kare: true });
+}
+for (const [on, igne] of [['igne-', IGNE], ['igne34-', IGNE_34]]) {
+  pinIstekleri.push({ ad: `${on}tik`, igne, zemin: SIYAH, kenar: BEYAZ, kenarKalinlik: 2.5, ikon: 'tik', ikonRenk: BEYAZ, kalinlik: 2.4 });
+  pinIstekleri.push({ ad: `${on}tamam`, igne, zemin: YESIL, kenar: BEYAZ, kenarKalinlik: 2.5, ikon: 'tik', ikonRenk: BEYAZ, kalinlik: 2.4 });
+}
 
 const GOLGE = `<filter id="g" x="-50%" y="-50%" width="200%" height="200%"><feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#0f0f0f" flood-opacity="0.22"/></filter>`;
 const IGNE_GOLGE = `<filter id="g" x="-50%" y="-50%" width="200%" height="200%"><feDropShadow dx="0" dy="4" stdDeviation="5" flood-color="#0f0f0f" flood-opacity="0.3"/></filter>`;
@@ -119,16 +133,19 @@ const rozet = (cx, cy) => `<circle cx="${cx}" cy="${cy}" r="6.75" fill="${SIYAH}
 
 function pinSvg(i) {
   if (i.igne) {
-    // İğne: r 17 baş + uca inen damla; kenar 2,5 (yol üstünde), dışında 2 px siyah halka (6,5 px siyah alt vuruş).
-    const W = IGNE.en + 2 * IGNE_PAD;
-    const H = IGNE.boy + 2 * IGNE_PAD;
+    // İğne: r baş + uca inen damla; kenar 2,5 (yol üstünde), dışında 2 px siyah halka (6,5 px siyah alt vuruş).
+    // #73: IGNE (38 × 46) ya da IGNE_34 (44 × 53); eğri, glif ve rozet konumu oranla (k).
+    const olcu = i.igne;
+    const k = olcu.en / IGNE.en;
+    const W = olcu.en + 2 * IGNE_PAD;
+    const H = olcu.boy + 2 * IGNE_PAD;
     const cx = W / 2;
-    const bas = IGNE_PAD + IGNE.en / 2; // baş merkezi y
-    const uc = IGNE_PAD + IGNE.boy; // uç y
-    const r = IGNE.en / 2 - i.kenarKalinlik / 2;
-    const yol = `M${cx} ${uc} C${cx - 6} ${uc - 9} ${cx - r} ${bas + 11} ${cx - r} ${bas} a${r} ${r} 0 1 1 ${2 * r} 0 C${cx + r} ${bas + 11} ${cx + 6} ${uc - 9} ${cx} ${uc} Z`;
-    const rz = `${i.rozet ? rozet(cx + 12, bas - 12) : ''}${i.yildiz ? yildizRozet(cx - 12, bas - 12) : ''}`;
-    return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">${IGNE_GOLGE}<g filter="url(#g)"><path d="${yol}" fill="${i.zemin}" stroke="${SIYAH}" stroke-width="${i.kenarKalinlik + 4}" stroke-linejoin="round"/><path d="${yol}" fill="${i.zemin}" stroke="${i.kenar}" stroke-width="${i.kenarKalinlik}" stroke-linejoin="round"/></g>${glif(i, 17, cx, bas)}${rz}</svg>`;
+    const bas = IGNE_PAD + olcu.en / 2; // baş merkezi y
+    const uc = IGNE_PAD + olcu.boy; // uç y
+    const r = olcu.en / 2 - i.kenarKalinlik / 2;
+    const yol = `M${cx} ${uc} C${cx - 6 * k} ${uc - 9 * k} ${cx - r} ${bas + 11 * k} ${cx - r} ${bas} a${r} ${r} 0 1 1 ${2 * r} 0 C${cx + r} ${bas + 11 * k} ${cx + 6 * k} ${uc - 9 * k} ${cx} ${uc} Z`;
+    const rz = `${i.rozet ? rozet(cx + 12 * k, bas - 12 * k) : ''}${i.yildiz ? yildizRozet(cx - 12 * k, bas - 12 * k) : ''}`;
+    return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">${IGNE_GOLGE}<g filter="url(#g)"><path d="${yol}" fill="${i.zemin}" stroke="${SIYAH}" stroke-width="${i.kenarKalinlik + 4}" stroke-linejoin="round"/><path d="${yol}" fill="${i.zemin}" stroke="${i.kenar}" stroke-width="${i.kenarKalinlik}" stroke-linejoin="round"/></g>${glif(i, Math.round(17 * k), cx, bas)}${rz}</svg>`;
   }
   const { cap } = i;
   const W = cap + 2 * PAD;
@@ -136,7 +153,8 @@ function pinSvg(i) {
   const sekil = i.kare
     ? `<rect x="${PAD}" y="${PAD}" width="${cap}" height="${cap}" rx="9" fill="${i.zemin}"/>`
     : `<circle cx="${c}" cy="${c}" r="${(cap - i.kenarKalinlik) / 2}" fill="${i.zemin}" stroke="${i.kenar}" stroke-width="${i.kenarKalinlik}"/>`;
-  const rz = `${i.rozet ? rozet(c + 10, c - 10) : ''}${i.yildiz ? yildizRozet(c - 10, c - 10) : ''}`;
+  const rk = cap / 28;
+  const rz = `${i.rozet ? rozet(c + 10 * rk, c - 10 * rk) : ''}${i.yildiz ? yildizRozet(c - 10 * rk, c - 10 * rk) : ''}`;
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${W}" viewBox="0 0 ${W} ${W}">${GOLGE}<g filter="url(#g)">${sekil}</g>${glif(i, i.ikonPx ?? 14, c, c)}${rz}</svg>`;
 }
 
@@ -178,6 +196,8 @@ export function pinIkonuAnahtari(ikon: string, renk: string): string {
 
 /** #65: iğne (seçili) görselinin çapası — PNG içinde ucun konumu (kenar payı dahil). */
 export const IGNE_CAPA = { x: 0.5, y: ${(IGNE_PAD + IGNE.boy + IGNE_HALKA) / (IGNE.boy + 2 * IGNE_PAD)} } as const;
+/** #73: 34 kademesinde (44 × 53) seçili iğnenin çapası. */
+export const IGNE_CAPA_34 = { x: 0.5, y: ${(IGNE_PAD + IGNE_34.boy + IGNE_HALKA) / (IGNE_34.boy + 2 * IGNE_PAD)} } as const;
 
 /** Pin içi ikonun PNG'si; üretilmemiş (ikon, renk) çifti için undefined → SVG'ye düşülür. */
 export function pinIkonuPng(ikon: string, renk: string): ImageRequireSource | undefined {

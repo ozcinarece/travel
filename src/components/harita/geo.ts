@@ -34,9 +34,30 @@ export const KUCUK_ZOOM = 13;
 export function kucukPin(p: HaritaPini, zoom: number): boolean {
   return p.tur === 'oneri' && !p.secili && !p.oneCikan && zoom < KUCUK_ZOOM;
 }
-/** Zoom'a göre pinleri küçültür (`kucuk` işareti; ad ve puan düşer). Diğer türler olduğu gibi. */
+/**
+ * #73 A (docs/05 1.7): yakınlaşınca pin büyür — zoom 16'da 28 px, 18'de 34 px, arası kademesiz hissi için 0,5 zoom adımıyla
+ * dört PNG kademesi (28 / 30 / 32 / 34; Android `image` işaretçisi ölçeklenemez). Küçük pin (20) kademesi aynen.
+ */
+export type PinBoyu = 28 | 30 | 32 | 34;
+export const PIN_BOYLARI: PinBoyu[] = [28, 30, 32, 34];
+export function pinBoyu(zoom: number): PinBoyu {
+  if (zoom < 16.5) return 28;
+  if (zoom < 17) return 30;
+  if (zoom < 17.5) return 32;
+  return 34;
+}
+/** Boyu zoom'la değişen pin türleri (öneri, listede, atanmamış, durak, otel); rota hapı / konum / aday değil. */
+export function boyutlanir(p: HaritaPini): boolean {
+  return p.tur === 'oneri' || p.tur === 'listede' || p.tur === 'bos' || p.tur === 'durak' || p.tur === 'otel';
+}
+/** Zoom'a göre pinleri küçültür (`kucuk`; ad ve puan düşer, #66) ya da büyütür (`boy`, #73). Diğer türler olduğu gibi. */
 export function zoomaGorePinler(pinler: HaritaPini[], zoom: number): HaritaPini[] {
-  return pinler.map((p) => (kucukPin(p, zoom) ? { ...p, kucuk: true, ad: undefined, puan: null } : p));
+  const boy = pinBoyu(zoom);
+  return pinler.map((p) => {
+    if (kucukPin(p, zoom)) return { ...p, kucuk: true, ad: undefined, puan: null };
+    if (boy !== 28 && boyutlanir(p)) return { ...p, boy };
+    return p;
+  });
 }
 
 /** "★ 4,8 · 312K" satırı: yalnız seçili pinde ya da zoom ≥ 14'te (#30, #40). Ad yoksa ya da puan yoksa yok. */
@@ -82,23 +103,36 @@ export function etiketOnceligi(p: HaritaPini): number {
  * #61 §5: seçili gün dışındaki (soluk) durak pini numarasız küçük nokta, 20 px.
  */
 export function pinCapi(p: HaritaPini): number {
-  if (p.secili) return IGNE.en;
+  if (p.secili) return igneOlcusu(p).en;
   if (p.kucuk) return KUCUK_PIN;
   if (p.tur === 'durak' && (p.opaklik ?? 1) < 1) return 20;
-  return 28;
+  return p.boy ?? 28;
 }
 /**
  * #65 (docs/05 §2): seçili pin iğne (damla) biçimi 38 × 46 px; çapa iğnenin UCU (konum), gövde ucun üstünde; ad etiketi
  * ucun 4 px altında. Öneri / listede / tamamlandı PNG, numaralı durak görünüm.
  */
 export const IGNE = { en: 38, boy: 46, etiketPayi: 4, halka: 3.25 } as const;
+/** #73 A: zoom ≥ 17,5'te (pin 34) seçili iğne 44 × 53 (oranlar aynı). */
+export const IGNE_34 = { en: 44, boy: 53, etiketPayi: 4, halka: 3.25 } as const;
+export type IgneOlcusu = { en: number; boy: number; etiketPayi: number; halka: number };
+/** Pinin iğne ölçüsü: 34 kademesinde büyük iğne, diğer kademelerde 38 × 46. */
+export function igneOlcusu(p: Pick<HaritaPini, 'boy'>): IgneOlcusu {
+  return p.boy === 34 ? IGNE_34 : IGNE;
+}
 /** İğnenin görünen yüksekliği (yol + dış halkanın uçtan taşması). */
-export const IGNE_GORUNEN_BOY = IGNE.boy + IGNE.halka;
+export function igneGorunenBoy(o: IgneOlcusu): number {
+  return o.boy + o.halka;
+}
+export const IGNE_GORUNEN_BOY = igneGorunenBoy(IGNE);
 /** #66: küçük öneri pini (zoom < 13): 20 px, 1,5 px kategori kenarı, 11 px glif, adsız. */
 export const KUCUK_PIN = 20;
 /** Pinin ekran kutusu (engel): daire konumun ortasında; seçili iğne konumun üstünde. */
 export function pinKutusu(p: HaritaPini, cx: number, cy: number): { x1: number; y1: number; x2: number; y2: number } {
-  if (p.secili && p.tur !== 'etiket' && p.tur !== 'konum' && p.tur !== 'aday') return { x1: cx - IGNE.en / 2, y1: cy - IGNE_GORUNEN_BOY, x2: cx + IGNE.en / 2, y2: cy };
+  if (p.secili && p.tur !== 'etiket' && p.tur !== 'konum' && p.tur !== 'aday') {
+    const o = igneOlcusu(p);
+    return { x1: cx - o.en / 2, y1: cy - igneGorunenBoy(o), x2: cx + o.en / 2, y2: cy };
+  }
   const r = (p.tur === 'otel' ? OTEL_KARE : p.tur === 'konum' ? KONUM_HALKA : pinCapi(p)) / 2;
   return { x1: cx - r, y1: cy - r, x2: cx + r, y2: cy + r };
 }
@@ -237,7 +271,10 @@ export function pinZ(p: HaritaPini): number {
  * ucu (iğne + 4 px + etiket kutusu).
  */
 export function pinCapasi(p: HaritaPini, detay = false): { x: number; y: number } {
-  if (p.secili) return { x: 0.5, y: IGNE_GORUNEN_BOY / (IGNE_GORUNEN_BOY + IGNE.etiketPayi + etiketYuksekligi(detay)) };
+  if (p.secili) {
+    const gorunen = igneGorunenBoy(igneOlcusu(p));
+    return { x: 0.5, y: gorunen / (gorunen + IGNE.etiketPayi + etiketYuksekligi(detay)) };
+  }
   const d = pinCapi(p);
   return { x: 0.5, y: d / 2 / (d + 2 + etiketYuksekligi(detay)) };
 }
@@ -303,4 +340,35 @@ export function izlemeGerekli(imza: string, yakalanan: string | null, beklenenPn
  */
 export function isaretciImzasi(p: HaritaPini, etiketGizli: boolean, detay: boolean): string {
   return [p.tur ?? '', p.renk, p.etiket ?? '', p.ikon ?? '', p.kategoriRenk ?? '', p.etiketIkon ?? '', p.secili ? 1 : 0, p.kucuk ? 1 : 0, p.oneCikan ? 1 : 0, p.tamam ? 1 : 0, p.ad && !etiketGizli ? p.ad : '', detay ? 1 : 0, p.puan ?? '', p.yorumSayisi ?? ''].join('|');
+}
+
+/** #73 B: dokunma hedefi — pin merkezine en çok bu kadar px (≥ 44 px kutu). Uzun basmada 28 (eski kural). */
+export const DOKUNMA_ESIGI_PX = 22;
+/**
+ * #73 B: harita / işaretçi dokunuşunun koordinatından en yakın pin (merkeze ≤ esik px); eşitlikte pinZ yüksek olan.
+ * Daire pinde merkez koordinatta; seçili iğnede baş merkezi ucun (koordinatın) üstünde (iğne boyu − baş yarıçapı).
+ * Rota hapı, konum ve (uzun basmada) otel sayılmaz. Android `image` işaretçisinde onMarkerClick koordinatı işaretçinin
+ * konumudur (dokunuş noktası değil) → o pin 0 px'te bulunur; ad işaretçisi de pinin konumunda olduğundan aynı pine düşer.
+ */
+export function enYakinPin(
+  pinler: HaritaPini[],
+  bolge: HaritaBolgesi | null,
+  ekran: { genislik: number; yukseklik: number },
+  konum: Konum,
+  esikPx = DOKUNMA_ESIGI_PX,
+  haric: (p: HaritaPini) => boolean = (p) => p.tur === 'etiket' || p.tur === 'konum',
+): string | null {
+  if (!bolge || bolge.latDelta <= 0 || bolge.lngDelta <= 0) return null;
+  const pxLat = ekran.yukseklik / bolge.latDelta;
+  const pxLng = ekran.genislik / bolge.lngDelta;
+  let enYakin: { id: string; d: number; z: number } | null = null;
+  for (const p of pinler) {
+    if (haric(p)) continue;
+    const basY = p.secili ? (() => { const o = igneOlcusu(p); return o.boy - o.en / 2; })() : 0;
+    const d = Math.hypot((p.konum.lng - konum.lng) * pxLng, (p.konum.lat - konum.lat) * pxLat + basY);
+    if (d > esikPx) continue;
+    const z = pinZ(p);
+    if (!enYakin || d < enYakin.d - 1e-6 || (Math.abs(d - enYakin.d) <= 1e-6 && z > enYakin.z)) enYakin = { id: p.id, d, z };
+  }
+  return enYakin?.id ?? null;
 }

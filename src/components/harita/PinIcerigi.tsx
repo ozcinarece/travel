@@ -6,7 +6,7 @@ import { yorumKisa } from '@/lib/pinIkonu';
 import { puanMetni } from '@/lib/puan';
 import { renk, yazi } from '@/theme';
 
-import { etiketYuksekligi, IGNE, IGNE_GORUNEN_BOY, kisaAd, KONUM_HALKA, OTEL_KARE, pinCapi } from './geo';
+import { etiketYuksekligi, IGNE, igneGorunenBoy, igneOlcusu, kisaAd, KONUM_HALKA, OTEL_KARE, pinCapi, type IgneOlcusu } from './geo';
 import { PIN_IKONLARI, pinIkonuAnahtari, pinIkonuPng } from './pinIkonlari';
 import type { HaritaPini } from './tipler';
 
@@ -50,16 +50,19 @@ export function pinGorseli(pin: HaritaPini): ImageRequireSource | undefined {
 
 /** Pinin tam PNG adı (assets/pin); #71: işaretçi anahtarına girer — görsel değişince işaretçi yeniden kurulur. */
 export function pinGorselAdi(pin: HaritaPini): string | undefined {
-  if (pin.tur === 'otel') return 'otel-28';
+  // #73: boy kademesi (28 / 30 / 32 / 34) PNG adına girer; seçili iğne 28 tabanlı (`igne-`) ya da 34 tabanlı (`igne34-`).
+  const boy = pin.boy ?? 28;
+  if (pin.tur === 'otel') return `otel-${boy}`;
   if (pin.tur !== 'oneri' && pin.tur !== 'bos' && pin.tur !== 'listede' && !(pin.tur === 'durak' && pin.tamam)) return undefined;
-  // #66: zoom < 13'te öneri küçük pin (20 px). #65: seçili = iğne (çapa ucu, IGNE_CAPA); değilse 28 px daire (çapa merkez).
+  // #66: zoom < 13'te öneri küçük pin (20 px). #65: seçili = iğne (çapa ucu); değilse daire (çapa merkez).
   if (pin.kucuk && pin.tur === 'oneri') return `kucuk-${pin.ikon ?? 'kamera'}-20`;
+  const igne = pin.secili ? (boy === 34 ? 'igne34-' : 'igne-') : '';
   // #69: öne çıkan = aynı görünüm + sol üstte ★ rozeti (`one-` öneki; iğnede `igne-one-`).
-  const on = `${pin.secili ? 'igne-' : ''}${pin.oneCikan && (pin.tur === 'oneri' || pin.tur === 'listede') && !pin.tamam ? 'one-' : ''}`;
-  const son = pin.secili ? '' : '-28';
+  const on = `${igne}${pin.oneCikan && (pin.tur === 'oneri' || pin.tur === 'listede') && !pin.tamam ? 'one-' : ''}`;
+  const son = pin.secili ? '' : `-${boy}`;
   let ad: string;
   if (pin.tamam) ad = `${on}tamam${son}`;
-  else if (pin.tur === 'listede') ad = pin.ikon && pin.kategoriRenk ? `${on}dolu-${pin.ikon}${son}` : `${pin.secili ? 'igne-' : ''}tik${son}`;
+  else if (pin.tur === 'listede') ad = pin.ikon && pin.kategoriRenk ? `${on}dolu-${pin.ikon}${son}` : `${igne}tik${son}`;
   else ad = `${on}daire-${pin.ikon ?? 'kamera'}${son}`;
   return ad in PIN_IKONLARI ? ad : undefined;
 }
@@ -70,15 +73,16 @@ const IGNE_PAY = 6;
  * #67 🔴1: iğne yolu — scripts/pin-ikonlari.mjs ile aynı (r 17,75 baş + uca inen damla), önce siyah 6,5 px, üstüne 2,5 px beyaz kenar.
  * Yerleşim kutusu IGNE.en × IGNE_GORUNEN_BOY (uç + halka); SVG payı dışa taşar.
  */
-function IgneSvg({ dolgu }: { dolgu: string }) {
+function IgneSvg({ dolgu, olcu }: { dolgu: string; olcu: IgneOlcusu }) {
   const kenar = 2.5;
-  const W = IGNE.en + 2 * IGNE_PAY;
-  const H = IGNE.boy + 2 * IGNE_PAY;
+  const k = olcu.en / IGNE.en; // #73: 34 kademesinde ölçek (44 / 38)
+  const W = olcu.en + 2 * IGNE_PAY;
+  const H = olcu.boy + 2 * IGNE_PAY;
   const cx = W / 2;
-  const bas = IGNE_PAY + IGNE.en / 2;
-  const uc = IGNE_PAY + IGNE.boy;
-  const r = IGNE.en / 2 - kenar / 2;
-  const yol = `M${cx} ${uc} C${cx - 6} ${uc - 9} ${cx - r} ${bas + 11} ${cx - r} ${bas} a${r} ${r} 0 1 1 ${2 * r} 0 C${cx + r} ${bas + 11} ${cx + 6} ${uc - 9} ${cx} ${uc} Z`;
+  const bas = IGNE_PAY + olcu.en / 2;
+  const uc = IGNE_PAY + olcu.boy;
+  const r = olcu.en / 2 - kenar / 2;
+  const yol = `M${cx} ${uc} C${cx - 6 * k} ${uc - 9 * k} ${cx - r} ${bas + 11 * k} ${cx - r} ${bas} a${r} ${r} 0 1 1 ${2 * r} 0 C${cx + r} ${bas + 11 * k} ${cx + 6 * k} ${uc - 9 * k} ${cx} ${uc} Z`;
   return (
     <Svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} style={s.igneSvg} pointerEvents="none">
       <Path d={yol} fill={dolgu} stroke={renk.metin} strokeWidth={kenar + 4} strokeLinejoin="round" />
@@ -91,12 +95,12 @@ function IgneSvg({ dolgu }: { dolgu: string }) {
 const PNG_PAD = 8;
 const PNG_IGNE_PAD = 12;
 /** #67 🔴2: tam pin PNG'si görünüm içinde — yerleşim kutusu daire (cap) ya da iğne ölçüsünde, pay negatif kenar boşluğuyla taşar. */
-function PngPin({ gorsel, secili, cap, onYuklendi }: { gorsel: ImageRequireSource; secili: boolean; cap: number; onYuklendi?: () => void }) {
+function PngPin({ gorsel, secili, cap, igne, onYuklendi }: { gorsel: ImageRequireSource; secili: boolean; cap: number; igne: IgneOlcusu; onYuklendi?: () => void }) {
   const pay = secili ? PNG_IGNE_PAD : PNG_PAD;
-  const en = (secili ? IGNE.en : cap) + 2 * pay;
-  const boy = (secili ? IGNE.boy : cap) + 2 * pay;
-  // İğnede görünen uç halkayla IGNE.halka kadar aşağıda: alt kenar boşluğu o kadar az negatif → kutu IGNE_GORUNEN_BOY.
-  const altPay = secili ? -(pay - IGNE.halka) : -pay;
+  const en = (secili ? igne.en : cap) + 2 * pay;
+  const boy = (secili ? igne.boy : cap) + 2 * pay;
+  // İğnede görünen uç halkayla halka kadar aşağıda: alt kenar boşluğu o kadar az negatif → kutu igneGorunenBoy.
+  const altPay = secili ? -(pay - igne.halka) : -pay;
   return <Image source={gorsel} style={{ width: en, height: boy, marginHorizontal: -pay, marginTop: -pay, marginBottom: altPay }} fadeDuration={0} onLoad={onYuklendi} />;
 }
 
@@ -183,7 +187,8 @@ export function PinIcerigi({
       </View>
     );
   }
-  const cap = pin.secili ? 28 : pinCapi(pin);
+  const cap = pin.secili ? (pin.boy ?? 28) : pinCapi(pin);
+  const igne = igneOlcusu(pin);
   const daire = { width: cap, height: cap, borderRadius: cap / 2 };
   const puan = puanMetni(pin.puan);
   const yorum = yorumKisa(pin.yorumSayisi);
@@ -197,13 +202,13 @@ export function PinIcerigi({
       ) : gorsel ? (
         // #67 incelemesi 🔴2: PNG'si olan pin (öneri / listede / tamamlanan / otel) web'de ve native yedekte aynı PNG ile çizilir —
         // kenar payı (gölge, rozet) negatif kenar boşluğuyla taşar; yerleşim kutusu daire / iğne ölçüsünde kalır (çapa aynı).
-        <PngPin gorsel={gorsel} secili={!!pin.secili} cap={pinCapi(pin)} onYuklendi={() => onYuklendi?.(pinPngAnahtari(pin) ?? '')} />
+        <PngPin gorsel={gorsel} secili={!!pin.secili} cap={pinCapi(pin)} igne={igne} onYuklendi={() => onYuklendi?.(pinPngAnahtari(pin) ?? '')} />
       ) : pin.secili ? (
         // #65 / #67 🔴1: seçili numaralı durak iğne biçimi (görünüm) — PNG iğnesiyle aynı yol: siyah 6,5 px alt vuruş + 2,5 px
         // beyaz kenar, gün renginde dolgu; 14 px numara. Çapa uç (pinCapasi).
-        <View style={s.igne} collapsable={false}>
-          <IgneSvg dolgu={pin.tamam ? renk.basari : pin.renk} />
-          <View style={s.igneBas}>
+        <View style={[s.igne, { width: igne.en, height: igneGorunenBoy(igne) }]} collapsable={false}>
+          <IgneSvg dolgu={pin.tamam ? renk.basari : pin.renk} olcu={igne} />
+          <View style={[s.igneBas, { width: igne.en, height: igne.en }]}>
             {pin.tamam ? <PinIkonu ad="tik" boyut={17} renk={renk.zemin} kalinlik={2.4} onYuklendi={onYuklendi} /> : <Text style={s.igneMetin}>{pin.etiket ?? ''}</Text>}
           </View>
         </View>
@@ -257,9 +262,9 @@ const s = StyleSheet.create({
   kucuk: { borderWidth: 1.5 },
   yildizRozet: { position: 'absolute', left: -4, top: -4, width: 15, height: 15, borderRadius: 7.5, backgroundColor: renk.vurgu, borderWidth: 1.5, borderColor: renk.zemin, alignItems: 'center', justifyContent: 'center' },
   // #65: seçili iğne (görünüm): baş 38 (2,5 kenar + 2 siyah halka ≈ kenar 4,5 karma), uç 45° döndürülmüş kare.
-  igne: { width: IGNE.en, height: IGNE_GORUNEN_BOY },
+  igne: {},
   igneSvg: { position: 'absolute', left: -IGNE_PAY, top: -IGNE_PAY },
-  igneBas: { position: 'absolute', left: 0, top: 0, width: IGNE.en, height: IGNE.en, alignItems: 'center', justifyContent: 'center' },
+  igneBas: { position: 'absolute', left: 0, top: 0, alignItems: 'center', justifyContent: 'center' },
   igneMetin: { fontFamily: yazi.ekstra, fontSize: 14, color: renk.zemin },
   golge: { shadowColor: renk.metin, shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.22, shadowRadius: 6, elevation: 3 },
   daireMetin: { fontFamily: yazi.ekstra, fontSize: 13, color: renk.zemin },
