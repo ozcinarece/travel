@@ -14,3 +14,9 @@ export function hataRaporunuBaslat() {
 export function hataRaporuyla<P extends Record<string, unknown>>(Bilesen: ComponentType<P>): ComponentType<P> {
   return dsn ? Sentry.wrap(Bilesen) : Bilesen;
 }
+
+/** #66 KK7: tanı izi — bir sonraki hata raporuna eklenir (DSN yoksa sessiz). Kişisel veri içermez. */
+export function izBirak(kategori: string, mesaj: string, seviye: 'info' | 'error' = 'info') {
+  if (!dsn) return;
+  Sentry.addBreadcrumb({ category: kategori, message: mesaj, level: seviye });
+}

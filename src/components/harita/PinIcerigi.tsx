@@ -46,7 +46,8 @@ export function pinPngAnahtari(pin: HaritaPini): string | null {
 export function pinGorseli(pin: HaritaPini): ImageRequireSource | undefined {
   if (pin.tur === 'otel') return PIN_IKONLARI['otel-28'];
   if (pin.tur !== 'oneri' && pin.tur !== 'bos' && pin.tur !== 'listede' && !(pin.tur === 'durak' && pin.tamam)) return undefined;
-  // #65: seçili = iğne (çapa ucu, IGNE_CAPA); değilse 28 px daire (çapa merkez).
+  // #66: zoom < 13'te öneri küçük pin (20 px). #65: seçili = iğne (çapa ucu, IGNE_CAPA); değilse 28 px daire (çapa merkez).
+  if (pin.kucuk && pin.tur === 'oneri') return PIN_IKONLARI[`kucuk-${pin.ikon ?? 'kamera'}-20`];
   const on = pin.secili ? 'igne-' : '';
   const son = pin.secili ? '' : '-28';
   if (pin.tamam) return PIN_IKONLARI[`${on}tamam${son}`];
@@ -194,9 +195,9 @@ export function PinIcerigi({
           <PinIkonu ad="tik" boyut={IKON_PX} renk={renk.zemin} kalinlik={2.4} onYuklendi={onYuklendi} />
         </View>
       ) : pin.tur === 'oneri' || pin.tur === 'bos' ? (
-        // #53: beyaz daire, kategori renginde 2 px kenar, kategori ikonu.
-        <View style={[s.daire, daire, s.beyaz, { borderColor: kRenk }]} collapsable={false}>
-          <PinIkonu ad={pin.ikon ?? 'kamera'} boyut={IKON_PX} renk={kRenk} kalinlik={2.1} onYuklendi={onYuklendi} />
+        // #53: beyaz daire, kategori renginde 2 px kenar, kategori ikonu. #66: küçük pin 20 px, 1,5 px kenar, 11 px glif.
+        <View style={[s.daire, daire, s.beyaz, { borderColor: kRenk }, pin.kucuk && s.kucuk]} collapsable={false}>
+          <PinIkonu ad={pin.ikon ?? 'kamera'} boyut={pin.kucuk ? 11 : IKON_PX} renk={kRenk} kalinlik={2.1} onYuklendi={onYuklendi} />
         </View>
       ) : pin.tur === 'listede' ? (
         // #61 §4: listede = kategori renginde dolu daire + beyaz kategori ikonu (kategori yoksa #53: siyah + ✓).
@@ -233,6 +234,7 @@ const s = StyleSheet.create({
   sutun: { alignItems: 'center', width: 140 },
   daire: { borderWidth: 2, borderColor: renk.zemin, alignItems: 'center', justifyContent: 'center' },
   beyaz: { backgroundColor: renk.zemin, borderWidth: 2 },
+  kucuk: { borderWidth: 1.5 },
   // #65: seçili iğne (görünüm): baş 38 (2,5 kenar + 2 siyah halka ≈ kenar 4,5 karma), uç 45° döndürülmüş kare.
   igne: { width: IGNE.en, height: IGNE_GORUNEN_BOY },
   igneSvg: { position: 'absolute', left: -IGNE_PAY, top: -IGNE_PAY },

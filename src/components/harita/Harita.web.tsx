@@ -5,7 +5,7 @@ import { Text, View, useWindowDimensions } from 'react-native';
 import { t } from '@/i18n';
 import { renk } from '@/theme';
 
-import { bolgeHesapla, detayGoster, etiketBolgesi, pinCapasi, pinSecimi, pinZ, zoomDelta } from './geo';
+import { bolgeHesapla, detayGoster, etiketBolgesi, gizliEtiketler, pinCapasi, pinZ, zoomaGorePinler, zoomDelta } from './geo';
 import { PinIcerigi } from './PinIcerigi';
 import { bacakEtiketPinleri } from './rota';
 import type { HaritaBolgesi, HaritaCizgisi, HaritaOdagi, HaritaProps, HaritaSigdirma } from './tipler';
@@ -85,13 +85,12 @@ function Cizgi({ cizgi }: { cizgi: HaritaCizgisi }) {
 export function Harita({ merkez, zoom = 14, pinler = [], daireler = [], cizgiler = [], odak, onPinBas, onHaritaBas, onPinSuruklendi, onBolgeDegisti, ustBosluk = 0, sigdir }: HaritaProps) {
   const ekran = useWindowDimensions();
   const [bolge, setBolge] = useState<HaritaBolgesi>(() => bolgeHesapla(merkez, zoomDelta(zoom), zoomDelta(zoom)));
-  const tumPinler = useMemo(() => [...pinler, ...bacakEtiketPinleri(cizgiler)], [pinler, cizgiler]);
   const olcu = useMemo(() => ({ genislik: ekran.width, yukseklik: ekran.height }), [ekran.width, ekran.height]);
-  // #59 §A: kümeleme yok. #59 §B: etiket hesabı yalnız zoom adımında yenilenir.
+  // #59 §A: kümeleme yok. #59 §B: etiket hesabı yalnız zoom adımında yenilenir. #66: zoom < 13'te öneri küçük; pin düşmez.
   const [etiketBolge, setEtiketBolge] = useState<HaritaBolgesi>(bolge);
-  const secim = useMemo(() => pinSecimi(tumPinler, etiketBolge, olcu, ustBosluk), [tumPinler, etiketBolge, olcu, ustBosluk]);
-  const gizli = secim.gizli;
-  const gorunen = useMemo(() => secim.pinler.filter((p) => !(p.tur === 'etiket' && gizli.etiket.has(p.id))), [secim, gizli]);
+  const tumPinler = useMemo(() => [...zoomaGorePinler(pinler, etiketBolge.zoom), ...bacakEtiketPinleri(cizgiler)], [pinler, cizgiler, etiketBolge.zoom]);
+  const gizli = useMemo(() => gizliEtiketler(tumPinler, etiketBolge, olcu, ustBosluk), [tumPinler, etiketBolge, olcu, ustBosluk]);
+  const gorunen = useMemo(() => tumPinler.filter((p) => !(p.tur === 'etiket' && gizli.etiket.has(p.id))), [tumPinler, gizli]);
 
   if (!anahtar) {
     return (

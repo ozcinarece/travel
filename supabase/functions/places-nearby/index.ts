@@ -1,6 +1,7 @@
 // places-nearby — Nearby Search (New), POPULARITY. 3.4 KK4 öneri çipleri (en fazla 20) ve
 // #17 otel adayları (`cip: 'otel'`, en fazla 12). Cevap yalnız bellekte; veritabanına yazılmaz (PRD §7).
-// Önbellek: (çip, 0,01° hücre, yarıçap, adet) anahtarıyla izolat belleğinde 24 sa (teknik not §3).
+// Önbellek: (çip, 0,0001° hücre, yarıçap, adet) anahtarıyla izolat belleğinde 24 sa (teknik not §3). #66: karo
+// merkezleri 125 m'ye kadar inebildiğinden hücre 4 ondalık, yarıçap en az 100 m.
 import { CIP_TIPLERI, GoogleHatasi, yakinAra, type HafifYer } from '../_shared/google.ts';
 import { govde, hata, json, onKontrol } from '../_shared/http.ts';
 
@@ -19,10 +20,10 @@ Deno.serve(async (istek) => {
   if (!Number.isFinite(lat) || !Number.isFinite(lng) || Math.abs(lat) > 90 || Math.abs(lng) > 180) return hata('merkez geçersiz');
   const tipler = typeof g.cip === 'string' ? CIP_TIPLERI[g.cip] : undefined;
   if (!tipler) return hata('cip geçersiz');
-  const yaricapM = Math.min(Math.max(Number(g.yaricapM) || 3000, 500), 15_000);
+  const yaricapM = Math.min(Math.max(Number(g.yaricapM) || 3000, 100), 15_000);
   const enFazla = Math.min(Math.max(Math.trunc(Number(g.enFazla) || 20), 1), 20);
 
-  const anahtar = `${g.cip}:${lat.toFixed(2)},${lng.toFixed(2)}:${yaricapM}:${enFazla}`;
+  const anahtar = `${g.cip}:${lat.toFixed(4)},${lng.toFixed(4)}:${yaricapM}:${enFazla}`;
   const eski = onbellek.get(anahtar);
   if (eski && Date.now() - eski.zaman < TTL_MS) return json({ yerler: eski.deger, onbellek: true });
 

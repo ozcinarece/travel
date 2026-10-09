@@ -1,6 +1,6 @@
 import { describe, expect, it } from '@jest/globals';
 
-import { etiketBolgesi, etiketOnceligi, isaretciImzasi, izlemeGerekli, sigdir, bolgedenUzaklasti, bolgeHesapla, deltaZoom, detayGoster, gizliEtiketler, haritaDolgusu, kisaAd, mesafeM, pinCapasi, pinCapi, pinSecimi, SIFIR_DOLGU, zoomDelta } from '../geo';
+import { etiketBolgesi, etiketOnceligi, isaretciImzasi, izlemeGerekli, sigdir, bolgedenUzaklasti, bolgeHesapla, deltaZoom, detayGoster, gizliEtiketler, haritaDolgusu, kisaAd, kucukPin, mesafeM, pinCapasi, pinCapi, SIFIR_DOLGU, zoomaGorePinler, zoomDelta } from '../geo';
 import type { HaritaPini } from '../tipler';
 
 const roma = { lat: 41.9028, lng: 12.4964 };
@@ -73,10 +73,10 @@ describe('geo', () => {
     expect(bolgeHesapla(roma, 0.02, 0.02, 15.5).zoom).toBe(15.5);
   });
 
-  it('detayGoster: seçili ya da zoom ≥ 14 (#40), puan ve ad varsa', () => {
+  it('detayGoster: seçili ya da zoom ≥ 15 (#66; #40\'ta 14), puan ve ad varsa', () => {
     const p: HaritaPini = { id: 'x', konum: roma, renk: '#000', tur: 'oneri', ad: 'Pantheon', puan: 4.8 };
-    expect(detayGoster(p, 13.9)).toBe(false);
-    expect(detayGoster(p, 14)).toBe(true);
+    expect(detayGoster(p, 14.9)).toBe(false);
+    expect(detayGoster(p, 15)).toBe(true);
     expect(detayGoster(p, 16)).toBe(true);
     expect(detayGoster({ ...p, secili: true }, 12)).toBe(true);
     expect(detayGoster({ ...p, puan: null }, 17)).toBe(false);
@@ -197,37 +197,37 @@ describe('geo', () => {
   });
 });
 
-// #61 §2: adı sığmayan öneri pini çizilmez; listedekiler ve duraklar hep çizilir.
-describe('pinSecimi (#61)', () => {
+// #66 KK1: pin hiç düşmez — çakışmada yalnız ad / puan gizlenir. KK2: zoom < 13'te öneri küçük pin (20 px, adsız).
+describe('pin düşürme yok, zoom\'a göre küçük pin (#66)', () => {
   const bolge = { merkez: roma, yaricapM: 1000, latDelta: 0.02, lngDelta: 0.01, zoom: 15 };
   const ekran = { genislik: 400, yukseklik: 800 };
   const p = (id: string, dLng: number, o: Partial<HaritaPini>): HaritaPini => ({ id, konum: { lat: roma.lat, lng: roma.lng + dLng }, renk: '#000', ad: `Yer ${id}`, ...o });
-  it('üst üste iki öneri: düşük öncelikli (id sırası) düşer, kalanın adı görünür', () => {
-    const s = pinSecimi([p('a', 0, { tur: 'oneri' }), p('b', 0.0001, { tur: 'oneri' })], bolge, ekran);
-    expect(s.pinler.map((x) => x.id)).toEqual(['a']);
-    expect(s.gizli.etiket.size).toBe(0);
+  it('üst üste iki öneri: ikisi de kalır, yalnız düşük öncelikli (id sırası) adını yitirir', () => {
+    const pinler = [p('a', 0, { tur: 'oneri' }), p('b', 0.0001, { tur: 'oneri' })];
+    const gizli = gizliEtiketler(pinler, bolge, ekran);
+    expect([...gizli.etiket]).toEqual(['b']);
+    // Harita artık pin listesini süzmez: zoomaGorePinler zoom ≥ 13'te pinleri olduğu gibi bırakır.
+    expect(zoomaGorePinler(pinler, 15)).toEqual(pinler);
   });
-  it('listede pin önerinin üstünde: öneri düşer, listede kalır ve adı görünür', () => {
-    const s = pinSecimi([p('o', 0, { tur: 'oneri' }), p('l', 0.0001, { tur: 'listede' })], bolge, ekran);
-    expect(s.pinler.map((x) => x.id)).toEqual(['l']);
-    expect(s.gizli.etiket.has('l')).toBe(false);
+  it('listede pin önerinin üstünde: öneri kalır (adsız), listede adıyla', () => {
+    const gizli = gizliEtiketler([p('o', 0, { tur: 'oneri' }), p('l', 0.0001, { tur: 'listede' })], bolge, ekran);
+    expect(gizli.etiket.has('o')).toBe(true);
+    expect(gizli.etiket.has('l')).toBe(false);
   });
-  it('çakışan iki listede pini: ikisi de çizilir, yalnız biri etiketsiz', () => {
-    const s = pinSecimi([p('l1', 0, { tur: 'listede' }), p('l2', 0.0001, { tur: 'listede' })], bolge, ekran);
-    expect(s.pinler).toHaveLength(2);
-    expect(s.gizli.etiket.size).toBe(1);
+  it('zoom < 13: seçili olmayan öneri küçük (20 px, adsız, puansız); listede / seçili / durak tam boy', () => {
+    expect(kucukPin(p('a', 0, { tur: 'oneri' }), 12.9)).toBe(true);
+    expect(kucukPin(p('a', 0, { tur: 'oneri' }), 13)).toBe(false);
+    expect(kucukPin(p('a', 0, { tur: 'oneri', secili: true }), 12)).toBe(false);
+    expect(kucukPin(p('a', 0, { tur: 'listede' }), 12)).toBe(false);
+    const [k, l] = zoomaGorePinler([p('a', 0, { tur: 'oneri', puan: 4.5 }), p('l', 0.001, { tur: 'listede' })], 12);
+    expect(k).toMatchObject({ kucuk: true, puan: null });
+    expect(k.ad).toBeUndefined();
+    expect(pinCapi(k)).toBe(20);
+    expect(l.kucuk).toBeUndefined();
+    // Küçük pinler adsız olduğundan hiçbir etiket çakışmaz.
+    expect(gizliEtiketler(zoomaGorePinler([p('a', 0, { tur: 'oneri' }), p('b', 0.0001, { tur: 'oneri' })], 12), { ...bolge, zoom: 12 }, ekran).etiket.size).toBe(0);
   });
-  it('uzak pinler dokunulmaz; düşen pin başkasının etiketini engellemeyi bırakır (zincir)', () => {
-    // a (öneri, uzun adlı) b'nin etiketiyle çakışır → düşer; a'nın geniş etiketi kalkınca 80 px sağdaki c'nin etiketi yer bulur.
-    const s = pinSecimi(
-      [p('b', 0, { tur: 'listede' }), p('a', 0.0005, { tur: 'oneri', ad: 'Yer a uzun isim xx' }), p('c', 0.002, { tur: 'oneri' }), p('uzak', 0.01, { tur: 'oneri' })],
-      bolge,
-      ekran,
-    );
-    expect(s.pinler.map((x) => x.id).sort()).toEqual(['b', 'c', 'uzak']);
-    expect(s.gizli.etiket.size).toBe(0);
-  });
-  it('#61 §5: diğer günün durağı 20 px, seçili günün durağı 28, seçili 34', () => {
+  it('#61 §5: diğer günün durağı 20 px, seçili günün durağı 28, seçili iğne 38', () => {
     expect(pinCapi({ id: 'x', konum: roma, renk: '#000', tur: 'durak', opaklik: 0.4 })).toBe(20);
     expect(pinCapi({ id: 'x', konum: roma, renk: '#000', tur: 'durak' })).toBe(28);
     expect(pinCapi({ id: 'x', konum: roma, renk: '#000', tur: 'durak', opaklik: 0.4, secili: true })).toBe(38);
