@@ -2,7 +2,7 @@ import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import { PixelRatio, StyleSheet, View, useWindowDimensions } from 'react-native';
 import MapView, { Circle, Marker, Polyline, PROVIDER_GOOGLE } from 'react-native-maps';
 
-import { bolgeHesapla, detayGoster, etiketBolgesi, haritaDolgusu, isaretciImzasi, izlemeGerekli, pinCapasi, pinCapi, pinSecimi, pinZ, zoomDelta } from './geo';
+import { bolgeHesapla, detayGoster, etiketBolgesi, haritaDolgusu, IGNE, isaretciImzasi, izlemeGerekli, pinCapasi, pinCapi, pinSecimi, pinZ, zoomDelta } from './geo';
 import { ACIK_HARITA_STILI } from './haritaStili';
 import { PinIcerigi, pinGorseli, pinPngAnahtari } from './PinIcerigi';
 import { IGNE_CAPA, PIN_IKONLARI } from './pinIkonlari';
@@ -77,7 +77,7 @@ export function Harita({
     sigdirKamera(sigdir.noktalar, { top: sigdir.ust, right: 48, bottom: sigdir.alt, left: 48 });
   }, [sigdir, hazir]);
 
-  // #33: bacak etiketleri (#59: yalnız taksi "12 dk") pin gibi çizilir; çakışma kuralına en düşük öncelikle girer.
+  // #33: bacak etiketleri (#65: yalnız araba "12 dk") pin gibi çizilir; çakışma kuralına en düşük öncelikle girer.
   const tumPinler = useMemo(() => [...pinler, ...bacakEtiketPinleri(cizgiler)], [pinler, cizgiler]);
   const olcu = useMemo(() => ({ genislik: ekran.width, yukseklik: ekran.height }), [ekran.width, ekran.height]);
   // #59 §A: kümeleme yok; yakın pinler üst üste biner (beyaz kenar ayırır, z-sırası pinZ). #61 §2: adı sığmayan öneri
@@ -95,8 +95,9 @@ export function Harita({
     let enYakin: { id: string; d: number } | null = null;
     for (const p of gorunen) {
       if (p.tur === 'etiket' || p.tur === 'konum' || p.tur === 'otel') continue;
-      // Pin dairesi çapanın üstünde değil, merkezinde (pinCapasi daire merkezi).
-      const d = Math.hypot((p.konum.lng - k.longitude) * pxLng, (p.konum.lat - k.latitude) * pxLat);
+      // Daire pinde merkez koordinatta; seçili iğnede baş merkezi ucun (koordinatın) 27 px üstünde (#67 incelemesi).
+      const basY = p.secili ? IGNE.boy - IGNE.en / 2 : 0;
+      const d = Math.hypot((p.konum.lng - k.longitude) * pxLng, (p.konum.lat - k.latitude) * pxLat + basY);
       if (d <= Math.max(28, pinCapi(p) / 2 + 6) && (!enYakin || d < enYakin.d)) enYakin = { id: p.id, d };
     }
     if (enYakin) onPinUzunBas(enYakin.id);

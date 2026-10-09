@@ -84,6 +84,8 @@ const YESIL = '#1f8a4c';
 const PAD = 8;
 const IGNE_PAD = 12;
 const IGNE = { en: 38, boy: 46 };
+/** Siyah dış halkanın yol ucundan dışa taşması ((2,5 + 4) / 2 px): görünen uç bu kadar aşağıda — çapa buna göre (#67 incelemesi). */
+const IGNE_HALKA = 3.25;
 /** { ad, cap, zemin, kenar, kenarKalinlik, ikon, ikonRenk, kare?, rozet?, igne? } */
 const pinIstekleri = [];
 for (const k of kategoriler) {
@@ -164,7 +166,7 @@ export function pinIkonuAnahtari(ikon: string, renk: string): string {
 }
 
 /** #65: iğne (seçili) görselinin çapası — PNG içinde ucun konumu (kenar payı dahil). */
-export const IGNE_CAPA = { x: 0.5, y: ${(IGNE_PAD + IGNE.boy) / (IGNE.boy + 2 * IGNE_PAD)} } as const;
+export const IGNE_CAPA = { x: 0.5, y: ${(IGNE_PAD + IGNE.boy + IGNE_HALKA) / (IGNE.boy + 2 * IGNE_PAD)} } as const;
 
 /** Pin içi ikonun PNG'si; üretilmemiş (ikon, renk) çifti için undefined → SVG'ye düşülür. */
 export function pinIkonuPng(ikon: string, renk: string): ImageRequireSource | undefined {

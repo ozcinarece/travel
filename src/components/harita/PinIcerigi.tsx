@@ -1,11 +1,12 @@
 import { Image, StyleSheet, Text, View, type ImageRequireSource } from 'react-native';
+import Svg, { Path } from 'react-native-svg';
 
 import { Ikon, type IkonAdi } from '@/components/ui/Ikon';
 import { yorumKisa } from '@/lib/pinIkonu';
 import { puanMetni } from '@/lib/puan';
 import { renk, yazi } from '@/theme';
 
-import { etiketYuksekligi, IGNE, kisaAd, KONUM_HALKA, OTEL_KARE, pinCapi } from './geo';
+import { etiketYuksekligi, IGNE, IGNE_GORUNEN_BOY, kisaAd, KONUM_HALKA, OTEL_KARE, pinCapi } from './geo';
 import { PIN_IKONLARI, pinIkonuAnahtari, pinIkonuPng } from './pinIkonlari';
 import type { HaritaPini } from './tipler';
 
@@ -53,6 +54,42 @@ export function pinGorseli(pin: HaritaPini): ImageRequireSource | undefined {
   return PIN_IKONLARI[`${on}daire-${pin.ikon ?? 'kamera'}${son}`];
 }
 
+/** İğne SVG'sinin yerleşim kutusundan dışa payı (siyah halka + küçük gölge). */
+const IGNE_PAY = 6;
+/**
+ * #67 🔴1: iğne yolu — scripts/pin-ikonlari.mjs ile aynı (r 17,75 baş + uca inen damla), önce siyah 6,5 px, üstüne 2,5 px beyaz kenar.
+ * Yerleşim kutusu IGNE.en × IGNE_GORUNEN_BOY (uç + halka); SVG payı dışa taşar.
+ */
+function IgneSvg({ dolgu }: { dolgu: string }) {
+  const kenar = 2.5;
+  const W = IGNE.en + 2 * IGNE_PAY;
+  const H = IGNE.boy + 2 * IGNE_PAY;
+  const cx = W / 2;
+  const bas = IGNE_PAY + IGNE.en / 2;
+  const uc = IGNE_PAY + IGNE.boy;
+  const r = IGNE.en / 2 - kenar / 2;
+  const yol = `M${cx} ${uc} C${cx - 6} ${uc - 9} ${cx - r} ${bas + 11} ${cx - r} ${bas} a${r} ${r} 0 1 1 ${2 * r} 0 C${cx + r} ${bas + 11} ${cx + 6} ${uc - 9} ${cx} ${uc} Z`;
+  return (
+    <Svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} style={s.igneSvg} pointerEvents="none">
+      <Path d={yol} fill={dolgu} stroke={renk.metin} strokeWidth={kenar + 4} strokeLinejoin="round" />
+      <Path d={yol} fill={dolgu} stroke={renk.zemin} strokeWidth={kenar} strokeLinejoin="round" />
+    </Svg>
+  );
+}
+
+/** PNG kenar payları (scripts/pin-ikonlari.mjs PAD / IGNE_PAD). */
+const PNG_PAD = 8;
+const PNG_IGNE_PAD = 12;
+/** #67 🔴2: tam pin PNG'si görünüm içinde — yerleşim kutusu daire (cap) ya da iğne ölçüsünde, pay negatif kenar boşluğuyla taşar. */
+function PngPin({ gorsel, secili, cap, onYuklendi }: { gorsel: ImageRequireSource; secili: boolean; cap: number; onYuklendi?: () => void }) {
+  const pay = secili ? PNG_IGNE_PAD : PNG_PAD;
+  const en = (secili ? IGNE.en : cap) + 2 * pay;
+  const boy = (secili ? IGNE.boy : cap) + 2 * pay;
+  // İğnede görünen uç halkayla IGNE.halka kadar aşağıda: alt kenar boşluğu o kadar az negatif → kutu IGNE_GORUNEN_BOY.
+  const altPay = secili ? -(pay - IGNE.halka) : -pay;
+  return <Image source={gorsel} style={{ width: en, height: boy, marginHorizontal: -pay, marginTop: -pay, marginBottom: altPay }} fadeDuration={0} onLoad={onYuklendi} />;
+}
+
 /**
  * Pin içi ikon önceden üretilmiş PNG (assets/pin, scripts/pin-ikonlari.mjs) — Android işaretçi bitmap'ini alırken
  * SVG'nin çizilmesini beklemek gerekmez; `onYuklendi` görüntü yüklenince PNG anahtarıyla çağrılır. PNG yoksa SVG.
@@ -64,10 +101,10 @@ function PinIkonu({ ad, renk: r, boyut, kalinlik, onYuklendi }: { ad: IkonAdi; r
 }
 
 /**
- * Pin görünümleri (#53, 7 Ekim mockup; #59 §A2 ölçüler): 28 px daire (seçili 34) + ALTINDA kısa ad (+ ★ puan · yorum
+ * Pin görünümleri (#53, 7 Ekim mockup; #59 §A2 ölçüler): 28 px daire (#65: seçili iğne 38 × 46) + ALTINDA kısa ad (+ ★ puan · yorum
  * satırı, `detay`). durak = gün renginde daire + sıra numarası · listede = siyah daire + ✓ · oneri / bos = beyaz daire,
  * kategori renginde kenar ve ikon · seçili = siyah halka · otel = siyah kare + ev · aday (3.3) = beyaz hap "★ puan · ad" ·
- * etiket (#33) = küçük beyaz hap (taksi bacağı süresi). `etiketGizli` çakışma kuralıyla gelir (geo.gizliEtiketler).
+ * etiket (#33) = küçük beyaz hap (araba bacağı süresi). `etiketGizli` çakışma kuralıyla gelir (geo.gizliEtiketler).
  * `onYuklendi(pngAnahtari)`: içerikteki PNG ikon yüklendi (Android bitmap yakalaması için, Harita.native).
  */
 export function PinIcerigi({
@@ -132,18 +169,24 @@ export function PinIcerigi({
   const puan = puanMetni(pin.puan);
   const yorum = yorumKisa(pin.yorumSayisi);
   const kRenk = pin.kategoriRenk ?? renk.metin;
+  const gorsel = pinGorseli(pin);
   return (
     <View style={[s.sutun, durt && s.durtme]} collapsable={false}>
       {yalnizEtiket ? (
         // Daire ayrı image işaretçisinde: dairenin yerinde boşluk; seçili iğnede etiket doğrudan ucun altında (çapa uç).
         pin.secili ? null : <View style={{ width: cap, height: cap }} />
+      ) : gorsel ? (
+        // #67 incelemesi 🔴2: PNG'si olan pin (öneri / listede / tamamlanan / otel) web'de ve native yedekte aynı PNG ile çizilir —
+        // kenar payı (gölge, rozet) negatif kenar boşluğuyla taşar; yerleşim kutusu daire / iğne ölçüsünde kalır (çapa aynı).
+        <PngPin gorsel={gorsel} secili={!!pin.secili} cap={pinCapi(pin)} onYuklendi={() => onYuklendi?.(pinPngAnahtari(pin) ?? '')} />
       ) : pin.secili ? (
-        // #65: seçili numaralı durak iğne biçimi (görünüm): 38 px baş + uç; gövde ucun üstünde, çapa uç (pinCapasi).
+        // #65 / #67 🔴1: seçili numaralı durak iğne biçimi (görünüm) — PNG iğnesiyle aynı yol: siyah 6,5 px alt vuruş + 2,5 px
+        // beyaz kenar, gün renginde dolgu; 14 px numara. Çapa uç (pinCapasi).
         <View style={s.igne} collapsable={false}>
-          <View style={[s.igneBas, { backgroundColor: pin.tamam ? renk.basari : pin.renk }]}>
+          <IgneSvg dolgu={pin.tamam ? renk.basari : pin.renk} />
+          <View style={s.igneBas}>
             {pin.tamam ? <PinIkonu ad="tik" boyut={17} renk={renk.zemin} kalinlik={2.4} onYuklendi={onYuklendi} /> : <Text style={s.igneMetin}>{pin.etiket ?? ''}</Text>}
           </View>
-          <View style={[s.igneUc, { backgroundColor: pin.tamam ? renk.basari : pin.renk }]} />
         </View>
       ) : pin.tamam ? (
         // #42 KK7: tamamlanan durak yeşil + tik.
@@ -191,9 +234,9 @@ const s = StyleSheet.create({
   daire: { borderWidth: 2, borderColor: renk.zemin, alignItems: 'center', justifyContent: 'center' },
   beyaz: { backgroundColor: renk.zemin, borderWidth: 2 },
   // #65: seçili iğne (görünüm): baş 38 (2,5 kenar + 2 siyah halka ≈ kenar 4,5 karma), uç 45° döndürülmüş kare.
-  igne: { width: IGNE.en, height: IGNE.boy, alignItems: 'center' },
-  igneBas: { width: IGNE.en, height: IGNE.en, borderRadius: IGNE.en / 2, borderWidth: 2.5, borderColor: renk.zemin, alignItems: 'center', justifyContent: 'center', zIndex: 1, shadowColor: renk.metin, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 10, elevation: 4 },
-  igneUc: { width: 16, height: 16, marginTop: -11, transform: [{ rotate: '45deg' }], borderBottomRightRadius: 3 },
+  igne: { width: IGNE.en, height: IGNE_GORUNEN_BOY },
+  igneSvg: { position: 'absolute', left: -IGNE_PAY, top: -IGNE_PAY },
+  igneBas: { position: 'absolute', left: 0, top: 0, width: IGNE.en, height: IGNE.en, alignItems: 'center', justifyContent: 'center' },
   igneMetin: { fontFamily: yazi.ekstra, fontSize: 14, color: renk.zemin },
   golge: { shadowColor: renk.metin, shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.22, shadowRadius: 6, elevation: 3 },
   daireMetin: { fontFamily: yazi.ekstra, fontSize: 13, color: renk.zemin },

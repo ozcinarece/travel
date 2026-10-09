@@ -170,7 +170,8 @@ export function programCizgileri(secenek: {
       return {
         id: `${kimlik}:kus`,
         noktalar: [a, z],
-        renk: rengi,
+        // docs/05 §3: rota gelene kadar GÜN renginde (rota tonu değil), 3 dp, kesikli.
+        renk: gunRengi(g.index),
         opaklik,
         // Gerçek yol gelene kadar kuş uçuşu: ince kesikli (docs/05 §3).
         kesik: true,

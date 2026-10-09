@@ -73,7 +73,7 @@ export function pinIkonuAnahtari(ikon: string, renk: string): string {
 }
 
 /** #65: iğne (seçili) görselinin çapası — PNG içinde ucun konumu (kenar payı dahil). */
-export const IGNE_CAPA = { x: 0.5, y: 0.8285714285714286 } as const;
+export const IGNE_CAPA = { x: 0.5, y: 0.875 } as const;
 
 /** Pin içi ikonun PNG'si; üretilmemiş (ikon, renk) çifti için undefined → SVG'ye düşülür. */
 export function pinIkonuPng(ikon: string, renk: string): ImageRequireSource | undefined {

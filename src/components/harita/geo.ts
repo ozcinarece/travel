@@ -66,7 +66,7 @@ export function etiketOnceligi(p: HaritaPini): number {
 }
 
 /**
- * Daire çapı (px) — PinIcerigi ile aynı sayılar. #59 §A2: 28 px, seçili 34 px (siyah halka dairenin kenarıdır).
+ * Daire çapı (px) — PinIcerigi ile aynı sayılar. #59 §A2: 28 px; #65: seçili iğne 38 px baş (IGNE).
  * #61 §5: seçili gün dışındaki (soluk) durak pini numarasız küçük nokta, 20 px.
  */
 export function pinCapi(p: HaritaPini): number {
@@ -78,10 +78,12 @@ export function pinCapi(p: HaritaPini): number {
  * #65 (docs/05 §2): seçili pin iğne (damla) biçimi 38 × 46 px; çapa iğnenin UCU (konum), gövde ucun üstünde; ad etiketi
  * ucun 4 px altında. Öneri / listede / tamamlandı PNG, numaralı durak görünüm.
  */
-export const IGNE = { en: 38, boy: 46, etiketPayi: 4 } as const;
+export const IGNE = { en: 38, boy: 46, etiketPayi: 4, halka: 3.25 } as const;
+/** İğnenin görünen yüksekliği (yol + dış halkanın uçtan taşması). */
+export const IGNE_GORUNEN_BOY = IGNE.boy + IGNE.halka;
 /** Pinin ekran kutusu (engel): daire konumun ortasında; seçili iğne konumun üstünde. */
 export function pinKutusu(p: HaritaPini, cx: number, cy: number): { x1: number; y1: number; x2: number; y2: number } {
-  if (p.secili && p.tur !== 'etiket' && p.tur !== 'konum' && p.tur !== 'aday') return { x1: cx - IGNE.en / 2, y1: cy - IGNE.boy, x2: cx + IGNE.en / 2, y2: cy };
+  if (p.secili && p.tur !== 'etiket' && p.tur !== 'konum' && p.tur !== 'aday') return { x1: cx - IGNE.en / 2, y1: cy - IGNE_GORUNEN_BOY, x2: cx + IGNE.en / 2, y2: cy };
   const r = (p.tur === 'otel' ? OTEL_KARE : p.tur === 'konum' ? KONUM_HALKA : pinCapi(p)) / 2;
   return { x1: cx - r, y1: cy - r, x2: cx + r, y2: cy + r };
 }
@@ -237,7 +239,7 @@ export function pinZ(p: HaritaPini): number {
  * ucu (iğne + 4 px + etiket kutusu).
  */
 export function pinCapasi(p: HaritaPini, detay = false): { x: number; y: number } {
-  if (p.secili) return { x: 0.5, y: IGNE.boy / (IGNE.boy + IGNE.etiketPayi + etiketYuksekligi(detay)) };
+  if (p.secili) return { x: 0.5, y: IGNE_GORUNEN_BOY / (IGNE_GORUNEN_BOY + IGNE.etiketPayi + etiketYuksekligi(detay)) };
   const d = pinCapi(p);
   return { x: 0.5, y: d / 2 / (d + 2 + etiketYuksekligi(detay)) };
 }

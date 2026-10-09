@@ -63,8 +63,8 @@ describe('geo', () => {
     // #59: 28 px daire (+2 boşluk +16 etiket); seçili 34 px (halka kenarda).
     expect(c.y).toBeCloseTo(14 / 46);
     expect(pinCapasi({ id: 'x', konum: roma, renk: '#000', tur: 'durak' }, true).y).toBeCloseTo(14 / 60);
-    // #65: seçili iğne 38 × 46, çapa uç; etiket ucun 4 px altında.
-    expect(pinCapasi({ id: 'x', konum: roma, renk: '#000', tur: 'durak', secili: true }).y).toBeCloseTo(46 / 66);
+    // #65: seçili iğne 38 × 46 (+ 3,25 px dış halka → görünen uç 49,25), çapa görünen uç; etiket ucun 4 px altında.
+    expect(pinCapasi({ id: 'x', konum: roma, renk: '#000', tur: 'durak', secili: true }).y).toBeCloseTo(49.25 / 69.25);
   });
 
   it('deltaZoom zoomDelta\'nın tersidir; bolgeHesapla zoom üretir', () => {
