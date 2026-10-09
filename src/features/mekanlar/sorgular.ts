@@ -33,7 +33,8 @@ export function useUyeler(seyahatId: string | undefined) {
   });
 }
 
-export type YeniMekan = { place_id: string; primary_type: string | null; lat: number; lng: number };
+/** #80 KK7: `default_minutes` verilirse (panelde ayarlanan süre) §6 varsayılanı yerine o yazılır. */
+export type YeniMekan = { place_id: string; primary_type: string | null; lat: number; lng: number; default_minutes?: number };
 
 /**
  * PRD 3.4 KK5/KK7: havuza ekler; ekleyen = oturum kullanıcısı, süre §6 varsayılanı.
@@ -51,7 +52,7 @@ export function useMekanEkle(seyahatId: string) {
         primary_type: yeni.primary_type,
         lat: yeni.lat,
         lng: yeni.lng,
-        default_minutes: varsayilanDakika(yeni.primary_type),
+        default_minutes: yeni.default_minutes ?? varsayilanDakika(yeni.primary_type),
         added_by: session.user.id,
       });
       if (error && error.code !== '23505') throw error;
