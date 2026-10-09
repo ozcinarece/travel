@@ -1,17 +1,14 @@
 import { Image, StyleSheet, Text, View, type ImageRequireSource } from 'react-native';
+import Svg, { Path } from 'react-native-svg';
 
 import { Ikon, type IkonAdi } from '@/components/ui/Ikon';
 import { yorumKisa } from '@/lib/pinIkonu';
 import { puanMetni } from '@/lib/puan';
 import { renk, yazi } from '@/theme';
 
-import { etiketYuksekligi, kisaAd, KONUM_HALKA, OTEL_KARE, pinCapi } from './geo';
+import { etiketYuksekligi, IGNE, IGNE_GORUNEN_BOY, kisaAd, KONUM_HALKA, OTEL_KARE, pinCapi } from './geo';
 import { PIN_IKONLARI, pinIkonuAnahtari, pinIkonuPng } from './pinIkonlari';
 import type { HaritaPini } from './tipler';
-
-/** #61 §7: taksi modu renkleri (gün renginden bağımsız): sarı dolgu, koyu kahve metin. */
-export const TAKSI_SARI = '#FAC775';
-export const TAKSI_METIN = '#412402';
 
 /** #59 §A2: daire içi kategori ikonu 14 px; otel karesindeki ev 16 px. */
 const IKON_PX = 14;
@@ -20,7 +17,8 @@ const EV_PX = 16;
 /** Pinin içindeki ikon (ad + renk); yoksa null. PNG anahtarı buradan türer (pinPngAnahtari). */
 function pinIkonu(pin: HaritaPini): { ad: IkonAdi; renk: string } | null {
   if (pin.tur === 'otel') return { ad: 'ev', renk: renk.zemin };
-  if (pin.tur === 'etiket') return pin.etiketIkon ? { ad: pin.etiketIkon, renk: renk.metin } : null;
+  // #65 (docs/05 §4): araba hapındaki glif rota tonunda (pin.renk = çizginin rengi).
+  if (pin.tur === 'etiket') return pin.etiketIkon ? { ad: pin.etiketIkon, renk: pin.etiketIkon === 'araba' ? pin.renk : renk.metin } : null;
   if (pin.tur === 'aday' || pin.tur === 'konum' || !pin.tur) return null;
   if (pin.tamam) return { ad: 'tik', renk: renk.zemin };
   // #61 §4: listede = kategori renginde dolu daire + beyaz kategori ikonu (kategori yoksa siyah + ✓).
@@ -48,10 +46,48 @@ export function pinPngAnahtari(pin: HaritaPini): string | null {
 export function pinGorseli(pin: HaritaPini): ImageRequireSource | undefined {
   if (pin.tur === 'otel') return PIN_IKONLARI['otel-28'];
   if (pin.tur !== 'oneri' && pin.tur !== 'bos' && pin.tur !== 'listede' && !(pin.tur === 'durak' && pin.tamam)) return undefined;
-  const cap = pinCapi(pin);
-  if (pin.tamam) return PIN_IKONLARI[`tamam-${cap}`];
-  if (pin.tur === 'listede') return pin.ikon && pin.kategoriRenk ? PIN_IKONLARI[`dolu-${pin.ikon}-${cap}`] : PIN_IKONLARI[`tik-${cap}`];
-  return PIN_IKONLARI[`daire-${pin.ikon ?? 'kamera'}-${cap}`];
+  // #65: seçili = iğne (çapa ucu, IGNE_CAPA); değilse 28 px daire (çapa merkez).
+  const on = pin.secili ? 'igne-' : '';
+  const son = pin.secili ? '' : '-28';
+  if (pin.tamam) return PIN_IKONLARI[`${on}tamam${son}`];
+  if (pin.tur === 'listede') return pin.ikon && pin.kategoriRenk ? PIN_IKONLARI[`${on}dolu-${pin.ikon}${son}`] : PIN_IKONLARI[`${on}tik${son}`];
+  return PIN_IKONLARI[`${on}daire-${pin.ikon ?? 'kamera'}${son}`];
+}
+
+/** İğne SVG'sinin yerleşim kutusundan dışa payı (siyah halka + küçük gölge). */
+const IGNE_PAY = 6;
+/**
+ * #67 🔴1: iğne yolu — scripts/pin-ikonlari.mjs ile aynı (r 17,75 baş + uca inen damla), önce siyah 6,5 px, üstüne 2,5 px beyaz kenar.
+ * Yerleşim kutusu IGNE.en × IGNE_GORUNEN_BOY (uç + halka); SVG payı dışa taşar.
+ */
+function IgneSvg({ dolgu }: { dolgu: string }) {
+  const kenar = 2.5;
+  const W = IGNE.en + 2 * IGNE_PAY;
+  const H = IGNE.boy + 2 * IGNE_PAY;
+  const cx = W / 2;
+  const bas = IGNE_PAY + IGNE.en / 2;
+  const uc = IGNE_PAY + IGNE.boy;
+  const r = IGNE.en / 2 - kenar / 2;
+  const yol = `M${cx} ${uc} C${cx - 6} ${uc - 9} ${cx - r} ${bas + 11} ${cx - r} ${bas} a${r} ${r} 0 1 1 ${2 * r} 0 C${cx + r} ${bas + 11} ${cx + 6} ${uc - 9} ${cx} ${uc} Z`;
+  return (
+    <Svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} style={s.igneSvg} pointerEvents="none">
+      <Path d={yol} fill={dolgu} stroke={renk.metin} strokeWidth={kenar + 4} strokeLinejoin="round" />
+      <Path d={yol} fill={dolgu} stroke={renk.zemin} strokeWidth={kenar} strokeLinejoin="round" />
+    </Svg>
+  );
+}
+
+/** PNG kenar payları (scripts/pin-ikonlari.mjs PAD / IGNE_PAD). */
+const PNG_PAD = 8;
+const PNG_IGNE_PAD = 12;
+/** #67 🔴2: tam pin PNG'si görünüm içinde — yerleşim kutusu daire (cap) ya da iğne ölçüsünde, pay negatif kenar boşluğuyla taşar. */
+function PngPin({ gorsel, secili, cap, onYuklendi }: { gorsel: ImageRequireSource; secili: boolean; cap: number; onYuklendi?: () => void }) {
+  const pay = secili ? PNG_IGNE_PAD : PNG_PAD;
+  const en = (secili ? IGNE.en : cap) + 2 * pay;
+  const boy = (secili ? IGNE.boy : cap) + 2 * pay;
+  // İğnede görünen uç halkayla IGNE.halka kadar aşağıda: alt kenar boşluğu o kadar az negatif → kutu IGNE_GORUNEN_BOY.
+  const altPay = secili ? -(pay - IGNE.halka) : -pay;
+  return <Image source={gorsel} style={{ width: en, height: boy, marginHorizontal: -pay, marginTop: -pay, marginBottom: altPay }} fadeDuration={0} onLoad={onYuklendi} />;
 }
 
 /**
@@ -65,10 +101,10 @@ function PinIkonu({ ad, renk: r, boyut, kalinlik, onYuklendi }: { ad: IkonAdi; r
 }
 
 /**
- * Pin görünümleri (#53, 7 Ekim mockup; #59 §A2 ölçüler): 28 px daire (seçili 34) + ALTINDA kısa ad (+ ★ puan · yorum
+ * Pin görünümleri (#53, 7 Ekim mockup; #59 §A2 ölçüler): 28 px daire (#65: seçili iğne 38 × 46) + ALTINDA kısa ad (+ ★ puan · yorum
  * satırı, `detay`). durak = gün renginde daire + sıra numarası · listede = siyah daire + ✓ · oneri / bos = beyaz daire,
  * kategori renginde kenar ve ikon · seçili = siyah halka · otel = siyah kare + ev · aday (3.3) = beyaz hap "★ puan · ad" ·
- * etiket (#33) = küçük beyaz hap (taksi bacağı süresi). `etiketGizli` çakışma kuralıyla gelir (geo.gizliEtiketler).
+ * etiket (#33) = küçük beyaz hap (araba bacağı süresi). `etiketGizli` çakışma kuralıyla gelir (geo.gizliEtiketler).
  * `onYuklendi(pngAnahtari)`: içerikteki PNG ikon yüklendi (Android bitmap yakalaması için, Harita.native).
  */
 export function PinIcerigi({
@@ -103,12 +139,12 @@ export function PinIcerigi({
     );
   }
   if (pin.tur === 'etiket') {
-    // #61 §7: taksi hapı sarı zemin, 1 px siyah kenar, koyu kahve metin (mod rengi); yürüyüş hapı beyaz.
-    const taksi = pin.etiketIkon === 'taksi';
+    // #65 (docs/05 §4): araba süre hapı — beyaz zemin, pin gölgesi, 10,5 px / 800 metin, solda rota tonunda araba glifi.
+    const araba = pin.etiketIkon === 'araba';
     return (
-      <View style={[s.bacakHap, taksi && s.taksiHap, etiketGizli && s.gorunmez, durt && s.durtme]} collapsable={false}>
-        {pin.etiketIkon ? <PinIkonu ad={pin.etiketIkon} boyut={13} renk={renk.metin} kalinlik={2.2} onYuklendi={onYuklendi} /> : null}
-        <Text style={[s.bacakMetin, taksi && s.taksiMetin]} numberOfLines={1}>
+      <View style={[s.bacakHap, s.golge, etiketGizli && s.gorunmez, durt && s.durtme]} collapsable={false}>
+        {pin.etiketIkon ? <PinIkonu ad={pin.etiketIkon} boyut={12} renk={araba ? pin.renk : renk.metin} kalinlik={2.2} onYuklendi={onYuklendi} /> : null}
+        <Text style={s.bacakMetin} numberOfLines={1}>
           {pin.etiket}
         </Text>
       </View>
@@ -128,24 +164,38 @@ export function PinIcerigi({
       </View>
     );
   }
-  const cap = pinCapi(pin);
-  // #55 §D11: seçili = siyah halka (3 px, dairenin kenarı; turuncu 2. günle karışmasın).
-  const daire = { width: cap, height: cap, borderRadius: cap / 2, ...(pin.secili ? { borderWidth: 3, borderColor: renk.metin } : {}) };
+  const cap = pin.secili ? 28 : pinCapi(pin);
+  const daire = { width: cap, height: cap, borderRadius: cap / 2 };
   const puan = puanMetni(pin.puan);
   const yorum = yorumKisa(pin.yorumSayisi);
   const kRenk = pin.kategoriRenk ?? renk.metin;
+  const gorsel = pinGorseli(pin);
   return (
     <View style={[s.sutun, durt && s.durtme]} collapsable={false}>
       {yalnizEtiket ? (
-        <View style={{ width: cap, height: cap }} />
+        // Daire ayrı image işaretçisinde: dairenin yerinde boşluk; seçili iğnede etiket doğrudan ucun altında (çapa uç).
+        pin.secili ? null : <View style={{ width: cap, height: cap }} />
+      ) : gorsel ? (
+        // #67 incelemesi 🔴2: PNG'si olan pin (öneri / listede / tamamlanan / otel) web'de ve native yedekte aynı PNG ile çizilir —
+        // kenar payı (gölge, rozet) negatif kenar boşluğuyla taşar; yerleşim kutusu daire / iğne ölçüsünde kalır (çapa aynı).
+        <PngPin gorsel={gorsel} secili={!!pin.secili} cap={pinCapi(pin)} onYuklendi={() => onYuklendi?.(pinPngAnahtari(pin) ?? '')} />
+      ) : pin.secili ? (
+        // #65 / #67 🔴1: seçili numaralı durak iğne biçimi (görünüm) — PNG iğnesiyle aynı yol: siyah 6,5 px alt vuruş + 2,5 px
+        // beyaz kenar, gün renginde dolgu; 14 px numara. Çapa uç (pinCapasi).
+        <View style={s.igne} collapsable={false}>
+          <IgneSvg dolgu={pin.tamam ? renk.basari : pin.renk} />
+          <View style={s.igneBas}>
+            {pin.tamam ? <PinIkonu ad="tik" boyut={17} renk={renk.zemin} kalinlik={2.4} onYuklendi={onYuklendi} /> : <Text style={s.igneMetin}>{pin.etiket ?? ''}</Text>}
+          </View>
+        </View>
       ) : pin.tamam ? (
         // #42 KK7: tamamlanan durak yeşil + tik.
         <View style={[s.daire, daire, { backgroundColor: renk.basari }]} collapsable={false}>
           <PinIkonu ad="tik" boyut={IKON_PX} renk={renk.zemin} kalinlik={2.4} onYuklendi={onYuklendi} />
         </View>
       ) : pin.tur === 'oneri' || pin.tur === 'bos' ? (
-        // #53: beyaz daire, kategori renginde 2,5 px kenar, kategori ikonu.
-        <View style={[s.daire, daire, s.beyaz, { borderColor: kRenk }, pin.secili && { borderWidth: 3, borderColor: renk.metin }]} collapsable={false}>
+        // #53: beyaz daire, kategori renginde 2 px kenar, kategori ikonu.
+        <View style={[s.daire, daire, s.beyaz, { borderColor: kRenk }]} collapsable={false}>
           <PinIkonu ad={pin.ikon ?? 'kamera'} boyut={IKON_PX} renk={kRenk} kalinlik={2.1} onYuklendi={onYuklendi} />
         </View>
       ) : pin.tur === 'listede' ? (
@@ -159,7 +209,7 @@ export function PinIcerigi({
           {pin.etiket ? <Text style={s.daireMetin}>{pin.etiket}</Text> : null}
         </View>
       )}
-      <View style={[s.etiketKutu, { height: etiketYuksekligi(detay) }]}>
+      <View style={[s.etiketKutu, { height: etiketYuksekligi(detay) }, pin.secili && { marginTop: IGNE.etiketPayi }]}>
         {pin.ad && !etiketGizli ? (
           <View style={s.etiketZemin}>
             {/* #47 D14: tamamlanan pin de adını gösterir (gri). */}
@@ -182,7 +232,13 @@ export function PinIcerigi({
 const s = StyleSheet.create({
   sutun: { alignItems: 'center', width: 140 },
   daire: { borderWidth: 2, borderColor: renk.zemin, alignItems: 'center', justifyContent: 'center' },
-  beyaz: { backgroundColor: renk.zemin, borderWidth: 2.5 },
+  beyaz: { backgroundColor: renk.zemin, borderWidth: 2 },
+  // #65: seçili iğne (görünüm): baş 38 (2,5 kenar + 2 siyah halka ≈ kenar 4,5 karma), uç 45° döndürülmüş kare.
+  igne: { width: IGNE.en, height: IGNE_GORUNEN_BOY },
+  igneSvg: { position: 'absolute', left: -IGNE_PAY, top: -IGNE_PAY },
+  igneBas: { position: 'absolute', left: 0, top: 0, width: IGNE.en, height: IGNE.en, alignItems: 'center', justifyContent: 'center' },
+  igneMetin: { fontFamily: yazi.ekstra, fontSize: 14, color: renk.zemin },
+  golge: { shadowColor: renk.metin, shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.22, shadowRadius: 6, elevation: 3 },
   daireMetin: { fontFamily: yazi.ekstra, fontSize: 13, color: renk.zemin },
   // Etiket yüksekliği sabit (16 / detaylı 30) ki çapa hesabı (geo.pinCapasi) gizli/görünür fark etmesin.
   etiketKutu: { marginTop: 2, justifyContent: 'center', alignItems: 'center' },
@@ -195,12 +251,10 @@ const s = StyleSheet.create({
   hapMetin: { fontFamily: yazi.kalin, fontSize: 12, color: renk.metin },
   yildiz: { fontFamily: yazi.kalin, fontSize: 11, color: renk.vurgu },
   otel: { width: OTEL_KARE, height: OTEL_KARE, borderRadius: 9, alignItems: 'center', justifyContent: 'center' },
-  bacakHap: { flexDirection: 'row', gap: 3, height: 22, paddingHorizontal: 8, borderRadius: 11, backgroundColor: renk.zemin, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: renk.ayrac },
-  bacakMetin: { fontFamily: yazi.kalin, fontSize: 11, lineHeight: 14, color: renk.metin },
+  bacakHap: { flexDirection: 'row', gap: 4, height: 22, paddingHorizontal: 8, borderRadius: 11, backgroundColor: renk.zemin, alignItems: 'center', justifyContent: 'center' },
+  bacakMetin: { fontFamily: yazi.ekstra, fontSize: 10.5, lineHeight: 14, color: renk.metin },
   gorunmez: { opacity: 0 },
   durtme: { paddingBottom: 1 },
-  taksiHap: { backgroundColor: TAKSI_SARI, borderColor: renk.metin },
-  taksiMetin: { color: TAKSI_METIN },
   konumHalka: { width: KONUM_HALKA, height: KONUM_HALKA, borderRadius: KONUM_HALKA / 2, backgroundColor: 'rgba(66,133,244,0.25)', alignItems: 'center', justifyContent: 'center' },
   konumNokta: { width: 14, height: 14, borderRadius: 7, backgroundColor: '#4285f4', borderWidth: 2.5, borderColor: renk.zemin },
 });

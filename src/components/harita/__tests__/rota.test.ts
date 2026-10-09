@@ -11,10 +11,10 @@ const ekran = { genislik: 400, yukseklik: 800 };
 const px = 0.000025;
 
 describe('yonOklari (#59 §C)', () => {
-  it('doğuya giden 450 px bacakta ~45 px aralıkla oklar, açı 90°', () => {
-    const c: HaritaCizgisi = { id: 'a', noktalar: [roma, { lat: roma.lat, lng: roma.lng + 450 * px }], renk: '#1f4fc2', opaklik: 0.9 };
+  it('doğuya giden 456 px bacakta ~24 px aralıkla oklar, açı 90°', () => {
+    const c: HaritaCizgisi = { id: 'a', noktalar: [roma, { lat: roma.lat, lng: roma.lng + 456 * px }], renk: '#1f4fc2', opaklik: 0.9 };
     const oklar = yonOklari([c], [], bolge, ekran);
-    expect(oklar).toHaveLength(10);
+    expect(oklar).toHaveLength(19);
     expect(oklar.every((o) => Math.abs(o.aci - 90) < 0.01)).toBe(true);
     // Kuzeye giden bacak 0°, güneye 180°.
     const kuzey: HaritaCizgisi = { ...c, id: 'k', noktalar: [roma, { lat: roma.lat + 100 * px, lng: roma.lng }] };
@@ -25,10 +25,12 @@ describe('yonOklari (#59 §C)', () => {
 
   it('pinlerin 20 px yakınına ok konmaz; kesik / ince / soluk çizgide ok yok', () => {
     const c: HaritaCizgisi = { id: 'a', noktalar: [roma, { lat: roma.lat, lng: roma.lng + 450 * px }], renk: '#1f4fc2', opaklik: 0.9 };
-    // İlk ok 22,5 px'te: tam oraya pin koyunca o ok düşer.
-    const pin: HaritaPini = { id: 'p', konum: { lat: roma.lat, lng: roma.lng + 22.5 * px }, renk: '#000', tur: 'durak' };
-    expect(yonOklari([c], [pin], bolge, ekran)).toHaveLength(9);
+    // #65: oklar 12, 36, 60… px'te (19 ok); 12 px'e pin koyunca 20 px içindeki ilk ok düşer (36 px'teki 24 px uzakta, kalır).
+    const pin: HaritaPini = { id: 'p', konum: { lat: roma.lat, lng: roma.lng + 12 * px }, renk: '#000', tur: 'durak' };
+    expect(yonOklari([c], [pin], bolge, ekran)).toHaveLength(18);
     expect(yonOklari([{ ...c, kesik: true }], [], bolge, ekran)).toHaveLength(0);
+    // #65: araba bacağında ok yok.
+    expect(yonOklari([{ ...c, arac: true }], [], bolge, ekran)).toHaveLength(0);
     expect(yonOklari([{ ...c, ince: true }], [], bolge, ekran)).toHaveLength(0);
     expect(yonOklari([{ ...c, opaklik: 0.35 }], [], bolge, ekran)).toHaveLength(0);
   });
@@ -42,11 +44,11 @@ describe('yonOklari (#59 §C)', () => {
     expect(b).toEqual(a);
   });
 
-  it('bacakEtiketPinleri yalnız etiketli (taksi) çizgiden hap üretir', () => {
+  it('bacakEtiketPinleri yalnız etiketli (araba) çizgiden hap üretir', () => {
     const yuruyus: HaritaCizgisi = { id: 'y', noktalar: [roma, { lat: roma.lat + 0.01, lng: roma.lng }], renk: '#000' };
-    const taksi: HaritaCizgisi = { ...yuruyus, id: 't', kesik: true, etiket: '14 dk', etiketIkon: 'taksi' };
+    const taksi: HaritaCizgisi = { ...yuruyus, id: 't', arac: true, etiket: '14 dk', etiketIkon: 'araba' };
     const haplar = bacakEtiketPinleri([yuruyus, taksi]);
     expect(haplar).toHaveLength(1);
-    expect(haplar[0]).toMatchObject({ id: 'bacak:t', tur: 'etiket', etiket: '14 dk', etiketIkon: 'taksi' });
+    expect(haplar[0]).toMatchObject({ id: 'bacak:t', tur: 'etiket', etiket: '14 dk', etiketIkon: 'araba' });
   });
 });

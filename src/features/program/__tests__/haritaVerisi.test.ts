@@ -43,19 +43,21 @@ describe('programCizgileri (#51)', () => {
     const c = cizgiler([H, A, C, B, H], rotalar);
     // Yeni sırada A>B yok: eski bacağın polyline'ı kullanılmaz.
     expect(c.every((x) => x.id.endsWith(':kus'))).toBe(true);
-    expect(c.every((x) => x.kesik)).toBe(true);
+    expect(c.every((x) => x.kesik && x.ince)).toBe(true);
     expect(c[1].noktalar).toEqual([{ lat: A.lat, lng: A.lng }, { lat: C.lat, lng: C.lng }]);
 
     const d = cizgiler([H, A, B, C, H], rotalar);
     expect(d[1].id).toBe('rota:g1:A>B:yol');
-    expect(d[1].kesik).toBe(false);
+    expect(d[1].kesik).toBeFalsy();
     // #59 §C: yürüyüş bacağında hap yok; taksi bacağında "33 dk".
     expect(d[1].etiket).toBeUndefined();
     const taksili: RotaHaritasi = { 'A>B': { ...rota('A', 'B'), mode: 'DRIVE', drive_seconds: 14 * 60 } };
     const e = cizgiler([H, A, B, C, H], taksili);
-    expect(e[1].kesik).toBe(true);
+    // #65: araba bacağı düz (kesik değil), oksuz (arac), hap ikonu araba.
+    expect(e[1].kesik).toBeFalsy();
+    expect(e[1].arac).toBe(true);
     expect(e[1].etiket).toBe('14 dk');
-    expect(e[1].etiketIkon).toBe('taksi');
+    expect(e[1].etiketIkon).toBe('araba');
     // #61 §5: örnek polyline pinlerden çok uzakta (Kaliforniya) → sapma kontrolü düz çizgiye düşürür; yol kimliği kalır.
     expect(d[1].noktalar).toEqual([{ lat: A.lat, lng: A.lng }, { lat: B.lat, lng: B.lng }]);
   });
@@ -78,7 +80,7 @@ describe('otelPinleri (#56)', () => {
     const p1 = otelPinleri(gunlerIki, uclar, 'g1');
     expect(p1.map((p) => [p.id, p.opaklik])).toEqual([
       ['otel:stay:x', 1],
-      ['otel:stay:y', 0.4],
+      ['otel:stay:y', 0.45],
     ]);
     // Taşınma günü iki otel de tam renk.
     expect(otelPinleri(gunlerIki, uclar, 'g2').map((p) => p.opaklik)).toEqual([1, 1]);

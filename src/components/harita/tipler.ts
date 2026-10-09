@@ -15,7 +15,7 @@ export type HaritaPini = {
   /** #53: kategori rengi — oneri/bos dairesinin kenarı ve ikonu. */
   kategoriRenk?: string;
   /** #47 B5: `etiket` türü hapta metnin önündeki çizgi ikon. */
-  etiketIkon?: 'yurume' | 'taksi';
+  etiketIkon?: 'yurume' | 'araba';
   /** ★ puan: aday hapında; diğer türlerde ad etiketinin ikinci satırında (seçili ya da zoom ≥ 16, #30). */
   puan?: number | null;
   /** Google yorum sayısı; puanla birlikte "★ 4,8 · 312K". */
@@ -57,13 +57,15 @@ export type HaritaCizgisi = {
   renk: string;
   /** 0–1; seçili gün 0,9 (geçilen bacak 0,35), diğer günler 0,32. */
   opaklik?: number;
-  /** #59 §C: taksi bacağı noktalı (beyaz kenarlı); gerçek yol gelmemiş kuş uçuşu da kesikli. */
+  /** Gerçek yol gelmemiş kuş uçuşu: kesikli (#65: araba bacağı düzdür, kesik değil). */
   kesik?: boolean;
+  /** #65: araba bacağı (uzun bacak) — yürümeyle aynı katmanlar, yön oku yok. */
+  arac?: boolean;
   /** #59 §C: diğer günlerin rotası — 3 dp, kenarsız, oksuz. */
   ince?: boolean;
   etiket?: string;
   /** #47 B5: bacak hapında ikon (emoji yerine). */
-  etiketIkon?: 'yurume' | 'taksi';
+  etiketIkon?: 'yurume' | 'araba';
 };
 
 /** Kamerayı programla taşıma isteği; `sayac` her değişimde yeni animasyon (aynı konuma yeniden gidebilmek için). */

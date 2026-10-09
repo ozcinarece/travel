@@ -1,4 +1,4 @@
-// #33: rota çizgilerinden bacak etiketi pinleri ("🚕 12 dk" hapı, bacağın ortasında). #59 §C: yalnız taksi bacağı
+// #33: rota çizgilerinden bacak etiketi pinleri ("araba 12 dk" hapı, bacağın ortasında). #59 §C / #65: yalnız araba bacağı
 // hap taşır (yürüyüş süreleri panelde); yön okları ayrı işaretçi olarak çizilir.
 import { cizgiOrtasi } from '@/lib/polyline';
 
@@ -19,14 +19,14 @@ export function bacakEtiketPinleri(cizgiler: HaritaCizgisi[]): HaritaPini[] {
 export type YonOku = { id: string; konum: Konum; aci: number };
 
 /** Ok aralığı (ekran px), toplam üst sınır, pin merkezine en az uzaklık (px). */
-export const OK_ARALIGI_PX = 45;
-export const OK_EN_FAZLA = 40;
+export const OK_ARALIGI_PX = 24;
+export const OK_EN_FAZLA = 80;
 export const OK_PIN_PAYI_PX = 20;
 
 /**
- * Seçili günün yürüyüş bacaklarına (kesik/ince olmayan, soluk olmayan çizgiler) ~45 px aralıkla ok yerleştirir.
+ * Seçili günün yürüyüş bacaklarına (kesik/ince/araba olmayan, soluk olmayan çizgiler) ~24 px aralıkla ok yerleştirir (#65).
  * Hesap ekran pikselinde (bölge yalnız ölçek verir; merkez önemsiz → kaydırmada sonuç değişmez, yalnız zoom adımında
- * yeniden hesaplanır). Pinlerin 20 px yakınına ok konmaz. Toplam 40'ı aşarsa aralık orantılı büyütülür.
+ * yeniden hesaplanır). Pinlerin 20 px yakınına ok konmaz. Toplam 80'i (OK_EN_FAZLA) aşarsa seyreltilir.
  */
 export function yonOklari(cizgiler: HaritaCizgisi[], pinler: HaritaPini[], bolge: HaritaBolgesi | null, ekran: { genislik: number; yukseklik: number }): YonOku[] {
   if (!bolge || bolge.latDelta <= 0 || bolge.lngDelta <= 0) return [];
@@ -38,7 +38,7 @@ export function yonOklari(cizgiler: HaritaCizgisi[], pinler: HaritaPini[], bolge
 
   const adaylar: YonOku[] = [];
   for (const c of cizgiler) {
-    if (c.kesik || c.ince || (c.opaklik ?? 1) < 0.5 || c.noktalar.length < 2) continue;
+    if (c.kesik || c.ince || c.arac || (c.opaklik ?? 1) < 0.5 || c.noktalar.length < 2) continue;
     let sonraki = OK_ARALIGI_PX / 2;
     let yol = 0;
     for (let i = 1; i < c.noktalar.length; i++) {

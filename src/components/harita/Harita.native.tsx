@@ -2,10 +2,10 @@ import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import { PixelRatio, StyleSheet, View, useWindowDimensions } from 'react-native';
 import MapView, { Circle, Marker, Polyline, PROVIDER_GOOGLE } from 'react-native-maps';
 
-import { bolgeHesapla, detayGoster, etiketBolgesi, haritaDolgusu, isaretciImzasi, izlemeGerekli, pinCapasi, pinCapi, pinSecimi, pinZ, zoomDelta } from './geo';
+import { bolgeHesapla, detayGoster, etiketBolgesi, haritaDolgusu, IGNE, isaretciImzasi, izlemeGerekli, pinCapasi, pinCapi, pinSecimi, pinZ, zoomDelta } from './geo';
 import { ACIK_HARITA_STILI } from './haritaStili';
-import { PinIcerigi, pinGorseli, pinPngAnahtari, TAKSI_SARI } from './PinIcerigi';
-import { PIN_IKONLARI } from './pinIkonlari';
+import { PinIcerigi, pinGorseli, pinPngAnahtari } from './PinIcerigi';
+import { IGNE_CAPA, PIN_IKONLARI } from './pinIkonlari';
 import { usePinGorselleri } from './pinOnYukleme';
 import { bacakEtiketPinleri, yonOklari } from './rota';
 import type { HaritaBolgesi, HaritaCizgisi, HaritaPini, HaritaProps, Konum } from './tipler';
@@ -18,14 +18,8 @@ function saydam(hex: string, opaklik: number) {
 
 /** #59 §C (RouteSpec5): seçili gün üç katman — gölge 11 dp %12 · beyaz kenar 9 dp · renk 5,5 dp; diğer günler 3 dp. */
 const ROTA = { golge: 11, kenar: 9, cizgi: 5.5, ince: 3, golgeRenk: '#0f0f0f', golgeOpaklik: 0.12 } as const;
-/**
- * #61 §7: taksi bacağı sarı-siyah şerit (mod rengi, gün renginden bağımsız): siyah 10 dp kenar · sarı 6 dp dolgu ·
- * siyah 6 dp kesikli şerit (10/14 dp; Android'de desen ekran pikseli olduğundan PixelRatio ile çevrilir). Ok yok.
- * Rotası henüz gelmemiş yürüyüş kuş uçuşu kesikli (10/8 dp), gün renginde.
- */
-const TAKSI = { kenar: 10, dolgu: 6, serit: 6, siyah: '#0f0f0f', sari: TAKSI_SARI } as const;
+/** Rotası henüz gelmemiş kuş uçuşu: ince kesikli (10/8 dp; Android'de desen ekran pikseli → PixelRatio). #65: araba bacağı düz. */
 const dp = (v: number) => Math.round(PixelRatio.get() * v);
-const SERIT = [dp(10), dp(14)];
 const KESIKLI = [dp(10), dp(8)];
 const OK_PNG = PIN_IKONLARI['ok-ffffff'];
 
@@ -83,7 +77,7 @@ export function Harita({
     sigdirKamera(sigdir.noktalar, { top: sigdir.ust, right: 48, bottom: sigdir.alt, left: 48 });
   }, [sigdir, hazir]);
 
-  // #33: bacak etiketleri (#59: yalnız taksi "12 dk") pin gibi çizilir; çakışma kuralına en düşük öncelikle girer.
+  // #33: bacak etiketleri (#65: yalnız araba "12 dk") pin gibi çizilir; çakışma kuralına en düşük öncelikle girer.
   const tumPinler = useMemo(() => [...pinler, ...bacakEtiketPinleri(cizgiler)], [pinler, cizgiler]);
   const olcu = useMemo(() => ({ genislik: ekran.width, yukseklik: ekran.height }), [ekran.width, ekran.height]);
   // #59 §A: kümeleme yok; yakın pinler üst üste biner (beyaz kenar ayırır, z-sırası pinZ). #61 §2: adı sığmayan öneri
@@ -91,7 +85,7 @@ export function Harita({
   const secim = useMemo(() => pinSecimi(tumPinler, etiketBolge, olcu, ustBosluk), [tumPinler, etiketBolge, olcu, ustBosluk]);
   const gizli = secim.gizli;
   const gorunen = useMemo(() => secim.pinler.filter((p) => !(p.tur === 'etiket' && gizli.etiket.has(p.id))), [secim, gizli]);
-  // #59 §C: yön okları — zoom adımına göre; en fazla 40.
+  // #59 §C / #65: yön okları ~24 px aralık, en fazla 80 — zoom adımına göre.
   const oklar = useMemo(() => yonOklari(cizgiler, pinler, etiketBolge, olcu), [cizgiler, pinler, etiketBolge, olcu]);
   // #55 §C10: Marker'da uzun basma yok — haritaya uzun basılan noktaya ~28 px içindeki en yakın pin.
   const uzunBas = (k: { latitude: number; longitude: number }) => {
@@ -101,8 +95,9 @@ export function Harita({
     let enYakin: { id: string; d: number } | null = null;
     for (const p of gorunen) {
       if (p.tur === 'etiket' || p.tur === 'konum' || p.tur === 'otel') continue;
-      // Pin dairesi çapanın üstünde değil, merkezinde (pinCapasi daire merkezi).
-      const d = Math.hypot((p.konum.lng - k.longitude) * pxLng, (p.konum.lat - k.latitude) * pxLat);
+      // Daire pinde merkez koordinatta; seçili iğnede baş merkezi ucun (koordinatın) 27 px üstünde (#67 incelemesi).
+      const basY = p.secili ? IGNE.boy - IGNE.en / 2 : 0;
+      const d = Math.hypot((p.konum.lng - k.longitude) * pxLng, (p.konum.lat - k.latitude) * pxLat + basY);
       if (d <= Math.max(28, pinCapi(p) / 2 + 6) && (!enYakin || d < enYakin.d)) enYakin = { id: p.id, d };
     }
     if (enYakin) onPinUzunBas(enYakin.id);
@@ -185,7 +180,8 @@ export function Harita({
             <Marker
               coordinate={{ latitude: p.konum.lat, longitude: p.konum.lng }}
               image={gorsel}
-              anchor={{ x: 0.5, y: 0.5 }}
+              // #65: seçili iğnenin çapası ucu; dairelerde merkez.
+              anchor={p.secili ? IGNE_CAPA : { x: 0.5, y: 0.5 }}
               tracksViewChanges={false}
               opacity={p.opaklik ?? 1}
               zIndex={pinZ(p)}
@@ -201,24 +197,13 @@ export function Harita({
   );
 }
 
-/** #59 §C: üç katmanlı rota (gölge · beyaz kenar · renk); taksi noktalı; diğer günler tek ince çizgi. */
+/** #59 §C / #65: üç katmanlı rota (gölge · beyaz kenar · renk) — yürüme ve araba aynı (araba düz, oksuz); diğer günler ve kuş uçuşu ince. */
 function RotaCizgisi({ cizgi: c }: { cizgi: HaritaCizgisi }) {
   const noktalar = useMemo(() => c.noktalar.map((n) => ({ latitude: n.lat, longitude: n.lng })), [c.noktalar]);
   const opaklik = c.opaklik ?? 1;
   const ortak = { coordinates: noktalar, lineCap: 'round' as const, lineJoin: 'round' as const };
-  // #61 §7: taksi (hap taşıyan kesik bacak) sarı-siyah şerit; rotası gelmemiş yürüyüş kuş uçuşu kesikli.
-  const taksi = c.kesik && c.etiketIkon === 'taksi';
-  const desen = c.kesik && !taksi ? KESIKLI : undefined;
+  const desen = c.kesik ? KESIKLI : undefined;
   if (c.ince) return <Polyline {...ortak} lineDashPattern={desen} strokeColor={saydam(c.renk, opaklik)} strokeWidth={ROTA.ince} zIndex={0} />;
-  if (taksi)
-    return (
-      <>
-        <Polyline {...ortak} strokeColor={saydam(TAKSI.siyah, opaklik)} strokeWidth={TAKSI.kenar} zIndex={1} />
-        <Polyline {...ortak} strokeColor={saydam(TAKSI.sari, opaklik)} strokeWidth={TAKSI.dolgu} zIndex={2} />
-        {/* Şerit düz uçlu: yuvarlak uç her parçayı iki yandan 3 dp uzatıp 10/14'ü 16/8 yapıyordu. */}
-        <Polyline {...ortak} lineCap="butt" lineDashPattern={SERIT} strokeColor={saydam(TAKSI.siyah, opaklik)} strokeWidth={TAKSI.serit} zIndex={3} />
-      </>
-    );
   return (
     <>
       <Polyline {...ortak} strokeColor={saydam(ROTA.golgeRenk, ROTA.golgeOpaklik * opaklik)} strokeWidth={ROTA.golge} zIndex={1} />
@@ -269,7 +254,8 @@ function OzelIsaretci({
     setTimeout(() => setYuklenenPng(anahtar), 80);
   };
   const durt = yuklenenPng !== null && yuklenenPng === beklenenPng;
-  const capa = p.tur === 'aday' ? { x: 0.1, y: 0.5 } : p.tur === 'otel' || p.tur === 'etiket' || p.tur === 'konum' || !p.tur ? { x: 0.5, y: 0.5 } : pinCapasi(p, detay);
+  const capa =
+    p.tur === 'aday' ? { x: 0.1, y: 0.5 } : p.tur === 'otel' || p.tur === 'etiket' || p.tur === 'konum' || !p.tur ? { x: 0.5, y: 0.5 } : yalnizEtiket && p.secili ? { x: 0.5, y: 0 } : pinCapasi(p, detay);
   // Bacak etiketi, kullanıcı konumu ve yalnız-etiket işaretçisi dokunulamaz (dokunuş daire işaretçisine gider).
   const bacak = p.tur === 'etiket' || p.tur === 'konum' || yalnizEtiket;
   return (
