@@ -1,6 +1,6 @@
 # Pin ve ikon sistemi
 
-Sürüm 1.5 · 9 Ekim 2026 (öne çıkan ★ rozeti) · önceki 1.4 (pin düşürme kalktı, zoom'a göre küçük pin) · önceki: 1.3 (seçili = iğne; listede = dolu + ✓ rozeti; taksi → araba, düz; yürüme okları sık) · Sahip: Ece (ürün)
+Sürüm 1.6 · 9 Ekim 2026 (seçili ad hep görünür; öne çıkan seçimi) · önceki 1.5 (öne çıkan ★ rozeti) · önceki 1.4 (pin düşürme kalktı, zoom'a göre küçük pin) · önceki: 1.3 (seçili = iğne; listede = dolu + ✓ rozeti; taksi → araba, düz; yürüme okları sık) · Sahip: Ece (ürün)
 
 Kanvastaki **"Pin ve ikon sistemi"** panosu (`PinSystem6`), haritadaki her işaretin tek kaynağıdır: https://claude.ai/artifact/46jh8ggGczM7VDTVHyzRQT
 
@@ -28,7 +28,7 @@ Diğer glifler: `tik` (`M5 12.5l4.5 4.5L19 7.5`, kalınlık +0,6) · `ev` · `ar
 | Durum | Boyut | Görünüm |
 |---|---|---|
 | Öneri (Keşfet) | 28 px | beyaz zemin, kategori renginde 2 px kenar, kategori renginde 14 px glif |
-| Öne çıkan (Keşfet) | 28 px | öneri ya da listede görünümü + **sol üst köşede turuncu ★ rozeti** (15 px `#ff5a1f` daire, 1,5 px beyaz kenar, beyaz yıldız 8 px). Her zoom'da tam boy (küçük pine dönmez); ad altında ★ puan · yorum |
+| Öne çıkan (Keşfet) | 28 px | öneri ya da listede görünümü + **sol üst köşede turuncu ★ rozeti** (15 px `#ff5a1f` daire, 1,5 px beyaz kenar, beyaz yıldız 8 px). Her zoom'da tam boy (küçük pine dönmez); ad altında ★ puan · yorum. **Seçim:** seyahatin yüklenmiş mekanları içinde ≥ 4,3 puan ve ≥ 200 yorumlu adaylar skorla (puan × log10(yorum+1)) sıralanır; yüklenmiş mekan sayısının %10'u kadar aday öne çıkan olur (#70 incelemesi) |
 | Listede (Keşfet) | 28 px | kategori renginde dolu daire, 2 px beyaz kenar, beyaz 14 px glif + **sağ üst köşede ✓ rozeti** (15 px siyah daire, 1,5 px beyaz kenar, beyaz ✓ 9 px; köşeden 3 px taşar) |
 | Seçili (öneri, listede, durak, tamamlandı) | 38 × 46 px | **iğne (damla) biçimi**: aynı zemin ve kenar (2,5 px), 17 px glif / 14 px numara, 2 px siyah dış halka, gölge `0 4px 10px rgba(15,15,15,.3)`. **Çapa = iğnenin ucu** (konum). Listede ise ✓ rozeti iğnenin sağ üstünde kalır. Ad etiketi ucun 4 px altında |
 | Durak (seçili gün) | 28 px | gün renginde dolu, 2 px beyaz kenar, beyaz sıra numarası 12 px / 800 |
@@ -39,7 +39,7 @@ Diğer glifler: `tik` (`M5 12.5l4.5 4.5L19 7.5`, kalınlık +0,6) · `ev` · `ar
 
 Tüm pinlerde gölge: `0 2px 6px rgba(15,15,15,.22)`. Üst üste binme sırası: konum > seçili > otel > listede / durak > öneri > hap.
 
-**Ad etiketi:** 11 px kalın, beyaz hale; 18–20 karakterde kesilir. Yakınlaşınca altında ★ puan · yorum. Çakışmada önce puan satırı, sonra ad düşer. **Pin hiçbir zaman düşmez**, yalnız adı gizlenir.
+**Ad etiketi:** 11 px kalın, beyaz hale; 18–20 karakterde kesilir. Yakınlaşınca altında ★ puan · yorum. Çakışmada önce puan satırı, sonra ad düşer. **Pin hiçbir zaman düşmez**, yalnız adı gizlenir. **Seçili pinin adı hiç gizlenmez** (#67 incelemesi).
 
 **Yakınlığa göre (Keşfet, kanvas `KesfetZoom7`):**
 
