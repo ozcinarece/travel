@@ -1,6 +1,6 @@
 import { Image } from 'expo-image';
 import { router } from 'expo-router';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 
 import { bolgeHesapla, zoomDelta } from '@/components/harita/geo';
@@ -34,6 +34,7 @@ export default function KesfetEkrani() {
 }
 
 const ILK_ZOOM = 13;
+const ILK_BOLGE_BEKLEME_MS = 2000;
 
 /** #29: önizleme kartındaki mekan — çip önerisinden, arama sonucundan ya da listedeki pinden. */
 type Secim = { place_id: string; kaynak: 'oneri' | 'arama' | 'liste' };
@@ -66,6 +67,13 @@ function Kesfet({ seyahat, konaklamalar }: { seyahat: Seyahat; konaklamalar: Kon
   );
   const ilkBolge = useMemo(() => bolgeHesapla(ilkMerkez, zoomDelta(ILK_ZOOM), zoomDelta(ILK_ZOOM)), [ilkMerkez]);
   const [bolge, setBolge] = useState<HaritaBolgesi | null>(null);
+  // İlk tur gerçek görünür bölgeyi bekler (kare `ilkBolge` ile çift yükleme olmasın, #68 incelemesi); harita 2 sn içinde
+  // bölge bildirmezse yedek olarak ilkBolge kullanılır.
+  const [ilkBolgeYedek, setIlkBolgeYedek] = useState(false);
+  useEffect(() => {
+    const z = setTimeout(() => setIlkBolgeYedek(true), ILK_BOLGE_BEKLEME_MS);
+    return () => clearTimeout(z);
+  }, []);
   const cipSec = (c: OneriCipi) => {
     setCip(c);
     setAramaSonucu(null);
@@ -81,13 +89,14 @@ function Kesfet({ seyahat, konaklamalar }: { seyahat: Seyahat; konaklamalar: Kon
   const linkMi = linkGibiMi(sorgu);
   const aramaAcik = !linkMi && sorgu.trim().length >= 2 && !aramaSonucu;
   const oneriler = useOneriler('mekan-oneri', sorgu, jeton, undefined, aramaMerkezi, aramaAcik);
-  const yakin = useKaroOnerileri(cip, bolge ?? ilkBolge);
+  const yakin = useKaroOnerileri(seyahat.id, cip, bolge ?? (ilkBolgeYedek ? ilkBolge : null));
 
-  const havuz = mekanlar.data ?? [];
+  const havuz = useMemo(() => mekanlar.data ?? [], [mekanlar.data]);
   // #30: listedeki pinlerin altında ad etiketi (canlı ad, PRD §7).
   const havuzAdlari = useHafifYerler(havuz.map((m) => m.place_id));
   const uyeAdi = (uid: string | null) => uyeler.data?.find((u) => u.user_id === uid)?.display_name ?? '';
   const oneriListesi: HafifYer[] = yakin.yerler;
+  const havuzIdleri = useMemo(() => new Set(havuz.map((m) => m.place_id)), [havuz]);
 
   // #29: seçili mekanın kart verisi — önizleme (ilk fotoğrafla), yoksa elimizdeki hafif veri.
   const onizleme = useOnizleme(secim?.place_id);
@@ -99,6 +108,30 @@ function Kesfet({ seyahat, konaklamalar }: { seyahat: Seyahat; konaklamalar: Kon
       null)
     : null;
   const seciliMekan = secim ? havuz.find((m) => m.place_id === secim.place_id) : undefined;
+
+  // #53: öneri = beyaz daire, kategori renginde kenar + ikon (primaryType). #66 KK6: en fazla 250 öneri pini çizilir
+  // (aşılırsa görünür alan dışındakiler; listede kalırlar). #68 🔴2: liste oturum boyu büyür — tek geçişte Set ile ayıklanır,
+  // yalnız girdileri değişince yeniden kurulur.
+  const oneriPinleri = useMemo((): HaritaPini[] => {
+    const gorulen = new Set(havuzIdleri);
+    const adaylar: HafifYer[] = [];
+    for (const y of [...(aramaSonucu ? [aramaSonucu] : []), ...oneriListesi]) {
+      if (gorulen.has(y.place_id)) continue;
+      gorulen.add(y.place_id);
+      adaylar.push(y);
+    }
+    return gorunurOneriler(adaylar, bolge).map((y) => ({
+      id: `o:${y.place_id}`,
+      konum: { lat: y.lat, lng: y.lng },
+      renk: renk.metin,
+      ad: y.ad,
+      ...kategoriPini(y.primary_type),
+      puan: y.puan,
+      yorumSayisi: y.puan_sayisi,
+      tur: 'oneri' as const,
+      secili: secim?.place_id === y.place_id,
+    }));
+  }, [oneriListesi, havuzIdleri, aramaSonucu, bolge, secim?.place_id]);
 
   const pinler: HaritaPini[] = [
     ...konaklamalar.map((k) => ({
@@ -119,22 +152,7 @@ function Kesfet({ seyahat, konaklamalar }: { seyahat: Seyahat; konaklamalar: Kon
       tur: 'listede' as const,
       secili: secim?.place_id === m.place_id,
     })),
-    // #53: öneri = beyaz daire, kategori renginde kenar + ikon (primaryType). #66 KK6: en fazla 250 öneri pini çizilir
-    // (aşılırsa görünür alan dışındakiler; listede kalırlar).
-    ...gorunurOneriler(
-      [...(aramaSonucu ? [aramaSonucu] : []), ...oneriListesi].filter((y, i, dizi) => !havuz.some((m) => m.place_id === y.place_id) && dizi.findIndex((x) => x.place_id === y.place_id) === i),
-      bolge,
-    ).map((y) => ({
-      id: `o:${y.place_id}`,
-      konum: { lat: y.lat, lng: y.lng },
-      renk: renk.metin,
-      ad: y.ad,
-      ...kategoriPini(y.primary_type),
-      puan: y.puan,
-      yorumSayisi: y.puan_sayisi,
-      tur: 'oneri' as const,
-      secili: secim?.place_id === y.place_id,
-    })),
+    ...oneriPinleri,
   ];
 
   const sec = async (placeId: string, ad: string) => {

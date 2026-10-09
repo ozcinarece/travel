@@ -16,9 +16,22 @@ export const KARO_GECIKME_MS = 400;
 
 export type Karo = { anahtar: string; z: number; ix: number; iy: number; merkez: Konum; yaricapM: number };
 
+/** Bu zoom'un altında karo istenmez (şehir ölçeğinin çok dışı): eldeki birikim gösterilir (#68 incelemesi 🔴1). */
+export const KARO_ZOOM_ALT_SINIR = KARO_ZOOM_EN_AZ - 1;
+/** Görünüm başına en çok karo (güvenlik; merkezden dışa üretildiği için ortadakiler hep vardır). */
+export const KARO_EN_FAZLA_GORUNUM = 400;
+
 /** Bölgenin karo zoom adımı (tam sayı, 11–17; aşağı yuvarlanır → ara zoom'da büyük karo, görünüm 8–15 karo kalır). */
 export function karoZoomu(zoom: number): number {
   return Math.max(KARO_ZOOM_EN_AZ, Math.min(KARO_ZOOM_EN_COK, Math.floor(zoom)));
+}
+
+/**
+ * Bölgenin etkin zoom'u: görünen ENLEM aralığından (geo.deltaZoom). Native'de `bolge.zoom` zaten budur; web'de gerçek Google
+ * zoom'u gelir ve masaüstü görünümü çok daha geniştir — karo adımı her iki platformda görünümün kapladığı alandan seçilir.
+ */
+export function bolgeZoomu(bolge: HaritaBolgesi): number {
+  return bolge.latDelta > 0 ? Math.log2(360 / bolge.latDelta) : bolge.zoom;
 }
 
 /**
@@ -51,18 +64,28 @@ export function karoYap(z: number, ix: number, iy: number): Karo {
  * Alan haritanın görünen enlem/boylam aralığıdır; en fazla 400 karo (güvenlik).
  */
 export function gorunurKarolar(bolge: HaritaBolgesi): Karo[] {
-  const z = karoZoomu(bolge.zoom);
+  const zoom = bolgeZoomu(bolge);
+  if (zoom < KARO_ZOOM_ALT_SINIR) return [];
+  const z = karoZoomu(zoom);
   const d = karoKenariDerece(z);
   const { merkez, latDelta, lngDelta } = bolge;
   const ix1 = Math.floor((merkez.lng - lngDelta / 2) / d);
   const ix2 = Math.floor((merkez.lng + lngDelta / 2) / d);
   const iy1 = Math.floor((merkez.lat - latDelta / 2) / d);
   const iy2 = Math.floor((merkez.lat + latDelta / 2) / d);
+  // Merkez karosundan dışa halka halka (#68 🔴1): sınır dolarsa görünümün ortası elde kalır, kenarları değil.
+  const cx = Math.floor(merkez.lng / d);
+  const cy = Math.floor(merkez.lat / d);
+  const enUzak = Math.max(cx - ix1, ix2 - cx, cy - iy1, iy2 - cy);
   const karolar: Karo[] = [];
-  for (let iy = iy1; iy <= iy2; iy++) {
-    for (let ix = ix1; ix <= ix2; ix++) {
-      karolar.push(karoYap(z, ix, iy));
-      if (karolar.length >= 400) break;
+  halka: for (let r = 0; r <= enUzak; r++) {
+    for (let iy = cy - r; iy <= cy + r; iy++) {
+      for (let ix = cx - r; ix <= cx + r; ix++) {
+        if (Math.max(Math.abs(ix - cx), Math.abs(iy - cy)) !== r) continue;
+        if (ix < ix1 || ix > ix2 || iy < iy1 || iy > iy2) continue;
+        karolar.push(karoYap(z, ix, iy));
+        if (karolar.length >= KARO_EN_FAZLA_GORUNUM) break halka;
+      }
     }
   }
   const uzaklik = (k: Karo) => Math.hypot(k.merkez.lat - merkez.lat, (k.merkez.lng - merkez.lng) * Math.cos((merkez.lat * Math.PI) / 180));

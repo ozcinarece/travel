@@ -3,7 +3,7 @@ import { describe, expect, it, jest } from '@jest/globals';
 import { bolgeHesapla, zoomDelta } from '@/components/harita/geo';
 
 import type { HafifYer } from '../api';
-import { birikimeEkle, birikimListesi, gorunurKarolar, gorunurOneriler, istenecekKarolar, KARO_EN_FAZLA_ISTEK, karoKenariM, karoOnbellekAnahtari, karoYap, karoZoomu } from '../karolar';
+import { birikimeEkle, birikimListesi, bolgeZoomu, gorunurKarolar, gorunurOneriler, istenecekKarolar, KARO_EN_FAZLA_GORUNUM, KARO_EN_FAZLA_ISTEK, karoKenariM, karoOnbellekAnahtari, karoYap, karoZoomu } from '../karolar';
 
 jest.mock('@/lib/supabase', () => ({ supabase: {} }));
 
@@ -44,6 +44,27 @@ describe('karolar (#66)', () => {
     expect(Math.abs(k13[0].merkez.lng - eskisehir.lng)).toBeLessThanOrEqual(d / 2);
     // Zoom değişince karolar başka adımdan.
     expect(gorunurKarolar(bolge(15)).every((k) => k.z === 15)).toBe(true);
+  });
+
+  it('#68 🔴1: çok uzaklaşınca karo istenmez; sınır dolarsa merkezden dışa üretilir (ilk karo merkezi içerir)', () => {
+    // Zoom 9 (Eskişehir'den 80 km dışı görünür): karo yok, eldeki birikim gösterilir.
+    expect(gorunurKarolar(bolge(9))).toEqual([]);
+    expect(gorunurKarolar(bolge(9.9))).toEqual([]);
+    expect(gorunurKarolar(bolge(10.5)).every((x) => x.z === 11)).toBe(true);
+    // Zoom 11 ama görünüm çok geniş (masaüstü / yatay): 400 sınırı dolar; ortadaki karolar yine var, uzaktakiler düşer.
+    const genis = bolgeHesapla(eskisehir, zoomDelta(11), zoomDelta(11) * 24, 11);
+    const k = gorunurKarolar(genis);
+    expect(k.length).toBe(KARO_EN_FAZLA_GORUNUM);
+    const d = karoKenariM(11) / 111_320;
+    expect(Math.abs(k[0].merkez.lat - eskisehir.lat)).toBeLessThanOrEqual(d / 2);
+    expect(Math.abs(k[0].merkez.lng - eskisehir.lng)).toBeLessThanOrEqual(d / 2);
+    // Sıra merkeze uzaklığa göre: sonuncu karo ilkinden uzak, hiçbir karo görünümün dışında değil.
+    const uzak = (x: { merkez: { lat: number; lng: number } }) => Math.hypot(x.merkez.lat - eskisehir.lat, (x.merkez.lng - eskisehir.lng) * 0.77);
+    expect(uzak(k[k.length - 1])).toBeGreaterThan(uzak(k[0]));
+    expect(k.every((x) => Math.abs(x.merkez.lng - eskisehir.lng) <= genis.lngDelta / 2 + d && Math.abs(x.merkez.lat - eskisehir.lat) <= genis.latDelta / 2 + d)).toBe(true);
+    // Web: bolge.zoom gerçek Google zoom'u olsa da karo adımı enlem aralığından (bolgeZoomu).
+    expect(bolgeZoomu({ ...bolge(13), zoom: 15 })).toBeCloseTo(13);
+    expect(gorunurKarolar({ ...bolge(13), zoom: 15 }).every((x) => x.z === 13)).toBe(true);
   });
 
   it('istenecekKarolar: önbellektekiler atlanır, en fazla 12', () => {

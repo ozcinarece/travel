@@ -8,7 +8,17 @@ import { govde, hata, json, onKontrol } from '../_shared/http.ts';
 type Istek = { merkez: { lat: number; lng: number }; yaricapM?: number; cip: string; enFazla?: number };
 
 const TTL_MS = 24 * 60 * 60 * 1000;
+/** Önbellek izolat belleğinde (kullanıcılar arasında yalnız aynı izolat paylaşır); en çok bu kadar anahtar, en eski silinir (#68 incelemesi). */
+const ONBELLEK_EN_FAZLA = 5000;
 const onbellek = new Map<string, { zaman: number; deger: HafifYer[] }>();
+function onbellekYaz(anahtar: string, deger: HafifYer[]) {
+  const simdi = Date.now();
+  if (onbellek.size >= ONBELLEK_EN_FAZLA) {
+    for (const [k, v] of onbellek) if (simdi - v.zaman >= TTL_MS) onbellek.delete(k);
+    while (onbellek.size >= ONBELLEK_EN_FAZLA) onbellek.delete(onbellek.keys().next().value!);
+  }
+  onbellek.set(anahtar, { zaman: simdi, deger });
+}
 
 Deno.serve(async (istek) => {
   const on = onKontrol(istek);
@@ -26,10 +36,11 @@ Deno.serve(async (istek) => {
   const anahtar = `${g.cip}:${lat.toFixed(4)},${lng.toFixed(4)}:${yaricapM}:${enFazla}`;
   const eski = onbellek.get(anahtar);
   if (eski && Date.now() - eski.zaman < TTL_MS) return json({ yerler: eski.deger, onbellek: true });
+  if (eski) onbellek.delete(anahtar);
 
   try {
     const yerler = await yakinAra({ merkez: { lat, lng }, yaricapM, tipler, enFazla });
-    onbellek.set(anahtar, { zaman: Date.now(), deger: yerler });
+    onbellekYaz(anahtar, yerler);
     return json({ yerler, onbellek: false });
   } catch (e) {
     if (e instanceof GoogleHatasi) {
