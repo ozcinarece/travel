@@ -1,6 +1,6 @@
 # Pin ve ikon sistemi
 
-Sürüm 1.6 · 9 Ekim 2026 (seçili ad hep görünür; öne çıkan seçimi) · önceki 1.5 (öne çıkan ★ rozeti) · önceki 1.4 (pin düşürme kalktı, zoom'a göre küçük pin) · önceki: 1.3 (seçili = iğne; listede = dolu + ✓ rozeti; taksi → araba, düz; yürüme okları sık) · Sahip: Ece (ürün)
+Sürüm 1.7 · 9 Ekim 2026 (zoom ≥ 17'de büyük pin; dokunma alanı ≥ 44 px) · önceki 1.6 (seçili ad hep görünür; öne çıkan seçimi) · önceki 1.5 (öne çıkan ★ rozeti) · önceki 1.4 (pin düşürme kalktı, zoom'a göre küçük pin) · önceki: 1.3 (seçili = iğne; listede = dolu + ✓ rozeti; taksi → araba, düz; yürüme okları sık) · Sahip: Ece (ürün)
 
 Kanvastaki **"Pin ve ikon sistemi"** panosu (`PinSystem6`), haritadaki her işaretin tek kaynağıdır: https://claude.ai/artifact/46jh8ggGczM7VDTVHyzRQT
 
@@ -37,7 +37,7 @@ Diğer glifler: `tik` (`M5 12.5l4.5 4.5L19 7.5`, kalınlık +0,6) · `ev` · `ar
 | Otel | 28 px | siyah yuvarlatılmış kare (r 9) + beyaz ev 16 px |
 | Ben (konum) | 22 px | `#4285f4` nokta, beyaz kenar, %25 halka |
 
-Tüm pinlerde gölge: `0 2px 6px rgba(15,15,15,.22)`. Üst üste binme sırası: konum > seçili > otel > listede / durak > öneri > hap.
+Tüm pinlerde gölge: `0 2px 6px rgba(15,15,15,.22)`. **Dokunma alanı:** her pinin dokunma kutusu en az 44 × 44 px (pin görselinden bağımsız); dokunuş, en yakın pin merkezine 22 px içindeyse o pine sayılır. Üst üste binme sırası: konum > seçili > otel > listede / durak > öneri > hap.
 
 **Ad etiketi:** 11 px kalın, beyaz hale; 18–20 karakterde kesilir. Yakınlaşınca altında ★ puan · yorum. Çakışmada önce puan satırı, sonra ad düşer. **Pin hiçbir zaman düşmez**, yalnız adı gizlenir. **Seçili pinin adı hiç gizlenmez** (#67 incelemesi).
 
@@ -47,7 +47,8 @@ Tüm pinlerde gölge: `0 2px 6px rgba(15,15,15,.22)`. Üst üste binme sırası:
 |---|---|---|---|
 | < 13 (şehir) | **küçük pin 20 px**: beyaz zemin, 1,5 px kategori kenarı, 11 px glif | yok | yok |
 | 13–15 (semt) | 28 px | çakışmıyorsa | yok |
-| ≥ 15 (sokak) | 28 px | çakışmıyorsa | ★ puan |
+| 15–16 (sokak) | 28 px | çakışmıyorsa | ★ puan |
+| ≥ 17 (yakın) | **34 px**, 17 px glif; listede/durak/otel de 34 px, seçili iğne 44 × 53 | çakışmıyorsa | ★ puan |
 
 Listede, durak, otel ve seçili pinler her zoom'da tam boyutta çizilir.
 
