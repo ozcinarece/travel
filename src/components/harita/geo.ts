@@ -26,8 +26,18 @@ export function deltaZoom(latDelta: number): number {
 
 // ---------------------------------------------------------------- #30 puan satırı
 
-/** Puan + yorum satırının göründüğü yakınlık (Google zoom). #40: 14 (mahalle ölçeği); önce 16'ydı. */
-export const DETAY_ZOOM = 14;
+/** Puan + yorum satırının göründüğü yakınlık (Google zoom). #66 (docs/05 §2): 15 (sokak); #40'ta 14'tü. */
+export const DETAY_ZOOM = 15;
+/** #66 (docs/05 §2, kanvas KesfetZoom7): bu zoom'un altında öneri pini 20 px küçük pin, adsız. */
+export const KUCUK_ZOOM = 13;
+/** Pinin küçük (20 px, adsız) çizileceği durum: seçili olmayan öneri, zoom < 13. */
+export function kucukPin(p: HaritaPini, zoom: number): boolean {
+  return p.tur === 'oneri' && !p.secili && zoom < KUCUK_ZOOM;
+}
+/** Zoom'a göre pinleri küçültür (`kucuk` işareti; ad ve puan düşer). Diğer türler olduğu gibi. */
+export function zoomaGorePinler(pinler: HaritaPini[], zoom: number): HaritaPini[] {
+  return pinler.map((p) => (kucukPin(p, zoom) ? { ...p, kucuk: true, ad: undefined, puan: null } : p));
+}
 
 /** "★ 4,8 · 312K" satırı: yalnız seçili pinde ya da zoom ≥ 14'te (#30, #40). Ad yoksa ya da puan yoksa yok. */
 export function detayGoster(p: HaritaPini, zoom: number): boolean {
@@ -71,6 +81,7 @@ export function etiketOnceligi(p: HaritaPini): number {
  */
 export function pinCapi(p: HaritaPini): number {
   if (p.secili) return IGNE.en;
+  if (p.kucuk) return KUCUK_PIN;
   if (p.tur === 'durak' && (p.opaklik ?? 1) < 1) return 20;
   return 28;
 }
@@ -81,6 +92,8 @@ export function pinCapi(p: HaritaPini): number {
 export const IGNE = { en: 38, boy: 46, etiketPayi: 4, halka: 3.25 } as const;
 /** İğnenin görünen yüksekliği (yol + dış halkanın uçtan taşması). */
 export const IGNE_GORUNEN_BOY = IGNE.boy + IGNE.halka;
+/** #66: küçük öneri pini (zoom < 13): 20 px, 1,5 px kategori kenarı, 11 px glif, adsız. */
+export const KUCUK_PIN = 20;
 /** Pinin ekran kutusu (engel): daire konumun ortasında; seçili iğne konumun üstünde. */
 export function pinKutusu(p: HaritaPini, cx: number, cy: number): { x1: number; y1: number; x2: number; y2: number } {
   if (p.secili && p.tur !== 'etiket' && p.tur !== 'konum' && p.tur !== 'aday') return { x1: cx - IGNE.en / 2, y1: cy - IGNE_GORUNEN_BOY, x2: cx + IGNE.en / 2, y2: cy };
@@ -196,28 +209,6 @@ export function gizliEtiketler(
 }
 
 /**
- * #61 §2: Keşfet'te her görünen pinin adı okunmalı — adı çakışma yüzünden gizlenecek ÖNERİ pini hiç çizilmez
- * (yakınlaşınca geri gelir). Listedekiler, duraklar ve diğer türler hep çizilir. Düşen pinler başka etiketleri
- * engellemeyi bıraktığından hesap birkaç tur tekrarlanır.
- */
-export function pinSecimi(
-  pinler: HaritaPini[],
-  bolge: HaritaBolgesi | null,
-  ekran: { genislik: number; yukseklik: number },
-  ustBosluk = 0,
-): { pinler: HaritaPini[]; gizli: GizliEtiketler } {
-  let kalan = pinler;
-  let gizli = gizliEtiketler(kalan, bolge, ekran, ustBosluk);
-  for (let tur = 0; tur < 4; tur++) {
-    const dusen = new Set(kalan.filter((p) => p.tur === 'oneri' && p.ad && gizli.etiket.has(p.id)).map((p) => p.id));
-    if (dusen.size === 0) break;
-    kalan = kalan.filter((p) => !dusen.has(p.id));
-    gizli = gizliEtiketler(kalan, bolge, ekran, ustBosluk);
-  }
-  return { pinler: kalan, gizli };
-}
-
-/**
  * Pinlerin üst üste binme sırası (#59 §A3): konum > seçili > otel > seçili günün durakları (sıra no küçük üstte, #61 §5:
  * üst üste binen duraklarda görünen numara ve altındaki ad aynı pine ait olsun) > listede / diğer gün durağı > diğer > hap.
  */
@@ -304,5 +295,5 @@ export function izlemeGerekli(imza: string, yakalanan: string | null, beklenenPn
  * KURULMAZ; anahtar yalnız pin kimliğidir). Konum, opaklık ve z-sırası native özelliktir, imzaya girmez.
  */
 export function isaretciImzasi(p: HaritaPini, etiketGizli: boolean, detay: boolean): string {
-  return [p.tur ?? '', p.renk, p.etiket ?? '', p.ikon ?? '', p.kategoriRenk ?? '', p.etiketIkon ?? '', p.secili ? 1 : 0, p.tamam ? 1 : 0, p.ad && !etiketGizli ? p.ad : '', detay ? 1 : 0, p.puan ?? '', p.yorumSayisi ?? ''].join('|');
+  return [p.tur ?? '', p.renk, p.etiket ?? '', p.ikon ?? '', p.kategoriRenk ?? '', p.etiketIkon ?? '', p.secili ? 1 : 0, p.kucuk ? 1 : 0, p.tamam ? 1 : 0, p.ad && !etiketGizli ? p.ad : '', detay ? 1 : 0, p.puan ?? '', p.yorumSayisi ?? ''].join('|');
 }

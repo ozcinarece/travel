@@ -31,6 +31,10 @@ describe('pinPngAnahtari', () => {
 describe('pinGorseli', () => {
   it('kategori / listede / tamamlanan / otel için PNG; seçili iğne sürümü', () => {
     expect(pinGorseli(p({ tur: 'oneri', ikon: 'kamera', kategoriRenk: '#3b6fe0' }))).toBeDefined();
+    // #66: küçük öneri pini ayrı PNG (20 px).
+    const kucuk = pinGorseli(p({ tur: 'oneri', ikon: 'kamera', kategoriRenk: '#3b6fe0', kucuk: true }));
+    expect(kucuk).toBeDefined();
+    expect(kucuk).not.toBe(pinGorseli(p({ tur: 'oneri', ikon: 'kamera', kategoriRenk: '#3b6fe0' })));
     expect(pinGorseli(p({ tur: 'bos', ikon: 'agac', kategoriRenk: '#1f8a4c', secili: true }))).toBeDefined();
     expect(pinGorseli(p({ tur: 'listede', ikon: 'muze', kategoriRenk: '#8a4fd6', secili: true }))).not.toBe(pinGorseli(p({ tur: 'listede', ikon: 'muze', kategoriRenk: '#8a4fd6' })));
     expect(pinGorseli(p({ tur: 'durak', etiket: '2', tamam: true, secili: true }))).toBeDefined();

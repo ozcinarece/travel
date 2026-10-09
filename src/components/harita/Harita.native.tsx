@@ -2,7 +2,7 @@ import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import { PixelRatio, StyleSheet, View, useWindowDimensions } from 'react-native';
 import MapView, { Circle, Marker, Polyline, PROVIDER_GOOGLE } from 'react-native-maps';
 
-import { bolgeHesapla, detayGoster, etiketBolgesi, haritaDolgusu, IGNE, isaretciImzasi, izlemeGerekli, pinCapasi, pinCapi, pinSecimi, pinZ, zoomDelta } from './geo';
+import { bolgeHesapla, detayGoster, etiketBolgesi, gizliEtiketler, haritaDolgusu, IGNE, isaretciImzasi, izlemeGerekli, pinCapasi, pinCapi, pinZ, zoomaGorePinler, zoomDelta } from './geo';
 import { ACIK_HARITA_STILI } from './haritaStili';
 import { PinIcerigi, pinGorseli, pinPngAnahtari } from './PinIcerigi';
 import { IGNE_CAPA, PIN_IKONLARI } from './pinIkonlari';
@@ -78,13 +78,13 @@ export function Harita({
   }, [sigdir, hazir]);
 
   // #33: bacak etiketleri (#65: yalnız araba "12 dk") pin gibi çizilir; çakışma kuralına en düşük öncelikle girer.
-  const tumPinler = useMemo(() => [...pinler, ...bacakEtiketPinleri(cizgiler)], [pinler, cizgiler]);
+  // #66 KK2: zoom < 13'te öneri pinleri küçük ve adsız (zoom adımına bağlı).
+  const tumPinler = useMemo(() => [...zoomaGorePinler(pinler, etiketBolge.zoom), ...bacakEtiketPinleri(cizgiler)], [pinler, cizgiler, etiketBolge.zoom]);
   const olcu = useMemo(() => ({ genislik: ekran.width, yukseklik: ekran.height }), [ekran.width, ekran.height]);
-  // #59 §A: kümeleme yok; yakın pinler üst üste biner (beyaz kenar ayırır, z-sırası pinZ). #61 §2: adı sığmayan öneri
-  // pini çizilmez. Gizlenen hap da hiç çizilmez (opaklıkla saklamak bitmap yakalaması isterdi).
-  const secim = useMemo(() => pinSecimi(tumPinler, etiketBolge, olcu, ustBosluk), [tumPinler, etiketBolge, olcu, ustBosluk]);
-  const gizli = secim.gizli;
-  const gorunen = useMemo(() => secim.pinler.filter((p) => !(p.tur === 'etiket' && gizli.etiket.has(p.id))), [secim, gizli]);
+  // #59 §A: kümeleme yok; yakın pinler üst üste biner (beyaz kenar ayırır, z-sırası pinZ). #66 KK1: pin hiç düşmez,
+  // yalnız adı / puanı gizlenir. Gizlenen hap hiç çizilmez (opaklıkla saklamak bitmap yakalaması isterdi).
+  const gizli = useMemo(() => gizliEtiketler(tumPinler, etiketBolge, olcu, ustBosluk), [tumPinler, etiketBolge, olcu, ustBosluk]);
+  const gorunen = useMemo(() => tumPinler.filter((p) => !(p.tur === 'etiket' && gizli.etiket.has(p.id))), [tumPinler, gizli]);
   // #59 §C / #65: yön okları ~24 px aralık, en fazla 80 — zoom adımına göre.
   const oklar = useMemo(() => yonOklari(cizgiler, pinler, etiketBolge, olcu), [cizgiler, pinler, etiketBolge, olcu]);
   // #55 §C10: Marker'da uzun basma yok — haritaya uzun basılan noktaya ~28 px içindeki en yakın pin.

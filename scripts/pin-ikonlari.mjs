@@ -90,6 +90,8 @@ const IGNE_HALKA = 3.25;
 const pinIstekleri = [];
 for (const k of kategoriler) {
   pinIstekleri.push({ ad: `daire-${k.ikon}-28`, cap: 28, zemin: BEYAZ, kenar: k.renk, kenarKalinlik: 2, ikon: k.ikon, ikonRenk: k.renk });
+  // #66 (docs/05 §2, KesfetZoom7): zoom < 13 küçük öneri pini 20 px, 1,5 px kenar, 11 px glif.
+  pinIstekleri.push({ ad: `kucuk-${k.ikon}-20`, cap: 20, zemin: BEYAZ, kenar: k.renk, kenarKalinlik: 1.5, ikon: k.ikon, ikonRenk: k.renk, ikonPx: 11 });
   pinIstekleri.push({ ad: `dolu-${k.ikon}-28`, cap: 28, zemin: k.renk, kenar: BEYAZ, kenarKalinlik: 2, ikon: k.ikon, ikonRenk: BEYAZ, rozet: true });
   pinIstekleri.push({ ad: `igne-daire-${k.ikon}`, igne: true, zemin: BEYAZ, kenar: k.renk, kenarKalinlik: 2.5, ikon: k.ikon, ikonRenk: k.renk });
   pinIstekleri.push({ ad: `igne-dolu-${k.ikon}`, igne: true, zemin: k.renk, kenar: BEYAZ, kenarKalinlik: 2.5, ikon: k.ikon, ikonRenk: BEYAZ, rozet: true });
