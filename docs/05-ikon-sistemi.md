@@ -1,6 +1,6 @@
 # Pin ve ikon sistemi
 
-Sürüm 1.7 · 9 Ekim 2026 (zoom ≥ 17'de büyük pin; dokunma alanı ≥ 44 px) · önceki 1.6 (seçili ad hep görünür; öne çıkan seçimi) · önceki 1.5 (öne çıkan ★ rozeti) · önceki 1.4 (pin düşürme kalktı, zoom'a göre küçük pin) · önceki: 1.3 (seçili = iğne; listede = dolu + ✓ rozeti; taksi → araba, düz; yürüme okları sık) · Sahip: Ece (ürün)
+Sürüm 1.7 · 9 Ekim 2026 (zoom 16→18 arası kademesiz büyüyen pin; dokunma alanı ≥ 44 px) · önceki 1.6 (seçili ad hep görünür; öne çıkan seçimi) · önceki 1.5 (öne çıkan ★ rozeti) · önceki 1.4 (pin düşürme kalktı, zoom'a göre küçük pin) · önceki: 1.3 (seçili = iğne; listede = dolu + ✓ rozeti; taksi → araba, düz; yürüme okları sık) · Sahip: Ece (ürün)
 
 Kanvastaki **"Pin ve ikon sistemi"** panosu (`PinSystem6`), haritadaki her işaretin tek kaynağıdır: https://claude.ai/artifact/46jh8ggGczM7VDTVHyzRQT
 
@@ -48,7 +48,7 @@ Tüm pinlerde gölge: `0 2px 6px rgba(15,15,15,.22)`. **Dokunma alanı:** her pi
 | < 13 (şehir) | **küçük pin 20 px**: beyaz zemin, 1,5 px kategori kenarı, 11 px glif | yok | yok |
 | 13–15 (semt) | 28 px | çakışmıyorsa | yok |
 | 15–16 (sokak) | 28 px | çakışmıyorsa | ★ puan |
-| ≥ 17 (yakın) | **34 px**, 17 px glif; listede/durak/otel de 34 px, seçili iğne 44 × 53 | çakışmıyorsa | ★ puan |
+| 16 → 18 (yakın) | **28 → 34 px arası kademesiz** (zoom ile doğrusal; 16'da 28, 18'de 34, ara değerler 0,25 zoom adımında yeniden hesaplanır), glif 14 → 17; listede/durak/otel aynı; seçili iğne orantılı | çakışmıyorsa | ★ puan |
 
 Listede, durak, otel ve seçili pinler her zoom'da tam boyutta çizilir.
 
