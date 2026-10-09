@@ -1,6 +1,6 @@
 # Pin ve ikon sistemi
 
-Sürüm 1.1 · 9 Ekim 2026 (taksi: sarı-siyah şerit → kesikli rota çizgisi) · Sahip: Ece (ürün)
+Sürüm 1.2 · 9 Ekim 2026 (seçili = iğne; listede = dolu + ✓ rozeti; taksi = kesikli rota çizgisi) · Sahip: Ece (ürün)
 
 Kanvastaki **"Pin ve ikon sistemi"** panosu (`PinSystem6`), haritadaki her işaretin tek kaynağıdır: https://claude.ai/artifact/46jh8ggGczM7VDTVHyzRQT
 
@@ -28,8 +28,8 @@ Diğer glifler: `tik` (`M5 12.5l4.5 4.5L19 7.5`, kalınlık +0,6) · `ev` · `ta
 | Durum | Boyut | Görünüm |
 |---|---|---|
 | Öneri (Keşfet) | 28 px | beyaz zemin, kategori renginde 2 px kenar, kategori renginde 14 px glif |
-| Listede (Keşfet) | 28 px | kategori renginde dolu daire, 2 px beyaz kenar, beyaz 14 px glif |
-| Seçili (her tür) | 34 px | aynı görünüm, 16 px glif, 2 px beyaz kenar + **2,5 px siyah dış halka** (kalın siyah çerçeve değil) |
+| Listede (Keşfet) | 28 px | kategori renginde dolu daire, 2 px beyaz kenar, beyaz 14 px glif + **sağ üst köşede ✓ rozeti** (15 px siyah daire, 1,5 px beyaz kenar, beyaz ✓ 9 px; köşeden 3 px taşar) |
+| Seçili (öneri, listede, durak, tamamlandı) | 38 × 46 px | **iğne (damla) biçimi**: aynı zemin ve kenar (2,5 px), 17 px glif / 14 px numara, 2 px siyah dış halka, gölge `0 4px 10px rgba(15,15,15,.3)`. **Çapa = iğnenin ucu** (konum). Listede ise ✓ rozeti iğnenin sağ üstünde kalır. Ad etiketi ucun 4 px altında |
 | Durak (seçili gün) | 28 px | gün renginde dolu, 2 px beyaz kenar, beyaz sıra numarası 12 px / 800 |
 | Diğer gün durağı | 20 px | gün renginde nokta, numarasız, %45 opak |
 | Tamamlandı | 28 px | `#1f8a4c` dolu + beyaz ✓ |
