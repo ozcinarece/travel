@@ -319,32 +319,47 @@ function GenelSekmesi({
   );
 }
 
-/** KK5: 10 küçük resim (120×88), yatay; yalnız görünür olanlar + 1 komşu çözülür; dokununca tam ekran galeri. */
-function FotoSeridi({ yer, onAc }: { yer: TamYer; onAc: () => void }) {
+/**
+ * KK5: 10 küçük resim (120×88), yatay; yalnız görünür olanlar + 1 komşu çözülür; dokununca tam ekran galeri.
+ * #85 kök neden: kaydırma işleyicisi `e.nativeEvent`'i setState GÜNCELLEYİCİSİNİN içinde (render sırasında) okuyordu.
+ * React Native sentetik olayları havuzlar: işleyici dönünce `nativeEvent` null'lanır; art arda kaydırma olaylarında
+ * güncelleyici render'a ertelenince `null.contentOffset` → render istisnası (hata kartı). Konum artık işleyicide eşzamanlı
+ * okunur; güncelleyiciye yalnız sayı girer. Her küçük resim kendi hook'unu taşıyan ayrı bileşendir (hook sayısı sabit).
+ */
+export function FotoSeridi({ yer, onAc }: { yer: TamYer; onAc: () => void }) {
   const ekran = useWindowDimensions();
   const [yuklenecek, setYuklenecek] = useState(() => gorunenFotoSayisi(0, ekran.width, FOTO_EN, FOTO_ARA));
+  const kaydirildi = (e: { nativeEvent: { contentOffset: { x: number } } }) => {
+    const sayi = gorunenFotoSayisi(e.nativeEvent.contentOffset.x, ekran.width, FOTO_EN, FOTO_ARA);
+    setYuklenecek((n) => Math.max(n, sayi));
+  };
   return (
     <ScrollView
       horizontal
       showsHorizontalScrollIndicator={false}
       style={s.serit}
       contentContainerStyle={s.seritIcerik}
-      onScroll={(e) => setYuklenecek((n) => Math.max(n, gorunenFotoSayisi(e.nativeEvent.contentOffset.x, ekran.width, FOTO_EN, FOTO_ARA)))}
+      onScroll={kaydirildi}
       scrollEventThrottle={48}
+      testID="foto-seridi"
     >
       {yer.fotolar.map((f, i) => (
         <Pressable key={f.ad} accessibilityRole="imagebutton" accessibilityLabel={t('mekan.panel.fotoAc')} onPress={onAc}>
-          <KucukFoto ad={f.ad} hazirUri={i === 0 ? yer.foto_uri : null} yukle={i < yuklenecek} />
+          <KucukFoto ad={f.ad} hazirUri={i === 0 ? yer.foto_uri : null} yukle={i < yuklenecek} testID={`foto-kare-${i}`} />
         </Pressable>
       ))}
     </ScrollView>
   );
 }
 
-function KucukFoto({ ad, hazirUri, yukle }: { ad: string; hazirUri: string | null; yukle: boolean }) {
+function KucukFoto({ ad, hazirUri, yukle, testID }: { ad: string; hazirUri: string | null; yukle: boolean; testID?: string }) {
   const sorgu = usePlaceFoto(yukle && !hazirUri ? ad : undefined, 400);
   const uri = hazirUri ?? sorgu.data ?? null;
-  return <View style={s.kucukFoto}>{uri ? <Image source={{ uri }} style={StyleSheet.absoluteFill} contentFit="cover" transition={150} /> : null}</View>;
+  return (
+    <View style={s.kucukFoto} testID={testID} accessibilityState={{ busy: yukle && !uri }}>
+      {uri ? <Image source={{ uri }} style={StyleSheet.absoluteFill} contentFit="cover" transition={150} /> : null}
+    </View>
+  );
 }
 
 function Satir({ etiket, children }: { etiket: string; children: ReactNode }) {
