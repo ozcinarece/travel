@@ -126,6 +126,16 @@ describe('rotaNoktalari (#61)', () => {
     expect(n[0]).toEqual(a);
     expect(n[3]).toEqual(z);
   });
+  it('#88 KK2: 50 m bacakta 600 m dolambaç → düz; 140 m makul yol korunur', () => {
+    const b = { lat: 41.9, lng: 12.49 };
+    const c = { lat: 41.90045, lng: 12.49 }; // ~50 m kuzey
+    // Dolambaç: doğuya 250 m, kuzeye 50 m, batıya 250 m (~550–600 m).
+    const dolambac = kodla([b, { lat: 41.9, lng: 12.493 }, { lat: 41.90045, lng: 12.493 }, c]);
+    expect(rotaNoktalari(dolambac, b, c)).toEqual([b, c]);
+    // Makul: doğuya 45 m, kuzeye 50 m, batıya 45 m (~140 m ≤ 150 m).
+    const makul = kodla([b, { lat: 41.9, lng: 12.49054 }, { lat: 41.90045, lng: 12.49054 }, c]);
+    expect(rotaNoktalari(makul, b, c).length).toBeGreaterThan(2);
+  });
   it('yol tam pinlerde başlıyorsa ek nokta yok; boş polyline → düz çizgi', () => {
     expect(rotaNoktalari(kodla([a, z]), a, z)).toHaveLength(2);
     expect(rotaNoktalari('', a, z)).toEqual([a, z]);
