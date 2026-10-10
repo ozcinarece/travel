@@ -52,6 +52,11 @@ export function govdeYuksekligi(gorunen: number, ustSerit: number): number {
   return Math.max(0, gorunen - PANEL_UST_DOLGU - ustSerit);
 }
 
+/** #85 KK4: Android geri tuşu önceliği — tam ekran galeri açıksa yalnız galeri kapanır, panel kalır. */
+export function geriTusu(galeriAcik: boolean): 'galeri' | 'panel' {
+  return galeriAcik ? 'galeri' : 'panel';
+}
+
 /** KK3: ana düğme — Keşfet'te listeye ekle / listeden çıkar; Program'da güne ekle / günden çıkar. */
 export type CtaAnahtari = 'listeyeEkle' | 'listedenCikar' | 'guneEkle' | 'gundenCikar';
 export function ctaAnahtari(baglam: 'kesfet' | 'program', icinde: boolean): CtaAnahtari {

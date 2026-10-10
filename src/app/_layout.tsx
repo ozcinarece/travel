@@ -11,6 +11,7 @@ import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
 
+import { HataSiniri } from '@/components/ui/HataSiniri';
 import { useProfil } from '@/features/profil/sorgular';
 import { hataRaporunuBaslat, hataRaporuyla } from '@/lib/hataRaporu';
 import { OturumSaglayici, useOturum } from '@/lib/oturum';
@@ -57,13 +58,16 @@ function Kok() {
   );
 }
 
+// #85 KK3: hata sınırı en dışta — yakalanmamış render hatasında gri ekran yerine "Yeniden dene" kartı; hata Sentry'ye gider.
 function KokLayout() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <OturumSaglayici>
-        <Kok />
-      </OturumSaglayici>
-    </QueryClientProvider>
+    <HataSiniri>
+      <QueryClientProvider client={queryClient}>
+        <OturumSaglayici>
+          <Kok />
+        </OturumSaglayici>
+      </QueryClientProvider>
+    </HataSiniri>
   );
 }
 

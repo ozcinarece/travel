@@ -1,6 +1,6 @@
 import { Image } from 'expo-image';
 import { useEffect, useReducer, useState, type ReactNode } from 'react';
-import { ActivityIndicator, BackHandler, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
+import { ActivityIndicator, BackHandler, Platform, Pressable, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AltSayfa, useSayfaKaydirma } from '@/components/harita/AltSayfa';
@@ -9,6 +9,7 @@ import { FotoGalerisi } from '@/components/yerler/FotoGalerisi';
 import {
   acikDurumu,
   ctaAnahtari,
+  geriTusu,
   gorunenFotoSayisi,
   govdeYuksekligi,
   KAPALI_PANEL,
@@ -21,6 +22,7 @@ import {
 } from '@/features/mekan/panel';
 import { usePlaceFoto, useTamYer, useYorumlar, type HafifYer, type TamYer, type Yorum } from '@/features/yerler/api';
 import { t } from '@/i18n';
+import { izBirak } from '@/lib/hataRaporu';
 import { kategoriEtiketi, sureMetni } from '@/lib/kategori';
 import { yorumKisa } from '@/lib/pinIkonu';
 import { puanMetni } from '@/lib/puan';
@@ -61,6 +63,8 @@ const FOTO_ARA = 8;
  * Yorumlar yalnız sekmeye dokununca istenir (KK8).
  * #83: yükseklikler panelin yaşadığı alana göre (ekranın alt menü HARİÇ yüksekliği, onLayout); gövde + sabit alt çubuk
  * görünür yüksekliğe sığar (alt çubuk hep alt menünün üstünde); Android geri tuşu yalnız paneli kapatır.
+ * #85: tam ekran galeri RN `Modal` DEĞİL — panelin kendi katmanında (absoluteFill) overlay; Android'de Modal gri/boş
+ * sahne bırakıyordu. Geri tuşu önce galeriyi kapatır (KK4). Panel/galeri olayları Sentry izine yazılır.
  */
 export function MekanPaneli(p: MekanPaneliProps) {
   const ekran = useWindowDimensions();
@@ -75,16 +79,26 @@ export function MekanPaneli(p: MekanPaneliProps) {
     if (panelGecis(durum, o).hal === 'kapali') p.onKapat();
     else gonder(o);
   };
-  // #83 KK3: Android geri tuşu panel açıkken yalnız paneli kapatır, ekrandan çıkmaz.
+  // #85: tam ekran galeri (overlay) durumu panelde — geri tuşu önceliği ve alan ölçüsü burada.
+  const [galeri, setGaleri] = useState(false);
+  const galeriAc = (acik: boolean) => {
+    izBirak('panel', acik ? 'galeri açıldı' : 'galeri kapandı');
+    setGaleri(acik);
+  };
+  useEffect(() => {
+    izBirak('panel', `mekan paneli açıldı: ${p.placeId}`);
+  }, [p.placeId]);
+  // #83 KK3 / #85 KK4: Android geri tuşu — galeri açıksa galeriyi, değilse yalnız paneli kapatır (ekrandan çıkmaz).
   const { onKapat } = p;
   useEffect(() => {
     if (Platform.OS !== 'android') return;
     const abone = BackHandler.addEventListener('hardwareBackPress', () => {
-      onKapat();
+      if (geriTusu(galeri) === 'galeri') setGaleri(false);
+      else onKapat();
       return true;
     });
     return () => abone.remove();
-  }, [onKapat]);
+  }, [onKapat, galeri]);
   // #83 KK1–2: alan = üst katmanın ölçülen yüksekliği (alt menü hariç); ölçülene kadar pencere yüksekliği.
   const [alanH, setAlanH] = useState(0);
   const [seritH, setSeritH] = useState(0);
@@ -161,7 +175,9 @@ export function MekanPaneli(p: MekanPaneliProps) {
         <AltSayfa hal={hal} onHal={(h) => olay({ tur: 'hal', hal: h })} yukseklik={yukseklik} ust={ust} onUstYukseklik={setSeritH} altDolgu={0}>
           {/* Gövde görünür yüksekliğe sabitlenir: sayfa tam boy olup aşağı kaydığı için flex:1 alt çubuğu ekran dışına taşırıyordu (#83). */}
           <View style={{ height: govdeYuksekligi(yukseklik[hal], seritH) }}>
-            {durum.sekme === 'genel' ? <GenelSekmesi yer={yer} yukleniyor={tam.isPending} hata={tam.isError} dakika={p.dakika} onSure={p.onSure} gunSecici={p.gunSecici} mesgul={p.mesgul} /> : null}
+            {durum.sekme === 'genel' ? (
+              <GenelSekmesi yer={yer} yukleniyor={tam.isPending} hata={tam.isError} dakika={p.dakika} onSure={p.onSure} gunSecici={p.gunSecici} mesgul={p.mesgul} onGaleri={() => galeriAc(true)} />
+            ) : null}
             {durum.sekme === 'yorumlar' ? <YorumlarSekmesi placeId={p.placeId} acik={durum.sekme === 'yorumlar'} /> : null}
             {durum.sekme === 'rehber' ? <RehberSekmesi /> : null}
             <View style={s.altCubuk}>
@@ -180,6 +196,15 @@ export function MekanPaneli(p: MekanPaneliProps) {
             </View>
           </View>
         </AltSayfa>
+      ) : null}
+      {galeri && yer && yer.fotolar.length > 0 ? (
+        // #85: tam ekran galeri — Modal yerine panel katmanında overlay (alt menü hariç alan); × ve geri tuşu kapatır.
+        <View style={[StyleSheet.absoluteFill, s.galeri]}>
+          <FotoGalerisi fotolar={yer.fotolar} ilkUri={yer.foto_uri} yukseklik={Math.round((alanH || ekran.height) * 0.62)} />
+          <Pressable accessibilityRole="button" accessibilityLabel={t('mekan.panel.fotoKapat')} onPress={() => galeriAc(false)} hitSlop={8} style={[s.galeriKapat, { top: kenar.top + 8 }]}>
+            <Text style={s.galeriKapatMetin}>×</Text>
+          </Pressable>
+        </View>
       ) : null}
     </View>
   );
@@ -205,6 +230,7 @@ function GenelSekmesi({
   onSure,
   gunSecici,
   mesgul,
+  onGaleri,
 }: {
   yer: TamYer | null;
   yukleniyor: boolean;
@@ -213,14 +239,15 @@ function GenelSekmesi({
   onSure: (fark: number) => void;
   gunSecici?: MekanPaneliProps['gunSecici'];
   mesgul?: boolean;
+  /** Fotoğraf şeridine dokunuldu → tam ekran galeri (panel katmanında). */
+  onGaleri: () => void;
 }) {
   const [ozetAcik, setOzetAcik] = useState(false);
-  const [galeri, setGaleri] = useState(false);
   const ekran = useWindowDimensions();
   const acik = acikDurumu(yer);
   return (
     <Govde>
-      {yer && yer.fotolar.length > 0 ? <FotoSeridi yer={yer} onAc={() => setGaleri(true)} /> : null}
+      {yer && yer.fotolar.length > 0 ? <FotoSeridi yer={yer} onAc={onGaleri} /> : null}
       {yukleniyor && !yer ? <ActivityIndicator color={renk.metin} style={{ marginVertical: 20 }} /> : null}
       {hata && !yer ? <Text style={s.hata}>{t('mekan.hata')}</Text> : null}
       {yer?.ozet ? (
@@ -288,16 +315,6 @@ function GenelSekmesi({
           </Text>
         </Satir>
       </View>
-      {yer ? (
-        <Modal visible={galeri} animationType="fade" onRequestClose={() => setGaleri(false)}>
-          <View style={s.galeri}>
-            <FotoGalerisi fotolar={yer.fotolar} ilkUri={yer.foto_uri} yukseklik={Math.round(ekran.height * 0.62)} />
-            <Pressable accessibilityRole="button" accessibilityLabel={t('mekan.panel.fotoKapat')} onPress={() => setGaleri(false)} style={s.galeriKapat}>
-              <Text style={s.galeriKapatMetin}>×</Text>
-            </Pressable>
-          </View>
-        </Modal>
-      ) : null}
     </Govde>
   );
 }
@@ -490,7 +507,7 @@ const s = StyleSheet.create({
   yorumZaman: { fontFamily: yazi.normal, fontSize: 11, color: renk.soluk },
   yorumMetin: { fontFamily: yazi.normal, fontSize: 13, lineHeight: 19, color: '#4a4a4a' },
   atif: { fontFamily: yazi.normal, fontSize: 11, color: renk.soluk, textAlign: 'center', paddingTop: 4 },
-  galeri: { flex: 1, backgroundColor: renk.metin, justifyContent: 'center' },
-  galeriKapat: { position: 'absolute', top: 48, right: bosluk.kenar, width: 36, height: 36, borderRadius: 18, backgroundColor: renk.zemin, alignItems: 'center', justifyContent: 'center' },
+  galeri: { backgroundColor: renk.metin, justifyContent: 'center' },
+  galeriKapat: { position: 'absolute', right: bosluk.kenar, width: 36, height: 36, borderRadius: 18, backgroundColor: renk.zemin, alignItems: 'center', justifyContent: 'center' },
   galeriKapatMetin: { fontFamily: yazi.ekstra, fontSize: 20, lineHeight: 22, color: renk.metin },
 });

@@ -2,7 +2,10 @@
   "genel": {
     "geri": "Geri",
     "vazgec": "Vazgeç",
-    "yukleniyor": "Yükleniyor…"
+    "yukleniyor": "Yükleniyor…",
+    "hataBaslik": "Bir şeyler ters gitti",
+    "hataMetin": "Beklenmedik bir hata oldu. Yeniden deneyebilirsin; sorun sürerse uygulamayı kapatıp aç.",
+    "yenidenDene": "Yeniden dene"
   },
   "sekme": {
     "seyahatler": "Seyahatler",
