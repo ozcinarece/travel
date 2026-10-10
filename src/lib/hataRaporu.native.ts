@@ -1,6 +1,8 @@
 import * as Sentry from '@sentry/react-native';
 import type { ComponentType } from 'react';
 
+import { izEkle } from './izler';
+
 // #49: çökme raporlama. DSN (gizli değildir) EAS ortamından EXPO_PUBLIC_SENTRY_DSN ile gelir; yoksa kapalı.
 // Kişisel veri gönderilmez; performans izleme kapalı — yalnız hatalar ve native çökmeler.
 const dsn = process.env.EXPO_PUBLIC_SENTRY_DSN;
@@ -17,6 +19,7 @@ export function hataRaporuyla<P extends Record<string, unknown>>(Bilesen: Compon
 
 /** #66 KK7: tanı izi — bir sonraki hata raporuna eklenir (DSN yoksa sessiz). Kişisel veri içermez. */
 export function izBirak(kategori: string, mesaj: string, seviye: 'info' | 'error' = 'info') {
+  izEkle(kategori, mesaj);
   if (!dsn) return;
   Sentry.addBreadcrumb({ category: kategori, message: mesaj, level: seviye });
 }
