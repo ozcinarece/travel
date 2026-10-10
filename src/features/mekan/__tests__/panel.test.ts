@@ -2,7 +2,7 @@ import { describe, expect, it } from '@jest/globals';
 
 import type { Yorum } from '@/features/yerler/api';
 
-import { acikDurumu, ctaAnahtari, gorunenFotoSayisi, KAPALI_PANEL, panelGecis, panelYukseklikleri, yorumlariSirala } from '../panel';
+import { acikDurumu, ctaAnahtari, gorunenFotoSayisi, govdeYuksekligi, KAPALI_PANEL, panelGecis, panelYukseklikleri, yorumlariSirala } from '../panel';
 
 describe('mekan paneli durum makinesi (#80 KK14)', () => {
   it('kapalı → pine dokun: yarı + genel; açıkken başka pine dokun: hal ve sekme korunur (KK13)', () => {
@@ -13,18 +13,27 @@ describe('mekan paneli durum makinesi (#80 KK14)', () => {
     expect(panelGecis(tamYorum, { tur: 'ac' })).toBe(tamYorum);
   });
 
-  it('×, haritaya dokunma ve aşağı çekme (katli) kapatır; kapalıyken sekme/hal olayları durumu bozmaz', () => {
+  it('×, haritaya dokunma, yarıdan aşağı çekme ve geri tuşu kapatır; tamdan aşağı çekme önce yarıya iner (#83 KK3)', () => {
     const acik = panelGecis(KAPALI_PANEL, { tur: 'ac' });
     expect(panelGecis(acik, { tur: 'kapat' })).toEqual(KAPALI_PANEL);
     expect(panelGecis(acik, { tur: 'hal', hal: 'katli' })).toEqual(KAPALI_PANEL);
+    expect(panelGecis(acik, { tur: 'geri' })).toEqual(KAPALI_PANEL);
+    expect(panelGecis(KAPALI_PANEL, { tur: 'geri' })).toBe(KAPALI_PANEL);
+    const tam = panelGecis(acik, { tur: 'hal', hal: 'tam' });
+    expect(panelGecis(tam, { tur: 'hal', hal: 'katli' })).toEqual({ hal: 'yari', sekme: 'genel' });
+    expect(panelGecis(panelGecis(tam, { tur: 'hal', hal: 'katli' }), { tur: 'hal', hal: 'katli' })).toEqual(KAPALI_PANEL);
+    expect(panelGecis(tam, { tur: 'geri' })).toEqual(KAPALI_PANEL);
     expect(panelGecis(KAPALI_PANEL, { tur: 'hal', hal: 'katli' })).toBe(KAPALI_PANEL);
     expect(panelGecis(KAPALI_PANEL, { tur: 'kapat' })).toBe(KAPALI_PANEL);
     // Yeniden açılınca sekme genel'e döner.
     expect(panelGecis(panelGecis(panelGecis(acik, { tur: 'sekme', sekme: 'rehber' }), { tur: 'kapat' }), { tur: 'ac' })).toEqual({ hal: 'yari', sekme: 'genel' });
   });
 
-  it('yükseklikler: yarı %55, tam = ekran − üst güvenli − 8', () => {
-    expect(panelYukseklikleri(800, 40)).toEqual({ katli: 0, yari: 440, tam: 752 });
+  it('yükseklikler alt menü hariç alana göre: yarı %55, tam = alan − üst güvenli − 8, kapanma durağı yarının %45\'i (#83 KK1–3)', () => {
+    expect(panelYukseklikleri(800, 40)).toEqual({ katli: 198, yari: 440, tam: 752 });
+    // Gövde (içerik + alt çubuk) görünür yüksekliğe sığar: alt çubuk alt menünün üstünde kalır.
+    expect(govdeYuksekligi(440, 150)).toBe(280);
+    expect(govdeYuksekligi(100, 150)).toBe(0);
   });
 });
 

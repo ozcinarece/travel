@@ -1,12 +1,24 @@
 import { Image } from 'expo-image';
 import { useEffect, useReducer, useState, type ReactNode } from 'react';
-import { ActivityIndicator, Modal, Pressable, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
+import { ActivityIndicator, BackHandler, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AltSayfa, useSayfaKaydirma } from '@/components/harita/AltSayfa';
 import { Avatar } from '@/components/ui/Avatar';
 import { FotoGalerisi } from '@/components/yerler/FotoGalerisi';
-import { acikDurumu, ctaAnahtari, gorunenFotoSayisi, KAPALI_PANEL, panelGecis, panelYukseklikleri, yorumlariSirala, type PanelSekmesi, type YorumSirasi } from '@/features/mekan/panel';
+import {
+  acikDurumu,
+  ctaAnahtari,
+  gorunenFotoSayisi,
+  govdeYuksekligi,
+  KAPALI_PANEL,
+  panelGecis,
+  panelYukseklikleri,
+  yorumlariSirala,
+  type PanelOlayi,
+  type PanelSekmesi,
+  type YorumSirasi,
+} from '@/features/mekan/panel';
 import { usePlaceFoto, useTamYer, useYorumlar, type HafifYer, type TamYer, type Yorum } from '@/features/yerler/api';
 import { t } from '@/i18n';
 import { kategoriEtiketi, sureMetni } from '@/lib/kategori';
@@ -47,6 +59,8 @@ const FOTO_ARA = 8;
  * saat", ★ puan · yorum, ★ Öne çıkan) + Genel · Yorumlar · Rehber sekmeleri + sabit alt çubuk (CTA + Yol tarifi).
  * Harita dolgusuna dokunmaz (kamera yerinde kalır, KK1). Pin değişince içerik değişir, hal/sekme korunur (KK13).
  * Yorumlar yalnız sekmeye dokununca istenir (KK8).
+ * #83: yükseklikler panelin yaşadığı alana göre (ekranın alt menü HARİÇ yüksekliği, onLayout); gövde + sabit alt çubuk
+ * görünür yüksekliğe sığar (alt çubuk hep alt menünün üstünde); Android geri tuşu yalnız paneli kapatır.
  */
 export function MekanPaneli(p: MekanPaneliProps) {
   const ekran = useWindowDimensions();
@@ -56,7 +70,25 @@ export function MekanPaneli(p: MekanPaneliProps) {
   useEffect(() => {
     gonder({ tur: 'ac' });
   }, []);
-  const yukseklik = panelYukseklikleri(ekran.height, kenar.top);
+  // Reducer'ın "kapalı"ya götürdüğü her olay üst bileşene bırakılır (seçim kalkar → panel kalkar); diğerleri yerel durum.
+  const olay = (o: PanelOlayi) => {
+    if (panelGecis(durum, o).hal === 'kapali') p.onKapat();
+    else gonder(o);
+  };
+  // #83 KK3: Android geri tuşu panel açıkken yalnız paneli kapatır, ekrandan çıkmaz.
+  const { onKapat } = p;
+  useEffect(() => {
+    if (Platform.OS !== 'android') return;
+    const abone = BackHandler.addEventListener('hardwareBackPress', () => {
+      onKapat();
+      return true;
+    });
+    return () => abone.remove();
+  }, [onKapat]);
+  // #83 KK1–2: alan = üst katmanın ölçülen yüksekliği (alt menü hariç); ölçülene kadar pencere yüksekliği.
+  const [alanH, setAlanH] = useState(0);
+  const [seritH, setSeritH] = useState(0);
+  const yukseklik = panelYukseklikleri(alanH || ekran.height, kenar.top);
   const tam = useTamYer(p.placeId, p.tz);
   const yer = tam.data ?? null;
   const ad = yer?.ad ?? p.hafif?.ad ?? '';
@@ -84,7 +116,9 @@ export function MekanPaneli(p: MekanPaneliProps) {
                 {' · '}
                 <Text style={acik.acik ? s.acik : s.kapali}>{acik.acik ? t('mekan.acik') : t('mekan.kapali')}</Text>
                 {acik.acik && acik.kapanis ? ` · ${t('mekan.kadar', { saat: acik.kapanis })}` : ''}
-                {!acik.acik && acik.acilis && acik.acilis.gun !== 'sonra' ? ` · ${t(acik.acilis.gun === 'bugun' ? 'mekan.panel.acilisBugun' : 'mekan.panel.acilisYarin', { saat: acik.acilis.saat })}` : ''}
+                {!acik.acik && acik.acilis && acik.acilis.gun !== 'sonra'
+                  ? ` · ${t(acik.acilis.gun === 'bugun' ? 'mekan.panel.acilisBugun' : 'mekan.panel.acilisYarin', { saat: acik.acilis.saat })}`
+                  : ''}
               </>
             ) : null}
           </Text>
@@ -121,22 +155,33 @@ export function MekanPaneli(p: MekanPaneliProps) {
   );
 
   return (
-    // Aşağı çekip bırakma ('katli') kapatmadır: üst bileşen seçimi kaldırır, panel kalkar.
-    <AltSayfa hal={hal} onHal={(h) => (h === 'katli' ? p.onKapat() : gonder({ tur: 'hal', hal: h }))} yukseklik={yukseklik} ust={ust} altDolgu={0}>
-      <View style={{ flex: 1 }}>
-        {durum.sekme === 'genel' ? <GenelSekmesi yer={yer} yukleniyor={tam.isPending} hata={tam.isError} dakika={p.dakika} onSure={p.onSure} gunSecici={p.gunSecici} mesgul={p.mesgul} /> : null}
-        {durum.sekme === 'yorumlar' ? <YorumlarSekmesi placeId={p.placeId} acik={durum.sekme === 'yorumlar'} /> : null}
-        {durum.sekme === 'rehber' ? <RehberSekmesi /> : null}
-        <View style={[s.altCubuk, { paddingBottom: Math.max(kenar.bottom, 12) }]}>
-          <Pressable accessibilityRole="button" accessibilityState={{ disabled: !!p.mesgul }} disabled={p.mesgul} onPress={p.onCta} style={({ pressed }) => [s.cta, (pressed || p.mesgul) && { opacity: 0.8 }]}>
-            <Text style={s.ctaMetin}>{cta}</Text>
-          </Pressable>
-          <Pressable accessibilityRole="button" onPress={p.onYolTarifi} style={({ pressed }) => [s.ikincil, pressed && { opacity: 0.8 }]}>
-            <Text style={s.ikincilMetin}>{t('mekan.panel.yolTarifi')}</Text>
-          </Pressable>
-        </View>
-      </View>
-    </AltSayfa>
+    <View style={StyleSheet.absoluteFill} pointerEvents="box-none" onLayout={(e) => setAlanH(e.nativeEvent.layout.height)}>
+      {alanH > 0 ? (
+        // Aşağı çekip bırakma ('katli'): yarıdan kapatır (üst bileşen seçimi kaldırır), tamdan yarıya iner (#83 KK3).
+        <AltSayfa hal={hal} onHal={(h) => olay({ tur: 'hal', hal: h })} yukseklik={yukseklik} ust={ust} onUstYukseklik={setSeritH} altDolgu={0}>
+          {/* Gövde görünür yüksekliğe sabitlenir: sayfa tam boy olup aşağı kaydığı için flex:1 alt çubuğu ekran dışına taşırıyordu (#83). */}
+          <View style={{ height: govdeYuksekligi(yukseklik[hal], seritH) }}>
+            {durum.sekme === 'genel' ? <GenelSekmesi yer={yer} yukleniyor={tam.isPending} hata={tam.isError} dakika={p.dakika} onSure={p.onSure} gunSecici={p.gunSecici} mesgul={p.mesgul} /> : null}
+            {durum.sekme === 'yorumlar' ? <YorumlarSekmesi placeId={p.placeId} acik={durum.sekme === 'yorumlar'} /> : null}
+            {durum.sekme === 'rehber' ? <RehberSekmesi /> : null}
+            <View style={s.altCubuk}>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityState={{ disabled: !!p.mesgul }}
+                disabled={p.mesgul}
+                onPress={p.onCta}
+                style={({ pressed }) => [s.cta, (pressed || p.mesgul) && { opacity: 0.8 }]}
+              >
+                <Text style={s.ctaMetin}>{cta}</Text>
+              </Pressable>
+              <Pressable accessibilityRole="button" onPress={p.onYolTarifi} style={({ pressed }) => [s.ikincil, pressed && { opacity: 0.8 }]}>
+                <Text style={s.ikincilMetin}>{t('mekan.panel.yolTarifi')}</Text>
+              </Pressable>
+            </View>
+          </View>
+        </AltSayfa>
+      ) : null}
+    </View>
   );
 }
 
@@ -152,7 +197,23 @@ function Govde({ children }: { children: ReactNode }) {
 
 // ---------------------------------------------------------------- Genel
 
-function GenelSekmesi({ yer, yukleniyor, hata, dakika, onSure, gunSecici, mesgul }: { yer: TamYer | null; yukleniyor: boolean; hata: boolean; dakika: number; onSure: (fark: number) => void; gunSecici?: MekanPaneliProps['gunSecici']; mesgul?: boolean }) {
+function GenelSekmesi({
+  yer,
+  yukleniyor,
+  hata,
+  dakika,
+  onSure,
+  gunSecici,
+  mesgul,
+}: {
+  yer: TamYer | null;
+  yukleniyor: boolean;
+  hata: boolean;
+  dakika: number;
+  onSure: (fark: number) => void;
+  gunSecici?: MekanPaneliProps['gunSecici'];
+  mesgul?: boolean;
+}) {
   const [ozetAcik, setOzetAcik] = useState(false);
   const [galeri, setGaleri] = useState(false);
   const ekran = useWindowDimensions();
@@ -189,7 +250,8 @@ function GenelSekmesi({ yer, yukleniyor, hata, dakika, onSure, gunSecici, mesgul
                     disabled={mesgul}
                     hitSlop={4}
                     onPress={() => gunSecici.onGunSec(g)}
-                    style={[s.gunDaire, { borderColor: rengi }, secili && { backgroundColor: rengi }]}>
+                    style={[s.gunDaire, { borderColor: rengi }, secili && { backgroundColor: rengi }]}
+                  >
                     <Text style={[s.gunMetin, { color: secili ? renk.zemin : rengi }]}>{g.index}</Text>
                   </Pressable>
                 );
@@ -251,7 +313,8 @@ function FotoSeridi({ yer, onAc }: { yer: TamYer; onAc: () => void }) {
       style={s.serit}
       contentContainerStyle={s.seritIcerik}
       onScroll={(e) => setYuklenecek((n) => Math.max(n, gorunenFotoSayisi(e.nativeEvent.contentOffset.x, ekran.width, FOTO_EN, FOTO_ARA)))}
-      scrollEventThrottle={48}>
+      scrollEventThrottle={48}
+    >
       {yer.fotolar.map((f, i) => (
         <Pressable key={f.ad} accessibilityRole="imagebutton" accessibilityLabel={t('mekan.panel.fotoAc')} onPress={onAc}>
           <KucukFoto ad={f.ad} hazirUri={i === 0 ? yer.foto_uri : null} yukle={i < yuklenecek} />
@@ -407,7 +470,8 @@ const s = StyleSheet.create({
   gunler: { flexDirection: 'row', gap: 6, flexWrap: 'wrap', justifyContent: 'flex-end', flexShrink: 1 },
   gunDaire: { width: 30, height: 30, borderRadius: 15, borderWidth: 2, alignItems: 'center', justifyContent: 'center', backgroundColor: renk.zemin },
   gunMetin: { fontFamily: yazi.ekstra, fontSize: 12 },
-  altCubuk: { flexDirection: 'row', gap: 10, paddingHorizontal: bosluk.kenar, paddingTop: 12, borderTopWidth: 1, borderTopColor: renk.ayrac, backgroundColor: renk.zemin },
+  // Alt güvenli alanı uygulama alt menüsü karşılar (panel alanı menünün üstünde biter, #83 KK1).
+  altCubuk: { flexDirection: 'row', gap: 10, paddingHorizontal: bosluk.kenar, paddingTop: 12, paddingBottom: 12, borderTopWidth: 1, borderTopColor: renk.ayrac, backgroundColor: renk.zemin },
   cta: { flex: 1, height: 52, borderRadius: 999, backgroundColor: renk.metin, alignItems: 'center', justifyContent: 'center' },
   ctaMetin: { fontFamily: yazi.kalin, fontSize: 14, color: renk.zemin },
   ikincil: { height: 52, paddingHorizontal: 18, borderRadius: 999, backgroundColor: renk.yuzey, alignItems: 'center', justifyContent: 'center' },
