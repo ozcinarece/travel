@@ -11,8 +11,10 @@ export type PanelOlayi =
   | { tur: 'ac' }
   /** ×, haritaya dokunma, seçimin kalkması. */
   | { tur: 'kapat' }
-  /** Alt sayfa sürüklemesi: 'katli' = aşağı çekildi → kapanır. */
+  /** Alt sayfa sürüklemesi: 'katli' = aşağı çekildi → yarıdan kapanır, tamdan önce yarıya iner (#83 KK3). */
   | { tur: 'hal'; hal: 'katli' | 'yari' | 'tam' }
+  /** #83 KK3: Android geri tuşu — panel açıksa yalnız paneli kapatır (ekrandan çıkmaz). */
+  | { tur: 'geri' }
   | { tur: 'sekme'; sekme: PanelSekmesi };
 
 export const KAPALI_PANEL: PanelDurumu = { hal: 'kapali', sekme: 'genel' };
@@ -22,18 +24,32 @@ export function panelGecis(d: PanelDurumu, olay: PanelOlayi): PanelDurumu {
     case 'ac':
       return d.hal === 'kapali' ? { hal: 'yari', sekme: 'genel' } : d;
     case 'kapat':
+    case 'geri':
       return d.hal === 'kapali' ? d : KAPALI_PANEL;
     case 'hal':
-      if (olay.hal === 'katli') return d.hal === 'kapali' ? d : KAPALI_PANEL;
+      if (olay.hal === 'katli') return d.hal === 'kapali' ? d : d.hal === 'tam' ? { ...d, hal: 'yari' } : KAPALI_PANEL;
       return d.hal === olay.hal ? d : { ...d, hal: olay.hal };
     case 'sekme':
       return d.sekme === olay.sekme ? d : { ...d, sekme: olay.sekme };
   }
 }
 
-/** Alt sayfa yükseklikleri (px): kapalı 0 · yarı %55 · tam = ekran − üst güvenli alan − 8. */
-export function panelYukseklikleri(ekranYuksekligi: number, ustGuvenli: number) {
-  return { katli: 0, yari: Math.round(ekranYuksekligi * 0.55), tam: Math.max(Math.round(ekranYuksekligi * 0.55), ekranYuksekligi - ustGuvenli - 8) };
+/** Panelin iç üst dolgusu (AltSayfa paddingTop). */
+export const PANEL_UST_DOLGU = 10;
+
+/**
+ * Alt sayfa yükseklikleri (px). `alanYuksekligi` = panelin yaşadığı alan: ekranın ALT MENÜ HARİÇ yüksekliği (#83 KK1–2;
+ * HaritaEkrani'nin üst katmanı ölçülür). yarı %55 · tam = alan − üst güvenli alan − 8 · 'katli' = kapanma durağı:
+ * yarının %45'i — yarıdan bu noktaya doğru çekilince (yarının ~%27'si kadar) panel kapanır (#83 KK3 "zor kapanıyor").
+ */
+export function panelYukseklikleri(alanYuksekligi: number, ustGuvenli: number) {
+  const yari = Math.round(alanYuksekligi * 0.55);
+  return { katli: Math.round(yari * 0.45), yari, tam: Math.max(yari, alanYuksekligi - ustGuvenli - 8) };
+}
+
+/** #83 KK1: gövde (sekme içeriği + sabit alt çubuk) görünür yüksekliğe sığar; alt çubuk hep alt menünün üstünde. */
+export function govdeYuksekligi(gorunen: number, ustSerit: number): number {
+  return Math.max(0, gorunen - PANEL_UST_DOLGU - ustSerit);
 }
 
 /** KK3: ana düğme — Keşfet'te listeye ekle / listeden çıkar; Program'da güne ekle / günden çıkar. */

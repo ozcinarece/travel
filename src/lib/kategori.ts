@@ -12,7 +12,9 @@ const VARSAYILAN_DAKIKA: Record<string, number> = {
   viewpoint: 20,
   scenic_point: 20,
   restaurant: 75,
-  cafe: 45,
+  // #83: kafe / kahveci 30 dk (45 uzun geliyordu).
+  cafe: 30,
+  coffee_shop: 30,
   bar: 90,
   bakery: 20,
   shopping_mall: 90,

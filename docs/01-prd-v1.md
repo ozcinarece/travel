@@ -169,7 +169,7 @@ Açık tema zorunlu. Bina blokları kapalı, `poi` tümü kapalı, şehir etiket
 Her yerde `X sa Y dk` / `Y dk`; ondalık saat yok. Yorum sayısı `1,2K`, `312K`.
 
 ## 6. Kalınacak süre varsayılanları
-v0.2 tablosu aynen. Kullanıcı −/+ ile 15 dk adımlarla değiştirir (min 15 dk, maks 8 sa).
+v0.2 tablosu aynen, tek değişiklik: **kafe / kahveci (`cafe`, `coffee_shop`) 30 dk** (#83; 45 uzun geliyordu). Kullanıcı −/+ ile 15 dk adımlarla değiştirir (min 15 dk, maks 8 sa).
 
 ## 7. Google Places ve Routes kısıtları
 - Veritabanında yalnız `place_id` ve enlem/boylam (≤ 30 gün); ad, puan, saat, fotoğraf saklanmaz. `stays.label` kullanıcı metnidir.
