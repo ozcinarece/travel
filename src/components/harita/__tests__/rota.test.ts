@@ -1,7 +1,7 @@
 import { describe, expect, it } from '@jest/globals';
 
 import { bolgeHesapla } from '../geo';
-import { bacakEtiketPinleri, OK_EN_FAZLA, yonOklari } from '../rota';
+import { bacakEtiketPinleri, cizgiDeseni, OK_EN_FAZLA, yonOklari } from '../rota';
 import type { HaritaCizgisi, HaritaPini } from '../tipler';
 
 const roma = { lat: 41.9028, lng: 12.4964 };
@@ -50,5 +50,13 @@ describe('yonOklari (#59 §C)', () => {
     const haplar = bacakEtiketPinleri([yuruyus, taksi]);
     expect(haplar).toHaveLength(1);
     expect(haplar[0]).toMatchObject({ id: 'bacak:t', tur: 'etiket', etiket: '14 dk', etiketIkon: 'araba' });
+  });
+});
+
+describe('cizgiDeseni (#88 KK1)', () => {
+  it('kesikte desen, gerçek rotada BOŞ dizi (undefined değil: Android eski deseni korur)', () => {
+    expect(cizgiDeseni(true, [10, 8])).toEqual([10, 8]);
+    expect(cizgiDeseni(false, [10, 8])).toEqual([]);
+    expect(cizgiDeseni(undefined, [10, 8])).toEqual([]);
   });
 });

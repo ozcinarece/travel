@@ -19,10 +19,11 @@ export const SOLUK_BACAK = 0.35;
 /**
  * #61 §5: Google yolu en yakın yola "oturtur" — pin yoldan uzaktaysa polyline pine değmez, dolambaçlıysa (yakın iki
  * POI arasında blok turu) pinlerden kopuk bir çizgi kalır. Çizgi uçlara düz parçayla bağlanır; yol kuş uçuşunun
- * 3 katı + 150 m'den uzunsa (ya da uçları pinlerden 120 m'den uzaksa) düz çizgi kullanılır.
+ * 3 katı ya da kuş uçuşu + 100 m'den (hangisi büyükse) uzunsa, ya da uçları pinlerden 120 m'den uzaksa düz çizgi kullanılır.
+ * #88 KK2: kısa bacakta (50 m) eski "3 kat + 150 m" kuralı 300 m'lik dolambaca izin veriyordu; şimdi 150 m.
  */
 export const SAPMA_ORANI = 3;
-export const SAPMA_PAYI_M = 150;
+export const SAPMA_PAYI_M = 100;
 export const UC_PAYI_M = 120;
 export function rotaNoktalari(polyline: string, a: Konum, z: Konum): Konum[] {
   const yol = polylineCoz(polyline).filter((n) => Number.isFinite(n.lat) && Number.isFinite(n.lng));
@@ -32,7 +33,7 @@ export function rotaNoktalari(polyline: string, a: Konum, z: Konum): Konum[] {
   const kus = mesafeM(a, z);
   const basUzak = mesafeM(a, yol[0]);
   const sonUzak = mesafeM(yol[yol.length - 1], z);
-  if (uzunluk > kus * SAPMA_ORANI + SAPMA_PAYI_M || basUzak > UC_PAYI_M || sonUzak > UC_PAYI_M) return [a, z];
+  if (uzunluk > Math.max(kus * SAPMA_ORANI, kus + SAPMA_PAYI_M) || basUzak > UC_PAYI_M || sonUzak > UC_PAYI_M) return [a, z];
   return [...(basUzak > 2 ? [a] : []), ...yol, ...(sonUzak > 2 ? [z] : [])];
 }
 

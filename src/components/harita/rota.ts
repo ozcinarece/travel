@@ -63,3 +63,12 @@ export function yonOklari(cizgiler: HaritaCizgisi[], pinler: HaritaPini[], bolge
   const adim = Math.ceil(adaylar.length / OK_EN_FAZLA);
   return adaylar.filter((_, i) => i % adim === 0).slice(0, OK_EN_FAZLA);
 }
+
+/**
+ * #88 KK1: Polyline kesik deseni — kuş uçuşu (`kesik`) için verilen desen, gerçek rota için BOŞ dizi. `undefined` değil:
+ * react-native-maps Android `MapPolyline.applyPattern` null gelince erken döner ve ESKİ deseni korur (#77'den beri aynı
+ * Polyline yerinde güncellendiği için kuş uçuşu → rota geçişinde çizgi noktalı kalıyordu). Boş dizi Google'da düz çizgidir.
+ */
+export function cizgiDeseni(kesik: boolean | undefined, kesikli: readonly number[]): number[] {
+  return kesik ? [...kesikli] : [];
+}
