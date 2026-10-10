@@ -20,3 +20,10 @@ export function izBirak(kategori: string, mesaj: string, seviye: 'info' | 'error
   if (!dsn) return;
   Sentry.addBreadcrumb({ category: kategori, message: mesaj, level: seviye });
 }
+
+/** #85 KK3: hata sınırının yakaladığı istisna Sentry'ye gider (DSN yoksa yalnız konsol). Kişisel veri içermez. */
+export function hataBildir(hata: unknown, baglam?: string) {
+  console.error(baglam ?? 'hata', hata);
+  if (!dsn) return;
+  Sentry.captureException(hata, baglam ? { tags: { baglam } } : undefined);
+}

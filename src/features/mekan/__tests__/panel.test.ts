@@ -2,7 +2,7 @@ import { describe, expect, it } from '@jest/globals';
 
 import type { Yorum } from '@/features/yerler/api';
 
-import { acikDurumu, ctaAnahtari, gorunenFotoSayisi, govdeYuksekligi, KAPALI_PANEL, panelGecis, panelYukseklikleri, yorumlariSirala } from '../panel';
+import { acikDurumu, ctaAnahtari, geriTusu, gorunenFotoSayisi, govdeYuksekligi, KAPALI_PANEL, panelGecis, panelYukseklikleri, yorumlariSirala } from '../panel';
 
 describe('mekan paneli durum makinesi (#80 KK14)', () => {
   it('kapalı → pine dokun: yarı + genel; açıkken başka pine dokun: hal ve sekme korunur (KK13)', () => {
@@ -34,6 +34,13 @@ describe('mekan paneli durum makinesi (#80 KK14)', () => {
     // Gövde (içerik + alt çubuk) görünür yüksekliğe sığar: alt çubuk alt menünün üstünde kalır.
     expect(govdeYuksekligi(440, 150)).toBe(280);
     expect(govdeYuksekligi(100, 150)).toBe(0);
+  });
+});
+
+describe('geri tuşu önceliği (#85 KK4)', () => {
+  it('galeri açıkken geri galeriyi kapatır, değilse paneli', () => {
+    expect(geriTusu(true)).toBe('galeri');
+    expect(geriTusu(false)).toBe('panel');
   });
 });
 
