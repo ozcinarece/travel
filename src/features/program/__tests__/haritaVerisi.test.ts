@@ -5,6 +5,9 @@ import type { TempoSonucu } from '@/schedule/tempo';
 
 import type { GunUcNoktalari, Konaklama } from '@/features/konaklama/plan';
 
+import { bolgeHesapla } from '@/components/harita/geo';
+import { cizgiAnahtari, yonOklari } from '@/components/harita/rota';
+
 import { otelPinleri, programCizgileri, rotaNoktalari } from '../haritaVerisi';
 import type { MatrisNoktasi, RotaHaritasi } from '../sorgular';
 
@@ -62,6 +65,26 @@ describe('programCizgileri (#51)', () => {
     expect(e[1].etiketIkon).toBe('araba');
     // #61 §5: örnek polyline pinlerden çok uzakta (Kaliforniya) → sapma kontrolü düz çizgiye düşürür; yol kimliği kalır.
     expect(d[1].noktalar).toEqual([{ lat: A.lat, lng: A.lng }, { lat: B.lat, lng: B.lng }]);
+  });
+});
+
+describe('#88: rota gelmiş bacakta oklar + ayrı Polyline anahtarı', () => {
+  it('kuş uçuşunda ok yok ve anahtar |kus; rota gelince anahtar |yol ve ok sayısı > 0', () => {
+    const noktalar = [H, A, B];
+    const bolge = bolgeHesapla({ lat: 41.9, lng: 12.49 }, 0.02, 0.01, 15);
+    const ekran = { genislik: 400, yukseklik: 800 };
+    const kus = cizgiler(noktalar, {});
+    expect(kus.every((x) => x.kesik)).toBe(true);
+    expect(yonOklari(kus, [], bolge, ekran)).toHaveLength(0);
+    // Pinlere yakın gerçek yol (uçlar pinlerde; tek ara nokta).
+    const yol = kodla([{ lat: A.lat, lng: A.lng }, { lat: 41.903, lng: 12.49 }, { lat: B.lat, lng: B.lng }]);
+    const rotali = cizgiler(noktalar, { 'A>B': { ...rota('A', 'B'), polyline: yol } });
+    const ab = rotali.find((x) => x.id === 'rota:g1:A>B')!;
+    expect(ab.kesik).toBeFalsy();
+    expect(ab.ince).toBeFalsy();
+    expect(cizgiAnahtari(ab)).toBe('rota:g1:A>B|yol');
+    expect(cizgiAnahtari(kus.find((x) => x.id === 'rota:g1:A>B')!)).toBe('rota:g1:A>B|kus');
+    expect(yonOklari([ab], [], bolge, ekran).length).toBeGreaterThan(0);
   });
 });
 
