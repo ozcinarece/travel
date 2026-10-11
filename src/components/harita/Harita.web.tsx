@@ -6,6 +6,8 @@ import { t } from '@/i18n';
 import { renk } from '@/theme';
 
 import { bolgeHesapla, detayGoster, etiketBolgesi, gizliEtiketler, pinCapasi, pinZ, zoomaGorePinler, zoomDelta } from './geo';
+import { GunHapiIcerigi } from './GunHapi';
+import { hapCapasi, hapYerlesimi, noktaEkranX } from './hap';
 import { PinIcerigi } from './PinIcerigi';
 import { bacakEtiketPinleri } from './rota';
 import type { HaritaBolgesi, HaritaCizgisi, HaritaOdagi, HaritaProps, HaritaSigdirma } from './tipler';
@@ -44,8 +46,8 @@ function SigdirGit({ sigdir }: { sigdir?: HaritaSigdirma }) {
 
 /**
  * #33: Maps JS Polyline (kütüphanede hazır bileşen yok). #59 §C: seçili gün üç katman (gölge 11 · beyaz 9 · renk 5,5),
- * yürüyüş bacağında beyaz yön okları (FORWARD_OPEN_ARROW, ~24 px); #65: araba bacağı aynı katmanlar, düz, oksuz; diğer günler
- * ve kuş uçuşu 3 px ince (kuş uçuşu noktalı).
+ * yürüyüş bacağında beyaz yön okları (FORWARD_OPEN_ARROW, ~24 px); #65: araba bacağı aynı katmanlar, düz, oksuz; kuş uçuşu
+ * 3 px ince noktalı. #91: diğer günlerin rotası hiç gelmez.
  */
 function Cizgi({ cizgi }: { cizgi: HaritaCizgisi }) {
   const harita = useMap();
@@ -82,10 +84,13 @@ function Cizgi({ cizgi }: { cizgi: HaritaCizgisi }) {
 }
 
 // Web'de `altBosluk` yok sayılır (Maps JS logosu konumlanmaz; panel web'de ikincil); uzun basma yok.
-export function Harita({ merkez, zoom = 14, pinler = [], daireler = [], cizgiler = [], odak, onPinBas, onHaritaBas, onPinSuruklendi, onBolgeDegisti, ustBosluk = 0, sigdir, seciliId = null }: HaritaProps) {
+export function Harita({ merkez, zoom = 14, pinler = [], daireler = [], cizgiler = [], odak, onPinBas, onHaritaBas, onPinSuruklendi, onBolgeDegisti, ustBosluk = 0, sigdir, seciliId = null, hap = null }: HaritaProps) {
   const ekran = useWindowDimensions();
   const [bolge, setBolge] = useState<HaritaBolgesi>(() => bolgeHesapla(merkez, zoomDelta(zoom), zoomDelta(zoom)));
   const olcu = useMemo(() => ({ genislik: ekran.width, yukseklik: ekran.height }), [ekran.width, ekran.height]);
+  // #91 B: gün hapı — genişlik ölçülür, kenardan taşmaz (hap.ts); tıklama = "Güne git" (onPinBas(nokta)).
+  const [hapGenisligi, setHapGenisligi] = useState(0);
+  const hapYer = hap ? hapYerlesimi(noktaEkranX(hap.konum, bolge, ekran.width), ekran.width, hapGenisligi || 200) : null;
   // #59 §A: kümeleme yok. #59 §B: etiket hesabı yalnız zoom adımında yenilenir. #66: zoom < 13'te öneri küçük; pin düşmez.
   const [etiketBolge, setEtiketBolge] = useState<HaritaBolgesi>(bolge);
   const tumPinler = useMemo(() => [...zoomaGorePinler(pinler, etiketBolge.zoom), ...bacakEtiketPinleri(cizgiler)], [pinler, cizgiler, etiketBolge.zoom]);
@@ -140,6 +145,11 @@ export function Harita({ merkez, zoom = 14, pinler = [], daireler = [], cizgiler
             fillOpacity={0}
           />
         ))}
+        {hap && hapYer ? (
+          <AdvancedMarker position={hap.konum} zIndex={60} anchorPoint={(({ x, y }) => [`${x * 100}%`, `${y * 100}%`])(hapCapasi(hapYer.uc, hapGenisligi || 200)) as [string, string]} onClick={() => onPinBas?.(hap.pinId)}>
+            <GunHapiIcerigi hap={hap} uc={hapYer.uc} onLayout={(e) => setHapGenisligi(Math.round(e.nativeEvent.layout.width))} />
+          </AdvancedMarker>
+        ) : null}
         {gorunen.map((p) => {
           const detay = detayGoster(p, etiketBolge.zoom) && !gizli.detay.has(p.id);
           const bacak = p.tur === 'etiket' || p.tur === 'konum';

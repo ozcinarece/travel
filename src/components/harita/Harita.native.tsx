@@ -4,13 +4,15 @@ import MapView, { Circle, Marker, Polyline, PROVIDER_GOOGLE } from 'react-native
 
 import { bolgeHesapla, enYakinPin, etiketBolgesi, gizliEtiketler, haritaDolgusu, isaretciImzasi, izlemeGerekli, pinCapasi, pinZ, zoomaGorePinler, zoomDelta } from './geo';
 import { ACIK_HARITA_STILI } from './haritaStili';
+import { GunHapiIcerigi } from './GunHapi';
+import { hapCapasi, hapYerlesimi, noktaEkranX } from './hap';
 import { dokunusuIletir, isaretciPlani, planFarki } from './isaretciler';
 import { PinIcerigi, pinPngAnahtari } from './PinIcerigi';
 import { IGNE_CAPA, IGNE_CAPA_34, PIN_IKONLARI } from './pinIkonlari';
 import { usePinGorselleri } from './pinOnYukleme';
 import { bacakEtiketPinleri, cizgiAnahtari, yonOklari } from './rota';
 import { dokunmaKaydet, isaretciSayilariniKaydet, secimSuresiKaydet, taniSayaclari } from './tani';
-import type { HaritaBolgesi, HaritaCizgisi, HaritaPini, HaritaProps, Konum } from './tipler';
+import type { GunHapi, HaritaBolgesi, HaritaCizgisi, HaritaPini, HaritaProps, Konum } from './tipler';
 import { yenidenKurulsunMu } from './yenidenKurulum';
 
 /** "#rrggbb" + opaklık → "#rrggbbaa". */
@@ -19,7 +21,7 @@ function saydam(hex: string, opaklik: number) {
   return hex.length === 7 ? `${hex}${a}` : hex;
 }
 
-/** #59 §C (RouteSpec5): seçili gün üç katman — gölge 11 dp %12 · beyaz kenar 9 dp · renk 5,5 dp; diğer günler 3 dp. */
+/** #59 §C (RouteSpec5): seçili gün üç katman — gölge 11 dp %12 · beyaz kenar 9 dp · renk 5,5 dp; kuş uçuşu 3 dp. */
 const ROTA = { golge: 11, kenar: 9, cizgi: 5.5, ince: 3, golgeRenk: '#0f0f0f', golgeOpaklik: 0.12 } as const;
 /** Rotası henüz gelmemiş kuş uçuşu: ince kesikli (10/8 dp; Android'de desen ekran pikseli → PixelRatio). #65: araba bacağı düz. */
 const dp = (v: number) => Math.round(PixelRatio.get() * v);
@@ -46,6 +48,7 @@ export function Harita({
   onPinUzunBas,
   seciliId = null,
   ilkBolge = null,
+  hap = null,
 }: HaritaProps) {
   const ref = useRef<MapView>(null);
   const ekran = useWindowDimensions();
@@ -219,6 +222,7 @@ export function Harita({
             zIndex={0}
           />
         ))}
+      {hap ? <GunHapiIsaretcisi hap={hap} bolge={bolge} ekranGenisligi={olcu.genislik} /> : null}
       {plan.map((i) => {
         // #40: çakışmada önce puan satırı düşer (gizli.detay), sonra ad (gizli.etiket).
         const p = i.pin;
@@ -246,10 +250,9 @@ export function Harita({
 }
 
 /**
- * #59 §C / #65: üç katmanlı rota (gölge · beyaz kenar · renk) — yürüme ve araba aynı (araba düz, oksuz); diğer günler ve kuş
- * uçuşu ince. #77: ince de aynı ÜÇ Polyline'dır (gölge ve kenar saydam) — ince ↔ kalın, kuş uçuşu ↔ gerçek yol geçişleri
- * çizgiyi kaldırıp yeniden kurmak yerine aynı Polyline'ın özelliklerini günceller (Android'de kaldırılan çizgi hayalet kalabiliyordu).
- * #88: ince ↔ kalın geçişi aynı örnekte kalır; kuş uçuşu ↔ rota geçişi ise AYRI örneklerdir (desen prop'u asla değişmez).
+ * #59 §C / #65: üç katmanlı rota (gölge · beyaz kenar · renk) — yürüme ve araba aynı (araba düz, oksuz). Rota gelene kadar
+ * kuş uçuşu ince kesikli. #88: kuş uçuşu ↔ rota geçişi AYRI örneklerdir (desen prop'u asla değişmez).
+ * #91 A: diğer günlerin rotası hiç gelmez (programCizgileri boş döner) — "ince düz" hali kalktı; düz çizgi hep üç katman.
  */
 function RotaCizgisi({ cizgi: c }: { cizgi: HaritaCizgisi }) {
   const noktalar = useMemo(() => c.noktalar.map((n) => ({ latitude: n.lat, longitude: n.lng })), [c.noktalar]);
@@ -261,16 +264,42 @@ function RotaCizgisi({ cizgi: c }: { cizgi: HaritaCizgisi }) {
     return <Polyline coordinates={noktalar} lineCap="butt" lineJoin="round" lineDashPattern={KESIKLI} strokeColor={saydam(c.renk, opaklik)} strokeWidth={ROTA.ince} zIndex={0} />;
   }
   const ortak = { coordinates: noktalar, lineCap: 'round' as const, lineJoin: 'round' as const };
-  const ince = !!c.ince;
   return (
     <>
-      <Polyline {...ortak} strokeColor={ince ? SAYDAM : saydam(ROTA.golgeRenk, ROTA.golgeOpaklik * opaklik)} strokeWidth={ROTA.golge} zIndex={ince ? 0 : 1} />
-      <Polyline {...ortak} strokeColor={ince ? SAYDAM : saydam('#ffffff', opaklik)} strokeWidth={ROTA.kenar} zIndex={ince ? 0 : 2} />
-      <Polyline {...ortak} strokeColor={saydam(c.renk, opaklik)} strokeWidth={ince ? ROTA.ince : ROTA.cizgi} zIndex={ince ? 0 : 3} />
+      <Polyline {...ortak} strokeColor={saydam(ROTA.golgeRenk, ROTA.golgeOpaklik * opaklik)} strokeWidth={ROTA.golge} zIndex={1} />
+      <Polyline {...ortak} strokeColor={saydam('#ffffff', opaklik)} strokeWidth={ROTA.kenar} zIndex={2} />
+      <Polyline {...ortak} strokeColor={saydam(c.renk, opaklik)} strokeWidth={ROTA.cizgi} zIndex={3} />
     </>
   );
 }
-const SAYDAM = '#00000000';
+
+/**
+ * #91 B: gün hapı işaretçisi — noktanın üstünde, ekran kenarından taşmaz (hap.ts). Genişlik onLayout ile ölçülür; ölçüm ve
+ * içerik değişince bitmap yeniden alınır (tracksViewChanges 350 ms). Dokunuş: Android'de işaretçi dokunuşu bu işaretçinin
+ * KONUMUNA (= noktanın konumu) düşer → `dokun` en yakın pini (noktayı) bulur → `onPinBas(nokta)`; ekran bunu "Güne git" sayar.
+ */
+function GunHapiIsaretcisi({ hap, bolge, ekranGenisligi }: { hap: GunHapi; bolge: HaritaBolgesi; ekranGenisligi: number }) {
+  const [genislik, setGenislik] = useState(0);
+  // Bitmap'i alınmış görünümün imzası (OzelIsaretci ile aynı düzen): imza değişince izleme açılır, 350 ms sonra yakalanır.
+  const [yakalanan, setYakalanan] = useState<string | null>(null);
+  const x = noktaEkranX(hap.konum, bolge, ekranGenisligi);
+  const yer = hapYerlesimi(x, ekranGenisligi, genislik || 200);
+  const imza = `${hap.metin}|${hap.renk}|${genislik}|${Math.round(yer.uc)}`;
+  const izle = yakalanan !== imza;
+  useEffect(() => {
+    const z = setTimeout(() => setYakalanan(imza), YAKALAMA_GECIKMESI_MS);
+    return () => clearTimeout(z);
+  }, [imza]);
+  return (
+    <Marker
+      coordinate={{ latitude: hap.konum.lat, longitude: hap.konum.lng }}
+      anchor={hapCapasi(yer.uc, genislik || 200)}
+      tracksViewChanges={izle}
+      zIndex={60}>
+      <GunHapiIcerigi hap={hap} uc={yer.uc} onLayout={(e) => setGenislik(Math.round(e.nativeEvent.layout.width))} />
+    </Marker>
+  );
+}
 
 /** Görünüm değişince bitmap bu kadar ms sonra alınır (yerleşim + çizim payı). */
 const YAKALAMA_GECIKMESI_MS = 350;

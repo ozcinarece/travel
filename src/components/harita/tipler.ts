@@ -61,13 +61,13 @@ export type HaritaCizgisi = {
   noktalar: Konum[];
   /** #59 §C: koyu rota tonu (theme.rotaRengi); seçili günde üç katman (gölge · beyaz kenar · renk). */
   renk: string;
-  /** 0–1; seçili gün 0,9 (geçilen bacak 0,35), diğer günler 0,32. */
+  /** 0–1; seçili gün 0,9 (geçilen bacak 0,35). #91: diğer günlerin çizgisi yok. */
   opaklik?: number;
   /** Gerçek yol gelmemiş kuş uçuşu: kesikli (#65: araba bacağı düzdür, kesik değil). */
   kesik?: boolean;
   /** #65: araba bacağı (uzun bacak) — yürümeyle aynı katmanlar, yön oku yok. */
   arac?: boolean;
-  /** #59 §C: diğer günlerin rotası — 3 dp, kenarsız, oksuz. */
+  /** 3 dp, kenarsız, oksuz — #91'den beri yalnız kuş uçuşu (`kesik`) ince; diğer günlerin rotası hiç çizilmez. */
   ince?: boolean;
   etiket?: string;
   /** #47 B5: bacak hapında ikon (emoji yerine). */
@@ -82,6 +82,13 @@ export type HaritaOdagi = { konum: Konum; zoom: number; sayac: number };
  * gün seçici, altta harita dolgusunun (panel) üstüne ek pay. Yeni nesne = yeni sığdırma.
  */
 export type HaritaSigdirma = { noktalar: Konum[]; ust: number; alt: number };
+
+/**
+ * #91 B: diğer gün noktasının üstündeki gün hapı — siyah hap: gün rengi 7 px nokta + "Cum 16 · Odunpazarı Evleri" + beyaz
+ * "Güne git" düğmesi; altında üçgen noktayı gösterir. Aynı anda tek hap. Hapa dokunmak `onPinBas(pinId)` üretir (işaretçi
+ * dokunuşu noktanın konumuna düşer); ekran bunu "Güne git" sayar.
+ */
+export type GunHapi = { pinId: string; konum: Konum; renk: string; metin: string; dugme: string };
 
 export type HaritaProps = {
   merkez: Konum;
@@ -112,4 +119,6 @@ export type HaritaProps = {
   seciliId?: string | null;
   /** #79: verilirse harita `merkez`/`zoom` yerine bu bölgeden açılır (ekran yeniden kurulunca son görünür bölge). */
   ilkBolge?: HaritaBolgesi | null;
+  /** #91 B: açık gün hapı (diğer gün noktasına dokunuldu); yoksa çizilmez. */
+  hap?: GunHapi | null;
 };

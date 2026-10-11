@@ -1,6 +1,6 @@
 import { describe, expect, it, jest } from '@jest/globals';
 
-import type { Gun, Mekan } from '@/lib/tipler';
+import type { Gun } from '@/lib/tipler';
 import type { TempoSonucu } from '@/schedule/tempo';
 
 import type { GunUcNoktalari, Konaklama } from '@/features/konaklama/plan';
@@ -30,7 +30,7 @@ const POLY = '_p~iF~ps|U_ulLnnqC_mqNvxq`@';
 const rota = (from: string, to: string) => ({ from_key: from, to_key: to, seconds: 1980, meters: 2400, mode: 'WALK' as const, polyline: POLY, drive_seconds: null, drive_meters: null });
 
 function cizgiler(noktalar: MatrisNoktasi[], rotalar: RotaHaritasi) {
-  return programCizgileri({ gunUclari: new Map(), mekanIle: new Map<string, Mekan>(), gunler: [gun], tempolar, seciliGunId: 'g1', seciliNoktalar: noktalar, rotalar, bacak, gecilenBacak: 0 });
+  return programCizgileri({ gunler: [gun], tempolar, seciliGunId: 'g1', seciliNoktalar: noktalar, rotalar, bacak, gecilenBacak: 0 });
 }
 
 describe('programCizgileri (#51)', () => {
@@ -116,17 +116,22 @@ describe('otelPinleri (#56)', () => {
   });
 });
 
-describe('programCizgileri diğer günler (#56)', () => {
-  it('rota günün kendi başlangıç ve bitiş otelini kullanır', () => {
-    const mekanIle = new Map<string, Mekan>([['a', { id: 'a', place_id: 'A', lat: 41.85, lng: 12.4 } as unknown as Mekan]]);
-    const tp = new Map<string, TempoSonucu>([['g2', { sira: ['a'] } as unknown as TempoSonucu]]);
-    const c = programCizgileri({ gunUclari: uclar, mekanIle, gunler: gunlerIki, tempolar: tp, seciliGunId: 'g1', seciliNoktalar: [], rotalar: {}, bacak, gecilenBacak: 0 });
-    // #77: diğer gün de bacak bacak (otel → A, A → otel), kimlikler seçili günün matris anahtarlarıyla aynı biçimde.
-    expect(c).toHaveLength(2);
-    expect(c.map((x) => x.id)).toEqual(['rota:g2:stay:x>A', 'rota:g2:A>stay:y']);
-    expect(c.every((x) => x.ince && x.renk === '#cf5a22' && x.opaklik === 0.32)).toBe(true);
-    expect(c[0].noktalar).toEqual([{ lat: X.lat, lng: X.lng }, { lat: 41.85, lng: 12.4 }]);
-    expect(c[1].noktalar).toEqual([{ lat: 41.85, lng: 12.4 }, { lat: Y.lat, lng: Y.lng }]);
+describe('programCizgileri diğer günler (#91 A)', () => {
+  it('seçili olmayan günler için HİÇBİR çizgi üretilmez (düz, ince ya da kuş uçuşu yok); seçili gün olduğu gibi', () => {
+    const tp = new Map<string, TempoSonucu>([
+      ['g1', { sira: ['a', 'b'] } as unknown as TempoSonucu],
+      ['g2', { sira: ['c'] } as unknown as TempoSonucu],
+      ['g3', { sira: ['d', 'e', 'f'] } as unknown as TempoSonucu],
+    ]);
+    // g1 seçili: yalnız g1'in bacakları (otel → A → B → otel), g2 ve g3'ten tek çizgi yok.
+    const c = programCizgileri({ gunler: gunlerIki, tempolar: tp, seciliGunId: 'g1', seciliNoktalar: [H, A, B, H], rotalar: {}, bacak, gecilenBacak: 0 });
+    expect(c.map((x) => x.id)).toEqual(['rota:g1:hotel>A', 'rota:g1:A>B', 'rota:g1:B>hotel']);
+    expect(c.every((x) => x.id.startsWith('rota:g1:'))).toBe(true);
+    // Boş gün seçili (g2'nin noktaları yok): hiç çizgi yok — diğer günlerin rotası da, kuş uçuşu da.
+    const bos = programCizgileri({ gunler: gunlerIki, tempolar: tp, seciliGunId: 'g2', seciliNoktalar: [], rotalar: {}, bacak, gecilenBacak: 0 });
+    expect(bos).toEqual([]);
+    // Seçili gün yokken de çizgi yok.
+    expect(programCizgileri({ gunler: gunlerIki, tempolar: tp, seciliGunId: undefined, seciliNoktalar: [], rotalar: {}, bacak, gecilenBacak: 0 })).toEqual([]);
   });
 });
 
