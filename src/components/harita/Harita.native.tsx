@@ -8,7 +8,7 @@ import { dokunusuIletir, isaretciPlani, planFarki } from './isaretciler';
 import { PinIcerigi, pinPngAnahtari } from './PinIcerigi';
 import { IGNE_CAPA, IGNE_CAPA_34, PIN_IKONLARI } from './pinIkonlari';
 import { usePinGorselleri } from './pinOnYukleme';
-import { bacakEtiketPinleri, cizgiDeseni, yonOklari } from './rota';
+import { bacakEtiketPinleri, cizgiAnahtari, yonOklari } from './rota';
 import { dokunmaKaydet, isaretciSayilariniKaydet, secimSuresiKaydet, taniSayaclari } from './tani';
 import type { HaritaBolgesi, HaritaCizgisi, HaritaPini, HaritaProps, Konum } from './tipler';
 import { yenidenKurulsunMu } from './yenidenKurulum';
@@ -191,7 +191,8 @@ export function Harita({
         if (__DEV__) console.log(`[harita] bölge olayı ${taniSayaclari.bolgeOlayi} · kurulum ${haritaSayaclari.kurulum} · yakalama ${haritaSayaclari.yakalama} · zoom ${yeni.zoom.toFixed(2)} · işaretçi ${gorunen.length}`);
       }}>
       {cizgiler.map((c) => (
-        <RotaCizgisi key={c.id} cizgi={c} />
+        // #88: kuş uçuşu ve gerçek rota ayrı örnekler (anahtar `|kus` / `|yol`): desen prop'u hiç değişmez.
+        <RotaCizgisi key={cizgiAnahtari(c)} cizgi={c} />
       ))}
       {daireler.map((d) => (
         <Circle
@@ -248,27 +249,24 @@ export function Harita({
  * #59 §C / #65: üç katmanlı rota (gölge · beyaz kenar · renk) — yürüme ve araba aynı (araba düz, oksuz); diğer günler ve kuş
  * uçuşu ince. #77: ince de aynı ÜÇ Polyline'dır (gölge ve kenar saydam) — ince ↔ kalın, kuş uçuşu ↔ gerçek yol geçişleri
  * çizgiyi kaldırıp yeniden kurmak yerine aynı Polyline'ın özelliklerini günceller (Android'de kaldırılan çizgi hayalet kalabiliyordu).
+ * #88: ince ↔ kalın geçişi aynı örnekte kalır; kuş uçuşu ↔ rota geçişi ise AYRI örneklerdir (desen prop'u asla değişmez).
  */
 function RotaCizgisi({ cizgi: c }: { cizgi: HaritaCizgisi }) {
   const noktalar = useMemo(() => c.noktalar.map((n) => ({ latitude: n.lat, longitude: n.lng })), [c.noktalar]);
   const opaklik = c.opaklik ?? 1;
+  // #88: kuş uçuşu AYRI bileşen örneği (anahtar `|kus`) — tek ince kesikli Polyline; rota gelince bu örnek kaldırılır,
+  // aşağıdaki düz örnek eklenir. Düz rotaya `lineDashPattern` hiç verilmez (Android'de desen kaldırma/boşaltma güvenilmez).
+  // Kesikli çizgide uç 'butt': Android yuvarlak uçlu deseni NOKTA (Dot) olarak çizer, kesik (Dash) değil.
+  if (c.kesik) {
+    return <Polyline coordinates={noktalar} lineCap="butt" lineJoin="round" lineDashPattern={KESIKLI} strokeColor={saydam(c.renk, opaklik)} strokeWidth={ROTA.ince} zIndex={0} />;
+  }
   const ortak = { coordinates: noktalar, lineCap: 'round' as const, lineJoin: 'round' as const };
-  // #88 KK1: desen hiç `undefined` olmaz — Android null gelince eski deseni korur (rota.cizgiDeseni). Kesikli çizgide uç
-  // 'butt': Android yuvarlak uçlu deseni NOKTA (Dot) olarak çizer, kesik (Dash) değil.
-  const desen = cizgiDeseni(c.kesik, KESIKLI);
   const ince = !!c.ince;
   return (
     <>
       <Polyline {...ortak} strokeColor={ince ? SAYDAM : saydam(ROTA.golgeRenk, ROTA.golgeOpaklik * opaklik)} strokeWidth={ROTA.golge} zIndex={ince ? 0 : 1} />
       <Polyline {...ortak} strokeColor={ince ? SAYDAM : saydam('#ffffff', opaklik)} strokeWidth={ROTA.kenar} zIndex={ince ? 0 : 2} />
-      <Polyline
-        {...ortak}
-        lineCap={c.kesik ? 'butt' : 'round'}
-        lineDashPattern={desen}
-        strokeColor={saydam(c.renk, opaklik)}
-        strokeWidth={ince ? ROTA.ince : ROTA.cizgi}
-        zIndex={ince ? 0 : 3}
-      />
+      <Polyline {...ortak} strokeColor={saydam(c.renk, opaklik)} strokeWidth={ince ? ROTA.ince : ROTA.cizgi} zIndex={ince ? 0 : 3} />
     </>
   );
 }

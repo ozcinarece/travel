@@ -1,7 +1,7 @@
 import { describe, expect, it } from '@jest/globals';
 
 import { bolgeHesapla } from '../geo';
-import { bacakEtiketPinleri, cizgiDeseni, OK_EN_FAZLA, yonOklari } from '../rota';
+import { bacakEtiketPinleri, cizgiAnahtari, OK_EN_FAZLA, yonOklari } from '../rota';
 import type { HaritaCizgisi, HaritaPini } from '../tipler';
 
 const roma = { lat: 41.9028, lng: 12.4964 };
@@ -53,10 +53,11 @@ describe('yonOklari (#59 §C)', () => {
   });
 });
 
-describe('cizgiDeseni (#88 KK1)', () => {
-  it('kesikte desen, gerçek rotada BOŞ dizi (undefined değil: Android eski deseni korur)', () => {
-    expect(cizgiDeseni(true, [10, 8])).toEqual([10, 8]);
-    expect(cizgiDeseni(false, [10, 8])).toEqual([]);
-    expect(cizgiDeseni(undefined, [10, 8])).toEqual([]);
+describe('cizgiAnahtari (#88 KK1)', () => {
+  it('kuş uçuşu ve gerçek rota ayrı Polyline örnekleri: aynı bacak, farklı anahtar; aynı hal aynı anahtar', () => {
+    expect(cizgiAnahtari({ id: 'rota:g1:A>B', kesik: true })).toBe('rota:g1:A>B|kus');
+    expect(cizgiAnahtari({ id: 'rota:g1:A>B', kesik: false })).toBe('rota:g1:A>B|yol');
+    expect(cizgiAnahtari({ id: 'rota:g1:A>B' })).toBe('rota:g1:A>B|yol');
+    expect(cizgiAnahtari({ id: 'rota:g1:A>B', kesik: true })).not.toBe(cizgiAnahtari({ id: 'rota:g1:A>B', kesik: false }));
   });
 });
