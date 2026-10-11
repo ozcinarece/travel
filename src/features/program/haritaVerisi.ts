@@ -115,8 +115,6 @@ export function otelPinleri(gunler: Gun[], gunUclari: Map<string, GunUcNoktalari
 }
 
 export function programCizgileri(secenek: {
-  gunUclari: Map<string, GunUcNoktalari>;
-  mekanIle: Map<string, Mekan>;
   gunler: Gun[];
   tempolar: Map<string, TempoSonucu>;
   seciliGunId: string | undefined;
@@ -126,7 +124,7 @@ export function programCizgileri(secenek: {
   /** #42 KK7: seçili günde geçilen bacak sayısı (otel→1 dahil); bu kadar bacak soluk çizilir. */
   gecilenBacak: number;
 }): HaritaCizgisi[] {
-  const { gunUclari, mekanIle, gunler, tempolar, seciliGunId, seciliNoktalar, rotalar, bacak, gecilenBacak } = secenek;
+  const { gunler, tempolar, seciliGunId, seciliNoktalar, rotalar, bacak, gecilenBacak } = secenek;
   return gunler.flatMap((g): HaritaCizgisi[] => {
     const tp = tempolar.get(g.id);
     if (!tp || tp.sira.length === 0) return [];
@@ -142,14 +140,9 @@ export function programCizgileri(secenek: {
       kimlikler.set(cift, tekrar + 1);
       return `rota:${g.id}:${cift}${tekrar ? `#${tekrar}` : ''}`;
     };
-    if (g.id !== seciliGunId) {
-      const u = gunUclari.get(g.id);
-      const uc = (n: GunUcNoktalari['baslangic'] | undefined) => (n ? [{ key: n.key, lat: n.lat, lng: n.lng }] : []);
-      const noktalar = tp.sira.map((mekanId) => mekanIle.get(mekanId)).filter((m): m is Mekan => !!m).map((m) => ({ key: m.place_id, lat: m.lat, lng: m.lng }));
-      const yol = [...uc(u?.baslangic), ...noktalar, ...uc(u?.bitis)];
-      // #59 §C: diğer günlerin rotası ince, %32 — bacak bacak düz çizgi.
-      return bacakListesi(yol).map((b) => ({ id: kimlik(b.from.key, b.to.key), noktalar: [{ lat: b.from.lat, lng: b.from.lng }, { lat: b.to.lat, lng: b.to.lng }], renk: rengi, opaklik: 0.32, ince: true }));
-    }
+    // #91 A (docs/05 v1.8 §3): yalnız seçili günün rotası çizilir. Diğer günler için HİÇBİR çizgi üretilmez — ne düz,
+    // ne %32 ince, ne kuş uçuşu; durakları soluk nokta olarak kalır (programPinleri). Boş gün planlarken ekran temiz.
+    if (g.id !== seciliGunId) return [];
     // #33: seçili gün bacak bacak gerçek yol; #65: araba bacağı yürümeyle aynı düz çizgi (ok yok) + "araba 14 dk" hapı;
     // rota gelene kadar kuş uçuşu ince kesikli. #59 §C: yürüyüş süre hapları haritada yok — `etiket` yalnız arabada.
     // #51: kimlik bacağın uçlarından (from>to) ve kaynağından türer — sıra değişince eski çizgi/etiket yeniden

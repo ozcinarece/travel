@@ -23,6 +23,7 @@ import { useGunOteliKaydet, useKonaklamalar } from '@/features/konaklama/sorgula
 import { useDuragaAta, useDuraklar, useDurakKaldir, useGunEkle, useGunler, useGunSil } from '@/features/gunler/sorgular';
 import { useKonum, yakinDurakId } from '@/features/konum/useKonum';
 import { useMekanGuncelle, useMekanlar, useMekanSil, useUyeler } from '@/features/mekanlar/sorgular';
+import { gunHapiVerisi, pinDokunusu } from '@/features/program/gunHapi';
 import { programCizgileri, programPinleri } from '@/features/program/haritaVerisi';
 import { useDurakGuncelle, useGunGuncelle, useSiraYaz } from '@/features/program/sorgular';
 import { gunDuraklari, saatKisa, useGunProgrami, useSimdi } from '@/features/program/useProgram';
@@ -130,6 +131,8 @@ function ProgramSekmesi({
   const [otelSayfasi, setOtelSayfasi] = useState(false);
   const gunOteliKaydet = useGunOteliKaydet(seyahat.id);
   const [seciliMekanId, setSeciliMekanId] = useState<string | null>(null);
+  // #91 B: diğer gün noktasına dokunuldu → üstünde gün hapı (mekan kimliği); haritaya / başka pine dokununca kapanır.
+  const [gunHapiMekanId, setGunHapiMekanId] = useState<string | null>(null);
   const [duzenle, setDuzenle] = useState(false);
   const [menuDurak, setMenuDurak] = useState<Durak | null>(null);
   const [gunSecDurak, setGunSecDurak] = useState<Durak | null>(null);
@@ -451,7 +454,28 @@ function ProgramSekmesi({
   let gecilenBacak = 0;
   if (prog?.bugun) for (const x of satirlar.filter((y) => y.durum !== 'atlandi')) if (x.durum === 'gecildi') gecilenBacak++; else break;
   const pinler = programPinleri({ gunUclari: verisi.gunUclari, mekanlar, duraklar, gunler, tempolar: verisi.tempolar, adlar: yerler.data, seciliGunId: gun?.id, seciliMekanId, tamamlananMekanIds, konum });
-  const cizgiler = programCizgileri({ gunUclari: verisi.gunUclari, mekanIle, gunler, tempolar: verisi.tempolar, seciliGunId: gun?.id, seciliNoktalar: verisi.seciliNoktalar, rotalar: verisi.rotalar, bacak: verisi.bacak, gecilenBacak });
+  // #91 A: yalnız seçili günün rotası (diğer günler için hiçbir çizgi üretilmez).
+  const cizgiler = programCizgileri({ gunler, tempolar: verisi.tempolar, seciliGunId: gun?.id, seciliNoktalar: verisi.seciliNoktalar, rotalar: verisi.rotalar, bacak: verisi.bacak, gecilenBacak });
+  // #91 B: açık gün hapı — durak başka günde değilse (taşındı, silindi, gün değişti) kendiliğinden kapanır.
+  const hapMekan = gunHapiMekanId ? mekanIle.get(gunHapiMekanId) : undefined;
+  const gunHapi = gunHapiVerisi({
+    mekanId: gunHapiMekanId,
+    durak: gunHapiMekanId ? durakIle.get(gunHapiMekanId) : undefined,
+    konum: hapMekan ? { lat: hapMekan.lat, lng: hapMekan.lng } : undefined,
+    gunler,
+    seciliGunId: gun?.id,
+    hafif: hapMekan ? yerler.data?.[hapMekan.place_id] : undefined,
+    dugme: t('program.guneGit'),
+  });
+  // KK2: "Güne git" — o günün sekmesine geç (rotası çizilir), dokunulan durak seçili pin (iğne) olur.
+  const guneGit = (gunId: string, mekanId: string) => {
+    setGunHapiMekanId(null);
+    setSeciliGunId(gunId);
+    setDuzenle(false);
+    setOnceBitis(null);
+    setEklenen(null);
+    setSeciliMekanId(mekanId);
+  };
 
   // #55 §A5: gün seçilince ve panel hal değiştirince harita otel + günün duraklarını sığdırır; kenar boşluğu üstte
   // başlık + gün seçici, altta panel (harita dolgusu zaten panel yüksekliği kadar).
@@ -813,6 +837,7 @@ function ProgramSekmesi({
             seciliId={gun?.id}
             bugunIndex={bugunIndex}
             onSec={(id) => {
+              setGunHapiMekanId(null);
               setSeciliGunId(id);
               setDuzenle(false);
               setOnceBitis(null);
@@ -839,14 +864,24 @@ function ProgramSekmesi({
           daireler: otel ? [{ id: 'yurume', merkez: otel, yaricapM: YURUME_YARICAPI_M, renk: renk.metin }] : [],
           // KK6: pine dokununca harita kaymaz (Harita bileşeni), panel pin paneline döner.
           onPinBas: (pinId) => {
+            // #91 KK3: başka pine dokununca hap kapanır (aynı noktaya ikinci dokunuş aşağıda "Güne git").
+            if (!pinId.startsWith('m:') || pinId.slice(2) !== gunHapiMekanId) setGunHapiMekanId(null);
             // #56: ev pinine dokununca günün oteli alt sayfası.
             if (pinId.startsWith('otel:')) return otelAc();
             if (!pinId.startsWith('m:')) return;
             const mekanId = pinId.slice(2);
             const m = mekanIle.get(mekanId);
-            // #53 §6: gün seçiliyken atanmamış pine dokunmak doğrudan o günün sonuna ekler; atanmış pin → pin paneli.
-            if (m && gun && !durakIle.has(mekanId)) hizliEkle(m);
-            else {
+            if (!m) return;
+            // #53 §6: gün seçiliyken atanmamış pine dokunmak doğrudan o günün sonuna ekler; seçili günün durağı → pin paneli;
+            // #91 B: diğer günün noktası → gün hapı; hap açıkken aynı noktaya (ya da hapa) dokunmak → "Güne git".
+            const karar = pinDokunusu({ durak: durakIle.get(mekanId), seciliGunId: gun?.id, gunSecili: !!gun, hapAcikMekanId: gunHapiMekanId, mekanId });
+            if (karar.tur === 'hizliEkle') hizliEkle(m);
+            else if (karar.tur === 'guneGit') guneGit(karar.gunId, mekanId);
+            else if (karar.tur === 'hapAc') {
+              setEklenen(null);
+              setSeciliMekanId(null);
+              setGunHapiMekanId(mekanId);
+            } else {
               setEklenen(null);
               setSeciliMekanId(mekanId);
             }
@@ -854,8 +889,10 @@ function ProgramSekmesi({
           // Haritaya dokununca pin paneli ve "güne eklendi" kartı kapanır.
           onHaritaBas: () => {
             setSeciliMekanId(null);
+            setGunHapiMekanId(null);
             setEklenen(null);
           },
+          hap: gunHapi,
         }}
       />
       <SecimMenusu acik={!!menuDurak} baslik={menuDurak ? adi(menuDurak.id) : undefined} secenekler={menuSecenekleri} onKapat={() => setMenuDurak(null)} />
