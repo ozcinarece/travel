@@ -10,19 +10,11 @@ import { dokunusuIletir, isaretciPlani, planFarki } from './isaretciler';
 import { PinIcerigi, pinPngAnahtari } from './PinIcerigi';
 import { IGNE_CAPA, IGNE_CAPA_34, PIN_IKONLARI } from './pinIkonlari';
 import { usePinGorselleri } from './pinOnYukleme';
-import { bacakEtiketPinleri, cizgiAnahtari, yonOklari } from './rota';
+import { bacakEtiketPinleri, rotaYuvaKatmanlari, yonOklari, yuvaSayisi } from './rota';
 import { dokunmaKaydet, isaretciSayilariniKaydet, secimSuresiKaydet, taniSayaclari } from './tani';
 import type { GunHapi, HaritaBolgesi, HaritaCizgisi, HaritaPini, HaritaProps, Konum } from './tipler';
 import { yenidenKurulsunMu } from './yenidenKurulum';
 
-/** "#rrggbb" + opaklık → "#rrggbbaa". */
-function saydam(hex: string, opaklik: number) {
-  const a = Math.round(Math.max(0, Math.min(1, opaklik)) * 255).toString(16).padStart(2, '0');
-  return hex.length === 7 ? `${hex}${a}` : hex;
-}
-
-/** #59 §C (RouteSpec5): seçili gün üç katman — gölge 11 dp %12 · beyaz kenar 9 dp · renk 5,5 dp; kuş uçuşu 3 dp. */
-const ROTA = { golge: 11, kenar: 9, cizgi: 5.5, ince: 3, golgeRenk: '#0f0f0f', golgeOpaklik: 0.12 } as const;
 /** Rotası henüz gelmemiş kuş uçuşu: ince kesikli (10/8 dp; Android'de desen ekran pikseli → PixelRatio). #65: araba bacağı düz. */
 const dp = (v: number) => Math.round(PixelRatio.get() * v);
 const KESIKLI = [dp(10), dp(8)];
@@ -133,6 +125,11 @@ export function Harita({
     dokunmaKaydet(id);
     onPinBas?.(id);
   };
+  // #91: yuva havuzu yalnız büyür (şimdiye kadar görülen en çok çizgi); küçülmek Polyline kaldırmak demek olurdu.
+  // Önceki render'ların en çoğu durumda tutulur (React'in "önceki render bilgisi" deseni: render sırasında koşullu setState).
+  const [enCokCizgi, setEnCokCizgi] = useState(0);
+  const yuvalar = yuvaSayisi(enCokCizgi, cizgiler.length);
+  if (yuvalar !== enCokCizgi) setEnCokCizgi(yuvalar);
   // #59 §C / #65: yön okları ~24 px aralık, en fazla 80 — zoom adımına göre.
   const oklar = useMemo(() => yonOklari(cizgiler, pinler, etiketBolge, olcu), [cizgiler, pinler, etiketBolge, olcu]);
   // #73 B: dokunma — işaretçi ya da harita dokunuşunun koordinatından en yakın pin (merkeze ≤ 22 px; eşitlikte pinZ).
@@ -193,9 +190,10 @@ export function Harita({
         onBolgeDegisti?.(yeni);
         if (__DEV__) console.log(`[harita] bölge olayı ${taniSayaclari.bolgeOlayi} · kurulum ${haritaSayaclari.kurulum} · yakalama ${haritaSayaclari.yakalama} · zoom ${yeni.zoom.toFixed(2)} · işaretçi ${gorunen.length}`);
       }}>
-      {cizgiler.map((c) => (
-        // #88: kuş uçuşu ve gerçek rota ayrı örnekler (anahtar `|kus` / `|yol`): desen prop'u hiç değişmez.
-        <RotaCizgisi key={cizgiAnahtari(c)} cizgi={c} />
+      {/* #91 (ikinci tur): rota çizgileri SABİT yuva havuzunda — Polyline hiç kaldırılmaz (Android'de kaldırma indeks bazlı ve
+          güvenilmez → hayalet çizgi); yuvalar yalnız koordinat/renk günceller, boş yuva saydam ve noktasız. */}
+      {Array.from({ length: yuvalar }, (_, i) => (
+        <RotaYuvasi key={`yuva:${i}`} cizgi={cizgiler[i] ?? null} />
       ))}
       {daireler.map((d) => (
         <Circle
@@ -250,25 +248,22 @@ export function Harita({
 }
 
 /**
- * #59 §C / #65: üç katmanlı rota (gölge · beyaz kenar · renk) — yürüme ve araba aynı (araba düz, oksuz). Rota gelene kadar
- * kuş uçuşu ince kesikli. #88: kuş uçuşu ↔ rota geçişi AYRI örneklerdir (desen prop'u asla değişmez).
- * #91 A: diğer günlerin rotası hiç gelmez (programCizgileri boş döner) — "ince düz" hali kalktı; düz çizgi hep üç katman.
+ * #91 (ikinci tur): bir rota yuvası — HEP aynı 4 Polyline örneği (kesik · gölge · beyaz kenar · renk; rota.rotaYuvaKatmanlari).
+ * Kuş uçuşu yalnız kesik katmanı doldurur, gerçek rota üç düz katmanı; boş yuva hepsini boşaltır (koordinat yok + saydam).
+ * Desen prop'u yalnız kesik katmanda ve sabittir (#88: Android'de deseni kaldırmak/boşaltmak güvenilmez); düz katmanlara desen
+ * hiç verilmez. Kesik uç 'butt' (yuvarlak uçlu desen Android'de nokta çizer).
  */
-function RotaCizgisi({ cizgi: c }: { cizgi: HaritaCizgisi }) {
-  const noktalar = useMemo(() => c.noktalar.map((n) => ({ latitude: n.lat, longitude: n.lng })), [c.noktalar]);
-  const opaklik = c.opaklik ?? 1;
-  // #88: kuş uçuşu AYRI bileşen örneği (anahtar `|kus`) — tek ince kesikli Polyline; rota gelince bu örnek kaldırılır,
-  // aşağıdaki düz örnek eklenir. Düz rotaya `lineDashPattern` hiç verilmez (Android'de desen kaldırma/boşaltma güvenilmez).
-  // Kesikli çizgide uç 'butt': Android yuvarlak uçlu deseni NOKTA (Dot) olarak çizer, kesik (Dash) değil.
-  if (c.kesik) {
-    return <Polyline coordinates={noktalar} lineCap="butt" lineJoin="round" lineDashPattern={KESIKLI} strokeColor={saydam(c.renk, opaklik)} strokeWidth={ROTA.ince} zIndex={0} />;
-  }
-  const ortak = { coordinates: noktalar, lineCap: 'round' as const, lineJoin: 'round' as const };
+function RotaYuvasi({ cizgi }: { cizgi: HaritaCizgisi | null }) {
+  const katmanlar = useMemo(() => rotaYuvaKatmanlari(cizgi), [cizgi]);
   return (
     <>
-      <Polyline {...ortak} strokeColor={saydam(ROTA.golgeRenk, ROTA.golgeOpaklik * opaklik)} strokeWidth={ROTA.golge} zIndex={1} />
-      <Polyline {...ortak} strokeColor={saydam('#ffffff', opaklik)} strokeWidth={ROTA.kenar} zIndex={2} />
-      <Polyline {...ortak} strokeColor={saydam(c.renk, opaklik)} strokeWidth={ROTA.cizgi} zIndex={3} />
+      {katmanlar.map((k) => {
+        const noktalar = k.noktalar.map((n) => ({ latitude: n.lat, longitude: n.lng }));
+        if (k.ad === 'kesik') {
+          return <Polyline key={k.ad} coordinates={noktalar} lineCap="butt" lineJoin="round" lineDashPattern={KESIKLI} strokeColor={k.renk} strokeWidth={k.genislik} zIndex={k.zIndex} />;
+        }
+        return <Polyline key={k.ad} coordinates={noktalar} lineCap="round" lineJoin="round" strokeColor={k.renk} strokeWidth={k.genislik} zIndex={k.zIndex} />;
+      })}
     </>
   );
 }
