@@ -15,7 +15,7 @@ export function useSeyahatler() {
       const { data, error } = await supabase
         .from('trips')
         .select(
-          'id, city_label, start_date, end_date, tz, hotel_place_id, created_at, members(user_id, role, display_name, guest), places(count), stays(count)',
+          'id, name, city_label, start_date, end_date, tz, hotel_place_id, created_at, members(user_id, role, display_name, guest), places(count), stays(count)',
         )
         .order('start_date', { ascending: true, nullsFirst: false })
         .order('created_at', { ascending: false });
@@ -39,6 +39,8 @@ export function useSeyahatOlustur() {
         .from('trips')
         .insert({
           owner_id: session.user.id,
+          // #98 KK2: seyahatin adı (boş → null; ekranlar şehir etiketine düşer).
+          name: yeni.name?.trim().slice(0, 80) || null,
           city_place_id: yeni.sehir.place_id,
           city_label: yeni.sehir.ad.slice(0, 80),
           country_code: yeni.sehir.country_code,
@@ -57,6 +59,21 @@ export function useSeyahatOlustur() {
   });
 }
 
+/** #98 KK2: seyahatin adını günceller ("Değiştir"). */
+export function useSeyahatAdiKaydet(seyahatId: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (ad: string) => {
+      const { error } = await supabase.from('trips').update({ name: ad.trim().slice(0, 80) || null }).eq('id', seyahatId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['seyahat', seyahatId] });
+      qc.invalidateQueries({ queryKey: ['seyahatler'] });
+    },
+  });
+}
+
 /** Tek seyahat (RLS üyeyi süzer). */
 export function useSeyahat(id: string | undefined) {
   const { hesapli } = useOturum();
@@ -66,7 +83,7 @@ export function useSeyahat(id: string | undefined) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('trips')
-        .select('id, city_label, country_code, lat, lng, tz, start_date, end_date, hotel_place_id, hotel_lat, hotel_lng, hotel_label, day_start, day_end')
+        .select('id, name, city_label, country_code, lat, lng, tz, start_date, end_date, hotel_place_id, hotel_lat, hotel_lng, hotel_label, day_start, day_end, invite_token')
         .eq('id', id!)
         .single();
       if (error) throw error;

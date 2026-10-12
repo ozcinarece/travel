@@ -2,6 +2,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { t } from '@/i18n';
 import { tarihAraligi } from '@/lib/takvim';
+import { seyahatAdi } from '@/features/sihirbaz/sihirbaz';
 import type { SeyahatOzet } from '@/lib/tipler';
 import { minDokunma, renk, yazi } from '@/theme';
 
@@ -24,8 +25,9 @@ export function SeyahatSatiri({ seyahat, benimId, onPress }: Props) {
         <Text style={s.harf}>{seyahat.city_label.trim().charAt(0).toLocaleUpperCase('tr')}</Text>
       </View>
       <View style={s.metinler}>
+        {/* #98 KK2: seyahatin adı (yoksa şehir). */}
         <Text style={s.sehir} numberOfLines={1}>
-          {seyahat.city_label}
+          {seyahatAdi(seyahat)}
         </Text>
         <Text style={s.alt} numberOfLines={1}>
           {parcalar.join(' · ')}

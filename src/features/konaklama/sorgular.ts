@@ -66,6 +66,37 @@ export function useGunOteliKaydet(seyahatId: string) {
   });
 }
 
+/** #98 KK4: sihirbaz "gece gece" — bir geceye otel (ya da otel yok); gecePlani yalnız o gecenin iki gününü yazar. */
+export function useGeceOteliKaydet(seyahatId: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (g: { konaklamalar: Konaklama[]; guncellemeler: (stayId: string | null) => { id: string; start_stay_id: string | null; end_stay_id: string | null }[]; otel: OtelSecimiVeyaKayitli }) => {
+      const otelId = g.otel ? await konaklamaKimligi(seyahatId, g.otel, g.konaklamalar) : null;
+      for (const u of g.guncellemeler(otelId)) {
+        const { error } = await supabase.from('days').update({ start_stay_id: u.start_stay_id, end_stay_id: u.end_stay_id }).eq('id', u.id);
+        if (error) throw error;
+      }
+    },
+    onSettled: () => {
+      qc.invalidateQueries({ queryKey: ['gunler', seyahatId] });
+      qc.invalidateQueries({ queryKey: ['konaklamalar', seyahatId] });
+    },
+  });
+}
+
+/** #98 KK4: "Bütün gecelerde aynı otel" — tumGunlereOtel'in kanca hali. */
+export function useTumGunlereOtel(seyahatId: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (otel: OtelSecimi | null) => tumGunlereOtel(seyahatId, otel),
+    onSettled: () => {
+      qc.invalidateQueries({ queryKey: ['gunler', seyahatId] });
+      qc.invalidateQueries({ queryKey: ['konaklamalar', seyahatId] });
+      qc.invalidateQueries({ queryKey: ['seyahatler'] });
+    },
+  });
+}
+
 /** 3.3 Otel ekranı: seçilen otel (ya da otel yok) tüm günlere uygulanır. */
 export async function tumGunlereOtel(seyahatId: string, otel: OtelSecimi | null) {
   const [{ data: mevcut, error: e1 }, { data: gunler, error: e2 }] = await Promise.all([

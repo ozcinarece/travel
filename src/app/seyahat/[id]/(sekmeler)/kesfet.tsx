@@ -17,7 +17,14 @@ import { useSeyahatId } from '@/features/seyahatler/baglam';
 import { useSeyahat } from '@/features/seyahatler/sorgular';
 import { SeyahatYukleme } from '@/components/seyahatler/SeyahatYukleme';
 import { FiltreSayfasi } from '@/components/kesfet/FiltreSayfasi';
+import { CekmeceKartlari, CekmeceSatirlari, CekmeceSeridi } from '@/components/kesfet/OneriCekmecesi';
+import type { SayfaHali } from '@/components/harita/AltSayfa';
+import { sehirEslestir, useSehirler } from '@/features/icerik/sorgular';
+import { useOnerilenler } from '@/features/sihirbaz/onerilenler';
+import { cekmeceListesi, cekmeceSayisi, type CekmeceCipi } from '@/features/yerler/cekmece';
 import { hafifYerler, linkCoz, linkGibiMi, useHafifYerler, useOneriler, yeniOturumJetonu, type HafifYer, type OneriCipi } from '@/features/yerler/api';
+import { useQuery } from '@tanstack/react-query';
+
 import { aktifFiltreSayisi, filtreAktif, filtredenGecer, filtreOzeti } from '@/features/yerler/filtre';
 import { useOneCikanlar } from '@/features/yerler/oneCikan';
 import { gorunurOneriler } from '@/features/yerler/karolar';
@@ -293,12 +300,70 @@ function Kesfet({ seyahat, konaklamalar, ilkMekan }: { seyahat: Seyahat; konakla
     Linking.openURL(`https://www.google.com/maps/dir/?api=1&destination=${y.lat},${y.lng}&destination_place_id=${encodeURIComponent(secim.place_id)}&travelmode=walking`);
   };
 
+  // #98 B: öneri çekmecesi — üç hal; görünür alanda olup listede olmayanlar, puan sırası; harita kayınca yeniden süzülür
+  // (yeni istek yok, #71 "Bu bölgeyi tara" kuralı). "+" ile eklenen, bir sonraki bölge/yenilemeye kadar "Listede ✓" kalır.
+  const [cekmece, setCekmece] = useState<SayfaHali>('katli');
+  const [cekmeceCip, setCekmeceCip] = useState<CekmeceCipi>('bolge');
+  const [tutulan, setTutulan] = useState<Set<string>>(() => new Set());
+  const [cekmeceMesgul, setCekmeceMesgul] = useState<string | null>(null);
+  // "Önceki render" deseni (render sırasında koşullu setState): bölge / öneri listesi değişince tutulanlar sıfırlanır;
+  // KK4: mekan paneli açılınca çekmece küçülür ve gizlenir; panel kapanınca küçük halde geri gelir.
+  const [tutKaynak, setTutKaynak] = useState({ bolge, oneriListesi });
+  if (tutKaynak.bolge !== bolge || tutKaynak.oneriListesi !== oneriListesi) {
+    setTutKaynak({ bolge, oneriListesi });
+    if (tutulan.size > 0) setTutulan(new Set());
+  }
+  const [oncekiSecim, setOncekiSecim] = useState(secim);
+  if (oncekiSecim !== secim) {
+    setOncekiSecim(secim);
+    if (secim && cekmece !== 'katli') setCekmece('katli');
+  }
+  const bolgeListesi = useMemo(() => cekmeceListesi(oneriListesi, havuzIdleri, bolge, tutulan), [oneriListesi, havuzIdleri, bolge, tutulan]);
+  const cekmeceListe = useMemo(() => (cekmece === 'tam' && cekmeceCip !== 'bolge' ? cekmeceListesi(oneriListesi, havuzIdleri, bolge, tutulan, cekmeceCip) : bolgeListesi), [cekmece, cekmeceCip, oneriListesi, havuzIdleri, bolge, tutulan, bolgeListesi]);
+  const cekmeceSayi = cekmeceSayisi(bolgeListesi, havuzIdleri);
+  // Satır / kart fotoğrafları: yalnız ilk 12 öneri için hafif Details foto maskesi (24 sa önbellek).
+  const fotoIdleri = useMemo(() => cekmeceListe.slice(0, 12).map((y) => y.place_id).sort(), [cekmeceListe]);
+  const fotolar = useQuery({
+    queryKey: ['cekmece-foto', fotoIdleri.join(',')],
+    enabled: cekmece !== 'katli' && fotoIdleri.length > 0,
+    staleTime: 24 * 60 * 60 * 1000,
+    retry: 1,
+    queryFn: async () => new Map((await hafifYerler(fotoIdleri, { foto: true })).map((y) => [y.place_id, y.foto_uri ?? null] as const)),
+  });
+  // "Rehberden" çipi (tam hal): şehir yayınlı rehberle eşleşiyorsa içerik ekibinin yerleri (#98 KK6 ile aynı kaynak).
+  const sehirler = useSehirler();
+  const rehberSehir = sehirEslestir(sehirler.data, { ad: seyahat.city_label, lat: seyahat.lat, lng: seyahat.lng });
+  const rehber = useOnerilenler(seyahat, rehberSehir, 'rehber');
+  const cekmecedenEkle = async (y: HafifYer) => {
+    setCekmeceMesgul(y.place_id);
+    await listeyeEkle(y);
+    setTutulan((t0) => new Set(t0).add(y.place_id));
+    setCekmeceMesgul(null);
+  };
+  const cekmecedenCikar = async (placeId: string) => {
+    const m = havuz.find((x) => x.place_id === placeId);
+    if (!m) return;
+    setCekmeceMesgul(placeId);
+    await listedenCikar(m);
+    setCekmeceMesgul(null);
+  };
+  const cekmeceOrtak = {
+    havuz: havuzIdleri,
+    oneCikan,
+    fotolar: fotolar.data ?? new Map<string, string | null>(),
+    mesgulId: cekmeceMesgul,
+    onEkle: cekmecedenEkle,
+    onCikar: cekmecedenCikar,
+    onAc: (placeId: string) => setSecim({ place_id: placeId, kaynak: 'oneri' }),
+  };
+
   const sonEkleyen = havuz.length > 0 ? havuz[havuz.length - 1] : null;
   const sonEkleyenSayi = sonEkleyen ? havuz.filter((m) => m.added_by === sonEkleyen.added_by).length : 0;
 
   return (
     <HaritaEkrani
       baslik={seyahat.city_label}
+      altMenuVar
       geri={() => router.replace('/(tabs)')}
       sagUst={
         // #45: Grup'a erişim avatarlardan (seyahat içi alt menü kalktı).
@@ -405,7 +470,19 @@ function Kesfet({ seyahat, konaklamalar, ilkMekan }: { seyahat: Seyahat; konakla
           </>
         )
       }
-      altSerbest={
+      // #98 B: öneri çekmecesi (alt sayfa); eski alt katman (tanı, hatalar, "Listede N mekan" çubuğu) çekmecenin üstünde yüzer.
+      altSayfaGizli={!!secim}
+      altSayfa={{
+        hal: cekmece,
+        onHal: setCekmece,
+        ust: <CekmeceSeridi hal={cekmece} sayi={cekmeceSayi} onHal={setCekmece} />,
+        govde: (yukseklik) =>
+          cekmece === 'katli' ? null : cekmece === 'yari' ? (
+            <CekmeceSatirlari liste={cekmeceListe} yukseklik={yukseklik} {...cekmeceOrtak} />
+          ) : (
+            <CekmeceKartlari liste={cekmeceListe} cip={cekmeceCip} onCip={setCekmeceCip} rehber={rehber.liste} rehberVar={!!rehberSehir} yukseklik={yukseklik} bolgeSayisi={cekmeceSayi} {...cekmeceOrtak} />
+          ),
+        ustunde: (
         <View style={s.alt} pointerEvents="box-none">
           {tani ? (
             <View style={s.tani} pointerEvents="none">
@@ -414,7 +491,6 @@ function Kesfet({ seyahat, konaklamalar, ilkMekan }: { seyahat: Seyahat; konakla
               </Text>
             </View>
           ) : null}
-          <FiltreSayfasi acik={filtreAcik} filtre={filtre} onFiltre={setFiltre} sayi={gecenler.length} onKapat={() => setFiltreAcik(false)} />
           {hata ? (
             <View style={s.hataKutu}>
               <Text style={s.hataMetin}>{hata}</Text>
@@ -453,10 +529,13 @@ function Kesfet({ seyahat, konaklamalar, ilkMekan }: { seyahat: Seyahat; konakla
             </Pressable>
           </View>
         </View>
-      }
+        ),
+      }}
       // #80: mekan paneli en üst katmanda; harita dolgusu değişmez (kamera yerinde). Pin değişince içerik değişir, panel kalır.
       ustKatman={
-        secim ? (
+        <>
+          <FiltreSayfasi acik={filtreAcik} filtre={filtre} onFiltre={setFiltre} sayi={gecenler.length} onKapat={() => setFiltreAcik(false)} />
+          {secim ? (
           <MekanPaneli
             placeId={secim.place_id}
             tz={seyahat.tz}
@@ -472,7 +551,8 @@ function Kesfet({ seyahat, konaklamalar, ilkMekan }: { seyahat: Seyahat; konakla
             onYolTarifi={yolTarifi}
             onKapat={() => setSecim(null)}
           />
-        ) : null
+          ) : null}
+        </>
       }
       harita={{
         merkez: ilkMerkez,

@@ -91,7 +91,8 @@ const config: ExpoConfig = {
     typedRoutes: true,
     reactCompiler: true,
   },
-  extra: { eas: { projectId: easProjectId } },
+  // #98: `appDomain` davet linkinin alan adı (istemci lib/davetLinki okur).
+  extra: { appDomain, eas: { projectId: easProjectId } },
   updates: { url: `https://u.expo.dev/${easProjectId}` },
   runtimeVersion: expoGoIcin ? 'exposdk:57.0.0' : { policy: 'appVersion' },
 };

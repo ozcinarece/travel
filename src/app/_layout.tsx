@@ -48,8 +48,8 @@ function Kok() {
       </Stack.Protected>
       <Stack.Protected guard={girisTamam}>
         <Stack.Screen name="(tabs)" />
-        <Stack.Screen name="ilk-seyahat" />
         <Stack.Screen name="hesap-sil" />
+        {/* #98: yalnız sihirbaz / günün oteli "Haritadan" seçimi (secim=1); 3.3 tek başına akış kalktı. */}
         <Stack.Screen name="yeni/otel" />
         <Stack.Screen name="seyahat/[id]" />
       </Stack.Protected>

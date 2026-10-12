@@ -306,4 +306,38 @@ end $$;
 select pg_temp.hata_bekle($$set role authenticated; select public.stays_tasi_eski_oteller()$$, '42501');
 reset role;
 
+-- ---------------------------------------------------------------- #98: içerik tabloları ve seyahat adı
+reset role;
+-- Seed: Eskişehir yayınlı; yayınsız bir şehir ve yayınsız bir yer eklenir (okunmamalı).
+insert into public.sehirler (id, ad, slug, lat, lng, yayin) values ('22222222-2222-4222-8222-000000000002', 'Taslak Şehir', 'taslak', 40, 30, false);
+insert into public.yerler (sehir_id, ad, lat, lng, yayin) values ('11111111-1111-4111-8111-000000000001', 'Taslak Yer', 39.7, 30.5, false);
+insert into public.yerler (sehir_id, ad, lat, lng, yayin) values ('22222222-2222-4222-8222-000000000002', 'Gizli Şehrin Yeri', 40, 30, true);
+set role authenticated;
+select pg_temp.as_user(:B);
+do $$
+begin
+  assert (select count(*) from public.sehirler) = 1, 'yalnız yayınlı şehir okunur';
+  assert (select count(*) from public.yerler) = 8, 'yalnız yayınlı şehrin yayınlı yerleri okunur (8 seed)';
+  assert (select count(*) from public.yerler where one_cikan_sira = 1 and ad = 'Odunpazarı Evleri') = 1, 'öne çıkan sırası seed';
+end $$;
+-- İstemci içerik yazamaz (politika yok → RLS reddeder).
+select pg_temp.hata_bekle($$insert into public.sehirler (ad, slug, lat, lng, yayin) values ('X', 'x-sehir', 1, 1, true)$$, '42501');
+-- UPDATE politikası yok: satır görünmez, güncelleme sessizce 0 satır etkiler.
+update public.yerler set yayin = false;
+reset role;
+do $$ begin assert (select count(*) from public.yerler where yayin) = 9, 'istemci içerik güncelleyemez (8 seed + gizli şehrin yeri)'; end $$;
+set role authenticated;
+set role anon;
+select pg_temp.as_user(:G, true);
+do $$ begin assert (select count(*) from public.sehirler) = 1, 'anonim de yayınlı şehri okur'; end $$;
+reset role;
+
+-- Seyahat adı: üye yazar, 80 karakter sınırı, boşsa null (X'in Nice seyahati bu noktada hâlâ var).
+set role authenticated;
+select pg_temp.as_user(:X);
+update public.trips set name = 'Nice Gezisi' where city_label = 'Nice';
+do $$ begin assert (select name from public.trips where city_label = 'Nice') = 'Nice Gezisi', 'seyahat adı yazılır'; end $$;
+select pg_temp.hata_bekle($$update public.trips set name = repeat('a', 81) where city_label = 'Nice'$$, '23514');
+reset role;
+
 \echo 'rls_test: TÜM TESTLER GEÇTİ'
