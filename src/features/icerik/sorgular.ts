@@ -1,4 +1,5 @@
 // #97 / #98 / #100: içerik tabloları (sehirler, yerler, geziler, kaydedilenler, olaylar) — yayınlı okunur; backoffice yazar.
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { useOturum } from '@/lib/oturum';
@@ -103,12 +104,38 @@ const cozulen = new Map<string, Promise<string | null>>();
  * İçerik satırının (yer ya da gezi durağı) Google place_id'si: backoffice doldurmadıysa adıyla Autocomplete'ten ilk öneri
  * (konuma yanlı). Yalnız bellekte tutulur (PRD §7: Google kimliği içerik tablosuna istemciden yazılmaz).
  */
+/** Çözülen kimlik cihazda 7 gün saklanır (AsyncStorage); backoffice `place_id`'yi doldurunca (#106) bu yol kullanılmaz. */
+const COZUM_ONEKI = 'icerik-place-id:';
+const COZUM_OMRU_MS = 7 * 24 * 60 * 60 * 1000;
+
+async function kayitliCozum(id: string): Promise<string | null | undefined> {
+  try {
+    const ham = await AsyncStorage.getItem(COZUM_ONEKI + id);
+    if (!ham) return undefined;
+    const { place_id, zaman } = JSON.parse(ham) as { place_id: string; zaman: number };
+    if (!place_id || Date.now() - zaman > COZUM_OMRU_MS) return undefined;
+    return place_id;
+  } catch {
+    return undefined;
+  }
+}
+
+function cozumuSakla(id: string, place_id: string) {
+  AsyncStorage.setItem(COZUM_ONEKI + id, JSON.stringify({ place_id, zaman: Date.now() })).catch(() => {});
+}
+
 export function icerikPlaceId(satir: { id: string; place_id: string | null; ad: string; lat: number; lng: number }, sehirAdi: string): Promise<string | null> {
   if (satir.place_id) return Promise.resolve(satir.place_id);
   let p = cozulen.get(satir.id);
   if (!p) {
-    p = otomatikTamamla({ girdi: `${satir.ad}, ${sehirAdi}`, oturum: `icerik-${satir.id}`, merkez: { lat: satir.lat, lng: satir.lng, yaricapM: 5000 } })
-      .then((oneriler) => oneriler[0]?.place_id ?? null)
+    p = kayitliCozum(satir.id)
+      .then(async (kayitli) => {
+        if (kayitli) return kayitli;
+        const oneriler = await otomatikTamamla({ girdi: `${satir.ad}, ${sehirAdi}`, oturum: `icerik-${satir.id}`, merkez: { lat: satir.lat, lng: satir.lng, yaricapM: 5000 } });
+        const pid = oneriler[0]?.place_id ?? null;
+        if (pid) cozumuSakla(satir.id, pid);
+        return pid;
+      })
       .catch(() => {
         cozulen.delete(satir.id);
         return null;
