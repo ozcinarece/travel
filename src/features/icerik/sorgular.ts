@@ -51,7 +51,7 @@ export function useTumYerler() {
   });
 }
 
-const GEZI_ALANLARI = 'id, sehir_id, baslik, slug, kapak_url, ozet, yazar_ad, gun_sayisi, mekan_sayisi, sira, created_at, sehirler(ad, slug)';
+const GEZI_ALANLARI = 'id, sehir_id, baslik, slug, kapak_url, ozet, yazar_ad, gun_sayisi, mekan_sayisi, sira, created_at, sehirler(ad, slug, kapak_url)';
 
 /** #97 KK4: önerilen geziler (sıra, sonra yeni); `sehirId` ile süzülür. */
 export function useGeziler(sehirId?: string) {
