@@ -1,5 +1,4 @@
 // #98 KK5 · 4. adım "Kimlerle?": davet linki kartı (paylaş / kopyala; PRD 3.10 token) + arkadaş listesi (v1 boş durum, #52).
-import * as Clipboard from 'expo-clipboard';
 import { useState } from 'react';
 import { Pressable, Share, StyleSheet, Text, View } from 'react-native';
 
@@ -14,11 +13,15 @@ export function AdimDavet({ seyahat }: { seyahat: Seyahat }) {
   const link = davetLinki(seyahat.invite_token);
   const [kopyalandi, setKopyalandi] = useState(false);
   const paylas = () => Share.share({ message: t('sihirbaz.kimlerle.paylasMetin', { ad: seyahatAdi(seyahat), link }) }).catch(() => {});
-  const kopyala = async () => {
-    await Clipboard.setStringAsync(link);
-    setKopyalandi(true);
-    setTimeout(() => setKopyalandi(false), 1500);
-  };
+  // #115: expo-clipboard native modülü OTA ile gidemez (dev build'de yok → çökme). "Kopyala" yalnız linki paylaşım sayfasına
+  // verir (oradan panoya kopyalanır); link metni ayrıca `selectable`.
+  const kopyala = () =>
+    Share.share({ message: link })
+      .then(() => {
+        setKopyalandi(true);
+        setTimeout(() => setKopyalandi(false), 1500);
+      })
+      .catch(() => {});
   return (
     <View style={s.kap}>
       <View style={s.kart}>
