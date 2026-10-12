@@ -25,6 +25,8 @@ export type IkonAdi =
   // #47 B5: emoji yerine çizgi ikonlar
   | 'harita'
   | 'yurume'
+  // #95 (docs/05 §1, kanvas LegChips11): bacak hapındaki yürüyen kişi (12 px).
+  | 'yuru'
   | 'araba'
   // #69: filtre düğmesi (kaydırıcılar) ve dolu yıldız (öne çıkan).
   | 'filtre'
@@ -138,6 +140,13 @@ export function Ikon({ ad, boyut = 24, renk, kalinlik = 2 }: Props) {
         <>
           <Circle cx={13} cy={4.5} r={1.8} {...ortak} />
           <Path d="M10 21l2-6 2.5 2.5V21M12 15l-1-5 3-1.5 2 3.5h2.5M11 10l-3 2v3" {...ortak} />
+        </>
+      ) : ad === 'yuru' ? (
+        // #95 (docs/05 §1): yürüyen kişi — baş, gövde-bacak, kollar.
+        <>
+          <Circle cx={13.5} cy={4} r={1.7} {...ortak} />
+          <Path d="M12.5 8l-1.5 5.5L9 20M11 13.5l3 3 1.5 4.5" {...ortak} />
+          <Path d="M12.5 8l2.5 2.5 2.5-.5M12.5 8l-2.5 3-1.5 2.5" {...ortak} />
         </>
       ) : ad === 'araba' ? (
         // #65: uzun bacak modu "araba" (taksi glifinin çatı ışığı olmayan hali; docs/05 §4).

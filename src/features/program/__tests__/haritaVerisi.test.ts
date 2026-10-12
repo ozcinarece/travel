@@ -54,8 +54,10 @@ describe('programCizgileri (#51)', () => {
     // Kuş uçuşundan gerçek yola geçişte kimlik değişmez (#77).
     expect(d[1].id).toBe(c.find((x) => x.id === 'rota:g1:A>B')?.id ?? cizgiler([H, A, B, C, H], {})[1].id);
     expect(d[1].kesik).toBeFalsy();
-    // #59 §C: yürüyüş bacağında hap yok; taksi bacağında "33 dk".
-    expect(d[1].etiket).toBeUndefined();
+    // #95 (docs/05 v1.9): yürüyüş bacağında da hap — "33 dk" + yuru glifi, rota tonunda hap rengi.
+    expect(d[1].etiket).toBe('33 dk');
+    expect(d[1].etiketIkon).toBe('yuru');
+    expect(d[1].etiketRenk).toBe('#1f4fc2');
     const taksili: RotaHaritasi = { 'A>B': { ...rota('A', 'B'), mode: 'DRIVE', drive_seconds: 14 * 60 } };
     const e = cizgiler([H, A, B, C, H], taksili);
     // #65: araba bacağı düz (kesik değil), oksuz (arac), hap ikonu araba.
@@ -63,6 +65,12 @@ describe('programCizgileri (#51)', () => {
     expect(e[1].arac).toBe(true);
     expect(e[1].etiket).toBe('14 dk');
     expect(e[1].etiketIkon).toBe('araba');
+    // Kuş uçuşu bacağında da hap ("~" kestirim), geçilen bacakta yok.
+    expect(c[0].etiket).toMatch(/^~\d+ dk$/);
+    expect(c[0].etiketIkon).toBe('yuru');
+    const gecilmis = programCizgileri({ gunler: [gun], tempolar, seciliGunId: 'g1', seciliNoktalar: [H, A, B, C, H], rotalar, bacak, gecilenBacak: 2 });
+    expect(gecilmis.slice(0, 2).every((x) => x.etiket === undefined)).toBe(true);
+    expect(gecilmis.slice(2).every((x) => !!x.etiket)).toBe(true);
     // #61 §5: örnek polyline pinlerden çok uzakta (Kaliforniya) → sapma kontrolü düz çizgiye düşürür; yol kimliği kalır.
     expect(d[1].noktalar).toEqual([{ lat: A.lat, lng: A.lng }, { lat: B.lat, lng: B.lng }]);
   });

@@ -6,7 +6,7 @@ import { yorumKisa } from '@/lib/pinIkonu';
 import { puanMetni } from '@/lib/puan';
 import { renk, yazi } from '@/theme';
 
-import { etiketYuksekligi, IGNE, igneGorunenBoy, igneOlcusu, kisaAd, KONUM_HALKA, OTEL_KARE, pinCapi, type IgneOlcusu } from './geo';
+import { etiketYuksekligi, HAP_DOLGU_PX, HAP_GLIF_BOSLUK_PX, HAP_GLIF_PX, HAP_YUKSEKLIK, hapGenisligi, IGNE, igneGorunenBoy, igneOlcusu, kisaAd, KONUM_HALKA, OTEL_KARE, pinCapi, type IgneOlcusu } from './geo';
 import { PIN_IKONLARI, pinIkonuAnahtari, pinIkonuPng } from './pinIkonlari';
 import type { HaritaPini } from './tipler';
 
@@ -137,6 +137,7 @@ export function PinIcerigi({
   onYuklendi,
   yalnizEtiket = false,
   durt = false,
+  glifAyri = false,
 }: {
   pin: HaritaPini;
   etiketGizli?: boolean;
@@ -149,6 +150,12 @@ export function PinIcerigi({
    * (update → updated++) bitmap'i yeniden alır; görüntü yüklenmesi boyut değiştirmediği için eski (boş) bitmap kalıyordu.
    */
   durt?: boolean;
+  /**
+   * #95: bacak hapında glif AYRI bir PNG `image` işaretçisiyle çizilir (Harita.native) — görünüm yakalamasında içerideki
+   * Image bitmap'e yetişmiyordu (cihazda araba glifi hiç çıkmadı). Burada glifin yeri boş bırakılır; hap sabit genişlikte
+   * (geo.hapGenisligi) ki çapa (glif yuvası merkezi) ölçümsüz bilinsin.
+   */
+  glifAyri?: boolean;
 }) {
   if (pin.tur === 'aday') {
     const puan = puanMetni(pin.puan);
@@ -162,13 +169,19 @@ export function PinIcerigi({
     );
   }
   if (pin.tur === 'etiket') {
-    // #65 (docs/05 §4): araba süre hapı — beyaz zemin, pin gölgesi, 10,5 px / 800 metin, solda rota tonunda araba glifi.
+    // #65 / #95 (docs/05 §4, LegChips11): bacak süre hapı — beyaz zemin, pin gölgesi, 22 px, 10,5 px / 800 metin, solda 12 px
+    // glif: yürüme `yuru` siyah, araba `araba` rota tonunda. Genişlik sabit (hapGenisligi); glif `glifAyri` ile dışarıda çizilebilir.
     const araba = pin.etiketIkon === 'araba';
+    const metin = pin.etiket ?? '';
     return (
-      <View style={[s.bacakHap, s.golge, etiketGizli && s.gorunmez, durt && s.durtme]} collapsable={false}>
-        {pin.etiketIkon ? <PinIkonu ad={pin.etiketIkon} boyut={12} renk={araba ? pin.renk : renk.metin} kalinlik={2.2} onYuklendi={onYuklendi} /> : null}
+      <View style={[s.bacakHap, s.golge, { width: hapGenisligi(metin) }, etiketGizli && s.gorunmez, durt && s.durtme]} collapsable={false}>
+        {glifAyri || !pin.etiketIkon ? (
+          <View style={s.bacakGlifYuva} />
+        ) : (
+          <PinIkonu ad={pin.etiketIkon} boyut={HAP_GLIF_PX} renk={araba ? pin.renk : renk.metin} kalinlik={2.2} onYuklendi={onYuklendi} />
+        )}
         <Text style={s.bacakMetin} numberOfLines={1}>
-          {pin.etiket}
+          {metin}
         </Text>
       </View>
     );
@@ -279,8 +292,9 @@ const s = StyleSheet.create({
   hapMetin: { fontFamily: yazi.kalin, fontSize: 12, color: renk.metin },
   yildiz: { fontFamily: yazi.kalin, fontSize: 11, color: renk.vurgu },
   otel: { width: OTEL_KARE, height: OTEL_KARE, borderRadius: 9, alignItems: 'center', justifyContent: 'center' },
-  bacakHap: { flexDirection: 'row', gap: 4, height: 22, paddingHorizontal: 8, borderRadius: 11, backgroundColor: renk.zemin, alignItems: 'center', justifyContent: 'center' },
-  bacakMetin: { fontFamily: yazi.ekstra, fontSize: 10.5, lineHeight: 14, color: renk.metin },
+  bacakHap: { flexDirection: 'row', gap: HAP_GLIF_BOSLUK_PX, height: HAP_YUKSEKLIK, paddingHorizontal: HAP_DOLGU_PX, borderRadius: HAP_YUKSEKLIK / 2, backgroundColor: renk.zemin, alignItems: 'center' },
+  bacakGlifYuva: { width: HAP_GLIF_PX, height: HAP_GLIF_PX },
+  bacakMetin: { flex: 1, textAlign: 'center', fontFamily: yazi.ekstra, fontSize: 10.5, lineHeight: 14, color: renk.metin },
   gorunmez: { opacity: 0 },
   durtme: { paddingBottom: 1 },
   konumHalka: { width: KONUM_HALKA, height: KONUM_HALKA, borderRadius: KONUM_HALKA / 2, backgroundColor: 'rgba(66,133,244,0.25)', alignItems: 'center', justifyContent: 'center' },

@@ -1,18 +1,31 @@
-// #33: rota çizgilerinden bacak etiketi pinleri ("araba 12 dk" hapı, bacağın ortasında). #59 §C / #65: yalnız araba bacağı
-// hap taşır (yürüyüş süreleri panelde); yön okları ayrı işaretçi olarak çizilir.
+// #33: rota çizgilerinden bacak etiketi pinleri (süre hapı, bacağın ortasında). #95 (docs/05 v1.9 §4): her bacakta hap —
+// yürüme `yuru` / araba `araba` glifi; zoom < 13'te haplar yok; çakışmada uzun bacak kalır. Yön okları ayrı işaretçidir.
 import { cizgiOrtasi } from '@/lib/polyline';
 
+import { KUCUK_ZOOM, mesafeM } from './geo';
+import { pinIkonuAnahtari } from './pinIkonlari';
 import type { HaritaBolgesi, HaritaCizgisi, HaritaPini, Konum } from './tipler';
 
-export function bacakEtiketPinleri(cizgiler: HaritaCizgisi[]): HaritaPini[] {
+export function bacakEtiketPinleri(cizgiler: HaritaCizgisi[], zoom = Infinity): HaritaPini[] {
+  // docs/05 §4: zoom < 13'te (şehir ölçeği) haplar gizli.
+  if (zoom < KUCUK_ZOOM) return [];
   const pinler: HaritaPini[] = [];
   for (const c of cizgiler) {
     if (!c.etiket) continue;
     const orta = cizgiOrtasi(c.noktalar);
     if (!orta) continue;
-    pinler.push({ id: `bacak:${c.id}`, konum: orta, renk: c.renk, tur: 'etiket', etiket: c.etiket, etiketIkon: c.etiketIkon });
+    let bacakM = 0;
+    for (let i = 1; i < c.noktalar.length; i++) bacakM += mesafeM(c.noktalar[i - 1], c.noktalar[i]);
+    // Glif rengi rota tonu (`etiketRenk`); kuş uçuşunda çizgi gün renginde olduğundan `renk`e düşülmez.
+    pinler.push({ id: `bacak:${c.id}`, konum: orta, renk: c.etiketRenk ?? c.renk, tur: 'etiket', etiket: c.etiket, etiketIkon: c.etiketIkon, bacakM });
   }
   return pinler;
+}
+
+/** #95: hap glifinin PNG anahtarı — yürüme siyah `yuru`, araba rota tonunda `araba`; glif yoksa null. */
+export function hapGlifAnahtari(p: Pick<HaritaPini, 'etiketIkon' | 'renk'>): string | null {
+  if (!p.etiketIkon) return null;
+  return pinIkonuAnahtari(p.etiketIkon, p.etiketIkon === 'araba' ? p.renk : '#0f0f0f');
 }
 
 /** #59 §C: rota üstünde yön oku — konum + saat yönünde derece (0 = kuzey; ok görseli doğuya bakar, Harita -90 uygular). */

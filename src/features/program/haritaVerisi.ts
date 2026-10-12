@@ -143,8 +143,9 @@ export function programCizgileri(secenek: {
     // #91 A (docs/05 v1.8 §3): yalnız seçili günün rotası çizilir. Diğer günler için HİÇBİR çizgi üretilmez — ne düz,
     // ne %32 ince, ne kuş uçuşu; durakları soluk nokta olarak kalır (programPinleri). Boş gün planlarken ekran temiz.
     if (g.id !== seciliGunId) return [];
-    // #33: seçili gün bacak bacak gerçek yol; #65: araba bacağı yürümeyle aynı düz çizgi (ok yok) + "araba 14 dk" hapı;
-    // rota gelene kadar kuş uçuşu ince kesikli. #59 §C: yürüyüş süre hapları haritada yok — `etiket` yalnız arabada.
+    // #33: seçili gün bacak bacak gerçek yol; #65: araba bacağı yürümeyle aynı düz çizgi (ok yok); rota gelene kadar kuş
+    // uçuşu ince kesikli. #95 (docs/05 v1.9 §4): HER bacakta süre hapı — yürüme `yuru` (siyah), araba `araba` (rota tonu);
+    // geçilen bacakta hap yok. (#59 §C'nin "yürüyüş süresi haritada yok" kuralı 12 Eki'de kalktı.)
     // #51: kimlik bacağın uçlarından (from>to) ve kaynağından türer — sıra değişince eski çizgi/etiket yeniden
     // kullanılmaz (Android Polyline/Marker eski koordinatta kalıyordu); aynı çift iki kez geçerse sıra no ayırır.
     return bacakListesi(seciliNoktalar).map((b, i): HaritaCizgisi => {
@@ -163,8 +164,9 @@ export function programCizgileri(secenek: {
           renk: rengi,
           opaklik,
           arac: !!taksi,
-          etiket: i < gecilenBacak || !taksi ? undefined : `${dk} dk`,
-          etiketIkon: taksi ? 'araba' : 'yurume',
+          etiket: i < gecilenBacak ? undefined : `${dk} dk`,
+          etiketIkon: taksi ? 'araba' : 'yuru',
+          etiketRenk: rengi,
         };
       }
       const m = bacakModu(a, z, bacak(a, z));
@@ -178,8 +180,10 @@ export function programCizgileri(secenek: {
         kesik: true,
         ince: true,
         arac: m.mod === 'taksi',
-        etiket: i < gecilenBacak || m.mod !== 'taksi' ? undefined : `~${Math.max(1, Math.round(m.sn / 60))} dk`,
-        etiketIkon: m.mod === 'taksi' ? 'araba' : 'yurume',
+        etiket: i < gecilenBacak ? undefined : `~${Math.max(1, Math.round(m.sn / 60))} dk`,
+        etiketIkon: m.mod === 'taksi' ? 'araba' : 'yuru',
+        // Çizgi gün renginde (kuş uçuşu); hap glifi rota tonunda kalır (PNG yalnız rota tonlarında var).
+        etiketRenk: rengi,
       };
     });
   });
