@@ -29,7 +29,10 @@ describe('takvim aralığı (#98 KK3)', () => {
     expect(a).toEqual({ gidis: '2026-10-16', donus: null });
     expect(tarihDokun(a, '2026-10-19')).toEqual({ gidis: '2026-10-16', donus: '2026-10-19' });
     expect(tarihDokun(a, '2026-10-10')).toEqual({ gidis: '2026-10-10', donus: null });
-    expect(tarihDokun(a, '2026-10-16')).toEqual({ gidis: '2026-10-16', donus: '2026-10-16' });
+    // #117 KK3: yalnız gidiş seçiliyken aynı güne ikinci dokunuş sıfırlar; aralık tamamken herhangi bir gün yeni gidiş.
+    expect(tarihDokun(a, '2026-10-16')).toBeNull();
+    expect(tarihDokun({ gidis: '2026-10-16', donus: '2026-10-19' }, '2026-10-16')).toEqual({ gidis: '2026-10-16', donus: null });
+    expect(tarihDokun({ gidis: '2026-10-16', donus: '2026-10-19' }, '2026-10-20')).toEqual({ gidis: '2026-10-20', donus: null });
     expect(tarihDokun({ gidis: '2026-10-16', donus: '2026-10-19' }, '2026-10-20')).toEqual({ gidis: '2026-10-20', donus: null });
   });
   it('özet: "16 – 19 Ekim · 4 gün · 3 gece"; ay geçişi; tek gün', () => {
@@ -50,6 +53,35 @@ describe('geceler ve gece oteli (#98 KK4)', () => {
     expect(geceler([gun(1, null), gun(2, null)]).map((x) => x.etiket)).toEqual(['1. gece']);
     expect(geceler([gun(1, null)])).toHaveLength(1);
     expect(geceler([])).toEqual([]);
+  });
+  it('#117 KK5c: 16–19 Eki → 3 gece sırayla A, B, C: her gecenin oteli akşam gününün bitişi; son gün gece değil', () => {
+    let gl = gunler.map((g) => ({ ...g }));
+    const uygula = (gece: ReturnType<typeof geceler>[number], stay: string) => {
+      for (const u of gecePlani(gece, stay)) gl = gl.map((g) => (g.id === u.id ? { ...g, start_stay_id: u.start_stay_id, end_stay_id: u.end_stay_id } : g));
+    };
+    const n = geceler(gl);
+    expect(n).toHaveLength(3);
+    uygula(n[0], 'A');
+    uygula(geceler(gl)[1], 'B');
+    uygula(geceler(gl)[2], 'C');
+    expect(geceler(gl).map((x) => x.aksamGun.end_stay_id)).toEqual(['A', 'B', 'C']);
+    expect(gl.map((g) => [g.start_stay_id, g.end_stay_id])).toEqual([
+      [null, 'A'],
+      ['A', 'B'],
+      ['B', 'C'],
+      ['C', 'C'],
+    ]);
+    // Ters sırayla (3., 2., 1.) da aynı sonuç.
+    gl = gunler.map((g) => ({ ...g }));
+    uygula(geceler(gl)[2], 'C');
+    uygula(geceler(gl)[1], 'B');
+    uygula(geceler(gl)[0], 'A');
+    expect(gl.map((g) => [g.start_stay_id, g.end_stay_id])).toEqual([
+      [null, 'A'],
+      ['A', 'B'],
+      ['B', 'C'],
+      ['C', 'C'],
+    ]);
   });
   it('geceye otel: akşam gününün bitişi + sabah gününün başlangıcı (ve dönüşse bitişi); tek günde her ikisi', () => {
     const g = geceler(gunler);

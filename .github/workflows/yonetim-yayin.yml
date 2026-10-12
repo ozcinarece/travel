@@ -1,0 +1,72 @@
+name: yonetim-yayin
+
+# #106 KK5: yönetim paneli (web) — `main`'e her birleştirmede Cloudflare Pages'e (ücretsiz katman) dağıtılır.
+# Gerekli secret'lar: CLOUDFLARE_API_TOKEN (izin: Cloudflare Pages · Edit), CLOUDFLARE_ACCOUNT_ID.
+# Değişkenler: YONETIM_URL (Pages adresi, ör. https://gezi-yonetim.pages.dev), isteğe bağlı CLOUDFLARE_PAGES_PROJE.
+# Secret'lar yoksa iş uyarıyla atlanır (CI kırmızıya dönmez).
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: yonetim-yayin
+  cancel-in-progress: true
+
+jobs:
+  yayin:
+    runs-on: ubuntu-latest
+    environment:
+      name: yonetim
+      url: ${{ vars.YONETIM_URL }}
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      PROJE: ${{ vars.CLOUDFLARE_PAGES_PROJE || 'gezi-yonetim' }}
+      # Herkese açık istemci değerleri (eas.json preview profiliyle aynı).
+      EXPO_PUBLIC_SUPABASE_URL: https://xwqeobelyeuzoxyuvauw.supabase.co
+      EXPO_PUBLIC_SUPABASE_ANON_KEY: sb_publishable_XB3vg3rrcdIK9Bafkv-Uug_G-5IEyyN
+      EXPO_PUBLIC_APPLE_SIGN_IN: '0'
+      # #107 önizlemedeki mini harita (web anahtarı; panel alan adı referrer listesinde olmalı). Yoksa harita yerine not.
+      EXPO_PUBLIC_GOOGLE_MAPS_WEB_KEY: ${{ vars.EXPO_PUBLIC_GOOGLE_MAPS_WEB_KEY }}
+      # Yönetim grubu yalnız bu değişkenle derlenir (metro.config.js).
+      YONETIM: '1'
+    steps:
+      - name: Ön koşul
+        id: kosul
+        run: |
+          if [ -z "$CLOUDFLARE_API_TOKEN" ] || [ -z "$CLOUDFLARE_ACCOUNT_ID" ]; then
+            echo "::warning::CLOUDFLARE_API_TOKEN / CLOUDFLARE_ACCOUNT_ID tanımlı değil; yönetim paneli dağıtılmadı."
+            echo "hazir=0" >> "$GITHUB_OUTPUT"
+          else
+            echo "hazir=1" >> "$GITHUB_OUTPUT"
+          fi
+      - uses: actions/checkout@v4
+        if: steps.kosul.outputs.hazir == '1'
+      - uses: actions/setup-node@v4
+        if: steps.kosul.outputs.hazir == '1'
+        with:
+          node-version: 22
+          cache: npm
+      - if: steps.kosul.outputs.hazir == '1'
+        run: npm ci
+      - name: Web çıktısı
+        if: steps.kosul.outputs.hazir == '1'
+        run: |
+          npx expo export --platform web --output-dir dist
+          test -f dist/yonetim/index.html
+          # Panel alan adında kök doğrudan panele açılır. Dinamik rota: statik "[id]" sayfası köşeli parantezsiz bir
+          # adla kopyalanır ve oraya yeniden yazılır (istemci rotayı adres çubuğundan çözer).
+          cp "dist/yonetim/geziler/[id]/onizle.html" dist/yonetim/geziler/_onizle.html
+          cp "dist/yonetim/yerler/[id]/onizle.html" dist/yonetim/yerler/_onizle.html
+          printf '%s\n' \
+            "/ /yonetim 302" \
+            "/yonetim/geziler/:id/onizle /yonetim/geziler/_onizle 200" \
+            "/yonetim/yerler/:id/onizle /yonetim/yerler/_onizle 200" > dist/_redirects
+      - name: Cloudflare Pages
+        if: steps.kosul.outputs.hazir == '1'
+        run: |
+          npx --yes wrangler@4 pages project create "$PROJE" --production-branch=main 2>/dev/null || true
+          npx --yes wrangler@4 pages deploy dist --project-name="$PROJE" --branch=main --commit-dirty=true
+          echo "### Yönetim paneli" >> "$GITHUB_STEP_SUMMARY"
+          echo "- ${{ vars.YONETIM_URL || 'YONETIM_URL değişkeni tanımlı değil' }}/yonetim" >> "$GITHUB_STEP_SUMMARY"

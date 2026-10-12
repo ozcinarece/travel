@@ -495,6 +495,8 @@
     "otelSaat": "Otel · {saat}",
     "baslangicSaat": "Başlangıç · {saat}",
     "eklendi": "✓ {gun}. güne eklendi · {sira}. sıra · bitiş {bit}",
+    "gezidenEklendi": "{durak} durak eklendi · {mekan} mekan listende",
+    "gezidenEklendiListe": "{mekan} mekan listene eklendi",
     "eklendiKisa": "✓ {gun}. güne eklendi",
     "geriAl": "Geri al",
     "tasi": "Taşı:",
@@ -589,14 +591,14 @@
       "araHata": "Arama şu an yapılamıyor. Tekrar dene.",
       "sonucYok": "Sonuç yok",
       "kaldir": "Şehri kaldır",
-      "kilitli": "Şehir kaydedildi; yeni seyahat için Yeni'den başla."
+      "kilitli": "Seyahat oluştu; şehir artık değiştirilemez. Başka şehir için Yeni'den yeni seyahat kur."
     },
     "nezaman": {
       "baslik": "Ne zaman?",
       "alt": "Gidiş ve dönüş gününe dokun",
       "atla": "Tarihim belli değil",
       "ozetYok": "Gidiş gününe dokun",
-      "kilitli": "Tarihler kaydedildi; gün eklemek için Program'ı kullan.",
+      "kilitli": "Tarihler kaydedildi; tarihi Program'dan değiştir (gün ekle / sil).",
       "hata": "Seyahat oluşturulamadı. Tekrar dener misin?"
     },
     "oteller": {
@@ -607,6 +609,7 @@
       "otelEkle": "+ Otel ekle",
       "degistir": "Değiştir",
       "kaldir": "Kaldır",
+      "menuDegistir": "Oteli değiştir",
       "not": "Anahtarı kapatınca her gece ayrı seçilir (şehir değişimi, taşınma). Otel günün başlangıç ve bitiş noktası olur; sonra Program'dan değiştirilebilir.",
       "atla": "Henüz belli değil",
       "kaydetHata": "Kaydedilemedi. Tekrar dener misin?",
@@ -658,7 +661,7 @@
     "yaklasanBugun": "YAKLAŞAN · BUGÜN",
     "aktif": "ŞU AN SEYAHATTE",
     "tarihsiz": "Tarih yok",
-    "durakKisi": "{durak} durak · {kisi} kişi",
+    "mekanKisi": "{mekan} mekan · {kisi} kişi",
     "programaGit": "Programa git",
     "ilkBaslik": "İlk seyahatini kur",
     "ilkAlt": "Şehir, tarih, otel; gerisini harita halleder",
@@ -675,6 +678,9 @@
     "hangiSeyahat": "Hangi seyahate?",
     "seyahatYok": "Önce bir seyahat kur",
     "ekleHata": "Eklenemedi. Tekrar dene.",
+    "ekleHataSebep": "Eklenemedi: {sebep}",
+    "bulunamadi": "Google'da bulunamadı",
+    "cozuluyor": "Mekan kimliği çözülüyor, bir saniye…",
     "bos": "İçerik hazırlanıyor"
   },
   "ara": {
@@ -715,8 +721,13 @@
     "yalnizMekan": "Yalnız mekanları listeme ekle",
     "yalnizMekanAlt": "{mekan} mekan listene gelir, güne sen dağıtırsın",
     "not": "Hedef günde durak varsa plan onların sonuna eklenir; hiçbir durak silinmez.",
-    "alHata": "Aktarılamadı. Tekrar dener misin?",
+    "alHata": "Aktarılamadı: {sebep}",
     "cozumYok": "{n} mekan Google'da bulunamadı; onlar atlandı.",
+    "hicEklenmedi": "Hiçbir mekan eklenemedi — {sebep}",
+    "sebepBulunamadi": "Google'da bulunamadı ({ad})",
+    "sebepSunucu": "{sebep} ({ad})",
+    "hepsiZatenVar": "mekanların hepsi zaten listende",
+    "gunDahil": "Bu günü al",
     "kaydet": "Kaydet",
     "kaydedildi": "Kaydedildi",
     "paylas": "Paylaş",

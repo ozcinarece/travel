@@ -70,7 +70,21 @@ type PanelHali = 'katli' | 'yari' | 'tam';
  */
 export default function ProgramEkrani() {
   const id = useSeyahatId();
-  const { gun: gunParam } = useLocalSearchParams<{ gun?: string }>();
+  const { gun: gunParam, eklenenDurak, eklenenMekan, atlanan } = useLocalSearchParams<{ gun?: string; eklenenDurak?: string; eklenenMekan?: string; atlanan?: string }>();
+  // #118 KK4: "Geziyi seyahatime al" sonrası bildirim ("3 durak eklendi · 11 mekan listende"; atlanan varsa eki).
+  const [gezidenBildirim, setGezidenBildirim] = useState<string | null>(() => {
+    const d = Number(eklenenDurak ?? 0);
+    const m = Number(eklenenMekan ?? 0);
+    if (!eklenenDurak && !eklenenMekan) return null;
+    const ana = d > 0 ? t('program.gezidenEklendi', { durak: d, mekan: m }) : t('program.gezidenEklendiListe', { mekan: m });
+    const a = Number(atlanan ?? 0);
+    return a > 0 ? `${ana} · ${t('gezi.cozumYok', { n: a })}` : ana;
+  });
+  useEffect(() => {
+    if (!gezidenBildirim) return;
+    const z = setTimeout(() => setGezidenBildirim(null), 4500);
+    return () => clearTimeout(z);
+  }, [gezidenBildirim]);
   const seyahat = useSeyahat(id);
   const gunler = useGunler(id);
   const duraklar = useDuraklar(id);
@@ -80,15 +94,22 @@ export default function ProgramEkrani() {
     return <SeyahatYukleme sorgular={[seyahat, gunler, duraklar, mekanlar, konaklamalar]} kimlikYok={!id} />;
   }
   return (
-    <ProgramSekmesi
-      key={id}
-      seyahat={seyahat.data}
-      gunler={gunler.data}
-      duraklar={duraklar.data}
-      mekanlar={mekanlar.data}
-      konaklamalar={konaklamalar.data}
-      gunParam={gunParam}
-    />
+    <>
+      <ProgramSekmesi
+        key={id}
+        seyahat={seyahat.data}
+        gunler={gunler.data}
+        duraklar={duraklar.data}
+        mekanlar={mekanlar.data}
+        konaklamalar={konaklamalar.data}
+        gunParam={gunParam}
+      />
+      {gezidenBildirim ? (
+        <View style={s.gezidenBildirim} pointerEvents="none">
+          <Text style={s.gezidenBildirimMetin}>{gezidenBildirim}</Text>
+        </View>
+      ) : null}
+    </>
   );
 }
 
@@ -1116,6 +1137,8 @@ const s = StyleSheet.create({
   kucukDugmeAktif: { backgroundColor: renk.metin },
   kucukDugmeMetin: { fontFamily: yazi.kalin, fontSize: 12, color: renk.metin },
   uyariMetin: { fontFamily: yazi.normal, fontSize: 11, color: renk.ikincil, paddingTop: 6 },
+  gezidenBildirim: { position: 'absolute', left: 20, right: 20, top: 110, paddingHorizontal: 16, paddingVertical: 12, borderRadius: 14, backgroundColor: renk.metin, shadowColor: renk.metin, shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.2, shadowRadius: 12, elevation: 8 },
+  gezidenBildirimMetin: { fontFamily: yazi.kalin, fontSize: 13, color: renk.zemin, textAlign: 'center' },
   hata: { fontFamily: yazi.yari, fontSize: 12, textAlign: 'center', color: renk.uyari },
   // #47 B6: 40 px yuvarlak düğme, 20 px ikon.
   ikonDugme: { width: 40, height: 40, borderRadius: 20, backgroundColor: renk.yuzey, alignItems: 'center', justifyContent: 'center' },
