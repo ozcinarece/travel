@@ -4,6 +4,7 @@
 // merkezleri 125 m'ye kadar inebildiğinden hücre 4 ondalık, yarıçap en az 100 m.
 import { CIP_TIPLERI, GoogleHatasi, yakinAra, type HafifYer } from '../_shared/google.ts';
 import { govde, hata, json, onKontrol } from '../_shared/http.ts';
+import { sayacli } from '../_shared/sayac.ts';
 
 type Istek = { merkez: { lat: number; lng: number }; yaricapM?: number; cip: string; enFazla?: number };
 
@@ -20,7 +21,7 @@ function onbellekYaz(anahtar: string, deger: HafifYer[]) {
   onbellek.set(anahtar, { zaman: simdi, deger });
 }
 
-Deno.serve(async (istek) => {
+Deno.serve(sayacli('places-nearby', async (istek) => {
   const on = onKontrol(istek);
   if (on) return on;
 
@@ -50,4 +51,4 @@ Deno.serve(async (istek) => {
     console.error('places-nearby', e);
     return hata('sunucu hatası', 500);
   }
-});
+}));

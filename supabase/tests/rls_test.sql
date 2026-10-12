@@ -620,4 +620,64 @@ begin
 end $$;
 reset role;
 
+-- ---------------------------------------------------------------- #110: genel bakış (sayaç, ayarlar, özet)
+reset role;
+-- Sayaç yalnız service_role ile artar; aynı gün aynı işlev birikir.
+set role service_role;
+select public.api_sayac_artir('places-nearby', 1, 1);
+select public.api_sayac_artir('places-nearby', 2, 0);
+select public.api_sayac_artir('places-full', 1, 1);
+reset role;
+do $$
+begin
+  assert (select cagri from public.api_sayac where fonksiyon = 'places-nearby') = 3, 'çağrılar birikir';
+  assert (select google from public.api_sayac where fonksiyon = 'places-nearby') = 1, 'Google istekleri ayrı sayılır';
+end $$;
+set role authenticated;
+select pg_temp.as_email(:B, 'b@ornek.com');
+select pg_temp.hata_bekle($$select public.api_sayac_artir('places-full', 1, 1)$$, '42501');
+select pg_temp.hata_bekle($$select public.yonetim_ozet(30)$$, '42501');
+do $$
+begin
+  assert (select count(*) from public.api_sayac) = 0, 'admin olmayan sayacı görmez';
+  assert (select count(*) from public.yonetim_ayarlari) = 0, 'admin olmayan ayarları görmez';
+end $$;
+-- Davet olayları uygulamadan yazılabilir (kendi adına).
+insert into public.olaylar (tur, hedef_id) values ('davet_paylasildi', null);
+reset role;
+-- Linkle katılım: sahip olmayan bir üye (önceki bölümlerdeki üyeliklerden bağımsız).
+insert into public.members (trip_id, user_id, display_name)
+  select id, :X, 'Katılan' from public.trips order by created_at limit 1
+  on conflict (trip_id, user_id) do update set role = 'member', joined_at = now();
+select set_config('test.kullanici', (select count(*) from auth.users where not coalesce(is_anonymous, false))::text, false),
+  set_config('test.seyahat', (select count(*) from public.trips)::text, false),
+  set_config('test.katilim', (select count(*) from public.members where role <> 'owner')::text, false);
+set role anon;
+select pg_temp.hata_bekle($$select public.yonetim_ozet(30)$$, '42501');
+select pg_temp.hata_bekle($$select count(*) from public.yonetim_ayarlari$$, '42501');
+set role authenticated;
+select pg_temp.as_email(:E, 'ozcinar.ece@gmail.com');
+select pg_temp.hata_bekle($$select public.yonetim_ozet(0)$$, '22023');
+do $$
+declare o jsonb := public.yonetim_ozet(30);
+begin
+  assert (o #>> '{kullanici,toplam}')::int = current_setting('test.kullanici')::int, 'kullanıcı: anonimler hariç';
+  assert (o #>> '{seyahat,toplam}')::int = current_setting('test.seyahat')::int, 'seyahat toplamı';
+  assert (o #>> '{gezi_alindi,toplam}')::int = 2, 'aralıktaki gezi alma (#109 testindeki 2 olay)';
+  assert (o #>> '{gezi_alindi,mekan}')::int = 2, 'meta durak yok → yalnız mekan';
+  assert (o #>> '{paylasim,paylasildi}')::int = 1, 'davet paylaşımı';
+  assert (o #>> '{paylasim,olay_var}')::boolean, 'davet olayı var';
+  assert jsonb_array_length(o -> 'en_cok_alinan') <= 4, 'tablo en çok 4 satır (kanvas)';
+  assert (o #>> '{paylasim,katilim}')::int = current_setting('test.katilim')::int and current_setting('test.katilim')::int >= 1, 'linkle katılım (sahip hariç üye)';
+  assert (o #>> '{google,ay}')::int = 2, 'bu ayki Google istekleri';
+  assert (o #>> '{google,butce}')::int = 25000, 'bütçe ayarı';
+  assert jsonb_array_length(o -> 'haftalik') = 12, '12 haftalık seri';
+  assert (o -> 'en_cok_alinan' -> 0 ->> 'id') = '88888888-8888-4888-8888-000000000001', 'en çok alınan gezi ilk sırada';
+  assert (o -> 'en_cok_alinan' -> 0 ->> 'alindi')::int = 2, 'alındı sayısı';
+  assert (o #>> '{bugun,kesfet}')::int = 3 and (o #>> '{bugun,mekan_paneli}')::int = 1 and (o #>> '{bugun,yorum}')::int = 0, 'günün özeti çağrı sayıları';
+end $$;
+update public.yonetim_ayarlari set deger = '30000' where anahtar = 'google_aylik_butce';
+do $$ begin assert (public.yonetim_ozet(7) #>> '{google,butce}')::int = 30000, 'admin bütçeyi değiştirir'; end $$;
+reset role;
+
 \echo 'rls_test: TÜM TESTLER GEÇTİ'

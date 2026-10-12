@@ -2,13 +2,14 @@
 // Fotoğraf başına faturalanır; URI izolat belleğinde 24 sa tutulur. Anahtar istemciye gitmez (PRD §7).
 import { fotoUri } from '../_shared/google.ts';
 import { govde, hata, json, onKontrol } from '../_shared/http.ts';
+import { sayacli } from '../_shared/sayac.ts';
 
 type Istek = { ad: string; genislik?: number };
 
 const TTL_MS = 24 * 60 * 60 * 1000;
 const onbellek = new Map<string, { zaman: number; uri: string | null }>();
 
-Deno.serve(async (istek) => {
+Deno.serve(sayacli('places-photo', async (istek) => {
   const on = onKontrol(istek);
   if (on) return on;
   const g = await govde<Istek>(istek);
@@ -26,4 +27,4 @@ Deno.serve(async (istek) => {
     console.error('places-photo', e);
     return hata('fotoğraf alınamadı', 502);
   }
-});
+}));

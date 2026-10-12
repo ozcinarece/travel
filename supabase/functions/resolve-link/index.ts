@@ -5,6 +5,7 @@
 import { GoogleHatasi, hafifDetay, metinAra, type HafifYer } from '../_shared/google.ts';
 import { govde, hata, json, onKontrol } from '../_shared/http.ts';
 import { googleMapsLinkiMi, haritaLinkiAyristir, kisaLinkMi } from '../_shared/mapsLink.ts';
+import { sayacli } from '../_shared/sayac.ts';
 
 type Istek = { url: string; merkez?: { lat: number; lng: number } };
 type Cevap = { yer: HafifYer; kaynak: 'place_id' | 'arama' | 'koordinat' };
@@ -21,7 +22,7 @@ async function kisaLinkiTakipEt(url: string): Promise<string> {
   return simdiki;
 }
 
-Deno.serve(async (istek) => {
+Deno.serve(sayacli('resolve-link', async (istek) => {
   const on = onKontrol(istek);
   if (on) return on;
 
@@ -71,4 +72,4 @@ Deno.serve(async (istek) => {
     console.error('resolve-link', e);
     return hata('sunucu hatası', 500);
   }
-});
+}));

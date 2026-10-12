@@ -3,6 +3,7 @@
 // ad/puan/saat veritabanına girmez). Şehir modunda (sehir: true) puan yerine saat dilimi + ülke kodu döner.
 import { GoogleHatasi, hafifDetay, type HafifYer } from '../_shared/google.ts';
 import { govde, hata, json, onKontrol } from '../_shared/http.ts';
+import { sayacli } from '../_shared/sayac.ts';
 
 type Istek = { ids: string[]; sehir?: boolean; saatler?: boolean; foto?: boolean; ozet?: boolean; sessionToken?: string };
 
@@ -13,7 +14,7 @@ function onbellekAnahtari(id: string, sehir: boolean, saatler: boolean, foto: bo
   return `${sehir ? 'sehir' : saatler ? 'saatli' : foto ? (ozet ? 'ozetli' : 'fotolu') : 'hafif'}:${id}`;
 }
 
-Deno.serve(async (istek) => {
+Deno.serve(sayacli('places-light', async (istek) => {
   const on = onKontrol(istek);
   if (on) return on;
 
@@ -52,4 +53,4 @@ Deno.serve(async (istek) => {
     console.error('places-light', e);
     return hata('sunucu hatası', 500);
   }
-});
+}));

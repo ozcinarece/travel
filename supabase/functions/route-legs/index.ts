@@ -10,6 +10,7 @@ import { createClient } from 'npm:@supabase/supabase-js@2';
 import { GoogleHatasi } from '../_shared/google.ts';
 import { govde, hata, json, onKontrol } from '../_shared/http.ts';
 import { rotaBacagi, type Nokta, type RotaModu } from '../_shared/routes.ts';
+import { sayacli } from '../_shared/sayac.ts';
 
 type IstekBacagi = { from: Nokta; to: Nokta };
 type Istek = { trip_id: string; bacaklar: IstekBacagi[]; arac?: boolean };
@@ -40,7 +41,7 @@ const TAKSI_ESIGI_SN = 40 * 60;
 const noktaMi = (n: unknown): n is Nokta =>
   !!n && typeof (n as Nokta).key === 'string' && (n as Nokta).key.length > 0 && Number.isFinite((n as Nokta).lat) && Number.isFinite((n as Nokta).lng);
 
-Deno.serve(async (istek) => {
+Deno.serve(sayacli('route-legs', async (istek) => {
   const on = onKontrol(istek);
   if (on) return on;
   const g = await govde<Istek>(istek);
@@ -125,4 +126,4 @@ Deno.serve(async (istek) => {
     if (error) console.error('walk_cache upsert (route-legs)', error.message);
   }
   return json({ bacaklar: bacaklar.map((b) => bilinen.get(`${b.from.key}>${b.to.key}`)).filter(Boolean), ...(eksik ? { eksik: true } : {}) });
-});
+}));

@@ -7,12 +7,13 @@ import { createClient } from 'npm:@supabase/supabase-js@2';
 import { GoogleHatasi } from '../_shared/google.ts';
 import { govde, hata, json, onKontrol } from '../_shared/http.ts';
 import { yuruyusMatrisi, type Bacak, type Nokta } from '../_shared/routes.ts';
+import { sayacli } from '../_shared/sayac.ts';
 
 type Istek = { trip_id: string; noktalar: Nokta[] };
 
 const ONBELLEK_GUN = 30;
 
-Deno.serve(async (istek) => {
+Deno.serve(sayacli('route-matrix', async (istek) => {
   const on = onKontrol(istek);
   if (on) return on;
   const g = await govde<Istek>(istek);
@@ -85,4 +86,4 @@ Deno.serve(async (istek) => {
     console.error('route-matrix', e);
     return hata('sunucu hatası', 500);
   }
-});
+}));

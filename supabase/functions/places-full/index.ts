@@ -2,13 +2,14 @@
 // (places-reviews; yalnız Yorumlar sekmesinde). Cevap bu izolatta 24 saat önbelleklenir (bellek; DB'ye yazılmaz, PRD §7).
 import { GoogleHatasi, tamDetay, type TamYer } from '../_shared/google.ts';
 import { govde, hata, json, onKontrol } from '../_shared/http.ts';
+import { sayacli } from '../_shared/sayac.ts';
 
 type Istek = { id: string; tz?: string };
 
 const TTL_MS = 24 * 60 * 60 * 1000;
 const onbellek = new Map<string, { zaman: number; deger: TamYer }>();
 
-Deno.serve(async (istek) => {
+Deno.serve(sayacli('places-full', async (istek) => {
   const on = onKontrol(istek);
   if (on) return on;
   const g = await govde<Istek>(istek);
@@ -31,4 +32,4 @@ Deno.serve(async (istek) => {
     console.error('places-full', e);
     return hata('sunucu hatası', 500);
   }
-});
+}));
