@@ -88,17 +88,15 @@ export function markdownAyristir(kaynak: string | null | undefined): MdBlok[] {
       continue;
     }
     const g = GORSEL.exec(satir.trim());
-    if (g && !/^https?:\/\//i.test(g[2])) {
-      // #119 KK1b: çözülemeyen görsel (foto:… yer tutucu, göreli yol) çizilmez; boş kutu yok.
-      bitir();
-      continue;
-    }
     if (g) {
       bitir();
       // Art arda görseller aynı satıra (en çok 2); altyazı ilk görselin alt metni. Tek etikette virgüllü hedefler de olur.
+      // #119 KK1b: çözümden sonra hâlâ http(s) olmayan hedef (göreli yol, yer tutucu) çizilmez; boş kutu yok. `foto:` (#107) çözülür.
       for (const hedef of g[2].split(',').filter((h) => h.trim())) {
+        const url = gorselUrl(hedef);
+        if (!/^https?:\/\//i.test(url)) continue;
         const son = bloklar[bloklar.length - 1];
-        const foto = { url: gorselUrl(hedef), alt: g[1] };
+        const foto = { url, alt: g[1] };
         if (son && son.tur === 'fotolar' && son.fotolar.length < 2) son.fotolar.push(foto);
         else bloklar.push({ tur: 'fotolar', fotolar: [foto], altyazi: g[1] || null });
       }
