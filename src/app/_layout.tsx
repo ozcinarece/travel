@@ -57,6 +57,10 @@ function Kok() {
         <Stack.Screen name="geziler" />
         <Stack.Screen name="gezi/[slug]" />
         <Stack.Screen name="yerler" />
+        {/* #100: kaydettiklerim + şehir rehberi. */}
+        <Stack.Screen name="kaydettiklerim" />
+        <Stack.Screen name="rehber/[slug]/index" />
+        <Stack.Screen name="rehber/[slug]/[bolum]" />
       </Stack.Protected>
       <Stack.Screen name="r/[token]" />
     </Stack>

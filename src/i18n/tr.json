@@ -118,6 +118,8 @@
   },
   "profil": {
     "baslik": "Profil",
+    "kaydettiklerim": "Kaydettiklerim",
+    "kaydettiklerimAlt": "Kalp bıraktığın geziler ve yerler",
     "cikis": "Çıkış",
     "hesapSil": "Hesabı sil"
   },
@@ -212,6 +214,33 @@
     "listeBaslik": "Gezilecek yerler",
     "filtreSehir": "Şehir",
     "bos": "Bu şehirde yer yok"
+  },
+  "kaydettiklerim": {
+    "baslik": "Kaydettiklerim",
+    "alt": "Kalp bıraktığın geziler ve yerler",
+    "geziler": "Geziler · {n}",
+    "yerler": "Yerler · {n}",
+    "gunluk": "{n} GÜNLÜK",
+    "sehirMekan": "{sehir} · {n} mekan",
+    "bosGezi": "Beğendiğin gezilere kalp bırak",
+    "bosYer": "Beğendiğin yerlere kalp bırak",
+    "kaldirildi": "Kaldırıldı",
+    "geriAl": "Geri al",
+    "seyahatYok": "Mekan panelini açmak için önce bir seyahat kur",
+    "kaldir": "Kaydedilenlerden kaldır"
+  },
+  "rehber": {
+    "hap": "Rehber",
+    "ustBaslik": "ŞEHİR REHBERİ",
+    "bolum": {
+      "ulasim": "Nasıl gidilir, nasıl gezilir",
+      "yemek": "Ne yenir",
+      "mahalle": "Mahalleler",
+      "ipucu": "İpuçları"
+    },
+    "geziler": "Bu şehirde önerilen geziler",
+    "hata": "Rehber yüklenemedi",
+    "okuma": "{n} dk okuma"
   },
   "kesfet": {
     "ara": "Mekan ara",
