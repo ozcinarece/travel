@@ -19,6 +19,8 @@ type Props = {
   /** Alt düğme; `devam` yoksa alt alan yalnız `altIcerik`ten oluşur. */
   devam?: { baslik?: string; onPress: () => void; pasif?: boolean; yukleniyor?: boolean };
   atla?: { baslik: string; onPress: () => void };
+  /** #117: Devam'ın altında düğme yerine bilgi satırı (ör. "Tarihler kaydedildi; Program'dan değiştir"). */
+  altNot?: string;
   /** Alt alanın üstünde özel satır (6. adımda "Listede N mekan" çubuğu). */
   altIcerik?: ReactNode;
   hata?: string | null;
@@ -26,7 +28,7 @@ type Props = {
   kaydirmasiz?: boolean;
 };
 
-export function AdimKabugu({ adim, baslik, alt, onGeri, children, devam, atla, altIcerik, hata, kaydirmasiz }: Props) {
+export function AdimKabugu({ adim, baslik, alt, onGeri, children, devam, atla, altIcerik, hata, kaydirmasiz, altNot }: Props) {
   const aktif = adimIndeksi(adim);
   return (
     <SafeAreaView style={s.ekran} edges={['top']}>
@@ -63,6 +65,8 @@ export function AdimKabugu({ adim, baslik, alt, onGeri, children, devam, atla, a
             <Pressable accessibilityRole="button" onPress={atla.onPress} hitSlop={10} style={s.atla}>
               <Text style={s.atlaMetin}>{atla.baslik}</Text>
             </Pressable>
+          ) : altNot ? (
+            <Text style={s.altNot}>{altNot}</Text>
           ) : null}
         </View>
       </KeyboardAvoidingView>
@@ -84,6 +88,8 @@ const s = StyleSheet.create({
   icerik: { paddingHorizontal: bosluk.kenar, paddingTop: 10, paddingBottom: 16, gap: 12 },
   altAlan: { paddingHorizontal: bosluk.kenar, paddingTop: 8, paddingBottom: 10, gap: 8 },
   atla: { alignSelf: 'center', paddingVertical: 8, minHeight: minDokunma, justifyContent: 'center' },
-  atlaMetin: { fontFamily: yazi.kalin, fontSize: 13, color: renk.ikincil },
+  // #117 KK2/KK4: bağlantı okunur — 14 px, siyah, altı çizili (soluk gri metin okunmuyordu).
+  atlaMetin: { fontFamily: yazi.kalin, fontSize: 14, color: renk.metin, textDecorationLine: 'underline' },
+  altNot: { fontFamily: yazi.normal, fontSize: 12, color: renk.ikincil, textAlign: 'center', paddingVertical: 8 },
   hata: { fontFamily: yazi.yari, fontSize: 12, textAlign: 'center', color: renk.uyari },
 });
