@@ -45,14 +45,23 @@ export function kestirimTaksiSn(a: Konum, b: Konum): number {
   return (mesafeM(a, b) * 1.4) / (25_000 / 3600) + 180;
 }
 
-/** Bir bacağın gerçek/kestirim süreleri: yürüyüş (sıralama için) + araç (varsa). */
-export type BacakSuresi = { yuruyusSn: number; taksiSn: number | null; kestirim: boolean };
+/** #101 KK1: kullanıcının bacak için elle seçimi; yoksa otomatik (40 dk kuralı). v2: 'toplu'. */
+export type BacakSecimi = 'yurume' | 'araba';
+
+/** Bir bacağın gerçek/kestirim süreleri: yürüyüş (sıralama için) + araç (varsa) + elle seçim (#101). */
+export type BacakSuresi = { yuruyusSn: number; taksiSn: number | null; kestirim: boolean; secim?: BacakSecimi | null };
 export type BacakKaynagi = (a: Konum, b: Konum) => BacakSuresi;
 
-/** Bacak modu: yürüyüş eşiği aşılırsa taksi; taksi süresi yoksa kestirim. */
+/**
+ * Bacak modu: elle seçim varsa o (#101 KK1); yoksa yürüyüş eşiği aşılırsa taksi. Taksi süresi yoksa kestirim.
+ * Elle seçilen bacak otomatik değişmez; seçim çift bazlı saklandığından çift bozulunca `secim` gelmez → otomatik.
+ */
 export function bacakModu(a: Konum, b: Konum, bacak: BacakSuresi): { mod: 'yuruyus' | 'taksi'; sn: number; kestirim: boolean } {
+  const taksi = () => (bacak.taksiSn !== null ? { mod: 'taksi' as const, sn: bacak.taksiSn, kestirim: bacak.kestirim } : { mod: 'taksi' as const, sn: kestirimTaksiSn(a, b), kestirim: true });
+  if (bacak.secim === 'yurume') return { mod: 'yuruyus', sn: bacak.yuruyusSn, kestirim: bacak.kestirim };
+  if (bacak.secim === 'araba') return taksi();
   if (bacak.yuruyusSn <= TAKSI_ESIGI_SN) return { mod: 'yuruyus', sn: bacak.yuruyusSn, kestirim: bacak.kestirim };
-  return bacak.taksiSn !== null ? { mod: 'taksi', sn: bacak.taksiSn, kestirim: bacak.kestirim } : { mod: 'taksi', sn: kestirimTaksiSn(a, b), kestirim: true };
+  return taksi();
 }
 
 export function saatDakika(hhmm: string): number {

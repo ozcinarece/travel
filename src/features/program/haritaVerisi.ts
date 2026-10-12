@@ -155,21 +155,31 @@ export function programCizgileri(secenek: {
       const r = rotalar[cift];
       const a = { lat: b.from.lat, lng: b.from.lng };
       const z = { lat: b.to.lat, lng: b.to.lng };
+      // #101: mod elle seçimden ya da 40 dk kuralından (bacak kaynağı `secim` taşır); yürüme yolu `polyline`, araba yolu
+      // `drive_polyline` (yoksa araba bacağı kuş uçuşu düz çizgi, süre kestirim).
+      const k = bacak(a, z);
+      // Rota geldiyse süreler rotadan (yürüme `seconds`, araba `drive_seconds`); seçim bacak kaynağından.
+      // Elle seçim yoksa sunucunun otomatik önerisi (mode DRIVE = 40 dk üstü) geçerli.
+      const m = bacakModu(a, z, r ? { yuruyusSn: r.seconds, taksiSn: r.drive_seconds ?? null, kestirim: false, secim: k.secim ?? (r.mode === 'DRIVE' && r.drive_seconds ? 'araba' : null) } : k);
       if (r) {
-        const taksi = r.mode === 'DRIVE' && r.drive_seconds;
-        const dk = Math.max(1, Math.round((taksi ? r.drive_seconds! : r.seconds) / 60));
+        const taksi = m.mod === 'taksi';
+        // Eski satırlar (migration öncesi): mode DRIVE iken `polyline` araba yoluydu, yürüme yolu yok.
+        const eskiAraba = r.mode === 'DRIVE' && !r.drive_polyline;
+        const yol = taksi ? (r.drive_polyline ?? (eskiAraba ? r.polyline : null)) : eskiAraba ? null : r.polyline;
+        const dk = Math.max(1, Math.round(m.sn / 60));
         return {
           id,
-          noktalar: rotaNoktalari(r.polyline, a, z),
+          noktalar: yol ? rotaNoktalari(yol, a, z) : [a, z],
           renk: rengi,
           opaklik,
-          arac: !!taksi,
-          etiket: i < gecilenBacak ? undefined : `${dk} dk`,
+          arac: taksi,
+          kesik: !yol,
+          ince: !yol,
+          etiket: i < gecilenBacak ? undefined : `${m.kestirim ? '~' : ''}${dk} dk`,
           etiketIkon: taksi ? 'araba' : 'yuru',
           etiketRenk: rengi,
         };
       }
-      const m = bacakModu(a, z, bacak(a, z));
       return {
         id,
         noktalar: [a, z],

@@ -4,7 +4,7 @@
 // KK10: yürüyüş süresi önbellekte yoksa kestirim kullanılır ve satır `kestirim` olarak işaretlenir.
 import type { Konum } from '@/components/harita/tipler';
 
-import { bacakModu, dakikaSaat, kestirimYuruyusSn, saatDakika } from './tempo';
+import { bacakModu, dakikaSaat, kestirimYuruyusSn, saatDakika, type BacakSecimi } from './tempo';
 
 export const UZUN_KALMA_PAYI_DK = 10;
 
@@ -25,7 +25,7 @@ export type Yuruyus = { sn: number; m: number; kestirim: boolean; mod: 'yuruyus'
  * Önbellekten bacak; yoksa null (kestirime düşülür). Anahtarlar place_id ya da 'hotel'.
  * `taksi`: route-legs'ten araç süresi (yalnız 40 dk üstü bacaklarda gelir); yoksa kestirim.
  */
-export type YuruyusKaynagi = (fromKey: string, toKey: string) => { sn: number; m: number; taksi?: { sn: number; m: number } | null } | null;
+export type YuruyusKaynagi = (fromKey: string, toKey: string) => { sn: number; m: number; taksi?: { sn: number; m: number } | null; /** #101: elle seçim (yürüme / araba); yoksa otomatik. */ secim?: BacakSecimi | null } | null;
 
 /** gecildi = tamamlandı (elle ya da otomatik) · buradasin = sıradaki durak, kullanıcı 60 m içinde (konum) · siradaki · bekliyor · atlandi. */
 export type DurakDurumu = 'gecildi' | 'buradasin' | 'siradaki' | 'bekliyor' | 'atlandi';
@@ -84,7 +84,7 @@ export function programHesapla(secenek: {
   const bacak = (aKey: string, aKonum: Konum, bKey: string, bKonum: Konum): Yuruyus => {
     const c = secenek.yuruyus(aKey, bKey);
     const yuruyusSn = c ? c.sn : kestirimYuruyusSn(aKonum, bKonum);
-    const m = bacakModu(aKonum, bKonum, { yuruyusSn, taksiSn: c?.taksi?.sn ?? null, kestirim: !c });
+    const m = bacakModu(aKonum, bKonum, { yuruyusSn, taksiSn: c?.taksi?.sn ?? null, kestirim: !c, secim: c?.secim ?? null });
     if (m.mod === 'taksi') {
       // Araç mesafesi: gerçek varsa o; yoksa kuş uçuşu × 1,4.
       const metre = c?.taksi?.m ?? Math.round(((m.sn - 180) * 25_000) / 3600);

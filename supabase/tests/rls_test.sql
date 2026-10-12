@@ -386,4 +386,20 @@ set role anon;
 do $$ begin assert (select count(*) from public.sehir_rehberi) = 4, 'anon da yayınlı rehberi okur'; end $$;
 reset role;
 
+-- ---------------------------------------------------------------- #101: bacak modları (üye yazar, üye olmayan göremez)
+reset role;
+set role authenticated;
+select pg_temp.as_user(:B);
+insert into public.bacak_modlari (trip_id, from_key, to_key, mod) select id, 'A', 'B', 'araba' from public.trips limit 1;
+update public.bacak_modlari set mod = 'yurume' where from_key = 'A';
+do $$ begin assert (select mod from public.bacak_modlari where from_key = 'A') = 'yurume', 'üye bacak modunu değiştirir'; end $$;
+select pg_temp.hata_bekle($$insert into public.bacak_modlari (trip_id, from_key, to_key, mod) select id, 'A', 'C', 'toplu' from public.trips limit 1$$, '23514');
+select pg_temp.as_user(:X);
+do $$ begin assert (select count(*) from public.bacak_modlari) = 0, 'üye olmayan bacak modunu görmez'; end $$;
+select pg_temp.hata_bekle($$insert into public.bacak_modlari (trip_id, from_key, to_key, mod) values ('33333333-3333-4333-8333-000000000001', 'A', 'B', 'araba')$$, '42501');
+select pg_temp.as_user(:B);
+delete from public.bacak_modlari where from_key = 'A';
+do $$ begin assert (select count(*) from public.bacak_modlari) = 0, 'otomatiğe dönüş = satır silinir'; end $$;
+reset role;
+
 \echo 'rls_test: TÜM TESTLER GEÇTİ'

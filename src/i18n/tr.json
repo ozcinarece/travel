@@ -405,6 +405,15 @@
     "bos": "Bu günde durak yok. Günler sekmesinden pinlere dokunarak ekle.",
     "yuruyus": "{n} dk yürüyüş",
     "yuruyusKisa": "{dk} dk · {mesafe}",
+    "bacak": {
+      "baslik": "NASIL GİDİLİR · {mesafe}",
+      "baslikKisa": "NASIL GİDİLİR",
+      "yurume": "Yürüme",
+      "araba": "Araba",
+      "toplu": "Toplu taşıma",
+      "yakinda": "yakında",
+      "otel": "Otel"
+    },
     "yuruyusUzun": "40+ dk",
     "oteleDonus": "{n} dk otele",
     "kestirim": "~",

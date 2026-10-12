@@ -5,6 +5,7 @@ import { useOturum } from '@/lib/oturum';
 import { supabase } from '@/lib/supabase';
 import type { Degisiklik } from '@/lib/tipler';
 import type { YuruyusKaynagi } from '@/schedule/program';
+import type { BacakSecimi } from '@/schedule/tempo';
 
 export type MatrisNoktasi = { key: string; lat: number; lng: number };
 type Bacak = { from_key: string; to_key: string; seconds: number; meters: number };
@@ -19,8 +20,14 @@ export type RotaBacagi = {
   polyline: string;
   drive_seconds: number | null;
   drive_meters: number | null;
+  /** #101: araba yolu (kodlu); `polyline` her zaman yürüme yolu. */
+  drive_polyline?: string | null;
 };
 export type RotaHaritasi = Record<string, RotaBacagi>;
+
+/** #101 KK1: bacak çifti → elle seçim. Anahtar `from>to` (matris anahtarları: place_id | stay:<id>). */
+export type BacakModlari = Map<string, BacakSecimi>;
+export const bacakAnahtari = (fromKey: string, toKey: string) => `${fromKey}>${toKey}`;
 
 /**
  * §5.1 / T9: gün bazlı yürüyüş matrisi. Edge Function walk_cache'ten okur, eksikleri Google'dan alır (≤ 30 gün).
@@ -55,19 +62,20 @@ export function useYuruyusMatrisi(seyahatId: string | undefined, noktalar: Matri
  * `bacaklar` sırayla otel → 1 → … → otel; sunucu önbellekten (walk_cache.polyline) okur, yalnız eksikleri Google'a sorar.
  * İstemci 1 saat önbellekler; sıra değişince anahtar değişir, sunucu yalnız yeni bacakları ister.
  */
-export function useRotaBacaklari(seyahatId: string | undefined, bacaklar: { from: MatrisNoktasi; to: MatrisNoktasi }[]) {
+export function useRotaBacaklari(seyahatId: string | undefined, bacaklar: { from: MatrisNoktasi; to: MatrisNoktasi }[], arac = false) {
   const { session } = useOturum();
   const temiz = bacaklar.filter((b) => b.from.key !== b.to.key).slice(0, 12);
   const anahtar = temiz.map((b) => `${b.from.key}>${b.to.key}`).join('|');
   const sorgu = useQuery({
-    queryKey: ['rota', seyahatId, anahtar],
+    // #101 KK4: `arac` = tek bacak için araba yolu da (seçici açılınca; 24 sa önbellek).
+    queryKey: ['rota', seyahatId, anahtar, arac ? 'arac' : ''],
     enabled: !!session && !!seyahatId && temiz.length >= 1,
-    staleTime: 60 * 60 * 1000,
+    staleTime: 24 * 60 * 60 * 1000,
     gcTime: 24 * 60 * 60 * 1000,
     retry: 1,
     queryFn: async () => {
       const { data, error } = await supabase.functions.invoke<{ bacaklar: RotaBacagi[]; eksik?: boolean }>('route-legs', {
-        body: { trip_id: seyahatId, bacaklar: temiz },
+        body: { trip_id: seyahatId, bacaklar: temiz, ...(arac ? { arac: true } : {}) },
       });
       if (error) throw error;
       const harita: RotaHaritasi = {};
@@ -81,16 +89,64 @@ const BOS_ROTA: RotaHaritasi = {};
 
 /**
  * Yürüyüş matrisi + gerçek bacaklar → programHesapla kaynağı: yürüyüş süresi matristen (yoksa bacağın kendi WALK değeri),
- * DRIVE bacağında araç süresi `taksi` olarak eklenir.
+ * araç süresi varsa `taksi` (otomatik > 40 dk, istenmiş ya da seçilmiş bacak); #101: elle seçim `secim` ile taşınır.
  */
-export function bacakKaynagi(yuruyus: YuruyusKaynagi, rotalar: RotaHaritasi): YuruyusKaynagi {
+export function bacakKaynagi(yuruyus: YuruyusKaynagi, rotalar: RotaHaritasi, modlar?: BacakModlari): YuruyusKaynagi {
   return (a, b) => {
-    const r = rotalar[`${a}>${b}`];
+    const cift = bacakAnahtari(a, b);
+    const r = rotalar[cift];
     const w = yuruyus(a, b) ?? (r ? { sn: r.seconds, m: r.meters } : null);
+    const secim = modlar?.get(cift) ?? null;
     if (!w) return null;
-    const taksi = r && r.mode === 'DRIVE' && r.drive_seconds ? { sn: r.drive_seconds, m: r.drive_meters ?? 0 } : null;
-    return { sn: w.sn, m: w.m, taksi };
+    const taksi = r && r.drive_seconds ? { sn: r.drive_seconds, m: r.drive_meters ?? 0 } : null;
+    return { sn: w.sn, m: w.m, taksi, secim };
   };
+}
+
+/** #101 KK6: seyahatin bacak seçimleri (çift bazlı). */
+export function useBacakModlari(seyahatId: string | undefined) {
+  const { session } = useOturum();
+  return useQuery({
+    queryKey: ['bacak-modlari', seyahatId],
+    enabled: !!session && !!seyahatId,
+    staleTime: 5 * 60 * 1000,
+    queryFn: async (): Promise<BacakModlari> => {
+      const { data, error } = await supabase.from('bacak_modlari').select('from_key, to_key, mod').eq('trip_id', seyahatId!);
+      if (error) throw error;
+      return new Map((data as { from_key: string; to_key: string; mod: BacakSecimi }[]).map((x) => [bacakAnahtari(x.from_key, x.to_key), x.mod]));
+    },
+  });
+}
+
+/** #101: bacak seçimini yaz — `otomatik` satırı siler; iyimser; rota sorgusu yenilenir (araba yolu sunucudan gelir). */
+export function useBacakModuKaydet(seyahatId: string) {
+  const qc = useQueryClient();
+  const anahtar = ['bacak-modlari', seyahatId];
+  return useMutation({
+    mutationFn: async ({ from, to, mod }: { from: string; to: string; mod: BacakSecimi | 'otomatik' }) => {
+      const { error } =
+        mod === 'otomatik'
+          ? await supabase.from('bacak_modlari').delete().match({ trip_id: seyahatId, from_key: from, to_key: to })
+          : await supabase.from('bacak_modlari').upsert({ trip_id: seyahatId, from_key: from, to_key: to, mod }, { onConflict: 'trip_id,from_key,to_key' });
+      if (error) throw error;
+    },
+    onMutate: async (v) => {
+      await qc.cancelQueries({ queryKey: anahtar });
+      const onceki = qc.getQueryData<BacakModlari>(anahtar) ?? new Map();
+      const yeni = new Map(onceki);
+      if (v.mod === 'otomatik') yeni.delete(bacakAnahtari(v.from, v.to));
+      else yeni.set(bacakAnahtari(v.from, v.to), v.mod);
+      qc.setQueryData(anahtar, yeni);
+      return { onceki };
+    },
+    onError: (_e, _v, ctx) => {
+      if (ctx) qc.setQueryData(anahtar, ctx.onceki);
+    },
+    onSettled: () => {
+      qc.invalidateQueries({ queryKey: anahtar });
+      qc.invalidateQueries({ queryKey: ['rota', seyahatId] });
+    },
+  });
 }
 
 /** Sıralı noktalardan bacak listesi: [p0→p1, p1→p2, …]. */
