@@ -15,10 +15,12 @@ describe('markdownAyristir (#97 B KK1)', () => {
     ]);
   });
   it('üçüncü görsel yeni satıra; boş kaynak boş; okuma süresi en az 1 dk', () => {
-    const md = '![a](u1)\n![b](u2)\n![c](u3)';
+    const md = '![a](https://x/u1)\n![b](https://x/u2)\n![c](https://x/u3)';
     const b = markdownAyristir(md);
     expect(b).toHaveLength(2);
-    expect(b[1]).toEqual({ tur: 'fotolar', fotolar: [{ url: 'u3', alt: 'c' }], altyazi: 'c' });
+    expect(b[1]).toEqual({ tur: 'fotolar', fotolar: [{ url: 'https://x/u3', alt: 'c' }], altyazi: 'c' });
+    // #119 KK1b: çözülemeyen görsel (foto:… yer tutucu, göreli yol) hiç çizilmez.
+    expect(markdownAyristir('![a](foto:porsuk)\nMetin')).toEqual([{ tur: 'paragraf', metin: 'Metin' }]);
     expect(markdownAyristir(null)).toEqual([]);
     expect(okumaSuresiDk('bir iki üç')).toBe(1);
     expect(okumaSuresiDk(Array.from({ length: 800 }, () => 'kelime').join(' '))).toBe(4);

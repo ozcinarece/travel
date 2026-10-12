@@ -4,6 +4,7 @@ import { ActivityIndicator, BackHandler, Platform, Pressable, ScrollView, StyleS
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AltSayfa, useSayfaKaydirma } from '@/components/harita/AltSayfa';
+import { Kalp } from '@/components/icerik/Kalp';
 import { MdYazi } from '@/components/icerik/MdYazi';
 import { Avatar } from '@/components/ui/Avatar';
 import { FotoGalerisi } from '@/components/yerler/FotoGalerisi';
@@ -69,6 +70,8 @@ const FOTO_ARA = 8;
  * sahne bırakıyordu. Geri tuşu önce galeriyi kapatır (KK4). Panel/galeri olayları Sentry izine yazılır.
  */
 export function MekanPaneli(p: MekanPaneliProps) {
+  // #119 KK4: bu Google mekanı içerik tablosunda (`yerler`) varsa kalp ve Rehber sekmesi oradan dolar.
+  const icerikYeri = useYerRehberi(p.placeId);
   const ekran = useWindowDimensions();
   const kenar = useSafeAreaInsets();
   const [durum, gonder] = useReducer(panelGecis, KAPALI_PANEL);
@@ -153,9 +156,13 @@ export function MekanPaneli(p: MekanPaneliProps) {
             {p.ekleyenAd ? <Text style={s.alt}>{t('mekan.ekledi', { ad: p.ekleyenAd })}</Text> : null}
           </View>
         </View>
-        <Pressable accessibilityRole="button" accessibilityLabel={t('mekan.panel.kapat')} onPress={p.onKapat} hitSlop={8} style={s.kapat}>
-          <Text style={s.kapatMetin}>×</Text>
-        </Pressable>
+        <View style={s.ustDugmeler}>
+          {/* #119 KK4 / #100 KK4: içerik yeriyse (yerler.place_id eşleşir) kalp — her yerde aynı bileşen. */}
+          {icerikYeri.data?.id ? <Kalp tur="yer" hedefId={icerikYeri.data.id} boyut={32} arkaPlan={renk.yuzey} /> : null}
+          <Pressable accessibilityRole="button" accessibilityLabel={t('mekan.panel.kapat')} onPress={p.onKapat} hitSlop={8} style={s.kapat}>
+            <Text style={s.kapatMetin}>×</Text>
+          </Pressable>
+        </View>
       </View>
       <View style={s.sekmeler}>
         {(['genel', 'yorumlar', 'rehber'] as PanelSekmesi[]).map((sek) => {
@@ -488,6 +495,7 @@ const s = StyleSheet.create({
   puanKalin: { fontFamily: yazi.kalin, color: renk.metin },
   rozet: { height: 20, paddingHorizontal: 8, borderRadius: 999, backgroundColor: renk.vurgu, justifyContent: 'center' },
   rozetMetin: { fontFamily: yazi.ekstra, fontSize: 10.5, color: renk.zemin },
+  ustDugmeler: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   kapat: { width: 32, height: 32, borderRadius: 16, backgroundColor: renk.yuzey, alignItems: 'center', justifyContent: 'center' },
   kapatMetin: { fontFamily: yazi.ekstra, fontSize: 18, lineHeight: 20, color: renk.metin },
   sekmeler: { flexDirection: 'row', gap: 2, padding: 3, borderRadius: 12, backgroundColor: renk.yuzey },

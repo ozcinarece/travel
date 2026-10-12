@@ -88,6 +88,11 @@ export function markdownAyristir(kaynak: string | null | undefined): MdBlok[] {
       continue;
     }
     const g = GORSEL.exec(satir.trim());
+    if (g && !/^https?:\/\//i.test(g[2])) {
+      // #119 KK1b: çözülemeyen görsel (foto:… yer tutucu, göreli yol) çizilmez; boş kutu yok.
+      bitir();
+      continue;
+    }
     if (g) {
       bitir();
       // Art arda görseller aynı satıra (en çok 2); altyazı ilk görselin alt metni. Tek etikette virgüllü hedefler de olur.
