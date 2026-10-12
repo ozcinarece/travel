@@ -13,7 +13,8 @@ export const KART_GENISLIK = 350;
 export const KART_ARALIK = 10;
 export const KART_ADIM = KART_GENISLIK + KART_ARALIK;
 /** Kartın yaklaşık yüksekliği (foto 100 + metin + düğmeler) + sayfa noktaları — kamera kaydırma payı. */
-export const KART_YUKSEKLIK = 100 + 120 + 22;
+/** #120 KK1: foto 72 + gövde ~106 + sayfa noktaları 22 ≈ 200 px. */
+export const KART_YUKSEKLIK = 72 + 106 + 22;
 
 export type DurakKarti = {
   durakId: string;

@@ -41,7 +41,7 @@ describe('kartKamerasi (#99 KK2)', () => {
     const k = kartKamerasi({ konum: { lat: 39.78, lng: 30.5 }, zoom: 15, ekranYukseklik: 800 });
     expect(k.konum.lng).toBe(30.5);
     expect(k.konum.lat).toBeLessThan(39.78);
-    expect(39.78 - k.konum.lat).toBeCloseTo(((242 + 14) / 2) * (360 / 2 ** 15 / 800), 8);
+    expect(39.78 - k.konum.lat).toBeCloseTo(((200 + 14) / 2) * (360 / 2 ** 15 / 800), 8);
     expect(kartKamerasi({ konum: { lat: 0, lng: 0 }, zoom: 11, ekranYukseklik: 800 }).zoom).toBe(14);
     expect(kartKamerasi({ konum: { lat: 0, lng: 0 }, zoom: 19, ekranYukseklik: 800 }).zoom).toBe(17);
   });

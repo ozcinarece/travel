@@ -9,7 +9,7 @@ import type { HaritaOdagi, HaritaSigdirma } from '@/components/harita/tipler';
 import { BacakSecici, BacakSegmenti, SECICI_GENISLIK } from '@/components/program/BacakSecici';
 import { CizelgeListesi, mesafeMetni } from '@/components/program/CizelgeListesi';
 import { DurakKartlari } from '@/components/program/DurakKartlari';
-import { GunKartlari, gunEtiketKisa, gunEtiketUzun } from '@/components/program/GunKartlari';
+import { GunKartlari, gunEtiketKisa, gunEtiketUzun, gunHucresi } from '@/components/program/GunKartlari';
 import { GunOteliSayfasi } from '@/components/program/GunOteliSayfasi';
 import { MiniCubuk } from '@/components/program/MiniCubuk';
 import { OtelUcSatiri } from '@/components/program/OtelUcSatiri';
@@ -38,6 +38,7 @@ import { usePuanKaydet, usePuanlar } from '@/features/puanlar/sorgular';
 import { useHafifYerler, useOnizleme } from '@/features/yerler/api';
 import { t } from '@/i18n';
 import { sureMetni } from '@/lib/kategori';
+import { izBirak } from '@/lib/hataRaporu';
 import { onayIste } from '@/lib/onay';
 import { kategoriPini } from '@/lib/pinIkonu';
 import { useOturum } from '@/lib/oturum';
@@ -148,6 +149,11 @@ function ProgramSekmesi({
   const mekanSil = useMekanSil(seyahat.id);
 
   const bugunIndex = kacinciGun(seyahat);
+  // #120 KK4: hata kartı için iz — ekran kuruldu (gün, durak, mekan sayısı).
+  useEffect(() => {
+    izBirak('program', `kuruldu · gün ${gunler.length} · durak ${duraklar.length} · mekan ${mekanlar.length}`);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   const [seciliGunId, setSeciliGunId] = useState<string | null>(null);
   const gun = gunler.find((g) => g.id === seciliGunId) ?? gunler.find((g) => String(g.index) === gunParam) ?? gunler.find((g) => g.index === bugunIndex) ?? gunler[0];
   const [panel, setPanel] = useState<PanelHali>('katli');
@@ -421,12 +427,15 @@ function ProgramSekmesi({
   };
   const koru = () => cubuk && setKorunan(`${cubuk.tur}:${'durakId' in cubuk ? cubuk.durakId : cubuk.hedefId}`);
 
-  // Uzun bas menüsü: Başka güne al / Atla / Günden çıkar (+ Tamamlamayı geri al, #43 KK3).
+  // #120 KK2: "Başka güne al" menüde hedef günleri doğrudan listeler ("Başka güne al → Cmt 17"); durağın kendi günü dışarıda.
+  const guneAlSecenekleri = (d: Durak): SecimSecenegi[] =>
+    gunler.filter((g) => g.id !== d.day_id).map((g) => ({ etiket: t('program.baskaGuneAlHedef', { gun: gunHucresi(g, 0).ust }), onPress: () => baskaGuneAl(d, g) }));
+  // Uzun bas menüsü: Başka güne al → gün / Atla / Günden çıkar (+ Tamamlamayı geri al, #43 KK3).
   const menuSecenekleri: SecimSecenegi[] = menuDurak
     ? [
         { etiket: t('program.detay'), onPress: () => paneliAc(menuDurak.place_ref) },
         ...(menuDurak.completed_at ? [{ etiket: t('program.tamamlamayiGeriAl'), onPress: () => tamamla(menuDurak, true) }] : []),
-        { etiket: t('program.baskaGuneAl'), onPress: () => setGunSecDurak(menuDurak), pasif: gunler.length < 2 },
+        ...guneAlSecenekleri(menuDurak),
         { etiket: menuDurak.skipped ? t('program.menuAtlama') : t('program.menuAtla'), onPress: () => atla(menuDurak) },
         { etiket: t('program.menuCikar'), onPress: () => gundenCikar(menuDurak), tehlike: true },
       ]
@@ -459,7 +468,7 @@ function ProgramSekmesi({
     ? [
         ...(uzunDurak
           ? [
-              { etiket: `${t('program.baskaGuneAl')} ›`, onPress: () => setGunSecDurak(uzunDurak), pasif: gunler.length < 2 },
+              ...guneAlSecenekleri(uzunDurak),
               { etiket: t('program.menuCikar'), onPress: () => gundenCikar(uzunDurak) },
             ]
           : []),
@@ -830,6 +839,10 @@ function ProgramSekmesi({
             siradakiFoto={siradakiFoto.data?.foto_uri}
             onYolTarifi={yolTarifi}
             onMenu={(d) => (d.completed_at ? setMenuDurak(d) : uzunBas(d.place_ref))}
+            baslangicKey={seciliUclar.baslangic?.key ?? null}
+            acikBacakId={acikBacak?.kaynak === 'panel' ? acikCift : null}
+            onBacakBas={(from, to) => bacakAc(from, to, 'panel')}
+            bacakSecici={acikBacak ? <BacakSegmenti mesafe={verisi.yuruyus(acikBacak.from.key, acikBacak.to.key)?.m !== undefined ? mesafeMetni(verisi.yuruyus(acikBacak.from.key, acikBacak.to.key)!.m) : null} secenekler={acikSecenekler} onSec={bacakSec} /> : null}
             onGunSec={setGunSecDurak}
             onTasi={tasi}
             onSure={sureDegistir}

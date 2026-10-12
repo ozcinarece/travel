@@ -35,6 +35,8 @@ describe('sira anahtarı', () => {
   });
 
   it('ters girdi hata', () => {
-    expect(() => arasindaAnahtar('b', 'a')).toThrow();
+    // #120 KK4: ters / eşit komşular render'ı düşürmez — `a`dan sonra bir anahtar üretilir (ve iz bırakılır).
+    expect(arasindaAnahtar('b', 'a') > 'b').toBe(true);
+    expect(arasindaAnahtar('b', 'b') > 'b').toBe(true);
   });
 });
