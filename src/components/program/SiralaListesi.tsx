@@ -18,13 +18,13 @@ export type SiralaSatiri = {
   numara: number | null;
   tamam?: boolean;
   atlandi?: boolean;
-  /** Önceki noktadan bacak: "12 dk" + ikon; yoksa satır boş kalır. */
-  bacak?: { metin: string; ikon: 'yurume' | 'araba' };
+  /** Önceki noktadan bacak: "12 dk · 900 m" hapı + ikon (#101: `id` = çift anahtarı, dokununca seçici açılır); yoksa satır boş. */
+  bacak?: { metin: string; ikon: 'yurume' | 'araba'; id?: string };
 };
 
-/** #55 §C8: durak satırı en az 44 px (ad 2 satıra kadar); üstündeki yürüyüş satırı 16 px. */
+/** #55 §C8: durak satırı en az 44 px (ad 2 satıra kadar); üstündeki bacak satırı 30 px (#101: 26 px gri hap). */
 export const DURAK_EN_AZ = 44;
-export const ARA_YUKSEKLIK = 16;
+export const ARA_YUKSEKLIK = 30;
 /** Kenara bu kadar yaklaşınca liste kendiliğinden kayar. */
 const KENAR_PAYI = 48;
 const KAYMA_HIZI = 7;
@@ -72,6 +72,10 @@ type Props = {
   onUzunBas?: (id: string) => void;
   /** #55 §D11: numara dairesi gün renginde. */
   numaraRengi?: string;
+  /** #101 KK3: açık bacak (çift anahtarı) ve hapa dokunma; açık bacağın altında seçici içerik (segment). Aynı anda tek bacak. */
+  acikBacakId?: string | null;
+  onBacakBas?: (id: string) => void;
+  bacakSecici?: ReactNode;
 };
 
 /**
@@ -79,7 +83,7 @@ type Props = {
  * ikonu · ad [2 satır] + "09:00 – 09:45 · 45 dk" · ≡), aralarda 16 px yürüyüş satırı. Satıra uzun bas → menü. Sürükleme yalnız ≡'den: tutulan satır kalkar (turuncu kenar, gölge), bırakılacak yer
  * turuncu 3 px çizgi; kenara yaklaşınca liste kendiliğinden kayar.
  */
-export function SiralaListesi({ satirlar, bas, son, yukseklik, onTasi, onSatirBas, onUzunBas, numaraRengi = renk.metin }: Props) {
+export function SiralaListesi({ satirlar, bas, son, yukseklik, onTasi, onSatirBas, onUzunBas, numaraRengi = renk.metin, acikBacakId = null, onBacakBas, bacakSecici }: Props) {
   const [surukle, setSurukle] = useState<{ index: number; hedef: number } | null>(null);
   // Satır yükseklikleri içeriğe göre (ad 2 satır) — yuvalar ölçülür.
   const [yuvalar, setYuvalar] = useState<Yuva[]>([]);
@@ -211,14 +215,26 @@ export function SiralaListesi({ satirlar, bas, son, yukseklik, onTasi, onSatirBa
                   return yeni;
                 });
               }}>
-              <View style={s.ara}>
-                {x.bacak && !tutulan ? (
-                  <>
-                    <Ikon ad={x.bacak.ikon} boyut={11} renk={renk.ikincil} kalinlik={2.2} />
-                    <Text style={s.araMetin}>{x.bacak.metin}</Text>
-                  </>
-                ) : null}
-              </View>
+              {x.bacak && !tutulan ? (
+                <View style={s.araKap}>
+                  <View style={s.ara}>
+                    <View style={s.araCizgi} />
+                    <Pressable
+                      accessibilityRole="button"
+                      accessibilityState={{ expanded: !!x.bacak.id && acikBacakId === x.bacak.id }}
+                      disabled={!x.bacak.id || !onBacakBas}
+                      onPress={() => x.bacak?.id && onBacakBas?.(x.bacak.id)}
+                      style={({ pressed }) => [s.araHap, pressed && { opacity: 0.8 }]}>
+                      <Ikon ad={x.bacak.ikon} boyut={12} renk={renk.metin} kalinlik={2.2} />
+                      <Text style={s.araMetin}>{x.bacak.metin}</Text>
+                      {x.bacak.id && onBacakBas ? <Text style={s.araOk}>{acikBacakId === x.bacak.id ? '˅' : '›'}</Text> : null}
+                    </Pressable>
+                  </View>
+                  {x.bacak.id && acikBacakId === x.bacak.id && bacakSecici ? <View style={s.araAcik}>{bacakSecici}</View> : null}
+                </View>
+              ) : (
+                <View style={s.ara} />
+              )}
               <Animated.View style={[tutulan && [s.tutulan, { transform: [{ translateY: kayma }] }]]}>
                 <SiraSatiri
                   satir={x}
@@ -276,8 +292,14 @@ function SiraSatiri({
 }
 
 const s = StyleSheet.create({
-  ara: { height: ARA_YUKSEKLIK, flexDirection: 'row', alignItems: 'center', gap: 4, paddingLeft: 48 },
-  araMetin: { fontFamily: yazi.normal, fontSize: 11, lineHeight: 14, color: renk.ikincil },
+  araKap: {},
+  // #101 KK3 (kanvas LegMode17 ekran 2): solda 2 px gri çizgi, gri hap "🚶 12 dk · 900 m ›" 26 px.
+  ara: { height: ARA_YUKSEKLIK, flexDirection: 'row', alignItems: 'center', gap: 10, paddingLeft: 17 },
+  araCizgi: { width: 2, height: 22, backgroundColor: '#d9d9d4', marginLeft: 13 },
+  araHap: { flexDirection: 'row', alignItems: 'center', gap: 6, height: 26, paddingHorizontal: 10, borderRadius: 999, backgroundColor: '#f6f6f4' },
+  araMetin: { fontFamily: yazi.ekstra, fontSize: 11.5, lineHeight: 14, color: renk.metin },
+  araOk: { fontFamily: yazi.kalin, fontSize: 12, color: renk.ikincil },
+  araAcik: { paddingLeft: 42, paddingRight: 4, paddingBottom: 6 },
   satir: { minHeight: DURAK_EN_AZ, flexDirection: 'row', alignItems: 'center', borderRadius: 12, backgroundColor: renk.zemin },
   satirIc: { flex: 1, minWidth: 0, flexDirection: 'row', alignItems: 'center', gap: 10, paddingLeft: 4, paddingVertical: 4 },
   adKutu: { flex: 1, minWidth: 0 },

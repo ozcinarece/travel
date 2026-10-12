@@ -174,7 +174,7 @@ export function PinIcerigi({
     const araba = pin.etiketIkon === 'araba';
     const metin = pin.etiket ?? '';
     return (
-      <View style={[s.bacakHap, s.golge, { width: hapGenisligi(metin) }, etiketGizli && s.gorunmez, durt && s.durtme]} collapsable={false}>
+      <View style={[s.bacakHap, s.golge, { width: hapGenisligi(metin) }, pin.secili && s.bacakHapSecili, etiketGizli && s.gorunmez, durt && s.durtme]} collapsable={false}>
         {glifAyri || !pin.etiketIkon ? (
           <View style={s.bacakGlifYuva} />
         ) : (
@@ -294,6 +294,8 @@ const s = StyleSheet.create({
   otel: { width: OTEL_KARE, height: OTEL_KARE, borderRadius: 9, alignItems: 'center', justifyContent: 'center' },
   bacakHap: { flexDirection: 'row', gap: HAP_GLIF_BOSLUK_PX, height: HAP_YUKSEKLIK, paddingHorizontal: HAP_DOLGU_PX, borderRadius: HAP_YUKSEKLIK / 2, backgroundColor: renk.zemin, alignItems: 'center' },
   bacakGlifYuva: { width: HAP_GLIF_PX, height: HAP_GLIF_PX },
+  // #101 KK2: seçili hap 2,5 px siyah çerçeve (çerçeve içe çizilir; genişlik/çapa değişmez).
+  bacakHapSecili: { borderWidth: 2.5, borderColor: renk.metin },
   bacakMetin: { flex: 1, textAlign: 'center', fontFamily: yazi.ekstra, fontSize: 10.5, lineHeight: 14, color: renk.metin },
   gorunmez: { opacity: 0 },
   durtme: { paddingBottom: 1 },

@@ -28,6 +28,23 @@ export function noktaEkranX(konum: Konum, bolge: HaritaBolgesi | null, ekranGeni
   return ekranGenisligi / 2 + ((konum.lng - bolge.merkez.lng) * ekranGenisligi) / bolge.lngDelta;
 }
 
+/** Noktanın ekran y'si (px) — yalnız ölçek ve merkez (üstte pozitif y aşağı). */
+export function noktaEkranY(konum: Konum, bolge: HaritaBolgesi | null, ekranYukseklik: number): number {
+  if (!bolge || bolge.latDelta <= 0) return ekranYukseklik / 2;
+  return ekranYukseklik / 2 - ((konum.lat - bolge.merkez.lat) * ekranYukseklik) / bolge.latDelta;
+}
+
+/**
+ * #101 KK2: seçicinin yerleşimi — hapın ekran noktasının (x, y) üstünde; kenarda içeri kayar (hapYerlesimi ile aynı kural),
+ * üçgen hapta kalır. Dönüş: `sol`, `ust` (görünümün üst kenarı) ve `uc`. Üstte yer yoksa (y küçük) hapın ALTINA iner.
+ */
+export function seciciYerlesimi(nokta: { x: number; y: number }, ekran: { genislik: number; yukseklik: number }, boyut: { genislik: number; yukseklik: number }, ustSinir = 0): { sol: number; ust: number; uc: number; altta: boolean } {
+  const { sol, uc } = hapYerlesimi(nokta.x, ekran.genislik, boyut.genislik);
+  const ustte = nokta.y - HAP_NOKTA_BOSLUGU_PX - boyut.yukseklik;
+  if (ustte >= ustSinir) return { sol, ust: ustte, uc, altta: false };
+  return { sol, ust: Math.min(ekran.yukseklik - boyut.yukseklik, nokta.y + HAP_NOKTA_BOSLUGU_PX), uc, altta: true };
+}
+
 /**
  * İşaretçi çapası: x = üçgenin hap içindeki oranı (üçgen noktanın üstünde kalır), y = 1 (görünümün altı = nokta merkezi;
  * görünüm altta HAP_NOKTA_BOSLUGU_PX boşluk taşır).

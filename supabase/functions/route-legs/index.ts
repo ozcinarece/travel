@@ -1,8 +1,10 @@
 // route-legs — #33: seçili günün bacakları için GERÇEK yol (Routes API computeRoutes, WALK; polyline).
 // İstek: { trip_id, bacaklar: [{ from: {key, lat, lng}, to: {key, lat, lng} }] } (≤ 12 bacak).
-// Yürüyüş > 40 dk olan bacak için aynı bacak DRIVE ile de alınır (mode 'DRIVE', kesikli çizim, 🚕).
+// Yürüyüş > 40 dk olan bacak için aynı bacak DRIVE ile de alınır (mode 'DRIVE' = otomatik araba önerisi).
+// #101 KK4: araba yolu ayrıca `arac: true` istenince (seçici açıldı) ya da bacak `bacak_modlari`nda araba seçiliyse alınır;
+// `polyline` her zaman yürüme, `drive_polyline` araba (24 sa istemci / 30 gün sunucu önbelleği).
 // Önbellek: walk_cache satırı (route-matrix ile aynı anahtar) polyline/mode/drive_* sütunlarıyla; ≤ 30 gün.
-// Yalnızca polyline'ı eksik bacaklar Google'a sorulur; service_role ile yazılır. Üyelik RLS ile doğrulanır.
+// Yalnızca polyline'ı eksik bacaklar (ya da arabası gerekip eksik olanlar) Google'a sorulur; service_role ile yazılır.
 import { createClient } from 'npm:@supabase/supabase-js@2';
 
 import { GoogleHatasi } from '../_shared/google.ts';
@@ -10,7 +12,7 @@ import { govde, hata, json, onKontrol } from '../_shared/http.ts';
 import { rotaBacagi, type Nokta, type RotaModu } from '../_shared/routes.ts';
 
 type IstekBacagi = { from: Nokta; to: Nokta };
-type Istek = { trip_id: string; bacaklar: IstekBacagi[] };
+type Istek = { trip_id: string; bacaklar: IstekBacagi[]; arac?: boolean };
 
 type CevapBacagi = {
   from_key: string;
@@ -21,9 +23,11 @@ type CevapBacagi = {
   mode: RotaModu;
   /** `mode`'a ait kodlu polyline. */
   polyline: string;
-  /** mode = DRIVE ise araç süresi/mesafesi. */
+  /** Araç süresi/mesafesi — otomatik (> 40 dk), istenmiş (`arac`) ya da seçilmiş bacakta; yoksa null. */
   drive_seconds: number | null;
   drive_meters: number | null;
+  /** #101: araba yolu (kodlu). */
+  drive_polyline: string | null;
 };
 
 type Satir = CevapBacagi & { fetched_at?: string };
@@ -47,6 +51,7 @@ Deno.serve(async (istek) => {
     .filter((b, i, dizi) => dizi.findIndex((x) => x.from.key === b.from.key && x.to.key === b.to.key) === i);
   if (bacaklar.length === 0) return json({ bacaklar: [] });
   if (bacaklar.length > EN_FAZLA_BACAK) return hata(`en fazla ${EN_FAZLA_BACAK} bacak`);
+  const aracIstendi = g.arac === true;
 
   const url = Deno.env.get('SUPABASE_URL')!;
   const kullanici = createClient(url, Deno.env.get('SUPABASE_ANON_KEY')!, {
@@ -61,7 +66,7 @@ Deno.serve(async (istek) => {
   const anahtarlar = [...new Set(bacaklar.flatMap((b) => [b.from.key, b.to.key]))];
   const { data: eski, error: onbellekHatasi } = await servis
     .from('walk_cache')
-    .select('from_key, to_key, seconds, meters, mode, polyline, drive_seconds, drive_meters')
+    .select('from_key, to_key, seconds, meters, mode, polyline, drive_seconds, drive_meters, drive_polyline')
     .eq('trip_id', tripId)
     .in('from_key', anahtarlar)
     .in('to_key', anahtarlar)
@@ -70,29 +75,39 @@ Deno.serve(async (istek) => {
   if (onbellekHatasi) return hata('önbellek okunamadı', 500);
 
   const bilinen = new Map<string, CevapBacagi>();
-  for (const s of (eski ?? []) as Satir[]) bilinen.set(`${s.from_key}>${s.to_key}`, { ...s, mode: (s.mode ?? 'WALK') as RotaModu });
+  for (const s of (eski ?? []) as Satir[]) bilinen.set(`${s.from_key}>${s.to_key}`, { ...s, mode: (s.mode ?? 'WALK') as RotaModu, drive_polyline: s.drive_polyline ?? null });
 
-  const eksikler = bacaklar.filter((b) => !bilinen.has(`${b.from.key}>${b.to.key}`));
+  // #101: araba seçili bacaklar (bacak_modlari) — araba yolu bunlar için de alınır.
+  const { data: secimler } = await servis.from('bacak_modlari').select('from_key, to_key, mod').eq('trip_id', tripId).eq('mod', 'araba');
+  const arabaSecili = new Set((secimler ?? []).map((x: { from_key: string; to_key: string }) => `${x.from_key}>${x.to_key}`));
+  const aracGerekli = (b: IstekBacagi, yuruyusSn: number) => yuruyusSn > TAKSI_ESIGI_SN || aracIstendi || arabaSecili.has(`${b.from.key}>${b.to.key}`);
+
   let eksik = false;
   const yeni: CevapBacagi[] = [];
   await Promise.all(
-    eksikler.map(async (b) => {
+    bacaklar.map(async (b) => {
+      const cift = `${b.from.key}>${b.to.key}`;
       try {
-        const yuruyus = await rotaBacagi(b.from, b.to, 'WALK');
-        if (!yuruyus) return;
-        let satir: CevapBacagi = {
-          from_key: b.from.key,
-          to_key: b.to.key,
-          seconds: yuruyus.seconds,
-          meters: yuruyus.meters,
-          mode: 'WALK',
-          polyline: yuruyus.polyline,
-          drive_seconds: null,
-          drive_meters: null,
-        };
-        if (yuruyus.seconds > TAKSI_ESIGI_SN) {
+        let satir = bilinen.get(cift);
+        if (!satir) {
+          const yuruyus = await rotaBacagi(b.from, b.to, 'WALK');
+          if (!yuruyus) return;
+          satir = {
+            from_key: b.from.key,
+            to_key: b.to.key,
+            seconds: yuruyus.seconds,
+            meters: yuruyus.meters,
+            // mode = otomatik öneri: 40 dk üstü araba.
+            mode: yuruyus.seconds > TAKSI_ESIGI_SN ? 'DRIVE' : 'WALK',
+            polyline: yuruyus.polyline,
+            drive_seconds: null,
+            drive_meters: null,
+            drive_polyline: null,
+          };
+        } else if (!aracGerekli(b, satir.seconds) || satir.drive_polyline) return;
+        if (aracGerekli(b, satir.seconds) && !satir.drive_polyline) {
           const arac = await rotaBacagi(b.from, b.to, 'DRIVE');
-          if (arac) satir = { ...satir, mode: 'DRIVE', polyline: arac.polyline, drive_seconds: arac.seconds, drive_meters: arac.meters };
+          if (arac) satir = { ...satir, drive_seconds: arac.seconds, drive_meters: arac.meters, drive_polyline: arac.polyline };
         }
         yeni.push(satir);
       } catch (e) {

@@ -1,3 +1,5 @@
+import type { ReactNode } from 'react';
+
 import type { PinIkonu } from '@/lib/pinIkonu';
 
 export type Konum = { lat: number; lng: number };
@@ -94,6 +96,13 @@ export type HaritaSigdirma = { noktalar: Konum[]; ust: number; alt: number };
  */
 export type GunHapi = { pinId: string; konum: Konum; renk: string; metin: string; dugme: string };
 
+/**
+ * #101 KK2: hapın üstünde React görünümü (Marker değil — Android'de işaretçi bitmap'tir, içindeki seçenekler ayrı dokunulamaz).
+ * Harita `konum`un ekran noktasını bulur (pointForCoordinate), görünümü kenardan taşmadan noktanın üstüne yerleştirir;
+ * kaydırmada noktayla birlikte hareket eder. `genislik` sabit (200).
+ */
+export type HaritaSecici = { konum: Konum; genislik: number; icerik: ReactNode };
+
 export type HaritaProps = {
   merkez: Konum;
   /** Web'deki Google zoom seviyesiyle aynı ölçek. */
@@ -125,4 +134,6 @@ export type HaritaProps = {
   ilkBolge?: HaritaBolgesi | null;
   /** #91 B: açık gün hapı (diğer gün noktasına dokunuldu); yoksa çizilmez. */
   hap?: GunHapi | null;
+  /** #101 KK2: bacak hapının üstünde ulaşım seçicisi; yoksa yok. */
+  secici?: HaritaSecici | null;
 };

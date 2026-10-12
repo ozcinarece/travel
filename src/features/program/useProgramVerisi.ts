@@ -8,7 +8,7 @@ import type { Durak, Gun, Mekan, Seyahat } from '@/lib/tipler';
 import type { YuruyusKaynagi } from '@/schedule/program';
 import { kestirimYuruyusSn, tempoHesapla, type BacakKaynagi, type TempoEtiketi, type TempoSonucu } from '@/schedule/tempo';
 
-import { bacakKaynagi, bacakListesi, matrisNoktalari, useRotaBacaklari, useYuruyusMatrisi, type MatrisNoktasi, type RotaHaritasi } from './sorgular';
+import { bacakKaynagi, bacakListesi, matrisNoktalari, useRotaBacaklari, useYuruyusMatrisi, type BacakModlari, type MatrisNoktasi, type RotaHaritasi } from './sorgular';
 
 /** Postgres time "09:00:00" → "09:00". */
 const saat = (tm: string | null | undefined, varsayilan: string) => (tm ? tm.slice(0, 5) : varsayilan);
@@ -27,6 +27,8 @@ export type ProgramVerisi = {
   rotalar: RotaHaritasi;
   rotaYukleniyor: boolean;
   rotaHata: boolean;
+  /** #101 KK4: seçici açık bacağın araba yolu yükleniyor. */
+  aracYukleniyor: boolean;
   /** Konum tabanlı bacak kaynağı (tempo için). */
   bacak: BacakKaynagi;
   /** Gün kimliği → tempo (elle sıralı günde mevcut sıra, değilse §5.1). */
@@ -47,8 +49,12 @@ export function useProgramVerisi(secenek: {
   seciliGun: Gun | undefined;
   /** #56: seyahatin otelleri (stays). */
   konaklamalar: Konaklama[];
+  /** #101: bacak çifti → elle seçim (yürüme / araba). */
+  modlar?: BacakModlari;
+  /** #101 KK4: seçici açık bacak — araba yolu yalnız o an istenir (maliyet). */
+  aracBacagi?: { from: MatrisNoktasi; to: MatrisNoktasi } | null;
 }): ProgramVerisi {
-  const { seyahat, gunler, duraklar, mekanlar, seciliGun, konaklamalar } = secenek;
+  const { seyahat, gunler, duraklar, mekanlar, seciliGun, konaklamalar, modlar, aracBacagi } = secenek;
   // #56: her günün başlangıç / bitiş oteli (days.start_stay_id / end_stay_id).
   const gunUclari = useMemo(() => {
     const k = new Map(konaklamalar.map((x) => [x.id, x]));
@@ -94,12 +100,19 @@ export function useProgramVerisi(secenek: {
     return [...(b ? [{ key: b.key, lat: b.lat, lng: b.lng }] : []), ...n, ...(s ? [{ key: s.key, lat: s.lat, lng: s.lng }] : [])];
   }, [seciliSira, seciliUclar]);
   const rota = useRotaBacaklari(seyahat.id, bacakListesi(seciliNoktalar));
+  // #101 KK4: seçici açıkken o bacağın araba yolu (ayrı tek-bacak isteği; sunucu önbelleğe yazar).
+  const arac = useRotaBacaklari(seyahat.id, aracBacagi ? [aracBacagi] : [], true);
+  const rotalar = useMemo((): RotaHaritasi => {
+    const birlesik: RotaHaritasi = { ...rota.rotalar };
+    for (const [k, r] of Object.entries(arac.rotalar)) birlesik[k] = { ...birlesik[k], ...r };
+    return birlesik;
+  }, [rota.rotalar, arac.rotalar]);
 
-  const yuruyus = useMemo(() => bacakKaynagi(matris.yuruyus, rota.rotalar), [matris.yuruyus, rota.rotalar]);
+  const yuruyus = useMemo(() => bacakKaynagi(matris.yuruyus, rotalar, modlar), [matris.yuruyus, rotalar, modlar]);
   const bacak: BacakKaynagi = useMemo(
     () => (a, b) => {
       const c = yuruyus(konumKey.get(`${a.lat},${a.lng}`) ?? '', konumKey.get(`${b.lat},${b.lng}`) ?? '');
-      return c ? { yuruyusSn: c.sn, taksiSn: c.taksi?.sn ?? null, kestirim: false } : { yuruyusSn: kestirimYuruyusSn(a, b), taksiSn: null, kestirim: true };
+      return c ? { yuruyusSn: c.sn, taksiSn: c.taksi?.sn ?? null, kestirim: false, secim: c.secim ?? null } : { yuruyusSn: kestirimYuruyusSn(a, b), taksiSn: null, kestirim: true };
     },
     [yuruyus, konumKey],
   );
@@ -147,9 +160,10 @@ export function useProgramVerisi(secenek: {
     yuruyus,
     matrisYukleniyor: matris.yukleniyor,
     matrisHata: matris.hata,
-    rotalar: rota.rotalar,
+    rotalar,
     rotaYukleniyor: rota.yukleniyor,
     rotaHata: rota.hata,
+    aracYukleniyor: !!aracBacagi && arac.yukleniyor,
     bacak,
     tempolar,
     etiketler,

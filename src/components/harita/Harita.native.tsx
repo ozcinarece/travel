@@ -5,7 +5,7 @@ import MapView, { Circle, Marker, Polyline, PROVIDER_GOOGLE } from 'react-native
 import { bolgeHesapla, enYakinPin, etiketBolgesi, bacakHapCapasi, gizliEtiketler, haritaDolgusu, isaretciImzasi, izlemeGerekli, pinCapasi, pinZ, zoomaGorePinler, zoomDelta } from './geo';
 import { ACIK_HARITA_STILI } from './haritaStili';
 import { GunHapiIcerigi } from './GunHapi';
-import { hapCapasi, hapYerlesimi, noktaEkranX } from './hap';
+import { HAP_UCGEN, hapCapasi, hapYerlesimi, noktaEkranX, seciciYerlesimi } from './hap';
 import { dokunusuIletir, isaretciPlani, planFarki } from './isaretciler';
 import { PinIcerigi, pinPngAnahtari } from './PinIcerigi';
 import { IGNE_CAPA, IGNE_CAPA_34, PIN_IKONLARI } from './pinIkonlari';
@@ -41,6 +41,7 @@ export function Harita({
   seciliId = null,
   ilkBolge = null,
   hap = null,
+  secici = null,
 }: HaritaProps) {
   const ref = useRef<MapView>(null);
   const ekran = useWindowDimensions();
@@ -135,8 +136,9 @@ export function Harita({
   // #73 B: dokunma — işaretçi ya da harita dokunuşunun koordinatından en yakın pin (merkeze ≤ 22 px; eşitlikte pinZ).
   // Android'de işaretçi dokunuşunun koordinatı işaretçinin konumudur: o pin 0 px'te bulunur; ad işaretçisi de pinin
   // konumunda olduğundan aynı pine düşer (ad işaretçisinin dokunuşu yutması böylece bitti). Pin yoksa harita dokunuşu.
+  // #101 KK2: bacak hapına dokunma da iletilir (`bacak:<çizgi>`); yalnız kullanıcı konumu dışarıda.
   const dokun = (k: { latitude: number; longitude: number }, isaretci: boolean) => {
-    const id = enYakinPin(gorunen, bolge, olcu, { lat: k.latitude, lng: k.longitude }, undefined, (p) => !dokunusuIletir(p));
+    const id = enYakinPin(gorunen, bolge, olcu, { lat: k.latitude, lng: k.longitude }, undefined, (p) => p.tur === 'konum');
     if (id) pinBas(id);
     else if (!isaretci) onHaritaBas?.();
   };
@@ -147,7 +149,27 @@ export function Harita({
     if (id) onPinUzunBas(id);
   };
 
+  // #101 KK2: seçici — hapın ekran noktası pointForCoordinate ile (mapPadding dahil, dp); kaydırmada her karede yenilenir.
+  // Nokta, ait olduğu konumun anahtarıyla saklanır: konum değişince eski nokta kullanılmaz (sıfırlama için setState gerekmez).
+  const [seciciNokta, setSeciciNokta] = useState<{ anahtar: string; x: number; y: number } | null>(null);
+  const seciciKonum = secici?.konum;
+  const seciciAnahtar = seciciKonum ? `${seciciKonum.lat},${seciciKonum.lng}` : null;
+  const seciciNoktasiniBul = () => {
+    if (!seciciKonum || !seciciAnahtar) return;
+    ref.current
+      ?.pointForCoordinate({ latitude: seciciKonum.lat, longitude: seciciKonum.lng })
+      .then((pt) => setSeciciNokta({ anahtar: seciciAnahtar, x: pt.x, y: pt.y }))
+      .catch(() => {});
+  };
+  useEffect(() => {
+    seciciNoktasiniBul();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [seciciAnahtar, bolge, hazir]);
+  const [seciciBoy, setSeciciBoy] = useState(140);
+  const seciciYer = secici && seciciNokta && seciciNokta.anahtar === seciciAnahtar ? seciciYerlesimi(seciciNokta, olcu, { genislik: secici.genislik, yukseklik: seciciBoy }, ustBosluk) : null;
+
   return (
+    <>
     <MapView
       key={nesil}
       ref={ref}
@@ -182,6 +204,7 @@ export function Harita({
       }}
       onMarkerPress={(e) => dokun(e.nativeEvent.coordinate, true)}
       onLongPress={(e) => uzunBas(e.nativeEvent.coordinate)}
+      onRegionChange={secici ? () => seciciNoktasiniBul() : undefined}
       onRegionChangeComplete={(b) => {
         const yeni = bolgeHesapla({ lat: b.latitude, lng: b.longitude }, b.latitudeDelta, b.longitudeDelta);
         taniSayaclari.bolgeOlayi += 1;
@@ -257,8 +280,27 @@ export function Harita({
         );
       })}
     </MapView>
+    {secici && seciciYer ? (
+      <View pointerEvents="box-none" style={StyleSheet.absoluteFill}>
+        <View
+          style={{ position: 'absolute', left: seciciYer.sol, top: seciciYer.ust, width: secici.genislik }}
+          onLayout={(e) => {
+            const h = Math.round(e.nativeEvent.layout.height);
+            if (h && h !== seciciBoy) setSeciciBoy(h);
+          }}>
+          {secici.icerik}
+          {/* Üçgen: hapın üstündeyken altta, altındayken üstte (45° kare). */}
+          <View style={[s.seciciUcgen, seciciYer.altta ? { top: -HAP_UCGEN / 2 } : { bottom: -HAP_UCGEN / 2 }, { left: seciciYer.uc - HAP_UCGEN / 2 }]} />
+        </View>
+      </View>
+    ) : null}
+    </>
   );
 }
+
+const s = StyleSheet.create({
+  seciciUcgen: { position: 'absolute', width: HAP_UCGEN, height: HAP_UCGEN, backgroundColor: '#fff', transform: [{ rotate: '45deg' }] },
+});
 
 /**
  * #91 (ikinci tur): bir rota yuvası — HEP aynı 4 Polyline örneği (kesik · gölge · beyaz kenar · renk; rota.rotaYuvaKatmanlari).
