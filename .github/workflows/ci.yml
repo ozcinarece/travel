@@ -4,6 +4,8 @@ on:
   pull_request:
   push:
     branches: [main]
+  # Çakışmalı açılıp tabanı sonradan değişen PR'da pull_request olayı gelmez; CI elle çalıştırılabilsin.
+  workflow_dispatch:
 
 jobs:
   uygulama:
