@@ -108,7 +108,7 @@ export default function AnaSayfa() {
               {seyahatAdi(yaklasan)}
             </Text>
             <Text style={s.kartAlt} numberOfLines={1}>
-              {[yaklasan.start_date && yaklasan.end_date ? tarihAraligi(yaklasan.start_date, yaklasan.end_date) : t('anasayfa.tarihsiz'), t('anasayfa.durakKisi', { durak: yaklasan.places[0]?.count ?? 0, kisi: yaklasan.members.length })].join(' · ')}
+              {[yaklasan.start_date && yaklasan.end_date ? tarihAraligi(yaklasan.start_date, yaklasan.end_date) : t('anasayfa.tarihsiz'), t('anasayfa.mekanKisi', { mekan: yaklasan.places[0]?.count ?? 0, kisi: yaklasan.members.length })].join(' · ')}
             </Text>
             <View style={s.kartDugme}>
               <Text style={s.kartDugmeMetin}>{t('anasayfa.programaGit')} →</Text>

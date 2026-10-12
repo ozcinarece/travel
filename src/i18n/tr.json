@@ -657,7 +657,7 @@
     "yaklasanBugun": "YAKLAŞAN · BUGÜN",
     "aktif": "ŞU AN SEYAHATTE",
     "tarihsiz": "Tarih yok",
-    "durakKisi": "{durak} durak · {kisi} kişi",
+    "mekanKisi": "{mekan} mekan · {kisi} kişi",
     "programaGit": "Programa git",
     "ilkBaslik": "İlk seyahatini kur",
     "ilkAlt": "Şehir, tarih, otel; gerisini harita halleder",
