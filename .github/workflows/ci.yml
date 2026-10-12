@@ -22,6 +22,26 @@ jobs:
       - name: Birim testleri
         run: npm test -- --ci
 
+  # #106 KK1: yönetim paneli mobil pakete girmez — android paketinde (yonetim) rotası ya da panel kodu olmamalı.
+  mobil-paket:
+    runs-on: ubuntu-latest
+    env:
+      EXPO_PUBLIC_SUPABASE_URL: https://ornek.supabase.co
+      EXPO_PUBLIC_SUPABASE_ANON_KEY: ornek
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Android paketi yönetim kodu içermez
+        run: |
+          npx expo export --platform android --no-bytecode --output-dir paket
+          if grep -l -e '(yonetim)' -e 'components/yonetim' -e 'features/yonetim' -e 'Menüyü aç' paket/_expo/static/js/android/*.js; then
+            echo "::error::Yönetim paneli android paketine girdi (#106 KK1)"; exit 1
+          fi
+
   veritabani:
     runs-on: ubuntu-latest
     services:

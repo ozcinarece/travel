@@ -402,4 +402,91 @@ delete from public.bacak_modlari where from_key = 'A';
 do $$ begin assert (select count(*) from public.bacak_modlari) = 0, 'otomatiğe dönüş = satır silinir'; end $$;
 reset role;
 
+-- ---------------------------------------------------------------- #106: backoffice yöneticisi (is_admin) ve içerik yazma
+-- E = Ece (seed admin, doğrulanmış Google hesabı). S = aynı e-postayla doğrulanmamış kayıt. M = JWT'de Ece'nin
+-- e-postası ama auth kaydında başka e-posta (eski/sahte JWT). B = sıradan hesap.
+reset role;
+\set E '''eceeceec-0000-0000-0000-000000000005'''
+\set S '''55555555-0000-0000-0000-000000000006'''
+\set M '''66666666-0000-0000-0000-000000000007'''
+insert into auth.users (id, email, email_confirmed_at) values
+  (:E, 'Ozcinar.Ece@gmail.com', now()),
+  (:S, 'ozcinar.ece@gmail.com', null),
+  (:M, 'baska@ornek.com', now());
+update auth.users set email = 'b@ornek.com', email_confirmed_at = now() where id = :B;
+
+create function pg_temp.as_email(u uuid, eposta text) returns void
+language sql as $$
+  select set_config('request.jwt.claims', json_build_object('sub', u, 'email', eposta)::text, false);
+$$;
+grant execute on function pg_temp.as_email(uuid, text) to anon, authenticated;
+
+set role authenticated;
+-- Yönetici değiller: doğrulanmamış aynı e-posta, JWT/kayıt uyuşmazlığı, sıradan hesap, misafir.
+select pg_temp.as_email(:S, 'ozcinar.ece@gmail.com');
+do $$ begin assert not public.is_admin(), 'doğrulanmamış e-posta admin olamaz'; end $$;
+select pg_temp.as_email(:M, 'ozcinar.ece@gmail.com');
+do $$ begin assert not public.is_admin(), 'JWT e-postası auth kaydıyla uyuşmazsa admin değil'; end $$;
+select pg_temp.as_email(:B, 'b@ornek.com');
+do $$
+begin
+  assert not public.is_admin(), 'sıradan hesap admin değil';
+  assert (select count(*) from public.admin_kullanicilar) = 0, 'admin listesi admin olmayana görünmez';
+  assert (select count(*) from public.sehirler) = 1, 'admin olmayan taslak şehri görmez';
+end $$;
+select pg_temp.hata_bekle($$insert into public.admin_kullanicilar (email) values ('b@ornek.com')$$, '42501');
+select pg_temp.hata_bekle($$insert into public.geziler (sehir_id, baslik, slug) values ('11111111-1111-4111-8111-000000000001', 'x', 'x-gezi')$$, '42501');
+select pg_temp.hata_bekle($$insert into storage.objects (bucket_id, name) values ('icerik', 'geziler/x/kapak.jpg')$$, '42501');
+select pg_temp.as_user(:G, true);
+do $$ begin assert not public.is_admin(), 'misafir admin değil'; end $$;
+set role anon;
+do $$ begin assert not public.is_admin(), 'oturumsuz admin değil'; end $$;
+select pg_temp.hata_bekle($$select count(*) from public.admin_kullanicilar$$, '42501');
+
+-- Ece: e-posta büyük/küçük harf duyarsız; taslak dahil okur; tüm içerik tablolarına yazar.
+set role authenticated;
+select pg_temp.as_email(:E, 'OZCINAR.ECE@gmail.com');
+do $$
+begin
+  assert public.is_admin(), 'Ece admin';
+  assert (select count(*) from public.admin_kullanicilar) = 1, 'admin listeyi görür';
+  assert (select count(*) from public.sehirler where not yayin) = 2, 'admin taslak şehirleri görür';
+  assert (select count(*) from public.yerler where not yayin) = 1, 'admin taslak yeri görür';
+  assert (select count(*) from public.geziler where not yayin) = 1, 'admin taslak geziyi görür';
+  assert (select count(*) from public.sehir_rehberi) = 5, 'admin yayınsız şehrin rehberini de görür';
+end $$;
+insert into public.sehirler (id, ad, slug, lat, lng) values ('77777777-7777-4777-8777-000000000001', 'Bursa', 'bursa', 40.19, 29.06);
+insert into public.yerler (id, sehir_id, ad, lat, lng) values ('77777777-7777-4777-8777-000000000002', '77777777-7777-4777-8777-000000000001', 'Ulu Cami', 40.18, 29.06);
+insert into public.geziler (id, sehir_id, baslik, slug) values ('77777777-7777-4777-8777-000000000003', '77777777-7777-4777-8777-000000000001', 'Bursa''da üç gün', 'bursa-uc-gun');
+insert into public.gezi_gunleri (id, gezi_id, sira) values ('77777777-7777-4777-8777-000000000004', '77777777-7777-4777-8777-000000000003', 1);
+insert into public.gezi_duraklari (gezi_gun_id, sira, ad, lat, lng) values ('77777777-7777-4777-8777-000000000004', 1, 'Ulu Cami', 40.18, 29.06);
+insert into public.sehir_rehberi (sehir_id, bolum, baslik) values ('77777777-7777-4777-8777-000000000001', 'yemek', 'İskender');
+insert into storage.objects (bucket_id, name) values ('icerik', 'geziler/77777777-7777-4777-8777-000000000003/kapak.jpg');
+-- Admin yalnız `icerik` kovasına yazar; avatars kuralı değişmez.
+select pg_temp.hata_bekle($$insert into storage.objects (bucket_id, name) values ('avatars', 'baskasi/a.jpg')$$, '42501');
+update public.geziler set yayin = true where slug = 'bursa-uc-gun';
+update public.sehirler set yayin = true where slug = 'bursa';
+insert into public.admin_kullanicilar (email) values ('ikinci@ornek.com');
+select pg_temp.hata_bekle($$insert into public.admin_kullanicilar (email) values ('Buyuk@Ornek.com')$$, '23514');
+do $$ begin assert (select count(*) from public.admin_kullanicilar) = 2, 'admin yeni admin ekler'; end $$;
+
+-- Yayınlanan içerik herkese görünür; taslak yer görünmez; admin olmayan silemez, admin siler.
+select pg_temp.as_email(:B, 'b@ornek.com');
+do $$
+begin
+  assert (select count(*) from public.geziler where slug = 'bursa-uc-gun') = 1, 'yayınlanan gezi herkese görünür';
+  assert (select count(*) from public.yerler where ad = 'Ulu Cami') = 0, 'taslak yer görünmez';
+end $$;
+delete from public.geziler where slug = 'bursa-uc-gun';
+select pg_temp.as_email(:E, 'ozcinar.ece@gmail.com');
+do $$ begin assert (select count(*) from public.geziler where slug = 'bursa-uc-gun') = 1, 'admin olmayan gezi silemez'; end $$;
+delete from public.sehirler where slug = 'bursa';
+delete from public.admin_kullanicilar where email = 'ikinci@ornek.com';
+do $$
+begin
+  assert (select count(*) from public.geziler where slug = 'bursa-uc-gun') = 0, 'admin şehri silince gezisi de gider (cascade)';
+  assert (select count(*) from public.admin_kullanicilar) = 1, 'admin admin kaldırır';
+end $$;
+reset role;
+
 \echo 'rls_test: TÜM TESTLER GEÇTİ'

@@ -1,0 +1,26 @@
+{
+  "marka": "Yönetim",
+  "menu": {
+    "genel": "Genel bakış",
+    "geziler": "Geziler",
+    "yerler": "Yerler",
+    "sehirler": "Şehirler",
+    "anaSayfa": "Ana sayfa düzeni",
+    "kullanicilar": "Kullanıcılar",
+    "ayarlar": "Ayarlar",
+    "ac": "Menüyü aç",
+    "kapat": "Menüyü kapat"
+  },
+  "rol": "{ad} · admin",
+  "giris": {
+    "baslik": "Giriş",
+    "google": "Google ile giriş",
+    "aciklama": "Yönetim paneline yalnız yönetici listesindeki Google hesapları girer.",
+    "hata": "Giriş yapılamadı. Yeniden dene."
+  },
+  "yetkinYok": {
+    "baslik": "Yetkin yok",
+    "aciklama": "{eposta} yönetici listesinde değil. Başka bir hesapla girmek için çıkış yap.",
+    "cikis": "Çıkış"
+  }
+}
