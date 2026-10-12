@@ -197,7 +197,7 @@ function OtelFormu({ trip, sehir, mevcut, secimModu }: { trip: string; sehir: Se
   return (
     <HaritaEkrani
       baslik={secimModu ? t('gunOteli.haritaBaslik') : t('otel.baslik')}
-      geri={() => (router.canGoBack() ? router.back() : router.replace('/(tabs)'))}
+      geri={() => (router.canGoBack() ? router.back() : router.replace('/(tabs)/seyahatler'))}
       sagUst={<BilgiHapi metin={secimModu ? t('gunOteli.haritaAlt') : t('otel.alt', { sehir: sehir.city_label })} />}
       arama={
         <>

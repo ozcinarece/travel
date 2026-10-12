@@ -52,6 +52,11 @@ function Kok() {
         {/* #98: yalnız sihirbaz / günün oteli "Haritadan" seçimi (secim=1); 3.3 tek başına akış kalktı. */}
         <Stack.Screen name="yeni/otel" />
         <Stack.Screen name="seyahat/[id]" />
+        {/* #97: ana sayfa içerik rotaları. */}
+        <Stack.Screen name="ara" />
+        <Stack.Screen name="geziler" />
+        <Stack.Screen name="gezi/[slug]" />
+        <Stack.Screen name="yerler" />
       </Stack.Protected>
       <Stack.Screen name="r/[token]" />
     </Stack>

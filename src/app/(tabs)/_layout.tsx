@@ -4,7 +4,7 @@ import { Ikon } from '@/components/ui/Ikon';
 import { t } from '@/i18n';
 import { renk, yazi } from '@/theme';
 
-// PRD §4: uygulama seviyesi alt menü v1 = Seyahatler · Yeni · Profil (Haritam v2).
+// PRD §4 / #97 KK1: uygulama seviyesi alt menü = Ana sayfa · Seyahatler · Yeni · Profil (Haritam v2).
 export default function SekmeLayout() {
   return (
     <Tabs
@@ -15,7 +15,9 @@ export default function SekmeLayout() {
         tabBarLabelStyle: { fontFamily: yazi.yari, fontSize: 10 },
         tabBarStyle: { borderTopColor: renk.ayrac, backgroundColor: renk.zemin },
       }}>
-      <Tabs.Screen name="index" options={{ title: t('sekme.seyahatler'), tabBarIcon: ({ color }) => <Ikon ad="seyahatler" renk={color} /> }} />
+      {/* #97 KK1: Ana sayfa · Seyahatler · Yeni · Profil; ilk açılış Ana sayfa. */}
+      <Tabs.Screen name="index" options={{ title: t('sekme.anasayfa'), tabBarIcon: ({ color }) => <Ikon ad="ev" renk={color} /> }} />
+      <Tabs.Screen name="seyahatler" options={{ title: t('sekme.seyahatler'), tabBarIcon: ({ color }) => <Ikon ad="seyahatler" renk={color} /> }} />
       {/* #98: Yeni sekmesi sihirbazdır; adımlar tam ekran (alt menü gizli), geri ile Seyahatler'e döner. */}
       <Tabs.Screen name="yeni" options={{ title: t('sekme.yeni'), tabBarIcon: ({ color }) => <Ikon ad="yeni" renk={color} />, tabBarStyle: { display: 'none' } }} />
       <Tabs.Screen name="profil" options={{ title: t('sekme.profil'), tabBarIcon: ({ color }) => <Ikon ad="profil" renk={color} /> }} />

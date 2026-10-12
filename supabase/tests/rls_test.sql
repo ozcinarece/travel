@@ -340,4 +340,33 @@ do $$ begin assert (select name from public.trips where city_label = 'Nice') = '
 select pg_temp.hata_bekle($$update public.trips set name = repeat('a', 81) where city_label = 'Nice'$$, '23514');
 reset role;
 
+-- ---------------------------------------------------------------- #97: geziler, kaydedilenler, olaylar
+reset role;
+insert into public.geziler (sehir_id, baslik, slug, gun_sayisi, yayin) values ('11111111-1111-4111-8111-000000000001', 'Taslak gezi', 'taslak-gezi', 1, false);
+set role authenticated;
+select pg_temp.as_user(:B);
+do $$
+begin
+  assert (select count(*) from public.geziler) = 1, 'yalnız yayınlı gezi okunur';
+  assert (select count(*) from public.gezi_gunleri) = 2, 'yayınlı gezinin 2 günü';
+  assert (select count(*) from public.gezi_duraklari) = 11, 'yayınlı gezinin 11 durağı';
+  assert (select mekan_sayisi from public.geziler where slug = 'eskisehir-iki-gun') = 11, 'mekan sayısı seed';
+end $$;
+-- Kalp: yalnız kendi satırı; başkası adına yazılamaz, başkasınınki görünmez.
+insert into public.kaydedilenler (user_id, tur, hedef_id) values (:B, 'gezi', '33333333-3333-4333-8333-000000000001');
+select pg_temp.hata_bekle($$insert into public.kaydedilenler (user_id, tur, hedef_id) values ('aaaaaaaa-0000-0000-0000-000000000001', 'gezi', '33333333-3333-4333-8333-000000000001')$$, '42501');
+select pg_temp.hata_bekle($$insert into public.kaydedilenler (user_id, tur, hedef_id) values ('bbbbbbbb-0000-0000-0000-000000000002', 'otel', '33333333-3333-4333-8333-000000000001')$$, '23514');
+insert into public.olaylar (tur, hedef_id, meta) values ('gezi_goruntulendi', '33333333-3333-4333-8333-000000000001', '{"sayfa": 1}');
+select pg_temp.as_user(:X);
+do $$
+begin
+  assert (select count(*) from public.kaydedilenler) = 0, 'X başkasının kalbini görmez';
+  assert (select count(*) from public.olaylar) = 0, 'X başkasının olayını görmez';
+end $$;
+select pg_temp.as_user(:B);
+do $$ begin assert (select count(*) from public.kaydedilenler where tur = 'gezi') = 1, 'B kendi kalbini görür'; end $$;
+delete from public.kaydedilenler where tur = 'gezi';
+do $$ begin assert (select count(*) from public.kaydedilenler) = 0, 'kalp kaldırılır'; end $$;
+reset role;
+
 \echo 'rls_test: TÜM TESTLER GEÇTİ'

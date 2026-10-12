@@ -364,7 +364,7 @@ function Kesfet({ seyahat, konaklamalar, ilkMekan }: { seyahat: Seyahat; konakla
     <HaritaEkrani
       baslik={seyahat.city_label}
       altMenuVar
-      geri={() => router.replace('/(tabs)')}
+      geri={() => router.replace('/(tabs)/seyahatler')}
       sagUst={
         // #45: Grup'a erişim avatarlardan (seyahat içi alt menü kalktı).
         <Pressable
