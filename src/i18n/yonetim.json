@@ -189,5 +189,60 @@
       "alinti": "Alıntı",
       "liste": "Liste"
     }
+  },
+  "anaSayfa": {
+    "aciklama": "Sıra sürükleyerek değişir. \"Yaklaşan seyahat\" kartı ve selam sabittir, listede değildir.",
+    "tur": {
+      "tek_kart": "tam genişlik kart",
+      "serit": "yatay şerit",
+      "mozaik": "foto mozaiği",
+      "sehir_seckisi": "şehir seçkisi"
+    },
+    "turAd": {
+      "tek_kart": "Tek kart",
+      "serit": "Şerit",
+      "mozaik": "Mozaik",
+      "sehir_seckisi": "Şehir seçkisi"
+    },
+    "otomatik": {
+      "tek_kart": "otomatik: en çok alınan (son 30 gün)",
+      "serit": "otomatik (sıra: gezi sırası)",
+      "mozaik": "otomatik (sıra: öne çıkan sırası)",
+      "sehir_seckisi": "otomatik"
+    },
+    "elleSabit": "elle sabitlendi",
+    "siraElle": "(sıra: elle)",
+    "secilmedi": "içerik seçilmedi",
+    "acilis": "açılış {tarih}",
+    "kapanis": "kapanış {tarih}",
+    "duzenle": "Düzenle",
+    "kapat": "Kapat",
+    "acikKapali": "{baslik} açık / kapalı",
+    "ekle": "+ Bölüm ekle (şerit · mozaik · tek kart · şehir seçkisi)",
+    "yeniBaslik": "Yeni bölüm",
+    "planliBaslik": "Planlı yayın:",
+    "planliYok": "Planlı bölüm yok.",
+    "yayinNotu": "Değişiklikler \"Yayınla\" ile canlıya çıkar; önce önizle.",
+    "yayinlandi": "Yayınlandı · {saat}",
+    "bekleyen": "Yayınlanmamış değişiklik var",
+    "yayinHata": "Yayınlanamadı. Yeniden dene.",
+    "alan": {
+      "baslik": "BAŞLIK",
+      "tur": "TÜR",
+      "kaynak": "KAYNAK",
+      "icerik": "İÇERİK (sürükle = sıra)",
+      "ekle": "EKLE",
+      "baslangic": "BAŞLANGIÇ",
+      "bitis": "BİTİŞ"
+    },
+    "kaynak": {
+      "otomatik": "Otomatik",
+      "elle": "Elle"
+    },
+    "ekleSec": "Seç…",
+    "cikar": "{ad} içerikten çıkar",
+    "sil": "Bölümü sil",
+    "silOnay": "Silmek için yeniden bas",
+    "onizleme": "ÖNİZLEME · ANA SAYFA"
   }
 }

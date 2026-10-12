@@ -17,6 +17,10 @@ const ozet = (id: string, baslik: string, sehir: string, yayin: boolean, yayin_a
   yayin,
   yayin_at,
   updated_at: '2026-10-12T00:00:00Z',
+  kapak_url: null,
+  ozet: null,
+  sira: null,
+  created_at: '2026-10-12T00:00:00Z',
   sehirler: { ad: sehir === 's1' ? 'Eskişehir' : 'İzmir' },
 });
 

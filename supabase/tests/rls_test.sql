@@ -578,4 +578,46 @@ begin
 end $$;
 reset role;
 
+-- ---------------------------------------------------------------- #109: ana sayfa düzeni (taslak, yayın, görünen)
+reset role;
+-- Seed + ilk yayın: üç bölüm, sırayla; taslak tablo anon'a kapalı, admin olmayana boş.
+set role anon;
+do $$
+begin
+  assert (select string_agg(tur, ',' order by sira) from public.ana_sayfa_gorunen) = 'tek_kart,serit,mozaik', 'seed bölümleri sırayla görünür';
+  assert (select icerik ->> 'gezi_id' from public.ana_sayfa_gorunen where tur = 'tek_kart') is not null, 'otomatik öne çıkan gezi çözülür';
+end $$;
+select pg_temp.hata_bekle($$select count(*) from public.ana_sayfa_bolumleri$$, '42501');
+select pg_temp.hata_bekle($$select public.ana_sayfa_yayinla()$$, '42501');
+set role authenticated;
+select pg_temp.as_email(:B, 'b@ornek.com');
+do $$ begin assert (select count(*) from public.ana_sayfa_bolumleri) = 0, 'admin olmayan taslağı görmez'; end $$;
+select pg_temp.hata_bekle($$insert into public.ana_sayfa_bolumleri (tur, baslik, sira) values ('serit', 'x', 9)$$, '42501');
+select pg_temp.hata_bekle($$select public.ana_sayfa_yayinla()$$, '42501');
+select pg_temp.hata_bekle($$insert into public.ana_sayfa_yayini (bolumler) values ('[]')$$, '42501');
+-- En çok alınan: B'nin aldığı editör gezisi öne çıkar.
+insert into public.olaylar (tur, hedef_id) values ('gezi_alindi', '88888888-8888-4888-8888-000000000001'), ('gezi_alindi', '88888888-8888-4888-8888-000000000001');
+do $$ begin assert public.ana_sayfa_en_cok_alinan() = '88888888-8888-4888-8888-000000000001', 'son 30 günde en çok alınan gezi'; end $$;
+
+-- Admin: kapalı bölüm, gelecekte başlayan bölüm, şu an açık planlı bölüm; sıra çakışması; tek deyimde yer değiştirme.
+select pg_temp.as_email(:E, 'ozcinar.ece@gmail.com');
+insert into public.ana_sayfa_bolumleri (tur, baslik, sira, acik) values ('serit', 'Kapalı', 4, false);
+insert into public.ana_sayfa_bolumleri (tur, baslik, sira, baslangic_at, bitis_at) values ('serit', 'Gelecek', 5, now() + interval '1 day', now() + interval '20 day');
+insert into public.ana_sayfa_bolumleri (tur, baslik, sira, baslangic_at, bitis_at, icerik) values ('sehir_seckisi', 'Şimdi', 6, now() - interval '1 hour', now() + interval '1 day', '{"sehir_idler": []}');
+select pg_temp.hata_bekle($$insert into public.ana_sayfa_bolumleri (tur, baslik, sira) values ('serit', 'Çakışan', 1)$$, '23505');
+select pg_temp.hata_bekle($$insert into public.ana_sayfa_bolumleri (tur, baslik, sira, baslangic_at, bitis_at) values ('serit', 'Ters', 7, now(), now() - interval '1 day')$$, '23514');
+update public.ana_sayfa_bolumleri set sira = case sira when 1 then 2 else 1 end where sira in (1, 2);
+-- Yayınlanmadan uygulama eski düzeni görür.
+set role anon;
+do $$ begin assert (select string_agg(baslik, ',' order by sira) from public.ana_sayfa_gorunen) = 'Öne çıkan gezi,Önerilen geziler,Gezilecek yerler', 'yayın öncesi eski düzen'; end $$;
+set role authenticated;
+select pg_temp.as_email(:E, 'ozcinar.ece@gmail.com');
+do $$ begin assert public.ana_sayfa_yayinla() is not null, 'admin yayınlar'; end $$;
+set role anon;
+do $$
+begin
+  assert (select string_agg(baslik, ',' order by sira) from public.ana_sayfa_gorunen) = 'Önerilen geziler,Öne çıkan gezi,Gezilecek yerler,Şimdi', 'yayından sonra: yeni sıra; kapalı ve zamanı gelmemiş bölüm yok';
+end $$;
+reset role;
+
 \echo 'rls_test: TÜM TESTLER GEÇTİ'
