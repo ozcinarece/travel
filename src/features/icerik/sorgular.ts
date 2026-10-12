@@ -5,7 +5,9 @@ import { useOturum } from '@/lib/oturum';
 import { supabase } from '@/lib/supabase';
 import type { Gezi, GeziDetay, Kaydedilen, KaydedilenTuru, OlayTuru, Sehir, SehirRehberi, Yer } from '@/lib/tipler';
 
-import { otomatikTamamla } from '../yerler/api';
+import { fonksiyonHatasi, otomatikTamamla, yeniOturumJetonu } from '../yerler/api';
+
+import { izBirak } from '@/lib/hataRaporu';
 
 const GUN_MS = 24 * 60 * 60 * 1000;
 
@@ -98,19 +100,40 @@ export function sehirEslestir(sehirler: Sehir[] | undefined, secim: { ad: string
 }
 
 const cozulen = new Map<string, Promise<string | null>>();
+/** #118: çözülemeyen satırların sebebi (kullanıcıya söylenir: "Google'da bulunamadı" / sunucu hatası). */
+const cozumSebepleri = new Map<string, string>();
+export function cozumSebebi(id: string): string | null {
+  return cozumSebepleri.get(id) ?? null;
+}
 
 /**
  * İçerik satırının (yer ya da gezi durağı) Google place_id'si: backoffice doldurmadıysa adıyla Autocomplete'ten ilk öneri
  * (konuma yanlı). Yalnız bellekte tutulur (PRD §7: Google kimliği içerik tablosuna istemciden yazılmaz).
  */
+/**
+ * #118 kök nedeni: oturum anahtarı `icerik-<uuid>` (43 karakter) Google'ın 36 karakter sınırını aşıyordu → her çözüm 400 ile
+ * düşüyor, istemci sessizce "bulunamadı" sayıyordu. Artık 32 karakterlik anahtar; boş sonuçta sunucu Text Search dener;
+ * hata/boşluk sebebi `cozumSebebi` ile ekrana taşınır ve iz bırakılır. Boş sonuç önbelleğe alınmaz (yeniden denenir).
+ */
 export function icerikPlaceId(satir: { id: string; place_id: string | null; ad: string; lat: number; lng: number }, sehirAdi: string): Promise<string | null> {
   if (satir.place_id) return Promise.resolve(satir.place_id);
   let p = cozulen.get(satir.id);
   if (!p) {
-    p = otomatikTamamla({ girdi: `${satir.ad}, ${sehirAdi}`, oturum: `icerik-${satir.id}`, merkez: { lat: satir.lat, lng: satir.lng, yaricapM: 5000 } })
-      .then((oneriler) => oneriler[0]?.place_id ?? null)
-      .catch(() => {
+    p = otomatikTamamla({ girdi: `${satir.ad}, ${sehirAdi}`, oturum: yeniOturumJetonu(), merkez: { lat: satir.lat, lng: satir.lng, yaricapM: 5000 }, aramaYedegi: true })
+      .then((oneriler) => {
+        const pid = oneriler[0]?.place_id ?? null;
+        if (!pid) {
+          cozumSebepleri.set(satir.id, 'bulunamadi');
+          cozulen.delete(satir.id);
+          izBirak('icerik', `place_id yok: ${satir.ad}`);
+        } else cozumSebepleri.delete(satir.id);
+        return pid;
+      })
+      .catch(async (e) => {
+        const sebep = await fonksiyonHatasi(e);
+        cozumSebepleri.set(satir.id, sebep);
         cozulen.delete(satir.id);
+        izBirak('icerik', `place_id çözümü hata: ${satir.ad} — ${sebep}`, 'error');
         return null;
       });
     cozulen.set(satir.id, p);

@@ -9,7 +9,7 @@ import { SecimMenusu } from '@/components/program/SecimMenusu';
 import { Avatar } from '@/components/ui/Avatar';
 import { Ikon } from '@/components/ui/Ikon';
 import { useIcerikCanli } from '@/features/icerik/fotolar';
-import { useGeziler, useTumYerler } from '@/features/icerik/sorgular';
+import { cozumSebebi, useGeziler, useTumYerler } from '@/features/icerik/sorgular';
 import { hedefSeyahatler, useYereEkle } from '@/features/icerik/yerEkle';
 import { useMekanlar } from '@/features/mekanlar/sorgular';
 import { useProfil } from '@/features/profil/sorgular';
@@ -47,7 +47,10 @@ export default function AnaSayfa() {
   const yereEkle = async (y: Yer, seyahatId: string) => {
     const c = canli.data?.get(y.id);
     if (!c?.place_id) {
-      setBildirim(t('anasayfa.ekleHata'));
+      // #118: sebebi söyle (çözülüyor / Google'da yok / sunucu hatası); izler hata kartında.
+      const sebep = cozumSebebi(y.id);
+      setBildirim(canli.isPending ? t('anasayfa.cozuluyor') : t('anasayfa.ekleHataSebep', { sebep: !sebep || sebep === 'bulunamadi' ? t('anasayfa.bulunamadi') : sebep }));
+      setTimeout(() => setBildirim(null), 3500);
       return;
     }
     setMesgulId(y.id);
@@ -56,8 +59,9 @@ export default function AnaSayfa() {
       const sy = hedefler.find((x) => x.id === seyahatId);
       setBildirim(t('anasayfa.eklendi', { seyahat: sy ? seyahatAdi(sy) : '' }));
       setTimeout(() => setBildirim(null), 2500);
-    } catch {
-      setBildirim(t('anasayfa.ekleHata'));
+    } catch (e) {
+      setBildirim(t('anasayfa.ekleHataSebep', { sebep: e instanceof Error ? e.message : String(e) }));
+      setTimeout(() => setBildirim(null), 3500);
     } finally {
       setMesgulId(null);
     }

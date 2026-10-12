@@ -7,9 +7,9 @@ import type { GeziDuragi, Mekan } from '@/lib/tipler';
 import { sonAnahtar } from '@/schedule/sira';
 
 import type { AktarmaPlani } from './aktar';
-import { icerikPlaceId, olayYaz } from './sorgular';
+import { cozumSebebi, icerikPlaceId, olayYaz } from './sorgular';
 
-export type AktarmaSonucu = { eklenenMekan: number; eklenenDurak: number; cozumsuz: number; ilkGunId: string | null; ilkGunIndex: number | null };
+export type AktarmaSonucu = { eklenenMekan: number; eklenenDurak: number; cozumsuz: number; /** #118: çözülemeyenlerin adı ve sebebi (ilk üçü). */ cozumsuzler: { ad: string; sebep: string }[]; /** Havuzda zaten olanlar. */ zatenVar: number; ilkGunId: string | null; ilkGunIndex: number | null };
 
 export function useGeziAktar() {
   const { session } = useOturum();
@@ -21,6 +21,8 @@ export function useGeziAktar() {
       const kimlik = new Map<string, string | null>();
       await Promise.all(plan.duraklar.map(async (d) => kimlik.set(d.id, await icerikPlaceId(d, sehirAdi))));
       const cozulen = plan.duraklar.filter((d) => kimlik.get(d.id));
+      const cozumsuzler = plan.duraklar.filter((d) => !kimlik.get(d.id)).map((d) => ({ ad: d.ad, sebep: cozumSebebi(d.id) ?? 'bulunamadi' }));
+      let zatenVar = 0;
       // 2. Havuz: tekil place_id ile ekle (zaten varsa 23505 → sessiz).
       const gorulen = new Set<string>();
       let eklenenMekan = 0;
@@ -31,6 +33,7 @@ export function useGeziAktar() {
         const { error } = await supabase.from('places').insert({ trip_id: seyahatId, place_id: pid, primary_type: d.kategori, lat: d.lat, lng: d.lng, default_minutes: d.sure_dk, added_by: session.user.id });
         if (error && error.code !== '23505') throw error;
         if (!error) eklenenMekan += 1;
+        else zatenVar += 1;
       }
       // 3. Günlere ata: havuz satırları + hedef günün mevcut durakları (sonuna, KK3).
       let eklenenDurak = 0;
@@ -71,7 +74,7 @@ export function useGeziAktar() {
         ilkGunIndex = typeof gun?.index === 'number' ? gun.index : null;
       }
       await olayYaz('gezi_alindi', geziId, { seyahat: seyahatId, mekan: eklenenMekan, durak: eklenenDurak });
-      return { eklenenMekan, eklenenDurak, cozumsuz: plan.duraklar.length - cozulen.length, ilkGunId, ilkGunIndex };
+      return { eklenenMekan, eklenenDurak, cozumsuz: plan.duraklar.length - cozulen.length, cozumsuzler, zatenVar, ilkGunId, ilkGunIndex };
     },
     onSettled: (_s, _e, v) => {
       qc.invalidateQueries({ queryKey: ['mekanlar', v.seyahatId] });
