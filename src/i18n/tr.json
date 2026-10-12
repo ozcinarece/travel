@@ -10,7 +10,8 @@
   "sekme": {
     "seyahatler": "Seyahatler",
     "yeni": "Yeni",
-    "profil": "Profil"
+    "profil": "Profil",
+    "anasayfa": "Ana sayfa"
   },
   "giris": {
     "baslik": "Arkadaşlarınla\nharitada plan kur,\nsaat saat gez.",
@@ -208,7 +209,9 @@
     "bulunamadi": "Seyahat bulunamadı."
   },
   "yerler": {
-    "atif": "Google"
+    "listeBaslik": "Gezilecek yerler",
+    "filtreSehir": "Şehir",
+    "bos": "Bu şehirde yer yok"
   },
   "kesfet": {
     "ara": "Mekan ara",
@@ -598,5 +601,78 @@
       "hata": "Öneriler alınamadı. Haritadan devam edebilirsin.",
       "ekleHata": "Eklenemedi. Tekrar dene."
     }
+  },
+  "anasayfa": {
+    "merhaba": "Merhaba {ad}",
+    "soru": "Nereye gidelim?",
+    "ara": "Şehir, gezi ya da yer ara",
+    "yaklasan": "YAKLAŞAN · {n} GÜN SONRA",
+    "yaklasanBugun": "YAKLAŞAN · BUGÜN",
+    "aktif": "ŞU AN SEYAHATTE",
+    "tarihsiz": "Tarih yok",
+    "durakKisi": "{durak} durak · {kisi} kişi",
+    "programaGit": "Programa git",
+    "ilkBaslik": "İlk seyahatini kur",
+    "ilkAlt": "Şehir, tarih, otel; gerisini harita halleder",
+    "ilkDugme": "Başla",
+    "geziler": "Önerilen geziler",
+    "yerler": "Gezilecek yerler",
+    "tumu": "Tümü ›",
+    "gunlukGezi": "{n} GÜNLÜK GEZİ",
+    "gunluk": "{n} GÜNLÜK",
+    "mekanSayisi": "{n} mekan",
+    "ekle": "Listeye ekle",
+    "listede": "Listende",
+    "eklendi": "Listene eklendi · {seyahat}",
+    "hangiSeyahat": "Hangi seyahate?",
+    "seyahatYok": "Önce bir seyahat kur",
+    "ekleHata": "Eklenemedi. Tekrar dene.",
+    "bos": "İçerik hazırlanıyor"
+  },
+  "ara": {
+    "baslik": "Ara",
+    "yer": "Şehir, gezi ya da yer",
+    "sehirler": "Şehirler",
+    "geziler": "Geziler",
+    "yerler": "Yerler",
+    "sonucYok": "Sonuç yok",
+    "geziSayisi": "{n} gezi"
+  },
+  "gezi": {
+    "listeBaslik": "Önerilen geziler",
+    "filtreSehir": "Şehir",
+    "filtreGun": "Gün sayısı",
+    "hepsi": "Hepsi",
+    "gunAdet": "{n} gün",
+    "bos": "Bu filtreyle gezi yok",
+    "rozet": "{n} GÜNLÜK GEZİ · {sehir} · {mekan} MEKAN",
+    "okuma": "{n} dk okuma",
+    "sayfa1": "Sayfa 1 / 2 · yazı",
+    "sayfa2": "Sayfa 2 / 2 · plan · {gun} günlük gezi · {mekan} mekan",
+    "planiGor": "Planı gör",
+    "gunMekan": "{gun} gün · {mekan} mekan",
+    "gunCip": "{n}. Gün",
+    "haritaBuyut": "Haritayı büyüt",
+    "haritaKapat": "Haritayı kapat",
+    "al": "Geziyi seyahatime al",
+    "alBaslik": "Seyahatime al",
+    "hedef": "Hedef seyahat",
+    "yeniSeyahat": "Yeni seyahat",
+    "tum": "Tüm gezi",
+    "tumAlt": "{gun} gün, {mekan} mekan → {gunler}",
+    "tumAltListe": "{mekan} mekan listene gelir (seyahatin günü yok)",
+    "gunleriSec": "Günleri seç",
+    "gunleriSecAlt": "Gezinin seçtiğin günleri seyahatindeki güne eklenir",
+    "listeye": "Listeye",
+    "yalnizMekan": "Yalnız mekanları listeme ekle",
+    "yalnizMekanAlt": "{mekan} mekan listene gelir, güne sen dağıtırsın",
+    "not": "Hedef günde durak varsa plan onların sonuna eklenir; hiçbir durak silinmez.",
+    "alHata": "Aktarılamadı. Tekrar dener misin?",
+    "cozumYok": "{n} mekan Google'da bulunamadı; onlar atlandı.",
+    "kaydet": "Kaydet",
+    "kaydedildi": "Kaydedildi",
+    "paylas": "Paylaş",
+    "paylasMetin": "{baslik} · {link}",
+    "hata": "Gezi yüklenemedi."
   }
 }

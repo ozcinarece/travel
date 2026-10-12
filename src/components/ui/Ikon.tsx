@@ -28,6 +28,11 @@ export type IkonAdi =
   // #95 (docs/05 §1, kanvas LegChips11): bacak hapındaki yürüyen kişi (12 px).
   | 'yuru'
   | 'araba'
+  // #97: ana sayfa arama, kalp (kaydet), paylaş.
+  | 'ara'
+  | 'kalp'
+  | 'kalpDolu'
+  | 'paylas'
   // #69: filtre düğmesi (kaydırıcılar) ve dolu yıldız (öne çıkan).
   | 'filtre'
   | 'yildiz'
@@ -147,6 +152,20 @@ export function Ikon({ ad, boyut = 24, renk, kalinlik = 2 }: Props) {
           <Circle cx={13.5} cy={4} r={1.7} {...ortak} />
           <Path d="M12.5 8l-1.5 5.5L9 20M11 13.5l3 3 1.5 4.5" {...ortak} />
           <Path d="M12.5 8l2.5 2.5 2.5-.5M12.5 8l-2.5 3-1.5 2.5" {...ortak} />
+        </>
+      ) : ad === 'ara' ? (
+        <>
+          <Circle cx={11} cy={11} r={6.5} {...ortak} />
+          <Path d="M16 16l4.5 4.5" {...ortak} />
+        </>
+      ) : ad === 'kalp' ? (
+        <Path d="M12 20.5l-7.4-7.3a4.6 4.6 0 0 1 6.5-6.5l.9.9.9-.9a4.6 4.6 0 0 1 6.5 6.5L12 20.5z" {...ortak} />
+      ) : ad === 'kalpDolu' ? (
+        <Path d="M12 20.5l-7.4-7.3a4.6 4.6 0 0 1 6.5-6.5l.9.9.9-.9a4.6 4.6 0 0 1 6.5 6.5L12 20.5z" {...ortak} fill={renk} />
+      ) : ad === 'paylas' ? (
+        <>
+          <Path d="M12 3v12M8 7l4-4 4 4" {...ortak} />
+          <Path d="M5 12v7h14v-7" {...ortak} />
         </>
       ) : ad === 'araba' ? (
         // #65: uzun bacak modu "araba" (taksi glifinin çatı ışığı olmayan hali; docs/05 §4).

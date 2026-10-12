@@ -6,8 +6,10 @@ import { Ikon, type IkonAdi } from '@/components/ui/Ikon';
 import { t } from '@/i18n';
 import { renk, yazi } from '@/theme';
 
-const OGELER: { ad: IkonAdi; baslik: string; yol: '/(tabs)' | '/(tabs)/yeni' | '/(tabs)/profil' }[] = [
-  { ad: 'seyahatler', baslik: 'sekme.seyahatler', yol: '/(tabs)' },
+const OGELER: { ad: IkonAdi; baslik: string; yol: '/(tabs)' | '/(tabs)/seyahatler' | '/(tabs)/yeni' | '/(tabs)/profil' }[] = [
+  // #97 KK1: Ana sayfa eklendi; seyahat içinde Seyahatler seçili kalır.
+  { ad: 'ev', baslik: 'sekme.anasayfa', yol: '/(tabs)' },
+  { ad: 'seyahatler', baslik: 'sekme.seyahatler', yol: '/(tabs)/seyahatler' },
   { ad: 'yeni', baslik: 'sekme.yeni', yol: '/(tabs)/yeni' },
   { ad: 'profil', baslik: 'sekme.profil', yol: '/(tabs)/profil' },
 ];

@@ -130,7 +130,31 @@ export type YeniSeyahat = {
 };
 
 /** #97 / #98: içerik tabloları (yayınlı okunur; backoffice yazar). */
-export type Sehir = { id: string; ad: string; slug: string; kapak_url: string | null; lat: number; lng: number };
+export type Sehir = { id: string; ad: string; slug: string; kapak_url: string | null; lat: number; lng: number; /** #97: yayınlı gezi sayısı ("N gezi"). */ gezi_sayisi?: number };
+
+/** #97: önerilen gezi (içerik ekibi yazar; yayınlı okunur). */
+export type Gezi = {
+  id: string;
+  sehir_id: string;
+  baslik: string;
+  slug: string;
+  kapak_url: string | null;
+  ozet: string | null;
+  yazi_md: string | null;
+  yazar_ad: string | null;
+  gun_sayisi: number;
+  mekan_sayisi: number;
+  sira: number | null;
+  created_at: string;
+  /** Gömülü şehir (liste kartlarında "Eskişehir"). */
+  sehirler?: { ad: string; slug: string } | null;
+};
+export type GeziDuragi = { id: string; gezi_gun_id: string; sira: number; place_id: string | null; ad: string; kategori: string | null; sure_dk: number; lat: number; lng: number };
+export type GeziGunu = { id: string; gezi_id: string; sira: number; baslik: string | null; gezi_duraklari: GeziDuragi[] };
+export type GeziDetay = Gezi & { gezi_gunleri: GeziGunu[] };
+export type KaydedilenTuru = 'gezi' | 'yer';
+export type Kaydedilen = { tur: KaydedilenTuru; hedef_id: string; created_at: string };
+export type OlayTuru = 'gezi_goruntulendi' | 'gezi_alindi' | 'yer_eklendi';
 export type Yer = {
   id: string;
   sehir_id: string;
