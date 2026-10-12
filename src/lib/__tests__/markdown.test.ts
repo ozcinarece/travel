@@ -19,8 +19,8 @@ describe('markdownAyristir (#97 B KK1)', () => {
     const b = markdownAyristir(md);
     expect(b).toHaveLength(2);
     expect(b[1]).toEqual({ tur: 'fotolar', fotolar: [{ url: 'https://x/u3', alt: 'c' }], altyazi: 'c' });
-    // #119 KK1b: çözülemeyen görsel (foto:… yer tutucu, göreli yol) hiç çizilmez.
-    expect(markdownAyristir('![a](foto:porsuk)\nMetin')).toEqual([{ tur: 'paragraf', metin: 'Metin' }]);
+    // #119 KK1b: çözülemeyen görsel (göreli yol, yer tutucu) hiç çizilmez; `foto:` kova yolu ise çözülür (#107 testi aşağıda).
+    expect(markdownAyristir('![a](porsuk.jpg)\nMetin')).toEqual([{ tur: 'paragraf', metin: 'Metin' }]);
     expect(markdownAyristir(null)).toEqual([]);
     expect(okumaSuresiDk('bir iki üç')).toBe(1);
     expect(okumaSuresiDk(Array.from({ length: 800 }, () => 'kelime').join(' '))).toBe(4);
