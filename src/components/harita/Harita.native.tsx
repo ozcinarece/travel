@@ -4,6 +4,8 @@ import MapView, { Circle, Marker, Polyline, PROVIDER_GOOGLE } from 'react-native
 
 import { bolgeHesapla, enYakinPin, etiketBolgesi, bacakHapCapasi, gizliEtiketler, haritaDolgusu, isaretciImzasi, izlemeGerekli, pinCapasi, pinZ, zoomaGorePinler, zoomDelta } from './geo';
 import { ACIK_HARITA_STILI } from './haritaStili';
+
+import { izBirak } from '@/lib/hataRaporu';
 import { GunHapiIcerigi } from './GunHapi';
 import { HAP_UCGEN, hapCapasi, hapYerlesimi, noktaEkranX, seciciYerlesimi } from './hap';
 import { dokunusuIletir, isaretciPlani, planFarki } from './isaretciler';
@@ -74,6 +76,7 @@ export function Harita({
       return;
     }
     sonHazirMs.current = simdi;
+    izBirak('harita', `hazır (onMapReady ${taniSayaclari.haritaHazir})`);
     setHazir(true);
   };
 
@@ -155,7 +158,7 @@ export function Harita({
   const seciciKonum = secici?.konum;
   const seciciAnahtar = seciciKonum ? `${seciciKonum.lat},${seciciKonum.lng}` : null;
   const seciciNoktasiniBul = () => {
-    if (!seciciKonum || !seciciAnahtar) return;
+    if (!seciciKonum || !seciciAnahtar || !hazir) return;
     ref.current
       ?.pointForCoordinate({ latitude: seciciKonum.lat, longitude: seciciKonum.lng })
       .then((pt) => setSeciciNokta({ anahtar: seciciAnahtar, x: pt.x, y: pt.y }))

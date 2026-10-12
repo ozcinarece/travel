@@ -60,6 +60,11 @@ export type CizelgeListesiProps = {
   onTasi: (from: number, to: number) => void;
   onSure: (d: Durak, fark: number) => void;
   onBaslangic: (fark: number) => void;
+  /** #120 KK3 / #101 KK3: tam ekranda da bacak satırı açılır — önceki noktanın anahtarı (başlangıç oteli) ve seçici. */
+  baslangicKey?: string | null;
+  acikBacakId?: string | null;
+  onBacakBas?: (fromKey: string, toKey: string) => void;
+  bacakSecici?: ReactNode;
 };
 
 /**
@@ -176,9 +181,12 @@ export function CizelgeListesi(p: CizelgeListesiProps) {
         const aktif = satir.durum === 'siradaki' || satir.durum === 'buradasin';
         const tamam = satir.durum === 'gecildi';
         const puan = m ? p.puanim(m.id) : null;
-        // #45 §4: iki satır arasında küçük yürüyüş/taksi metni; yoldaysa mavi.
+        // #45 §4: iki satır arasında küçük yürüyüş/taksi metni; yoldaysa mavi. #120 KK3: dokununca ulaşım seçici (tam ekranda da).
         let ara: ReactNode = null;
-        if (satir.yuruyus && i > 0) {
+        const oncekiKey = i > 0 ? (satirlar.slice(0, i).reverse().find((x) => x.durum !== 'atlandi')?.durak.key ?? null) : (p.baslangicKey ?? null);
+        const bacakCifti = oncekiKey && !tamam && satir.durum !== 'atlandi' ? `${oncekiKey}>${satir.durak.key}` : null;
+        const bacakAcik = !!bacakCifti && p.acikBacakId === bacakCifti;
+        if (satir.yuruyus && (i > 0 || p.baslangicKey)) {
           const onceki = satirlar.slice(0, i).reverse().find((x) => x.durum === 'gecildi');
           const yolda = prog.bugun && prog.simdiDk !== null && aktif && !!onceki && satir.durum !== 'buradasin';
           const dk = yuruyusDk(satir.yuruyus);
@@ -190,21 +198,39 @@ export function CizelgeListesi(p: CizelgeListesiProps) {
               <View style={s.ray} />
               {yolda ? (
                 <Text style={s.yolda}>{Math.max(0, satir.varisDk - prog.simdiDk!) > 0 ? t('program.suAnYolda', { n: Math.max(0, satir.varisDk - prog.simdiDk!) }) : t('program.suAnYoldaGec')}</Text>
-              ) : satir.yuruyus.mod === 'taksi' ? (
-                <Pressable accessibilityRole="button" onPress={() => p.onYolTarifi(durak, 'taksi')} hitSlop={6} style={s.araIc}>
+              ) : (
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityState={{ expanded: bacakAcik }}
+                  disabled={!bacakCifti || !p.onBacakBas}
+                  onPress={() => bacakCifti && p.onBacakBas?.(oncekiKey!, satir.durak.key)}
+                  hitSlop={6}
+                  style={s.araIc}>
                   {ikon}
                   <Text style={s.araMetin}>
-                    {metin} · <Text style={s.araBaglanti}>{t('program.taksiYolTarifi')}</Text>
+                    {metin}
+                    {satir.yuruyus.mod === 'taksi' ? (
+                      <>
+                        {' · '}
+                        <Text style={s.araBaglanti} onPress={() => p.onYolTarifi(durak, 'taksi')}>
+                          {t('program.taksiYolTarifi')}
+                        </Text>
+                      </>
+                    ) : null}
+                    {bacakCifti && p.onBacakBas ? <Text style={s.araOk}>{bacakAcik ? '  ˅' : '  ›'}</Text> : null}
                   </Text>
                 </Pressable>
-              ) : (
-                <View style={s.araIc}>
-                  {ikon}
-                  <Text style={s.araMetin}>{metin}</Text>
-                </View>
               )}
             </View>
           );
+          if (bacakAcik && p.bacakSecici) {
+            ara = (
+              <>
+                {ara}
+                <View style={s.araSecici}>{p.bacakSecici}</View>
+              </>
+            );
+          }
         }
         return (
           <View key={d.id}>
@@ -342,6 +368,8 @@ const s = StyleSheet.create({
   araSatir: { height: 20, justifyContent: 'center', paddingLeft: RAY_X + 12 },
   araIc: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   araMetin: { fontFamily: yazi.normal, fontSize: 11, lineHeight: 14, color: renk.ikincil },
+  araOk: { fontFamily: yazi.kalin, fontSize: 11, color: renk.ikincil },
+  araSecici: { paddingLeft: RAY_X + 12, paddingRight: 4, paddingVertical: 6 },
   araBaglanti: { fontFamily: yazi.kalin, color: renk.metin },
   yolda: { fontFamily: yazi.kalin, fontSize: 11, lineHeight: 14, color: '#2563eb' },
   aktifKart: { flexDirection: 'row', alignItems: 'center', gap: 10, padding: 8, paddingLeft: 0, borderRadius: 14, backgroundColor: renk.yuzey, marginVertical: 2 },

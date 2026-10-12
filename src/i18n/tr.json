@@ -120,6 +120,8 @@
     "baslik": "Profil",
     "kaydettiklerim": "Kaydettiklerim",
     "kaydettiklerimAlt": "Kalp bıraktığın geziler ve yerler",
+    "sonHata": "Son hata · {zaman}",
+    "sonHataSil": "Kaydı sil",
     "cikis": "Çıkış",
     "hesapSil": "Hesabı sil"
   },
@@ -426,6 +428,7 @@
     "kapaliSaatBelirsiz": "Bu saatte kapalı",
     "kapaliHafta": "{gunler} kapalı",
     "baskaGuneAl": "Başka güne al",
+    "baskaGuneAlHedef": "Başka güne al → {gun}",
     "guneAl": "{n}. güne al",
     "guneGit": "Güne git",
     "menuAtla": "Atla",

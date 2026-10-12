@@ -31,6 +31,7 @@ import { gorunurOneriler } from '@/features/yerler/karolar';
 import { useKaroOnerileri } from '@/features/yerler/karoYukleme';
 import { kesfetDurumunuAl, useKesfetDurumu } from '@/features/yerler/kesfetDurumu';
 import { t } from '@/i18n';
+import { izBirak } from '@/lib/hataRaporu';
 import { kategoriPini } from '@/lib/pinIkonu';
 import { varsayilanDakika } from '@/lib/kategori';
 import type { Mekan, Seyahat } from '@/lib/tipler';
@@ -69,6 +70,10 @@ function Kesfet({ seyahat, konaklamalar, ilkMekan }: { seyahat: Seyahat; konakla
   // #79 KK5: ekranın kuruluş sayısı tanı şeridinde (1'den fazlaysa ekran yeniden mount olmuş demektir).
   useEffect(() => {
     taniSayaclari.kesfetKurulum += 1;
+    // #120 KK4: hata kartı için iz — ekran kuruldu (kaçıncı kurulum, bellekteki seçim/bölge).
+    const d = kesfetDurumunuAl(seyahat.id);
+    izBirak('kesfet', `kuruldu #${taniSayaclari.kesfetKurulum} · seçim ${d.secim?.place_id ? 'var' : 'yok'} · bölge ${d.bolge ? 'bellekte' : 'yok'}`);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   const [aramaSonucu, setAramaSonucu] = useState<HafifYer | null>(null);
   const [secim, setSecim] = useKesfetDurumu(seyahat.id, 'secim');

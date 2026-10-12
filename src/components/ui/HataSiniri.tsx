@@ -3,7 +3,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { t } from '@/i18n';
 import { hataBildir } from '@/lib/hataRaporu';
-import { hataOzeti, ilkBilesen, sonIzler } from '@/lib/izler';
+import { hataOzeti, ilkBilesen, sonHatayiSakla, sonIzler } from '@/lib/izler';
 import { bosluk, renk, yazi } from '@/theme';
 
 type Props = { children: ReactNode };
@@ -24,6 +24,8 @@ export class HataSiniri extends Component<Props, Durum> {
     const bilesen = ilkBilesen(bilgi.componentStack);
     this.setState({ bilesen });
     hataBildir(hata, `hata-siniri${bilesen ? `: ${bilesen}` : ''}`);
+    // #120 KK4: son hata cihazda saklanır (Profil → "Son hata"): kart kapansa da kök neden kaybolmaz.
+    sonHatayiSakla(hata, bilesen, bilgi.componentStack ?? null);
   }
 
   yenidenDene = () => this.setState({ hata: null, bilesen: null });
@@ -31,7 +33,7 @@ export class HataSiniri extends Component<Props, Durum> {
   render() {
     if (!this.state.hata) return this.props.children;
     // #85: DSN yokken tek kanıt bu kart — hata mesajı + bileşen + son 5 iz (küçük gri yazı; ekran görüntüsüyle iletilir).
-    const izler = sonIzler(5);
+    const izler = sonIzler(8);
     return (
       <View style={s.ekran}>
         <View style={s.kart}>
