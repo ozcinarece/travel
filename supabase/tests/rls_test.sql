@@ -789,4 +789,61 @@ end $$;
 select pg_temp.hata_bekle($$insert into public.icerik_mekanlari (sahip_tur, sahip_id, place_id, bicim, sira) values ('rehber', gen_random_uuid(), 'ChIJ-xxxxxxxxxx', 'kart', 1)$$, '42501');
 reset role;
 
+-- #137 Davetle katılma: özet anon'a açık; katılım oturum ister; token geçersizse P0002; zaten üye yeniden yazılmaz;
+-- web'den katılan ilk uygulama açılışında karşılanır, damga bir kez yazılır. Kendi seyahatiyle (önceki bölümlerden bağımsız).
+reset role;
+\set DV '''aaaaaaaa-2222-0000-0000-000000000022'''
+\set WG '''aaaaaaaa-2222-0000-0000-000000000021'''
+insert into auth.users (id, is_anonymous) values (:DV, false);
+insert into auth.users (id, is_anonymous, raw_user_meta_data) values (:WG, false, '{"full_name": "Web Gezgini"}');
+insert into public.profiles (id, name, username) values (:DV, 'Davetçi', 'davetci');
+set role authenticated;
+select pg_temp.as_user(:DV);
+insert into public.trips (owner_id, city_place_id, city_label, lat, lng, tz, start_date, end_date, name)
+values (:DV, 'ChIJ-izmir', 'İzmir', 38.42, 27.14, 'Europe/Istanbul', '2027-05-01', '2027-05-04', 'İzmir Gezisi');
+reset role;
+select set_config('test.davet_token', (select invite_token from public.trips where city_place_id = 'ChIJ-izmir'), false);
+set role anon;
+select pg_temp.as_user(null);
+do $$
+declare o jsonb := public.davet_ozeti(current_setting('test.davet_token'));
+begin
+  assert (o ->> 'city_label') = 'İzmir' and (o ->> 'name') = 'İzmir Gezisi', 'anon özeti okur: ' || coalesce(o::text, 'null');
+  assert jsonb_array_length(o -> 'gunler') = 4 and (o ->> 'day_count') = '4', 'gün listesi 4';
+  assert (o ->> 'inviter_name') = 'Davetçi', 'davet eden sahip';
+  assert (o ->> 'uye') = 'false', 'anon üye değil';
+  assert public.davet_ozeti('yokyokyo') is null, 'bilinmeyen token null';
+end $$;
+select pg_temp.hata_bekle($$select public.davetle_katil(current_setting('test.davet_token'), 'web')$$, '42501');
+set role authenticated;
+select pg_temp.as_user(:WG);
+select pg_temp.hata_bekle($$select public.davetle_katil('yokyokyo', 'web')$$, 'P0002');
+select pg_temp.hata_bekle($$select public.davetle_katil(current_setting('test.davet_token'), 'sms')$$, '22023');
+do $$
+declare k jsonb; o jsonb;
+begin
+  k := public.davetle_katil(current_setting('test.davet_token'), 'web');
+  assert (k ->> 'zaten_uye') = 'false', 'ilk katılım';
+  assert (k ->> 'inviter_name') = 'Davetçi' and (k ->> 'day_count') = '4', 'katılım özeti';
+  assert (select display_name from public.members where user_id = auth.uid()) = 'Web Gezgini', 'profil yoksa sağlayıcı adı';
+  assert (select joined_via from public.members where user_id = auth.uid()) = 'web', 'kanal web';
+  assert (select landed_at from public.members where user_id = auth.uid()) is null, 'web katılımı henüz karşılanmadı';
+  k := public.davetle_katil(current_setting('test.davet_token'), 'app');
+  assert (k ->> 'zaten_uye') = 'true', 'ikinci çağrı zaten üye';
+  assert (select count(*) from public.members where user_id = auth.uid()) = 1, 'üyelik bir kez yazılır';
+  assert (select count(*) from public.trips) = 1, 'katılan seyahati görür';
+  o := public.davet_ozeti(current_setting('test.davet_token'));
+  assert (o ->> 'uye') = 'true' and (o ->> 'member_count') = '2', 'özet üyeyi bilir';
+  assert (public.davet_karsilama() ->> 'city_label') = 'İzmir', 'uygulama ilk açılışta karşılar';
+  perform public.davet_karsilandi((public.davet_karsilama() ->> 'trip_id')::uuid);
+  assert public.davet_karsilama() is null, 'damga sonrası karşılama yok';
+  assert (select landed_at from public.members where user_id = auth.uid()) is not null, 'landed_at yazıldı';
+  insert into public.olaylar (tur, hedef_id, meta) values ('davet_katildi', (k ->> 'trip_id')::uuid, '{"kanal": "web"}');
+  -- Üye kendisi ayrılır (RLS: role = member).
+  delete from public.members where user_id = auth.uid();
+  assert (select count(*) from public.trips) = 0, 'ayrılan seyahati görmez';
+end $$;
+select pg_temp.hata_bekle($$insert into public.olaylar (tur) values ('davet_bilinmeyen')$$, '23514');
+reset role;
+
 \echo 'rls_test: TÜM TESTLER GEÇTİ'

@@ -1,8 +1,9 @@
 import { Redirect, router } from 'expo-router';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { bekleyenDavetiOku, bekleyenDavetiSil, davetKarsilandi, useDavetKarsilama } from '@/features/davet/sorgular';
 import { GeziKarti } from '@/components/icerik/GeziKarti';
 import { YerKarosu } from '@/components/icerik/YerKarosu';
 import { SecimMenusu } from '@/components/program/SecimMenusu';
@@ -27,6 +28,20 @@ import { bosluk, renk, yazi } from '@/theme';
  */
 export default function AnaSayfa() {
   const profil = useProfil();
+  // #137: giriş/profil öncesi görülen davet → /r/{token}'a dön; web'de katılıp uygulamayı ilk açan → doğrudan seyahat (KK2).
+  const [bekleyenDavet, setBekleyenDavet] = useState<string | null | undefined>(undefined);
+  useEffect(() => {
+    bekleyenDavetiOku().then(setBekleyenDavet);
+  }, []);
+  const karsilama = useDavetKarsilama(bekleyenDavet === null && !!profil.data);
+  // "Önceki render" deseni: karşılanacak seyahat gelince bir kez tutulur; damga ve temizlik etkide.
+  const [karsilanan, setKarsilanan] = useState<string | null>(null);
+  if (karsilama.data && karsilanan !== karsilama.data.trip_id) setKarsilanan(karsilama.data.trip_id);
+  useEffect(() => {
+    if (!karsilanan) return;
+    davetKarsilandi(karsilanan);
+    bekleyenDavetiSil();
+  }, [karsilanan]);
   const seyahatler = useSeyahatler();
   const geziler = useGeziler();
   const yerler = useTumYerler();
@@ -41,6 +56,8 @@ export default function AnaSayfa() {
   const [bildirim, setBildirim] = useState<string | null>(null);
   const [mesgulId, setMesgulId] = useState<string | null>(null);
 
+  if (bekleyenDavet) return <Redirect href={{ pathname: '/r/[token]', params: { token: bekleyenDavet } }} />;
+  if (karsilanan) return <Redirect href={{ pathname: '/seyahat/[id]/(sekmeler)/program', params: { id: karsilanan, katildin: '1' } }} />;
   // #98: 0.3 yönlendirme ekranı kalktı — ilk açılış doğrudan sihirbaza (damgayı sihirbaz yazar).
   if (profil.data && !profil.data.onboarding_done_at) return <Redirect href="/(tabs)/yeni" />;
 

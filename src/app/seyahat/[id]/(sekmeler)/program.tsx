@@ -4,6 +4,8 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Alert, Linking, Pressable, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 
+import { GrupPenceresi } from '@/components/davet/GrupPenceresi';
+import { KatilimSayfasi } from '@/components/davet/KatilimSayfasi';
 import { HaritaEkrani } from '@/components/harita/HaritaEkrani';
 import type { HaritaOdagi, HaritaSigdirma } from '@/components/harita/tipler';
 import { BacakSecici, BacakSegmenti, SECICI_GENISLIK } from '@/components/program/BacakSecici';
@@ -70,7 +72,7 @@ type PanelHali = 'katli' | 'yari' | 'tam';
  */
 export default function ProgramEkrani() {
   const id = useSeyahatId();
-  const { gun: gunParam, eklenenDurak, eklenenMekan, atlanan } = useLocalSearchParams<{ gun?: string; eklenenDurak?: string; eklenenMekan?: string; atlanan?: string }>();
+  const { gun: gunParam, eklenenDurak, eklenenMekan, atlanan, katildin } = useLocalSearchParams<{ gun?: string; eklenenDurak?: string; eklenenMekan?: string; atlanan?: string; katildin?: string }>();
   // #118 KK4: "Geziyi seyahatime al" sonrası bildirim ("3 durak eklendi · 11 mekan listende"; atlanan varsa eki).
   const [gezidenBildirim, setGezidenBildirim] = useState<string | null>(() => {
     const d = Number(eklenenDurak ?? 0);
@@ -103,6 +105,7 @@ export default function ProgramEkrani() {
         mekanlar={mekanlar.data}
         konaklamalar={konaklamalar.data}
         gunParam={gunParam}
+        katildin={katildin === '1'}
       />
       {gezidenBildirim ? (
         <View style={s.gezidenBildirim} pointerEvents="none">
@@ -127,6 +130,7 @@ function ProgramSekmesi({
   mekanlar,
   konaklamalar,
   gunParam,
+  katildin,
 }: {
   seyahat: Seyahat;
   gunler: Gun[];
@@ -134,10 +138,15 @@ function ProgramSekmesi({
   mekanlar: Mekan[];
   konaklamalar: Konaklama[];
   gunParam?: string;
+  /** #137 KK1: davetle katılım sonrası "Katıldın ✓" alt sayfası. */
+  katildin?: boolean;
 }) {
   const { session } = useOturum();
   const ekran = useWindowDimensions();
   const uyeler = useUyeler(seyahat.id);
+  // #137 KK6: Grup penceresi (yüzlere dokununca); KK1 karşılama sayfası (bir kez, kapatınca kalkar).
+  const [grupAcik, setGrupAcik] = useState(false);
+  const [karsilamaAcik, setKarsilamaAcik] = useState(!!katildin);
   const durakGuncelle = useDurakGuncelle(seyahat.id);
   const durakKaldir = useDurakKaldir(seyahat.id);
   const siraYaz = useSiraYaz(seyahat.id);
@@ -556,11 +565,7 @@ function ProgramSekmesi({
   // #45 §2: üst satırda yalnız "‹ Şehir" + avatarlar ("Şu an" hapı kalktı).
   const sagUst = (
     <View style={s.sagUst}>
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel={t('seyahat.grup.baslik')}
-        onPress={() => router.navigate({ pathname: '/seyahat/[id]/(sekmeler)/grup', params: { id: seyahat.id } })}
-        style={[s.avatarlar, s.golge]}>
+      <Pressable accessibilityRole="button" accessibilityLabel={t('seyahat.grup.baslik')} onPress={() => setGrupAcik(true)} style={[s.avatarlar, s.golge]}>
         {(uyeler.data ?? []).slice(0, 3).map((u, i) => (
           <View key={u.user_id} style={[s.avatarCerceve, i > 0 && { marginLeft: -8 }]}>
             <Avatar ad={u.display_name} boyut={26} arkaPlan={['#0f0f0f', '#ff5a1f', '#4c6ef5'][i % 3]} />
@@ -1110,6 +1115,19 @@ function ProgramSekmesi({
           onKapat={() => setPuanDurakId(null)}
         />
       ) : null}
+      <GrupPenceresi acik={grupAcik} onKapat={() => setGrupAcik(false)} seyahat={seyahat} uyeler={uyeler.data ?? []} mekanlar={mekanlar} />
+      <KatilimSayfasi
+        acik={karsilamaAcik && !!uyeler.data}
+        seyahat={seyahat}
+        uyeler={uyeler.data ?? []}
+        gunSayisi={gunler.length}
+        mekanSayisi={mekanlar.length}
+        onProgram={() => setKarsilamaAcik(false)}
+        onMekanEkle={() => {
+          setKarsilamaAcik(false);
+          router.navigate({ pathname: '/seyahat/[id]/(sekmeler)/kesfet', params: { id: seyahat.id } });
+        }}
+      />
     </>
   );
 }

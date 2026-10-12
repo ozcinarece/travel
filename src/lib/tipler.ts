@@ -158,7 +158,29 @@ export type GeziGunu = { id: string; gezi_id: string; sira: number; baslik: stri
 export type GeziDetay = Gezi & { gezi_gunleri: GeziGunu[] };
 export type KaydedilenTuru = 'gezi' | 'yer';
 export type Kaydedilen = { tur: KaydedilenTuru; hedef_id: string; created_at: string };
-export type OlayTuru = 'gezi_goruntulendi' | 'gezi_alindi' | 'yer_eklendi';
+export type OlayTuru = 'gezi_goruntulendi' | 'gezi_alindi' | 'yer_eklendi' | 'davet_paylasildi' | 'davet_acildi' | 'davet_katildi';
+
+/** #137: /r/{token} özeti (davet_ozeti; giriş gerektirmez). Google verisi yok: yalnız sayılar ve günler. */
+export type DavetOzeti = {
+  trip_id: string;
+  name: string | null;
+  city_label: string;
+  start_date: string | null;
+  end_date: string | null;
+  member_count: number;
+  place_count: number;
+  day_count: number;
+  inviter_name: string | null;
+  /** Soran kullanıcı zaten üye mi (anon için false). */
+  uye: boolean;
+  gunler: { index: number; date: string | null; durak: number }[];
+};
+
+/** #137: davetle_katil cevabı. */
+export type DavetKatilim = { trip_id: string; zaten_uye: boolean; name: string | null; city_label: string; inviter_name: string | null; day_count: number; place_count: number };
+
+/** #137 KK2: web'de katılıp uygulamayı ilk kez açan kişinin düşeceği seyahat (davet_karsilama). */
+export type DavetKarsilama = { trip_id: string; name: string | null; city_label: string; inviter_name: string | null; day_count: number; place_count: number };
 export type Yer = {
   id: string;
   sehir_id: string;
@@ -204,4 +226,7 @@ export type Uye = {
   display_name: string;
   role: 'owner' | 'member';
   joined_at: string;
+  /** #137: davetle katılma kanalı ve uygulamada ilk karşılanma zamanı (web katılımında boş başlar). */
+  joined_via?: 'web' | 'app' | null;
+  landed_at?: string | null;
 };
