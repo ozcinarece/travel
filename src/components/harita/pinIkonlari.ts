@@ -27,6 +27,7 @@ export const PIN_IKONLARI: Record<string, ImageRequireSource> = {
   'araba-6e3fab': require('../../../assets/pin/araba-6e3fab.png'),
   'araba-b83762': require('../../../assets/pin/araba-b83762.png'),
   'araba-0b84ba': require('../../../assets/pin/araba-0b84ba.png'),
+  'yuru-0f0f0f': require('../../../assets/pin/yuru-0f0f0f.png'),
   'ok-ffffff': require('../../../assets/pin/ok-ffffff.png'),
   'kucuk-kamera-20': require('../../../assets/pin/kucuk-kamera-20.png'),
   'daire-kamera-28': require('../../../assets/pin/daire-kamera-28.png'),

@@ -48,6 +48,8 @@ const istekler = [
   { ikon: 'ev', renk: BEYAZ, boyut: 16, kalinlik: 2.2 },
   // #65 (docs/05 §4): araba süre hapı — rota tonunda araba glifi 12 px.
   ...rotaTonlari.map((renk) => ({ ikon: 'araba', renk, boyut: 12, kalinlik: 2.2 })),
+  // #95 (docs/05 §4, LegChips11): yürüme hapı — siyah yürüyen kişi 12 px (hap glifi ayrı `image` işaretçisidir).
+  { ikon: 'yuru', renk: '#0f0f0f', boyut: 12, kalinlik: 2.2 },
   // #59 C: rota yön oku "›" (12 px, beyaz, hafif koyu hale).
   { ikon: 'ok', renk: BEYAZ, boyut: 12, kalinlik: 2.4, hale: true },
 ];

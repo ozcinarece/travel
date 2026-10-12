@@ -83,7 +83,8 @@ export function kisaAd(ad: string): string {
  * atanmamış > öneri > rota bacağı hapı. Seçili gün = tam opak durak pini.
  */
 export function etiketOnceligi(p: HaritaPini): number {
-  if (p.tur === 'etiket') return 0;
+  // #95: haplar en sonda; kendi aralarında uzun bacak önce (çakışırsa kısa bacağın hapı gizlenir).
+  if (p.tur === 'etiket') return Math.min(0.9, (p.bacakM ?? 0) / 1e6);
   if (p.secili) return 100;
   if (p.tur === 'durak') {
     if ((p.opaklik ?? 1) < 1) return 50;
@@ -161,8 +162,22 @@ const ETIKET_YUKSEKLIK = 16;
 const DETAY_YUKSEKLIK = 30;
 const HARF_PX = 6.5;
 /** Bacak etiketi hapı ("🚶 12 dk"): yükseklik ve karakter genişliği. */
-const HAP_YUKSEKLIK = 22;
-const HAP_HARF_PX = 7;
+/** #95 (docs/05 §4): bacak süre hapı — 22 px; solda 12 px glif yuvası (8 px dolgu + 12 glif + 4 boşluk), metin ~7 px/harf, sağda 8 px. */
+export const HAP_YUKSEKLIK = 22;
+export const HAP_HARF_PX = 7;
+export const HAP_GLIF_PX = 12;
+export const HAP_DOLGU_PX = 8;
+export const HAP_GLIF_BOSLUK_PX = 4;
+/** Glif yuvasının merkezi, hapın sol kenarından (px): hap işaretçisinin çapası buradadır — glif PNG işaretçisiyle aynı noktaya oturur. */
+export const HAP_GLIF_MERKEZ_PX = HAP_DOLGU_PX + HAP_GLIF_PX / 2;
+/** Hapın SABİT genişliği (px) — metin uzunluğundan; görünüm bu genişlikte çizilir ki çapa ve çakışma kutusu ölçümsüz bilinsin. */
+export function hapGenisligi(etiket: string): number {
+  return HAP_DOLGU_PX + HAP_GLIF_PX + HAP_GLIF_BOSLUK_PX + etiket.length * HAP_HARF_PX + HAP_DOLGU_PX;
+}
+/** Hap işaretçisinin çapası: x = glif yuvası merkezi (bacağın ortası oraya düşer), y = orta. */
+export function bacakHapCapasi(etiket: string): { x: number; y: number } {
+  return { x: HAP_GLIF_MERKEZ_PX / hapGenisligi(etiket), y: 0.5 };
+}
 
 export function etiketYuksekligi(detay: boolean): number {
   return detay ? DETAY_YUKSEKLIK : ETIKET_YUKSEKLIK;
@@ -211,8 +226,9 @@ export function gizliEtiketler(
     const cx = (p.konum.lng - bolge.merkez.lng) * pxLng;
     const cy = -(p.konum.lat - bolge.merkez.lat) * pxLat;
     if (p.tur === 'etiket') {
-      const en = (p.etiket?.length ?? 0) * HAP_HARF_PX + 16;
-      const kutu: Kutu = { x1: cx - en / 2, y1: cy - HAP_YUKSEKLIK / 2, x2: cx + en / 2, y2: cy + HAP_YUKSEKLIK / 2 };
+      // #95: hapın glif yuvası bacağın ortasındadır; hap oradan sağa uzanır.
+      const en = hapGenisligi(p.etiket ?? '');
+      const kutu: Kutu = { x1: cx - HAP_GLIF_MERKEZ_PX, y1: cy - HAP_YUKSEKLIK / 2, x2: cx - HAP_GLIF_MERKEZ_PX + en, y2: cy + HAP_YUKSEKLIK / 2 };
       const basliktaKalir = kutu.y1 + ekran.yukseklik / 2 < ustBosluk;
       if (basliktaKalir || cakisiyor(kutu)) gizli.etiket.add(p.id);
       else yerlesen.push(kutu);

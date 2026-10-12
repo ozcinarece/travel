@@ -1,7 +1,7 @@
 import { describe, expect, it } from '@jest/globals';
 
 import { bolgeHesapla } from '../geo';
-import { bacakEtiketPinleri, cizgiAnahtari, OK_EN_FAZLA, rotaYuvaKatmanlari, SAYDAM, yonOklari, yuvaSayisi } from '../rota';
+import { bacakEtiketPinleri, cizgiAnahtari, hapGlifAnahtari, OK_EN_FAZLA, rotaYuvaKatmanlari, SAYDAM, yonOklari, yuvaSayisi } from '../rota';
 import type { HaritaCizgisi, HaritaPini } from '../tipler';
 
 const roma = { lat: 41.9028, lng: 12.4964 };
@@ -44,12 +44,22 @@ describe('yonOklari (#59 §C)', () => {
     expect(b).toEqual(a);
   });
 
-  it('bacakEtiketPinleri yalnız etiketli (araba) çizgiden hap üretir', () => {
-    const yuruyus: HaritaCizgisi = { id: 'y', noktalar: [roma, { lat: roma.lat + 0.01, lng: roma.lng }], renk: '#000' };
-    const taksi: HaritaCizgisi = { ...yuruyus, id: 't', arac: true, etiket: '14 dk', etiketIkon: 'araba' };
-    const haplar = bacakEtiketPinleri([yuruyus, taksi]);
-    expect(haplar).toHaveLength(1);
-    expect(haplar[0]).toMatchObject({ id: 'bacak:t', tur: 'etiket', etiket: '14 dk', etiketIkon: 'araba' });
+  it('bacakEtiketPinleri: etiketli her çizgiden hap (#95: yürüme de), bacak uzunluğu ve rota tonu taşır; zoom < 13 → yok', () => {
+    const yuruyus: HaritaCizgisi = { id: 'y', noktalar: [roma, { lat: roma.lat + 0.01, lng: roma.lng }], renk: '#2f6fed', etiket: '12 dk', etiketIkon: 'yuru', etiketRenk: '#1f4fc2', kesik: true };
+    const taksi: HaritaCizgisi = { ...yuruyus, id: 't', arac: true, kesik: false, etiket: '14 dk', etiketIkon: 'araba', renk: '#1f4fc2' };
+    const etiketsiz: HaritaCizgisi = { ...yuruyus, id: 'g', etiket: undefined };
+    const haplar = bacakEtiketPinleri([yuruyus, taksi, etiketsiz], 15);
+    expect(haplar).toHaveLength(2);
+    // Kuş uçuşunda çizgi gün renginde ama hap glifi rota tonunda (PNG yalnız rota tonlarında var).
+    expect(haplar[0]).toMatchObject({ id: 'bacak:y', tur: 'etiket', etiket: '12 dk', etiketIkon: 'yuru', renk: '#1f4fc2' });
+    expect(haplar[1]).toMatchObject({ id: 'bacak:t', etiket: '14 dk', etiketIkon: 'araba', renk: '#1f4fc2' });
+    expect(haplar[0].bacakM).toBeGreaterThan(1000);
+    expect(bacakEtiketPinleri([yuruyus, taksi], 12.9)).toEqual([]);
+    expect(bacakEtiketPinleri([yuruyus, taksi]).length).toBe(2);
+    // Glif PNG anahtarı: yürüme siyah, araba rota tonunda.
+    expect(hapGlifAnahtari(haplar[0])).toBe('yuru-0f0f0f');
+    expect(hapGlifAnahtari(haplar[1])).toBe('araba-1f4fc2');
+    expect(hapGlifAnahtari({ renk: '#000' })).toBeNull();
   });
 });
 

@@ -14,8 +14,10 @@ export type HaritaPini = {
   ikon?: PinIkonu;
   /** #53: kategori rengi — oneri/bos dairesinin kenarı ve ikonu. */
   kategoriRenk?: string;
-  /** #47 B5: `etiket` türü hapta metnin önündeki çizgi ikon. */
-  etiketIkon?: 'yurume' | 'araba';
+  /** #47 B5 / #95: `etiket` türünde hapta metnin önündeki glif — yürüme `yuru` (siyah) ya da `araba` (rota tonu, `renk`). */
+  etiketIkon?: 'yuru' | 'araba';
+  /** #95: hapın bacak uzunluğu (m) — çakışmada uzun bacağın hapı kalır, kısanınki gizlenir. */
+  bacakM?: number;
   /** ★ puan: aday hapında; diğer türlerde ad etiketinin ikinci satırında (seçili ya da zoom ≥ 16, #30). */
   puan?: number | null;
   /** Google yorum sayısı; puanla birlikte "★ 4,8 · 312K". */
@@ -70,8 +72,10 @@ export type HaritaCizgisi = {
   /** 3 dp, kenarsız, oksuz — #91'den beri yalnız kuş uçuşu (`kesik`) ince; diğer günlerin rotası hiç çizilmez. */
   ince?: boolean;
   etiket?: string;
-  /** #47 B5: bacak hapında ikon (emoji yerine). */
-  etiketIkon?: 'yurume' | 'araba';
+  /** #47 B5 / #95: bacak hapında glif — her bacakta: yürüme `yuru`, araba `araba`. */
+  etiketIkon?: 'yuru' | 'araba';
+  /** #95: hapın (araba glifinin) rengi = rota tonu; kuş uçuşunda çizgi gün renginde çizildiği için ayrı verilir. */
+  etiketRenk?: string;
 };
 
 /** Kamerayı programla taşıma isteği; `sayac` her değişimde yeni animasyon (aynı konuma yeniden gidebilmek için). */

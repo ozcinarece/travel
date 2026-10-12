@@ -5,7 +5,7 @@ import { Text, View, useWindowDimensions } from 'react-native';
 import { t } from '@/i18n';
 import { renk } from '@/theme';
 
-import { bolgeHesapla, detayGoster, etiketBolgesi, gizliEtiketler, pinCapasi, pinZ, zoomaGorePinler, zoomDelta } from './geo';
+import { bolgeHesapla, detayGoster, etiketBolgesi, bacakHapCapasi, gizliEtiketler, pinCapasi, pinZ, zoomaGorePinler, zoomDelta } from './geo';
 import { GunHapiIcerigi } from './GunHapi';
 import { hapCapasi, hapYerlesimi, noktaEkranX } from './hap';
 import { PinIcerigi } from './PinIcerigi';
@@ -93,7 +93,8 @@ export function Harita({ merkez, zoom = 14, pinler = [], daireler = [], cizgiler
   const hapYer = hap ? hapYerlesimi(noktaEkranX(hap.konum, bolge, ekran.width), ekran.width, hapGenisligi || 200) : null;
   // #59 §A: kümeleme yok. #59 §B: etiket hesabı yalnız zoom adımında yenilenir. #66: zoom < 13'te öneri küçük; pin düşmez.
   const [etiketBolge, setEtiketBolge] = useState<HaritaBolgesi>(bolge);
-  const tumPinler = useMemo(() => [...zoomaGorePinler(pinler, etiketBolge.zoom), ...bacakEtiketPinleri(cizgiler)], [pinler, cizgiler, etiketBolge.zoom]);
+  // #95: her bacakta süre hapı (glif görünümün içinde — web'de Image sorunsuz); zoom < 13'te yok.
+  const tumPinler = useMemo(() => [...zoomaGorePinler(pinler, etiketBolge.zoom), ...bacakEtiketPinleri(cizgiler, etiketBolge.zoom)], [pinler, cizgiler, etiketBolge.zoom]);
   const gizli = useMemo(() => gizliEtiketler(tumPinler, etiketBolge, olcu, ustBosluk), [tumPinler, etiketBolge, olcu, ustBosluk]);
   // #75: seçim listeden ayrı (`seciliId`); çakışma hesabı seçimle değişmez.
   const gorunen = useMemo(() => tumPinler.filter((p) => !(p.tur === 'etiket' && gizli.etiket.has(p.id))).map((p) => (seciliId !== null && p.id === seciliId && !p.secili ? { ...p, secili: true } : p)), [tumPinler, gizli, seciliId]);
@@ -153,8 +154,9 @@ export function Harita({ merkez, zoom = 14, pinler = [], daireler = [], cizgiler
         {gorunen.map((p) => {
           const detay = detayGoster(p, etiketBolge.zoom) && !gizli.detay.has(p.id);
           const bacak = p.tur === 'etiket' || p.tur === 'konum';
+          const yuzde = ({ x, y }: { x: number; y: number }) => [`${x * 100}%`, `${y * 100}%`];
           const capa =
-            p.tur === 'aday' ? ['10%', '50%'] : p.tur === 'otel' || bacak ? ['50%', '50%'] : (({ x, y }) => [`${x * 100}%`, `${y * 100}%`])(pinCapasi(p, detay));
+            p.tur === 'aday' ? ['10%', '50%'] : p.tur === 'etiket' ? yuzde(bacakHapCapasi(p.etiket ?? '')) : p.tur === 'otel' || bacak ? ['50%', '50%'] : yuzde(pinCapasi(p, detay));
           return p.tur ? (
             <AdvancedMarker
               key={p.id}

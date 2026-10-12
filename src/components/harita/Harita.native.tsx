@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { PixelRatio, StyleSheet, View, useWindowDimensions } from 'react-native';
 import MapView, { Circle, Marker, Polyline, PROVIDER_GOOGLE } from 'react-native-maps';
 
-import { bolgeHesapla, enYakinPin, etiketBolgesi, gizliEtiketler, haritaDolgusu, isaretciImzasi, izlemeGerekli, pinCapasi, pinZ, zoomaGorePinler, zoomDelta } from './geo';
+import { bolgeHesapla, enYakinPin, etiketBolgesi, bacakHapCapasi, gizliEtiketler, haritaDolgusu, isaretciImzasi, izlemeGerekli, pinCapasi, pinZ, zoomaGorePinler, zoomDelta } from './geo';
 import { ACIK_HARITA_STILI } from './haritaStili';
 import { GunHapiIcerigi } from './GunHapi';
 import { hapCapasi, hapYerlesimi, noktaEkranX } from './hap';
@@ -10,7 +10,7 @@ import { dokunusuIletir, isaretciPlani, planFarki } from './isaretciler';
 import { PinIcerigi, pinPngAnahtari } from './PinIcerigi';
 import { IGNE_CAPA, IGNE_CAPA_34, PIN_IKONLARI } from './pinIkonlari';
 import { usePinGorselleri } from './pinOnYukleme';
-import { bacakEtiketPinleri, rotaYuvaKatmanlari, yonOklari, yuvaSayisi } from './rota';
+import { bacakEtiketPinleri, hapGlifAnahtari, rotaYuvaKatmanlari, yonOklari, yuvaSayisi } from './rota';
 import { dokunmaKaydet, isaretciSayilariniKaydet, secimSuresiKaydet, taniSayaclari } from './tani';
 import type { GunHapi, HaritaBolgesi, HaritaCizgisi, HaritaPini, HaritaProps, Konum } from './tipler';
 import { yenidenKurulsunMu } from './yenidenKurulum';
@@ -100,9 +100,9 @@ export function Harita({
     sigdirKamera(sigdir.noktalar, { top: sigdir.ust, right: 48, bottom: sigdir.alt, left: 48 });
   }, [sigdir, hazir]);
 
-  // #33: bacak etiketleri (#65: yalnız araba "12 dk") pin gibi çizilir; çakışma kuralına en düşük öncelikle girer.
+  // #33 / #95: bacak süre hapları (her bacak) pin gibi çizilir; çakışma kuralına en düşük öncelikle girer; zoom < 13'te yok.
   // #66 KK2: zoom < 13'te öneri pinleri küçük ve adsız (zoom adımına bağlı).
-  const tumPinler = useMemo(() => [...zoomaGorePinler(pinler, etiketBolge.zoom), ...bacakEtiketPinleri(cizgiler)], [pinler, cizgiler, etiketBolge.zoom]);
+  const tumPinler = useMemo(() => [...zoomaGorePinler(pinler, etiketBolge.zoom), ...bacakEtiketPinleri(cizgiler, etiketBolge.zoom)], [pinler, cizgiler, etiketBolge.zoom]);
   const olcu = useMemo(() => ({ genislik: ekran.width, yukseklik: ekran.height }), [ekran.width, ekran.height]);
   // #59 §A: kümeleme yok; yakın pinler üst üste biner (beyaz kenar ayırır, z-sırası pinZ). #66 KK1: pin hiç düşmez,
   // yalnız adı / puanı gizlenir. Gizlenen hap hiç çizilmez (opaklıkla saklamak bitmap yakalaması isterdi).
@@ -221,6 +221,19 @@ export function Harita({
           />
         ))}
       {hap ? <GunHapiIsaretcisi hap={hap} bolge={bolge} ekranGenisligi={olcu.genislik} /> : null}
+      {/* #95: hap glifleri AYRI PNG `image` işaretçileri (pinler gibi, ilk kareden yerinde) — hap görünümünün glif yuvasına oturur
+          (hap çapası = yuva merkezi, glif çapası = merkez; ikisi de bacağın orta noktasında). Görünüm yakalamasındaki Image
+          cihazda hiç çıkmıyordu (#95 A). */}
+      {gorsellerHazir &&
+        gorunen
+          .filter((p) => p.tur === 'etiket')
+          .map((p) => {
+            const anahtar = hapGlifAnahtari(p);
+            const gorsel = anahtar ? PIN_IKONLARI[anahtar] : undefined;
+            return gorsel ? (
+              <Marker key={`glif:${p.id}`} coordinate={{ latitude: p.konum.lat, longitude: p.konum.lng }} image={gorsel} anchor={{ x: 0.5, y: 0.5 }} tappable={false} tracksViewChanges={false} zIndex={1} />
+            ) : null;
+          })}
       {plan.map((i) => {
         // #40: çakışmada önce puan satırı düşer (gizli.detay), sonra ad (gizli.etiket).
         const p = i.pin;
@@ -313,8 +326,9 @@ function OzelIsaretci({
   yalnizEtiket = false,
 }: { pin: HaritaPini; etiketGizli: boolean; detay: boolean; yalnizEtiket?: boolean } & Pick<HaritaProps, 'onPinSuruklendi'>) {
   const imza = isaretciImzasi(p, etiketGizli, detay);
-  // Yalnız etiket işaretçisi metinden ibaret: PNG beklenmez.
-  const beklenenPng = yalnizEtiket ? null : pinPngAnahtari(p);
+  // Yalnız etiket işaretçisi metinden ibaret: PNG beklenmez. #95: bacak hapının glifi ayrı işaretçide → görünümde PNG yok.
+  const bacakHapi = p.tur === 'etiket';
+  const beklenenPng = yalnizEtiket || bacakHapi ? null : pinPngAnahtari(p);
   // Bitmap'i alınmış (yakalanmış) görünümün imzası; yüklenmiş PNG ikonun anahtarı.
   const [yakalanan, setYakalanan] = useState<string | null>(null);
   const [yuklenenPng, setYuklenenPng] = useState<string | null>(null);
@@ -336,8 +350,9 @@ function OzelIsaretci({
     setTimeout(() => setYuklenenPng(anahtar), 80);
   };
   const durt = yuklenenPng !== null && yuklenenPng === beklenenPng;
+  // #95: hapın çapası glif yuvasının merkezi — bacağın orta noktası oraya düşer, glif PNG işaretçisi aynı noktada.
   const capa =
-    p.tur === 'aday' ? { x: 0.1, y: 0.5 } : p.tur === 'otel' || p.tur === 'etiket' || p.tur === 'konum' || !p.tur ? { x: 0.5, y: 0.5 } : yalnizEtiket && p.secili ? { x: 0.5, y: 0 } : pinCapasi(p, detay);
+    p.tur === 'aday' ? { x: 0.1, y: 0.5 } : bacakHapi ? bacakHapCapasi(p.etiket ?? '') : p.tur === 'otel' || p.tur === 'konum' || !p.tur ? { x: 0.5, y: 0.5 } : yalnizEtiket && p.secili ? { x: 0.5, y: 0 } : pinCapasi(p, detay);
   // #73: dokunuş işaretçide değil haritanın onPress'inde çözülür (en yakın pin); `tappable` yalnız iOS'ta anlamlı.
   const bacak = !dokunusuIletir(p);
   return (
@@ -360,7 +375,7 @@ function OzelIsaretci({
       }>
       {p.tur ? (
         <View collapsable={false}>
-          <PinIcerigi pin={p} etiketGizli={etiketGizli} detay={detay} onYuklendi={ikonYuklendi} yalnizEtiket={yalnizEtiket} durt={durt} />
+          <PinIcerigi pin={p} etiketGizli={etiketGizli} detay={detay} onYuklendi={ikonYuklendi} yalnizEtiket={yalnizEtiket} durt={durt} glifAyri={bacakHapi} />
         </View>
       ) : null}
     </Marker>
