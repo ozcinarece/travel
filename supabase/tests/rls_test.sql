@@ -547,4 +547,35 @@ begin
 end $$;
 reset role;
 
+-- ---------------------------------------------------------------- #108: yer editörü (rehber kaydı, öne çıkan sırası, place_id)
+reset role;
+set role authenticated;
+select pg_temp.as_email(:E, 'ozcinar.ece@gmail.com');
+insert into public.yerler (id, sehir_id, ad, place_id, kategori, lat, lng) values
+  ('99999999-9999-4999-8999-000000000001', '11111111-1111-4111-8111-000000000001', 'Editör Yeri', 'ChIJabcdefgh12345', 'park', 39.7, 30.5);
+update public.yerler set rehber_md = '## Ne zaman gidilir' || chr(10) || chr(10) || 'Sabah sakin.', ses_url = null where id = '99999999-9999-4999-8999-000000000001';
+-- Öne çıkan sırası şehir içinde tekil; 0 ve negatif olmaz; başka şehirde aynı sıra serbest.
+select pg_temp.hata_bekle($$update public.yerler set one_cikan_sira = 1 where id = '99999999-9999-4999-8999-000000000001'$$, '23505');
+select pg_temp.hata_bekle($$update public.yerler set one_cikan_sira = 0 where id = '99999999-9999-4999-8999-000000000001'$$, '23514');
+update public.yerler set one_cikan_sira = 99 where id = '99999999-9999-4999-8999-000000000001';
+-- Tek deyimde iki yerin sırası takas edilebilir (ertelenebilir kısıt).
+update public.yerler set one_cikan_sira = case one_cikan_sira when 1 then 2 else 1 end
+  where sehir_id = '11111111-1111-4111-8111-000000000001' and one_cikan_sira in (1, 2);
+do $$ begin assert (select one_cikan_sira from public.yerler where ad = 'Odunpazarı Evleri') = 2, 'öne çıkan sırası takas edilir'; end $$;
+-- place_id biçimi.
+select pg_temp.hata_bekle($$update public.yerler set place_id = 'kisa' where id = '99999999-9999-4999-8999-000000000001'$$, '23514');
+select pg_temp.hata_bekle($$update public.yerler set place_id = 'ChIJ abc def ghi' where id = '99999999-9999-4999-8999-000000000001'$$, '23514');
+-- Taslak yerin rehberi görünmez; yayınlanınca herkes okur; admin olmayan yazamaz.
+select pg_temp.as_email(:B, 'b@ornek.com');
+do $$ begin assert (select count(*) from public.yerler where id = '99999999-9999-4999-8999-000000000001') = 0, 'taslak yerin rehberi görünmez'; end $$;
+update public.yerler set rehber_md = 'sabote' where id = '99999999-9999-4999-8999-000000000001';
+select pg_temp.as_email(:E, 'ozcinar.ece@gmail.com');
+update public.yerler set yayin = true where id = '99999999-9999-4999-8999-000000000001';
+set role anon;
+do $$
+begin
+  assert (select rehber_md from public.yerler where id = '99999999-9999-4999-8999-000000000001') like '## Ne zaman gidilir%', 'yayınlı yerin rehberi herkese okunur; admin olmayan yazamadı';
+end $$;
+reset role;
+
 \echo 'rls_test: TÜM TESTLER GEÇTİ'

@@ -3,16 +3,18 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import Svg, { Circle, Path } from 'react-native-svg';
 
 import { blokEkle, gorselSatiri, saatMetni, yayinlaAlanlari } from '@/features/yonetim/gezi';
-import { useGeziIslemleri, useIcerikFotolari, useOtomatikKayit, type YonetimGezi, type YonetimSehri } from '@/features/yonetim/geziSorgulari';
+import { fotoHataAnahtari, useFotoIslemleri, useIcerikFotolari } from '@/features/yonetim/fotolar';
+import { alanlariAl, GEZI_LISTESI, geziAnahtari, useGeziIslemleri, type YonetimGezi, type YonetimSehri } from '@/features/yonetim/geziSorgulari';
+import { useOtomatikKayit } from '@/features/yonetim/otomatikKayit';
 import { ty } from '@/features/yonetim/metin';
 import type { GeziDetay } from '@/lib/tipler';
 import { yazi } from '@/theme';
 
 import { Sekmeler } from '../Form';
 import { Hap } from '../Hap';
+import { IcerikFotolari } from '../IcerikFotolari';
 import { YonetimSayfasi } from '../Kabuk';
 import { yRenk } from '../tema';
-import { GeziFotolari } from './GeziFotolari';
 import { GeziGenel } from './GeziGenel';
 import { GeziOnizleme, OlcekliTelefon } from './GeziOnizleme';
 import { GeziPlanEditoru } from './GeziPlanEditoru';
@@ -31,9 +33,10 @@ export function onizlemeGezisi(gezi: YonetimGezi, taslak: Partial<GeziDetay>): G
  * ortada sekmeler, sağda 300 px telefon önizlemesi. Gezi kimliğiyle anahtarlanır (otomatik kayıt her gezide yeni).
  */
 export function GeziEditoru({ gezi, sehirler, liste }: { gezi: YonetimGezi; sehirler: YonetimSehri[]; liste: React.ReactNode }) {
-  const { taslak, degistir, durum, simdiKaydet } = useOtomatikKayit(gezi);
+  const { taslak, degistir, durum, simdiKaydet } = useOtomatikKayit({ tablo: 'geziler', id: gezi.id, ilk: alanlariAl(gezi), yenilenecek: [GEZI_LISTESI, geziAnahtari(gezi.id)] });
   const islemler = useGeziIslemleri(gezi.id);
   const fotolar = useIcerikFotolari('gezi', gezi.id);
+  const fotoIs = useFotoIslemleri('gezi', gezi.id);
   const [sekme, setSekme] = useState<Sekme>('yazi');
   const [sayfa, setSayfa] = useState<0 | 1>(0);
   const [hata, setHata] = useState<string | null>(null);
@@ -49,10 +52,9 @@ export function GeziEditoru({ gezi, sehirler, liste }: { gezi: YonetimGezi; sehi
   };
   const fotoYukle = async (dosya: File) => {
     try {
-      return await islemler.fotoYukle(dosya, (fotolar.data?.length ?? 0) + 1);
+      return await fotoIs.yukle(dosya, (fotolar.data?.length ?? 0) + 1);
     } catch (e) {
-      const kod = (e as Error).message;
-      throw new Error(ty(kod === 'foto_tur' ? 'gezi.fotoHata.tur' : kod === 'foto_boyut' ? 'gezi.fotoHata.boyut' : 'gezi.fotoHata.yukleme'));
+      throw new Error(ty(`gezi.fotoHata.${fotoHataAnahtari(e)}`));
     }
   };
   const yaziyaEkle = (yol: string, alt: string) => {
@@ -66,7 +68,7 @@ export function GeziEditoru({ gezi, sehirler, liste }: { gezi: YonetimGezi; sehi
   const kayitMetni = durum.kaydediliyor
     ? ty('gezi.kaydediliyor')
     : durum.hata
-      ? ty(durum.hata === 'slug' ? 'gezi.slugHata' : 'gezi.kayitHata')
+      ? ty(durum.hata === 'tekil' ? 'gezi.slugHata' : 'gezi.kayitHata')
       : durum.kaydedildi
         ? ty('gezi.kaydedildi', { saat: saatMetni(durum.kaydedildi) })
         : null;
@@ -90,7 +92,7 @@ export function GeziEditoru({ gezi, sehirler, liste }: { gezi: YonetimGezi; sehi
             <Text style={s.hata}>{hata}</Text>
           </Pressable>
         ) : null}
-        {sekme === 'genel' ? <GeziGenel taslak={taslak} sehirler={sehirler} degistir={degistir} slugHatasi={durum.hata === 'slug'} /> : null}
+        {sekme === 'genel' ? <GeziGenel taslak={taslak} sehirler={sehirler} degistir={degistir} slugHatasi={durum.hata === 'tekil'} /> : null}
         {sekme === 'yazi' ? (
           <GeziYazi
             metin={taslak.yazi_md ?? ''}
@@ -102,7 +104,7 @@ export function GeziEditoru({ gezi, sehirler, liste }: { gezi: YonetimGezi; sehi
         ) : null}
         {sekme === 'plan' ? <GeziPlanEditoru gunler={gezi.gezi_gunleri} merkez={merkez} islemler={islemler} onHata={islemHatasi} /> : null}
         {sekme === 'fotolar' ? (
-          <GeziFotolari
+          <IcerikFotolari
             fotolar={fotolar.data ?? []}
             kapakUrl={taslak.kapak_url}
             onYukle={async (dosyalar) => {
@@ -116,11 +118,11 @@ export function GeziEditoru({ gezi, sehirler, liste }: { gezi: YonetimGezi; sehi
             }}
             onKapak={(kapak_url) => degistir({ kapak_url }, true)}
             onYaziyaEkle={(f) => yaziyaEkle(f.yol, f.altyazi ?? '')}
-            onAltyazi={(yol, a) => islemler.fotoAltyazi(yol, a).catch(islemHatasi)}
-            onSirala={(yollar) => islemler.fotolariSirala(yollar).catch(islemHatasi)}
+            onAltyazi={(yol, a) => fotoIs.altyazi(yol, a).catch(islemHatasi)}
+            onSirala={(yollar) => fotoIs.sirala(yollar).catch(islemHatasi)}
             onSil={(yol) => {
               if (taslak.kapak_url?.endsWith(yol)) degistir({ kapak_url: null }, true);
-              islemler.fotoSil(yol).catch(islemHatasi);
+              fotoIs.sil(yol).catch(islemHatasi);
             }}
           />
         ) : null}
