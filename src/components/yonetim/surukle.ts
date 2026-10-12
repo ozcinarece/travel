@@ -35,6 +35,31 @@ export function useSuruklenen(ref: Ogesi, grup: string, indeks: number, onBirak:
   }, [ref, tur]);
 }
 
+/** #111: yalnız bırakma hedefi (sürüklenmez): `grup`tan gelen öğe bu indekse bırakılır (ör. mekan kartı paragraf altına). */
+export function useBirakmaHedefi(ref: Ogesi, grup: string, indeks: number, onBirak: (kaynak: number, hedef: number) => void) {
+  const tur = `application/x-yonetim-${grup}`;
+  const birak = useEffectEvent((kaynak: number) => onBirak(kaynak, indeks));
+  useEffect(() => {
+    const el = dom(ref);
+    if (!el || typeof el.addEventListener !== 'function') return;
+    const ustunde = (e: DragEvent) => {
+      if (e.dataTransfer?.types.includes(tur)) e.preventDefault();
+    };
+    const bitti = (e: DragEvent) => {
+      const veri = e.dataTransfer?.getData(tur);
+      if (!veri) return;
+      e.preventDefault();
+      birak(Number(veri));
+    };
+    el.addEventListener('dragover', ustunde);
+    el.addEventListener('drop', bitti);
+    return () => {
+      el.removeEventListener('dragover', ustunde);
+      el.removeEventListener('drop', bitti);
+    };
+  }, [ref, tur]);
+}
+
 /** Dosya bırakma alanı (KK5): bilgisayardan sürüklenen görseller. */
 export function useDosyaBirakma(ref: Ogesi, onDosyalar: (dosyalar: File[]) => void) {
   const al = useEffectEvent((d: File[]) => onDosyalar(d));

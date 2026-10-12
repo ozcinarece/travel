@@ -18,12 +18,15 @@ export function useOtomatikKayit<T extends object>({
   ilk,
   yenilenecek,
   bekleme = 2000,
+  onKaydedildi,
 }: {
-  tablo: 'geziler' | 'yerler';
+  tablo: 'geziler' | 'yerler' | 'sehirler' | 'sehir_rehberi';
   id: string;
   ilk: T;
   yenilenecek: QueryKey[];
   bekleme?: number;
+  /** #111: kayıttan sonra (ör. yazıdaki mekanları `icerik_mekanlari`na yaz); hata kayıt hatası sayılır. */
+  onKaydedildi?: (alanlar: T, fark: Partial<T>) => Promise<void>;
 }) {
   const qc = useQueryClient();
   const [taslak, setTaslak] = useState<T>(ilk);
@@ -32,6 +35,10 @@ export function useOtomatikKayit<T extends object>({
   const son = useRef<T>(ilk);
   const zamanlayici = useRef<ReturnType<typeof setTimeout> | null>(null);
   const anahtarlar = useRef(yenilenecek);
+  const sonra = useRef(onKaydedildi);
+  useEffect(() => {
+    sonra.current = onKaydedildi;
+  });
 
   const yaz = useCallback(async () => {
     if (zamanlayici.current) clearTimeout(zamanlayici.current);
@@ -46,6 +53,12 @@ export function useOtomatikKayit<T extends object>({
       return;
     }
     sunucu.current = alanlar;
+    try {
+      await sonra.current?.(alanlar, fark as Partial<T>);
+    } catch {
+      setDurum((d) => ({ ...d, kaydediliyor: false, hata: 'kayit' }));
+      return;
+    }
     setDurum({ kaydedildi: new Date(), kaydediliyor: false, hata: null });
     await Promise.all(anahtarlar.current.map((queryKey) => qc.invalidateQueries({ queryKey })));
   }, [qc, tablo, id]);
