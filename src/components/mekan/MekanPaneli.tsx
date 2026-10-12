@@ -4,6 +4,7 @@ import { ActivityIndicator, BackHandler, Platform, Pressable, ScrollView, StyleS
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AltSayfa, useSayfaKaydirma } from '@/components/harita/AltSayfa';
+import { MdYazi } from '@/components/icerik/MdYazi';
 import { Avatar } from '@/components/ui/Avatar';
 import { FotoGalerisi } from '@/components/yerler/FotoGalerisi';
 import {
@@ -20,6 +21,7 @@ import {
   type PanelSekmesi,
   type YorumSirasi,
 } from '@/features/mekan/panel';
+import { useYerRehberi } from '@/features/icerik/sorgular';
 import { usePlaceFoto, useTamYer, useYorumlar, type HafifYer, type TamYer, type Yorum } from '@/features/yerler/api';
 import { t } from '@/i18n';
 import { izBirak } from '@/lib/hataRaporu';
@@ -179,7 +181,7 @@ export function MekanPaneli(p: MekanPaneliProps) {
               <GenelSekmesi yer={yer} yukleniyor={tam.isPending} hata={tam.isError} dakika={p.dakika} onSure={p.onSure} gunSecici={p.gunSecici} mesgul={p.mesgul} onGaleri={() => galeriAc(true)} />
             ) : null}
             {durum.sekme === 'yorumlar' ? <YorumlarSekmesi placeId={p.placeId} acik={durum.sekme === 'yorumlar'} /> : null}
-            {durum.sekme === 'rehber' ? <RehberSekmesi /> : null}
+            {durum.sekme === 'rehber' ? <RehberSekmesi placeId={p.placeId} /> : null}
             <View style={s.altCubuk}>
               <Pressable
                 accessibilityRole="button"
@@ -452,13 +454,22 @@ function Yildizlar({ puan, boyut }: { puan: number | null; boyut: number }) {
 
 // ---------------------------------------------------------------- Rehber (KK11: yer tutucu)
 
-function RehberSekmesi() {
+/** #100 KK4: `yerler.rehber_md` varsa markdown; yoksa mevcut boş durum. */
+function RehberSekmesi({ placeId }: { placeId: string }) {
+  const yer = useYerRehberi(placeId);
+  const md = yer.data?.rehber_md?.trim();
   return (
     <Govde>
-      <View style={s.bilgi}>
-        <Text style={s.bilgiBaslik}>{t('mekan.panel.rehberBaslik')}</Text>
-        <Text style={s.ozet}>{t('mekan.panel.rehberMetin')}</Text>
-      </View>
+      {md ? (
+        <View style={{ marginHorizontal: -bosluk.kenar }}>
+          <MdYazi kaynak={md} />
+        </View>
+      ) : (
+        <View style={s.bilgi}>
+          <Text style={s.bilgiBaslik}>{t('mekan.panel.rehberBaslik')}</Text>
+          <Text style={s.ozet}>{t('mekan.panel.rehberMetin')}</Text>
+        </View>
+      )}
     </Govde>
   );
 }

@@ -3,7 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { useOturum } from '@/lib/oturum';
 import { supabase } from '@/lib/supabase';
-import type { Gezi, GeziDetay, Kaydedilen, KaydedilenTuru, OlayTuru, Sehir, Yer } from '@/lib/tipler';
+import type { Gezi, GeziDetay, Kaydedilen, KaydedilenTuru, OlayTuru, Sehir, SehirRehberi, Yer } from '@/lib/tipler';
 
 import { otomatikTamamla } from '../yerler/api';
 
@@ -15,7 +15,7 @@ export function useSehirler() {
     queryKey: ['icerik', 'sehirler'],
     staleTime: GUN_MS,
     queryFn: async () => {
-      const { data, error } = await supabase.from('sehirler').select('id, ad, slug, kapak_url, lat, lng, geziler(count)').order('ad');
+      const { data, error } = await supabase.from('sehirler').select('id, ad, slug, kapak_url, lat, lng, ozet, geziler(count)').order('ad');
       if (error) throw error;
       return (data as unknown as (Sehir & { geziler: { count: number }[] })[]).map(({ geziler, ...s }) => ({ ...s, gezi_sayisi: geziler?.[0]?.count ?? 0 }) as Sehir);
     },
@@ -171,4 +171,60 @@ export async function olayYaz(tur: OlayTuru, hedef_id: string | null, meta?: Rec
   } catch {
     // analitik akışı kullanıcıyı durdurmaz
   }
+}
+
+/** #100 A: kalp bırakılan geziler (kimlik listesiyle; yayınlı olmayan düşer). */
+export function useGezilerIle(ids: string[]) {
+  return useQuery({
+    queryKey: ['icerik', 'geziler', 'ile', [...ids].sort().join(',')],
+    enabled: ids.length > 0,
+    staleTime: GUN_MS,
+    queryFn: async () => {
+      const { data, error } = await supabase.from('geziler').select(GEZI_ALANLARI).in('id', ids);
+      if (error) throw error;
+      return data as unknown as Gezi[];
+    },
+  });
+}
+
+/** #100 A: kalp bırakılan yerler (şehir adıyla). */
+export function useYerlerIle(ids: string[]) {
+  return useQuery({
+    queryKey: ['icerik', 'yerler', 'ile', [...ids].sort().join(',')],
+    enabled: ids.length > 0,
+    staleTime: GUN_MS,
+    queryFn: async () => {
+      const { data, error } = await supabase.from('yerler').select(`${YER_ALANLARI}, sehirler(ad, slug, lat, lng)`).in('id', ids);
+      if (error) throw error;
+      return data as unknown as (Yer & { sehirler: { ad: string; slug: string; lat: number; lng: number } | null })[];
+    },
+  });
+}
+
+/** #100 B: şehrin rehber bölümleri (sıra ile); boş dizi = rehber yok (Keşfet'te hap çıkmaz). */
+export function useSehirRehberi(sehirId: string | undefined) {
+  return useQuery({
+    queryKey: ['icerik', 'rehber', sehirId],
+    enabled: !!sehirId,
+    staleTime: GUN_MS,
+    queryFn: async () => {
+      const { data, error } = await supabase.from('sehir_rehberi').select('id, sehir_id, bolum, baslik, ozet, yazi_md, sira').eq('sehir_id', sehirId!).order('sira');
+      if (error) throw error;
+      return data as SehirRehberi[];
+    },
+  });
+}
+
+/** #100 KK4: mekan panelinin Rehber sekmesi — `yerler.rehber_md` (place_id eşleşmesi); yoksa null. */
+export function useYerRehberi(placeId: string | undefined) {
+  return useQuery({
+    queryKey: ['icerik', 'yer-rehber', placeId],
+    enabled: !!placeId,
+    staleTime: GUN_MS,
+    queryFn: async () => {
+      const { data, error } = await supabase.from('yerler').select('id, ad, rehber_md, sehirler(ad)').eq('place_id', placeId!).limit(1).maybeSingle();
+      if (error) throw error;
+      return (data as unknown as { id: string; ad: string; rehber_md: string | null; sehirler: { ad: string } | null } | null) ?? null;
+    },
+  });
 }

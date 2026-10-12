@@ -19,7 +19,7 @@ import { SeyahatYukleme } from '@/components/seyahatler/SeyahatYukleme';
 import { FiltreSayfasi } from '@/components/kesfet/FiltreSayfasi';
 import { CekmeceKartlari, CekmeceSatirlari, CekmeceSeridi } from '@/components/kesfet/OneriCekmecesi';
 import type { SayfaHali } from '@/components/harita/AltSayfa';
-import { sehirEslestir, useSehirler } from '@/features/icerik/sorgular';
+import { sehirEslestir, useSehirRehberi, useSehirler } from '@/features/icerik/sorgular';
 import { useOnerilenler } from '@/features/sihirbaz/onerilenler';
 import { cekmeceListesi, cekmeceSayisi, type CekmeceCipi } from '@/features/yerler/cekmece';
 import { hafifYerler, linkCoz, linkGibiMi, useHafifYerler, useOneriler, yeniOturumJetonu, type HafifYer, type OneriCipi } from '@/features/yerler/api';
@@ -334,6 +334,9 @@ function Kesfet({ seyahat, konaklamalar, ilkMekan }: { seyahat: Seyahat; konakla
   const sehirler = useSehirler();
   const rehberSehir = sehirEslestir(sehirler.data, { ad: seyahat.city_label, lat: seyahat.lat, lng: seyahat.lng });
   const rehber = useOnerilenler(seyahat, rehberSehir, 'rehber');
+  // #100 B KK1: şehrin rehberi varsa arama kutusunun altında sağda beyaz "Rehber" hapı.
+  const sehirRehberi = useSehirRehberi(rehberSehir?.id);
+  const rehberVar = !!rehberSehir && (sehirRehberi.data?.length ?? 0) > 0;
   const cekmecedenEkle = async (y: HafifYer) => {
     setCekmeceMesgul(y.place_id);
     await listeyeEkle(y);
@@ -444,6 +447,14 @@ function Kesfet({ seyahat, konaklamalar, ilkMekan }: { seyahat: Seyahat; konakla
           </View>
         ) : (
           <>
+            {rehberVar ? (
+              <View style={s.rehberSatir} pointerEvents="box-none">
+                <Pressable accessibilityRole="button" onPress={() => router.push({ pathname: '/rehber/[slug]', params: { slug: rehberSehir!.slug } })} style={({ pressed }) => [s.rehberHap, s.golge, pressed && { opacity: 0.85 }]}>
+                  <Ikon ad="kitap" boyut={16} renk={renk.metin} kalinlik={2.2} />
+                  <Text style={s.rehberMetin}>{t('rehber.hap')}</Text>
+                </Pressable>
+              </View>
+            ) : null}
             {/* #69 §B: hızlı filtreler — ★ Öne çıkanlar · 4,5+ ★ · 5K+ yorum; açılır/kapanır (siyah + ×), birlikte VE. */}
             <ScrollView horizontal showsHorizontalScrollIndicator={false} style={s.ciplerKaydirma} contentContainerStyle={s.cipler} keyboardShouldPersistTaps="handled">
               <HizliFiltre aktif={filtre.oneCikan} onPress={() => setFiltre({ ...filtre, oneCikan: !filtre.oneCikan })} yildiz>
@@ -627,6 +638,9 @@ const s = StyleSheet.create({
     paddingVertical: 10,
   },
   yukleniyorSatir: { alignItems: 'center', gap: 6 },
+  rehberSatir: { alignItems: 'flex-end' },
+  rehberHap: { flexDirection: 'row', alignItems: 'center', gap: 6, height: 36, paddingLeft: 10, paddingRight: 12, borderRadius: 999, backgroundColor: renk.zemin },
+  rehberMetin: { fontFamily: yazi.ekstra, fontSize: 12.5, color: renk.metin },
   ciplerKaydirma: { marginHorizontal: -bosluk.kenar },
   cipler: { gap: 8, paddingHorizontal: bosluk.kenar },
   cip: { height: 32, paddingHorizontal: 12, borderRadius: 999, backgroundColor: renk.zemin, flexDirection: 'row', alignItems: 'center', gap: 4 },
