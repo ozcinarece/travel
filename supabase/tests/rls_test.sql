@@ -489,4 +489,62 @@ begin
 end $$;
 reset role;
 
+-- ---------------------------------------------------------------- #107: gezi editörü (planlı yayın, sayılar, sıralama, fotoğraflar)
+reset role;
+set role authenticated;
+select pg_temp.as_email(:E, 'ozcinar.ece@gmail.com');
+insert into public.geziler (id, sehir_id, baslik, slug) values ('88888888-8888-4888-8888-000000000001', '11111111-1111-4111-8111-000000000001', 'Editör gezisi', 'editor-gezisi');
+insert into public.gezi_gunleri (id, gezi_id, sira, baslik) values
+  ('88888888-8888-4888-8888-0000000000d1', '88888888-8888-4888-8888-000000000001', 1, 'Bir'),
+  ('88888888-8888-4888-8888-0000000000d2', '88888888-8888-4888-8888-000000000001', 2, 'İki');
+insert into public.gezi_duraklari (id, gezi_gun_id, sira, ad, lat, lng) values
+  ('88888888-8888-4888-8888-0000000000a1', '88888888-8888-4888-8888-0000000000d1', 1, 'A', 39.7, 30.5),
+  ('88888888-8888-4888-8888-0000000000a2', '88888888-8888-4888-8888-0000000000d1', 2, 'B', 39.7, 30.5),
+  ('88888888-8888-4888-8888-0000000000a3', '88888888-8888-4888-8888-0000000000d1', 3, 'C', 39.7, 30.5);
+do $$
+begin
+  assert (select gun_sayisi from public.geziler where slug = 'editor-gezisi') = 2, 'gün sayısı türetilir';
+  assert (select mekan_sayisi from public.geziler where slug = 'editor-gezisi') = 3, 'mekan sayısı türetilir';
+end $$;
+-- Sürükle-sırala: tek çağrıda C, A, B (tekillik deyim sonunda denetlenir); günler ters çevrilir.
+select public.gezi_duraklari_sirala('88888888-8888-4888-8888-0000000000d1', array['88888888-8888-4888-8888-0000000000a3', '88888888-8888-4888-8888-0000000000a1', '88888888-8888-4888-8888-0000000000a2']::uuid[]);
+select public.gezi_gunleri_sirala('88888888-8888-4888-8888-000000000001', array['88888888-8888-4888-8888-0000000000d2', '88888888-8888-4888-8888-0000000000d1']::uuid[]);
+do $$
+begin
+  assert (select string_agg(ad, '' order by sira) from public.gezi_duraklari where gezi_gun_id = '88888888-8888-4888-8888-0000000000d1') = 'CAB', 'duraklar sıralanır';
+  assert (select sira from public.gezi_gunleri where baslik = 'İki') = 1, 'günler sıralanır';
+end $$;
+delete from public.gezi_duraklari where ad = 'B';
+delete from public.gezi_gunleri where baslik = 'İki';
+do $$
+begin
+  assert (select mekan_sayisi from public.geziler where slug = 'editor-gezisi') = 2, 'durak silinince sayı düşer';
+  assert (select gun_sayisi from public.geziler where slug = 'editor-gezisi') = 1, 'gün silinince sayı düşer';
+end $$;
+-- Planlı yayın: zamanı gelmemiş gezi ve günleri uygulamada görünmez; zamanı geçince görünür.
+update public.geziler set yayin = true, yayin_at = now() + interval '1 day' where slug = 'editor-gezisi';
+insert into public.icerik_fotolari (yol, sahip_tur, sahip_id, altyazi) values ('geziler/88888888-8888-4888-8888-000000000001/kapak.jpg', 'gezi', '88888888-8888-4888-8888-000000000001', 'Kapak');
+select pg_temp.hata_bekle($$insert into public.icerik_fotolari (yol, sahip_tur, sahip_id) values ('geziler/88888888-8888-4888-8888-000000000001/a.jpg', 'yer', '88888888-8888-4888-8888-000000000001')$$, '23514');
+select pg_temp.as_email(:B, 'b@ornek.com');
+do $$
+begin
+  assert (select count(*) from public.geziler where slug = 'editor-gezisi') = 0, 'planlı gezi görünmez';
+  assert (select count(*) from public.gezi_gunleri where gezi_id = '88888888-8888-4888-8888-000000000001') = 0, 'planlı gezinin günü görünmez';
+  assert (select count(*) from public.gezi_duraklari where gezi_gun_id = '88888888-8888-4888-8888-0000000000d1') = 0, 'planlı gezinin durağı görünmez';
+  assert (select altyazi from public.icerik_fotolari where sahip_id = '88888888-8888-4888-8888-000000000001') = 'Kapak', 'fotoğraf altyazısı herkese okunur';
+end $$;
+-- Admin olmayan sıralayamaz (RLS: 0 satır), fotoğraf yazamaz.
+select public.gezi_duraklari_sirala('88888888-8888-4888-8888-0000000000d1', array['88888888-8888-4888-8888-0000000000a1', '88888888-8888-4888-8888-0000000000a3']::uuid[]);
+select pg_temp.hata_bekle($$insert into public.icerik_fotolari (yol, sahip_tur, sahip_id) values ('geziler/88888888-8888-4888-8888-000000000001/b.jpg', 'gezi', '88888888-8888-4888-8888-000000000001')$$, '42501');
+reset role;
+do $$ begin assert (select string_agg(ad, '' order by sira) from public.gezi_duraklari where gezi_gun_id = '88888888-8888-4888-8888-0000000000d1') = 'CA', 'admin olmayan sıralayamaz'; end $$;
+update public.geziler set yayin_at = now() - interval '1 minute' where slug = 'editor-gezisi';
+set role anon;
+do $$
+begin
+  assert (select count(*) from public.geziler where slug = 'editor-gezisi') = 1, 'zamanı gelen gezi görünür';
+  assert (select count(*) from public.gezi_duraklari where gezi_gun_id = '88888888-8888-4888-8888-0000000000d1') = 2, 'durakları görünür';
+end $$;
+reset role;
+
 \echo 'rls_test: TÜM TESTLER GEÇTİ'
