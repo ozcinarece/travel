@@ -129,7 +129,8 @@ export default function SihirbazEkrani() {
         onGeri={geri}
         hata={hata}
         devam={{ onPress: () => seyahatiKur(false), pasif: !aralik && !kilitli, yukleniyor: olustur.isPending }}
-        atla={kilitli ? undefined : { baslik: t('sihirbaz.nezaman.atla'), onPress: () => seyahatiKur(true) }}>
+        atla={kilitli ? undefined : { baslik: t('sihirbaz.nezaman.atla'), onPress: () => seyahatiKur(true) }}
+        altNot={kilitli ? t('sihirbaz.nezaman.kilitli') : undefined}>
         <AdimNeZaman aralik={aralik} onAralik={setAralik} kilitli={kilitli} />
       </AdimKabugu>
     );

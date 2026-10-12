@@ -151,7 +151,7 @@ export type Gezi = {
   sira: number | null;
   created_at: string;
   /** Gömülü şehir (liste kartlarında "Eskişehir"). */
-  sehirler?: { ad: string; slug: string } | null;
+  sehirler?: { ad: string; slug: string; kapak_url?: string | null } | null;
 };
 export type GeziDuragi = { id: string; gezi_gun_id: string; sira: number; place_id: string | null; ad: string; kategori: string | null; sure_dk: number; lat: number; lng: number };
 export type GeziGunu = { id: string; gezi_id: string; sira: number; baslik: string | null; gezi_duraklari: GeziDuragi[] };

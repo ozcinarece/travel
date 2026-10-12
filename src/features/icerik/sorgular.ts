@@ -1,11 +1,14 @@
 // #97 / #98 / #100: içerik tabloları (sehirler, yerler, geziler, kaydedilenler, olaylar) — yayınlı okunur; backoffice yazar.
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { useOturum } from '@/lib/oturum';
 import { supabase } from '@/lib/supabase';
 import type { Gezi, GeziDetay, Kaydedilen, KaydedilenTuru, OlayTuru, Sehir, SehirRehberi, Yer } from '@/lib/tipler';
 
-import { otomatikTamamla } from '../yerler/api';
+import { fonksiyonHatasi, otomatikTamamla, yeniOturumJetonu } from '../yerler/api';
+
+import { izBirak } from '@/lib/hataRaporu';
 
 const GUN_MS = 24 * 60 * 60 * 1000;
 
@@ -51,7 +54,7 @@ export function useTumYerler() {
   });
 }
 
-const GEZI_ALANLARI = 'id, sehir_id, baslik, slug, kapak_url, ozet, yazar_ad, gun_sayisi, mekan_sayisi, sira, created_at, sehirler(ad, slug)';
+const GEZI_ALANLARI = 'id, sehir_id, baslik, slug, kapak_url, ozet, yazar_ad, gun_sayisi, mekan_sayisi, sira, created_at, sehirler(ad, slug, kapak_url)';
 
 /** #97 KK4: önerilen geziler (sıra, sonra yeni); `sehirId` ile süzülür. */
 export function useGeziler(sehirId?: string) {
@@ -98,19 +101,65 @@ export function sehirEslestir(sehirler: Sehir[] | undefined, secim: { ad: string
 }
 
 const cozulen = new Map<string, Promise<string | null>>();
+/** #118: çözülemeyen satırların sebebi (kullanıcıya söylenir: "Google'da bulunamadı" / sunucu hatası). */
+const cozumSebepleri = new Map<string, string>();
+export function cozumSebebi(id: string): string | null {
+  return cozumSebepleri.get(id) ?? null;
+}
 
 /**
  * İçerik satırının (yer ya da gezi durağı) Google place_id'si: backoffice doldurmadıysa adıyla Autocomplete'ten ilk öneri
  * (konuma yanlı). Yalnız bellekte tutulur (PRD §7: Google kimliği içerik tablosuna istemciden yazılmaz).
  */
+/**
+ * #118 kök nedeni: oturum anahtarı `icerik-<uuid>` (43 karakter) Google'ın 36 karakter sınırını aşıyordu → her çözüm 400 ile
+ * düşüyor, istemci sessizce "bulunamadı" sayıyordu. Artık 32 karakterlik anahtar; boş sonuçta sunucu Text Search dener;
+ * hata/boşluk sebebi `cozumSebebi` ile ekrana taşınır ve iz bırakılır. Boş sonuç önbelleğe alınmaz (yeniden denenir).
+ * Çözülen kimlik cihazda 7 gün saklanır (AsyncStorage, #113); backoffice `place_id`'yi doldurunca (#106) bu yol kullanılmaz.
+ */
+const COZUM_ONEKI = 'icerik-place-id:';
+const COZUM_OMRU_MS = 7 * 24 * 60 * 60 * 1000;
+
+async function kayitliCozum(id: string): Promise<string | null | undefined> {
+  try {
+    const ham = await AsyncStorage.getItem(COZUM_ONEKI + id);
+    if (!ham) return undefined;
+    const { place_id, zaman } = JSON.parse(ham) as { place_id: string; zaman: number };
+    if (!place_id || Date.now() - zaman > COZUM_OMRU_MS) return undefined;
+    return place_id;
+  } catch {
+    return undefined;
+  }
+}
+
+function cozumuSakla(id: string, place_id: string) {
+  AsyncStorage.setItem(COZUM_ONEKI + id, JSON.stringify({ place_id, zaman: Date.now() })).catch(() => {});
+}
+
 export function icerikPlaceId(satir: { id: string; place_id: string | null; ad: string; lat: number; lng: number }, sehirAdi: string): Promise<string | null> {
   if (satir.place_id) return Promise.resolve(satir.place_id);
   let p = cozulen.get(satir.id);
   if (!p) {
-    p = otomatikTamamla({ girdi: `${satir.ad}, ${sehirAdi}`, oturum: `icerik-${satir.id}`, merkez: { lat: satir.lat, lng: satir.lng, yaricapM: 5000 } })
-      .then((oneriler) => oneriler[0]?.place_id ?? null)
-      .catch(() => {
+    p = kayitliCozum(satir.id)
+      .then(async (kayitli) => {
+        if (kayitli) return kayitli;
+        const oneriler = await otomatikTamamla({ girdi: `${satir.ad}, ${sehirAdi}`, oturum: yeniOturumJetonu(), merkez: { lat: satir.lat, lng: satir.lng, yaricapM: 5000 }, aramaYedegi: true });
+        const pid = oneriler[0]?.place_id ?? null;
+        if (!pid) {
+          cozumSebepleri.set(satir.id, 'bulunamadi');
+          cozulen.delete(satir.id);
+          izBirak('icerik', `place_id yok: ${satir.ad}`);
+        } else {
+          cozumSebepleri.delete(satir.id);
+          cozumuSakla(satir.id, pid);
+        }
+        return pid;
+      })
+      .catch(async (e) => {
+        const sebep = await fonksiyonHatasi(e);
+        cozumSebepleri.set(satir.id, sebep);
         cozulen.delete(satir.id);
+        izBirak('icerik', `place_id çözümü hata: ${satir.ad} — ${sebep}`, 'error');
         return null;
       });
     cozulen.set(satir.id, p);

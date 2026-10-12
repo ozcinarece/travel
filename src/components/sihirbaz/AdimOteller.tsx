@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Pressable, StyleSheet, Switch, Text, View } from 'react-native';
 
+import { SecimMenusu } from '@/components/program/SecimMenusu';
 import { Ikon } from '@/components/ui/Ikon';
 import type { Konaklama } from '@/features/konaklama/plan';
 import { useGeceOteliKaydet, useTumGunlereOtel, type OtelSecimiVeyaKayitli } from '@/features/konaklama/sorgular';
@@ -21,13 +22,15 @@ export function AdimOteller({ seyahat, gunler, konaklamalar, onHata }: Props) {
   const farkli = new Set(liste.map(geceninOteli).filter(Boolean));
   const [hepsiAyni, setHepsiAyni] = useState(farkli.size <= 1);
   const [secilen, setSecilen] = useState<Gece | 'hepsi' | null>(null);
+  // #117 KK5b: dolu satıra dokununca menü — Oteli değiştir / Kaldır (boş satır doğrudan seçim sayfasını açar).
+  const [menu, setMenu] = useState<Gece | 'hepsi' | null>(null);
   const hepsine = useTumGunlereOtel(seyahat.id);
   const geceye = useGeceOteliKaydet(seyahat.id);
   const ilkOtel = liste.length > 0 ? geceninOteli(liste[0]) : (gunler[0]?.start_stay_id ?? null);
   const mesgul = hepsine.isPending || geceye.isPending;
 
-  const sec = async (otel: OtelSecimiVeyaKayitli) => {
-    const hedef = secilen;
+  const sec = async (otel: OtelSecimiVeyaKayitli, hedefVerilen?: Gece | 'hepsi') => {
+    const hedef = hedefVerilen ?? secilen;
     setSecilen(null);
     onHata(null);
     try {
@@ -49,10 +52,19 @@ export function AdimOteller({ seyahat, gunler, konaklamalar, onHata }: Props) {
         <Switch accessibilityLabel={t('sihirbaz.oteller.hepsiAyni')} value={hepsiAyni} onValueChange={setHepsiAyni} trackColor={{ true: renk.metin, false: renk.ayrac }} />
       </View>
       {hepsiAyni ? (
-        <OtelSatiri etiket={null} ad={otelAdi(ilkOtel)} ekleMetni={t('sihirbaz.oteller.otelSec')} pasif={mesgul} onPress={() => setSecilen('hepsi')} />
+        <OtelSatiri etiket={null} ad={otelAdi(ilkOtel)} ekleMetni={t('sihirbaz.oteller.otelSec')} pasif={mesgul} onPress={() => (ilkOtel ? setMenu('hepsi') : setSecilen('hepsi'))} />
       ) : (
-        liste.map((g) => <OtelSatiri key={g.sira} etiket={g.etiket} ad={otelAdi(geceninOteli(g))} ekleMetni={t('sihirbaz.oteller.otelEkle')} pasif={mesgul} onPress={() => setSecilen(g)} />)
+        liste.map((g) => <OtelSatiri key={g.sira} etiket={g.etiket} ad={otelAdi(geceninOteli(g))} ekleMetni={t('sihirbaz.oteller.otelEkle')} pasif={mesgul} onPress={() => (geceninOteli(g) ? setMenu(g) : setSecilen(g))} />)
       )}
+      <SecimMenusu
+        acik={menu !== null}
+        baslik={menu && menu !== 'hepsi' ? menu.etiket : t('sihirbaz.oteller.hepsiAyni')}
+        secenekler={[
+          { etiket: t('sihirbaz.oteller.menuDegistir'), onPress: () => setSecilen(menu) },
+          { etiket: t('sihirbaz.oteller.kaldir'), onPress: () => menu && sec(null, menu), tehlike: true },
+        ]}
+        onKapat={() => setMenu(null)}
+      />
       <Text style={s.not}>{t('sihirbaz.oteller.not')}</Text>
       <OtelSecSayfasi
         acik={secilen !== null}

@@ -50,6 +50,8 @@ export async function otomatikTamamla(secenek: {
   tur?: 'cities' | 'lodging';
   limit?: number;
   merkez?: Merkez;
+  /** #118: Autocomplete boş dönerse sunucu Text Search dener (içerik yerleri). */
+  aramaYedegi?: boolean;
 }): Promise<Oneri[]> {
   const cevap = await cagir<{ oneriler: Oneri[] }>('places-autocomplete', {
     input: secenek.girdi,
@@ -57,8 +59,19 @@ export async function otomatikTamamla(secenek: {
     tur: secenek.tur,
     limit: secenek.limit,
     merkez: secenek.merkez,
+    ...(secenek.aramaYedegi ? { aramaYedegi: true } : {}),
   });
   return cevap.oneriler;
+}
+
+/** 4xx/5xx cevabının gövdesindeki `hata` metni (supabase-js FunctionsHttpError.context); yoksa mesaj. */
+export async function fonksiyonHatasi(e: unknown): Promise<string> {
+  const ctx = (e as { context?: Response })?.context;
+  if (ctx && typeof ctx.json === 'function') {
+    const g = await ctx.json().catch(() => null);
+    if (g?.hata) return String(g.hata);
+  }
+  return e instanceof Error ? e.message : String(e);
 }
 
 export type LinkCozumu = { yer: HafifYer; kaynak: 'place_id' | 'arama' | 'koordinat' };

@@ -79,7 +79,8 @@ export function OtelSecSayfasi({ acik, baslik, seyahat, konaklamalar, onKapat, o
 
   return (
     <Modal visible={acik && !haritada} transparent animationType="slide" onRequestClose={onKapat}>
-      <KeyboardAvoidingView style={s.perde} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+      {/* #117 KK5a: Android'de de klavye kadar yukarı kalk (Modal içinde pencere yeniden boyutlanmaz). */}
+      <KeyboardAvoidingView style={s.perde} behavior="padding" keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}>
         <Pressable style={StyleSheet.absoluteFill} onPress={onKapat} accessibilityLabel={t('genel.vazgec')} />
         <View style={s.kutu}>
           <View style={s.tutamak} />
