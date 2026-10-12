@@ -20,10 +20,14 @@ export type YonetimGeziOzeti = {
   yayin: boolean;
   yayin_at: string | null;
   updated_at: string;
+  kapak_url: string | null;
+  ozet: string | null;
+  sira: number | null;
+  created_at: string;
   sehirler: { ad: string } | null;
 };
 export type YonetimGezi = Omit<YonetimGeziOzeti, 'sehirler'> &
-  GeziAlanlari & { created_at: string; sira: number | null; sehirler: { ad: string; slug: string } | null; gezi_gunleri: GeziGunu[] };
+  GeziAlanlari & { sehirler: { ad: string; slug: string } | null; gezi_gunleri: GeziGunu[] };
 
 export const geziAnahtari = (id: string | undefined) => ['yonetim', 'gezi', id] as const;
 export const GEZI_LISTESI = ['yonetim', 'geziler'] as const;
@@ -46,7 +50,7 @@ export function useYonetimGezileri() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('geziler')
-        .select('id, baslik, slug, sehir_id, gun_sayisi, mekan_sayisi, yayin, yayin_at, updated_at, sehirler(ad)')
+        .select('id, baslik, slug, sehir_id, gun_sayisi, mekan_sayisi, yayin, yayin_at, updated_at, kapak_url, ozet, sira, created_at, sehirler(ad)')
         .order('updated_at', { ascending: false });
       if (error) throw error;
       return data as unknown as YonetimGeziOzeti[];
