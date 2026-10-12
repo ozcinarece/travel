@@ -1,7 +1,7 @@
 import { describe, expect, it } from '@jest/globals';
 
 import { bolgeHesapla } from '../geo';
-import { bacakEtiketPinleri, cizgiAnahtari, OK_EN_FAZLA, yonOklari } from '../rota';
+import { bacakEtiketPinleri, cizgiAnahtari, OK_EN_FAZLA, rotaYuvaKatmanlari, SAYDAM, yonOklari, yuvaSayisi } from '../rota';
 import type { HaritaCizgisi, HaritaPini } from '../tipler';
 
 const roma = { lat: 41.9028, lng: 12.4964 };
@@ -59,5 +59,36 @@ describe('cizgiAnahtari (#88 KK1)', () => {
     expect(cizgiAnahtari({ id: 'rota:g1:A>B', kesik: false })).toBe('rota:g1:A>B|yol');
     expect(cizgiAnahtari({ id: 'rota:g1:A>B' })).toBe('rota:g1:A>B|yol');
     expect(cizgiAnahtari({ id: 'rota:g1:A>B', kesik: true })).not.toBe(cizgiAnahtari({ id: 'rota:g1:A>B', kesik: false }));
+  });
+});
+
+describe('rota yuva havuzu (#91 ikinci tur — Android Polyline kaldırılmaz)', () => {
+  const a = { lat: 41.9, lng: 12.49 };
+  const z = { lat: 41.91, lng: 12.5 };
+  it('havuz yalnız büyür: 9 → 0 çizgide 9 yuva kalır, 12 gelince 12', () => {
+    expect(yuvaSayisi(0, 9)).toBe(9);
+    expect(yuvaSayisi(9, 0)).toBe(9);
+    expect(yuvaSayisi(9, 12)).toBe(12);
+  });
+  it('her yuva hep 4 katman, aynı sırada ve genişlikte; boş yuva noktasız + saydam', () => {
+    const bos = rotaYuvaKatmanlari(null);
+    expect(bos.map((k) => k.ad)).toEqual(['kesik', 'golge', 'kenar', 'renk']);
+    expect(bos.map((k) => k.genislik)).toEqual([3, 11, 9, 5.5]);
+    expect(bos.every((k) => k.noktalar.length === 0 && k.renk === SAYDAM)).toBe(true);
+  });
+  it('kuş uçuşu yalnız kesik katmanı doldurur; rota üç düz katmanı doldurur, kesik boşalır', () => {
+    const kus = rotaYuvaKatmanlari({ id: 'r', noktalar: [a, z], renk: '#2f6fed', opaklik: 0.9, kesik: true, ince: true });
+    expect(kus[0].noktalar).toEqual([a, z]);
+    expect(kus[0].renk).toBe('#2f6fede6');
+    expect(kus.slice(1).every((k) => k.noktalar.length === 0 && k.renk === SAYDAM)).toBe(true);
+
+    const yol = rotaYuvaKatmanlari({ id: 'r', noktalar: [a, z], renk: '#1f4fc2', opaklik: 0.9 });
+    expect(yol[0].noktalar).toEqual([]);
+    expect(yol[0].renk).toBe(SAYDAM);
+    expect(yol.slice(1).map((k) => k.noktalar)).toEqual([[a, z], [a, z], [a, z]]);
+    expect(yol[3].renk).toBe('#1f4fc2e6');
+    expect(yol[2].renk).toBe('#ffffffe6');
+    // Katman sırası ve genişlikleri çizgiden bağımsız sabit: yuvadaki Polyline örnekleri yerinde güncellenir.
+    expect(yol.map((k) => [k.ad, k.genislik, k.zIndex])).toEqual(rotaYuvaKatmanlari(null).map((k) => [k.ad, k.genislik, k.zIndex]));
   });
 });
