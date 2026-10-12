@@ -1,6 +1,6 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
-import { ActivityIndicator, Linking, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { ActivityIndicator, Linking, Pressable, ScrollView, StyleSheet, Text, TextInput, View, useWindowDimensions } from 'react-native';
 
 import { bolgedenUzaklasti, bolgeHesapla, zoomDelta } from '@/components/harita/geo';
 import { medyan, secimSuresiKaydet, taniSayaclari, useTani } from '@/components/harita/tani';
@@ -20,6 +20,7 @@ import { FiltreSayfasi } from '@/components/kesfet/FiltreSayfasi';
 import { CekmeceKartlari, CekmeceSatirlari, CekmeceSeridi } from '@/components/kesfet/OneriCekmecesi';
 import type { SayfaHali } from '@/components/harita/AltSayfa';
 import { sehirEslestir, useSehirRehberi, useSehirler } from '@/features/icerik/sorgular';
+import { kartKamerasi } from '@/features/program/durakKarti';
 import { useOnerilenler } from '@/features/sihirbaz/onerilenler';
 import { cekmeceListesi, cekmeceSayisi, type CekmeceCipi } from '@/features/yerler/cekmece';
 import { hafifYerler, linkCoz, linkGibiMi, useHafifYerler, useOneriler, yeniOturumJetonu, type HafifYer, type OneriCipi } from '@/features/yerler/api';
@@ -318,8 +319,9 @@ function Kesfet({ seyahat, konaklamalar, ilkMekan }: { seyahat: Seyahat; konakla
     setOncekiSecim(secim);
     if (secim && cekmece !== 'katli') setCekmece('katli');
   }
-  const bolgeListesi = useMemo(() => cekmeceListesi(oneriListesi, havuzIdleri, bolge, tutulan), [oneriListesi, havuzIdleri, bolge, tutulan]);
-  const cekmeceListe = useMemo(() => (cekmece === 'tam' && cekmeceCip !== 'bolge' ? cekmeceListesi(oneriListesi, havuzIdleri, bolge, tutulan, cekmeceCip) : bolgeListesi), [cekmece, cekmeceCip, oneriListesi, havuzIdleri, bolge, tutulan, bolgeListesi]);
+  // #121 KK5: çekmece de hızlı filtreden geçenleri listeler (`gecenler`), pinlerle aynı küme.
+  const bolgeListesi = useMemo(() => cekmeceListesi(gecenler, havuzIdleri, bolge, tutulan), [gecenler, havuzIdleri, bolge, tutulan]);
+  const cekmeceListe = useMemo(() => (cekmece === 'tam' && cekmeceCip !== 'bolge' ? cekmeceListesi(gecenler, havuzIdleri, bolge, tutulan, cekmeceCip) : bolgeListesi), [cekmece, cekmeceCip, gecenler, havuzIdleri, bolge, tutulan, bolgeListesi]);
   const cekmeceSayi = cekmeceSayisi(bolgeListesi, havuzIdleri);
   // Satır / kart fotoğrafları: yalnız ilk 12 öneri için hafif Details foto maskesi (24 sa önbellek).
   const fotoIdleri = useMemo(() => cekmeceListe.slice(0, 12).map((y) => y.place_id).sort(), [cekmeceListe]);
@@ -350,6 +352,16 @@ function Kesfet({ seyahat, konaklamalar, ilkMekan }: { seyahat: Seyahat; konakla
     await listedenCikar(m);
     setCekmeceMesgul(null);
   };
+  // #121 KK7: satıra dokunma → panel + kamera o pine kayar (pin iğne olur). Merkez, yarım panelin (ekranın %55'i) üstünde
+  // kalacak kadar güneye alınır (Program kartıyla aynı hesap, zoom 16).
+  const ekran = useWindowDimensions();
+  const cekmecedenAc = (placeId: string) => {
+    setSecim({ place_id: placeId, kaynak: 'oneri' });
+    const y = oneriListesi.find((x) => x.place_id === placeId);
+    if (!y) return;
+    const kamera = kartKamerasi({ konum: { lat: y.lat, lng: y.lng }, zoom: 16, ekranYukseklik: ekran.height, kartYukseklik: Math.round(ekran.height * 0.55), altPay: 0 });
+    odakla(kamera.konum.lat, kamera.konum.lng, kamera.zoom);
+  };
   const cekmeceOrtak = {
     havuz: havuzIdleri,
     oneCikan,
@@ -357,7 +369,7 @@ function Kesfet({ seyahat, konaklamalar, ilkMekan }: { seyahat: Seyahat; konakla
     mesgulId: cekmeceMesgul,
     onEkle: cekmecedenEkle,
     onCikar: cekmecedenCikar,
-    onAc: (placeId: string) => setSecim({ place_id: placeId, kaynak: 'oneri' }),
+    onAc: cekmecedenAc,
   };
 
   const sonEkleyen = havuz.length > 0 ? havuz[havuz.length - 1] : null;

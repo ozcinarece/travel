@@ -23,8 +23,9 @@ Deno.serve(async (istek) => {
   if (ids.length > 25) return hata('en fazla 25 place_id');
   const sehir = g.sehir === true;
   const saatler = g.saatler === true && !sehir;
-  // #29: fotoğraf yalnız tek mekan için (önizleme kartı); Photo çağrısı fotoğraf başına faturalanır.
-  const foto = g.foto === true && !sehir && !saatler && ids.length === 1;
+  // #29: fotoğraf önizleme kartı için; #119: içerik karoları (gezi durakları, yerler) için en çok 12 kimlikle de —
+  // `photos` alanı Details maskesine ek SKU getirmez, Photo medyası istemci yüklerken faturalanır; 24 sa önbellek.
+  const foto = g.foto === true && !sehir && !saatler && ids.length <= 12;
   // #45: editorialSummary yalnız pin paneli (tek mekan, fotoğrafla birlikte); 24 sa önbellek.
   const ozet = foto && g.ozet === true;
   const oturum = typeof g.sessionToken === 'string' && /^[A-Za-z0-9_-]{8,64}$/.test(g.sessionToken) ? g.sessionToken : undefined;
