@@ -5,6 +5,7 @@ import { ActivityIndicator, Modal, Pressable, ScrollView, StyleSheet, Text, View
 
 import { gunHucresi } from '@/components/program/GunKartlari';
 import { Buton } from '@/components/ui/Buton';
+import { Ikon } from '@/components/ui/Ikon';
 import { useGunler } from '@/features/gunler/sorgular';
 import { aktarmaDugmesi, aktarmaPlani, geziGunuBasligi, varsayilanEslesme, type AktarmaPlani, type AktarmaSecimi } from '@/features/icerik/aktar';
 import { seyahatAdi } from '@/features/sihirbaz/sihirbaz';
@@ -31,6 +32,10 @@ export function SeyahatimeAl({ acik, gezi, seyahatler, onKapat, onYeniSeyahat, o
   const [mesgul, setMesgul] = useState(false);
   const gunListesi = useMemo(() => [...(gunler.data ?? [])].sort((a, b) => a.index - b.index), [gunler.data]);
   const eslesme = secim.tur === 'gunler' ? secim.eslesme : varsayilanEslesme(gezi, gunListesi);
+  // #118 KK3: her gezi günü için onay kutusu; kapalı gün hiç alınmaz (kanvas Home13 ekran 4).
+  const dahil = secim.tur === 'gunler' ? (secim.dahil ?? {}) : {};
+  const gunDahil = (gunId: string) => dahil[gunId] !== false;
+  const gunDegistir = (gunId: string) => secim.tur === 'gunler' && setSecim({ ...secim, dahil: { ...dahil, [gunId]: !gunDahil(gunId) } });
   const plan = useMemo(() => aktarmaPlani(gezi, gunListesi, secim), [gezi, gunListesi, secim]);
   const gunAdi = (g: Gun) => gunHucresi(g, 0).ust;
   const tumHedefler = Object.values(varsayilanEslesme(gezi, gunListesi)).filter((x): x is string => !!x).map((id) => gunListesi.find((g) => g.id === id)).filter((g): g is Gun => !!g).map(gunAdi);
@@ -74,10 +79,14 @@ export function SeyahatimeAl({ acik, gezi, seyahatler, onKapat, onYeniSeyahat, o
                   {secim.tur === 'gunler'
                     ? gezi.gezi_gunleri.map((g) => (
                         <View key={g.id} style={s.gunSatir}>
-                          <View style={{ flex: 1 }}>
-                            <Text style={s.gunBaslik}>{geziGunuBasligi(g)}</Text>
-                            <Text style={s.gunAlt}>{t('anasayfa.mekanSayisi', { n: g.gezi_duraklari.length })}</Text>
-                          </View>
+                          <Pressable accessibilityRole="checkbox" accessibilityLabel={t('gezi.gunDahil')} accessibilityState={{ checked: gunDahil(g.id) }} onPress={() => gunDegistir(g.id)} hitSlop={6} style={s.gunUst}>
+                            <View style={[s.onayKutusu, gunDahil(g.id) && s.onayKutusuSecili]}>{gunDahil(g.id) ? <Ikon ad="tik" boyut={13} renk={renk.zemin} kalinlik={2.8} /> : null}</View>
+                            <View style={{ flex: 1 }}>
+                              <Text style={[s.gunBaslik, !gunDahil(g.id) && { color: renk.soluk }]}>{geziGunuBasligi(g)}</Text>
+                              <Text style={s.gunAlt}>{t('anasayfa.mekanSayisi', { n: g.gezi_duraklari.length })}</Text>
+                            </View>
+                          </Pressable>
+                          {gunDahil(g.id) ? (
                           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={s.hedefCipler}>
                             {gunListesi.map((hg) => (
                               <Pressable key={hg.id} accessibilityRole="button" accessibilityState={{ selected: eslesme[g.id] === hg.id }} onPress={() => setSecim({ tur: 'gunler', eslesme: { ...eslesme, [g.id]: hg.id } })} style={[s.hedefCip, eslesme[g.id] === hg.id && s.cipSecili]}>
@@ -88,6 +97,7 @@ export function SeyahatimeAl({ acik, gezi, seyahatler, onKapat, onYeniSeyahat, o
                               <Text style={[s.hedefCipMetin, !eslesme[g.id] && s.cipMetinSecili]}>{t('gezi.listeye')}</Text>
                             </Pressable>
                           </ScrollView>
+                          ) : null}
                         </View>
                       ))
                     : null}
@@ -146,6 +156,9 @@ const s = StyleSheet.create({
   secenekBaslik: { fontFamily: yazi.kalin, fontSize: 14, color: renk.metin },
   secenekAlt: { fontFamily: yazi.normal, fontSize: 12, color: renk.ikincil },
   gunSatir: { gap: 6, paddingTop: 4, borderTopWidth: 1, borderTopColor: renk.ayrac, paddingVertical: 8 },
+  gunUst: { flexDirection: 'row', alignItems: 'center', gap: 12, minHeight: 36 },
+  onayKutusu: { width: 20, height: 20, borderRadius: 6, borderWidth: 1.5, borderColor: '#c8c8c4', alignItems: 'center', justifyContent: 'center' },
+  onayKutusuSecili: { backgroundColor: renk.metin, borderColor: renk.metin },
   gunBaslik: { fontFamily: yazi.kalin, fontSize: 13, color: renk.metin },
   gunAlt: { fontFamily: yazi.normal, fontSize: 11, color: renk.ikincil },
   hedefCipler: { gap: 6 },

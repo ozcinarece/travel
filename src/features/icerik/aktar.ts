@@ -6,8 +6,8 @@ import { gunHucresi } from '@/components/program/GunKartlari';
 export type AktarmaSecimi =
   /** KK2: günler sırayla seyahatin günlerine; gün azsa fazlası listeye. */
   | { tur: 'tum' }
-  /** KK2: her gezi günü için hedef gün (null = listeye). */
-  | { tur: 'gunler'; eslesme: Record<string, string | null> }
+  /** KK2: her gezi günü için hedef gün (null = listeye). #118: `dahil[günId] === false` → o gün hiç alınmaz (listeye de değil). */
+  | { tur: 'gunler'; eslesme: Record<string, string | null>; dahil?: Record<string, boolean> }
   /** KK2: yalnız mekanlar listeye. */
   | { tur: 'mekanlar' };
 
@@ -31,7 +31,10 @@ export function varsayilanEslesme(gezi: Pick<GeziDetay, 'gezi_gunleri'>, gunler:
 }
 
 export function aktarmaPlani(gezi: Pick<GeziDetay, 'gezi_gunleri'>, gunler: Gun[], secim: AktarmaSecimi): AktarmaPlani {
-  const tum = gezi.gezi_gunleri.flatMap((g) => g.gezi_duraklari);
+  // #118: kapalı günler (onay kutusu) planın tamamen dışında — mekanı havuza da, listeye de gitmez.
+  const dahilMi = (g: GeziGunu) => secim.tur !== 'gunler' || secim.dahil?.[g.id] !== false;
+  const gunler_ = gezi.gezi_gunleri.filter(dahilMi);
+  const tum = gunler_.flatMap((g) => g.gezi_duraklari);
   const gorulen = new Set<string>();
   const duraklar = tum.filter((d) => {
     const k = d.place_id ?? d.id;
@@ -44,7 +47,7 @@ export function aktarmaPlani(gezi: Pick<GeziDetay, 'gezi_gunleri'>, gunler: Gun[
   const atamalar = new Map<string, GeziDuragi[]>();
   const listeyeKalan: GeziDuragi[] = [];
   const atanan = new Set<string>();
-  for (const g of gezi.gezi_gunleri) {
+  for (const g of gunler_) {
     const hedef = eslesme[g.id] ?? null;
     for (const d of g.gezi_duraklari) {
       const k = d.place_id ?? d.id;

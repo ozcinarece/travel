@@ -35,6 +35,18 @@ describe('geziyi seyahatime al (#97 C)', () => {
     expect(p.listeyeKalan.map((d) => d.id)).toEqual(['c']);
     expect(aktarmaDugmesi(p, gunler, { tur: 'gunler', eslesme: {} })).toBe('1 günü al · Cmt 17');
   });
+  it('#118: gün onay kutusu — kapalı gün hiç alınmaz (listeye de değil); açık gün hedefine gider', () => {
+    const p = aktarmaPlani(gezi, gunler, { tur: 'gunler', eslesme: { G1: 'd1', G2: 'd2', G3: null }, dahil: { G1: true, G2: false, G3: false } });
+    expect(p.atamalar).toEqual([{ gunId: 'd1', duraklar: [expect.objectContaining({ id: 'a' }), expect.objectContaining({ id: 'b' })] }]);
+    expect(p.listeyeKalan).toEqual([]);
+    expect(p.duraklar.map((d) => d.id)).toEqual(['a', 'b']);
+    expect(aktarmaDugmesi(p, gunler, { tur: 'gunler', eslesme: {} })).toBe('1 günü al · Cum 16');
+    // Kapalı güne "Listeye" seçilmiş olsa da gitmez; açık günün listeye seçimi gider.
+    const q = aktarmaPlani(gezi, gunler, { tur: 'gunler', eslesme: { G1: null, G2: 'd2', G3: null }, dahil: { G1: true, G2: false, G3: true } });
+    expect(q.atamalar).toEqual([]);
+    expect(q.listeyeKalan.map((d) => d.id)).toEqual(['a', 'b', 'd']);
+    expect(aktarmaDugmesi(q, gunler, { tur: 'gunler', eslesme: {} })).toBe('3 mekanı listeye ekle');
+  });
   it('yalnız mekanlar: atama yok, hepsi listeye', () => {
     const p = aktarmaPlani(gezi, gunler, { tur: 'mekanlar' });
     expect(p.atamalar).toEqual([]);
