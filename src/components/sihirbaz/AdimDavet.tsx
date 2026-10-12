@@ -1,5 +1,4 @@
 // #98 KK5 · 4. adım "Kimlerle?": davet linki kartı (paylaş / kopyala; PRD 3.10 token) + arkadaş listesi (v1 boş durum, #52).
-import { useState } from 'react';
 import { Pressable, Share, StyleSheet, Text, View } from 'react-native';
 
 import { Ikon } from '@/components/ui/Ikon';
@@ -11,17 +10,8 @@ import { minDokunma, renk, yazi } from '@/theme';
 
 export function AdimDavet({ seyahat }: { seyahat: Seyahat }) {
   const link = davetLinki(seyahat.invite_token);
-  const [kopyalandi, setKopyalandi] = useState(false);
+  // #115/#117: "Kopyala" (expo-clipboard) bir sonraki EAS build'e kadar yok — tek düğme "Linki paylaş"; link metni seçilebilir.
   const paylas = () => Share.share({ message: t('sihirbaz.kimlerle.paylasMetin', { ad: seyahatAdi(seyahat), link }) }).catch(() => {});
-  // #115: expo-clipboard native modülü OTA ile gidemez (dev build'de yok → çökme). "Kopyala" yalnız linki paylaşım sayfasına
-  // verir (oradan panoya kopyalanır); link metni ayrıca `selectable`.
-  const kopyala = () =>
-    Share.share({ message: link })
-      .then(() => {
-        setKopyalandi(true);
-        setTimeout(() => setKopyalandi(false), 1500);
-      })
-      .catch(() => {});
   return (
     <View style={s.kap}>
       <View style={s.kart}>
@@ -32,9 +22,6 @@ export function AdimDavet({ seyahat }: { seyahat: Seyahat }) {
         <View style={s.dugmeler}>
           <Pressable accessibilityRole="button" onPress={paylas} style={[s.dugme, s.dugmeKoyu]}>
             <Text style={[s.dugmeMetin, { color: renk.zemin }]}>{t('sihirbaz.kimlerle.paylas')}</Text>
-          </Pressable>
-          <Pressable accessibilityRole="button" onPress={kopyala} style={s.dugme}>
-            <Text style={s.dugmeMetin}>{kopyalandi ? t('sihirbaz.kimlerle.kopyalandi') : t('sihirbaz.kimlerle.kopyala')}</Text>
           </Pressable>
         </View>
       </View>

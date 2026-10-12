@@ -35,6 +35,8 @@ export type IkonAdi =
   | 'paylas'
   // #100: şehir rehberi hapı (kitap).
   | 'kitap'
+  // #117: kilitli şehir çipi.
+  | 'kilit'
   // #69: filtre düğmesi (kaydırıcılar) ve dolu yıldız (öne çıkan).
   | 'filtre'
   | 'yildiz'
@@ -164,6 +166,11 @@ export function Ikon({ ad, boyut = 24, renk, kalinlik = 2 }: Props) {
         <Path d="M12 20.5l-7.4-7.3a4.6 4.6 0 0 1 6.5-6.5l.9.9.9-.9a4.6 4.6 0 0 1 6.5 6.5L12 20.5z" {...ortak} />
       ) : ad === 'kalpDolu' ? (
         <Path d="M12 20.5l-7.4-7.3a4.6 4.6 0 0 1 6.5-6.5l.9.9.9-.9a4.6 4.6 0 0 1 6.5 6.5L12 20.5z" {...ortak} fill={renk} />
+      ) : ad === 'kilit' ? (
+        <>
+          <Path d="M6 11h12v10H6z" {...ortak} />
+          <Path d="M8.5 11V7.5a3.5 3.5 0 0 1 7 0V11" {...ortak} />
+        </>
       ) : ad === 'kitap' ? (
         <>
           <Path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" {...ortak} />

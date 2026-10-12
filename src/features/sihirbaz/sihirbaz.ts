@@ -29,6 +29,8 @@ export function seyahatAdi(s: { name?: string | null; city_label: string }): str
 /** KK3: takvimde iki dokunuş = aralık (ilk gidiş, ikinci dönüş; dönüş gidişten önceyse gidiş yeniden başlar; aynı güne iki kez = tek gün). */
 export type Aralik = { gidis: Tarih; donus: Tarih | null } | null;
 export function tarihDokun(aralik: Aralik, gun: Tarih): Aralik {
+  // #117 KK3: yalnız gidiş seçiliyken aynı güne ikinci dokunuş seçimi sıfırlar (tek günlük seyahat için Devam yeter).
+  if (aralik && !aralik.donus && gun === aralik.gidis) return null;
   if (!aralik || aralik.donus) return { gidis: gun, donus: null };
   if (gun < aralik.gidis) return { gidis: gun, donus: null };
   return { gidis: aralik.gidis, donus: gun };
