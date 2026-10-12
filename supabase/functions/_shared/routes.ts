@@ -1,5 +1,6 @@
 // Google Routes API — computeRouteMatrix (WALK). Anahtar yalnızca burada (GOOGLE_SERVER_KEY); PRD §5.1, §7.
 import { GoogleHatasi } from './google.ts';
+import { googleSay } from './sayac.ts';
 
 export type Nokta = { key: string; lat: number; lng: number };
 export type Bacak = { from_key: string; to_key: string; seconds: number; meters: number };
@@ -18,6 +19,7 @@ export async function yuruyusMatrisi(kaynaklar: Nokta[], hedefler: Nokta[]): Pro
   const anahtar = Deno.env.get('GOOGLE_SERVER_KEY');
   if (!anahtar) throw new Error('GOOGLE_SERVER_KEY tanımlı değil');
   const waypoint = (n: Nokta) => ({ waypoint: { location: { latLng: { latitude: n.lat, longitude: n.lng } } } });
+  googleSay();
   const cevap = await fetch('https://routes.googleapis.com/distanceMatrix/v2:computeRouteMatrix', {
     method: 'POST',
     headers: {
@@ -55,6 +57,7 @@ export async function rotaBacagi(a: Nokta, b: Nokta, mod: RotaModu): Promise<Rot
   const anahtar = Deno.env.get('GOOGLE_SERVER_KEY');
   if (!anahtar) throw new Error('GOOGLE_SERVER_KEY tanımlı değil');
   const nokta = (n: Nokta) => ({ location: { latLng: { latitude: n.lat, longitude: n.lng } } });
+  googleSay();
   const cevap = await fetch('https://routes.googleapis.com/directions/v2:computeRoutes', {
     method: 'POST',
     headers: {

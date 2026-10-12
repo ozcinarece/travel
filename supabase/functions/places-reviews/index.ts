@@ -2,13 +2,14 @@
 // verir (ek sayfa yok). Cevap bu izolatta 24 saat önbelleklenir (bellek); yorumlar DB'ye yazılmaz (PRD §7).
 import { GoogleHatasi, yorumDetay, type YorumOzeti } from '../_shared/google.ts';
 import { govde, hata, json, onKontrol } from '../_shared/http.ts';
+import { sayacli } from '../_shared/sayac.ts';
 
 type Istek = { id: string };
 
 const TTL_MS = 24 * 60 * 60 * 1000;
 const onbellek = new Map<string, { zaman: number; deger: YorumOzeti }>();
 
-Deno.serve(async (istek) => {
+Deno.serve(sayacli('places-reviews', async (istek) => {
   const on = onKontrol(istek);
   if (on) return on;
   const g = await govde<Istek>(istek);
@@ -28,4 +29,4 @@ Deno.serve(async (istek) => {
     console.error('places-reviews', e);
     return hata('sunucu hatası', 500);
   }
-});
+}));

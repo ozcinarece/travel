@@ -1,6 +1,8 @@
 // Google Places API (New) çağrıları. Anahtar YALNIZCA burada okunur
 // (Supabase secret GOOGLE_SERVER_KEY); istemci paketine asla girmez (PRD §7, teknik not §3).
 
+import { googleSay } from './sayac.ts';
+
 const KOK = 'https://places.googleapis.com/v1';
 const DIL = 'tr';
 
@@ -25,6 +27,7 @@ async function istek<T>(yol: string, secenek: { govde?: unknown; maske?: string 
     'x-goog-api-key': anahtar(),
   };
   if (secenek.maske) basliklar['x-goog-fieldmask'] = secenek.maske;
+  googleSay();
   const cevap = await fetch(`${KOK}/${yol}`, {
     method: secenek.govde ? 'POST' : 'GET',
     headers: basliklar,
@@ -382,6 +385,7 @@ export function acilisZamani(nextOpenTime: string | undefined, tz?: string, simd
 
 /** Place Photo (New): yönlendirme atlanıp fotoğraf URI'si alınır; anahtar istemciye gitmez. Fotoğraf başına faturalanır. */
 export async function fotoUri(ad: string, genislik = 800): Promise<string | null> {
+  googleSay();
   const cevap = await fetch(`${KOK}/${ad}/media?maxWidthPx=${genislik}&skipHttpRedirect=true`, {
     headers: { 'x-goog-api-key': anahtar() },
   });

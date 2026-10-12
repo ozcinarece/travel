@@ -19,7 +19,9 @@ create table auth.users (
   is_anonymous boolean not null default false,
   -- #106 is_admin(): Supabase'deki gibi e-posta ve doğrulanma zamanı.
   email text,
-  email_confirmed_at timestamptz
+  email_confirmed_at timestamptz,
+  -- #110 genel bakış: kayıt zamanı (Supabase'deki gibi).
+  created_at timestamptz not null default now()
 );
 
 create function auth.jwt() returns jsonb

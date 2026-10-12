@@ -3,6 +3,7 @@
 // places-light'a aynı token'la gidilir ve oturum kapanır. Sonuçlar önbelleklenmez.
 import { GoogleHatasi, metinAra, otomatikTamamla } from '../_shared/google.ts';
 import { govde, hata, json, onKontrol } from '../_shared/http.ts';
+import { sayacli } from '../_shared/sayac.ts';
 
 type Istek = {
   input: string;
@@ -15,7 +16,7 @@ type Istek = {
   aramaYedegi?: boolean;
 };
 
-Deno.serve(async (istek) => {
+Deno.serve(sayacli('places-autocomplete', async (istek) => {
   const on = onKontrol(istek);
   if (on) return on;
 
@@ -43,4 +44,4 @@ Deno.serve(async (istek) => {
     console.error('places-autocomplete', e);
     return hata('sunucu hatası', 500);
   }
-});
+}));
