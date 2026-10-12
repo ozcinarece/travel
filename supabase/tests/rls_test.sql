@@ -580,17 +580,23 @@ reset role;
 
 -- ---------------------------------------------------------------- #109: ana sayfa düzeni (taslak, yayın, görünen)
 reset role;
--- Seed + ilk yayın: üç bölüm, sırayla; taslak tablo anon'a kapalı, admin olmayana boş.
+-- Seed + ilk yayın: üç bölüm, mozaik kapalı (#132); taslak tablo anon'a kapalı, admin olmayana boş.
 set role anon;
 do $$
 begin
-  assert (select string_agg(tur, ',' order by sira) from public.ana_sayfa_gorunen) = 'tek_kart,serit,mozaik', 'seed bölümleri sırayla görünür';
+  assert (select string_agg(tur, ',' order by sira) from public.ana_sayfa_gorunen) = 'tek_kart,serit', 'seed bölümleri sırayla görünür; mozaik yok (#132)';
+  assert not exists (select 1 from public.ana_sayfa_gorunen where tur = 'mozaik'), '#132: anon ana_sayfa_gorunen''de mozaik görmez';
+  assert (select count(*) from public.ana_sayfa_yayini) >= 1 and (select bolumler from public.ana_sayfa_yayini order by id desc limit 1) is not null, 'anon son yayını okur (izinli sütunlar)';
   assert (select icerik ->> 'gezi_id' from public.ana_sayfa_gorunen where tur = 'tek_kart') is not null, 'otomatik öne çıkan gezi çözülür';
 end $$;
 select pg_temp.hata_bekle($$select count(*) from public.ana_sayfa_bolumleri$$, '42501');
 select pg_temp.hata_bekle($$select public.ana_sayfa_yayinla()$$, '42501');
+-- #132 KK1: yayınlayanın e-postası sütun izniyle kapalı.
+select pg_temp.hata_bekle($$select yayinlayan from public.ana_sayfa_yayini$$, '42501');
+select pg_temp.hata_bekle($$select * from public.ana_sayfa_yayini$$, '42501');
 set role authenticated;
 select pg_temp.as_email(:B, 'b@ornek.com');
+select pg_temp.hata_bekle($$select yayinlayan from public.ana_sayfa_yayini$$, '42501');
 do $$ begin assert (select count(*) from public.ana_sayfa_bolumleri) = 0, 'admin olmayan taslağı görmez'; end $$;
 select pg_temp.hata_bekle($$insert into public.ana_sayfa_bolumleri (tur, baslik, sira) values ('serit', 'x', 9)$$, '42501');
 select pg_temp.hata_bekle($$select public.ana_sayfa_yayinla()$$, '42501');
@@ -609,14 +615,14 @@ select pg_temp.hata_bekle($$insert into public.ana_sayfa_bolumleri (tur, baslik,
 update public.ana_sayfa_bolumleri set sira = case sira when 1 then 2 else 1 end where sira in (1, 2);
 -- Yayınlanmadan uygulama eski düzeni görür.
 set role anon;
-do $$ begin assert (select string_agg(baslik, ',' order by sira) from public.ana_sayfa_gorunen) = 'Öne çıkan gezi,Önerilen geziler,Gezilecek yerler', 'yayın öncesi eski düzen'; end $$;
+do $$ begin assert (select string_agg(baslik, ',' order by sira) from public.ana_sayfa_gorunen) = 'Öne çıkan gezi,Önerilen geziler', 'yayın öncesi eski düzen'; end $$;
 set role authenticated;
 select pg_temp.as_email(:E, 'ozcinar.ece@gmail.com');
 do $$ begin assert public.ana_sayfa_yayinla() is not null, 'admin yayınlar'; end $$;
 set role anon;
 do $$
 begin
-  assert (select string_agg(baslik, ',' order by sira) from public.ana_sayfa_gorunen) = 'Önerilen geziler,Öne çıkan gezi,Gezilecek yerler,Şimdi', 'yayından sonra: yeni sıra; kapalı ve zamanı gelmemiş bölüm yok';
+  assert (select string_agg(baslik, ',' order by sira) from public.ana_sayfa_gorunen) = 'Önerilen geziler,Öne çıkan gezi,Şimdi', 'yayından sonra: yeni sıra; kapalı (mozaik dahil) ve zamanı gelmemiş bölüm yok';
 end $$;
 reset role;
 
