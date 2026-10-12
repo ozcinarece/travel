@@ -1,6 +1,6 @@
 # Pin ve ikon sistemi
 
-Sürüm 1.8 · 11 Ekim 2026 (diğer günlerin rotası çizilmez; soluk noktaya dokununca gün hapı) · önceki 1.7 (zoom 16→18 arası kademesiz büyüyen pin; dokunma alanı ≥ 44 px) · önceki 1.6 (seçili ad hep görünür; öne çıkan seçimi) · önceki 1.5 (öne çıkan ★ rozeti) · önceki 1.4 (pin düşürme kalktı, zoom'a göre küçük pin) · önceki: 1.3 (seçili = iğne; listede = dolu + ✓ rozeti; taksi → araba, düz; yürüme okları sık) · Sahip: Ece (ürün)
+Sürüm 1.9 · 12 Ekim 2026 (her bacakta süre hapı: yürüme glifi / araba glifi) · önceki 1.8 (diğer günlerin rotası çizilmez; soluk noktaya dokununca gün hapı) · önceki 1.7 (zoom 16→18 arası kademesiz büyüyen pin; dokunma alanı ≥ 44 px) · önceki 1.6 (seçili ad hep görünür; öne çıkan seçimi) · önceki 1.5 (öne çıkan ★ rozeti) · önceki 1.4 (pin düşürme kalktı, zoom'a göre küçük pin) · önceki: 1.3 (seçili = iğne; listede = dolu + ✓ rozeti; taksi → araba, düz; yürüme okları sık) · Sahip: Ece (ürün)
 
 Kanvastaki **"Pin ve ikon sistemi"** panosu (`PinSystem6`) ve rota için `OtherDayRoute10`, haritadaki her işaretin tek kaynağıdır: https://claude.ai/artifact/46jh8ggGczM7VDTVHyzRQT
 
@@ -20,6 +20,7 @@ Yollar `src/components/ui/Ikon.tsx` ile birebir aynıdır. PNG'ler `scripts/pin-
 | Park | `#1f8a4c` | `agac` | `M12 3l5 7h-3l4 5H6l4-5H7l5-7z` · `M12 15v6` |
 | Manzara | `#0ea5e9` | `dag` | `M3 19l6.5-11 4 6.5 2-3L21 19H3z` + daire (17.5, 6, r 1.5) |
 | Alışveriş | `#c2185b` | `canta` | `M5 8h14l-1 12H6L5 8z` · `M9 10V7a3 3 0 0 1 6 0v3` |
+| Yürüme (hap) | `#0f0f0f` | `yuru` | daire (13.5, 4, r 1.7) · `M12.5 8l-1.5 5.5L9 20M11 13.5l3 3 1.5 4.5` · `M12.5 8l2.5 2.5 2.5-.5M12.5 8l-2.5 3-1.5 2.5` |
 
 Diğer glifler: `tik` (`M5 12.5l4.5 4.5L19 7.5`, kalınlık +0,6) · `ev` · `araba` · yön oku `M9 5l6 7-6 7`.
 
@@ -66,5 +67,5 @@ Gün renkleri (pinler): 1 `#2f6fed` · 2 `#f2783f` · 3 `#12a37a` · 4 `#8a4fd6`
 
 ## 4. Haplar
 
-- **Araba süre hapı:** beyaz zemin, pin gölgesi, metin `#0f0f0f` 10,5 px / 800, solda rota tonunda **araba** glifi 12 px (`taksi` glifinin çatı ışığı olmayan hali: `M5 16V12l2-5h10l2 5v4M3.5 16h17v3h-17z` + iki teker). Yalnız araba bacağında; yürüyüş süreleri haritada gösterilmez.
+- **Bacak süre hapı (her bacakta, kanvas `LegChips11`):** beyaz zemin, pin gölgesi, 22 px yükseklik, metin `#0f0f0f` 10,5 px / 800, solda 12 px glif. **Yürüme:** `yuru` glifi siyah `#0f0f0f`. **Araba:** `araba` glifi rota tonunda (`taksi` glifinin çatı ışığı olmayan hali: `M5 16V12l2-5h10l2 5v4M3.5 16h17v3h-17z` + iki teker). Bacağın ortasında (yol uzunluğunun %50'si), pinlerin 20 px yakınına konmaz, çakışırsa kısa bacağın hapı gizlenir; zoom < 13'te haplar gizli; geçilen bacakta hap yok. v1.8'e kadarki "yürüyüş süreleri haritada gösterilmez" kuralı 12 Eki'de kalktı (Ece, Bursa ekranı).
 - **Yön oku:** beyaz 12 px "›", düz (`flat`) işaretçi, rota yönünde döner.
