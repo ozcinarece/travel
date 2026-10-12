@@ -3,7 +3,7 @@ import { describe, expect, it, jest } from '@jest/globals';
 import type { HafifYer } from '@/features/yerler/api';
 import type { Yer } from '@/lib/tipler';
 
-import { cipListesi, googleMekani, rehberMekani } from '../onerilenler';
+import { cipListesi, GORMEN_EN_AZ, googleMekani, rehberMekani } from '../onerilenler';
 
 jest.mock('@/lib/supabase', () => ({ supabase: {} }));
 
@@ -22,11 +22,27 @@ describe('görmen gerekenler listesi (#98 KK6)', () => {
     expect(rehber[1]).toMatchObject({ place_id: 'k', puan: null, primary_type: 'museum', dakika: 90 });
     expect(rehberMekani(yer('y3', 'Yok'), null, undefined)).toBeNull();
   });
-  it('"Görmen gerekenler" = rehberdekiler + öne çıkanlar (tekrar yok, puan sırası); "Rehberden" yalnız rehber', () => {
+  it('"Görmen gerekenler" = rehberdekiler + öne çıkanlar (tekrar yok, puan sırası), en az 10 karta kadar genel listeyle dolar; "Rehberden" yalnız rehber', () => {
     const g = cipListesi('gormen', rehber, hepsi, undefined);
-    expect(g.map((m) => m.place_id)).toEqual(['b', 'k', 'a']);
+    expect(g.map((m) => m.place_id).slice(0, 3)).toEqual(['b', 'k', 'a']);
     expect(g[2].neden).toBe('oneCikan');
+    expect(g).toHaveLength(GORMEN_EN_AZ);
+    expect(g[3].neden).toBeNull();
     expect(cipListesi('rehber', rehber, hepsi, undefined).map((m) => m.place_id)).toEqual(['b', 'k']);
+  });
+  it('#121 KK1: turistik Nearby listesi (gezilecek + müze) öne çıkanlardan sonra puan sırasıyla gelir, tekrar yok', () => {
+    const turistik = [hafif('t1', 4.5, 300), hafif('t2', 4.6, 900, 'museum'), hafif('a', 4.8, 9000)];
+    const g = cipListesi('gormen', rehber, hepsi, undefined, turistik);
+    expect(g.map((m) => m.place_id).slice(0, 5)).toEqual(['b', 'k', 'a', 't2', 't1']);
+    expect(g.filter((m) => m.place_id === 'a')).toHaveLength(1);
+  });
+  it('#121 KK4: listede olanlar gizlenir, az önce eklenenler (tut) "Listede ✓" ile kalır', () => {
+    const havuz = new Set(['b', 'a']);
+    expect(cipListesi('gormen', rehber, hepsi, undefined, [], havuz).map((m) => m.place_id)).not.toContain('b');
+    expect(cipListesi('gormen', rehber, hepsi, undefined, [], havuz).map((m) => m.place_id)).not.toContain('a');
+    expect(cipListesi('gormen', rehber, hepsi, undefined, [], havuz, new Set(['a'])).map((m) => m.place_id)).toContain('a');
+    expect(cipListesi('rehber', rehber, hepsi, undefined, [], havuz).map((m) => m.place_id)).toEqual(['k']);
+    expect(cipListesi('yemek', rehber, hepsi, [hafif('a', 4.8, 9000, 'restaurant'), hafif('r', 4, 10, 'restaurant')], [], havuz).map((m) => m.place_id)).toEqual(['r']);
   });
   it('kategori çipi: Google listesi puan sırası, öne çıkan rozeti korunur', () => {
     const yemek = [hafif('r2', 4.2, 500, 'restaurant'), hafif('a', 4.8, 9000, 'restaurant')];

@@ -1,7 +1,8 @@
 import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Linking, StyleSheet, Text, View } from 'react-native';
 
+import { MekanPaneli } from '@/components/mekan/MekanPaneli';
 import { AdimDavet } from '@/components/sihirbaz/AdimDavet';
 import { AdimKabugu } from '@/components/sihirbaz/AdimKabugu';
 import { AdimNereye } from '@/components/sihirbaz/AdimNereye';
@@ -11,10 +12,12 @@ import { AdimOteller } from '@/components/sihirbaz/AdimOteller';
 import { useGunler } from '@/features/gunler/sorgular';
 import { sehirEslestir, useSehirler } from '@/features/icerik/sorgular';
 import { useKonaklamalar } from '@/features/konaklama/sorgular';
-import { useMekanlar } from '@/features/mekanlar/sorgular';
+import { useMekanEkle, useMekanGuncelle, useMekanlar, useMekanSil } from '@/features/mekanlar/sorgular';
 import { useProfil, useProfilGuncelle } from '@/features/profil/sorgular';
 import { useSeyahat, useSeyahatAdiKaydet, useSeyahatOlustur } from '@/features/seyahatler/sorgular';
+import type { OnerilenMekan } from '@/features/sihirbaz/onerilenler';
 import { oncekiAdim, seyahatAdiOner, sonrakiAdim, type Adim, type Aralik } from '@/features/sihirbaz/sihirbaz';
+import type { HafifYer } from '@/features/yerler/api';
 import { t } from '@/i18n';
 import type { SehirSecimi } from '@/lib/tipler';
 import { renk, yazi } from '@/theme';
@@ -40,6 +43,13 @@ export default function SihirbazEkrani() {
   const gunler = useGunler(tripId ?? undefined);
   const konaklamalar = useKonaklamalar(tripId ?? undefined);
   const mekanlar = useMekanlar(tripId ?? undefined);
+  // #121 KK3: 5. adımda karta dokunma → mekan paneli (#80); "Listeye ekle / Listeden çıkar" panelden de olur.
+  const [panel, setPanel] = useState<OnerilenMekan | null>(null);
+  const [tutulan, setTutulan] = useState<Set<string>>(() => new Set());
+  const [sureAyari, setSureAyari] = useState<Record<string, number>>({});
+  const ekle = useMekanEkle(tripId ?? '');
+  const sil = useMekanSil(tripId ?? '');
+  const guncelle = useMekanGuncelle(tripId ?? '');
 
   // 0.3 yönlendirme ekranı kalktı (#98): ilk açılış sihirbaza gelir, damga burada yazılır (bir daha yönlendirilmez).
   const profil = useProfil();
@@ -148,27 +158,75 @@ export default function SihirbazEkrani() {
     );
   }
   const havuz = mekanlar.data ?? [];
+  const tut = (placeId: string) => setTutulan((t0) => new Set(t0).add(placeId));
+  const panelMekan = panel ? havuz.find((m) => m.place_id === panel.place_id) : undefined;
+  const panelHafif: HafifYer | null = panel
+    ? { place_id: panel.place_id, ad: panel.ad, lat: panel.lat, lng: panel.lng, primary_type: panel.primary_type, tz: null, puan: panel.puan, puan_sayisi: panel.puan_sayisi, acik: null, ulke_kodu: null, foto_uri: panel.foto_uri }
+    : null;
+  const panelDakika = panel ? (panelMekan?.default_minutes ?? sureAyari[panel.place_id] ?? panel.dakika) : 0;
+  const sureDegistir = (fark: number) => {
+    if (!panel) return;
+    const yeni = Math.min(480, Math.max(15, panelDakika + fark));
+    if (yeni === panelDakika) return;
+    if (panelMekan) guncelle.mutateAsync({ id: panelMekan.id, default_minutes: yeni }).catch(() => setHata(t('sihirbaz.onerilenler.ekleHata')));
+    else setSureAyari((a) => ({ ...a, [panel.place_id]: yeni }));
+  };
+  const paneldenCta = async () => {
+    if (!panel) return;
+    setHata(null);
+    try {
+      if (panelMekan) await sil.mutateAsync(panelMekan.id);
+      else {
+        await ekle.mutateAsync({ place_id: panel.place_id, primary_type: panel.primary_type, lat: panel.lat, lng: panel.lng, default_minutes: panelDakika });
+        tut(panel.place_id);
+      }
+    } catch {
+      setHata(t('sihirbaz.onerilenler.ekleHata'));
+    }
+  };
+  const yolTarifi = () => {
+    if (!panel) return;
+    Linking.openURL(`https://www.google.com/maps/dir/?api=1&destination=${panel.lat},${panel.lng}&destination_place_id=${encodeURIComponent(panel.place_id)}&travelmode=walking`);
+  };
   return (
-    <AdimKabugu
-      adim={adim}
-      baslik={t('sihirbaz.onerilenler.baslik', { sehir: seyahat.data.city_label })}
-      alt={t('sihirbaz.onerilenler.alt')}
-      onGeri={geri}
-      hata={hata}
-      kaydirmasiz
-      altIcerik={
-        <View style={s.cubuk}>
-          <View style={{ flex: 1 }}>
-            <Text style={s.cubukBaslik}>{havuz.length > 0 ? t('sihirbaz.onerilenler.listedeN', { n: havuz.length }) : t('sihirbaz.onerilenler.listedeBos')}</Text>
-            <Text style={s.cubukAlt}>{t('sihirbaz.onerilenler.haritaNot')}</Text>
+    <View style={{ flex: 1 }}>
+      <AdimKabugu
+        adim={adim}
+        baslik={t('sihirbaz.onerilenler.baslik', { sehir: seyahat.data.city_label })}
+        alt={t('sihirbaz.onerilenler.alt')}
+        onGeri={geri}
+        hata={hata}
+        kaydirmasiz
+        altIcerik={
+          <View style={s.cubuk}>
+            <View style={{ flex: 1 }}>
+              <Text style={s.cubukBaslik}>{havuz.length > 0 ? t('sihirbaz.onerilenler.listedeN', { n: havuz.length }) : t('sihirbaz.onerilenler.listedeBos')}</Text>
+              <Text style={s.cubukAlt}>{t('sihirbaz.onerilenler.haritaNot')}</Text>
+            </View>
+            <Text onPress={haritayaGec} accessibilityRole="button" style={s.cubukDugme}>
+              {t('sihirbaz.onerilenler.haritayaGec')} →
+            </Text>
           </View>
-          <Text onPress={haritayaGec} accessibilityRole="button" style={s.cubukDugme}>
-            {t('sihirbaz.onerilenler.haritayaGec')} →
-          </Text>
-        </View>
-      }>
-      <AdimOnerilenler seyahat={seyahat.data} rehberSehir={rehberSehir} havuz={havuz} onHata={setHata} />
-    </AdimKabugu>
+        }>
+        <AdimOnerilenler seyahat={seyahat.data} rehberSehir={rehberSehir} havuz={havuz} tutulan={tutulan} onTut={tut} onHata={setHata} onAc={setPanel} />
+      </AdimKabugu>
+      {panel ? (
+        <MekanPaneli
+          placeId={panel.place_id}
+          tz={seyahat.data.tz}
+          hafif={panelHafif}
+          oneCikan={panel.neden === 'oneCikan'}
+          dakika={panelDakika}
+          onSure={sureDegistir}
+          baglam="kesfet"
+          icinde={!!panelMekan}
+          mesgul={ekle.isPending || sil.isPending}
+          onCta={paneldenCta}
+          onYolTarifi={yolTarifi}
+          onKapat={() => setPanel(null)}
+        />
+      ) : null}
+    </View>
   );
 }
 

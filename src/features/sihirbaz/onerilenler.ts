@@ -61,20 +61,38 @@ export function googleMekani(y: HafifYer, oneCikan: boolean): OnerilenMekan {
   };
 }
 
+/** #121 KK1: "Görmen gerekenler" en az bu kadar kart hedefler; öne çıkanlar yetmezse turistik liste puan sırasıyla doldurur. */
+export const GORMEN_EN_AZ = 10;
+
 /**
- * Çipe göre liste: "Görmen gerekenler" = rehberdekiler (sırayla) + öne çıkanlar (puan sırası, tekrar yok);
- * "Rehberden" = yalnız rehber; kategori çipleri = Google listesi puan sırası (öne çıkan rozeti korunur).
+ * Çipe göre liste: "Görmen gerekenler" = rehberdekiler (sırayla) + öne çıkanlar (puan sırası) + turistik Nearby listesi
+ * (gezilecek + müze; puan sırası, tekrar yok) — en az 10 kart; "Rehberden" = yalnız rehber; kategori çipleri = Google listesi
+ * puan sırası (öne çıkan rozeti korunur). #121 KK4: listede olanlar gizlenir (`havuz`), az önce eklenenler (`tut`) ✓ ile kalır.
  */
-export function cipListesi(cip: OnerilenCipi, rehber: OnerilenMekan[], hepsi: HafifYer[], kategori: HafifYer[] | undefined): OnerilenMekan[] {
+export function cipListesi(cip: OnerilenCipi, rehber: OnerilenMekan[], hepsi: HafifYer[], kategori: HafifYer[] | undefined, turistik: HafifYer[] = [], havuz: Set<string> = new Set(), tut: Set<string> = new Set()): OnerilenMekan[] {
   const oneCikan = oneCikanlar(hepsi);
-  if (cip === 'rehber') return rehber;
+  const gizli = (id: string) => havuz.has(id) && !tut.has(id);
+  if (cip === 'rehber') return rehber.filter((r) => !gizli(r.place_id));
   if (cip === 'gormen') {
-    const gorulen = new Set(rehber.map((r) => r.place_id));
-    const one = oneriSirala(hepsi.filter((y) => oneCikan.has(y.place_id) && !gorulen.has(y.place_id))).map((y) => googleMekani(y, true));
-    return [...rehber, ...one];
+    const gorulen = new Set<string>();
+    const sonuc: OnerilenMekan[] = [];
+    const ekle = (m: OnerilenMekan) => {
+      if (gorulen.has(m.place_id) || gizli(m.place_id)) return;
+      gorulen.add(m.place_id);
+      sonuc.push(m);
+    };
+    rehber.forEach(ekle);
+    oneriSirala(hepsi.filter((y) => oneCikan.has(y.place_id))).forEach((y) => ekle(googleMekani(y, true)));
+    // Turistik türler (tourist_attraction, museum, landmark…) puan sırasıyla; hâlâ azsa `hepsi`nin kalanı.
+    oneriSirala(turistik).forEach((y) => ekle(googleMekani(y, oneCikan.has(y.place_id))));
+    if (sonuc.length < GORMEN_EN_AZ) oneriSirala(hepsi).forEach((y) => sonuc.length < GORMEN_EN_AZ && ekle(googleMekani(y, oneCikan.has(y.place_id))));
+    return sonuc;
   }
-  return oneriSirala(kategori ?? []).map((y) => googleMekani(y, oneCikan.has(y.place_id)));
+  return oneriSirala(kategori ?? []).map((y) => googleMekani(y, oneCikan.has(y.place_id))).filter((m) => !gizli(m.place_id));
 }
+
+/** #121 KK: 5. adımın Nearby istek sayacı (oturum başına; PR kanıtı: en çok 3). */
+export const nearbySayaci = { istek: 0 };
 
 const GOOGLE_CIP: Record<Exclude<OnerilenCipi, 'gormen' | 'rehber'>, OneriCipi> = { yemek: 'yemek', kafe: 'kafe', manzara: 'manzara' };
 const YARICAP_M = 6000;
@@ -88,16 +106,21 @@ function useGoogleListesi(anahtar: string, cip: OneriCipi, merkez: { lat: number
     staleTime: GUN_MS,
     retry: 1,
     queryFn: async () => {
+      nearbySayaci.istek += 1;
+      if (__DEV__) console.log(`[sihirbaz] nearby istek #${nearbySayaci.istek} · ${cip}`);
       const yerler = await yakinYerler({ cip, merkez: { ...merkez, yaricapM: YARICAP_M }, enFazla: 20 });
-      // Kart fotoğrafı: hafif Details foto maskesi (400 px); 24 sa istemci önbelleği.
-      const fotolu = await hafifYerler(yerler.map((y) => y.place_id), { foto: true }).catch(() => [] as HafifYer[]);
+      // Kart fotoğrafı: hafif Details foto maskesi (400 px); places-light foto için ≤ 12 kimlik → 12'lik parçalar; 24 sa önbellek.
+      const ids = yerler.map((y) => y.place_id);
+      const parcalar: string[][] = [];
+      for (let i = 0; i < ids.length; i += 12) parcalar.push(ids.slice(i, i + 12));
+      const fotolu = (await Promise.all(parcalar.map((p) => hafifYerler(p, { foto: true }).catch(() => [] as HafifYer[])))).flat();
       const foto = new Map(fotolu.map((y) => [y.place_id, y.foto_uri ?? null]));
       return yerler.map((y) => ({ ...y, foto_uri: foto.get(y.place_id) ?? null }));
     },
   });
 }
 
-export function useOnerilenler(seyahat: { id: string; lat: number; lng: number; city_label: string }, rehberSehir: Sehir | undefined, cip: OnerilenCipi) {
+export function useOnerilenler(seyahat: { id: string; lat: number; lng: number; city_label: string }, rehberSehir: Sehir | undefined, cip: OnerilenCipi, havuz: Set<string> = new Set(), tut: Set<string> = new Set()) {
   const merkez = { lat: seyahat.lat, lng: seyahat.lng };
   const yerler = useSehirYerleri(rehberSehir?.id);
   // Rehber yerlerinin Google kimliği ve canlı verisi (puan, yorum, foto).
@@ -115,10 +138,14 @@ export function useOnerilenler(seyahat: { id: string; lat: number; lng: number; 
     },
   });
   const hepsi = useGoogleListesi(seyahat.id, 'hepsi', merkez, true);
+  // #121 KK1: turistik türler — iki Nearby isteği daha (gezilecek + müze); toplam 3, 24 sa önbellek.
+  const gezilecek = useGoogleListesi(seyahat.id, 'gezilecek', merkez, cip === 'gormen');
+  const muze = useGoogleListesi(seyahat.id, 'muze', merkez, cip === 'gormen');
   const googleCip = cip === 'gormen' || cip === 'rehber' ? null : GOOGLE_CIP[cip];
   const kategori = useGoogleListesi(seyahat.id, googleCip ?? 'hepsi', merkez, !!googleCip);
-  const liste = useMemo(() => cipListesi(cip, rehber.data ?? [], hepsi.data ?? [], googleCip ? kategori.data : undefined), [cip, rehber.data, hepsi.data, kategori.data, googleCip]);
-  const yukleniyor = cip === 'rehber' ? yerler.isPending || rehber.isPending : cip === 'gormen' ? (rehberSehir ? rehber.isPending : false) || hepsi.isPending : kategori.isPending;
+  const turistik = useMemo(() => [...(gezilecek.data ?? []), ...(muze.data ?? [])], [gezilecek.data, muze.data]);
+  const liste = useMemo(() => cipListesi(cip, rehber.data ?? [], hepsi.data ?? [], googleCip ? kategori.data : undefined, turistik, havuz, tut), [cip, rehber.data, hepsi.data, kategori.data, googleCip, turistik, havuz, tut]);
+  const yukleniyor = cip === 'rehber' ? yerler.isPending || rehber.isPending : cip === 'gormen' ? (rehberSehir ? rehber.isPending : false) || hepsi.isPending || gezilecek.isPending || muze.isPending : kategori.isPending;
   const hata = cip === 'rehber' ? rehber.isError : cip === 'gormen' ? hepsi.isError && rehber.isError : kategori.isError;
   return { liste, yukleniyor: yukleniyor && liste.length === 0, hata: hata && liste.length === 0 };
 }

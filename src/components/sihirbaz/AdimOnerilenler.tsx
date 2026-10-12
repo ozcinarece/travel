@@ -1,5 +1,6 @@
 // #98 KK6 · 5. adım "{Şehir}'de görmen gerekenler": çipler + kart listesi; "Listeye ekle" seyahatin mekan havuzuna yazar.
-import { useState } from 'react';
+// #121: listede olanlar gizli (üstte "Listende N mekan var"), az önce eklenenler "Listede ✓" ile kalır; karta dokunma → mekan paneli.
+import { useMemo, useState } from 'react';
 import { ActivityIndicator, FlatList, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { useMekanEkle, useMekanSil } from '@/features/mekanlar/sorgular';
@@ -10,11 +11,22 @@ import { bosluk, renk, yazi } from '@/theme';
 
 import { MekanKarti } from './MekanKarti';
 
-type Props = { seyahat: Seyahat; rehberSehir: Sehir | undefined; havuz: Mekan[]; onHata: (m: string | null) => void };
+type Props = {
+  seyahat: Seyahat;
+  rehberSehir: Sehir | undefined;
+  havuz: Mekan[];
+  /** #121 KK4: bu ekranda eklenenler — listede olsa da kart "Listede ✓" ile kalır (gizlenmez). */
+  tutulan: Set<string>;
+  onTut: (placeId: string) => void;
+  onHata: (m: string | null) => void;
+  /** #121 KK3: karta dokunma → mekan paneli. */
+  onAc: (m: OnerilenMekan) => void;
+};
 
-export function AdimOnerilenler({ seyahat, rehberSehir, havuz, onHata }: Props) {
+export function AdimOnerilenler({ seyahat, rehberSehir, havuz, tutulan, onTut, onHata, onAc }: Props) {
   const [cip, setCip] = useState<OnerilenCipi>('gormen');
-  const { liste, yukleniyor, hata } = useOnerilenler(seyahat, rehberSehir, cip);
+  const havuzIdleri = useMemo(() => new Set(havuz.map((m) => m.place_id)), [havuz]);
+  const { liste, yukleniyor, hata } = useOnerilenler(seyahat, rehberSehir, cip, havuzIdleri, tutulan);
   const ekle = useMekanEkle(seyahat.id);
   const sil = useMekanSil(seyahat.id);
   const [mesgul, setMesgul] = useState<string | null>(null);
@@ -26,6 +38,7 @@ export function AdimOnerilenler({ seyahat, rehberSehir, havuz, onHata }: Props) 
     setMesgul(m.place_id);
     try {
       await ekle.mutateAsync({ place_id: m.place_id, primary_type: m.primary_type, lat: m.lat, lng: m.lng, default_minutes: m.dakika });
+      onTut(m.place_id);
     } catch {
       onHata(t('sihirbaz.onerilenler.ekleHata'));
     } finally {
@@ -63,8 +76,9 @@ export function AdimOnerilenler({ seyahat, rehberSehir, havuz, onHata }: Props) 
           keyExtractor={(m) => m.place_id}
           contentContainerStyle={s.liste}
           ItemSeparatorComponent={() => <View style={{ height: 12 }} />}
+          ListHeaderComponent={havuz.length > 0 ? <Text style={s.gizliNot}>{t('sihirbaz.onerilenler.gizliNot', { n: havuz.length })}</Text> : null}
           ListEmptyComponent={<Text style={s.bos}>{hata ? t('sihirbaz.onerilenler.hata') : t('sihirbaz.onerilenler.bos')}</Text>}
-          renderItem={({ item }) => <MekanKarti mekan={item} listede={havuzIle.has(item.place_id)} mesgul={mesgul === item.place_id} onEkle={() => listeyeEkle(item)} onCikar={() => listedenCikar(item)} />}
+          renderItem={({ item }) => <MekanKarti mekan={item} listede={havuzIle.has(item.place_id)} mesgul={mesgul === item.place_id} onEkle={() => listeyeEkle(item)} onCikar={() => listedenCikar(item)} onAc={() => onAc(item)} />}
         />
       )}
     </View>
@@ -79,4 +93,5 @@ const s = StyleSheet.create({
   cipMetinSecili: { color: renk.zemin },
   liste: { paddingHorizontal: bosluk.kenar, paddingTop: 6, paddingBottom: 16 },
   bos: { fontFamily: yazi.normal, fontSize: 13, color: renk.ikincil, textAlign: 'center', paddingVertical: 30 },
+  gizliNot: { fontFamily: yazi.normal, fontSize: 12, color: renk.ikincil, paddingBottom: 10 },
 });
