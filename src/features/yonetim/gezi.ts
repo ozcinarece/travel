@@ -64,10 +64,10 @@ export function yayinlaAlanlari(g: { yayin_at: string | null }, simdi: Date = ne
 }
 
 /** Otomatik kayıtta yalnız değişen alanlar yazılır; fark yoksa null. */
-export function kayitFarki(sunucu: GeziAlanlari, taslak: GeziAlanlari): Partial<GeziAlanlari> | null {
-  const fark: Partial<GeziAlanlari> = {};
-  for (const k of Object.keys(taslak) as (keyof GeziAlanlari)[]) {
-    if (taslak[k] !== sunucu[k]) (fark as Record<string, unknown>)[k] = taslak[k];
+export function kayitFarki<T extends object>(sunucu: T, taslak: T): Partial<T> | null {
+  const fark: Partial<T> = {};
+  for (const k of Object.keys(taslak) as (keyof T)[]) {
+    if (taslak[k] !== sunucu[k]) fark[k] = taslak[k];
   }
   return Object.keys(fark).length ? fark : null;
 }

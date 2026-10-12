@@ -108,5 +108,86 @@
     "yuklenemedi": "Gezi yüklenemedi.",
     "islemHata": "İşlem yapılamadı. Yeniden dene.",
     "yazarSatiri": "{yazar} · {ay} {yil} · {okuma}"
+  },
+  "yer": {
+    "baslik": "Yer · {ad}",
+    "yeni": "+ Yer",
+    "yeniAra": "Google'da mekan ara ya da link yapıştır → yer eklenir",
+    "tumSehirler": "Tüm şehirler",
+    "rehberVar": "{kategori} · rehber ✓",
+    "rehberYok": "{kategori} · rehber yok",
+    "durum": {
+      "yayinda": "Yayında",
+      "taslak": "Taslak"
+    },
+    "sekme": {
+      "genel": "Genel",
+      "rehber": "Rehber",
+      "fotolar": "Fotoğraflar"
+    },
+    "alan": {
+      "ad": "AD",
+      "placeId": "PLACE_ID",
+      "sehir": "ŞEHİR",
+      "oneCikan": "ÖNE ÇIKAN SIRASI",
+      "durum": "DURUM",
+      "kategori": "KATEGORİ",
+      "puan": "PUAN",
+      "yorum": "YORUM",
+      "konum": "KONUM",
+      "altyazi": "ALTYAZI"
+    },
+    "dogrula": "Google'dan doğrula",
+    "dogrulandi": "Google'da bulundu · kategori ve konum güncellendi",
+    "placeGecersiz": "place_id biçimi geçersiz",
+    "placeBulunamadi": "Google'da bulunamadı",
+    "oneCikanGecersiz": "1 ya da daha büyük tam sayı; boş = öne çıkmıyor",
+    "oneCikanTekil": "Bu şehirde bu sıra başka yerde",
+    "canli": "Canlı Google verisi (salt okunur; saklanmaz)",
+    "rehberEtiket": "REHBER · markdown",
+    "arac": {
+      "kalin": "B",
+      "italik": "I",
+      "h2": "H2",
+      "alinti": "“ ”",
+      "liste": "• Liste",
+      "gorsel": "Görsel",
+      "mekan": "Mekan",
+      "ses": "Ses · yakında"
+    },
+    "aracEtiket": {
+      "kalin": "Kalın",
+      "italik": "İtalik",
+      "h2": "Ara başlık",
+      "alinti": "Alıntı",
+      "liste": "Liste",
+      "gorsel": "Görsel ekle",
+      "mekan": "Mekan bağlantısı",
+      "ses": "Sesli anlatım (yakında)"
+    },
+    "gorselEkle": "Görsel ekle",
+    "gorselEkleAlt": "sürükle ya da Storage'dan seç",
+    "altyazi": "Altyazı: {metin}",
+    "altyaziYok": "Altyazı yok",
+    "duzenle": "düzenle",
+    "kaldir": "kaldır",
+    "paragraf": "Yazmaya başla… (boş satır yeni paragraf; ## başlık, > alıntı, - liste)",
+    "ses": "Sesli anlatım · v2: ses dosyası yükle ya da tarayıcıdan kaydet (≤ 3 dk); kullanıcı panelde dinler",
+    "sayac": "{karakter} karakter · ~{dk} dk okuma",
+    "gorselSayisi": "{n} görsel",
+    "mekanSayisi": "{n} mekan bağlantısı",
+    "taslakKaydedildi": "Taslak kaydedildi · {saat}",
+    "kaydedildi": "Kaydedildi · {saat}",
+    "onizleme": "ÖNİZLEME · MEKAN PANELİ › REHBER",
+    "bos": "Soldan bir yer seç ya da “+ Yer” ile ekle.",
+    "yuklenemedi": "Yer yüklenemedi.",
+    "eklenemedi": "Yer eklenemedi (aynı mekan zaten olabilir).",
+    "not": "Genel sekmesi: ad, place_id, kategori, şehir, öne çıkan sırası, kapak. Fotoğraflar: Storage galerisi, kapak seç.",
+    "blok": {
+      "baslik": "Başlık",
+      "paragraf": "Paragraf",
+      "alinti": "Alıntı",
+      "liste": "Liste"
+    }
   }
 }

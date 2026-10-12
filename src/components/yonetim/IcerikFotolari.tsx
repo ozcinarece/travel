@@ -3,15 +3,15 @@ import { useRef, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { tasi } from '@/features/yonetim/gezi';
-import type { IcerikFotosu } from '@/features/yonetim/geziSorgulari';
+import type { IcerikFotosu } from '@/features/yonetim/fotolar';
 import { ty } from '@/features/yonetim/metin';
 import { icerikFotoUrl } from '@/lib/markdown';
 import { yazi } from '@/theme';
 
-import { MetinKutusu } from '../Form';
-import { Hap } from '../Hap';
-import { dosyaSec, useDosyaBirakma, useSuruklenen } from '../surukle';
-import { yRenk } from '../tema';
+import { MetinKutusu } from './Form';
+import { Hap } from './Hap';
+import { dosyaSec, useDosyaBirakma, useSuruklenen } from './surukle';
+import { yRenk } from './tema';
 
 type Props = {
   fotolar: IcerikFotosu[];
@@ -25,10 +25,10 @@ type Props = {
 };
 
 /**
- * KK5: Storage `icerik/geziler/<id>/` — yükle (düğme ya da sürükle-bırak), kapak seç, altyazı, sırala, sil; herkese açık
+ * #107 / #108 KK5: Storage `icerik/<geziler|yerler>/<id>/` — yükle (düğme ya da sürükle-bırak), kapak seç, altyazı, sırala, sil; herkese açık
  * okuma. Kanvasta bu sekme çizilmedi (tasarım bekliyor): kesikli kutu, durak satırı stili ve haplarla kuruldu.
  */
-export function GeziFotolari({ fotolar, kapakUrl, onYukle, onKapak, onYaziyaEkle, onAltyazi, onSirala, onSil }: Props) {
+export function IcerikFotolari({ fotolar, kapakUrl, onYukle, onKapak, onYaziyaEkle, onAltyazi, onSirala, onSil }: Props) {
   const alan = useRef<View>(null);
   const [mesgul, setMesgul] = useState(false);
   const yukle = async (dosyalar: File[]) => {

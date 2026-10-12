@@ -58,9 +58,11 @@ jobs:
           # Panel alan adında kök doğrudan panele açılır. Dinamik rota: statik "[id]" sayfası köşeli parantezsiz bir
           # adla kopyalanır ve oraya yeniden yazılır (istemci rotayı adres çubuğundan çözer).
           cp "dist/yonetim/geziler/[id]/onizle.html" dist/yonetim/geziler/_onizle.html
+          cp "dist/yonetim/yerler/[id]/onizle.html" dist/yonetim/yerler/_onizle.html
           printf '%s\n' \
             "/ /yonetim 302" \
-            "/yonetim/geziler/:id/onizle /yonetim/geziler/_onizle 200" > dist/_redirects
+            "/yonetim/geziler/:id/onizle /yonetim/geziler/_onizle 200" \
+            "/yonetim/yerler/:id/onizle /yonetim/yerler/_onizle 200" > dist/_redirects
       - name: Cloudflare Pages
         if: steps.kosul.outputs.hazir == '1'
         run: |
