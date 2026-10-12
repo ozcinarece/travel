@@ -16,7 +16,10 @@ create extension pgcrypto schema extensions;
 
 create table auth.users (
   id uuid primary key default gen_random_uuid(),
-  is_anonymous boolean not null default false
+  is_anonymous boolean not null default false,
+  -- #106 is_admin(): Supabase'deki gibi e-posta ve doğrulanma zamanı.
+  email text,
+  email_confirmed_at timestamptz
 );
 
 create function auth.jwt() returns jsonb

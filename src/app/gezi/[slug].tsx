@@ -15,7 +15,7 @@ import { Ikon } from '@/components/ui/Ikon';
 import type { AktarmaPlani } from '@/features/icerik/aktar';
 import { useGeziAktar } from '@/features/icerik/aktarSorgu';
 import { useIcerikCanli } from '@/features/icerik/fotolar';
-import { olayYaz, useGezi } from '@/features/icerik/sorgular';
+import { cozumSebebi, olayYaz, useGezi } from '@/features/icerik/sorgular';
 import { hedefSeyahatler, useYereEkle } from '@/features/icerik/yerEkle';
 import { useMekanlar } from '@/features/mekanlar/sorgular';
 import { useSeyahatler } from '@/features/seyahatler/sorgular';
@@ -89,10 +89,14 @@ export default function GeziEkrani() {
 
   const durakEkle = async (d: GeziDuragi, seyahatId: string) => {
     const c = canli.data?.get(d.id);
-    if (!c?.place_id) return setAlHata(t('anasayfa.ekleHata'));
+    // #118: sebebi söyle — kimlik henüz çözülüyor / Google'da yok / sunucu hatası.
+    if (!c?.place_id) return setAlHata(canli.isPending ? t('anasayfa.cozuluyor') : t('anasayfa.ekleHataSebep', { sebep: cozumSebebi(d.id) === 'bulunamadi' || !cozumSebebi(d.id) ? t('anasayfa.bulunamadi') : cozumSebebi(d.id)! }));
     setMesgulId(d.id);
     try {
       await ekle.mutateAsync({ seyahatId, yerId: null, place_id: c.place_id, primary_type: c.hafif?.primary_type ?? d.kategori, lat: d.lat, lng: d.lng });
+      setAlHata(null);
+    } catch (e) {
+      setAlHata(t('anasayfa.ekleHataSebep', { sebep: e instanceof Error ? e.message : String(e) }));
     } finally {
       setMesgulId(null);
     }
@@ -107,11 +111,20 @@ export default function GeziEkrani() {
     setAlHata(null);
     try {
       const sonuc = await aktar.mutateAsync({ seyahatId, geziId: g.id, sehirAdi: g.sehirler?.ad ?? '', plan });
+      // #118 KK4: sessiz başarısızlık yok — hiçbir şey eklenmediyse sayfa açık kalır ve sebep söylenir.
+      if (sonuc.eklenenMekan === 0 && sonuc.eklenenDurak === 0) {
+        const ilk = sonuc.cozumsuzler[0];
+        const sebep = ilk ? (ilk.sebep === 'bulunamadi' ? t('gezi.sebepBulunamadi', { ad: ilk.ad }) : t('gezi.sebepSunucu', { ad: ilk.ad, sebep: ilk.sebep })) : t('gezi.hepsiZatenVar');
+        setAlHata(t('gezi.hicEklenmedi', { sebep }));
+        return;
+      }
       setAlAcik(false);
-      if (sonuc.cozumsuz > 0) setAlHata(t('gezi.cozumYok', { n: sonuc.cozumsuz }));
-      router.replace({ pathname: '/seyahat/[id]/(sekmeler)/program', params: { id: seyahatId, ...(sonuc.ilkGunIndex !== null ? { gun: String(sonuc.ilkGunIndex) } : {}) } });
-    } catch {
-      setAlHata(t('gezi.alHata'));
+      router.replace({
+        pathname: '/seyahat/[id]/(sekmeler)/program',
+        params: { id: seyahatId, eklenenDurak: String(sonuc.eklenenDurak), eklenenMekan: String(sonuc.eklenenMekan + sonuc.zatenVar), atlanan: String(sonuc.cozumsuz), ...(sonuc.ilkGunIndex !== null ? { gun: String(sonuc.ilkGunIndex) } : {}) },
+      });
+    } catch (e) {
+      setAlHata(t('gezi.alHata', { sebep: e instanceof Error ? e.message : String(e) }));
     }
   };
   const yeniSeyahat = () => {

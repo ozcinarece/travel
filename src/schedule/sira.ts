@@ -1,6 +1,8 @@
 // stops.order_key: kesirli sıra anahtarı (metin, "C" sıralaması). Sürükle-bırak tek satır yazar (T7).
 // Basamaklar 0-9a-z; iki anahtar arasına her zaman yeni bir anahtar sığar.
 
+import { izEkle } from '@/lib/izler';
+
 const BASAMAK = '0123456789abcdefghijklmnopqrstuvwxyz';
 
 function deger(ch: string | undefined, varsayilan: number) {
@@ -13,7 +15,12 @@ function deger(ch: string | undefined, varsayilan: number) {
  * Eşit ya da ters sıralı girdi hatadır.
  */
 export function arasindaAnahtar(a?: string, b?: string): string {
-  if (a !== undefined && b !== undefined && a >= b) throw new Error(`sira: ${a} >= ${b}`);
+  // #120 KK4: eşit ya da ters sıralı komşu anahtarlar (eşzamanlı ekleme, eski veri) render'ı düşürmesin — `a`dan sonra
+  // bir anahtar üretilir (sıra görsel olarak korunur; bir sonraki yazımda normalize olur). İz bırakılır.
+  if (a !== undefined && b !== undefined && a >= b) {
+    izEkle('sira', `komşu anahtarlar sıralı değil: ${a} >= ${b}`);
+    b = undefined;
+  }
   let sonuc = '';
   for (let i = 0; ; i++) {
     const alt = deger(a?.[i], 0);
