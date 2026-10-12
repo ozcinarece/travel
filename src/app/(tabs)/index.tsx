@@ -29,8 +29,8 @@ export default function SeyahatlerEkrani() {
   const { aktif, yaklasan, gecmis } = siniflandir(seyahatler.data ?? []);
   const program = useAktifProgram(aktif[0]);
 
-  // 0.3 bir kez gösterilir: profil var ama yönlendirme damgası yoksa oraya.
-  if (profil.data && !profil.data.onboarding_done_at) return <Redirect href="/ilk-seyahat" />;
+  // #98: 0.3 yönlendirme ekranı kalktı — ilk açılış doğrudan sihirbaza (damgayı sihirbaz yazar).
+  if (profil.data && !profil.data.onboarding_done_at) return <Redirect href="/(tabs)/yeni" />;
 
   const ac = (id: string) => router.push({ pathname: '/seyahat/[id]', params: { id } });
   const programAc = (id: string) => router.push({ pathname: '/seyahat/[id]/(sekmeler)/program', params: { id } });

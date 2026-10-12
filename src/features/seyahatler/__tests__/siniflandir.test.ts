@@ -5,6 +5,7 @@ import type { SeyahatOzet } from '@/lib/tipler';
 
 const sy = (id: string, start: string | null, end: string | null): SeyahatOzet => ({
   id,
+  name: null,
   city_label: id,
   start_date: start,
   end_date: end,

@@ -1,222 +1,180 @@
 import { router } from 'expo-router';
-import { useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { useEffect, useState } from 'react';
+import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 
-import { EkranBasligi } from '@/components/EkranBasligi';
-import { Buton } from '@/components/ui/Buton';
-import { TarihSecici, type TarihAraligi } from '@/components/ui/TarihSecici';
-import { GoogleAtfi } from '@/components/yerler/GoogleAtfi';
-import { useSeyahatOlustur } from '@/features/seyahatler/sorgular';
-import { hafifYerler, useSehirOnerileri, yeniOturumJetonu, type Oneri } from '@/features/yerler/api';
+import { AdimDavet } from '@/components/sihirbaz/AdimDavet';
+import { AdimKabugu } from '@/components/sihirbaz/AdimKabugu';
+import { AdimNereye } from '@/components/sihirbaz/AdimNereye';
+import { AdimNeZaman } from '@/components/sihirbaz/AdimNeZaman';
+import { AdimOnerilenler } from '@/components/sihirbaz/AdimOnerilenler';
+import { AdimOteller } from '@/components/sihirbaz/AdimOteller';
+import { useGunler } from '@/features/gunler/sorgular';
+import { sehirEslestir, useSehirler } from '@/features/icerik/sorgular';
+import { useKonaklamalar } from '@/features/konaklama/sorgular';
+import { useMekanlar } from '@/features/mekanlar/sorgular';
+import { useProfil, useProfilGuncelle } from '@/features/profil/sorgular';
+import { useSeyahat, useSeyahatAdiKaydet, useSeyahatOlustur } from '@/features/seyahatler/sorgular';
+import { oncekiAdim, seyahatAdiOner, sonrakiAdim, type Adim, type Aralik } from '@/features/sihirbaz/sihirbaz';
 import { t } from '@/i18n';
-import { kisaTarih } from '@/lib/takvim';
 import type { SehirSecimi } from '@/lib/tipler';
-import { bosluk, minDokunma, renk, yazi } from '@/theme';
+import { renk, yazi } from '@/theme';
 
-// PRD 3.2 Nereye? — KK1 şehir Autocomplete (Edge Function, oturum token'ı, ilk 3), KK2 isteğe bağlı tarihler, KK3 Devam → 3.3.
-export default function NereyeEkrani() {
-  const [sorgu, setSorgu] = useState('');
-  const [jeton, setJeton] = useState(yeniOturumJetonu);
-  const [secili, setSecili] = useState<SehirSecimi | null>(null);
-  const [secimYukleniyor, setSecimYukleniyor] = useState(false);
-  const [tarihler, setTarihler] = useState<TarihAraligi>(null);
-  const [takvimAcik, setTakvimAcik] = useState(false);
+/**
+ * #98 (kanvas TripWizard14): seyahat kurma sihirbazı — 5 soru, sonra harita. NewTrip (3.2) / Hotel (3.3) / FirstTrip (0.3)
+ * ekranlarının yerini alır. Şehir + ad + tarih yerelde tutulur; 2. adımdan çıkınca (Devam ya da "Tarihim belli değil")
+ * seyahat oluşturulur, kalan adımlar seyahate yazar. Geri: şehir ve tarihler oluşturulduktan sonra kilitlidir (ad değişir).
+ */
+export default function SihirbazEkrani() {
+  const [adim, setAdim] = useState<Adim>('nereye');
+  const [sehir, setSehir] = useState<SehirSecimi | null>(null);
+  const [ad, setAd] = useState<string | null>(null);
+  const [aralik, setAralik] = useState<Aralik>(null);
+  const [tripId, setTripId] = useState<string | null>(null);
   const [hata, setHata] = useState<string | null>(null);
-  const oneriler = useSehirOnerileri(secili ? '' : sorgu, jeton);
+  const [yakinda, setYakinda] = useState(false);
+
+  const sehirler = useSehirler();
   const olustur = useSeyahatOlustur();
+  const adKaydet = useSeyahatAdiKaydet(tripId ?? '');
+  const seyahat = useSeyahat(tripId ?? undefined);
+  const gunler = useGunler(tripId ?? undefined);
+  const konaklamalar = useKonaklamalar(tripId ?? undefined);
+  const mekanlar = useMekanlar(tripId ?? undefined);
 
-  // Seçim: hafif Details şehir maskesiyle (konum, tz, ülke) — aynı oturum token'ı, oturum kapanır; sonraki arama yeni token.
-  const sec = async (o: Oneri) => {
-    setHata(null);
-    setSecimYukleniyor(true);
-    try {
-      const [yer] = await hafifYerler([o.place_id], { sehir: true, oturum: jeton });
-      if (!yer?.tz) throw new Error('tz yok');
-      setSecili({
-        place_id: yer.place_id,
-        ad: o.ana || yer.ad,
-        ikincil: o.ikincil,
-        lat: yer.lat,
-        lng: yer.lng,
-        tz: yer.tz,
-        country_code: yer.ulke_kodu,
-      });
-      setSorgu(o.ana);
-      setJeton(yeniOturumJetonu());
-    } catch {
-      setHata(t('yeni.secimHata'));
-    } finally {
-      setSecimYukleniyor(false);
+  // 0.3 yönlendirme ekranı kalktı (#98): ilk açılış sihirbaza gelir, damga burada yazılır (bir daha yönlendirilmez).
+  const profil = useProfil();
+  const profilGuncelle = useProfilGuncelle();
+  useEffect(() => {
+    if (profil.data && !profil.data.onboarding_done_at && !profilGuncelle.isPending) {
+      profilGuncelle.mutate({ onboarding_done_at: new Date().toISOString() });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [profil.data?.onboarding_done_at]);
+
+  const onerilenAd = seyahatAdiOner(sehir ? [sehir.ad] : []);
+  const rehberSehir = sehirEslestir(sehirler.data, sehir);
+  const kilitli = !!tripId;
+
+  const geri = () => {
+    setHata(null);
+    const o = oncekiAdim(adim);
+    if (o) setAdim(o);
+    else router.navigate('/(tabs)');
+  };
+  const ileri = () => {
+    setHata(null);
+    const n = sonrakiAdim(adim);
+    if (n) setAdim(n);
   };
 
-  const yaz = (metin: string) => {
-    setSorgu(metin);
-    if (secili) setSecili(null);
+  // 1 → 2: ad değiştiyse ve seyahat varsa kaydet.
+  const nereyeDevam = async () => {
+    if (!sehir) return;
+    if (tripId && seyahat.data && (ad ?? onerilenAd) !== (seyahat.data.name ?? onerilenAd)) {
+      try {
+        await adKaydet.mutateAsync(ad ?? onerilenAd);
+      } catch {
+        setHata(t('sihirbaz.nezaman.hata'));
+        return;
+      }
+    }
+    ileri();
   };
-
-  const devam = async () => {
-    if (!secili) return;
+  // 2 → 3: seyahat oluşturulur (tarihli ya da tarihsiz).
+  const seyahatiKur = async (tarihsiz: boolean) => {
+    if (!sehir) return;
+    if (tripId) return ileri();
     setHata(null);
     try {
       const id = await olustur.mutateAsync({
-        sehir: secili,
-        start_date: tarihler?.gidis ?? null,
-        end_date: tarihler?.donus ?? null,
+        sehir,
+        name: ad ?? onerilenAd,
+        start_date: tarihsiz ? null : (aralik?.gidis ?? null),
+        end_date: tarihsiz ? null : (aralik?.donus ?? aralik?.gidis ?? null),
       });
-      router.push({ pathname: '/yeni/otel', params: { trip: id } });
+      setTripId(id);
+      setAdim('oteller');
     } catch {
-      setHata(t('yeni.hata'));
+      setHata(t('sihirbaz.nezaman.hata'));
     }
   };
+  const haritayaGec = () => {
+    if (!tripId) return;
+    router.replace({ pathname: '/seyahat/[id]/(sekmeler)/kesfet', params: { id: tripId } });
+  };
 
-  const listeAcik = !secili && sorgu.trim().length >= 2;
-
+  if (adim === 'nereye') {
+    return (
+      <AdimKabugu adim={adim} baslik={t('sihirbaz.nereye.baslik')} alt={t('sihirbaz.nereye.alt')} onGeri={geri} hata={hata ?? (yakinda ? t('sihirbaz.nereye.yakinda') : null)} devam={{ onPress: nereyeDevam, pasif: !sehir, yukleniyor: adKaydet.isPending }}>
+        <AdimNereye sehir={sehir} onSehir={setSehir} ad={ad} onerilenAd={onerilenAd} onAd={setAd} sehirler={sehirler.data} kilitli={kilitli} onYakinda={() => setYakinda(true)} />
+      </AdimKabugu>
+    );
+  }
+  if (adim === 'nezaman') {
+    return (
+      <AdimKabugu
+        adim={adim}
+        baslik={t('sihirbaz.nezaman.baslik')}
+        alt={t('sihirbaz.nezaman.alt')}
+        onGeri={geri}
+        hata={hata}
+        devam={{ onPress: () => seyahatiKur(false), pasif: !aralik && !kilitli, yukleniyor: olustur.isPending }}
+        atla={kilitli ? undefined : { baslik: t('sihirbaz.nezaman.atla'), onPress: () => seyahatiKur(true) }}>
+        <AdimNeZaman aralik={aralik} onAralik={setAralik} kilitli={kilitli} />
+      </AdimKabugu>
+    );
+  }
+  // 3–5: seyahat ve günler yüklenene kadar bekleme.
+  if (!seyahat.data || !gunler.data || !konaklamalar.data) {
+    return (
+      <AdimKabugu adim={adim} baslik="" onGeri={geri}>
+        {seyahat.isError || gunler.isError ? <Text style={s.hata}>{t('sihirbaz.nezaman.hata')}</Text> : <ActivityIndicator color={renk.metin} style={{ marginTop: 40 }} />}
+      </AdimKabugu>
+    );
+  }
+  if (adim === 'oteller') {
+    return (
+      <AdimKabugu adim={adim} baslik={t('sihirbaz.oteller.baslik')} alt={t('sihirbaz.oteller.alt')} onGeri={geri} hata={hata} devam={{ onPress: ileri }} atla={{ baslik: t('sihirbaz.oteller.atla'), onPress: ileri }}>
+        <AdimOteller seyahat={seyahat.data} gunler={gunler.data} konaklamalar={konaklamalar.data} onHata={setHata} />
+      </AdimKabugu>
+    );
+  }
+  if (adim === 'kimlerle') {
+    return (
+      <AdimKabugu adim={adim} baslik={t('sihirbaz.kimlerle.baslik')} alt={t('sihirbaz.kimlerle.alt')} onGeri={geri} hata={hata} devam={{ onPress: ileri }} atla={{ baslik: t('sihirbaz.kimlerle.atla'), onPress: ileri }}>
+        <AdimDavet seyahat={seyahat.data} />
+      </AdimKabugu>
+    );
+  }
+  const havuz = mekanlar.data ?? [];
   return (
-    <SafeAreaView style={s.ekran} edges={['top']}>
-      <ScrollView contentContainerStyle={s.icerik} keyboardShouldPersistTaps="handled">
-        <EkranBasligi baslik={t('yeni.baslik')} alt={t('yeni.alt')} geri={router.canGoBack() ? () => router.back() : undefined} />
-
-        <View style={s.arama}>
-          <Text style={s.buyutec}>⌕</Text>
-          <TextInput
-            accessibilityLabel={t('yeni.ara')}
-            placeholder={t('yeni.araYer')}
-            placeholderTextColor={renk.soluk}
-            value={sorgu}
-            onChangeText={yaz}
-            autoCorrect={false}
-            autoCapitalize="words"
-            returnKeyType="search"
-            style={s.girdi}
-          />
-          {secimYukleniyor || (listeAcik && oneriler.isFetching) ? <ActivityIndicator color={renk.ikincil} /> : null}
-        </View>
-
-        {listeAcik ? (
-          <View style={s.liste}>
-            {oneriler.isError ? <Text style={s.hata}>{t('yeni.araHata')}</Text> : null}
-            {oneriler.data?.length === 0 ? <Text style={s.bos}>{t('yeni.sonucYok')}</Text> : null}
-            {oneriler.data?.map((o) => (
-              <Pressable
-                key={o.place_id}
-                accessibilityRole="button"
-                disabled={secimYukleniyor}
-                onPress={() => sec(o)}
-                style={({ pressed }) => [s.satir, pressed && { opacity: 0.7 }]}>
-                <View style={s.karo}>
-                  <Text style={s.harf}>{o.ana.charAt(0).toLocaleUpperCase('tr')}</Text>
-                </View>
-                <View style={s.metinler}>
-                  <Text style={s.ana} numberOfLines={1}>
-                    {o.ana}
-                  </Text>
-                  <Text style={s.ikincil} numberOfLines={1}>
-                    {o.ikincil}
-                  </Text>
-                </View>
-                <Text style={s.ok}>›</Text>
-              </Pressable>
-            ))}
-            {oneriler.data && oneriler.data.length > 0 ? <GoogleAtfi /> : null}
+    <AdimKabugu
+      adim={adim}
+      baslik={t('sihirbaz.onerilenler.baslik', { sehir: seyahat.data.city_label })}
+      alt={t('sihirbaz.onerilenler.alt')}
+      onGeri={geri}
+      hata={hata}
+      kaydirmasiz
+      altIcerik={
+        <View style={s.cubuk}>
+          <View style={{ flex: 1 }}>
+            <Text style={s.cubukBaslik}>{havuz.length > 0 ? t('sihirbaz.onerilenler.listedeN', { n: havuz.length }) : t('sihirbaz.onerilenler.listedeBos')}</Text>
+            <Text style={s.cubukAlt}>{t('sihirbaz.onerilenler.haritaNot')}</Text>
           </View>
-        ) : null}
-
-        {secili ? (
-          <View style={s.liste}>
-            <View style={s.satir}>
-              <View style={[s.karo, s.karoSecili]}>
-                <Text style={[s.harf, { color: renk.zemin }]}>{secili.ad.charAt(0).toLocaleUpperCase('tr')}</Text>
-              </View>
-              <View style={s.metinler}>
-                <Text style={s.ana}>{secili.ad}</Text>
-                <Text style={s.ikincil}>{secili.ikincil}</Text>
-              </View>
-              <Text style={s.tik}>✓</Text>
-            </View>
-            <GoogleAtfi />
-          </View>
-        ) : null}
-
-        <Text style={s.bolum}>{t('yeni.tarihler')}</Text>
-        <View style={s.tarihKutular}>
-          <TarihKutusu etiket={t('yeni.gidis')} deger={tarihler?.gidis} onPress={() => setTakvimAcik(true)} />
-          <TarihKutusu etiket={t('yeni.donus')} deger={tarihler?.donus} onPress={() => setTakvimAcik(true)} />
+          <Text onPress={haritayaGec} accessibilityRole="button" style={s.cubukDugme}>
+            {t('sihirbaz.onerilenler.haritayaGec')} →
+          </Text>
         </View>
-        <Text style={s.not}>{t('yeni.tarihNot')}</Text>
-
-        <Text style={s.bolum}>{t('yeni.kimlerle')}</Text>
-        <Text style={s.not}>{t('yeni.kimlerleNot')}</Text>
-      </ScrollView>
-
-      <View style={s.altKisim}>
-        {hata ? <Text style={s.hata}>{hata}</Text> : null}
-        <Buton baslik={t('yeni.devam')} onPress={devam} pasif={!secili} yukleniyor={olustur.isPending} />
-      </View>
-
-      <TarihSecici acik={takvimAcik} deger={tarihler} onKapat={() => setTakvimAcik(false)} onSec={setTarihler} />
-    </SafeAreaView>
-  );
-}
-
-function TarihKutusu({ etiket, deger, onPress }: { etiket: string; deger?: string; onPress: () => void }) {
-  return (
-    <Pressable accessibilityRole="button" accessibilityLabel={etiket} onPress={onPress} style={s.tarihKutu}>
-      <Text style={s.tarihEtiket}>{etiket}</Text>
-      <Text style={[s.tarihDeger, !deger && { color: renk.soluk }]}>{deger ? kisaTarih(deger) : t('yeni.sec')}</Text>
-    </Pressable>
+      }>
+      <AdimOnerilenler seyahat={seyahat.data} rehberSehir={rehberSehir} havuz={havuz} onHata={setHata} />
+    </AdimKabugu>
   );
 }
 
 const s = StyleSheet.create({
-  ekran: { flex: 1, backgroundColor: renk.zemin },
-  icerik: { paddingBottom: 16 },
-  arama: {
-    marginHorizontal: bosluk.kenar,
-    marginTop: 14,
-    height: 48,
-    paddingHorizontal: 16,
-    borderRadius: 14,
-    backgroundColor: renk.yuzey,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-  },
-  buyutec: { fontSize: 18, color: renk.ikincil },
-  girdi: { flex: 1, fontFamily: yazi.yari, fontSize: 14, color: renk.metin, paddingVertical: 0 },
-  liste: { paddingHorizontal: bosluk.kenar, paddingTop: 14 },
-  satir: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 14,
-    paddingVertical: 12,
-    minHeight: minDokunma,
-    borderTopWidth: 1,
-    borderTopColor: renk.ayrac,
-  },
-  karo: { width: 48, height: 48, borderRadius: 12, backgroundColor: renk.yuzey, alignItems: 'center', justifyContent: 'center' },
-  karoSecili: { backgroundColor: renk.metin },
-  harf: { fontFamily: yazi.ekstra, fontSize: 17, color: renk.metin },
-  metinler: { flex: 1, gap: 2 },
-  ana: { fontFamily: yazi.kalin, fontSize: 15, color: renk.metin },
-  ikincil: { fontFamily: yazi.normal, fontSize: 12, color: renk.ikincil },
-  ok: { fontFamily: yazi.kalin, fontSize: 22, color: '#c4c4c4' },
-  tik: { fontFamily: yazi.ekstra, fontSize: 16, color: renk.metin },
-  bos: { fontFamily: yazi.normal, fontSize: 13, color: renk.ikincil, paddingVertical: 12 },
-  bolum: {
-    fontFamily: yazi.ekstra,
-    fontSize: 17,
-    letterSpacing: -0.4,
-    color: renk.metin,
-    paddingHorizontal: bosluk.kenar,
-    paddingTop: 22,
-  },
-  tarihKutular: { flexDirection: 'row', gap: 10, paddingHorizontal: bosluk.kenar, paddingTop: 10 },
-  tarihKutu: { flex: 1, padding: 14, paddingVertical: 12, borderRadius: 14, backgroundColor: renk.yuzey, gap: 2, minHeight: minDokunma },
-  tarihEtiket: { fontFamily: yazi.normal, fontSize: 11, color: renk.ikincil },
-  tarihDeger: { fontFamily: yazi.kalin, fontSize: 16, color: renk.metin },
-  not: { fontFamily: yazi.normal, fontSize: 12, lineHeight: 18, color: renk.ikincil, paddingHorizontal: bosluk.kenar, paddingTop: 8 },
-  altKisim: { paddingHorizontal: bosluk.kenar, paddingBottom: 12, paddingTop: 8, gap: 10 },
-  hata: { fontFamily: yazi.yari, fontSize: 12, textAlign: 'center', color: renk.uyari },
+  hata: { fontFamily: yazi.yari, fontSize: 12, textAlign: 'center', color: renk.uyari, paddingTop: 20 },
+  cubuk: { height: 60, paddingLeft: 16, paddingRight: 6, borderRadius: 999, backgroundColor: renk.metin, flexDirection: 'row', alignItems: 'center', gap: 10 },
+  cubukBaslik: { fontFamily: yazi.kalin, fontSize: 13, color: renk.zemin },
+  cubukAlt: { fontFamily: yazi.normal, fontSize: 11, color: '#a3a3a3' },
+  cubukDugme: { fontFamily: yazi.kalin, fontSize: 13, color: renk.metin, backgroundColor: renk.zemin, borderRadius: 999, paddingHorizontal: 16, paddingVertical: 13, overflow: 'hidden' },
 });

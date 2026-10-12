@@ -21,6 +21,8 @@ export type UyeOzet = { user_id: string; role: 'owner' | 'member'; display_name:
 /** 3.1 listesi için seyahat + üyeler + mekan sayısı (tek sorgu, RLS süzer). */
 export type SeyahatOzet = {
   id: string;
+  /** #98 KK2: seyahatin adı ("Eskişehir Gezisi"); boşsa şehir etiketi gösterilir. */
+  name: string | null;
   city_label: string;
   start_date: string | null;
   end_date: string | null;
@@ -36,6 +38,8 @@ export type SeyahatOzet = {
 /** Tek seyahat (3.3 ve seyahat içi ekranlar). */
 export type Seyahat = {
   id: string;
+  /** #98 KK2: seyahatin adı; boşsa şehir etiketi. */
+  name: string | null;
   city_label: string;
   country_code: string | null;
   lat: number;
@@ -50,6 +54,8 @@ export type Seyahat = {
   /** "HH:MM:SS" (Postgres time) — §5.3 gün başlangıcı/bitişi varsayılanları. */
   day_start: string;
   day_end: string;
+  /** #98 adım 4: davet linki (PRD 3.10, 8 karakter base62). */
+  invite_token: string;
 };
 
 /** days satırı (PRD §8). Tarihsiz seyahatte date null. */
@@ -117,8 +123,27 @@ export type SehirSecimi = {
 
 export type YeniSeyahat = {
   sehir: SehirSecimi;
+  /** #98 KK2: boşsa otomatik "{Şehir} Gezisi" (sihirbaz.seyahatAdiOner). */
+  name?: string | null;
   start_date: string | null;
   end_date: string | null;
+};
+
+/** #97 / #98: içerik tabloları (yayınlı okunur; backoffice yazar). */
+export type Sehir = { id: string; ad: string; slug: string; kapak_url: string | null; lat: number; lng: number };
+export type Yer = {
+  id: string;
+  sehir_id: string;
+  /** Google place_id; boşsa istemci adıyla çözer (icerik.yerPlaceId). */
+  place_id: string | null;
+  ad: string;
+  /** Google birincil tipi (museum, park, mosque…). */
+  kategori: string | null;
+  rehber_md: string | null;
+  kapak_url: string | null;
+  one_cikan_sira: number | null;
+  lat: number;
+  lng: number;
 };
 
 // account_deletion_preview() satırı

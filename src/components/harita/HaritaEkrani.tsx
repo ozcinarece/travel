@@ -48,6 +48,11 @@ type Props = {
    */
   altSayfa?: { hal: SayfaHali; onHal: (h: SayfaHali) => void; ust: ReactNode; govde: (yukseklik: number) => ReactNode; ustunde?: ReactNode };
   /**
+   * #98 B KK4: alt sayfa görünmez ve dokunulmaz (mekan paneli açıkken çekmece gizlenir) — harita dolgusu DEĞİŞMEZ (kamera
+   * yerinde kalır, #80 KK1); panel kapanınca sayfa aynı halde geri gelir.
+   */
+  altSayfaGizli?: boolean;
+  /**
    * #80: en üst katman (mekan paneli) — harita dolgusunu DEĞİŞTİRMEZ (kamera yerinde kalır, KK1); kendi konumunu kendi
    * belirler (absoluteFill içinde alt sayfa). Dokunuşlar yalnız kendi alanında yakalanır.
    */
@@ -66,7 +71,7 @@ const GECIS_YUKSEKLIK = 250;
  * #17 KK2: tam ekran harita kabuğu — 3.3 Otel, 3.4 Keşfet ve 3.5 bunu paylaşır.
  * Harita ekranın tamamını kaplar; üstte ve altta yüzen katmanlar dokunuşu yalnız kendi alanlarında yakalar.
  */
-export function HaritaEkrani({ baslik, geri, sagUst, arama, aramaSag, ustEk, altNot, altSerbest, altPanel, onUstYukseklik, altMenuVar, panelTam, altBaslik, altSayfa, ustKatman, harita }: Props) {
+export function HaritaEkrani({ baslik, geri, sagUst, arama, aramaSag, ustEk, altNot, altSerbest, altPanel, onUstYukseklik, altMenuVar, panelTam, altBaslik, altSayfa, altSayfaGizli, ustKatman, harita }: Props) {
   const kenar = useSafeAreaInsets();
   const [ustY, setUstY] = useState(0);
   const [panelY, setPanelY] = useState(0);
@@ -125,6 +130,7 @@ export function HaritaEkrani({ baslik, geri, sagUst, arama, aramaSag, ustEk, alt
       </View>
 
       {sayfaAcik && ekranH > 0 ? (
+        <View style={[StyleSheet.absoluteFill, altSayfaGizli && s.gizli]} pointerEvents={altSayfaGizli ? 'none' : 'box-none'}>
         <AltSayfa
           hal={altSayfa!.hal}
           onHal={altSayfa!.onHal}
@@ -142,6 +148,7 @@ export function HaritaEkrani({ baslik, geri, sagUst, arama, aramaSag, ustEk, alt
           altDolgu={sayfaAlt}>
           {altSayfa!.govde(yukseklik[altSayfa!.hal] - SAYFA_UST_DOLGU - seritH - sayfaAlt)}
         </AltSayfa>
+        </View>
       ) : panelTam && altPanel ? (
         <View style={[s.panel, s.panelTam, { top: ustY, paddingBottom: altMenuVar ? 10 : Math.max(kenar.bottom, 14) }]}>{altPanel}</View>
       ) : (
@@ -231,6 +238,7 @@ export function EylemHapi({ metin, onPress, yukleniyor }: { metin: string; onPre
 }
 
 const s = StyleSheet.create({
+  gizli: { opacity: 0 },
   ekran: { flex: 1, backgroundColor: renk.yuzey },
   gecis: { position: 'absolute', left: 0, right: 0, top: 0, height: GECIS_YUKSEKLIK },
   buyukBaslik: { flexDirection: 'row', alignItems: 'center', gap: 10, flexShrink: 1 },

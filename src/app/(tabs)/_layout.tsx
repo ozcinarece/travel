@@ -16,7 +16,8 @@ export default function SekmeLayout() {
         tabBarStyle: { borderTopColor: renk.ayrac, backgroundColor: renk.zemin },
       }}>
       <Tabs.Screen name="index" options={{ title: t('sekme.seyahatler'), tabBarIcon: ({ color }) => <Ikon ad="seyahatler" renk={color} /> }} />
-      <Tabs.Screen name="yeni" options={{ title: t('sekme.yeni'), tabBarIcon: ({ color }) => <Ikon ad="yeni" renk={color} /> }} />
+      {/* #98: Yeni sekmesi sihirbazdır; adımlar tam ekran (alt menü gizli), geri ile Seyahatler'e döner. */}
+      <Tabs.Screen name="yeni" options={{ title: t('sekme.yeni'), tabBarIcon: ({ color }) => <Ikon ad="yeni" renk={color} />, tabBarStyle: { display: 'none' } }} />
       <Tabs.Screen name="profil" options={{ title: t('sekme.profil'), tabBarIcon: ({ color }) => <Ikon ad="profil" renk={color} /> }} />
     </Tabs>
   );
