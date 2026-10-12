@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from 'react';
+import { useRef, useState, type ReactNode } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import Svg, { Circle, Path } from 'react-native-svg';
 
@@ -7,6 +7,8 @@ import { blokEkle, gorselSatiri, saatMetni } from '@/features/yonetim/gezi';
 import type { YonetimSehri } from '@/features/yonetim/geziSorgulari';
 import { ty } from '@/features/yonetim/metin';
 import { useOtomatikKayit } from '@/features/yonetim/otomatikKayit';
+import { mekanBaglari } from '@/features/yonetim/sehir';
+import { mekanlariYaz, type MekanAdi } from '@/features/yonetim/sehirSorgulari';
 import { gecerliPlaceId } from '@/features/yonetim/yer';
 import { yerAlanlari, yerAnahtari, YER_LISTESI, type YonetimYeri } from '@/features/yonetim/yerSorgulari';
 import { useHafifYerler } from '@/features/yerler/api';
@@ -30,7 +32,17 @@ const SEKMELER: Sekme[] = ['genel', 'rehber', 'fotolar'];
  * (Genel · Rehber · Fotoğraflar), sağda mekan paneli Rehber önizlemesi. Yer kimliğiyle anahtarlanır.
  */
 export function YerEditoru({ yer, sehirler, liste }: { yer: YonetimYeri; sehirler: YonetimSehri[]; liste: ReactNode }) {
-  const { taslak, degistir, durum, simdiKaydet } = useOtomatikKayit({ tablo: 'yerler', id: yer.id, ilk: yerAlanlari(yer), yenilenecek: [YER_LISTESI, yerAnahtari(yer.id)] });
+  // #111: rehberdeki mekanlar kayıtta `icerik_mekanlari`na (sahip: yer); yeni seçilenler taslak yer olarak açılır.
+  const bilinen = useRef<Record<string, MekanAdi>>({});
+  const { taslak, degistir, durum, simdiKaydet } = useOtomatikKayit({
+    tablo: 'yerler',
+    id: yer.id,
+    ilk: yerAlanlari(yer),
+    yenilenecek: [YER_LISTESI, yerAnahtari(yer.id)],
+    onKaydedildi: async (t, fark) => {
+      if (fark.rehber_md !== undefined) await mekanlariYaz('yer', yer.id, mekanBaglari(t.rehber_md), bilinen.current);
+    },
+  });
   const fotolar = useIcerikFotolari('yer', yer.id);
   const fotoIs = useFotoIslemleri('yer', yer.id);
   const [sekme, setSekme] = useState<Sekme>('rehber');
@@ -81,7 +93,17 @@ export function YerEditoru({ yer, sehirler, liste }: { yer: YonetimYeri; sehirle
         ) : null}
         {sekme === 'genel' ? <YerGenel taslak={taslak} sehirler={sehirler} degistir={degistir} tekilHatasi={durum.hata === 'tekil'} /> : null}
         {sekme === 'rehber' ? (
-          <RehberEditoru md={taslak.rehber_md} onDegis={(rehber_md) => degistir({ rehber_md: rehber_md || null })} merkez={merkez} fotoYukle={fotoYukle} onHata={setHata} kayitMetni={kayitMetni} />
+          <RehberEditoru
+            md={taslak.rehber_md}
+            onDegis={(rehber_md) => degistir({ rehber_md: rehber_md || null })}
+            merkez={merkez}
+            fotoYukle={fotoYukle}
+            onHata={setHata}
+            kayitMetni={kayitMetni}
+            onMekanSecildi={(y) => {
+              bilinen.current[y.place_id] = { ad: y.ad, kategori: y.primary_type, lat: y.lat, lng: y.lng };
+            }}
+          />
         ) : null}
         {sekme === 'fotolar' ? (
           <IcerikFotolari

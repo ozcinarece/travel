@@ -72,4 +72,13 @@ describe('markdownAyristir — foto: ve mekan: (#107 KK3)', () => {
     expect(mekanlariAyikla('[a](https://x) ve [b](mekan:P)').metin).toBe('[a](https://x) ve b');
     expect(satirParcalari('2 * 3 = 6')).toEqual([{ metin: '2 * 3 = 6' }]);
   });
+
+  it('#111: ::mekan[place_id] tek satırda kart bloğu; paragrafı böler; bozuk kimlik düz metin', () => {
+    expect(markdownAyristir('Çibörek için erken gidin.\n::mekan[ChIJ-hayri-usta-1]\nTatlı için helva.\n\n::mekan[kısa]')).toEqual([
+      { tur: 'paragraf', metin: 'Çibörek için erken gidin.' },
+      { tur: 'mekan', place_id: 'ChIJ-hayri-usta-1' },
+      { tur: 'paragraf', metin: 'Tatlı için helva.' },
+      { tur: 'paragraf', metin: '::mekan[kısa]' },
+    ]);
+  });
 });

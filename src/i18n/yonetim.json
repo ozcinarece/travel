@@ -310,5 +310,149 @@
       "mekanPaneli": "Mekan paneli",
       "yorum": "Yorum isteği"
     }
+  },
+  "sehir": {
+    "baslik": "Şehir · {ad}",
+    "baslikRehber": "Şehir · {ad} · Rehber bölümleri",
+    "yeni": "+ Şehir",
+    "ara": "Ara",
+    "araYer": "Şehir ara",
+    "yeniAra": "Şehir ara (Google)",
+    "satirYayinda": "{n} gezi · yayında",
+    "satirTaslak": "{n} gezi · taslak",
+    "bos": "Soldan bir şehir seç ya da + Şehir ile ekle.",
+    "yuklenemedi": "Şehir yüklenemedi. Yeniden dene.",
+    "eklenemedi": "Şehir eklenemedi. Yeniden dene.",
+    "kaydet": "Kaydet",
+    "onizleme": "Önizleme",
+    "onizlemeBaslik": "Önizleme · {ad}",
+    "sekme": {
+      "genel": "Genel",
+      "rehber": "Rehber bölümleri",
+      "fotolar": "Fotoğraflar"
+    },
+    "durum": {
+      "taslak": "Taslak",
+      "yayinda": "Yayında"
+    },
+    "alan": {
+      "ad": "AD",
+      "slug": "SLUG",
+      "durum": "DURUM",
+      "lat": "ENLEM",
+      "lng": "BOYLAM",
+      "ozet": "ÖZET (REHBER, 2 CÜMLE)"
+    },
+    "ozetSayac": "{n} / 400",
+    "slugTekil": "Bu slug başka bir şehirde var.",
+    "kapakUyari": "Yayına almak için karo kapağı gerekli (Fotoğraflar).",
+    "fotoHata": {
+      "tur": "Yalnız JPG, PNG ya da WebP yüklenebilir.",
+      "boyut": "Dosya 8 MB'tan büyük.",
+      "kucuk": "Fotoğraf en az 1600 px olmalı.",
+      "yukleme": "Yüklenemedi. Yeniden dene."
+    },
+    "foto": {
+      "rolBaslik": {
+        "karo": "KARO KAPAĞI · kare",
+        "genis": "GENİŞ KAPAK · 3:2"
+      },
+      "rolYeri": {
+        "karo": "Sihirbaz “Popüler şehirler” · şehir seçkisi karoları · Kaydettiklerim",
+        "genis": "Şehir rehberi kapağı · ana sayfa şehir kartı · arama sonucu"
+      },
+      "rolBos": "Seçilmedi",
+      "rol": {
+        "karo": "Karo kapağı",
+        "genis": "Geniş kapak"
+      },
+      "rolSec": "Rol ▾",
+      "rolSecEtiket": "{ad} rolü",
+      "rolYok": "Rol yok",
+      "kural": "Fotoğraf sürükle ya da seç · JPG/PNG/WebP, en az 1600 px, en çok 8 MB · Storage",
+      "yukle": "Fotoğraf yükle",
+      "yukleniyor": "Yükleniyor…",
+      "ekle": "Ekle",
+      "altMetin": "ALT METİN",
+      "altZorunlu": "Alt metin zorunlu",
+      "kaynak": "KAYNAK",
+      "kaynakSec": "Seç ▾",
+      "kaynaklar": {
+        "kendi": "Kendi çekimim",
+        "telifsiz": "Telifsiz",
+        "izinli": "İzinli"
+      },
+      "kirp": "Kırp",
+      "sil": "Sil",
+      "silOnay": "Silinsin mi?",
+      "not": "Roller sürükle-bırakla da atanır (fotoyu üstteki role bırak). Rolü boş şehirde uygulama kategori gradyanı gösterir. Gezi ve yer fotoğrafları kendi editörlerinde aynı kalıp."
+    },
+    "nerede": {
+      "baslik": "NEREDE GÖRÜNÜR",
+      "karo": "Sihirbaz · Popüler şehirler (karo)",
+      "gezi": "{n} gezi",
+      "rehber": "Şehir rehberi kapağı (geniş)",
+      "rehberUst": "ŞEHİR REHBERİ",
+      "anaSayfa": "Ana sayfa şehir seçkisi (geniş)",
+      "cip": "ŞEHİR",
+      "git": "{ad} git"
+    }
+  },
+  "rehber": {
+    "bolumler": "{sehir} · BÖLÜMLER",
+    "yeniBolum": "+ Bölüm",
+    "mekanSayisi": "{n} mekan",
+    "notOnce": "Sağdaki sayı, bölümde kart olarak bağlı mekan sayısı. Bu mekanlar uygulamada ",
+    "notOneriler": "Öneriler",
+    "notSonra": " sayfasına kendiliğinden girer.",
+    "bos": "Bu şehirde henüz rehber bölümü yok. + Bölüm ile ekle.",
+    "varsayilan": {
+      "ulasim": "Nasıl gidilir, nasıl gezilir",
+      "yemek": "Ne yenir",
+      "mahalle": "Mahalleler",
+      "ipucu": "İpuçları"
+    },
+    "cip": {
+      "ulasim": "Nasıl gezilir",
+      "yemek": "Ne yenir",
+      "mahalle": "Mahalleler",
+      "ipucu": "İpuçları"
+    },
+    "alan": {
+      "baslik": "BÖLÜM BAŞLIĞI",
+      "ozet": "KISA ÖZET (içindekiler satırı)"
+    },
+    "nasil": "NASIL EKLENSİN?",
+    "bicim": {
+      "satir": "Satır içi bağlantı",
+      "kart": "Mekan kartı"
+    },
+    "bicimAlt": {
+      "satir": "Seçili metin dokunulabilir olur",
+      "kart": "Paragraf altına, Listeye ekle ile"
+    },
+    "vazgec": "Vazgeç",
+    "ekle": "Ekle",
+    "degistir": "Değiştir",
+    "kaldir": "{ad} kartını kaldır",
+    "kartAlt": "MEKAN KARTI · {kategori} · place_id ✓",
+    "kaynak": "Kaynak görünümü: ",
+    "sayac": "{kart} mekan kartı · {satir} satır içi bağlantı",
+    "okuma": "~{dk} dk okuma",
+    "kaydedildi": "Kaydedildi · {saat}",
+    "onizlemeEtiket": "ÖNİZLEME · REHBER SEKMESİ",
+    "onizleme": {
+      "baslik": "{ad} rehberi",
+      "oneriler": "Öneriler ›",
+      "listeyeEkle": "Listeye ekle",
+      "yorum": "{n} yorum",
+      "sekme": {
+        "kesfet": "Keşfet",
+        "program": "Program",
+        "rehber": "Rehber",
+        "grup": "Grup"
+      }
+    },
+    "mekanAra": "Mekan ara ya da Google Maps linki yapıştır"
   }
 }

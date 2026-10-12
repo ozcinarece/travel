@@ -47,8 +47,8 @@ describe('Rehber blok modeli (#108 KK3)', () => {
   });
 
   it('alt şerit sayaçları', () => {
-    expect(rehberSayaclari(MD)).toEqual({ karakter: MD.length, okumaDk: 1, gorsel: 2, mekan: 1 });
-    expect(rehberSayaclari(null)).toEqual({ karakter: 0, okumaDk: 1, gorsel: 0, mekan: 0 });
+    expect(rehberSayaclari(MD)).toEqual({ karakter: MD.length, okumaDk: 1, gorsel: 2, mekan: 1, kart: 0 });
+    expect(rehberSayaclari(null)).toEqual({ karakter: 0, okumaDk: 1, gorsel: 0, mekan: 0, kart: 0 });
     expect(binlik(1240)).toBe('1.240');
     expect(binlik(12)).toBe('12');
   });
