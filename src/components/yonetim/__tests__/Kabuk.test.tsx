@@ -56,6 +56,20 @@ describe('Kabuk (#106)', () => {
     expect(queryByRole('link', { name: 'Yerler' })).toBeNull();
   });
 
+  it('dar ekran (BekleyenTasarim21 ekran 3): üst çubukta avatar; açık menüde 7 öğe, bulunulan sayfa seçili', () => {
+    genislik(800);
+    mockYol = '/yonetim/geziler';
+    const { getByRole, getByLabelText } = render(
+      <Kabuk kullanici={{ ad: 'Ece', harf: 'E' }}>
+        <Text>gövde</Text>
+      </Kabuk>,
+    );
+    expect(getByLabelText('Ece · admin')).toBeTruthy();
+    fireEvent.press(getByRole('button', { name: 'Menüyü aç' }));
+    for (const ad of MENU) expect(getByRole('link', { name: ad })).toBeTruthy();
+    expect(getByRole('link', { name: 'Geziler' }).props.accessibilityState).toEqual({ selected: true });
+  });
+
   it('oturumsuz/admin olmayanda kullanıcı satırı yok', () => {
     genislik(1440);
     const { queryByText } = render(<Kabuk kullanici={null}>{null}</Kabuk>);

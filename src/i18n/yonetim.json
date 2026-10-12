@@ -13,14 +13,16 @@
   },
   "rol": "{ad} · admin",
   "giris": {
-    "baslik": "Giriş",
+    "baslik": "Giriş yap",
     "google": "Google ile giriş",
-    "aciklama": "Yönetim paneline yalnız yönetici listesindeki Google hesapları girer.",
+    "aciklama": "Yönetim paneline yalnız yönetici listesindeki hesaplar girer.",
+    "not": "Uygulamadaki hesabınla aynı Google hesabı.",
     "hata": "Giriş yapılamadı. Yeniden dene."
   },
   "yetkinYok": {
     "baslik": "Yetkin yok",
-    "aciklama": "{eposta} yönetici listesinde değil. Başka bir hesapla girmek için çıkış yap.",
+    "aciklama": "yönetici listesinde değil. Bir yöneticiden seni eklemesini iste.",
+    "baskaHesap": "Başka hesapla gir",
     "cikis": "Çıkış"
   },
   "gezi": {
@@ -48,11 +50,13 @@
       "ozet": "ÖZET (kart altı, 1 satır)",
       "yazar": "YAZAR",
       "okuma": "OKUMA",
-      "slug": "SLUG",
-      "planli": "PLANLI YAYIN",
+      "slug": "SLUG · bağlantı",
+      "planli": "YAYIN TARİHİ",
       "yazi": "YAZI · markdown",
       "gunBaslik": "GÜN BAŞLIĞI",
-      "altyazi": "ALTYAZI"
+      "altyazi": "ALTYAZI",
+      "planliTarih": "Yayın tarihi",
+      "planliSaat": "Yayın saati"
     },
     "okumaDk": "{n} dk",
     "kaydedildi": "Kaydedildi · {saat}",
@@ -80,7 +84,6 @@
       "foto": "Görsel ekle",
       "mekan": "Mekan bağlantısı"
     },
-    "plan": "PLAN · {n}. GÜN{baslik}",
     "gunEtiket": "{n}. Gün{baslik}",
     "gunEkle": "+ Gün",
     "gunSil": "Günü sil",
@@ -91,7 +94,7 @@
     "mekanAra": "Mekan ara (Google) ya da link yapıştır → place_id, kategori, konum otomatik",
     "araHata": "Mekan alınamadı. Yeniden dene.",
     "fotoYukle": "+ Fotoğraf yükle",
-    "fotoBirak": "Fotoğrafları buraya sürükle · jpeg, png, webp · en çok 5 MB",
+    "fotoBirak": "Fotoğraf sürükle ya da seç · JPG/PNG/WebP · en çok 5 MB",
     "kapak": "Kapak",
     "kapakYap": "Kapak yap",
     "yaziyaEkle": "Yazıya ekle",
@@ -102,12 +105,35 @@
       "yukleme": "Yüklenemedi. Yeniden dene."
     },
     "fotoYok": "Henüz fotoğraf yok.",
-    "onizleme": "ÖNİZLEME · {n}. SAYFA",
-    "sayfa": "{n} / 2 ›",
     "bos": "Soldan bir gezi seç ya da yeni gezi oluştur.",
     "yuklenemedi": "Gezi yüklenemedi.",
     "islemHata": "İşlem yapılamadı. Yeniden dene.",
-    "yazarSatiri": "{yazar} · {ay} {yil} · {okuma}"
+    "yazarSatiri": "{yazar} · {ay} {yil} · {okuma}",
+    "slugOnek": "gezi/",
+    "slugOtomatik": "otomatik · düzenle",
+    "slugElle": "elle",
+    "okumaOtomatik": "{n} dk · otomatik",
+    "menuKapat": "Menüyü kapat",
+    "durumAciklama": {
+      "taslak": "yalnız sen",
+      "planli": "tarihte açılır",
+      "yayinda": "hemen"
+    },
+    "planliNot": "Uygulamada {gun} {ay} {saat}’da görünür (İstanbul)",
+    "gunSilOnay": "{n}. Gün ve {durak} durağı silinsin mi?",
+    "gunSiraNot": "Günleri sürükleyerek sırala",
+    "aramaEkle": "↵ Ekle",
+    "aramaIpucu": "Google · ↑↓ seç, ↵ ekle, Esc kapat · link yapıştırınca tek sonuç",
+    "kapakTamam": "Kapak ✓",
+    "altyaziEkle": "Altyazı ekle",
+    "fotoYazidaSil": "Bu fotoğraf yazıda kullanılıyor. Yine de silinsin mi?",
+    "fotoNotOnce": "Sıra sürükleyerek değişir (yazıdaki sıradan bağımsız). “Yazıya ekle” imlecin olduğu yere ",
+    "fotoNotKod": "![altyazı](foto:yol)",
+    "fotoNotSonra": " koyar. Yazıda kullanılan foto silinmek istenirse uyarır.",
+    "onizleme1": "ÖNİZLEME · 1. SAYFA",
+    "onizleme2": "ÖNİZLEME · 2. SAYFA (plan)",
+    "oncekiSayfa": "Önceki sayfa",
+    "sonrakiSayfa": "Sonraki sayfa"
   },
   "yer": {
     "baslik": "Yer · {ad}",

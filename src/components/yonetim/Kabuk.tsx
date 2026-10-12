@@ -1,6 +1,7 @@
 import { Link, usePathname } from 'expo-router';
 import { useState, type ReactNode } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
+import Svg, { Path } from 'react-native-svg';
 
 import { aktifMenu, GENIS_EKRAN, MENU, type MenuOgesi } from '@/features/yonetim/menu';
 import { ty } from '@/features/yonetim/metin';
@@ -13,7 +14,8 @@ type Kullanici = { ad: string; harf: string };
 
 /**
  * #106 KK4: kanvastaki kabuk — sol menü 210 px (#f6f6f4, sağda 1 px #ebebeb), içerik sağda.
- * < 1200 px: aynı menü bloğu üstte tam genişlikte; "Yönetim" satırına basınca açılır/kapanır.
+ * < 1200 px (kanvas BekleyenTasarim21 ekran 3): 56 px üst çubuk (#f6f6f4; menü simgesi, logo, "Yönetim", sağda avatar);
+ * menü açılınca çubuğun altında iki sütunlu katman (40 px öğeler, gölge), arkadaki sayfa %35 soluk.
  */
 export function Kabuk({ kullanici, children }: { kullanici: Kullanici | null; children: ReactNode }) {
   const { width } = useWindowDimensions();
@@ -24,34 +26,65 @@ export function Kabuk({ kullanici, children }: { kullanici: Kullanici | null; ch
   const [acikYol, setAcikYol] = useState<string | null>(null);
   const acik = acikYol === yol;
 
-  const ogeler = genis || acik;
+  if (!genis) {
+    return (
+      <View style={[s.ekran, s.sutun]}>
+        <View style={s.darUst}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={ty(acik ? 'menu.kapat' : 'menu.ac')}
+            accessibilityState={{ expanded: acik }}
+            onPress={() => setAcikYol(acik ? null : yol)}
+            style={s.darMarka}>
+            <Svg width={22} height={22} viewBox="0 0 24 24" fill="none" stroke={yRenk.metin} strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+              <Path d="M4 7h16M4 12h16M4 17h16" />
+            </Svg>
+            <View style={s.darLogo}>
+              <View style={s.darIsaret} />
+              <Text style={s.darMarkaMetin}>{ty('marka')}</Text>
+            </View>
+          </Pressable>
+          {kullanici ? (
+            <View accessibilityLabel={ty('rol', { ad: kullanici.ad })} style={s.darAvatar}>
+              <Text style={s.avatarHarf}>{kullanici.harf}</Text>
+            </View>
+          ) : null}
+        </View>
+        <View style={s.icerik}>
+          <View style={[s.icerik, acik && s.soluk]} pointerEvents={acik ? 'none' : 'auto'}>
+            {children}
+          </View>
+          {acik ? (
+            <View style={s.darMenu}>
+              {MENU.map((oge) => (
+                <View key={oge.anahtar} style={s.darHucre}>
+                  <MenuSatiri oge={oge} secili={oge.anahtar === aktif} dar />
+                </View>
+              ))}
+            </View>
+          ) : null}
+        </View>
+      </View>
+    );
+  }
+
   return (
-    <View style={[s.ekran, genis ? s.satir : s.sutun]}>
-      <View style={[s.menu, genis ? s.menuGenis : s.menuDar]}>
-        <Pressable
-          accessibilityRole={genis ? undefined : 'button'}
-          accessibilityLabel={genis ? undefined : ty(acik ? 'menu.kapat' : 'menu.ac')}
-          accessibilityState={genis ? undefined : { expanded: acik }}
-          disabled={genis}
-          onPress={() => setAcikYol(acik ? null : yol)}
-          style={s.marka}>
+    <View style={[s.ekran, s.satir]}>
+      <View style={[s.menu, s.menuGenis]}>
+        <View style={s.marka}>
           <View style={s.markaIsaret} />
           <Text style={s.markaMetin}>{ty('marka')}</Text>
-        </Pressable>
-        {ogeler ? (
-          <>
-            {MENU.map((oge) => (
-              <MenuSatiri key={oge.anahtar} oge={oge} secili={oge.anahtar === aktif} />
-            ))}
-            {kullanici ? (
-              <View style={[s.kullanici, genis && s.kullaniciAltta]}>
-                <View style={s.avatar}>
-                  <Text style={s.avatarHarf}>{kullanici.harf}</Text>
-                </View>
-                <Text style={s.kullaniciAd}>{ty('rol', { ad: kullanici.ad })}</Text>
-              </View>
-            ) : null}
-          </>
+        </View>
+        {MENU.map((oge) => (
+          <MenuSatiri key={oge.anahtar} oge={oge} secili={oge.anahtar === aktif} />
+        ))}
+        {kullanici ? (
+          <View style={[s.kullanici, s.kullaniciAltta]}>
+            <View style={s.avatar}>
+              <Text style={s.avatarHarf}>{kullanici.harf}</Text>
+            </View>
+            <Text style={s.kullaniciAd}>{ty('rol', { ad: kullanici.ad })}</Text>
+          </View>
         ) : null}
       </View>
       <View style={s.icerik}>{children}</View>
@@ -59,7 +92,7 @@ export function Kabuk({ kullanici, children }: { kullanici: Kullanici | null; ch
   );
 }
 
-function MenuSatiri({ oge, secili }: { oge: MenuOgesi; secili: boolean }) {
+function MenuSatiri({ oge, secili, dar }: { oge: MenuOgesi; secili: boolean; dar?: boolean }) {
   const renk = secili ? yRenk.metin : yRenk.ikincil;
   return (
     <Link href={oge.yol as never} asChild>
@@ -67,9 +100,9 @@ function MenuSatiri({ oge, secili }: { oge: MenuOgesi; secili: boolean }) {
       <Pressable
         accessibilityRole="link"
         accessibilityState={{ selected: secili }}
-        style={StyleSheet.flatten([s.oge, secili && s.ogeSecili])}>
+        style={StyleSheet.flatten([s.oge, dar && s.ogeDar, secili && s.ogeSecili])}>
         <YonetimIkon ad={oge.anahtar} renk={renk} />
-        <Text style={[s.ogeMetin, secili ? s.ogeMetinSecili : { color: renk }]}>{ty(`menu.${oge.anahtar}`)}</Text>
+        <Text style={[s.ogeMetin, dar && s.ogeMetinDar, secili ? s.ogeMetinSecili : { color: renk }]}>{ty(`menu.${oge.anahtar}`)}</Text>
       </Pressable>
     </Link>
   );
@@ -117,7 +150,33 @@ const s = StyleSheet.create({
   sutun: { flexDirection: 'column' },
   menu: { backgroundColor: yRenk.yuzey, paddingVertical: 18, paddingHorizontal: 12, gap: 4 },
   menuGenis: { width: 210, flexShrink: 0, borderRightWidth: 1, borderRightColor: yRenk.ayrac },
-  menuDar: { borderBottomWidth: 1, borderBottomColor: yRenk.ayrac },
+  darUst: { height: 56, flexShrink: 0, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 18, borderBottomWidth: 1, borderBottomColor: yRenk.ayrac, backgroundColor: yRenk.yuzey },
+  darMarka: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  darLogo: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  darIsaret: { width: 30, height: 30, borderRadius: 9, backgroundColor: yRenk.metin },
+  darMarkaMetin: { fontFamily: yazi.ekstra, fontSize: 16, letterSpacing: -0.32, color: yRenk.metin },
+  darAvatar: { width: 28, height: 28, borderRadius: 14, backgroundColor: yRenk.metin, alignItems: 'center', justifyContent: 'center' },
+  darMenu: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    top: 0,
+    zIndex: 5,
+    paddingTop: 10,
+    paddingHorizontal: 12,
+    paddingBottom: 14,
+    backgroundColor: yRenk.yuzey,
+    borderBottomWidth: 1,
+    borderBottomColor: yRenk.ayrac,
+    boxShadow: '0 10px 24px rgba(15,15,15,0.1)',
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    rowGap: 4,
+  },
+  darHucre: { width: '50%', paddingHorizontal: 2 },
+  soluk: { opacity: 0.35 },
+  ogeDar: { height: 40 },
+  ogeMetinDar: { fontSize: 13 },
   marka: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 8, paddingBottom: 16 },
   markaIsaret: { width: 26, height: 26, borderRadius: 8, backgroundColor: yRenk.metin },
   markaMetin: { fontFamily: yazi.ekstra, fontSize: 14, letterSpacing: -0.28, color: yRenk.metin },

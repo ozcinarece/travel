@@ -87,6 +87,7 @@ export function YerEditoru({ yer, sehirler, liste }: { yer: YonetimYeri; sehirle
           <IcerikFotolari
             fotolar={fotolar.data ?? []}
             kapakUrl={taslak.kapak_url}
+            yazidaMi={(yol) => (taslak.rehber_md ?? '').includes(`foto:${yol}`)}
             onYukle={async (dosyalar) => {
               for (const d of dosyalar) {
                 try {
