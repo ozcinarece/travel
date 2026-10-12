@@ -19,8 +19,8 @@ describe('pinDokunusu (#91 B KK1–3)', () => {
     expect(pinDokunusu({ durak: undefined, seciliGunId: 'g1', gunSecili: true, hapAcikMekanId: null, mekanId: 'm1' })).toEqual({ tur: 'hizliEkle' });
     expect(pinDokunusu({ durak: undefined, seciliGunId: undefined, gunSecili: false, hapAcikMekanId: null, mekanId: 'm1' })).toEqual({ tur: 'panel' });
   });
-  it('seçili günün durağı: panel (hap açık olsa da)', () => {
-    expect(pinDokunusu({ durak: durak('g1'), seciliGunId: 'g1', gunSecili: true, hapAcikMekanId: 'm1', mekanId: 'm1' })).toEqual({ tur: 'panel' });
+  it('seçili günün durağı: durak kartı (#99; hap açık olsa da)', () => {
+    expect(pinDokunusu({ durak: durak('g1'), seciliGunId: 'g1', gunSecili: true, hapAcikMekanId: 'm1', mekanId: 'm1' })).toEqual({ tur: 'kart' });
   });
   it('diğer günün noktası: önce hap; hap açıkken aynı noktaya ikinci dokunuş "Güne git"; başka nokta yeni hap', () => {
     expect(pinDokunusu({ durak: durak('g2'), seciliGunId: 'g1', gunSecili: true, hapAcikMekanId: null, mekanId: 'm1' })).toEqual({ tur: 'hapAc' });
