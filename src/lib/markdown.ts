@@ -2,6 +2,7 @@
 // görsel (![altyazı](url); art arda iki görsel = ikili foto satırı, altyazı ilk görselin alt metni). Saf; test edilir.
 // #107 (backoffice yazar): `foto:<yol>` = `icerik` kovasındaki dosya; `![a](foto:x, foto:y)` tek satırda iki foto;
 // `[ad](mekan:<place_id>)`, `**kalın**`, `*italik*`: `metin` sade kalır (işaretsiz), biçim `parcalar`'da, bağlantılar `mekanlar`'da.
+// #111: tek satır `::mekan[<place_id>]` = paragraf altına mekan kartı (`mekan` bloğu; uygulamada kart bileşeni çizer).
 export type MekanBaglantisi = { ad: string; place_id: string };
 export type MdParca = { metin: string; kalin?: true; italik?: true; place_id?: string };
 type Bicim = { mekanlar?: MekanBaglantisi[]; parcalar?: MdParca[] };
@@ -11,9 +12,11 @@ export type MdBlok =
   | ({ tur: 'paragraf'; metin: string } & Bicim)
   | ({ tur: 'alinti'; metin: string } & Bicim)
   | { tur: 'madde'; ogeler: string[]; mekanlar?: MekanBaglantisi[] }
-  | { tur: 'fotolar'; fotolar: { url: string; alt: string }[]; altyazi: string | null };
+  | { tur: 'fotolar'; fotolar: { url: string; alt: string }[]; altyazi: string | null }
+  | { tur: 'mekan'; place_id: string };
 
 const GORSEL = /^!\[([^\]]*)\]\(([^)]+)\)\s*$/;
+export const MEKAN_KARTI = /^::mekan\[([A-Za-z0-9_-]{10,255})\]$/;
 const SATIR_ICI = /\*\*([^*]+)\*\*|\*([^*\s][^*]*)\*|\[([^\]]+)\]\(mekan:([^)\s]+)\)/g;
 
 /** `icerik` kovasındaki dosyanın herkese açık adresi (yol: `geziler/<id>/<dosya>`). */
@@ -85,6 +88,12 @@ export function markdownAyristir(kaynak: string | null | undefined): MdBlok[] {
     if (b) {
       bitir();
       bloklar.push(mekanli({ tur: 'baslik' as const, seviye: b[1].length as 1 | 2 | 3, metin: b[2].trim() }));
+      continue;
+    }
+    const k = MEKAN_KARTI.exec(satir.trim());
+    if (k) {
+      bitir();
+      bloklar.push({ tur: 'mekan', place_id: k[1] });
       continue;
     }
     const g = GORSEL.exec(satir.trim());

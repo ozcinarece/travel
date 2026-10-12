@@ -21,7 +21,9 @@ create table auth.users (
   email text,
   email_confirmed_at timestamptz,
   -- #110 genel bakış: kayıt zamanı (Supabase'deki gibi).
-  created_at timestamptz not null default now()
+  created_at timestamptz not null default now(),
+  -- #111 kullanıcı listesi: son görülme.
+  last_sign_in_at timestamptz
 );
 
 create function auth.jwt() returns jsonb

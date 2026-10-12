@@ -580,17 +580,23 @@ reset role;
 
 -- ---------------------------------------------------------------- #109: ana sayfa düzeni (taslak, yayın, görünen)
 reset role;
--- Seed + ilk yayın: üç bölüm, sırayla; taslak tablo anon'a kapalı, admin olmayana boş.
+-- Seed + ilk yayın: üç bölüm, mozaik kapalı (#132); taslak tablo anon'a kapalı, admin olmayana boş.
 set role anon;
 do $$
 begin
-  assert (select string_agg(tur, ',' order by sira) from public.ana_sayfa_gorunen) = 'tek_kart,serit,mozaik', 'seed bölümleri sırayla görünür';
+  assert (select string_agg(tur, ',' order by sira) from public.ana_sayfa_gorunen) = 'tek_kart,serit', 'seed bölümleri sırayla görünür; mozaik yok (#132)';
+  assert not exists (select 1 from public.ana_sayfa_gorunen where tur = 'mozaik'), '#132: anon ana_sayfa_gorunen''de mozaik görmez';
+  assert (select count(*) from public.ana_sayfa_yayini) >= 1 and (select bolumler from public.ana_sayfa_yayini order by id desc limit 1) is not null, 'anon son yayını okur (izinli sütunlar)';
   assert (select icerik ->> 'gezi_id' from public.ana_sayfa_gorunen where tur = 'tek_kart') is not null, 'otomatik öne çıkan gezi çözülür';
 end $$;
 select pg_temp.hata_bekle($$select count(*) from public.ana_sayfa_bolumleri$$, '42501');
 select pg_temp.hata_bekle($$select public.ana_sayfa_yayinla()$$, '42501');
+-- #132 KK1: yayınlayanın e-postası sütun izniyle kapalı.
+select pg_temp.hata_bekle($$select yayinlayan from public.ana_sayfa_yayini$$, '42501');
+select pg_temp.hata_bekle($$select * from public.ana_sayfa_yayini$$, '42501');
 set role authenticated;
 select pg_temp.as_email(:B, 'b@ornek.com');
+select pg_temp.hata_bekle($$select yayinlayan from public.ana_sayfa_yayini$$, '42501');
 do $$ begin assert (select count(*) from public.ana_sayfa_bolumleri) = 0, 'admin olmayan taslağı görmez'; end $$;
 select pg_temp.hata_bekle($$insert into public.ana_sayfa_bolumleri (tur, baslik, sira) values ('serit', 'x', 9)$$, '42501');
 select pg_temp.hata_bekle($$select public.ana_sayfa_yayinla()$$, '42501');
@@ -609,14 +615,14 @@ select pg_temp.hata_bekle($$insert into public.ana_sayfa_bolumleri (tur, baslik,
 update public.ana_sayfa_bolumleri set sira = case sira when 1 then 2 else 1 end where sira in (1, 2);
 -- Yayınlanmadan uygulama eski düzeni görür.
 set role anon;
-do $$ begin assert (select string_agg(baslik, ',' order by sira) from public.ana_sayfa_gorunen) = 'Öne çıkan gezi,Önerilen geziler,Gezilecek yerler', 'yayın öncesi eski düzen'; end $$;
+do $$ begin assert (select string_agg(baslik, ',' order by sira) from public.ana_sayfa_gorunen) = 'Öne çıkan gezi,Önerilen geziler', 'yayın öncesi eski düzen'; end $$;
 set role authenticated;
 select pg_temp.as_email(:E, 'ozcinar.ece@gmail.com');
 do $$ begin assert public.ana_sayfa_yayinla() is not null, 'admin yayınlar'; end $$;
 set role anon;
 do $$
 begin
-  assert (select string_agg(baslik, ',' order by sira) from public.ana_sayfa_gorunen) = 'Önerilen geziler,Öne çıkan gezi,Gezilecek yerler,Şimdi', 'yayından sonra: yeni sıra; kapalı ve zamanı gelmemiş bölüm yok';
+  assert (select string_agg(baslik, ',' order by sira) from public.ana_sayfa_gorunen) = 'Önerilen geziler,Öne çıkan gezi,Şimdi', 'yayından sonra: yeni sıra; kapalı (mozaik dahil) ve zamanı gelmemiş bölüm yok';
 end $$;
 reset role;
 
@@ -678,6 +684,109 @@ begin
 end $$;
 update public.yonetim_ayarlari set deger = '30000' where anahtar = 'google_aylik_butce';
 do $$ begin assert (public.yonetim_ozet(7) #>> '{google,butce}')::int = 30000, 'admin bütçeyi değiştirir'; end $$;
+reset role;
+
+-- ---------------------------------------------------------------- #111: şehir editörü, mekan bağlama, kullanıcı yönetimi
+reset role;
+\set Z '''aaaaaaaa-1111-0000-0000-000000000011'''
+\set K '''aaaaaaaa-1111-0000-0000-000000000012'''
+insert into auth.users (id, email, email_confirmed_at, last_sign_in_at) values
+  (:Z, 'zeynep@ornek.com', now(), now() - interval '2 days'),
+  (:K, 'kaan@ornek.com', now(), null);
+insert into public.profiles (id, name, username) values (:Z, 'Zeynep', 'zeynep'), (:K, 'Kaan', 'kaan');
+-- Z'nin iki seyahati: biri K ile ortak (K'ye devredilir), biri yalnız (silinir); Z, K'nin seyahatinde üye.
+insert into public.trips (id, owner_id, city_place_id, city_label, lat, lng, tz, start_date, end_date) values
+  ('dddddddd-1111-4111-8111-000000000001', :Z, 'ChIJ-roma', 'Roma', 41.9, 12.5, 'Europe/Rome', '2026-12-01', '2026-12-02'),
+  ('dddddddd-1111-4111-8111-000000000002', :Z, 'ChIJ-oslo', 'Oslo', 59.9, 10.7, 'Europe/Oslo', '2026-12-01', '2026-12-01'),
+  ('dddddddd-1111-4111-8111-000000000003', :K, 'ChIJ-lyon', 'Lyon', 45.7, 4.8, 'Europe/Paris', '2026-12-01', '2026-12-01');
+insert into public.members (trip_id, user_id, display_name) values
+  ('dddddddd-1111-4111-8111-000000000001', :K, 'Kaan'),
+  ('dddddddd-1111-4111-8111-000000000003', :Z, 'Zeynep');
+
+-- Kullanıcı listesi ve hesap silme yalnız admin.
+set role authenticated;
+select pg_temp.as_email(:B, 'b@ornek.com');
+select pg_temp.hata_bekle($$select * from public.yonetim_kullanicilar()$$, '42501');
+select pg_temp.hata_bekle($$select public.yonetim_hesap_sil('aaaaaaaa-1111-0000-0000-000000000011')$$, '42501');
+select pg_temp.hata_bekle($$select public.icerik_mekanlari_yaz('rehber', gen_random_uuid(), '[]')$$, '42501');
+set role anon;
+select pg_temp.hata_bekle($$select * from public.yonetim_kullanicilar()$$, '42501');
+set role authenticated;
+select pg_temp.as_email(:E, 'ozcinar.ece@gmail.com');
+do $$
+declare z record;
+begin
+  select * into z from public.yonetim_kullanicilar('zeyn');
+  assert z.ad = 'Zeynep' and z.eposta = 'zeynep@ornek.com' and z.seyahat_sayisi = 3 and not z.admin and z.son_gorulme is not null, 'arama: ad, e-posta, seyahat sayısı, son görülme';
+  assert (select count(*) from public.yonetim_kullanicilar('ornek.com')) >= 3, 'e-postayla arama';
+  assert (select admin from public.yonetim_kullanicilar('ozcinar') where id = 'eceeceec-0000-0000-0000-000000000005'), 'admin işareti';
+  assert not exists (select 1 from public.yonetim_kullanicilar() where id = '99999999-0000-0000-0000-000000000003'), 'anonim hesap listede yok';
+end $$;
+-- Admin kendini ve başka admini silemez; son admin kaldırılamaz.
+select pg_temp.hata_bekle($$select public.yonetim_hesap_sil('eceeceec-0000-0000-0000-000000000005')$$, '42501');
+insert into public.admin_kullanicilar (email) values ('kaan@ornek.com');
+select pg_temp.hata_bekle($$select public.yonetim_hesap_sil('aaaaaaaa-1111-0000-0000-000000000012')$$, '42501');
+delete from public.admin_kullanicilar where email = 'kaan@ornek.com';
+select pg_temp.hata_bekle($$delete from public.admin_kullanicilar$$, '23514');
+
+-- KK4 hesap silme kaskadı: ortak seyahat K'ye devredilir, yalnız seyahat silinir, üyelikler temizlenir.
+select public.yonetim_hesap_sil(:Z);
+reset role;
+do $$
+begin
+  assert not exists (select 1 from auth.users where id = 'aaaaaaaa-1111-0000-0000-000000000011'), 'auth kaydı silindi';
+  assert not exists (select 1 from public.profiles where id = 'aaaaaaaa-1111-0000-0000-000000000011'), 'profil cascade';
+  assert not exists (select 1 from public.members where user_id = 'aaaaaaaa-1111-0000-0000-000000000011'), 'tüm üyelikler temizlendi';
+  assert (select owner_id from public.trips where id = 'dddddddd-1111-4111-8111-000000000001') = 'aaaaaaaa-1111-0000-0000-000000000012', 'ortak seyahat K''ye devredildi';
+  assert (select role from public.members where trip_id = 'dddddddd-1111-4111-8111-000000000001' and user_id = 'aaaaaaaa-1111-0000-0000-000000000012') = 'owner', 'K sahip rolünde';
+  assert not exists (select 1 from public.trips where id = 'dddddddd-1111-4111-8111-000000000002'), 'tek kişilik seyahat silindi';
+  assert (select count(*) from public.members where trip_id = 'dddddddd-1111-4111-8111-000000000003') = 1, 'K''nin seyahatinden Z çıktı';
+  assert exists (select 1 from public.changes where trip_id = 'dddddddd-1111-4111-8111-000000000001' and field = 'ownership_transferred'), 'devir akışa yazıldı';
+end $$;
+
+-- KK4 şehir rehberi sorgusu: admin yayınsız şehrin rehberini düzenler; uygulama yalnız yayınlı şehri okur; sıra tek deyimde.
+set role authenticated;
+select pg_temp.as_email(:E, 'ozcinar.ece@gmail.com');
+update public.sehir_rehberi set sira = case sira when 1 then 2 when 2 then 1 else sira end where sehir_id = '11111111-1111-4111-8111-000000000001';
+select pg_temp.hata_bekle($$update public.sehir_rehberi set sira = 1 where sehir_id = '11111111-1111-4111-8111-000000000001' and bolum = 'ipucu'$$, '23505');
+insert into public.sehir_rehberi (sehir_id, bolum, baslik, sira) values ('11111111-1111-4111-8111-000000000099', 'ulasim', 'Gizli ulaşım', 2);
+update public.sehirler set genis_kapak_url = 'sehirler/x.webp' where slug = 'eskisehir';
+-- Mekan bağlama: rehber bölümüne kart + satır; bilinmeyen place_id taslak yer olarak açılır, bilinen tekrar açılmaz.
+do $$
+declare
+  r uuid := (select id from public.sehir_rehberi where sehir_id = '11111111-1111-4111-8111-000000000001' and bolum = 'yemek');
+  acilan integer;
+begin
+  acilan := public.icerik_mekanlari_yaz('rehber', r, '[
+    {"place_id": "ChIJ-hayri-usta-0001", "bicim": "kart", "ad": "Hayri Usta Çibörek", "kategori": "restaurant", "lat": 39.76, "lng": 30.52},
+    {"place_id": "ChIJ-met-helva-00002", "bicim": "satir", "ad": "Met Helvacısı", "kategori": "store", "lat": 39.77, "lng": 30.51},
+    {"place_id": "ChIJ-hayri-usta-0001", "bicim": "satir", "ad": "Hayri Usta", "lat": 39.76, "lng": 30.52}
+  ]');
+  assert acilan = 2, 'iki yeni taslak yer';
+  assert (select count(*) from public.icerik_mekanlari where sahip_id = r) = 3, 'üç bağlantı (sıra korunur)';
+  assert (select bicim from public.icerik_mekanlari where sahip_id = r and sira = 1) = 'kart', 'ilk bağlantı kart';
+  assert (select ad from public.yerler where place_id = 'ChIJ-hayri-usta-0001') = 'Hayri Usta Çibörek', 'ad editörün metni';
+  assert not (select yayin from public.yerler where place_id = 'ChIJ-met-helva-00002'), 'açılan yer taslak';
+  assert (select sehir_id from public.yerler where place_id = 'ChIJ-met-helva-00002') = '11111111-1111-4111-8111-000000000001', 'yer rehberin şehrinde';
+  acilan := public.icerik_mekanlari_yaz('rehber', r, '[{"place_id": "ChIJ-met-helva-00002", "bicim": "kart", "ad": "Met", "lat": 39.77, "lng": 30.51}]');
+  assert acilan = 0, 'var olan yer yeniden açılmaz';
+  assert (select count(*) from public.icerik_mekanlari where sahip_id = r) = 1, 'liste tümüyle değişir';
+end $$;
+select pg_temp.hata_bekle($$select public.icerik_mekanlari_yaz('rehber', gen_random_uuid(), '[]')$$, '23503');
+-- Şehir fotoğrafı satırı: yol şehrin klasöründe olmalı.
+insert into public.icerik_fotolari (yol, sahip_tur, sahip_id, altyazi, kaynak, genislik, yukseklik)
+  values ('sehirler/11111111-1111-4111-8111-000000000001/a.webp', 'sehir', '11111111-1111-4111-8111-000000000001', 'Odunpazarı', 'kendi', 2400, 1600);
+select pg_temp.hata_bekle($$insert into public.icerik_fotolari (yol, sahip_tur, sahip_id) values ('yerler/11111111-1111-4111-8111-000000000001/b.webp', 'sehir', '11111111-1111-4111-8111-000000000001')$$, '23514');
+set role anon;
+do $$
+begin
+  assert (select count(*) from public.sehir_rehberi where sehir_id = '11111111-1111-4111-8111-000000000099') = 0, 'yayınsız şehrin rehberi uygulamada yok';
+  assert (select string_agg(bolum, ',' order by sira) from public.sehir_rehberi where sehir_id = '11111111-1111-4111-8111-000000000001') = 'yemek,ulasim,mahalle,ipucu', 'uygulama yeni sırayla okur';
+  assert (select genis_kapak_url from public.sehirler where slug = 'eskisehir') = 'sehirler/x.webp', 'geniş kapak okunur';
+  assert (select count(*) from public.icerik_mekanlari) = 1, 'mekan bağlantıları herkese açık';
+  assert not exists (select 1 from public.yerler where place_id = 'ChIJ-met-helva-00002'), 'taslak yer uygulamada yok';
+end $$;
+select pg_temp.hata_bekle($$insert into public.icerik_mekanlari (sahip_tur, sahip_id, place_id, bicim, sira) values ('rehber', gen_random_uuid(), 'ChIJ-xxxxxxxxxx', 'kart', 1)$$, '42501');
 reset role;
 
 \echo 'rls_test: TÜM TESTLER GEÇTİ'

@@ -5,6 +5,9 @@ import { RehberEditoru } from '../yer/RehberEditoru';
 
 jest.mock('@/lib/supabase', () => ({ supabase: {} }));
 
+// Kart blokları canlı mekan adını sorgular (#111); testte ağ yok — ad bilinmez, kimlik görünür.
+jest.mock('@/features/yerler/api', () => ({ ...jest.requireActual<object>('@/features/yerler/api'), useHafifYerler: () => ({ data: undefined }) }));
+
 const MD = '## Ne zaman gidilir\n\nHafta içi sabah sakin.\n\n![Şato](foto:yerler/y1/a.jpg)\n\n> [Kent Park](mekan:ChIJkent123456) ile birleştirin.';
 
 // #108 KK3: Rehber blok görünümü — bloklar, araç çubuğu, sayaçlar; değişiklik markdown olarak yazılır.
@@ -43,5 +46,20 @@ describe('RehberEditoru (#108 KK3)', () => {
     fireEvent.press(getByText('kaldır'));
     expect(String(onDegis.mock.calls.at(-1)?.[0])).not.toContain('foto:');
     expect(getByRole('button', { name: 'Sesli anlatım (yakında)' }).props.accessibilityState).toEqual({ disabled: true });
+  });
+
+  it('#111 şehir rehberi: kart bloğu (MEKAN KARTI), kart sayacı, satır içi bağlantı vurgulu; × kartı kaldırır', () => {
+    const onDegis = jest.fn();
+    const md = 'Çibörek için [Hayri Usta](mekan:ChIJhayri12345) uğrayın.\n\n::mekan[ChIJhayri12345]';
+    const { getByText, getByLabelText } = render(
+      <RehberEditoru md={md} onDegis={onDegis} merkez={undefined} fotoYukle={async () => 'x'} onHata={() => {}} kayitMetni={null} sehirRehberi={{ baslik: 'Ne yenir' }} />,
+    );
+    expect(getByText('Ne yenir')).toBeTruthy();
+    expect(getByText('MEKAN KARTI · Mekan · place_id ✓')).toBeTruthy();
+    expect(getByText('1 mekan kartı · 1 satır içi bağlantı')).toBeTruthy();
+    expect(getByText('Hayri Usta')).toBeTruthy();
+    expect(getByText(/::mekan\[ChIJ…45\]/)).toBeTruthy();
+    fireEvent.press(getByLabelText('ChIJhayri12345 kartını kaldır'));
+    expect(onDegis).toHaveBeenLastCalledWith('Çibörek için [Hayri Usta](mekan:ChIJhayri12345) uğrayın.');
   });
 });

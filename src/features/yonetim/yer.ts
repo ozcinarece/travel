@@ -15,15 +15,17 @@ export type YerAlanlari = {
   lng: number;
 };
 
-export type RehberBlokTuru = 'baslik' | 'paragraf' | 'alinti' | 'liste' | 'gorsel';
+export type RehberBlokTuru = 'baslik' | 'paragraf' | 'alinti' | 'liste' | 'gorsel' | 'mekan';
 
 /**
  * Kanvas ekran 4 blok görünümü. Metin bloklarında satır içi işaretler (`**`, `*`, `[ad](mekan:…)`) olduğu gibi kalır;
- * görsel bloğunda hedefler `foto:<yol>` (en çok 2 → tek satır) ve ortak altyazı.
+ * görsel bloğunda hedefler `foto:<yol>` (en çok 2 → tek satır) ve ortak altyazı. #111 mekan kartı bloğunda `metin` = place_id
+ * (`::mekan[place_id]`, tek satır).
  */
 export type RehberBlok = { id: string; tur: RehberBlokTuru; metin: string; hedefler?: string[] };
 
 const GORSEL = /^!\[([^\]]*)\]\(([^)]+)\)\s*$/;
+const KART = /^::mekan\[([A-Za-z0-9_-]{10,255})\]$/;
 
 let sayac = 0;
 export const blokKimligi = () => `b${Date.now().toString(36)}${(sayac++).toString(36)}`;
@@ -49,6 +51,8 @@ export function rehberBloklari(md: string | null | undefined, kimlik: () => stri
         if (son?.tur === 'gorsel' && (son.hedefler?.length ?? 0) + hedefler.length <= 2 && satirlar.length > 1) son.hedefler!.push(...hedefler);
         else bloklar.push({ id: kimlik(), tur: 'gorsel', metin: g[1], hedefler });
       }
+    } else if (satirlar.every((s) => KART.test(s.trim()))) {
+      for (const s of satirlar) bloklar.push({ id: kimlik(), tur: 'mekan', metin: KART.exec(s.trim())![1] });
     } else if (satirlar.every((s) => s.startsWith('>'))) {
       bloklar.push({ id: kimlik(), tur: 'alinti', metin: satirlar.map((s) => s.replace(/^>\s?/, '')).join('\n') });
     } else if (satirlar.every((s) => /^[-*]\s+/.test(s))) {
@@ -74,6 +78,8 @@ export function rehberMd(bloklar: RehberBlok[]): string {
           return m ? m.split('\n').filter((s) => s.trim()).map((s) => `- ${s.trim()}`).join('\n') : '';
         case 'gorsel':
           return b.hedefler?.length ? `![${m.replace(/[[\]\n]/g, ' ')}](${b.hedefler.join(', ')})` : '';
+        case 'mekan':
+          return m ? `::mekan[${m}]` : '';
         default:
           return m;
       }
@@ -84,7 +90,7 @@ export function rehberMd(bloklar: RehberBlok[]): string {
 
 /** Bloğun türünü değiştirir (araç çubuğu H2 / alıntı / liste; aynı türe yeniden basmak paragrafa döndürür). */
 export function blokTuru(b: RehberBlok, tur: 'baslik' | 'alinti' | 'liste'): RehberBlok {
-  if (b.tur === 'gorsel') return b;
+  if (b.tur === 'gorsel' || b.tur === 'mekan') return b;
   return { ...b, tur: b.tur === tur ? 'paragraf' : tur };
 }
 
@@ -100,14 +106,25 @@ export function gorselEkle(bloklar: RehberBlok[], odakId: string | null, hedef: 
   return [...bloklar.slice(0, yer), yeni, ...bloklar.slice(yer)];
 }
 
-export type RehberSayaclari = { karakter: number; okumaDk: number; gorsel: number; mekan: number };
+export type RehberSayaclari = { karakter: number; okumaDk: number; gorsel: number; mekan: number; kart: number };
 
-/** Kanvas alt şeridi: "1.240 karakter · ~2 dk okuma · 2 görsel · 1 mekan bağlantısı". */
+/** #111: mekan kartını odaktaki bloğun (imlecin bulunduğu paragraf) altına ekler; odak yoksa sona. */
+export function kartEkle(bloklar: RehberBlok[], odakId: string | null, placeId: string, kimlik: () => string = blokKimligi): RehberBlok[] {
+  const i = bloklar.findIndex((b) => b.id === odakId);
+  const yer = i === -1 ? bloklar.length : i + 1;
+  return [...bloklar.slice(0, yer), { id: kimlik(), tur: 'mekan', metin: placeId }, ...bloklar.slice(yer)];
+}
+
+/**
+ * Kanvas alt şeridi: "1.240 karakter · ~2 dk okuma · 2 görsel · 1 mekan bağlantısı"; #111 "2 mekan kartı · 1 satır içi
+ * bağlantı" (`kart`).
+ */
 export function rehberSayaclari(md: string | null | undefined): RehberSayaclari {
   const m = md ?? '';
   const gorsel = [...m.matchAll(/^!\[[^\]]*\]\(([^)]+)\)\s*$/gm)].reduce((t, g) => t + g[1].split(',').filter((h) => h.trim()).length, 0);
   const mekan = [...m.matchAll(/\[[^\]]+\]\(mekan:[^)\s]+\)/g)].length;
-  return { karakter: m.length, okumaDk: okumaSuresiDk(m), gorsel, mekan };
+  const kart = [...m.matchAll(/^::mekan\[[A-Za-z0-9_-]{10,255}\]\s*$/gm)].length;
+  return { karakter: m.length, okumaDk: okumaSuresiDk(m), gorsel, mekan, kart };
 }
 
 /** KK7: Google place_id biçimi (DB kısıtıyla aynı). */
