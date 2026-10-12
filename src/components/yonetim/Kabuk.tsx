@@ -87,14 +87,21 @@ export function UstCubuk({ baslik, eylemler }: { baslik: string; eylemler?: Reac
   );
 }
 
-/** Sayfa: üst çubuk + kaydırılan gövde (kanvas içerik boşluğu 20 / 24, 12 aralık). */
-export function YonetimSayfasi({ baslik, eylemler, children }: { baslik: string; eylemler?: ReactNode; children?: ReactNode }) {
+/**
+ * Sayfa: üst çubuk + kaydırılan gövde (kanvas içerik boşluğu 20 / 24, 12 aralık).
+ * `sutunlu`: gövde kaydırılmaz, sütunlar yan yana kendi kaydırmalarını taşır (gezi editörü: liste · sekmeler · önizleme).
+ */
+export function YonetimSayfasi({ baslik, eylemler, sutunlu, children }: { baslik: string; eylemler?: ReactNode; sutunlu?: boolean; children?: ReactNode }) {
   return (
     <View style={s.sayfa}>
       <UstCubuk baslik={baslik} eylemler={eylemler} />
-      <ScrollView style={s.govde} contentContainerStyle={s.govdeIc}>
-        {children}
-      </ScrollView>
+      {sutunlu ? (
+        <View style={s.sutunlar}>{children}</View>
+      ) : (
+        <ScrollView style={s.govde} contentContainerStyle={s.govdeIc}>
+          {children}
+        </ScrollView>
+      )}
     </View>
   );
 }
@@ -146,6 +153,7 @@ const s = StyleSheet.create({
   baslik: { flexShrink: 1, fontFamily: yazi.ekstra, fontSize: 17, letterSpacing: -0.34, color: yRenk.metin },
   eylemler: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   govde: { flex: 1 },
+  sutunlar: { flex: 1, minHeight: 0, flexDirection: 'row' },
   govdeIc: { paddingVertical: 20, paddingHorizontal: 24, gap: 12 },
   aciklama: { fontFamily: yazi.normal, fontSize: 13, lineHeight: 19, color: yRenk.ikincil },
 });

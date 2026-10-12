@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, Text } from 'react-native';
 
 import { yazi } from '@/theme';
@@ -11,11 +12,13 @@ type Props = {
   onPress: () => void;
   tur?: Tur;
   yukleniyor?: boolean;
+  /** Metnin solunda 14 px ikon (kanvas: Önizle). */
+  ikon?: ReactNode;
 };
 
 // Kanvastaki üst çubuk hapı: 34 yüksek, 14 yan boşluk, tam yuvarlak, 1,5 çerçeve, 12,5 px 800.
 // Birincil siyah (Yayınla, + Yeni gezi), ikincil beyaz + #d9d9d4 çerçeve (Önizle, Son 30 gün).
-export function Hap({ baslik, onPress, tur = 'ikincil', yukleniyor }: Props) {
+export function Hap({ baslik, onPress, tur = 'ikincil', yukleniyor, ikon }: Props) {
   const birincil = tur === 'birincil';
   const metinRengi = birincil ? yRenk.zemin : yRenk.metin;
   return (
@@ -25,7 +28,7 @@ export function Hap({ baslik, onPress, tur = 'ikincil', yukleniyor }: Props) {
       disabled={yukleniyor}
       onPress={onPress}
       style={({ pressed }) => [s.kap, birincil ? s.birincil : s.ikincil, (pressed || yukleniyor) && s.basili]}>
-      {yukleniyor ? <ActivityIndicator size="small" color={metinRengi} /> : null}
+      {yukleniyor ? <ActivityIndicator size="small" color={metinRengi} /> : ikon}
       <Text style={[s.metin, { color: metinRengi }]}>{baslik}</Text>
     </Pressable>
   );

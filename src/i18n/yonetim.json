@@ -22,5 +22,91 @@
     "baslik": "Yetkin yok",
     "aciklama": "{eposta} yönetici listesinde değil. Başka bir hesapla girmek için çıkış yap.",
     "cikis": "Çıkış"
+  },
+  "gezi": {
+    "baslik": "Gezi · {baslik}",
+    "yeni": "+ Yeni gezi",
+    "filtre": "Filtre",
+    "ara": "Gezi ara",
+    "tumSehirler": "Tüm şehirler",
+    "alt": "{sehir} · {n} gün",
+    "durum": {
+      "yayinda": "Yayında",
+      "taslak": "Taslak",
+      "planli": "Planlı"
+    },
+    "sekme": {
+      "genel": "Genel",
+      "yazi": "Yazı",
+      "plan": "Plan (günler)",
+      "fotolar": "Fotoğraflar"
+    },
+    "alan": {
+      "baslik": "BAŞLIK",
+      "sehir": "ŞEHİR",
+      "durum": "DURUM",
+      "ozet": "ÖZET (kart altı, 1 satır)",
+      "yazar": "YAZAR",
+      "okuma": "OKUMA",
+      "slug": "SLUG",
+      "planli": "PLANLI YAYIN",
+      "yazi": "YAZI · markdown",
+      "gunBaslik": "GÜN BAŞLIĞI",
+      "altyazi": "ALTYAZI"
+    },
+    "okumaDk": "{n} dk",
+    "kaydedildi": "Kaydedildi · {saat}",
+    "kaydediliyor": "Kaydediliyor…",
+    "kayitHata": "Kaydedilemedi",
+    "slugHata": "Bu slug başka bir gezide",
+    "slugGecersiz": "Slug: küçük harf, rakam, tire (2–80)",
+    "onizle": "Önizle",
+    "yayinla": "Yayınla",
+    "arac": {
+      "kalin": "B",
+      "italik": "I",
+      "h2": "H2",
+      "alinti": "“ ”",
+      "liste": "Liste",
+      "foto": "🖼 Foto",
+      "mekan": "📍 Mekan"
+    },
+    "aracEtiket": {
+      "kalin": "Kalın",
+      "italik": "İtalik",
+      "h2": "Ara başlık",
+      "alinti": "Alıntı",
+      "liste": "Liste",
+      "foto": "Görsel ekle",
+      "mekan": "Mekan bağlantısı"
+    },
+    "plan": "PLAN · {n}. GÜN{baslik}",
+    "gunEtiket": "{n}. Gün{baslik}",
+    "gunEkle": "+ Gün",
+    "gunSil": "Günü sil",
+    "placeVar": "place_id ✓",
+    "placeYok": "place_id yok",
+    "durakSil": "{ad} durağını sil",
+    "sure": "{ad} süresi (dk)",
+    "mekanAra": "Mekan ara (Google) ya da link yapıştır → place_id, kategori, konum otomatik",
+    "araHata": "Mekan alınamadı. Yeniden dene.",
+    "fotoYukle": "+ Fotoğraf yükle",
+    "fotoBirak": "Fotoğrafları buraya sürükle · jpeg, png, webp · en çok 5 MB",
+    "kapak": "Kapak",
+    "kapakYap": "Kapak yap",
+    "yaziyaEkle": "Yazıya ekle",
+    "fotoSil": "Fotoğrafı sil",
+    "fotoHata": {
+      "tur": "Yalnız jpeg, png ya da webp yüklenebilir.",
+      "boyut": "Dosya 5 MB'tan büyük.",
+      "yukleme": "Yüklenemedi. Yeniden dene."
+    },
+    "fotoYok": "Henüz fotoğraf yok.",
+    "onizleme": "ÖNİZLEME · {n}. SAYFA",
+    "sayfa": "{n} / 2 ›",
+    "bos": "Soldan bir gezi seç ya da yeni gezi oluştur.",
+    "yuklenemedi": "Gezi yüklenemedi.",
+    "islemHata": "İşlem yapılamadı. Yeniden dene.",
+    "yazarSatiri": "{yazar} · {ay} {yil} · {okuma}"
   }
 }

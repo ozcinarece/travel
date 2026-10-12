@@ -27,6 +27,8 @@ jobs:
       EXPO_PUBLIC_SUPABASE_URL: https://xwqeobelyeuzoxyuvauw.supabase.co
       EXPO_PUBLIC_SUPABASE_ANON_KEY: sb_publishable_XB3vg3rrcdIK9Bafkv-Uug_G-5IEyyN
       EXPO_PUBLIC_APPLE_SIGN_IN: '0'
+      # #107 önizlemedeki mini harita (web anahtarı; panel alan adı referrer listesinde olmalı). Yoksa harita yerine not.
+      EXPO_PUBLIC_GOOGLE_MAPS_WEB_KEY: ${{ vars.EXPO_PUBLIC_GOOGLE_MAPS_WEB_KEY }}
       # Yönetim grubu yalnız bu değişkenle derlenir (metro.config.js).
       YONETIM: '1'
     steps:
@@ -53,8 +55,12 @@ jobs:
         run: |
           npx expo export --platform web --output-dir dist
           test -f dist/yonetim/index.html
-          # Panel alan adında kök doğrudan panele açılır.
-          echo "/ /yonetim 302" > dist/_redirects
+          # Panel alan adında kök doğrudan panele açılır. Dinamik rota: statik "[id]" sayfası köşeli parantezsiz bir
+          # adla kopyalanır ve oraya yeniden yazılır (istemci rotayı adres çubuğundan çözer).
+          cp "dist/yonetim/geziler/[id]/onizle.html" dist/yonetim/geziler/_onizle.html
+          printf '%s\n' \
+            "/ /yonetim 302" \
+            "/yonetim/geziler/:id/onizle /yonetim/geziler/_onizle 200" > dist/_redirects
       - name: Cloudflare Pages
         if: steps.kosul.outputs.hazir == '1'
         run: |
