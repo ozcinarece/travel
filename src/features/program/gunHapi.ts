@@ -8,8 +8,10 @@ import { gunRengi } from '@/theme';
 export type PinDokunusu =
   /** Seçili güne atanmamış mekan → günün sonuna hızlı ekle (#53 §6). */
   | { tur: 'hizliEkle' }
-  /** Seçili günün durağı → mekan paneli (#80). */
+  /** Seçili güne atanmamış mekan, gün seçili değilken → mekan paneli (#80). */
   | { tur: 'panel' }
+  /** Seçili günün durağı → kaydırmalı durak kartı (#99 KK5; Detay ile panel). */
+  | { tur: 'kart' }
   /** Diğer günün durağı → noktanın üstünde gün hapı (KK1). */
   | { tur: 'hapAc' }
   /** Hap açıkken aynı noktaya ya da hapa dokunma → "Güne git" (KK2). */
@@ -22,7 +24,7 @@ export type PinDokunusu =
 export function pinDokunusu(secenek: { durak: Durak | undefined; seciliGunId: string | undefined; gunSecili: boolean; hapAcikMekanId: string | null; mekanId: string }): PinDokunusu {
   const { durak, seciliGunId, gunSecili, hapAcikMekanId, mekanId } = secenek;
   if (!durak) return gunSecili ? { tur: 'hizliEkle' } : { tur: 'panel' };
-  if (durak.day_id === seciliGunId) return { tur: 'panel' };
+  if (durak.day_id === seciliGunId) return { tur: 'kart' };
   if (hapAcikMekanId === mekanId) return { tur: 'guneGit', gunId: durak.day_id };
   return { tur: 'hapAc' };
 }

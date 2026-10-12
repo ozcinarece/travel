@@ -472,6 +472,13 @@
     "paneliKapat": "Çizelgeyi kapat",
     "mekanEkle": "Mekan ekle (Keşfet)",
     "detay": "Detay",
+    "kart": {
+      "sayac": "{n} / {toplam}",
+      "vardik": "Vardık",
+      "kapat": "Kartı kapat",
+      "kaydir": "Durak kartları — sağa sola kaydır",
+      "atlandi": "Atlandı"
+    },
     "puan": {
       "baslik": "Nasıldı?",
       "tamamlandi": "✓ Tamamlandı · {bas}–{bit} · {dk} dk kaldınız",
