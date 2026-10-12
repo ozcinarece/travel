@@ -22,9 +22,9 @@ type Islemler = ReturnType<typeof useGeziIslemleri>;
 type Props = { gunler: GeziGunu[]; merkez: Merkez | undefined; islemler: Islemler; onHata: () => void };
 
 /**
- * KK4 (kanvas "PLAN · 1. GÜN · ODUNPAZARI"): gün seçimi, "+ Gün", durak satırları (tutamaç · gün renginde numara · ad ·
- * kategori ikonu + place_id ✓ · süre hapı · ×), kesikli "Mekan ara" kutusu. Sürükle = sıra (duraklar ve günler).
- * Gün başlığı / gün silme kanvasta yok (tasarım bekliyor): alan kutusu + hap ile.
+ * KK4 (kanvas BekleyenTasarim21 ekran 5): gün çipleri (tutamaç, seçili siyah; sürükle = sıra), "+ Gün", "Günleri
+ * sürükleyerek sırala"; GÜN BAŞLIĞI alanı + kırmızı çerçeveli "Günü sil" (onay ister); durak satırları (tutamaç · gün
+ * renginde numara · ad · kategori ikonu + place_id ✓ · süre hapı · ×); mekan arama (açılır liste, klavye).
  */
 export function GeziPlanEditoru({ gunler, merkez, islemler, onHata }: Props) {
   const [seciliId, setSeciliId] = useState<string | undefined>(gunler[0]?.id);
@@ -34,35 +34,46 @@ export function GeziPlanEditoru({ gunler, merkez, islemler, onHata }: Props) {
   if (!gun) {
     return <Hap baslik={ty('gezi.gunEkle')} onPress={() => dene(() => islemler.gunEkle(gunler))} />;
   }
-  const baslikEki = (g: GeziGunu) => (g.baslik ? ` · ${g.baslik}` : '');
   const gunTasi = (kaynak: number, hedef: number) => dene(() => islemler.gunleriSirala(tasi(gunler, kaynak, hedef).map((g) => g.id)));
   const durakTasi = (kaynak: number, hedef: number) => dene(() => islemler.duraklariSirala(gun, tasi(gun.gezi_duraklari, kaynak, hedef).map((d) => d.id)));
+  const gunSil = () => {
+    // Kanvas: "1. Gün ve 3 durağı silinsin mi?" — tarayıcının onay kutusu (kanvasta ayrı onay çizimi yok).
+    if (!window.confirm(ty('gezi.gunSilOnay', { n: gun.sira, durak: gun.gezi_duraklari.length }))) return;
+    dene(async () => {
+      await islemler.gunSil(gun, gunler);
+      setSeciliId(undefined);
+    });
+  };
 
   return (
     <View style={s.kap}>
       <View style={s.ust}>
-        <Text style={s.etiket}>{ty('gezi.plan', { n: gun.sira, baslik: baslikEki(gun).toLocaleUpperCase('tr-TR') })}</Text>
-        <View style={s.gunler}>
-          {gunler.map((g, i) =>
-            g.id === gun.id ? null : <GunEtiketi key={g.id} gun={g} indeks={i} etiket={ty('gezi.gunEtiket', { n: g.sira, baslik: baslikEki(g) })} onSec={() => setSeciliId(g.id)} onBirak={gunTasi} />,
-          )}
-          <Hap baslik={ty('gezi.gunEkle')} onPress={() => dene(() => islemler.gunEkle(gunler))} />
-        </View>
+        {gunler.map((g, i) => (
+          <GunCipi
+            key={g.id}
+            gun={g}
+            indeks={i}
+            secili={g.id === gun.id}
+            etiket={ty('gezi.gunEtiket', { n: g.sira, baslik: g.baslik ? ` · ${g.baslik}` : '' })}
+            onSec={() => setSeciliId(g.id)}
+            onBirak={gunTasi}
+          />
+        ))}
+        <Hap baslik={ty('gezi.gunEkle')} onPress={() => dene(() => islemler.gunEkle(gunler))} />
+        <View style={s.esnek} />
+        <Text style={s.not}>{ty('gezi.gunSiraNot')}</Text>
       </View>
       <View style={s.gunAyar}>
         <Alan etiket={ty('gezi.alan.gunBaslik')}>
           <GunBasligi key={gun.id} gun={gun} onKaydet={(b) => dene(() => islemler.gunBaslik(gun, b))} />
         </Alan>
         {gunler.length > 1 ? (
-          <Hap
-            baslik={ty('gezi.gunSil')}
-            onPress={() =>
-              dene(async () => {
-                await islemler.gunSil(gun, gunler);
-                setSeciliId(undefined);
-              })
-            }
-          />
+          <Pressable accessibilityRole="button" onPress={gunSil} style={({ pressed }) => [s.gunSil, pressed && s.basili]}>
+            <Svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke={KIRMIZI} strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+              <Path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3" />
+            </Svg>
+            <Text style={s.gunSilMetin}>{ty('gezi.gunSil')}</Text>
+          </Pressable>
         ) : null}
       </View>
       {gun.gezi_duraklari.map((d, i) => (
@@ -81,12 +92,18 @@ export function GeziPlanEditoru({ gunler, merkez, islemler, onHata }: Props) {
   );
 }
 
-function GunEtiketi({ gun, indeks, etiket, onSec, onBirak }: { gun: GeziGunu; indeks: number; etiket: string; onSec: () => void; onBirak: (k: number, h: number) => void }) {
+const KIRMIZI = '#c0392b';
+
+/** Gün çipi: 34 px, tam yuvarlak; tutamaç (seçili beyaz %60, diğer #b8b8b2), "1. Gün · başlık" 12,5 px 800. */
+function GunCipi({ gun, indeks, secili, etiket, onSec, onBirak }: { gun: GeziGunu; indeks: number; secili: boolean; etiket: string; onSec: () => void; onBirak: (k: number, h: number) => void }) {
   const ref = useRef<View>(null);
   useSuruklenen(ref, `gun-${gun.gezi_id}`, indeks, onBirak);
   return (
-    <Pressable ref={ref} accessibilityRole="button" onPress={onSec}>
-      <Text style={s.etiket}>{etiket}</Text>
+    <Pressable ref={ref} accessibilityRole="button" accessibilityState={{ selected: secili }} onPress={onSec} style={StyleSheet.flatten([s.cip, secili && s.cipSecili])}>
+      <Svg width={13} height={13} viewBox="0 0 24 24" fill="none" stroke={secili ? '#ffffff99' : '#b8b8b2'} strokeWidth={2.6} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+        <Path d={TUTAMAC} />
+      </Svg>
+      <Text style={[s.cipMetin, secili && s.cipMetinSecili]}>{etiket}</Text>
     </Pressable>
   );
 }
@@ -169,10 +186,17 @@ function SureHapi({ dakika, etiket, onKaydet }: { dakika: number; etiket: string
 
 const s = StyleSheet.create({
   kap: { gap: 6 },
-  ust: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8 },
-  etiket: { fontFamily: yazi.ekstra, fontSize: 11, color: yRenk.ikincil },
-  gunler: { flexDirection: 'row', alignItems: 'center', gap: 6, flexWrap: 'wrap', justifyContent: 'flex-end' },
-  gunAyar: { flexDirection: 'row', alignItems: 'flex-end', gap: 8, paddingBottom: 4 },
+  ust: { flexDirection: 'row', alignItems: 'center', gap: 6, flexWrap: 'wrap', paddingBottom: 8 },
+  esnek: { flexGrow: 1 },
+  not: { fontFamily: yazi.yari, fontSize: 11, color: yRenk.ikincil },
+  cip: { height: 34, paddingLeft: 6, paddingRight: 10, borderRadius: 999, backgroundColor: yRenk.yuzey, flexDirection: 'row', alignItems: 'center', gap: 6 },
+  cipSecili: { backgroundColor: yRenk.metin },
+  cipMetin: { fontFamily: yazi.ekstra, fontSize: 12.5, color: yRenk.metin },
+  cipMetinSecili: { color: yRenk.zemin },
+  gunAyar: { flexDirection: 'row', alignItems: 'flex-end', gap: 10, paddingBottom: 8 },
+  gunSil: { height: 36, paddingHorizontal: 12, borderRadius: 999, borderWidth: 1.5, borderColor: '#f2c4bd', flexDirection: 'row', alignItems: 'center', gap: 6 },
+  gunSilMetin: { fontFamily: yazi.ekstra, fontSize: 12.5, color: KIRMIZI },
+  basili: { opacity: 0.7 },
   satir: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 7, paddingHorizontal: 10, borderRadius: 10, borderWidth: 1, borderColor: yRenk.ayrac },
   numara: { width: 22, height: 22, borderRadius: 11, alignItems: 'center', justifyContent: 'center' },
   numaraMetin: { fontFamily: yazi.ekstra, fontSize: 11, color: yRenk.zemin },

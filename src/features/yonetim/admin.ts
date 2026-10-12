@@ -28,10 +28,11 @@ export function useYonetimDurumu(): YonetimDurumu {
 }
 
 // Supabase → Auth → URL Configuration → Redirect URLs listesinde olmalı: {YONETIM_URL}/yonetim/giris
-export async function yonetimGiris(): Promise<void> {
+/** `hesapSec`: Google hesap seçicisini zorla ("Başka hesapla gir"). */
+export async function yonetimGiris(secenek: { hesapSec?: boolean } = {}): Promise<void> {
   const { error } = await supabase.auth.signInWithOAuth({
     provider: 'google',
-    options: { redirectTo: `${window.location.origin}${GIRIS}` },
+    options: { redirectTo: `${window.location.origin}${GIRIS}`, ...(secenek.hesapSec ? { queryParams: { prompt: 'select_account' } } : {}) },
   });
   if (error) throw error;
 }

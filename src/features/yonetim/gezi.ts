@@ -1,4 +1,5 @@
 // #107 gezi editörü — saf kurallar (slug, yayın durumu, markdown araç çubuğu, sıra, otomatik kayıt farkı). Testli.
+import { AYLAR_KISA } from '@/lib/takvim';
 
 export type GeziDurumu = 'yayinda' | 'taslak' | 'planli';
 
@@ -43,7 +44,33 @@ export function geziDurumu(g: { yayin: boolean; yayin_at: string | null }, simdi
   return 'yayinda';
 }
 
-/** Durum seçimi → DB alanları. Planlıda tarih yoksa ya da geçmişteyse yarın 09:00. Yayında'da gelecekteki tarih bugüne çekilir. */
+// Planlı yayın saati İstanbul'a göre girilir ve gösterilir (Türkiye 2016'dan beri yaz saati olmadan UTC+3).
+const ISTANBUL = 'Europe/Istanbul';
+
+/** ISO → İstanbul'da { tarih: "2026-10-20", saat: "09:00" }. */
+export function istanbulParcalari(iso: string): { tarih: string; saat: string } {
+  const p = Object.fromEntries(
+    new Intl.DateTimeFormat('en-CA', { timeZone: ISTANBUL, year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' })
+      .formatToParts(new Date(iso))
+      .map((x) => [x.type, x.value]),
+  );
+  return { tarih: `${p.year}-${p.month}-${p.day}`, saat: `${p.hour}:${p.minute}` };
+}
+
+/** İstanbul tarihi + saati → ISO; bozuksa null. */
+export function istanbuldanIso(tarih: string, saat: string): string | null {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(tarih) || !/^\d{2}:\d{2}$/.test(saat)) return null;
+  const t = new Date(`${tarih}T${saat}:00+03:00`);
+  return Number.isNaN(t.getTime()) ? null : t.toISOString();
+}
+
+/** "2026-10-20" → "20 Eki 2026". */
+export function tarihGosterimi(tarih: string): string {
+  const [y, a, g] = tarih.split('-').map(Number);
+  return `${g} ${AYLAR_KISA[a - 1]} ${y}`;
+}
+
+/** Durum seçimi → DB alanları. Planlıda tarih yoksa ya da geçmişteyse yarın 09:00 (İstanbul). Yayında'da gelecekteki tarih bugüne çekilir. */
 export function durumAlanlari(durum: GeziDurumu, planli: string | null, simdi: Date = new Date()): { yayin: boolean; yayin_at: string | null } {
   if (durum === 'taslak') return { yayin: false, yayin_at: planli };
   if (durum === 'yayinda') {
@@ -51,10 +78,10 @@ export function durumAlanlari(durum: GeziDurumu, planli: string | null, simdi: D
     return { yayin: true, yayin_at: gecmis ? planli : simdi.toISOString() };
   }
   if (planli && new Date(planli).getTime() > simdi.getTime()) return { yayin: true, yayin_at: planli };
-  const yarin = new Date(simdi);
-  yarin.setDate(yarin.getDate() + 1);
-  yarin.setHours(9, 0, 0, 0);
-  return { yayin: true, yayin_at: yarin.toISOString() };
+  // Yarın 09:00 İstanbul (kanvas: "Uygulamada … görünür (İstanbul)").
+  const yarin = new Date(`${istanbulParcalari(simdi.toISOString()).tarih}T00:00:00Z`);
+  yarin.setUTCDate(yarin.getUTCDate() + 1);
+  return { yayin: true, yayin_at: istanbuldanIso(yarin.toISOString().slice(0, 10), '09:00')! };
 }
 
 /** "Yayınla": planlı tarih gelecekteyse onunla, değilse şimdi. */
@@ -130,7 +157,23 @@ export const mekanBaglantisi = (ad: string, placeId: string) => `[${ad.replace(/
 /** Yüklenen dosyanın kovadaki yolu: `geziler/<geziId>/<rastgele>.<uzantı>` (DB kısıtı ile aynı biçim). */
 export function fotoYolu(tur: 'geziler' | 'yerler', sahipId: string, dosyaAdi: string, rastgele: string): string {
   const uzanti = (/\.([a-z0-9]{2,5})$/i.exec(dosyaAdi)?.[1] ?? 'jpg').toLowerCase().replace('jpeg', 'jpg');
-  return `${tur}/${sahipId}/${rastgele}.${uzanti}`;
+  // Kanvas (BekleyenTasarim21 ekran 6) satırda dosya adını gösterir: "<8 rastgele>-<sade ad>.<uzantı>".
+  const kok = dosyaAdi
+    .replace(/\.[^.]+$/, '')
+    .toLocaleLowerCase('tr-TR')
+    .replace(/[çğıöşü]/g, (h) => TR[h])
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 60);
+  return `${tur}/${sahipId}/${rastgele.slice(0, 8)}${kok ? `-${kok}` : ''}.${uzanti}`;
+}
+
+/** Yolun gösterilen dosya adı: 8 haneli rastgele önek atılır ("odunpazari-01.webp"); eski (UUID) adlar olduğu gibi. */
+export function fotoDosyaAdi(yol: string): string {
+  const ad = yol.split('/').pop() ?? yol;
+  return ad.replace(/^[0-9a-f]{8}-(?![0-9a-f]{4}-)/, '');
 }
 
 export const FOTO_TURLERI = ['image/jpeg', 'image/png', 'image/webp'] as const;

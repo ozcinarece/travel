@@ -107,6 +107,7 @@ export function GeziEditoru({ gezi, sehirler, liste }: { gezi: YonetimGezi; sehi
           <IcerikFotolari
             fotolar={fotolar.data ?? []}
             kapakUrl={taslak.kapak_url}
+            yazidaMi={(yol) => (taslak.yazi_md ?? '').includes(`foto:${yol}`)}
             onYukle={async (dosyalar) => {
               for (const d of dosyalar) {
                 try {
@@ -129,10 +130,17 @@ export function GeziEditoru({ gezi, sehirler, liste }: { gezi: YonetimGezi; sehi
       </ScrollView>
       <View style={s.onizleme}>
         <View style={s.onizlemeUst}>
-          <Text style={s.etiket}>{ty('gezi.onizleme', { n: sayfa + 1 })}</Text>
-          <Pressable accessibilityRole="button" onPress={() => setSayfa(sayfa === 0 ? 1 : 0)} hitSlop={6}>
-            <Text style={s.etiket}>{ty('gezi.sayfa', { n: sayfa + 1 })}</Text>
-          </Pressable>
+          <Text style={s.etiket}>{ty(sayfa === 0 ? 'gezi.onizleme1' : 'gezi.onizleme2')}</Text>
+          {/* Kanvas: "‹ 1 / 2 ›" — oklar sayfayı değiştirir. */}
+          <Text style={s.etiket}>
+            <Text accessibilityRole="button" accessibilityLabel={ty('gezi.oncekiSayfa')} accessibilityState={{ disabled: sayfa === 0 }} onPress={() => setSayfa(0)} style={sayfa === 0 && s.pasif}>
+              ‹
+            </Text>
+            {` ${sayfa + 1} / 2 `}
+            <Text accessibilityRole="button" accessibilityLabel={ty('gezi.sonrakiSayfa')} accessibilityState={{ disabled: sayfa === 1 }} onPress={() => setSayfa(1)} style={sayfa === 1 && s.pasif}>
+              ›
+            </Text>
+          </Text>
         </View>
         <OlcekliTelefon olcek={0.62}>
           <GeziOnizleme gezi={onizleme} sehirAdi={sehir?.ad ?? ''} sayfa={sayfa} />
@@ -153,6 +161,7 @@ function GozIkonu() {
 }
 
 const s = StyleSheet.create({
+  pasif: { opacity: 0.4 },
   kayit: { fontFamily: yazi.yari, fontSize: 11.5, color: yRenk.ikincil },
   hata: { fontFamily: yazi.yari, fontSize: 11.5, color: '#ff5a1f' },
   orta: { flex: 1, minWidth: 0, borderRightWidth: 1, borderRightColor: yRenk.ayrac },
