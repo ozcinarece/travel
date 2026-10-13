@@ -78,6 +78,17 @@ jobs:
           npx eas-cli env:create "${{ inputs.profile }}" --name EXPO_PUBLIC_SENTRY_DSN --value "$SENTRY_DSN" \
             --visibility plaintext --scope project --force --non-interactive
 
+      # #137: davet linkinin alan adı derleme sunucusunda app.config'e girer (Android intent filter, iOS associated domains,
+      # extra.appDomain). Repo değişkeni APP_DOMAIN; yoksa linkler uygulamayı açmaz (web'de açılır, web'den katılım çalışır).
+      - name: Davet alan adı
+        if: inputs.build_id == ''
+        env:
+          APP_DOMAIN: ${{ vars.APP_DOMAIN }}
+        run: |
+          if [ -z "$APP_DOMAIN" ]; then echo "::warning::APP_DOMAIN değişkeni yok; davet linkleri uygulamayı açmaz"; exit 0; fi
+          npx eas-cli env:create "${{ inputs.profile }}" --name APP_DOMAIN --value "$APP_DOMAIN" \
+            --visibility plaintext --scope project --force --non-interactive
+
       - name: EAS derleme
         id: derleme
         run: |
