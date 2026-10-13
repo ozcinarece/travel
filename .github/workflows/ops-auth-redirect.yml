@@ -32,8 +32,14 @@ jobs:
           if (!liste.includes(adres)) {
             const r = await fetch(url, { method: "PATCH", headers: h, body: JSON.stringify({ uri_allow_list: [...liste, adres].join(",") }) });
             if (!r.ok) { console.error(`PATCH ${r.status}`, (await r.text()).slice(0, 300)); process.exit(1); }
+            console.log("PATCH yanıtı:", r.status, (await r.json()).uri_allow_list);
           }
-          const sonra = (await oku()).uri_allow_list;
+          let sonra = "";
+          for (let i = 0; i < 12; i++) {
+            sonra = (await oku()).uri_allow_list ?? "";
+            if (sonra.split(",").map((s) => s.trim()).includes(adres)) break;
+            await new Promise((ok) => setTimeout(ok, 5000));
+          }
           console.log("sonra:", sonra);
           if (!sonra.split(",").map((s) => s.trim()).includes(adres)) process.exit(1);
           console.log(`### Supabase Auth\n- Redirect URLs: ${sonra}`);
