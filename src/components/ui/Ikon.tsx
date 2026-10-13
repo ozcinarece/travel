@@ -56,7 +56,9 @@ export type IkonAdi =
   | 'liste'
   | 'takvim'
   | 'begen'
-  | 'cop';
+  | 'cop'
+  // #164 (kanvas 14): "Burada kalış" satırındaki kronometre.
+  | 'saat';
 
 type Props = { ad: IkonAdi; boyut?: number; renk: ColorValue; kalinlik?: number };
 
@@ -69,7 +71,12 @@ export function Ikon({ ad, boyut = 24, renk, kalinlik = 2 }: Props) {
   const ortak = { stroke: renk, strokeWidth: kalinlik, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const, fill: 'none' };
   return (
     <Svg width={boyut} height={boyut} viewBox="0 0 24 24">
-      {ad === 'liste' ? (
+      {ad === 'saat' ? (
+        <>
+          <Circle cx={12} cy={13} r={8} {...ortak} />
+          <Path d="M12 9v4l2.5 2M9 2h6" {...ortak} />
+        </>
+      ) : ad === 'liste' ? (
         <>
           <Path d="M9 6h11M9 12h11M9 18h11" {...ortak} />
           <Circle cx={4.5} cy={6} r={1.3} fill={renk} stroke="none" />

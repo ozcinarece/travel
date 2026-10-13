@@ -1,7 +1,22 @@
 import { describe, expect, it, jest } from '@jest/globals';
 
 import type { HafifYer } from '../api';
-import { aktifFiltreSayisi, BOS_FILTRE, filtreOzeti, filtreUygula, kategoriDegistir, oneCikanlar } from '../filtre';
+import {
+  aktifFiltreSayisi,
+  BOS_FILTRE,
+  filtreOzeti,
+  filtreUygula,
+  hizliCipBas,
+  hizliCipSecili,
+  kategoriDegistir,
+  oneCikanlar,
+  taramaKumeleri,
+  turistikDegistir,
+  turistikTur,
+  VARSAYILAN_FILTRE,
+  varsayilanMi,
+} from '../filtre';
+import { konaklamaMi } from '@/lib/pinIkonu';
 
 jest.mock('@/lib/supabase', () => ({ supabase: {} }));
 
@@ -63,5 +78,53 @@ describe('filtreUygula (#69)', () => {
     expect(filtreOzeti({ ...BOS_FILTRE, oneCikan: true }, 9)).toBe('Şehrin öne çıkanları · 9 mekan gizli');
     expect(filtreOzeti({ oneCikan: false, kategoriler: ['muze'], puan: 4.5, yorum: 5000 }, 3)).toBe('Müze · 4,5+ puan · 5K+ yorum · 3 mekan gizli');
     expect(filtreOzeti({ ...BOS_FILTRE, kategoriler: ['muze', 'park'], yorum: 500 }, 0)).toBe('2 kategori · 500+ yorum · 0 mekan gizli');
+  });
+});
+
+describe('#164 Turistik grubu ve hızlı çipler', () => {
+  it('açılış filtresi Turistik: tarihi yer, müze, ibadet, manzara; yemek, kafe, park, otel geçmez', () => {
+    const liste = [y('t', 4, 10), y('m', 4, 10, 'museum'), y('c', 4, 10, 'mosque'), y('g', 4, 10, 'observation_deck'), y('r', 4, 10, 'restaurant'), y('k', 4, 10, 'cafe'), y('p', 4, 10, 'park')];
+    expect(filtreUygula(liste, VARSAYILAN_FILTRE, new Set()).map((x) => x.place_id)).toEqual(['t', 'm', 'c', 'g']);
+    expect(varsayilanMi(VARSAYILAN_FILTRE)).toBe(true);
+    expect(varsayilanMi({ ...VARSAYILAN_FILTRE, puan: 4 })).toBe(false);
+    expect(varsayilanMi(BOS_FILTRE)).toBe(false);
+    expect(aktifFiltreSayisi(VARSAYILAN_FILTRE)).toBe(1);
+  });
+  it('hızlı çipler tek seçim; seçili çipe yeniden dokunmak Turistik’e döner, Tümü kategorisiz', () => {
+    expect(hizliCipSecili(VARSAYILAN_FILTRE, 'turistik')).toBe(true);
+    expect(hizliCipSecili(VARSAYILAN_FILTRE, 'yemek')).toBe(false);
+    const yemek = hizliCipBas({ ...VARSAYILAN_FILTRE, puan: 4.5 }, 'yemek');
+    expect(yemek).toEqual({ ...BOS_FILTRE, kategoriler: ['yemek'], puan: 4.5 });
+    expect(hizliCipSecili(yemek, 'yemek')).toBe(true);
+    expect(hizliCipBas(yemek, 'yemek').kategoriler).toEqual(VARSAYILAN_FILTRE.kategoriler);
+    expect(hizliCipBas(VARSAYILAN_FILTRE, 'turistik').kategoriler).toEqual(VARSAYILAN_FILTRE.kategoriler);
+    const tumu = hizliCipBas(VARSAYILAN_FILTRE, 'tumu');
+    expect(tumu.kategoriler).toEqual([]);
+    expect(hizliCipSecili(tumu, 'tumu')).toBe(true);
+    expect(hizliCipSecili(tumu, 'turistik')).toBe(false);
+  });
+  it('filtre sayfası: Turistik hapı grubu açıp kapatır, alt seçenekler ayrı; özet grubu tek kategori sayar', () => {
+    const kapali = turistikDegistir({ ...VARSAYILAN_FILTRE, kategoriler: [...VARSAYILAN_FILTRE.kategoriler, 'yemek'] });
+    expect(kapali.kategoriler).toEqual(['yemek']);
+    expect(turistikDegistir(kapali).kategoriler.sort()).toEqual(['gezilecek', 'ibadet', 'manzara', 'muze', 'yemek']);
+    const muzesiz = kategoriDegistir(VARSAYILAN_FILTRE, 'muze');
+    expect(hizliCipSecili(muzesiz, 'turistik')).toBe(false);
+    expect(filtreOzeti(VARSAYILAN_FILTRE, 4)).toBe('Turistik · 4 mekan gizli');
+    expect(filtreOzeti({ ...VARSAYILAN_FILTRE, kategoriler: [...VARSAYILAN_FILTRE.kategoriler, 'yemek'] }, 0)).toBe('2 kategori · 0 mekan gizli');
+  });
+  it('tarama kümeleri: her zaman hepsi; Turistik için tek turistik kümesi, kalanlar kendi kümesiyle', () => {
+    expect(taramaKumeleri(VARSAYILAN_FILTRE)).toEqual(['hepsi', 'turistik']);
+    expect(taramaKumeleri(BOS_FILTRE)).toEqual(['hepsi']);
+    expect(taramaKumeleri({ ...BOS_FILTRE, kategoriler: ['yemek'] })).toEqual(['hepsi', 'yemek']);
+    expect(taramaKumeleri({ ...VARSAYILAN_FILTRE, kategoriler: [...VARSAYILAN_FILTRE.kategoriler, 'kafe'] })).toEqual(['hepsi', 'turistik', 'kafe']);
+  });
+  it('otel hiç Turistik sayılmaz (Google bazen tourist_attraction da der)', () => {
+    for (const tip of ['lodging', 'hotel', 'resort_hotel', 'bed_and_breakfast', 'guest_house', 'hostel', 'inn', 'japanese_inn', 'campground']) {
+      expect(konaklamaMi(tip)).toBe(true);
+      expect(turistikTur(tip)).toBe(false);
+    }
+    for (const tip of ['tourist_attraction', 'museum', 'restaurant', 'park', 'spa', null]) expect(konaklamaMi(tip)).toBe(false);
+    expect(turistikTur('tourist_attraction')).toBe(true);
+    expect(turistikTur('restaurant')).toBe(false);
   });
 });

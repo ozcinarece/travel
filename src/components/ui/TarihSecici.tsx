@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
+import { CekilenSayfa, modalKokuStili } from '@/components/ui/sayfaCekme';
 import { Buton } from '@/components/ui/Buton';
 import { t } from '@/i18n';
 import { AYLAR, GUNLER_KISA, ayIzgarasi, ayKaydir, parcala, type Tarih } from '@/lib/takvim';
@@ -48,82 +50,84 @@ export function TarihSecici({ acik, deger, onKapat, onSec }: Props) {
 
   return (
     <Modal visible={acik} transparent animationType="slide" onRequestClose={onKapat}>
-      <Pressable style={s.perde} onPress={onKapat} accessibilityLabel={t('genel.vazgec')} />
-      <View style={s.sayfa}>
-        <Text style={s.baslik}>{!gidis || donus ? t('takvim.baslikGidis') : t('takvim.baslikDonus')}</Text>
+      <GestureHandlerRootView style={modalKokuStili}>
+        <Pressable style={s.perde} onPress={onKapat} accessibilityLabel={t('genel.vazgec')} />
+        <CekilenSayfa onKapat={onKapat} style={s.sayfa}>
+          <Text style={s.baslik}>{!gidis || donus ? t('takvim.baslikGidis') : t('takvim.baslikDonus')}</Text>
 
-        <View style={s.ayBasi}>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={t('takvim.oncekiAy')}
-            onPress={() => setGorunen(ayKaydir(gorunen.yil, gorunen.ay, -1))}
-            style={s.ok}>
-            <Text style={s.okIsaret}>‹</Text>
-          </Pressable>
-          <Text style={s.ayAdi}>
-            {AYLAR[gorunen.ay - 1]} {gorunen.yil}
-          </Text>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={t('takvim.sonrakiAy')}
-            onPress={() => setGorunen(ayKaydir(gorunen.yil, gorunen.ay, 1))}
-            style={s.ok}>
-            <Text style={s.okIsaret}>›</Text>
-          </Pressable>
-        </View>
-
-        <View style={s.satir}>
-          {GUNLER_KISA.map((g) => (
-            <Text key={g} style={s.gunAdi}>
-              {g}
+          <View style={s.ayBasi}>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={t('takvim.oncekiAy')}
+              onPress={() => setGorunen(ayKaydir(gorunen.yil, gorunen.ay, -1))}
+              style={s.ok}>
+              <Text style={s.okIsaret}>‹</Text>
+            </Pressable>
+            <Text style={s.ayAdi}>
+              {AYLAR[gorunen.ay - 1]} {gorunen.yil}
             </Text>
-          ))}
-        </View>
-        <View style={s.izgara}>
-          {hucreler.map((gun, i) =>
-            gun ? (
-              <Pressable
-                key={gun}
-                accessibilityRole="button"
-                accessibilityLabel={gun}
-                accessibilityState={{ selected: gun === gidis || gun === donus }}
-                onPress={() => dokun(gun)}
-                style={[
-                  s.hucre,
-                  araliktaMi(gun) && s.hucreArada,
-                  (gun === gidis || gun === donus) && s.hucreSecili,
-                ]}>
-                <Text
-                  style={[
-                    s.gunSayi,
-                    gun === bugun && s.bugun,
-                    gun < bugun && s.gecmisGun,
-                    (gun === gidis || gun === donus) && s.gunSayiSecili,
-                  ]}>
-                  {parcala(gun).gun}
-                </Text>
-              </Pressable>
-            ) : (
-              <View key={`bos-${i}`} style={s.hucre} />
-            ),
-          )}
-        </View>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={t('takvim.sonrakiAy')}
+              onPress={() => setGorunen(ayKaydir(gorunen.yil, gorunen.ay, 1))}
+              style={s.ok}>
+              <Text style={s.okIsaret}>›</Text>
+            </Pressable>
+          </View>
 
-        <View style={s.dugmeler}>
-          <Pressable
-            accessibilityRole="button"
-            onPress={() => {
-              setGidis(null);
-              setDonus(null);
-              onSec(null);
-              onKapat();
-            }}
-            hitSlop={10}>
-            <Text style={s.temizle}>{t('takvim.temizle')}</Text>
-          </Pressable>
-          <Buton baslik={t('takvim.tamam')} onPress={tamam} pasif={!gidis} stil={s.tamam} />
-        </View>
-      </View>
+          <View style={s.satir}>
+            {GUNLER_KISA.map((g) => (
+              <Text key={g} style={s.gunAdi}>
+                {g}
+              </Text>
+            ))}
+          </View>
+          <View style={s.izgara}>
+            {hucreler.map((gun, i) =>
+              gun ? (
+                <Pressable
+                  key={gun}
+                  accessibilityRole="button"
+                  accessibilityLabel={gun}
+                  accessibilityState={{ selected: gun === gidis || gun === donus }}
+                  onPress={() => dokun(gun)}
+                  style={[
+                    s.hucre,
+                    araliktaMi(gun) && s.hucreArada,
+                    (gun === gidis || gun === donus) && s.hucreSecili,
+                  ]}>
+                  <Text
+                    style={[
+                      s.gunSayi,
+                      gun === bugun && s.bugun,
+                      gun < bugun && s.gecmisGun,
+                      (gun === gidis || gun === donus) && s.gunSayiSecili,
+                    ]}>
+                    {parcala(gun).gun}
+                  </Text>
+                </Pressable>
+              ) : (
+                <View key={`bos-${i}`} style={s.hucre} />
+              ),
+            )}
+          </View>
+
+          <View style={s.dugmeler}>
+            <Pressable
+              accessibilityRole="button"
+              onPress={() => {
+                setGidis(null);
+                setDonus(null);
+                onSec(null);
+                onKapat();
+              }}
+              hitSlop={10}>
+              <Text style={s.temizle}>{t('takvim.temizle')}</Text>
+            </Pressable>
+            <Buton baslik={t('takvim.tamam')} onPress={tamam} pasif={!gidis} stil={s.tamam} />
+          </View>
+        </CekilenSayfa>
+      </GestureHandlerRootView>
     </Modal>
   );
 }

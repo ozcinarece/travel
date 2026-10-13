@@ -7,6 +7,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import type { HaritaBolgesi } from '@/components/harita/tipler';
 import { izBirak } from '@/lib/hataRaporu';
+import { konaklamaMi } from '@/lib/pinIkonu';
 
 import { yakinYerler, type HafifYer, type OneriCipi } from './api';
 import { birikimeEkle, birikimListesi, istenecekKarolar, KARO_EN_FAZLA_ISTEK, karoOnbellekAnahtari, type Karo } from './karolar';
@@ -51,7 +52,8 @@ async function karoyuGetir(seyahatId: string, kume: OneriCipi, karo: Karo): Prom
     const yerler = await yakinYerler({ cip: kume, merkez: { lat: karo.merkez.lat, lng: karo.merkez.lng, yaricapM: karo.yaricapM } });
     karoDurumu.set(anahtar, 'tamam');
     const b = birikimiAl(seyahatId);
-    const yeni = birikimeEkle(b.yerler, yerler);
+    // #164 KK2: sunucu konaklamayı dışlasa da (excludedPrimaryTypes) birincil tipi konaklama olan sonuç burada da süzülür.
+    const yeni = birikimeEkle(b.yerler, yerler.filter((y) => !konaklamaMi(y.primary_type)));
     if (yeni > 0) b.surum += 1;
     return yeni;
   } catch (e) {
@@ -105,7 +107,7 @@ export type KaroOnerileri = {
  * yakınlaştırılsa / filtre değişse hiçbir istek atılmaz — kullanıcı "Bu bölgeyi tara"ya basınca `tara()` ile bir tur.
  * `karoSayaci.tur` kullanıcı dokunuşu başına en fazla 1 artar.
  */
-export function useKaroOnerileri(seyahatId: string, ilkBolge: HaritaBolgesi | null): KaroOnerileri {
+export function useKaroOnerileri(seyahatId: string, ilkBolge: HaritaBolgesi | null, ilkKumeler: OneriCipi[] = ['hepsi']): KaroOnerileri {
   const [surum, setSurum] = useState(() => birikimiAl(seyahatId).surum);
   const [yolda, setYolda] = useState(0);
   const [hata, setHata] = useState(false);
@@ -139,13 +141,15 @@ export function useKaroOnerileri(seyahatId: string, ilkBolge: HaritaBolgesi | nu
     [seyahatId],
   );
 
-  // Açılış: ilk gerçek bölge gelince bir kez (`hepsi` kümesi); bölge sonradan değişse de yeniden tetiklenmez.
+  // Açılış: ilk gerçek bölge gelince bir kez (#164: o anki filtrenin kümeleri — varsayılan `hepsi` + `turistik`); bölge
+  // sonradan değişse de yeniden tetiklenmez.
   const ilkTur = useRef(false);
+  const [acilisKumeleri] = useState(ilkKumeler);
   useEffect(() => {
     if (!ilkBolge || ilkTur.current) return;
     ilkTur.current = true;
-    tara(ilkBolge, ['hepsi']);
-  }, [ilkBolge, tara]);
+    tara(ilkBolge, acilisKumeleri);
+  }, [ilkBolge, tara, acilisKumeleri]);
 
   // Liste yalnız sürüm değişince yeniden sıralanır (#68 🔴2). Seyahat ekranı seyahat başına yeniden kurulur (key=id), bu
   // yüzden `seyahatId` bir kanca ömründe değişmez; yine de bağımlılıkta.

@@ -1,7 +1,9 @@
 import { Image } from 'expo-image';
 import { useState } from 'react';
 import { KeyboardAvoidingView, Linking, Modal, Platform, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
+import { CekilenSayfa, modalKokuStili } from '@/components/ui/sayfaCekme';
 import { googleYorumLinki, type Puan } from '@/features/puanlar/sorgular';
 import { t } from '@/i18n';
 import { renk, yazi } from '@/theme';
@@ -42,59 +44,61 @@ export function PuanSayfasi(p: Props) {
   };
   return (
     <Modal visible={p.acik} transparent animationType="slide" onRequestClose={p.onKapat}>
-      <KeyboardAvoidingView style={s.perde} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-        <Pressable style={StyleSheet.absoluteFill} onPress={p.onKapat} accessibilityLabel={t('program.puan.sonra')} />
-        <View style={s.kutu}>
-          <View style={s.ust}>
-            {p.foto ? <Image source={{ uri: p.foto }} style={s.foto} contentFit="cover" /> : null}
-            <View style={{ flex: 1, minWidth: 0, gap: 2 }}>
-              <Text style={s.ad} numberOfLines={2}>
-                {p.ad}
-              </Text>
-              <Text style={s.alt}>{t('program.puan.tamamlandi', { bas: p.bas, bit: p.bit, dk: p.kalinanDk })}</Text>
+      <GestureHandlerRootView style={modalKokuStili}>
+        <KeyboardAvoidingView style={s.perde} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+          <Pressable style={StyleSheet.absoluteFill} onPress={p.onKapat} accessibilityLabel={t('program.puan.sonra')} />
+          <CekilenSayfa onKapat={p.onKapat} style={s.kutu}>
+            <View style={s.ust}>
+              {p.foto ? <Image source={{ uri: p.foto }} style={s.foto} contentFit="cover" /> : null}
+              <View style={{ flex: 1, minWidth: 0, gap: 2 }}>
+                <Text style={s.ad} numberOfLines={2}>
+                  {p.ad}
+                </Text>
+                <Text style={s.alt}>{t('program.puan.tamamlandi', { bas: p.bas, bit: p.bit, dk: p.kalinanDk })}</Text>
+              </View>
             </View>
-          </View>
 
-          <Text style={s.baslik}>{t('program.puan.baslik')}</Text>
-          <View style={s.yildizlar} accessibilityRole="adjustable">
-            {[1, 2, 3, 4, 5].map((n) => (
-              <Pressable key={n} accessibilityRole="button" accessibilityLabel={t('program.puan.yildiz', { n })} hitSlop={4} onPress={() => setYildiz(n)}>
-                <Text style={[s.yildiz, n <= yildiz && { color: renk.vurgu }]}>{n <= yildiz ? '★' : '☆'}</Text>
+            <Text style={s.baslik}>{t('program.puan.baslik')}</Text>
+            <View style={s.yildizlar} accessibilityRole="adjustable">
+              {[1, 2, 3, 4, 5].map((n) => (
+                <Pressable key={n} accessibilityRole="button" accessibilityLabel={t('program.puan.yildiz', { n })} hitSlop={4} onPress={() => setYildiz(n)}>
+                  <Text style={[s.yildiz, n <= yildiz && { color: renk.vurgu }]}>{n <= yildiz ? '★' : '☆'}</Text>
+                </Pressable>
+              ))}
+            </View>
+
+
+            <TextInput
+              value={not}
+              onChangeText={setNot}
+              placeholder={t('program.puan.not')}
+              placeholderTextColor={renk.soluk}
+              maxLength={280}
+              multiline
+              style={s.not}
+            />
+
+            <Pressable accessibilityRole="link" onPress={() => Linking.openURL(googleYorumLinki(p.placeId))} hitSlop={6}>
+              <Text style={s.google}>{t('program.puan.google')} ↗</Text>
+            </Pressable>
+
+            {hata ? <Text style={s.hata}>{t('program.puan.hata')}</Text> : null}
+            <View style={s.dugmeler}>
+              <Pressable accessibilityRole="button" onPress={p.onKapat} style={[s.dugme, s.dugmeGri]}>
+                <Text style={s.dugmeMetin}>{t('program.puan.sonra')}</Text>
               </Pressable>
-            ))}
-          </View>
-
-
-          <TextInput
-            value={not}
-            onChangeText={setNot}
-            placeholder={t('program.puan.not')}
-            placeholderTextColor={renk.soluk}
-            maxLength={280}
-            multiline
-            style={s.not}
-          />
-
-          <Pressable accessibilityRole="link" onPress={() => Linking.openURL(googleYorumLinki(p.placeId))} hitSlop={6}>
-            <Text style={s.google}>{t('program.puan.google')} ↗</Text>
-          </Pressable>
-
-          {hata ? <Text style={s.hata}>{t('program.puan.hata')}</Text> : null}
-          <View style={s.dugmeler}>
-            <Pressable accessibilityRole="button" onPress={p.onKapat} style={[s.dugme, s.dugmeGri]}>
-              <Text style={s.dugmeMetin}>{t('program.puan.sonra')}</Text>
-            </Pressable>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityState={{ disabled: yildiz === 0 || p.kaydediliyor }}
-              disabled={yildiz === 0 || p.kaydediliyor}
-              onPress={kaydet}
-              style={[s.dugme, s.dugmeSiyah, (yildiz === 0 || p.kaydediliyor) && { opacity: 0.4 }]}>
-              <Text style={[s.dugmeMetin, { color: renk.zemin }]}>{t('program.puan.kaydet')}</Text>
-            </Pressable>
-          </View>
-        </View>
-      </KeyboardAvoidingView>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityState={{ disabled: yildiz === 0 || p.kaydediliyor }}
+                disabled={yildiz === 0 || p.kaydediliyor}
+                onPress={kaydet}
+                style={[s.dugme, s.dugmeSiyah, (yildiz === 0 || p.kaydediliyor) && { opacity: 0.4 }]}>
+                <Text style={[s.dugmeMetin, { color: renk.zemin }]}>{t('program.puan.kaydet')}</Text>
+              </Pressable>
+            </View>
+          </CekilenSayfa>
+        </KeyboardAvoidingView>
+      </GestureHandlerRootView>
     </Modal>
   );
 }

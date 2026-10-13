@@ -35,6 +35,12 @@ export function pinKategorisi(primaryType: string | null | undefined): PinKatego
   return 'gezilecek';
 }
 
+/** #164 KK2: birincil tipi konaklama mı (otel, pansiyon, kamp…). Keşfet ve "Görmen gerekenler" önerilerinden süzülür. */
+const KONAKLAMA = /lodging|hotel|motel|hostel|bed_and_breakfast|guest_house|private_guest_room|(^|_)inn$|cottage|farmstay|campground|camping_cabin|rv_park|mobile_home_park/;
+export function konaklamaMi(primaryType: string | null | undefined): boolean {
+  return KONAKLAMA.test((primaryType ?? '').toLowerCase());
+}
+
 const ESLEME: [RegExp, PinIkonu][] = [
   [/park|garden|zoo|botanical|national_park|hiking|beach|campground/, 'agac'],
   [/restaurant|food|meal|pizza|steak|sushi|bakery|diner|bistro|brunch|breakfast|barbecue|seafood|deli|sandwich/, 'catal'],

@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { Animated, PanResponder, Pressable, ScrollView, StyleSheet, Text, View, type PanResponderInstance } from 'react-native';
 
-import { useSayfaKaydirma } from '@/components/harita/AltSayfa';
+import { SayfaKaydirmasi, useSayfaKaydirma, useSayfaKilidi } from '@/components/ui/sayfaCekme';
 import { Ikon } from '@/components/ui/Ikon';
 import { t } from '@/i18n';
 import { gunUstuMetin, kose, renk, yazi } from '@/theme';
@@ -94,6 +94,8 @@ export function SiralaListesi({ satirlar, bas, son, alt, yukseklik, onTasi, onSa
   // Satır yükseklikleri içeriğe göre (ad 2 satır) — yuvalar ölçülür.
   const [yuvalar, setYuvalar] = useState<Yuva[]>([]);
   const sayfaKaydirma = useSayfaKaydirma();
+  // #164 KK7: ≡ ile sıralama sayfanın aşağı çekilmesinden önceliklidir — sürüklerken sayfa jesti devreye girmez.
+  const sayfaKilidi = useSayfaKilidi();
   const [kayma] = useState(() => new Animated.Value(0));
   const kaydirici = useRef<ScrollView>(null);
   const kabRef = useRef<View>(null);
@@ -123,6 +125,7 @@ export function SiralaListesi({ satirlar, bas, son, alt, yukseklik, onTasi, onSa
 
   const basla = (index: number) => {
     const d = durum.current;
+    sayfaKilidi(true);
     d.index = index;
     d.hedef = index;
     d.dy = 0;
@@ -156,6 +159,7 @@ export function SiralaListesi({ satirlar, bas, son, alt, yukseklik, onTasi, onSa
 
   const birak = () => {
     const d = durum.current;
+    sayfaKilidi(false);
     durdur();
     const { index, hedef } = d;
     d.index = -1;
@@ -192,74 +196,78 @@ export function SiralaListesi({ satirlar, bas, son, alt, yukseklik, onTasi, onSa
 
   return (
     <View ref={kabRef} style={{ height: yukseklik }} collapsable={false}>
-      <ScrollView
-        ref={kaydirici}
-        scrollEnabled={!surukle}
-        scrollEventThrottle={16}
-        onScroll={(e) => {
-          durum.current.kaydirY = e.nativeEvent.contentOffset.y;
-          sayfaKaydirma(e);
-        }}
-        onContentSizeChange={(_w, h) => {
-          durum.current.icerikH = h;
-        }}
-        contentContainerStyle={{ paddingBottom: 8 }}>
-        {bas}
-        {satirlar.map((x, i) => {
-          const tutulan = surukle?.index === i;
-          return (
-            // Tutulan satır sonraki kardeşlerin üstünde çizilsin (zIndex dış kapta).
-            <View
-              key={x.id}
-              style={tutulan ? { zIndex: 10, elevation: 10 } : undefined}
-              onLayout={(e) => {
-                const { y, height } = e.nativeEvent.layout;
-                setYuvalar((eski) => {
-                  if (eski[i]?.y === y && eski[i]?.h === height) return eski;
-                  const yeni = eski.slice(0, satirlar.length);
-                  yeni[i] = { y, h: height };
-                  return yeni;
-                });
-              }}>
-              {x.bacak && !tutulan ? (
-                <View>
-                  <View style={s.ara}>
-                    <Pressable
-                      accessibilityRole="button"
-                      accessibilityState={{ expanded: !!x.bacak.id && acikBacakId === x.bacak.id }}
-                      disabled={!x.bacak.id || !onBacakBas}
-                      onPress={() => x.bacak?.id && onBacakBas?.(x.bacak.id)}
-                      style={({ pressed }) => [s.araHap, x.bacak?.ikon === 'araba' && s.araHapAraba, pressed && { opacity: 0.8 }]}>
-                      <Ikon ad={x.bacak.ikon} boyut={14} renk={x.bacak.ikon === 'araba' ? renk.zemin : renk.ana} kalinlik={2.4} />
-                      <Text style={[s.araMetin, x.bacak.ikon === 'araba' && { color: renk.zemin }]}>{x.bacak.metin}</Text>
-                    </Pressable>
+      <SayfaKaydirmasi>
+        <ScrollView
+          ref={kaydirici}
+          scrollEnabled={!surukle}
+          scrollEventThrottle={16}
+          bounces={false}
+          overScrollMode="never"
+          onScroll={(e) => {
+            durum.current.kaydirY = e.nativeEvent.contentOffset.y;
+            sayfaKaydirma(e);
+          }}
+          onContentSizeChange={(_w, h) => {
+            durum.current.icerikH = h;
+          }}
+          contentContainerStyle={{ paddingBottom: 8 }}>
+          {bas}
+          {satirlar.map((x, i) => {
+            const tutulan = surukle?.index === i;
+            return (
+              // Tutulan satır sonraki kardeşlerin üstünde çizilsin (zIndex dış kapta).
+              <View
+                key={x.id}
+                style={tutulan ? { zIndex: 10, elevation: 10 } : undefined}
+                onLayout={(e) => {
+                  const { y, height } = e.nativeEvent.layout;
+                  setYuvalar((eski) => {
+                    if (eski[i]?.y === y && eski[i]?.h === height) return eski;
+                    const yeni = eski.slice(0, satirlar.length);
+                    yeni[i] = { y, h: height };
+                    return yeni;
+                  });
+                }}>
+                {x.bacak && !tutulan ? (
+                  <View>
+                    <View style={s.ara}>
+                      <Pressable
+                        accessibilityRole="button"
+                        accessibilityState={{ expanded: !!x.bacak.id && acikBacakId === x.bacak.id }}
+                        disabled={!x.bacak.id || !onBacakBas}
+                        onPress={() => x.bacak?.id && onBacakBas?.(x.bacak.id)}
+                        style={({ pressed }) => [s.araHap, x.bacak?.ikon === 'araba' && s.araHapAraba, pressed && { opacity: 0.8 }]}>
+                        <Ikon ad={x.bacak.ikon} boyut={14} renk={x.bacak.ikon === 'araba' ? renk.zemin : renk.ana} kalinlik={2.4} />
+                        <Text style={[s.araMetin, x.bacak.ikon === 'araba' && { color: renk.zemin }]}>{x.bacak.metin}</Text>
+                      </Pressable>
+                    </View>
+                    {x.bacak.id && acikBacakId === x.bacak.id && bacakSecici ? <View style={s.araAcik}>{bacakSecici}</View> : null}
                   </View>
-                  {x.bacak.id && acikBacakId === x.bacak.id && bacakSecici ? <View style={s.araAcik}>{bacakSecici}</View> : null}
-                </View>
-              ) : (
-                <View style={s.ara} />
-              )}
-              {x.bosluk && !tutulan ? (
-                <View style={s.boslukKap}>
-                  <Text style={s.bosluk}>{x.bosluk}</Text>
-                </View>
-              ) : null}
-              <Animated.View style={[tutulan && [s.tutulan, { transform: [{ translateY: kayma }] }]]}>
-                <SiraSatiri
-                  satir={x}
-                  numaraRengi={numaraRengi}
-                  tutamac={tutamaclar[i]}
-                  onBas={() => onSatirBas(x.id)}
-                  onUzunBas={onUzunBas ? () => onUzunBas(x.id) : undefined}
-                />
-              </Animated.View>
-            </View>
-          );
-        })}
-        {son ? <View style={{ marginTop: 6 }}>{son}</View> : null}
-        {alt ? <View style={{ marginTop: 10 }}>{alt}</View> : null}
-        {surukle && surukle.hedef !== surukle.index ? <View pointerEvents="none" style={[s.birakmaCizgisi, { top: birakmaCizgisiY(surukle.index, surukle.hedef, yuvalar) }]} /> : null}
-      </ScrollView>
+                ) : (
+                  <View style={s.ara} />
+                )}
+                {x.bosluk && !tutulan ? (
+                  <View style={s.boslukKap}>
+                    <Text style={s.bosluk}>{x.bosluk}</Text>
+                  </View>
+                ) : null}
+                <Animated.View style={[tutulan && [s.tutulan, { transform: [{ translateY: kayma }] }]]}>
+                  <SiraSatiri
+                    satir={x}
+                    numaraRengi={numaraRengi}
+                    tutamac={tutamaclar[i]}
+                    onBas={() => onSatirBas(x.id)}
+                    onUzunBas={onUzunBas ? () => onUzunBas(x.id) : undefined}
+                  />
+                </Animated.View>
+              </View>
+            );
+          })}
+          {son ? <View style={{ marginTop: 6 }}>{son}</View> : null}
+          {alt ? <View style={{ marginTop: 10 }}>{alt}</View> : null}
+          {surukle && surukle.hedef !== surukle.index ? <View pointerEvents="none" style={[s.birakmaCizgisi, { top: birakmaCizgisiY(surukle.index, surukle.hedef, yuvalar) }]} /> : null}
+        </ScrollView>
+      </SayfaKaydirmasi>
     </View>
   );
 }

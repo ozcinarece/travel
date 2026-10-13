@@ -3,7 +3,8 @@ import { useEffect, useReducer, useState, type ReactNode } from 'react';
 import { ActivityIndicator, BackHandler, Linking, Platform, Pressable, ScrollView, Share, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { AltSayfa, useSayfaKaydirma } from '@/components/harita/AltSayfa';
+import { AltSayfa } from '@/components/harita/AltSayfa';
+import { SayfaKaydirmasi, useSayfaKaydirma } from '@/components/ui/sayfaCekme';
 import { Kalp } from '@/components/icerik/Kalp';
 import { MdYazi } from '@/components/icerik/MdYazi';
 import { Avatar } from '@/components/ui/Avatar';
@@ -200,17 +201,18 @@ export function MekanPaneli(p: MekanPaneliProps) {
                     {satirAcik}
                   </Text>
                   {p.ekleyenAd ? <Text style={s.ekleyen}>{t('mekan.ekledi', { ad: p.ekleyenAd })}</Text> : null}
-                  {/* KK1: Burada kalış [–] süre [+] (15 dk adım; değişince saatler yeniden hesaplanır). */}
+                  {/* KK1: Burada kalış [–] süre [+] (15 dk adım; değişince saatler yeniden hesaplanır). #164 KK9 (kanvas 14): tek satır
+                      ~32 px — saat ikonu, etiket, 30 px düğmeler; açıklama satırı ve zemin kutusu yok. */}
                   <View style={s.kalis}>
-                    <View style={{ flex: 1 }}>
-                      <Text style={s.kalisBaslik}>{t('mekan.panel.kalis')}</Text>
-                      <Text style={s.kalisAlt}>{t('mekan.panel.kalisAlt', { sure: sureMetni(varsayilanDakika(tip)) })}</Text>
-                    </View>
-                    <Pressable accessibilityRole="button" accessibilityLabel={t('mekan.azalt')} onPress={() => p.onSure(-15)} hitSlop={4} style={s.kalisDugme}>
+                    <Ikon ad="saat" boyut={16} renk={renk.ikincil} kalinlik={2.4} />
+                    <Text style={s.kalisBaslik} numberOfLines={1} accessibilityHint={t('mekan.panel.kalisAlt', { sure: sureMetni(varsayilanDakika(tip)) })}>
+                      {t('mekan.panel.kalis')}
+                    </Text>
+                    <Pressable accessibilityRole="button" accessibilityLabel={t('mekan.azalt')} onPress={() => p.onSure(-15)} hitSlop={7} style={s.kalisDugme}>
                       <Text style={s.kalisIsaret}>–</Text>
                     </Pressable>
                     <Text style={s.kalisDeger}>{sureMetni(p.dakika)}</Text>
-                    <Pressable accessibilityRole="button" accessibilityLabel={t('mekan.artir')} onPress={() => p.onSure(15)} hitSlop={4} style={s.kalisDugme}>
+                    <Pressable accessibilityRole="button" accessibilityLabel={t('mekan.artir')} onPress={() => p.onSure(15)} hitSlop={7} style={s.kalisDugme}>
                       <Text style={s.kalisIsaret}>+</Text>
                     </Pressable>
                   </View>
@@ -266,13 +268,18 @@ export function MekanPaneli(p: MekanPaneliProps) {
   );
 }
 
-/** Gövde: alt sayfanın kaydırma bağlamına bağlı liste (liste en üstteyken aşağı çekiş sayfayı indirir). */
+/**
+ * Gövde: alt sayfanın kaydırma bağlamına bağlı liste. #164 KK7: içerik en üstteyken içeriğin herhangi bir yerinden aşağı çekiş
+ * paneli bir alt hale indirir (tamdan yarıya, yarıdan kapanır); değilse önce içerik kayar.
+ */
 function Govde({ children }: { children: ReactNode }) {
   const kaydirma = useSayfaKaydirma();
   return (
-    <ScrollView style={{ flex: 1 }} contentContainerStyle={s.govde} onScroll={kaydirma} scrollEventThrottle={16} showsVerticalScrollIndicator={false}>
-      {children}
-    </ScrollView>
+    <SayfaKaydirmasi>
+      <ScrollView style={{ flex: 1 }} contentContainerStyle={s.govde} onScroll={kaydirma} scrollEventThrottle={16} bounces={false} overScrollMode="never" showsVerticalScrollIndicator={false}>
+        {children}
+      </ScrollView>
+    </SayfaKaydirmasi>
   );
 }
 
@@ -532,12 +539,12 @@ const s = StyleSheet.create({
   ekleyen: { fontFamily: yazi.normal, fontSize: 12, color: renk.ikincil },
   acik: { fontFamily: yazi.ekstra, color: renk.basariMetin },
   kapali: { fontFamily: yazi.ekstra, color: renk.uyari },
-  kalis: { flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 4, paddingVertical: 6, paddingLeft: 12, paddingRight: 6, borderRadius: 14, backgroundColor: renk.yuzey },
-  kalisBaslik: { fontFamily: yazi.ekstra, fontSize: 13, color: renk.metin },
-  kalisAlt: { fontFamily: yazi.normal, fontSize: 11, color: renk.ikincil },
-  kalisDugme: { width: 36, height: 36, borderRadius: 11, backgroundColor: renk.zemin, alignItems: 'center', justifyContent: 'center' },
-  kalisIsaret: { fontFamily: yazi.ekstra, fontSize: 20, lineHeight: 22, color: renk.ana },
-  kalisDeger: { minWidth: 58, textAlign: 'center', fontFamily: yazi.baslik, fontSize: 16, color: renk.metin },
+  // #164 KK9 (kanvas 14): tek satır, 32 px; düğmeler 30 px Buz, değer 14 px.
+  kalis: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 2, height: 32 },
+  kalisBaslik: { flex: 1, fontFamily: yazi.ekstra, fontSize: 13, color: renk.ikincil },
+  kalisDugme: { width: 30, height: 30, borderRadius: 9, backgroundColor: renk.yuzey, alignItems: 'center', justifyContent: 'center' },
+  kalisIsaret: { fontFamily: yazi.ekstra, fontSize: 17, lineHeight: 20, color: renk.ana },
+  kalisDeger: { minWidth: 48, textAlign: 'center', fontFamily: yazi.ekstra, fontSize: 14, color: renk.metin },
   eylemler: { flexDirection: 'row', gap: 8 },
   eylem: { flex: 1, height: 44, borderRadius: 13, alignItems: 'center', justifyContent: 'center' },
   eylemBirincil: { backgroundColor: renk.ana },

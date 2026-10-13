@@ -231,21 +231,59 @@ const KATEGORI_TIPLERI: Record<string, string[]> = {
 export const CIP_TIPLERI: Record<string, string[]> = {
   otel: ['lodging'],
   hepsi: [...new Set(Object.values(KATEGORI_TIPLERI).flat())],
+  // #164 KK1: Keşfet'in varsayılan "Turistik" grubu ve sihirbazın "Görmen gerekenler" listesi aynı küme: tarihi yer ve anıt,
+  // müze ve galeri, manzara, ibadet yerleri.
+  turistik: ['tourist_attraction', 'historical_landmark', 'cultural_landmark', 'monument', 'museum', 'art_gallery', 'observation_deck', 'mosque', 'church', 'synagogue'],
   ...KATEGORI_TIPLERI,
   // Eski istemciler (#69 öncesi çipler) bir sürüm daha kabul edilir; OTA'yı almamış istemci 400 almasın.
   populer: ['tourist_attraction'],
   sanat: ['museum', 'art_gallery'],
 };
 
+/**
+ * #164 KK2: konaklama birincil tipleri (Places API (New) Table A, Lodging). Google bazı otelleri `tourist_attraction` diye de
+ * etiketlediğinden otel dışındaki tüm öneri istekleri bunları `excludedPrimaryTypes` ile dışlar; istemci de ayrıca süzer.
+ */
+export const KONAKLAMA_TIPLERI = [
+  'lodging',
+  'hotel',
+  'motel',
+  'hostel',
+  'bed_and_breakfast',
+  'guest_house',
+  'resort_hotel',
+  'extended_stay_hotel',
+  'private_guest_room',
+  'cottage',
+  'farmstay',
+  'campground',
+  'camping_cabin',
+  'rv_park',
+];
+
 export async function yakinAra(secenek: {
   merkez: { lat: number; lng: number };
   yaricapM: number;
   tipler: string[];
   enFazla?: number;
+  /** Dışlanacak birincil tipler (excludedPrimaryTypes). */
+  haric?: string[];
 }): Promise<HafifYer[]> {
+  try {
+    return await yakinAraBir(secenek, secenek.haric);
+  } catch (e) {
+    // Dışlama listesi reddedilirse (geçersiz tip → 400) Keşfet boş kalmasın: dışlamasız bir kez daha; istemci süzgeci yine çalışır.
+    if (!(e instanceof GoogleHatasi) || e.durum !== 400 || !secenek.haric?.length) throw e;
+    console.error('places-nearby excludedPrimaryTypes reddedildi', e.message);
+    return yakinAraBir(secenek, undefined);
+  }
+}
+
+async function yakinAraBir(secenek: { merkez: { lat: number; lng: number }; yaricapM: number; tipler: string[]; enFazla?: number }, haric: string[] | undefined): Promise<HafifYer[]> {
   const cevap = await istek<{ places?: DetailsCevap[] }>('places:searchNearby', {
     govde: {
       includedTypes: secenek.tipler,
+      ...(haric?.length ? { excludedPrimaryTypes: haric } : {}),
       maxResultCount: Math.min(Math.max(secenek.enFazla ?? 20, 1), 20),
       rankPreference: 'POPULARITY',
       languageCode: DIL,

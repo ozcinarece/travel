@@ -52,4 +52,13 @@ describe('görmen gerekenler listesi (#98 KK6)', () => {
     expect(liste[1].neden).toBeNull();
     expect(googleMekani(hafif('z', 4, 10, 'cafe'), false).dakika).toBe(30);
   });
+  it('#164: Google kaynaklı kartlar yalnız Turistik türlerden; restoran ve otel "Görmen gerekenler"e girmez', () => {
+    const karisik = [hafif('r', 4.9, 20000, 'restaurant'), hafif('h', 4.9, 15000, 'hotel'), ...hepsi];
+    const turistik = [hafif('o', 4.9, 12000, 'lodging'), hafif('t1', 4.5, 300)];
+    const g = cipListesi('gormen', rehber, karisik, undefined, turistik).map((m) => m.place_id);
+    expect(g).not.toContain('r');
+    expect(g).not.toContain('h');
+    expect(g).not.toContain('o');
+    expect(g).toContain('t1');
+  });
 });

@@ -4,6 +4,7 @@ import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 import { HataSiniri } from '@/components/ui/HataSiniri';
 import { Buton } from '@/components/ui/Buton';
@@ -99,21 +100,25 @@ function Kok() {
 }
 
 // #85 KK3: hata sınırı en dışta — yakalanmamış render hatasında gri ekran yerine "Yeniden dene" kartı; hata Sentry'ye gider.
+// #164: alt sayfaların içerikten çekilmesi gesture-handler jestleriyle; kök görünüm onları etkinleştirir.
 function KokLayout() {
   return (
-    <HataSiniri>
-      <QueryClientProvider client={queryClient}>
-        <OturumSaglayici>
-          <Kok />
-        </OturumSaglayici>
-      </QueryClientProvider>
-    </HataSiniri>
+    <GestureHandlerRootView style={k.kok}>
+      <HataSiniri>
+        <QueryClientProvider client={queryClient}>
+          <OturumSaglayici>
+            <Kok />
+          </OturumSaglayici>
+        </QueryClientProvider>
+      </HataSiniri>
+    </GestureHandlerRootView>
   );
 }
 
 export default hataRaporuyla(KokLayout);
 
 const k = StyleSheet.create({
+  kok: { flex: 1 },
   hata: { flex: 1, backgroundColor: renk.zemin, justifyContent: 'center', padding: 24, gap: 16 },
   hataMetin: { fontFamily: yazi.yari, fontSize: 15, lineHeight: 22, textAlign: 'center', color: renk.metin },
 });

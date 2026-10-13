@@ -1,6 +1,8 @@
 import type { ReactNode } from 'react';
-import { Modal, Pressable, ScrollView, StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
+import { Modal, Pressable, StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
+import { CekilenSayfa, modalKokuStili, SayfaKaydirici } from '@/components/ui/sayfaCekme';
 import { renk } from '@/theme';
 
 type Props = {
@@ -13,22 +15,28 @@ type Props = {
   stil?: StyleProp<ViewStyle>;
 };
 
-/** #136 (kanvas 2 · 3c · 16): tutamaçlı alt sayfa — beyaz, üst köşeler 30, perde Lacivert %45; dışına dokununca kapanır. */
+/**
+ * #136 (kanvas 2 · 3c · 16): tutamaçlı alt sayfa — beyaz, üst köşeler 30, perde Lacivert %45; dışına dokununca kapanır.
+ * #164 KK7: tutamaktan ya da içeriğin herhangi bir yerinden aşağı çekilerek de kapanır (kaydırılan içerik en üstteyken).
+ */
 export function AltPencere({ acik, onKapat, children, kaydirilir, kapatEtiketi, stil }: Props) {
   return (
     <Modal visible={acik} transparent animationType="slide" onRequestClose={onKapat}>
-      <Pressable style={s.perde} onPress={onKapat} accessibilityLabel={kapatEtiketi}>
-        <Pressable style={[s.sayfa, kaydirilir && s.sinirli]} onPress={() => {}} accessibilityRole="none">
-          <View style={s.tutamac} />
-          {kaydirilir ? (
-            <ScrollView contentContainerStyle={[s.icerik, stil]} showsVerticalScrollIndicator={false}>
-              {children}
-            </ScrollView>
-          ) : (
-            <View style={[s.icerik, stil]}>{children}</View>
-          )}
-        </Pressable>
-      </Pressable>
+      <GestureHandlerRootView style={modalKokuStili}>
+        <View style={s.perde}>
+          <Pressable style={StyleSheet.absoluteFill} onPress={onKapat} accessibilityLabel={kapatEtiketi} />
+          <CekilenSayfa onKapat={onKapat} style={[s.sayfa, kaydirilir && s.sinirli]}>
+            <View style={s.tutamac} />
+            {kaydirilir ? (
+              <SayfaKaydirici contentContainerStyle={[s.icerik, stil]} showsVerticalScrollIndicator={false}>
+                {children}
+              </SayfaKaydirici>
+            ) : (
+              <View style={[s.icerik, stil]}>{children}</View>
+            )}
+          </CekilenSayfa>
+        </View>
+      </GestureHandlerRootView>
     </Modal>
   );
 }
