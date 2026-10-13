@@ -10,7 +10,7 @@ import { Cip } from '@/components/ui/Cip';
 import { useIcerikCanli } from '@/features/icerik/fotolar';
 import { useSehirler, useTumYerler } from '@/features/icerik/sorgular';
 import { hedefSeyahatler, useYereEkle } from '@/features/icerik/yerEkle';
-import { useMekanlar } from '@/features/mekanlar/sorgular';
+import { useMekanlar, useMekanSil } from '@/features/mekanlar/sorgular';
 import { useSeyahatler } from '@/features/seyahatler/sorgular';
 import { seyahatAdi } from '@/features/sihirbaz/sihirbaz';
 import { t } from '@/i18n';
@@ -30,6 +30,7 @@ export default function YerlerEkrani() {
   const liste = useMemo(() => (yerler.data ?? []).filter((y) => !sehirId || y.sehir_id === sehirId), [yerler.data, sehirId]);
   const canli = useIcerikCanli(liste, (y) => (y as (typeof liste)[number]).sehirler?.ad ?? '');
   const ekle = useYereEkle();
+  const sil = useMekanSil(hedef?.id ?? '');
   const [secimYeri, setSecimYeri] = useState<(typeof liste)[number] | null>(null);
   const [mesgulId, setMesgulId] = useState<string | null>(null);
   const [bildirim, setBildirim] = useState<string | null>(null);
@@ -45,6 +46,18 @@ export default function YerlerEkrani() {
       setTimeout(() => setBildirim(null), 2500);
     } catch {
       setBildirim(t('anasayfa.ekleHata'));
+    } finally {
+      setMesgulId(null);
+    }
+  };
+  // ✓'ye dokununca listeden çıkar (hedef seyahatin listesi).
+  const cikar = async (y: (typeof liste)[number]) => {
+    const pid = canli.data?.get(y.id)?.place_id;
+    const m = pid ? hedefMekanlar.data?.find((x) => x.place_id === pid) : undefined;
+    if (!m) return;
+    setMesgulId(y.id);
+    try {
+      await sil.mutateAsync(m.id);
     } finally {
       setMesgulId(null);
     }
@@ -84,6 +97,7 @@ export default function YerlerEkrani() {
                       listede={!!c?.place_id && hedefIdleri.has(c.place_id)}
                       mesgul={mesgulId === y.id}
                       onEkle={() => artiBas(y)}
+                      onCikar={() => cikar(y)}
                       onAc={() => {
                         if (hedef && c?.place_id) router.push({ pathname: '/seyahat/[id]/(sekmeler)/kesfet', params: { id: hedef.id, mekan: c.place_id } });
                       }}

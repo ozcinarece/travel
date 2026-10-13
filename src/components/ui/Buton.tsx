@@ -1,9 +1,10 @@
 import type { ReactNode } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, Text, type StyleProp, type ViewStyle } from 'react-native';
 
-import { minDokunma, renk, yazi } from '@/theme';
+import { kose, minDokunma, renk, yazi } from '@/theme';
 
-type Tur = 'birincil' | 'ikincil' | 'tehlike';
+/** #136 (kanvas Temel): birincil Gece · vurgu Mandalina (üstünde Lacivert) · ikincil Buz · çerçeveli beyaz · tehlike. */
+type Tur = 'birincil' | 'vurgu' | 'ikincil' | 'cerceveli' | 'tehlike';
 
 type Props = {
   baslik: string;
@@ -13,13 +14,15 @@ type Props = {
   yukleniyor?: boolean;
   ikon?: ReactNode;
   stil?: StyleProp<ViewStyle>;
+  /** Büyük CTA (54 px) ya da satır içi (46 px); varsayılan 52. */
+  boy?: 'buyuk' | 'normal' | 'kucuk';
 };
 
-const ZEMIN: Record<Tur, string> = { birincil: renk.metin, ikincil: renk.yuzey, tehlike: renk.uyari };
-const METIN: Record<Tur, string> = { birincil: renk.zemin, ikincil: renk.metin, tehlike: renk.zemin };
+const ZEMIN: Record<Tur, string> = { birincil: renk.ana, vurgu: renk.vurgu, ikincil: renk.yuzey, cerceveli: renk.zemin, tehlike: renk.uyari };
+const METIN: Record<Tur, string> = { birincil: renk.zemin, vurgu: renk.metin, ikincil: renk.ana, cerceveli: renk.metin, tehlike: renk.zemin };
+const BOY = { buyuk: 54, normal: 52, kucuk: 46 } as const;
 
-// Kanvastaki hap buton: 52 yüksek, tam yuvarlak; siyah (birincil), gri yüzey (ikincil), turuncu-kırmızı (tehlike).
-export function Buton({ baslik, onPress, tur = 'birincil', pasif, yukleniyor, ikon, stil }: Props) {
+export function Buton({ baslik, onPress, tur = 'birincil', pasif, yukleniyor, ikon, stil, boy = 'normal' }: Props) {
   const kapali = !!pasif || !!yukleniyor;
   return (
     <Pressable
@@ -27,19 +30,13 @@ export function Buton({ baslik, onPress, tur = 'birincil', pasif, yukleniyor, ik
       accessibilityState={{ disabled: kapali, busy: !!yukleniyor }}
       disabled={kapali}
       onPress={onPress}
-      style={({ pressed }) => [
-        s.kap,
-        { backgroundColor: ZEMIN[tur] },
-        pasif && s.pasif,
-        pressed && s.basili,
-        stil,
-      ]}>
+      style={({ pressed }) => [s.kap, { backgroundColor: ZEMIN[tur], height: BOY[boy] }, tur === 'cerceveli' && s.cerceve, pasif && s.pasif, pressed && s.basili, stil]}>
       {yukleniyor ? (
         <ActivityIndicator color={METIN[tur]} />
       ) : (
         <>
           {ikon}
-          <Text style={[s.metin, { color: METIN[tur] }]}>{baslik}</Text>
+          <Text style={[s.metin, { color: METIN[tur] }, boy === 'kucuk' && { fontSize: 14 }]}>{baslik}</Text>
         </>
       )}
     </Pressable>
@@ -47,17 +44,9 @@ export function Buton({ baslik, onPress, tur = 'birincil', pasif, yukleniyor, ik
 }
 
 const s = StyleSheet.create({
-  kap: {
-    height: 52,
-    minHeight: minDokunma,
-    paddingHorizontal: 18,
-    borderRadius: 999,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 10,
-  },
+  kap: { minHeight: minDokunma, paddingHorizontal: 20, borderRadius: kose.dugme, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 },
+  cerceve: { borderWidth: 1.5, borderColor: renk.ayrac },
   pasif: { opacity: 0.4 },
   basili: { opacity: 0.85 },
-  metin: { fontFamily: yazi.kalin, fontSize: 14 },
+  metin: { fontFamily: yazi.ekstra, fontSize: 16, color: renk.zemin },
 });

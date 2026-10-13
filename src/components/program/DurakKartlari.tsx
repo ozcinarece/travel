@@ -7,7 +7,7 @@ import { KART_ADIM, KART_ARALIK, KART_GENISLIK, kartDugmeleri, kartIndeksi, type
 import { useOnizleme } from '@/features/yerler/api';
 import { t } from '@/i18n';
 import { kategoriPini } from '@/lib/pinIkonu';
-import { bosluk, renk, yazi } from '@/theme';
+import { bosluk, gunUstuMetin, renk, yazi } from '@/theme';
 
 type Props = {
   kartlar: DurakKarti[];
@@ -126,7 +126,7 @@ function Kart({ kart, toplam, gunRenk, bugun, fotoIste, onDetay, onYolTarifi, on
             </Text>
           </View>
           <View style={[s.numara, { backgroundColor: kart.tamamlandi ? renk.basari : gunRenk }]}>
-            {kart.tamamlandi ? <Ikon ad="tik" boyut={14} renk={renk.zemin} kalinlik={2.6} /> : <Text style={s.numaraMetin}>{kart.sira}</Text>}
+            {kart.tamamlandi ? <Ikon ad="tik" boyut={14} renk={renk.zemin} kalinlik={2.6} /> : <Text style={[s.numaraMetin, { color: gunUstuMetin(gunRenk) }]}>{kart.sira}</Text>}
           </View>
         </View>
         <View style={s.dugmeler}>

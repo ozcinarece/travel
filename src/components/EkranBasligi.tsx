@@ -43,6 +43,7 @@ const stil = StyleSheet.create({
   },
   geriIsaret: { fontFamily: yazi.kalin, fontSize: 24, lineHeight: 26, color: renk.metin, marginTop: -2 },
   metinler: { flex: 1, gap: 2 },
-  baslik: { fontFamily: yazi.ekstra, fontSize: 26, letterSpacing: -0.8, lineHeight: 29, color: renk.metin },
+  // #136: ekran başlığı Archivo (kanvas ölçek 32; satır içi başlıkta 28).
+  baslik: { fontFamily: yazi.baslik, fontSize: 28, letterSpacing: -0.8, lineHeight: 31, color: renk.metin },
   alt: { fontFamily: yazi.normal, fontSize: 13, color: renk.ikincil },
 });

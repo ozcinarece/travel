@@ -165,7 +165,9 @@ export function programCizgileri(secenek: {
         const taksi = m.mod === 'taksi';
         // Eski satırlar (migration öncesi): mode DRIVE iken `polyline` araba yoluydu, yürüme yolu yok.
         const eskiAraba = r.mode === 'DRIVE' && !r.drive_polyline;
-        const yol = taksi ? (r.drive_polyline ?? (eskiAraba ? r.polyline : null)) : eskiAraba ? null : r.polyline;
+        // #136 (kanvas Temel · harita dili): yürüme gerçek yol düz çizgi; ARABA kuş uçuşu kesik çizgi (araba yolu çizilmez,
+        // süre `drive_seconds`'tan). Eski satırlarda (mode DRIVE, polyline araba yolu) yürüme yolu yoktur → kuş uçuşu.
+        const yol = taksi ? null : eskiAraba ? null : r.polyline;
         const dk = Math.max(1, Math.round(m.sn / 60));
         return {
           id,
@@ -174,7 +176,7 @@ export function programCizgileri(secenek: {
           opaklik,
           arac: taksi,
           kesik: !yol,
-          ince: !yol,
+          ince: !yol && !taksi,
           etiket: i < gecilenBacak ? undefined : `${m.kestirim ? '~' : ''}${dk} dk`,
           etiketIkon: taksi ? 'araba' : 'yuru',
           etiketRenk: rengi,

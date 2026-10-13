@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { PixelRatio, StyleSheet, View, useWindowDimensions } from 'react-native';
 import MapView, { Circle, Marker, Polyline, PROVIDER_GOOGLE } from 'react-native-maps';
 
-import { bolgeHesapla, enYakinPin, etiketBolgesi, bacakHapCapasi, gizliEtiketler, haritaDolgusu, isaretciImzasi, izlemeGerekli, pinCapasi, pinZ, zoomaGorePinler, zoomDelta } from './geo';
+import { bolgeHesapla, enYakinPin, etiketBolgesi, bacakHapCapasi, gizliEtiketler, haritaDolgusu, isaretciImzasi, izlemeGerekli, pinCapasi, pinZ, seciliKareMi, zoomaGorePinler, zoomDelta } from './geo';
 import { ACIK_HARITA_STILI } from './haritaStili';
 
 import { izBirak } from '@/lib/hataRaporu';
@@ -273,7 +273,7 @@ export function Harita({
             coordinate={{ latitude: p.konum.lat, longitude: p.konum.lng }}
             image={i.gorsel}
             // #65: seçili iğnenin çapası ucu; dairelerde merkez.
-            anchor={p.secili ? (p.boy === 34 ? IGNE_CAPA_34 : IGNE_CAPA) : { x: 0.5, y: 0.5 }}
+            anchor={p.secili && !seciliKareMi(p) ? (p.boy === 34 ? IGNE_CAPA_34 : IGNE_CAPA) : { x: 0.5, y: 0.5 }}
             tracksViewChanges={false}
             opacity={p.opaklik ?? 1}
             zIndex={pinZ(p)}

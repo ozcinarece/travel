@@ -9,7 +9,8 @@ export const KATEGORI_PIN: Record<PinKategorisi, { renk: string; ikon: PinIkonu 
   gezilecek: { renk: '#3b6fe0', ikon: 'kamera' },
   muze: { renk: '#8a4fd6', ikon: 'muze' },
   ibadet: { renk: '#6b7280', ikon: 'ibadet' },
-  yemek: { renk: '#e8590c', ikon: 'catal' },
+  // #136: Yemek markayla (Mandalina) karışmasın diye daha koyu turuncu.
+  yemek: { renk: '#d9480f', ikon: 'catal' },
   kafe: { renk: '#9a5b2e', ikon: 'fincan' },
   park: { renk: '#1f8a4c', ikon: 'agac' },
   manzara: { renk: '#0ea5e9', ikon: 'dag' },

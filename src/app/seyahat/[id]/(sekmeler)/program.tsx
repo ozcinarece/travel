@@ -53,7 +53,7 @@ import { enUcuzEklemeIndeksi, yuruyusDk } from '@/schedule/program';
 import { arasindaAnahtar } from '@/schedule/sira';
 import { varsayilanSira } from '@/schedule/siralama';
 import { bacakModu, dakikaSaat, kestirimTaksiSn, kestirimYuruyusSn, saatDakika, type BacakSecimi } from '@/schedule/tempo';
-import { gunRengi, minDokunma, renk, yazi } from '@/theme';
+import { gunRengi, minDokunma, renk, yazi, yuzRenkleri } from '@/theme';
 
 // PRD 3.3 KK3: 20 dk yürüyüş ≈ 1,5 km.
 const YURUME_YARICAPI_M = 1500;
@@ -568,7 +568,7 @@ function ProgramSekmesi({
       <Pressable accessibilityRole="button" accessibilityLabel={t('seyahat.grup.baslik')} onPress={() => setGrupAcik(true)} style={[s.avatarlar, s.golge]}>
         {(uyeler.data ?? []).slice(0, 3).map((u, i) => (
           <View key={u.user_id} style={[s.avatarCerceve, i > 0 && { marginLeft: -8 }]}>
-            <Avatar ad={u.display_name} boyut={26} arkaPlan={['#0f0f0f', '#ff5a1f', '#4c6ef5'][i % 3]} />
+            <Avatar ad={u.display_name} url={u.photo_url} boyut={26} arkaPlan={yuzRenkleri[i % yuzRenkleri.length]} />
           </View>
         ))}
       </Pressable>

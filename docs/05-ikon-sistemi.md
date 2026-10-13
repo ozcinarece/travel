@@ -1,6 +1,6 @@
 # Pin ve ikon sistemi
 
-Sürüm 1.9 · 12 Ekim 2026 (her bacakta süre hapı: yürüme glifi / araba glifi) · önceki 1.8 (diğer günlerin rotası çizilmez; soluk noktaya dokununca gün hapı) · önceki 1.7 (zoom 16→18 arası kademesiz büyüyen pin; dokunma alanı ≥ 44 px) · önceki 1.6 (seçili ad hep görünür; öne çıkan seçimi) · önceki 1.5 (öne çıkan ★ rozeti) · önceki 1.4 (pin düşürme kalktı, zoom'a göre küçük pin) · önceki: 1.3 (seçili = iğne; listede = dolu + ✓ rozeti; taksi → araba, düz; yürüme okları sık) · Sahip: Ece (ürün)
+Sürüm 2.0 · 13 Ekim 2026 (#136 Tripmate kimliği: durak pini köşeli kare, seçili durak Mandalina kare, listede Mandalina kare + Gece kenar, araba kuş uçuşu kesik, yeni gün renkleri) · önceki 1.9 (her bacakta süre hapı: yürüme glifi / araba glifi) · önceki 1.8 (diğer günlerin rotası çizilmez; soluk noktaya dokununca gün hapı) · önceki 1.7 (zoom 16→18 arası kademesiz büyüyen pin; dokunma alanı ≥ 44 px) · önceki 1.6 (seçili ad hep görünür; öne çıkan seçimi) · önceki 1.5 (öne çıkan ★ rozeti) · önceki 1.4 (pin düşürme kalktı, zoom'a göre küçük pin) · önceki: 1.3 (seçili = iğne; listede = dolu + ✓ rozeti; taksi → araba, düz; yürüme okları sık) · Sahip: Ece (ürün)
 
 Kanvastaki **"Pin ve ikon sistemi"** panosu (`PinSystem6`) ve rota için `OtherDayRoute10`, haritadaki her işaretin tek kaynağıdır: https://claude.ai/artifact/46jh8ggGczM7VDTVHyzRQT
 
@@ -15,12 +15,12 @@ Yollar `src/components/ui/Ikon.tsx` ile birebir aynıdır. PNG'ler `scripts/pin-
 | Gezilecek yer | `#3b6fe0` | `kamera` | `M4 8h3l1.5-2.5h7L17 8h3v11H4V8z` + daire (12, 13.5, r 3.5) |
 | Müze | `#8a4fd6` | `muze` | `M3 9l9-5 9 5H3zM5 9v8M9.5 9v8M14.5 9v8M19 9v8M3 20h18` |
 | İbadet yeri | `#6b7280` | `ibadet` | `M5 20v-6a5 5 0 0 1 10 0v6M3 20h18M10 9V7M19 20V8l-1.5-3L16 8v12` |
-| Yemek | `#e8590c` | `catal` | `M7 3v6a2.5 2.5 0 0 0 5 0V3M9.5 3v18` · `M17 3c-1.7 1.2-2.5 3.5-2.5 6.5V13H17v8M17 3v10` |
+| Yemek | `#d9480f` (#136: markayla karışmasın) | `catal` | `M7 3v6a2.5 2.5 0 0 0 5 0V3M9.5 3v18` · `M17 3c-1.7 1.2-2.5 3.5-2.5 6.5V13H17v8M17 3v10` |
 | Kafe | `#9a5b2e` | `fincan` | `M4 8h12v6a5 5 0 0 1-5 5h-2a5 5 0 0 1-5-5V8z` · `M16 10h2a2.5 2.5 0 0 1 0 5h-2M7 4.5v2M10 4.5v2M13 4.5v2` |
 | Park | `#1f8a4c` | `agac` | `M12 3l5 7h-3l4 5H6l4-5H7l5-7z` · `M12 15v6` |
 | Manzara | `#0ea5e9` | `dag` | `M3 19l6.5-11 4 6.5 2-3L21 19H3z` + daire (17.5, 6, r 1.5) |
 | Alışveriş | `#c2185b` | `canta` | `M5 8h14l-1 12H6L5 8z` · `M9 10V7a3 3 0 0 1 6 0v3` |
-| Yürüme (hap) | `#0f0f0f` | `yuru` | daire (13.5, 4, r 1.7) · `M12.5 8l-1.5 5.5L9 20M11 13.5l3 3 1.5 4.5` · `M12.5 8l2.5 2.5 2.5-.5M12.5 8l-2.5 3-1.5 2.5` |
+| Yürüme (hap) | `#0e1430` | `yuru` | daire (13.5, 4, r 1.7) · `M12.5 8l-1.5 5.5L9 20M11 13.5l3 3 1.5 4.5` · `M12.5 8l2.5 2.5 2.5-.5M12.5 8l-2.5 3-1.5 2.5` |
 
 Diğer glifler: `tik` (`M5 12.5l4.5 4.5L19 7.5`, kalınlık +0,6) · `ev` · `araba` · yön oku `M9 5l6 7-6 7`.
 
@@ -30,12 +30,13 @@ Diğer glifler: `tik` (`M5 12.5l4.5 4.5L19 7.5`, kalınlık +0,6) · `ev` · `ar
 |---|---|---|
 | Öneri (Keşfet) | 28 px | beyaz zemin, kategori renginde 2 px kenar, kategori renginde 14 px glif |
 | Öne çıkan (Keşfet) | 28 px | öneri ya da listede görünümü + **sol üst köşede turuncu ★ rozeti** (15 px `#ff5a1f` daire, 1,5 px beyaz kenar, beyaz yıldız 8 px). Her zoom'da tam boy (küçük pine dönmez); ad altında ★ puan · yorum. **Seçim:** seyahatin yüklenmiş mekanları içinde ≥ 4,3 puan ve ≥ 200 yorumlu adaylar skorla (puan × log10(yorum+1)) sıralanır; yüklenmiş mekan sayısının %10'u kadar aday öne çıkan olur (#70 incelemesi) |
-| Listede (Keşfet) | 28 px | kategori renginde dolu daire, 2 px beyaz kenar, beyaz 14 px glif + **sağ üst köşede ✓ rozeti** (15 px siyah daire, 1,5 px beyaz kenar, beyaz ✓ 9 px; köşeden 3 px taşar) |
-| Seçili (öneri, listede, durak, tamamlandı) | 38 × 46 px | **iğne (damla) biçimi**: aynı zemin ve kenar (2,5 px), 17 px glif / 14 px numara, 2 px siyah dış halka, gölge `0 4px 10px rgba(15,15,15,.3)`. **Çapa = iğnenin ucu** (konum). Listede ise ✓ rozeti iğnenin sağ üstünde kalır. Ad etiketi ucun 4 px altında |
-| Durak (seçili gün) | 28 px | gün renginde dolu, 2 px beyaz kenar, beyaz sıra numarası 12 px / 800 |
+| Listede (Keşfet) | 28 px | **#136: Mandalina kare (köşe 8), 2 px Gece kenar, Lacivert 14 px glif + sağ üst köşede ✓ rozeti** (15 px Gece daire, 1,5 px beyaz kenar, beyaz ✓ 9 px; köşeden 3 px taşar) |
+| Seçili öneri / listede (Keşfet) | 38 × 46 px | **iğne (damla) biçimi**: aynı zemin ve kenar (2,5 px), 17 px glif, 2 px Gece dış halka, gölge `0 4px 10px rgba(14,20,48,.3)`. **Çapa = iğnenin ucu** (konum). Listede ise ✓ rozeti iğnenin sağ üstünde kalır. Ad etiketi ucun 4 px altında |
+| **Seçili / sıradaki durak** (#136) | 38 px | **köşeli kare (köşe 11), Mandalina dolgu, 3 px Gece kenar, Lacivert 15 px numara**; çapa merkez; tamamlandıysa Başarı dolgu + beyaz ✓ |
+| Durak (seçili gün) | 30 px | **#136: köşeli kare (köşe 9)**, gün renginde dolu, 3 px beyaz kenar, sıra numarası 13 px / 800 (beyaz; 2. günün sarısında Lacivert) |
 | Diğer gün durağı | 20 px | gün renginde nokta, numarasız, %45 opak. **Dokununca** siyah hap: gün rengi nokta + "Cum 16 · Odunpazarı Evleri" + beyaz "Güne git" düğmesi; haritaya dokununca kapanır (kanvas `OtherDayRoute10`) |
-| Tamamlandı | 28 px | `#1f8a4c` dolu + beyaz ✓ |
-| Otel | 28 px | siyah yuvarlatılmış kare (r 9) + beyaz ev 16 px |
+| Tamamlandı | 28 px | `#16a06e` dolu + beyaz ✓ |
+| Otel | 28 px | Gece `#152a6b` yuvarlatılmış kare (r 8) + beyaz ev 16 px |
 | Ben (konum) | 22 px | `#4285f4` nokta, beyaz kenar, %25 halka |
 
 Tüm pinlerde gölge: `0 2px 6px rgba(15,15,15,.22)`. **Dokunma alanı:** her pinin dokunma kutusu en az 44 × 44 px (pin görselinden bağımsız); dokunuş, en yakın pin merkezine 22 px içindeyse o pine sayılır. Üst üste binme sırası: konum > seçili > otel > listede / durak > öneri > hap.
@@ -58,12 +59,12 @@ Listede, durak, otel ve seçili pinler her zoom'da tam boyutta çizilir.
 | Tür | Katmanlar |
 |---|---|
 | Yürüme (seçili gün) | gölge 11 dp `#0f0f0f` %12 · beyaz 9 dp · rota tonu 5,5 dp; yuvarlak uç ve köşe; **~24 px aralıkla** beyaz yön oku (sık, Google'ın yürüme görünümüne yakın) |
-| Araba (uzun bacak, >40 dk yürüme) | yürümenin aynısı: gölge 11 · beyaz 9 · rota tonu 5,5 dp, **düz**, yön oku yok. Adı "araba"; taksi mi kendi aracı mı kullanıcı karar verir |
+| Araba (uzun bacak, >40 dk yürüme) | **#136: kuş uçuşu KESİK çizgi** (logodaki gibi), rota tonu 4,5 dp, gölgesiz, yön oku yok; araba yolu çizilmez, süre `drive_seconds`. Adı "araba"; taksi mi kendi aracı mı kullanıcı karar verir |
 | Diğer günler | **çizilmez.** Yalnız durakları soluk nokta olarak kalır (§2). v1.7'deki "3 dp %32" kalktı: boş gün planlarken başka günün rotası ekranı dolduruyordu (11 Eki cihaz incelemesi) |
 | Rota gelene kadar | gün rengi 3 dp, kesikli (kuş uçuşu). **Yalnız seçili gün için**; diğer günler için hiçbir zaman çizilmez |
 
-Rota tonu = gün renginin ~%20 koyusu: 1 `#1f4fc2` · 2 `#cf5a22` · 3 `#0b7d5d` · 4 `#6e3fab` · 5 `#b83762` · 6 `#0b84ba`.
-Gün renkleri (pinler): 1 `#2f6fed` · 2 `#f2783f` · 3 `#12a37a` · 4 `#8a4fd6` · 5 `#e0457b` · 6 `#0ea5e9`.
+Rota tonu = gün renginin ~%20 koyusu (#136): 1 `#2350c4` · 2 `#c4841d` · 3 `#128058` · 4 `#623fb3` · 5 `#b33762` · 6 `#0b84ba`.
+Gün renkleri (pinler, kanvas Temel): 1 `#2c64f5` · 2 `#f5a524` (üstünde Lacivert yazı) · 3 `#16a06e` · 4 `#7b4fe0` · 5 `#e0457b` · 6 `#0ea5e9`.
 
 ## 4. Haplar
 

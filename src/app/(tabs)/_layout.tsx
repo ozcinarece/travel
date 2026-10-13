@@ -10,9 +10,10 @@ export default function SekmeLayout() {
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: renk.metin,
+        // #136: seçili sekme Gece, pasif gri mavi; etiket 11 / 800.
+        tabBarActiveTintColor: renk.ana,
         tabBarInactiveTintColor: renk.soluk,
-        tabBarLabelStyle: { fontFamily: yazi.yari, fontSize: 10 },
+        tabBarLabelStyle: { fontFamily: yazi.ekstra, fontSize: 11 },
         tabBarStyle: { borderTopColor: renk.ayrac, backgroundColor: renk.zemin },
       }}>
       {/* #97 KK1: Ana sayfa · Seyahatler · Yeni · Profil; ilk açılış Ana sayfa. */}

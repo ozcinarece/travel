@@ -24,7 +24,7 @@ export function UygulamaMenusu() {
     <View style={[s.kap, { paddingBottom: Math.max(alt, 6) }]} accessibilityRole="tablist">
       {OGELER.map((o) => {
         const secili = o.ad === 'seyahatler';
-        const rengi = secili ? renk.metin : renk.soluk;
+        const rengi = secili ? renk.ana : renk.soluk;
         return (
           <Pressable key={o.ad} accessibilityRole="tab" accessibilityState={{ selected: secili }} onPress={() => router.navigate(o.yol)} style={s.oge}>
             <Ikon ad={o.ad} renk={rengi} />
@@ -39,5 +39,5 @@ export function UygulamaMenusu() {
 const s = StyleSheet.create({
   kap: { flexDirection: 'row', borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: renk.ayrac, backgroundColor: renk.zemin, paddingTop: 6 },
   oge: { flex: 1, alignItems: 'center', gap: 2, minHeight: 44, justifyContent: 'center' },
-  metin: { fontFamily: yazi.yari, fontSize: 10 },
+  metin: { fontFamily: yazi.ekstra, fontSize: 11 },
 });

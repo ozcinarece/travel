@@ -71,10 +71,13 @@ function Cizgi({ cizgi }: { cizgi: HaritaCizgisi }) {
             ? [{ icon: { path: kutuphane.SymbolPath.FORWARD_OPEN_ARROW, strokeColor: '#ffffff', strokeWeight: 2, scale: 2.2 }, offset: '12px', repeat: '24px' }]
             : undefined,
       });
+    // #136: araba bacağı kuş uçuşu kesik 4,5 px rota tonunda (gölgesiz); kuş uçuşu ince 3 px.
     const katmanlar = cizgi.ince
       ? [katman(cizgi.renk, 3, 0, { noktali: cizgi.kesik })]
-      : [
-          katman('#0f0f0f', 11, 1, { opaklik: 0.12 * opaklik }),
+      : cizgi.kesik && cizgi.arac
+        ? [katman(cizgi.renk, 4.5, 0, { noktali: true })]
+        : [
+          katman('#0e1430', 11, 1, { opaklik: 0.12 * opaklik }),
           katman('#ffffff', 9, 2, {}),
           katman(cizgi.renk, 5.5, 3, { noktali: cizgi.kesik, oklar: !cizgi.kesik && !cizgi.arac && opaklik >= 0.5 }),
         ];

@@ -46,7 +46,7 @@ const s = StyleSheet.create({
     borderWidth: 1.5,
     borderColor: 'transparent',
   },
-  vurgulu: { borderColor: renk.metin },
+  vurgulu: { borderColor: renk.ana },
   onEk: { fontFamily: yazi.yari, fontSize: 15, color: renk.ikincil },
   girdi: { flex: 1, fontFamily: yazi.yari, fontSize: 15, color: renk.metin, paddingVertical: 0 },
   alt: { fontFamily: yazi.yari, fontSize: 11, color: renk.ikincil },

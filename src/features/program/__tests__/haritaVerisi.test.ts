@@ -57,11 +57,13 @@ describe('programCizgileri (#51)', () => {
     // #95 (docs/05 v1.9): yürüyüş bacağında da hap — "33 dk" + yuru glifi, rota tonunda hap rengi.
     expect(d[1].etiket).toBe('33 dk');
     expect(d[1].etiketIkon).toBe('yuru');
-    expect(d[1].etiketRenk).toBe('#1f4fc2');
+    expect(d[1].etiketRenk).toBe('#2350c4');
     const taksili: RotaHaritasi = { 'A>B': { ...rota('A', 'B'), mode: 'DRIVE', drive_seconds: 14 * 60 } };
     const e = cizgiler([H, A, B, C, H], taksili);
-    // #65: araba bacağı düz (kesik değil), oksuz (arac), hap ikonu araba.
-    expect(e[1].kesik).toBeFalsy();
+    // #136 (kanvas Temel): araba bacağı kuş uçuşu KESİK (ince değil, 4,5 dp), oksuz (arac), hap ikonu araba; uçlar düz.
+    expect(e[1].kesik).toBe(true);
+    expect(e[1].ince).toBe(false);
+    expect(e[1].noktalar).toEqual([{ lat: A.lat, lng: A.lng }, { lat: B.lat, lng: B.lng }]);
     expect(e[1].arac).toBe(true);
     expect(e[1].etiket).toBe('14 dk');
     expect(e[1].etiketIkon).toBe('araba');

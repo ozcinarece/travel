@@ -4,9 +4,9 @@ import Svg, { Path } from 'react-native-svg';
 import { Ikon, type IkonAdi } from '@/components/ui/Ikon';
 import { yorumKisa } from '@/lib/pinIkonu';
 import { puanMetni } from '@/lib/puan';
-import { renk, yazi } from '@/theme';
+import { gunUstuMetin, renk, yazi } from '@/theme';
 
-import { etiketYuksekligi, HAP_DOLGU_PX, HAP_GLIF_BOSLUK_PX, HAP_GLIF_PX, HAP_YUKSEKLIK, hapGenisligi, IGNE, igneGorunenBoy, igneOlcusu, kisaAd, KONUM_HALKA, OTEL_KARE, pinCapi, type IgneOlcusu } from './geo';
+import { etiketYuksekligi, HAP_DOLGU_PX, HAP_GLIF_BOSLUK_PX, HAP_GLIF_PX, HAP_YUKSEKLIK, hapGenisligi, IGNE, igneGorunenBoy, igneOlcusu, kisaAd, KONUM_HALKA, OTEL_KARE, pinCapi, seciliKareMi, type IgneOlcusu } from './geo';
 import { PIN_IKONLARI, pinIkonuAnahtari, pinIkonuPng } from './pinIkonlari';
 import type { HaritaPini } from './tipler';
 
@@ -85,7 +85,7 @@ function IgneSvg({ dolgu, olcu }: { dolgu: string; olcu: IgneOlcusu }) {
   const yol = `M${cx} ${uc} C${cx - 6 * k} ${uc - 9 * k} ${cx - r} ${bas + 11 * k} ${cx - r} ${bas} a${r} ${r} 0 1 1 ${2 * r} 0 C${cx + r} ${bas + 11 * k} ${cx + 6 * k} ${uc - 9 * k} ${cx} ${uc} Z`;
   return (
     <Svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} style={s.igneSvg} pointerEvents="none">
-      <Path d={yol} fill={dolgu} stroke={renk.metin} strokeWidth={kenar + 4} strokeLinejoin="round" />
+      <Path d={yol} fill={dolgu} stroke={renk.ana} strokeWidth={kenar + 4} strokeLinejoin="round" />
       <Path d={yol} fill={dolgu} stroke={renk.zemin} strokeWidth={kenar} strokeLinejoin="round" />
     </Svg>
   );
@@ -200,9 +200,12 @@ export function PinIcerigi({
       </View>
     );
   }
-  const cap = pin.secili ? (pin.boy ?? 28) : pinCapi(pin);
+  const kareSecili = seciliKareMi(pin);
+  const cap = pin.secili && !kareSecili ? (pin.boy ?? 28) : pinCapi(pin);
   const igne = igneOlcusu(pin);
   const daire = { width: cap, height: cap, borderRadius: cap / 2 };
+  // #136: durak pini köşeli kare (köşe 9; seçili 11), 3 px beyaz kenar; seçili Mandalina + Gece kenar.
+  const kare = { width: cap, height: cap, borderRadius: Math.round((11 * cap) / 38) };
   const puan = puanMetni(pin.puan);
   const yorum = yorumKisa(pin.yorumSayisi);
   const kRenk = pin.kategoriRenk ?? renk.metin;
@@ -216,9 +219,14 @@ export function PinIcerigi({
         // #67 incelemesi 🔴2: PNG'si olan pin (öneri / listede / tamamlanan / otel) web'de ve native yedekte aynı PNG ile çizilir —
         // kenar payı (gölge, rozet) negatif kenar boşluğuyla taşar; yerleşim kutusu daire / iğne ölçüsünde kalır (çapa aynı).
         <PngPin gorsel={gorsel} secili={!!pin.secili} cap={pinCapi(pin)} igne={igne} onYuklendi={() => onYuklendi?.(pinPngAnahtari(pin) ?? '')} />
+      ) : kareSecili ? (
+        // #136 (kanvas Temel): seçili / sıradaki durak — 38 px Mandalina kare, 3 px Gece kenar, Lacivert 15 px numara; çapa merkez.
+        <View style={[s.kare, kare, s.kareSecili]} collapsable={false}>
+          <Text style={[s.kareMetin, { fontSize: 15, color: renk.metin }]}>{pin.etiket ?? ''}</Text>
+        </View>
       ) : pin.secili ? (
-        // #65 / #67 🔴1: seçili numaralı durak iğne biçimi (görünüm) — PNG iğnesiyle aynı yol: siyah 6,5 px alt vuruş + 2,5 px
-        // beyaz kenar, gün renginde dolgu; 14 px numara. Çapa uç (pinCapasi).
+        // #65 / #67 🔴1: seçili Keşfet pini iğne biçimi (görünüm yedeği) — PNG iğnesiyle aynı yol: Gece 6,5 px alt vuruş + 2,5 px
+        // beyaz kenar; 14 px numara. Çapa uç (pinCapasi).
         <View style={[s.igne, { width: igne.en, height: igneGorunenBoy(igne) }]} collapsable={false}>
           <IgneSvg dolgu={pin.tamam ? renk.basari : pin.renk} olcu={igne} />
           <View style={[s.igneBas, { width: igne.en, height: igne.en }]}>
@@ -242,8 +250,13 @@ export function PinIcerigi({
           <PinIkonu ad={pin.ikon && pin.kategoriRenk ? pin.ikon : 'tik'} boyut={IKON_PX} renk={renk.zemin} kalinlik={pin.ikon && pin.kategoriRenk ? 2.1 : 2.4} onYuklendi={onYuklendi} />
           {pin.oneCikan ? <YildizRozeti /> : null}
         </View>
+      ) : pin.tur === 'durak' && (pin.opaklik ?? 1) >= 1 ? (
+        // #136: güne atanmış durak = gün renginde köşeli kare (30, köşe 9), 3 px beyaz kenar, 13 px numara (sarıda Lacivert).
+        <View style={[s.kare, kare, { backgroundColor: pin.renk }]} collapsable={false}>
+          {pin.etiket ? <Text style={[s.kareMetin, { color: gunUstuMetin(pin.renk) }]}>{pin.etiket}</Text> : null}
+        </View>
       ) : (
-        // #55 §D11: güne atanmış = gün renginde daire + sıra numarası; #61 §5: diğer günler numarasız küçük nokta (%40).
+        // #61 §5: diğer günlerin durakları numarasız küçük nokta (soluk).
         <View style={[s.daire, daire, { backgroundColor: pin.renk }]} collapsable={false}>
           {pin.etiket ? <Text style={s.daireMetin}>{pin.etiket}</Text> : null}
         </View>
@@ -271,6 +284,9 @@ export function PinIcerigi({
 const s = StyleSheet.create({
   sutun: { alignItems: 'center', width: 140 },
   daire: { borderWidth: 2, borderColor: renk.zemin, alignItems: 'center', justifyContent: 'center' },
+  kare: { borderWidth: 3, borderColor: renk.zemin, alignItems: 'center', justifyContent: 'center' },
+  kareSecili: { backgroundColor: renk.vurgu, borderColor: renk.ana },
+  kareMetin: { fontFamily: yazi.ekstra, fontSize: 13, color: renk.zemin },
   beyaz: { backgroundColor: renk.zemin, borderWidth: 2 },
   kucuk: { borderWidth: 1.5 },
   yildizRozet: { position: 'absolute', left: -4, top: -4, width: 15, height: 15, borderRadius: 7.5, backgroundColor: renk.vurgu, borderWidth: 1.5, borderColor: renk.zemin, alignItems: 'center', justifyContent: 'center' },
@@ -291,7 +307,7 @@ const s = StyleSheet.create({
   hapSecili: { backgroundColor: renk.metin },
   hapMetin: { fontFamily: yazi.kalin, fontSize: 12, color: renk.metin },
   yildiz: { fontFamily: yazi.kalin, fontSize: 11, color: renk.vurgu },
-  otel: { width: OTEL_KARE, height: OTEL_KARE, borderRadius: 9, alignItems: 'center', justifyContent: 'center' },
+  otel: { width: OTEL_KARE, height: OTEL_KARE, borderRadius: 8, alignItems: 'center', justifyContent: 'center' },
   bacakHap: { flexDirection: 'row', gap: HAP_GLIF_BOSLUK_PX, height: HAP_YUKSEKLIK, paddingHorizontal: HAP_DOLGU_PX, borderRadius: HAP_YUKSEKLIK / 2, backgroundColor: renk.zemin, alignItems: 'center' },
   bacakGlifYuva: { width: HAP_GLIF_PX, height: HAP_GLIF_PX },
   // #101 KK2: seçili hap 2,5 px siyah çerçeve (çerçeve içe çizilir; genişlik/çapa değişmez).

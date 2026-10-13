@@ -12,7 +12,8 @@ const easProjectId = process.env.EAS_PROJECT_ID ?? 'ce63656a-1090-42c8-9de9-8c9a
 const expoGoIcin = process.env.EXPO_GO_UPDATE === '1';
 
 const config: ExpoConfig = {
-  name: 'gezi',
+  // #136 KK7: görünen ad çalışma adı Tripmate (mağaza adı sonra); slug/EAS projesi değişmez.
+  name: 'Tripmate',
   slug: 'gezi',
   owner: 'eceoz1',
   version: '0.1.0',
@@ -21,7 +22,6 @@ const config: ExpoConfig = {
   scheme: 'gezi',
   userInterfaceStyle: 'light',
   ios: {
-    icon: './assets/expo.icon',
     bundleIdentifier: process.env.IOS_BUNDLE_ID ?? 'app.gezi.dev',
     usesAppleSignIn: appleAcik,
     associatedDomains: appDomain ? [`applinks:${appDomain}`] : [],
@@ -29,7 +29,7 @@ const config: ExpoConfig = {
   android: {
     package: process.env.ANDROID_PACKAGE ?? 'app.gezi.dev',
     adaptiveIcon: {
-      backgroundColor: '#ffffff',
+      backgroundColor: '#152A6B',
       foregroundImage: './assets/images/android-icon-foreground.png',
       backgroundImage: './assets/images/android-icon-background.png',
       monochromeImage: './assets/images/android-icon-monochrome.png',
@@ -56,9 +56,10 @@ const config: ExpoConfig = {
     [
       'expo-splash-screen',
       {
-        backgroundColor: '#ffffff',
+        // #136 KK7: Gece zemin + logo (ikon/splash yerel: bir sonraki EAS build'de görünür).
+        backgroundColor: '#152A6B',
         image: './assets/images/splash-icon.png',
-        imageWidth: 76,
+        imageWidth: 120,
       },
     ],
     [

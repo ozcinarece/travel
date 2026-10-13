@@ -784,5 +784,11 @@
     "paylas": "Paylaş",
     "paylasMetin": "{baslik} · {link}",
     "hata": "Gezi yüklenemedi."
+  },
+  "ui": {
+    "ekle": {
+      "ekle": "Listeye ekle",
+      "listede": "Listende, çıkarmak için dokun"
+    }
   }
 }
