@@ -1,5 +1,6 @@
 // places-nearby — Nearby Search (New), POPULARITY. 3.4 KK4 öneri çipleri (en fazla 20) ve
-// #17 otel adayları (`cip: 'otel'`, en fazla 12). #164: öneri istekleri konaklamayı dışlar (excludedPrimaryTypes). Cevap yalnız bellekte; veritabanına yazılmaz (PRD §7).
+// #17 otel adayları (`cip: 'otel'`, en fazla 12). #164: öneri istekleri konaklamayı dışlar (excludedPrimaryTypes). #178: Turistik
+// çipinde turistik değeri olmayan ibadet yerleri süzülür. Cevap yalnız bellekte; veritabanına yazılmaz (PRD §7).
 // Önbellek: (çip, 0,0001° hücre, yarıçap, adet) anahtarıyla izolat belleğinde 24 sa (teknik not §3). #66: karo
 // merkezleri 125 m'ye kadar inebildiğinden hücre 4 ondalık, yarıçap en az 100 m.
 import { CIP_TIPLERI, GoogleHatasi, KONAKLAMA_TIPLERI, yakinAra, type HafifYer } from '../_shared/google.ts';
@@ -42,7 +43,8 @@ Deno.serve(sayacli('places-nearby', async (istek) => {
   try {
     // #164 KK2: otel adayları dışındaki tüm istekler (Turistik, Tümü, kategoriler) konaklamayı dışlar.
     const haric = g.cip === 'otel' ? undefined : KONAKLAMA_TIPLERI;
-    const yerler = await yakinAra({ merkez: { lat, lng }, yaricapM, tipler, enFazla, haric });
+    // #178 KK2: Turistik'te mahalle camisi yok — ibadet yeri yalnız turistik tip ya da ≥ 1.000 yorumla.
+    const yerler = await yakinAra({ merkez: { lat, lng }, yaricapM, tipler, enFazla, haric, ibadetSuzgeci: g.cip === 'turistik' });
     onbellekYaz(anahtar, yerler);
     return json({ yerler, onbellek: false });
   } catch (e) {

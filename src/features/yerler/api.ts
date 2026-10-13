@@ -166,7 +166,8 @@ export function useOtelOnerileri(girdi: string, oturum: string, merkez: Merkez |
  * Nearby Search tip kümesi (Edge Function CIP_TIPLERI anahtarı). #69: Keşfet'te çip yok — karo istekleri `hepsi`
  * (gezilecek + müze + ibadet + park + manzara + yemek + kafe + alışveriş) ile; kategori filtresi seçiliyse o kategoriye özel
  * karo istekleri de atılır. `otel`: 3.3 otel adayları. Eski çipler (populer/yemek/sanat/manzara) kaldırıldı. #164: `turistik`
- * (gezilecek + müze + ibadet + manzara tipleri) varsayılan Turistik grubunun ve sihirbazın "Görmen gerekenler" kümesidir.
+ * (gezilecek + müze + manzara tipleri) varsayılan Turistik grubunun ve sihirbazın "Görmen gerekenler" kümesidir; #178: ibadet
+ * yerleri bu kümede yalnız turistik değerleri varsa gelir (sunucu süzgeci).
  */
 export type OneriCipi = 'otel' | 'hepsi' | 'turistik' | 'gezilecek' | 'muze' | 'ibadet' | 'yemek' | 'kafe' | 'park' | 'manzara' | 'alisveris';
 
