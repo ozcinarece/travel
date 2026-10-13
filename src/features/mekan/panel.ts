@@ -1,10 +1,12 @@
 // #80: mekan paneli — saf durum makinesi, CTA metni ve yorum sıralaması (bileşenden bağımsız; test edilir).
 import type { TamYer, Yorum } from '@/features/yerler/api';
 
-/** Panel halleri: kapalı · yarı (%55, varsayılan) · tam (yukarı çekince). */
+/** Panel halleri: kapalı · yarı (%55) · tam (#142 KK1: varsayılan — alttan neredeyse tam ekran). */
 export type PanelHali = 'kapali' | 'yari' | 'tam';
-export type PanelSekmesi = 'genel' | 'yorumlar' | 'rehber';
-export type PanelDurumu = { hal: PanelHali; sekme: PanelSekmesi };
+/** #142 KK2: Rehber · Bilgiler · Google yorumları. */
+export type PanelSekmesi = 'rehber' | 'bilgiler' | 'yorumlar';
+/** `sekme: null` = kendiliğinden — rehber yazısı varsa Rehber, yoksa Bilgiler (`panelSekmesi`). */
+export type PanelDurumu = { hal: PanelHali; sekme: PanelSekmesi | null };
 
 export type PanelOlayi =
   /** Pine dokunuldu (aynı ya da başka pin). Panel açıksa hal ve sekme korunur, içerik değişir (KK13). */
@@ -17,12 +19,12 @@ export type PanelOlayi =
   | { tur: 'geri' }
   | { tur: 'sekme'; sekme: PanelSekmesi };
 
-export const KAPALI_PANEL: PanelDurumu = { hal: 'kapali', sekme: 'genel' };
+export const KAPALI_PANEL: PanelDurumu = { hal: 'kapali', sekme: null };
 
 export function panelGecis(d: PanelDurumu, olay: PanelOlayi): PanelDurumu {
   switch (olay.tur) {
     case 'ac':
-      return d.hal === 'kapali' ? { hal: 'yari', sekme: 'genel' } : d;
+      return d.hal === 'kapali' ? { hal: 'tam', sekme: null } : d;
     case 'kapat':
     case 'geri':
       return d.hal === 'kapali' ? d : KAPALI_PANEL;
@@ -32,6 +34,11 @@ export function panelGecis(d: PanelDurumu, olay: PanelOlayi): PanelDurumu {
     case 'sekme':
       return d.sekme === olay.sekme ? d : { ...d, sekme: olay.sekme };
   }
+}
+
+/** #142 KK2: görünen sekme — seçilmediyse rehber yazısı varsa Rehber, yoksa Bilgiler. */
+export function panelSekmesi(d: PanelDurumu, rehberVar: boolean): PanelSekmesi {
+  return d.sekme ?? (rehberVar ? 'rehber' : 'bilgiler');
 }
 
 /** Panelin iç üst dolgusu (AltSayfa paddingTop). */
@@ -57,10 +64,10 @@ export function geriTusu(galeriAcik: boolean): 'galeri' | 'panel' {
   return galeriAcik ? 'galeri' : 'panel';
 }
 
-/** KK3: ana düğme — Keşfet'te listeye ekle / listeden çıkar; Program'da güne ekle / günden çıkar. */
-export type CtaAnahtari = 'listeyeEkle' | 'listedenCikar' | 'guneEkle' | 'gundenCikar';
+/** KK3: ana düğme — Keşfet'te listeye ekle / "Listede ✓" (dokununca çıkar, #142); Program'da güne ekle / günden çıkar. */
+export type CtaAnahtari = 'listeyeEkle' | 'listede' | 'guneEkle' | 'gundenCikar';
 export function ctaAnahtari(baglam: 'kesfet' | 'program', icinde: boolean): CtaAnahtari {
-  if (baglam === 'kesfet') return icinde ? 'listedenCikar' : 'listeyeEkle';
+  if (baglam === 'kesfet') return icinde ? 'listede' : 'listeyeEkle';
   return icinde ? 'gundenCikar' : 'guneEkle';
 }
 
@@ -85,7 +92,9 @@ export function acikDurumu(yer: { acik: boolean | null; kapanis?: string | null;
   return yer.acik ? { acik: true, kapanis: yer.kapanis ?? null } : { acik: false, acilis: yer.acilis ?? null };
 }
 
-/** KK5: fotoğraf şeridinde yalnız görünür (+1 komşu) küçük resimlerin URI'si istenir. */
-export function gorunenFotoSayisi(kaydirmaX: number, genislik: number, kareGenisligi: number, bosluk: number): number {
-  return Math.floor((kaydirmaX + genislik) / (kareGenisligi + bosluk)) + 2;
+/** #142 KK1: foto kaydırmada sayfa → yalnız o sayfa ve komşuları çözülür (foto başına istek). */
+export function fotoSayfasi(kaydirmaX: number, genislik: number, sayi: number): number {
+  if (sayi <= 0 || genislik <= 0) return 0;
+  return Math.min(sayi - 1, Math.max(0, Math.round(kaydirmaX / genislik)));
 }
+export const fotoYuklensin = (i: number, sayfa: number) => Math.abs(i - sayfa) <= 1;

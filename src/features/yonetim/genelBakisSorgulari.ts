@@ -34,3 +34,17 @@ export function useSentryOzeti() {
     },
   });
 }
+
+/** #142 KK3: bugünkü Google yorum isteği / günlük sınır (`yorum_gunluk_sinir`); sınır doluysa uygulama "Google'da aç" der. */
+export function useYorumKotasi() {
+  return useQuery({
+    queryKey: ['yonetim', 'genel', 'yorum-kotasi'],
+    staleTime: ON_DAKIKA,
+    retry: false,
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc('yonetim_yorum_kotasi');
+      if (error) throw error;
+      return data as { kullanilan: number; sinir: number | null };
+    },
+  });
+}

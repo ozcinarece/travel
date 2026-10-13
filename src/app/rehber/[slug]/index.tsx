@@ -7,5 +7,13 @@ import { useSehirler } from '@/features/icerik/sorgular';
 export default function RehberEkrani() {
   const { slug } = useLocalSearchParams<{ slug: string }>();
   const sehirler = useSehirler();
-  return <SehirRehberi sehir={sehirler.data?.find((x) => x.slug === slug)} sehirlerYukleniyor={sehirler.isPending} onGeri={() => router.back()} />;
+  const sehir = sehirler.data?.find((x) => x.slug === slug);
+  return (
+    <SehirRehberi
+      sehir={sehir}
+      sehirlerYukleniyor={sehirler.isPending}
+      onGeri={() => router.back()}
+      onRehberMekanlari={sehir ? () => router.push({ pathname: '/yerler', params: { sehir: sehir.id } }) : undefined}
+    />
+  );
 }

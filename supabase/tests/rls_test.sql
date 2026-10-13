@@ -1070,4 +1070,22 @@ end $$;
 select pg_temp.hata_bekle($$insert into public.oylar (seyahat_id, mekan) values (current_setting('test.oy_s')::uuid, current_setting('test.oy_p')::uuid)$$, '42501');
 reset role;
 
+
+-- #142 KK3: yorum kotası — sınır panel ayarından, kullanım api_sayac'tan; yalnız yönetici okur, service_role işlevi doğrudan.
+reset role;
+select public.api_sayac_artir('places-reviews', 5, 4);
+do $$
+declare k jsonb := public.yorum_kotasi();
+begin
+  assert (k ->> 'kullanilan')::int = 4, 'bugünkü Google yorum isteği: ' || k::text;
+  assert (k ->> 'sinir')::int = 300, 'varsayılan sınır 300';
+end $$;
+set role authenticated;
+select pg_temp.as_email(:E, 'ozcinar.ece@gmail.com');
+do $$ begin assert (public.yonetim_yorum_kotasi() ->> 'kullanilan')::int = 4, 'yönetici kotayı okur'; end $$;
+select pg_temp.as_email(:B, 'b@ornek.com');
+select pg_temp.hata_bekle($$select public.yonetim_yorum_kotasi()$$, '42501');
+select pg_temp.hata_bekle($$select public.yorum_kotasi()$$, '42501');
+reset role;
+
 \echo 'rls_test: TÜM TESTLER GEÇTİ'

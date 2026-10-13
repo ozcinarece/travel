@@ -14,8 +14,8 @@ import { t } from '@/i18n';
 import { bosluk, olcek, renk, yazi } from '@/theme';
 
 /**
- * #141 KK1: seyahat içi Rehber sekmesi — seyahatin şehri yayınlı rehberle eşleşiyorsa şehir rehberi (#100); yoksa boş hal.
- * Geri → ana sayfa. Bölüm çipleri ve okuma ilerlemesi #142'de.
+ * #141 KK1 / #142 KK4–5: seyahat içi Rehber sekmesi — seyahatin şehri yayınlı rehberle eşleşiyorsa şehir rehberi (blog, çipler,
+ * yapışkan başlık, okuma ilerlemesi; mekan kartları seyahatin listesine ekler); yoksa boş hal. Geri → ana sayfa.
  */
 export default function RehberSekmesi() {
   const id = useSeyahatId();
@@ -37,7 +37,16 @@ export default function RehberSekmesi() {
       </View>
     );
   }
-  return <SehirRehberi sehir={sehir} sehirlerYukleniyor={sehirler.isPending} onGeri={anaSayfa} />;
+  return (
+    <SehirRehberi
+      sehir={sehir}
+      sehirlerYukleniyor={sehirler.isPending}
+      onGeri={anaSayfa}
+      seyahat={{ id, ad: seyahatAdi(seyahat.data), tz: seyahat.data.tz }}
+      // KK4: "Rehberdeki N mekan ›" → Keşfet'te "Rehberden" listesi (hepsi bir listede, tek dokunuşla ekle).
+      onRehberMekanlari={() => router.navigate({ pathname: '/seyahat/[id]/(sekmeler)/kesfet', params: { id, cekmece: 'rehber' } })}
+    />
+  );
 }
 
 const s = StyleSheet.create({

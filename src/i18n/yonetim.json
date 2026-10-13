@@ -309,7 +309,8 @@
       "istek": "Keşfet yükleme {kesfet} · mekan paneli {mekan} · yorum isteği {yorum}",
       "sentry": "Sentry: {n} yeni hata (bkz. Ayarlar)",
       "sentryYok": "Sentry: bağlı değil",
-      "sentryHata": "Sentry: alınamadı"
+      "sentryHata": "Sentry: alınamadı",
+      "yorumKotasi": "Google yorum {n} / {sinir} (günlük sınır)"
     },
     "yukleniyor": "Yükleniyor…",
     "hata": "Özet alınamadı. Yeniden dene.",

@@ -1,7 +1,6 @@
 // #141 Listem: oylar (KK3) ve değişiklik geri alma (KK6).
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
-import { hafifYerler } from '@/features/yerler/api';
 import { useOturum } from '@/lib/oturum';
 import { supabase } from '@/lib/supabase';
 import type { Oy } from '@/lib/tipler';
@@ -53,22 +52,5 @@ export function useDegisikligiGeriAl(seyahatId: string) {
       Promise.all(
         ['mekanlar', 'duraklar', 'gunler', 'degisiklikler', 'oylar'].map((k) => qc.invalidateQueries({ queryKey: [k, seyahatId] })),
       ),
-  });
-}
-
-/** Satır fotoğrafları: hafif Details foto maskesi, 12'lik parçalar, 24 sa önbellek (satır başına istek yok). */
-export function useListemFotolari(placeIds: string[]) {
-  const sirali = [...new Set(placeIds)].sort();
-  return useQuery({
-    queryKey: ['listem-foto', sirali.join(',')],
-    enabled: sirali.length > 0,
-    staleTime: 24 * 60 * 60 * 1000,
-    retry: 1,
-    queryFn: async () => {
-      const parcalar: string[][] = [];
-      for (let i = 0; i < sirali.length; i += 12) parcalar.push(sirali.slice(i, i + 12));
-      const sonuc = await Promise.all(parcalar.map((p) => hafifYerler(p, { foto: true })));
-      return new Map(sonuc.flat().map((y) => [y.place_id, y.foto_uri ?? null] as const));
-    },
   });
 }

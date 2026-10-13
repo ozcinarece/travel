@@ -21,7 +21,7 @@ import { SeyahatYukleme } from '@/components/seyahatler/SeyahatYukleme';
 import { FiltreSayfasi } from '@/components/kesfet/FiltreSayfasi';
 import { CekmeceKartlari, CekmeceSatirlari, CekmeceSeridi } from '@/components/kesfet/OneriCekmecesi';
 import type { SayfaHali } from '@/components/harita/AltSayfa';
-import { sehirEslestir, useSehirRehberi, useSehirler } from '@/features/icerik/sorgular';
+import { sehirEslestir, useSehirler } from '@/features/icerik/sorgular';
 import { kartKamerasi } from '@/features/program/durakKarti';
 import { useOnerilenler } from '@/features/sihirbaz/onerilenler';
 import { cekmeceListesi, cekmeceSayisi, type CekmeceCipi } from '@/features/yerler/cekmece';
@@ -44,17 +44,18 @@ import { bosluk, renk, yazi, yuzRenkleri } from '@/theme';
 export default function KesfetEkrani() {
   const id = useSeyahatId();
   // #80 KK12: eski `mekan/[placeId]` derin linki buraya `mekan` parametresiyle yönlenir → panel açılır.
-  const { mekan } = useLocalSearchParams<{ mekan?: string | string[] }>();
+  // #142 KK4: Rehber sekmesindeki "Rehberdeki N mekan ›" → `cekmece=rehber` (çekmece tam halde "Rehberden" listesiyle açılır).
+  const { mekan, cekmece } = useLocalSearchParams<{ mekan?: string | string[]; cekmece?: string }>();
   const seyahat = useSeyahat(id);
   const konaklamalar = useKonaklamalar(id);
   if (!seyahat.data || !konaklamalar.data || !id) return <SeyahatYukleme sorgular={[seyahat, konaklamalar]} kimlikYok={!id} />;
-  return <Kesfet key={id} seyahat={seyahat.data} konaklamalar={konaklamalar.data} ilkMekan={Array.isArray(mekan) ? mekan[0] : mekan} />;
+  return <Kesfet key={id} seyahat={seyahat.data} konaklamalar={konaklamalar.data} ilkMekan={Array.isArray(mekan) ? mekan[0] : mekan} cekmeceIstegi={cekmece === 'rehber' ? 'rehber' : null} />;
 }
 
 const ILK_ZOOM = 13;
 const ILK_BOLGE_BEKLEME_MS = 2000;
 
-function Kesfet({ seyahat, konaklamalar, ilkMekan }: { seyahat: Seyahat; konaklamalar: Konaklama[]; ilkMekan?: string }) {
+function Kesfet({ seyahat, konaklamalar, ilkMekan, cekmeceIstegi }: { seyahat: Seyahat; konaklamalar: Konaklama[]; ilkMekan?: string; cekmeceIstegi: 'rehber' | null }) {
   const mekanlar = useMekanlar(seyahat.id);
   const uyeler = useUyeler(seyahat.id);
   // #137 KK6: Grup penceresi (yüzlere dokununca; Grup sekmesi kalktı).
@@ -325,6 +326,16 @@ function Kesfet({ seyahat, konaklamalar, ilkMekan }: { seyahat: Seyahat; konakla
     setTutKaynak({ bolge, oneriListesi });
     if (tutulan.size > 0) setTutulan(new Set());
   }
+  // #142 KK4: Rehber sekmesinden gelince çekmece tam + "Rehberden" çipi (parametre her değişişte bir kez).
+  const [oncekiIstek, setOncekiIstek] = useState<'rehber' | null>(null);
+  if (oncekiIstek !== cekmeceIstegi) {
+    setOncekiIstek(cekmeceIstegi);
+    if (cekmeceIstegi === 'rehber') {
+      setYalnizListe(false);
+      setCekmeceCip('rehber');
+      setCekmece('tam');
+    }
+  }
   const [oncekiSecim, setOncekiSecim] = useState(secim);
   if (oncekiSecim !== secim) {
     setOncekiSecim(secim);
@@ -349,9 +360,6 @@ function Kesfet({ seyahat, konaklamalar, ilkMekan }: { seyahat: Seyahat; konakla
   const sehirler = useSehirler();
   const rehberSehir = sehirEslestir(sehirler.data, { ad: seyahat.city_label, lat: seyahat.lat, lng: seyahat.lng });
   const rehber = useOnerilenler(seyahat, rehberSehir, 'rehber');
-  // #100 B KK1: şehrin rehberi varsa arama kutusunun altında sağda beyaz "Rehber" hapı.
-  const sehirRehberi = useSehirRehberi(rehberSehir?.id);
-  const rehberVar = !!rehberSehir && (sehirRehberi.data?.length ?? 0) > 0;
   const cekmecedenEkle = async (y: HafifYer) => {
     setCekmeceMesgul(y.place_id);
     await listeyeEkle(y);
@@ -460,14 +468,6 @@ function Kesfet({ seyahat, konaklamalar, ilkMekan }: { seyahat: Seyahat; konakla
           </View>
         ) : (
           <>
-            {rehberVar ? (
-              <View style={s.rehberSatir} pointerEvents="box-none">
-                <Pressable accessibilityRole="button" onPress={() => router.push({ pathname: '/rehber/[slug]', params: { slug: rehberSehir!.slug } })} style={({ pressed }) => [s.rehberHap, s.golge, pressed && { opacity: 0.85 }]}>
-                  <Ikon ad="kitap" boyut={16} renk={renk.metin} kalinlik={2.2} />
-                  <Text style={s.rehberMetin}>{t('rehber.hap')}</Text>
-                </Pressable>
-              </View>
-            ) : null}
             {/* #141 KK7 (kanvas 9): varsayılan "Tümü"; kategori çipi tek seçim (kategori renginde glif). Öne çıkan / puan /
                 yorum filtreleri filtre sayfasında. */}
             <ScrollView horizontal showsHorizontalScrollIndicator={false} style={s.ciplerKaydirma} contentContainerStyle={s.cipler} keyboardShouldPersistTaps="handled">
@@ -629,9 +629,6 @@ const s = StyleSheet.create({
     paddingVertical: 10,
   },
   yukleniyorSatir: { alignItems: 'center', gap: 6 },
-  rehberSatir: { alignItems: 'flex-end' },
-  rehberHap: { flexDirection: 'row', alignItems: 'center', gap: 6, height: 36, paddingLeft: 10, paddingRight: 12, borderRadius: 999, backgroundColor: renk.zemin },
-  rehberMetin: { fontFamily: yazi.ekstra, fontSize: 12.5, color: renk.metin },
   ciplerKaydirma: { marginHorizontal: -bosluk.kenar },
   cipler: { gap: 8, paddingHorizontal: bosluk.kenar },
   cip: { height: 36, paddingHorizontal: 12, borderRadius: 999, backgroundColor: renk.zemin, flexDirection: 'row', alignItems: 'center', gap: 5 },

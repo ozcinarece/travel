@@ -9,7 +9,7 @@ import { Hap } from '@/components/yonetim/Hap';
 import { Aciklama, YonetimSayfasi } from '@/components/yonetim/Kabuk';
 import { yRenk } from '@/components/yonetim/tema';
 import { csvDosyaAdi, csvMetni, kartlar, type Ozet } from '@/features/yonetim/genelBakis';
-import { useGenelBakis, useSentryOzeti } from '@/features/yonetim/genelBakisSorgulari';
+import { useGenelBakis, useSentryOzeti, useYorumKotasi } from '@/features/yonetim/genelBakisSorgulari';
 import { ty } from '@/features/yonetim/metin';
 import { binlik } from '@/features/yonetim/yer';
 import { yazi } from '@/theme';
@@ -33,6 +33,7 @@ export default function GenelBakisSayfasi() {
   const [gun, setGun] = useState(30);
   const ozet = useGenelBakis(gun);
   const sentry = useSentryOzeti();
+  const kota = useYorumKotasi();
   const o = ozet.data;
 
   const sentryMetni = sentry.data
@@ -80,6 +81,7 @@ export default function GenelBakisSayfasi() {
             </Text>
             <Text style={s.bugunMetin}>
               {ty('genel.bugun.istek', { kesfet: binlik(o.bugun.kesfet), mekan: binlik(o.bugun.mekan_paneli), yorum: binlik(o.bugun.yorum) })}
+              {kota.data?.sinir ? ` · ${ty('genel.bugun.yorumKotasi', { n: binlik(kota.data.kullanilan), sinir: binlik(kota.data.sinir) })}` : ''}
             </Text>
             {sentryMetni ? <Text style={s.bugunMetin}>{sentryMetni}</Text> : null}
           </View>

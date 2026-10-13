@@ -110,11 +110,16 @@ export function DurakKartlari({ kartlar, seciliDurakId, gezi, tz, konum, onSec, 
   );
 }
 
-/** Rehber yazısından kısa ipucu: başlıksız ilk paragraf, en çok ~220 karakter. */
+/** Rehber yazısından kısa ipucu: varsa alıntı bloğu (mekan rehberindeki İPUCU, #142), yoksa başlıksız ilk paragraf; ~220 karakter. */
 export function rehberIpucu(md: string | null | undefined): string | null {
   if (!md) return null;
-  const paragraf = md
-    .split(/\n\s*\n/)
+  const alinti = md
+    .split('\n')
+    .filter((l) => /^\s*>/.test(l))
+    .map((l) => l.replace(/^\s*>\s?/, '').trim())
+    .filter(Boolean)
+    .join(' ');
+  const paragraf = (alinti ? [alinti] : md.split(/\n\s*\n/))
     .map((p) =>
       p
         .split('\n')
