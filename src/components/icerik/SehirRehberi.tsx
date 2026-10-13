@@ -185,7 +185,7 @@ export function SehirRehberi({ sehir, sehirlerYukleniyor, onGeri, seyahat, onReh
               }}>
               <Text style={s.bolumNo}>{String(i + 1).padStart(2, '0')}</Text>
               <Text style={s.bolumBaslik}>{b.baslik}</Text>
-              <MdYazi kaynak={bolumYazisi(b.yazi_md)} kenar={0} buyuk mekanKarti={mekanKarti} onMekan={(id) => (hafif.data?.[id] ? setPanelId(id) : null)} />
+              <MdYazi kaynak={bolumYazisi(b.yazi_md)} kenar={0} buyuk ipucu mekanKarti={mekanKarti} onMekan={(id) => (hafif.data?.[id] ? setPanelId(id) : null)} />
             </View>
           ))}
           {geziler.data && geziler.data.length > 0 ? (
