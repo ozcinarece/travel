@@ -1,43 +1,9 @@
-import { router } from 'expo-router';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-
-import { Ikon, type IkonAdi } from '@/components/ui/Ikon';
-import { t } from '@/i18n';
-import { renk, yazi } from '@/theme';
-
-const OGELER: { ad: IkonAdi; baslik: string; yol: '/(tabs)' | '/(tabs)/seyahatler' | '/(tabs)/yeni' | '/(tabs)/profil' }[] = [
-  // #97 KK1: Ana sayfa eklendi; seyahat içinde Seyahatler seçili kalır.
-  { ad: 'ev', baslik: 'sekme.anasayfa', yol: '/(tabs)' },
-  { ad: 'seyahatler', baslik: 'sekme.seyahatler', yol: '/(tabs)/seyahatler' },
-  { ad: 'yeni', baslik: 'sekme.yeni', yol: '/(tabs)/yeni' },
-  { ad: 'profil', baslik: 'sekme.profil', yol: '/(tabs)/profil' },
-];
+import { AltMenu } from './AltMenu';
 
 /**
- * #45 §1: seyahat içinde de uygulama alt menüsü görünür (Seyahatler seçili); seyahat içi Keşfet · Program · Grup menüsü kalktı.
- * Öğeler uygulama sekmeleriyle birebir (Haritam v2'de eklenir, PRD §4).
+ * #45 §1: seyahat içinde de uygulama alt menüsü görünür (Seyahatler seçili). #138: 5 öğeli AltMenu ile aynı.
+ * #141 bunu seyahat içi menüyle (Keşfet · Program · Listem · Rehber) değiştirir.
  */
 export function UygulamaMenusu() {
-  const alt = useSafeAreaInsets().bottom;
-  return (
-    <View style={[s.kap, { paddingBottom: Math.max(alt, 6) }]} accessibilityRole="tablist">
-      {OGELER.map((o) => {
-        const secili = o.ad === 'seyahatler';
-        const rengi = secili ? renk.ana : renk.soluk;
-        return (
-          <Pressable key={o.ad} accessibilityRole="tab" accessibilityState={{ selected: secili }} onPress={() => router.navigate(o.yol)} style={s.oge}>
-            <Ikon ad={o.ad} renk={rengi} />
-            <Text style={[s.metin, { color: rengi }]}>{t(o.baslik)}</Text>
-          </Pressable>
-        );
-      })}
-    </View>
-  );
+  return <AltMenu aktif="seyahatler" />;
 }
-
-const s = StyleSheet.create({
-  kap: { flexDirection: 'row', borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: renk.ayrac, backgroundColor: renk.zemin, paddingTop: 6 },
-  oge: { flex: 1, alignItems: 'center', gap: 2, minHeight: 44, justifyContent: 'center' },
-  metin: { fontFamily: yazi.ekstra, fontSize: 11 },
-});

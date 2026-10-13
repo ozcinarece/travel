@@ -57,7 +57,11 @@ export async function appleIleGiris(): Promise<void> {
   const { error } = await supabase.auth.signInWithIdToken({ provider: 'apple', token: kimlik.identityToken });
   if (error) throw error;
   const ad = [kimlik.fullName?.givenName, kimlik.fullName?.familyName].filter(Boolean).join(' ');
-  if (ad) await supabase.auth.updateUser({ data: { full_name: ad } });
+  if (!ad) return;
+  await supabase.auth.updateUser({ data: { full_name: ad } });
+  // #138: profil otomatik oluşur; ad güncellemesinden önce oluştuysa "Gezgin" kalır → Apple'ın verdiği adla düzelt.
+  const { data: profil } = await supabase.rpc('profil_hazirla');
+  if (profil && (profil as { name: string }).name === 'Gezgin') await supabase.from('profiles').update({ name: ad.slice(0, 60) }).eq('id', (profil as { id: string }).id);
 }
 
 /** Kullanıcı giriş penceresini kendisi kapattıysa hata gösterilmez. */

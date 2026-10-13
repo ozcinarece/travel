@@ -11,7 +11,9 @@
     "seyahatler": "Seyahatler",
     "yeni": "Yeni",
     "profil": "Profil",
-    "anasayfa": "Ana sayfa"
+    "anasayfa": "Ana sayfa",
+    "kaydettiklerim": "Kaydettiklerim",
+    "yeniEtiket": "Yeni seyahat"
   },
   "giris": {
     "baslik": "Arkadaşlarınla\nharitada plan kur,\nsaat saat gez.",
@@ -27,7 +29,8 @@
       "yuruyus": "18 dk yürüyüş",
       "durak2": "Pantheon",
       "ekleyen": "· Ayşe ekledi"
-    }
+    },
+    "profilHata": "Profilin hazırlanamadı. Bağlantını kontrol edip tekrar dene."
   },
   "profilKur": {
     "baslik": "Sen kimsin?",
@@ -119,11 +122,19 @@
   "profil": {
     "baslik": "Profil",
     "kaydettiklerim": "Kaydettiklerim",
-    "kaydettiklerimAlt": "Kalp bıraktığın geziler ve yerler",
     "sonHata": "Son hata · {zaman}",
     "sonHataSil": "Kaydı sil",
-    "cikis": "Çıkış",
-    "hesapSil": "Hesabı sil"
+    "cikis": "Çıkış yap",
+    "hesapSil": "Hesabı sil",
+    "duzenle": "Düzenle",
+    "gizlilik": "Haritanı kimler görsün",
+    "gizlilikSec": "Haritanı kimler görsün?",
+    "gizlilikNot": "Gezdiğin yerler haritanda; kimin göreceğini sen seçersin.",
+    "duzenleBaslik": "Profili düzenle",
+    "kaydet": "Kaydet",
+    "kaydedildi": "Kaydedildi",
+    "hata": "Kaydedilemedi. Tekrar dener misin?",
+    "kaydetHata": "Kaydedilemedi: {sebep}"
   },
   "hesapSil": {
     "baslik": "Hesabı sil",
@@ -159,7 +170,6 @@
     "planNot": "Mekan adları ve saatler katılınca açılır.",
     "katilGoogle": "Google ile katıl",
     "katilApple": "Apple ile katıl",
-    "profilTamamla": "Katılmak için profilini tamamla",
     "katiliyor": "Katılıyorsun…",
     "zatenUye": "Zaten bu seyahattesin, açılıyor…",
     "gecersizBaslik": "Bu davet geçersiz",
@@ -708,18 +718,18 @@
     "merhaba": "Merhaba {ad}",
     "soru": "Nereye gidelim?",
     "ara": "Şehir, gezi ya da yer ara",
-    "yaklasan": "YAKLAŞAN · {n} GÜN SONRA",
-    "yaklasanBugun": "YAKLAŞAN · BUGÜN",
+    "yaklasan": "{n} GÜN SONRA",
+    "yaklasanBugun": "BUGÜN",
     "aktif": "ŞU AN SEYAHATTE",
     "tarihsiz": "Tarih yok",
     "mekanKisi": "{mekan} mekan · {kisi} kişi",
     "programaGit": "Programa git",
     "ilkBaslik": "İlk seyahatini kur",
-    "ilkAlt": "Şehir, tarih, otel; gerisini harita halleder",
+    "ilkAlt": "Şehri ve tarihleri seç, arkadaşlarını davet et. Mekanları sen seç, program kendini kursun.",
     "ilkDugme": "Başla",
-    "geziler": "Önerilen geziler",
+    "geziler": "Önerilen Geziler",
     "yerler": "Gezilecek yerler",
-    "tumu": "Tümü ›",
+    "tumu": "Tümü",
     "gunlukGezi": "{n} GÜNLÜK GEZİ",
     "gunluk": "{n} GÜNLÜK",
     "mekanSayisi": "{n} mekan",
@@ -732,7 +742,16 @@
     "ekleHataSebep": "Eklenemedi: {sebep}",
     "bulunamadi": "Google'da bulunamadı",
     "cozuluyor": "Mekan kimliği çözülüyor, bir saniye…",
-    "bos": "İçerik hazırlanıyor"
+    "bos": "İçerik hazırlanıyor",
+    "hosGeldin": "Hoş geldin {ad}",
+    "ilkSoru": "İlk gezin nereye?",
+    "haziraBaslik": "Ya da hazır bir geziyle başla",
+    "haziraAlt": "Beğendiğini tek dokunuşla seyahatine al.",
+    "tarihsizRozet": "TASLAK",
+    "kartAlt": "{tarih} · {gun} gün · {mekan} mekan",
+    "kartAltTarihsiz": "Tarih belli değil · {mekan} mekan",
+    "profil": "Profil",
+    "yeniBaslik": "Yeni bir seyahat kur"
   },
   "ara": {
     "baslik": "Ara",

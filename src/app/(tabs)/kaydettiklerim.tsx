@@ -74,8 +74,9 @@ export default function KaydettiklerimEkrani() {
   };
 
   return (
-    <SafeAreaView style={s.ekran}>
-      <EkranBasligi baslik={t('kaydettiklerim.baslik')} alt={t('kaydettiklerim.alt')} geri={() => router.back()} />
+    <SafeAreaView style={s.ekran} edges={['top']}>
+      {/* #138 KK6: Kaydettiklerim alt menüde sekme (geri yok). */}
+      <EkranBasligi baslik={t('kaydettiklerim.baslik')} alt={t('kaydettiklerim.alt')} />
       <View style={s.cipler}>
         <Cip baslik={t('kaydettiklerim.geziler', { n: geziIdleri.length })} secili={sekme === 'gezi'} onPress={() => setSekme('gezi')} />
         <Cip baslik={t('kaydettiklerim.yerler', { n: yerIdleri.length })} secili={sekme === 'yer'} onPress={() => setSekme('yer')} />

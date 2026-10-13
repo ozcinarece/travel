@@ -865,4 +865,45 @@ select pg_temp.as_user(:WG);
 select pg_temp.hata_bekle($$insert into public.olaylar (tur) values ('davet_bilinmeyen')$$, '23514');
 reset role;
 
+-- #138 Otomatik profil: ad/foto sağlayıcıdan, kullanıcı adı addan (alınmışsa sayı), Apple gizli ad → Gezgin; misafir alamaz; bir kez.
+reset role;
+\set P1 '''aaaaaaaa-3333-0000-0000-000000000031'''
+\set P2 '''aaaaaaaa-3333-0000-0000-000000000032'''
+\set P3 '''aaaaaaaa-3333-0000-0000-000000000033'''
+\set P4 '''aaaaaaaa-3333-0000-0000-000000000034'''
+insert into auth.users (id, is_anonymous, raw_user_meta_data) values
+  (:P1, false, '{"full_name": "Zehra Özçınar", "picture": "https://ornek/z.jpg"}'),
+  (:P2, false, '{"name": "Zehra  Özçınar"}'),
+  (:P3, false, null),
+  (:P4, true, null);
+do $$
+begin
+  assert public.kullanici_adi_taban('İlkay Çağrı Şen') = 'ilkay.cagri.sen', 'Türkçe sadeleşir';
+  assert public.kullanici_adi_taban('Al') = 'gezgin', 'kısa ad → gezgin';
+  assert public.kullanici_adi_taban('!!') = 'gezgin', 'harfsiz → gezgin';
+  assert length(public.kullanici_adi_taban('Çok Uzun Bir Ad Soyad Daha Uzun')) <= 20, 'en çok 20';
+end $$;
+set role authenticated;
+select pg_temp.as_user(:P1);
+do $$
+declare p public.profiles;
+begin
+  p := public.profil_hazirla();
+  assert p.name = 'Zehra Özçınar' and p.username = 'zehra.ozcinar', 'ad ve kullanıcı adı: ' || p.username;
+  assert p.photo_url = 'https://ornek/z.jpg' and p.map_visibility = 'friends', 'foto ve varsayılan gizlilik';
+  assert p.onboarding_done_at is not null, 'karşılama damgası';
+  assert (public.profil_hazirla()).username = 'zehra.ozcinar', 'ikinci çağrı aynı profili döndürür';
+end $$;
+select pg_temp.as_user(:P2);
+do $$ begin assert (public.profil_hazirla()).username = 'zehra.ozcinar2', 'alınmış → sayı eki'; end $$;
+select pg_temp.as_user(:P3);
+do $$
+declare p public.profiles := public.profil_hazirla();
+begin
+  assert p.name = 'Gezgin' and p.username = 'gezgin', 'ad yok → Gezgin: ' || p.username;
+end $$;
+select pg_temp.as_user(:P4, true);
+select pg_temp.hata_bekle($$select public.profil_hazirla()$$, '42501');
+reset role;
+
 \echo 'rls_test: TÜM TESTLER GEÇTİ'
