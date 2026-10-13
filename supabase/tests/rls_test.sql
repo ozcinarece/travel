@@ -1531,13 +1531,15 @@ delete from public.sehirler where slug = 'bursa-hat';
 
 -- Bütçe (icerik-google) ve Genel bakış: içerik istekleri Mekan kalemine, karışık birim fiyatla.
 delete from public.api_sayac where gun = (now() at time zone 'Europe/Istanbul')::date;
-insert into public.api_sayac (fonksiyon, cagri, google) values ('places-full', 20, 20), ('icerik-google', 3, 100);
+-- icerik-kimlik (Text Search IDs Only, ücretsiz): sayılır ama maliyet kalemine girmez.
+insert into public.api_sayac (fonksiyon, cagri, google) values ('places-full', 20, 20), ('icerik-google', 3, 100), ('icerik-kimlik', 0, 500);
 set role service_role;
 do $$
 begin
-  assert (public.icerik_google_butcesi(0) ->> 'harcanan')::numeric = 3.84, format('harcanan: %s', public.icerik_google_butcesi(0));
-  assert (public.icerik_google_butcesi(100) ->> 'yeterli')::boolean, '3,84 + 3,50 ≤ 10';
-  assert not (public.icerik_google_butcesi(200) ->> 'yeterli')::boolean, '3,84 + 7 > 10';
+  -- icerik fiyatı 20 $/1000 (20261102): 20 × 17 + 100 × 20 = 2,34 $.
+  assert (public.icerik_google_butcesi(0) ->> 'harcanan')::numeric = 2.34, format('harcanan: %s', public.icerik_google_butcesi(0));
+  assert (public.icerik_google_butcesi(300) ->> 'yeterli')::boolean, '2,34 + 6 ≤ 10';
+  assert not (public.icerik_google_butcesi(400) ->> 'yeterli')::boolean, '2,34 + 8 > 10';
 end $$;
 reset role;
 set role authenticated;
@@ -1546,11 +1548,46 @@ do $$
 declare o jsonb := public.yonetim_genel(1);
 begin
   assert (o #>> '{google,mekan}')::int = 120, format('mekan + içerik: %s', o -> 'google');
-  assert (o #>> '{google,fiyat,mekan}')::numeric = 32, format('karışık fiyat (20×17 + 100×35) / 120: %s', o -> 'google');
+  assert (o #>> '{google,fiyat,mekan}')::numeric = 19.5, format('karışık fiyat (20×17 + 100×20) / 120: %s', o -> 'google');
   assert (o #>> '{google,fiyat,foto}')::numeric = 7, 'diğer fiyatlar aynı';
 end $$;
 reset role;
 delete from public.api_sayac where gun = (now() at time zone 'Europe/Istanbul')::date;
+
+-- İçerik hattı 2: mekan rehberleri. Yer satırı yoksa taslak açılır; taslak ve rehberi boşsa yazılır; yayındaki ya da
+-- rehberi dolu satıra dokunulmaz (rehber_atlanan).
+insert into public.yerler (sehir_id, place_id, ad, kategori, lat, lng, yayin, rehber_md) values
+  ('11111111-1111-4111-8111-000000000001', 'ChIJ-yayin-yer-1', 'Yayındaki yer', 'museum', 39.76, 30.52, true, 'Canlı rehber.'),
+  ('11111111-1111-4111-8111-000000000001', 'ChIJ-taslak-yer1', 'Taslak yer', 'museum', 39.76, 30.52, false, null),
+  ('11111111-1111-4111-8111-000000000001', 'ChIJ-dolu-yer-01', 'Dolu taslak', 'park', 39.76, 30.52, false, 'Ece''nin rehberi.');
+create function pg_temp.rehberli(p_slug text) returns jsonb
+language sql as $$
+  select jsonb_set(pg_temp.icerik_ornek(p_slug), '{gunler,0,duraklar}', jsonb_build_array(
+    jsonb_build_object('place_id', 'ChIJ-yeni-yer-001', 'ad', 'Yeni yer', 'kategori', 'museum', 'sure_dk', 60, 'lat', 39.7646, 'lng', 30.5236, 'rehber_md', E'Yeni rehber.\n\n> İpucu.'),
+    jsonb_build_object('place_id', 'ChIJ-yayin-yer-1', 'ad', 'Yayındaki yer', 'kategori', 'museum', 'sure_dk', 60, 'lat', 39.76, 'lng', 30.52, 'rehber_md', 'Benim rehberim.'),
+    jsonb_build_object('place_id', 'ChIJ-taslak-yer1', 'ad', 'Taslak yer', 'kategori', 'museum', 'sure_dk', 60, 'lat', 39.76, 'lng', 30.52, 'rehber_md', 'Taslağa rehber.'),
+    jsonb_build_object('place_id', 'ChIJ-dolu-yer-01', 'ad', 'Dolu taslak', 'kategori', 'park', 'sure_dk', 45, 'lat', 39.76, 'lng', 30.52, 'rehber_md', 'Üzerine yazma.'),
+    jsonb_build_object('place_id', 'ChIJ-rehbersiz-01', 'ad', 'Rehbersiz', 'kategori', 'cafe', 'sure_dk', 30, 'lat', 39.76, 'lng', 30.52)));
+$$;
+select pg_temp.hata_bekle($$select public.icerik_gezi_taslak_yukle(jsonb_set(pg_temp.rehberli('hat-rehber-uzun'), '{gunler,0,duraklar,0,rehber_md}', to_jsonb(repeat('a', 8001))))$$, '22023');
+do $$
+declare r jsonb := public.icerik_gezi_taslak_yukle(pg_temp.rehberli('hat-rehber'));
+declare k jsonb;
+begin
+  assert (r ->> 'yer_acilan')::int = 1 and (r ->> 'rehber_yazilan')::int = 2, format('rehber: %s', r);
+  assert r -> 'rehber_atlanan' @> '["ChIJ-yayin-yer-1", "ChIJ-dolu-yer-01"]' and jsonb_array_length(r -> 'rehber_atlanan') = 2, format('atlanan: %s', r);
+  assert (select not yayin and rehber_md like 'Yeni rehber.%' and kategori = 'museum' and sehir_id = '11111111-1111-4111-8111-000000000001'
+    from public.yerler where place_id = 'ChIJ-yeni-yer-001'), 'yeni yer taslak açıldı';
+  assert (select rehber_md from public.yerler where place_id = 'ChIJ-yayin-yer-1') = 'Canlı rehber.', 'yayındaki yerin rehberine dokunulmaz';
+  assert (select rehber_md from public.yerler where place_id = 'ChIJ-taslak-yer1') = 'Taslağa rehber.', 'boş taslağa yazılır';
+  assert (select rehber_md from public.yerler where place_id = 'ChIJ-dolu-yer-01') = 'Ece''nin rehberi.', 'dolu taslağa dokunulmaz';
+  assert not exists (select 1 from public.yerler where place_id = 'ChIJ-rehbersiz-01'), 'rehbersiz durak için yer açılmaz';
+  k := public.icerik_gezi_kontrol('hat-rehber');
+  -- yer_yok: rehbersiz durak + 2. günün iki durağı.
+  assert (k ->> 'yer_yok')::int = 3 and (k ->> 'rehber_dolu')::int = 4 and (k ->> 'rehber_yayinda')::int = 1, format('kontrol: %s', k);
+end $$;
+select public.icerik_gezi_taslak_sil('hat-rehber');
+delete from public.yerler where place_id in ('ChIJ-yeni-yer-001', 'ChIJ-yayin-yer-1', 'ChIJ-taslak-yer1', 'ChIJ-dolu-yer-01');
 
 -- #174 KK8 Seyahat silme: yalnız sahip siler (trips_delete = is_owner). Üye ve dışarıdan birinin silmesi RLS ile süzülür
 -- (hata yok, 0 satır); sahip silince bağlı satırlar (günler, mekanlar, duraklar, üyeler, değişiklikler, oylar, puanlar) kalmaz.

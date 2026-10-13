@@ -16,8 +16,12 @@ export const SINIR = {
   durakCok: 7,
   gunDk: 480,
   gecisDk: 25,
-  kelimeAz: 500,
+  // Gezi yazısında durak başına 1–3 cümle; ayrıntı mekan rehberinde (docs/07).
+  kelimeAz: 350,
   kelimeCok: 900,
+  rehberAz: 150,
+  rehberCok: 300,
+  rehberKarakter: 8000,
 };
 
 export const SLUG = /^[a-z0-9-]{2,80}$/;
@@ -138,11 +142,38 @@ function yayinVar(nesne) {
 
 const uzunluk = (s) => [...(s ?? '')].length;
 
+export const REHBER_DOSYA = /^[a-z0-9-]{2,80}$/;
+const FIYAT_SAAT = /\d\s?(TL|₺)|₺\s?\d|\b([01]?\d|2[0-3])[:.][0-5]\d\b/;
+
+/**
+ * Mekan rehberi (yerler.rehber_md): 150–300 kelime; tek bir ">" İPUCU (100 m yaklaşınca bildirimde gösterilir); fiyat ve
+ * açılış saati yok. Sözdizimi gezi yazısıyla aynı kurallarla denetlenir.
+ */
+export function rehberDenetle(md) {
+  const hatalar = [];
+  const uyarilar = [];
+  const metin = (md ?? '').replace(/\r\n?/g, '\n').trim();
+  if (!metin) return { hatalar: ['boş'], uyarilar };
+  if (uzunluk(metin) > SINIR.rehberKarakter) hatalar.push(`${uzunluk(metin)} karakter (en çok ${SINIR.rehberKarakter})`);
+  hatalar.push(...markdownHatalari(metin).map((h) => h.replace(/^yazi_md /, '')));
+  // Ardışık ">" satırları tek ipucudur.
+  const ipucu = metin.split(/\n\s*\n/).filter((p) => p.split('\n').some((l) => /^>/.test(l))).length;
+  if (ipucu !== 1) hatalar.push(`tek bir ">" İPUCU olmalı (gelen ${ipucu})`);
+  if (/^::mekan\[/m.test(metin)) hatalar.push('mekan kartı (::mekan) rehberde kullanılmaz');
+  const kelime = kelimeSayisi(metin);
+  if (kelime < SINIR.rehberAz || kelime > SINIR.rehberCok) uyarilar.push(`${kelime} kelime (önerilen ${SINIR.rehberAz}–${SINIR.rehberCok})`);
+  if (FIYAT_SAAT.test(metin)) uyarilar.push('fiyat ya da saat geçiyor; yazma (kapalı gün yazılabilir)');
+  const kucuk = metin.toLocaleLowerCase('tr');
+  for (const k of KLISELER) if (kucuk.includes(k)) uyarilar.push(`klişe "${k}"`);
+  return { hatalar, uyarilar };
+}
+
 /**
  * Plan dosyasının durağan denetimi (Google verisi gerekmeden).
  * `bilinenIdler`: araştırmada bulunan place_id'ler (yazıda durak dışı mekan anılırsa); `plan.ek_mekanlar` da sayılır.
+ * `rehberler`: durak.rehber → mekan rehberi metni (icerik/yerler/<şehir>/<rehber>.md; hat okur).
  */
-export function planDenetle(plan, { bilinenIdler = [] } = {}) {
+export function planDenetle(plan, { bilinenIdler = [], rehberler = new Map() } = {}) {
   const hatalar = [];
   const uyarilar = [];
   if (!plan || typeof plan !== 'object' || Array.isArray(plan)) return { hatalar: ['plan bir JSON nesnesi olmalı'], uyarilar };
@@ -192,6 +223,16 @@ export function planDenetle(plan, { bilinenIdler = [] } = {}) {
       if (!d?.ad?.trim()) hatalar.push(`${dk}: ad boş`);
       else if (uzunluk(d.ad) > SINIR.durakAd) hatalar.push(`${dk}: ad ${uzunluk(d.ad)} karakter (en çok ${SINIR.durakAd})`);
       if (!Number.isInteger(d?.sure_dk) || d.sure_dk < SINIR.sureEnAz || d.sure_dk > SINIR.sureEnCok) hatalar.push(`${dk}: sure_dk ${SINIR.sureEnAz}–${SINIR.sureEnCok} arası tam sayı olmalı`);
+      if (!Array.isArray(d?.kapali_gunler)) hatalar.push(`${dk}: kapali_gunler gerekli (her gün açıksa [])`);
+      else if (d.kapali_gunler.some((g) => kapaliGunNo(g) === null)) hatalar.push(`${dk}: kapali_gunler yalnız gün adı (ör. "pazartesi")`);
+      if (d?.rehber === undefined) uyarilar.push(`${dk}: mekan rehberi yok (rehber)`);
+      else if (typeof d.rehber !== 'string' || !REHBER_DOSYA.test(d.rehber)) hatalar.push(`${dk}: rehber dosya adı ^[a-z0-9-]{2,80}$ olmalı`);
+      else if (!rehberler.has(d.rehber)) hatalar.push(`${dk}: rehber dosyası bulunamadı (${d.rehber}.md)`);
+      else {
+        const r = rehberDenetle(rehberler.get(d.rehber));
+        hatalar.push(...r.hatalar.map((h) => `${dk} rehber: ${h}`));
+        uyarilar.push(...r.uyarilar.map((u) => `${dk} rehber: ${u}`));
+      }
     });
   });
 
@@ -258,36 +299,20 @@ const dakika = (hhmm) => {
   const [s, d] = hhmm.split(':').map(Number);
   return s * 60 + d;
 };
-const HAFTA = 7 * 1440;
 
-/**
- * Ziyaret aralığı [bas, bit) (haftanın günü + gün içi dakika) açık bir periyoda sığıyor mu? periyotlar: Google haftalık
- * (gun 0 = Pazar). Boş dizi = her zaman açık; null = bilinmiyor. Döner: 'acik' | 'kapali_gun' | 'saat_disi' | 'bilinmiyor'.
- */
-export function acikMi(periyotlar, gun, basDk, bitDk) {
-  if (periyotlar === null || periyotlar === undefined) return 'bilinmiyor';
-  if (periyotlar.length === 0) return 'acik';
-  const araliklar = periyotlar.map((p) => {
-    const a = p.gun * 1440 + dakika(p.ac);
-    let k = p.kapaGun * 1440 + dakika(p.kapa);
-    if (k <= a) k += HAFTA;
-    return [a, k];
-  });
-  const b = gun * 1440 + basDk;
-  const e = gun * 1440 + bitDk;
-  const sigar = araliklar.some(([a, k]) => [0, HAFTA, -HAFTA].some((kay) => b >= a + kay && e <= k + kay));
-  if (sigar) return 'acik';
-  const gunBas = gun * 1440;
-  const gunBit = gunBas + 1440;
-  const oGunAcik = araliklar.some(([a, k]) => [0, HAFTA, -HAFTA].some((kay) => a + kay < gunBit && k + kay > gunBas));
-  return oGunAcik ? 'saat_disi' : 'kapali_gun';
+/** "pazartesi", "Salı", "sali" → 1, 2; tanınmazsa null. */
+export function kapaliGunNo(ad) {
+  if (typeof ad !== 'string') return null;
+  const k = ad.trim().toLocaleLowerCase('tr');
+  return k in GUNLER ? GUNLER[k] : null;
 }
 
 const YEMEK = /(^|_)(restaurant|food_court|meal_takeaway|diner|steak_house|brunch_restaurant)$|^restaurant$/;
 export const yemekMi = (tip) => !!tip && YEMEK.test(tip);
 
 /**
- * Detaylarla gün denetimi (UYARI). `detaylar`: place_id → {lat, lng, primary_type, periyotlar}. Gün 09:30'da başlar;
+ * Detaylarla gün denetimi (UYARI). `detaylar`: place_id → {lat, lng, primary_type}; kapalı gün plandaki `kapali_gunler`'den
+ * (resmî site ya da OSM opening_hours; Google saatleri istenmez). Gün 09:30'da başlar;
  * saatler kestirimdir (uygulama kendi hesaplar). Döner: { uyarilar, gunler: [{durak, sure, yurume}] } (yalnız sayı).
  */
 export function gunleriDenetle(plan, detaylar, { baslangic = '09:30' } = {}) {
@@ -311,9 +336,7 @@ export function gunleriDenetle(plan, detaylar, { baslangic = '09:30' } = {}) {
         yurume += y;
         t += y;
       }
-      const durum = acikMi(det.periyotlar, haftaGunu, t, t + d.sure_dk);
-      if (durum === 'kapali_gun') uyarilar.push(`${kod}: ${GUN_ADI[haftaGunu]} günü kapalı`);
-      else if (durum === 'saat_disi') uyarilar.push(`${kod}: tahmini ziyaret saati (${saat(t)}–${saat(t + d.sure_dk)}) açık saatlere sığmıyor`);
+      if ((d.kapali_gunler ?? []).some((g) => kapaliGunNo(g) === haftaGunu)) uyarilar.push(`${kod}: ${GUN_ADI[haftaGunu]} günü kapalı`);
       if (yemekMi(det.primary_type) && t < 14 * 60 && t + d.sure_dk > 12 * 60) ogle = true;
       if (d.sure_dk !== varsayilanDakika(det.primary_type) && !d.sure_gerekcesi?.trim()) {
         uyarilar.push(`${kod}: süre ${d.sure_dk} dk, varsayılan ${varsayilanDakika(det.primary_type)}; sure_gerekcesi yaz`);
@@ -334,8 +357,8 @@ function saat(dk) {
   return `${String(Math.floor(d / 60) % 24).padStart(2, '0')}:${String(d % 60).padStart(2, '0')}`;
 }
 
-/** Yükleme verisi (icerik_gezi_taslak_yukle p_veri): kategori ve konum detaydan; adı plan verir. */
-export function yuklemeVerisi(plan, detaylar) {
+/** Yükleme verisi (icerik_gezi_taslak_yukle p_veri): kategori ve konum detaydan; ad, süre ve mekan rehberi plandan. */
+export function yuklemeVerisi(plan, detaylar, rehberler = new Map()) {
   const sehir = plan.sehir.yeni
     ? (() => {
         const s = detaylar.get(plan.sehir.yeni.place_id);
@@ -355,17 +378,17 @@ export function yuklemeVerisi(plan, detaylar) {
       baslik: g.baslik.trim(),
       duraklar: g.duraklar.map((d) => {
         const det = detaylar.get(d.place_id);
-        return { place_id: d.place_id, ad: d.ad.trim(), kategori: det.primary_type ?? null, sure_dk: d.sure_dk, lat: det.lat, lng: det.lng };
+        const rehber = d.rehber ? rehberler.get(d.rehber)?.replace(/\r\n?/g, '\n').trim() : undefined;
+        return { place_id: d.place_id, ad: d.ad.trim(), kategori: det.primary_type ?? null, sure_dk: d.sure_dk, lat: det.lat, lng: det.lng, ...(rehber ? { rehber_md: rehber } : {}) };
       }),
     })),
   };
 }
 
-/** Yüklemede detayı alınacak place_id'ler: duraklar + ek mekanlar + yeni şehir. */
+/** Yüklemede detayı alınacak place_id'ler: duraklar + yeni şehir (ek mekanların durumu araştırmadaki kısa listeden). */
 export function detayIdleri(plan) {
   const idler = new Set();
   for (const g of plan.gunler ?? []) for (const d of g.duraklar ?? []) if (d?.place_id) idler.add(d.place_id);
-  for (const m of plan.ek_mekanlar ?? []) if (m?.place_id) idler.add(m.place_id);
   if (plan.sehir?.yeni?.place_id) idler.add(plan.sehir.yeni.place_id);
   return [...idler];
 }

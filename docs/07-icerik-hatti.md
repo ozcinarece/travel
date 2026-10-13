@@ -1,7 +1,7 @@
 # İçerik hattı (AI gezi editörü → BO taslağı)
 
-Sürüm 1.0 · 13 Ekim 2026 · Sahip: Ece (ürün) · Kod: `scripts/icerik/`, `supabase/functions/icerik-google/`,
-`supabase/migrations/20261101120000_icerik_hatti.sql`, `.github/workflows/icerik.yml`
+Sürüm 1.1 · 13 Ekim 2026 (OSM destekli araştırma, mekan rehberleri) · Sahip: Ece (ürün) · Kod: `scripts/icerik/`, `supabase/functions/icerik-google/`,
+`supabase/migrations/20261101120000_icerik_hatti.sql`, `…20261102120000_icerik_osm_rehber.sql`, `.github/workflows/icerik.yml`
 
 AI gezi editörü önerilen gezileri hazırlar ve BO'ya **taslak** olarak yükler. Ece BO'da gezi editöründe açar, düzenler,
 fotoğraf ekler ve kendisi yayınlar. Hat hiçbir şeyi yayınlamaz.
@@ -18,8 +18,9 @@ Supabase secrets'tadır). Köprü GitHub Actions'tır:
 ```
 oturum ──(workflow_dispatch: icerik.yml)──▶ GitHub Actions
                                             │  SUPABASE_ACCESS_TOKEN (secret) ─▶ Yönetim API ─▶ service_role (çalışma anında, maskeli)
-                                            ├─ arastir ─▶ icerik-google (Edge Function) ─▶ Google Places
-                                            │             sonuç: oturumun açık anahtarıyla şifreli ─▶ geçici dal icerik-sonuc/<run_id>
+                                            ├─ osm ─▶ Overpass (OpenStreetMap; Google'a gidilmez)
+                                            ├─ arastir ─▶ icerik-google (Edge Function) ─▶ Google Places (kimlik · puan)
+                                            │             osm/arastir sonucu: oturumun açık anahtarıyla şifreli ─▶ geçici dal icerik-sonuc/<run_id>
                                             └─ yukle / sil / kontrol / sehirler ─▶ Yönetim API (postgres) ─▶ icerik_* SQL işlevleri
 oturum ◀── adım durumları ve duyurular (yalnız sayı, slug, id) · şifreli dal (yalnız oturum çözer)
 ```
@@ -27,8 +28,9 @@ oturum ◀── adım durumları ve duyurular (yalnız sayı, slug, id) · şif
 | İşlem | Ne yapar | Yazar mı? |
 |---|---|---|
 | `sehirler` | Şehirler: slug, ad, yayında mı, geziler (slug, durum, gün, durak) | Hayır |
-| `arastir` | Metin araması ve/veya detay; sonuç şifreli geçici dalda | Hayır (DB'ye) |
-| `yukle` | Plan dosyasını denetler, duraklar için detay alır (kapalı mı, konum, kategori), `icerik_gezi_taslak_yukle` | `kuru=false` ise |
+| `osm` | Şehrin OSM aday listesi (Overpass): ad, konum, tür, opening_hours, wikipedia/wikidata; sonuç şifreli geçici dalda | Hayır |
+| `arastir` | `kimlik` (OSM adayının place_id'si, ücretsiz) ve/veya `puan` (kısa liste ≤ 30); sonuç şifreli geçici dalda | Hayır (DB'ye) |
+| `yukle` | Plan dosyasını ve mekan rehberlerini denetler, duraklar için detay alır (kapalı mı, konum, kategori), `icerik_gezi_taslak_yukle` | `kuru=false` ise |
 | `kontrol` | Slug için: durum, gün ve durak sayısı, place_id'si eksik durak, yazıdaki mekanlar, updated_at, BO linki | Hayır |
 | `sil` | `icerik_gezi_taslak_sil` (yalnız taslak) | `kuru=false` ise |
 | `temizle` | Geçici `icerik-sonuc/*` dallarını siler | Dal siler |
@@ -45,9 +47,13 @@ alınır, yazma kalıcı olamaz. Gerçek yazma için `kuru=false`.
   kalır). Yayındaki (planlı dahil) geziye hiçbir durumda dokunmaz. Şehir slug'la bulunur; yoksa yalnız `sehir.yeni` ile
   (Ece'nin onayıyla) taslak şehir açar. Tablo kısıtlarını kendisi denetler ve Türkçe hata verir. Yazıdaki
   `[ad](mekan:id)` ve `::mekan[id]` izlerini `icerik_mekanlari`'na yazar (BO'nun `icerik_mekanlari_yaz` kuralı: yazı
-  sırası, satir/kart); taslak yer satırı açmaz. Döner: `{gezi_id, slug, gun_sayisi, mekan_sayisi, updated_at, …}`.
+  sırası, satir/kart). Durağın mekan rehberini (`rehber_md`) `yerler`'e yazar: yer satırı yoksa **taslak** açar
+  (`yayin=false`); taslak ve rehberi boşsa doldurur; yayındaki ya da rehberi dolu satıra dokunmaz (`rehber_atlanan`).
+  Döner: `{gezi_id, slug, gun_sayisi, mekan_sayisi, updated_at, yer_acilan, rehber_yazilan, rehber_atlanan, …}`.
 - `icerik_gezi_taslak_sil(p_slug)` — yalnız `yayin=false`; fotoğrafı olan taslağı silmez (önce BO'dan kaldırılır).
-- `icerik_sehirler()`, `icerik_gezi_kontrol(p_slug)` — okuma; kullanıcı verisi yok.
+  Açılan taslak yer satırları kalır (mekan başkadır, başka gezide de kullanılır).
+- `icerik_sehirler()`, `icerik_gezi_kontrol(p_slug)` — okuma; kullanıcı verisi yok. Kontrol durakların rehber durumunu
+  da verir (`rehber_dolu`, `rehber_yayinda`, `yer_yok`).
 - `icerik_google_butcesi(p_istek)` (yalnız service_role) — Edge Function Google'a gitmeden sorar: bugünkü tahmini
   harcama + bu isteğin üst sınırı günlük bütçeyi (`yonetim_ayarlari.google_gunluk_butce`) aşar mı?
 
@@ -58,35 +64,54 @@ Hata kodları: `22023` geçersiz veri · `23505` slug ya da şehir zaten var · 
 - Yalnız service_role anahtarı ya da `is_admin()` olan oturum; diğerlerine 403. service_role: taşıyıcı ortamdaki
   anahtarla birebir aynıysa ya da PostgREST onu yalnız service_role'e açık `icerik_google_butcesi`'ne kabul ediyorsa
   (ortamdaki anahtar yeni biçimde, `sb_secret_…`, olabilir). Geçidin JWT ayarına güvenilmez.
-- `{"islem": "ara", "merkez": {lat, lng}, "yaricap_m": 15000, "sorgular": [{"metin": "…", "tip": "museum"}]}` — en çok
-  25 sorgu, sorgu başına en çok 20 sonuç; konaklama (`KONAKLAMA_TIPLERI` ya da `lodging` tipi) elenir. Alanlar: id, ad,
-  birincil tip, tipler, konum, puan, yorum sayısı, işletme durumu.
-- `{"islem": "detay", "idler": ["ChIJ…"]}` — en çok 60 id. Alanlar: id, ad, birincil tip, konum, işletme durumu, haftalık
-  açılış periyotları.
-- Günlük bütçe doluysa Google'a gitmeden 429; bütçe okunamazsa 503 (kapalı kalır). Her Google isteği `googleSay` ile
-  sayılır (`api_sayac`, fonksiyon `icerik-google`). Cevap gövdesi ve Google verisi loglanmaz.
+- `{"islem": "kimlik", "sorgular": [{"metin": "…", "lat": …, "lng": …, "yaricap_m": 300}]}` — OSM adayının place_id'si:
+  Text Search yalnız `places.id` maskesiyle (**Text Search Essentials IDs Only — ücretsiz, sınırsız**). En çok 80 sorgu;
+  sorgu başına en çok 3 id (Google sırasıyla). Başka alan istenemez (istekte bilinmeyen anahtar → 400). Bütçe
+  denetimine girmez; istek sayısı ayrı sayaca (`api_sayac`, fonksiyon `icerik-kimlik`) yazılır ve maliyet kalemine girmez.
+- `{"islem": "puan", "idler": ["ChIJ…"]}` — **yalnız son kısa liste**, en çok 30 id: ad, birincil tip, işletme durumu,
+  puan, yorum sayısı (Place Details Enterprise). Geniş aramada puan istenmez.
+- `{"islem": "detay", "idler": ["ChIJ…"]}` — yükleme, en çok 60 id: ad, birincil tip, konum, işletme durumu (Place
+  Details Pro). Açılış saatleri istenmez; kapalı gün plandaki `kapali_gunler`'den gelir.
+- `puan` ve `detay`: günlük bütçe doluysa Google'a gitmeden 429; bütçe okunamazsa 503 (kapalı kalır). Her istek
+  `googleSay` ile sayılır (`api_sayac`, fonksiyon `icerik-google`). Cevap gövdesi ve Google verisi loglanmaz.
 - Genel bakış: içerik istekleri **Mekan** kalemine eklenir, Mekan birim fiyatı o günün karışık fiyatı olur
-  (`google_birim_fiyat.icerik` = 35 $/1000, üst sınır). İstek sayısı gerçek, tahmini dolar doğru kalır.
+  (`google_birim_fiyat.icerik` = 20 $/1000: puan 20, detay 17 — üst sınır). İstek sayısı gerçek, tahmini dolar doğru
+  kalır. Ücretsiz `icerik-kimlik` sayacı maliyete girmez.
 - **Bakım notu:** Fonksiyon → kalem eşlemesi iki yerde: `yonetim_genel_temel` (Genel bakış) ve `google_harcama_bugun`
   (bütçe denetimi). Yeni bir Google çağıran Edge Function eklenince ikisi de güncellenir. `yonetim_genel` bir sarmaldır
   (`yonetim_genel_temel` + içerik istekleri); `create or replace` ile yeniden yazılırsa sarmal korunur.
 
+### Araştırma akışı (gezi başına)
+
+1. `osm` — şehrin aday listesi (Overpass, ücretsiz). OSM verisi saklanabilir (ODbL; atıf: "© OpenStreetMap katkıcıları").
+2. Oturum adayları süzer: konaklama, alt kayıtlar, şehir dışı elenir. Önem: Wikipedia/Wikidata varlığı + kategori
+   boşluğu + editörün değerlendirmesi.
+3. `arastir` `kimlik` — seçilen adayların place_id'si (ad + OSM konumu, 300 m yanlılık; ücretsiz).
+4. `arastir` `puan` — son kısa liste (duraklar, yedekler, restoran/kafe adayları; **en çok 30**). Puan ve yorum sayısı
+   yalnız burada.
+5. Kapalı günler resmî siteden ya da OSM `opening_hours`'tan plana yazılır (`kapali_gunler`).
+6. `yukle` (önce kuru) — duraklar için detay (konum, kategori, açık mı).
+
 ### Maliyet (liste fiyatı, ücretsiz kota düşülmeden)
 
-| | İstek | Tahmin |
+| Adım | İstek | Tahmin |
 |---|---|---|
-| Araştırma, üst sınır | 25 metin araması (Text Search Enterprise 35 $/1000) + 60 detay (Place Details Enterprise 20 $/1000) | ≈ 2,08 $ |
-| Araştırma, tipik | 15 arama + 30 detay | ≈ 1,13 $ |
-| Yükleme (kuru ya da gerçek), 2 gün × 6 durak + 2 ek mekan | 14 detay | ≈ 0,28 $ |
+| `osm` | Overpass | 0 $ |
+| `kimlik` | Text Search IDs Only (ör. 60 sorgu) | 0 $ |
+| `puan` | kısa liste: tipik 25, en çok 30 × Place Details Enterprise (20 $/1000) | 0,50 $ (en çok 0,60 $) |
+| `yukle` kuru + gerçek | 2 × 12 durak × Place Details Pro (17 $/1000) | 0,41 $ |
+| **Gezi başına** | | **≈ 0,91 $** (30 kısa liste + 14 durakla en çok 1,08 $) |
 
-Günlük Google bütçesi uygulamayla ortaktır (varsayılan 10 $). BO Genel bakış içerik isteklerini 35 $/1000 ile sayar
-(üst sınır).
+Ücretsiz aylık kota (Google Maps Platform, SKU başına; uygulamayla ortak): Pro 5.000, Enterprise 1.000 istek. Bu kotalar
+içinde kalındığında gerçek fatura 0 $. Günlük Google bütçesi uygulamayla ortaktır (varsayılan 10 $); BO Genel bakış
+içerik isteklerini 20 $/1000 ile sayar (üst sınır). 1 $ hedefinde kalmak için kısa liste 25'i, kuru deneme 1'i
+geçmemeli.
 
 ## 2. Plan dosyası
 
 `icerik/geziler/<slug>.json` — dosya adı `gezi.slug` ile aynı. Google verisi yok: `place_id` ve durak adı dışında Google'dan
 gelen alan girmez (koordinat, puan, adres, saat, yorum doğrulayıcıda HATA). Koordinat ve kategori yükleme anında
-Google'dan taze alınır.
+Google'dan taze alınır. Mekan rehberleri ayrı dosyalarda: `icerik/yerler/<şehir slug>/<rehber>.md`.
 
 ```json
 {
@@ -104,7 +129,10 @@ Google'dan taze alınır.
     {
       "baslik": "Odunpazarı",
       "duraklar": [
-        { "place_id": "ChIJ…", "ad": "…", "sure_dk": 75, "sure_gerekcesi": "varsayılan 90; koleksiyon küçük" }
+        {
+          "place_id": "ChIJ…", "ad": "…", "sure_dk": 75, "sure_gerekcesi": "varsayılan 90; koleksiyon küçük",
+          "kapali_gunler": ["pazartesi"], "rehber": "odunpazari-modern-muze"
+        }
       ]
     }
   ],
@@ -118,6 +146,9 @@ Google'dan taze alınır.
 ```
 
 - `takvim.ilk_gun` (isteğe bağlı, varsayılan cumartesi): kapalı gün denetimi için 1. günün haftanın günü.
+- `kapali_gunler` (zorunlu; her gün açıksa `[]`): resmî siteden ya da OSM `opening_hours`'tan. Bilinmiyorsa `[]` ve
+  DOĞRULANACAKLAR'a bir satır.
+- `rehber` (isteğe bağlı, yoksa UYARI): mekan rehberi dosyasının adı → `icerik/yerler/<şehir>/<rehber>.md`.
 - `ek_mekanlar` (isteğe bağlı): yazıda anılan ama durak olmayan mekanlar (araştırmadan). Yüklemede bunların da kapalı
   olup olmadığına bakılır; veritabanına durak olarak girmez.
 - Yeni şehir (yalnız Ece'nin onayıyla): `"sehir": {"yeni": {"ad": "…", "slug": "…", "place_id": "ChIJ…"}}`; şehrin
@@ -133,12 +164,26 @@ HATA yüklemeyi durdurur, UYARI rapora girer. İletilerde durak adı yazılmaz; 
 | slug `^[a-z0-9-]{2,80}$`, place_id `^[A-Za-z0-9_-]{10,255}$` | gün toplamı (durak + tahmini yürüme) 8 saati aşıyor |
 | 1–30 gün, her günde en az 1 durak, `sure_dk` 15–480 tam sayı | ardışık iki durak arası tahmini yürüme > 25 dk |
 | `yayin` / `yayin_at` alanı | 12:00–14:00 arasına yemek durağı düşmüyor |
-| Google alanı (koordinat, puan, adres, saat, yorum) | durak plandaki güne göre kapalı güne ya da saat dışına düşüyor |
+| Google alanı (koordinat, puan, adres, saat, yorum) | durak `kapali_gunler`'e göre kapalı güne düşüyor |
 | `#`, `###`, tablo, numaralı ya da iç içe liste, `* `/`+ ` madde | varsayılandan sapan süre için `sure_gerekcesi` yok |
 | http(s) bağlantı, `mekan:` dışı bağlantı, `foto:` ve görsel | durak yazıda bağlantılı geçmiyor; gün başına 1–2 kart değil |
-| iç içe ya da kapanmamış kalın/italik | 500–900 kelime dışı; `>` ipucu yok; gün başlığı sayısı tutmuyor |
+| iç içe ya da kapanmamış kalın/italik | 350–900 kelime dışı; `>` ipucu yok; gün başlığı sayısı tutmuyor |
 | köşeli parantezli not (`[doğrula]`, kaynak notu), TODO | klişe ("muhteşem", "eşsiz" …); ondalıkta nokta |
 | yazıdaki `mekan:id` / `::mekan[id]` ne durakta ne `ek_mekanlar`'da | aynı mekan iki durakta |
+| `kapali_gunler` yok ya da gün adı değil | durağın mekan rehberi yok |
+| rehber dosyası yok; rehberde tek `>` İPUCU değil, `::mekan` kartı, yukarıdaki sözdizimi hataları | rehber 150–300 kelime dışı; fiyat ya da saat geçiyor; klişe |
+
+Gezi yazısında durak başına 1–3 cümle; ayrıntı mekan rehberinde.
+
+### Mekan rehberi (`icerik/yerler/<şehir>/<rehber>.md` → `yerler.rehber_md`)
+
+- 150–300 kelime: ne olduğu ve neden gidilir · neye bakılır · ne kadar sürer, ne zaman gidilir.
+- Tek bir `>` İPUCU paragrafı: uygulama mekana 100 m yaklaşınca bildirimde gösterir; o anda işe yarasın.
+- Fiyat ve açılış saati yok; kapalı gün yazılabilir. Emin olunmayan her şey DOĞRULANACAKLAR'a.
+- Kaynak: resmî siteler önce; Vikipedi yalnız doğrulama için. Kopyalama ve yakın çeviri yok. Kaynaklar içerik PR'ına
+  yazılır, metne değil.
+- Yükleme yer satırı yoksa taslak açar; yayındaki ya da rehberi dolu satıra dokunmaz — o durumda dosya repoda kalır ve
+  teslimde listelenir.
 
 Yürüme tahmini: kuş uçuşu × 1,3 ÷ 75 m/dk. Saat kestirimi gün 09:30'da başlar (uygulama saatleri kendisi hesaplar).
 Varsayılan süreler `src/lib/kategori.ts` ile aynıdır.
@@ -157,9 +202,17 @@ node scripts/icerik/anahtar.mjs            # açık anahtarı (tek satır base64
 gh api -X POST repos/ozcinarece/travel/actions/workflows/icerik.yml/dispatches \
   -f ref=main -f 'inputs[islem]=sehirler'
 
+# OSM aday listesi (Google'a gidilmez)
 gh api -X POST repos/ozcinarece/travel/actions/workflows/icerik.yml/dispatches -f ref=main \
-  -f 'inputs[islem]=arastir' \
-  -f 'inputs[istek]={"sehir":"eskisehir","yaricap_m":15000,"sorgular":[{"metin":"Eskişehir müze","tip":"museum"}],"detay":[],"acik_anahtar":"<base64>"}'
+  -f 'inputs[islem]=osm' -f 'inputs[istek]={"sehir":"eskisehir","yaricap_m":8000,"acik_anahtar":"<base64>"}'
+
+# place_id eşleme (ücretsiz) — ad + OSM konumu
+gh api -X POST …/dispatches -f ref=main -f 'inputs[islem]=arastir' \
+  -f 'inputs[istek]={"sehir":"eskisehir","kimlik":[{"metin":"Odunpazarı Modern Müze","lat":39.76,"lng":30.52}],"acik_anahtar":"<base64>"}'
+
+# kısa liste puanı (en çok 30)
+gh api -X POST …/dispatches -f ref=main -f 'inputs[islem]=arastir' \
+  -f 'inputs[istek]={"sehir":"eskisehir","puan":["ChIJ…"],"acik_anahtar":"<base64>"}'
 
 # yükle: ref = içerik dalı (dosya o dalda); önce kuru, sonra gerçek
 gh api -X POST repos/ozcinarece/travel/actions/workflows/icerik.yml/dispatches -f ref=claude/icerik-<slug> \
@@ -176,7 +229,7 @@ gh api repos/ozcinarece/travel/actions/runs/<run_id>/jobs          # adım durum
 gh api repos/ozcinarece/travel/check-runs/<job_id>/annotations     # duyurular (HATA / UYARI / sonuç)
 ```
 
-Araştırma sonucunu çözmek (repo dışındaki geçici klasöre; geçici dal okunduktan sonra silinir):
+OSM ve araştırma sonucunu çözmek (repo dışındaki geçici klasöre; geçici dal okunduktan sonra silinir):
 
 ```bash
 node scripts/icerik/coz.mjs <run_id> --cikti /tmp/…/icerik-arastirma
@@ -200,6 +253,9 @@ Dal silinemezse: `inputs[islem]=temizle`, `inputs[istek]=<run_id>` (ya da `hepsi
 - **Google verisi (PRD §7).** Araştırma sonucu yalnız şifreli olarak geçici dalda ve oturumun belleğinde / repo
   dışındaki geçici klasöründe durur; repoya ve veritabanına ham girmez. Veritabanına yalnız gezi editörünün yazdığı
   alanlar girer: place_id, durak adı, kategori (birincil tip), lat, lng.
-- **Maliyet.** Alan maskeleri en dar; araştırma başına en çok 25 metin araması ve 60 detay; günlük bütçe doluysa
-  Google'a gidilmez.
+  Mekan rehberi editörün kendi metnidir (Google verisi değil).
+- **OSM verisi** (ODbL) saklanabilir; kullanıldığı yerde atıf: "© OpenStreetMap katkıcıları".
+- **Maliyet.** Alan maskeleri en dar; geniş aday listesi OSM'den, place_id eşleme ücretsiz (IDs Only); puan yalnız kısa
+  listede (≤ 30); yükleme detayı açılış saati istemez. Günlük bütçe doluysa Google'a gidilmez. Hedef: gezi başına ücretsiz
+  kota içinde, liste fiyatıyla en çok 1 $.
 - **Workflow girdileri** adımlara ortam değişkeniyle geçer (komut satırına gömülmez). Bağımlılık kurulmaz.

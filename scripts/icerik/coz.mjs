@@ -1,4 +1,4 @@
-// İçerik hattı (docs/07): `arastir` sonucunu geçici daldan (icerik-sonuc/<run_id>) alır, oturumun özel anahtarıyla çözer,
+// İçerik hattı (docs/07): `osm` ya da `arastir` sonucunu geçici daldan (icerik-sonuc/<run_id>) alır, oturumun özel anahtarıyla çözer,
 // repo DIŞINDA bir dosyaya yazar ve geçici dalı siler. Ekrana yalnız sayılar yazılır (Google verisi değil).
 // Kullanım: node scripts/icerik/coz.mjs <run_id> --cikti <repo dışında bir klasör>
 import { execFileSync } from 'node:child_process';
@@ -29,9 +29,12 @@ await mkdir(klasor, { recursive: true, mode: 0o700 });
 const dosya = path.join(klasor, `arastirma-${runId}.json`);
 await writeFile(dosya, JSON.stringify(sonuc, null, 1), { mode: 0o600 });
 
-const ara = sonuc.ara?.sonuclar ?? [];
-const aday = ara.reduce((t, s) => t + (s.adaylar?.length ?? 0), 0);
-console.log(`çözüldü: ${dosya} · ${ara.length} sorgu · ${aday} aday · ${sonuc.detay?.yerler?.length ?? 0} detay`);
+const sayilar = [
+  sonuc.adaylar ? `${sonuc.adaylar.length} OSM adayı` : null,
+  sonuc.kimlik ? `${sonuc.kimlik.sonuclar?.length ?? 0} kimlik sorgusu` : null,
+  sonuc.puan ? `${sonuc.puan.yerler?.length ?? 0} puan` : null,
+].filter(Boolean);
+console.log(`çözüldü: ${dosya} · ${sayilar.join(' · ')}`);
 
 try {
   execFileSync('git', ['push', '-q', 'origin', '--delete', dal], { stdio: 'pipe' });

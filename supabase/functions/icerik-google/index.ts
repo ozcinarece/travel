@@ -1,22 +1,28 @@
-// icerik-google — içerik hattının (docs/07) Google kapısı: metin araması ve durak detayı. Yalnız service_role anahtarı
-// (GitHub Actions'taki hat) ve yönetici (is_admin) çağırır; diğer herkese 403. Google'a gitmeden önce günlük Google bütçesi
-// (yonetim_ayarlari.google_gunluk_butce) bu isteğin tahmini maliyetiyle denetlenir; okunamazsa istek yapılmaz (kapalı kalır).
-// Cevap yalnız çağırana döner; gövde ve Google verisi loga, DB'ye yazılmaz (PRD §7). Loga yalnız durum kodu düşer.
-import { GoogleHatasi, icerikDetay, icerikMetinAra, KONAKLAMA_TIPLERI, type IcerikAday, type IcerikDetay } from '../_shared/google.ts';
+// icerik-google — içerik hattının (docs/07) Google kapısı. Yalnız service_role (GitHub Actions'taki hat) ve yönetici
+// (is_admin) çağırır; diğer herkese 403. Üç işlem:
+//   kimlik — OSM adayının place_id'si: Text Search, yalnız `places.id` (IDs Only SKU, ücretsiz). Bütçe denetimine girmez;
+//            istek sayısı ayrı, ücretsiz sayaca (`icerik-kimlik`) yazılır. Başka alan istenirse reddedilir.
+//   puan   — kısa liste (≤ 30): ad, tip, işletme durumu, puan, yorum sayısı (Place Details Enterprise).
+//   detay  — yükleme (≤ 60): ad, tip, konum, işletme durumu (Place Details Pro).
+// puan ve detay Google'a gitmeden önce günlük bütçeyi (yonetim_ayarlari.google_gunluk_butce) bu isteğin tahmini maliyetiyle
+// denetler; okunamazsa istek yapılmaz. Cevap yalnız çağırana döner; gövde ve Google verisi loga, DB'ye yazılmaz (PRD §7).
+import { GoogleHatasi, icerikDetay, icerikKimlik, icerikPuan, type IcerikDetay, type IcerikPuan } from '../_shared/google.ts';
 import { govde, hata, json, onKontrol } from '../_shared/http.ts';
 import { sayacli } from '../_shared/sayac.ts';
 
-const EN_COK_SORGU = 25;
+const EN_COK_KIMLIK = 80;
+const EN_COK_PUAN = 30;
 const EN_COK_DETAY = 60;
 const PLACE_ID = /^[A-Za-z0-9_-]{10,255}$/;
-const KONAKLAMA = new Set(KONAKLAMA_TIPLERI);
+/** kimlik isteğinde izin verilen anahtarlar: alan maskesi ya da alan listesi gönderilemez (IDs Only kalır). */
+const KIMLIK_ANAHTARLARI = new Set(['islem', 'sorgular', 'merkez', 'yaricap_m']);
 
-type Sorgu = { metin: string; tip?: string };
+type KimlikSorgusu = { metin: string; lat?: number; lng?: number; yaricap_m?: number };
 type Istek = {
-  islem: 'ara' | 'detay';
+  islem: 'kimlik' | 'puan' | 'detay';
   merkez: { lat: number; lng: number };
   yaricap_m: number;
-  sorgular: Sorgu[];
+  sorgular: KimlikSorgusu[];
   idler: string[];
 };
 
@@ -105,7 +111,31 @@ async function sirayla<T, U>(ogeler: T[], es: number, is: (oge: T) => Promise<U>
 
 const googleDurumu = (e: unknown) => (e instanceof GoogleHatasi ? e.durum : 500);
 
-const konaklama = (a: IcerikAday) => (a.primary_type !== null && KONAKLAMA.has(a.primary_type)) || a.tipler.includes('lodging');
+const gecerliKonum = (lat: unknown, lng: unknown) => typeof lat === 'number' && typeof lng === 'number' && Math.abs(lat) <= 90 && Math.abs(lng) <= 180;
+
+/** Ücretsiz kimlik isteklerini maliyet kalemi olmayan ayrı sayaca yazar (Genel bakış harcamasına girmez). */
+async function kimlikSay(adet: number) {
+  const url = Deno.env.get('SUPABASE_URL');
+  const anahtar = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+  if (!url || !anahtar || adet <= 0) return;
+  try {
+    await fetch(`${url}/rest/v1/rpc/api_sayac_artir`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', apikey: anahtar, authorization: `Bearer ${anahtar}` },
+      body: JSON.stringify({ p_fonksiyon: 'icerik-kimlik', p_cagri: 0, p_google: adet }),
+    });
+  } catch {
+    console.error('icerik-google kimlik sayacı yazılamadı');
+  }
+}
+
+function idleriAl(g: Partial<Istek>, enCok: number): string[] | Response {
+  const idler = Array.isArray(g.idler) ? [...new Set(g.idler.filter((x): x is string => typeof x === 'string'))] : [];
+  if (idler.length === 0) return hata('en az bir place_id gerekli');
+  if (idler.length > enCok) return hata(`istek başına en çok ${enCok} place_id`);
+  if (idler.some((x) => !PLACE_ID.test(x))) return hata('geçersiz place_id');
+  return idler;
+}
 
 Deno.serve(sayacli('icerik-google', async (istek) => {
   const on = onKontrol(istek);
@@ -113,52 +143,52 @@ Deno.serve(sayacli('icerik-google', async (istek) => {
   if (!(await yetkili(istek))) return hata('yetki yok', 403);
 
   const g = await govde<Istek>(istek);
-  if (g.islem === 'ara') {
+  if (g.islem === 'kimlik') {
+    if (Object.keys(g).some((k) => !KIMLIK_ANAHTARLARI.has(k))) return hata('kimlik yalnız place_id döner; başka alan istenemez');
     const m = g.merkez;
-    if (!m || typeof m.lat !== 'number' || typeof m.lng !== 'number' || Math.abs(m.lat) > 90 || Math.abs(m.lng) > 180) return hata('merkez (lat, lng) gerekli');
-    const yaricap = typeof g.yaricap_m === 'number' && g.yaricap_m > 0 ? Math.min(g.yaricap_m, 50_000) : 15_000;
-    const sorgular = Array.isArray(g.sorgular) ? g.sorgular.filter((s): s is Sorgu => !!s && typeof s.metin === 'string' && s.metin.trim().length > 0) : [];
+    if (m !== undefined && !gecerliKonum(m?.lat, m?.lng)) return hata('merkez geçersiz');
+    const varsayilanYaricap = typeof g.yaricap_m === 'number' && g.yaricap_m > 0 ? g.yaricap_m : 300;
+    const sorgular = Array.isArray(g.sorgular) ? g.sorgular : [];
     if (sorgular.length === 0) return hata('en az bir sorgu gerekli');
-    if (sorgular.length > EN_COK_SORGU) return hata(`istek başına en çok ${EN_COK_SORGU} sorgu`);
-    if (sorgular.some((s) => s.metin.length > 200 || (s.tip !== undefined && (typeof s.tip !== 'string' || !/^[a-z_]{2,40}$/.test(s.tip))))) return hata('geçersiz sorgu');
-
-    const butce = await butceVar(sorgular.length);
-    if (!butce) return hata('bütçe denetlenemedi; Google çağrısı yapılmadı', 503);
-    if (!butce.yeterli) return json({ hata: 'günlük Google bütçesi dolu', harcanan: butce.harcanan, butce: butce.butce }, 429);
-
+    if (sorgular.length > EN_COK_KIMLIK) return hata(`istek başına en çok ${EN_COK_KIMLIK} sorgu`);
+    for (const s of sorgular) {
+      if (!s || typeof s.metin !== 'string' || !s.metin.trim() || s.metin.length > 200) return hata('geçersiz sorgu');
+      if (Object.keys(s).some((k) => !['metin', 'lat', 'lng', 'yaricap_m'].includes(k))) return hata('kimlik yalnız place_id döner; başka alan istenemez');
+      const konumVar = s.lat !== undefined || s.lng !== undefined;
+      if (konumVar ? !gecerliKonum(s.lat, s.lng) : !m) return hata('her sorguda konum (lat, lng) ya da istekte merkez gerekli');
+    }
+    let adet = 0;
     const sonuclar = await sirayla(sorgular, 5, async (s) => {
+      const merkez = s.lat !== undefined ? { lat: s.lat, lng: s.lng! } : m!;
       try {
-        const adaylar = await icerikMetinAra({ metin: s.metin.trim(), merkez: m, yaricapM: yaricap, tip: s.tip });
-        const kalan = adaylar.filter((a) => !konaklama(a));
-        return { sorgu: s.metin.trim(), tip: s.tip ?? null, elenen_konaklama: adaylar.length - kalan.length, adaylar: kalan };
+        adet += 1;
+        return { sorgu: s.metin.trim(), idler: await icerikKimlik({ metin: s.metin.trim(), merkez, yaricapM: s.yaricap_m ?? varsayilanYaricap }) };
       } catch (e) {
-        console.error('icerik-google ara', googleDurumu(e));
-        return { sorgu: s.metin.trim(), tip: s.tip ?? null, hata: googleDurumu(e) };
+        console.error('icerik-google kimlik', googleDurumu(e));
+        return { sorgu: s.metin.trim(), hata: googleDurumu(e) };
       }
     });
-    return json({ islem: 'ara', sonuclar });
+    await kimlikSay(adet);
+    return json({ islem: 'kimlik', sonuclar });
   }
 
-  if (g.islem === 'detay') {
-    const idler = Array.isArray(g.idler) ? [...new Set(g.idler.filter((x): x is string => typeof x === 'string'))] : [];
-    if (idler.length === 0) return hata('en az bir place_id gerekli');
-    if (idler.length > EN_COK_DETAY) return hata(`istek başına en çok ${EN_COK_DETAY} place_id`);
-    if (idler.some((x) => !PLACE_ID.test(x))) return hata('geçersiz place_id');
-
+  if (g.islem === 'puan' || g.islem === 'detay') {
+    const idler = idleriAl(g, g.islem === 'puan' ? EN_COK_PUAN : EN_COK_DETAY);
+    if (idler instanceof Response) return idler;
     const butce = await butceVar(idler.length);
     if (!butce) return hata('bütçe denetlenemedi; Google çağrısı yapılmadı', 503);
     if (!butce.yeterli) return json({ hata: 'günlük Google bütçesi dolu', harcanan: butce.harcanan, butce: butce.butce }, 429);
-
-    const yerler = await sirayla(idler, 8, async (id): Promise<IcerikDetay | { place_id: string; hata: number }> => {
+    const cagri = g.islem === 'puan' ? icerikPuan : icerikDetay;
+    const yerler = await sirayla(idler, 8, async (id): Promise<IcerikPuan | IcerikDetay | { place_id: string; hata: number }> => {
       try {
-        return await icerikDetay(id);
+        return await cagri(id);
       } catch (e) {
-        console.error('icerik-google detay', googleDurumu(e));
+        console.error(`icerik-google ${g.islem}`, googleDurumu(e));
         return { place_id: id, hata: googleDurumu(e) };
       }
     });
-    return json({ islem: 'detay', yerler });
+    return json({ islem: g.islem, yerler });
   }
 
-  return hata("islem 'ara' ya da 'detay' olmalı");
+  return hata("islem 'kimlik', 'puan' ya da 'detay' olmalı");
 }));
