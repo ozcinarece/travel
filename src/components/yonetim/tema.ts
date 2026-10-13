@@ -30,6 +30,9 @@ export const yRenk = {
   bekliyorMetin: '#8a5a00',
   /** Yazı alanında yer tutucu (kanvas BO-1 "/ ile blok ekle"). */
   yerTutucu: '#b4bbd3',
+  /** Genel bakış: içerik sağlığında sorunsuz satır; kapak yoksa küçük resim zeminleri (kanvas BO-0). */
+  notrZemin: '#f4f6fa',
+  kapakZeminleri: [renk.anaAcik, '#ffe2cc', '#dce6ff'],
   /** Sol menü (Gece zemin üstünde). */
   menuMetin: '#b9c3e6',
   menuIkon: '#8e9bcb',

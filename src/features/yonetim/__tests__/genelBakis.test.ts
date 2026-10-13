@@ -1,108 +1,67 @@
 import { describe, expect, it } from '@jest/globals';
 
-import { butceAsildi, csvDosyaAdi, csvMetni, degisim, grafik, grafikAdimi, haftaEtiketi, kartlar, kisaSayi, oran, yuzdeMetni, type Ozet } from '../genelBakis';
-import { ty } from '../metin';
+import { degisimMetni, dolarMetni, googleOzeti, haftaCubuklari, icerikDurumu, selam, sureMetni, tarihEtiketi, yuzde, type IcerikSehri } from '../genelBakis';
 
-const haftalar = Array.from({ length: 12 }, (_, i) => {
-  const t = new Date(Date.UTC(2026, 6, 20 + i * 7));
-  return { hafta: t.toISOString().slice(0, 10), kullanici: 10 + i * 3, seyahat: 4 + i * 2 };
-});
+// #157 (kanvas BO-0): gösterge metinleri, Google tahmini harcama, bu hafta grafiği, içerik sağlığı.
+describe('genel bakış (#157)', () => {
+  it('süre: "2 dk 40 sn", saniye, saat', () => {
+    expect(sureMetni(160)).toBe('2 dk 40 sn');
+    expect(sureMetni(45.4)).toBe('45 sn');
+    expect(sureMetni(120)).toBe('2 dk');
+    expect(sureMetni(3900)).toBe('1 sa 5 dk');
+    expect(sureMetni(7170)).toBe('2 sa');
+  });
 
-const ozet = (alan: Partial<Ozet> = {}): Ozet => ({
-  aralik_gun: 30,
-  kullanici: { toplam: 1284, son7: 96 },
-  seyahat: { toplam: 642, bu_hafta: 48, onceki_hafta: 40 },
-  gezi_alindi: { toplam: 213, onceki: 190, tum: 120, gunler: 60, mekan: 33 },
-  paylasim: { paylasildi: 87, paylasildi_onceki: 80, acildi: 310, olay_var: true, katilim: 12, katilim_onceki: 0 },
-  google: { ay: 18400, onceki_ay: 15000, butce: 25000 },
-  haftalik: haftalar,
-  en_cok_alinan: [{ id: 'g1', baslik: "Odunpazarı'ndan Porsuk'a", sehir: 'Eskişehir', gun_sayisi: 2, goruntu: 1240, alindi: 96, kalp: 210 }],
-  bugun: { kullanici: 14, seyahat: 9, gezi_alindi: 3, kesfet: 1120, mekan_paneli: 2340, yorum: 410 },
-  ...alan,
-});
+  it('oran ve değişim: payda 0 → yok (sıfır değil)', () => {
+    expect(yuzde(38, 100)).toBe('%38');
+    expect(yuzde(1, 0)).toBeNull();
+    expect(degisimMetni(124, 105)).toBe('+%18');
+    expect(degisimMetni(95, 100)).toBe('−%5');
+    expect(degisimMetni(5, 5)).toBe('%0');
+    expect(degisimMetni(5, 0)).toBeNull();
+  });
 
-describe('sayı biçimleri', () => {
-  it('kanvastaki gibi kısaltır', () => {
-    expect(kisaSayi(18400)).toBe('18,4K');
-    expect(kisaSayi(25000)).toBe('25K');
-    expect(kisaSayi(9870)).toBe('9.870');
-    expect(kisaSayi(1_240_000)).toBe('1,2M');
+  it('Google: kalem × birim fiyat; çubuk toplam harcamadaki pay, yorumlar sınıra göre; bütçe aşımı', () => {
+    const o = googleOzeti({ mekan: 120, foto: 300, rota: 200, yorum: 96, butce: 10, fiyat: { mekan: 17, foto: 7, rota: 5, yorum: 20 }, yorum_sinir: 300 });
+    expect(o.toplam).toBeCloseTo(2.04 + 2.1 + 1 + 1.92);
+    expect(dolarMetni(o.toplam)).toBe('$7,06');
+    // 2,04 / 7,06 · 2,10 / 7,06 · 1,00 / 7,06 (kalan pay yorumlar).
+    expect(o.kalemler.map((k) => [k.anahtar, k.sayi, Math.round(k.oran * 100)])).toEqual([
+      ['mekan', 120, 29],
+      ['foto', 300, 30],
+      ['rota', 200, 14],
+    ]);
+    expect(o.yorum).toEqual({ sayi: 96, sinir: 300, oran: 0.32 });
+    expect(o.asildi).toBe(false);
+    expect(googleOzeti({ mekan: 1000, foto: 0, rota: 0, yorum: 0, butce: 10, fiyat: { mekan: 17 }, yorum_sinir: null }).asildi).toBe(true);
+    const fiyatsiz = googleOzeti({ mekan: 5, foto: 0, rota: 0, yorum: 0, butce: null, fiyat: null, yorum_sinir: null });
+    expect([fiyatsiz.toplam, fiyatsiz.butce, fiyatsiz.yorum.oran]).toEqual([0, null, 0]);
   });
-  it('yüzde: 10 altı tek ondalık, düşüş eksi', () => {
-    expect(yuzdeMetni(8.08)).toBe('+8,1%');
-    expect(yuzdeMetni(12.1)).toBe('+12%');
-    expect(yuzdeMetni(-3.2)).toBe('−3,2%');
-    expect(degisim(5, 0)).toBeNull();
-    expect(degisim(48, 40)).toBe(20);
-  });
-  it('oran: alındı / görüntü', () => {
-    expect(oran(96, 1240)).toBe('8%');
-    expect(oran(3, 0)).toBe('—');
-  });
-});
 
-describe('KPI kartları (KK1)', () => {
-  it('kanvas sırası ve metinleri', () => {
-    const k = kartlar(ozet(), ty);
-    expect(k.map((x) => x.baslik)).toEqual(['Kullanıcı', 'Seyahat', 'Gezi alındı', 'Paylaşım', 'Google API']);
-    expect(k[0]).toMatchObject({ deger: '1.284', alt: 'son 7 gün +96' });
-    expect(yuzdeMetni(k[0].degisim!)).toBe('+8,1%');
-    expect(k[1]).toMatchObject({ deger: '642', alt: 'bu hafta 48', degisim: 20 });
-    expect(k[2].alt).toBe('tüm gezi 120 · seçili gün 60 · yalnız mekan 33');
-    expect(k[3]).toMatchObject({ deger: '87', alt: 'davet linki açılma 310' });
-    expect(k[4]).toMatchObject({ deger: '18,4K', alt: 'istek / ay · bütçe 25K', degisim: null });
+  it('bu hafta: Pzt…Paz, en yüksek 208 px, boş gün çubuksuz', () => {
+    const gunler = ['2026-10-12', '2026-10-13', '2026-10-14', '2026-10-15', '2026-10-16', '2026-10-17', '2026-10-18'];
+    const c = haftaCubuklari(gunler.map((gun, i) => ({ gun, plan: i === 4 ? 26 : 13, katilim: i === 6 ? 0 : 5 })));
+    expect(c.map((x) => x.etiket)).toEqual(['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz']);
+    expect(c[4].plan).toEqual({ x: 392, y: 32, h: 208 });
+    expect(c[0].plan).toEqual({ x: 40, y: 136, h: 104 });
+    expect(c[0].katilim.x).toBe(74);
+    expect(c[6].katilim.h).toBe(0);
   });
-  it('davet olayı yokken paylaşım linkle katılımı gösterir', () => {
-    const k = kartlar(ozet({ paylasim: { paylasildi: 0, paylasildi_onceki: 0, acildi: 0, olay_var: false, katilim: 12, katilim_onceki: 0 } }), ty);
-    expect(k[3]).toMatchObject({ deger: '12', alt: 'linkle katılım', degisim: null });
-  });
-  it('bütçe eşiği', () => {
-    expect(butceAsildi(ozet())).toBe(false);
-    expect(butceAsildi(ozet({ google: { ay: 25000, onceki_ay: 0, butce: 25000 } }))).toBe(true);
-    expect(butceAsildi(ozet({ google: { ay: 25000, onceki_ay: 0, butce: null } }))).toBe(false);
-  });
-});
 
-describe('haftalık grafik (KK2)', () => {
-  it('yuvarlak adım', () => {
-    expect(grafikAdimi(43)).toBe(10);
-    expect(grafikAdimi(0)).toBe(1);
-    expect(grafikAdimi(7)).toBe(2);
-    expect(grafikAdimi(240)).toBe(50);
+  it('içerik sağlığı: ilk eksik ya da özet', () => {
+    const tam: IcerikSehri = { id: 's', ad: 'Eskişehir', kapak: true, genis_kapak: true, bolum: 5, bos_bolum: 0, mekan: 8, gezi: 2 };
+    expect(icerikDurumu(tam)).toEqual({ tamam: true, anahtar: 'tamam' });
+    expect(icerikDurumu({ ...tam, bos_bolum: 2 })).toEqual({ tamam: false, anahtar: 'bosBolum', n: 2 });
+    expect(icerikDurumu({ ...tam, genis_kapak: false }).anahtar).toBe('genisKapakYok');
+    expect(icerikDurumu({ ...tam, bolum: 0 }).anahtar).toBe('rehberYok');
+    expect(icerikDurumu({ ...tam, gezi: 0 }).anahtar).toBe('geziYok');
   });
-  it('kanvas geometrisi: 6 çizgi, x 30–540, çift haftalar + son hafta etiketli', () => {
-    const g = grafik(haftalar);
-    expect(g.cizgiler.map((c) => c.y)).toEqual([160, 132, 104, 76, 48, 20]);
-    expect(g.cizgiler.map((c) => c.etiket)).toEqual(['0', '10', '20', '30', '40', '50']);
-    expect(g.xEtiketleri[0]).toEqual({ x: 30, etiket: '20 Tem' });
-    expect(g.xEtiketleri[1].etiket).toBe('');
-    expect(g.xEtiketleri[10].etiket).toBe('28 Eyl');
-    expect(g.xEtiketleri[11]).toEqual({ x: 540, etiket: '5 Eki' });
-    expect(g.kullanici.yol.startsWith('M30.0 132.0 L76.4')).toBe(true);
-    expect(g.kullanici.son).toEqual({ x: 540, y: 160 - (43 / 50) * 140 });
-  });
-  it('boş seri çizgisiz', () => {
-    const g = grafik([]);
-    expect(g.kullanici).toEqual({ yol: '', son: null });
-    expect(g.cizgiler).toHaveLength(6);
-  });
-  it('hafta etiketi', () => {
-    expect(haftaEtiketi('2026-10-12')).toBe('12 Eki');
-  });
-});
 
-describe('CSV (KK6)', () => {
-  it('bölümler ve tırnaklama', () => {
-    const csv = csvMetni(ozet({ en_cok_alinan: [{ id: 'g', baslik: 'Bursa, "üç" gün', sehir: 'Bursa', gun_sayisi: 3, goruntu: 980, alindi: 61, kalp: 150 }] }), ty);
-    const satirlar = csv.split('\r\n');
-    expect(satirlar[0]).toBe('Metrik,Değer');
-    expect(satirlar).toContain('Kullanıcı,1284');
-    expect(satirlar).toContain('Hafta,Kullanıcı,Seyahat');
-    expect(satirlar).toContain('2026-07-20,10,4');
-    expect(satirlar).toContain('"Bursa, ""üç"" gün",Bursa,3,980,61,150,6%');
-    expect(satirlar).toContain('Yorum isteği,410');
-  });
-  it('dosya adı', () => {
-    expect(csvDosyaAdi(7, new Date(2026, 9, 2))).toBe('genel-bakis-7-gun-2026-10-02.csv');
+  it('başlık: Türkiye saatiyle tarih ve selam', () => {
+    expect(tarihEtiketi(new Date('2026-10-13T06:00:00Z'))).toBe('13 EKİM SALI');
+    expect(tarihEtiketi(new Date('2026-10-13T22:30:00Z'))).toBe('14 EKİM ÇARŞAMBA');
+    expect(selam(new Date('2026-10-13T06:00:00Z'))).toBe('gunaydin');
+    expect(selam(new Date('2026-10-13T11:00:00Z'))).toBe('iyiGunler');
+    expect(selam(new Date('2026-10-13T19:00:00Z'))).toBe('iyiAksamlar');
   });
 });
