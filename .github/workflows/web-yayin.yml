@@ -20,11 +20,13 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: web
-      url: https://${{ vars.APP_DOMAIN }}
+      url: https://${{ vars.APP_DOMAIN || 'gezi-web.pages.dev' }}
     # Cloudflare kimlik bilgileri yalnız onlara ihtiyaç duyan adımlarda (npm ci sırasındaki install betikleri okuyamasın).
     env:
       PROJE: ${{ vars.CLOUDFLARE_PAGES_WEB_PROJE || 'gezi-web' }}
-      APP_DOMAIN: ${{ vars.APP_DOMAIN }}
+      # Yayın varsayılanları (herkese açık değerler; repo değişkeni verilirse o geçer): Pages alan adı, app.config.ts'teki
+      # paket kimliği ve EAS imza sertifikasının SHA-256'sı (assetlinks.json zaten herkese açık yayımlanır).
+      APP_DOMAIN: ${{ vars.APP_DOMAIN || 'gezi-web.pages.dev' }}
       # #144: Profil › Yardım ve geri bildirim e-postası (repo değişkeni; boşsa satır gösterilmez).
       EXPO_PUBLIC_DESTEK_EPOSTA: ${{ vars.DESTEK_EPOSTA }}
       EXPO_PUBLIC_SUPABASE_URL: https://xwqeobelyeuzoxyuvauw.supabase.co
@@ -32,9 +34,9 @@ jobs:
       EXPO_PUBLIC_APPLE_SIGN_IN: '0'
       EXPO_PUBLIC_GOOGLE_MAPS_WEB_KEY: ${{ vars.EXPO_PUBLIC_GOOGLE_MAPS_WEB_KEY }}
       APPLE_TEAM_ID: ${{ vars.APPLE_TEAM_ID }}
-      IOS_BUNDLE_ID: ${{ vars.IOS_BUNDLE_ID }}
-      ANDROID_PACKAGE: ${{ vars.ANDROID_PACKAGE }}
-      ANDROID_SHA256: ${{ secrets.ANDROID_SHA256 }}
+      IOS_BUNDLE_ID: ${{ vars.IOS_BUNDLE_ID || 'app.gezi.dev' }}
+      ANDROID_PACKAGE: ${{ vars.ANDROID_PACKAGE || 'app.gezi.dev' }}
+      ANDROID_SHA256: ${{ secrets.ANDROID_SHA256 || vars.ANDROID_SHA256 || 'E9:96:C3:DD:C0:4B:76:48:FA:8A:21:C9:1B:D6:21:59:0A:1C:E9:CD:86:82:74:93:F5:D6:2A:D2:7F:9A:86:E2' }}
     steps:
       - name: Ön koşul
         id: kosul
