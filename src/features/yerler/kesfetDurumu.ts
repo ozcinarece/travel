@@ -5,7 +5,7 @@ import { useCallback, useState } from 'react';
 
 import type { HaritaBolgesi } from '@/components/harita/tipler';
 
-import { BOS_FILTRE, type Filtre } from './filtre';
+import { VARSAYILAN_FILTRE, type Filtre } from './filtre';
 
 /** #29: önizleme kartındaki mekan — çip önerisinden, arama sonucundan ya da listedeki pinden. */
 export type KesfetSecimi = { place_id: string; kaynak: 'oneri' | 'arama' | 'liste' };
@@ -22,7 +22,8 @@ const durumlar = new Map<string, KesfetDurumu>();
 export function kesfetDurumunuAl(seyahatId: string): KesfetDurumu {
   let d = durumlar.get(seyahatId);
   if (!d) {
-    d = { filtre: BOS_FILTRE, secim: null, bolge: null };
+    // #164 KK3: açılış filtresi Turistik.
+    d = { filtre: VARSAYILAN_FILTRE, secim: null, bolge: null };
     durumlar.set(seyahatId, d);
   }
   return d;

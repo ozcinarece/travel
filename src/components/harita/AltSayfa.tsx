@@ -1,22 +1,16 @@
-import {
-  createContext,
-  useContext,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type ReactNode,
-} from "react";
-import {
-  Animated,
-  PanResponder,
-  StyleSheet,
-  View,
-  type NativeScrollEvent,
-  type NativeSyntheticEvent,
-} from "react-native";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { Animated, StyleSheet, View } from "react-native";
+import { Gesture, GestureDetector } from "react-native-gesture-handler";
 
+import {
+  SayfaCekmeSaglayici,
+  useIcerikCekme,
+  useSayfaKaydirma,
+} from "@/components/ui/sayfaCekme";
 import { renk } from "@/theme";
+
+// #164: gövde kaydırması `sayfaCekme`de; eski içe aktarmalar bozulmasın.
+export { useSayfaKaydirma };
 
 /** #55 §B7: üç durma noktası. */
 export type SayfaHali = "katli" | "yari" | "tam";
@@ -28,11 +22,15 @@ const SIRA: SayfaHali[] = ["katli", "yari", "tam"];
 /** Hızlı kaydırmada (fling) konumun bu kadar ms sonrası tahmin edilir. */
 const FLING_MS = 180;
 
-/** Bırakılan konum + hız → en yakın durma noktası (öteleme cinsinden: 0 = tam açık). */
+/**
+ * Bırakılan konum + hız → en yakın durma noktası (öteleme cinsinden: 0 = tam açık). #164 KK5: `baslangic` verilirse sonuç ona
+ * komşu hallerle sınırlanır — küçükten yarıma, yarımdan tama; hızlı fırlatmada da tek adım (yarım hal atlanmaz).
+ */
 export function durmaNoktasi(
   oteleme: number,
   hiz: number,
   yukseklik: SayfaYukseklikleri,
+  baslangic?: SayfaHali,
 ): SayfaHali {
   const tahmin = oteleme + hiz * FLING_MS;
   let en: SayfaHali = "katli";
@@ -44,14 +42,13 @@ export function durmaNoktasi(
       en = h;
     }
   }
-  return en;
+  if (!baslangic) return en;
+  const b = SIRA.indexOf(baslangic);
+  const i = SIRA.indexOf(en);
+  return SIRA[Math.max(b - 1, Math.min(b + 1, i))];
 }
 
-/** Gövdedeki liste kaydırmasını sayfaya bildirir: liste en üstteyken aşağı çekmek sayfayı indirir. */
-const KaydirmaBaglami = createContext<
-  (e: NativeSyntheticEvent<NativeScrollEvent>) => void
->(() => {});
-export const useSayfaKaydirma = () => useContext(KaydirmaBaglami);
+const YAY = { useNativeDriver: true, tension: 140, friction: 20 } as const;
 
 type Props = {
   hal: SayfaHali;
@@ -68,9 +65,9 @@ type Props = {
 };
 
 /**
- * #55 §B7 alt sayfa: katlı · yarı açık · tam ekran. Tutamaktan / başlıktan iki yöne, listenin en üstündeyken listeden
- * aşağı çekilir; bırakınca hız da hesaba katılarak en yakın noktaya yaylı (~250 ms) oturur. ≡ sürükleme tutamacı
- * sonlandırmayı reddettiği için sayfa onu bölmez.
+ * #55 §B7 alt sayfa: katlı · yarı açık · tam ekran. Tutamaktan / başlıktan iki yöne, #164 KK7: içeriğin herhangi bir yerinden
+ * aşağı (içerik en üstteyken; değilse önce içerik kayar) çekilir; bırakınca hız da hesaba katılarak komşu hale (#164 KK5: tek
+ * adım) yaylı (~250 ms) oturur. ≡ sürüklemesi `useSayfaKilidi` ile önceliği alır, sayfa onu bölmez.
  */
 export function AltSayfa({
   hal,
@@ -88,7 +85,9 @@ export function AltSayfa({
   const durum = useRef({
     baslangic: yukseklik.tam - yukseklik[hal],
     simdi: yukseklik.tam - yukseklik[hal],
-    listeY: 0,
+    basHal: hal,
+    /** Şerit jestinin aktifleştiği andaki parmak konumu (Android'de translationY aktifleşmede sıfırlandığı için). */
+    seritY0: 0,
     hal,
     yukseklik,
     onHal,
@@ -108,83 +107,69 @@ export function AltSayfa({
   // Hal (ya da ölçüler) değişince yaylı otur.
   const hedef = yukseklik.tam - yukseklik[hal];
   useEffect(() => {
-    Animated.spring(oteleme, {
-      toValue: hedef,
-      useNativeDriver: true,
-      tension: 140,
-      friction: 20,
-    }).start();
+    Animated.spring(oteleme, { toValue: hedef, ...YAY }).start();
   }, [hedef, oteleme]);
 
-  // Ortak sürükleme işleyicileri; üst şerit iki yöne, gövde yalnız aşağı (liste en üstteyken) yakalar.
+  // Ortak sürükleme işleyicileri: üst şerit iki yöne, gövde yalnız aşağı (içerik en üstteyken) taşır. Ref'ler yalnız jest
+  // işleyicilerinin içinde okunur.
   const isleyiciler = useMemo(
     () => ({
-      onPanResponderGrant: () => {
-        durum.current.baslangic = durum.current.simdi;
+      basla: () => {
         oteleme.stopAnimation();
+        durum.current.baslangic = durum.current.simdi;
+        durum.current.basHal = durum.current.hal;
       },
-      onPanResponderMove: (_: unknown, g: { dy: number }) => {
+      tasi: (dy: number) => {
         const d = durum.current;
         const enFazla = d.yukseklik.tam - d.yukseklik.katli;
-        oteleme.setValue(Math.max(0, Math.min(enFazla, d.baslangic + g.dy)));
+        oteleme.setValue(Math.max(0, Math.min(enFazla, d.baslangic + dy)));
       },
-      onPanResponderRelease: (_: unknown, g: { vy: number }) => {
+      birak: (vy: number) => {
         const d = durum.current;
-        const yeni = durmaNoktasi(d.simdi, g.vy, d.yukseklik);
+        const yeni = durmaNoktasi(d.simdi, vy, d.yukseklik, d.basHal);
         if (yeni === d.hal)
           Animated.spring(oteleme, {
             toValue: d.yukseklik.tam - d.yukseklik[yeni],
-            useNativeDriver: true,
-            tension: 140,
-            friction: 20,
+            ...YAY,
           }).start();
         else d.onHal(yeni);
       },
-      onPanResponderTerminate: () => {
+      iptal: () => {
         const d = durum.current;
         Animated.spring(oteleme, {
           toValue: d.yukseklik.tam - d.yukseklik[d.hal],
-          useNativeDriver: true,
-          tension: 140,
-          friction: 20,
+          ...YAY,
         }).start();
       },
     }),
     [oteleme],
   );
-  const dikey = (g: { dx: number; dy: number }) =>
-    Math.abs(g.dy) >= 8 && Math.abs(g.dy) > Math.abs(g.dx) * 1.2;
-  // Ref'ler yalnız jest işleyicilerinin içinde okunur (render sırasında değil); lint kapanışı ayırt edemiyor.
+  // Ref'ler yalnız jest işleyicilerinin içinde okunur; lint zincirdeki kapanışları ayırt edemiyor.
+  /* eslint-disable react-hooks/refs */
   const ustCekme = useMemo(
     () =>
-      // eslint-disable-next-line react-hooks/refs
-      PanResponder.create({
-        onMoveShouldSetPanResponder: (_, g) => dikey(g),
-        ...isleyiciler,
-      }),
+      Gesture.Pan()
+        .runOnJS(true)
+        .activeOffsetY([-8, 8])
+        .failOffsetX([-20, 20])
+        .onStart((e) => {
+          durum.current.seritY0 = e.absoluteY;
+          isleyiciler.basla();
+        })
+        .onUpdate((e) => isleyiciler.tasi(e.absoluteY - durum.current.seritY0))
+        .onEnd((e, basarili) =>
+          basarili ? isleyiciler.birak(e.velocityY / 1000) : isleyiciler.iptal(),
+        ),
     [isleyiciler],
   );
-  const govdeCekme = useMemo(
-    () =>
-      // eslint-disable-next-line react-hooks/refs
-      PanResponder.create({
-        // Liste en üstteyken aşağı çekiş listeden önce yakalanır (sayfa iner); yukarı ve diğer hareketler listeye kalır.
-        onMoveShouldSetPanResponderCapture: (_, g) =>
-          dikey(g) &&
-          g.dy > 0 &&
-          durum.current.listeY <= 0 &&
-          durum.current.hal !== "katli",
-        ...isleyiciler,
-      }),
-    [isleyiciler],
-  );
-
-  const kaydirma = useMemo(
-    () => (e: NativeSyntheticEvent<NativeScrollEvent>) => {
-      durum.current.listeY = e.nativeEvent.contentOffset.y;
-    },
-    [],
-  );
+  /* eslint-enable react-hooks/refs */
+  const { govde: govdeCekme, deger: kaydirmaDegeri } = useIcerikCekme({
+    etkin: hal !== "katli",
+    onBasla: isleyiciler.basla,
+    onCek: isleyiciler.tasi,
+    onBirak: (b) => isleyiciler.birak(b.vy),
+    onIptal: isleyiciler.iptal,
+  });
 
   return (
     <>
@@ -211,17 +196,21 @@ export function AltSayfa({
           },
         ]}
       >
-        <View
-          {...ustCekme.panHandlers}
-          onLayout={(e) => onUstYukseklik?.(e.nativeEvent.layout.height)}
-        >
-          {ust}
-        </View>
-        <KaydirmaBaglami.Provider value={kaydirma}>
-          <View {...govdeCekme.panHandlers} style={{ flex: 1 }}>
-            {children}
+        <GestureDetector gesture={ustCekme}>
+          <View
+            onLayout={(e) => onUstYukseklik?.(e.nativeEvent.layout.height)}
+            collapsable={false}
+          >
+            {ust}
           </View>
-        </KaydirmaBaglami.Provider>
+        </GestureDetector>
+        <SayfaCekmeSaglayici deger={kaydirmaDegeri}>
+          <GestureDetector gesture={govdeCekme}>
+            <View style={{ flex: 1 }} collapsable={false}>
+              {children}
+            </View>
+          </GestureDetector>
+        </SayfaCekmeSaglayici>
       </Animated.View>
     </>
   );

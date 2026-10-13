@@ -7,6 +7,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import type { HaritaBolgesi } from '@/components/harita/tipler';
 import { izBirak } from '@/lib/hataRaporu';
+import { konaklamaMi } from '@/lib/pinIkonu';
 
 import { yakinYerler, type HafifYer, type OneriCipi } from './api';
 import { birikimeEkle, birikimListesi, istenecekKarolar, KARO_EN_FAZLA_ISTEK, karoOnbellekAnahtari, type Karo } from './karolar';
@@ -51,7 +52,8 @@ async function karoyuGetir(seyahatId: string, kume: OneriCipi, karo: Karo): Prom
     const yerler = await yakinYerler({ cip: kume, merkez: { lat: karo.merkez.lat, lng: karo.merkez.lng, yaricapM: karo.yaricapM } });
     karoDurumu.set(anahtar, 'tamam');
     const b = birikimiAl(seyahatId);
-    const yeni = birikimeEkle(b.yerler, yerler);
+    // #164 KK2: sunucu konaklamayı dışlasa da (excludedPrimaryTypes) birincil tipi konaklama olan sonuç burada da süzülür.
+    const yeni = birikimeEkle(b.yerler, yerler.filter((y) => !konaklamaMi(y.primary_type)));
     if (yeni > 0) b.surum += 1;
     return yeni;
   } catch (e) {
@@ -96,7 +98,10 @@ export type KaroOnerileri = {
   hata: boolean;
   /** Son taranan görünür bölge ("Bu bölgeyi tara" düğmesi bundan uzaklaşınca çıkar); henüz tarama yoksa null. */
   sonTaranan: HaritaBolgesi | null;
-  /** Kullanıcı dokunuşu: bu bölge için bir tur (o anki filtreye göre kümeler). Yolda tur varsa yok sayılır. */
+  /**
+   * Bu bölge için bir tur (o anki filtreye göre kümeler): "Bu bölgeyi tara" dokunuşu ya da #166 incelemesi 3 — çip değişince son
+   * taranan bölge için yeni kümeler. Yolda tur varsa sonuncusu bekletilir, tur bitince çalışır. Önbellekteki karolar istenmez.
+   */
   tara: (bolge: HaritaBolgesi, kumeler: OneriCipi[]) => void;
 };
 
@@ -105,13 +110,14 @@ export type KaroOnerileri = {
  * yakınlaştırılsa / filtre değişse hiçbir istek atılmaz — kullanıcı "Bu bölgeyi tara"ya basınca `tara()` ile bir tur.
  * `karoSayaci.tur` kullanıcı dokunuşu başına en fazla 1 artar.
  */
-export function useKaroOnerileri(seyahatId: string, ilkBolge: HaritaBolgesi | null): KaroOnerileri {
+export function useKaroOnerileri(seyahatId: string, ilkBolge: HaritaBolgesi | null, kumeler: OneriCipi[] = ['hepsi']): KaroOnerileri {
   const [surum, setSurum] = useState(() => birikimiAl(seyahatId).surum);
   const [yolda, setYolda] = useState(0);
   const [hata, setHata] = useState(false);
   const [sonTaranan, setSonTaranan] = useState<HaritaBolgesi | null>(null);
   const canli = useRef(true);
   const yoldaRef = useRef(false);
+  const bekleyen = useRef<{ bolge: HaritaBolgesi; kumeler: OneriCipi[] } | null>(null);
   useEffect(() => {
     canli.current = true;
     return () => {
@@ -120,12 +126,15 @@ export function useKaroOnerileri(seyahatId: string, ilkBolge: HaritaBolgesi | nu
   }, []);
 
   const tara = useCallback(
-    (b: HaritaBolgesi, kumeler: OneriCipi[]) => {
-      if (yoldaRef.current) return;
+    function turAc(b: HaritaBolgesi, k: OneriCipi[]) {
+      if (yoldaRef.current) {
+        bekleyen.current = { bolge: b, kumeler: k };
+        return;
+      }
       yoldaRef.current = true;
       setYolda((n) => n + 1);
       setSonTaranan(b);
-      turBaslat(seyahatId, kumeler, b)
+      turBaslat(seyahatId, k, b)
         .then((s) => {
           if (!canli.current) return;
           setHata(s.hata);
@@ -134,17 +143,25 @@ export function useKaroOnerileri(seyahatId: string, ilkBolge: HaritaBolgesi | nu
         .finally(() => {
           yoldaRef.current = false;
           if (canli.current) setYolda((n) => n - 1);
+          const sira = bekleyen.current;
+          bekleyen.current = null;
+          if (sira && canli.current) turAc(sira.bolge, sira.kumeler);
         });
     },
     [seyahatId],
   );
 
-  // Açılış: ilk gerçek bölge gelince bir kez (`hepsi` kümesi); bölge sonradan değişse de yeniden tetiklenmez.
+  // Açılış: ilk gerçek bölge gelince bir kez, o anki filtrenin kümeleriyle (#166 incelemesi 3: varsayılan yalnız `turistik`);
+  // bölge sonradan değişse de yeniden tetiklenmez.
   const ilkTur = useRef(false);
+  const guncelKumeler = useRef(kumeler);
+  useEffect(() => {
+    guncelKumeler.current = kumeler;
+  });
   useEffect(() => {
     if (!ilkBolge || ilkTur.current) return;
     ilkTur.current = true;
-    tara(ilkBolge, ['hepsi']);
+    tara(ilkBolge, guncelKumeler.current);
   }, [ilkBolge, tara]);
 
   // Liste yalnız sürüm değişince yeniden sıralanır (#68 🔴2). Seyahat ekranı seyahat başına yeniden kurulur (key=id), bu

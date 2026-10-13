@@ -44,9 +44,10 @@ type Props = {
   altBaslik?: string;
   /**
    * #55 §B7: alt panel yerine üç durma noktalı alt sayfa. `govde(yukseklik)` sayfanın görünür gövde yüksekliğini alır.
-   * `ustunde`: sayfanın hemen üstünde yüzen içerik (sayfayla hareket eder).
+   * `ustunde`: sayfanın hemen üstünde yüzen içerik (sayfayla hareket eder). #165: `yariOran` yarım halin alana oranı
+   * (varsayılan %45); `tamGuvenli` tam hal üst katmanı (başlık, arama) da örter, durum çubuğunun altına kadar çıkar.
    */
-  altSayfa?: { hal: SayfaHali; onHal: (h: SayfaHali) => void; ust: ReactNode; govde: (yukseklik: number) => ReactNode; ustunde?: ReactNode };
+  altSayfa?: { hal: SayfaHali; onHal: (h: SayfaHali) => void; ust: ReactNode; govde: (yukseklik: number) => ReactNode; ustunde?: ReactNode; yariOran?: number; tamGuvenli?: boolean };
   /**
    * #98 B KK4: alt sayfa görünmez ve dokunulmaz (mekan paneli açıkken çekmece gizlenir) — harita dolgusu DEĞİŞMEZ (kamera
    * yerinde kalır, #80 KK1); panel kapanınca sayfa aynı halde geri gelir.
@@ -82,17 +83,19 @@ export function HaritaEkrani({ baslik, geri, sagUst, arama, aramaSag, ustEk, alt
   const sayfaAlt = altMenuVar ? 0 : kenar.bottom;
   const yukseklik = {
     katli: SAYFA_UST_DOLGU + seritH + sayfaAlt,
-    yari: Math.max(SAYFA_UST_DOLGU + seritH + 160, Math.round(ekranH * YARI_ORAN)),
-    tam: Math.max(SAYFA_UST_DOLGU + seritH + 200, ekranH - ustY),
+    yari: Math.max(SAYFA_UST_DOLGU + seritH + 160, Math.round(ekranH * (altSayfa?.yariOran ?? YARI_ORAN))),
+    tam: Math.max(SAYFA_UST_DOLGU + seritH + 200, ekranH - (altSayfa?.tamGuvenli ? kenar.top : ustY)),
   };
   const sayfaAcik = !!altSayfa && !altPanel;
-  const haritaAlt = sayfaAcik ? (altSayfa!.hal === 'tam' ? 0 : yukseklik[altSayfa!.hal]) : altPanel && !panelTam ? panelY : 0;
+  // #164 KK6: gizli sayfa kendi halini (yarım / tam) ve kaydırmasını korur; harita onu katlı sayar (beyaz zemin yok).
+  const gorunenHal: SayfaHali | null = sayfaAcik ? (altSayfaGizli ? 'katli' : altSayfa!.hal) : null;
+  const haritaAlt = gorunenHal ? (gorunenHal === 'tam' ? 0 : yukseklik[gorunenHal]) : altPanel && !panelTam ? panelY : 0;
   return (
     <View style={s.ekran} onLayout={(e) => setEkranH(e.nativeEvent.layout.height)}>
       {/* #71 KK5: ekran kendi üst katman yüksekliğini vermezse ölçülen üst katman (başlık + arama + çipler) kullanılır. */}
       <Harita {...harita} altBosluk={haritaAlt} ustBosluk={harita.ustBosluk ?? ustY} />
       {/* #47 A2: tam ekranda harita şeridi görünmez (beyaz arka plan). */}
-      {panelTam || (sayfaAcik && altSayfa!.hal === 'tam') ? <View style={[StyleSheet.absoluteFill, { backgroundColor: renk.zemin }]} /> : null}
+      {panelTam || gorunenHal === 'tam' ? <View style={[StyleSheet.absoluteFill, { backgroundColor: renk.zemin }]} /> : null}
       {altBaslik !== undefined && !panelTam ? (
         <View style={s.gecis} pointerEvents="none">
           <Svg width="100%" height={GECIS_YUKSEKLIK}>

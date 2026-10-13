@@ -349,6 +349,7 @@
       "oneCikanlar": "Öne çıkanlar",
       "oneCikanNot": "Puan ve yorum sayısına göre şehrin en iyi %10’u",
       "kategori": "Kategori",
+      "turistik": "Turistik",
       "kategoriler": {
         "gezilecek": "Gezilecek yer",
         "muze": "Müze",
@@ -392,16 +393,15 @@
     "cekmece": {
       "kucuk": "Bu bölgede önerilen · {n}",
       "baslik": "Bu bölgede önerilen",
-      "alt": "{n} mekan · listede olmayanlar",
-      "altBos": "Görünür alanda listede olmayan öneri yok",
-      "tamAlt": "Listede olmayanlar · puana göre",
       "haritayaDon": "Haritaya dön",
-      "buBolgede": "Bu bölgede · {n}",
+      "yerSayisi": "{n} yer",
+      "bos": "Bu bölgede öneri yok · Haritayı kaydır ya da filtreyi değiştir",
       "ekle": "Listeye ekle",
       "listede": "Listede ✓",
       "ac": "Önerileri aç",
       "kapat": "Önerileri kapat",
-      "listende": "Listende {n} · göster",
+      "listende": "Listende {n}",
+      "listendeIpucu": "Haritada yalnız listendekileri gösterir",
       "onerilereDon": "Önerilere dön",
       "listeBaslik": "Listende · {n}"
     },

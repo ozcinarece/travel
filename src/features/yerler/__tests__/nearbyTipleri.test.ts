@@ -27,4 +27,12 @@ describe('places-nearby tip kümeleri', () => {
   it('eski çip anahtarları (populer, sanat, yemek, manzara) hâlâ tanımlı', () => {
     for (const k of ['populer', 'sanat', 'yemek', 'manzara', 'hepsi', 'otel']) expect(kaynak).toMatch(new RegExp(`^\\s+${k}: \\[`, 'm'));
   });
+  it('#164: turistik kümesi tanımlı; konaklama dışlama listesi yalnız Table A konaklama tipleri', () => {
+    expect(kaynak).toMatch(/^\s+turistik: \[/m);
+    const KONAKLAMA_TABLE_A = new Set(['lodging', 'hotel', 'motel', 'hostel', 'bed_and_breakfast', 'guest_house', 'resort_hotel', 'extended_stay_hotel', 'private_guest_room', 'cottage', 'farmstay', 'campground', 'camping_cabin', 'rv_park']);
+    const blok = kaynak.match(/export const KONAKLAMA_TIPLERI = \[([^\]]+)\]/);
+    const liste = [...(blok?.[1] ?? '').matchAll(/'([a-z_]+)'/g)].map((m) => m[1]);
+    expect(liste.length).toBeGreaterThanOrEqual(5);
+    expect(liste.filter((t) => !KONAKLAMA_TABLE_A.has(t))).toEqual([]);
+  });
 });

@@ -1,177 +1,276 @@
-// #98 B (kanvas TripWizard14 ekran 6–7): Keşfet öneri çekmecesi — üç hal: küçük (tutamaç + "Bu bölgede önerilen · N") →
-// yarım (satırlar: foto 46, ad, kategori · süre · ★, "+") → tam ekran (çipler + büyük kartlar, "Haritaya dön").
+// #98 B → #164 / #165 (kanvas 9 · 9b · 9c): Keşfet öneri çekmecesi — üç hal: küçük (tutamak + tek satır "Bu bölgede önerilen · N"
+// + "Listende N") → yarım (aynı başlık + satırlar: foto 52, ad, "Kategori · ★ puan · süre", EkleDugmesi) → tam (durum çubuğunun
+// altına kadar; sabit başlık + "N yer" + filtre + hızlı çipler, iki sütun fotoğraflı kart, yüzen "Haritaya dön").
 import { Image } from 'expo-image';
-import { FlatList, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import type { ReactNode } from 'react';
+import { FlatList, Pressable, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 
-import { MekanKarti } from '@/components/sihirbaz/MekanKarti';
+import type { SayfaHali } from '@/components/harita/AltSayfa';
 import { EkleDugmesi } from '@/components/ui/EkleDugmesi';
 import { Ikon } from '@/components/ui/Ikon';
-import type { SayfaHali } from '@/components/harita/AltSayfa';
-import { googleMekani, type OnerilenMekan } from '@/features/sihirbaz/onerilenler';
+import { SayfaKaydirmasi, useSayfaKaydirma } from '@/components/ui/sayfaCekme';
 import type { HafifYer } from '@/features/yerler/api';
-import { CEKMECE_CIPLERI, type CekmeceCipi } from '@/features/yerler/cekmece';
 import { t } from '@/i18n';
-import { kategoriEtiketi, sureMetni, varsayilanDakika } from '@/lib/kategori';
-import { kategoriPini, yorumKisa } from '@/lib/pinIkonu';
+import { kategoriEtiketi, sureMetni } from '@/lib/kategori';
+import { kategoriPini } from '@/lib/pinIkonu';
 import { puanMetni } from '@/lib/puan';
 import { bosluk, renk, yazi } from '@/theme';
 
+/** Satır / kart verisi: Google önerisi ya da rehber yeri (foto, öne çıkan ve süre çekmecenin elindeki veriden; ek istek yok). */
+export type CekmeceOgesi = {
+  place_id: string;
+  ad: string;
+  primary_type: string | null;
+  puan: number | null;
+  foto_uri: string | null;
+  oneCikan: boolean;
+  /** Varsayılan kalış süresi (dk) — listedeyse mekanın kendi süresi (Program'la aynı kaynak). */
+  dakika: number;
+  /** "+" ile eklenecek hafif veri. */
+  yer: HafifYer;
+};
+
 type Ortak = {
   havuz: Set<string>;
-  oneCikan: Set<string>;
-  fotolar: Map<string, string | null>;
   mesgulId: string | null;
   onEkle: (y: HafifYer) => void;
   onCikar: (placeId: string) => void;
   onAc: (placeId: string) => void;
 };
 
-/** Üst şerit: tutamaç + başlık (hal'e göre); tam halde sağda "Haritaya dön". */
+/** #165 KK3/KK7: "Kategori · ★ 4,7 · 1 sa". */
+export function ogeMetni(o: Pick<CekmeceOgesi, 'primary_type' | 'puan' | 'dakika'>): string {
+  const puan = puanMetni(o.puan);
+  return [kategoriEtiketi(o.primary_type), puan ? `★ ${puan}` : null, sureMetni(o.dakika)].filter(Boolean).join(' · ');
+}
+
 /**
- * #141 KK7 (kanvas 9): sağda "Listende N · göster" — dokununca harita ve çekmece yalnız listeyi gösterir (öneri pinleri
- * gizlenir); tekrar dokununca önerilere döner.
+ * #141 KK7 (kanvas 9): sağda "Listende N" — dokununca harita ve çekmece yalnız listeyi gösterir (öneri pinleri gizlenir); tekrar
+ * dokununca önerilere döner. #164 KK4: kısa etiket — başlığa yer kalsın; sığmazsa başlık "…" ile kısalır, düğme küçülmez.
  */
 type ListeDugmesi = { sayi: number; yalniz: boolean; onPress: () => void };
 
 function ListeGoster({ sayi, yalniz, onPress }: ListeDugmesi) {
   return (
-    <Pressable accessibilityRole="button" accessibilityState={{ selected: yalniz }} onPress={onPress} style={({ pressed }) => [s.listeDugme, yalniz && s.listeDugmeAcik, pressed && { opacity: 0.85 }]}>
+    <Pressable accessibilityRole="button" accessibilityState={{ selected: yalniz }} accessibilityHint={yalniz ? undefined : t('kesfet.cekmece.listendeIpucu')} onPress={onPress} style={({ pressed }) => [s.listeDugme, yalniz && s.listeDugmeAcik, pressed && { opacity: 0.85 }]}>
       <View style={s.listeKare} />
-      <Text style={s.listeDugmeMetin}>{yalniz ? t('kesfet.cekmece.onerilereDon') : t('kesfet.cekmece.listende', { n: sayi })}</Text>
+      <Text style={s.listeDugmeMetin} numberOfLines={1}>
+        {yalniz ? t('kesfet.cekmece.onerilereDon') : t('kesfet.cekmece.listende', { n: sayi })}
+      </Text>
     </Pressable>
   );
 }
 
-export function CekmeceSeridi({ hal, sayi, onHal, liste }: { hal: SayfaHali; sayi: number; onHal: (h: SayfaHali) => void; liste?: ListeDugmesi }) {
+/**
+ * Üst şerit (tutamakla birlikte sürüklenir; tam halde kaydırırken üstte sabit kalır). Küçük ve yarım halde tek satır başlık; tam
+ * halde Archivo başlık + "N yer" + filtre düğmesi, altında `cipler`.
+ */
+export function CekmeceSeridi({ hal, sayi, onHal, liste, tam }: { hal: SayfaHali; sayi: number; onHal: (h: SayfaHali) => void; liste?: ListeDugmesi; tam?: { yerSayisi: number; onFiltre: () => void; cipler: ReactNode } }) {
   const listeDugmesi = liste && (liste.sayi > 0 || liste.yalniz) ? <ListeGoster {...liste} /> : null;
+  const baslik = liste?.yalniz ? t('kesfet.cekmece.listeBaslik', { n: liste.sayi }) : t('kesfet.cekmece.kucuk', { n: sayi });
   return (
     <View style={s.serit}>
       <Pressable accessibilityRole="button" accessibilityLabel={t(hal === 'katli' ? 'kesfet.cekmece.ac' : 'kesfet.cekmece.kapat')} onPress={() => onHal(hal === 'katli' ? 'yari' : 'katli')} hitSlop={8} style={s.tutamakDokunma}>
         <View style={s.tutamak} />
       </Pressable>
-      {hal === 'katli' ? (
-        <View style={s.seritSatir}>
-          <Pressable accessibilityRole="button" onPress={() => onHal('yari')} style={s.kucukDokun}>
-            <Text style={s.kucukMetin} numberOfLines={1}>
-              {liste?.yalniz ? t('kesfet.cekmece.listeBaslik', { n: liste.sayi }) : t('kesfet.cekmece.kucuk', { n: sayi })}
+      {hal === 'tam' && tam ? (
+        <View style={s.tamUst}>
+          <View style={s.seritSatir}>
+            <Text accessibilityRole="header" style={s.tamBaslik} numberOfLines={1}>
+              {liste?.yalniz ? t('kesfet.cekmece.listeBaslik', { n: liste.sayi }) : t('kesfet.cekmece.baslik')}
             </Text>
-          </Pressable>
-          {listeDugmesi ?? <Ikon ad="yukari" boyut={18} renk={renk.metin} kalinlik={2.2} />}
+            {liste?.yalniz ? (
+              listeDugmesi
+            ) : (
+              <>
+                <Text style={s.yerSayisi}>{t('kesfet.cekmece.yerSayisi', { n: tam.yerSayisi })}</Text>
+                <Pressable accessibilityRole="button" accessibilityLabel={t('kesfet.filtre.ac')} onPress={tam.onFiltre} hitSlop={2} style={({ pressed }) => [s.filtreDugme, pressed && { opacity: 0.85 }]}>
+                  <Ikon ad="filtre" boyut={18} renk={renk.ana} kalinlik={2.4} />
+                </Pressable>
+              </>
+            )}
+          </View>
+          {liste?.yalniz ? null : tam.cipler}
         </View>
       ) : (
         <View style={s.seritSatir}>
-          <View style={{ flex: 1 }}>
-            <Text style={s.baslik}>{liste?.yalniz ? t('kesfet.cekmece.listeBaslik', { n: liste.sayi }) : t('kesfet.cekmece.baslik')}</Text>
-            {!liste?.yalniz ? <Text style={s.alt}>{hal === 'tam' ? t('kesfet.cekmece.tamAlt') : sayi > 0 ? t('kesfet.cekmece.alt', { n: sayi }) : t('kesfet.cekmece.altBos')}</Text> : null}
-          </View>
-          {listeDugmesi}
-          {hal === 'tam' ? (
-            <Pressable accessibilityRole="button" onPress={() => onHal('katli')} style={s.haritayaDon}>
-              <Text style={s.haritayaDonMetin}>{t('kesfet.cekmece.haritayaDon')}</Text>
-            </Pressable>
-          ) : null}
+          <Pressable accessibilityRole="button" disabled={hal !== 'katli'} onPress={() => onHal('yari')} style={s.kucukDokun}>
+            <Text style={s.kucukMetin} numberOfLines={1} ellipsizeMode="tail">
+              {baslik}
+            </Text>
+          </Pressable>
+          {listeDugmesi ?? (hal === 'katli' ? <Ikon ad="yukari" boyut={18} renk={renk.metin} kalinlik={2.2} /> : null)}
         </View>
       )}
     </View>
   );
 }
 
-/** Yarım hal: satır listesi. */
-export function CekmeceSatirlari({ liste, yukseklik, ...o }: Ortak & { liste: HafifYer[]; yukseklik: number }) {
+function BosDurum() {
+  return <Text style={s.bos}>{t('kesfet.cekmece.bos')}</Text>;
+}
+
+/** #165 KK3–4 (kanvas 9b) yarım hal: satır listesi, çekmecenin içinde kayar. */
+export function CekmeceSatirlari({ liste, yukseklik, ...o }: Ortak & { liste: CekmeceOgesi[]; yukseklik: number }) {
+  // #164 KK7: liste en üstteyken içerikten aşağı çekiş çekmeceyi bir alt hale indirir; değilse önce liste kayar.
+  const sayfaKaydirma = useSayfaKaydirma();
   return (
-    <FlatList
-      data={liste}
-      keyExtractor={(y) => y.place_id}
-      style={{ height: yukseklik }}
-      contentContainerStyle={s.satirlar}
-      keyboardShouldPersistTaps="handled"
-      ListEmptyComponent={<Text style={s.bos}>{t('kesfet.cekmece.altBos')}</Text>}
-      renderItem={({ item: y }) => {
-        const listede = o.havuz.has(y.place_id);
-        const puan = puanMetni(y.puan);
-        const yorum = yorumKisa(y.puan_sayisi);
-        const meta = [kategoriEtiketi(y.primary_type), sureMetni(varsayilanDakika(y.primary_type)), puan ? `★ ${puan}${yorum ? ` · ${yorum}` : ''}` : null].filter(Boolean).join(' · ');
-        const foto = o.fotolar.get(y.place_id);
-        return (
-          <Pressable accessibilityRole="button" onPress={() => o.onAc(y.place_id)} style={({ pressed }) => [s.satir, pressed && { opacity: 0.8 }]}>
-            <View style={[s.foto, { backgroundColor: kategoriPini(y.primary_type).kategoriRenk }]}>{foto ? <Image source={{ uri: foto }} style={StyleSheet.absoluteFill} contentFit="cover" transition={120} /> : null}</View>
-            <View style={{ flex: 1, gap: 2 }}>
-              <Text style={s.ad} numberOfLines={1}>
-                {y.ad}
-              </Text>
-              <Text style={s.meta} numberOfLines={1}>
-                {meta}
-              </Text>
-            </View>
-            {/* #136 KK5: tek EkleDugmesi — listedeyse yeşil ✓, dokununca çıkar. */}
-            <EkleDugmesi listede={listede} mesgul={o.mesgulId === y.place_id} onPress={() => (listede ? o.onCikar(y.place_id) : o.onEkle(y))} />
-          </Pressable>
-        );
-      }}
-    />
+    <SayfaKaydirmasi>
+      <FlatList
+        data={liste}
+        keyExtractor={(y) => y.place_id}
+        style={{ height: yukseklik }}
+        onScroll={sayfaKaydirma}
+        scrollEventThrottle={16}
+        bounces={false}
+        overScrollMode="never"
+        contentContainerStyle={s.satirlar}
+        keyboardShouldPersistTaps="handled"
+        ListEmptyComponent={<BosDurum />}
+        renderItem={({ item: y }) => {
+          const listede = o.havuz.has(y.place_id);
+          return (
+            <Pressable accessibilityRole="button" onPress={() => o.onAc(y.place_id)} style={({ pressed }) => [s.satir, pressed && { opacity: 0.8 }]}>
+              <Foto oge={y} stil={s.satirFoto} />
+              <View style={s.satirMetin}>
+                <Text style={s.satirAd} numberOfLines={1}>
+                  {y.ad}
+                </Text>
+                <Text style={s.meta} numberOfLines={1}>
+                  {ogeMetni(y)}
+                </Text>
+              </View>
+              {/* #136 KK5: tek EkleDugmesi — listedeyse açık yeşil ✓, dokununca çıkar. */}
+              <EkleDugmesi listede={listede} mesgul={o.mesgulId === y.place_id} onPress={() => (listede ? o.onCikar(y.place_id) : o.onEkle(y.yer))} />
+            </Pressable>
+          );
+        }}
+      />
+    </SayfaKaydirmasi>
   );
 }
 
-/** Tam hal: çipler + büyük kartlar (5. adımla aynı düzen). `rehber` yalnız "Rehberden" çipi için. */
-export function CekmeceKartlari({ liste, cip, onCip, rehber, rehberVar, yukseklik, bolgeSayisi, ...o }: Ortak & { liste: HafifYer[]; cip: CekmeceCipi; onCip: (c: CekmeceCipi) => void; rehber: OnerilenMekan[]; rehberVar: boolean; yukseklik: number; bolgeSayisi: number }) {
-  const kartlar: OnerilenMekan[] = cip === 'rehber' ? rehber.filter((m) => !o.havuz.has(m.place_id) || true) : liste.map((y) => googleMekani({ ...y, foto_uri: o.fotolar.get(y.place_id) ?? null }, o.oneCikan.has(y.place_id)));
-  const cipler = CEKMECE_CIPLERI.filter((c) => c !== 'rehber' || rehberVar);
-  const etiket = (c: CekmeceCipi) => (c === 'bolge' ? t('kesfet.cekmece.buBolgede', { n: bolgeSayisi }) : t(`sihirbaz.onerilenler.cip.${c}`));
+/** #165 KK7 (kanvas 9c) tam hal: iki sütun kart; başlık ve çipler şeritte (üstte sabit). Altta yüzen "Haritaya dön". */
+export function CekmeceKartlari({ liste, yukseklik, onHaritayaDon, ...o }: Ortak & { liste: CekmeceOgesi[]; yukseklik: number; onHaritayaDon: () => void }) {
+  const sayfaKaydirma = useSayfaKaydirma();
+  const ekran = useWindowDimensions();
+  const genislik = Math.floor((ekran.width - 2 * bosluk.kenar - KART_ARASI) / 2);
   return (
     <View style={{ height: yukseklik }}>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={s.cipler} keyboardShouldPersistTaps="handled">
-        {cipler.map((c) => (
-          <Pressable key={c} accessibilityRole="button" accessibilityState={{ selected: cip === c }} onPress={() => onCip(c)} style={[s.cip, cip === c && s.cipSecili]}>
-            <Text style={[s.cipMetin, cip === c && s.cipMetinSecili]}>{etiket(c)}</Text>
-          </Pressable>
-        ))}
-      </ScrollView>
-      <FlatList
-        data={kartlar}
-        keyExtractor={(m) => m.place_id}
-        contentContainerStyle={s.kartlar}
-        ItemSeparatorComponent={() => <View style={{ height: 12 }} />}
-        ListEmptyComponent={<Text style={s.bos}>{t('kesfet.cekmece.altBos')}</Text>}
-        renderItem={({ item }) => (
-          <MekanKarti
-            mekan={item}
-            listede={o.havuz.has(item.place_id)}
-            mesgul={o.mesgulId === item.place_id}
-            onEkle={() => o.onEkle({ place_id: item.place_id, ad: item.ad, lat: item.lat, lng: item.lng, primary_type: item.primary_type, tz: null, puan: item.puan, puan_sayisi: item.puan_sayisi, acik: null, ulke_kodu: null })}
-            onCikar={() => o.onCikar(item.place_id)}
-            onAc={() => o.onAc(item.place_id)}
-          />
-        )}
-      />
+      <SayfaKaydirmasi>
+        <FlatList
+          data={liste}
+          keyExtractor={(m) => m.place_id}
+          numColumns={2}
+          onScroll={sayfaKaydirma}
+          scrollEventThrottle={16}
+          bounces={false}
+          overScrollMode="never"
+          columnWrapperStyle={s.kartSatiri}
+          contentContainerStyle={s.kartlar}
+          ListEmptyComponent={<BosDurum />}
+          renderItem={({ item }) => <OneriKarti oge={item} genislik={genislik} {...o} />}
+        />
+      </SayfaKaydirmasi>
+      <HaritayaDon onPress={onHaritayaDon} />
+    </View>
+  );
+}
+
+/** Tam halde yalnız listedekiler (satırlar) gösterilirken de "Haritaya dön" yüzer. */
+export function HaritayaDonlu({ yukseklik, onHaritayaDon, children }: { yukseklik: number; onHaritayaDon: () => void; children: ReactNode }) {
+  return (
+    <View style={{ height: yukseklik }}>
+      {children}
+      <HaritayaDon onPress={onHaritayaDon} />
+    </View>
+  );
+}
+
+/** #165 KK8: alt menünün üstünde, ortada yüzen Gece hap; dokununca çekmece küçük hale iner. */
+function HaritayaDon({ onPress }: { onPress: () => void }) {
+  return (
+    <View style={s.haritayaDonKap} pointerEvents="box-none">
+      <Pressable accessibilityRole="button" onPress={onPress} style={({ pressed }) => [s.haritayaDon, pressed && { opacity: 0.9 }]}>
+        <Ikon ad="harita" boyut={18} renk={renk.zemin} kalinlik={2.3} />
+        <Text style={s.haritayaDonMetin}>{t('kesfet.cekmece.haritayaDon')}</Text>
+      </Pressable>
+    </View>
+  );
+}
+
+const KART_ARASI = 12;
+
+function OneriKarti({ oge, genislik, ...o }: Ortak & { oge: CekmeceOgesi; genislik: number }) {
+  const listede = o.havuz.has(oge.place_id);
+  return (
+    <Pressable accessibilityRole="button" onPress={() => o.onAc(oge.place_id)} style={({ pressed }) => [s.kart, { width: genislik }, pressed && { opacity: 0.85 }]}>
+      <View>
+        <Foto oge={oge} stil={s.kartFoto} />
+        {oge.oneCikan ? (
+          <View style={s.rozet}>
+            <Text style={s.rozetMetin}>{t('mekan.panel.oneCikan')}</Text>
+          </View>
+        ) : null}
+        <View style={s.kartEkle}>
+          <EkleDugmesi listede={listede} mesgul={o.mesgulId === oge.place_id} onPress={() => (listede ? o.onCikar(oge.place_id) : o.onEkle(oge.yer))} />
+        </View>
+      </View>
+      <Text style={s.kartAd} numberOfLines={2}>
+        {oge.ad}
+      </Text>
+      <Text style={s.meta} numberOfLines={1}>
+        {ogeMetni(oge)}
+      </Text>
+    </Pressable>
+  );
+}
+
+/** Fotoğraf; yoksa kategori renginde zemin. */
+function Foto({ oge, stil }: { oge: CekmeceOgesi; stil: object }) {
+  return (
+    <View style={[stil, { backgroundColor: kategoriPini(oge.primary_type).kategoriRenk }]}>
+      {oge.foto_uri ? <Image source={{ uri: oge.foto_uri }} style={StyleSheet.absoluteFill} contentFit="cover" transition={120} /> : null}
     </View>
   );
 }
 
 const s = StyleSheet.create({
-  kucukDokun: { flex: 1, minHeight: 44, justifyContent: 'center' },
-  listeDugme: { height: 34, paddingLeft: 6, paddingRight: 10, borderRadius: 10, backgroundColor: '#fff1e6', flexDirection: 'row', alignItems: 'center', gap: 6 },
+  serit: { paddingHorizontal: bosluk.kenar, paddingBottom: 8 },
+  tutamakDokunma: { alignSelf: 'center', paddingVertical: 6, paddingHorizontal: 30 },
+  tutamak: { width: 40, height: 5, borderRadius: 3, backgroundColor: renk.ayrac },
+  seritSatir: { flexDirection: 'row', alignItems: 'center', gap: 10, minHeight: 36 },
+  kucukDokun: { flex: 1, minWidth: 0, minHeight: 44, justifyContent: 'center' },
+  // #164 KK4 (kanvas 9): tek satır, 15 px.
+  kucukMetin: { fontFamily: yazi.ekstra, fontSize: 15, color: renk.metin },
+  listeDugme: { flexShrink: 0, height: 34, paddingLeft: 6, paddingRight: 10, borderRadius: 10, backgroundColor: '#fff1e6', flexDirection: 'row', alignItems: 'center', gap: 6 },
   listeDugmeAcik: { backgroundColor: renk.vurgu },
   listeKare: { width: 20, height: 20, borderRadius: 6, backgroundColor: renk.vurgu, borderWidth: 2, borderColor: renk.ana },
   listeDugmeMetin: { fontFamily: yazi.ekstra, fontSize: 13, color: renk.metin },
-  serit: { paddingHorizontal: bosluk.kenar, paddingBottom: 8 },
-  tutamakDokunma: { alignSelf: 'center', paddingVertical: 6, paddingHorizontal: 30 },
-  tutamak: { width: 36, height: 4, borderRadius: 2, backgroundColor: renk.ayrac },
-  seritSatir: { flexDirection: 'row', alignItems: 'center', gap: 10, minHeight: 36 },
-  kucukMetin: { fontFamily: yazi.baslik, fontSize: 17, letterSpacing: -0.34, color: renk.metin },
-  baslik: { fontFamily: yazi.ekstra, fontSize: 16, color: renk.metin },
-  alt: { fontFamily: yazi.normal, fontSize: 12, color: renk.ikincil },
-  haritayaDon: { height: 34, paddingHorizontal: 12, borderRadius: 999, backgroundColor: renk.yuzey, justifyContent: 'center' },
-  haritayaDonMetin: { fontFamily: yazi.kalin, fontSize: 12, color: renk.metin },
+  // #165 KK6 (kanvas 9c): tam hal üstü.
+  tamUst: { gap: 12, paddingTop: 2 },
+  tamBaslik: { flex: 1, minWidth: 0, fontFamily: yazi.baslik, fontSize: 21, letterSpacing: -0.42, color: renk.metin },
+  yerSayisi: { flexShrink: 0, fontFamily: yazi.ekstra, fontSize: 13, color: renk.ikincil },
+  filtreDugme: { flexShrink: 0, width: 40, height: 40, borderRadius: 12, backgroundColor: renk.yuzey, alignItems: 'center', justifyContent: 'center' },
+  // #165 KK3 (kanvas 9b): satırlar.
   satirlar: { paddingHorizontal: bosluk.kenar, paddingBottom: 16 },
-  satir: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 8, minHeight: 62, borderTopWidth: 1, borderTopColor: renk.ayrac },
-  foto: { width: 46, height: 46, borderRadius: 12, overflow: 'hidden' },
-  ad: { fontFamily: yazi.kalin, fontSize: 14, color: renk.metin },
+  satir: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: renk.yuzey },
+  satirFoto: { width: 52, height: 52, borderRadius: 12, overflow: 'hidden' },
+  satirMetin: { flex: 1, minWidth: 0, gap: 2 },
+  satirAd: { fontFamily: yazi.ekstra, fontSize: 15, color: renk.metin },
   meta: { fontFamily: yazi.normal, fontSize: 12, color: renk.ikincil },
-  bos: { fontFamily: yazi.normal, fontSize: 13, color: renk.ikincil, textAlign: 'center', paddingVertical: 24 },
-  cipler: { gap: 8, paddingHorizontal: bosluk.kenar, paddingBottom: 8 },
-  cip: { height: 34, paddingHorizontal: 14, borderRadius: 999, backgroundColor: renk.yuzey, justifyContent: 'center' },
-  cipSecili: { backgroundColor: renk.metin },
-  cipMetin: { fontFamily: yazi.kalin, fontSize: 12, color: renk.metin },
-  cipMetinSecili: { color: renk.zemin },
-  kartlar: { paddingHorizontal: bosluk.kenar, paddingBottom: 16 },
+  bos: { fontFamily: yazi.normal, fontSize: 13, color: renk.ikincil, textAlign: 'center', paddingVertical: 24, paddingHorizontal: bosluk.kenar },
+  // #165 KK7 (kanvas 9c): iki sütun kart.
+  kartlar: { paddingHorizontal: bosluk.kenar, paddingTop: 4, paddingBottom: 84, gap: 16 },
+  kartSatiri: { gap: KART_ARASI },
+  kart: { gap: 6 },
+  kartFoto: { height: 118, borderRadius: 16, overflow: 'hidden' },
+  rozet: { position: 'absolute', left: 8, top: 8, height: 22, paddingHorizontal: 7, borderRadius: 7, backgroundColor: renk.zemin, justifyContent: 'center' },
+  rozetMetin: { fontFamily: yazi.ekstra, fontSize: 11, color: renk.ana },
+  kartEkle: { position: 'absolute', right: 8, bottom: 8 },
+  kartAd: { fontFamily: yazi.ekstra, fontSize: 14, lineHeight: 17, color: renk.metin },
+  // #165 KK8: yüzen "Haritaya dön".
+  haritayaDonKap: { position: 'absolute', left: 0, right: 0, bottom: 18, alignItems: 'center' },
+  haritayaDon: { height: 44, paddingLeft: 14, paddingRight: 18, borderRadius: 999, backgroundColor: renk.ana, flexDirection: 'row', alignItems: 'center', gap: 8, shadowColor: renk.metin, shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.28, shadowRadius: 20, elevation: 8 },
+  haritayaDonMetin: { fontFamily: yazi.ekstra, fontSize: 14, color: renk.zemin },
 });

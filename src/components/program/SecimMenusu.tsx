@@ -1,5 +1,7 @@
-import { Modal, Pressable, StyleSheet, Text } from 'react-native';
+import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
+import { CekilenSayfa, modalKokuStili } from '@/components/ui/sayfaCekme';
 import { t } from '@/i18n';
 import { minDokunma, renk, yazi } from '@/theme';
 
@@ -7,35 +9,38 @@ export type SecimSecenegi = { etiket: string; onPress: () => void; tehlike?: boo
 
 type Props = { acik: boolean; baslik?: string; secenekler: SecimSecenegi[]; onKapat: () => void };
 
-/** Alttan açılan seçenek menüsü (3.7 KK4 uzun basma menüsü, gün seçimi). Web ve mobilde aynı. */
+/** Alttan açılan seçenek menüsü (3.7 KK4 uzun basma menüsü, gün seçimi). Web ve mobilde aynı. #164: aşağı çekilerek kapanır. */
 export function SecimMenusu({ acik, baslik, secenekler, onKapat }: Props) {
   return (
     <Modal visible={acik} transparent animationType="fade" onRequestClose={onKapat}>
-      <Pressable style={s.perde} onPress={onKapat} accessibilityLabel={t('genel.vazgec')}>
-        <Pressable style={s.kutu} onPress={() => {}}>
-          {baslik ? (
-            <Text style={s.baslik} numberOfLines={2}>
-              {baslik}
-            </Text>
-          ) : null}
-          {secenekler.map((o) => (
-            <Pressable
-              key={o.etiket}
-              accessibilityRole="button"
-              disabled={o.pasif}
-              onPress={() => {
-                onKapat();
-                o.onPress();
-              }}
-              style={({ pressed }) => [s.satir, pressed && { backgroundColor: renk.yuzey }, o.pasif && { opacity: 0.4 }]}>
-              <Text style={[s.satirMetin, o.tehlike && { color: renk.uyari }]}>{o.etiket}</Text>
+      <GestureHandlerRootView style={modalKokuStili}>
+        <View style={s.perde}>
+          <Pressable style={StyleSheet.absoluteFill} onPress={onKapat} accessibilityLabel={t('genel.vazgec')} />
+          <CekilenSayfa onKapat={onKapat} style={s.kutu}>
+            {baslik ? (
+              <Text style={s.baslik} numberOfLines={2}>
+                {baslik}
+              </Text>
+            ) : null}
+            {secenekler.map((o) => (
+              <Pressable
+                key={o.etiket}
+                accessibilityRole="button"
+                disabled={o.pasif}
+                onPress={() => {
+                  onKapat();
+                  o.onPress();
+                }}
+                style={({ pressed }) => [s.satir, pressed && { backgroundColor: renk.yuzey }, o.pasif && { opacity: 0.4 }]}>
+                <Text style={[s.satirMetin, o.tehlike && { color: renk.uyari }]}>{o.etiket}</Text>
+              </Pressable>
+            ))}
+            <Pressable accessibilityRole="button" onPress={onKapat} style={s.vazgec}>
+              <Text style={s.vazgecMetin}>{t('genel.vazgec')}</Text>
             </Pressable>
-          ))}
-          <Pressable accessibilityRole="button" onPress={onKapat} style={s.vazgec}>
-            <Text style={s.vazgecMetin}>{t('genel.vazgec')}</Text>
-          </Pressable>
-        </Pressable>
-      </Pressable>
+          </CekilenSayfa>
+        </View>
+      </GestureHandlerRootView>
     </Modal>
   );
 }

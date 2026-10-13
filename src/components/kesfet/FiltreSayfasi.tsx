@@ -1,9 +1,11 @@
 import type { ReactNode } from 'react';
-import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Ikon } from '@/components/ui/Ikon';
-import { BOS_FILTRE, KATEGORILER, kategoriDegistir, PUAN_ESIKLERI, YORUM_ESIKLERI, type Filtre, type PuanEsigi, type YorumEsigi } from '@/features/yerler/filtre';
+import { CekilenSayfa, modalKokuStili, SayfaKaydirici } from '@/components/ui/sayfaCekme';
+import { KATEGORILER, kategoriDegistir, PUAN_ESIKLERI, turistikDegistir, VARSAYILAN_FILTRE, YORUM_ESIKLERI, type Filtre, type PuanEsigi, type YorumEsigi } from '@/features/yerler/filtre';
 import { t } from '@/i18n';
 import { KATEGORI_PIN, type PinKategorisi } from '@/lib/pinIkonu';
 import { renk, yazi } from '@/theme';
@@ -21,7 +23,8 @@ type Props = {
 /**
  * #69 §C (kanvas KesfetFilter8): filtre alt sayfası — Göster (Hepsi / ★ Öne çıkanlar) · Kategori (8, çoklu, kategori renginde
  * dolu çip + ikon) · Puan (Hepsi / 4,0+ / 4,5+) · Yorum sayısı (Hepsi / 500+ / 1K+ / 5K+); altta "N mekanı göster", üstte Temizle.
- * "Şimdi açık" filtresi yok.
+ * "Şimdi açık" filtresi yok. #164 KK1: kategoride "Turistik" grup hapı (tarihi yer ve anıt + alt seçenekler Müze, İbadet,
+ * Manzara); Temizle açılıştaki Turistik filtresine döner. KK8: tutamaktan ya da içerikten aşağı çekilerek kapanır.
  */
 export function FiltreSayfasi({ acik, filtre, onFiltre, sayi, onKapat }: Props) {
   const kenar = useSafeAreaInsets();
@@ -29,42 +32,48 @@ export function FiltreSayfasi({ acik, filtre, onFiltre, sayi, onKapat }: Props) 
   const yorumMetni = (y: YorumEsigi) => (y === 0 ? t('kesfet.filtre.hepsi') : t('kesfet.filtre.yorumArti', { n: y >= 1000 ? `${y / 1000}K` : String(y) }));
   return (
     <Modal visible={acik} transparent animationType="slide" onRequestClose={onKapat}>
-      <View style={s.perde}>
-        <Pressable style={StyleSheet.absoluteFill} onPress={onKapat} accessibilityLabel={t('kesfet.filtre.kapat')} />
-        <View style={[s.sayfa, { paddingBottom: Math.max(kenar.bottom, 16) }]}>
-          <View style={s.tutamac} />
-          <View style={s.baslikSatir}>
-            <Text style={s.baslik}>{t('kesfet.filtre.baslik')}</Text>
-            <Pressable accessibilityRole="button" hitSlop={8} onPress={() => onFiltre(BOS_FILTRE)}>
-              <Text style={s.temizle}>{t('kesfet.filtre.temizle')}</Text>
+      <GestureHandlerRootView style={modalKokuStili}>
+        <View style={s.perde}>
+          <Pressable style={StyleSheet.absoluteFill} onPress={onKapat} accessibilityLabel={t('kesfet.filtre.kapat')} />
+          <CekilenSayfa onKapat={onKapat} style={[s.sayfa, { paddingBottom: Math.max(kenar.bottom, 16) }]}>
+            <View style={s.tutamac} />
+            <View style={s.baslikSatir}>
+              <Text style={s.baslik}>{t('kesfet.filtre.baslik')}</Text>
+              <Pressable accessibilityRole="button" hitSlop={8} onPress={() => onFiltre(VARSAYILAN_FILTRE)}>
+                <Text style={s.temizle}>{t('kesfet.filtre.temizle')}</Text>
+              </Pressable>
+            </View>
+            <SayfaKaydirici contentContainerStyle={s.govde} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
+              <Bolum baslik={t('kesfet.filtre.goster')} not={t('kesfet.filtre.oneCikanNot')}>
+                <Hap metin={t('kesfet.filtre.hepsi')} secili={!filtre.oneCikan} onPress={() => onFiltre({ ...filtre, oneCikan: false })} />
+                <Hap metin={`★ ${t('kesfet.filtre.oneCikanlar')}`} secili={filtre.oneCikan} onPress={() => onFiltre({ ...filtre, oneCikan: true })} />
+              </Bolum>
+              <Bolum baslik={t('kesfet.filtre.kategori')}>
+                {KATEGORILER.map((k) =>
+                  k === 'gezilecek' ? (
+                    <KategoriHapi key={k} kategori={k} metin={t('kesfet.filtre.turistik')} secili={filtre.kategoriler.includes(k)} onPress={() => onFiltre(turistikDegistir(filtre))} />
+                  ) : (
+                    <KategoriHapi key={k} kategori={k} secili={filtre.kategoriler.includes(k)} onPress={() => onFiltre(kategoriDegistir(filtre, k))} />
+                  ),
+                )}
+              </Bolum>
+              <Bolum baslik={t('kesfet.filtre.puan')} not={t('kesfet.filtre.puanNot')}>
+                {PUAN_ESIKLERI.map((p) => (
+                  <Hap key={p} metin={puanMetni(p)} secili={filtre.puan === p} onPress={() => onFiltre({ ...filtre, puan: p })} />
+                ))}
+              </Bolum>
+              <Bolum baslik={t('kesfet.filtre.yorum')}>
+                {YORUM_ESIKLERI.map((y) => (
+                  <Hap key={y} metin={yorumMetni(y)} secili={filtre.yorum === y} onPress={() => onFiltre({ ...filtre, yorum: y })} />
+                ))}
+              </Bolum>
+            </SayfaKaydirici>
+            <Pressable accessibilityRole="button" onPress={onKapat} style={({ pressed }) => [s.goster, pressed && { opacity: 0.85 }]}>
+              <Text style={s.gosterMetin}>{t('kesfet.filtre.goster_n', { n: sayi })}</Text>
             </Pressable>
-          </View>
-          <ScrollView contentContainerStyle={s.govde} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
-            <Bolum baslik={t('kesfet.filtre.goster')} not={t('kesfet.filtre.oneCikanNot')}>
-              <Hap metin={t('kesfet.filtre.hepsi')} secili={!filtre.oneCikan} onPress={() => onFiltre({ ...filtre, oneCikan: false })} />
-              <Hap metin={`★ ${t('kesfet.filtre.oneCikanlar')}`} secili={filtre.oneCikan} onPress={() => onFiltre({ ...filtre, oneCikan: true })} />
-            </Bolum>
-            <Bolum baslik={t('kesfet.filtre.kategori')}>
-              {KATEGORILER.map((k) => (
-                <KategoriHapi key={k} kategori={k} secili={filtre.kategoriler.includes(k)} onPress={() => onFiltre(kategoriDegistir(filtre, k))} />
-              ))}
-            </Bolum>
-            <Bolum baslik={t('kesfet.filtre.puan')} not={t('kesfet.filtre.puanNot')}>
-              {PUAN_ESIKLERI.map((p) => (
-                <Hap key={p} metin={puanMetni(p)} secili={filtre.puan === p} onPress={() => onFiltre({ ...filtre, puan: p })} />
-              ))}
-            </Bolum>
-            <Bolum baslik={t('kesfet.filtre.yorum')}>
-              {YORUM_ESIKLERI.map((y) => (
-                <Hap key={y} metin={yorumMetni(y)} secili={filtre.yorum === y} onPress={() => onFiltre({ ...filtre, yorum: y })} />
-              ))}
-            </Bolum>
-          </ScrollView>
-          <Pressable accessibilityRole="button" onPress={onKapat} style={({ pressed }) => [s.goster, pressed && { opacity: 0.85 }]}>
-            <Text style={s.gosterMetin}>{t('kesfet.filtre.goster_n', { n: sayi })}</Text>
-          </Pressable>
+          </CekilenSayfa>
         </View>
-      </View>
+      </GestureHandlerRootView>
     </Modal>
   );
 }
@@ -88,7 +97,7 @@ function Hap({ metin, secili, onPress }: { metin: string; secili: boolean; onPre
 }
 
 /** Kategori çipi: seçiliyken kategori renginde dolu, beyaz ikon dairesi %20; değilken gri yüzey + beyaz ikon dairesi. */
-function KategoriHapi({ kategori, secili, onPress }: { kategori: PinKategorisi; secili: boolean; onPress: () => void }) {
+function KategoriHapi({ kategori, metin, secili, onPress }: { kategori: PinKategorisi; metin?: string; secili: boolean; onPress: () => void }) {
   const k = KATEGORI_PIN[kategori];
   return (
     <Pressable
@@ -100,7 +109,7 @@ function KategoriHapi({ kategori, secili, onPress }: { kategori: PinKategorisi; 
       <View style={[s.kategoriIkon, secili && s.kategoriIkonSecili]}>
         <Ikon ad={k.ikon} boyut={12} renk={secili ? renk.zemin : k.renk} kalinlik={2.4} />
       </View>
-      <Text style={[s.hapMetin, secili && s.hapMetinSecili]}>{t(`kesfet.filtre.kategoriler.${kategori}`)}</Text>
+      <Text style={[s.hapMetin, secili && s.hapMetinSecili]}>{metin ?? t(`kesfet.filtre.kategoriler.${kategori}`)}</Text>
     </Pressable>
   );
 }

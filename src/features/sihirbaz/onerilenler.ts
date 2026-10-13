@@ -3,9 +3,10 @@
 import { useQuery } from '@tanstack/react-query';
 import { useMemo } from 'react';
 
-import { oneCikanlar } from '@/features/yerler/filtre';
+import { oneCikanlar, turistikTur } from '@/features/yerler/filtre';
 import { hafifYerler, oneriSirala, yakinYerler, type HafifYer, type OneriCipi } from '@/features/yerler/api';
 import { varsayilanDakika } from '@/lib/kategori';
+import { konaklamaMi } from '@/lib/pinIkonu';
 import type { Sehir, Yer } from '@/lib/tipler';
 
 import { useSehirYerleri, yerPlaceId } from '../icerik/sorgular';
@@ -66,8 +67,9 @@ export const GORMEN_EN_AZ = 10;
 
 /**
  * Çipe göre liste: "Görmen gerekenler" = rehberdekiler (sırayla) + öne çıkanlar (puan sırası) + turistik Nearby listesi
- * (gezilecek + müze; puan sırası, tekrar yok) — en az 10 kart; "Rehberden" = yalnız rehber; kategori çipleri = Google listesi
+ * (puan sırası, tekrar yok) — en az 10 kart; "Rehberden" = yalnız rehber; kategori çipleri = Google listesi
  * puan sırası (öne çıkan rozeti korunur). #121 KK4: listede olanlar gizlenir (`havuz`), az önce eklenenler (`tut`) ✓ ile kalır.
+ * #164: Google kaynaklı kartlar Keşfet'in Turistik kümesiyle aynı türlerden (tarihi yer, müze, manzara, ibadet); konaklama yok.
  */
 export function cipListesi(cip: OnerilenCipi, rehber: OnerilenMekan[], hepsi: HafifYer[], kategori: HafifYer[] | undefined, turistik: HafifYer[] = [], havuz: Set<string> = new Set(), tut: Set<string> = new Set()): OnerilenMekan[] {
   const oneCikan = oneCikanlar(hepsi);
@@ -82,10 +84,11 @@ export function cipListesi(cip: OnerilenCipi, rehber: OnerilenMekan[], hepsi: Ha
       sonuc.push(m);
     };
     rehber.forEach(ekle);
-    oneriSirala(hepsi.filter((y) => oneCikan.has(y.place_id))).forEach((y) => ekle(googleMekani(y, true)));
-    // Turistik türler (tourist_attraction, museum, landmark…) puan sırasıyla; hâlâ azsa `hepsi`nin kalanı.
-    oneriSirala(turistik).forEach((y) => ekle(googleMekani(y, oneCikan.has(y.place_id))));
-    if (sonuc.length < GORMEN_EN_AZ) oneriSirala(hepsi).forEach((y) => sonuc.length < GORMEN_EN_AZ && ekle(googleMekani(y, oneCikan.has(y.place_id))));
+    const turistikHepsi = hepsi.filter((y) => turistikTur(y.primary_type));
+    oneriSirala(turistikHepsi.filter((y) => oneCikan.has(y.place_id))).forEach((y) => ekle(googleMekani(y, true)));
+    // Turistik türler (tourist_attraction, museum, landmark…) puan sırasıyla; hâlâ azsa `hepsi`nin turistik kalanı.
+    oneriSirala(turistik.filter((y) => turistikTur(y.primary_type))).forEach((y) => ekle(googleMekani(y, oneCikan.has(y.place_id))));
+    if (sonuc.length < GORMEN_EN_AZ) oneriSirala(turistikHepsi).forEach((y) => sonuc.length < GORMEN_EN_AZ && ekle(googleMekani(y, oneCikan.has(y.place_id))));
     return sonuc;
   }
   return oneriSirala(kategori ?? []).map((y) => googleMekani(y, oneCikan.has(y.place_id))).filter((m) => !gizli(m.place_id));
@@ -108,7 +111,8 @@ function useGoogleListesi(anahtar: string, cip: OneriCipi, merkez: { lat: number
     queryFn: async () => {
       nearbySayaci.istek += 1;
       if (__DEV__) console.log(`[sihirbaz] nearby istek #${nearbySayaci.istek} · ${cip}`);
-      const yerler = await yakinYerler({ cip, merkez: { ...merkez, yaricapM: YARICAP_M }, enFazla: 20 });
+      // #164 KK2: konaklama önerilmez (sunucu da dışlar).
+      const yerler = (await yakinYerler({ cip, merkez: { ...merkez, yaricapM: YARICAP_M }, enFazla: 20 })).filter((y) => !konaklamaMi(y.primary_type));
       // Kart fotoğrafı: hafif Details foto maskesi (400 px); places-light foto için ≤ 12 kimlik → 12'lik parçalar; 24 sa önbellek.
       const ids = yerler.map((y) => y.place_id);
       const parcalar: string[][] = [];
@@ -138,14 +142,14 @@ export function useOnerilenler(seyahat: { id: string; lat: number; lng: number; 
     },
   });
   const hepsi = useGoogleListesi(seyahat.id, 'hepsi', merkez, true);
-  // #121 KK1: turistik türler — iki Nearby isteği daha (gezilecek + müze); toplam 3, 24 sa önbellek.
-  const gezilecek = useGoogleListesi(seyahat.id, 'gezilecek', merkez, cip === 'gormen');
-  const muze = useGoogleListesi(seyahat.id, 'muze', merkez, cip === 'gormen');
+  // #121 KK1 / #164: turistik türler — Keşfet'in Turistik kümesiyle tek Nearby isteği (tarihi yer, müze, manzara, ibadet);
+  // toplam 2, 24 sa önbellek.
+  const turistikSorgu = useGoogleListesi(seyahat.id, 'turistik', merkez, cip === 'gormen');
   const googleCip = cip === 'gormen' || cip === 'rehber' ? null : GOOGLE_CIP[cip];
   const kategori = useGoogleListesi(seyahat.id, googleCip ?? 'hepsi', merkez, !!googleCip);
-  const turistik = useMemo(() => [...(gezilecek.data ?? []), ...(muze.data ?? [])], [gezilecek.data, muze.data]);
+  const turistik = useMemo(() => turistikSorgu.data ?? [], [turistikSorgu.data]);
   const liste = useMemo(() => cipListesi(cip, rehber.data ?? [], hepsi.data ?? [], googleCip ? kategori.data : undefined, turistik, havuz, tut), [cip, rehber.data, hepsi.data, kategori.data, googleCip, turistik, havuz, tut]);
-  const yukleniyor = cip === 'rehber' ? yerler.isPending || rehber.isPending : cip === 'gormen' ? (rehberSehir ? rehber.isPending : false) || hepsi.isPending || gezilecek.isPending || muze.isPending : kategori.isPending;
+  const yukleniyor = cip === 'rehber' ? yerler.isPending || rehber.isPending : cip === 'gormen' ? (rehberSehir ? rehber.isPending : false) || hepsi.isPending || turistikSorgu.isPending : kategori.isPending;
   const hata = cip === 'rehber' ? rehber.isError : cip === 'gormen' ? hepsi.isError && rehber.isError : kategori.isError;
   return { liste, yukleniyor: yukleniyor && liste.length === 0, hata: hata && liste.length === 0 };
 }

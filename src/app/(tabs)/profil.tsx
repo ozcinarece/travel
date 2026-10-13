@@ -52,8 +52,9 @@ export default function ProfilEkrani() {
         {p ? (
           <View style={s.kimlik}>
             <Avatar ad={p.name} url={p.photo_url} boyut={72} arkaPlan={renk.vurgu} />
-            <View style={{ flex: 1, gap: 2 }}>
-              <Text style={s.ad} numberOfLines={1}>
+            {/* #164 KK10: uzun ad taşmaz — 20 px, tek satır, sığmazsa "…"; Düzenle düğmesi küçülmez. */}
+            <View style={s.adKutu}>
+              <Text style={s.ad} numberOfLines={1} ellipsizeMode="tail">
                 {p.name}
               </Text>
               <Text style={s.kullaniciAdi} numberOfLines={1}>
@@ -155,9 +156,10 @@ const s = StyleSheet.create({
   ekran: { flex: 1, backgroundColor: renk.zemin },
   icerik: { paddingHorizontal: bosluk.kenar, paddingTop: 24, paddingBottom: 32, gap: 18 },
   kimlik: { flexDirection: 'row', alignItems: 'center', gap: 14 },
-  ad: { fontFamily: yazi.baslik, fontSize: 24, letterSpacing: -0.5, color: renk.metin },
+  adKutu: { flex: 1, minWidth: 0, gap: 2 },
+  ad: { fontFamily: yazi.baslik, fontSize: 20, letterSpacing: -0.4, color: renk.metin },
   kullaniciAdi: { fontFamily: yazi.normal, fontSize: 14, color: renk.ikincil },
-  duzenle: { height: 38, paddingHorizontal: 12, borderRadius: kose.alan, backgroundColor: renk.yuzey, justifyContent: 'center' },
+  duzenle: { flexShrink: 0, height: 38, paddingHorizontal: 12, borderRadius: kose.alan, backgroundColor: renk.yuzey, justifyContent: 'center' },
   duzenleMetin: { fontFamily: yazi.ekstra, fontSize: 13, color: renk.ana },
   sayilar: { flexDirection: 'row', gap: 8 },
   sayi: { flex: 1, padding: 12, borderRadius: 16, backgroundColor: renk.yuzey, gap: 2 },

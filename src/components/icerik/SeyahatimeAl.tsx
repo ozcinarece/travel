@@ -3,7 +3,9 @@
 // mükerrer bilgi kutusu, seçime göre düğme ("5 yeni durağı al · Cum 16") ve "Yalnız mekanları listeme ekle (N yeni)".
 import { useMemo, useState } from 'react';
 import { ActivityIndicator, Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
+import { CekilenSayfa, modalKokuStili, SayfaKaydirici } from '@/components/ui/sayfaCekme';
 import { gunHucresi } from '@/components/program/GunKartlari';
 import { Buton } from '@/components/ui/Buton';
 import { Ikon } from '@/components/ui/Ikon';
@@ -49,43 +51,45 @@ export function SeyahatimeAl({ gezi, seyahatler, ilkHedefId, kimlik, onKapat, on
   const hedef = seyahatler.find((s) => s.id === hedefId) ?? seyahatler[0] ?? null;
   return (
     <Modal visible transparent animationType="slide" onRequestClose={onKapat}>
-      <View style={s.perde}>
-        <Pressable style={StyleSheet.absoluteFill} onPress={onKapat} accessibilityLabel={t('genel.vazgec')} />
-        <View style={s.kutu} accessibilityViewIsModal>
-          <View style={s.tutamak} />
-          <View style={{ gap: 4 }}>
-            <Text style={s.baslik}>{t('gezi.alBaslik')}</Text>
-            <Text style={s.altBaslik}>{`${gezi.baslik} · ${t('gezi.gunMekan', { gun: gezi.gun_sayisi, mekan: gezi.mekan_sayisi })}`}</Text>
-          </View>
-          <View style={{ gap: 8 }}>
-            <Text style={s.bolum}>{t('gezi.hangiSeyahate')}</Text>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={s.cipler} style={s.ciplerSerit}>
-              {seyahatler.map((sy) => {
-                const secili = hedef?.id === sy.id;
-                return (
-                  <Pressable key={sy.id} accessibilityRole="button" accessibilityState={{ selected: secili }} onPress={() => setHedefId(sy.id)} style={[s.cip, secili && s.cipSecili]}>
-                    <Text style={[s.cipMetin, secili && s.cipMetinSecili]} numberOfLines={1}>
-                      {`${seyahatAdi(sy)}${sy.start_date && sy.end_date ? ` · ${tarihAraligi(sy.start_date, sy.end_date)}` : ''}`}
-                    </Text>
-                  </Pressable>
-                );
-              })}
-              <Pressable accessibilityRole="button" onPress={onYeniSeyahat} style={s.cip}>
-                <Text style={s.cipMetin}>{`+ ${t('gezi.yeniSeyahat')}`}</Text>
-              </Pressable>
-            </ScrollView>
-          </View>
-          {hedef ? (
-            // Seyahat değişince gün seçimi ve eşleşme baştan kurulur.
-            <HedefGunleri key={hedef.id} gezi={gezi} seyahatId={hedef.id} kimlik={kimlik} onAl={onAl} hata={hata} />
-          ) : (
-            <>
-              <Text style={s.not}>{t('anasayfa.seyahatYok')}</Text>
-              {hata ? <Text style={s.hata}>{hata}</Text> : null}
-            </>
-          )}
+      <GestureHandlerRootView style={modalKokuStili}>
+        <View style={s.perde}>
+          <Pressable style={StyleSheet.absoluteFill} onPress={onKapat} accessibilityLabel={t('genel.vazgec')} />
+          <CekilenSayfa onKapat={onKapat} style={s.kutu} accessibilityViewIsModal>
+            <View style={s.tutamak} />
+            <View style={{ gap: 4 }}>
+              <Text style={s.baslik}>{t('gezi.alBaslik')}</Text>
+              <Text style={s.altBaslik}>{`${gezi.baslik} · ${t('gezi.gunMekan', { gun: gezi.gun_sayisi, mekan: gezi.mekan_sayisi })}`}</Text>
+            </View>
+            <View style={{ gap: 8 }}>
+              <Text style={s.bolum}>{t('gezi.hangiSeyahate')}</Text>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={s.cipler} style={s.ciplerSerit}>
+                {seyahatler.map((sy) => {
+                  const secili = hedef?.id === sy.id;
+                  return (
+                    <Pressable key={sy.id} accessibilityRole="button" accessibilityState={{ selected: secili }} onPress={() => setHedefId(sy.id)} style={[s.cip, secili && s.cipSecili]}>
+                      <Text style={[s.cipMetin, secili && s.cipMetinSecili]} numberOfLines={1}>
+                        {`${seyahatAdi(sy)}${sy.start_date && sy.end_date ? ` · ${tarihAraligi(sy.start_date, sy.end_date)}` : ''}`}
+                      </Text>
+                    </Pressable>
+                  );
+                })}
+                <Pressable accessibilityRole="button" onPress={onYeniSeyahat} style={s.cip}>
+                  <Text style={s.cipMetin}>{`+ ${t('gezi.yeniSeyahat')}`}</Text>
+                </Pressable>
+              </ScrollView>
+            </View>
+            {hedef ? (
+              // Seyahat değişince gün seçimi ve eşleşme baştan kurulur.
+              <HedefGunleri key={hedef.id} gezi={gezi} seyahatId={hedef.id} kimlik={kimlik} onAl={onAl} hata={hata} />
+            ) : (
+              <>
+                <Text style={s.not}>{t('anasayfa.seyahatYok')}</Text>
+                {hata ? <Text style={s.hata}>{hata}</Text> : null}
+              </>
+            )}
+          </CekilenSayfa>
         </View>
-      </View>
+      </GestureHandlerRootView>
     </Modal>
   );
 }
@@ -125,7 +129,7 @@ function HedefGunleri({ gezi, seyahatId, kimlik, onAl, hata }: { gezi: GeziDetay
 
   return (
     <>
-      <ScrollView style={s.kaydirma} contentContainerStyle={{ gap: 8 }}>
+      <SayfaKaydirici style={s.kaydirma} contentContainerStyle={{ gap: 8 }}>
         <Text style={s.bolum}>{t('gezi.hangiGunler')}</Text>
         {gezi.gezi_gunleri.map((g) => {
           const acik = gunDahil(g.id);
@@ -199,7 +203,7 @@ function HedefGunleri({ gezi, seyahatId, kimlik, onAl, hata }: { gezi: GeziDetay
         ) : null}
         {hata ? <Text style={s.hata}>{hata}</Text> : null}
         {yukleniyor ? <ActivityIndicator color={renk.ana} /> : null}
-      </ScrollView>
+      </SayfaKaydirici>
       <Buton baslik={dugme.metin} tur="vurgu" boy="buyuk" onPress={() => al('gunler')} pasif={dugme.pasif || yukleniyor || mesgul !== null} yukleniyor={mesgul === 'gunler'} />
       <Pressable accessibilityRole="button" disabled={yukleniyor || mesgul !== null || ozet.yalnizMekanYeni === 0} onPress={() => al('mekan')} style={s.link} hitSlop={6}>
         {mesgul === 'mekan' ? (
