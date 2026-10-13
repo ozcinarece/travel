@@ -31,6 +31,8 @@ as $$
   from kalem k where k.ad is not null;
 $$;
 revoke execute on function public.google_harcama_bugun() from public, anon, authenticated, service_role;
+comment on function public.google_harcama_bugun() is
+  'Bugünkü tahmini Google harcaması (USD). Fonksiyon → kalem eşlemesi yonetim_genel_temel ile aynı olmalı; yeni bir Google fonksiyonu eklenince ikisi de güncellenir (docs/07, #170).';
 
 -- icerik-google Google'a gitmeden önce sorar: bugünkü harcama + bu isteğin üst sınır maliyeti (p_istek × icerik fiyatı)
 -- günlük bütçeyi aşar mı? Bütçe tanımlı değilse sınır yok. Yalnız service_role (Edge Function).
@@ -84,6 +86,8 @@ end;
 $$;
 revoke execute on function public.yonetim_genel(integer) from public, anon;
 grant execute on function public.yonetim_genel(integer) to authenticated;
+comment on function public.yonetim_genel(integer) is
+  'Sarmal: yonetim_genel_temel + icerik-google istekleri Mekan kalemine (karışık birim fiyat) (#170). create or replace ile değiştirilirse sarmal korunmalı.';
 
 -- ---------------------------------------------------------------- şehirler ve kontrol (hat okur; yalnız postgres)
 

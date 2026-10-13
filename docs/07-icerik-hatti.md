@@ -66,6 +66,9 @@ Hata kodları: `22023` geçersiz veri · `23505` slug ya da şehir zaten var · 
   sayılır (`api_sayac`, fonksiyon `icerik-google`). Cevap gövdesi ve Google verisi loglanmaz.
 - Genel bakış: içerik istekleri **Mekan** kalemine eklenir, Mekan birim fiyatı o günün karışık fiyatı olur
   (`google_birim_fiyat.icerik` = 35 $/1000, üst sınır). İstek sayısı gerçek, tahmini dolar doğru kalır.
+- **Bakım notu:** Fonksiyon → kalem eşlemesi iki yerde: `yonetim_genel_temel` (Genel bakış) ve `google_harcama_bugun`
+  (bütçe denetimi). Yeni bir Google çağıran Edge Function eklenince ikisi de güncellenir. `yonetim_genel` bir sarmaldır
+  (`yonetim_genel_temel` + içerik istekleri); `create or replace` ile yeniden yazılırsa sarmal korunur.
 
 ### Maliyet (liste fiyatı, ücretsiz kota düşülmeden)
 
