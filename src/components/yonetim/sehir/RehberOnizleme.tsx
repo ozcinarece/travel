@@ -95,7 +95,7 @@ export function RehberOnizleme({ sehirAdi, bolumler, seciliId }: { sehirAdi: str
           const secili = k.anahtar === 'rehber';
           return (
             <View key={k.anahtar} style={s.sekme}>
-              <Ikon ad={k.ikon} boyut={22} renk={secili ? yRenk.metin : '#9a9a9a'} kalinlik={2.2} />
+              <Ikon ad={k.ikon} boyut={22} renk={secili ? yRenk.metin : yRenk.soluk} kalinlik={2.2} />
               <Text style={[s.sekmeMetin, secili && s.sekmeSecili]}>{ty(`rehber.onizleme.sekme.${k.anahtar}`)}</Text>
             </View>
           );
@@ -141,19 +141,19 @@ const s = StyleSheet.create({
   baslik: { flexShrink: 1, fontFamily: yazi.ekstra, fontSize: 21, letterSpacing: -0.42, color: yRenk.metin },
   gorsel: { width: TELEFON.genislik, height: 150, backgroundColor: yRenk.yuzey },
   metinKap: { paddingHorizontal: 20 },
-  paragraf: { fontFamily: yazi.normal, fontSize: 14.5, lineHeight: 23.2, color: '#2a2a2a' },
+  paragraf: { fontFamily: yazi.normal, fontSize: 14.5, lineHeight: 23.2, color: yRenk.metin },
   araBaslik: { fontFamily: yazi.ekstra, fontSize: 16, color: yRenk.metin },
   alinti: { fontFamily: yazi.kalin },
   kalin: { fontFamily: yazi.kalin },
   italik: { fontStyle: 'italic' },
-  bag: { fontFamily: yazi.kalin, textDecorationLine: 'underline', textDecorationColor: '#c8c8c4' },
+  bag: { fontFamily: yazi.kalin, textDecorationLine: 'underline', textDecorationColor: yRenk.yerTutucu },
   kartKap: { paddingHorizontal: 20 },
-  kart: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 10, borderRadius: 14, borderWidth: 1, borderColor: yRenk.ayrac, backgroundColor: yRenk.zemin, boxShadow: '0 2px 8px rgba(15,15,15,0.05)' },
+  kart: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 10, borderRadius: 14, borderWidth: 1, borderColor: yRenk.ayrac, backgroundColor: yRenk.zemin, boxShadow: '0 2px 8px rgba(14,20,48,0.05)' },
   kartKare: { width: 56, height: 56, borderRadius: 10 },
   kartMetin: { flex: 1, minWidth: 0, gap: 3 },
   kartAd: { fontFamily: yazi.ekstra, fontSize: 14, color: yRenk.metin },
   kartAlt: { fontFamily: yazi.yari, fontSize: 11.5, color: yRenk.ikincil },
-  yildiz: { color: '#ff5a1f' },
+  yildiz: { color: yRenk.vurgu },
   ekle: { height: 32, paddingHorizontal: 11, borderRadius: 999, borderWidth: 1.5, borderColor: yRenk.metin, justifyContent: 'center' },
   ekleMetin: { fontFamily: yazi.ekstra, fontSize: 12, color: yRenk.metin },
   ust: { position: 'absolute', left: 0, right: 0, top: 0, zIndex: 25, paddingTop: 52, paddingHorizontal: 20, paddingBottom: 10, backgroundColor: 'rgba(255,255,255,0.97)', borderBottomWidth: 1, borderBottomColor: yRenk.ayrac, gap: 8 },
@@ -167,6 +167,6 @@ const s = StyleSheet.create({
   cipMetinSecili: { color: yRenk.zemin },
   alt: { position: 'absolute', left: 0, right: 0, bottom: 0, zIndex: 30, flexDirection: 'row', paddingTop: 10, paddingBottom: 28, borderTopWidth: 1, borderTopColor: yRenk.ayrac, backgroundColor: yRenk.zemin },
   sekme: { flex: 1, alignItems: 'center', gap: 4 },
-  sekmeMetin: { fontFamily: yazi.yari, fontSize: 10.5, color: '#9a9a9a' },
+  sekmeMetin: { fontFamily: yazi.yari, fontSize: 10.5, color: yRenk.soluk },
   sekmeSecili: { fontFamily: yazi.ekstra, color: yRenk.metin },
 });

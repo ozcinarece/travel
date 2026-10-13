@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { StyleSheet, Text } from 'react-native';
 
 import { GirisKarti, GoogleDugmesi } from '@/components/yonetim/GirisKarti';
+import { yRenk } from '@/components/yonetim/tema';
 import { useYonetimDurumu, yonetimGiris } from '@/features/yonetim/admin';
 import { GIRIS, yonetimYonu } from '@/features/yonetim/menu';
 import { ty } from '@/features/yonetim/metin';
@@ -37,6 +38,6 @@ export default function YonetimGirisSayfasi() {
 }
 
 const s = StyleSheet.create({
-  not: { fontFamily: yazi.normal, fontSize: 11.5, color: '#6e6e6e', marginTop: -6 },
-  hata: { fontFamily: yazi.yari, fontSize: 11.5, color: '#ff5a1f' },
+  not: { fontFamily: yazi.normal, fontSize: 11.5, color: yRenk.ikincil, marginTop: -6 },
+  hata: { fontFamily: yazi.yari, fontSize: 11.5, color: yRenk.hata },
 });

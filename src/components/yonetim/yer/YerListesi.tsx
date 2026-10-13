@@ -49,7 +49,7 @@ export function YerListesi({ yerler, sehirler, sehirId, onSehir, seciliId, onSec
   return (
     <View style={s.kap}>
       <View style={s.ust}>
-        <Hap tur="birincil" baslik={ty('yer.yeni')} onPress={() => setEkle((a) => !a)} />
+        <Hap kucuk tur="birincil" baslik={ty('yer.yeni')} onPress={() => setEkle((a) => !a)} />
         <select aria-label={ty('yer.alan.sehir')} value={sehirId} onChange={(e) => onSehir(e.target.value)} style={hapSecim}>
           <option value="">{ty('yer.tumSehirler')}</option>
           {sehirler.map((sh) => (
@@ -100,7 +100,7 @@ export function YerListesi({ yerler, sehirler, sehirId, onSehir, seciliId, onSec
 }
 
 const s = StyleSheet.create({
-  kap: { width: 240, flexShrink: 0, borderRightWidth: 1, borderRightColor: yRenk.ayrac, paddingVertical: 14, paddingHorizontal: 10, gap: 2 },
+  kap: { width: 240, flexShrink: 0, borderRightWidth: 1, borderRightColor: yRenk.ayrac, backgroundColor: yRenk.zemin, paddingVertical: 14, paddingHorizontal: 10, gap: 2 },
   ust: { flexDirection: 'row', gap: 6, paddingHorizontal: 2, paddingBottom: 8 },
   ekle: { paddingHorizontal: 2, paddingBottom: 8 },
   liste: { gap: 2 },

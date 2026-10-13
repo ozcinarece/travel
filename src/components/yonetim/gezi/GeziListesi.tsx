@@ -32,8 +32,8 @@ export function GeziListesi({ geziler, sehirler, seciliId, onSec, onYeni, yeniMe
   return (
     <View style={s.kap}>
       <View style={s.ust}>
-        <Hap tur="birincil" baslik={ty('gezi.yeni')} onPress={onYeni} yukleniyor={yeniMesgul} />
-        <Hap baslik={ty('gezi.filtre')} onPress={() => setFiltreAcik((a) => !a)} />
+        <Hap kucuk tur="birincil" baslik={ty('gezi.yeni')} onPress={onYeni} yukleniyor={yeniMesgul} />
+        <Hap kucuk baslik={ty('gezi.filtre')} onPress={() => setFiltreAcik((a) => !a)} />
       </View>
       {filtreAcik ? (
         <View style={s.filtre}>
@@ -75,7 +75,7 @@ export function GeziListesi({ geziler, sehirler, seciliId, onSec, onYeni, yeniMe
 }
 
 const s = StyleSheet.create({
-  kap: { width: 240, flexShrink: 0, borderRightWidth: 1, borderRightColor: yRenk.ayrac, paddingVertical: 14, paddingHorizontal: 10, gap: 4 },
+  kap: { width: 240, flexShrink: 0, borderRightWidth: 1, borderRightColor: yRenk.ayrac, backgroundColor: yRenk.zemin, paddingVertical: 14, paddingHorizontal: 10, gap: 4 },
   ust: { flexDirection: 'row', gap: 6, paddingHorizontal: 2, paddingBottom: 8 },
   filtre: { gap: 6, paddingHorizontal: 2, paddingBottom: 8 },
   liste: { gap: 4 },

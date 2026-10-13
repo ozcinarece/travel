@@ -1,4 +1,4 @@
-// #106 KK4: sol menü sırası kanvastaki gibi (Backoffice Main.dc.html). Saf: kabuk ve testler buradan okur.
+// #106 KK4 / #155: sol menü sırası kanvastaki gibi (BO-0: Genel bakış, Ana sayfa, Geziler, Şehirler, Yerler, …). Saf: kabuk ve testler buradan okur.
 export type MenuAnahtari = 'genel' | 'geziler' | 'yerler' | 'sehirler' | 'anaSayfa' | 'kullanicilar' | 'ayarlar';
 
 export type MenuOgesi = { anahtar: MenuAnahtari; yol: string };
@@ -9,10 +9,10 @@ export const YETKIN_YOK = '/yonetim/yetkin-yok';
 
 export const MENU: readonly MenuOgesi[] = [
   { anahtar: 'genel', yol: KOK },
-  { anahtar: 'geziler', yol: '/yonetim/geziler' },
-  { anahtar: 'yerler', yol: '/yonetim/yerler' },
-  { anahtar: 'sehirler', yol: '/yonetim/sehirler' },
   { anahtar: 'anaSayfa', yol: '/yonetim/ana-sayfa' },
+  { anahtar: 'geziler', yol: '/yonetim/geziler' },
+  { anahtar: 'sehirler', yol: '/yonetim/sehirler' },
+  { anahtar: 'yerler', yol: '/yonetim/yerler' },
   { anahtar: 'kullanicilar', yol: '/yonetim/kullanicilar' },
   { anahtar: 'ayarlar', yol: '/yonetim/ayarlar' },
 ];

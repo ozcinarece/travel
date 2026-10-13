@@ -113,15 +113,15 @@ export function MekanSecici({ merkez, varsayilan, yalnizKart, onEkle, onVazgec }
         </>
       )}
       <View style={s.eylemler}>
-        <Hap baslik={ty('rehber.vazgec')} onPress={onVazgec} />
-        <Hap tur="birincil" baslik={ty('rehber.ekle')} yukleniyor={mesgul} onPress={() => (link || secili) && ekle()} />
+        <Hap kucuk baslik={ty('rehber.vazgec')} onPress={onVazgec} />
+        <Hap kucuk tur="birincil" baslik={ty('rehber.ekle')} yukleniyor={mesgul} onPress={() => (link || secili) && ekle()} />
       </View>
     </View>
   );
 }
 
 const s = StyleSheet.create({
-  kutu: { width: 360, padding: 10, borderRadius: 14, backgroundColor: yRenk.zemin, gap: 8, boxShadow: '0 14px 40px rgba(15,15,15,0.2)' },
+  kutu: { width: 360, padding: 10, borderRadius: 14, backgroundColor: yRenk.zemin, gap: 8, boxShadow: '0 14px 40px rgba(14,20,48,0.2)' },
   ara: { flexDirection: 'row', alignItems: 'center', gap: 8, height: 36, paddingHorizontal: 10, borderRadius: 10, borderWidth: 1.5, borderColor: yRenk.metin },
   girdi: { flex: 1, minWidth: 0, fontFamily: yazi.kalin, fontSize: 13, color: yRenk.metin },
   sonuc: { flexDirection: 'row', alignItems: 'center', gap: 10, padding: 8, borderRadius: 8 },
@@ -130,7 +130,7 @@ const s = StyleSheet.create({
   sonucMetin: { flex: 1, minWidth: 0 },
   sonucAd: { fontFamily: yazi.ekstra, fontSize: 12.5, color: yRenk.metin },
   sonucAlt: { fontFamily: yazi.yari, fontSize: 11, color: yRenk.ikincil },
-  hata: { fontFamily: yazi.yari, fontSize: 11, color: '#ff5a1f' },
+  hata: { fontFamily: yazi.yari, fontSize: 11, color: yRenk.hata },
   soru: { fontFamily: yazi.ekstra, fontSize: 10.5, color: yRenk.ikincil, paddingTop: 4, paddingHorizontal: 2 },
   secenekler: { flexDirection: 'row', gap: 6 },
   secenek: { flex: 1, paddingVertical: 8, paddingHorizontal: 10, borderRadius: 10, borderWidth: 1.5, borderColor: yRenk.cerceve, gap: 2 },

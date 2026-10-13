@@ -157,7 +157,7 @@ function SeciliFoto({ foto, onAltMetin, onKaynak, onSil }: { foto: IcerikFotosu;
           onChange={(e) => setAlt(e.target.value)}
           onBlur={() => alt.trim() !== (foto.altyazi ?? '') && onAltMetin(alt)}
           placeholder={ty('sehir.foto.altZorunlu')}
-          style={{ height: 30, padding: '0 10px', borderRadius: 8, background: yRenk.zemin, border: `1px solid ${alt.trim() ? yRenk.cerceve : '#ff5a1f'}`, fontFamily: yazi.yari, fontSize: 12, minWidth: 200, boxSizing: 'border-box', color: yRenk.metin }}
+          style={{ height: 30, padding: '0 10px', borderRadius: 8, background: yRenk.zemin, border: `1px solid ${alt.trim() ? yRenk.cerceve : yRenk.hata}`, fontFamily: yazi.yari, fontSize: 12, minWidth: 200, boxSizing: 'border-box', color: yRenk.metin }}
         />
       </View>
       <Text style={s.seciliEtiket}>{ty('sehir.foto.kaynak')}</Text>
@@ -175,9 +175,9 @@ function SeciliFoto({ foto, onAltMetin, onKaynak, onSil }: { foto: IcerikFotosu;
       </select>
       {/* Kırpma ekranı kanvasta yok (tasarım bekliyor). */}
       <View style={s.pasif}>
-        <Hap baslik={ty('sehir.foto.kirp')} onPress={() => {}} />
+        <Hap kucuk baslik={ty('sehir.foto.kirp')} onPress={() => {}} />
       </View>
-      <Hap baslik={ty(silOnay ? 'sehir.foto.silOnay' : 'sehir.foto.sil')} onPress={() => (silOnay ? onSil() : setSilOnay(true))} />
+      <Hap kucuk baslik={ty(silOnay ? 'sehir.foto.silOnay' : 'sehir.foto.sil')} onPress={() => (silOnay ? onSil() : setSilOnay(true))} />
     </View>
   );
 }

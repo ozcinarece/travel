@@ -3,11 +3,11 @@ import { StyleSheet, Text, View } from 'react-native';
 import { yuzdeMetni, type Kart } from '@/features/yonetim/genelBakis';
 import { yazi } from '@/theme';
 
-import { yRenk } from '../tema';
+import { yGolge, yRenk } from '../tema';
 
 /**
  * KK1 (kanvas ekran 1 kartı): 16 × 18 iç boşluk, 14 yarıçap, 1 px #ebebeb; başlık 12 px 700 gri, değer 28 px 800,
- * alt satır 11,5 px 600 gri ve önünde yeşil (#1f8a4c) değişim. Düşüş kanvasta yok: hata rengiyle (#ff5a1f).
+ * alt satır 11,5 px 600 gri ve önünde yeşil değişim. Düşüş kanvasta yok: hata rengiyle.
  */
 export function KpiKarti({ kart }: { kart: Kart }) {
   return (
@@ -23,10 +23,10 @@ export function KpiKarti({ kart }: { kart: Kart }) {
 }
 
 const s = StyleSheet.create({
-  kart: { flex: 1, minWidth: 0, paddingVertical: 16, paddingHorizontal: 18, borderRadius: 14, borderWidth: 1, borderColor: yRenk.ayrac, gap: 6 },
+  kart: { flex: 1, minWidth: 0, padding: 20, borderRadius: 22, backgroundColor: yRenk.zemin, boxShadow: yGolge, gap: 6 },
   baslik: { fontFamily: yazi.kalin, fontSize: 12, color: yRenk.ikincil },
   deger: { fontFamily: yazi.ekstra, fontSize: 28, letterSpacing: -0.84, lineHeight: 28, color: yRenk.metin },
   alt: { fontFamily: yazi.yari, fontSize: 11.5, color: yRenk.ikincil },
-  degisim: { fontFamily: yazi.ekstra, color: '#1f8a4c' },
-  dusus: { color: '#ff5a1f' },
+  degisim: { fontFamily: yazi.ekstra, color: yRenk.basari },
+  dusus: { color: yRenk.hata },
 });

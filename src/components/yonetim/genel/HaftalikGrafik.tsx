@@ -5,10 +5,10 @@ import { GRAFIK, grafik, type Ozet } from '@/features/yonetim/genelBakis';
 import { ty } from '@/features/yonetim/metin';
 import { yazi } from '@/theme';
 
-import { yRenk } from '../tema';
+import { yGolge, yRenk } from '../tema';
 
-const SEYAHAT = '#ff5a1f';
-const SOLUK = '#9a9a9a';
+const SEYAHAT = yRenk.vurgu;
+const SOLUK = yRenk.soluk;
 
 /**
  * KK2 (kanvas "Haftalık · yeni kullanıcı ve seyahat"): 560 × 190 SVG, 6 yatay çizgi (#ebebeb, etiket 10 px #9a9a9a),
@@ -78,7 +78,7 @@ function Lejant({ renk, metin }: { renk: string; metin: string }) {
 }
 
 const s = StyleSheet.create({
-  kart: { flex: 1, minWidth: 0, paddingVertical: 16, paddingHorizontal: 18, borderRadius: 14, borderWidth: 1, borderColor: yRenk.ayrac, gap: 10 },
+  kart: { flex: 1, minWidth: 0, padding: 20, borderRadius: 22, backgroundColor: yRenk.zemin, boxShadow: yGolge, gap: 10 },
   ust: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   baslik: { fontFamily: yazi.ekstra, fontSize: 13, color: yRenk.metin },
   lejant: { flexDirection: 'row', gap: 14 },

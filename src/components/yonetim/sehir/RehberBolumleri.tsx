@@ -45,7 +45,7 @@ export function BolumListesi({
       ))}
       {eksikBolum(bolumler) ? (
         <View style={s.ekle}>
-          <Hap baslik={ty('rehber.yeniBolum')} onPress={onEkle} />
+          <Hap kucuk baslik={ty('rehber.yeniBolum')} onPress={onEkle} />
         </View>
       ) : null}
       <Text style={s.not}>
@@ -63,7 +63,7 @@ function BolumSatiri({ bolum, indeks, secili, onSec, onBirak }: { bolum: RehberB
   const kart = kartSayisi(bolum.yazi_md);
   return (
     <Pressable ref={ref} accessibilityRole="button" accessibilityState={{ selected: secili }} onPress={onSec} style={StyleSheet.flatten([s.satir, secili && s.satirSecili])}>
-      <Svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="#c8c8c4" strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <Svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke={yRenk.yerTutucu} strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
         <Path d={TUTAMAC} />
       </Svg>
       <Text style={s.no}>{String(indeks + 1).padStart(2, '0')}</Text>
@@ -148,7 +148,7 @@ export function BolumEditoru({
 }
 
 const s = StyleSheet.create({
-  liste: { width: 240, flexShrink: 0, borderRightWidth: 1, borderRightColor: yRenk.ayrac, paddingVertical: 14, paddingHorizontal: 10, gap: 2 },
+  liste: { width: 240, flexShrink: 0, borderRightWidth: 1, borderRightColor: yRenk.ayrac, backgroundColor: yRenk.zemin, paddingVertical: 14, paddingHorizontal: 10, gap: 2 },
   listeBaslik: { fontFamily: yazi.ekstra, fontSize: 11, color: yRenk.ikincil, paddingHorizontal: 8, paddingBottom: 8 },
   satir: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingVertical: 9, paddingHorizontal: 10, borderRadius: 10 },
   satirSecili: { backgroundColor: yRenk.yuzey },

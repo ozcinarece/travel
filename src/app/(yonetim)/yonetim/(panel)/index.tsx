@@ -7,7 +7,7 @@ import { HaftalikGrafik } from '@/components/yonetim/genel/HaftalikGrafik';
 import { KpiKarti } from '@/components/yonetim/genel/KpiKarti';
 import { Hap } from '@/components/yonetim/Hap';
 import { Aciklama, YonetimSayfasi } from '@/components/yonetim/Kabuk';
-import { yRenk } from '@/components/yonetim/tema';
+import { yGolge, yRenk } from '@/components/yonetim/tema';
 import { csvDosyaAdi, csvMetni, kartlar, type Ozet } from '@/features/yonetim/genelBakis';
 import { useGenelBakis, useSentryOzeti, useYorumKotasi } from '@/features/yonetim/genelBakisSorgulari';
 import { ty } from '@/features/yonetim/metin';
@@ -95,7 +95,7 @@ const s = StyleSheet.create({
   satir: { flexDirection: 'row', gap: 12 },
   hataSatiri: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   // Kanvas günün özeti: 14 × 18 iç boşluk, 14 yarıçap, 1 px #ebebeb, 12,5 px 600 gri, parçalar arası 24.
-  bugun: { flexDirection: 'row', flexWrap: 'wrap', columnGap: 24, rowGap: 6, paddingVertical: 14, paddingHorizontal: 18, borderRadius: 14, borderWidth: 1, borderColor: yRenk.ayrac },
+  bugun: { flexDirection: 'row', flexWrap: 'wrap', columnGap: 24, rowGap: 6, padding: 20, borderRadius: 22, backgroundColor: yRenk.zemin, boxShadow: yGolge },
   bugunMetin: { fontFamily: yazi.yari, fontSize: 12.5, color: yRenk.ikincil },
   bugunBaslik: { fontFamily: yazi.kalin, color: yRenk.metin },
 });

@@ -5,6 +5,7 @@ import type { Ozet } from '@/features/yonetim/genelBakis';
 
 import { EnCokTablosu } from '../genel/EnCokTablosu';
 import { KpiKarti } from '../genel/KpiKarti';
+import { yRenk } from '../tema';
 
 const satirlar: Ozet['en_cok_alinan'] = [
   { id: 'g1', baslik: "Odunpazarı'ndan Porsuk'a", sehir: 'Eskişehir', gun_sayisi: 2, goruntu: 1240, alindi: 96, kalp: 210 },
@@ -16,9 +17,9 @@ describe('genel bakış parçaları (#110)', () => {
   it('KPI kartı: artış yeşil, düşüş turuncu', () => {
     const { getByText, rerender } = render(<KpiKarti kart={{ anahtar: 'k', baslik: 'Kullanıcı', deger: '1.284', degisim: 8.08, alt: 'son 7 gün +96' }} />);
     expect(getByText('1.284')).toBeTruthy();
-    expect(getByText('+8,1%', { exact: false }).props.style).toEqual(expect.arrayContaining([expect.objectContaining({ color: '#1f8a4c' })]));
+    expect(getByText('+8,1%', { exact: false }).props.style).toEqual(expect.arrayContaining([expect.objectContaining({ color: yRenk.basari })]));
     rerender(<KpiKarti kart={{ anahtar: 'k', baslik: 'Seyahat', deger: '642', degisim: -5, alt: 'bu hafta 2' }} />);
-    expect(getByText('−5%', { exact: false }).props.style).toEqual(expect.arrayContaining([expect.objectContaining({ color: '#ff5a1f' })]));
+    expect(getByText('−5%', { exact: false }).props.style).toEqual(expect.arrayContaining([expect.objectContaining({ color: yRenk.hata })]));
   });
   it('tablo: aralık başlığı, şehir · gün, oran', () => {
     const { getByText } = render(<EnCokTablosu gun={7} satirlar={satirlar} />);

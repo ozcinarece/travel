@@ -81,6 +81,6 @@ export function SehirGenel({ taslak, degistir, tekilHatasi }: Props) {
 const s = StyleSheet.create({
   kap: { gap: 14 },
   ozet: { minHeight: 90, textAlignVertical: 'top' },
-  hata: { fontFamily: yazi.yari, fontSize: 11, color: '#ff5a1f' },
+  hata: { fontFamily: yazi.yari, fontSize: 11, color: yRenk.hata },
   bilgi: { fontFamily: yazi.yari, fontSize: 11, color: yRenk.ikincil },
 });

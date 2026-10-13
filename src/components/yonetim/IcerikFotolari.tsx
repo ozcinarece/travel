@@ -120,7 +120,7 @@ function FotoSatiri({
   const ad = fotoDosyaAdi(foto.yol);
   return (
     <View ref={ref} style={[s.satir, kapak && s.satirKapak]}>
-      <Svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="#c8c8c4" strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <Svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke={yRenk.yerTutucu} strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
         <Path d={TUTAMAC} />
       </Svg>
       <View style={s.kucuk}>
@@ -154,8 +154,8 @@ function FotoSatiri({
         />
       </View>
       <View style={s.eylemler}>
-        <Hap tur={kapak ? 'birincil' : 'ikincil'} baslik={ty(kapak ? 'gezi.kapakTamam' : 'gezi.kapakYap')} onPress={onKapak} />
-        <Hap baslik={ty('gezi.yaziyaEkle')} onPress={onYaziyaEkle} />
+        <Hap kucuk tur={kapak ? 'birincil' : 'ikincil'} baslik={ty(kapak ? 'gezi.kapakTamam' : 'gezi.kapakYap')} onPress={onKapak} />
+        <Hap kucuk baslik={ty('gezi.yaziyaEkle')} onPress={onYaziyaEkle} />
       </View>
       <Pressable accessibilityRole="button" accessibilityLabel={ty('gezi.fotoSil')} onPress={onSil} hitSlop={8}>
         <Text style={s.sil}>×</Text>
@@ -173,11 +173,11 @@ const s = StyleSheet.create({
   satir: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 8, paddingHorizontal: 10, borderRadius: 12, borderWidth: 1, borderColor: yRenk.ayrac },
   satirKapak: { borderColor: yRenk.metin },
   kucuk: { width: 88, height: 60, borderRadius: 8, overflow: 'hidden', backgroundColor: yRenk.yuzey },
-  rozet: { position: 'absolute', left: 6, top: 6, height: 20, paddingHorizontal: 9, borderRadius: 999, backgroundColor: 'rgba(15,15,15,0.75)', justifyContent: 'center' },
+  rozet: { position: 'absolute', left: 6, top: 6, height: 20, paddingHorizontal: 9, borderRadius: 999, backgroundColor: 'rgba(14,20,48,0.75)', justifyContent: 'center' },
   rozetMetin: { fontFamily: yazi.ekstra, fontSize: 9.5, color: yRenk.zemin },
   orta: { flex: 1, minWidth: 0, gap: 4 },
   ad: { fontFamily: yazi.ekstra, fontSize: 12, color: yRenk.metin },
-  altyazi: { height: 30, paddingHorizontal: 10, borderRadius: 8, borderWidth: 1, borderColor: yRenk.cerceve, fontFamily: yazi.yari, fontSize: 12, color: '#2a2a2a' },
+  altyazi: { height: 30, paddingHorizontal: 10, borderRadius: 8, borderWidth: 1, borderColor: yRenk.cerceve, fontFamily: yazi.yari, fontSize: 12, color: yRenk.metin },
   eylemler: { gap: 4 },
   sil: { fontFamily: yazi.normal, fontSize: 14, color: yRenk.ikincil, paddingHorizontal: 4 },
   not: { fontFamily: yazi.normal, fontSize: 11.5, lineHeight: 16.7, color: yRenk.ikincil },
