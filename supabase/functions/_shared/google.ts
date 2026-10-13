@@ -148,6 +148,8 @@ type DetailsCevap = {
   location?: { latitude: number; longitude: number };
   displayName?: { text: string };
   primaryType?: string;
+  /** Tüm tipler (yalnız Nearby maskesinde; #178 ibadet süzgeci). */
+  types?: string[];
   timeZone?: { id: string };
   rating?: number;
   userRatingCount?: number;
@@ -324,8 +326,9 @@ export const CIP_TIPLERI: Record<string, string[]> = {
   otel: ['lodging'],
   hepsi: [...new Set(Object.values(KATEGORI_TIPLERI).flat())],
   // #164 KK1: Keşfet'in varsayılan "Turistik" grubu ve sihirbazın "Görmen gerekenler" listesi aynı küme: tarihi yer ve anıt,
-  // müze ve galeri, manzara, ibadet yerleri.
-  turistik: ['tourist_attraction', 'historical_landmark', 'cultural_landmark', 'monument', 'museum', 'art_gallery', 'observation_deck', 'mosque', 'church', 'synagogue'],
+  // müze ve galeri, manzara. #178 KK1: ibadet tipleri (mosque, church, synagogue) çıktı — her mahalle camisi bu tiplerde;
+  // tarihî ve turistik ibadet yerleri tourist_attraction / historical_landmark tipini de taşıdığı için yine gelir.
+  turistik: ['tourist_attraction', 'historical_landmark', 'cultural_landmark', 'monument', 'museum', 'art_gallery', 'observation_deck'],
   ...KATEGORI_TIPLERI,
   // Eski istemciler (#69 öncesi çipler) bir sürüm daha kabul edilir; OTA'yı almamış istemci 400 almasın.
   populer: ['tourist_attraction'],
@@ -353,14 +356,34 @@ export const KONAKLAMA_TIPLERI = [
   'rv_park',
 ];
 
-export async function yakinAra(secenek: {
+/** #178 KK2: ibadet tipleri. `place_of_worship` Table B'dir (includedTypes'ta kullanılamaz) ama cevabın `types` listesinde görünür. */
+const IBADET_TIPLERI = ['mosque', 'church', 'synagogue', 'place_of_worship'];
+/** Bir ibadet yerinin turistik değeri olduğunu gösteren tipler. */
+const TURISTIK_DEGER_TIPLERI = ['tourist_attraction', 'historical_landmark', 'cultural_landmark'];
+export const IBADET_EN_AZ_YORUM = 1000;
+
+/**
+ * #178 KK2: Turistik'te ibadet yeri yalnız turistik değeri varsa gösterilir — turistik tiplerden birini de taşıyorsa ya da en
+ * az 1.000 yorumu varsa. İbadet yeri olmayan sonuç olduğu gibi kalır. Tipler ve yorum sayısı Nearby cevabında (ek istek yok).
+ */
+export function turistikDegeriVar(d: Pick<DetailsCevap, 'types' | 'primaryType' | 'userRatingCount'>): boolean {
+  const tipler = new Set([...(d.types ?? []), ...(d.primaryType ? [d.primaryType] : [])]);
+  if (!IBADET_TIPLERI.some((t) => tipler.has(t))) return true;
+  return TURISTIK_DEGER_TIPLERI.some((t) => tipler.has(t)) || (d.userRatingCount ?? 0) >= IBADET_EN_AZ_YORUM;
+}
+
+type YakinSecenek = {
   merkez: { lat: number; lng: number };
   yaricapM: number;
   tipler: string[];
   enFazla?: number;
   /** Dışlanacak birincil tipler (excludedPrimaryTypes). */
   haric?: string[];
-}): Promise<HafifYer[]> {
+  /** #178: turistik değeri olmayan ibadet yerleri cevaptan süzülür (Turistik çipi). */
+  ibadetSuzgeci?: boolean;
+};
+
+export async function yakinAra(secenek: YakinSecenek): Promise<HafifYer[]> {
   try {
     return await yakinAraBir(secenek, secenek.haric);
   } catch (e) {
@@ -372,7 +395,7 @@ export async function yakinAra(secenek: {
   }
 }
 
-async function yakinAraBir(secenek: { merkez: { lat: number; lng: number }; yaricapM: number; tipler: string[]; enFazla?: number }, haric: string[] | undefined): Promise<HafifYer[]> {
+async function yakinAraBir(secenek: YakinSecenek, haric: string[] | undefined): Promise<HafifYer[]> {
   const cevap = await istek<{ places?: DetailsCevap[] }>('places:searchNearby', {
     govde: {
       includedTypes: secenek.tipler,
@@ -385,9 +408,11 @@ async function yakinAraBir(secenek: { merkez: { lat: number; lng: number }; yari
         circle: { center: { latitude: secenek.merkez.lat, longitude: secenek.merkez.lng }, radius: Math.min(secenek.yaricapM, 50_000) },
       },
     },
-    maske: 'places.id,places.location,places.displayName,places.primaryType,places.rating,places.userRatingCount,places.currentOpeningHours.openNow',
+    // `places.types` Pro alanı: puan ve "şu an açık" zaten Enterprise SKU'sunda — fiyat değişmez.
+    maske: 'places.id,places.location,places.displayName,places.primaryType,places.types,places.rating,places.userRatingCount,places.currentOpeningHours.openNow',
   });
-  return (cevap.places ?? []).map((d) => ({
+  const yerler = cevap.places ?? [];
+  return (secenek.ibadetSuzgeci ? yerler.filter(turistikDegeriVar) : yerler).map((d) => ({
     place_id: d.id,
     ad: d.displayName?.text ?? '',
     lat: d.location?.latitude ?? 0,
