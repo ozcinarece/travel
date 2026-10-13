@@ -67,9 +67,9 @@ export type HaritaCizgisi = {
   renk: string;
   /** 0–1; seçili gün 0,9 (geçilen bacak 0,35). #91: diğer günlerin çizgisi yok. */
   opaklik?: number;
-  /** Gerçek yol gelmemiş kuş uçuşu: kesikli (#65: araba bacağı düzdür, kesik değil). */
+  /** Kesik çizgi: rota gelmemiş kuş uçuşu (ince) ya da #136 araba bacağı (4,5 dp rota tonu, kuş uçuşu). */
   kesik?: boolean;
-  /** #65: araba bacağı (uzun bacak) — yürümeyle aynı katmanlar, yön oku yok. */
+  /** Araba bacağı: #136'dan beri kuş uçuşu kesik çizgi; yön oku ve hap glifi `araba`. */
   arac?: boolean;
   /** 3 dp, kenarsız, oksuz — #91'den beri yalnız kuş uçuşu (`kesik`) ince; diğer günlerin rotası hiç çizilmez. */
   ince?: boolean;

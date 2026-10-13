@@ -56,8 +56,8 @@ describe('yonOklari (#59 §C)', () => {
     expect(haplar[0].bacakM).toBeGreaterThan(1000);
     expect(bacakEtiketPinleri([yuruyus, taksi], 12.9)).toEqual([]);
     expect(bacakEtiketPinleri([yuruyus, taksi]).length).toBe(2);
-    // Glif PNG anahtarı: yürüme siyah, araba rota tonunda.
-    expect(hapGlifAnahtari(haplar[0])).toBe('yuru-0f0f0f');
+    // Glif PNG anahtarı: yürüme Lacivert (#136), araba rota tonunda.
+    expect(hapGlifAnahtari(haplar[0])).toBe('yuru-0e1430');
     expect(hapGlifAnahtari(haplar[1])).toBe('araba-1f4fc2');
     expect(hapGlifAnahtari({ renk: '#000' })).toBeNull();
   });

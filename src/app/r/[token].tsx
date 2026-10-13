@@ -173,8 +173,8 @@ export default function DavetEkrani() {
             <Buton baslik={t('davet.profilTamamla')} onPress={profiliTamamla} />
           ) : (
             <>
-              {appleVar ? <Buton baslik={t('davet.katilApple')} onPress={() => girisYap('apple', appleIleGiris)} yukleniyor={mesgul === 'apple'} pasif={mesgul !== null && mesgul !== 'apple'} /> : null}
-              <Buton baslik={t('davet.katilGoogle')} tur={appleVar ? 'ikincil' : 'birincil'} onPress={() => girisYap('google', googleIleGiris)} yukleniyor={mesgul === 'google'} pasif={mesgul !== null && mesgul !== 'google'} />
+              {appleVar ? <Buton baslik={t('davet.katilApple')} boy="buyuk" onPress={() => girisYap('apple', appleIleGiris)} yukleniyor={mesgul === 'apple'} pasif={mesgul !== null && mesgul !== 'apple'} /> : null}
+              <Buton baslik={t('davet.katilGoogle')} tur={appleVar ? 'cerceveli' : 'birincil'} boy="buyuk" onPress={() => girisYap('google', googleIleGiris)} yukleniyor={mesgul === 'google'} pasif={mesgul !== null && mesgul !== 'google'} />
               {Platform.OS === 'web' ? <Text style={s.not}>{t('davet.webNot')}</Text> : null}
               <Text style={s.not}>{t('giris.kosullar')}</Text>
             </>
@@ -190,10 +190,10 @@ const s = StyleSheet.create({
   icerik: { flexGrow: 1, padding: bosluk.kenar, paddingTop: 28, gap: 12, maxWidth: 520, width: '100%', alignSelf: 'center' },
   davetci: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   davetciMetin: { fontFamily: yazi.kalin, fontSize: 13, color: renk.ikincil },
-  baslik: { fontFamily: yazi.ekstra, fontSize: 28, lineHeight: 32, letterSpacing: -0.8, color: renk.metin },
+  baslik: { fontFamily: yazi.baslik, fontSize: 28, lineHeight: 32, letterSpacing: -0.8, color: renk.metin },
   alt: { fontFamily: yazi.normal, fontSize: 15, lineHeight: 22, color: renk.ikincil },
-  plan: { marginTop: 8, padding: 16, borderRadius: 18, backgroundColor: renk.yuzey, gap: 8 },
-  planBaslik: { fontFamily: yazi.kalin, fontSize: 12, color: renk.ikincil },
+  plan: { marginTop: 8, padding: 16, borderRadius: 22, backgroundColor: renk.yuzey, gap: 8 },
+  planBaslik: { fontFamily: yazi.ekstra, fontSize: 12, letterSpacing: 0.5, color: renk.ikincil },
   gunSatiri: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 6 },
   gunAd: { fontFamily: yazi.kalin, fontSize: 14, color: renk.metin },
   gunDurak: { fontFamily: yazi.normal, fontSize: 13, color: renk.ikincil },

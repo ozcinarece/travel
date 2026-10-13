@@ -1,9 +1,10 @@
 // #98 B (kanvas TripWizard14 ekran 6–7): Keşfet öneri çekmecesi — üç hal: küçük (tutamaç + "Bu bölgede önerilen · N") →
 // yarım (satırlar: foto 46, ad, kategori · süre · ★, "+") → tam ekran (çipler + büyük kartlar, "Haritaya dön").
 import { Image } from 'expo-image';
-import { ActivityIndicator, FlatList, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { FlatList, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { MekanKarti } from '@/components/sihirbaz/MekanKarti';
+import { EkleDugmesi } from '@/components/ui/EkleDugmesi';
 import { Ikon } from '@/components/ui/Ikon';
 import type { SayfaHali } from '@/components/harita/AltSayfa';
 import { googleMekani, type OnerilenMekan } from '@/features/sihirbaz/onerilenler';
@@ -13,7 +14,7 @@ import { t } from '@/i18n';
 import { kategoriEtiketi, sureMetni, varsayilanDakika } from '@/lib/kategori';
 import { kategoriPini, yorumKisa } from '@/lib/pinIkonu';
 import { puanMetni } from '@/lib/puan';
-import { bosluk, minDokunma, renk, yazi } from '@/theme';
+import { bosluk, renk, yazi } from '@/theme';
 
 type Ortak = {
   havuz: Set<string>;
@@ -81,13 +82,8 @@ export function CekmeceSatirlari({ liste, yukseklik, ...o }: Ortak & { liste: Ha
                 {meta}
               </Text>
             </View>
-            {listede ? (
-              <Text style={s.listede}>{t('kesfet.cekmece.listede')}</Text>
-            ) : (
-              <Pressable accessibilityRole="button" accessibilityLabel={t('kesfet.cekmece.ekle')} disabled={o.mesgulId === y.place_id} onPress={() => o.onEkle(y)} hitSlop={6} style={s.arti}>
-                {o.mesgulId === y.place_id ? <ActivityIndicator color={renk.zemin} /> : <Text style={s.artiMetin}>+</Text>}
-              </Pressable>
-            )}
+            {/* #136 KK5: tek EkleDugmesi — listedeyse yeşil ✓, dokununca çıkar. */}
+            <EkleDugmesi listede={listede} mesgul={o.mesgulId === y.place_id} onPress={() => (listede ? o.onCikar(y.place_id) : o.onEkle(y))} />
           </Pressable>
         );
       }}
@@ -145,9 +141,6 @@ const s = StyleSheet.create({
   foto: { width: 46, height: 46, borderRadius: 12, overflow: 'hidden' },
   ad: { fontFamily: yazi.kalin, fontSize: 14, color: renk.metin },
   meta: { fontFamily: yazi.normal, fontSize: 12, color: renk.ikincil },
-  arti: { width: 36, height: 36, borderRadius: 18, backgroundColor: renk.metin, alignItems: 'center', justifyContent: 'center' },
-  artiMetin: { fontFamily: yazi.kalin, fontSize: 20, lineHeight: 22, color: renk.zemin },
-  listede: { fontFamily: yazi.kalin, fontSize: 12, color: renk.ikincil, minHeight: minDokunma, textAlignVertical: 'center' },
   bos: { fontFamily: yazi.normal, fontSize: 13, color: renk.ikincil, textAlign: 'center', paddingVertical: 24 },
   cipler: { gap: 8, paddingHorizontal: bosluk.kenar, paddingBottom: 8 },
   cip: { height: 34, paddingHorizontal: 14, borderRadius: 999, backgroundColor: renk.yuzey, justifyContent: 'center' },

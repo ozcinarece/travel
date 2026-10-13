@@ -4,6 +4,7 @@ import { Image } from 'expo-image';
 import { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
+import { EkleDugmesi } from '@/components/ui/EkleDugmesi';
 import type { IcerikCanli } from '@/features/icerik/fotolar';
 import { t } from '@/i18n';
 import { kategoriEtiketi, sureMetni } from '@/lib/kategori';
@@ -49,9 +50,7 @@ export function GeziPlani({ gezi, canli, onDurakEkle, listede, mesgulId }: Props
                   {kategoriEtiketi(d.kategori)} · {sureMetni(d.sure_dk)}
                 </Text>
               </View>
-              <Pressable accessibilityRole="button" accessibilityLabel={icinde ? t('anasayfa.listede') : t('anasayfa.ekle')} disabled={icinde || mesgulId === d.id} onPress={() => onDurakEkle(d)} hitSlop={6} style={[s.arti, icinde && s.artiListede]}>
-                <Text style={[s.artiMetin, icinde && { color: renk.metin }]}>{icinde ? '✓' : '+'}</Text>
-              </Pressable>
+              <EkleDugmesi listede={icinde} mesgul={mesgulId === d.id} pasif={icinde} onPress={() => onDurakEkle(d)} boyut={34} />
             </View>
           );
         })}
@@ -74,8 +73,5 @@ const s = StyleSheet.create({
   foto: { width: 44, height: 44, borderRadius: 12, overflow: 'hidden' },
   ad: { fontFamily: yazi.kalin, fontSize: 14, color: renk.metin },
   meta: { fontFamily: yazi.normal, fontSize: 12, color: renk.ikincil },
-  arti: { width: 34, height: 34, borderRadius: 17, backgroundColor: renk.metin, alignItems: 'center', justifyContent: 'center', minWidth: 34 },
-  artiListede: { backgroundColor: renk.yuzey },
-  artiMetin: { fontFamily: yazi.kalin, fontSize: 18, lineHeight: 20, color: renk.zemin },
   _: { minHeight: minDokunma },
 });

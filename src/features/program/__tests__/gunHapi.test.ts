@@ -33,7 +33,7 @@ describe('gunHapiVerisi (#91 B KK1)', () => {
   const konum = { lat: 39.78, lng: 30.5 };
   it('"Cum 16 · Odunpazarı Evleri", gün rengi, pin kimliği m:<mekan>; tarihsiz günde "3. gün"', () => {
     const h = gunHapiVerisi({ mekanId: 'm1', durak: durak('g1'), konum, gunler, seciliGunId: 'g2', hafif: { ad: 'Odunpazarı Evleri' } as never, dugme: 'Güne git' });
-    expect(h).toEqual({ pinId: 'm:m1', konum, renk: '#2f6fed', metin: 'Cum 16 · Odunpazarı Evleri', dugme: 'Güne git' });
+    expect(h).toEqual({ pinId: 'm:m1', konum, renk: '#2c64f5', metin: 'Cum 16 · Odunpazarı Evleri', dugme: 'Güne git' });
     expect(gunHapiVerisi({ mekanId: 'm1', durak: durak('g3'), konum, gunler, seciliGunId: 'g1', hafif: undefined, dugme: 'Güne git' })?.metin).toBe('3. gün');
   });
   it('hap yok: mekan yok, durak seçili güne geçti, durak silindi, gün bulunamadı', () => {

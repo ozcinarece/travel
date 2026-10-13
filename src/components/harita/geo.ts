@@ -104,10 +104,20 @@ export function etiketOnceligi(p: HaritaPini): number {
  * #61 §5: seçili gün dışındaki (soluk) durak pini numarasız küçük nokta, 20 px.
  */
 export function pinCapi(p: HaritaPini): number {
+  // #136: seçili durak büyük kare (38), çapa merkez; iğne yalnız Keşfet pinlerinde (öneri / listede / tamamlandı PNG).
+  if (p.secili && p.tur === 'durak' && !p.tamam) return SECILI_DURAK;
   if (p.secili) return igneOlcusu(p).en;
   if (p.kucuk) return KUCUK_PIN;
   if (p.tur === 'durak' && (p.opaklik ?? 1) < 1) return 20;
+  if (p.tur === 'durak') return DURAK_KARE;
   return p.boy ?? 28;
+}
+/** #136 (kanvas Temel · harita dili): durak pini köşeli kare 30 px (köşe 9); seçili / sıradaki 38 px Mandalina (köşe 11). */
+export const DURAK_KARE = 30;
+export const SECILI_DURAK = 38;
+/** Seçili durak kare biçiminde mi (iğne yerine)? */
+export function seciliKareMi(p: Pick<HaritaPini, 'secili' | 'tur' | 'tamam'>): boolean {
+  return !!p.secili && p.tur === 'durak' && !p.tamam;
 }
 /**
  * #65 (docs/05 §2): seçili pin iğne (damla) biçimi 38 × 46 px; çapa iğnenin UCU (konum), gövde ucun üstünde; ad etiketi
@@ -130,7 +140,7 @@ export const IGNE_GORUNEN_BOY = igneGorunenBoy(IGNE);
 export const KUCUK_PIN = 20;
 /** Pinin ekran kutusu (engel): daire konumun ortasında; seçili iğne konumun üstünde. */
 export function pinKutusu(p: HaritaPini, cx: number, cy: number): { x1: number; y1: number; x2: number; y2: number } {
-  if (p.secili && p.tur !== 'etiket' && p.tur !== 'konum' && p.tur !== 'aday') {
+  if (p.secili && p.tur !== 'etiket' && p.tur !== 'konum' && p.tur !== 'aday' && !seciliKareMi(p)) {
     const o = igneOlcusu(p);
     return { x1: cx - o.en / 2, y1: cy - igneGorunenBoy(o), x2: cx + o.en / 2, y2: cy };
   }
@@ -139,7 +149,7 @@ export function pinKutusu(p: HaritaPini, cx: number, cy: number): { x1: number; 
 }
 /** Ad etiketinin üst kenarı (px, konuma göre): daire altı + 2; seçili iğnede uç + 4. */
 export function etiketUstu(p: HaritaPini): number {
-  return p.secili ? IGNE.etiketPayi : pinCapi(p) / 2 + 2;
+  return p.secili && !seciliKareMi(p) ? IGNE.etiketPayi : pinCapi(p) / 2 + 2;
 }
 /** #59 §A2: otel karesi ve konum halkası (px) — PinIcerigi ile aynı. */
 export const OTEL_KARE = 28;
@@ -287,7 +297,7 @@ export function pinZ(p: HaritaPini): number {
  * ucu (iğne + 4 px + etiket kutusu).
  */
 export function pinCapasi(p: HaritaPini, detay = false): { x: number; y: number } {
-  if (p.secili) {
+  if (p.secili && !seciliKareMi(p)) {
     const gorunen = igneGorunenBoy(igneOlcusu(p));
     return { x: 0.5, y: gorunen / (gorunen + IGNE.etiketPayi + etiketYuksekligi(detay)) };
   }

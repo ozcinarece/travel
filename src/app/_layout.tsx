@@ -1,11 +1,4 @@
-import {
-  PlusJakartaSans_400Regular,
-  PlusJakartaSans_500Medium,
-  PlusJakartaSans_600SemiBold,
-  PlusJakartaSans_700Bold,
-  PlusJakartaSans_800ExtraBold,
-  useFonts,
-} from '@expo-google-fonts/plus-jakarta-sans';
+import { Figtree_400Regular, Figtree_500Medium, Figtree_600SemiBold, Figtree_700Bold, Figtree_800ExtraBold, useFonts } from '@expo-google-fonts/figtree';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
@@ -22,12 +15,15 @@ SplashScreen.preventAutoHideAsync();
 const queryClient = new QueryClient();
 
 function Kok() {
+  // #136: Figtree (metin) + Archivo SemiExpanded 850 (başlık; Google Fonts değişken dosyasından üretilmiş statik örnek,
+  // assets/fonts). İkisi de JS varlığı — OTA ile gider, yerel derleme gerekmez.
   const [fontlar, fontHatasi] = useFonts({
-    PlusJakartaSans_400Regular,
-    PlusJakartaSans_500Medium,
-    PlusJakartaSans_600SemiBold,
-    PlusJakartaSans_700Bold,
-    PlusJakartaSans_800ExtraBold,
+    Figtree_400Regular,
+    Figtree_500Medium,
+    Figtree_600SemiBold,
+    Figtree_700Bold,
+    Figtree_800ExtraBold,
+    ArchivoSemiExpanded_850: require('../../assets/fonts/ArchivoSemiExpanded-ExtraBold.ttf'),
   });
   const { hazir, hesapli } = useOturum();
   const profil = useProfil();

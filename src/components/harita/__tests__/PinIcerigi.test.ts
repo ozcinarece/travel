@@ -12,10 +12,11 @@ describe('pinPngAnahtari', () => {
   it('kategori pini, listede ✓, tamamlanan durak ✓, otel ev, araba hapı', () => {
     expect(pinPngAnahtari(p({ tur: 'oneri', ikon: 'kamera', kategoriRenk: '#3b6fe0' }))).toBe('kamera-3b6fe0');
     expect(pinPngAnahtari(p({ tur: 'bos', ikon: 'agac', kategoriRenk: '#1f8a4c' }))).toBe('agac-1f8a4c');
+    expect(pinPngAnahtari(p({ tur: 'oneri', ikon: 'catal', kategoriRenk: '#d9480f' }))).toBe('catal-d9480f');
     expect(pinPngAnahtari(p({ tur: 'listede' }))).toBe('tik-ffffff');
     expect(pinPngAnahtari(p({ tur: 'durak', etiket: '2', tamam: true }))).toBe('tik-ffffff');
     expect(pinPngAnahtari(p({ tur: 'otel' }))).toBe('ev-ffffff');
-    expect(pinPngAnahtari(p({ tur: 'etiket', etiket: '14 dk', etiketIkon: 'araba', renk: '#1f4fc2' }))).toBe('araba-1f4fc2');
+    expect(pinPngAnahtari(p({ tur: 'etiket', etiket: '14 dk', etiketIkon: 'araba', renk: '#2350c4' }))).toBe('araba-2350c4');
   });
 
   it('ikonsuz ya da PNG üretilmemiş pin → null (SVG / metin, beklenmez)', () => {

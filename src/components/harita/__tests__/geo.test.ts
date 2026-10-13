@@ -62,13 +62,16 @@ describe('geo', () => {
   });
 
   it('pinCapasi daire merkezini çapa yapar; detay satırıyla kutu uzar', () => {
-    const c = pinCapasi({ id: 'x', konum: roma, renk: '#000', tur: 'durak' });
+    const c = pinCapasi({ id: 'x', konum: roma, renk: '#000', tur: 'oneri' });
     expect(c.x).toBe(0.5);
-    // #59: 28 px daire (+2 boşluk +16 etiket); seçili 34 px (halka kenarda).
+    // #59: 28 px daire (+2 boşluk +16 etiket).
     expect(c.y).toBeCloseTo(14 / 46);
-    expect(pinCapasi({ id: 'x', konum: roma, renk: '#000', tur: 'durak' }, true).y).toBeCloseTo(14 / 60);
-    // #65: seçili iğne 38 × 46 (+ 3,25 px dış halka → görünen uç 49,25), çapa görünen uç; etiket ucun 4 px altında.
-    expect(pinCapasi({ id: 'x', konum: roma, renk: '#000', tur: 'durak', secili: true }).y).toBeCloseTo(49.25 / 69.25);
+    expect(pinCapasi({ id: 'x', konum: roma, renk: '#000', tur: 'oneri' }, true).y).toBeCloseTo(14 / 60);
+    // #136: durak köşeli kare 30 px; seçili durak 38 px Mandalina kare, çapa yine merkez.
+    expect(pinCapasi({ id: 'x', konum: roma, renk: '#000', tur: 'durak' }).y).toBeCloseTo(15 / 48);
+    expect(pinCapasi({ id: 'x', konum: roma, renk: '#000', tur: 'durak', secili: true }).y).toBeCloseTo(19 / 56);
+    // #65: seçili Keşfet pini iğne 38 × 46 (+ 3,25 px dış halka → görünen uç 49,25), çapa görünen uç; etiket ucun 4 px altında.
+    expect(pinCapasi({ id: 'x', konum: roma, renk: '#000', tur: 'oneri', secili: true }).y).toBeCloseTo(49.25 / 69.25);
   });
 
   it('deltaZoom zoomDelta\'nın tersidir; bolgeHesapla zoom üretir', () => {
@@ -235,9 +238,9 @@ describe('pin düşürme yok, zoom\'a göre küçük pin (#66)', () => {
     // Küçük pinler adsız olduğundan hiçbir etiket çakışmaz.
     expect(gizliEtiketler(zoomaGorePinler([p('a', 0, { tur: 'oneri' }), p('b', 0.0001, { tur: 'oneri' })], 12), { ...bolge, zoom: 12 }, ekran).etiket.size).toBe(0);
   });
-  it('#61 §5: diğer günün durağı 20 px, seçili günün durağı 28, seçili iğne 38', () => {
+  it('#61 §5 / #136: diğer günün durağı 20 px, seçili günün durağı kare 30, seçili 38', () => {
     expect(pinCapi({ id: 'x', konum: roma, renk: '#000', tur: 'durak', opaklik: 0.4 })).toBe(20);
-    expect(pinCapi({ id: 'x', konum: roma, renk: '#000', tur: 'durak' })).toBe(28);
+    expect(pinCapi({ id: 'x', konum: roma, renk: '#000', tur: 'durak' })).toBe(30);
     expect(pinCapi({ id: 'x', konum: roma, renk: '#000', tur: 'durak', opaklik: 0.4, secili: true })).toBe(38);
   });
 

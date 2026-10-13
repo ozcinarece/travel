@@ -49,7 +49,7 @@ const istekler = [
   // #65 (docs/05 §4): araba süre hapı — rota tonunda araba glifi 12 px.
   ...rotaTonlari.map((renk) => ({ ikon: 'araba', renk, boyut: 12, kalinlik: 2.2 })),
   // #95 (docs/05 §4, LegChips11): yürüme hapı — siyah yürüyen kişi 12 px (hap glifi ayrı `image` işaretçisidir).
-  { ikon: 'yuru', renk: '#0f0f0f', boyut: 12, kalinlik: 2.2 },
+  { ikon: 'yuru', renk: '#0e1430', boyut: 12, kalinlik: 2.2 },
   // #59 C: rota yön oku "›" (12 px, beyaz, hafif koyu hale).
   { ikon: 'ok', renk: BEYAZ, boyut: 12, kalinlik: 2.4, hale: true },
 ];
@@ -81,8 +81,11 @@ const dosyaAdi = (i) => `${i.ikon}-${i.renk.slice(1)}`;
 // (15 px siyah, 1,5 px beyaz kenar) · tamamlandı yeşil + ✓ · otel siyah kare r9 + ev 16. Hepsinde gölge 0 2 6 %22
 // (kanvas PAD piksel pay; çapa yine merkez). Seçili = iğne 38 × 46 (2,5 px kenar, 2 px siyah dış halka, 17 px glif,
 // gölge 0 4 10 %30); çapa iğnenin ucu (IGNE_CAPA).
-const SIYAH = '#0f0f0f';
-const YESIL = '#1f8a4c';
+// #136 (kanvas Temel): Gece kenar/rozet, Lacivert glif, Başarı yeşili; listede = Mandalina KARE + Gece kenar + ✓ köşe.
+const SIYAH = '#152a6b';
+const LACIVERT = '#0e1430';
+const MANDALINA = '#ff7a1a';
+const YESIL = '#16a06e';
 const PAD = 8;
 const IGNE_PAD = 12;
 const IGNE = { en: 38, boy: 46 };
@@ -100,16 +103,16 @@ for (const k of kategoriler) {
   for (const cap of BOYLAR) {
     const ikonPx = Math.round(14 * cap / 28);
     pinIstekleri.push({ ad: `daire-${k.ikon}-${cap}`, cap, zemin: BEYAZ, kenar: k.renk, kenarKalinlik: 2, ikon: k.ikon, ikonRenk: k.renk, ikonPx });
-    pinIstekleri.push({ ad: `dolu-${k.ikon}-${cap}`, cap, zemin: k.renk, kenar: BEYAZ, kenarKalinlik: 2, ikon: k.ikon, ikonRenk: BEYAZ, ikonPx, rozet: true });
+    pinIstekleri.push({ ad: `dolu-${k.ikon}-${cap}`, cap, zemin: MANDALINA, kenar: SIYAH, kenarKalinlik: 2, ikon: k.ikon, ikonRenk: LACIVERT, ikonPx, rozet: true, kare: true });
     // #69 (docs/05 §2): öne çıkan — aynı görünüm + sol üstte turuncu ★ rozeti (öneri / listede).
     pinIstekleri.push({ ad: `one-daire-${k.ikon}-${cap}`, cap, zemin: BEYAZ, kenar: k.renk, kenarKalinlik: 2, ikon: k.ikon, ikonRenk: k.renk, ikonPx, yildiz: true });
-    pinIstekleri.push({ ad: `one-dolu-${k.ikon}-${cap}`, cap, zemin: k.renk, kenar: BEYAZ, kenarKalinlik: 2, ikon: k.ikon, ikonRenk: BEYAZ, ikonPx, rozet: true, yildiz: true });
+    pinIstekleri.push({ ad: `one-dolu-${k.ikon}-${cap}`, cap, zemin: MANDALINA, kenar: SIYAH, kenarKalinlik: 2, ikon: k.ikon, ikonRenk: LACIVERT, ikonPx, rozet: true, yildiz: true, kare: true });
   }
   for (const [on, igne] of [['igne-', IGNE], ['igne34-', IGNE_34]]) {
     pinIstekleri.push({ ad: `${on}daire-${k.ikon}`, igne, zemin: BEYAZ, kenar: k.renk, kenarKalinlik: 2.5, ikon: k.ikon, ikonRenk: k.renk });
-    pinIstekleri.push({ ad: `${on}dolu-${k.ikon}`, igne, zemin: k.renk, kenar: BEYAZ, kenarKalinlik: 2.5, ikon: k.ikon, ikonRenk: BEYAZ, rozet: true });
+    pinIstekleri.push({ ad: `${on}dolu-${k.ikon}`, igne, zemin: MANDALINA, kenar: SIYAH, kenarKalinlik: 2.5, ikon: k.ikon, ikonRenk: LACIVERT, rozet: true });
     pinIstekleri.push({ ad: `${on}one-daire-${k.ikon}`, igne, zemin: BEYAZ, kenar: k.renk, kenarKalinlik: 2.5, ikon: k.ikon, ikonRenk: k.renk, yildiz: true });
-    pinIstekleri.push({ ad: `${on}one-dolu-${k.ikon}`, igne, zemin: k.renk, kenar: BEYAZ, kenarKalinlik: 2.5, ikon: k.ikon, ikonRenk: BEYAZ, rozet: true, yildiz: true });
+    pinIstekleri.push({ ad: `${on}one-dolu-${k.ikon}`, igne, zemin: MANDALINA, kenar: SIYAH, kenarKalinlik: 2.5, ikon: k.ikon, ikonRenk: LACIVERT, rozet: true, yildiz: true });
   }
 }
 for (const cap of BOYLAR) {
@@ -127,7 +130,7 @@ const GOLGE = `<filter id="g" x="-50%" y="-50%" width="200%" height="200%"><feDr
 const IGNE_GOLGE = `<filter id="g" x="-50%" y="-50%" width="200%" height="200%"><feDropShadow dx="0" dy="4" stdDeviation="5" flood-color="#0f0f0f" flood-opacity="0.3"/></filter>`;
 const glif = (i, px, cx, cy) => `<g transform="translate(${cx - px / 2} ${cy - px / 2}) scale(${px / 24})">${ikonIci(i.ikon, i.ikonRenk, i.kalinlik ?? 2.1)}</g>`;
 /** ✓ rozeti: 15 px siyah daire, 1,5 px beyaz kenar, 9 px beyaz ✓; merkezi (cx, cy). */
-const TURUNCU = '#ff5a1f';
+const TURUNCU = '#ff7a1a';
 const YILDIZ = 'M12 2l3 7 7 .6-5.3 4.6 1.7 7.1L12 17.6 5.6 21.3l1.7-7.1L2 9.6 9 9z';
 /** #69 ★ rozeti: 15 px turuncu daire, 1,5 px beyaz kenar, 8 px beyaz dolu yıldız; merkezi (cx, cy). */
 const yildizRozet = (cx, cy) => `<circle cx="${cx}" cy="${cy}" r="6.75" fill="${TURUNCU}" stroke="${BEYAZ}" stroke-width="1.5"/><g transform="translate(${cx - 4} ${cy - 4}) scale(${8 / 24})"><path d="${YILDIZ}" fill="${BEYAZ}"/></g>`;
@@ -152,9 +155,11 @@ function pinSvg(i) {
   const { cap } = i;
   const W = cap + 2 * PAD;
   const c = W / 2;
+  // #136: kare pin (otel, listede) — köşe 11·cap/38 (28 px'te 8), kenar varsa yol üstünde.
+  const kk = i.kenarKalinlik;
   const sekil = i.kare
-    ? `<rect x="${PAD}" y="${PAD}" width="${cap}" height="${cap}" rx="9" fill="${i.zemin}"/>`
-    : `<circle cx="${c}" cy="${c}" r="${(cap - i.kenarKalinlik) / 2}" fill="${i.zemin}" stroke="${i.kenar}" stroke-width="${i.kenarKalinlik}"/>`;
+    ? `<rect x="${PAD + kk / 2}" y="${PAD + kk / 2}" width="${cap - kk}" height="${cap - kk}" rx="${Math.round((11 * cap) / 38)}" fill="${i.zemin}" stroke="${i.kenar}" stroke-width="${kk}"/>`
+    : `<circle cx="${c}" cy="${c}" r="${(cap - kk) / 2}" fill="${i.zemin}" stroke="${i.kenar}" stroke-width="${kk}"/>`;
   const rk = cap / 28;
   const rz = `${i.rozet ? rozet(c + 10 * rk, c - 10 * rk) : ''}${i.yildiz ? yildizRozet(c - 10 * rk, c - 10 * rk) : ''}`;
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${W}" viewBox="0 0 ${W} ${W}">${GOLGE}<g filter="url(#g)">${sekil}</g>${glif(i, i.ikonPx ?? 14, c, c)}${rz}</svg>`;

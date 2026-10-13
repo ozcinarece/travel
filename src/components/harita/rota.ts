@@ -25,7 +25,7 @@ export function bacakEtiketPinleri(cizgiler: HaritaCizgisi[], zoom = Infinity): 
 /** #95: hap glifinin PNG anahtarı — yürüme siyah `yuru`, araba rota tonunda `araba`; glif yoksa null. */
 export function hapGlifAnahtari(p: Pick<HaritaPini, 'etiketIkon' | 'renk'>): string | null {
   if (!p.etiketIkon) return null;
-  return pinIkonuAnahtari(p.etiketIkon, p.etiketIkon === 'araba' ? p.renk : '#0f0f0f');
+  return pinIkonuAnahtari(p.etiketIkon, p.etiketIkon === 'araba' ? p.renk : '#0e1430');
 }
 
 /** #59 §C: rota üstünde yön oku — konum + saat yönünde derece (0 = kuzey; ok görseli doğuya bakar, Harita -90 uygular). */
@@ -101,7 +101,8 @@ export type RotaKatmani = { ad: 'kesik' | 'golge' | 'kenar' | 'renk'; noktalar: 
 
 export const SAYDAM = '#00000000';
 /** #59 §C (RouteSpec5): gölge 11 dp %12 · beyaz kenar 9 dp · renk 5,5 dp; kuş uçuşu 3 dp. */
-export const ROTA_OLCU = { golge: 11, kenar: 9, cizgi: 5.5, ince: 3, golgeRenk: '#0f0f0f', golgeOpaklik: 0.12 } as const;
+/** #136: araba bacağı kuş uçuşu KESİK çizgi (logodaki gibi), 4,5 dp rota tonunda; rota gelene kadarki kuş uçuşu 3 dp. */
+export const ROTA_OLCU = { golge: 11, kenar: 9, cizgi: 5.5, ince: 3, arac: 4.5, golgeRenk: '#0e1430', golgeOpaklik: 0.12 } as const;
 
 /** "#rrggbb" + opaklık → "#rrggbbaa". */
 export function saydam(hex: string, opaklik: number): string {
@@ -124,7 +125,7 @@ export function rotaYuvaKatmanlari(c: HaritaCizgisi | null): RotaKatmani[] {
   const kesik = !!c && !!c.kesik;
   const duz = !!c && !c.kesik;
   return [
-    { ad: 'kesik', noktalar: kesik ? c.noktalar : bos, renk: kesik ? saydam(c.renk, opaklik) : SAYDAM, genislik: ROTA_OLCU.ince, zIndex: 0 },
+    { ad: 'kesik', noktalar: kesik ? c.noktalar : bos, renk: kesik ? saydam(c.renk, opaklik) : SAYDAM, genislik: kesik && c.arac && !c.ince ? ROTA_OLCU.arac : ROTA_OLCU.ince, zIndex: 0 },
     { ad: 'golge', noktalar: duz ? c.noktalar : bos, renk: duz ? saydam(ROTA_OLCU.golgeRenk, ROTA_OLCU.golgeOpaklik * opaklik) : SAYDAM, genislik: ROTA_OLCU.golge, zIndex: 1 },
     { ad: 'kenar', noktalar: duz ? c.noktalar : bos, renk: duz ? saydam('#ffffff', opaklik) : SAYDAM, genislik: ROTA_OLCU.kenar, zIndex: 2 },
     { ad: 'renk', noktalar: duz ? c.noktalar : bos, renk: duz ? saydam(c.renk, opaklik) : SAYDAM, genislik: ROTA_OLCU.cizgi, zIndex: 3 },
