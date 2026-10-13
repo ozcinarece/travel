@@ -77,7 +77,7 @@ type PanelHali = 'katli' | 'yari' | 'tam';
  */
 export default function ProgramEkrani() {
   const id = useSeyahatId();
-  const { gun: gunParam, eklenenDurak, eklenenMekan, atlanan, katildin, planKuruldu, atanmamis } = useLocalSearchParams<{
+  const { gun: gunParam, eklenenDurak, eklenenMekan, atlanan, katildin, planKuruldu, atanmamis, otel: otelParam } = useLocalSearchParams<{
     gun?: string;
     eklenenDurak?: string;
     eklenenMekan?: string;
@@ -85,6 +85,7 @@ export default function ProgramEkrani() {
     katildin?: string;
     planKuruldu?: string;
     atanmamis?: string;
+    otel?: string;
   }>();
   // #118 KK4: "Geziyi seyahatime al" sonrası bildirim ("3 durak eklendi · 11 mekan listende"; atlanan varsa eki).
   const [gezidenBildirim, setGezidenBildirim] = useState<string | null>(() => {
@@ -121,6 +122,7 @@ export default function ProgramEkrani() {
         katildin={katildin === '1'}
         planKuruldu={planKuruldu === '1'}
         atanmamis={Number(atanmamis ?? 0)}
+        otelAcik={otelParam === '1'}
       />
       {gezidenBildirim ? (
         <View style={s.gezidenBildirim} pointerEvents="none">
@@ -148,6 +150,7 @@ function ProgramSekmesi({
   katildin,
   planKuruldu,
   atanmamis = 0,
+  otelAcik,
 }: {
   seyahat: Seyahat;
   gunler: Gun[];
@@ -160,6 +163,8 @@ function ProgramSekmesi({
   /** #139 KK6: sihirbazın "Planı kur"u sonrası "Plan hazır" alt sayfası; güne sığmayan mekan sayısı. */
   planKuruldu?: boolean;
   atanmamis?: number;
+  /** #144: Seyahatler'deki "Otel yok" çipi "Nerede kalıyorsun?" sayfasıyla açar. */
+  otelAcik?: boolean;
 }) {
   const { session } = useOturum();
   const ekran = useWindowDimensions();
@@ -171,7 +176,7 @@ function ProgramSekmesi({
   const [planHazirAcik, setPlanHazirAcik] = useState(!!planKuruldu);
   const davet = useDavetPaylas(seyahat);
   const [otelSeritGizli, setOtelSeritGizli] = useState<boolean | null>(null);
-  const [nereKaliyorAcik, setNereKaliyorAcik] = useState(false);
+  const [nereKaliyorAcik, setNereKaliyorAcik] = useState(!!otelAcik);
   const tumGunlereOtel = useTumGunlereOtel(seyahat.id);
   useEffect(() => {
     AsyncStorage.getItem(OTEL_SERIT_ONEKI + seyahat.id)

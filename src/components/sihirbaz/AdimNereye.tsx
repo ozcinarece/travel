@@ -5,7 +5,8 @@ import { ActivityIndicator, Pressable, StyleSheet, Text, TextInput, View } from 
 
 import { Ikon } from '@/components/ui/Ikon';
 import { GoogleAtfi } from '@/components/yerler/GoogleAtfi';
-import { hafifYerler, otomatikTamamla, useSehirOnerileri, yeniOturumJetonu, type Oneri } from '@/features/yerler/api';
+import { icerikSehirSecimi, sehirSecimi } from '@/features/sihirbaz/girisler';
+import { useSehirOnerileri, yeniOturumJetonu, type Oneri } from '@/features/yerler/api';
 import { t } from '@/i18n';
 import type { Sehir, SehirSecimi } from '@/lib/tipler';
 import { kose, minDokunma, renk, yazi } from '@/theme';
@@ -37,9 +38,7 @@ export function AdimNereye({ sehir, onSehir, ad, onerilenAd, onAd, sehirler, kil
     setHata(null);
     setMesgul(placeId);
     try {
-      const [yer] = await hafifYerler([placeId], { sehir: true, oturum });
-      if (!yer?.tz) throw new Error('tz yok');
-      onSehir({ place_id: yer.place_id, ad: adi || yer.ad, ikincil, lat: yer.lat, lng: yer.lng, tz: yer.tz, country_code: yer.ulke_kodu });
+      onSehir(await sehirSecimi(placeId, adi, ikincil, oturum));
       setSorgu('');
       setJeton(yeniOturumJetonu());
     } catch {
@@ -55,10 +54,9 @@ export function AdimNereye({ sehir, onSehir, ad, onerilenAd, onAd, sehirler, kil
     setHata(null);
     setMesgul(k.id);
     try {
-      const oturum = yeniOturumJetonu();
-      const [o] = await otomatikTamamla({ girdi: k.ad, oturum, tur: 'cities', limit: 1, merkez: { lat: k.lat, lng: k.lng, yaricapM: 50_000 } });
-      if (!o) throw new Error('öneri yok');
-      await sec(o.place_id, k.ad, o.ikincil, oturum);
+      onSehir(await icerikSehirSecimi(k));
+      setSorgu('');
+      setJeton(yeniOturumJetonu());
     } catch {
       setHata(t('sihirbaz.nereye.secimHata'));
     } finally {

@@ -7,7 +7,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { GeziPlani } from '@/components/icerik/GeziPlani';
 import { Kalp } from '@/components/icerik/Kalp';
 import { MdYazi } from '@/components/icerik/MdYazi';
-import { SeyahatimeAl } from '@/components/icerik/SeyahatimeAl';
+import { GeziAl } from '@/components/icerik/GeziAl';
 import { MekanPaneli } from '@/components/mekan/MekanPaneli';
 import { SecimMenusu } from '@/components/program/SecimMenusu';
 import { Buton } from '@/components/ui/Buton';
@@ -15,8 +15,7 @@ import { EkleDugmesi } from '@/components/ui/EkleDugmesi';
 import { Ikon } from '@/components/ui/Ikon';
 import { Logo } from '@/components/ui/Logo';
 import { SegmentSecici } from '@/components/ui/SegmentSecici';
-import { kalinParcalar, type AktarmaPlani } from '@/features/icerik/aktar';
-import { useGeziAktar } from '@/features/icerik/aktarSorgu';
+import { kalinParcalar } from '@/features/icerik/aktar';
 import { useIcerikCanli } from '@/features/icerik/fotolar';
 import { rehberMekanIdleri } from '@/features/icerik/rehber';
 import { cozumSebebi, olayYaz, useGezi, useGeziAlinma } from '@/features/icerik/sorgular';
@@ -77,7 +76,6 @@ export default function GeziEkrani() {
   const yaziIdleri = useMemo(() => rehberMekanIdleri([gezi.data?.yazi_md ?? '']), [gezi.data?.yazi_md]);
   const yaziHafif = useHafifYerler(yaziIdleri);
   const yaziFoto = useYerFotolari(yaziIdleri);
-  const aktar = useGeziAktar();
   const [panel, setPanel] = useState<{ placeId: string; hafif: HafifYer; dakika: number } | null>(null);
 
   useEffect(() => {
@@ -173,27 +171,6 @@ export default function GeziEkrani() {
     />
   );
 
-  // KK5: aktarım sonrası Program, eklenen ilk gün seçili; saatler Program açılınca yeniden hesaplanır.
-  const al = async (seyahatId: string, plan: AktarmaPlani, secenek: 'tum' | 'gunler' | 'mekan') => {
-    setAlHata(null);
-    try {
-      const sonuc = await aktar.mutateAsync({ seyahatId, geziId: g.id, sehirAdi: g.sehirler?.ad ?? '', plan, secenek });
-      // #118 KK4: sessiz başarısızlık yok — hiçbir şey eklenmediyse sayfa açık kalır ve sebep söylenir.
-      if (sonuc.eklenenMekan === 0 && sonuc.eklenenDurak === 0) {
-        const ilk = sonuc.cozumsuzler[0];
-        const sebep = ilk ? (ilk.sebep === 'bulunamadi' ? t('gezi.sebepBulunamadi', { ad: ilk.ad }) : t('gezi.sebepSunucu', { ad: ilk.ad, sebep: ilk.sebep })) : t('gezi.hepsiZatenVar');
-        setAlHata(t('gezi.hicEklenmedi', { sebep }));
-        return;
-      }
-      setAlAcik(false);
-      router.replace({
-        pathname: '/seyahat/[id]/(sekmeler)/program',
-        params: { id: seyahatId, eklenenDurak: String(sonuc.eklenenDurak), eklenenMekan: String(sonuc.eklenenMekan + sonuc.zatenVar), atlanan: String(sonuc.cozumsuz), ...(sonuc.ilkGunIndex !== null ? { gun: String(sonuc.ilkGunIndex) } : {}) },
-      });
-    } catch (e) {
-      setAlHata(t('gezi.alHata', { sebep: e instanceof Error ? e.message : String(e) }));
-    }
-  };
   const yeniSeyahat = () => {
     setAlAcik(false);
     router.navigate('/(tabs)/yeni');
@@ -330,7 +307,7 @@ export default function GeziEkrani() {
       </View>
 
       {alAcik ? (
-        <SeyahatimeAl gezi={g} seyahatler={hedefler} ilkHedefId={hedef?.id ?? null} kimlik={kimlik} onKapat={() => setAlAcik(false)} onYeniSeyahat={yeniSeyahat} onAl={al} hata={alHata} />
+        <GeziAl gezi={g} kimlik={kimlik} ilkHedefId={hedef?.id ?? null} onKapat={() => setAlAcik(false)} />
       ) : null}
       <SecimMenusu
         acik={!!hedefMenusu}
