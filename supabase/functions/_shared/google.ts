@@ -213,6 +213,89 @@ export async function metinAra(secenek: {
   };
 }
 
+// ---------------------------------------------------------------- İçerik hattı (icerik-google; docs/07)
+
+/**
+ * İçerik araştırması: sorgu başına en çok 20 sonuç. Puan ve yorum sayısı editör raporu için gerekir (Text Search Enterprise
+ * SKU); adres, fotoğraf, saat istenmez. Sonuç yalnız çağırana döner; DB'ye ve loga yazılmaz (PRD §7).
+ */
+const ICERIK_ARA_MASKE =
+  'places.id,places.displayName,places.primaryType,places.types,places.location,places.rating,places.userRatingCount,places.businessStatus';
+/** Durak doğrulaması: kapalı mı, kapalı gün, taze konum ve kategori (Place Details Enterprise SKU). */
+const ICERIK_DETAY_MASKE = 'id,displayName,primaryType,location,businessStatus,regularOpeningHours.periods';
+
+export type IcerikAday = {
+  place_id: string;
+  ad: string;
+  primary_type: string | null;
+  tipler: string[];
+  lat: number;
+  lng: number;
+  puan: number | null;
+  puan_sayisi: number | null;
+  durum: string | null;
+};
+
+export type IcerikDetay = {
+  place_id: string;
+  ad: string;
+  primary_type: string | null;
+  lat: number;
+  lng: number;
+  durum: string | null;
+  /** Haftalık periyotlar (gun 0 = Pazar); boş dizi = her zaman açık; null = saat bilgisi yok. */
+  periyotlar: { gun: number; ac: string; kapaGun: number; kapa: string }[] | null;
+};
+
+type IcerikCevap = DetailsCevap & { types?: string[]; businessStatus?: string };
+
+export async function icerikMetinAra(secenek: {
+  metin: string;
+  merkez: { lat: number; lng: number };
+  yaricapM: number;
+  tip?: string;
+}): Promise<IcerikAday[]> {
+  const govde: Record<string, unknown> = {
+    textQuery: secenek.metin,
+    languageCode: DIL,
+    maxResultCount: 20,
+    locationBias: {
+      circle: { center: { latitude: secenek.merkez.lat, longitude: secenek.merkez.lng }, radius: Math.min(Math.max(secenek.yaricapM, 100), 50_000) },
+    },
+  };
+  if (secenek.tip) govde.includedType = secenek.tip;
+  const cevap = await istek<{ places?: IcerikCevap[] }>('places:searchText', { govde, maske: ICERIK_ARA_MASKE });
+  return (cevap.places ?? []).map((d) => ({
+    place_id: d.id,
+    ad: d.displayName?.text ?? '',
+    primary_type: d.primaryType ?? null,
+    tipler: d.types ?? [],
+    lat: d.location?.latitude ?? 0,
+    lng: d.location?.longitude ?? 0,
+    puan: d.rating ?? null,
+    puan_sayisi: d.userRatingCount ?? null,
+    durum: d.businessStatus ?? null,
+  }));
+}
+
+export async function icerikDetay(placeId: string): Promise<IcerikDetay> {
+  const d = await istek<IcerikCevap>(`places/${encodeURIComponent(placeId)}?languageCode=${DIL}`, { maske: ICERIK_DETAY_MASKE });
+  const ham = (d.regularOpeningHours?.periods ?? []).filter((p) => p.open?.day !== undefined);
+  return {
+    place_id: d.id,
+    ad: d.displayName?.text ?? '',
+    primary_type: d.primaryType ?? null,
+    lat: d.location?.latitude ?? 0,
+    lng: d.location?.longitude ?? 0,
+    durum: d.businessStatus ?? null,
+    periyotlar: !d.regularOpeningHours
+      ? null
+      : ham.some((p) => !p.close)
+        ? []
+        : ham.map((p) => ({ gun: p.open!.day!, ac: hhmm(p.open), kapaGun: p.close!.day ?? p.open!.day!, kapa: hhmm(p.close) })),
+  };
+}
+
 // ---------------------------------------------------------------- Nearby Search (3.3 otel adayları, 3.4 öneri çipleri)
 
 /** Çip → Places (New) tipleri. 3.4 çipleri PRD KK4 / teknik not T8; `otel` #17 (lodging). Geçerlilik ilk canlı testte doğrulanır. */

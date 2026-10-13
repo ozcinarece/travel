@@ -1,0 +1,100 @@
+name: icerik
+
+# İçerik hattı (docs/07-icerik-hatti.md): AI gezi editörünün araştırma ve taslak yükleme köprüsü. Yalnız elle tetiklenir.
+# Loglar ve duyurular herkese açıktır: yalnız sayı, slug, id ve sonuç yazılır; Google verisi ve kullanıcı verisi yazılmaz.
+# Gerekli secret: SUPABASE_ACCESS_TOKEN (Yönetim API). service_role anahtarı çalışma anında bu token'la alınır ve maskelenir.
+# Hiçbir şey yayınlanmaz: yükleme her zaman taslaktır (yayin=false); yayındaki satıra dokunulmaz.
+on:
+  workflow_dispatch:
+    inputs:
+      islem:
+        description: sehirler · arastir · yukle · kontrol · sil · temizle
+        required: true
+        type: choice
+        options: [sehirler, arastir, yukle, kontrol, sil, temizle]
+      dosya:
+        description: 'yukle: plan dosyası (icerik/geziler/<slug>.json; ref olarak içerik dalını seç)'
+        required: false
+        type: string
+      istek:
+        description: 'arastir: JSON (sehir, sorgular, detay, acik_anahtar) · kontrol/sil: slug · yukle: {"yeniden": true} · temizle: run id ya da hepsi'
+        required: false
+        type: string
+      kuru:
+        description: 'yukle/sil: her şeyi dener, yazmaz (gerçek yazma için false)'
+        default: true
+        type: boolean
+
+permissions:
+  contents: read
+
+concurrency:
+  group: icerik-${{ inputs.islem }}-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  hat:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      # arastir: şifreli sonucu geçici dala (icerik-sonuc/<run_id>) koyar; temizle: o dalları siler.
+      contents: write
+    env:
+      SUPABASE_PROJECT_REF: xwqeobelyeuzoxyuvauw
+      YONETIM_URL: ${{ vars.YONETIM_URL || 'https://gezi-yonetim.pages.dev' }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Git kimliği yalnız dal işlemlerinde (arastir, temizle) kalır.
+          persist-credentials: ${{ inputs.islem == 'arastir' || inputs.islem == 'temizle' }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Ön koşul
+        if: inputs.islem != 'temizle'
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+        run: |
+          if [ -z "$SUPABASE_ACCESS_TOKEN" ]; then echo "::error::SUPABASE_ACCESS_TOKEN secret'ı tanımlı değil"; exit 1; fi
+      # Bağımlılık kurulmaz (npm ci yok): betikler yalnız Node yerleşikleri kullanır, kurulum betikleri secret'a erişmez.
+      - name: Hat
+        if: inputs.islem != 'temizle'
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          ISLEM: ${{ inputs.islem }}
+          DOSYA: ${{ inputs.dosya }}
+          ISTEK: ${{ inputs.istek }}
+          KURU: ${{ inputs.kuru }}
+          CIKTI: ${{ runner.temp }}/sonuc.enc
+        run: node scripts/icerik/hat.mjs
+      - name: Şifreli sonucu geçici dala koy
+        if: inputs.islem == 'arastir'
+        env:
+          CIKTI: ${{ runner.temp }}/sonuc.enc
+        run: |
+          dal="icerik-sonuc/${GITHUB_RUN_ID}"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -q --orphan "$dal"
+          git rm -rq --cached .
+          git clean -fdxq
+          cp "$CIKTI" sonuc.enc
+          git add sonuc.enc
+          git commit -qm "icerik: şifreli araştırma sonucu (geçici)"
+          git push -q origin "$dal"
+          echo "::notice title=Sonuç dalı::$dal"
+      - name: Geçici dalları sil
+        if: inputs.islem == 'temizle'
+        env:
+          ISTEK: ${{ inputs.istek }}
+        run: |
+          if [ "$ISTEK" = "hepsi" ]; then
+            dallar=$(git ls-remote --heads origin 'refs/heads/icerik-sonuc/*' | awk '{print $2}' | sed 's#^refs/heads/##')
+          elif [[ "$ISTEK" =~ ^[0-9]+$ ]]; then
+            dallar="icerik-sonuc/$ISTEK"
+          else
+            echo "::error::istek: run id ya da hepsi"; exit 1
+          fi
+          n=0
+          for d in $dallar; do git push -q origin --delete "$d" && n=$((n+1)); done
+          echo "::notice title=Temizlik::$n geçici dal silindi"

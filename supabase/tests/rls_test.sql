@@ -1389,4 +1389,167 @@ select pg_temp.hata_bekle($$select public.rehber_taslak_kaydet('11111111-1111-41
 select pg_temp.hata_bekle($$select public.rehber_yayinla('11111111-1111-4111-8111-000000000001', now())$$, '42501');
 reset role;
 
+-- ---------------------------------------------------------------- İçerik hattı (docs/07): taslak yükle / sil, şehirler, kontrol, bütçe
+-- Yalnız postgres (Yönetim API) çalıştırır; yayin=false zorlanır; yayındaki geziye dokunulmaz; slug çakışması reddedilir;
+-- p_yeniden ve sil yalnız taslakta; hata olursa hiçbir şey yazılmaz.
+create function pg_temp.icerik_ornek(p_slug text, p_sehir jsonb default '{"slug": "eskisehir"}') returns jsonb
+language sql as $$
+  select jsonb_build_object(
+    'sehir', p_sehir,
+    'gezi', jsonb_build_object('slug', p_slug, 'baslik', 'Eskişehir''de bir hafta sonu', 'ozet', 'Yürüyerek, rahat tempoda',
+      'yazar_ad', 'Tripmate ekibi',
+      'yazi_md', E'Giriş paragrafı, [Kurşunlu](mekan:ChIJ-kursunlu-01) ile başlar.\n\n## 1. gün · Odunpazarı\n\nMetin.\n::mekan[ChIJ-modern-muze-1]\n\n## 2. gün · Porsuk\n\n[Kent Park](mekan:ChIJ-kent-park-01) akşamüstü.'),
+    'gunler', jsonb_build_array(
+      jsonb_build_object('baslik', 'Odunpazarı', 'duraklar', jsonb_build_array(
+        jsonb_build_object('place_id', 'ChIJ-kursunlu-01', 'ad', 'Kurşunlu Külliyesi', 'kategori', 'mosque', 'sure_dk', 30, 'lat', 39.7627, 'lng', 30.5261),
+        jsonb_build_object('place_id', 'ChIJ-modern-muze-1', 'ad', 'Odunpazarı Modern Müze', 'kategori', 'museum', 'sure_dk', 75, 'lat', 39.7646, 'lng', 30.5236))),
+      jsonb_build_object('baslik', 'Porsuk', 'duraklar', jsonb_build_array(
+        jsonb_build_object('place_id', 'ChIJ-kent-park-01', 'ad', 'Kent Park', 'kategori', 'park', 'sure_dk', 45, 'lat', 39.7757, 'lng', 30.5004),
+        jsonb_build_object('place_id', 'ChIJ-adalar-0001', 'ad', 'Adalar', 'kategori', null, 'sure_dk', 45, 'lat', 39.7772, 'lng', 30.5185)))));
+$$;
+grant execute on function pg_temp.icerik_ornek(text, jsonb) to anon, authenticated, service_role;
+
+-- Yetki: anon, authenticated (admin dahil) ve service_role çalıştıramaz.
+set role anon;
+select pg_temp.hata_bekle($$select public.icerik_gezi_taslak_yukle(pg_temp.icerik_ornek('hat-anon'))$$, '42501');
+select pg_temp.hata_bekle($$select public.icerik_gezi_taslak_sil('eskisehir-iki-gun')$$, '42501');
+select pg_temp.hata_bekle($$select public.icerik_sehirler()$$, '42501');
+select pg_temp.hata_bekle($$select public.icerik_gezi_kontrol('eskisehir-iki-gun')$$, '42501');
+select pg_temp.hata_bekle($$select public.icerik_google_butcesi(1)$$, '42501');
+set role authenticated;
+select pg_temp.as_email(:E, 'ozcinar.ece@gmail.com');
+select pg_temp.hata_bekle($$select public.icerik_gezi_taslak_yukle(pg_temp.icerik_ornek('hat-admin'))$$, '42501');
+select pg_temp.hata_bekle($$select public.icerik_gezi_taslak_yukle(pg_temp.icerik_ornek('hat-admin'), true)$$, '42501');
+select pg_temp.hata_bekle($$select public.icerik_gezi_taslak_sil('eskisehir-iki-gun')$$, '42501');
+select pg_temp.hata_bekle($$select public.icerik_google_butcesi(1)$$, '42501');
+select pg_temp.hata_bekle($$select public.yonetim_genel_temel(7)$$, '42501');
+select pg_temp.as_user(:B);
+select pg_temp.hata_bekle($$select public.icerik_gezi_taslak_yukle(pg_temp.icerik_ornek('hat-b'))$$, '42501');
+set role service_role;
+select pg_temp.hata_bekle($$select public.icerik_gezi_taslak_yukle(pg_temp.icerik_ornek('hat-servis'))$$, '42501');
+select pg_temp.hata_bekle($$select public.icerik_gezi_taslak_sil('eskisehir-iki-gun')$$, '42501');
+reset role;
+do $$ begin assert not exists (select 1 from public.geziler where slug like 'hat-%'), 'yetkisiz çağrı hiçbir şey yazmaz'; end $$;
+
+-- Yükle (postgres): taslak, günler, duraklar, yazıdaki mekanlar.
+do $$
+declare
+  r jsonb := public.icerik_gezi_taslak_yukle(pg_temp.icerik_ornek('hat-eskisehir'));
+  g record;
+begin
+  select * into g from public.geziler where slug = 'hat-eskisehir';
+  assert not g.yayin and g.yayin_at is null, 'yüklenen gezi taslak';
+  assert g.sehir_id = '11111111-1111-4111-8111-000000000001' and g.yazar_ad = 'Tripmate ekibi', 'şehir slug''la bulunur';
+  assert (r ->> 'gezi_id')::uuid = g.id and (r ->> 'gun_sayisi')::int = 2 and (r ->> 'mekan_sayisi')::int = 4 and r ->> 'slug' = 'hat-eskisehir', format('dönüş: %s', r);
+  assert r ? 'updated_at' and (r ->> 'yazidaki_mekan')::int = 3 and not (r ->> 'yeni_sehir')::boolean, format('dönüş: %s', r);
+  assert (select array_agg(d.sure_dk order by gg.sira, d.sira) from public.gezi_duraklari d join public.gezi_gunleri gg on gg.id = d.gezi_gun_id where gg.gezi_id = g.id) = '{30,75,45,45}', 'sıra ve süreler';
+  assert (select baslik from public.gezi_gunleri where gezi_id = g.id and sira = 2) = 'Porsuk', 'gün başlığı';
+  assert (select array_agg(m.place_id || ':' || m.bicim order by m.sira) from public.icerik_mekanlari m where m.sahip_tur = 'gezi' and m.sahip_id = g.id)
+    = '{ChIJ-kursunlu-01:satir,ChIJ-modern-muze-1:kart,ChIJ-kent-park-01:satir}', 'yazıdaki mekanlar yazı sırasıyla';
+  assert not exists (select 1 from public.yerler where place_id = 'ChIJ-adalar-0001'), 'taslak yer satırı açılmaz';
+  assert (public.icerik_gezi_kontrol('hat-eskisehir') ->> 'durum') = 'taslak' and (public.icerik_gezi_kontrol('hat-eskisehir') ->> 'place_id_eksik')::int = 0, 'kontrol';
+  assert (select count(*) from jsonb_array_elements(public.icerik_sehirler()) s, jsonb_array_elements(s -> 'geziler') z
+    where s ->> 'slug' = 'eskisehir' and z ->> 'slug' = 'hat-eskisehir' and z ->> 'durum' = 'taslak') = 1, 'şehirler listesi taslağı gösterir';
+end $$;
+
+-- Slug çakışması, yayın girdisi ve tablo kısıtları reddedilir; hata olursa hiçbir şey yazılmaz.
+select pg_temp.hata_bekle($$select public.icerik_gezi_taslak_yukle(pg_temp.icerik_ornek('hat-eskisehir'))$$, '23505');
+select pg_temp.hata_bekle($$select public.icerik_gezi_taslak_yukle(pg_temp.icerik_ornek('eskisehir-iki-gun'))$$, '23505');
+select pg_temp.hata_bekle($$select public.icerik_gezi_taslak_yukle(jsonb_set(pg_temp.icerik_ornek('hat-yayin'), '{gezi,yayin}', 'true'))$$, '22023');
+select pg_temp.hata_bekle($$select public.icerik_gezi_taslak_yukle(jsonb_set(pg_temp.icerik_ornek('hat-yayin'), '{gezi,yayin_at}', '"2026-11-01T00:00:00Z"'))$$, '22023');
+select pg_temp.hata_bekle($$select public.icerik_gezi_taslak_yukle(pg_temp.icerik_ornek('Hat-Buyuk'))$$, '22023');
+select pg_temp.hata_bekle($$select public.icerik_gezi_taslak_yukle(jsonb_set(pg_temp.icerik_ornek('hat-sure'), '{gunler,1,duraklar,0,sure_dk}', '10'))$$, '22023');
+select pg_temp.hata_bekle($$select public.icerik_gezi_taslak_yukle(jsonb_set(pg_temp.icerik_ornek('hat-sure'), '{gunler,1,duraklar,0,sure_dk}', '45.5'))$$, '22023');
+select pg_temp.hata_bekle($$select public.icerik_gezi_taslak_yukle(jsonb_set(pg_temp.icerik_ornek('hat-bos'), '{gunler,1,duraklar}', '[]'))$$, '22023');
+select pg_temp.hata_bekle($$select public.icerik_gezi_taslak_yukle(jsonb_set(pg_temp.icerik_ornek('hat-pid'), '{gunler,0,duraklar,0,place_id}', '"kısa"'))$$, '22023');
+select pg_temp.hata_bekle($$select public.icerik_gezi_taslak_yukle(pg_temp.icerik_ornek('hat-konum') #- '{gunler,1,duraklar,1,lat}')$$, '22023');
+select pg_temp.hata_bekle($$select public.icerik_gezi_taslak_yukle(jsonb_set(pg_temp.icerik_ornek('hat-ad'), '{gunler,0,duraklar,0,ad}', to_jsonb(repeat('a', 121))))$$, '22023');
+select pg_temp.hata_bekle($$select public.icerik_gezi_taslak_yukle(jsonb_set(pg_temp.icerik_ornek('hat-gun'), '{gunler}', (select jsonb_agg(pg_temp.icerik_ornek('x') #> '{gunler,0}') from generate_series(1, 31))))$$, '22023');
+select pg_temp.hata_bekle($$select public.icerik_gezi_taslak_yukle(pg_temp.icerik_ornek('hat-sehir', '{"slug": "yok-boyle-sehir"}'))$$, 'P0002');
+select pg_temp.hata_bekle($$select public.icerik_gezi_taslak_yukle(pg_temp.icerik_ornek('hat-sehir', '{"yeni": {"ad": "Eskişehir", "slug": "eskisehir", "lat": 39.77, "lng": 30.52}}'))$$, '23505');
+do $$ begin assert not exists (select 1 from public.geziler where slug in ('hat-yayin', 'hat-sure', 'hat-bos', 'hat-pid', 'hat-konum', 'hat-ad', 'hat-gun', 'hat-sehir')), 'reddedilen yükleme iz bırakmaz'; end $$;
+
+-- Kuru çalıştırma (hat: işlem hata ile biter, hiçbir şey kalmaz).
+do $$
+begin
+  begin
+    perform public.icerik_gezi_taslak_yukle(pg_temp.icerik_ornek('hat-kuru'));
+    raise exception 'KURU_TAMAM' using errcode = 'P0001';
+  exception when sqlstate 'P0001' then null;
+  end;
+  assert not exists (select 1 from public.geziler where slug = 'hat-kuru'), 'kuru çalıştırma yazmaz';
+end $$;
+
+-- Yeni şehir yalnız `yeni` ile ve taslak açılır.
+do $$
+declare r jsonb := public.icerik_gezi_taslak_yukle(pg_temp.icerik_ornek('hat-bursa', '{"yeni": {"ad": "Bursa", "slug": "bursa-hat", "lat": 40.19, "lng": 29.06}}'));
+begin
+  assert (r ->> 'yeni_sehir')::boolean and not (select yayin from public.sehirler where slug = 'bursa-hat'), 'yeni şehir taslak';
+  assert (select s.slug from public.geziler g join public.sehirler s on s.id = g.sehir_id where g.slug = 'hat-bursa') = 'bursa-hat', 'gezi yeni şehre bağlı';
+end $$;
+
+-- p_yeniden: taslağı yeniden yazar (kimlik, kapak ve sıra kalır; yayın tarihi sıfırlanır).
+update public.geziler set kapak_url = 'https://ornek/kapak.webp', sira = 7, yayin_at = now() + interval '3 days' where slug = 'hat-eskisehir';
+do $$
+declare
+  v_id uuid := (select id from public.geziler where slug = 'hat-eskisehir');
+  r jsonb := public.icerik_gezi_taslak_yukle(jsonb_set(pg_temp.icerik_ornek('hat-eskisehir'), '{gunler}', (pg_temp.icerik_ornek('x') -> 'gunler') - 1), true);
+  g record;
+begin
+  select * into g from public.geziler where slug = 'hat-eskisehir';
+  assert g.id = v_id and (r ->> 'yeniden')::boolean and (r ->> 'gun_sayisi')::int = 1 and (r ->> 'mekan_sayisi')::int = 2, format('yeniden: %s', r);
+  assert not g.yayin and g.yayin_at is null and g.kapak_url = 'https://ornek/kapak.webp' and g.sira = 7, 'taslak kalır, kapak ve sıra korunur';
+  assert (select count(*) from public.gezi_gunleri where gezi_id = v_id) = 1, 'eski günler silindi';
+end $$;
+
+-- Yayındaki gezi: ne yeniden yazılır ne silinir (planlı yayın da yayindir).
+select pg_temp.hata_bekle($$select public.icerik_gezi_taslak_yukle(pg_temp.icerik_ornek('eskisehir-iki-gun'), true)$$, '42501');
+select pg_temp.hata_bekle($$select public.icerik_gezi_taslak_sil('eskisehir-iki-gun')$$, '42501');
+update public.geziler set yayin = true, yayin_at = now() + interval '1 day' where slug = 'hat-bursa';
+select pg_temp.hata_bekle($$select public.icerik_gezi_taslak_yukle(pg_temp.icerik_ornek('hat-bursa', '{"slug": "bursa-hat"}'), true)$$, '42501');
+select pg_temp.hata_bekle($$select public.icerik_gezi_taslak_sil('hat-bursa')$$, '42501');
+do $$
+begin
+  assert (select gun_sayisi from public.geziler where slug = 'eskisehir-iki-gun') = 2 and (select yayin from public.geziler where slug = 'eskisehir-iki-gun'), 'yayındaki gezi değişmedi';
+  assert (select mekan_sayisi from public.geziler where slug = 'hat-bursa') = 4, 'planlı gezi değişmedi';
+end $$;
+
+-- Sil: yalnız taslak; fotoğraflı taslak silinmez; yoksa P0002.
+insert into public.icerik_fotolari (yol, sahip_tur, sahip_id) select 'geziler/' || id || '/a.webp', 'gezi', id from public.geziler where slug = 'hat-eskisehir';
+select pg_temp.hata_bekle($$select public.icerik_gezi_taslak_sil('hat-eskisehir')$$, '42501');
+delete from public.icerik_fotolari where sahip_tur = 'gezi' and yol like '%/a.webp';
+do $$
+declare v_id uuid := (select id from public.geziler where slug = 'hat-eskisehir');
+begin
+  assert (public.icerik_gezi_taslak_sil('hat-eskisehir') ->> 'gezi_id')::uuid = v_id, 'taslak silindi';
+  assert not exists (select 1 from public.geziler where id = v_id) and not exists (select 1 from public.gezi_gunleri where gezi_id = v_id), 'günler cascade';
+  assert not exists (select 1 from public.icerik_mekanlari where sahip_tur = 'gezi' and sahip_id = v_id), 'yazıdaki mekanlar silindi';
+end $$;
+select pg_temp.hata_bekle($$select public.icerik_gezi_taslak_sil('hat-eskisehir')$$, 'P0002');
+delete from public.geziler where slug = 'hat-bursa';
+delete from public.sehirler where slug = 'bursa-hat';
+
+-- Bütçe (icerik-google) ve Genel bakış: içerik istekleri Mekan kalemine, karışık birim fiyatla.
+delete from public.api_sayac where gun = (now() at time zone 'Europe/Istanbul')::date;
+insert into public.api_sayac (fonksiyon, cagri, google) values ('places-full', 20, 20), ('icerik-google', 3, 100);
+set role service_role;
+do $$
+begin
+  assert (public.icerik_google_butcesi(0) ->> 'harcanan')::numeric = 3.84, format('harcanan: %s', public.icerik_google_butcesi(0));
+  assert (public.icerik_google_butcesi(100) ->> 'yeterli')::boolean, '3,84 + 3,50 ≤ 10';
+  assert not (public.icerik_google_butcesi(200) ->> 'yeterli')::boolean, '3,84 + 7 > 10';
+end $$;
+reset role;
+set role authenticated;
+select pg_temp.as_email(:E, 'ozcinar.ece@gmail.com');
+do $$
+declare o jsonb := public.yonetim_genel(1);
+begin
+  assert (o #>> '{google,mekan}')::int = 120, format('mekan + içerik: %s', o -> 'google');
+  assert (o #>> '{google,fiyat,mekan}')::numeric = 32, format('karışık fiyat (20×17 + 100×35) / 120: %s', o -> 'google');
+  assert (o #>> '{google,fiyat,foto}')::numeric = 7, 'diğer fiyatlar aynı';
+end $$;
+reset role;
+delete from public.api_sayac where gun = (now() at time zone 'Europe/Istanbul')::date;
+
 \echo 'rls_test: TÜM TESTLER GEÇTİ'

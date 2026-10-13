@@ -71,6 +71,16 @@
     ],
     "setupFiles": [
       "<rootDir>/jest.setup.js"
-    ]
+    ],
+    "transform": {
+      "\\.mjs$": [
+        "babel-jest",
+        {
+          "presets": [
+            "babel-preset-expo"
+          ]
+        }
+      ]
+    }
   }
 }
