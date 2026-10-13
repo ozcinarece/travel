@@ -5,6 +5,8 @@ import { tumGunlereOtel } from '@/features/konaklama/sorgular';
 import { supabase } from '@/lib/supabase';
 import type { OtelSecimi, Seyahat, SeyahatOzet, YeniSeyahat } from '@/lib/tipler';
 
+import { kendiSildiklerim, seyahatYokMu, yerelKayitlariTemizle } from './silme';
+
 /** Üyesi olunan seyahatler (RLS süzer) + üyeler + mekan sayısı. Aktif/yaklaşan/geçmiş ayrımı ekranda (3.1). */
 export function useSeyahatler() {
   const { hesapli } = useOturum();
@@ -74,12 +76,13 @@ export function useSeyahatAdiKaydet(seyahatId: string) {
   });
 }
 
-/** Tek seyahat (RLS üyeyi süzer). */
+/** Tek seyahat (RLS üyeyi süzer). #174 KK5: seyahat yoksa (silindi) yeniden denenmez — ekran hemen listeye döner. */
 export function useSeyahat(id: string | undefined) {
   const { hesapli } = useOturum();
   return useQuery({
     queryKey: ['seyahat', id],
     enabled: hesapli && !!id,
+    retry: (n, hata) => !seyahatYokMu(hata) && n < 3,
     queryFn: async () => {
       const { data, error } = await supabase
         .from('trips')
@@ -123,6 +126,37 @@ export function useOtelKaydet(seyahatId: string) {
       qc.invalidateQueries({ queryKey: ['gunler', seyahatId] });
       qc.invalidateQueries({ queryKey: ['konaklamalar', seyahatId] });
       qc.invalidateQueries({ queryKey: ['seyahatler'] });
+    },
+  });
+}
+
+/**
+ * #174: seyahati siler — yalnız sahip (trips_delete = is_owner); günler, mekanlar, duraklar, üyeler, değişiklikler, oylar
+ * cascade ile gider. RLS yetkisiz silmeyi hata vermeden süzer; silinen satır dönmezse hata sayılır (KK9: seyahat yerinde
+ * kalır). KK4: liste anında güncellenir; durumlar ve profil sayıları yenilenir; seyahate ait önbellek ve cihazdaki bağlı
+ * kayıtlar (KK7) temizlenir.
+ */
+export function useSeyahatSil() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (seyahatId: string) => {
+      kendiSildiklerim.add(seyahatId);
+      const { data, error } = await supabase.from('trips').delete().eq('id', seyahatId).select('id');
+      if (error || !data || data.length === 0) {
+        kendiSildiklerim.delete(seyahatId);
+        throw error ?? new Error('silinemedi');
+      }
+    },
+    onSuccess: (_sonuc, seyahatId) => {
+      qc.setQueryData<SeyahatOzet[]>(['seyahatler'], (eski) => eski?.filter((sy) => sy.id !== seyahatId));
+      qc.invalidateQueries({ queryKey: ['seyahatler'] });
+      qc.invalidateQueries({ queryKey: ['seyahat-durumlari'] });
+      qc.invalidateQueries({ queryKey: ['profil-sayilari'] });
+      // Açık ekranın sorguları ekran kapanınca atılır (açıkken atılırsa boşa yeniden istenir).
+      const seyahatinMi = (anahtar: readonly unknown[]) => anahtar.includes(seyahatId);
+      qc.removeQueries({ predicate: (q) => seyahatinMi(q.queryKey), type: 'inactive' });
+      setTimeout(() => qc.removeQueries({ predicate: (q) => seyahatinMi(q.queryKey), type: 'inactive' }), 3000);
+      void yerelKayitlariTemizle(seyahatId);
     },
   });
 }

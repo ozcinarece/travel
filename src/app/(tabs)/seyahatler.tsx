@@ -1,20 +1,25 @@
-import { router, useFocusEffect } from 'expo-router';
-import { useCallback, useState } from 'react';
+import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { MiniCubuk } from '@/components/program/MiniCubuk';
 import { BosDurum } from '@/components/seyahatler/BosDurum';
 import { GecmisSatiri, KapakKarti, SeyahatSatiri } from '@/components/seyahatler/SeyahatSatiri';
+import { useSeyahattenAyril } from '@/features/davet/sorgular';
 import { hedefSeyahatler } from '@/features/icerik/yerEkle';
 import { useProfil } from '@/features/profil/sorgular';
 import { useDurakGuncelle } from '@/features/program/sorgular';
 import { useAktifProgram } from '@/features/program/useAktifProgram';
 import { useSeyahatDurumlari, type DurumCipi } from '@/features/seyahatler/durum';
+import { eylemMenusu, sahipMi, silmeMetni } from '@/features/seyahatler/silme';
 import { siniflandir } from '@/features/seyahatler/siniflandir';
-import { useSeyahatler } from '@/features/seyahatler/sorgular';
+import { useSeyahatler, useSeyahatSil } from '@/features/seyahatler/sorgular';
 import { yeniGirisNo } from '@/features/sihirbaz/girisler';
+import { seyahatAdi } from '@/features/sihirbaz/sihirbaz';
 import { t } from '@/i18n';
+import { onayIste } from '@/lib/onay';
+import { useOturum } from '@/lib/oturum';
 import type { SeyahatOzet } from '@/lib/tipler';
 import { kaydirSuresi } from '@/schedule/kaydir';
 import { dakikaSaat } from '@/schedule/tempo';
@@ -48,6 +53,49 @@ export default function SeyahatlerEkrani() {
     if (c.anahtar === 'atanmamis') router.push({ pathname: '/seyahat/[id]/(sekmeler)/listem', params: { id: sy.id, segment: 'atanmamis' } });
     else if (c.anahtar === 'otel') router.push({ pathname: '/seyahat/[id]/(sekmeler)/program', params: { id: sy.id, otel: '1' } });
   };
+  // #174 KK1, KK3–KK4, KK9: uzun basınca platform menüsü — sahipte "Seyahati sil", üyede "Seyahatten ayrıl"; onay, kısa bildirim.
+  const { session } = useOturum();
+  const sil = useSeyahatSil();
+  const ayril = useSeyahattenAyril();
+  const [bildirim, setBildirim] = useState<string | null>(null);
+  const bildirimZamani = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const goster = useCallback((metin: string) => {
+    setBildirim(metin);
+    if (bildirimZamani.current) clearTimeout(bildirimZamani.current);
+    bildirimZamani.current = setTimeout(() => setBildirim(null), 3000);
+  }, []);
+  // Seyahat içinden silince (sahip) ya da açık seyahat başkası tarafından silinince (KK5) liste bildirimle açılır; bildirim
+  // parametresi 3 sn sonra temizlenir.
+  const parametre = useLocalSearchParams<{ bildirim?: string }>();
+  const gelenBildirim = parametre.bildirim === 'silindi' ? t('seyahatler.silindi') : parametre.bildirim === 'silinmis' ? t('seyahatler.silinmis') : null;
+  useEffect(() => {
+    if (!gelenBildirim) return;
+    const z = setTimeout(() => router.setParams({ bildirim: undefined }), 3000);
+    return () => clearTimeout(z);
+  }, [gelenBildirim]);
+  const gorunenBildirim = bildirim ?? gelenBildirim;
+  const uzunBas = async (sy: SeyahatOzet) => {
+    const sahip = sahipMi(sy.members, session?.user.id);
+    const secildi = await eylemMenusu(seyahatAdi(sy), { metin: t(sahip ? 'seyahatler.sil' : 'davet.grup.ayril'), yikici: sahip }, t('genel.vazgec'));
+    if (!secildi) return;
+    if (sahip) {
+      if (!(await onayIste(t('seyahatler.silOnay'), silmeMetni(sy.members.length), t('seyahatler.silEvet'), t('genel.vazgec')))) return;
+      try {
+        await sil.mutateAsync(sy.id);
+        goster(t('seyahatler.silindi'));
+      } catch {
+        goster(t('seyahatler.silHata'));
+      }
+      return;
+    }
+    if (!(await onayIste(t('davet.grup.ayrilOnay'), t('davet.grup.ayrilMetin'), t('davet.grup.ayrilEvet'), t('genel.vazgec')))) return;
+    try {
+      await ayril.mutateAsync(sy.id);
+    } catch {
+      goster(t('davet.grup.ayrilHata'));
+    }
+  };
+
   // KK1: Tekrar kur — aynı plan, yeni tarih (sihirbaz 2. adım).
   const tekrarKur = (id: string) => router.navigate({ pathname: '/(tabs)/yeni', params: { tekrar: id, n: yeniGirisNo() } });
   const bos = !seyahatler.isPending && !seyahatler.isError && (seyahatler.data?.length ?? 0) === 0;
@@ -83,9 +131,11 @@ export default function SeyahatlerEkrani() {
         {yaklasan.length > 0 ? (
           <View style={s.bolum}>
             <Text style={s.bolumBaslik}>{t('seyahatler.yaklasan')}</Text>
-            {kapak ? <KapakKarti seyahat={kapak} durum={durumlar.data?.get(kapak.id)} onPress={() => ac(kapak.id)} onCip={cip(kapak)} siradaki={siradaki} /> : null}
+            {kapak ? (
+              <KapakKarti seyahat={kapak} durum={durumlar.data?.get(kapak.id)} onPress={() => ac(kapak.id)} onUzunBas={() => uzunBas(kapak)} onCip={cip(kapak)} siradaki={siradaki} />
+            ) : null}
             {digerleri.map((sy, i) => (
-              <SeyahatSatiri key={sy.id} seyahat={sy} sira={i} durum={durumlar.data?.get(sy.id)} onPress={() => ac(sy.id)} onCip={cip(sy)} />
+              <SeyahatSatiri key={sy.id} seyahat={sy} sira={i} durum={durumlar.data?.get(sy.id)} onPress={() => ac(sy.id)} onUzunBas={() => uzunBas(sy)} onCip={cip(sy)} />
             ))}
           </View>
         ) : null}
@@ -94,12 +144,17 @@ export default function SeyahatlerEkrani() {
           <View style={s.bolum}>
             <Text style={[s.bolumBaslik, yaklasan.length > 0 && { paddingTop: 6 }]}>{t('seyahatler.gecmis')}</Text>
             {gecmis.map((sy, i) => (
-              <GecmisSatiri key={sy.id} seyahat={sy} sira={i} durum={durumlar.data?.get(sy.id)} onPress={() => ac(sy.id)} onTekrar={() => tekrarKur(sy.id)} />
+              <GecmisSatiri key={sy.id} seyahat={sy} sira={i} durum={durumlar.data?.get(sy.id)} onPress={() => ac(sy.id)} onUzunBas={() => uzunBas(sy)} onTekrar={() => tekrarKur(sy.id)} />
             ))}
           </View>
         ) : null}
       </ScrollView>
       {aktif[0] ? <AktifCubuk seyahat={aktif[0]} program={program} /> : null}
+      {gorunenBildirim ? (
+        <View style={s.bildirim} pointerEvents="none" accessibilityLiveRegion="polite">
+          <Text style={s.bildirimMetin}>{gorunenBildirim}</Text>
+        </View>
+      ) : null}
     </SafeAreaView>
   );
 }
@@ -133,4 +188,6 @@ const s = StyleSheet.create({
   hata: { fontFamily: yazi.yari, fontSize: 12, color: renk.uyari, paddingTop: 12 },
   bolum: { paddingTop: 18, gap: 12 },
   bolumBaslik: { fontFamily: yazi.ekstra, fontSize: 12, letterSpacing: 0.48, color: renk.ikincil },
+  bildirim: { position: 'absolute', left: bosluk.kenar, right: bosluk.kenar, bottom: 24, alignItems: 'center' },
+  bildirimMetin: { overflow: 'hidden', paddingHorizontal: 16, paddingVertical: 10, borderRadius: 999, backgroundColor: renk.metin, color: renk.zemin, fontFamily: yazi.ekstra, fontSize: 13 },
 });
