@@ -297,7 +297,6 @@
     "kaldir": "Kaydedilenlerden kaldır"
   },
   "rehber": {
-    "hap": "Rehber",
     "ustBaslik": "ŞEHİR REHBERİ",
     "bolum": {
       "ulasim": "Nasıl gidilir, nasıl gezilir",
@@ -305,9 +304,12 @@
       "mahalle": "Mahalleler",
       "ipucu": "İpuçları"
     },
-    "geziler": "Bu şehirde önerilen geziler",
+    "geziler": "Bu şehirde hazır geziler",
     "hata": "Rehber yüklenemedi",
-    "okuma": "{n} dk okuma"
+    "okuma": "{n} dk okuma",
+    "mekanlar": "Rehberdeki {n} mekan",
+    "mekanlarAlt": "Hepsi bir listede, tek dokunuşla ekle",
+    "yapiskan": "{sehir} rehberi"
   },
   "kesfet": {
     "ara": "Mekan ara",
@@ -385,7 +387,6 @@
     "hata": "Mekan bilgisi alınamadı.",
     "acik": "Açık",
     "kapali": "Kapalı",
-    "kadar": "{saat}'e kadar",
     "ekledi": "{ad} ekledi",
     "saatYok": "Saat bilgisi yok",
     "azalt": "Süreyi azalt",
@@ -395,8 +396,6 @@
     "fotoAtif": "Fotoğraf: {yazar} · Google",
     "panel": {
       "kapat": "Paneli kapat",
-      "sekmeGenel": "Genel",
-      "sekmeYorumlar": "Yorumlar",
       "sekmeRehber": "Rehber",
       "oneCikan": "★ Öne çıkan",
       "acilisBugun": "bugün {saat}",
@@ -404,18 +403,16 @@
       "bilmen": "Bilmen gerekenler",
       "devami": "Devamı",
       "dahaAz": "Daha az",
-      "sure": "Kalınacak süre",
       "bugun": "Bugün",
       "adres": "Adres",
       "gun": "Gün",
       "fotoAc": "Fotoğrafı büyüt",
       "fotoKapat": "Galeriyi kapat",
       "listeyeEkle": "Listeye ekle",
-      "listedenCikar": "Listeden çıkar",
       "guneEkle": "Güne ekle",
       "gundenCikar": "Günden çıkar",
       "yolTarifi": "Yol tarifi",
-      "yorumHata": "Yorumlar alınamadı.",
+      "yorumHata": "Yorumlar şu an alınamadı.",
       "yorumYok": "Henüz yorum yok",
       "yorumSayisi": "{n} yorum",
       "siralaYeni": "En yeni",
@@ -425,7 +422,23 @@
       "yorumDahaAz": "daha az",
       "yorumAtif": "Yorumlar Google’dan",
       "rehberBaslik": "Rehber hazırlanıyor",
-      "rehberMetin": "Bu mekan için rehber notları yakında."
+      "rehberMetin": "Bu mekan için henüz rehber yazısı yok.",
+      "sekmeBilgiler": "Bilgiler",
+      "sekmeGoogle": "Google yorumları",
+      "kadar": "kadar",
+      "kalis": "Burada kalış",
+      "kalisAlt": "Önerilen {sure} · değiştirirsen saatler yeniden hesaplanır",
+      "listede": "Listede ✓",
+      "listedeA11y": "Listende, çıkarmak için dokun",
+      "paylas": "Paylaş",
+      "sesli": "Sesli rehberi dinle",
+      "sesliAlt": "yürürken dinle",
+      "yakinda": "YAKINDA",
+      "ipucu": "İPUCU",
+      "googleAc": "Google'da aç",
+      "yorumSiniri": "Bugünlük Google yorumu sınırına ulaşıldı. Yorumları Google Haritalar'da okuyabilirsin.",
+      "fotoSayac": "{n} / {toplam}",
+      "fotoGoogle": "Foto · Google"
     }
   },
   "gunler": {

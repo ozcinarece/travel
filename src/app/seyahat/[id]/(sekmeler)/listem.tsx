@@ -19,7 +19,7 @@ import { useDuragaAta, useDuraklar, useDurakKaldir, useGunler } from '@/features
 import type { Konaklama } from '@/features/konaklama/plan';
 import { useKonaklamalar } from '@/features/konaklama/sorgular';
 import { gunProgramlari, gunSecenekleri, listemGruplari, type GunSecenegi, type ListemSatiri, type ListemSiralama } from '@/features/listem/listem';
-import { useListemFotolari, useOylar, useOyVer } from '@/features/listem/sorgular';
+import { useOylar, useOyVer } from '@/features/listem/sorgular';
 import { useMekanGuncelle, useMekanlar, useMekanSil, useUyeler } from '@/features/mekanlar/sorgular';
 import { useDurakGuncelle } from '@/features/program/sorgular';
 import { useProgramVerisi } from '@/features/program/useProgramVerisi';
@@ -27,7 +27,7 @@ import { useSeyahatId } from '@/features/seyahatler/baglam';
 import { useSeyahat } from '@/features/seyahatler/sorgular';
 import { usePlaniUygula } from '@/features/sihirbaz/planUygula';
 import { seyahatAdi } from '@/features/sihirbaz/sihirbaz';
-import { useHafifYerler } from '@/features/yerler/api';
+import { useHafifYerler, useYerFotolari } from '@/features/yerler/api';
 import { t } from '@/i18n';
 import { kategoriEtiketi, sureMetni } from '@/lib/kategori';
 import { useOturum } from '@/lib/oturum';
@@ -125,7 +125,7 @@ function Listem({ seyahat, gunler, duraklar, mekanlar, konaklamalar }: { seyahat
     mekanlar.map((m) => m.place_id),
     { saatler: true },
   );
-  const fotolar = useListemFotolari(mekanlar.map((m) => m.place_id));
+  const fotolar = useYerFotolari(mekanlar.map((m) => m.place_id));
   const verisi = useProgramVerisi({ seyahat, gunler, duraklar, mekanlar, seciliGun: undefined, konaklamalar });
   const mekanIle = useMemo(() => new Map(mekanlar.map((m) => [m.id, m])), [mekanlar]);
   const durakIle = useMemo(() => new Map(duraklar.map((d) => [d.place_ref, d])), [duraklar]);

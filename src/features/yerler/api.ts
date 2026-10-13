@@ -242,14 +242,29 @@ export function useTamYer(placeId: string | undefined, tz?: string) {
 }
 
 /** #80 KK8: yorumlar YALNIZ Yorumlar sekmesi açıkken istenir (`acik`); 24 sa bellek, DB'ye yazılmaz (PRD §7). */
+/** #142 KK3: places-reviews günlük sınırı doldu — sekmede "Google'da aç". */
+export class YorumSiniri extends Error {
+  constructor() {
+    super('yorum_siniri');
+  }
+}
+
+/**
+ * #80 KK8 / #142 KK3: yorumlar yalnız sekmeye dokununca istenir; aynı oturumda cihazda tutulur (ikinci açılışta istek yok),
+ * DB'ye yazılmaz (PRD §7). Sınır doluysa YorumSiniri (önbelleğe girmez; sonraki açılışta yeniden denenir).
+ */
 export function useYorumlar(placeId: string | undefined, acik: boolean) {
   return useQuery({
     queryKey: ['yorumlar', placeId],
     enabled: !!placeId && acik,
-    staleTime: 24 * 60 * 60 * 1000,
-    gcTime: 24 * 60 * 60 * 1000,
-    retry: 1,
-    queryFn: async () => cagir<YorumOzeti>('places-reviews', { id: placeId }),
+    staleTime: Infinity,
+    gcTime: Infinity,
+    retry: (n, e) => !(e instanceof YorumSiniri) && n < 1,
+    queryFn: async () => {
+      const cevap = await cagir<YorumOzeti | { sinir: true }>('places-reviews', { id: placeId });
+      if ('sinir' in cevap && cevap.sinir) throw new YorumSiniri();
+      return cevap as YorumOzeti;
+    },
   });
 }
 
@@ -262,4 +277,21 @@ export async function yakinYerler(secenek: { cip: OneriCipi; merkez: Merkez; enF
     enFazla: secenek.enFazla,
   });
   return cevap.yerler;
+}
+
+/** #141/#142: liste ve rehber kartı fotoğrafları — hafif Details foto maskesi, 12'lik parçalar, 24 sa önbellek (satır başına istek yok). */
+export function useYerFotolari(placeIds: string[]) {
+  const sirali = [...new Set(placeIds)].sort();
+  return useQuery({
+    queryKey: ['yer-foto', sirali.join(',')],
+    enabled: sirali.length > 0,
+    staleTime: 24 * 60 * 60 * 1000,
+    retry: 1,
+    queryFn: async () => {
+      const parcalar: string[][] = [];
+      for (let i = 0; i < sirali.length; i += 12) parcalar.push(sirali.slice(i, i + 12));
+      const sonuc = await Promise.all(parcalar.map((p) => hafifYerler(p, { foto: true })));
+      return new Map(sonuc.flat().map((y) => [y.place_id, y.foto_uri ?? null] as const));
+    },
+  });
 }

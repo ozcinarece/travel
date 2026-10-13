@@ -2,12 +2,14 @@ import { describe, expect, it } from '@jest/globals';
 
 import type { Yorum } from '@/features/yerler/api';
 
-import { acikDurumu, ctaAnahtari, geriTusu, gorunenFotoSayisi, govdeYuksekligi, KAPALI_PANEL, panelGecis, panelYukseklikleri, yorumlariSirala } from '../panel';
+import { acikDurumu, ctaAnahtari, fotoSayfasi, fotoYuklensin, geriTusu, govdeYuksekligi, KAPALI_PANEL, panelGecis, panelSekmesi, panelYukseklikleri, yorumlariSirala } from '../panel';
 
 describe('mekan paneli durum makinesi (#80 KK14)', () => {
-  it('kapalı → pine dokun: yarı + genel; açıkken başka pine dokun: hal ve sekme korunur (KK13)', () => {
+  it('kapalı → pine dokun: #142 neredeyse tam ekran + kendiliğinden sekme; açıkken başka pine dokun: hal ve sekme korunur (KK13)', () => {
     const acik = panelGecis(KAPALI_PANEL, { tur: 'ac' });
-    expect(acik).toEqual({ hal: 'yari', sekme: 'genel' });
+    expect(acik).toEqual({ hal: 'tam', sekme: null });
+    expect(panelSekmesi(acik, true)).toBe('rehber');
+    expect(panelSekmesi(acik, false)).toBe('bilgiler');
     const tamYorum = panelGecis(panelGecis(acik, { tur: 'hal', hal: 'tam' }), { tur: 'sekme', sekme: 'yorumlar' });
     expect(tamYorum).toEqual({ hal: 'tam', sekme: 'yorumlar' });
     expect(panelGecis(tamYorum, { tur: 'ac' })).toBe(tamYorum);
@@ -16,17 +18,19 @@ describe('mekan paneli durum makinesi (#80 KK14)', () => {
   it('×, haritaya dokunma, yarıdan aşağı çekme ve geri tuşu kapatır; tamdan aşağı çekme önce yarıya iner (#83 KK3)', () => {
     const acik = panelGecis(KAPALI_PANEL, { tur: 'ac' });
     expect(panelGecis(acik, { tur: 'kapat' })).toEqual(KAPALI_PANEL);
-    expect(panelGecis(acik, { tur: 'hal', hal: 'katli' })).toEqual(KAPALI_PANEL);
+    // Açılış tam ekran: aşağı çekiş önce yarıya, yarıdan kapatır.
+    expect(panelGecis(panelGecis(acik, { tur: 'hal', hal: 'yari' }), { tur: 'hal', hal: 'katli' })).toEqual(KAPALI_PANEL);
     expect(panelGecis(acik, { tur: 'geri' })).toEqual(KAPALI_PANEL);
     expect(panelGecis(KAPALI_PANEL, { tur: 'geri' })).toBe(KAPALI_PANEL);
     const tam = panelGecis(acik, { tur: 'hal', hal: 'tam' });
-    expect(panelGecis(tam, { tur: 'hal', hal: 'katli' })).toEqual({ hal: 'yari', sekme: 'genel' });
+    expect(panelGecis(tam, { tur: 'hal', hal: 'katli' })).toEqual({ hal: 'yari', sekme: null });
     expect(panelGecis(panelGecis(tam, { tur: 'hal', hal: 'katli' }), { tur: 'hal', hal: 'katli' })).toEqual(KAPALI_PANEL);
     expect(panelGecis(tam, { tur: 'geri' })).toEqual(KAPALI_PANEL);
     expect(panelGecis(KAPALI_PANEL, { tur: 'hal', hal: 'katli' })).toBe(KAPALI_PANEL);
     expect(panelGecis(KAPALI_PANEL, { tur: 'kapat' })).toBe(KAPALI_PANEL);
-    // Yeniden açılınca sekme genel'e döner.
-    expect(panelGecis(panelGecis(panelGecis(acik, { tur: 'sekme', sekme: 'rehber' }), { tur: 'kapat' }), { tur: 'ac' })).toEqual({ hal: 'yari', sekme: 'genel' });
+    // Yeniden açılınca sekme kendiliğinden seçilir.
+    expect(panelGecis(panelGecis(panelGecis(acik, { tur: 'sekme', sekme: 'yorumlar' }), { tur: 'kapat' }), { tur: 'ac' })).toEqual({ hal: 'tam', sekme: null });
+    expect(panelSekmesi({ hal: 'tam', sekme: 'yorumlar' }, true)).toBe('yorumlar');
   });
 
   it('yükseklikler alt menü hariç alana göre: yarı %55, tam = alan − üst güvenli − 8, kapanma durağı yarının %45\'i (#83 KK1–3)', () => {
@@ -45,9 +49,9 @@ describe('geri tuşu önceliği (#85 KK4)', () => {
 });
 
 describe('CTA metni (#80 KK3)', () => {
-  it('Keşfet: listeye ekle / listeden çıkar; Program: güne ekle / günden çıkar', () => {
+  it('Keşfet: listeye ekle / Listede ✓; Program: güne ekle / günden çıkar', () => {
     expect(ctaAnahtari('kesfet', false)).toBe('listeyeEkle');
-    expect(ctaAnahtari('kesfet', true)).toBe('listedenCikar');
+    expect(ctaAnahtari('kesfet', true)).toBe('listede');
     expect(ctaAnahtari('program', false)).toBe('guneEkle');
     expect(ctaAnahtari('program', true)).toBe('gundenCikar');
   });
@@ -74,9 +78,10 @@ describe('açık/kapalı satırı ve fotoğraf şeridi (#80 KK2, KK5)', () => {
     expect(acikDurumu({ acik: null })).toBeNull();
     expect(acikDurumu(undefined)).toBeNull();
   });
-  it('yalnız görünür kareler + 1 komşu yüklenir', () => {
-    // 390 px ekran, 120 px kare + 8 boşluk: başta 3 görünür → 5 (indeks 0–4) istenir; 10 fotoğrafın hepsi değil.
-    expect(gorunenFotoSayisi(0, 390, 120, 8)).toBe(5);
-    expect(gorunenFotoSayisi(640, 390, 120, 8)).toBe(10);
+  it('#142 foto kaydırma: sayfa ofsetten; yalnız o sayfa ve komşuları yüklenir', () => {
+    expect(fotoSayfasi(0, 390, 6)).toBe(0);
+    expect(fotoSayfasi(390 * 2 + 100, 390, 6)).toBe(2);
+    expect(fotoSayfasi(390 * 9, 390, 6)).toBe(5);
+    expect([0, 1, 2, 3].map((i) => fotoYuklensin(i, 1))).toEqual([true, true, true, false]);
   });
 });

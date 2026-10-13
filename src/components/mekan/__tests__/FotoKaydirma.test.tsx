@@ -3,7 +3,7 @@ import { act, render } from '@testing-library/react-native';
 
 import type { TamYer } from '@/features/yerler/api';
 
-import { FotoSeridi } from '../MekanPaneli';
+import { FotoKaydirma } from '../MekanPaneli';
 
 // Yalnız hangi küçük resimlerin URI istediğini sayıyoruz (ad tanımlıysa istek açık).
 const mockIstenen = new Set<string>();
@@ -44,34 +44,25 @@ function havuzlanmisOlay(x: number) {
   return { nativeEvent: { contentOffset: { x } } as { contentOffset: { x: number } } | null };
 }
 
-// #85 KK2/KK4 yeniden üretim: 10 fotoğraflı şerit, art arda kaydırma olayları (görünen 5 → 8 → 10); olay nesneleri
-// işleyiciden sonra null'lanır (havuzlama). Eski kod `e.nativeEvent`'i güncelleyicide (render'da) okuyup patlıyordu.
-describe('FotoSeridi (#85)', () => {
+// #142 KK1 (#85 dersiyle): 10 fotoğraflı kaydırma, sayfa genişliği 390. Başta yalnız 0 (hazır URI) ve komşusu 1 istenir;
+// 3. sayfaya kayınca 2–4; havuzlanmış olaylar (işleyiciden sonra null) hata üretmez.
+describe('FotoKaydirma (#142)', () => {
   beforeEach(() => mockIstenen.clear());
 
-  it('başta yalnız görünür + 1 komşu istenir; kaydırma sonrası 10/10; havuzlanmış olaylar hata üretmez', () => {
-    const { getByTestId } = render(<FotoSeridi yer={yer} onAc={() => {}} />);
-    // 750 px genişlik (jest pencere), 128 px kare: başta 7 kare → ilk foto hazır URI'yle, 6 istek.
-    expect(mockIstenen.size).toBeGreaterThanOrEqual(5);
-    expect(mockIstenen.size).toBeLessThan(10);
-    const serit = getByTestId('foto-seridi');
-    const o1 = havuzlanmisOlay(300);
-    const o2 = havuzlanmisOlay(640);
-    const o3 = havuzlanmisOlay(900);
-    // Art arda üç olay tek toplu güncellemede: ilki eager hesaplanır, ikinci ve üçüncü güncelleyici render'a ertelenir.
-    // İşleyiciler döndükten sonra olaylar havuza iade edilir (nativeEvent null); render act bitince çalışır.
+  it('yalnız görünen sayfa ve komşuları istenir; sayaç "1 / 10"', () => {
+    const { getByTestId, getByText } = render(<FotoKaydirma yer={yer} genislik={390} onAc={() => {}} />);
+    expect([...mockIstenen]).toEqual(['places/p1/photos/1']);
+    expect(getByText('1 / 10')).toBeTruthy();
+    const kaydirma = getByTestId('foto-kaydirma');
+    const o1 = havuzlanmisOlay(390 * 3);
     expect(() =>
       act(() => {
-        serit.props.onScroll(o1);
-        serit.props.onScroll(o2);
-        serit.props.onScroll(o3);
+        kaydirma.props.onMomentumScrollEnd(o1);
         o1.nativeEvent = null;
-        o2.nativeEvent = null;
-        o3.nativeEvent = null;
       }),
     ).not.toThrow();
-    // 9 kare istenir (ilk kare hazır URI ile gelir, hook'u kapalı).
-    expect(mockIstenen.size).toBe(9);
-    for (let i = 0; i < 10; i++) expect(getByTestId(`foto-kare-${i}`)).toBeTruthy();
+    expect([...mockIstenen].sort()).toEqual(['places/p1/photos/1', 'places/p1/photos/2', 'places/p1/photos/3', 'places/p1/photos/4']);
+    expect(getByText('4 / 10')).toBeTruthy();
+    for (let i = 0; i < 10; i++) expect(getByTestId(`foto-sayfa-${i}`)).toBeTruthy();
   });
 });
