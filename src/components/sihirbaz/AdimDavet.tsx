@@ -1,8 +1,10 @@
-// #98 KK5 · 4. adım "Kimlerle?": davet linki kartı (paylaş / kopyala; PRD 3.10 token) + arkadaş listesi (v1 boş durum, #52).
-import { Pressable, Share, StyleSheet, Text, View } from 'react-native';
+// #98 KK5 · 4. adım "Kimlerle?": davet linki kartı (paylaş; PRD 3.10 token) + arkadaş listesi (v1 boş durum, #52).
+// #137 KK5: ilk paylaşımdan önce profil onayı alt sayfası; paylaşım `davet_paylasildi` olayı yazar.
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 
+import { ProfilOnayi } from '@/components/davet/ProfilOnayi';
 import { Ikon } from '@/components/ui/Ikon';
-import { seyahatAdi } from '@/features/sihirbaz/sihirbaz';
+import { useDavetPaylas } from '@/features/davet/paylas';
 import { t } from '@/i18n';
 import { davetLinki } from '@/lib/davetLinki';
 import type { Seyahat } from '@/lib/tipler';
@@ -11,9 +13,10 @@ import { minDokunma, renk, yazi } from '@/theme';
 export function AdimDavet({ seyahat }: { seyahat: Seyahat }) {
   const link = davetLinki(seyahat.invite_token);
   // #115/#117: "Kopyala" (expo-clipboard) bir sonraki EAS build'e kadar yok — tek düğme "Linki paylaş"; link metni seçilebilir.
-  const paylas = () => Share.share({ message: t('sihirbaz.kimlerle.paylasMetin', { ad: seyahatAdi(seyahat), link }) }).catch(() => {});
+  const { paylas, onayAcik, onayKapat, onayla } = useDavetPaylas(seyahat);
   return (
     <View style={s.kap}>
+      <ProfilOnayi acik={onayAcik} onKapat={onayKapat} onGonder={onayla} />
       <View style={s.kart}>
         <Text style={s.kartBaslik}>{t('sihirbaz.kimlerle.linkBaslik')}</Text>
         <Text style={s.link} numberOfLines={1} selectable>

@@ -9,7 +9,6 @@ const SekmeDuzeni = () => (
   <Tabs initialRouteName="kesfet" screenOptions={{ headerShown: false }} tabBar={() => null}>
     <Tabs.Screen name="kesfet" />
     <Tabs.Screen name="program" />
-    <Tabs.Screen name="grup" />
   </Tabs>
 );
 
@@ -22,13 +21,11 @@ function Kesfet() {
 }
 
 const Program = () => <Text>program ekranı</Text>;
-const Grup = () => <Text>grup ekranı</Text>;
 
 const rotalar = {
   'seyahat/[id]/(sekmeler)/_layout': SekmeDuzeni,
   'seyahat/[id]/(sekmeler)/kesfet': Kesfet,
   'seyahat/[id]/(sekmeler)/program': Program,
-  'seyahat/[id]/(sekmeler)/grup': Grup,
 };
 
 describe('Programa geç (#49)', () => {

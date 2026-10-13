@@ -11,6 +11,7 @@ import { Ikon } from '@/components/ui/Ikon';
 import { GoogleAtfi } from '@/components/yerler/GoogleAtfi';
 import type { Konaklama } from '@/features/konaklama/plan';
 import { useKonaklamalar } from '@/features/konaklama/sorgular';
+import { GrupPenceresi } from '@/components/davet/GrupPenceresi';
 import { MekanPaneli } from '@/components/mekan/MekanPaneli';
 import { useMekanEkle, useMekanGuncelle, useMekanlar, useMekanSil, useUyeler } from '@/features/mekanlar/sorgular';
 import { useSeyahatId } from '@/features/seyahatler/baglam';
@@ -55,6 +56,8 @@ const ILK_BOLGE_BEKLEME_MS = 2000;
 function Kesfet({ seyahat, konaklamalar, ilkMekan }: { seyahat: Seyahat; konaklamalar: Konaklama[]; ilkMekan?: string }) {
   const mekanlar = useMekanlar(seyahat.id);
   const uyeler = useUyeler(seyahat.id);
+  // #137 KK6: Grup penceresi (yüzlere dokununca; Grup sekmesi kalktı).
+  const [grupAcik, setGrupAcik] = useState(false);
   const ekle = useMekanEkle(seyahat.id);
   const sil = useMekanSil(seyahat.id);
   const guncelle = useMekanGuncelle(seyahat.id);
@@ -387,18 +390,7 @@ function Kesfet({ seyahat, konaklamalar, ilkMekan }: { seyahat: Seyahat; konakla
       geri={() => router.replace('/(tabs)/seyahatler')}
       sagUst={
         // #45: Grup'a erişim avatarlardan (seyahat içi alt menü kalktı).
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={t('seyahat.grup.baslik')}
-          hitSlop={8}
-          onPress={() =>
-            router.navigate({
-              pathname: '/seyahat/[id]/(sekmeler)/grup',
-              params: { id: seyahat.id },
-            })
-          }
-          style={s.avatarlar}
-        >
+        <Pressable accessibilityRole="button" accessibilityLabel={t('seyahat.grup.baslik')} hitSlop={8} onPress={() => setGrupAcik(true)} style={s.avatarlar}>
           {(uyeler.data ?? []).slice(0, 3).map((u, i) => (
             <View key={u.user_id} style={[s.avatarCerceve, i > 0 && { marginLeft: -8 }]}>
               <Avatar ad={u.display_name} boyut={24} arkaPlan={['#0f0f0f', '#ff5a1f', '#4c6ef5'][i % 3]} />
@@ -563,6 +555,7 @@ function Kesfet({ seyahat, konaklamalar, ilkMekan }: { seyahat: Seyahat; konakla
       ustKatman={
         <>
           <FiltreSayfasi acik={filtreAcik} filtre={filtre} onFiltre={setFiltre} sayi={gecenler.length} onKapat={() => setFiltreAcik(false)} />
+          <GrupPenceresi acik={grupAcik} onKapat={() => setGrupAcik(false)} seyahat={seyahat} uyeler={uyeler.data ?? []} mekanlar={havuz} />
           {secim ? (
           <MekanPaneli
             placeId={secim.place_id}

@@ -23,7 +23,9 @@ create table auth.users (
   -- #110 genel bakış: kayıt zamanı (Supabase'deki gibi).
   created_at timestamptz not null default now(),
   -- #111 kullanıcı listesi: son görülme.
-  last_sign_in_at timestamptz
+  last_sign_in_at timestamptz,
+  -- #137 davetle katılım: profil yoksa ad sağlayıcı verisinden (Supabase'deki gibi).
+  raw_user_meta_data jsonb
 );
 
 create function auth.jwt() returns jsonb

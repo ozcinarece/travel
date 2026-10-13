@@ -141,13 +141,64 @@
     "onizlemeHata": "Seyahatler yüklenemedi; bağlantını kontrol edip tekrar dene."
   },
   "davet": {
-    "yakinda": "Davetle katılım yakında hazır olacak.",
-    "token": "Davet kodu: {token}",
     "alan": {
       "yer": "Linki buraya yapıştır",
       "git": "Katıl",
       "hata": "Bu link tanınmadı. Biçim: …/r/xxxxxxxx"
-    }
+    },
+    "biri": "Bir arkadaşın",
+    "davetEden": "{ad} davet ediyor",
+    "baslik": "{ad} seni {seyahatEk} davet etti",
+    "ozet": "{tarih} · {gun} gün · {mekan} mekan · {kisi} kişi",
+    "tarihsiz": "Tarih belli değil",
+    "planBaslik": "PLAN",
+    "gunSatiri": "{gun}. gün",
+    "gunDurak": "{n} durak",
+    "gunBos": "henüz durak yok",
+    "gunYok": "Günler henüz planlanmadı",
+    "planNot": "Mekan adları ve saatler katılınca açılır.",
+    "katilGoogle": "Google ile katıl",
+    "katilApple": "Apple ile katıl",
+    "profilTamamla": "Katılmak için profilini tamamla",
+    "katiliyor": "Katılıyorsun…",
+    "zatenUye": "Zaten bu seyahattesin, açılıyor…",
+    "gecersizBaslik": "Bu davet geçersiz",
+    "gecersizMetin": "Link yanlış kopyalanmış ya da davet eden linki yenilemiş olabilir. Yeni link iste.",
+    "anaSayfa": "Ana sayfaya git",
+    "hata": "Katılım tamamlanamadı. Tekrar dene.",
+    "webNot": "Uygulaman yoksa da sorun yok: burada katıl; sonra indirirsen aynı hesapla doğrudan seyahate düşersin.",
+    "linkKopyalandi": "Link kopyalandı",
+    "katildin": {
+      "rozet": "Katıldın ✓",
+      "baslik": "{ad} seni {seyahatEk} ekledi",
+      "metin": "Plan hazırlanıyor: {gun} gün, {mekan} mekan. Sen de mekan ekleyebilir, sırayı birlikte değiştirebilirsiniz.",
+      "program": "Programa bak",
+      "mekanEkle": "Mekan ekle"
+    },
+    "onay": {
+      "baslik": "Arkadaşların seni böyle görecek",
+      "metin": "Davet linkini göndermeden önce bir bak: adını ve fotoğrafını hesabından aldık.",
+      "degistir": "Değiştir",
+      "gonder": "Tamam, gönder",
+      "not": "Kimlerin ne göreceğini Profil'den ayarlarsın."
+    },
+    "grup": {
+      "baslik": "Seyahattekiler · {n}",
+      "sen": "(sen)",
+      "kurdu": "Kurdu",
+      "mekanEkledi": "{n} mekan ekledi",
+      "ekleKart": "Arkadaşını ekle",
+      "ekleAlt": "Linke dokunan katılır; uygulama indirmesi gerekmez.",
+      "gonder": "Davet linkini gönder",
+      "degisiklikler": "Son değişiklikler",
+      "degisiklikYok": "Henüz değişiklik yok",
+      "ayril": "Seyahatten ayrıl",
+      "ayrilOnay": "Seyahatten ayrılmak istiyor musun?",
+      "ayrilMetin": "Eklediğin mekanlar kalır; linkle yeniden katılabilirsin.",
+      "ayrilEvet": "Ayrıl",
+      "ayrilHata": "Ayrılamadın. Tekrar dene."
+    },
+    "tekrarDene": "Tekrar dene"
   },
   "harita": {
     "anahtarYok": "Harita anahtarı tanımlı değil"
@@ -459,8 +510,7 @@
     },
     "grup": {
       "degisiklikler": "Son değişiklikler",
-      "degisiklikYok": "Henüz değişiklik yok",
-      "davetYakinda": "Davet linki 3.10 ile geliyor."
+      "degisiklikYok": "Henüz değişiklik yok"
     },
     "sekmeBaslik": "Program",
     "taksi": "{n} dk araba",

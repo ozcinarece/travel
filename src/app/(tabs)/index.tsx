@@ -1,8 +1,9 @@
 import { Redirect, router } from 'expo-router';
-import { useMemo, useState } from 'react';
-import { Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useEffect, useMemo, useState } from 'react';
+import { ActivityIndicator, Platform, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { bekleyenDavetiOku, bekleyenDavetiSil, useDavetKarsilama, useDavetKarsilandi } from '@/features/davet/sorgular';
 import { GeziKarti } from '@/components/icerik/GeziKarti';
 import { YerKarosu } from '@/components/icerik/YerKarosu';
 import { SecimMenusu } from '@/components/program/SecimMenusu';
@@ -16,6 +17,7 @@ import { useProfil } from '@/features/profil/sorgular';
 import { useSeyahatler } from '@/features/seyahatler/sorgular';
 import { gunFarki, seyahatAdi } from '@/features/sihirbaz/sihirbaz';
 import { t } from '@/i18n';
+import { useOturum } from '@/lib/oturum';
 import { tarihAraligi } from '@/lib/takvim';
 import type { Yer } from '@/lib/tipler';
 import { yerelTarih } from '@/lib/zaman';
@@ -27,6 +29,31 @@ import { bosluk, renk, yazi } from '@/theme';
  */
 export default function AnaSayfa() {
   const profil = useProfil();
+  const { hesapli } = useOturum();
+  // #137: giriş/profil öncesi görülen davet → /r/{token}'a dön; web'de katılıp uygulamayı ilk açan → doğrudan seyahat (KK2).
+  // İkisi de bilinene kadar yükleniyor gösterilir; başka yönlendirme (ilk açılış → sihirbaz) ancak ikisi de boş çıkınca.
+  const [bekleyenDavet, setBekleyenDavet] = useState<null | undefined>(undefined);
+  useEffect(() => {
+    bekleyenDavetiOku().then((token) => {
+      if (token) router.replace({ pathname: '/r/[token]', params: { token } });
+      else setBekleyenDavet(null);
+    });
+  }, []);
+  const karsilamaEtkin = bekleyenDavet === null && !!profil.data;
+  const karsilama = useDavetKarsilama(karsilamaEtkin);
+  const karsilamaBekleniyor = karsilamaEtkin && hesapli && Platform.OS !== 'web' && karsilama.data === undefined && !karsilama.isError;
+  const karsilandi = useDavetKarsilandi();
+  // "Önceki render" deseni: karşılanacak seyahat gelince bir kez tutulur; damga, önbellek ve tek seferlik geçiş etkide.
+  const [karsilanan, setKarsilanan] = useState<string | null>(null);
+  if (karsilama.data && karsilanan !== karsilama.data.trip_id) setKarsilanan(karsilama.data.trip_id);
+  useEffect(() => {
+    if (!karsilanan) return;
+    bekleyenDavetiSil();
+    karsilandi(karsilanan).then(() => {
+      router.replace({ pathname: '/seyahat/[id]/(sekmeler)/program', params: { id: karsilanan, katildin: '1' } });
+      setKarsilanan(null);
+    });
+  }, [karsilanan, karsilandi]);
   const seyahatler = useSeyahatler();
   const geziler = useGeziler();
   const yerler = useTumYerler();
@@ -41,6 +68,13 @@ export default function AnaSayfa() {
   const [bildirim, setBildirim] = useState<string | null>(null);
   const [mesgulId, setMesgulId] = useState<string | null>(null);
 
+  if (bekleyenDavet === undefined || karsilamaBekleniyor || karsilanan) {
+    return (
+      <SafeAreaView style={[s.ekran, s.ortala]}>
+        <ActivityIndicator color={renk.metin} />
+      </SafeAreaView>
+    );
+  }
   // #98: 0.3 yönlendirme ekranı kalktı — ilk açılış doğrudan sihirbaza (damgayı sihirbaz yazar).
   if (profil.data && !profil.data.onboarding_done_at) return <Redirect href="/(tabs)/yeni" />;
 
@@ -197,6 +231,7 @@ function Bolum({ baslik, onTumu, children }: { baslik: string; onTumu: () => voi
 
 const s = StyleSheet.create({
   ekran: { flex: 1, backgroundColor: renk.zemin },
+  ortala: { alignItems: 'center', justifyContent: 'center' },
   icerik: { paddingBottom: 28 },
   ust: { paddingHorizontal: bosluk.kenar, paddingTop: 14, flexDirection: 'row', alignItems: 'center', gap: 12 },
   merhaba: { fontFamily: yazi.kalin, fontSize: 13, color: renk.ikincil },
