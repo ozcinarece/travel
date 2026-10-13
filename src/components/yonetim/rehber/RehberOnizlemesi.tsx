@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState, type CSSProperties } from 'react';
 import { View } from 'react-native';
 
 import { SehirRehberi } from '@/components/icerik/SehirRehberi';
+import type { BilinenMekanlar } from '@/features/icerik/mekanBilgileri';
 import { ty } from '@/features/yonetim/metin';
 import { onizlemeNo, onizlemeSatirlari, type TaslakBolum } from '@/features/yonetim/rehberTaslak';
 import type { Sehir } from '@/lib/tipler';
@@ -18,6 +19,8 @@ const YUKSEKLIK = Math.round((700 - 16) / OLCEK);
 type Props = {
   sehir: Sehir;
   bolumler: TaslakBolum[];
+  /** #172 KK7: taslağın bildiği mekanlar (yayından önce DB'de yazı satırı yok) — kartlar Google'a sorulmadan çizilir. */
+  bilinen?: BilinenMekanlar;
   seciliId: string;
   acik: boolean;
   onAcik: (acik: boolean) => void;
@@ -28,7 +31,7 @@ type Props = {
  * Telefon önizlemesi **uygulamanın kendi `SehirRehberi` bileşeniyle** çizilir: taslak, ayrı bir sorgu istemcisinde uygulamanın
  * rehber sorgusunun yerine konur (yapışkan çipler, okuma çizgisi, kart, alıntı uygulamadaki gibi); yazdıkça güncellenir.
  */
-export function RehberOnizlemesi({ sehir, bolumler, seciliId, acik, onAcik }: Props) {
+export function RehberOnizlemesi({ sehir, bolumler, bilinen, seciliId, acik, onAcik }: Props) {
   const [kapsam, setKapsam] = useState<'bolum' | 'sayfa'>('sayfa');
   // Önizlemenin kendi önbelleği: taslak uygulamanın `['icerik', 'rehber', id]` sorgusuna yazılır, panelinkine dokunmaz.
   const istemci = useMemo(() => new QueryClient({ defaultOptions: { queries: { retry: false, staleTime: Infinity } } }), []);
@@ -72,7 +75,7 @@ export function RehberOnizlemesi({ sehir, bolumler, seciliId, acik, onAcik }: Pr
         <div style={c.olcek}>
           <QueryClientProvider client={istemci}>
             <View style={{ width: GENISLIK, height: YUKSEKLIK }}>
-              <SehirRehberi key={yalniz ?? 'sayfa'} sehir={sehir} sehirlerYukleniyor={false} onGeri={() => {}} ilkNo={yalniz ? onizlemeNo(bolumler, yalniz) : 1} />
+              <SehirRehberi key={yalniz ?? 'sayfa'} sehir={sehir} sehirlerYukleniyor={false} onGeri={() => {}} ilkNo={yalniz ? onizlemeNo(bolumler, yalniz) : 1} bilinen={bilinen} />
             </View>
           </QueryClientProvider>
         </div>

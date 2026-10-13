@@ -16,19 +16,19 @@ import { Ikon } from '@/components/ui/Ikon';
 import { Logo } from '@/components/ui/Logo';
 import { SegmentSecici } from '@/components/ui/SegmentSecici';
 import { kalinParcalar } from '@/features/icerik/aktar';
-import { useIcerikCanli } from '@/features/icerik/fotolar';
-import { rehberMekanIdleri } from '@/features/icerik/rehber';
+import { icerikHafif, useIcerikCanli } from '@/features/icerik/fotolar';
+import { useIcerikMekanlari } from '@/features/icerik/mekanBilgileri';
+import { rehberKartIdleri, rehberMekanIdleri } from '@/features/icerik/rehber';
 import { cozumSebebi, olayYaz, useGezi, useGeziAlinma } from '@/features/icerik/sorgular';
 import { hedefSeyahatler, useYereEkle, varsayilanHedef } from '@/features/icerik/yerEkle';
 import { useMekanGuncelle, useMekanlar, useMekanSil } from '@/features/mekanlar/sorgular';
 import { useSeyahatler } from '@/features/seyahatler/sorgular';
 import { seyahatAdi } from '@/features/sihirbaz/sihirbaz';
-import { useHafifYerler, useYerFotolari, type HafifYer } from '@/features/yerler/api';
+import type { HafifYer } from '@/features/yerler/api';
 import { t } from '@/i18n';
 import { davetLinki } from '@/lib/davetLinki';
 import { kategoriEtiketi, sureMetni, varsayilanDakika } from '@/lib/kategori';
 import { okumaSuresiDk } from '@/lib/markdown';
-import { puanMetni } from '@/lib/puan';
 import { AYLAR, parcala, tarihAraligi } from '@/lib/takvim';
 import type { GeziDuragi } from '@/lib/tipler';
 import { bosluk, renk, yazi } from '@/theme';
@@ -72,10 +72,11 @@ export default function GeziEkrani() {
   const duraklar = useMemo(() => gezi.data?.gezi_gunleri.flatMap((g) => g.gezi_duraklari) ?? [], [gezi.data]);
   const canli = useIcerikCanli(duraklar, () => gezi.data?.sehirler?.ad ?? '', !!gezi.data);
   const kimlik = useCallback((d: GeziDuragi) => canli.data?.get(d.id)?.place_id ?? d.place_id ?? null, [canli.data]);
-  // Gezi yazısındaki mekan kartları (`::mekan[place_id]`) ve satır içi bağlantılar.
+  // Gezi yazısındaki mekan kartları (`::mekan[place_id]`) ve satır içi bağlantılar. #172 KK7–KK9: ad, kategori, konum DB'den
+  // (yazının açtığı yer satırı; yoksa aynı mekanın gezi durağı); fotoğraf önce bizim, yoksa Google (yalnız kartlar); puan yok.
   const yaziIdleri = useMemo(() => rehberMekanIdleri([gezi.data?.yazi_md ?? '']), [gezi.data?.yazi_md]);
-  const yaziHafif = useHafifYerler(yaziIdleri);
-  const yaziFoto = useYerFotolari(yaziIdleri);
+  const yaziKartlari = useMemo(() => rehberKartIdleri([gezi.data?.yazi_md ?? '']), [gezi.data?.yazi_md]);
+  const yaziMekan = useIcerikMekanlari(yaziIdleri, { kartlar: yaziKartlari });
   const [panel, setPanel] = useState<{ placeId: string; hafif: HafifYer; dakika: number } | null>(null);
 
   useEffect(() => {
@@ -140,7 +141,7 @@ export default function GeziEkrani() {
       setAlHata(canli.isPending ? t('anasayfa.cozuluyor') : t('anasayfa.ekleHataSebep', { sebep: sebep === 'bulunamadi' || !sebep ? t('anasayfa.bulunamadi') : sebep }));
       return null;
     }
-    return { anahtar: d.id, place_id: pid, primary_type: canli.data?.get(d.id)?.hafif?.primary_type ?? d.kategori, lat: d.lat, lng: d.lng, dakika: d.sure_dk };
+    return { anahtar: d.id, place_id: pid, primary_type: d.kategori, lat: d.lat, lng: d.lng, dakika: d.sure_dk };
   };
   const durakArti = (d: GeziDuragi) => {
     const y = durakYeri(d);
@@ -176,22 +177,27 @@ export default function GeziEkrani() {
     router.navigate('/(tabs)/yeni');
   };
 
-  const mekanKarti = (placeId: string) => {
+  /** Yazıdaki mekanın DB verisi (yazının yer satırı, yoksa aynı mekanın gezi durağı) — panelin yedeği, kart, listeye ekleme. */
+  const yaziYeri = (placeId: string): { hafif: HafifYer; durak: GeziDuragi | undefined } | null => {
     const durak = duraklar.find((d) => kimlik(d) === placeId);
-    const hafif = yaziHafif.data?.[placeId] ?? (durak ? canli.data?.get(durak.id)?.hafif : null) ?? null;
-    if (!hafif && !durak) return null;
-    const foto = yaziFoto.data?.get(placeId) ?? (durak ? canli.data?.get(durak.id)?.foto_uri : null) ?? null;
-    const puan = puanMetni(hafif?.puan);
-    const y: Yer = { anahtar: placeId, place_id: placeId, primary_type: hafif?.primary_type ?? durak?.kategori ?? null, lat: hafif?.lat ?? durak!.lat, lng: hafif?.lng ?? durak!.lng, dakika: durak?.sure_dk };
+    const m = yaziMekan.mekan(placeId) ?? (durak ? { ad: durak.ad, kategori: durak.kategori, lat: durak.lat, lng: durak.lng } : null);
+    return m ? { hafif: icerikHafif(placeId, m), durak } : null;
+  };
+  const mekanKarti = (placeId: string) => {
+    const bilgi = yaziYeri(placeId);
+    if (!bilgi) return null;
+    const { hafif, durak } = bilgi;
+    const foto = yaziMekan.mekan(placeId)?.foto ?? (durak ? canli.data?.get(durak.id)?.foto_uri : null) ?? yaziMekan.foto(placeId);
+    const y: Yer = { anahtar: placeId, place_id: placeId, primary_type: hafif.primary_type, lat: hafif.lat, lng: hafif.lng, dakika: durak?.sure_dk };
     return (
-      <Pressable accessibilityRole="button" disabled={!hafif} onPress={() => paneliAc(placeId, hafif, listedeki(placeId)?.default_minutes ?? durak?.sure_dk)} style={({ pressed }) => [s.kart, pressed && { opacity: 0.85 }]}>
+      <Pressable accessibilityRole="button" onPress={() => paneliAc(placeId, hafif, listedeki(placeId)?.default_minutes ?? durak?.sure_dk)} style={({ pressed }) => [s.kart, pressed && { opacity: 0.85 }]}>
         <View style={s.kartFoto}>{foto ? <Image source={{ uri: foto }} style={StyleSheet.absoluteFill} contentFit="cover" transition={150} /> : null}</View>
         <View style={{ flex: 1, minWidth: 0 }}>
           <Text style={s.kartAd} numberOfLines={1}>
-            {hafif?.ad ?? durak?.ad}
+            {hafif.ad}
           </Text>
           <Text style={s.kartAlt} numberOfLines={1}>
-            {[kategoriEtiketi(y.primary_type), puan ? `★ ${puan}` : null, durak ? sureMetni(durak.sure_dk) : null].filter(Boolean).join(' · ')}
+            {[kategoriEtiketi(y.primary_type), durak ? sureMetni(durak.sure_dk) : null].filter(Boolean).join(' · ')}
           </Text>
         </View>
         <EkleDugmesi listede={!!listedeki(placeId)} mesgul={mesgulId === placeId} onPress={() => degistir(y)} />
@@ -266,7 +272,10 @@ export default function GeziEkrani() {
               listede={durakListede}
               mesgulId={mesgulId}
               onDurakEkle={durakArti}
-              onDurak={(d) => paneliAc(kimlik(d) ?? '', canli.data?.get(d.id)?.hafif, listedeki(kimlik(d) ?? '')?.default_minutes ?? d.sure_dk)}
+              onDurak={(d) => {
+                const pid = kimlik(d);
+                if (pid) paneliAc(pid, icerikHafif(pid, d), listedeki(pid)?.default_minutes ?? d.sure_dk);
+              }}
             />
           </View>
         ) : (
@@ -279,7 +288,7 @@ export default function GeziEkrani() {
                 {[g.yazar_ad, `${tarih.gun} ${AYLAR[tarih.ay - 1]}`, t('gezi.okuma', { n: okumaSuresiDk(g.yazi_md) }), alinmaSayisi > 0 ? t('gezi.alindi', { n: alinmaSayisi }) : null].filter(Boolean).join(' · ')}
               </Text>
             </View>
-            <MdYazi kaynak={g.yazi_md} kenar={22} buyuk mekanKarti={mekanKarti} onMekan={(id) => paneliAc(id, yaziHafif.data?.[id], listedeki(id)?.default_minutes)} />
+            <MdYazi kaynak={g.yazi_md} kenar={22} buyuk mekanKarti={mekanKarti} onMekan={(id) => paneliAc(id, yaziYeri(id)?.hafif, listedeki(id)?.default_minutes)} />
           </View>
         )}
       </ScrollView>

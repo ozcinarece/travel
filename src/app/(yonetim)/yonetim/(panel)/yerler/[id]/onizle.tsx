@@ -12,7 +12,8 @@ export default function YerOnizlemeSayfasi() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const yer = useYonetimYer(id);
   const placeId = yer.data && gecerliPlaceId(yer.data.place_id) ? yer.data.place_id! : null;
-  const canli = useHafifYerler(placeId ? [placeId] : []);
+  // #172: BO yer önizlemesi Google'ın canlı ★ puanını ve yorum sayısını gösterir (tek kimlik, önbellekten).
+  const canli = useHafifYerler(placeId ? [placeId] : [], { puan: true });
   return (
     <YonetimSayfasi baslik={ty('yer.baslik', { ad: yer.data?.ad ?? '' })}>
       {yer.data ? <YerOnizleme yer={yer.data} canli={placeId ? canli.data?.[placeId] : undefined} /> : yer.isError ? <Aciklama>{ty('yer.yuklenemedi')}</Aciklama> : null}

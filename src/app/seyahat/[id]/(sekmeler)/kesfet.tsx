@@ -26,8 +26,7 @@ import { sehirEslestir, useSehirler } from '@/features/icerik/sorgular';
 import { kartKamerasi } from '@/features/program/durakKarti';
 import { useOnerilenler, type OnerilenMekan } from '@/features/sihirbaz/onerilenler';
 import { cekmeceListesi, cekmeceSayisi, type CekmeceCipi } from '@/features/yerler/cekmece';
-import { hafifYerler, linkCoz, linkGibiMi, useHafifYerler, useOneriler, yeniOturumJetonu, type HafifYer, type OneriCipi } from '@/features/yerler/api';
-import { useQuery } from '@tanstack/react-query';
+import { hafifOnbellek, hafifYerler, linkCoz, linkGibiMi, useHafifYerler, useOneriler, useYerFotolari, yeniOturumJetonu, type HafifYer, type OneriCipi } from '@/features/yerler/api';
 
 import { aktifFiltreSayisi, ayniKumeler, filtreAktif, filtredenGecer, filtreOzeti, taramaKumeleri, varsayilanMi, type Filtre } from '@/features/yerler/filtre';
 import { useOneCikanlar } from '@/features/yerler/oneCikan';
@@ -149,7 +148,8 @@ function Kesfet({ seyahat, konaklamalar, ilkMekan, cekmeceIstegi }: { seyahat: S
 
   const havuz = useMemo(() => mekanlar.data ?? [], [mekanlar.data]);
   // #30: listedeki pinlerin altında ad etiketi (canlı ad, PRD §7).
-  const havuzAdlari = useHafifYerler(havuz.map((m) => m.place_id));
+  // #172 KK3: listedeki pinlerin etiketinde ve çekmecede ★ puan — Enterprise maske (Keşfet'te puan kalır, KK9).
+  const havuzAdlari = useHafifYerler(havuz.map((m) => m.place_id), { puan: true });
   const uyeAdi = (uid: string | null) => uyeler.data?.find((u) => u.user_id === uid)?.display_name ?? '';
   const oneriListesi: HafifYer[] = yakin.yerler;
   const havuzIdleri = useMemo(() => new Set(havuz.map((m) => m.place_id)), [havuz]);
@@ -242,6 +242,8 @@ function Kesfet({ seyahat, konaklamalar, ilkMekan, cekmeceIstegi }: { seyahat: S
     setMesgul(true);
     try {
       const [yer] = await hafifYerler([placeId], { oturum: jeton });
+      // #172: seçim ad ve puanla gelir (pin etiketi, panel) — ortak önbelleğe yazılır, listeye eklenince yeniden istenmez.
+      if (yer) hafifOnbellek.yaz([yer], 'hafif', [placeId]);
       if (!yer) throw new Error('yer yok');
       setAramaSonucu({ ...yer, ad: yer.ad || ad });
       setSecim({ place_id: yer.place_id, kaynak: 'arama' });
@@ -364,15 +366,10 @@ function Kesfet({ seyahat, konaklamalar, ilkMekan, cekmeceIstegi }: { seyahat: S
   const listeYerleri = useMemo(() => havuz.map((m) => havuzAdlari.data?.[m.place_id]).filter((y): y is HafifYer => !!y), [havuz, havuzAdlari.data]);
   const rehberGorunur = cekmece === 'tam' && cekmeceCip === 'rehber' && !yalnizListe;
   const cekmeceGosterilen = yalnizListe ? listeYerleri : bolgeListesi;
-  // Satır / kart fotoğrafları: yalnız ilk 12 öneri için hafif Details foto maskesi (24 sa önbellek). Rehber yerlerinin fotoğrafı kendinde.
+  // Satır / kart fotoğrafları: yalnız ilk 12 öneri için. #172 KK2–KK3: ad ve puan Nearby'den / listeden zaten elde —
+  // yalnız fotoğraf, ortak önbellekten (eksik kimlik için Pro foto maskesi). Rehber yerlerinin fotoğrafı kendinde.
   const fotoIdleri = useMemo(() => (rehberGorunur ? [] : cekmeceGosterilen.slice(0, 12).map((y) => y.place_id).sort()), [rehberGorunur, cekmeceGosterilen]);
-  const fotolar = useQuery({
-    queryKey: ['cekmece-foto', fotoIdleri.join(',')],
-    enabled: cekmece !== 'katli' && fotoIdleri.length > 0,
-    staleTime: 24 * 60 * 60 * 1000,
-    retry: 1,
-    queryFn: async () => new Map((await hafifYerler(fotoIdleri, { foto: true })).map((y) => [y.place_id, y.foto_uri ?? null] as const)),
-  });
+  const fotolar = useYerFotolari(cekmece !== 'katli' ? fotoIdleri : []);
   // "Rehberden" çipi (tam hal): şehir yayınlı rehberle eşleşiyorsa içerik ekibinin yerleri (#98 KK6 ile aynı kaynak).
   const sehirler = useSehirler();
   const rehberSehir = sehirEslestir(sehirler.data, { ad: seyahat.city_label, lat: seyahat.lat, lng: seyahat.lng });

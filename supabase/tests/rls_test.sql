@@ -786,6 +786,10 @@ begin
   assert (select genis_kapak_url from public.sehirler where slug = 'eskisehir') = 'sehirler/x.webp', 'geniş kapak okunur';
   assert (select count(*) from public.icerik_mekanlari) = 1, 'mekan bağlantıları herkese açık';
   assert not exists (select 1 from public.yerler where place_id = 'ChIJ-met-helva-00002'), 'taslak yer uygulamada yok';
+  -- #172 KK7: yayınlı içerikte geçen taslak yer ve yayınlı yer adıyla okunur; artık hiçbir yazıda geçmeyen taslak yer okunmaz.
+  assert (select string_agg(place_id || '=' || ad || '/' || coalesce(kategori, '-'), ',' order by place_id collate "C")
+          from public.icerik_mekan_bilgileri(array['ChIJ-met-helva-00002', 'ChIJ-hayri-usta-0001', 'ChIJabcdefgh12345', 'ChIJ-yok-0000000001']))
+    = 'ChIJ-met-helva-00002=Met Helvacısı/store,ChIJabcdefgh12345=Editör Yeri/park', 'içerik mekan bilgileri: rehberdeki taslak yer + yayınlı yer';
 end $$;
 select pg_temp.hata_bekle($$insert into public.icerik_mekanlari (sahip_tur, sahip_id, place_id, bicim, sira) values ('rehber', gen_random_uuid(), 'ChIJ-xxxxxxxxxx', 'kart', 1)$$, '42501');
 reset role;
