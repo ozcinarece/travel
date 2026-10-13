@@ -1,56 +1,87 @@
-// #97 B KK2 (kanvas Home13 ekran 3): plan sayfası — gün çipleri, seçili günün mini haritası, numaralı duraklar
-// (foto 44 px, ad, kategori · süre, "+"). Altta "Geziyi seyahatime al" (ekran verir).
+// #97 B KK2 → #143 KK2 (kanvas 17 · Rota & plan): gün çipleri ("1. gün · 6"; seçili gün renginde dolu, diğerleri çerçeveli +
+// renk noktası), seçili günün mini haritası (büyüt), gün özeti ("~5 sa 40 dk · 3,4 km yürüyüş"), numaralı duraklar (foto 46,
+// ad, kategori · süre, EkleDugmesi) ve aralarında noktalı çizgiyle "N dk yürüyüş".
 import { Image } from 'expo-image';
-import { useState } from 'react';
+import { useMemo } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { EkleDugmesi } from '@/components/ui/EkleDugmesi';
 import type { IcerikCanli } from '@/features/icerik/fotolar';
+import { geziGunOzeti } from '@/features/icerik/gezi';
 import { t } from '@/i18n';
 import { kategoriEtiketi, sureMetni } from '@/lib/kategori';
+import { mesafeMetni } from '@/lib/mesafe';
 import { kategoriPini } from '@/lib/pinIkonu';
 import type { GeziDetay, GeziDuragi } from '@/lib/tipler';
-import { gunRengi, gunUstuMetin, minDokunma, renk, yazi } from '@/theme';
+import { gunRengi, gunUstuMetin, renk, yazi } from '@/theme';
 
 import { MiniHarita } from './MiniHarita';
 
-type Props = { gezi: GeziDetay; canli: Map<string, IcerikCanli> | undefined; onDurakEkle: (d: GeziDuragi) => void; listede: (d: GeziDuragi) => boolean; mesgulId: string | null };
+type Props = {
+  gezi: GeziDetay;
+  canli: Map<string, IcerikCanli> | undefined;
+  listede: (d: GeziDuragi) => boolean;
+  mesgulId: string | null;
+  onDurakEkle: (d: GeziDuragi) => void;
+  /** Satıra dokunuldu (mekan rehberi). */
+  onDurak?: (d: GeziDuragi) => void;
+  /** Seçili gün (sıra indeksi); sayfada tutulur, sekme değişince korunur. */
+  gunSira: number;
+  onGunSira: (i: number) => void;
+};
 
-export function GeziPlani({ gezi, canli, onDurakEkle, listede, mesgulId }: Props) {
-  const [gunSira, setGunSira] = useState(0);
+export function GeziPlani({ gezi, canli, listede, mesgulId, onDurakEkle, onDurak, gunSira, onGunSira }: Props) {
   const gun = gezi.gezi_gunleri[gunSira] ?? gezi.gezi_gunleri[0];
+  const ozet = useMemo(() => geziGunOzeti(gun?.gezi_duraklari ?? []), [gun]);
   if (!gun) return null;
   const rengi = gunRengi(gun.sira);
   return (
     <View style={s.kap}>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={s.cipler}>
-        {gezi.gezi_gunleri.map((g, i) => (
-          <Pressable key={g.id} accessibilityRole="button" accessibilityState={{ selected: i === gunSira }} onPress={() => setGunSira(i)} style={[s.cip, i === gunSira && s.cipSecili]}>
-            <View style={[s.cipNokta, { backgroundColor: gunRengi(g.sira) }]} />
-            <Text style={[s.cipMetin, i === gunSira && s.cipMetinSecili]}>{`${t('gezi.gunCip', { n: g.sira })}${g.baslik ? ` · ${g.baslik}` : ''}`}</Text>
-          </Pressable>
-        ))}
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={s.cipler} style={s.ciplerSerit}>
+        {gezi.gezi_gunleri.map((g, i) => {
+          const secili = i === gunSira;
+          const r = gunRengi(g.sira);
+          return (
+            <Pressable key={g.id} accessibilityRole="button" accessibilityState={{ selected: secili }} onPress={() => onGunSira(i)} style={[s.cip, secili ? { backgroundColor: r, borderColor: r } : null]}>
+              {secili ? null : <View style={[s.cipNokta, { backgroundColor: r }]} />}
+              <Text style={[s.cipMetin, secili && { color: gunUstuMetin(r) }]}>{t('gezi.gunCip', { n: g.sira, mekan: g.gezi_duraklari.length })}</Text>
+            </Pressable>
+          );
+        })}
       </ScrollView>
-      <MiniHarita duraklar={gun.gezi_duraklari} gunIndex={gun.sira} baslik={`${t('gezi.gunCip', { n: gun.sira })}${gun.baslik ? ` · ${gun.baslik}` : ''}`} />
-      <View>
+      <MiniHarita duraklar={gun.gezi_duraklari} gunIndex={gun.sira} baslik={`${t('gezi.gunKisa', { n: gun.sira })}${gun.baslik ? ` · ${gun.baslik}` : ''}`} />
+      <View style={s.liste}>
+        {gun.gezi_duraklari.length > 1 ? <Text style={s.ozet}>{t('gezi.gunOzeti', { sure: sureMetni(ozet.toplamDk), mesafe: mesafeMetni(ozet.yuruyusM) })}</Text> : null}
         {gun.gezi_duraklari.map((d, i) => {
           const c = canli?.get(d.id);
           const icinde = listede(d);
           return (
-            <View key={d.id} style={s.satir}>
-              <View style={[s.numara, { backgroundColor: rengi }]}>
-                <Text style={[s.numaraMetin, { color: gunUstuMetin(rengi) }]}>{i + 1}</Text>
-              </View>
-              <View style={[s.foto, { backgroundColor: kategoriPini(d.kategori).kategoriRenk }]}>{c?.foto_uri ? <Image source={{ uri: c.foto_uri }} style={StyleSheet.absoluteFill} contentFit="cover" transition={120} /> : null}</View>
-              <View style={{ flex: 1, gap: 2 }}>
-                <Text style={s.ad} numberOfLines={1}>
-                  {d.ad}
-                </Text>
-                <Text style={s.meta} numberOfLines={1}>
-                  {kategoriEtiketi(d.kategori)} · {sureMetni(d.sure_dk)}
-                </Text>
-              </View>
-              <EkleDugmesi listede={icinde} mesgul={mesgulId === d.id} onPress={() => onDurakEkle(d)} />
+            <View key={d.id}>
+              {i > 0 ? (
+                <View style={s.bacak}>
+                  <View style={s.noktalar}>
+                    {[0, 1, 2, 3].map((k) => (
+                      <View key={k} style={s.nokta} />
+                    ))}
+                  </View>
+                  <Text style={s.bacakMetin}>{t('gezi.yuruyus', { n: ozet.bacakDk[i - 1] })}</Text>
+                </View>
+              ) : null}
+              <Pressable accessibilityRole="button" disabled={!onDurak || !c?.hafif} onPress={() => onDurak?.(d)} style={({ pressed }) => [s.satir, pressed && { opacity: 0.85 }]}>
+                <View style={[s.numara, { backgroundColor: rengi }]}>
+                  <Text style={[s.numaraMetin, { color: gunUstuMetin(rengi) }]}>{i + 1}</Text>
+                </View>
+                <View style={[s.foto, { backgroundColor: kategoriPini(d.kategori).kategoriRenk }]}>{c?.foto_uri ? <Image source={{ uri: c.foto_uri }} style={StyleSheet.absoluteFill} contentFit="cover" transition={120} /> : null}</View>
+                <View style={{ flex: 1, minWidth: 0 }}>
+                  <Text style={s.ad} numberOfLines={1}>
+                    {d.ad}
+                  </Text>
+                  <Text style={s.meta} numberOfLines={1}>
+                    {`${kategoriEtiketi(c?.hafif?.primary_type ?? d.kategori)} · ${sureMetni(d.sure_dk)}`}
+                  </Text>
+                </View>
+                <EkleDugmesi listede={icinde} mesgul={mesgulId === d.id} onPress={() => onDurakEkle(d)} />
+              </Pressable>
             </View>
           );
         })}
@@ -61,17 +92,22 @@ export function GeziPlani({ gezi, canli, onDurakEkle, listede, mesgulId }: Props
 
 const s = StyleSheet.create({
   kap: { gap: 12 },
-  cipler: { gap: 8, paddingVertical: 2 },
-  cip: { flexDirection: 'row', alignItems: 'center', gap: 6, height: 34, paddingHorizontal: 12, borderRadius: 999, backgroundColor: renk.yuzey },
-  cipSecili: { backgroundColor: renk.metin },
+  ciplerSerit: { marginHorizontal: -20 },
+  cipler: { gap: 8, paddingHorizontal: 20 },
+  cip: { flexDirection: 'row', alignItems: 'center', gap: 6, height: 38, paddingHorizontal: 14, borderRadius: 12, borderWidth: 1.5, borderColor: renk.ayrac, backgroundColor: renk.zemin },
   cipNokta: { width: 8, height: 8, borderRadius: 4 },
-  cipMetin: { fontFamily: yazi.kalin, fontSize: 12, color: renk.metin },
-  cipMetinSecili: { color: renk.zemin },
-  satir: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 8, minHeight: 60, borderTopWidth: 1, borderTopColor: renk.ayrac },
-  numara: { width: 24, height: 24, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
-  numaraMetin: { fontFamily: yazi.ekstra, fontSize: 12, color: renk.zemin },
-  foto: { width: 44, height: 44, borderRadius: 12, overflow: 'hidden' },
-  ad: { fontFamily: yazi.kalin, fontSize: 14, color: renk.metin },
+  cipMetin: { fontFamily: yazi.ekstra, fontSize: 14, color: renk.metin },
+  liste: { gap: 8, paddingTop: 2 },
+  ozet: { fontFamily: yazi.normal, fontSize: 13, color: renk.ikincil },
+  satir: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 4 },
+  numara: { width: 28, height: 28, borderRadius: 8, alignItems: 'center', justifyContent: 'center' },
+  numaraMetin: { fontFamily: yazi.ekstra, fontSize: 13 },
+  foto: { width: 46, height: 46, borderRadius: 12, overflow: 'hidden' },
+  ad: { fontFamily: yazi.ekstra, fontSize: 15, color: renk.metin },
   meta: { fontFamily: yazi.normal, fontSize: 12, color: renk.ikincil },
-  _: { minHeight: minDokunma },
+  // Kanvas 17: 28 px numaranın ortasından noktalı çizgi (13 px içeride), yazı 26 px sağında.
+  bacak: { flexDirection: 'row', alignItems: 'center', height: 26, paddingLeft: 13 },
+  noktalar: { width: 2, height: 26, justifyContent: 'space-between', paddingVertical: 1 },
+  nokta: { width: 2, height: 2, borderRadius: 1, backgroundColor: '#b4bbd3' },
+  bacakMetin: { marginLeft: 24, fontFamily: yazi.ekstra, fontSize: 12, color: renk.ana },
 });

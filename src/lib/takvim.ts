@@ -9,6 +9,8 @@ export const AYLAR_KISA = ['Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz', 'Tem', 'A�
 /** Pazartesi'den başlar (Türkiye takvimi). */
 export const GUNLER_KISA = ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'] as const;
 export const GUNLER = ['Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi', 'Pazar'] as const;
+/** #143: bulunma ekli gün adları ("Cuma'da zaten 3 durağın var"). */
+export const GUNLER_BULUNMA = ["Pazartesi'de", "Salı'da", "Çarşamba'da", "Perşembe'de", "Cuma'da", "Cumartesi'de", "Pazar'da"] as const;
 
 export type Tarih = string; // YYYY-MM-DD
 
