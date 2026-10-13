@@ -25,6 +25,8 @@ jobs:
     env:
       PROJE: ${{ vars.CLOUDFLARE_PAGES_WEB_PROJE || 'gezi-web' }}
       APP_DOMAIN: ${{ vars.APP_DOMAIN }}
+      # #144: Profil › Yardım ve geri bildirim e-postası (repo değişkeni; boşsa satır gösterilmez).
+      EXPO_PUBLIC_DESTEK_EPOSTA: ${{ vars.DESTEK_EPOSTA }}
       EXPO_PUBLIC_SUPABASE_URL: https://xwqeobelyeuzoxyuvauw.supabase.co
       EXPO_PUBLIC_SUPABASE_ANON_KEY: sb_publishable_XB3vg3rrcdIK9Bafkv-Uug_G-5IEyyN
       EXPO_PUBLIC_APPLE_SIGN_IN: '0'
