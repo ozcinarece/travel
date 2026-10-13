@@ -51,7 +51,12 @@ export type IkonAdi =
   | 'dag'
   | 'canta'
   | 'tutamac'
-  | 'geri';
+  | 'geri'
+  // #141 seyahat içi menü: Listem (madde işaretli liste), Program (takvim), oy (başparmak), çöp (Çıkar).
+  | 'liste'
+  | 'takvim'
+  | 'begen'
+  | 'cop';
 
 type Props = { ad: IkonAdi; boyut?: number; renk: ColorValue; kalinlik?: number };
 
@@ -64,7 +69,28 @@ export function Ikon({ ad, boyut = 24, renk, kalinlik = 2 }: Props) {
   const ortak = { stroke: renk, strokeWidth: kalinlik, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const, fill: 'none' };
   return (
     <Svg width={boyut} height={boyut} viewBox="0 0 24 24">
-      {ad === 'kesfet' ? (
+      {ad === 'liste' ? (
+        <>
+          <Path d="M9 6h11M9 12h11M9 18h11" {...ortak} />
+          <Circle cx={4.5} cy={6} r={1.3} fill={renk} stroke="none" />
+          <Circle cx={4.5} cy={12} r={1.3} fill={renk} stroke="none" />
+          <Circle cx={4.5} cy={18} r={1.3} fill={renk} stroke="none" />
+        </>
+      ) : ad === 'takvim' ? (
+        <>
+          <Rect x={4} y={5} width={16} height={15} rx={3} {...ortak} />
+          <Path d="M4 10h16M9 3v4M15 3v4" {...ortak} />
+        </>
+      ) : ad === 'begen' ? (
+        <>
+          <Path d="M7 11v9H4v-9h3z" {...ortak} />
+          <Path d="M7 11l4-7a2 2 0 0 1 3 2l-1 4h5a2 2 0 0 1 2 2.3l-1.2 6A2 2 0 0 1 16.8 20H7" {...ortak} />
+        </>
+      ) : ad === 'cop' ? (
+        <>
+          <Path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3" {...ortak} />
+        </>
+      ) : ad === 'kesfet' ? (
         <>
           <Path d="M12 21s7-6.2 7-11a7 7 0 1 0-14 0c0 4.8 7 11 7 11z" {...ortak} />
           <Circle cx={12} cy={10} r={2.5} {...ortak} />

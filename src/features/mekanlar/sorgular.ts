@@ -113,6 +113,10 @@ export function useSeyahatCanli(seyahatId: string | undefined) {
       .on('postgres_changes', { event: '*', schema: 'public', table: 'members', filter: `trip_id=eq.${seyahatId}` }, () =>
         qc.invalidateQueries({ queryKey: ['uyeler', seyahatId] }),
       )
+      // #141 KK3: oylar.
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'oylar', filter: `seyahat_id=eq.${seyahatId}` }, () =>
+        qc.invalidateQueries({ queryKey: ['oylar', seyahatId] }),
+      )
       .subscribe();
     return () => {
       supabase.removeChannel(kanal);

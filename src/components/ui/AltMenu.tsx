@@ -1,6 +1,6 @@
 // #138 KK6 (kanvas 3 · 22): uygulama alt menüsü — Ana sayfa · Seyahatler · [Yeni] · Kaydettiklerim · Profil.
 // Yeni ortada 56 px Mandalina kare (köşe 18), menünün üstüne taşar. Seçili öğe Gece (dolu ikon), diğerleri gri mavi.
-// Hem (tabs) düzeninin `tabBar`'ı hem seyahat içindeki UygulamaMenusu bunu kullanır.
+// (tabs) düzeninin `tabBar`'ı; seyahat içinde #141'den beri SeyahatMenusu (Keşfet · Program · Listem · Rehber).
 import { router } from 'expo-router';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';

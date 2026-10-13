@@ -48,6 +48,51 @@ export function degisiklikMetni(d: Degisiklik, mekanAdi: (placesId: string | nul
   }
 }
 
+/**
+ * #141 KK6: aynı işlemde (aynı an, aynı kişi, aynı satır) yazılan alan değişiklikleri tek cümle olur — "Mert Kurşunlu
+ * Külliyesi mekanını 2. güne taşıdı". Sunucu geri almayı da aynı grup üzerinden yapar (degisikligi_geri_al).
+ */
+export type DegisiklikGrubu = { id: number; kim: string | null; at: string; entity: string; entity_id: string; satirlar: Degisiklik[] };
+
+export function degisiklikGruplari(liste: Degisiklik[]): DegisiklikGrubu[] {
+  const gruplar: DegisiklikGrubu[] = [];
+  for (const d of liste) {
+    const son = gruplar[gruplar.length - 1];
+    if (son && son.at === d.at && son.kim === d.user_id && son.entity === d.entity && son.entity_id === d.entity_id) son.satirlar.push(d);
+    else gruplar.push({ id: d.id, kim: d.user_id, at: d.at, entity: d.entity, entity_id: d.entity_id, satirlar: [d] });
+  }
+  return gruplar;
+}
+
+/**
+ * Grubun cümlesi: taşıma ("… mekanını 2. güne taşıdı") öne alınır; diğerlerinde ilk anlamlı satırın cümlesi. Alan değişikliği
+ * satırında place_ref yoktur — durağın mekanı `durakMekani` ile (güncel durak listesinden) bulunur.
+ */
+export function grupMetni(
+  g: DegisiklikGrubu,
+  k: { mekanAdi: (placesId: string | null | undefined) => string; gunNo: (dayId: string) => number | null; durakMekani: (durakId: string) => string | null },
+): string {
+  const tasima = g.satirlar.find((d) => d.entity === 'stops' && d.field === 'day_id');
+  if (tasima) {
+    const ad = k.mekanAdi(k.durakMekani(g.entity_id));
+    const n = k.gunNo(String(tasima.new ?? ''));
+    return n ? `${ad} mekanını ${n}. güne taşıdı` : `${ad} mekanını başka güne aldı`;
+  }
+  const ana = g.satirlar.find((d) => d.field !== 'order_key') ?? g.satirlar[0];
+  return degisiklikMetni(ana, k.mekanAdi);
+}
+
+/** Geri alınabilen gruplar: plan verisi (mekan, durak, gün alanları); varış/tamamlanma (otomatik) ve üyelik değil. */
+export function geriAlinabilir(g: DegisiklikGrubu): boolean {
+  const ilk = g.satirlar[0];
+  if (g.entity === 'places' || g.entity === 'stops') {
+    if (!ilk.field) return true;
+    return g.satirlar.some((d) => d.field && !['arrived_at', 'arrived_by', 'completed_at', 'completed_by', 'auto_completed'].includes(d.field));
+  }
+  if (g.entity === 'days') return !!ilk.field && g.satirlar.some((d) => d.field === 'start_time' || d.field === 'order_manual');
+  return false;
+}
+
 export function zamanMetni(iso: string, simdi = Date.now()): string {
   const fark = Math.max(0, simdi - Date.parse(iso));
   const dk = Math.round(fark / 60_000);

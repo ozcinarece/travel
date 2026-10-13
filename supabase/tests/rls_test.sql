@@ -971,4 +971,103 @@ reset role;
 select pg_temp.as_user(null);
 do $$ begin assert public.gecmis_varislari_temizle() >= 0, 'oturumsuz (cron) çağrı çalışır'; end $$;
 
+
+-- #141 oylar (tekil, yalnız üye, yalnız kendi adına) ve değişiklik geri alma (taşıma, mekan silme + bağlı durak, ekleme).
+\set OA '''aaaaaaaa-2222-0000-0000-000000000041'''
+\set OB '''aaaaaaaa-2222-0000-0000-000000000042'''
+\set OC '''aaaaaaaa-2222-0000-0000-000000000043'''
+insert into auth.users (id, is_anonymous) values (:OA, false), (:OB, false), (:OC, false);
+insert into public.profiles (id, name, username) values (:OB, 'Oycu', 'oycu');
+set role authenticated;
+select pg_temp.as_user(:OA);
+do $$
+declare s uuid; g1 uuid; g2 uuid; p uuid; st uuid;
+begin
+  insert into public.trips (owner_id, city_place_id, city_label, lat, lng, tz, start_date, end_date, name)
+  values (auth.uid(), 'ChIJ-oy', 'Eskişehir', 39.77, 30.52, 'Europe/Istanbul', '2027-06-01', '2027-06-03', 'Oy Gezisi') returning id into s;
+  select id into g1 from public.days where trip_id = s and index = 1;
+  select id into g2 from public.days where trip_id = s and index = 2;
+  insert into public.places (trip_id, place_id, lat, lng, added_by) values (s, 'ChIJ-oy-yer1', 39.77, 30.52, auth.uid()) returning id into p;
+  insert into public.stops (trip_id, day_id, place_ref, order_key, minutes) values (s, g1, p, 'a0', 60) returning id into st;
+  perform set_config('test.oy_s', s::text, false);
+  perform set_config('test.oy_g1', g1::text, false);
+  perform set_config('test.oy_g2', g2::text, false);
+  perform set_config('test.oy_p', p::text, false);
+  perform set_config('test.oy_st', st::text, false);
+end $$;
+reset role;
+select set_config('test.oy_token', (select invite_token from public.trips where id = current_setting('test.oy_s')::uuid), false);
+set role authenticated;
+select pg_temp.as_user(:OB);
+select public.davetle_katil(current_setting('test.oy_token'), 'app');
+insert into public.oylar (seyahat_id, mekan) values (current_setting('test.oy_s')::uuid, current_setting('test.oy_p')::uuid);
+select pg_temp.hata_bekle($$insert into public.oylar (seyahat_id, mekan) values (current_setting('test.oy_s')::uuid, current_setting('test.oy_p')::uuid)$$, '23505');
+select pg_temp.hata_bekle($$insert into public.oylar (seyahat_id, mekan, kullanici) values (current_setting('test.oy_s')::uuid, current_setting('test.oy_p')::uuid, 'aaaaaaaa-2222-0000-0000-000000000041')$$, '42501');
+-- Taşıma: gün + sıra birlikte eski haline.
+update public.stops set day_id = current_setting('test.oy_g2')::uuid, order_key = 'b0' where id = current_setting('test.oy_st')::uuid;
+do $$
+declare cid bigint;
+begin
+  select id into cid from public.changes where entity = 'stops' and entity_id = current_setting('test.oy_st') and field = 'day_id' order by id desc limit 1;
+  assert cid is not null, 'taşıma kaydı var';
+  perform set_config('test.oy_cid', cid::text, false);
+  perform public.degisikligi_geri_al(cid);
+  assert (select day_id from public.stops where id = current_setting('test.oy_st')::uuid) = current_setting('test.oy_g1')::uuid, 'gün geri döndü';
+  assert (select order_key from public.stops where id = current_setting('test.oy_st')::uuid) = 'a0', 'sıra geri döndü';
+end $$;
+-- Mekan silme (durağı ve oyu da gider) → geri al: mekan ve durak geri gelir (oy gelmez).
+delete from public.places where id = current_setting('test.oy_p')::uuid;
+do $$
+declare cid bigint;
+begin
+  assert (select count(*) from public.oylar where seyahat_id = current_setting('test.oy_s')::uuid) = 0, 'oy mekanla gitti';
+  select id into cid from public.changes where entity = 'places' and entity_id = current_setting('test.oy_p') and new is null order by id desc limit 1;
+  perform public.degisikligi_geri_al(cid);
+  assert exists (select 1 from public.places where id = current_setting('test.oy_p')::uuid), 'mekan geri geldi';
+  assert (select day_id from public.stops where id = current_setting('test.oy_st')::uuid) = current_setting('test.oy_g1')::uuid, 'durağı da geri geldi';
+end $$;
+-- Ekleme → geri al = sil.
+insert into public.places (trip_id, place_id, lat, lng, added_by) values (current_setting('test.oy_s')::uuid, 'ChIJ-oy-yer2', 39.78, 30.51, auth.uid());
+do $$
+declare cid bigint;
+begin
+  select id into cid from public.changes where entity = 'places' and old is null and new ->> 'place_id' = 'ChIJ-oy-yer2' order by id desc limit 1;
+  perform public.degisikligi_geri_al(cid);
+  assert not exists (select 1 from public.places where place_id = 'ChIJ-oy-yer2'), 'eklenen silindi';
+end $$;
+select pg_temp.hata_bekle($$select public.degisikligi_geri_al(-1)$$, 'P0002');
+-- Beyaz liste: varış alanı geri alınmaz.
+update public.stops set arrived_at = now() where id = current_setting('test.oy_st')::uuid;
+select set_config('test.oy_varis_cid', (select id from public.changes where entity = 'stops' and entity_id = current_setting('test.oy_st') and field = 'arrived_at' order by id desc limit 1)::text, false);
+select pg_temp.hata_bekle($$select public.degisikligi_geri_al(current_setting('test.oy_varis_cid')::bigint)$$, '22023');
+-- Not kuralı (PRD 3.8 KK3): ekleyen / sahip olmayan üye notu geri alarak da değiştiremez.
+select pg_temp.as_user(:OA);
+update public.places set note = 'Sabah erken git' where id = current_setting('test.oy_p')::uuid;
+select pg_temp.as_user(:OB);
+select set_config('test.oy_not_cid', (select id from public.changes where entity = 'places' and entity_id = current_setting('test.oy_p') and field = 'note' order by id desc limit 1)::text, false);
+select pg_temp.hata_bekle($$select public.degisikligi_geri_al(current_setting('test.oy_not_cid')::bigint)$$, '42501');
+-- Eski kayıtta olmayan NOT NULL sütun (auto_completed) geri yüklemede tablo varsayılanını alır.
+delete from public.places where id = current_setting('test.oy_p')::uuid;
+reset role;
+update public.changes set old = old - 'auto_completed'
+where entity = 'stops' and entity_id = current_setting('test.oy_st') and new is null
+  and id = (select max(id) from public.changes where entity = 'stops' and entity_id = current_setting('test.oy_st') and new is null);
+set role authenticated;
+select pg_temp.as_user(:OB);
+do $$
+declare cid bigint;
+begin
+  select id into cid from public.changes where entity = 'places' and entity_id = current_setting('test.oy_p') and new is null order by id desc limit 1;
+  perform public.degisikligi_geri_al(cid);
+  assert (select auto_completed from public.stops where id = current_setting('test.oy_st')::uuid) = false, 'eksik sütun varsayılanla';
+end $$;
+select pg_temp.as_user(:OC);
+select pg_temp.hata_bekle($$select public.degisikligi_geri_al(current_setting('test.oy_cid')::bigint)$$, '42501');
+do $$
+begin
+  assert (select count(*) from public.oylar) = 0, 'üye olmayan oyları görmez';
+end $$;
+select pg_temp.hata_bekle($$insert into public.oylar (seyahat_id, mekan) values (current_setting('test.oy_s')::uuid, current_setting('test.oy_p')::uuid)$$, '42501');
+reset role;
+
 \echo 'rls_test: TÜM TESTLER GEÇTİ'
