@@ -247,9 +247,9 @@ export function RehberEditoru({ md, onDegis, merkez, fotoYukle, onHata, kayitMet
 
 const METIN_STILI: Record<'baslik' | 'paragraf' | 'alinti' | 'liste', TextStyle> = {
   baslik: { fontFamily: yazi.ekstra, fontSize: 15, letterSpacing: -0.15, lineHeight: 20, color: yRenk.metin, paddingTop: 4 },
-  paragraf: { fontFamily: yazi.normal, fontSize: 13.5, lineHeight: 21.6, color: '#2a2a2a' },
+  paragraf: { fontFamily: yazi.normal, fontSize: 13.5, lineHeight: 21.6, color: yRenk.metin },
   alinti: { fontFamily: yazi.kalin, fontSize: 13, lineHeight: 19, color: yRenk.metin },
-  liste: { fontFamily: yazi.normal, fontSize: 13.5, lineHeight: 21.6, color: '#2a2a2a' },
+  liste: { fontFamily: yazi.normal, fontSize: 13.5, lineHeight: 21.6, color: yRenk.metin },
 };
 
 function MetinBlogu({
@@ -343,7 +343,7 @@ function KartBlogu({
   const ad = yer?.ad ?? blok.metin;
   return (
     <View ref={ref} style={s.kart}>
-      <Svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="#c8c8c4" strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <Svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke={yRenk.yerTutucu} strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
         <Path d={IKON.tutamac} />
       </Svg>
       <View style={[s.kartKare, { backgroundColor: kategoriPini(yer?.primary_type).kategoriRenk }]} />
@@ -474,7 +474,7 @@ const s = StyleSheet.create({
   aracSecili: { backgroundColor: yRenk.metin },
   italik: { fontStyle: 'italic' },
   kalin: { fontFamily: yazi.kalin },
-  bag: { fontFamily: yazi.kalin, backgroundColor: '#fff1e8', borderBottomWidth: 2, borderBottomColor: '#ff5a1f' },
+  bag: { fontFamily: yazi.kalin, backgroundColor: '#fff1e8', borderBottomWidth: 2, borderBottomColor: yRenk.vurgu },
   acilir: { position: 'absolute', top: 38, left: 0, right: 0, zIndex: 10, alignItems: 'center' },
   ustBaslik: { fontFamily: yazi.ekstra, fontSize: 16, color: yRenk.metin },
   kart: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 8, paddingHorizontal: 10, marginVertical: 2, borderRadius: 10, borderWidth: 1.5, borderColor: yRenk.metin, backgroundColor: yRenk.zemin },

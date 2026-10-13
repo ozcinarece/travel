@@ -32,7 +32,7 @@ export function GeziPlanEditoru({ gunler, merkez, islemler, onHata }: Props) {
   const dene = (is: () => Promise<unknown>) => is().catch(onHata);
 
   if (!gun) {
-    return <Hap baslik={ty('gezi.gunEkle')} onPress={() => dene(() => islemler.gunEkle(gunler))} />;
+    return <Hap kucuk baslik={ty('gezi.gunEkle')} onPress={() => dene(() => islemler.gunEkle(gunler))} />;
   }
   const gunTasi = (kaynak: number, hedef: number) => dene(() => islemler.gunleriSirala(tasi(gunler, kaynak, hedef).map((g) => g.id)));
   const durakTasi = (kaynak: number, hedef: number) => dene(() => islemler.duraklariSirala(gun, tasi(gun.gezi_duraklari, kaynak, hedef).map((d) => d.id)));
@@ -59,7 +59,7 @@ export function GeziPlanEditoru({ gunler, merkez, islemler, onHata }: Props) {
             onBirak={gunTasi}
           />
         ))}
-        <Hap baslik={ty('gezi.gunEkle')} onPress={() => dene(() => islemler.gunEkle(gunler))} />
+        <Hap kucuk baslik={ty('gezi.gunEkle')} onPress={() => dene(() => islemler.gunEkle(gunler))} />
         <View style={s.esnek} />
         <Text style={s.not}>{ty('gezi.gunSiraNot')}</Text>
       </View>
@@ -92,7 +92,7 @@ export function GeziPlanEditoru({ gunler, merkez, islemler, onHata }: Props) {
   );
 }
 
-const KIRMIZI = '#c0392b';
+const KIRMIZI = yRenk.hata;
 
 /** Gün çipi: 34 px, tam yuvarlak; tutamaç (seçili beyaz %60, diğer #b8b8b2), "1. Gün · başlık" 12,5 px 800. */
 function GunCipi({ gun, indeks, secili, etiket, onSec, onBirak }: { gun: GeziGunu; indeks: number; secili: boolean; etiket: string; onSec: () => void; onBirak: (k: number, h: number) => void }) {
@@ -136,7 +136,7 @@ function DurakSatiri({
   const kategori = kategoriPini(durak.kategori);
   return (
     <View ref={ref} style={s.satir}>
-      <Svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="#c8c8c4" strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <Svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke={yRenk.yerTutucu} strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
         <Path d={TUTAMAC} />
       </Svg>
       <View style={[s.numara, { backgroundColor: renk }]}>

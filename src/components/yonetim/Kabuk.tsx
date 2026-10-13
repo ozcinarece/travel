@@ -1,21 +1,49 @@
+import { Image } from 'expo-image';
 import { Link, usePathname } from 'expo-router';
 import { useState, type ReactNode } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
-import Svg, { Path } from 'react-native-svg';
+import Svg, { Circle, Path } from 'react-native-svg';
 
+import { Logo } from '@/components/ui/Logo';
 import { aktifMenu, GENIS_EKRAN, MENU, type MenuOgesi } from '@/features/yonetim/menu';
 import { ty } from '@/features/yonetim/metin';
 import { yazi } from '@/theme';
 
-import { yGolge, yRenk } from './tema';
+import { AltCizgiliSekmeler, type SekmeTanimi } from './Ortak';
+import { yRenk } from './tema';
 import { YonetimIkon } from './YonetimIkon';
 
 type Kullanici = { ad: string; harf: string };
 
+/** Menü arkasındaki soluk kesik rota (kanvas BO-0: 232 × 220, altta 70 px, %35). */
+function MenuRotasi() {
+  return (
+    <Svg width={232} height={220} viewBox="0 0 232 220" style={s.rota} aria-hidden>
+      <Path d="M-10 190 C60 120 110 200 170 130 S230 60 250 70" stroke={yRenk.vurgu} strokeWidth={5} fill="none" strokeDasharray="11 8" />
+      <Circle cx={52} cy={152} r={7} fill={yRenk.vurgu} />
+      <Circle cx={196} cy={96} r={7} fill={yRenk.zemin} />
+    </Svg>
+  );
+}
+
+/** Logo (36 × 22, koyu zemin) + "tripmate" (Archivo 19) + "YÖNETİM" (10 px 800, #FFB27A). */
+function Marka() {
+  return (
+    <View style={s.marka}>
+      <Logo boyut={36} koyuZemin />
+      <View style={s.markaYazi}>
+        <Text style={s.markaAd}>tripmate</Text>
+        <Text style={s.markaAlt}>{ty('marka').toLocaleUpperCase('tr-TR')}</Text>
+      </View>
+    </View>
+  );
+}
+
 /**
- * #106 KK4: kanvastaki kabuk — sol menü 210 px (#f6f6f4, sağda 1 px #ebebeb), içerik sağda.
- * < 1200 px (kanvas BekleyenTasarim21 ekran 3): 56 px üst çubuk (#f6f6f4; menü simgesi, logo, "Yönetim", sağda avatar);
- * menü açılınca çubuğun altında iki sütunlu katman (40 px öğeler, gölge), arkadaki sayfa %35 soluk.
+ * #155 KK1 / KK6 (kanvas BO-0): sol menü 232 px Gece; üstte logo + "YÖNETİM", arkada soluk kesik rota; öğeler 42 px,
+ * seçili açık zemin + Mandalina ikon + 7 px nokta; altta kullanıcı kartı (Mandalina avatar, ad, "Admin").
+ * < 1200 px (#135 düzeni, yeni renkler): 56 px Gece üst çubuk (menü simgesi, logo, avatar); menü açılınca çubuğun altında
+ * iki sütunlu Gece katman, arkadaki sayfa %35 soluk.
  */
 export function Kabuk({ kullanici, children }: { kullanici: Kullanici | null; children: ReactNode }) {
   const { width } = useWindowDimensions();
@@ -36,17 +64,14 @@ export function Kabuk({ kullanici, children }: { kullanici: Kullanici | null; ch
             accessibilityState={{ expanded: acik }}
             onPress={() => setAcikYol(acik ? null : yol)}
             style={s.darMarka}>
-            <Svg width={22} height={22} viewBox="0 0 24 24" fill="none" stroke={yRenk.metin} strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-              <Path d="M4 7h16M4 12h16M4 17h16" />
+            <Svg width={22} height={22} viewBox="0 0 24 24" fill="none" stroke={yRenk.zemin} strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+              <Path d={acik ? 'M6 6l12 12M18 6L6 18' : 'M4 7h16M4 12h16M4 17h16'} />
             </Svg>
-            <View style={s.darLogo}>
-              <View style={s.darIsaret} />
-              <Text style={s.darMarkaMetin}>{ty('marka')}</Text>
-            </View>
+            <Marka />
           </Pressable>
           {kullanici ? (
             <View accessibilityLabel={ty('rol', { ad: kullanici.ad })} style={s.darAvatar}>
-              <Text style={s.avatarHarf}>{kullanici.harf}</Text>
+              <Text style={s.darAvatarHarf}>{kullanici.harf}</Text>
             </View>
           ) : null}
         </View>
@@ -70,20 +95,23 @@ export function Kabuk({ kullanici, children }: { kullanici: Kullanici | null; ch
 
   return (
     <View style={[s.ekran, s.satir]}>
-      <View style={[s.menu, s.menuGenis]}>
-        <View style={s.marka}>
-          <View style={s.markaIsaret} />
-          <Text style={s.markaMetin}>{ty('marka')}</Text>
-        </View>
+      <View style={s.menu}>
+        <MenuRotasi />
+        <Marka />
         {MENU.map((oge) => (
           <MenuSatiri key={oge.anahtar} oge={oge} secili={oge.anahtar === aktif} />
         ))}
         {kullanici ? (
-          <View style={[s.kullanici, s.kullaniciAltta]}>
+          <View accessibilityLabel={ty('rol', { ad: kullanici.ad })} style={s.kullanici}>
             <View style={s.avatar}>
               <Text style={s.avatarHarf}>{kullanici.harf}</Text>
             </View>
-            <Text style={s.kullaniciAd}>{ty('rol', { ad: kullanici.ad })}</Text>
+            <View style={s.kullaniciYazi}>
+              <Text numberOfLines={1} style={s.kullaniciAd}>
+                {kullanici.ad}
+              </Text>
+              <Text style={s.kullaniciRol}>{ty('rolEtiket')}</Text>
+            </View>
           </View>
         ) : null}
       </View>
@@ -93,7 +121,6 @@ export function Kabuk({ kullanici, children }: { kullanici: Kullanici | null; ch
 }
 
 function MenuSatiri({ oge, secili, dar }: { oge: MenuOgesi; secili: boolean; dar?: boolean }) {
-  const renk = secili ? yRenk.metin : yRenk.ikincil;
   return (
     <Link href={oge.yol as never} asChild>
       {/* Link asChild stili DOM'a doğrudan yazar (web): dizi değil düz nesne verilir. */}
@@ -101,33 +128,76 @@ function MenuSatiri({ oge, secili, dar }: { oge: MenuOgesi; secili: boolean; dar
         accessibilityRole="link"
         accessibilityState={{ selected: secili }}
         style={StyleSheet.flatten([s.oge, dar && s.ogeDar, secili && s.ogeSecili])}>
-        <YonetimIkon ad={oge.anahtar} renk={renk} />
-        <Text style={[s.ogeMetin, dar && s.ogeMetinDar, secili ? s.ogeMetinSecili : { color: renk }]}>{ty(`menu.${oge.anahtar}`)}</Text>
+        <YonetimIkon ad={oge.anahtar} renk={secili ? yRenk.vurgu : yRenk.menuIkon} />
+        <Text numberOfLines={1} style={[s.ogeMetin, secili && s.ogeMetinSecili]}>
+          {ty(`menu.${oge.anahtar}`)}
+        </Text>
+        {secili ? <View style={s.ogeNokta} /> : null}
       </Pressable>
     </Link>
   );
 }
 
-/** Kanvastaki üst çubuk: 56 px, alt çizgi, solda sayfa başlığı (17 px 800), sağda eylemler (8 px aralık). */
-export function UstCubuk({ baslik, eylemler }: { baslik: string; eylemler?: ReactNode }) {
+type BaslikProps = {
+  /** Üst etiket (kanvas "ŞEHİRLER", "GENEL BAKIŞ · 13 EKİM SALI"); büyük harfe çevrilir. */
+  ust?: string;
+  baslik: string;
+  /** 52 px, 16 köşe küçük kapak (adres). */
+  kapak?: string | null;
+  /** Başlığın yanında durum rozeti (Ortak › Rozet). */
+  rozet?: ReactNode;
+  /** Sağda eylemlerden önce kayıt durumu (Ortak › KayitDurumu). */
+  durum?: ReactNode;
+  eylemler?: ReactNode;
+  sekmeler?: SekmeTanimi<string>;
+};
+
+/**
+ * #155 KK2 (kanvas BO-0 / BO-1): beyaz başlık, 18 / 28 iç boşluk, alt çizgi; [kapak] üst etiket + Archivo 26 başlık
+ * [+ rozet]; sağda kayıt durumu + eylemler (10 aralık); altında alt çizgili sekmeler, sekme yoksa 10 px boşluk.
+ */
+export function SayfaBasligi({ ust, baslik, kapak, rozet, durum, eylemler, sekmeler }: BaslikProps) {
   return (
-    <View style={s.ustCubuk}>
-      <Text accessibilityRole="header" numberOfLines={1} style={s.baslik}>
-        {baslik}
-      </Text>
-      {eylemler ? <View style={s.eylemler}>{eylemler}</View> : null}
+    <View style={s.baslikKap}>
+      <View style={s.baslikSatir}>
+        {kapak ? <Image source={{ uri: kapak }} style={s.kapak} contentFit="cover" accessibilityIgnoresInvertColors /> : null}
+        <View style={s.baslikMetin}>
+          {ust ? <Text style={s.ust}>{ust.toLocaleUpperCase('tr-TR')}</Text> : null}
+          <View style={s.baslikIc}>
+            <Text accessibilityRole="header" numberOfLines={1} style={s.baslik}>
+              {baslik}
+            </Text>
+            {rozet}
+          </View>
+        </View>
+        {durum || eylemler ? (
+          <View style={s.eylemler}>
+            {durum}
+            {eylemler}
+          </View>
+        ) : null}
+      </View>
+      {sekmeler ? <AltCizgiliSekmeler {...sekmeler} /> : <View style={s.sekmesiz} />}
     </View>
   );
 }
 
+/** Eski ad: yalnız başlık + eylemler. */
+export function UstCubuk({ baslik, eylemler }: { baslik: string; eylemler?: ReactNode }) {
+  return <SayfaBasligi baslik={baslik} eylemler={eylemler} />;
+}
+
 /**
- * Sayfa: üst çubuk + kaydırılan gövde (kanvas içerik boşluğu 20 / 24, 12 aralık).
- * `sutunlu`: gövde kaydırılmaz, sütunlar yan yana kendi kaydırmalarını taşır (gezi editörü: liste · sekmeler · önizleme).
+ * Sayfa: başlık + Buz zeminde gövde (kanvas BO-0: 24 / 28 iç boşluk, 20 aralık).
+ * `sutunlu`: gövde kaydırılmaz, sütunlar yan yana kendi kaydırmalarını taşır (editörler: liste · orta · önizleme).
+ * `ust` verilmezse bulunulan menü bölümünün adı.
  */
-export function YonetimSayfasi({ baslik, eylemler, sutunlu, children }: { baslik: string; eylemler?: ReactNode; sutunlu?: boolean; children?: ReactNode }) {
+export function YonetimSayfasi({ sutunlu, children, ust, ...baslik }: BaslikProps & { sutunlu?: boolean; children?: ReactNode }) {
+  const aktif = aktifMenu(usePathname());
+  const bolum = aktif ? ty(`menu.${aktif}`) : undefined;
   return (
     <View style={s.sayfa}>
-      <UstCubuk baslik={baslik} eylemler={eylemler} />
+      <SayfaBasligi ust={ust ?? (bolum !== baslik.baslik ? bolum : undefined)} {...baslik} />
       {sutunlu ? (
         <View style={s.sutunlar}>{children}</View>
       ) : (
@@ -139,23 +209,55 @@ export function YonetimSayfasi({ baslik, eylemler, sutunlu, children }: { baslik
   );
 }
 
-/** Gövde açıklama satırı (kanvas: 13 px #6e6e6e). */
+/** Gövde açıklama satırı (13 px Gri mavi). */
 export function Aciklama({ children }: { children: ReactNode }) {
   return <Text style={s.aciklama}>{children}</Text>;
 }
 
+/** Editör sütunları (kanvas BO-1): yan sütunlar beyaz + Çizgi kenar; ortası Buz üstünde beyaz kâğıt. */
+export const sutun = StyleSheet.create({
+  sol: { width: 250, flexShrink: 0, backgroundColor: yRenk.zemin, borderRightWidth: 1, borderRightColor: yRenk.ayrac },
+  sag: { width: 360, flexShrink: 0, backgroundColor: yRenk.zemin, borderLeftWidth: 1, borderLeftColor: yRenk.ayrac },
+  orta: { flex: 1, minWidth: 0 },
+  ortaIc: { flexGrow: 1, paddingVertical: 24, paddingHorizontal: 28 },
+  kagit: { backgroundColor: yRenk.zemin, borderRadius: 24, boxShadow: '0 10px 30px rgba(21,42,107,0.08)', paddingVertical: 24, paddingHorizontal: 28, gap: 14 },
+});
+
 const s = StyleSheet.create({
-  ekran: { flex: 1, minHeight: '100%', backgroundColor: yRenk.zemin },
+  ekran: { flex: 1, minHeight: '100%', backgroundColor: yRenk.yuzey },
   satir: { flexDirection: 'row' },
   sutun: { flexDirection: 'column' },
-  menu: { backgroundColor: yRenk.yuzey, paddingVertical: 18, paddingHorizontal: 12, gap: 4 },
-  menuGenis: { width: 210, flexShrink: 0, borderRightWidth: 1, borderRightColor: yRenk.ayrac },
-  darUst: { height: 56, flexShrink: 0, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 18, borderBottomWidth: 1, borderBottomColor: yRenk.ayrac, backgroundColor: yRenk.yuzey },
-  darMarka: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  darLogo: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  darIsaret: { width: 30, height: 30, borderRadius: 9, backgroundColor: yRenk.metin },
-  darMarkaMetin: { fontFamily: yazi.ekstra, fontSize: 16, letterSpacing: -0.32, color: yRenk.metin },
-  darAvatar: { width: 28, height: 28, borderRadius: 14, backgroundColor: yRenk.metin, alignItems: 'center', justifyContent: 'center' },
+  menu: {
+    width: 232,
+    flexShrink: 0,
+    backgroundColor: yRenk.ana,
+    paddingTop: 22,
+    paddingHorizontal: 14,
+    paddingBottom: 18,
+    gap: 4,
+    position: 'relative',
+    overflow: 'hidden',
+  },
+  rota: { position: 'absolute', left: 0, bottom: 70, opacity: 0.35 },
+  marka: { flexDirection: 'row', alignItems: 'center', gap: 9, paddingHorizontal: 8, paddingBottom: 22 },
+  markaYazi: { gap: 4 },
+  markaAd: { fontFamily: yazi.baslik, fontSize: 19, lineHeight: 19, letterSpacing: -0.67, color: yRenk.zemin },
+  markaAlt: { fontFamily: yazi.ekstra, fontSize: 10, lineHeight: 10, letterSpacing: 1, color: yRenk.menuEtiket },
+  oge: { flexDirection: 'row', alignItems: 'center', gap: 10, height: 42, paddingHorizontal: 12, borderRadius: 12 },
+  ogeSecili: { backgroundColor: 'rgba(255,255,255,0.12)' },
+  ogeMetin: { flexShrink: 1, fontFamily: yazi.ekstra, fontSize: 14, color: yRenk.menuMetin },
+  ogeMetinSecili: { color: yRenk.zemin },
+  ogeNokta: { marginLeft: 'auto', width: 7, height: 7, borderRadius: 4, backgroundColor: yRenk.vurgu },
+  kullanici: { marginTop: 'auto', flexDirection: 'row', alignItems: 'center', gap: 10, padding: 10, borderRadius: 14, backgroundColor: 'rgba(255,255,255,0.08)' },
+  avatar: { width: 36, height: 36, borderRadius: 11, backgroundColor: yRenk.vurgu, alignItems: 'center', justifyContent: 'center' },
+  avatarHarf: { fontFamily: yazi.baslik, fontSize: 15, color: yRenk.metin },
+  kullaniciYazi: { flex: 1, minWidth: 0 },
+  kullaniciAd: { fontFamily: yazi.ekstra, fontSize: 13, lineHeight: 15.6, color: yRenk.zemin },
+  kullaniciRol: { fontFamily: yazi.normal, fontSize: 11, lineHeight: 13.2, color: yRenk.menuMetin },
+  darUst: { height: 56, flexShrink: 0, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 18, backgroundColor: yRenk.ana },
+  darMarka: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  darAvatar: { width: 30, height: 30, borderRadius: 9, backgroundColor: yRenk.vurgu, alignItems: 'center', justifyContent: 'center' },
+  darAvatarHarf: { fontFamily: yazi.baslik, fontSize: 13, color: yRenk.metin },
   darMenu: {
     position: 'absolute',
     left: 0,
@@ -165,10 +267,8 @@ const s = StyleSheet.create({
     paddingTop: 10,
     paddingHorizontal: 12,
     paddingBottom: 14,
-    backgroundColor: yRenk.yuzey,
-    borderBottomWidth: 1,
-    borderBottomColor: yRenk.ayrac,
-    boxShadow: '0 10px 24px rgba(15,15,15,0.1)',
+    backgroundColor: yRenk.ana,
+    boxShadow: '0 10px 24px rgba(14,20,48,0.2)',
     flexDirection: 'row',
     flexWrap: 'wrap',
     rowGap: 4,
@@ -176,43 +276,19 @@ const s = StyleSheet.create({
   darHucre: { width: '50%', paddingHorizontal: 2 },
   soluk: { opacity: 0.35 },
   ogeDar: { height: 40 },
-  ogeMetinDar: { fontSize: 13 },
-  marka: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 8, paddingBottom: 16 },
-  markaIsaret: { width: 26, height: 26, borderRadius: 8, backgroundColor: yRenk.metin },
-  markaMetin: { fontFamily: yazi.ekstra, fontSize: 14, letterSpacing: -0.28, color: yRenk.metin },
-  oge: { flexDirection: 'row', alignItems: 'center', gap: 10, height: 38, paddingHorizontal: 12, borderRadius: 10 },
-  ogeSecili: { backgroundColor: yRenk.zemin, boxShadow: yGolge },
-  ogeMetin: { fontFamily: yazi.yari, fontSize: 13 },
-  ogeMetinSecili: { fontFamily: yazi.ekstra, color: yRenk.metin },
-  kullanici: { flexDirection: 'row', alignItems: 'center', gap: 8, padding: 8 },
-  kullaniciAltta: { marginTop: 'auto' },
-  avatar: {
-    width: 26,
-    height: 26,
-    borderRadius: 13,
-    backgroundColor: yRenk.metin,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  avatarHarf: { fontFamily: yazi.ekstra, fontSize: 11, color: yRenk.zemin },
-  kullaniciAd: { fontFamily: yazi.kalin, fontSize: 12, color: yRenk.metin },
   icerik: { flex: 1, minWidth: 0 },
-  sayfa: { flex: 1 },
-  ustCubuk: {
-    height: 56,
-    flexShrink: 0,
-    borderBottomWidth: 1,
-    borderBottomColor: yRenk.ayrac,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 24,
-    gap: 12,
-  },
-  baslik: { flexShrink: 1, fontFamily: yazi.ekstra, fontSize: 17, letterSpacing: -0.34, color: yRenk.metin },
-  eylemler: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  sayfa: { flex: 1, backgroundColor: yRenk.yuzey },
+  baslikKap: { flexShrink: 0, paddingTop: 18, paddingHorizontal: 28, backgroundColor: yRenk.zemin, borderBottomWidth: 1, borderBottomColor: yRenk.ayrac, gap: 8 },
+  baslikSatir: { flexDirection: 'row', alignItems: 'center', gap: 14 },
+  kapak: { width: 52, height: 52, flexShrink: 0, borderRadius: 16, backgroundColor: '#ffe2cc' },
+  baslikMetin: { flexShrink: 1, minWidth: 0, gap: 2 },
+  ust: { fontFamily: yazi.ekstra, fontSize: 11, letterSpacing: 0.88, color: yRenk.soluk },
+  baslikIc: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  baslik: { flexShrink: 1, fontFamily: yazi.baslik, fontSize: 26, lineHeight: 30, letterSpacing: -0.78, color: yRenk.metin },
+  eylemler: { marginLeft: 'auto', flexDirection: 'row', alignItems: 'center', gap: 10 },
+  sekmesiz: { height: 10 },
   govde: { flex: 1 },
   sutunlar: { flex: 1, minHeight: 0, flexDirection: 'row' },
-  govdeIc: { paddingVertical: 20, paddingHorizontal: 24, gap: 12 },
+  govdeIc: { paddingVertical: 24, paddingHorizontal: 28, gap: 20 },
   aciklama: { fontFamily: yazi.normal, fontSize: 13, lineHeight: 19, color: yRenk.ikincil },
 });

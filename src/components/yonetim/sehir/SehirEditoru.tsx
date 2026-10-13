@@ -18,9 +18,10 @@ import {
 } from '@/features/yonetim/sehirSorgulari';
 import { yazi } from '@/theme';
 
-import { Sekmeler } from '../Form';
+import { DurumRozeti } from '../Form';
 import { Hap } from '../Hap';
-import { YonetimSayfasi } from '../Kabuk';
+import { sutun, YonetimSayfasi } from '../Kabuk';
+import { KayitDurumu } from '../Ortak';
 import { OlcekliTelefon } from '../gezi/GeziOnizleme';
 import { yRenk } from '../tema';
 import { NeredeGorunur } from './NeredeGorunur';
@@ -36,7 +37,7 @@ type Props = { sehir: YonetimSehirDetayi; sehirler: YonetimSehirDetayi[]; liste:
 
 /**
  * #111 şehir editörü. Genel ve Fotoğraflar (kanvas Sehir19): solda şehir listesi, ortada sekmeler, sağda "NEREDE
- * GÖRÜNÜR"; üst çubukta "Şehir · ad", durum, Önizle, Kaydet. Rehber bölümleri (kanvas RehberEditor22): solda bölümler,
+ * GÖRÜNÜR"; başlıkta ŞEHİRLER · ad + durum rozeti, kayıt durumu, Önizle, Kaydet, sekmeler (#155). Rehber bölümleri (kanvas RehberEditor22): solda bölümler,
  * ortada bölüm editörü, sağda uygulama rehber sekmesi önizlemesi; üst çubukta Önizle, Yayınla. Şehir kimliğiyle anahtarlanır.
  */
 export function SehirEditoru({ sehir, sehirler, liste, sekme, onSekme }: Props) {
@@ -104,12 +105,15 @@ export function SehirEditoru({ sehir, sehirler, liste, sekme, onSekme }: Props) 
   return (
     <YonetimSayfasi
       sutunlu
-      baslik={rehber ? ty('sehir.baslikRehber', { ad: taslak.ad }) : ty('sehir.baslik', { ad: taslak.ad })}
+      baslik={taslak.ad}
+      kapak={taslak.kapak_url}
+      rozet={<DurumRozeti durum={taslak.yayin ? 'yayinda' : 'taslak'} etiket={ty(taslak.yayin ? 'sehir.durum.yayinda' : 'sehir.durum.taslak')} />}
+      durum={!rehber && kayitMetni ? <KayitDurumu metin={kayitMetni} hata={!!durum.hata} /> : null}
+      sekmeler={{ secili: sekme, onSec: (a) => onSekme(a as Sekme), sekmeler: SEKMELER.map((a) => ({ anahtar: a, etiket: ty(`sehir.sekme.${a}`) })) }}
       eylemler={
         <>
-          {rehber ? null : <Text style={s.durum}>{kayitMetni ?? ty(taslak.yayin ? 'sehir.durum.yayinda' : 'sehir.durum.taslak')}</Text>}
           <Hap baslik={ty('gezi.onizle')} onPress={onizle} ikon={<GozIkonu />} />
-          {rehber ? <Hap tur="birincil" baslik={ty('gezi.yayinla')} onPress={yayinla} /> : <Hap tur="birincil" baslik={ty('sehir.kaydet')} onPress={() => void simdiKaydet()} />}
+          {rehber ? <Hap tur="vurgu" baslik={ty('gezi.yayinla')} onPress={yayinla} /> : <Hap tur="birincil" baslik={ty('sehir.kaydet')} onPress={() => void simdiKaydet()} />}
         </>
       }>
       {rehber ? (
@@ -124,8 +128,8 @@ export function SehirEditoru({ sehir, sehirler, liste, sekme, onSekme }: Props) 
       ) : (
         liste
       )}
-      <ScrollView style={s.orta} contentContainerStyle={s.ortaIc}>
-        <Sekmeler secili={sekme} onSec={onSekme} sekmeler={SEKMELER.map((a) => ({ anahtar: a, etiket: ty(`sehir.sekme.${a}`) }))} />
+      <ScrollView style={sutun.orta} contentContainerStyle={sutun.ortaIc}>
+        <View style={sutun.kagit}>
         {hata ? (
           <Pressable accessibilityRole="button" onPress={() => setHata(null)}>
             <Text style={s.hata}>{hata}</Text>
@@ -163,6 +167,7 @@ export function SehirEditoru({ sehir, sehirler, liste, sekme, onSekme }: Props) 
             }}
           />
         ) : null}
+        </View>
       </ScrollView>
       {rehber ? (
         <View style={s.onizleme}>
@@ -180,7 +185,7 @@ export function SehirEditoru({ sehir, sehirler, liste, sekme, onSekme }: Props) 
 
 function GozIkonu() {
   return (
-    <Svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke={yRenk.metin} strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+    <Svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke={yRenk.ana} strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
       <Path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12z" />
       <Circle cx="12" cy="12" r="3" />
     </Svg>
@@ -188,11 +193,8 @@ function GozIkonu() {
 }
 
 const s = StyleSheet.create({
-  durum: { fontFamily: yazi.yari, fontSize: 11.5, color: yRenk.ikincil },
-  hata: { fontFamily: yazi.yari, fontSize: 11.5, color: '#ff5a1f' },
+  hata: { fontFamily: yazi.yari, fontSize: 11.5, color: yRenk.hata },
   bos: { fontFamily: yazi.normal, fontSize: 13, color: yRenk.ikincil },
-  orta: { flex: 1, minWidth: 0, borderRightWidth: 1, borderRightColor: yRenk.ayrac },
-  ortaIc: { flexGrow: 1, paddingVertical: 16, paddingHorizontal: 20, gap: 14 },
-  onizleme: { width: 300, flexShrink: 0, paddingVertical: 14, paddingHorizontal: 16, gap: 8, backgroundColor: yRenk.yuzey },
+  onizleme: { width: 300, flexShrink: 0, paddingVertical: 14, paddingHorizontal: 16, gap: 8, backgroundColor: yRenk.zemin, borderLeftWidth: 1, borderLeftColor: yRenk.ayrac },
   etiket: { fontFamily: yazi.ekstra, fontSize: 11, color: yRenk.ikincil },
 });

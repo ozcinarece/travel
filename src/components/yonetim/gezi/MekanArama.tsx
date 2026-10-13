@@ -151,8 +151,8 @@ const s = StyleSheet.create({
   kutuOdak: { borderColor: yRenk.metin },
   // Odak kutunun siyah çerçevesiyle gösterilir; tarayıcının kendi çerçevesi çizilmez.
   girdi: { flex: 1, minWidth: 0, fontFamily: yazi.kalin, fontSize: 13, color: yRenk.metin, outlineWidth: 0 },
-  hata: { fontFamily: yazi.yari, fontSize: 11, color: '#ff5a1f' },
-  liste: { position: 'absolute', left: 0, right: 0, top: 44, zIndex: 10, padding: 6, borderRadius: 12, backgroundColor: yRenk.zemin, boxShadow: '0 10px 30px rgba(15,15,15,0.16)', gap: 2 },
+  hata: { fontFamily: yazi.yari, fontSize: 11, color: yRenk.hata },
+  liste: { position: 'absolute', left: 0, right: 0, top: 44, zIndex: 10, padding: 6, borderRadius: 12, backgroundColor: yRenk.zemin, boxShadow: '0 10px 30px rgba(14,20,48,0.16)', gap: 2 },
   satir: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 8, paddingHorizontal: 10, borderRadius: 8 },
   satirSecili: { backgroundColor: yRenk.yuzey },
   kare: { width: 34, height: 34, borderRadius: 8 },

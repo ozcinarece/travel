@@ -1,45 +1,46 @@
-import Svg, { Circle, Path, Rect } from 'react-native-svg';
+import Svg, { Circle, Path } from 'react-native-svg';
 
 import type { MenuAnahtari } from '@/features/yonetim/menu';
 
-// Kanvastaki sol menü ikonları birebir: 24'lük kutu, 2 px çizgi, yuvarlak uç ve birleşim.
+// #155 kanvas BO-0 sol menü ikonları birebir: 24'lük kutu, 2,2 px çizgi, yuvarlak uç ve birleşim.
 const CIZIM: Record<MenuAnahtari, React.ReactNode> = {
   genel: <Path d="M4 20V10M10 20V4M16 20v-7M22 20H2" />,
+  anaSayfa: <Path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z" />,
   geziler: (
     <>
-      <Path d="M4 5a2 2 0 0 1 2-2h5v17H6a2 2 0 0 0-2 2z" />
-      <Path d="M20 5a2 2 0 0 0-2-2h-5v17h5a2 2 0 0 1 2 2z" />
+      <Path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2z" />
+      <Path d="M9 4v14M15 6v14" />
+    </>
+  ),
+  sehirler: (
+    <>
+      <Path d="M3 21h18M5 21V8l5-3v16M10 21V3l9 5v13" />
+      <Path d="M13 10h3M13 14h3" />
     </>
   ),
   yerler: (
     <>
-      <Path d="M4 8h3l1.5-2.5h7L17 8h3v11H4V8z" />
-      <Circle cx="12" cy="13.5" r="3.5" />
-    </>
-  ),
-  sehirler: <Path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2zM9 4v14M15 6v14" />,
-  anaSayfa: (
-    <>
-      <Rect x="3" y="4" width="18" height="6" rx="1.5" />
-      <Rect x="3" y="14" width="8" height="6" rx="1.5" />
-      <Rect x="13" y="14" width="8" height="6" rx="1.5" />
+      <Path d="M12 21s-7-6.1-7-11a7 7 0 0 1 14 0c0 4.9-7 11-7 11z" />
+      <Circle cx="12" cy="10" r="2.5" />
     </>
   ),
   kullanicilar: (
     <>
       <Circle cx="9" cy="8" r="3.5" />
-      <Path d="M2.5 20a6.5 6.5 0 0 1 13 0M16 4.5a3.5 3.5 0 0 1 0 7M21.5 20a6.5 6.5 0 0 0-4.5-6.2" />
+      <Path d="M2.5 20a6.5 6.5 0 0 1 13 0" />
+      <Circle cx="17" cy="9" r="2.5" />
+      <Path d="M16 14.2a5 5 0 0 1 5.5 5.8" />
     </>
   ),
   ayarlar: (
     <>
       <Circle cx="12" cy="12" r="3" />
-      <Path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z" />
+      <Path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1" />
     </>
   ),
 };
 
-export function YonetimIkon({ ad, renk, boyut = 17 }: { ad: MenuAnahtari; renk: string; boyut?: number }) {
+export function YonetimIkon({ ad, renk, boyut = 18 }: { ad: MenuAnahtari; renk: string; boyut?: number }) {
   return (
     <Svg
       width={boyut}
@@ -47,7 +48,7 @@ export function YonetimIkon({ ad, renk, boyut = 17 }: { ad: MenuAnahtari; renk: 
       viewBox="0 0 24 24"
       fill="none"
       stroke={renk}
-      strokeWidth={2}
+      strokeWidth={2.2}
       strokeLinecap="round"
       strokeLinejoin="round"
       aria-hidden>

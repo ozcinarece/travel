@@ -5,7 +5,7 @@ import { ty } from '@/features/yonetim/metin';
 import { binlik } from '@/features/yonetim/yer';
 import { yazi } from '@/theme';
 
-import { yRenk } from '../tema';
+import { yGolge, yRenk } from '../tema';
 
 /** Kanvas ızgarası: 1fr 64 52 44 44, 8 aralık. */
 const SUTUN = [64, 52, 44, 44] as const;
@@ -49,7 +49,7 @@ export function EnCokTablosu({ gun, satirlar }: { gun: number; satirlar: Ozet['e
 }
 
 const s = StyleSheet.create({
-  kart: { width: 440, paddingVertical: 16, paddingHorizontal: 18, borderRadius: 14, borderWidth: 1, borderColor: yRenk.ayrac },
+  kart: { width: 440, padding: 20, borderRadius: 22, backgroundColor: yRenk.zemin, boxShadow: yGolge },
   baslik: { fontFamily: yazi.ekstra, fontSize: 13, color: yRenk.metin, paddingBottom: 8 },
   basliklar: { flexDirection: 'row', gap: 8, paddingBottom: 6 },
   ustMetin: { fontFamily: yazi.ekstra, fontSize: 10.5, color: yRenk.ikincil },
@@ -59,6 +59,6 @@ const s = StyleSheet.create({
   alt: { fontFamily: yazi.yari, fontSize: 11, color: yRenk.ikincil },
   goruntu: { fontFamily: yazi.yari, fontSize: 12.5, color: yRenk.ikincil },
   kalin: { fontFamily: yazi.ekstra, fontSize: 12.5, color: yRenk.metin },
-  oran: { color: '#1f8a4c' },
+  oran: { color: yRenk.basari },
   bos: { fontFamily: yazi.yari, fontSize: 12, color: yRenk.ikincil, paddingVertical: 9, borderTopWidth: 1, borderTopColor: yRenk.ayrac },
 });

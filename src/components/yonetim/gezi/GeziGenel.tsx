@@ -30,8 +30,8 @@ type Props = {
 };
 
 const DURUMLAR: GeziDurumu[] = ['taslak', 'planli', 'yayinda'];
-const TURUNCU = '#ff5a1f';
-const KIRMIZI = '#c0392b';
+const TURUNCU = yRenk.vurgu;
+const KIRMIZI = yRenk.hata;
 
 /**
  * KK2 (kanvas BekleyenTasarim21 ekran 4): BAŞLIK · ŞEHİR (170); DURUM (200, açılır menü: Taslak yalnız sen · Planlı
@@ -191,7 +191,7 @@ const s = StyleSheet.create({
   kutuMetin: { fontFamily: yazi.kalin, fontSize: 13, color: yRenk.metin },
   ok: { fontFamily: yazi.kalin, fontSize: 13, color: yRenk.ikincil },
   perde: { position: 'fixed' as 'absolute', left: 0, right: 0, top: 0, bottom: 0, zIndex: 4, cursor: 'auto' },
-  menu: { position: 'absolute', left: 0, right: 0, top: 42, zIndex: 5, padding: 6, borderRadius: 12, backgroundColor: yRenk.zemin, boxShadow: '0 10px 30px rgba(15,15,15,0.16)', gap: 2 },
+  menu: { position: 'absolute', left: 0, right: 0, top: 42, zIndex: 5, padding: 6, borderRadius: 12, backgroundColor: yRenk.zemin, boxShadow: '0 10px 30px rgba(14,20,48,0.16)', gap: 2 },
   menuSatir: { height: 34, paddingHorizontal: 10, borderRadius: 8, flexDirection: 'row', alignItems: 'center', gap: 8 },
   menuSatirSecili: { backgroundColor: yRenk.yuzey },
   menuAciklama: { fontFamily: yazi.yari, fontSize: 11.5, color: yRenk.ikincil },

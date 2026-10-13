@@ -21,7 +21,7 @@ function genislik(width: number) {
   mockGenislik = width;
 }
 
-const MENU = ['Genel bakış', 'Geziler', 'Yerler', 'Şehirler', 'Ana sayfa düzeni', 'Kullanıcılar', 'Ayarlar'];
+const MENU = ['Genel bakış', 'Ana sayfa', 'Geziler', 'Şehirler', 'Yerler', 'Kullanıcılar', 'Ayarlar'];
 
 // #106 KK4: kabuk render — sol menü, seçili öğe, kullanıcı satırı, üst çubuk; dar ekranda açılır-kapanır menü.
 describe('Kabuk (#106)', () => {
@@ -29,7 +29,7 @@ describe('Kabuk (#106)', () => {
   it('geniş ekranda 7 menü öğesi, bulunulan sayfa seçili, admin satırı ve üst çubuk', () => {
     genislik(1440);
     mockYol = '/yonetim/geziler';
-    const { getByText, getByRole } = render(
+    const { getByText, getByRole, getByLabelText } = render(
       <Kabuk kullanici={{ ad: 'Ece', harf: 'E' }}>
         <YonetimSayfasi baslik="Geziler" />
       </Kabuk>,
@@ -37,7 +37,8 @@ describe('Kabuk (#106)', () => {
     for (const ad of MENU) expect(getByRole('link', { name: ad })).toBeTruthy();
     expect(getByRole('link', { name: 'Geziler' }).props.accessibilityState).toEqual({ selected: true });
     expect(getByRole('link', { name: 'Genel bakış' }).props.accessibilityState).toEqual({ selected: false });
-    expect(getByText('Ece · admin')).toBeTruthy();
+    expect(getByLabelText('Ece · admin')).toBeTruthy();
+    expect(getByText('Admin')).toBeTruthy();
     expect(getByRole('header', { name: 'Geziler' })).toBeTruthy();
   });
 
@@ -72,7 +73,8 @@ describe('Kabuk (#106)', () => {
 
   it('oturumsuz/admin olmayanda kullanıcı satırı yok', () => {
     genislik(1440);
-    const { queryByText } = render(<Kabuk kullanici={null}>{null}</Kabuk>);
-    expect(queryByText(/· admin/)).toBeNull();
+    const { queryByLabelText, queryByText } = render(<Kabuk kullanici={null}>{null}</Kabuk>);
+    expect(queryByLabelText(/· admin/)).toBeNull();
+    expect(queryByText('Admin')).toBeNull();
   });
 });

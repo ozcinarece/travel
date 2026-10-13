@@ -75,7 +75,7 @@ export default function AnaSayfaDuzeniSayfasi() {
         <>
           {durumMetni ? <Text style={s.durum}>{durumMetni}</Text> : null}
           <Hap baslik={ty('gezi.onizle')} onPress={() => window.open('/yonetim/ana-sayfa/onizle', '_blank')} ikon={<GozIkonu />} />
-          <Hap tur="birincil" baslik={ty('gezi.yayinla')} onPress={yayinla} yukleniyor={mesgul} />
+          <Hap tur="vurgu" baslik={ty('gezi.yayinla')} onPress={yayinla} yukleniyor={mesgul} />
         </>
       }>
       <ScrollView style={s.orta} contentContainerStyle={s.ortaIc}>
@@ -130,7 +130,7 @@ export default function AnaSayfaDuzeniSayfasi() {
 
 function GozIkonu() {
   return (
-    <Svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke={yRenk.metin} strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+    <Svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke={yRenk.ana} strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
       <Path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12z" />
       <Circle cx="12" cy="12" r="3" />
     </Svg>
@@ -142,13 +142,13 @@ const s = StyleSheet.create({
   orta: { flex: 1, minWidth: 0, borderRightWidth: 1, borderRightColor: yRenk.ayrac },
   ortaIc: { paddingVertical: 20, paddingHorizontal: 24, gap: 10 },
   aciklama: { fontFamily: yazi.yari, fontSize: 12, color: yRenk.ikincil, paddingBottom: 4 },
-  hata: { fontFamily: yazi.yari, fontSize: 11.5, color: '#ff5a1f' },
+  hata: { fontFamily: yazi.yari, fontSize: 11.5, color: yRenk.hata },
   ekle: { height: 40, paddingHorizontal: 14, borderRadius: 12, borderWidth: 1.5, borderStyle: 'dashed', borderColor: yRenk.cerceve, justifyContent: 'center' },
   ekleMetin: { fontFamily: yazi.kalin, fontSize: 12.5, color: yRenk.ikincil },
   planli: { marginTop: 6, paddingVertical: 12, paddingHorizontal: 14, borderRadius: 12, backgroundColor: yRenk.yuzey },
   planliMetin: { fontFamily: yazi.normal, fontSize: 12, lineHeight: 18, color: yRenk.ikincil },
   planliBaslik: { fontFamily: yazi.ekstra, color: yRenk.metin },
-  onizleme: { width: 300, flexShrink: 0, paddingVertical: 14, paddingHorizontal: 16, gap: 8, backgroundColor: yRenk.yuzey },
+  onizleme: { width: 300, flexShrink: 0, paddingVertical: 14, paddingHorizontal: 16, gap: 8, backgroundColor: yRenk.zemin, borderLeftWidth: 1, borderLeftColor: yRenk.ayrac },
   etiket: { fontFamily: yazi.ekstra, fontSize: 11, color: yRenk.ikincil },
   cerceve: { borderRadius: 16, overflow: 'hidden' },
   olcek: { position: 'absolute', left: 0, top: 0, transformOrigin: 'top left' },

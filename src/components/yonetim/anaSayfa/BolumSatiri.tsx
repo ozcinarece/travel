@@ -39,7 +39,7 @@ export function BolumSatiri({ bolum, indeks, secenekler, acik, onAcKapa, onGunce
   return (
     <View style={s.kap}>
       <View ref={ref} style={s.satir}>
-        <Svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="#c8c8c4" strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+        <Svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke={yRenk.yerTutucu} strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
           <Path d={TUTAMAC} />
         </Svg>
         <View style={s.metinler}>
@@ -52,7 +52,7 @@ export function BolumSatiri({ bolum, indeks, secenekler, acik, onAcKapa, onGunce
           </Text>
         </View>
         <Anahtar acik={bolum.acik} etiket={ty('anaSayfa.acikKapali', { baslik: bolum.baslik })} onDegis={(a) => onGuncelle({ acik: a })} />
-        <Hap baslik={ty(acik ? 'anaSayfa.kapat' : 'anaSayfa.duzenle')} onPress={onAcKapa} />
+        <Hap kucuk baslik={ty(acik ? 'anaSayfa.kapat' : 'anaSayfa.duzenle')} onPress={onAcKapa} />
       </View>
       {acik ? <Duzenleyici bolum={bolum} secenekler={secenekler} onGuncelle={onGuncelle} onSil={onSil} /> : null}
     </View>
@@ -131,7 +131,7 @@ function Duzenleyici({ bolum, secenekler, onGuncelle, onSil }: { bolum: TaslakBo
           <TarihKutusu etiket={ty('anaSayfa.alan.bitis')} deger={yerelTarihGirdisi(bolum.bitis_at)} onDegis={(g) => onGuncelle({ bitis_at: yerelTarihtenIso(g) })} />
         </Alan>
         <View style={s.sil}>
-          <Hap baslik={ty(silOnay ? 'anaSayfa.silOnay' : 'anaSayfa.sil')} onPress={() => (silOnay ? onSil() : setSilOnay(true))} />
+          <Hap kucuk baslik={ty(silOnay ? 'anaSayfa.silOnay' : 'anaSayfa.sil')} onPress={() => (silOnay ? onSil() : setSilOnay(true))} />
         </View>
       </AlanSatiri>
     </View>
@@ -143,7 +143,7 @@ function IcerikSatiri({ id, indeks, bolumId, ad, onCikar, onBirak }: { id: strin
   useSuruklenen(ref, `icerik-${bolumId}`, indeks, onBirak);
   return (
     <View ref={ref} style={s.icerikSatir}>
-      <Svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="#c8c8c4" strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <Svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke={yRenk.yerTutucu} strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
         <Path d={TUTAMAC} />
       </Svg>
       <Text style={s.icerikAd} numberOfLines={1}>

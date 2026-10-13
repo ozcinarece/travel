@@ -35,13 +35,13 @@ describe('yonetimYonu (#106 KK2)', () => {
 });
 
 describe('menü (#106 KK4)', () => {
-  it('kanvastaki sıra', () => {
+  it('kanvastaki sıra (#155 BO-0)', () => {
     expect(MENU.map((m) => ty(`menu.${m.anahtar}`))).toEqual([
       'Genel bakış',
+      'Ana sayfa',
       'Geziler',
-      'Yerler',
       'Şehirler',
-      'Ana sayfa düzeni',
+      'Yerler',
       'Kullanıcılar',
       'Ayarlar',
     ]);

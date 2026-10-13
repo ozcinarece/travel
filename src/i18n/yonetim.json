@@ -5,13 +5,14 @@
     "geziler": "Geziler",
     "yerler": "Yerler",
     "sehirler": "Şehirler",
-    "anaSayfa": "Ana sayfa düzeni",
+    "anaSayfa": "Ana sayfa",
     "kullanicilar": "Kullanıcılar",
     "ayarlar": "Ayarlar",
     "ac": "Menüyü aç",
     "kapat": "Menüyü kapat"
   },
   "rol": "{ad} · admin",
+  "rolEtiket": "Admin",
   "giris": {
     "baslik": "Giriş yap",
     "google": "Google ile giriş",
