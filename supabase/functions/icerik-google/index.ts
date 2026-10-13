@@ -31,9 +31,9 @@ function esit(a: string, b: string): boolean {
 }
 
 /**
- * Yetki: Authorization taşıyıcısı projenin service_role anahtarıyla birebir aynıysa hat; değilse kullanıcı oturumudur ve
- * PostgREST `is_admin()` ile denetlenir (JWT'yi PostgREST doğrular). Geçide (verify_jwt) güvenilmez: anahtar karşılaştırması
- * ve PostgREST denetimi ayarı ne olursa olsun geçerlidir.
+ * Yetki: Authorization taşıyıcısı ortamdaki service_role anahtarıyla birebir aynıysa ya da PostgREST onu service_role
+ * olarak kabul ediyorsa (yalnız service_role'e açık RPC) hat; değilse kullanıcı oturumudur ve PostgREST `is_admin()` ile
+ * denetlenir. Geçide (verify_jwt) güvenilmez: her iki denetim de JWT'yi PostgREST'e doğrulatır.
  */
 async function yetkili(istek: Request): Promise<boolean> {
   const token = (istek.headers.get('authorization') ?? '').replace(/^Bearer\s+/i, '').trim();
@@ -41,8 +41,22 @@ async function yetkili(istek: Request): Promise<boolean> {
   const servis = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
   if (servis && esit(token, servis)) return true;
   const url = Deno.env.get('SUPABASE_URL');
+  if (!url) return false;
+  // Ortamdaki anahtar farklı biçimdeyse (yeni API anahtarları: sb_secret_…), taşıyıcıyı PostgREST doğrular: yalnız
+  // service_role'e açık `icerik_google_butcesi` bu anahtarla çağrılabiliyorsa çağıran service_role'dür.
+  try {
+    const cevap = await fetch(`${url}/rest/v1/rpc/icerik_google_butcesi`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', apikey: token, authorization: `Bearer ${token}` },
+      body: JSON.stringify({ p_istek: 0 }),
+    });
+    await cevap.body?.cancel();
+    if (cevap.ok) return true;
+  } catch {
+    // aşağıda yönetici denetimi
+  }
   const anon = Deno.env.get('SUPABASE_ANON_KEY');
-  if (!url || !anon) return false;
+  if (!anon) return false;
   try {
     const cevap = await fetch(`${url}/rest/v1/rpc/is_admin`, {
       method: 'POST',
