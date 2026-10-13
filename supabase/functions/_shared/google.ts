@@ -106,6 +106,22 @@ const FOTOLU_MASKE = `${HAFIF_MASKE},photos`;
 const OZETLI_MASKE = `${FOTOLU_MASKE},editorialSummary`;
 /** Şehir seçimi: puan gerekmez; saat dilimi ve ülke kodu gerekir (trips.tz, trips.country_code). */
 const SEHIR_MASKE = 'id,location,displayName,primaryType,timeZone,addressComponents';
+/**
+ * #172 KK3: puan ya da "şu an açık" göstermeyen çağrılar (`puansiz`) Enterprise alanlarını (rating, userRatingCount,
+ * currentOpeningHours) istemez — Place Details Pro SKU. Fotoğraf gerekiyorsa yalnız `photos` eklenir.
+ */
+const PRO_MASKE = 'id,location,displayName,primaryType,timeZone';
+const PRO_FOTOLU_MASKE = `${PRO_MASKE},photos`;
+/** #172 KK2: Listem satırı saat + fotoğrafı tek istekte alır (iki ayrı Details yerine). */
+const SAATLI_FOTOLU_MASKE = `${SAATLI_MASKE},photos`;
+
+/** Details maskesi: şehir · saatli (Enterprise, puan da gelir) · foto (+ özet) · hafif; `puansiz` ile Pro maskeler. */
+export function hafifMaske(secenek: { sehir?: boolean; saatler?: boolean; foto?: boolean; ozet?: boolean; puansiz?: boolean }): string {
+  if (secenek.sehir) return SEHIR_MASKE;
+  if (secenek.saatler) return secenek.foto ? SAATLI_FOTOLU_MASKE : SAATLI_MASKE;
+  if (secenek.foto) return secenek.ozet ? OZETLI_MASKE : secenek.puansiz ? PRO_FOTOLU_MASKE : FOTOLU_MASKE;
+  return secenek.puansiz ? PRO_MASKE : HAFIF_MASKE;
+}
 
 export type HafifYer = {
   place_id: string;
@@ -148,12 +164,13 @@ function hhmm(g?: GunSaat) {
   return `${String(g?.hour ?? 0).padStart(2, '0')}:${String(g?.minute ?? 0).padStart(2, '0')}`;
 }
 
-export async function hafifDetay(placeId: string, secenek: { sehir?: boolean; oturum?: string; saatler?: boolean; foto?: boolean; ozet?: boolean }): Promise<HafifYer> {
+export async function hafifDetay(
+  placeId: string,
+  secenek: { sehir?: boolean; oturum?: string; saatler?: boolean; foto?: boolean; ozet?: boolean; puansiz?: boolean },
+): Promise<HafifYer> {
   const parametreler = new URLSearchParams({ languageCode: DIL });
   if (secenek.oturum) parametreler.set('sessionToken', secenek.oturum);
-  const d = await istek<DetailsCevap>(`places/${encodeURIComponent(placeId)}?${parametreler}`, {
-    maske: secenek.sehir ? SEHIR_MASKE : secenek.saatler ? SAATLI_MASKE : secenek.foto ? (secenek.ozet ? OZETLI_MASKE : FOTOLU_MASKE) : HAFIF_MASKE,
-  });
+  const d = await istek<DetailsCevap>(`places/${encodeURIComponent(placeId)}?${parametreler}`, { maske: hafifMaske(secenek) });
   const foto = secenek.foto ? (d.photos?.[0]?.name ? await fotoUri(d.photos[0].name, 400) : null) : undefined;
   const ulke = d.addressComponents?.find((b) => b.types?.includes('country'))?.shortText ?? null;
   const hamPeriyotlar = (d.regularOpeningHours?.periods ?? []).filter((p) => p.open?.day !== undefined);

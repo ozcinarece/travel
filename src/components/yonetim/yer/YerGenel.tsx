@@ -29,7 +29,8 @@ export function YerGenel({ taslak, sehirler, degistir, tekilHatasi }: Props) {
   const [dogrulama, setDogrulama] = useState<'yok' | 'mesgul' | 'tamam' | 'bulunamadi'>('yok');
   const placeGecerli = gecerliPlaceId(taslak.place_id);
   // Canlı veri yalnız ekranda (24 sa istemci önbelleği); DB'ye puan / yorum yazılmaz (PRD §7).
-  const canli = useHafifYerler(placeGecerli ? [taslak.place_id!] : []);
+  // #172: BO yer önizlemesi Google'ın canlı ★ puanını ve yorum sayısını gösterir (tek kimlik, önbellekten).
+  const canli = useHafifYerler(placeGecerli ? [taslak.place_id!] : [], { puan: true });
   const g = placeGecerli ? canli.data?.[taslak.place_id!] : undefined;
   const siraSonuc = oneCikanSirasi(sira);
 
@@ -37,7 +38,8 @@ export function YerGenel({ taslak, sehirler, degistir, tekilHatasi }: Props) {
     if (!placeGecerli) return;
     setDogrulama('mesgul');
     try {
-      const [yer] = await hafifYerler([taslak.place_id!]);
+      // #172 KK3: yalnız kategori ve konum yazılır — Pro maske.
+      const [yer] = await hafifYerler([taslak.place_id!], { puansiz: true });
       if (!yer) throw new Error('yok');
       degistir({ kategori: yer.primary_type, lat: yer.lat, lng: yer.lng }, true);
       setDogrulama('tamam');

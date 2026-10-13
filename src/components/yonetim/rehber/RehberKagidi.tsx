@@ -2,6 +2,7 @@ import type { CSSProperties } from 'react';
 
 import { ty } from '@/features/yonetim/metin';
 import { mekanBaskaBolumde, type TaslakBolum } from '@/features/yonetim/rehberTaslak';
+import type { BilinenMekanlar } from '@/features/icerik/mekanBilgileri';
 import type { HafifYer, Merkez } from '@/features/yerler/api';
 import { yazi } from '@/theme';
 
@@ -16,6 +17,8 @@ type Props = {
   fotoYukle: (dosya: File) => Promise<string>;
   onHata: (m: string) => void;
   onMekanSecildi: (y: HafifYer) => void;
+  /** #172 KK7: taslağın bildiği mekanlar — kart adı Google'a sorulmadan. */
+  bilinen?: BilinenMekanlar;
   onDegis: (alan: Partial<TaslakBolum>) => void;
 };
 
@@ -23,7 +26,7 @@ type Props = {
  * #156 KK1 (kanvas BO-1 orta): Buz üstünde beyaz kâğıt (24 köşe, 34 / 44 iç boşluk) — "BÖLÜM 02", Archivo 32 başlık,
  * "özet · İÇİNDEKİLER SATIRI", ardından uygulamadaki gibi görünen blok editörü.
  */
-export function RehberKagidi({ bolum, no, bolumler, merkez, fotoYukle, onHata, onMekanSecildi, onDegis }: Props) {
+export function RehberKagidi({ bolum, no, bolumler, merkez, fotoYukle, onHata, onMekanSecildi, bilinen, onDegis }: Props) {
   return (
     <div style={c.kagit}>
       <div style={c.no}>{ty('rehberEditor.bolumNo', { no: String(no).padStart(2, '0') })}</div>
@@ -56,6 +59,7 @@ export function RehberKagidi({ bolum, no, bolumler, merkez, fotoYukle, onHata, o
         fotoYukle={fotoYukle}
         onHata={onHata}
         onMekanSecildi={onMekanSecildi}
+        bilinen={bilinen}
         baskaBolumde={(placeId) => mekanBaskaBolumde(placeId, bolumler, bolum.id)}
       />
     </div>

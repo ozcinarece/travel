@@ -67,7 +67,8 @@ export function GeziPlani({ gezi, canli, listede, mesgulId, onDurakEkle, onDurak
                   <Text style={s.bacakMetin}>{t('gezi.yuruyus', { n: ozet.bacakDk[i - 1] })}</Text>
                 </View>
               ) : null}
-              <Pressable accessibilityRole="button" disabled={!onDurak || !c?.hafif} onPress={() => onDurak?.(d)} style={({ pressed }) => [s.satir, pressed && { opacity: 0.85 }]}>
+              {/* #172 KK7: satır DB'den çizilir; panel için yalnız Google kimliği gerekir. */}
+              <Pressable accessibilityRole="button" disabled={!onDurak || !c?.place_id} onPress={() => onDurak?.(d)} style={({ pressed }) => [s.satir, pressed && { opacity: 0.85 }]}>
                 <View style={[s.numara, { backgroundColor: rengi }]}>
                   <Text style={[s.numaraMetin, { color: gunUstuMetin(rengi) }]}>{i + 1}</Text>
                 </View>
@@ -77,7 +78,7 @@ export function GeziPlani({ gezi, canli, listede, mesgulId, onDurakEkle, onDurak
                     {d.ad}
                   </Text>
                   <Text style={s.meta} numberOfLines={1}>
-                    {`${kategoriEtiketi(c?.hafif?.primary_type ?? d.kategori)} · ${sureMetni(d.sure_dk)}`}
+                    {`${kategoriEtiketi(d.kategori)} · ${sureMetni(d.sure_dk)}`}
                   </Text>
                 </View>
                 <EkleDugmesi listede={icinde} mesgul={mesgulId === d.id} onPress={() => onDurakEkle(d)} />

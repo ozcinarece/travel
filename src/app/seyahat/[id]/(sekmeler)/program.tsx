@@ -251,9 +251,10 @@ function ProgramSekmesi({
   const gunMekanlari = useMemo(() => gunDurak.map((d) => mekanIle.get(d.place_ref)).filter((m): m is Mekan => !!m), [gunDurak, mekanIle]);
 
   // Adlar canlı (PRD §7); günün durakları için saatler (KK5). Tek sorgu: saatli, tüm mekanlar.
+  // #172: kartta ve pinde ★ puan (KK3); saatli maske Enterprise olduğu için puan ek maliyet getirmez.
   const yerler = useHafifYerler(
     mekanlar.map((m) => m.place_id),
-    { saatler: true },
+    { puan: true, saatler: true },
   );
   const adi = (durakId: string) => {
     const d = duraklar.find((x) => x.id === durakId);

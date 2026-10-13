@@ -58,6 +58,8 @@ export function useRehberYazari(sehirId: string, bekleme = 2000) {
   const [silinen, setSilinen] = useState<Silinen | null>(null);
   const son = useRef<TaslakBolum[] | null>(null);
   const yeniBilinen = useRef<Record<string, BilinenMekan>>({});
+  // #172 KK7: editör ve önizleme kart adlarını taslağın bildiği mekanlardan çizer (Google'a sorulmaz); bu oturumda seçilenler de.
+  const [oturumBilinen, setOturumBilinen] = useState<Record<string, BilinenMekan>>({});
   const kirli = useRef(false);
   const zamanlayici = useRef<ReturnType<typeof setTimeout> | null>(null);
   // Düzenlemenin dayandığı taslak damgası (sunucu metni, mikrosaniyeli; Date'e çevrilmez). undefined = henüz alınmadı.
@@ -149,6 +151,8 @@ export function useRehberYazari(sehirId: string, bekleme = 2000) {
     await Promise.all([taslakQ.refetch(), canli.refetch()]);
   };
 
+  const taslakBilinen = t?.bilinen;
+  const bilinen = useMemo(() => ({ ...(taslakBilinen ?? {}), ...oturumBilinen }), [taslakBilinen, oturumBilinen]);
   const bolumGuncelle = (id: string, alan: Partial<TaslakBolum>) => degistir((b) => b.map((x) => (x.id === id ? { ...x, ...alan } : x)));
 
   return {
@@ -162,8 +166,11 @@ export function useRehberYazari(sehirId: string, bekleme = 2000) {
     taslakVar: taslakDegisti(zaman),
     silinen,
     bolumGuncelle,
+    bilinen,
     mekanSecildi: (y: HafifYer) => {
-      yeniBilinen.current[y.place_id] = { ad: y.ad, kategori: y.primary_type, lat: y.lat, lng: y.lng };
+      const m = { ad: y.ad, kategori: y.primary_type, lat: y.lat, lng: y.lng };
+      yeniBilinen.current[y.place_id] = m;
+      setOturumBilinen((x) => ({ ...x, [y.place_id]: m }));
     },
     ekle: (baslik: string) => {
       const b = yeniBolum(yeniKimlik(), baslik);

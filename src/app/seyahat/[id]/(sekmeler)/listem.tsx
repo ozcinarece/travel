@@ -27,7 +27,7 @@ import { useSeyahatId } from '@/features/seyahatler/baglam';
 import { useSeyahat } from '@/features/seyahatler/sorgular';
 import { usePlaniUygula } from '@/features/sihirbaz/planUygula';
 import { seyahatAdi } from '@/features/sihirbaz/sihirbaz';
-import { useHafifYerler, useYerFotolari } from '@/features/yerler/api';
+import { useHafifYerler } from '@/features/yerler/api';
 import { t } from '@/i18n';
 import { kategoriEtiketi, sureMetni } from '@/lib/kategori';
 import { useOturum } from '@/lib/oturum';
@@ -123,11 +123,11 @@ function Listem({ seyahat, gunler, duraklar, mekanlar, konaklamalar }: { seyahat
     return () => clearTimeout(z);
   }, [bildirim]);
 
+  // #172 KK2: ad, tip, açılış saatleri ve satır fotoğrafı tek istekte (saatli + foto); puan panelin yedeği (KK3).
   const yerler = useHafifYerler(
     mekanlar.map((m) => m.place_id),
-    { saatler: true },
+    { puan: true, saatler: true, foto: true },
   );
-  const fotolar = useYerFotolari(mekanlar.map((m) => m.place_id));
   const verisi = useProgramVerisi({ seyahat, gunler, duraklar, mekanlar, seciliGun: undefined, konaklamalar });
   const mekanIle = useMemo(() => new Map(mekanlar.map((m) => [m.id, m])), [mekanlar]);
   const durakIle = useMemo(() => new Map(duraklar.map((d) => [d.place_ref, d])), [duraklar]);
@@ -205,7 +205,7 @@ function Listem({ seyahat, gunler, duraklar, mekanlar, konaklamalar }: { seyahat
     const alt = [atanmamis || !saat ? t('listem.satirAtanmamis', { kategori: kategori(m), sure: sureMetni(x.durak?.minutes ?? m.default_minutes) }) : t('listem.satirGunde', { kategori: kategori(m), saat }), ekleyen(m)]
       .filter(Boolean)
       .join(' · ');
-    const foto = fotolar.data?.get(m.place_id) ?? null;
+    const foto = yerler.data?.[m.place_id]?.foto_uri ?? null;
     const icerik = (
       <View style={[s.satir, atanmamis && s.satirKutuda]}>
         <Pressable accessibilityRole="button" onPress={() => setPanelId(m.id)} style={s.satirIc}>
@@ -379,7 +379,7 @@ function Listem({ seyahat, gunler, duraklar, mekanlar, konaklamalar }: { seyahat
       <GuneEkleSayfasi
         acik={!!guneEkleMekan}
         ad={guneEkleMekan ? adi(guneEkleMekan) : ''}
-        foto={guneEkleMekan ? (fotolar.data?.get(guneEkleMekan.place_id) ?? null) : null}
+        foto={guneEkleMekan ? (yerler.data?.[guneEkleMekan.place_id]?.foto_uri ?? null) : null}
         dakika={guneEkleMekan?.default_minutes ?? 0}
         secenekler={secenekler}
         ilkAd={ilkAd}

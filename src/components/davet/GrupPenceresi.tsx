@@ -38,7 +38,8 @@ export function GrupPenceresi({ acik, onKapat, seyahat, uyeler, mekanlar }: Prop
   const gunler = useGunler(acik ? seyahat.id : undefined);
   const geriAl = useDegisikligiGeriAl(seyahat.id);
   const an = useSimdi(acik);
-  const yerler = useHafifYerler(acik ? mekanlar.map((m) => m.place_id) : []);
+  // #172 KK3: yalnız ad (etkinlik metinleri) — Pro maske; ekranın önbellekte tuttuğu kimlikler yeniden istenmez.
+  const yerler = useHafifYerler(acik ? mekanlar.map((m) => m.place_id) : [], { puan: false });
   const ayril = useSeyahattenAyril();
   const sil = useSeyahatSil();
   const [bildirim, setBildirim] = useState<string | null>(null);

@@ -13,6 +13,13 @@ export function rehberMekanIdleri(yazilar: (string | null | undefined)[]): strin
   return [...gorulen];
 }
 
+/** #172 KK8: yalnız kartlar (`::mekan[id]`) — fotoğraf yalnız kartta gösterilir; satır içi bağlantı fotoğrafsızdır. */
+export function rehberKartIdleri(yazilar: (string | null | undefined)[]): string[] {
+  const gorulen = new Set<string>();
+  for (const md of yazilar) for (const b of markdownAyristir(md)) if (b.tur === 'mekan') gorulen.add(b.place_id);
+  return [...gorulen];
+}
+
 /**
  * Okunan bölüm: üstü yapışkan başlığın altına (`pay`) gelmiş son bölüm; hiçbiri gelmediyse ilk bölüm. Konumlar bölüm
  * sırasıyla içerikteki y (ölçülmemiş = undefined, atlanır).

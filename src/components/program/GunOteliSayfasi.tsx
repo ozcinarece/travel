@@ -87,7 +87,8 @@ export function GunOteliSayfasi({ seyahat, gun, gunler, konaklamalar, referans, 
     setHata(null);
     setMesgul(true);
     try {
-      const [yer] = await hafifYerler([o.place_id], { oturum: jeton });
+      // #172 KK3: puan gösterilmez — Pro maske (oturum token'ı yine seçimle kapanır).
+      const [yer] = await hafifYerler([o.place_id], { oturum: jeton, puansiz: true });
       if (!yer) throw new Error('yer yok');
       yeniSec({ place_id: yer.place_id, ad: o.ana || yer.ad, lat: yer.lat, lng: yer.lng });
       setJeton(yeniOturumJetonu());
