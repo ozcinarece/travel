@@ -14,13 +14,14 @@ import { yerAlanlari, yerAnahtari, YER_LISTESI, type YonetimYeri } from '@/featu
 import { useHafifYerler } from '@/features/yerler/api';
 import { yazi } from '@/theme';
 
-import { Sekmeler } from '../Form';
+import { DurumRozeti } from '../Form';
 import { Hap } from '../Hap';
 import { IcerikFotolari } from '../IcerikFotolari';
-import { YonetimSayfasi } from '../Kabuk';
+import { sutun, YonetimSayfasi } from '../Kabuk';
+import { KayitDurumu } from '../Ortak';
 import { OlcekliTelefon } from '../gezi/GeziOnizleme';
+import { BlokEditoru } from '../rehber/BlokEditoru';
 import { yRenk } from '../tema';
-import { RehberEditoru } from './RehberEditoru';
 import { YerGenel } from './YerGenel';
 import { YerOnizleme } from './YerOnizleme';
 
@@ -75,17 +76,20 @@ export function YerEditoru({ yer, sehirler, liste }: { yer: YonetimYeri; sehirle
   return (
     <YonetimSayfasi
       sutunlu
-      baslik={ty('yer.baslik', { ad: taslak.ad })}
+      baslik={taslak.ad}
+      kapak={taslak.kapak_url}
+      rozet={<DurumRozeti durum={taslak.yayin ? 'yayinda' : 'taslak'} etiket={ty(taslak.yayin ? 'yer.durum.yayinda' : 'yer.durum.taslak')} />}
+      durum={kayitMetni ? <KayitDurumu metin={kayitMetni} hata={durum.hata === 'kayit'} /> : null}
+      sekmeler={{ secili: sekme, onSec: (a) => setSekme(a as Sekme), sekmeler: SEKMELER.map((a) => ({ anahtar: a, etiket: ty(`yer.sekme.${a}`) })) }}
       eylemler={
         <>
-          <Text style={s.durum}>{ty(taslak.yayin ? 'yer.durum.yayinda' : 'yer.durum.taslak')}</Text>
           <Hap baslik={ty('gezi.onizle')} onPress={onizle} ikon={<GozIkonu />} />
-          <Hap tur="birincil" baslik={ty('gezi.yayinla')} onPress={() => degistir({ yayin: true }, true)} />
+          <Hap tur="vurgu" baslik={ty('gezi.yayinla')} onPress={() => degistir({ yayin: true }, true)} />
         </>
       }>
       {liste}
-      <ScrollView style={s.orta} contentContainerStyle={s.ortaIc}>
-        <Sekmeler secili={sekme} onSec={setSekme} sekmeler={SEKMELER.map((a) => ({ anahtar: a, etiket: ty(`yer.sekme.${a}`) }))} />
+      <ScrollView style={sutun.orta} contentContainerStyle={sutun.ortaIc}>
+        <View style={sutun.kagit}>
         {hata ? (
           <Pressable accessibilityRole="button" onPress={() => setHata(null)}>
             <Text style={s.hata}>{hata}</Text>
@@ -93,13 +97,13 @@ export function YerEditoru({ yer, sehirler, liste }: { yer: YonetimYeri; sehirle
         ) : null}
         {sekme === 'genel' ? <YerGenel taslak={taslak} sehirler={sehirler} degistir={degistir} tekilHatasi={durum.hata === 'tekil'} /> : null}
         {sekme === 'rehber' ? (
-          <RehberEditoru
-            md={taslak.rehber_md}
+          // #156 KK14: şehir rehberiyle aynı editör (bölüm listesi olmadan).
+          <BlokEditoru
+            md={taslak.rehber_md ?? ''}
             onDegis={(rehber_md) => degistir({ rehber_md: rehber_md || null })}
             merkez={merkez}
             fotoYukle={fotoYukle}
             onHata={setHata}
-            kayitMetni={kayitMetni}
             onMekanSecildi={(y) => {
               bilinen.current[y.place_id] = { ad: y.ad, kategori: y.primary_type, lat: y.lat, lng: y.lng };
             }}
@@ -135,6 +139,7 @@ export function YerEditoru({ yer, sehirler, liste }: { yer: YonetimYeri; sehirle
             }}
           />
         ) : null}
+        </View>
       </ScrollView>
       <View style={s.onizleme}>
         <Text style={s.etiket}>{ty('yer.onizleme')}</Text>
@@ -149,7 +154,7 @@ export function YerEditoru({ yer, sehirler, liste }: { yer: YonetimYeri; sehirle
 
 function GozIkonu() {
   return (
-    <Svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke={yRenk.metin} strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+    <Svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke={yRenk.ana} strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
       <Path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12z" />
       <Circle cx="12" cy="12" r="3" />
     </Svg>
@@ -157,11 +162,8 @@ function GozIkonu() {
 }
 
 const s = StyleSheet.create({
-  durum: { fontFamily: yazi.yari, fontSize: 11.5, color: yRenk.ikincil },
-  hata: { fontFamily: yazi.yari, fontSize: 11.5, color: '#ff5a1f' },
-  orta: { flex: 1, minWidth: 0, borderRightWidth: 1, borderRightColor: yRenk.ayrac },
-  ortaIc: { flexGrow: 1, paddingVertical: 16, paddingHorizontal: 20, gap: 12 },
-  onizleme: { width: 300, flexShrink: 0, paddingVertical: 14, paddingHorizontal: 16, gap: 8, backgroundColor: yRenk.yuzey },
+  hata: { fontFamily: yazi.yari, fontSize: 11.5, color: yRenk.hata },
+  onizleme: { width: 300, flexShrink: 0, paddingVertical: 14, paddingHorizontal: 16, gap: 8, backgroundColor: yRenk.zemin, borderLeftWidth: 1, borderLeftColor: yRenk.ayrac },
   etiket: { fontFamily: yazi.ekstra, fontSize: 11, color: yRenk.ikincil },
   not: { fontFamily: yazi.yari, fontSize: 11, lineHeight: 16, color: yRenk.ikincil },
 });

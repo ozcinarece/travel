@@ -84,7 +84,7 @@ export function YerGenel({ taslak, sehirler, degistir, tekilHatasi }: Props) {
           {dogrulama === 'tamam' ? <Text style={s.bilgi}>{ty('yer.dogrulandi')}</Text> : null}
         </Alan>
         <View style={s.dugme}>
-          <Hap baslik={ty('yer.dogrula')} onPress={dogrula} yukleniyor={dogrulama === 'mesgul'} />
+          <Hap kucuk baslik={ty('yer.dogrula')} onPress={dogrula} yukleniyor={dogrulama === 'mesgul'} />
         </View>
         <Alan etiket={ty('yer.alan.oneCikan')} genislik={140}>
           <MetinKutusu
@@ -126,6 +126,6 @@ const s = StyleSheet.create({
   dugme: { justifyContent: 'flex-start', paddingTop: 17 },
   salt: { minHeight: 36, paddingVertical: 8, paddingHorizontal: 12, borderRadius: 10, borderWidth: 1, borderColor: yRenk.ayrac, backgroundColor: yRenk.yuzey, justifyContent: 'center' },
   saltMetin: { fontFamily: yazi.kalin, fontSize: 13, color: yRenk.metin },
-  hata: { fontFamily: yazi.yari, fontSize: 11, color: '#ff5a1f' },
+  hata: { fontFamily: yazi.yari, fontSize: 11, color: yRenk.hata },
   bilgi: { fontFamily: yazi.yari, fontSize: 11, color: yRenk.ikincil },
 });

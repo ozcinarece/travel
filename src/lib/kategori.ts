@@ -70,6 +70,11 @@ export function kategoriEtiketi(primaryType: string | null | undefined): string 
   return ETIKET[primaryType] ?? primaryType.replace(/_/g, ' ');
 }
 
+/** Türkçe etiketi olan tipte etiket, yoksa null (ham İngilizce gösterilmesin diye; #156 rehber kartı). */
+export function bilinenKategori(primaryType: string | null | undefined): string | null {
+  return (primaryType && ETIKET[primaryType]) || null;
+}
+
 /** "1,25 sa" / "45 dk" (kanvas biçimi). */
 export function sureMetni(dakika: number): string {
   // #51: ondalık saat yok — "X sa Y dk" / "X sa" / "Y dk".

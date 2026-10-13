@@ -15,16 +15,10 @@ export type SehirAlanlari = {
   genis_kapak_url: string | null;
 };
 
+/** Eski 4 bölümün türü (#100); #156'dan sonra yeni bölümler türsüz (null), adı serbest. */
 export type BolumTuru = 'ulasim' | 'yemek' | 'mahalle' | 'ipucu';
-/** Uygulamanın rehber sekmeleri (#100); "+ Bölüm" eksik olanı bu sırayla ekler. */
-export const BOLUM_TURLERI: BolumTuru[] = ['ulasim', 'yemek', 'mahalle', 'ipucu'];
 
-export type RehberBolumu = { id: string; sehir_id: string; bolum: BolumTuru; baslik: string; ozet: string | null; yazi_md: string | null; sira: number };
-
-/** Henüz olmayan ilk bölüm türü; dördü de varsa null. */
-export function eksikBolum(mevcut: readonly { bolum: BolumTuru }[]): BolumTuru | null {
-  return BOLUM_TURLERI.find((t) => !mevcut.some((b) => b.bolum === t)) ?? null;
-}
+export type RehberBolumu = { id: string; sehir_id: string; bolum: BolumTuru | null; baslik: string; ozet: string | null; yazi_md: string | null; sira: number; gizli?: boolean };
 
 const UST_BASLIK = /^#\s+[^\n]*\n*/;
 
@@ -46,17 +40,6 @@ const MEKAN_IZI = /\[([^\]]+)\]\(mekan:([A-Za-z0-9_-]{10,255})\)|^::mekan\[([A-Z
 /** Yazıdaki mekanlar, yazı sırasıyla: satır içi `[metin](mekan:id)` (ad = metin) ve kart `::mekan[id]`. */
 export function mekanBaglari(md: string | null | undefined): MekanBagi[] {
   return [...(md ?? '').matchAll(MEKAN_IZI)].map((m) => (m[3] ? { place_id: m[3], bicim: 'kart' } : { place_id: m[2], bicim: 'satir', ad: m[1].trim() }));
-}
-
-/** Sol listedeki "N mekan": bölümde kart olarak bağlı mekan sayısı. */
-export function kartSayisi(md: string | null | undefined): number {
-  return mekanBaglari(md).filter((m) => m.bicim === 'kart').length;
-}
-
-/** "Kaynak görünümü": yazıdaki ham mekan işaretleri, kimlik kısaltılmış ("ChIJ…h3"). */
-export function kaynakIzleri(md: string | null | undefined): string[] {
-  const kisa = (id: string) => (id.length > 8 ? `${id.slice(0, 4)}…${id.slice(-2)}` : id);
-  return mekanBaglari(md).map((m) => (m.bicim === 'kart' ? `::mekan[${kisa(m.place_id)}]` : `[${m.ad}](mekan:${kisa(m.place_id)})`));
 }
 
 // ---------------------------------------------------------------- fotoğraflar

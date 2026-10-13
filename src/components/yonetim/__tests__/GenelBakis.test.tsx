@@ -1,34 +1,47 @@
-import { describe, expect, it } from '@jest/globals';
+import { describe, expect, it, jest } from '@jest/globals';
 import { render } from '@testing-library/react-native';
+import type { ReactNode } from 'react';
 
-import type { Ozet } from '@/features/yonetim/genelBakis';
+import type { Genel } from '@/features/yonetim/genelBakis';
 
-import { EnCokTablosu } from '../genel/EnCokTablosu';
-import { KpiKarti } from '../genel/KpiKarti';
+import { GoogleKarti, GostergeKarti, IcerikSagligi } from '../genel/GenelKartlar';
 
-const satirlar: Ozet['en_cok_alinan'] = [
-  { id: 'g1', baslik: "Odunpazarı'ndan Porsuk'a", sehir: 'Eskişehir', gun_sayisi: 2, goruntu: 1240, alindi: 96, kalp: 210 },
-  { id: 'g2', baslik: "Bursa'da üç gün", sehir: 'Bursa', gun_sayisi: 3, goruntu: 0, alindi: 2, kalp: 0 },
-];
+jest.mock('expo-router', () => ({ Link: ({ children }: { children: ReactNode }) => children }));
 
-// #110 KK1 / KK3: kart (değişim + alt satır) ve en çok alınan geziler tablosu.
-describe('genel bakış parçaları (#110)', () => {
-  it('KPI kartı: artış yeşil, düşüş turuncu', () => {
-    const { getByText, rerender } = render(<KpiKarti kart={{ anahtar: 'k', baslik: 'Kullanıcı', deger: '1.284', degisim: 8.08, alt: 'son 7 gün +96' }} />);
-    expect(getByText('1.284')).toBeTruthy();
-    expect(getByText('+8,1%', { exact: false }).props.style).toEqual(expect.arrayContaining([expect.objectContaining({ color: '#1f8a4c' })]));
-    rerender(<KpiKarti kart={{ anahtar: 'k', baslik: 'Seyahat', deger: '642', degisim: -5, alt: 'bu hafta 2' }} />);
-    expect(getByText('−5%', { exact: false }).props.style).toEqual(expect.arrayContaining([expect.objectContaining({ color: '#ff5a1f' })]));
+const google: Genel['google'] = { mekan: 120, foto: 300, rota: 200, yorum: 96, butce: 10, fiyat: { mekan: 17, foto: 7, rota: 5, yorum: 20 }, yorum_sinir: 300 };
+
+// #157 KK7: olay yoksa "veri bekleniyor" (sıfır gösterilmez); KK4 Google kartı; KK6 içerik sağlığı.
+describe('Genel bakış kartları (#157)', () => {
+  it('olay yoksa değer yerine "veri bekleniyor"', () => {
+    const { getByText, queryByText } = render(<GostergeKarti baslik="Kurulan plan" deger="0" bekleniyor />);
+    expect(getByText('veri bekleniyor')).toBeTruthy();
+    expect(queryByText('0')).toBeNull();
+    expect(getByText('KURULAN PLAN')).toBeTruthy();
   });
-  it('tablo: aralık başlığı, şehir · gün, oran', () => {
-    const { getByText } = render(<EnCokTablosu gun={7} satirlar={satirlar} />);
-    expect(getByText('En çok alınan geziler · 7 gün')).toBeTruthy();
-    expect(getByText('Eskişehir · 2 gün')).toBeTruthy();
-    expect(getByText('8%')).toBeTruthy();
-    expect(getByText('1.240')).toBeTruthy();
-    expect(getByText('—')).toBeTruthy();
+
+  it('Google kartı: tahmini harcama / bütçe, kalemler, yorum n / sınır; sınır ayarı yoksa veri bekleniyor', () => {
+    const { getByText, rerender } = render(<GoogleKarti google={google} />);
+    expect(getByText('$7,06')).toBeTruthy();
+    expect(getByText('/ günlük bütçe $10')).toBeTruthy();
+    expect(getByText('Mekan bilgisi')).toBeTruthy();
+    expect(getByText('96 / 300 · günlük sınır')).toBeTruthy();
+    expect(getByText('Sınırları düzenle ›')).toBeTruthy();
+    rerender(<GoogleKarti google={{ ...google, yorum_sinir: null }} />);
+    expect(getByText('veri bekleniyor')).toBeTruthy();
   });
-  it('tablo boşken açıklama', () => {
-    expect(render(<EnCokTablosu gun={30} satirlar={[]} />).getByText('Bu aralıkta alınan gezi yok.')).toBeTruthy();
+
+  it('içerik sağlığı: tamam özeti ve ilk eksik', () => {
+    const { getByText } = render(
+      <IcerikSagligi
+        sehirler={[
+          { id: 'a', ad: 'Eskişehir', kapak: true, genis_kapak: true, bolum: 5, bos_bolum: 0, mekan: 8, gezi: 2 },
+          { id: 'b', ad: 'Bursa', kapak: true, genis_kapak: true, bolum: 4, bos_bolum: 2, mekan: 3, gezi: 1 },
+          { id: 'c', ad: 'Kapadokya', kapak: true, genis_kapak: false, bolum: 3, bos_bolum: 0, mekan: 2, gezi: 1 },
+        ]}
+      />,
+    );
+    expect(getByText('Rehber 5 bölüm · 8 mekan · 2 hazır gezi')).toBeTruthy();
+    expect(getByText('Rehberde 2 bölüm boş')).toBeTruthy();
+    expect(getByText('Geniş kapak fotoğrafı yok')).toBeTruthy();
   });
 });

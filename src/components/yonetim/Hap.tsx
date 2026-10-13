@@ -5,47 +5,55 @@ import { yazi } from '@/theme';
 
 import { yRenk } from './tema';
 
-type Tur = 'birincil' | 'ikincil';
+type Tur = 'birincil' | 'vurgu' | 'ikincil';
 
 type Props = {
   baslik: string;
   onPress: () => void;
   tur?: Tur;
+  /** Satır içi (34 px, kanvas bildirimdeki "Geri al" ölçüsü). */
+  kucuk?: boolean;
   yukleniyor?: boolean;
   /** Metnin solunda 14 px ikon (kanvas: Önizle). */
   ikon?: ReactNode;
 };
 
-// Kanvastaki üst çubuk hapı: 34 yüksek, 14 yan boşluk, tam yuvarlak, 1,5 çerçeve, 12,5 px 800.
-// Birincil siyah (Yayınla, + Yeni gezi), ikincil beyaz + #d9d9d4 çerçeve (Önizle, Son 30 gün).
-export function Hap({ baslik, onPress, tur = 'ikincil', yukleniyor, ikon }: Props) {
-  const birincil = tur === 'birincil';
-  const metinRengi = birincil ? yRenk.zemin : yRenk.metin;
+const RENK: Record<Tur, { zemin: string; metin: string; cerceve: string }> = {
+  birincil: { zemin: yRenk.ana, metin: yRenk.zemin, cerceve: yRenk.ana },
+  vurgu: { zemin: yRenk.vurgu, metin: yRenk.metin, cerceve: yRenk.vurgu },
+  ikincil: { zemin: yRenk.zemin, metin: yRenk.ana, cerceve: yRenk.cerceve },
+};
+
+/**
+ * #155 Düğme (kanvas BO-1 üst çubuk): 40 px, 12 köşe, 800. Vurgu = Mandalina + Lacivert yazı (Yayınla, 14 px, 18 yan);
+ * ikincil = beyaz + 1,5 px Çizgi çerçeve + Gece yazı (Geçmiş, 13 px, 14 yan); birincil = Gece + beyaz yazı.
+ */
+export function Hap({ baslik, onPress, tur = 'ikincil', kucuk, yukleniyor, ikon }: Props) {
+  const r = RENK[tur];
   return (
     <Pressable
       accessibilityRole="button"
       accessibilityState={{ disabled: !!yukleniyor, busy: !!yukleniyor }}
       disabled={yukleniyor}
       onPress={onPress}
-      style={({ pressed }) => [s.kap, birincil ? s.birincil : s.ikincil, (pressed || yukleniyor) && s.basili]}>
-      {yukleniyor ? <ActivityIndicator size="small" color={metinRengi} /> : ikon}
-      <Text style={[s.metin, { color: metinRengi }]}>{baslik}</Text>
+      style={({ pressed }) => [
+        s.kap,
+        kucuk ? s.kucuk : tur === 'ikincil' ? s.ikincil : s.dolu,
+        { backgroundColor: r.zemin, borderColor: r.cerceve },
+        (pressed || yukleniyor) && s.basili,
+      ]}>
+      {yukleniyor ? <ActivityIndicator size="small" color={r.metin} /> : ikon}
+      <Text style={[s.metin, !kucuk && tur !== 'ikincil' && s.metinBuyuk, { color: r.metin }]}>{baslik}</Text>
     </Pressable>
   );
 }
 
 const s = StyleSheet.create({
-  kap: {
-    height: 34,
-    paddingHorizontal: 14,
-    borderRadius: 999,
-    borderWidth: 1.5,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-  },
-  birincil: { backgroundColor: yRenk.metin, borderColor: yRenk.metin },
-  ikincil: { backgroundColor: yRenk.zemin, borderColor: yRenk.cerceve },
+  kap: { height: 40, borderRadius: 12, borderWidth: 1.5, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6 },
+  ikincil: { paddingHorizontal: 14 },
+  dolu: { paddingHorizontal: 18 },
+  kucuk: { height: 34, paddingHorizontal: 12, borderRadius: 10 },
   basili: { opacity: 0.7 },
-  metin: { fontFamily: yazi.ekstra, fontSize: 12.5 },
+  metin: { fontFamily: yazi.ekstra, fontSize: 13 },
+  metinBuyuk: { fontSize: 14 },
 });

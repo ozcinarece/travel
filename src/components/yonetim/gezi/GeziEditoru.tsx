@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import Svg, { Circle, Path } from 'react-native-svg';
 
-import { blokEkle, gorselSatiri, saatMetni, yayinlaAlanlari } from '@/features/yonetim/gezi';
+import { blokEkle, geziDurumu, gorselSatiri, saatMetni, yayinlaAlanlari } from '@/features/yonetim/gezi';
 import { fotoHataAnahtari, useFotoIslemleri, useIcerikFotolari } from '@/features/yonetim/fotolar';
 import { alanlariAl, GEZI_LISTESI, geziAnahtari, useGeziIslemleri, type YonetimGezi, type YonetimSehri } from '@/features/yonetim/geziSorgulari';
 import { useOtomatikKayit } from '@/features/yonetim/otomatikKayit';
@@ -10,10 +10,11 @@ import { ty } from '@/features/yonetim/metin';
 import type { GeziDetay } from '@/lib/tipler';
 import { yazi } from '@/theme';
 
-import { Sekmeler } from '../Form';
+import { DurumRozeti } from '../Form';
 import { Hap } from '../Hap';
 import { IcerikFotolari } from '../IcerikFotolari';
-import { YonetimSayfasi } from '../Kabuk';
+import { sutun, YonetimSayfasi } from '../Kabuk';
+import { KayitDurumu } from '../Ortak';
 import { yRenk } from '../tema';
 import { GeziGenel } from './GeziGenel';
 import { GeziOnizleme, OlcekliTelefon } from './GeziOnizleme';
@@ -29,8 +30,8 @@ export function onizlemeGezisi(gezi: YonetimGezi, taslak: Partial<GeziDetay>): G
 }
 
 /**
- * #107 kanvas ekran 2: üst çubuk ("Gezi · başlık", Kaydedildi · saat, Önizle, Yayınla), solda liste (sayfa verir),
- * ortada sekmeler, sağda 300 px telefon önizlemesi. Gezi kimliğiyle anahtarlanır (otomatik kayıt her gezide yeni).
+ * #107 kanvas ekran 2, #155 kabuğu: başlıkta GEZİLER · başlık + durum rozeti, kayıt durumu, Önizle, Yayınla ve
+ * sekmeler; solda liste (sayfa verir), ortada Buz üstünde beyaz kâğıt, sağda 300 px telefon önizlemesi. Gezi kimliğiyle anahtarlanır (otomatik kayıt her gezide yeni).
  */
 export function GeziEditoru({ gezi, sehirler, liste }: { gezi: YonetimGezi; sehirler: YonetimSehri[]; liste: React.ReactNode }) {
   const { taslak, degistir, durum, simdiKaydet } = useOtomatikKayit({ tablo: 'geziler', id: gezi.id, ilk: alanlariAl(gezi), yenilenecek: [GEZI_LISTESI, geziAnahtari(gezi.id)] });
@@ -65,6 +66,7 @@ export function GeziEditoru({ gezi, sehirler, liste }: { gezi: YonetimGezi; sehi
     setSekme('yazi');
   };
 
+  const gDurum = geziDurumu({ yayin: !!taslak.yayin, yayin_at: taslak.yayin_at ?? null });
   const kayitMetni = durum.kaydediliyor
     ? ty('gezi.kaydediliyor')
     : durum.hata
@@ -76,17 +78,20 @@ export function GeziEditoru({ gezi, sehirler, liste }: { gezi: YonetimGezi; sehi
   return (
     <YonetimSayfasi
       sutunlu
-      baslik={ty('gezi.baslik', { baslik: taslak.baslik })}
+      baslik={taslak.baslik ?? ''}
+      kapak={taslak.kapak_url}
+      rozet={<DurumRozeti durum={gDurum} etiket={ty(`gezi.durum.${gDurum}`)} />}
+      durum={kayitMetni ? <KayitDurumu metin={kayitMetni} hata={!!durum.hata} /> : null}
+      sekmeler={{ secili: sekme, onSec: (a) => setSekme(a as Sekme), sekmeler: SEKMELER.map((a) => ({ anahtar: a, etiket: ty(`gezi.sekme.${a}`) })) }}
       eylemler={
         <>
-          {kayitMetni ? <Text style={[s.kayit, durum.hata && s.hata]}>{kayitMetni}</Text> : null}
           <Hap baslik={ty('gezi.onizle')} onPress={onizle} ikon={<GozIkonu />} />
-          <Hap tur="birincil" baslik={ty('gezi.yayinla')} onPress={() => degistir((t) => yayinlaAlanlari(t), true)} />
+          <Hap tur="vurgu" baslik={ty('gezi.yayinla')} onPress={() => degistir((t) => yayinlaAlanlari(t), true)} />
         </>
       }>
       {liste}
-      <ScrollView style={s.orta} contentContainerStyle={s.ortaIc}>
-        <Sekmeler secili={sekme} onSec={setSekme} sekmeler={SEKMELER.map((a) => ({ anahtar: a, etiket: ty(`gezi.sekme.${a}`) }))} />
+      <ScrollView style={sutun.orta} contentContainerStyle={sutun.ortaIc}>
+        <View style={sutun.kagit}>
         {hata ? (
           <Pressable accessibilityRole="button" onPress={() => setHata(null)}>
             <Text style={s.hata}>{hata}</Text>
@@ -127,6 +132,7 @@ export function GeziEditoru({ gezi, sehirler, liste }: { gezi: YonetimGezi; sehi
             }}
           />
         ) : null}
+        </View>
       </ScrollView>
       <View style={s.onizleme}>
         <View style={s.onizlemeUst}>
@@ -153,7 +159,7 @@ export function GeziEditoru({ gezi, sehirler, liste }: { gezi: YonetimGezi; sehi
 /** Kanvas "Önizle" göz ikonu (14 px, 2,4 çizgi). */
 function GozIkonu() {
   return (
-    <Svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke={yRenk.metin} strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+    <Svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke={yRenk.ana} strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
       <Path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12z" />
       <Circle cx="12" cy="12" r="3" />
     </Svg>
@@ -162,11 +168,8 @@ function GozIkonu() {
 
 const s = StyleSheet.create({
   pasif: { opacity: 0.4 },
-  kayit: { fontFamily: yazi.yari, fontSize: 11.5, color: yRenk.ikincil },
-  hata: { fontFamily: yazi.yari, fontSize: 11.5, color: '#ff5a1f' },
-  orta: { flex: 1, minWidth: 0, borderRightWidth: 1, borderRightColor: yRenk.ayrac },
-  ortaIc: { flexGrow: 1, paddingVertical: 16, paddingHorizontal: 20, gap: 14 },
-  onizleme: { width: 300, flexShrink: 0, paddingVertical: 14, paddingHorizontal: 16, gap: 8, backgroundColor: yRenk.yuzey },
+  hata: { fontFamily: yazi.yari, fontSize: 11.5, color: yRenk.hata },
+  onizleme: { width: 300, flexShrink: 0, paddingVertical: 14, paddingHorizontal: 16, gap: 8, backgroundColor: yRenk.zemin, borderLeftWidth: 1, borderLeftColor: yRenk.ayrac },
   onizlemeUst: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   etiket: { fontFamily: yazi.ekstra, fontSize: 11, color: yRenk.ikincil },
 });

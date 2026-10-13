@@ -54,7 +54,7 @@ export function NeredeGorunur({ id, taslak, gezi, komsu }: { id: string; taslak:
 const golge = { textShadowColor: 'rgba(0,0,0,0.3)', textShadowRadius: 8, textShadowOffset: { width: 0, height: 1 } };
 
 const s = StyleSheet.create({
-  kap: { width: 300, flexShrink: 0, paddingVertical: 14, paddingHorizontal: 16, gap: 12, backgroundColor: yRenk.yuzey },
+  kap: { width: 300, flexShrink: 0, paddingVertical: 14, paddingHorizontal: 16, gap: 12, backgroundColor: yRenk.zemin, borderLeftWidth: 1, borderLeftColor: yRenk.ayrac },
   etiket: { fontFamily: yazi.ekstra, fontSize: 11, color: yRenk.ikincil },
   alt: { fontFamily: yazi.kalin, fontSize: 11, color: yRenk.ikincil },
   karolar: { flexDirection: 'row', gap: 8 },
@@ -67,7 +67,7 @@ const s = StyleSheet.create({
   rehberUst: { fontFamily: yazi.ekstra, fontSize: 9, letterSpacing: 0.72, color: 'rgba(255,255,255,0.9)' },
   rehberAd: { fontFamily: yazi.ekstra, fontSize: 20, letterSpacing: -0.6, color: yRenk.zemin },
   secki: { width: 268, height: 110, borderRadius: 12 },
-  cip: { position: 'absolute', left: 12, top: 12, height: 24, paddingHorizontal: 9, borderRadius: 999, backgroundColor: 'rgba(15,15,15,0.75)', justifyContent: 'center' },
+  cip: { position: 'absolute', left: 12, top: 12, height: 24, paddingHorizontal: 9, borderRadius: 999, backgroundColor: 'rgba(14,20,48,0.75)', justifyContent: 'center' },
   cipMetin: { fontFamily: yazi.ekstra, fontSize: 10.5, color: yRenk.zemin },
   seckiMetin: { position: 'absolute', left: 14, bottom: 10, fontFamily: yazi.ekstra, fontSize: 15, color: yRenk.zemin, ...golge },
 });

@@ -5,13 +5,14 @@
     "geziler": "Geziler",
     "yerler": "Yerler",
     "sehirler": "Şehirler",
-    "anaSayfa": "Ana sayfa düzeni",
+    "anaSayfa": "Ana sayfa",
     "kullanicilar": "Kullanıcılar",
     "ayarlar": "Ayarlar",
     "ac": "Menüyü aç",
     "kapat": "Menüyü kapat"
   },
   "rol": "{ad} · admin",
+  "rolEtiket": "Admin",
   "giris": {
     "baslik": "Giriş yap",
     "google": "Google ile giriş",
@@ -272,75 +273,98 @@
     "onizleme": "ÖNİZLEME · ANA SAYFA"
   },
   "genel": {
-    "aralik": "Son {gun} gün",
-    "aralikSec": "Aralık",
-    "disaAktar": "Dışa aktar",
-    "kullanici": "Kullanıcı",
-    "seyahat": "Seyahat",
-    "kart": {
-      "kullanici": "Kullanıcı",
-      "kullaniciAlt": "son 7 gün +{n}",
-      "seyahat": "Seyahat",
-      "seyahatAlt": "bu hafta {n}",
-      "gezi": "Gezi alındı",
-      "geziAlt": "tüm gezi {tum} · seçili gün {gunler} · yalnız mekan {mekan}",
-      "paylasim": "Paylaşım",
-      "paylasimAlt": "davet linki açılma {n}",
-      "katilimAlt": "linkle katılım",
-      "google": "Google API",
-      "googleAlt": "istek / ay · bütçe {butce}",
-      "googleAltButcesiz": "istek / ay"
+    "ust": "GENEL BAKIŞ · {tarih}",
+    "selam": {
+      "gunaydin": "Günaydın {ad}",
+      "iyiGunler": "İyi günler {ad}",
+      "iyiAksamlar": "İyi akşamlar {ad}"
     },
-    "grafik": "Haftalık · yeni kullanıcı ve seyahat",
-    "grafikEtiket": "Son 12 haftada haftalık yeni kullanıcı ve seyahat sayısı",
-    "tablo": {
-      "baslik": "En çok alınan geziler · {gun} gün",
-      "gezi": "GEZİ",
-      "goruntu": "GÖRÜNTÜ",
-      "alindi": "ALINDI",
-      "kalp": "KALP",
-      "oran": "ORAN",
-      "alt": "{sehir} · {gun} gün",
-      "bos": "Bu aralıkta alınan gezi yok."
+    "selamAdsiz": {
+      "gunaydin": "Günaydın",
+      "iyiGunler": "İyi günler",
+      "iyiAksamlar": "İyi akşamlar"
     },
-    "bugun": {
-      "baslik": "Bugün",
-      "ozet": "{kullanici} yeni kullanıcı · {seyahat} seyahat · {gezi} gezi alındı",
-      "istek": "Keşfet yükleme {kesfet} · mekan paneli {mekan} · yorum isteği {yorum}",
-      "sentry": "Sentry: {n} yeni hata (bkz. Ayarlar)",
-      "sentryYok": "Sentry: bağlı değil",
-      "sentryHata": "Sentry: alınamadı",
-      "yorumKotasi": "Google yorum {n} / {sinir} (günlük sınır)"
+    "donem": {
+      "etiket": "Dönem",
+      "1": "Bugün",
+      "7": "7 gün",
+      "30": "30 gün"
+    },
+    "veriBekleniyor": "veri bekleniyor",
+    "yok": "—",
+    "ilkPlan": {
+      "baslik": "İlk saatlik plana kadar",
+      "alt": "medyan · {n} kişi · hedef < 3 dk",
+      "hedefte": "hedefte",
+      "hedefUstu": "hedef üstü",
+      "bekleniyorAlt": "plan_kuruldu olayı bekleniyor"
+    },
+    "davet": {
+      "baslik": "Davet linki paylaşan",
+      "alt": "kurulan seyahatlerin",
+      "katilim": "katılım {oran}",
+      "bekleniyorAlt": "davet olayları bekleniyor",
+      "katilimBekleniyor": "katılım: veri bekleniyor",
+      "katilimYok": "katılım —"
+    },
+    "plan": {
+      "baslik": "Kurulan plan",
+      "degisim": {
+        "1": "düne göre",
+        "7": "geçen haftaya göre",
+        "30": "önceki 30 güne göre"
+      },
+      "oncekiYok": "önceki dönemde plan yok"
+    },
+    "gezi": {
+      "baslik": "Alınan hazır gezi",
+      "enCok": "en çok: {baslik}",
+      "yok": "bu dönemde alınan gezi yok"
+    },
+    "hafta": {
+      "baslik": "Bu hafta",
+      "plan": "Kurulan plan",
+      "katilim": "Davet katılımı",
+      "etiket": "Bu hafta günlere göre kurulan plan ve davetle katılım"
+    },
+    "google": {
+      "baslik": "Google API · bugün",
+      "butce": "/ günlük bütçe {butce}",
+      "butceYok": "/ günlük bütçe tanımlı değil",
+      "asildi": "Günlük bütçe aşıldı",
+      "tahmin": "tahmini; ücretsiz kota düşülmez",
+      "kalem": {
+        "mekan": "Mekan bilgisi",
+        "foto": "Fotoğraf",
+        "rota": "Rota ve süre",
+        "yorum": "Google yorumları"
+      },
+      "yorumSinir": "{n} / {sinir} · günlük sınır",
+      "sinirlar": "Sınırları düzenle ›"
+    },
+    "enCok": {
+      "baslik": "En çok alınan geziler",
+      "kez": "{n} kez",
+      "bos": "Bu dönemde alınan gezi yok."
+    },
+    "icerik": {
+      "baslik": "İçerik sağlığı",
+      "duzenle": "Düzenle",
+      "bos": "Yayında şehir yok.",
+      "tamam": "Rehber {bolum} bölüm · {mekan} mekan · {gezi} hazır gezi",
+      "rehberYok": "Rehber yok",
+      "bosBolum": "Rehberde {n} bölüm boş",
+      "kapakYok": "Kapak fotoğrafı yok",
+      "genisKapakYok": "Geniş kapak fotoğrafı yok",
+      "geziYok": "Hazır gezi yok"
     },
     "yukleniyor": "Yükleniyor…",
-    "hata": "Özet alınamadı. Yeniden dene.",
-    "yeniden": "Yeniden dene",
-    "csv": {
-      "metrik": "Metrik",
-      "deger": "Değer",
-      "aralik": "Aralık (gün)",
-      "kullanici7": "Yeni kullanıcı (7 gün)",
-      "seyahatHafta": "Seyahat (bu hafta)",
-      "geziTum": "Gezi alındı · tüm gezi",
-      "geziGunler": "Gezi alındı · seçili gün",
-      "geziMekan": "Gezi alındı · yalnız mekan",
-      "paylasildi": "Davet linki üretildi",
-      "acildi": "Davet linki açıldı",
-      "katilim": "Linkle katılım",
-      "googleAy": "Google API istek (bu ay)",
-      "butce": "Google aylık bütçe",
-      "hafta": "Hafta",
-      "sehir": "Şehir",
-      "gun": "Gün",
-      "bugun": "Bugün",
-      "kesfet": "Keşfet yükleme",
-      "mekanPaneli": "Mekan paneli",
-      "yorum": "Yorum isteği"
-    }
+    "hata": "Özet alınamadı.",
+    "yeniden": "Yeniden dene"
   },
   "sehir": {
     "baslik": "Şehir · {ad}",
-    "baslikRehber": "Şehir · {ad} · Rehber bölümleri",
+    "baslikRehber": "Şehir · {ad} · Rehber",
     "yeni": "+ Şehir",
     "ara": "Ara",
     "araYer": "Şehir ara",
@@ -355,7 +379,7 @@
     "onizlemeBaslik": "Önizleme · {ad}",
     "sekme": {
       "genel": "Genel",
-      "rehber": "Rehber bölümleri",
+      "rehber": "Rehber",
       "fotolar": "Fotoğraflar"
     },
     "durum": {
@@ -426,60 +450,125 @@
     }
   },
   "rehber": {
-    "bolumler": "{sehir} · BÖLÜMLER",
-    "yeniBolum": "+ Bölüm",
-    "mekanSayisi": "{n} mekan",
-    "notOnce": "Sağdaki sayı, bölümde kart olarak bağlı mekan sayısı. Bu mekanlar uygulamada ",
-    "notOneriler": "Öneriler",
-    "notSonra": " sayfasına kendiliğinden girer.",
-    "bos": "Bu şehirde henüz rehber bölümü yok. + Bölüm ile ekle.",
-    "varsayilan": {
-      "ulasim": "Nasıl gidilir, nasıl gezilir",
-      "yemek": "Ne yenir",
-      "mahalle": "Mahalleler",
-      "ipucu": "İpuçları"
+    "kaydedildi": "Kaydedildi · {saat}"
+  },
+  "rehberEditor": {
+    "sayfa": "SAYFA",
+    "kapakOzet": "Kapak ve özet",
+    "bolumler": "BÖLÜMLER",
+    "mekanSayi": "{n} mekan",
+    "gizliRozet": "GİZLİ",
+    "bolumEkle": "+ Bölüm ekle",
+    "yeniBolum": "Yeni bölüm",
+    "ipucu": "Sürükle = sıra. ··· = adlandır, çoğalt, gizle, sil. Bölüm adı serbest.",
+    "rehberMekanlari": "Rehberdeki mekanlar · {n}",
+    "rehberMekanlariAciklama": "Kartlardan kendiliğinden toplanır; uygulamada “Rehberdeki {n} mekan” sayfası.",
+    "menu": {
+      "ac": "Bölüm menüsü",
+      "adlandir": "Yeniden adlandır",
+      "cogalt": "Çoğalt",
+      "gizle": "Uygulamada gizle",
+      "goster": "Uygulamada göster",
+      "gizleNot": "taslak kalır",
+      "yukari": "Yukarı taşı",
+      "asagi": "Aşağı taşı",
+      "sil": "Bölümü sil"
     },
-    "cip": {
-      "ulasim": "Nasıl gezilir",
-      "yemek": "Ne yenir",
-      "mahalle": "Mahalleler",
-      "ipucu": "İpuçları"
-    },
-    "alan": {
-      "baslik": "BÖLÜM BAŞLIĞI",
-      "ozet": "KISA ÖZET (içindekiler satırı)"
-    },
-    "nasil": "NASIL EKLENSİN?",
-    "bicim": {
-      "satir": "Satır içi bağlantı",
-      "kart": "Mekan kartı"
-    },
-    "bicimAlt": {
-      "satir": "Seçili metin dokunulabilir olur",
-      "kart": "Paragraf altına, Listeye ekle ile"
-    },
-    "vazgec": "Vazgeç",
-    "ekle": "Ekle",
+    "kopya": "(kopya)",
+    "silindi": "“{ad}” bölümü silindi",
+    "silindiMekan": "“{ad}” bölümü silindi · içindeki {n} mekan kartıyla",
+    "geriAl": "Geri al",
+    "bolumNo": "BÖLÜM {no}",
+    "baslikYerTutucu": "Bölüm adı",
+    "icindekiler": "· İÇİNDEKİLER SATIRI",
+    "ozetYerTutucu": "Kısa özet",
+    "gizliNot": "Bu bölüm uygulamada gizli; taslak olarak kalır.",
+    "yerTutucu": "Yazmaya devam et ya da / ile blok ekle",
+    "ipucuYerTutucu": "İpucu",
+    "altyazi": "altyazı",
     "degistir": "Değiştir",
-    "kaldir": "{ad} kartını kaldır",
-    "kartAlt": "MEKAN KARTI · {kategori} · place_id ✓",
-    "kaynak": "Kaynak görünümü: ",
-    "sayac": "{kart} mekan kartı · {satir} satır içi bağlantı",
-    "okuma": "~{dk} dk okuma",
-    "kaydedildi": "Kaydedildi · {saat}",
-    "onizlemeEtiket": "ÖNİZLEME · REHBER SEKMESİ",
-    "onizleme": {
-      "baslik": "{ad} rehberi",
-      "oneriler": "Öneriler ›",
-      "listeyeEkle": "Listeye ekle",
-      "yorum": "{n} yorum",
-      "sekme": {
-        "kesfet": "Keşfet",
-        "program": "Program",
-        "rehber": "Rehber",
-        "grup": "Grup"
-      }
+    "blokEkle": "BLOK EKLE",
+    "slash": {
+      "mekan": "Mekan kartı",
+      "mekanAlt": "Ara ya da Google Maps linki yapıştır",
+      "baslik": "Ara başlık",
+      "foto": "Fotoğraf",
+      "ipucu": "İpucu kutusu",
+      "liste": "Madde listesi"
     },
-    "mekanAra": "Mekan ara ya da Google Maps linki yapıştır"
+    "slashAnahtar": {
+      "mekan": "mekan,yer,kart",
+      "baslik": "başlık,h2,ara",
+      "foto": "fotoğraf,görsel,resim",
+      "ipucu": "ipucu,not,uyarı",
+      "liste": "madde,liste"
+    },
+    "ipucuEtiket": "İPUCU",
+    "blok": {
+      "yukari": "Yukarı taşı",
+      "asagi": "Aşağı taşı",
+      "mekanDegistir": "Mekanı değiştir",
+      "sil": "Sil",
+      "tutamac": "Sürükle",
+      "ekle": "Blok ekle"
+    },
+    "secim": {
+      "etiket": "Biçim",
+      "kalinEtiket": "Kalın",
+      "italikEtiket": "İtalik",
+      "baglanti": "Bağlantı",
+      "mekanaBagla": "Mekana bağla",
+      "adres": "Bağlantı adresi (https://…)"
+    },
+    "mekan": {
+      "ara": "Mekan ara",
+      "sonuclar": "Mekan sonuçları",
+      "linkIpucu": "Google Maps linki de yapıştırabilirsin",
+      "ekleKisa": "↵ Ekle",
+      "deVar": "{no} · {baslik}’de de var",
+      "kart": "Kart olarak",
+      "metin": "Metne bağla",
+      "klavye": "↑↓ seç · ↵ ekle · Esc vazgeç",
+      "bulunamadi": "Mekan bulunamadı; başka bir arama ya da link dene."
+    },
+    "onizleme": {
+      "etiket": "UYGULAMADA",
+      "buBolum": "Bu bölüm",
+      "tumSayfa": "Tüm sayfa",
+      "gizle": "Önizlemeyi gizle",
+      "goster": "Önizlemeyi göster",
+      "baslik": "Önizleme",
+      "not": "Uygulamanın kendi bileşenleriyle çizilir; yazarken anında güncellenir."
+    },
+    "gecmis": {
+      "dugme": "Geçmiş",
+      "baslik": "GEÇMİŞ · SON 20 SÜRÜM",
+      "don": "Bu sürüme dön",
+      "bos": "Henüz sürüm yok.",
+      "satir": "{tarih} · {yazan}",
+      "neden": {
+        "kayit": "Kayıt",
+        "silme": "Silmeden önce",
+        "donus": "Dönüşten önce",
+        "yayin": "Yayın"
+      },
+      "bolum": "{n} bölüm"
+    },
+    "taslakVar": "Taslak değişiklik var",
+    "kaydediliyor": "Kaydediliyor…",
+    "kaydedildi": "Kaydedildi {saat}",
+    "kayitHata": "Kaydedilemedi",
+    "yayinHata": "Yayınlanamadı; tekrar dene.",
+    "cakisma": "Bu rehber başka yerde değişti",
+    "yenidenYukle": "Yeniden yükle",
+    "yayinlandi": "Yayınlandı",
+    "yukleniyor": "Yükleniyor…",
+    "yuklenemedi": "Rehber yüklenemedi.",
+    "kapak": {
+      "etiket": "KAPAK VE ÖZET",
+      "ozet": "Şehir özeti (rehber sayfasının başında, 2 cümle)",
+      "kapakYok": "Geniş kapak yok",
+      "fotolar": "Fotoğraflar sekmesinde değiştir"
+    }
   }
 }

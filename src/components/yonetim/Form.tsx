@@ -1,9 +1,10 @@
 import type { CSSProperties, ReactNode } from 'react';
-import { Pressable, StyleSheet, Text, TextInput, View, type TextInputProps } from 'react-native';
+import { StyleSheet, Text, TextInput, View, type TextInputProps } from 'react-native';
 
 import { yazi } from '@/theme';
 
-import { yGolge, yRenk } from './tema';
+import { AltCizgiliSekmeler, Rozet, type RozetTuru } from './Ortak';
+import { yRenk } from './tema';
 
 // Kanvas (Backoffice ekran 2): alan = 11 px 800 büyük harf etiket + 36 px kutu (10 yarıçap, 1 px #d9d9d4, 13 px 700).
 
@@ -66,40 +67,14 @@ export function TarihKutusu({ deger, onDegis, etiket }: { deger: string; onDegis
   return <input aria-label={etiket} type="datetime-local" value={deger} onChange={(e) => onDegis(e.target.value)} style={domKutu} />;
 }
 
-/** Kanvas sekme çubuğu: #f6f6f4 zemin, 4 iç boşluk; seçili sekme beyaz + gölge, 30 px, 12,5 px 800. */
-export function Sekmeler<T extends string>({ secili, sekmeler, onSec }: { secili: T; sekmeler: { anahtar: T; etiket: string }[]; onSec: (a: T) => void }) {
-  return (
-    <View accessibilityRole="tablist" style={s.sekmeler}>
-      {sekmeler.map((sk) => {
-        const aktif = sk.anahtar === secili;
-        return (
-          <Pressable
-            key={sk.anahtar}
-            accessibilityRole="tab"
-            accessibilityState={{ selected: aktif }}
-            onPress={() => onSec(sk.anahtar)}
-            style={StyleSheet.flatten([s.sekme, aktif && s.sekmeAktif])}>
-            <Text style={[s.sekmeMetin, !aktif && s.sekmeMetinPasif]}>{sk.etiket}</Text>
-          </Pressable>
-        );
-      })}
-    </View>
-  );
-}
+/** Sekmeler: #155 alt çizgili sekmeler (Ortak); editörler sekmeleri sayfa başlığına verir. */
+export const Sekmeler = AltCizgiliSekmeler;
 
-const ROZET = {
-  yayinda: { zemin: '#e6f5ec', metin: '#1f8a4c' },
-  taslak: { zemin: '#f1f1ef', metin: '#6e6e6e' },
-  planli: { zemin: '#fff1e8', metin: '#ff5a1f' },
-} as const;
+const ROZET = { yayinda: 'basari', taslak: 'notr', planli: 'bekliyor' } as const satisfies Record<string, RozetTuru>;
 
-/** Kanvas durum rozeti: 22 px, tam yuvarlak, 11 px 800. */
+/** Durum rozeti (#155: Ortak › Rozet; yayında Başarı, taslak nötr, planlı bekliyor). */
 export function DurumRozeti({ durum, etiket }: { durum: keyof typeof ROZET; etiket: string }) {
-  return (
-    <View style={[s.rozet, { backgroundColor: ROZET[durum].zemin }]}>
-      <Text style={[s.rozetMetin, { color: ROZET[durum].metin }]}>{etiket}</Text>
-    </View>
-  );
+  return <Rozet tur={ROZET[durum]} etiket={etiket} />;
 }
 
 /** Kanvas süre hapı: 26 px, #f6f6f4, 11,5 px 800. */
@@ -125,12 +100,5 @@ const s = StyleSheet.create({
     lineHeight: 19,
     color: yRenk.metin,
   },
-  hatali: { borderColor: '#ff5a1f' },
-  sekmeler: { flexDirection: 'row', gap: 2, padding: 4, borderRadius: 12, backgroundColor: yRenk.yuzey, alignSelf: 'flex-start' },
-  sekme: { height: 30, paddingHorizontal: 14, borderRadius: 9, justifyContent: 'center' },
-  sekmeAktif: { backgroundColor: yRenk.zemin, boxShadow: yGolge },
-  sekmeMetin: { fontFamily: yazi.ekstra, fontSize: 12.5, color: yRenk.metin },
-  sekmeMetinPasif: { color: yRenk.ikincil },
-  rozet: { height: 22, paddingHorizontal: 8, borderRadius: 999, justifyContent: 'center' },
-  rozetMetin: { fontFamily: yazi.ekstra, fontSize: 11 },
+  hatali: { borderColor: yRenk.hata },
 });

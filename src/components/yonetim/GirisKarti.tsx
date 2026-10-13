@@ -49,7 +49,7 @@ export function GoogleDugmesi({ onPress, yukleniyor }: { onPress: () => void; yu
 
 const s = StyleSheet.create({
   zemin: { flex: 1, minHeight: '100%', backgroundColor: yRenk.yuzey, alignItems: 'center', justifyContent: 'center', padding: 16 },
-  kart: { width: 360, maxWidth: '100%', padding: 32, borderRadius: 20, backgroundColor: yRenk.zemin, boxShadow: '0 10px 30px rgba(15,15,15,0.08)', gap: 18 },
+  kart: { width: 360, maxWidth: '100%', padding: 32, borderRadius: 20, backgroundColor: yRenk.zemin, boxShadow: '0 10px 30px rgba(14,20,48,0.08)', gap: 18 },
   logo: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   isaret: { width: 30, height: 30, borderRadius: 9, backgroundColor: yRenk.metin },
   marka: { fontFamily: yazi.ekstra, fontSize: 16, letterSpacing: -0.32, color: yRenk.metin },

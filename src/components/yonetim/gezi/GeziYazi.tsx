@@ -103,6 +103,6 @@ const s = StyleSheet.create({
     fontFamily: Platform.select({ web: 'ui-monospace, Menlo, monospace', default: 'monospace' }),
     fontSize: 12.5,
     lineHeight: 19,
-    color: '#2a2a2a',
+    color: yRenk.metin,
   },
 });

@@ -33,8 +33,8 @@ export function SehirListesi({ sehirler, seciliId, onSec, onYeni }: Props) {
   return (
     <View style={s.kap}>
       <View style={s.ust}>
-        <Hap tur="birincil" baslik={ty('sehir.yeni')} onPress={() => setMod((m) => (m === 'yeni' ? null : 'yeni'))} />
-        <Hap baslik={ty('sehir.ara')} onPress={() => setMod((m) => (m === 'ara' ? null : 'ara'))} />
+        <Hap kucuk tur="birincil" baslik={ty('sehir.yeni')} onPress={() => setMod((m) => (m === 'yeni' ? null : 'yeni'))} />
+        <Hap kucuk baslik={ty('sehir.ara')} onPress={() => setMod((m) => (m === 'ara' ? null : 'ara'))} />
       </View>
       {mod === 'ara' ? (
         <View style={s.alt}>
@@ -116,7 +116,7 @@ function SehirArama({ onSec }: { onSec: (yer: HafifYer) => Promise<void> }) {
 }
 
 const s = StyleSheet.create({
-  kap: { width: 240, flexShrink: 0, borderRightWidth: 1, borderRightColor: yRenk.ayrac, paddingVertical: 14, paddingHorizontal: 10, gap: 2 },
+  kap: { width: 240, flexShrink: 0, borderRightWidth: 1, borderRightColor: yRenk.ayrac, backgroundColor: yRenk.zemin, paddingVertical: 14, paddingHorizontal: 10, gap: 2 },
   ust: { flexDirection: 'row', gap: 6, paddingHorizontal: 2, paddingBottom: 8 },
   alt: { paddingHorizontal: 2, paddingBottom: 8 },
   liste: { gap: 2 },
@@ -129,7 +129,7 @@ const s = StyleSheet.create({
   arama: { gap: 6 },
   kutu: { flexDirection: 'row', alignItems: 'center', gap: 8, height: 36, paddingHorizontal: 12, borderRadius: 10, borderWidth: 1.5, borderStyle: 'dashed', borderColor: yRenk.cerceve },
   girdi: { flex: 1, minWidth: 0, fontFamily: yazi.kalin, fontSize: 12.5, color: yRenk.metin },
-  hata: { fontFamily: yazi.yari, fontSize: 11, color: '#ff5a1f' },
+  hata: { fontFamily: yazi.yari, fontSize: 11, color: yRenk.hata },
   sonuc: { paddingVertical: 7, paddingHorizontal: 10, borderRadius: 10, borderWidth: 1, borderColor: yRenk.ayrac },
   sonucAd: { fontFamily: yazi.kalin, fontSize: 12.5, color: yRenk.metin },
   sonucAlt: { fontFamily: yazi.yari, fontSize: 11, color: yRenk.ikincil },

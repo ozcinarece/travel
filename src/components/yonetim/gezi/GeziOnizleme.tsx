@@ -126,7 +126,7 @@ const s = StyleSheet.create({
   govdeIc: { paddingBottom: 20, gap: 12 },
   kapak: { height: 300, backgroundColor: '#2f6fed', justifyContent: 'flex-end' },
   kapakGolge: { position: 'absolute', left: 0, right: 0, top: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.3)' },
-  yuvarlak: { width: 36, height: 36, borderRadius: 18, backgroundColor: yRenk.zemin, alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 12px rgba(15,15,15,0.12)' },
+  yuvarlak: { width: 36, height: 36, borderRadius: 18, backgroundColor: yRenk.zemin, alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 12px rgba(14,20,48,0.12)' },
   solUst: { position: 'absolute', left: 20, top: 56 },
   sagUst: { position: 'absolute', right: 20, top: 56, flexDirection: 'row', gap: 8 },
   kapakMetin: { paddingHorizontal: 20, paddingBottom: 20, gap: 6 },

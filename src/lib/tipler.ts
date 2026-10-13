@@ -137,7 +137,8 @@ export type Sehir = { id: string; ad: string; slug: string; kapak_url: string | 
 
 /** #100 B: şehir rehberi bölümü (backoffice yazar; yayınlı şehir okunur). */
 export type RehberBolumu = 'ulasim' | 'yemek' | 'mahalle' | 'ipucu';
-export type SehirRehberi = { id: string; sehir_id: string; bolum: RehberBolumu; baslik: string; ozet: string | null; yazi_md: string | null; sira: number };
+/** #156: `bolum` yalnız eski 4 bölümde; editörde eklenen serbest bölümde null. */
+export type SehirRehberi = { id: string; sehir_id: string; bolum: RehberBolumu | null; baslik: string; ozet: string | null; yazi_md: string | null; sira: number };
 
 /** #97: önerilen gezi (içerik ekibi yazar; yayınlı okunur). */
 export type Gezi = {
