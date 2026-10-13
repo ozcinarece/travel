@@ -8,6 +8,11 @@ export type AcilisDurumu =
   | { durum: 'kapali_gun' }
   | { durum: 'kapali_saat'; sonrakiAcilis: string | null };
 
+/** Takvim hafta günü (0 = Pazartesi, lib/takvim) → Google hafta günü (0 = Pazar). */
+export function googleGunu(takvimGunu: number): number {
+  return (takvimGunu + 1) % 7;
+}
+
 function dk(hhmm: string) {
   const [s, d] = hhmm.split(':').map(Number);
   return s * 60 + d;

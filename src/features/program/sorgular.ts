@@ -233,3 +233,13 @@ export function matrisNoktalari(oteller: MatrisNoktasi[], mekanlar: { place_id: 
   for (const m of mekanlar) n.push({ key: m.place_id, lat: m.lat, lng: m.lng });
   return n;
 }
+
+/**
+ * #140 KK9: konumla yazılan varışlar gezi bitince silinir (migration 20261025: günlük zamanlayıcı). Zamanlayıcı yoksa ya da
+ * henüz çalışmadıysa bitmiş seyahatin Program'ı açılınca o seyahat için bir kez istenir; hata sessiz.
+ */
+export async function varislariTemizle(seyahatId: string): Promise<number> {
+  const { data, error } = await supabase.rpc('gecmis_varislari_temizle', { t: seyahatId });
+  if (error) return 0;
+  return typeof data === 'number' ? data : 0;
+}

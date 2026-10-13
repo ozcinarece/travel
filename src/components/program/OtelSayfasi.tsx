@@ -147,8 +147,7 @@ export function OtelSeridi({ onPress }: { onPress: () => void }) {
 
 const s = StyleSheet.create({
   serit: {
-    marginHorizontal: 16,
-    marginTop: 8,
+    marginBottom: 8,
     minHeight: 44,
     paddingLeft: 7,
     paddingRight: 14,

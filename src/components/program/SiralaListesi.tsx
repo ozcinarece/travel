@@ -2,29 +2,33 @@ import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { Animated, PanResponder, Pressable, ScrollView, StyleSheet, Text, View, type PanResponderInstance } from 'react-native';
 
 import { useSayfaKaydirma } from '@/components/harita/AltSayfa';
-import { Ikon, type IkonAdi } from '@/components/ui/Ikon';
+import { Ikon } from '@/components/ui/Ikon';
 import { t } from '@/i18n';
-import { gunUstuMetin, renk, yazi } from '@/theme';
+import { gunUstuMetin, kose, renk, yazi } from '@/theme';
 
-/** #53 §5: yarı açık paneldeki satır (durak). */
+/** #53 §5 → #140 (kanvas 11): listedeki durak satırı. */
 export type SiralaSatiri = {
   id: string;
   ad: string;
-  ikon: IkonAdi;
-  ikonRenk: string;
-  /** #55 §C9: adın altında "09:00 – 09:45 · 45 dk". */
-  saat: string;
+  /** Saat sütunu — varış "09:51" (yuvarlamasız); atlananda null. */
+  saat: string | null;
+  /** Adın altı: "Gezilecek · 1 sa · 10:51'e kadar" / "Atlandı". */
+  alt: string;
   /** Sıra numarası (atlananda null). */
   numara: number | null;
   tamam?: boolean;
   atlandi?: boolean;
-  /** Önceki noktadan bacak: "12 dk · 900 m" hapı + ikon (#101: `id` = çift anahtarı, dokununca seçici açılır); yoksa satır boş. */
+  /** Gezi gününde sıradaki / buradasın durak: Mandalina kare. */
+  vurgu?: boolean;
+  /** Önceki noktadan bacak: "6 dk · 450 m" hapı (araba Gece dolu); `id` = çift anahtarı (dokununca seçici); yeni çiftte "hesaplanıyor…". */
   bacak?: { metin: string; ikon: 'yurume' | 'araba'; id?: string };
+  /** #140 KK1: varıştan önceki boşluk, sebebiyle ("4 dk serbest · 12:00'de açılıyor"). */
+  bosluk?: string | null;
 };
 
-/** #55 §C8: durak satırı en az 44 px (ad 2 satıra kadar); üstündeki bacak satırı 30 px (#101: 26 px gri hap). */
-export const DURAK_EN_AZ = 44;
-export const ARA_YUKSEKLIK = 30;
+/** #55 §C8: durak satırı en az 50 px (ad 2 satıra kadar); üstündeki bacak satırı 38 px (30 px hap). */
+export const DURAK_EN_AZ = 50;
+export const ARA_YUKSEKLIK = 38;
 /** Kenara bu kadar yaklaşınca liste kendiliğinden kayar. */
 const KENAR_PAYI = 48;
 const KAYMA_HIZI = 7;
@@ -65,6 +69,8 @@ type Props = {
   /** #56: ilk satır (Başlangıç) ve son satır (Bitiş / Otele dönüş). */
   bas: ReactNode;
   son?: ReactNode;
+  /** #140: listenin en altı ("Listede, güne atanmamış · N" kutusu). */
+  alt?: ReactNode;
   yukseklik: number;
   onTasi: (from: number, to: number) => void;
   onSatirBas: (id: string) => void;
@@ -83,7 +89,7 @@ type Props = {
  * ikonu · ad [2 satır] + "09:00 – 09:45 · 45 dk" · ≡), aralarda 16 px yürüyüş satırı. Satıra uzun bas → menü. Sürükleme yalnız ≡'den: tutulan satır kalkar (turuncu kenar, gölge), bırakılacak yer
  * turuncu 3 px çizgi; kenara yaklaşınca liste kendiliğinden kayar.
  */
-export function SiralaListesi({ satirlar, bas, son, yukseklik, onTasi, onSatirBas, onUzunBas, numaraRengi = renk.metin, acikBacakId = null, onBacakBas, bacakSecici }: Props) {
+export function SiralaListesi({ satirlar, bas, son, alt, yukseklik, onTasi, onSatirBas, onUzunBas, numaraRengi = renk.ana, acikBacakId = null, onBacakBas, bacakSecici }: Props) {
   const [surukle, setSurukle] = useState<{ index: number; hedef: number } | null>(null);
   // Satır yükseklikleri içeriğe göre (ad 2 satır) — yuvalar ölçülür.
   const [yuvalar, setYuvalar] = useState<Yuva[]>([]);
@@ -216,18 +222,16 @@ export function SiralaListesi({ satirlar, bas, son, yukseklik, onTasi, onSatirBa
                 });
               }}>
               {x.bacak && !tutulan ? (
-                <View style={s.araKap}>
+                <View>
                   <View style={s.ara}>
-                    <View style={s.araCizgi} />
                     <Pressable
                       accessibilityRole="button"
                       accessibilityState={{ expanded: !!x.bacak.id && acikBacakId === x.bacak.id }}
                       disabled={!x.bacak.id || !onBacakBas}
                       onPress={() => x.bacak?.id && onBacakBas?.(x.bacak.id)}
-                      style={({ pressed }) => [s.araHap, pressed && { opacity: 0.8 }]}>
-                      <Ikon ad={x.bacak.ikon} boyut={12} renk={renk.metin} kalinlik={2.2} />
-                      <Text style={s.araMetin}>{x.bacak.metin}</Text>
-                      {x.bacak.id && onBacakBas ? <Text style={s.araOk}>{acikBacakId === x.bacak.id ? '˅' : '›'}</Text> : null}
+                      style={({ pressed }) => [s.araHap, x.bacak?.ikon === 'araba' && s.araHapAraba, pressed && { opacity: 0.8 }]}>
+                      <Ikon ad={x.bacak.ikon} boyut={14} renk={x.bacak.ikon === 'araba' ? renk.zemin : renk.ana} kalinlik={2.4} />
+                      <Text style={[s.araMetin, x.bacak.ikon === 'araba' && { color: renk.zemin }]}>{x.bacak.metin}</Text>
                     </Pressable>
                   </View>
                   {x.bacak.id && acikBacakId === x.bacak.id && bacakSecici ? <View style={s.araAcik}>{bacakSecici}</View> : null}
@@ -235,6 +239,11 @@ export function SiralaListesi({ satirlar, bas, son, yukseklik, onTasi, onSatirBa
               ) : (
                 <View style={s.ara} />
               )}
+              {x.bosluk && !tutulan ? (
+                <View style={s.boslukKap}>
+                  <Text style={s.bosluk}>{x.bosluk}</Text>
+                </View>
+              ) : null}
               <Animated.View style={[tutulan && [s.tutulan, { transform: [{ translateY: kayma }] }]]}>
                 <SiraSatiri
                   satir={x}
@@ -248,6 +257,7 @@ export function SiralaListesi({ satirlar, bas, son, yukseklik, onTasi, onSatirBa
           );
         })}
         {son ? <View style={{ marginTop: 6 }}>{son}</View> : null}
+        {alt ? <View style={{ marginTop: 10 }}>{alt}</View> : null}
         {surukle && surukle.hedef !== surukle.index ? <View pointerEvents="none" style={[s.birakmaCizgisi, { top: birakmaCizgisiY(surukle.index, surukle.hedef, yuvalar) }]} /> : null}
       </ScrollView>
     </View>
@@ -270,45 +280,57 @@ function SiraSatiri({
   return (
     <View style={s.satir}>
       <Pressable accessibilityRole="button" onPress={onBas} onLongPress={onUzunBas} delayLongPress={350} style={s.satirIc}>
-        <View style={[s.numara, { backgroundColor: numaraRengi }, satir.tamam && { backgroundColor: renk.basari }, satir.atlandi && { backgroundColor: renk.ayrac }]}>
-          {satir.tamam ? <Ikon ad="tik" boyut={14} renk={renk.zemin} kalinlik={2.6} /> : <Text style={[s.numaraMetin, { color: satir.atlandi ? renk.ikincil : gunUstuMetin(numaraRengi) }]}>{satir.numara ?? '–'}</Text>}
+        <Text style={[s.saat, satir.atlandi && { color: renk.soluk }]}>{satir.saat ?? '–'}</Text>
+        <View
+          style={[
+            s.numara,
+            { backgroundColor: numaraRengi },
+            satir.vurgu && { backgroundColor: renk.vurgu },
+            satir.tamam && { backgroundColor: renk.basari },
+            satir.atlandi && { backgroundColor: renk.ayrac },
+          ]}>
+          {satir.tamam ? (
+            <Ikon ad="tik" boyut={14} renk={renk.zemin} kalinlik={2.8} />
+          ) : (
+            <Text style={[s.numaraMetin, { color: satir.vurgu ? renk.metin : gunUstuMetin(numaraRengi) }]}>{satir.numara ?? '–'}</Text>
+          )}
         </View>
-        <Ikon ad={satir.ikon} boyut={18} renk={satir.ikonRenk} kalinlik={2.1} />
-        {/* #55 §C8–9: ad en fazla 2 satır (kesilmez), altında saat aralığı + süre. */}
+        {/* #55 §C8–9: ad en fazla 2 satır (kesilmez), altında "Kategori · süre · 10:51'e kadar". */}
         <View style={s.adKutu}>
           <Text style={[s.ad, satir.atlandi && s.cizili]} numberOfLines={2}>
             {satir.ad}
           </Text>
-          <Text style={s.saat} numberOfLines={1}>
-            {satir.saat}
+          <Text style={s.alt} numberOfLines={1}>
+            {satir.alt}
           </Text>
         </View>
       </Pressable>
       <View {...tutamac?.panHandlers} accessibilityRole="adjustable" accessibilityLabel={t('program.surukle')} style={s.tutamac} hitSlop={6}>
-        <Ikon ad="tutamac" boyut={20} renk={renk.ikincil} kalinlik={2.2} />
+        <Ikon ad="tutamac" boyut={20} renk="#b4bbd3" kalinlik={2.4} />
       </View>
     </View>
   );
 }
 
 const s = StyleSheet.create({
-  araKap: {},
-  // #101 KK3 (kanvas LegMode17 ekran 2): solda 2 px gri çizgi, gri hap "🚶 12 dk · 900 m ›" 26 px.
-  ara: { height: ARA_YUKSEKLIK, flexDirection: 'row', alignItems: 'center', gap: 10, paddingLeft: 17 },
-  araCizgi: { width: 2, height: 22, backgroundColor: '#d9d9d4', marginLeft: 13 },
-  araHap: { flexDirection: 'row', alignItems: 'center', gap: 6, height: 26, paddingHorizontal: 10, borderRadius: 999, backgroundColor: '#f6f6f4' },
-  araMetin: { fontFamily: yazi.ekstra, fontSize: 11.5, lineHeight: 14, color: renk.metin },
-  araOk: { fontFamily: yazi.kalin, fontSize: 12, color: renk.ikincil },
-  araAcik: { paddingLeft: 42, paddingRight: 4, paddingBottom: 6 },
+  // #140 (kanvas 11): bacak hapı saat sütununun sağında (56 px), 30 px; yürüme beyaz + Çizgi kenar, araba Gece dolu.
+  ara: { height: ARA_YUKSEKLIK, flexDirection: 'row', alignItems: 'center', paddingLeft: 56 },
+  araHap: { flexDirection: 'row', alignItems: 'center', gap: 4, height: 30, paddingLeft: 6, paddingRight: 10, borderRadius: 999, borderWidth: 1.5, borderColor: renk.ayrac, backgroundColor: renk.zemin },
+  araHapAraba: { backgroundColor: renk.ana, borderColor: renk.ana },
+  araMetin: { fontFamily: yazi.ekstra, fontSize: 12, color: renk.ana },
+  araAcik: { paddingLeft: 56, paddingBottom: 6 },
+  boslukKap: { paddingLeft: 56, paddingBottom: 6 },
+  bosluk: { alignSelf: 'flex-start', overflow: 'hidden', paddingHorizontal: 10, paddingVertical: 5, borderRadius: kose.rozet, backgroundColor: '#fff6e6', fontFamily: yazi.ekstra, fontSize: 12, color: '#8a5a00' },
   satir: { minHeight: DURAK_EN_AZ, flexDirection: 'row', alignItems: 'center', borderRadius: 12, backgroundColor: renk.zemin },
-  satirIc: { flex: 1, minWidth: 0, flexDirection: 'row', alignItems: 'center', gap: 10, paddingLeft: 4, paddingVertical: 4 },
-  adKutu: { flex: 1, minWidth: 0 },
-  numara: { width: 28, height: 28, borderRadius: 14, backgroundColor: renk.metin, alignItems: 'center', justifyContent: 'center' },
-  numaraMetin: { fontFamily: yazi.ekstra, fontSize: 13, color: renk.zemin },
-  ad: { fontFamily: yazi.kalin, fontSize: 14, lineHeight: 18, color: renk.metin },
-  saat: { fontFamily: yazi.normal, fontSize: 11, lineHeight: 14, color: renk.ikincil },
+  satirIc: { flex: 1, minWidth: 0, flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 6 },
+  saat: { width: 44, fontFamily: yazi.ekstra, fontSize: 13, color: renk.metin },
+  adKutu: { flex: 1, minWidth: 0, gap: 1 },
+  numara: { width: 30, height: 30, borderRadius: 9, alignItems: 'center', justifyContent: 'center' },
+  numaraMetin: { fontFamily: yazi.ekstra, fontSize: 13 },
+  ad: { fontFamily: yazi.ekstra, fontSize: 15, lineHeight: 19, color: renk.metin },
+  alt: { fontFamily: yazi.normal, fontSize: 12, lineHeight: 15, color: renk.ikincil },
   cizili: { textDecorationLine: 'line-through', color: renk.soluk },
-  tutamac: { width: 44, minHeight: DURAK_EN_AZ, alignSelf: 'stretch', alignItems: 'center', justifyContent: 'center' },
+  tutamac: { width: 40, minHeight: DURAK_EN_AZ, alignSelf: 'stretch', alignItems: 'center', justifyContent: 'center' },
   tutulan: {
     zIndex: 10,
     borderRadius: 12,

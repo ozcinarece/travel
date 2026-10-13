@@ -1,6 +1,6 @@
 import { describe, expect, it } from '@jest/globals';
 
-import { aktifMi, gunSayisi, kacinciGun, yerelTarih, yerelAn } from '../zaman';
+import { aktifMi, gunSayisi, kacinciGun, saatEkli, yerelAn, yerelTarih } from '../zaman';
 
 const roma = { start_date: '2026-10-12', end_date: '2026-10-15', tz: 'Europe/Rome' };
 
@@ -63,5 +63,25 @@ describe('yerelAn', () => {
     expect(yerelAn('2026-10-05', 10, 'Europe/Istanbul').toISOString()).toBe('2026-10-04T21:10:00.000Z');
     // Batı yarımküre: New York (UTC-4): 2026-10-05 23:50 → 06 Eki 03:50Z.
     expect(yerelAn('2026-10-05', 1430, 'America/New_York').toISOString()).toBe('2026-10-06T03:50:00.000Z');
+  });
+});
+
+describe('saatEkli (#140)', () => {
+  it('bulunma: son okunan sayıya göre -de/-da/-te/-ta', () => {
+    expect(saatEkli('11:05', 'bulunma')).toBe("11:05'te");
+    expect(saatEkli('12:00', 'bulunma')).toBe("12:00'de");
+    expect(saatEkli('09:30', 'bulunma')).toBe("09:30'da");
+    expect(saatEkli('10:40', 'bulunma')).toBe("10:40'ta");
+    expect(saatEkli('10:00', 'bulunma')).toBe("10:00'da");
+    expect(saatEkli('00:00', 'bulunma')).toBe("00:00'da");
+    expect(saatEkli('13:16', 'bulunma')).toBe("13:16'da");
+  });
+  it('yönelme: -e/-a/-ye/-ya', () => {
+    expect(saatEkli('10:51', 'yonelme')).toBe("10:51'e");
+    expect(saatEkli('11:48', 'yonelme')).toBe("11:48'e");
+    expect(saatEkli('12:00', 'yonelme')).toBe("12:00'ye");
+    expect(saatEkli('09:30', 'yonelme')).toBe("09:30'a");
+    expect(saatEkli('14:06', 'yonelme')).toBe("14:06'ya");
+    expect(saatEkli('15:20', 'yonelme')).toBe("15:20'ye");
   });
 });

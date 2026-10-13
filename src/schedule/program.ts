@@ -2,11 +2,16 @@
 // KK7 (#43): "Tamamlandı" işaretli durakta sonraki saatler completed_at + yürüyüş ile yeniden hesaplanır (ayrılış anı).
 // KK8 (#43): dokunulmadıysa planlanan bitiş + 10 dk geçince durak otomatik tamamlanmış sayılır (planlanan bitişle).
 // KK10: yürüyüş süresi önbellekte yoksa kestirim kullanılır ve satır `kestirim` olarak işaretlenir.
+// #140 KK1: yuvarlama yok — her varış = önceki bitiş + yol süresi (hapta görünen dakika). Boşluk yalnız sebebiyle: mekan
+// varıştan sonra (en çok `ACILIS_BEKLEME_DK` içinde) açılıyorsa varış açılışa kayar ve satır "N dk serbest · HH:MM'de açılıyor" der.
 import type { Konum } from '@/components/harita/tipler';
 
+import { acilisDurumu, type Periyot } from './acilis';
 import { bacakModu, dakikaSaat, kestirimYuruyusSn, saatDakika, type BacakSecimi } from './tempo';
 
 export const UZUN_KALMA_PAYI_DK = 10;
+/** #140 KK1: varıştan sonra en çok bu kadar içinde açılan mekan beklenir; daha uzunsa bekleme yazılmaz (plan kaymaz). */
+export const ACILIS_BEKLEME_DK = 60;
 
 export type ProgramDuragi = {
   id: string;
@@ -27,7 +32,7 @@ export type Yuruyus = { sn: number; m: number; kestirim: boolean; mod: 'yuruyus'
  */
 export type YuruyusKaynagi = (fromKey: string, toKey: string) => { sn: number; m: number; taksi?: { sn: number; m: number } | null; /** #101: elle seçim (yürüme / araba); yoksa otomatik. */ secim?: BacakSecimi | null } | null;
 
-/** gecildi = tamamlandı (elle ya da otomatik) · buradasin = sıradaki durak, kullanıcı 60 m içinde (konum) · siradaki · bekliyor · atlandi. */
+/** gecildi = tamamlandı (elle ya da otomatik) · buradasin = sıradaki durak, kullanıcı 100 m içinde (konum, #140) · siradaki · bekliyor · atlandi. */
 export type DurakDurumu = 'gecildi' | 'buradasin' | 'siradaki' | 'bekliyor' | 'atlandi';
 
 export type ProgramSatiri = {
@@ -40,7 +45,11 @@ export type ProgramSatiri = {
   durum: DurakDurumu;
   /** #43 KK8: planlanan bitiş + 10 dk geçtiği için (henüz yazılmamış olsa da) otomatik tamamlanmış sayıldı. */
   otomatik: boolean;
+  /** #140 KK1: varıştan önceki boşluk ve sebebi (mekan sonra açılıyor); yoksa null. */
+  bosluk: Bosluk | null;
 };
+
+export type Bosluk = { dk: number; sebep: 'acilis'; saat: string };
 
 export type Program = {
   satirlar: ProgramSatiri[];
@@ -73,8 +82,12 @@ export function programHesapla(secenek: {
   yuruyus: YuruyusKaynagi;
   /** Bugünün programıysa seyahat dilimindeki şu an (dakika); değilse null. */
   simdiDk: number | null;
-  /** Konumla: kullanıcının 60 m içinde olduğu durak (#43 KK4); yoksa null. */
+  /** Konumla: kullanıcının 100 m içinde olduğu durak (#43 KK4, #140 KK9); yoksa null. */
   buradaId?: string | null;
+  /** #140 KK1: mekanın haftalık açılış saatleri (anahtar = place_id); bilinmiyorsa null. Günün hafta günüyle birlikte verilir. */
+  acilis?: (key: string) => Periyot[] | null | undefined;
+  /** Google hafta günü (0 = Pazar, `googleGunu`); tarihsiz günde null (bekleme hesaplanmaz). */
+  haftaGunu?: number | null;
 }): Program {
   const { duraklar, otel, simdiDk } = secenek;
   const bitisOtel = secenek.bitisOtel === undefined ? otel : secenek.bitisOtel;
@@ -119,7 +132,7 @@ export function programHesapla(secenek: {
   let siradakiVerildi = false;
   for (const d of duraklar) {
     if (d.skipped) {
-      satirlar.push({ durak: d, varisDk: saat, ayrilisDk: saat, yuruyus: null, durum: 'atlandi', otomatik: false });
+      satirlar.push({ durak: d, varisDk: saat, ayrilisDk: saat, yuruyus: null, durum: 'atlandi', otomatik: false, bosluk: null });
       continue;
     }
     toplam++;
@@ -128,7 +141,10 @@ export function programHesapla(secenek: {
       y = bacak(oncekiKey, oncekiKonum, d.key, d.konum);
       topla(y);
     }
-    const varisDk = saat + (y ? Math.round(y.sn / 60) : 0);
+    // KK1: hapta görünen dakika eklenir (09:45 + 6 dk → 09:51); ara tampon yok.
+    let varisDk = saat + (y ? yuruyusDk(y) : 0);
+    const bosluk = acilisBoslugu(secenek.acilis?.(d.key), secenek.haftaGunu ?? null, varisDk);
+    if (bosluk) varisDk += bosluk.dk;
     const planAyrilis = varisDk + d.dakika;
     let ayrilisDk = planAyrilis;
     let durum: DurakDurumu = 'bekliyor';
@@ -147,7 +163,7 @@ export function programHesapla(secenek: {
       siradakiVerildi = true;
     }
     if (durum === 'gecildi') tamamlanan++;
-    satirlar.push({ durak: d, varisDk, ayrilisDk, yuruyus: y, durum, otomatik });
+    satirlar.push({ durak: d, varisDk, ayrilisDk, yuruyus: y, durum, otomatik, bosluk });
     saat = ayrilisDk;
     oncekiKey = d.key;
     oncekiKonum = d.konum;
@@ -160,8 +176,20 @@ export function programHesapla(secenek: {
     oteleDonus = bacak(oncekiKey, oncekiKonum, bitisKey, bitisOtel);
     topla(oteleDonus);
   }
-  const bitisDk = saat + (oteleDonus ? Math.round(oteleDonus.sn / 60) : 0);
+  const bitisDk = saat + (oteleDonus ? yuruyusDk(oteleDonus) : 0);
   return { satirlar, baslangicDk, bitisDk, oteleDonus, yuruyusSn, yuruyusM, taksiSn, taksiM, kestirimVar, tamamlanan, toplam };
+}
+
+/**
+ * #140 KK1: varış anında mekan kapalıysa ve aynı gün `ACILIS_BEKLEME_DK` içinde açılıyorsa boşluk (sebebi: açılış).
+ * Açılış bilinmiyor, mekan açık, bugün kapalı ya da açılış çok uzaksa null (kapanış uyarısı ayrı sürüm).
+ */
+export function acilisBoslugu(periyotlar: Periyot[] | null | undefined, haftaGunu: number | null, varisDk: number): Bosluk | null {
+  if (haftaGunu === null || !periyotlar) return null;
+  const a = acilisDurumu(periyotlar, haftaGunu, varisDk);
+  if (a.durum !== 'kapali_saat' || !a.sonrakiAcilis) return null;
+  const dk = saatDakika(a.sonrakiAcilis) - varisDk;
+  return dk > 0 && dk <= ACILIS_BEKLEME_DK ? { dk, sebep: 'acilis', saat: a.sonrakiAcilis } : null;
 }
 
 /** "09:00 – 10:30" gibi. */

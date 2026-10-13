@@ -53,3 +53,20 @@ export function yerelAn(tarih: string, dk: number, tz: string): Date {
   else if (gorunenTarih < tarih) fark -= 1440;
   return new Date(tahmin.getTime() - fark * 60_000);
 }
+
+// #140: saatin Türkçe eki — "11:05'te geldin", "12:00'de açılıyor", "10:51'e kadar". Son okunan sayıya göre (dakika 0 değilse
+// dakika, değilse saat): birler basamağı varsa onun, yoksa onlar basamağının sesi; 0 → "sıfır".
+const BULUNMA_BIR = ['da', 'de', 'de', 'te', 'te', 'te', 'da', 'de', 'de', 'da'];
+const BULUNMA_ON = ['da', 'da', 'de', 'da', 'ta', 'de'];
+const YONELME_BIR = ['a', 'e', 'ye', 'e', 'e', 'e', 'ya', 'ye', 'e', 'a'];
+const YONELME_ON = ['a', 'a', 'ye', 'a', 'a', 'ye'];
+
+/** "HH:MM" + kesme + ek: `bulunma` (-de/-da/-te/-ta) ya da `yonelme` (-e/-a/-ye/-ya). */
+export function saatEkli(hhmm: string, tur: 'bulunma' | 'yonelme'): string {
+  const [s, d] = hhmm.split(':').map(Number);
+  const n = d ? d : s % 24;
+  const bir = n % 10;
+  const on = Math.floor(n / 10) % 10;
+  const ek = tur === 'bulunma' ? (bir || !on ? BULUNMA_BIR[bir] : BULUNMA_ON[on]) : bir || !on ? YONELME_BIR[bir] : YONELME_ON[on];
+  return `${hhmm}'${ek}`;
+}

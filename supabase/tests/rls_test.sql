@@ -141,8 +141,9 @@ select pg_temp.hata_bekle(
     from public.days d join public.places p on p.trip_id = d.trip_id
     where d.index = 2 and p.place_id = 'ChIJ-kolezyum'$$,
   '23505');
+-- #140: süre 15'in katı olmak zorunda değil; 15–480 dışı reddedilir.
 select pg_temp.hata_bekle(
-  $$update public.stops set minutes = 50$$,
+  $$update public.stops set minutes = 10$$,
   '23514');
 update public.stops set arrived_at = now(), arrived_by = auth.uid();
 -- #43: Tamamlandı (üye yazar) ve otomatik tamamlanma bayrağı.
@@ -923,5 +924,51 @@ end $$;
 select pg_temp.as_user(:P4, true);
 select pg_temp.hata_bekle($$select public.profil_hazirla()$$, '42501');
 reset role;
+
+
+-- #140 Program: kalış süresi 15'in katı olmak zorunda değil; biten seyahatin varışları ve "vardı" kayıtları temizlenir
+-- (yalnız üye; gelecek seyahat dokunulmaz). Kendi seyahatleriyle.
+\set VT '''aaaaaaaa-2222-0000-0000-000000000031'''
+\set YB '''aaaaaaaa-2222-0000-0000-000000000032'''
+insert into auth.users (id, is_anonymous) values (:VT, false), (:YB, false);
+set role authenticated;
+select pg_temp.as_user(:VT);
+do $$
+declare bitti uuid; gelecek uuid; g uuid; p uuid;
+begin
+  insert into public.trips (owner_id, city_place_id, city_label, lat, lng, tz, start_date, end_date, name)
+  values (auth.uid(), 'ChIJ-varis-1', 'Bursa', 40.18, 29.06, 'Europe/Istanbul', current_date - 10, current_date - 8, 'Biten') returning id into bitti;
+  insert into public.trips (owner_id, city_place_id, city_label, lat, lng, tz, start_date, end_date, name)
+  values (auth.uid(), 'ChIJ-varis-2', 'Bursa', 40.18, 29.06, 'Europe/Istanbul', current_date + 5, current_date + 7, 'Gelecek') returning id into gelecek;
+  select id into g from public.days where trip_id = bitti and index = 1;
+  insert into public.places (trip_id, place_id, lat, lng, added_by) values (bitti, 'ChIJ-varis-yer1', 40.18, 29.06, auth.uid()) returning id into p;
+  insert into public.stops (trip_id, day_id, place_ref, order_key, minutes, arrived_at, arrived_by) values (bitti, g, p, 'a0', 85, now() - interval '9 days', auth.uid());
+  select id into g from public.days where trip_id = gelecek and index = 1;
+  insert into public.places (trip_id, place_id, lat, lng, added_by) values (gelecek, 'ChIJ-varis-yer2', 40.18, 29.06, auth.uid()) returning id into p;
+  insert into public.stops (trip_id, day_id, place_ref, order_key, minutes, arrived_at, arrived_by) values (gelecek, g, p, 'a0', 45, now(), auth.uid());
+  perform set_config('test.varis_bitti', bitti::text, false);
+  perform set_config('test.varis_gelecek', gelecek::text, false);
+  assert (select minutes from public.stops where trip_id = bitti) = 85, 'kalış 85 dk yazılır (15 katı değil)';
+end $$;
+select pg_temp.hata_bekle($$update public.stops set minutes = 10 where trip_id = current_setting('test.varis_bitti')::uuid$$, '23514');
+select pg_temp.as_user(:YB);
+select pg_temp.hata_bekle($$select public.gecmis_varislari_temizle(current_setting('test.varis_bitti')::uuid)$$, '42501');
+select pg_temp.as_user(:VT);
+do $$
+begin
+  assert public.gecmis_varislari_temizle(current_setting('test.varis_bitti')::uuid) = 1, 'biten seyahatte bir varış silinir';
+  assert (select arrived_at from public.stops where trip_id = current_setting('test.varis_bitti')::uuid) is null, 'varış anı silindi';
+  assert (select arrived_by from public.stops where trip_id = current_setting('test.varis_bitti')::uuid) is null, 'varan silindi';
+  assert not exists (select 1 from public.changes where trip_id = current_setting('test.varis_bitti')::uuid and field in ('arrived_at', 'arrived_by')), '"vardı" kayıtları silindi';
+  assert public.gecmis_varislari_temizle(current_setting('test.varis_gelecek')::uuid) = 0, 'gelecek seyahat dokunulmaz';
+  assert (select arrived_at from public.stops where trip_id = current_setting('test.varis_gelecek')::uuid) is not null, 'gelecek varış durur';
+end $$;
+-- Parametresiz çağrı yalnız zamanlayıcıya (oturumsuz): oturumlu kullanıcı tüm seyahatleri taratamaz.
+select pg_temp.hata_bekle($$select public.gecmis_varislari_temizle()$$, '42501');
+-- trips.tz yalnız geçerli IANA adı; geçersiz değer yazılamaz.
+select pg_temp.hata_bekle($$update public.trips set tz = 'Mars/Olympus' where id = current_setting('test.varis_gelecek')::uuid$$, '22023');
+reset role;
+select pg_temp.as_user(null);
+do $$ begin assert public.gecmis_varislari_temizle() >= 0, 'oturumsuz (cron) çağrı çalışır'; end $$;
 
 \echo 'rls_test: TÜM TESTLER GEÇTİ'

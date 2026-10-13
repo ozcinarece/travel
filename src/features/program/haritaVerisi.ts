@@ -3,7 +3,6 @@ import { mesafeM } from '@/components/harita/geo';
 import type { HaritaCizgisi, HaritaPini, Konum } from '@/components/harita/tipler';
 import type { GunUcNoktalari } from '@/features/konaklama/plan';
 import type { HafifYer } from '@/features/yerler/api';
-import { kategoriPini } from '@/lib/pinIkonu';
 import { polylineCoz } from '@/lib/polyline';
 import type { Durak, Gun, Mekan } from '@/lib/tipler';
 import { bacakModu, type BacakKaynagi, type TempoSonucu } from '@/schedule/tempo';
@@ -13,8 +12,9 @@ import { bacakListesi, type MatrisNoktasi, type RotaHaritasi } from './sorgular'
 
 /** #42 KK5 / #65 (docs/05 §2): seçili güne ait olmayan pinler ve atanmamış öneri pinleri bu opaklıkta (%45). */
 export const SOLUK_PIN = 0.45;
-/** #42 KK7: geçilen rota parçası. */
-export const SOLUK_BACAK = 0.35;
+/** #42 KK7: geçilen rota parçası. #140 KK5 (kanvas 12): gri (`GECILEN_RENK`), hapsız. */
+export const SOLUK_BACAK = 0.9;
+export const GECILEN_RENK = '#b4bbd3';
 
 /**
  * #61 §5: Google yolu en yakın yola "oturtur" — pin yoldan uzaktaysa polyline pine değmez, dolambaçlıysa (yakın iki
@@ -75,16 +75,14 @@ export function programPinleri(secenek: {
       puan: hafif?.puan ?? null,
       yorumSayisi: hafif?.puan_sayisi ?? null,
       secili,
-      // KK5: seçili günün pinleri tam renk; diğer günler ve atanmamışlar soluk (seçili pin hariç).
+      // KK5: seçili günün pinleri tam renk; diğer günler soluk (seçili pin hariç).
       opaklik: seciliGunde || secili ? 1 : SOLUK_PIN,
     };
-    if (idx) {
-      // #61 §5: numara yalnız seçili günün pinlerinde (diğer günler numarasız küçük nokta; listeyle karışmasın).
-      const sira = seciliGunde ? gunSiralari.get(m.id) : undefined;
-      pinler.push({ ...ortak, tur: 'durak', renk: gunRengi(idx), etiket: sira ? String(sira) : '', tamam: seciliGunde && tamamlananMekanIds.has(m.id) });
-    } else {
-      pinler.push({ ...ortak, tur: 'bos', renk: renk.metin, ...kategoriPini(m.primary_type) });
-    }
+    // #140 KK4: güne atanmamış mekanlar Program haritasında yok (Listem'de).
+    if (!idx) continue;
+    // #61 §5: numara yalnız seçili günün pinlerinde (diğer günler numarasız küçük, yarı saydam nokta; rota yok).
+    const sira = seciliGunde ? gunSiralari.get(m.id) : undefined;
+    pinler.push({ ...ortak, tur: 'durak', renk: gunRengi(idx), etiket: sira ? String(sira) : '', tamam: seciliGunde && tamamlananMekanIds.has(m.id) });
   }
   if (konum) pinler.push({ id: 'konum', tur: 'konum', konum, renk: '#4285f4' });
   return pinler;
@@ -109,7 +107,7 @@ export function otelPinleri(gunler: Gun[], gunUclari: Map<string, GunUcNoktalari
     id: `otel:${key}`,
     tur: 'otel' as const,
     konum: o.konum,
-    renk: renk.metin,
+    renk: renk.ana,
     opaklik: o.secili ? 1 : SOLUK_PIN,
   }));
 }
@@ -149,7 +147,8 @@ export function programCizgileri(secenek: {
     // #51: kimlik bacağın uçlarından (from>to) ve kaynağından türer — sıra değişince eski çizgi/etiket yeniden
     // kullanılmaz (Android Polyline/Marker eski koordinatta kalıyordu); aynı çift iki kez geçerse sıra no ayırır.
     return bacakListesi(seciliNoktalar).map((b, i): HaritaCizgisi => {
-      const opaklik = i < gecilenBacak ? SOLUK_BACAK : 0.9;
+      const gecildi = i < gecilenBacak;
+      const opaklik = 0.9;
       const cift = `${b.from.key}>${b.to.key}`;
       const id = kimlik(b.from.key, b.to.key);
       const r = rotalar[cift];
@@ -172,12 +171,12 @@ export function programCizgileri(secenek: {
         return {
           id,
           noktalar: yol ? rotaNoktalari(yol, a, z) : [a, z],
-          renk: rengi,
+          renk: gecildi ? GECILEN_RENK : rengi,
           opaklik,
           arac: taksi,
           kesik: !yol,
           ince: !yol && !taksi,
-          etiket: i < gecilenBacak ? undefined : `${m.kestirim ? '~' : ''}${dk} dk`,
+          etiket: gecildi ? undefined : `${m.kestirim ? '~' : ''}${dk} dk`,
           etiketIkon: taksi ? 'araba' : 'yuru',
           etiketRenk: rengi,
         };
@@ -186,13 +185,13 @@ export function programCizgileri(secenek: {
         id,
         noktalar: [a, z],
         // docs/05 §3: rota gelene kadar GÜN renginde (rota tonu değil), 3 dp, kesikli.
-        renk: gunRengi(g.index),
+        renk: gecildi ? GECILEN_RENK : gunRengi(g.index),
         opaklik,
         // Gerçek yol gelene kadar kuş uçuşu: ince kesikli (docs/05 §3).
         kesik: true,
         ince: true,
         arac: m.mod === 'taksi',
-        etiket: i < gecilenBacak ? undefined : `~${Math.max(1, Math.round(m.sn / 60))} dk`,
+        etiket: gecildi ? undefined : `~${Math.max(1, Math.round(m.sn / 60))} dk`,
         etiketIkon: m.mod === 'taksi' ? 'araba' : 'yuru',
         // Çizgi gün renginde (kuş uçuşu); hap glifi rota tonunda kalır (PNG yalnız rota tonlarında var).
         etiketRenk: rengi,

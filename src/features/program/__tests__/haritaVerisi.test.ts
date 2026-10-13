@@ -8,7 +8,7 @@ import type { GunUcNoktalari, Konaklama } from '@/features/konaklama/plan';
 import { bolgeHesapla } from '@/components/harita/geo';
 import { cizgiAnahtari, yonOklari } from '@/components/harita/rota';
 
-import { otelPinleri, programCizgileri, rotaNoktalari } from '../haritaVerisi';
+import { GECILEN_RENK, SOLUK_PIN, otelPinleri, programCizgileri, programPinleri, rotaNoktalari } from '../haritaVerisi';
 import type { MatrisNoktasi, RotaHaritasi } from '../sorgular';
 
 // sorgular.ts → supabase istemcisi (AsyncStorage); saf fonksiyon testinde gerekmez (jest.mock yukarı taşınır).
@@ -71,7 +71,7 @@ describe('programCizgileri (#51)', () => {
     expect(c[0].etiket).toMatch(/^~\d+ dk$/);
     expect(c[0].etiketIkon).toBe('yuru');
     const gecilmis = programCizgileri({ gunler: [gun], tempolar, seciliGunId: 'g1', seciliNoktalar: [H, A, B, C, H], rotalar, bacak, gecilenBacak: 2 });
-    expect(gecilmis.slice(0, 2).every((x) => x.etiket === undefined)).toBe(true);
+    expect(gecilmis.slice(0, 2).every((x) => x.etiket === undefined && x.renk === GECILEN_RENK)).toBe(true);
     expect(gecilmis.slice(2).every((x) => !!x.etiket)).toBe(true);
     // #61 §5: örnek polyline pinlerden çok uzakta (Kaliforniya) → sapma kontrolü düz çizgiye düşürür; yol kimliği kalır.
     expect(d[1].noktalar).toEqual([{ lat: A.lat, lng: A.lng }, { lat: B.lat, lng: B.lng }]);
@@ -203,3 +203,30 @@ function kodla(noktalar: { lat: number; lng: number }[]): string {
   }
   return s;
 }
+
+describe('#140 KK4 programPinleri', () => {
+  it('güne atanmamış mekan pin üretmez; diğer günün durağı numarasız ve soluk', () => {
+    const mekanlar = [
+      { id: 'm1', place_id: 'p1', lat: 41.9, lng: 12.5, primary_type: null },
+      { id: 'm2', place_id: 'p2', lat: 41.91, lng: 12.5, primary_type: null },
+      { id: 'm3', place_id: 'p3', lat: 41.92, lng: 12.5, primary_type: 'museum' },
+    ] as never;
+    const duraklar = [
+      { id: 'd1', day_id: 'g1', place_ref: 'm1' },
+      { id: 'd2', day_id: 'g2', place_ref: 'm2' },
+    ] as never;
+    const gunler2 = [
+      { id: 'g1', index: 1 },
+      { id: 'g2', index: 2 },
+    ] as never;
+    const tp = new Map([
+      ['g1', { sira: ['m1'] }],
+      ['g2', { sira: ['m2'] }],
+    ]) as never;
+    const p = programPinleri({ gunUclari: new Map(), mekanlar, duraklar, gunler: gunler2, tempolar: tp, adlar: undefined, seciliGunId: 'g1', seciliMekanId: null, tamamlananMekanIds: new Set(), konum: null });
+    expect(p.map((x) => x.id)).toEqual(['m:m1', 'm:m2']);
+    expect(p[0].etiket).toBe('1');
+    expect(p[1].etiket).toBe('');
+    expect(p[1].opaklik).toBe(SOLUK_PIN);
+  });
+});

@@ -1,8 +1,8 @@
 import { describe, expect, it } from '@jest/globals';
 
 import { acilisDurumu, kapaliGunler } from '../acilis';
-import { kaydirSuresi, miniCubuk } from '../kaydir';
-import { enUcuzEklemeIndeksi, programHesapla, type ProgramDuragi } from '../program';
+import { gecikme, kaydirSuresi, miniCubuk } from '../kaydir';
+import { acilisBoslugu, enUcuzEklemeIndeksi, programHesapla, type ProgramDuragi } from '../program';
 
 const otel = { lat: 41.9, lng: 12.5 };
 const d = (id: string, dakika: number, ek: Partial<ProgramDuragi> = {}): ProgramDuragi => ({
@@ -112,7 +112,7 @@ describe('programHesapla', () => {
     expect(sonra.satirlar[1].varisDk).toBe(590);
   });
 
-  it('#43 KK4: konum sıradaki durağın 60 m içindeyse "buradasin"', () => {
+  it('#43 KK4: konum sıradaki durağın 100 m içindeyse "buradasin"', () => {
     const p = programHesapla({ baslangic: '09:00', duraklar: [d('d1', 30), d('d2', 30)], otel, yuruyus: sabit, simdiDk: 560, buradaId: 'd1' });
     expect(p.satirlar[0].durum).toBe('buradasin');
     expect(p.satirlar[1].durum).toBe('bekliyor');
@@ -143,6 +143,72 @@ describe('programHesapla', () => {
     expect(p.satirlar[0].yuruyus).toBeNull();
     expect(p.satirlar[0].varisDk).toBe(540);
     expect(p.oteleDonus).toBeNull();
+  });
+});
+
+describe('#140 KK1 yuvarlamasız saatler ve sebepli boşluk', () => {
+  // Pazartesi (Google günü 1) 12:00'de açılan mekan; diğerleri her zaman açık.
+  const ogleden = [{ gun: 1, ac: '12:00', kapaGun: 1, kapa: '22:00' }];
+  const dakikalik = (sn: number) => () => ({ sn, m: 450 });
+
+  it('her varış = önceki bitiş + hapta görünen yol dakikası (09:45 + 6 dk → 09:51)', () => {
+    const p = programHesapla({ baslangic: '09:45', duraklar: [d('d1', 60), d('d2', 45)], otel, yuruyus: dakikalik(6 * 60 + 10), simdiDk: null });
+    expect(p.satirlar[0].varisDk).toBe(9 * 60 + 51);
+    expect(p.satirlar[0].ayrilisDk).toBe(10 * 60 + 51);
+    expect(p.satirlar[1].varisDk).toBe(10 * 60 + 57);
+    expect(p.satirlar.every((x) => x.bosluk === null)).toBe(true);
+  });
+
+  it('30 sn altındaki bacak da hapta görünen 1 dk kadar ekler (hap ile saat aynı)', () => {
+    const p = programHesapla({ baslangic: '09:00', duraklar: [d('d1', 30)], otel, yuruyus: dakikalik(20), simdiDk: null });
+    expect(p.satirlar[0].varisDk).toBe(541);
+  });
+
+  it('mekan varıştan sonra açılıyorsa varış açılışa kayar, boşluk sebebiyle yazılır', () => {
+    const p = programHesapla({
+      baslangic: '10:00',
+      duraklar: [d('d1', 105), d('d2', 60)],
+      otel: null,
+      yuruyus: dakikalik(11 * 60),
+      simdiDk: null,
+      acilis: (k) => (k === 'd2' ? ogleden : []),
+      haftaGunu: 1,
+    });
+    // d1 10:00–11:45, yol 11 dk → 11:56; d2 12:00'de açılıyor → 4 dk serbest.
+    expect(p.satirlar[1].bosluk).toEqual({ dk: 4, sebep: 'acilis', saat: '12:00' });
+    expect(p.satirlar[1].varisDk).toBe(12 * 60);
+    expect(p.bitisDk).toBe(13 * 60);
+  });
+
+  it('açılış bilinmiyor, tarihsiz gün ya da açılış 60 dk sonrasından uzaksa boşluk yok', () => {
+    expect(acilisBoslugu(null, 1, 11 * 60)).toBeNull();
+    expect(acilisBoslugu(ogleden, null, 11 * 60)).toBeNull();
+    expect(acilisBoslugu(ogleden, 1, 10 * 60)).toBeNull();
+    expect(acilisBoslugu(ogleden, 1, 11 * 60)).toEqual({ dk: 60, sebep: 'acilis', saat: '12:00' });
+    expect(acilisBoslugu(ogleden, 1, 12 * 60 + 5)).toBeNull();
+  });
+});
+
+describe('#140 KK10 gecikme (Gerideyiz)', () => {
+  // 09:00 otel → d1 09:10–10:40 → d2 10:50–11:50
+  const prog = (simdiDk: number, ek: { buradaId?: string; tamam?: number } = {}) =>
+    programHesapla({ baslangic: '09:00', duraklar: [d('d1', 90, { tamamlandiDk: ek.tamam ?? null }), d('d2', 60)], otel, yuruyus: sabit, simdiDk, buradaId: ek.buradaId ?? null });
+
+  it('buradaysan: gerçek varış canlı plandan sonraysa gecikme; kaydırma önceki ayrılışı geri çeker', () => {
+    const g = gecikme(prog(665, { buradaId: 'd2', tamam: 640 }), { simdiDk: 665, buradaId: 'd2', varisDk: 665, kalanDk: null });
+    expect(g).toEqual({ dk: 15, hedefId: 'd2', oncekiId: 'd1', yeniAyrilisDk: 655 });
+  });
+
+  it('yoldaysan: şu an + kalan yol; vaktinde ya da erkense null', () => {
+    expect(gecikme(prog(650, { tamam: 640 }), { simdiDk: 650, buradaId: null, varisDk: null, kalanDk: 12 })?.dk).toBe(12);
+    expect(gecikme(prog(642, { tamam: 640 }), { simdiDk: 642, buradaId: null, varisDk: null, kalanDk: 5 })).toBeNull();
+  });
+
+  it('hâlâ önceki duraktaysan (uzun kalma): şimdi çıkıyorsun, ilk durakta önceki yok (başlangıç kayar)', () => {
+    const uzun = gecikme(prog(660, { buradaId: 'd1' }), { simdiDk: 660, buradaId: 'd1', varisDk: null, kalanDk: null });
+    expect(uzun).toEqual({ dk: 20, hedefId: 'd2', oncekiId: 'd1', yeniAyrilisDk: 660 });
+    const ilk = gecikme(prog(570), { simdiDk: 570, buradaId: null, varisDk: null, kalanDk: 10 });
+    expect(ilk).toEqual({ dk: 30, hedefId: 'd1', oncekiId: null, yeniAyrilisDk: 570 });
   });
 });
 
@@ -254,8 +320,8 @@ describe('miniCubuk', () => {
     expect(m).toEqual({ tur: 'yuruyus', hedefId: 'd2', kalanDk: 10, gecikmeDk: 31 });
   });
 
-  it('kaydirSuresi 15 dk adımına yukarı yuvarlar', () => {
-    expect(kaydirSuresi(550, 635)).toBe(90);
+  it('#140 KK1: kaydirSuresi yuvarlamaz (tam dakika, en az 15)', () => {
+    expect(kaydirSuresi(550, 635)).toBe(85);
     expect(kaydirSuresi(550, 556)).toBe(15);
   });
 });

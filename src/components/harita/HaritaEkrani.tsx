@@ -172,7 +172,7 @@ export function HaritaEkrani({ baslik, geri, sagUst, arama, aramaSag, ustEk, alt
   );
 }
 
-/** Sol üst beyaz geri hapı ("‹ İstanbul"); #39 ile Çizelge de kullanır. */
+/** Sol üst beyaz geri hapı ("‹ Eskişehir Gezisi"); #140 (kanvas 10): 40 px, Gece ok, Archivo 15. */
 export function GeriHapi({ baslik, onPress }: { baslik: string; onPress: () => void }) {
   return (
     <Pressable
@@ -181,7 +181,7 @@ export function GeriHapi({ baslik, onPress }: { baslik: string; onPress: () => v
       onPress={onPress}
       hitSlop={8}
       style={({ pressed }) => [s.geriHap, s.golge, pressed && { opacity: 0.8 }]}>
-      <Text style={s.geriIsaret}>‹</Text>
+      <Ikon ad="geri" boyut={20} renk={renk.ana} kalinlik={2.6} />
       <Text style={s.geriMetin} numberOfLines={1}>
         {baslik}
       </Text>
@@ -258,16 +258,15 @@ const s = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
-    height: 36,
-    minHeight: 36,
+    height: 40,
+    minHeight: 40,
     paddingLeft: 8,
-    paddingRight: 12,
+    paddingRight: 14,
     borderRadius: 999,
     backgroundColor: renk.zemin,
-    maxWidth: '70%',
+    maxWidth: '62%',
   },
-  geriIsaret: { fontFamily: yazi.kalin, fontSize: 22, lineHeight: 24, color: renk.metin, marginTop: -2 },
-  geriMetin: { fontFamily: yazi.kalin, fontSize: 13, color: renk.metin, flexShrink: 1 },
+  geriMetin: { fontFamily: yazi.baslik, fontSize: 15, letterSpacing: -0.2, color: renk.metin, flexShrink: 1 },
   bilgiHap: { height: 36, paddingHorizontal: 12, borderRadius: 999, backgroundColor: renk.zemin, justifyContent: 'center' },
   bilgiMetin: { fontFamily: yazi.kalin, fontSize: 12, color: renk.ikincil },
   aramaSatir: { flexDirection: 'row', alignItems: 'center', gap: 8 },
