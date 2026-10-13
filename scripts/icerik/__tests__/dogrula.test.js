@@ -1,6 +1,5 @@
 // İçerik hattı doğrulayıcısı (docs/07): HATA yüklemeyi durdurur, UYARI rapora girer.
 import {
-  acikMi,
   detayIdleri,
   dolarEtiketi,
   gunleriDenetle,
@@ -8,6 +7,7 @@ import {
   markdownHatalari,
   mekanIzleri,
   planDenetle,
+  rehberDenetle,
   slugUret,
   yuklemeVerisi,
   yurumeDk,
@@ -55,11 +55,11 @@ function ornekPlan() {
       {
         baslik: 'Odunpazarı',
         duraklar: [
-          { place_id: ID.kursunlu, ad: 'Kurşunlu Külliyesi', sure_dk: 30, sure_gerekcesi: 'avlu küçük' },
-          { place_id: ID.modern, ad: 'Odunpazarı Modern Müze', sure_dk: 90 },
-          { place_id: ID.cam, ad: 'Çağdaş Cam Sanatları Müzesi', sure_dk: 45, sure_gerekcesi: 'tek kat' },
-          { place_id: ID.ogle, ad: 'Öğle yemeği', sure_dk: 75 },
-          { place_id: ID.kafe, ad: 'Kafe', sure_dk: 30 },
+          { place_id: ID.kursunlu, ad: 'Kurşunlu Külliyesi', sure_dk: 30, sure_gerekcesi: 'avlu küçük', kapali_gunler: [], rehber: 'kursunlu' },
+          { place_id: ID.modern, ad: 'Odunpazarı Modern Müze', sure_dk: 90, kapali_gunler: ['pazartesi'], rehber: 'omm' },
+          { place_id: ID.cam, ad: 'Çağdaş Cam Sanatları Müzesi', sure_dk: 45, sure_gerekcesi: 'tek kat', kapali_gunler: ['Pazartesi'], rehber: 'cam' },
+          { place_id: ID.ogle, ad: 'Öğle yemeği', sure_dk: 75, kapali_gunler: [], rehber: 'ogle' },
+          { place_id: ID.kafe, ad: 'Kafe', sure_dk: 30, kapali_gunler: [], rehber: 'kafe' },
         ],
       },
     ],
@@ -69,13 +69,16 @@ function ornekPlan() {
 }
 
 // Odunpazarı çevresi: duraklar birbirine yürüme mesafesinde.
-const det = (lat, lng, primary_type, periyotlar = []) => ({ lat, lng, primary_type, periyotlar, durum: 'OPERATIONAL' });
-const PZT_KAPALI = [2, 3, 4, 5, 6, 0].map((gun) => ({ gun, ac: '10:00', kapaGun: gun, kapa: '18:00' }));
+const det = (lat, lng, primary_type) => ({ lat, lng, primary_type, durum: 'OPERATIONAL' });
+
+// Mekan rehberi: ~170 kelime, tek ipucu.
+const ornekRehber = (ad) => `${ad} ${paragraf(80)}.\n\n${paragraf(80)}.\n\n> Girişte sağdaki merdivenden çık; üst kat daha sakin.`;
+const REHBERLER = new Map(['kursunlu', 'omm', 'cam', 'ogle', 'kafe'].map((k) => [k, ornekRehber(k)]));
 function detaylar() {
   return new Map([
     [ID.kursunlu, det(39.7627, 30.5261, 'mosque')],
-    [ID.modern, det(39.7646, 30.5236, 'museum', PZT_KAPALI)],
-    [ID.cam, det(39.764, 30.5248, 'museum', PZT_KAPALI)],
+    [ID.modern, det(39.7646, 30.5236, 'museum')],
+    [ID.cam, det(39.764, 30.5248, 'museum')],
     [ID.ogle, det(39.7655, 30.5247, 'restaurant')],
     [ID.kafe, det(39.7660, 30.5240, 'cafe')],
     [ID.sazova, det(39.7536, 30.4556, 'park')],
@@ -92,7 +95,7 @@ describe('slugUret', () => {
 
 describe('planDenetle', () => {
   it('örnek plan temiz', () => {
-    const { hatalar, uyarilar } = planDenetle(ornekPlan());
+    const { hatalar, uyarilar } = planDenetle(ornekPlan(), { rehberler: REHBERLER });
     expect(hatalar).toEqual([]);
     expect(uyarilar).toEqual([]);
   });
@@ -107,7 +110,7 @@ describe('planDenetle', () => {
     p.gunler[0].duraklar[2].sure_dk = 45.5;
     p.gunler[0].duraklar[3].place_id = 'kisa';
     p.gunler[0].duraklar[4].ad = 'a'.repeat(121);
-    const { hatalar } = planDenetle(p);
+    const { hatalar } = planDenetle(p, { rehberler: REHBERLER });
     expect(hatalar).toEqual(
       expect.arrayContaining([
         expect.stringMatching(/^gezi\.baslik: 51 karakter/),
@@ -128,7 +131,7 @@ describe('planDenetle', () => {
     p.gunler[0].duraklar[0].lat = 39.7;
     p.gunler[0].duraklar[1].puan = 4.6;
     p.gunler.push({ baslik: 'Boş', duraklar: [] });
-    const { hatalar } = planDenetle(p);
+    const { hatalar } = planDenetle(p, { rehberler: REHBERLER });
     expect(hatalar).toEqual(
       expect.arrayContaining([
         expect.stringMatching(/^yayin/),
@@ -137,33 +140,33 @@ describe('planDenetle', () => {
         '2. gün: en az 1 durak olmalı',
       ]),
     );
-    expect(planDenetle({ ...ornekPlan(), gezi: { ...ornekPlan().gezi, yayin: false } }).hatalar).toEqual([]);
+    expect(planDenetle({ ...ornekPlan(), gezi: { ...ornekPlan().gezi, yayin: false } }, { rehberler: REHBERLER }).hatalar).toEqual([]);
   });
 
   it('yazıda bilinmeyen mekan HATA; araştırmadaki ya da ek mekan geçer', () => {
     const p = ornekPlan();
     p.gezi.yazi_md += '\n\n::mekan[ChIJbilinmeyen001]';
-    expect(planDenetle(p).hatalar).toEqual([expect.stringContaining('ChIJbilinmeyen001 ne durakta ne araştırmada')]);
-    expect(planDenetle(p, { bilinenIdler: ['ChIJbilinmeyen001'] }).hatalar).toEqual([]);
+    expect(planDenetle(p, { rehberler: REHBERLER }).hatalar).toEqual([expect.stringContaining('ChIJbilinmeyen001 ne durakta ne araştırmada')]);
+    expect(planDenetle(p, { bilinenIdler: ['ChIJbilinmeyen001'], rehberler: REHBERLER }).hatalar).toEqual([]);
   });
 
   it('durak sayısı, yazıda geçmeyen durak, kelime sayısı, klişe UYARI', () => {
     const p = ornekPlan();
     p.gunler[0].duraklar = p.gunler[0].duraklar.slice(0, 3);
     p.gezi.yazi_md = p.gezi.yazi_md.replace(`[Cam Müzesi](mekan:${ID.cam})`, 'Cam Müzesi') + ' Muhteşem bir gün.';
-    const { hatalar, uyarilar } = planDenetle(p, { bilinenIdler: [ID.ogle, ID.kafe] });
+    const { hatalar, uyarilar } = planDenetle(p, { bilinenIdler: [ID.ogle, ID.kafe], rehberler: REHBERLER });
     expect(hatalar).toEqual([]);
     expect(uyarilar).toEqual(
       expect.arrayContaining(['1. gün: 3 durak (önerilen 4–7)', expect.stringMatching(/^g1\.d3: yazıda bağlantılı geçmiyor/), 'yazi_md: klişe "muhteşem"']),
     );
     p.gezi.yazi_md = p.gezi.yazi_md.replace(paragraf(250), '').replace(paragraf(250), '');
-    expect(planDenetle(p, { bilinenIdler: [ID.ogle, ID.kafe] }).uyarilar).toEqual(expect.arrayContaining([expect.stringMatching(/^yazi_md: \d+ kelime/)]));
+    expect(planDenetle(p, { bilinenIdler: [ID.ogle, ID.kafe], rehberler: REHBERLER }).uyarilar).toEqual(expect.arrayContaining([expect.stringMatching(/^yazi_md: \d+ kelime/)]));
   });
 
   it('yeni şehir place_id ister', () => {
     const p = ornekPlan();
     p.sehir = { yeni: { ad: 'Bursa', slug: 'bursa' } };
-    expect(planDenetle(p).hatalar).toEqual([expect.stringMatching(/^sehir\.yeni\.place_id/)]);
+    expect(planDenetle(p, { rehberler: REHBERLER }).hatalar).toEqual([expect.stringMatching(/^sehir\.yeni\.place_id/)]);
   });
 });
 
@@ -207,15 +210,27 @@ describe('mekanIzleri ve kelimeSayisi', () => {
   });
 });
 
-describe('açılış saatleri', () => {
-  it('kapalı gün, saat dışı, her zaman açık, bilinmiyor', () => {
-    expect(acikMi(PZT_KAPALI, 1, 600, 660)).toBe('kapali_gun');
-    expect(acikMi(PZT_KAPALI, 6, 570, 660)).toBe('saat_disi');
-    expect(acikMi(PZT_KAPALI, 6, 600, 690)).toBe('acik');
-    expect(acikMi([], 1, 0, 60)).toBe('acik');
-    expect(acikMi(null, 1, 0, 60)).toBe('bilinmiyor');
-    // Gece yarısını geçen periyot (Cumartesi 18:00 – Pazar 02:00).
-    expect(acikMi([{ gun: 6, ac: '18:00', kapaGun: 0, kapa: '02:00' }], 6, 1380, 1430)).toBe('acik');
+describe('kapalı günler ve mekan rehberi', () => {
+  it('kapali_gunler zorunlu ve yalnız gün adı; rehber dosyası bulunmalı', () => {
+    const p = ornekPlan();
+    delete p.gunler[0].duraklar[0].kapali_gunler;
+    p.gunler[0].duraklar[1].kapali_gunler = ['pzt'];
+    p.gunler[0].duraklar[2].rehber = 'yok-boyle';
+    delete p.gunler[0].duraklar[3].rehber;
+    const { hatalar, uyarilar } = planDenetle(p, { rehberler: REHBERLER });
+    expect(hatalar).toEqual(
+      expect.arrayContaining([expect.stringMatching(/^g1\.d1: kapali_gunler gerekli/), expect.stringMatching(/^g1\.d2: kapali_gunler yalnız gün adı/), expect.stringMatching(/^g1\.d3: rehber dosyası bulunamadı/)]),
+    );
+    expect(uyarilar).toContain('g1.d4: mekan rehberi yok (rehber)');
+  });
+
+  it('rehber: tek ipucu, 150–300 kelime, fiyat ve saat yok, sözdizimi', () => {
+    expect(rehberDenetle(ornekRehber('OMM'))).toEqual({ hatalar: [], uyarilar: [] });
+    expect(rehberDenetle(`${paragraf(170)}.`).hatalar).toEqual(['tek bir ">" İPUCU olmalı (gelen 0)']);
+    expect(rehberDenetle(`${paragraf(170)}.\n\n> Bir.\n\n> İki.`).hatalar).toEqual(['tek bir ">" İPUCU olmalı (gelen 2)']);
+    const kisa = rehberDenetle('Kısa.\n\n> İpucu, giriş 250 TL ve 10:00 açılır.');
+    expect(kisa.uyarilar).toEqual(expect.arrayContaining([expect.stringMatching(/kelime/), expect.stringMatching(/fiyat ya da saat/)]));
+    expect(rehberDenetle(`# Başlık\n\n${paragraf(170)}.\n\n> İpucu [kaynak].`).hatalar.join('\n')).toMatch(/tek diyezli[\s\S]*köşeli parantez/);
   });
 });
 
@@ -231,7 +246,7 @@ describe('gunleriDenetle', () => {
   it('pazartesi kapalı müze, uzun geçiş, öğle yemeği, 8 saat, gerekçesiz süre', () => {
     const p = ornekPlan();
     p.takvim = { ilk_gun: 'pazartesi' };
-    p.gunler[0].duraklar.splice(4, 0, { place_id: ID.sazova, ad: 'Sazova', sure_dk: 400 });
+    p.gunler[0].duraklar.splice(4, 0, { place_id: ID.sazova, ad: 'Sazova', sure_dk: 400, kapali_gunler: [] });
     p.gunler[0].duraklar.splice(3, 1);
     const { uyarilar } = gunleriDenetle(p, detaylar());
     expect(uyarilar).toEqual(
@@ -253,7 +268,9 @@ describe('yükleme verisi', () => {
     expect(v.sehir).toEqual({ slug: 'eskisehir' });
     expect(v.gezi).not.toHaveProperty('yayin');
     expect(v.gunler[0].duraklar[1]).toEqual({ place_id: ID.modern, ad: 'Odunpazarı Modern Müze', kategori: 'museum', sure_dk: 90, lat: 39.7646, lng: 30.5236 });
-    expect(detayIdleri(ornekPlan())).toEqual([ID.kursunlu, ID.modern, ID.cam, ID.ogle, ID.kafe, ID.sazova]);
+    expect(detayIdleri(ornekPlan())).toEqual([ID.kursunlu, ID.modern, ID.cam, ID.ogle, ID.kafe]);
+    const r = yuklemeVerisi(ornekPlan(), detaylar(), REHBERLER);
+    expect(r.gunler[0].duraklar[1].rehber_md).toBe(ornekRehber('omm'));
   });
 
   it('dolar tırnağı etiketi metinde geçmez', () => {

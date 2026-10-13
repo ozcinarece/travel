@@ -21,13 +21,14 @@ export class GoogleHatasi extends Error {
   }
 }
 
-async function istek<T>(yol: string, secenek: { govde?: unknown; maske?: string }): Promise<T> {
+async function istek<T>(yol: string, secenek: { govde?: unknown; maske?: string; say?: boolean }): Promise<T> {
   const basliklar: Record<string, string> = {
     'content-type': 'application/json',
     'x-goog-api-key': anahtar(),
   };
   if (secenek.maske) basliklar['x-goog-fieldmask'] = secenek.maske;
-  googleSay();
+  // Ücretsiz SKU (Text Search IDs Only) çağıranın kendi sayacına yazılır; maliyet kalemlerine girmez.
+  if (secenek.say !== false) googleSay();
   const cevap = await fetch(`${KOK}/${yol}`, {
     method: secenek.govde ? 'POST' : 'GET',
     headers: basliklar,
@@ -216,24 +217,23 @@ export async function metinAra(secenek: {
 // ---------------------------------------------------------------- İçerik hattı (icerik-google; docs/07)
 
 /**
- * İçerik araştırması: sorgu başına en çok 20 sonuç. Puan ve yorum sayısı editör raporu için gerekir (Text Search Enterprise
- * SKU); adres, fotoğraf, saat istenmez. Sonuç yalnız çağırana döner; DB'ye ve loga yazılmaz (PRD §7).
+ * Kimlik eşleme: Text Search yalnız `places.id` maskesiyle (Text Search Essentials IDs Only — ücretsiz, sınırsız). Aday
+ * listesi OpenStreetMap'ten gelir; burada yalnız place_id bulunur. Başka alan istenmez. `googleSay` çağrılmaz: çağıran
+ * ücretsiz sayaca (`icerik-kimlik`) yazar.
  */
-const ICERIK_ARA_MASKE =
-  'places.id,places.displayName,places.primaryType,places.types,places.location,places.rating,places.userRatingCount,places.businessStatus';
-/** Durak doğrulaması: kapalı mı, kapalı gün, taze konum ve kategori (Place Details Enterprise SKU). */
-const ICERIK_DETAY_MASKE = 'id,displayName,primaryType,location,businessStatus,regularOpeningHours.periods';
+const ICERIK_KIMLIK_MASKE = 'places.id';
+/** Kısa liste (gezi başına ≤ 30): puan ve yorum sayısı — Place Details Enterprise SKU. Adres, saat, fotoğraf istenmez. */
+const ICERIK_PUAN_MASKE = 'id,displayName,primaryType,businessStatus,rating,userRatingCount';
+/** Yükleme: kapalı mı, taze konum ve kategori — Place Details Pro SKU (açılış saatleri istenmez; kapalı gün plandan). */
+const ICERIK_DETAY_MASKE = 'id,displayName,primaryType,location,businessStatus';
 
-export type IcerikAday = {
+export type IcerikPuan = {
   place_id: string;
   ad: string;
   primary_type: string | null;
-  tipler: string[];
-  lat: number;
-  lng: number;
+  durum: string | null;
   puan: number | null;
   puan_sayisi: number | null;
-  durum: string | null;
 };
 
 export type IcerikDetay = {
@@ -243,44 +243,41 @@ export type IcerikDetay = {
   lat: number;
   lng: number;
   durum: string | null;
-  /** Haftalık periyotlar (gun 0 = Pazar); boş dizi = her zaman açık; null = saat bilgisi yok. */
-  periyotlar: { gun: number; ac: string; kapaGun: number; kapa: string }[] | null;
 };
 
-type IcerikCevap = DetailsCevap & { types?: string[]; businessStatus?: string };
+type IcerikCevap = DetailsCevap & { businessStatus?: string };
 
-export async function icerikMetinAra(secenek: {
-  metin: string;
-  merkez: { lat: number; lng: number };
-  yaricapM: number;
-  tip?: string;
-}): Promise<IcerikAday[]> {
-  const govde: Record<string, unknown> = {
-    textQuery: secenek.metin,
-    languageCode: DIL,
-    maxResultCount: 20,
-    locationBias: {
-      circle: { center: { latitude: secenek.merkez.lat, longitude: secenek.merkez.lng }, radius: Math.min(Math.max(secenek.yaricapM, 100), 50_000) },
+/** Ada ve konuma (OSM noktası) en yakın en çok 3 place_id, Google sırasıyla. */
+export async function icerikKimlik(secenek: { metin: string; merkez: { lat: number; lng: number }; yaricapM: number }): Promise<string[]> {
+  const cevap = await istek<{ places?: { id: string }[] }>('places:searchText', {
+    govde: {
+      textQuery: secenek.metin,
+      languageCode: DIL,
+      maxResultCount: 3,
+      locationBias: {
+        circle: { center: { latitude: secenek.merkez.lat, longitude: secenek.merkez.lng }, radius: Math.min(Math.max(secenek.yaricapM, 50), 50_000) },
+      },
     },
-  };
-  if (secenek.tip) govde.includedType = secenek.tip;
-  const cevap = await istek<{ places?: IcerikCevap[] }>('places:searchText', { govde, maske: ICERIK_ARA_MASKE });
-  return (cevap.places ?? []).map((d) => ({
+    maske: ICERIK_KIMLIK_MASKE,
+    say: false,
+  });
+  return (cevap.places ?? []).map((p) => p.id);
+}
+
+export async function icerikPuan(placeId: string): Promise<IcerikPuan> {
+  const d = await istek<IcerikCevap>(`places/${encodeURIComponent(placeId)}?languageCode=${DIL}`, { maske: ICERIK_PUAN_MASKE });
+  return {
     place_id: d.id,
     ad: d.displayName?.text ?? '',
     primary_type: d.primaryType ?? null,
-    tipler: d.types ?? [],
-    lat: d.location?.latitude ?? 0,
-    lng: d.location?.longitude ?? 0,
+    durum: d.businessStatus ?? null,
     puan: d.rating ?? null,
     puan_sayisi: d.userRatingCount ?? null,
-    durum: d.businessStatus ?? null,
-  }));
+  };
 }
 
 export async function icerikDetay(placeId: string): Promise<IcerikDetay> {
   const d = await istek<IcerikCevap>(`places/${encodeURIComponent(placeId)}?languageCode=${DIL}`, { maske: ICERIK_DETAY_MASKE });
-  const ham = (d.regularOpeningHours?.periods ?? []).filter((p) => p.open?.day !== undefined);
   return {
     place_id: d.id,
     ad: d.displayName?.text ?? '',
@@ -288,11 +285,6 @@ export async function icerikDetay(placeId: string): Promise<IcerikDetay> {
     lat: d.location?.latitude ?? 0,
     lng: d.location?.longitude ?? 0,
     durum: d.businessStatus ?? null,
-    periyotlar: !d.regularOpeningHours
-      ? null
-      : ham.some((p) => !p.close)
-        ? []
-        : ham.map((p) => ({ gun: p.open!.day!, ac: hhmm(p.open), kapaGun: p.close!.day ?? p.open!.day!, kapa: hhmm(p.close) })),
   };
 }
 
