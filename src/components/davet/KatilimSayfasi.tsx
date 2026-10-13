@@ -31,7 +31,7 @@ export function KatilimSayfasi({ acik, seyahat, uyeler, gunSayisi, mekanSayisi, 
             <View style={s.yuzler}>
               {gorunen.map((u, i) => (
                 <View key={u.user_id} style={[s.yuzCerceve, i > 0 && { marginLeft: -10 }]}>
-                  <Avatar ad={u.display_name} boyut={40} arkaPlan={i === 0 ? renk.vurgu : renk.metin} />
+                  <Avatar ad={u.display_name} url={u.photo_url} boyut={40} arkaPlan={i === 0 ? renk.vurgu : renk.metin} />
                 </View>
               ))}
               {kalan > 0 ? (

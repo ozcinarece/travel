@@ -7,6 +7,7 @@ import { olayYaz } from '@/features/icerik/sorgular';
 import { seyahatAdi } from '@/features/sihirbaz/sihirbaz';
 import { t } from '@/i18n';
 import { davetLinki } from '@/lib/davetLinki';
+import { useOturum } from '@/lib/oturum';
 
 import { profilOnayiVerildiMi, profilOnayiniYaz } from './sorgular';
 
@@ -38,15 +39,17 @@ export async function davetiPaylas(seyahat: SeyahatOzeti): Promise<'paylasildi' 
 }
 
 export function useDavetPaylas(seyahat: SeyahatOzeti, onSonuc?: (s: 'paylasildi' | 'kopyalandi' | 'vazgecildi') => void) {
+  const { session } = useOturum();
+  const kullaniciId = session?.user.id;
   const [onayAcik, setOnayAcik] = useState(false);
   const gonder = async () => onSonuc?.(await davetiPaylas(seyahat));
   const paylas = async () => {
-    if (await profilOnayiVerildiMi()) return gonder();
+    if (await profilOnayiVerildiMi(kullaniciId)) return gonder();
     setOnayAcik(true);
   };
   const onayla = async () => {
     setOnayAcik(false);
-    await profilOnayiniYaz();
+    await profilOnayiniYaz(kullaniciId);
     await gonder();
   };
   return { paylas, onayAcik, onayKapat: () => setOnayAcik(false), onayla };

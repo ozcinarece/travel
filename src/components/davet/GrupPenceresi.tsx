@@ -82,7 +82,7 @@ export function GrupPenceresi({ acik, onKapat, seyahat, uyeler, mekanlar }: Prop
                   const parcalar = [u.role === 'owner' ? t('davet.grup.kurdu') : null, n > 0 ? t('davet.grup.mekanEkledi', { n }) : null].filter(Boolean);
                   return (
                     <View key={u.user_id} style={s.uye}>
-                      <Avatar ad={u.display_name} boyut={44} arkaPlan={YUZ_RENKLERI[i % YUZ_RENKLERI.length]} />
+                      <Avatar ad={u.display_name} url={u.photo_url} boyut={44} arkaPlan={YUZ_RENKLERI[i % YUZ_RENKLERI.length]} />
                       <View style={{ flex: 1, gap: 1 }}>
                         <Text style={s.uyeAd}>
                           {u.display_name} {benim(u.user_id) ? <Text style={s.uyeSen}>{t('davet.grup.sen')}</Text> : null}
@@ -108,7 +108,7 @@ export function GrupPenceresi({ acik, onKapat, seyahat, uyeler, mekanlar }: Prop
                 {degisiklikler.data?.length === 0 ? <Text style={s.not}>{t('davet.grup.degisiklikYok')}</Text> : null}
                 {(degisiklikler.data ?? []).slice(0, 5).map((d) => (
                   <View key={d.id} style={s.degisiklik}>
-                    <Avatar ad={uyeAdi(d.user_id)} boyut={28} arkaPlan={renk.soluk} />
+                    <Avatar ad={uyeAdi(d.user_id)} url={uyeler.find((u) => u.user_id === d.user_id)?.photo_url} boyut={28} arkaPlan={renk.soluk} />
                     <View style={{ flex: 1 }}>
                       <Text style={s.degisiklikMetin} numberOfLines={2}>
                         <Text style={s.kim}>{uyeAdi(d.user_id)}</Text> {degisiklikMetni(d, mekanAdi)}

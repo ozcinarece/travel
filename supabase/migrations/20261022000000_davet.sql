@@ -31,6 +31,8 @@ as $$
     'place_count', (select count(*) from public.places p where p.trip_id = t.id),
     'day_count', (select count(*) from public.days d where d.trip_id = t.id),
     'inviter_name', (select m.display_name from public.members m where m.trip_id = t.id and m.role = 'owner'),
+    'inviter_photo', (select p.photo_url from public.members m join public.profiles p on p.id = m.user_id
+                      where m.trip_id = t.id and m.role = 'owner'),
     'uye', coalesce((select true from public.members m where m.trip_id = t.id and m.user_id = auth.uid()), false),
     'gunler', coalesce((
       select jsonb_agg(jsonb_build_object('index', d.index, 'date', d.date,
@@ -109,5 +111,27 @@ as $$
   update public.members set landed_at = now() where trip_id = t and user_id = auth.uid() and landed_at is null;
 $$;
 
+-- KK5: "Arkadaşların seni böyle görecek" — profilde ad değişince üyeliklerdeki görünen ad da değişir (Grup penceresi, davet
+-- özeti, değişiklik kayıtları). Fotoğraf üyelikte tutulmaz; istemci profillerden okur.
+create or replace function public.profil_adini_uyeliklere_yaz()
+returns trigger
+language plpgsql security definer set search_path = ''
+as $$
+begin
+  if new.name is distinct from coalesce(old.name, '') and char_length(trim(new.name)) > 0 then
+    update public.members set display_name = left(trim(new.name), 40)
+    where user_id = new.id and display_name is distinct from left(trim(new.name), 40);
+  end if;
+  return new;
+end;
+$$;
+
+drop trigger if exists profiles_ad_uyeliklere on public.profiles;
+create trigger profiles_ad_uyeliklere
+after insert or update of name on public.profiles
+for each row execute function public.profil_adini_uyeliklere_yaz();
+
+revoke execute on function public.davet_ozeti(text), public.davetle_katil(text, text), public.davet_karsilama(), public.davet_karsilandi(uuid),
+  public.profil_adini_uyeliklere_yaz() from public, anon;
 grant execute on function public.davet_ozeti(text) to anon, authenticated;
 grant execute on function public.davetle_katil(text, text), public.davet_karsilama(), public.davet_karsilandi(uuid) to authenticated;

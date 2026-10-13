@@ -28,7 +28,11 @@ export function useUyeler(seyahatId: string | undefined) {
     queryFn: async () => {
       const { data, error } = await supabase.from('members').select('*').eq('trip_id', seyahatId!).order('joined_at');
       if (error) throw error;
-      return data as Uye[];
+      const uyeler = data as Uye[];
+      // #137 KK5: yüzlerde profil fotoğrafı (fotoğraf alınamazsa baş harf).
+      const { data: profiller } = await supabase.from('profiles').select('id, photo_url').in('id', uyeler.map((u) => u.user_id));
+      const foto = new Map((profiller ?? []).map((p) => [p.id as string, p.photo_url as string | null]));
+      return uyeler.map((u) => ({ ...u, photo_url: foto.get(u.user_id) ?? null }));
     },
   });
 }

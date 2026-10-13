@@ -796,7 +796,7 @@ reset role;
 \set WG '''aaaaaaaa-2222-0000-0000-000000000021'''
 insert into auth.users (id, is_anonymous) values (:DV, false);
 insert into auth.users (id, is_anonymous, raw_user_meta_data) values (:WG, false, '{"full_name": "Web Gezgini"}');
-insert into public.profiles (id, name, username) values (:DV, 'Davetçi', 'davetci');
+insert into public.profiles (id, name, username, photo_url) values (:DV, 'Davetçi', 'davetci', 'https://ornek/davetci.jpg');
 set role authenticated;
 select pg_temp.as_user(:DV);
 insert into public.trips (owner_id, city_place_id, city_label, lat, lng, tz, start_date, end_date, name)
@@ -811,6 +811,7 @@ begin
   assert (o ->> 'city_label') = 'İzmir' and (o ->> 'name') = 'İzmir Gezisi', 'anon özeti okur: ' || coalesce(o::text, 'null');
   assert jsonb_array_length(o -> 'gunler') = 4 and (o ->> 'day_count') = '4', 'gün listesi 4';
   assert (o ->> 'inviter_name') = 'Davetçi', 'davet eden sahip';
+  assert (o ->> 'inviter_photo') = 'https://ornek/davetci.jpg', 'davet edenin fotoğrafı';
   assert (o ->> 'uye') = 'false', 'anon üye değil';
   assert public.davet_ozeti('yokyokyo') is null, 'bilinmeyen token null';
 end $$;
@@ -839,10 +840,28 @@ begin
   assert public.davet_karsilama() is null, 'damga sonrası karşılama yok';
   assert (select landed_at from public.members where user_id = auth.uid()) is not null, 'landed_at yazıldı';
   insert into public.olaylar (tur, hedef_id, meta) values ('davet_katildi', (k ->> 'trip_id')::uuid, '{"kanal": "web"}');
+  -- KK5: profil adı değişince arkadaşların gördüğü ad (üyelik) da değişir.
+  insert into public.profiles (id, name, username) values (auth.uid(), 'Webci', 'webci');
+  assert (select display_name from public.members where user_id = auth.uid()) = 'Webci', 'profil oluşunca üyelik adı';
+  update public.profiles set name = 'Web Gezgini Ece' where id = auth.uid();
+  assert (select display_name from public.members where user_id = auth.uid()) = 'Web Gezgini Ece', 'profil adı üyeliğe yazılır';
   -- Üye kendisi ayrılır (RLS: role = member).
   delete from public.members where user_id = auth.uid();
   assert (select count(*) from public.trips) = 0, 'ayrılan seyahati görmez';
 end $$;
+-- KK8: link yenilenince eski token geçersiz — özet null, katılım P0002.
+select pg_temp.as_user(:DV);
+select set_config('test.eski_token', current_setting('test.davet_token'), false);
+select public.rotate_invite_token((select id from public.trips where city_place_id = 'ChIJ-izmir'));
+select pg_temp.as_user(:WG);
+do $$ begin assert public.davet_ozeti(current_setting('test.eski_token')) is null, 'eski token özeti yok'; end $$;
+select pg_temp.hata_bekle($$select public.davetle_katil(current_setting('test.eski_token'), 'app')$$, 'P0002');
+-- Oturumsuz (anon rolü) yalnız özeti okur.
+set role anon;
+select pg_temp.hata_bekle($$select public.davet_karsilama()$$, '42501');
+select pg_temp.hata_bekle($$select public.davet_karsilandi(gen_random_uuid())$$, '42501');
+set role authenticated;
+select pg_temp.as_user(:WG);
 select pg_temp.hata_bekle($$insert into public.olaylar (tur) values ('davet_bilinmeyen')$$, '23514');
 reset role;
 

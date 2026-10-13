@@ -1,6 +1,7 @@
 // #137 Davetle katılma: özet (anon), katılım, web → uygulama karşılaması, bekleyen davet ve profil onayı (cihazda).
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useCallback } from 'react';
 import { Platform } from 'react-native';
 
 import { olayYaz } from '@/features/icerik/sorgular';
@@ -12,7 +13,7 @@ export type DavetKanali = 'web' | 'app';
 export const DAVET_KANALI: DavetKanali = Platform.OS === 'web' ? 'web' : 'app';
 
 const BEKLEYEN = 'davet:bekleyen';
-const PROFIL_ONAYI = 'davet:profil-onayi';
+const PROFIL_ONAYI = 'davet:profil-onayi:';
 
 /** /r/{token} özeti — giriş gerektirmez; token bilinmiyorsa null. */
 export function useDavetOzeti(token: string | undefined) {
@@ -63,9 +64,19 @@ export function useDavetKarsilama(etkin: boolean) {
   });
 }
 
-/** Karşılama bir kez: damga yazılır, sorgu temizlenir. */
-export async function davetKarsilandi(tripId: string): Promise<void> {
-  await supabase.rpc('davet_karsilandi', { t: tripId }).then(() => undefined, () => undefined);
+/** Karşılama bir kez: damga yazılır ve önbellekteki karşılama boşaltılır (ana sayfa yeniden açılınca tekrar yönlendirmez). */
+export function useDavetKarsilandi() {
+  const qc = useQueryClient();
+  return useCallback(
+    async (tripId: string): Promise<void> => {
+      await supabase.rpc('davet_karsilandi', { t: tripId }).then(
+        () => undefined,
+        () => undefined,
+      );
+      qc.setQueryData(['davet-karsilama'], null);
+    },
+    [qc],
+  );
 }
 
 /** Üye kendisi ayrılır (RLS: sahip ayrılamaz). */
@@ -107,17 +118,19 @@ export async function bekleyenDavetiSil(): Promise<void> {
   }
 }
 
-/** KK5: "Arkadaşların seni böyle görecek" bir kez gösterilir. */
-export async function profilOnayiVerildiMi(): Promise<boolean> {
+/** KK5: "Arkadaşların seni böyle görecek" hesap başına bir kez (aynı cihazdaki ikinci hesap da görür). */
+export async function profilOnayiVerildiMi(kullaniciId: string | undefined): Promise<boolean> {
+  if (!kullaniciId) return false;
   try {
-    return (await AsyncStorage.getItem(PROFIL_ONAYI)) === '1';
+    return (await AsyncStorage.getItem(PROFIL_ONAYI + kullaniciId)) === '1';
   } catch {
     return true;
   }
 }
-export async function profilOnayiniYaz(): Promise<void> {
+export async function profilOnayiniYaz(kullaniciId: string | undefined): Promise<void> {
+  if (!kullaniciId) return;
   try {
-    await AsyncStorage.setItem(PROFIL_ONAYI, '1');
+    await AsyncStorage.setItem(PROFIL_ONAYI + kullaniciId, '1');
   } catch {
     // sessiz
   }

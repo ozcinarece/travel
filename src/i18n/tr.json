@@ -197,7 +197,8 @@
       "ayrilMetin": "Eklediğin mekanlar kalır; linkle yeniden katılabilirsin.",
       "ayrilEvet": "Ayrıl",
       "ayrilHata": "Ayrılamadın. Tekrar dene."
-    }
+    },
+    "tekrarDene": "Tekrar dene"
   },
   "harita": {
     "anahtarYok": "Harita anahtarı tanımlı değil"

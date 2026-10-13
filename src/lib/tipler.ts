@@ -171,6 +171,8 @@ export type DavetOzeti = {
   place_count: number;
   day_count: number;
   inviter_name: string | null;
+  /** Davet edenin profil fotoğrafı (yoksa null). */
+  inviter_photo?: string | null;
   /** Soran kullanıcı zaten üye mi (anon için false). */
   uye: boolean;
   gunler: { index: number; date: string | null; durak: number }[];
@@ -229,4 +231,6 @@ export type Uye = {
   /** #137: davetle katılma kanalı ve uygulamada ilk karşılanma zamanı (web katılımında boş başlar). */
   joined_via?: 'web' | 'app' | null;
   landed_at?: string | null;
+  /** Profil fotoğrafı (profillerden; üyelikte tutulmaz). */
+  photo_url?: string | null;
 };

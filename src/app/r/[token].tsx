@@ -10,7 +10,7 @@ import { Avatar } from '@/components/ui/Avatar';
 import { Buton } from '@/components/ui/Buton';
 import { appleIleGiris, appleKullanilabilir, googleIleGiris, iptalMi } from '@/features/auth/giris';
 import { davetAdimi, davetSeyahatAdi, yonelmeEki } from '@/features/davet/katilim';
-import { DAVET_KANALI, bekleyenDavetiSil, bekleyenDavetiYaz, useDavetOzeti, useDavetleKatil } from '@/features/davet/sorgular';
+import { DAVET_KANALI, bekleyenDavetiSil, bekleyenDavetiYaz, useDavetKarsilandi, useDavetOzeti, useDavetleKatil } from '@/features/davet/sorgular';
 import { olayYaz } from '@/features/icerik/sorgular';
 import { useProfil } from '@/features/profil/sorgular';
 import { t } from '@/i18n';
@@ -30,12 +30,17 @@ export default function DavetEkrani() {
   const [appleVar, setAppleVar] = useState(false);
   const [mesgul, setMesgul] = useState<Saglayici | null>(null);
   const [hata, setHata] = useState<string | null>(null);
+  // Katılım sırasında token yenilendiyse (P0002) ya da ağ hatası: sonsuz bekleme yok — geçersiz ekranı ya da "Tekrar dene".
+  const [katilimHatasi, setKatilimHatasi] = useState<'gecersiz' | 'ag' | null>(null);
+  const [deneme, setDeneme] = useState(0);
+  const karsilandi = useDavetKarsilandi();
 
   useEffect(() => {
     appleKullanilabilir().then(setAppleVar);
   }, []);
 
-  const adim = davetAdimi({ ozet: ozet.data, ozetBekliyor: ozet.isPending, hazir, hesapli, profilVar: hesapli ? (profil.isPending ? undefined : !!profil.data) : undefined });
+  const hamAdim = davetAdimi({ ozet: ozet.data, ozetBekliyor: ozet.isPending, hazir, hesapli, profilVar: hesapli ? (profil.isPending ? undefined : !!profil.data) : undefined });
+  const adim = katilimHatasi === 'gecersiz' ? 'gecersiz' : hamAdim;
 
   // Olay: davet açıldı (hesaplıysa bir kez; anon yazamaz, giriş sonrası aynı sayfaya dönünce yazılır).
   const acildiYazildi = useRef(false);
@@ -52,10 +57,13 @@ export default function DavetEkrani() {
     if (adim === 'uye') {
       katilimBasladi.current = true;
       bekleyenDavetiSil();
-      router.replace({ pathname: '/seyahat/[id]/(sekmeler)/program', params: { id: ozet.data!.trip_id } });
+      const tripId = ozet.data!.trip_id;
+      // Web'de katılıp linki uygulamada açan: karşılama damgası şimdi (sonradan bir kez daha karşılanmasın).
+      if (DAVET_KANALI === 'app') karsilandi(tripId);
+      router.replace({ pathname: '/seyahat/[id]/(sekmeler)/program', params: { id: tripId } });
       return;
     }
-    if (adim !== 'katil') return;
+    if (adim !== 'katil' || katilimHatasi) return;
     katilimBasladi.current = true;
     katil
       .mutateAsync(token)
@@ -63,12 +71,24 @@ export default function DavetEkrani() {
         bekleyenDavetiSil();
         router.replace({ pathname: '/seyahat/[id]/(sekmeler)/program', params: sonuc.zaten_uye ? { id: sonuc.trip_id } : { id: sonuc.trip_id, katildin: '1' } });
       })
-      .catch(() => {
+      .catch((e: unknown) => {
         katilimBasladi.current = false;
-        setHata(t('davet.hata'));
+        if ((e as { code?: string } | null)?.code === 'P0002') {
+          bekleyenDavetiSil();
+          setKatilimHatasi('gecersiz');
+        } else {
+          setKatilimHatasi('ag');
+          setHata(t('davet.hata'));
+        }
       });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [adim, token]);
+  }, [adim, token, deneme]);
+  const tekrarDene = () => {
+    setHata(null);
+    setKatilimHatasi(null);
+    ozet.refetch();
+    setDeneme((n) => n + 1);
+  };
 
   useEffect(() => {
     if (adim === 'gecersiz') bekleyenDavetiSil();
@@ -115,12 +135,12 @@ export default function DavetEkrani() {
   const o = ozet.data;
   const seyahatAd = davetSeyahatAdi(o);
   const tarih = o.start_date && o.end_date ? tarihAraligi(o.start_date, o.end_date) : t('davet.tarihsiz');
-  const katiliyor = adim === 'katil' || adim === 'uye';
+  const katiliyor = (adim === 'katil' || adim === 'uye') && !katilimHatasi;
   return (
     <SafeAreaView style={s.ekran}>
       <ScrollView contentContainerStyle={s.icerik}>
         <View style={s.davetci}>
-          <Avatar ad={o.inviter_name ?? '?'} boyut={44} arkaPlan={renk.vurgu} />
+          <Avatar ad={o.inviter_name ?? '?'} url={o.inviter_photo} boyut={44} arkaPlan={renk.vurgu} />
           <Text style={s.davetciMetin}>{t('davet.davetEden', { ad: o.inviter_name ?? t('davet.biri') })}</Text>
         </View>
         <Text accessibilityRole="header" style={s.baslik}>
@@ -142,7 +162,9 @@ export default function DavetEkrani() {
 
         <View style={s.altKisim}>
           {hata ? <Text style={s.hata}>{hata}</Text> : null}
-          {katiliyor ? (
+          {katilimHatasi === 'ag' ? (
+            <Buton baslik={t('davet.tekrarDene')} onPress={tekrarDene} />
+          ) : katiliyor ? (
             <View style={s.katiliyor}>
               <ActivityIndicator color={renk.metin} />
               <Text style={s.katiliyorMetin}>{adim === 'uye' ? t('davet.zatenUye') : t('davet.katiliyor')}</Text>
