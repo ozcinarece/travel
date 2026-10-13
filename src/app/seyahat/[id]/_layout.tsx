@@ -47,9 +47,12 @@ function useSilinmeBekcisi(seyahatId: string | undefined) {
   useEffect(() => {
     if (!seyahatId) return;
     const yenile = () => qc.invalidateQueries({ queryKey: ['seyahat', seyahatId] });
+    // Realtime DELETE olayları `filter` ile süzülemez; eski kayıt yalnız birincil anahtarı taşır — kimlikle karşılaştırılır.
     const kanal = supabase
       .channel(`seyahat-silme:${seyahatId}`)
-      .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'trips', filter: `id=eq.${seyahatId}` }, yenile)
+      .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'trips' }, (olay) => {
+        if ((olay.old as { id?: string } | undefined)?.id === seyahatId) yenile();
+      })
       .subscribe();
     const abonelik = AppState.addEventListener('change', (durum) => {
       if (durum === 'active') yenile();
