@@ -102,6 +102,9 @@ export type Degisiklik = {
   at: string;
 };
 
+/** #141 KK3: Listem oyu — kişi başına mekan başına bir. */
+export type Oy = { mekan: string; kullanici: string };
+
 /** 3.3'te seçilen otel; place_id yalnız koordinattan geldiyse boş. */
 export type OtelSecimi = {
   place_id: string | null;

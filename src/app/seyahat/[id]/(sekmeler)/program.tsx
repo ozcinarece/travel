@@ -550,7 +550,6 @@ function ProgramSekmesi({
       setSeciliMekanId(mekanId);
     }
   };
-  const kesfeteGit = () => router.navigate({ pathname: '/seyahat/[id]/(sekmeler)/kesfet', params: { id: seyahat.id } });
 
 
   // ---------------------------------------------------------------- harita
@@ -774,11 +773,11 @@ function ProgramSekmesi({
   const gunMerkezi = gunMekanlari.length
     ? { lat: gunMekanlari.reduce((a, m) => a + m.lat, 0) / gunMekanlari.length, lng: gunMekanlari.reduce((a, m) => a + m.lng, 0) / gunMekanlari.length }
     : null;
-  // #140 KK4: güne atanmamış mekanlar haritada yok — listenin altında kesikli kutu (Listem #141'de; şimdilik Keşfet).
+  // #140 KK4: güne atanmamış mekanlar haritada yok — listenin altında kesikli kutu → Listem (#141).
   const atanmamisSayisi = mekanlar.filter((m) => !durakIle.has(m.id)).length;
   const atanmamisKutusu =
     atanmamisSayisi > 0 ? (
-      <Pressable accessibilityRole="button" onPress={kesfeteGit} style={({ pressed }) => [s.atanmamis, pressed && { opacity: 0.7 }]}>
+      <Pressable accessibilityRole="button" onPress={() => router.navigate({ pathname: '/seyahat/[id]/(sekmeler)/listem', params: { id: seyahat.id } })} style={({ pressed }) => [s.atanmamis, pressed && { opacity: 0.7 }]}>
         <View style={{ flex: 1, gap: 2 }}>
           <Text style={s.atanmamisBaslik}>{t('program.liste.atanmamis', { n: atanmamisSayisi })}</Text>
           <Text style={s.atanmamisAlt}>{t('program.liste.atanmamisAlt')}</Text>
@@ -918,9 +917,9 @@ function ProgramSekmesi({
   return (
     <>
       <HaritaEkrani
-        // #140 (kanvas 10): sol üstte "‹ {seyahat adı}" hapı (geri → Keşfet; #141 ana sayfaya bağlar).
+        // #140 (kanvas 10) / #141 KK1: sol üstte "‹ {seyahat adı}" hapı → ana sayfa.
         baslik={seyahatAdi(seyahat)}
-        geri={kesfeteGit}
+        geri={() => router.navigate('/(tabs)')}
         sagUst={
           <View style={s.sagUst}>
             {panel === 'tam' && !seciliMekan ? (

@@ -16,6 +16,7 @@ import { MekanPaneli } from '@/components/mekan/MekanPaneli';
 import { useMekanEkle, useMekanGuncelle, useMekanlar, useMekanSil, useUyeler } from '@/features/mekanlar/sorgular';
 import { useSeyahatId } from '@/features/seyahatler/baglam';
 import { useSeyahat } from '@/features/seyahatler/sorgular';
+import { seyahatAdi } from '@/features/sihirbaz/sihirbaz';
 import { SeyahatYukleme } from '@/components/seyahatler/SeyahatYukleme';
 import { FiltreSayfasi } from '@/components/kesfet/FiltreSayfasi';
 import { CekmeceKartlari, CekmeceSatirlari, CekmeceSeridi } from '@/components/kesfet/OneriCekmecesi';
@@ -27,14 +28,14 @@ import { cekmeceListesi, cekmeceSayisi, type CekmeceCipi } from '@/features/yerl
 import { hafifYerler, linkCoz, linkGibiMi, useHafifYerler, useOneriler, yeniOturumJetonu, type HafifYer, type OneriCipi } from '@/features/yerler/api';
 import { useQuery } from '@tanstack/react-query';
 
-import { aktifFiltreSayisi, filtreAktif, filtredenGecer, filtreOzeti } from '@/features/yerler/filtre';
+import { aktifFiltreSayisi, filtreAktif, filtredenGecer, filtreOzeti, KATEGORILER } from '@/features/yerler/filtre';
 import { useOneCikanlar } from '@/features/yerler/oneCikan';
 import { gorunurOneriler } from '@/features/yerler/karolar';
 import { useKaroOnerileri } from '@/features/yerler/karoYukleme';
 import { kesfetDurumunuAl, useKesfetDurumu } from '@/features/yerler/kesfetDurumu';
 import { t } from '@/i18n';
 import { izBirak } from '@/lib/hataRaporu';
-import { kategoriPini } from '@/lib/pinIkonu';
+import { KATEGORI_PIN, kategoriPini, type PinKategorisi } from '@/lib/pinIkonu';
 import { varsayilanDakika } from '@/lib/kategori';
 import type { Mekan, Seyahat } from '@/lib/tipler';
 import { bosluk, renk, yazi, yuzRenkleri } from '@/theme';
@@ -68,6 +69,8 @@ function Kesfet({ seyahat, konaklamalar, ilkMekan }: { seyahat: Seyahat; konakla
   // seyahat belleğinde (kesfetDurumu): ekran yeniden kurulsa da aynı filtreyle süzülür, aynı bölgeden açılır.
   const [filtre, setFiltre] = useKesfetDurumu(seyahat.id, 'filtre');
   const [filtreAcik, setFiltreAcik] = useState(false);
+  // #141 KK7: "Listende N · göster" — harita ve çekmece yalnız listeyi gösterir.
+  const [yalnizListe, setYalnizListe] = useState(false);
   // #71: tanı şeridi — filtre düğmesine uzun basınca açılır/kapanır (cihazda logcat olmadan sayaçlar).
   const [taniAcik, setTaniAcik] = useState(__DEV__);
   const tani = useTani(taniAcik);
@@ -218,7 +221,7 @@ function Kesfet({ seyahat, konaklamalar, ilkMekan }: { seyahat: Seyahat; konakla
       tur: 'listede' as const,
       oneCikan: oneCikan.has(m.place_id),
     })),
-    ...oneriPinleri,
+    ...(yalnizListe ? [] : oneriPinleri),
   ];
 
   const sec = async (placeId: string, ad: string) => {
@@ -331,8 +334,10 @@ function Kesfet({ seyahat, konaklamalar, ilkMekan }: { seyahat: Seyahat; konakla
   const bolgeListesi = useMemo(() => cekmeceListesi(gecenler, havuzIdleri, bolge, tutulan), [gecenler, havuzIdleri, bolge, tutulan]);
   const cekmeceListe = useMemo(() => (cekmece === 'tam' && cekmeceCip !== 'bolge' ? cekmeceListesi(gecenler, havuzIdleri, bolge, tutulan, cekmeceCip) : bolgeListesi), [cekmece, cekmeceCip, gecenler, havuzIdleri, bolge, tutulan, bolgeListesi]);
   const cekmeceSayi = cekmeceSayisi(bolgeListesi, havuzIdleri);
+  const listeYerleri = useMemo(() => havuz.map((m) => havuzAdlari.data?.[m.place_id]).filter((y): y is HafifYer => !!y), [havuz, havuzAdlari.data]);
+  const cekmeceGosterilen = yalnizListe ? listeYerleri : cekmeceListe;
   // Satır / kart fotoğrafları: yalnız ilk 12 öneri için hafif Details foto maskesi (24 sa önbellek).
-  const fotoIdleri = useMemo(() => cekmeceListe.slice(0, 12).map((y) => y.place_id).sort(), [cekmeceListe]);
+  const fotoIdleri = useMemo(() => cekmeceGosterilen.slice(0, 12).map((y) => y.place_id).sort(), [cekmeceGosterilen]);
   const fotolar = useQuery({
     queryKey: ['cekmece-foto', fotoIdleri.join(',')],
     enabled: cekmece !== 'katli' && fotoIdleri.length > 0,
@@ -380,14 +385,13 @@ function Kesfet({ seyahat, konaklamalar, ilkMekan }: { seyahat: Seyahat; konakla
     onAc: cekmecedenAc,
   };
 
-  const sonEkleyen = havuz.length > 0 ? havuz[havuz.length - 1] : null;
-  const sonEkleyenSayi = sonEkleyen ? havuz.filter((m) => m.added_by === sonEkleyen.added_by).length : 0;
 
   return (
     <HaritaEkrani
-      baslik={seyahat.city_label}
+      // #141 KK1: sol üstte her zaman "‹ {seyahat adı}" → ana sayfa.
+      baslik={seyahatAdi(seyahat)}
       altMenuVar
-      geri={() => router.replace('/(tabs)/seyahatler')}
+      geri={() => router.navigate('/(tabs)')}
       sagUst={
         // #45: Grup'a erişim avatarlardan (seyahat içi alt menü kalktı).
         <Pressable accessibilityRole="button" accessibilityLabel={t('seyahat.grup.baslik')} hitSlop={8} onPress={() => setGrupAcik(true)} style={s.avatarlar}>
@@ -464,17 +468,18 @@ function Kesfet({ seyahat, konaklamalar, ilkMekan }: { seyahat: Seyahat; konakla
                 </Pressable>
               </View>
             ) : null}
-            {/* #69 §B: hızlı filtreler — ★ Öne çıkanlar · 4,5+ ★ · 5K+ yorum; açılır/kapanır (siyah + ×), birlikte VE. */}
+            {/* #141 KK7 (kanvas 9): varsayılan "Tümü"; kategori çipi tek seçim (kategori renginde glif). Öne çıkan / puan /
+                yorum filtreleri filtre sayfasında. */}
             <ScrollView horizontal showsHorizontalScrollIndicator={false} style={s.ciplerKaydirma} contentContainerStyle={s.cipler} keyboardShouldPersistTaps="handled">
-              <HizliFiltre aktif={filtre.oneCikan} onPress={() => setFiltre({ ...filtre, oneCikan: !filtre.oneCikan })} yildiz>
-                {t('kesfet.filtre.oneCikanlar')}
-              </HizliFiltre>
-              <HizliFiltre aktif={filtre.puan === 4.5} onPress={() => setFiltre({ ...filtre, puan: filtre.puan === 4.5 ? 0 : 4.5 })}>
-                {t('kesfet.filtre.hizliPuan')}
-              </HizliFiltre>
-              <HizliFiltre aktif={filtre.yorum === 5000} onPress={() => setFiltre({ ...filtre, yorum: filtre.yorum === 5000 ? 0 : 5000 })}>
-                {t('kesfet.filtre.hizliYorum')}
-              </HizliFiltre>
+              <KategoriCipi secili={filtre.kategoriler.length === 0} onPress={() => setFiltre({ ...filtre, kategoriler: [] })} />
+              {KATEGORILER.map((k) => (
+                <KategoriCipi
+                  key={k}
+                  kategori={k}
+                  secili={filtre.kategoriler.includes(k)}
+                  onPress={() => setFiltre({ ...filtre, kategoriler: filtre.kategoriler.length === 1 && filtre.kategoriler[0] === k ? [] : [k] })}
+                />
+              ))}
             </ScrollView>
             {filtreli ? (
               // #69 KK5: filtre açıkken "Şehrin öne çıkanları · 9 mekan gizli" hapı (dokunulmaz).
@@ -495,10 +500,10 @@ function Kesfet({ seyahat, konaklamalar, ilkMekan }: { seyahat: Seyahat; konakla
       altSayfa={{
         hal: cekmece,
         onHal: setCekmece,
-        ust: <CekmeceSeridi hal={cekmece} sayi={cekmeceSayi} onHal={setCekmece} />,
+        ust: <CekmeceSeridi hal={cekmece} sayi={cekmeceSayi} onHal={setCekmece} liste={{ sayi: havuz.length, yalniz: yalnizListe, onPress: () => setYalnizListe((x) => !x) }} />,
         govde: (yukseklik) =>
-          cekmece === 'katli' ? null : cekmece === 'yari' ? (
-            <CekmeceSatirlari liste={cekmeceListe} yukseklik={yukseklik} {...cekmeceOrtak} />
+          cekmece === 'katli' ? null : cekmece === 'yari' || yalnizListe ? (
+            <CekmeceSatirlari liste={cekmeceGosterilen} yukseklik={yukseklik} {...cekmeceOrtak} />
           ) : (
             <CekmeceKartlari liste={cekmeceListe} cip={cekmeceCip} onCip={setCekmeceCip} rehber={rehber.liste} rehberVar={!!rehberSehir} yukseklik={yukseklik} bolgeSayisi={cekmeceSayi} {...cekmeceOrtak} />
           ),
@@ -523,31 +528,6 @@ function Kesfet({ seyahat, konaklamalar, ilkMekan }: { seyahat: Seyahat; konakla
           ) : null}
           {!yakin.hata && !yakin.yukleniyor && oneriListesi.length === 0 && !aramaSonucu ? <Text style={s.bosOneri}>{t('kesfet.bolgeBos')}</Text> : null}
 
-          <View style={[s.cubuk, s.golge]}>
-            <View style={{ flex: 1 }}>
-              <Text style={s.cubukBaslik}>{havuz.length > 0 ? t('kesfet.listede', { n: havuz.length }) : t('kesfet.listedeBos')}</Text>
-              {sonEkleyen && uyeAdi(sonEkleyen.added_by) ? (
-                <Text style={s.cubukAlt}>
-                  {t('kesfet.sonEkleyen', {
-                    ad: uyeAdi(sonEkleyen.added_by),
-                    n: sonEkleyenSayi,
-                  })}
-                </Text>
-              ) : null}
-            </View>
-            <Pressable
-              accessibilityRole="button"
-              onPress={() =>
-                router.navigate({
-                  pathname: '/seyahat/[id]/(sekmeler)/program',
-                  params: { id: seyahat.id },
-                })
-              }
-              style={s.cubukDugme}
-            >
-              <Text style={s.cubukDugmeMetin}>{t('kesfet.gunlereDagit')} →</Text>
-            </Pressable>
-          </View>
         </View>
         ),
       }}
@@ -591,12 +571,13 @@ function Kesfet({ seyahat, konaklamalar, ilkMekan }: { seyahat: Seyahat; konakla
 }
 
 /** #69 §B: hızlı filtre çipi — 32 px beyaz hap, gölgeli; açıkken siyah + "×". */
-function HizliFiltre({ aktif, onPress, yildiz, children }: { aktif: boolean; onPress: () => void; yildiz?: boolean; children: string }) {
+/** #141 KK7 (kanvas 9): kategori çipi — seçili Gece dolu beyaz yazı; diğerleri beyaz, glif kategori renginde. Kategorisiz = "Tümü". */
+function KategoriCipi({ kategori, secili, onPress }: { kategori?: PinKategorisi; secili: boolean; onPress: () => void }) {
+  const k = kategori ? KATEGORI_PIN[kategori] : null;
   return (
-    <Pressable accessibilityRole="button" accessibilityState={{ selected: aktif }} onPress={onPress} style={[s.cip, s.golge, aktif && s.cipAktif]}>
-      {yildiz ? <Ikon ad="yildiz" boyut={11} renk={aktif ? renk.zemin : renk.vurgu} /> : null}
-      <Text style={[s.cipMetin, aktif && s.cipMetinAktif]}>{children}</Text>
-      {aktif ? <Text style={[s.cipMetin, s.cipKapat]}>×</Text> : null}
+    <Pressable accessibilityRole="button" accessibilityState={{ selected: secili }} onPress={onPress} style={[s.cip, s.golge, secili && s.cipAktif]}>
+      {k ? <Ikon ad={k.ikon} boyut={14} renk={secili ? renk.zemin : k.renk} kalinlik={2.4} /> : null}
+      <Text style={[s.cipMetin, secili && s.cipMetinAktif]}>{kategori ? t(`kesfet.filtre.kategoriler.${kategori}`) : t('kesfet.tumu')}</Text>
     </Pressable>
   );
 }
@@ -653,10 +634,9 @@ const s = StyleSheet.create({
   rehberMetin: { fontFamily: yazi.ekstra, fontSize: 12.5, color: renk.metin },
   ciplerKaydirma: { marginHorizontal: -bosluk.kenar },
   cipler: { gap: 8, paddingHorizontal: bosluk.kenar },
-  cip: { height: 32, paddingHorizontal: 12, borderRadius: 999, backgroundColor: renk.zemin, flexDirection: 'row', alignItems: 'center', gap: 4 },
-  cipAktif: { backgroundColor: renk.metin },
-  cipMetin: { fontFamily: yazi.kalin, fontSize: 12, color: renk.metin },
-  cipKapat: { color: renk.zemin, opacity: 0.7, marginLeft: 4 },
+  cip: { height: 36, paddingHorizontal: 12, borderRadius: 999, backgroundColor: renk.zemin, flexDirection: 'row', alignItems: 'center', gap: 5 },
+  cipAktif: { backgroundColor: renk.ana },
+  cipMetin: { fontFamily: yazi.ekstra, fontSize: 13, color: renk.metin },
   filtreDugme: { width: 46, height: 46, borderRadius: 14, backgroundColor: renk.yuzey, alignItems: 'center', justifyContent: 'center' },
   filtreDugmeAktif: { backgroundColor: renk.metin },
   filtreRozet: { position: 'absolute', right: -2, top: -2, minWidth: 16, height: 16, borderRadius: 8, paddingHorizontal: 3, backgroundColor: renk.vurgu, borderWidth: 1.5, borderColor: renk.zemin, alignItems: 'center', justifyContent: 'center' },
@@ -672,27 +652,6 @@ const s = StyleSheet.create({
     textAlign: 'center',
     paddingHorizontal: bosluk.kenar,
   },
-  cubuk: {
-    marginHorizontal: bosluk.kenar,
-    height: 56,
-    paddingLeft: 16,
-    paddingRight: 6,
-    borderRadius: 999,
-    backgroundColor: renk.metin,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-  },
-  cubukBaslik: { fontFamily: yazi.kalin, fontSize: 13, color: renk.zemin },
-  cubukAlt: { fontFamily: yazi.normal, fontSize: 11, color: '#a3a3a3' },
-  cubukDugme: {
-    height: 44,
-    paddingHorizontal: 16,
-    borderRadius: 999,
-    backgroundColor: renk.zemin,
-    justifyContent: 'center',
-  },
-  cubukDugmeMetin: { fontFamily: yazi.kalin, fontSize: 13, color: renk.metin },
   tani: { marginHorizontal: bosluk.kenar, paddingHorizontal: 8, paddingVertical: 4, borderRadius: 8, backgroundColor: 'rgba(15,15,15,0.8)' },
   taniMetin: { fontFamily: yazi.kalin, fontSize: 10, lineHeight: 14, color: renk.zemin },
   hataKutu: {

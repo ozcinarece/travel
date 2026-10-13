@@ -173,14 +173,14 @@ export function HaritaEkrani({ baslik, geri, sagUst, arama, aramaSag, ustEk, alt
 }
 
 /** Sol üst beyaz geri hapı ("‹ Eskişehir Gezisi"); #140 (kanvas 10): 40 px, Gece ok, Archivo 15. */
-export function GeriHapi({ baslik, onPress }: { baslik: string; onPress: () => void }) {
+export function GeriHapi({ baslik, onPress, duz }: { baslik: string; onPress: () => void; /** Beyaz sayfada (Listem): Buz zemin, gölgesiz. */ duz?: boolean }) {
   return (
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={t('genel.geri')}
       onPress={onPress}
       hitSlop={8}
-      style={({ pressed }) => [s.geriHap, s.golge, pressed && { opacity: 0.8 }]}>
+      style={({ pressed }) => [s.geriHap, duz ? { backgroundColor: renk.yuzey } : s.golge, pressed && { opacity: 0.8 }]}>
       <Ikon ad="geri" boyut={20} renk={renk.ana} kalinlik={2.6} />
       <Text style={s.geriMetin} numberOfLines={1}>
         {baslik}

@@ -27,23 +27,44 @@ type Ortak = {
 };
 
 /** Üst şerit: tutamaç + başlık (hal'e göre); tam halde sağda "Haritaya dön". */
-export function CekmeceSeridi({ hal, sayi, onHal }: { hal: SayfaHali; sayi: number; onHal: (h: SayfaHali) => void }) {
+/**
+ * #141 KK7 (kanvas 9): sağda "Listende N · göster" — dokununca harita ve çekmece yalnız listeyi gösterir (öneri pinleri
+ * gizlenir); tekrar dokununca önerilere döner.
+ */
+type ListeDugmesi = { sayi: number; yalniz: boolean; onPress: () => void };
+
+function ListeGoster({ sayi, yalniz, onPress }: ListeDugmesi) {
+  return (
+    <Pressable accessibilityRole="button" accessibilityState={{ selected: yalniz }} onPress={onPress} style={({ pressed }) => [s.listeDugme, yalniz && s.listeDugmeAcik, pressed && { opacity: 0.85 }]}>
+      <View style={s.listeKare} />
+      <Text style={s.listeDugmeMetin}>{yalniz ? t('kesfet.cekmece.onerilereDon') : t('kesfet.cekmece.listende', { n: sayi })}</Text>
+    </Pressable>
+  );
+}
+
+export function CekmeceSeridi({ hal, sayi, onHal, liste }: { hal: SayfaHali; sayi: number; onHal: (h: SayfaHali) => void; liste?: ListeDugmesi }) {
+  const listeDugmesi = liste && (liste.sayi > 0 || liste.yalniz) ? <ListeGoster {...liste} /> : null;
   return (
     <View style={s.serit}>
       <Pressable accessibilityRole="button" accessibilityLabel={t(hal === 'katli' ? 'kesfet.cekmece.ac' : 'kesfet.cekmece.kapat')} onPress={() => onHal(hal === 'katli' ? 'yari' : 'katli')} hitSlop={8} style={s.tutamakDokunma}>
         <View style={s.tutamak} />
       </Pressable>
       {hal === 'katli' ? (
-        <Pressable accessibilityRole="button" onPress={() => onHal('yari')} style={s.seritSatir}>
-          <Text style={s.kucukMetin}>{t('kesfet.cekmece.kucuk', { n: sayi })}</Text>
-          <Ikon ad="yukari" boyut={18} renk={renk.metin} kalinlik={2.2} />
-        </Pressable>
+        <View style={s.seritSatir}>
+          <Pressable accessibilityRole="button" onPress={() => onHal('yari')} style={s.kucukDokun}>
+            <Text style={s.kucukMetin} numberOfLines={1}>
+              {liste?.yalniz ? t('kesfet.cekmece.listeBaslik', { n: liste.sayi }) : t('kesfet.cekmece.kucuk', { n: sayi })}
+            </Text>
+          </Pressable>
+          {listeDugmesi ?? <Ikon ad="yukari" boyut={18} renk={renk.metin} kalinlik={2.2} />}
+        </View>
       ) : (
         <View style={s.seritSatir}>
           <View style={{ flex: 1 }}>
-            <Text style={s.baslik}>{t('kesfet.cekmece.baslik')}</Text>
-            <Text style={s.alt}>{hal === 'tam' ? t('kesfet.cekmece.tamAlt') : sayi > 0 ? t('kesfet.cekmece.alt', { n: sayi }) : t('kesfet.cekmece.altBos')}</Text>
+            <Text style={s.baslik}>{liste?.yalniz ? t('kesfet.cekmece.listeBaslik', { n: liste.sayi }) : t('kesfet.cekmece.baslik')}</Text>
+            {!liste?.yalniz ? <Text style={s.alt}>{hal === 'tam' ? t('kesfet.cekmece.tamAlt') : sayi > 0 ? t('kesfet.cekmece.alt', { n: sayi }) : t('kesfet.cekmece.altBos')}</Text> : null}
           </View>
+          {listeDugmesi}
           {hal === 'tam' ? (
             <Pressable accessibilityRole="button" onPress={() => onHal('katli')} style={s.haritayaDon}>
               <Text style={s.haritayaDonMetin}>{t('kesfet.cekmece.haritayaDon')}</Text>
@@ -127,11 +148,16 @@ export function CekmeceKartlari({ liste, cip, onCip, rehber, rehberVar, yuksekli
 }
 
 const s = StyleSheet.create({
+  kucukDokun: { flex: 1, minHeight: 44, justifyContent: 'center' },
+  listeDugme: { height: 34, paddingLeft: 6, paddingRight: 10, borderRadius: 10, backgroundColor: '#fff1e6', flexDirection: 'row', alignItems: 'center', gap: 6 },
+  listeDugmeAcik: { backgroundColor: renk.vurgu },
+  listeKare: { width: 20, height: 20, borderRadius: 6, backgroundColor: renk.vurgu, borderWidth: 2, borderColor: renk.ana },
+  listeDugmeMetin: { fontFamily: yazi.ekstra, fontSize: 13, color: renk.metin },
   serit: { paddingHorizontal: bosluk.kenar, paddingBottom: 8 },
   tutamakDokunma: { alignSelf: 'center', paddingVertical: 6, paddingHorizontal: 30 },
   tutamak: { width: 36, height: 4, borderRadius: 2, backgroundColor: renk.ayrac },
   seritSatir: { flexDirection: 'row', alignItems: 'center', gap: 10, minHeight: 36 },
-  kucukMetin: { flex: 1, fontFamily: yazi.kalin, fontSize: 13, color: renk.metin },
+  kucukMetin: { fontFamily: yazi.baslik, fontSize: 17, letterSpacing: -0.34, color: renk.metin },
   baslik: { fontFamily: yazi.ekstra, fontSize: 16, color: renk.metin },
   alt: { fontFamily: yazi.normal, fontSize: 12, color: renk.ikincil },
   haritayaDon: { height: 34, paddingHorizontal: 12, borderRadius: 999, backgroundColor: renk.yuzey, justifyContent: 'center' },

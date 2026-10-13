@@ -206,7 +206,10 @@
       "ayrilOnay": "Seyahatten ayrılmak istiyor musun?",
       "ayrilMetin": "Eklediğin mekanlar kalır; linkle yeniden katılabilirsin.",
       "ayrilEvet": "Ayrıl",
-      "ayrilHata": "Ayrılamadın. Tekrar dene."
+      "ayrilHata": "Ayrılamadın. Tekrar dene.",
+      "geriAl": "Geri al",
+      "geriAlHata": "Geri alınamadı, tekrar dener misin?",
+      "vardi": "vardı: {ad} · {zaman}"
     },
     "tekrarDene": "Tekrar dene",
     "paylasMetin": "{ad} için seyahat planına katıl: {link}"
@@ -336,8 +339,6 @@
       "yorum": "Yorum sayısı",
       "yorumArti": "{n}+",
       "goster_n": "{n} mekanı göster",
-      "hizliPuan": "4,5+ ★",
-      "hizliYorum": "5K+ yorum",
       "ozetOneCikan": "Şehrin öne çıkanları",
       "ozetPuan": "{p}+ puan",
       "ozetYorum": "{n}+ yorum",
@@ -350,10 +351,6 @@
     "yorum": "{n} yorum",
     "acik": "Açık",
     "kapali": "Kapalı",
-    "listede": "Listede {n} mekan",
-    "listedeBos": "Liste boş",
-    "sonEkleyen": "{ad} {n} ekledi",
-    "gunlereDagit": "Programa geç",
     "oneriHata": "Öneriler alınamadı.",
     "araHata": "Arama şu an yapılamıyor.",
     "sonucYok": "Sonuç yok",
@@ -377,8 +374,12 @@
       "ekle": "Listeye ekle",
       "listede": "Listede ✓",
       "ac": "Önerileri aç",
-      "kapat": "Önerileri kapat"
-    }
+      "kapat": "Önerileri kapat",
+      "listende": "Listende {n} · göster",
+      "onerilereDon": "Önerilere dön",
+      "listeBaslik": "Listende · {n}"
+    },
+    "tumu": "Tümü"
   },
   "mekan": {
     "hata": "Mekan bilgisi alınamadı.",
@@ -589,7 +590,7 @@
       "otelDonus": "{ad} · dönüş",
       "otelVaris": "{ad} · varış",
       "atanmamis": "Listede, güne atanmamış · {n}",
-      "atanmamisAlt": "Listem'den bir güne ekle",
+      "atanmamisAlt": "Listem'de bir güne ekle",
       "baslangic": "Başlangıç saati",
       "baslangicSec": "{saat} ({fark})"
     }
@@ -801,6 +802,58 @@
     "ekle": {
       "ekle": "Listeye ekle",
       "listede": "Listende, çıkarmak için dokun"
+    }
+  },
+  "seyahatMenusu": {
+    "kesfet": "Keşfet",
+    "program": "Program",
+    "listem": "Listem",
+    "rehber": "Rehber",
+    "rehberYok": "{sehir} rehberi hazırlanıyor",
+    "rehberYokAlt": "Bu şehir için henüz rehber yazısı yok. Keşfet'te bölgedeki öne çıkan mekanlara bakabilirsin.",
+    "kesfeteGit": "Keşfet'e git"
+  },
+  "listem": {
+    "baslik": "Listem",
+    "sirala": "Sırala: {ne}",
+    "siralaPlan": "Plan sırası",
+    "siralaOy": "En çok oy",
+    "tumu": "Tümü · {n}",
+    "gunlerde": "Günlerde · {n}",
+    "atanmamisSeg": "Atanmamış · {n}",
+    "atanmamis": "Güne atanmamış · {n}",
+    "dagit": "Günlere dağıt",
+    "dagitildi": "{n} mekan günlere dağıtıldı",
+    "dagitildiKalan": "{n} mekan günlere dağıtıldı · {k} mekan güne sığmadı",
+    "guneEkleDugme": "Güne ekle",
+    "gunBaslik": "{gun} · {ad} çevresi",
+    "mekanSayisi": "{n} mekan",
+    "satirAtanmamis": "{kategori} · {sure}",
+    "satirGunde": "{kategori} · {saat}",
+    "atlandi": "atlandı",
+    "sen": "sen ekledin",
+    "ekledi": "{ad} ekledi",
+    "oyVer": "Oy ver, {n} oy",
+    "oyGeriAl": "Oyunu geri al, {n} oy",
+    "cikar": "Çıkar",
+    "cikti": "{ad} listeden çıktı",
+    "geriAl": "Geri al",
+    "bos": "Listen boş",
+    "bosAlt": "Keşfet'te beğendiğin mekanları listeye ekle; burada günlere dağıtırsın.",
+    "bosDugme": "Keşfet'e git",
+    "gunBos": "Bu güne henüz mekan eklenmedi",
+    "hata": "Olmadı, tekrar dener misin?",
+    "guneEkle": {
+      "alt": "Hangi güne ekleyelim? · ~{sure}",
+      "onerilen": "ÖNERİLEN",
+      "yakininda": "Yakınında {n} mekan · {mesafe}",
+      "enYakin": "en yakını {mesafe}",
+      "mekan": "{n} mekan",
+      "biter": "biter {bas} → {bit}",
+      "bos": "Boş gün · tüm gün senin",
+      "bosDonus": "Boş gün · dönüş günü",
+      "not": "Dokunduğun güne eklenir, saatler yeniden hesaplanır.",
+      "eklendi": "{ad} {gun}. güne eklendi"
     }
   }
 }
