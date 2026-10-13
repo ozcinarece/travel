@@ -3,7 +3,11 @@ import { describe, expect, it } from '@jest/globals';
 import {
   blokEkle,
   durumAlanlari,
+  istanbuldanIso,
+  istanbulParcalari,
+  tarihGosterimi,
   fotoDenetle,
+  fotoDosyaAdi,
   fotoYolu,
   geziDurumu,
   gorselSatiri,
@@ -43,7 +47,7 @@ describe('slug ve yayın durumu (#107 KK2, KK7)', () => {
     expect(durumAlanlari('planli', '2026-10-20T09:00:00Z', SIMDI)).toEqual({ yayin: true, yayin_at: '2026-10-20T09:00:00Z' });
     const yarin = durumAlanlari('planli', null, SIMDI);
     expect(yarin.yayin).toBe(true);
-    expect(new Date(yarin.yayin_at!).getHours()).toBe(9);
+    expect(yarin.yayin_at).toBe('2026-10-13T06:00:00.000Z');
     expect(new Date(yarin.yayin_at!).getTime()).toBeGreaterThan(SIMDI.getTime());
     expect(geziDurumu(yarin, SIMDI)).toBe('planli');
   });
@@ -58,6 +62,16 @@ describe('slug ve yayın durumu (#107 KK2, KK7)', () => {
     expect(yerelTarihGirdisi(iso)).toBe('2026-10-16T09:30');
     expect(yerelTarihtenIso('')).toBeNull();
     expect(yerelTarihGirdisi(null)).toBe('');
+  });
+});
+
+describe('planlı yayın İstanbul saatiyle (BekleyenTasarim21 ekran 4)', () => {
+  it('İstanbul parçaları ⇄ ISO, gösterim', () => {
+    expect(istanbuldanIso('2026-10-20', '09:00')).toBe('2026-10-20T06:00:00.000Z');
+    expect(istanbulParcalari('2026-10-20T06:00:00.000Z')).toEqual({ tarih: '2026-10-20', saat: '09:00' });
+    expect(istanbulParcalari('2026-10-20T22:30:00Z')).toEqual({ tarih: '2026-10-21', saat: '01:30' });
+    expect(istanbuldanIso('2026-10-20', '')).toBeNull();
+    expect(tarihGosterimi('2026-10-20')).toBe('20 Eki 2026');
   });
 });
 
@@ -99,8 +113,11 @@ describe('markdown araç çubuğu (#107 KK3)', () => {
 
 describe('fotoğraf yükleme kuralları (#107 KK5)', () => {
   it('yol biçimi ve kova sınırları', () => {
-    expect(fotoYolu('geziler', 'g1', 'Porsuk.JPEG', 'r1')).toBe('geziler/g1/r1.jpg');
-    expect(fotoYolu('geziler', 'g1', 'adsiz', 'r2')).toBe('geziler/g1/r2.jpg');
+    expect(fotoYolu('geziler', 'g1', 'Porsuk.JPEG', 'r1')).toBe('geziler/g1/r1-porsuk.jpg');
+    expect(fotoYolu('geziler', 'g1', 'Odunpazarı 01.webp', 'a1b2c3d4-ffff')).toBe('geziler/g1/a1b2c3d4-odunpazari-01.webp');
+    expect(fotoYolu('geziler', 'g1', '.jpg', 'r2')).toBe('geziler/g1/r2.jpg');
+    expect(fotoDosyaAdi('geziler/g1/a1b2c3d4-odunpazari-01.webp')).toBe('odunpazari-01.webp');
+    expect(fotoDosyaAdi('geziler/g1/a1b2c3d4-e5f6-4a7b-8c9d-0123456789ab.jpg')).toBe('a1b2c3d4-e5f6-4a7b-8c9d-0123456789ab.jpg');
     expect(fotoDenetle({ type: 'image/png', size: 1000 })).toBeNull();
     expect(fotoDenetle({ type: 'image/gif', size: 1000 })).toBe('tur');
     expect(fotoDenetle({ type: 'image/jpeg', size: 6 * 1024 * 1024 })).toBe('boyut');

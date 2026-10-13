@@ -87,9 +87,15 @@ function PlanSayfasi({ gezi, sehirAdi }: { gezi: GeziDetay; sehirAdi: string }) 
   return (
     <>
       <ScrollView style={s.govde} contentContainerStyle={s.planIc}>
-        <View>
-          <Text style={s.planBaslik}>{`${sehirAdi} · ${t('gezi.gunAdet', { n: gezi.gun_sayisi })}`}</Text>
-          <Text style={s.altOzet}>{t('gezi.sayfa2', { gun: gezi.gun_sayisi, mekan: gezi.mekan_sayisi })}</Text>
+        {/* Kanvas BekleyenTasarim21 ekran 5: 36 px gri geri dairesi + başlık 20 / 800 + alt satır. */}
+        <View style={s.planUst}>
+          <View style={[s.yuvarlak, s.griYuvarlak]}>
+            <CizgiIkon d="M15 18l-6-6 6-6" />
+          </View>
+          <View style={s.planMetin}>
+            <Text style={s.planBaslik}>{`${sehirAdi} · ${t('gezi.gunAdet', { n: gezi.gun_sayisi })}`}</Text>
+            <Text style={s.altOzet}>{t('gezi.sayfa2', { gun: gezi.gun_sayisi, mekan: gezi.mekan_sayisi })}</Text>
+          </View>
         </View>
         <GeziPlani gezi={gezi} canli={undefined} onDurakEkle={() => {}} listede={() => false} mesgulId={null} />
       </ScrollView>
@@ -135,5 +141,8 @@ const s = StyleSheet.create({
   siyahDugme: { height: 50, paddingHorizontal: 22, borderRadius: 999, backgroundColor: yRenk.metin, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 },
   siyahMetin: { fontFamily: yazi.ekstra, fontSize: 14, color: yRenk.zemin },
   planIc: { paddingTop: 56, paddingHorizontal: 20, paddingBottom: 20, gap: 12 },
-  planBaslik: { fontFamily: yazi.ekstra, fontSize: 18, letterSpacing: -0.4, color: yRenk.metin },
+  planUst: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  planMetin: { flex: 1, minWidth: 0 },
+  griYuvarlak: { backgroundColor: yRenk.yuzey, boxShadow: 'none' },
+  planBaslik: { fontFamily: yazi.ekstra, fontSize: 20, lineHeight: 21, letterSpacing: -0.6, color: yRenk.metin },
 });
