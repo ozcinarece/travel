@@ -36,7 +36,37 @@ export function miniCubuk(plan: Program, canli: Program, simdiDk: number, burada
   return { tur: 'yuruyus', hedefId: siradaki.durak.id, kalanDk, gecikmeDk };
 }
 
-/** "Kaydır": bulunulan durağın süresi fiilen geçen süreye (15 dk'ya yukarı yuvarlanmış) çekilir; sonrakiler kayar. */
+/** "Kaydır": bulunulan durağın süresi fiilen geçen süreye çekilir (#140 KK1: yuvarlama yok, tam dakika); sonrakiler kayar. */
 export function kaydirSuresi(varildiDk: number, simdiDk: number): number {
-  return Math.min(480, Math.max(15, Math.ceil((simdiDk - varildiDk) / 15) * 15));
+  return Math.min(480, Math.max(15, Math.ceil(simdiDk - varildiDk)));
+}
+
+/**
+ * #140 KK10 "Gerideyiz": yalnız konum açıkken (izin yoksa yalnız saat odağı). Sıradaki durağa beklenen varış — buradaysan
+ * gerçek varış, yoldaysan şu an + kalan yol — canlı programdaki varıştan ne kadar sonra. `kaydir` önerisi: önceki durağın
+ * ayrılışı (ya da ilk durakta günün başlangıcı) beklenen varıştan bacak süresi kadar önceye çekilir; sonraki saatler kayar.
+ */
+export type Gecikme = {
+  dk: number;
+  hedefId: string;
+  /** Önceki (geçilmiş) durak; yoksa günün ilk durağı — başlangıç saati kayar. */
+  oncekiId: string | null;
+  /** Önceki duraktan ayrılış (ya da günün başlangıcı) bu dakikaya çekilir. */
+  yeniAyrilisDk: number;
+};
+
+export function gecikme(canli: Program, secenek: { simdiDk: number; buradaId: string | null; varisDk: number | null; kalanDk: number | null }): Gecikme | null {
+  const { simdiDk, buradaId, varisDk, kalanDk } = secenek;
+  const satirlar = canli.satirlar;
+  const i = satirlar.findIndex((s) => s.durum === 'siradaki' || s.durum === 'buradasin');
+  if (i < 0) return null;
+  const hedef = satirlar[i];
+  const onceki = satirlar.slice(0, i).reverse().find((s) => s.durum === 'gecildi') ?? null;
+  const bacak = hedef.yuruyus ? yuruyusDk(hedef.yuruyus) : 0;
+  // Hâlâ önceki duraktaysan (uzun kalma) şimdi çıkıyorsun; buradaysan gerçek varış; yoldaysan şu an + kalan yol.
+  const oncedeyim = !!onceki && buradaId === onceki.durak.id;
+  const beklenen = hedef.durum === 'buradasin' ? (varisDk ?? simdiDk) : oncedeyim ? simdiDk + bacak : simdiDk + (kalanDk ?? 0);
+  const dk = Math.round(beklenen - hedef.varisDk);
+  if (dk <= 0) return null;
+  return { dk, hedefId: hedef.durak.id, oncekiId: onceki?.durak.id ?? null, yeniAyrilisDk: beklenen - bacak };
 }

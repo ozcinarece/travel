@@ -2,71 +2,74 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { Ikon } from '@/components/ui/Ikon';
 import { t } from '@/i18n';
-import { minDokunma, renk, yazi } from '@/theme';
+import { kose, minDokunma, renk, yazi } from '@/theme';
 
 type Props = {
-  /** donus: bitiş = başlangıç (aynı otele dönüş) — tek satır sade. */
+  /** donus: bitiş = başlangıç (aynı otele dönüş). */
   tur: 'baslangic' | 'bitis' | 'donus';
   /** Otel adı; null = otel yok. */
   ad: string | null;
   saat: string;
   onPress: () => void;
+  /** #140: başlangıç satırında saate dokununca başlangıç saati seçimi. */
+  onSaat?: () => void;
 };
 
 /**
- * #56 §1: listenin ilk / son satırı. Otel varsa siyah ev · ad · "Başlangıç · 09:00" · Değiştir; yoksa kesikli çerçeve,
- * gri ev, "Başlangıç: otel yok" + alt metin, siyah "+ Otel ekle". Bitiş başlangıçla aynıysa "Otele dönüş · 13:44".
+ * #56 §1 → #140 (kanvas 11): listenin ilk / son satırı — saat sütunu (44 px) · Gece kare ev · "[Otel adı] · çıkış"
+ * (bitişte "· varış", aynı otele dönüşte "· dönüş"). Otel yoksa kesikli kare, "Başlangıç: otel yok" + "Otel ekle".
  */
-export function OtelUcSatiri({ tur, ad, saat, onPress }: Props) {
-  if (tur === 'donus') {
-    return (
-      <Pressable accessibilityRole="button" onPress={onPress} style={({ pressed }) => [s.donus, pressed && { opacity: 0.6 }]}>
-        <Ikon ad="ev" boyut={14} renk={renk.ikincil} kalinlik={2.2} />
-        <Text style={s.donusMetin}>{t('gunOteli.donus', { saat })}</Text>
-      </Pressable>
-    );
-  }
+export function OtelUcSatiri({ tur, ad, saat, onPress, onSaat }: Props) {
   const bas = tur === 'baslangic';
+  const saatSutunu = onSaat ? (
+    <Pressable accessibilityRole="button" accessibilityLabel={t('program.liste.baslangic')} onPress={onSaat} hitSlop={8} style={s.saatKutu}>
+      <Text style={[s.saat, s.saatDokun]}>{saat}</Text>
+    </Pressable>
+  ) : (
+    <View style={s.saatKutu}>
+      <Text style={s.saat}>{saat}</Text>
+    </View>
+  );
   if (!ad) {
     return (
-      <Pressable accessibilityRole="button" onPress={onPress} style={({ pressed }) => [s.satir, s.yok, pressed && { opacity: 0.6 }]}>
-        <Ikon ad="ev" boyut={18} renk={renk.soluk} kalinlik={2.2} />
-        <View style={s.metinler}>
-          <Text style={s.ad} numberOfLines={1}>
+      <View style={s.satir}>
+        {saatSutunu}
+        <Pressable accessibilityRole="button" onPress={onPress} style={({ pressed }) => [s.icerik, pressed && { opacity: 0.6 }]}>
+          <View style={[s.kare, s.kareYok]}>
+            <Ikon ad="ev" boyut={14} renk={renk.soluk} kalinlik={2.4} />
+          </View>
+          <Text style={[s.ad, { color: renk.ikincil }]} numberOfLines={1}>
             {t(bas ? 'gunOteli.baslangicYok' : 'gunOteli.bitisYok')}
           </Text>
-          <Text style={s.alt} numberOfLines={1}>
-            {t(bas ? 'gunOteli.baslangicYokAlt' : 'gunOteli.bitisYokAlt')}
-          </Text>
-        </View>
-        <Text style={s.ekle}>{t('gunOteli.ekle')}</Text>
-      </Pressable>
+          <Text style={s.ekle}>{t('gunOteli.ekle')}</Text>
+        </Pressable>
+      </View>
     );
   }
+  const metin = t(bas ? 'program.liste.otelCikis' : tur === 'donus' ? 'program.liste.otelDonus' : 'program.liste.otelVaris', { ad });
   return (
-    <Pressable accessibilityRole="button" onPress={onPress} style={({ pressed }) => [s.satir, pressed && { opacity: 0.6 }]}>
-      <Ikon ad="ev" boyut={18} renk={renk.metin} kalinlik={2.2} />
-      <View style={s.metinler}>
+    <View style={s.satir}>
+      {saatSutunu}
+      <Pressable accessibilityRole="button" onPress={onPress} style={({ pressed }) => [s.icerik, pressed && { opacity: 0.6 }]}>
+        <View style={s.kare}>
+          <Ikon ad="ev" boyut={14} renk={renk.zemin} kalinlik={2.4} />
+        </View>
         <Text style={s.ad} numberOfLines={1}>
-          {ad}
+          {metin}
         </Text>
-        <Text style={s.alt} numberOfLines={1}>
-          {t(bas ? 'gunOteli.baslangic' : 'gunOteli.bitis', { saat })}
-        </Text>
-      </View>
-      <Text style={s.degistir}>{t('gunOteli.degistir')}</Text>
-    </Pressable>
+      </Pressable>
+    </View>
   );
 }
 
 const s = StyleSheet.create({
-  satir: { flexDirection: 'row', alignItems: 'center', gap: 10, minHeight: minDokunma, paddingHorizontal: 8, paddingVertical: 6, borderRadius: 12 },
-  yok: { borderWidth: 1, borderStyle: 'dashed', borderColor: '#c4c4c4' },
-  metinler: { flex: 1, gap: 1 },
-  ad: { fontFamily: yazi.kalin, fontSize: 14, color: renk.metin },
-  alt: { fontFamily: yazi.normal, fontSize: 12, color: renk.ikincil },
-  degistir: { fontFamily: yazi.kalin, fontSize: 13, color: renk.ikincil },
-  ekle: { fontFamily: yazi.ekstra, fontSize: 13, color: renk.metin },
-  donus: { flexDirection: 'row', alignItems: 'center', gap: 8, minHeight: 32, paddingLeft: 10 },
-  donusMetin: { fontFamily: yazi.kalin, fontSize: 13, color: renk.ikincil },
+  satir: { flexDirection: 'row', alignItems: 'center', gap: 12, minHeight: minDokunma },
+  saatKutu: { width: 44 },
+  saat: { fontFamily: yazi.ekstra, fontSize: 13, color: renk.ikincil },
+  saatDokun: { textDecorationLine: 'underline', textDecorationStyle: 'dotted' },
+  icerik: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 12, minHeight: minDokunma },
+  kare: { width: 30, height: 30, borderRadius: 9, backgroundColor: renk.ana, alignItems: 'center', justifyContent: 'center' },
+  kareYok: { backgroundColor: 'transparent', borderWidth: 1.5, borderStyle: 'dashed', borderColor: '#b4bbd3' },
+  ad: { flex: 1, fontFamily: yazi.ekstra, fontSize: 15, color: renk.metin },
+  ekle: { fontFamily: yazi.ekstra, fontSize: 13, color: renk.ana, paddingHorizontal: 4, borderRadius: kose.rozet },
 });

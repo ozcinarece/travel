@@ -7,8 +7,8 @@ import { mesafeM } from '@/components/harita/geo';
 
 export type KonumIzni = 'bekliyor' | 'verildi' | 'reddedildi';
 
-/** "Bir durağın içinde" sayılan yarıçap (metre). */
-export const DURAK_YARICAPI_M = 60;
+/** "Bir durağın içinde" sayılan yarıçap (metre). #140 KK9: 60 → 100 m. */
+export const DURAK_YARICAPI_M = 100;
 
 export function useKonum(aktif: boolean): { konum: Konum | null; izin: KonumIzni } {
   const [konum, setKonum] = useState<Konum | null>(null);
@@ -41,7 +41,7 @@ export function useKonum(aktif: boolean): { konum: Konum | null; izin: KonumIzni
   return { konum: aktif ? konum : null, izin };
 }
 
-/** Kullanıcının 60 m içinde olduğu ilk durak (kimlik); yoksa null. */
+/** Kullanıcının 100 m içinde olduğu ilk durak (kimlik); yoksa null. */
 export function yakinDurakId(konum: Konum | null, duraklar: { id: string; konum: Konum }[]): string | null {
   if (!konum) return null;
   for (const d of duraklar) if (mesafeM(konum, d.konum) <= DURAK_YARICAPI_M) return d.id;

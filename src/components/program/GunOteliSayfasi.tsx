@@ -12,10 +12,10 @@ import { otelinGeceleri, type Konaklama, type OtelKapsami } from '@/features/kon
 import type { OtelSecimiVeyaKayitli } from '@/features/konaklama/sorgular';
 import { hafifYerler, linkCoz, linkGibiMi, useOtelOnerileri, yeniOturumJetonu, type Oneri } from '@/features/yerler/api';
 import { t } from '@/i18n';
+import { mesafeMetni } from '@/lib/mesafe';
 import type { Gun, OtelSecimi, Seyahat } from '@/lib/tipler';
 import { minDokunma, renk, yazi } from '@/theme';
 
-import { mesafeMetni } from './CizelgeListesi';
 import { gunEtiketKisa } from './GunKartlari';
 
 /** Bir uç için seçim: kayıtlı otel, aramadan / haritadan yeni otel ya da otel yok. */

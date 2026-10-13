@@ -42,12 +42,12 @@ export function BacakSecici({ baslik, secenekler, onSec }: Ortak & { baslik: str
 }
 
 /**
- * #101 KK3 (kanvas LegMode17 ekran 2): panelde bacak satırı açılınca — "NASIL GİDİLİR · 900 m" + üçlü yatay segment
- * (Yürüme 12 dk · Araba 4 dk · yakında). Seçili siyah.
+ * #101 KK3 → #140 (kanvas 11): panelde bacak hapı açılınca Buz kutu — "NASIL GİDİLİR · 900 m" + beyaz zeminde üçlü segment
+ * "Yürüme · 12 dk" · "Araba · 5 dk" · "Toplu taşıma yakında" (soluk). Seçili Gece dolu.
  */
 export function BacakSegmenti({ mesafe, secenekler, onSec }: Ortak & { mesafe: string | null }) {
   return (
-    <View style={{ gap: 6 }}>
+    <View style={s.segmentKutu}>
       <Text style={s.segmentBaslik}>{mesafe ? t('program.bacak.baslik', { mesafe }) : t('program.bacak.baslikKisa')}</Text>
       <View style={s.segment}>
         {secenekler.map((o) => (
@@ -57,9 +57,14 @@ export function BacakSegmenti({ mesafe, secenekler, onSec }: Ortak & { mesafe: s
             accessibilityState={{ selected: o.secili, disabled: o.pasif }}
             disabled={o.pasif}
             onPress={() => o.mod !== 'toplu' && onSec(o.mod)}
-            style={({ pressed }) => [s.parca, o.secili && s.parcaSecili, o.pasif && { opacity: 0.5 }, pressed && { opacity: 0.8 }]}>
-            <Ikon ad={o.mod === 'yurume' ? 'yurume' : o.mod === 'araba' ? 'araba' : 'grup'} boyut={14} renk={o.secili ? renk.zemin : renk.metin} kalinlik={2.2} />
-            {sure(o) !== null ? <Text style={[s.parcaMetin, o.secili && { color: renk.zemin }, o.pasif && { color: renk.ikincil }]}>{sure(o)}</Text> : <ActivityIndicator size="small" color={o.secili ? renk.zemin : renk.ikincil} />}
+            style={({ pressed }) => [s.parca, o.secili && s.parcaSecili, pressed && { opacity: 0.8 }]}>
+            {o.pasif ? (
+              <Text style={[s.parcaMetin, s.parcaPasif]} numberOfLines={2}>{`${etiket(o.mod)}\n${t('program.bacak.yakinda')}`}</Text>
+            ) : sure(o) !== null ? (
+              <Text style={[s.parcaMetin, o.secili && { color: renk.zemin }]} numberOfLines={1} adjustsFontSizeToFit>{`${etiket(o.mod)} · ${sure(o)}`}</Text>
+            ) : (
+              <ActivityIndicator size="small" color={o.secili ? renk.zemin : renk.ikincil} />
+            )}
           </Pressable>
         ))}
       </View>
@@ -72,12 +77,14 @@ const s = StyleSheet.create({
   golge: { shadowColor: renk.metin, shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.18, shadowRadius: 14, elevation: 8 },
   baslik: { fontFamily: yazi.ekstra, fontSize: 10.5, letterSpacing: 0.6, color: renk.ikincil, paddingHorizontal: 10, paddingTop: 6, paddingBottom: 4 },
   satir: { flexDirection: 'row', alignItems: 'center', gap: 8, height: 40, paddingHorizontal: 10, borderRadius: 12 },
-  satirSecili: { backgroundColor: renk.metin },
+  satirSecili: { backgroundColor: renk.ana },
   satirMetin: { flex: 1, fontFamily: yazi.ekstra, fontSize: 13, color: renk.metin },
   satirSure: { fontFamily: yazi.kalin, fontSize: 12, color: renk.ikincil },
-  segmentBaslik: { fontFamily: yazi.ekstra, fontSize: 11, letterSpacing: 0.4, color: renk.ikincil },
-  segment: { flexDirection: 'row', gap: 6, padding: 4, borderRadius: 14, backgroundColor: '#f6f6f4' },
-  parca: { flex: 1, height: 36, borderRadius: 10, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6 },
-  parcaSecili: { backgroundColor: renk.metin },
-  parcaMetin: { fontFamily: yazi.ekstra, fontSize: 12, color: renk.metin },
+  segmentKutu: { padding: 10, gap: 8, borderRadius: 16, backgroundColor: renk.yuzey },
+  segmentBaslik: { fontFamily: yazi.ekstra, fontSize: 11, letterSpacing: 0.66, color: renk.ikincil },
+  segment: { flexDirection: 'row', gap: 4, padding: 3, borderRadius: 12, backgroundColor: renk.zemin },
+  parca: { flex: 1, height: 40, borderRadius: 10, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 4 },
+  parcaSecili: { backgroundColor: renk.ana },
+  parcaMetin: { fontFamily: yazi.ekstra, fontSize: 13, color: renk.ana, textAlign: 'center' },
+  parcaPasif: { fontSize: 11, lineHeight: 13, color: '#8a91ad' },
 });

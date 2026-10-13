@@ -3,8 +3,10 @@ import { useEffect, useMemo, useState } from 'react';
 
 import type { GunUcNoktalari } from '@/features/konaklama/plan';
 import type { Konum } from '@/components/harita/tipler';
+import { haftaGunu } from '@/lib/takvim';
 import type { Durak, Gun, Mekan, Seyahat } from '@/lib/tipler';
 import { yerelSaatDk, yerelTarih } from '@/lib/zaman';
+import { googleGunu, type Periyot } from '@/schedule/acilis';
 import { miniCubuk, type MiniCubuk } from '@/schedule/kaydir';
 import { programHesapla, type Program, type ProgramDuragi, type YuruyusKaynagi } from '@/schedule/program';
 
@@ -52,13 +54,22 @@ export function useGunProgrami(secenek: {
   buradaId?: string | null;
   /** #56: günün başlangıç/bitiş oteli (stays). */
   uclar: GunUcNoktalari;
+  /** #140 KK1: saatli hafif yerler (place_id → periyotlar); varsa açılışı bekleyen durakta sebepli boşluk. */
+  saatler?: Record<string, { periyotlar?: Periyot[] | null }>;
 }): GunProgrami | null {
-  const { seyahat, gun, duraklar, mekanlar, yuruyus, an, buradaId, uclar } = secenek;
+  const { seyahat, gun, duraklar, mekanlar, yuruyus, an, buradaId, uclar, saatler } = secenek;
   return useMemo(() => {
     if (!seyahat || !gun) return null;
     const otel = uclar.baslangic ? { lat: uclar.baslangic.lat, lng: uclar.baslangic.lng } : null;
     const bitisOtel = uclar.bitis ? { lat: uclar.bitis.lat, lng: uclar.bitis.lng } : null;
-    const uc = { otel, bitisOtel, otelKey: uclar.baslangic?.key, bitisKey: uclar.bitis?.key };
+    const uc = {
+      otel,
+      bitisOtel,
+      otelKey: uclar.baslangic?.key,
+      bitisKey: uclar.bitis?.key,
+      acilis: saatler ? (key: string) => saatler[key]?.periyotlar : undefined,
+      haftaGunu: gun.date ? googleGunu(haftaGunu(gun.date)) : null,
+    };
     const bugun = !!gun.date && gun.date === yerelTarih(an, seyahat.tz);
     const simdiDk = bugun ? yerelSaatDk(an, seyahat.tz) : null;
     const mekanIle = new Map(mekanlar.map((m) => [m.id, m]));
@@ -79,5 +90,5 @@ export function useGunProgrami(secenek: {
     const canli = programHesapla({ baslangic, duraklar: yap(true), ...uc, yuruyus, simdiDk, buradaId: buradaId ?? null });
     const cubuk = simdiDk !== null ? miniCubuk(plan, canli, simdiDk, buradaId ?? null) : null;
     return { gun, bugun, simdiDk, plan, canli, cubuk, otel, bitisOtel };
-  }, [seyahat, gun, duraklar, mekanlar, yuruyus, an, buradaId, uclar]);
+  }, [seyahat, gun, duraklar, mekanlar, yuruyus, an, buradaId, uclar, saatler]);
 }

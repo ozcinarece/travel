@@ -1,9 +1,10 @@
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
+import { Ikon } from '@/components/ui/Ikon';
 import { t } from '@/i18n';
 import { AYLAR, AYLAR_KISA, GUNLER, GUNLER_KISA, haftaGunu, parcala } from '@/lib/takvim';
 import type { Durak, Gun } from '@/lib/tipler';
-import { gunRengi, renk, yazi } from '@/theme';
+import { bosluk, gunRengi, gunUstuMetin, kose, renk, yazi } from '@/theme';
 
 type Props = {
   gunler: Gun[];
@@ -45,74 +46,51 @@ export function gunHucresi(gun: Gun, durakSayisi: number): { ust: string; alt: s
   return { ust: t('program.gunSec', { n: gun.index }), alt: durakSayisi > 0 ? t('gunler.durakSayisi', { n: durakSayisi }) : t('gunler.bosKisa') };
 }
 
-/** 3 güne kadar şerit kaymaz (eşit genişlik); 4+ günde yatay kayar. */
-const KAYMADAN_SIGAN = 3;
-const KAYAN_HUCRE = 84;
-
 /**
- * #53 §4 gün seçici: tek parça beyaz şerit (4 px iç boşluk, 16 px köşe), eşit genişlikte 44 px hücreler —
- * renk noktası + "N. gün", altında "Cmt 10". Seçili gün siyah değil: #f1f1ef zemin, koyu yazı, altta günün renginde
- * 22×3 px çizgi; seçili olmayan gri yazı, nokta %50. Sonda "+" (gün ekle); uzun bas → Günü sil. Metin asla "…" değil.
+ * #53 §4 → #140 (kanvas 10): gün seçici — ayrı beyaz çipler (40 px, köşe 12, gölge) yatay şeritte: "Cum 16" / "1. gün".
+ * Seçili gün kendi renginde dolu (yazı `gunUstuMetin`); diğerlerinde durak varsa gün rengi nokta, boş günün yazısı soluk.
+ * Sonda "+" (gün ekle); uzun bas → Günü sil. Bugünün çipinde altı çizili tarih.
  */
 export function GunKartlari({ gunler, duraklar, seciliId, bugunIndex, onSec, onUzunBas, onEkle, ekleniyor }: Props) {
-  const kayar = gunler.length > KAYMADAN_SIGAN;
-  const hucreler = gunler.map((g) => {
-    const aktif = g.id === seciliId;
-    const rengi = gunRengi(g.index);
-    const n = duraklar.filter((d) => d.day_id === g.id).length;
-    const hucre = gunHucresi(g, n);
-    return (
-      <Pressable
-        key={g.id}
-        accessibilityRole="button"
-        accessibilityState={{ selected: aktif }}
-        accessibilityLabel={`${t('program.gunSec', { n: g.index })} · ${t('gunler.durakSayisi', { n })}`}
-        onPress={() => onSec(g.id)}
-        onLongPress={onUzunBas ? () => onUzunBas(g) : undefined}
-        style={[s.hucre, kayar ? { width: KAYAN_HUCRE } : { flex: 1 }, aktif && s.hucreAktif]}>
-        <View style={s.ustSatir}>
-          <View style={[s.nokta, { backgroundColor: rengi }, !aktif && { opacity: 0.5 }]} />
-          <Text style={[s.baslik, !aktif && s.soluk]}>{hucre.ust}</Text>
-        </View>
-        <Text style={[s.alt, g.index === bugunIndex && { color: renk.vurgu }]}>{hucre.alt}</Text>
-        {aktif ? <View style={[s.cizgi, { backgroundColor: rengi }]} /> : null}
-      </Pressable>
-    );
-  });
-  const arti = onEkle ? (
-    <Pressable accessibilityRole="button" accessibilityLabel={t('gunler.gunEkle')} disabled={ekleniyor} onPress={onEkle} style={s.arti}>
-      <Text style={s.artiIsaret}>+</Text>
-    </Pressable>
-  ) : null;
   return (
-    <View style={[s.serit, s.golge]}>
-      {kayar ? (
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={s.icerik} keyboardShouldPersistTaps="handled">
-          {hucreler}
-          {arti}
-        </ScrollView>
-      ) : (
-        <View style={[s.icerik, { flex: 1 }]}>
-          {hucreler}
-          {arti}
-        </View>
-      )}
-    </View>
+    <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={s.icerik} keyboardShouldPersistTaps="handled" style={s.serit}>
+      {gunler.map((g) => {
+        const aktif = g.id === seciliId;
+        const rengi = gunRengi(g.index);
+        const n = duraklar.filter((d) => d.day_id === g.id).length;
+        const hucre = gunHucresi(g, n);
+        return (
+          <Pressable
+            key={g.id}
+            accessibilityRole="button"
+            accessibilityState={{ selected: aktif }}
+            accessibilityLabel={`${t('program.gunSec', { n: g.index })} · ${t('gunler.durakSayisi', { n })}`}
+            onPress={() => onSec(g.id)}
+            onLongPress={onUzunBas ? () => onUzunBas(g) : undefined}
+            style={({ pressed }) => [s.cip, s.golge, aktif && { backgroundColor: rengi }, pressed && { opacity: 0.85 }]}>
+            {!aktif && n > 0 ? <View style={[s.nokta, { backgroundColor: rengi }]} /> : null}
+            <Text style={[s.metin, aktif ? { color: gunUstuMetin(rengi) } : n === 0 && s.soluk, g.index === bugunIndex && s.bugun]}>{hucre.ust}</Text>
+          </Pressable>
+        );
+      })}
+      {onEkle ? (
+        <Pressable accessibilityRole="button" accessibilityLabel={t('gunler.gunEkle')} disabled={ekleniyor} onPress={onEkle} style={({ pressed }) => [s.cip, s.golge, s.arti, pressed && { opacity: 0.85 }]}>
+          <Ikon ad="yeni" boyut={18} renk={renk.ana} kalinlik={2.6} />
+        </Pressable>
+      ) : null}
+    </ScrollView>
   );
 }
 
 const s = StyleSheet.create({
-  serit: { flexDirection: 'row', padding: 4, borderRadius: 16, backgroundColor: renk.zemin },
-  golge: { shadowColor: renk.metin, shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.08, shadowRadius: 8, elevation: 3 },
-  icerik: { flexDirection: 'row', gap: 4 },
-  hucre: { height: 44, borderRadius: 12, paddingHorizontal: 8, alignItems: 'center', justifyContent: 'center' },
-  hucreAktif: { backgroundColor: '#f1f1ef' },
-  ustSatir: { flexDirection: 'row', alignItems: 'center', gap: 5 },
+  // HaritaEkrani üst katmanı 20 px iç boşluklu; şerit kenardan kenara kayar.
+  serit: { marginHorizontal: -bosluk.kenar, flexGrow: 0 },
+  icerik: { flexDirection: 'row', gap: 6, paddingHorizontal: bosluk.kenar, paddingBottom: 10 },
+  golge: { shadowColor: renk.metin, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.12, shadowRadius: 10, elevation: 4 },
+  cip: { height: 40, paddingHorizontal: 12, borderRadius: kose.alan, backgroundColor: renk.zemin, flexDirection: 'row', alignItems: 'center', gap: 6 },
   nokta: { width: 8, height: 8, borderRadius: 4 },
-  baslik: { fontFamily: yazi.ekstra, fontSize: 13, lineHeight: 16, color: renk.metin },
+  metin: { fontFamily: yazi.ekstra, fontSize: 14, color: renk.metin },
   soluk: { color: renk.ikincil },
-  alt: { fontFamily: yazi.normal, fontSize: 11, lineHeight: 14, color: renk.ikincil },
-  cizgi: { position: 'absolute', bottom: 3, width: 22, height: 3, borderRadius: 1.5 },
-  arti: { width: 44, height: 44, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
-  artiIsaret: { fontFamily: yazi.kalin, fontSize: 22, lineHeight: 24, color: renk.metin },
+  bugun: { textDecorationLine: 'underline' },
+  arti: { width: 40, paddingHorizontal: 0, justifyContent: 'center' },
 });
