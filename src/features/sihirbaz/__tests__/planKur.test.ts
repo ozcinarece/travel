@@ -84,8 +84,8 @@ describe('planKur (#139 KK5)', () => {
     expect(secimOzeti([m('k', 39.7, 30.5, 15)]).saat).toBe(1);
   });
 
-  it('durak dakikası 15 katı, 15–480', () => {
-    expect(durakDakikasi(50)).toBe(45);
+  it('durak dakikası tam dakika (yuvarlama yok), 15–480', () => {
+    expect(durakDakikasi(50)).toBe(50);
     expect(durakDakikasi(5)).toBe(15);
     expect(durakDakikasi(700)).toBe(480);
   });

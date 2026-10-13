@@ -16,7 +16,11 @@ as $$
 declare
   n integer;
 begin
-  -- Tek seyahat isteniyorsa yalnız üyesi temizletebilir (Program açılışında); parametresiz çağrı zamanlayıcı içindir.
+  -- Tek seyahat isteniyorsa yalnız üyesi temizletebilir (Program açılışında); parametresiz çağrı yalnız zamanlayıcı içindir
+  -- (pg_cron'da oturum yok); oturumlu kullanıcı tüm seyahatleri taratamaz.
+  if t is null and auth.uid() is not null then
+    raise exception 'yetki yok' using errcode = '42501';
+  end if;
   if t is not null and not public.is_member(t) then
     raise exception 'yetki yok' using errcode = '42501';
   end if;
@@ -24,6 +28,8 @@ begin
     select tr.id from public.trips tr
     where (t is null or tr.id = t)
       and tr.end_date is not null
+      -- Geçersiz saat dilimi tek satırda bile tüm temizliği düşürmesin (yazımda da doğrulanır, aşağıda).
+      and tr.tz in (select name from pg_catalog.pg_timezone_names)
       and tr.end_date < (now() at time zone tr.tz)::date - 1
   ), temiz as (
     update public.stops s set arrived_at = null, arrived_by = null
@@ -36,11 +42,31 @@ begin
   where c.entity = 'stops' and c.field in ('arrived_at', 'arrived_by')
     and c.trip_id in (
       select tr.id from public.trips tr
-      where (t is null or tr.id = t) and tr.end_date is not null and tr.end_date < (now() at time zone tr.tz)::date - 1
+      where (t is null or tr.id = t) and tr.end_date is not null
+        and tr.tz in (select name from pg_catalog.pg_timezone_names)
+        and tr.end_date < (now() at time zone tr.tz)::date - 1
     );
   return n;
 end;
 $$;
+
+-- trips.tz üyelerce değiştirilebilir: yalnız geçerli IANA adı yazılır (gece temizliği ve tüm saat hesapları buna dayanır).
+create or replace function public.trips_tz_dogrula()
+returns trigger
+language plpgsql set search_path = ''
+as $$
+begin
+  if not exists (select 1 from pg_catalog.pg_timezone_names z where z.name = new.tz) then
+    raise exception 'geçersiz saat dilimi: %', new.tz using errcode = '22023';
+  end if;
+  return new;
+end;
+$$;
+
+drop trigger if exists trips_tz_dogrula on public.trips;
+create trigger trips_tz_dogrula
+before insert or update of tz on public.trips
+for each row execute function public.trips_tz_dogrula();
 
 revoke execute on function public.gecmis_varislari_temizle(uuid) from public, anon;
 grant execute on function public.gecmis_varislari_temizle(uuid) to authenticated;

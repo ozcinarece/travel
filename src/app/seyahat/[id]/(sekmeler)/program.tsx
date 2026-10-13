@@ -290,7 +290,7 @@ function ProgramSekmesi({
   const an = useSimdi(true);
   const { konum, izin } = useKonum(bugun);
   const buradaId = useMemo(
-    () => (konum ? yakinDurakId(konum, gunDurak.filter((d) => !d.skipped).map((d) => ({ id: d.id, konum: mekanIle.get(d.place_ref) ?? { lat: 0, lng: 0 } }))) : null),
+    () => (konum ? yakinDurakId(konum, gunDurak.filter((d) => !d.skipped && !d.completed_at).map((d) => ({ id: d.id, konum: mekanIle.get(d.place_ref) ?? { lat: 0, lng: 0 } }))) : null),
     [konum, gunDurak, mekanIle],
   );
   const prog = useGunProgrami({ seyahat, gun, duraklar, mekanlar, yuruyus: verisi.yuruyus, an, buradaId: konum ? buradaId : undefined, uclar: seciliUclar, saatler: yerler.data });
@@ -346,16 +346,18 @@ function ProgramSekmesi({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [seyahat.id]);
 
-  // #43 KK4 → #140 KK9: konum durağın 100 m içine girince varış yazılır — grup görür ("vardı"), koordinat yazılmaz.
+  // #43 KK4 → #140 KK9: konum durağın 100 m içine girince varış yazılır — grup görür ("vardı"), koordinat yazılmaz. Yalnız
+  // sıradaki durağa: yolda yakınından geçilen ileri duraklara varış yazılmaz.
   const varisYazilan = useRef(new Set<string>());
+  const siradakiId = prog?.canli.satirlar.find((x) => x.durum === 'siradaki' || x.durum === 'buradasin')?.durak.id ?? null;
   useEffect(() => {
-    if (!buradaId) return;
+    if (!buradaId || buradaId !== siradakiId) return;
     const d = gunDurak.find((x) => x.id === buradaId);
     if (!d || d.arrived_at || varisYazilan.current.has(d.id)) return;
     varisYazilan.current.add(d.id);
     durakGuncelle.mutateAsync({ id: d.id, arrived_at: new Date().toISOString(), arrived_by: session?.user.id ?? null }).catch(() => varisYazilan.current.delete(d.id));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [buradaId]);
+  }, [buradaId, siradakiId]);
 
   // Seçili mekan (#80 mekan paneli). Mekan silinmişse panel kendiliğinden kapanır (türetilmiş).
   const seciliMekan = seciliMekanId ? mekanIle.get(seciliMekanId) : undefined;

@@ -963,6 +963,12 @@ begin
   assert public.gecmis_varislari_temizle(current_setting('test.varis_gelecek')::uuid) = 0, 'gelecek seyahat dokunulmaz';
   assert (select arrived_at from public.stops where trip_id = current_setting('test.varis_gelecek')::uuid) is not null, 'gelecek varış durur';
 end $$;
+-- Parametresiz çağrı yalnız zamanlayıcıya (oturumsuz): oturumlu kullanıcı tüm seyahatleri taratamaz.
+select pg_temp.hata_bekle($$select public.gecmis_varislari_temizle()$$, '42501');
+-- trips.tz yalnız geçerli IANA adı; geçersiz değer yazılamaz.
+select pg_temp.hata_bekle($$update public.trips set tz = 'Mars/Olympus' where id = current_setting('test.varis_gelecek')::uuid$$, '22023');
 reset role;
+select pg_temp.as_user(null);
+do $$ begin assert public.gecmis_varislari_temizle() >= 0, 'oturumsuz (cron) çağrı çalışır'; end $$;
 
 \echo 'rls_test: TÜM TESTLER GEÇTİ'

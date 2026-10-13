@@ -170,7 +170,7 @@ export function planKur(
   return { gunler: sonuc, atanmamis, bolgeSayisi };
 }
 
-/** stops.minutes 15'in katı, 15–480 (DB kısıtı). */
+/** stops.minutes 15–480 (DB kısıtı); #140: 15'in katına yuvarlanmaz, tam dakika. */
 export function durakDakikasi(dk: number): number {
-  return Math.min(480, Math.max(15, Math.round(dk / 15) * 15));
+  return Math.min(480, Math.max(15, Math.round(dk)));
 }
