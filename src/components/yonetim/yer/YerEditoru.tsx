@@ -20,8 +20,8 @@ import { IcerikFotolari } from '../IcerikFotolari';
 import { sutun, YonetimSayfasi } from '../Kabuk';
 import { KayitDurumu } from '../Ortak';
 import { OlcekliTelefon } from '../gezi/GeziOnizleme';
+import { BlokEditoru } from '../rehber/BlokEditoru';
 import { yRenk } from '../tema';
-import { RehberEditoru } from './RehberEditoru';
 import { YerGenel } from './YerGenel';
 import { YerOnizleme } from './YerOnizleme';
 
@@ -97,13 +97,13 @@ export function YerEditoru({ yer, sehirler, liste }: { yer: YonetimYeri; sehirle
         ) : null}
         {sekme === 'genel' ? <YerGenel taslak={taslak} sehirler={sehirler} degistir={degistir} tekilHatasi={durum.hata === 'tekil'} /> : null}
         {sekme === 'rehber' ? (
-          <RehberEditoru
-            md={taslak.rehber_md}
+          // #156 KK14: şehir rehberiyle aynı editör (bölüm listesi olmadan).
+          <BlokEditoru
+            md={taslak.rehber_md ?? ''}
             onDegis={(rehber_md) => degistir({ rehber_md: rehber_md || null })}
             merkez={merkez}
             fotoYukle={fotoYukle}
             onHata={setHata}
-            kayitMetni={null}
             onMekanSecildi={(y) => {
               bilinen.current[y.place_id] = { ad: y.ad, kategori: y.primary_type, lat: y.lat, lng: y.lng };
             }}

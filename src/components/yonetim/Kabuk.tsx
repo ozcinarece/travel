@@ -278,7 +278,8 @@ const s = StyleSheet.create({
   ogeDar: { height: 40 },
   icerik: { flex: 1, minWidth: 0 },
   sayfa: { flex: 1, backgroundColor: yRenk.yuzey },
-  baslikKap: { flexShrink: 0, paddingTop: 18, paddingHorizontal: 28, backgroundColor: yRenk.zemin, borderBottomWidth: 1, borderBottomColor: yRenk.ayrac, gap: 8 },
+  // Başlıktaki açılır menüler (Geçmiş) sütunların üstünde.
+  baslikKap: { zIndex: 10, flexShrink: 0, paddingTop: 18, paddingHorizontal: 28, backgroundColor: yRenk.zemin, borderBottomWidth: 1, borderBottomColor: yRenk.ayrac, gap: 8 },
   baslikSatir: { flexDirection: 'row', alignItems: 'center', gap: 14 },
   kapak: { width: 52, height: 52, flexShrink: 0, borderRadius: 16, backgroundColor: '#ffe2cc' },
   baslikMetin: { flexShrink: 1, minWidth: 0, gap: 2 },

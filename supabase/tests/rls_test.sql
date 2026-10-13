@@ -1266,4 +1266,75 @@ set role anon;
 select pg_temp.hata_bekle($$select public.yonetim_genel(7)$$, '42501');
 reset role;
 
+
+-- #156 Rehber editörü: serbest bölüm, gizli, taslak + Yayınla, Geçmiş (son 20). Eskişehir'in 4 bölümüyle (yukarıdan).
+reset role;
+create temp table rehber_156 as
+  select (select id from public.sehir_rehberi where sehir_id = '11111111-1111-4111-8111-000000000001' and bolum = 'yemek') as yemek,
+         (select id from public.sehir_rehberi where sehir_id = '11111111-1111-4111-8111-000000000001' and bolum = 'ulasim') as ulasim,
+         '15600000-0000-4000-8000-000000000001'::uuid as aksam;
+grant select on rehber_156 to authenticated, anon;
+set role authenticated;
+select pg_temp.as_email(:E, 'ozcinar.ece@gmail.com');
+do $$
+declare
+  r rehber_156;
+  v_bolumler jsonb;
+  v_zaman timestamptz;
+begin
+  select * into r from rehber_156;
+  -- Ulaşım silinir; Ne yenir yeniden adlandırılır; serbest adlı yeni bölüm gizli eklenir. Mahalleler / İpuçları kalır.
+  v_bolumler := jsonb_build_array(
+    jsonb_build_object('id', r.yemek, 'baslik', 'Ne yenir', 'ozet', 'Çibörek, met helvası', 'gizli', false, 'bolum', 'yemek',
+      'govde', E'Tatlı için [Met Helvacısı](mekan:ChIJ-met-helva-00002) uğrayın.\n\n::mekan[ChIJ-cam-sanat-0003]\n\n> Kutu kutu alın.'),
+    jsonb_build_object('id', (select id from public.sehir_rehberi where sehir_id = '11111111-1111-4111-8111-000000000001' and bolum = 'mahalle'), 'baslik', 'Mahalleler', 'gizli', false, 'bolum', 'mahalle', 'govde', 'Odunpazarı.'),
+    jsonb_build_object('id', r.aksam, 'baslik', 'Akşam ne yapılır', 'gizli', true, 'govde', ''),
+    jsonb_build_object('id', (select id from public.sehir_rehberi where sehir_id = '11111111-1111-4111-8111-000000000001' and bolum = 'ipucu'), 'baslik', 'İpuçları', 'gizli', false, 'bolum', 'ipucu', 'govde', '')
+  );
+  v_zaman := public.rehber_taslak_kaydet('11111111-1111-4111-8111-000000000001', v_bolumler,
+    '{"ChIJ-cam-sanat-0003": {"ad": "Cam Sanatları Evi", "kategori": "museum", "lat": 39.76, "lng": 30.52}}');
+  assert v_zaman is not null, 'taslak kaydedildi';
+  assert (select count(*) from public.sehir_rehberi_surum where sehir_id = '11111111-1111-4111-8111-000000000001') = 1, 'ilk kayıtta sürüm';
+  perform public.rehber_taslak_kaydet('11111111-1111-4111-8111-000000000001', v_bolumler);
+  assert (select count(*) from public.sehir_rehberi_surum where sehir_id = '11111111-1111-4111-8111-000000000001') = 1, '2 dk içinde yeni sürüm yok';
+  assert (select bilinen ? 'ChIJ-cam-sanat-0003' from public.sehir_rehberi_taslak where sehir_id = '11111111-1111-4111-8111-000000000001'), 'bilinen mekanlar birleşir';
+  -- Taslak canlıyı değiştirmez.
+  assert (select baslik from public.sehir_rehberi where id = r.ulasim) is not null, 'yayından önce Ulaşım canlıda';
+  assert public.rehber_yayinla('11111111-1111-4111-8111-000000000001') = 1, 'yayın: bilinmeyen kart mekanı taslak yer açar';
+  assert (select count(*) from public.sehir_rehberi where sehir_id = '11111111-1111-4111-8111-000000000001') = 4, 'canlı = taslak (4 bölüm)';
+  assert not exists (select 1 from public.sehir_rehberi where id = r.ulasim), 'taslakta olmayan bölüm silinir';
+  assert (select string_agg(baslik, ',' order by sira) from public.sehir_rehberi where sehir_id = '11111111-1111-4111-8111-000000000001') = 'Ne yenir,Mahalleler,Akşam ne yapılır,İpuçları', 'sıra taslaktan';
+  assert (select bolum is null and gizli and yazi_md = '# Akşam ne yapılır' from public.sehir_rehberi where id = r.aksam), 'serbest bölüm: türsüz, gizli, yalnız başlık';
+  assert (select yazi_md like E'# Ne yenir\n\nTatlı için%' from public.sehir_rehberi where id = r.yemek), 'yazı: # başlık + gövde';
+  assert (select string_agg(place_id || ':' || bicim, ',' order by sira) from public.icerik_mekanlari where sahip_id = r.yemek)
+    = 'ChIJ-met-helva-00002:satir,ChIJ-cam-sanat-0003:kart', 'mekanlar yazı sırasıyla';
+  assert (select ad from public.yerler where place_id = 'ChIJ-cam-sanat-0003') = 'Cam Sanatları Evi', 'kart mekanının adı bilinen listesinden';
+  assert (select yayinlandi_at >= updated_at from public.sehir_rehberi_taslak where sehir_id = '11111111-1111-4111-8111-000000000001'), 'taslak yayınlandı damgası';
+  assert (select count(*) from public.sehir_rehberi_surum where sehir_id = '11111111-1111-4111-8111-000000000001' and neden = 'yayin') = 1, 'yayın sürümü';
+  -- Geçmiş en çok 20 sürüm tutar.
+  for i in 1..25 loop
+    perform public.rehber_taslak_kaydet('11111111-1111-4111-8111-000000000001', v_bolumler, '{}', 'silme');
+  end loop;
+  assert (select count(*) from public.sehir_rehberi_surum where sehir_id = '11111111-1111-4111-8111-000000000001') = 20, 'son 20 sürüm';
+end $$;
+select pg_temp.hata_bekle($$select public.rehber_yayinla('11111111-1111-4111-8111-000000000099')$$, 'P0002');
+set role anon;
+do $$
+begin
+  assert (select count(*) from public.sehir_rehberi where sehir_id = '11111111-1111-4111-8111-000000000001') = 3, 'gizli bölüm uygulamada yok';
+  assert not exists (select 1 from public.sehir_rehberi where id = (select aksam from rehber_156)), 'gizli bölüm okunmaz';
+  assert (select count(*) from public.sehir_rehberi_taslak) = 0, 'taslak herkese kapalı';
+end $$;
+select pg_temp.hata_bekle($$select public.rehber_taslak_kaydet('11111111-1111-4111-8111-000000000001', '[]')$$, '42501');
+set role authenticated;
+select pg_temp.as_user(:B);
+do $$
+begin
+  assert (select count(*) from public.sehir_rehberi_taslak) = 0, 'taslak admin olmayana görünmez';
+  assert (select count(*) from public.sehir_rehberi_surum) = 0, 'geçmiş admin olmayana görünmez';
+end $$;
+select pg_temp.hata_bekle($$select public.rehber_taslak_kaydet('11111111-1111-4111-8111-000000000001', '[]')$$, '42501');
+select pg_temp.hata_bekle($$select public.rehber_yayinla('11111111-1111-4111-8111-000000000001')$$, '42501');
+reset role;
+
 \echo 'rls_test: TÜM TESTLER GEÇTİ'

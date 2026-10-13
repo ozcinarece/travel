@@ -123,9 +123,13 @@ export function KayitDurumu({ metin, hata }: { metin: string; hata?: boolean }) 
 /** Bildirim (kanvas BO-2): altta ortada, 48 px, 14 köşe, Lacivert zemin, beyaz 14 px; sağda Mandalina eylem ("Geri al"). */
 export function Bildirim({ metin, eylem, onEylem }: { metin: string; eylem?: string; onEylem?: () => void }) {
   return (
-    <View accessibilityRole="alert" accessibilityLiveRegion="polite" style={s.bildirim}>
-      <Text style={s.bildirimMetin}>{metin}</Text>
-      {eylem && onEylem ? <Hap kucuk tur="vurgu" baslik={eylem} onPress={onEylem} /> : null}
+    <View pointerEvents="box-none" style={s.bildirimKap}>
+      <View accessibilityRole="alert" accessibilityLiveRegion="polite" style={s.bildirim}>
+        <Text numberOfLines={1} style={s.bildirimMetin}>
+          {metin}
+        </Text>
+        {eylem && onEylem ? <Hap kucuk tur="vurgu" baslik={eylem} onPress={onEylem} /> : null}
+      </View>
     </View>
   );
 }
@@ -153,12 +157,9 @@ const s = StyleSheet.create({
   kayit: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   nokta: { width: 8, height: 8, borderRadius: 4 },
   kayitMetin: { fontFamily: yazi.normal, fontSize: 13, color: yRenk.ikincil },
+  bildirimKap: { position: 'absolute', left: 16, right: 16, bottom: 24, zIndex: 40, alignItems: 'center' },
   bildirim: {
-    position: 'absolute',
-    left: '50%',
-    bottom: 24,
-    transform: [{ translateX: '-50%' }],
-    zIndex: 40,
+    maxWidth: '100%',
     height: 48,
     paddingLeft: 16,
     paddingRight: 8,
@@ -169,5 +170,5 @@ const s = StyleSheet.create({
     gap: 14,
     boxShadow: '0 12px 28px rgba(14,20,48,0.3)',
   },
-  bildirimMetin: { fontFamily: yazi.normal, fontSize: 14, color: yRenk.zemin },
+  bildirimMetin: { flexShrink: 1, fontFamily: yazi.normal, fontSize: 14, color: yRenk.zemin },
 });

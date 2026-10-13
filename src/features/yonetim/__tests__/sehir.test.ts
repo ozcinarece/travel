@@ -6,11 +6,8 @@ import { AYLAR_KISA } from '@/lib/takvim';
 import {
   boyutYolu,
   dosyaAdi,
-  eksikBolum,
   fotoBilgisi,
   fotoRolu,
-  kartSayisi,
-  kaynakIzleri,
   mekanBaglari,
   olcekle,
   rehberGovdesi,
@@ -21,39 +18,22 @@ import {
   yayinEngeli,
   yonelme,
 } from '../sehir';
-import { kartEkle, rehberBloklari, rehberMd, rehberSayaclari } from '../yer';
 
 const ID = '11111111-1111-4111-8111-000000000001';
 
 describe('rehber bölümleri (#111 KK1)', () => {
-  it('eksik bölüm uygulama sekme sırasıyla', () => {
-    expect(eksikBolum([{ bolum: 'ulasim' }, { bolum: 'mahalle' }])).toBe('yemek');
-    expect(eksikBolum(['ulasim', 'yemek', 'mahalle', 'ipucu'].map((b) => ({ bolum: b as 'ulasim' })))).toBeNull();
-  });
   it('yazı = # Başlık + gövde (uygulama ilk başlığı atar)', () => {
     expect(rehberGovdesi('# Ne yenir\n\nÇibörek.\n\n- Balaban')).toBe('Çibörek.\n\n- Balaban');
     expect(rehberGovdesi(null)).toBe('');
     expect(rehberYazisi('Ne yenir', 'Çibörek.')).toBe('# Ne yenir\n\nÇibörek.');
     expect(rehberYazisi('Ne yenir', '  ')).toBe('# Ne yenir');
   });
-  it('yazıdaki mekanlar sırayla: satır içi (ad = metin) ve kart; sayılar ve kaynak görünümü', () => {
+  it('yazıdaki mekanlar sırayla: satır içi (ad = metin) ve kart', () => {
     const md = 'Tatlı için [Met Helvacısı](mekan:ChIJmethelva01h3) uğrayın.\n\n::mekan[ChIJhayriusta001]\n\n[kısa](mekan:x)';
     expect(mekanBaglari(md)).toEqual([
       { place_id: 'ChIJmethelva01h3', bicim: 'satir', ad: 'Met Helvacısı' },
       { place_id: 'ChIJhayriusta001', bicim: 'kart' },
     ]);
-    expect(kartSayisi(md)).toBe(1);
-    expect(kaynakIzleri(md)).toEqual(['[Met Helvacısı](mekan:ChIJ…h3)', '::mekan[ChIJ…01]']);
-  });
-  it('kart bloğu: markdown ⇄ blok, imlecin paragrafının altına eklenir, sayaç', () => {
-    let n = 0;
-    const kimlik = () => `b${n++}`;
-    const b = rehberBloklari('Paragraf bir.\n\nParagraf iki.', kimlik);
-    const yeni = kartEkle(b, b[0].id, 'ChIJhayriusta001', kimlik);
-    expect(rehberMd(yeni)).toBe('Paragraf bir.\n\n::mekan[ChIJhayriusta001]\n\nParagraf iki.');
-    expect(rehberBloklari(rehberMd(yeni), kimlik).map((x) => x.tur)).toEqual(['paragraf', 'mekan', 'paragraf']);
-    expect(rehberSayaclari(rehberMd(yeni)).kart).toBe(1);
-    expect(rehberMd(kartEkle(b, null, 'ChIJhayriusta001', kimlik)).endsWith('::mekan[ChIJhayriusta001]')).toBe(true);
   });
 });
 
