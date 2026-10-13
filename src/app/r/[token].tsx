@@ -107,10 +107,6 @@ export default function DavetEkrani() {
       setMesgul(null);
     }
   };
-  const profiliTamamla = async () => {
-    if (token) await bekleyenDavetiYaz(token);
-    router.replace('/(auth)/profil-kur');
-  };
   const anaSayfa = () => router.replace('/(tabs)');
 
   if (adim === 'yukleniyor') {
@@ -164,13 +160,12 @@ export default function DavetEkrani() {
           {hata ? <Text style={s.hata}>{hata}</Text> : null}
           {katilimHatasi === 'ag' ? (
             <Buton baslik={t('davet.tekrarDene')} onPress={tekrarDene} />
-          ) : katiliyor ? (
+          ) : katiliyor || adim === 'profil' ? (
+            // #138: profil sunucuda kendiliğinden oluşur (kök düzen); bu arada "katılıyorsun".
             <View style={s.katiliyor}>
-              <ActivityIndicator color={renk.metin} />
+              <ActivityIndicator color={renk.ana} />
               <Text style={s.katiliyorMetin}>{adim === 'uye' ? t('davet.zatenUye') : t('davet.katiliyor')}</Text>
             </View>
-          ) : adim === 'profil' ? (
-            <Buton baslik={t('davet.profilTamamla')} onPress={profiliTamamla} />
           ) : (
             <>
               {appleVar ? <Buton baslik={t('davet.katilApple')} boy="buyuk" onPress={() => girisYap('apple', appleIleGiris)} yukleniyor={mesgul === 'apple'} pasif={mesgul !== null && mesgul !== 'apple'} /> : null}

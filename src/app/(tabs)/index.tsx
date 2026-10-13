@@ -1,37 +1,42 @@
-import { Redirect, router } from 'expo-router';
+import { router } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, Platform, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { bekleyenDavetiOku, bekleyenDavetiSil, useDavetKarsilama, useDavetKarsilandi } from '@/features/davet/sorgular';
+import { IlkSeyahatKarti, YaklasanKart } from '@/components/icerik/AnaSayfaKartlari';
 import { GeziKarti } from '@/components/icerik/GeziKarti';
-import { YerKarosu } from '@/components/icerik/YerKarosu';
-import { SecimMenusu } from '@/components/program/SecimMenusu';
 import { Avatar } from '@/components/ui/Avatar';
 import { Ikon } from '@/components/ui/Ikon';
-import { useIcerikCanli } from '@/features/icerik/fotolar';
-import { cozumSebebi, useGeziler, useTumYerler } from '@/features/icerik/sorgular';
-import { hedefSeyahatler, useYereEkle } from '@/features/icerik/yerEkle';
-import { useMekanlar, useMekanSil } from '@/features/mekanlar/sorgular';
+import { LogoYazi } from '@/components/ui/Logo';
+import { bekleyenDavetiOku, bekleyenDavetiSil, useDavetKarsilama, useDavetKarsilandi } from '@/features/davet/sorgular';
+import { useGeziler } from '@/features/icerik/sorgular';
+import { hedefSeyahatler } from '@/features/icerik/yerEkle';
 import { useProfil } from '@/features/profil/sorgular';
 import { useSeyahatler } from '@/features/seyahatler/sorgular';
 import { gunFarki, seyahatAdi } from '@/features/sihirbaz/sihirbaz';
 import { t } from '@/i18n';
 import { useOturum } from '@/lib/oturum';
 import { tarihAraligi } from '@/lib/takvim';
-import type { Yer } from '@/lib/tipler';
+import type { SeyahatOzet } from '@/lib/tipler';
 import { yerelTarih } from '@/lib/zaman';
-import { bosluk, renk, yazi } from '@/theme';
+import { bosluk, kose, olcek, renk, yazi } from '@/theme';
 
 /**
- * #97 A (kanvas Home13): Ana sayfa — "Merhaba {ad}" + arama, yaklaşan seyahat kartı (ya da "İlk seyahatini kur"),
- * Önerilen geziler (ilk tam genişlik, gerisi şerit), Gezilecek yerler (2 sütun foto mozaiği, "+").
+ * #138 (kanvas 3 · Ana sayfa, 3b · İlk açılış): logo + profil, selam, arama, yaklaşan seyahat kartı, Önerilen Geziler.
+ * "Gezilecek yerler" mozaiği kalktı (seyahat seçilmeden "+"nın hedefi belirsiz). Hiç seyahat yoksa: "Hoş geldin / İlk gezin
+ * nereye?", büyük "İlk seyahatini kur · Başla" kartı ve "Ya da hazır bir geziyle başla" şeridi; başka kutu yok.
+ * #137: giriş öncesi görülen davet → /r/{token}; web'de katılıp uygulamayı ilk açan → doğrudan seyahat.
  */
 export default function AnaSayfa() {
   const profil = useProfil();
+  const seyahatler = useSeyahatler();
+  const geziler = useGeziler();
+  const hedefler = useMemo(() => hedefSeyahatler(seyahatler.data), [seyahatler.data]);
+  const yaklasan = hedefler[0] ?? null;
+
   const { hesapli } = useOturum();
-  // #137: giriş/profil öncesi görülen davet → /r/{token}'a dön; web'de katılıp uygulamayı ilk açan → doğrudan seyahat (KK2).
-  // İkisi de bilinene kadar yükleniyor gösterilir; başka yönlendirme (ilk açılış → sihirbaz) ancak ikisi de boş çıkınca.
+  // #137: giriş öncesi görülen davet → /r/{token}; web'de katılıp uygulamayı ilk açan → doğrudan seyahat (KK2). İkisi de
+  // bilinene kadar yükleniyor gösterilir (ilk açılış ekranı bir an görünüp kaybolmasın); geçişler tek seferlik replace.
   const [bekleyenDavet, setBekleyenDavet] = useState<null | undefined>(undefined);
   useEffect(() => {
     bekleyenDavetiOku().then((token) => {
@@ -54,219 +59,139 @@ export default function AnaSayfa() {
       setKarsilanan(null);
     });
   }, [karsilanan, karsilandi]);
-  const seyahatler = useSeyahatler();
-  const geziler = useGeziler();
-  const yerler = useTumYerler();
-  const hedefler = useMemo(() => hedefSeyahatler(seyahatler.data), [seyahatler.data]);
-  const yaklasan = hedefler[0] ?? null;
-  const hedefMekanlar = useMekanlar(yaklasan?.id);
-  const hedefIdleri = useMemo(() => new Set((hedefMekanlar.data ?? []).map((m) => m.place_id)), [hedefMekanlar.data]);
-  const yerListesi = useMemo(() => (yerler.data ?? []).slice(0, 8), [yerler.data]);
-  const canli = useIcerikCanli(yerListesi, (y) => (y as (typeof yerListesi)[number]).sehirler?.ad ?? '');
-  const ekle = useYereEkle();
-  const sil = useMekanSil(yaklasan?.id ?? '');
-  const [secimYeri, setSecimYeri] = useState<(typeof yerListesi)[number] | null>(null);
-  const [bildirim, setBildirim] = useState<string | null>(null);
-  const [mesgulId, setMesgulId] = useState<string | null>(null);
 
   if (bekleyenDavet === undefined || karsilamaBekleniyor || karsilanan) {
     return (
       <SafeAreaView style={[s.ekran, s.ortala]}>
-        <ActivityIndicator color={renk.metin} />
+        <ActivityIndicator color={renk.ana} />
       </SafeAreaView>
     );
   }
-  // #98: 0.3 yönlendirme ekranı kalktı — ilk açılış doğrudan sihirbaza (damgayı sihirbaz yazar).
-  if (profil.data && !profil.data.onboarding_done_at) return <Redirect href="/(tabs)/yeni" />;
 
-  const yereEkle = async (y: Yer, seyahatId: string) => {
-    const c = canli.data?.get(y.id);
-    if (!c?.place_id) {
-      // #118: sebebi söyle (çözülüyor / Google'da yok / sunucu hatası); izler hata kartında.
-      const sebep = cozumSebebi(y.id);
-      setBildirim(canli.isPending ? t('anasayfa.cozuluyor') : t('anasayfa.ekleHataSebep', { sebep: !sebep || sebep === 'bulunamadi' ? t('anasayfa.bulunamadi') : sebep }));
-      setTimeout(() => setBildirim(null), 3500);
-      return;
-    }
-    setMesgulId(y.id);
-    try {
-      await ekle.mutateAsync({ seyahatId, yerId: y.id, place_id: c.place_id, primary_type: c.hafif?.primary_type ?? y.kategori, lat: c.hafif?.lat ?? y.lat, lng: c.hafif?.lng ?? y.lng });
-      const sy = hedefler.find((x) => x.id === seyahatId);
-      setBildirim(t('anasayfa.eklendi', { seyahat: sy ? seyahatAdi(sy) : '' }));
-      setTimeout(() => setBildirim(null), 2500);
-    } catch (e) {
-      setBildirim(t('anasayfa.ekleHataSebep', { sebep: e instanceof Error ? e.message : String(e) }));
-      setTimeout(() => setBildirim(null), 3500);
-    } finally {
-      setMesgulId(null);
-    }
-  };
-  // ✓'ye dokununca yaklaşan seyahatin listesinden çıkar.
-  const cikar = async (y: (typeof yerListesi)[number]) => {
-    const pid = canli.data?.get(y.id)?.place_id;
-    const m = pid ? hedefMekanlar.data?.find((x) => x.place_id === pid) : undefined;
-    if (!m) return;
-    setMesgulId(y.id);
-    try {
-      await sil.mutateAsync(m.id);
-    } finally {
-      setMesgulId(null);
-    }
-  };
-  const artiBas = (y: (typeof yerListesi)[number]) => {
-    if (hedefler.length === 0) return router.navigate('/(tabs)/yeni');
-    if (hedefler.length === 1) return yereEkle(y, hedefler[0].id);
-    setSecimYeri(y);
-  };
-  const yerAc = (y: (typeof yerListesi)[number]) => {
-    const c = canli.data?.get(y.id);
-    if (yaklasan && c?.place_id) router.push({ pathname: '/seyahat/[id]/(sekmeler)/kesfet', params: { id: yaklasan.id, mekan: c.place_id } });
-    else router.push('/yerler');
-  };
-
-  const bugun = yaklasan ? yerelTarih(new Date(), yaklasan.tz) : '';
-  const kalanGun = yaklasan?.start_date ? gunFarki(bugun, yaklasan.start_date) : null;
-  const ilkGezi = geziler.data?.[0];
-  const digerGeziler = (geziler.data ?? []).slice(1);
+  const ad = profil.data?.name?.split(' ')[0] ?? '';
+  // KK5: ilk açılış = hiç seyahat yok (geçmiş dahil).
+  const ilkAcilis = !seyahatler.isPending && !seyahatler.isError && (seyahatler.data?.length ?? 0) === 0;
+  const gezilerListe = geziler.data ?? [];
+  const yeni = () => router.navigate('/(tabs)/yeni');
+  const geziAc = (slug: string) => router.push({ pathname: '/gezi/[slug]', params: { slug } });
 
   return (
     <SafeAreaView style={s.ekran} edges={['top']}>
-      <ScrollView contentContainerStyle={s.icerik} refreshControl={<RefreshControl refreshing={seyahatler.isRefetching} onRefresh={() => Promise.all([seyahatler.refetch(), geziler.refetch(), yerler.refetch()])} />}>
+      <ScrollView contentContainerStyle={s.icerik} refreshControl={<RefreshControl refreshing={seyahatler.isRefetching} onRefresh={() => Promise.all([seyahatler.refetch(), geziler.refetch()])} />}>
         <View style={s.ust}>
-          <View style={{ flex: 1 }}>
-            <Text style={s.merhaba}>{t('anasayfa.merhaba', { ad: profil.data?.name?.split(' ')[0] ?? '' })}</Text>
-            <Text accessibilityRole="header" style={s.soru}>
-              {t('anasayfa.soru')}
-            </Text>
-          </View>
-          <Pressable accessibilityRole="button" accessibilityLabel={t('sekme.profil')} onPress={() => router.navigate('/(tabs)/profil')} hitSlop={8}>
-            <Avatar ad={profil.data?.name ?? '?'} url={profil.data?.photo_url} boyut={36} />
+          <LogoYazi boyut={36} />
+          <Pressable accessibilityRole="button" accessibilityLabel={t('anasayfa.profil')} onPress={() => router.navigate('/(tabs)/profil')} hitSlop={6}>
+            <Avatar ad={profil.data?.name ?? '?'} url={profil.data?.photo_url} boyut={44} arkaPlan={renk.vurgu} />
           </Pressable>
         </View>
-        <Pressable accessibilityRole="search" onPress={() => router.push('/ara')} style={s.arama}>
-          <Ikon ad="ara" boyut={18} renk={renk.ikincil} kalinlik={2.2} />
-          <Text style={s.aramaMetin}>{t('anasayfa.ara')}</Text>
-        </Pressable>
 
-        {yaklasan ? (
-          <Pressable accessibilityRole="button" onPress={() => router.push({ pathname: '/seyahat/[id]/(sekmeler)/program', params: { id: yaklasan.id } })} style={s.kart}>
-            <Text style={s.kartUst}>{kalanGun === null ? t('anasayfa.tarihsiz').toLocaleUpperCase('tr') : kalanGun <= 0 ? t('anasayfa.aktif') : kalanGun === 0 ? t('anasayfa.yaklasanBugun') : t('anasayfa.yaklasan', { n: kalanGun })}</Text>
-            <Text style={s.kartAd} numberOfLines={1}>
-              {seyahatAdi(yaklasan)}
-            </Text>
-            <Text style={s.kartAlt} numberOfLines={1}>
-              {[yaklasan.start_date && yaklasan.end_date ? tarihAraligi(yaklasan.start_date, yaklasan.end_date) : t('anasayfa.tarihsiz'), t('anasayfa.mekanKisi', { mekan: yaklasan.places[0]?.count ?? 0, kisi: yaklasan.members.length })].join(' · ')}
-            </Text>
-            <View style={s.kartDugme}>
-              <Text style={s.kartDugmeMetin}>{t('anasayfa.programaGit')} →</Text>
+        <View style={s.selam}>
+          <Text style={s.merhaba}>{ilkAcilis ? t('anasayfa.hosGeldin', { ad }) : t('anasayfa.merhaba', { ad })}</Text>
+          <Text accessibilityRole="header" style={s.soru}>
+            {ilkAcilis ? t('anasayfa.ilkSoru') : t('anasayfa.soru')}
+          </Text>
+        </View>
+
+        {ilkAcilis ? (
+          <>
+            <View style={s.kenar}>
+              <IlkSeyahatKarti baslik={t('anasayfa.ilkBaslik')} onPress={yeni} />
             </View>
-          </Pressable>
-        ) : !seyahatler.isPending ? (
-          <Pressable accessibilityRole="button" onPress={() => router.navigate('/(tabs)/yeni')} style={s.kart}>
-            <Text style={s.kartAd}>{t('anasayfa.ilkBaslik')}</Text>
-            <Text style={s.kartAlt}>{t('anasayfa.ilkAlt')}</Text>
-            <View style={s.kartDugme}>
-              <Text style={s.kartDugmeMetin}>{t('anasayfa.ilkDugme')} →</Text>
-            </View>
-          </Pressable>
-        ) : null}
-
-        <Bolum baslik={t('anasayfa.geziler')} onTumu={() => router.push('/geziler')}>
-          {ilkGezi ? <GeziKarti gezi={ilkGezi} buyuk onPress={() => router.push({ pathname: '/gezi/[slug]', params: { slug: ilkGezi.slug } })} /> : <Text style={s.bos}>{t('anasayfa.bos')}</Text>}
-          {digerGeziler.length > 0 ? (
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={s.seritKaydirma} contentContainerStyle={s.serit}>
-              {digerGeziler.map((g, i) => (
-                <GeziKarti key={g.id} gezi={g} sira={i + 1} onPress={() => router.push({ pathname: '/gezi/[slug]', params: { slug: g.slug } })} />
-              ))}
-            </ScrollView>
-          ) : null}
-        </Bolum>
-
-        <Bolum baslik={t('anasayfa.yerler')} onTumu={() => router.push('/yerler')}>
-          {yerListesi.length === 0 ? <Text style={s.bos}>{t('anasayfa.bos')}</Text> : null}
-          <View style={s.mozaik}>
-            {[0, 1].map((sutun) => (
-              <View key={sutun} style={s.sutun}>
-                {yerListesi
-                  .filter((_, i) => i % 2 === sutun)
-                  .map((y, i) => {
-                    const c = canli.data?.get(y.id);
-                    return (
-                      <YerKarosu
-                        key={y.id}
-                        ad={y.ad}
-                        sehir={y.sehirler?.ad ?? null}
-                        kategori={c?.hafif?.primary_type ?? y.kategori}
-                        fotoUri={c?.foto_uri ?? null}
-                        puan={c?.hafif?.puan ?? null}
-                        yorum={c?.hafif?.puan_sayisi ?? null}
-                        yukseklik={(i + sutun) % 2 === 0 ? 190 : 150}
-                        listede={!!c?.place_id && hedefIdleri.has(c.place_id)}
-                        mesgul={mesgulId === y.id}
-                        onEkle={() => artiBas(y)}
-                        onCikar={() => cikar(y)}
-                        onAc={() => yerAc(y)}
-                      />
-                    );
-                  })}
+            {gezilerListe.length > 0 ? (
+              <View style={s.bolum}>
+                <View style={{ gap: 2, paddingHorizontal: bosluk.kenar }}>
+                  <Text style={s.bolumBaslik}>{t('anasayfa.haziraBaslik')}</Text>
+                  <Text style={s.bolumAlt}>{t('anasayfa.haziraAlt')}</Text>
+                </View>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={s.serit}>
+                  {gezilerListe.map((g, i) => (
+                    <GeziKarti key={g.id} gezi={g} sira={i} genislik={250} onPress={() => geziAc(g.slug)} />
+                  ))}
+                </ScrollView>
               </View>
-            ))}
-          </View>
-        </Bolum>
+            ) : null}
+          </>
+        ) : (
+          <>
+            <Pressable accessibilityRole="search" onPress={() => router.push('/ara')} style={s.arama}>
+              <Ikon ad="ara" boyut={20} renk={renk.ana} kalinlik={2.4} />
+              <Text style={s.aramaMetin}>{t('anasayfa.ara')}</Text>
+            </Pressable>
+
+            <View style={s.kenar}>
+              {yaklasan ? (
+                <YaklasanKart
+                  rozet={yaklasanRozeti(yaklasan)}
+                  ad={seyahatAdi(yaklasan)}
+                  alt={yaklasanAlti(yaklasan)}
+                  uyeler={yaklasan.members}
+                  onPress={() => router.push({ pathname: '/seyahat/[id]/(sekmeler)/program', params: { id: yaklasan.id } })}
+                />
+              ) : !seyahatler.isPending ? (
+                <IlkSeyahatKarti baslik={t('anasayfa.yeniBaslik')} onPress={yeni} />
+              ) : null}
+            </View>
+
+            <View style={s.bolum}>
+              <View style={s.bolumSatir}>
+                <Text style={s.bolumBaslik}>{t('anasayfa.geziler')}</Text>
+                <Pressable accessibilityRole="button" onPress={() => router.push('/geziler')} hitSlop={8}>
+                  <Text style={s.tumu}>{t('anasayfa.tumu')}</Text>
+                </Pressable>
+              </View>
+              {gezilerListe[0] ? (
+                <View style={s.kenar}>
+                  <GeziKarti gezi={gezilerListe[0]} buyuk kalp onPress={() => geziAc(gezilerListe[0].slug)} />
+                </View>
+              ) : (
+                <Text style={[s.bolumAlt, s.kenar]}>{t('anasayfa.bos')}</Text>
+              )}
+              {gezilerListe.length > 1 ? (
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={s.serit}>
+                  {gezilerListe.slice(1).map((g, i) => (
+                    <GeziKarti key={g.id} gezi={g} sira={i + 1} onPress={() => geziAc(g.slug)} />
+                  ))}
+                </ScrollView>
+              ) : null}
+            </View>
+          </>
+        )}
       </ScrollView>
-      {bildirim ? (
-        <View style={s.bildirim} pointerEvents="none">
-          <Text style={s.bildirimMetin}>{bildirim}</Text>
-        </View>
-      ) : null}
-      <SecimMenusu
-        acik={!!secimYeri}
-        baslik={t('anasayfa.hangiSeyahat')}
-        secenekler={hedefler.map((sy) => ({ etiket: seyahatAdi(sy), onPress: () => secimYeri && yereEkle(secimYeri, sy.id) }))}
-        onKapat={() => setSecimYeri(null)}
-      />
     </SafeAreaView>
   );
 }
 
-function Bolum({ baslik, onTumu, children }: { baslik: string; onTumu: () => void; children: React.ReactNode }) {
-  return (
-    <View style={s.bolum}>
-      <View style={s.bolumSatir}>
-        <Text style={s.bolumBaslik}>{baslik}</Text>
-        <Pressable accessibilityRole="button" onPress={onTumu} hitSlop={8}>
-          <Text style={s.tumu}>{t('anasayfa.tumu')}</Text>
-        </Pressable>
-      </View>
-      {children}
-    </View>
-  );
+/** "4 GÜN SONRA" · "BUGÜN" · "ŞU AN SEYAHATTE" · tarihsizse "TASLAK". */
+function yaklasanRozeti(sy: SeyahatOzet): string {
+  if (!sy.start_date) return t('anasayfa.tarihsizRozet');
+  const kalan = gunFarki(yerelTarih(new Date(), sy.tz), sy.start_date);
+  if (kalan < 0) return t('anasayfa.aktif');
+  if (kalan === 0) return t('anasayfa.yaklasanBugun');
+  return t('anasayfa.yaklasan', { n: kalan });
+}
+
+/** "16 – 19 Ekim · 4 gün · 12 mekan" (tarihsizse "Tarih belli değil · N mekan"). */
+function yaklasanAlti(sy: SeyahatOzet): string {
+  const mekan = sy.places[0]?.count ?? 0;
+  if (!sy.start_date || !sy.end_date) return t('anasayfa.kartAltTarihsiz', { mekan });
+  return t('anasayfa.kartAlt', { tarih: tarihAraligi(sy.start_date, sy.end_date), gun: gunFarki(sy.start_date, sy.end_date) + 1, mekan });
 }
 
 const s = StyleSheet.create({
   ekran: { flex: 1, backgroundColor: renk.zemin },
   ortala: { alignItems: 'center', justifyContent: 'center' },
-  icerik: { paddingBottom: 28 },
-  ust: { paddingHorizontal: bosluk.kenar, paddingTop: 14, flexDirection: 'row', alignItems: 'center', gap: 12 },
-  merhaba: { fontFamily: yazi.kalin, fontSize: 13, color: renk.ikincil },
-  soru: { fontFamily: yazi.ekstra, fontSize: 28, letterSpacing: -0.9, color: renk.metin },
-  arama: { marginHorizontal: bosluk.kenar, marginTop: 14, height: 48, paddingHorizontal: 16, borderRadius: 14, backgroundColor: renk.yuzey, flexDirection: 'row', alignItems: 'center', gap: 10 },
-  aramaMetin: { fontFamily: yazi.yari, fontSize: 14, color: renk.soluk },
-  kart: { marginHorizontal: bosluk.kenar, marginTop: 16, padding: 18, borderRadius: 22, backgroundColor: renk.metin, gap: 4 },
-  kartUst: { fontFamily: yazi.ekstra, fontSize: 10, letterSpacing: 0.8, color: '#a3a3a3' },
-  kartAd: { fontFamily: yazi.ekstra, fontSize: 22, letterSpacing: -0.5, color: renk.zemin },
-  kartAlt: { fontFamily: yazi.normal, fontSize: 12, color: '#c4c4c4' },
-  kartDugme: { alignSelf: 'flex-start', marginTop: 10, height: 38, paddingHorizontal: 16, borderRadius: 999, backgroundColor: renk.zemin, justifyContent: 'center' },
-  kartDugmeMetin: { fontFamily: yazi.kalin, fontSize: 13, color: renk.metin },
-  bolum: { paddingTop: 24, paddingHorizontal: bosluk.kenar, gap: 12 },
-  bolumSatir: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  bolumBaslik: { fontFamily: yazi.ekstra, fontSize: 18, letterSpacing: -0.4, color: renk.metin },
-  tumu: { fontFamily: yazi.kalin, fontSize: 13, color: renk.ikincil },
-  seritKaydirma: { marginHorizontal: -bosluk.kenar },
-  serit: { gap: 10, paddingHorizontal: bosluk.kenar },
-  mozaik: { flexDirection: 'row', gap: 10 },
-  sutun: { flex: 1, gap: 10 },
-  bos: { fontFamily: yazi.normal, fontSize: 13, color: renk.ikincil, paddingVertical: 12 },
-  bildirim: { position: 'absolute', left: bosluk.kenar, right: bosluk.kenar, bottom: 16, paddingHorizontal: 16, paddingVertical: 12, borderRadius: 14, backgroundColor: renk.metin },
-  bildirimMetin: { fontFamily: yazi.kalin, fontSize: 13, color: renk.zemin, textAlign: 'center' },
+  icerik: { paddingTop: 12, paddingBottom: 32, gap: 20 },
+  ust: { paddingHorizontal: bosluk.kenar, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  selam: { paddingHorizontal: bosluk.kenar, gap: 4 },
+  merhaba: { fontFamily: yazi.yari, fontSize: 15, color: renk.ikincil },
+  soru: { fontFamily: yazi.baslik, fontSize: olcek.ekran, lineHeight: 34, letterSpacing: -1, color: renk.metin },
+  arama: { marginHorizontal: bosluk.kenar, height: 52, paddingHorizontal: 16, borderRadius: kose.dugme, backgroundColor: renk.yuzey, flexDirection: 'row', alignItems: 'center', gap: 10 },
+  aramaMetin: { fontFamily: yazi.yari, fontSize: 15, color: renk.soluk },
+  kenar: { paddingHorizontal: bosluk.kenar },
+  bolum: { gap: 12, paddingTop: 6 },
+  bolumSatir: { paddingHorizontal: bosluk.kenar, flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between' },
+  bolumBaslik: { fontFamily: yazi.baslik, fontSize: olcek.bolum, letterSpacing: -0.4, color: renk.metin },
+  bolumAlt: { fontFamily: yazi.normal, fontSize: 14, color: renk.ikincil },
+  tumu: { fontFamily: yazi.ekstra, fontSize: 14, color: renk.ana },
+  serit: { gap: 12, paddingHorizontal: bosluk.kenar },
 });

@@ -9,6 +9,21 @@ import { useGecikmeli } from '@/lib/useGecikmeli';
 
 export const profilAnahtari = (uid: string | undefined) => ['profil', uid] as const;
 
+/** #138: giriş sonrası profil sunucuda kendiliğinden oluşur (ad/foto sağlayıcıdan, kullanıcı adı addan). Varsa aynısını döndürür. */
+export async function profilHazirla(): Promise<Profil> {
+  const { data, error } = await supabase.rpc('profil_hazirla');
+  if (error) throw error;
+  return data as Profil;
+}
+
+export function useProfilHazirla() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: profilHazirla,
+    onSuccess: (profil) => qc.setQueryData(profilAnahtari(profil.id), profil),
+  });
+}
+
 export function useProfil() {
   const { session, hesapli } = useOturum();
   const uid = session?.user.id;
