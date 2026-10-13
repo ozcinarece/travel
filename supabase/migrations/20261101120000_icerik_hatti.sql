@@ -51,6 +51,8 @@ begin
 end;
 $$;
 revoke execute on function public.icerik_google_butcesi(integer) from public, anon, authenticated;
+-- UYARI: bu yetki icerik-google'ın yetki sınırıdır (#171): işlevi çağırabilen taşıyıcı service_role sayılır. authenticated
+-- ya da anon'a execute VERİLMEZ; verilirse giriş yapan herkes Google bütçesini harcayabilir (rls_test bunu yakalar).
 grant execute on function public.icerik_google_butcesi(integer) to service_role;
 
 -- Genel bakış (BO-0) kalemleri sabit (mekan · foto · rota · yorum; panel değişmez): içerik hattının istekleri Mekan

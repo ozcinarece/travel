@@ -8,16 +8,16 @@ on:
   workflow_dispatch:
     inputs:
       islem:
-        description: sehirler · arastir · yukle · kontrol · sil · temizle
+        description: sehirler · osm · arastir · yukle · kontrol · sil · temizle
         required: true
         type: choice
-        options: [sehirler, arastir, yukle, kontrol, sil, temizle]
+        options: [sehirler, osm, arastir, yukle, kontrol, sil, temizle]
       dosya:
         description: 'yukle: plan dosyası (icerik/geziler/<slug>.json; ref olarak içerik dalını seç)'
         required: false
         type: string
       istek:
-        description: 'arastir: JSON (sehir, sorgular, detay, acik_anahtar) · kontrol/sil: slug · yukle: {"yeniden": true} · temizle: run id ya da hepsi'
+        description: 'osm: JSON (sehir, yaricap_m, acik_anahtar) · arastir: JSON (sehir, kimlik, puan, acik_anahtar) · kontrol/sil: slug · yukle: {"yeniden": true} · temizle: run id ya da hepsi'
         required: false
         type: string
       kuru:
@@ -37,7 +37,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:
-      # arastir: şifreli sonucu geçici dala (icerik-sonuc/<run_id>) koyar; temizle: o dalları siler.
+      # osm / arastir: şifreli sonucu geçici dala (icerik-sonuc/<run_id>) koyar; temizle: o dalları siler.
       contents: write
     env:
       SUPABASE_PROJECT_REF: xwqeobelyeuzoxyuvauw
@@ -45,8 +45,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          # Git kimliği yalnız dal işlemlerinde (arastir, temizle) kalır.
-          persist-credentials: ${{ inputs.islem == 'arastir' || inputs.islem == 'temizle' }}
+          # Git kimliği yalnız dal işlemlerinde (osm, arastir, temizle) kalır.
+          persist-credentials: ${{ inputs.islem == 'osm' || inputs.islem == 'arastir' || inputs.islem == 'temizle' }}
       - uses: actions/setup-node@v4
         with:
           node-version: 22
@@ -68,8 +68,9 @@ jobs:
           CIKTI: ${{ runner.temp }}/sonuc.enc
         run: node scripts/icerik/hat.mjs
       - name: Şifreli sonucu geçici dala koy
-        if: inputs.islem == 'arastir'
+        if: inputs.islem == 'osm' || inputs.islem == 'arastir'
         env:
+          ISLEM: ${{ inputs.islem }}
           CIKTI: ${{ runner.temp }}/sonuc.enc
         run: |
           dal="icerik-sonuc/${GITHUB_RUN_ID}"
@@ -80,7 +81,7 @@ jobs:
           git clean -fdxq
           cp "$CIKTI" sonuc.enc
           git add sonuc.enc
-          git commit -qm "icerik: şifreli araştırma sonucu (geçici)"
+          git commit -qm "icerik: şifreli $ISLEM sonucu (geçici)"
           git push -q origin "$dal"
           echo "::notice title=Sonuç dalı::$dal"
       - name: Geçici dalları sil

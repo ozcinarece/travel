@@ -1,5 +1,5 @@
-// İçerik hattı (docs/07): .github/workflows/icerik.yml'in çalıştırdığı işlemler — sehirler, arastir, yukle, kontrol, sil.
-// Ortam: ISLEM, DOSYA, ISTEK, KURU, SUPABASE_ACCESS_TOKEN, SUPABASE_PROJECT_REF, YONETIM_URL, CIKTI (arastir), GITHUB_RUN_ID;
+// İçerik hattı (docs/07): .github/workflows/icerik.yml'in çalıştırdığı işlemler — sehirler, osm, arastir, yukle, kontrol, sil.
+// Ortam: ISLEM, DOSYA, ISTEK, KURU, SUPABASE_ACCESS_TOKEN, SUPABASE_PROJECT_REF, YONETIM_URL, CIKTI (osm, arastir), GITHUB_RUN_ID;
 // yerel deneme için SUPABASE_API_URL ve SUPABASE_URL.
 // Loglar ve duyurular HERKESE AÇIK: yalnız sayı, slug, id ve sonuç yazılır. Google verisi (ad, puan, adres, saat, koordinat)
 // ve kullanıcı verisi yazılmaz. service_role anahtarı çalışma anında Yönetim API'sinden alınır, maskelenir, hiçbir yere
@@ -7,7 +7,7 @@
 import { appendFile, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 
-import { detayIdleri, dolarEtiketi, gunleriDenetle, planDenetle, SEHIR_SLUG, SLUG, yuklemeVerisi } from './dogrula.mjs';
+import { detayIdleri, dolarEtiketi, gunleriDenetle, planDenetle, REHBER_DOSYA, SEHIR_SLUG, SLUG, yuklemeVerisi } from './dogrula.mjs';
 import { derAl, sifrele } from './sifre.mjs';
 
 const ortam = process.env;
@@ -18,7 +18,8 @@ const KURU = ortam.KURU !== 'false';
 // Yerel deneme için değiştirilebilir; iş akışında varsayılanlar kullanılır.
 const API_KOK = ortam.SUPABASE_API_URL || 'https://api.supabase.com';
 const PROJE_URL = ortam.SUPABASE_URL || `https://${REF}.supabase.co`;
-const EN_COK_SORGU = 25;
+const EN_COK_KIMLIK = 80;
+const EN_COK_PUAN = 30;
 const EN_COK_DETAY = 60;
 
 class HatHatasi extends Error {}
@@ -180,50 +181,141 @@ async function sehirler() {
   await ozet(['### Şehirler', ...satirlar.map((s) => `- ${s}`)]);
 }
 
-async function arastir() {
-  const istek = istekAl();
-  const acik = istek.acik_anahtar;
+function acikAnahtarAl(istek) {
   try {
-    derAl(acik);
+    derAl(istek.acik_anahtar);
   } catch {
     throw new HatHatasi('istek.acik_anahtar gerekli (scripts/icerik/anahtar.mjs)');
   }
-  const sorgular = Array.isArray(istek.sorgular) ? istek.sorgular : [];
-  const idler = Array.isArray(istek.detay) ? [...new Set(istek.detay)] : [];
-  if (!sorgular.length && !idler.length) throw new HatHatasi('istek.sorgular ya da istek.detay gerekli');
-  if (sorgular.length > EN_COK_SORGU) throw new HatHatasi(`en çok ${EN_COK_SORGU} sorgu`);
-  if (idler.length > EN_COK_DETAY) throw new HatHatasi(`en çok ${EN_COK_DETAY} detay`);
+  return istek.acik_anahtar;
+}
 
-  let merkez = istek.merkez;
-  if (sorgular.length && !merkez) {
-    if (!SEHIR_SLUG.test(istek.sehir ?? '')) throw new HatHatasi('istek.sehir (slug) ya da istek.merkez gerekli');
-    const satir = (await sql(`select lat, lng from public.sehirler where slug = '${istek.sehir}'`))[0];
-    if (!satir) throw new HatHatasi(`şehir bulunamadı: ${istek.sehir}; istek.merkez ver`);
-    merkez = { lat: Number(satir.lat), lng: Number(satir.lng) };
-  }
+async function sehirMerkezi(istek) {
+  if (istek.merkez) return istek.merkez;
+  if (!SEHIR_SLUG.test(istek.sehir ?? '')) throw new HatHatasi('istek.sehir (slug) ya da istek.merkez gerekli');
+  const satir = (await sql(`select lat, lng from public.sehirler where slug = '${istek.sehir}'`))[0];
+  if (!satir) throw new HatHatasi(`şehir bulunamadı: ${istek.sehir}; istek.merkez ver`);
+  return { lat: Number(satir.lat), lng: Number(satir.lng) };
+}
 
-  const sonuc = { zaman: new Date().toISOString(), istek: { sehir: istek.sehir ?? null, merkez, yaricap_m: istek.yaricap_m ?? null, sorgular, detay: idler } };
-  if (sorgular.length) sonuc.ara = await google({ islem: 'ara', merkez, yaricap_m: istek.yaricap_m, sorgular });
-  if (idler.length) sonuc.detay = await google({ islem: 'detay', idler });
+/** Sonuç oturumun açık anahtarıyla şifrelenir; iş akışı onu geçici dala (icerik-sonuc/<run_id>) koyar. */
+async function sifreliYaz(sonuc, acik) {
+  await writeFile(ortam.CIKTI, JSON.stringify(await sifrele(JSON.stringify(sonuc), acik)));
+}
 
-  const paket = await sifrele(JSON.stringify(sonuc), acik);
-  await writeFile(ortam.CIKTI, JSON.stringify(paket));
+/**
+ * Araştırma (Google): `kimlik` — OSM adaylarının place_id'si (IDs Only, ücretsiz; ≤ 80 sorgu, sorgu başına OSM konumu);
+ * `puan` — kısa liste (≤ 30) için ad, tip, işletme durumu, puan, yorum sayısı. Geniş aramada puan istenmez.
+ */
+async function arastir() {
+  const istek = istekAl();
+  const acik = acikAnahtarAl(istek);
+  const kimlik = Array.isArray(istek.kimlik) ? istek.kimlik : [];
+  const puan = Array.isArray(istek.puan) ? [...new Set(istek.puan)] : [];
+  if (!kimlik.length && !puan.length) throw new HatHatasi('istek.kimlik ya da istek.puan gerekli');
+  if (kimlik.length > EN_COK_KIMLIK) throw new HatHatasi(`en çok ${EN_COK_KIMLIK} kimlik sorgusu`);
+  if (puan.length > EN_COK_PUAN) throw new HatHatasi(`kısa liste en çok ${EN_COK_PUAN} mekan`);
 
-  const ara = sonuc.ara?.sonuclar ?? [];
-  const detay = sonuc.detay?.yerler ?? [];
+  const merkez = kimlik.some((k) => k?.lat === undefined) ? await sehirMerkezi(istek) : undefined;
+  const sonuc = { zaman: new Date().toISOString(), istek: { sehir: istek.sehir ?? null, kimlik, puan } };
+  if (kimlik.length) sonuc.kimlik = await google({ islem: 'kimlik', sorgular: kimlik, ...(merkez ? { merkez } : {}) });
+  if (puan.length) sonuc.puan = await google({ islem: 'puan', idler: puan });
+  await sifreliYaz(sonuc, acik);
+
+  const k = sonuc.kimlik?.sonuclar ?? [];
+  const p = sonuc.puan?.yerler ?? [];
   const satir = [
-    `${ara.length} sorgu · ${ara.reduce((t, s) => t + (s.adaylar?.length ?? 0), 0)} aday · ${ara.reduce((t, s) => t + (s.elenen_konaklama ?? 0), 0)} konaklama elendi · ${ara.filter((s) => s.hata).length} hatalı sorgu`,
-    `${detay.length} detay · ${detay.filter((y) => y.hata).length} hatalı`,
+    `kimlik: ${k.length} sorgu · ${k.filter((x) => x.idler?.length).length} eşleşti · ${k.filter((x) => x.hata).length} hatalı (ücretsiz)`,
+    `puan: ${p.length} mekan · ${p.filter((y) => y.hata).length} hatalı`,
     `şifreli sonuç: icerik-sonuc/${ortam.GITHUB_RUN_ID}`,
   ];
   duyuru('notice', 'Araştırma', satir);
-  await ozet(['### Araştırma', ...satir.map((s) => `- ${s}`)]);
+  await ozet(['### Araştırma', ...satir.map((x) => `- ${x}`)]);
+}
+
+/** OSM etiketlerinden yalnız aday seçimine yarayanlar (ODbL; atıf: © OpenStreetMap katkıcıları). */
+const OSM_ETIKETLERI = ['name', 'name:tr', 'name:en', 'tourism', 'historic', 'amenity', 'leisure', 'religion', 'cuisine', 'opening_hours', 'wikipedia', 'wikidata', 'website', 'heritage'];
+const OVERPASS = ['https://overpass-api.de/api/interpreter', 'https://overpass.kumi.systems/api/interpreter'];
+
+export function overpassSorgusu({ lat, lng }, yaricap) {
+  const a = `(around:${Math.round(yaricap)},${lat},${lng})`;
+  return `[out:json][timeout:90];
+(
+  nwr${a}["tourism"~"^(museum|attraction|viewpoint|gallery|artwork|zoo|theme_park)$"]["name"];
+  nwr${a}["historic"]["name"];
+  nwr${a}["amenity"="place_of_worship"]["name"];
+  nwr${a}["leisure"~"^(park|garden)$"]["name"];
+  nwr${a}["amenity"~"^(restaurant|cafe)$"]["name"];
+);
+out center tags;`;
+}
+
+/** OSM aday listesi (Overpass): ad, konum, tür, opening_hours, wikipedia/wikidata. Google'a gidilmez. */
+async function osm() {
+  const istek = istekAl();
+  const acik = acikAnahtarAl(istek);
+  const merkez = await sehirMerkezi(istek);
+  const yaricap = Math.min(Math.max(Number(istek.yaricap_m) || 8000, 500), 30000);
+  const sorgu = overpassSorgusu(merkez, yaricap);
+  let veri = null;
+  for (const url of OVERPASS) {
+    try {
+      const cevap = await fetch(url, {
+        method: 'POST',
+        headers: { 'content-type': 'application/x-www-form-urlencoded', 'user-agent': 'tripmate-icerik-hatti (github.com/ozcinarece/travel)' },
+        body: new URLSearchParams({ data: sorgu }),
+      });
+      if (cevap.ok) {
+        veri = await cevap.json();
+        break;
+      }
+    } catch {
+      // sıradaki sunucu
+    }
+  }
+  if (!veri) throw new HatHatasi('Overpass yanıt vermedi');
+  const adaylar = (veri.elements ?? [])
+    .map((e) => {
+      const lat = e.lat ?? e.center?.lat;
+      const lng = e.lon ?? e.center?.lon;
+      const etiketler = Object.fromEntries(OSM_ETIKETLERI.filter((k) => e.tags?.[k] !== undefined).map((k) => [k, e.tags[k]]));
+      return { osm: `${e.type}/${e.id}`, ad: e.tags?.['name:tr'] ?? e.tags?.name, lat, lng, etiketler };
+    })
+    .filter((a) => a.ad && typeof a.lat === 'number' && typeof a.lng === 'number');
+  await sifreliYaz({ zaman: new Date().toISOString(), kaynak: '© OpenStreetMap katkıcıları (ODbL)', merkez, yaricap_m: yaricap, adaylar }, acik);
+  const say = (f) => adaylar.filter(f).length;
+  const satir = [
+    `${adaylar.length} aday · müze/galeri ${say((a) => /museum|gallery/.test(a.etiketler.tourism ?? ''))} · tarihi ${say((a) => a.etiketler.historic)} · ibadet ${say((a) => a.etiketler.amenity === 'place_of_worship')} · park ${say((a) => a.etiketler.leisure)} · yemek/kafe ${say((a) => /restaurant|cafe/.test(a.etiketler.amenity ?? ''))}`,
+    `wikidata ${say((a) => a.etiketler.wikidata)} · opening_hours ${say((a) => a.etiketler.opening_hours)}`,
+    `şifreli sonuç: icerik-sonuc/${ortam.GITHUB_RUN_ID}`,
+  ];
+  duyuru('notice', 'OSM adayları', satir);
+  await ozet(['### OSM adayları', ...satir.map((x) => `- ${x}`)]);
+}
+
+/** Planın mekan rehberleri: icerik/yerler/<şehir>/<rehber>.md (yoksa haritada yok; doğrulayıcı HATA verir). */
+async function rehberleriOku(plan) {
+  const sehir = plan.sehir?.yeni?.slug ?? plan.sehir?.slug;
+  const rehberler = new Map();
+  if (!SEHIR_SLUG.test(sehir ?? '')) return rehberler;
+  for (const g of plan.gunler ?? []) {
+    for (const d of g.duraklar ?? []) {
+      if (typeof d?.rehber !== 'string' || !REHBER_DOSYA.test(d.rehber) || rehberler.has(d.rehber)) continue;
+      try {
+        rehberler.set(d.rehber, await readFile(`icerik/yerler/${sehir}/${d.rehber}.md`, 'utf8'));
+      } catch {
+        // dosya yok: doğrulayıcı HATA verir
+      }
+    }
+  }
+  return rehberler;
 }
 
 async function yukle() {
   const plan = await planOku();
   const { yeniden } = istekAl();
-  const { hatalar, uyarilar } = planDenetle(plan);
+  const rehberler = await rehberleriOku(plan);
+  const { hatalar, uyarilar } = planDenetle(plan, { rehberler });
   if (hatalar.length) {
     duyuru('error', `HATA (${hatalar.length}) · ${plan.gezi.slug}`, hatalar);
     throw new HatHatasi(`plan dosyasında ${hatalar.length} hata; yüklenmedi`);
@@ -250,7 +342,7 @@ async function yukle() {
   const tumUyarilar = [...uyarilar, ...gun.uyarilar];
   duyuru('warning', `UYARI (${tumUyarilar.length}) · ${plan.gezi.slug}`, tumUyarilar);
 
-  const veri = JSON.stringify(yuklemeVerisi(plan, detaylar));
+  const veri = JSON.stringify(yuklemeVerisi(plan, detaylar, rehberler));
   const etiket = dolarEtiketi(veri);
   const r = await yazanCagri(`public.icerik_gezi_taslak_yukle(${etiket}${veri}${etiket}::jsonb, ${yeniden === true})`, veri);
 
@@ -258,6 +350,7 @@ async function yukle() {
   const satir = [
     `${KURU ? 'KURU: denetimler geçti, hiçbir şey yazılmadı' : 'YÜKLENDİ (taslak)'} · ${r.slug} · gezi_id ${r.gezi_id}${KURU ? ' (geri alındı)' : ''}`,
     `${r.gun_sayisi} gün · ${r.mekan_sayisi} durak · yazıda ${r.yazidaki_mekan} mekan izi · ${r.yeniden ? 'yeniden yazıldı' : 'yeni'}${r.yeni_sehir ? ' · yeni şehir (taslak)' : ''} · updated_at ${r.updated_at}`,
+    `mekan rehberi: ${r.rehber_yazilan ?? 0} yazıldı (${r.yer_acilan ?? 0} yeni taslak yer) · atlanan ${(r.rehber_atlanan ?? []).length}${(r.rehber_atlanan ?? []).length ? ` (yayında ya da dolu: ${r.rehber_atlanan.join(', ')})` : ''}`,
     ...gunSatirlari,
     ...(KURU ? [] : [`BO: ${editorLinki(r.gezi_id)}`]),
   ];
@@ -273,6 +366,7 @@ async function kontrol(slug = slugAl()) {
     `${k.slug} · ${k.durum} (yayin=${k.yayin}, yayin_at=${k.yayin_at ?? 'boş'}) · gezi_id ${k.gezi_id}`,
     `${k.gun_sayisi} gün · ${k.mekan_sayisi} durak (gün başına ${k.gunler.map((g) => g.durak).join('/')}) · place_id eksik ${k.place_id_eksik}`,
     `yazıdaki mekan: ${k.mekan_kart} kart, ${k.mekan_satir} bağlantı · foto ${k.foto} · kapak ${k.kapak ? 'var' : 'yok'}`,
+    `mekan rehberi: ${k.rehber_dolu} durakta dolu (${k.rehber_yayinda} yayında) · ${k.yer_yok} durağın yer satırı yok`,
     `şehir ${k.sehir} (${k.sehir_yayin ? 'yayında' : 'taslak'}) · updated_at ${k.updated_at}`,
     `BO: ${editorLinki(k.gezi_id)}`,
   ];
@@ -288,7 +382,7 @@ async function sil() {
   await ozet([`### ${KURU ? 'Kuru silme' : 'Silme'}`, `- ${satir}`]);
 }
 
-const ISLEMLER = { sehirler, arastir, yukle, kontrol: () => kontrol(), sil };
+const ISLEMLER = { sehirler, osm, arastir, yukle, kontrol: () => kontrol(), sil };
 
 if (process.argv[1] && import.meta.url === new URL(`file://${path.resolve(process.argv[1])}`).href) {
   const is = ISLEMLER[ortam.ISLEM];
