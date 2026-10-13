@@ -1,0 +1,40 @@
+name: ops-auth-redirect
+
+# Tek seferlik (#146 ön koşulu): Supabase Auth → Redirect URLs listesine https://gezi-web.pages.dev/giris eklenir.
+# Var olan adresler korunur; yalnız uri_allow_list ve site_url yazdırılır (auth yapılandırmasının geri kalanı gizli).
+on:
+  push:
+    branches: [claude/ops-auth-redirect]
+
+jobs:
+  ekle:
+    runs-on: ubuntu-latest
+    env:
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      REF: xwqeobelyeuzoxyuvauw
+      ADRES: https://gezi-web.pages.dev/giris
+    steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Redirect URL
+        run: |
+          node --input-type=module -e '
+          const { SUPABASE_ACCESS_TOKEN: t, REF: ref, ADRES: adres } = process.env;
+          if (!t) { console.error("SUPABASE_ACCESS_TOKEN yok"); process.exit(1); }
+          const url = `https://api.supabase.com/v1/projects/${ref}/config/auth`;
+          const h = { authorization: `Bearer ${t}`, "content-type": "application/json" };
+          const oku = async () => { const r = await fetch(url, { headers: h }); if (!r.ok) throw new Error(`GET ${r.status}`); return r.json(); };
+          const once = await oku();
+          const liste = (once.uri_allow_list ?? "").split(",").map((s) => s.trim()).filter(Boolean);
+          console.log("site_url:", once.site_url);
+          console.log("önce:", liste);
+          if (!liste.includes(adres)) {
+            const r = await fetch(url, { method: "PATCH", headers: h, body: JSON.stringify({ uri_allow_list: [...liste, adres].join(",") }) });
+            if (!r.ok) { console.error(`PATCH ${r.status}`, (await r.text()).slice(0, 300)); process.exit(1); }
+          }
+          const sonra = (await oku()).uri_allow_list;
+          console.log("sonra:", sonra);
+          if (!sonra.split(",").map((s) => s.trim()).includes(adres)) process.exit(1);
+          console.log(`### Supabase Auth\n- Redirect URLs: ${sonra}`);
+          '
