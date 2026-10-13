@@ -15,7 +15,7 @@ type SeyahatOzeti = { id: string; invite_token: string; name?: string | null; ci
 
 export async function davetiPaylas(seyahat: SeyahatOzeti): Promise<'paylasildi' | 'kopyalandi' | 'vazgecildi'> {
   const link = davetLinki(seyahat.invite_token);
-  const metin = t('sihirbaz.kimlerle.paylasMetin', { ad: seyahatAdi(seyahat), link });
+  const metin = t('davet.paylasMetin', { ad: seyahatAdi(seyahat), link });
   let sonuc: 'paylasildi' | 'kopyalandi' | 'vazgecildi' = 'vazgecildi';
   try {
     if (Platform.OS === 'web') {
