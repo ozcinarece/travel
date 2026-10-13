@@ -1,11 +1,13 @@
 // #156 rehber editörü — saf çekirdek: markdown ↔ bloklar ve satır içi markdown ↔ HTML (contentEditable). Testli.
 // Saklama biçimi değişmez (src/lib/markdown.ts okur): paragraf, `## ara başlık`, `- madde`, `> ipucu`, `![alt](foto:yol)` (ya da
 // https / virgüllü iki hedef, olduğu gibi),
-// `::mekan[place_id]`; satır içi `**kalın**`, `*italik*`, `[metin](mekan:id)`, `[metin](https://…)`.
+// `::mekan[place_id]`; satır içi `**kalın**`, `*italik*`, `[metin](mekan:id)`. Uygulamanın ayrıştırıcısı iç içe biçim ve dış
+// bağlantı okumaz: editör de üretmez (tek kat biçim; bağlantı metni biçimsiz).
 
 export type Blok =
   | { id: string; tur: 'paragraf'; md: string }
-  | { id: string; tur: 'baslik'; md: string }
+  /** `seviye` yalnız `#` / `###` ile gelen başlıkta (yoksa `##`; "/" menüsü `##` açar). */
+  | { id: string; tur: 'baslik'; md: string; seviye?: 1 | 3 }
   | { id: string; tur: 'liste'; ogeler: string[] }
   | { id: string; tur: 'ipucu'; md: string }
   /** `hedef` parantez içi olduğu gibi: `foto:<yol>`, `https://…` ya da virgüllü iki hedef (yan yana iki foto). */
@@ -44,12 +46,12 @@ export function mdBloklari(md: string | null | undefined): Blok[] {
       bitir();
       continue;
     }
-    const b = /^#{1,3}\s+(.*)$/.exec(satir);
+    const b = /^(#{1,3})\s+(.*)$/.exec(satir);
     const k = MEKAN_KARTI.exec(satir);
     const f = FOTO.exec(satir);
     if (b || k || f) {
       bitir();
-      if (b) bloklar.push({ id: blokId(), tur: 'baslik', md: b[1].trim() });
+      if (b) bloklar.push({ id: blokId(), tur: 'baslik', md: b[2].trim(), ...(b[1].length !== 2 ? { seviye: b[1].length as 1 | 3 } : {}) });
       else if (k) bloklar.push({ id: blokId(), tur: 'mekan', place_id: k[1] });
       else if (f) bloklar.push({ id: blokId(), tur: 'foto', hedef: f[2].trim(), alt: f[1] });
       continue;
@@ -81,7 +83,7 @@ export function bloklarMd(bloklar: readonly Blok[]): string {
         if (b.md.trim()) parcalar.push(tekSatir(b.md));
         break;
       case 'baslik':
-        if (b.md.trim()) parcalar.push(`## ${tekSatir(b.md)}`);
+        if (b.md.trim()) parcalar.push(`${'#'.repeat(b.seviye ?? 2)} ${tekSatir(b.md)}`);
         break;
       case 'ipucu':
         if (b.md.trim()) parcalar.push(`> ${tekSatir(b.md)}`);
@@ -106,11 +108,12 @@ const tekSatir = (md: string) => md.replace(/\s*\n\s*/g, ' ').replace(/ /g, ' '
 
 // ---------------------------------------------------------------- satır içi
 
-const SATIR_ICI = /\*\*([^*]+)\*\*|\*([^*\s][^*]*)\*|\[([^\]]+)\]\((mekan:[A-Za-z0-9_-]{10,255}|https?:\/\/[^)\s]+)\)/g;
+const SATIR_ICI = /\*\*([^*]+)\*\*|\*([^*\s][^*]*)\*|\[([^\]]+)\]\((mekan:[A-Za-z0-9_-]{10,255})\)/g;
+const MEKAN_BAGI = /\[[^\]]+\]\(mekan:[A-Za-z0-9_-]{10,255}\)/g;
 
 const kacis = (m: string) => m.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
-/** Satır içi markdown → contentEditable HTML (`<b>`, `<i>`, `<a href="mekan:…">`, `<a href="https://…">`). */
+/** Satır içi markdown → contentEditable HTML (`<b>`, `<i>`, `<a href="mekan:…">`). */
 export function mdHtml(md: string): string {
   let html = '';
   let son = 0;
@@ -127,36 +130,53 @@ export function mdHtml(md: string): string {
 /** DOM düğümü benzeri (test için de): metin ya da etiketli öğe. */
 export type HtmlDugum = { nodeType: number; nodeName: string; textContent: string | null; childNodes: ArrayLike<HtmlDugum>; getAttribute?: (a: string) => string | null; style?: { fontWeight?: string; fontStyle?: string } };
 
-/** contentEditable içeriği → satır içi markdown (tarayıcının `<b>/<strong>/<i>/<em>/<a>/<span style>` biçimleri). */
-export function htmlMd(kok: HtmlDugum): string {
+/**
+ * contentEditable içeriği → satır içi markdown (tarayıcının `<b>/<strong>/<i>/<em>/<a>/<span style>` biçimleri).
+ * `bicimli`: bir biçimin ya da bağlantının içindeyiz — iç işaret basılmaz (uygulama `***x***`, `**[a](…)**` okumaz).
+ */
+export function htmlMd(kok: HtmlDugum, bicimli = false): string {
   let md = '';
-  for (const d of Array.from(kok.childNodes)) md += dugumMd(d);
-  return md.replace(/ /g, ' ').replace(/[ \t]*\n[ \t]*/g, ' ').replace(/ {2,}/g, ' ');
+  for (const d of Array.from(kok.childNodes)) md += dugumMd(d, bicimli);
+  return md.replace(/\u00a0/g, ' ').replace(/[ \t]*\n[ \t]*/g, ' ').replace(/ {2,}/g, ' ');
 }
 
-function dugumMd(d: HtmlDugum): string {
+/** Metni işaretle sarar; işaret boşluğa yapışmaz ("**kalın** "), mekan bağlantıları sarılmaz (çevresindeki parçalar sarılır). */
+function sar(ic: string, isaret: string): string {
+  let md = '';
+  let son = 0;
+  const parca = (p: string) => {
+    if (!p.trim()) return p;
+    const bas = p.match(/^\s*/)![0];
+    const bit = p.match(/\s*$/)![0];
+    return `${bas}${isaret}${p.trim()}${isaret}${bit}`;
+  };
+  for (const m of ic.matchAll(MEKAN_BAGI)) {
+    md += parca(ic.slice(son, m.index)) + m[0];
+    son = m.index + m[0].length;
+  }
+  return md + parca(ic.slice(son));
+}
+
+function dugumMd(d: HtmlDugum, bicimli: boolean): string {
   if (d.nodeType === 3) return (d.textContent ?? '').replace(/\n/g, ' ');
   if (d.nodeType !== 1) return '';
   const ad = d.nodeName.toLowerCase();
   if (ad === 'br') return ' ';
-  const ic = htmlMd(d);
-  if (!ic.trim()) return ic;
-  const sar = (isaret: string) => {
-    // İşaret boşluğa yapışmaz: "**kalın** " (boşluk dışarıda).
-    const bas = ic.match(/^\s*/)![0];
-    const son = ic.match(/\s*$/)![0];
-    return `${bas}${isaret}${ic.trim()}${isaret}${son}`;
-  };
   if (ad === 'a') {
     const href = d.getAttribute?.('href') ?? '';
-    if (/^mekan:[A-Za-z0-9_-]{10,255}$/.test(href) || /^https?:\/\//.test(href)) return `[${ic.trim().replace(/[[\]]/g, '')}](${href})`;
-    return ic;
+    // Yalnız mekan bağlantısı; metni biçimsiz ve tek satır. Başka adres (yapıştırılmış dış bağlantı) düz metin kalır.
+    if (!/^mekan:[A-Za-z0-9_-]{10,255}$/.test(href)) return htmlMd(d, bicimli);
+    const metin = htmlMd(d, true).replace(/[[\]*]/g, '').trim();
+    return metin ? `[${metin}](${href})` : '';
   }
   const kalin = ad === 'b' || ad === 'strong' || (d.style?.fontWeight ?? '') === 'bold' || Number(d.style?.fontWeight) >= 600;
   const italik = ad === 'i' || ad === 'em' || d.style?.fontStyle === 'italic';
-  // İkisi birden: uygulamanın ayrıştırıcısı `***` okumaz, kalın kalır.
-  if (kalin) return sar('**');
-  if (italik) return sar('*');
+  if ((kalin || italik) && !bicimli) {
+    const ic = htmlMd(d, true);
+    // İkisi birden: kalın kalır.
+    return ic.trim() ? sar(ic, kalin ? '**' : '*') : ic;
+  }
+  const ic = htmlMd(d, bicimli);
   if (ad === 'div' || ad === 'p') return ` ${ic} `;
   return ic;
 }

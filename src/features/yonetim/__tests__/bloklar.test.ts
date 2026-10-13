@@ -1,6 +1,6 @@
 import { describe, expect, it } from '@jest/globals';
 
-import { markdownAyristir } from '@/lib/markdown';
+import { markdownAyristir, satirParcalari } from '@/lib/markdown';
 
 import {
   blokSayaclari,
@@ -80,10 +80,10 @@ describe('bloklar (#156)', () => {
     expect(md).toBe('bir iki\n\n- a');
   });
 
-  it('satır içi markdown ↔ HTML', () => {
+  it('satır içi markdown ↔ HTML (dış bağlantı uygulamada yok: düz metin)', () => {
     const md = 'Bir **kalın** ve *italik*, [Met](mekan:ChIJ-met-helva-00002) ile [site](https://ornek.com/a?b=1) & <x>';
     const html = mdHtml(md);
-    expect(html).toBe('Bir <b>kalın</b> ve <i>italik</i>, <a href="mekan:ChIJ-met-helva-00002">Met</a> ile <a href="https://ornek.com/a?b=1">site</a> &amp; &lt;x&gt;');
+    expect(html).toBe('Bir <b>kalın</b> ve <i>italik</i>, <a href="mekan:ChIJ-met-helva-00002">Met</a> ile [site](https://ornek.com/a?b=1) &amp; &lt;x&gt;');
     const kok = el('div', [
       'Bir ',
       el('b', ['kalın']),
@@ -91,11 +91,32 @@ describe('bloklar (#156)', () => {
       el('i', ['italik']),
       ', ',
       el('a', ['Met'], { href: 'mekan:ChIJ-met-helva-00002' }),
-      ' ile ',
-      el('a', ['site'], { href: 'https://ornek.com/a?b=1' }),
-      ' & <x>',
+      ' ile [site](https://ornek.com/a?b=1) & <x>',
     ]);
     expect(htmlMd(kok)).toBe(md);
+  });
+
+  it('iç içe biçim ve biçimli bağlantı: tek kat işaret, bağlantı sarılmaz; uygulamanın ayrıştırıcısı işaretsiz okur', () => {
+    const met = { href: 'mekan:ChIJ-met-helva-00002' };
+    const ornekler: [HtmlDugum, string][] = [
+      [el('div', [el('b', [el('i', ['ikisi'])])]), '**ikisi**'],
+      [el('div', [el('i', ['a ', el('b', ['b']), ' c'])]), '*a b c*'],
+      [el('div', [el('b', [el('a', ['Met'], met)])]), '[Met](mekan:ChIJ-met-helva-00002)'],
+      [el('div', [el('a', [el('b', ['Met'])], met)]), '[Met](mekan:ChIJ-met-helva-00002)'],
+      [el('div', [el('b', ['önce ', el('a', ['Met'], met), ' sonra'])]), '**önce** [Met](mekan:ChIJ-met-helva-00002) **sonra**'],
+      [el('div', [el('span', ['x'], {}, { fontWeight: '700', fontStyle: 'italic' })]), '**x**'],
+    ];
+    for (const [kok, beklenen] of ornekler) {
+      const md = htmlMd(kok);
+      expect(md).toBe(beklenen);
+      const parcalar = satirParcalari(md);
+      expect(parcalar.map((p) => p.metin).join('')).not.toMatch(/[*[\]]/);
+    }
+    expect(satirParcalari('**önce** [Met](mekan:ChIJ-met-helva-00002) **sonra**').find((p) => p.place_id)?.metin).toBe('Met');
+  });
+
+  it('başlık seviyesi korunur (#, ##, ###)', () => {
+    expect(bloklarMd(mdBloklari('# Bir\n\n## İki\n\n### Üç'))).toBe('# Bir\n\n## İki\n\n### Üç');
   });
 
   it('tarayıcı biçimleri: strong/em, kalın span, boşluk işaretin dışında, br ve nbsp boşluk, bilinmeyen bağlantı düz metin', () => {

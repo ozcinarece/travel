@@ -271,7 +271,11 @@ export function useSehirRehberi(sehirId: string | undefined) {
     enabled: !!sehirId,
     staleTime: GUN_MS,
     queryFn: async () => {
-      const { data, error } = await supabase.from('sehir_rehberi').select('id, sehir_id, bolum, baslik, ozet, yazi_md, sira').eq('sehir_id', sehirId!).order('sira');
+      const { data, error } = await supabase.from('sehir_rehberi').select('id, sehir_id, bolum, baslik, ozet, yazi_md, sira')
+        .eq('sehir_id', sehirId!)
+        // #156: gizli bölüm uygulamada yok (admin politikası onu da döndürür; Önizle de bu sorguyu kullanır).
+        .eq('gizli', false)
+        .order('sira');
       if (error) throw error;
       return data as SehirRehberi[];
     },

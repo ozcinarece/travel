@@ -364,7 +364,7 @@
   },
   "sehir": {
     "baslik": "Şehir · {ad}",
-    "baslikRehber": "Şehir · {ad} · Rehber bölümleri",
+    "baslikRehber": "Şehir · {ad} · Rehber",
     "yeni": "+ Şehir",
     "ara": "Ara",
     "araYer": "Şehir ara",
@@ -379,7 +379,7 @@
     "onizlemeBaslik": "Önizleme · {ad}",
     "sekme": {
       "genel": "Genel",
-      "rehber": "Rehber bölümleri",
+      "rehber": "Rehber",
       "fotolar": "Fotoğraflar"
     },
     "durum": {
@@ -559,6 +559,8 @@
     "kaydedildi": "Kaydedildi {saat}",
     "kayitHata": "Kaydedilemedi",
     "yayinHata": "Yayınlanamadı; tekrar dene.",
+    "cakisma": "Bu rehber başka yerde değişti",
+    "yenidenYukle": "Yeniden yükle",
     "yayinlandi": "Yayınlandı",
     "yukleniyor": "Yükleniyor…",
     "yuklenemedi": "Rehber yüklenemedi.",

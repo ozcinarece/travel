@@ -3,7 +3,7 @@ import { useEffect, useState, type CSSProperties } from 'react';
 import { saatMetni } from '@/features/yonetim/gezi';
 import { ty } from '@/features/yonetim/metin';
 import { rehberMekanSayisi } from '@/features/yonetim/rehberTaslak';
-import { KAPAK_OZET, useRehberYazari } from '@/features/yonetim/rehberYazari';
+import { cakismaMi, KAPAK_OZET, useRehberYazari } from '@/features/yonetim/rehberYazari';
 import type { SehirAlanlari } from '@/features/yonetim/sehir';
 import type { Merkez } from '@/features/yerler/api';
 import { icerikFotoUrl } from '@/lib/markdown';
@@ -63,8 +63,9 @@ export function SehirRehberSekmesi({ sehirId, sehir, sekmeler, merkez, fotoYukle
     setHata(null);
     try {
       await y.yayinla();
-    } catch {
-      setHata(ty('rehberEditor.yayinHata'));
+    } catch (e) {
+      // Çakışmada ayrı uyarı (Yeniden yükle) görünür.
+      if (!cakismaMi(e)) setHata(ty('rehberEditor.yayinHata'));
     } finally {
       setYayinMesgul(false);
     }
@@ -105,6 +106,12 @@ export function SehirRehberSekmesi({ sehirId, sehir, sekmeler, merkez, fotoYukle
       />
       <div style={c.orta}>
         <div style={c.kaydir}>
+          {y.cakisma ? (
+            <div role="alert" style={c.cakisma}>
+              <span>{ty('rehberEditor.cakisma')}</span>
+              <Hap kucuk tur="birincil" baslik={ty('rehberEditor.yenidenYukle')} onPress={() => void y.yenidenYukle()} />
+            </div>
+          ) : null}
           {hata ? (
             <button type="button" onClick={() => setHata(null)} style={c.hata}>
               {hata}
@@ -173,10 +180,11 @@ function KapakOzet({ sehir, onOzet, onFotolar }: { sehir: SehirAlanlari; onOzet:
 
 const c: Record<string, CSSProperties> = {
   orta: { flex: 1, minWidth: 0, position: 'relative', display: 'flex' },
-  kaydir: { flex: 1, minWidth: 0, overflowY: 'auto', padding: '24px 28px 96px 64px', display: 'flex', flexDirection: 'column', gap: 12 },
+  kaydir: { flex: 1, minWidth: 0, overflowY: 'auto', padding: '24px 0', display: 'flex', flexDirection: 'column', gap: 12 },
   hata: { alignSelf: 'center', border: 0, borderRadius: 10, padding: '8px 12px', background: yRenk.hataZemin, color: yRenk.hata, fontFamily: yazi.yari, fontSize: 13, cursor: 'pointer' },
+  cakisma: { alignSelf: 'center', display: 'flex', alignItems: 'center', gap: 12, borderRadius: 12, padding: '8px 8px 8px 14px', background: yRenk.hataZemin, color: yRenk.hata, fontFamily: yazi.yari, fontSize: 13 },
   bilgi: { fontFamily: yazi.normal, fontSize: 13, color: yRenk.ikincil },
-  kagit: { width: '100%', maxWidth: 700, margin: '0 auto', background: yRenk.zemin, borderRadius: 24, boxShadow: '0 10px 30px rgba(21,42,107,0.08)', padding: '34px 48px', boxSizing: 'border-box', display: 'flex', flexDirection: 'column', gap: 16 },
+  kagit: { width: '100%', maxWidth: 620, margin: '0 auto', flexGrow: 1, flexShrink: 0, background: yRenk.zemin, borderRadius: 24, boxShadow: '0 10px 30px rgba(21,42,107,0.08)', padding: '34px 44px', boxSizing: 'border-box', display: 'flex', flexDirection: 'column', gap: 16 },
   etiket: { fontFamily: yazi.ekstra, fontSize: 12, letterSpacing: '0.08em', color: yRenk.ikincil },
   kapak: { position: 'relative', height: 220, borderRadius: 16, background: '#ffe2cc', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' },
   kapakGorsel: { width: '100%', height: '100%', objectFit: 'cover' },

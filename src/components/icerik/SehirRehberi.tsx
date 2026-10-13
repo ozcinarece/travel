@@ -16,7 +16,7 @@ import { useGeziler, useSehirRehberi, useSehirYerleri } from '@/features/icerik/
 import { useMekanEkle, useMekanGuncelle, useMekanlar, useMekanSil } from '@/features/mekanlar/sorgular';
 import { useHafifYerler, useYerFotolari, type HafifYer } from '@/features/yerler/api';
 import { t } from '@/i18n';
-import { kategoriEtiketi, varsayilanDakika } from '@/lib/kategori';
+import { bilinenKategori, varsayilanDakika } from '@/lib/kategori';
 import { puanMetni } from '@/lib/puan';
 import type { Sehir } from '@/lib/tipler';
 import { bosluk, kose, renk, yazi } from '@/theme';
@@ -32,6 +32,8 @@ type Props = {
   seyahat?: { id: string; ad: string; tz: string };
   /** "Rehberdeki N mekan ›" (seyahatte Keşfet'in "Rehberden" listesi; dışarıda yerler sayfası). */
   onRehberMekanlari?: () => void;
+  /** #156 panel önizlemesi "Bu bölüm": tek bölüm çizilirken numarası (varsayılan 1). */
+  ilkNo?: number;
 };
 
 /**
@@ -40,7 +42,7 @@ type Props = {
  * EkleDugmesi, satır içi bağlantı turuncu alt çizgi → mekan rehberi), en altta "Bu şehirde hazır geziler". Kapak geçince üstte
  * "‹ {şehir} rehberi" + çipler sabit; okunan bölümün çipi Gece; turuncu okuma ilerleme çizgisi.
  */
-export function SehirRehberi({ sehir, sehirlerYukleniyor, onGeri, seyahat, onRehberMekanlari }: Props) {
+export function SehirRehberi({ sehir, sehirlerYukleniyor, onGeri, seyahat, onRehberMekanlari, ilkNo = 1 }: Props) {
   const kenar = useSafeAreaInsets();
   const rehber = useSehirRehberi(sehir?.id);
   const geziler = useGeziler(sehir?.id);
@@ -116,7 +118,7 @@ export function SehirRehberi({ sehir, sehirlerYukleniyor, onGeri, seyahat, onReh
             {y.ad}
           </Text>
           <Text style={s.kartAlt} numberOfLines={1}>
-            {[kategoriEtiketi(y.primary_type), puan ? `★ ${puan}` : null].filter(Boolean).join(' · ')}
+            {[bilinenKategori(y.primary_type), puan ? `★ ${puan}` : null].filter(Boolean).join(' · ')}
           </Text>
         </View>
         {seyahat ? <EkleDugmesi listede={listede} mesgul={mesgulId === placeId} onPress={() => degistir(y)} /> : null}
@@ -183,7 +185,7 @@ export function SehirRehberi({ sehir, sehirlerYukleniyor, onGeri, seyahat, onReh
                 const y = e.nativeEvent.layout.y;
                 setKonumlar((k) => (k[b.id] === y ? k : { ...k, [b.id]: y }));
               }}>
-              <Text style={s.bolumNo}>{String(i + 1).padStart(2, '0')}</Text>
+              <Text style={s.bolumNo}>{String(i + ilkNo).padStart(2, '0')}</Text>
               <Text style={s.bolumBaslik}>{b.baslik}</Text>
               <MdYazi kaynak={bolumYazisi(b.yazi_md)} kenar={0} buyuk ipucu mekanKarti={mekanKarti} onMekan={(id) => (hafif.data?.[id] ? setPanelId(id) : null)} />
             </View>

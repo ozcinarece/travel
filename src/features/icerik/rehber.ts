@@ -34,5 +34,6 @@ export function okumaOrani(kaydirmaY: number, icerikYukseklik: number, gorunenYu
 
 /** Bölüm yazısının ilk `#` başlığı bölüm başlığıyla çizildiği için düşer. */
 export function bolumYazisi(md: string | null | undefined): string {
-  return (md ?? '').replace(/^#\s+[^\n]*\n+/, '');
+  // Gövdesi boş bölümde yazı yalnız `# Başlık` (satır sonu yok).
+  return (md ?? '').replace(/^#\s+[^\n]*(\n+|$)/, '');
 }

@@ -33,17 +33,34 @@ export function imlectenBol(el: HTMLElement): { once: string; sonra: string } {
   const parca = kalan.extractContents();
   const kap = document.createElement('div');
   kap.appendChild(parca);
-  return { once: htmlMd(el).trim(), sonra: htmlMd(kap).trim() };
+  // Kırpılmaz: Backspace aynı yerden araya boşluk koymadan birleştirir. Bölünen yerdeki boşluk öncekinde kalır (yeni satırın
+  // başında görünmez).
+  const sonra = htmlMd(kap);
+  const bosluk = /^ +/.exec(sonra)?.[0] ?? '';
+  return { once: htmlMd(el) + (bosluk ? ' ' : ''), sonra: sonra.slice(bosluk.length) };
 }
 
-/** Öğeye odaklan, imleç başa ya da sona. */
-export function odakla(el: HTMLElement, konum: 'bas' | 'son') {
+/** Öğeye odaklan, imleç başa, sona ya da `konum`uncu karaktere. */
+export function odakla(el: HTMLElement, konum: 'bas' | 'son' | number) {
   el.focus();
   const sec = window.getSelection();
   if (!sec) return;
   const r = document.createRange();
   r.selectNodeContents(el);
   r.collapse(konum === 'bas');
+  if (typeof konum === 'number') {
+    let kalan = konum;
+    const yuruyen = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+    for (let d = yuruyen.nextNode(); d; d = yuruyen.nextNode()) {
+      const uzunluk = d.textContent?.length ?? 0;
+      if (kalan <= uzunluk) {
+        r.setStart(d, kalan);
+        r.collapse(true);
+        break;
+      }
+      kalan -= uzunluk;
+    }
+  }
   sec.removeAllRanges();
   sec.addRange(r);
 }

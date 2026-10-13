@@ -4,7 +4,7 @@ import { View } from 'react-native';
 
 import { SehirRehberi } from '@/components/icerik/SehirRehberi';
 import { ty } from '@/features/yonetim/metin';
-import { onizlemeSatirlari, type TaslakBolum } from '@/features/yonetim/rehberTaslak';
+import { onizlemeNo, onizlemeSatirlari, type TaslakBolum } from '@/features/yonetim/rehberTaslak';
 import type { Sehir } from '@/lib/tipler';
 import { yazi } from '@/theme';
 
@@ -72,7 +72,7 @@ export function RehberOnizlemesi({ sehir, bolumler, seciliId, acik, onAcik }: Pr
         <div style={c.olcek}>
           <QueryClientProvider client={istemci}>
             <View style={{ width: GENISLIK, height: YUKSEKLIK }}>
-              <SehirRehberi key={yalniz ?? 'sayfa'} sehir={sehir} sehirlerYukleniyor={false} onGeri={() => {}} />
+              <SehirRehberi key={yalniz ?? 'sayfa'} sehir={sehir} sehirlerYukleniyor={false} onGeri={() => {}} ilkNo={yalniz ? onizlemeNo(bolumler, yalniz) : 1} />
             </View>
           </QueryClientProvider>
         </div>

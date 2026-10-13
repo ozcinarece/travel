@@ -16,10 +16,10 @@ import {
   type SlashSecenek,
 } from '@/features/yonetim/bloklar';
 import { ty } from '@/features/yonetim/metin';
-import { useHafifYerler, type HafifYer, type Merkez } from '@/features/yerler/api';
-import { kategoriEtiketi } from '@/lib/kategori';
+import { useHafifYerler, useYerFotolari, type HafifYer, type Merkez } from '@/features/yerler/api';
+import { bilinenKategori } from '@/lib/kategori';
 import { icerikFotoUrl } from '@/lib/markdown';
-import { kategoriPini } from '@/lib/pinIkonu';
+import { puanMetni } from '@/lib/puan';
 import { yazi } from '@/theme';
 
 import { dosyaSec } from '../surukle';
@@ -42,7 +42,8 @@ type Props = {
 
 type MetinTuru = 'paragraf' | 'baslik' | 'ipucu' | 'liste';
 type MekanKutusu = { blok: string; mod: 'slash' | 'degistir' | 'baglan' };
-type Odak = { id: string; konum: 'bas' | 'son' };
+/** konum: baş, son ya da metin içinde karakter sırası (Backspace birleştirmesinde birleşme noktası). */
+type Odak = { id: string; konum: 'bas' | 'son' | number };
 
 const SLASH_ETIKET = (): Record<SlashSecenek, string[]> =>
   Object.fromEntries(SLASH_SECENEKLERI.map((o) => [o, [ty(`rehberEditor.slash.${o}`), ...ty(`rehberEditor.slashAnahtar.${o}`).split(',')]])) as Record<SlashSecenek, string[]>;
@@ -57,16 +58,24 @@ function sonaParagraf(bloklar: Blok[]): Blok[] {
  * #156 KK1–6 (kanvas BO-1 / BO-2): WYSIWYG blok editörü — sayfa uygulamadaki gibi (Figtree 17 metin, Archivo ara başlık,
  * turuncu alt çizgili mekan bağlantısı, Gece çerçeveli mekan kartı, sarı İPUCU kutusu); doğrudan üstüne yazılır.
  * "/" menüsü (Mekan kartı · Ara başlık · Fotoğraf · İpucu kutusu · Madde listesi; yazdıkça süzülür, ↵ ekler); her bloğun
- * solunda tutamaç (sürükle) ve "+"; kart / foto seçilince üstte ↑↓ · Mekanı değiştir · Sil; metin seçilince B · I ·
- * Bağlantı · Mekana bağla. Saklama biçimi markdown (features/yonetim/bloklar).
+ * solunda tek tutamaç (boş paragrafta "+", diğerlerinde sürükle); kart / foto seçilince üstte ↑↓ · Mekanı değiştir · Sil;
+ * metin seçilince B · I · Mekana bağla (dış bağlantı uygulamada yok). Saklama biçimi markdown (features/yonetim/bloklar).
  */
 export function BlokEditoru({ md, onDegis, merkez, fotoYukle, onHata, onMekanSecildi, baskaBolumde, onOdak }: Props) {
   const [bloklar, setBloklar] = useState<Blok[]>(() => sonaParagraf(mdBloklari(md)));
   const yazilan = useRef(md);
+  // Üste bildirilip henüz geri gelmemiş yazılar: geri gelen kendi yazımızsa (ara hâl dahil) yeniden ayrıştırılmaz.
+  const bildirilen = useRef<string[]>([]);
   // Dışarıdan gelen yazı (bölüm değişti, sürüme dönüldü): yeniden ayrıştır.
   useEffect(() => {
+    const i = bildirilen.current.indexOf(md);
+    if (i >= 0) {
+      bildirilen.current = bildirilen.current.slice(i + 1);
+      return;
+    }
     if (md === yazilan.current) return;
     yazilan.current = md;
+    bildirilen.current = [];
     setBloklar(sonaParagraf(mdBloklari(md)));
   }, [md]);
 
@@ -77,6 +86,7 @@ export function BlokEditoru({ md, onDegis, merkez, fotoYukle, onHata, onMekanSec
         const yeniMd = bloklarMd(yeni);
         if (yeniMd !== yazilan.current) {
           yazilan.current = yeniMd;
+          bildirilen.current = [...bildirilen.current, yeniMd].slice(-20);
           // Durum güncellemesi bitince üst bileşene bildir.
           queueMicrotask(() => onDegis(yeniMd));
         }
@@ -111,8 +121,10 @@ export function BlokEditoru({ md, onDegis, merkez, fotoYukle, onHata, onMekanSec
   const [slashKapali, setSlashKapali] = useState<string | null>(null);
   const kartIdleri = useMemo(() => bloklar.flatMap((b) => (b.tur === 'mekan' ? [b.place_id] : [])), [bloklar]);
   const kartlar = useHafifYerler(kartIdleri);
+  // Kartın küçük resmi uygulamadaki gibi (rehber kartı aynı fotoğrafı gösterir; yoksa nötr kare).
+  const kartFotolari = useYerFotolari(kartIdleri);
 
-  // ---------------------------------------------------------------- seçim araç çubuğu (B · I · Bağlantı · Mekana bağla)
+  // ---------------------------------------------------------------- seçim araç çubuğu (B · I · Mekana bağla)
   const [secim, setSecim] = useState<{ x: number; y: number; blok: string } | null>(null);
   const baglanacak = useRef<Range | null>(null);
   useEffect(() => {
@@ -129,10 +141,6 @@ export function BlokEditoru({ md, onDegis, merkez, fotoYukle, onHata, onMekanSec
     return () => document.removeEventListener('selectionchange', dinle);
   }, []);
   const bicimle = (komut: 'bold' | 'italic') => document.execCommand(komut);
-  const baglantiEkle = () => {
-    const adres = window.prompt(ty('rehberEditor.secim.adres'), 'https://');
-    if (adres && /^https?:\/\/\S+$/.test(adres.trim())) document.execCommand('createLink', false, adres.trim());
-  };
   const mekanaBagla = () => {
     const sec = window.getSelection();
     if (!sec?.rangeCount || !secim) return;
@@ -142,10 +150,11 @@ export function BlokEditoru({ md, onDegis, merkez, fotoYukle, onHata, onMekanSec
   };
 
   // ---------------------------------------------------------------- blok ekleme
-  const sonrayaEkle = (id: string, yeni: Blok) => {
+  /** `id`'nin altına `yeni` blok; `alan` verilirse `id` aynı güncellemede değişir (tek bildirim, ara hâl yok). */
+  const sonrayaEkle = (id: string, yeni: Blok, alan?: Partial<Blok>) => {
     degistir((b) => {
       const i = b.findIndex((x) => x.id === id);
-      return [...b.slice(0, i + 1), yeni, ...b.slice(i + 1)];
+      return [...b.slice(0, i), ...(alan ? [{ ...b[i], ...alan } as Blok] : b.slice(i, i + 1)), yeni, ...b.slice(i + 1)];
     });
     return yeni.id;
   };
@@ -176,8 +185,9 @@ export function BlokEditoru({ md, onDegis, merkez, fotoYukle, onHata, onMekanSec
   const artiyaBas = (id: string) => {
     const blok = bloklar.find((b) => b.id === id);
     // Boş paragrafta "+": aynı yerde "/" menüsü; değilse altına yeni paragraf + menü.
-    const hedef = blok?.tur === 'paragraf' && !blok.md.trim() ? id : sonrayaEkle(id, { id: blokId(), tur: 'paragraf', md: '' });
-    blokGuncelle(hedef, { md: '/' });
+    const hedef = blok?.tur === 'paragraf' && !blok.md.trim() ? id : blokId();
+    if (hedef === id) blokGuncelle(id, { md: '/' });
+    else sonrayaEkle(id, { id: hedef, tur: 'paragraf', md: '/' });
     setSlashKapali(null);
     setOdak({ id: hedef, konum: 'son' });
   };
@@ -238,8 +248,11 @@ export function BlokEditoru({ md, onDegis, merkez, fotoYukle, onHata, onMekanSec
         // Boş son maddede Enter: listeden çık.
         e.preventDefault();
         li.remove();
-        blokGuncelle(blok.id, { ogeler: listeOku(el) });
-        setOdak({ id: sonrayaEkle(blok.id, { id: blokId(), tur: 'paragraf', md: '' }), konum: 'bas' });
+        setOdak({ id: sonrayaEkle(blok.id, { id: blokId(), tur: 'paragraf', md: '' }, { ogeler: listeOku(el) }), konum: 'bas' });
+      } else if (e.key === 'Enter' && e.shiftKey) {
+        // Shift+Enter de yeni madde (satır sonu markdown'da boşluk olurdu).
+        e.preventDefault();
+        document.execCommand('insertParagraph');
       } else if (e.key === 'Backspace' && imlecBasta(el) && !el.textContent?.trim()) {
         e.preventDefault();
         degistir((b) => b.map((x) => (x.id === blok.id ? { id: blok.id, tur: 'paragraf', md: '' } : x)));
@@ -247,12 +260,12 @@ export function BlokEditoru({ md, onDegis, merkez, fotoYukle, onHata, onMekanSec
       }
       return;
     }
-    if (e.key === 'Enter' && !e.shiftKey) {
+    // Shift+Enter de Enter gibi: saklama biçiminde satır sonu yok (boşluk olurdu).
+    if (e.key === 'Enter') {
       e.preventDefault();
       if (blok.tur === 'paragraf') {
         const { once, sonra } = imlectenBol(el);
-        blokGuncelle(blok.id, { md: once });
-        setOdak({ id: sonrayaEkle(blok.id, { id: blokId(), tur: 'paragraf', md: sonra }), konum: 'bas' });
+        setOdak({ id: sonrayaEkle(blok.id, { id: blokId(), tur: 'paragraf', md: sonra }, { md: once }), konum: 'bas' });
       } else if (imlecSonda(el)) {
         setOdak({ id: sonrayaEkle(blok.id, { id: blokId(), tur: 'paragraf', md: '' }), konum: 'bas' });
       }
@@ -270,10 +283,11 @@ export function BlokEditoru({ md, onDegis, merkez, fotoYukle, onHata, onMekanSec
       if (!onceki) return;
       e.preventDefault();
       if (onceki.tur === 'paragraf' || onceki.tur === 'ipucu' || onceki.tur === 'baslik') {
-        // Öncekiyle birleş.
-        const ek = htmlMd(el).trim();
-        degistir((b) => b.filter((x) => x.id !== blok.id).map((x) => (x.id === onceki.id ? ({ ...x, md: `${(x as { md: string }).md}${ek ? ` ${ek}` : ''}` } as Blok) : x)));
-        setOdak({ id: onceki.id, konum: 'son' });
+        // Öncekiyle birleş (araya boşluk eklenmez: Enter'ın böldüğü yer aynen birleşir); imleç birleşme noktasında.
+        const ek = htmlMd(el);
+        const nokta = ogeler.current.get(onceki.id)?.textContent?.length ?? 0;
+        degistir((b) => b.filter((x) => x.id !== blok.id).map((x) => (x.id === onceki.id ? ({ ...x, md: `${(x as { md: string }).md}${ek}` } as Blok) : x)));
+        setOdak({ id: onceki.id, konum: nokta });
       } else if (!el.textContent?.trim()) {
         degistir((b) => b.filter((x) => x.id !== blok.id));
         setSeciliBlok(onceki.id);
@@ -364,13 +378,13 @@ export function BlokEditoru({ md, onDegis, merkez, fotoYukle, onHata, onMekanSec
         );
       case 'mekan': {
         const y = kartlar.data?.[blok.place_id];
-        const tip = y?.primary_type;
+        const foto = kartFotolari.data?.get(blok.place_id) ?? null;
         return (
           <div style={{ ...c.kart, ...(seciliBlok === blok.id ? c.kartSecili : null) }} onMouseDown={() => setSeciliBlok(blok.id)} role="group" aria-label={y?.ad ?? blok.place_id}>
-            <div style={{ ...c.kartKare, background: kategoriPini(tip).kategoriRenk }} />
+            <div style={c.kartKare}>{foto ? <img src={foto} alt="" style={c.kartFoto} /> : null}</div>
             <div style={c.kartMetin}>
               <div style={c.kartAd}>{y?.ad ?? '…'}</div>
-              <div style={c.kartAlt}>{[kategoriEtiketi(tip), y?.puan != null ? `★ ${y.puan.toLocaleString('tr-TR')}` : null].filter(Boolean).join(' · ')}</div>
+              <div style={c.kartAlt}>{[bilinenKategori(y?.primary_type), y && puanMetni(y.puan) ? `★ ${puanMetni(y.puan)}` : null].filter(Boolean).join(' · ')}</div>
             </div>
             <span aria-hidden style={c.kartArti}>
               <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke={yRenk.metin} strokeWidth={3} strokeLinecap="round">
@@ -384,6 +398,13 @@ export function BlokEditoru({ md, onDegis, merkez, fotoYukle, onHata, onMekanSec
   };
 
   const slashSecenekleri = slash ? slashSuz(slashSuzgeci((bloklar.find((b) => b.id === slash.blok) as { md?: string } | undefined)?.md ?? '') ?? '', SLASH_ETIKET()) : [];
+  // "/" menüsü bölümün sonunda da görünür alana kayar.
+  const slashMenusu = useRef<HTMLDivElement>(null);
+  const slashBlok = slash?.blok;
+  const slashSayisi = slashSecenekleri.length;
+  useEffect(() => {
+    if (slashBlok && slashSayisi) slashMenusu.current?.scrollIntoView({ block: 'nearest' });
+  }, [slashBlok, slashSayisi]);
 
   return (
     <div ref={kap} style={c.kap} onMouseDown={(e) => e.target === e.currentTarget && setSeciliBlok(null)}>
@@ -407,28 +428,32 @@ export function BlokEditoru({ md, onDegis, merkez, fotoYukle, onHata, onMekanSec
               setHedef(null);
             }}>
             <div className="blok-oluk" style={c.oluk}>
-              <button type="button" aria-label={ty('rehberEditor.blok.ekle')} title={ty('rehberEditor.blok.ekle')} style={c.olukDugme} onMouseDown={(e) => e.preventDefault()} onClick={() => artiyaBas(blok.id)}>
-                +
-              </button>
-              <span
-                role="button"
-                aria-label={ty('rehberEditor.blok.tutamac')}
-                title={ty('rehberEditor.blok.tutamac')}
-                draggable
-                onDragStart={(e) => {
-                  e.dataTransfer.effectAllowed = 'move';
-                  e.dataTransfer.setData('text/plain', blok.id);
-                  setSuruklenen(blok.id);
-                }}
-                onDragEnd={() => {
-                  setSuruklenen(null);
-                  setHedef(null);
-                }}
-                style={{ ...c.olukDugme, cursor: 'grab' }}>
-                <svg width={12} height={12} viewBox="0 0 24 24" fill={yRenk.ikincil} aria-hidden>
-                  {[6, 12, 18].flatMap((y) => [<circle key={`a${y}`} cx="9" cy={y} r="1.9" />, <circle key={`b${y}`} cx="15" cy={y} r="1.9" />])}
-                </svg>
-              </span>
+              {blok.tur === 'paragraf' && !blok.md.trim() ? (
+                // Kanvas: boş paragrafta "+" ("/" menüsü), diğer bloklarda tek tutamaç (sürükle).
+                <button type="button" aria-label={ty('rehberEditor.blok.ekle')} title={ty('rehberEditor.blok.ekle')} style={c.olukDugme} onMouseDown={(e) => e.preventDefault()} onClick={() => artiyaBas(blok.id)}>
+                  +
+                </button>
+              ) : (
+                <span
+                  role="button"
+                  aria-label={ty('rehberEditor.blok.tutamac')}
+                  title={ty('rehberEditor.blok.tutamac')}
+                  draggable
+                  onDragStart={(e) => {
+                    e.dataTransfer.effectAllowed = 'move';
+                    e.dataTransfer.setData('text/plain', blok.id);
+                    setSuruklenen(blok.id);
+                  }}
+                  onDragEnd={() => {
+                    setSuruklenen(null);
+                    setHedef(null);
+                  }}
+                  style={{ ...c.olukDugme, cursor: 'grab' }}>
+                  <svg width={12} height={12} viewBox="0 0 24 24" fill="#7f93d6" aria-hidden>
+                    {[6, 12, 18].flatMap((y) => [<circle key={`a${y}`} cx="9" cy={y} r="2" />, <circle key={`b${y}`} cx="15" cy={y} r="2" />])}
+                  </svg>
+                </span>
+              )}
             </div>
             {kutuBurada ? (
               <MekanEkleKutusu
@@ -469,7 +494,7 @@ export function BlokEditoru({ md, onDegis, merkez, fotoYukle, onHata, onMekanSec
               </div>
             ) : null}
             {slash?.blok === blok.id && slashSecenekleri.length ? (
-              <div role="listbox" aria-label={ty('rehberEditor.blokEkle')} style={c.slash}>
+              <div ref={slashMenusu} role="listbox" aria-label={ty('rehberEditor.blokEkle')} style={c.slash}>
                 <div style={c.slashBaslik}>{ty('rehberEditor.blokEkle')}</div>
                 {slashSecenekleri.map((o, k) => (
                   <div
@@ -508,9 +533,6 @@ export function BlokEditoru({ md, onDegis, merkez, fotoYukle, onHata, onMekanSec
           <button type="button" aria-label={ty('rehberEditor.secim.italikEtiket')} style={{ ...c.secimDugme, fontStyle: 'italic' }} onClick={() => bicimle('italic')}>
             I
           </button>
-          <button type="button" style={{ ...c.secimDugme, width: 'auto', padding: '0 10px' }} onClick={baglantiEkle}>
-            {ty('rehberEditor.secim.baglanti')}
-          </button>
           <button type="button" style={{ ...c.secimDugme, width: 'auto', padding: '0 10px', background: yRenk.vurgu, color: yRenk.metin }} onClick={mekanaBagla}>
             {ty('rehberEditor.secim.mekanaBagla')}
           </button>
@@ -519,10 +541,9 @@ export function BlokEditoru({ md, onDegis, merkez, fotoYukle, onHata, onMekanSec
       <style>{`.blok-oluk{opacity:0;transition:opacity .12s}[data-blok-kap]:hover>.blok-oluk,[data-blok-kap]:focus-within>.blok-oluk{opacity:1}
 [data-metin]:empty::before{content:attr(data-yer-tutucu);color:${yRenk.yerTutucu};pointer-events:none}
 [data-metin] a[href^="mekan:"]{font-family:${yazi.ekstra};color:inherit;text-decoration:underline;text-decoration-color:${yRenk.vurgu};text-decoration-thickness:2px;text-underline-offset:3px}
-[data-metin] a[href^="http"]{color:${yRenk.ana};text-decoration:underline}
 [data-metin] b{font-family:${yazi.ekstra};font-weight:normal}
 [data-metin]{outline:none}
-[data-metin] ::selection{background:${yRenk.menuMetin}}`}</style>
+[data-metin]::selection,[data-metin] ::selection{background:#c9d2f2;color:${yRenk.ana}}`}</style>
     </div>
   );
 }
@@ -664,7 +685,8 @@ const c: Record<string, CSSProperties> = {
   altyazi: { marginTop: 6, width: '100%', border: 0, outline: 'none', padding: 0, fontFamily: yazi.normal, fontSize: 13, color: yRenk.soluk, background: 'transparent' },
   kart: { position: 'relative', display: 'flex', alignItems: 'center', gap: 12, padding: 10, borderRadius: 18, border: `1.5px solid ${yRenk.ayrac}`, cursor: 'pointer', userSelect: 'none' },
   kartSecili: { border: `2px solid ${yRenk.ana}`, padding: 9.5 },
-  kartKare: { width: 52, height: 52, flexShrink: 0, borderRadius: 14 },
+  kartKare: { width: 56, height: 56, flexShrink: 0, borderRadius: 14, overflow: 'hidden', background: yRenk.yuzey },
+  kartFoto: { width: '100%', height: '100%', objectFit: 'cover', display: 'block' },
   kartMetin: { flex: 1, minWidth: 0 },
   kartAd: { fontFamily: yazi.ekstra, fontSize: 15, color: yRenk.metin },
   kartAlt: { fontFamily: yazi.normal, fontSize: 12, color: yRenk.ikincil },

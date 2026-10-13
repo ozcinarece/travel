@@ -37,7 +37,10 @@ export function MekanEkleKutusu({ merkez, sabitBicim, baskaBolumde, onEkle, onVa
   const oneriler = useOneriler('yonetim-rehber-mekan', girdi, oturum, undefined, merkez, !link);
   const sonuclar = link ? [] : (oneriler.data ?? []).slice(0, 5);
 
-  useEffect(() => alan.current?.focus(), []);
+  const kutu = useRef<HTMLDivElement>(null);
+  useEffect(() => alan.current?.focus({ preventScroll: true }), []);
+  // Bölümün sonunda da tamamı görünsün (sonuçlar geldikçe büyür).
+  useEffect(() => kutu.current?.scrollIntoView({ block: 'nearest' }), [sonuclar.length, hata]);
 
   const ekle = async (indeks = secili) => {
     setMesgul(true);
@@ -71,7 +74,7 @@ export function MekanEkleKutusu({ merkez, sabitBicim, baskaBolumde, onEkle, onVa
   };
 
   return (
-    <div style={c.kutu} onKeyDown={tus}>
+    <div ref={kutu} style={c.kutu} onKeyDown={tus}>
       <div style={c.ara}>
         <svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke={yRenk.ana} strokeWidth={2.4} strokeLinecap="round" aria-hidden>
           <circle cx="11" cy="11" r="7" />

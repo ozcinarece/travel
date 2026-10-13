@@ -63,7 +63,7 @@ export function RehberKagidi({ bolum, no, bolumler, merkez, fotoYukle, onHata, o
 }
 
 const c: Record<string, CSSProperties> = {
-  kagit: { width: '100%', maxWidth: 700, margin: '0 auto', background: yRenk.zemin, borderRadius: 24, boxShadow: '0 10px 30px rgba(21,42,107,0.08)', padding: '34px 48px', boxSizing: 'border-box', display: 'flex', flexDirection: 'column', gap: 16 },
+  kagit: { width: '100%', maxWidth: 620, margin: '0 auto', flexGrow: 1, flexShrink: 0, background: yRenk.zemin, borderRadius: 24, boxShadow: '0 10px 30px rgba(21,42,107,0.08)', padding: '34px 44px', boxSizing: 'border-box', display: 'flex', flexDirection: 'column', gap: 16 },
   no: { fontFamily: yazi.ekstra, fontSize: 12, letterSpacing: '0.08em', color: yRenk.ikincil },
   baslik: { border: 0, outline: 'none', padding: 0, marginTop: -8, background: 'transparent', fontFamily: yazi.baslik, fontSize: 32, lineHeight: 1.05, letterSpacing: '-0.03em', color: yRenk.metin, width: '100%' },
   ozetSatir: { marginTop: -6, display: 'flex', alignItems: 'baseline', gap: 6, flexWrap: 'wrap' },

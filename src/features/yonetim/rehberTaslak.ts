@@ -31,6 +31,11 @@ export function onizlemeSatirlari(sehirId: string, bolumler: readonly TaslakBolu
     .map((b, i) => ({ id: b.id, sehir_id: sehirId, bolum: b.bolum, baslik: b.baslik, ozet: b.ozet, yazi_md: rehberYazisi(b.baslik, b.govde), sira: i + 1 }));
 }
 
+/** Uygulamadaki bölüm numarası (gizliler sayılmaz; gizli bölüm kendi yerinde sayılır): önizlemede "Bu bölüm". */
+export function onizlemeNo(bolumler: readonly TaslakBolum[], id: string): number {
+  return Math.max(0, bolumler.filter((b) => !b.gizli || b.id === id).findIndex((b) => b.id === id)) + 1;
+}
+
 /** Bölümdeki mekan kartı sayısı (sol listedeki "3 mekan"). */
 export function bolumKartSayisi(b: Pick<TaslakBolum, 'govde'>): number {
   return mekanBaglari(b.govde).filter((m) => m.bicim === 'kart').length;

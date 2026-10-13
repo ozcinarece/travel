@@ -8,6 +8,7 @@ import {
   bolumTasi,
   canlidanTaslak,
   mekanBaskaBolumde,
+  onizlemeNo,
   onizlemeSatirlari,
   rehberMekanSayisi,
   taslakDegisti,
@@ -71,5 +72,13 @@ describe('rehber taslağı (#156)', () => {
     expect(bolumGeriAl(kalan, silinen!).map((b) => b.id)).toEqual(['a', 'b', 'c']);
     expect(bolumGeriAl(bolumler, silinen!)).toHaveLength(3);
     expect(yeniBolum('n', 'Yeni bölüm')).toEqual({ id: 'n', baslik: 'Yeni bölüm', ozet: null, govde: '', gizli: false, bolum: null });
+  });
+
+  it('önizleme "Bu bölüm" numarası uygulamadaki gibi (gizliler sayılmaz)', () => {
+    expect(onizlemeNo(bolumler, 'a')).toBe(1);
+    expect(onizlemeNo(bolumler, 'b')).toBe(2);
+    const gizliOnde = [{ ...bolumler[0], gizli: true }, bolumler[1]];
+    expect(onizlemeNo(gizliOnde, 'b')).toBe(1);
+    expect(onizlemeNo(bolumler, 'c')).toBe(3);
   });
 });

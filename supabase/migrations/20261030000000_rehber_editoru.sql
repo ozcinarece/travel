@@ -41,55 +41,83 @@ alter table public.sehir_rehberi_surum enable row level security;
 create policy sehir_rehberi_surum_admin on public.sehir_rehberi_surum for all to authenticated
   using ((select public.is_admin())) with check ((select public.is_admin()));
 
--- Taslağı yazar. Sürüm: neden 'kayit' ise son sürüm 2 dakikadan eskiyse; diğer nedenlerde (silme, dönüş) her zaman.
--- `bilinen` eskisiyle birleşir. Döner: taslağın updated_at'i.
-create function public.rehber_taslak_kaydet(p_sehir uuid, p_bolumler jsonb, p_bilinen jsonb default '{}'::jsonb, p_neden text default 'kayit')
+-- Taslağı yazar. Eşzamanlılık: `p_onceki` editörün son okuduğu / yazdığı `updated_at`; sunucudaki taslak o değilse
+-- (başka sekme ya da kişi yazmış) 40001 — eski sekme yeni taslağın üstüne yazamaz. İlk taslakta `p_onceki` null.
+-- Sürüm: neden 'kayit' ise son sürüm 2 dakikadan eskiyse güncellemeden ÖNCEKİ hâl; diğer nedenlerde (silme, dönüş) her
+-- zaman (silme / dönüşten önceki hâl). `bilinen` eskisiyle birleşir. Döner: taslağın yeni updated_at'i.
+create function public.rehber_taslak_kaydet(
+  p_sehir uuid, p_bolumler jsonb, p_bilinen jsonb default '{}'::jsonb, p_neden text default 'kayit', p_onceki timestamptz default null
+)
 returns timestamptz
 language plpgsql security invoker set search_path = ''
 as $$
 declare
+  v_eski public.sehir_rehberi_taslak;
   v_zaman timestamptz;
 begin
   if not public.is_admin() then
     raise exception 'yalnız admin' using errcode = '42501';
   end if;
-  insert into public.sehir_rehberi_taslak as t (sehir_id, bolumler, bilinen)
-    values (p_sehir, p_bolumler, coalesce(p_bilinen, '{}'::jsonb))
-  on conflict (sehir_id) do update
-    set bolumler = excluded.bolumler, bilinen = t.bilinen || excluded.bilinen, updated_at = now()
-  returning updated_at into v_zaman;
-  if p_neden <> 'kayit' or not exists (
-    select 1 from public.sehir_rehberi_surum where sehir_id = p_sehir and created_at > now() - interval '2 minutes'
-  ) then
-    insert into public.sehir_rehberi_surum (sehir_id, bolumler, neden) values (p_sehir, p_bolumler, p_neden);
-    delete from public.sehir_rehberi_surum
+  select * into v_eski from public.sehir_rehberi_taslak where sehir_id = p_sehir for update;
+  if v_eski.sehir_id is null then
+    if p_onceki is not null then
+      raise exception 'taslak değişti' using errcode = '40001';
+    end if;
+    insert into public.sehir_rehberi_taslak (sehir_id, bolumler, bilinen)
+      values (p_sehir, p_bolumler, coalesce(p_bilinen, '{}'::jsonb))
+    on conflict (sehir_id) do nothing
+    returning updated_at into v_zaman;
+    if v_zaman is null then
+      raise exception 'taslak değişti' using errcode = '40001';
+    end if;
+  else
+    if p_onceki is distinct from v_eski.updated_at then
+      raise exception 'taslak değişti' using errcode = '40001';
+    end if;
+    -- Aynı işlemde iki kayıt aynı now()'ı alır; damga her yazışta ilerlesin.
+    update public.sehir_rehberi_taslak
+      set bolumler = p_bolumler, bilinen = bilinen || coalesce(p_bilinen, '{}'::jsonb),
+          updated_at = greatest(now(), v_eski.updated_at + interval '1 microsecond')
       where sehir_id = p_sehir
-        and id not in (select id from public.sehir_rehberi_surum where sehir_id = p_sehir order by created_at desc, id desc limit 20);
+      returning updated_at into v_zaman;
+    if p_neden <> 'kayit' or not exists (
+      select 1 from public.sehir_rehberi_surum where sehir_id = p_sehir and created_at > now() - interval '2 minutes'
+    ) then
+      insert into public.sehir_rehberi_surum (sehir_id, bolumler, neden) values (p_sehir, v_eski.bolumler, p_neden);
+      delete from public.sehir_rehberi_surum
+        where sehir_id = p_sehir
+          and id not in (select id from public.sehir_rehberi_surum where sehir_id = p_sehir order by created_at desc, id desc limit 20);
+    end if;
   end if;
   return v_zaman;
 end;
 $$;
-revoke execute on function public.rehber_taslak_kaydet(uuid, jsonb, jsonb, text) from public, anon;
-grant execute on function public.rehber_taslak_kaydet(uuid, jsonb, jsonb, text) to authenticated;
+revoke execute on function public.rehber_taslak_kaydet(uuid, jsonb, jsonb, text, timestamptz) from public, anon;
+grant execute on function public.rehber_taslak_kaydet(uuid, jsonb, jsonb, text, timestamptz) to authenticated;
 
 -- Yayınla: taslak canlı bölümlere geçer (taslakta olmayan bölüm ve bağlantıları silinir), her bölümün yazısındaki
 -- mekanlar `icerik_mekanlari`na yazılır (yazı sırasıyla; bilinmeyen place_id taslak yer olarak açılır). Döner: açılan yer.
-create function public.rehber_yayinla(p_sehir uuid) returns integer
+-- `p_beklenen`: editörün gördüğü taslağın updated_at'i; taslak o değilse (başka yerde değişmiş) 40001.
+create function public.rehber_yayinla(p_sehir uuid, p_beklenen timestamptz) returns integer
 language plpgsql security invoker set search_path = ''
 as $$
 declare
   v_taslak public.sehir_rehberi_taslak;
   b record;
   v_md text;
+  v_satir integer;
   v_mekanlar jsonb;
   v_acilan integer := 0;
 begin
   if not public.is_admin() then
     raise exception 'yalnız admin' using errcode = '42501';
   end if;
-  select * into v_taslak from public.sehir_rehberi_taslak where sehir_id = p_sehir;
+  select * into v_taslak from public.sehir_rehberi_taslak where sehir_id = p_sehir for update;
   if v_taslak.sehir_id is null then
     raise exception 'taslak yok' using errcode = 'P0002';
+  end if;
+  if p_beklenen is distinct from v_taslak.updated_at then
+    raise exception 'taslak değişti' using errcode = '40001';
   end if;
   set constraints public.sehir_rehberi_sira_tekil deferred;
 
@@ -108,14 +136,19 @@ begin
               v_md, b.i::integer, coalesce((b.e ->> 'gizli')::boolean, false))
     on conflict (id) do update
       set bolum = excluded.bolum, baslik = excluded.baslik, ozet = excluded.ozet, yazi_md = excluded.yazi_md,
-          sira = excluded.sira, gizli = excluded.gizli;
+          sira = excluded.sira, gizli = excluded.gizli
+      where public.sehir_rehberi.sehir_id = p_sehir;
+    get diagnostics v_satir = row_count;
+    if v_satir = 0 then
+      raise exception 'bölüm başka şehrin: %', b.e ->> 'id' using errcode = '42501';
+    end if;
 
     -- Yazıdaki mekanlar (satır içi `[ad](mekan:id)` ve satır başında `::mekan[id]`), editörün bildiği ad / konumla.
     select coalesce(jsonb_agg(
       jsonb_build_object('place_id', p.place_id, 'bicim', p.bicim)
         || case when v_taslak.bilinen ? p.place_id
-             then jsonb_build_object('ad', coalesce(nullif(p.ad, ''), v_taslak.bilinen -> p.place_id ->> 'ad'))
-                  || (v_taslak.bilinen -> p.place_id) - 'ad'
+             then (v_taslak.bilinen -> p.place_id) - 'ad'
+                  || jsonb_build_object('ad', coalesce(nullif(v_taslak.bilinen -> p.place_id ->> 'ad', ''), nullif(p.ad, '')))
              else '{}'::jsonb end
       order by p.sira), '[]'::jsonb)
     into v_mekanlar
@@ -130,7 +163,8 @@ begin
     v_acilan := v_acilan + public.icerik_mekanlari_yaz('rehber', (b.e ->> 'id')::uuid, v_mekanlar);
   end loop;
 
-  update public.sehir_rehberi_taslak set yayinlandi_at = now() where sehir_id = p_sehir;
+  -- Yayın damgası taslağınkinden önce olamaz ("Taslak değişiklik var" = updated_at > yayinlandi_at).
+  update public.sehir_rehberi_taslak set yayinlandi_at = greatest(now(), updated_at) where sehir_id = p_sehir;
   insert into public.sehir_rehberi_surum (sehir_id, bolumler, neden) values (p_sehir, v_taslak.bolumler, 'yayin');
   delete from public.sehir_rehberi_surum
     where sehir_id = p_sehir
@@ -138,5 +172,5 @@ begin
   return v_acilan;
 end;
 $$;
-revoke execute on function public.rehber_yayinla(uuid) from public, anon;
-grant execute on function public.rehber_yayinla(uuid) to authenticated;
+revoke execute on function public.rehber_yayinla(uuid, timestamptz) from public, anon;
+grant execute on function public.rehber_yayinla(uuid, timestamptz) to authenticated;

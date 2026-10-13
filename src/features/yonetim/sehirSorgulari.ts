@@ -1,13 +1,12 @@
 // #111 şehir editörü — Supabase okuma/yazma. RLS: yalnız admin yazar ve taslak şehirleri okur (#106 is_admin()).
-import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { useCallback } from 'react';
+import { useQuery } from '@tanstack/react-query';
 
 import type { HafifYer } from '@/features/yerler/api';
 import { supabase } from '@/lib/supabase';
 
 import { slugUret } from './gezi';
 import { hataVer } from './geziSorgulari';
-import { rehberYazisi, type BolumTuru, type MekanBagi, type RehberBolumu, type SehirAlanlari } from './sehir';
+import type { MekanBagi, RehberBolumu, SehirAlanlari } from './sehir';
 import type { BilinenMekan, RehberTaslagi, TaslakBolum } from './rehberTaslak';
 
 export type YonetimSehirDetayi = SehirAlanlari & { id: string; updated_at: string; geziler: { count: number }[] };
@@ -70,32 +69,6 @@ export function useRehberBolumleri(sehirId: string | undefined) {
   });
 }
 
-/** Bölüm ekle / sırala / sil; mekan listesini yaz. Her işlemden sonra bölümler yenilenir. */
-export function useRehberIslemleri(sehirId: string) {
-  const qc = useQueryClient();
-  const yap = useCallback(
-    async <T,>(is: () => Promise<T>): Promise<T> => {
-      try {
-        return await is();
-      } finally {
-        await qc.invalidateQueries({ queryKey: rehberAnahtari(sehirId) });
-      }
-    },
-    [qc, sehirId],
-  );
-  return {
-    ekle: (bolum: BolumTuru, baslik: string, sira: number) =>
-      yap(async () => (await hataVer(supabase.from('sehir_rehberi').insert({ sehir_id: sehirId, bolum, baslik, sira, yazi_md: rehberYazisi(baslik, '') }).select('id').single())) as { id: string }),
-    /** Sürükle-sırala: tek upsert deyimi (sıra tekilliği deyim sonunda denetlenir). */
-    sirala: (bolumler: RehberBolumu[]) => yap(() => hataVer(supabase.from('sehir_rehberi').upsert(bolumler.map((b, i) => ({ ...b, sira: i + 1 }))))),
-    sil: (id: string) =>
-      yap(async () => {
-        await hataVer(supabase.from('icerik_mekanlari').delete().eq('sahip_tur', 'rehber').eq('sahip_id', id));
-        await hataVer(supabase.from('sehir_rehberi').delete().eq('id', id));
-      }),
-  };
-}
-
 export type MekanAdi = { ad: string; kategori: string | null; lat: number; lng: number };
 
 /**
@@ -144,11 +117,21 @@ export function useRehberSurumleri(sehirId: string | undefined, etkin: boolean) 
 }
 
 /** Taslağı yazar (sürüm kuralı veritabanında). Döner: taslağın updated_at'i. */
-export async function rehberTaslakKaydet(sehirId: string, bolumler: TaslakBolum[], bilinen: Record<string, BilinenMekan>, neden: 'kayit' | 'silme' | 'donus' = 'kayit'): Promise<string> {
-  return (await hataVer(supabase.rpc('rehber_taslak_kaydet', { p_sehir: sehirId, p_bolumler: bolumler, p_bilinen: bilinen, p_neden: neden }))) as string;
+/**
+ * Taslağı yazar (sürüm kuralı veritabanında). `onceki`: düzenlemenin dayandığı taslak damgası (yoksa null); sunucudaki
+ * taslak başka yerde değiştiyse 40001. Döner: taslağın yeni updated_at'i.
+ */
+export async function rehberTaslakKaydet(
+  sehirId: string,
+  bolumler: TaslakBolum[],
+  bilinen: Record<string, BilinenMekan>,
+  neden: 'kayit' | 'silme' | 'donus',
+  onceki: string | null,
+): Promise<string> {
+  return (await hataVer(supabase.rpc('rehber_taslak_kaydet', { p_sehir: sehirId, p_bolumler: bolumler, p_bilinen: bilinen, p_neden: neden, p_onceki: onceki }))) as string;
 }
 
-/** Yayınla: taslak canlıya; mekan bağlantıları yazılır. Döner: açılan taslak yer sayısı. */
-export async function rehberYayinla(sehirId: string): Promise<number> {
-  return (await hataVer(supabase.rpc('rehber_yayinla', { p_sehir: sehirId }))) as number;
+/** Yayınla: `beklenen` damgalı taslak canlıya (değiştiyse 40001); mekan bağlantıları yazılır. Döner: açılan taslak yer sayısı. */
+export async function rehberYayinla(sehirId: string, beklenen: string): Promise<number> {
+  return (await hataVer(supabase.rpc('rehber_yayinla', { p_sehir: sehirId, p_beklenen: beklenen }))) as number;
 }
