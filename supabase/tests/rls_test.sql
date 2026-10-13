@@ -895,12 +895,28 @@ begin
   assert (public.profil_hazirla()).username = 'zehra.ozcinar', 'ikinci çağrı aynı profili döndürür';
 end $$;
 select pg_temp.as_user(:P2);
-do $$ begin assert (public.profil_hazirla()).username = 'zehra.ozcinar2', 'alınmış → sayı eki'; end $$;
+do $$ begin assert (public.profil_hazirla()).username ~ '^zehra\.ozcinar[0-9]{4}$', 'alınmış → rastgele 4 haneli ek'; end $$;
 select pg_temp.as_user(:P3);
 do $$
 declare p public.profiles := public.profil_hazirla();
 begin
   assert p.name = 'Gezgin' and p.username = 'gezgin', 'ad yok → Gezgin: ' || p.username;
+  -- Apple adı sonradan gelir: kendiliğinden oluşan Gezgin profili ad ve kullanıcı adıyla düzelir.
+  p := public.profil_hazirla('Ayşe Kaya');
+  assert p.name = 'Ayşe Kaya' and p.username = 'ayse.kaya', 'Apple adı profili düzeltir: ' || p.username;
+  p := public.profil_hazirla('Başka Ad');
+  assert p.name = 'Ayşe Kaya', 'gerçek adı olan profil değişmez';
+end $$;
+-- Tavan yok: "gezgin" ve sayılı ekleri dolu olsa da yeni profil oluşur.
+reset role;
+insert into auth.users (id, is_anonymous) select ('aaaaaaaa-3333-0000-0000-' || lpad(g::text, 12, '0'))::uuid, false from generate_series(100, 140) g;
+insert into public.profiles (id, name, username) select ('aaaaaaaa-3333-0000-0000-' || lpad(g::text, 12, '0'))::uuid, 'Gezgin', case when g = 100 then 'gezgin' else 'gezgin' || g end from generate_series(100, 139) g;
+set role authenticated;
+select pg_temp.as_user('aaaaaaaa-3333-0000-0000-000000000140');
+do $$
+declare p public.profiles := public.profil_hazirla();
+begin
+  assert p.username ~ '^gezgin[0-9]{4}$', 'dolu tabanda rastgele ek: ' || p.username;
 end $$;
 select pg_temp.as_user(:P4, true);
 select pg_temp.hata_bekle($$select public.profil_hazirla()$$, '42501');

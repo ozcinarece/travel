@@ -2,7 +2,7 @@ import { Figtree_400Regular, Figtree_500Medium, Figtree_600SemiBold, Figtree_700
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 
 import { HataSiniri } from '@/components/ui/HataSiniri';
@@ -33,26 +33,38 @@ function Kok() {
   const profil = useProfil();
   // #138 KK1: "Profilini kur" ekranı yok — hesap var, profil yoksa sunucu kendiliğinden oluşturur (ad/foto sağlayıcıdan).
   const hazirla = useProfilHazirla();
+  const hazirlaMutate = hazirla.mutate;
   const profilYok = hesapli && profil.isSuccess && profil.data === null;
-  const [denenen, setDenenen] = useState<string | null>(null);
   const uid = session?.user.id ?? null;
-  if (profilYok && uid && denenen !== uid) {
-    setDenenen(uid);
-    hazirla.mutate();
-  }
+  const denenen = useRef<string | null>(null);
+  useEffect(() => {
+    if (!profilYok || !uid || denenen.current === uid) return;
+    denenen.current = uid;
+    hazirlaMutate();
+  }, [profilYok, uid, hazirlaMutate]);
+
+  // Profil okunamadı (ör. açılışta çevrimdışı) ya da oluşturulamadı: oturumu olan kullanıcıya giriş ekranı açılamaz →
+  // "Tekrar dene". Hata ekranı deneme sürerken de (yükleniyor halinde) kalır; boş ekran yok.
+  const hataVar = hesapli && (profil.isError || (profilYok && hazirla.isError));
+  const deneniyor = profil.isFetching || hazirla.isPending;
+  const [hataModu, setHataModu] = useState(false);
+  if (hataVar && !hataModu) setHataModu(true);
+  if (hataModu && !hataVar && !deneniyor) setHataModu(false);
+  const hataEkrani = hataVar || hataModu;
 
   // Açılış ekranı fontlar, oturum ve (hesaplıysa) profil hazır olana kadar durur.
   const profilBekleniyor = hesapli && (profil.isPending || (profilYok && !hazirla.isError));
-  const yuklendi = (fontlar || !!fontHatasi) && hazir && !profilBekleniyor;
+  const yuklendi = (fontlar || !!fontHatasi) && hazir && (!profilBekleniyor || hataEkrani);
   useEffect(() => {
     if (yuklendi) SplashScreen.hideAsync();
   }, [yuklendi]);
   if (!yuklendi) return null;
-  if (profilYok && hazirla.isError) {
+  if (hataEkrani) {
+    const tekrarDene = () => (profil.isError ? profil.refetch() : hazirlaMutate());
     return (
       <View style={k.hata}>
-        {hazirla.isPending ? <ActivityIndicator color={renk.ana} /> : <Text style={k.hataMetin}>{t('giris.profilHata')}</Text>}
-        <Buton baslik={t('genel.yenidenDene')} onPress={() => hazirla.mutate()} yukleniyor={hazirla.isPending} />
+        {deneniyor ? <ActivityIndicator color={renk.ana} /> : <Text style={k.hataMetin}>{t('giris.profilHata')}</Text>}
+        <Buton baslik={t('genel.yenidenDene')} onPress={tekrarDene} yukleniyor={deneniyor} />
       </View>
     );
   }
