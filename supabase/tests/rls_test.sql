@@ -1093,13 +1093,14 @@ reset role;
 insert into public.olaylar (user_id, tur, hedef_id, meta) values
   ('eeeeeeee-0000-0000-0000-000000000004', 'gezi_alindi', '33333333-3333-4333-8333-000000000001', '{"secenek": "tum"}'),
   ('bbbbbbbb-0000-0000-0000-000000000002', 'gezi_alindi', '33333333-3333-4333-8333-000000000001', '{"secenek": "gunler"}'),
+  ('bbbbbbbb-0000-0000-0000-000000000002', 'gezi_alindi', '33333333-3333-4333-8333-000000000001', '{"secenek": "gunler"}'),
   ('bbbbbbbb-0000-0000-0000-000000000002', 'gezi_goruntulendi', '33333333-3333-4333-8333-000000000001', null),
   ('bbbbbbbb-0000-0000-0000-000000000002', 'gezi_alindi', (select id from public.geziler where slug = 'taslak-gezi'), null);
 set role authenticated;
 select pg_temp.as_user(:G);
 do $$
 begin
-  assert public.gezi_alinma_sayisi('33333333-3333-4333-8333-000000000001') >= 2, 'alınma sayısı kullanıcılar arası (olaylar kapalı kalır)';
+  assert public.gezi_alinma_sayisi('33333333-3333-4333-8333-000000000001') = 2, 'alınma sayısı kişi başına bir (aynı kişinin iki alımı bir; olaylar kapalı kalır)';
   assert (select count(*) from public.olaylar where tur = 'gezi_alindi') = 0, 'G olay satırlarını görmez';
   assert public.gezi_alinma_sayisi((select gen_random_uuid())) = 0, 'olmayan gezi 0';
 end $$;

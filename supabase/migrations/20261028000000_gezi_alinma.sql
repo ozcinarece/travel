@@ -3,10 +3,11 @@
 -- kimin aldığı görünmez. Yayında olmayan (ya da olmayan) gezi için 0.
 create index if not exists olaylar_hedef_tur_idx on public.olaylar (hedef_id, tur);
 
+-- Kişi başına bir: olaylar_insert her oturumun (anonim dahil) olay yazmasına izin verdiğinden ham satır sayısı şişirilebilir.
 create function public.gezi_alinma_sayisi(p_gezi uuid) returns integer
 language sql stable security definer set search_path = ''
 as $$
-  select count(*)::integer
+  select count(distinct o.user_id)::integer
   from public.olaylar o
   where o.tur = 'gezi_alindi' and o.hedef_id = p_gezi
     and public.gezi_yayinda(p_gezi);
