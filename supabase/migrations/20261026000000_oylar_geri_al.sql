@@ -29,7 +29,10 @@ declare
   d public.changes;
   eski jsonb;
   setler text;
+  sutunlar text;
   r record;
+  izinli text[];
+  ekleyen uuid;
 begin
   select * into d from public.changes where id = c;
   if d.id is null then
@@ -40,31 +43,57 @@ begin
   end if;
 
   if d.field is not null then
-    if d.entity not in ('places', 'stops', 'days') then
+    -- Geri alınabilir alanlar (beyaz liste); varış / tamamlama / kimlik alanları geri alınmaz.
+    izinli := case d.entity
+      when 'places' then array['note', 'default_minutes']
+      when 'stops' then array['day_id', 'order_key', 'minutes', 'skipped']
+      when 'days' then array['start_time', 'end_time', 'order_manual', 'start_stay_id', 'end_stay_id']
+    end;
+    if izinli is null then
       raise exception 'geri alınamaz' using errcode = '22023';
     end if;
     select jsonb_object_agg(x.field, x.old), string_agg(format('%I = (y.r).%I', x.field, x.field), ', ')
       into eski, setler
       from public.changes x
-      where x.trip_id = d.trip_id and x.entity = d.entity and x.entity_id = d.entity_id and x.at = d.at and x.field is not null;
-    execute format('update public.%I t set %s from (select jsonb_populate_record(null::public.%I, $1) as r) y where t.id = $2', d.entity, setler, d.entity)
-      using eski, d.entity_id::uuid;
+      where x.trip_id = d.trip_id and x.entity = d.entity and x.entity_id = d.entity_id and x.at = d.at
+        and x.field = any (izinli);
+    if setler is null then
+      raise exception 'geri alınamaz' using errcode = '22023';
+    end if;
+    -- PRD 3.8 KK3: notu yalnız ekleyen ya da sahip değiştirir; tanımlayıcı yetkiyle çalışıldığı için places_guard burada
+    -- devreye girmez, aynı kural burada uygulanır.
+    if d.entity = 'places' and eski ? 'note' then
+      select p.added_by into ekleyen from public.places p where p.id = d.entity_id::uuid and p.trip_id = d.trip_id;
+      if auth.uid() is distinct from ekleyen and not public.is_owner(d.trip_id) then
+        raise exception 'notu yalnızca ekleyen ya da sahip düzenler' using errcode = '42501';
+      end if;
+    end if;
+    execute format('update public.%I t set %s from (select jsonb_populate_record(null::public.%I, $1) as r) y where t.id = $2 and t.trip_id = $3',
+                   d.entity, setler, d.entity)
+      using eski, d.entity_id::uuid, d.trip_id;
   elsif d.old is null then
     if d.entity not in ('places', 'stops') then
       raise exception 'geri alınamaz' using errcode = '22023';
     end if;
-    execute format('delete from public.%I where id = $1', d.entity) using d.entity_id::uuid;
+    execute format('delete from public.%I where id = $1 and trip_id = $2', d.entity) using d.entity_id::uuid, d.trip_id;
   else
     if d.entity not in ('places', 'stops') then
       raise exception 'geri alınamaz' using errcode = '22023';
     end if;
-    -- Önce mekanlar, sonra aynı işlemde silinen duraklar (mekan silinince durağı da gider).
+    -- Önce mekanlar, sonra aynı işlemde silinen duraklar (mekan silinince durağı da gider). Yalnız kayıtta olan sütunlar
+    -- yazılır; sonradan eklenen NOT NULL sütunlar (ör. stops.auto_completed) tablo varsayılanını alır.
     for r in
       select x.entity, x.old from public.changes x
       where x.trip_id = d.trip_id and x.at = d.at and x.field is null and x.new is null and x.entity in ('places', 'stops')
+        and x.old ->> 'trip_id' = d.trip_id::text
       order by case x.entity when 'places' then 0 else 1 end, x.id
     loop
-      execute format('insert into public.%I select * from jsonb_populate_record(null::public.%I, $1) on conflict do nothing', r.entity, r.entity) using r.old;
+      select string_agg(format('%I', a.attname), ', ' order by a.attnum) into sutunlar
+        from pg_catalog.pg_attribute a
+        where a.attrelid = format('public.%I', r.entity)::regclass and a.attnum > 0 and not a.attisdropped and r.old ? a.attname;
+      execute format('insert into public.%I (%s) select %s from jsonb_populate_record(null::public.%I, $1) on conflict do nothing',
+                     r.entity, sutunlar, sutunlar, r.entity)
+        using r.old;
     end loop;
   end if;
 end;

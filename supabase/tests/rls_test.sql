@@ -1036,6 +1036,31 @@ begin
   assert not exists (select 1 from public.places where place_id = 'ChIJ-oy-yer2'), 'eklenen silindi';
 end $$;
 select pg_temp.hata_bekle($$select public.degisikligi_geri_al(-1)$$, 'P0002');
+-- Beyaz liste: varış alanı geri alınmaz.
+update public.stops set arrived_at = now() where id = current_setting('test.oy_st')::uuid;
+select set_config('test.oy_varis_cid', (select id from public.changes where entity = 'stops' and entity_id = current_setting('test.oy_st') and field = 'arrived_at' order by id desc limit 1)::text, false);
+select pg_temp.hata_bekle($$select public.degisikligi_geri_al(current_setting('test.oy_varis_cid')::bigint)$$, '22023');
+-- Not kuralı (PRD 3.8 KK3): ekleyen / sahip olmayan üye notu geri alarak da değiştiremez.
+select pg_temp.as_user(:OA);
+update public.places set note = 'Sabah erken git' where id = current_setting('test.oy_p')::uuid;
+select pg_temp.as_user(:OB);
+select set_config('test.oy_not_cid', (select id from public.changes where entity = 'places' and entity_id = current_setting('test.oy_p') and field = 'note' order by id desc limit 1)::text, false);
+select pg_temp.hata_bekle($$select public.degisikligi_geri_al(current_setting('test.oy_not_cid')::bigint)$$, '42501');
+-- Eski kayıtta olmayan NOT NULL sütun (auto_completed) geri yüklemede tablo varsayılanını alır.
+delete from public.places where id = current_setting('test.oy_p')::uuid;
+reset role;
+update public.changes set old = old - 'auto_completed'
+where entity = 'stops' and entity_id = current_setting('test.oy_st') and new is null
+  and id = (select max(id) from public.changes where entity = 'stops' and entity_id = current_setting('test.oy_st') and new is null);
+set role authenticated;
+select pg_temp.as_user(:OB);
+do $$
+declare cid bigint;
+begin
+  select id into cid from public.changes where entity = 'places' and entity_id = current_setting('test.oy_p') and new is null order by id desc limit 1;
+  perform public.degisikligi_geri_al(cid);
+  assert (select auto_completed from public.stops where id = current_setting('test.oy_st')::uuid) = false, 'eksik sütun varsayılanla';
+end $$;
 select pg_temp.as_user(:OC);
 select pg_temp.hata_bekle($$select public.degisikligi_geri_al(current_setting('test.oy_cid')::bigint)$$, '42501');
 do $$
