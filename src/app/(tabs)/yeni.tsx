@@ -1,21 +1,21 @@
-import { router } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { router, useFocusEffect } from 'expo-router';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Linking, StyleSheet, Text, View } from 'react-native';
 
 import { MekanPaneli } from '@/components/mekan/MekanPaneli';
-import { AdimDavet } from '@/components/sihirbaz/AdimDavet';
 import { AdimKabugu } from '@/components/sihirbaz/AdimKabugu';
 import { AdimNereye } from '@/components/sihirbaz/AdimNereye';
 import { AdimNeZaman } from '@/components/sihirbaz/AdimNeZaman';
 import { AdimOnerilenler } from '@/components/sihirbaz/AdimOnerilenler';
-import { AdimOteller } from '@/components/sihirbaz/AdimOteller';
-import { useGunler } from '@/features/gunler/sorgular';
-import { sehirEslestir, useSehirler } from '@/features/icerik/sorgular';
-import { useKonaklamalar } from '@/features/konaklama/sorgular';
+import { PlanCubugu } from '@/components/sihirbaz/PlanCubugu';
+import { useDuraklar, useGunler } from '@/features/gunler/sorgular';
+import { olayYaz, sehirEslestir, useSehirler } from '@/features/icerik/sorgular';
 import { useMekanEkle, useMekanGuncelle, useMekanlar, useMekanSil } from '@/features/mekanlar/sorgular';
 import { useProfil, useProfilGuncelle } from '@/features/profil/sorgular';
 import { useSeyahat, useSeyahatAdiKaydet, useSeyahatOlustur } from '@/features/seyahatler/sorgular';
 import type { OnerilenMekan } from '@/features/sihirbaz/onerilenler';
+import { secimOzeti } from '@/features/sihirbaz/planKur';
+import { usePlaniUygula } from '@/features/sihirbaz/planUygula';
 import { oncekiAdim, seyahatAdiOner, sonrakiAdim, type Adim, type Aralik } from '@/features/sihirbaz/sihirbaz';
 import type { HafifYer } from '@/features/yerler/api';
 import { t } from '@/i18n';
@@ -23,9 +23,10 @@ import type { SehirSecimi } from '@/lib/tipler';
 import { renk, yazi } from '@/theme';
 
 /**
- * #98 (kanvas TripWizard14): seyahat kurma sihirbazı — 5 soru, sonra harita. NewTrip (3.2) / Hotel (3.3) / FirstTrip (0.3)
- * ekranlarının yerini alır. Şehir + ad + tarih yerelde tutulur; 2. adımdan çıkınca (Devam ya da "Tarihim belli değil")
- * seyahat oluşturulur, kalan adımlar seyahate yazar. Geri: şehir ve tarihler oluşturulduktan sonra kilitlidir (ad değişir).
+ * #98 → #139 (kanvas 4 · 5 · 7 · 8): seyahat kurma sihirbazı — 3 adım: Nereye → Ne zaman → Neleri görmek istersin, sonra
+ * "Planı kur" (seçilenler yakınlığa göre günlere dağıtılır) ve Program'da "Planın hazır". Otel Program'a, davet Plan hazır'a
+ * taşındı. Şehir + ad + tarih yerelde tutulur; 2. adımdan çıkınca (Devam ya da "Tarihim belli değil") seyahat oluşturulur.
+ * Geri: şehir ve tarihler oluşturulduktan sonra kilitlidir (ad değişir). Hedef: 3 dakikada saatlik rota (olay `plan_kuruldu`).
  */
 export default function SihirbazEkrani() {
   const [adim, setAdim] = useState<Adim>('nereye');
@@ -33,16 +34,24 @@ export default function SihirbazEkrani() {
   const [ad, setAd] = useState<string | null>(null);
   const [aralik, setAralik] = useState<Aralik>(null);
   const [tripId, setTripId] = useState<string | null>(null);
+  useFocusEffect(
+    useCallback(() => {
+      if (!tripId) baslangicAni.current = Date.now();
+    }, [tripId]),
+  );
   const [hata, setHata] = useState<string | null>(null);
-  const [yakinda, setYakinda] = useState(false);
+  // KK8: sihirbaz başlangıcı → plan yazılana kadar süre (ölçüm: < 3 dk). Seyahat henüz kurulmadıysa ekran her odağa
+  // geldiğinde sıfırlanır (sekmeden çıkıp dönünce süre uzun ölçülmesin).
+  const baslangicAni = useRef(0);
 
   const sehirler = useSehirler();
   const olustur = useSeyahatOlustur();
   const adKaydet = useSeyahatAdiKaydet(tripId ?? '');
   const seyahat = useSeyahat(tripId ?? undefined);
   const gunler = useGunler(tripId ?? undefined);
-  const konaklamalar = useKonaklamalar(tripId ?? undefined);
+  const duraklar = useDuraklar(tripId ?? undefined);
   const mekanlar = useMekanlar(tripId ?? undefined);
+  const planUygula = usePlaniUygula(tripId ?? '');
   // #121 KK3: 5. adımda karta dokunma → mekan paneli (#80); "Listeye ekle / Listeden çıkar" panelden de olur.
   const [panel, setPanel] = useState<OnerilenMekan | null>(null);
   const [tutulan, setTutulan] = useState<Set<string>>(() => new Set());
@@ -103,20 +112,37 @@ export default function SihirbazEkrani() {
         end_date: tarihsiz ? null : (aralik?.donus ?? aralik?.gidis ?? null),
       });
       setTripId(id);
-      setAdim('oteller');
+      setAdim('onerilenler');
     } catch {
       setHata(t('sihirbaz.nezaman.hata'));
     }
   };
+  // Mekan seçmeden geçiş: Keşfet (sihirbaz bitti, plan yok).
   const haritayaGec = () => {
     if (!tripId) return;
+    olayYaz('sihirbaz_bitti', tripId, { mekan: 0 });
     router.replace({ pathname: '/seyahat/[id]/(sekmeler)/kesfet', params: { id: tripId } });
+  };
+  // KK5: Planı kur → yakınlığa göre günlere dağıt (yalnız kuş uçuşu tahmini, ek istek yok) → Program "Planın hazır".
+  const planiKur = async () => {
+    if (!tripId || !mekanlar.data || !gunler.data || !duraklar.data) return;
+    setHata(null);
+    try {
+      const plan = await planUygula.mutateAsync({ mekanlar: mekanlar.data, gunler: gunler.data, duraklar: duraklar.data });
+      const atanan = plan.gunler.reduce((t0, g) => t0 + g.mekanlar.length, 0);
+      const doluGun = plan.gunler.filter((g) => g.mekanlar.length > 0).length;
+      olayYaz('sihirbaz_bitti', tripId, { mekan: mekanlar.data.length });
+      olayYaz('plan_kuruldu', tripId, { mekan: atanan, gun: doluGun, atanmamis: plan.atanmamis.length, bolge: plan.bolgeSayisi, sure_sn: Math.round((Date.now() - baslangicAni.current) / 1000) });
+      router.replace({ pathname: '/seyahat/[id]/(sekmeler)/program', params: { id: tripId, planKuruldu: '1', atanmamis: String(plan.atanmamis.length) } });
+    } catch {
+      setHata(t('sihirbaz.onerilenler.planHata'));
+    }
   };
 
   if (adim === 'nereye') {
     return (
-      <AdimKabugu adim={adim} baslik={t('sihirbaz.nereye.baslik')} alt={t('sihirbaz.nereye.alt')} onGeri={geri} hata={hata ?? (yakinda ? t('sihirbaz.nereye.yakinda') : null)} devam={{ onPress: nereyeDevam, pasif: !sehir, yukleniyor: adKaydet.isPending }}>
-        <AdimNereye sehir={sehir} onSehir={setSehir} ad={ad} onerilenAd={onerilenAd} onAd={setAd} sehirler={sehirler.data} kilitli={kilitli} onYakinda={() => setYakinda(true)} />
+      <AdimKabugu adim={adim} baslik={t('sihirbaz.nereye.baslik')} onGeri={geri} hata={hata} devam={{ onPress: nereyeDevam, pasif: !sehir, yukleniyor: adKaydet.isPending }}>
+        <AdimNereye sehir={sehir} onSehir={setSehir} ad={ad} onerilenAd={onerilenAd} onAd={setAd} sehirler={sehirler.data} kilitli={kilitli} />
       </AdimKabugu>
     );
   }
@@ -125,7 +151,7 @@ export default function SihirbazEkrani() {
       <AdimKabugu
         adim={adim}
         baslik={t('sihirbaz.nezaman.baslik')}
-        alt={t('sihirbaz.nezaman.alt')}
+        ust={seyahat.data ? (seyahat.data.name ?? seyahat.data.city_label) : (ad ?? onerilenAd)}
         onGeri={geri}
         hata={hata}
         devam={{ onPress: () => seyahatiKur(false), pasif: !aralik && !kilitli, yukleniyor: olustur.isPending }}
@@ -135,25 +161,11 @@ export default function SihirbazEkrani() {
       </AdimKabugu>
     );
   }
-  // 3–5: seyahat ve günler yüklenene kadar bekleme.
-  if (!seyahat.data || !gunler.data || !konaklamalar.data) {
+  // 3: seyahat, günler ve duraklar yüklenene kadar bekleme.
+  if (!seyahat.data || !gunler.data || !duraklar.data) {
     return (
       <AdimKabugu adim={adim} baslik="" onGeri={geri}>
-        {seyahat.isError || gunler.isError ? <Text style={s.hata}>{t('sihirbaz.nezaman.hata')}</Text> : <ActivityIndicator color={renk.metin} style={{ marginTop: 40 }} />}
-      </AdimKabugu>
-    );
-  }
-  if (adim === 'oteller') {
-    return (
-      <AdimKabugu adim={adim} baslik={t('sihirbaz.oteller.baslik')} alt={t('sihirbaz.oteller.alt')} onGeri={geri} hata={hata} devam={{ onPress: ileri }} atla={{ baslik: t('sihirbaz.oteller.atla'), onPress: ileri }}>
-        <AdimOteller seyahat={seyahat.data} gunler={gunler.data} konaklamalar={konaklamalar.data} onHata={setHata} />
-      </AdimKabugu>
-    );
-  }
-  if (adim === 'kimlerle') {
-    return (
-      <AdimKabugu adim={adim} baslik={t('sihirbaz.kimlerle.baslik')} alt={t('sihirbaz.kimlerle.alt')} onGeri={geri} hata={hata} devam={{ onPress: ileri }} atla={{ baslik: t('sihirbaz.kimlerle.atla'), onPress: ileri }}>
-        <AdimDavet seyahat={seyahat.data} />
+        {seyahat.isError || gunler.isError ? <Text style={s.hata}>{t('sihirbaz.nezaman.hata')}</Text> : <ActivityIndicator color={renk.ana} style={{ marginTop: 40 }} />}
       </AdimKabugu>
     );
   }
@@ -192,22 +204,12 @@ export default function SihirbazEkrani() {
     <View style={{ flex: 1 }}>
       <AdimKabugu
         adim={adim}
-        baslik={t('sihirbaz.onerilenler.baslik', { sehir: seyahat.data.city_label })}
+        baslik={t('sihirbaz.onerilenler.baslik')}
         alt={t('sihirbaz.onerilenler.alt')}
         onGeri={geri}
         hata={hata}
         kaydirmasiz
-        altIcerik={
-          <View style={s.cubuk}>
-            <View style={{ flex: 1 }}>
-              <Text style={s.cubukBaslik}>{havuz.length > 0 ? t('sihirbaz.onerilenler.listedeN', { n: havuz.length }) : t('sihirbaz.onerilenler.listedeBos')}</Text>
-              <Text style={s.cubukAlt}>{t('sihirbaz.onerilenler.haritaNot')}</Text>
-            </View>
-            <Text onPress={haritayaGec} accessibilityRole="button" style={s.cubukDugme}>
-              {t('sihirbaz.onerilenler.haritayaGec')} →
-            </Text>
-          </View>
-        }>
+        altIcerik={<PlanCubugu ozet={secimOzeti(havuz.map((m) => ({ id: m.id, lat: m.lat, lng: m.lng, dakika: m.default_minutes })))} onPlaniKur={planiKur} onHaritayaGec={haritayaGec} yukleniyor={planUygula.isPending} />}>
         <AdimOnerilenler seyahat={seyahat.data} rehberSehir={rehberSehir} havuz={havuz} tutulan={tutulan} onTut={tut} onHata={setHata} onAc={setPanel} />
       </AdimKabugu>
       {panel ? (
@@ -232,8 +234,4 @@ export default function SihirbazEkrani() {
 
 const s = StyleSheet.create({
   hata: { fontFamily: yazi.yari, fontSize: 12, textAlign: 'center', color: renk.uyari, paddingTop: 20 },
-  cubuk: { height: 60, paddingLeft: 16, paddingRight: 6, borderRadius: 999, backgroundColor: renk.metin, flexDirection: 'row', alignItems: 'center', gap: 10 },
-  cubukBaslik: { fontFamily: yazi.kalin, fontSize: 13, color: renk.zemin },
-  cubukAlt: { fontFamily: yazi.normal, fontSize: 11, color: '#a3a3a3' },
-  cubukDugme: { fontFamily: yazi.kalin, fontSize: 13, color: renk.metin, backgroundColor: renk.zemin, borderRadius: 999, paddingHorizontal: 16, paddingVertical: 13, overflow: 'hidden' },
 });

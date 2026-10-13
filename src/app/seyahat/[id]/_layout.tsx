@@ -21,6 +21,8 @@ export default function SeyahatLayout() {
         <Stack.Screen name="(sekmeler)" />
         {/* #80: mekan detayı sayfa değil panel (Keşfet / Program içinde); bu rota yalnız eski derin linki yönlendirir. */}
         <Stack.Screen name="mekan/[placeId]" />
+        {/* #139 KK7: "Geceleri ayrı seç". */}
+        <Stack.Screen name="geceler" />
       </Stack>
     </SeyahatIdSaglayici>
   );

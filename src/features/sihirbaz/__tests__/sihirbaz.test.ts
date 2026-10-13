@@ -12,7 +12,8 @@ describe('sihirbaz adımları ve ad (#98 KK1–2)', () => {
     expect(sonrakiAdim('nereye')).toBe('nezaman');
     expect(sonrakiAdim('onerilenler')).toBeNull();
     expect(oncekiAdim('nereye')).toBeNull();
-    expect(oncekiAdim('oteller')).toBe('nezaman');
+    expect(sonrakiAdim('nezaman')).toBe('onerilenler');
+    expect(oncekiAdim('onerilenler')).toBe('nezaman');
   });
   it('seyahat adı: "{Şehir} Gezisi", iki şehirde "A – B Gezisi"; ekranda yazılan ad > şehir etiketi', () => {
     expect(seyahatAdiOner(['Eskişehir'])).toBe('Eskişehir Gezisi');

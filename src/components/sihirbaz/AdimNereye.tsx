@@ -1,5 +1,5 @@
-// #98 KK2 · 1. adım "Nereye?": arama + popüler şehir karoları (yayınlı `sehirler`), seçili şehir siyah çip, "+ Şehir ekle"
-// v1'de yakında, "SEYAHATİN ADI" otomatik ("{Şehir} Gezisi") + Değiştir.
+// #98 KK2 → #139 (kanvas 4): 1. adım "Nereye gidiyorsun?" — arama kutusunda seçili şehir Gece çip (×), altında "ÖNERİLER"
+// hap çipleri (rehberi hazır şehirler), "SEYAHAT ADI" otomatik ("{Şehir} Gezisi") + Değiştir.
 import { useState } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 
@@ -8,7 +8,7 @@ import { GoogleAtfi } from '@/components/yerler/GoogleAtfi';
 import { hafifYerler, otomatikTamamla, useSehirOnerileri, yeniOturumJetonu, type Oneri } from '@/features/yerler/api';
 import { t } from '@/i18n';
 import type { Sehir, SehirSecimi } from '@/lib/tipler';
-import { minDokunma, renk, yazi } from '@/theme';
+import { kose, minDokunma, renk, yazi } from '@/theme';
 
 type Props = {
   sehir: SehirSecimi | null;
@@ -20,10 +20,9 @@ type Props = {
   sehirler: Sehir[] | undefined;
   /** Seyahat oluşturulduysa şehir değiştirilemez (ad değişir). */
   kilitli: boolean;
-  onYakinda: () => void;
 };
 
-export function AdimNereye({ sehir, onSehir, ad, onerilenAd, onAd, sehirler, kilitli, onYakinda }: Props) {
+export function AdimNereye({ sehir, onSehir, ad, onerilenAd, onAd, sehirler, kilitli }: Props) {
   const [sorgu, setSorgu] = useState('');
   const [jeton, setJeton] = useState(yeniOturumJetonu);
   const [mesgul, setMesgul] = useState<string | null>(null);
@@ -68,11 +67,29 @@ export function AdimNereye({ sehir, onSehir, ad, onerilenAd, onAd, sehirler, kil
   };
 
   const gorunenAd = ad ?? onerilenAd;
+  const ONERI_ZEMINLERI = ['#c9d2f2', '#ffe2cc', '#dce6ff', '#d7f0e6'];
   return (
     <View style={s.kap}>
-      {!sehir ? (
-        <View style={s.arama}>
-          <Text style={s.buyutec}>⌕</Text>
+      {/* #139 KK2 (kanvas 4): arama kutusu 2 px Gece kenar; seçili şehir içinde Gece çip (×). */}
+      <View style={s.arama}>
+        <Ikon ad="ara" boyut={20} renk={renk.ana} kalinlik={2.4} />
+        {sehir ? (
+          <View style={s.cip}>
+            <Text style={s.cipMetin} numberOfLines={1}>
+              {sehir.ad}
+            </Text>
+            {!kilitli ? (
+              // #117 KK1: × 28 px dokunma hedefi; seyahat oluşmadan serbest.
+              <Pressable accessibilityRole="button" accessibilityLabel={t('sihirbaz.nereye.kaldir')} onPress={() => onSehir(null)} hitSlop={10} style={s.cipKapatHedef}>
+                <Text style={s.cipKapat}>×</Text>
+              </Pressable>
+            ) : (
+              <View style={s.cipKapatHedef}>
+                <Ikon ad="kilit" boyut={13} renk={renk.zemin} kalinlik={2.2} />
+              </View>
+            )}
+          </View>
+        ) : (
           <TextInput
             accessibilityLabel={t('sihirbaz.nereye.ara')}
             placeholder={t('sihirbaz.nereye.araYer')}
@@ -84,9 +101,10 @@ export function AdimNereye({ sehir, onSehir, ad, onerilenAd, onAd, sehirler, kil
             returnKeyType="search"
             style={s.girdi}
           />
-          {listeAcik && oneriler.isFetching ? <ActivityIndicator color={renk.ikincil} /> : null}
-        </View>
-      ) : null}
+        )}
+        {listeAcik && oneriler.isFetching ? <ActivityIndicator color={renk.ikincil} /> : null}
+      </View>
+      {kilitli ? <Text style={s.not}>{t('sihirbaz.nereye.kilitli')}</Text> : null}
       {listeAcik ? (
         <View style={s.liste}>
           {oneriler.isError ? <Text style={s.hata}>{t('sihirbaz.nereye.araHata')}</Text> : null}
@@ -108,32 +126,38 @@ export function AdimNereye({ sehir, onSehir, ad, onerilenAd, onAd, sehirler, kil
         </View>
       ) : null}
 
-      {/* Seçili şehir çipleri + "+ Şehir ekle" (v1: yakında). */}
-      <View style={s.cipler}>
-        {sehir ? (
-          <View style={s.cip}>
-            <Text style={s.cipMetin}>{sehir.ad}</Text>
-            {!kilitli ? (
-              // #117 KK1: × 28 px yuvarlak dokunma hedefi (küçük metin hedefi kaçıyordu); seyahat oluşmadan serbest.
-              <Pressable accessibilityRole="button" accessibilityLabel={t('sihirbaz.nereye.kaldir')} onPress={() => onSehir(null)} hitSlop={10} style={s.cipKapatHedef}>
-                <Text style={s.cipKapat}>×</Text>
-              </Pressable>
-            ) : (
-              <Ikon ad="kilit" boyut={14} renk={renk.zemin} kalinlik={2.2} />
-            )}
+      {/* KK2: "ÖNERİLER" küçük hap çipler (rehberi hazır şehirler); "+ Şehir ekle / yakında" kartı yok. */}
+      {!listeAcik && sehirler && sehirler.length > 0 ? (
+        <View style={{ gap: 10 }}>
+          <Text style={s.etiket}>{t('sihirbaz.nereye.oneriler')}</Text>
+          <View style={s.oneriler}>
+            {sehirler.map((k, i) => {
+              const secili = sehir?.ad === k.ad;
+              return (
+                <Pressable
+                  key={k.id}
+                  accessibilityRole="button"
+                  accessibilityState={{ selected: secili, disabled: kilitli }}
+                  disabled={!!mesgul || kilitli || secili}
+                  onPress={() => karoSec(k)}
+                  style={({ pressed }) => [s.oneri, secili && s.oneriSecili, (pressed || (kilitli && !secili)) && { opacity: 0.6 }]}>
+                  <View style={[s.oneriIkon, { backgroundColor: secili ? renk.anaAcik : ONERI_ZEMINLERI[i % ONERI_ZEMINLERI.length] }]}>
+                    {mesgul === k.id ? <ActivityIndicator color={renk.ana} /> : secili ? <Ikon ad="tik" boyut={14} renk={renk.ana} kalinlik={3} /> : <Text style={s.oneriHarf}>{k.ad.charAt(0).toLocaleUpperCase('tr')}</Text>}
+                  </View>
+                  <Text style={[s.oneriMetin, secili && { color: renk.ana }]}>{k.ad}</Text>
+                </Pressable>
+              );
+            })}
           </View>
-        ) : null}
-        <Pressable accessibilityRole="button" onPress={onYakinda} style={s.cipEkle}>
-          <Text style={s.cipEkleMetin}>{t('sihirbaz.nereye.sehirEkle')}</Text>
-        </Pressable>
-      </View>
-      {kilitli ? <Text style={s.not}>{t('sihirbaz.nereye.kilitli')}</Text> : null}
+          <Text style={s.not}>{t('sihirbaz.nereye.onerilerNot')}</Text>
+        </View>
+      ) : null}
 
       {sehir ? (
         <View style={s.adKutu}>
-          <Text style={s.adBaslik}>{t('sihirbaz.nereye.adBaslik')}</Text>
-          {adDuzenle ? (
-            <View style={s.adSatir}>
+          <View style={{ flex: 1, gap: 2 }}>
+            <Text style={s.etiket}>{t('sihirbaz.nereye.adBaslik')}</Text>
+            {adDuzenle ? (
               <TextInput
                 accessibilityLabel={t('sihirbaz.nereye.adYer')}
                 value={adTaslak}
@@ -147,52 +171,26 @@ export function AdimNereye({ sehir, onSehir, ad, onerilenAd, onAd, sehirler, kil
                 }}
                 style={s.adGirdi}
               />
-              <Pressable
-                accessibilityRole="button"
-                onPress={() => {
-                  onAd(adTaslak.trim() ? adTaslak.trim() : null);
-                  setAdDuzenle(false);
-                }}
-                hitSlop={8}>
-                <Text style={s.degistir}>{t('sihirbaz.nereye.tamam')}</Text>
-              </Pressable>
-            </View>
-          ) : (
-            <View style={s.adSatir}>
+            ) : (
               <Text style={s.adMetin} numberOfLines={1}>
                 {gorunenAd}
               </Text>
-              <Pressable
-                accessibilityRole="button"
-                onPress={() => {
-                  setAdTaslak(gorunenAd);
-                  setAdDuzenle(true);
-                }}
-                hitSlop={8}>
-                <Text style={s.degistir}>{t('sihirbaz.nereye.degistir')}</Text>
-              </Pressable>
-            </View>
-          )}
-        </View>
-      ) : null}
-
-      {!sehir && !listeAcik && sehirler && sehirler.length > 0 ? (
-        <View style={{ gap: 10 }}>
-          <Text style={s.bolum}>{t('sihirbaz.nereye.populer')}</Text>
-          <View style={s.karolar}>
-            {sehirler.map((k) => (
-              <Pressable key={k.id} accessibilityRole="button" disabled={!!mesgul} onPress={() => karoSec(k)} style={({ pressed }) => [s.karo, pressed && { opacity: 0.85 }]}>
-                <View style={s.karoZemin}>
-                  <Text style={s.karoHarf}>{k.ad.charAt(0).toLocaleUpperCase('tr')}</Text>
-                  {mesgul === k.id ? <ActivityIndicator color={renk.zemin} style={s.karoYukleniyor} /> : null}
-                </View>
-                <Text style={s.karoAd} numberOfLines={1}>
-                  {k.ad}
-                </Text>
-                <Text style={s.karoAlt}>{t('sihirbaz.nereye.rehberli')}</Text>
-              </Pressable>
-            ))}
+            )}
           </View>
+          <Pressable
+            accessibilityRole="button"
+            onPress={() => {
+              if (adDuzenle) {
+                onAd(adTaslak.trim() ? adTaslak.trim() : null);
+                setAdDuzenle(false);
+              } else {
+                setAdTaslak(gorunenAd);
+                setAdDuzenle(true);
+              }
+            }}
+            style={s.degistir}>
+            <Text style={s.degistirMetin}>{adDuzenle ? t('sihirbaz.nereye.tamam') : t('sihirbaz.nereye.degistir')}</Text>
+          </Pressable>
         </View>
       ) : null}
       {hata ? <Text style={s.hata}>{hata}</Text> : null}
@@ -201,37 +199,31 @@ export function AdimNereye({ sehir, onSehir, ad, onerilenAd, onAd, sehirler, kil
 }
 
 const s = StyleSheet.create({
-  kap: { gap: 14 },
-  arama: { height: 48, paddingHorizontal: 16, borderRadius: 14, backgroundColor: renk.yuzey, flexDirection: 'row', alignItems: 'center', gap: 10 },
-  buyutec: { fontSize: 18, color: renk.ikincil },
-  girdi: { flex: 1, fontFamily: yazi.yari, fontSize: 14, color: renk.metin, paddingVertical: 0 },
+  kap: { gap: 18 },
+  arama: { minHeight: 56, paddingVertical: 8, paddingLeft: 16, paddingRight: 10, borderRadius: 16, borderWidth: 2, borderColor: renk.ana, flexDirection: 'row', alignItems: 'center', gap: 10 },
+  girdi: { flex: 1, fontFamily: yazi.yari, fontSize: 16, color: renk.metin, paddingVertical: 0 },
   liste: { gap: 0 },
   satir: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 10, minHeight: minDokunma, borderTopWidth: 1, borderTopColor: renk.ayrac },
-  ana: { fontFamily: yazi.kalin, fontSize: 15, color: renk.metin },
+  ana: { fontFamily: yazi.ekstra, fontSize: 15, color: renk.metin },
   ikincil: { fontFamily: yazi.normal, fontSize: 12, color: renk.ikincil },
-  ok: { fontFamily: yazi.kalin, fontSize: 22, color: '#c4c4c4' },
+  ok: { fontFamily: yazi.kalin, fontSize: 22, color: renk.soluk },
   bos: { fontFamily: yazi.normal, fontSize: 13, color: renk.ikincil, paddingVertical: 12 },
-  cipler: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, alignItems: 'center' },
-  cip: { flexDirection: 'row', alignItems: 'center', gap: 8, height: 36, paddingLeft: 14, paddingRight: 10, borderRadius: 999, backgroundColor: renk.metin },
-  cipMetin: { fontFamily: yazi.kalin, fontSize: 13, color: renk.zemin },
-  cipKapat: { fontFamily: yazi.kalin, fontSize: 16, color: renk.zemin, opacity: 0.8 },
-  cipKapatHedef: { width: 28, height: 28, borderRadius: 14, alignItems: 'center', justifyContent: 'center', marginRight: -6 },
-  cipEkle: { height: 36, paddingHorizontal: 14, borderRadius: 999, borderWidth: 1, borderStyle: 'dashed', borderColor: '#c4c4c4', justifyContent: 'center' },
-  cipEkleMetin: { fontFamily: yazi.kalin, fontSize: 13, color: renk.ikincil },
-  not: { fontFamily: yazi.normal, fontSize: 12, color: renk.ikincil },
-  adKutu: { padding: 14, borderRadius: 14, backgroundColor: renk.yuzey, gap: 6 },
-  adBaslik: { fontFamily: yazi.kalin, fontSize: 10, letterSpacing: 0.6, color: renk.ikincil },
-  adSatir: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  adMetin: { flex: 1, fontFamily: yazi.ekstra, fontSize: 17, color: renk.metin },
-  adGirdi: { flex: 1, fontFamily: yazi.ekstra, fontSize: 17, color: renk.metin, paddingVertical: 0, borderBottomWidth: 1, borderBottomColor: renk.metin },
-  degistir: { fontFamily: yazi.kalin, fontSize: 13, color: renk.vurgu, paddingVertical: 6 },
-  bolum: { fontFamily: yazi.ekstra, fontSize: 15, color: renk.metin },
-  karolar: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
-  karo: { width: '47%', gap: 6 },
-  karoZemin: { height: 96, borderRadius: 16, backgroundColor: renk.metin, alignItems: 'center', justifyContent: 'center' },
-  karoHarf: { fontFamily: yazi.ekstra, fontSize: 28, color: renk.zemin },
-  karoYukleniyor: { position: 'absolute', right: 10, top: 10 },
-  karoAd: { fontFamily: yazi.kalin, fontSize: 14, color: renk.metin },
-  karoAlt: { fontFamily: yazi.normal, fontSize: 11, color: renk.ikincil },
+  cip: { flexDirection: 'row', alignItems: 'center', gap: 4, height: 36, paddingLeft: 12, paddingRight: 4, borderRadius: kose.cip, backgroundColor: renk.ana, flexShrink: 1 },
+  cipMetin: { fontFamily: yazi.ekstra, fontSize: 15, color: renk.zemin, flexShrink: 1 },
+  cipKapat: { fontFamily: yazi.ekstra, fontSize: 17, color: renk.zemin },
+  cipKapatHedef: { width: 28, height: 28, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
+  not: { fontFamily: yazi.normal, fontSize: 13, lineHeight: 19, color: renk.ikincil },
+  etiket: { fontFamily: yazi.ekstra, fontSize: 12, letterSpacing: 0.5, color: renk.ikincil },
+  oneriler: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  oneri: { height: minDokunma, paddingLeft: 6, paddingRight: 14, borderRadius: kose.cip, borderWidth: 1.5, borderColor: renk.ayrac, backgroundColor: renk.zemin, flexDirection: 'row', alignItems: 'center', gap: 8 },
+  oneriSecili: { backgroundColor: renk.yuzey, borderColor: renk.yuzey, opacity: 0.5 },
+  oneriIkon: { width: 32, height: 32, borderRadius: 16, alignItems: 'center', justifyContent: 'center' },
+  oneriHarf: { fontFamily: yazi.baslik, fontSize: 14, color: renk.ana },
+  oneriMetin: { fontFamily: yazi.ekstra, fontSize: 15, color: renk.metin },
+  adKutu: { paddingVertical: 14, paddingHorizontal: 16, borderRadius: 18, backgroundColor: renk.yuzey, flexDirection: 'row', alignItems: 'center', gap: 12 },
+  adMetin: { fontFamily: yazi.baslik, fontSize: 19, letterSpacing: -0.4, color: renk.metin },
+  adGirdi: { fontFamily: yazi.baslik, fontSize: 19, color: renk.metin, paddingVertical: 0, borderBottomWidth: 1.5, borderBottomColor: renk.ana },
+  degistir: { height: 40, paddingHorizontal: 14, borderRadius: kose.alan, backgroundColor: renk.zemin, justifyContent: 'center' },
+  degistirMetin: { fontFamily: yazi.ekstra, fontSize: 14, color: renk.ana },
   hata: { fontFamily: yazi.yari, fontSize: 12, color: renk.uyari },
 });

@@ -2,7 +2,8 @@
 import { AYLAR, GUNLER_KISA, haftaGunu, parcala, tarihEkle, type Tarih } from '@/lib/takvim';
 import type { Gun } from '@/lib/tipler';
 
-export const ADIMLAR = ['nereye', 'nezaman', 'oteller', 'kimlerle', 'onerilenler'] as const;
+// #139 KK1: 3 adım — Nereye → Ne zaman → Neleri görmek istersin. Otel Program'a, davet Plan hazır'a taşındı.
+export const ADIMLAR = ['nereye', 'nezaman', 'onerilenler'] as const;
 export type Adim = (typeof ADIMLAR)[number];
 
 export function sonrakiAdim(a: Adim): Adim | null {

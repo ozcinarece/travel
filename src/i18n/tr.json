@@ -208,7 +208,8 @@
       "ayrilEvet": "Ayrıl",
       "ayrilHata": "Ayrılamadın. Tekrar dene."
     },
-    "tekrarDene": "Tekrar dene"
+    "tekrarDene": "Tekrar dene",
+    "paylasMetin": "{ad} için seyahat planına katıl: {link}"
   },
   "harita": {
     "anahtarYok": "Harita anahtarı tanımlı değil"
@@ -593,7 +594,37 @@
       "hata": "Kaydedilemedi. Tekrar dene."
     },
     "ilerlemeBittiPuan": "Bugünün programı bitti · {n}/{n} · puanlamadığın {k} durak var",
-    "ilkiniPuanla": "☆ İlkini puanla"
+    "ilkiniPuanla": "☆ İlkini puanla",
+    "planHazir": {
+      "rozet": "PLANIN HAZIR",
+      "baslik": "{n} mekanı yakınlığa göre {gun} güne dağıttık",
+      "baslikTek": "{n} mekanı 1 güne yerleştirdik",
+      "gunSatiri": "{gun} · {ad}",
+      "gunAlt": "{n} mekan · {bas} – {bit} · {yol}",
+      "yolYuruyus": "{dk} dk yol",
+      "yolAraba": "{dk} dk yol · araba dahil",
+      "bosGunler": "{gunler} boş",
+      "bosAlt": "Keşfet'ten mekan ekleyebilirsin",
+      "atanmamis": "{n} mekan güne sığmadı · Listede, güne atanmamış",
+      "davet": "Davet et",
+      "gune": "1. güne bak",
+      "cevre": "{ad} çevresi",
+      "gunNo": "{n}. gün"
+    },
+    "otelSerit": "Otel ekle · gün otelden başlasın",
+    "otelSayfa": {
+      "baslik": "Nerede kalıyorsun?",
+      "alt": "Her gün otelden başlar, otelde biter. Yol süreleri buna göre hesaplanır.",
+      "ara": "Otel adı ya da adres",
+      "hepsiAyni": "Her gece aynı otel",
+      "hepsiAyniAlt": "{gece} gece · {tarih}",
+      "hepsiAyniAltTarihsiz": "Bütün geceler",
+      "ayriSec": "Geceleri ayrı seç",
+      "simdiDegil": "Şimdi değil",
+      "kaydet": "Kaydet",
+      "hata": "Otel kaydedilemedi. Tekrar dene.",
+      "geceler": "Geceleri seç"
+    }
   },
   "gunOteli": {
     "baslik": "{gun} gecesi nerede kalıyorsun?",
@@ -635,31 +666,30 @@
     "adim": "{n}. adım",
     "nereye": {
       "baslik": "Nereye gidiyorsun?",
-      "alt": "Şehri seç; adı istersen değiştir",
       "ara": "Şehir ara",
       "araYer": "Şehir ara",
-      "sehirEkle": "+ Şehir ekle",
-      "yakinda": "Birden çok şehir yakında",
-      "adBaslik": "SEYAHATİN ADI",
+      "adBaslik": "SEYAHAT ADI",
       "degistir": "Değiştir",
       "tamam": "Tamam",
       "adYer": "Seyahatin adı",
-      "populer": "Popüler şehirler",
-      "geziSayisi": "{n} gezi",
-      "rehberli": "Rehberli şehir",
       "secimHata": "Şehir bilgisi alınamadı. Tekrar dene.",
       "araHata": "Arama şu an yapılamıyor. Tekrar dene.",
       "sonucYok": "Sonuç yok",
       "kaldir": "Şehri kaldır",
-      "kilitli": "Seyahat oluştu; şehir artık değiştirilemez. Başka şehir için Yeni'den yeni seyahat kur."
+      "kilitli": "Seyahat oluştu; şehir artık değiştirilemez. Başka şehir için Yeni'den yeni seyahat kur.",
+      "oneriler": "ÖNERİLER",
+      "onerilerNot": "Bu şehirlerde rehber, öne çıkan mekanlar ve hazır geziler var."
     },
     "nezaman": {
       "baslik": "Ne zaman?",
-      "alt": "Gidiş ve dönüş gününe dokun",
       "atla": "Tarihim belli değil",
       "ozetYok": "Gidiş gününe dokun",
       "kilitli": "Tarihler kaydedildi; tarihi Program'dan değiştir (gün ekle / sil).",
-      "hata": "Seyahat oluşturulamadı. Tekrar dener misin?"
+      "hata": "Seyahat oluşturulamadı. Tekrar dener misin?",
+      "oncekiAy": "Önceki ay",
+      "sonrakiAy": "Sonraki ay",
+      "gunGece": "{gun} gün · {gece} gece",
+      "tekGun": "1 gün"
     },
     "oteller": {
       "baslik": "Nerede kalıyorsun?",
@@ -677,22 +707,9 @@
       "secBaslikGece": "{gece} · otel seç",
       "otelYok": "Otel yok"
     },
-    "kimlerle": {
-      "baslik": "Kimlerle gidiyorsun?",
-      "alt": "Seyahati birlikte planlayın; sonra da davet edebilirsin",
-      "linkBaslik": "Davet linki",
-      "paylas": "Linki paylaş",
-      "kopyala": "Kopyala",
-      "kopyalandi": "Kopyalandı",
-      "arkadaslar": "Arkadaşların",
-      "arkadasYok": "Arkadaş sistemi yakında",
-      "arkadasNot": "Şimdilik linki paylaş; uygulaması olmayan arkadaşın tarayıcıdan katılır.",
-      "atla": "Şimdilik yalnız",
-      "paylasMetin": "{ad} için seyahat planına katıl: {link}"
-    },
     "onerilenler": {
-      "baslik": "{sehir}'de görmen gerekenler",
-      "alt": "Kart kart; beğendiğini listeye ekle, gerisini haritada",
+      "baslik": "Neleri görmek istersin?",
+      "alt": "Seçtiklerini yakınlığa göre günlere biz dağıtalım.",
       "cip": {
         "gormen": "Görmen gerekenler",
         "yemek": "Yemek",
@@ -704,15 +721,23 @@
       "rehberde": "Rehberde",
       "ekle": "Listeye ekle",
       "listede": "Listede ✓",
-      "listedeN": "Listede {n} mekan",
       "gizliNot": "Listende {n} mekan var · zaten eklediklerin burada gösterilmez",
-      "listedeBos": "Listen boş",
-      "haritaNot": "Haritada da ekleyebilirsin",
       "haritayaGec": "Haritaya geç",
       "bos": "Bu kategoride öneri bulunamadı",
       "hata": "Öneriler alınamadı. Haritadan devam edebilirsin.",
-      "ekleHata": "Eklenemedi. Tekrar dene."
-    }
+      "ekleHata": "Eklenemedi. Tekrar dene.",
+      "ozetMekan": "{n} mekan",
+      "ozetAlt": "{bolge} bölge · ~{saat} saat",
+      "ozetBos": "Beğendiklerini ekle",
+      "ozetBosAlt": "Ya da şimdilik haritaya geç",
+      "planiKur": "Planı kur",
+      "haritaBuyut": "Haritayı büyüt",
+      "haritaKapat": "Haritayı kapat",
+      "planHata": "Plan kurulamadı. Tekrar dene.",
+      "kmUzak": "{ad} · {km} km"
+    },
+    "kapat": "Kapat",
+    "sayac": "{n}/{toplam}"
   },
   "anasayfa": {
     "merhaba": "Merhaba {ad}",
