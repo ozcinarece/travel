@@ -1180,4 +1180,78 @@ end $$;
 select pg_temp.hata_bekle($$select public.seyahati_kopyala('14400000-0000-4000-8000-000000000001', '14400000-0000-4000-8000-000000000004')$$, '42501');
 reset role;
 
+
+-- #157 Genel bakış (BO-0): olay yoksa "veri bekleniyor" (olay_var false); ilk plan medyanı (kişi başı ilk plan), davet oranı,
+-- kurulan plan, alınan gezi (kişi başı), bu hafta, Google kalemleri, içerik sağlığı. Ölçülen olaylar baştan temizlenir.
+reset role;
+delete from public.olaylar where tur in ('plan_kuruldu', 'davet_paylasildi', 'davet_katildi', 'gezi_alindi', 'sihirbaz_bitti');
+delete from public.api_sayac where gun = (now() at time zone 'Europe/Istanbul')::date;
+\set U1 '''15700000-0000-4000-8000-000000000001'''
+\set U2 '''15700000-0000-4000-8000-000000000002'''
+\set U3 '''15700000-0000-4000-8000-000000000003'''
+insert into auth.users (id, is_anonymous) values (:U1, false), (:U2, false), (:U3, false);
+set role authenticated;
+select pg_temp.as_email(:E, 'ozcinar.ece@gmail.com');
+do $$
+declare o jsonb := public.yonetim_genel(7);
+begin
+  assert not (o #>> '{ilk_plan,olay_var}')::boolean and not (o #>> '{plan,olay_var}')::boolean, 'plan olayı yok → veri bekleniyor';
+  assert not (o #>> '{davet,olay_var}')::boolean and not (o #>> '{gezi,olay_var}')::boolean, 'davet / gezi olayı yok';
+  assert not (o ->> 'hafta_olay_var')::boolean, 'grafik verisi yok';
+  assert o #> '{ilk_plan,medyan_sn}' = 'null'::jsonb, 'medyan yok (sıfır değil)';
+end $$;
+reset role;
+insert into public.trips (id, owner_id, city_place_id, city_label, lat, lng, tz) values
+  ('15700000-0000-4000-8000-0000000000a1', :U1, 'ChIJ-esk', 'Eskişehir', 39.77, 30.52, 'Europe/Istanbul'),
+  ('15700000-0000-4000-8000-0000000000a2', :U1, 'ChIJ-esk', 'Eskişehir', 39.77, 30.52, 'Europe/Istanbul');
+insert into public.olaylar (user_id, tur, hedef_id, meta, created_at) values
+  (:U1, 'plan_kuruldu', '15700000-0000-4000-8000-0000000000a1', '{"sure_sn": 100}', now() - interval '2 days'),
+  (:U1, 'plan_kuruldu', '15700000-0000-4000-8000-0000000000a2', '{"sure_sn": 900}', now() - interval '1 hour'),
+  (:U2, 'plan_kuruldu', null, '{"sure_sn": 200}', now() - interval '3 days'),
+  (:U3, 'plan_kuruldu', null, '{"sure_sn": 50}', now() - interval '20 days'),
+  (:U1, 'davet_paylasildi', '15700000-0000-4000-8000-0000000000a1', null, now() - interval '1 day'),
+  (:U2, 'davet_katildi', '15700000-0000-4000-8000-0000000000a1', '{"kanal": "app"}', now() - interval '20 hours'),
+  (:U1, 'gezi_alindi', (select id from public.geziler order by baslik limit 1), null, now() - interval '1 day'),
+  (:U1, 'gezi_alindi', (select id from public.geziler order by baslik limit 1), null, now() - interval '1 day'),
+  (:U2, 'gezi_alindi', (select id from public.geziler order by baslik limit 1), null, now() - interval '1 day'),
+  (:U1, 'gezi_alindi', (select id from public.geziler order by baslik offset 1 limit 1), null, now() - interval '1 day');
+insert into public.api_sayac (fonksiyon, cagri, google) values ('places-full', 12, 10), ('places-light', 5, 2), ('places-photo', 4, 4), ('route-matrix', 2, 2), ('places-reviews', 3, 3), ('sentry-ozet', 9, 0);
+create temp table beklenen_157 as select
+  (select count(*) from public.trips where created_at > now() - interval '7 days') as kurulan,
+  (select count(*) from public.olaylar where tur = 'plan_kuruldu' and created_at >= (date_trunc('week', now() at time zone 'Europe/Istanbul')) at time zone 'Europe/Istanbul') as hafta_plan,
+  (select baslik from public.geziler order by baslik limit 1) as en_cok,
+  (select count(*) filter (where not coalesce((to_jsonb(r) ->> 'gizli')::boolean, false)) from public.sehir_rehberi r join public.sehirler s on s.id = r.sehir_id where s.slug = 'eskisehir') as esk_bolum;
+grant select on beklenen_157 to authenticated;
+set role authenticated;
+select pg_temp.as_email(:E, 'ozcinar.ece@gmail.com');
+do $$
+declare
+  o jsonb := public.yonetim_genel(7);
+  b beklenen_157;
+  esk jsonb;
+begin
+  select * into b from beklenen_157;
+  assert (o #>> '{ilk_plan,olay_var}')::boolean, 'plan olayı var';
+  assert (o #>> '{ilk_plan,n}')::int = 2 and (o #>> '{ilk_plan,medyan_sn}')::numeric = 150, format('ilk plan medyanı (kişi başı ilk plan, 7 gün): %s', o -> 'ilk_plan');
+  assert (o #>> '{plan,sayi}')::int = 3 and (o #>> '{plan,onceki}')::int = 0, format('kurulan plan: %s', o -> 'plan');
+  assert (o #>> '{davet,kurulan}')::int = b.kurulan and (o #>> '{davet,paylasilan}')::int = 1 and (o #>> '{davet,katilan}')::int = 1, format('davet: %s', o -> 'davet');
+  assert (o #>> '{gezi,sayi}')::int = 3, 'alınan gezi kişi başı (aynı kişi iki kez = 1)';
+  assert o #>> '{gezi,en_cok}' = b.en_cok, 'en çok alınan';
+  assert jsonb_array_length(o -> 'en_cok_alinan') = 2 and (o #>> '{en_cok_alinan,0,sayi}')::int = 2, 'en çok alınanlar sıralı';
+  assert jsonb_array_length(o -> 'hafta') = 7, 'hafta 7 gün';
+  assert (select sum((g ->> 'plan')::int) from jsonb_array_elements(o -> 'hafta') g) = b.hafta_plan, 'hafta: bu haftanın planları';
+  assert (o #>> '{google,mekan}')::int = 12 and (o #>> '{google,foto}')::int = 4 and (o #>> '{google,rota}')::int = 2 and (o #>> '{google,yorum}')::int = 3, format('Google kalemleri: %s', o -> 'google');
+  assert (o #>> '{google,butce}')::numeric = 10 and (o #>> '{google,fiyat,foto}')::numeric = 7 and (o #>> '{google,yorum_sinir}')::int = 300, 'bütçe, fiyat, yorum sınırı';
+  select e into esk from jsonb_array_elements(o -> 'icerik') e where e ->> 'ad' = 'Eskişehir';
+  assert esk is not null and (esk ->> 'bolum')::int = b.esk_bolum and esk ? 'genis_kapak' and esk ? 'bos_bolum' and esk ? 'gezi', format('içerik sağlığı: %s', esk);
+  assert not exists (select 1 from jsonb_array_elements(o -> 'icerik') e where e ->> 'ad' = 'Gizli'), 'yalnız yayındaki şehirler';
+  assert (public.yonetim_genel(30) #>> '{ilk_plan,n}')::int = 3 and (public.yonetim_genel(30) #>> '{plan,sayi}')::int = 4, '30 gün';
+end $$;
+select pg_temp.hata_bekle($$select public.yonetim_genel(14)$$, '22023');
+select pg_temp.as_user(:B);
+select pg_temp.hata_bekle($$select public.yonetim_genel(7)$$, '42501');
+set role anon;
+select pg_temp.hata_bekle($$select public.yonetim_genel(7)$$, '42501');
+reset role;
+
 \echo 'rls_test: TÜM TESTLER GEÇTİ'
