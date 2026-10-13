@@ -25,7 +25,7 @@ jobs:
       EXPO_PUBLIC_SUPABASE_ANON_KEY: sb_publishable_XB3vg3rrcdIK9Bafkv-Uug_G-5IEyyN
       EXPO_PUBLIC_APPLE_SIGN_IN: '0'
       # #137: davet linkinin alan adı (https://{APP_DOMAIN}/r/{token}); repo değişkeni. Boşsa link yalnız koddur.
-      APP_DOMAIN: ${{ vars.APP_DOMAIN }}
+      APP_DOMAIN: ${{ vars.APP_DOMAIN || 'gezi-web.pages.dev' }}
       # #144: Profil › Yardım ve geri bildirim e-postası (repo değişkeni; boşsa satır gösterilmez).
       EXPO_PUBLIC_DESTEK_EPOSTA: ${{ vars.DESTEK_EPOSTA }}
     steps:

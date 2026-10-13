@@ -83,7 +83,7 @@ jobs:
       - name: Davet alan adı
         if: inputs.build_id == ''
         env:
-          APP_DOMAIN: ${{ vars.APP_DOMAIN }}
+          APP_DOMAIN: ${{ vars.APP_DOMAIN || 'gezi-web.pages.dev' }}
         run: |
           if [ -z "$APP_DOMAIN" ]; then echo "::warning::APP_DOMAIN değişkeni yok; davet linkleri uygulamayı açmaz"; exit 0; fi
           npx eas-cli env:create "${{ inputs.profile }}" --name APP_DOMAIN --value "$APP_DOMAIN" \
@@ -134,8 +134,12 @@ jobs:
           "$APKSIGNER" verify --print-certs uygulama.apk | tee sertifika.txt
           SHA1=$(grep -m1 -i 'SHA-1 digest' sertifika.txt | sed 's/.*: *//' | tr -d '[:space:]' | sed 's/../&:/g; s/:$//' | tr 'a-f' 'A-F')
           echo "Imza SHA-1: $SHA1"
+          # App Link doğrulaması (web-yayin assetlinks.json) için SHA-256.
+          SHA256=$(grep -m1 -i 'SHA-256 digest' sertifika.txt | sed 's/.*: *//' | tr -d '[:space:]' | sed 's/../&:/g; s/:$//' | tr 'a-f' 'A-F')
+          echo "Imza SHA-256: $SHA256"
           echo "- APK indirme: $URL" >> "$GITHUB_STEP_SUMMARY"
           echo "- İmza SHA-1: \`$SHA1\` (paket: \`app.gezi.dev\`)" >> "$GITHUB_STEP_SUMMARY"
+          echo "- İmza SHA-256: \`$SHA256\` (web-yayin assetlinks.json varsayılanıyla aynı olmalı)" >> "$GITHUB_STEP_SUMMARY"
 
       # APK GitHub Releases'e de konur: expo.dev indirmesi telefonda takılırsa buradan iner.
       - name: APK'yı GitHub Release'e ekle (Android)
