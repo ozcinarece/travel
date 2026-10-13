@@ -12,7 +12,23 @@ export function useKayitli(tur: KaydedilenTuru, hedefId: string | undefined): bo
   return !!hedefId && !!k.data?.some((x) => x.tur === tur && x.hedef_id === hedefId);
 }
 
-export function Kalp({ tur, hedefId, koyu, boyut = 36, arkaPlan }: { tur: KaydedilenTuru; hedefId: string; koyu?: boolean; boyut?: number; /** Açık zeminde (beyaz panel) daire rengi. */ arkaPlan?: string }) {
+export function Kalp({
+  tur,
+  hedefId,
+  koyu,
+  boyut = 36,
+  arkaPlan,
+  kose,
+}: {
+  tur: KaydedilenTuru;
+  hedefId: string;
+  koyu?: boolean;
+  boyut?: number;
+  /** Açık zeminde (beyaz panel) daire rengi. */
+  arkaPlan?: string;
+  /** #143: kare düğme köşesi (kanvas 17 kapak düğmeleri 44 px, köşe 14); verilmezse daire. */
+  kose?: number;
+}) {
   const kayitli = useKayitli(tur, hedefId);
   const kaydet = useKaydet();
   return (
@@ -22,7 +38,7 @@ export function Kalp({ tur, hedefId, koyu, boyut = 36, arkaPlan }: { tur: Kayded
       accessibilityState={{ selected: kayitli }}
       onPress={() => kaydet.mutate({ tur, hedef_id: hedefId, kayitli })}
       hitSlop={6}
-      style={[s.dugme, { width: boyut, height: boyut, borderRadius: boyut / 2 }, koyu ? s.koyu : s.acik, arkaPlan ? { backgroundColor: arkaPlan } : null]}>
+      style={[s.dugme, { width: boyut, height: boyut, borderRadius: kose ?? boyut / 2 }, koyu ? s.koyu : s.acik, arkaPlan ? { backgroundColor: arkaPlan } : null]}>
       <Ikon ad={kayitli ? 'kalpDolu' : 'kalp'} boyut={Math.round(boyut * 0.5)} renk={kayitli ? renk.vurgu : koyu ? renk.zemin : renk.metin} kalinlik={2.2} />
     </Pressable>
   );

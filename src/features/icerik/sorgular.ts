@@ -91,6 +91,20 @@ export function useGezi(slug: string | undefined) {
   });
 }
 
+/** #143: gezi kaç kez seyahate alındı (kapak rozeti, yazar satırı); yayında değilse 0. */
+export function useGeziAlinma(geziId: string | undefined) {
+  return useQuery({
+    queryKey: ['icerik', 'gezi-alinma', geziId],
+    enabled: !!geziId,
+    staleTime: 60 * 60 * 1000,
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc('gezi_alinma_sayisi', { p_gezi: geziId! });
+      if (error) throw error;
+      return typeof data === 'number' ? data : 0;
+    },
+  });
+}
+
 /** Seçili Google şehrini yayınlı bir şehirle eşleştir: ad eşitliği ya da merkeze 25 km. */
 export function sehirEslestir(sehirler: Sehir[] | undefined, secim: { ad: string; lat: number; lng: number } | null): Sehir | undefined {
   if (!sehirler || !secim) return undefined;

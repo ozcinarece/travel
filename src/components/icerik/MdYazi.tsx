@@ -19,7 +19,7 @@ type Props = {
   ipucu?: boolean;
   /** Yatay iç boşluk (varsayılan 20). */
   kenar?: number;
-  /** Paragraf yazı boyu (şehir rehberi 16, kanvas 15). */
+  /** Uzun okuma (şehir rehberi, gezi yazısı): paragraf 16, başlık Archivo 21, alıntı Buz kutuda Archivo 17 (kanvas 15 · 18). */
   buyuk?: boolean;
 };
 
@@ -57,7 +57,7 @@ export function MdYazi({ kaynak, onMekan, mekanKarti, ipucu, kenar = 20, buyuk }
         switch (b.tur) {
           case 'baslik':
             return (
-              <Text key={i} style={[s.baslik, b.seviye === 1 && s.baslik1]}>
+              <Text key={i} style={[s.baslik, b.seviye === 1 && s.baslik1, buyuk && s.baslikBuyuk]}>
                 <Parcalar parcalar={b.parcalar} metin={b.metin} onMekan={onMekan} />
               </Text>
             );
@@ -76,8 +76,8 @@ export function MdYazi({ kaynak, onMekan, mekanKarti, ipucu, kenar = 20, buyuk }
                 </Text>
               </View>
             ) : (
-              <View key={i} style={s.alinti}>
-                <Text style={s.alintiMetin}>
+              <View key={i} style={buyuk ? s.alintiBuyuk : s.alinti}>
+                <Text style={buyuk ? s.alintiMetinBuyuk : s.alintiMetin}>
                   “<Parcalar parcalar={b.parcalar} metin={b.metin} onMekan={onMekan} />”
                 </Text>
               </View>
@@ -116,6 +116,7 @@ const s = StyleSheet.create({
   kap: { gap: 14 },
   baslik: { fontFamily: yazi.ekstra, fontSize: 18, letterSpacing: -0.4, color: renk.metin, paddingTop: 6 },
   baslik1: { fontSize: 22 },
+  baslikBuyuk: { fontFamily: yazi.baslik, fontSize: 21, lineHeight: 25, letterSpacing: -0.4, paddingTop: 4 },
   paragraf: { fontFamily: yazi.normal, fontSize: 15, lineHeight: 24, color: '#232b48' },
   paragrafBuyuk: { fontSize: 16, lineHeight: 25.6 },
   kalin: { fontFamily: yazi.ekstra },
@@ -124,6 +125,8 @@ const s = StyleSheet.create({
   baglanti: { fontFamily: yazi.ekstra, color: renk.metin, textDecorationLine: 'underline', textDecorationColor: renk.vurgu },
   alinti: { padding: 14, borderRadius: 14, backgroundColor: renk.yuzey, borderLeftWidth: 3, borderLeftColor: renk.vurgu },
   alintiMetin: { fontFamily: yazi.yari, fontSize: 14, lineHeight: 21, color: renk.metin },
+  alintiBuyuk: { paddingVertical: 14, paddingHorizontal: 16, borderRadius: 16, backgroundColor: renk.yuzey },
+  alintiMetinBuyuk: { fontFamily: yazi.baslik, fontSize: 17, lineHeight: 24, color: renk.ana },
   ipucu: { paddingVertical: 12, paddingHorizontal: 14, borderRadius: 16, backgroundColor: '#fff6e6', gap: 4 },
   ipucuBaslik: { fontFamily: yazi.ekstra, fontSize: 11, letterSpacing: 0.66, color: '#8a5a00' },
   ipucuMetin: { fontFamily: yazi.normal, fontSize: 14, lineHeight: 20, color: renk.metin },

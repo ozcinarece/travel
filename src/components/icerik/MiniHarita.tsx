@@ -1,4 +1,5 @@
-// #97 B KK2: seçili gezi gününün mini haritası (120 px; dokununca tam ekran, yalnız bakma) — numaralı duraklar + kuş uçuşu.
+// #97 B KK2 → #143 (kanvas 17): seçili gezi gününün mini haritası (170 px, köşe 22; sağ üstte büyüt; dokununca tam ekran,
+// yalnız bakma) — numaralı duraklar + kuş uçuşu.
 import { useMemo, useState } from 'react';
 import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -27,10 +28,10 @@ export function MiniHarita({ duraklar, gunIndex, baslik }: { duraklar: GeziDurag
     <>
       <Pressable accessibilityRole="button" accessibilityLabel={t('gezi.haritaBuyut')} onPress={() => setAcik(true)} style={s.kucuk}>
         <View style={StyleSheet.absoluteFill} pointerEvents="none">
-          <Harita merkez={merkez} zoom={13} pinler={pinler} cizgiler={cizgiler} sigdir={sigdir(16, 16)} />
+          <Harita merkez={merkez} zoom={13} pinler={pinler} cizgiler={cizgiler} sigdir={sigdir(28, 20)} />
         </View>
         <View style={s.buyutRozet}>
-          <Ikon ad="genislet" boyut={14} renk={renk.metin} kalinlik={2.2} />
+          <Ikon ad="genislet" boyut={18} renk={renk.metin} kalinlik={2.2} />
         </View>
       </Pressable>
       <Modal visible={acik} animationType="slide" onRequestClose={() => setAcik(false)}>
@@ -53,10 +54,10 @@ export function MiniHarita({ duraklar, gunIndex, baslik }: { duraklar: GeziDurag
 }
 
 const s = StyleSheet.create({
-  kucuk: { height: 120, borderRadius: 16, overflow: 'hidden', backgroundColor: renk.yuzey },
-  buyutRozet: { position: 'absolute', right: 8, bottom: 8, width: 28, height: 28, borderRadius: 14, backgroundColor: renk.zemin, alignItems: 'center', justifyContent: 'center' },
+  kucuk: { height: 170, borderRadius: 22, overflow: 'hidden', backgroundColor: '#f1f3f8' },
+  buyutRozet: { position: 'absolute', right: 10, top: 10, width: 40, height: 40, borderRadius: 12, backgroundColor: renk.zemin, alignItems: 'center', justifyContent: 'center' },
   ust: { position: 'absolute', left: 16, right: 16, flexDirection: 'row', alignItems: 'center', gap: 10 },
-  kapat: { width: 40, height: 40, borderRadius: 20, backgroundColor: renk.zemin, alignItems: 'center', justifyContent: 'center' },
+  kapat: { width: 40, height: 40, borderRadius: 12, backgroundColor: renk.zemin, alignItems: 'center', justifyContent: 'center' },
   baslikHap: { height: 36, paddingHorizontal: 14, borderRadius: 999, backgroundColor: renk.zemin, justifyContent: 'center', maxWidth: '75%' },
   baslikMetin: { fontFamily: yazi.kalin, fontSize: 13, color: renk.metin },
 });
