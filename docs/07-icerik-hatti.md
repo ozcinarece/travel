@@ -55,8 +55,9 @@ Hata kodları: `22023` geçersiz veri · `23505` slug ya da şehir zaten var · 
 
 ### icerik-google (Edge Function)
 
-- Yalnız service_role anahtarı (taşıyıcı birebir aynı) ya da `is_admin()` olan oturum; diğerlerine 403. Geçidin JWT
-  ayarına güvenilmez.
+- Yalnız service_role anahtarı ya da `is_admin()` olan oturum; diğerlerine 403. service_role: taşıyıcı ortamdaki
+  anahtarla birebir aynıysa ya da PostgREST onu yalnız service_role'e açık `icerik_google_butcesi`'ne kabul ediyorsa
+  (ortamdaki anahtar yeni biçimde, `sb_secret_…`, olabilir). Geçidin JWT ayarına güvenilmez.
 - `{"islem": "ara", "merkez": {lat, lng}, "yaricap_m": 15000, "sorgular": [{"metin": "…", "tip": "museum"}]}` — en çok
   25 sorgu, sorgu başına en çok 20 sonuç; konaklama (`KONAKLAMA_TIPLERI` ya da `lodging` tipi) elenir. Alanlar: id, ad,
   birincil tip, tipler, konum, puan, yorum sayısı, işletme durumu.
