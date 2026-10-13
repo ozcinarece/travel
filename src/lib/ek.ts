@@ -10,3 +10,23 @@ export function iyelikEkli(n: number): string {
   const ek = bir ? BIR[bir] : on ? ON[on] : n % 1000 === 0 && n > 0 ? 'i' : n > 0 ? 'ü' : 'ı';
   return `${n}'${ek}`;
 }
+
+const KALIN = 'aıou';
+const UNLU = 'aeıioöuü';
+
+/**
+ * #144: özel adın yönelme eki — "Bursa'ya", "Eskişehir'e", "Eskişehir Gezisi'ne". Son ünlünün kalınlığına göre -a/-e; ünlüyle
+ * biten adda kaynaştırma -y-, çok kelimeli adın son kelimesi ı/i/u/ü ile bitiyorsa (iyelikli tamlama: "Gezisi", "Tatili") -n-.
+ * Harfle bitmeyen adda (rakam vb.) karar verilemez → null.
+ */
+export function yonelmeEkli(ad: string): string | null {
+  const temiz = ad.trim();
+  const son = temiz.slice(-1).toLocaleLowerCase('tr');
+  if (!/\p{L}/u.test(son)) return null;
+  const kucuk = temiz.toLocaleLowerCase('tr');
+  const sonUnlu = [...kucuk].reverse().find((h) => UNLU.includes(h));
+  const ek = sonUnlu && KALIN.includes(sonUnlu) ? 'a' : 'e';
+  if (!UNLU.includes(son)) return `${temiz}'${ek}`;
+  const tamlama = /\s/.test(temiz) && 'ıiuü'.includes(son);
+  return `${temiz}'${tamlama ? 'n' : 'y'}${ek}`;
+}

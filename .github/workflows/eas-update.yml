@@ -26,6 +26,8 @@ jobs:
       EXPO_PUBLIC_APPLE_SIGN_IN: '0'
       # #137: davet linkinin alan adı (https://{APP_DOMAIN}/r/{token}); repo değişkeni. Boşsa link yalnız koddur.
       APP_DOMAIN: ${{ vars.APP_DOMAIN }}
+      # #144: Profil › Yardım ve geri bildirim e-postası (repo değişkeni; boşsa satır gösterilmez).
+      EXPO_PUBLIC_DESTEK_EPOSTA: ${{ vars.DESTEK_EPOSTA }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4

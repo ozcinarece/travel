@@ -1,27 +1,43 @@
-import { Link, router } from 'expo-router';
-import { useEffect, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useQuery } from '@tanstack/react-query';
+import * as Location from 'expo-location';
+import { Link, router, useFocusEffect } from 'expo-router';
+import { useCallback, useEffect, useState } from 'react';
+import { Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { SecimMenusu } from '@/components/program/SecimMenusu';
 import { Avatar } from '@/components/ui/Avatar';
 import { Ikon } from '@/components/ui/Ikon';
 import { cikis } from '@/features/auth/giris';
-import { useProfil, useProfilGuncelle } from '@/features/profil/sorgular';
+import { useProfil, useProfilGuncelle, useProfilSayilari } from '@/features/profil/sorgular';
 import { t } from '@/i18n';
 import { sonHatayiOku, sonHatayiSil, type SonHata } from '@/lib/izler';
 import type { HaritaGizliligi } from '@/lib/tipler';
 import { bosluk, kose, renk, yazi } from '@/theme';
 
 const GIZLILIKLER: HaritaGizliligi[] = ['friends', 'everyone', 'me'];
+/** Yardım ve geri bildirim e-postası (ortam değişkeni; yoksa satır gösterilmez). */
+const DESTEK_EPOSTA = process.env.EXPO_PUBLIC_DESTEK_EPOSTA ?? '';
 
 /**
- * #138 (kanvas 22 · Profil): foto, ad, @kullanıcı adı, Düzenle; "Haritanı kimler görsün" (varsayılan Arkadaşlarım — giriş
- * kurulumundan buraya taşındı); Çıkış yap, Hesabı sil. Sayılar (seyahat · mekan gezildi · şehir) ve diğer ayarlar #144'te.
+ * #138 → #144 (kanvas 22 · Profil): foto, ad, @kullanıcı adı, Düzenle; sayılar seyahat · mekan gezildi · şehir (KK5 kuralı
+ * `profil_sayilari`); ayarlar: Haritanı kimler görsün, Bildirimler, Konum (Gezi günlerinde), Dil, Yardım ve geri bildirim, Çıkış
+ * yap; Hesabı sil.
  */
 export default function ProfilEkrani() {
   const profil = useProfil();
+  const sayilar = useProfilSayilari();
   const guncelle = useProfilGuncelle();
+  // Konum yalnız gezi günlerinde (Program) istenir; burada iznin durumu, dokununca telefon ayarları.
+  const konumIzni = useQuery({ queryKey: ['konum-izni'], queryFn: async () => (await Location.getForegroundPermissionsAsync()).status });
+  useFocusEffect(
+    useCallback(() => {
+      konumIzni.refetch();
+      sayilar.refetch();
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []),
+  );
+  const ayarlar = () => Linking.openSettings().catch(() => {});
   const [gizlilikAcik, setGizlilikAcik] = useState(false);
   // #120 KK4: hata kartının kaydı — "Bir şeyler ters gitti" sonrası kök neden burada okunur (seçilebilir metin).
   const [sonHata, setSonHata] = useState<SonHata | null>(null);
@@ -50,8 +66,22 @@ export default function ProfilEkrani() {
           </View>
         ) : null}
 
+        <View style={s.sayilar}>
+          <Sayi n={sayilar.data?.seyahat} etiket={t('profil.sayiSeyahat')} />
+          <Sayi n={sayilar.data?.gezilen} etiket={t('profil.sayiGezilen')} />
+          <Sayi n={sayilar.data?.sehir} etiket={t('profil.sayiSehir')} />
+        </View>
+
         <View>
           <Satir baslik={t('profil.gizlilik')} deger={p ? t(`profilKur.gizlilik.${p.map_visibility}`) : ''} onPress={() => setGizlilikAcik(true)} />
+          <Satir baslik={t('profil.bildirimler')} onPress={ayarlar} />
+          <Satir
+            baslik={t('profil.konum')}
+            deger={konumIzni.data === 'granted' ? t('profil.konumAcik') : konumIzni.data === 'denied' ? t('profil.konumKapali') : konumIzni.data ? t('profil.konumSorulmadi') : ''}
+            onPress={ayarlar}
+          />
+          <Satir baslik={t('profil.dil')} deger={t('profil.dilDeger')} okYok />
+          {DESTEK_EPOSTA ? <Satir baslik={t('profil.yardim')} onPress={() => Linking.openURL(`mailto:${DESTEK_EPOSTA}?subject=${encodeURIComponent(t('profil.yardimKonu'))}`).catch(() => {})} /> : null}
           <Satir baslik={t('profil.cikis')} tehlike onPress={cikis} okYok />
         </View>
 
@@ -96,9 +126,20 @@ export default function ProfilEkrani() {
   );
 }
 
-function Satir({ baslik, deger, onPress, tehlike, okYok }: { baslik: string; deger?: string; onPress: () => void; tehlike?: boolean; okYok?: boolean }) {
+function Sayi({ n, etiket }: { n: number | undefined; etiket: string }) {
   return (
-    <Pressable accessibilityRole="button" onPress={onPress} style={({ pressed }) => [s.satir, pressed && { opacity: 0.7 }]}>
+    <View style={s.sayi}>
+      <Text style={s.sayiDeger}>{n ?? '–'}</Text>
+      <Text style={s.sayiEtiket} numberOfLines={1}>
+        {etiket}
+      </Text>
+    </View>
+  );
+}
+
+function Satir({ baslik, deger, onPress, tehlike, okYok }: { baslik: string; deger?: string; onPress?: () => void; tehlike?: boolean; okYok?: boolean }) {
+  return (
+    <Pressable accessibilityRole={onPress ? 'button' : 'text'} disabled={!onPress} onPress={onPress} style={({ pressed }) => [s.satir, pressed && { opacity: 0.7 }]}>
       <Text style={[s.satirBaslik, tehlike && { color: renk.uyari }]}>{baslik}</Text>
       {deger ? <Text style={s.satirDeger}>{deger}</Text> : null}
       {okYok ? null : (
@@ -118,6 +159,10 @@ const s = StyleSheet.create({
   kullaniciAdi: { fontFamily: yazi.normal, fontSize: 14, color: renk.ikincil },
   duzenle: { height: 38, paddingHorizontal: 12, borderRadius: kose.alan, backgroundColor: renk.yuzey, justifyContent: 'center' },
   duzenleMetin: { fontFamily: yazi.ekstra, fontSize: 13, color: renk.ana },
+  sayilar: { flexDirection: 'row', gap: 8 },
+  sayi: { flex: 1, padding: 12, borderRadius: 16, backgroundColor: renk.yuzey, gap: 2 },
+  sayiDeger: { fontFamily: yazi.baslik, fontSize: 22, color: renk.metin },
+  sayiEtiket: { fontFamily: yazi.ekstra, fontSize: 12, color: renk.ikincil },
   satir: { flexDirection: 'row', alignItems: 'center', gap: 10, height: 52, paddingHorizontal: 4, borderBottomWidth: 1, borderBottomColor: renk.ayrac },
   satirBaslik: { flex: 1, fontFamily: yazi.ekstra, fontSize: 15, color: renk.metin },
   satirDeger: { fontFamily: yazi.normal, fontSize: 14, color: renk.ikincil },

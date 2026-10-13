@@ -1,5 +1,5 @@
 import { Image } from 'expo-image';
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { ActivityIndicator, Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -72,7 +72,9 @@ function Listem({ seyahat, gunler, duraklar, mekanlar, konaklamalar }: { seyahat
   const durakGuncelle = useDurakGuncelle(seyahat.id);
   const mekanGuncelle = useMekanGuncelle(seyahat.id);
   const dagit = usePlaniUygula(seyahat.id);
-  const [segment, setSegment] = useState<Segment>('tumu');
+  // #144: Seyahatler'deki "N mekan güne atanmadı" çipi Atanmamış segmentiyle açar.
+  const { segment: segmentParam } = useLocalSearchParams<{ segment?: string }>();
+  const [segment, setSegment] = useState<Segment>(segmentParam === 'atanmamis' ? 'atanmamis' : 'tumu');
   const [siralama, setSiralama] = useState<ListemSiralama>('plan');
   const [siralamaMenu, setSiralamaMenu] = useState(false);
   const [grupAcik, setGrupAcik] = useState(false);

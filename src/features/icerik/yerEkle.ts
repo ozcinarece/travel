@@ -48,3 +48,42 @@ export function useYereEkle() {
     },
   });
 }
+
+export type CokluEklemeSonucu = { eklenen: number; zaten: number; cozumsuz: number };
+
+/**
+ * #144 KK3: Kaydettiklerim'de bir şehrin tüm yerleri seyahatin listesine — mükerrer (place_id) atlanır; Google kimliği
+ * çözülemeyen içerik satırı atlanıp sayılır.
+ */
+export function useYerleriEkle() {
+  const { session } = useOturum();
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ seyahatId, yerler }: { seyahatId: string; yerler: { yerId: string; place_id: string | null; primary_type: string | null; lat: number; lng: number }[] }): Promise<CokluEklemeSonucu> => {
+      if (!session) throw new Error('oturum yok');
+      const { data, error } = await supabase.from('places').select('place_id').eq('trip_id', seyahatId);
+      if (error) throw error;
+      const mevcut = new Set((data ?? []).map((m) => m.place_id as string));
+      const gorulen = new Set<string>();
+      const yeni = yerler.filter((y): y is typeof y & { place_id: string } => {
+        if (!y.place_id || mevcut.has(y.place_id) || gorulen.has(y.place_id)) return false;
+        gorulen.add(y.place_id);
+        return true;
+      });
+      if (yeni.length > 0) {
+        const { error: e } = await supabase
+          .from('places')
+          .insert(yeni.map((y) => ({ trip_id: seyahatId, place_id: y.place_id, primary_type: y.primary_type, lat: y.lat, lng: y.lng, default_minutes: varsayilanDakika(y.primary_type), added_by: session.user.id })));
+        if (e) throw e;
+        await Promise.all(yeni.map((y) => olayYaz('yer_eklendi', y.yerId, { seyahat: seyahatId, place_id: y.place_id })));
+      }
+      const cozumsuz = yerler.filter((y) => !y.place_id).length;
+      return { eklenen: yeni.length, zaten: yerler.length - cozumsuz - yeni.length, cozumsuz };
+    },
+    onSuccess: (_d, v) => {
+      qc.invalidateQueries({ queryKey: ['mekanlar', v.seyahatId] });
+      qc.invalidateQueries({ queryKey: ['seyahatler'] });
+      qc.invalidateQueries({ queryKey: ['seyahat-durumlari'] });
+    },
+  });
+}

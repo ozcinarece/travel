@@ -1,5 +1,5 @@
-import { router, useFocusEffect } from 'expo-router';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ActivityIndicator, Linking, StyleSheet, Text, View } from 'react-native';
 
 import { MekanPaneli } from '@/components/mekan/MekanPaneli';
@@ -9,10 +9,12 @@ import { AdimNeZaman } from '@/components/sihirbaz/AdimNeZaman';
 import { AdimOnerilenler } from '@/components/sihirbaz/AdimOnerilenler';
 import { PlanCubugu } from '@/components/sihirbaz/PlanCubugu';
 import { useDuraklar, useGunler } from '@/features/gunler/sorgular';
-import { olayYaz, sehirEslestir, useSehirler } from '@/features/icerik/sorgular';
+import { icerikPlaceId, olayYaz, sehirEslestir, useSehirler, useYerlerIle } from '@/features/icerik/sorgular';
+import { useYerleriEkle } from '@/features/icerik/yerEkle';
 import { useMekanEkle, useMekanGuncelle, useMekanlar, useMekanSil } from '@/features/mekanlar/sorgular';
 import { useProfil, useProfilGuncelle } from '@/features/profil/sorgular';
 import { useSeyahat, useSeyahatAdiKaydet, useSeyahatOlustur } from '@/features/seyahatler/sorgular';
+import { seyahatiKopyala, useIcerikSehirSecimi, useTekrarKaynagi } from '@/features/sihirbaz/girisler';
 import type { OnerilenMekan } from '@/features/sihirbaz/onerilenler';
 import { secimOzeti } from '@/features/sihirbaz/planKur';
 import { usePlaniUygula } from '@/features/sihirbaz/planUygula';
@@ -27,6 +29,8 @@ import { renk, yazi } from '@/theme';
  * "Planı kur" (seçilenler yakınlığa göre günlere dağıtılır) ve Program'da "Planın hazır". Otel Program'a, davet Plan hazır'a
  * taşındı. Şehir + ad + tarih yerelde tutulur; 2. adımdan çıkınca (Devam ya da "Tarihim belli değil") seyahat oluşturulur.
  * Geri: şehir ve tarihler oluşturulduktan sonra kilitlidir (ad değişir). Hedef: 3 dakikada saatlik rota (olay `plan_kuruldu`).
+ * #144 girişleri: `tekrar` (geçmiş seyahat → aynı şehir ve ad, 2. adımdan; seyahat oluşunca plan kopyalanır, Program açılır),
+ * `sehir` + `yerler` (Kaydettiklerim → rehberli şehir seçili; seyahat oluşunca kaydedilen yerler listeye).
  */
 export default function SihirbazEkrani() {
   const [adim, setAdim] = useState<Adim>('nereye');
@@ -45,6 +49,18 @@ export default function SihirbazEkrani() {
   const baslangicAni = useRef(0);
 
   const sehirler = useSehirler();
+  // #144: dışarıdan giriş parametreleri bir kez uygulanır (sekme ekranı açık kalır; aynı parametreyle tekrar uygulanmaz).
+  const giris = useLocalSearchParams<{ tekrar?: string; sehir?: string; yerler?: string; n?: string }>();
+  const tekrarKaynagi = useTekrarKaynagi(giris.tekrar);
+  const girisSehri = useIcerikSehirSecimi(giris.tekrar ? undefined : sehirler.data?.find((k) => k.id === giris.sehir));
+  const girisYerIdleri = useMemo(() => (giris.tekrar ? [] : (giris.yerler?.split(',').filter(Boolean) ?? [])), [giris.tekrar, giris.yerler]);
+  const girisYerleri = useYerlerIle(girisYerIdleri);
+  const yerleriEkle = useYerleriEkle();
+  // `n`: her dokunuşta yeni (aynı seyahat için ikinci "Tekrar kur" da uygulanır).
+  const girisAnahtari = giris.tekrar ? `tekrar:${giris.tekrar}:${giris.n ?? ''}` : giris.sehir ? `sehir:${giris.sehir}:${giris.yerler ?? ''}:${giris.n ?? ''}` : null;
+  const [uygulananGiris, setUygulananGiris] = useState<string | null>(null);
+  /** Uygulanan giriş: kopyalanacak seyahat ya da listeye eklenecek kaydedilen yerler (yalnız şehir değişmediyse). */
+  const [girisPlani, setGirisPlani] = useState<{ tur: 'tekrar'; kaynak: string; sehirId: string } | { tur: 'yerler'; sehirId: string } | null>(null);
   const olustur = useSeyahatOlustur();
   const adKaydet = useSeyahatAdiKaydet(tripId ?? '');
   const seyahat = useSeyahat(tripId ?? undefined);
@@ -69,6 +85,28 @@ export default function SihirbazEkrani() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [profil.data?.onboarding_done_at]);
+
+  if (girisAnahtari && girisAnahtari !== uygulananGiris) {
+    const hazir = giris.tekrar ? tekrarKaynagi.data : girisSehri.data;
+    if (hazir) {
+      setUygulananGiris(girisAnahtari);
+      setTripId(null);
+      setAralik(null);
+      setHata(null);
+      setTutulan(new Set());
+      if (tekrarKaynagi.data && giris.tekrar) {
+        setSehir(tekrarKaynagi.data.sehir);
+        setAd(tekrarKaynagi.data.ad);
+        setGirisPlani({ tur: 'tekrar', kaynak: tekrarKaynagi.data.id, sehirId: tekrarKaynagi.data.sehir.place_id });
+        setAdim('nezaman');
+      } else if (girisSehri.data) {
+        setSehir(girisSehri.data);
+        setAd(null);
+        setGirisPlani({ tur: 'yerler', sehirId: girisSehri.data.place_id });
+        setAdim('nereye');
+      }
+    }
+  }
 
   const onerilenAd = seyahatAdiOner(sehir ? [sehir.ad] : []);
   const rehberSehir = sehirEslestir(sehirler.data, sehir);
@@ -111,6 +149,28 @@ export default function SihirbazEkrani() {
         start_date: tarihsiz ? null : (aralik?.gidis ?? null),
         end_date: tarihsiz ? null : (aralik?.donus ?? aralik?.gidis ?? null),
       });
+      // #144 Tekrar kur: aynı plan yeni tarihe; plan hazır olduğundan öneriler atlanır, Program açılır.
+      if (girisPlani?.tur === 'tekrar' && girisPlani.sehirId === sehir.place_id) {
+        const n = await seyahatiKopyala(girisPlani.kaynak, id);
+        setGirisPlani(null);
+        olayYaz('sihirbaz_bitti', id, { tekrar: girisPlani.kaynak, durak: n });
+        router.replace({ pathname: '/seyahat/[id]/(sekmeler)/program', params: { id } });
+        // Sekme açık kalır: bir sonraki "+" baştan başlasın.
+        setAdim('nereye');
+        setSehir(null);
+        setAd(null);
+        setAralik(null);
+        return;
+      }
+      // #144 Bu şehre seyahat kur: kaydedilen yerler listeye (3. adımda listede görünür).
+      if (girisPlani?.tur === 'yerler' && girisPlani.sehirId === sehir.place_id && girisYerleri.data?.length) {
+        const satirlar = await Promise.all(
+          girisYerleri.data.map(async (y) => ({ yerId: y.id, place_id: await icerikPlaceId(y, y.sehirler?.ad ?? sehir.ad), primary_type: y.kategori, lat: y.lat, lng: y.lng })),
+        );
+        await yerleriEkle.mutateAsync({ seyahatId: id, yerler: satirlar }).catch(() => undefined);
+        setTutulan(new Set(satirlar.map((x) => x.place_id).filter((x): x is string => !!x)));
+      }
+      setGirisPlani(null);
       setTripId(id);
       setAdim('onerilenler');
     } catch {

@@ -1113,4 +1113,71 @@ set role anon;
 do $$ begin assert public.gezi_alinma_sayisi('33333333-3333-4333-8333-000000000001') >= 2, 'anon da okur (paylaşılan gezi linki)'; end $$;
 reset role;
 
+-- ---------------------------------------------------------------- #144: seyahat durumları, profil sayıları, Tekrar kur
+set role authenticated;
+select pg_temp.as_user(:X);
+create temp table onceki_144 as select public.profil_sayilari() as sayilar;
+insert into public.trips (id, owner_id, city_place_id, city_label, lat, lng, tz, start_date, end_date) values
+  ('14400000-0000-4000-8000-000000000001', :X, 'ChIJ-esk', 'Eskişehir', 39.77, 30.52, 'Europe/Istanbul', '2026-03-10', '2026-03-12'),
+  ('14400000-0000-4000-8000-000000000002', :X, 'ChIJ-esk', 'Eskişehir', 39.77, 30.52, 'Europe/Istanbul', '2099-01-01', '2099-01-02'),
+  ('14400000-0000-4000-8000-000000000003', :X, 'ChIJ-bur', 'Bursa', 40.18, 29.06, 'Europe/Istanbul', null, null);
+insert into public.places (id, trip_id, place_id, lat, lng, default_minutes, added_by) values
+  ('14400000-0000-4000-8000-0000000000a1', '14400000-0000-4000-8000-000000000001', 'p1', 39.77, 30.52, 60, :X),
+  ('14400000-0000-4000-8000-0000000000a2', '14400000-0000-4000-8000-000000000001', 'p2', 39.77, 30.52, 45, :X),
+  ('14400000-0000-4000-8000-0000000000a3', '14400000-0000-4000-8000-000000000001', 'p3', 39.77, 30.52, 50, :X),
+  ('14400000-0000-4000-8000-0000000000a4', '14400000-0000-4000-8000-000000000001', 'p4', 39.77, 30.52, 45, :X),
+  ('14400000-0000-4000-8000-0000000000a7', '14400000-0000-4000-8000-000000000001', 'p7', 39.77, 30.52, 45, :X),
+  ('14400000-0000-4000-8000-0000000000b1', '14400000-0000-4000-8000-000000000002', 'p1', 39.77, 30.52, 45, :X),
+  ('14400000-0000-4000-8000-0000000000b5', '14400000-0000-4000-8000-000000000002', 'p5', 39.77, 30.52, 45, :X),
+  ('14400000-0000-4000-8000-0000000000c6', '14400000-0000-4000-8000-000000000003', 'p6', 40.18, 29.06, 45, :X);
+update public.days set start_time = '10:30', order_manual = true where trip_id = '14400000-0000-4000-8000-000000000001' and index = 1;
+insert into public.stops (trip_id, day_id, place_ref, order_key, minutes, skipped)
+select '14400000-0000-4000-8000-000000000001', d.id, v.ref::uuid, v.k, v.dk, v.atla
+from (values (1, '14400000-0000-4000-8000-0000000000a1', 'a', 60, false), (1, '14400000-0000-4000-8000-0000000000a2', 'b', 45, true),
+             (2, '14400000-0000-4000-8000-0000000000a3', 'a', 50, false), (3, '14400000-0000-4000-8000-0000000000a7', 'a', 45, false)) v(gun, ref, k, dk, atla)
+join public.days d on d.trip_id = '14400000-0000-4000-8000-000000000001' and d.index = v.gun;
+insert into public.stops (trip_id, day_id, place_ref, order_key, minutes)
+select '14400000-0000-4000-8000-000000000002', d.id, '14400000-0000-4000-8000-0000000000b1', 'a', 45 from public.days d where d.trip_id = '14400000-0000-4000-8000-000000000002' and d.index = 1;
+insert into public.stops (trip_id, day_id, place_ref, order_key, minutes)
+select '14400000-0000-4000-8000-000000000003', d.id, '14400000-0000-4000-8000-0000000000c6', 'a', 45 from public.days d where d.trip_id = '14400000-0000-4000-8000-000000000003';
+do $$
+declare r record; o jsonb; j jsonb;
+begin
+  select * into r from public.seyahat_durumlari() where trip_id = '14400000-0000-4000-8000-000000000001';
+  assert (r.gun, r.planli_gun, r.atanmamis, r.gezilen) = (3, 3, 1, 3), format('bitmiş seyahat durumu: %s', r);
+  select * into r from public.seyahat_durumlari() where trip_id = '14400000-0000-4000-8000-000000000002';
+  assert (r.gun, r.planli_gun, r.atanmamis, r.gezilen) = (2, 1, 1, 0), format('yaklaşan: gezilen sayılmaz: %s', r);
+  select * into r from public.seyahat_durumlari() where trip_id = '14400000-0000-4000-8000-000000000003';
+  assert (r.gun, r.planli_gun, r.atanmamis, r.gezilen) = (1, 1, 0, 0), format('tarihsiz sayılmaz: %s', r);
+  select sayilar into o from onceki_144;
+  j := public.profil_sayilari();
+  assert (j->>'seyahat')::int = (o->>'seyahat')::int + 3, 'profil: üç yeni seyahat';
+  -- p1, p3, p7 (p2 atlandı; p5 atanmamış ve seyahat yaklaşan; p6 tarihsiz); şehir yalnız Eskişehir.
+  assert (j->>'gezilen')::int = (o->>'gezilen')::int + 3, 'profil: mekan gezildi kuralı';
+  assert (j->>'sehir')::int = (o->>'sehir')::int + 1, 'profil: şehir aynı mantıkla';
+end $$;
+-- Tekrar kur: yeni tarihli (2 günlük) seyahate aynı plan.
+insert into public.trips (id, owner_id, city_place_id, city_label, lat, lng, tz, start_date, end_date) values
+  ('14400000-0000-4000-8000-000000000004', :X, 'ChIJ-esk', 'Eskişehir', 39.77, 30.52, 'Europe/Istanbul', '2099-06-01', '2099-06-02');
+do $$
+begin
+  assert public.seyahati_kopyala('14400000-0000-4000-8000-000000000001', '14400000-0000-4000-8000-000000000004') = 3, 'gün 1–2 durakları kopyalanır (3. günün karşılığı yok)';
+  assert (select count(*) from public.places where trip_id = '14400000-0000-4000-8000-000000000004') = 5, 'tüm mekanlar listeye';
+  assert (select count(*) from public.stops where trip_id = '14400000-0000-4000-8000-000000000004' and skipped) = 0, 'atlama kopyalanmaz';
+  assert (select minutes from public.stops s join public.places p on p.id = s.place_ref where p.trip_id = '14400000-0000-4000-8000-000000000004' and p.place_id = 'p3') = 50, 'süre korunur';
+  assert (select google_fetched_at from public.places where trip_id = '14400000-0000-4000-8000-000000000004' and place_id = 'p1')
+       = (select google_fetched_at from public.places where trip_id = '14400000-0000-4000-8000-000000000001' and place_id = 'p1'), 'tazelik damgası korunur';
+  assert not exists (select 1 from public.stops s join public.places p on p.id = s.place_ref where p.trip_id = '14400000-0000-4000-8000-000000000004' and p.place_id in ('p4', 'p7')), 'atanmamış ve karşılıksız gün listede kalır';
+  assert (select start_time = '10:30' and order_manual from public.days where trip_id = '14400000-0000-4000-8000-000000000004' and index = 1), 'gün ayarı kopyalanır';
+  assert public.seyahati_kopyala('14400000-0000-4000-8000-000000000001', '14400000-0000-4000-8000-000000000004') = 0, 'ikinci kez: hiçbir şey çoğalmaz';
+end $$;
+select pg_temp.hata_bekle($$select public.seyahati_kopyala(gen_random_uuid(), '14400000-0000-4000-8000-000000000004')$$, '42501');
+select pg_temp.as_user(:B);
+do $$
+begin
+  assert not exists (select 1 from public.seyahat_durumlari() where trip_id::text like '14400000-%'), 'başkasının seyahati görünmez';
+end $$;
+select pg_temp.hata_bekle($$select public.seyahati_kopyala('14400000-0000-4000-8000-000000000001', '14400000-0000-4000-8000-000000000004')$$, '42501');
+reset role;
+
 \echo 'rls_test: TÜM TESTLER GEÇTİ'

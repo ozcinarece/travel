@@ -24,6 +24,23 @@ export function useProfilHazirla() {
   });
 }
 
+/** #144 KK4–5: profil sayıları — seyahat · mekan gezildi · şehir (profil_sayilari RPC'si; kural migration'da). */
+export type ProfilSayilari = { seyahat: number; gezilen: number; sehir: number };
+
+export function useProfilSayilari() {
+  const { session } = useOturum();
+  return useQuery({
+    queryKey: ['profil-sayilari', session?.user.id],
+    enabled: !!session,
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc('profil_sayilari');
+      if (error) throw error;
+      const j = (data ?? {}) as Partial<ProfilSayilari>;
+      return { seyahat: Number(j.seyahat ?? 0), gezilen: Number(j.gezilen ?? 0), sehir: Number(j.sehir ?? 0) } satisfies ProfilSayilari;
+    },
+  });
+}
+
 export function useProfil() {
   const { session, hesapli } = useOturum();
   const uid = session?.user.id;
