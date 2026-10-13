@@ -294,7 +294,7 @@
     "yok": "—",
     "ilkPlan": {
       "baslik": "İlk saatlik plana kadar",
-      "alt": "medyan · hedef < 3 dk",
+      "alt": "medyan · {n} kişi · hedef < 3 dk",
       "hedefte": "hedefte",
       "hedefUstu": "hedef üstü",
       "bekleniyorAlt": "plan_kuruldu olayı bekleniyor"
@@ -303,7 +303,9 @@
       "baslik": "Davet linki paylaşan",
       "alt": "kurulan seyahatlerin",
       "katilim": "katılım {oran}",
-      "bekleniyorAlt": "davet olayları bekleniyor"
+      "bekleniyorAlt": "davet olayları bekleniyor",
+      "katilimBekleniyor": "katılım: veri bekleniyor",
+      "katilimYok": "katılım —"
     },
     "plan": {
       "baslik": "Kurulan plan",

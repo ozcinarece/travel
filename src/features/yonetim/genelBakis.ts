@@ -16,7 +16,7 @@ export type IcerikSehri = { id: string; ad: string; kapak: boolean; genis_kapak:
 export type Genel = {
   donem: Donem;
   ilk_plan: { olay_var: boolean; n: number; medyan_sn: number | null };
-  davet: { olay_var: boolean; kurulan: number; paylasilan: number; katilan: number };
+  davet: { olay_var: boolean; kurulan: number; paylasilan: number; katilan: number; katilim_olay_var: boolean };
   plan: { olay_var: boolean; sayi: number; onceki: number };
   gezi: { olay_var: boolean; sayi: number; en_cok: string | null };
   hafta: { gun: string; plan: number; katilim: number }[];
@@ -38,8 +38,10 @@ export function sureMetni(sn: number): string {
     const kalan = s % 60;
     return kalan ? `${dk} dk ${kalan} sn` : `${dk} dk`;
   }
-  const sa = Math.floor(s / 3600);
-  const dk = Math.round((s % 3600) / 60);
+  // Dakikaya yuvarlayıp sonra saate böl ("1 sa 60 dk" çıkmasın).
+  const toplamDk = Math.round(s / 60);
+  const sa = Math.floor(toplamDk / 60);
+  const dk = toplamDk % 60;
   return dk ? `${sa} sa ${dk} dk` : `${sa} sa`;
 }
 
@@ -70,8 +72,9 @@ export type GoogleOzeti = {
 };
 
 /**
- * Bugünkü tahmini harcama: kalem isteği × birim fiyat (USD / 1000). Çubuk: kalemin bütçedeki payı; Google yorumları
- * çubuğu günlük sınıra göre. Fiyat yoksa 0 sayılır.
+ * Bugünkü tahmini harcama: kalem isteği × birim fiyat (USD / 1000). Çubuk: kalemin bugünkü toplam harcamadaki payı
+ * (mekan + foto + rota + yorum = %100; bütçeye yakınlığı üstteki "$4,10 / $10" gösterir); Google yorumları çubuğu
+ * günlük sınıra göre. Fiyat yoksa 0 sayılır.
  */
 export function googleOzeti(g: Genel['google']): GoogleOzeti {
   const fiyat = g.fiyat ?? {};
@@ -83,7 +86,7 @@ export function googleOzeti(g: Genel['google']): GoogleOzeti {
     toplam,
     butce,
     asildi: butce !== null && toplam >= butce,
-    kalemler: (['mekan', 'foto', 'rota'] as const).map((k) => ({ anahtar: k, sayi: g[k] ?? 0, usd: usd(k), oran: oranla(usd(k), butce) })),
+    kalemler: (['mekan', 'foto', 'rota'] as const).map((k) => ({ anahtar: k, sayi: g[k] ?? 0, usd: usd(k), oran: oranla(usd(k), toplam) })),
     yorum: { sayi: g.yorum ?? 0, sinir: g.yorum_sinir, oran: oranla(g.yorum ?? 0, g.yorum_sinir) },
   };
 }

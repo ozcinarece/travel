@@ -1189,7 +1189,9 @@ delete from public.api_sayac where gun = (now() at time zone 'Europe/Istanbul'):
 \set U1 '''15700000-0000-4000-8000-000000000001'''
 \set U2 '''15700000-0000-4000-8000-000000000002'''
 \set U3 '''15700000-0000-4000-8000-000000000003'''
-insert into auth.users (id, is_anonymous) values (:U1, false), (:U2, false), (:U3, false);
+\set U4 '''15700000-0000-4000-8000-000000000004'''
+\set U5 '''15700000-0000-4000-8000-000000000005'''
+insert into auth.users (id, is_anonymous) values (:U1, false), (:U2, false), (:U3, false), (:U4, false), (:U5, false);
 set role authenticated;
 select pg_temp.as_email(:E, 'ozcinar.ece@gmail.com');
 do $$
@@ -1197,6 +1199,7 @@ declare o jsonb := public.yonetim_genel(7);
 begin
   assert not (o #>> '{ilk_plan,olay_var}')::boolean and not (o #>> '{plan,olay_var}')::boolean, 'plan olayı yok → veri bekleniyor';
   assert not (o #>> '{davet,olay_var}')::boolean and not (o #>> '{gezi,olay_var}')::boolean, 'davet / gezi olayı yok';
+  assert not (o #>> '{davet,katilim_olay_var}')::boolean, 'katılım olayı yok';
   assert not (o ->> 'hafta_olay_var')::boolean, 'grafik verisi yok';
   assert o #> '{ilk_plan,medyan_sn}' = 'null'::jsonb, 'medyan yok (sıfır değil)';
 end $$;
@@ -1209,6 +1212,10 @@ insert into public.olaylar (user_id, tur, hedef_id, meta, created_at) values
   (:U1, 'plan_kuruldu', '15700000-0000-4000-8000-0000000000a2', '{"sure_sn": 900}', now() - interval '1 hour'),
   (:U2, 'plan_kuruldu', null, '{"sure_sn": 200}', now() - interval '3 days'),
   (:U3, 'plan_kuruldu', null, '{"sure_sn": 50}', now() - interval '20 days'),
+  -- meta istemciden: bozuk ve aşırı değer özeti düşürmez, medyana girmez.
+  (:U4, 'plan_kuruldu', null, '{"sure_sn": "x"}', now() - interval '2 hours'),
+  (:U5, 'plan_kuruldu', null, '{"sure_sn": 99999}', now() - interval '1 day 1 minute'),
+  (:U5, 'plan_kuruldu', null, '{"sure_sn": 30}', now() - interval '2 hours'),
   (:U1, 'davet_paylasildi', '15700000-0000-4000-8000-0000000000a1', null, now() - interval '1 day'),
   (:U2, 'davet_katildi', '15700000-0000-4000-8000-0000000000a1', '{"kanal": "app"}', now() - interval '20 hours'),
   (:U1, 'gezi_alindi', (select id from public.geziler order by baslik limit 1), null, now() - interval '1 day'),
@@ -1220,6 +1227,9 @@ create temp table beklenen_157 as select
   (select count(*) from public.trips where created_at > now() - interval '7 days') as kurulan,
   (select count(*) from public.olaylar where tur = 'plan_kuruldu' and created_at >= (date_trunc('week', now() at time zone 'Europe/Istanbul')) at time zone 'Europe/Istanbul') as hafta_plan,
   (select baslik from public.geziler order by baslik limit 1) as en_cok,
+  (select count(*) from public.olaylar where tur = 'plan_kuruldu'
+     and created_at > ((now() at time zone 'Europe/Istanbul')::date::timestamp at time zone 'Europe/Istanbul') - interval '1 day'
+     and created_at <= now() - interval '1 day') as dun_ayni_saat,
   (select count(*) filter (where not coalesce((to_jsonb(r) ->> 'gizli')::boolean, false)) from public.sehir_rehberi r join public.sehirler s on s.id = r.sehir_id where s.slug = 'eskisehir') as esk_bolum;
 grant select on beklenen_157 to authenticated;
 set role authenticated;
@@ -1233,7 +1243,9 @@ begin
   select * into b from beklenen_157;
   assert (o #>> '{ilk_plan,olay_var}')::boolean, 'plan olayı var';
   assert (o #>> '{ilk_plan,n}')::int = 2 and (o #>> '{ilk_plan,medyan_sn}')::numeric = 150, format('ilk plan medyanı (kişi başı ilk plan, 7 gün): %s', o -> 'ilk_plan');
-  assert (o #>> '{plan,sayi}')::int = 3 and (o #>> '{plan,onceki}')::int = 0, format('kurulan plan: %s', o -> 'plan');
+  assert (o #>> '{plan,sayi}')::int = 6 and (o #>> '{plan,onceki}')::int = 0, format('kurulan plan: %s', o -> 'plan');
+  assert (public.yonetim_genel(1) #>> '{plan,onceki}')::int = b.dun_ayni_saat, 'Bugün: dünün aynı saatine kadar kıyaslanır';
+  assert (o #>> '{davet,katilim_olay_var}')::boolean, 'katılım olayı var';
   assert (o #>> '{davet,kurulan}')::int = b.kurulan and (o #>> '{davet,paylasilan}')::int = 1 and (o #>> '{davet,katilan}')::int = 1, format('davet: %s', o -> 'davet');
   assert (o #>> '{gezi,sayi}')::int = 3, 'alınan gezi kişi başı (aynı kişi iki kez = 1)';
   assert o #>> '{gezi,en_cok}' = b.en_cok, 'en çok alınan';
@@ -1245,7 +1257,7 @@ begin
   select e into esk from jsonb_array_elements(o -> 'icerik') e where e ->> 'ad' = 'Eskişehir';
   assert esk is not null and (esk ->> 'bolum')::int = b.esk_bolum and esk ? 'genis_kapak' and esk ? 'bos_bolum' and esk ? 'gezi', format('içerik sağlığı: %s', esk);
   assert not exists (select 1 from jsonb_array_elements(o -> 'icerik') e where e ->> 'ad' = 'Gizli'), 'yalnız yayındaki şehirler';
-  assert (public.yonetim_genel(30) #>> '{ilk_plan,n}')::int = 3 and (public.yonetim_genel(30) #>> '{plan,sayi}')::int = 4, '30 gün';
+  assert (public.yonetim_genel(30) #>> '{ilk_plan,n}')::int = 3 and (public.yonetim_genel(30) #>> '{plan,sayi}')::int = 7, '30 gün';
 end $$;
 select pg_temp.hata_bekle($$select public.yonetim_genel(14)$$, '22023');
 select pg_temp.as_user(:B);

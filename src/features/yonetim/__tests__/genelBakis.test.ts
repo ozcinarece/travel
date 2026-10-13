@@ -9,6 +9,7 @@ describe('genel bakış (#157)', () => {
     expect(sureMetni(45.4)).toBe('45 sn');
     expect(sureMetni(120)).toBe('2 dk');
     expect(sureMetni(3900)).toBe('1 sa 5 dk');
+    expect(sureMetni(7170)).toBe('2 sa');
   });
 
   it('oran ve değişim: payda 0 → yok (sıfır değil)', () => {
@@ -20,14 +21,15 @@ describe('genel bakış (#157)', () => {
     expect(degisimMetni(5, 0)).toBeNull();
   });
 
-  it('Google: kalem × birim fiyat; çubuk bütçedeki pay, yorumlar sınıra göre; bütçe aşımı', () => {
+  it('Google: kalem × birim fiyat; çubuk toplam harcamadaki pay, yorumlar sınıra göre; bütçe aşımı', () => {
     const o = googleOzeti({ mekan: 120, foto: 300, rota: 200, yorum: 96, butce: 10, fiyat: { mekan: 17, foto: 7, rota: 5, yorum: 20 }, yorum_sinir: 300 });
     expect(o.toplam).toBeCloseTo(2.04 + 2.1 + 1 + 1.92);
     expect(dolarMetni(o.toplam)).toBe('$7,06');
+    // 2,04 / 7,06 · 2,10 / 7,06 · 1,00 / 7,06 (kalan pay yorumlar).
     expect(o.kalemler.map((k) => [k.anahtar, k.sayi, Math.round(k.oran * 100)])).toEqual([
-      ['mekan', 120, 20],
-      ['foto', 300, 21],
-      ['rota', 200, 10],
+      ['mekan', 120, 29],
+      ['foto', 300, 30],
+      ['rota', 200, 14],
     ]);
     expect(o.yorum).toEqual({ sayi: 96, sinir: 300, oran: 0.32 });
     expect(o.asildi).toBe(false);

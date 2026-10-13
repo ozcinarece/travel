@@ -19,7 +19,8 @@ export async function yuruyusMatrisi(kaynaklar: Nokta[], hedefler: Nokta[]): Pro
   const anahtar = Deno.env.get('GOOGLE_SERVER_KEY');
   if (!anahtar) throw new Error('GOOGLE_SERVER_KEY tanımlı değil');
   const waypoint = (n: Nokta) => ({ waypoint: { location: { latLng: { latitude: n.lat, longitude: n.lng } } } });
-  googleSay();
+  // Google matrisi eleman başına faturalar (kaynak × hedef); #157 bütçe kartı istek değil eleman sayar.
+  googleSay(kaynaklar.length * hedefler.length);
   const cevap = await fetch('https://routes.googleapis.com/distanceMatrix/v2:computeRouteMatrix', {
     method: 'POST',
     headers: {

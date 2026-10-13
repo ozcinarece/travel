@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, useWindowDimensions, View } from 'react-native';
 
 import { AltMetin, EnCokAlinanlar, GoogleKarti, GostergeKarti, HaftaGrafigi, IcerikSagligi, Rozet } from '@/components/yonetim/genel/GenelKartlar';
 import { Hap } from '@/components/yonetim/Hap';
@@ -8,6 +8,7 @@ import { Segment } from '@/components/yonetim/Ortak';
 import { yRenk } from '@/components/yonetim/tema';
 import { degisimMetni, DONEMLER, PLAN_HEDEF_SN, selam, sureMetni, tarihEtiketi, yuzde, type Donem } from '@/features/yonetim/genelBakis';
 import { useGenelBakis } from '@/features/yonetim/genelBakisSorgulari';
+import { GENIS_EKRAN } from '@/features/yonetim/menu';
 import { ty } from '@/features/yonetim/metin';
 import { binlik } from '@/features/yonetim/yer';
 import { useOturum } from '@/lib/oturum';
@@ -24,6 +25,11 @@ export default function GenelBakisSayfasi() {
   const ad = ((session?.user.user_metadata?.full_name as string | undefined) ?? '').trim().split(/\s+/)[0];
   const sel = selam();
   const o = genel.data;
+  // Dört gösterge sığmıyorsa 2 × 2 (3 + 1 kalmasın): kart en az 240 px; değer satırı kırılmasın. Gövde genişliği pencereden (menü 232 px ≥ 1200).
+  const { width } = useWindowDimensions();
+  const govde = width - (width >= GENIS_EKRAN ? 232 : 0) - 56;
+  const kartStili = govde < 4 * 240 + 3 * 20 ? s.ikili : undefined;
+  const katilimOrani = o ? yuzde(o.davet.katilan, o.davet.paylasilan) : null;
 
   return (
     <YonetimSayfasi
@@ -50,13 +56,14 @@ export default function GenelBakisSayfasi() {
         <>
           <View style={s.sira}>
             <GostergeKarti
+              style={kartStili}
               baslik={ty('genel.ilkPlan.baslik')}
               bekleniyor={!o.ilk_plan.olay_var}
               deger={o.ilk_plan.medyan_sn !== null ? sureMetni(o.ilk_plan.medyan_sn) : ty('genel.yok')}
               alt={
                 o.ilk_plan.olay_var ? (
                   <>
-                    <AltMetin once={ty('genel.ilkPlan.alt')} />
+                    <AltMetin once={ty('genel.ilkPlan.alt', { n: binlik(o.ilk_plan.n) })} />
                     {o.ilk_plan.medyan_sn !== null ? (
                       o.ilk_plan.medyan_sn < PLAN_HEDEF_SN ? <Rozet tur="basari" etiket={ty('genel.ilkPlan.hedefte')} /> : <Rozet tur="bekliyor" etiket={ty('genel.ilkPlan.hedefUstu')} />
                     ) : null}
@@ -67,14 +74,16 @@ export default function GenelBakisSayfasi() {
               }
             />
             <GostergeKarti
+              style={kartStili}
               baslik={ty('genel.davet.baslik')}
               bekleniyor={!o.davet.olay_var}
               deger={yuzde(o.davet.paylasilan, o.davet.kurulan) ?? ty('genel.yok')}
               alt={
                 o.davet.olay_var ? (
                   <AltMetin
-                    once={`${ty('genel.davet.alt')}${yuzde(o.davet.katilan, o.davet.paylasilan) ? ' · ' : ''}`}
-                    vurgu={yuzde(o.davet.katilan, o.davet.paylasilan) ? ty('genel.davet.katilim', { oran: yuzde(o.davet.katilan, o.davet.paylasilan)! }) : null}
+                    once={`${ty('genel.davet.alt')} · `}
+                    vurgu={o.davet.katilim_olay_var && katilimOrani ? ty('genel.davet.katilim', { oran: katilimOrani }) : null}
+                    sonra={o.davet.katilim_olay_var ? (katilimOrani ? undefined : ty('genel.davet.katilimYok')) : ty('genel.davet.katilimBekleniyor')}
                   />
                 ) : (
                   <AltMetin once={ty('genel.davet.bekleniyorAlt')} />
@@ -82,6 +91,7 @@ export default function GenelBakisSayfasi() {
               }
             />
             <GostergeKarti
+              style={kartStili}
               baslik={ty('genel.plan.baslik')}
               bekleniyor={!o.plan.olay_var}
               deger={binlik(o.plan.sayi)}
@@ -100,6 +110,7 @@ export default function GenelBakisSayfasi() {
               }
             />
             <GostergeKarti
+              style={kartStili}
               baslik={ty('genel.gezi.baslik')}
               bekleniyor={!o.gezi.olay_var}
               deger={binlik(o.gezi.sayi)}
@@ -123,4 +134,6 @@ export default function GenelBakisSayfasi() {
 const s = StyleSheet.create({
   sira: { flexDirection: 'row', flexWrap: 'wrap', gap: 20, alignItems: 'stretch' },
   satir: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  // İki sütun: %40 taban + büyüme (üçüncü kart sığmaz, ikisi satırı doldurur).
+  ikili: { flexBasis: '40%', flexGrow: 1 },
 });

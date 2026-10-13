@@ -16,10 +16,14 @@ as $$
 declare
   v_tz constant text := 'Europe/Istanbul';
   v_bugun date := (now() at time zone v_tz)::date;
-  -- Dönem: Bugün = Türkiye günü başından; 7 / 30 gün = son N gün. Önceki dönem aynı uzunlukta hemen öncesi.
+  -- Dönem: Bugün = Türkiye günü başından şimdiye; 7 / 30 gün = son N gün. Önceki dönem aynı uzunlukta bir dönem önce:
+  -- Bugün için dün aynı saate kadar (sabah, dünün tamamıyla kıyaslanmasın).
+  v_kayma interval := make_interval(days => p_gun);
   v_bas timestamptz := case when p_gun = 1 then v_bugun::timestamp at time zone v_tz else now() - make_interval(days => p_gun) end;
-  v_onceki timestamptz := v_bas - case when p_gun = 1 then interval '1 day' else make_interval(days => p_gun) end;
+  v_onceki_bas timestamptz := v_bas - v_kayma;
+  v_onceki_son timestamptz := now() - v_kayma;
   v_hafta date := date_trunc('week', now() at time zone v_tz)::date;
+  v_hafta_bas timestamptz := v_hafta::timestamp at time zone v_tz;
   sonuc jsonb;
 begin
   if not public.is_admin() then
@@ -30,13 +34,15 @@ begin
   end if;
 
   with
-  -- Kullanıcının ilk planı (her kullanıcı bir kez); süre sihirbaz başlangıcından (meta.sure_sn).
+  -- Kullanıcının ilk planı (her kullanıcı bir kez); süre sihirbaz ekranından planın yazılmasına (meta.sure_sn).
+  -- meta istemciden gelir: yalnız sayı ve 0–3600 sn okunur (bozuk değer özeti düşürmez, saatlerce açık kalan sihirbaz kırpılır).
   ilk_plan as (
-    select distinct on (o.user_id) o.user_id, o.created_at, nullif(o.meta ->> 'sure_sn', '')::numeric as sure
+    select distinct on (o.user_id) o.user_id, o.created_at,
+      case when jsonb_typeof(o.meta -> 'sure_sn') = 'number' then (o.meta ->> 'sure_sn')::numeric end as sure
     from public.olaylar o where o.tur = 'plan_kuruldu'
     order by o.user_id, o.created_at
   ),
-  donem_ilk as (select sure from ilk_plan where created_at > v_bas and sure is not null),
+  donem_ilk as (select sure from ilk_plan where created_at > v_bas and sure between 0 and 3600),
   kurulan as (select t.id from public.trips t where t.created_at > v_bas),
   paylasilan as (
     select distinct o.hedef_id from public.olaylar o
@@ -52,6 +58,15 @@ begin
     group by o.hedef_id
   ),
   gunler as (select (v_hafta + i)::date as gun from generate_series(0, 6) i),
+  -- Bu haftanın olayları tek taramada günlere göre.
+  hafta_olay as (
+    select (o.created_at at time zone v_tz)::date as gun,
+      count(*) filter (where o.tur = 'plan_kuruldu') as plan,
+      count(*) filter (where o.tur = 'davet_katildi') as katilim
+    from public.olaylar o
+    where o.tur in ('plan_kuruldu', 'davet_katildi') and o.created_at >= v_hafta_bas
+    group by 1
+  ),
   sayac as (
     select
       case
@@ -69,7 +84,7 @@ begin
   ),
   sehir_bolum as (
     select r.sehir_id, count(*) as bolum,
-      count(*) filter (where nullif(trim(regexp_replace(coalesce(r.yazi_md, ''), '^#\s+[^\n]*\n*', '')), '') is null) as bos
+      count(*) filter (where nullif(btrim(regexp_replace(coalesce(r.yazi_md, ''), '^#\s+[^\n]*\n*', ''), E' \t\r\n'), '') is null) as bos
     from gorunen r group by r.sehir_id
   ),
   sehir_mekan as (
@@ -87,20 +102,18 @@ begin
       'olay_var', exists (select 1 from public.olaylar where tur = 'davet_paylasildi'),
       'kurulan', (select count(*) from kurulan),
       'paylasilan', (select count(*) from paylasilan),
-      'katilan', (select count(*) from katilan)),
+      'katilan', (select count(*) from katilan),
+      'katilim_olay_var', exists (select 1 from public.olaylar where tur = 'davet_katildi')),
     'plan', jsonb_build_object(
       'olay_var', exists (select 1 from public.olaylar where tur = 'plan_kuruldu'),
       'sayi', (select count(*) from public.olaylar where tur = 'plan_kuruldu' and created_at > v_bas),
-      'onceki', (select count(*) from public.olaylar where tur = 'plan_kuruldu' and created_at > v_onceki and created_at <= v_bas)),
+      'onceki', (select count(*) from public.olaylar where tur = 'plan_kuruldu' and created_at > v_onceki_bas and created_at <= v_onceki_son)),
     'gezi', jsonb_build_object(
       'olay_var', exists (select 1 from public.olaylar where tur = 'gezi_alindi'),
       'sayi', (select coalesce(sum(sayi), 0) from alinan),
       'en_cok', (select g.baslik from alinan a join public.geziler g on g.id = a.hedef_id order by a.sayi desc, g.baslik limit 1)),
-    'hafta', (select jsonb_agg(jsonb_build_object(
-        'gun', g.gun,
-        'plan', (select count(*) from public.olaylar o where o.tur = 'plan_kuruldu' and (o.created_at at time zone v_tz)::date = g.gun),
-        'katilim', (select count(*) from public.olaylar o where o.tur = 'davet_katildi' and (o.created_at at time zone v_tz)::date = g.gun)
-      ) order by g.gun) from gunler g),
+    'hafta', (select jsonb_agg(jsonb_build_object('gun', g.gun, 'plan', coalesce(h.plan, 0), 'katilim', coalesce(h.katilim, 0)) order by g.gun)
+      from gunler g left join hafta_olay h on h.gun = g.gun),
     'hafta_olay_var', exists (select 1 from public.olaylar where tur in ('plan_kuruldu', 'davet_katildi')),
     'google', jsonb_build_object(
       'mekan', (select coalesce(sum(google), 0) from sayac where kalem = 'mekan'),

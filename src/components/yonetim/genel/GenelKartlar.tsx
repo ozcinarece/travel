@@ -1,8 +1,9 @@
 import { Image } from 'expo-image';
 import { Link } from 'expo-router';
 import type { ReactNode } from 'react';
+import type { StyleProp, ViewStyle } from 'react-native';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import Svg, { Path, Rect, Text as SvgText } from 'react-native-svg';
+import Svg, { Path, Rect } from 'react-native-svg';
 
 import {
   dolarMetni,
@@ -21,9 +22,9 @@ import { Kart, KartEtiketi, Rozet } from '../Ortak';
 import { yRenk } from '../tema';
 
 /** Gösterge kartı (kanvas BO-0 üst sıra): etiket, Archivo 34 değer, 13 px alt satır; veri yoksa "veri bekleniyor". */
-export function GostergeKarti({ baslik, deger, alt, bekleniyor }: { baslik: string; deger: string; alt?: ReactNode; bekleniyor?: boolean }) {
+export function GostergeKarti({ baslik, deger, alt, bekleniyor, style }: { baslik: string; deger: string; alt?: ReactNode; bekleniyor?: boolean; style?: StyleProp<ViewStyle> }) {
   return (
-    <Kart style={s.gosterge}>
+    <Kart style={[s.gosterge, style]}>
       <KartEtiketi>{baslik}</KartEtiketi>
       {bekleniyor ? <Text style={s.bekleniyor}>{ty('genel.veriBekleniyor')}</Text> : <Text style={s.deger}>{deger}</Text>}
       {alt ? <View style={s.altSatir}>{alt}</View> : null}
@@ -58,13 +59,19 @@ export function HaftaGrafigi({ hafta, bekleniyor }: { hafta: Genel['hafta']; bek
         </View>
       </View>
       <View style={s.grafik}>
-        <Svg width="100%" height="100%" viewBox={`0 0 ${G.genislik} ${G.yukseklik}`} accessibilityLabel={ty('genel.hafta.etiket')} role="img">
+        {/* Gün etiketleri SVG dışında: dar ekranda ölçekle küçülmesin (13 px sabit). */}
+        <Svg width="100%" height="100%" viewBox={`0 0 ${G.genislik} ${G.taban + 8}`} accessibilityLabel={ty('genel.hafta.etiket')} role="img">
           <Path d={`M30 ${G.taban} H650`} stroke={yRenk.ayrac} strokeWidth={2} />
           <Path d="M30 160 H650 M30 80 H650" stroke={yRenk.yuzey} strokeWidth={2} />
           {cubuklar.map((c) => (
             <SvgCubuk key={c.gun} c={c} />
           ))}
         </Svg>
+        {cubuklar.map((c) => (
+          <Text key={c.gun} style={[s.gunEtiketi, { left: `${((c.plan.x + G.cubuk + G.ara / 2) / G.genislik) * 100}%` }]}>
+            {c.etiket}
+          </Text>
+        ))}
         {bekleniyor ? (
           <View style={s.grafikBekleniyor}>
             <Text style={s.bekleniyorKucuk}>{ty('genel.veriBekleniyor')}</Text>
@@ -81,9 +88,6 @@ function SvgCubuk({ c }: { c: ReturnType<typeof haftaCubuklari>[number] }) {
     <>
       {c.plan.h ? <Rect x={c.plan.x} y={c.plan.y} width={G.cubuk} height={c.plan.h} rx={8} fill={yRenk.ana} /> : null}
       {c.katilim.h ? <Rect x={c.katilim.x} y={c.katilim.y} width={G.cubuk} height={c.katilim.h} rx={8} fill={yRenk.vurgu} /> : null}
-      <SvgText x={c.plan.x + G.cubuk + G.ara / 2} y={262} textAnchor="middle" fontFamily={yazi.ekstra} fontSize={13} fill={yRenk.soluk}>
-        {c.etiket}
-      </SvgText>
     </>
   );
 }
@@ -144,7 +148,7 @@ function Cubuk({ etiket, deger, oran, renk }: { etiket: string; deger: string; o
 /** KK5 "EN ÇOK ALINAN GEZİLER": ilk 3; 48 px kapak, ad, "128 kez", Mandalina çubuk (en çoka göre). */
 export function EnCokAlinanlar({ geziler }: { geziler: Genel['en_cok_alinan'] }) {
   const enCok = Math.max(1, ...geziler.map((g) => g.sayi));
-  const renkler = ['#c9d2f2', '#ffe2cc', '#dce6ff'];
+  const renkler = yRenk.kapakZeminleri;
   return (
     <Kart style={s.esitKart}>
       <KartEtiketi>{ty('genel.enCok.baslik')}</KartEtiketi>
@@ -180,7 +184,7 @@ export function IcerikSagligi({ sehirler }: { sehirler: IcerikSehri[] }) {
       {sehirler.map((sh) => {
         const d = icerikDurumu(sh);
         return (
-          <View key={sh.id} style={[s.saglik, { backgroundColor: d.tamam ? '#f4f6fa' : yRenk.bekliyorZemin }]}>
+          <View key={sh.id} style={[s.saglik, { backgroundColor: d.tamam ? yRenk.notrZemin : yRenk.bekliyorZemin }]}>
             <View style={[s.nokta, { backgroundColor: d.tamam ? yRenk.basari : yRenk.vurgu }]} />
             <View style={s.saglikMetin}>
               <Text style={s.saglikAd}>{sh.ad}</Text>
@@ -199,20 +203,22 @@ export function IcerikSagligi({ sehirler }: { sehirler: IcerikSehri[] }) {
 }
 
 const s = StyleSheet.create({
-  gosterge: { flex: 1, minWidth: 220, gap: 10 },
+  gosterge: { flex: 1, minWidth: 0, gap: 10 },
   deger: { fontFamily: yazi.baslik, fontSize: 34, lineHeight: 36, letterSpacing: -1.02, color: yRenk.metin },
-  bekleniyor: { fontFamily: yazi.baslik, fontSize: 20, lineHeight: 36, letterSpacing: -0.4, color: yRenk.yerTutucu },
+  bekleniyor: { fontFamily: yazi.baslik, fontSize: 20, lineHeight: 36, letterSpacing: -0.4, color: yRenk.ikincil },
   bekleniyorKucuk: { fontFamily: yazi.ekstra, fontSize: 13, color: yRenk.ikincil },
   altSatir: { flexDirection: 'row', alignItems: 'center', gap: 8, flexWrap: 'wrap' },
   alt: { fontFamily: yazi.normal, fontSize: 13, color: yRenk.ikincil },
   altVurgu: { fontFamily: yazi.ekstra },
-  grafikKart: { flex: 1.6, minWidth: 420, gap: 10 },
+  // Kanvas orta sıra: 700 / 432.
+  grafikKart: { flex: 1.62, minWidth: 420, gap: 10 },
   grafikUst: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   lejant: { flexDirection: 'row', gap: 14 },
   lejantOge: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   lejantKare: { width: 12, height: 12, borderRadius: 4 },
   lejantMetin: { fontFamily: yazi.ekstra, fontSize: 13, color: yRenk.metin },
-  grafik: { width: '100%', aspectRatio: 660 / 272 },
+  grafik: { width: '100%', aspectRatio: 660 / 248, marginBottom: 24 },
+  gunEtiketi: { position: 'absolute', top: '100%', marginTop: 6, width: 40, marginLeft: -20, textAlign: 'center', fontFamily: yazi.ekstra, fontSize: 13, color: yRenk.soluk },
   grafikBekleniyor: { position: 'absolute', left: 0, right: 0, top: 0, bottom: 0, alignItems: 'center', justifyContent: 'center' },
   googleKart: { flex: 1, minWidth: 300, gap: 10 },
   harcama: { flexDirection: 'row', alignItems: 'baseline', gap: 8 },
