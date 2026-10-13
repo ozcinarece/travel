@@ -1,6 +1,8 @@
 name: eas-build
 
 # Elle tetiklenir: Actions → eas-build → Run workflow. Android "preview" (internal dağıtım, APK) varsayılan.
+# nerede=yerel: Android, Expo sunucusu yerine bu iş akışında derlenir (eas build --local); Expo'nun aylık derleme
+# kotasından düşmez, imza anahtarı yine EAS'tan gelir.
 # Gerekli GitHub secret'ları: EXPO_TOKEN (expo.dev → hesap → Access tokens), GOOGLE_MAPS_ANDROID_KEY.
 # Supabase URL + publishable anahtar eas.json'da (herkese açık değerler). Google sunucu anahtarı burada YOK.
 on:
@@ -16,6 +18,11 @@ on:
         default: android
         type: choice
         options: [android, ios]
+      nerede:
+        description: expo (EAS sunucusu, aylık kota) ya da yerel (GitHub Actions'ta eas build --local; yalnız Android APK, kotadan düşmez)
+        default: expo
+        type: choice
+        options: [expo, yerel]
       build_id:
         description: Var olan bir EAS derlemesinin kimliği (verilirse yeni derleme başlatılmaz, yalnızca beklenir ve SHA-1 çıkarılır)
         default: ''
@@ -41,6 +48,24 @@ jobs:
       - name: Ön koşul
         run: |
           if [ -z "$EXPO_TOKEN" ]; then echo "::error::EXPO_TOKEN secret'ı tanımlı değil"; exit 1; fi
+          if [ "${{ inputs.nerede }}" = "yerel" ]; then
+            if [ "${{ inputs.platform }}" != "android" ]; then echo "::error::yerel derleme yalnız Android (iOS macOS ister)"; exit 1; fi
+            if [ "${{ inputs.profile }}" = "production" ]; then echo "::error::yerel derleme APK profilleri içindir (preview, development)"; exit 1; fi
+            if [ -n "${{ inputs.build_id }}" ]; then echo "::error::build_id yalnız Expo sunucusundaki derlemeler için"; exit 1; fi
+          fi
+
+      # Yerel derleme: Gradle + NDK için disk açılır (runner'da kullanılmayan araçlar silinir), JDK 17 (AGP 8.12).
+      # Android SDK runner'da hazır; eksik NDK/build-tools sürümünü Gradle kendisi indirir.
+      - name: Disk alanı (yerel)
+        if: inputs.nerede == 'yerel'
+        run: |
+          sudo rm -rf /usr/share/dotnet /opt/ghc /usr/local/share/boost /usr/share/swift "$AGENT_TOOLSDIRECTORY/CodeQL"
+          df -h /
+      - uses: actions/setup-java@v4
+        if: inputs.nerede == 'yerel'
+        with:
+          distribution: temurin
+          java-version: 17
 
       # İlk çalıştırmada @eceoz1/gezi projesini oluşturur/bağlar. app.config.ts dinamik olduğu için eas init
       # kimliği dosyaya yazamaz ve hata verir; kimlik çıktıdan alınıp bu iş için ortama konur.
@@ -91,7 +116,24 @@ jobs:
 
       - name: EAS derleme
         id: derleme
+        timeout-minutes: 120
+        env:
+          YEREL_GOOGLE_MAPS_ANDROID_KEY: ${{ secrets.GOOGLE_MAPS_ANDROID_KEY }}
+          YEREL_SENTRY_DSN: ${{ vars.SENTRY_DSN || secrets.SENTRY_DSN }}
+          YEREL_APP_DOMAIN: ${{ vars.APP_DOMAIN || 'gezi-web.pages.dev' }}
         run: |
+          if [ "${{ inputs.nerede }}" = "yerel" ]; then
+            # Yerel derlemede app.config bu makinede değerlendirilir: değerler EAS ortamına ek olarak buradan da verilir.
+            [ -n "$YEREL_GOOGLE_MAPS_ANDROID_KEY" ] && export GOOGLE_MAPS_ANDROID_KEY="$YEREL_GOOGLE_MAPS_ANDROID_KEY"
+            [ -n "$YEREL_SENTRY_DSN" ] && export EXPO_PUBLIC_SENTRY_DSN="$YEREL_SENTRY_DSN"
+            export APP_DOMAIN="$YEREL_APP_DOMAIN"
+            npx eas-cli build --platform android --profile "${{ inputs.profile }}" --local \
+              --non-interactive --output "$GITHUB_WORKSPACE/uygulama.apk"
+            echo "id=yerel-${{ github.run_id }}" >> "$GITHUB_OUTPUT"
+            echo "### Derleme (yerel)" >> "$GITHUB_STEP_SUMMARY"
+            echo "- GitHub Actions'ta derlendi (eas build --local, Expo kotasından düşmez); imza EAS'taki anahtarla" >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
           if [ -n "${{ inputs.build_id }}" ]; then
             echo "id=${{ inputs.build_id }}" >> "$GITHUB_OUTPUT"
             echo "Var olan derleme izleniyor: ${{ inputs.build_id }}"
@@ -107,6 +149,7 @@ jobs:
 
       # EAS ücretsiz kuyruğu uzun sürebilir: 3 saate kadar beklenir (iş zaman aşımı 200 dk).
       - name: Derlemeyi bekle
+        if: inputs.nerede != 'yerel'
         timeout-minutes: 200
         run: |
           for i in $(seq 1 360); do
@@ -126,9 +169,12 @@ jobs:
       - name: SHA-1 (Android)
         if: inputs.platform == 'android'
         run: |
-          URL=$(node -e "const d=require('./durum.json'); console.log(d.artifacts.buildUrl||d.artifacts.applicationArchiveUrl)")
-          echo "APK indirme: $URL"
-          curl -sSL "$URL" -o uygulama.apk
+          if [ "${{ inputs.nerede }}" != "yerel" ]; then
+            URL=$(node -e "const d=require('./durum.json'); console.log(d.artifacts.buildUrl||d.artifacts.applicationArchiveUrl)")
+            echo "APK indirme: $URL"
+            curl -sSL "$URL" -o uygulama.apk
+            echo "- APK indirme: $URL" >> "$GITHUB_STEP_SUMMARY"
+          fi
           APKSIGNER=$(ls -d "${ANDROID_HOME:-$ANDROID_SDK_ROOT}"/build-tools/*/apksigner 2>/dev/null | sort -V | tail -1)
           if [ -z "$APKSIGNER" ]; then echo "::error::apksigner bulunamadı"; exit 1; fi
           "$APKSIGNER" verify --print-certs uygulama.apk | tee sertifika.txt
@@ -137,7 +183,6 @@ jobs:
           # App Link doğrulaması (web-yayin assetlinks.json) için SHA-256.
           SHA256=$(grep -m1 -i 'SHA-256 digest' sertifika.txt | sed 's/.*: *//' | tr -d '[:space:]' | sed 's/../&:/g; s/:$//' | tr 'a-f' 'A-F')
           echo "Imza SHA-256: $SHA256"
-          echo "- APK indirme: $URL" >> "$GITHUB_STEP_SUMMARY"
           echo "- İmza SHA-1: \`$SHA1\` (paket: \`app.gezi.dev\`)" >> "$GITHUB_STEP_SUMMARY"
           echo "- İmza SHA-256: \`$SHA256\` (web-yayin assetlinks.json varsayılanıyla aynı olmalı)" >> "$GITHUB_STEP_SUMMARY"
 
@@ -151,6 +196,6 @@ jobs:
           cp uygulama.apk "gezi-${{ inputs.profile }}.apk"
           gh release create "$ETIKET" "gezi-${{ inputs.profile }}.apk" \
             --title "Android ${{ inputs.profile }} $(date -u +%Y-%m-%d)" \
-            --notes "EAS derlemesi ${{ steps.derleme.outputs.id }} · paket app.gezi.dev · imza SHA-1 $(grep -m1 -i 'SHA-1 digest' sertifika.txt | sed 's/.*: *//')" \
+            --notes "$([ "${{ inputs.nerede }}" = yerel ] && echo "GitHub Actions yerel derlemesi (run ${{ github.run_id }})" || echo "EAS derlemesi ${{ steps.derleme.outputs.id }}") · paket app.gezi.dev · imza SHA-1 $(grep -m1 -i 'SHA-1 digest' sertifika.txt | sed 's/.*: *//')" \
             --prerelease 2>/dev/null || gh release upload "$ETIKET" "gezi-${{ inputs.profile }}.apk" --clobber
           echo "- Release: https://github.com/${{ github.repository }}/releases/tag/$ETIKET" >> "$GITHUB_STEP_SUMMARY"
