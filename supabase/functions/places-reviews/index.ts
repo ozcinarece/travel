@@ -1,7 +1,9 @@
 // places-reviews — #80 KK8: mekan panelinin Yorumlar sekmesi. Yalnız sekmeye dokununca çağrılır; Google en fazla 5 yorum
 // verir (ek sayfa yok). Cevap bu izolatta 24 saat önbelleklenir (bellek); yorumlar DB'ye yazılmaz (PRD §7).
 // #142 KK3: Google'a gitmeden önce günlük sınır (yorum_kotasi: api_sayac × panel ayarı `yorum_gunluk_sinir`); doluysa
-// `{ sinir: true }` döner, uygulama sekmede "Google'da aç" gösterir. Kota cevabı izolatta 60 sn tutulur.
+// boş bir yorum özeti + `sinir: true` döner (eski uygulama sürümleri de çökmeden boş sekme gösterir; yenisi "Google'da aç").
+// Kota cevabı izolatta 60 sn tutulur. Bilinçli olarak gevşek (fail-open): kota okunamazsa ya da ayar tamsayı değilse istek
+// engellenmez; birden çok izolat aynı anda çalışırsa sınır birkaç istek aşılabilir.
 import { GoogleHatasi, yorumDetay, type YorumOzeti } from '../_shared/google.ts';
 import { govde, hata, json, onKontrol } from '../_shared/http.ts';
 import { sayacli } from '../_shared/sayac.ts';
@@ -50,7 +52,7 @@ Deno.serve(sayacli('places-reviews', async (istek) => {
   const simdi = Date.now();
   const eski = onbellek.get(g.id);
   if (eski && simdi - eski.zaman < TTL_MS) return json(eski.deger);
-  if (!(await kotaVar())) return json({ sinir: true });
+  if (!(await kotaVar())) return json({ place_id: g.id, puan: null, puan_sayisi: null, yorumlar: [], sinir: true });
   try {
     kotaSonrasi += 1;
     const ozet = await yorumDetay(g.id);
