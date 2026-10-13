@@ -10,7 +10,7 @@ import { t } from '@/i18n';
 import { kategoriEtiketi, sureMetni } from '@/lib/kategori';
 import { kategoriPini } from '@/lib/pinIkonu';
 import type { GeziDetay, GeziDuragi } from '@/lib/tipler';
-import { gunRengi, minDokunma, renk, yazi } from '@/theme';
+import { gunRengi, gunUstuMetin, minDokunma, renk, yazi } from '@/theme';
 
 import { MiniHarita } from './MiniHarita';
 
@@ -39,7 +39,7 @@ export function GeziPlani({ gezi, canli, onDurakEkle, listede, mesgulId }: Props
           return (
             <View key={d.id} style={s.satir}>
               <View style={[s.numara, { backgroundColor: rengi }]}>
-                <Text style={s.numaraMetin}>{i + 1}</Text>
+                <Text style={[s.numaraMetin, { color: gunUstuMetin(rengi) }]}>{i + 1}</Text>
               </View>
               <View style={[s.foto, { backgroundColor: kategoriPini(d.kategori).kategoriRenk }]}>{c?.foto_uri ? <Image source={{ uri: c.foto_uri }} style={StyleSheet.absoluteFill} contentFit="cover" transition={120} /> : null}</View>
               <View style={{ flex: 1, gap: 2 }}>
@@ -50,7 +50,7 @@ export function GeziPlani({ gezi, canli, onDurakEkle, listede, mesgulId }: Props
                   {kategoriEtiketi(d.kategori)} · {sureMetni(d.sure_dk)}
                 </Text>
               </View>
-              <EkleDugmesi listede={icinde} mesgul={mesgulId === d.id} pasif={icinde} onPress={() => onDurakEkle(d)} boyut={34} />
+              <EkleDugmesi listede={icinde} mesgul={mesgulId === d.id} onPress={() => onDurakEkle(d)} />
             </View>
           );
         })}

@@ -152,7 +152,7 @@ const s = StyleSheet.create({
   hucreSecili: { backgroundColor: renk.metin, borderRadius: 12 },
   gunSayi: { fontFamily: yazi.yari, fontSize: 14, color: renk.metin },
   gunSayiSecili: { color: renk.zemin, fontFamily: yazi.kalin },
-  bugun: { color: renk.vurgu, fontFamily: yazi.ekstra },
+  bugun: { color: renk.ana, fontFamily: yazi.ekstra },
   gecmisGun: { color: renk.soluk },
   dugmeler: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingTop: 6 },
   temizle: { fontFamily: yazi.kalin, fontSize: 14, color: renk.ikincil, paddingVertical: 12 },

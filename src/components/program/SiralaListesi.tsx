@@ -4,7 +4,7 @@ import { Animated, PanResponder, Pressable, ScrollView, StyleSheet, Text, View, 
 import { useSayfaKaydirma } from '@/components/harita/AltSayfa';
 import { Ikon, type IkonAdi } from '@/components/ui/Ikon';
 import { t } from '@/i18n';
-import { renk, yazi } from '@/theme';
+import { gunUstuMetin, renk, yazi } from '@/theme';
 
 /** #53 §5: yarı açık paneldeki satır (durak). */
 export type SiralaSatiri = {
@@ -271,7 +271,7 @@ function SiraSatiri({
     <View style={s.satir}>
       <Pressable accessibilityRole="button" onPress={onBas} onLongPress={onUzunBas} delayLongPress={350} style={s.satirIc}>
         <View style={[s.numara, { backgroundColor: numaraRengi }, satir.tamam && { backgroundColor: renk.basari }, satir.atlandi && { backgroundColor: renk.ayrac }]}>
-          {satir.tamam ? <Ikon ad="tik" boyut={14} renk={renk.zemin} kalinlik={2.6} /> : <Text style={s.numaraMetin}>{satir.numara ?? '–'}</Text>}
+          {satir.tamam ? <Ikon ad="tik" boyut={14} renk={renk.zemin} kalinlik={2.6} /> : <Text style={[s.numaraMetin, { color: satir.atlandi ? renk.ikincil : gunUstuMetin(numaraRengi) }]}>{satir.numara ?? '–'}</Text>}
         </View>
         <Ikon ad={satir.ikon} boyut={18} renk={satir.ikonRenk} kalinlik={2.1} />
         {/* #55 §C8–9: ad en fazla 2 satır (kesilmez), altında saat aralığı + süre. */}

@@ -119,7 +119,7 @@ for yy in range(432):
             px[xx, yy] = (255, 255, 255, a_)
 mono.save(KOK / 'android-icon-monochrome.png')
 print('android-icon-monochrome.png', mono.size)
-# Splash: saydam zeminde beyaz-Mandalina logo (expo-splash-screen zemin rengi Gece), 240 × 144.
-logo_merkezli(240, 144, SEFFAF, 0.9, BEYAZ, yol=KOK / 'splash-icon.png')
+# Splash: saydam zeminde beyaz-Mandalina logo (expo-splash-screen zemin rengi Gece), 480 × 288 (120 px genişlikte 4x).
+logo_merkezli(480, 288, SEFFAF, 0.9, BEYAZ, yol=KOK / 'splash-icon.png')
 # Favicon 48: Gece zemin, kesiksiz çizgi (24 px altı kuralı; tarayıcı 16–32 px gösterir).
 logo_merkezli(48, 48, GECE, 0.78, BEYAZ, kesik=False, yol=KOK / 'favicon.png')

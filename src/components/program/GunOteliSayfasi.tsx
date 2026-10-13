@@ -295,7 +295,7 @@ const s = StyleSheet.create({
   arama: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 8, height: 44, paddingHorizontal: 12, borderRadius: 999, backgroundColor: renk.yuzey },
   buyutec: { fontSize: 16, color: renk.ikincil },
   girdi: { flex: 1, fontFamily: yazi.yari, fontSize: 14, color: renk.metin, paddingVertical: 0 },
-  linkDugme: { fontFamily: yazi.kalin, fontSize: 12, color: renk.vurgu, paddingVertical: 8 },
+  linkDugme: { fontFamily: yazi.kalin, fontSize: 12, color: renk.ana, paddingVertical: 8 },
   haritadan: { flexDirection: 'row', alignItems: 'center', gap: 6, height: 44, paddingHorizontal: 14, borderRadius: 999, borderWidth: 1, borderColor: renk.ayrac },
   haritadanMetin: { fontFamily: yazi.kalin, fontSize: 13, color: renk.metin },
   oneriler: { borderRadius: 14, borderWidth: 1, borderColor: renk.ayrac, paddingHorizontal: 14, paddingVertical: 4 },

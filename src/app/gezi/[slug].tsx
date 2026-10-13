@@ -17,7 +17,7 @@ import { useGeziAktar } from '@/features/icerik/aktarSorgu';
 import { useIcerikCanli } from '@/features/icerik/fotolar';
 import { cozumSebebi, olayYaz, useGezi } from '@/features/icerik/sorgular';
 import { hedefSeyahatler, useYereEkle } from '@/features/icerik/yerEkle';
-import { useMekanlar } from '@/features/mekanlar/sorgular';
+import { useMekanlar, useMekanSil } from '@/features/mekanlar/sorgular';
 import { useSeyahatler } from '@/features/seyahatler/sorgular';
 import { seyahatAdi } from '@/features/sihirbaz/sihirbaz';
 import { t } from '@/i18n';
@@ -49,6 +49,7 @@ export default function GeziEkrani() {
   const canli = useIcerikCanli(duraklar, () => gezi.data?.sehirler?.ad ?? '', !!gezi.data);
   const aktar = useGeziAktar();
   const ekle = useYereEkle();
+  const sil = useMekanSil(hedef?.id ?? '');
   const [secimDuragi, setSecimDuragi] = useState<GeziDuragi | null>(null);
   const [mesgulId, setMesgulId] = useState<string | null>(null);
 
@@ -102,6 +103,14 @@ export default function GeziEkrani() {
     }
   };
   const durakArti = (d: GeziDuragi) => {
+    // ✓'ye dokununca listeden çıkar (#136 Temel: tek EkleDugmesi davranışı).
+    const pid = canli.data?.get(d.id)?.place_id;
+    const m = pid ? hedefMekanlar.data?.find((x) => x.place_id === pid) : undefined;
+    if (m) {
+      setMesgulId(d.id);
+      sil.mutateAsync(m.id).finally(() => setMesgulId(null));
+      return;
+    }
     if (hedefler.length === 0) return router.navigate('/(tabs)/yeni');
     if (hedefler.length === 1) return durakEkle(d, hedefler[0].id);
     setSecimDuragi(d);

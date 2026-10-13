@@ -9,7 +9,7 @@ import { Rozet } from '@/components/ui/Rozet';
 import { davetSeyahatAdi, yonelmeEki } from '@/features/davet/katilim';
 import { t } from '@/i18n';
 import type { Uye } from '@/lib/tipler';
-import { olcek, renk, yazi } from '@/theme';
+import { olcek, renk, yazi, yuzRenkleri } from '@/theme';
 
 type Props = {
   acik: boolean;
@@ -21,7 +21,6 @@ type Props = {
   onMekanEkle: () => void;
 };
 
-const YUZ = [renk.vurgu, renk.ana, renk.anaAcik];
 
 export function KatilimSayfasi({ acik, seyahat, uyeler, gunSayisi, mekanSayisi, onProgram, onMekanEkle }: Props) {
   const davetEden = uyeler.find((u) => u.role === 'owner')?.display_name ?? t('davet.biri');
@@ -33,7 +32,7 @@ export function KatilimSayfasi({ acik, seyahat, uyeler, gunSayisi, mekanSayisi, 
         <View style={s.yuzler}>
           {gorunen.map((u, i) => (
             <View key={u.user_id} style={[s.yuzCerceve, i > 0 && { marginLeft: -10 }]}>
-              <Avatar ad={u.display_name} url={u.photo_url} boyut={44} arkaPlan={YUZ[i % YUZ.length]} />
+              <Avatar ad={u.display_name} url={u.photo_url} boyut={44} arkaPlan={yuzRenkleri[i % yuzRenkleri.length]} />
             </View>
           ))}
           {kalan > 0 ? (

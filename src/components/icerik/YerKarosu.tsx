@@ -1,5 +1,5 @@
 // #97 A KK5–7 (kanvas Home13): gezilecek yer karosu — foto mozaiği (150/190 px dönüşümlü), ad + şehir + ★ puan · yorum,
-// sağ üstte beyaz "+" (listede ise ✓). Foto yoksa kategori renginde düz zemin.
+// sağ üstte EkleDugmesi (38 px; listede ise ✓, dokununca çıkarır). Foto yoksa kategori renginde düz zemin.
 import { Image } from 'expo-image';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
@@ -19,10 +19,12 @@ type Props = {
   listede: boolean;
   mesgul?: boolean;
   onEkle: () => void;
+  /** ✓'ye dokununca listeden çıkar (#136 Temel: tek EkleDugmesi davranışı). */
+  onCikar?: () => void;
   onAc: () => void;
 };
 
-export function YerKarosu({ ad, sehir, kategori, fotoUri, puan, yorum, yukseklik, listede, mesgul, onEkle, onAc }: Props) {
+export function YerKarosu({ ad, sehir, kategori, fotoUri, puan, yorum, yukseklik, listede, mesgul, onEkle, onCikar, onAc }: Props) {
   const p = puanMetni(puan);
   const y = yorumKisa(yorum);
   return (
@@ -30,7 +32,7 @@ export function YerKarosu({ ad, sehir, kategori, fotoUri, puan, yorum, yukseklik
       {fotoUri ? <Image source={{ uri: fotoUri }} style={StyleSheet.absoluteFill} contentFit="cover" transition={150} /> : null}
       <View style={s.golgelik} />
       <View style={s.arti}>
-        <EkleDugmesi listede={listede} mesgul={mesgul} pasif={listede} onPress={onEkle} boyut={32} />
+        <EkleDugmesi listede={listede} mesgul={mesgul} pasif={listede && !onCikar} onPress={listede ? (onCikar ?? onEkle) : onEkle} />
       </View>
       <View style={s.metinler}>
         <Text style={s.ad} numberOfLines={2}>

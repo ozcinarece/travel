@@ -30,6 +30,9 @@ export const renk = {
 } as const;
 
 // Gün renkleri (kanvas Temel · harita dili): 1 mavi · 2 sarı (üstünde Lacivert yazı) · 3 yeşil · 4 mor; 5–6 ek, 7. günden sonra döner.
+/** Kişi yüzleri (avatar zemini) sırası: Mandalina, Gece, Gece açık. */
+export const yuzRenkleri = [renk.vurgu, renk.ana, renk.anaAcik] as const;
+
 export const gunRenkleri = ['#2c64f5', '#f5a524', '#16a06e', '#7b4fe0', '#e0457b', '#0ea5e9'] as const;
 
 export function gunRengi(gunIndex: number): string {

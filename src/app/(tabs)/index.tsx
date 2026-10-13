@@ -12,7 +12,7 @@ import { Ikon } from '@/components/ui/Ikon';
 import { useIcerikCanli } from '@/features/icerik/fotolar';
 import { cozumSebebi, useGeziler, useTumYerler } from '@/features/icerik/sorgular';
 import { hedefSeyahatler, useYereEkle } from '@/features/icerik/yerEkle';
-import { useMekanlar } from '@/features/mekanlar/sorgular';
+import { useMekanlar, useMekanSil } from '@/features/mekanlar/sorgular';
 import { useProfil } from '@/features/profil/sorgular';
 import { useSeyahatler } from '@/features/seyahatler/sorgular';
 import { gunFarki, seyahatAdi } from '@/features/sihirbaz/sihirbaz';
@@ -64,6 +64,7 @@ export default function AnaSayfa() {
   const yerListesi = useMemo(() => (yerler.data ?? []).slice(0, 8), [yerler.data]);
   const canli = useIcerikCanli(yerListesi, (y) => (y as (typeof yerListesi)[number]).sehirler?.ad ?? '');
   const ekle = useYereEkle();
+  const sil = useMekanSil(yaklasan?.id ?? '');
   const [secimYeri, setSecimYeri] = useState<(typeof yerListesi)[number] | null>(null);
   const [bildirim, setBildirim] = useState<string | null>(null);
   const [mesgulId, setMesgulId] = useState<string | null>(null);
@@ -96,6 +97,18 @@ export default function AnaSayfa() {
     } catch (e) {
       setBildirim(t('anasayfa.ekleHataSebep', { sebep: e instanceof Error ? e.message : String(e) }));
       setTimeout(() => setBildirim(null), 3500);
+    } finally {
+      setMesgulId(null);
+    }
+  };
+  // ✓'ye dokununca yaklaşan seyahatin listesinden çıkar.
+  const cikar = async (y: (typeof yerListesi)[number]) => {
+    const pid = canli.data?.get(y.id)?.place_id;
+    const m = pid ? hedefMekanlar.data?.find((x) => x.place_id === pid) : undefined;
+    if (!m) return;
+    setMesgulId(y.id);
+    try {
+      await sil.mutateAsync(m.id);
     } finally {
       setMesgulId(null);
     }
@@ -191,6 +204,7 @@ export default function AnaSayfa() {
                         listede={!!c?.place_id && hedefIdleri.has(c.place_id)}
                         mesgul={mesgulId === y.id}
                         onEkle={() => artiBas(y)}
+                        onCikar={() => cikar(y)}
                         onAc={() => yerAc(y)}
                       />
                     );

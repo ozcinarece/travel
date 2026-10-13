@@ -18,13 +18,12 @@ import { t } from '@/i18n';
 import { onayIste } from '@/lib/onay';
 import { useOturum } from '@/lib/oturum';
 import type { Mekan, Seyahat, Uye } from '@/lib/tipler';
-import { kose, minDokunma, olcek, renk, yazi } from '@/theme';
+import { kose, minDokunma, olcek, renk, yazi, yuzRenkleri } from '@/theme';
 
 import { ProfilOnayi } from './ProfilOnayi';
 
 type Props = { acik: boolean; onKapat: () => void; seyahat: Seyahat; uyeler: Uye[]; mekanlar: Mekan[] };
 
-const YUZ_RENKLERI = [renk.vurgu, renk.ana, renk.anaAcik];
 
 export function GrupPenceresi({ acik, onKapat, seyahat, uyeler, mekanlar }: Props) {
   const { session } = useOturum();
@@ -80,7 +79,7 @@ export function GrupPenceresi({ acik, onKapat, seyahat, uyeler, mekanlar }: Prop
           const parcalar = [u.role === 'owner' ? t('davet.grup.kurdu') : null, n > 0 ? t('davet.grup.mekanEkledi', { n }) : null].filter(Boolean);
           return (
             <View key={u.user_id} style={s.uye}>
-              <Avatar ad={u.display_name} url={u.photo_url} boyut={44} arkaPlan={YUZ_RENKLERI[i % YUZ_RENKLERI.length]} />
+              <Avatar ad={u.display_name} url={u.photo_url} boyut={44} arkaPlan={yuzRenkleri[i % yuzRenkleri.length]} />
               <View style={{ flex: 1, gap: 1 }}>
                 <Text style={s.uyeAd}>
                   {u.display_name} {benim(u.user_id) ? <Text style={s.uyeSen}>{t('davet.grup.sen')}</Text> : null}

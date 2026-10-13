@@ -37,7 +37,7 @@ import { izBirak } from '@/lib/hataRaporu';
 import { kategoriPini } from '@/lib/pinIkonu';
 import { varsayilanDakika } from '@/lib/kategori';
 import type { Mekan, Seyahat } from '@/lib/tipler';
-import { bosluk, renk, yazi } from '@/theme';
+import { bosluk, renk, yazi, yuzRenkleri } from '@/theme';
 
 // PRD 3.4 Keşfet: HaritaEkrani kabuğu (#17) — üstte şehir hapı + üyeler, arama, çipler; altta öneri kartları; en altta liste çubuğu.
 export default function KesfetEkrani() {
@@ -393,7 +393,7 @@ function Kesfet({ seyahat, konaklamalar, ilkMekan }: { seyahat: Seyahat; konakla
         <Pressable accessibilityRole="button" accessibilityLabel={t('seyahat.grup.baslik')} hitSlop={8} onPress={() => setGrupAcik(true)} style={s.avatarlar}>
           {(uyeler.data ?? []).slice(0, 3).map((u, i) => (
             <View key={u.user_id} style={[s.avatarCerceve, i > 0 && { marginLeft: -8 }]}>
-              <Avatar ad={u.display_name} boyut={24} arkaPlan={['#0f0f0f', '#ff5a1f', '#4c6ef5'][i % 3]} />
+              <Avatar ad={u.display_name} url={u.photo_url} boyut={24} arkaPlan={yuzRenkleri[i % yuzRenkleri.length]} />
             </View>
           ))}
         </Pressable>

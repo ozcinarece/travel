@@ -377,7 +377,7 @@ const s = StyleSheet.create({
   atif: { position: 'absolute', bottom: 2, left: 4, fontFamily: yazi.kalin, fontSize: 8, color: renk.zemin },
   bittiDugme: { height: 34, paddingHorizontal: 14, borderRadius: 999, backgroundColor: renk.vurgu, justifyContent: 'center' },
   bittiMetin: { fontFamily: yazi.kalin, fontSize: 12, color: renk.zemin },
-  kapaliMetin: { fontFamily: yazi.yari, fontSize: 11, lineHeight: 14, color: renk.vurgu },
+  kapaliMetin: { fontFamily: yazi.yari, fontSize: 11, lineHeight: 14, color: renk.ana },
   kapaliBaglanti: { fontFamily: yazi.kalin, textDecorationLine: 'underline' },
   araclar: { flexDirection: 'row', gap: 8, paddingBottom: 12, flexWrap: 'wrap' },
   arac: { height: 36, paddingHorizontal: 14, borderRadius: 999, backgroundColor: renk.yuzey, flexDirection: 'row', alignItems: 'center', gap: 6 },

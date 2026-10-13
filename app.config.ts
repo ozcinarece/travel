@@ -22,7 +22,6 @@ const config: ExpoConfig = {
   scheme: 'gezi',
   userInterfaceStyle: 'light',
   ios: {
-    icon: './assets/expo.icon',
     bundleIdentifier: process.env.IOS_BUNDLE_ID ?? 'app.gezi.dev',
     usesAppleSignIn: appleAcik,
     associatedDomains: appDomain ? [`applinks:${appDomain}`] : [],
