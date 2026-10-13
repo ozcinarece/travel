@@ -1589,4 +1589,87 @@ end $$;
 select public.icerik_gezi_taslak_sil('hat-rehber');
 delete from public.yerler where place_id in ('ChIJ-yeni-yer-001', 'ChIJ-yayin-yer-1', 'ChIJ-taslak-yer1', 'ChIJ-dolu-yer-01');
 
+-- #174 KK8 Seyahat silme: yalnız sahip siler (trips_delete = is_owner). Üye ve dışarıdan birinin silmesi RLS ile süzülür
+-- (hata yok, 0 satır); sahip silince bağlı satırlar (günler, mekanlar, duraklar, üyeler, değişiklikler, oylar, puanlar) kalmaz.
+reset role;
+\set SS '''aaaaaaaa-1740-0000-0000-000000000001'''
+\set SU '''aaaaaaaa-1740-0000-0000-000000000002'''
+\set SN '''aaaaaaaa-1740-0000-0000-000000000003'''
+insert into auth.users (id, is_anonymous) values (:SS, false), (:SU, false), (:SN, false);
+insert into public.profiles (id, name, username) values (:SS, 'Sahip', 'sahip174'), (:SU, 'Uye', 'uye174'), (:SN, 'Disari', 'disari174');
+set role authenticated;
+select pg_temp.as_user(:SS);
+insert into public.trips (owner_id, city_place_id, city_label, country_code, lat, lng, tz, start_date, end_date)
+  values (:SS, 'ChIJ-silinecek', 'Silinecek', 'TR', 39.77, 30.52, 'Europe/Istanbul', '2026-11-02', '2026-11-03');
+reset role;
+select id as sil_trip, invite_token as sil_token from public.trips where owner_id = :SS \gset
+select set_config('test.sil_trip', :'sil_trip', false);
+select set_config('test.sil_token', :'sil_token', false);
+set role authenticated;
+select pg_temp.as_user(:SU);
+select public.join_trip(:'sil_token', 'Uye');
+select pg_temp.as_user(:SS);
+insert into public.places (trip_id, place_id, primary_type, lat, lng, default_minutes, added_by)
+  values (:'sil_trip', 'ChIJ-silinecek-yer1', 'museum', 39.77, 30.52, 60, :SS);
+insert into public.stops (trip_id, day_id, place_ref, order_key, minutes)
+  select d.trip_id, d.id, p.id, 'a0', 60 from public.days d join public.places p on p.trip_id = d.trip_id
+  where d.trip_id = :'sil_trip' and d.index = 1;
+select pg_temp.as_user(:SU);
+insert into public.oylar (seyahat_id, mekan) select trip_id, id from public.places where trip_id = :'sil_trip';
+insert into public.stop_ratings (trip_id, place_ref, stars) select trip_id, id, 5 from public.places where trip_id = :'sil_trip';
+do $$
+declare n integer;
+begin
+  delete from public.trips where id = current_setting('test.sil_trip')::uuid;
+  get diagnostics n = row_count;
+  assert n = 0, 'üye seyahati silemez';
+  assert exists (select 1 from public.trips where id = current_setting('test.sil_trip')::uuid), 'üye için seyahat yerinde';
+end $$;
+select pg_temp.as_user(:SN);
+do $$
+declare n integer;
+begin
+  delete from public.trips where id = current_setting('test.sil_trip')::uuid;
+  get diagnostics n = row_count;
+  assert n = 0, 'dışarıdan biri seyahati silemez';
+end $$;
+reset role;
+do $$
+declare t uuid := current_setting('test.sil_trip')::uuid;
+begin
+  assert exists (select 1 from public.trips where id = t), 'yetkisiz silmelerden sonra seyahat duruyor';
+  assert (select count(*) from public.members where trip_id = t) = 2, 'sahip + üye';
+  assert exists (select 1 from public.days where trip_id = t) and exists (select 1 from public.stops where trip_id = t)
+    and exists (select 1 from public.changes where trip_id = t) and exists (select 1 from public.oylar where seyahat_id = t)
+    and exists (select 1 from public.stop_ratings where trip_id = t), 'bağlı satırlar silmeden önce var';
+end $$;
+set role authenticated;
+select pg_temp.as_user(:SS);
+do $$
+declare n integer;
+begin
+  delete from public.trips where id = current_setting('test.sil_trip')::uuid;
+  get diagnostics n = row_count;
+  assert n = 1, 'sahip seyahati siler';
+end $$;
+reset role;
+do $$
+declare t uuid := current_setting('test.sil_trip')::uuid;
+begin
+  assert not exists (select 1 from public.trips where id = t), 'seyahat silindi';
+  assert not exists (select 1 from public.days where trip_id = t), 'günler kalmaz';
+  assert not exists (select 1 from public.places where trip_id = t), 'mekanlar kalmaz';
+  assert not exists (select 1 from public.stops where trip_id = t), 'duraklar kalmaz';
+  assert not exists (select 1 from public.members where trip_id = t), 'üyelikler kalmaz';
+  assert not exists (select 1 from public.changes where trip_id = t), 'değişiklikler kalmaz';
+  assert not exists (select 1 from public.oylar where seyahat_id = t), 'oylar kalmaz';
+  assert not exists (select 1 from public.stop_ratings where trip_id = t), 'puanlar kalmaz';
+  assert not exists (select 1 from public.stays where trip_id = t), 'konaklamalar kalmaz';
+  assert exists (select 1 from auth.users where id = 'aaaaaaaa-1740-0000-0000-000000000002'), 'üyenin hesabı durur';
+end $$;
+-- KK6: silinmiş seyahatin davet linki özet döndürmez (uygulama "Bu seyahat artık yok" gösterir), katılım P0002.
+set role anon;
+do $$ begin assert public.davet_ozeti(current_setting('test.sil_token', true)) is null, 'silinmiş seyahatin daveti özetsiz'; end $$;
+reset role;
+
 \echo 'rls_test: TÜM TESTLER GEÇTİ'

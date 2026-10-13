@@ -10,7 +10,8 @@ import { ayYil, tarihAraligi } from '@/lib/takvim';
 import type { SeyahatOzet } from '@/lib/tipler';
 import { renk, yazi } from '@/theme';
 
-type Ortak = { seyahat: SeyahatOzet; durum: SeyahatDurumu | undefined; onPress: () => void };
+/** #174 KK1: `onUzunBas` — kartın eylem menüsü (sahip: Seyahati sil · üye: Seyahatten ayrıl). */
+type Ortak = { seyahat: SeyahatOzet; durum: SeyahatDurumu | undefined; onPress: () => void; onUzunBas?: () => void };
 
 const KARO_ZEMINLERI = ['#ffe2cc', '#dce6ff', '#d7f0e6', '#e6e0fa', '#ffd9bf'];
 
@@ -31,10 +32,10 @@ function Cipler({ cipler, koyu, onCip }: { cipler: DurumCipi[]; koyu?: boolean; 
 }
 
 /** Yaklaşan (ya da şu an süren) ilk tarihli seyahat. */
-export function KapakKarti({ seyahat, durum, onPress, onCip, siradaki }: Ortak & { onCip: (c: DurumCipi) => void; siradaki?: string | null }) {
+export function KapakKarti({ seyahat, durum, onPress, onUzunBas, onCip, siradaki }: Ortak & { onCip: (c: DurumCipi) => void; siradaki?: string | null }) {
   const sayim = geriSayim(seyahat);
   return (
-    <Pressable accessibilityRole="button" onPress={onPress} style={({ pressed }) => [s.kapak, pressed && { opacity: 0.92 }]}>
+    <Pressable accessibilityRole="button" onPress={onPress} onLongPress={onUzunBas} style={({ pressed }) => [s.kapak, pressed && { opacity: 0.92 }]}>
       <Svg width={180} height={120} viewBox="0 0 180 120" style={s.kapakSusu} pointerEvents="none">
         <Path d="M10 100 Q90 10 170 70" stroke={renk.vurgu} strokeOpacity={0.35} strokeWidth={6} strokeDasharray="10 8" fill="none" />
       </Svg>
@@ -57,10 +58,10 @@ export function KapakKarti({ seyahat, durum, onPress, onCip, siradaki }: Ortak &
   );
 }
 
-export function SeyahatSatiri({ seyahat, durum, onPress, onCip, sira }: Ortak & { onCip: (c: DurumCipi) => void; sira: number }) {
+export function SeyahatSatiri({ seyahat, durum, onPress, onUzunBas, onCip, sira }: Ortak & { onCip: (c: DurumCipi) => void; sira: number }) {
   const taslak = !seyahat.start_date;
   return (
-    <Pressable accessibilityRole="button" onPress={onPress} style={({ pressed }) => [s.satir, pressed && { opacity: 0.85 }]}>
+    <Pressable accessibilityRole="button" onPress={onPress} onLongPress={onUzunBas} style={({ pressed }) => [s.satir, pressed && { opacity: 0.85 }]}>
       <View style={s.satirUst}>
         <View style={[s.karo, { backgroundColor: KARO_ZEMINLERI[sira % KARO_ZEMINLERI.length] }]}>
           <Text style={s.harf}>{seyahat.city_label.trim().charAt(0).toLocaleUpperCase('tr')}</Text>
@@ -80,11 +81,11 @@ export function SeyahatSatiri({ seyahat, durum, onPress, onCip, sira }: Ortak & 
   );
 }
 
-export function GecmisSatiri({ seyahat, durum, onPress, onTekrar, sira }: Ortak & { onTekrar: () => void; sira: number }) {
+export function GecmisSatiri({ seyahat, durum, onPress, onUzunBas, onTekrar, sira }: Ortak & { onTekrar: () => void; sira: number }) {
   const parcalar = [seyahat.end_date ? ayYil(seyahat.end_date) : t('seyahatler.tarihBelliDegil'), t('seyahatler.gezildi', { n: durum?.gezilen ?? 0 })];
   if (seyahat.members.length > 1) parcalar.push(kisiMetni(seyahat.members.length));
   return (
-    <Pressable accessibilityRole="button" onPress={onPress} style={({ pressed }) => [s.gecmis, pressed && { opacity: 0.85 }]}>
+    <Pressable accessibilityRole="button" onPress={onPress} onLongPress={onUzunBas} style={({ pressed }) => [s.gecmis, pressed && { opacity: 0.85 }]}>
       <View style={[s.karo, { backgroundColor: KARO_ZEMINLERI[(sira + 1) % KARO_ZEMINLERI.length] }]}>
         <Text style={s.harf}>{seyahat.city_label.trim().charAt(0).toLocaleUpperCase('tr')}</Text>
       </View>

@@ -1,5 +1,6 @@
 // #137 KK6 (kanvas 16 · Grup): üstteki yüzlere dokununca açılan pencere — katılanlar (+ kaç mekan ekledi, #140 gezi
-// sırasında "vardı: {mekan} · 12 dk önce"), "Davet linkini gönder" (profil onayıyla), Son değişiklikler, "Seyahatten ayrıl".
+// sırasında "vardı: {mekan} · 12 dk önce"), "Davet linkini gönder" (profil onayıyla), Son değişiklikler, "Seyahatten ayrıl"
+// (üye) ya da #174 "Seyahati sil" (sahip; aynı kırmızı metin düğmesi).
 // #141 KK6: Son değişiklikler aynı işlemdeki alanları tek cümlede toplar ve "Geri al" düğmesi taşır (degisikligi_geri_al).
 import { router } from 'expo-router';
 import { useState } from 'react';
@@ -15,6 +16,8 @@ import { useDegisikligiGeriAl } from '@/features/listem/sorgular';
 import { degisiklikGruplari, geriAlinabilir, grupMetni, zamanMetni } from '@/features/program/degisiklikMetni';
 import { useDegisiklikler } from '@/features/program/sorgular';
 import { useSimdi } from '@/features/program/useProgram';
+import { silmeMetni } from '@/features/seyahatler/silme';
+import { useSeyahatSil } from '@/features/seyahatler/sorgular';
 import { seyahatAdi } from '@/features/sihirbaz/sihirbaz';
 import { useHafifYerler } from '@/features/yerler/api';
 import { t } from '@/i18n';
@@ -37,6 +40,7 @@ export function GrupPenceresi({ acik, onKapat, seyahat, uyeler, mekanlar }: Prop
   const an = useSimdi(acik);
   const yerler = useHafifYerler(acik ? mekanlar.map((m) => m.place_id) : []);
   const ayril = useSeyahattenAyril();
+  const sil = useSeyahatSil();
   const [bildirim, setBildirim] = useState<string | null>(null);
   const paylasim = useDavetPaylas(seyahat, (sonuc) => {
     if (sonuc === 'kopyalandi') {
@@ -82,6 +86,7 @@ export function GrupPenceresi({ acik, onKapat, seyahat, uyeler, mekanlar }: Prop
   };
   const benUye = uyeler.find((u) => benim(u.user_id));
   const ayrilabilir = !!benUye && benUye.role !== 'owner';
+  const silinebilir = benUye?.role === 'owner';
 
   const seyahattenAyril = async () => {
     const onay = await onayIste(t('davet.grup.ayrilOnay'), t('davet.grup.ayrilMetin'), t('davet.grup.ayrilEvet'), t('genel.vazgec'));
@@ -92,6 +97,20 @@ export function GrupPenceresi({ acik, onKapat, seyahat, uyeler, mekanlar }: Prop
       router.replace('/(tabs)/seyahatler');
     } catch {
       setBildirim(t('davet.grup.ayrilHata'));
+      setTimeout(() => setBildirim(null), 2500);
+    }
+  };
+
+  // #174 KK2–KK4, KK9: onay (tek başına / başkaları da var), silince Seyahatler'e dönüş + "Seyahat silindi"; hata pencerede.
+  const seyahatiSil = async () => {
+    const onay = await onayIste(t('seyahatler.silOnay'), silmeMetni(uyeler.length), t('seyahatler.silEvet'), t('genel.vazgec'));
+    if (!onay) return;
+    try {
+      await sil.mutateAsync(seyahat.id);
+      onKapat();
+      router.replace({ pathname: '/(tabs)/seyahatler', params: { bildirim: 'silindi' } });
+    } catch {
+      setBildirim(t('seyahatler.silHata'));
       setTimeout(() => setBildirim(null), 2500);
     }
   };
@@ -171,6 +190,11 @@ export function GrupPenceresi({ acik, onKapat, seyahat, uyeler, mekanlar }: Prop
       {ayrilabilir ? (
         <Pressable accessibilityRole="button" onPress={seyahattenAyril} disabled={ayril.isPending} style={s.ayril}>
           <Text style={s.ayrilMetin}>{t('davet.grup.ayril')}</Text>
+        </Pressable>
+      ) : null}
+      {silinebilir ? (
+        <Pressable accessibilityRole="button" onPress={seyahatiSil} disabled={sil.isPending} style={s.ayril}>
+          <Text style={s.ayrilMetin}>{t('davet.grup.sil')}</Text>
         </Pressable>
       ) : null}
       {bildirim ? <Text style={s.bildirim}>{bildirim}</Text> : null}
