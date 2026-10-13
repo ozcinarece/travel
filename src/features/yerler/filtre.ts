@@ -40,9 +40,28 @@ export const BOS_FILTRE: Filtre = { oneCikan: false, kategoriler: [], puan: 0, y
 /** #164 KK3: Keşfet açılışı (ve Temizle) "Turistik" ile — #141 KK7'deki "Tümü" yerine. */
 export const VARSAYILAN_FILTRE: Filtre = { ...BOS_FILTRE, kategoriler: TURISTIK };
 
-/** #164: birincil tipi Turistik grubunda mı (konaklama hiç sayılmaz). Sihirbazın "Görmen gerekenler" listesi de bunu kullanır. */
+/**
+ * #166 incelemesi: Turistik kategorilerinin AÇIK izin listesi (#164 KK1 tipleri; `historical_place` Google'ın tarihi yer tipi).
+ * Pin rengi için tanınmayan tip "gezilecek" sayılır (pinKategorisi), ama süzgeçte yalnız bu tipler Turistik'tir — düğün salonu,
+ * `event_venue`, `night_club` gibi yerler Turistik'e ve "Görmen gerekenler"e girmez. Diğer kategoriler pinKategorisi ile.
+ */
+const KATEGORI_IZNI: Partial<Record<PinKategorisi, readonly string[]>> = {
+  gezilecek: ['tourist_attraction', 'historical_landmark', 'cultural_landmark', 'monument', 'historical_place'],
+  muze: ['museum', 'art_gallery'],
+  manzara: ['observation_deck'],
+  ibadet: ['mosque', 'church', 'synagogue'],
+};
+
+/** Birincil tip bu kategoriye uyar mı (Turistik kategorilerinde izin listesi, diğerlerinde pin kategorisi). */
+export function kategoriyeUyar(k: PinKategorisi, primaryType: string | null | undefined): boolean {
+  if (konaklamaMi(primaryType)) return false;
+  const izin = KATEGORI_IZNI[k];
+  return izin ? izin.includes(primaryType ?? '') : pinKategorisi(primaryType) === k;
+}
+
+/** #164: birincil tipi Turistik grubunda mı (izin listesi; konaklama hiç sayılmaz). Sihirbazın "Görmen gerekenler"i de bunu kullanır. */
 export function turistikTur(primaryType: string | null | undefined): boolean {
-  return !konaklamaMi(primaryType) && TURISTIK.includes(pinKategorisi(primaryType));
+  return TURISTIK.some((k) => kategoriyeUyar(k, primaryType));
 }
 
 /** Turistik grubunun tamamı seçili mi. */
@@ -63,13 +82,13 @@ export function hizliCipSecili(f: Filtre, c: HizliCip): boolean {
 }
 
 /**
- * Hızlı çipe dokunma (tek seçim): o çipin kategorileri seçilir. Yalnız o çip seçiliyken yeniden dokunmak açılıştaki Turistik'e
- * döner (Turistik ve Tümü'de değişmez). Öne çıkan / puan / yorum koşulları korunur.
+ * Hızlı çipe dokunma (tek seçim): o çipin kategorileri seçilir. Yalnız o çip seçiliyken yeniden dokunmak (Tümü dahil) açılıştaki
+ * Turistik'e döner; Turistik'te değişmez. Öne çıkan / puan / yorum koşulları korunur.
  */
 export function hizliCipBas(f: Filtre, c: HizliCip): Filtre {
   const kategoriler: PinKategorisi[] = c === 'tumu' ? [] : c === 'turistik' ? TURISTIK : [c];
   const ayni = f.kategoriler.length === kategoriler.length && kategoriler.every((k) => f.kategoriler.includes(k));
-  if (ayni && c !== 'tumu' && c !== 'turistik') return { ...f, kategoriler: TURISTIK };
+  if (ayni && c !== 'turistik') return { ...f, kategoriler: TURISTIK };
   return { ...f, kategoriler };
 }
 
@@ -80,13 +99,21 @@ export function turistikDegistir(f: Filtre): Filtre {
 }
 
 /**
- * #69 KK10 / #164: tarama kümeleri — her zaman `hepsi`; Turistik grubu seçiliyse `turistik` kümesi, kalan kategoriler (4'ten
- * azsa) kendi kümeleriyle. Böylece varsayılan görünümün türleri ayrıca istenir, çip değişince de `hepsi` elde olur.
+ * #69 KK10 / #164 (#166 incelemesi 3): tarama kümeleri. Yalnız Turistik kategorileri seçiliyse (varsayılan) yalnız `turistik`
+ * istenir — karo bütçesi önce `hepsi`ye harcanmasın. Tümü `hepsi`; başka kategoriler `hepsi` + (Turistik'ten de seçim varsa
+ * `turistik`) + kalan kategoriler (4'ten azsa) kendi kümeleriyle.
  */
 export function taramaKumeleri(f: Filtre): OneriCipi[] {
-  const turistik = turistikSecili(f);
-  const kalan = turistik ? f.kategoriler.filter((k) => !TURISTIK.includes(k)) : f.kategoriler;
-  return ['hepsi', ...(turistik ? (['turistik'] as OneriCipi[]) : []), ...(kalan.length < 4 ? kalan : [])];
+  if (f.kategoriler.length === 0) return ['hepsi'];
+  const turistikten = f.kategoriler.some((k) => TURISTIK.includes(k));
+  const diger = f.kategoriler.filter((k) => !TURISTIK.includes(k));
+  if (diger.length === 0) return ['turistik'];
+  return ['hepsi', ...(turistikten ? (['turistik'] as OneriCipi[]) : []), ...(diger.length < 4 ? diger : [])];
+}
+
+/** İki tarama kümesi listesi aynı mı (sırasız). */
+export function ayniKumeler(a: OneriCipi[], b: OneriCipi[]): boolean {
+  return a.length === b.length && a.every((k) => b.includes(k));
 }
 
 /** Popülerlik skoru (oneriSirala ile aynı): puan × log10(yorum + 1). */
@@ -109,7 +136,7 @@ export function oneCikanlar(yerler: HafifYer[]): Set<string> {
 /** Bir mekan filtreden geçer mi (VE)? Puan eşiği yalnız ≥ 100 yorumlu mekanlarda sayılır. */
 export function filtredenGecer(y: HafifYer, f: Filtre, oneCikan: Set<string>): boolean {
   if (f.oneCikan && !oneCikan.has(y.place_id)) return false;
-  if (f.kategoriler.length > 0 && !f.kategoriler.includes(pinKategorisi(y.primary_type))) return false;
+  if (f.kategoriler.length > 0 && !f.kategoriler.some((k) => kategoriyeUyar(k, y.primary_type))) return false;
   if (f.puan > 0 && !((y.puan ?? 0) >= f.puan && (y.puan_sayisi ?? 0) >= PUAN_FILTRESI_EN_AZ_YORUM)) return false;
   if (f.yorum > 0 && (y.puan_sayisi ?? 0) < f.yorum) return false;
   return true;

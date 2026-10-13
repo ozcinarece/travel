@@ -272,9 +272,10 @@ export async function yakinAra(secenek: {
   try {
     return await yakinAraBir(secenek, secenek.haric);
   } catch (e) {
-    // Dışlama listesi reddedilirse (geçersiz tip → 400) Keşfet boş kalmasın: dışlamasız bir kez daha; istemci süzgeci yine çalışır.
-    if (!(e instanceof GoogleHatasi) || e.durum !== 400 || !secenek.haric?.length) throw e;
-    console.error('places-nearby excludedPrimaryTypes reddedildi', e.message);
+    // Dışlama listesi reddedilirse (tip hatası → 400) Keşfet boş kalmasın: dışlamasız bir kez daha; istemci süzgeci yine çalışır.
+    // Başka 400'lerde (ör. geçersiz konum) tekrar denenmez.
+    if (!(e instanceof GoogleHatasi) || e.durum !== 400 || !secenek.haric?.length || !/type/i.test(e.message)) throw e;
+    console.error('places-nearby dışlama tipleri reddedildi', e.message);
     return yakinAraBir(secenek, undefined);
   }
 }
@@ -283,7 +284,8 @@ async function yakinAraBir(secenek: { merkez: { lat: number; lng: number }; yari
   const cevap = await istek<{ places?: DetailsCevap[] }>('places:searchNearby', {
     govde: {
       includedTypes: secenek.tipler,
-      ...(haric?.length ? { excludedPrimaryTypes: haric } : {}),
+      // #166 incelemesi: birincil tipi `tourist_attraction` olup tipleri arasında `lodging` olan oteller de dışlansın.
+      ...(haric?.length ? { excludedPrimaryTypes: haric, excludedTypes: ['lodging'] } : {}),
       maxResultCount: Math.min(Math.max(secenek.enFazla ?? 20, 1), 20),
       rankPreference: 'POPULARITY',
       languageCode: DIL,

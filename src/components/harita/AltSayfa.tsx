@@ -86,6 +86,8 @@ export function AltSayfa({
     baslangic: yukseklik.tam - yukseklik[hal],
     simdi: yukseklik.tam - yukseklik[hal],
     basHal: hal,
+    /** Şerit jestinin aktifleştiği andaki parmak konumu (Android'de translationY aktifleşmede sıfırlandığı için). */
+    seritY0: 0,
     hal,
     yukseklik,
     onHal,
@@ -150,8 +152,11 @@ export function AltSayfa({
         .runOnJS(true)
         .activeOffsetY([-8, 8])
         .failOffsetX([-20, 20])
-        .onStart(isleyiciler.basla)
-        .onUpdate((e) => isleyiciler.tasi(e.translationY))
+        .onStart((e) => {
+          durum.current.seritY0 = e.absoluteY;
+          isleyiciler.basla();
+        })
+        .onUpdate((e) => isleyiciler.tasi(e.absoluteY - durum.current.seritY0))
         .onEnd((e, basarili) =>
           basarili ? isleyiciler.birak(e.velocityY / 1000) : isleyiciler.iptal(),
         ),

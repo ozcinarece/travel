@@ -29,7 +29,7 @@ import { cekmeceListesi, cekmeceSayisi, type CekmeceCipi } from '@/features/yerl
 import { hafifYerler, linkCoz, linkGibiMi, useHafifYerler, useOneriler, yeniOturumJetonu, type HafifYer, type OneriCipi } from '@/features/yerler/api';
 import { useQuery } from '@tanstack/react-query';
 
-import { aktifFiltreSayisi, filtreAktif, filtredenGecer, filtreOzeti, taramaKumeleri, varsayilanMi } from '@/features/yerler/filtre';
+import { aktifFiltreSayisi, ayniKumeler, filtreAktif, filtredenGecer, filtreOzeti, taramaKumeleri, varsayilanMi, type Filtre } from '@/features/yerler/filtre';
 import { useOneCikanlar } from '@/features/yerler/oneCikan';
 import { gorunurOneriler } from '@/features/yerler/karolar';
 import { useKaroOnerileri } from '@/features/yerler/karoYukleme';
@@ -136,6 +136,15 @@ function Kesfet({ seyahat, konaklamalar, ilkMekan, cekmeceIstegi }: { seyahat: S
   const uzaklasti = !!bolge && !!yakin.sonTaranan && bolgedenUzaklasti(bolge, yakin.sonTaranan);
   const bolgeyiTara = () => {
     if (bolge) yakin.tara(bolge, kumeler);
+  };
+  // #166 incelemesi 3: açılış yalnız `turistik` ister; başka çip / Tümü seçilince tarama kümeleri değişir ve son taranan bölge
+  // yeni kümelerle bir kez taranır (önbellekteki karolar istenmez). #71 "filtre değişimi istek atmaz" kuralına bilinçli istisna:
+  // maliyet açılışta düşer, yalnız çip değiştirenler ek istek yapar.
+  const filtreyiDegistir = (f: Filtre) => {
+    setFiltre(f);
+    const yeni = taramaKumeleri(f);
+    const hedef = yakin.sonTaranan ?? bolge;
+    if (hedef && !ayniKumeler(yeni, kumeler)) yakin.tara(hedef, yeni);
   };
 
   const havuz = useMemo(() => mekanlar.data ?? [], [mekanlar.data]);
@@ -506,7 +515,7 @@ function Kesfet({ seyahat, konaklamalar, ilkMekan, cekmeceIstegi }: { seyahat: S
           <>
             {/* #164 KK3 (kanvas 9): Turistik · Yemek · Kafe · Park · Alışveriş · Tümü; varsayılan Turistik, tek seçim (kategori
                 renginde glif). Öne çıkan / puan / yorum ve Müze · İbadet · Manzara alt seçenekleri filtre sayfasında. */}
-            <HizliCipler filtre={filtre} onFiltre={setFiltre} />
+            <HizliCipler filtre={filtre} onFiltre={filtreyiDegistir} />
             {filtreli && !varsayilan ? (
               // #69 KK5: filtre açıkken "Şehrin öne çıkanları · 9 mekan gizli" hapı (dokunulmaz).
               <View style={s.yukleniyorSatir} pointerEvents="none">
@@ -541,7 +550,7 @@ function Kesfet({ seyahat, konaklamalar, ilkMekan, cekmeceIstegi }: { seyahat: S
               cipler: (
                 <HizliCipler
                   filtre={filtre}
-                  onFiltre={setFiltre}
+                  onFiltre={filtreyiDegistir}
                   cerceveli
                   secimYok={cekmeceCip === 'rehber'}
                   onSecildi={() => setCekmeceCip('bolge')}
@@ -588,7 +597,7 @@ function Kesfet({ seyahat, konaklamalar, ilkMekan, cekmeceIstegi }: { seyahat: S
       // #80: mekan paneli en üst katmanda; harita dolgusu değişmez (kamera yerinde). Pin değişince içerik değişir, panel kalır.
       ustKatman={
         <>
-          <FiltreSayfasi acik={filtreAcik} filtre={filtre} onFiltre={setFiltre} sayi={gecenler.length} onKapat={() => setFiltreAcik(false)} />
+          <FiltreSayfasi acik={filtreAcik} filtre={filtre} onFiltre={filtreyiDegistir} sayi={gecenler.length} onKapat={() => setFiltreAcik(false)} />
           <GrupPenceresi acik={grupAcik} onKapat={() => setGrupAcik(false)} seyahat={seyahat} uyeler={uyeler.data ?? []} mekanlar={havuz} />
           {secim ? (
           <MekanPaneli

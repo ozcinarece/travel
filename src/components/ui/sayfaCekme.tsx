@@ -3,7 +3,7 @@
 // kaydırma görünümünün yerel jestiyle EŞZAMANLI çalışır; içerik en üstteyken aşağı çekiş sayfayı taşır, değilse önce içerik kayar.
 // Sayfada aşağı çekmeyi kullanan başka bir işlev (ör. Program'da ≡ ile sıralama) `useSayfaKilidi` ile önceliği alır.
 import { createContext, useContext, useEffect, useMemo, useRef, useState, type ReactElement, type ReactNode } from 'react';
-import { Animated, ScrollView, StyleSheet, type LayoutChangeEvent, type NativeScrollEvent, type NativeSyntheticEvent, type ScrollViewProps, type StyleProp, type ViewStyle } from 'react-native';
+import { Animated, ScrollView, StyleSheet, TextInput, type LayoutChangeEvent, type NativeScrollEvent, type NativeSyntheticEvent, type ScrollViewProps, type StyleProp, type TextInputProps, type ViewStyle } from 'react-native';
 import { Gesture, GestureDetector, type NativeGesture, type PanGesture } from 'react-native-gesture-handler';
 
 /** Jestin sayfayı taşımaya başlaması için gereken dikey yol (px). */
@@ -25,6 +25,50 @@ export function cekmeKarari(g: { dx: number; dy: number; icerikY: number; kilitl
   return 'bekle';
 }
 
+/**
+ * Gövde çekişinin dokunuş takibi (saf; olay sırası test edilir). Jest elle aktifleşir: dokunuştan sonraki her harekette karar
+ * verilir; aktifleştikten sonra hareketler YOK SAYILIR (başlangıç bir daha taşınmaz). Yol, aktifleşme anındaki parmak
+ * konumundan ölçülür — Android'de Pan'ın `translationY`'si aktifleşmede sıfırlanır, iOS'ta dokunuştan sayılır; bu yüzden
+ * `absoluteY` kullanılır.
+ */
+export class CekmeTakibi {
+  /** Gövdedeki dikey kaydırmanın son konumu (onScroll). */
+  icerikY = 0;
+  /** Sayfada aşağı çekmeyi kullanan başka bir işlev sürüyor. */
+  kilit = false;
+  /** Jest aktifleşti (sayfa taşınıyor); dokunuş bitince sıfırlanır. */
+  aktif = false;
+  private x0 = 0;
+  private y0 = 0;
+  private aktifY = 0;
+
+  dokunma(x: number, y: number) {
+    this.x0 = x;
+    this.y0 = y;
+    this.aktif = false;
+  }
+
+  /** Aktifken 'yok' (hiçbir şey yapılmaz); değilse karar. 'basla' anındaki konum taşımanın başlangıcı olur. */
+  hareket(x: number, y: number): CekmeKarari | 'yok' {
+    if (this.aktif) return 'yok';
+    const karar = cekmeKarari({ dx: x - this.x0, dy: y - this.y0, icerikY: this.icerikY, kilitli: this.kilit });
+    if (karar === 'basla') {
+      this.aktif = true;
+      this.aktifY = y;
+    }
+    return karar;
+  }
+
+  /** Taşımanın başladığı noktadan bu yana aşağı yol (px). */
+  yol(y: number): number {
+    return Math.max(0, y - this.aktifY);
+  }
+
+  bitti() {
+    this.aktif = false;
+  }
+}
+
 type Baglam = {
   /** Gövdedeki dikey kaydırmanın konumu buraya bildirilir. */
   onScroll: (e: NativeSyntheticEvent<NativeScrollEvent>) => void;
@@ -32,8 +76,11 @@ type Baglam = {
   jest: NativeGesture;
   /** Sayfada aşağı çekmeyi kullanan başka bir işlev başlayınca true, bitince false. */
   kilitle: (k: boolean) => void;
-  /** Kaydırma görünümü kurulup kalkınca konum sıfırlanır (yeni liste en üstten başlar). */
-  sifirla: () => void;
+  /**
+   * Kaydırma görünümü kuruldu / kalktı: konum sıfırlanır (yeni liste en üstten başlar) ve sayfa jesti yeniden kurulur — yerel
+   * jest yeniden bağlanınca yeni etiket alır, eşzamanlılık bağı eski etikette kalmasın.
+   */
+  baglandi: () => void;
 };
 
 const SayfaBaglami = createContext<Baglam | null>(null);
@@ -51,11 +98,11 @@ export const useSayfaKilidi = () => useContext(SayfaBaglami)?.kilitle ?? bosKili
  */
 export function SayfaKaydirmasi({ children }: { children: ReactElement }) {
   const b = useContext(SayfaBaglami);
-  const sifirla = b?.sifirla;
+  const baglandi = b?.baglandi;
   useEffect(() => {
-    sifirla?.();
-    return () => sifirla?.();
-  }, [sifirla]);
+    baglandi?.();
+    return () => baglandi?.();
+  }, [baglandi]);
   if (!b) return children;
   return <GestureDetector gesture={b.jest}>{children}</GestureDetector>;
 }
@@ -79,6 +126,28 @@ export function SayfaKaydirici({ onScroll, ...p }: ScrollViewProps) {
   );
 }
 
+/**
+ * #166 incelemesi: sayfa içindeki metin alanı — odaktayken sayfa çekişi kilitlenir (çok satırlı notun içinde aşağı sürüklemek
+ * sayfayı kapatıp yazılanı kaybettirmesin); odak gidince ya da alan kalkınca kilit açılır.
+ */
+export function SayfaMetinAlani({ onFocus, onBlur, ...p }: TextInputProps) {
+  const kilitle = useSayfaKilidi();
+  useEffect(() => () => kilitle(false), [kilitle]);
+  return (
+    <TextInput
+      {...p}
+      onFocus={(e) => {
+        kilitle(true);
+        onFocus?.(e);
+      }}
+      onBlur={(e) => {
+        kilitle(false);
+        onBlur?.(e);
+      }}
+    />
+  );
+}
+
 /** Bırakılan çekişin hızı px/ms (PanResponder ile aynı birim). */
 export type Birakis = { dy: number; vy: number };
 
@@ -91,19 +160,22 @@ export function useIcerikCekme(o: { etkin: boolean; onBasla: () => void; onCek: 
   useEffect(() => {
     isleyici.current = o;
   });
-  const durum = useRef({ icerikY: 0, kilit: false, x0: 0, y0: 0, tasimaY0: 0 });
+  const takipRef = useRef(new CekmeTakibi());
   const [jest] = useState(() => Gesture.Native());
+  // Kaydırma görünümü her kurulup kalktığında artar; Pan bu sayede yerel jestin yeni etiketiyle yeniden kurulur.
+  const [kaydiriciSurumu, setKaydiriciSurumu] = useState(0);
   const deger = useMemo<Baglam>(
     () => ({
       onScroll: (e) => {
-        durum.current.icerikY = e.nativeEvent.contentOffset.y;
+        takipRef.current.icerikY = e.nativeEvent.contentOffset.y;
       },
       jest,
       kilitle: (k) => {
-        durum.current.kilit = k;
+        takipRef.current.kilit = k;
       },
-      sifirla: () => {
-        durum.current.icerikY = 0;
+      baglandi: () => {
+        takipRef.current.icerikY = 0;
+        setKaydiriciSurumu((n) => n + 1);
       },
     }),
     [jest],
@@ -120,32 +192,30 @@ export function useIcerikCekme(o: { etkin: boolean; onBasla: () => void; onCek: 
         .simultaneousWithExternalGesture(jest)
         .onTouchesDown((e) => {
           const t = e.allTouches[0];
-          if (!t) return;
-          durum.current.x0 = t.absoluteX;
-          durum.current.y0 = t.absoluteY;
+          if (t) takipRef.current.dokunma(t.absoluteX, t.absoluteY);
         })
         .onTouchesMove((e, yonetici) => {
+          // Aktifken (sayfa taşınıyor) dokunuş hareketleri yok sayılır; yol onUpdate'te ölçülür.
+          if (takipRef.current.aktif) return;
           const t = e.allTouches[0];
           if (!t || e.numberOfTouches > 1) {
             yonetici.fail();
             return;
           }
-          const d = durum.current;
-          const karar = cekmeKarari({ dx: t.absoluteX - d.x0, dy: t.absoluteY - d.y0, icerikY: d.icerikY, kilitli: d.kilit });
+          const karar = takipRef.current.hareket(t.absoluteX, t.absoluteY);
           if (karar === 'birak') yonetici.fail();
-          else if (karar === 'basla') {
-            // Sayfa bu noktadan taşınır (içerik az önce en üste vardıysa önceki yol sayılmaz).
-            d.tasimaY0 = t.absoluteY - d.y0;
-            yonetici.activate();
-          }
+          else if (karar === 'basla') yonetici.activate();
         })
         .onStart(() => isleyici.current.onBasla())
-        .onUpdate((e) => isleyici.current.onCek(Math.max(0, e.translationY - durum.current.tasimaY0)))
+        .onUpdate((e) => isleyici.current.onCek(takipRef.current.yol(e.absoluteY)))
         .onEnd((e, basarili) => {
-          if (basarili) isleyici.current.onBirak({ dy: Math.max(0, e.translationY - durum.current.tasimaY0), vy: e.velocityY / 1000 });
+          if (basarili) isleyici.current.onBirak({ dy: takipRef.current.yol(e.absoluteY), vy: e.velocityY / 1000 });
           else isleyici.current.onIptal();
-        }),
-    [jest, etkin],
+        })
+        .onFinalize(() => takipRef.current.bitti()),
+    // `kaydiriciSurumu`: kaydırma görünümü yeniden bağlanınca eşzamanlılık bağı yenilensin diye Pan yeniden kurulur.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [jest, etkin, kaydiriciSurumu],
   );
   /* eslint-enable react-hooks/refs */
   return { govde, deger };

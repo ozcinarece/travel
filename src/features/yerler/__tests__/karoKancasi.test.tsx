@@ -6,8 +6,8 @@ import { bolgeHesapla, zoomDelta } from '@/components/harita/geo';
 import type { HafifYer } from '../api';
 import { karoBelleginiSifirla, karoSayaci, useKaroOnerileri } from '../karoYukleme';
 
-const mockYakinYerler = jest.fn<() => Promise<HafifYer[]>>();
-jest.mock('../api', () => ({ ...(jest.requireActual('../api') as object), yakinYerler: () => mockYakinYerler() }));
+const mockYakinYerler = jest.fn<(s: { cip: string }) => Promise<HafifYer[]>>();
+jest.mock('../api', () => ({ ...(jest.requireActual('../api') as object), yakinYerler: (s: { cip: string }) => mockYakinYerler(s) }));
 jest.mock('@/lib/supabase', () => ({ supabase: {} }));
 jest.mock('@/lib/hataRaporu', () => ({ izBirak: jest.fn() }));
 
@@ -47,7 +47,7 @@ describe('useKaroOnerileri (#71)', () => {
     expect(result.current.sonTaranan?.merkez.lat).toBeCloseTo(eskisehir.lat);
   });
 
-  it('"Bu bölgeyi tara": dokunuş başına en fazla 1 tur; yoldayken ikinci dokunuş yok sayılır; sonuçlar birikime eklenir', async () => {
+  it('"Bu bölgeyi tara": dokunuş başına en fazla 1 tur; yoldayken ikinci dokunuş bekletilir (aynı karolar yeniden istenmez); sonuçlar birikime eklenir', async () => {
     // Zoom 12 görünümü ≤ 12 karo: tek tur görünümün tamamını kapsar.
     const { result } = renderHook(() => useKaroOnerileri('s1', bolge(12)));
     await act(async () => {});
@@ -66,5 +66,22 @@ describe('useKaroOnerileri (#71)', () => {
       result.current.tara(uzak, ['hepsi']);
     });
     expect(karoSayaci.tur).toBe(2);
+  });
+
+  it('#166 incelemesi 3: açılış turu yalnız turistik; yoldayken gelen çip değişimi (hepsi + yemek) tur bitince aynı bölge için çalışır', async () => {
+    const { result } = renderHook(() => useKaroOnerileri('s2', bolge(12), ['turistik']));
+    act(() => {
+      result.current.tara(bolge(12), ['hepsi', 'yemek']);
+    });
+    await act(async () => {});
+    await act(async () => {});
+    const istenen = mockYakinYerler.mock.calls.map((c) => c[0].cip);
+    const ilk = istenen.slice(0, istenen.indexOf('hepsi'));
+    expect(ilk.length).toBeGreaterThan(0);
+    expect(new Set(ilk)).toEqual(new Set(['turistik']));
+    expect(istenen).toContain('hepsi');
+    expect(istenen).toContain('yemek');
+    expect(karoSayaci.tur).toBe(2);
+    expect(result.current.yukleniyor).toBe(false);
   });
 });

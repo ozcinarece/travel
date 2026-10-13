@@ -1,9 +1,9 @@
 import { Image } from 'expo-image';
 import { useState } from 'react';
-import { KeyboardAvoidingView, Linking, Modal, Platform, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { KeyboardAvoidingView, Linking, Modal, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
-import { CekilenSayfa, modalKokuStili } from '@/components/ui/sayfaCekme';
+import { CekilenSayfa, modalKokuStili, SayfaMetinAlani } from '@/components/ui/sayfaCekme';
 import { googleYorumLinki, type Puan } from '@/features/puanlar/sorgular';
 import { t } from '@/i18n';
 import { renk, yazi } from '@/theme';
@@ -68,7 +68,7 @@ export function PuanSayfasi(p: Props) {
             </View>
 
 
-            <TextInput
+            <SayfaMetinAlani
               value={not}
               onChangeText={setNot}
               placeholder={t('program.puan.not')}
