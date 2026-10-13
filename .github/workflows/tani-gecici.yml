@@ -1,0 +1,45 @@
+name: tani-gecici
+
+# Geçici, salt okuma tanı: son 7 günün Google istek sayaçları (api_sayac; yalnız gün × fonksiyon sayıları).
+# Yalnız bu dala push'ta çalışır; iş bitince dal silinir.
+on:
+  push:
+    branches: [claude/tani-google-harcama]
+
+permissions:
+  contents: read
+
+jobs:
+  sayac:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      SUPABASE_PROJECT_REF: xwqeobelyeuzoxyuvauw
+    steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Sayaçlar
+        run: |
+          cat > /tmp/t.mjs <<'JS'
+          const q = async (query) => {
+            const r = await fetch(`https://api.supabase.com/v1/projects/${process.env.SUPABASE_PROJECT_REF}/database/query`, {
+              method: 'POST',
+              headers: { authorization: `Bearer ${process.env.SUPABASE_ACCESS_TOKEN}`, 'content-type': 'application/json' },
+              body: JSON.stringify({ query }),
+            });
+            if (!r.ok) { console.log(`::error::HTTP ${r.status}`); process.exit(1); }
+            return r.json();
+          };
+          const satirlar = await q(`select gun::text, fonksiyon, cagri, google from public.api_sayac
+            where gun >= (now() at time zone 'Europe/Istanbul')::date - 6 order by gun desc, google desc`);
+          const gunler = {};
+          for (const s of satirlar) (gunler[s.gun] ??= []).push(`${s.fonksiyon}: çağrı ${s.cagri}, google ${s.google}`);
+          for (const [g, l] of Object.entries(gunler)) console.log(`::notice title=Gun ${g}::${l.join('%0A')}`);
+          const f = await q(`select (select deger::text from public.yonetim_ayarlari where anahtar = 'google_birim_fiyat') as fiyat,
+            (select deger::text from public.yonetim_ayarlari where anahtar = 'google_gunluk_butce') as butce,
+            public.google_harcama_bugun()::text as bugun, (now() at time zone 'Europe/Istanbul')::text as simdi`);
+          console.log(`::notice title=Fiyat ve tahmin::${JSON.stringify(f[0])}`);
+          JS
+          node /tmp/t.mjs
