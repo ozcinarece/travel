@@ -56,11 +56,22 @@ jobs:
 
       # Yerel derleme: Gradle + NDK için disk açılır (runner'da kullanılmayan araçlar silinir), JDK 17 (AGP 8.12).
       # Android SDK runner'da hazır; eksik NDK/build-tools sürümünü Gradle kendisi indirir.
-      - name: Disk alanı (yerel)
+      # Gradle ayarları kullanıcı dizininde (projenin gradle.properties'ini ezer): Expo şablonundaki 512 MB metaspace lint
+      # adımında yetmiyor (OutOfMemoryError: Metaspace); daemon kapalı (hata sonrası asılı kalan süreç olmasın); yalnız ARM
+      # ABI'leri (telefonlar; x86 emülatör içindir) — derleme süresi ve bellek yarıya iner.
+      - name: Disk alanı ve Gradle ayarları (yerel)
         if: inputs.nerede == 'yerel'
         run: |
           sudo rm -rf /usr/share/dotnet /opt/ghc /usr/local/share/boost /usr/share/swift "$AGENT_TOOLSDIRECTORY/CodeQL"
           df -h /
+          free -h
+          mkdir -p ~/.gradle
+          {
+            echo "org.gradle.jvmargs=-Xmx4g -XX:MaxMetaspaceSize=1536m -XX:+HeapDumpOnOutOfMemoryError -Dfile.encoding=UTF-8"
+            echo "org.gradle.daemon=false"
+            echo "reactNativeArchitectures=armeabi-v7a,arm64-v8a"
+          } >> ~/.gradle/gradle.properties
+          cat ~/.gradle/gradle.properties
       - uses: actions/setup-java@v4
         if: inputs.nerede == 'yerel'
         with:
@@ -116,7 +127,7 @@ jobs:
 
       - name: EAS derleme
         id: derleme
-        timeout-minutes: 120
+        timeout-minutes: 75
         env:
           YEREL_GOOGLE_MAPS_ANDROID_KEY: ${{ secrets.GOOGLE_MAPS_ANDROID_KEY }}
           YEREL_SENTRY_DSN: ${{ vars.SENTRY_DSN || secrets.SENTRY_DSN }}
