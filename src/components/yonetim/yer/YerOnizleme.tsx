@@ -53,7 +53,7 @@ export function YerOnizleme({ yer, canli }: { yer: YerAlanlari; canli: HafifYer 
           </View>
         </View>
         <View style={s.sekmeler}>
-          {(['sekmeGenel', 'sekmeYorumlar', 'sekmeRehber'] as const).map((k) => (
+          {(['sekmeBilgiler', 'sekmeGoogle', 'sekmeRehber'] as const).map((k) => (
             <View key={k} style={[s.sekme, k === 'sekmeRehber' && s.sekmeSecili]}>
               <Text style={[s.sekmeMetin, k === 'sekmeRehber' && s.sekmeMetinSecili]}>{t(`mekan.panel.${k}`)}</Text>
             </View>

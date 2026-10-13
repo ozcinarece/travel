@@ -1,6 +1,6 @@
 import { describe, expect, it } from '@jest/globals';
 
-import { kategoriEtiketi, sureMetni, varsayilanDakika } from '@/lib/kategori';
+import { bilinenKategori, kategoriEtiketi, sureMetni, varsayilanDakika } from '@/lib/kategori';
 
 describe('kategori ve süre (PRD §6)', () => {
   it('varsayılan dakika tabloya göre, bilinmeyen 45', () => {
@@ -15,6 +15,9 @@ describe('kategori ve süre (PRD §6)', () => {
     expect(kategoriEtiketi('historical_landmark')).toBe('Tarihi yer');
     expect(kategoriEtiketi('ramen_restaurant')).toBe('ramen restaurant');
     expect(kategoriEtiketi(undefined)).toBe('Mekan');
+    expect(bilinenKategori('historical_landmark')).toBe('Tarihi yer');
+    expect(bilinenKategori('train_station')).toBeNull();
+    expect(bilinenKategori(null)).toBeNull();
   });
 
   it('süre metni', () => {
