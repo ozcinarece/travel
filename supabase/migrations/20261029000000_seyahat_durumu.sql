@@ -59,8 +59,9 @@ begin
   if not public.is_member(p_kaynak) or not public.is_member(p_hedef) then
     raise exception 'seyahat bulunamadı' using errcode = '42501';
   end if;
-  insert into public.places (trip_id, place_id, primary_type, lat, lng, default_minutes, note, added_by)
-  select p_hedef, p.place_id, p.primary_type, p.lat, p.lng, p.default_minutes, p.note, auth.uid()
+  -- google_fetched_at kopyalanır: koordinatın 30 günlük tazelik damgası (PRD §7) sıfırlanmaz.
+  insert into public.places (trip_id, place_id, primary_type, lat, lng, google_fetched_at, default_minutes, note, added_by)
+  select p_hedef, p.place_id, p.primary_type, p.lat, p.lng, p.google_fetched_at, p.default_minutes, p.note, auth.uid()
   from public.places p where p.trip_id = p_kaynak
   on conflict (trip_id, place_id) do nothing;
 
@@ -82,5 +83,5 @@ begin
 end;
 $$;
 
-revoke all on function public.seyahat_bitti(date, text), public.seyahat_durumlari(), public.profil_sayilari(), public.seyahati_kopyala(uuid, uuid) from public;
+revoke all on function public.seyahat_bitti(date, text), public.seyahat_durumlari(), public.profil_sayilari(), public.seyahati_kopyala(uuid, uuid) from public, anon;
 grant execute on function public.seyahat_bitti(date, text), public.seyahat_durumlari(), public.profil_sayilari(), public.seyahati_kopyala(uuid, uuid) to authenticated;

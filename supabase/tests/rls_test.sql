@@ -1165,6 +1165,8 @@ begin
   assert (select count(*) from public.places where trip_id = '14400000-0000-4000-8000-000000000004') = 5, 'tüm mekanlar listeye';
   assert (select count(*) from public.stops where trip_id = '14400000-0000-4000-8000-000000000004' and skipped) = 0, 'atlama kopyalanmaz';
   assert (select minutes from public.stops s join public.places p on p.id = s.place_ref where p.trip_id = '14400000-0000-4000-8000-000000000004' and p.place_id = 'p3') = 50, 'süre korunur';
+  assert (select google_fetched_at from public.places where trip_id = '14400000-0000-4000-8000-000000000004' and place_id = 'p1')
+       = (select google_fetched_at from public.places where trip_id = '14400000-0000-4000-8000-000000000001' and place_id = 'p1'), 'tazelik damgası korunur';
   assert not exists (select 1 from public.stops s join public.places p on p.id = s.place_ref where p.trip_id = '14400000-0000-4000-8000-000000000004' and p.place_id in ('p4', 'p7')), 'atanmamış ve karşılıksız gün listede kalır';
   assert (select start_time = '10:30' and order_manual from public.days where trip_id = '14400000-0000-4000-8000-000000000004' and index = 1), 'gün ayarı kopyalanır';
   assert public.seyahati_kopyala('14400000-0000-4000-8000-000000000001', '14400000-0000-4000-8000-000000000004') = 0, 'ikinci kez: hiçbir şey çoğalmaz';
