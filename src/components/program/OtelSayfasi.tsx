@@ -11,6 +11,7 @@ import { GoogleAtfi } from '@/components/yerler/GoogleAtfi';
 import { tarihOzeti } from '@/features/sihirbaz/sihirbaz';
 import { hafifYerler, useOtelOnerileri, yeniOturumJetonu, type Oneri } from '@/features/yerler/api';
 import { t } from '@/i18n';
+import { puanMetni } from '@/lib/puan';
 import type { OtelSecimi, Seyahat } from '@/lib/tipler';
 import { kose, olcek, renk, yazi } from '@/theme';
 
@@ -20,6 +21,8 @@ export function OtelSayfasi({ acik, seyahat, geceSayisi, onKapat, onSimdiDegil, 
   const [sorgu, setSorgu] = useState('');
   const [jeton, setJeton] = useState(yeniOturumJetonu);
   const [secim, setSecim] = useState<OtelSecimi | null>(null);
+  // Kartın alt satırı (kanvas 6: "Odunpazarı · ★ 4,6"): öneri metninin ilk parçası + hafif Details puanı; ek istek yok.
+  const [seciliAlt, setSeciliAlt] = useState<string | null>(null);
   const [hepsiAyni, setHepsiAyni] = useState(true);
   const [mesgul, setMesgul] = useState(false);
   const [kaydediliyor, setKaydediliyor] = useState(false);
@@ -34,6 +37,8 @@ export function OtelSayfasi({ acik, seyahat, geceSayisi, onKapat, onSimdiDegil, 
       const [yer] = await hafifYerler([o.place_id], { oturum: jeton });
       if (!yer) throw new Error('yer yok');
       setSecim({ place_id: yer.place_id, ad: o.ana || yer.ad, lat: yer.lat, lng: yer.lng });
+      const puan = puanMetni(yer.puan);
+      setSeciliAlt([o.ikincil.split(',')[0]?.trim(), puan ? `★ ${puan}` : null].filter(Boolean).join(' · ') || null);
       setSorgu('');
       setJeton(yeniOturumJetonu());
     } catch {
@@ -91,9 +96,16 @@ export function OtelSayfasi({ acik, seyahat, geceSayisi, onKapat, onSimdiDegil, 
           <View style={s.seciliIkon}>
             <Ikon ad="ev" boyut={20} renk={renk.ana} kalinlik={2.2} />
           </View>
-          <Text style={s.seciliAd} numberOfLines={2}>
-            {secim.ad}
-          </Text>
+          <View style={{ flex: 1, gap: 2 }}>
+            <Text style={s.seciliAd} numberOfLines={2}>
+              {secim.ad}
+            </Text>
+            {seciliAlt ? (
+              <Text style={s.seciliAlt} numberOfLines={1}>
+                {seciliAlt}
+              </Text>
+            ) : null}
+          </View>
           <Ikon ad="tik" boyut={22} renk={renk.basari} kalinlik={3} />
         </View>
       ) : null}
@@ -160,7 +172,8 @@ const s = StyleSheet.create({
   oneriAlt: { fontFamily: yazi.normal, fontSize: 12, color: renk.ikincil },
   secili: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 12, paddingHorizontal: 14, borderRadius: 18, borderWidth: 2, borderColor: renk.ana },
   seciliIkon: { width: 44, height: 44, borderRadius: 14, backgroundColor: renk.anaAcik, alignItems: 'center', justifyContent: 'center' },
-  seciliAd: { flex: 1, fontFamily: yazi.ekstra, fontSize: 15, color: renk.metin },
+  seciliAd: { fontFamily: yazi.ekstra, fontSize: 15, color: renk.metin },
+  seciliAlt: { fontFamily: yazi.normal, fontSize: 13, color: renk.ikincil },
   anahtar: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   anahtarBaslik: { fontFamily: yazi.ekstra, fontSize: 15, color: renk.metin },
   anahtarAlt: { fontFamily: yazi.normal, fontSize: 13, color: renk.ikincil },
