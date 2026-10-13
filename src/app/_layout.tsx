@@ -45,7 +45,8 @@ function Kok() {
 
   // Profil okunamadı (ör. açılışta çevrimdışı) ya da oluşturulamadı: oturumu olan kullanıcıya giriş ekranı açılamaz →
   // "Tekrar dene". Hata ekranı deneme sürerken de (yükleniyor halinde) kalır; boş ekran yok.
-  const hataVar = hesapli && (profil.isError || (profilYok && hazirla.isError));
+  // Profil hiç okunamadıysa; arka plan yenilemesi düşerse (veri korunur) kullanıcı bulunduğu ekrandan atılmaz.
+  const hataVar = hesapli && ((profil.isError && profil.data === undefined) || (profilYok && hazirla.isError));
   const deneniyor = profil.isFetching || hazirla.isPending;
   const [hataModu, setHataModu] = useState(false);
   if (hataVar && !hataModu) setHataModu(true);
