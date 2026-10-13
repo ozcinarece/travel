@@ -147,23 +147,23 @@ export function planKur(
   let g = 0;
   for (const m of sira) {
     let yerlesti = false;
-    while (g < sonuc.length) {
-      const onceki = dolu[g].son;
+    // İmleç yalnız mekan yerleşince ilerler: sığmayan mekan (boş güne bile) önceki günün kalan kapasitesini boşa harcatmaz.
+    for (let k = g; k < sonuc.length; k++) {
+      const onceki = dolu[k].son;
       const bacak = onceki ? bacakDk(onceki, m) : { dk: 0, araba: false };
-      const bos = dolu[g].dk === 0;
-      if (dolu[g].dk + bacak.dk + m.dakika <= kapasite) {
-        dolu[g] = { dk: dolu[g].dk + bacak.dk + m.dakika, son: m };
-        const s = sonuc[g];
+      if (dolu[k].dk + bacak.dk + m.dakika <= kapasite) {
+        dolu[k] = { dk: dolu[k].dk + bacak.dk + m.dakika, son: m };
+        const s = sonuc[k];
         s.mekanlar.push(m);
         s.ziyaretDk += m.dakika;
         s.yolDk += bacak.dk;
         if (bacak.araba) s.arabaBacagi += 1;
         yerlesti = true;
+        g = k;
         break;
       }
-      // Boş güne bile sığmıyorsa bu mekan hiçbir güne sığmaz → atanmamış; gün aynı kalır.
-      if (bos) break;
-      g += 1;
+      // Boş güne bile sığmıyorsa bu mekan hiçbir güne sığmaz → atanmamış.
+      if (dolu[k].dk === 0) break;
     }
     if (!yerlesti) atanmamis.push(m);
   }

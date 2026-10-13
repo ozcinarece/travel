@@ -9,7 +9,8 @@ import { sonAnahtar } from '@/schedule/sira';
 
 import { durakDakikasi, planKur, type PlanMekani, type PlanSonucu } from './planKur';
 
-const planMekani = (m: Mekan, dakika = m.default_minutes): PlanMekani => ({ id: m.id, lat: m.lat, lng: m.lng, dakika });
+// Kapasite, kayda yazılacak süreyle hesaplanır (durakDakikasi); gün kapasitesini aşan birkaç dakika kalmaz.
+const planMekani = (m: Mekan, dakika = m.default_minutes): PlanMekani => ({ id: m.id, lat: m.lat, lng: m.lng, dakika: durakDakikasi(dakika) });
 
 export function planiHesapla(p: { mekanlar: Mekan[]; gunler: Gun[]; duraklar: Durak[]; baslangic?: Konum | null }): PlanSonucu {
   const atanmis = new Set(p.duraklar.map((d) => d.place_ref));
@@ -41,7 +42,7 @@ export function usePlaniUygula(seyahatId: string) {
         for (const m of g.mekanlar) {
           const k = sonAnahtar(anahtarlar);
           anahtarlar = [...anahtarlar, k];
-          satirlar.push({ trip_id: seyahatId, day_id: g.gunId, place_ref: m.id, order_key: k, minutes: durakDakikasi(m.dakika) });
+          satirlar.push({ trip_id: seyahatId, day_id: g.gunId, place_ref: m.id, order_key: k, minutes: m.dakika });
         }
       }
       if (satirlar.length > 0) {

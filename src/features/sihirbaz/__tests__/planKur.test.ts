@@ -62,6 +62,14 @@ describe('planKur (#139 KK5)', () => {
     expect(p.gunler[1].mekanlar).toHaveLength(3);
   });
 
+  it('hiçbir güne sığmayan mekan önceki günün kalan kapasitesini boşa harcatmaz', () => {
+    // 1. gün 8 saat dolu (mevcut); 10 saatlik mekan hiçbir güne sığmaz; ardından gelen 30 dk'lık mekan 1. günün kalanına girer.
+    const mevcut = new Map([['g1', [m('dolu', 39.7637, 30.5243, 480)]]]);
+    const p = planKur([m('dev', 39.7637, 30.5243, 600), m('kucuk', 39.7638, 30.5244, 30)], gunler, { mevcut });
+    expect(p.atanmamis.map((x) => x.id)).toEqual(['dev']);
+    expect(p.gunler[0].mekanlar.map((x) => x.id)).toEqual(['kucuk']);
+  });
+
   it('en yakın komşu: başlangıçtan en yakına; başlangıç yoksa en batıdan', () => {
     expect(enYakinKomsu(odunpazari, { lat: 39.7621, lng: 30.5281 })[0].id).toBe('o3');
     expect(enYakinKomsu([...odunpazari, ...sazova], null)[0].id).toBe('s1');

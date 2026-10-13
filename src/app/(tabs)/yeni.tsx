@@ -1,5 +1,5 @@
-import { router } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { router, useFocusEffect } from 'expo-router';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Linking, StyleSheet, Text, View } from 'react-native';
 
 import { MekanPaneli } from '@/components/mekan/MekanPaneli';
@@ -34,9 +34,15 @@ export default function SihirbazEkrani() {
   const [ad, setAd] = useState<string | null>(null);
   const [aralik, setAralik] = useState<Aralik>(null);
   const [tripId, setTripId] = useState<string | null>(null);
+  useFocusEffect(
+    useCallback(() => {
+      if (!tripId) baslangicAni.current = Date.now();
+    }, [tripId]),
+  );
   const [hata, setHata] = useState<string | null>(null);
-  // KK8: sihirbaz başlangıcı → plan yazılana kadar süre (ölçüm: < 3 dk).
-  const [baslangicAni] = useState(() => Date.now());
+  // KK8: sihirbaz başlangıcı → plan yazılana kadar süre (ölçüm: < 3 dk). Seyahat henüz kurulmadıysa ekran her odağa
+  // geldiğinde sıfırlanır (sekmeden çıkıp dönünce süre uzun ölçülmesin).
+  const baslangicAni = useRef(0);
 
   const sehirler = useSehirler();
   const olustur = useSeyahatOlustur();
@@ -126,7 +132,7 @@ export default function SihirbazEkrani() {
       const atanan = plan.gunler.reduce((t0, g) => t0 + g.mekanlar.length, 0);
       const doluGun = plan.gunler.filter((g) => g.mekanlar.length > 0).length;
       olayYaz('sihirbaz_bitti', tripId, { mekan: mekanlar.data.length });
-      olayYaz('plan_kuruldu', tripId, { mekan: atanan, gun: doluGun, atanmamis: plan.atanmamis.length, bolge: plan.bolgeSayisi, sure_sn: Math.round((Date.now() - baslangicAni) / 1000) });
+      olayYaz('plan_kuruldu', tripId, { mekan: atanan, gun: doluGun, atanmamis: plan.atanmamis.length, bolge: plan.bolgeSayisi, sure_sn: Math.round((Date.now() - baslangicAni.current) / 1000) });
       router.replace({ pathname: '/seyahat/[id]/(sekmeler)/program', params: { id: tripId, planKuruldu: '1', atanmamis: String(plan.atanmamis.length) } });
     } catch {
       setHata(t('sihirbaz.onerilenler.planHata'));
