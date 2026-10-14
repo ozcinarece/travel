@@ -2157,4 +2157,108 @@ begin
 end $$;
 reset role;
 
+-- #192 Önerilen gezi rotası önbelleği: yayınlı gezide herkes okur, yayınlanmamışta yalnız admin; yazma yalnız service_role; durak
+-- değişince o günün bacakları silinir (süre değişikliği silmez); "Seyahatime al" bacakları fetched_at korunarak walk_cache'e
+-- kopyalar (≤ 30 gün, üye, yayınlı gezi); günlük temizlik 31 günü aşanları siler.
+reset role;
+\set RU '''aaaaaaaa-1920-0000-0000-000000000001'''
+\set RN '''aaaaaaaa-1920-0000-0000-000000000002'''
+insert into auth.users (id, is_anonymous) values (:RU, false), (:RN, false);
+insert into public.profiles (id, name, username) values (:RU, 'Rota', 'rota192'), (:RN, 'Disari', 'disari192');
+insert into public.sehirler (id, ad, slug, lat, lng, yayin) values ('19201920-0000-4000-8000-000000000001', 'Rotalı', 'rotali-192', 39.77, 30.52, true);
+insert into public.geziler (id, sehir_id, baslik, slug, yayin) values
+  ('19201920-0000-4000-8000-000000000010', '19201920-0000-4000-8000-000000000001', 'Yayınlı rota', 'yayinli-rota-192', true),
+  ('19201920-0000-4000-8000-000000000020', '19201920-0000-4000-8000-000000000001', 'Taslak rota', 'taslak-rota-192', false);
+insert into public.gezi_gunleri (id, gezi_id, sira) values
+  ('19201920-0000-4000-8000-000000000011', '19201920-0000-4000-8000-000000000010', 1),
+  ('19201920-0000-4000-8000-000000000021', '19201920-0000-4000-8000-000000000020', 1);
+insert into public.gezi_duraklari (id, gezi_gun_id, sira, ad, lat, lng) values
+  ('19201920-0000-4000-8000-0000000000a1', '19201920-0000-4000-8000-000000000011', 1, 'A', 39.770, 30.520),
+  ('19201920-0000-4000-8000-0000000000a2', '19201920-0000-4000-8000-000000000011', 2, 'B', 39.772, 30.523),
+  ('19201920-0000-4000-8000-0000000000a3', '19201920-0000-4000-8000-000000000011', 3, 'C', 39.775, 30.526),
+  ('19201920-0000-4000-8000-0000000000b1', '19201920-0000-4000-8000-000000000021', 1, 'T1', 39.770, 30.520),
+  ('19201920-0000-4000-8000-0000000000b2', '19201920-0000-4000-8000-000000000021', 2, 'T2', 39.772, 30.523);
+create function pg_temp.rota_doldur() returns void language sql as $$
+  insert into public.gezi_rota_onbellek (gezi_gun_id, kimden_durak_id, kime_durak_id, mod, polyline, saniye, metre, fetched_at) values
+    ('19201920-0000-4000-8000-000000000011', '19201920-0000-4000-8000-0000000000a1', '19201920-0000-4000-8000-0000000000a2', 'WALK', 'abc', 300, 400, now() - interval '2 days'),
+    ('19201920-0000-4000-8000-000000000011', '19201920-0000-4000-8000-0000000000a2', '19201920-0000-4000-8000-0000000000a3', 'WALK', 'def', 360, 450, now() - interval '40 days'),
+    ('19201920-0000-4000-8000-000000000021', '19201920-0000-4000-8000-0000000000b1', '19201920-0000-4000-8000-0000000000b2', 'WALK', 'ghi', 300, 400, now())
+  on conflict do nothing;
+$$;
+set role service_role;
+select pg_temp.rota_doldur();
+set role anon;
+do $$
+begin
+  assert (select count(*) from public.gezi_rota_onbellek where gezi_gun_id = '19201920-0000-4000-8000-000000000011') = 2, 'anon yayınlı gezinin rotasını okur';
+  assert (select count(*) from public.gezi_rota_onbellek where gezi_gun_id = '19201920-0000-4000-8000-000000000021') = 0, 'anon taslak gezinin rotasını göremez';
+end $$;
+set role authenticated;
+select pg_temp.as_user(:RN);
+do $$ begin assert (select count(*) from public.gezi_rota_onbellek where gezi_gun_id = '19201920-0000-4000-8000-000000000021') = 0, 'admin olmayan taslağı göremez'; end $$;
+select pg_temp.hata_bekle($$insert into public.gezi_rota_onbellek (gezi_gun_id, kimden_durak_id, kime_durak_id, mod, polyline, saniye, metre) values ('19201920-0000-4000-8000-000000000011', '19201920-0000-4000-8000-0000000000a1', '19201920-0000-4000-8000-0000000000a3', 'WALK', 'x', 1, 1)$$, '42501');
+select pg_temp.hata_bekle($$delete from public.gezi_rota_onbellek$$, '42501');
+select pg_temp.as_email(:E, 'ozcinar.ece@gmail.com');
+do $$ begin assert (select count(*) from public.gezi_rota_onbellek where gezi_gun_id = '19201920-0000-4000-8000-000000000021') = 1, 'admin taslağın rotasını görür (BO önizleme)'; end $$;
+reset role;
+
+-- KK7: süre değişikliği silmez; sıra, yeni durak, silinen durak o günün bacaklarını siler (öbür güne dokunmaz).
+update public.gezi_duraklari set sure_dk = 60, ad = 'A2' where id = '19201920-0000-4000-8000-0000000000a1';
+do $$ begin assert (select count(*) from public.gezi_rota_onbellek where gezi_gun_id = '19201920-0000-4000-8000-000000000011') = 2, 'süre / ad değişikliği bacakları silmez'; end $$;
+update public.gezi_duraklari set sira = 9 where id = '19201920-0000-4000-8000-0000000000a3';
+do $$
+begin
+  assert (select count(*) from public.gezi_rota_onbellek where gezi_gun_id = '19201920-0000-4000-8000-000000000011') = 0, 'sıra değişince günün bacakları silinir';
+  assert (select count(*) from public.gezi_rota_onbellek where gezi_gun_id = '19201920-0000-4000-8000-000000000021') = 1, 'öbür gün etkilenmez';
+end $$;
+update public.gezi_duraklari set sira = 3 where id = '19201920-0000-4000-8000-0000000000a3';
+select pg_temp.rota_doldur();
+insert into public.gezi_duraklari (id, gezi_gun_id, sira, ad, lat, lng) values ('19201920-0000-4000-8000-0000000000a4', '19201920-0000-4000-8000-000000000011', 4, 'D', 39.778, 30.53);
+do $$ begin assert (select count(*) from public.gezi_rota_onbellek where gezi_gun_id = '19201920-0000-4000-8000-000000000011') = 0, 'yeni durak günün bacaklarını siler'; end $$;
+select pg_temp.rota_doldur();
+delete from public.gezi_duraklari where id = '19201920-0000-4000-8000-0000000000a4';
+do $$ begin assert (select count(*) from public.gezi_rota_onbellek where gezi_gun_id = '19201920-0000-4000-8000-000000000011') = 0, 'silinen durak günün bacaklarını siler'; end $$;
+select pg_temp.rota_doldur();
+
+-- KK5: Seyahatime al — üye kopyalar; 30 günü geçen bacak ve taslak gezinin bacağı kopyalanmaz; fetched_at korunur; walk_cache'teki
+-- daha taze satır ezilmez; üye olmayan kopyalayamaz.
+set role authenticated;
+select pg_temp.as_user(:RU);
+insert into public.trips (id, owner_id, city_place_id, city_label, lat, lng, tz) values ('19201920-0000-4000-8000-0000000000f1', :RU, 'ChIJ-rotali-192', 'Rotalı', 39.77, 30.52, 'Europe/Istanbul');
+reset role;
+insert into public.walk_cache (trip_id, from_key, to_key, seconds, meters, polyline, mode, fetched_at) values
+  ('19201920-0000-4000-8000-0000000000f1', 'ChIJ-durak-T1xx', 'ChIJ-durak-T2xx', 999, 999, 'taze', 'WALK', now() + interval '1 hour');
+set role authenticated;
+select pg_temp.as_user(:RU);
+do $$
+declare
+  eslesme jsonb := '[{"durak_id":"19201920-0000-4000-8000-0000000000a1","place_id":"ChIJ-durak-Axxx"},{"durak_id":"19201920-0000-4000-8000-0000000000a2","place_id":"ChIJ-durak-Bxxx"},{"durak_id":"19201920-0000-4000-8000-0000000000a3","place_id":"ChIJ-durak-Cxxx"},{"durak_id":"19201920-0000-4000-8000-0000000000b1","place_id":"ChIJ-durak-T1xx"},{"durak_id":"19201920-0000-4000-8000-0000000000b2","place_id":"ChIJ-durak-T2xx"},{"durak_id":"x","place_id":"kisa"}]';
+  n integer;
+begin
+  n := public.gezi_rotasini_seyahate_kopyala('19201920-0000-4000-8000-0000000000f1', eslesme);
+  assert n = 1, 'yalnız taze ve yayınlı bacak kopyalanır: ' || n;
+  assert (select seconds from public.walk_cache where trip_id = '19201920-0000-4000-8000-0000000000f1' and from_key = 'ChIJ-durak-Axxx' and to_key = 'ChIJ-durak-Bxxx') = 300, 'bacak walk_cache''te';
+  assert (select fetched_at from public.walk_cache where from_key = 'ChIJ-durak-Axxx' and to_key = 'ChIJ-durak-Bxxx') < now() - interval '1 day', 'fetched_at korunur';
+  assert not exists (select 1 from public.walk_cache where from_key = 'ChIJ-durak-Bxxx'), '30 günü geçen bacak kopyalanmaz';
+  assert (select seconds from public.walk_cache where from_key = 'ChIJ-durak-T1xx') = 999, 'taslak gezinin bacağı kopyalanmaz, var olan satır ezilmez';
+end $$;
+select pg_temp.as_user(:RN);
+select pg_temp.hata_bekle($$select public.gezi_rotasini_seyahate_kopyala('19201920-0000-4000-8000-0000000000f1', '[]'::jsonb)$$, '42501');
+select pg_temp.hata_bekle($$select public.rota_onbellegi_temizle()$$, '42501');
+
+-- KK6: günlük temizlik (oturumsuz, cron) 31 günü aşan satırları siler: rota önbelleği ve walk_cache.
+reset role;
+update public.walk_cache set fetched_at = now() - interval '32 days' where trip_id = '19201920-0000-4000-8000-0000000000f1' and from_key = 'ChIJ-durak-T1xx';
+select public.rota_onbellegi_temizle();
+do $$
+begin
+  assert not exists (select 1 from public.gezi_rota_onbellek where kimden_durak_id = '19201920-0000-4000-8000-0000000000a2'), '40 günlük rota satırı silindi';
+  assert exists (select 1 from public.gezi_rota_onbellek where kimden_durak_id = '19201920-0000-4000-8000-0000000000a1'), '2 günlük satır kalır';
+  assert not exists (select 1 from public.walk_cache where from_key = 'ChIJ-durak-T1xx'), '32 günlük walk_cache satırı silindi';
+  assert exists (select 1 from public.walk_cache where from_key = 'ChIJ-durak-Axxx'), 'kopyalanan (2 günlük) walk_cache satırı kalır';
+end $$;
+-- Gezi silinince rota satırları da gider (cascade).
+delete from public.geziler where id = '19201920-0000-4000-8000-000000000010';
+do $$ begin assert not exists (select 1 from public.gezi_rota_onbellek where gezi_gun_id = '19201920-0000-4000-8000-000000000011'), 'cascade'; end $$;
+
 \echo 'rls_test: TÜM TESTLER GEÇTİ'
