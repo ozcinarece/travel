@@ -4,7 +4,7 @@
 // aynı formda açılır: ekleyen ya da sahip düzenler/siler, diğer üyeler yalnız görür. Seçimler (para birimi, ödeyen, durak)
 // iç içe pencere açmadan formun içinde açılır.
 import { Image } from 'expo-image';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { ActivityIndicator, KeyboardAvoidingView, Modal, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
@@ -34,7 +34,7 @@ import {
   type HarcamaKategorisi,
 } from '@/features/harcama/hesap';
 import { kisiler as kisiKaynagi } from '@/features/harcama/metin';
-import { fisSecVeYukle, useFisAdresi, useHarcamaKaydet, useHarcamalar, useHarcamaSil } from '@/features/harcama/sorgular';
+import { fisSecVeYukle, fisSil, useFisAdresi, useHarcamaKaydet, useHarcamalar, useHarcamaSil } from '@/features/harcama/sorgular';
 import { useMekanlar } from '@/features/mekanlar/sorgular';
 import { t } from '@/i18n';
 import { onayIste } from '@/lib/onay';
@@ -115,6 +115,15 @@ function FormIcerigi({ onKapat, seyahat, uyeler, harcama, durakId, onBildirim }:
   const [durak, setDurak] = useState<string | null>(ilkDurak);
   const [fis, setFis] = useState<string | null>(harcama?.fis_yolu ?? null);
   const [fisYukleniyor, setFisYukleniyor] = useState(false);
+  // Bu açılışta yüklenen ama kaydedilmeyen fişler form kapanınca silinir (kovada sahipsiz dosya kalmasın).
+  const yuklenenler = useRef<string[]>([]);
+  const kaydedilen = useRef<string | null | undefined>(undefined);
+  useEffect(
+    () => () => {
+      for (const yol of yuklenenler.current) if (yol !== kaydedilen.current) void fisSil(yol);
+    },
+    [],
+  );
   const [acilan, setAcilan] = useState<Acilan>(null);
   const [hata, setHata] = useState<string | null>(null);
 
@@ -166,6 +175,9 @@ function FormIcerigi({ onKapat, seyahat, uyeler, harcama, durakId, onBildirim }:
       },
       {
         onSuccess: () => {
+          kaydedilen.current = fis;
+          // Fiş değiştiyse ya da kaldırıldıysa eski dosya silinir.
+          if (harcama?.fis_yolu && harcama.fis_yolu !== fis) void fisSil(harcama.fis_yolu);
           onBildirim?.(harcama ? t('harcama.form.guncellendi') : t('harcama.form.eklendi'));
           onKapat();
         },
@@ -178,7 +190,7 @@ function FormIcerigi({ onKapat, seyahat, uyeler, harcama, durakId, onBildirim }:
     if (!harcama) return;
     const onay = await onayIste(t('harcama.form.silBaslik'), t('harcama.form.silMetin'), t('harcama.form.sil'), t('genel.vazgec'));
     if (!onay) return;
-    sil.mutate(harcama.id, {
+    sil.mutate({ id: harcama.id, fisYolu: harcama.fis_yolu }, {
       onSuccess: () => {
         onBildirim?.(t('harcama.form.silindi'));
         onKapat();
@@ -192,7 +204,10 @@ function FormIcerigi({ onKapat, seyahat, uyeler, harcama, durakId, onBildirim }:
     setHata(null);
     try {
       const yol = await fisSecVeYukle(seyahat.id);
-      if (yol) setFis(yol);
+      if (yol) {
+        yuklenenler.current.push(yol);
+        setFis(yol);
+      }
     } catch {
       setHata(t('harcama.form.fisYuklenemedi'));
     } finally {
@@ -466,7 +481,7 @@ function FormIcerigi({ onKapat, seyahat, uyeler, harcama, durakId, onBildirim }:
             disabled={fisYukleniyor}
             style={({ pressed }) => [s.fisDugme, fis && s.fisVar, pressed && { opacity: 0.8 }]}
           >
-            {fisYukleniyor ? <ActivityIndicator color={renk.ana} /> : <Ikon ad={fis ? 'tik' : 'kamera'} boyut={20} renk={fis ? renk.basariMetin : renk.ana} kalinlik={2.2} />}
+            {fisYukleniyor ? <ActivityIndicator color={renk.ana} /> : <Ikon ad={fis ? 'tik' : 'galeri'} boyut={20} renk={fis ? renk.basariMetin : renk.ana} kalinlik={2.2} />}
           </Pressable>
           <Pressable accessibilityRole="button" disabled={!hazir} onPress={kaydetBas} style={({ pressed }) => [s.kaydet, !hazir && { opacity: 0.45 }, pressed && { opacity: 0.85 }]}>
             {kaydet.isPending ? <ActivityIndicator color={renk.zemin} /> : <Text style={s.kaydetMetin}>{t('harcama.form.kaydet')}</Text>}

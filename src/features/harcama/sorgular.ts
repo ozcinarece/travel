@@ -85,14 +85,16 @@ export function useHarcamaKaydet(seyahatId: string) {
   });
 }
 
+/** Harcama silinince fiş dosyası da silinir (fişte kart bilgisi olabilir); geri alınan harcama fişsiz döner. */
 export function useHarcamaSil(seyahatId: string) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (id: string) => {
+    mutationFn: async ({ id, fisYolu }: { id: string; fisYolu: string | null }) => {
       const { error } = await supabase.from('harcamalar').delete().eq('id', id);
       if (error) throw error;
+      if (fisYolu) await fisSil(fisYolu);
     },
-    onMutate: (id) => qc.setQueryData<Harcama[]>(harcamaAnahtari(seyahatId), (eski) => eski?.filter((h) => h.id !== id)),
+    onMutate: ({ id }) => qc.setQueryData<Harcama[]>(harcamaAnahtari(seyahatId), (eski) => eski?.filter((h) => h.id !== id)),
     onSettled: () => {
       qc.invalidateQueries({ queryKey: harcamaAnahtari(seyahatId) });
       qc.invalidateQueries({ queryKey: ['degisiklikler', seyahatId] });
@@ -174,6 +176,15 @@ export async function fisSecVeYukle(seyahatId: string): Promise<string | null> {
   const { error } = await supabase.storage.from('fisler').upload(yol, govde, { contentType: dosya.mimeType ?? 'image/jpeg', upsert: false });
   if (error) throw error;
   return yol;
+}
+
+/** Fiş dosyasını siler (yükleyen ya da seyahat sahibi; olmazsa sessiz geçer — kayıt zaten bağlı değil). */
+export async function fisSil(yol: string): Promise<void> {
+  try {
+    await supabase.storage.from('fisler').remove([yol]);
+  } catch {
+    // dosya silinemedi: harcama kaydı fişe bağlı değil, akış sürer
+  }
 }
 
 /** Özel kovadaki fiş için kısa ömürlü imzalı adres (yalnız üyeler alabilir). */

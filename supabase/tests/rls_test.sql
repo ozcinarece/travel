@@ -1730,8 +1730,9 @@ begin
 end $$;
 reset role;
 
--- #183 Harcamalar: üye okur/ekler; ekleyen ya da sahip düzenler/siler; paylar toplamı = harcama (₺); ödeşmeyi iki taraf
--- işaretler/siler; IBAN yalnız seyahat arkadaşlarına görünür; fiş kovası yalnız üyelere; Geri al (ekleme · silme · düzenleme).
+-- #183 Harcamalar: üye okur/ekler; ekleyen ya da sahip düzenler/siler; paylar toplamı = harcama (₺) ve yalnız harcama_kaydet'le
+-- yazılır; doğrudan güncelleme akışa düşer; ödeşmeyi iki taraf işaretler/siler (ayrılan üyeyle de; açık borcu aşmadan); IBAN
+-- yalnız borçlu karşı tarafa görünür; fiş kovası yalnız üyelere (silme: yükleyen ya da sahip); Geri al (ekleme · silme · düzenleme).
 reset role;
 \set HS '''aaaaaaaa-1830-0000-0000-000000000001'''
 \set HU '''aaaaaaaa-1830-0000-0000-000000000002'''
@@ -1817,7 +1818,7 @@ select pg_temp.hata_bekle(format('insert into public.harcamalar (trip_id, tutar_
 -- Mert (üye, ekleyen değil, sahip değil) Ayşe'nin harcamasını silemez, düzenleyemez, payına dokunamaz.
 select pg_temp.as_user(:HV);
 delete from public.harcamalar where id = :'h1';
-update public.harcama_paylari set pay_kurus = 0 where harcama_id = :'h1';
+select pg_temp.hata_bekle(format('update public.harcama_paylari set pay_kurus = 0 where harcama_id = %L', current_setting('test.h1')), '42501');
 do $$
 declare h uuid := current_setting('test.h1')::uuid;
 begin
@@ -1833,10 +1834,18 @@ select pg_temp.hata_bekle(format('delete from public.harcama_paylari where harca
 select pg_temp.hata_bekle(format('select public.degisikligi_geri_al(%s)',
   (select id from public.changes where entity = 'harcamalar' and entity_id = current_setting('test.h1') and old is null)), '42501');
 
--- Ekleyen, payları toplamı bozacak şekilde tek başına değiştiremez (işlem sonunda denetlenir).
+-- Ekleyen bile payları doğrudan yazamaz (toplamı koruyarak kişiler arasında kaydırma da yok): yalnız harcama_kaydet.
 select pg_temp.as_user(:HU);
-select pg_temp.hata_bekle(format($q$do $b$ begin update public.harcama_paylari set pay_kurus = 1 where harcama_id = %L and user_id = %L; set constraints all immediate; end $b$$q$,
-  current_setting('test.h1'), 'aaaaaaaa-1830-0000-0000-000000000003'), '23514');
+select pg_temp.hata_bekle(format('update public.harcama_paylari set pay_kurus = pay_kurus where harcama_id = %L', current_setting('test.h1')), '42501');
+select pg_temp.hata_bekle(format('delete from public.harcama_paylari where harcama_id = %L', current_setting('test.h1')), '42501');
+-- Doğrudan güncelleme (PATCH) akışa düşer: updated_at ilerler, değişen alan kaydedilir; fiş başka klasörden olamaz.
+update public.harcamalar set kategori = 'bilet' where id = :'h1';
+do $$
+declare h uuid := current_setting('test.h1')::uuid;
+begin
+  assert exists (select 1 from public.changes where entity = 'harcamalar' and entity_id = h::text and field = 'kategori' and new = '"bilet"'), 'doğrudan güncelleme akışa düştü';
+end $$;
+select pg_temp.hata_bekle(format('update public.harcamalar set fis_yolu = %L where id = %L', 'baska/fis.jpg', current_setting('test.h1')), '23514');
 
 -- Sahip düzenler: 120 ₺, Mert hariç ikiye; değişmeyen pay yeniden yazılmaz, Mert'in payı silinir.
 select pg_temp.as_user(:HS);
@@ -1884,13 +1893,16 @@ begin
   assert not exists (select 1 from public.changes where entity = 'harcamalar' and entity_id = h::text and field = 'stop_id'), 'FK boşalması akışa düşmez';
 end $$;
 
--- Ödeşme: iki taraftan biri işaretler/siler; üçüncü kişi işaretleyemez/silemez; kendine ödeşme ve dışarıdan taraf yok.
+-- Ödeşme: iki taraftan biri işaretler/siler; üçüncü kişi işaretleyemez/silemez; kendine ödeşme, dışarıdan taraf ve açık borcu
+-- aşan tutar yok.
 select pg_temp.as_user(:HV);
-insert into public.odesmeler (trip_id, kimden, kime, tl_kurus) values (:'h_trip', :HV, :HU, 3333);
 select pg_temp.hata_bekle(format('insert into public.odesmeler (trip_id, kimden, kime, tl_kurus) values (%L, %L, %L, 1)',
   current_setting('test.h_trip'), 'aaaaaaaa-1830-0000-0000-000000000003', 'aaaaaaaa-1830-0000-0000-000000000003'), '23514');
 select pg_temp.hata_bekle(format('insert into public.odesmeler (trip_id, kimden, kime, tl_kurus) values (%L, %L, %L, 1)',
   current_setting('test.h_trip'), 'aaaaaaaa-1830-0000-0000-000000000003', 'aaaaaaaa-1830-0000-0000-000000000004'), '22023');
+select pg_temp.hata_bekle(format('insert into public.odesmeler (trip_id, kimden, kime, tl_kurus) values (%L, %L, %L, 3334)',
+  current_setting('test.h_trip'), 'aaaaaaaa-1830-0000-0000-000000000003', 'aaaaaaaa-1830-0000-0000-000000000002'), '22023');
+insert into public.odesmeler (trip_id, kimden, kime, tl_kurus) values (:'h_trip', :HV, :HU, 3333);
 select pg_temp.as_user(:HS);
 select pg_temp.hata_bekle(format('insert into public.odesmeler (trip_id, kimden, kime, tl_kurus) values (%L, %L, %L, 1)',
   current_setting('test.h_trip'), 'aaaaaaaa-1830-0000-0000-000000000003', 'aaaaaaaa-1830-0000-0000-000000000002'), '42501');
@@ -1905,19 +1917,23 @@ do $$ begin assert not exists (select 1 from public.odesmeler where trip_id = cu
 select public.degisikligi_geri_al((select id from public.changes where entity = 'odesmeler' and trip_id = current_setting('test.h_trip')::uuid and new is null));
 do $$ begin assert (select tl_kurus from public.odesmeler where trip_id = current_setting('test.h_trip')::uuid) = 3333, 'ödeşme silmesi geri alındı'; end $$;
 
--- IBAN: sahibi yazar; seyahat arkadaşı görür; dışarıdan biri göremez, değiştiremez; biçim denetlenir.
+-- IBAN: sahibi yazar; yalnız ona borcu olan seyahat arkadaşı görür (Ece −33,33; Mert ödeşti, 0); dışarıdan biri göremez,
+-- değiştiremez; biçim denetlenir.
 insert into public.odeme_bilgileri (iban) values ('TR330006100519786457841326');
 select pg_temp.hata_bekle($$insert into public.odeme_bilgileri (iban) values ('TR33 0006') on conflict (user_id) do update set iban = excluded.iban$$, '23514');
+select pg_temp.as_user(:HS);
+do $$ begin assert (select iban from public.odeme_bilgileri where user_id = 'aaaaaaaa-1830-0000-0000-000000000002') = 'TR330006100519786457841326', 'borçlu karşı taraf IBAN görür'; end $$;
 select pg_temp.as_user(:HV);
-do $$ begin assert (select iban from public.odeme_bilgileri where user_id = 'aaaaaaaa-1830-0000-0000-000000000002') = 'TR330006100519786457841326', 'seyahat arkadaşı IBAN görür'; end $$;
+do $$ begin assert not exists (select 1 from public.odeme_bilgileri where user_id = 'aaaaaaaa-1830-0000-0000-000000000002'), 'borcu olmayan arkadaş IBAN göremez'; end $$;
 select pg_temp.as_user(:HN);
 update public.odeme_bilgileri set iban = 'TR000000000000000000000000';
 do $$ begin assert not exists (select 1 from public.odeme_bilgileri where user_id = 'aaaaaaaa-1830-0000-0000-000000000002'), 'dışarıdan biri IBAN göremez'; end $$;
 select pg_temp.hata_bekle($$insert into public.odeme_bilgileri (user_id, iban) values ('aaaaaaaa-1830-0000-0000-000000000002', 'TR000000000000000000000000')$$, '42501');
 
--- Fiş kovası: üye yükler ve görür; dışarıdan biri göremez, yükleyemez; klasörü seyahat olmayan yol reddedilir.
+-- Fiş kovası: üye yükler ve görür; dışarıdan biri göremez, yükleyemez; klasörü seyahat olmayan yol reddedilir; silme yalnız
+-- yükleyen ya da seyahatin sahibi.
 select pg_temp.as_user(:HU);
-select format('insert into storage.objects (bucket_id, name) values (%L, %L)', 'fisler', current_setting('test.h_trip') || '/fis1.jpg') as fis_ekle \gset
+select format('insert into storage.objects (bucket_id, name, owner_id) values (%L, %L, %L)', 'fisler', current_setting('test.h_trip') || '/fis1.jpg', 'aaaaaaaa-1830-0000-0000-000000000002') as fis_ekle \gset
 :fis_ekle;
 select pg_temp.hata_bekle($$insert into storage.objects (bucket_id, name) values ('fisler', 'baska/fis.jpg')$$, '42501');
 select pg_temp.hata_bekle($$insert into storage.objects (bucket_id, name) values ('fisler', 'fis.jpg')$$, '42501');
@@ -1926,6 +1942,24 @@ do $$ begin assert (select count(*) from storage.objects where bucket_id = 'fisl
 select pg_temp.as_user(:HN);
 do $$ begin assert (select count(*) from storage.objects where bucket_id = 'fisler') = 0, 'dışarıdan biri fişi göremez'; end $$;
 select pg_temp.hata_bekle(format('insert into storage.objects (bucket_id, name) values (%L, %L)', 'fisler', current_setting('test.h_trip') || '/fis2.jpg'), '42501');
+select pg_temp.as_user(:HV);
+delete from storage.objects where bucket_id = 'fisler';
+do $$ begin assert (select count(*) from storage.objects where bucket_id = 'fisler') = 1, 'yüklemeyen üye fişi silemez'; end $$;
+select pg_temp.as_user(:HU);
+delete from storage.objects where bucket_id = 'fisler';
+do $$ begin assert (select count(*) from storage.objects where bucket_id = 'fisler') = 0, 'yükleyen fişi siler'; end $$;
+
+-- Ayrılan üyeyle kalan borç kapanır: Mert 30 ₺ borçluyken seyahatten ayrılır, Ayşe "Ödendi işaretle"; fazlası reddedilir.
+select pg_temp.as_user(:HU);
+select public.harcama_kaydet(:'h_trip', null, 'Taksi', 6000, 'TRY', 6000, 'ulasim', :HU, null, null,
+  jsonb_build_array(jsonb_build_object('user_id', :HU, 'pay_kurus', 3000), jsonb_build_object('user_id', :HV, 'pay_kurus', 3000)));
+select pg_temp.as_user(:HV);
+delete from public.members where trip_id = :'h_trip' and user_id = auth.uid();
+select pg_temp.as_user(:HU);
+insert into public.odesmeler (trip_id, kimden, kime, tl_kurus) values (:'h_trip', :HV, :HU, 3000);
+select pg_temp.hata_bekle(format('insert into public.odesmeler (trip_id, kimden, kime, tl_kurus) values (%L, %L, %L, 1)',
+  current_setting('test.h_trip'), 'aaaaaaaa-1830-0000-0000-000000000003', 'aaaaaaaa-1830-0000-0000-000000000002'), '22023');
+do $$ begin assert public.seyahat_net(current_setting('test.h_trip')::uuid, 'aaaaaaaa-1830-0000-0000-000000000003') = 0, 'ayrılan üyenin borcu kapandı'; end $$;
 
 -- Seyahat silinince harcama, pay ve ödeşmeler gider (ertelenmiş toplam denetimi engel olmaz).
 select pg_temp.as_user(:HS);

@@ -1,6 +1,7 @@
 // #183 KK6 (kanvas 25c): Bakiyeler — kişi başına net durum kartları; "Kim kime" sadeleştirilmiş (en az transfer); alan kişi
 // "Ödendi işaretle", veren kişi "Ödedim" → ödeşme kaydı; "Ödeşmeler" geçmişi (iki taraf geri alabilir). KK7: borçluya alacaklının
-// IBAN'ı yazılır; IBAN profil ayarlarından eklenir. Hatırlatma şimdilik uygulama içi (yerel bildirim yeni build ister).
+// IBAN'ı yazılır (yalnız ona borçlu olan görür); IBAN profil ayarlarından eklenir. Hatırlatma uygulama içi: "Gezi bitince
+// Bakiyeler burada seni bekler" (gerçek bildirim push işiyle ayrı).
 import { router } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
@@ -167,7 +168,6 @@ export default function BakiyelerEkrani() {
 
         <View style={s.gece}>
           <Text style={s.geceBaslik}>{t('harcama.bakiye.hatirlatmaBaslik')}</Text>
-          <Text style={s.geceMetin}>{t('harcama.bakiye.hatirlatmaMetin')}</Text>
           {benimIban ? <Text style={[s.geceMetin, { color: renk.zemin }]}>{t('harcama.bakiye.ibaninVar', { iban: ibanBicimle(benimIban) })}</Text> : null}
           <View style={{ flexDirection: 'row', gap: 8 }}>
             <Pressable accessibilityRole="button" onPress={() => router.push('/profil-duzenle')} style={({ pressed }) => [s.geceDugme, { backgroundColor: benimIban ? BEYAZ_14 : renk.vurgu }, pressed && { opacity: 0.85 }]}>

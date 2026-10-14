@@ -75,7 +75,9 @@ export type IkonAdi =
   | 'tramvay'
   | 'bilet'
   | 'kisiler'
-  | 'kapat';
+  | 'kapat'
+  // #187: fiş galeriden — resim.
+  | 'galeri';
 
 type Props = {
   ad: IkonAdi;
@@ -110,6 +112,12 @@ export function Ikon({ ad, boyut = 24, renk, kalinlik = 2, dolgu }: Props) {
         </>
       ) : ad === 'kapat' ? (
         <Path d="M6 6l12 12M18 6L6 18" {...ortak} />
+      ) : ad === 'galeri' ? (
+        <>
+          <Rect x={3} y={5} width={18} height={14} rx={2.5} {...ortak} />
+          <Circle cx={9} cy={10} r={1.6} {...ortak} />
+          <Path d="M21 16l-5-5-8 8" {...ortak} />
+        </>
       ) : ad === 'saat' ? (
         <>
           <Circle cx={12} cy={13} r={8} {...ortak} />

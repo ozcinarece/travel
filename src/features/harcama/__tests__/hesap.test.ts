@@ -188,6 +188,43 @@ describe('#183 KK6 bakiyeler ve sadeleştirme', () => {
     }
   });
 
+  it('n ≤ 8: transfer sayısı kaba kuvvetle bulunan en azla aynı (sıfır toplamlı kümelere en iyi bölünme)', () => {
+    // En az transfer = sıfır olmayan kişi sayısı − en çok sıfır toplamlı küme sayısı; bütün bölünmeler denenir.
+    const enAz = (degerler: number[]): number => {
+      const v = degerler.filter((x) => x !== 0);
+      let enIyi = 0;
+      const ara = (kalan: number[], kume: number) => {
+        if (kalan.length === 0) {
+          enIyi = Math.max(enIyi, kume);
+          return;
+        }
+        const [ilk, ...diger] = kalan;
+        for (let m = 0; m < 1 << diger.length; m++) {
+          let t = v[ilk];
+          diger.forEach((j, i) => {
+            if (m & (1 << i)) t += v[j];
+          });
+          if (t === 0) ara(diger.filter((_, i) => !(m & (1 << i))), kume + 1);
+        }
+      };
+      ara(v.map((_, i) => i), 0);
+      return v.length - enIyi;
+    };
+    let tohum = 23;
+    const rastgele = (n: number) => {
+      tohum = (tohum * 1103515245 + 12345) % 2 ** 31;
+      return tohum % n;
+    };
+    for (let i = 0; i < 250; i++) {
+      const n = 2 + rastgele(7);
+      // Küçük değerler: eşleşen alt kümeler sık çıksın.
+      const degerler = Array.from({ length: n - 1 }, () => (rastgele(11) - 5) * 100);
+      degerler.push(-degerler.reduce((a, b) => a + b, 0));
+      const net = new Map(degerler.map((v, j) => [`k${j}`, v]));
+      expect(sadelestir(net)).toHaveLength(enAz(degerler));
+    }
+  });
+
   it('herkes ödeşmişse transfer yok', () => {
     expect(sadelestir(new Map([['a', 0], ['b', 0]]))).toEqual([]);
   });

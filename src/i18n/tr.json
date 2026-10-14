@@ -159,7 +159,7 @@
     "yardim": "Yardım ve geri bildirim",
     "yardimKonu": "Tripmate geri bildirim",
     "iban": "IBAN",
-    "ibanNot": "Yalnız aynı seyahatte olduğun kişiler görür; sana borcu olanlara Bakiyeler'de yazılır.",
+    "ibanNot": "Yalnız sana borcu olan seyahat arkadaşların görür; Bakiyeler'de yanında yazılır.",
     "ibanGecersiz": "Bu IBAN geçerli görünmüyor."
   },
   "hesapSil": {
@@ -1156,8 +1156,7 @@
       "geriAlMetin": "Bu ödeşme silinir, bakiyeler eski haline döner.",
       "herkesOdesti": "Herkes ödeşmiş. Kimsenin kimseye borcu yok.",
       "henuzYok": "Henüz harcama yok.",
-      "hatirlatmaBaslik": "Gezi bitince hatırlatırım",
-      "hatirlatmaMetin": "Son gün 20:00'den sonra Gezi ve Harcamalar sayfasında “Kim kime ne borçlu” satırı çıkar; IBAN'ını eklersen sana borcu olanlara yazılır.",
+      "hatirlatmaBaslik": "Gezi bitince Bakiyeler burada seni bekler",
       "ibaninVar": "IBAN'ın: {iban}",
       "ibanEkle": "IBAN ekle",
       "ibanDegistir": "IBAN'ı değiştir"
