@@ -8,6 +8,8 @@ import {
   mekanIzleri,
   planDenetle,
   rehberDenetle,
+  sehirKimligi,
+  sehirKimligiSql,
   slugUret,
   yuklemeVerisi,
   yurumeDk,
@@ -288,5 +290,31 @@ describe('şifreleme (arastir sonucu)', () => {
     expect(JSON.stringify(paket)).not.toContain('gizli');
     expect(await coz(paket, ozelPem)).toBe('{"ara":"çok gizli"}');
     await expect(coz({ ...paket, veri: Buffer.from('bozuk').toString('base64') }, ozelPem)).rejects.toThrow();
+  });
+});
+
+describe('#197 şehir kimliği', () => {
+  const sehir = { lat: 39.7767, lng: 30.5206 };
+  const yer = { place_id: 'ChIJ_eskisehir_1', tz: 'Europe/Istanbul', ulke_kodu: 'TR', lat: 39.78, lng: 30.52 };
+  test('geçerli ve yakın: kimlik, saat dilimi, ülke kodu', () => {
+    expect(sehirKimligi(sehir, yer)).toEqual({ place_id: 'ChIJ_eskisehir_1', tz: 'Europe/Istanbul', ulke_kodu: 'TR' });
+    expect(sehirKimligi(sehir, { ...yer, ulke_kodu: null })).toEqual({ place_id: 'ChIJ_eskisehir_1', tz: 'Europe/Istanbul', ulke_kodu: null });
+    expect(sehirKimligi(sehir, { ...yer, tz: 'America/Argentina/Buenos_Aires' })?.tz).toBe('America/Argentina/Buenos_Aires');
+  });
+  test("Google'ın şehri 50 km'den uzaksa ya da biçim bozuksa yazılmaz", () => {
+    expect(sehirKimligi(sehir, { ...yer, lat: 41.0, lng: 29.0 })).toBeNull();
+    expect(sehirKimligi(sehir, { ...yer, tz: null })).toBeNull();
+    expect(sehirKimligi(sehir, { ...yer, tz: "Europe/Istanbul'; drop" })).toBeNull();
+    expect(sehirKimligi(sehir, { ...yer, place_id: 'kisa' })).toBeNull();
+    expect(sehirKimligi(sehir, null)).toBeNull();
+  });
+  test('SQL yalnız doğrulanmış değerlerle', () => {
+    expect(sehirKimligiSql('eskisehir', { place_id: 'ChIJ_eskisehir_1', tz: 'Europe/Istanbul', ulke_kodu: 'TR' })).toBe(
+      "select public.icerik_sehir_kimligi_yaz('eskisehir', 'ChIJ_eskisehir_1', 'Europe/Istanbul', 'TR') as y",
+    );
+    expect(sehirKimligiSql('eskisehir', { place_id: 'ChIJ_eskisehir_1', tz: 'UTC', ulke_kodu: null })).toContain("'UTC', null)");
+    expect(() => sehirKimligiSql("x'; drop", { place_id: 'ChIJ_eskisehir_1', tz: 'UTC' })).toThrow();
+    expect(() => sehirKimligiSql('eskisehir', { place_id: "ChIJ'x", tz: 'UTC' })).toThrow();
+    expect(() => sehirKimligiSql('eskisehir', { place_id: 'ChIJ_eskisehir_1', tz: 'UTC', ulke_kodu: 'tr' })).toThrow();
   });
 });

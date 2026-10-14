@@ -1,14 +1,17 @@
 // İçerik hattı (docs/07): .github/workflows/icerik.yml'in çalıştırdığı işlemler — sehirler, osm, arastir, yukle, kontrol, sil,
-// kesfet-olc (#190: Keşfet · Turistik isteğinin ölçümü, yalnız sayı).
+// kesfet-olc (#190: Keşfet · Turistik isteğinin ölçümü, yalnız sayı). #197: `sehirler` kimliği (Google kimliği, saat dilimi,
+// ülke kodu) eksik şehirleri bir kez doldurur (KURU=false); yeni şehirli yükleme kendi şehrini doldurur.
 // Ortam: ISLEM, DOSYA, ISTEK, KURU, SUPABASE_ACCESS_TOKEN, SUPABASE_PROJECT_REF, YONETIM_URL, CIKTI (osm, arastir), GITHUB_RUN_ID;
 // yerel deneme için SUPABASE_API_URL ve SUPABASE_URL.
 // Loglar ve duyurular HERKESE AÇIK: yalnız sayı, slug, id ve sonuç yazılır. Google verisi (ad, puan, adres, saat, koordinat)
 // ve kullanıcı verisi yazılmaz. service_role anahtarı çalışma anında Yönetim API'sinden alınır, maskelenir, hiçbir yere
-// yazılmaz. Yazma yalnız icerik_gezi_taslak_yukle / icerik_gezi_taslak_sil ile; KURU=true iken işlem hatayla geri alınır.
+// yazılmaz. Yazma yalnız icerik_gezi_taslak_yukle / icerik_gezi_taslak_sil (ve #197 icerik_sehir_kimligi_yaz) ile; KURU=true iken
+// işlem hatayla geri alınır, `sehirler` Google'a gitmez.
+import { randomUUID } from 'node:crypto';
 import { appendFile, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 
-import { detayIdleri, dolarEtiketi, gunleriDenetle, planDenetle, REHBER_DOSYA, SEHIR_SLUG, SLUG, yuklemeVerisi } from './dogrula.mjs';
+import { detayIdleri, dolarEtiketi, gunleriDenetle, planDenetle, REHBER_DOSYA, SEHIR_SLUG, sehirKimligi, sehirKimligiSql, SLUG, yuklemeVerisi } from './dogrula.mjs';
 import { derAl, sifrele } from './sifre.mjs';
 
 const ortam = process.env;
@@ -116,6 +119,41 @@ async function google(govde) {
   return j;
 }
 
+/** Uygulamanın kendi Edge Function'ı (service_role ile). Google isteği o fonksiyonun sayacına yazılır; hata iletisi onundur. */
+async function fonksiyon(ad, govde) {
+  const anahtar = await servisAnahtari();
+  const cevap = await fetch(`${PROJE_URL}/functions/v1/${ad}`, {
+    method: 'POST',
+    headers: { authorization: `Bearer ${anahtar}`, apikey: anahtar, 'content-type': 'application/json' },
+    body: JSON.stringify(govde),
+  });
+  const j = await cevap.json().catch(() => ({}));
+  if (!cevap.ok) throw new HatHatasi(`${ad} ${cevap.status}: ${typeof j.hata === 'string' ? j.hata.slice(0, 200) : 'hata'}`);
+  return j;
+}
+
+/**
+ * #197: şehrin kimliği — uygulamanın şehir seçimiyle aynı yol: place_id biliniyorsa yalnız hafif yer (şehir modu: saat dilimi,
+ * ülke kodu), yoksa önce Autocomplete (cities, şehrin konumuna yanlı, ilk öneri). Google'ın şehri bizimkinden 50 km'den uzaksa
+ * null. Google verisi loga yazılmaz.
+ */
+async function sehirKimligiCoz(sehir, placeId) {
+  const oturum = randomUUID().replace(/-/g, '');
+  let id = placeId;
+  if (!id) {
+    const { oneriler } = await fonksiyon('places-autocomplete', { input: sehir.ad, sessionToken: oturum, tur: 'cities', limit: 1, merkez: { lat: sehir.lat, lng: sehir.lng, yaricapM: 50_000 } });
+    id = Array.isArray(oneriler) ? oneriler[0]?.place_id : undefined;
+    if (!id) return null;
+  }
+  const { yerler } = await fonksiyon('places-light', { ids: [id], sehir: true, sessionToken: oturum });
+  return sehirKimligi({ lat: Number(sehir.lat), lng: Number(sehir.lng) }, Array.isArray(yerler) ? yerler[0] : null);
+}
+
+/** Kimliği bir kez yazar (dolu alan ezilmez). Döner: yazıldı mı. */
+async function sehirKimligiYaz(slug, k) {
+  return (await sql(sehirKimligiSql(slug, k)))[0]?.y === true;
+}
+
 // ---------------------------------------------------------------- yardımcılar
 
 function istekAl() {
@@ -180,6 +218,35 @@ async function sehirler() {
   });
   duyuru('notice', `Şehirler (${liste.length})`, satirlar.length ? satirlar : ['şehir yok']);
   await ozet(['### Şehirler', ...satirlar.map((s) => `- ${s}`)]);
+
+  // #197: kimliği (Google kimliği + saat dilimi) eksik şehirler bir kez doldurulur — mevcut şehirlerin tek seferlik doldurması da bu.
+  // Loga yalnız slug ve sayı.
+  const eksik = liste.filter((s) => !s.kimlik);
+  if (!eksik.length) {
+    duyuru('notice', 'Şehir kimliği', ['hepsi dolu']);
+    return;
+  }
+  if (KURU) {
+    const satir = [`${eksik.length} şehirde eksik (KURU: Google'a gidilmedi, yazılmadı): ${eksik.map((s) => s.slug).join(', ')}`];
+    duyuru('notice', 'Şehir kimliği', satir);
+    await ozet(['### Şehir kimliği', ...satir.map((s) => `- ${s}`)]);
+    return;
+  }
+  const dolan = [];
+  const olmayan = [];
+  for (const s of eksik) {
+    try {
+      const k = await sehirKimligiCoz(s);
+      if (!k) olmayan.push(`${s.slug} (eşleşmedi)`);
+      else if (await sehirKimligiYaz(s.slug, k)) dolan.push(s.slug);
+      else olmayan.push(`${s.slug} (yazılmadı)`);
+    } catch (e) {
+      olmayan.push(`${s.slug} (${e instanceof HatHatasi ? e.message : 'hata'})`);
+    }
+  }
+  const satir = [`dolduruldu ${dolan.length}${dolan.length ? `: ${dolan.join(', ')}` : ''}`, ...(olmayan.length ? [`doldurulamadı ${olmayan.length}: ${olmayan.join(', ')}`] : [])];
+  duyuru(olmayan.length ? 'warning' : 'notice', 'Şehir kimliği', satir);
+  await ozet(['### Şehir kimliği', ...satir.map((s) => `- ${s}`)]);
 }
 
 function acikAnahtarAl(istek) {
@@ -358,6 +425,20 @@ async function yukle() {
   duyuru('notice', `${KURU ? 'Kuru yükleme' : 'Yükleme'} · ${r.slug}`, satir);
   await ozet([`### ${KURU ? 'Kuru yükleme' : 'Yükleme'}`, ...satir.map((s) => `- ${s}`), ...tumUyarilar.map((u) => `- UYARI: ${u}`)]);
   if (!KURU) await kontrol(r.slug);
+  // #197: yeni şehir kimliğiyle açılır (place_id plandan; saat dilimi ve ülke kodu tek hafif yer isteğiyle). Olmazsa yükleme
+  // bozulmaz: `sehirler` işlemi sonra doldurur.
+  if (!KURU && r.yeni_sehir) {
+    const yeni = plan.sehir.yeni;
+    const konum = detaylar.get(yeni.place_id);
+    let sonuc = 'doldurulamadı (sehirler işlemi doldurur)';
+    try {
+      const k = konum ? await sehirKimligiCoz({ ad: yeni.ad, lat: konum.lat, lng: konum.lng }, yeni.place_id) : null;
+      if (k && (await sehirKimligiYaz(yeni.slug, k))) sonuc = 'yazıldı';
+    } catch {
+      // aşağıda uyarı
+    }
+    duyuru(sonuc === 'yazıldı' ? 'notice' : 'warning', `Şehir kimliği · ${yeni.slug}`, [sonuc]);
+  }
 }
 
 async function kontrol(slug = slugAl()) {
