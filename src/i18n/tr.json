@@ -881,9 +881,7 @@
     "sohbet": "Sohbet",
     "rehberYok": "{sehir} rehberi hazırlanıyor",
     "rehberYokAlt": "Bu şehir için henüz rehber yazısı yok. Keşfet'te bölgedeki öne çıkan mekanlara bakabilirsin.",
-    "kesfeteGit": "Keşfet'e git",
-    "yakinda": "Yakında",
-    "sohbetYakinda": "Seyahattekilerle mesajlaşma, mekan paylaşma ve oylama burada olacak."
+    "kesfeteGit": "Keşfet'e git"
   },
   "geziSayfasi": {
     "seyahatler": "Seyahatler",
@@ -978,7 +976,8 @@
     "tarihKisalir": "Son {n} gün kalkacak",
     "tarihKisalirMetin": "O günlerdeki {n} durak listeye döner; mekanlar silinmez.",
     "tarihKisalirEvet": "Değiştir",
-    "kaydedilemedi": "Kaydedilemedi. Tekrar dene."
+    "kaydedilemedi": "Kaydedilemedi. Tekrar dene.",
+    "mesajAt": "Mesaj at"
   },
   "plan": {
     "baslik": "Plan",
@@ -1166,6 +1165,75 @@
       "borcun": "Borcun: {liste}",
       "alacagin": "Sana borçlular: {liste}",
       "iban": "IBAN: {iban}"
+    }
+  },
+  "sohbet": {
+    "bugun": "Bugün",
+    "dun": "Dün",
+    "biri": "Biri",
+    "okundu": "okundu",
+    "silindi": "Bu mesaj silindi",
+    "uzunBas": "Uzun basınca mesajı silebilirsin",
+    "mesajiSil": "Mesajı sil",
+    "konumlar": "Seyahattekiler ve konumlar",
+    "yaz": "Mesaj yaz…",
+    "gonder": "Gönder",
+    "bos": "Henüz mesaj yok. Bir mekan paylaş, oylama aç ya da selam ver.",
+    "gonderilemedi": "Gönderilemedi. Bağlantını kontrol edip tekrar dene.",
+    "oyVerilemedi": "Oy kaydedilemedi. Tekrar dener misin?",
+    "fotoYuklenemedi": "Fotoğraf yüklenemedi. Tekrar dener misin?",
+    "listeyeEklendi": "Listene eklendi",
+    "listeye": "Listeye",
+    "listede": "Listede",
+    "veDaha": "{cumle} ve {n} değişiklik daha",
+    "harcamaEkledi": "{tutar} harcama ekledi",
+    "ek": {
+      "mekan": "Mekan",
+      "oylama": "Oylama",
+      "foto": "Fotoğraf",
+      "harcama": "Harcama"
+    },
+    "mekan": {
+      "baslik": "Mekan paylaş",
+      "ara": "Mekan ara",
+      "listen": "Listendekiler · {n}",
+      "listeBos": "Listende henüz mekan yok; yukarıdan arayabilirsin.",
+      "gune": "{n}. güne {dk} dk",
+      "birMekan": "bir mekan"
+    },
+    "oylama": {
+      "etiket": "OYLAMA",
+      "etiketKapali": "OYLAMA · KAPANDI",
+      "vermedi": "{adlar} oy vermedi",
+      "kapanir_bugun": "bugün {saat} kapanır",
+      "kapanir_yarin": "yarın {saat} kapanır",
+      "kapanir_tarih": "{tarih} {saat} kapanır",
+      "kapandi": "kapandı",
+      "planaEkle": "Plana ekle",
+      "secenekEtiketi": "{metin}, {n} oy",
+      "yeni": "Oylama aç",
+      "soru": "Soru (ör. Cumartesi akşam ne yiyelim?)",
+      "secenekler": "Seçenekler",
+      "secenek": "{n}. seçenek",
+      "mekanBagla": "{n}. seçeneğe listeden mekan bağla",
+      "mekanKaldir": "Mekan bağını kaldır",
+      "secenekSil": "{n}. seçeneği çıkar",
+      "secenekEkle": "Seçenek ekle",
+      "kapanis": "Kapanış",
+      "kapanisYok": "Kapanış yok",
+      "kapanis_saat": "1 saat sonra",
+      "kapanis_aksam": "Bu akşam 20:00",
+      "kapanis_yarin": "Yarın 12:00",
+      "not": "Not (isteğe bağlı)",
+      "gonder": "Oylamayı gönder"
+    },
+    "gezi": {
+      "ac": "Aç",
+      "bos": "Seyahattekilerle burada yazışın: mekan paylaşın, oylama açın.",
+      "oyVer": "Oy ver",
+      "yanitla": "Yanıtla",
+      "git": "Sohbete git",
+      "gitYeni": "Sohbete git · {n} yeni"
     }
   }
 }

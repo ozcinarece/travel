@@ -19,6 +19,7 @@ import { GeziHarcamaKarti } from '@/components/harcama/GeziHarcamaKarti';
 import { HarcamaFormu } from '@/components/harcama/HarcamaFormu';
 import { HatirlatmaSatiri } from '@/components/harcama/HatirlatmaSatiri';
 import { GeziAlYukleyici } from '@/components/icerik/GeziAl';
+import { GeziSohbetKarti } from '@/components/sohbet/GeziSohbetKarti';
 import { SecimMenusu } from '@/components/program/SecimMenusu';
 import { SeyahatYukleme } from '@/components/seyahatler/SeyahatYukleme';
 import { useDavetPaylas } from '@/features/davet/paylas';
@@ -44,6 +45,8 @@ import { useProgramVerisi } from '@/features/program/useProgramVerisi';
 import { useSeyahatId } from '@/features/seyahatler/baglam';
 import { useSeyahat } from '@/features/seyahatler/sorgular';
 import { usePlaniUygula } from '@/features/sihirbaz/planUygula';
+import { saatMetni } from '@/features/sohbet/sohbet';
+import { useMesajlar, useOkunmamis, useOylamalar } from '@/features/sohbet/sorgular';
 import { seyahatAdi } from '@/features/sihirbaz/sihirbaz';
 import type { HafifYer } from '@/features/yerler/api';
 import { t } from '@/i18n';
@@ -151,6 +154,16 @@ function GeziSayfasi({ seyahat, gunler, duraklar, mekanlar, konaklamalar, katild
   );
   const ibanlar = useIbanlar(hOzet.benimNet < 0 ? hOzet.karsilar.map((x) => x.id) : []);
   const bakiyeler = () => router.push({ pathname: '/seyahat/[id]/bakiyeler', params: { id: seyahat.id } });
+
+  // #184 KK10: sohbet özeti — açık oylama (en yenisi) varsa o, yoksa son mesaj.
+  const mesajlar = useMesajlar(seyahat.id);
+  const oylamalar = useOylamalar(seyahat.id);
+  const okunmamis = useOkunmamis(seyahat.id);
+  const acikOylama = (oylamalar.data ?? []).find((o) => !o.kapanis_at || Date.parse(o.kapanis_at) > an.getTime()) ?? null;
+  const oylamaMesaji = acikOylama ? (mesajlar.data ?? []).find((m) => m.oylama_id === acikOylama.id && !m.silindi_at) : undefined;
+  const sonMesaj = (mesajlar.data ?? []).find((m) => !m.silindi_at) ?? null;
+  const ozetMesaj = oylamaMesaji ?? sonMesaj;
+  const sohbeteGit = () => router.navigate({ pathname: '/seyahat/[id]/(sekmeler)/sohbet', params: { id: seyahat.id } });
   const adim = siradakiAdim({
     mod,
     gunler,
@@ -297,6 +310,18 @@ function GeziSayfasi({ seyahat, gunler, duraklar, mekanlar, konaklamalar, katild
         onBakiyeler={bakiyeler}
       />
     ) : null;
+  const sohbetKarti = mesajlar.data ? (
+    <GeziSohbetKarti
+      mesaj={ozetMesaj}
+      oylama={oylamaMesaji ? acikOylama : null}
+      saat={ozetMesaj ? saatMetni(ozetMesaj.created_at, seyahat.tz) : ''}
+      okunmamis={okunmamis.data ?? 0}
+      k={kisiler}
+      benId={benId}
+      mekanAdi={(placeId) => bilinen.ad({ place_id: placeId }) ?? t('sohbet.mekan.birMekan')}
+      onAc={sohbeteGit}
+    />
+  ) : null;
   const siraNo = (uid: string) => Math.max(0, uyeListesi.findIndex((u) => u.user_id === uid));
   const metin = adim ? adimMetni(adim) : null;
 
@@ -331,8 +356,9 @@ function GeziSayfasi({ seyahat, gunler, duraklar, mekanlar, konaklamalar, katild
                 onMenu={setDurakMenu}
                 onPlan={() => plan({ gun: String(bugunGun?.index ?? 1) })}
               />
-              <GrupKarti durumlar={grup} sira={siraNo} mekanAdi={adiYaDaKategori} an={an} onSeyahattekiler={() => setGrupAcik(true)} />
+              <GrupKarti durumlar={grup} sira={siraNo} mekanAdi={adiYaDaKategori} an={an} onSeyahattekiler={() => setGrupAcik(true)} onMesajAt={sohbeteGit} />
               {harcamaKarti}
+              {sohbetKarti}
             </>
           ) : gorunenAdim && metin ? (
             <SiradakiAdimSatiri baslik={metin.baslik} alt={metin.alt} dugme={metin.dugme} mesgul={gorunenAdim.tur === 'planKur' && planUygula.isPending} onPress={() => void adimEylemi(gorunenAdim)} />
@@ -364,6 +390,7 @@ function GeziSayfasi({ seyahat, gunler, duraklar, mekanlar, konaklamalar, katild
             </>
           ) : null}
           {mod !== 'gezi' ? harcamaKarti : null}
+          {mod !== 'gezi' ? sohbetKarti : null}
           {sehir ? (
             <RehberKartlari
               sehir={sehir.ad}

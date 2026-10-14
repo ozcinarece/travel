@@ -96,37 +96,27 @@ export function useSeyahatCanli(seyahatId: string | undefined) {
   const { session } = useOturum();
   useEffect(() => {
     if (!seyahatId || !session) return;
+    // Plan ve harcama değişiklikleri sohbetin gri satırlarını da yeniler (#184 KK4; changes yayında değil, kaynak tablolar yeterli).
+    const yenile = (...anahtarlar: string[]) => () => {
+      for (const a of anahtarlar) qc.invalidateQueries({ queryKey: [a, seyahatId] });
+    };
     const kanal = supabase
       .channel(`seyahat:${seyahatId}`)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'places', filter: `trip_id=eq.${seyahatId}` }, () =>
-        qc.invalidateQueries({ queryKey: ['mekanlar', seyahatId] }),
-      )
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'stops', filter: `trip_id=eq.${seyahatId}` }, () =>
-        qc.invalidateQueries({ queryKey: ['duraklar', seyahatId] }),
-      )
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'days', filter: `trip_id=eq.${seyahatId}` }, () =>
-        qc.invalidateQueries({ queryKey: ['gunler', seyahatId] }),
-      )
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'stays', filter: `trip_id=eq.${seyahatId}` }, () =>
-        qc.invalidateQueries({ queryKey: ['konaklamalar', seyahatId] }),
-      )
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'members', filter: `trip_id=eq.${seyahatId}` }, () =>
-        qc.invalidateQueries({ queryKey: ['uyeler', seyahatId] }),
-      )
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'places', filter: `trip_id=eq.${seyahatId}` }, yenile('mekanlar', 'sohbet-degisiklikler'))
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'stops', filter: `trip_id=eq.${seyahatId}` }, yenile('duraklar', 'sohbet-degisiklikler'))
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'days', filter: `trip_id=eq.${seyahatId}` }, yenile('gunler', 'sohbet-degisiklikler'))
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'stays', filter: `trip_id=eq.${seyahatId}` }, yenile('konaklamalar', 'sohbet-degisiklikler'))
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'members', filter: `trip_id=eq.${seyahatId}` }, yenile('uyeler', 'sohbet-degisiklikler'))
       // #141 KK3: oylar.
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'oylar', filter: `seyahat_id=eq.${seyahatId}` }, () =>
-        qc.invalidateQueries({ queryKey: ['oylar', seyahatId] }),
-      )
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'oylar', filter: `seyahat_id=eq.${seyahatId}` }, yenile('oylar'))
       // #183: harcamalar, paylar (harcama sorgusu payları da getirir) ve ödeşmeler.
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'harcamalar', filter: `trip_id=eq.${seyahatId}` }, () =>
-        qc.invalidateQueries({ queryKey: ['harcamalar', seyahatId] }),
-      )
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'harcama_paylari', filter: `trip_id=eq.${seyahatId}` }, () =>
-        qc.invalidateQueries({ queryKey: ['harcamalar', seyahatId] }),
-      )
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'odesmeler', filter: `trip_id=eq.${seyahatId}` }, () =>
-        qc.invalidateQueries({ queryKey: ['odesmeler', seyahatId] }),
-      )
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'harcamalar', filter: `trip_id=eq.${seyahatId}` }, yenile('harcamalar', 'sohbet-degisiklikler'))
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'harcama_paylari', filter: `trip_id=eq.${seyahatId}` }, yenile('harcamalar'))
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'odesmeler', filter: `trip_id=eq.${seyahatId}` }, yenile('odesmeler', 'sohbet-degisiklikler'))
+      // #184: mesajlar (oylama mesajı oylamayla aynı işlemde gelir), oylar, okuma durumu.
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'mesajlar', filter: `trip_id=eq.${seyahatId}` }, yenile('mesajlar', 'oylamalar', 'sohbet-okunmamis'))
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'oylama_oylari', filter: `trip_id=eq.${seyahatId}` }, yenile('oylamalar'))
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'mesaj_okuma', filter: `trip_id=eq.${seyahatId}` }, yenile('mesaj-okuma'))
       .subscribe();
     return () => {
       supabase.removeChannel(kanal);

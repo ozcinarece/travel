@@ -77,7 +77,10 @@ export type IkonAdi =
   | 'kisiler'
   | 'kapat'
   // #187: fiş galeriden — resim.
-  | 'galeri';
+  | 'galeri'
+  // #184 (kanvas 26): oylama çubukları, gönder.
+  | 'grafik'
+  | 'gonder';
 
 type Props = {
   ad: IkonAdi;
@@ -98,7 +101,11 @@ export function Ikon({ ad, boyut = 24, renk, kalinlik = 2, dolgu }: Props) {
   const ortak = { stroke: renk, strokeWidth: kalinlik, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const, fill: dolguSaydam ? renk : 'none', fillOpacity: dolguSaydam || 1 };
   return (
     <Svg width={boyut} height={boyut} viewBox="0 0 24 24">
-      {ad === 'tramvay' ? (
+      {ad === 'grafik' ? (
+        <Path d="M5 20V10M12 20V4M19 20v-7" {...ortak} />
+      ) : ad === 'gonder' ? (
+        <Path d="M4 12l16-8-6 16-2-7z" {...ortak} />
+      ) : ad === 'tramvay' ? (
         <Path d="M5 16V12l2-5h10l2 5v4M3.5 16h17v3h-17z" {...ortak} />
       ) : ad === 'bilet' ? (
         <>
