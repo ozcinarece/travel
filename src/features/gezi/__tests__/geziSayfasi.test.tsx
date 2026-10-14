@@ -8,7 +8,7 @@ import type { ReactNode } from 'react';
 import { SeyahatIdSaglayici } from '@/features/seyahatler/baglam';
 import { hafifOnbellek } from '@/features/yerler/api';
 import { tarihEkle } from '@/lib/takvim';
-import { yerelTarih } from '@/lib/zaman';
+import { yerelSaatDk, yerelTarih } from '@/lib/zaman';
 
 import GeziEkrani from '../../../app/seyahat/[id]/(sekmeler)/gezi';
 
@@ -230,6 +230,9 @@ describe('#181 KK13: Gezi sayfası açılışında Google isteği yok', () => {
 
   it('gezi modu: bugünün durak kartı ve grup kartı — yine istek yok', async () => {
     mockTablolar = fikstur(bugun());
+    // Gün şimdi başlasın: duraklar saatten bağımsız olarak "sıradaki" kalır (geçmiş saatte otomatik tamamlanmasın).
+    const dk = Math.max(0, yerelSaatDk(new Date(), IST) - 5);
+    (mockTablolar.days[0] as { start_time: string }).start_time = `${String(Math.floor(dk / 60)).padStart(2, '0')}:${String(dk % 60).padStart(2, '0')}:00`;
     const { getByText, queryByText, qc } = ciz();
     await waitFor(() => getByText('Eskişehir Gezisi'));
     await sakinles(qc);
