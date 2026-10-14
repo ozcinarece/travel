@@ -8,16 +8,16 @@ on:
   workflow_dispatch:
     inputs:
       islem:
-        description: sehirler · osm · arastir · yukle · kontrol · sil · temizle
+        description: sehirler · osm · arastir · yukle · kontrol · sil · temizle · kesfet-olc (Keşfet ölçümü, yalnız sayı)
         required: true
         type: choice
-        options: [sehirler, osm, arastir, yukle, kontrol, sil, temizle]
+        options: [sehirler, osm, arastir, yukle, kontrol, sil, temizle, kesfet-olc]
       dosya:
         description: 'yukle: plan dosyası (icerik/geziler/<slug>.json; ref olarak içerik dalını seç)'
         required: false
         type: string
       istek:
-        description: 'osm: JSON (sehir, yaricap_m, acik_anahtar) · arastir: JSON (sehir, kimlik, puan, acik_anahtar) · kontrol/sil: slug · yukle: {"yeniden": true} · temizle: run id ya da hepsi'
+        description: 'osm: JSON (sehir, yaricap_m, acik_anahtar) · arastir: JSON (sehir, kimlik, puan, acik_anahtar) · kontrol/sil: slug · yukle: {"yeniden": true} · temizle: run id ya da hepsi · kesfet-olc: {"yaricaplar": [1000, 3000]}'
         required: false
         type: string
       kuru:

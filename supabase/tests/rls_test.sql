@@ -2124,4 +2124,36 @@ delete from storage.objects where bucket_id = 'sohbet';
 do $$ begin assert (select count(*) from storage.objects where bucket_id = 'sohbet') = 0, 'yükleyen sohbet fotoğrafını siler'; end $$;
 reset role;
 
+-- #189 Keşfet kalitesi: eşikler ayarda (varsayılanlar migration'la); gizleme listesini yalnız admin okur / yazar; süzgeç ayarlarını
+-- yalnız service_role okur (places-nearby).
+do $$
+begin
+  assert (select (deger #>> '{turistik,yorum}')::int from public.yonetim_ayarlari where anahtar = 'kesfet_esikleri') = 50, 'Turistik en az 50 yorum';
+  assert (select (deger #>> '{yemek,puan}')::numeric from public.yonetim_ayarlari where anahtar = 'kesfet_esikleri') = 3.8, 'Yemek en az 3,8';
+  assert (select (deger #>> '{park,yorum}')::int from public.yonetim_ayarlari where anahtar = 'kesfet_esikleri') = 20, 'Park en az 20 yorum';
+end $$;
+set role authenticated;
+select pg_temp.as_email(:B, 'b@ornek.com');
+select pg_temp.hata_bekle($$insert into public.kesfet_gizli (place_id, neden) values ('ChIJ-kuafor-duzce', 'kuaför')$$, '42501');
+do $$ begin assert (select count(*) from public.kesfet_gizli) = 0, 'admin olmayan gizleme listesini görmez'; end $$;
+select pg_temp.hata_bekle($$select public.kesfet_suzgec_ayarlari()$$, '42501');
+select pg_temp.as_email(:E, 'ozcinar.ece@gmail.com');
+insert into public.kesfet_gizli (place_id, neden) values ('ChIJ-kuafor-duzce', 'kuaför, Müze tipiyle');
+select pg_temp.hata_bekle($$insert into public.kesfet_gizli (place_id) values ('kisa')$$, '23514');
+do $$
+begin
+  assert (select ekleyen from public.kesfet_gizli where place_id = 'ChIJ-kuafor-duzce') = auth.uid(), 'ekleyen admin';
+end $$;
+select pg_temp.hata_bekle($$select public.kesfet_suzgec_ayarlari()$$, '42501');
+set role anon;
+select pg_temp.hata_bekle($$select count(*) from public.kesfet_gizli$$, '42501');
+set role service_role;
+do $$
+declare a jsonb := public.kesfet_suzgec_ayarlari();
+begin
+  assert (a #>> '{esikler,turistik,puan}')::numeric = 3.8, 'service_role eşikleri okur';
+  assert a -> 'gizli' = '["ChIJ-kuafor-duzce"]'::jsonb, 'service_role gizli listeyi okur';
+end $$;
+reset role;
+
 \echo 'rls_test: TÜM TESTLER GEÇTİ'

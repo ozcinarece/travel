@@ -12,12 +12,37 @@ describe('kategori ve süre (PRD §6)', () => {
   });
 
   it('etiketler', () => {
-    expect(kategoriEtiketi('historical_landmark')).toBe('Tarihi yer');
-    expect(kategoriEtiketi('ramen_restaurant')).toBe('ramen restaurant');
+    expect(kategoriEtiketi('historical_landmark')).toBe('Tarihî yer');
     expect(kategoriEtiketi(undefined)).toBe('Mekan');
-    expect(bilinenKategori('historical_landmark')).toBe('Tarihi yer');
+    expect(bilinenKategori('historical_landmark')).toBe('Tarihî yer');
     expect(bilinenKategori('train_station')).toBeNull();
     expect(bilinenKategori(null)).toBeNull();
+  });
+
+  it('#189 KK4: Nearby turistik tipleri Türkçe', () => {
+    expect(kategoriEtiketi('cultural_landmark')).toBe('Kültürel yer');
+    expect(kategoriEtiketi('monument')).toBe('Anıt');
+    expect(kategoriEtiketi('sculpture')).toBe('Heykel');
+    expect(kategoriEtiketi('observation_deck')).toBe('Manzara');
+    expect(kategoriEtiketi('art_gallery')).toBe('Galeri');
+    expect(kategoriEtiketi('historical_place')).toBe('Tarihî yer');
+  });
+
+  it('#189 KK4: etiketsiz tip ham İngilizce ad döndürmez — kategorinin genel adı ya da "Mekan"', () => {
+    expect(kategoriEtiketi('ramen_restaurant')).toBe('Yemek');
+    expect(kategoriEtiketi('vegan_restaurant')).toBe('Yemek');
+    expect(kategoriEtiketi('heritage_site')).toBe('Gezilecek yer');
+    expect(kategoriEtiketi('history_museum')).toBe('Müze');
+    expect(kategoriEtiketi('city_park')).toBe('Park');
+    expect(kategoriEtiketi('buddhist_temple')).toBe('İbadet yeri');
+    expect(kategoriEtiketi('guest_house')).toBe('Konaklama');
+    expect(kategoriEtiketi('hair_salon')).toBe('Mekan');
+    expect(kategoriEtiketi('train_station')).toBe('Mekan');
+    for (const tip of ['hair_salon', 'electronics_store', 'car_repair', 'ramen_restaurant', 'heritage_site', 'night_club', 'event_venue', 'brand_new_type']) {
+      const etiket = kategoriEtiketi(tip);
+      expect(etiket).not.toMatch(/_/);
+      expect(etiket).not.toBe(tip.replace(/_/g, ' '));
+    }
   });
 
   it('süre metni', () => {

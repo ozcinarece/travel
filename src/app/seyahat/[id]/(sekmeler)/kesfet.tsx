@@ -26,7 +26,7 @@ import type { SayfaHali } from '@/components/harita/AltSayfa';
 import { sehirEslestir, useSehirler } from '@/features/icerik/sorgular';
 import { kartKamerasi } from '@/features/program/durakKarti';
 import { useOnerilenler, type OnerilenMekan } from '@/features/sihirbaz/onerilenler';
-import { cekmeceListesi, cekmeceSayisi, type CekmeceCipi } from '@/features/yerler/cekmece';
+import { AZ_ONERI, cekmeceListesi, cekmeceSayisi, gorunurOneriSayisi, type CekmeceCipi } from '@/features/yerler/cekmece';
 import { hafifOnbellek, hafifYerler, linkCoz, linkGibiMi, useHafifYerler, useOneriler, useYerFotolari, yeniOturumJetonu, type HafifYer, type OneriCipi } from '@/features/yerler/api';
 
 import { aktifFiltreSayisi, ayniKumeler, filtreAktif, filtredenGecer, filtreOzeti, taramaKumeleri, varsayilanMi, type Filtre } from '@/features/yerler/filtre';
@@ -403,12 +403,17 @@ function Kesfet({ seyahat, konaklamalar, ilkMekan, cekmeceIstegi, cipIstegi }: {
     const kamera = kartKamerasi({ konum: { lat: y.lat, lng: y.lng }, zoom: 16, ekranYukseklik: ekran.height, kartYukseklik: Math.round(ekran.height * 0.55), altPay: 0 });
     odakla(kamera.konum.lat, kamera.konum.lng, kamera.zoom);
   };
+  // #189 KK3: süzgeçten sonra görünür alanda 3'ten az öneri kaldıysa çöp yerine yönlendirme satırı. Tarama sürerken, hata varken,
+  // yalnız liste / rehber görünümünde ve kullanıcının kendi koşulu (öne çıkan, puan, yorum) varken çıkmaz.
+  const kullaniciKosulu = filtre.oneCikan || filtre.puan > 0 || filtre.yorum > 0;
+  const azOneri = !yalnizListe && !rehberGorunur && !yakin.yukleniyor && !yakin.hata && !kullaniciKosulu && !!cekmeceBolgesi && gorunurOneriSayisi(gecenler, cekmeceBolgesi) < AZ_ONERI;
   const cekmeceOrtak = {
     havuz: havuzIdleri,
     mesgulId: cekmeceMesgul,
     onEkle: cekmecedenEkle,
     onCikar: cekmecedenCikar,
     onAc: cekmecedenAc,
+    azMetni: azOneri ? t('kesfet.cekmece.az') : null,
   };
   // #165 KK10: süre mekanın varsayılan kalış süresi (listedeyse kendi süresi — Program'la aynı kaynak); puan ve fotoğraf
   // çekmecenin elindeki veriden (ek Google isteği yok).

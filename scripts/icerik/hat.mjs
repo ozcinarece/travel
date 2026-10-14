@@ -1,4 +1,5 @@
-// İçerik hattı (docs/07): .github/workflows/icerik.yml'in çalıştırdığı işlemler — sehirler, osm, arastir, yukle, kontrol, sil.
+// İçerik hattı (docs/07): .github/workflows/icerik.yml'in çalıştırdığı işlemler — sehirler, osm, arastir, yukle, kontrol, sil,
+// kesfet-olc (#190: Keşfet · Turistik isteğinin ölçümü, yalnız sayı).
 // Ortam: ISLEM, DOSYA, ISTEK, KURU, SUPABASE_ACCESS_TOKEN, SUPABASE_PROJECT_REF, YONETIM_URL, CIKTI (osm, arastir), GITHUB_RUN_ID;
 // yerel deneme için SUPABASE_API_URL ve SUPABASE_URL.
 // Loglar ve duyurular HERKESE AÇIK: yalnız sayı, slug, id ve sonuç yazılır. Google verisi (ad, puan, adres, saat, koordinat)
@@ -382,7 +383,88 @@ async function sil() {
   await ozet([`### ${KURU ? 'Kuru silme' : 'Silme'}`, `- ${satir}`]);
 }
 
-const ISLEMLER = { sehirler, osm, arastir, yukle, kontrol: () => kontrol(), sil };
+// ---------------------------------------------------------------- kesfet-olc (#190 / #189 Ek 1)
+
+// Ölçüm noktaları: issue'daki üç bölge. Sabit; istekle değişmez (log herkese açık, yalnız bu adlar ve sayılar yazılır).
+const OLCUM_NOKTALARI = [
+  { ad: 'Düzce merkez', lat: 40.8438, lng: 31.1565 },
+  { ad: 'Eskişehir Odunpazarı', lat: 39.7637, lng: 30.5263 },
+  { ad: 'İstanbul Sultanahmet', lat: 41.0055, lng: 28.9768 },
+];
+// supabase/functions/_shared/google.ts ile aynı kümeler (TURISTIK_BIRINCIL, ibadet tipleri, Turistik varsayılan eşiği).
+const OLCUM_TURISTIK = new Set(['tourist_attraction', 'historical_landmark', 'historical_place', 'cultural_landmark', 'monument', 'sculpture', 'castle', 'museum', 'art_museum', 'history_museum', 'art_gallery', 'observation_deck']);
+const OLCUM_IBADET = new Set(['mosque', 'church', 'synagogue', 'place_of_worship', 'hindu_temple']);
+const OLCUM_ESIK = { yorum: 50, puan: 3.8 };
+// Kaçan ibadet yerlerinden bilinenler: etiket bizim listemizden yazılır (Google'ın ad metni loga girmez). Sıra önemli.
+const BILINEN_IBADET = [
+  [/k[üu][çc][üu]k ayasofya|little hagia/i, 'Küçük Ayasofya'],
+  [/ayasofya|hagia sophia/i, 'Ayasofya'],
+  [/sultan ?ahmet|blue mosque/i, 'Sultanahmet Camii'],
+  [/s[üu]leymaniye/i, 'Süleymaniye'],
+  [/r[üu]stem pa[şs]a/i, 'Rüstem Paşa'],
+  [/yeni cami|new mosque/i, 'Yeni Cami'],
+  [/kur[şs]unlu/i, 'Kurşunlu'],
+  [/alaeddin/i, 'Alaeddin Camii'],
+];
+
+/** Bir Turistik cevabının sayıları (yer adı, puan, koordinat yazılmaz). */
+export function turistikSayilari(yerler) {
+  const yorumda = (y) => (y.puan_sayisi ?? 0) >= OLCUM_ESIK.yorum;
+  const esikte = (y) => yorumda(y) && (y.puan ?? 0) >= OLCUM_ESIK.puan;
+  const s = { toplam: yerler.length, turistik: 0, turistikEsikte: 0, turistikYorumAlti: 0, turistikPuanAlti: 0, ibadet: 0, ibadetEsikte: 0, bilinen: [], diger: 0 };
+  for (const y of yerler) {
+    if (OLCUM_TURISTIK.has(y.primary_type)) {
+      s.turistik += 1;
+      if (esikte(y)) s.turistikEsikte += 1;
+      else if (!yorumda(y)) s.turistikYorumAlti += 1;
+      else s.turistikPuanAlti += 1;
+    } else if (OLCUM_IBADET.has(y.primary_type)) {
+      s.ibadet += 1;
+      if (esikte(y)) {
+        s.ibadetEsikte += 1;
+        s.bilinen.push(BILINEN_IBADET.find(([desen]) => desen.test(y.ad ?? ''))?.[1] ?? 'diğer');
+      }
+    } else s.diger += 1;
+  }
+  return s;
+}
+
+/**
+ * Yayındaki places-nearby'ye noktalar × yarıçaplar için Turistik isteği atar ve sayıları yazar. "İbadet (eşikte)" = birincil tipi
+ * ibadet yeri olup Turistik eşiğini geçen yer: `includedPrimaryTypes` isteğinde gelmez (kaçan tarihî cami). Her istek
+ * places-nearby sayacına 1 çağrı (önbellekte değilse 1 Google isteği) olarak yazılır.
+ */
+async function kesfetOlc() {
+  const istek = istekAl();
+  const yaricaplar = (Array.isArray(istek.yaricaplar) ? istek.yaricaplar : [1000, 3000]).map(Number).filter((r) => Number.isFinite(r) && r >= 100 && r <= 15000).slice(0, 3);
+  if (!yaricaplar.length) throw new HatHatasi('yaricaplar: 100–15000 m arası 1–3 sayı');
+  const anahtar = await servisAnahtari();
+  const satirlar = [];
+  const toplam = { istek: 0, google: 0, ibadetEsikte: 0 };
+  for (const n of OLCUM_NOKTALARI) {
+    for (const r of yaricaplar) {
+      const cevap = await fetch(`${PROJE_URL}/functions/v1/places-nearby`, {
+        method: 'POST',
+        headers: { authorization: `Bearer ${anahtar}`, apikey: anahtar, 'content-type': 'application/json' },
+        body: JSON.stringify({ merkez: { lat: n.lat, lng: n.lng }, yaricapM: r, cip: 'turistik', enFazla: 20 }),
+      });
+      toplam.istek += 1;
+      const j = await cevap.json().catch(() => ({}));
+      if (!cevap.ok) throw new HatHatasi(`places-nearby ${cevap.status}: ${typeof j.hata === 'string' ? j.hata.slice(0, 200) : 'hata'}`);
+      if (!j.onbellek) toplam.google += 1;
+      const s = turistikSayilari(Array.isArray(j.yerler) ? j.yerler : []);
+      toplam.ibadetEsikte += s.ibadetEsikte;
+      satirlar.push(
+        `| ${n.ad} | ${r} m | ${s.toplam} | ${s.turistik} (${s.turistikEsikte}; yorum < ${OLCUM_ESIK.yorum}: ${s.turistikYorumAlti}, puan < ${OLCUM_ESIK.puan}: ${s.turistikPuanAlti}) | ${s.ibadet} (${s.ibadetEsikte}${s.bilinen.length ? `: ${s.bilinen.join(', ')}` : ''}) | ${s.diger} |${j.onbellek ? ' önbellek' : ''}`,
+      );
+    }
+  }
+  const baslik = '| Nokta | Yarıçap | Sonuç | Turistik birincil (eşikte; eşik altı nedeni) | İbadet birincil (eşikte: bilinenler) | Diğer |';
+  duyuru('notice', 'Keşfet ölçümü', [baslik, ...satirlar, `istek ${toplam.istek} · Google ${toplam.google} · eşikte ibadet toplamı ${toplam.ibadetEsikte}`]);
+  await ozet(['### Keşfet · Turistik ölçümü', '', baslik, '|---|---|---|---|---|---|', ...satirlar, '', `- istek ${toplam.istek} · Google ${toplam.google} · eşikte ibadet toplamı ${toplam.ibadetEsikte}`]);
+}
+
+const ISLEMLER = { sehirler, osm, arastir, yukle, kontrol: () => kontrol(), sil, 'kesfet-olc': kesfetOlc };
 
 if (process.argv[1] && import.meta.url === new URL(`file://${path.resolve(process.argv[1])}`).href) {
   const is = ISLEMLER[ortam.ISLEM];

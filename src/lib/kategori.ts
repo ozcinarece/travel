@@ -1,4 +1,5 @@
 // Google birincil tip → kategori etiketi ve varsayılan kalınacak süre (PRD §6).
+import { eslesenKategori, konaklamaMi, type PinKategorisi } from './pinIkonu';
 
 /** PRD §6: dakika. Listede olmayan tip 45. */
 const VARSAYILAN_DAKIKA: Record<string, number> = {
@@ -28,33 +29,59 @@ export function varsayilanDakika(primaryType: string | null | undefined): number
   return (primaryType && VARSAYILAN_DAKIKA[primaryType]) || 45;
 }
 
-/** Ekran etiketi; bilinmeyen tip alt çizgileri boşluğa çevirir. v1 Türkçe. */
+/**
+ * Ekran etiketi. v1 Türkçe. #189 KK4: Nearby'nin Turistik'te döndürebileceği bütün tipler burada; etiketi olmayan tipte ham
+ * İngilizce ad değil, kategorinin genel adı gösterilir (kategoriEtiketi).
+ */
 const ETIKET: Record<string, string> = {
   museum: 'Müze',
+  art_museum: 'Müze',
+  history_museum: 'Müze',
   art_gallery: 'Galeri',
   tourist_attraction: 'Gezilecek yer',
-  historical_landmark: 'Tarihi yer',
-  historical_place: 'Tarihi yer',
+  historical_landmark: 'Tarihî yer',
+  historical_place: 'Tarihî yer',
+  cultural_landmark: 'Kültürel yer',
   monument: 'Anıt',
+  sculpture: 'Heykel',
+  castle: 'Kale',
+  fountain: 'Çeşme',
   church: 'Kilise',
   mosque: 'Cami',
   synagogue: 'Sinagog',
+  hindu_temple: 'Tapınak',
   place_of_worship: 'İbadet yeri',
   park: 'Park',
   garden: 'Bahçe',
   viewpoint: 'Manzara',
   scenic_point: 'Manzara',
-  observation_deck: 'Seyir terası',
+  observation_deck: 'Manzara',
+  botanical_garden: 'Botanik bahçesi',
+  national_park: 'Milli park',
+  city_park: 'Park',
+  hiking_area: 'Yürüyüş alanı',
+  beach: 'Plaj',
   restaurant: 'Restoran',
+  turkish_restaurant: 'Türk restoranı',
   italian_restaurant: 'İtalyan restoranı',
   pizza_restaurant: 'Pizzacı',
+  seafood_restaurant: 'Balık restoranı',
+  fast_food_restaurant: 'Fast food',
+  steak_house: 'Et lokantası',
+  kebab_shop: 'Kebapçı',
+  meal_takeaway: 'Paket yemek',
   cafe: 'Kafe',
   coffee_shop: 'Kahveci',
+  tea_house: 'Çay evi',
   bar: 'Bar',
   bakery: 'Fırın',
+  dessert_shop: 'Tatlıcı',
+  confectionery: 'Şekerci',
   ice_cream_shop: 'Dondurmacı',
   shopping_mall: 'AVM',
   market: 'Pazar',
+  farmers_market: 'Pazar',
+  department_store: 'Mağaza',
   store: 'Mağaza',
   zoo: 'Hayvanat bahçesi',
   aquarium: 'Akvaryum',
@@ -65,9 +92,28 @@ const ETIKET: Record<string, string> = {
   hotel: 'Otel',
 };
 
+/** #189 KK4: etiketsiz tipte kategorinin genel adı (Keşfet çipinin adı gibi). */
+const GENEL_AD: Record<PinKategorisi, string> = {
+  gezilecek: 'Gezilecek yer',
+  muze: 'Müze',
+  ibadet: 'İbadet yeri',
+  yemek: 'Yemek',
+  kafe: 'Kafe',
+  park: 'Park',
+  manzara: 'Manzara',
+  alisveris: 'Alışveriş',
+};
+/** Eşleme tablosunda olmayan ama gezilecek yer olduğu belli tipler (ör. ileride eklenecek tarihî tipler). */
+const GEZILECEK_DESENI = /attraction|landmark|historic|monument|heritage|ruins|archaeolog|castle|palace|fortress|memorial|sculpture|cultural/;
+
 export function kategoriEtiketi(primaryType: string | null | undefined): string {
   if (!primaryType) return 'Mekan';
-  return ETIKET[primaryType] ?? primaryType.replace(/_/g, ' ');
+  const etiket = ETIKET[primaryType];
+  if (etiket) return etiket;
+  if (konaklamaMi(primaryType)) return 'Konaklama';
+  const k = eslesenKategori(primaryType);
+  if (k) return GENEL_AD[k];
+  return GEZILECEK_DESENI.test(primaryType) ? GENEL_AD.gezilecek : 'Mekan';
 }
 
 /** Türkçe etiketi olan tipte etiket, yoksa null (ham İngilizce gösterilmesin diye; #156 rehber kartı). */

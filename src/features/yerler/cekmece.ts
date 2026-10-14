@@ -19,6 +19,15 @@ export function cekmeceListesi(oneriler: HafifYer[], havuz: Set<string>, bolge: 
   return oneriSirala(gorunur.filter((y) => (!havuz.has(y.place_id) || tut.has(y.place_id)) && (!k || pinKategorisi(y.primary_type) === k)));
 }
 
+/** #189 KK3: görünür alanda (listedekiler dahil) bundan az öneri kalırsa çekmece "öne çıkan yer az" der. */
+export const AZ_ONERI = 3;
+
+/** Görünür alandaki öneri sayısı (süzgeçten geçenler; listedekiler de sayılır). */
+export function gorunurOneriSayisi(oneriler: HafifYer[], bolge: HaritaBolgesi | null): number {
+  if (!bolge) return 0;
+  return oneriler.filter((y) => Math.abs(y.lat - bolge.merkez.lat) <= bolge.latDelta / 2 && Math.abs(y.lng - bolge.merkez.lng) <= bolge.lngDelta / 2).length;
+}
+
 /** KK1 küçük hal sayısı: listede olmayanlar (az önce eklenenler sayılmaz). */
 export function cekmeceSayisi(liste: HafifYer[], havuz: Set<string>): number {
   return liste.filter((y) => !havuz.has(y.place_id)).length;
