@@ -35,6 +35,7 @@ import { useKesfetOnerileri } from '@/features/yerler/kesfetYukleme';
 import { alanCipi, alandaAraGorunur, alanIcinde, gorunumAlani, gorunurOneriler, sehirCipleri } from '@/features/yerler/sehirListesi';
 import { kesfetDurumunuAl, useKesfetDurumu } from '@/features/yerler/kesfetDurumu';
 import { t } from '@/i18n';
+import { bulunmaEkli } from '@/lib/ek';
 import { izBirak } from '@/lib/hataRaporu';
 import { kategoriPini } from '@/lib/pinIkonu';
 import { varsayilanDakika } from '@/lib/kategori';
@@ -131,6 +132,7 @@ function Kesfet({ seyahat, konaklamalar, ilkMekan, cekmeceIstegi, cipIstegi }: {
   const sehirMerkezi = useMemo(() => (sehirLat == null || sehirLng == null ? null : { lat: sehirLat, lng: sehirLng }), [sehirLat, sehirLng]);
   const cipler = useMemo(() => sehirCipleri(filtre), [filtre]);
   const yakin = useKesfetOnerileri(seyahat.id, sehirMerkezi, cipler);
+  const sehirAdi = rehberSehir?.ad ?? seyahat.city_label;
   const filtreyiDegistir = (f: Filtre) => setFiltre(f);
   useEffect(() => {
     if (cipIstegi) filtreyiDegistir({ ...filtre, kategoriler: ['yemek'] });
@@ -398,6 +400,10 @@ function Kesfet({ seyahat, konaklamalar, ilkMekan, cekmeceIstegi, cipIstegi }: {
   const azOneri = !yalnizListe && !rehberGorunur && !yakin.yukleniyor && !yakin.hata && !kullaniciKosulu && !!cekmeceBolgesi && gorunurOneriSayisi(gecenler, cekmeceBolgesi) < AZ_ONERI;
   // #189 Ek 2 KK9: son "Bu alanda ara" genişletildiyse ve görünüm o alandaysa çekmece bunu söyler (az satırının yerine).
   const genisletildi = !yalnizListe && !rehberGorunur && !!yakin.genisAlan && !!cekmeceBolgesi && alanIcinde(gorunumAlani(cekmeceBolgesi), yakin.genisAlan);
+  // #191: çekmece başlığı şehir listesinin şehrini söyler ("Eskişehir'de öne çıkanlar") — şehir dışında hapın neden çıktığı anlaşılır.
+  // Görünüm "Bu alanda ara" ile aranmış bir alandaysa liste o alanındır: başlık eski haliyle ("Bu bölgede önerilen").
+  const aranmisAlanda = !!cekmeceBolgesi && yakin.arananlar.some((a) => alanIcinde(gorunumAlani(cekmeceBolgesi), a));
+  const sehirBasligi = aranmisAlanda ? null : bulunmaEkli(sehirAdi);
   const cekmeceOrtak = {
     havuz: havuzIdleri,
     mesgulId: cekmeceMesgul,
@@ -541,6 +547,7 @@ function Kesfet({ seyahat, konaklamalar, ilkMekan, cekmeceIstegi, cipIstegi }: {
           <CekmeceSeridi
             hal={cekmece}
             sayi={cekmeceSayi}
+            sehir={sehirBasligi}
             onHal={setCekmece}
             liste={{ sayi: havuz.length, yalniz: yalnizListe, onPress: () => setYalnizListe((x) => !x) }}
             tam={{

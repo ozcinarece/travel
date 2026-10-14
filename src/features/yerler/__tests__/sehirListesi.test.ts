@@ -15,11 +15,12 @@ const sehir = { merkez: eskisehir, yaricapM: 8000 };
 const yer = (id: string, lat: number, lng: number): HafifYer => ({ place_id: id, ad: id, lat, lng, primary_type: 'museum', tz: null, puan: 4.6, puan_sayisi: 500, acik: null, ulke_kodu: null });
 
 describe('KK7 şehir istekleri', () => {
-  it('Turistik üç alt istek; çip seçilince her biri bir istek; Tümü tek istek', () => {
+  it('Turistik üç alt istek; çip seçilince her biri bir istek; Tümü açılıştaki üç Turistik listesi (yeni istek yok, hepsi yok)', () => {
     expect(sehirCipleri(VARSAYILAN_FILTRE)).toEqual(['turistik_tarihi', 'turistik_muze', 'turistik_manzara']);
     expect(sehirCipleri({ ...BOS_FILTRE, kategoriler: ['yemek'] })).toEqual(['yemek']);
     expect(sehirCipleri({ ...BOS_FILTRE, kategoriler: ['kafe', 'park', 'alisveris'] })).toEqual(['kafe', 'park', 'alisveris']);
-    expect(sehirCipleri(BOS_FILTRE)).toEqual(['hepsi']);
+    expect(sehirCipleri(BOS_FILTRE)).toEqual(sehirCipleri(VARSAYILAN_FILTRE));
+    expect(sehirCipleri(BOS_FILTRE)).not.toContain('hepsi');
   });
 
   it('Turistik alt seçenekleri kendi alt isteğine; ibadet tarihî yerler isteğine (tekrar yok)', () => {
@@ -30,12 +31,13 @@ describe('KK7 şehir istekleri', () => {
 });
 
 describe('KK9 "Bu alanda ara"', () => {
-  it('tek isteğin çipi: Turistik grubu → turistik; tek kategori → kendi; Tümü / karışık → hepsi', () => {
+  it('tek isteğin çipi: Tümü ve Turistik → turistik; kategori → kendi; karışıkta Turistik varsa turistik, yoksa ilk kategori; hepsi yok', () => {
     expect(alanCipi(VARSAYILAN_FILTRE)).toBe('turistik');
+    expect(alanCipi(BOS_FILTRE)).toBe('turistik');
     expect(alanCipi({ ...BOS_FILTRE, kategoriler: ['muze'] })).toBe('turistik');
     expect(alanCipi({ ...BOS_FILTRE, kategoriler: ['yemek'] })).toBe('yemek');
-    expect(alanCipi({ ...BOS_FILTRE, kategoriler: ['yemek', 'kafe'] })).toBe('hepsi');
-    expect(alanCipi(BOS_FILTRE)).toBe('hepsi');
+    expect(alanCipi({ ...BOS_FILTRE, kategoriler: ['yemek', 'kafe'] })).toBe('yemek');
+    expect(alanCipi({ ...BOS_FILTRE, kategoriler: ['kafe', 'muze'] })).toBe('turistik');
   });
 
   it('alan: merkez görünüm merkezi, yarıçap yarı köşegen; genişletme 3 kat (15 km sınırı); 5\'ten az yerde genişletilir', () => {

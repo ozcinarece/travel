@@ -67,9 +67,24 @@ function ListeGoster({ sayi, yalniz, onPress }: ListeDugmesi) {
  * Üst şerit (tutamakla birlikte sürüklenir; tam halde kaydırırken üstte sabit kalır). Küçük ve yarım halde tek satır başlık; tam
  * halde Archivo başlık + "N yer" + filtre düğmesi, altında `cipler`.
  */
-export function CekmeceSeridi({ hal, sayi, onHal, liste, tam }: { hal: SayfaHali; sayi: number; onHal: (h: SayfaHali) => void; liste?: ListeDugmesi; tam?: { yerSayisi: number; onFiltre: () => void; cipler: ReactNode } }) {
+export function CekmeceSeridi({
+  hal,
+  sayi,
+  onHal,
+  liste,
+  tam,
+  sehir,
+}: {
+  hal: SayfaHali;
+  sayi: number;
+  onHal: (h: SayfaHali) => void;
+  liste?: ListeDugmesi;
+  tam?: { yerSayisi: number; onFiltre: () => void; cipler: ReactNode };
+  /** #191: şehir listesinin şehri, bulunma ekiyle ("Eskişehir'de"); verilirse başlık "Eskişehir'de öne çıkanlar". */
+  sehir?: string | null;
+}) {
   const listeDugmesi = liste && (liste.sayi > 0 || liste.yalniz) ? <ListeGoster {...liste} /> : null;
-  const baslik = liste?.yalniz ? t('kesfet.cekmece.listeBaslik', { n: liste.sayi }) : t('kesfet.cekmece.kucuk', { n: sayi });
+  const baslik = liste?.yalniz ? t('kesfet.cekmece.listeBaslik', { n: liste.sayi }) : sehir ? t('kesfet.cekmece.sehirKucuk', { sehir, n: sayi }) : t('kesfet.cekmece.kucuk', { n: sayi });
   return (
     <View style={s.serit}>
       <Pressable accessibilityRole="button" accessibilityLabel={t(hal === 'katli' ? 'kesfet.cekmece.ac' : 'kesfet.cekmece.kapat')} onPress={() => onHal(hal === 'katli' ? 'yari' : 'katli')} hitSlop={8} style={s.tutamakDokunma}>
@@ -79,7 +94,7 @@ export function CekmeceSeridi({ hal, sayi, onHal, liste, tam }: { hal: SayfaHali
         <View style={s.tamUst}>
           <View style={s.seritSatir}>
             <Text accessibilityRole="header" style={s.tamBaslik} numberOfLines={1}>
-              {liste?.yalniz ? t('kesfet.cekmece.listeBaslik', { n: liste.sayi }) : t('kesfet.cekmece.baslik')}
+              {liste?.yalniz ? t('kesfet.cekmece.listeBaslik', { n: liste.sayi }) : sehir ? t('kesfet.cekmece.sehirBaslik', { sehir }) : t('kesfet.cekmece.baslik')}
             </Text>
             {liste?.yalniz ? (
               listeDugmesi

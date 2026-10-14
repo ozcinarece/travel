@@ -405,6 +405,8 @@
     "cekmece": {
       "kucuk": "Bu bölgede önerilen · {n}",
       "baslik": "Bu bölgede önerilen",
+      "sehirKucuk": "{sehir} öne çıkanlar · {n}",
+      "sehirBaslik": "{sehir} öne çıkanlar",
       "haritayaDon": "Haritaya dön",
       "yerSayisi": "{n} yer",
       "bos": "Bu bölgede öneri yok · Haritayı kaydır ya da filtreyi değiştir",

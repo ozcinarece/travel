@@ -28,12 +28,16 @@ const TURISTIK_ALT: Partial<Record<PinKategorisi, OneriCipi>> = {
 };
 const KATEGORI_CIPI: Partial<Record<PinKategorisi, OneriCipi>> = { yemek: 'yemek', kafe: 'kafe', park: 'park', alisveris: 'alisveris' };
 
+const TURISTIK_ALT_ISTEKLER: OneriCipi[] = ['turistik_tarihi', 'turistik_muze', 'turistik_manzara'];
+
 /**
  * KK7: filtrenin şehir istekleri. Turistik kategorileri alt isteklere (tam grup → üçü: müze ve galeri · tarihî yer, anıt,
- * kültürel · manzara ve park), Yemek / Kafe / Park / Alışveriş kendi çipine gider; Tümü tek `hepsi` isteğidir.
+ * kültürel · manzara ve park), Yemek / Kafe / Park / Alışveriş kendi çipine gider. #191 incelemesi: Tümü yeni istek atmaz —
+ * eldeki şehir listelerinin birleşimini gösterir; açılışta zaten yüklenen üç Turistik listesini ister (önbellekte, 0 istek).
+ * `hepsi` (includedTypes) Keşfet'ten hiç istenmez: süzgeç her yerde aynı.
  */
 export function sehirCipleri(f: Filtre): OneriCipi[] {
-  if (f.kategoriler.length === 0) return ['hepsi'];
+  if (f.kategoriler.length === 0) return [...TURISTIK_ALT_ISTEKLER];
   const cipler: OneriCipi[] = [];
   for (const k of f.kategoriler) {
     const c = TURISTIK_ALT[k] ?? KATEGORI_CIPI[k];
@@ -42,11 +46,13 @@ export function sehirCipleri(f: Filtre): OneriCipi[] {
   return cipler;
 }
 
-/** KK9: "Bu alanda ara"nın tek isteği: yalnız Turistik grubu → `turistik`; tek kategori → kendi çipi; Tümü / karışık → `hepsi`. */
+/**
+ * KK9: "Bu alanda ara"nın tek isteği. Tümü ya da seçimde Turistik kategorisi varsa `turistik`; yoksa ilk seçili kategorinin çipi
+ * (#191 incelemesi: `hepsi` yok — 20'lik yer yanlış tipli işletmelerle dolmasın).
+ */
 export function alanCipi(f: Filtre): OneriCipi {
-  if (f.kategoriler.length > 0 && f.kategoriler.every((k) => TURISTIK.includes(k))) return 'turistik';
-  if (f.kategoriler.length === 1) return KATEGORI_CIPI[f.kategoriler[0]] ?? 'hepsi';
-  return 'hepsi';
+  if (f.kategoriler.length === 0 || f.kategoriler.some((k) => TURISTIK.includes(k))) return 'turistik';
+  return f.kategoriler.map((k) => KATEGORI_CIPI[k]).find((c): c is OneriCipi => !!c) ?? 'turistik';
 }
 
 /** Görünümün arama alanı: merkez = görünüm merkezi, yarıçap = yarı köşegen. */

@@ -40,7 +40,7 @@ describe('#189 Ek 2 useKesfetOnerileri', () => {
     sahteSunucu();
   });
 
-  it('KK10 akışı: Turistik açılış 3 · 5 kaydırma/zoom 0 · Yemek 1 · şehir dışı "Bu alanda ara" 1 (az sonuçta +1) → ≤ 6 istek', async () => {
+  it('KK10 akışı: Turistik açılış 3 · 5 kaydırma/zoom 0 · Yemek 1 · Tümü 0 · şehir dışı "Bu alanda ara" 1 (az sonuçta +1) → ≤ 6 istek', async () => {
     for (const azSonuc of [false, true]) {
       kesfetBelleginiSifirla();
       mockKesfetYerleri.mockClear();
@@ -62,13 +62,21 @@ describe('#189 Ek 2 useKesfetOnerileri', () => {
       const yemek = { ...BOS_FILTRE, kategoriler: ['yemek' as const] };
       rerender({ f: yemek });
       await waitFor(() => expect(kesfetSayaci.istek).toBe(4));
-      // Şehir dışına kaydır → "Bu alanda ara": görünüm için tek istek (az sonuçta bir kez 3 kat yarıçapla).
+      // #191 incelemesi: Tümü yeni istek atmaz; eldeki şehir listelerinin birleşimi (Turistik üçü + Yemek) gösterilir.
+      const yerSayisi = result.current.yerler.length;
+      rerender({ f: BOS_FILTRE });
+      await act(async () => undefined);
+      expect(kesfetSayaci.istek).toBe(4);
+      expect(result.current.yerler.length).toBe(yerSayisi);
+      expect(new Set(result.current.yerler.map((y) => y.primary_type))).toEqual(new Set(['museum', 'restaurant']));
+      // Şehir dışına kaydır → "Bu alanda ara" (Tümü'de turistik): görünüm için tek istek (az sonuçta bir kez 3 kat yarıçapla).
       const disarida = ekran(13, { lat: eskisehir.lat + 0.25, lng: eskisehir.lng });
-      act(() => result.current.alandaAra(disarida, alanCipi(yemek)));
+      act(() => result.current.alandaAra(disarida, alanCipi(BOS_FILTRE)));
       await waitFor(() => expect(result.current.alanAraniyor).toBe(false));
       await waitFor(() => expect(kesfetSayaci.istek).toBe(azSonuc ? 6 : 5));
       const alanIstekleri = mockKesfetYerleri.mock.calls.map(([s]) => s).filter((s) => !s.sehir);
-      expect(alanIstekleri[0].cip).toBe('yemek');
+      expect(alanIstekleri[0].cip).toBe('turistik');
+      expect(mockKesfetYerleri.mock.calls.some(([s]) => s.cip === 'hepsi')).toBe(false);
       expect(alanIstekleri[0].merkez.lat).toBeCloseTo(disarida.merkez.lat, 6);
       if (azSonuc) {
         expect(alanIstekleri[1].merkez.yaricapM).toBe(Math.min(15_000, Math.round(alanIstekleri[0].merkez.yaricapM! * 3)));
