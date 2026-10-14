@@ -53,8 +53,13 @@ export function useProgramVerisi(secenek: {
   modlar?: BacakModlari;
   /** #101 KK4: seçici açık bacak — araba yolu yalnız o an istenir (maliyet). */
   aracBacagi?: { from: MatrisNoktasi; to: MatrisNoktasi } | null;
+  /**
+   * #181 KK13: false → route-matrix / route-legs istenmez; yalnız önbellekteki (Plan sekmesi açıldıysa) yürüyüşler, yoksa
+   * kuş uçuşu kestirimi. Gezi sayfası açılışında Google'a istek gitmez.
+   */
+  ag?: boolean;
 }): ProgramVerisi {
-  const { seyahat, gunler, duraklar, mekanlar, seciliGun, konaklamalar, modlar, aracBacagi } = secenek;
+  const { seyahat, gunler, duraklar, mekanlar, seciliGun, konaklamalar, modlar, aracBacagi, ag = true } = secenek;
   // #56: her günün başlangıç / bitiş oteli (days.start_stay_id / end_stay_id).
   const gunUclari = useMemo(() => {
     const k = new Map(konaklamalar.map((x) => [x.id, x]));
@@ -74,7 +79,7 @@ export function useProgramVerisi(secenek: {
     const atanan = new Set(duraklar.filter((d) => !d.skipped).map((d) => d.place_ref));
     return mekanlar.filter((m) => atanan.has(m.id)).slice(0, 25 - oteller.length);
   }, [duraklar, mekanlar, oteller.length]);
-  const matris = useYuruyusMatrisi(seyahat.id, matrisNoktalari(oteller, atanmisMekanlar));
+  const matris = useYuruyusMatrisi(seyahat.id, matrisNoktalari(oteller, atanmisMekanlar), ag);
 
   const konumKey = useMemo(() => {
     const k = new Map<string, string>();
@@ -99,9 +104,9 @@ export function useProgramVerisi(secenek: {
     const { baslangic: b, bitis: s } = seciliUclar;
     return [...(b ? [{ key: b.key, lat: b.lat, lng: b.lng }] : []), ...n, ...(s ? [{ key: s.key, lat: s.lat, lng: s.lng }] : [])];
   }, [seciliSira, seciliUclar]);
-  const rota = useRotaBacaklari(seyahat.id, bacakListesi(seciliNoktalar));
+  const rota = useRotaBacaklari(seyahat.id, bacakListesi(seciliNoktalar), false, ag);
   // #101 KK4: seçici açıkken o bacağın araba yolu (ayrı tek-bacak isteği; sunucu önbelleğe yazar).
-  const arac = useRotaBacaklari(seyahat.id, aracBacagi ? [aracBacagi] : [], true);
+  const arac = useRotaBacaklari(seyahat.id, aracBacagi ? [aracBacagi] : [], true, ag);
   const rotalar = useMemo((): RotaHaritasi => {
     const birlesik: RotaHaritasi = { ...rota.rotalar };
     for (const [k, r] of Object.entries(arac.rotalar)) birlesik[k] = { ...birlesik[k], ...r };

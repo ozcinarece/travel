@@ -1676,4 +1676,58 @@ set role anon;
 do $$ begin assert public.davet_ozeti(current_setting('test.sil_token', true)) is null, 'silinmiş seyahatin daveti özetsiz'; end $$;
 reset role;
 
+-- #181 KK4 Tarihleri değiştir: üye çağırır, günler kayar; uzayınca sona gün eklenir (son günün oteliyle), kısalınca sondaki
+-- günler ve durakları kalkar (mekan listede kalır). Dışarıdan biri çağıramaz; ters aralık reddedilir.
+reset role;
+\set TS '''aaaaaaaa-1810-0000-0000-000000000001'''
+\set TU '''aaaaaaaa-1810-0000-0000-000000000002'''
+\set TN '''aaaaaaaa-1810-0000-0000-000000000003'''
+insert into auth.users (id, is_anonymous) values (:TS, false), (:TU, false), (:TN, false);
+insert into public.profiles (id, name, username) values (:TS, 'Sahip', 'sahip181'), (:TU, 'Uye', 'uye181'), (:TN, 'Disari', 'disari181');
+set role authenticated;
+select pg_temp.as_user(:TS);
+insert into public.trips (owner_id, city_place_id, city_label, country_code, lat, lng, tz, start_date, end_date)
+  values (:TS, 'ChIJ-tarih181', 'Tarihli', 'TR', 39.77, 30.52, 'Europe/Istanbul', '2026-11-10', '2026-11-12');
+reset role;
+select id as tarih_trip, invite_token as tarih_token from public.trips where owner_id = :TS \gset
+select set_config('test.tarih_trip', :'tarih_trip', false);
+set role authenticated;
+select pg_temp.as_user(:TU);
+select public.join_trip(:'tarih_token', 'Uye');
+select pg_temp.as_user(:TS);
+insert into public.stays (trip_id, place_id, lat, lng, label, created_by) values (:'tarih_trip', 'ChIJ-otel181', 39.77, 30.52, 'Otel', :TS);
+update public.days set start_stay_id = (select id from public.stays where trip_id = :'tarih_trip'), end_stay_id = (select id from public.stays where trip_id = :'tarih_trip')
+  where trip_id = :'tarih_trip' and index = 3;
+insert into public.places (trip_id, place_id, primary_type, lat, lng, added_by) values (:'tarih_trip', 'ChIJ-son-gun-181', 'museum', 39.77, 30.52, :TS);
+insert into public.stops (trip_id, day_id, place_ref, order_key, minutes)
+  select d.trip_id, d.id, p.id, 'a0', 45 from public.days d join public.places p on p.trip_id = d.trip_id
+  where d.trip_id = :'tarih_trip' and d.index = 3;
+-- Dışarıdan biri ve ters aralık.
+select pg_temp.as_user(:TN);
+select pg_temp.hata_bekle(format('select public.seyahat_tarihlerini_degistir(%L, %L, %L)', current_setting('test.tarih_trip'), '2026-11-11', '2026-11-13'), '42501');
+select pg_temp.as_user(:TU);
+select pg_temp.hata_bekle(format('select public.seyahat_tarihlerini_degistir(%L, %L, %L)', current_setting('test.tarih_trip'), '2026-11-13', '2026-11-11'), '22023');
+-- Üye uzatır ve kaydırır: 3 gün → 5 gün, bir gün ileri.
+do $$
+declare t uuid := current_setting('test.tarih_trip')::uuid;
+begin
+  assert public.seyahat_tarihlerini_degistir(t, '2026-11-11', '2026-11-15') = 5, 'yeni gün sayısı';
+  assert (select start_date from public.trips where id = t) = '2026-11-11' and (select end_date from public.trips where id = t) = '2026-11-15', 'seyahat tarihleri';
+  assert (select count(*) from public.days where trip_id = t) = 5, '5 gün';
+  assert not exists (select 1 from public.days where trip_id = t and date <> '2026-11-11'::date + (index - 1)), 'günler sırayla tarihlendi';
+  assert (select count(*) from public.days d join public.stays s on s.id = d.start_stay_id and s.id = d.end_stay_id where d.trip_id = t and d.index in (4, 5)) = 2,
+    'yeni günler son günün oteliyle';
+  assert (select count(*) from public.stops where trip_id = t) = 1, 'durak yerinde';
+end $$;
+-- Kısaltır: 5 gün → 2 gün; 3. gündeki durak kalkar, mekan listede kalır.
+do $$
+declare t uuid := current_setting('test.tarih_trip')::uuid;
+begin
+  assert public.seyahat_tarihlerini_degistir(t, '2026-11-11', '2026-11-12') = 2, 'kısalan gün sayısı';
+  assert (select count(*) from public.days where trip_id = t) = 2, '2 gün';
+  assert not exists (select 1 from public.stops where trip_id = t), 'silinen günün durağı kalktı';
+  assert exists (select 1 from public.places where trip_id = t and place_id = 'ChIJ-son-gun-181'), 'mekan listede kalır';
+end $$;
+reset role;
+
 \echo 'rls_test: TÜM TESTLER GEÇTİ'

@@ -76,6 +76,25 @@ export function useSeyahatAdiKaydet(seyahatId: string) {
   });
 }
 
+/**
+ * #181 KK4: tarihleri değiştir — günler tarihle kayar; uzayınca sona gün eklenir, kısalınca sondaki günler (ve durakları) silinir
+ * (seyahat_tarihlerini_degistir, tek işlem).
+ */
+export function useTarihleriDegistir(seyahatId: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ gidis, donus }: { gidis: string; donus: string }) => {
+      const { error } = await supabase.rpc('seyahat_tarihlerini_degistir', { p_trip_id: seyahatId, p_start: gidis, p_end: donus });
+      if (error) throw error;
+    },
+    onSettled: () => {
+      for (const k of ['seyahat', 'gunler', 'duraklar']) qc.invalidateQueries({ queryKey: [k, seyahatId] });
+      qc.invalidateQueries({ queryKey: ['seyahatler'] });
+      qc.invalidateQueries({ queryKey: ['seyahat-durumlari'] });
+    },
+  });
+}
+
 /** Tek seyahat (RLS üyeyi süzer). #174 KK5: seyahat yoksa (silindi) yeniden denenmez — ekran hemen listeye döner. */
 export function useSeyahat(id: string | undefined) {
   const { hesapli } = useOturum();

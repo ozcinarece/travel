@@ -17,9 +17,10 @@ type Satir = { place_id: string; ad: string; kategori: string | null; lat: numbe
 
 const GUN_MS = 24 * 60 * 60 * 1000;
 
-export function useIcerikMekanlari(ids: string[], secenek: { kartlar?: string[]; bilinen?: BilinenMekanlar } = {}) {
+/** Yalnız DB sorgusu (Google yok): place_id → bizim ad, kategori, konum ve fotoğraf. #181 Gezi sayfası da bunu okur. */
+export function useIcerikMekanDb(ids: string[]) {
   const sirali = useMemo(() => [...new Set(ids)].sort(), [ids]);
-  const db = useQuery({
+  return useQuery({
     queryKey: ['icerik-mekan', sirali],
     enabled: sirali.length > 0,
     placeholderData: (onceki) => onceki,
@@ -36,6 +37,11 @@ export function useIcerikMekanlari(ids: string[], secenek: { kartlar?: string[];
       );
     },
   });
+}
+
+export function useIcerikMekanlari(ids: string[], secenek: { kartlar?: string[]; bilinen?: BilinenMekanlar } = {}) {
+  const sirali = useMemo(() => [...new Set(ids)].sort(), [ids]);
+  const db = useIcerikMekanDb(ids);
   const { kartlar, bilinen } = secenek;
   const mekanlar = useMemo(() => {
     const m = new Map(db.data ?? []);

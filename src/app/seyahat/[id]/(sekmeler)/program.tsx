@@ -36,6 +36,7 @@ import { programCizgileri, programPinleri } from '@/features/program/haritaVeris
 import { bacakAnahtari, useBacakModlari, useBacakModuKaydet, useDurakGuncelle, useGunGuncelle, useSiraYaz, varislariTemizle, type MatrisNoktasi } from '@/features/program/sorgular';
 import { gunDuraklari, saatKisa, useGunProgrami, useSimdi } from '@/features/program/useProgram';
 import { useProgramVerisi } from '@/features/program/useProgramVerisi';
+import { geziyeGit } from '@/features/gezi/gezinti';
 import { useSeyahatId } from '@/features/seyahatler/baglam';
 import { useSeyahat } from '@/features/seyahatler/sorgular';
 import { seyahatAdi } from '@/features/sihirbaz/sihirbaz';
@@ -77,7 +78,9 @@ type PanelHali = 'katli' | 'yari' | 'tam';
  */
 export default function ProgramEkrani() {
   const id = useSeyahatId();
-  const { gun: gunParam, eklenenDurak, eklenenMekan, atlanan, katildin, planKuruldu, atanmamis, otel: otelParam } = useLocalSearchParams<{
+  const { gun: gunParam, eklenenDurak, eklenenMekan, atlanan, katildin, planKuruldu, atanmamis, otel: otelParam, n: istekNo } = useLocalSearchParams<{
+    /** #181: Gezi sayfasından her istekte yeni; sekme zaten açıksa gün / otel / plan hazır isteği yeniden uygulanır. */
+    n?: string;
     gun?: string;
     eklenenDurak?: string;
     eklenenMekan?: string;
@@ -123,6 +126,7 @@ export default function ProgramEkrani() {
         planKuruldu={planKuruldu === '1'}
         atanmamis={Number(atanmamis ?? 0)}
         otelAcik={otelParam === '1'}
+        istekNo={istekNo}
       />
       {gezidenBildirim ? (
         <View style={s.gezidenBildirim} pointerEvents="none">
@@ -151,6 +155,7 @@ function ProgramSekmesi({
   planKuruldu,
   atanmamis = 0,
   otelAcik,
+  istekNo,
 }: {
   seyahat: Seyahat;
   gunler: Gun[];
@@ -165,6 +170,7 @@ function ProgramSekmesi({
   atanmamis?: number;
   /** #144: Seyahatler'deki "Otel yok" çipi "Nerede kalıyorsun?" sayfasıyla açar. */
   otelAcik?: boolean;
+  istekNo?: string;
 }) {
   const { session } = useOturum();
   const ekran = useWindowDimensions();
@@ -204,6 +210,16 @@ function ProgramSekmesi({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   const [seciliGunId, setSeciliGunId] = useState<string | null>(null);
+  // #181: sekme açıkken Gezi sayfasından gelen istek (gün kartı, "Otel seç", "Planı kur"); "önceki render" deseni — ilk
+  // kurulumda useState başlangıçları zaten uygular.
+  const [oncekiIstek, setOncekiIstek] = useState(istekNo);
+  if (istekNo !== oncekiIstek) {
+    setOncekiIstek(istekNo);
+    const hedef = gunler.find((g) => String(g.index) === gunParam);
+    if (hedef) setSeciliGunId(hedef.id);
+    if (otelAcik) setNereKaliyorAcik(true);
+    if (planKuruldu) setPlanHazirAcik(true);
+  }
   const gun = gunler.find((g) => g.id === seciliGunId) ?? gunler.find((g) => String(g.index) === gunParam) ?? gunler.find((g) => g.index === bugunIndex) ?? gunler[0];
   const [panel, setPanel] = useState<PanelHali>('katli');
   const [puanDurakId, setPuanDurakId] = useState<string | null>(null);
@@ -783,7 +799,7 @@ function ProgramSekmesi({
   const atanmamisSayisi = mekanlar.filter((m) => !durakIle.has(m.id)).length;
   const atanmamisKutusu =
     atanmamisSayisi > 0 ? (
-      <Pressable accessibilityRole="button" onPress={() => router.navigate({ pathname: '/seyahat/[id]/(sekmeler)/listem', params: { id: seyahat.id } })} style={({ pressed }) => [s.atanmamis, pressed && { opacity: 0.7 }]}>
+      <Pressable accessibilityRole="button" onPress={() => router.navigate({ pathname: '/seyahat/[id]/listem', params: { id: seyahat.id } })} style={({ pressed }) => [s.atanmamis, pressed && { opacity: 0.7 }]}>
         <View style={{ flex: 1, gap: 2 }}>
           <Text style={s.atanmamisBaslik}>{t('program.liste.atanmamis', { n: atanmamisSayisi })}</Text>
           <Text style={s.atanmamisAlt}>{t('program.liste.atanmamisAlt')}</Text>
@@ -923,9 +939,9 @@ function ProgramSekmesi({
   return (
     <>
       <HaritaEkrani
-        // #140 (kanvas 10) / #141 KK1: sol üstte "‹ {seyahat adı}" hapı → ana sayfa.
+        // #140 (kanvas 10) / #141 KK1: sol üstte "‹ {seyahat adı}" hapı; #181: seyahatin evi Gezi sayfası.
         baslik={seyahatAdi(seyahat)}
-        geri={() => router.navigate('/(tabs)')}
+        geri={() => geziyeGit(seyahat.id)}
         sagUst={
           <View style={s.sagUst}>
             {panel === 'tam' && !seciliMekan ? (
