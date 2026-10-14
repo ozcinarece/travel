@@ -51,6 +51,7 @@ import { AYLAR, GUNLER, haftaGunu, parcala, tarihEkle } from '@/lib/takvim';
 import type { Durak, Gun, Mekan, Seyahat } from '@/lib/tipler';
 import { kacinciGun, saatEkli, yerelAn, yerelSaatDk, yerelTarih } from '@/lib/zaman';
 import { cizgiOrtasi } from '@/lib/polyline';
+import { googleGunu } from '@/schedule/acilis';
 import { gecikme } from '@/schedule/kaydir';
 import { enUcuzEklemeIndeksi, yuruyusDk } from '@/schedule/program';
 import { arasindaAnahtar } from '@/schedule/sira';
@@ -570,7 +571,12 @@ function ProgramSekmesi({
   let gecilenBacak = 0;
   if (prog?.bugun) for (const x of satirlar.filter((y) => y.durum !== 'atlandi')) if (x.durum === 'gecildi') gecilenBacak++; else break;
   // #99 KK1: seçili günün durak kartları (otel yok); açık kart durak silinince/taşınınca kendiliğinden kapanır (türetilmiş).
-  const kartlar = useMemo(() => kartListesi({ gunDurak, mekanIle, adlar: yerler.data, satirlar }), [gunDurak, mekanIle, yerler.data, satirlar]);
+  // #168 KK3: Açık / Kapalı varış anında, o günün hafta günüyle (tarihsiz günde gösterilmez).
+  const kartHaftaGunu = gun?.date ? googleGunu(haftaGunu(gun.date)) : null;
+  const kartlar = useMemo(
+    () => kartListesi({ gunDurak, mekanIle, adlar: yerler.data, satirlar, haftaGunu: kartHaftaGunu }),
+    [gunDurak, mekanIle, yerler.data, satirlar, kartHaftaGunu],
+  );
   const acikKart = kartDurakId ? kartlar.find((k) => k.durakId === kartDurakId) : undefined;
   const kartAc = (durakId: string) => {
     const k = kartlar.find((x) => x.durakId === durakId);
@@ -984,6 +990,7 @@ function ProgramSekmesi({
                 gezi={!!prog?.bugun}
                 tz={seyahat.tz}
                 konum={konum}
+                gunRenk={gunRengi(gun.index)}
                 onSec={kartAc}
                 onRehber={(k) => paneliAc(k.mekanId)}
                 onYolTarifi={(k) => {

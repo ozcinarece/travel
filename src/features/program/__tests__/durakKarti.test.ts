@@ -3,7 +3,21 @@ import { describe, expect, it, jest } from '@jest/globals';
 import type { Durak, Mekan } from '@/lib/tipler';
 import type { ProgramSatiri } from '@/schedule/program';
 
-import { KART_ADIM, kartIndeksi, kartKamerasi, kartListesi, kartSaati, odakKarti, sonrakiKart } from '../durakKarti';
+import {
+  ilerlemeParcalari,
+  KART_ADIM,
+  kartAdimi,
+  kartGenisligi,
+  kartIndeksi,
+  kartKamerasi,
+  kartListesi,
+  kartSaati,
+  kartSekmesi,
+  odakKarti,
+  sonrakiKart,
+  yolTarifiBirincil,
+  type DurakKarti,
+} from '../durakKarti';
 
 jest.mock('@/lib/supabase', () => ({ supabase: {} }));
 jest.mock('@/lib/oturum', () => ({ useOturum: () => ({}) }));
@@ -74,7 +88,7 @@ describe('kartKamerasi (#99 KK2)', () => {
     const k = kartKamerasi({ konum: { lat: 39.78, lng: 30.5 }, zoom: 15, ekranYukseklik: 800 });
     expect(k.konum.lng).toBe(30.5);
     expect(k.konum.lat).toBeLessThan(39.78);
-    expect(39.78 - k.konum.lat).toBeCloseTo(((210 + 14) / 2) * (360 / 2 ** 15 / 800), 8);
+    expect(39.78 - k.konum.lat).toBeCloseTo(((220 + 14) / 2) * (360 / 2 ** 15 / 800), 8);
     expect(kartKamerasi({ konum: { lat: 0, lng: 0 }, zoom: 11, ekranYukseklik: 800 }).zoom).toBe(14);
     expect(kartKamerasi({ konum: { lat: 0, lng: 0 }, zoom: 19, ekranYukseklik: 800 }).zoom).toBe(17);
   });
@@ -87,5 +101,85 @@ describe('kartIndeksi (#99 KK2)', () => {
     expect(kartIndeksi(KART_ADIM * 9, 5)).toBe(4);
     expect(kartIndeksi(-50, 5)).toBe(0);
     expect(kartIndeksi(420 * 3, 5, 420)).toBe(3);
+  });
+});
+
+describe('#168 durak kartı', () => {
+  const mekanIle = new Map([
+    ['m1', mekan('m1', 'p1', 'mosque')],
+    ['m2', mekan('m2', 'p2', 'museum')],
+    ['m3', mekan('m3', 'p3', 'museum')],
+  ]);
+  // p1 her gün 09:00–17:00; p2 Pazartesi (Google 1) kapalı, diğer günler 10:00–18:00; p3 saat bilgisi yok.
+  const hafta = (ac: string, kapa: string, haric: number[] = []) => [0, 1, 2, 3, 4, 5, 6].filter((g) => !haric.includes(g)).map((gun) => ({ gun, ac, kapaGun: gun, kapa }));
+  const adlar = {
+    p1: { place_id: 'p1', ad: 'Kurşunlu Külliyesi', primary_type: 'mosque', puan: 4.7, puan_sayisi: 3100, periyotlar: hafta('09:00', '17:00') },
+    p2: { place_id: 'p2', ad: 'Cam Müzesi', primary_type: 'museum', puan: 4.5, puan_sayisi: 900, periyotlar: hafta('10:00', '18:00', [1]) },
+    p3: { place_id: 'p3', ad: 'Taş Müzesi', primary_type: 'museum', puan: null, puan_sayisi: null, periyotlar: null },
+  } as never;
+  const gunDurak = [durak('d1', 'm1'), durak('d2', 'm2'), durak('d3', 'm3')];
+  const satirlar = [satir('d1', 9 * 60 + 30, 10 * 60 + 15, 'gecildi', yuru(6)), satir('d2', 10 * 60 + 27, 11 * 60, 'siradaki', yuru(12)), satir('d3', 11 * 60 + 8, 12 * 60, 'bekliyor', yuru(8, 'taksi'))];
+
+  it('KK6: kart soldan 12, sağdan 28 px içeride; sonraki kart 20 px görünür', () => {
+    expect(kartGenisligi(390)).toBe(350);
+    expect(kartAdimi(390)).toBe(358);
+    expect(12 + kartGenisligi(390) + 8).toBe(390 - 20);
+    expect(kartGenisligi(1024)).toBe(520);
+  });
+
+  it('KK3: Açık / Kapalı planlanan varışta, o günün saatleriyle; tarihsiz gün ya da saat bilgisi yoksa gösterilmez', () => {
+    // Salı (Google 2): p2 10:27'de açık.
+    expect(kartListesi({ gunDurak, mekanIle, adlar, satirlar, haftaGunu: 2 }).map((k) => k.acik)).toEqual([true, true, null]);
+    // Pazartesi: p2 kapalı.
+    expect(kartListesi({ gunDurak, mekanIle, adlar, satirlar, haftaGunu: 1 }).map((k) => k.acik)).toEqual([true, false, null]);
+    // Varış açılıştan önce: kapalı.
+    expect(kartListesi({ gunDurak: [durak('d1', 'm1')], mekanIle, adlar, satirlar: [satir('d1', 8 * 60, 9 * 60, 'bekliyor')], haftaGunu: 2 })[0].acik).toBe(false);
+    expect(kartListesi({ gunDurak, mekanIle, adlar, satirlar }).map((k) => k.acik)).toEqual([null, null, null]);
+    // Atlanan durakta varış yok.
+    expect(kartListesi({ gunDurak: [durak('d1', 'm1', { skipped: true })], mekanIle, adlar, satirlar: [satir('d1', 600, 600, 'atlandi')], haftaGunu: 2 })[0].acik).toBeNull();
+  });
+
+  it('KK2: ilerleme — planda öncekiler geçilmiş; gezide yalnız gezilenler; bu durak her zaman kendi parçası', () => {
+    const k = kartListesi({ gunDurak, mekanIle, adlar, satirlar });
+    expect(ilerlemeParcalari(k, 'd2', false)).toEqual(['gecildi', 'bu', 'sonra']);
+    expect(ilerlemeParcalari(k, 'd1', false)).toEqual(['bu', 'sonra', 'sonra']);
+    expect(ilerlemeParcalari(k, 'd3', true)).toEqual(['gecildi', 'sonra', 'bu']);
+    expect(ilerlemeParcalari(k, 'd1', true)).toEqual(['bu', 'sonra', 'sonra']);
+    expect(ilerlemeParcalari(k, 'yok', false)).toEqual(['sonra', 'sonra', 'sonra']);
+  });
+
+  it('KK7: plan modunda sekme geliş (mod glifi); otelsiz ilk durakta "Günün ilk durağı"; atlanan soluk', () => {
+    const k = kartListesi({ gunDurak, mekanIle, adlar, satirlar });
+    const sec = { gezi: false, konum: null, tz: 'Europe/Istanbul' };
+    expect(kartSekmesi(k[1], sec)).toEqual({ metin: '1. duraktan 12 dk yürüyüş', ikon: 'yurume', ton: 'normal' });
+    expect(kartSekmesi(k[2], sec)).toEqual({ metin: '2. duraktan 8 dk araba', ikon: 'araba', ton: 'normal' });
+    // Planda durum (gecildi / siradaki) sekmeyi değiştirmez.
+    expect(kartSekmesi(k[0], sec).metin).toBe('Otelden 6 dk yürüyüş');
+    const ilk = kartListesi({ gunDurak: [durak('d1', 'm1')], mekanIle, adlar, satirlar: [satir('d1', 540, 600, 'bekliyor')] })[0];
+    expect(kartSekmesi(ilk, sec)).toEqual({ metin: 'Günün ilk durağı', ikon: 'pin', ton: 'normal' });
+    const atlanan = kartListesi({ gunDurak: [durak('d1', 'm1', { skipped: true })], mekanIle, adlar, satirlar: [satir('d1', 600, 600, 'atlandi')] })[0];
+    expect(kartSekmesi(atlanan, { ...sec, gezi: true })).toEqual({ metin: 'Atlandı', ikon: null, ton: 'soluk' });
+  });
+
+  it('KK8–9: gezi modunda sıradaki kalan yol (konum yoksa geliş); buradayken varış anı; gezilen ✓', () => {
+    const k = kartListesi({ gunDurak, mekanIle, adlar, satirlar });
+    const sec = { gezi: true, konum: null, tz: 'Europe/Istanbul' };
+    expect(kartSekmesi(k[1], sec)).toEqual({ metin: 'Sıradaki · 1. duraktan 12 dk yürüyüş', ikon: 'yurume', ton: 'normal' });
+    // ~300 m kuzeyde: kuş uçuşu kestirim (#140 KK9 ile aynı hesap).
+    const konum = { lat: k[1].konum.lat + 0.0027, lng: k[1].konum.lng };
+    expect(kartSekmesi(k[1], { ...sec, konum }).metin).toMatch(/^Sıradaki · \d+ dk kaldı · 300 m$/);
+    expect(kartSekmesi(k[0], sec)).toEqual({ metin: 'Gezildi', ikon: 'tik', ton: 'gezildi' });
+    expect(kartSekmesi(k[2], sec).metin).toBe('2. duraktan 8 dk araba');
+    const burada: DurakKarti = { ...k[1], durum: 'buradasin', varildi: '2026-10-16T08:05:00Z' };
+    expect(kartSekmesi(burada, sec)).toEqual({ metin: "Buradasın · 11:05'te geldin", ikon: 'tik', ton: 'burada' });
+    expect(kartSekmesi({ ...burada, varildi: null }, sec).metin).toBe('Buradasın');
+  });
+
+  it('KK7–9: birincil düğme planda ve buradayken Mekan rehberi, sıradaki durağa giderken Yol tarifi', () => {
+    expect(yolTarifiBirincil({ durum: 'siradaki' }, false)).toBe(false);
+    expect(yolTarifiBirincil({ durum: 'siradaki' }, true)).toBe(true);
+    expect(yolTarifiBirincil({ durum: 'buradasin' }, true)).toBe(false);
+    expect(yolTarifiBirincil({ durum: 'bekliyor' }, true)).toBe(false);
+    expect(yolTarifiBirincil({ durum: null }, false)).toBe(false);
   });
 });
