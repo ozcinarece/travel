@@ -4,6 +4,8 @@
 // #189: kalite süzgeci — birincil tip çipin kümesinde olmalı, yorum / puan alt sınırı (Ayarlar: kesfet_esikleri), elle gizlenen
 // yerler (kesfet_gizli) çıkar. Ek Google isteği yok; süzgeç önbellekten SONRA uygulanır, ayar değişikliği hemen geçerli olur.
 // #190: kategori çiplerinde istek de birincil tiple atılır (includedPrimaryTypes); sonradan süzgeç güvenlik ağı.
+// #189 Ek 2: `sehir: true` şehir listesi isteğidir — yarıçapı istemci değil ayar belirler (kesfet_esikleri.sehir_yaricap_m,
+// varsayılan 8 km); aynı şehre bakan herkes aynı önbellek anahtarına düşer. Cevap kullanılan yarıçapı da taşır.
 // Önbellek: (çip, 0,0001° hücre, yarıçap, adet) anahtarıyla izolat belleğinde 24 sa (teknik not §3). #66: karo
 // merkezleri 125 m'ye kadar inebildiğinden hücre 4 ondalık, yarıçap en az 100 m.
 import { CIP_TIPLERI, GoogleHatasi, hafifYer, istekBirincilTipleri, kesfetSuzgeci, KONAKLAMA_TIPLERI, yakinAra, type YakinYer } from '../_shared/google.ts';
@@ -11,7 +13,7 @@ import { govde, hata, json, onKontrol } from '../_shared/http.ts';
 import { kesfetAyari } from '../_shared/kesfetAyari.ts';
 import { sayacli } from '../_shared/sayac.ts';
 
-type Istek = { merkez: { lat: number; lng: number }; yaricapM?: number; cip: string; enFazla?: number };
+type Istek = { merkez: { lat: number; lng: number }; yaricapM?: number; cip: string; enFazla?: number; sehir?: boolean };
 
 const TTL_MS = 24 * 60 * 60 * 1000;
 /** Önbellek izolat belleğinde (kullanıcılar arasında yalnız aynı izolat paylaşır); en çok bu kadar anahtar, en eski silinir (#68 incelemesi). */
@@ -36,13 +38,14 @@ Deno.serve(sayacli('places-nearby', async (istek) => {
   if (!Number.isFinite(lat) || !Number.isFinite(lng) || Math.abs(lat) > 90 || Math.abs(lng) > 180) return hata('merkez geçersiz');
   const tipler = typeof g.cip === 'string' ? CIP_TIPLERI[g.cip] : undefined;
   if (!tipler) return hata('cip geçersiz');
-  const yaricapM = Math.min(Math.max(Number(g.yaricapM) || 3000, 100), 15_000);
+  const ayarIstegi = kesfetAyari();
+  const yaricapM = g.sehir === true ? (await ayarIstegi).sehirYaricapM : Math.min(Math.max(Number(g.yaricapM) || 3000, 100), 15_000);
   const enFazla = Math.min(Math.max(Math.trunc(Number(g.enFazla) || 20), 1), 20);
 
   const cip = g.cip;
   const cevapla = async (ham: YakinYer[], onbellekten: boolean) => {
-    const ayar = await kesfetAyari();
-    return json({ yerler: kesfetSuzgeci(ham, cip, ayar.esikler, ayar.gizli).map(hafifYer), onbellek: onbellekten });
+    const ayar = await ayarIstegi;
+    return json({ yerler: kesfetSuzgeci(ham, cip, ayar.esikler, ayar.gizli).map(hafifYer), onbellek: onbellekten, yaricapM });
   };
 
   const anahtar = `${cip}:${lat.toFixed(4)},${lng.toFixed(4)}:${yaricapM}:${enFazla}`;

@@ -3,7 +3,7 @@
 // altına kadar; sabit başlık + "N yer" + filtre + hızlı çipler, iki sütun fotoğraflı kart, yüzen "Haritaya dön").
 import { Image } from 'expo-image';
 import type { ReactNode } from 'react';
-import { FlatList, Pressable, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
+import { ActivityIndicator, FlatList, Pressable, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 
 import type { SayfaHali } from '@/components/harita/AltSayfa';
 import { EkleDugmesi } from '@/components/ui/EkleDugmesi';
@@ -67,9 +67,24 @@ function ListeGoster({ sayi, yalniz, onPress }: ListeDugmesi) {
  * Üst şerit (tutamakla birlikte sürüklenir; tam halde kaydırırken üstte sabit kalır). Küçük ve yarım halde tek satır başlık; tam
  * halde Archivo başlık + "N yer" + filtre düğmesi, altında `cipler`.
  */
-export function CekmeceSeridi({ hal, sayi, onHal, liste, tam }: { hal: SayfaHali; sayi: number; onHal: (h: SayfaHali) => void; liste?: ListeDugmesi; tam?: { yerSayisi: number; onFiltre: () => void; cipler: ReactNode } }) {
+export function CekmeceSeridi({
+  hal,
+  sayi,
+  onHal,
+  liste,
+  tam,
+  sehir,
+}: {
+  hal: SayfaHali;
+  sayi: number;
+  onHal: (h: SayfaHali) => void;
+  liste?: ListeDugmesi;
+  tam?: { yerSayisi: number; onFiltre: () => void; cipler: ReactNode };
+  /** #191: şehir listesinin şehri, bulunma ekiyle ("Eskişehir'de"); verilirse başlık "Eskişehir'de öne çıkanlar". */
+  sehir?: string | null;
+}) {
   const listeDugmesi = liste && (liste.sayi > 0 || liste.yalniz) ? <ListeGoster {...liste} /> : null;
-  const baslik = liste?.yalniz ? t('kesfet.cekmece.listeBaslik', { n: liste.sayi }) : t('kesfet.cekmece.kucuk', { n: sayi });
+  const baslik = liste?.yalniz ? t('kesfet.cekmece.listeBaslik', { n: liste.sayi }) : sehir ? t('kesfet.cekmece.sehirKucuk', { sehir, n: sayi }) : t('kesfet.cekmece.kucuk', { n: sayi });
   return (
     <View style={s.serit}>
       <Pressable accessibilityRole="button" accessibilityLabel={t(hal === 'katli' ? 'kesfet.cekmece.ac' : 'kesfet.cekmece.kapat')} onPress={() => onHal(hal === 'katli' ? 'yari' : 'katli')} hitSlop={8} style={s.tutamakDokunma}>
@@ -79,7 +94,7 @@ export function CekmeceSeridi({ hal, sayi, onHal, liste, tam }: { hal: SayfaHali
         <View style={s.tamUst}>
           <View style={s.seritSatir}>
             <Text accessibilityRole="header" style={s.tamBaslik} numberOfLines={1}>
-              {liste?.yalniz ? t('kesfet.cekmece.listeBaslik', { n: liste.sayi }) : t('kesfet.cekmece.baslik')}
+              {liste?.yalniz ? t('kesfet.cekmece.listeBaslik', { n: liste.sayi }) : sehir ? t('kesfet.cekmece.sehirBaslik', { sehir }) : t('kesfet.cekmece.baslik')}
             </Text>
             {liste?.yalniz ? (
               listeDugmesi
@@ -195,6 +210,23 @@ export function HaritayaDonlu({ yukseklik, onHaritayaDon, children }: { yuksekli
   );
 }
 
+/** #189 Ek 2 KK9 / KK11: ekranın üst ortasında "Bu alanda ara" — "Haritaya dön" hapı stilinde; yoldayken bekleme metni. */
+export function AlandaAraHapi({ onPress, yukleniyor }: { onPress: () => void; yukleniyor: boolean }) {
+  return (
+    <View style={s.alanHapiKap} pointerEvents="box-none">
+      <Pressable
+        accessibilityRole="button"
+        accessibilityState={{ busy: yukleniyor, disabled: yukleniyor }}
+        disabled={yukleniyor}
+        onPress={onPress}
+        style={({ pressed }) => [s.haritayaDon, pressed && { opacity: 0.9 }]}>
+        {yukleniyor ? <ActivityIndicator size="small" color={renk.zemin} /> : <Ikon ad="ara" boyut={18} renk={renk.zemin} kalinlik={2.3} />}
+        <Text style={s.haritayaDonMetin}>{yukleniyor ? t('genel.yukleniyor') : t('kesfet.alandaAra')}</Text>
+      </Pressable>
+    </View>
+  );
+}
+
 /** #165 KK8: alt menünün üstünde, ortada yüzen Gece hap; dokununca çekmece küçük hale iner. */
 function HaritayaDon({ onPress }: { onPress: () => void }) {
   return (
@@ -282,4 +314,5 @@ const s = StyleSheet.create({
   haritayaDonKap: { position: 'absolute', left: 0, right: 0, bottom: 18, alignItems: 'center' },
   haritayaDon: { height: 44, paddingLeft: 14, paddingRight: 18, borderRadius: 999, backgroundColor: renk.ana, flexDirection: 'row', alignItems: 'center', gap: 8, shadowColor: renk.metin, shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.28, shadowRadius: 20, elevation: 8 },
   haritayaDonMetin: { fontFamily: yazi.ekstra, fontSize: 14, color: renk.zemin },
+  alanHapiKap: { alignItems: 'center' },
 });

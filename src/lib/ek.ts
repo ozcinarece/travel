@@ -30,3 +30,21 @@ export function yonelmeEkli(ad: string): string | null {
   const tamlama = /\s/.test(temiz) && 'ıiuü'.includes(son);
   return `${temiz}'${tamlama ? 'n' : 'y'}${ek}`;
 }
+
+const SERT = 'fstkçşhp';
+
+/**
+ * #191: özel adın bulunma eki — "Eskişehir'de", "Bursa'da", "Kars'ta", "Sultanahmet'te", "Eskişehir Merkezi'nde". Son ünlünün
+ * kalınlığına göre -da/-de; sert ünsüzle biten adda -ta/-te; çok kelimeli adın son kelimesi ı/i/u/ü ile bitiyorsa (iyelikli
+ * tamlama) -nda/-nde. Harfle bitmeyen adda karar verilemez → null.
+ */
+export function bulunmaEkli(ad: string): string | null {
+  const temiz = ad.trim();
+  const son = temiz.slice(-1).toLocaleLowerCase('tr');
+  if (!/\p{L}/u.test(son)) return null;
+  const kucuk = temiz.toLocaleLowerCase('tr');
+  const sonUnlu = [...kucuk].reverse().find((h) => UNLU.includes(h));
+  const unlu = sonUnlu && KALIN.includes(sonUnlu) ? 'a' : 'e';
+  if (UNLU.includes(son) && /\s/.test(temiz) && 'ıiuü'.includes(son)) return `${temiz}'n${'d' + unlu}`;
+  return `${temiz}'${SERT.includes(son) ? 't' : 'd'}${unlu}`;
+}

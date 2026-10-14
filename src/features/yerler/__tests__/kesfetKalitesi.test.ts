@@ -12,6 +12,7 @@ type GoogleModulu = {
   VARSAYILAN_ESIKLER: Esikler;
   esikleriCoz: (deger: unknown) => Esikler;
   istekBirincilTipleri: (cip: string) => string[] | undefined;
+  sehirYaricapiCoz: (deger: unknown) => number;
   yerGrubu: (y: { primary_type: string | null; tipler: string[] }, cip: string) => string | null;
   kesfetSuzgeci: (yerler: YakinYer[], cip: string, esikler: Esikler, gizli: ReadonlySet<string>) => YakinYer[];
   hafifYer: (y: YakinYer) => Omit<YakinYer, 'tipler'>;
@@ -25,7 +26,7 @@ type GoogleModulu = {
     birincilTipler?: string[];
   }) => Promise<YakinYer[]>;
 };
-const { BIRINCIL_TIPLER, CIP_TIPLERI, KONAKLAMA_TIPLERI, VARSAYILAN_ESIKLER, esikleriCoz, hafifYer, istekBirincilTipleri, kesfetSuzgeci, yakinAra, yerGrubu } =
+const { BIRINCIL_TIPLER, CIP_TIPLERI, KONAKLAMA_TIPLERI, VARSAYILAN_ESIKLER, esikleriCoz, hafifYer, istekBirincilTipleri, kesfetSuzgeci, sehirYaricapiCoz, yakinAra, yerGrubu } =
   jest.requireActual<GoogleModulu>('../../../../supabase/functions/_shared/google');
 
 // #189 KK6: sabit cevaplar. Düzce, Keşfet · Turistik (14 Ekim) örneğinden: kuaför ve teknoloji mağazası tiplerine `museum` eklemiş,
@@ -153,6 +154,39 @@ describe('#190: istek birincil tiple (includedPrimaryTypes)', () => {
     expect(google.istekler[0].includedPrimaryTypes).toBeDefined();
     expect(google.istekler[1].includedTypes).toEqual(CIP_TIPLERI.turistik);
     expect(sonuc).toEqual(['Tarihî Cami', 'Düzce Müzesi', 'Tarihî Hamam', 'Kafkas Anıt Rölyef']);
+  });
+});
+
+describe('#189 Ek 2: şehir listesi alt istekleri ve yarıçapı', () => {
+  it('Turistik üç alt istek includedPrimaryTypes ile; her tip süzgeçten geçer; manzara ve park, parkı Park eşiğiyle tutar', async () => {
+    for (const cip of ['turistik_muze', 'turistik_tarihi', 'turistik_manzara']) {
+      const tipler = istekBirincilTipleri(cip)!;
+      expect(tipler.length).toBeGreaterThan(0);
+      expect(tipler.length).toBeLessThanOrEqual(50);
+      for (const t of tipler) expect(yerGrubu({ primary_type: t, tipler: [] }, cip)).not.toBeNull();
+      google.istekler.length = 0;
+      await kesfet(cip);
+      expect(google.istekler[0].includedPrimaryTypes).toEqual(tipler);
+    }
+    expect(istekBirincilTipleri('turistik_muze')).toEqual(['museum', 'art_museum', 'history_museum', 'art_gallery']);
+    expect(istekBirincilTipleri('turistik_manzara')).toEqual(expect.arrayContaining(['observation_deck', 'park', 'botanical_garden']));
+    expect(yerGrubu({ primary_type: 'park', tipler: [] }, 'turistik_manzara')).toBe('park');
+    expect(yerGrubu({ primary_type: 'observation_deck', tipler: [] }, 'turistik_manzara')).toBe('turistik');
+    // Müze alt isteğinde park kabul edilmez.
+    expect(yerGrubu({ primary_type: 'park', tipler: [] }, 'turistik_muze')).toBeNull();
+    // Düzce: Şehir Parkı (25 yorum, 3,0) Park eşiğiyle kalır; müzeler ve tarihî yerler kendi alt isteklerinde.
+    expect(adlar(await kesfet('turistik_manzara'))).toEqual(['Şehir Parkı']);
+    expect(adlar(await kesfet('turistik_muze'))).toEqual(['Düzce Müzesi']);
+    expect(adlar(await kesfet('turistik_tarihi'))).toEqual(['Tarihî Hamam', 'Kafkas Anıt Rölyef']);
+  });
+
+  it('şehir yarıçapı ayardan (sehir_yaricap_m); yoksa 8 km; 2–15 km arasına çekilir', () => {
+    expect(sehirYaricapiCoz(null)).toBe(8000);
+    expect(sehirYaricapiCoz({ turistik: { yorum: 50 } })).toBe(8000);
+    expect(sehirYaricapiCoz({ sehir_yaricap_m: 6000 })).toBe(6000);
+    expect(sehirYaricapiCoz({ sehir_yaricap_m: 500 })).toBe(2000);
+    expect(sehirYaricapiCoz({ sehir_yaricap_m: 40_000 })).toBe(15_000);
+    expect(sehirYaricapiCoz({ sehir_yaricap_m: 'x' })).toBe(8000);
   });
 });
 

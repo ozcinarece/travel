@@ -169,7 +169,22 @@ export function useOtelOnerileri(girdi: string, oturum: string, merkez: Merkez |
  * (gezilecek + müze + manzara tipleri) varsayılan Turistik grubunun ve sihirbazın "Görmen gerekenler" kümesidir; #178: ibadet
  * yerleri bu kümede yalnız turistik değerleri varsa gelir (sunucu süzgeci).
  */
-export type OneriCipi = 'otel' | 'hepsi' | 'turistik' | 'gezilecek' | 'muze' | 'ibadet' | 'yemek' | 'kafe' | 'park' | 'manzara' | 'alisveris';
+export type OneriCipi =
+  | 'otel'
+  | 'hepsi'
+  | 'turistik'
+  | 'gezilecek'
+  | 'muze'
+  | 'ibadet'
+  | 'yemek'
+  | 'kafe'
+  | 'park'
+  | 'manzara'
+  | 'alisveris'
+  // #189 Ek 2: Keşfet şehir listesinde Turistik'in üç alt isteği.
+  | 'turistik_muze'
+  | 'turistik_tarihi'
+  | 'turistik_manzara';
 
 /** Popülerlik puanı: puan × log10(yorum + 1); eşitlikte place_id (deterministik). */
 export function oneriSirala<T extends { place_id: string; puan: number | null; puan_sayisi: number | null }>(yerler: T[]): T[] {
@@ -320,6 +335,21 @@ export async function yakinYerler(secenek: { cip: OneriCipi; merkez: Merkez; enF
   // ortak önbelleğe yazılır; listeye eklenen öneri ya da çekmece fotoğrafı için bu alanlar yeniden istenmez.
   hafifOnbellek.yaz(cevap.yerler, 'hafif');
   return cevap.yerler;
+}
+
+/**
+ * #189 Ek 2: Keşfet isteği. `sehir: true` şehir listesidir — yarıçapı sunucu ayardan seçer (varsayılan 8 km) ve cevapta döner;
+ * değilse "Bu alanda ara" alanı (`merkez.yaricapM`). Sonuçlar ortak önbelleğe yazılır (yakinYerler gibi).
+ */
+export async function kesfetYerleri(secenek: { cip: OneriCipi; merkez: Merkez; sehir?: boolean }): Promise<{ yerler: HafifYer[]; yaricapM: number }> {
+  const cevap = await cagir<{ yerler: HafifYer[]; yaricapM?: number }>('places-nearby', {
+    merkez: { lat: secenek.merkez.lat, lng: secenek.merkez.lng },
+    ...(secenek.sehir ? { sehir: true } : { yaricapM: secenek.merkez.yaricapM ?? 3000 }),
+    cip: secenek.cip,
+    enFazla: 20,
+  });
+  hafifOnbellek.yaz(cevap.yerler, 'hafif');
+  return { yerler: cevap.yerler, yaricapM: cevap.yaricapM ?? secenek.merkez.yaricapM ?? 0 };
 }
 
 /**
