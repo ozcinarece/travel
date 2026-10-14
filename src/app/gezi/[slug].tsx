@@ -316,7 +316,7 @@ export default function GeziEkrani() {
       </View>
 
       {alAcik ? (
-        <GeziAl gezi={g} kimlik={kimlik} ilkHedefId={hedef?.id ?? null} onKapat={() => setAlAcik(false)} />
+        <GeziAl gezi={g} kimlik={kimlik} foto={(d) => canli.data?.get(d.id)?.foto_uri ?? null} ilkHedefId={hedef?.id ?? null} onKapat={() => setAlAcik(false)} />
       ) : null}
       <SecimMenusu
         acik={!!hedefMenusu}

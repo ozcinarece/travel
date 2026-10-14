@@ -2273,4 +2273,58 @@ end $$;
 delete from public.geziler where id = '19201920-0000-4000-8000-000000000010';
 do $$ begin assert not exists (select 1 from public.gezi_rota_onbellek where gezi_gun_id = '19201920-0000-4000-8000-000000000011'), 'cascade'; end $$;
 
+-- #193 KK3 · KK12: "Seyahatime al" → Yeni seyahat — seyahat, günler, mekanlar ve plan tek işlemde; bir adım hata verirse hiçbiri
+-- yazılmaz. Tarihsiz seyahat ("Tarih sonra") istenen sayıda tarihsiz günle; durak yoksa mekanlar atanmamış (KK10).
+reset role;
+\set YS '''aaaaaaaa-1930-0000-0000-000000000001'''
+\set YA '''aaaaaaaa-1930-0000-0000-000000000002'''
+insert into auth.users (id, is_anonymous) values (:YS, false), (:YA, true);
+insert into public.profiles (id, name, username) values (:YS, 'Yeni', 'yeni193');
+set role authenticated;
+select pg_temp.as_user(:YS);
+do $$
+declare
+  v uuid;
+  sehir constant jsonb := '{"name": "Eskişehir''de üç gün", "city_place_id": "ChIJ_eskisehir_193", "city_label": "Eskişehir", "country_code": "TR", "lat": 39.77, "lng": 30.52, "tz": "Europe/Istanbul"}';
+  mekanlar constant jsonb := '[{"place_id": "ChIJ_a_193", "primary_type": "museum", "lat": 39.77, "lng": 30.52, "dk": 90}, {"place_id": "ChIJ_b_193", "primary_type": "park", "lat": 39.78, "lng": 30.53, "dk": 45}, {"place_id": "ChIJ_c_193", "primary_type": "restaurant", "lat": 39.79, "lng": 30.54, "dk": 60}]';
+begin
+  -- Tarihli, 3 gün: 1. güne iki durak, 3. güne bir durak (sırayla).
+  v := public.geziden_seyahat_ac(sehir || '{"start_date": "2026-10-16", "end_date": "2026-10-18"}', 3, mekanlar,
+    '[{"gun": 1, "place_id": "ChIJ_a_193", "order_key": "i", "dk": 90}, {"gun": 1, "place_id": "ChIJ_b_193", "order_key": "r", "dk": 45}, {"gun": 3, "place_id": "ChIJ_c_193", "order_key": "i", "dk": 60}]');
+  assert (select name from public.trips where id = v) = 'Eskişehir''de üç gün', 'ad = gezi başlığı';
+  assert (select owner_id from public.trips where id = v) = auth.uid(), 'sahip çağıran';
+  assert exists (select 1 from public.members where trip_id = v and user_id = auth.uid() and role = 'owner'), 'sahip üye';
+  assert (select count(*) from public.days where trip_id = v) = 3, 'tarihli: 3 gün';
+  assert (select date from public.days where trip_id = v and index = 3) = '2026-10-18', '3. gün tarihi';
+  assert (select count(*) from public.places where trip_id = v and added_by = auth.uid()) = 3, '3 mekan, ekleyen çağıran';
+  assert (select array_agg(p.place_id order by s.order_key) from public.stops s join public.days d on d.id = s.day_id join public.places p on p.id = s.place_ref where s.trip_id = v and d.index = 1) = array['ChIJ_a_193', 'ChIJ_b_193'], '1. gün iki durak, sırayla';
+  assert (select s.minutes from public.stops s join public.days d on d.id = s.day_id where s.trip_id = v and d.index = 3) = 60, '3. gün durağı ve süresi';
+
+  -- Tarihsiz ("Tarih sonra"), 3 gün, durak yok: mekanlar atanmamış.
+  v := public.geziden_seyahat_ac(sehir, 3, mekanlar, '[]');
+  assert (select start_date is null and end_date is null from public.trips where id = v), 'tarihsiz seyahat';
+  assert (select count(*) from public.days where trip_id = v and date is null) = 3, 'tarihsiz: 3 tarihsiz gün';
+  assert (select array_agg(index order by index) from public.days where trip_id = v) = array[1, 2, 3], 'gün sırası 1..3';
+  assert (select count(*) from public.places where trip_id = v) = 3 and not exists (select 1 from public.stops where trip_id = v), 'mekanlar atanmamış';
+  perform set_config('test.ys_sayi', (select count(*) from public.trips where owner_id = auth.uid())::text, false);
+end $$;
+
+-- Tek işlem: durak yazımı düşerse (sıra anahtarı yok) seyahat de, mekanlar da yazılmaz.
+select pg_temp.hata_bekle($$select public.geziden_seyahat_ac('{"name": "Yarım", "city_place_id": "ChIJ_y", "city_label": "Y", "lat": 1, "lng": 1, "tz": "Europe/Istanbul"}', 2, '[{"place_id": "ChIJ_a_193", "lat": 1, "lng": 1}]', '[{"gun": 1, "place_id": "ChIJ_a_193"}]')$$, '23502');
+select pg_temp.hata_bekle($$select public.geziden_seyahat_ac('{"name": "Yarım", "city_place_id": "ChIJ_y", "city_label": "Y", "lat": 1, "lng": 1, "tz": "Europe/Istanbul"}', 2, '[]', '[{"gun": 3, "place_id": "ChIJ_a_193", "order_key": "i"}]')$$, '22023');
+select pg_temp.hata_bekle($$select public.geziden_seyahat_ac('{"name": "Yarım", "city_place_id": "ChIJ_y", "city_label": "Y", "lat": 1, "lng": 1, "tz": "Europe/Istanbul", "start_date": "2026-10-16", "end_date": "2026-10-17"}', 3, '[]', '[]')$$, '22023');
+select pg_temp.hata_bekle($$select public.geziden_seyahat_ac('{"name": "Yarım", "city_place_id": "ChIJ_y", "city_label": "Y", "lat": 1, "lng": 1, "tz": "Europe/Istanbul"}', 31, '[]', '[]')$$, '22023');
+do $$
+begin
+  assert (select count(*) from public.trips where owner_id = auth.uid())::text = current_setting('test.ys_sayi'), 'hata sonrası yarım seyahat yok';
+  assert not exists (select 1 from public.trips where name = 'Yarım'), 'yarım seyahat yok';
+end $$;
+-- Misafir seyahat açamaz (trips_insert); anon çağıramaz.
+select pg_temp.as_user(:YA, true);
+select pg_temp.hata_bekle($$select public.geziden_seyahat_ac('{"name": "Misafir", "city_place_id": "ChIJ_y", "city_label": "Y", "lat": 1, "lng": 1, "tz": "Europe/Istanbul"}', 1, '[]', '[]')$$, '42501');
+reset role;
+set role anon;
+select pg_temp.hata_bekle($$select public.geziden_seyahat_ac('{}', 1, '[]', '[]')$$, '42501');
+reset role;
+
 \echo 'rls_test: TÜM TESTLER GEÇTİ'

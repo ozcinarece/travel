@@ -3,7 +3,7 @@ import type { Durak, Gun, GeziDetay, GeziDuragi, GeziGunu, Mekan } from '@/lib/t
 
 import { gunHucresi } from '@/components/program/GunKartlari';
 import { t } from '@/i18n';
-import { GUNLER_BULUNMA, haftaGunu } from '@/lib/takvim';
+import { GUNLER_BULUNMA, haftaGunu, tarihEkle } from '@/lib/takvim';
 
 export type AktarmaSecimi =
   /** Günler sırayla seyahatin günlerine; gün azsa fazlası listeye. */
@@ -204,4 +204,78 @@ export function aktarmaSecenegi(gezi: Pick<GeziDetay, 'gezi_gunleri'>, secim: Ak
   if (secim.tur === 'mekanlar') return 'mekan';
   if (secim.tur === 'tum') return 'tum';
   return gezi.gezi_gunleri.every((g) => secim.dahil?.[g.id] !== false && !!secim.eslesme[g.id]) ? 'tum' : 'gunler';
+}
+
+// ---------------------------------------------------------------- #193 KK5: eksik gün (seyahatin sonuna eklenir)
+
+/** Seyahatte henüz olmayan, aktarımda sona eklenecek gün: "+1" son günden sonraki ilk gün. */
+export const sanalGunMu = (id: string | null | undefined): id is string => !!id && id.startsWith('+');
+const sanalSirasi = (id: string) => Number(id.slice(1));
+
+/** Gezinin seyahatten fazla günleri → sanal hedef ("+1", "+2"…), gezi sırasıyla. */
+export function eksikGunler(gezi: Pick<GeziDetay, 'gezi_gunleri'>, gunler: Pick<Gun, 'id'>[]): Record<string, string> {
+  const e: Record<string, string> = {};
+  gezi.gezi_gunleri.forEach((g, i) => {
+    if (i >= gunler.length) e[g.id] = `+${i - gunler.length + 1}`;
+  });
+  return e;
+}
+
+/** Sayfanın varsayılan eşleşmesi: günler sırayla; fazla gezi günleri sona eklenecek güne (KK5). */
+export function hedefEslesmesi(gezi: Pick<GeziDetay, 'gezi_gunleri'>, gunler: Gun[]): Record<string, string | null> {
+  return { ...varsayilanEslesme(gezi, gunler), ...eksikGunler(gezi, gunler) };
+}
+
+/** KK5: fazla gün varsayılan seçilmez. */
+export function varsayilanDahil(gezi: Pick<GeziDetay, 'gezi_gunleri'>, gunler: Gun[]): Record<string, boolean> {
+  return Object.fromEntries(Object.keys(eksikGunler(gezi, gunler)).map((id) => [id, false]));
+}
+
+/**
+ * Seçili gezi günlerinin sanal hedefleri sıkıştırılır: yalnız 5. gün seçildiyse tek gün eklenir. Dönen: sanal kimlik → seyahatin
+ * sonuna eklenecek kaçıncı gün (1, 2…). Seçilmemiş bir satırın etiketi için `dahilDegil` seçilirse alacağı sıra.
+ */
+export function sanalSira(gezi: Pick<GeziDetay, 'gezi_gunleri'>, eslesme: Record<string, string | null>, dahil: Record<string, boolean>): Map<string, number> {
+  const secili = [...new Set(gezi.gezi_gunleri.filter((g) => dahil[g.id] !== false).map((g) => eslesme[g.id]).filter(sanalGunMu))].sort((a, b) => sanalSirasi(a) - sanalSirasi(b));
+  return new Map(secili.map((id, i) => [id, i + 1]));
+}
+
+/** Seçilmemiş sanal hedefin "seçilirse" sırası (önündeki seçili sanal günlerden sonra). */
+export function sanalSiraOnizleme(sira: Map<string, number>, id: string): number {
+  return sira.get(id) ?? [...sira.keys()].filter((k) => sanalSirasi(k) < sanalSirasi(id)).length + 1;
+}
+
+/** Sanal günün gösterim nesnesi ("Paz 18" / "3. gün"): son günden `n` gün sonra; tarihsiz seyahatte tarihsiz. */
+export function sanalGun(gunler: Gun[], id: string, n: number): Gun {
+  const son = [...gunler].sort((a, b) => b.index - a.index)[0];
+  const tripId = son?.trip_id ?? '';
+  return { id, trip_id: tripId, index: (son?.index ?? 0) + n, date: son?.date ? tarihEkle(son.date, n) : null, start_time: null, end_time: null, order_manual: false, start_stay_id: null, end_stay_id: null };
+}
+
+/** Planın sanal hedefleri (seçili günlerden), eklenecekleri sırayla. */
+export function eklenecekGunler(plan: AktarmaPlani, sira: Map<string, number>): string[] {
+  return [...new Set(plan.atamalar.map((a) => a.gunId).filter(sanalGunMu))].sort((a, b) => (sira.get(a) ?? 0) - (sira.get(b) ?? 0));
+}
+
+/**
+ * KK5 bilgi cümlesi: "Seyahatin 2 gün; 3. günü seçersen seyahate **Paz 18** eklenir." — seçildiyse "…; 3. gün için seyahate
+ * **Paz 18** eklenir." Fazla gün yoksa null.
+ */
+export function eksikGunBilgisi(gezi: Pick<GeziDetay, 'gezi_gunleri'>, gunler: Gun[], eslesme: Record<string, string | null>, dahil: Record<string, boolean>): string | null {
+  const eksik = eksikGunler(gezi, gunler);
+  const satirlar = gezi.gezi_gunleri.filter((g) => eksik[g.id] && sanalGunMu(eslesme[g.id]));
+  if (satirlar.length === 0) return null;
+  const sira = sanalSira(gezi, eslesme, dahil);
+  const secili = satirlar.filter((g) => dahil[g.id] !== false);
+  // Seçiliyse gerçek sıraları; hiçbiri seçili değilse hepsi seçilseydi alacakları tarihler (art arda).
+  const hedefler = secili.length ? secili : satirlar;
+  const adlar = hedefler.map((g) => g.sira);
+  const tarihler = hedefler.map((g, i) => gunHucresi(sanalGun(gunler, eslesme[g.id]!, secili.length ? (sira.get(eslesme[g.id]!) ?? i + 1) : i + 1), 0).ust).join(', ');
+  const gunListesi = adlar.length === 1 ? t('gezi.eksikGunTek', { n: adlar[0] }) : t('gezi.eksikGunCok', { liste: siraliListe(adlar.map((n) => `${n}.`)) });
+  return t(secili.length ? 'gezi.eksikGunSecildi' : 'gezi.eksikGunSecilmedi', { n: gunler.length, gunler: gunListesi, tarihler });
+}
+
+/** "3., 4. ve 5." */
+function siraliListe(parcalar: string[]): string {
+  return parcalar.length <= 1 ? (parcalar[0] ?? '') : `${parcalar.slice(0, -1).join(', ')}${t('gezi.ve')}${parcalar[parcalar.length - 1]}`;
 }
