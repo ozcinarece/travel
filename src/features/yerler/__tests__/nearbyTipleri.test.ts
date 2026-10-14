@@ -12,6 +12,20 @@ const TABLE_A = new Set([
   'restaurant', 'cafe', 'coffee_shop', 'bakery',
   'shopping_mall', 'market',
   'lodging',
+  // #190: includedPrimaryTypes kümeleri (Places API (New) Table A — Culture, Food and Drink, Entertainment and Recreation,
+  // Natural Features, Shopping; yıldızlılar Google'ın sonradan eklediği tipler).
+  'sculpture', 'castle', 'art_museum', 'history_museum',
+  'turkish_restaurant', 'kebab_shop', 'seafood_restaurant', 'fast_food_restaurant', 'pizza_restaurant', 'hamburger_restaurant',
+  'steak_house', 'barbecue_restaurant', 'breakfast_restaurant', 'brunch_restaurant', 'buffet_restaurant', 'fine_dining_restaurant',
+  'mediterranean_restaurant', 'middle_eastern_restaurant', 'lebanese_restaurant', 'greek_restaurant', 'italian_restaurant',
+  'french_restaurant', 'spanish_restaurant', 'american_restaurant', 'mexican_restaurant', 'brazilian_restaurant',
+  'chinese_restaurant', 'japanese_restaurant', 'sushi_restaurant', 'ramen_restaurant', 'korean_restaurant', 'thai_restaurant',
+  'vietnamese_restaurant', 'indonesian_restaurant', 'indian_restaurant', 'asian_restaurant', 'afghani_restaurant',
+  'african_restaurant', 'shawarma_restaurant', 'vegan_restaurant', 'vegetarian_restaurant', 'diner', 'food_court',
+  'meal_takeaway', 'deli', 'sandwich_shop',
+  'tea_house', 'dessert_shop', 'confectionery', 'ice_cream_shop', 'coffee_roastery', 'coffee_stand', 'cat_cafe', 'dog_cafe',
+  'city_park', 'state_park', 'dog_park', 'hiking_area', 'wildlife_park', 'beach',
+  'farmers_market', 'flea_market', 'department_store',
 ]);
 const TABLE_B = new Set(['place_of_worship', 'point_of_interest', 'establishment', 'food', 'health', 'natural_feature', 'locality', 'political', 'premise', 'route']);
 

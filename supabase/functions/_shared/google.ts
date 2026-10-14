@@ -381,27 +381,39 @@ type YakinSecenek = {
   haric?: string[];
   /** #178: turistik değeri olmayan ibadet yerleri cevaptan süzülür (Turistik çipi). */
   ibadetSuzgeci?: boolean;
+  /**
+   * #190: kategori çiplerinde `includedTypes` yerine `includedPrimaryTypes` — yalnız birincil tipi bu kümede olan yer gelir
+   * (tiplerine `museum` ekleyen kuaför 20 kişilik yeri doldurmaz). Bkz. `istekBirincilTipleri`.
+   */
+  birincilTipler?: string[];
 };
 
 /** Nearby sonucu + tüm tipleri (#189 süzgeci için; istemciye gönderilmeden önce `hafifYer` ile atılır). */
 export type YakinYer = HafifYer & { tipler: string[] };
 
 export async function yakinAra(secenek: YakinSecenek): Promise<YakinYer[]> {
-  try {
-    return await yakinAraBir(secenek, secenek.haric);
-  } catch (e) {
-    // Dışlama listesi reddedilirse (tip hatası → 400) Keşfet boş kalmasın: dışlamasız bir kez daha; istemci süzgeci yine çalışır.
-    // Başka 400'lerde (ör. geçersiz konum) tekrar denenmez.
-    if (!(e instanceof GoogleHatasi) || e.durum !== 400 || !secenek.haric?.length || !/type/i.test(e.message)) throw e;
-    console.error('places-nearby dışlama tipleri reddedildi', e.message);
-    return yakinAraBir(secenek, undefined);
+  // Tip listesi reddedilirse (tip hatası → 400) Keşfet boş kalmasın: önce `includedTypes`'a, sonra dışlamasız isteğe düşülür;
+  // sonradan süzgeç (kesfetSuzgeci) ve istemci süzgeci yine çalışır. Başka 400'lerde (ör. geçersiz konum) tekrar denenmez.
+  const denemeler: { birincil: boolean; haric: string[] | undefined }[] = [
+    ...(secenek.birincilTipler?.length ? [{ birincil: true, haric: secenek.haric }] : []),
+    { birincil: false, haric: secenek.haric },
+    ...(secenek.haric?.length ? [{ birincil: false, haric: undefined }] : []),
+  ];
+  for (let i = 0; ; i++) {
+    const d = denemeler[i];
+    try {
+      return await yakinAraBir(secenek, d.birincil, d.haric);
+    } catch (e) {
+      if (i === denemeler.length - 1 || !(e instanceof GoogleHatasi) || e.durum !== 400 || !/type/i.test(e.message)) throw e;
+      console.error('places-nearby tip listesi reddedildi', d.birincil ? 'includedPrimaryTypes' : 'excludedPrimaryTypes', e.message);
+    }
   }
 }
 
-async function yakinAraBir(secenek: YakinSecenek, haric: string[] | undefined): Promise<YakinYer[]> {
+async function yakinAraBir(secenek: YakinSecenek, birincil: boolean, haric: string[] | undefined): Promise<YakinYer[]> {
   const cevap = await istek<{ places?: DetailsCevap[] }>('places:searchNearby', {
     govde: {
-      includedTypes: secenek.tipler,
+      ...(birincil ? { includedPrimaryTypes: secenek.birincilTipler } : { includedTypes: secenek.tipler }),
       // #166 incelemesi: birincil tipi `tourist_attraction` olup tipleri arasında `lodging` olan oteller de dışlansın.
       ...(haric?.length ? { excludedPrimaryTypes: haric, excludedTypes: ['lodging'] } : {}),
       maxResultCount: Math.min(Math.max(secenek.enFazla ?? 20, 1), 20),
@@ -448,7 +460,7 @@ export const VARSAYILAN_ESIKLER: KesfetEsikleri = {
   yemek: { yorum: 30, puan: 3.8 },
   kafe: { yorum: 30, puan: 3.8 },
   park: { yorum: 20, puan: 0 },
-  alisveris: { yorum: 0, puan: 0 },
+  alisveris: { yorum: 30, puan: 3.8 },
 };
 
 /** Ayardaki değeri varsayılanların üstüne yazar; geçersiz alan (negatif, sayı değil, puan > 5) varsayılanda kalır. */
@@ -466,36 +478,97 @@ export function esikleriCoz(deger: unknown): KesfetEsikleri {
 }
 
 /**
- * KK1: birincil tip kümeleri. Nearby `includedTypes`'ı `types` listesinin herhangi birinde arar; işletmeler kendine yanlış tip
- * ekleyebildiği için gösterilecek yerin BİRİNCİL tipi çipin kümesinde olmalı. Kümeler includedTypes'ın alt türlerini de kapsar
- * (ör. `turkish_restaurant` Yemek'tir) ve istemcinin kategori eşlemesiyle (pinKategorisi, Turistik izin listesi) uyumludur.
+ * KK1: birincil tip kümeleri (Places API (New) Table A). Nearby `includedTypes`'ı `types` listesinin herhangi birinde arar;
+ * işletmeler kendine yanlış tip ekleyebildiği için gösterilecek yerin BİRİNCİL tipi çipin kümesinde olmalı. Kümeler
+ * includedTypes'ın alt türlerini de kapsar (ör. `turkish_restaurant` Yemek'tir) ve istemcinin kategori eşlemesiyle
+ * (pinKategorisi, Turistik izin listesi) uyumludur. #190: kategori çipleri isteği de bu kümelerle atar (`includedPrimaryTypes`,
+ * küme başına en çok 50 tip); sonradan süzgeç güvenlik ağı olarak kalır.
  */
-const TURISTIK_BIRINCIL = new Set([
-  'tourist_attraction',
-  'historical_landmark',
-  'historical_place',
-  'cultural_landmark',
-  'monument',
-  'sculpture',
-  'castle',
-  'museum',
-  'art_museum',
-  'history_museum',
-  'art_gallery',
-  'observation_deck',
-]);
-const YEMEK_BIRINCIL = new Set(['restaurant', 'steak_house', 'diner', 'food_court', 'meal_takeaway', 'deli', 'sandwich_shop', 'kebab_shop']);
-const KAFE_BIRINCIL = new Set(['cafe', 'coffee_shop', 'bakery', 'tea_house', 'dessert_shop', 'confectionery', 'ice_cream_shop', 'coffee_roastery', 'coffee_stand', 'cat_cafe', 'dog_cafe']);
-const PARK_BIRINCIL = new Set(['park', 'city_park', 'state_park', 'national_park', 'dog_park', 'garden', 'botanical_garden', 'zoo', 'hiking_area', 'wildlife_park', 'beach']);
-const ALISVERIS_BIRINCIL = new Set(['shopping_mall', 'market', 'farmers_market', 'flea_market', 'department_store']);
+export const BIRINCIL_TIPLER: Record<KesfetGrubu, readonly string[]> = {
+  turistik: [
+    'tourist_attraction',
+    'historical_landmark',
+    'historical_place',
+    'cultural_landmark',
+    'monument',
+    'sculpture',
+    'castle',
+    'museum',
+    'art_museum',
+    'history_museum',
+    'art_gallery',
+    'observation_deck',
+  ],
+  // Restoran alt türleri tek tek: includedPrimaryTypes alt türü kapsamaz (`restaurant` birincil tipi `turkish_restaurant` olanı getirmez).
+  yemek: [
+    'restaurant',
+    'turkish_restaurant',
+    'kebab_shop',
+    'seafood_restaurant',
+    'fast_food_restaurant',
+    'pizza_restaurant',
+    'hamburger_restaurant',
+    'steak_house',
+    'barbecue_restaurant',
+    'breakfast_restaurant',
+    'brunch_restaurant',
+    'buffet_restaurant',
+    'fine_dining_restaurant',
+    'mediterranean_restaurant',
+    'middle_eastern_restaurant',
+    'lebanese_restaurant',
+    'greek_restaurant',
+    'italian_restaurant',
+    'french_restaurant',
+    'spanish_restaurant',
+    'american_restaurant',
+    'mexican_restaurant',
+    'brazilian_restaurant',
+    'chinese_restaurant',
+    'japanese_restaurant',
+    'sushi_restaurant',
+    'ramen_restaurant',
+    'korean_restaurant',
+    'thai_restaurant',
+    'vietnamese_restaurant',
+    'indonesian_restaurant',
+    'indian_restaurant',
+    'asian_restaurant',
+    'afghani_restaurant',
+    'african_restaurant',
+    'shawarma_restaurant',
+    'vegan_restaurant',
+    'vegetarian_restaurant',
+    'diner',
+    'food_court',
+    'meal_takeaway',
+    'deli',
+    'sandwich_shop',
+  ],
+  kafe: ['cafe', 'coffee_shop', 'bakery', 'tea_house', 'dessert_shop', 'confectionery', 'ice_cream_shop', 'coffee_roastery', 'coffee_stand', 'cat_cafe', 'dog_cafe'],
+  park: ['park', 'city_park', 'state_park', 'national_park', 'dog_park', 'garden', 'botanical_garden', 'zoo', 'hiking_area', 'wildlife_park', 'beach'],
+  alisveris: ['shopping_mall', 'market', 'farmers_market', 'flea_market', 'department_store'],
+};
+const BIRINCIL_KUMESI = Object.fromEntries(GRUPLAR.map((g) => [g, new Set(BIRINCIL_TIPLER[g])])) as Record<KesfetGrubu, Set<string>>;
 
 const BIRINCIL: Record<KesfetGrubu, (tip: string) => boolean> = {
-  turistik: (p) => TURISTIK_BIRINCIL.has(p),
-  yemek: (p) => YEMEK_BIRINCIL.has(p) || p.endsWith('_restaurant'),
-  kafe: (p) => KAFE_BIRINCIL.has(p),
-  park: (p) => PARK_BIRINCIL.has(p),
-  alisveris: (p) => ALISVERIS_BIRINCIL.has(p),
+  turistik: (p) => BIRINCIL_KUMESI.turistik.has(p),
+  // Listede olmayan yeni bir restoran alt türü (dışlama yedeği / Tümü isteğinden gelirse) yine Yemek sayılır.
+  yemek: (p) => BIRINCIL_KUMESI.yemek.has(p) || p.endsWith('_restaurant'),
+  kafe: (p) => BIRINCIL_KUMESI.kafe.has(p),
+  park: (p) => BIRINCIL_KUMESI.park.has(p),
+  alisveris: (p) => BIRINCIL_KUMESI.alisveris.has(p),
 };
+
+/**
+ * #190: isteğin `includedPrimaryTypes`'ı. Yalnız beş kategori çipi (Turistik · Yemek · Kafe · Park · Alışveriş); Tümü'nün
+ * birleşik kümesi 50 tip sınırını aştığı için `includedTypes` + sonradan süzgeçle kalır, eski çipler ve `otel` de öyle.
+ * Turistik istisnası (birincil tipi farklı ama `tourist_attraction` / `historical_landmark` taşıyan tarihî cami) bu istekte
+ * gelmez — ölçüm PR #190'da; ikinci istek atılmaz.
+ */
+export function istekBirincilTipleri(cip: string): string[] | undefined {
+  return (GRUPLAR as string[]).includes(cip) ? [...BIRINCIL_TIPLER[cip as KesfetGrubu]] : undefined;
+}
 
 /** KK1 istisnası (#178 mantığı): Turistik'te birincil tipi turistik olmayan ama tiplerinde bunlardan biri olan yer kalır. */
 const TURISTIK_ISTISNA = ['tourist_attraction', 'historical_landmark'];

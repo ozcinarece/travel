@@ -8,16 +8,29 @@ type Esikler = Record<'turistik' | 'yemek' | 'kafe' | 'park' | 'alisveris', { yo
 type GoogleModulu = {
   CIP_TIPLERI: Record<string, string[]>;
   KONAKLAMA_TIPLERI: string[];
+  BIRINCIL_TIPLER: Record<keyof Esikler, readonly string[]>;
   VARSAYILAN_ESIKLER: Esikler;
   esikleriCoz: (deger: unknown) => Esikler;
+  istekBirincilTipleri: (cip: string) => string[] | undefined;
+  yerGrubu: (y: { primary_type: string | null; tipler: string[] }, cip: string) => string | null;
   kesfetSuzgeci: (yerler: YakinYer[], cip: string, esikler: Esikler, gizli: ReadonlySet<string>) => YakinYer[];
   hafifYer: (y: YakinYer) => Omit<YakinYer, 'tipler'>;
-  yakinAra: (s: { merkez: { lat: number; lng: number }; yaricapM: number; tipler: string[]; enFazla?: number; haric?: string[]; ibadetSuzgeci?: boolean }) => Promise<YakinYer[]>;
+  yakinAra: (s: {
+    merkez: { lat: number; lng: number };
+    yaricapM: number;
+    tipler: string[];
+    enFazla?: number;
+    haric?: string[];
+    ibadetSuzgeci?: boolean;
+    birincilTipler?: string[];
+  }) => Promise<YakinYer[]>;
 };
-const { CIP_TIPLERI, KONAKLAMA_TIPLERI, VARSAYILAN_ESIKLER, esikleriCoz, hafifYer, kesfetSuzgeci, yakinAra } = jest.requireActual<GoogleModulu>('../../../../supabase/functions/_shared/google');
+const { BIRINCIL_TIPLER, CIP_TIPLERI, KONAKLAMA_TIPLERI, VARSAYILAN_ESIKLER, esikleriCoz, hafifYer, istekBirincilTipleri, kesfetSuzgeci, yakinAra, yerGrubu } =
+  jest.requireActual<GoogleModulu>('../../../../supabase/functions/_shared/google');
 
 // #189 KK6: sabit cevaplar. Düzce, Keşfet · Turistik (14 Ekim) örneğinden: kuaför ve teknoloji mağazası tiplerine `museum` eklemiş,
-// biri birincil tipi `museum` yapmış ama birkaç yorumlu. Nearby taklidi `includedTypes`'ı `types` listesinin herhangi birinde arar.
+// biri birincil tipi `museum` yapmış ama birkaç yorumlu. Nearby taklidi `includedTypes`'ı `types` listesinin herhangi birinde,
+// `includedPrimaryTypes`'ı yalnız birincil tipte arar.
 type GoogleYeri = { id: string; displayName: { text: string }; primaryType: string; types: string[]; rating: number; userRatingCount: number; location: { latitude: number; longitude: number } };
 let sira = 0;
 const yer = (ad: string, birincil: string, tipler: string[], yorum: number, puan: number): GoogleYeri => ({
@@ -50,14 +63,21 @@ const DUZCE: GoogleYeri[] = [
   yer('Pastane', 'bakery', ['cafe', 'food'], 60, 4.2),
 ];
 
-function sahteGoogle() {
-  const istekler: { includedTypes: string[] }[] = [];
-  const fetchSahte = jest.fn(async (_url: string, init: { body: string }) => {
-    const govde = JSON.parse(init.body);
+type Govde = { includedTypes?: string[]; includedPrimaryTypes?: string[]; excludedPrimaryTypes?: string[]; maxResultCount: number };
+type SahteCevap = { ok: boolean; status: number; json: () => Promise<unknown>; text: () => Promise<string> };
+function sahteGoogle(birincilReddi = false) {
+  const istekler: Govde[] = [];
+  const fetchSahte = jest.fn(async (_url: string, init: { body: string }): Promise<SahteCevap> => {
+    const govde = JSON.parse(init.body) as Govde;
     istekler.push(govde);
-    const dahil = new Set<string>(govde.includedTypes);
+    if (birincilReddi && govde.includedPrimaryTypes) {
+      const hata = { error: { message: 'Unsupported types: x_type.' } };
+      return { ok: false, status: 400, json: async () => hata, text: async () => JSON.stringify(hata) };
+    }
+    const birincil = govde.includedPrimaryTypes ? new Set(govde.includedPrimaryTypes) : null;
+    const dahil = new Set<string>(govde.includedTypes ?? []);
     const haric = new Set<string>(govde.excludedPrimaryTypes ?? []);
-    const places = DUZCE.filter((p) => p.types.some((t) => dahil.has(t)) && !haric.has(p.primaryType))
+    const places = DUZCE.filter((p) => (birincil ? birincil.has(p.primaryType) : p.types.some((t) => dahil.has(t))) && !haric.has(p.primaryType))
       .sort((a, b) => b.userRatingCount - a.userRatingCount)
       .slice(0, govde.maxResultCount);
     return { ok: true, status: 200, json: async () => ({ places }), text: async () => '' };
@@ -81,25 +101,76 @@ afterEach(() => {
 const DUZCE_MERKEZ = { lat: 40.84, lng: 31.16 };
 /** places-nearby ile aynı yol: Nearby (ham, tipleriyle) → süzgeç (önbellekten sonra) → istemci biçimi. */
 async function kesfet(cip: string, gizli: string[] = [], esikler = VARSAYILAN_ESIKLER) {
-  const ham = await yakinAra({ merkez: DUZCE_MERKEZ, yaricapM: 3000, tipler: CIP_TIPLERI[cip], enFazla: 20, haric: cip === 'otel' ? undefined : KONAKLAMA_TIPLERI, ibadetSuzgeci: cip === 'turistik' });
+  const ham = await yakinAra({
+    merkez: DUZCE_MERKEZ,
+    yaricapM: 3000,
+    tipler: CIP_TIPLERI[cip],
+    enFazla: 20,
+    haric: cip === 'otel' ? undefined : KONAKLAMA_TIPLERI,
+    ibadetSuzgeci: cip === 'turistik',
+    birincilTipler: istekBirincilTipleri(cip),
+  });
   return kesfetSuzgeci(ham, cip, esikler, new Set(gizli)).map(hafifYer);
 }
 const adlar = (yerler: { ad: string }[]) => yerler.map((y) => y.ad);
 
+describe('#190: istek birincil tiple (includedPrimaryTypes)', () => {
+  it('beş kategori çipi includedPrimaryTypes ile, yerGrubu kümeleriyle gider; includedTypes gitmez', async () => {
+    for (const cip of ['turistik', 'yemek', 'kafe', 'park', 'alisveris'] as const) {
+      google.istekler.length = 0;
+      await kesfet(cip);
+      expect(google.istekler).toHaveLength(1);
+      expect(google.istekler[0].includedPrimaryTypes).toEqual([...BIRINCIL_TIPLER[cip]]);
+      expect(google.istekler[0].includedTypes).toBeUndefined();
+      // Konaklama dışlaması sürer.
+      expect(google.istekler[0].excludedPrimaryTypes).toEqual(KONAKLAMA_TIPLERI);
+    }
+  });
+
+  it('Tümü (50 tip sınırını aşar), otel ve eski çipler includedTypes ile kalır', async () => {
+    for (const cip of ['hepsi', 'otel', 'manzara', 'ibadet']) {
+      google.istekler.length = 0;
+      await kesfet(cip);
+      expect(google.istekler[0].includedPrimaryTypes).toBeUndefined();
+      expect(google.istekler[0].includedTypes).toEqual(CIP_TIPLERI[cip]);
+    }
+    expect(new Set(Object.values(BIRINCIL_TIPLER).flat()).size).toBeGreaterThan(50);
+  });
+
+  it('her küme en çok 50 tip, tekrarsız; her tip kendi çipinin birincil tip şartını geçer (süzgeçle aynı küme)', () => {
+    for (const [cip, tipler] of Object.entries(BIRINCIL_TIPLER)) {
+      expect(tipler.length).toBeLessThanOrEqual(50);
+      expect(new Set(tipler).size).toBe(tipler.length);
+      for (const t of tipler) expect(yerGrubu({ primary_type: t, tipler: [] }, cip)).toBe(cip);
+    }
+  });
+
+  it('Google tip listesini reddederse (400) Keşfet boş kalmaz: includedTypes ile bir kez daha, süzgeç yine çalışır', async () => {
+    google = sahteGoogle(true);
+    g.fetch = google.fetchSahte;
+    const sonuc = adlar(await kesfet('turistik'));
+    expect(google.istekler).toHaveLength(2);
+    expect(google.istekler[0].includedPrimaryTypes).toBeDefined();
+    expect(google.istekler[1].includedTypes).toEqual(CIP_TIPLERI.turistik);
+    expect(sonuc).toEqual(['Tarihî Cami', 'Düzce Müzesi', 'Tarihî Hamam', 'Kafkas Anıt Rölyef']);
+  });
+});
+
 describe('#189 KK1 + KK2: Düzce · Turistik', () => {
-  it('kuaför ve teknoloji mağazası (yalnız types listesinde müze) düşer; az yorumlu ya da düşük puanlı yer düşer; tarihî yapılar ve gerçek müze kalır', async () => {
+  it('kuaför ve teknoloji mağazası hiç gelmez (istek birincil tiple); az yorumlu ya da düşük puanlı yer düşer; tarihî yapılar ve gerçek müze kalır', async () => {
     const sonuc = await kesfet('turistik');
-    expect(adlar(sonuc)).toEqual(['Tarihî Cami', 'Düzce Müzesi', 'Tarihî Hamam', 'Kafkas Anıt Rölyef']);
+    expect(adlar(sonuc)).toEqual(['Düzce Müzesi', 'Tarihî Hamam', 'Kafkas Anıt Rölyef']);
     // Ek Google isteği yok: tek Nearby.
     expect(google.fetchSahte).toHaveBeenCalledTimes(1);
     // Cevapta tip listesi yok (istemci biçimi değişmedi).
     expect(sonuc.every((y) => !('tipler' in y))).toBe(true);
   });
 
-  it('istisna (#178 mantığı): birincil tipi turistik olmayan ama tourist_attraction / historical_landmark taşıyan yer kalır; mahalle camisi kalmaz', async () => {
-    const sonuc = adlar(await kesfet('turistik'));
-    expect(sonuc).toContain('Tarihî Cami');
-    expect(sonuc).not.toContain('Mahalle Camii');
+  it('tarihî cami (birincil tipi mosque) tek istekte gelmez — kaçan yer; gelirse (Tümü, yedek istek) süzgeçteki istisna onu tutar, mahalle camisini tutmaz', async () => {
+    expect(adlar(await kesfet('turistik'))).not.toContain('Tarihî Cami');
+    const ham = (ad: string, tipler: string[]) => ({ place_id: `ChIJ-${ad}`, ad, primary_type: 'mosque', puan: 4.8, puan_sayisi: 1500, tipler });
+    const sonuc = kesfetSuzgeci([ham('tarihi', ['mosque', 'historical_landmark']), ham('mahalle', ['mosque', 'monument'])], 'turistik', VARSAYILAN_ESIKLER, new Set());
+    expect(sonuc.map((y) => y.ad)).toEqual(['tarihi']);
   });
 
   it('Yemek: birincil tip restoran ailesinden ve ≥ 30 yorum, ≥ 3,8 puan', async () => {
@@ -114,11 +185,11 @@ describe('#189 KK1 + KK2: Düzce · Turistik', () => {
     expect(adlar(await kesfet('hepsi')).sort()).toEqual(['Düzce Müzesi', 'Kafkas Anıt Rölyef', 'Lokanta', 'Pastane', 'Tarihî Cami', 'Tarihî Hamam', 'Şehir Parkı'].sort());
   });
 
-  it('eşikler ayardan: Turistik yorum sınırı 1000 olunca yalnız Tarihî Cami kalır; 0/0 olunca yalnız birincil tip şartı kalır', async () => {
-    const siki = esikleriCoz({ turistik: { yorum: 1000, puan: 3.8 } });
-    expect(adlar(await kesfet('turistik', [], siki))).toEqual(['Tarihî Cami']);
+  it('eşikler ayardan: Turistik yorum sınırı 500 olunca yalnız Düzce Müzesi kalır; 0/0 olunca yalnız birincil tip şartı kalır', async () => {
+    const siki = esikleriCoz({ turistik: { yorum: 500, puan: 3.8 } });
+    expect(adlar(await kesfet('turistik', [], siki))).toEqual(['Düzce Müzesi']);
     const gevsek = esikleriCoz({ turistik: { yorum: 0, puan: 0 } });
-    expect(adlar(await kesfet('turistik', [], gevsek))).toEqual(['Tarihî Cami', 'Düzce Müzesi', 'Düşük puanlı müze', 'Tarihî Hamam', 'Kafkas Anıt Rölyef', 'Az yorumlu anıt', 'Müze tipli dükkân']);
+    expect(adlar(await kesfet('turistik', [], gevsek))).toEqual(['Düzce Müzesi', 'Düşük puanlı müze', 'Tarihî Hamam', 'Kafkas Anıt Rölyef', 'Az yorumlu anıt', 'Müze tipli dükkân']);
   });
 });
 
@@ -145,7 +216,7 @@ describe('#189 KK2: eşik ayarı', () => {
       yemek: { yorum: 30, puan: 3.8 },
       kafe: { yorum: 30, puan: 3.8 },
       park: { yorum: 20, puan: 0 },
-      alisveris: { yorum: 0, puan: 0 },
+      alisveris: { yorum: 30, puan: 3.8 },
     });
   });
 

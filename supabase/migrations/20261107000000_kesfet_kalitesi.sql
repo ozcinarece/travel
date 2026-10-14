@@ -8,7 +8,7 @@ insert into public.yonetim_ayarlari (anahtar, deger) values ('kesfet_esikleri', 
   "yemek": {"yorum": 30, "puan": 3.8},
   "kafe": {"yorum": 30, "puan": 3.8},
   "park": {"yorum": 20, "puan": 0},
-  "alisveris": {"yorum": 0, "puan": 0}
+  "alisveris": {"yorum": 30, "puan": 3.8}
 }'::jsonb) on conflict (anahtar) do nothing;
 
 -- KK5: Keşfet'te gösterilmeyecek yerler. Yalnız admin okur ve yazar (BO; şimdilik supabase-sql ile de eklenebilir).

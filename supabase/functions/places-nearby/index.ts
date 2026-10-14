@@ -3,9 +3,10 @@
 // çipinde turistik değeri olmayan ibadet yerleri süzülür. Cevap yalnız bellekte; veritabanına yazılmaz (PRD §7).
 // #189: kalite süzgeci — birincil tip çipin kümesinde olmalı, yorum / puan alt sınırı (Ayarlar: kesfet_esikleri), elle gizlenen
 // yerler (kesfet_gizli) çıkar. Ek Google isteği yok; süzgeç önbellekten SONRA uygulanır, ayar değişikliği hemen geçerli olur.
+// #190: kategori çiplerinde istek de birincil tiple atılır (includedPrimaryTypes); sonradan süzgeç güvenlik ağı.
 // Önbellek: (çip, 0,0001° hücre, yarıçap, adet) anahtarıyla izolat belleğinde 24 sa (teknik not §3). #66: karo
 // merkezleri 125 m'ye kadar inebildiğinden hücre 4 ondalık, yarıçap en az 100 m.
-import { CIP_TIPLERI, GoogleHatasi, hafifYer, kesfetSuzgeci, KONAKLAMA_TIPLERI, yakinAra, type YakinYer } from '../_shared/google.ts';
+import { CIP_TIPLERI, GoogleHatasi, hafifYer, istekBirincilTipleri, kesfetSuzgeci, KONAKLAMA_TIPLERI, yakinAra, type YakinYer } from '../_shared/google.ts';
 import { govde, hata, json, onKontrol } from '../_shared/http.ts';
 import { kesfetAyari } from '../_shared/kesfetAyari.ts';
 import { sayacli } from '../_shared/sayac.ts';
@@ -53,7 +54,7 @@ Deno.serve(sayacli('places-nearby', async (istek) => {
     // #164 KK2: otel adayları dışındaki tüm istekler (Turistik, Tümü, kategoriler) konaklamayı dışlar.
     const haric = cip === 'otel' ? undefined : KONAKLAMA_TIPLERI;
     // #178 KK2: Turistik'te mahalle camisi yok — ibadet yeri yalnız turistik tip ya da ≥ 1.000 yorumla.
-    const yerler = await yakinAra({ merkez: { lat, lng }, yaricapM, tipler, enFazla, haric, ibadetSuzgeci: cip === 'turistik' });
+    const yerler = await yakinAra({ merkez: { lat, lng }, yaricapM, tipler, enFazla, haric, ibadetSuzgeci: cip === 'turistik', birincilTipler: istekBirincilTipleri(cip) });
     onbellekYaz(anahtar, yerler);
     return await cevapla(yerler, false);
   } catch (e) {
