@@ -21,7 +21,7 @@ on:
         required: false
         type: string
       kuru:
-        description: 'yukle/sil: her şeyi dener, yazmaz (gerçek yazma için false)'
+        description: 'yukle/sil: her şeyi dener, yazmaz · sehirler: kimliği eksik şehirleri yalnız listeler (doldurmak için false)'
         default: true
         type: boolean
 

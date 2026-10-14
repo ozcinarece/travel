@@ -27,10 +27,10 @@ oturum ◀── adım durumları ve duyurular (yalnız sayı, slug, id) · şif
 
 | İşlem | Ne yapar | Yazar mı? |
 |---|---|---|
-| `sehirler` | Şehirler: slug, ad, yayında mı, geziler (slug, durum, gün, durak) | Hayır |
+| `sehirler` | Şehirler: slug, ad, yayında mı, geziler (slug, durum, gün, durak). #197: Google kimliği ve saat dilimi eksik şehirleri listeler; `kuru=false` ise bir kez doldurur (Autocomplete `cities` + hafif yer, şehir başına ≤ 2 istek; Google'ın şehri bizimkinden 50 km'den uzaksa yazmaz). Mevcut şehirlerin tek seferlik doldurması budur | `kuru=false` ise (yalnız boş kimlik) |
 | `osm` | Şehrin OSM aday listesi (Overpass): ad, konum, tür, opening_hours, wikipedia/wikidata; sonuç şifreli geçici dalda | Hayır |
 | `arastir` | `kimlik` (OSM adayının place_id'si, ücretsiz) ve/veya `puan` (kısa liste ≤ 30); sonuç şifreli geçici dalda | Hayır (DB'ye) |
-| `yukle` | Plan dosyasını ve mekan rehberlerini denetler, duraklar için detay alır (kapalı mı, konum, kategori), `icerik_gezi_taslak_yukle` | `kuru=false` ise |
+| `yukle` | Plan dosyasını ve mekan rehberlerini denetler, duraklar için detay alır (kapalı mı, konum, kategori), `icerik_gezi_taslak_yukle`. Yeni şehir açtıysa şehrin kimliğini de yazar (place_id plandan, saat dilimi ve ülke kodu tek hafif yer isteğiyle; olmazsa uyarı, `sehirler` sonra doldurur) | `kuru=false` ise |
 | `kontrol` | Slug için: durum, gün ve durak sayısı, place_id'si eksik durak, yazıdaki mekanlar, updated_at, BO linki | Hayır |
 | `sil` | `icerik_gezi_taslak_sil` (yalnız taslak) | `kuru=false` ise |
 | `temizle` | Geçici `icerik-sonuc/*` dallarını siler | Dal siler |
@@ -53,7 +53,10 @@ alınır, yazma kalıcı olamaz. Gerçek yazma için `kuru=false`.
 - `icerik_gezi_taslak_sil(p_slug)` — yalnız `yayin=false`; fotoğrafı olan taslağı silmez (önce BO'dan kaldırılır).
   Açılan taslak yer satırları kalır (mekan başkadır, başka gezide de kullanılır).
 - `icerik_sehirler()`, `icerik_gezi_kontrol(p_slug)` — okuma; kullanıcı verisi yok. Kontrol durakların rehber durumunu
-  da verir (`rehber_dolu`, `rehber_yayinda`, `yer_yok`).
+  da verir (`rehber_dolu`, `rehber_yayinda`, `yer_yok`). `icerik_sehirler` şehrin konumunu ve `kimlik` (place_id ve tz dolu
+  mu) durumunu da verir (konum loga yazılmaz).
+- `icerik_sehir_kimligi_yaz(p_slug, p_place_id, p_tz, p_ulke_kodu)` (#197) — şehrin Google kimliğini, IANA saat dilimini ve
+  ülke kodunu **bir kez** yazar: dolu alan ezilmez. Geçersiz saat dilimi tetikleyiciyle reddedilir (`22023`).
 - `icerik_google_butcesi(p_istek)` (yalnız service_role) — Edge Function Google'a gitmeden sorar: bugünkü tahmini
   harcama + bu isteğin üst sınırı günlük bütçeyi (`yonetim_ayarlari.google_gunluk_butce`) aşar mı?
 

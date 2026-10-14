@@ -400,3 +400,29 @@ export function dolarEtiketi(metin, rastgele = () => Math.random().toString(36).
     if (!metin.includes(etiket)) return etiket;
   }
 }
+
+// ---------------------------------------------------------------- #197 şehir kimliği
+
+/** IANA saat dilimi adı (Europe/Istanbul, America/Argentina/Buenos_Aires, UTC). */
+export const TZ_ADI = /^[A-Za-z][A-Za-z0-9_+-]*(\/[A-Za-z0-9_+-]+){0,2}$/;
+export const ULKE_KODU = /^[A-Z]{2}$/;
+/** Google'ın şehri bizim şehrimizin konumundan en çok bu kadar uzakta olabilir (yanlış eşleşmeyi yazmamak için). */
+export const SEHIR_KIMLIK_YARICAP_M = 50_000;
+
+/**
+ * Hafif yer (şehir modu: kimlik, konum, saat dilimi, ülke kodu) → yazılacak kimlik. Biçim bozuksa ya da Google'ın şehri bizim
+ * şehrimizden 50 km'den uzaksa null (yazılmaz).
+ */
+export function sehirKimligi(sehir, yer) {
+  if (!yer || !PLACE_ID.test(yer.place_id ?? '') || !TZ_ADI.test(yer.tz ?? '')) return null;
+  if (!Number.isFinite(yer.lat) || !Number.isFinite(yer.lng) || mesafeM(sehir, yer) > SEHIR_KIMLIK_YARICAP_M) return null;
+  return { place_id: yer.place_id, tz: yer.tz, ulke_kodu: ULKE_KODU.test(yer.ulke_kodu ?? '') ? yer.ulke_kodu : null };
+}
+
+/** `icerik_sehir_kimligi_yaz` çağrısı; değerler önce biçimle doğrulanır (SQL'e yalnız doğrulanmış metin girer). */
+export function sehirKimligiSql(slug, k) {
+  if (!SEHIR_SLUG.test(slug ?? '') || !PLACE_ID.test(k?.place_id ?? '') || !TZ_ADI.test(k?.tz ?? '') || (k.ulke_kodu != null && !ULKE_KODU.test(k.ulke_kodu))) {
+    throw new Error('şehir kimliği biçimi geçersiz');
+  }
+  return `select public.icerik_sehir_kimligi_yaz('${slug}', '${k.place_id}', '${k.tz}', ${k.ulke_kodu ? `'${k.ulke_kodu}'` : 'null'}) as y`;
+}

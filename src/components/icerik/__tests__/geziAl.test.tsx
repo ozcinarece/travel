@@ -15,7 +15,11 @@ import { GeziAl } from '../GeziAl';
 const mockRouter = router as unknown as { replace: jest.Mock; push: jest.Mock };
 
 type Satir = Record<string, unknown>;
+/** #197: içerik şehri; varsayılan kimlikli (place_id + tz + ülke kodu tabloda). */
+const KIMLIKLI_SEHIR = { id: 'S1', ad: 'Eskişehir', slug: 'eskisehir', kapak_url: null, lat: 39.77, lng: 30.52, place_id: 'ChIJ_esk', tz: 'Europe/Istanbul', ulke_kodu: 'TR' };
 const mockDb = {
+  sehir: KIMLIKLI_SEHIR as Record<string, unknown>,
+  invoke: [] as string[],
   tablolar: {} as Record<string, Satir[]>,
   yazilan: [] as { tablo: string; satir: Satir }[],
   rpc: [] as { ad: string; args: Record<string, unknown> }[],
@@ -29,14 +33,19 @@ jest.mock('@/lib/hataRaporu', () => ({ izBirak: () => undefined }));
 jest.mock('@/lib/oturum', () => ({ useOturum: () => ({ session: { user: { id: 'ben', is_anonymous: false } }, hazir: true, hesapli: true }) }));
 jest.mock('@/features/icerik/geziRota', () => ({ GEZI_ROTA_TAZE_MS: 1000, geziRotaAnahtari: (g: { id: string }) => ['gezi-rota', g.id], gunRotasiniGetir: async () => [] }));
 jest.mock('@/features/icerik/sorgular', () => ({
-  useSehirler: () => ({ data: [{ id: 'S1', ad: 'Eskişehir', lat: 39.77, lng: 30.52 }] }),
+  useSehirler: () => ({ data: [mockDb.sehir] }),
   useGezi: () => ({ data: undefined }),
   icerikPlaceId: async (d: { id: string; place_id: string | null }) => d.place_id ?? `P${d.id}`,
   cozumSebebi: () => null,
   olayYaz: (...a: unknown[]) => mockOlay(...a),
 }));
-jest.mock('@/features/sihirbaz/girisler', () => ({
-  useIcerikSehirSecimi: () => ({ data: { place_id: 'ChIJ_esk', ad: 'Eskişehir', ikincil: 'Türkiye', lat: 39.77, lng: 30.52, tz: 'Europe/Istanbul', country_code: 'TR' }, isError: false, isPending: false, refetch: jest.fn() }),
+// #197: şehir seçimi gerçek yoldan (girisler); Google'a giden iki çağrı sayılır. Tabloda kimlik varsa ikisi de 0 olmalı.
+const mockGoogle = { otomatikTamamla: jest.fn(), hafifYerler: jest.fn() };
+jest.mock('@/features/yerler/api', () => ({
+  ...jest.requireActual<object>('@/features/yerler/api'),
+  otomatikTamamla: async (...a: unknown[]) => (mockGoogle.otomatikTamamla(...a), [{ place_id: 'ChIJ_google_esk', ana: 'Eskişehir', ikincil: 'Türkiye' }]),
+  hafifYerler: async (...a: unknown[]) => (mockGoogle.hafifYerler(...a), [{ place_id: 'ChIJ_google_esk', ad: 'Eskişehir', lat: 39.77, lng: 30.52, tz: 'Europe/Istanbul', ulke_kodu: 'TR' }]),
+  yeniOturumJetonu: () => 'oturum-jetonu-1',
 }));
 jest.mock('@/features/seyahatler/sorgular', () => ({
   useSeyahatler: () => ({ data: mockDb.tablolar.ozet ?? [] }),
@@ -101,7 +110,12 @@ jest.mock('@/lib/supabase', () => {
         }
         return { data: 0, error: null };
       },
-      functions: { invoke: async () => ({ data: null, error: null }) },
+      functions: {
+        invoke: async (ad: string) => {
+          mockDb.invoke.push(ad);
+          return { data: null, error: null };
+        },
+      },
     },
   };
 });
@@ -156,7 +170,16 @@ function ac(ilkHedefId?: string | null) {
   return onKapat;
 }
 
+/** Yeni seyahat formu şehrin seçimini (tablodan ya da Google'dan) bekler; düğme o zamana kadar pasif. */
+async function sehirHazir() {
+  await waitFor(() => expect(qc.isFetching()).toBe(0));
+}
+
 beforeEach(() => {
+  mockDb.sehir = KIMLIKLI_SEHIR;
+  mockDb.invoke = [];
+  mockGoogle.otomatikTamamla.mockClear();
+  mockGoogle.hafifYerler.mockClear();
   mockDb.tablolar = { ozet: [] };
   mockDb.yazilan = [];
   mockDb.rpc = [];
@@ -170,6 +193,7 @@ afterEach(() => qc?.clear());
 describe('#193 Yeni seyahat akışın içinde (KK2–KK4)', () => {
   it('seyahat yoksa "Yeni seyahat" seçili; tek işlem RPC: ad = gezi başlığı, şehir, tarihler, 3 gün, plan; Plan 1. gün + bildirim', async () => {
     const onKapat = ac(null);
+    await sehirHazir();
     expect(screen.getByText('Sihirbaza gitmez; bitince yeni seyahatin Plan\'ı açılır.')).toBeTruthy();
     expect(screen.getAllByText(/Eskişehir'de üç gün/).length).toBeGreaterThan(0);
     // Tarih seçilmeden düğme pasif; başlangıç gününe dokununca 3 gün.
@@ -199,10 +223,28 @@ describe('#193 Yeni seyahat akışın içinde (KK2–KK4)', () => {
     expect(mockRouter.replace).toHaveBeenCalledWith({ pathname: '/seyahat/[id]/(sekmeler)/program', params: { id: 'yeni-trip', gun: '1', eklenenGun: '3', eklenenDurak: '5', atlanan: '0' } });
     // KK3: plan kuruldu (kaynak gezi) ölçülür.
     expect(mockOlay).toHaveBeenCalledWith('plan_kuruldu', 'yeni-trip', expect.objectContaining({ kaynak: 'gezi', mekan: 5, gun: 3 }));
+    // #197 KK4: şehir tablodan (kimlik, saat dilimi, ülke kodu) — Google'a giden istek 0.
+    expect(cagri[0].args.p_seyahat).toEqual(expect.objectContaining({ city_place_id: 'ChIJ_esk', country_code: 'TR' }));
+    expect(mockGoogle.otomatikTamamla).not.toHaveBeenCalled();
+    expect(mockGoogle.hafifYerler).not.toHaveBeenCalled();
+    expect(mockDb.invoke).toEqual([]);
+  });
+
+  it('#197 KK3: şehrin kimliği tabloda yoksa bugünkü yol (Autocomplete + hafif yer, birer kez)', async () => {
+    mockDb.sehir = { ...KIMLIKLI_SEHIR, place_id: null, tz: null, ulke_kodu: null };
+    ac(null);
+    await sehirHazir();
+    fireEvent.press(screen.getByText('Tarih sonra'));
+    await waitFor(() => expect(mockGoogle.hafifYerler).toHaveBeenCalledTimes(1));
+    fireEvent.press(screen.getByText('Seyahati aç ve planı al'));
+    await waitFor(() => expect(mockRouter.replace).toHaveBeenCalled());
+    expect(mockGoogle.otomatikTamamla).toHaveBeenCalledTimes(1);
+    expect(mockDb.rpc.find((r) => r.ad === 'geziden_seyahat_ac')!.args.p_seyahat).toEqual(expect.objectContaining({ city_place_id: 'ChIJ_google_esk', tz: 'Europe/Istanbul' }));
   });
 
   it('"Tarih sonra": tarihsiz; gün sayısı − / + ile', async () => {
     ac(null);
+    await sehirHazir();
     fireEvent.press(screen.getByLabelText('Bir gün arttır'));
     fireEvent.press(screen.getByText('Tarih sonra'));
     fireEvent.press(screen.getByText('Seyahati aç ve planı al'));
@@ -215,6 +257,7 @@ describe('#193 Yeni seyahat akışın içinde (KK2–KK4)', () => {
   it('KK3: RPC hata verirse seyahat oluşmaz — dönüş yok, sayfa açık, hata söylenir, istemci tabloya yazmaz', async () => {
     mockDb.rpcHata = { message: 'durak yazılamadı', code: '23502' };
     const onKapat = ac(null);
+    await sehirHazir();
     fireEvent.press(screen.getByText('Tarih sonra'));
     fireEvent.press(screen.getByText('Seyahati aç ve planı al'));
     await waitFor(() => expect(screen.getByText(/Aktarılamadı/)).toBeTruthy());
@@ -226,6 +269,7 @@ describe('#193 Yeni seyahat akışın içinde (KK2–KK4)', () => {
 
   it('KK10: "Yalnız mekanlar" + yeni seyahat — boş günler, seçilen mekanlar atanmamış; Gezi sayfasına dönülür', async () => {
     ac(null);
+    await sehirHazir();
     fireEvent.press(screen.getByText('Yalnız mekanlar'));
     fireEvent.press(screen.getByText('Tarih sonra'));
     // Varsayılan: yemek (Yer y) hariç 4 mekan.

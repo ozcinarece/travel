@@ -2327,4 +2327,36 @@ set role anon;
 select pg_temp.hata_bekle($$select public.geziden_seyahat_ac('{}', 1, '[]', '[]')$$, '42501');
 reset role;
 
+-- #197: şehrin Google kimliği, saat dilimi ve ülke kodu — tanınmayan saat dilimi yazılmaz (boş kalır); hattın yazımı yalnız boş alanları doldurur
+-- (dolu alan ezilmez); istemci yazamaz; yayınlı şehrin kimliği herkese okunur; `icerik_sehirler` kimlik durumunu verir.
+reset role;
+insert into public.sehirler (id, ad, slug, lat, lng, yayin) values ('19701970-0000-4000-8000-000000000001', 'Kimlikli', 'kimlikli-197', 39.77, 30.52, true);
+update public.sehirler set tz = 'Avrupa/Eskisehir' where slug = 'kimlikli-197';
+do $$ begin assert (select tz from public.sehirler where slug = 'kimlikli-197') is null, 'tanınmayan saat dilimi yazılmaz'; end $$;
+select pg_temp.hata_bekle($$update public.sehirler set place_id = 'kisa' where slug = 'kimlikli-197'$$, '23514');
+select pg_temp.hata_bekle($$update public.sehirler set ulke_kodu = 'tr' where slug = 'kimlikli-197'$$, '23514');
+do $$
+begin
+  assert not (select (x ->> 'kimlik')::boolean from jsonb_array_elements(public.icerik_sehirler()) x where x ->> 'slug' = 'kimlikli-197'), 'kimlik eksik görünür';
+  assert public.icerik_sehir_kimligi_yaz('kimlikli-197', 'ChIJ_kimlikli_197', 'Europe/Istanbul', 'TR'), 'boş alanlar dolar';
+  assert (select place_id = 'ChIJ_kimlikli_197' and tz = 'Europe/Istanbul' and ulke_kodu = 'TR' from public.sehirler where slug = 'kimlikli-197'), 'kimlik yazıldı';
+  -- Bir kez: dolu alan ezilmez, yazılacak bir şey yoksa false.
+  assert not public.icerik_sehir_kimligi_yaz('kimlikli-197', 'ChIJ_baska_kimlik', 'Europe/Berlin', 'DE'), 'dolu şehir yeniden yazılmaz';
+  assert (select place_id from public.sehirler where slug = 'kimlikli-197') = 'ChIJ_kimlikli_197', 'kimlik korunur';
+  assert (select (x ->> 'kimlik')::boolean from jsonb_array_elements(public.icerik_sehirler()) x where x ->> 'slug' = 'kimlikli-197'), 'kimlik var görünür';
+  assert (select (x ->> 'lat')::float from jsonb_array_elements(public.icerik_sehirler()) x where x ->> 'slug' = 'kimlikli-197') = 39.77, 'liste konumu verir';
+end $$;
+set role anon;
+do $$ begin assert (select tz from public.sehirler where slug = 'kimlikli-197') = 'Europe/Istanbul', 'anon yayınlı şehrin saat dilimini okur'; end $$;
+reset role;
+set role authenticated;
+select pg_temp.as_user(:YS);
+select pg_temp.hata_bekle($$select public.icerik_sehir_kimligi_yaz('kimlikli-197', 'ChIJ_x_123456', 'UTC', 'TR')$$, '42501');
+select pg_temp.hata_bekle($$select public.icerik_sehirler()$$, '42501');
+do $$ begin
+  update public.sehirler set tz = 'UTC' where slug = 'kimlikli-197';
+  assert (select tz from public.sehirler where slug = 'kimlikli-197') = 'Europe/Istanbul', 'admin olmayan şehri değiştiremez (RLS)';
+end $$;
+reset role;
+
 \echo 'rls_test: TÜM TESTLER GEÇTİ'

@@ -18,7 +18,7 @@ export function useSehirler() {
     queryKey: ['icerik', 'sehirler'],
     staleTime: GUN_MS,
     queryFn: async () => {
-      const { data, error } = await supabase.from('sehirler').select('id, ad, slug, kapak_url, lat, lng, ozet, geziler(count)').order('ad');
+      const { data, error } = await supabase.from('sehirler').select('id, ad, slug, kapak_url, lat, lng, ozet, place_id, tz, ulke_kodu, geziler(count)').order('ad');
       if (error) throw error;
       return (data as unknown as (Sehir & { geziler: { count: number }[] })[]).map(({ geziler, ...s }) => ({ ...s, gezi_sayisi: geziler?.[0]?.count ?? 0 }) as Sehir);
     },

@@ -46,11 +46,15 @@ export function sehirAlanlari(s: SehirAlanlari): SehirAlanlari {
   return { ad: s.ad, slug: s.slug, lat: s.lat, lng: s.lng, ozet: s.ozet, yayin: s.yayin, kapak_url: s.kapak_url, genis_kapak_url: s.genis_kapak_url };
 }
 
-/** "+ Şehir": Google'dan seçilen şehir taslak olarak (ad, slug, konum); slug çakışırsa sona kısa ek. */
-export async function sehirOlustur(yer: Pick<HafifYer, 'ad' | 'lat' | 'lng'>): Promise<string> {
+/**
+ * "+ Şehir": Google'dan seçilen şehir taslak olarak (ad, slug, konum); slug çakışırsa sona kısa ek. #197: seçimin Google kimliği,
+ * saat dilimi ve ülke kodu da yazılır (seçici şehir modunda zaten alır; ek istek yok) — seyahat açarken şehir için Google'a gidilmez.
+ */
+export async function sehirOlustur(yer: Pick<HafifYer, 'ad' | 'lat' | 'lng'> & Partial<Pick<HafifYer, 'place_id' | 'tz' | 'ulke_kodu'>>): Promise<string> {
   const temel = slugUret(yer.ad) || 'sehir';
+  const kimlik = { place_id: yer.place_id ?? null, tz: yer.tz ?? null, ulke_kodu: yer.ulke_kodu ?? null };
   for (const slug of [temel, `${temel}-${Math.random().toString(36).slice(2, 6)}`]) {
-    const { data, error } = await supabase.from('sehirler').insert({ ad: yer.ad.slice(0, 80), slug, lat: yer.lat, lng: yer.lng, yayin: false }).select('id').single();
+    const { data, error } = await supabase.from('sehirler').insert({ ad: yer.ad.slice(0, 80), slug, lat: yer.lat, lng: yer.lng, yayin: false, ...kimlik }).select('id').single();
     if (!error) return (data as { id: string }).id;
     if ((error as { code?: string }).code !== '23505') throw error;
   }
