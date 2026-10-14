@@ -65,7 +65,7 @@ export type GunKarti = {
   /** Tema satırı: ilk durağın adı (biliniyorsa), değilse duraklarının kategorileri; boş günde null. */
   tema: string | null;
   durakSayisi: number;
-  /** "09:30–18:10"; boş günde null. */
+  /** "09:30–18:10"; yürüyüşler kestirimse (Plan henüz açılmadı) "~09:30–18:10"; boş günde null. */
   saat: string | null;
 };
 
@@ -91,7 +91,7 @@ export function gunKartlari(p: { gunler: Gun[]; duraklar: Durak[]; mekanlar: Mek
         etiket: gunEtiketi(g),
         tema: gunun.length === 0 ? null : (ilkAd ?? kategoriler.join(' · ')),
         durakSayisi: gunun.length,
-        saat: gunun.length > 0 && tp ? `${tp.baslangic}–${tp.bitis}` : null,
+        saat: gunun.length > 0 && tp ? `${tp.kestirim ? '~' : ''}${tp.baslangic}–${tp.bitis}` : null,
       };
     });
 }

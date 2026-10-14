@@ -1,6 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { router, useLocalSearchParams } from 'expo-router';
-import { useEffect, useMemo, useState } from 'react';
+import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Linking, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { GrupPenceresi } from '@/components/davet/GrupPenceresi';
@@ -24,6 +24,7 @@ import { durumCipi, geziModu, grupDurumlari, gunKartlari, gunTarihi, listemOnizl
 import { siradakiAdim, type SiradakiAdim } from '@/features/gezi/siradakiAdim';
 import { useDuragaAta, useDuraklar, useGunler } from '@/features/gunler/sorgular';
 import { sehirEslestir, useGeziler, useSehirler, useSehirYerleri } from '@/features/icerik/sorgular';
+import { OTEL_SERIT_ONEKI } from '@/features/konaklama/otelSeridi';
 import type { Konaklama } from '@/features/konaklama/plan';
 import { useKonaklamalar } from '@/features/konaklama/sorgular';
 import { useKonum, yakinDurakId } from '@/features/konum/useKonum';
@@ -45,9 +46,6 @@ import type { Durak, Gun, Mekan, Seyahat, Yer } from '@/lib/tipler';
 import { kacinciGun, yerelTarih } from '@/lib/zaman';
 import { kestirimTaksiSn, kestirimYuruyusSn } from '@/schedule/tempo';
 import { gunRengi, renk, yazi } from '@/theme';
-
-/** #139 KK7: Plan sekmesindeki otel şeridinde "Şimdi değil" denen seyahatler (cihazda); Sıradaki adım otel adımını atlar. */
-const OTEL_SERIT_ONEKI = 'otel-serit:';
 
 /**
  * #181 (kanvas 23 · 23b · 27): seyahatin ana sayfası (açılış sekmesi). Plan modunda kapak + Sıradaki adım + Plan özeti + Listem +
@@ -98,11 +96,18 @@ function GeziSayfasi({ seyahat, gunler, duraklar, mekanlar, konaklamalar, katild
   const [gunSecDurak, setGunSecDurak] = useState<DurakKarti | null>(null);
   const [eklenenler, setEklenenler] = useState<Set<string>>(() => new Set());
   const [otelErtelendi, setOtelErtelendi] = useState(false);
-  useEffect(() => {
-    AsyncStorage.getItem(OTEL_SERIT_ONEKI + seyahat.id)
-      .then((v) => setOtelErtelendi(v === '1'))
-      .catch(() => undefined);
-  }, [seyahat.id]);
+  // Sekme odaktayken: otel şeridi kararı (Plan'da "Şimdi değil" denmiş olabilir) yeniden okunur; konum yalnız odaktayken izlenir
+  // (Plan'la birlikte iki izleyici çalışmasın).
+  const [odakta, setOdakta] = useState(true);
+  useFocusEffect(
+    useCallback(() => {
+      setOdakta(true);
+      AsyncStorage.getItem(OTEL_SERIT_ONEKI + seyahat.id)
+        .then((v) => setOtelErtelendi(v === '1'))
+        .catch(() => undefined);
+      return () => setOdakta(false);
+    }, [seyahat.id]),
+  );
 
   const an = useSimdi(true);
   const mod = geziModu(seyahat, an);
@@ -146,7 +151,7 @@ function GeziSayfasi({ seyahat, gunler, duraklar, mekanlar, konaklamalar, katild
   const otel = konaklamalar.length > 0 ? { etiket: konaklamalar[0].label?.trim() || t('geziSayfasi.otel'), gece: Math.max(1, gunler.length - 1) } : null;
 
   // ---------------------------------------------------------------- gezi modu: bugünün kartı ve grup
-  const { konum } = useKonum(mod === 'gezi');
+  const { konum } = useKonum(mod === 'gezi' && odakta);
   const bugunDuraklari = useMemo(() => (bugunGun ? gunDuraklari(bugunGun, duraklar) : []), [bugunGun, duraklar]);
   const buradaId = useMemo(
     () => (konum ? yakinDurakId(konum, bugunDuraklari.filter((d) => !d.skipped && !d.completed_at).map((d) => ({ id: d.id, konum: mekanIle.get(d.place_ref) ?? { lat: 0, lng: 0 } }))) : null),
@@ -182,6 +187,8 @@ function GeziSayfasi({ seyahat, gunler, duraklar, mekanlar, konaklamalar, katild
   const listemiAc = (segment?: 'atanmamis') => router.push({ pathname: '/seyahat/[id]/listem', params: { id: seyahat.id, ...(segment ? { segment } : {}) } });
 
   const planiKur = async () => {
+    // Çift dokunma: dağıtım sürerken ikinci istek yok.
+    if (planUygula.isPending) return;
     try {
       const sonuc = await planUygula.mutateAsync({ mekanlar, gunler, duraklar });
       plan({ planKuruldu: '1', atanmamis: String(sonuc.atanmamis.length) });
@@ -290,28 +297,33 @@ function GeziSayfasi({ seyahat, gunler, duraklar, mekanlar, konaklamalar, katild
               <GrupKarti durumlar={grup} sira={siraNo} mekanAdi={adiYaDaKategori} an={an} onSeyahattekiler={() => setGrupAcik(true)} />
             </>
           ) : gorunenAdim && metin ? (
-            <SiradakiAdimSatiri baslik={metin.baslik} alt={metin.alt} dugme={metin.dugme} onPress={() => void adimEylemi(gorunenAdim)} />
+            <SiradakiAdimSatiri baslik={metin.baslik} alt={metin.alt} dugme={metin.dugme} mesgul={gorunenAdim.tur === 'planKur' && planUygula.isPending} onPress={() => void adimEylemi(gorunenAdim)} />
           ) : null}
 
-          <PlanOzeti
-            kartlar={kartlar}
-            otel={otel}
-            onPlan={() => plan()}
-            onGun={(k) => plan({ gun: String(k.gun.index) })}
-            onMekanEkle={() => sekme('kesfet')}
-            onOtel={() => plan({ otel: '1' })}
-          />
-          <ListemOnizleme
-            toplam={mekanlar.length}
-            satirlar={listem}
-            ad={(placeId) => bilinen.ad({ place_id: placeId })}
-            foto={bilinen.foto}
-            onTumu={() => listemiAc()}
-            onOy={oyla}
-            onEkle={() => sekme('kesfet')}
-          />
-          {sehir && oneriler.length > 0 ? (
-            <RehberOnerileri sehir={sehir.ad} yerler={oneriler} eklenenler={eklenenler} onEkle={listeyeEkle} onKesfet={() => sekme('kesfet', { cekmece: 'rehber' })} />
+          {/* Gezi modunda (kanvas 23b) Plan özeti, Listem ve rehber önerileri yok: Bugün → Grup → (Harcamalar → Sohbet) → Rehber. */}
+          {mod !== 'gezi' ? (
+            <>
+              <PlanOzeti
+                kartlar={kartlar}
+                otel={otel}
+                onPlan={() => plan()}
+                onGun={(k) => plan({ gun: String(k.gun.index) })}
+                onMekanEkle={() => sekme('kesfet')}
+                onOtel={() => plan({ otel: '1' })}
+              />
+              <ListemOnizleme
+                toplam={mekanlar.length}
+                satirlar={listem}
+                ad={(placeId) => bilinen.ad({ place_id: placeId })}
+                foto={bilinen.foto}
+                onTumu={() => listemiAc()}
+                onOy={oyla}
+                onEkle={() => sekme('kesfet')}
+              />
+              {sehir && oneriler.length > 0 ? (
+                <RehberOnerileri sehir={sehir.ad} yerler={oneriler} eklenenler={eklenenler} onEkle={listeyeEkle} onKesfet={() => sekme('kesfet', { cekmece: 'rehber' })} />
+              ) : null}
+            </>
           ) : null}
           {sehir ? (
             <RehberKartlari

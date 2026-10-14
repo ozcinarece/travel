@@ -2,7 +2,7 @@
 // küçük Buz düğme ve fotoğraf kutusu (bizim fotoğrafımız ya da oturum önbelleği; yoksa kategori renginde boş kutu).
 import { Image } from 'expo-image';
 import type { ReactNode } from 'react';
-import { Pressable, StyleSheet, Text, View, type StyleProp, type ViewStyle } from 'react-native';
+import { ActivityIndicator, Pressable, StyleSheet, Text, View, type StyleProp, type ViewStyle } from 'react-native';
 
 import { Ikon } from '@/components/ui/Ikon';
 import { pinKategorisi, type PinKategorisi } from '@/lib/pinIkonu';
@@ -55,7 +55,7 @@ export function BuzDugme({ metin, onPress, kucuk }: { metin: string; onPress: ()
 }
 
 /** KK5: kapağın altındaki tek, sessiz satır — beyaz, solda 3 px Mandalina çizgi, sağda küçük Buz düğme. */
-export function SiradakiAdimSatiri({ baslik, alt, dugme, onPress }: { baslik: string; alt: string | null; dugme: string; onPress: () => void }) {
+export function SiradakiAdimSatiri({ baslik, alt, dugme, mesgul, onPress }: { baslik: string; alt: string | null; dugme: string; /** İş sürüyor (Planı kur): düğme beklemede, dokunulmaz. */ mesgul?: boolean; onPress: () => void }) {
   return (
     <View style={s.siradaki}>
       <View style={{ flex: 1, minWidth: 0 }}>
@@ -66,7 +66,13 @@ export function SiradakiAdimSatiri({ baslik, alt, dugme, onPress }: { baslik: st
           </Text>
         ) : null}
       </View>
-      <BuzDugme metin={dugme} onPress={onPress} />
+      {mesgul ? (
+        <View style={[s.buz, { minWidth: 56, alignItems: 'center' }]} accessibilityLabel={dugme} accessibilityState={{ busy: true }}>
+          <ActivityIndicator size="small" color={renk.ana} />
+        </View>
+      ) : (
+        <BuzDugme metin={dugme} onPress={onPress} />
+      )}
     </View>
   );
 }

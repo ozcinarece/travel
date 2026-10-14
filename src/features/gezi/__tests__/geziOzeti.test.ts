@@ -39,8 +39,8 @@ const durak = (id: string, gunId: string, mekanId: string, order = 'a0', ek: Par
   skipped: false,
   ...ek,
 });
-const tempo = (baslangic: string, bitis: string): TempoSonucu =>
-  ({ doluluk: 0.5, etiket: 'rahat', durakSayisi: 2, geziDk: 90, yuruyusDk: 10, taksiDk: 0, kestirim: true, baslangic, bitis, sigar: 0, enUzun: null, sira: [] }) as TempoSonucu;
+const tempo = (baslangic: string, bitis: string, kestirim = false): TempoSonucu =>
+  ({ doluluk: 0.5, etiket: 'rahat', durakSayisi: 2, geziDk: 90, yuruyusDk: 10, taksiDk: 0, kestirim, baslangic, bitis, sigar: 0, enUzun: null, sira: [] }) as TempoSonucu;
 
 describe('#181 mod ve kapak', () => {
   it('gezi modu tarihler içinde, bitti dönüş geçince; tarihsiz plan', () => {
@@ -57,6 +57,23 @@ describe('#181 mod ve kapak', () => {
     expect(durumCipi(seyahat('2026-10-01', '2026-10-03'), AN)).toBeNull();
   });
 
+  it('gece yarısı sınırı: mod ve çip cihazın değil seyahatin saat dilimine göre', () => {
+    // 16 Ekim 21:30 UTC = İstanbul'da 17 Ekim 00:30, New York'ta 16 Ekim 17:30.
+    const an = new Date('2026-10-16T21:30:00Z');
+    const ist = { start_date: '2026-10-17', end_date: '2026-10-18', tz: IST };
+    const ny = { ...ist, tz: 'America/New_York' };
+    expect(geziModu(ist, an)).toBe('gezi');
+    expect(durumCipi(ist, an)).toEqual({ tur: 'bugun', metin: 'Bugün · 1. gün' });
+    expect(geziModu(ny, an)).toBe('plan');
+    expect(durumCipi(ny, an)).toEqual({ tur: 'kalan', metin: '1 gün kaldı' });
+    // Dönüş günü İstanbul'da bitti, New York'ta sürüyor.
+    const donus = { start_date: '2026-10-15', end_date: '2026-10-16' };
+    expect(geziModu({ ...donus, tz: IST }, an)).toBe('bitti');
+    expect(durumCipi({ ...donus, tz: IST }, an)).toBeNull();
+    expect(geziModu({ ...donus, tz: 'America/New_York' }, an)).toBe('gezi');
+    expect(durumCipi({ ...donus, tz: 'America/New_York' }, an)).toEqual({ tur: 'bugun', metin: 'Bugün · 2. gün' });
+  });
+
   it('tarih satırı: aralık · gün adları · gün sayısı', () => {
     expect(tarihSatiri(seyahat('2026-10-16', '2026-10-18'), 3)).toBe('16–18 Ekim · Cum–Paz · 3 gün');
     expect(tarihSatiri(seyahat('2026-10-16', '2026-10-16'), 1)).toBe('16 Ekim · Cum · 1 gün');
@@ -70,7 +87,7 @@ describe('#181 KK6 gün kartları', () => {
   const duraklar = [durak('d2', 'g1', 'm2', 'a1'), durak('d1', 'g1', 'm1', 'a0'), durak('d3', 'g2', 'm3', 'a0'), durak('d4', 'g2', 'm2', 'a1', { skipped: true })];
   const tempolar = new Map([
     ['g1', tempo('09:30', '18:10')],
-    ['g2', tempo('10:00', '17:20')],
+    ['g2', tempo('10:00', '17:20', true)],
   ]);
 
   it('gün sırası, renk, etiket, tema (ilk durağın adı), durak sayısı (atlanan hariç), saat; boş gün', () => {
@@ -78,8 +95,8 @@ describe('#181 KK6 gün kartları', () => {
     const k = gunKartlari({ gunler, duraklar, mekanlar, tempolar, ad });
     expect(k.map((x) => [x.gun.index, x.etiket, x.renk, x.tema, x.durakSayisi, x.saat])).toEqual([
       [1, 'Cum 16', '#2c64f5', 'Odunpazarı Evleri', 2, '09:30–18:10'],
-      // Adı bilinmeyen günde tema kategorilerden (Google'a gidilmez).
-      [2, 'Cmt 17', '#f5a524', 'Park', 1, '10:00–17:20'],
+      // Adı bilinmeyen günde tema kategorilerden (Google'a gidilmez); yürüyüşler kestirimse saat "~" ile.
+      [2, 'Cmt 17', '#f5a524', 'Park', 1, '~10:00–17:20'],
       [3, 'Paz 18', '#16a06e', null, 0, null],
     ]);
   });

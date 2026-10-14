@@ -3,6 +3,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ActionSheetIOS, Alert, Platform } from 'react-native';
 
+import { OTEL_SERIT_ONEKI } from '@/features/konaklama/otelSeridi';
 import { t } from '@/i18n';
 import type { UyeOzet } from '@/lib/tipler';
 
@@ -29,7 +30,7 @@ export function seyahatYokMu(hata: unknown): boolean {
 export const kendiSildiklerim = new Set<string>();
 
 /** Seyahate bağlı yerel kayıtlar (KK7). Zamanlanmış bildirim ve arka plan konumu yok; ön plan konumu ekranla kapanır. */
-const YEREL_ONEKLER = ['otel-serit:'];
+const YEREL_ONEKLER = [OTEL_SERIT_ONEKI];
 export async function yerelKayitlariTemizle(seyahatId: string): Promise<void> {
   await Promise.all(YEREL_ONEKLER.map((o) => AsyncStorage.removeItem(o + seyahatId).catch(() => undefined)));
 }

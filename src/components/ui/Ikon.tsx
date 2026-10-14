@@ -70,7 +70,14 @@ export type IkonAdi =
   // #164 (kanvas 14): "Burada kalış" satırındaki kronometre.
   | 'saat';
 
-type Props = { ad: IkonAdi; boyut?: number; renk: ColorValue; kalinlik?: number; /** #181: seçili sekmede çizgi renginde %18 dolgu. */ dolgu?: boolean };
+type Props = {
+  ad: IkonAdi;
+  boyut?: number;
+  renk: ColorValue;
+  kalinlik?: number;
+  /** #181: seçili sekmede çizgi renginde %18 dolgu (true); sayı verilirse o saydamlıkta (1 = tam dolu, ör. kendi oyun). */
+  dolgu?: boolean | number;
+};
 
 /**
  * Kanvastaki çizgi ikonlar (#26): yazı tipi bağımlılığı yok, SVG olarak çizilir.
@@ -78,7 +85,8 @@ type Props = { ad: IkonAdi; boyut?: number; renk: ColorValue; kalinlik?: number;
  * #30: pin kategori ikonları aynı sette; 16 px'te çizilir (kalınlık 2,2).
  */
 export function Ikon({ ad, boyut = 24, renk, kalinlik = 2, dolgu }: Props) {
-  const ortak = { stroke: renk, strokeWidth: kalinlik, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const, fill: dolgu ? renk : 'none', fillOpacity: dolgu ? 0.18 : 1 };
+  const dolguSaydam = dolgu === true ? 0.18 : typeof dolgu === 'number' ? dolgu : 0;
+  const ortak = { stroke: renk, strokeWidth: kalinlik, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const, fill: dolguSaydam ? renk : 'none', fillOpacity: dolguSaydam || 1 };
   return (
     <Svg width={boyut} height={boyut} viewBox="0 0 24 24">
       {ad === 'saat' ? (

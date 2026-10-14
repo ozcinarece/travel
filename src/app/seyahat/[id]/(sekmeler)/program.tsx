@@ -25,6 +25,7 @@ import { Avatar } from '@/components/ui/Avatar';
 import { Ikon } from '@/components/ui/Ikon';
 import type { Konaklama } from '@/features/konaklama/plan';
 import { useDavetPaylas } from '@/features/davet/paylas';
+import { OTEL_SERIT_ONEKI } from '@/features/konaklama/otelSeridi';
 import { useGunOteliKaydet, useKonaklamalar, useTumGunlereOtel } from '@/features/konaklama/sorgular';
 import { useDuragaAta, useDuraklar, useDurakKaldir, useGunEkle, useGunler, useGunSil } from '@/features/gunler/sorgular';
 import { useKonum, yakinDurakId } from '@/features/konum/useKonum';
@@ -65,8 +66,6 @@ const YURUME_YARICAPI_M = 1500;
 const KAYDEDILDI_MS = 4000;
 /** #140 KK10: bu kadar ve üstü gecikmede "Saatleri kaydır" önerilir. */
 const GERIDEYIZ_ESIGI_DK = 10;
-/** #139 KK7: otel şeridinde "Şimdi değil" denen seyahatler (cihazda). */
-const OTEL_SERIT_ONEKI = 'otel-serit:';
 
 /** #45 §3: alt panel üç hal. */
 type PanelHali = 'katli' | 'yari' | 'tam';
