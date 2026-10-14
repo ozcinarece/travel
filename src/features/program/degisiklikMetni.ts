@@ -44,6 +44,13 @@ export function degisiklikMetni(d: Degisiklik, mekanAdi: (placesId: string | nul
     case 'trips':
       if (d.field?.startsWith('hotel')) return 'oteli değiştirdi';
       return 'seyahati değiştirdi';
+    // #200: Günlere dağıt tek kayıt (eklenen duraklar, kısalan süreler, uzayan günler birlikte geri alınır).
+    case 'dagit': {
+      const o = (yeni ?? {}) as { mekan?: number; kisalt?: boolean; uzat?: boolean };
+      return [`${o.mekan ?? 0} mekanı günlere dağıttı`, o.kisalt ? 'süreleri kısalttı' : null, o.uzat ? 'günleri uzattı' : null].filter(Boolean).join(' · ');
+    }
+    case 'dagit_geri':
+      return 'günlere dağıtımı geri aldı';
     // #183: harcama ve ödeşme (paylar akışta ayrıca gösterilmez; harcamayla birlikte geri alınır).
     case 'harcamalar': {
       const satir = (yeni ?? eski) as { aciklama?: string; tl_kurus?: number } | null;
@@ -102,7 +109,7 @@ export function grupMetni(
  */
 export function geriAlinabilir(g: DegisiklikGrubu): boolean {
   const ilk = g.satirlar[0];
-  if (g.entity === 'harcamalar' || g.entity === 'odesmeler') return true;
+  if (g.entity === 'harcamalar' || g.entity === 'odesmeler' || g.entity === 'dagit') return true;
   if (g.entity === 'places' || g.entity === 'stops') {
     if (!ilk.field) return true;
     return g.satirlar.some((d) => d.field && !['arrived_at', 'arrived_by', 'completed_at', 'completed_by', 'auto_completed'].includes(d.field));

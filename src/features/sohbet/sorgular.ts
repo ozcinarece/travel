@@ -87,6 +87,8 @@ export function useSohbetDegisiklikleri(seyahatId: string | undefined) {
         .select('id, user_id, entity, entity_id, field, old, new, at')
         .eq('trip_id', seyahatId!)
         .neq('entity', 'harcama_paylari')
+        // #200: Günlere dağıt tek sistem satırı (işlemin satırları kayda bağlı).
+        .is('grup', null)
         .order('at', { ascending: false })
         .limit(DEGISIKLIK_SINIRI);
       if (error) throw error;

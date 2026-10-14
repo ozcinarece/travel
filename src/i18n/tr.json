@@ -1086,6 +1086,30 @@
       "bosDonus": "Boş gün · dönüş günü",
       "not": "Dokunduğun güne eklenir, saatler yeniden hesaplanır.",
       "eklendi": "{ad} {gun}. güne eklendi"
+    },
+    "sigmayan": {
+      "baslik": "{n} mekan günlere sığmıyor",
+      "alt": "{mekan} mekan · {gun} gün",
+      "altPencere": "{mekan} mekan · {gun} gün · günler {pencere}",
+      "soru": "NASIL SIĞDIRALIM?",
+      "kisalt": "Süreleri kısalt",
+      "kisaltAciklama": "Her yerde biraz daha kısa kal: ortalama **{once} → {sonra} dk**.",
+      "hepsiSigar": "Hepsi sığar",
+      "yemekAyni": "Yemek durakları aynı",
+      "kismi": "{n} tanesi daha sığar; {k} mekan Listem’de kalır",
+      "uzat": "Günleri uzat",
+      "uzatTek": "{gunler} bitişi **{eski} → {yeni}**; süreler aynı kalır.",
+      "uzatCok": "{liste}; süreler aynı kalır.",
+      "uzatGun": "{gun} **{eski} → {yeni}**",
+      "liste": "Listede kalsın",
+      "listeAciklama": "{n} mekan dağıtılır; **{adlar}** Listem’de kalır.",
+      "listeAciklamaAdsiz": "{n} mekan dağıtılır; {k} mekan Listem’de kalır.",
+      "veDaha": "{adlar} ve {n} mekan daha",
+      "ve": " ve ",
+      "mekan": "{n} mekan",
+      "dugme": "{n} mekanı dağıt",
+      "not": "Süreleri sonra Plan’da tek tek değiştirebilirsin.",
+      "gunNo": "{n}. gün"
     }
   },
   "harcama": {

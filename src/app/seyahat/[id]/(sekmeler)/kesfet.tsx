@@ -27,6 +27,7 @@ import { sehirEslestir, useSehirler } from '@/features/icerik/sorgular';
 import { kartKamerasi } from '@/features/program/durakKarti';
 import { useOnerilenler, type OnerilenMekan } from '@/features/sihirbaz/onerilenler';
 import { AZ_ONERI, cekmeceListesi, cekmeceSayisi, gorunurOneriSayisi, type CekmeceCipi } from '@/features/yerler/cekmece';
+import { listedekiBenzerler } from '@/features/yerler/benzerYer';
 import { hafifOnbellek, hafifYerler, linkCoz, linkGibiMi, useHafifYerler, useOneriler, useYerFotolari, yeniOturumJetonu, type HafifYer } from '@/features/yerler/api';
 
 import { aktifFiltreSayisi, filtreAktif, filtredenGecer, filtreOzeti, varsayilanMi, type Filtre } from '@/features/yerler/filtre';
@@ -146,6 +147,12 @@ function Kesfet({ seyahat, konaklamalar, ilkMekan, cekmeceIstegi, cipIstegi }: {
   const uyeAdi = (uid: string | null) => uyeler.data?.find((u) => u.user_id === uid)?.display_name ?? '';
   const oneriListesi: HafifYer[] = yakin.yerler;
   const havuzIdleri = useMemo(() => new Set(havuz.map((m) => m.place_id)), [havuz]);
+  // #200 KK8: kimliği farklı ama listedeki mekana 60 m'den yakın ve adı benzer öneri de listede sayılır (gösterilmez). Ad eldeki
+  // hafif veriden; ek Google isteği yok.
+  const listedeSayilan = useMemo(() => {
+    const benzer = listedekiBenzerler(oneriListesi, havuz.map((m) => ({ place_id: m.place_id, lat: m.lat, lng: m.lng, ad: havuzAdlari.data?.[m.place_id]?.ad })));
+    return benzer.size > 0 ? new Set([...havuzIdleri, ...benzer]) : havuzIdleri;
+  }, [oneriListesi, havuz, havuzAdlari.data, havuzIdleri]);
   // #69 §A: öne çıkanlar — şehrin yüklenmiş mekanları arasında en üst %10; liste büyüdükçe en fazla 10 sn'de bir yeniden hesap.
   const oneCikan = useOneCikanlar(oneriListesi);
   // #69 KK5: filtre açıkken eşleşmeyen öneri pinleri gizlenir; listedekiler ve seçili pin her zaman görünür.
@@ -183,7 +190,7 @@ function Kesfet({ seyahat, konaklamalar, ilkMekan, cekmeceIstegi, cipIstegi }: {
   // #69 KK5: filtre açıkken yalnız geçenler + seçili pin; gizli sayısı listedekileri ve seçili pini saymaz.
   const seciliOneri = secim && filtreli ? oneriListesi.find((y) => y.place_id === secim.place_id) : undefined;
   const oneriPinleri = useMemo((): HaritaPini[] => {
-    const gorulen = new Set(havuzIdleri);
+    const gorulen = new Set(listedeSayilan);
     const adaylar: HafifYer[] = [];
     for (const y of [...(aramaSonucu ? [aramaSonucu] : []), ...gecenler, ...(seciliOneri ? [seciliOneri] : [])]) {
       if (gorulen.has(y.place_id)) continue;
@@ -201,7 +208,7 @@ function Kesfet({ seyahat, konaklamalar, ilkMekan, cekmeceIstegi, cipIstegi }: {
       tur: 'oneri' as const,
       oneCikan: oneCikan.has(y.place_id),
     }));
-  }, [gecenler, seciliOneri, havuzIdleri, aramaSonucu, bolge, oneCikan]);
+  }, [gecenler, seciliOneri, listedeSayilan, aramaSonucu, bolge, oneCikan]);
   // #75: seçim pin listesinden ayrı (Harita `seciliId`): seçim değişince liste ve çakışma hesabı yeniden kurulmaz.
   const seciliId = secim ? (havuzIdleri.has(secim.place_id) ? `m:${secim.place_id}` : `o:${secim.place_id}`) : null;
   // #75: dokunuş → kart (#80: panel) süresi — panel `secim` ile aynı render'da; commit sonrası ölçülür.
@@ -211,8 +218,8 @@ function Kesfet({ seyahat, konaklamalar, ilkMekan, cekmeceIstegi, cipIstegi }: {
   const gizliSayi = useMemo(() => {
     if (!filtreli) return 0;
     const gecen = new Set(gecenler.map((y) => y.place_id));
-    return oneriListesi.filter((y) => !havuzIdleri.has(y.place_id) && !gecen.has(y.place_id) && y.place_id !== secim?.place_id).length;
-  }, [filtreli, oneriListesi, gecenler, havuzIdleri, secim?.place_id]);
+    return oneriListesi.filter((y) => !listedeSayilan.has(y.place_id) && !gecen.has(y.place_id) && y.place_id !== secim?.place_id).length;
+  }, [filtreli, oneriListesi, gecenler, listedeSayilan, secim?.place_id]);
 
   const pinler: HaritaPini[] = [
     ...konaklamalar.map((k) => ({
@@ -360,8 +367,8 @@ function Kesfet({ seyahat, konaklamalar, ilkMekan, cekmeceIstegi, cipIstegi }: {
   }
   // #121 KK5: çekmece de hızlı filtreden geçenleri listeler (`gecenler`), pinlerle aynı küme.
   // #165: tam haldeki kategori çipleri artık Keşfet'in hızlı filtre çipleri (aynı filtre); çekmecenin kendi çipi yalnız "Rehberden".
-  const bolgeListesi = useMemo(() => cekmeceListesi(gecenler, havuzIdleri, cekmeceBolgesi, tutulan), [gecenler, havuzIdleri, cekmeceBolgesi, tutulan]);
-  const cekmeceSayi = cekmeceSayisi(bolgeListesi, havuzIdleri);
+  const bolgeListesi = useMemo(() => cekmeceListesi(gecenler, listedeSayilan, cekmeceBolgesi, tutulan), [gecenler, listedeSayilan, cekmeceBolgesi, tutulan]);
+  const cekmeceSayi = cekmeceSayisi(bolgeListesi, listedeSayilan);
   const listeYerleri = useMemo(() => havuz.map((m) => havuzAdlari.data?.[m.place_id]).filter((y): y is HafifYer => !!y), [havuz, havuzAdlari.data]);
   const rehberGorunur = cekmece === 'tam' && cekmeceCip === 'rehber' && !yalnizListe;
   const cekmeceGosterilen = yalnizListe ? listeYerleri : bolgeListesi;

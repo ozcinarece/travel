@@ -199,9 +199,10 @@ describe('#181 KK13: Gezi sayfası açılışında Google isteği yok', () => {
     await sakinles(qc);
 
     expect(getByText('12 gün kaldı')).toBeTruthy();
-    // KK5: park güne atanmamış (adı bilinmiyor) · otel de seçilmedi.
+    // KK5: park güne atanmamış (adı bilinmiyor). #200 KK1: otel eksiği yalnız Plan bölümündeki otel satırında (bir kez).
     expect(getByText('1 mekan güne atanmamış')).toBeTruthy();
-    expect(getByText('otel de seçilmedi')).toBeTruthy();
+    expect(queryAllByText('otel de seçilmedi')).toHaveLength(0);
+    expect(queryAllByText('Otel seçilmedi')).toHaveLength(1);
     expect(getByText('Dağıt')).toBeTruthy();
     // KK6: gün kartı teması ilk durağın DB'deki adı; KK7: Google'da kalan ad yerine kategori.
     expect(queryAllByText('Odunpazarı Evleri').length).toBeGreaterThan(0);

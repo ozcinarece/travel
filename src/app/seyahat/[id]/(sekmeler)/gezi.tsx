@@ -62,6 +62,9 @@ import { gunRengi, renk, yazi } from '@/theme';
  * Rehberden öneriler + Rehber; gezi modunda (tarihler içinde) Sıradaki adım yerine bugünün durak kartı ve Grup kartı. KK13:
  * açılışta Google'a istek gitmez — adlar ve öneriler DB'den (ya da oturum önbelleğinden), gün saatleri eldeki yürüyüşlerden.
  */
+/** #200 KK1: plan modunda ekranda kendi satırı olan eksikler (PlanOzeti'nin otel satırı). */
+const EKRANDAKI_SATIRLAR: readonly SiradakiAdim['tur'][] = ['otel'];
+
 export default function GeziEkrani() {
   const id = useSeyahatId();
   // #181 KK14: davetle gelen kullanıcı doğrudan buraya iner ("Katıldın ✓" alt sayfası bir kez).
@@ -176,6 +179,8 @@ function GeziSayfasi({ seyahat, gunler, duraklar, mekanlar, konaklamalar, katild
     baslangic: seyahat.start_date,
     ilkGunCikis: saatKisa([...gunler].sort((a, b) => a.index - b.index)[0]?.start_time, saatKisa(seyahat.day_start, '09:00')),
     acikTransfer: harcamalar.data && odesmeler.data ? hOzet.transferler.length : 0,
+    // #200 KK1: Plan bölümünde otel satırı hep var ("Otel seçilmedi · Seç") — Sıradaki adım onu tekrar etmez.
+    ekranda: mod === 'plan' ? EKRANDAKI_SATIRLAR : undefined,
   });
   // Uye listesi gelmeden "Davet et" gösterilmez (tek kişi sanılmasın).
   const gorunenAdim = adim?.tur === 'davet' && !uyeler.data ? null : adim;
