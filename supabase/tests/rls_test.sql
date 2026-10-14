@@ -1972,4 +1972,125 @@ begin
   assert not exists (select 1 from public.odesmeler where trip_id = current_setting('test.h_trip')::uuid), 'ödeşmeler gitti';
 end $$;
 
+-- #184 Sohbet: yalnız üyeler okur/yazar; kişi yalnız kendi mesajını (yumuşak) siler, içerik temizlenir; oylama 2–4 seçenek, oy
+-- tekil ve değiştirilebilir, kapanınca oy yok, başka oylamanın seçeneği reddedilir; okunmamış sayısı; fotoğraf kovası.
+reset role;
+\set SS '''aaaaaaaa-1840-0000-0000-000000000001'''
+\set SU '''aaaaaaaa-1840-0000-0000-000000000002'''
+\set SN '''aaaaaaaa-1840-0000-0000-000000000003'''
+insert into auth.users (id, is_anonymous) values (:SS, false), (:SU, false), (:SN, false);
+insert into public.profiles (id, name, username) values (:SS, 'Ece', 'ece184'), (:SU, 'Ayse', 'ayse184'), (:SN, 'Disari', 'disari184');
+set role authenticated;
+select pg_temp.as_user(:SS);
+insert into public.trips (owner_id, city_place_id, city_label, country_code, lat, lng, tz, start_date, end_date)
+  values (:SS, 'ChIJ-sohbet184', 'Sohbetli', 'TR', 39.77, 30.52, 'Europe/Istanbul', '2026-11-25', '2026-11-26');
+reset role;
+select id as s_trip, invite_token as s_token from public.trips where owner_id = :SS \gset
+select set_config('test.s_trip', :'s_trip', false);
+set role authenticated;
+select pg_temp.as_user(:SU);
+select public.join_trip(:'s_token', 'Ayşe');
+
+-- Ece yazar; Ayşe okur ve okunmamış 1 görür; okuyunca 0.
+select pg_temp.as_user(:SS);
+insert into public.mesajlar (trip_id, tur, metin) values (:'s_trip', 'metin', 'Cuma akşamı Odunpazarı''nda kalalım');
+select pg_temp.hata_bekle(format('insert into public.mesajlar (trip_id, tur, metin) values (%L, %L, %L)', current_setting('test.s_trip'), 'metin', '   '), '23514');
+select pg_temp.hata_bekle(format('insert into public.mesajlar (trip_id, tur) values (%L, %L)', current_setting('test.s_trip'), 'mekan'), '23514');
+select pg_temp.hata_bekle(format('insert into public.mesajlar (trip_id, user_id, tur, metin) values (%L, null, %L, %L)', current_setting('test.s_trip'), 'metin', 'sistem gibi'), '42501');
+select pg_temp.as_user(:SU);
+do $$
+declare t uuid := current_setting('test.s_trip')::uuid;
+begin
+  assert (select count(*) from public.mesajlar where trip_id = t) = 1, 'üye mesajı okur';
+  assert public.sohbet_okunmamis(t) = 1, 'okunmamış 1';
+  perform public.sohbet_okundu(t);
+  assert public.sohbet_okunmamis(t) = 0, 'okuyunca 0';
+end $$;
+-- Ayşe, Ece'nin mesajını silemez ve içeriğini değiştiremez.
+update public.mesajlar set silindi_at = now() where trip_id = :'s_trip';
+select pg_temp.hata_bekle(format('update public.mesajlar set metin = %L where trip_id = %L', 'değişti', current_setting('test.s_trip')), '42501');
+do $$ begin assert (select silindi_at from public.mesajlar where trip_id = current_setting('test.s_trip')::uuid) is null, 'başkasının mesajı silinmez'; end $$;
+
+-- Dışarıdan biri okuyamaz, yazamaz, okunmamışı sıfır.
+select pg_temp.as_user(:SN);
+do $$
+begin
+  assert (select count(*) from public.mesajlar where trip_id = current_setting('test.s_trip')::uuid) = 0, 'üye olmayan okuyamaz';
+  assert public.sohbet_okunmamis(current_setting('test.s_trip')::uuid) = 0, 'üye olmayana sayı yok';
+end $$;
+select pg_temp.hata_bekle(format('insert into public.mesajlar (trip_id, tur, metin) values (%L, %L, %L)', current_setting('test.s_trip'), 'metin', 'selam'), '42501');
+select pg_temp.hata_bekle(format('select public.oylama_olustur(%L, %L, %L, null)', current_setting('test.s_trip'), 'Ne yiyelim?', '[{"metin":"Çibörek"},{"metin":"Balık"}]'), '42501');
+select pg_temp.hata_bekle(format('select public.sohbet_okundu(%L)', current_setting('test.s_trip')), '42501');
+
+-- Ece kendi mesajını siler: içerik temizlenir, geri alınamaz.
+select pg_temp.as_user(:SS);
+update public.mesajlar set silindi_at = now() where trip_id = :'s_trip';
+do $$
+declare m public.mesajlar;
+begin
+  select * into m from public.mesajlar where trip_id = current_setting('test.s_trip')::uuid;
+  assert m.silindi_at is not null and m.metin = '', 'yumuşak silme içeriği temizler';
+end $$;
+select pg_temp.hata_bekle(format('update public.mesajlar set silindi_at = null where trip_id = %L', current_setting('test.s_trip')), '42501');
+
+-- Oylama: 2–4 seçenek, kapanış ileride; mesaj da yazılır.
+select pg_temp.hata_bekle(format('select public.oylama_olustur(%L, %L, %L, null)', current_setting('test.s_trip'), 'Tek?', '[{"metin":"Yalnız"}]'), '22023');
+select pg_temp.hata_bekle(format('select public.oylama_olustur(%L, %L, %L, now() - interval ''1 hour'')', current_setting('test.s_trip'), 'Geçmiş?', '[{"metin":"A"},{"metin":"B"}]'), '22023');
+select public.oylama_olustur(:'s_trip', 'Çibörek mi, balık mı?', '[{"metin":"Çibörek · Hacı Baba","place_id":"ChIJ-cibörek"},{"metin":"Balık"}]'::jsonb, now() + interval '1 day', 'Cumartesi akşamı için:') as s_mesaj \gset
+reset role;
+select oylama_id as s_oylama from public.mesajlar where id = :'s_mesaj' \gset
+select id as s_cibörek from public.oylama_secenekleri where oylama_id = :'s_oylama' and sira = 1 \gset
+select id as s_balik from public.oylama_secenekleri where oylama_id = :'s_oylama' and sira = 2 \gset
+select set_config('test.s_oylama', :'s_oylama', false), set_config('test.s_balik', :'s_balik', false);
+set role authenticated;
+select pg_temp.as_user(:SS);
+do $$ begin assert (select count(*) from public.oylama_secenekleri where oylama_id = current_setting('test.s_oylama')::uuid) = 2, 'iki seçenek'; end $$;
+
+-- Oy tekil: ikinci oy aynı satırı günceller (oy değişir), çift satır olmaz; başkası adına oy yok.
+insert into public.oylama_oylari (oylama_id, trip_id, secenek_id) values (:'s_oylama', :'s_trip', :'s_cibörek');
+select pg_temp.hata_bekle(format('insert into public.oylama_oylari (oylama_id, trip_id, secenek_id) values (%L, %L, %L)',
+  current_setting('test.s_oylama'), current_setting('test.s_trip'), current_setting('test.s_balik')), '23505');
+-- Uygulamadaki gibi PostgREST upsert'i (tüm sütunlar SET'te).
+insert into public.oylama_oylari (oylama_id, trip_id, secenek_id, user_id) values (:'s_oylama', :'s_trip', :'s_balik', :SS)
+  on conflict (oylama_id, user_id) do update set oylama_id = excluded.oylama_id, trip_id = excluded.trip_id, secenek_id = excluded.secenek_id, user_id = excluded.user_id;
+do $$
+begin
+  assert (select count(*) from public.oylama_oylari where oylama_id = current_setting('test.s_oylama')::uuid) = 1, 'kişi başına tek oy';
+  assert (select secenek_id from public.oylama_oylari where oylama_id = current_setting('test.s_oylama')::uuid) = current_setting('test.s_balik')::uuid, 'oy değişti';
+end $$;
+select pg_temp.hata_bekle(format('insert into public.oylama_oylari (oylama_id, trip_id, secenek_id, user_id) values (%L, %L, %L, %L)',
+  current_setting('test.s_oylama'), current_setting('test.s_trip'), current_setting('test.s_balik'), 'aaaaaaaa-1840-0000-0000-000000000002'), '42501');
+select pg_temp.hata_bekle(format('delete from public.oylama_oylari where oylama_id = %L', current_setting('test.s_oylama')), '42501');
+-- Başka oylamanın seçeneği reddedilir.
+select public.oylama_olustur(:'s_trip', 'Kapanmış', '[{"metin":"A"},{"metin":"B"}]'::jsonb, now() + interval '1 hour') as s_mesaj2 \gset
+reset role;
+select oylama_id as s_oylama2 from public.mesajlar where id = :'s_mesaj2' \gset
+select set_config('test.s_oylama2', :'s_oylama2', false);
+set role authenticated;
+select pg_temp.as_user(:SU);
+select pg_temp.hata_bekle(format('insert into public.oylama_oylari (oylama_id, trip_id, secenek_id) values (%L, %L, %L)',
+  current_setting('test.s_oylama2'), current_setting('test.s_trip'), current_setting('test.s_balik')), '23503');
+-- Kapanışı geçmişe çek (oylama düzenlenemez; test için yönetici): kapanmış oylamaya oy yok.
+reset role;
+update public.oylamalar set kapanis_at = now() - interval '1 minute' where id = :'s_oylama2';
+set role authenticated;
+select pg_temp.as_user(:SU);
+select pg_temp.hata_bekle(format('insert into public.oylama_oylari (oylama_id, trip_id, secenek_id) values (%L, %L, (select id from public.oylama_secenekleri where oylama_id = %L limit 1))',
+  current_setting('test.s_oylama2'), current_setting('test.s_trip'), current_setting('test.s_oylama2')), '22023');
+select pg_temp.hata_bekle(format('update public.oylamalar set soru = %L', 'değişti'), '42501');
+-- Dışarıdan biri oy veremez, oyları göremez.
+select pg_temp.as_user(:SN);
+select pg_temp.hata_bekle(format('insert into public.oylama_oylari (oylama_id, trip_id, secenek_id) values (%L, %L, %L)',
+  current_setting('test.s_oylama'), current_setting('test.s_trip'), current_setting('test.s_balik')), '22023');
+do $$ begin assert (select count(*) from public.oylama_oylari where trip_id = current_setting('test.s_trip')::uuid) = 0, 'üye olmayan oyları göremez'; end $$;
+
+-- Fotoğraf kovası: üye yükler; dışarıdan biri göremez, yükleyemez.
+select pg_temp.as_user(:SU);
+select format('insert into storage.objects (bucket_id, name) values (%L, %L)', 'sohbet', current_setting('test.s_trip') || '/foto1.jpg') as sohbet_foto \gset
+:sohbet_foto;
+select pg_temp.as_user(:SN);
+do $$ begin assert (select count(*) from storage.objects where bucket_id = 'sohbet') = 0, 'dışarıdan biri sohbet fotoğrafını göremez'; end $$;
+select pg_temp.hata_bekle(format('insert into storage.objects (bucket_id, name) values (%L, %L)', 'sohbet', current_setting('test.s_trip') || '/foto2.jpg'), '42501');
+reset role;
+
 \echo 'rls_test: TÜM TESTLER GEÇTİ'

@@ -1,5 +1,5 @@
 // #181 KK12 (kanvas 23b): gezi modunda grup kartı — konum paylaşan üyelerin son "vardı" durumu (stops.arrived_*, mevcut veri);
-// son 12 saatte varışı olmayan üye için "konumunu paylaşmıyor". "Seyahattekiler ›" pencereyi açar.
+// son 12 saatte varışı olmayan üye için "konumunu paylaşmıyor" + #184 "Mesaj at" (Sohbet). "Seyahattekiler ›" pencereyi açar.
 import { StyleSheet, Text, View } from 'react-native';
 
 import { Avatar } from '@/components/ui/Avatar';
@@ -9,7 +9,7 @@ import { zamanMetni } from '@/features/program/degisiklikMetni';
 import { t } from '@/i18n';
 import { renk, yazi, yuzRenkleri } from '@/theme';
 
-import { BolumBasligi, Kart } from './GeziParcalari';
+import { BolumBasligi, BuzDugme, Kart } from './GeziParcalari';
 
 type Props = {
   durumlar: GrupDurumu[];
@@ -18,9 +18,10 @@ type Props = {
   mekanAdi: (mekanId: string) => string;
   an: Date;
   onSeyahattekiler: () => void;
+  onMesajAt?: () => void;
 };
 
-export function GrupKarti({ durumlar, sira, mekanAdi, an, onSeyahattekiler }: Props) {
+export function GrupKarti({ durumlar, sira, mekanAdi, an, onSeyahattekiler, onMesajAt }: Props) {
   if (durumlar.length === 0) return null;
   return (
     <View style={{ gap: 10 }}>
@@ -40,6 +41,7 @@ export function GrupKarti({ durumlar, sira, mekanAdi, an, onSeyahattekiler }: Pr
               </Text>
               {varis ? <Text style={s.zaman}>{zamanMetni(varis.at, an.getTime())}</Text> : null}
             </View>
+            {!varis && onMesajAt ? <BuzDugme kucuk metin={t('geziSayfasi.mesajAt')} onPress={onMesajAt} /> : null}
           </View>
         ))}
       </Kart>
