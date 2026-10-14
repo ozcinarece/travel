@@ -52,7 +52,9 @@ for each row execute function public.gezi_rota_onbellek_bosalt();
 -- KK5: "Seyahatime al" — gezinin önbellekteki (≤ 30 gün) bacakları seyahatin walk_cache'ine, fetched_at korunarak. Duraklar
 -- seyahatte Google kimliğiyle anılır; eşleşmeyi istemci verir (gezi durağının place_id'si boş olabilir, istemci adıyla çözer):
 -- p_eslesme = [{"durak_id": …, "place_id": …}]. Çağıran seyahatin üyesi olmalı; gezi yayında olmalı (ya da çağıran admin).
--- walk_cache'te daha taze satır varsa ezilmez. Kopyalanan bacak sayısını döner.
+-- Eşleşme istemciden geldiği için yalnız seyahatin listesindeki (places) place_id'ler kabul edilir: üye başka bir yerin kimliğiyle
+-- walk_cache'e yanlış bacak yazamaz (kopya iki akışta da mekanlar eklendikten sonra çağrılır). walk_cache'te daha taze satır
+-- varsa ezilmez. Kopyalanan bacak sayısını döner.
 create or replace function public.gezi_rotasini_seyahate_kopyala(p_trip uuid, p_eslesme jsonb)
 returns integer
 language plpgsql security definer set search_path = ''
@@ -67,6 +69,7 @@ begin
     select (x ->> 'durak_id')::uuid as durak_id, x ->> 'place_id' as place_id
     from jsonb_array_elements(case when jsonb_typeof(p_eslesme) = 'array' then p_eslesme else '[]'::jsonb end) x
     where x ->> 'durak_id' ~ '^[0-9a-f-]{36}$' and x ->> 'place_id' ~ '^[A-Za-z0-9_-]{10,255}$'
+      and exists (select 1 from public.places p where p.trip_id = p_trip and p.place_id = x ->> 'place_id')
   ),
   kaynak as (
     select distinct on (a.place_id, b.place_id)

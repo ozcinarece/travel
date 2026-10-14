@@ -2221,10 +2221,22 @@ do $$ begin assert (select count(*) from public.gezi_rota_onbellek where gezi_gu
 select pg_temp.rota_doldur();
 
 -- KK5: Seyahatime al — üye kopyalar; 30 günü geçen bacak ve taslak gezinin bacağı kopyalanmaz; fetched_at korunur; walk_cache'teki
--- daha taze satır ezilmez; üye olmayan kopyalayamaz.
+-- daha taze satır ezilmez; seyahatin listesinde olmayan place_id kabul edilmez; üye olmayan kopyalayamaz.
 set role authenticated;
 select pg_temp.as_user(:RU);
 insert into public.trips (id, owner_id, city_place_id, city_label, lat, lng, tz) values ('19201920-0000-4000-8000-0000000000f1', :RU, 'ChIJ-rotali-192', 'Rotalı', 39.77, 30.52, 'Europe/Istanbul');
+-- Listede A, C, T1, T2 var; B yok (önce).
+insert into public.places (trip_id, place_id, lat, lng, added_by)
+select '19201920-0000-4000-8000-0000000000f1', p, 39.77, 30.52, :RU from unnest(array['ChIJ-durak-Axxx', 'ChIJ-durak-Cxxx', 'ChIJ-durak-T1xx', 'ChIJ-durak-T2xx']) p;
+do $$
+begin
+  -- A>B'nin B'si seyahatin listesinde değil → kopyalanmaz (üye yabancı bir kimlikle walk_cache'e bacak yazamaz).
+  assert public.gezi_rotasini_seyahate_kopyala('19201920-0000-4000-8000-0000000000f1',
+    '[{"durak_id":"19201920-0000-4000-8000-0000000000a1","place_id":"ChIJ-durak-Axxx"},{"durak_id":"19201920-0000-4000-8000-0000000000a2","place_id":"ChIJ-durak-Bxxx"}]') = 0,
+    'listede olmayan place_id kopyalanmaz';
+  assert not exists (select 1 from public.walk_cache where trip_id = '19201920-0000-4000-8000-0000000000f1' and to_key = 'ChIJ-durak-Bxxx'), 'yabancı bacak yazılmadı';
+end $$;
+insert into public.places (trip_id, place_id, lat, lng, added_by) values ('19201920-0000-4000-8000-0000000000f1', 'ChIJ-durak-Bxxx', 39.77, 30.52, :RU);
 reset role;
 insert into public.walk_cache (trip_id, from_key, to_key, seconds, meters, polyline, mode, fetched_at) values
   ('19201920-0000-4000-8000-0000000000f1', 'ChIJ-durak-T1xx', 'ChIJ-durak-T2xx', 999, 999, 'taze', 'WALK', now() + interval '1 hour');
