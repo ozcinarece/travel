@@ -33,6 +33,8 @@ export default function SeyahatLayout() {
         {/* #181 KK2: Listem ve Rehber sekme değil; Gezi sayfasından açılır. */}
         <Stack.Screen name="listem" />
         <Stack.Screen name="rehber" />
+        {/* #183 KK6: Harcamalar › Bakiyeler. */}
+        <Stack.Screen name="bakiyeler" />
       </Stack>
     </SeyahatIdSaglayici>
   );

@@ -70,7 +70,12 @@ export type IkonAdi =
   | 'begen'
   | 'cop'
   // #164 (kanvas 14): "Burada kalış" satırındaki kronometre.
-  | 'saat';
+  | 'saat'
+  // #183 (kanvas 25 · 25b · 25c): harcama kategorileri (ulaşım tramvayı, bilet), Bakiyeler kişileri, kapat (×).
+  | 'tramvay'
+  | 'bilet'
+  | 'kisiler'
+  | 'kapat';
 
 type Props = {
   ad: IkonAdi;
@@ -91,7 +96,21 @@ export function Ikon({ ad, boyut = 24, renk, kalinlik = 2, dolgu }: Props) {
   const ortak = { stroke: renk, strokeWidth: kalinlik, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const, fill: dolguSaydam ? renk : 'none', fillOpacity: dolguSaydam || 1 };
   return (
     <Svg width={boyut} height={boyut} viewBox="0 0 24 24">
-      {ad === 'saat' ? (
+      {ad === 'tramvay' ? (
+        <Path d="M5 16V12l2-5h10l2 5v4M3.5 16h17v3h-17z" {...ortak} />
+      ) : ad === 'bilet' ? (
+        <>
+          <Path d="M4 8a2 2 0 0 0 2-2V5h12v1a2 2 0 0 0 2 2v8a2 2 0 0 0-2 2v1H6v-1a2 2 0 0 0-2-2z" {...ortak} />
+          <Path d="M12 7v2M12 11v2M12 15v2" {...ortak} />
+        </>
+      ) : ad === 'kisiler' ? (
+        <>
+          <Circle cx={9} cy={8} r={3.5} {...ortak} />
+          <Path d="M2.5 20a6.5 6.5 0 0 1 13 0M16 4.5a3.5 3.5 0 0 1 0 7M21.5 20a6.5 6.5 0 0 0-4.5-6.2" {...ortak} />
+        </>
+      ) : ad === 'kapat' ? (
+        <Path d="M6 6l12 12M18 6L6 18" {...ortak} />
+      ) : ad === 'saat' ? (
         <>
           <Circle cx={12} cy={13} r={8} {...ortak} />
           <Path d="M12 9v4l2.5 2M9 2h6" {...ortak} />

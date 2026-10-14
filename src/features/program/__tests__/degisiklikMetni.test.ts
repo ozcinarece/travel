@@ -2,7 +2,7 @@ import { describe, expect, it } from '@jest/globals';
 
 import type { Degisiklik } from '@/lib/tipler';
 
-import { degisiklikGruplari, geriAlinabilir, grupMetni } from '../degisiklikMetni';
+import { degisiklikGruplari, geriAlinabilir, geriAlmaYetkisi, grupMetni } from '../degisiklikMetni';
 
 const d = (id: number, ek: Partial<Degisiklik>): Degisiklik => ({ id, user_id: 'u1', entity: 'stops', entity_id: 's1', field: null, old: null, new: null, at: '2026-10-13T10:00:00Z', ...ek });
 
@@ -33,5 +33,23 @@ describe('Son değişiklikler (#141 KK6)', () => {
     expect(geriAlinabilir(g[2])).toBe(false);
     expect(geriAlinabilir(degisiklikGruplari([d(1, { entity: 'members', entity_id: 'u3', new: {} })])[0])).toBe(false);
     expect(geriAlinabilir(degisiklikGruplari([d(1, { entity: 'days', entity_id: 'g1', field: 'start_time', old: '09:00', new: '10:00' })])[0])).toBe(true);
+  });
+
+  it('#183 harcama ve ödeşme: cümle, geri alma düğmesi yalnız yetkiliye (ekleyen / sahip; ödeşmede iki taraf)', () => {
+    const ekleme = degisiklikGruplari([d(1, { entity: 'harcamalar', entity_id: 'h1', user_id: 'ayse', new: { aciklama: 'Tramvay', tl_kurus: 9000, olusturan: 'ayse' } })])[0];
+    expect(grupMetni(ekleme, k)).toBe('"Tramvay" harcamasını ekledi · 90 ₺');
+    expect(geriAlinabilir(ekleme)).toBe(true);
+    expect(geriAlmaYetkisi(ekleme, 'ayse', false)).toBe(true);
+    expect(geriAlmaYetkisi(ekleme, 'mert', false)).toBe(false);
+    expect(geriAlmaYetkisi(ekleme, 'mert', true)).toBe(true);
+    const odesme = degisiklikGruplari([d(2, { entity: 'odesmeler', entity_id: 'o1', user_id: 'ayse', new: { kimden: 'ayse', kime: 'ben', tl_kurus: 21333 } })])[0];
+    expect(grupMetni(odesme, k)).toBe('bir ödeşmeyi işaretledi · 213,33 ₺');
+    expect(geriAlmaYetkisi(odesme, 'ben', false)).toBe(true);
+    expect(geriAlmaYetkisi(odesme, 'mert', true)).toBe(false);
+    // Düzenleme (alan satırı) — değişikliği yapan ya da sahip.
+    const duzenleme = degisiklikGruplari([d(3, { entity: 'harcamalar', entity_id: 'h1', user_id: 'ayse', field: 'tl_kurus', old: 9000, new: 12000 })])[0];
+    expect(grupMetni(duzenleme, k)).toBe('bir harcamayı değiştirdi');
+    expect(geriAlmaYetkisi(duzenleme, 'ayse', false)).toBe(true);
+    expect(geriAlmaYetkisi(duzenleme, 'mert', false)).toBe(false);
   });
 });

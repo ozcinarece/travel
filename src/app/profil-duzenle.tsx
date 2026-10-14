@@ -8,6 +8,8 @@ import { Avatar } from '@/components/ui/Avatar';
 import { Buton } from '@/components/ui/Buton';
 import { Cip } from '@/components/ui/Cip';
 import { MetinAlani } from '@/components/ui/MetinAlani';
+import { ibanBicimle, ibanGecerli, ibanTemizle } from '@/features/harcama/hesap';
+import { useIbanKaydet, useIbanlar } from '@/features/harcama/sorgular';
 import { kullaniciAdiDurumu } from '@/features/profil/kullaniciAdiDurumu';
 import { fotografSecVeYukle, useKullaniciAdiMusait, useProfil, useProfilGuncelle } from '@/features/profil/sorgular';
 import { t } from '@/i18n';
@@ -18,7 +20,10 @@ import { bosluk, renk, yazi } from '@/theme';
 
 const GIZLILIKLER: HaritaGizliligi[] = ['friends', 'everyone', 'me'];
 
-/** #138 KK2–3: Profil › Düzenle — foto, ad, kullanıcı adı (300 ms müsaitlik), harita gizliliği. Otomatik profil buradan değişir. */
+/**
+ * #138 KK2–3: Profil › Düzenle — foto, ad, kullanıcı adı (300 ms müsaitlik), harita gizliliği. Otomatik profil buradan değişir.
+ * #183 KK7: IBAN (ayrı tablo; yalnız seyahat arkadaşları görür). Boş bırakılırsa silinir.
+ */
 export default function ProfilDuzenle() {
   const { session } = useOturum();
   const profil = useProfil();
@@ -30,12 +35,21 @@ export default function ProfilDuzenle() {
   const [foto, setFoto] = useState<string | null>(p?.photo_url ?? null);
   const [fotoMesgul, setFotoMesgul] = useState(false);
   const [hata, setHata] = useState<string | null>(null);
+  const ibanlar = useIbanlar(session ? [session.user.id] : []);
+  const ibanKaydet = useIbanKaydet();
+  const kayitliIban = session ? (ibanlar.data?.get(session.user.id) ?? '') : '';
+  // Kullanıcı yazana kadar kayıtlı değer görünür (sorgu sonradan gelebilir).
+  const [ibanYazi, setIbanYazi] = useState<string | null>(null);
+  const iban = ibanTemizle(ibanYazi ?? kayitliIban);
+  const ibanDegisti = ibanYazi !== null && iban !== kayitliIban;
+  const ibanTamam = iban === '' || ibanGecerli(iban);
 
   const kontrol = useKullaniciAdiMusait(kullaniciAdi);
   const durum = kullaniciAdiDurumu({ kullaniciAdi, mevcut: p?.username, ...kontrol });
   const adGecerli = ad.trim().length > 0 && ad.trim().length <= 60;
   const kullaniciAdiTamam = durum.tur === 'ayni' || durum.tur === 'musait';
-  const degisti = !!p && (ad.trim() !== p.name || kullaniciAdi !== p.username || gizlilik !== p.map_visibility || foto !== p.photo_url);
+  const profilDegisti = !!p && (ad.trim() !== p.name || kullaniciAdi !== p.username || gizlilik !== p.map_visibility || foto !== p.photo_url);
+  const degisti = profilDegisti || ibanDegisti;
 
   const fotoSec = async () => {
     if (!session) return;
@@ -49,8 +63,20 @@ export default function ProfilDuzenle() {
       setFotoMesgul(false);
     }
   };
-  const kaydet = () => {
+  const kaydet = async () => {
     setHata(null);
+    if (ibanDegisti) {
+      try {
+        await ibanKaydet.mutateAsync(iban || null);
+      } catch {
+        setHata(t('profil.hata'));
+        return;
+      }
+    }
+    if (!profilDegisti) {
+      router.back();
+      return;
+    }
     guncelle.mutate(
       { name: ad.trim(), username: kullaniciAdi, map_visibility: gizlilik, photo_url: foto },
       {
@@ -100,10 +126,21 @@ export default function ProfilDuzenle() {
               </View>
               <Text style={s.not}>{t('profil.gizlilikNot')}</Text>
             </View>
+            <MetinAlani
+              etiket={t('profil.iban')}
+              value={ibanYazi ?? ibanBicimle(kayitliIban)}
+              onChangeText={setIbanYazi}
+              placeholder="TR00 0000 0000 0000 0000 0000 00"
+              autoCapitalize="characters"
+              autoCorrect={false}
+              maxLength={42}
+              altMetin={ibanTamam ? t('profil.ibanNot') : t('profil.ibanGecersiz')}
+              altRenk={ibanTamam ? undefined : renk.uyari}
+            />
           </View>
           <View style={s.altKisim}>
             {hata ? <Text style={s.hata}>{hata}</Text> : null}
-            <Buton baslik={t('profil.kaydet')} onPress={kaydet} pasif={!degisti || !adGecerli || !kullaniciAdiTamam} yukleniyor={guncelle.isPending} boy="buyuk" />
+            <Buton baslik={t('profil.kaydet')} onPress={() => void kaydet()} pasif={!degisti || !adGecerli || !kullaniciAdiTamam || !ibanTamam} yukleniyor={guncelle.isPending || ibanKaydet.isPending} boy="buyuk" />
           </View>
         </ScrollView>
       </KeyboardAvoidingView>

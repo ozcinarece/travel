@@ -50,7 +50,7 @@ export function useDegisikligiGeriAl(seyahatId: string) {
     },
     onSettled: () =>
       Promise.all(
-        ['mekanlar', 'duraklar', 'gunler', 'degisiklikler', 'oylar'].map((k) => qc.invalidateQueries({ queryKey: [k, seyahatId] })),
+        ['mekanlar', 'duraklar', 'gunler', 'degisiklikler', 'oylar', 'harcamalar', 'odesmeler'].map((k) => qc.invalidateQueries({ queryKey: [k, seyahatId] })),
       ),
   });
 }

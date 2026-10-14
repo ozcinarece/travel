@@ -17,6 +17,7 @@ import { GunOteliSayfasi } from '@/components/program/GunOteliSayfasi';
 import { OtelSayfasi, OtelSeridi } from '@/components/program/OtelSayfasi';
 import { OtelUcSatiri } from '@/components/program/OtelUcSatiri';
 import { PlanHazirSayfasi, type PlanGunOzeti } from '@/components/program/PlanHazirSayfasi';
+import { HarcamaFormu } from '@/components/harcama/HarcamaFormu';
 import { GuneEkleSayfasi } from '@/components/listem/GuneEkleSayfasi';
 import { MekanPaneli } from '@/components/mekan/MekanPaneli';
 import { HaritaSeridi } from '@/components/plan/HaritaSeridi';
@@ -264,6 +265,8 @@ function ProgramSekmesi({
   const [ustYukseklik, setUstYukseklik] = useState(0);
   // #55 §C10: planlama aşamasında uzun basılan durak / mekan (Başka güne al · Günden çıkar · Listeden sil).
   const [uzunBasilan, setUzunBasilan] = useState<Mekan | null>(null);
+  // #183 KK4: durak menüsünden "Harcama ekle" — form o durağa bağlı açılır.
+  const [harcamaDuragi, setHarcamaDuragi] = useState<string | null>(null);
   // #140 KK2: sürükleme arka planda kaydedilince başlıkta "Kaydedildi ✓" (birkaç saniye).
   const [kaydedildi, setKaydedildi] = useState(0);
   useEffect(() => {
@@ -555,6 +558,7 @@ function ProgramSekmesi({
         ...(menuDurak.completed_at ? [{ etiket: t('program.tamamlamayiGeriAl'), onPress: () => tamamla(menuDurak, true) }] : []),
         ...guneAlSecenekleri(menuDurak),
         { etiket: menuDurak.skipped ? t('program.menuAtlama') : t('program.menuAtla'), onPress: () => atla(menuDurak) },
+        { etiket: t('harcama.duraktanEkle'), onPress: () => setHarcamaDuragi(menuDurak.id) },
         { etiket: t('program.menuCikar'), onPress: () => gundenCikar(menuDurak), tehlike: true },
       ]
     : [];
@@ -587,6 +591,7 @@ function ProgramSekmesi({
         ...(uzunDurak
           ? [
               ...guneAlSecenekleri(uzunDurak),
+              { etiket: t('harcama.duraktanEkle'), onPress: () => setHarcamaDuragi(uzunDurak.id) },
               { etiket: t('program.menuCikar'), onPress: () => gundenCikar(uzunDurak) },
             ]
           : []),
@@ -1382,6 +1387,7 @@ function ProgramSekmesi({
         />
       ) : null}
       <GrupPenceresi acik={grupAcik} onKapat={() => setGrupAcik(false)} seyahat={seyahat} uyeler={uyeler.data ?? []} mekanlar={mekanlar} />
+      <HarcamaFormu acik={!!harcamaDuragi} onKapat={() => setHarcamaDuragi(null)} seyahat={seyahat} uyeler={uyeler.data ?? []} durakId={harcamaDuragi} />
       <PlanHazirSayfasi
         acik={planHazirAcik && planOzeti.ozetler.length > 0}
         ozetler={planOzeti.ozetler}

@@ -13,7 +13,7 @@ import { useDavetPaylas } from '@/features/davet/paylas';
 import { useSeyahattenAyril } from '@/features/davet/sorgular';
 import { useDuraklar, useGunler } from '@/features/gunler/sorgular';
 import { useDegisikligiGeriAl } from '@/features/listem/sorgular';
-import { degisiklikGruplari, geriAlinabilir, grupMetni, zamanMetni } from '@/features/program/degisiklikMetni';
+import { degisiklikGruplari, geriAlinabilir, geriAlmaYetkisi, grupMetni, zamanMetni } from '@/features/program/degisiklikMetni';
 import { useDegisiklikler } from '@/features/program/sorgular';
 import { useSimdi } from '@/features/program/useProgram';
 import { silmeMetni } from '@/features/seyahatler/silme';
@@ -51,6 +51,7 @@ export function GrupPenceresi({ acik, onKapat, seyahat, uyeler, mekanlar }: Prop
   });
 
   const benim = (uid: string | null) => !!session && uid === session.user.id;
+  const sahipMi = uyeler.some((u) => u.user_id === session?.user.id && u.role === 'owner');
   const uyeAdi = (uid: string | null) => uyeler.find((u) => u.user_id === uid)?.display_name ?? '?';
   const mekanAdi = (placesId: string | null | undefined) => {
     const m = mekanlar.find((x) => x.id === placesId);
@@ -168,7 +169,7 @@ export function GrupPenceresi({ acik, onKapat, seyahat, uyeler, mekanlar }: Prop
         {degisiklikler.isPending ? <ActivityIndicator color={renk.ikincil} /> : null}
         {degisiklikler.data?.length === 0 ? <Text style={s.not}>{t('davet.grup.degisiklikYok')}</Text> : null}
         {gruplar.map((g) => {
-          const geriAlinir = sonMu(g.entity, g.entity_id) && geriAlinabilir(g);
+          const geriAlinir = sonMu(g.entity, g.entity_id) && geriAlinabilir(g) && geriAlmaYetkisi(g, session?.user.id ?? null, sahipMi);
           return (
             <View key={g.id} style={s.degisiklik}>
               <Avatar ad={uyeAdi(g.kim)} url={uyeler.find((u) => u.user_id === g.kim)?.photo_url} boyut={28} arkaPlan={renk.anaAcik} />

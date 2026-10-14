@@ -219,6 +219,8 @@ export function useDegisiklikler(seyahatId: string | undefined, etkin = true) {
         .from('changes')
         .select('id, user_id, entity, entity_id, field, old, new, at')
         .eq('trip_id', seyahatId!)
+        // #183: harcama payları harcamanın satırıyla birlikte anlatılır ve geri alınır; listeyi doldurmasın.
+        .neq('entity', 'harcama_paylari')
         .order('at', { ascending: false })
         .limit(10);
       if (error) throw error;
