@@ -1,5 +1,5 @@
 // #97 B KK2 → #143 (kanvas 17): seçili gezi gününün mini haritası (170 px, köşe 22; sağ üstte büyüt; dokununca tam ekran,
-// yalnız bakma) — numaralı duraklar + kuş uçuşu.
+// yalnız bakma) — numaralı duraklar. #192: bacaklar gerçek yolla (gezi_rota_onbellek); yol gelene kadar / gelmezse kuş uçuşu.
 import { useMemo, useState } from 'react';
 import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -7,19 +7,18 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Harita } from '@/components/harita/Harita';
 import type { HaritaCizgisi, HaritaPini, HaritaSigdirma } from '@/components/harita/tipler';
 import { Ikon } from '@/components/ui/Ikon';
+import { geziGunCizgileri } from '@/features/icerik/gezi';
+import type { GeziRotalari } from '@/features/icerik/geziRota';
 import { t } from '@/i18n';
 import type { GeziDuragi } from '@/lib/tipler';
 import { gunRengi, renk, yazi } from '@/theme';
 
-export function MiniHarita({ duraklar, gunIndex, baslik }: { duraklar: GeziDuragi[]; gunIndex: number; baslik: string }) {
+export function MiniHarita({ duraklar, gunIndex, baslik, rotalar }: { duraklar: GeziDuragi[]; gunIndex: number; baslik: string; rotalar?: GeziRotalari }) {
   const [acik, setAcik] = useState(false);
   const kenar = useSafeAreaInsets();
   const rengi = gunRengi(gunIndex);
   const pinler = useMemo<HaritaPini[]>(() => duraklar.map((d, i) => ({ id: `gd:${d.id}`, tur: 'durak', konum: { lat: d.lat, lng: d.lng }, renk: rengi, etiket: String(i + 1), ad: d.ad })), [duraklar, rengi]);
-  const cizgiler = useMemo<HaritaCizgisi[]>(
-    () => duraklar.slice(1).map((d, i) => ({ id: `gc:${duraklar[i].id}>${d.id}`, noktalar: [{ lat: duraklar[i].lat, lng: duraklar[i].lng }, { lat: d.lat, lng: d.lng }], renk: rengi, opaklik: 0.9, kesik: true, ince: true })),
-    [duraklar, rengi],
-  );
+  const cizgiler = useMemo<HaritaCizgisi[]>(() => geziGunCizgileri(duraklar, gunIndex, rotalar), [duraklar, gunIndex, rotalar]);
   const noktalar = duraklar.map((d) => ({ lat: d.lat, lng: d.lng }));
   const merkez = noktalar[0] ?? { lat: 39.78, lng: 30.52 };
   const sigdir = (ust: number, alt: number): HaritaSigdirma => ({ noktalar, ust, alt });

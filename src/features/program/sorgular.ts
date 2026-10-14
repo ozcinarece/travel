@@ -84,8 +84,36 @@ export function useRotaBacaklari(seyahatId: string | undefined, bacaklar: { from
       return { harita, eksik: !!data?.eksik };
     },
   });
-  return { rotalar: sorgu.data?.harita ?? BOS_ROTA, yukleniyor: ag && sorgu.isPending && temiz.length >= 1, hata: sorgu.isError };
+  // #192 KK5: `ag` kapalıyken (Plan listesi, Gezi sayfası) Google'a gidilmez ama walk_cache doğrudan okunur (üye okur; ≤ 30 gün):
+  // önerilen geziden kopyalanan ya da daha önce hesaplanan bacakların gerçek süresi listede de görünür.
+  const onbellek = useQuery({
+    queryKey: ['rota-onbellek', seyahatId, anahtar],
+    enabled: !ag && !sorgu.data && !!session && !!seyahatId && temiz.length >= 1,
+    staleTime: 10 * 60 * 1000,
+    gcTime: 24 * 60 * 60 * 1000,
+    retry: 1,
+    queryFn: async () => {
+      const anahtarlar = [...new Set(temiz.flatMap((b) => [b.from.key, b.to.key]))];
+      const sinir = new Date(Date.now() - ROTA_ONBELLEK_MS).toISOString();
+      const { data, error } = await supabase
+        .from('walk_cache')
+        .select('from_key, to_key, seconds, meters, mode, polyline, drive_seconds, drive_meters, drive_polyline')
+        .eq('trip_id', seyahatId!)
+        .in('from_key', anahtarlar)
+        .in('to_key', anahtarlar)
+        .gte('fetched_at', sinir)
+        .not('polyline', 'is', null);
+      if (error) throw error;
+      const istenen = new Set(temiz.map((b) => `${b.from.key}>${b.to.key}`));
+      const harita: RotaHaritasi = {};
+      for (const b of (data ?? []) as RotaBacagi[]) if (istenen.has(`${b.from_key}>${b.to_key}`)) harita[`${b.from_key}>${b.to_key}`] = b;
+      return harita;
+    },
+  });
+  return { rotalar: sorgu.data?.harita ?? onbellek.data ?? BOS_ROTA, yukleniyor: ag && sorgu.isPending && temiz.length >= 1, hata: sorgu.isError };
 }
+/** walk_cache satırı en çok 30 gün geçerli (Google Routes koşulu; sunucu da aynı sınırla okur). */
+const ROTA_ONBELLEK_MS = 30 * 24 * 60 * 60 * 1000;
 const BOS_ROTA: RotaHaritasi = {};
 
 /**

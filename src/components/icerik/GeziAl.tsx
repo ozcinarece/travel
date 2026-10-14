@@ -38,7 +38,7 @@ export function GeziAl({ gezi, kimlik, ilkHedefId, onKapat, gecis = 'replace' }:
   const al = async (seyahatId: string, plan: AktarmaPlani, secenek: 'tum' | 'gunler' | 'mekan') => {
     setHata(null);
     try {
-      const sonuc = await aktar.mutateAsync({ seyahatId, geziId: gezi.id, sehirAdi: gezi.sehirler?.ad ?? '', plan, secenek });
+      const sonuc = await aktar.mutateAsync({ seyahatId, geziId: gezi.id, sehirAdi: gezi.sehirler?.ad ?? '', plan, secenek, gunler: gezi.gezi_gunleri });
       // #118 KK4: sessiz başarısızlık yok — hiçbir şey eklenmediyse sayfa açık kalır ve sebep söylenir.
       if (sonuc.eklenenMekan === 0 && sonuc.eklenenDurak === 0) {
         const ilkHata = sonuc.cozumsuzler[0];

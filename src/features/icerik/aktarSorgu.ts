@@ -4,10 +4,11 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import { useOturum } from '@/lib/oturum';
 import { supabase } from '@/lib/supabase';
-import type { GeziDuragi, Mekan } from '@/lib/tipler';
+import type { GeziDuragi, GeziGunu, Mekan } from '@/lib/tipler';
 import { sonAnahtar } from '@/schedule/sira';
 
 import type { AktarmaPlani } from './aktar';
+import { GEZI_ROTA_TAZE_MS, geziRotaAnahtari, gunRotasiniGetir } from './geziRota';
 import { cozumSebebi, icerikPlaceId, olayYaz } from './sorgular';
 
 export type AktarmaSonucu = {
@@ -23,6 +24,8 @@ export type AktarmaSonucu = {
   baskaGunde: number;
   ilkGunId: string | null;
   ilkGunIndex: number | null;
+  /** #192 KK5: seyahatin walk_cache'ine kopyalanan gerçek yol bacağı sayısı. */
+  rotaBacagi: number;
 };
 
 const sure = (d: GeziDuragi) => Math.min(480, Math.max(15, Math.round(d.sure_dk)));
@@ -31,7 +34,22 @@ export function useGeziAktar() {
   const { session } = useOturum();
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async ({ seyahatId, geziId, sehirAdi, plan, secenek }: { seyahatId: string; geziId: string; sehirAdi: string; plan: AktarmaPlani; secenek: 'tum' | 'gunler' | 'mekan' }): Promise<AktarmaSonucu> => {
+    mutationFn: async ({
+      seyahatId,
+      geziId,
+      sehirAdi,
+      plan,
+      secenek,
+      gunler,
+    }: {
+      seyahatId: string;
+      geziId: string;
+      sehirAdi: string;
+      plan: AktarmaPlani;
+      secenek: 'tum' | 'gunler' | 'mekan';
+      /** #192: gezinin günleri — duraklar güne atanıyorsa bacakları walk_cache'e kopyalanır. */
+      gunler?: GeziGunu[];
+    }): Promise<AktarmaSonucu> => {
       if (!session) throw new Error('oturum yok');
       // 1. Google kimlikleri (backoffice doldurmadıysa adıyla).
       const kimlik = new Map<string, string | null>();
@@ -90,6 +108,20 @@ export function useGeziAktar() {
           ilkGunId ??= a.gunId;
         }
       }
+      // #192 KK5: gezinin gerçek yol bacakları seyahatin walk_cache'ine (fetched_at korunur) — Program bu bacaklar için Google'a
+      // gitmez. Bacağı önbellekte olmayan gün önce hesaplanır (gezi başına bir kez, gün tek istek). İsteğe bağlı: hata aktarmayı bozmaz.
+      let rotaBacagi = 0;
+      if (eklenenDurak > 0 && gunler?.length) {
+        try {
+          const ilgili = new Set(plan.duraklar.map((d) => d.gezi_gun_id));
+          await Promise.all(gunler.filter((g) => ilgili.has(g.id) && g.gezi_duraklari.length >= 2).map((g) => qc.fetchQuery({ queryKey: geziRotaAnahtari(g), queryFn: () => gunRotasiniGetir(g), staleTime: GEZI_ROTA_TAZE_MS })));
+          const eslesme = cozulen.map((d) => ({ durak_id: d.id, place_id: kimlik.get(d.id) }));
+          const { data } = await supabase.rpc('gezi_rotasini_seyahate_kopyala', { p_trip: seyahatId, p_eslesme: eslesme });
+          rotaBacagi = typeof data === 'number' ? data : 0;
+        } catch {
+          // rota kopyası olmadan da aktarma tamam; Program eksik bacakları kendisi ister.
+        }
+      }
       // Program ekranı günü `gun` (index) parametresiyle seçer.
       let ilkGunIndex: number | null = null;
       if (ilkGunId) {
@@ -107,11 +139,12 @@ export function useGeziAktar() {
         mekan: eklenenMekan,
         durak: eklenenDurak,
       });
-      return { eklenenMekan, eklenenDurak, cozumsuz: plan.duraklar.length - cozulen.length, cozumsuzler, zatenVar, ayniGunde, baskaGunde, ilkGunId, ilkGunIndex };
+      return { eklenenMekan, eklenenDurak, cozumsuz: plan.duraklar.length - cozulen.length, cozumsuzler, zatenVar, ayniGunde, baskaGunde, ilkGunId, ilkGunIndex, rotaBacagi };
     },
     onSettled: (_s, _e, v) => {
       qc.invalidateQueries({ queryKey: ['mekanlar', v.seyahatId] });
       qc.invalidateQueries({ queryKey: ['duraklar', v.seyahatId] });
+      qc.invalidateQueries({ queryKey: ['rota-onbellek', v.seyahatId] });
       qc.invalidateQueries({ queryKey: ['seyahatler'] });
       qc.invalidateQueries({ queryKey: ['icerik', 'gezi-alinma', v.geziId] });
     },

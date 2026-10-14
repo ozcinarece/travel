@@ -1,6 +1,7 @@
 // #97 B KK2 → #143 KK2 (kanvas 17 · Rota & plan): gün çipleri ("1. gün · 6"; seçili gün renginde dolu, diğerleri çerçeveli +
-// renk noktası), seçili günün mini haritası (büyüt), gün özeti ("~5 sa 40 dk · 3,4 km yürüyüş"), numaralı duraklar (foto 46,
-// ad, kategori · süre, EkleDugmesi) ve aralarında noktalı çizgiyle "N dk yürüyüş".
+// renk noktası), seçili günün mini haritası (büyüt), gün özeti ("5 sa 40 dk · 3,4 km yürüyüş"), numaralı duraklar (foto 46,
+// ad, kategori · süre, EkleDugmesi) ve aralarında noktalı çizgiyle "N dk yürüyüş". #192: süreler ve çizgi gerçek yoldan
+// (gezi_rota_onbellek; gün başına bir kez hesaplanır, 30 gün saklanır); yol gelene kadar kestirim ve özet "~" ile.
 import { Image } from 'expo-image';
 import { useMemo } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
@@ -8,6 +9,7 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { EkleDugmesi } from '@/components/ui/EkleDugmesi';
 import type { IcerikCanli } from '@/features/icerik/fotolar';
 import { geziGunOzeti } from '@/features/icerik/gezi';
+import { useGeziRotasi } from '@/features/icerik/geziRota';
 import { t } from '@/i18n';
 import { kategoriEtiketi, sureMetni } from '@/lib/kategori';
 import { mesafeMetni } from '@/lib/mesafe';
@@ -32,7 +34,8 @@ type Props = {
 
 export function GeziPlani({ gezi, canli, listede, mesgulId, onDurakEkle, onDurak, gunSira, onGunSira }: Props) {
   const gun = gezi.gezi_gunleri[gunSira] ?? gezi.gezi_gunleri[0];
-  const ozet = useMemo(() => geziGunOzeti(gun?.gezi_duraklari ?? []), [gun]);
+  const { rotalar } = useGeziRotasi(gun);
+  const ozet = useMemo(() => geziGunOzeti(gun?.gezi_duraklari ?? [], rotalar), [gun, rotalar]);
   if (!gun) return null;
   const rengi = gunRengi(gun.sira);
   return (
@@ -49,9 +52,9 @@ export function GeziPlani({ gezi, canli, listede, mesgulId, onDurakEkle, onDurak
           );
         })}
       </ScrollView>
-      <MiniHarita duraklar={gun.gezi_duraklari} gunIndex={gun.sira} baslik={`${t('gezi.gunKisa', { n: gun.sira })}${gun.baslik ? ` · ${gun.baslik}` : ''}`} />
+      <MiniHarita duraklar={gun.gezi_duraklari} gunIndex={gun.sira} rotalar={rotalar} baslik={`${t('gezi.gunKisa', { n: gun.sira })}${gun.baslik ? ` · ${gun.baslik}` : ''}`} />
       <View style={s.liste}>
-        {gun.gezi_duraklari.length > 1 ? <Text style={s.ozet}>{t('gezi.gunOzeti', { sure: sureMetni(ozet.toplamDk), mesafe: mesafeMetni(ozet.yuruyusM) })}</Text> : null}
+        {gun.gezi_duraklari.length > 1 ? <Text style={s.ozet}>{t(ozet.kestirim ? 'gezi.gunOzeti' : 'gezi.gunOzetiGercek', { sure: sureMetni(ozet.toplamDk), mesafe: mesafeMetni(ozet.yuruyusM) })}</Text> : null}
         {gun.gezi_duraklari.map((d, i) => {
           const c = canli?.get(d.id);
           const icinde = listede(d);
@@ -64,7 +67,7 @@ export function GeziPlani({ gezi, canli, listede, mesgulId, onDurakEkle, onDurak
                       <View key={k} style={s.nokta} />
                     ))}
                   </View>
-                  <Text style={s.bacakMetin}>{t('gezi.yuruyus', { n: ozet.bacakDk[i - 1] })}</Text>
+                  <Text style={s.bacakMetin}>{t(ozet.bacakMod[i - 1] === 'DRIVE' ? 'gezi.arac' : 'gezi.yuruyus', { n: ozet.bacakDk[i - 1] })}</Text>
                 </View>
               ) : null}
               {/* #172 KK7: satır DB'den çizilir; panel için yalnız Google kimliği gerekir. */}
