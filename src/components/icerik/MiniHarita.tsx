@@ -7,7 +7,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Harita } from '@/components/harita/Harita';
 import type { HaritaCizgisi, HaritaPini, HaritaSigdirma } from '@/components/harita/tipler';
 import { Ikon } from '@/components/ui/Ikon';
-import { geziGunCizgileri } from '@/features/icerik/gezi';
+import { geziGunCizgileri, konumGecerli } from '@/features/icerik/gezi';
 import type { GeziRotalari } from '@/features/icerik/geziRota';
 import { t } from '@/i18n';
 import type { GeziDuragi } from '@/lib/tipler';
@@ -17,12 +17,16 @@ export function MiniHarita({ duraklar, gunIndex, baslik, rotalar }: { duraklar: 
   const [acik, setAcik] = useState(false);
   const kenar = useSafeAreaInsets();
   const rengi = gunRengi(gunIndex);
-  const pinler = useMemo<HaritaPini[]>(() => duraklar.map((d, i) => ({ id: `gd:${d.id}`, tur: 'durak', konum: { lat: d.lat, lng: d.lng }, renk: rengi, etiket: String(i + 1), ad: d.ad })), [duraklar, rengi]);
+  // #199 KK2: konumu bozuk durak haritaya girmez (numarası listedeki sırasıyla kalır).
+  const pinler = useMemo<HaritaPini[]>(
+    () => duraklar.flatMap((d, i): HaritaPini[] => (konumGecerli(d) ? [{ id: `gd:${d.id}`, tur: 'durak', konum: { lat: d.lat, lng: d.lng }, renk: rengi, etiket: String(i + 1), ad: d.ad }] : [])),
+    [duraklar, rengi],
+  );
   const cizgiler = useMemo<HaritaCizgisi[]>(() => geziGunCizgileri(duraklar, gunIndex, rotalar), [duraklar, gunIndex, rotalar]);
-  const noktalar = duraklar.map((d) => ({ lat: d.lat, lng: d.lng }));
+  const noktalar = pinler.map((p) => p.konum);
   const merkez = noktalar[0] ?? { lat: 39.78, lng: 30.52 };
   const sigdir = (ust: number, alt: number): HaritaSigdirma => ({ noktalar, ust, alt });
-  if (duraklar.length === 0) return null;
+  if (noktalar.length === 0) return null;
   return (
     <>
       <Pressable accessibilityRole="button" accessibilityLabel={t('gezi.haritaBuyut')} onPress={() => setAcik(true)} style={s.kucuk}>
