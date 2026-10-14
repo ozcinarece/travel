@@ -180,7 +180,7 @@ function GeziSayfasi({ seyahat, gunler, duraklar, mekanlar, konaklamalar, katild
 
   // ---------------------------------------------------------------- gezinti
   // Her istekte yeni `n`; önceki isteğin anahtarları (otel, gün, plan hazır, çip) açıkça boşaltılır (parametre birleşmesin).
-  const BOS_ISTEK = { program: { gun: '', otel: '', planKuruldu: '', atanmamis: '' }, kesfet: { cip: '', cekmece: '' } };
+  const BOS_ISTEK = { program: { gun: '', otel: '', planKuruldu: '', atanmamis: '', harita: '' }, kesfet: { cip: '', cekmece: '' } };
   const sekme = (ad: 'program' | 'kesfet', params: Record<string, string> = {}) =>
     router.navigate({ pathname: `/seyahat/[id]/(sekmeler)/${ad}`, params: { id: seyahat.id, ...BOS_ISTEK[ad], ...params, n: String(Date.now()) } });
   const plan = (params: Record<string, string> = {}) => sekme('program', params);
@@ -290,7 +290,7 @@ function GeziSayfasi({ seyahat, gunler, duraklar, mekanlar, konaklamalar, katild
                 foto={bilinen.foto}
                 tip={(mid) => mekanIle.get(mid)?.primary_type ?? null}
                 onYolTarifi={yolTarifi}
-                onHarita={() => plan({ gun: String(bugunGun?.index ?? 1) })}
+                onHarita={() => plan({ gun: String(bugunGun?.index ?? 1), harita: '1' })}
                 onMenu={setDurakMenu}
                 onPlan={() => plan({ gun: String(bugunGun?.index ?? 1) })}
               />

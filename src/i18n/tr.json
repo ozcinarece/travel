@@ -976,6 +976,28 @@
     "tarihKisalirEvet": "Değiştir",
     "kaydedilemedi": "Kaydedilemedi. Tekrar dene."
   },
+  "plan": {
+    "baslik": "Plan",
+    "sirayiDuzenle": "Sırayı düzenle",
+    "gunEkle": "Gün ekle",
+    "haritayiAc": "Haritayı aç",
+    "seritEtiket": "{bas} – {bit} · {km} yürüme",
+    "otelCikis": "Otelden çıkış {saat}",
+    "cikis": "Çıkış {saat}",
+    "otelden": "{dk} dk · otelden",
+    "dk": "{dk} dk",
+    "dkArac": "{dk} dk · araçla",
+    "atlandi": "Atlandı",
+    "oy": "{n} oy",
+    "onerdi": "{ad} önerdi",
+    "aksam": "Akşam boş.",
+    "aksamIkisi": "{rehber} ya da listedeki {liste}?",
+    "aksamListe": "Listedeki {liste}?",
+    "aksamRehber": "Rehberden {rehber}?",
+    "oner": "Öner",
+    "gunBos": "Bu günde henüz durak yok. Keşfet'ten ya da listenden mekan ekle.",
+    "mekanEkle": "Mekan ekle"
+  },
   "listem": {
     "baslik": "Listem",
     "sirala": "Sırala: {ne}",
