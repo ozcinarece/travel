@@ -19,6 +19,8 @@ export type IkonAdi =
   | 'arti'
   | 'yatak'
   | 'kalpOy'
+  // #182 (kanvas 24): "Sırayı düzenle" — karşılıklı oklar.
+  | 'sirala'
   // #30 pin kategori ikonları (16 px çizgi)
   | 'agac'
   | 'catal'
@@ -317,6 +319,8 @@ export function Ikon({ ad, boyut = 24, renk, kalinlik = 2, dolgu }: Props) {
         </>
       ) : ad === 'kalpOy' ? (
         <Path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z" {...ortak} />
+      ) : ad === 'sirala' ? (
+        <Path d="M7 7h11l-3-3M17 17H6l3 3" {...ortak} />
       ) : (
         <>
           <Circle cx={12} cy={8} r={4} {...ortak} />
