@@ -117,6 +117,16 @@ export function useSeyahatCanli(seyahatId: string | undefined) {
       .on('postgres_changes', { event: '*', schema: 'public', table: 'oylar', filter: `seyahat_id=eq.${seyahatId}` }, () =>
         qc.invalidateQueries({ queryKey: ['oylar', seyahatId] }),
       )
+      // #183: harcamalar, paylar (harcama sorgusu payları da getirir) ve ödeşmeler.
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'harcamalar', filter: `trip_id=eq.${seyahatId}` }, () =>
+        qc.invalidateQueries({ queryKey: ['harcamalar', seyahatId] }),
+      )
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'harcama_paylari', filter: `trip_id=eq.${seyahatId}` }, () =>
+        qc.invalidateQueries({ queryKey: ['harcamalar', seyahatId] }),
+      )
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'odesmeler', filter: `trip_id=eq.${seyahatId}` }, () =>
+        qc.invalidateQueries({ queryKey: ['odesmeler', seyahatId] }),
+      )
       .subscribe();
     return () => {
       supabase.removeChannel(kanal);

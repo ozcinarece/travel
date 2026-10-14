@@ -51,10 +51,16 @@ describe('#181 KK5 Sıradaki adım: öncelik sırası', () => {
     expect(siradakiAdim(tamam())).toBeNull();
   });
 
-  it('gezi modunda ve bitmiş gezide satır yok', () => {
+  it('gezi modunda ve (açık borcu olmayan) bitmiş gezide satır yok', () => {
     const plansiz = { ...tamam(), duraklar: [] };
     expect(siradakiAdim({ ...plansiz, mod: 'gezi' })).toBeNull();
     expect(siradakiAdim({ ...plansiz, mod: 'bitti' })).toBeNull();
+    expect(siradakiAdim({ ...plansiz, mod: 'gezi', acikTransfer: 2 })).toBeNull();
+  });
+
+  it('#183 KK9 · 8 gezi bitti ve açık borç var → Harcamaları kapat (plan adımları artık sorulmaz)', () => {
+    expect(siradakiAdim({ ...tamam(), duraklar: [], mod: 'bitti', acikTransfer: 2 })).toEqual({ tur: 'harcamaKapat', transfer: 2 });
+    expect(siradakiAdim({ ...tamam(), mod: 'bitti', acikTransfer: 0 })).toBeNull();
   });
 
   it('1 · hiç durak yoksa Planı kur (listede kaç mekan var)', () => {

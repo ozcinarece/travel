@@ -1,4 +1,5 @@
 // #137: Grup penceresi ve (#141) Son değişiklikler — `changes` satırını kısa Türkçe cümleye çevirir (eski grup.tsx'ten taşındı).
+import { paraMetni } from '@/features/harcama/hesap';
 import type { Degisiklik } from '@/lib/tipler';
 
 export function degisiklikMetni(d: Degisiklik, mekanAdi: (placesId: string | null | undefined) => string): string {
@@ -43,6 +44,18 @@ export function degisiklikMetni(d: Degisiklik, mekanAdi: (placesId: string | nul
     case 'trips':
       if (d.field?.startsWith('hotel')) return 'oteli değiştirdi';
       return 'seyahati değiştirdi';
+    // #183: harcama ve ödeşme (paylar akışta ayrıca gösterilmez; harcamayla birlikte geri alınır).
+    case 'harcamalar': {
+      const satir = (yeni ?? eski) as { aciklama?: string; tl_kurus?: number } | null;
+      const ad = satir?.aciklama?.trim() ? `"${satir.aciklama.trim()}" harcamasını` : 'bir harcamayı';
+      if (ekle) return `${ad} ekledi${satir?.tl_kurus ? ` · ${paraMetni(satir.tl_kurus)}` : ''}`;
+      if (sil) return `${ad} sildi`;
+      return 'bir harcamayı değiştirdi';
+    }
+    case 'odesmeler':
+      if (ekle) return `bir ödeşmeyi işaretledi${yeni?.tl_kurus ? ` · ${paraMetni(Number(yeni.tl_kurus))}` : ''}`;
+      if (sil) return 'bir ödeşmeyi geri aldı';
+      return 'bir ödeşmeyi değiştirdi';
     default:
       return 'bir değişiklik yaptı';
   }
@@ -82,15 +95,32 @@ export function grupMetni(
   return degisiklikMetni(ana, k.mekanAdi);
 }
 
-/** Geri alınabilen gruplar: plan verisi (mekan, durak, gün alanları); varış/tamamlanma (otomatik) ve üyelik değil. */
+/**
+ * Geri alınabilen gruplar: plan verisi (mekan, durak, gün alanları); varış/tamamlanma (otomatik) ve üyelik değil. #183: harcama
+ * (ekleme · silme · düzenleme) ve ödeşme (işaretleme · geri alma) — sunucu yetkiyi ayrıca denetler (ekleyen ya da sahip; ödeşmede
+ * iki taraf).
+ */
 export function geriAlinabilir(g: DegisiklikGrubu): boolean {
   const ilk = g.satirlar[0];
+  if (g.entity === 'harcamalar' || g.entity === 'odesmeler') return true;
   if (g.entity === 'places' || g.entity === 'stops') {
     if (!ilk.field) return true;
     return g.satirlar.some((d) => d.field && !['arrived_at', 'arrived_by', 'completed_at', 'completed_by', 'auto_completed'].includes(d.field));
   }
   if (g.entity === 'days') return !!ilk.field && g.satirlar.some((d) => d.field === 'start_time' || d.field === 'order_manual');
   return false;
+}
+
+/**
+ * #183: harcama / ödeşme grubunu bu kişi geri alabilir mi (sunucudaki kuralın aynısı; düğme boşuna görünmesin). Harcama: sahip,
+ * ekleyen ya da değişikliği yapan (yapabildiyse ekleyen ya da sahiptir). Ödeşme: iki taraftan biri. Diğer varlıklarda kısıt yok.
+ */
+export function geriAlmaYetkisi(g: DegisiklikGrubu, benId: string | null, sahip: boolean): boolean {
+  const satir = (g.satirlar[0].old ?? g.satirlar[0].new) as Record<string, unknown> | null;
+  const nesne = satir && typeof satir === 'object' ? satir : null;
+  if (g.entity === 'harcamalar') return sahip || (!!benId && (g.kim === benId || nesne?.olusturan === benId));
+  if (g.entity === 'odesmeler') return !!benId && (nesne?.kimden === benId || nesne?.kime === benId);
+  return true;
 }
 
 export function zamanMetni(iso: string, simdi = Date.now()): string {

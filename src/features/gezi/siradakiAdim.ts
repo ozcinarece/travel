@@ -1,6 +1,6 @@
 // #181 KK5 (kanvas 23 · 27): Gezi sayfasında kapağın altındaki tek, sessiz "Sıradaki adım" satırı. Öncelik sırasıyla ilk doğru
-// koşul gösterilir; biri bitince sıradaki gelir. Gezi modunda ve bitmiş gezide satır yok (gezi modunda yerine bugünün durak
-// kartı; 8 "Gezi bitti → Harcamaları kapat" Harcamalar (#183) ile gelir). Koşulların hiçbiri yoksa satır gizlenir.
+// koşul gösterilir; biri bitince sıradaki gelir. Gezi modunda satır yok (yerine bugünün durak kartı). #183 KK9: bitmiş gezide
+// açık borç varsa 8 "Gezi bitti → Harcamaları kapat"; yoksa satır yok. Koşulların hiçbiri yoksa satır gizlenir.
 import { pinKategorisi } from '@/lib/pinIkonu';
 import type { Durak, Gun, Mekan } from '@/lib/tipler';
 
@@ -18,7 +18,9 @@ export type SiradakiAdim =
   /** 5 Bir günde yemek durağı yok → Öğle yemeği ekle. */
   | { tur: 'yemek'; gun: Gun }
   /** 6 Yarın başlıyor → İlk durak ve çıkış saati. */
-  | { tur: 'yarin'; ilkMekanId: string | null; cikis: string };
+  | { tur: 'yarin'; ilkMekanId: string | null; cikis: string }
+  /** 8 Gezi bitti, açık borç var → Harcamaları kapat (Bakiyeler). `transfer`: herkesin ödeşmesi için gereken en az transfer. */
+  | { tur: 'harcamaKapat'; transfer: number };
 
 export type SiradakiGirdi = {
   mod: GeziModu;
@@ -35,6 +37,8 @@ export type SiradakiGirdi = {
   baslangic: string | null;
   /** "HH:MM" — 1. günün çıkış saati (days.start_time, yoksa trips.day_start). */
   ilkGunCikis: string;
+  /** #183: sadeleştirilmiş açık transfer sayısı (bitmiş gezide 8. adım). */
+  acikTransfer?: number;
 };
 
 const sira = (a: { order_key: string }, b: { order_key: string }) => (a.order_key < b.order_key ? -1 : a.order_key > b.order_key ? 1 : 0);
@@ -45,8 +49,9 @@ function ertesiGun(tarih: string): string {
   return new Date(Date.UTC(y, a - 1, g + 1)).toISOString().slice(0, 10);
 }
 
-/** Öncelik: plan kur → dağıt → otel → davet → yemek → yarın. Gezi / bitmiş gezide null. */
+/** Öncelik: plan kur → dağıt → otel → davet → yemek → yarın. Gezi modunda null; bitmiş gezide yalnız harcamaları kapat. */
 export function siradakiAdim(g: SiradakiGirdi): SiradakiAdim | null {
+  if (g.mod === 'bitti') return g.acikTransfer ? { tur: 'harcamaKapat', transfer: g.acikTransfer } : null;
   if (g.mod !== 'plan') return null;
   const aktif = g.duraklar.filter((d) => !d.skipped);
   if (g.duraklar.length === 0) return { tur: 'planKur', mekanSayisi: g.mekanlar.length };

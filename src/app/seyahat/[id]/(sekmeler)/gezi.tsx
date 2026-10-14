@@ -15,6 +15,9 @@ import { GrupKarti } from '@/components/gezi/GrupKarti';
 import { ListemOnizleme } from '@/components/gezi/ListemOnizleme';
 import { PlanOzeti } from '@/components/gezi/PlanOzeti';
 import { RehberKartlari, RehberOnerileri } from '@/components/gezi/RehberOnerileri';
+import { GeziHarcamaKarti } from '@/components/harcama/GeziHarcamaKarti';
+import { HarcamaFormu } from '@/components/harcama/HarcamaFormu';
+import { HatirlatmaSatiri } from '@/components/harcama/HatirlatmaSatiri';
 import { GeziAlYukleyici } from '@/components/icerik/GeziAl';
 import { SecimMenusu } from '@/components/program/SecimMenusu';
 import { SeyahatYukleme } from '@/components/seyahatler/SeyahatYukleme';
@@ -23,6 +26,9 @@ import { useBilinenMekanlar } from '@/features/gezi/bilinenMekanlar';
 import { durumCipi, geziModu, grupDurumlari, gunKartlari, gunTarihi, listemOnizlemesi, mekanAdi, rehberOnerileri, tarihSatiri } from '@/features/gezi/geziOzeti';
 import { siradakiAdim, type SiradakiAdim } from '@/features/gezi/siradakiAdim';
 import { useDuragaAta, useDuraklar, useGunler } from '@/features/gunler/sorgular';
+import { harcamaOzeti, hatirlatmaVakti } from '@/features/harcama/hesap';
+import { kisiler as kisiKaynagi } from '@/features/harcama/metin';
+import { useHarcamalar, useIbanlar, useOdesmeler } from '@/features/harcama/sorgular';
 import { sehirEslestir, useGeziler, useSehirler, useSehirYerleri } from '@/features/icerik/sorgular';
 import { useYereEkle } from '@/features/icerik/yerEkle';
 import { OTEL_SERIT_ONEKI } from '@/features/konaklama/otelSeridi';
@@ -98,6 +104,7 @@ function GeziSayfasi({ seyahat, gunler, duraklar, mekanlar, konaklamalar, katild
   const [gunSecDurak, setGunSecDurak] = useState<DurakKarti | null>(null);
   const [eklenenler, setEklenenler] = useState<Set<string>>(() => new Set());
   const [otelErtelendi, setOtelErtelendi] = useState(false);
+  const [harcamaFormu, setHarcamaFormu] = useState(false);
   // Sekme odaktayken: otel şeridi kararı (Plan'da "Şimdi değil" denmiş olabilir) yeniden okunur; konum yalnız odaktayken izlenir
   // (Plan'la birlikte iki izleyici çalışmasın).
   const [odakta, setOdakta] = useState(true);
@@ -133,6 +140,17 @@ function GeziSayfasi({ seyahat, gunler, duraklar, mekanlar, konaklamalar, katild
   const onerilenGezi = geziler.data?.[0] ?? null;
 
   const uyeListesi = useMemo(() => uyeler.data ?? [], [uyeler.data]);
+
+  // #183 KK8 · KK9 · KK7: harcama özeti (bizim veritabanımız).
+  const harcamalar = useHarcamalar(seyahat.id);
+  const odesmeler = useOdesmeler(seyahat.id);
+  const kisiler = useMemo(() => kisiKaynagi(uyeListesi), [uyeListesi]);
+  const hOzet = useMemo(
+    () => harcamaOzeti({ harcamalar: harcamalar.data ?? [], odesmeler: odesmeler.data ?? [], benId, bugun: yerelTarih(an, seyahat.tz), gununTarihi: (iso) => yerelTarih(new Date(iso), seyahat.tz) }),
+    [harcamalar.data, odesmeler.data, benId, an, seyahat.tz],
+  );
+  const ibanlar = useIbanlar(hOzet.benimNet < 0 ? hOzet.karsilar.map((x) => x.id) : []);
+  const bakiyeler = () => router.push({ pathname: '/seyahat/[id]/bakiyeler', params: { id: seyahat.id } });
   const adim = siradakiAdim({
     mod,
     gunler,
@@ -144,6 +162,7 @@ function GeziSayfasi({ seyahat, gunler, duraklar, mekanlar, konaklamalar, katild
     bugun: yerelTarih(an, seyahat.tz),
     baslangic: seyahat.start_date,
     ilkGunCikis: saatKisa([...gunler].sort((a, b) => a.index - b.index)[0]?.start_time, saatKisa(seyahat.day_start, '09:00')),
+    acikTransfer: harcamalar.data && odesmeler.data ? hOzet.transferler.length : 0,
   });
   // Uye listesi gelmeden "Davet et" gösterilmez (tek kişi sanılmasın).
   const gorunenAdim = adim?.tur === 'davet' && !uyeler.data ? null : adim;
@@ -204,6 +223,7 @@ function GeziSayfasi({ seyahat, gunler, duraklar, mekanlar, konaklamalar, katild
     if (a.tur === 'otel') return plan({ otel: '1' });
     if (a.tur === 'davet') return davet.paylas();
     if (a.tur === 'yemek') return sekme('kesfet', { cip: 'yemek' });
+    if (a.tur === 'harcamaKapat') return bakiyeler();
     return plan({ gun: '1' });
   };
   const adimMetni = (a: SiradakiAdim): { baslik: string; alt: string | null; dugme: string } => {
@@ -223,6 +243,7 @@ function GeziSayfasi({ seyahat, gunler, duraklar, mekanlar, konaklamalar, katild
     if (a.tur === 'otel') return { baslik: t('geziSayfasi.otelYok'), alt: t('geziSayfasi.adim.otelAlt'), dugme: t('geziSayfasi.adim.otelDugme') };
     if (a.tur === 'davet') return { baslik: t('geziSayfasi.adim.davet'), alt: t('geziSayfasi.adim.davetAlt'), dugme: t('geziSayfasi.adim.davetDugme') };
     if (a.tur === 'yemek') return { baslik: t('geziSayfasi.adim.yemek', { gun: gunTarihi(a.gun) }), alt: t('geziSayfasi.adim.yemekAlt'), dugme: t('geziSayfasi.adim.yemekDugme') };
+    if (a.tur === 'harcamaKapat') return { baslik: t('geziSayfasi.adim.harcamaKapat'), alt: t('geziSayfasi.adim.harcamaKapatAlt', { n: a.transfer }), dugme: t('geziSayfasi.adim.harcamaKapatDugme') };
     return {
       baslik: t('geziSayfasi.adim.yarin'),
       alt: a.ilkMekanId ? t('geziSayfasi.adim.yarinAlt', { ad: adiYaDaKategori(a.ilkMekanId), saat: a.cikis }) : t('geziSayfasi.adim.yarinCikis', { saat: a.cikis }),
@@ -263,6 +284,19 @@ function GeziSayfasi({ seyahat, gunler, duraklar, mekanlar, konaklamalar, katild
   };
 
   const benUye = uyeListesi.find((u) => u.user_id === benId);
+  const harcamaKarti =
+    harcamalar.data && odesmeler.data ? (
+      <GeziHarcamaKarti
+        gezi={mod === 'gezi'}
+        ozet={hOzet}
+        adet={harcamalar.data.length}
+        k={kisiler}
+        benId={benId}
+        onTumu={() => router.navigate({ pathname: '/seyahat/[id]/(sekmeler)/harcama', params: { id: seyahat.id } })}
+        onEkle={() => setHarcamaFormu(true)}
+        onBakiyeler={bakiyeler}
+      />
+    ) : null;
   const siraNo = (uid: string) => Math.max(0, uyeListesi.findIndex((u) => u.user_id === uid));
   const metin = adim ? adimMetni(adim) : null;
 
@@ -280,6 +314,7 @@ function GeziSayfasi({ seyahat, gunler, duraklar, mekanlar, konaklamalar, katild
           onGrup={() => setGrupAcik(true)}
         />
         <View style={[s.icerik, mod === 'gezi' && s.icerikGezi]}>
+          {hatirlatmaVakti(seyahat, an) && mod !== 'plan' ? <HatirlatmaSatiri ozet={hOzet} k={kisiler} ibanlar={ibanlar.data} onBakiyeler={bakiyeler} /> : null}
           {mod === 'gezi' ? (
             <>
               <BugunKarti
@@ -297,6 +332,7 @@ function GeziSayfasi({ seyahat, gunler, duraklar, mekanlar, konaklamalar, katild
                 onPlan={() => plan({ gun: String(bugunGun?.index ?? 1) })}
               />
               <GrupKarti durumlar={grup} sira={siraNo} mekanAdi={adiYaDaKategori} an={an} onSeyahattekiler={() => setGrupAcik(true)} />
+              {harcamaKarti}
             </>
           ) : gorunenAdim && metin ? (
             <SiradakiAdimSatiri baslik={metin.baslik} alt={metin.alt} dugme={metin.dugme} mesgul={gorunenAdim.tur === 'planKur' && planUygula.isPending} onPress={() => void adimEylemi(gorunenAdim)} />
@@ -327,6 +363,7 @@ function GeziSayfasi({ seyahat, gunler, duraklar, mekanlar, konaklamalar, katild
               ) : null}
             </>
           ) : null}
+          {mod !== 'gezi' ? harcamaKarti : null}
           {sehir ? (
             <RehberKartlari
               sehir={sehir.ad}
@@ -400,6 +437,7 @@ function GeziSayfasi({ seyahat, gunler, duraklar, mekanlar, konaklamalar, katild
           sekme('kesfet');
         }}
       />
+      <HarcamaFormu acik={harcamaFormu} onKapat={() => setHarcamaFormu(false)} seyahat={seyahat} uyeler={uyeListesi} onBildirim={setBildirim} />
       {geziAlSlug ? <GeziAlYukleyici slug={geziAlSlug} ilkHedefId={seyahat.id} onKapat={() => setGeziAlSlug(null)} /> : null}
     </View>
   );
