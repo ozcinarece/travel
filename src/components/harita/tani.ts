@@ -2,7 +2,7 @@
 // Harita dururken tur sayısı artıyor mu, pine dokununca onPress geliyor mu, işaretçi sayısı ne — hepsi buradan okunur.
 import { useEffect, useState } from 'react';
 
-import { karoSayaci } from '@/features/yerler/karoYukleme';
+import { kesfetSayaci } from '@/features/yerler/kesfetYukleme';
 
 export const taniSayaclari = {
   /** onRegionChangeComplete (kamera durdu) sayısı. */
@@ -55,7 +55,7 @@ export function isaretciSayilariniKaydet(gorunen: number, plan: { tur: 'png' | '
   taniSayaclari.pngIsaretci = plan.filter((i) => i.tur === 'png').length;
   taniSayaclari.adIsaretci = plan.filter((i) => i.tur === 'ad').length;
   taniSayaclari.gorunumIsaretci = plan.filter((i) => i.tur === 'gorunum').length;
-  if (__DEV__) console.log(`[harita] işaretçi ${gorunen} (png ${taniSayaclari.pngIsaretci} · ad ${taniSayaclari.adIsaretci} · görünüm ${taniSayaclari.gorunumIsaretci}) · tur ${karoSayaci.tur}`);
+  if (__DEV__) console.log(`[harita] işaretçi ${gorunen} (png ${taniSayaclari.pngIsaretci} · ad ${taniSayaclari.adIsaretci} · görünüm ${taniSayaclari.gorunumIsaretci}) · Keşfet isteği ${kesfetSayaci.istek}`);
 }
 
 export function dokunmaKaydet(id: string) {
@@ -65,13 +65,12 @@ export function dokunmaKaydet(id: string) {
   if (__DEV__) console.log(`[harita] dokunma ${taniSayaclari.dokunma}: ${id}`);
 }
 
-export type TaniOzeti = { tur: number; istek: number; hata: number; bolgeOlayi: number; dokunma: number; sonDokunma: string; gorunen: number; png: number; ad: number; gorunum: number; render: number; sonDegisim: number; igneMs: number[]; kartMs: number[]; haritaHazir: number; haritaYenidenKurulum: number; kesfetKurulum: number };
+export type TaniOzeti = { istek: number; hata: number; bolgeOlayi: number; dokunma: number; sonDokunma: string; gorunen: number; png: number; ad: number; gorunum: number; render: number; sonDegisim: number; igneMs: number[]; kartMs: number[]; haritaHazir: number; haritaYenidenKurulum: number; kesfetKurulum: number };
 
 export function taniOzeti(): TaniOzeti {
   return {
-    tur: karoSayaci.tur,
-    istek: karoSayaci.istek,
-    hata: karoSayaci.hata,
+    istek: kesfetSayaci.istek,
+    hata: kesfetSayaci.hata,
     bolgeOlayi: taniSayaclari.bolgeOlayi,
     dokunma: taniSayaclari.dokunma,
     sonDokunma: taniSayaclari.sonDokunma,

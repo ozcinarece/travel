@@ -1,9 +1,9 @@
 // #189 Keşfet süzgecinin ayarları: yorum / puan eşikleri (yonetim_ayarlari.kesfet_esikleri) ve gizleme listesi (kesfet_gizli).
 // Tek RPC (`kesfet_suzgec_ayarlari`, yalnız service_role) ile okunur; izolat belleğinde 60 sn tutulur — gizlenen yer en geç bir
 // dakikada düşer. Okunamazsa Keşfet durmaz: son bilinen ayar, o da yoksa varsayılan eşikler ve boş liste (30 sn sonra yeniden).
-import { esikleriCoz, VARSAYILAN_ESIKLER, type KesfetEsikleri } from './google.ts';
+import { esikleriCoz, sehirYaricapiCoz, VARSAYILAN_ESIKLER, VARSAYILAN_SEHIR_YARICAPI_M, type KesfetEsikleri } from './google.ts';
 
-export type KesfetAyari = { esikler: KesfetEsikleri; gizli: ReadonlySet<string> };
+export type KesfetAyari = { esikler: KesfetEsikleri; gizli: ReadonlySet<string>; sehirYaricapM: number };
 
 const TTL_MS = 60 * 1000;
 const HATA_TTL_MS = 30 * 1000;
@@ -24,10 +24,10 @@ export async function kesfetAyari(): Promise<KesfetAyari> {
     if (!cevap.ok) throw new Error(`${cevap.status} ${(await cevap.text()).slice(0, 200)}`);
     const g = (await cevap.json()) as { esikler?: unknown; gizli?: unknown };
     const gizli = new Set(Array.isArray(g.gizli) ? g.gizli.filter((x): x is string => typeof x === 'string') : []);
-    bellek = { zaman: simdi, ttl: TTL_MS, deger: { esikler: esikleriCoz(g.esikler), gizli } };
+    bellek = { zaman: simdi, ttl: TTL_MS, deger: { esikler: esikleriCoz(g.esikler), gizli, sehirYaricapM: sehirYaricapiCoz(g.esikler) } };
   } catch (e) {
     console.error('kesfet_suzgec_ayarlari', e);
-    bellek = { zaman: simdi, ttl: HATA_TTL_MS, deger: bellek?.deger ?? { esikler: VARSAYILAN_ESIKLER, gizli: new Set() } };
+    bellek = { zaman: simdi, ttl: HATA_TTL_MS, deger: bellek?.deger ?? { esikler: VARSAYILAN_ESIKLER, gizli: new Set(), sehirYaricapM: VARSAYILAN_SEHIR_YARICAPI_M } };
   }
   return bellek.deger;
 }

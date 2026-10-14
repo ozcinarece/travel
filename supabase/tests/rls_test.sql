@@ -2131,6 +2131,7 @@ begin
   assert (select (deger #>> '{turistik,yorum}')::int from public.yonetim_ayarlari where anahtar = 'kesfet_esikleri') = 50, 'Turistik en az 50 yorum';
   assert (select (deger #>> '{yemek,puan}')::numeric from public.yonetim_ayarlari where anahtar = 'kesfet_esikleri') = 3.8, 'Yemek en az 3,8';
   assert (select (deger #>> '{park,yorum}')::int from public.yonetim_ayarlari where anahtar = 'kesfet_esikleri') = 20, 'Park en az 20 yorum';
+  assert (select (deger #>> '{sehir_yaricap_m}')::int from public.yonetim_ayarlari where anahtar = 'kesfet_esikleri') = 8000, '#189 Ek 2: şehir listesi 8 km';
 end $$;
 set role authenticated;
 select pg_temp.as_email(:B, 'b@ornek.com');

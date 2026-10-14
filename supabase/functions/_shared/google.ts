@@ -330,6 +330,11 @@ export const CIP_TIPLERI: Record<string, string[]> = {
   // tarihî ve turistik ibadet yerleri tourist_attraction / historical_landmark tipini de taşıdığı için yine gelir.
   turistik: ['tourist_attraction', 'historical_landmark', 'cultural_landmark', 'monument', 'museum', 'art_gallery', 'observation_deck'],
   ...KATEGORI_TIPLERI,
+  // #189 Ek 2: şehir listesinde Turistik üç alt istek (müze ve galeri · tarihî yer, anıt, kültürel · manzara ve park). İstek
+  // `includedPrimaryTypes` ile gider (istekBirincilTipleri); bu listeler yalnız yedek istek (`includedTypes`) içindir.
+  turistik_muze: ['museum', 'art_gallery'],
+  turistik_tarihi: ['tourist_attraction', 'historical_landmark', 'cultural_landmark', 'monument'],
+  turistik_manzara: ['observation_deck', 'park', 'garden', 'botanical_garden', 'national_park'],
   // Eski istemciler (#69 öncesi çipler) bir sürüm daha kabul edilir; OTA'yı almamış istemci 400 almasın.
   populer: ['tourist_attraction'],
   sanat: ['museum', 'art_gallery'],
@@ -567,29 +572,47 @@ const BIRINCIL: Record<KesfetGrubu, (tip: string) => boolean> = {
  * gelmez — ölçüm PR #190'da; ikinci istek atılmaz.
  */
 export function istekBirincilTipleri(cip: string): string[] | undefined {
-  return (GRUPLAR as string[]).includes(cip) ? [...BIRINCIL_TIPLER[cip as KesfetGrubu]] : undefined;
+  if ((GRUPLAR as string[]).includes(cip)) return [...BIRINCIL_TIPLER[cip as KesfetGrubu]];
+  return ALT_ISTEK_TIPLERI[cip] ? [...ALT_ISTEK_TIPLERI[cip]] : undefined;
+}
+
+/** #189 Ek 2: Turistik alt isteklerinin birincil tipleri (Turistik ve Park kümelerinin alt kümeleri; süzgeçten geçerler). */
+const ALT_ISTEK_TIPLERI: Record<string, readonly string[]> = {
+  turistik_muze: ['museum', 'art_museum', 'history_museum', 'art_gallery'],
+  turistik_tarihi: ['tourist_attraction', 'historical_landmark', 'historical_place', 'cultural_landmark', 'monument', 'sculpture', 'castle'],
+  turistik_manzara: ['observation_deck', ...BIRINCIL_TIPLER.park],
+};
+
+/** #189 Ek 2: şehir listesinin yarıçapı (m): `kesfet_esikleri.sehir_yaricap_m`, varsayılan 8 km, 2–15 km arası. */
+export const VARSAYILAN_SEHIR_YARICAPI_M = 8000;
+export function sehirYaricapiCoz(deger: unknown): number {
+  const r = deger && typeof deger === 'object' ? (deger as Record<string, unknown>).sehir_yaricap_m : undefined;
+  return typeof r === 'number' && Number.isFinite(r) ? Math.min(15_000, Math.max(2000, Math.round(r))) : VARSAYILAN_SEHIR_YARICAPI_M;
 }
 
 /** KK1 istisnası (#178 mantığı): Turistik'te birincil tipi turistik olmayan ama tiplerinde bunlardan biri olan yer kalır. */
 const TURISTIK_ISTISNA = ['tourist_attraction', 'historical_landmark'];
 
-/** Çipin eşik grubu; `hepsi` her grubu kabul eder; `otel` ve `ibadet` süzülmez (null). Eski çipler Turistik sayılır. */
-function cipGrubu(cip: string): KesfetGrubu | 'hepsi' | null {
-  if (cip === 'hepsi') return 'hepsi';
-  if ((GRUPLAR as string[]).includes(cip)) return cip as KesfetGrubu;
-  if (['gezilecek', 'muze', 'manzara', 'populer', 'sanat'].includes(cip)) return 'turistik';
+/**
+ * Çipin kabul ettiği eşik grupları (sırayla denenir); `hepsi` hepsini kabul eder; `otel` ve `ibadet` süzülmez (null). Eski çipler
+ * ve Turistik alt istekleri Turistik sayılır; "manzara ve park" alt isteği Park'ı da kabul eder (park kendi eşiğiyle).
+ */
+function cipGruplari(cip: string): readonly KesfetGrubu[] | null {
+  if (cip === 'hepsi') return GRUPLAR;
+  if ((GRUPLAR as string[]).includes(cip)) return [cip as KesfetGrubu];
+  if (cip === 'turistik_manzara') return ['turistik', 'park'];
+  if (['gezilecek', 'muze', 'manzara', 'populer', 'sanat', 'turistik_muze', 'turistik_tarihi'].includes(cip)) return ['turistik'];
   return null;
 }
 
-/** Yerin bu çipteki grubu (KK1); birincil tipi kümede değilse ve istisnaya da girmiyorsa null. */
+/** Yerin bu çipteki grubu (KK1); birincil tipi kabul edilen kümelerde değilse ve istisnaya da girmiyorsa null. */
 export function yerGrubu(y: Pick<YakinYer, 'primary_type' | 'tipler'>, cip: string): KesfetGrubu | null {
-  const cg = cipGrubu(cip);
-  if (!cg) return null;
+  const gruplar = cipGruplari(cip);
+  if (!gruplar) return null;
   const p = y.primary_type ?? '';
-  const istisna = TURISTIK_ISTISNA.some((t) => y.tipler.includes(t));
-  if (cg === 'hepsi') return GRUPLAR.find((g) => BIRINCIL[g](p)) ?? (istisna ? 'turistik' : null);
-  if (BIRINCIL[cg](p)) return cg;
-  return cg === 'turistik' && istisna ? 'turistik' : null;
+  const grup = gruplar.find((g) => BIRINCIL[g](p));
+  if (grup) return grup;
+  return gruplar.includes('turistik') && TURISTIK_ISTISNA.some((t) => y.tipler.includes(t)) ? 'turistik' : null;
 }
 
 /**
@@ -597,7 +620,7 @@ export function yerGrubu(y: Pick<YakinYer, 'primary_type' | 'tipler'>, cip: stri
  * `ibadet` çiplerinde yalnız gizleme listesi uygulanır. Sıra korunur (popülerlik).
  */
 export function kesfetSuzgeci(yerler: YakinYer[], cip: string, esikler: KesfetEsikleri, gizli: ReadonlySet<string>): YakinYer[] {
-  const suzulur = cipGrubu(cip) !== null;
+  const suzulur = cipGruplari(cip) !== null;
   return yerler.filter((y) => {
     if (gizli.has(y.place_id)) return false;
     if (!suzulur) return true;

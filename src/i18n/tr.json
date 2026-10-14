@@ -398,8 +398,8 @@
     "koordinatMekan": "Linkte mekan değil yalnızca konum var; mekanı adıyla ara.",
     "ekleHata": "Eklenemedi. Tekrar dene.",
     "secimHata": "Mekan bilgisi alınamadı.",
-    "bolgeyiTara": "Bu bölgeyi tara",
-    "bolgeBos": "Bu bölgede öneri yok; haritayı kaydırıp \"Bu bölgeyi tara\"ya dokun.",
+    "alandaAra": "Bu alanda ara",
+    "bolgeBos": "Bu bölgede öneri yok; haritayı kaydırıp \"Bu alanda ara\"ya dokun.",
     "listedeCikar": "Listede ✓ · Çıkar",
     "detay": "Detay",
     "cekmece": {
@@ -409,6 +409,7 @@
       "yerSayisi": "{n} yer",
       "bos": "Bu bölgede öneri yok · Haritayı kaydır ya da filtreyi değiştir",
       "az": "Bu bölgede öne çıkan yer az. Aramayla bulabilir ya da şehir rehberine bakabilirsin.",
+      "genis": "Yakında öne çıkan yer yok; çevredekiler gösteriliyor.",
       "ekle": "Listeye ekle",
       "listede": "Listede ✓",
       "ac": "Önerileri aç",
