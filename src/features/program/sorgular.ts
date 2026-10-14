@@ -249,6 +249,8 @@ export function useDegisiklikler(seyahatId: string | undefined, etkin = true) {
         .eq('trip_id', seyahatId!)
         // #183: harcama payları harcamanın satırıyla birlikte anlatılır ve geri alınır; listeyi doldurmasın.
         .neq('entity', 'harcama_paylari')
+        // #200: toplu işlemin (Günlere dağıt) satırları kaydıyla birlikte tek satır.
+        .is('grup', null)
         .order('at', { ascending: false })
         .limit(10);
       if (error) throw error;

@@ -3,7 +3,10 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { useOturum } from '@/lib/oturum';
 import { supabase } from '@/lib/supabase';
-import type { Oy } from '@/lib/tipler';
+import type { Durak, Mekan, Oy } from '@/lib/tipler';
+import { sonAnahtar } from '@/schedule/sira';
+
+import { dagitimYazimi, type DagitimSecenegi } from './sigmayanlar';
 
 export function useOylar(seyahatId: string | undefined) {
   const { session } = useOturum();
@@ -52,5 +55,34 @@ export function useDegisikligiGeriAl(seyahatId: string) {
       Promise.all(
         ['mekanlar', 'duraklar', 'gunler', 'degisiklikler', 'sohbet-degisiklikler', 'oylar', 'harcamalar', 'odesmeler'].map((k) => qc.invalidateQueries({ queryKey: [k, seyahatId] })),
       ),
+  });
+}
+
+/**
+ * #200 KK5: Günlere dağıt — seçilen yol (kısalt / uzat / listede kalsın) tek işlemde yazılır ve değişiklik geçmişinde tek kayıttır
+ * (gunlere_dagit); "Geri al" hepsini birlikte döndürür. Yeni duraklar günün sonuna, planKur'un gezme sırasıyla eklenir.
+ */
+export function useGunlereDagit(seyahatId: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ secenek, mekanlar, duraklar }: { secenek: DagitimSecenegi; mekanlar: Mekan[]; duraklar: Durak[] }) => {
+      const y = dagitimYazimi(secenek, mekanlar);
+      const anahtarlar = new Map<string, string[]>();
+      const yeni = y.yeni.map((d) => {
+        const onceki = anahtarlar.get(d.gunId) ?? duraklar.filter((x) => x.day_id === d.gunId).map((x) => x.order_key);
+        const order_key = sonAnahtar(onceki);
+        anahtarlar.set(d.gunId, [...onceki, order_key]);
+        return { day_id: d.gunId, place_ref: d.mekanId, order_key, minutes: d.dakika };
+      });
+      const { error } = await supabase.rpc('gunlere_dagit', {
+        p_trip: seyahatId,
+        p_duraklar: yeni,
+        p_sureler: y.sureler.map((x) => ({ id: x.durakId, minutes: x.dakika })),
+        p_bitisler: y.bitisler.map((x) => ({ id: x.gunId, end_time: x.bitis })),
+      });
+      if (error) throw error;
+      return secenek;
+    },
+    onSettled: () => Promise.all(['duraklar', 'gunler', 'degisiklikler', 'sohbet-degisiklikler'].map((k) => qc.invalidateQueries({ queryKey: [k, seyahatId] }))),
   });
 }

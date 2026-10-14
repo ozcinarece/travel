@@ -2398,4 +2398,78 @@ begin
   assert (select count(*) from public.gezi_rota_onbellek where gezi_gun_id = '19201920-0000-4000-8000-000000000021') = 0, 'gün silinince bacakları da silinir';
 end $$;
 
+-- #200 KK5: "Günlere dağıt" tek işlemde yazılır ve değişiklik geçmişinde TEK kayıttır (akış grupsuz satırları okur); "Geri al"
+-- eklenen durakları siler, kısalan süreleri ve uzayan gün bitişlerini eski haline getirir; geri alma da tek kayıttır. Mekanın
+-- varsayılan süresi değişmez; 22:00'yi geçen bitiş reddedilir; başka seyahatin günü / mekanı yazılmaz; üye olmayan çağıramaz.
+reset role;
+\set DU '''aaaaaaaa-2000-0000-0000-000000000001'''
+\set DN '''aaaaaaaa-2000-0000-0000-000000000002'''
+insert into auth.users (id, is_anonymous) values (:DU, false), (:DN, false);
+insert into public.profiles (id, name, username) values (:DU, 'Dagit', 'dagit200'), (:DN, 'Yabanci', 'yabanci200');
+set role authenticated;
+select pg_temp.as_user(:DU);
+insert into public.trips (id, owner_id, city_place_id, city_label, lat, lng, tz, start_date, end_date)
+  values ('20002000-0000-4000-8000-0000000000f1', :DU, 'ChIJ-dagit-200', 'Dağıt', 39.77, 30.52, 'Europe/Istanbul', '2026-11-02', '2026-11-03');
+insert into public.places (id, trip_id, place_id, lat, lng, default_minutes, added_by) values
+  ('20002000-0000-4000-8000-0000000000a1', '20002000-0000-4000-8000-0000000000f1', 'ChIJ-dagit-A-200', 39.77, 30.52, 90, :DU),
+  ('20002000-0000-4000-8000-0000000000a2', '20002000-0000-4000-8000-0000000000f1', 'ChIJ-dagit-B-200', 39.77, 30.52, 60, :DU),
+  ('20002000-0000-4000-8000-0000000000a3', '20002000-0000-4000-8000-0000000000f1', 'ChIJ-dagit-C-200', 39.77, 30.52, 60, :DU);
+insert into public.stops (id, trip_id, day_id, place_ref, order_key, minutes)
+select '20002000-0000-4000-8000-0000000000d1', '20002000-0000-4000-8000-0000000000f1', d.id, '20002000-0000-4000-8000-0000000000a1', 'a0', 90
+from public.days d where d.trip_id = '20002000-0000-4000-8000-0000000000f1' and d.index = 1;
+create temp table dagit_kayit (k bigint);
+grant all on dagit_kayit to authenticated;
+insert into dagit_kayit
+select public.gunlere_dagit('20002000-0000-4000-8000-0000000000f1',
+  (select jsonb_agg(x) from (
+     select jsonb_build_object('day_id', d.id, 'place_ref', '20002000-0000-4000-8000-0000000000a2', 'order_key', 'a1', 'minutes', 45) x
+     from public.days d where d.trip_id = '20002000-0000-4000-8000-0000000000f1' and d.index = 1
+     union all
+     select jsonb_build_object('day_id', d.id, 'place_ref', '20002000-0000-4000-8000-0000000000a3', 'order_key', 'a0', 'minutes', 60)
+     from public.days d where d.trip_id = '20002000-0000-4000-8000-0000000000f1' and d.index = 2
+     -- Başka seyahatin mekanı yazılmaz.
+     union all
+     (select jsonb_build_object('day_id', d.id, 'place_ref', p.id, 'order_key', 'a9', 'minutes', 60)
+      from public.days d, public.places p where d.trip_id = '20002000-0000-4000-8000-0000000000f1' and d.index = 2
+        and p.trip_id <> '20002000-0000-4000-8000-0000000000f1' limit 1)
+   ) y),
+  '[{"id": "20002000-0000-4000-8000-0000000000d1", "minutes": 68}]',
+  (select jsonb_agg(jsonb_build_object('id', d.id, 'end_time', '21:15')) from public.days d where d.trip_id = '20002000-0000-4000-8000-0000000000f1' and d.index = 2));
+do $$
+declare
+  k bigint := (select k from dagit_kayit);
+  t uuid := '20002000-0000-4000-8000-0000000000f1';
+begin
+  assert (select count(*) from public.stops where trip_id = t) = 3, 'iki yeni durak (başka seyahatin mekanı yok)';
+  assert (select minutes from public.stops where id = '20002000-0000-4000-8000-0000000000d1') = 68, 'mevcut durak kısaldı';
+  assert (select default_minutes from public.places where id = '20002000-0000-4000-8000-0000000000a1') = 90, 'mekanın varsayılan süresi aynı';
+  assert (select end_time from public.days where trip_id = t and index = 2) = time '21:15', 'gün uzadı';
+  assert (select end_time from public.days where trip_id = t and index = 1) is null, 'öbür gün aynı';
+  assert (select new from public.changes where id = k) = '{"mekan": 2, "kisalt": true, "uzat": true}'::jsonb, 'tek kayıt özeti';
+  assert (select count(*) from public.changes where trip_id = t and grup = k) = 4, 'iki ekleme + süre + bitiş kayda bağlı';
+  assert (select count(*) from public.changes where trip_id = t and grup is null and at = (select at from public.changes where id = k)) = 1, 'akışta tek satır';
+end $$;
+-- Doğrulama: 22:00'yi geçen bitiş; üye olmayan.
+select pg_temp.hata_bekle($$select public.gunlere_dagit('20002000-0000-4000-8000-0000000000f1', '[]', '[]', '[{"id": "20002000-0000-4000-8000-000000000000", "end_time": "22:30"}]')$$, '22023');
+select pg_temp.as_user(:DN);
+select pg_temp.hata_bekle($$select public.gunlere_dagit('20002000-0000-4000-8000-0000000000f1', '[]', '[]', '[]')$$, '42501');
+select pg_temp.hata_bekle($$select public.degisikligi_geri_al((select k from dagit_kayit))$$, '42501');
+-- Geri al: tek seferde hepsi.
+select pg_temp.as_user(:DU);
+select public.degisikligi_geri_al((select k from dagit_kayit));
+do $$
+declare
+  t uuid := '20002000-0000-4000-8000-0000000000f1';
+  g bigint;
+begin
+  assert (select count(*) from public.stops where trip_id = t) = 1, 'eklenen duraklar silindi';
+  assert (select minutes from public.stops where id = '20002000-0000-4000-8000-0000000000d1') = 90, 'süre eski haline döndü';
+  assert (select end_time from public.days where trip_id = t and index = 2) is null, 'bitiş eski haline döndü';
+  select id into g from public.changes where trip_id = t and entity = 'dagit_geri';
+  assert g is not null, 'geri alma tek kayıt';
+  assert (select count(*) from public.changes where trip_id = t and grup = g) = 4, 'geri almanın satırları kayda bağlı';
+end $$;
+select pg_temp.hata_bekle($$select public.degisikligi_geri_al((select id from public.changes where entity = 'dagit_geri' and trip_id = '20002000-0000-4000-8000-0000000000f1'))$$, '22023');
+reset role;
+
 \echo 'rls_test: TÜM TESTLER GEÇTİ'

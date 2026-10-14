@@ -1,11 +1,12 @@
 // #181 (kanvas 23): Gezi sayfasının ortak parçaları — bölüm başlığı ("Plan" + "Planı aç ›"), sessiz "Sıradaki adım" satırı,
-// küçük Buz düğme ve fotoğraf kutusu (bizim fotoğrafımız ya da oturum önbelleği; yoksa kategori renginde boş kutu).
+// küçük Buz düğme ve fotoğraf kutusu (bizim fotoğrafımız ya da oturum önbelleği; yoksa kategori renginde kutu + #200 kategori ikonu).
 import { Image } from 'expo-image';
 import type { ReactNode } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, Text, View, type StyleProp, type ViewStyle } from 'react-native';
 
+import { PIN_IKONLARI } from '@/components/harita/pinIkonlari';
 import { Ikon } from '@/components/ui/Ikon';
-import { pinKategorisi, type PinKategorisi } from '@/lib/pinIkonu';
+import { KATEGORI_PIN, pinKategorisi, type PinKategorisi } from '@/lib/pinIkonu';
 import { renk, yazi } from '@/theme';
 
 /** Fotoğrafı olmayan mekanın kutusu: kategoriye göre açık ton (kanvas 23). */
@@ -25,11 +26,23 @@ export function kutuRengi(tip: string | null | undefined): string {
   return KUTU_RENGI[pinKategorisi(tip)];
 }
 
+/** #200: fotoğrafı olmayan mekanın kutusunda kategori ikonu (kategori renginde, pastel zeminde) — boş kutu değil. */
+export function KategoriIkonu({ tip, boyut }: { tip: string | null | undefined; boyut: number }) {
+  const k = KATEGORI_PIN[pinKategorisi(tip)];
+  const kaynak = PIN_IKONLARI[`${k.ikon}-${k.renk.slice(1)}`];
+  if (!kaynak) return null;
+  return (
+    <View style={[StyleSheet.absoluteFill, { alignItems: 'center', justifyContent: 'center' }]} pointerEvents="none" testID="kategori-ikonu">
+      <Image source={kaynak} style={{ width: boyut, height: boyut }} contentFit="contain" />
+    </View>
+  );
+}
+
 export function FotoKutusu({ uri, tip, boyut, kose, stil }: { uri: string | null; tip: string | null | undefined; boyut?: number; kose: number; stil?: StyleProp<ViewStyle> }) {
   const olcu = boyut ? { width: boyut, height: boyut } : null;
   return (
     <View style={[{ borderRadius: kose, overflow: 'hidden', backgroundColor: KUTU_RENGI[pinKategorisi(tip)] }, olcu, stil]}>
-      {uri ? <Image source={{ uri }} style={StyleSheet.absoluteFill} contentFit="cover" transition={150} /> : null}
+      {uri ? <Image source={{ uri }} style={StyleSheet.absoluteFill} contentFit="cover" transition={150} /> : <KategoriIkonu tip={tip} boyut={Math.round((boyut ?? 46) * 0.45)} />}
     </View>
   );
 }

@@ -5,9 +5,11 @@ import { ActivityIndicator, Linking, Pressable, ScrollView, StyleSheet, Text, Vi
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { GrupPenceresi } from '@/components/davet/GrupPenceresi';
+import { KategoriIkonu } from '@/components/gezi/GeziParcalari';
 import { GeriHapi } from '@/components/harita/HaritaEkrani';
 import { GuneEkleSayfasi } from '@/components/listem/GuneEkleSayfasi';
 import { KaydirilirSatir } from '@/components/listem/KaydirilirSatir';
+import { SigmayanlarSayfasi } from '@/components/listem/SigmayanlarSayfasi';
 import { MekanPaneli } from '@/components/mekan/MekanPaneli';
 import { gunAdi } from '@/components/program/PlanHazirSayfasi';
 import { SecimMenusu } from '@/components/program/SecimMenusu';
@@ -20,13 +22,13 @@ import { useDuragaAta, useDuraklar, useDurakKaldir, useGunler } from '@/features
 import type { Konaklama } from '@/features/konaklama/plan';
 import { useKonaklamalar } from '@/features/konaklama/sorgular';
 import { gunProgramlari, gunSecenekleri, listemGruplari, type GunSecenegi, type ListemSatiri, type ListemSiralama } from '@/features/listem/listem';
-import { useOylar, useOyVer } from '@/features/listem/sorgular';
+import { dagitimSecenekleri, type DagitimHesabi, type DagitimSecenegi } from '@/features/listem/sigmayanlar';
+import { useGunlereDagit, useOylar, useOyVer } from '@/features/listem/sorgular';
 import { useMekanGuncelle, useMekanlar, useMekanSil, useUyeler } from '@/features/mekanlar/sorgular';
 import { useDurakGuncelle } from '@/features/program/sorgular';
 import { useProgramVerisi } from '@/features/program/useProgramVerisi';
 import { useSeyahatId } from '@/features/seyahatler/baglam';
 import { useSeyahat } from '@/features/seyahatler/sorgular';
-import { usePlaniUygula } from '@/features/sihirbaz/planUygula';
 import { seyahatAdi } from '@/features/sihirbaz/sihirbaz';
 import { useHafifYerler } from '@/features/yerler/api';
 import { t } from '@/i18n';
@@ -72,7 +74,9 @@ function Listem({ seyahat, gunler, duraklar, mekanlar, konaklamalar }: { seyahat
   const kaldir = useDurakKaldir(seyahat.id);
   const durakGuncelle = useDurakGuncelle(seyahat.id);
   const mekanGuncelle = useMekanGuncelle(seyahat.id);
-  const dagit = usePlaniUygula(seyahat.id);
+  const dagit = useGunlereDagit(seyahat.id);
+  // #200 KK3: sığmayan mekan varsa yazmadan önce seçenek penceresi.
+  const [sigmayan, setSigmayan] = useState<DagitimHesabi | null>(null);
   // #144: Seyahatler'deki "N mekan güne atanmadı" çipi Atanmamış segmentiyle açar.
   const { segment: segmentParam } = useLocalSearchParams<{ segment?: string }>();
   const [segment, setSegment] = useState<Segment>(segmentParam === 'atanmamis' ? 'atanmamis' : 'tumu');
@@ -189,14 +193,21 @@ function Listem({ seyahat, gunler, duraklar, mekanlar, konaklamalar }: { seyahat
       setBildirim(t('listem.hata'));
     }
   };
-  const gunlereDagit = async () => {
+  // #200 KK3–KK5: gün kapasitesi günün penceresi (gün saatleri, yoksa seyahatinki). Hepsi sığıyorsa doğrudan yazılır; sığmayan
+  // varsa pencere açılır. Yazım tek işlemde ve geçmişte tek kayıt ("Geri al" hepsini döndürür).
+  const dagitimiYaz = async (secenek: DagitimSecenegi) => {
     try {
-      const plan = await dagit.mutateAsync({ mekanlar, gunler, duraklar });
-      const n = plan.gunler.reduce((t0, g) => t0 + g.mekanlar.length, 0);
-      setBildirim(plan.atanmamis.length > 0 ? t('listem.dagitildiKalan', { n, k: plan.atanmamis.length }) : t('listem.dagitildi', { n }));
+      await dagit.mutateAsync({ secenek, mekanlar, duraklar });
+      setSigmayan(null);
+      setBildirim(secenek.kalan.length > 0 ? t('listem.dagitildiKalan', { n: secenek.dagitilan, k: secenek.kalan.length }) : t('listem.dagitildi', { n: secenek.dagitilan }));
     } catch {
       setBildirim(t('listem.hata'));
     }
+  };
+  const gunlereDagit = () => {
+    const hesap = dagitimSecenekleri({ mekanlar, gunler, duraklar, gunBasi: seyahat.day_start, gunSonu: seyahat.day_end });
+    if (hesap.taban.hepsi) return dagitimiYaz(hesap.taban);
+    setSigmayan(hesap);
   };
 
   const satirOgesi = (x: ListemSatiri, atanmamis: boolean) => {
@@ -210,7 +221,7 @@ function Listem({ seyahat, gunler, duraklar, mekanlar, konaklamalar }: { seyahat
     const icerik = (
       <View style={[s.satir, atanmamis && s.satirKutuda]}>
         <Pressable accessibilityRole="button" onPress={() => setPanelId(m.id)} style={s.satirIc}>
-          <View style={s.foto}>{foto ? <Image source={{ uri: foto }} style={StyleSheet.absoluteFill} contentFit="cover" transition={150} /> : null}</View>
+          <View style={s.foto}>{foto ? <Image source={{ uri: foto }} style={StyleSheet.absoluteFill} contentFit="cover" transition={150} /> : <KategoriIkonu tip={m.primary_type} boyut={22} />}</View>
           <View style={{ flex: 1, minWidth: 0 }}>
             <Text style={[s.ad, x.durak?.skipped && s.cizili]} numberOfLines={1}>
               {ad}
@@ -377,6 +388,20 @@ function Listem({ seyahat, gunler, duraklar, mekanlar, konaklamalar }: { seyahat
         </View>
       ) : null}
 
+      {sigmayan ? (
+        <SigmayanlarSayfasi
+          hesap={sigmayan}
+          gunler={gunler}
+          mekanAdi={(mid) => {
+            const m = mekanlar.find((x) => x.id === mid);
+            const ad = m ? adi(m) : null;
+            return ad && ad !== '…' ? ad : null;
+          }}
+          mesgul={dagit.isPending}
+          onDagit={(x) => void dagitimiYaz(x)}
+          onKapat={() => setSigmayan(null)}
+        />
+      ) : null}
       <GuneEkleSayfasi
         acik={!!guneEkleMekan}
         ad={guneEkleMekan ? adi(guneEkleMekan) : ''}

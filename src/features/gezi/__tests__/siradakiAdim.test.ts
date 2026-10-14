@@ -119,3 +119,31 @@ describe('#181 KK5 Sıradaki adım: öncelik sırası', () => {
     expect(siradakiAdim(g)?.tur).toBe('yarin');
   });
 });
+
+// #200 KK1–KK2: ekranda kendi satırı olan bir eksik Sıradaki adımda tekrar edilmez; öncelik sırasındaki sonraki adım gelir.
+describe('#200 Sıradaki adım: ekrandaki satırı tekrar etmez', () => {
+  it('KK1 · otel satırı ekrandayken otel atlanır: tek kişiyse Davet et, değilse sıradaki', () => {
+    expect(siradakiAdim({ ...tamam(), otelVar: false, uyeSayisi: 1, ekranda: ['otel'] })).toEqual({ tur: 'davet' });
+    expect(siradakiAdim({ ...tamam(), otelVar: false, ekranda: ['otel'] })).toBeNull();
+    expect(siradakiAdim({ ...tamam(), otelVar: false, bugun: '2026-10-23', ekranda: ['otel'] })?.tur).toBe('yarin');
+  });
+  it('KK1 · otel satırı ekrandayken Dağıt satırı "otel de seçilmedi" demez', () => {
+    const g = tamam();
+    g.mekanlar.push(mekan('yeni', 'park'));
+    expect(siradakiAdim({ ...g, otelVar: false, ekranda: ['otel'] })).toEqual({ tur: 'dagit', mekanIdleri: ['yeni'], otelYok: false });
+  });
+  it('KK2 · genel kural: ekranda satırı olan her eksik atlanır', () => {
+    const g = tamam();
+    g.mekanlar.push(mekan('yeni', 'park'));
+    expect(siradakiAdim({ ...g, otelVar: false, uyeSayisi: 1, ekranda: ['dagit'] })?.tur).toBe('otel');
+    expect(siradakiAdim({ ...tamam(), uyeSayisi: 1, bugun: '2026-10-23', ekranda: ['davet'] })?.tur).toBe('yarin');
+    expect(siradakiAdim({ ...tamam(), duraklar: [], ekranda: ['planKur'] })).toBeNull();
+    expect(siradakiAdim({ ...tamam(), mod: 'bitti', acikTransfer: 2, ekranda: ['harcamaKapat'] })).toBeNull();
+    const yemeksiz = tamam();
+    yemeksiz.duraklar = yemeksiz.duraklar.filter((d) => d.id !== 'd5');
+    yemeksiz.mekanlar = yemeksiz.mekanlar.filter((m) => m.id !== 'm5');
+    expect(siradakiAdim({ ...yemeksiz, bugun: '2026-10-23' })?.tur).toBe('yemek');
+    expect(siradakiAdim({ ...yemeksiz, bugun: '2026-10-23', ekranda: ['yemek'] })?.tur).toBe('yarin');
+    expect(siradakiAdim({ ...tamam(), bugun: '2026-10-23', ekranda: ['yarin'] })).toBeNull();
+  });
+});

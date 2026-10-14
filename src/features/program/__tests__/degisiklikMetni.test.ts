@@ -53,3 +53,16 @@ describe('Son değişiklikler (#141 KK6)', () => {
     expect(geriAlmaYetkisi(duzenleme, 'mert', false)).toBe(false);
   });
 });
+
+describe('#200 Günlere dağıt tek kayıt', () => {
+  const k = { mekanAdi: () => '…', gunNo: () => null, durakMekani: () => null };
+  it('cümle: kaç mekan, süre kısaltma ve gün uzatma; geri alınabilir, geri alması geri alınmaz', () => {
+    const dagit = degisiklikGruplari([d(1, { entity: 'dagit', entity_id: 't1', new: { mekan: 12, kisalt: true, uzat: false } })])[0];
+    expect(grupMetni(dagit, k)).toBe('12 mekanı günlere dağıttı · süreleri kısalttı');
+    expect(grupMetni(degisiklikGruplari([d(2, { entity: 'dagit', entity_id: 't1', new: { mekan: 9, kisalt: false, uzat: true } })])[0], k)).toBe('9 mekanı günlere dağıttı · günleri uzattı');
+    expect(geriAlinabilir(dagit)).toBe(true);
+    const geri = degisiklikGruplari([d(3, { entity: 'dagit_geri', entity_id: 't1', old: { mekan: 12 } })])[0];
+    expect(grupMetni(geri, k)).toBe('günlere dağıtımı geri aldı');
+    expect(geriAlinabilir(geri)).toBe(false);
+  });
+});
