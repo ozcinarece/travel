@@ -36,6 +36,8 @@ type Ortak = {
   onEkle: (y: HafifYer) => void;
   onCikar: (placeId: string) => void;
   onAc: (placeId: string) => void;
+  /** #189 KK3: görünür alanda az öneri kaldıysa listenin altındaki (boşsa yerindeki) yönlendirme satırı. */
+  azMetni?: string | null;
 };
 
 /** #165 KK3/KK7: "Kategori · ★ 4,7 · 1 sa". */
@@ -106,8 +108,12 @@ export function CekmeceSeridi({ hal, sayi, onHal, liste, tam }: { hal: SayfaHali
   );
 }
 
-function BosDurum() {
-  return <Text style={s.bos}>{t('kesfet.cekmece.bos')}</Text>;
+function BosDurum({ azMetni }: { azMetni?: string | null }) {
+  return <Text style={s.bos}>{azMetni ?? t('kesfet.cekmece.bos')}</Text>;
+}
+
+function AzSatiri({ metin }: { metin?: string | null }) {
+  return metin ? <Text style={s.az}>{metin}</Text> : null;
 }
 
 /** #165 KK3–4 (kanvas 9b) yarım hal: satır listesi, çekmecenin içinde kayar. */
@@ -126,7 +132,8 @@ export function CekmeceSatirlari({ liste, yukseklik, ...o }: Ortak & { liste: Ce
         overScrollMode="never"
         contentContainerStyle={s.satirlar}
         keyboardShouldPersistTaps="handled"
-        ListEmptyComponent={<BosDurum />}
+        ListEmptyComponent={<BosDurum azMetni={o.azMetni} />}
+        ListFooterComponent={liste.length > 0 ? <AzSatiri metin={o.azMetni} /> : null}
         renderItem={({ item: y }) => {
           const listede = o.havuz.has(y.place_id);
           return (
@@ -168,7 +175,8 @@ export function CekmeceKartlari({ liste, yukseklik, onHaritayaDon, ...o }: Ortak
           overScrollMode="never"
           columnWrapperStyle={s.kartSatiri}
           contentContainerStyle={s.kartlar}
-          ListEmptyComponent={<BosDurum />}
+          ListEmptyComponent={<BosDurum azMetni={o.azMetni} />}
+          ListFooterComponent={liste.length > 0 ? <AzSatiri metin={o.azMetni} /> : null}
           renderItem={({ item }) => <OneriKarti oge={item} genislik={genislik} {...o} />}
         />
       </SayfaKaydirmasi>
@@ -260,6 +268,7 @@ const s = StyleSheet.create({
   satirAd: { fontFamily: yazi.ekstra, fontSize: 15, color: renk.metin },
   meta: { fontFamily: yazi.normal, fontSize: 12, color: renk.ikincil },
   bos: { fontFamily: yazi.normal, fontSize: 13, color: renk.ikincil, textAlign: 'center', paddingVertical: 24, paddingHorizontal: bosluk.kenar },
+  az: { fontFamily: yazi.normal, fontSize: 13, lineHeight: 18, color: renk.ikincil, textAlign: 'center', paddingTop: 16, paddingBottom: 8 },
   // #165 KK7 (kanvas 9c): iki sütun kart.
   kartlar: { paddingHorizontal: bosluk.kenar, paddingTop: 4, paddingBottom: 84, gap: 16 },
   kartSatiri: { gap: KART_ARASI },

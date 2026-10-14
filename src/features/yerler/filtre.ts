@@ -45,9 +45,10 @@ export const VARSAYILAN_FILTRE: Filtre = { ...BOS_FILTRE, kategoriler: TURISTIK 
  * Pin rengi için tanınmayan tip "gezilecek" sayılır (pinKategorisi), ama süzgeçte yalnız bu tipler Turistik'tir — düğün salonu,
  * `event_venue`, `night_club` gibi yerler Turistik'e ve "Görmen gerekenler"e girmez. Diğer kategoriler pinKategorisi ile.
  */
+// #189: sunucunun Turistik birincil tip kümesiyle aynı (supabase/functions/_shared/google.ts TURISTIK_BIRINCIL).
 const KATEGORI_IZNI: Partial<Record<PinKategorisi, readonly string[]>> = {
-  gezilecek: ['tourist_attraction', 'historical_landmark', 'cultural_landmark', 'monument', 'historical_place'],
-  muze: ['museum', 'art_gallery'],
+  gezilecek: ['tourist_attraction', 'historical_landmark', 'cultural_landmark', 'monument', 'historical_place', 'sculpture', 'castle'],
+  muze: ['museum', 'art_museum', 'history_museum', 'art_gallery'],
   manzara: ['observation_deck'],
   ibadet: ['mosque', 'church', 'synagogue'],
 };

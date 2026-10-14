@@ -3,7 +3,7 @@ import { describe, expect, it, jest } from '@jest/globals';
 import { bolgeHesapla } from '@/components/harita/geo';
 
 import type { HafifYer } from '../api';
-import { cekmeceListesi, cekmeceSayisi } from '../cekmece';
+import { AZ_ONERI, cekmeceListesi, cekmeceSayisi, gorunurOneriSayisi } from '../cekmece';
 
 jest.mock('@/lib/supabase', () => ({ supabase: {} }));
 
@@ -24,6 +24,12 @@ describe('öneri çekmecesi listesi (#98 B KK2–3)', () => {
     // Puan × log10(yorum): d (4,6 · 941) c'nin (4,4 · 1,1K) önünde.
     expect(liste.map((y) => y.place_id)).toEqual(['a', 'b', 'd', 'c']);
     expect(cekmeceSayisi(liste, new Set(['a']))).toBe(3);
+  });
+  it('#189 KK3: görünür alandaki öneri sayısı listedekileri de sayar; dışarıdakiler ve bölgesiz durum 0', () => {
+    expect(AZ_ONERI).toBe(3);
+    expect(gorunurOneriSayisi([...icerde, disarda], bolge)).toBe(4);
+    expect(gorunurOneriSayisi([icerde[0], icerde[1], disarda], bolge)).toBeLessThan(AZ_ONERI);
+    expect(gorunurOneriSayisi(icerde, null)).toBe(0);
   });
   it('kategori çipleri süzer; bölge yoksa boş', () => {
     expect(cekmeceListesi(icerde, new Set(), bolge, new Set(), 'yemek').map((y) => y.place_id)).toEqual(['b']);

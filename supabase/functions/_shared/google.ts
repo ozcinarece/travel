@@ -383,7 +383,10 @@ type YakinSecenek = {
   ibadetSuzgeci?: boolean;
 };
 
-export async function yakinAra(secenek: YakinSecenek): Promise<HafifYer[]> {
+/** Nearby sonucu + tüm tipleri (#189 süzgeci için; istemciye gönderilmeden önce `hafifYer` ile atılır). */
+export type YakinYer = HafifYer & { tipler: string[] };
+
+export async function yakinAra(secenek: YakinSecenek): Promise<YakinYer[]> {
   try {
     return await yakinAraBir(secenek, secenek.haric);
   } catch (e) {
@@ -395,7 +398,7 @@ export async function yakinAra(secenek: YakinSecenek): Promise<HafifYer[]> {
   }
 }
 
-async function yakinAraBir(secenek: YakinSecenek, haric: string[] | undefined): Promise<HafifYer[]> {
+async function yakinAraBir(secenek: YakinSecenek, haric: string[] | undefined): Promise<YakinYer[]> {
   const cevap = await istek<{ places?: DetailsCevap[] }>('places:searchNearby', {
     govde: {
       includedTypes: secenek.tipler,
@@ -423,7 +426,113 @@ async function yakinAraBir(secenek: YakinSecenek, haric: string[] | undefined): 
     puan_sayisi: d.userRatingCount ?? null,
     acik: d.currentOpeningHours?.openNow ?? null,
     ulke_kodu: null,
+    tipler: d.types ?? [],
   }));
+}
+
+/** İstemciye giden biçim: tipler atılır. */
+export function hafifYer({ tipler: _tipler, ...y }: YakinYer): HafifYer {
+  return y;
+}
+
+// ---------------------------------------------------------------- #189 Keşfet kalitesi (sunucu süzgeci; ek Google isteği yok)
+
+/** Eşik grubu: hızlı çipler (Turistik · Yemek · Kafe · Park · Alışveriş). */
+export type KesfetGrubu = 'turistik' | 'yemek' | 'kafe' | 'park' | 'alisveris';
+export type KesfetEsikleri = Record<KesfetGrubu, { yorum: number; puan: number }>;
+const GRUPLAR: KesfetGrubu[] = ['turistik', 'yemek', 'kafe', 'park', 'alisveris'];
+
+/** KK2 varsayılanları; yonetim_ayarlari.kesfet_esikleri (Ayarlar) bunları ezer. Puan 0 = puan şartı yok. */
+export const VARSAYILAN_ESIKLER: KesfetEsikleri = {
+  turistik: { yorum: 50, puan: 3.8 },
+  yemek: { yorum: 30, puan: 3.8 },
+  kafe: { yorum: 30, puan: 3.8 },
+  park: { yorum: 20, puan: 0 },
+  alisveris: { yorum: 0, puan: 0 },
+};
+
+/** Ayardaki değeri varsayılanların üstüne yazar; geçersiz alan (negatif, sayı değil, puan > 5) varsayılanda kalır. */
+export function esikleriCoz(deger: unknown): KesfetEsikleri {
+  const sonuc = Object.fromEntries(GRUPLAR.map((g) => [g, { ...VARSAYILAN_ESIKLER[g] }])) as KesfetEsikleri;
+  if (!deger || typeof deger !== 'object') return sonuc;
+  for (const grup of GRUPLAR) {
+    const g = (deger as Record<string, unknown>)[grup];
+    if (!g || typeof g !== 'object') continue;
+    const { yorum, puan } = g as { yorum?: unknown; puan?: unknown };
+    if (typeof yorum === 'number' && Number.isFinite(yorum) && yorum >= 0) sonuc[grup].yorum = Math.trunc(yorum);
+    if (typeof puan === 'number' && Number.isFinite(puan) && puan >= 0 && puan <= 5) sonuc[grup].puan = puan;
+  }
+  return sonuc;
+}
+
+/**
+ * KK1: birincil tip kümeleri. Nearby `includedTypes`'ı `types` listesinin herhangi birinde arar; işletmeler kendine yanlış tip
+ * ekleyebildiği için gösterilecek yerin BİRİNCİL tipi çipin kümesinde olmalı. Kümeler includedTypes'ın alt türlerini de kapsar
+ * (ör. `turkish_restaurant` Yemek'tir) ve istemcinin kategori eşlemesiyle (pinKategorisi, Turistik izin listesi) uyumludur.
+ */
+const TURISTIK_BIRINCIL = new Set([
+  'tourist_attraction',
+  'historical_landmark',
+  'historical_place',
+  'cultural_landmark',
+  'monument',
+  'sculpture',
+  'castle',
+  'museum',
+  'art_museum',
+  'history_museum',
+  'art_gallery',
+  'observation_deck',
+]);
+const YEMEK_BIRINCIL = new Set(['restaurant', 'steak_house', 'diner', 'food_court', 'meal_takeaway', 'deli', 'sandwich_shop', 'kebab_shop']);
+const KAFE_BIRINCIL = new Set(['cafe', 'coffee_shop', 'bakery', 'tea_house', 'dessert_shop', 'confectionery', 'ice_cream_shop', 'coffee_roastery', 'coffee_stand', 'cat_cafe', 'dog_cafe']);
+const PARK_BIRINCIL = new Set(['park', 'city_park', 'state_park', 'national_park', 'dog_park', 'garden', 'botanical_garden', 'zoo', 'hiking_area', 'wildlife_park', 'beach']);
+const ALISVERIS_BIRINCIL = new Set(['shopping_mall', 'market', 'farmers_market', 'flea_market', 'department_store']);
+
+const BIRINCIL: Record<KesfetGrubu, (tip: string) => boolean> = {
+  turistik: (p) => TURISTIK_BIRINCIL.has(p),
+  yemek: (p) => YEMEK_BIRINCIL.has(p) || p.endsWith('_restaurant'),
+  kafe: (p) => KAFE_BIRINCIL.has(p),
+  park: (p) => PARK_BIRINCIL.has(p),
+  alisveris: (p) => ALISVERIS_BIRINCIL.has(p),
+};
+
+/** KK1 istisnası (#178 mantığı): Turistik'te birincil tipi turistik olmayan ama tiplerinde bunlardan biri olan yer kalır. */
+const TURISTIK_ISTISNA = ['tourist_attraction', 'historical_landmark'];
+
+/** Çipin eşik grubu; `hepsi` her grubu kabul eder; `otel` ve `ibadet` süzülmez (null). Eski çipler Turistik sayılır. */
+function cipGrubu(cip: string): KesfetGrubu | 'hepsi' | null {
+  if (cip === 'hepsi') return 'hepsi';
+  if ((GRUPLAR as string[]).includes(cip)) return cip as KesfetGrubu;
+  if (['gezilecek', 'muze', 'manzara', 'populer', 'sanat'].includes(cip)) return 'turistik';
+  return null;
+}
+
+/** Yerin bu çipteki grubu (KK1); birincil tipi kümede değilse ve istisnaya da girmiyorsa null. */
+export function yerGrubu(y: Pick<YakinYer, 'primary_type' | 'tipler'>, cip: string): KesfetGrubu | null {
+  const cg = cipGrubu(cip);
+  if (!cg) return null;
+  const p = y.primary_type ?? '';
+  const istisna = TURISTIK_ISTISNA.some((t) => y.tipler.includes(t));
+  if (cg === 'hepsi') return GRUPLAR.find((g) => BIRINCIL[g](p)) ?? (istisna ? 'turistik' : null);
+  if (BIRINCIL[cg](p)) return cg;
+  return cg === 'turistik' && istisna ? 'turistik' : null;
+}
+
+/**
+ * #189: Keşfet cevabının süzgeci — gizleme listesi (KK5), birincil tip şartı (KK1), yorum / puan alt sınırı (KK2). `otel` ve
+ * `ibadet` çiplerinde yalnız gizleme listesi uygulanır. Sıra korunur (popülerlik).
+ */
+export function kesfetSuzgeci(yerler: YakinYer[], cip: string, esikler: KesfetEsikleri, gizli: ReadonlySet<string>): YakinYer[] {
+  const suzulur = cipGrubu(cip) !== null;
+  return yerler.filter((y) => {
+    if (gizli.has(y.place_id)) return false;
+    if (!suzulur) return true;
+    const grup = yerGrubu(y, cip);
+    if (!grup) return false;
+    const e = esikler[grup];
+    return (y.puan_sayisi ?? 0) >= e.yorum && (e.puan <= 0 || (y.puan ?? 0) >= e.puan);
+  });
 }
 
 // ---------------------------------------------------------------- Tam Details (#80 mekan paneli · Genel)

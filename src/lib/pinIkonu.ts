@@ -22,17 +22,22 @@ const KATEGORI_ESLEME: [RegExp, PinKategorisi][] = [
   [/church|mosque|synagogue|place_of_worship|temple|cathedral|basilica|hindu|shrine/, 'ibadet'],
   [/museum|art_gallery|gallery/, 'muze'],
   [/cafe|bakery|coffee|tea_house|dessert|ice_cream|confectionery/, 'kafe'],
-  [/restaurant|food|meal|pizza|steak|sushi|diner|bistro|brunch|breakfast|barbecue|seafood|deli|sandwich|bar$|pub|wine_bar/, 'yemek'],
+  [/restaurant|food|meal|pizza|steak|sushi|diner|bistro|brunch|breakfast|barbecue|seafood|deli|sandwich|kebab|bar$|pub|wine_bar/, 'yemek'],
   [/park|garden|national_park|zoo|botanical|beach|hiking/, 'park'],
   [/observation|scenic|viewpoint|lookout/, 'manzara'],
   [/shopping|market|store|shop|mall/, 'alisveris'],
 ];
 
-/** #53: Google primaryType → kategori; tourist_attraction / landmark / bilinmeyen → gezilecek yer. */
-export function pinKategorisi(primaryType: string | null | undefined): PinKategorisi {
+/** Eşleme tablosunda karşılığı olan kategori; tanınmayan tipte null (#189: etiket yedeği "Mekan" olsun diye). */
+export function eslesenKategori(primaryType: string | null | undefined): PinKategorisi | null {
   const t = (primaryType ?? '').toLowerCase();
   for (const [desen, k] of KATEGORI_ESLEME) if (desen.test(t)) return k;
-  return 'gezilecek';
+  return null;
+}
+
+/** #53: Google primaryType → kategori; tourist_attraction / landmark / bilinmeyen → gezilecek yer. */
+export function pinKategorisi(primaryType: string | null | undefined): PinKategorisi {
+  return eslesenKategori(primaryType) ?? 'gezilecek';
 }
 
 /** #164 KK2: birincil tipi konaklama mı (otel, pansiyon, kamp…). Keşfet ve "Görmen gerekenler" önerilerinden süzülür. */
