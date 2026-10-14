@@ -15,6 +15,7 @@ import { SeyahatYukleme } from '@/components/seyahatler/SeyahatYukleme';
 import { Avatar } from '@/components/ui/Avatar';
 import { Ikon } from '@/components/ui/Ikon';
 import { SegmentSecici } from '@/components/ui/SegmentSecici';
+import { geriYaDaGezi } from '@/features/gezi/gezinti';
 import { useDuragaAta, useDuraklar, useDurakKaldir, useGunler } from '@/features/gunler/sorgular';
 import type { Konaklama } from '@/features/konaklama/plan';
 import { useKonaklamalar } from '@/features/konaklama/sorgular';
@@ -251,7 +252,7 @@ function Listem({ seyahat, gunler, duraklar, mekanlar, konaklamalar }: { seyahat
     <View style={s.ekran}>
       <ScrollView contentContainerStyle={[s.icerik, { paddingTop: kenar.top + 12 }]}>
         <View style={s.ustSatir}>
-          <GeriHapi baslik={seyahatAdi(seyahat)} onPress={() => router.navigate('/(tabs)')} duz />
+          <GeriHapi baslik={seyahatAdi(seyahat)} onPress={() => geriYaDaGezi(seyahat.id)} duz />
           <Pressable accessibilityRole="button" accessibilityLabel={t('seyahat.grup.baslik')} onPress={() => setGrupAcik(true)} hitSlop={8} style={s.yuzler}>
             {(uyeler.data ?? []).slice(0, 2).map((u, i) => (
               <View key={u.user_id} style={[s.yuzCerceve, i > 0 && { marginLeft: -8 }]}>

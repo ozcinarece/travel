@@ -60,7 +60,7 @@ export default function DavetEkrani() {
       const tripId = ozet.data!.trip_id;
       // Web'de katılıp linki uygulamada açan: karşılama damgası şimdi (sonradan bir kez daha karşılanmasın).
       if (DAVET_KANALI === 'app') karsilandi(tripId);
-      router.replace({ pathname: '/seyahat/[id]/(sekmeler)/program', params: { id: tripId } });
+      router.replace({ pathname: '/seyahat/[id]/(sekmeler)/gezi', params: { id: tripId } });
       return;
     }
     if (adim !== 'katil' || katilimHatasi) return;
@@ -69,7 +69,7 @@ export default function DavetEkrani() {
       .mutateAsync(token)
       .then((sonuc) => {
         bekleyenDavetiSil();
-        router.replace({ pathname: '/seyahat/[id]/(sekmeler)/program', params: sonuc.zaten_uye ? { id: sonuc.trip_id } : { id: sonuc.trip_id, katildin: '1' } });
+        router.replace({ pathname: '/seyahat/[id]/(sekmeler)/gezi', params: sonuc.zaten_uye ? { id: sonuc.trip_id } : { id: sonuc.trip_id, katildin: '1' } });
       })
       .catch((e: unknown) => {
         katilimBasladi.current = false;

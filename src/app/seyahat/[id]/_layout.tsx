@@ -11,7 +11,7 @@ import { useSeyahat } from '@/features/seyahatler/sorgular';
 import { supabase } from '@/lib/supabase';
 import type { SeyahatOzet } from '@/lib/tipler';
 
-// Seyahat içi yığın: sekmeler (Keşfet · Günler · Program · Grup) + mekan detayı (3.8).
+// Seyahat içi yığın: sekmeler (#181: Gezi · Plan · Keşfet · Harcama · Sohbet) + Listem, Rehber, geceler, eski mekan derin linki.
 // Realtime aboneliği seyahat açıkken burada yaşar (PRD §5.5).
 export default function SeyahatLayout() {
   const { id } = useLocalSearchParams<{ id: string | string[] }>();
@@ -30,6 +30,9 @@ export default function SeyahatLayout() {
         <Stack.Screen name="mekan/[placeId]" />
         {/* #139 KK7: "Geceleri ayrı seç". */}
         <Stack.Screen name="geceler" />
+        {/* #181 KK2: Listem ve Rehber sekme değil; Gezi sayfasından açılır. */}
+        <Stack.Screen name="listem" />
+        <Stack.Screen name="rehber" />
       </Stack>
     </SeyahatIdSaglayici>
   );

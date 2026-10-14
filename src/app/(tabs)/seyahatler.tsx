@@ -50,7 +50,7 @@ export default function SeyahatlerEkrani() {
 
   const ac = (id: string) => router.push({ pathname: '/seyahat/[id]', params: { id } });
   const cip = (sy: SeyahatOzet) => (c: DurumCipi) => {
-    if (c.anahtar === 'atanmamis') router.push({ pathname: '/seyahat/[id]/(sekmeler)/listem', params: { id: sy.id, segment: 'atanmamis' } });
+    if (c.anahtar === 'atanmamis') router.push({ pathname: '/seyahat/[id]/listem', params: { id: sy.id, segment: 'atanmamis' } });
     else if (c.anahtar === 'otel') router.push({ pathname: '/seyahat/[id]/(sekmeler)/program', params: { id: sy.id, otel: '1' } });
   };
   // #174 KK1, KK3–KK4, KK9: uzun basınca platform menüsü — sahipte "Seyahati sil", üyede "Seyahatten ayrıl"; onay, kısa bildirim.

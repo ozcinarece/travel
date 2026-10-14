@@ -1,4 +1,4 @@
-import { router, useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, Linking, Pressable, StyleSheet, Text, TextInput, View, useWindowDimensions } from 'react-native';
 
@@ -14,6 +14,7 @@ import { useKonaklamalar } from '@/features/konaklama/sorgular';
 import { GrupPenceresi } from '@/components/davet/GrupPenceresi';
 import { MekanPaneli } from '@/components/mekan/MekanPaneli';
 import { useMekanEkle, useMekanGuncelle, useMekanlar, useMekanSil, useUyeler } from '@/features/mekanlar/sorgular';
+import { geziyeGit } from '@/features/gezi/gezinti';
 import { useSeyahatId } from '@/features/seyahatler/baglam';
 import { useSeyahat } from '@/features/seyahatler/sorgular';
 import { seyahatAdi } from '@/features/sihirbaz/sihirbaz';
@@ -45,17 +46,18 @@ export default function KesfetEkrani() {
   const id = useSeyahatId();
   // #80 KK12: eski `mekan/[placeId]` derin linki buraya `mekan` parametresiyle yönlenir → panel açılır.
   // #142 KK4: Rehber sekmesindeki "Rehberdeki N mekan ›" → `cekmece=rehber` (çekmece tam halde "Rehberden" listesiyle açılır).
-  const { mekan, cekmece } = useLocalSearchParams<{ mekan?: string | string[]; cekmece?: string }>();
+  // #181: Gezi sayfasının "Öğle yemeği ekle"si `cip=yemek` (+ her istekte yeni `n`) ile Yemek çipini seçer.
+  const { mekan, cekmece, cip, n } = useLocalSearchParams<{ mekan?: string | string[]; cekmece?: string; cip?: string; n?: string }>();
   const seyahat = useSeyahat(id);
   const konaklamalar = useKonaklamalar(id);
   if (!seyahat.data || !konaklamalar.data || !id) return <SeyahatYukleme sorgular={[seyahat, konaklamalar]} kimlikYok={!id} />;
-  return <Kesfet key={id} seyahat={seyahat.data} konaklamalar={konaklamalar.data} ilkMekan={Array.isArray(mekan) ? mekan[0] : mekan} cekmeceIstegi={cekmece === 'rehber' ? 'rehber' : null} />;
+  return <Kesfet key={id} seyahat={seyahat.data} konaklamalar={konaklamalar.data} ilkMekan={Array.isArray(mekan) ? mekan[0] : mekan} cekmeceIstegi={cekmece === 'rehber' ? 'rehber' : null} cipIstegi={cip === 'yemek' ? `yemek:${n ?? ''}` : null} />;
 }
 
 const ILK_ZOOM = 13;
 const ILK_BOLGE_BEKLEME_MS = 2000;
 
-function Kesfet({ seyahat, konaklamalar, ilkMekan, cekmeceIstegi }: { seyahat: Seyahat; konaklamalar: Konaklama[]; ilkMekan?: string; cekmeceIstegi: 'rehber' | null }) {
+function Kesfet({ seyahat, konaklamalar, ilkMekan, cekmeceIstegi, cipIstegi }: { seyahat: Seyahat; konaklamalar: Konaklama[]; ilkMekan?: string; cekmeceIstegi: 'rehber' | null; cipIstegi: string | null }) {
   const mekanlar = useMekanlar(seyahat.id);
   const uyeler = useUyeler(seyahat.id);
   // #137 KK6: Grup penceresi (yüzlere dokununca; Grup sekmesi kalktı).
@@ -145,6 +147,10 @@ function Kesfet({ seyahat, konaklamalar, ilkMekan, cekmeceIstegi }: { seyahat: S
     const hedef = yakin.sonTaranan ?? bolge;
     if (hedef && !ayniKumeler(yeni, kumeler)) yakin.tara(hedef, yeni);
   };
+  useEffect(() => {
+    if (cipIstegi) filtreyiDegistir({ ...filtre, kategoriler: ['yemek'] });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cipIstegi]);
 
   const havuz = useMemo(() => mekanlar.data ?? [], [mekanlar.data]);
   // #30: listedeki pinlerin altında ad etiketi (canlı ad, PRD §7).
@@ -438,10 +444,10 @@ function Kesfet({ seyahat, konaklamalar, ilkMekan, cekmeceIstegi }: { seyahat: S
 
   return (
     <HaritaEkrani
-      // #141 KK1: sol üstte her zaman "‹ {seyahat adı}" → ana sayfa.
+      // #141 KK1: sol üstte her zaman "‹ {seyahat adı}"; #181: seyahatin evi Gezi sayfası.
       baslik={seyahatAdi(seyahat)}
       altMenuVar
-      geri={() => router.navigate('/(tabs)')}
+      geri={() => geziyeGit(seyahat.id)}
       sagUst={
         // #45: Grup'a erişim avatarlardan (seyahat içi alt menü kalktı).
         <Pressable accessibilityRole="button" accessibilityLabel={t('seyahat.grup.baslik')} hitSlop={8} onPress={() => setGrupAcik(true)} style={s.avatarlar}>

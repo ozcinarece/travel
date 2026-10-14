@@ -65,13 +65,13 @@ export function GeziAl({ gezi, kimlik, ilkHedefId, onKapat, gecis = 'replace' }:
 }
 
 /** #144 KK2: slug'dan gezi detayı ve durakların Google kimlikleri yüklenir, sonra aynı alt sayfa. */
-export function GeziAlYukleyici({ slug, onKapat }: { slug: string; onKapat: () => void }) {
+export function GeziAlYukleyici({ slug, onKapat, ilkHedefId }: { slug: string; onKapat: () => void; /** #181: seyahatin Gezi sayfasından açılınca o seyahat seçili. */ ilkHedefId?: string }) {
   const gezi = useGezi(slug);
   const duraklar = useMemo(() => gezi.data?.gezi_gunleri.flatMap((g) => g.gezi_duraklari) ?? [], [gezi.data]);
   // #172: yalnız Google kimlikleri gerekir — fotoğraf istenmez (places-light çağrılmaz).
   const canli = useIcerikCanli(duraklar, () => gezi.data?.sehirler?.ad ?? '', !!gezi.data, { foto: false });
   const kimlik = useCallback((d: GeziDuragi) => canli.data?.get(d.id)?.place_id ?? d.place_id ?? null, [canli.data]);
-  if (gezi.data) return <GeziAl gezi={gezi.data} kimlik={kimlik} onKapat={onKapat} gecis="push" />;
+  if (gezi.data) return <GeziAl gezi={gezi.data} kimlik={kimlik} ilkHedefId={ilkHedefId} onKapat={onKapat} gecis="push" />;
   return (
     <Modal visible transparent animationType="fade" onRequestClose={onKapat}>
       <Pressable style={s.perde} onPress={onKapat} accessibilityLabel={t('genel.vazgec')}>

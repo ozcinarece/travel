@@ -33,13 +33,14 @@ export const bacakAnahtari = (fromKey: string, toKey: string) => `${fromKey}>${t
  * §5.1 / T9: gün bazlı yürüyüş matrisi. Edge Function walk_cache'ten okur, eksikleri Google'dan alır (≤ 30 gün).
  * İstemci 1 saat önbellekler; nokta kümesi değişince yalnız eksikler sorulur (sunucu tarafında).
  */
-export function useYuruyusMatrisi(seyahatId: string | undefined, noktalar: MatrisNoktasi[]) {
+export function useYuruyusMatrisi(seyahatId: string | undefined, noktalar: MatrisNoktasi[], ag = true) {
   const { session } = useOturum();
   const sirali = [...noktalar].sort((a, b) => a.key.localeCompare(b.key));
   const anahtar = sirali.map((n) => n.key).join('|');
   const sorgu = useQuery({
     queryKey: ['yuruyus', seyahatId, anahtar],
-    enabled: !!session && !!seyahatId && sirali.length >= 2,
+    // #181 KK13: `ag` kapalıysa yalnız önbellekteki matris okunur (istek yok; Gezi sayfası).
+    enabled: ag && !!session && !!seyahatId && sirali.length >= 2,
     staleTime: 60 * 60 * 1000,
     gcTime: 24 * 60 * 60 * 1000,
     retry: 1,
@@ -54,7 +55,7 @@ export function useYuruyusMatrisi(seyahatId: string | undefined, noktalar: Matri
     },
   });
   const yuruyus: YuruyusKaynagi = (a, b) => sorgu.data?.harita[`${a}>${b}`] ?? null;
-  return { yuruyus, yukleniyor: sorgu.isPending && sirali.length >= 2, hata: sorgu.isError, eksik: !!sorgu.data?.eksik };
+  return { yuruyus, yukleniyor: ag && sorgu.isPending && sirali.length >= 2, hata: sorgu.isError, eksik: !!sorgu.data?.eksik };
 }
 
 /**
@@ -62,14 +63,14 @@ export function useYuruyusMatrisi(seyahatId: string | undefined, noktalar: Matri
  * `bacaklar` sırayla otel → 1 → … → otel; sunucu önbellekten (walk_cache.polyline) okur, yalnız eksikleri Google'a sorar.
  * İstemci 1 saat önbellekler; sıra değişince anahtar değişir, sunucu yalnız yeni bacakları ister.
  */
-export function useRotaBacaklari(seyahatId: string | undefined, bacaklar: { from: MatrisNoktasi; to: MatrisNoktasi }[], arac = false) {
+export function useRotaBacaklari(seyahatId: string | undefined, bacaklar: { from: MatrisNoktasi; to: MatrisNoktasi }[], arac = false, ag = true) {
   const { session } = useOturum();
   const temiz = bacaklar.filter((b) => b.from.key !== b.to.key).slice(0, 12);
   const anahtar = temiz.map((b) => `${b.from.key}>${b.to.key}`).join('|');
   const sorgu = useQuery({
-    // #101 KK4: `arac` = tek bacak için araba yolu da (seçici açılınca; 24 sa önbellek).
+    // #101 KK4: `arac` = tek bacak için araba yolu da (seçici açılınca; 24 sa önbellek). #181 KK13: `ag` kapalı → yalnız önbellek.
     queryKey: ['rota', seyahatId, anahtar, arac ? 'arac' : ''],
-    enabled: !!session && !!seyahatId && temiz.length >= 1,
+    enabled: ag && !!session && !!seyahatId && temiz.length >= 1,
     staleTime: 24 * 60 * 60 * 1000,
     gcTime: 24 * 60 * 60 * 1000,
     retry: 1,
@@ -83,7 +84,7 @@ export function useRotaBacaklari(seyahatId: string | undefined, bacaklar: { from
       return { harita, eksik: !!data?.eksik };
     },
   });
-  return { rotalar: sorgu.data?.harita ?? BOS_ROTA, yukleniyor: sorgu.isPending && temiz.length >= 1, hata: sorgu.isError };
+  return { rotalar: sorgu.data?.harita ?? BOS_ROTA, yukleniyor: ag && sorgu.isPending && temiz.length >= 1, hata: sorgu.isError };
 }
 const BOS_ROTA: RotaHaritasi = {};
 

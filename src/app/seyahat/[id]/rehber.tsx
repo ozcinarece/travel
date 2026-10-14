@@ -7,6 +7,7 @@ import { SehirRehberi } from '@/components/icerik/SehirRehberi';
 import { SeyahatYukleme } from '@/components/seyahatler/SeyahatYukleme';
 import { Buton } from '@/components/ui/Buton';
 import { sehirEslestir, useSehirler } from '@/features/icerik/sorgular';
+import { geriYaDaGezi } from '@/features/gezi/gezinti';
 import { useSeyahatId } from '@/features/seyahatler/baglam';
 import { useSeyahat } from '@/features/seyahatler/sorgular';
 import { seyahatAdi } from '@/features/sihirbaz/sihirbaz';
@@ -14,17 +15,18 @@ import { t } from '@/i18n';
 import { bosluk, olcek, renk, yazi } from '@/theme';
 
 /**
- * #141 KK1 / #142 KK4–5: seyahat içi Rehber sekmesi — seyahatin şehri yayınlı rehberle eşleşiyorsa şehir rehberi (blog, çipler,
- * yapışkan başlık, okuma ilerlemesi; mekan kartları seyahatin listesine ekler); yoksa boş hal. Geri → ana sayfa.
+ * #141 KK1 / #142 KK4–5: seyahat içi Rehber — seyahatin şehri yayınlı rehberle eşleşiyorsa şehir rehberi (blog, çipler, yapışkan
+ * başlık, okuma ilerlemesi; mekan kartları seyahatin listesine ekler); yoksa boş hal. #181 KK2: artık sekme değil, Gezi
+ * sayfasındaki Rehber kartından açılır; geri → Gezi sayfası.
  */
-export default function RehberSekmesi() {
+export default function RehberEkrani() {
   const id = useSeyahatId();
   const seyahat = useSeyahat(id);
   const sehirler = useSehirler();
   const kenar = useSafeAreaInsets();
   if (!id || !seyahat.data) return <SeyahatYukleme sorgular={[seyahat]} kimlikYok={!id} />;
   const sehir = sehirEslestir(sehirler.data, { ad: seyahat.data.city_label, lat: seyahat.data.lat, lng: seyahat.data.lng });
-  const anaSayfa = () => router.navigate('/(tabs)');
+  const anaSayfa = () => geriYaDaGezi(id);
   if (!sehirler.isPending && !sehir) {
     return (
       <View style={[s.ekran, { paddingTop: kenar.top + 12 }]}>
