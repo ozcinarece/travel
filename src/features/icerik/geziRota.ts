@@ -57,7 +57,9 @@ export const geziRotaAnahtari = (gun: Pick<GeziGunu, 'id' | 'gezi_duraklari'>) =
 export const GEZI_ROTA_TAZE_MS = 24 * 60 * 60 * 1000;
 
 export function rotaHaritasi(satirlar: GeziRotaBacagi[] | undefined): GeziRotalari {
-  return satirlar?.length ? new Map(satirlar.map((s) => [bacakAnahtari(s.kimden_durak_id, s.kime_durak_id), s])) : BOS;
+  // #199 KK2: kimliği eksik satır atlanır (bozuk cevap haritayı düşürmesin; o bacak kuş uçuşunda kalır).
+  const gecerli = Array.isArray(satirlar) ? satirlar.filter((s) => !!s && typeof s.kimden_durak_id === 'string' && typeof s.kime_durak_id === 'string') : [];
+  return gecerli.length ? new Map(gecerli.map((s) => [bacakAnahtari(s.kimden_durak_id, s.kime_durak_id), s])) : BOS;
 }
 
 /** Seçili günün bacakları (KK2–KK3). Durak sayısı 2'den azsa istek yok. */

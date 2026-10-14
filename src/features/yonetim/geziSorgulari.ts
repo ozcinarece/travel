@@ -2,6 +2,7 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useCallback } from 'react';
 
+import { GEZI_GUNLERI_GOMME } from '@/features/icerik/gommeler';
 import type { HafifYer } from '@/features/yerler/api';
 import { varsayilanDakika } from '@/lib/kategori';
 import { supabase } from '@/lib/supabase';
@@ -65,7 +66,7 @@ export function useYonetimGezi(id: string | undefined) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('geziler')
-        .select('*, sehirler(ad, slug), gezi_gunleri(id, gezi_id, sira, baslik, gezi_duraklari(id, gezi_gun_id, sira, place_id, ad, kategori, sure_dk, lat, lng))')
+        .select(`*, sehirler(ad, slug), ${GEZI_GUNLERI_GOMME}`)
         .eq('id', id!)
         .single();
       if (error) throw error;

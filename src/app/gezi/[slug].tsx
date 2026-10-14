@@ -1,5 +1,5 @@
 import { Image } from 'expo-image';
-import { router, useLocalSearchParams } from 'expo-router';
+import { router, useLocalSearchParams, type ErrorBoundaryProps } from 'expo-router';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ActivityIndicator, Linking, Pressable, ScrollView, Share, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -10,6 +10,7 @@ import { MdYazi } from '@/components/icerik/MdYazi';
 import { GeziAl } from '@/components/icerik/GeziAl';
 import { MekanPaneli } from '@/components/mekan/MekanPaneli';
 import { SecimMenusu } from '@/components/program/SecimMenusu';
+import { BolumSiniri } from '@/components/ui/BolumSiniri';
 import { Buton } from '@/components/ui/Buton';
 import { EkleDugmesi } from '@/components/ui/EkleDugmesi';
 import { Ikon } from '@/components/ui/Ikon';
@@ -27,6 +28,7 @@ import { seyahatAdi } from '@/features/sihirbaz/sihirbaz';
 import type { HafifYer } from '@/features/yerler/api';
 import { t } from '@/i18n';
 import { davetLinki } from '@/lib/davetLinki';
+import { hataOzeti } from '@/lib/izler';
 import { kategoriEtiketi, sureMetni, varsayilanDakika } from '@/lib/kategori';
 import { okumaSuresiDk } from '@/lib/markdown';
 import { AYLAR, parcala, tarihAraligi } from '@/lib/takvim';
@@ -91,9 +93,16 @@ export default function GeziEkrani() {
     );
   }
   if (gezi.isError || !gezi.data) {
+    // #199: sebep görünür (ekran görüntüsüyle iletilir) ve yeniden denenebilir; sunucu düzelince sayfa kapatılmadan açılır.
     return (
       <View style={[s.ekran, s.ortala, { paddingTop: kenar.top }]}>
         <Text style={s.hata}>{t('gezi.hata')}</Text>
+        {gezi.error ? (
+          <Text style={s.hataKod} selectable>
+            {geziHataKodu(gezi.error)}
+          </Text>
+        ) : null}
+        <Buton baslik={t('genel.yenidenDene')} yukleniyor={gezi.isFetching} onPress={() => gezi.refetch()} />
         <Buton baslik={t('genel.geri')} tur="ikincil" onPress={() => router.back()} />
       </View>
     );
@@ -249,46 +258,53 @@ export default function GeziEkrani() {
           </View>
         ) : null}
         {hedef ? (
-          <Pressable accessibilityRole="button" accessibilityHint={t('gezi.degistir')} onPress={() => setHedefMenusu({ bekleyen: null })} style={s.hedef}>
-            <View style={s.hedefNokta} />
-            <Text style={s.hedefMetin} numberOfLines={1}>
-              {kalinParcalar(t('gezi.hedefSatir', { seyahat: seyahatAdi(hedef) })).map((p, i) => (
-                <Text key={i} style={p.kalin ? s.hedefKalin : undefined}>
-                  {p.metin}
-                </Text>
-              ))}
-            </Text>
-            <Text style={s.hedefDegistir}>{t('gezi.degistir')}</Text>
-            <Ikon ad="asagi" boyut={14} renk={renk.ana} kalinlik={2.4} />
-          </Pressable>
+          <BolumSiniri ad="gezi-hedef">
+            <Pressable accessibilityRole="button" accessibilityHint={t('gezi.degistir')} onPress={() => setHedefMenusu({ bekleyen: null })} style={s.hedef}>
+              <View style={s.hedefNokta} />
+              <Text style={s.hedefMetin} numberOfLines={1}>
+                {kalinParcalar(t('gezi.hedefSatir', { seyahat: seyahatAdi(hedef) })).map((p, i) => (
+                  <Text key={i} style={p.kalin ? s.hedefKalin : undefined}>
+                    {p.metin}
+                  </Text>
+                ))}
+              </Text>
+              <Text style={s.hedefDegistir}>{t('gezi.degistir')}</Text>
+              <Ikon ad="asagi" boyut={14} renk={renk.ana} kalinlik={2.4} />
+            </Pressable>
+          </BolumSiniri>
         ) : null}
         {aktifSekme === 'plan' ? (
           <View style={s.plan}>
-            <GeziPlani
-              gezi={g}
-              gunSira={gunSira}
-              onGunSira={setGunSira}
-              canli={canli.data}
-              listede={durakListede}
-              mesgulId={mesgulId}
-              onDurakEkle={durakArti}
-              onDurak={(d) => {
-                const pid = kimlik(d);
-                if (pid) paneliAc(pid, icerikHafif(pid, d), listedeki(pid)?.default_minutes ?? d.sure_dk);
-              }}
-            />
+            {/* Sekmeler aynı yerde: anahtar, bir sekmenin hatası öbürüne taşınmasın diye. */}
+            <BolumSiniri key="plan" ad="gezi-plan">
+              <GeziPlani
+                gezi={g}
+                gunSira={gunSira}
+                onGunSira={setGunSira}
+                canli={canli.data}
+                listede={durakListede}
+                mesgulId={mesgulId}
+                onDurakEkle={durakArti}
+                onDurak={(d) => {
+                  const pid = kimlik(d);
+                  if (pid) paneliAc(pid, icerikHafif(pid, d), listedeki(pid)?.default_minutes ?? d.sure_dk);
+                }}
+              />
+            </BolumSiniri>
           </View>
         ) : (
           <View style={s.yazi}>
-            <View style={s.yazar}>
-              <View style={s.yazarKare}>
-                <Logo boyut={20} koyuZemin />
+            <BolumSiniri key="yazi" ad="gezi-yazi">
+              <View style={s.yazar}>
+                <View style={s.yazarKare}>
+                  <Logo boyut={20} koyuZemin />
+                </View>
+                <Text style={s.yazarMetin}>
+                  {[g.yazar_ad, `${tarih.gun} ${AYLAR[tarih.ay - 1]}`, t('gezi.okuma', { n: okumaSuresiDk(g.yazi_md) }), alinmaSayisi > 0 ? t('gezi.alindi', { n: alinmaSayisi }) : null].filter(Boolean).join(' · ')}
+                </Text>
               </View>
-              <Text style={s.yazarMetin}>
-                {[g.yazar_ad, `${tarih.gun} ${AYLAR[tarih.ay - 1]}`, t('gezi.okuma', { n: okumaSuresiDk(g.yazi_md) }), alinmaSayisi > 0 ? t('gezi.alindi', { n: alinmaSayisi }) : null].filter(Boolean).join(' · ')}
-              </Text>
-            </View>
-            <MdYazi kaynak={g.yazi_md} kenar={22} buyuk mekanKarti={mekanKarti} onMekan={(id) => paneliAc(id, yaziYeri(id)?.hafif, listedeki(id)?.default_minutes)} />
+              <MdYazi kaynak={g.yazi_md} kenar={22} buyuk mekanKarti={mekanKarti} onMekan={(id) => paneliAc(id, yaziYeri(id)?.hafif, listedeki(id)?.default_minutes)} />
+            </BolumSiniri>
           </View>
         )}
       </ScrollView>
@@ -316,7 +332,9 @@ export default function GeziEkrani() {
       </View>
 
       {alAcik ? (
-        <GeziAl gezi={g} kimlik={kimlik} foto={(d) => canli.data?.get(d.id)?.foto_uri ?? null} ilkHedefId={hedef?.id ?? null} onKapat={() => setAlAcik(false)} />
+        <BolumSiniri ad="gezi-al" yedek={() => <AlHatasi onKapat={() => setAlAcik(false)} />}>
+          <GeziAl gezi={g} kimlik={kimlik} foto={(d) => canli.data?.get(d.id)?.foto_uri ?? null} ilkHedefId={hedef?.id ?? null} onKapat={() => setAlAcik(false)} />
+        </BolumSiniri>
       ) : null}
       <SecimMenusu
         acik={!!hedefMenusu}
@@ -337,26 +355,63 @@ export default function GeziEkrani() {
 
       {panel ? (
         <View style={StyleSheet.absoluteFill} pointerEvents="box-none">
-          <MekanPaneli
-            placeId={panel.placeId}
-            hafif={panel.hafif}
-            dakika={panelMekani?.default_minutes ?? panel.dakika}
-            onSure={(fark) => {
-              const yeni = Math.min(480, Math.max(15, (panelMekani?.default_minutes ?? panel.dakika) + fark));
-              if (panelMekani) guncelle.mutate({ id: panelMekani.id, default_minutes: yeni });
-              else setPanel({ ...panel, dakika: yeni });
-            }}
-            baglam="kesfet"
-            icinde={!!panelMekani}
-            mesgul={mesgulId === panel.placeId}
-            onCta={() => degistir({ anahtar: panel.placeId, place_id: panel.placeId, primary_type: panel.hafif.primary_type, lat: panel.hafif.lat, lng: panel.hafif.lng, dakika: panel.dakika })}
-            onYolTarifi={() =>
-              Linking.openURL(`https://www.google.com/maps/dir/?api=1&destination=${panel.hafif.lat},${panel.hafif.lng}&destination_place_id=${encodeURIComponent(panel.placeId)}&travelmode=walking`)
-            }
-            onKapat={() => setPanel(null)}
-          />
+          <BolumSiniri ad="gezi-mekan-paneli" yedek={() => <AlHatasi onKapat={() => setPanel(null)} />}>
+            <MekanPaneli
+              placeId={panel.placeId}
+              hafif={panel.hafif}
+              dakika={panelMekani?.default_minutes ?? panel.dakika}
+              onSure={(fark) => {
+                const yeni = Math.min(480, Math.max(15, (panelMekani?.default_minutes ?? panel.dakika) + fark));
+                if (panelMekani) guncelle.mutate({ id: panelMekani.id, default_minutes: yeni });
+                else setPanel({ ...panel, dakika: yeni });
+              }}
+              baglam="kesfet"
+              icinde={!!panelMekani}
+              mesgul={mesgulId === panel.placeId}
+              onCta={() => degistir({ anahtar: panel.placeId, place_id: panel.placeId, primary_type: panel.hafif.primary_type, lat: panel.hafif.lat, lng: panel.hafif.lng, dakika: panel.dakika })}
+              onYolTarifi={() =>
+                Linking.openURL(`https://www.google.com/maps/dir/?api=1&destination=${panel.hafif.lat},${panel.hafif.lng}&destination_place_id=${encodeURIComponent(panel.placeId)}&travelmode=walking`)
+              }
+              onKapat={() => setPanel(null)}
+            />
+          </BolumSiniri>
         </View>
       ) : null}
+    </View>
+  );
+}
+
+/** PostgREST / ağ hatasının kısa özeti: "PGRST201 · Could not embed …". */
+function geziHataKodu(e: unknown): string {
+  const kod = typeof e === 'object' && e && 'code' in e && typeof (e as { code: unknown }).code === 'string' ? (e as { code: string }).code : null;
+  const ozet = e instanceof Error ? hataOzeti(e) : typeof e === 'object' && e && 'message' in e ? String((e as { message: unknown }).message).slice(0, 160) : hataOzeti(e);
+  return kod ? `${kod} · ${ozet}` : ozet;
+}
+
+/** #199 KK3: üstte açılan pencere (Seyahatime al, mekan paneli) hata verirse sayfanın üstünde kapatılabilir küçük kart. */
+function AlHatasi({ onKapat }: { onKapat: () => void }) {
+  const kenar = useSafeAreaInsets();
+  return (
+    <View style={[s.pencereHata, { bottom: kenar.bottom + 16 }]}>
+      <Text style={s.hataKod}>{t('genel.bolumHata')}</Text>
+      <Buton baslik={t('genel.geri')} tur="ikincil" onPress={onKapat} />
+    </View>
+  );
+}
+
+/**
+ * #199 KK3: rota düzeyinde hata sınırı (Expo Router) — sayfanın bölüm sınırlarının dışında kalan bir hata (kapak, alt çubuk)
+ * bütün uygulamayı değil yalnız bu sayfayı "Yeniden dene · Geri" kartına çevirir.
+ */
+export function ErrorBoundary({ error, retry }: ErrorBoundaryProps) {
+  return (
+    <View style={[s.ekran, s.ortala]}>
+      <Text style={s.hata}>{t('gezi.hata')}</Text>
+      <Text style={s.hataKod} selectable>
+        {hataOzeti(error)}
+      </Text>
+      <Buton baslik={t('genel.yenidenDene')} onPress={() => retry()} />
+      <Buton baslik={t('genel.geri')} tur="ikincil" onPress={() => router.back()} />
     </View>
   );
 }
@@ -394,4 +449,6 @@ const s = StyleSheet.create({
   altBaslik: { fontFamily: yazi.baslik, fontSize: 17, color: renk.metin },
   altAlt: { fontFamily: yazi.normal, fontSize: 12, color: renk.ikincil },
   hata: { fontFamily: yazi.yari, fontSize: 12, color: renk.uyari, textAlign: 'center' },
+  hataKod: { fontFamily: yazi.normal, fontSize: 11, lineHeight: 15, color: renk.ikincil, textAlign: 'center' },
+  pencereHata: { position: 'absolute', left: bosluk.kenar, right: bosluk.kenar, padding: 16, gap: 10, borderRadius: 18, backgroundColor: renk.zemin, borderWidth: 1.5, borderColor: renk.ayrac },
 });

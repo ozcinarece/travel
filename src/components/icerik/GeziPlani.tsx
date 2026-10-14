@@ -6,6 +6,7 @@ import { Image } from 'expo-image';
 import { useMemo } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
+import { BolumSiniri } from '@/components/ui/BolumSiniri';
 import { EkleDugmesi } from '@/components/ui/EkleDugmesi';
 import type { IcerikCanli } from '@/features/icerik/fotolar';
 import { geziGunOzeti } from '@/features/icerik/gezi';
@@ -52,7 +53,10 @@ export function GeziPlani({ gezi, canli, listede, mesgulId, onDurakEkle, onDurak
           );
         })}
       </ScrollView>
-      <MiniHarita duraklar={gun.gezi_duraklari} gunIndex={gun.sira} rotalar={rotalar} baslik={`${t('gezi.gunKisa', { n: gun.sira })}${gun.baslik ? ` · ${gun.baslik}` : ''}`} />
+      {/* #199 KK3: harita hata verirse yalnız harita kutusu "açılamadı" kartına döner; durak listesi çalışır. */}
+      <BolumSiniri ad="gezi-harita" sifirla={gun.id}>
+        <MiniHarita duraklar={gun.gezi_duraklari} gunIndex={gun.sira} rotalar={rotalar} baslik={`${t('gezi.gunKisa', { n: gun.sira })}${gun.baslik ? ` · ${gun.baslik}` : ''}`} />
+      </BolumSiniri>
       <View style={s.liste}>
         {gun.gezi_duraklari.length > 1 ? <Text style={s.ozet}>{t(ozet.kestirim ? 'gezi.gunOzeti' : 'gezi.gunOzetiGercek', { sure: sureMetni(ozet.toplamDk), mesafe: mesafeMetni(ozet.yuruyusM) })}</Text> : null}
         {gun.gezi_duraklari.map((d, i) => {

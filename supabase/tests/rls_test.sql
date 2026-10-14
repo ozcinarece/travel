@@ -2359,4 +2359,43 @@ do $$ begin
 end $$;
 reset role;
 
+-- #199: PostgREST gömme belirsizliği bekçisi. Bir tablo iki tabloya yabancı anahtarlıysa ve anahtar sütunları birincil anahtarın
+-- parçasıysa PostgREST onu çoktan-çoğa bağlantı tablosu sayar; o iki tablo arasında doğrudan anahtar da varsa `a(b(…))` gömmesi
+-- belirsiz kalır (PGRST201) ve sorgu düşer — #192'nin gezi_rota_onbellek'i gezi_gunleri ↔ gezi_duraklari gömmesini (önerilen gezi
+-- ekranı, BO gezi editörü, gezi-rota) böyle düşürmüştü. API'ye açık şemada (public) böyle bir çift olmamalı.
+do $$
+declare
+  ciftler text;
+begin
+  with fk as (
+    select c.conrelid as jt, c.confrelid as hedef, c.conkey, c.conname
+    from pg_catalog.pg_constraint c
+    where c.contype = 'f' and c.connamespace = 'public'::regnamespace
+  ), pk as (
+    select conrelid, conkey from pg_catalog.pg_constraint where contype = 'p' and connamespace = 'public'::regnamespace
+  ), baglanti as (
+    select distinct a.jt, a.hedef as t1, b.hedef as t2
+    from fk a
+    join fk b on a.jt = b.jt and a.conname <> b.conname and a.hedef <> b.hedef
+    join pk on pk.conrelid = a.jt
+    where a.conkey <@ pk.conkey and b.conkey <@ pk.conkey
+  )
+  select string_agg(format('%s: %s ↔ %s', j.jt::regclass, j.t1::regclass, j.t2::regclass), '; ') into ciftler
+  from baglanti j
+  join pg_catalog.pg_class c1 on c1.oid = j.t1 and c1.relnamespace = 'public'::regnamespace
+  join pg_catalog.pg_class c2 on c2.oid = j.t2 and c2.relnamespace = 'public'::regnamespace
+  where exists (select 1 from fk d where (d.jt = j.t1 and d.hedef = j.t2) or (d.jt = j.t2 and d.hedef = j.t1));
+  assert ciftler is null, format('PostgREST gömmesi belirsiz (PGRST201): %s', ciftler);
+end $$;
+-- Gün anahtarı kalksa da temizlik tam: gün silinince durakları, durak anahtarları da bacakları siler.
+delete from public.gezi_rota_onbellek where gezi_gun_id = '19201920-0000-4000-8000-000000000021';
+insert into public.gezi_rota_onbellek (gezi_gun_id, kimden_durak_id, kime_durak_id, mod, polyline, saniye, metre) values
+  ('19201920-0000-4000-8000-000000000021', '19201920-0000-4000-8000-0000000000b1', '19201920-0000-4000-8000-0000000000b2', 'WALK', 'ghi', 300, 400);
+do $$
+begin
+  assert (select count(*) from public.gezi_rota_onbellek where gezi_gun_id = '19201920-0000-4000-8000-000000000021') = 1, 'taslak günün bacağı var';
+  delete from public.gezi_gunleri where id = '19201920-0000-4000-8000-000000000021';
+  assert (select count(*) from public.gezi_rota_onbellek where gezi_gun_id = '19201920-0000-4000-8000-000000000021') = 0, 'gün silinince bacakları da silinir';
+end $$;
+
 \echo 'rls_test: TÜM TESTLER GEÇTİ'

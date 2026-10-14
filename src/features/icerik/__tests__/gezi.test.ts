@@ -83,6 +83,47 @@ describe('gezi gerçek yol (#192 KK3–KK4)', () => {
   });
 });
 
+// #199 KK2: veri bozuk olsa da hesap patlamaz; sorun yalnız o bacakta kalır (kestirim / kuş uçuşu).
+describe('gezi bozuk veri (#199 KK2)', () => {
+  const bozuk = (ek: Record<string, unknown>) => bacak('A', 'B', ek as Partial<GeziRotaBacagi>);
+  it('yolu boş / bozuk bacak kuş uçuşu (iki nokta), süresi bozuk bacak kestirimde', () => {
+    for (const r of [bozuk({ polyline: '' }), bozuk({ polyline: null }), bozuk({ polyline: 42 })]) {
+      const [ab] = geziGunCizgileri([A, B], 0, rotaHaritasi([r]));
+      expect(ab.noktalar).toEqual([
+        { lat: A.lat, lng: A.lng },
+        { lat: B.lat, lng: B.lng },
+      ]);
+    }
+    for (const r of [bozuk({ saniye: null }), bozuk({ saniye: Number.NaN }), bozuk({ metre: null })]) {
+      const o = geziGunOzeti([A, B], rotaHaritasi([r]));
+      expect(o.kestirim).toBe(true);
+      expect(Number.isFinite(o.toplamDk)).toBe(true);
+      expect(Number.isFinite(o.yuruyusM)).toBe(true);
+      const [ab] = geziGunCizgileri([A, B], 0, rotaHaritasi([r]));
+      expect(ab).toEqual(expect.objectContaining({ kesik: true, ince: true }));
+    }
+    // DRIVE ama araç süresi yok → yürüyüş süresiyle, yürüyüş çizgisi.
+    expect(geziGunOzeti([A, B], rotaHaritasi([bozuk({ mod: 'DRIVE', arac_saniye: null })])).bacakMod).toEqual(['WALK']);
+    // Kimliği eksik satır atlanır.
+    expect(rotaHaritasi([bozuk({ kimden_durak_id: null }), null as unknown as GeziRotaBacagi]).size).toBe(0);
+  });
+  it('konumu bozuk durak: özet sayı kalır, çizgisi çizilmez, öbür bacaklar çizilir', () => {
+    const X = { id: 'X', lat: Number.NaN, lng: 30.5, sure_dk: 30 };
+    const o = geziGunOzeti([A, X, C]);
+    expect(o.bacakDk).toEqual([1, 1]);
+    expect(Number.isFinite(o.toplamDk) && Number.isFinite(o.yuruyusM)).toBe(true);
+    expect(geziGunCizgileri([A, X, C], 0)).toEqual([]);
+    expect(geziGunCizgileri([A, X, B, C], 0).map((c) => c.id)).toEqual(['gc:B>C']);
+  });
+  it('aynı noktadaki iki durak: hesap ve çizgi sorunsuz', () => {
+    const A2 = { ...A, id: 'A2' };
+    const o = geziGunOzeti([A, A2]);
+    expect(o.bacakDk).toEqual([1]);
+    expect(o.yuruyusM).toBe(0);
+    expect(geziGunCizgileri([A, A2], 0)).toHaveLength(1);
+  });
+});
+
 const sy = (id: string, city_label: string, start_date: string | null, end_date: string | null): SeyahatOzet =>
   ({ id, name: null, city_label, start_date, end_date, tz: 'Europe/Istanbul', hotel_place_id: null, created_at: '2026-01-01', members: [], places: [] }) as SeyahatOzet;
 

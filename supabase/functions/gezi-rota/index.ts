@@ -45,7 +45,7 @@ Deno.serve(sayacli('gezi-rota', async (istek) => {
   // Gün + duraklar (sıralı) ve yetki: yayınlı gezi herkese, taslak yalnız admine.
   const { data: gun, error: gunHata } = await servis
     .from('gezi_gunleri')
-    .select('id, gezi_id, gezi_duraklari(id, sira, lat, lng)')
+    .select('id, gezi_id, gezi_duraklari!gezi_duraklari_gezi_gun_id_fkey(id, sira, lat, lng)')
     .eq('id', gunId)
     .maybeSingle();
   if (gunHata) return hata('sunucu hatası', 500);
