@@ -395,18 +395,35 @@ const OLCUM_NOKTALARI = [
 const OLCUM_TURISTIK = new Set(['tourist_attraction', 'historical_landmark', 'historical_place', 'cultural_landmark', 'monument', 'sculpture', 'castle', 'museum', 'art_museum', 'history_museum', 'art_gallery', 'observation_deck']);
 const OLCUM_IBADET = new Set(['mosque', 'church', 'synagogue', 'place_of_worship', 'hindu_temple']);
 const OLCUM_ESIK = { yorum: 50, puan: 3.8 };
+// Kaçan ibadet yerlerinden bilinenler: etiket bizim listemizden yazılır (Google'ın ad metni loga girmez). Sıra önemli.
+const BILINEN_IBADET = [
+  [/k[üu][çc][üu]k ayasofya|little hagia/i, 'Küçük Ayasofya'],
+  [/ayasofya|hagia sophia/i, 'Ayasofya'],
+  [/sultan ?ahmet|blue mosque/i, 'Sultanahmet Camii'],
+  [/s[üu]leymaniye/i, 'Süleymaniye'],
+  [/r[üu]stem pa[şs]a/i, 'Rüstem Paşa'],
+  [/yeni cami|new mosque/i, 'Yeni Cami'],
+  [/kur[şs]unlu/i, 'Kurşunlu'],
+  [/alaeddin/i, 'Alaeddin Camii'],
+];
 
 /** Bir Turistik cevabının sayıları (yer adı, puan, koordinat yazılmaz). */
 export function turistikSayilari(yerler) {
-  const esikte = (y) => (y.puan_sayisi ?? 0) >= OLCUM_ESIK.yorum && (y.puan ?? 0) >= OLCUM_ESIK.puan;
-  const s = { toplam: yerler.length, turistik: 0, turistikEsikte: 0, ibadet: 0, ibadetEsikte: 0, diger: 0 };
+  const yorumda = (y) => (y.puan_sayisi ?? 0) >= OLCUM_ESIK.yorum;
+  const esikte = (y) => yorumda(y) && (y.puan ?? 0) >= OLCUM_ESIK.puan;
+  const s = { toplam: yerler.length, turistik: 0, turistikEsikte: 0, turistikYorumAlti: 0, turistikPuanAlti: 0, ibadet: 0, ibadetEsikte: 0, bilinen: [], diger: 0 };
   for (const y of yerler) {
     if (OLCUM_TURISTIK.has(y.primary_type)) {
       s.turistik += 1;
       if (esikte(y)) s.turistikEsikte += 1;
+      else if (!yorumda(y)) s.turistikYorumAlti += 1;
+      else s.turistikPuanAlti += 1;
     } else if (OLCUM_IBADET.has(y.primary_type)) {
       s.ibadet += 1;
-      if (esikte(y)) s.ibadetEsikte += 1;
+      if (esikte(y)) {
+        s.ibadetEsikte += 1;
+        s.bilinen.push(BILINEN_IBADET.find(([desen]) => desen.test(y.ad ?? ''))?.[1] ?? 'diğer');
+      }
     } else s.diger += 1;
   }
   return s;
@@ -437,10 +454,12 @@ async function kesfetOlc() {
       if (!j.onbellek) toplam.google += 1;
       const s = turistikSayilari(Array.isArray(j.yerler) ? j.yerler : []);
       toplam.ibadetEsikte += s.ibadetEsikte;
-      satirlar.push(`| ${n.ad} | ${r} m | ${s.toplam} | ${s.turistik} (${s.turistikEsikte}) | ${s.ibadet} (${s.ibadetEsikte}) | ${s.diger} |${j.onbellek ? ' önbellek' : ''}`);
+      satirlar.push(
+        `| ${n.ad} | ${r} m | ${s.toplam} | ${s.turistik} (${s.turistikEsikte}; yorum < ${OLCUM_ESIK.yorum}: ${s.turistikYorumAlti}, puan < ${OLCUM_ESIK.puan}: ${s.turistikPuanAlti}) | ${s.ibadet} (${s.ibadetEsikte}${s.bilinen.length ? `: ${s.bilinen.join(', ')}` : ''}) | ${s.diger} |${j.onbellek ? ' önbellek' : ''}`,
+      );
     }
   }
-  const baslik = '| Nokta | Yarıçap | Sonuç | Turistik birincil (eşikte) | İbadet birincil (eşikte) | Diğer |';
+  const baslik = '| Nokta | Yarıçap | Sonuç | Turistik birincil (eşikte; eşik altı nedeni) | İbadet birincil (eşikte: bilinenler) | Diğer |';
   duyuru('notice', 'Keşfet ölçümü', [baslik, ...satirlar, `istek ${toplam.istek} · Google ${toplam.google} · eşikte ibadet toplamı ${toplam.ibadetEsikte}`]);
   await ozet(['### Keşfet · Turistik ölçümü', '', baslik, '|---|---|---|---|---|---|', ...satirlar, '', `- istek ${toplam.istek} · Google ${toplam.google} · eşikte ibadet toplamı ${toplam.ibadetEsikte}`]);
 }
