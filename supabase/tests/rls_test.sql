@@ -1974,6 +1974,7 @@ end $$;
 
 -- #184 Sohbet: yalnız üyeler okur/yazar; kişi yalnız kendi mesajını (yumuşak) siler, içerik temizlenir; oylama 2–4 seçenek, oy
 -- tekil ve değiştirilebilir, kapanınca oy yok, başka oylamanın seçeneği reddedilir; okunmamış sayısı; fotoğraf kovası.
+-- Saatler sunucunun (created_at / silindi_at / son_okunan_at istemciden yazılamaz); oylama ve okuma yalnız RPC'yle yazılır.
 reset role;
 \set SS '''aaaaaaaa-1840-0000-0000-000000000001'''
 \set SU '''aaaaaaaa-1840-0000-0000-000000000002'''
@@ -1991,9 +1992,16 @@ set role authenticated;
 select pg_temp.as_user(:SU);
 select public.join_trip(:'s_token', 'Ayşe');
 
--- Ece yazar; Ayşe okur ve okunmamış 1 görür; okuyunca 0.
+-- Ece yazar; Ayşe okur ve okunmamış 1 görür; okuyunca 0. İstemcinin yazdığı ileri tarih ve silindi_at yok sayılır (yoksa
+-- 2100 tarihli mesaj rozeti kalıcı 1 yapardı).
 select pg_temp.as_user(:SS);
-insert into public.mesajlar (trip_id, tur, metin) values (:'s_trip', 'metin', 'Cuma akşamı Odunpazarı''nda kalalım');
+insert into public.mesajlar (trip_id, tur, metin, created_at, silindi_at) values (:'s_trip', 'metin', 'Cuma akşamı Odunpazarı''nda kalalım', '2100-01-01', now());
+do $$
+declare m public.mesajlar;
+begin
+  select * into m from public.mesajlar where trip_id = current_setting('test.s_trip')::uuid;
+  assert m.created_at <= now() and m.silindi_at is null and m.metin <> '', 'mesaj saati sunucunun, silinmiş doğmaz';
+end $$;
 select pg_temp.hata_bekle(format('insert into public.mesajlar (trip_id, tur, metin) values (%L, %L, %L)', current_setting('test.s_trip'), 'metin', '   '), '23514');
 select pg_temp.hata_bekle(format('insert into public.mesajlar (trip_id, tur) values (%L, %L)', current_setting('test.s_trip'), 'mekan'), '23514');
 select pg_temp.hata_bekle(format('insert into public.mesajlar (trip_id, user_id, tur, metin) values (%L, null, %L, %L)', current_setting('test.s_trip'), 'metin', 'sistem gibi'), '42501');
@@ -2005,7 +2013,12 @@ begin
   assert public.sohbet_okunmamis(t) = 1, 'okunmamış 1';
   perform public.sohbet_okundu(t);
   assert public.sohbet_okunmamis(t) = 0, 'okuyunca 0';
+  assert (select son_okunan_at from public.mesaj_okuma where trip_id = t and user_id = auth.uid()) <= now(), 'okuma anı sunucu saati';
 end $$;
+-- Okuma anı doğrudan yazılamaz (sahte "okundu" yok); yalnız sohbet_okundu.
+select pg_temp.hata_bekle(format('insert into public.mesaj_okuma (trip_id, son_okunan_at) values (%L, %L)', current_setting('test.s_trip'), '2100-01-01'), '42501');
+select pg_temp.hata_bekle(format('update public.mesaj_okuma set son_okunan_at = %L where trip_id = %L', '2100-01-01', current_setting('test.s_trip')), '42501');
+select pg_temp.hata_bekle(format('delete from public.mesaj_okuma where trip_id = %L', current_setting('test.s_trip')), '42501');
 -- Ayşe, Ece'nin mesajını silemez ve içeriğini değiştiremez.
 update public.mesajlar set silindi_at = now() where trip_id = :'s_trip';
 select pg_temp.hata_bekle(format('update public.mesajlar set metin = %L where trip_id = %L', 'değişti', current_setting('test.s_trip')), '42501');
@@ -2022,32 +2035,47 @@ select pg_temp.hata_bekle(format('insert into public.mesajlar (trip_id, tur, met
 select pg_temp.hata_bekle(format('select public.oylama_olustur(%L, %L, %L, null)', current_setting('test.s_trip'), 'Ne yiyelim?', '[{"metin":"Çibörek"},{"metin":"Balık"}]'), '42501');
 select pg_temp.hata_bekle(format('select public.sohbet_okundu(%L)', current_setting('test.s_trip')), '42501');
 
--- Ece kendi mesajını siler: içerik temizlenir, geri alınamaz.
+-- Ece kendi mesajını siler: içerik temizlenir, silme anı sunucunun, geri alınamaz.
 select pg_temp.as_user(:SS);
-update public.mesajlar set silindi_at = now() where trip_id = :'s_trip';
+update public.mesajlar set silindi_at = '2000-01-01' where trip_id = :'s_trip';
 do $$
 declare m public.mesajlar;
 begin
   select * into m from public.mesajlar where trip_id = current_setting('test.s_trip')::uuid;
   assert m.silindi_at is not null and m.metin = '', 'yumuşak silme içeriği temizler';
+  assert m.silindi_at > now() - interval '1 minute', 'silme anı sunucu saati';
 end $$;
 select pg_temp.hata_bekle(format('update public.mesajlar set silindi_at = null where trip_id = %L', current_setting('test.s_trip')), '42501');
 
--- Oylama: 2–4 seçenek, kapanış ileride; mesaj da yazılır.
+-- place_id Google biçiminde; fotoğraf yolu bu seyahatin klasöründe.
+select pg_temp.hata_bekle(format('insert into public.mesajlar (trip_id, tur, place_id) values (%L, %L, %L)', current_setting('test.s_trip'), 'mekan', 'ChIJ-cibörek'), '23514');
+select pg_temp.hata_bekle(format('insert into public.mesajlar (trip_id, tur, place_id) values (%L, %L, %L)', current_setting('test.s_trip'), 'mekan', 'kisa'), '23514');
+insert into public.mesajlar (trip_id, tur, place_id) values (:'s_trip', 'mekan', 'ChIJ-ciborek-hb1');
+select pg_temp.hata_bekle(format('insert into public.mesajlar (trip_id, tur, foto_yolu) values (%L, %L, %L)', current_setting('test.s_trip'), 'foto', 'baska/foto.jpg'), '23514');
+
+-- Oylama: 2–4 seçenek, kapanış ileride; mesaj da yazılır. Tablolara doğrudan yazım yok (seçeneksiz oylama, sonradan seçenek).
 select pg_temp.hata_bekle(format('select public.oylama_olustur(%L, %L, %L, null)', current_setting('test.s_trip'), 'Tek?', '[{"metin":"Yalnız"}]'), '22023');
 select pg_temp.hata_bekle(format('select public.oylama_olustur(%L, %L, %L, now() - interval ''1 hour'')', current_setting('test.s_trip'), 'Geçmiş?', '[{"metin":"A"},{"metin":"B"}]'), '22023');
-select public.oylama_olustur(:'s_trip', 'Çibörek mi, balık mı?', '[{"metin":"Çibörek · Hacı Baba","place_id":"ChIJ-cibörek"},{"metin":"Balık"}]'::jsonb, now() + interval '1 day', 'Cumartesi akşamı için:') as s_mesaj \gset
+select pg_temp.hata_bekle(format('select public.oylama_olustur(%L, %L, %L, null)', current_setting('test.s_trip'), 'Biçim?', '[{"metin":"A","place_id":"ChIJ-cibörek"},{"metin":"B"}]'), '23514');
+select pg_temp.hata_bekle(format('insert into public.oylamalar (trip_id, soru) values (%L, %L)', current_setting('test.s_trip'), 'Seçeneksiz?'), '42501');
+select public.oylama_olustur(:'s_trip', 'Çibörek mi, balık mı?', '[{"metin":"Çibörek · Hacı Baba","place_id":"ChIJ-ciborek-hb1"},{"metin":"Balık"}]'::jsonb, now() + interval '1 day', 'Cumartesi akşamı için:') as s_mesaj \gset
 reset role;
 select oylama_id as s_oylama from public.mesajlar where id = :'s_mesaj' \gset
-select id as s_cibörek from public.oylama_secenekleri where oylama_id = :'s_oylama' and sira = 1 \gset
+select id as s_ciborek from public.oylama_secenekleri where oylama_id = :'s_oylama' and sira = 1 \gset
 select id as s_balik from public.oylama_secenekleri where oylama_id = :'s_oylama' and sira = 2 \gset
 select set_config('test.s_oylama', :'s_oylama', false), set_config('test.s_balik', :'s_balik', false);
 set role authenticated;
 select pg_temp.as_user(:SS);
-do $$ begin assert (select count(*) from public.oylama_secenekleri where oylama_id = current_setting('test.s_oylama')::uuid) = 2, 'iki seçenek'; end $$;
+do $$
+begin
+  assert (select count(*) from public.oylama_secenekleri where oylama_id = current_setting('test.s_oylama')::uuid) = 2, 'iki seçenek';
+  assert (select olusturan from public.oylamalar where id = current_setting('test.s_oylama')::uuid) = auth.uid(), 'oylamayı açan';
+  assert (select user_id from public.mesajlar where oylama_id = current_setting('test.s_oylama')::uuid) = auth.uid(), 'oylama mesajı açanın';
+end $$;
+select pg_temp.hata_bekle(format('insert into public.oylama_secenekleri (oylama_id, sira, metin) values (%L, 3, %L)', current_setting('test.s_oylama'), 'Sonradan'), '42501');
 
 -- Oy tekil: ikinci oy aynı satırı günceller (oy değişir), çift satır olmaz; başkası adına oy yok.
-insert into public.oylama_oylari (oylama_id, trip_id, secenek_id) values (:'s_oylama', :'s_trip', :'s_cibörek');
+insert into public.oylama_oylari (oylama_id, trip_id, secenek_id) values (:'s_oylama', :'s_trip', :'s_ciborek');
 select pg_temp.hata_bekle(format('insert into public.oylama_oylari (oylama_id, trip_id, secenek_id) values (%L, %L, %L)',
   current_setting('test.s_oylama'), current_setting('test.s_trip'), current_setting('test.s_balik')), '23505');
 -- Uygulamadaki gibi PostgREST upsert'i (tüm sütunlar SET'te).
@@ -2084,13 +2112,16 @@ select pg_temp.hata_bekle(format('insert into public.oylama_oylari (oylama_id, t
   current_setting('test.s_oylama'), current_setting('test.s_trip'), current_setting('test.s_balik')), '22023');
 do $$ begin assert (select count(*) from public.oylama_oylari where trip_id = current_setting('test.s_trip')::uuid) = 0, 'üye olmayan oyları göremez'; end $$;
 
--- Fotoğraf kovası: üye yükler; dışarıdan biri göremez, yükleyemez.
+-- Fotoğraf kovası: üye yükler; dışarıdan biri göremez, yükleyemez; mesaj silinince dosyayı yükleyen (ya da sahip) siler.
 select pg_temp.as_user(:SU);
-select format('insert into storage.objects (bucket_id, name) values (%L, %L)', 'sohbet', current_setting('test.s_trip') || '/foto1.jpg') as sohbet_foto \gset
+select format('insert into storage.objects (bucket_id, name, owner_id) values (%L, %L, %L)', 'sohbet', current_setting('test.s_trip') || '/foto1.jpg', 'aaaaaaaa-1840-0000-0000-000000000002') as sohbet_foto \gset
 :sohbet_foto;
 select pg_temp.as_user(:SN);
 do $$ begin assert (select count(*) from storage.objects where bucket_id = 'sohbet') = 0, 'dışarıdan biri sohbet fotoğrafını göremez'; end $$;
 select pg_temp.hata_bekle(format('insert into storage.objects (bucket_id, name) values (%L, %L)', 'sohbet', current_setting('test.s_trip') || '/foto2.jpg'), '42501');
+select pg_temp.as_user(:SU);
+delete from storage.objects where bucket_id = 'sohbet';
+do $$ begin assert (select count(*) from storage.objects where bucket_id = 'sohbet') = 0, 'yükleyen sohbet fotoğrafını siler'; end $$;
 reset role;
 
 \echo 'rls_test: TÜM TESTLER GEÇTİ'

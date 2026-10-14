@@ -6,6 +6,9 @@
 -- places-light'tan gelir. Oylama seçeneğinin metni kullanıcının düzenlediği etikettir (otel etiketi gibi).
 --
 -- Kişi sütunları auth.users'a bağlı değildir (harcamalar gibi): seyahatten ayrılan birinin mesajı ve oyu kalır.
+-- Saatler sunucunundur: mesajın created_at / silindi_at'i tetikleyiciyle, okuma anı sohbet_okundu ile yazılır (istemci değeri
+-- yok sayılır; ileri tarihli mesaj rozeti kalıcı 1 yapamaz, sahte "okundu" üretilemez). Oylama ve okuma tablolarına doğrudan
+-- yazım kapalıdır; yalnız oylama_olustur / sohbet_okundu (definer, yetki içeride) yazar.
 -- Not: Listem'in mekan oyları `oylar` tablosunda (#141); oylama oyları `oylama_oylari`.
 
 -- ---------------------------------------------------------------- tablolar
@@ -25,7 +28,7 @@ create table public.oylama_secenekleri (
   oylama_id uuid not null references public.oylamalar (id) on delete cascade,
   sira smallint not null check (sira between 1 and 4),
   metin text not null check (char_length(trim(metin)) between 1 and 80),
-  place_id text check (char_length(place_id) <= 300),
+  place_id text check (place_id ~ '^[A-Za-z0-9_-]{10,255}$'),
   unique (oylama_id, sira),
   unique (id, oylama_id)
 );
@@ -51,13 +54,15 @@ create table public.mesajlar (
   user_id uuid default auth.uid(),
   tur text not null check (tur in ('metin', 'mekan', 'oylama', 'foto')),
   metin text not null default '' check (char_length(metin) <= 2000),
-  place_id text check (char_length(place_id) <= 300),
+  -- Google place_id biçimi.
+  place_id text check (place_id ~ '^[A-Za-z0-9_-]{10,255}$'),
   oylama_id uuid,
-  -- Storage: sohbet/{trip_id}/… (yalnız üyeler).
+  -- Storage: sohbet/{trip_id}/… (yalnız üyeler); başka seyahatin klasörü gösterilemez.
   foto_yolu text check (char_length(foto_yolu) <= 200),
   created_at timestamptz not null default now(),
   silindi_at timestamptz,
   foreign key (oylama_id, trip_id) references public.oylamalar (id, trip_id) on delete cascade,
+  constraint foto_klasoru check (foto_yolu is null or foto_yolu like trip_id::text || '/%'),
   -- Silinmemiş mesajın türüne göre içeriği dolu olmalı.
   constraint tur_icerigi check (
     silindi_at is not null
@@ -80,17 +85,24 @@ create table public.mesaj_okuma (
 
 -- ---------------------------------------------------------------- tetikleyiciler
 
--- Yumuşak silme: yalnız silindi_at yazılabilir (sütun yetkisi); silinen mesajın içeriği temizlenir, oylaması kalır (oylar
--- görünmez olur ama veri bozulmaz).
+-- Ekleme: saat sunucunun, mesaj silinmiş doğmaz. Yumuşak silme: yalnız silindi_at yazılabilir (sütun yetkisi), değeri sunucu
+-- saatidir; silinen mesajın içeriği temizlenir (fotoğraf dosyasını istemci kovadan siler), oylaması kalır (oylar görünmez olur
+-- ama veri bozulmaz).
 create or replace function public.mesajlar_guard()
 returns trigger
 language plpgsql set search_path = ''
 as $$
 begin
+  if tg_op = 'INSERT' then
+    new.created_at := now();
+    new.silindi_at := null;
+    return new;
+  end if;
   if old.silindi_at is not null then
     raise exception 'silinmiş mesaj değiştirilemez' using errcode = '42501';
   end if;
   if new.silindi_at is not null then
+    new.silindi_at := now();
     new.metin := '';
     new.place_id := null;
     new.foto_yolu := null;
@@ -100,7 +112,7 @@ end;
 $$;
 
 create trigger mesajlar_guard
-before update on public.mesajlar
+before insert or update on public.mesajlar
 for each row execute function public.mesajlar_guard();
 
 -- Oy: seçenek o oylamanın, oylama bu seyahatin ve açık olmalı.
@@ -133,16 +145,17 @@ for each row execute function public.oylama_oylari_guard();
 -- ---------------------------------------------------------------- RPC'ler
 
 -- KK3: oylama + 2–4 seçenek + sohbetteki oylama mesajı tek işlemde. p_secenekler: [{"metin": …, "place_id": … | null}].
+-- Tablolara doğrudan yazım kapalı (seçeneksiz oylama, oy başladıktan sonra seçenek eklenemez); yetki burada denetlenir.
 create or replace function public.oylama_olustur(p_trip_id uuid, p_soru text, p_secenekler jsonb, p_kapanis timestamptz, p_metin text default '')
 returns uuid
-language plpgsql security invoker set search_path = ''
+language plpgsql security definer set search_path = ''
 as $$
 declare
   oylama uuid;
   mesaj uuid;
   adet integer := coalesce(jsonb_array_length(case when jsonb_typeof(p_secenekler) = 'array' then p_secenekler end), 0);
 begin
-  if not public.is_member(p_trip_id) then
+  if auth.uid() is null or not public.is_member(p_trip_id) then
     raise exception 'seyahat bulunamadı' using errcode = '42501';
   end if;
   if adet < 2 or adet > 4 then
@@ -151,22 +164,27 @@ begin
   if p_kapanis is not null and p_kapanis <= now() then
     raise exception 'kapanış ileride olmalı' using errcode = '22023';
   end if;
-  insert into public.oylamalar (trip_id, soru, kapanis_at) values (p_trip_id, trim(p_soru), p_kapanis) returning id into oylama;
+  insert into public.oylamalar (trip_id, soru, kapanis_at, olusturan) values (p_trip_id, trim(p_soru), p_kapanis, auth.uid()) returning id into oylama;
   insert into public.oylama_secenekleri (oylama_id, sira, metin, place_id)
   select oylama, e.sira, trim(e.deger ->> 'metin'), nullif(e.deger ->> 'place_id', '')
   from jsonb_array_elements(p_secenekler) with ordinality as e(deger, sira);
-  insert into public.mesajlar (trip_id, tur, metin, oylama_id) values (p_trip_id, 'oylama', coalesce(trim(p_metin), ''), oylama) returning id into mesaj;
+  insert into public.mesajlar (trip_id, user_id, tur, metin, oylama_id) values (p_trip_id, auth.uid(), 'oylama', coalesce(trim(p_metin), ''), oylama) returning id into mesaj;
   return mesaj;
 end;
 $$;
 
--- KK8: sohbet açıkken okundu (sunucu saatiyle).
+-- KK8: sohbet açıkken okundu. mesaj_okuma'ya doğrudan yazım kapalı; okuma anı her zaman sunucu saati.
 create or replace function public.sohbet_okundu(p_trip_id uuid)
 returns void
-language sql volatile security invoker set search_path = ''
+language plpgsql volatile security definer set search_path = ''
 as $$
+begin
+  if auth.uid() is null or not public.is_member(p_trip_id) then
+    raise exception 'seyahat bulunamadı' using errcode = '42501';
+  end if;
   insert into public.mesaj_okuma (trip_id, user_id, son_okunan_at) values (p_trip_id, auth.uid(), now())
   on conflict (trip_id, user_id) do update set son_okunan_at = excluded.son_okunan_at;
+end;
 $$;
 
 -- KK8: okunmamış = başkalarının, son okumadan (hiç okumadıysa katılımdan) sonraki silinmemiş mesajları.
@@ -208,16 +226,13 @@ create policy mesajlar_update on public.mesajlar for update to authenticated
 revoke update on public.mesajlar from authenticated;
 grant update (silindi_at) on public.mesajlar to authenticated;
 
+-- Oylama ve seçenekleri yalnız oylama_olustur yazar.
 create policy oylamalar_select on public.oylamalar for select to authenticated using (public.is_member(trip_id));
-create policy oylamalar_insert on public.oylamalar for insert to authenticated
-  with check (public.is_member(trip_id) and olusturan = auth.uid());
-revoke update, delete on public.oylamalar from authenticated;
+revoke insert, update, delete on public.oylamalar from authenticated, anon;
 
 create policy oylama_secenekleri_select on public.oylama_secenekleri for select to authenticated
   using (exists (select 1 from public.oylamalar o where o.id = oylama_id and public.is_member(o.trip_id)));
-create policy oylama_secenekleri_insert on public.oylama_secenekleri for insert to authenticated
-  with check (exists (select 1 from public.oylamalar o where o.id = oylama_id and o.olusturan = auth.uid() and public.is_member(o.trip_id)));
-revoke update, delete on public.oylama_secenekleri from authenticated;
+revoke insert, update, delete on public.oylama_secenekleri from authenticated, anon;
 
 create policy oylama_oylari_select on public.oylama_oylari for select to authenticated using (public.is_member(trip_id));
 create policy oylama_oylari_insert on public.oylama_oylari for insert to authenticated
@@ -227,12 +242,9 @@ create policy oylama_oylari_update on public.oylama_oylari for update to authent
 -- Oy değiştirme PostgREST upsert'iyle gelir (tüm sütunlar SET'te); kişi, oylama ve seyahatin değişmemesini tetikleyici denetler.
 revoke delete on public.oylama_oylari from authenticated;
 
+-- Okuma anını yalnız sohbet_okundu yazar.
 create policy mesaj_okuma_select on public.mesaj_okuma for select to authenticated using (public.is_member(trip_id));
-create policy mesaj_okuma_insert on public.mesaj_okuma for insert to authenticated
-  with check (public.is_member(trip_id) and user_id = auth.uid());
-create policy mesaj_okuma_update on public.mesaj_okuma for update to authenticated
-  using (user_id = auth.uid()) with check (public.is_member(trip_id) and user_id = auth.uid());
-revoke delete on public.mesaj_okuma from authenticated;
+revoke insert, update, delete on public.mesaj_okuma from authenticated, anon;
 
 -- ---------------------------------------------------------------- Storage: sohbet fotoğrafları (özel kova)
 
@@ -245,8 +257,14 @@ create policy sohbet_select on storage.objects for select to authenticated
   using (bucket_id = 'sohbet' and public.fis_seyahat_uyesi(name));
 create policy sohbet_insert on storage.objects for insert to authenticated
   with check (bucket_id = 'sohbet' and public.fis_seyahat_uyesi(name));
+-- Mesaj silinince fotoğraf dosyası da silinir: yükleyen ya da seyahatin sahibi (fis_silebilir, #183).
+create policy sohbet_delete on storage.objects for delete to authenticated
+  using (bucket_id = 'sohbet' and public.fis_silebilir(name, owner_id));
 
--- ---------------------------------------------------------------- Realtime (#176: DELETE olayları süzülemez — burada DELETE yok)
+-- ---------------------------------------------------------------- Realtime
+-- #176 notu: postgres_changes DELETE olayları `filter` ile süzülemez. Bu tablolarda istemci silmez (mesaj yumuşak silinir =
+-- UPDATE; oy ve okuma silinmez); DELETE yalnız seyahat silinince cascade ile oluşur. Bu olaylar trip_id ile süzülmez (yalnız
+-- birincil anahtarı taşır); seyahatin silinmesini trips DELETE bekçisi (useSilinmeBekcisi) zaten yakalar. Risk düşük, kabul.
 
 do $$
 begin

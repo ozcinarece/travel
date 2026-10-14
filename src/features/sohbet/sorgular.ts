@@ -102,7 +102,9 @@ export function useSohbetOkundu(seyahatId: string) {
       const { error } = await supabase.rpc('sohbet_okundu', { p_trip_id: seyahatId });
       if (error) throw error;
     },
-    onSuccess: () => {
+    onSuccess: async () => {
+      // Okumadan önce başlamış bir sayım eski sayıyı geri yazmasın: önce iptal, sonra 0.
+      await qc.cancelQueries({ queryKey: ['sohbet-okunmamis', seyahatId] });
       qc.setQueryData(['sohbet-okunmamis', seyahatId], 0);
       qc.invalidateQueries({ queryKey: ['mesaj-okuma', seyahatId] });
     },
@@ -147,9 +149,11 @@ export function useMesajGonder(seyahatId: string) {
 export function useMesajSil(seyahatId: string) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (id: string) => {
+    // silindi_at'in değerini sunucu yazar (istemci saati yok sayılır); fotoğraflı mesajın dosyası da kovadan silinir.
+    mutationFn: async ({ id, fotoYolu }: { id: string; fotoYolu?: string | null }) => {
       const { error } = await supabase.from('mesajlar').update({ silindi_at: new Date().toISOString() }).eq('id', id);
       if (error) throw error;
+      if (fotoYolu) await sohbetFotoSil(fotoYolu);
     },
     onSettled: () => yenile(qc, seyahatId),
   });
@@ -200,6 +204,15 @@ export async function sohbetFotoSecVeYukle(seyahatId: string): Promise<string | 
   const { error } = await supabase.storage.from('sohbet').upload(yol, govde, { contentType: dosya.mimeType ?? 'image/jpeg', upsert: false });
   if (error) throw error;
   return yol;
+}
+
+/** Kovadan fotoğraf siler (silinen mesaj ya da gönderilemeyen yükleme); silinemezse akış sürer. */
+export async function sohbetFotoSil(yol: string): Promise<void> {
+  try {
+    await supabase.storage.from('sohbet').remove([yol]);
+  } catch {
+    // dosya silinemedi: mesaj zaten fotoğrafa bağlı değil
+  }
 }
 
 export function useSohbetFotoAdresi(yol: string | null | undefined) {

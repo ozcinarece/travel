@@ -5,7 +5,7 @@
 import { Image } from 'expo-image';
 import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
-import { ActivityIndicator, FlatList, KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { ActivityIndicator, AppState, FlatList, KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { GrupPenceresi } from '@/components/davet/GrupPenceresi';
@@ -51,6 +51,7 @@ import {
 } from '@/features/sohbet/sohbet';
 import {
   sohbetFotoSecVeYukle,
+  sohbetFotoSil,
   useMesajGonder,
   useMesajlar,
   useMesajOkumalari,
@@ -123,7 +124,7 @@ function Sohbet({ seyahat, uyeler, mesajlar, oylamalar }: { seyahat: Seyahat; uy
     setTimeout(() => setBildirim(null), 2500);
   };
 
-  // KK8: ekran açıkken (ve yeni mesaj geldikçe) okundu.
+  // KK8: ekran açıkken (ve yeni mesaj geldikçe) okundu. Uygulama arka plandayken gelen mesaj okunmuş sayılmaz; öne gelince işaretlenir.
   const [odakta, setOdakta] = useState(false);
   useFocusEffect(
     useCallback(() => {
@@ -131,11 +132,16 @@ function Sohbet({ seyahat, uyeler, mesajlar, oylamalar }: { seyahat: Seyahat; uy
       return () => setOdakta(false);
     }, []),
   );
+  const [onde, setOnde] = useState(AppState.currentState !== 'background' && AppState.currentState !== 'inactive');
+  useEffect(() => {
+    const abonelik = AppState.addEventListener('change', (durum) => setOnde(durum === 'active'));
+    return () => abonelik.remove();
+  }, []);
   const sonMesaj = mesajlar[0]?.id;
   const okunduIsaretle = okundu.mutate;
   useEffect(() => {
-    if (odakta) okunduIsaretle();
-  }, [odakta, sonMesaj, okunduIsaretle]);
+    if (odakta && onde) okunduIsaretle();
+  }, [odakta, onde, sonMesaj, okunduIsaretle]);
 
   // ---------------------------------------------------------------- adlar (DB / oturum önbelleği; listede olmayan mekanlar places-light)
   const mesajYerleri = useMemo(() => {
@@ -317,7 +323,15 @@ function Sohbet({ seyahat, uyeler, mesajlar, oylamalar }: { seyahat: Seyahat; uy
       if (yol) {
         const not = metin.trim();
         setMetin('');
-        gonder.mutate({ tur: 'foto', foto_yolu: yol, metin: not.slice(0, 2000) }, { onError: () => bildir(t('sohbet.gonderilemedi')) });
+        gonder.mutate(
+          { tur: 'foto', foto_yolu: yol, metin: not.slice(0, 2000) },
+          {
+            onError: () => {
+              void sohbetFotoSil(yol);
+              bildir(t('sohbet.gonderilemedi'));
+            },
+          },
+        );
       }
     } catch {
       bildir(t('sohbet.fotoYuklenemedi'));
@@ -329,7 +343,7 @@ function Sohbet({ seyahat, uyeler, mesajlar, oylamalar }: { seyahat: Seyahat; uy
   const ekler: { ad: string; ikon: IkonAdi; onPress: () => void }[] = [
     { ad: t('sohbet.ek.mekan'), ikon: 'pin', onPress: () => setAcik('mekan') },
     { ad: t('sohbet.ek.oylama'), ikon: 'grafik', onPress: () => setAcik('oylama') },
-    { ad: t('sohbet.ek.foto'), ikon: 'kamera', onPress: () => void fotoGonder() },
+    { ad: t('sohbet.ek.foto'), ikon: 'galeri', onPress: () => void fotoGonder() },
     { ad: t('sohbet.ek.harcama'), ikon: 'cuzdan', onPress: () => setAcik('harcama') },
   ];
 
@@ -373,8 +387,8 @@ function Sohbet({ seyahat, uyeler, mesajlar, oylamalar }: { seyahat: Seyahat; uy
       <View style={[s.alt, { paddingBottom: 10 }]}>
         <View style={s.ekler}>
           {ekler.map((e) => (
-            <Pressable key={e.ad} accessibilityRole="button" onPress={e.onPress} disabled={e.ikon === 'kamera' && fotoYukleniyor} style={({ pressed }) => [s.ek, pressed && { opacity: 0.8 }]}>
-              {e.ikon === 'kamera' && fotoYukleniyor ? <ActivityIndicator size="small" color={renk.ana} /> : <Ikon ad={e.ikon} boyut={14} renk={renk.ana} kalinlik={2.4} />}
+            <Pressable key={e.ad} accessibilityRole="button" onPress={e.onPress} disabled={e.ikon === 'galeri' && fotoYukleniyor} style={({ pressed }) => [s.ek, pressed && { opacity: 0.8 }]}>
+              {e.ikon === 'galeri' && fotoYukleniyor ? <ActivityIndicator size="small" color={renk.ana} /> : <Ikon ad={e.ikon} boyut={14} renk={renk.ana} kalinlik={2.4} />}
               <Text style={s.ekMetin}>{e.ad}</Text>
             </Pressable>
           ))}
@@ -425,7 +439,7 @@ function Sohbet({ seyahat, uyeler, mesajlar, oylamalar }: { seyahat: Seyahat; uy
       <SecimMenusu
         acik={!!menuMesaj}
         onKapat={() => setMenuMesaj(null)}
-        secenekler={menuMesaj ? [{ etiket: t('sohbet.mesajiSil'), tehlike: true, onPress: () => sil.mutate(menuMesaj.id, { onError: () => bildir(t('sohbet.gonderilemedi')) }) }] : []}
+        secenekler={menuMesaj ? [{ etiket: t('sohbet.mesajiSil'), tehlike: true, onPress: () => sil.mutate({ id: menuMesaj.id, fotoYolu: menuMesaj.foto_yolu }, { onError: () => bildir(t('sohbet.gonderilemedi')) }) }] : []}
       />
     </KeyboardAvoidingView>
   );

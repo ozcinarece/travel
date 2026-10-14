@@ -2,8 +2,9 @@
 // (insert, upsert, rpc) kaydedilir; Edge Function çağrıları ve fetch sayılır.
 import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { fireEvent, render, waitFor, within } from '@testing-library/react-native';
+import { act, fireEvent, render, waitFor, within } from '@testing-library/react-native';
 import type { ReactElement, ReactNode } from 'react';
+import { AppState, type AppStateStatus } from 'react-native';
 
 import { SeyahatIdSaglayici } from '@/features/seyahatler/baglam';
 import { hafifOnbellek } from '@/features/yerler/api';
@@ -28,7 +29,7 @@ jest.mock('expo-router', () => ({
 
 type Tablolar = Record<string, unknown[]>;
 let mockTablolar: Tablolar = {};
-const mockKayit = { invoke: [] as string[], rpc: [] as { ad: string; args: Record<string, unknown> }[], yaz: [] as { tablo: string; islem: string; satir: unknown }[] };
+const mockKayit = { invoke: [] as string[], rpc: [] as { ad: string; args: Record<string, unknown> }[], yaz: [] as { tablo: string; islem: string; satir: unknown }[], dosyaSil: [] as string[] };
 function mockSorgu(tablo: string) {
   let tek = false;
   const zincir: Record<string | symbol, unknown> = new Proxy(
@@ -78,7 +79,15 @@ jest.mock('@/lib/supabase', () => ({
         return { data: null, error: { message: 'Google isteği beklenmiyordu' } };
       },
     },
-    storage: { from: () => ({ createSignedUrl: async () => ({ data: null, error: { message: 'yok' } }) }) },
+    storage: {
+      from: () => ({
+        createSignedUrl: async () => ({ data: null, error: { message: 'yok' } }),
+        remove: async (yollar: string[]) => {
+          mockKayit.dosyaSil.push(...yollar);
+          return { data: [], error: null };
+        },
+      }),
+    },
     channel: () => ({ on: () => ({ subscribe: () => ({}) }) }),
     removeChannel: () => undefined,
   },
@@ -214,6 +223,7 @@ beforeEach(() => {
   mockKayit.invoke = [];
   mockKayit.rpc = [];
   mockKayit.yaz = [];
+  mockKayit.dosyaSil = [];
   mockTablolar = fikstur();
 });
 afterEach(() => {
@@ -286,6 +296,40 @@ describe('#184 Sohbet ekranı', () => {
     fireEvent.press(within(getByText(/Kurşunlu Külliyesi mekanını 2\. güne taşıdı/)).getByText('Geri al'));
     await waitFor(() => expect(mockKayit.rpc.some((r) => r.ad === 'degisikligi_geri_al')).toBe(true));
     expect(mockKayit.rpc.find((r) => r.ad === 'degisikligi_geri_al')!.args).toEqual({ c: 10 });
+  });
+
+  it('#188: uygulama arka plandayken okundu işaretlenmez; öne gelince işaretlenir', async () => {
+    const dinleyiciler: ((d: AppStateStatus) => void)[] = [];
+    const eskiDurum = AppState.currentState;
+    Object.defineProperty(AppState, 'currentState', { value: 'background', configurable: true, writable: true });
+    // RN'nin jest kurulumu addEventListener'ı zaten jest.fn yapar; spyOn onu sarmaz (mockRestore uygulamasını siler) — elle değiştir.
+    const asil = AppState.addEventListener;
+    AppState.addEventListener = ((_tur: string, cb: (d: AppStateStatus) => void) => {
+      dinleyiciler.push(cb);
+      return { remove: () => undefined };
+    }) as unknown as typeof AppState.addEventListener;
+    try {
+      const { getByText, qc } = ciz(<SohbetSekmesi />);
+      await waitFor(() => getByText('Çibörek mi, balık mı?'));
+      await sakinles(qc);
+      expect(mockKayit.rpc.some((r) => r.ad === 'sohbet_okundu')).toBe(false);
+      act(() => dinleyiciler.forEach((d) => d('active')));
+      await waitFor(() => expect(mockKayit.rpc.some((r) => r.ad === 'sohbet_okundu')).toBe(true));
+    } finally {
+      AppState.addEventListener = asil;
+      Object.defineProperty(AppState, 'currentState', { value: eskiDurum, configurable: true, writable: true });
+    }
+  });
+
+  it('#188: fotoğraflı mesaj silinince kovadaki dosya da silinir', async () => {
+    mockTablolar.mesajlar = [mesaj('k6', 'ben', an(bugun, 9, 20), { tur: 'foto', metin: 'Manzara', foto_yolu: 't1/manzara.jpg' }), ...mockTablolar.mesajlar];
+    const { getByText, qc } = ciz(<SohbetSekmesi />);
+    await waitFor(() => getByText('Manzara'));
+    await sakinles(qc);
+    fireEvent(getByText('Manzara'), 'longPress');
+    fireEvent.press(getByText('Mesajı sil'));
+    await waitFor(() => expect(mockKayit.dosyaSil).toEqual(['t1/manzara.jpg']));
+    expect(mockKayit.yaz.find((y) => y.tablo === 'mesajlar')?.islem).toBe('update');
   });
 });
 

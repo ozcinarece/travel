@@ -34,7 +34,8 @@ export function MekanSecici({ acik, onKapat, merkez, mekanlar, ad, foto, onSec, 
 
 function Icerik({ merkez, mekanlar, ad, foto, onSec, baslik, acik }: Omit<Props, 'onKapat'>) {
   const [girdi, setGirdi] = useState('');
-  const [oturum] = useState(yeniOturumJetonu);
+  // Otomatik tamamlama oturumu seçimle biter; sonraki arama yeni jetonla başlar (diğer arama ekranları gibi).
+  const [oturum, setOturum] = useState(yeniOturumJetonu);
   const oneriler = useOneriler('sohbet-mekan', girdi, oturum, undefined, { lat: merkez.lat, lng: merkez.lng, yaricapM: 20_000 }, acik);
   const sirali = useMemo(() => [...mekanlar].sort((a, b) => ad(a).localeCompare(ad(b), 'tr')), [mekanlar, ad]);
   const aramada = girdi.trim().length >= 2;
@@ -50,7 +51,15 @@ function Icerik({ merkez, mekanlar, ad, foto, onSec, baslik, acik }: Omit<Props,
       {aramada ? (
         <View style={{ gap: 4 }}>
           {(oneriler.data ?? []).map((o) => (
-            <Pressable key={o.place_id} accessibilityRole="button" onPress={() => onSec(o.place_id)} style={({ pressed }) => [s.satir, pressed && { opacity: 0.7 }]}>
+            <Pressable
+              key={o.place_id}
+              accessibilityRole="button"
+              onPress={() => {
+                setOturum(yeniOturumJetonu());
+                setGirdi('');
+                onSec(o.place_id);
+              }}
+              style={({ pressed }) => [s.satir, pressed && { opacity: 0.7 }]}>
               <View style={s.pin}>
                 <Ikon ad="pin" boyut={18} renk={renk.ana} />
               </View>
