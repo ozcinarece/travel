@@ -89,12 +89,14 @@ type PanelHali = 'katli' | 'yari' | 'tam';
  */
 export default function ProgramEkrani() {
   const id = useSeyahatId();
-  const { gun: gunParam, eklenenDurak, eklenenMekan, atlanan, katildin, planKuruldu, atanmamis, otel: otelParam, n: istekNo, harita: haritaParam } = useLocalSearchParams<{
+  const { gun: gunParam, eklenenGun, eklenenDurak, eklenenMekan, atlanan, katildin, planKuruldu, atanmamis, otel: otelParam, n: istekNo, harita: haritaParam } = useLocalSearchParams<{
     /** #182: "1" → harita görünümü (Gezi sayfasının "Haritada gör"ü). */
     harita?: string;
     /** #181: Gezi sayfasından her istekte yeni; sekme zaten açıksa gün / otel / plan hazır isteği yeniden uygulanır. */
     n?: string;
     gun?: string;
+    /** #193 KK4: gezi yeni seyahat olarak açıldı ("3 gün, 14 durak eklendi"). */
+    eklenenGun?: string;
     eklenenDurak?: string;
     eklenenMekan?: string;
     atlanan?: string;
@@ -108,7 +110,7 @@ export default function ProgramEkrani() {
     const d = Number(eklenenDurak ?? 0);
     const m = Number(eklenenMekan ?? 0);
     if (!eklenenDurak && !eklenenMekan) return null;
-    const ana = d > 0 ? t('program.gezidenEklendi', { durak: d, mekan: m }) : t('program.gezidenEklendiListe', { mekan: m });
+    const ana = eklenenGun ? t('program.gezidenYeni', { gun: Number(eklenenGun), durak: d }) : d > 0 ? t('program.gezidenEklendi', { durak: d, mekan: m }) : t('program.gezidenEklendiListe', { mekan: m });
     const a = Number(atlanan ?? 0);
     return a > 0 ? `${ana} · ${t('gezi.cozumYok', { n: a })}` : ana;
   });
