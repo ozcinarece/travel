@@ -24,12 +24,13 @@ import { durumCipi, geziModu, grupDurumlari, gunKartlari, gunTarihi, listemOnizl
 import { siradakiAdim, type SiradakiAdim } from '@/features/gezi/siradakiAdim';
 import { useDuragaAta, useDuraklar, useGunler } from '@/features/gunler/sorgular';
 import { sehirEslestir, useGeziler, useSehirler, useSehirYerleri } from '@/features/icerik/sorgular';
+import { useYereEkle } from '@/features/icerik/yerEkle';
 import { OTEL_SERIT_ONEKI } from '@/features/konaklama/otelSeridi';
 import type { Konaklama } from '@/features/konaklama/plan';
 import { useKonaklamalar } from '@/features/konaklama/sorgular';
 import { useKonum, yakinDurakId } from '@/features/konum/useKonum';
 import { useOylar, useOyVer } from '@/features/listem/sorgular';
-import { useMekanEkle, useMekanlar, useUyeler } from '@/features/mekanlar/sorgular';
+import { useMekanlar, useUyeler } from '@/features/mekanlar/sorgular';
 import { kartListesi, odakKarti, sonrakiKart, type DurakKarti } from '@/features/program/durakKarti';
 import { useDurakGuncelle } from '@/features/program/sorgular';
 import { gunDuraklari, saatKisa, useGunProgrami, useSimdi } from '@/features/program/useProgram';
@@ -75,7 +76,8 @@ function GeziSayfasi({ seyahat, gunler, duraklar, mekanlar, konaklamalar, katild
   const uyeler = useUyeler(seyahat.id);
   const oylar = useOylar(seyahat.id);
   const oyVer = useOyVer(seyahat.id);
-  const mekanEkle = useMekanEkle(seyahat.id);
+  // Rehber yeri listeye `useYereEkle` ile (yer_eklendi olayı yazılır).
+  const yereEkle = useYereEkle();
   const durakGuncelle = useDurakGuncelle(seyahat.id);
   const ata = useDuragaAta(seyahat.id);
   const planUygula = usePlaniUygula(seyahat.id);
@@ -230,8 +232,8 @@ function GeziSayfasi({ seyahat, gunler, duraklar, mekanlar, konaklamalar, katild
 
   const listeyeEkle = (y: Yer & { place_id: string }) => {
     setEklenenler((e) => new Set(e).add(y.place_id));
-    mekanEkle.mutate(
-      { place_id: y.place_id, primary_type: y.kategori, lat: y.lat, lng: y.lng },
+    yereEkle.mutate(
+      { seyahatId: seyahat.id, yerId: y.id, place_id: y.place_id, primary_type: y.kategori, lat: y.lat, lng: y.lng },
       {
         onError: () => {
           setEklenenler((e) => {

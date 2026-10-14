@@ -133,6 +133,7 @@ export function PlanListesi(p: Props) {
               </View>
             ) : null}
             <Pressable
+              accessibilityState={{ selected: r.vurgulu }}
               accessibilityRole="button"
               onPress={() => p.onDurak(r.mekanId)}
               onLongPress={() => p.onDurakUzunBas(r.mekanId)}

@@ -1,6 +1,7 @@
 // #182 KK3 (kanvas 24): Plan listesinin üstündeki 112 px harita şeridi — statik çizim, yalnız bu günün koordinatlarıyla: rota
 // (önbellekte gerçek yol çizgisi varsa o, yoksa noktalar düz bağlanır), numaralı pinler ve otel. Sol üstte "09:30 – 18:10 · 2,1 km
-// yürüme", sağ altta "Haritayı aç" (bugünkü harita ekranı tam ekran). Google'a istek yok; harita karosu da yok.
+// yürüme", sağ altta "Haritayı aç" (bugünkü harita ekranı tam ekran); şeridin tamamı dokunulabilir. Google'a istek yok; harita
+// karosu da yok.
 import { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
@@ -39,7 +40,12 @@ export function HaritaSeridi({ pinler, otel, cizgiler, cizgiRengi, etiket, onAc 
     )
     .join(' ');
   return (
-    <View style={s.kap} onLayout={(e) => setGenislik(Math.round(e.nativeEvent.layout.width))} accessibilityLabel={etiket ?? undefined}>
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={[etiket, t('plan.haritayiAc')].filter(Boolean).join(' · ')}
+      onPress={onAc}
+      onLayout={(e) => setGenislik(Math.round(e.nativeEvent.layout.width))}
+      style={({ pressed }) => [s.kap, pressed && { opacity: 0.92 }]}>
       <Svg width={genislik} height={YUKSEKLIK} style={StyleSheet.absoluteFill} pointerEvents="none">
         {/* Kanvastaki gibi soluk sokak çizgileri (süs; konumla ilgisi yok). */}
         <Path d={`M-10 70 Q${genislik * 0.23} 40 ${genislik * 0.46} 70 T${genislik + 10} 50`} stroke={renk.zemin} strokeWidth={10} fill="none" />
@@ -63,11 +69,11 @@ export function HaritaSeridi({ pinler, otel, cizgiler, cizgiRengi, etiket, onAc 
           </Text>
         </View>
       ) : null}
-      <Pressable accessibilityRole="button" onPress={onAc} hitSlop={6} style={({ pressed }) => [s.ac, pressed && { opacity: 0.85 }]}>
+      <View style={s.ac} pointerEvents="none">
         <Ikon ad="harita" boyut={14} renk={renk.ana} kalinlik={2.3} />
         <Text style={s.acMetin}>{t('plan.haritayiAc')}</Text>
-      </Pressable>
-    </View>
+      </View>
+    </Pressable>
   );
 }
 

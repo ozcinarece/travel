@@ -20,6 +20,11 @@ const KUTU_RENGI: Record<PinKategorisi, string> = {
   alisveris: '#eef2ff',
 };
 
+/** Fotoğrafı olmayan mekanın pastel zemini (kategoriye göre). */
+export function kutuRengi(tip: string | null | undefined): string {
+  return KUTU_RENGI[pinKategorisi(tip)];
+}
+
 export function FotoKutusu({ uri, tip, boyut, kose, stil }: { uri: string | null; tip: string | null | undefined; boyut?: number; kose: number; stil?: StyleProp<ViewStyle> }) {
   const olcu = boyut ? { width: boyut, height: boyut } : null;
   return (

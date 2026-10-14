@@ -1,12 +1,13 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useQueryClient } from '@tanstack/react-query';
 import { router, useLocalSearchParams } from 'expo-router';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Alert, BackHandler, LayoutAnimation, Linking, Pressable, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 
 import { GrupPenceresi } from '@/components/davet/GrupPenceresi';
 import { KatilimSayfasi } from '@/components/davet/KatilimSayfasi';
 import { ProfilOnayi } from '@/components/davet/ProfilOnayi';
+import { kutuRengi } from '@/components/gezi/GeziParcalari';
 import { HaritaEkrani } from '@/components/harita/HaritaEkrani';
 import type { HaritaOdagi, HaritaSigdirma } from '@/components/harita/tipler';
 import { BacakSecici, BacakSegmenti, SECICI_GENISLIK } from '@/components/program/BacakSecici';
@@ -32,10 +33,11 @@ import { OTEL_SERIT_ONEKI } from '@/features/konaklama/otelSeridi';
 import { useGunOteliKaydet, useKonaklamalar, useTumGunlereOtel } from '@/features/konaklama/sorgular';
 import { useDuragaAta, useDuraklar, useDurakKaldir, useGunEkle, useGunler, useGunSil } from '@/features/gunler/sorgular';
 import { sehirEslestir, useSehirler, useSehirYerleri } from '@/features/icerik/sorgular';
+import { useYereEkle } from '@/features/icerik/yerEkle';
 import { useKonum, yakinDurakId } from '@/features/konum/useKonum';
 import { gunSecenekleri as listemGunSecenekleri, type GunSecenegi } from '@/features/listem/listem';
 import { useOylar } from '@/features/listem/sorgular';
-import { useMekanEkle, useMekanGuncelle, useMekanlar, useMekanSil, useUyeler } from '@/features/mekanlar/sorgular';
+import { useMekanGuncelle, useMekanlar, useMekanSil, useUyeler } from '@/features/mekanlar/sorgular';
 import { aksamOnerisi, kmMetni, planSatirlari, YEMEK_RENGI, yurumeMetresi } from '@/features/plan/planListesi';
 import { bacakSecimi, hapCifti, hapPinId, seciciBasligi, seciciSecenekleri } from '@/features/program/bacakSecimi';
 import { kartKamerasi, kartListesi, odakKarti, type DurakKarti } from '@/features/program/durakKarti';
@@ -226,6 +228,8 @@ function ProgramSekmesi({
   // #182 KK1: Plan sekmesi "liste önce"; harita (kanvas 10 · 12) "Haritayı aç" ya da "Sırayı düzenle" ile tam ekran açılır.
   // KK7: listede Google'a istek yok — yürüyüş / rota yalnız önbellekten, adlar DB'den ya da oturum önbelleğinden.
   const [gorunum, setGorunum] = useState<'liste' | 'harita'>(haritaAcik ? 'harita' : 'liste');
+  // Harita Gezi'den ("Haritada gör") açıldıysa geri Gezi'ye döner, listeye değil.
+  const [haritaGezidenAcildi, setHaritaGezidenAcildi] = useState(!!haritaAcik);
   const harita = gorunum === 'harita';
   // #181: sekme açıkken Gezi sayfasından gelen istek (gün kartı, "Otel seç", "Planı kur"); "önceki render" deseni — ilk
   // kurulumda useState başlangıçları zaten uygular.
@@ -237,6 +241,7 @@ function ProgramSekmesi({
     if (otelAcik) setNereKaliyorAcik(true);
     if (planKuruldu) setPlanHazirAcik(true);
     setGorunum(haritaAcik ? 'harita' : 'liste');
+    setHaritaGezidenAcildi(!!haritaAcik);
   }
   const gun = gunler.find((g) => g.id === seciliGunId) ?? gunler.find((g) => String(g.index) === gunParam) ?? gunler.find((g) => g.index === bugunIndex) ?? gunler[0];
   const [panel, setPanel] = useState<PanelHali>('katli');
@@ -964,7 +969,8 @@ function ProgramSekmesi({
   const sehirler = useSehirler();
   const sehir = sehirEslestir(sehirler.data, { ad: seyahat.city_label, lat: seyahat.lat, lng: seyahat.lng });
   const sehirYerleri = useSehirYerleri(sehir?.id);
-  const mekanEkle = useMekanEkle(seyahat.id);
+  // Rehber yeri listeye `useYereEkle` ile (yer_eklendi olayı yazılır).
+  const yereEkle = useYereEkle();
   // KK5: "Öner" → Güne ekle (13b). Rehberden gelen yer önce listeye eklenir; liste yenilenince sayfa onunla açılır.
   const [guneEkleId, setGuneEkleId] = useState<string | null>(null);
   const [bekleyenPlaceId, setBekleyenPlaceId] = useState<string | null>(null);
@@ -999,6 +1005,8 @@ function ProgramSekmesi({
     return n;
   }, [oylar.data]);
   const ilkEtkin = planSatir.find((r) => r.numara !== null);
+  // Kanvas 24: bizim rehberimizde yazısı olan mekanın alt satırında "Mekan rehberi var".
+  const rehberliYerler = useMemo(() => new Set((sehirYerleri.data ?? []).filter((y) => y.place_id && y.rehber_md?.trim()).map((y) => y.place_id!)), [sehirYerleri.data]);
   const satirGorunumleri: PlanSatirGorunumu[] = planSatir.map((r) => {
     const puan = (yerler.data?.[r.mekan.place_id] ?? hafifOnbellek.oku(r.mekan.place_id, ['puan']))?.puan ?? null;
     const oy = oySayisi.get(r.mekan.id) ?? 0;
@@ -1009,6 +1017,7 @@ function ProgramSekmesi({
       puan ? `★ ${puan.toFixed(1).replace('.', ',')}` : null,
       oy > 0 ? t('plan.oy', { n: oy }) : null,
       r.mekan.added_by && r.mekan.added_by !== session?.user.id ? t('plan.onerdi', { ad: uyeAdi(r.mekan.added_by) }) : null,
+      rehberliYerler.has(r.mekan.place_id) ? t('plan.rehberVar') : null,
     ]
       .filter(Boolean)
       .join(' · ');
@@ -1025,7 +1034,7 @@ function ProgramSekmesi({
       ad: adGoster(r.mekan),
       alt,
       foto: bilinen.foto(r.mekan.place_id),
-      fotoZemin: renk.yuzey,
+      fotoZemin: kutuRengi(r.mekan.primary_type),
       gelis: r.gelis
         ? { metin: otelden ? t('plan.otelden', { dk: dkMetni }) : r.gelis.mod === 'taksi' ? t('plan.dkArac', { dk: dkMetni }) : t('plan.dk', { dk: dkMetni }), araba: r.gelis.mod === 'taksi' }
         : null,
@@ -1055,7 +1064,7 @@ function ProgramSekmesi({
     if (aksam.liste) return setGuneEkleId(aksam.liste.id);
     const y = aksam.rehber!;
     try {
-      await mekanEkle.mutateAsync({ place_id: y.place_id, primary_type: y.kategori, lat: y.lat, lng: y.lng });
+      await yereEkle.mutateAsync({ seyahatId: seyahat.id, yerId: y.id, place_id: y.place_id, primary_type: y.kategori, lat: y.lat, lng: y.lng });
       setBekleyenPlaceId(y.place_id);
     } catch {
       setHata(t('program.hata'));
@@ -1070,16 +1079,24 @@ function ProgramSekmesi({
     : null;
   const gunTemasi = gun ? gunKartlari({ gunler: [gun], duraklar, mekanlar, tempolar: verisi.tempolar, ad: (m) => yerler.data?.[m.place_id]?.ad ?? bilinen.ad(m) })[0]?.tema : null;
   const gunAdiUzun = gun?.date ? GUNLER[haftaGunu(gun.date)] : gun ? t('geziSayfasi.gunNo', { n: gun.index }) : '';
-  const sirayiDuzenle = () => {
+  const haritayiAc = () => {
+    setHaritaGezidenAcildi(false);
     setGorunum('harita');
+  };
+  const sirayiDuzenle = () => {
+    haritayiAc();
     setPanel('tam');
   };
-  const haritaKapat = () => {
+  const haritaKapat = useCallback(() => {
     setKartDurakId(null);
     setAcikBacak(null);
     setPanel('katli');
     setGorunum('liste');
-  };
+    if (haritaGezidenAcildi) {
+      setHaritaGezidenAcildi(false);
+      geziyeGit(seyahat.id);
+    }
+  }, [haritaGezidenAcildi, seyahat.id]);
   // Android geri tuşu haritadan listeye döner.
   useEffect(() => {
     if (!harita) return;
@@ -1088,7 +1105,7 @@ function ProgramSekmesi({
       return true;
     });
     return () => abonelik.remove();
-  }, [harita]);
+  }, [harita, haritaKapat]);
 
   const listeGorunumu = harita ? null : (
     <PlanListesi
@@ -1115,7 +1132,7 @@ function ProgramSekmesi({
             cizgiler={seritCizgileri}
             cizgiRengi={gunRengi(gun.index)}
             etiket={seritEtiketi}
-            onAc={() => setGorunum('harita')}
+            onAc={haritayiAc}
           />
         ) : null
       }

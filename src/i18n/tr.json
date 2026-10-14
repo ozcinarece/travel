@@ -996,7 +996,8 @@
     "aksamRehber": "Rehberden {rehber}?",
     "oner": "Öner",
     "gunBos": "Bu günde henüz durak yok. Keşfet'ten ya da listenden mekan ekle.",
-    "mekanEkle": "Mekan ekle"
+    "mekanEkle": "Mekan ekle",
+    "rehberVar": "Mekan rehberi var"
   },
   "listem": {
     "baslik": "Listem",

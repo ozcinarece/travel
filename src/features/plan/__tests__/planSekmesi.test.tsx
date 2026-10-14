@@ -2,7 +2,7 @@
 // sahte; Edge Function çağrıları ve fetch sayılır). Harita "Haritayı aç" ile açılınca istek beklenir (yalnız orada).
 import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { fireEvent, render, waitFor } from '@testing-library/react-native';
+import { fireEvent, render, waitFor, within } from '@testing-library/react-native';
 import type { ReactNode } from 'react';
 
 import { gunEtiketi } from '@/features/gezi/geziOzeti';
@@ -93,7 +93,11 @@ function fikstur(baslangic: string): Tablolar {
     oylar: [{ mekan: 'm1', kullanici: 'ayse' }],
     bacak_modlari: [],
     sehirler: [{ id: 's1', ad: 'Eskişehir', slug: 'eskisehir', kapak_url: null, lat: 39.7767, lng: 30.5206, ozet: null, geziler: [{ count: 1 }] }],
-    yerler: [],
+    // Rehber: listede olmayan yakın yer (akşam önerisi) ve 2. günün parkının rehber yazısı.
+    yerler: [
+      { id: 'y1', sehir_id: 's1', place_id: 'ChIJ-rehber-1', ad: 'Sazova Parkı', kategori: 'park', rehber_md: null, kapak_url: null, one_cikan_sira: 1, lat: 39.775, lng: 30.521 },
+      { id: 'y2', sehir_id: 's1', place_id: 'ChIJ-google-3', ad: 'Kent Parkı', kategori: 'park', rehber_md: 'Porsuk kıyısında…', kapak_url: null, one_cikan_sira: 2, lat: 39.774, lng: 30.52 },
+    ],
   };
 }
 
@@ -156,10 +160,33 @@ describe('#182 KK7: Plan sekmesi Google isteği doğurmaz', () => {
     await waitFor(() => getByText('Park'));
     await sakinles(qc);
     expect(queryByText('Restoran')).toBeNull();
+    // KK5: gün 17:00'den önce bitiyor → "Akşam boş" önerisi (listede olmayan yakın rehber yeri); kanvas 24 "Mekan rehberi var".
+    expect(getByText(/Sazova Parkı/)).toBeTruthy();
+    expect(getByText('Mekan rehberi var')).toBeTruthy();
     fireEvent.press(getByText(gunEtiketi({ index: 3, date: tarihEkle(bas, 2) })));
     await waitFor(() => getByText(/Bu günde henüz durak yok/));
     await sakinles(qc);
 
+    expect(sahte.invoke).toEqual([]);
+    expect(fetchSahte).not.toHaveBeenCalled();
+  });
+
+  it('gezi modu: bugün seçili açılır; geçilen durak ✓, sıradaki vurgulu — yine Google isteği yok', async () => {
+    const bas = yerelTarih(new Date(), IST);
+    const f = fikstur(bas);
+    f.stops = [
+      { ...durak('d1', 'g1', 'm1', 'a0'), arrived_at: new Date(Date.now() - 40 * 60_000).toISOString(), completed_at: new Date(Date.now() - 10 * 60_000).toISOString() },
+      durak('d2', 'g1', 'm22', 'a1'),
+      durak('d3', 'g2', 'm333', 'a0'),
+    ];
+    sahteSifirla(f, { 'ChIJ-db-1': { ad: 'Eti Arkeoloji Müzesi', kategori: 'museum' } });
+    const { getByText, getAllByText, getAllByRole, qc } = ciz();
+    await waitFor(() => getByText('Sırayı düzenle'));
+    await sakinles(qc);
+    expect(getByText('Eti Arkeoloji Müzesi')).toBeTruthy();
+    expect(getAllByText('✓').length).toBeGreaterThan(0);
+    const vurgulu = getAllByRole('button').filter((b) => b.props.accessibilityState?.selected === true);
+    expect(vurgulu.some((b) => within(b).queryByText('Restoran'))).toBe(true);
     expect(sahte.invoke).toEqual([]);
     expect(fetchSahte).not.toHaveBeenCalled();
   });
