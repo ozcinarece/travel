@@ -2472,4 +2472,43 @@ end $$;
 select pg_temp.hata_bekle($$select public.degisikligi_geri_al((select id from public.changes where entity = 'dagit_geri' and trip_id = '20002000-0000-4000-8000-0000000000f1'))$$, '22023');
 reset role;
 
+-- #205 ── Konumun kaynağı: varsayılan google_30g + damga; konum değişince damga yenilenir; osm'de osm_id zorunlu;
+-- kaynak google_30g'den çıkınca damga silinir; kontrol yalnız admin dışı rollere kapalı ve yalnız sayı verir.
+reset role;
+insert into public.sehirler (id, ad, slug, lat, lng, yayin) values ('20500000-0000-4000-8000-000000000001', 'Konum Şehri', 'konum-sehri', 40, 30, false);
+do $$
+declare
+  s uuid := '20500000-0000-4000-8000-000000000001';
+  k jsonb;
+begin
+  assert (select konum_kaynagi = 'google_30g' and google_fetched_at is not null from public.sehirler where id = s), 'varsayılan google_30g + damga';
+  update public.sehirler set google_fetched_at = now() - interval '40 days' where id = s;
+  k := public.konum_kaynagi_kontrol();
+  assert (k -> 'sehirler' ->> 'suresi_gecen')::int >= 1, 'süresi geçen sayılır';
+  assert (select array_agg(x order by x) from jsonb_object_keys(k -> 'sehirler') x) = array['elle', 'google_30g', 'osm', 'suresi_gecen', 'toplam'], 'yalnız sayılar';
+  update public.sehirler set lat = 40.1 where id = s;
+  assert (select google_fetched_at > now() - interval '1 minute' from public.sehirler where id = s), 'yeni Google konumu = yeni damga';
+  begin
+    update public.sehirler set konum_kaynagi = 'osm' where id = s;
+    raise exception 'osm_id olmadan osm kabul edildi';
+  exception when check_violation then null;
+  end;
+  update public.sehirler set konum_kaynagi = 'osm', osm_id = 'node/123', lat = 40.2 where id = s;
+  assert (select google_fetched_at is null and osm_id = 'node/123' from public.sehirler where id = s), 'osm: damga silinir';
+  begin
+    update public.sehirler set osm_id = 'node/abc' where id = s;
+    raise exception 'geçersiz osm_id kabul edildi';
+  exception when check_violation then null;
+  end;
+  update public.sehirler set konum_kaynagi = 'elle', lat = 40.3 where id = s;
+  assert (select konum_kaynagi = 'elle' and google_fetched_at is null from public.sehirler where id = s), 'elle';
+  update public.sehirler set konum_kaynagi = 'google_30g' where id = s;
+  assert (select google_fetched_at is not null from public.sehirler where id = s), 'google_30g''ye dönünce damga';
+  delete from public.sehirler where id = s;
+end $$;
+set role authenticated;
+select pg_temp.as_user(:A);
+select pg_temp.hata_bekle($$select public.konum_kaynagi_kontrol()$$, '42501');
+reset role;
+
 \echo 'rls_test: TÜM TESTLER GEÇTİ'

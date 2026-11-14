@@ -1,7 +1,8 @@
 -- #172 KK7–KK8: kendi içeriğimizdeki (rehber, gezi yazısı, yer rehberi) mekanların adı, kategorisi, konumu ve bizim
 -- fotoğrafımız DB'den — ekranlar bunun için places-light çağırmaz. Yazının açtığı yer satırları taslaktır (yayin=false;
 -- yerler_select göstermez), bu yüzden okuma bu fonksiyonla: yalnız yayınlı yerler ve yayınlı içerikte geçen kimlikler döner.
--- Ad editörün metni; kategori ve konum Google'ın saklanmasına izin verilen alanları (icerik_mekanlari_yaz notu, PRD §7).
+-- Ad editörün metni; kategori (primary_type) Google'ın saklanmasına izin verilen alanı. Konum değil: Google konumu en çok 30 gün saklanır;
+-- kaynağı ve damgası yerler.konum_kaynagi / google_fetched_at'te (#205, PRD §7).
 create function public.icerik_mekan_bilgileri(p_place_ids text[])
 returns table (place_id text, ad text, kategori text, lat double precision, lng double precision, kapak_url text, foto_yol text)
 language sql stable security definer set search_path = ''
