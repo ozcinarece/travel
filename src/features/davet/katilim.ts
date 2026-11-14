@@ -41,6 +41,26 @@ export function yonelmeEki(ad: string): string {
   return `${temiz}'${kaynastirma}${unlu}`;
 }
 
+/**
+ * #181: "{Ad}'de / 'da / 'te / 'ta" (bulunma): ünlü uyumu + ünsüz benzeşmesi (f s t k ç ş h p ile biten → t). "Eskişehir'de",
+ * "İstanbul'da", "Paris'te". İyelik görünümlü sonlar ("Gezisi'nde") ayırt edilmez; şehir adları için yeterli.
+ */
+export function bulunmaEki(ad: string): string {
+  const temiz = ad.trim();
+  if (!temiz) return '';
+  const kucuk = temiz.toLocaleLowerCase('tr');
+  let sonUnlu = '';
+  for (let i = kucuk.length - 1; i >= 0; i--) {
+    if (ON.includes(kucuk[i])) {
+      sonUnlu = kucuk[i];
+      break;
+    }
+  }
+  const unlu = sonUnlu && !INCE.includes(sonUnlu) ? 'a' : 'e';
+  const sert = 'fstkçşhp'.includes(kucuk[kucuk.length - 1]) ? 't' : 'd';
+  return `${temiz}'${sert}${unlu}`;
+}
+
 /** "{Davet eden} seni {Seyahat}'e ekledi" gibi başlıklar için seyahat adı (ad yoksa şehir). */
 export function davetSeyahatAdi(o: { name: string | null; city_label: string }): string {
   return o.name?.trim() || o.city_label;

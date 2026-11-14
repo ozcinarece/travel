@@ -33,13 +33,14 @@ export const bacakAnahtari = (fromKey: string, toKey: string) => `${fromKey}>${t
  * §5.1 / T9: gün bazlı yürüyüş matrisi. Edge Function walk_cache'ten okur, eksikleri Google'dan alır (≤ 30 gün).
  * İstemci 1 saat önbellekler; nokta kümesi değişince yalnız eksikler sorulur (sunucu tarafında).
  */
-export function useYuruyusMatrisi(seyahatId: string | undefined, noktalar: MatrisNoktasi[]) {
+export function useYuruyusMatrisi(seyahatId: string | undefined, noktalar: MatrisNoktasi[], ag = true) {
   const { session } = useOturum();
   const sirali = [...noktalar].sort((a, b) => a.key.localeCompare(b.key));
   const anahtar = sirali.map((n) => n.key).join('|');
   const sorgu = useQuery({
     queryKey: ['yuruyus', seyahatId, anahtar],
-    enabled: !!session && !!seyahatId && sirali.length >= 2,
+    // #181 KK13: `ag` kapalıysa yalnız önbellekteki matris okunur (istek yok; Gezi sayfası).
+    enabled: ag && !!session && !!seyahatId && sirali.length >= 2,
     staleTime: 60 * 60 * 1000,
     gcTime: 24 * 60 * 60 * 1000,
     retry: 1,
@@ -54,7 +55,7 @@ export function useYuruyusMatrisi(seyahatId: string | undefined, noktalar: Matri
     },
   });
   const yuruyus: YuruyusKaynagi = (a, b) => sorgu.data?.harita[`${a}>${b}`] ?? null;
-  return { yuruyus, yukleniyor: sorgu.isPending && sirali.length >= 2, hata: sorgu.isError, eksik: !!sorgu.data?.eksik };
+  return { yuruyus, yukleniyor: ag && sorgu.isPending && sirali.length >= 2, hata: sorgu.isError, eksik: !!sorgu.data?.eksik };
 }
 
 /**
@@ -62,14 +63,14 @@ export function useYuruyusMatrisi(seyahatId: string | undefined, noktalar: Matri
  * `bacaklar` sırayla otel → 1 → … → otel; sunucu önbellekten (walk_cache.polyline) okur, yalnız eksikleri Google'a sorar.
  * İstemci 1 saat önbellekler; sıra değişince anahtar değişir, sunucu yalnız yeni bacakları ister.
  */
-export function useRotaBacaklari(seyahatId: string | undefined, bacaklar: { from: MatrisNoktasi; to: MatrisNoktasi }[], arac = false) {
+export function useRotaBacaklari(seyahatId: string | undefined, bacaklar: { from: MatrisNoktasi; to: MatrisNoktasi }[], arac = false, ag = true) {
   const { session } = useOturum();
   const temiz = bacaklar.filter((b) => b.from.key !== b.to.key).slice(0, 12);
   const anahtar = temiz.map((b) => `${b.from.key}>${b.to.key}`).join('|');
   const sorgu = useQuery({
-    // #101 KK4: `arac` = tek bacak için araba yolu da (seçici açılınca; 24 sa önbellek).
+    // #101 KK4: `arac` = tek bacak için araba yolu da (seçici açılınca; 24 sa önbellek). #181 KK13: `ag` kapalı → yalnız önbellek.
     queryKey: ['rota', seyahatId, anahtar, arac ? 'arac' : ''],
-    enabled: !!session && !!seyahatId && temiz.length >= 1,
+    enabled: ag && !!session && !!seyahatId && temiz.length >= 1,
     staleTime: 24 * 60 * 60 * 1000,
     gcTime: 24 * 60 * 60 * 1000,
     retry: 1,
@@ -83,8 +84,36 @@ export function useRotaBacaklari(seyahatId: string | undefined, bacaklar: { from
       return { harita, eksik: !!data?.eksik };
     },
   });
-  return { rotalar: sorgu.data?.harita ?? BOS_ROTA, yukleniyor: sorgu.isPending && temiz.length >= 1, hata: sorgu.isError };
+  // #192 KK5: `ag` kapalıyken (Plan listesi, Gezi sayfası) Google'a gidilmez ama walk_cache doğrudan okunur (üye okur; ≤ 30 gün):
+  // önerilen geziden kopyalanan ya da daha önce hesaplanan bacakların gerçek süresi listede de görünür.
+  const onbellek = useQuery({
+    queryKey: ['rota-onbellek', seyahatId, anahtar],
+    enabled: !ag && !sorgu.data && !!session && !!seyahatId && temiz.length >= 1,
+    staleTime: 10 * 60 * 1000,
+    gcTime: 24 * 60 * 60 * 1000,
+    retry: 1,
+    queryFn: async () => {
+      const anahtarlar = [...new Set(temiz.flatMap((b) => [b.from.key, b.to.key]))];
+      const sinir = new Date(Date.now() - ROTA_ONBELLEK_MS).toISOString();
+      const { data, error } = await supabase
+        .from('walk_cache')
+        .select('from_key, to_key, seconds, meters, mode, polyline, drive_seconds, drive_meters, drive_polyline')
+        .eq('trip_id', seyahatId!)
+        .in('from_key', anahtarlar)
+        .in('to_key', anahtarlar)
+        .gte('fetched_at', sinir)
+        .not('polyline', 'is', null);
+      if (error) throw error;
+      const istenen = new Set(temiz.map((b) => `${b.from.key}>${b.to.key}`));
+      const harita: RotaHaritasi = {};
+      for (const b of (data ?? []) as RotaBacagi[]) if (istenen.has(`${b.from_key}>${b.to_key}`)) harita[`${b.from_key}>${b.to_key}`] = b;
+      return harita;
+    },
+  });
+  return { rotalar: sorgu.data?.harita ?? onbellek.data ?? BOS_ROTA, yukleniyor: ag && sorgu.isPending && temiz.length >= 1, hata: sorgu.isError };
 }
+/** walk_cache satırı en çok 30 gün geçerli (Google Routes koşulu; sunucu da aynı sınırla okur). */
+const ROTA_ONBELLEK_MS = 30 * 24 * 60 * 60 * 1000;
 const BOS_ROTA: RotaHaritasi = {};
 
 /**
@@ -218,6 +247,10 @@ export function useDegisiklikler(seyahatId: string | undefined, etkin = true) {
         .from('changes')
         .select('id, user_id, entity, entity_id, field, old, new, at')
         .eq('trip_id', seyahatId!)
+        // #183: harcama payları harcamanın satırıyla birlikte anlatılır ve geri alınır; listeyi doldurmasın.
+        .neq('entity', 'harcama_paylari')
+        // #200: toplu işlemin (Günlere dağıt) satırları kaydıyla birlikte tek satır.
+        .is('grup', null)
         .order('at', { ascending: false })
         .limit(10);
       if (error) throw error;

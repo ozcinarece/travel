@@ -11,13 +11,14 @@ import { MekanPaneli } from '@/components/mekan/MekanPaneli';
 import { Buton } from '@/components/ui/Buton';
 import { EkleDugmesi } from '@/components/ui/EkleDugmesi';
 import { Ikon } from '@/components/ui/Ikon';
-import { aktifBolum, bolumYazisi, okumaOrani, rehberMekanIdleri } from '@/features/icerik/rehber';
+import { icerikHafif } from '@/features/icerik/fotolar';
+import { useIcerikMekanlari, type BilinenMekanlar } from '@/features/icerik/mekanBilgileri';
+import { aktifBolum, bolumYazisi, okumaOrani, rehberKartIdleri, rehberMekanIdleri } from '@/features/icerik/rehber';
 import { useGeziler, useSehirRehberi, useSehirYerleri } from '@/features/icerik/sorgular';
 import { useMekanEkle, useMekanGuncelle, useMekanlar, useMekanSil } from '@/features/mekanlar/sorgular';
-import { useHafifYerler, useYerFotolari, type HafifYer } from '@/features/yerler/api';
+import type { HafifYer } from '@/features/yerler/api';
 import { t } from '@/i18n';
 import { bilinenKategori, varsayilanDakika } from '@/lib/kategori';
-import { puanMetni } from '@/lib/puan';
 import type { Sehir } from '@/lib/tipler';
 import { bosluk, kose, renk, yazi } from '@/theme';
 
@@ -34,6 +35,8 @@ type Props = {
   onRehberMekanlari?: () => void;
   /** #156 panel önizlemesi "Bu bölüm": tek bölüm çizilirken numarası (varsayılan 1). */
   ilkNo?: number;
+  /** #172: BO önizlemesi — taslağın bildiği mekanlar (yayından önce DB'de yazı satırı yok). */
+  bilinen?: BilinenMekanlar;
 };
 
 /**
@@ -42,15 +45,21 @@ type Props = {
  * EkleDugmesi, satır içi bağlantı turuncu alt çizgi → mekan rehberi), en altta "Bu şehirde hazır geziler". Kapak geçince üstte
  * "‹ {şehir} rehberi" + çipler sabit; okunan bölümün çipi Gece; turuncu okuma ilerleme çizgisi.
  */
-export function SehirRehberi({ sehir, sehirlerYukleniyor, onGeri, seyahat, onRehberMekanlari, ilkNo = 1 }: Props) {
+export function SehirRehberi({ sehir, sehirlerYukleniyor, onGeri, seyahat, onRehberMekanlari, ilkNo = 1, bilinen }: Props) {
   const kenar = useSafeAreaInsets();
   const rehber = useSehirRehberi(sehir?.id);
   const geziler = useGeziler(sehir?.id);
   const sehirYerleri = useSehirYerleri(sehir?.id);
   const bolumler = useMemo(() => rehber.data ?? [], [rehber.data]);
   const mekanIdleri = useMemo(() => rehberMekanIdleri(bolumler.map((b) => b.yazi_md)), [bolumler]);
-  const hafif = useHafifYerler(mekanIdleri);
-  const fotolar = useYerFotolari(mekanIdleri);
+  // #172 KK7–KK9: kart ve bağlantıların adı, kategorisi, konumu DB'den; fotoğraf önce bizim, yoksa Google (yalnız kartlar);
+  // puan gösterilmez. Panel saat / puan için Google'a yalnız açılınca gider (places-full, KK10).
+  const kartIdleri = useMemo(() => rehberKartIdleri(bolumler.map((b) => b.yazi_md)), [bolumler]);
+  const icerik = useIcerikMekanlari(mekanIdleri, { kartlar: kartIdleri, bilinen });
+  const hafifYeri = (placeId: string): HafifYer | undefined => {
+    const m = icerik.mekan(placeId);
+    return m ? icerikHafif(placeId, m) : undefined;
+  };
 
   // Seyahat listesi: kartta EkleDugmesi (Listeye ekle / Listende ✓), mekan rehberinde aynı.
   const mekanlar = useMekanlar(seyahat?.id);
@@ -105,10 +114,9 @@ export function SehirRehberi({ sehir, sehirlerYukleniyor, onGeri, seyahat, onReh
   }
 
   const mekanKarti = (placeId: string) => {
-    const y = hafif.data?.[placeId];
+    const y = hafifYeri(placeId);
     if (!y) return null;
-    const foto = fotolar.data?.get(placeId) ?? null;
-    const puan = puanMetni(y.puan);
+    const foto = icerik.foto(placeId);
     const listede = !!listedeki(placeId);
     return (
       <Pressable accessibilityRole="button" onPress={() => setPanelId(placeId)} style={({ pressed }) => [s.kart, pressed && { opacity: 0.85 }]}>
@@ -118,14 +126,14 @@ export function SehirRehberi({ sehir, sehirlerYukleniyor, onGeri, seyahat, onReh
             {y.ad}
           </Text>
           <Text style={s.kartAlt} numberOfLines={1}>
-            {[bilinenKategori(y.primary_type), puan ? `★ ${puan}` : null].filter(Boolean).join(' · ')}
+            {bilinenKategori(y.primary_type)}
           </Text>
         </View>
         {seyahat ? <EkleDugmesi listede={listede} mesgul={mesgulId === placeId} onPress={() => degistir(y)} /> : null}
       </Pressable>
     );
   };
-  const panelYeri = panelId ? hafif.data?.[panelId] : undefined;
+  const panelYeri = panelId ? hafifYeri(panelId) : undefined;
   const panelMekani = panelId ? listedeki(panelId) : undefined;
 
   const cipler = (yatay: boolean) =>
@@ -187,7 +195,7 @@ export function SehirRehberi({ sehir, sehirlerYukleniyor, onGeri, seyahat, onReh
               }}>
               <Text style={s.bolumNo}>{String(i + ilkNo).padStart(2, '0')}</Text>
               <Text style={s.bolumBaslik}>{b.baslik}</Text>
-              <MdYazi kaynak={bolumYazisi(b.yazi_md)} kenar={0} buyuk ipucu mekanKarti={mekanKarti} onMekan={(id) => (hafif.data?.[id] ? setPanelId(id) : null)} />
+              <MdYazi kaynak={bolumYazisi(b.yazi_md)} kenar={0} buyuk ipucu mekanKarti={mekanKarti} onMekan={(id) => (icerik.mekan(id) ? setPanelId(id) : null)} />
             </View>
           ))}
           {geziler.data && geziler.data.length > 0 ? (

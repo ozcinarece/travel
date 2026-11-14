@@ -55,7 +55,8 @@ export default function AnaSayfa() {
     if (!karsilanan) return;
     bekleyenDavetiSil();
     karsilandi(karsilanan).then(() => {
-      router.replace({ pathname: '/seyahat/[id]/(sekmeler)/program', params: { id: karsilanan, katildin: '1' } });
+      // #181 KK14: davetle gelen doğrudan Gezi sayfasına iner.
+      router.replace({ pathname: '/seyahat/[id]/(sekmeler)/gezi', params: { id: karsilanan, katildin: '1' } });
       setKarsilanan(null);
     });
   }, [karsilanan, karsilandi]);
@@ -125,7 +126,7 @@ export default function AnaSayfa() {
                   ad={seyahatAdi(yaklasan)}
                   alt={yaklasanAlti(yaklasan)}
                   uyeler={yaklasan.members}
-                  onPress={() => router.push({ pathname: '/seyahat/[id]/(sekmeler)/program', params: { id: yaklasan.id } })}
+                  onPress={() => router.push({ pathname: '/seyahat/[id]', params: { id: yaklasan.id } })}
                 />
               ) : !seyahatler.isPending ? (
                 <IlkSeyahatKarti baslik={t('anasayfa.yeniBaslik')} onPress={yeni} />

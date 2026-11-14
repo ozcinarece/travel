@@ -41,3 +41,6 @@ example
 # generated native folders
 /ios
 /android
+
+# İçerik hattı (docs/07): oturumun özel anahtarı
+.icerik-gizli/

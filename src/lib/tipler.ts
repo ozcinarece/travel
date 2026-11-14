@@ -133,7 +133,22 @@ export type YeniSeyahat = {
 };
 
 /** #97 / #98: içerik tabloları (yayınlı okunur; backoffice yazar). */
-export type Sehir = { id: string; ad: string; slug: string; kapak_url: string | null; lat: number; lng: number; /** #97: yayınlı gezi sayısı ("N gezi"). */ gezi_sayisi?: number; /** #100: rehber sayfası özeti (2 cümle). */ ozet?: string | null };
+export type Sehir = {
+  id: string;
+  ad: string;
+  slug: string;
+  kapak_url: string | null;
+  lat: number;
+  lng: number;
+  /** #97: yayınlı gezi sayısı ("N gezi"). */
+  gezi_sayisi?: number;
+  /** #100: rehber sayfası özeti (2 cümle). */
+  ozet?: string | null;
+  /** #197: şehrin Google kimliği, IANA saat dilimi ve ülke kodu — doluysa seyahat açarken şehir için Google'a gidilmez. */
+  place_id?: string | null;
+  tz?: string | null;
+  ulke_kodu?: string | null;
+};
 
 /** #100 B: şehir rehberi bölümü (backoffice yazar; yayınlı şehir okunur). */
 export type RehberBolumu = 'ulasim' | 'yemek' | 'mahalle' | 'ipucu';

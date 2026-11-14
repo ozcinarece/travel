@@ -46,7 +46,8 @@ export function MekanArama({ merkez, onSec, etiket = ty('gezi.mekanAra') }: { me
         ad: o.ana,
         tip: o.tipler[0],
         alt: o.ikincil,
-        al: async () => (await hafifYerler([o.place_id], { oturum }))[0],
+        // #172 KK3: ad, tip ve konum içerik satırına yazılır; puan gösterilmez — Pro maske.
+        al: async () => (await hafifYerler([o.place_id], { oturum, puansiz: true }))[0],
       }));
   const acik = odak && girdi.trim().length >= 2;
   const indeks = Math.min(secili, Math.max(0, satirlar.length - 1));

@@ -130,6 +130,7 @@ export function SehirRehberSekmesi({ sehirId, sehir, sekmeler, merkez, fotoYukle
               fotoYukle={fotoYukle}
               onHata={setHata}
               onMekanSecildi={y.mekanSecildi}
+              bilinen={y.bilinen}
               onDegis={(alan) => y.bolumGuncelle(bolum.id, alan)}
             />
           )}
@@ -145,6 +146,7 @@ export function SehirRehberSekmesi({ sehirId, sehir, sekmeler, merkez, fotoYukle
       <RehberOnizlemesi
         sehir={{ id: sehirId, ad: sehir.ad, slug: sehir.slug, kapak_url: sehir.kapak_url, lat: sehir.lat, lng: sehir.lng, ozet: sehir.ozet }}
         bolumler={y.bolumler}
+        bilinen={y.bilinen}
         seciliId={y.seciliId}
         acik={onizlemeAcik}
         onAcik={setOnizlemeAcik}

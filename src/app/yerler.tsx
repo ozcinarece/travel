@@ -40,7 +40,8 @@ export default function YerlerEkrani() {
     if (!c?.place_id) return setBildirim(t('anasayfa.ekleHata'));
     setMesgulId(y.id);
     try {
-      await ekle.mutateAsync({ seyahatId, yerId: y.id, place_id: c.place_id, primary_type: c.hafif?.primary_type ?? y.kategori, lat: c.hafif?.lat ?? y.lat, lng: c.hafif?.lng ?? y.lng });
+      // #172 KK7: tip ve konum DB satırından.
+      await ekle.mutateAsync({ seyahatId, yerId: y.id, place_id: c.place_id, primary_type: y.kategori, lat: y.lat, lng: y.lng });
       const sy = hedefler.find((x) => x.id === seyahatId);
       setBildirim(t('anasayfa.eklendi', { seyahat: sy ? seyahatAdi(sy) : '' }));
       setTimeout(() => setBildirim(null), 2500);
@@ -89,10 +90,11 @@ export default function YerlerEkrani() {
                       key={y.id}
                       ad={y.ad}
                       sehir={y.sehirler?.ad ?? null}
-                      kategori={c?.hafif?.primary_type ?? y.kategori}
+                      kategori={y.kategori}
                       fotoUri={c?.foto_uri ?? null}
-                      puan={c?.hafif?.puan ?? null}
-                      yorum={c?.hafif?.puan_sayisi ?? null}
+                      // #172 KK9: kendi içerik kartımız — puan gösterilmez.
+                      puan={null}
+                      yorum={null}
                       yukseklik={(i + sutun) % 2 === 0 ? 190 : 150}
                       listede={!!c?.place_id && hedefIdleri.has(c.place_id)}
                       mesgul={mesgulId === y.id}

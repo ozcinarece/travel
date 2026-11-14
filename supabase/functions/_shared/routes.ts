@@ -81,3 +81,53 @@ export async function rotaBacagi(a: Nokta, b: Nokta, mod: RotaModu): Promise<Rot
   if (!Number.isFinite(sn) || sn <= 0) return null;
   return { seconds: sn, meters: Math.round(r.distanceMeters ?? 0), polyline: r.polyline.encodedPolyline };
 }
+
+// ---------------------------------------------------------------- #192 önerilen gezi günü (tek istekte ara noktalı rota)
+
+/** Essentials SKU'da kalmak için istek başına en çok 10 ara nokta (12 nokta = 11 bacak); daha uzun gün parçalara bölünür. */
+export const GUN_PARCA_BACAK = 11;
+
+type GunRotasiCevabi = { routes?: { legs?: { duration?: string; distanceMeters?: number; polyline?: { encodedPolyline?: string } }[] }[] };
+
+/**
+ * #192: bir günün ardışık noktaları için gerçek yol — tek computeRoutes isteği (origin → intermediates → destination); her bacağın
+ * süresi, mesafesi ve kodlu polyline'ı. 11'den çok bacak parçalara bölünür (parça başına bir istek). Bacak sırası noktalarla
+ * aynı; rotası çıkmayan parçanın bacakları null.
+ */
+export async function gunRotasi(noktalar: Nokta[], mod: RotaModu = 'WALK'): Promise<(RotaBacagi | null)[]> {
+  const anahtar = Deno.env.get('GOOGLE_SERVER_KEY');
+  if (!anahtar) throw new Error('GOOGLE_SERVER_KEY tanımlı değil');
+  const nokta = (n: Nokta) => ({ location: { latLng: { latitude: n.lat, longitude: n.lng } } });
+  const sonuc: (RotaBacagi | null)[] = [];
+  for (let bas = 0; bas < noktalar.length - 1; bas += GUN_PARCA_BACAK) {
+    const parca = noktalar.slice(bas, bas + GUN_PARCA_BACAK + 1);
+    googleSay();
+    const cevap = await fetch('https://routes.googleapis.com/directions/v2:computeRoutes', {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        'x-goog-api-key': anahtar,
+        'x-goog-fieldmask': 'routes.legs.duration,routes.legs.distanceMeters,routes.legs.polyline.encodedPolyline',
+      },
+      body: JSON.stringify({
+        origin: nokta(parca[0]),
+        destination: nokta(parca[parca.length - 1]),
+        intermediates: parca.slice(1, -1).map(nokta),
+        travelMode: mod,
+        ...(mod === 'DRIVE' ? { routingPreference: 'TRAFFIC_UNAWARE' } : {}),
+        polylineQuality: 'OVERVIEW',
+      }),
+    });
+    if (!cevap.ok) throw new GoogleHatasi(cevap.status, (await cevap.text()).slice(0, 300));
+    // Rota çıktıysa her bacak gelir; aynı noktadaki ardışık duraklarda Google süre / mesafe / polyline'ı boş bırakabilir (0 değer
+    // JSON'da yazılmaz) → 1 sn, 0 m, boş polyline (çizgi düz kalır). Rota çıkmadıysa parçanın bacakları null.
+    const bacaklar = ((await cevap.json()) as GunRotasiCevabi).routes?.[0]?.legs ?? [];
+    const tam = bacaklar.length === parca.length - 1;
+    for (let i = 0; i < parca.length - 1; i++) {
+      const b = bacaklar[i];
+      const sn = Math.round(Number((b?.duration ?? '0s').replace('s', '')));
+      sonuc.push(tam && b && Number.isFinite(sn) ? { seconds: Math.max(1, sn), meters: Math.round(b.distanceMeters ?? 0), polyline: b.polyline?.encodedPolyline ?? '' } : null);
+    }
+  }
+  return sonuc;
+}

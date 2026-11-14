@@ -9,6 +9,10 @@ name: web-yayin
 on:
   push:
     branches: [main]
+    # İçerik dosyaları ve dokümanlar uygulamayı yeniden yayınlatmaz (docs/07).
+    paths-ignore:
+      - 'icerik/**'
+      - 'docs/**'
   workflow_dispatch:
 
 concurrency:

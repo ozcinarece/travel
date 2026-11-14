@@ -2,7 +2,7 @@ import { describe, expect, it } from '@jest/globals';
 
 import type { DavetOzeti } from '@/lib/tipler';
 
-import { davetAdimi, yonelmeEki } from '../katilim';
+import { bulunmaEki, davetAdimi, yonelmeEki } from '../katilim';
 
 const ozet: DavetOzeti = { trip_id: 't', name: 'İzmir Gezisi', city_label: 'İzmir', start_date: null, end_date: null, member_count: 1, place_count: 3, day_count: 2, inviter_name: 'Ece', uye: false, gunler: [] };
 
@@ -31,5 +31,17 @@ describe('yonelmeEki', () => {
     expect(yonelmeEki('Ürgüp')).toBe("Ürgüp'e");
     expect(yonelmeEki('Bodrum ')).toBe("Bodrum'a");
     expect(yonelmeEki('')).toBe('');
+  });
+});
+
+describe('#181 bulunmaEki', () => {
+  it('ünlü uyumu ve ünsüz benzeşmesi', () => {
+    expect(bulunmaEki('Eskişehir')).toBe("Eskişehir'de");
+    expect(bulunmaEki('İstanbul')).toBe("İstanbul'da");
+    expect(bulunmaEki('Paris')).toBe("Paris'te");
+    expect(bulunmaEki('Bodrum')).toBe("Bodrum'da");
+    expect(bulunmaEki('Ankara')).toBe("Ankara'da");
+    expect(bulunmaEki('Kapadokya')).toBe("Kapadokya'da");
+    expect(bulunmaEki('Kaş')).toBe("Kaş'ta");
   });
 });

@@ -30,7 +30,8 @@ export function useAktifProgram(ozet: SeyahatOzet | undefined) {
   );
   const uclar = useGunUclari(id, gun);
   const matris = useYuruyusMatrisi(id, matrisNoktalari(ucListesi(uclar), gunMekanlari));
-  const yerler = useHafifYerler(gunMekanlari.map((m) => m.place_id));
+  // #172 KK3: yalnız ad ("Sıradaki") — Pro maske.
+  const yerler = useHafifYerler(gunMekanlari.map((m) => m.place_id), { puan: false });
   const prog = useGunProgrami({ seyahat: seyahat.data, gun, duraklar: duraklar.data ?? [], mekanlar: mekanlar.data ?? [], yuruyus: matris.yuruyus, an, uclar });
 
   const adi = (durakId: string) => {

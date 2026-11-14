@@ -15,11 +15,11 @@ const yer = (id: string, ad: string, place_id: string | null = null): Yer =>
 describe('görmen gerekenler listesi (#98 KK6)', () => {
   // 20 mekan: ilk 2'si öne çıkan (≥4,3 puan, ≥200 yorum, en iyi %10).
   const hepsi = [hafif('a', 4.8, 9000), hafif('b', 4.7, 7000), ...Array.from({ length: 18 }, (_, i) => hafif(`x${i}`, 4.0, 150))];
-  const rehber = [rehberMekani(yer('y1', 'Odunpazarı Evleri'), 'b', hafif('b', 4.7, 7000))!, rehberMekani(yer('y2', 'Kurşunlu'), 'k', undefined)!];
+  const rehber = [rehberMekani(yer('y1', 'Odunpazarı Evleri'), 'b', 'https://google/b')!, rehberMekani({ ...yer('y2', 'Kurşunlu'), kapak_url: 'https://bizim/k' }, 'k', 'https://google/k')!];
 
-  it('rehber yeri: Google verisiyle puan/yorum dolar, rozet "rehber", süre kategoriden; kimlik çözülmediyse null', () => {
-    expect(rehber[0]).toMatchObject({ place_id: 'b', ad: 'Odunpazarı Evleri', puan: 4.7, puan_sayisi: 7000, neden: 'rehber', dakika: 60 });
-    expect(rehber[1]).toMatchObject({ place_id: 'k', puan: null, primary_type: 'museum', dakika: 90 });
+  it('#172 KK7–KK9 rehber yeri: ad, kategori, konum DB\'den; puan yok; fotoğraf önce bizim kapağımız; kimlik çözülmediyse null', () => {
+    expect(rehber[0]).toMatchObject({ place_id: 'b', ad: 'Odunpazarı Evleri', primary_type: 'museum', lat: 39.76, puan: null, puan_sayisi: null, foto_uri: 'https://google/b', neden: 'rehber', dakika: 90 });
+    expect(rehber[1]).toMatchObject({ place_id: 'k', puan: null, primary_type: 'museum', foto_uri: 'https://bizim/k' });
     expect(rehberMekani(yer('y3', 'Yok'), null, undefined)).toBeNull();
   });
   it('"Görmen gerekenler" = rehberdekiler + öne çıkanlar (tekrar yok, puan sırası), en az 10 karta kadar genel listeyle dolar; "Rehberden" yalnız rehber', () => {

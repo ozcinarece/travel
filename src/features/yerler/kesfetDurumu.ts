@@ -1,6 +1,6 @@
 // #79 KK2: Keşfet'in ekran durumu SEYAHAT bazlı modül belleğinde tutulur — ekran yeniden kurulsa da (yığın, sekme, hızlı
 // yenileme) filtre, seçili pin ve son görünür bölge aynı kalır; pinler aynı filtreyle süzülür, kamera aynı bölgeden açılır.
-// Birikim (karoYukleme.birikimiAl) zaten seyahat bazlı; bu dosya onun yanına ekran durumunu koyar.
+// Birikim (kesfetYukleme.birikimiAl) zaten seyahat bazlı; bu dosya onun yanına ekran durumunu koyar.
 import { useCallback, useState } from 'react';
 
 import type { HaritaBolgesi } from '@/components/harita/tipler';

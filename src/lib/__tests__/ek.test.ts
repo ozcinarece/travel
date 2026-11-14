@@ -1,6 +1,6 @@
 import { describe, expect, it } from '@jest/globals';
 
-import { iyelikEkli, yonelmeEkli } from '../ek';
+import { bulunmaEkli, iyelikEkli, yonelmeEkli } from '../ek';
 
 describe('iyelikEkli (#143)', () => {
   it('son okunan sayının sesine göre ek', () => {
@@ -24,5 +24,23 @@ describe('yonelmeEkli (#144)', () => {
       "İzmir'e",
     ]);
     expect(yonelmeEkli('Yaz 2026')).toBeNull();
+  });
+});
+
+describe('bulunmaEkli (#191)', () => {
+  it('kalın / ince ünlü, sert ünsüz, iyelikli tamlama', () => {
+    expect(['Eskişehir', 'Bursa', 'Düzce', 'Kars', 'Sultanahmet', 'Bodrum', 'Kapadokya', 'İstanbul', 'Eskişehir Merkezi', 'New York'].map(bulunmaEkli)).toEqual([
+      "Eskişehir'de",
+      "Bursa'da",
+      "Düzce'de",
+      "Kars'ta",
+      "Sultanahmet'te",
+      "Bodrum'da",
+      "Kapadokya'da",
+      "İstanbul'da",
+      "Eskişehir Merkezi'nde",
+      "New York'ta",
+    ]);
+    expect(bulunmaEkli('Yaz 2026')).toBeNull();
   });
 });

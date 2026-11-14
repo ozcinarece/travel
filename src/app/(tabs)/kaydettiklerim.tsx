@@ -18,7 +18,6 @@ import { t } from '@/i18n';
 import { yonelmeEkli } from '@/lib/ek';
 import { kategoriEtiketi } from '@/lib/kategori';
 import { kategoriPini } from '@/lib/pinIkonu';
-import { puanMetni } from '@/lib/puan';
 import type { Gezi, KaydedilenTuru, SeyahatOzet } from '@/lib/tipler';
 import { bosluk, renk, yazi } from '@/theme';
 
@@ -97,7 +96,7 @@ export default function KaydettiklerimEkrani() {
     setMesgulGrup(g.sehirId);
     try {
       const satirlar = await Promise.all(
-        g.yerler.map(async (y) => ({ yerId: y.id, place_id: canli.data?.get(y.id)?.place_id ?? (await icerikPlaceId(y, g.sehirAd)), primary_type: canli.data?.get(y.id)?.hafif?.primary_type ?? y.kategori, lat: y.lat, lng: y.lng })),
+        g.yerler.map(async (y) => ({ yerId: y.id, place_id: canli.data?.get(y.id)?.place_id ?? (await icerikPlaceId(y, g.sehirAd)), primary_type: y.kategori, lat: y.lat, lng: y.lng })),
       );
       const sonuc = await yerleriEkle.mutateAsync({ seyahatId: hedef.id, yerler: satirlar });
       const ad = seyahatAdi(hedef);
@@ -181,8 +180,8 @@ export default function KaydettiklerimEkrani() {
                       {[sol, sag].map((y, k) => {
                         if (!y) return <View key={k} style={s.kart} />;
                         const c = canli.data?.get(y.id);
-                        const puan = puanMetni(c?.hafif?.puan);
-                        const tur = c?.hafif?.primary_type ?? y.kategori;
+                        // #172 KK7–KK9: kaydedilen yer bizim içeriğimiz — kategori DB'den, puan gösterilmez.
+                        const tur = y.kategori;
                         return (
                           <Pressable key={y.id} accessibilityRole="button" accessibilityLabel={y.ad} onPress={() => yerAc(y, hedef)} style={({ pressed }) => [s.kart, pressed && { opacity: 0.9 }]}>
                             <View style={[s.kartFoto, { backgroundColor: kategoriPini(tur).kategoriRenk }]}>
@@ -195,7 +194,7 @@ export default function KaydettiklerimEkrani() {
                               {y.ad}
                             </Text>
                             <Text style={s.kartAlt} numberOfLines={1}>
-                              {[kategoriEtiketi(tur), puan ? `★ ${puan}` : null].filter(Boolean).join(' · ')}
+                              {kategoriEtiketi(tur)}
                             </Text>
                           </Pressable>
                         );

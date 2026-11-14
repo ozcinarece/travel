@@ -786,6 +786,10 @@ begin
   assert (select genis_kapak_url from public.sehirler where slug = 'eskisehir') = 'sehirler/x.webp', 'geniş kapak okunur';
   assert (select count(*) from public.icerik_mekanlari) = 1, 'mekan bağlantıları herkese açık';
   assert not exists (select 1 from public.yerler where place_id = 'ChIJ-met-helva-00002'), 'taslak yer uygulamada yok';
+  -- #172 KK7: yayınlı içerikte geçen taslak yer ve yayınlı yer adıyla okunur; artık hiçbir yazıda geçmeyen taslak yer okunmaz.
+  assert (select string_agg(place_id || '=' || ad || '/' || coalesce(kategori, '-'), ',' order by place_id collate "C")
+          from public.icerik_mekan_bilgileri(array['ChIJ-met-helva-00002', 'ChIJ-hayri-usta-0001', 'ChIJabcdefgh12345', 'ChIJ-yok-0000000001']))
+    = 'ChIJ-met-helva-00002=Met Helvacısı/store,ChIJabcdefgh12345=Editör Yeri/park', 'içerik mekan bilgileri: rehberdeki taslak yer + yayınlı yer';
 end $$;
 select pg_temp.hata_bekle($$insert into public.icerik_mekanlari (sahip_tur, sahip_id, place_id, bicim, sira) values ('rehber', gen_random_uuid(), 'ChIJ-xxxxxxxxxx', 'kart', 1)$$, '42501');
 reset role;
@@ -1387,6 +1391,1085 @@ begin
 end $$;
 select pg_temp.hata_bekle($$select public.rehber_taslak_kaydet('11111111-1111-4111-8111-000000000001', '[]')$$, '42501');
 select pg_temp.hata_bekle($$select public.rehber_yayinla('11111111-1111-4111-8111-000000000001', now())$$, '42501');
+reset role;
+
+-- ---------------------------------------------------------------- İçerik hattı (docs/07): taslak yükle / sil, şehirler, kontrol, bütçe
+-- Yalnız postgres (Yönetim API) çalıştırır; yayin=false zorlanır; yayındaki geziye dokunulmaz; slug çakışması reddedilir;
+-- p_yeniden ve sil yalnız taslakta; hata olursa hiçbir şey yazılmaz.
+create function pg_temp.icerik_ornek(p_slug text, p_sehir jsonb default '{"slug": "eskisehir"}') returns jsonb
+language sql as $$
+  select jsonb_build_object(
+    'sehir', p_sehir,
+    'gezi', jsonb_build_object('slug', p_slug, 'baslik', 'Eskişehir''de bir hafta sonu', 'ozet', 'Yürüyerek, rahat tempoda',
+      'yazar_ad', 'Tripmate ekibi',
+      'yazi_md', E'Giriş paragrafı, [Kurşunlu](mekan:ChIJ-kursunlu-01) ile başlar.\n\n## 1. gün · Odunpazarı\n\nMetin.\n::mekan[ChIJ-modern-muze-1]\n\n## 2. gün · Porsuk\n\n[Kent Park](mekan:ChIJ-kent-park-01) akşamüstü.'),
+    'gunler', jsonb_build_array(
+      jsonb_build_object('baslik', 'Odunpazarı', 'duraklar', jsonb_build_array(
+        jsonb_build_object('place_id', 'ChIJ-kursunlu-01', 'ad', 'Kurşunlu Külliyesi', 'kategori', 'mosque', 'sure_dk', 30, 'lat', 39.7627, 'lng', 30.5261),
+        jsonb_build_object('place_id', 'ChIJ-modern-muze-1', 'ad', 'Odunpazarı Modern Müze', 'kategori', 'museum', 'sure_dk', 75, 'lat', 39.7646, 'lng', 30.5236))),
+      jsonb_build_object('baslik', 'Porsuk', 'duraklar', jsonb_build_array(
+        jsonb_build_object('place_id', 'ChIJ-kent-park-01', 'ad', 'Kent Park', 'kategori', 'park', 'sure_dk', 45, 'lat', 39.7757, 'lng', 30.5004),
+        jsonb_build_object('place_id', 'ChIJ-adalar-0001', 'ad', 'Adalar', 'kategori', null, 'sure_dk', 45, 'lat', 39.7772, 'lng', 30.5185)))));
+$$;
+grant execute on function pg_temp.icerik_ornek(text, jsonb) to anon, authenticated, service_role;
+
+-- Yetki: anon, authenticated (admin dahil) ve service_role çalıştıramaz.
+set role anon;
+select pg_temp.hata_bekle($$select public.icerik_gezi_taslak_yukle(pg_temp.icerik_ornek('hat-anon'))$$, '42501');
+select pg_temp.hata_bekle($$select public.icerik_gezi_taslak_sil('eskisehir-iki-gun')$$, '42501');
+select pg_temp.hata_bekle($$select public.icerik_sehirler()$$, '42501');
+select pg_temp.hata_bekle($$select public.icerik_gezi_kontrol('eskisehir-iki-gun')$$, '42501');
+select pg_temp.hata_bekle($$select public.icerik_google_butcesi(1)$$, '42501');
+set role authenticated;
+select pg_temp.as_email(:E, 'ozcinar.ece@gmail.com');
+select pg_temp.hata_bekle($$select public.icerik_gezi_taslak_yukle(pg_temp.icerik_ornek('hat-admin'))$$, '42501');
+select pg_temp.hata_bekle($$select public.icerik_gezi_taslak_yukle(pg_temp.icerik_ornek('hat-admin'), true)$$, '42501');
+select pg_temp.hata_bekle($$select public.icerik_gezi_taslak_sil('eskisehir-iki-gun')$$, '42501');
+select pg_temp.hata_bekle($$select public.icerik_google_butcesi(1)$$, '42501');
+select pg_temp.hata_bekle($$select public.yonetim_genel_temel(7)$$, '42501');
+select pg_temp.as_user(:B);
+select pg_temp.hata_bekle($$select public.icerik_gezi_taslak_yukle(pg_temp.icerik_ornek('hat-b'))$$, '42501');
+set role service_role;
+select pg_temp.hata_bekle($$select public.icerik_gezi_taslak_yukle(pg_temp.icerik_ornek('hat-servis'))$$, '42501');
+select pg_temp.hata_bekle($$select public.icerik_gezi_taslak_sil('eskisehir-iki-gun')$$, '42501');
+reset role;
+do $$ begin assert not exists (select 1 from public.geziler where slug like 'hat-%'), 'yetkisiz çağrı hiçbir şey yazmaz'; end $$;
+
+-- Yükle (postgres): taslak, günler, duraklar, yazıdaki mekanlar.
+do $$
+declare
+  r jsonb := public.icerik_gezi_taslak_yukle(pg_temp.icerik_ornek('hat-eskisehir'));
+  g record;
+begin
+  select * into g from public.geziler where slug = 'hat-eskisehir';
+  assert not g.yayin and g.yayin_at is null, 'yüklenen gezi taslak';
+  assert g.sehir_id = '11111111-1111-4111-8111-000000000001' and g.yazar_ad = 'Tripmate ekibi', 'şehir slug''la bulunur';
+  assert (r ->> 'gezi_id')::uuid = g.id and (r ->> 'gun_sayisi')::int = 2 and (r ->> 'mekan_sayisi')::int = 4 and r ->> 'slug' = 'hat-eskisehir', format('dönüş: %s', r);
+  assert r ? 'updated_at' and (r ->> 'yazidaki_mekan')::int = 3 and not (r ->> 'yeni_sehir')::boolean, format('dönüş: %s', r);
+  assert (select array_agg(d.sure_dk order by gg.sira, d.sira) from public.gezi_duraklari d join public.gezi_gunleri gg on gg.id = d.gezi_gun_id where gg.gezi_id = g.id) = '{30,75,45,45}', 'sıra ve süreler';
+  assert (select baslik from public.gezi_gunleri where gezi_id = g.id and sira = 2) = 'Porsuk', 'gün başlığı';
+  assert (select array_agg(m.place_id || ':' || m.bicim order by m.sira) from public.icerik_mekanlari m where m.sahip_tur = 'gezi' and m.sahip_id = g.id)
+    = '{ChIJ-kursunlu-01:satir,ChIJ-modern-muze-1:kart,ChIJ-kent-park-01:satir}', 'yazıdaki mekanlar yazı sırasıyla';
+  assert not exists (select 1 from public.yerler where place_id = 'ChIJ-adalar-0001'), 'taslak yer satırı açılmaz';
+  assert (public.icerik_gezi_kontrol('hat-eskisehir') ->> 'durum') = 'taslak' and (public.icerik_gezi_kontrol('hat-eskisehir') ->> 'place_id_eksik')::int = 0, 'kontrol';
+  assert (select count(*) from jsonb_array_elements(public.icerik_sehirler()) s, jsonb_array_elements(s -> 'geziler') z
+    where s ->> 'slug' = 'eskisehir' and z ->> 'slug' = 'hat-eskisehir' and z ->> 'durum' = 'taslak') = 1, 'şehirler listesi taslağı gösterir';
+end $$;
+
+-- Slug çakışması, yayın girdisi ve tablo kısıtları reddedilir; hata olursa hiçbir şey yazılmaz.
+select pg_temp.hata_bekle($$select public.icerik_gezi_taslak_yukle(pg_temp.icerik_ornek('hat-eskisehir'))$$, '23505');
+select pg_temp.hata_bekle($$select public.icerik_gezi_taslak_yukle(pg_temp.icerik_ornek('eskisehir-iki-gun'))$$, '23505');
+select pg_temp.hata_bekle($$select public.icerik_gezi_taslak_yukle(jsonb_set(pg_temp.icerik_ornek('hat-yayin'), '{gezi,yayin}', 'true'))$$, '22023');
+select pg_temp.hata_bekle($$select public.icerik_gezi_taslak_yukle(jsonb_set(pg_temp.icerik_ornek('hat-yayin'), '{gezi,yayin_at}', '"2026-11-01T00:00:00Z"'))$$, '22023');
+select pg_temp.hata_bekle($$select public.icerik_gezi_taslak_yukle(pg_temp.icerik_ornek('Hat-Buyuk'))$$, '22023');
+select pg_temp.hata_bekle($$select public.icerik_gezi_taslak_yukle(jsonb_set(pg_temp.icerik_ornek('hat-sure'), '{gunler,1,duraklar,0,sure_dk}', '10'))$$, '22023');
+select pg_temp.hata_bekle($$select public.icerik_gezi_taslak_yukle(jsonb_set(pg_temp.icerik_ornek('hat-sure'), '{gunler,1,duraklar,0,sure_dk}', '45.5'))$$, '22023');
+select pg_temp.hata_bekle($$select public.icerik_gezi_taslak_yukle(jsonb_set(pg_temp.icerik_ornek('hat-bos'), '{gunler,1,duraklar}', '[]'))$$, '22023');
+select pg_temp.hata_bekle($$select public.icerik_gezi_taslak_yukle(jsonb_set(pg_temp.icerik_ornek('hat-pid'), '{gunler,0,duraklar,0,place_id}', '"kısa"'))$$, '22023');
+select pg_temp.hata_bekle($$select public.icerik_gezi_taslak_yukle(pg_temp.icerik_ornek('hat-konum') #- '{gunler,1,duraklar,1,lat}')$$, '22023');
+select pg_temp.hata_bekle($$select public.icerik_gezi_taslak_yukle(jsonb_set(pg_temp.icerik_ornek('hat-ad'), '{gunler,0,duraklar,0,ad}', to_jsonb(repeat('a', 121))))$$, '22023');
+select pg_temp.hata_bekle($$select public.icerik_gezi_taslak_yukle(jsonb_set(pg_temp.icerik_ornek('hat-gun'), '{gunler}', (select jsonb_agg(pg_temp.icerik_ornek('x') #> '{gunler,0}') from generate_series(1, 31))))$$, '22023');
+select pg_temp.hata_bekle($$select public.icerik_gezi_taslak_yukle(pg_temp.icerik_ornek('hat-sehir', '{"slug": "yok-boyle-sehir"}'))$$, 'P0002');
+select pg_temp.hata_bekle($$select public.icerik_gezi_taslak_yukle(pg_temp.icerik_ornek('hat-sehir', '{"yeni": {"ad": "Eskişehir", "slug": "eskisehir", "lat": 39.77, "lng": 30.52}}'))$$, '23505');
+do $$ begin assert not exists (select 1 from public.geziler where slug in ('hat-yayin', 'hat-sure', 'hat-bos', 'hat-pid', 'hat-konum', 'hat-ad', 'hat-gun', 'hat-sehir')), 'reddedilen yükleme iz bırakmaz'; end $$;
+
+-- Kuru çalıştırma (hat: işlem hata ile biter, hiçbir şey kalmaz).
+do $$
+begin
+  begin
+    perform public.icerik_gezi_taslak_yukle(pg_temp.icerik_ornek('hat-kuru'));
+    raise exception 'KURU_TAMAM' using errcode = 'P0001';
+  exception when sqlstate 'P0001' then null;
+  end;
+  assert not exists (select 1 from public.geziler where slug = 'hat-kuru'), 'kuru çalıştırma yazmaz';
+end $$;
+
+-- Yeni şehir yalnız `yeni` ile ve taslak açılır.
+do $$
+declare r jsonb := public.icerik_gezi_taslak_yukle(pg_temp.icerik_ornek('hat-bursa', '{"yeni": {"ad": "Bursa", "slug": "bursa-hat", "lat": 40.19, "lng": 29.06}}'));
+begin
+  assert (r ->> 'yeni_sehir')::boolean and not (select yayin from public.sehirler where slug = 'bursa-hat'), 'yeni şehir taslak';
+  assert (select s.slug from public.geziler g join public.sehirler s on s.id = g.sehir_id where g.slug = 'hat-bursa') = 'bursa-hat', 'gezi yeni şehre bağlı';
+end $$;
+
+-- p_yeniden: taslağı yeniden yazar (kimlik, kapak ve sıra kalır; yayın tarihi sıfırlanır).
+update public.geziler set kapak_url = 'https://ornek/kapak.webp', sira = 7, yayin_at = now() + interval '3 days' where slug = 'hat-eskisehir';
+do $$
+declare
+  v_id uuid := (select id from public.geziler where slug = 'hat-eskisehir');
+  r jsonb := public.icerik_gezi_taslak_yukle(jsonb_set(pg_temp.icerik_ornek('hat-eskisehir'), '{gunler}', (pg_temp.icerik_ornek('x') -> 'gunler') - 1), true);
+  g record;
+begin
+  select * into g from public.geziler where slug = 'hat-eskisehir';
+  assert g.id = v_id and (r ->> 'yeniden')::boolean and (r ->> 'gun_sayisi')::int = 1 and (r ->> 'mekan_sayisi')::int = 2, format('yeniden: %s', r);
+  assert not g.yayin and g.yayin_at is null and g.kapak_url = 'https://ornek/kapak.webp' and g.sira = 7, 'taslak kalır, kapak ve sıra korunur';
+  assert (select count(*) from public.gezi_gunleri where gezi_id = v_id) = 1, 'eski günler silindi';
+end $$;
+
+-- Yayındaki gezi: ne yeniden yazılır ne silinir (planlı yayın da yayindir).
+select pg_temp.hata_bekle($$select public.icerik_gezi_taslak_yukle(pg_temp.icerik_ornek('eskisehir-iki-gun'), true)$$, '42501');
+select pg_temp.hata_bekle($$select public.icerik_gezi_taslak_sil('eskisehir-iki-gun')$$, '42501');
+update public.geziler set yayin = true, yayin_at = now() + interval '1 day' where slug = 'hat-bursa';
+select pg_temp.hata_bekle($$select public.icerik_gezi_taslak_yukle(pg_temp.icerik_ornek('hat-bursa', '{"slug": "bursa-hat"}'), true)$$, '42501');
+select pg_temp.hata_bekle($$select public.icerik_gezi_taslak_sil('hat-bursa')$$, '42501');
+do $$
+begin
+  assert (select gun_sayisi from public.geziler where slug = 'eskisehir-iki-gun') = 2 and (select yayin from public.geziler where slug = 'eskisehir-iki-gun'), 'yayındaki gezi değişmedi';
+  assert (select mekan_sayisi from public.geziler where slug = 'hat-bursa') = 4, 'planlı gezi değişmedi';
+end $$;
+
+-- Sil: yalnız taslak; fotoğraflı taslak silinmez; yoksa P0002.
+insert into public.icerik_fotolari (yol, sahip_tur, sahip_id) select 'geziler/' || id || '/a.webp', 'gezi', id from public.geziler where slug = 'hat-eskisehir';
+select pg_temp.hata_bekle($$select public.icerik_gezi_taslak_sil('hat-eskisehir')$$, '42501');
+delete from public.icerik_fotolari where sahip_tur = 'gezi' and yol like '%/a.webp';
+do $$
+declare v_id uuid := (select id from public.geziler where slug = 'hat-eskisehir');
+begin
+  assert (public.icerik_gezi_taslak_sil('hat-eskisehir') ->> 'gezi_id')::uuid = v_id, 'taslak silindi';
+  assert not exists (select 1 from public.geziler where id = v_id) and not exists (select 1 from public.gezi_gunleri where gezi_id = v_id), 'günler cascade';
+  assert not exists (select 1 from public.icerik_mekanlari where sahip_tur = 'gezi' and sahip_id = v_id), 'yazıdaki mekanlar silindi';
+end $$;
+select pg_temp.hata_bekle($$select public.icerik_gezi_taslak_sil('hat-eskisehir')$$, 'P0002');
+delete from public.geziler where slug = 'hat-bursa';
+delete from public.sehirler where slug = 'bursa-hat';
+
+-- Bütçe (icerik-google) ve Genel bakış: içerik istekleri Mekan kalemine, karışık birim fiyatla.
+delete from public.api_sayac where gun = (now() at time zone 'Europe/Istanbul')::date;
+-- icerik-kimlik (Text Search IDs Only, ücretsiz): sayılır ama maliyet kalemine girmez.
+insert into public.api_sayac (fonksiyon, cagri, google) values ('places-full', 20, 20), ('icerik-google', 3, 100), ('icerik-kimlik', 0, 500);
+set role service_role;
+do $$
+begin
+  -- icerik fiyatı 20 $/1000 (20261102): 20 × 17 + 100 × 20 = 2,34 $.
+  assert (public.icerik_google_butcesi(0) ->> 'harcanan')::numeric = 2.34, format('harcanan: %s', public.icerik_google_butcesi(0));
+  assert (public.icerik_google_butcesi(300) ->> 'yeterli')::boolean, '2,34 + 6 ≤ 10';
+  assert not (public.icerik_google_butcesi(400) ->> 'yeterli')::boolean, '2,34 + 8 > 10';
+end $$;
+reset role;
+set role authenticated;
+select pg_temp.as_email(:E, 'ozcinar.ece@gmail.com');
+do $$
+declare o jsonb := public.yonetim_genel(1);
+begin
+  assert (o #>> '{google,mekan}')::int = 120, format('mekan + içerik: %s', o -> 'google');
+  assert (o #>> '{google,fiyat,mekan}')::numeric = 19.5, format('karışık fiyat (20×17 + 100×20) / 120: %s', o -> 'google');
+  assert (o #>> '{google,fiyat,foto}')::numeric = 7, 'diğer fiyatlar aynı';
+end $$;
+reset role;
+delete from public.api_sayac where gun = (now() at time zone 'Europe/Istanbul')::date;
+
+-- İçerik hattı 2: mekan rehberleri. Yer satırı yoksa taslak açılır; taslak ve rehberi boşsa yazılır; yayındaki ya da
+-- rehberi dolu satıra dokunulmaz (rehber_atlanan).
+insert into public.yerler (sehir_id, place_id, ad, kategori, lat, lng, yayin, rehber_md) values
+  ('11111111-1111-4111-8111-000000000001', 'ChIJ-yayin-yer-1', 'Yayındaki yer', 'museum', 39.76, 30.52, true, 'Canlı rehber.'),
+  ('11111111-1111-4111-8111-000000000001', 'ChIJ-taslak-yer1', 'Taslak yer', 'museum', 39.76, 30.52, false, null),
+  ('11111111-1111-4111-8111-000000000001', 'ChIJ-dolu-yer-01', 'Dolu taslak', 'park', 39.76, 30.52, false, 'Ece''nin rehberi.');
+create function pg_temp.rehberli(p_slug text) returns jsonb
+language sql as $$
+  select jsonb_set(pg_temp.icerik_ornek(p_slug), '{gunler,0,duraklar}', jsonb_build_array(
+    jsonb_build_object('place_id', 'ChIJ-yeni-yer-001', 'ad', 'Yeni yer', 'kategori', 'museum', 'sure_dk', 60, 'lat', 39.7646, 'lng', 30.5236, 'rehber_md', E'Yeni rehber.\n\n> İpucu.'),
+    jsonb_build_object('place_id', 'ChIJ-yayin-yer-1', 'ad', 'Yayındaki yer', 'kategori', 'museum', 'sure_dk', 60, 'lat', 39.76, 'lng', 30.52, 'rehber_md', 'Benim rehberim.'),
+    jsonb_build_object('place_id', 'ChIJ-taslak-yer1', 'ad', 'Taslak yer', 'kategori', 'museum', 'sure_dk', 60, 'lat', 39.76, 'lng', 30.52, 'rehber_md', 'Taslağa rehber.'),
+    jsonb_build_object('place_id', 'ChIJ-dolu-yer-01', 'ad', 'Dolu taslak', 'kategori', 'park', 'sure_dk', 45, 'lat', 39.76, 'lng', 30.52, 'rehber_md', 'Üzerine yazma.'),
+    jsonb_build_object('place_id', 'ChIJ-rehbersiz-01', 'ad', 'Rehbersiz', 'kategori', 'cafe', 'sure_dk', 30, 'lat', 39.76, 'lng', 30.52)));
+$$;
+select pg_temp.hata_bekle($$select public.icerik_gezi_taslak_yukle(jsonb_set(pg_temp.rehberli('hat-rehber-uzun'), '{gunler,0,duraklar,0,rehber_md}', to_jsonb(repeat('a', 8001))))$$, '22023');
+do $$
+declare r jsonb := public.icerik_gezi_taslak_yukle(pg_temp.rehberli('hat-rehber'));
+declare k jsonb;
+begin
+  assert (r ->> 'yer_acilan')::int = 1 and (r ->> 'rehber_yazilan')::int = 2, format('rehber: %s', r);
+  assert r -> 'rehber_atlanan' @> '["ChIJ-yayin-yer-1", "ChIJ-dolu-yer-01"]' and jsonb_array_length(r -> 'rehber_atlanan') = 2, format('atlanan: %s', r);
+  assert (select not yayin and rehber_md like 'Yeni rehber.%' and kategori = 'museum' and sehir_id = '11111111-1111-4111-8111-000000000001'
+    from public.yerler where place_id = 'ChIJ-yeni-yer-001'), 'yeni yer taslak açıldı';
+  assert (select rehber_md from public.yerler where place_id = 'ChIJ-yayin-yer-1') = 'Canlı rehber.', 'yayındaki yerin rehberine dokunulmaz';
+  assert (select rehber_md from public.yerler where place_id = 'ChIJ-taslak-yer1') = 'Taslağa rehber.', 'boş taslağa yazılır';
+  assert (select rehber_md from public.yerler where place_id = 'ChIJ-dolu-yer-01') = 'Ece''nin rehberi.', 'dolu taslağa dokunulmaz';
+  assert not exists (select 1 from public.yerler where place_id = 'ChIJ-rehbersiz-01'), 'rehbersiz durak için yer açılmaz';
+  k := public.icerik_gezi_kontrol('hat-rehber');
+  -- yer_yok: rehbersiz durak + 2. günün iki durağı.
+  assert (k ->> 'yer_yok')::int = 3 and (k ->> 'rehber_dolu')::int = 4 and (k ->> 'rehber_yayinda')::int = 1, format('kontrol: %s', k);
+end $$;
+select public.icerik_gezi_taslak_sil('hat-rehber');
+delete from public.yerler where place_id in ('ChIJ-yeni-yer-001', 'ChIJ-yayin-yer-1', 'ChIJ-taslak-yer1', 'ChIJ-dolu-yer-01');
+
+-- #174 KK8 Seyahat silme: yalnız sahip siler (trips_delete = is_owner). Üye ve dışarıdan birinin silmesi RLS ile süzülür
+-- (hata yok, 0 satır); sahip silince bağlı satırlar (günler, mekanlar, duraklar, üyeler, değişiklikler, oylar, puanlar) kalmaz.
+reset role;
+\set SS '''aaaaaaaa-1740-0000-0000-000000000001'''
+\set SU '''aaaaaaaa-1740-0000-0000-000000000002'''
+\set SN '''aaaaaaaa-1740-0000-0000-000000000003'''
+insert into auth.users (id, is_anonymous) values (:SS, false), (:SU, false), (:SN, false);
+insert into public.profiles (id, name, username) values (:SS, 'Sahip', 'sahip174'), (:SU, 'Uye', 'uye174'), (:SN, 'Disari', 'disari174');
+set role authenticated;
+select pg_temp.as_user(:SS);
+insert into public.trips (owner_id, city_place_id, city_label, country_code, lat, lng, tz, start_date, end_date)
+  values (:SS, 'ChIJ-silinecek', 'Silinecek', 'TR', 39.77, 30.52, 'Europe/Istanbul', '2026-11-02', '2026-11-03');
+reset role;
+select id as sil_trip, invite_token as sil_token from public.trips where owner_id = :SS \gset
+select set_config('test.sil_trip', :'sil_trip', false);
+select set_config('test.sil_token', :'sil_token', false);
+set role authenticated;
+select pg_temp.as_user(:SU);
+select public.join_trip(:'sil_token', 'Uye');
+select pg_temp.as_user(:SS);
+insert into public.places (trip_id, place_id, primary_type, lat, lng, default_minutes, added_by)
+  values (:'sil_trip', 'ChIJ-silinecek-yer1', 'museum', 39.77, 30.52, 60, :SS);
+insert into public.stops (trip_id, day_id, place_ref, order_key, minutes)
+  select d.trip_id, d.id, p.id, 'a0', 60 from public.days d join public.places p on p.trip_id = d.trip_id
+  where d.trip_id = :'sil_trip' and d.index = 1;
+select pg_temp.as_user(:SU);
+insert into public.oylar (seyahat_id, mekan) select trip_id, id from public.places where trip_id = :'sil_trip';
+insert into public.stop_ratings (trip_id, place_ref, stars) select trip_id, id, 5 from public.places where trip_id = :'sil_trip';
+do $$
+declare n integer;
+begin
+  delete from public.trips where id = current_setting('test.sil_trip')::uuid;
+  get diagnostics n = row_count;
+  assert n = 0, 'üye seyahati silemez';
+  assert exists (select 1 from public.trips where id = current_setting('test.sil_trip')::uuid), 'üye için seyahat yerinde';
+end $$;
+select pg_temp.as_user(:SN);
+do $$
+declare n integer;
+begin
+  delete from public.trips where id = current_setting('test.sil_trip')::uuid;
+  get diagnostics n = row_count;
+  assert n = 0, 'dışarıdan biri seyahati silemez';
+end $$;
+reset role;
+do $$
+declare t uuid := current_setting('test.sil_trip')::uuid;
+begin
+  assert exists (select 1 from public.trips where id = t), 'yetkisiz silmelerden sonra seyahat duruyor';
+  assert (select count(*) from public.members where trip_id = t) = 2, 'sahip + üye';
+  assert exists (select 1 from public.days where trip_id = t) and exists (select 1 from public.stops where trip_id = t)
+    and exists (select 1 from public.changes where trip_id = t) and exists (select 1 from public.oylar where seyahat_id = t)
+    and exists (select 1 from public.stop_ratings where trip_id = t), 'bağlı satırlar silmeden önce var';
+end $$;
+set role authenticated;
+select pg_temp.as_user(:SS);
+do $$
+declare n integer;
+begin
+  delete from public.trips where id = current_setting('test.sil_trip')::uuid;
+  get diagnostics n = row_count;
+  assert n = 1, 'sahip seyahati siler';
+end $$;
+reset role;
+do $$
+declare t uuid := current_setting('test.sil_trip')::uuid;
+begin
+  assert not exists (select 1 from public.trips where id = t), 'seyahat silindi';
+  assert not exists (select 1 from public.days where trip_id = t), 'günler kalmaz';
+  assert not exists (select 1 from public.places where trip_id = t), 'mekanlar kalmaz';
+  assert not exists (select 1 from public.stops where trip_id = t), 'duraklar kalmaz';
+  assert not exists (select 1 from public.members where trip_id = t), 'üyelikler kalmaz';
+  assert not exists (select 1 from public.changes where trip_id = t), 'değişiklikler kalmaz';
+  assert not exists (select 1 from public.oylar where seyahat_id = t), 'oylar kalmaz';
+  assert not exists (select 1 from public.stop_ratings where trip_id = t), 'puanlar kalmaz';
+  assert not exists (select 1 from public.stays where trip_id = t), 'konaklamalar kalmaz';
+  assert exists (select 1 from auth.users where id = 'aaaaaaaa-1740-0000-0000-000000000002'), 'üyenin hesabı durur';
+end $$;
+-- KK6: silinmiş seyahatin davet linki özet döndürmez (uygulama "Bu seyahat artık yok" gösterir), katılım P0002.
+set role anon;
+do $$ begin assert public.davet_ozeti(current_setting('test.sil_token', true)) is null, 'silinmiş seyahatin daveti özetsiz'; end $$;
+reset role;
+
+-- #181 KK4 Tarihleri değiştir: üye çağırır, günler kayar; uzayınca sona gün eklenir (son günün oteliyle), kısalınca sondaki
+-- günler ve durakları kalkar (mekan listede kalır). Dışarıdan biri çağıramaz; ters aralık reddedilir.
+reset role;
+\set TS '''aaaaaaaa-1810-0000-0000-000000000001'''
+\set TU '''aaaaaaaa-1810-0000-0000-000000000002'''
+\set TN '''aaaaaaaa-1810-0000-0000-000000000003'''
+insert into auth.users (id, is_anonymous) values (:TS, false), (:TU, false), (:TN, false);
+insert into public.profiles (id, name, username) values (:TS, 'Sahip', 'sahip181'), (:TU, 'Uye', 'uye181'), (:TN, 'Disari', 'disari181');
+set role authenticated;
+select pg_temp.as_user(:TS);
+insert into public.trips (owner_id, city_place_id, city_label, country_code, lat, lng, tz, start_date, end_date)
+  values (:TS, 'ChIJ-tarih181', 'Tarihli', 'TR', 39.77, 30.52, 'Europe/Istanbul', '2026-11-10', '2026-11-12');
+reset role;
+select id as tarih_trip, invite_token as tarih_token from public.trips where owner_id = :TS \gset
+select set_config('test.tarih_trip', :'tarih_trip', false);
+set role authenticated;
+select pg_temp.as_user(:TU);
+select public.join_trip(:'tarih_token', 'Uye');
+select pg_temp.as_user(:TS);
+insert into public.stays (trip_id, place_id, lat, lng, label, created_by) values (:'tarih_trip', 'ChIJ-otel181', 39.77, 30.52, 'Otel', :TS);
+update public.days set start_stay_id = (select id from public.stays where trip_id = :'tarih_trip'), end_stay_id = (select id from public.stays where trip_id = :'tarih_trip')
+  where trip_id = :'tarih_trip' and index = 3;
+insert into public.places (trip_id, place_id, primary_type, lat, lng, added_by) values (:'tarih_trip', 'ChIJ-son-gun-181', 'museum', 39.77, 30.52, :TS);
+insert into public.stops (trip_id, day_id, place_ref, order_key, minutes)
+  select d.trip_id, d.id, p.id, 'a0', 45 from public.days d join public.places p on p.trip_id = d.trip_id
+  where d.trip_id = :'tarih_trip' and d.index = 3;
+-- Dışarıdan biri ve ters aralık.
+select pg_temp.as_user(:TN);
+select pg_temp.hata_bekle(format('select public.seyahat_tarihlerini_degistir(%L, %L, %L)', current_setting('test.tarih_trip'), '2026-11-11', '2026-11-13'), '42501');
+select pg_temp.as_user(:TU);
+select pg_temp.hata_bekle(format('select public.seyahat_tarihlerini_degistir(%L, %L, %L)', current_setting('test.tarih_trip'), '2026-11-13', '2026-11-11'), '22023');
+-- Üye uzatır ve kaydırır: 3 gün → 5 gün, bir gün ileri.
+do $$
+declare t uuid := current_setting('test.tarih_trip')::uuid;
+begin
+  assert public.seyahat_tarihlerini_degistir(t, '2026-11-11', '2026-11-15') = 5, 'yeni gün sayısı';
+  assert (select start_date from public.trips where id = t) = '2026-11-11' and (select end_date from public.trips where id = t) = '2026-11-15', 'seyahat tarihleri';
+  assert (select count(*) from public.days where trip_id = t) = 5, '5 gün';
+  assert not exists (select 1 from public.days where trip_id = t and date <> '2026-11-11'::date + (index - 1)), 'günler sırayla tarihlendi';
+  assert (select count(*) from public.days d join public.stays s on s.id = d.start_stay_id and s.id = d.end_stay_id where d.trip_id = t and d.index in (4, 5)) = 2,
+    'yeni günler son günün oteliyle';
+  assert (select count(*) from public.stops where trip_id = t) = 1, 'durak yerinde';
+end $$;
+-- Kısaltır: 5 gün → 2 gün; 3. gündeki durak kalkar, mekan listede kalır.
+do $$
+declare t uuid := current_setting('test.tarih_trip')::uuid;
+begin
+  assert public.seyahat_tarihlerini_degistir(t, '2026-11-11', '2026-11-12') = 2, 'kısalan gün sayısı';
+  assert (select count(*) from public.days where trip_id = t) = 2, '2 gün';
+  assert not exists (select 1 from public.stops where trip_id = t), 'silinen günün durağı kalktı';
+  assert exists (select 1 from public.places where trip_id = t and place_id = 'ChIJ-son-gun-181'), 'mekan listede kalır';
+end $$;
+reset role;
+
+-- #183 Harcamalar: üye okur/ekler; ekleyen ya da sahip düzenler/siler; paylar toplamı = harcama (₺) ve yalnız harcama_kaydet'le
+-- yazılır; doğrudan güncelleme akışa düşer; ödeşmeyi iki taraf işaretler/siler (ayrılan üyeyle de; açık borcu aşmadan); IBAN
+-- yalnız borçlu karşı tarafa görünür; fiş kovası yalnız üyelere (silme: yükleyen ya da sahip); Geri al (ekleme · silme · düzenleme).
+reset role;
+\set HS '''aaaaaaaa-1830-0000-0000-000000000001'''
+\set HU '''aaaaaaaa-1830-0000-0000-000000000002'''
+\set HV '''aaaaaaaa-1830-0000-0000-000000000003'''
+\set HN '''aaaaaaaa-1830-0000-0000-000000000004'''
+insert into auth.users (id, is_anonymous) values (:HS, false), (:HU, false), (:HV, false), (:HN, false);
+insert into public.profiles (id, name, username) values (:HS, 'Ece', 'ece183'), (:HU, 'Ayse', 'ayse183'), (:HV, 'Mert', 'mert183'), (:HN, 'Disari', 'disari183');
+set role authenticated;
+select pg_temp.as_user(:HS);
+insert into public.trips (owner_id, city_place_id, city_label, country_code, lat, lng, tz, start_date, end_date)
+  values (:HS, 'ChIJ-harcama183', 'Harcamali', 'TR', 39.77, 30.52, 'Europe/Istanbul', '2026-11-20', '2026-11-22');
+reset role;
+select id as h_trip, invite_token as h_token from public.trips where owner_id = :HS \gset
+select set_config('test.h_trip', :'h_trip', false);
+set role authenticated;
+select pg_temp.as_user(:HU);
+select public.join_trip(:'h_token', 'Ayşe');
+select pg_temp.as_user(:HV);
+select public.join_trip(:'h_token', 'Mert');
+select pg_temp.as_user(:HS);
+insert into public.places (trip_id, place_id, primary_type, lat, lng, added_by) values (:'h_trip', 'ChIJ-cibörek-183', 'restaurant', 39.77, 30.52, :HS);
+insert into public.stops (trip_id, day_id, place_ref, order_key, minutes)
+  select d.trip_id, d.id, p.id, 'a0', 60 from public.days d join public.places p on p.trip_id = d.trip_id
+  where d.trip_id = :'h_trip' and d.index = 1;
+reset role;
+select id as h_stop from public.stops where trip_id = :'h_trip' \gset
+select set_config('test.h_stop', :'h_stop', false);
+select set_config('test.diger_stop', (select id::text from public.stops where trip_id <> :'h_trip' limit 1), false);
+do $$ begin assert current_setting('test.diger_stop') <> '', 'başka seyahatte durak var'; end $$;
+set role authenticated;
+
+-- Ayşe 100 ₺'yi üçe böler (yuvarlama farkı ödeyene) ve durağa bağlar.
+select pg_temp.as_user(:HU);
+select public.harcama_kaydet(:'h_trip', null, '  Çibörek öğle yemeği ', 10000, 'TRY', 10000, 'yemek', :HU, :'h_stop', null,
+  jsonb_build_array(jsonb_build_object('user_id', :HU, 'pay_kurus', 3334), jsonb_build_object('user_id', :HS, 'pay_kurus', 3333),
+                    jsonb_build_object('user_id', :HV, 'pay_kurus', 3333))) as h1 \gset
+select set_config('test.h1', :'h1', false);
+do $$
+declare h uuid := current_setting('test.h1')::uuid;
+begin
+  assert (select aciklama from public.harcamalar where id = h) = 'Çibörek öğle yemeği', 'açıklama kırpılır';
+  assert (select olusturan from public.harcamalar where id = h) = auth.uid(), 'oluşturan çağıran';
+  assert (select sum(pay_kurus) from public.harcama_paylari where harcama_id = h) = 10000, 'paylar toplamı';
+  assert exists (select 1 from public.changes where entity = 'harcamalar' and entity_id = h::text and old is null), 'ekleme akışa düştü';
+end $$;
+-- Toplam tutmayan paylar, üye olmayan ödeyen / pay sahibi, başka seyahatin durağı, boş bölüşüm reddedilir.
+select pg_temp.hata_bekle(format('select public.harcama_kaydet(%L, null, %L, 10000, %L, 10000, %L, %L, null, null, %L)',
+  current_setting('test.h_trip'), 'x', 'TRY', 'yemek', 'aaaaaaaa-1830-0000-0000-000000000002',
+  '[{"user_id": "aaaaaaaa-1830-0000-0000-000000000002", "pay_kurus": 9000}]'), '23514');
+select pg_temp.hata_bekle(format('select public.harcama_kaydet(%L, null, %L, 10000, %L, 10000, %L, %L, null, null, %L)',
+  current_setting('test.h_trip'), 'x', 'TRY', 'yemek', 'aaaaaaaa-1830-0000-0000-000000000004',
+  '[{"user_id": "aaaaaaaa-1830-0000-0000-000000000002", "pay_kurus": 10000}]'), '22023');
+select pg_temp.hata_bekle(format('select public.harcama_kaydet(%L, null, %L, 10000, %L, 10000, %L, %L, null, null, %L)',
+  current_setting('test.h_trip'), 'x', 'TRY', 'yemek', 'aaaaaaaa-1830-0000-0000-000000000002',
+  '[{"user_id": "aaaaaaaa-1830-0000-0000-000000000004", "pay_kurus": 10000}]'), '22023');
+select pg_temp.hata_bekle(format('select public.harcama_kaydet(%L, null, %L, 10000, %L, 10000, %L, %L, %L, null, %L)',
+  current_setting('test.h_trip'), 'x', 'TRY', 'yemek', 'aaaaaaaa-1830-0000-0000-000000000002',
+  current_setting('test.diger_stop'),
+  '[{"user_id": "aaaaaaaa-1830-0000-0000-000000000002", "pay_kurus": 10000}]'), '22023');
+select pg_temp.hata_bekle(format('select public.harcama_kaydet(%L, null, %L, 10000, %L, 10000, %L, %L, null, null, %L)',
+  current_setting('test.h_trip'), 'x', 'TRY', 'yemek', 'aaaaaaaa-1830-0000-0000-000000000002', '[]'), '22023');
+-- TRY'de ₺ karşılığı tutara eşit olmalı; dövizde kurla çevrilmiş tutar.
+select pg_temp.hata_bekle(format('select public.harcama_kaydet(%L, null, %L, 10000, %L, 12000, %L, %L, null, null, %L)',
+  current_setting('test.h_trip'), 'x', 'TRY', 'yemek', 'aaaaaaaa-1830-0000-0000-000000000002',
+  '[{"user_id": "aaaaaaaa-1830-0000-0000-000000000002", "pay_kurus": 12000}]'), '23514');
+select public.harcama_kaydet(:'h_trip', null, 'Müze', 2000, 'EUR', 72000, 'bilet', :HU, null, null,
+  jsonb_build_array(jsonb_build_object('user_id', :HU, 'pay_kurus', 36000), jsonb_build_object('user_id', :HV, 'pay_kurus', 36000))) as h2 \gset
+select set_config('test.h2', :'h2', false);
+
+-- Dışarıdan biri göremez ve yazamaz.
+select pg_temp.as_user(:HN);
+do $$
+begin
+  assert (select count(*) from public.harcamalar where trip_id = current_setting('test.h_trip')::uuid) = 0, 'üye olmayan harcamayı göremez';
+  assert (select count(*) from public.harcama_paylari where trip_id = current_setting('test.h_trip')::uuid) = 0, 'üye olmayan payı göremez';
+end $$;
+select pg_temp.hata_bekle(format('select public.harcama_kaydet(%L, null, %L, 10000, %L, 10000, %L, %L, null, null, %L)',
+  current_setting('test.h_trip'), 'x', 'TRY', 'yemek', 'aaaaaaaa-1830-0000-0000-000000000004',
+  '[{"user_id": "aaaaaaaa-1830-0000-0000-000000000004", "pay_kurus": 10000}]'), '42501');
+select pg_temp.hata_bekle(format('insert into public.harcamalar (trip_id, tutar_kurus, tl_kurus, odeyen_id) values (%L, 100, 100, %L)',
+  current_setting('test.h_trip'), 'aaaaaaaa-1830-0000-0000-000000000004'), '42501');
+
+-- Mert (üye, ekleyen değil, sahip değil) Ayşe'nin harcamasını silemez, düzenleyemez, payına dokunamaz.
+select pg_temp.as_user(:HV);
+delete from public.harcamalar where id = :'h1';
+select pg_temp.hata_bekle(format('update public.harcama_paylari set pay_kurus = 0 where harcama_id = %L', current_setting('test.h1')), '42501');
+do $$
+declare h uuid := current_setting('test.h1')::uuid;
+begin
+  assert exists (select 1 from public.harcamalar where id = h), 'üye başkasının harcamasını silemez';
+  assert (select pay_kurus from public.harcama_paylari where harcama_id = h and user_id = auth.uid()) = 3333, 'üye başkasının payını değiştiremez';
+end $$;
+select pg_temp.hata_bekle(format('select public.harcama_kaydet(%L, %L, %L, 10000, %L, 10000, %L, %L, null, null, %L)',
+  current_setting('test.h_trip'), current_setting('test.h1'), 'x', 'TRY', 'yemek', 'aaaaaaaa-1830-0000-0000-000000000003',
+  '[{"user_id": "aaaaaaaa-1830-0000-0000-000000000003", "pay_kurus": 10000}]'), '42501');
+select pg_temp.hata_bekle(format('delete from public.harcama_paylari where harcama_id = %L; insert into public.harcama_paylari (harcama_id, trip_id, user_id, pay_kurus) values (%L, %L, %L, 0)',
+  current_setting('test.h1'), current_setting('test.h1'), current_setting('test.h_trip'), 'aaaaaaaa-1830-0000-0000-000000000001'), '42501');
+-- Geri al da aynı kural: Mert, Ayşe'nin eklemesini geri alamaz.
+select pg_temp.hata_bekle(format('select public.degisikligi_geri_al(%s)',
+  (select id from public.changes where entity = 'harcamalar' and entity_id = current_setting('test.h1') and old is null)), '42501');
+
+-- Ekleyen bile payları doğrudan yazamaz (toplamı koruyarak kişiler arasında kaydırma da yok): yalnız harcama_kaydet.
+select pg_temp.as_user(:HU);
+select pg_temp.hata_bekle(format('update public.harcama_paylari set pay_kurus = pay_kurus where harcama_id = %L', current_setting('test.h1')), '42501');
+select pg_temp.hata_bekle(format('delete from public.harcama_paylari where harcama_id = %L', current_setting('test.h1')), '42501');
+-- Doğrudan güncelleme (PATCH) akışa düşer: updated_at ilerler, değişen alan kaydedilir; fiş başka klasörden olamaz.
+update public.harcamalar set kategori = 'bilet' where id = :'h1';
+do $$
+declare h uuid := current_setting('test.h1')::uuid;
+begin
+  assert exists (select 1 from public.changes where entity = 'harcamalar' and entity_id = h::text and field = 'kategori' and new = '"bilet"'), 'doğrudan güncelleme akışa düştü';
+end $$;
+select pg_temp.hata_bekle(format('update public.harcamalar set fis_yolu = %L where id = %L', 'baska/fis.jpg', current_setting('test.h1')), '23514');
+
+-- Sahip düzenler: 120 ₺, Mert hariç ikiye; değişmeyen pay yeniden yazılmaz, Mert'in payı silinir.
+select pg_temp.as_user(:HS);
+select public.harcama_kaydet(:'h_trip', :'h1', 'Çibörek', 12000, 'TRY', 12000, 'yemek', :HU, :'h_stop', null,
+  jsonb_build_array(jsonb_build_object('user_id', :HU, 'pay_kurus', 6000), jsonb_build_object('user_id', :HS, 'pay_kurus', 6000),
+                    jsonb_build_object('user_id', :HV, 'pay_kurus', 0)));
+do $$
+declare h uuid := current_setting('test.h1')::uuid;
+begin
+  assert (select tl_kurus from public.harcamalar where id = h) = 12000, 'sahip düzenledi';
+  assert (select count(*) from public.harcama_paylari where harcama_id = h) = 2, 'sıfır pay yazılmaz, eski pay silinir';
+  assert (select olusturan from public.harcamalar where id = h) = 'aaaaaaaa-1830-0000-0000-000000000002', 'oluşturan değişmez';
+end $$;
+-- Sahip düzenlemesini geri alır: tutar, açıklama ve üç pay eski haline döner.
+select public.degisikligi_geri_al((select max(id) from public.changes where entity = 'harcamalar' and entity_id = current_setting('test.h1') and field = 'tl_kurus'));
+do $$
+declare h uuid := current_setting('test.h1')::uuid;
+begin
+  assert (select tl_kurus from public.harcamalar where id = h) = 10000, 'tutar geri döndü';
+  assert (select aciklama from public.harcamalar where id = h) = 'Çibörek öğle yemeği', 'açıklama geri döndü';
+  assert (select count(*) from public.harcama_paylari where harcama_id = h) = 3, 'üç pay geri döndü';
+  assert (select pay_kurus from public.harcama_paylari where harcama_id = h and user_id = 'aaaaaaaa-1830-0000-0000-000000000002') = 3334, 'yuvarlama payı geri döndü';
+end $$;
+
+-- Ekleyen siler; silme geri alınınca harcama payları ile geri gelir; ekleme geri alınınca harcama kalkar.
+select pg_temp.as_user(:HU);
+delete from public.harcamalar where id = :'h1';
+do $$ begin assert not exists (select 1 from public.harcamalar where id = current_setting('test.h1')::uuid), 'ekleyen siler'; end $$;
+select public.degisikligi_geri_al((select max(id) from public.changes where entity = 'harcamalar' and entity_id = current_setting('test.h1') and new is null and field is null));
+do $$
+declare h uuid := current_setting('test.h1')::uuid;
+begin
+  assert (select stop_id from public.harcamalar where id = h) = current_setting('test.h_stop')::uuid, 'silme geri alındı (durak bağıyla)';
+  assert (select sum(pay_kurus) from public.harcama_paylari where harcama_id = h) = 10000, 'paylar geri geldi';
+end $$;
+select public.degisikligi_geri_al((select id from public.changes where entity = 'harcamalar' and entity_id = current_setting('test.h2') and old is null));
+do $$ begin assert not exists (select 1 from public.harcamalar where id = current_setting('test.h2')::uuid), 'ekleme geri alındı'; end $$;
+-- Durak silinince bağ boşalır, harcama kalır; bu boşalma akışa düşmez.
+select pg_temp.as_user(:HS);
+delete from public.stops where id = :'h_stop';
+do $$
+declare h uuid := current_setting('test.h1')::uuid;
+begin
+  assert (select stop_id from public.harcamalar where id = h) is null, 'durak silinince bağ boşaldı';
+  assert not exists (select 1 from public.changes where entity = 'harcamalar' and entity_id = h::text and field = 'stop_id'), 'FK boşalması akışa düşmez';
+end $$;
+
+-- Ödeşme: iki taraftan biri işaretler/siler; üçüncü kişi işaretleyemez/silemez; kendine ödeşme, dışarıdan taraf ve açık borcu
+-- aşan tutar yok.
+select pg_temp.as_user(:HV);
+select pg_temp.hata_bekle(format('insert into public.odesmeler (trip_id, kimden, kime, tl_kurus) values (%L, %L, %L, 1)',
+  current_setting('test.h_trip'), 'aaaaaaaa-1830-0000-0000-000000000003', 'aaaaaaaa-1830-0000-0000-000000000003'), '23514');
+select pg_temp.hata_bekle(format('insert into public.odesmeler (trip_id, kimden, kime, tl_kurus) values (%L, %L, %L, 1)',
+  current_setting('test.h_trip'), 'aaaaaaaa-1830-0000-0000-000000000003', 'aaaaaaaa-1830-0000-0000-000000000004'), '22023');
+select pg_temp.hata_bekle(format('insert into public.odesmeler (trip_id, kimden, kime, tl_kurus) values (%L, %L, %L, 3334)',
+  current_setting('test.h_trip'), 'aaaaaaaa-1830-0000-0000-000000000003', 'aaaaaaaa-1830-0000-0000-000000000002'), '22023');
+insert into public.odesmeler (trip_id, kimden, kime, tl_kurus) values (:'h_trip', :HV, :HU, 3333);
+select pg_temp.as_user(:HS);
+select pg_temp.hata_bekle(format('insert into public.odesmeler (trip_id, kimden, kime, tl_kurus) values (%L, %L, %L, 1)',
+  current_setting('test.h_trip'), 'aaaaaaaa-1830-0000-0000-000000000003', 'aaaaaaaa-1830-0000-0000-000000000002'), '42501');
+delete from public.odesmeler where trip_id = :'h_trip';
+select pg_temp.hata_bekle(format('select public.degisikligi_geri_al(%s)',
+  (select id from public.changes where entity = 'odesmeler' and trip_id = current_setting('test.h_trip')::uuid and old is null)), '42501');
+select pg_temp.hata_bekle($$update public.odesmeler set tl_kurus = 1$$, '42501');
+do $$ begin assert (select count(*) from public.odesmeler where trip_id = current_setting('test.h_trip')::uuid) = 1, 'üçüncü kişi silemez'; end $$;
+select pg_temp.as_user(:HU);
+delete from public.odesmeler where trip_id = :'h_trip';
+do $$ begin assert not exists (select 1 from public.odesmeler where trip_id = current_setting('test.h_trip')::uuid), 'alan kişi siler'; end $$;
+select public.degisikligi_geri_al((select id from public.changes where entity = 'odesmeler' and trip_id = current_setting('test.h_trip')::uuid and new is null));
+do $$ begin assert (select tl_kurus from public.odesmeler where trip_id = current_setting('test.h_trip')::uuid) = 3333, 'ödeşme silmesi geri alındı'; end $$;
+
+-- IBAN: sahibi yazar; yalnız ona borcu olan seyahat arkadaşı görür (Ece −33,33; Mert ödeşti, 0); dışarıdan biri göremez,
+-- değiştiremez; biçim denetlenir.
+insert into public.odeme_bilgileri (iban) values ('TR330006100519786457841326');
+select pg_temp.hata_bekle($$insert into public.odeme_bilgileri (iban) values ('TR33 0006') on conflict (user_id) do update set iban = excluded.iban$$, '23514');
+select pg_temp.as_user(:HS);
+do $$ begin assert (select iban from public.odeme_bilgileri where user_id = 'aaaaaaaa-1830-0000-0000-000000000002') = 'TR330006100519786457841326', 'borçlu karşı taraf IBAN görür'; end $$;
+select pg_temp.as_user(:HV);
+do $$ begin assert not exists (select 1 from public.odeme_bilgileri where user_id = 'aaaaaaaa-1830-0000-0000-000000000002'), 'borcu olmayan arkadaş IBAN göremez'; end $$;
+select pg_temp.as_user(:HN);
+update public.odeme_bilgileri set iban = 'TR000000000000000000000000';
+do $$ begin assert not exists (select 1 from public.odeme_bilgileri where user_id = 'aaaaaaaa-1830-0000-0000-000000000002'), 'dışarıdan biri IBAN göremez'; end $$;
+select pg_temp.hata_bekle($$insert into public.odeme_bilgileri (user_id, iban) values ('aaaaaaaa-1830-0000-0000-000000000002', 'TR000000000000000000000000')$$, '42501');
+
+-- Fiş kovası: üye yükler ve görür; dışarıdan biri göremez, yükleyemez; klasörü seyahat olmayan yol reddedilir; silme yalnız
+-- yükleyen ya da seyahatin sahibi.
+select pg_temp.as_user(:HU);
+select format('insert into storage.objects (bucket_id, name, owner_id) values (%L, %L, %L)', 'fisler', current_setting('test.h_trip') || '/fis1.jpg', 'aaaaaaaa-1830-0000-0000-000000000002') as fis_ekle \gset
+:fis_ekle;
+select pg_temp.hata_bekle($$insert into storage.objects (bucket_id, name) values ('fisler', 'baska/fis.jpg')$$, '42501');
+select pg_temp.hata_bekle($$insert into storage.objects (bucket_id, name) values ('fisler', 'fis.jpg')$$, '42501');
+select pg_temp.as_user(:HV);
+do $$ begin assert (select count(*) from storage.objects where bucket_id = 'fisler') = 1, 'üye fişi görür'; end $$;
+select pg_temp.as_user(:HN);
+do $$ begin assert (select count(*) from storage.objects where bucket_id = 'fisler') = 0, 'dışarıdan biri fişi göremez'; end $$;
+select pg_temp.hata_bekle(format('insert into storage.objects (bucket_id, name) values (%L, %L)', 'fisler', current_setting('test.h_trip') || '/fis2.jpg'), '42501');
+select pg_temp.as_user(:HV);
+delete from storage.objects where bucket_id = 'fisler';
+do $$ begin assert (select count(*) from storage.objects where bucket_id = 'fisler') = 1, 'yüklemeyen üye fişi silemez'; end $$;
+select pg_temp.as_user(:HU);
+delete from storage.objects where bucket_id = 'fisler';
+do $$ begin assert (select count(*) from storage.objects where bucket_id = 'fisler') = 0, 'yükleyen fişi siler'; end $$;
+
+-- Ayrılan üyeyle kalan borç kapanır: Mert 30 ₺ borçluyken seyahatten ayrılır, Ayşe "Ödendi işaretle"; fazlası reddedilir.
+select pg_temp.as_user(:HU);
+select public.harcama_kaydet(:'h_trip', null, 'Taksi', 6000, 'TRY', 6000, 'ulasim', :HU, null, null,
+  jsonb_build_array(jsonb_build_object('user_id', :HU, 'pay_kurus', 3000), jsonb_build_object('user_id', :HV, 'pay_kurus', 3000)));
+select pg_temp.as_user(:HV);
+delete from public.members where trip_id = :'h_trip' and user_id = auth.uid();
+select pg_temp.as_user(:HU);
+insert into public.odesmeler (trip_id, kimden, kime, tl_kurus) values (:'h_trip', :HV, :HU, 3000);
+select pg_temp.hata_bekle(format('insert into public.odesmeler (trip_id, kimden, kime, tl_kurus) values (%L, %L, %L, 1)',
+  current_setting('test.h_trip'), 'aaaaaaaa-1830-0000-0000-000000000003', 'aaaaaaaa-1830-0000-0000-000000000002'), '22023');
+do $$ begin assert public.seyahat_net(current_setting('test.h_trip')::uuid, 'aaaaaaaa-1830-0000-0000-000000000003') = 0, 'ayrılan üyenin borcu kapandı'; end $$;
+
+-- Seyahat silinince harcama, pay ve ödeşmeler gider (ertelenmiş toplam denetimi engel olmaz).
+select pg_temp.as_user(:HS);
+delete from public.trips where id = :'h_trip';
+reset role;
+do $$
+begin
+  assert not exists (select 1 from public.harcamalar where trip_id = current_setting('test.h_trip')::uuid), 'harcamalar gitti';
+  assert not exists (select 1 from public.harcama_paylari where trip_id = current_setting('test.h_trip')::uuid), 'paylar gitti';
+  assert not exists (select 1 from public.odesmeler where trip_id = current_setting('test.h_trip')::uuid), 'ödeşmeler gitti';
+end $$;
+
+-- #184 Sohbet: yalnız üyeler okur/yazar; kişi yalnız kendi mesajını (yumuşak) siler, içerik temizlenir; oylama 2–4 seçenek, oy
+-- tekil ve değiştirilebilir, kapanınca oy yok, başka oylamanın seçeneği reddedilir; okunmamış sayısı; fotoğraf kovası.
+-- Saatler sunucunun (created_at / silindi_at / son_okunan_at istemciden yazılamaz); oylama ve okuma yalnız RPC'yle yazılır.
+reset role;
+\set SS '''aaaaaaaa-1840-0000-0000-000000000001'''
+\set SU '''aaaaaaaa-1840-0000-0000-000000000002'''
+\set SN '''aaaaaaaa-1840-0000-0000-000000000003'''
+insert into auth.users (id, is_anonymous) values (:SS, false), (:SU, false), (:SN, false);
+insert into public.profiles (id, name, username) values (:SS, 'Ece', 'ece184'), (:SU, 'Ayse', 'ayse184'), (:SN, 'Disari', 'disari184');
+set role authenticated;
+select pg_temp.as_user(:SS);
+insert into public.trips (owner_id, city_place_id, city_label, country_code, lat, lng, tz, start_date, end_date)
+  values (:SS, 'ChIJ-sohbet184', 'Sohbetli', 'TR', 39.77, 30.52, 'Europe/Istanbul', '2026-11-25', '2026-11-26');
+reset role;
+select id as s_trip, invite_token as s_token from public.trips where owner_id = :SS \gset
+select set_config('test.s_trip', :'s_trip', false);
+set role authenticated;
+select pg_temp.as_user(:SU);
+select public.join_trip(:'s_token', 'Ayşe');
+
+-- Ece yazar; Ayşe okur ve okunmamış 1 görür; okuyunca 0. İstemcinin yazdığı ileri tarih ve silindi_at yok sayılır (yoksa
+-- 2100 tarihli mesaj rozeti kalıcı 1 yapardı).
+select pg_temp.as_user(:SS);
+insert into public.mesajlar (trip_id, tur, metin, created_at, silindi_at) values (:'s_trip', 'metin', 'Cuma akşamı Odunpazarı''nda kalalım', '2100-01-01', now());
+do $$
+declare m public.mesajlar;
+begin
+  select * into m from public.mesajlar where trip_id = current_setting('test.s_trip')::uuid;
+  assert m.created_at <= now() and m.silindi_at is null and m.metin <> '', 'mesaj saati sunucunun, silinmiş doğmaz';
+end $$;
+select pg_temp.hata_bekle(format('insert into public.mesajlar (trip_id, tur, metin) values (%L, %L, %L)', current_setting('test.s_trip'), 'metin', '   '), '23514');
+select pg_temp.hata_bekle(format('insert into public.mesajlar (trip_id, tur) values (%L, %L)', current_setting('test.s_trip'), 'mekan'), '23514');
+select pg_temp.hata_bekle(format('insert into public.mesajlar (trip_id, user_id, tur, metin) values (%L, null, %L, %L)', current_setting('test.s_trip'), 'metin', 'sistem gibi'), '42501');
+select pg_temp.as_user(:SU);
+do $$
+declare t uuid := current_setting('test.s_trip')::uuid;
+begin
+  assert (select count(*) from public.mesajlar where trip_id = t) = 1, 'üye mesajı okur';
+  assert public.sohbet_okunmamis(t) = 1, 'okunmamış 1';
+  perform public.sohbet_okundu(t);
+  assert public.sohbet_okunmamis(t) = 0, 'okuyunca 0';
+  assert (select son_okunan_at from public.mesaj_okuma where trip_id = t and user_id = auth.uid()) <= now(), 'okuma anı sunucu saati';
+end $$;
+-- Okuma anı doğrudan yazılamaz (sahte "okundu" yok); yalnız sohbet_okundu.
+select pg_temp.hata_bekle(format('insert into public.mesaj_okuma (trip_id, son_okunan_at) values (%L, %L)', current_setting('test.s_trip'), '2100-01-01'), '42501');
+select pg_temp.hata_bekle(format('update public.mesaj_okuma set son_okunan_at = %L where trip_id = %L', '2100-01-01', current_setting('test.s_trip')), '42501');
+select pg_temp.hata_bekle(format('delete from public.mesaj_okuma where trip_id = %L', current_setting('test.s_trip')), '42501');
+-- Ayşe, Ece'nin mesajını silemez ve içeriğini değiştiremez.
+update public.mesajlar set silindi_at = now() where trip_id = :'s_trip';
+select pg_temp.hata_bekle(format('update public.mesajlar set metin = %L where trip_id = %L', 'değişti', current_setting('test.s_trip')), '42501');
+do $$ begin assert (select silindi_at from public.mesajlar where trip_id = current_setting('test.s_trip')::uuid) is null, 'başkasının mesajı silinmez'; end $$;
+
+-- Dışarıdan biri okuyamaz, yazamaz, okunmamışı sıfır.
+select pg_temp.as_user(:SN);
+do $$
+begin
+  assert (select count(*) from public.mesajlar where trip_id = current_setting('test.s_trip')::uuid) = 0, 'üye olmayan okuyamaz';
+  assert public.sohbet_okunmamis(current_setting('test.s_trip')::uuid) = 0, 'üye olmayana sayı yok';
+end $$;
+select pg_temp.hata_bekle(format('insert into public.mesajlar (trip_id, tur, metin) values (%L, %L, %L)', current_setting('test.s_trip'), 'metin', 'selam'), '42501');
+select pg_temp.hata_bekle(format('select public.oylama_olustur(%L, %L, %L, null)', current_setting('test.s_trip'), 'Ne yiyelim?', '[{"metin":"Çibörek"},{"metin":"Balık"}]'), '42501');
+select pg_temp.hata_bekle(format('select public.sohbet_okundu(%L)', current_setting('test.s_trip')), '42501');
+
+-- Ece kendi mesajını siler: içerik temizlenir, silme anı sunucunun, geri alınamaz.
+select pg_temp.as_user(:SS);
+update public.mesajlar set silindi_at = '2000-01-01' where trip_id = :'s_trip';
+do $$
+declare m public.mesajlar;
+begin
+  select * into m from public.mesajlar where trip_id = current_setting('test.s_trip')::uuid;
+  assert m.silindi_at is not null and m.metin = '', 'yumuşak silme içeriği temizler';
+  assert m.silindi_at > now() - interval '1 minute', 'silme anı sunucu saati';
+end $$;
+select pg_temp.hata_bekle(format('update public.mesajlar set silindi_at = null where trip_id = %L', current_setting('test.s_trip')), '42501');
+
+-- place_id Google biçiminde; fotoğraf yolu bu seyahatin klasöründe.
+select pg_temp.hata_bekle(format('insert into public.mesajlar (trip_id, tur, place_id) values (%L, %L, %L)', current_setting('test.s_trip'), 'mekan', 'ChIJ-cibörek'), '23514');
+select pg_temp.hata_bekle(format('insert into public.mesajlar (trip_id, tur, place_id) values (%L, %L, %L)', current_setting('test.s_trip'), 'mekan', 'kisa'), '23514');
+insert into public.mesajlar (trip_id, tur, place_id) values (:'s_trip', 'mekan', 'ChIJ-ciborek-hb1');
+select pg_temp.hata_bekle(format('insert into public.mesajlar (trip_id, tur, foto_yolu) values (%L, %L, %L)', current_setting('test.s_trip'), 'foto', 'baska/foto.jpg'), '23514');
+
+-- Oylama: 2–4 seçenek, kapanış ileride; mesaj da yazılır. Tablolara doğrudan yazım yok (seçeneksiz oylama, sonradan seçenek).
+select pg_temp.hata_bekle(format('select public.oylama_olustur(%L, %L, %L, null)', current_setting('test.s_trip'), 'Tek?', '[{"metin":"Yalnız"}]'), '22023');
+select pg_temp.hata_bekle(format('select public.oylama_olustur(%L, %L, %L, now() - interval ''1 hour'')', current_setting('test.s_trip'), 'Geçmiş?', '[{"metin":"A"},{"metin":"B"}]'), '22023');
+select pg_temp.hata_bekle(format('select public.oylama_olustur(%L, %L, %L, null)', current_setting('test.s_trip'), 'Biçim?', '[{"metin":"A","place_id":"ChIJ-cibörek"},{"metin":"B"}]'), '23514');
+select pg_temp.hata_bekle(format('insert into public.oylamalar (trip_id, soru) values (%L, %L)', current_setting('test.s_trip'), 'Seçeneksiz?'), '42501');
+select public.oylama_olustur(:'s_trip', 'Çibörek mi, balık mı?', '[{"metin":"Çibörek · Hacı Baba","place_id":"ChIJ-ciborek-hb1"},{"metin":"Balık"}]'::jsonb, now() + interval '1 day', 'Cumartesi akşamı için:') as s_mesaj \gset
+reset role;
+select oylama_id as s_oylama from public.mesajlar where id = :'s_mesaj' \gset
+select id as s_ciborek from public.oylama_secenekleri where oylama_id = :'s_oylama' and sira = 1 \gset
+select id as s_balik from public.oylama_secenekleri where oylama_id = :'s_oylama' and sira = 2 \gset
+select set_config('test.s_oylama', :'s_oylama', false), set_config('test.s_balik', :'s_balik', false);
+set role authenticated;
+select pg_temp.as_user(:SS);
+do $$
+begin
+  assert (select count(*) from public.oylama_secenekleri where oylama_id = current_setting('test.s_oylama')::uuid) = 2, 'iki seçenek';
+  assert (select olusturan from public.oylamalar where id = current_setting('test.s_oylama')::uuid) = auth.uid(), 'oylamayı açan';
+  assert (select user_id from public.mesajlar where oylama_id = current_setting('test.s_oylama')::uuid) = auth.uid(), 'oylama mesajı açanın';
+end $$;
+select pg_temp.hata_bekle(format('insert into public.oylama_secenekleri (oylama_id, sira, metin) values (%L, 3, %L)', current_setting('test.s_oylama'), 'Sonradan'), '42501');
+
+-- Oy tekil: ikinci oy aynı satırı günceller (oy değişir), çift satır olmaz; başkası adına oy yok.
+insert into public.oylama_oylari (oylama_id, trip_id, secenek_id) values (:'s_oylama', :'s_trip', :'s_ciborek');
+select pg_temp.hata_bekle(format('insert into public.oylama_oylari (oylama_id, trip_id, secenek_id) values (%L, %L, %L)',
+  current_setting('test.s_oylama'), current_setting('test.s_trip'), current_setting('test.s_balik')), '23505');
+-- Uygulamadaki gibi PostgREST upsert'i (tüm sütunlar SET'te).
+insert into public.oylama_oylari (oylama_id, trip_id, secenek_id, user_id) values (:'s_oylama', :'s_trip', :'s_balik', :SS)
+  on conflict (oylama_id, user_id) do update set oylama_id = excluded.oylama_id, trip_id = excluded.trip_id, secenek_id = excluded.secenek_id, user_id = excluded.user_id;
+do $$
+begin
+  assert (select count(*) from public.oylama_oylari where oylama_id = current_setting('test.s_oylama')::uuid) = 1, 'kişi başına tek oy';
+  assert (select secenek_id from public.oylama_oylari where oylama_id = current_setting('test.s_oylama')::uuid) = current_setting('test.s_balik')::uuid, 'oy değişti';
+end $$;
+select pg_temp.hata_bekle(format('insert into public.oylama_oylari (oylama_id, trip_id, secenek_id, user_id) values (%L, %L, %L, %L)',
+  current_setting('test.s_oylama'), current_setting('test.s_trip'), current_setting('test.s_balik'), 'aaaaaaaa-1840-0000-0000-000000000002'), '42501');
+select pg_temp.hata_bekle(format('delete from public.oylama_oylari where oylama_id = %L', current_setting('test.s_oylama')), '42501');
+-- Başka oylamanın seçeneği reddedilir.
+select public.oylama_olustur(:'s_trip', 'Kapanmış', '[{"metin":"A"},{"metin":"B"}]'::jsonb, now() + interval '1 hour') as s_mesaj2 \gset
+reset role;
+select oylama_id as s_oylama2 from public.mesajlar where id = :'s_mesaj2' \gset
+select set_config('test.s_oylama2', :'s_oylama2', false);
+set role authenticated;
+select pg_temp.as_user(:SU);
+select pg_temp.hata_bekle(format('insert into public.oylama_oylari (oylama_id, trip_id, secenek_id) values (%L, %L, %L)',
+  current_setting('test.s_oylama2'), current_setting('test.s_trip'), current_setting('test.s_balik')), '23503');
+-- Kapanışı geçmişe çek (oylama düzenlenemez; test için yönetici): kapanmış oylamaya oy yok.
+reset role;
+update public.oylamalar set kapanis_at = now() - interval '1 minute' where id = :'s_oylama2';
+set role authenticated;
+select pg_temp.as_user(:SU);
+select pg_temp.hata_bekle(format('insert into public.oylama_oylari (oylama_id, trip_id, secenek_id) values (%L, %L, (select id from public.oylama_secenekleri where oylama_id = %L limit 1))',
+  current_setting('test.s_oylama2'), current_setting('test.s_trip'), current_setting('test.s_oylama2')), '22023');
+select pg_temp.hata_bekle(format('update public.oylamalar set soru = %L', 'değişti'), '42501');
+-- Dışarıdan biri oy veremez, oyları göremez.
+select pg_temp.as_user(:SN);
+select pg_temp.hata_bekle(format('insert into public.oylama_oylari (oylama_id, trip_id, secenek_id) values (%L, %L, %L)',
+  current_setting('test.s_oylama'), current_setting('test.s_trip'), current_setting('test.s_balik')), '22023');
+do $$ begin assert (select count(*) from public.oylama_oylari where trip_id = current_setting('test.s_trip')::uuid) = 0, 'üye olmayan oyları göremez'; end $$;
+
+-- Fotoğraf kovası: üye yükler; dışarıdan biri göremez, yükleyemez; mesaj silinince dosyayı yükleyen (ya da sahip) siler.
+select pg_temp.as_user(:SU);
+select format('insert into storage.objects (bucket_id, name, owner_id) values (%L, %L, %L)', 'sohbet', current_setting('test.s_trip') || '/foto1.jpg', 'aaaaaaaa-1840-0000-0000-000000000002') as sohbet_foto \gset
+:sohbet_foto;
+select pg_temp.as_user(:SN);
+do $$ begin assert (select count(*) from storage.objects where bucket_id = 'sohbet') = 0, 'dışarıdan biri sohbet fotoğrafını göremez'; end $$;
+select pg_temp.hata_bekle(format('insert into storage.objects (bucket_id, name) values (%L, %L)', 'sohbet', current_setting('test.s_trip') || '/foto2.jpg'), '42501');
+select pg_temp.as_user(:SU);
+delete from storage.objects where bucket_id = 'sohbet';
+do $$ begin assert (select count(*) from storage.objects where bucket_id = 'sohbet') = 0, 'yükleyen sohbet fotoğrafını siler'; end $$;
+reset role;
+
+-- #189 Keşfet kalitesi: eşikler ayarda (varsayılanlar migration'la); gizleme listesini yalnız admin okur / yazar; süzgeç ayarlarını
+-- yalnız service_role okur (places-nearby).
+do $$
+begin
+  assert (select (deger #>> '{turistik,yorum}')::int from public.yonetim_ayarlari where anahtar = 'kesfet_esikleri') = 50, 'Turistik en az 50 yorum';
+  assert (select (deger #>> '{yemek,puan}')::numeric from public.yonetim_ayarlari where anahtar = 'kesfet_esikleri') = 3.8, 'Yemek en az 3,8';
+  assert (select (deger #>> '{park,yorum}')::int from public.yonetim_ayarlari where anahtar = 'kesfet_esikleri') = 20, 'Park en az 20 yorum';
+  assert (select (deger #>> '{sehir_yaricap_m}')::int from public.yonetim_ayarlari where anahtar = 'kesfet_esikleri') = 8000, '#189 Ek 2: şehir listesi 8 km';
+end $$;
+set role authenticated;
+select pg_temp.as_email(:B, 'b@ornek.com');
+select pg_temp.hata_bekle($$insert into public.kesfet_gizli (place_id, neden) values ('ChIJ-kuafor-duzce', 'kuaför')$$, '42501');
+do $$ begin assert (select count(*) from public.kesfet_gizli) = 0, 'admin olmayan gizleme listesini görmez'; end $$;
+select pg_temp.hata_bekle($$select public.kesfet_suzgec_ayarlari()$$, '42501');
+select pg_temp.as_email(:E, 'ozcinar.ece@gmail.com');
+insert into public.kesfet_gizli (place_id, neden) values ('ChIJ-kuafor-duzce', 'kuaför, Müze tipiyle');
+select pg_temp.hata_bekle($$insert into public.kesfet_gizli (place_id) values ('kisa')$$, '23514');
+do $$
+begin
+  assert (select ekleyen from public.kesfet_gizli where place_id = 'ChIJ-kuafor-duzce') = auth.uid(), 'ekleyen admin';
+end $$;
+select pg_temp.hata_bekle($$select public.kesfet_suzgec_ayarlari()$$, '42501');
+set role anon;
+select pg_temp.hata_bekle($$select count(*) from public.kesfet_gizli$$, '42501');
+set role service_role;
+do $$
+declare a jsonb := public.kesfet_suzgec_ayarlari();
+begin
+  assert (a #>> '{esikler,turistik,puan}')::numeric = 3.8, 'service_role eşikleri okur';
+  assert a -> 'gizli' = '["ChIJ-kuafor-duzce"]'::jsonb, 'service_role gizli listeyi okur';
+end $$;
+reset role;
+
+-- #192 Önerilen gezi rotası önbelleği: yayınlı gezide herkes okur, yayınlanmamışta yalnız admin; yazma yalnız service_role; durak
+-- değişince o günün bacakları silinir (süre değişikliği silmez); "Seyahatime al" bacakları fetched_at korunarak walk_cache'e
+-- kopyalar (≤ 30 gün, üye, yayınlı gezi); günlük temizlik 31 günü aşanları siler.
+reset role;
+\set RU '''aaaaaaaa-1920-0000-0000-000000000001'''
+\set RN '''aaaaaaaa-1920-0000-0000-000000000002'''
+insert into auth.users (id, is_anonymous) values (:RU, false), (:RN, false);
+insert into public.profiles (id, name, username) values (:RU, 'Rota', 'rota192'), (:RN, 'Disari', 'disari192');
+insert into public.sehirler (id, ad, slug, lat, lng, yayin) values ('19201920-0000-4000-8000-000000000001', 'Rotalı', 'rotali-192', 39.77, 30.52, true);
+insert into public.geziler (id, sehir_id, baslik, slug, yayin) values
+  ('19201920-0000-4000-8000-000000000010', '19201920-0000-4000-8000-000000000001', 'Yayınlı rota', 'yayinli-rota-192', true),
+  ('19201920-0000-4000-8000-000000000020', '19201920-0000-4000-8000-000000000001', 'Taslak rota', 'taslak-rota-192', false);
+insert into public.gezi_gunleri (id, gezi_id, sira) values
+  ('19201920-0000-4000-8000-000000000011', '19201920-0000-4000-8000-000000000010', 1),
+  ('19201920-0000-4000-8000-000000000021', '19201920-0000-4000-8000-000000000020', 1);
+insert into public.gezi_duraklari (id, gezi_gun_id, sira, ad, lat, lng) values
+  ('19201920-0000-4000-8000-0000000000a1', '19201920-0000-4000-8000-000000000011', 1, 'A', 39.770, 30.520),
+  ('19201920-0000-4000-8000-0000000000a2', '19201920-0000-4000-8000-000000000011', 2, 'B', 39.772, 30.523),
+  ('19201920-0000-4000-8000-0000000000a3', '19201920-0000-4000-8000-000000000011', 3, 'C', 39.775, 30.526),
+  ('19201920-0000-4000-8000-0000000000b1', '19201920-0000-4000-8000-000000000021', 1, 'T1', 39.770, 30.520),
+  ('19201920-0000-4000-8000-0000000000b2', '19201920-0000-4000-8000-000000000021', 2, 'T2', 39.772, 30.523);
+create function pg_temp.rota_doldur() returns void language sql as $$
+  insert into public.gezi_rota_onbellek (gezi_gun_id, kimden_durak_id, kime_durak_id, mod, polyline, saniye, metre, fetched_at) values
+    ('19201920-0000-4000-8000-000000000011', '19201920-0000-4000-8000-0000000000a1', '19201920-0000-4000-8000-0000000000a2', 'WALK', 'abc', 300, 400, now() - interval '2 days'),
+    ('19201920-0000-4000-8000-000000000011', '19201920-0000-4000-8000-0000000000a2', '19201920-0000-4000-8000-0000000000a3', 'WALK', 'def', 360, 450, now() - interval '40 days'),
+    ('19201920-0000-4000-8000-000000000021', '19201920-0000-4000-8000-0000000000b1', '19201920-0000-4000-8000-0000000000b2', 'WALK', 'ghi', 300, 400, now())
+  on conflict do nothing;
+$$;
+set role service_role;
+select pg_temp.rota_doldur();
+set role anon;
+do $$
+begin
+  assert (select count(*) from public.gezi_rota_onbellek where gezi_gun_id = '19201920-0000-4000-8000-000000000011') = 2, 'anon yayınlı gezinin rotasını okur';
+  assert (select count(*) from public.gezi_rota_onbellek where gezi_gun_id = '19201920-0000-4000-8000-000000000021') = 0, 'anon taslak gezinin rotasını göremez';
+end $$;
+set role authenticated;
+select pg_temp.as_user(:RN);
+do $$ begin assert (select count(*) from public.gezi_rota_onbellek where gezi_gun_id = '19201920-0000-4000-8000-000000000021') = 0, 'admin olmayan taslağı göremez'; end $$;
+select pg_temp.hata_bekle($$insert into public.gezi_rota_onbellek (gezi_gun_id, kimden_durak_id, kime_durak_id, mod, polyline, saniye, metre) values ('19201920-0000-4000-8000-000000000011', '19201920-0000-4000-8000-0000000000a1', '19201920-0000-4000-8000-0000000000a3', 'WALK', 'x', 1, 1)$$, '42501');
+select pg_temp.hata_bekle($$delete from public.gezi_rota_onbellek$$, '42501');
+select pg_temp.as_email(:E, 'ozcinar.ece@gmail.com');
+do $$ begin assert (select count(*) from public.gezi_rota_onbellek where gezi_gun_id = '19201920-0000-4000-8000-000000000021') = 1, 'admin taslağın rotasını görür (BO önizleme)'; end $$;
+reset role;
+
+-- KK7: süre değişikliği silmez; sıra, yeni durak, silinen durak o günün bacaklarını siler (öbür güne dokunmaz).
+update public.gezi_duraklari set sure_dk = 60, ad = 'A2' where id = '19201920-0000-4000-8000-0000000000a1';
+do $$ begin assert (select count(*) from public.gezi_rota_onbellek where gezi_gun_id = '19201920-0000-4000-8000-000000000011') = 2, 'süre / ad değişikliği bacakları silmez'; end $$;
+update public.gezi_duraklari set sira = 9 where id = '19201920-0000-4000-8000-0000000000a3';
+do $$
+begin
+  assert (select count(*) from public.gezi_rota_onbellek where gezi_gun_id = '19201920-0000-4000-8000-000000000011') = 0, 'sıra değişince günün bacakları silinir';
+  assert (select count(*) from public.gezi_rota_onbellek where gezi_gun_id = '19201920-0000-4000-8000-000000000021') = 1, 'öbür gün etkilenmez';
+end $$;
+update public.gezi_duraklari set sira = 3 where id = '19201920-0000-4000-8000-0000000000a3';
+select pg_temp.rota_doldur();
+insert into public.gezi_duraklari (id, gezi_gun_id, sira, ad, lat, lng) values ('19201920-0000-4000-8000-0000000000a4', '19201920-0000-4000-8000-000000000011', 4, 'D', 39.778, 30.53);
+do $$ begin assert (select count(*) from public.gezi_rota_onbellek where gezi_gun_id = '19201920-0000-4000-8000-000000000011') = 0, 'yeni durak günün bacaklarını siler'; end $$;
+select pg_temp.rota_doldur();
+delete from public.gezi_duraklari where id = '19201920-0000-4000-8000-0000000000a4';
+do $$ begin assert (select count(*) from public.gezi_rota_onbellek where gezi_gun_id = '19201920-0000-4000-8000-000000000011') = 0, 'silinen durak günün bacaklarını siler'; end $$;
+select pg_temp.rota_doldur();
+
+-- KK5: Seyahatime al — üye kopyalar; 30 günü geçen bacak ve taslak gezinin bacağı kopyalanmaz; fetched_at korunur; walk_cache'teki
+-- daha taze satır ezilmez; seyahatin listesinde olmayan place_id kabul edilmez; üye olmayan kopyalayamaz.
+set role authenticated;
+select pg_temp.as_user(:RU);
+insert into public.trips (id, owner_id, city_place_id, city_label, lat, lng, tz) values ('19201920-0000-4000-8000-0000000000f1', :RU, 'ChIJ-rotali-192', 'Rotalı', 39.77, 30.52, 'Europe/Istanbul');
+-- Listede A, C, T1, T2 var; B yok (önce).
+insert into public.places (trip_id, place_id, lat, lng, added_by)
+select '19201920-0000-4000-8000-0000000000f1', p, 39.77, 30.52, :RU from unnest(array['ChIJ-durak-Axxx', 'ChIJ-durak-Cxxx', 'ChIJ-durak-T1xx', 'ChIJ-durak-T2xx']) p;
+do $$
+begin
+  -- A>B'nin B'si seyahatin listesinde değil → kopyalanmaz (üye yabancı bir kimlikle walk_cache'e bacak yazamaz).
+  assert public.gezi_rotasini_seyahate_kopyala('19201920-0000-4000-8000-0000000000f1',
+    '[{"durak_id":"19201920-0000-4000-8000-0000000000a1","place_id":"ChIJ-durak-Axxx"},{"durak_id":"19201920-0000-4000-8000-0000000000a2","place_id":"ChIJ-durak-Bxxx"}]') = 0,
+    'listede olmayan place_id kopyalanmaz';
+  assert not exists (select 1 from public.walk_cache where trip_id = '19201920-0000-4000-8000-0000000000f1' and to_key = 'ChIJ-durak-Bxxx'), 'yabancı bacak yazılmadı';
+end $$;
+insert into public.places (trip_id, place_id, lat, lng, added_by) values ('19201920-0000-4000-8000-0000000000f1', 'ChIJ-durak-Bxxx', 39.77, 30.52, :RU);
+reset role;
+insert into public.walk_cache (trip_id, from_key, to_key, seconds, meters, polyline, mode, fetched_at) values
+  ('19201920-0000-4000-8000-0000000000f1', 'ChIJ-durak-T1xx', 'ChIJ-durak-T2xx', 999, 999, 'taze', 'WALK', now() + interval '1 hour');
+set role authenticated;
+select pg_temp.as_user(:RU);
+do $$
+declare
+  eslesme jsonb := '[{"durak_id":"19201920-0000-4000-8000-0000000000a1","place_id":"ChIJ-durak-Axxx"},{"durak_id":"19201920-0000-4000-8000-0000000000a2","place_id":"ChIJ-durak-Bxxx"},{"durak_id":"19201920-0000-4000-8000-0000000000a3","place_id":"ChIJ-durak-Cxxx"},{"durak_id":"19201920-0000-4000-8000-0000000000b1","place_id":"ChIJ-durak-T1xx"},{"durak_id":"19201920-0000-4000-8000-0000000000b2","place_id":"ChIJ-durak-T2xx"},{"durak_id":"x","place_id":"kisa"}]';
+  n integer;
+begin
+  n := public.gezi_rotasini_seyahate_kopyala('19201920-0000-4000-8000-0000000000f1', eslesme);
+  assert n = 1, 'yalnız taze ve yayınlı bacak kopyalanır: ' || n;
+  assert (select seconds from public.walk_cache where trip_id = '19201920-0000-4000-8000-0000000000f1' and from_key = 'ChIJ-durak-Axxx' and to_key = 'ChIJ-durak-Bxxx') = 300, 'bacak walk_cache''te';
+  assert (select fetched_at from public.walk_cache where from_key = 'ChIJ-durak-Axxx' and to_key = 'ChIJ-durak-Bxxx') < now() - interval '1 day', 'fetched_at korunur';
+  assert not exists (select 1 from public.walk_cache where from_key = 'ChIJ-durak-Bxxx'), '30 günü geçen bacak kopyalanmaz';
+  assert (select seconds from public.walk_cache where from_key = 'ChIJ-durak-T1xx') = 999, 'taslak gezinin bacağı kopyalanmaz, var olan satır ezilmez';
+end $$;
+select pg_temp.as_user(:RN);
+select pg_temp.hata_bekle($$select public.gezi_rotasini_seyahate_kopyala('19201920-0000-4000-8000-0000000000f1', '[]'::jsonb)$$, '42501');
+select pg_temp.hata_bekle($$select public.rota_onbellegi_temizle()$$, '42501');
+
+-- KK6: günlük temizlik (oturumsuz, cron) 31 günü aşan satırları siler: rota önbelleği ve walk_cache.
+reset role;
+update public.walk_cache set fetched_at = now() - interval '32 days' where trip_id = '19201920-0000-4000-8000-0000000000f1' and from_key = 'ChIJ-durak-T1xx';
+select public.rota_onbellegi_temizle();
+do $$
+begin
+  assert not exists (select 1 from public.gezi_rota_onbellek where kimden_durak_id = '19201920-0000-4000-8000-0000000000a2'), '40 günlük rota satırı silindi';
+  assert exists (select 1 from public.gezi_rota_onbellek where kimden_durak_id = '19201920-0000-4000-8000-0000000000a1'), '2 günlük satır kalır';
+  assert not exists (select 1 from public.walk_cache where from_key = 'ChIJ-durak-T1xx'), '32 günlük walk_cache satırı silindi';
+  assert exists (select 1 from public.walk_cache where from_key = 'ChIJ-durak-Axxx'), 'kopyalanan (2 günlük) walk_cache satırı kalır';
+end $$;
+-- Gezi silinince rota satırları da gider (cascade).
+delete from public.geziler where id = '19201920-0000-4000-8000-000000000010';
+do $$ begin assert not exists (select 1 from public.gezi_rota_onbellek where gezi_gun_id = '19201920-0000-4000-8000-000000000011'), 'cascade'; end $$;
+
+-- #193 KK3 · KK12: "Seyahatime al" → Yeni seyahat — seyahat, günler, mekanlar ve plan tek işlemde; bir adım hata verirse hiçbiri
+-- yazılmaz. Tarihsiz seyahat ("Tarih sonra") istenen sayıda tarihsiz günle; durak yoksa mekanlar atanmamış (KK10).
+reset role;
+\set YS '''aaaaaaaa-1930-0000-0000-000000000001'''
+\set YA '''aaaaaaaa-1930-0000-0000-000000000002'''
+insert into auth.users (id, is_anonymous) values (:YS, false), (:YA, true);
+insert into public.profiles (id, name, username) values (:YS, 'Yeni', 'yeni193');
+set role authenticated;
+select pg_temp.as_user(:YS);
+do $$
+declare
+  v uuid;
+  sehir constant jsonb := '{"name": "Eskişehir''de üç gün", "city_place_id": "ChIJ_eskisehir_193", "city_label": "Eskişehir", "country_code": "TR", "lat": 39.77, "lng": 30.52, "tz": "Europe/Istanbul"}';
+  mekanlar constant jsonb := '[{"place_id": "ChIJ_a_193", "primary_type": "museum", "lat": 39.77, "lng": 30.52, "dk": 90}, {"place_id": "ChIJ_b_193", "primary_type": "park", "lat": 39.78, "lng": 30.53, "dk": 45}, {"place_id": "ChIJ_c_193", "primary_type": "restaurant", "lat": 39.79, "lng": 30.54, "dk": 60}]';
+begin
+  -- Tarihli, 3 gün: 1. güne iki durak, 3. güne bir durak (sırayla).
+  v := public.geziden_seyahat_ac(sehir || '{"start_date": "2026-10-16", "end_date": "2026-10-18"}', 3, mekanlar,
+    '[{"gun": 1, "place_id": "ChIJ_a_193", "order_key": "i", "dk": 90}, {"gun": 1, "place_id": "ChIJ_b_193", "order_key": "r", "dk": 45}, {"gun": 3, "place_id": "ChIJ_c_193", "order_key": "i", "dk": 60}]');
+  assert (select name from public.trips where id = v) = 'Eskişehir''de üç gün', 'ad = gezi başlığı';
+  assert (select owner_id from public.trips where id = v) = auth.uid(), 'sahip çağıran';
+  assert exists (select 1 from public.members where trip_id = v and user_id = auth.uid() and role = 'owner'), 'sahip üye';
+  assert (select count(*) from public.days where trip_id = v) = 3, 'tarihli: 3 gün';
+  assert (select date from public.days where trip_id = v and index = 3) = '2026-10-18', '3. gün tarihi';
+  assert (select count(*) from public.places where trip_id = v and added_by = auth.uid()) = 3, '3 mekan, ekleyen çağıran';
+  assert (select array_agg(p.place_id order by s.order_key) from public.stops s join public.days d on d.id = s.day_id join public.places p on p.id = s.place_ref where s.trip_id = v and d.index = 1) = array['ChIJ_a_193', 'ChIJ_b_193'], '1. gün iki durak, sırayla';
+  assert (select s.minutes from public.stops s join public.days d on d.id = s.day_id where s.trip_id = v and d.index = 3) = 60, '3. gün durağı ve süresi';
+
+  -- Tarihsiz ("Tarih sonra"), 3 gün, durak yok: mekanlar atanmamış.
+  v := public.geziden_seyahat_ac(sehir, 3, mekanlar, '[]');
+  assert (select start_date is null and end_date is null from public.trips where id = v), 'tarihsiz seyahat';
+  assert (select count(*) from public.days where trip_id = v and date is null) = 3, 'tarihsiz: 3 tarihsiz gün';
+  assert (select array_agg(index order by index) from public.days where trip_id = v) = array[1, 2, 3], 'gün sırası 1..3';
+  assert (select count(*) from public.places where trip_id = v) = 3 and not exists (select 1 from public.stops where trip_id = v), 'mekanlar atanmamış';
+  perform set_config('test.ys_sayi', (select count(*) from public.trips where owner_id = auth.uid())::text, false);
+end $$;
+
+-- Tek işlem: durak yazımı düşerse (sıra anahtarı yok) seyahat de, mekanlar da yazılmaz.
+select pg_temp.hata_bekle($$select public.geziden_seyahat_ac('{"name": "Yarım", "city_place_id": "ChIJ_y", "city_label": "Y", "lat": 1, "lng": 1, "tz": "Europe/Istanbul"}', 2, '[{"place_id": "ChIJ_a_193", "lat": 1, "lng": 1}]', '[{"gun": 1, "place_id": "ChIJ_a_193"}]')$$, '23502');
+select pg_temp.hata_bekle($$select public.geziden_seyahat_ac('{"name": "Yarım", "city_place_id": "ChIJ_y", "city_label": "Y", "lat": 1, "lng": 1, "tz": "Europe/Istanbul"}', 2, '[]', '[{"gun": 3, "place_id": "ChIJ_a_193", "order_key": "i"}]')$$, '22023');
+select pg_temp.hata_bekle($$select public.geziden_seyahat_ac('{"name": "Yarım", "city_place_id": "ChIJ_y", "city_label": "Y", "lat": 1, "lng": 1, "tz": "Europe/Istanbul", "start_date": "2026-10-16", "end_date": "2026-10-17"}', 3, '[]', '[]')$$, '22023');
+select pg_temp.hata_bekle($$select public.geziden_seyahat_ac('{"name": "Yarım", "city_place_id": "ChIJ_y", "city_label": "Y", "lat": 1, "lng": 1, "tz": "Europe/Istanbul"}', 31, '[]', '[]')$$, '22023');
+do $$
+begin
+  assert (select count(*) from public.trips where owner_id = auth.uid())::text = current_setting('test.ys_sayi'), 'hata sonrası yarım seyahat yok';
+  assert not exists (select 1 from public.trips where name = 'Yarım'), 'yarım seyahat yok';
+end $$;
+-- Misafir seyahat açamaz (trips_insert); anon çağıramaz.
+select pg_temp.as_user(:YA, true);
+select pg_temp.hata_bekle($$select public.geziden_seyahat_ac('{"name": "Misafir", "city_place_id": "ChIJ_y", "city_label": "Y", "lat": 1, "lng": 1, "tz": "Europe/Istanbul"}', 1, '[]', '[]')$$, '42501');
+reset role;
+set role anon;
+select pg_temp.hata_bekle($$select public.geziden_seyahat_ac('{}', 1, '[]', '[]')$$, '42501');
+reset role;
+
+-- #197: şehrin Google kimliği, saat dilimi ve ülke kodu — tanınmayan saat dilimi yazılmaz (boş kalır); hattın yazımı yalnız boş alanları doldurur
+-- (dolu alan ezilmez); istemci yazamaz; yayınlı şehrin kimliği herkese okunur; `icerik_sehirler` kimlik durumunu verir.
+reset role;
+insert into public.sehirler (id, ad, slug, lat, lng, yayin) values ('19701970-0000-4000-8000-000000000001', 'Kimlikli', 'kimlikli-197', 39.77, 30.52, true);
+update public.sehirler set tz = 'Avrupa/Eskisehir' where slug = 'kimlikli-197';
+do $$ begin assert (select tz from public.sehirler where slug = 'kimlikli-197') is null, 'tanınmayan saat dilimi yazılmaz'; end $$;
+select pg_temp.hata_bekle($$update public.sehirler set place_id = 'kisa' where slug = 'kimlikli-197'$$, '23514');
+select pg_temp.hata_bekle($$update public.sehirler set ulke_kodu = 'tr' where slug = 'kimlikli-197'$$, '23514');
+do $$
+begin
+  assert not (select (x ->> 'kimlik')::boolean from jsonb_array_elements(public.icerik_sehirler()) x where x ->> 'slug' = 'kimlikli-197'), 'kimlik eksik görünür';
+  assert public.icerik_sehir_kimligi_yaz('kimlikli-197', 'ChIJ_kimlikli_197', 'Europe/Istanbul', 'TR'), 'boş alanlar dolar';
+  assert (select place_id = 'ChIJ_kimlikli_197' and tz = 'Europe/Istanbul' and ulke_kodu = 'TR' from public.sehirler where slug = 'kimlikli-197'), 'kimlik yazıldı';
+  -- Bir kez: dolu alan ezilmez, yazılacak bir şey yoksa false.
+  assert not public.icerik_sehir_kimligi_yaz('kimlikli-197', 'ChIJ_baska_kimlik', 'Europe/Berlin', 'DE'), 'dolu şehir yeniden yazılmaz';
+  assert (select place_id from public.sehirler where slug = 'kimlikli-197') = 'ChIJ_kimlikli_197', 'kimlik korunur';
+  assert (select (x ->> 'kimlik')::boolean from jsonb_array_elements(public.icerik_sehirler()) x where x ->> 'slug' = 'kimlikli-197'), 'kimlik var görünür';
+  assert (select (x ->> 'lat')::float from jsonb_array_elements(public.icerik_sehirler()) x where x ->> 'slug' = 'kimlikli-197') = 39.77, 'liste konumu verir';
+end $$;
+set role anon;
+do $$ begin assert (select tz from public.sehirler where slug = 'kimlikli-197') = 'Europe/Istanbul', 'anon yayınlı şehrin saat dilimini okur'; end $$;
+reset role;
+set role authenticated;
+select pg_temp.as_user(:YS);
+select pg_temp.hata_bekle($$select public.icerik_sehir_kimligi_yaz('kimlikli-197', 'ChIJ_x_123456', 'UTC', 'TR')$$, '42501');
+select pg_temp.hata_bekle($$select public.icerik_sehirler()$$, '42501');
+do $$ begin
+  update public.sehirler set tz = 'UTC' where slug = 'kimlikli-197';
+  assert (select tz from public.sehirler where slug = 'kimlikli-197') = 'Europe/Istanbul', 'admin olmayan şehri değiştiremez (RLS)';
+end $$;
+reset role;
+
+-- #199: PostgREST gömme belirsizliği bekçisi. Bir tablo iki tabloya yabancı anahtarlıysa ve anahtar sütunları birincil anahtarın
+-- parçasıysa PostgREST onu çoktan-çoğa bağlantı tablosu sayar; o iki tablo arasında doğrudan anahtar da varsa `a(b(…))` gömmesi
+-- belirsiz kalır (PGRST201) ve sorgu düşer — #192'nin gezi_rota_onbellek'i gezi_gunleri ↔ gezi_duraklari gömmesini (önerilen gezi
+-- ekranı, BO gezi editörü, gezi-rota) böyle düşürmüştü. API'ye açık şemada (public) böyle bir çift olmamalı.
+do $$
+declare
+  ciftler text;
+begin
+  with fk as (
+    select c.conrelid as jt, c.confrelid as hedef, c.conkey, c.conname
+    from pg_catalog.pg_constraint c
+    where c.contype = 'f' and c.connamespace = 'public'::regnamespace
+  ), pk as (
+    select conrelid, conkey from pg_catalog.pg_constraint where contype = 'p' and connamespace = 'public'::regnamespace
+  ), baglanti as (
+    select distinct a.jt, a.hedef as t1, b.hedef as t2
+    from fk a
+    join fk b on a.jt = b.jt and a.conname <> b.conname and a.hedef <> b.hedef
+    join pk on pk.conrelid = a.jt
+    where a.conkey <@ pk.conkey and b.conkey <@ pk.conkey
+  )
+  select string_agg(format('%s: %s ↔ %s', j.jt::regclass, j.t1::regclass, j.t2::regclass), '; ') into ciftler
+  from baglanti j
+  join pg_catalog.pg_class c1 on c1.oid = j.t1 and c1.relnamespace = 'public'::regnamespace
+  join pg_catalog.pg_class c2 on c2.oid = j.t2 and c2.relnamespace = 'public'::regnamespace
+  where exists (select 1 from fk d where (d.jt = j.t1 and d.hedef = j.t2) or (d.jt = j.t2 and d.hedef = j.t1));
+  assert ciftler is null, format('PostgREST gömmesi belirsiz (PGRST201): %s', ciftler);
+end $$;
+-- Gün anahtarı kalksa da temizlik tam: gün silinince durakları, durak anahtarları da bacakları siler.
+delete from public.gezi_rota_onbellek where gezi_gun_id = '19201920-0000-4000-8000-000000000021';
+insert into public.gezi_rota_onbellek (gezi_gun_id, kimden_durak_id, kime_durak_id, mod, polyline, saniye, metre) values
+  ('19201920-0000-4000-8000-000000000021', '19201920-0000-4000-8000-0000000000b1', '19201920-0000-4000-8000-0000000000b2', 'WALK', 'ghi', 300, 400);
+do $$
+begin
+  assert (select count(*) from public.gezi_rota_onbellek where gezi_gun_id = '19201920-0000-4000-8000-000000000021') = 1, 'taslak günün bacağı var';
+  delete from public.gezi_gunleri where id = '19201920-0000-4000-8000-000000000021';
+  assert (select count(*) from public.gezi_rota_onbellek where gezi_gun_id = '19201920-0000-4000-8000-000000000021') = 0, 'gün silinince bacakları da silinir';
+end $$;
+
+-- #200 KK5: "Günlere dağıt" tek işlemde yazılır ve değişiklik geçmişinde TEK kayıttır (akış grupsuz satırları okur); "Geri al"
+-- eklenen durakları siler, kısalan süreleri ve uzayan gün bitişlerini eski haline getirir; geri alma da tek kayıttır. Mekanın
+-- varsayılan süresi değişmez; 22:00'yi geçen bitiş reddedilir; başka seyahatin günü / mekanı yazılmaz; üye olmayan çağıramaz.
+reset role;
+\set DU '''aaaaaaaa-2000-0000-0000-000000000001'''
+\set DN '''aaaaaaaa-2000-0000-0000-000000000002'''
+insert into auth.users (id, is_anonymous) values (:DU, false), (:DN, false);
+insert into public.profiles (id, name, username) values (:DU, 'Dagit', 'dagit200'), (:DN, 'Yabanci', 'yabanci200');
+set role authenticated;
+select pg_temp.as_user(:DU);
+insert into public.trips (id, owner_id, city_place_id, city_label, lat, lng, tz, start_date, end_date)
+  values ('20002000-0000-4000-8000-0000000000f1', :DU, 'ChIJ-dagit-200', 'Dağıt', 39.77, 30.52, 'Europe/Istanbul', '2026-11-02', '2026-11-03');
+insert into public.places (id, trip_id, place_id, lat, lng, default_minutes, added_by) values
+  ('20002000-0000-4000-8000-0000000000a1', '20002000-0000-4000-8000-0000000000f1', 'ChIJ-dagit-A-200', 39.77, 30.52, 90, :DU),
+  ('20002000-0000-4000-8000-0000000000a2', '20002000-0000-4000-8000-0000000000f1', 'ChIJ-dagit-B-200', 39.77, 30.52, 60, :DU),
+  ('20002000-0000-4000-8000-0000000000a3', '20002000-0000-4000-8000-0000000000f1', 'ChIJ-dagit-C-200', 39.77, 30.52, 60, :DU);
+insert into public.stops (id, trip_id, day_id, place_ref, order_key, minutes)
+select '20002000-0000-4000-8000-0000000000d1', '20002000-0000-4000-8000-0000000000f1', d.id, '20002000-0000-4000-8000-0000000000a1', 'a0', 90
+from public.days d where d.trip_id = '20002000-0000-4000-8000-0000000000f1' and d.index = 1;
+create temp table dagit_kayit (k bigint);
+grant all on dagit_kayit to authenticated;
+insert into dagit_kayit
+select public.gunlere_dagit('20002000-0000-4000-8000-0000000000f1',
+  (select jsonb_agg(x) from (
+     select jsonb_build_object('day_id', d.id, 'place_ref', '20002000-0000-4000-8000-0000000000a2', 'order_key', 'a1', 'minutes', 45) x
+     from public.days d where d.trip_id = '20002000-0000-4000-8000-0000000000f1' and d.index = 1
+     union all
+     select jsonb_build_object('day_id', d.id, 'place_ref', '20002000-0000-4000-8000-0000000000a3', 'order_key', 'a0', 'minutes', 60)
+     from public.days d where d.trip_id = '20002000-0000-4000-8000-0000000000f1' and d.index = 2
+     -- Başka seyahatin mekanı yazılmaz.
+     union all
+     (select jsonb_build_object('day_id', d.id, 'place_ref', p.id, 'order_key', 'a9', 'minutes', 60)
+      from public.days d, public.places p where d.trip_id = '20002000-0000-4000-8000-0000000000f1' and d.index = 2
+        and p.trip_id <> '20002000-0000-4000-8000-0000000000f1' limit 1)
+   ) y),
+  '[{"id": "20002000-0000-4000-8000-0000000000d1", "minutes": 68}]',
+  (select jsonb_agg(jsonb_build_object('id', d.id, 'end_time', '21:15')) from public.days d where d.trip_id = '20002000-0000-4000-8000-0000000000f1' and d.index = 2));
+do $$
+declare
+  k bigint := (select k from dagit_kayit);
+  t uuid := '20002000-0000-4000-8000-0000000000f1';
+begin
+  assert (select count(*) from public.stops where trip_id = t) = 3, 'iki yeni durak (başka seyahatin mekanı yok)';
+  assert (select minutes from public.stops where id = '20002000-0000-4000-8000-0000000000d1') = 68, 'mevcut durak kısaldı';
+  assert (select default_minutes from public.places where id = '20002000-0000-4000-8000-0000000000a1') = 90, 'mekanın varsayılan süresi aynı';
+  assert (select end_time from public.days where trip_id = t and index = 2) = time '21:15', 'gün uzadı';
+  assert (select end_time from public.days where trip_id = t and index = 1) is null, 'öbür gün aynı';
+  assert (select new from public.changes where id = k) = '{"mekan": 2, "kisalt": true, "uzat": true}'::jsonb, 'tek kayıt özeti';
+  assert (select count(*) from public.changes where trip_id = t and grup = k) = 4, 'iki ekleme + süre + bitiş kayda bağlı';
+  assert (select count(*) from public.changes where trip_id = t and grup is null and at = (select at from public.changes where id = k)) = 1, 'akışta tek satır';
+end $$;
+-- Doğrulama: 22:00'yi geçen bitiş; üye olmayan.
+select pg_temp.hata_bekle($$select public.gunlere_dagit('20002000-0000-4000-8000-0000000000f1', '[]', '[]', '[{"id": "20002000-0000-4000-8000-000000000000", "end_time": "22:30"}]')$$, '22023');
+select pg_temp.as_user(:DN);
+select pg_temp.hata_bekle($$select public.gunlere_dagit('20002000-0000-4000-8000-0000000000f1', '[]', '[]', '[]')$$, '42501');
+select pg_temp.hata_bekle($$select public.degisikligi_geri_al((select k from dagit_kayit))$$, '42501');
+-- Geri al: tek seferde hepsi.
+select pg_temp.as_user(:DU);
+select public.degisikligi_geri_al((select k from dagit_kayit));
+do $$
+declare
+  t uuid := '20002000-0000-4000-8000-0000000000f1';
+  g bigint;
+begin
+  assert (select count(*) from public.stops where trip_id = t) = 1, 'eklenen duraklar silindi';
+  assert (select minutes from public.stops where id = '20002000-0000-4000-8000-0000000000d1') = 90, 'süre eski haline döndü';
+  assert (select end_time from public.days where trip_id = t and index = 2) is null, 'bitiş eski haline döndü';
+  select id into g from public.changes where trip_id = t and entity = 'dagit_geri';
+  assert g is not null, 'geri alma tek kayıt';
+  assert (select count(*) from public.changes where trip_id = t and grup = g) = 4, 'geri almanın satırları kayda bağlı';
+end $$;
+select pg_temp.hata_bekle($$select public.degisikligi_geri_al((select id from public.changes where entity = 'dagit_geri' and trip_id = '20002000-0000-4000-8000-0000000000f1'))$$, '22023');
 reset role;
 
 \echo 'rls_test: TÜM TESTLER GEÇTİ'

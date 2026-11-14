@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type CSSProperties } from 'react';
 
 import { ty } from '@/features/yonetim/metin';
-import { hafifYerler, linkCoz, linkGibiMi, useOneriler, yeniOturumJetonu, type HafifYer, type Merkez } from '@/features/yerler/api';
+import { hafifOnbellek, hafifYerler, linkCoz, linkGibiMi, useOneriler, yeniOturumJetonu, type HafifYer, type Merkez } from '@/features/yerler/api';
 import { kategoriEtiketi } from '@/lib/kategori';
 import { kategoriPini } from '@/lib/pinIkonu';
 import { yazi } from '@/theme';
@@ -47,7 +47,10 @@ export function MekanEkleKutusu({ merkez, sabitBicim, baskaBolumde, onEkle, onVa
     setHata(false);
     try {
       const o = sonuclar[indeks];
-      const yer = link ? (await linkCoz(girdi.trim(), merkez)).yer : o ? (await hafifYerler([o.place_id], { oturum }))[0] : undefined;
+      // #172 KK3: kartın adı, kategorisi ve konumu taslağa yazılır; puan gösterilmez — Pro maske.
+      const yer = link ? (await linkCoz(girdi.trim(), merkez)).yer : o ? (await hafifYerler([o.place_id], { oturum, puansiz: true }))[0] : undefined;
+      // Kart, adını bu cevaptan çizer (taslağa yazılana kadar) — ortak önbelleğe.
+      if (yer) hafifOnbellek.yaz([yer], 'pro');
       if (!yer) throw new Error('bos');
       onEkle(yer, bicim);
     } catch {

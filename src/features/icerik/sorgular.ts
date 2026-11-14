@@ -7,6 +7,7 @@ import { supabase } from '@/lib/supabase';
 import type { Gezi, GeziDetay, Kaydedilen, KaydedilenTuru, OlayTuru, Sehir, SehirRehberi, Yer } from '@/lib/tipler';
 
 import { fonksiyonHatasi, otomatikTamamla, yeniOturumJetonu } from '../yerler/api';
+import { GEZI_GUNLERI_GOMME } from './gommeler';
 
 import { izBirak } from '@/lib/hataRaporu';
 
@@ -18,7 +19,7 @@ export function useSehirler() {
     queryKey: ['icerik', 'sehirler'],
     staleTime: GUN_MS,
     queryFn: async () => {
-      const { data, error } = await supabase.from('sehirler').select('id, ad, slug, kapak_url, lat, lng, ozet, geziler(count)').order('ad');
+      const { data, error } = await supabase.from('sehirler').select('id, ad, slug, kapak_url, lat, lng, ozet, place_id, tz, ulke_kodu, geziler(count)').order('ad');
       if (error) throw error;
       return (data as unknown as (Sehir & { geziler: { count: number }[] })[]).map(({ geziler, ...s }) => ({ ...s, gezi_sayisi: geziler?.[0]?.count ?? 0 }) as Sehir);
     },
@@ -80,7 +81,7 @@ export function useGezi(slug: string | undefined) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('geziler')
-        .select(`${GEZI_ALANLARI}, yazi_md, gezi_gunleri(id, gezi_id, sira, baslik, gezi_duraklari(id, gezi_gun_id, sira, place_id, ad, kategori, sure_dk, lat, lng))`)
+        .select(`${GEZI_ALANLARI}, yazi_md, ${GEZI_GUNLERI_GOMME}`)
         .eq('slug', slug!)
         .single();
       if (error) throw error;

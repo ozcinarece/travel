@@ -50,7 +50,8 @@ export function YerEditoru({ yer, sehirler, liste }: { yer: YonetimYeri; sehirle
   const [hata, setHata] = useState<string | null>(null);
   const sehir = sehirler.find((sh) => sh.id === taslak.sehir_id);
   const merkez = { lat: taslak.lat, lng: taslak.lng, yaricapM: sehir ? 20000 : 5000 };
-  const canli = useHafifYerler(gecerliPlaceId(taslak.place_id) ? [taslak.place_id!] : []);
+  // #172: BO yer önizlemesi Google'ın canlı ★ puanını ve yorum sayısını gösterir (tek kimlik, önbellekten).
+  const canli = useHafifYerler(gecerliPlaceId(taslak.place_id) ? [taslak.place_id!] : [], { puan: true });
   const islemHatasi = () => setHata(ty('gezi.islemHata'));
 
   const fotoYukle = async (dosya: File) => {

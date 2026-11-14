@@ -3,6 +3,8 @@ import type { Konum } from '@/components/harita/tipler';
 
 export function polylineCoz(kodlu: string): Konum[] {
   const noktalar: Konum[] = [];
+  // #199 KK2: sunucudan boş / bozuk değer gelirse (null, sayı) çizgi kuş uçuşuna düşsün, kod çözücü patlamasın.
+  if (typeof kodlu !== 'string') return noktalar;
   let i = 0;
   let lat = 0;
   let lng = 0;

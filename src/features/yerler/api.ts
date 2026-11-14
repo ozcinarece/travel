@@ -5,6 +5,8 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { useGecikmeli } from '@/lib/useGecikmeli';
 
+import { HafifOnbellek, type AlanGrubu, type Seviye } from './hafifOnbellek';
+
 export type Oneri = { place_id: string; ana: string; ikincil: string; tipler: string[] };
 
 export type HafifYer = {
@@ -95,7 +97,15 @@ export function linkGibiMi(metin: string): boolean {
   return /^(https?:\/\/|geo:|maps\.app\.goo\.gl|goo\.gl\/|www\.google\.|maps\.google\.)/i.test(metin.trim());
 }
 
-export async function hafifYerler(ids: string[], secenek: { sehir?: boolean; oturum?: string; saatler?: boolean; foto?: boolean; ozet?: boolean } = {}): Promise<HafifYer[]> {
+/**
+ * places-light ham çağrısı. #172 KK3: `puansiz` — puan / "şu an açık" göstermeyen çağrılar Pro maskeyle (Enterprise alanları
+ * istenmez). Ekranlar bunu doğrudan değil `useHafifYerler` / `hafifOnbellek` üzerinden kullanır; doğrudan çağrı yalnız
+ * otomatik tamamlama seçimi (oturum token'ını kapatır) ve şehir seçimi içindir.
+ */
+export async function hafifYerler(
+  ids: string[],
+  secenek: { sehir?: boolean; oturum?: string; saatler?: boolean; foto?: boolean; ozet?: boolean; puansiz?: boolean } = {},
+): Promise<HafifYer[]> {
   if (ids.length === 0) return [];
   const cevap = await cagir<{ yerler: HafifYer[] }>('places-light', {
     ids,
@@ -103,9 +113,32 @@ export async function hafifYerler(ids: string[], secenek: { sehir?: boolean; otu
     saatler: secenek.saatler,
     foto: secenek.foto,
     ozet: secenek.ozet,
+    puansiz: secenek.puansiz,
     sessionToken: secenek.oturum,
   });
   return cevap.yerler;
+}
+
+const SEVIYE_SECENEGI: Record<Seviye, { saatler?: boolean; foto?: boolean; puansiz?: boolean }> = {
+  pro: { puansiz: true },
+  hafif: {},
+  saatli: { saatler: true },
+  saatliFoto: { saatler: true, foto: true },
+  proFoto: { foto: true, puansiz: true },
+  foto: { foto: true },
+};
+
+/** #172 KK1–KK2: oturum boyunca tek önbellek — kimlik başına, alan grubu başına bir kez istenir. */
+export const hafifOnbellek = new HafifOnbellek((ids, seviye) => hafifYerler(ids, SEVIYE_SECENEGI[seviye]));
+
+/** Ekranın gösterdiği alanlar → önbellek grupları. `puan`: puan ya da "şu an açık" gösteriliyor mu (KK3). */
+export type HafifIhtiyac = { puan: boolean; saatler?: boolean; foto?: boolean };
+function gruplar(i: HafifIhtiyac): AlanGrubu[] {
+  const g: AlanGrubu[] = [];
+  if (i.puan) g.push('puan');
+  if (i.saatler) g.push('saat');
+  if (i.foto) g.push('foto');
+  return g;
 }
 
 export function useOneriler(anahtar: string, girdi: string, oturum: string, tur: 'cities' | 'lodging' | undefined, merkez?: Merkez, etkin = true) {
@@ -133,9 +166,25 @@ export function useOtelOnerileri(girdi: string, oturum: string, merkez: Merkez |
  * Nearby Search tip kümesi (Edge Function CIP_TIPLERI anahtarı). #69: Keşfet'te çip yok — karo istekleri `hepsi`
  * (gezilecek + müze + ibadet + park + manzara + yemek + kafe + alışveriş) ile; kategori filtresi seçiliyse o kategoriye özel
  * karo istekleri de atılır. `otel`: 3.3 otel adayları. Eski çipler (populer/yemek/sanat/manzara) kaldırıldı. #164: `turistik`
- * (gezilecek + müze + ibadet + manzara tipleri) varsayılan Turistik grubunun ve sihirbazın "Görmen gerekenler" kümesidir.
+ * (gezilecek + müze + manzara tipleri) varsayılan Turistik grubunun ve sihirbazın "Görmen gerekenler" kümesidir; #178: ibadet
+ * yerleri bu kümede yalnız turistik değerleri varsa gelir (sunucu süzgeci).
  */
-export type OneriCipi = 'otel' | 'hepsi' | 'turistik' | 'gezilecek' | 'muze' | 'ibadet' | 'yemek' | 'kafe' | 'park' | 'manzara' | 'alisveris';
+export type OneriCipi =
+  | 'otel'
+  | 'hepsi'
+  | 'turistik'
+  | 'gezilecek'
+  | 'muze'
+  | 'ibadet'
+  | 'yemek'
+  | 'kafe'
+  | 'park'
+  | 'manzara'
+  | 'alisveris'
+  // #189 Ek 2: Keşfet şehir listesinde Turistik'in üç alt isteği.
+  | 'turistik_muze'
+  | 'turistik_tarihi'
+  | 'turistik_manzara';
 
 /** Popülerlik puanı: puan × log10(yorum + 1); eşitlikte place_id (deterministik). */
 export function oneriSirala<T extends { place_id: string; puan: number | null; puan_sayisi: number | null }>(yerler: T[]): T[] {
@@ -143,14 +192,18 @@ export function oneriSirala<T extends { place_id: string; puan: number | null; p
   return [...yerler].sort((a, b) => skor(b) - skor(a) || a.place_id.localeCompare(b.place_id));
 }
 
-/** #29: önizleme kartı — tek mekan, ilk fotoğrafla (fotoğraf başına fatura; yalnız kart açıkken). */
-export function useOnizleme(placeId: string | undefined) {
+/**
+ * #29: önizleme kartı — tek mekan, ilk fotoğrafla (fotoğraf başına fatura; yalnız kart açıkken). #172: ortak önbellekten;
+ * ad ve tip zaten eldeyse yalnız fotoğraf istenir (Pro maskesi). `puan`: kart puanı bu cevaptan mı gösteriyor.
+ */
+export function useOnizleme(placeId: string | undefined, ihtiyac: { puan: boolean } = { puan: false }) {
+  const gerek: AlanGrubu[] = ihtiyac.puan ? ['puan', 'foto'] : ['foto'];
   return useQuery({
-    queryKey: ['onizleme', placeId],
+    queryKey: ['onizleme', gerek.join('+'), placeId],
     enabled: !!placeId,
     staleTime: 24 * 60 * 60 * 1000,
     retry: 1,
-    queryFn: async () => (await hafifYerler([placeId!], { foto: true }))[0] ?? null,
+    queryFn: async () => (await hafifOnbellek.getirHepsi([placeId!], gerek))[placeId!] ?? null,
   });
 }
 
@@ -162,7 +215,12 @@ export function useMekanOzeti(placeId: string | undefined) {
     staleTime: 24 * 60 * 60 * 1000,
     gcTime: 24 * 60 * 60 * 1000,
     retry: 1,
-    queryFn: async () => (await hafifYerler([placeId!], { foto: true, ozet: true }))[0] ?? null,
+    queryFn: async () => {
+      const y = (await hafifYerler([placeId!], { foto: true, ozet: true }))[0] ?? null;
+      // #172: aynı cevap ad, puan ve fotoğrafı da taşır — ortak önbelleğe yazılır (aynı kimlik ayrıca istenmez).
+      if (y) hafifOnbellek.yaz([y], 'foto', [placeId!]);
+      return y;
+    },
   });
 }
 
@@ -178,27 +236,23 @@ export function usePlaceFoto(ad: string | undefined, genislik = 800) {
   });
 }
 
-/** Liste ekranları için toplu hafif Details; istemci belleğinde 24 sa (PRD §7). Harita üstünde ad/puan canlı gösterilir. */
-export function useHafifYerler(ids: string[], secenek: { saatler?: boolean } = {}) {
+/**
+ * Liste ekranları için toplu hafif Details; istemci belleğinde 24 sa (PRD §7). #172: sorgu kümesi değişse de yalnız
+ * önbellekte olmayan kimlikler istenir (KK1); `foto` ile fotoğraf aynı istekte gelir, ayrıca hafif istenmez (KK2); puan
+ * göstermeyen ekran Pro maskeyle ister (KK3). Kayıt kimlikle anahtarlıdır.
+ */
+export function useHafifYerler(ids: string[], ihtiyac: HafifIhtiyac) {
   const sirali = [...new Set(ids)].sort();
-  const saatler = !!secenek.saatler;
+  const gerek = gruplar(ihtiyac);
   return useQuery({
-    queryKey: ['hafif-yerler', saatler ? 'saatli' : 'hafif', sirali],
+    queryKey: ['hafif-yerler', gerek.join('+') || 'temel', sirali],
     enabled: sirali.length > 0,
     // #61 §3: kimlik kümesi değişince (listeye ekleme) eski adlar yeni cevap gelene kadar kalır — etiketler yok olmaz.
     placeholderData: (onceki) => onceki,
     staleTime: 24 * 60 * 60 * 1000,
     gcTime: 24 * 60 * 60 * 1000,
     retry: 1,
-    queryFn: async () => {
-      // Edge Function istek başına 25 kimlik alır.
-      const parcalar: string[][] = [];
-      for (let i = 0; i < sirali.length; i += 25) parcalar.push(sirali.slice(i, i + 25));
-      const sonuc = await Promise.all(parcalar.map((p) => hafifYerler(p, { saatler })));
-      const harita: Record<string, HafifYer> = {};
-      for (const y of sonuc.flat()) harita[y.place_id] = y;
-      return harita;
-    },
+    queryFn: () => hafifOnbellek.getirHepsi(sirali, gerek),
   });
 }
 
@@ -277,22 +331,43 @@ export async function yakinYerler(secenek: { cip: OneriCipi; merkez: Merkez; enF
     cip: secenek.cip,
     enFazla: secenek.enFazla,
   });
+  // #172: Nearby cevabı ad, tip, konum, puan ve "şu an açık"ı taşır (hafif maskesiyle aynı alanlar, saat dilimi hariç) —
+  // ortak önbelleğe yazılır; listeye eklenen öneri ya da çekmece fotoğrafı için bu alanlar yeniden istenmez.
+  hafifOnbellek.yaz(cevap.yerler, 'hafif');
   return cevap.yerler;
 }
 
-/** #141/#142: liste ve rehber kartı fotoğrafları — hafif Details foto maskesi, 12'lik parçalar, 24 sa önbellek (satır başına istek yok). */
+/**
+ * #189 Ek 2: Keşfet isteği. `sehir: true` şehir listesidir — yarıçapı sunucu ayardan seçer (varsayılan 8 km) ve cevapta döner;
+ * değilse "Bu alanda ara" alanı (`merkez.yaricapM`). Sonuçlar ortak önbelleğe yazılır (yakinYerler gibi).
+ */
+export async function kesfetYerleri(secenek: { cip: OneriCipi; merkez: Merkez; sehir?: boolean }): Promise<{ yerler: HafifYer[]; yaricapM: number }> {
+  const cevap = await cagir<{ yerler: HafifYer[]; yaricapM?: number }>('places-nearby', {
+    merkez: { lat: secenek.merkez.lat, lng: secenek.merkez.lng },
+    ...(secenek.sehir ? { sehir: true } : { yaricapM: secenek.merkez.yaricapM ?? 3000 }),
+    cip: secenek.cip,
+    enFazla: 20,
+  });
+  hafifOnbellek.yaz(cevap.yerler, 'hafif');
+  return { yerler: cevap.yerler, yaricapM: cevap.yaricapM ?? secenek.merkez.yaricapM ?? 0 };
+}
+
+/**
+ * #141/#142 → #172 KK8: yalnız fotoğraf gereken kartlar (adı DB'den gelen içerik kartları) — ortak önbellekten, eksik
+ * kimlikler için Pro foto maskesi (12'lik parçalar). Kimlik → fotoğraf adresi (yoksa null).
+ */
 export function useYerFotolari(placeIds: string[]) {
   const sirali = [...new Set(placeIds)].sort();
   return useQuery({
-    queryKey: ['yer-foto', sirali.join(',')],
+    queryKey: ['yer-foto', sirali],
     enabled: sirali.length > 0,
+    placeholderData: (onceki) => onceki,
     staleTime: 24 * 60 * 60 * 1000,
+    gcTime: 24 * 60 * 60 * 1000,
     retry: 1,
     queryFn: async () => {
-      const parcalar: string[][] = [];
-      for (let i = 0; i < sirali.length; i += 12) parcalar.push(sirali.slice(i, i + 12));
-      const sonuc = await Promise.all(parcalar.map((p) => hafifYerler(p, { foto: true })));
-      return new Map(sonuc.flat().map((y) => [y.place_id, y.foto_uri ?? null] as const));
+      const yerler = await hafifOnbellek.getirHepsi(sirali, ['foto']);
+      return new Map(sirali.map((id) => [id, yerler[id]?.foto_uri ?? null] as const));
     },
   });
 }

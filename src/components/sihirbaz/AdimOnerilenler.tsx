@@ -37,7 +37,8 @@ export function AdimOnerilenler({ seyahat, rehberSehir, havuz, tutulan, onTut, o
   const havuzIle = new Map(havuz.map((m) => [m.place_id, m]));
   const cipler = CIPLER.filter((c) => c !== 'rehber' || !!rehberSehir);
   // Harita: seçilenlerin adı listede yoksa (önceden eklenmiş) hafif veriden.
-  const adlar = useHafifYerler(havuz.map((m) => m.place_id));
+  // #172 KK3: listedeki mekanların yalnız adı (harita etiketi) — Pro maske.
+  const adlar = useHafifYerler(havuz.map((m) => m.place_id), { puan: false });
   const secilenler = useMemo<HaritaNoktasi[]>(
     () => havuz.map((m) => ({ id: m.place_id, lat: m.lat, lng: m.lng, ad: liste.find((x) => x.place_id === m.place_id)?.ad ?? adlar.data?.[m.place_id]?.ad ?? '', primary_type: m.primary_type })),
     [havuz, liste, adlar.data],

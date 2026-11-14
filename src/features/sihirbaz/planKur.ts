@@ -7,7 +7,8 @@ import type { Konum } from '@/components/harita/tipler';
 import { kestirimTaksiSn, kestirimYuruyusSn, TAKSI_ESIGI_SN } from '@/schedule/tempo';
 
 export type PlanMekani = { id: string; lat: number; lng: number; dakika: number; ad?: string };
-export type PlanGunu = { id: string; index: number };
+/** #200: `kapasiteDk` verilirse o günün penceresi (başlangıç–bitiş); yoksa ortak kapasite. */
+export type PlanGunu = { id: string; index: number; kapasiteDk?: number };
 
 /** 10:00–19:00. */
 export const GUN_KAPASITESI_DK = 9 * 60;
@@ -151,7 +152,7 @@ export function planKur(
     for (let k = g; k < sonuc.length; k++) {
       const onceki = dolu[k].son;
       const bacak = onceki ? bacakDk(onceki, m) : { dk: 0, araba: false };
-      if (dolu[k].dk + bacak.dk + m.dakika <= kapasite) {
+      if (dolu[k].dk + bacak.dk + m.dakika <= (sirali[k].kapasiteDk ?? kapasite)) {
         dolu[k] = { dk: dolu[k].dk + bacak.dk + m.dakika, son: m };
         const s = sonuc[k];
         s.mekanlar.push(m);

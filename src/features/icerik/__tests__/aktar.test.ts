@@ -2,7 +2,25 @@ import { describe, expect, it, jest } from '@jest/globals';
 
 import type { GeziDetay, GeziDuragi, Gun } from '@/lib/tipler';
 
-import { aktarmaBilgisi, aktarmaOzeti, aktarmaPlani, aktarmaSecenegi, alDugmesi, hedefListesi, kalinParcalar, varsayilanEslesme, type HedefListesi } from '../aktar';
+import {
+  aktarmaBilgisi,
+  aktarmaOzeti,
+  aktarmaPlani,
+  aktarmaSecenegi,
+  alDugmesi,
+  eklenecekGunler,
+  eksikGunBilgisi,
+  eksikGunler,
+  hedefEslesmesi,
+  hedefListesi,
+  kalinParcalar,
+  sanalGun,
+  sanalSira,
+  sanalSiraOnizleme,
+  varsayilanDahil,
+  varsayilanEslesme,
+  type HedefListesi,
+} from '../aktar';
 
 jest.mock('@/lib/supabase', () => ({ supabase: {} }));
 
@@ -99,5 +117,58 @@ describe('seyahatime al özeti (#143 KK5–6)', () => {
     expect(aktarmaBilgisi(o, tarihsiz)).toBe('1. günde zaten 2 durağın var, **2 mekan** ikisinde de ortak. Eklenecek yeni durak yok.');
     const hic = aktarmaPlani(tekGun, tarihsiz, { tur: 'gunler', eslesme: {}, dahil: { G1: false, G2: false } });
     expect(alDugmesi(hic, aktarmaOzeti(tekGun, hic, kimlik, bos), tarihsiz)).toEqual({ metin: 'Bir gün seç', pasif: true });
+  });
+});
+
+describe('#193 KK5 eksik gün: seyahatten fazla gezi günü sona eklenir', () => {
+  // Gezi 3 gün, seyahat 2 gün (Cum 16 – Cmt 17): 3. gün "Paz 18 +".
+  const sirali = [gun('d1', 1, '2026-10-16'), gun('d2', 2, '2026-10-17')];
+  it('fazla gün sanal hedefe eşlenir ama varsayılan seçilmez; bilgi satırı söyler', () => {
+    expect(eksikGunler(gezi, sirali)).toEqual({ G3: '+1' });
+    const eslesme = hedefEslesmesi(gezi, sirali);
+    expect(eslesme).toEqual({ G1: 'd1', G2: 'd2', G3: '+1' });
+    const dahil = varsayilanDahil(gezi, sirali);
+    expect(dahil).toEqual({ G3: false });
+    const plan = aktarmaPlani(gezi, sirali, { tur: 'gunler', eslesme, dahil });
+    expect(plan.atamalar.map((a) => a.gunId)).toEqual(['d1', 'd2']);
+    const sira = sanalSira(gezi, eslesme, dahil);
+    expect(sira.size).toBe(0);
+    expect(eklenecekGunler(plan, sira)).toEqual([]);
+    expect(eksikGunBilgisi(gezi, sirali, eslesme, dahil)).toBe('Seyahatin 2 gün; 3. günü seçersen seyahate **Paz 18** eklenir.');
+  });
+  it('seçilirse hedefi "Paz 18" olan yeni gün; düğme ve bilgi satırı onu söyler', () => {
+    const eslesme = hedefEslesmesi(gezi, sirali);
+    const dahil = { G3: true };
+    const plan = aktarmaPlani(gezi, sirali, { tur: 'gunler', eslesme, dahil });
+    expect(plan.atamalar.map((a) => a.gunId)).toEqual(['d1', 'd2', '+1']);
+    const sira = sanalSira(gezi, eslesme, dahil);
+    expect(eklenecekGunler(plan, sira)).toEqual(['+1']);
+    const yeni = sanalGun(sirali, '+1', 1);
+    expect(yeni).toEqual(expect.objectContaining({ index: 3, date: '2026-10-18' }));
+    const tum = [...sirali, yeni];
+    const o = aktarmaOzeti(gezi, plan, kimlik, bos);
+    expect(o.hedefGunler.find((h) => h.gunId === '+1')).toEqual({ gunId: '+1', mevcut: 0, ortak: [], yeni: 1 });
+    // a, b, c, d (a2 = a bir kez).
+    expect(alDugmesi(plan, o, tum).metin).toBe('4 yeni durağı al · Cum 16, Cmt 17, Paz 18');
+    expect(eksikGunBilgisi(gezi, sirali, eslesme, dahil)).toBe('Seyahatin 2 gün; sonuna **Paz 18** eklenir.');
+  });
+  it('sıkıştırma: 5 günlük gezinin yalnız 5. günü seçilirse tek gün eklenir (son günden sonraki ilk gün)', () => {
+    const bes = { gezi_gunleri: [1, 2, 3, 4, 5].map((n) => ({ id: `G${n}`, gezi_id: 'z', sira: n, baslik: null, gezi_duraklari: [durak(`s${n}`, `G${n}`, 1, `P${n}`)] })) } as unknown as Pick<GeziDetay, 'gezi_gunleri'>;
+    const eslesme = hedefEslesmesi(bes, sirali);
+    expect(eslesme).toEqual({ G1: 'd1', G2: 'd2', G3: '+1', G4: '+2', G5: '+3' });
+    const dahil = { ...varsayilanDahil(bes, sirali), G5: true };
+    const sira = sanalSira(bes, eslesme, dahil);
+    expect([...sira]).toEqual([['+3', 1]]);
+    expect(eklenecekGunler(aktarmaPlani(bes, sirali, { tur: 'gunler', eslesme, dahil }), sira)).toEqual(['+3']);
+    // Seçilmemiş 3. gün seçilirse 5.'nin önüne geçer: önizleme sırası 1.
+    expect(sanalSiraOnizleme(sira, '+1')).toBe(1);
+    expect(eksikGunBilgisi(bes, sirali, eslesme, dahil)).toBe('Seyahatin 2 gün; sonuna **Paz 18** eklenir.');
+    expect(eksikGunBilgisi(bes, sirali, eslesme, varsayilanDahil(bes, sirali))).toBe('Seyahatin 2 gün; 3., 4. ve 5. günleri seçersen seyahate **Paz 18, Pzt 19, Sal 20** eklenir.');
+  });
+  it('tarihsiz seyahatte yeni gün "3. gün"; fazla gün yoksa bilgi satırı yok', () => {
+    const tarihsiz = [gun('d1', 1, null), gun('d2', 2, null)];
+    expect(sanalGun(tarihsiz, '+1', 1)).toEqual(expect.objectContaining({ index: 3, date: null }));
+    const uc = [...sirali, gun('d3', 3, '2026-10-18')];
+    expect(eksikGunBilgisi(gezi, uc, hedefEslesmesi(gezi, uc), varsayilanDahil(gezi, uc))).toBeNull();
   });
 });

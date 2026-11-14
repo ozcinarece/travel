@@ -9,6 +9,18 @@ export type IkonAdi =
   | 'seyahatler'
   | 'yeni'
   | 'profil'
+  // #181 (kanvas 23 · 27): seyahat içi 5 sekme (Gezi evi, Keşfet pusulası, Harcama cüzdanı, Sohbet balonu) ve Gezi sayfası
+  // (bölüm oku, artı, otel yatağı, oy kalbi).
+  | 'gezi'
+  | 'pusulaCizgi'
+  | 'cuzdan'
+  | 'sohbet'
+  | 'ileri'
+  | 'arti'
+  | 'yatak'
+  | 'kalpOy'
+  // #182 (kanvas 24): "Sırayı düzenle" — karşılıklı oklar.
+  | 'sirala'
   // #30 pin kategori ikonları (16 px çizgi)
   | 'agac'
   | 'catal'
@@ -60,23 +72,65 @@ export type IkonAdi =
   // #164 (kanvas 14): "Burada kalış" satırındaki kronometre.
   | 'saat'
   // #168 (kanvas 10 · 12): durak kartındaki Yol tarifi pusulası (dolu ibre).
-  | 'pusula';
+  | 'pusula'
+  // #183 (kanvas 25 · 25b · 25c): harcama kategorileri (ulaşım tramvayı, bilet), Bakiyeler kişileri, kapat (×).
+  | 'tramvay'
+  | 'bilet'
+  | 'kisiler'
+  | 'kapat'
+  // #187: fiş galeriden — resim.
+  | 'galeri'
+  // #184 (kanvas 26): oylama çubukları, gönder.
+  | 'grafik'
+  | 'gonder';
 
-type Props = { ad: IkonAdi; boyut?: number; renk: ColorValue; kalinlik?: number };
+type Props = {
+  ad: IkonAdi;
+  boyut?: number;
+  renk: ColorValue;
+  kalinlik?: number;
+  /** #181: seçili sekmede çizgi renginde %18 dolgu (true); sayı verilirse o saydamlıkta (1 = tam dolu, ör. kendi oyun). */
+  dolgu?: boolean | number;
+};
 
 /**
  * Kanvastaki çizgi ikonlar (#26): yazı tipi bağımlılığı yok, SVG olarak çizilir.
  * Yollar kanvas HTML'inden birebir (24×24 görünüm alanı, 2 px çizgi, yuvarlak uçlar).
  * #30: pin kategori ikonları aynı sette; 16 px'te çizilir (kalınlık 2,2).
  */
-export function Ikon({ ad, boyut = 24, renk, kalinlik = 2 }: Props) {
-  const ortak = { stroke: renk, strokeWidth: kalinlik, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const, fill: 'none' };
+export function Ikon({ ad, boyut = 24, renk, kalinlik = 2, dolgu }: Props) {
+  const dolguSaydam = dolgu === true ? 0.18 : typeof dolgu === 'number' ? dolgu : 0;
+  const ortak = { stroke: renk, strokeWidth: kalinlik, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const, fill: dolguSaydam ? renk : 'none', fillOpacity: dolguSaydam || 1 };
   return (
     <Svg width={boyut} height={boyut} viewBox="0 0 24 24">
       {ad === 'pusula' ? (
         <>
           <Circle cx={12} cy={12} r={9} {...ortak} />
           <Path d="M15.5 8.5l-2 5-5 2 2-5z" {...ortak} fill={renk} />
+        </>
+      ) : ad === 'grafik' ? (
+        <Path d="M5 20V10M12 20V4M19 20v-7" {...ortak} />
+      ) : ad === 'gonder' ? (
+        <Path d="M4 12l16-8-6 16-2-7z" {...ortak} />
+      ) : ad === 'tramvay' ? (
+        <Path d="M5 16V12l2-5h10l2 5v4M3.5 16h17v3h-17z" {...ortak} />
+      ) : ad === 'bilet' ? (
+        <>
+          <Path d="M4 8a2 2 0 0 0 2-2V5h12v1a2 2 0 0 0 2 2v8a2 2 0 0 0-2 2v1H6v-1a2 2 0 0 0-2-2z" {...ortak} />
+          <Path d="M12 7v2M12 11v2M12 15v2" {...ortak} />
+        </>
+      ) : ad === 'kisiler' ? (
+        <>
+          <Circle cx={9} cy={8} r={3.5} {...ortak} />
+          <Path d="M2.5 20a6.5 6.5 0 0 1 13 0M16 4.5a3.5 3.5 0 0 1 0 7M21.5 20a6.5 6.5 0 0 0-4.5-6.2" {...ortak} />
+        </>
+      ) : ad === 'kapat' ? (
+        <Path d="M6 6l12 12M18 6L6 18" {...ortak} />
+      ) : ad === 'galeri' ? (
+        <>
+          <Rect x={3} y={5} width={18} height={14} rx={2.5} {...ortak} />
+          <Circle cx={9} cy={10} r={1.6} {...ortak} />
+          <Path d="M21 16l-5-5-8 8" {...ortak} />
         </>
       ) : ad === 'saat' ? (
         <>
@@ -281,6 +335,33 @@ export function Ikon({ ad, boyut = 24, renk, kalinlik = 2 }: Props) {
           <Path d="M3.5 11L12 4l8.5 7" {...ortak} />
           <Path d="M6 10v10h12V10M10 20v-6h4v6" {...ortak} />
         </>
+      ) : ad === 'gezi' ? (
+        <Path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z" {...ortak} />
+      ) : ad === 'pusulaCizgi' ? (
+        <>
+          <Circle cx={12} cy={12} r={9} {...ortak} />
+          <Path d="M15.5 8.5l-2 5-5 2 2-5z" {...ortak} />
+        </>
+      ) : ad === 'cuzdan' ? (
+        <>
+          <Path d="M3 7a2 2 0 0 1 2-2h13v4H5a2 2 0 0 1-2-2zM3 7v10a2 2 0 0 0 2 2h16v-8H5" {...ortak} />
+          <Circle cx={16.5} cy={15} r={1.3} fill={renk} stroke="none" />
+        </>
+      ) : ad === 'sohbet' ? (
+        <Path d="M4 6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H9l-5 4z" {...ortak} />
+      ) : ad === 'ileri' ? (
+        <Path d="M9 5l7 7-7 7" {...ortak} />
+      ) : ad === 'arti' ? (
+        <Path d="M12 5v14M5 12h14" {...ortak} />
+      ) : ad === 'yatak' ? (
+        <>
+          <Path d="M3 18V8M3 13h18v5M21 13a3 3 0 0 0-3-3h-7v3" {...ortak} />
+          <Circle cx={7} cy={11} r={1.6} {...ortak} />
+        </>
+      ) : ad === 'kalpOy' ? (
+        <Path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z" {...ortak} />
+      ) : ad === 'sirala' ? (
+        <Path d="M7 7h11l-3-3M17 17H6l3 3" {...ortak} />
       ) : (
         <>
           <Circle cx={12} cy={8} r={4} {...ortak} />

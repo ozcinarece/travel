@@ -16,10 +16,10 @@ import {
   type SlashSecenek,
 } from '@/features/yonetim/bloklar';
 import { ty } from '@/features/yonetim/metin';
-import { useHafifYerler, useYerFotolari, type HafifYer, type Merkez } from '@/features/yerler/api';
+import { useIcerikMekanlari, type BilinenMekanlar } from '@/features/icerik/mekanBilgileri';
+import { hafifOnbellek, type HafifYer, type Merkez } from '@/features/yerler/api';
 import { bilinenKategori } from '@/lib/kategori';
 import { icerikFotoUrl } from '@/lib/markdown';
-import { puanMetni } from '@/lib/puan';
 import { yazi } from '@/theme';
 
 import { dosyaSec } from '../surukle';
@@ -38,6 +38,8 @@ type Props = {
   baskaBolumde?: (placeId: string) => { no: string; baslik: string } | null;
   /** Düzenlenen bloğun sırası (önizleme o bloğa kayar). */
   onOdak?: (indeks: number) => void;
+  /** #172 KK7: taslağın bildiği mekanlar (ad, kategori, konum) — kart Google'a sorulmadan çizilir. */
+  bilinen?: BilinenMekanlar;
 };
 
 type MetinTuru = 'paragraf' | 'baslik' | 'ipucu' | 'liste';
@@ -61,7 +63,7 @@ function sonaParagraf(bloklar: Blok[]): Blok[] {
  * solunda tek tutamaç (boş paragrafta "+", diğerlerinde sürükle); kart / foto seçilince üstte ↑↓ · Mekanı değiştir · Sil;
  * metin seçilince B · I · Mekana bağla (dış bağlantı uygulamada yok). Saklama biçimi markdown (features/yonetim/bloklar).
  */
-export function BlokEditoru({ md, onDegis, merkez, fotoYukle, onHata, onMekanSecildi, baskaBolumde, onOdak }: Props) {
+export function BlokEditoru({ md, onDegis, merkez, fotoYukle, onHata, onMekanSecildi, baskaBolumde, onOdak, bilinen }: Props) {
   const [bloklar, setBloklar] = useState<Blok[]>(() => sonaParagraf(mdBloklari(md)));
   const yazilan = useRef(md);
   // Üste bildirilip henüz geri gelmemiş yazılar: geri gelen kendi yazımızsa (ara hâl dahil) yeniden ayrıştırılmaz.
@@ -120,9 +122,18 @@ export function BlokEditoru({ md, onDegis, merkez, fotoYukle, onHata, onMekanSec
   const [slash, setSlash] = useState<{ blok: string; indeks: number } | null>(null);
   const [slashKapali, setSlashKapali] = useState<string | null>(null);
   const kartIdleri = useMemo(() => bloklar.flatMap((b) => (b.tur === 'mekan' ? [b.place_id] : [])), [bloklar]);
-  const kartlar = useHafifYerler(kartIdleri);
-  // Kartın küçük resmi uygulamadaki gibi (rehber kartı aynı fotoğrafı gösterir; yoksa nötr kare).
-  const kartFotolari = useYerFotolari(kartIdleri);
+  // #172 KK4, KK7–KK9: kart adı ve kategorisi DB'den (yayınlı içerik + taslağın bildikleri; az önce seçilen mekan seçim
+  // cevabından); puan yok. Küçük resim uygulamadaki gibi: önce bizim fotoğrafımız, yoksa Google — kart ekleyip silince
+  // yalnız o kart istenir (kimlik başına önbellek).
+  const kartBilinen = useMemo(() => {
+    const b: BilinenMekanlar = {};
+    for (const id of kartIdleri) {
+      const y = hafifOnbellek.oku(id);
+      if (y) b[id] = { ad: y.ad, kategori: y.primary_type, lat: y.lat, lng: y.lng };
+    }
+    return { ...b, ...bilinen };
+  }, [kartIdleri, bilinen]);
+  const kartlar = useIcerikMekanlari(kartIdleri, { kartlar: kartIdleri, bilinen: kartBilinen });
 
   // ---------------------------------------------------------------- seçim araç çubuğu (B · I · Mekana bağla)
   const [secim, setSecim] = useState<{ x: number; y: number; blok: string } | null>(null);
@@ -377,14 +388,14 @@ export function BlokEditoru({ md, onDegis, merkez, fotoYukle, onHata, onMekanSec
           </div>
         );
       case 'mekan': {
-        const y = kartlar.data?.[blok.place_id];
-        const foto = kartFotolari.data?.get(blok.place_id) ?? null;
+        const y = kartlar.mekan(blok.place_id);
+        const foto = kartlar.foto(blok.place_id);
         return (
           <div style={{ ...c.kart, ...(seciliBlok === blok.id ? c.kartSecili : null) }} onMouseDown={() => setSeciliBlok(blok.id)} role="group" aria-label={y?.ad ?? blok.place_id}>
             <div style={c.kartKare}>{foto ? <img src={foto} alt="" style={c.kartFoto} /> : null}</div>
             <div style={c.kartMetin}>
               <div style={c.kartAd}>{y?.ad ?? '…'}</div>
-              <div style={c.kartAlt}>{[bilinenKategori(y?.primary_type), y && puanMetni(y.puan) ? `★ ${puanMetni(y.puan)}` : null].filter(Boolean).join(' · ')}</div>
+              <div style={c.kartAlt}>{bilinenKategori(y?.kategori)}</div>
             </div>
             <span aria-hidden style={c.kartArti}>
               <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke={yRenk.metin} strokeWidth={3} strokeLinecap="round">
