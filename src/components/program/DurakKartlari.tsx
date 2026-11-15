@@ -6,17 +6,18 @@ import type { Konum } from '@/components/harita/tipler';
 import { Ikon } from '@/components/ui/Ikon';
 import { useYerRehberi } from '@/features/icerik/sorgular';
 import {
+  birincilDugme,
   ilerlemeParcalari,
   KART_ARALIK,
   KART_KENAR,
   KART_SAG,
   kartAdimi,
   kartGenisligi,
+  kartHali,
   kartIndeksi,
   kartSaati,
   kartSekmesi,
   sonrakiKart,
-  yolTarifiBirincil,
   type DurakKarti,
   type IlerlemeParcasi,
 } from '@/features/program/durakKarti';
@@ -52,7 +53,8 @@ type Props = {
  * sonraki / önceki durak; sonraki kart sağ kenardan görünür. Üç halde aynı yapı: sol üstte sekme (geliş · kalan yol ·
  * "Buradasın"), günün durakları kadar ilerleme parçası, numara + saat şeridi + ad + "Cami · ★ 4,7 · Açık" + 60 px foto,
  * 40 px düğmeler. Birincil düğme planda ve buradayken Mekan rehberi, sıradaki durağa giderken Yol tarifi. Gezi modunda
- * buradayken rehberden ipucu; gezi modunda altta "Sonra:".
+ * buradayken rehberden ipucu; gezi modunda altta "Sonra:". Ek haller kanvas 12c: gezilen (yeşil numara, Açık/Kapalı yok,
+ * iki düğme ikincil), atlanan (kesik kenarlı "–", yalnız "{sure} planlıydı", soluk ad ve çizgi, yalnız Mekan rehberi).
  */
 export function DurakKartlari({ kartlar, seciliDurakId, gezi, tz, konum, gunRenk, onSec, onRehber, onYolTarifi, onMenu, onKapat }: Props) {
   const ekran = useWindowDimensions();
@@ -175,25 +177,40 @@ function Kart({ kart, kartlar, genislik, gezi, tz, konum, gunRenk, aktif, fotoIs
   const sekme = kartSekmesi(kart, { gezi, konum, tz });
   const parcalar = ilerlemeParcalari(kartlar, kart.durakId, gezi);
   const sonraki = gezi ? sonrakiKart(kartlar, kart.durakId) : null;
-  const yolBirincil = yolTarifiBirincil(kart, gezi);
+  const hal = kartHali(kart, gezi);
+  const birincilTur = birincilDugme(kart, gezi);
+  const yolBirincil = birincilTur === 'yol';
 
-  const sekmeRengi = sekme.ton === 'burada' || sekme.ton === 'gezildi' ? renk.basariMetin : sekme.ton === 'soluk' ? renk.ikincil : renk.ana;
-  const parcaRengi = (p: IlerlemeParcasi) => (p === 'bu' ? gunRenk : p === 'sonra' ? renk.yuzey : gezi ? renk.basari : renk.anaAcik);
+  const sekmeRengi = sekme.ton === 'burada' || sekme.ton === 'gezildi' ? renk.basariMetin : sekme.ton === 'soluk' ? renk.soluk : renk.ana;
+  // 12c-B: gezilen durağın kendi parçası da yeşil; 12c-C: atlananda bütün parçalar Çizgi.
+  const parcaRengi = (p: IlerlemeParcasi) =>
+    hal === 'atlandi'
+      ? renk.ayrac
+      : p === 'bu'
+        ? hal === 'gezildi'
+          ? renk.basari
+          : gunRenk
+        : p === 'sonra'
+          ? renk.yuzey
+          : gezi
+            ? renk.basari
+            : renk.anaAcik;
 
-  // KK5: 40 px düğme; ikon kendi 16 px kutusunda, metnin satır yüksekliği 16 — ikisi dikey ortalı. Birincil solda.
+  // KK5: en az 40 px düğme; ikon kendi 16 px kutusunda, metin dikey ortalı. Birincil solda (12c-B/C: birincil yok).
   const dugme = (tur: 'yol' | 'rehber') => {
-    const birincil = tur === 'yol' ? yolBirincil : !yolBirincil;
+    const birincil = birincilTur === tur;
     const yazi = birincil ? renk.zemin : renk.ana;
     return (
       <Pressable
         key={tur}
         accessibilityRole="button"
+        accessibilityLabel={t(tur === 'yol' ? 'program.kart.yolTarifiEtiket' : 'program.kart.mekanRehberiEtiket', { ad: kart.ad })}
         onPress={() => (tur === 'yol' ? onYolTarifi(kart) : onRehber(kart))}
         style={({ pressed }) => [s.dugme, { flex: tur === 'rehber' ? 1.15 : 1 }, birincil ? s.dugmeBirincil : s.dugmeIkincil, pressed && { opacity: 0.85 }]}>
         <View style={s.dugmeIkon}>
           <Ikon ad={tur === 'yol' ? 'pusula' : 'kitap'} boyut={16} renk={yazi} kalinlik={2.3} />
         </View>
-        <Text style={[s.dugmeMetin, { color: yazi }]} numberOfLines={1}>
+        <Text style={[s.dugmeMetin, { color: yazi }]} numberOfLines={1} maxFontSizeMultiplier={YAZI_CARPANI}>
           {tur === 'yol' ? t('program.yolTarifi') : t('program.kart.mekanRehberi')}
         </Text>
       </Pressable>
@@ -203,13 +220,13 @@ function Kart({ kart, kartlar, genislik, gezi, tz, konum, gunRenk, aktif, fotoIs
   return (
     <View style={{ width: genislik }}>
       {/* KK1: kartın sol üstüne yapışık sekme. */}
-      <View style={[s.sekme, s.golge, sekme.ton === 'burada' && { backgroundColor: renk.basariZemin }]}>
+      <View style={[s.sekme, sekme.ton === 'burada' && { backgroundColor: renk.basariZemin }]}>
         {sekme.ikon ? (
           <View style={s.sekmeIkon}>
             <Ikon ad={sekme.ikon} boyut={14} renk={sekmeRengi} kalinlik={sekme.ikon === 'tik' ? 3 : 2.4} />
           </View>
         ) : null}
-        <Text style={[s.sekmeMetin, { color: sekmeRengi }]} numberOfLines={1}>
+        <Text style={[s.sekmeMetin, { color: sekmeRengi }]} numberOfLines={1} maxFontSizeMultiplier={YAZI_CARPANI}>
           {sekme.metin}
         </Text>
       </View>
@@ -227,26 +244,36 @@ function Kart({ kart, kartlar, genislik, gezi, tz, konum, gunRenk, aktif, fotoIs
         </View>
         {/* KK3: numara (seçili pin görünümü) · saat şeridi, ad, özet · küçük foto. */}
         <View style={s.ustSatir}>
-          <View style={[s.numara, kart.numara === null && s.numaraAtlandi]}>
-            <Text style={[s.numaraMetin, kart.numara === null && { color: renk.ikincil }]}>{kart.numara ?? '–'}</Text>
+          <View style={[s.numara, hal === 'gezildi' && s.numaraGezildi, hal === 'atlandi' && s.numaraAtlandi]}>
+            <Text style={[s.numaraMetin, hal === 'gezildi' && { color: renk.zemin }, hal === 'atlandi' && { color: renk.soluk }]}>{kart.numara ?? '–'}</Text>
           </View>
           <View style={s.bilgi}>
-            <View style={s.saatSatir}>
-              <Text style={[s.saat, !saat && { color: renk.ikincil }]} numberOfLines={1}>
-                {saat ?? t('program.kart.atlandi')}
+            {/* 12c-C: atlananda saat aralığı yok; yalnız "{sure} planlıydı". */}
+            {hal === 'atlandi' ? (
+              <Text style={[s.sure, { color: renk.soluk }]} numberOfLines={1}>
+                {t('program.kart.planliydi', { sure: sureMetni(kart.dakika) })}
               </Text>
-              <Text style={s.sure} numberOfLines={1}>
-                {gezi ? t('program.kart.planli', { sure: sureMetni(kart.dakika) }) : sureMetni(kart.dakika)}
-              </Text>
-            </View>
-            <Text style={s.ad} numberOfLines={2}>
+            ) : (
+              <View style={s.saatSatir}>
+                {saat ? (
+                  <Text style={s.saat} numberOfLines={1}>
+                    {saat}
+                  </Text>
+                ) : null}
+                <Text style={s.sure} numberOfLines={1}>
+                  {gezi ? t('program.kart.planli', { sure: sureMetni(kart.dakika) }) : sureMetni(kart.dakika)}
+                </Text>
+              </View>
+            )}
+            <Text style={[s.ad, hal === 'atlandi' && { color: renk.ikincil }]} numberOfLines={2}>
               {kart.ad}
             </Text>
-            <Text style={s.ozet} numberOfLines={1}>
+            <Text style={[s.ozet, hal === 'atlandi' && { color: renk.soluk }]} numberOfLines={1}>
               {kart.kategori}
               {puan ? ` · ★ ${puan}` : ''}
-              {kart.acik !== null ? ' · ' : ''}
-              {kart.acik !== null ? <Text style={[s.acik, !kart.acik && { color: renk.uyari }]}>{t(kart.acik ? 'program.kart.acik' : 'program.kart.kapali')}</Text> : null}
+              {/* 12c-B: gezilen durakta Açık / Varışta kapalı gösterilmez. */}
+              {kart.acik !== null && hal === 'normal' ? ' · ' : ''}
+              {kart.acik !== null && hal === 'normal' ? <Text style={[s.acik, !kart.acik && { color: renk.uyari }]}>{t(kart.acik ? 'program.kart.acik' : 'program.kart.kapali')}</Text> : null}
             </Text>
           </View>
           <View style={[s.foto, { backgroundColor: kategoriRenk + '33' }]}>
@@ -254,7 +281,7 @@ function Kart({ kart, kartlar, genislik, gezi, tz, konum, gunRenk, aktif, fotoIs
           </View>
         </View>
         <View style={s.dugmeler}>
-          {yolBirincil ? [dugme('yol'), dugme('rehber')] : [dugme('rehber'), dugme('yol')]}
+          {hal === 'atlandi' ? [dugme('rehber')] : yolBirincil ? [dugme('yol'), dugme('rehber')] : [dugme('rehber'), dugme('yol')]}
           <Pressable accessibilityRole="button" accessibilityLabel={t('program.kart.diger')} onPress={() => onMenu(kart)} style={({ pressed }) => [s.dahaDugme, pressed && { opacity: 0.85 }]}>
             <Ikon ad="daha" boyut={16} renk={renk.ana} kalinlik={2.4} />
           </Pressable>
@@ -287,13 +314,17 @@ function Kart({ kart, kartlar, genislik, gezi, tz, konum, gunRenk, aktif, fotoIs
   );
 }
 
+/** KK6 (büyük yazı): sekme ve düğme metni en çok 1,6 kat büyür; kutular minHeight ile uzar, metin kırpılmaz. */
+const YAZI_CARPANI = 1.6;
+
 const s = StyleSheet.create({
   kap: { position: 'absolute', left: 0, right: 0, bottom: 12 },
   golge: { shadowColor: renk.metin, shadowOffset: { width: 0, height: 12 }, shadowOpacity: 0.18, shadowRadius: 15, elevation: 10 },
   sekme: {
     alignSelf: 'flex-start',
     maxWidth: '88%',
-    height: 30,
+    minHeight: 30,
+    paddingVertical: 4,
     marginLeft: 14,
     paddingHorizontal: 12,
     borderTopLeftRadius: 12,
@@ -304,13 +335,14 @@ const s = StyleSheet.create({
     gap: 5,
   },
   sekmeIkon: { width: 14, height: 14 },
-  sekmeMetin: { flexShrink: 1, fontFamily: yazi.ekstra, fontSize: 12, lineHeight: 14 },
+  sekmeMetin: { flexShrink: 1, fontFamily: yazi.ekstra, fontSize: 12 },
   kart: { borderRadius: kose.kart, backgroundColor: renk.zemin, padding: 14, gap: 12 },
   ilerleme: { flexDirection: 'row', gap: 4 },
   parca: { flex: 1, height: 4, borderRadius: 2 },
   ustSatir: { flexDirection: 'row', alignItems: 'flex-start', gap: 12 },
   numara: { width: 34, height: 34, borderRadius: 10, borderWidth: 2.5, borderColor: renk.ana, backgroundColor: renk.vurgu, alignItems: 'center', justifyContent: 'center' },
-  numaraAtlandi: { borderColor: renk.ayrac, backgroundColor: renk.yuzey },
+  numaraGezildi: { borderWidth: 0, backgroundColor: renk.basariMetin },
+  numaraAtlandi: { borderWidth: 2, borderStyle: 'dashed', borderColor: '#b4bbd3', backgroundColor: renk.zemin },
   numaraMetin: { fontFamily: yazi.ekstra, fontSize: 15, color: renk.metin },
   bilgi: { flex: 1, minWidth: 0, gap: 3 },
   saatSatir: { flexDirection: 'row', alignItems: 'baseline', gap: 8 },
@@ -321,11 +353,11 @@ const s = StyleSheet.create({
   acik: { fontFamily: yazi.ekstra, color: renk.basariMetin },
   foto: { width: 60, height: 60, borderRadius: 14, overflow: 'hidden' },
   dugmeler: { flexDirection: 'row', gap: 8 },
-  dugme: { height: 40, paddingHorizontal: 10, borderRadius: 12, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6 },
+  dugme: { minHeight: 40, paddingHorizontal: 10, paddingVertical: 6, borderRadius: 12, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6 },
   dugmeBirincil: { backgroundColor: renk.ana },
   dugmeIkincil: { backgroundColor: renk.yuzey },
   dugmeIkon: { width: 16, height: 16 },
-  dugmeMetin: { flexShrink: 1, fontFamily: yazi.ekstra, fontSize: 14, lineHeight: 16 },
+  dugmeMetin: { flexShrink: 1, fontFamily: yazi.ekstra, fontSize: 14 },
   dahaDugme: { width: 40, height: 40, borderRadius: 12, backgroundColor: renk.yuzey, alignItems: 'center', justifyContent: 'center' },
   ipucu: { paddingVertical: 12, paddingHorizontal: 14, borderRadius: 16, backgroundColor: '#fff6e6', gap: 4 },
   ipucuBaslik: { fontFamily: yazi.ekstra, fontSize: 11, letterSpacing: 0.66, color: '#8a5a00' },

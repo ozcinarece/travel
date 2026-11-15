@@ -15,12 +15,12 @@ import { dakikaSaat, kestirimTaksiSn, kestirimYuruyusSn } from '@/schedule/tempo
 
 /**
  * #168 KK6 (kanvas 10 · 12): kart soldan 12 px, sağdan 28 px içeride biter — sonraki kart sağ kenardan görünür; kartlar
- * arası 8 px. Varsayılan ölçüler testler ve kamera payı için (390 px ekran); bileşen gerçek genişliği
+ * arası 10 px. Varsayılan ölçüler testler ve kamera payı için (390 px ekran); bileşen gerçek genişliği
  * `kartAdimi(ekranGenislik)` ile hesaplar.
  */
 export const KART_KENAR = 12;
 export const KART_SAG = 28;
-export const KART_ARALIK = 8;
+export const KART_ARALIK = 10;
 export const kartGenisligi = (ekranGenislik: number) => Math.min(520, ekranGenislik - KART_KENAR - KART_SAG);
 export const kartAdimi = (ekranGenislik: number) => kartGenisligi(ekranGenislik) + KART_ARALIK;
 export const KART_GENISLIK = kartGenisligi(390);
@@ -165,6 +165,23 @@ export function kartSekmesi(kart: DurakKarti, secenek: { gezi: boolean; konum: K
 /** #168 KK7–9: birincil düğme — gezi modunda sıradaki durağa giderken Yol tarifi, diğer hallerde Mekan rehberi. */
 export function yolTarifiBirincil(kart: Pick<DurakKarti, 'durum'>, gezi: boolean): boolean {
   return gezi && kart.durum === 'siradaki';
+}
+
+/** #168 (kanvas 12c): kartın ek hali — atlanan (12c-C, iki modda), gezi modunda gezilen (12c-B), diğerleri normal. */
+export type KartHali = 'normal' | 'gezildi' | 'atlandi';
+
+export function kartHali(kart: Pick<DurakKarti, 'numara' | 'durum'>, gezi: boolean): KartHali {
+  if (kart.numara === null) return 'atlandi';
+  return gezi && kart.durum === 'gecildi' ? 'gezildi' : 'normal';
+}
+
+/**
+ * #168 (kanvas 12c-B · 12c-C): birincil (dolu) düğme. Gezilen ve atlanan durakta birincil yok — iki düğme de ikincil;
+ * atlananda Yol tarifi hiç gösterilmez.
+ */
+export function birincilDugme(kart: Pick<DurakKarti, 'numara' | 'durum'>, gezi: boolean): 'yol' | 'rehber' | null {
+  if (kartHali(kart, gezi) !== 'normal') return null;
+  return yolTarifiBirincil(kart, gezi) ? 'yol' : 'rehber';
 }
 
 /** #140 KK7: kartın altındaki "Sonra:" — sıradaki atlanmamış kart; yoksa null. */

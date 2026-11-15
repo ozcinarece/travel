@@ -4,10 +4,13 @@ import type { Durak, Mekan } from '@/lib/tipler';
 import type { ProgramSatiri } from '@/schedule/program';
 
 import {
+  birincilDugme,
   ilerlemeParcalari,
   KART_ADIM,
+  KART_ARALIK,
   kartAdimi,
   kartGenisligi,
+  kartHali,
   kartIndeksi,
   kartKamerasi,
   kartListesi,
@@ -120,10 +123,10 @@ describe('#168 durak kartı', () => {
   const gunDurak = [durak('d1', 'm1'), durak('d2', 'm2'), durak('d3', 'm3')];
   const satirlar = [satir('d1', 9 * 60 + 30, 10 * 60 + 15, 'gecildi', yuru(6)), satir('d2', 10 * 60 + 27, 11 * 60, 'siradaki', yuru(12)), satir('d3', 11 * 60 + 8, 12 * 60, 'bekliyor', yuru(8, 'taksi'))];
 
-  it('KK6: kart soldan 12, sağdan 28 px içeride; sonraki kart 20 px görünür', () => {
+  it('KK6: kart soldan 12, sağdan 28 px içeride; sonraki kart 372 px\'de başlar, 18 px görünür (kanvas 10)', () => {
     expect(kartGenisligi(390)).toBe(350);
-    expect(kartAdimi(390)).toBe(358);
-    expect(12 + kartGenisligi(390) + 8).toBe(390 - 20);
+    expect(kartAdimi(390)).toBe(360);
+    expect(12 + kartGenisligi(390) + KART_ARALIK).toBe(390 - 18);
     expect(kartGenisligi(1024)).toBe(520);
   });
 
@@ -181,5 +184,23 @@ describe('#168 durak kartı', () => {
     expect(yolTarifiBirincil({ durum: 'buradasin' }, true)).toBe(false);
     expect(yolTarifiBirincil({ durum: 'bekliyor' }, true)).toBe(false);
     expect(yolTarifiBirincil({ durum: null }, false)).toBe(false);
+  });
+
+  it('12c: ek haller — atlanan iki modda, gezilen yalnız gezide; ikisinde de birincil düğme yok', () => {
+    expect(kartHali({ numara: null, durum: 'atlandi' }, false)).toBe('atlandi');
+    expect(kartHali({ numara: null, durum: 'atlandi' }, true)).toBe('atlandi');
+    expect(kartHali({ numara: 1, durum: 'gecildi' }, true)).toBe('gezildi');
+    expect(kartHali({ numara: 1, durum: 'gecildi' }, false)).toBe('normal');
+    expect(kartHali({ numara: 2, durum: 'siradaki' }, true)).toBe('normal');
+    expect(birincilDugme({ numara: 1, durum: 'gecildi' }, true)).toBeNull();
+    expect(birincilDugme({ numara: null, durum: 'atlandi' }, false)).toBeNull();
+    expect(birincilDugme({ numara: 2, durum: 'siradaki' }, true)).toBe('yol');
+    expect(birincilDugme({ numara: 1, durum: null }, false)).toBe('rehber');
+    expect(birincilDugme({ numara: 1, durum: 'buradasin' }, true)).toBe('rehber');
+  });
+
+  it('kanvas 10 · 12: kartlar arası 10 px', () => {
+    expect(KART_ARALIK).toBe(10);
+    expect(kartAdimi(390)).toBe(kartGenisligi(390) + 10);
   });
 });
