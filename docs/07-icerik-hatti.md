@@ -256,6 +256,14 @@ Dal silinemezse: `inputs[islem]=temizle`, `inputs[istek]=<run_id>` (ya da `hepsi
 - **Google verisi (PRD §7).** Araştırma sonucu yalnız şifreli olarak geçici dalda ve oturumun belleğinde / repo
   dışındaki geçici klasöründe durur; repoya ve veritabanına ham girmez. Veritabanına yalnız gezi editörünün yazdığı
   alanlar girer: place_id, durak adı, kategori (birincil tip), lat, lng.
+- **Konumun kaynağı (#205).** `sehirler`, `yerler` ve `gezi_duraklari`'nda `konum_kaynagi` sütunu var. Değerleri:
+  - `osm`: OSM adayının konumu, `osm_id` ile (ODbL, atıfla süresiz).
+  - `elle`: BO'da haritadan işaretlenmiş konum.
+  - `google_30g`: Google'dan gelen konum; `google_fetched_at` ile birlikte tutulur. Google koşulu gereği en çok 30 gün saklanır, sonra yenilenir.
+
+  Kaynağı verilmeyen yeni satır `google_30g` sayılır ve damgası yazıldığı an olur. Konum değiştiğinde damga yenilenir. `osm` ya da `elle` satırda (eklenirken de) damga tutulmaz.
+  `konum_kaynagi_kontrol()` tablo başına yalnız sayıları verir (`toplam`, `osm`, `elle`, `google_30g`, `suresi_gecen`). Hedef: `suresi_gecen = 0`.
+  Taşıma ve günlük yenileme #205 KK2–KK3 ile gelecek.
   Mekan rehberi editörün kendi metnidir (Google verisi değil).
 - **OSM verisi** (ODbL) saklanabilir; kullanıldığı yerde atıf: "© OpenStreetMap katkıcıları".
 - **Maliyet.** Alan maskeleri en dar; geniş aday listesi OSM'den, place_id eşleme ücretsiz (IDs Only); puan yalnız kısa
