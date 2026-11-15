@@ -2506,6 +2506,54 @@ begin
   assert (select google_fetched_at is not null from public.sehirler where id = s), 'google_30g''ye dönünce damga';
   delete from public.sehirler where id = s;
 end $$;
+-- #205 (inceleme 1–2): tetikleyici INSERT'te de çalışır; yerler ve gezi_duraklari da aynı kuralla.
+insert into public.sehirler (id, ad, slug, lat, lng, yayin) values ('20500000-0000-4000-8000-000000000011', 'Konum Şehri 2', 'konum-sehri-2', 40, 30, false);
+insert into public.geziler (id, sehir_id, baslik, slug) values ('20500000-0000-4000-8000-000000000012', '20500000-0000-4000-8000-000000000011', 'Konum gezisi', 'konum-gezisi');
+insert into public.gezi_gunleri (id, gezi_id, sira) values ('20500000-0000-4000-8000-000000000013', '20500000-0000-4000-8000-000000000012', 1);
+do $$
+declare
+  s uuid := '20500000-0000-4000-8000-000000000011';
+  gun uuid := '20500000-0000-4000-8000-000000000013';
+  y uuid;
+  d uuid;
+begin
+  -- sehirler: osm/elle ile eklenen satır damga taşımaz; google_30g'de açık null verilse de damga alır.
+  insert into public.sehirler (id, ad, slug, lat, lng, konum_kaynagi, osm_id) values ('20500000-0000-4000-8000-000000000014', 'OSM Şehri', 'osm-sehri', 40, 30, 'osm', 'relation/6');
+  assert (select google_fetched_at is null from public.sehirler where id = '20500000-0000-4000-8000-000000000014'), 'sehirler insert osm: damga yok';
+  insert into public.sehirler (id, ad, slug, lat, lng, konum_kaynagi) values ('20500000-0000-4000-8000-000000000015', 'Elle Şehri', 'elle-sehri', 40, 30, 'elle');
+  assert (select google_fetched_at is null from public.sehirler where id = '20500000-0000-4000-8000-000000000015'), 'sehirler insert elle: damga yok';
+  insert into public.sehirler (id, ad, slug, lat, lng, google_fetched_at) values ('20500000-0000-4000-8000-000000000016', 'Google Şehri', 'google-sehri', 40, 30, null);
+  assert (select konum_kaynagi = 'google_30g' and google_fetched_at is not null from public.sehirler where id = '20500000-0000-4000-8000-000000000016'), 'sehirler insert google null: damga';
+
+  -- yerler
+  insert into public.yerler (sehir_id, ad, lat, lng) values (s, 'Google Yeri', 40, 30) returning id into y;
+  assert (select konum_kaynagi = 'google_30g' and google_fetched_at is not null from public.yerler where id = y), 'yerler varsayılan google_30g + damga';
+  update public.yerler set google_fetched_at = now() - interval '40 days' where id = y;
+  update public.yerler set lng = 30.1 where id = y;
+  assert (select google_fetched_at > now() - interval '1 minute' from public.yerler where id = y), 'yerler yeni konum = yeni damga';
+  insert into public.yerler (sehir_id, ad, lat, lng, konum_kaynagi, osm_id) values (s, 'OSM Yeri', 40, 30, 'osm', 'way/45') returning id into y;
+  assert (select google_fetched_at is null from public.yerler where id = y), 'yerler insert osm: damga yok';
+  insert into public.yerler (sehir_id, ad, lat, lng, konum_kaynagi) values (s, 'Elle Yeri', 40, 30, 'elle') returning id into y;
+  assert (select google_fetched_at is null from public.yerler where id = y), 'yerler insert elle: damga yok';
+  begin
+    insert into public.yerler (sehir_id, ad, lat, lng, konum_kaynagi) values (s, 'Kimliksiz OSM', 40, 30, 'osm');
+    raise exception 'yerler: osm_id olmadan osm kabul edildi';
+  exception when check_violation then null;
+  end;
+
+  -- gezi_duraklari
+  insert into public.gezi_duraklari (gezi_gun_id, sira, ad, lat, lng) values (gun, 1, 'Google Durağı', 40, 30) returning id into d;
+  assert (select konum_kaynagi = 'google_30g' and google_fetched_at is not null from public.gezi_duraklari where id = d), 'gezi_duraklari varsayılan google_30g + damga';
+  update public.gezi_duraklari set google_fetched_at = now() - interval '40 days' where id = d;
+  update public.gezi_duraklari set lat = 40.1 where id = d;
+  assert (select google_fetched_at > now() - interval '1 minute' from public.gezi_duraklari where id = d), 'gezi_duraklari yeni konum = yeni damga';
+  insert into public.gezi_duraklari (gezi_gun_id, sira, ad, lat, lng, konum_kaynagi, osm_id) values (gun, 2, 'OSM Durağı', 40, 30, 'osm', 'node/7') returning id into d;
+  assert (select google_fetched_at is null from public.gezi_duraklari where id = d), 'gezi_duraklari insert osm: damga yok';
+  insert into public.gezi_duraklari (gezi_gun_id, sira, ad, lat, lng, konum_kaynagi) values (gun, 3, 'Elle Durağı', 40, 30, 'elle') returning id into d;
+  assert (select google_fetched_at is null from public.gezi_duraklari where id = d), 'gezi_duraklari insert elle: damga yok';
+
+  delete from public.sehirler where id in (s, '20500000-0000-4000-8000-000000000014', '20500000-0000-4000-8000-000000000015', '20500000-0000-4000-8000-000000000016');
+end $$;
 set role authenticated;
 select pg_temp.as_user(:A);
 select pg_temp.hata_bekle($$select public.konum_kaynagi_kontrol()$$, '42501');

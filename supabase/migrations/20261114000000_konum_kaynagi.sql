@@ -55,13 +55,15 @@ alter table public.gezi_duraklari
     and (konum_kaynagi <> 'google_30g' or google_fetched_at is not null));
 
 -- google_30g satırda konum değişip google_fetched_at verilmediyse damga yenilenir (yeni Google konumu = yeni 30 gün).
--- Kaynak google_30g'den çıkınca damga silinir: artık Google koordinatı tutulmuyor.
+-- Kaynak google_30g değilse damga silinir: artık Google koordinatı tutulmuyor. INSERT'te de çalışır: osm/elle ile eklenen
+-- satır sütun varsayılanındaki now()'u taşımaz; google_30g ile damgasız eklenen satır now() alır.
 create function public.konum_kaynagi_yaz() returns trigger
 language plpgsql set search_path = ''
 as $$
 begin
   if new.konum_kaynagi = 'google_30g' then
-    if (new.lat, new.lng) is distinct from (old.lat, old.lng)
+    if tg_op = 'UPDATE'
+       and (new.lat, new.lng) is distinct from (old.lat, old.lng)
        and new.google_fetched_at is not distinct from old.google_fetched_at then
       new.google_fetched_at := now();
     elsif new.google_fetched_at is null then
@@ -74,11 +76,11 @@ begin
 end;
 $$;
 
-create trigger sehirler_konum_kaynagi before update of lat, lng, konum_kaynagi, google_fetched_at, osm_id on public.sehirler
+create trigger sehirler_konum_kaynagi before insert or update of lat, lng, konum_kaynagi, google_fetched_at, osm_id on public.sehirler
   for each row execute function public.konum_kaynagi_yaz();
-create trigger yerler_konum_kaynagi before update of lat, lng, konum_kaynagi, google_fetched_at, osm_id on public.yerler
+create trigger yerler_konum_kaynagi before insert or update of lat, lng, konum_kaynagi, google_fetched_at, osm_id on public.yerler
   for each row execute function public.konum_kaynagi_yaz();
-create trigger gezi_duraklari_konum_kaynagi before update of lat, lng, konum_kaynagi, google_fetched_at, osm_id on public.gezi_duraklari
+create trigger gezi_duraklari_konum_kaynagi before insert or update of lat, lng, konum_kaynagi, google_fetched_at, osm_id on public.gezi_duraklari
   for each row execute function public.konum_kaynagi_yaz();
 
 -- KK6: kontrol. Yalnız sayılar (repo herkese açık; hat ve Actions loguna konum ya da ad yazılmaz).
