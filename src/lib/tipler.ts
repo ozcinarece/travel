@@ -172,7 +172,10 @@ export type Gezi = {
   /** Gömülü şehir (liste kartlarında "Eskişehir"). */
   sehirler?: { ad: string; slug: string; kapak_url?: string | null } | null;
 };
-export type GeziDuragi = { id: string; gezi_gun_id: string; sira: number; place_id: string | null; ad: string; kategori: string | null; sure_dk: number; lat: number; lng: number };
+export type GeziDuragi = { id: string; gezi_gun_id: string; sira: number; place_id: string | null; ad: string; kategori: string | null; sure_dk: number; lat: number; lng: number;
+  /** #205 KK7: koordinat Google'dan geldiyse alınma anı (osm/elle durakta null); "Seyahatime al" places'a taşır. */
+  google_fetched_at?: string | null;
+};
 export type GeziGunu = { id: string; gezi_id: string; sira: number; baslik: string | null; gezi_duraklari: GeziDuragi[] };
 export type GeziDetay = Gezi & { gezi_gunleri: GeziGunu[] };
 export type KaydedilenTuru = 'gezi' | 'yer';

@@ -121,7 +121,9 @@ export function useGeziAktar() {
         const pid = kimlik.get(d.id)!;
         if (gorulen.has(pid)) continue;
         gorulen.add(pid);
-        const { error } = await supabase.from('places').insert({ trip_id: seyahatId, place_id: pid, primary_type: d.kategori, lat: d.lat, lng: d.lng, default_minutes: sure(d), added_by: session.user.id });
+        // #205 KK7: koordinatın tazelik damgası durağınki (yoksa — osm/elle durak — sütun varsayılanı now()).
+        const damga = d.google_fetched_at ? { google_fetched_at: d.google_fetched_at } : {};
+        const { error } = await supabase.from('places').insert({ trip_id: seyahatId, place_id: pid, primary_type: d.kategori, lat: d.lat, lng: d.lng, ...damga, default_minutes: sure(d), added_by: session.user.id });
         if (error && error.code !== '23505') throw error;
         if (!error) eklenenMekan += 1;
         else zatenVar += 1;

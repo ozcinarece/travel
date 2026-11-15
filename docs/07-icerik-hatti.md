@@ -262,6 +262,8 @@ Dal silinemezse: `inputs[islem]=temizle`, `inputs[istek]=<run_id>` (ya da `hepsi
   - `google_30g`: Google'dan gelen konum; `google_fetched_at` ile birlikte tutulur. Google koşulu gereği en çok 30 gün saklanır, sonra yenilenir.
 
   Kaynağı verilmeyen yeni satır `google_30g` sayılır ve damgası yazıldığı an olur. Konum değiştiğinde damga yenilenir. `osm` ya da `elle` satırda (eklenirken de) damga tutulmaz.
+  `osm` ya da `elle` satırda koordinatı değiştiren yazım kaynağı da (`konum_kaynagi` ya da `osm_id`, değeri aynı olsa bile) aynı UPDATE'te yazmalı; yazmazsa satır `google_30g`'ye düşer ve damga alır. Damga gelecekte olamaz (1 gün pay). Koordinatı yeniden yazan iş damgayı da açıkça yazar: aynı koordinat yeniden yazılınca tetikleyici damgayı yenilemez.
+  "Seyahatime al" damgayı durağından `places`'a taşır (damgasız durakta `now()`). `konum_kaynagi_kontrol()`'ü yalnız `postgres` çağırır (hat, `supabase-sql`).
   `konum_kaynagi_kontrol()` tablo başına yalnız sayıları verir (`toplam`, `osm`, `elle`, `google_30g`, `suresi_gecen`). Hedef: `suresi_gecen = 0`.
   Taşıma ve günlük yenileme #205 KK2–KK3 ile gelecek.
   Mekan rehberi editörün kendi metnidir (Google verisi değil).

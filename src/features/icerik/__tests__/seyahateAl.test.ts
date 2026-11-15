@@ -69,6 +69,15 @@ describe('#193 KK2–KK3 yeni seyahat planı', () => {
     expect([...birinci].sort()).toEqual(birinci);
     expect(new Set(birinci).size).toBe(birinci.length);
   });
+  it('#205 KK7: RPC gövdesi durağın google_fetched_at damgasını taşır; damgasız (osm/elle) durakta null', () => {
+    const g1 = { id: 'G1', gezi_id: 'z', sira: 1, baslik: null, gezi_duraklari: [{ ...durak('a', 'G1', 1, 'PA'), google_fetched_at: '2026-11-01T10:00:00Z' }, { ...durak('o', 'G1', 2, 'PO'), google_fetched_at: null }] };
+    const { gunler, plan } = yeniSeyahatPlani({ gezi_gunleri: [g1] }, 1, null);
+    const g = yeniSeyahatGovdesi(plan, gunler, new Map(plan.duraklar.map((d) => [d.id, d.place_id])));
+    expect(g.mekanlar.map((m) => [m.place_id, m.google_fetched_at])).toEqual([
+      ['PA', '2026-11-01T10:00:00Z'],
+      ['PO', null],
+    ]);
+  });
   it('bilgi satırı: "{ad} adıyla yeni seyahat açılır, 3 günün 5 durağı aynı sırayla gelir."', () => {
     expect(yeniSeyahatBilgisi("Eskişehir'de üç gün", { gun: 3, durak: 5, listeye: 0 })).toBe("**Eskişehir'de üç gün** adıyla yeni seyahat açılır, 3 günün 5 durağı aynı sırayla gelir. Otel ve davet sonra.");
     expect(yeniSeyahatBilgisi('X', { gun: 2, durak: 4, listeye: 1 })).toBe("**X** adıyla yeni seyahat açılır, 2 günün 4 durağı aynı sırayla gelir. Kalan **1 mekan** Listem'e girer. Otel ve davet sonra.");

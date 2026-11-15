@@ -52,7 +52,7 @@ export function yeniSeyahatPlani(gezi: Pick<GeziDetay, 'gezi_gunleri'>, gunSayis
   return { gunler, plan, ozet: { gun: plan.atamalar.length, durak: plan.atamalar.reduce((n, a) => n + a.duraklar.length, 0), listeye: plan.listeyeKalan.length } };
 }
 
-export type YeniSeyahatMekani = { place_id: string; primary_type: string | null; lat: number; lng: number; dk: number };
+export type YeniSeyahatMekani = { place_id: string; primary_type: string | null; lat: number; lng: number; google_fetched_at: string | null; dk: number };
 export type YeniSeyahatDuragi = { gun: number; place_id: string; order_key: string; dk: number };
 
 /**
@@ -63,7 +63,7 @@ export function yeniSeyahatGovdesi(plan: AktarmaPlani, gunler: Gun[], kimlik: Ma
   const mekanlar = new Map<string, YeniSeyahatMekani>();
   for (const d of plan.duraklar) {
     const pid = kimlik.get(d.id);
-    if (pid && !mekanlar.has(pid)) mekanlar.set(pid, { place_id: pid, primary_type: d.kategori, lat: d.lat, lng: d.lng, dk: durakSuresi(d) });
+    if (pid && !mekanlar.has(pid)) mekanlar.set(pid, { place_id: pid, primary_type: d.kategori, lat: d.lat, lng: d.lng, google_fetched_at: d.google_fetched_at ?? null, dk: durakSuresi(d) });
   }
   const atanan = new Set<string>();
   const duraklar: YeniSeyahatDuragi[] = [];
