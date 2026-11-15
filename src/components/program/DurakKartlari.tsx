@@ -265,24 +265,33 @@ function Kart({ kart, kartlar, genislik, gezi, tz, konum, gunRenk, aktif, fotoIs
                 </Text>
               </View>
             )}
-            <Text style={[s.ad, hal === 'atlandi' && { color: renk.ikincil }]} numberOfLines={2}>
+            <Text style={[s.ad, hal === 'atlandi' && { color: renk.ikincil }]} numberOfLines={3}>
               {kart.ad}
             </Text>
-            <Text style={[s.ozet, hal === 'atlandi' && { color: renk.soluk }]} numberOfLines={1}>
-              {kart.kategori}
-              {puan ? ` · ★ ${puan}` : ''}
-              {/* 12c-B: gezilen durakta Açık / Varışta kapalı gösterilmez. */}
-              {kart.acik !== null && hal === 'normal' ? ' · ' : ''}
-              {kart.acik !== null && hal === 'normal' ? <Text style={[s.acik, !kart.acik && { color: renk.uyari }]}>{t(kart.acik ? 'program.kart.acik' : 'program.kart.kapali')}</Text> : null}
-            </Text>
+            {/* Özet en çok 2 satır: kategori · puan kısalabilir; Açık / "Varışta kapalı" ayrı metin, hiç kesilmez — sığmazsa alt satıra iner. */}
+            <View style={s.ozetSatir}>
+              <Text style={[s.ozet, s.ozetKisalir, hal === 'atlandi' && { color: renk.soluk }]} numberOfLines={1}>
+                {kart.kategori}
+                {puan ? ` · ★ ${puan}` : ''}
+                {/* 12c-B: gezilen durakta Açık / Varışta kapalı gösterilmez. */}
+                {kart.acik !== null && hal === 'normal' ? ' · ' : ''}
+              </Text>
+              {kart.acik !== null && hal === 'normal' ? (
+                <Text testID="durak-acik" style={[s.ozet, s.acik, !kart.acik && { color: renk.uyari }]}>
+                  {t(kart.acik ? 'program.kart.acik' : 'program.kart.kapali')}
+                </Text>
+              ) : null}
+            </View>
           </View>
-          <View style={[s.foto, { backgroundColor: kategoriRenk + '33' }]}>
+          {/* 12c-C: atlananda foto zemini Buz. */}
+          <View style={[s.foto, { backgroundColor: hal === 'atlandi' ? renk.yuzey : kategoriRenk + '33' }]}>
             {foto ? <Image source={{ uri: foto }} style={StyleSheet.absoluteFill} contentFit="cover" transition={200} /> : null}
           </View>
         </View>
         <View style={s.dugmeler}>
           {hal === 'atlandi' ? [dugme('rehber')] : yolBirincil ? [dugme('yol'), dugme('rehber')] : [dugme('rehber'), dugme('yol')]}
-          <Pressable accessibilityRole="button" accessibilityLabel={t('program.kart.diger')} onPress={() => onMenu(kart)} style={({ pressed }) => [s.dahaDugme, pressed && { opacity: 0.85 }]}>
+          {/* 40 px görünüm, hitSlop ile 44 px dokunma alanı. */}
+          <Pressable accessibilityRole="button" accessibilityLabel={t('program.kart.diger', { ad: kart.ad })} hitSlop={2} onPress={() => onMenu(kart)} style={({ pressed }) => [s.dahaDugme, pressed && { opacity: 0.85 }]}>
             <Ikon ad="daha" boyut={16} renk={renk.ana} kalinlik={2.4} />
           </Pressable>
         </View>
@@ -293,7 +302,7 @@ function Kart({ kart, kartlar, genislik, gezi, tz, konum, gunRenk, aktif, fotoIs
           </View>
         ) : null}
         {sonraki ? (
-          <Pressable accessibilityRole="button" accessibilityLabel={t('program.kart.sonrakiKart')} onPress={() => onSec(sonraki.durakId)} style={({ pressed }) => [s.sonra, pressed && { opacity: 0.7 }]}>
+          <Pressable accessibilityRole="button" accessibilityLabel={t('program.kart.sonrakiKart', { ad: sonraki.ad })} onPress={() => onSec(sonraki.durakId)} style={({ pressed }) => [s.sonra, pressed && { opacity: 0.7 }]}>
             <Text style={s.sonraMetin} numberOfLines={1}>
               <Text style={s.sonraEtiket}>{`${t('program.kart.sonra')} `}</Text>
               {sonraki.varisDk !== null ? t('program.kart.sonraMetin', { ad: sonraki.ad, saat: dakikaSaat(sonraki.varisDk) }) : sonraki.ad}
@@ -342,13 +351,15 @@ const s = StyleSheet.create({
   ustSatir: { flexDirection: 'row', alignItems: 'flex-start', gap: 12 },
   numara: { width: 34, height: 34, borderRadius: 10, borderWidth: 2.5, borderColor: renk.ana, backgroundColor: renk.vurgu, alignItems: 'center', justifyContent: 'center' },
   numaraGezildi: { borderWidth: 0, backgroundColor: renk.basariMetin },
-  numaraAtlandi: { borderWidth: 2, borderStyle: 'dashed', borderColor: '#b4bbd3', backgroundColor: renk.zemin },
+  numaraAtlandi: { borderWidth: 2, borderStyle: 'dashed', borderColor: renk.yerTutucu, backgroundColor: renk.zemin },
   numaraMetin: { fontFamily: yazi.ekstra, fontSize: 15, color: renk.metin },
   bilgi: { flex: 1, minWidth: 0, gap: 3 },
   saatSatir: { flexDirection: 'row', alignItems: 'baseline', gap: 8 },
   saat: { flexShrink: 1, fontFamily: yazi.baslik, fontSize: 17, color: renk.metin },
   sure: { fontFamily: yazi.ekstra, fontSize: 12, color: renk.ikincil },
   ad: { fontFamily: yazi.baslik, fontSize: 21, lineHeight: 23, letterSpacing: -0.42, color: renk.metin },
+  ozetSatir: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'baseline' },
+  ozetKisalir: { flexShrink: 1 },
   ozet: { fontFamily: yazi.normal, fontSize: 13, color: renk.ikincil },
   acik: { fontFamily: yazi.ekstra, color: renk.basariMetin },
   foto: { width: 60, height: 60, borderRadius: 14, overflow: 'hidden' },

@@ -584,12 +584,12 @@
       "kapali": "Varışta kapalı",
       "sonra": "Sonra:",
       "sonraMetin": "{ad} · {saat}",
-      "sonrakiKart": "Sonraki durağa geç",
+      "sonrakiKart": "Sonraki durak: {ad}",
       "mekanRehberi": "Mekan rehberi",
       "mekanRehberiEtiket": "Mekan rehberi: {ad}",
       "yolTarifiEtiket": "Yol tarifi: {ad}",
       "ipucu": "REHBERDEN İPUCU",
-      "diger": "Diğer: Atla, Başka güne al"
+      "diger": "Diğer seçenekler: {ad}"
     },
     "puan": {
       "baslik": "Nasıldı?",

@@ -13,6 +13,8 @@ export const renk = {
   yuzey: '#eef2ff',
   /** Çizgi — kenar ve ayraç. */
   ayrac: '#dde3f6',
+  /** Boş / pasif kutu kenarı (kesik numara, boş onay kutusu); yönetim temasındaki `yerTutucu` ile aynı. */
+  yerTutucu: '#b4bbd3',
   /** Gece — ana renk: birincil düğme, koyu kart, seçili sekme/çip, pin kenarı. */
   ana: '#152a6b',
   /** Koyu kart üstünde ikincil metin ve açık avatar. */
