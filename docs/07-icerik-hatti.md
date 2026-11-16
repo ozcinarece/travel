@@ -93,7 +93,9 @@ Hata kodları: `22023` geçersiz veri · `23505` slug ya da şehir zaten var · 
 4. `arastir` `puan` — son kısa liste (duraklar, yedekler, restoran/kafe adayları; **en çok 30**). Puan ve yorum sayısı
    yalnız burada.
 5. Kapalı günler resmî siteden ya da OSM `opening_hours`'tan plana yazılır (`kapali_gunler`).
-6. `yukle` (önce kuru) — duraklar için detay (konum, kategori, açık mı).
+6. `yukle` (önce kuru) — duraklar için detay (konum, kategori, açık mı). Durağın `osm` alanı varsa (#205 KK2) OSM nesnesi
+   Overpass'tan okunur (ücretsiz) ve Google konumuna en çok 150 m uzak olmalı (değilse ya da nesne bulunamazsa HATA);
+   veritabanına OSM konumu ve `osm_id` yazılır (`konum_kaynagi = osm`).
 
 ### Maliyet (liste fiyatı, ücretsiz kota düşülmeden)
 
@@ -133,7 +135,7 @@ Google'dan taze alınır. Mekan rehberleri ayrı dosyalarda: `icerik/yerler/<şe
       "baslik": "Odunpazarı",
       "duraklar": [
         {
-          "place_id": "ChIJ…", "ad": "…", "sure_dk": 75, "sure_gerekcesi": "varsayılan 90; koleksiyon küçük",
+          "place_id": "ChIJ…", "osm": "way/123456", "ad": "…", "sure_dk": 75, "sure_gerekcesi": "varsayılan 90; koleksiyon küçük",
           "kapali_gunler": ["pazartesi"], "rehber": "odunpazari-modern-muze"
         }
       ]
@@ -151,6 +153,9 @@ Google'dan taze alınır. Mekan rehberleri ayrı dosyalarda: `icerik/yerler/<şe
 - `takvim.ilk_gun` (isteğe bağlı, varsayılan cumartesi): kapalı gün denetimi için 1. günün haftanın günü.
 - `kapali_gunler` (zorunlu; her gün açıksa `[]`): resmî siteden ya da OSM `opening_hours`'tan. Bilinmiyorsa `[]` ve
   DOĞRULANACAKLAR'a bir satır.
+- `osm` (isteğe bağlı, yoksa UYARI; #205 KK2): durağın OSM adayının kimliği (`osm` işleminin aday listesindeki `osm`
+  alanı: `node/…`, `way/…`, `relation/…`). Varsa konum OSM'den süresiz tutulur; yoksa Google konumu `google_30g` olarak
+  30 gün tutulur.
 - `rehber` (isteğe bağlı, yoksa UYARI): mekan rehberi dosyasının adı → `icerik/yerler/<şehir>/<rehber>.md`.
 - `ek_mekanlar` (isteğe bağlı): yazıda anılan ama durak olmayan mekanlar (araştırmadan). Yüklemede bunların da kapalı
   olup olmadığına bakılır; veritabanına durak olarak girmez.
@@ -174,6 +179,7 @@ HATA yüklemeyi durdurur, UYARI rapora girer. İletilerde durak adı yazılmaz; 
 | köşeli parantezli not (`[doğrula]`, kaynak notu), TODO | klişe ("muhteşem", "eşsiz" …); ondalıkta nokta |
 | yazıdaki `mekan:id` / `::mekan[id]` ne durakta ne `ek_mekanlar`'da | aynı mekan iki durakta |
 | `kapali_gunler` yok ya da gün adı değil | durağın mekan rehberi yok |
+| `osm` biçimi geçersiz; yüklemede OSM nesnesi yok ya da Google konumundan > 150 m (#205) | durağın OSM adayı (`osm`) yok |
 | rehber dosyası yok; rehberde tek `>` İPUCU değil, `::mekan` kartı, yukarıdaki sözdizimi hataları | rehber 150–300 kelime dışı; fiyat ya da saat geçiyor; klişe |
 
 Gezi yazısında durak başına 1–3 cümle; ayrıntı mekan rehberinde.
@@ -266,7 +272,8 @@ Dal silinemezse: `inputs[islem]=temizle`, `inputs[istek]=<run_id>` (ya da `hepsi
   "Seyahatime al" damgayı durağından `places`'a taşır (damgasız durakta `now()`). `konum_kaynagi_kontrol()`'ü yalnız `postgres` çağırır (hat, `supabase-sql`).
   `yukle`'nin yazdığı damga (`now()`) Google'dan alınma anıdır: hat koordinatı araştırmadan değil, her yüklemede önbelleksiz yapılan detay çağrısından alır (`hat.mjs` `yukle` → `google({ islem: 'detay' })`, `dogrula.mjs`). Detay çağrısı önbelleğe alınırsa ya da koordinat araştırmadan alınırsa #205 KK8 yeniden açılır.
   `konum_kaynagi_kontrol()` tablo başına yalnız sayıları verir (`toplam`, `osm`, `elle`, `google_30g`, `suresi_gecen`). Hedef: `suresi_gecen = 0`.
-  Taşıma ve günlük yenileme #205 KK2–KK3 ile gelecek.
+  Yeni duraklar ve `yukle`'nin açtığı yeni yer satırları, planda `osm` varsa `osm` kaynağıyla yazılır (#205 KK2). Mevcut
+  satırların OSM eşleştirmesi ve günlük yenileme #205 KK3 ile gelecek.
   Mekan rehberi editörün kendi metnidir (Google verisi değil).
 - **OSM verisi** (ODbL) saklanabilir; kullanıldığı yerde atıf: "© OpenStreetMap katkıda bulunanlar".
 - **Maliyet.** Alan maskeleri en dar; geniş aday listesi OSM'den, place_id eşleme ücretsiz (IDs Only); puan yalnız kısa

@@ -27,6 +27,10 @@ export const SINIR = {
 export const SLUG = /^[a-z0-9-]{2,80}$/;
 export const SEHIR_SLUG = /^[a-z0-9-]{2,60}$/;
 export const PLACE_ID = /^[A-Za-z0-9_-]{10,255}$/;
+/** OSM nesne kimliği (#205 KK2): `osm` işleminin aday listesindeki `osm` alanı. */
+export const OSM_ID = /^(node|way|relation)\/[0-9]{1,19}$/;
+/** #205: OSM adayı ile Google yeri aynı mekan sayılırken konumlar arası en çok mesafe (KK3 eşleşme kuralı ile aynı). */
+export const OSM_ESLESME_M = 150;
 
 /** Plan dosyasına girmemesi gereken Google alanları (PRD §7: koordinat, puan, adres, saat, yorum). */
 const YASAK_ALANLAR = new Set(['lat', 'lng', 'konum', 'location', 'puan', 'rating', 'puan_sayisi', 'userRatingCount', 'yorum', 'yorumlar', 'reviews', 'adres', 'address', 'saatler', 'periyotlar', 'openingHours']);
@@ -225,6 +229,9 @@ export function planDenetle(plan, { bilinenIdler = [], rehberler = new Map() } =
       if (!Number.isInteger(d?.sure_dk) || d.sure_dk < SINIR.sureEnAz || d.sure_dk > SINIR.sureEnCok) hatalar.push(`${dk}: sure_dk ${SINIR.sureEnAz}–${SINIR.sureEnCok} arası tam sayı olmalı`);
       if (!Array.isArray(d?.kapali_gunler)) hatalar.push(`${dk}: kapali_gunler gerekli (her gün açıksa [])`);
       else if (d.kapali_gunler.some((g) => kapaliGunNo(g) === null)) hatalar.push(`${dk}: kapali_gunler yalnız gün adı (ör. "pazartesi")`);
+      // #205 KK2: OSM adayı verilirse konum OSM'den yazılır (süresiz, atıfla); verilmezse Google konumu 30 gün tutulur.
+      if (d?.osm === undefined) uyarilar.push(`${dk}: OSM adayı yok (osm); konum Google'dan, 30 günde yenilenmeli`);
+      else if (typeof d.osm !== 'string' || !OSM_ID.test(d.osm)) hatalar.push(`${dk}: osm "node/123", "way/45" ya da "relation/6" olmalı`);
       if (d?.rehber === undefined) uyarilar.push(`${dk}: mekan rehberi yok (rehber)`);
       else if (typeof d.rehber !== 'string' || !REHBER_DOSYA.test(d.rehber)) hatalar.push(`${dk}: rehber dosya adı ^[a-z0-9-]{2,80}$ olmalı`);
       else if (!rehberler.has(d.rehber)) hatalar.push(`${dk}: rehber dosyası bulunamadı (${d.rehber}.md)`);
@@ -357,8 +364,52 @@ function saat(dk) {
   return `${String(Math.floor(d / 60) % 24).padStart(2, '0')}:${String(d % 60).padStart(2, '0')}`;
 }
 
-/** Yükleme verisi (icerik_gezi_taslak_yukle p_veri): kategori ve konum detaydan; ad, süre ve mekan rehberi plandan. */
-export function yuklemeVerisi(plan, detaylar, rehberler = new Map()) {
+/** Plandaki durakların OSM kimlikleri (tekrarsız; biçimi geçersiz olanlar planDenetle'de hata). */
+export function osmIdleri(plan) {
+  const idler = new Set();
+  for (const g of plan.gunler ?? []) for (const d of g.duraklar ?? []) if (typeof d?.osm === 'string' && OSM_ID.test(d.osm)) idler.add(d.osm);
+  return [...idler];
+}
+
+/** #205 KK2: OSM kimliklerinden konum sorgusu (way/relation için merkez). Yalnız biçimi doğrulanmış kimlikler girer. */
+export function osmKimlikSorgusu(idler) {
+  const tur = { node: [], way: [], relation: [] };
+  for (const id of idler) {
+    if (!OSM_ID.test(id)) throw new Error('osm kimliği biçimi geçersiz');
+    const [t, n] = id.split('/');
+    tur[t].push(n);
+  }
+  const parca = Object.entries(tur)
+    .filter(([, n]) => n.length)
+    .map(([t, n]) => `  ${t}(id:${n.join(',')});`);
+  return `[out:json][timeout:60];\n(\n${parca.join('\n')}\n);\nout center;`;
+}
+
+/**
+ * #205 KK2: OSM adayı Google'daki yerle aynı mekan mı? OSM nesnesi bulunmalı ve konumu Google konumuna en çok 150 m uzak
+ * olmalı. Hata satırlarında koordinat yok; yalnız durak kodu, OSM kimliği ve metre (log herkese açık).
+ */
+export function osmKonumDenetle(plan, detaylar, osmKonumlari) {
+  const hatalar = [];
+  (plan.gunler ?? []).forEach((g, gi) =>
+    (g.duraklar ?? []).forEach((d, di) => {
+      if (typeof d?.osm !== 'string' || !OSM_ID.test(d.osm)) return;
+      const o = osmKonumlari.get(d.osm);
+      const det = detaylar.get(d.place_id);
+      if (!o) hatalar.push(`${durakKodu(gi, di)}: OSM nesnesi bulunamadı (${d.osm})`);
+      else if (det && mesafeM(o, det) > OSM_ESLESME_M) {
+        hatalar.push(`${durakKodu(gi, di)}: OSM konumu Google konumundan ${Math.round(mesafeM(o, det))} m uzakta (en çok ${OSM_ESLESME_M}; ${d.osm})`);
+      }
+    }),
+  );
+  return hatalar;
+}
+
+/**
+ * Yükleme verisi (icerik_gezi_taslak_yukle p_veri): kategori ve konum detaydan; ad, süre ve mekan rehberi plandan. #205 KK2:
+ * durağın OSM adayı varsa (ve `osmKonumlari`'nda okunduysa) konum OSM'den, `osm_id` ile.
+ */
+export function yuklemeVerisi(plan, detaylar, rehberler = new Map(), osmKonumlari = new Map()) {
   const sehir = plan.sehir.yeni
     ? (() => {
         const s = detaylar.get(plan.sehir.yeni.place_id);
@@ -379,7 +430,9 @@ export function yuklemeVerisi(plan, detaylar, rehberler = new Map()) {
       duraklar: g.duraklar.map((d) => {
         const det = detaylar.get(d.place_id);
         const rehber = d.rehber ? rehberler.get(d.rehber)?.replace(/\r\n?/g, '\n').trim() : undefined;
-        return { place_id: d.place_id, ad: d.ad.trim(), kategori: det.primary_type ?? null, sure_dk: d.sure_dk, lat: det.lat, lng: det.lng, ...(rehber ? { rehber_md: rehber } : {}) };
+        const osm = typeof d.osm === 'string' ? osmKonumlari.get(d.osm) : undefined;
+        const konum = osm ? { lat: osm.lat, lng: osm.lng, osm_id: d.osm } : { lat: det.lat, lng: det.lng };
+        return { place_id: d.place_id, ad: d.ad.trim(), kategori: det.primary_type ?? null, sure_dk: d.sure_dk, ...konum, ...(rehber ? { rehber_md: rehber } : {}) };
       }),
     })),
   };

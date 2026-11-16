@@ -1492,6 +1492,28 @@ begin
   assert (select s.slug from public.geziler g join public.sehirler s on s.id = g.sehir_id where g.slug = 'hat-bursa') = 'bursa-hat', 'gezi yeni şehre bağlı';
 end $$;
 
+-- #205 KK2: osm_id'li durak ve yeni yer satırı `osm` kaynağıyla yazılır (damga yok); osm_id'siz durak google_30g + damga.
+do $$
+declare
+  v jsonb := jsonb_set(jsonb_set(pg_temp.icerik_ornek('hat-osm'), '{gunler,0,duraklar,0}',
+    '{"place_id": "ChIJ-osm-deneme-1", "ad": "OSM durağı", "kategori": "museum", "sure_dk": 45, "lat": 39.7628, "lng": 30.5262, "osm_id": "way/123456", "rehber_md": "Rehber."}'),
+    '{gunler,0,duraklar,1,osm_id}', 'null');
+  g uuid;
+begin
+  perform public.icerik_gezi_taslak_yukle(v);
+  g := (select id from public.geziler where slug = 'hat-osm');
+  assert (select konum_kaynagi = 'osm' and osm_id = 'way/123456' and google_fetched_at is null
+    from public.gezi_duraklari d join public.gezi_gunleri gg on gg.id = d.gezi_gun_id where gg.gezi_id = g and gg.sira = 1 and d.sira = 1), 'KK2: osm durağı';
+  assert (select konum_kaynagi = 'google_30g' and osm_id is null and google_fetched_at is not null
+    from public.gezi_duraklari d join public.gezi_gunleri gg on gg.id = d.gezi_gun_id where gg.gezi_id = g and gg.sira = 1 and d.sira = 2), 'KK2: osm_id null → google_30g';
+  assert (select konum_kaynagi = 'osm' and osm_id = 'way/123456' and google_fetched_at is null and not yayin
+    from public.yerler where place_id = 'ChIJ-osm-deneme-1'), 'KK2: yeni yer satırı osm';
+  assert (select (public.konum_kaynagi_kontrol() -> 'gezi_duraklari' ->> 'osm')::int) >= 1, 'KK6: kontrol osm sayar';
+end $$;
+select pg_temp.hata_bekle($$select public.icerik_gezi_taslak_yukle(jsonb_set(pg_temp.icerik_ornek('hat-osm-bozuk'), '{gunler,0,duraklar,0,osm_id}', '"node/abc"'))$$, '22023');
+select pg_temp.hata_bekle($$select public.icerik_gezi_taslak_yukle(jsonb_set(pg_temp.icerik_ornek('hat-osm-bozuk'), '{gunler,0,duraklar,0,osm_id}', '123'))$$, '22023');
+do $$ begin assert not exists (select 1 from public.geziler where slug = 'hat-osm-bozuk'), 'KK2: bozuk osm_id iz bırakmaz'; end $$;
+
 -- p_yeniden: taslağı yeniden yazar (kimlik, kapak ve sıra kalır; yayın tarihi sıfırlanır).
 update public.geziler set kapak_url = 'https://ornek/kapak.webp', sira = 7, yayin_at = now() + interval '3 days' where slug = 'hat-eskisehir';
 do $$
