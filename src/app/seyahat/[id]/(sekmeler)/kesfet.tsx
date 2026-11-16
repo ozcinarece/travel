@@ -17,7 +17,6 @@ import { useMekanEkle, useMekanGuncelle, useMekanlar, useMekanSil, useUyeler } f
 import { geziyeGit } from '@/features/gezi/gezinti';
 import { useSeyahatId } from '@/features/seyahatler/baglam';
 import { useSeyahat } from '@/features/seyahatler/sorgular';
-import { seyahatAdi } from '@/features/sihirbaz/sihirbaz';
 import { SeyahatYukleme } from '@/components/seyahatler/SeyahatYukleme';
 import { FiltreSayfasi } from '@/components/kesfet/FiltreSayfasi';
 import { AlandaAraHapi, CekmeceKartlari, CekmeceSatirlari, CekmeceSeridi, HaritayaDonlu, type CekmeceOgesi } from '@/components/kesfet/OneriCekmecesi';
@@ -453,8 +452,9 @@ function Kesfet({ seyahat, konaklamalar, ilkMekan, cekmeceIstegi, cipIstegi }: {
 
   return (
     <HaritaEkrani
-      // #141 KK1: sol üstte her zaman "‹ {seyahat adı}"; #181: seyahatin evi Gezi sayfası.
-      baslik={seyahatAdi(seyahat)}
+      // #274 KK2 (kanvas 29e): sol üstte ekran başlığı "Yer ekle" (geri oku yok; seyahatin evi alt menüdeki Gezi).
+      baslik={t('kesfet.ekranBasligi')}
+      baslikHapi
       altMenuVar
       geri={() => geziyeGit(seyahat.id)}
       sagUst={

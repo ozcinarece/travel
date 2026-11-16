@@ -17,6 +17,8 @@ type Props = {
   /** Sol üstteki beyaz hapta geri okunun yanındaki metin. */
   baslik: string;
   geri: () => void;
+  /** #274 (kanvas 29e): sekme ekranında geri oku yok; beyaz hapta yalnız ekran başlığı ("Yer ekle"). */
+  baslikHapi?: boolean;
   /** Sağ üst: bilgi hapı (otel: "Roma · 2/2") ya da üye avatarları (3.4). */
   sagUst?: ReactNode;
   /** Arama kutusu (beyaz, 48 yüksek) — kabuk gölgeli kabı sağlar. */
@@ -72,7 +74,7 @@ const GECIS_YUKSEKLIK = 250;
  * #17 KK2: tam ekran harita kabuğu — 3.3 Otel, 3.4 Keşfet ve 3.5 bunu paylaşır.
  * Harita ekranın tamamını kaplar; üstte ve altta yüzen katmanlar dokunuşu yalnız kendi alanlarında yakalar.
  */
-export function HaritaEkrani({ baslik, geri, sagUst, arama, aramaSag, ustEk, altNot, altSerbest, altPanel, onUstYukseklik, altMenuVar, panelTam, altBaslik, altSayfa, altSayfaGizli, ustKatman, harita }: Props) {
+export function HaritaEkrani({ baslik, geri, baslikHapi, sagUst, arama, aramaSag, ustEk, altNot, altSerbest, altPanel, onUstYukseklik, altMenuVar, panelTam, altBaslik, altSayfa, altSayfaGizli, ustKatman, harita }: Props) {
   const kenar = useSafeAreaInsets();
   const [ustY, setUstY] = useState(0);
   const [panelY, setPanelY] = useState(0);
@@ -120,7 +122,7 @@ export function HaritaEkrani({ baslik, geri, sagUst, arama, aramaSag, ustEk, alt
           onUstYukseklik?.(h);
         }}>
         <View style={s.ustSatir} pointerEvents="box-none">
-          {altBaslik !== undefined ? <BuyukBaslik baslik={baslik} alt={altBaslik} onGeri={geri} /> : <GeriHapi baslik={baslik} onPress={geri} />}
+          {altBaslik !== undefined ? <BuyukBaslik baslik={baslik} alt={altBaslik} onGeri={geri} /> : baslikHapi ? <BaslikHapi baslik={baslik} /> : <GeriHapi baslik={baslik} onPress={geri} />}
           {sagUst}
         </View>
         {arama ? (
@@ -189,6 +191,17 @@ export function GeriHapi({ baslik, onPress, duz }: { baslik: string; onPress: ()
         {baslik}
       </Text>
     </Pressable>
+  );
+}
+
+/** #274 (kanvas 29e): ekran başlığı hapı — 40 px beyaz, gölgeli, Archivo 17; geri oku yok. */
+function BaslikHapi({ baslik }: { baslik: string }) {
+  return (
+    <View style={[s.baslikHap, s.golge]}>
+      <Text accessibilityRole="header" style={s.baslikMetin} numberOfLines={1}>
+        {baslik}
+      </Text>
+    </View>
   );
 }
 
@@ -270,6 +283,8 @@ const s = StyleSheet.create({
     maxWidth: '62%',
   },
   geriMetin: { fontFamily: yazi.baslik, fontSize: 15, letterSpacing: -0.2, color: renk.metin, flexShrink: 1 },
+  baslikHap: { height: 40, paddingHorizontal: 16, borderRadius: 999, backgroundColor: renk.zemin, justifyContent: 'center', maxWidth: '62%' },
+  baslikMetin: { fontFamily: yazi.baslik, fontSize: 17, letterSpacing: -0.34, color: renk.metin },
   bilgiHap: { height: 36, paddingHorizontal: 12, borderRadius: 999, backgroundColor: renk.zemin, justifyContent: 'center' },
   bilgiMetin: { fontFamily: yazi.kalin, fontSize: 12, color: renk.ikincil },
   aramaSatir: { flexDirection: 'row', alignItems: 'center', gap: 8 },
