@@ -31,7 +31,8 @@ jobs:
         if: inputs.fonksiyonlar
         run: |
           # Tüm fonksiyonlar (supabase/functions/*; _shared atlanır), JWT doğrulaması açık.
-          npx --yes supabase@latest functions deploy --project-ref "$SUPABASE_PROJECT_REF" --use-api
+          # --yes: güncel CLI etkileşimsiz çalıştırmada onay istiyor, yoksa hiçbir şey dağıtmadan çıkıyor.
+          npx --yes supabase@latest functions deploy --project-ref "$SUPABASE_PROJECT_REF" --use-api --yes
       - name: Özet
         run: |
           echo "### Supabase" >> "$GITHUB_STEP_SUMMARY"
