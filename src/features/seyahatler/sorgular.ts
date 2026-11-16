@@ -5,6 +5,7 @@ import { tumGunlereOtel } from '@/features/konaklama/sorgular';
 import { supabase } from '@/lib/supabase';
 import type { OtelSecimi, Seyahat, SeyahatOzet, YeniSeyahat } from '@/lib/tipler';
 
+import { otelAlanlari } from './otel';
 import { kendiSildiklerim, seyahatYokMu, yerelKayitlariTemizle } from './silme';
 
 /** Üyesi olunan seyahatler (RLS süzer) + üyeler + mekan sayısı. Aktif/yaklaşan/geçmiş ayrımı ekranda (3.1). */
@@ -116,7 +117,7 @@ export function useSeyahat(id: string | undefined) {
 
 /**
  * PRD 3.3: oteli kaydeder (null → otel yok, KK4). Google'dan yalnızca place_id + konum tutulur;
- * ad kullanıcının düzenleyebildiği etikettir (hotel_label). KK5: 3.7'den değiştirme aynı mutasyonu kullanır.
+ * #268: place_id varsa ad hotel_label'a yazılmaz (`otelAlanlari`). KK5: 3.7'den değiştirme aynı mutasyonu kullanır.
  */
 export function useOtelKaydet(seyahatId: string) {
   const qc = useQueryClient();
@@ -124,17 +125,7 @@ export function useOtelKaydet(seyahatId: string) {
     mutationFn: async (otel: OtelSecimi | null) => {
       const { error } = await supabase
         .from('trips')
-        .update(
-          otel
-            ? {
-                hotel_place_id: otel.place_id,
-                hotel_lat: otel.lat,
-                hotel_lng: otel.lng,
-                hotel_label: otel.ad.slice(0, 80) || null,
-                hotel_fetched_at: new Date().toISOString(),
-              }
-            : { hotel_place_id: null, hotel_lat: null, hotel_lng: null, hotel_label: null, hotel_fetched_at: null },
-        )
+        .update(otelAlanlari(otel, new Date()))
         .eq('id', seyahatId);
       if (error) throw error;
       // #56: otel artık gün bazında (stays); 3.3 seçimi tüm günlere uygulanır. trips.hotel_* eski derlemeler için yazılır.
