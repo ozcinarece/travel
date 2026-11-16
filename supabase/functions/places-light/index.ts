@@ -48,13 +48,14 @@ Deno.serve(sayacli('places-light', async (istek) => {
     return !eski || simdi - eski.zaman >= TTL_MS;
   }).length;
   if (eksik > 0) {
-    const sinir = await sinirKontrol(k, 'details', eksik);
-    if (sinir) return sinir;
     // `foto` ile her eksik kimlik için ayrıca bir Photo isteği gider (hafifDetay → fotoUri); Photo kovasına sığmazsa reddedilir.
+    // Photo önce sayılır: Photo'ya sığmayan istek, Details hakkını boşuna yakmadan reddedilir (#226).
     if (foto) {
       const fotoSiniri = await sinirKontrol(k, 'photo', eksik);
       if (fotoSiniri) return fotoSiniri;
     }
+    const sinir = await sinirKontrol(k, 'details', eksik);
+    if (sinir) return sinir;
   }
   try {
     const yerler = await Promise.all(
