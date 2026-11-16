@@ -2558,5 +2558,106 @@ set role authenticated;
 select pg_temp.as_user(:A);
 select pg_temp.hata_bekle($$select public.konum_kaynagi_kontrol()$$, '42501');
 reset role;
+-- #205 PR 2a: kontrol anon ve service_role'e de kapalı.
+set role anon;
+select pg_temp.hata_bekle($$select public.konum_kaynagi_kontrol()$$, '42501');
+reset role;
+set role service_role;
+do $$
+begin
+  perform public.konum_kaynagi_kontrol();
+  raise exception 'service_role kontrolü çağırabildi';
+exception when insufficient_privilege then null;
+end $$;
+reset role;
+
+-- #205 KK9: osm/elle satırda koordinat kaynaksız değişirse google_30g + damga; kaynak yazılırsa (aynı değerle de) korunur.
+-- KK10: damga gelecekte olamaz.
+insert into public.sehirler (id, ad, slug, lat, lng, yayin) values ('20500000-0000-4000-8000-000000000021', 'Koruma Şehri', 'koruma-sehri', 40, 30, false);
+insert into public.geziler (id, sehir_id, baslik, slug) values ('20500000-0000-4000-8000-000000000022', '20500000-0000-4000-8000-000000000021', 'Koruma gezisi', 'koruma-gezisi');
+insert into public.gezi_gunleri (id, gezi_id, sira) values ('20500000-0000-4000-8000-000000000023', '20500000-0000-4000-8000-000000000022', 1);
+do $$
+declare
+  s uuid := '20500000-0000-4000-8000-000000000021';
+  gun uuid := '20500000-0000-4000-8000-000000000023';
+  y uuid;
+  d uuid;
+begin
+  -- sehirler: osm satıra yalnız yeni lat → google_30g, osm_id silinir, damga taze.
+  update public.sehirler set konum_kaynagi = 'osm', osm_id = 'relation/9' where id = s;
+  update public.sehirler set lat = 40.5 where id = s;
+  assert (select konum_kaynagi = 'google_30g' and osm_id is null and google_fetched_at > now() - interval '1 minute' from public.sehirler where id = s),
+    'KK9 sehirler: osm satıra yalnız lat → google_30g + damga';
+  -- osm_id ile birlikte yazılan yeni koordinat osm kalır.
+  update public.sehirler set konum_kaynagi = 'osm', osm_id = 'relation/9' where id = s;
+  update public.sehirler set lat = 40.6, osm_id = 'relation/9' where id = s;
+  assert (select konum_kaynagi = 'osm' and osm_id = 'relation/9' and google_fetched_at is null and lat = 40.6 from public.sehirler where id = s),
+    'KK9 sehirler: osm_id aynı değerle yazılınca osm kalır';
+  -- işaret bir sonraki UPDATE'e taşınmaz.
+  update public.sehirler set lng = 30.6 where id = s;
+  assert (select konum_kaynagi = 'google_30g' from public.sehirler where id = s), 'KK9: işaret satırdan satıra / komuttan komuta taşınmaz';
+  -- koordinatsız güncelleme (ad) kaynağa dokunmaz.
+  update public.sehirler set konum_kaynagi = 'elle' where id = s;
+  update public.sehirler set ad = 'Koruma Şehri 2' where id = s;
+  assert (select konum_kaynagi = 'elle' from public.sehirler where id = s), 'KK9: koordinat değişmeyince elle kalır';
+
+  -- yerler: elle satırı haritada yeniden işaretlemek (konum_kaynagi = 'elle' aynı değerle) elle kalır; kaynaksız → google_30g.
+  insert into public.yerler (sehir_id, ad, lat, lng, konum_kaynagi) values (s, 'Elle Yeri K', 40, 30, 'elle') returning id into y;
+  update public.yerler set lat = 40.01, lng = 30.01, konum_kaynagi = 'elle' where id = y;
+  assert (select konum_kaynagi = 'elle' and google_fetched_at is null from public.yerler where id = y), 'KK9 yerler: elle yeniden işaretleme';
+  update public.yerler set lat = 40.02 where id = y;
+  assert (select konum_kaynagi = 'google_30g' and google_fetched_at is not null from public.yerler where id = y), 'KK9 yerler: kaynaksız koordinat → google_30g';
+
+  -- gezi_duraklari: osm durak, çok satırlı UPDATE'te her satır kendi başına.
+  insert into public.gezi_duraklari (gezi_gun_id, sira, ad, lat, lng, konum_kaynagi, osm_id) values (gun, 1, 'OSM K1', 40, 30, 'osm', 'node/1') returning id into d;
+  insert into public.gezi_duraklari (gezi_gun_id, sira, ad, lat, lng, konum_kaynagi, osm_id) values (gun, 2, 'OSM K2', 40, 30, 'osm', 'node/2');
+  update public.gezi_duraklari set lat = 41 where gezi_gun_id = gun;
+  assert (select count(*) from public.gezi_duraklari where gezi_gun_id = gun and konum_kaynagi = 'google_30g' and google_fetched_at is not null and osm_id is null) = 2,
+    'KK9 gezi_duraklari: iki osm satır da google_30g';
+
+  -- KK10: gelecek tarihli damga reddedilir (üç tablo); 1 güne kadar saat farkı kabul.
+  begin
+    update public.sehirler set konum_kaynagi = 'google_30g', google_fetched_at = now() + interval '10 years' where id = s;
+    raise exception 'KK10 sehirler: gelecek damga kabul edildi';
+  exception when check_violation then null;
+  end;
+  begin
+    update public.yerler set google_fetched_at = now() + interval '10 years' where id = y;
+    raise exception 'KK10 yerler: gelecek damga kabul edildi';
+  exception when check_violation then null;
+  end;
+  begin
+    insert into public.gezi_duraklari (gezi_gun_id, sira, ad, lat, lng, google_fetched_at) values (gun, 3, 'Gelecek', 40, 30, now() + interval '10 years');
+    raise exception 'KK10 gezi_duraklari: gelecek damga kabul edildi';
+  exception when check_violation then null;
+  end;
+  update public.yerler set google_fetched_at = now() + interval '1 hour' where id = y;
+  assert (select google_fetched_at > now() from public.yerler where id = y), 'KK10: 1 saatlik saat farkı kabul';
+
+  delete from public.sehirler where id = s;
+end $$;
+
+-- #205 KK7: "Seyahatime al" damgayı taşır; damga yoksa now(), gelecekteyse now()'a iner.
+set role authenticated;
+select pg_temp.as_user(:YS);
+do $$
+declare
+  v uuid;
+begin
+  v := public.geziden_seyahat_ac(
+    '{"name": "Damga", "city_place_id": "ChIJ_damga_205", "city_label": "Damga", "lat": 40, "lng": 30, "tz": "Europe/Istanbul"}', 1,
+    jsonb_build_array(
+      jsonb_build_object('place_id', 'ChIJ_damga_eski', 'lat', 40, 'lng', 30, 'google_fetched_at', now() - interval '20 days'),
+      jsonb_build_object('place_id', 'ChIJ_damga_yok', 'lat', 40, 'lng', 30),
+      jsonb_build_object('place_id', 'ChIJ_damga_null', 'lat', 40, 'lng', 30, 'google_fetched_at', null),
+      jsonb_build_object('place_id', 'ChIJ_damga_gelecek', 'lat', 40, 'lng', 30, 'google_fetched_at', now() + interval '10 years')),
+    '[]');
+  assert (select google_fetched_at between now() - interval '20 days 1 minute' and now() - interval '19 days' from public.places where trip_id = v and place_id = 'ChIJ_damga_eski'),
+    'KK7: durağın damgası taşınır';
+  assert (select count(*) from public.places where trip_id = v and place_id in ('ChIJ_damga_yok', 'ChIJ_damga_null', 'ChIJ_damga_gelecek')
+    and google_fetched_at between now() - interval '1 minute' and now()) = 3, 'KK7: damgasız / null / gelecek → now()';
+  delete from public.trips where id = v;
+end $$;
+reset role;
 
 \echo 'rls_test: TÜM TESTLER GEÇTİ'
