@@ -9,6 +9,7 @@ import { createClient } from 'npm:@supabase/supabase-js@2';
 
 import { GoogleHatasi } from '../_shared/google.ts';
 import { govde, hata, json, kullaniciDogrula } from '../_shared/http.ts';
+import { matrisPlani } from '../_shared/matrisPlani.ts';
 import { anahtarAl, noktalariCoz, noktalariOku } from '../_shared/rotaNoktalari.ts';
 import { yuruyusMatrisi, type Bacak, type Nokta } from '../_shared/routes.ts';
 import { sayacli } from '../_shared/sayac.ts';
@@ -64,44 +65,41 @@ Deno.serve(sayacli('route-matrix', async (istek) => {
   const bilinen = new Map<string, Bacak>();
   for (const b of (eski ?? []) as Bacak[]) bilinen.set(`${b.from_key}>${b.to_key}`, b);
 
-  // Eksik çiftler: yalnız eksik satırların/sütunların kesişimini sor (eleman başına fatura, T9).
-  const eksikKaynak = new Set<string>();
-  const eksikHedef = new Set<string>();
-  for (const a of noktalar) {
-    for (const b of noktalar) {
-      if (a.key !== b.key && !bilinen.has(`${a.key}>${b.key}`)) {
-        eksikKaynak.add(a.key);
-        eksikHedef.add(b.key);
-      }
-    }
-  }
+  // #253: eksik çiftler en ucuz planla istenir (tek dikdörtgen ya da yeni × hepsi + eski × yeni; en çok iki istek).
+  const plan = matrisPlani(anahtarlar, (a, b) => bilinen.has(`${a}>${b}`));
 
-  // #246 KK2: Google eleman başına faturalar (kaynak × hedef); sığmazsa 429 (gunluk_sinir).
-  if (eksikKaynak.size > 0) {
-    const sinir = await sinirKontrol(k, 'rota', eksikKaynak.size * eksikHedef.size);
+  // #246 KK2 / #253 KK2: Google eleman başına faturalar; sayaç planın gerçek eleman sayısıyla artar, sığmazsa 429.
+  if (plan.eleman > 0) {
+    const sinir = await sinirKontrol(k, 'rota', plan.eleman);
     if (sinir) return sinir;
   }
 
+  const yazilacak: Bacak[] = [];
+  const onbellegeYaz = async () => {
+    if (yazilacak.length === 0) return;
+    const { error } = await servis
+      .from('walk_cache')
+      .upsert(yazilacak.map((b) => ({ trip_id: tripId, ...b, fetched_at: new Date().toISOString() })), { onConflict: 'trip_id,from_key,to_key' });
+    if (error) console.error('walk_cache upsert', error.message);
+  };
+
   try {
-    if (eksikKaynak.size > 0) {
-      const yeni = await yuruyusMatrisi(
-        noktalar.filter((n) => eksikKaynak.has(n.key)),
-        noktalar.filter((n) => eksikHedef.has(n.key)),
-      );
-      const yazilacak = yeni.filter((b) => !bilinen.has(`${b.from_key}>${b.to_key}`));
-      for (const b of yeni) bilinen.set(`${b.from_key}>${b.to_key}`, b);
-      if (yazilacak.length > 0) {
-        const { error } = await servis
-          .from('walk_cache')
-          .upsert(yazilacak.map((b) => ({ trip_id: tripId, ...b, fetched_at: new Date().toISOString() })), { onConflict: 'trip_id,from_key,to_key' });
-        if (error) console.error('walk_cache upsert', error.message);
+    for (const p of plan.istekler) {
+      const yeni = await yuruyusMatrisi(p.kaynaklar.map((a) => dbNoktalari.get(a)!), p.hedefler.map((a) => dbNoktalari.get(a)!));
+      for (const b of yeni) {
+        const anahtar = `${b.from_key}>${b.to_key}`;
+        if (bilinen.has(anahtar)) continue;
+        bilinen.set(anahtar, b);
+        yazilacak.push(b);
       }
     }
+    await onbellegeYaz();
     return json({ bacaklar: [...bilinen.values()] });
   } catch (e) {
     if (e instanceof GoogleHatasi) {
       console.error('route-matrix google', e.durum, e.message);
-      // Kısmi veri varsa onu döndür; istemci eksik bacaklar için kestirim kullanır (KK10 iskelet).
+      // Gelen (faturalanan) istek önbelleğe yazıldı. Kısmi veri varsa onu döndür; istemci eksik bacaklar için kestirim kullanır (KK10 iskelet).
+      await onbellegeYaz();
       return json({ bacaklar: [...bilinen.values()], eksik: true });
     }
     console.error('route-matrix', e);

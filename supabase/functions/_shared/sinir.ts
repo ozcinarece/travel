@@ -22,7 +22,7 @@ export const GUNLUK_SINIR: Record<SinirKategorisi, { kullanici: number; misafir:
   autocomplete: { kullanici: 300, misafir: 100 },
   metin: { kullanici: 50, misafir: 15 },
   link: { kullanici: 30, misafir: 10 },
-  rota: { kullanici: 2000, misafir: 500 },
+  rota: { kullanici: 2000, misafir: 625 },
 };
 
 /** Bütün misafirlerin toplamı için gün başına tavan. */
