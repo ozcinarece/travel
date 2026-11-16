@@ -86,7 +86,7 @@ Hata kodları: `22023` geçersiz veri · `23505` slug ya da şehir zaten var · 
 
 ### Araştırma akışı (gezi başına)
 
-1. `osm` — şehrin aday listesi (Overpass, ücretsiz). OSM verisi saklanabilir (ODbL; atıf: "© OpenStreetMap katkıcıları").
+1. `osm` — şehrin aday listesi (Overpass, ücretsiz). OSM verisi saklanabilir (ODbL; atıf: "© OpenStreetMap katkıda bulunanlar").
 2. Oturum adayları süzer: konaklama, alt kayıtlar, şehir dışı elenir. Önem: Wikipedia/Wikidata varlığı + kategori
    boşluğu + editörün değerlendirmesi.
 3. `arastir` `kimlik` — seçilen adayların place_id'si (ad + OSM konumu, 300 m yanlılık; ücretsiz).
@@ -268,7 +268,7 @@ Dal silinemezse: `inputs[islem]=temizle`, `inputs[istek]=<run_id>` (ya da `hepsi
   `konum_kaynagi_kontrol()` tablo başına yalnız sayıları verir (`toplam`, `osm`, `elle`, `google_30g`, `suresi_gecen`). Hedef: `suresi_gecen = 0`.
   Taşıma ve günlük yenileme #205 KK2–KK3 ile gelecek.
   Mekan rehberi editörün kendi metnidir (Google verisi değil).
-- **OSM verisi** (ODbL) saklanabilir; kullanıldığı yerde atıf: "© OpenStreetMap katkıcıları".
+- **OSM verisi** (ODbL) saklanabilir; kullanıldığı yerde atıf: "© OpenStreetMap katkıda bulunanlar".
 - **Maliyet.** Alan maskeleri en dar; geniş aday listesi OSM'den, place_id eşleme ücretsiz (IDs Only); puan yalnız kısa
   listede (≤ 30); yükleme detayı açılış saati istemez. Günlük bütçe doluysa Google'a gidilmez. Hedef: gezi başına ücretsiz
   kota içinde, liste fiyatıyla en çok 1 $.

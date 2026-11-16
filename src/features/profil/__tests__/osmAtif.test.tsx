@@ -1,5 +1,5 @@
 // #205 KK5: Profil'de OSM atfı — "Hesabı sil"in altında, dokununca OSM telif sayfası açılır.
-import { describe, expect, it, jest } from '@jest/globals';
+import { afterEach, describe, expect, it, jest } from '@jest/globals';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { fireEvent, render, waitFor } from '@testing-library/react-native';
 import { Linking } from 'react-native';
@@ -25,15 +25,21 @@ jest.mock('expo-router', () => {
   };
 });
 
+let istemci: QueryClient | undefined;
+// gcTime sonsuz: gözlemcisi kalkan sorgu zamanlayıcı kurmaz (jest açık kalmaz); test sonunda önbellek boşaltılır.
+afterEach(() => istemci?.clear());
+
 describe('Profil OSM atfı', () => {
   it('metni gösterir ve telif sayfasını açar', async () => {
     const ac = jest.spyOn(Linking, 'openURL').mockResolvedValue(true);
-    const istemci = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    istemci = new QueryClient({ defaultOptions: { queries: { retry: false, gcTime: Infinity }, mutations: { retry: false, gcTime: Infinity } } });
     const ekran = render(
       <QueryClientProvider client={istemci}>
         <ProfilEkrani />
       </QueryClientProvider>,
     );
+    // Konum izni sorgusu ve son hata okuması bitsin: sonraki durum güncellemesi act() dışında kalmasın.
+    await waitFor(() => expect(istemci?.isFetching()).toBe(0));
     const atif = await waitFor(() => ekran.getByRole('link', { name: 'Konum verisi: © OpenStreetMap katkıda bulunanlar' }));
     expect(ekran.getByText('© OpenStreetMap katkıda bulunanlar')).toBeTruthy();
     fireEvent.press(atif);
