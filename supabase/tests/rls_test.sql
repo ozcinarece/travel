@@ -2685,17 +2685,44 @@ begin
   assert public.places_sinir_artir(repeat('f', 64), 'details', 30, 5), 'KK2: 25 + 5 = 30 sığar';
   assert (select adet from public.places_gunluk_sayac where ozet = repeat('f', 64)) = 30, 'KK2: toplu artış';
   assert not public.places_sinir_artir(repeat('g', 64), 'details', 3, 4), 'KK2: ilk istek sınırdan büyükse ret';
+  assert public.places_sinir_artir(o, 'metin', 3), 'KK2: Text Search yedeği kendi kategorisinde';
+  -- Misafir toplam tavanı: iki farklı misafir özeti kendi sınırları içinde kalsa da toplamı aşamaz.
+  assert public.places_sinir_artir(repeat('1', 64), 'nearby', 15, 1, 4), 'toplam: 1. misafir 1';
+  assert public.places_sinir_artir(repeat('1', 64), 'nearby', 15, 2, 4), 'toplam: 1. misafir 2 (3/4)';
+  assert public.places_sinir_artir(repeat('2', 64), 'nearby', 15, 1, 4), 'toplam: 2. misafir 1 (4/4)';
+  assert not public.places_sinir_artir(repeat('2', 64), 'nearby', 15, 1, 4), 'toplam: tavan dolu, 2. misafir ret';
+  assert not public.places_sinir_artir(repeat('3', 64), 'nearby', 15, 1, 4), 'toplam: tavan dolu, yeni misafir ret';
+  assert (select adet from public.places_gunluk_sayac where ozet = 'misafir-toplam' and kategori = 'nearby') = 4, 'toplam: ret toplamı artırmaz';
+  assert (select adet from public.places_gunluk_sayac where ozet = repeat('2', 64) and kategori = 'nearby') = 1, 'toplam: ret kullanıcıyı artırmaz';
+  assert (select count(*) from public.places_gunluk_sayac where ozet = repeat('3', 64)) = 0, 'toplam: ret satır yazmaz';
+  assert public.places_sinir_artir(repeat('3', 64), 'nearby', 15, 1), 'toplam: kayıtlı kullanıcı (tavansız) etkilenmez';
+  -- Kullanıcı sınırı dolarsa toplamdan alınan pay geri verilir.
+  assert public.places_sinir_artir(repeat('4', 64), 'photo', 2, 2, 10), 'toplam: 4. misafir 2/2';
+  assert not public.places_sinir_artir(repeat('4', 64), 'photo', 2, 1, 10), 'toplam: kullanıcı sınırı ret';
+  assert (select adet from public.places_gunluk_sayac where ozet = 'misafir-toplam' and kategori = 'photo') = 2, 'toplam: kullanıcı reddi toplamı geri alır';
 end $$;
+select pg_temp.hata_bekle($$select public.places_sinir_artir('misafir-toplam', 'details', 300)$$, '22023');
 select pg_temp.hata_bekle($$select public.places_sinir_artir(repeat('h', 64), 'details', 300, 26)$$, '22023');
 select pg_temp.hata_bekle($$select public.places_sinir_artir(repeat('h', 64), 'details', 300, 0)$$, '22023');
 select pg_temp.hata_bekle($$select public.places_sinir_artir('kimlik-acik', 'nearby', 3)$$, '23514');
 select pg_temp.hata_bekle($$select public.places_sinir_artir(repeat('d', 64), 'routes', 3)$$, '23514');
 reset role;
+-- Temizlik (oturumsuz, cron): 7 günden eski satırlar silinir, bugünküler kalır.
+do $$
+begin
+  insert into public.places_gunluk_sayac (ozet, gun, kategori, adet)
+    values (repeat('5', 64), (now() at time zone 'Europe/Istanbul')::date - 8, 'details', 1),
+           (repeat('5', 64), (now() at time zone 'Europe/Istanbul')::date - 7, 'details', 1);
+  perform public.places_sayac_temizle();
+  assert (select count(*) from public.places_gunluk_sayac where ozet = repeat('5', 64)) = 1, 'temizlik: yalnız 7 günden eski silinir';
+  assert (select count(*) from public.places_gunluk_sayac where ozet = 'misafir-toplam') = 2, 'temizlik: bugünkü satırlar kalır';
+end $$;
 set role authenticated;
 select pg_temp.as_email(:E, 'ozcinar.ece@gmail.com');
 do $$ begin assert public.is_admin(), 'ön koşul: E yönetici'; end $$;
 select pg_temp.hata_bekle($$select count(*) from public.places_gunluk_sayac$$, '42501');
 select pg_temp.hata_bekle($$select public.places_sinir_artir(repeat('e', 64), 'details', 300)$$, '42501');
+select pg_temp.hata_bekle($$select public.places_sayac_temizle()$$, '42501');
 select pg_temp.as_user(:B);
 select pg_temp.hata_bekle($$select count(*) from public.places_gunluk_sayac$$, '42501');
 select pg_temp.hata_bekle($$insert into public.places_gunluk_sayac (ozet, kategori, adet) values (repeat('e', 64), 'details', 0)$$, '42501');
@@ -2712,7 +2739,7 @@ reset role;
 do $$
 begin
   assert (select relrowsecurity from pg_class where oid = 'public.places_gunluk_sayac'::regclass), 'KK3: RLS açık';
-  assert (select prosecdef and proconfig @> array['search_path=""'] from pg_proc where oid = 'public.places_sinir_artir(text, text, integer, integer)'::regprocedure),
+  assert (select prosecdef and proconfig @> array['search_path=""'] from pg_proc where oid = 'public.places_sinir_artir(text, text, integer, integer, integer)'::regprocedure),
     'KK3: security definer, search_path boş';
 end $$;
 delete from public.places_gunluk_sayac;

@@ -35,6 +35,9 @@ Deno.serve(sayacli('places-autocomplete', async (istek) => {
   try {
     const oneriler = await otomatikTamamla({ girdi, oturum, tur, merkez: g.merkez });
     if (oneriler.length === 0 && g.aramaYedegi === true && g.merkez) {
+      // #226: Text Search yedeği ayrı bir Google isteği (Pro); kendi kovasında sayılır.
+      const metinSiniri = await sinirKontrol(k, 'metin');
+      if (metinSiniri) return metinSiniri;
       const yer = await metinAra({ metin: girdi, merkez: g.merkez, yaricapM: g.merkez.yaricapM ?? 5000 });
       if (yer) return json({ oneriler: [{ place_id: yer.place_id, ana: yer.ad, ikincil: '', tipler: yer.primary_type ? [yer.primary_type] : [] }], kaynak: 'arama' });
     }
