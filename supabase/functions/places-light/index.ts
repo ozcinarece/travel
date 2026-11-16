@@ -4,8 +4,9 @@
 // #172 KK3: `puansiz: true` — puan / "şu an açık" göstermeyen çağrılar Pro maskeyle (Enterprise alanları yok); saatli
 // istekte yok sayılır (açılış saatleri zaten Enterprise). `saatler` + `foto`: saat ve fotoğraf tek istekte (≤ 12 kimlik).
 import { GoogleHatasi, hafifDetay, type HafifYer } from '../_shared/google.ts';
-import { govde, hata, json, onKontrol } from '../_shared/http.ts';
+import { govde, hata, json, kullaniciDogrula } from '../_shared/http.ts';
 import { sayacli } from '../_shared/sayac.ts';
+import { sinirKontrol } from '../_shared/sinir.ts';
 
 type Istek = { ids: string[]; sehir?: boolean; saatler?: boolean; foto?: boolean; ozet?: boolean; puansiz?: boolean; sessionToken?: string };
 
@@ -22,8 +23,8 @@ function onbellekAnahtari(id: string, sehir: boolean, saatler: boolean, foto: bo
 }
 
 Deno.serve(sayacli('places-light', async (istek) => {
-  const on = onKontrol(istek);
-  if (on) return on;
+  const k = await kullaniciDogrula(istek);
+  if (k instanceof Response) return k;
 
   const g = await govde<Istek>(istek);
   const ids = Array.isArray(g.ids) ? g.ids.filter((x): x is string => typeof x === 'string' && x.length > 0) : [];
@@ -40,9 +41,19 @@ Deno.serve(sayacli('places-light', async (istek) => {
   const oturum = typeof g.sessionToken === 'string' && /^[A-Za-z0-9_-]{8,64}$/.test(g.sessionToken) ? g.sessionToken : undefined;
 
   const simdi = Date.now();
+  const tekil = [...new Set(ids)];
+  // #226: önbellekte olmayan her kimlik bir Details isteğidir ve öyle sayılır (önbellekten dönen sayılmaz).
+  const eksik = tekil.filter((id) => {
+    const eski = onbellek.get(onbellekAnahtari(id, sehir, saatler, foto, ozet, puansiz));
+    return !eski || simdi - eski.zaman >= TTL_MS;
+  }).length;
+  if (eksik > 0) {
+    const sinir = await sinirKontrol(k, 'details', eksik);
+    if (sinir) return sinir;
+  }
   try {
     const yerler = await Promise.all(
-      [...new Set(ids)].map(async (id, i) => {
+      tekil.map(async (id, i) => {
         const anahtar = onbellekAnahtari(id, sehir, saatler, foto, ozet, puansiz);
         const eski = onbellek.get(anahtar);
         if (eski && simdi - eski.zaman < TTL_MS) return eski.deger;

@@ -60,10 +60,12 @@ Kalan her şeyi Ürün karara bağlar; Ece istediği zaman geri çevirebilir.
 
 | Görev | Ne zaman | Kim |
 |---|---|---|
-| Geliştirme turu | Her gün 08:40 ve 18:40 | Geliştirici |
-| Ürün turu | Her gün 10:10 ve 20:10 | Ürün |
+| Geliştirme turu | Her gün 6 tur: 08:40, 11:40, 14:40, 17:40, 20:40, 23:40 | Geliştirici |
+| Ürün turu | Her gün 5 tur: 10:10, 13:10, 16:10, 19:10, 22:10 | Ürün |
 | Denetim kurulu | Pazartesi ve perşembe 11:25 | UX, Sadelik, Büyüme, Maliyet-Güvenlik (aynı turda, birbirinden bağımsız alt ajanlar) |
 | Haftalık özet | Cuma 17:50 | Ürün → Ece'ye bildirim |
+
+Son turdan beri hiçbir şey değişmediyse tur masaya yazmaz, tek satırla biter.
 
 **Tur başına sınırlar** (gürültü olmasın diye):
 - Geliştirici en çok 2 PR açar ya da günceller.

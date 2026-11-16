@@ -2,6 +2,7 @@
 // İstemci Google anahtarı taşımaz; oturum token'ı burada üretilir, seçimdeki hafif Details ile kapanır.
 import { useQuery } from '@tanstack/react-query';
 
+import { t } from '@/i18n';
 import { supabase } from '@/lib/supabase';
 import { useGecikmeli } from '@/lib/useGecikmeli';
 
@@ -37,9 +38,31 @@ export function yeniOturumJetonu(): string {
   return j;
 }
 
+/** #226 KK4: Places fonksiyonu kullanıcının günlük sınırı doldu (429). Mesajı kullanıcıya gösterilecek metindir. */
+export class GunlukSinir extends Error {
+  constructor() {
+    super(t('yerler.gunlukSinir'));
+    this.name = 'GunlukSinir';
+  }
+}
+
+/** supabase-js FunctionsHttpError'ın HTTP durumu (context: Response). */
+function hataDurumu(e: unknown): number | undefined {
+  const ctx = (e as { context?: { status?: unknown } } | null)?.context;
+  return typeof ctx?.status === 'number' ? ctx.status : undefined;
+}
+
+/** #226 KK4: sorgularda 429 yeniden denenmez (sonsuz deneme yok); diğer hatalar bir kez. */
+export const birKezDene = (deneme: number, e: unknown) => !(e instanceof GunlukSinir) && deneme < 1;
+
+/** Ekranın hata metni: günlük sınırsa sınır metni, değilse ekranın kendi metni. */
+export function placesHatasi(e: unknown, varsayilan: string): string {
+  return e instanceof GunlukSinir ? e.message : varsayilan;
+}
+
 async function cagir<T>(ad: string, govde: Record<string, unknown>): Promise<T> {
   const { data, error } = await supabase.functions.invoke<T>(ad, { body: govde });
-  if (error) throw error;
+  if (error) throw hataDurumu(error) === 429 ? new GunlukSinir() : error;
   if (!data) throw new Error(`${ad}: boş cevap`);
   return data;
 }
@@ -85,6 +108,7 @@ export async function linkCoz(url: string, merkez?: Merkez): Promise<LinkCozumu>
   });
   // 4xx cevaplarında supabase-js hata nesnesi döner; gövde context'tedir.
   if (error) {
+    if (hataDurumu(error) === 429) throw new GunlukSinir();
     const govde = await (error as { context?: Response }).context?.json?.().catch(() => null);
     throw new Error(govde?.hata ?? error.message);
   }
@@ -147,7 +171,7 @@ export function useOneriler(anahtar: string, girdi: string, oturum: string, tur:
     queryKey: [anahtar, gecikmis, oturum, merkez?.lat, merkez?.lng],
     enabled: etkin && gecikmis.length >= 2,
     staleTime: 5 * 60 * 1000,
-    retry: 1,
+    retry: birKezDene,
     queryFn: () => otomatikTamamla({ girdi: gecikmis, oturum, tur, limit: 3, merkez }),
   });
 }
@@ -202,7 +226,7 @@ export function useOnizleme(placeId: string | undefined, ihtiyac: { puan: boolea
     queryKey: ['onizleme', gerek.join('+'), placeId],
     enabled: !!placeId,
     staleTime: 24 * 60 * 60 * 1000,
-    retry: 1,
+    retry: birKezDene,
     queryFn: async () => (await hafifOnbellek.getirHepsi([placeId!], gerek))[placeId!] ?? null,
   });
 }
@@ -214,7 +238,7 @@ export function useMekanOzeti(placeId: string | undefined) {
     enabled: !!placeId,
     staleTime: 24 * 60 * 60 * 1000,
     gcTime: 24 * 60 * 60 * 1000,
-    retry: 1,
+    retry: birKezDene,
     queryFn: async () => {
       const y = (await hafifYerler([placeId!], { foto: true, ozet: true }))[0] ?? null;
       // #172: aynı cevap ad, puan ve fotoğrafı da taşır — ortak önbelleğe yazılır (aynı kimlik ayrıca istenmez).
@@ -231,7 +255,7 @@ export function usePlaceFoto(ad: string | undefined, genislik = 800) {
     enabled: !!ad,
     staleTime: 24 * 60 * 60 * 1000,
     gcTime: 24 * 60 * 60 * 1000,
-    retry: 1,
+    retry: birKezDene,
     queryFn: async () => (await cagir<{ uri: string | null }>('places-photo', { ad, genislik })).uri,
   });
 }
@@ -251,7 +275,7 @@ export function useHafifYerler(ids: string[], ihtiyac: HafifIhtiyac) {
     placeholderData: (onceki) => onceki,
     staleTime: 24 * 60 * 60 * 1000,
     gcTime: 24 * 60 * 60 * 1000,
-    retry: 1,
+    retry: birKezDene,
     queryFn: () => hafifOnbellek.getirHepsi(sirali, gerek),
   });
 }
@@ -291,7 +315,7 @@ export function useTamYer(placeId: string | undefined, tz?: string) {
     enabled: !!placeId,
     staleTime: 24 * 60 * 60 * 1000,
     gcTime: 24 * 60 * 60 * 1000,
-    retry: 1,
+    retry: birKezDene,
     queryFn: async () => (await cagir<{ yer: TamYer }>('places-full', { id: placeId, tz })).yer,
   });
 }
@@ -314,7 +338,7 @@ export function useYorumlar(placeId: string | undefined, acik: boolean) {
     enabled: !!placeId && acik,
     staleTime: Infinity,
     gcTime: Infinity,
-    retry: (n, e) => !(e instanceof YorumSiniri) && n < 1,
+    retry: (n, e) => !(e instanceof YorumSiniri) && birKezDene(n, e),
     queryFn: async () => {
       const cevap = await cagir<YorumOzeti | { sinir: true }>('places-reviews', { id: placeId });
       if ('sinir' in cevap && cevap.sinir) throw new YorumSiniri();
@@ -364,7 +388,7 @@ export function useYerFotolari(placeIds: string[]) {
     placeholderData: (onceki) => onceki,
     staleTime: 24 * 60 * 60 * 1000,
     gcTime: 24 * 60 * 60 * 1000,
-    retry: 1,
+    retry: birKezDene,
     queryFn: async () => {
       const yerler = await hafifOnbellek.getirHepsi(sirali, ['foto']);
       return new Map(sirali.map((id) => [id, yerler[id]?.foto_uri ?? null] as const));

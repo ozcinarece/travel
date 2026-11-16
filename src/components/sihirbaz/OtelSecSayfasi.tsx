@@ -11,7 +11,7 @@ import { GoogleAtfi } from '@/components/yerler/GoogleAtfi';
 import { haritadanSecimBekle, haritaSeciminiBirak } from '@/features/konaklama/haritaSecimi';
 import type { Konaklama } from '@/features/konaklama/plan';
 import type { OtelSecimiVeyaKayitli } from '@/features/konaklama/sorgular';
-import { hafifYerler, linkCoz, linkGibiMi, useOtelOnerileri, yeniOturumJetonu, type Oneri } from '@/features/yerler/api';
+import { hafifYerler, linkCoz, linkGibiMi, useOtelOnerileri, yeniOturumJetonu, placesHatasi, type Oneri } from '@/features/yerler/api';
 import { t } from '@/i18n';
 import type { OtelSecimi, Seyahat } from '@/lib/tipler';
 import { minDokunma, renk, yazi } from '@/theme';
@@ -56,8 +56,8 @@ export function OtelSecSayfasi({ acik, baslik, seyahat, konaklamalar, onKapat, o
       if (!yer) throw new Error('yer yok');
       setJeton(yeniOturumJetonu());
       bitir({ place_id: yer.place_id, ad: o.ana || yer.ad, lat: yer.lat, lng: yer.lng });
-    } catch {
-      setHata(t('gunOteli.secimHata'));
+    } catch (e) {
+      setHata(placesHatasi(e, t('gunOteli.secimHata')));
     } finally {
       setMesgul(false);
     }
@@ -69,7 +69,7 @@ export function OtelSecSayfasi({ acik, baslik, seyahat, konaklamalar, onKapat, o
       const { yer } = await linkCoz(sorgu.trim(), merkez);
       bitir({ place_id: yer.place_id || null, ad: yer.ad || t('otel.adsiz'), lat: yer.lat, lng: yer.lng });
     } catch (e) {
-      setHata((e as Error).message === 'desteklenmeyen_link' ? t('otel.linkDesteksiz') : t('otel.linkHata'));
+      setHata((e as Error).message === 'desteklenmeyen_link' ? t('otel.linkDesteksiz') : placesHatasi(e, t('otel.linkHata')));
     } finally {
       setMesgul(false);
     }
@@ -119,7 +119,7 @@ export function OtelSecSayfasi({ acik, baslik, seyahat, konaklamalar, onKapat, o
               </View>
               {listeAcik ? (
                 <View style={s.oneriler}>
-                  {oneriler.isError ? <Text style={s.hata}>{t('otel.araHata')}</Text> : null}
+                  {oneriler.isError ? <Text style={s.hata}>{placesHatasi(oneriler.error, t('otel.araHata'))}</Text> : null}
                   {oneriler.data?.length === 0 ? <Text style={s.bos}>{t('otel.sonucYok')}</Text> : null}
                   {oneriler.data?.map((o, i) => (
                     <Pressable key={o.place_id} accessibilityRole="button" disabled={mesgul} onPress={() => oneriSec(o)} style={({ pressed }) => [s.oneri, i > 0 && s.ayrac, pressed && { opacity: 0.7 }]}>

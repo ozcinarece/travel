@@ -9,6 +9,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { HataSiniri } from '@/components/ui/HataSiniri';
 import { Buton } from '@/components/ui/Buton';
 import { useProfil, useProfilHazirla } from '@/features/profil/sorgular';
+import { GunlukSinir } from '@/features/yerler/api';
 import { t } from '@/i18n';
 import { renk, yazi } from '@/theme';
 import { hataRaporunuBaslat, hataRaporuyla } from '@/lib/hataRaporu';
@@ -17,7 +18,8 @@ import { OturumSaglayici, useOturum } from '@/lib/oturum';
 hataRaporunuBaslat();
 SplashScreen.preventAutoHideAsync();
 
-const queryClient = new QueryClient();
+// #226 KK4: günlük Places sınırı (429) yeniden denenmez; diğer hatalarda varsayılan (3 deneme).
+const queryClient = new QueryClient({ defaultOptions: { queries: { retry: (n, e) => !(e instanceof GunlukSinir) && n < 3 } } });
 
 function Kok() {
   // #136: Figtree (metin) + Archivo SemiExpanded 850 (başlık; Google Fonts değişken dosyasından üretilmiş statik örnek,

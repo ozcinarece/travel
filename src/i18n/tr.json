@@ -308,7 +308,8 @@
   "yerler": {
     "listeBaslik": "Gezilecek yerler",
     "filtreSehir": "Şehir",
-    "bos": "Bu şehirde yer yok"
+    "bos": "Bu şehirde yer yok",
+    "gunlukSinir": "Bugünlük arama sınırına ulaştın, yarın yeniden dene."
   },
   "kaydettiklerim": {
     "baslik": "Kaydettiklerim",

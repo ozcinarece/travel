@@ -9,7 +9,7 @@ import { Buton } from '@/components/ui/Buton';
 import { Ikon } from '@/components/ui/Ikon';
 import { GoogleAtfi } from '@/components/yerler/GoogleAtfi';
 import { tarihOzeti } from '@/features/sihirbaz/sihirbaz';
-import { hafifYerler, useOtelOnerileri, yeniOturumJetonu, type Oneri } from '@/features/yerler/api';
+import { hafifYerler, useOtelOnerileri, yeniOturumJetonu, placesHatasi, type Oneri } from '@/features/yerler/api';
 import { t } from '@/i18n';
 import { puanMetni } from '@/lib/puan';
 import type { OtelSecimi, Seyahat } from '@/lib/tipler';
@@ -41,8 +41,8 @@ export function OtelSayfasi({ acik, seyahat, geceSayisi, onKapat, onSimdiDegil, 
       setSeciliAlt([o.ikincil.split(',')[0]?.trim(), puan ? `★ ${puan}` : null].filter(Boolean).join(' · ') || null);
       setSorgu('');
       setJeton(yeniOturumJetonu());
-    } catch {
-      setHata(t('gunOteli.secimHata'));
+    } catch (e) {
+      setHata(placesHatasi(e, t('gunOteli.secimHata')));
     } finally {
       setMesgul(false);
     }

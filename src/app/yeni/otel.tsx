@@ -22,6 +22,7 @@ import {
   yakinYerler,
   yeniOturumJetonu,
   type HafifYer,
+  placesHatasi,
   type Oneri,
 } from '@/features/yerler/api';
 import { t } from '@/i18n';
@@ -120,8 +121,8 @@ function OtelFormu({ trip, sehir, mevcut, secimModu }: { trip: string; sehir: Se
       if (!yer) throw new Error('yer yok');
       otelSec({ place_id: yer.place_id, ad: o.ana || yer.ad, lat: yer.lat, lng: yer.lng, puan: yer.puan });
       setJeton(yeniOturumJetonu());
-    } catch {
-      setHata(t('otel.secimHata'));
+    } catch (e) {
+      setHata(placesHatasi(e, t('otel.secimHata')));
     } finally {
       setMesgul(false);
     }
@@ -134,7 +135,7 @@ function OtelFormu({ trip, sehir, mevcut, secimModu }: { trip: string; sehir: Se
       const { yer } = await linkCoz(sorgu.trim(), merkez);
       otelSec({ place_id: yer.place_id || null, ad: yer.ad || t('otel.adsiz'), lat: yer.lat, lng: yer.lng, puan: yer.puan });
     } catch (e) {
-      setHata((e as Error).message === 'desteklenmeyen_link' ? t('otel.linkDesteksiz') : t('otel.linkHata'));
+      setHata((e as Error).message === 'desteklenmeyen_link' ? t('otel.linkDesteksiz') : placesHatasi(e, t('otel.linkHata')));
     } finally {
       setMesgul(false);
     }
@@ -226,7 +227,7 @@ function OtelFormu({ trip, sehir, mevcut, secimModu }: { trip: string; sehir: Se
         <>
           {listeAcik ? (
             <View style={[s.liste, s.golge]}>
-              {oneriler.isError ? <Text style={s.hata}>{t('otel.araHata')}</Text> : null}
+              {oneriler.isError ? <Text style={s.hata}>{placesHatasi(oneriler.error, t('otel.araHata'))}</Text> : null}
               {oneriler.data?.length === 0 ? <Text style={s.bos}>{t('otel.sonucYok')}</Text> : null}
               {oneriler.data?.map((o, i) => (
                 <Pressable

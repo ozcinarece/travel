@@ -9,9 +9,10 @@
 // Önbellek: (çip, 0,0001° hücre, yarıçap, adet) anahtarıyla izolat belleğinde 24 sa (teknik not §3). #66: karo
 // merkezleri 125 m'ye kadar inebildiğinden hücre 4 ondalık, yarıçap en az 100 m.
 import { CIP_TIPLERI, GoogleHatasi, hafifYer, istekBirincilTipleri, kesfetSuzgeci, KONAKLAMA_TIPLERI, yakinAra, type YakinYer } from '../_shared/google.ts';
-import { govde, hata, json, onKontrol } from '../_shared/http.ts';
+import { govde, hata, json, kullaniciDogrula } from '../_shared/http.ts';
 import { kesfetAyari } from '../_shared/kesfetAyari.ts';
 import { sayacli } from '../_shared/sayac.ts';
+import { sinirKontrol } from '../_shared/sinir.ts';
 
 type Istek = { merkez: { lat: number; lng: number }; yaricapM?: number; cip: string; enFazla?: number; sehir?: boolean };
 
@@ -29,8 +30,8 @@ function onbellekYaz(anahtar: string, deger: YakinYer[]) {
 }
 
 Deno.serve(sayacli('places-nearby', async (istek) => {
-  const on = onKontrol(istek);
-  if (on) return on;
+  const k = await kullaniciDogrula(istek);
+  if (k instanceof Response) return k;
 
   const g = await govde<Istek>(istek);
   const lat = Number(g.merkez?.lat);
@@ -53,6 +54,8 @@ Deno.serve(sayacli('places-nearby', async (istek) => {
   if (eski && Date.now() - eski.zaman < TTL_MS) return cevapla(eski.deger, true);
   if (eski) onbellek.delete(anahtar);
 
+  const sinir = await sinirKontrol(k, 'nearby');
+  if (sinir) return sinir;
   try {
     // #164 KK2: otel adayları dışındaki tüm istekler (Turistik, Tümü, kategoriler) konaklamayı dışlar.
     const haric = cip === 'otel' ? undefined : KONAKLAMA_TIPLERI;

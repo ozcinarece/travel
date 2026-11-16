@@ -12,7 +12,7 @@ import { GoogleAtfi } from '@/components/yerler/GoogleAtfi';
 import { haritadanSecimBekle, haritaSeciminiBirak } from '@/features/konaklama/haritaSecimi';
 import { otelinGeceleri, type Konaklama, type OtelKapsami } from '@/features/konaklama/plan';
 import type { OtelSecimiVeyaKayitli } from '@/features/konaklama/sorgular';
-import { hafifYerler, linkCoz, linkGibiMi, useOtelOnerileri, yeniOturumJetonu, type Oneri } from '@/features/yerler/api';
+import { hafifYerler, linkCoz, linkGibiMi, useOtelOnerileri, yeniOturumJetonu, placesHatasi, type Oneri } from '@/features/yerler/api';
 import { t } from '@/i18n';
 import { mesafeMetni } from '@/lib/mesafe';
 import type { Gun, OtelSecimi, Seyahat } from '@/lib/tipler';
@@ -92,8 +92,8 @@ export function GunOteliSayfasi({ seyahat, gun, gunler, konaklamalar, referans, 
       if (!yer) throw new Error('yer yok');
       yeniSec({ place_id: yer.place_id, ad: o.ana || yer.ad, lat: yer.lat, lng: yer.lng });
       setJeton(yeniOturumJetonu());
-    } catch {
-      setHata(t('gunOteli.secimHata'));
+    } catch (e) {
+      setHata(placesHatasi(e, t('gunOteli.secimHata')));
     } finally {
       setMesgul(false);
     }
@@ -106,7 +106,7 @@ export function GunOteliSayfasi({ seyahat, gun, gunler, konaklamalar, referans, 
       const { yer } = await linkCoz(sorgu.trim(), merkez);
       yeniSec({ place_id: yer.place_id || null, ad: yer.ad || t('otel.adsiz'), lat: yer.lat, lng: yer.lng });
     } catch (e) {
-      setHata((e as Error).message === 'desteklenmeyen_link' ? t('otel.linkDesteksiz') : t('otel.linkHata'));
+      setHata((e as Error).message === 'desteklenmeyen_link' ? t('otel.linkDesteksiz') : placesHatasi(e, t('otel.linkHata')));
     } finally {
       setMesgul(false);
     }
@@ -207,7 +207,7 @@ export function GunOteliSayfasi({ seyahat, gun, gunler, konaklamalar, referans, 
 
               {listeAcik ? (
                 <View style={s.oneriler}>
-                  {oneriler.isError ? <Text style={s.hata}>{t('otel.araHata')}</Text> : null}
+                  {oneriler.isError ? <Text style={s.hata}>{placesHatasi(oneriler.error, t('otel.araHata'))}</Text> : null}
                   {oneriler.data?.length === 0 ? <Text style={s.bos}>{t('otel.sonucYok')}</Text> : null}
                   {oneriler.data?.map((o, i) => (
                     <Pressable

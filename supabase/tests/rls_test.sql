@@ -2660,4 +2660,61 @@ begin
 end $$;
 reset role;
 
+-- ---------------------------------------------------------------- #226: Places günlük sınırı (kullanıcı özeti × gün × kategori)
+-- KK2: atomik artış, sınırda durur; KK3: yalnız service_role çalıştırır, anon ve authenticated (yönetici dahil) tabloya erişemez.
+reset role;
+set role service_role;
+do $$
+declare
+  o constant text := repeat('a', 64);
+  i integer;
+begin
+  for i in 1..3 loop
+    assert public.places_sinir_artir(o, 'nearby', 3), 'KK2: sınırın altında izin';
+  end loop;
+  assert not public.places_sinir_artir(o, 'nearby', 3), 'KK2: sınır dolunca ret';
+  assert not public.places_sinir_artir(o, 'nearby', 3), 'KK2: retten sonra da ret';
+  assert (select adet from public.places_gunluk_sayac where ozet = o and kategori = 'nearby') = 3, 'KK2: ret sayacı artırmaz';
+  assert public.places_sinir_artir(o, 'details', 3), 'KK2: kategoriler ayrı sayılır';
+  assert public.places_sinir_artir(repeat('b', 64), 'nearby', 3), 'KK2: kullanıcılar ayrı sayılır';
+  assert not public.places_sinir_artir(repeat('c', 64), 'nearby', 0), 'KK2: sıfır sınır her zaman ret';
+  assert (select count(*) from public.places_gunluk_sayac where ozet = repeat('c', 64)) = 0, 'KK2: sıfır sınır satır yazmaz';
+  -- places-light: bir çağrı önbellekte olmayan kimlik sayısı kadar sayılır; sınırı aşacak toplu istek bütünüyle reddedilir.
+  assert public.places_sinir_artir(repeat('f', 64), 'details', 30, 25), 'KK2: 25 kimlik sığar';
+  assert not public.places_sinir_artir(repeat('f', 64), 'details', 30, 6), 'KK2: 25 + 6 > 30 ret';
+  assert public.places_sinir_artir(repeat('f', 64), 'details', 30, 5), 'KK2: 25 + 5 = 30 sığar';
+  assert (select adet from public.places_gunluk_sayac where ozet = repeat('f', 64)) = 30, 'KK2: toplu artış';
+  assert not public.places_sinir_artir(repeat('g', 64), 'details', 3, 4), 'KK2: ilk istek sınırdan büyükse ret';
+end $$;
+select pg_temp.hata_bekle($$select public.places_sinir_artir(repeat('h', 64), 'details', 300, 26)$$, '22023');
+select pg_temp.hata_bekle($$select public.places_sinir_artir(repeat('h', 64), 'details', 300, 0)$$, '22023');
+select pg_temp.hata_bekle($$select public.places_sinir_artir('kimlik-acik', 'nearby', 3)$$, '23514');
+select pg_temp.hata_bekle($$select public.places_sinir_artir(repeat('d', 64), 'routes', 3)$$, '23514');
+reset role;
+set role authenticated;
+select pg_temp.as_email(:E, 'ozcinar.ece@gmail.com');
+do $$ begin assert public.is_admin(), 'ön koşul: E yönetici'; end $$;
+select pg_temp.hata_bekle($$select count(*) from public.places_gunluk_sayac$$, '42501');
+select pg_temp.hata_bekle($$select public.places_sinir_artir(repeat('e', 64), 'details', 300)$$, '42501');
+select pg_temp.as_user(:B);
+select pg_temp.hata_bekle($$select count(*) from public.places_gunluk_sayac$$, '42501');
+select pg_temp.hata_bekle($$insert into public.places_gunluk_sayac (ozet, kategori, adet) values (repeat('e', 64), 'details', 0)$$, '42501');
+select pg_temp.hata_bekle($$update public.places_gunluk_sayac set adet = 0$$, '42501');
+select pg_temp.hata_bekle($$delete from public.places_gunluk_sayac$$, '42501');
+select pg_temp.hata_bekle($$select public.places_sinir_artir(repeat('e', 64), 'details', 300)$$, '42501');
+select pg_temp.as_user(:G, true);
+select pg_temp.hata_bekle($$select public.places_sinir_artir(repeat('e', 64), 'details', 300)$$, '42501');
+reset role;
+set role anon;
+select pg_temp.hata_bekle($$select count(*) from public.places_gunluk_sayac$$, '42501');
+select pg_temp.hata_bekle($$select public.places_sinir_artir(repeat('e', 64), 'details', 300)$$, '42501');
+reset role;
+do $$
+begin
+  assert (select relrowsecurity from pg_class where oid = 'public.places_gunluk_sayac'::regclass), 'KK3: RLS açık';
+  assert (select prosecdef and proconfig @> array['search_path=""'] from pg_proc where oid = 'public.places_sinir_artir(text, text, integer, integer)'::regprocedure),
+    'KK3: security definer, search_path boş';
+end $$;
+delete from public.places_gunluk_sayac;
+
 \echo 'rls_test: TÜM TESTLER GEÇTİ'

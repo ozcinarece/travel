@@ -27,7 +27,7 @@ import {
   type PanelSekmesi,
   type YorumSirasi,
 } from '@/features/mekan/panel';
-import { usePlaceFoto, useTamYer, useYorumlar, YorumSiniri, type HafifYer, type TamYer, type Yorum } from '@/features/yerler/api';
+import { placesHatasi, usePlaceFoto, useTamYer, useYorumlar, YorumSiniri, type HafifYer, type TamYer, type Yorum } from '@/features/yerler/api';
 import { t } from '@/i18n';
 import { izBirak } from '@/lib/hataRaporu';
 import { kategoriEtiketi, sureMetni, varsayilanDakika } from '@/lib/kategori';
@@ -248,7 +248,7 @@ export function MekanPaneli(p: MekanPaneliProps) {
                   })}
                 </View>
                 {sekme === 'rehber' ? <RehberSekmesi md={rehberMd} /> : null}
-                {sekme === 'bilgiler' ? <BilgilerSekmesi yer={yer} yukleniyor={tam.isPending} hata={tam.isError} gunSecici={p.gunSecici} mesgul={p.mesgul} /> : null}
+                {sekme === 'bilgiler' ? <BilgilerSekmesi yer={yer} yukleniyor={tam.isPending} hata={tam.isError ? placesHatasi(tam.error, t('mekan.hata')) : null} gunSecici={p.gunSecici} mesgul={p.mesgul} /> : null}
                 {sekme === 'yorumlar' ? <YorumlarSekmesi placeId={p.placeId} acik googleUrl={googleUrl} /> : null}
               </View>
             </Govde>
@@ -329,14 +329,14 @@ function BuyukFoto({ ad, hazirUri, yukle, testID }: { ad: string; hazirUri: stri
 
 // ---------------------------------------------------------------- Bilgiler
 
-function BilgilerSekmesi({ yer, yukleniyor, hata, gunSecici, mesgul }: { yer: TamYer | null; yukleniyor: boolean; hata: boolean; gunSecici?: MekanPaneliProps['gunSecici']; mesgul?: boolean }) {
+function BilgilerSekmesi({ yer, yukleniyor, hata, gunSecici, mesgul }: { yer: TamYer | null; yukleniyor: boolean; hata: string | null; gunSecici?: MekanPaneliProps['gunSecici']; mesgul?: boolean }) {
   const [ozetAcik, setOzetAcik] = useState(false);
   const ekran = useWindowDimensions();
   const acik = acikDurumu(yer);
   return (
     <View style={{ gap: 14 }}>
       {yukleniyor && !yer ? <ActivityIndicator color={renk.metin} style={{ marginVertical: 20 }} /> : null}
-      {hata && !yer ? <Text style={s.hata}>{t('mekan.hata')}</Text> : null}
+      {hata && !yer ? <Text style={s.hata}>{hata}</Text> : null}
       {yer?.ozet ? (
         <View style={s.bilgi}>
           <Text style={s.bilgiBaslik}>{t('mekan.panel.bilmen')}</Text>
@@ -419,7 +419,7 @@ function YorumlarSekmesi({ placeId, acik, googleUrl }: { placeId: string; acik: 
       {sorgu.isPending ? <ActivityIndicator color={renk.metin} style={{ marginVertical: 20 }} /> : null}
       {sorgu.isError ? (
         <View style={s.googleKutu}>
-          <Text style={s.ozet}>{sorgu.error instanceof YorumSiniri ? t('mekan.panel.yorumSiniri') : t('mekan.panel.yorumHata')}</Text>
+          <Text style={s.ozet}>{sorgu.error instanceof YorumSiniri ? t('mekan.panel.yorumSiniri') : placesHatasi(sorgu.error, t('mekan.panel.yorumHata'))}</Text>
           <Pressable accessibilityRole="link" onPress={() => Linking.openURL(googleUrl)} style={({ pressed }) => [s.googleAc, pressed && { opacity: 0.8 }]}>
             <Text style={s.googleAcMetin}>{t('mekan.panel.googleAc')}</Text>
           </Pressable>

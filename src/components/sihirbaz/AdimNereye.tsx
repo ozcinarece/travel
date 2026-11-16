@@ -6,7 +6,7 @@ import { ActivityIndicator, Pressable, StyleSheet, Text, TextInput, View } from 
 import { Ikon } from '@/components/ui/Ikon';
 import { GoogleAtfi } from '@/components/yerler/GoogleAtfi';
 import { icerikSehirSecimi, sehirSecimi } from '@/features/sihirbaz/girisler';
-import { useSehirOnerileri, yeniOturumJetonu, type Oneri } from '@/features/yerler/api';
+import { useSehirOnerileri, yeniOturumJetonu, placesHatasi, type Oneri } from '@/features/yerler/api';
 import { t } from '@/i18n';
 import type { Sehir, SehirSecimi } from '@/lib/tipler';
 import { kose, minDokunma, renk, yazi } from '@/theme';
@@ -41,8 +41,8 @@ export function AdimNereye({ sehir, onSehir, ad, onerilenAd, onAd, sehirler, kil
       onSehir(await sehirSecimi(placeId, adi, ikincil, oturum));
       setSorgu('');
       setJeton(yeniOturumJetonu());
-    } catch {
-      setHata(t('sihirbaz.nereye.secimHata'));
+    } catch (e) {
+      setHata(placesHatasi(e, t('sihirbaz.nereye.secimHata')));
     } finally {
       setMesgul(null);
     }
@@ -57,8 +57,8 @@ export function AdimNereye({ sehir, onSehir, ad, onerilenAd, onAd, sehirler, kil
       onSehir(await icerikSehirSecimi(k));
       setSorgu('');
       setJeton(yeniOturumJetonu());
-    } catch {
-      setHata(t('sihirbaz.nereye.secimHata'));
+    } catch (e) {
+      setHata(placesHatasi(e, t('sihirbaz.nereye.secimHata')));
     } finally {
       setMesgul(null);
     }
@@ -105,7 +105,7 @@ export function AdimNereye({ sehir, onSehir, ad, onerilenAd, onAd, sehirler, kil
       {kilitli ? <Text style={s.not}>{t('sihirbaz.nereye.kilitli')}</Text> : null}
       {listeAcik ? (
         <View style={s.liste}>
-          {oneriler.isError ? <Text style={s.hata}>{t('sihirbaz.nereye.araHata')}</Text> : null}
+          {oneriler.isError ? <Text style={s.hata}>{placesHatasi(oneriler.error, t('sihirbaz.nereye.araHata'))}</Text> : null}
           {oneriler.data?.length === 0 ? <Text style={s.bos}>{t('sihirbaz.nereye.sonucYok')}</Text> : null}
           {oneriler.data?.map((o) => (
             <Pressable key={o.place_id} accessibilityRole="button" disabled={!!mesgul} onPress={() => oneriSec(o)} style={({ pressed }) => [s.satir, pressed && { opacity: 0.7 }]}>

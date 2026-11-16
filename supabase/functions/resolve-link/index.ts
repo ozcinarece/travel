@@ -3,9 +3,10 @@
 // place_id → hafif Details; ad+koordinat → Text Search; yalnız koordinat → koordinat döner.
 // Booking / Instagram linkleri v2 (T8): 'desteklenmeyen_link'.
 import { GoogleHatasi, hafifDetay, metinAra, type HafifYer } from '../_shared/google.ts';
-import { govde, hata, json, onKontrol } from '../_shared/http.ts';
+import { govde, hata, json, kullaniciDogrula } from '../_shared/http.ts';
 import { googleMapsLinkiMi, haritaLinkiAyristir, kisaLinkMi } from '../_shared/mapsLink.ts';
 import { sayacli } from '../_shared/sayac.ts';
+import { sinirKontrol } from '../_shared/sinir.ts';
 
 type Istek = { url: string; merkez?: { lat: number; lng: number } };
 type Cevap = { yer: HafifYer; kaynak: 'place_id' | 'arama' | 'koordinat' };
@@ -23,14 +24,16 @@ async function kisaLinkiTakipEt(url: string): Promise<string> {
 }
 
 Deno.serve(sayacli('resolve-link', async (istek) => {
-  const on = onKontrol(istek);
-  if (on) return on;
+  const k = await kullaniciDogrula(istek);
+  if (k instanceof Response) return k;
 
   const g = await govde<Istek>(istek);
   const ham = typeof g.url === 'string' ? g.url.trim() : '';
   if (!ham || ham.length > 2000) return hata('url gerekli');
   const url = /^(https?:\/\/|geo:)/i.test(ham) ? ham : `https://${ham}`;
   if (!googleMapsLinkiMi(url)) return json({ hata: 'desteklenmeyen_link' }, 422);
+  const sinir = await sinirKontrol(k, 'link');
+  if (sinir) return sinir;
 
   try {
     const acik = kisaLinkMi(url) ? await kisaLinkiTakipEt(url) : url;
