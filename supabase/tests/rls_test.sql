@@ -2954,4 +2954,80 @@ end $$;
 delete from public.trips where id = '22900000-0000-4000-8000-000000000010';
 delete from auth.users where id::text like '22900000-%';
 
+-- #234 KK1/KK2/KK3: seyahat silinince sohbet ve fisler klasörleri kuyruğa girer; kuyruk yalnız service_role'e açık.
+insert into auth.users (id) values ('23400000-0000-4000-8000-000000000001');
+insert into public.trips (id, owner_id, city_place_id, city_label, lat, lng, tz) values
+  ('23400000-0000-4000-8000-000000000010', '23400000-0000-4000-8000-000000000001', 'p234', 'Kova şehri', 40, 30, 'Europe/Istanbul'),
+  ('23400000-0000-4000-8000-000000000011', '23400000-0000-4000-8000-000000000001', 'p234', 'Kova şehri', 40, 30, 'Europe/Istanbul');
+insert into storage.objects (bucket_id, name) values
+  ('sohbet', '23400000-0000-4000-8000-000000000010/m1.jpg'),
+  ('fisler', '23400000-0000-4000-8000-000000000010/f1.jpg'),
+  ('fisler', '23400000-0000-4000-8000-000000000011/f2.jpg');
+delete from public.trips where id = '23400000-0000-4000-8000-000000000010';
+do $$
+begin
+  assert (select count(*) from public.silinecek_klasorler where trip_id = '23400000-0000-4000-8000-000000000010') = 2,
+    '#234 KK2: silinen seyahat için iki satır';
+  assert (select array_agg(kova order by kova) from public.silinecek_klasorler where trip_id = '23400000-0000-4000-8000-000000000010')
+    = array['fisler', 'sohbet'], '#234 KK2: sohbet ve fisler';
+  assert not exists (select 1 from public.silinecek_klasorler where trip_id = '23400000-0000-4000-8000-000000000011'),
+    '#234 KK2: silinmeyen seyahat kuyruğa girmez';
+  assert (select relrowsecurity from pg_class where oid = 'public.silinecek_klasorler'::regclass), '#234 KK1: RLS açık';
+  assert not exists (select 1 from pg_policies where tablename = 'silinecek_klasorler'), '#234 KK1: politika yok';
+  assert (select prosecdef and proconfig @> array['search_path=""'] from pg_proc where oid = 'public.trips_klasor_kuyrugu()'::regprocedure),
+    '#234 KK2: tetikleyici security definer, search_path boş';
+end $$;
+-- Hâlâ var olan seyahatin elle eklenmiş satırı listeye girmez (atlanır).
+insert into public.silinecek_klasorler (kova, trip_id) values ('fisler', '23400000-0000-4000-8000-000000000011');
+set role service_role;
+do $$
+declare
+  r record;
+  n int := 0;
+begin
+  for r in select * from public.kova_temizle_listesi(50) where trip_id::text like '23400000-%' loop
+    n := n + 1;
+    assert r.trip_id = '23400000-0000-4000-8000-000000000010', '#234 KK3: var olan seyahat atlanır';
+    assert r.dosyalar = array['23400000-0000-4000-8000-000000000010/' || case r.kova when 'sohbet' then 'm1.jpg' else 'f1.jpg' end],
+      '#234 KK3: yalnız o kova ve klasörün dosyaları';
+  end loop;
+  assert n = 2, '#234 KK3: iki klasör listelenir';
+  assert (select count(*) from public.kova_temizle_listesi(0)) = 0, '#234 KK3: p_adet 0 boş döner';
+  -- Dosya duruyorken kapanmaz (yarıda kalan tur sonraki turda devam eder).
+  assert public.kova_temizle_bitir('sohbet', '23400000-0000-4000-8000-000000000010') is null, '#234 KK4: dosya varken kapanmaz';
+  assert public.kova_temizle_bitir('fisler', '23400000-0000-4000-8000-000000000011') is null, '#234 KK3: var olan seyahat kapanmaz';
+end $$;
+reset role;
+delete from storage.objects where name = '23400000-0000-4000-8000-000000000010/m1.jpg';
+set role service_role;
+do $$
+begin
+  assert public.kova_temizle_bitir('sohbet', '23400000-0000-4000-8000-000000000010'), '#234 KK3: boşalan klasör kapanır';
+  assert not exists (select 1 from public.kova_temizle_listesi(50) where kova = 'sohbet' and trip_id = '23400000-0000-4000-8000-000000000010'),
+    '#234 KK3: kapanan klasör yeniden listelenmez';
+end $$;
+reset role;
+set role authenticated;
+select pg_temp.as_user('23400000-0000-4000-8000-000000000001');
+select pg_temp.hata_bekle($$select count(*) from public.silinecek_klasorler$$, '42501');
+select pg_temp.hata_bekle($$insert into public.silinecek_klasorler (kova, trip_id) values ('sohbet', gen_random_uuid())$$, '42501');
+select pg_temp.hata_bekle($$update public.silinecek_klasorler set silindi = now()$$, '42501');
+select pg_temp.hata_bekle($$delete from public.silinecek_klasorler$$, '42501');
+select pg_temp.hata_bekle($$select * from public.kova_temizle_listesi(50)$$, '42501');
+select pg_temp.hata_bekle($$select public.kova_temizle_bitir('sohbet', '23400000-0000-4000-8000-000000000010')$$, '42501');
+select pg_temp.as_email(:E, 'ozcinar.ece@gmail.com');
+select pg_temp.hata_bekle($$select count(*) from public.silinecek_klasorler$$, '42501');
+select pg_temp.hata_bekle($$select * from public.kova_temizle_listesi(50)$$, '42501');
+reset role;
+set role anon;
+select pg_temp.hata_bekle($$select count(*) from public.silinecek_klasorler$$, '42501');
+select pg_temp.hata_bekle($$insert into public.silinecek_klasorler (kova, trip_id) values ('sohbet', gen_random_uuid())$$, '42501');
+select pg_temp.hata_bekle($$select * from public.kova_temizle_listesi(50)$$, '42501');
+select pg_temp.hata_bekle($$select public.kova_temizle_bitir('sohbet', '23400000-0000-4000-8000-000000000010')$$, '42501');
+reset role;
+delete from public.trips where id = '23400000-0000-4000-8000-000000000011';
+delete from storage.objects where name like '23400000-%';
+delete from public.silinecek_klasorler where trip_id::text like '23400000-%';
+delete from auth.users where id = '23400000-0000-4000-8000-000000000001';
+
 \echo 'rls_test: TÜM TESTLER GEÇTİ'
