@@ -71,6 +71,8 @@ export type IkonAdi =
   | 'cop'
   // #164 (kanvas 14): "Burada kalış" satırındaki kronometre.
   | 'saat'
+  // #168 (kanvas 10 · 12): durak kartındaki Yol tarifi pusulası (dolu ibre).
+  | 'pusula'
   // #183 (kanvas 25 · 25b · 25c): harcama kategorileri (ulaşım tramvayı, bilet), Bakiyeler kişileri, kapat (×).
   | 'tramvay'
   | 'bilet'
@@ -101,7 +103,12 @@ export function Ikon({ ad, boyut = 24, renk, kalinlik = 2, dolgu }: Props) {
   const ortak = { stroke: renk, strokeWidth: kalinlik, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const, fill: dolguSaydam ? renk : 'none', fillOpacity: dolguSaydam || 1 };
   return (
     <Svg width={boyut} height={boyut} viewBox="0 0 24 24">
-      {ad === 'grafik' ? (
+      {ad === 'pusula' ? (
+        <>
+          <Circle cx={12} cy={12} r={9} {...ortak} />
+          <Path d="M15.5 8.5l-2 5-5 2 2-5z" {...ortak} fill={renk} />
+        </>
+      ) : ad === 'grafik' ? (
         <Path d="M5 20V10M12 20V4M19 20v-7" {...ortak} />
       ) : ad === 'gonder' ? (
         <Path d="M4 12l16-8-6 16-2-7z" {...ortak} />
