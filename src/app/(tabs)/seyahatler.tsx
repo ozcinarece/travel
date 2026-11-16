@@ -8,7 +8,6 @@ import { BosDurum } from '@/components/seyahatler/BosDurum';
 import { GecmisSatiri, KapakKarti, SeyahatSatiri } from '@/components/seyahatler/SeyahatSatiri';
 import { useSeyahattenAyril } from '@/features/davet/sorgular';
 import { hedefSeyahatler } from '@/features/icerik/yerEkle';
-import { useProfil } from '@/features/profil/sorgular';
 import { useDurakGuncelle } from '@/features/program/sorgular';
 import { useAktifProgram } from '@/features/program/useAktifProgram';
 import { useSeyahatDurumlari, type DurumCipi } from '@/features/seyahatler/durum';
@@ -31,7 +30,6 @@ import { bosluk, renk, yazi } from '@/theme';
  * "Otel yok" → Program'da "Nerede kalıyorsun?".
  */
 export default function SeyahatlerEkrani() {
-  const profil = useProfil();
   const seyahatler = useSeyahatler();
   const durumlar = useSeyahatDurumlari();
   // Sekme ekranı açık kalır: başka ekranda plan değişince çipler dönüşte tazelenir.
@@ -126,7 +124,7 @@ export default function SeyahatlerEkrani() {
         </Text>
 
         {seyahatler.isError ? <Text style={s.hata}>{t('seyahatler.hata')}</Text> : null}
-        {bos ? <BosDurum buyuk={profil.data?.next_trip_window === 'bu_ay'} /> : null}
+        {bos ? <BosDurum /> : null}
 
         {yaklasan.length > 0 ? (
           <View style={s.bolum}>

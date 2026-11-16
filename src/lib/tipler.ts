@@ -3,7 +3,6 @@
 export type HaritaGizliligi = 'friends' | 'everyone' | 'me';
 
 // PRD 0.3 KK2: "Sonraki seyahatin ne zaman?"
-export type SonrakiSeyahat = 'bu_ay' | 'uc_ay' | 'daha_sonra' | 'bilmiyorum';
 
 export type Profil = {
   id: string;
@@ -11,7 +10,6 @@ export type Profil = {
   username: string;
   photo_url: string | null;
   map_visibility: HaritaGizliligi;
-  next_trip_window: SonrakiSeyahat | null;
   onboarding_done_at: string | null;
   created_at: string;
 };
