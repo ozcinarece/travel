@@ -2756,15 +2756,19 @@ begin
   assert public.places_sinir_artir(repeat('7', 64), 'rota', 2000, 4), 'rota: 2000 tam sığar';
   assert (select adet from public.places_gunluk_sayac where ozet = repeat('7', 64) and kategori = 'rota') = 2000, 'rota: ret sayacı artırmaz';
   assert (select count(*) from public.places_gunluk_sayac where ozet = repeat('7', 64) and kategori <> 'rota') = 0, 'rota: Places kovaları etkilenmez';
-  -- Misafir: kendi sınırı 500; bütün misafirlerin toplamı 3000.
-  assert not public.places_sinir_artir(repeat('8', 64), 'rota', 500, 625, 3000), 'rota: misafir 625 > 500 ret';
+  -- Misafir: kendi sınırı 625 (#253: 25 noktalı ilk matris tek çağrıda sığar); bütün misafirlerin toplamı 3000.
+  assert not public.places_sinir_artir(repeat('8', 64), 'rota', 500, 625, 3000), 'rota: tek çağrı (625) sınırdan (500) büyükse ret; p_adet en çok 625 olduğu için daha küçük bir sınırla denenir';
   assert (select count(*) from public.places_gunluk_sayac where ozet = 'misafir-toplam' and kategori = 'rota') = 0, 'rota: ilk ret toplamı açmaz';
-  for i in 1..6 loop
-    assert public.places_sinir_artir(lpad(to_hex(i), 64, '9'), 'rota', 500, 500, 3000), format('rota: %s. misafir 500', i);
+  assert public.places_sinir_artir(repeat('8', 64), 'rota', 625, 625, 3000), 'rota: misafir 625 tek çağrıda geçer';
+  assert not public.places_sinir_artir(repeat('8', 64), 'rota', 625, 1, 3000), 'rota: misafirin 626. elemanı ret';
+  assert (select adet from public.places_gunluk_sayac where ozet = repeat('8', 64) and kategori = 'rota') = 625, 'rota: misafir 625 kalır';
+  for i in 1..4 loop
+    assert public.places_sinir_artir(lpad(to_hex(i), 64, '9'), 'rota', 625, 500, 3000), format('rota: %s. misafir 500', i);
   end loop;
+  assert public.places_sinir_artir(lpad(to_hex(5), 64, '9'), 'rota', 625, 375, 3000), 'rota: toplam 3000 tam sığar';
   assert (select adet from public.places_gunluk_sayac where ozet = 'misafir-toplam' and kategori = 'rota') = 3000, 'rota: misafir toplamı 3000';
-  assert not public.places_sinir_artir(repeat('a', 63) || 'b', 'rota', 500, 1, 3000), 'rota: tavan dolu, yeni misafir ret';
-  assert not public.places_sinir_artir(lpad(to_hex(1), 64, '9'), 'rota', 500, 1, 3000), 'rota: dolu misafir ret';
+  assert not public.places_sinir_artir(repeat('a', 63) || 'b', 'rota', 625, 1, 3000), 'rota: tavan dolu, yeni misafir ret';
+  assert not public.places_sinir_artir(lpad(to_hex(1), 64, '9'), 'rota', 625, 1, 3000), 'rota: dolu misafir ret';
   assert (select adet from public.places_gunluk_sayac where ozet = 'misafir-toplam' and kategori = 'rota') = 3000, 'rota: ret toplamı artırmaz';
   assert public.places_sinir_artir(repeat('7', 63) || '0', 'rota', 2000, 625), 'rota: kayıtlı kullanıcı misafir tavanından etkilenmez';
 end $$;
