@@ -105,7 +105,7 @@ export function useProfilOlustur() {
 }
 
 type ProfilDegisikligi = Partial<
-  Pick<Profil, 'name' | 'username' | 'map_visibility' | 'photo_url' | 'next_trip_window' | 'onboarding_done_at'>
+  Pick<Profil, 'name' | 'username' | 'map_visibility' | 'photo_url' | 'onboarding_done_at'>
 >;
 
 export function useProfilGuncelle() {
