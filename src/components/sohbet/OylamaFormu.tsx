@@ -36,12 +36,17 @@ export function OylamaFormu(p: Props) {
   );
 }
 
-/** `otoAd`: metin mekan seçilince Google'dan gelen adla dolduruldu ve kullanıcı değiştirmedi (#248 KK2: kaydedilmez). */
-type Secenek = { metin: string; place_id: string | null; otoAd?: boolean };
+/** `otoAd`: mekan seçilince kutuya Google'dan gelen ad; seçenekte tutulur ki kullanıcı yazıp silse de tanınsın (#248 KK2). */
+type Secenek = { metin: string; place_id: string | null; otoAd?: string };
+
+/** Kutudaki metin, mekan seçilince gelen Google adıyla aynı mı (trim sonrası)? */
+function otoAdMi(x: Secenek): boolean {
+  return !!x.otoAd && x.metin.trim() === x.otoAd.trim();
+}
 
 /** #248 KK2: Google'dan gelen ad oylama_secenekleri.metin'e yazılmaz; mekan seçeneğinde metin boş gider, ad ekranda canlı gelir. */
 export function kayitMetni(x: Secenek): string {
-  return x.place_id && x.otoAd ? '' : x.metin.trim().slice(0, 80);
+  return x.place_id && otoAdMi(x) ? '' : x.metin.trim().slice(0, 80);
 }
 
 function Icerik({ tz, mekanlar, ad, icerikAdi, gonderiliyor, onGonder }: Props) {
@@ -77,7 +82,7 @@ function Icerik({ tz, mekanlar, ad, icerikAdi, gonderiliyor, onGonder }: Props) 
             <View style={s.secenekSatiri}>
               <SayfaMetinAlani
                 value={x.metin}
-                onChangeText={(v) => degistir(i, { metin: v, otoAd: false })}
+                onChangeText={(v) => degistir(i, { metin: v })}
                 placeholder={t('sohbet.oylama.secenek', { n: i + 1 })}
                 placeholderTextColor={renk.soluk}
                 maxLength={80}
@@ -104,7 +109,7 @@ function Icerik({ tz, mekanlar, ad, icerikAdi, gonderiliyor, onGonder }: Props) 
               <View style={s.mekanListesi}>
                 {x.place_id ? (
                   <Pressable accessibilityRole="button" onPress={() => {
-                      degistir(i, x.otoAd ? { place_id: null, metin: '', otoAd: false } : { place_id: null });
+                      degistir(i, otoAdMi(x) ? { place_id: null, metin: '', otoAd: undefined } : { place_id: null, otoAd: undefined });
                       setMekanAcik(null);
                     }} style={s.mekanSatiri}>
                     <Text style={[s.mekanAd, { color: renk.ikincil }]}>{t('sohbet.oylama.mekanKaldir')}</Text>
@@ -118,11 +123,11 @@ function Icerik({ tz, mekanlar, ad, icerikAdi, gonderiliyor, onGonder }: Props) 
                       const bizim = icerikAdi(m);
                       degistir(
                         i,
-                        x.metin.trim() && !x.otoAd
-                          ? { place_id: m.place_id }
+                        x.metin.trim() && !otoAdMi(x)
+                          ? { place_id: m.place_id, otoAd: undefined }
                           : bizim
-                            ? { place_id: m.place_id, metin: bizim.slice(0, 80), otoAd: false }
-                            : { place_id: m.place_id, metin: ad(m).slice(0, 80), otoAd: true },
+                            ? { place_id: m.place_id, metin: bizim.slice(0, 80), otoAd: undefined }
+                            : { place_id: m.place_id, metin: ad(m).slice(0, 80), otoAd: ad(m).slice(0, 80) },
                       );
                       setMekanAcik(null);
                     }}
