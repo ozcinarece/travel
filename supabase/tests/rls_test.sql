@@ -2702,10 +2702,34 @@ begin
   assert (select adet from public.places_gunluk_sayac where ozet = 'misafir-toplam' and kategori = 'photo') = 2, 'toplam: kullanıcı reddi toplamı geri alır';
 end $$;
 select pg_temp.hata_bekle($$select public.places_sinir_artir('misafir-toplam', 'details', 300)$$, '22023');
-select pg_temp.hata_bekle($$select public.places_sinir_artir(repeat('h', 64), 'details', 300, 26)$$, '22023');
+select pg_temp.hata_bekle($$select public.places_sinir_artir(repeat('h', 64), 'details', 300, 626)$$, '22023');
 select pg_temp.hata_bekle($$select public.places_sinir_artir(repeat('h', 64), 'details', 300, 0)$$, '22023');
 select pg_temp.hata_bekle($$select public.places_sinir_artir('kimlik-acik', 'nearby', 3)$$, '23514');
 select pg_temp.hata_bekle($$select public.places_sinir_artir(repeat('d', 64), 'routes', 3)$$, '23514');
+-- #246 KK2/KK4: Routes `rota` kategorisi; eleman sayılır (matris 25 × 25 = 625'e kadar tek çağrıda), misafir toplam tavanı.
+do $$
+begin
+  assert public.places_sinir_artir(repeat('7', 64), 'rota', 2000, 625), 'rota: 625 elemanlı matris tek çağrıda sayılır';
+  assert public.places_sinir_artir(repeat('7', 64), 'rota', 2000, 121), 'rota: normal gün (11 × 11)';
+  assert (select adet from public.places_gunluk_sayac where ozet = repeat('7', 64) and kategori = 'rota') = 746, 'rota: eleman toplanır';
+  assert public.places_sinir_artir(repeat('7', 64), 'rota', 2000, 625), 'rota: 1371';
+  assert public.places_sinir_artir(repeat('7', 64), 'rota', 2000, 625), 'rota: 1996';
+  assert not public.places_sinir_artir(repeat('7', 64), 'rota', 2000, 5), 'rota: kullanıcı 2000 sınırı aşılmaz';
+  assert public.places_sinir_artir(repeat('7', 64), 'rota', 2000, 4), 'rota: 2000 tam sığar';
+  assert (select adet from public.places_gunluk_sayac where ozet = repeat('7', 64) and kategori = 'rota') = 2000, 'rota: ret sayacı artırmaz';
+  assert (select count(*) from public.places_gunluk_sayac where ozet = repeat('7', 64) and kategori <> 'rota') = 0, 'rota: Places kovaları etkilenmez';
+  -- Misafir: kendi sınırı 500; bütün misafirlerin toplamı 3000.
+  assert not public.places_sinir_artir(repeat('8', 64), 'rota', 500, 625, 3000), 'rota: misafir 625 > 500 ret';
+  assert (select count(*) from public.places_gunluk_sayac where ozet = 'misafir-toplam' and kategori = 'rota') = 0, 'rota: ilk ret toplamı açmaz';
+  for i in 1..6 loop
+    assert public.places_sinir_artir(lpad(to_hex(i), 64, '9'), 'rota', 500, 500, 3000), format('rota: %s. misafir 500', i);
+  end loop;
+  assert (select adet from public.places_gunluk_sayac where ozet = 'misafir-toplam' and kategori = 'rota') = 3000, 'rota: misafir toplamı 3000';
+  assert not public.places_sinir_artir(repeat('a', 63) || 'b', 'rota', 500, 1, 3000), 'rota: tavan dolu, yeni misafir ret';
+  assert not public.places_sinir_artir(lpad(to_hex(1), 64, '9'), 'rota', 500, 1, 3000), 'rota: dolu misafir ret';
+  assert (select adet from public.places_gunluk_sayac where ozet = 'misafir-toplam' and kategori = 'rota') = 3000, 'rota: ret toplamı artırmaz';
+  assert public.places_sinir_artir(repeat('7', 63) || '0', 'rota', 2000, 625), 'rota: kayıtlı kullanıcı misafir tavanından etkilenmez';
+end $$;
 reset role;
 -- Temizlik (oturumsuz, cron): 7 günden eski satırlar silinir, bugünküler kalır.
 do $$
@@ -2715,7 +2739,7 @@ begin
            (repeat('5', 64), (now() at time zone 'Europe/Istanbul')::date - 7, 'details', 1);
   perform public.places_sayac_temizle();
   assert (select count(*) from public.places_gunluk_sayac where ozet = repeat('5', 64)) = 1, 'temizlik: yalnız 7 günden eski silinir';
-  assert (select count(*) from public.places_gunluk_sayac where ozet = 'misafir-toplam') = 2, 'temizlik: bugünkü satırlar kalır';
+  assert (select count(*) from public.places_gunluk_sayac where ozet = 'misafir-toplam') = 3, 'temizlik: bugünkü satırlar kalır (nearby, photo, rota)';
 end $$;
 set role authenticated;
 select pg_temp.as_email(:E, 'ozcinar.ece@gmail.com');
