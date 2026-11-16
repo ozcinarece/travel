@@ -1,0 +1,34 @@
+name: kova-temizle
+
+# #234 KK4: silinen seyahatlerin sohbet ve fiş klasörlerini günde bir kez siler (kova-temizle Edge Function'ı, service_role).
+# Bir tur en çok 50 klasör; yarıda kalan klasör sonraki turda devam eder. Logda yalnız sayı vardır.
+# Gerekli secret: SUPABASE_ACCESS_TOKEN (service_role anahtarı çalışma anında Yönetim API'sinden alınır ve maskelenir).
+on:
+  schedule:
+    - cron: '53 1 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: kova-temizle
+  cancel-in-progress: false
+
+jobs:
+  temizle:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      SUPABASE_PROJECT_REF: xwqeobelyeuzoxyuvauw
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Temizle
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+        run: node scripts/kova-temizle.mjs
