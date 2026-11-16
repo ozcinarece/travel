@@ -11,7 +11,21 @@ import { randomUUID } from 'node:crypto';
 import { appendFile, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 
-import { detayIdleri, dolarEtiketi, gunleriDenetle, planDenetle, REHBER_DOSYA, SEHIR_SLUG, sehirKimligi, sehirKimligiSql, SLUG, yuklemeVerisi } from './dogrula.mjs';
+import {
+  detayIdleri,
+  dolarEtiketi,
+  gunleriDenetle,
+  osmIdleri,
+  osmKimlikSorgusu,
+  osmKonumDenetle,
+  planDenetle,
+  REHBER_DOSYA,
+  SEHIR_SLUG,
+  sehirKimligi,
+  sehirKimligiSql,
+  SLUG,
+  yuklemeVerisi,
+} from './dogrula.mjs';
 import { derAl, sifrele } from './sifre.mjs';
 
 const ortam = process.env;
@@ -318,14 +332,8 @@ export function overpassSorgusu({ lat, lng }, yaricap) {
 out center tags;`;
 }
 
-/** OSM aday listesi (Overpass): ad, konum, tür, opening_hours, wikipedia/wikidata. Google'a gidilmez. */
-async function osm() {
-  const istek = istekAl();
-  const acik = acikAnahtarAl(istek);
-  const merkez = await sehirMerkezi(istek);
-  const yaricap = Math.min(Math.max(Number(istek.yaricap_m) || 8000, 500), 30000);
-  const sorgu = overpassSorgusu(merkez, yaricap);
-  let veri = null;
+/** Overpass sorgusu (sunucular sırayla denenir). Google'a gidilmez. */
+async function overpass(sorgu) {
   for (const url of OVERPASS) {
     try {
       const cevap = await fetch(url, {
@@ -333,15 +341,34 @@ async function osm() {
         headers: { 'content-type': 'application/x-www-form-urlencoded', 'user-agent': 'tripmate-icerik-hatti (github.com/ozcinarece/travel)' },
         body: new URLSearchParams({ data: sorgu }),
       });
-      if (cevap.ok) {
-        veri = await cevap.json();
-        break;
-      }
+      if (cevap.ok) return await cevap.json();
     } catch {
       // sıradaki sunucu
     }
   }
-  if (!veri) throw new HatHatasi('Overpass yanıt vermedi');
+  throw new HatHatasi('Overpass yanıt vermedi');
+}
+
+/** OSM kimliği → konum (Overpass). Bulunamayan kimlik haritada olmaz. */
+async function osmKonumlariOku(idler) {
+  const harita = new Map();
+  if (!idler.length) return harita;
+  const veri = await overpass(osmKimlikSorgusu(idler));
+  for (const e of veri.elements ?? []) {
+    const lat = e.lat ?? e.center?.lat;
+    const lng = e.lon ?? e.center?.lon;
+    if (typeof lat === 'number' && typeof lng === 'number') harita.set(`${e.type}/${e.id}`, { lat, lng });
+  }
+  return harita;
+}
+
+/** OSM aday listesi (Overpass): ad, konum, tür, opening_hours, wikipedia/wikidata. Google'a gidilmez. */
+async function osm() {
+  const istek = istekAl();
+  const acik = acikAnahtarAl(istek);
+  const merkez = await sehirMerkezi(istek);
+  const yaricap = Math.min(Math.max(Number(istek.yaricap_m) || 8000, 500), 30000);
+  const veri = await overpass(overpassSorgusu(merkez, yaricap));
   const adaylar = (veri.elements ?? [])
     .map((e) => {
       const lat = e.lat ?? e.center?.lat;
@@ -406,11 +433,22 @@ async function yukle() {
     throw new HatHatasi('kapalı ya da bulunamayan mekan var; yüklenmedi');
   }
 
+  // #205 KK2: OSM adayı olan duraklarda konum OSM'den (süresiz, atıfla); aday Google'daki yerle aynı mekan olmalı (≤ 150 m).
+  const osmKonumlari = await osmKonumlariOku(osmIdleri(plan));
+  const osmSorunlari = osmKonumDenetle(plan, detaylar, osmKonumlari);
+  if (osmSorunlari.length) {
+    duyuru('error', `OSM sorunu (${osmSorunlari.length}) · ${plan.gezi.slug}`, osmSorunlari);
+    throw new HatHatasi('OSM adayı bulunamadı ya da Google konumundan uzak; yüklenmedi');
+  }
+
   const gun = gunleriDenetle(plan, detaylar);
   const tumUyarilar = [...uyarilar, ...gun.uyarilar];
   duyuru('warning', `UYARI (${tumUyarilar.length}) · ${plan.gezi.slug}`, tumUyarilar);
 
-  const veri = JSON.stringify(yuklemeVerisi(plan, detaylar, rehberler));
+  const yukleme = yuklemeVerisi(plan, detaylar, rehberler, osmKonumlari);
+  const veri = JSON.stringify(yukleme);
+  const durakSayisi = yukleme.gunler.reduce((t, g) => t + g.duraklar.length, 0);
+  const osmDurak = yukleme.gunler.reduce((t, g) => t + g.duraklar.filter((d) => d.osm_id).length, 0);
   const etiket = dolarEtiketi(veri);
   const r = await yazanCagri(`public.icerik_gezi_taslak_yukle(${etiket}${veri}${etiket}::jsonb, ${yeniden === true})`, veri);
 
@@ -419,6 +457,7 @@ async function yukle() {
     `${KURU ? 'KURU: denetimler geçti, hiçbir şey yazılmadı' : 'YÜKLENDİ (taslak)'} · ${r.slug} · gezi_id ${r.gezi_id}${KURU ? ' (geri alındı)' : ''}`,
     `${r.gun_sayisi} gün · ${r.mekan_sayisi} durak · yazıda ${r.yazidaki_mekan} mekan izi · ${r.yeniden ? 'yeniden yazıldı' : 'yeni'}${r.yeni_sehir ? ' · yeni şehir (taslak)' : ''} · updated_at ${r.updated_at}`,
     `mekan rehberi: ${r.rehber_yazilan ?? 0} yazıldı (${r.yer_acilan ?? 0} yeni taslak yer) · atlanan ${(r.rehber_atlanan ?? []).length}${(r.rehber_atlanan ?? []).length ? ` (yayında ya da dolu: ${r.rehber_atlanan.join(', ')})` : ''}`,
+    `konum: ${osmDurak} durak OSM · ${durakSayisi - osmDurak} durak Google (30 gün)`,
     ...gunSatirlari,
     ...(KURU ? [] : [`BO: ${editorLinki(r.gezi_id)}`]),
   ];

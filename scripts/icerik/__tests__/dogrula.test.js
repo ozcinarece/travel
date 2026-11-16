@@ -13,6 +13,9 @@ import {
   slugUret,
   yuklemeVerisi,
   yurumeDk,
+  osmIdleri,
+  osmKimlikSorgusu,
+  osmKonumDenetle,
 } from '../dogrula.mjs';
 import { anahtarCifti, coz, sifrele } from '../sifre.mjs';
 
@@ -57,11 +60,11 @@ function ornekPlan() {
       {
         baslik: 'Odunpazarı',
         duraklar: [
-          { place_id: ID.kursunlu, ad: 'Kurşunlu Külliyesi', sure_dk: 30, sure_gerekcesi: 'avlu küçük', kapali_gunler: [], rehber: 'kursunlu' },
-          { place_id: ID.modern, ad: 'Odunpazarı Modern Müze', sure_dk: 90, kapali_gunler: ['pazartesi'], rehber: 'omm' },
-          { place_id: ID.cam, ad: 'Çağdaş Cam Sanatları Müzesi', sure_dk: 45, sure_gerekcesi: 'tek kat', kapali_gunler: ['Pazartesi'], rehber: 'cam' },
-          { place_id: ID.ogle, ad: 'Öğle yemeği', sure_dk: 75, kapali_gunler: [], rehber: 'ogle' },
-          { place_id: ID.kafe, ad: 'Kafe', sure_dk: 30, kapali_gunler: [], rehber: 'kafe' },
+          { place_id: ID.kursunlu, osm: 'way/101', ad: 'Kurşunlu Külliyesi', sure_dk: 30, sure_gerekcesi: 'avlu küçük', kapali_gunler: [], rehber: 'kursunlu' },
+          { place_id: ID.modern, osm: 'way/102', ad: 'Odunpazarı Modern Müze', sure_dk: 90, kapali_gunler: ['pazartesi'], rehber: 'omm' },
+          { place_id: ID.cam, osm: 'node/103', ad: 'Çağdaş Cam Sanatları Müzesi', sure_dk: 45, sure_gerekcesi: 'tek kat', kapali_gunler: ['Pazartesi'], rehber: 'cam' },
+          { place_id: ID.ogle, osm: 'node/104', ad: 'Öğle yemeği', sure_dk: 75, kapali_gunler: [], rehber: 'ogle' },
+          { place_id: ID.kafe, osm: 'node/105', ad: 'Kafe', sure_dk: 30, kapali_gunler: [], rehber: 'kafe' },
         ],
       },
     ],
@@ -273,6 +276,48 @@ describe('yükleme verisi', () => {
     expect(detayIdleri(ornekPlan())).toEqual([ID.kursunlu, ID.modern, ID.cam, ID.ogle, ID.kafe]);
     const r = yuklemeVerisi(ornekPlan(), detaylar(), REHBERLER);
     expect(r.gunler[0].duraklar[1].rehber_md).toBe(ornekRehber('omm'));
+  });
+
+  it('#205 KK2: OSM adayı olan durakta konum OSM\'den ve osm_id ile; olmayanda Google detayından', () => {
+    const plan = ornekPlan();
+    plan.gunler[0].duraklar[1].osm = 'way/123456';
+    const osm = new Map([['way/123456', { lat: 39.7648, lng: 30.5237 }]]);
+    const v = yuklemeVerisi(plan, detaylar(), new Map(), osm);
+    expect(v.gunler[0].duraklar[1]).toEqual({ place_id: ID.modern, ad: 'Odunpazarı Modern Müze', kategori: 'museum', sure_dk: 90, lat: 39.7648, lng: 30.5237, osm_id: 'way/123456' });
+    expect(v.gunler[0].duraklar[0]).not.toHaveProperty('osm_id');
+    expect(v.gunler[0].duraklar[0].lat).toBe(39.7627);
+    // Overpass'ta okunamadıysa (denetim bunu hata sayar) Google konumuna düşer, osm_id yazılmaz.
+    expect(yuklemeVerisi(plan, detaylar()).gunler[0].duraklar[1]).not.toHaveProperty('osm_id');
+    expect(osmIdleri(plan)).toEqual(['way/101', 'way/123456', 'node/103', 'node/104', 'node/105']);
+  });
+
+  it('#205 KK2: OSM adayı bulunamazsa ya da 150 m\'den uzaksa hata; satırda koordinat yok', () => {
+    const plan = ornekPlan();
+    for (const d of plan.gunler[0].duraklar) delete d.osm;
+    plan.gunler[0].duraklar[0].osm = 'node/1';
+    plan.gunler[0].duraklar[1].osm = 'way/2';
+    plan.gunler[0].duraklar[2].osm = 'relation/3';
+    const osm = new Map([
+      ['node/1', { lat: 39.7628, lng: 30.5262 }],
+      ['way/2', { lat: 39.7700, lng: 30.5236 }],
+    ]);
+    const h = osmKonumDenetle(plan, detaylar(), osm);
+    expect(h).toEqual(['g1.d2: OSM konumu Google konumundan 600 m uzakta (en çok 150; way/2)', 'g1.d3: OSM nesnesi bulunamadı (relation/3)']);
+    expect(h.join(' ')).not.toMatch(/39\.|30\./);
+  });
+
+  it('#205 KK2: plan denetimi osm biçimini sınar, eksikse uyarır', () => {
+    const plan = ornekPlan();
+    plan.gunler[0].duraklar[0].osm = 'node/abc';
+    delete plan.gunler[0].duraklar[1].osm;
+    const { hatalar, uyarilar } = planDenetle(plan, { rehberler: REHBERLER });
+    expect(hatalar).toContain('g1.d1: osm "node/123", "way/45" ya da "relation/6" olmalı');
+    expect(uyarilar).toContain("g1.d2: OSM adayı yok (osm); konum Google'dan, 30 günde yenilenmeli");
+  });
+
+  it('#205 KK2: OSM kimlik sorgusu türlere ayrılır; geçersiz kimlik sorguya girmez', () => {
+    expect(osmKimlikSorgusu(['node/1', 'way/2', 'node/3'])).toBe('[out:json][timeout:60];\n(\n  node(id:1,3);\n  way(id:2);\n);\nout center;');
+    expect(() => osmKimlikSorgusu(['node/1);out;'])).toThrow('osm kimliği biçimi geçersiz');
   });
 
   it('dolar tırnağı etiketi metinde geçmez', () => {
