@@ -34,8 +34,6 @@
     "profilHata": "Profilin hazırlanamadı. Bağlantını kontrol edip tekrar dene."
   },
   "profilKur": {
-    "baslik": "Sen kimsin?",
-    "alt": "1/2 · Arkadaşların seni böyle bulur",
     "fotoEkle": "Fotoğraf ekle",
     "fotoDegistir": "Fotoğrafı değiştir",
     "fotoHata": "Fotoğraf yüklenemedi.",
@@ -45,33 +43,12 @@
     "musait": "Müsait",
     "alinmis": "Alınmış",
     "kural": "3–24 karakter: küçük harf, rakam, nokta, alt çizgi",
-    "gizlilikBaslik": "Haritanı kimler görsün?",
     "gizlilik": {
       "friends": "Arkadaşlarım",
       "everyone": "Herkes",
       "me": "Sadece ben"
     },
-    "gizlilikNot": "Sonra profilinden değiştirebilirsin.",
-    "devam": "Devam",
-    "hata": "Kaydedilemedi. Tekrar dener misin?",
     "kontrolHata": "Kontrol yapılamadı. Bağlantını kontrol et; sorun sürerse veritabanı kurulumu eksik olabilir."
-  },
-  "ilkSeyahat": {
-    "baslik": "İlk seyahatin",
-    "alt": "2/2 · Nereden başlamak istersin?",
-    "yeni": "Yeni seyahat planla",
-    "yeniAlt": "Şehri seç, mekanları haritada işaretle",
-    "davet": "Davet linkim var",
-    "davetAlt": "Arkadaşının planına katıl; her şey hazır",
-    "soru": "Sonraki seyahatin ne zaman?",
-    "pencere": {
-      "bu_ay": "Bu ay",
-      "uc_ay": "1–3 ay",
-      "bilmiyorum": "Belli değil"
-    },
-    "not": "Ana ekranı buna göre düzenleriz; yakın seyahat varsa planlama öne çıkar.",
-    "atla": "Şimdilik atla",
-    "hata": "Kaydedilemedi. Tekrar dener misin?"
   },
   "seyahatler": {
     "baslik": "Seyahatler",
@@ -112,24 +89,6 @@
       "yarin": "YARIN",
       "gunSonra": "{n} GÜN SONRA"
     }
-  },
-  "yeni": {
-    "baslik": "Nereye?",
-    "alt": "Yeni seyahat · 1/2",
-    "ara": "Şehir ara",
-    "araYer": "Şehir adı yaz",
-    "araHata": "Arama şu an yapılamıyor. Tekrar dene.",
-    "sonucYok": "Sonuç yok",
-    "secimHata": "Şehir bilgisi alınamadı. Tekrar dene.",
-    "tarihler": "Tarihler",
-    "gidis": "Gidiş",
-    "donus": "Dönüş",
-    "sec": "Seç",
-    "tarihNot": "Tarihi sonra da girebilirsin.",
-    "kimlerle": "Kimlerle",
-    "kimlerleNot": "Linkle davet et; uygulama gerekmez. Davet linki bir sonraki adımda hazır olur.",
-    "devam": "Devam · otel",
-    "hata": "Seyahat oluşturulamadı. Tekrar dener misin?"
   },
   "profil": {
     "baslik": "Profil",
@@ -349,7 +308,6 @@
     },
     "geziler": "Bu şehirde hazır geziler",
     "hata": "Rehber yüklenemedi",
-    "okuma": "{n} dk okuma",
     "mekanlar": "Rehberdeki {n} mekan",
     "mekanlarAlt": "Hepsi bir listede, tek dokunuşla ekle",
     "yapiskan": "{sehir} rehberi"

@@ -91,10 +91,8 @@ function Kok() {
         <Stack.Screen name="geziler" />
         <Stack.Screen name="gezi/[slug]" />
         <Stack.Screen name="yerler" />
-        {/* #100: şehir rehberi (Kaydettiklerim #138'de sekme). #138: Profil › Düzenle. */}
+        {/* #138: Profil › Düzenle. */}
         <Stack.Screen name="profil-duzenle" />
-        <Stack.Screen name="rehber/[slug]/index" />
-        <Stack.Screen name="rehber/[slug]/[bolum]" />
       </Stack.Protected>
       <Stack.Screen name="r/[token]" />
     </Stack>
