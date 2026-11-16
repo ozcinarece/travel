@@ -1,14 +1,15 @@
 // #137 Davetle katılma — saf kurallar (test edilir): /r/{token} ekranının adımı, Türkçe yönelme eki, özet metinleri.
 import type { DavetOzeti } from '@/lib/tipler';
 
-export type DavetAdimi = 'yukleniyor' | 'gecersiz' | 'giris' | 'profil' | 'uye' | 'katil';
+export type DavetAdimi = 'yukleniyor' | 'ag' | 'gecersiz' | 'giris' | 'profil' | 'uye' | 'katil';
 
 /**
- * /r/{token} ne göstersin? Özet yoksa geçersiz; oturum yoksa giriş düğmeleri; hesap var ama profil yoksa profil tamamlama;
+ * /r/{token} ne göstersin? Özet isteği hata verdiyse `ag` (#239: "Bağlanamadık"); istek başarılı ama özet yoksa geçersiz; oturum yoksa giriş düğmeleri; hesap var ama profil yoksa profil tamamlama;
  * zaten üyeyse doğrudan seyahat; aksi hâlde katılım.
  */
-export function davetAdimi(g: { ozet: DavetOzeti | null | undefined; ozetBekliyor: boolean; hazir: boolean; hesapli: boolean; profilVar: boolean | undefined }): DavetAdimi {
+export function davetAdimi(g: { ozet: DavetOzeti | null | undefined; ozetBekliyor: boolean; ozetHata?: boolean; hazir: boolean; hesapli: boolean; profilVar: boolean | undefined }): DavetAdimi {
   if (g.ozetBekliyor || !g.hazir) return 'yukleniyor';
+  if (g.ozetHata && !g.ozet) return 'ag';
   if (!g.ozet) return 'gecersiz';
   if (!g.hesapli) return 'giris';
   if (g.profilVar === undefined) return 'yukleniyor';

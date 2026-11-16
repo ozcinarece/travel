@@ -29,6 +29,9 @@ export const renk = {
   basariZemin: '#e3f5ee',
   /** Harita arkasındaki ekran zemini (kanvas 3c). */
   haritaZemin: '#f1f3f8',
+  /** Dikkat (turuncu): geçersiz davet ikon kutusu zemini ve çizgisi (kanvas 3d-B). */
+  dikkatZemin: '#fff0e3',
+  dikkat: '#b5500a',
 } as const;
 
 // Gün renkleri (kanvas Temel · harita dili): 1 mavi · 2 sarı (üstünde Lacivert yazı) · 3 yeşil · 4 mor; 5–6 ek, 7. günden sonra döner.
