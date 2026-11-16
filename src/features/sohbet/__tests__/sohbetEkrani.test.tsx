@@ -59,6 +59,8 @@ function mockSorgu(tablo: string) {
   );
   return zincir;
 }
+// #248 Ş3: places-light cevabı (null → hata). Uydurma adlar.
+let mockHafif: Record<string, { ad: string }> | null = null;
 const mockDb: Record<string, string> = { 'ChIJ-kursunlu': 'Kurşunlu Külliyesi', 'ChIJ-cib': 'Hacı Baba Çibörek' };
 jest.mock('@/lib/supabase', () => ({
   supabase: {
@@ -74,8 +76,12 @@ jest.mock('@/lib/supabase', () => ({
       return { data: null, error: { message: `beklenmeyen rpc ${ad}` } };
     },
     functions: {
-      invoke: async (ad: string) => {
+      invoke: async (ad: string, secenek?: { body?: { ids?: string[] } }) => {
         mockKayit.invoke.push(ad);
+        if (ad === 'places-light' && mockHafif) {
+          const yerler = (secenek?.body?.ids ?? []).filter((id) => mockHafif![id]).map((id) => ({ place_id: id, lat: 39.77, lng: 30.52, primary_type: 'restaurant', tz: null, puan: null, puan_sayisi: null, acik: null, ulke_kodu: null, ...mockHafif![id] }));
+          return { data: { yerler }, error: null };
+        }
         return { data: null, error: { message: 'Google isteği beklenmiyordu' } };
       },
     },
@@ -225,6 +231,7 @@ beforeEach(() => {
   mockKayit.yaz = [];
   mockKayit.dosyaSil = [];
   mockTablolar = fikstur();
+  mockHafif = null;
 });
 afterEach(() => {
   while (acik.length) {
@@ -344,5 +351,54 @@ describe('#184 KK10 Gezi sayfası Sohbet kartı', () => {
     expect(getByText('Oy ver')).toBeTruthy();
     expect(mockKayit.invoke).toEqual([]);
     expect(fetchSahte).not.toHaveBeenCalled();
+  });
+});
+
+// #248 inceleme 2 (UX Ş3): mekan seçeneğinin metni boş; ad listedeki mekan için de places-light'tan canlı gelir.
+describe('#248 Ş3 oylama seçenek adları', () => {
+  const ikiRestoran = () => {
+    mockTablolar.places.push(
+      { id: 'm3', trip_id: 't1', place_id: 'ChIJ-r1', primary_type: 'restaurant', lat: 39.77, lng: 30.52, google_fetched_at: '', default_minutes: 75, added_by: 'ben', note: null, created_at: '2026-10-03T00:00:00Z' },
+      { id: 'm4', trip_id: 't1', place_id: 'ChIJ-r2', primary_type: 'restaurant', lat: 39.77, lng: 30.53, google_fetched_at: '', default_minutes: 75, added_by: 'ben', note: null, created_at: '2026-10-04T00:00:00Z' },
+    );
+    (mockTablolar.oylamalar[0] as { oylama_secenekleri: unknown[] }).oylama_secenekleri = [
+      { id: 'x1', oylama_id: 'o1', sira: 1, metin: '', place_id: 'ChIJ-r1' },
+      { id: 'x2', oylama_id: 'o1', sira: 2, metin: '', place_id: 'ChIJ-r2' },
+    ];
+    (mockTablolar.oylamalar[0] as { oylama_oylari: unknown[] }).oylama_oylari = [];
+  };
+
+  it('soğuk açılış, Sohbet: listedeki mekanların adı places-light\'tan gelir (tek istek); erişilebilirlik etiketi adı okur', async () => {
+    ikiRestoran();
+    mockHafif = { 'ChIJ-r1': { ad: 'Lokanta Bir' }, 'ChIJ-r2': { ad: 'Lokanta İki' } };
+    const { getByText, getByLabelText, queryByText, qc } = ciz(<SohbetSekmesi />);
+    await waitFor(() => getByText('Lokanta Bir'));
+    await sakinles(qc);
+    expect(getByText('Lokanta İki')).toBeTruthy();
+    expect(getByLabelText('Lokanta Bir, 0 oy')).toBeTruthy();
+    expect(queryByText('Restoran')).toBeNull();
+    expect(mockKayit.invoke.filter((a) => a === 'places-light')).toHaveLength(1);
+  });
+
+  it('Gezi kartı da aynı adları gösterir', async () => {
+    ikiRestoran();
+    mockHafif = { 'ChIJ-r1': { ad: 'Lokanta Bir' }, 'ChIJ-r2': { ad: 'Lokanta İki' } };
+    const { getByText, qc } = ciz(<GeziEkrani />);
+    await waitFor(() => getByText('Lokanta Bir · 0'));
+    await sakinles(qc);
+    expect(getByText('Lokanta İki · 0')).toBeTruthy();
+  });
+
+  it('ad çekilemezse aynı kategori numaralanır: "Restoran 1 / Restoran 2" (Sohbet ve Gezi)', async () => {
+    ikiRestoran();
+    const sohbet = ciz(<SohbetSekmesi />);
+    await waitFor(() => sohbet.getByText('Restoran 1'), { timeout: 4000 });
+    await sakinles(sohbet.qc);
+    expect(sohbet.getByText('Restoran 2')).toBeTruthy();
+    expect(sohbet.queryByText('…')).toBeNull();
+    sohbet.unmount();
+    const gezi = ciz(<GeziEkrani />);
+    await waitFor(() => gezi.getByText('Restoran 1 · 0'), { timeout: 4000 });
+    expect(gezi.getByText('Restoran 2 · 0')).toBeTruthy();
   });
 });

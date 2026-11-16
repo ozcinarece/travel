@@ -32,6 +32,7 @@ import { useMekanEkle, useMekanlar, useUyeler } from '@/features/mekanlar/sorgul
 import { degisiklikGruplari, geriAlinabilir, geriAlmaYetkisi, grupMetni, type DegisiklikGrubu } from '@/features/program/degisiklikMetni';
 import { useSimdi } from '@/features/program/useProgram';
 import { useSeyahatId } from '@/features/seyahatler/baglam';
+import { useOylamaAdlari } from '@/features/sohbet/oylamaAdlari';
 import { useSeyahat } from '@/features/seyahatler/sorgular';
 import { seyahatAdi } from '@/features/sihirbaz/sihirbaz';
 import {
@@ -156,6 +157,8 @@ function Sohbet({ seyahat, uyeler, mesajlar, oylamalar }: { seyahat: Seyahat; uy
   const hafif = useHafifYerler(listedeOlmayan, { puan: false, foto: true });
   const mekanIle = useMemo(() => new Map(mekanlar.map((m) => [m.id, m])), [mekanlar]);
   const yerIle = useMemo(() => new Map(mekanlar.map((m) => [m.place_id, m])), [mekanlar]);
+  // #248 Ş3: oylama seçeneklerinin adı listedeki mekanlar için de canlı (Gezi'deki kartla aynı sorgu).
+  const oylamaAdlari = useOylamaAdlari(oylamalar, (p) => yerIle.get(p)?.primary_type);
   const durakKonumlari = useMemo(() => {
     const gunIle = new Map(gunler.map((g) => [g.id, g.index]));
     return duraklar
@@ -259,6 +262,7 @@ function Sohbet({ seyahat, uyeler, mesajlar, oylamalar }: { seyahat: Seyahat; uy
         const ozet = oylamaOzeti(o, uyeIdleri, benId, an);
         const kz = o.kapanis_at ? kapanisZamani(o.kapanis_at, an, seyahat.tz) : null;
         const kapanis = o.kapanis_at ? (kz ? t(`sohbet.oylama.kapanir_${kz.gun}`, { saat: kz.saat, tarih: tarihEtiketi(kz.tarih, bugun, { bugun: '', dun: '' }) }) : t('sohbet.oylama.kapandi')) : null;
+        const adlar = oylamaAdlari.adlar(o);
         const kazananPlanda = ozet.kazanan?.place_id ? yerBilgisi(ozet.kazanan.place_id).planda : true;
         ek = (
           <OylamaKarti
@@ -267,7 +271,7 @@ function Sohbet({ seyahat, uyeler, mesajlar, oylamalar }: { seyahat: Seyahat; uy
             k={k}
             benId={benId}
             kapanis={kapanis}
-            secenekAdi={(sc) => sc.metin || (sc.place_id ? yerBilgisi(sc.place_id).ad : '')}
+            secenekAdi={(sc) => adlar.get(sc.id) ?? sc.metin}
             onOy={(secenekId) => oyVer.mutate({ oylamaId: o.id, secenekId }, { onError: () => bildir(t('sohbet.oyVerilemedi')) })}
             onPlanaEkle={kazananPlanda ? undefined : planaEkle}
           />
