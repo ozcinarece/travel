@@ -163,11 +163,12 @@ function GeziSayfasi({ seyahat, gunler, duraklar, mekanlar, konaklamalar, katild
   const mesajlar = useMesajlar(seyahat.id);
   const oylamalar = useOylamalar(seyahat.id);
   const okunmamis = useOkunmamis(seyahat.id);
-  // #248 Ş3: seçenek adları Sohbet'teki kartla aynı sorgudan (bütün oylamaların kimlikleri → aynı anahtar, tek istek).
+  // #248: kart yalnız açık oylamayı gösterir; adlar da yalnız onun için istenir (kapanmış oylamalar için Google isteği yok).
   const oylamaListesi = useMemo(() => oylamalar.data ?? [], [oylamalar.data]);
   const yerTipi = useMemo(() => new Map(mekanlar.map((m) => [m.place_id, m.primary_type])), [mekanlar]);
-  const oylamaAdlari = useOylamaAdlari(oylamaListesi, (p) => yerTipi.get(p));
   const acikOylama = oylamaListesi.find((o) => !o.kapanis_at || Date.parse(o.kapanis_at) > an.getTime()) ?? null;
+  const acikOylamalar = useMemo(() => (acikOylama ? [acikOylama] : []), [acikOylama]);
+  const oylamaAdlari = useOylamaAdlari(acikOylamalar, (p) => yerTipi.get(p));
   const oylamaMesaji = acikOylama ? (mesajlar.data ?? []).find((m) => m.oylama_id === acikOylama.id && !m.silindi_at) : undefined;
   const sonMesaj = (mesajlar.data ?? []).find((m) => !m.silindi_at) ?? null;
   const ozetMesaj = oylamaMesaji ?? sonMesaj;

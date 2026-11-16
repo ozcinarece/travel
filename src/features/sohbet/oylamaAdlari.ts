@@ -1,6 +1,7 @@
 // #248 inceleme 2 (UX Ş3): oylama seçeneğinin adı. Mekan seçeneğinin metni boş kaydedilir (Google adı saklanmaz), ad ekranda
-// canlı gelir: önce bizim içeriğimiz / oturum önbelleği, yoksa places-light. Sohbet ve Gezi aynı sorguyu kullanır (aynı anahtar,
-// tek istek). Ad yüklenirken "…"; hiç gelemezse kategori, aynı oylamada aynı kategori birden çok kez geçiyorsa "Restoran 1 / 2".
+// canlı gelir: önce bizim içeriğimiz / oturum önbelleği, yoksa places-light (ortak `hafifOnbellek`: aynı kimlik oturumda bir
+// kez istenir). Ad yüklenirken "…" (oylanamaz); hiç gelemezse kategori, aynı oylamada aynı kategori birden çok kez geçiyorsa
+// "Restoran 1 / 2".
 import { useMemo } from 'react';
 
 import { useBilinenMekanlar } from '@/features/gezi/bilinenMekanlar';
@@ -10,7 +11,8 @@ import { kategoriEtiketi } from '@/lib/kategori';
 
 import type { Oylama, OylamaSecenegi } from './sohbet';
 
-export const YUKLENIYOR = '…';
+/** Ad yüklenirken görünen yer tutucu (`tr.json`). */
+export const yukleniyorMetni = () => t('sohbet.oylama.adYukleniyor');
 
 /** Adı canlı gösterilecek seçeneklerin `place_id`'leri (metni boş mekan seçenekleri), sıralı ve tekil. */
 export function adiCanliYerler(oylamalar: Oylama[]): string[] {
@@ -37,7 +39,7 @@ export function secenekAdlari(secenekler: OylamaSecenegi[], b: AdBilgisi): Map<s
     }
     const ad = b.ad(sc.place_id);
     if (ad) sonuc.set(sc.id, ad);
-    else if (b.yukleniyor(sc.place_id)) sonuc.set(sc.id, YUKLENIYOR);
+    else if (b.yukleniyor(sc.place_id)) sonuc.set(sc.id, yukleniyorMetni());
     else yedekler.push({ id: sc.id, etiket: kategoriEtiketi(b.tip(sc.place_id)) });
   }
   const sayi = new Map<string, number>();
@@ -55,25 +57,56 @@ export function secenekAdlari(secenekler: OylamaSecenegi[], b: AdBilgisi): Map<s
   return sonuc;
 }
 
+/** Adı henüz yüklenen seçeneklerin kimlikleri (bu seçenekler oylanamaz). */
+export function yuklenenSecenekler(secenekler: OylamaSecenegi[], b: AdBilgisi): Set<string> {
+  const sonuc = new Set<string>();
+  for (const sc of secenekler) {
+    if (sc.metin.trim() || !sc.place_id) continue;
+    if (!b.ad(sc.place_id) && b.yukleniyor(sc.place_id)) sonuc.add(sc.id);
+  }
+  return sonuc;
+}
+
 /**
  * Oylamalardaki mekan seçeneklerinin adları. `tipKaynagi`: listedeki mekanın türü (ad gelmezse kategori için).
  * Google'a etki: metni boş her mekan seçeneği için en çok 1 places-light (Pro maske) isteği; oturum önbelleğinde ya da bizim
  * içeriğimizde olan için istek yok (hafifOnbellek yalnız eksik kimlikleri ister).
+ * `fotoIle`: ekranın aynı kimliği fotoğrafla da istediği kimlikler (Sohbet'te listede olmayan mekan kartları). Bunlar burada da
+ * fotoğraf grubuyla istenir; böylece önbellek hangi sırayla gelirse gelsin o kimlik için tek istek (Pro + foto) gider, fotoğrafsız
+ * Pro'dan sonra ikinci bir fotoğraflı istek gitmez (#248 inceleme 3, madde 2). `null`: küme henüz belli değil (liste
+ * yükleniyor); o sırada istek gitmez, adlar "…" görünür.
  */
-export function useOylamaAdlari(oylamalar: Oylama[], tipKaynagi: (placeId: string) => string | null | undefined = () => null) {
+export function useOylamaAdlari(
+  oylamalar: Oylama[],
+  tipKaynagi: (placeId: string) => string | null | undefined = () => null,
+  fotoIle: ReadonlySet<string> | null = BOS,
+) {
   const ids = useMemo(() => adiCanliYerler(oylamalar), [oylamalar]);
   const bilinen = useBilinenMekanlar(ids);
-  // Bizim içeriğimizde adı olan için Google'a gidilmez; içerik sorgusu bitmeden istenmez (iki ekranda aynı anahtar).
-  const istenecek = bilinen.yukleniyor ? [] : ids.filter((p) => !bilinen.icerikAdi(p));
-  const hafif = useHafifYerler(istenecek, { puan: false });
+  // Bizim içeriğimizde adı olan için Google'a gidilmez; içerik sorgusu bitmeden istenmez.
+  const bekle = bilinen.yukleniyor || fotoIle === null;
+  const istenecek = bekle ? [] : ids.filter((p) => !bilinen.icerikAdi(p));
+  const hafif = useHafifYerler(
+    istenecek.filter((p) => !fotoIle?.has(p)),
+    { puan: false },
+  );
+  const hafifFoto = useHafifYerler(
+    istenecek.filter((p) => !!fotoIle?.has(p)),
+    { puan: false, foto: true },
+  );
+  const veri = (p: string) => (fotoIle?.has(p) ? hafifFoto : hafif);
   const bilgi: AdBilgisi = {
-    ad: (p) => bilinen.ad({ place_id: p }) ?? hafif.data?.[p]?.ad ?? null,
-    tip: (p) => tipKaynagi(p) ?? hafif.data?.[p]?.primary_type ?? null,
+    ad: (p) => bilinen.ad({ place_id: p }) ?? veri(p).data?.[p]?.ad ?? null,
+    tip: (p) => tipKaynagi(p) ?? veri(p).data?.[p]?.primary_type ?? null,
     // Çevrimdışıyken sorgu "paused" kalır, hata sonrası "idle": ikisinde de yedek ada düşülür.
-    yukleniyor: (p) => bilinen.yukleniyor || (hafif.fetchStatus === 'fetching' && !hafif.data?.[p]),
+    yukleniyor: (p) => bekle || (veri(p).fetchStatus === 'fetching' && !veri(p).data?.[p]),
   };
   return {
     /** Oylamanın seçenek adları (sıra numarası için bütün seçenekler birlikte değerlendirilir). */
     adlar: (o: Oylama) => secenekAdlari(o.oylama_secenekleri, bilgi),
+    /** Adı yüklenen (henüz oylanamayan) seçenekler. */
+    yuklenenler: (o: Oylama) => yuklenenSecenekler(o.oylama_secenekleri, bilgi),
   };
 }
+
+const BOS: ReadonlySet<string> = new Set();

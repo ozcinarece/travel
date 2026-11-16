@@ -61,6 +61,9 @@ function mockSorgu(tablo: string) {
 }
 // #248 Ş3: places-light cevabı (null → hata). Uydurma adlar.
 let mockHafif: Record<string, { ad: string }> | null = null;
+// #248 inceleme 3: her places-light isteğinin kimlikleri; `mockHafifBekle` verilirse cevap o çözülene kadar bekler.
+let mockHafifIstekleri: string[][] = [];
+let mockHafifBekle: Promise<void> | null = null;
 const mockDb: Record<string, string> = { 'ChIJ-kursunlu': 'Kurşunlu Külliyesi', 'ChIJ-cib': 'Hacı Baba Çibörek' };
 jest.mock('@/lib/supabase', () => ({
   supabase: {
@@ -78,6 +81,8 @@ jest.mock('@/lib/supabase', () => ({
     functions: {
       invoke: async (ad: string, secenek?: { body?: { ids?: string[] } }) => {
         mockKayit.invoke.push(ad);
+        if (ad === 'places-light') mockHafifIstekleri.push([...(secenek?.body?.ids ?? [])]);
+        if (ad === 'places-light' && mockHafifBekle) await mockHafifBekle;
         if (ad === 'places-light' && mockHafif) {
           const yerler = (secenek?.body?.ids ?? []).filter((id) => mockHafif![id]).map((id) => ({ place_id: id, lat: 39.77, lng: 30.52, primary_type: 'restaurant', tz: null, puan: null, puan_sayisi: null, acik: null, ulke_kodu: null, ...mockHafif![id] }));
           return { data: { yerler }, error: null };
@@ -232,6 +237,8 @@ beforeEach(() => {
   mockKayit.dosyaSil = [];
   mockTablolar = fikstur();
   mockHafif = null;
+  mockHafifIstekleri = [];
+  mockHafifBekle = null;
 });
 afterEach(() => {
   while (acik.length) {
@@ -411,5 +418,57 @@ describe('#248 Ş3 oylama seçenek adları', () => {
     const gezi = ciz(<GeziEkrani />);
     await waitFor(() => gezi.getByText('Restoran 1 · 0'), { timeout: 4000 });
     expect(gezi.getByText('Restoran 2 · 0')).toBeTruthy();
+  });
+
+  // #248 inceleme 3, madde 1: Gezi kartı yalnız açık oylamayı gösterir; kapanmış oylamanın mekanları için istek gitmez.
+  it('Gezi: kapanmış oylamanın mekanı istenmez, yalnız açık oylamanınki', async () => {
+    ikiRestoran();
+    mockTablolar.oylamalar.push({
+      id: 'o0',
+      trip_id: 't1',
+      soru: 'Dün nerede yedik?',
+      kapanis_at: an(dun, 12),
+      olusturan: 'ayse',
+      created_at: an(dun, 9),
+      oylama_secenekleri: [{ id: 'e1', oylama_id: 'o0', sira: 1, metin: '', place_id: 'ChIJ-eski' }],
+      oylama_oylari: [],
+    });
+    mockHafif = { 'ChIJ-r1': { ad: 'Lokanta Bir' }, 'ChIJ-r2': { ad: 'Lokanta İki' }, 'ChIJ-eski': { ad: 'Eski Yer' } };
+    const { getByText, qc } = ciz(<GeziEkrani />);
+    await waitFor(() => getByText('Lokanta Bir · 0'));
+    await sakinles(qc);
+    expect(mockHafifIstekleri.flat()).not.toContain('ChIJ-eski');
+    expect(mockHafifIstekleri.flat().sort()).toEqual(['ChIJ-r1', 'ChIJ-r2']);
+  });
+
+  // Madde 2: listede olmayan oylama mekanı Sohbet'te hem kart fotoğrafı hem ad için gerekir; tek istek gider.
+  it('Sohbet: listede olmayan oylama mekanı için tek places-light isteği', async () => {
+    (mockTablolar.oylamalar[0] as { oylama_secenekleri: unknown[] }).oylama_secenekleri = [
+      { id: 'x1', oylama_id: 'o1', sira: 1, metin: '', place_id: 'ChIJ-disari' },
+      { id: 'x2', oylama_id: 'o1', sira: 2, metin: 'Balık', place_id: null },
+    ];
+    mockHafif = { 'ChIJ-disari': { ad: 'Dışarıdaki Lokanta' } };
+    const { getByText, qc } = ciz(<SohbetSekmesi />);
+    await waitFor(() => getByText('Dışarıdaki Lokanta'));
+    await sakinles(qc);
+    expect(mockHafifIstekleri.filter((ids) => ids.includes('ChIJ-disari'))).toHaveLength(1);
+  });
+
+  // Madde 3: ad yüklenirken seçenek "…" görünür, oylanamaz; ekran okuyucu "Yükleniyor" okur.
+  it('ad yüklenirken seçenek oylanamaz ve "Yükleniyor" okunur', async () => {
+    ikiRestoran();
+    mockHafif = { 'ChIJ-r1': { ad: 'Lokanta Bir' }, 'ChIJ-r2': { ad: 'Lokanta İki' } };
+    let birak: () => void = () => undefined;
+    mockHafifBekle = new Promise<void>((c) => (birak = c));
+    const { getByText, getAllByLabelText, getByLabelText, qc } = ciz(<SohbetSekmesi />);
+    await waitFor(() => expect(getAllByLabelText('Yükleniyor')).toHaveLength(2));
+    const secenek = getAllByLabelText('Yükleniyor')[0];
+    expect(secenek.props.accessibilityState).toEqual(expect.objectContaining({ disabled: true, busy: true }));
+    fireEvent.press(secenek);
+    expect(mockKayit.yaz.some((y) => y.tablo === 'oylama_oylari')).toBe(false);
+    await act(async () => birak());
+    await waitFor(() => getByText('Lokanta Bir'));
+    await sakinles(qc);
+    expect(getByLabelText('Lokanta Bir, 0 oy').props.accessibilityState).toEqual(expect.objectContaining({ disabled: false }));
   });
 });

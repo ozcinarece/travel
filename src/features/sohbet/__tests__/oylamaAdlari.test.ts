@@ -1,7 +1,7 @@
 // #248 inceleme 2 (UX Ş3): seçenek adı — metin, canlı ad, yükleniyor "…", yedek kategori ve aynı kategoride numara.
 import { describe, expect, it, jest } from '@jest/globals';
 
-import { adiCanliYerler, secenekAdlari, YUKLENIYOR, type AdBilgisi } from '../oylamaAdlari';
+import { adiCanliYerler, secenekAdlari, yukleniyorMetni, yuklenenSecenekler, type AdBilgisi } from '../oylamaAdlari';
 import type { Oylama, OylamaSecenegi } from '../sohbet';
 
 jest.mock('@/lib/supabase', () => ({ supabase: {} }));
@@ -21,7 +21,7 @@ describe('secenekAdlari', () => {
   });
   it('ad yüklenirken kategori değil "…"', () => {
     const m = secenekAdlari([sc('b', 1, '', 'P1')], bilgi({}, ['P1'], { P1: 'restaurant' }));
-    expect(m.get('b')).toBe(YUKLENIYOR);
+    expect(m.get('b')).toBe(yukleniyorMetni());
   });
   it('ad gelmezse kategori; tek ise numarasız', () => {
     const m = secenekAdlari([sc('a', 1, '', 'P1'), sc('b', 2, '', 'P2')], bilgi({}, [], { P1: 'restaurant', P2: 'cafe' }));
@@ -34,6 +34,13 @@ describe('secenekAdlari', () => {
     expect(m.get('a')).toBe('Restoran 1');
     expect(m.get('b')).toBe('Restoran 2');
     expect(m.get('c')).toBe('Lokanta');
+  });
+});
+
+describe('yuklenenSecenekler', () => {
+  it('yalnız adı yüklenen mekan seçenekleri (metinli ya da adı gelmiş olan değil)', () => {
+    const y = yuklenenSecenekler([sc('a', 1, 'Balık', null), sc('b', 2, '', 'P1'), sc('c', 3, '', 'P2')], bilgi({ P2: 'Lokanta' }, ['P1', 'P2']));
+    expect([...y]).toEqual(['b']);
   });
 });
 

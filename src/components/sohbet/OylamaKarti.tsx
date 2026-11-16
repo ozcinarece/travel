@@ -18,6 +18,8 @@ type Props = {
   kapanis: string | null;
   /** #248 KK2: mekan seçeneğinin metni boşsa ad canlı gelir. */
   secenekAdi: (s: OylamaSecenegi) => string;
+  /** #248: adı henüz yüklenen seçenek oylanamaz; ekran okuyucu "Yükleniyor" okur. */
+  yukleniyor?: (s: OylamaSecenegi) => boolean;
   onOy: (secenekId: string) => void;
   /** Kazanan mekan seçeneği için (planda değilse). */
   onPlanaEkle?: (s: OylamaSecenegi) => void;
@@ -26,7 +28,7 @@ type Props = {
 const KAZANAN = '#ffd9bf';
 const DIGER = '#dce3f6';
 
-export function OylamaKarti({ oylama, ozet, k, benId, kapanis, secenekAdi, onOy, onPlanaEkle }: Props) {
+export function OylamaKarti({ oylama, ozet, k, benId, kapanis, secenekAdi, yukleniyor = () => false, onOy, onPlanaEkle }: Props) {
   const vermeyenler = ozet.oyVermeyenler.filter((id) => id !== benId || ozet.kapali);
   const altMetin = [
     vermeyenler.length ? t('sohbet.oylama.vermedi', { adlar: vermeyenler.map((id) => (id === benId ? t('harcama.sen') : k.ad(id))).join(', ') }) : null,
@@ -43,13 +45,15 @@ export function OylamaKarti({ oylama, ozet, k, benId, kapanis, secenekAdi, onOy,
       <Text style={s.soru}>{oylama.soru}</Text>
       {ozet.secenekler.map(({ secenek, oy, oran, oyVerenler }) => {
         const benim = ozet.benimOyum === secenek.id;
+        const bekliyor = yukleniyor(secenek);
+        const kapali = ozet.kapali || bekliyor;
         return (
           <Pressable
             key={secenek.id}
             accessibilityRole="button"
-            accessibilityState={{ selected: benim, disabled: ozet.kapali }}
-            accessibilityLabel={t('sohbet.oylama.secenekEtiketi', { metin: secenekAdi(secenek), n: oy })}
-            disabled={ozet.kapali}
+            accessibilityState={{ selected: benim, disabled: kapali, busy: bekliyor }}
+            accessibilityLabel={bekliyor ? t('sohbet.oylama.secenekYukleniyor') : t('sohbet.oylama.secenekEtiketi', { metin: secenekAdi(secenek), n: oy })}
+            disabled={kapali}
             onPress={() => onOy(secenek.id)}
             style={s.secenek}
           >
