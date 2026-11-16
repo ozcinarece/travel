@@ -16,6 +16,10 @@ import {
   osmIdleri,
   osmKimlikSorgusu,
   osmKonumDenetle,
+  adSade,
+  adUyar,
+  osmEslestir,
+  eslemeYaricapi,
 } from '../dogrula.mjs';
 import { anahtarCifti, coz, sifrele } from '../sifre.mjs';
 
@@ -361,5 +365,50 @@ describe('#197 şehir kimliği', () => {
     expect(() => sehirKimligiSql("x'; drop", { place_id: 'ChIJ_eskisehir_1', tz: 'UTC' })).toThrow();
     expect(() => sehirKimligiSql('eskisehir', { place_id: "ChIJ'x", tz: 'UTC' })).toThrow();
     expect(() => sehirKimligiSql('eskisehir', { place_id: 'ChIJ_eskisehir_1', tz: 'UTC', ulke_kodu: 'tr' })).toThrow();
+  });
+});
+
+describe('#205 KK3: OSM eşleştirmesi (ad + 150 m)', () => {
+  const satir = { ad: 'Kurşunlu Camii', lat: 39.7667, lng: 30.5256 };
+  // ~0,001° enlem ≈ 111 m
+  const yakin = { osm: 'way/10', adlar: ['Kurşunlu Camii'], lat: 39.7677, lng: 30.5256 };
+  const uzak = { osm: 'way/11', adlar: ['Kurşunlu Camii'], lat: 39.7687, lng: 30.5256 };
+  const baskaAd = { osm: 'node/12', adlar: ['Başka Kafe'], lat: 39.7667, lng: 30.5256 };
+
+  it('adı Türkçe harf ve noktalamadan bağımsız sadeleştirir', () => {
+    expect(adSade('  KURŞUNLU Camii & Külliyesi ')).toBe('kursunlu camii kulliyesi');
+    expect(adSade('İstanbul')).toBe('istanbul');
+    expect(adSade('Işık')).toBe('isik');
+  });
+
+  it('aynı ad ya da tam sözcük dizisi olarak içerme uyar; kısa ya da yarım sözcük uymaz', () => {
+    expect(adUyar('Kurşunlu Camii', 'KURSUNLU CAMİİ')).toBe(true);
+    expect(adUyar('Odunpazarı Modern Müze', 'OMM Odunpazarı Modern Müze')).toBe(true);
+    expect(adUyar('Park', 'Kent Park')).toBe(false);
+    expect(adUyar('Kurşunlu', 'Kurşunluk Parkı')).toBe(false);
+    expect(adUyar('', 'Kurşunlu')).toBe(false);
+  });
+
+  it('150 m içindeki adı uyan adayı seçer, en yakını tercih eder', () => {
+    expect(osmEslestir(satir, [uzak, yakin, baskaAd])).toEqual({ osm_id: 'way/10', lat: yakin.lat, lng: yakin.lng });
+    expect(osmEslestir(satir, [{ ...yakin, osm: 'node/13', lat: 39.7672 }, yakin])?.osm_id).toBe('node/13');
+  });
+
+  it('150 m dışı, adı uymayan ya da kimliği bozuk aday eşleşmez', () => {
+    expect(osmEslestir(satir, [uzak])).toBeNull();
+    expect(osmEslestir(satir, [baskaAd])).toBeNull();
+    expect(osmEslestir(satir, [{ ...yakin, osm: 'node/abc' }])).toBeNull();
+    expect(osmEslestir(satir, [])).toBeNull();
+  });
+
+  it('ikinci adlardan (name:tr, alt_name) da eşleşir', () => {
+    expect(osmEslestir(satir, [{ ...yakin, adlar: ['Kursunlu Mosque', 'Kurşunlu Camii'] }])?.osm_id).toBe('way/10');
+  });
+
+  it('Overpass yarıçapı en uzak satırı kapsar; 1–30 km', () => {
+    const m = { lat: 39.7667, lng: 30.5256 };
+    expect(eslemeYaricapi(m, [])).toBe(1000);
+    expect(eslemeYaricapi(m, [{ lat: 39.7967, lng: 30.5256 }])).toBeGreaterThan(3800);
+    expect(eslemeYaricapi(m, [{ lat: 41, lng: 30.5256 }])).toBe(30000);
   });
 });

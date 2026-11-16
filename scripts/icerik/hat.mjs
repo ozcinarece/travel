@@ -1,5 +1,5 @@
-// İçerik hattı (docs/07): .github/workflows/icerik.yml'in çalıştırdığı işlemler — sehirler, osm, arastir, yukle, kontrol, sil,
-// kesfet-olc (#190: Keşfet · Turistik isteğinin ölçümü, yalnız sayı). #197: `sehirler` kimliği (Google kimliği, saat dilimi,
+// İçerik hattı (docs/07): .github/workflows/icerik.yml'in çalıştırdığı işlemler — sehirler, osm, osm-esle (#205 KK3), arastir,
+// yukle, kontrol, sil, kesfet-olc (#190: Keşfet · Turistik isteğinin ölçümü, yalnız sayı). #197: `sehirler` kimliği (Google kimliği, saat dilimi,
 // ülke kodu) eksik şehirleri bir kez doldurur (KURU=false); yeni şehirli yükleme kendi şehrini doldurur.
 // Ortam: ISLEM, DOSYA, ISTEK, KURU, SUPABASE_ACCESS_TOKEN, SUPABASE_PROJECT_REF, YONETIM_URL, CIKTI (osm, arastir), GITHUB_RUN_ID;
 // yerel deneme için SUPABASE_API_URL ve SUPABASE_URL.
@@ -14,9 +14,11 @@ import path from 'node:path';
 import {
   detayIdleri,
   dolarEtiketi,
+  eslemeYaricapi,
   gunleriDenetle,
   osmIdleri,
   osmKimlikSorgusu,
+  osmEslestir,
   osmKonumDenetle,
   planDenetle,
   REHBER_DOSYA,
@@ -388,6 +390,95 @@ async function osm() {
   await ozet(['### OSM adayları', ...satir.map((x) => `- ${x}`)]);
 }
 
+/** #205 KK3: eşleştirme için şehir çevresindeki adlı OSM nesneleri (aday seçiminden geniş: her amenity, place). */
+export function eslemeSorgusu({ lat, lng }, yaricap) {
+  const a = `(around:${Math.round(yaricap)},${lat},${lng})`;
+  return `[out:json][timeout:120];
+(
+  nwr${a}["tourism"]["name"];
+  nwr${a}["historic"]["name"];
+  nwr${a}["amenity"]["name"];
+  nwr${a}["leisure"]["name"];
+  nwr${a}["place"]["name"];
+);
+out center tags;`;
+}
+
+/** Konumu Google'dan (google_30g) olan içerik satırları, şehirleriyle. Ad ve konum yalnız bellekte kalır, yazdırılmaz. */
+async function googleSatirlari() {
+  const satirlar = await sql(`
+    select 'sehirler' as tablo, s.id, s.id as sehir_id, s.ad, s.lat, s.lng from public.sehirler s where s.konum_kaynagi = 'google_30g'
+    union all
+    select 'yerler', y.id, y.sehir_id, y.ad, y.lat, y.lng from public.yerler y where y.konum_kaynagi = 'google_30g'
+    union all
+    select 'gezi_duraklari', d.id, g.sehir_id, d.ad, d.lat, d.lng
+      from public.gezi_duraklari d join public.gezi_gunleri gg on gg.id = d.gezi_gun_id join public.geziler g on g.id = gg.gezi_id
+     where d.konum_kaynagi = 'google_30g'`);
+  const merkezler = new Map((await sql('select id, slug, lat, lng from public.sehirler')).map((s) => [s.id, { slug: s.slug, lat: Number(s.lat), lng: Number(s.lng) }]));
+  return { satirlar: satirlar.map((s) => ({ ...s, lat: Number(s.lat), lng: Number(s.lng) })), merkezler };
+}
+
+/**
+ * #205 KK3: mevcut google_30g satırlar OSM eşleşmesiyle taşınır (ad + en çok 150 m). Şehir başına tek Overpass sorgusu, şehir
+ * merkezi çevresinde; satır koordinatı dışarı gönderilmez, eşleştirme yerelde yapılır. Google'a gidilmez.
+ * KURU (varsayılan): eşleştirir, icerik_konum_osm_esle'yi çağırır ve geri alır; yalnız sayılar raporlanır.
+ * Eşleşmeyenler tablo başına sayı ve satır kimliğiyle (uuid) özete girer; ad ve koordinat yazılmaz.
+ */
+async function osmEsle() {
+  const { satirlar, merkezler } = await googleSatirlari();
+  const TABLOLAR = ['sehirler', 'yerler', 'gezi_duraklari'];
+  const sayi = Object.fromEntries(TABLOLAR.map((t) => [t, { toplam: 0, eslesen: 0, eslesmeyen: [] }]));
+  const eslesmeler = [];
+  const sehirSatirlari = new Map();
+  for (const s of satirlar) {
+    if (!sehirSatirlari.has(s.sehir_id)) sehirSatirlari.set(s.sehir_id, []);
+    sehirSatirlari.get(s.sehir_id).push(s);
+  }
+  const hataliSehir = [];
+  for (const [sehirId, liste] of sehirSatirlari) {
+    const merkez = merkezler.get(sehirId);
+    let adaylar = [];
+    try {
+      const veri = await overpass(eslemeSorgusu(merkez, eslemeYaricapi(merkez, liste)));
+      adaylar = (veri.elements ?? [])
+        .map((e) => ({
+          osm: `${e.type}/${e.id}`,
+          adlar: [e.tags?.name, e.tags?.['name:tr'], e.tags?.['name:en'], e.tags?.alt_name, e.tags?.official_name].filter(Boolean),
+          lat: e.lat ?? e.center?.lat,
+          lng: e.lon ?? e.center?.lon,
+        }))
+        .filter((a) => a.adlar.length && typeof a.lat === 'number' && typeof a.lng === 'number');
+    } catch {
+      hataliSehir.push(merkez.slug);
+    }
+    for (const s of liste) {
+      sayi[s.tablo].toplam += 1;
+      const e = adaylar.length ? osmEslestir(s, adaylar) : null;
+      if (e) {
+        sayi[s.tablo].eslesen += 1;
+        eslesmeler.push({ tablo: s.tablo, id: s.id, ...e });
+      } else sayi[s.tablo].eslesmeyen.push(s.id);
+    }
+  }
+  const sonuc = eslesmeler.length
+    ? await yazanCagri(`public.icerik_konum_osm_esle('${JSON.stringify(eslesmeler).replace(/'/g, "''")}'::jsonb)`, 'osm-esle')
+    : { yazilan: {}, atlanan: {} };
+  const satir = TABLOLAR.map(
+    (t) =>
+      `${t}: google_30g ${sayi[t].toplam} · eşleşen ${sayi[t].eslesen} · ${KURU ? 'yazılacak' : 'yazılan'} ${sonuc.yazilan?.[t] ?? 0} · atlanan ${sonuc.atlanan?.[t] ?? 0} · eşleşmeyen ${sayi[t].eslesmeyen.length}`,
+  );
+  if (hataliSehir.length) satir.push(`Overpass yanıt vermedi (bu şehirlerin satırları eşleşmeyen sayıldı): ${hataliSehir.join(', ')}`);
+  satir.push(KURU ? 'KURU: yazılmadı (işlem geri alındı)' : 'yazıldı');
+  duyuru(hataliSehir.length ? 'warning' : 'notice', 'OSM eşleştirmesi', satir);
+  await ozet([
+    '### OSM eşleştirmesi (#205 KK3)',
+    ...satir.map((x) => `- ${x}`),
+    '',
+    '#### Eşleşmeyen satırlar (kimlik)',
+    ...TABLOLAR.flatMap((t) => (sayi[t].eslesmeyen.length ? [`- ${t}: ${sayi[t].eslesmeyen.join(', ')}`] : [])),
+  ]);
+}
+
 /** Planın mekan rehberleri: icerik/yerler/<şehir>/<rehber>.md (yoksa haritada yok; doğrulayıcı HATA verir). */
 async function rehberleriOku(plan) {
   const sehir = plan.sehir?.yeni?.slug ?? plan.sehir?.slug;
@@ -584,7 +675,7 @@ async function kesfetOlc() {
   await ozet(['### Keşfet · Turistik ölçümü', '', baslik, '|---|---|---|---|---|---|', ...satirlar, '', `- istek ${toplam.istek} · Google ${toplam.google} · eşikte ibadet toplamı ${toplam.ibadetEsikte}`]);
 }
 
-const ISLEMLER = { sehirler, osm, arastir, yukle, kontrol: () => kontrol(), sil, 'kesfet-olc': kesfetOlc };
+const ISLEMLER = { sehirler, osm, 'osm-esle': osmEsle, arastir, yukle, kontrol: () => kontrol(), sil, 'kesfet-olc': kesfetOlc };
 
 if (process.argv[1] && import.meta.url === new URL(`file://${path.resolve(process.argv[1])}`).href) {
   const is = ISLEMLER[ortam.ISLEM];

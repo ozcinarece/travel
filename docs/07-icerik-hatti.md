@@ -29,6 +29,7 @@ oturum ◀── adım durumları ve duyurular (yalnız sayı, slug, id) · şif
 |---|---|---|
 | `sehirler` | Şehirler: slug, ad, yayında mı, geziler (slug, durum, gün, durak). #197: Google kimliği ve saat dilimi eksik şehirleri listeler; `kuru=false` ise bir kez doldurur (Autocomplete `cities` + hafif yer, şehir başına ≤ 2 istek; Google'ın şehri bizimkinden 50 km'den uzaksa yazmaz). Mevcut şehirlerin tek seferlik doldurması budur | `kuru=false` ise (yalnız boş kimlik) |
 | `osm` | Şehrin OSM aday listesi (Overpass): ad, konum, tür, opening_hours, wikipedia/wikidata; sonuç şifreli geçici dalda | Hayır |
+| `osm-esle` | #205 KK3: konumu Google'dan (`google_30g`) olan mevcut şehir, yer ve durak satırlarını OSM'le eşleştirir (ad + en çok 150 m; şehir başına tek Overpass sorgusu, şehir merkezi çevresinde, eşleştirme yerelde). Eşleşen satır `osm` olur (`icerik_konum_osm_esle`, 150 m'yi yeniden denetler). Rapor yalnız sayı; eşleşmeyenler özette satır kimliğiyle | `kuru=false` ise |
 | `arastir` | `kimlik` (OSM adayının place_id'si, ücretsiz) ve/veya `puan` (kısa liste ≤ 30); sonuç şifreli geçici dalda | Hayır (DB'ye) |
 | `yukle` | Plan dosyasını ve mekan rehberlerini denetler, duraklar için detay alır (kapalı mı, konum, kategori), `icerik_gezi_taslak_yukle`. Yeni şehir açtıysa şehrin kimliğini de yazar (place_id plandan, saat dilimi ve ülke kodu tek hafif yer isteğiyle; olmazsa uyarı, `sehirler` sonra doldurur) | `kuru=false` ise |
 | `kontrol` | Slug için: durum, gün ve durak sayısı, place_id'si eksik durak, yazıdaki mekanlar, updated_at, BO linki | Hayır |
@@ -102,6 +103,7 @@ Hata kodları: `22023` geçersiz veri · `23505` slug ya da şehir zaten var · 
 | Adım | İstek | Tahmin |
 |---|---|---|
 | `osm` | Overpass | 0 $ |
+| `osm-esle` | Overpass, şehir başına 1 | 0 $ |
 | `kimlik` | Text Search IDs Only (ör. 60 sorgu) | 0 $ |
 | `puan` | kısa liste: tipik 25, en çok 30 × Place Details Enterprise (20 $/1000) | 0,50 $ (en çok 0,60 $) |
 | `yukle` kuru + gerçek | 2 × 12 durak × Place Details Pro (17 $/1000) | 0,41 $ |
@@ -215,6 +217,9 @@ gh api -X POST repos/ozcinarece/travel/actions/workflows/icerik.yml/dispatches \
 gh api -X POST repos/ozcinarece/travel/actions/workflows/icerik.yml/dispatches -f ref=main \
   -f 'inputs[islem]=osm' -f 'inputs[istek]={"sehir":"eskisehir","yaricap_m":8000,"acik_anahtar":"<base64>"}'
 
+# Mevcut satırları OSM'e taşı (#205 KK3; Google'a gidilmez). Önce kuru, sayılara bakılınca kuru=false
+gh api -X POST …/dispatches -f ref=main -f 'inputs[islem]=osm-esle' -F 'inputs[kuru]=true'
+
 # place_id eşleme (ücretsiz) — ad + OSM konumu
 gh api -X POST …/dispatches -f ref=main -f 'inputs[islem]=arastir' \
   -f 'inputs[istek]={"sehir":"eskisehir","kimlik":[{"metin":"Odunpazarı Modern Müze","lat":39.76,"lng":30.52}],"acik_anahtar":"<base64>"}'
@@ -273,7 +278,8 @@ Dal silinemezse: `inputs[islem]=temizle`, `inputs[istek]=<run_id>` (ya da `hepsi
   `yukle`'nin yazdığı damga (`now()`) Google'dan alınma anıdır: hat koordinatı araştırmadan değil, her yüklemede önbelleksiz yapılan detay çağrısından alır (`hat.mjs` `yukle` → `google({ islem: 'detay' })`, `dogrula.mjs`). Detay çağrısı önbelleğe alınırsa ya da koordinat araştırmadan alınırsa #205 KK8 yeniden açılır.
   `konum_kaynagi_kontrol()` tablo başına yalnız sayıları verir (`toplam`, `osm`, `elle`, `google_30g`, `suresi_gecen`). Hedef: `suresi_gecen = 0`.
   Yeni duraklar ve `yukle`'nin açtığı yeni yer satırları, planda `osm` varsa `osm` kaynağıyla yazılır (#205 KK2). Mevcut
-  satırların OSM eşleştirmesi ve günlük yenileme #205 KK3 ile gelecek.
+  satırlar `osm-esle` ile OSM'e taşınır (#205 KK3; önce kuru, tekrar çalıştırmak güvenli: yalnız `google_30g` satıra dokunur).
+  Eşleşmeyenler `google_30g` kalır; #220 kararı B ile BO'da elle işaretlenir. Günlük yenileme işi ayrı PR'da.
   Mekan rehberi editörün kendi metnidir (Google verisi değil).
 - **OSM verisi** (ODbL) saklanabilir; kullanıldığı yerde atıf: "© OpenStreetMap katkıda bulunanlar".
 - **Maliyet.** Alan maskeleri en dar; geniş aday listesi OSM'den, place_id eşleme ücretsiz (IDs Only); puan yalnız kısa

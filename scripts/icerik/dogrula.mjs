@@ -479,3 +479,54 @@ export function sehirKimligiSql(slug, k) {
   }
   return `select public.icerik_sehir_kimligi_yaz('${slug}', '${k.place_id}', '${k.tz}', ${k.ulke_kodu ? `'${k.ulke_kodu}'` : 'null'}) as y`;
 }
+
+// ---------------------------------------------------------------- #205 KK3: mevcut satırların OSM eşleştirmesi
+
+/** Ad karşılaştırması için sade biçim: Türkçe küçük harf, aksansız, yalnız harf/rakam ve tek boşluk. */
+export function adSade(ad) {
+  return String(ad ?? '')
+    .toLocaleLowerCase('tr')
+    .replace(/ı/g, 'i')
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim();
+}
+
+/**
+ * İki ad aynı mekanı mı anlatıyor? Sade biçimleri aynıysa ya da kısa olan (en az 5 harf) uzun olanın içinde tam sözcük
+ * dizisi olarak geçiyorsa ("Odunpazarı Modern Müze" ~ "OMM Odunpazarı Modern Müze").
+ */
+export function adUyar(a, b) {
+  const x = adSade(a);
+  const y = adSade(b);
+  if (!x || !y) return false;
+  if (x === y) return true;
+  const [kisa, uzun] = x.length <= y.length ? [x, y] : [y, x];
+  return kisa.length >= 5 && ` ${uzun} `.includes(` ${kisa} `);
+}
+
+/**
+ * KK3 eşleşme kuralı: adı uyan ve en çok 150 m uzaktaki OSM adaylarından en yakını; yoksa null.
+ * aday: { osm: 'node/1', adlar: [name, name:tr, …], lat, lng }.
+ */
+export function osmEslestir(satir, adaylar) {
+  let enIyi = null;
+  let enIyiM = Infinity;
+  for (const a of adaylar) {
+    if (typeof a?.osm !== 'string' || !OSM_ID.test(a.osm)) continue;
+    if (!(a.adlar ?? []).some((ad) => adUyar(satir.ad, ad))) continue;
+    const m = mesafeM(satir, a);
+    if (m <= OSM_ESLESME_M && m < enIyiM) {
+      enIyi = a;
+      enIyiM = m;
+    }
+  }
+  return enIyi ? { osm_id: enIyi.osm, lat: enIyi.lat, lng: enIyi.lng } : null;
+}
+
+/** Bir şehrin satırlarını kapsayan Overpass yarıçapı (m): en uzak satır + 500 m; 1–30 km. */
+export function eslemeYaricapi(merkez, satirlar) {
+  const uzak = satirlar.reduce((m, s) => Math.max(m, mesafeM(merkez, s)), 0);
+  return Math.min(Math.max(Math.ceil(uzak + 500), 1000), 30000);
+}
