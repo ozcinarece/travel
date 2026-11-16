@@ -23,6 +23,9 @@ Deno.serve(sayacli('places-full', async (istek) => {
   if (eski && simdi - eski.zaman < TTL_MS && new Date(eski.zaman).toDateString() === new Date(simdi).toDateString()) return json({ yer: eski.deger });
   const sinir = await sinirKontrol(k, 'details');
   if (sinir) return sinir;
+  // #226: tamDetay ilk fotoğrafı ayrıca Place Photo ile URI'ye çeviriyor (fotoUri); o istek de Photo kovasından düşülür.
+  const fotoSiniri = await sinirKontrol(k, 'photo');
+  if (fotoSiniri) return fotoSiniri;
   try {
     const yer = await tamDetay(g.id, tz);
     onbellek.set(anahtar, { zaman: simdi, deger: yer });
