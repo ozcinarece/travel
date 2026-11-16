@@ -525,6 +525,38 @@ export function osmEslestir(satir, adaylar) {
   return enIyi ? { osm_id: enIyi.osm, lat: enIyi.lat, lng: enIyi.lng } : null;
 }
 
+/**
+ * #205 KK3 takip: büyük şehirde tek Overpass sorgusu zaman aşımına düşüyor (bursa, roma). Şehir merkezi ve yarıçaptan kurulan
+ * daireyi en çok `kenarM` kenarlı karelere böler; daireye değmeyen kareler atlanır. Kareler yalnız merkez ve yarıçaptan
+ * türetilir (satır koordinatı dışarı gitmez); köşeler 4 ondalığa (~11 m) yuvarlanır. Kare: [güney, batı, kuzey, doğu].
+ */
+export function eslemeKareleri({ lat, lng }, yaricap, kenarM = 6000) {
+  const r = Math.max(Number(yaricap) || 0, 1);
+  const n = Math.max(1, Math.ceil((2 * r) / kenarM));
+  const mLat = 111320;
+  const mLng = 111320 * Math.cos(rad(lat));
+  const adim = (2 * r) / n;
+  const yuvarla = (x) => Math.round(x * 1e4) / 1e4;
+  const kareler = [];
+  for (let i = 0; i < n; i += 1) {
+    for (let j = 0; j < n; j += 1) {
+      // Karenin merkeze göre metre cinsinden kenarları; dairenin karede en yakın noktası r içinde mi?
+      const y0 = -r + i * adim;
+      const x0 = -r + j * adim;
+      const ey = Math.min(Math.max(0, y0), y0 + adim);
+      const ex = Math.min(Math.max(0, x0), x0 + adim);
+      if (Math.hypot(ex, ey) > r) continue;
+      kareler.push([
+        yuvarla(lat + y0 / mLat),
+        yuvarla(lng + x0 / mLng),
+        yuvarla(lat + (y0 + adim) / mLat),
+        yuvarla(lng + (x0 + adim) / mLng),
+      ]);
+    }
+  }
+  return kareler;
+}
+
 /** Bir şehrin satırlarını kapsayan Overpass yarıçapı (m): en uzak satır + 500 m; 1–30 km. */
 export function eslemeYaricapi(merkez, satirlar) {
   const uzak = satirlar.reduce((m, s) => Math.max(m, mesafeM(merkez, s)), 0);

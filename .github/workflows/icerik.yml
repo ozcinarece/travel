@@ -35,7 +35,7 @@ concurrency:
 jobs:
   hat:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 30 # osm-esle: büyük şehirler parça parça sorulur (#205 KK3 takip)
     permissions:
       # osm / arastir: şifreli sonucu geçici dala (icerik-sonuc/<run_id>) koyar; temizle: o dalları siler.
       contents: write

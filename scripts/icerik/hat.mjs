@@ -14,6 +14,7 @@ import path from 'node:path';
 import {
   detayIdleri,
   dolarEtiketi,
+  eslemeKareleri,
   eslemeYaricapi,
   gunleriDenetle,
   osmIdleri,
@@ -351,6 +352,20 @@ async function overpass(sorgu) {
   throw new HatHatasi('Overpass yanıt vermedi');
 }
 
+const bekle = (ms) => new Promise((r) => setTimeout(r, ms));
+
+/** #205 KK3 takip: Overpass yoğunken (429/504) birkaç kez, artan beklemeyle yeniden dener. */
+async function overpassYeniden(sorgu, deneme = 3) {
+  for (let i = 0; ; i += 1) {
+    try {
+      return await overpass(sorgu);
+    } catch (e) {
+      if (i + 1 >= deneme) throw e;
+      await bekle(5000 * 3 ** i);
+    }
+  }
+}
+
 /** OSM kimliği → konum (Overpass). Bulunamayan kimlik haritada olmaz. */
 async function osmKonumlariOku(idler) {
   const harita = new Map();
@@ -390,10 +405,13 @@ async function osm() {
   await ozet(['### OSM adayları', ...satir.map((x) => `- ${x}`)]);
 }
 
-/** #205 KK3: eşleştirme için şehir çevresindeki adlı OSM nesneleri (aday seçiminden geniş: her amenity, place). */
-export function eslemeSorgusu({ lat, lng }, yaricap) {
-  const a = `(around:${Math.round(yaricap)},${lat},${lng})`;
-  return `[out:json][timeout:120];
+/**
+ * #205 KK3: eşleştirme için bir karedeki adlı OSM nesneleri (aday seçiminden geniş: her amenity, place).
+ * Kare: [güney, batı, kuzey, doğu] (eslemeKareleri); büyük şehir tek sorguda zaman aşımına düştüğü için parça parça sorulur.
+ */
+export function eslemeSorgusu([g, b, k, d]) {
+  const a = `(${g},${b},${k},${d})`;
+  return `[out:json][timeout:90];
 (
   nwr${a}["tourism"]["name"];
   nwr${a}["historic"]["name"];
@@ -402,6 +420,25 @@ export function eslemeSorgusu({ lat, lng }, yaricap) {
   nwr${a}["place"]["name"];
 );
 out center tags;`;
+}
+
+/** Bir şehrin eşleştirme adayları: kareler sırayla sorulur, OSM kimliğiyle tekilleştirilir. Bir kare düşerse şehir hatalıdır. */
+async function eslemeAdaylari(merkez, yaricap) {
+  const adaylar = new Map();
+  for (const [i, kare] of eslemeKareleri(merkez, yaricap).entries()) {
+    if (i) await bekle(1000);
+    const veri = await overpassYeniden(eslemeSorgusu(kare));
+    for (const e of veri.elements ?? []) {
+      const a = {
+        osm: `${e.type}/${e.id}`,
+        adlar: [e.tags?.name, e.tags?.['name:tr'], e.tags?.['name:en'], e.tags?.alt_name, e.tags?.official_name].filter(Boolean),
+        lat: e.lat ?? e.center?.lat,
+        lng: e.lon ?? e.center?.lon,
+      };
+      if (a.adlar.length && typeof a.lat === 'number' && typeof a.lng === 'number') adaylar.set(a.osm, a);
+    }
+  }
+  return [...adaylar.values()];
 }
 
 /** Konumu Google'dan (google_30g) olan içerik satırları, şehirleriyle. Ad ve konum yalnız bellekte kalır, yazdırılmaz. */
@@ -419,8 +456,8 @@ async function googleSatirlari() {
 }
 
 /**
- * #205 KK3: mevcut google_30g satırlar OSM eşleşmesiyle taşınır (ad + en çok 150 m). Şehir başına tek Overpass sorgusu, şehir
- * merkezi çevresinde; satır koordinatı dışarı gönderilmez, eşleştirme yerelde yapılır. Google'a gidilmez.
+ * #205 KK3: mevcut google_30g satırlar OSM eşleşmesiyle taşınır (ad + en çok 150 m). Şehir başına, şehir merkezi çevresindeki
+ * daire en çok 6 km'lik karelere bölünüp sorulur; satır koordinatı dışarı gönderilmez, eşleştirme yerelde yapılır. Google'a gidilmez.
  * KURU (varsayılan): eşleştirir, icerik_konum_osm_esle'yi çağırır ve geri alır; yalnız sayılar raporlanır.
  * Eşleşmeyenler tablo başına sayı ve satır kimliğiyle (uuid) özete girer; ad ve koordinat yazılmaz.
  */
@@ -439,15 +476,7 @@ async function osmEsle() {
     const merkez = merkezler.get(sehirId);
     let adaylar = [];
     try {
-      const veri = await overpass(eslemeSorgusu(merkez, eslemeYaricapi(merkez, liste)));
-      adaylar = (veri.elements ?? [])
-        .map((e) => ({
-          osm: `${e.type}/${e.id}`,
-          adlar: [e.tags?.name, e.tags?.['name:tr'], e.tags?.['name:en'], e.tags?.alt_name, e.tags?.official_name].filter(Boolean),
-          lat: e.lat ?? e.center?.lat,
-          lng: e.lon ?? e.center?.lon,
-        }))
-        .filter((a) => a.adlar.length && typeof a.lat === 'number' && typeof a.lng === 'number');
+      adaylar = await eslemeAdaylari(merkez, eslemeYaricapi(merkez, liste));
     } catch {
       hataliSehir.push(merkez.slug);
     }
