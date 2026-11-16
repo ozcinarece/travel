@@ -7,6 +7,7 @@ import { ActivityIndicator, Platform, ScrollView, StyleSheet, Text, View } from 
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Avatar } from '@/components/ui/Avatar';
+import { Ikon } from '@/components/ui/Ikon';
 import { Buton } from '@/components/ui/Buton';
 import { appleIleGiris, appleKullanilabilir, googleIleGiris, iptalMi } from '@/features/auth/giris';
 import { davetAdimi, davetSeyahatAdi, yonelmeEki } from '@/features/davet/katilim';
@@ -39,7 +40,7 @@ export default function DavetEkrani() {
     appleKullanilabilir().then(setAppleVar);
   }, []);
 
-  const hamAdim = davetAdimi({ ozet: ozet.data, ozetBekliyor: ozet.isPending, hazir, hesapli, profilVar: hesapli ? (profil.isPending ? undefined : !!profil.data) : undefined });
+  const hamAdim = davetAdimi({ ozet: ozet.data, ozetBekliyor: ozet.isPending, ozetHata: ozet.isError, hazir, hesapli, profilVar: hesapli ? (profil.isPending ? undefined : !!profil.data) : undefined });
   const adim = katilimHatasi === 'gecersiz' ? 'gecersiz' : hamAdim;
 
   // Olay: davet açıldı (hesaplıysa bir kez; anon yazamaz, giriş sonrası aynı sayfaya dönünce yazılır).
@@ -116,13 +117,31 @@ export default function DavetEkrani() {
       </SafeAreaView>
     );
   }
-  if (adim === 'gecersiz' || !ozet.data) {
+  // #239 (kanvas 3d): A · özet isteği başarısız → "Bağlanamadık" + Tekrar dene (girişli/girişsiz aynı);
+  // B · istek başarılı ama davet yok → "Bu davet geçersiz"; girişsiz kişi giriş ekranına, girişli ana sayfaya gider.
+  if (adim === 'ag' || adim === 'gecersiz' || !ozet.data) {
+    const ag = adim === 'ag';
     return (
-      <SafeAreaView style={s.ekran}>
-        <View style={s.icerik}>
-          <Text style={s.baslik}>{t('davet.gecersizBaslik')}</Text>
-          <Text style={s.alt}>{t('davet.gecersizMetin')}</Text>
-          {hesapli ? <Buton baslik={t('davet.anaSayfa')} onPress={anaSayfa} stil={{ marginTop: 16 }} /> : null}
+      <SafeAreaView style={s.hataEkran}>
+        <View style={s.hataIcerik}>
+          <View style={s.hataUst}>
+            <View style={[s.ikonKutu, { backgroundColor: ag ? renk.yuzey : renk.dikkatZemin }]} accessible={false} importantForAccessibility="no-hide-descendants">
+              <Ikon ad={ag ? 'wifiKapali' : 'kirikBag'} boyut={26} renk={ag ? renk.ana : renk.dikkat} kalinlik={2.2} />
+            </View>
+            <Text accessibilityRole="header" style={s.baslik}>
+              {t(ag ? 'davet.agBaslik' : 'davet.gecersizBaslik')}
+            </Text>
+            <Text style={s.alt}>{t(ag ? 'davet.agMetin' : 'davet.gecersizMetin')}</Text>
+          </View>
+          <View style={s.hataAlt}>
+            {ag ? (
+              <Buton baslik={t('davet.tekrarDene')} boy="buyuk" onPress={() => ozet.refetch()} yukleniyor={ozet.isFetching} />
+            ) : hesapli ? (
+              <Buton baslik={t('davet.anaSayfa')} boy="buyuk" onPress={anaSayfa} />
+            ) : (
+              <Buton baslik={t('davet.gozAt')} boy="buyuk" onPress={() => router.replace('/giris')} />
+            )}
+          </View>
         </View>
       </SafeAreaView>
     );
@@ -193,6 +212,11 @@ const s = StyleSheet.create({
   gunAd: { fontFamily: yazi.kalin, fontSize: 14, color: renk.metin },
   gunDurak: { fontFamily: yazi.normal, fontSize: 13, color: renk.ikincil },
   planNot: { fontFamily: yazi.normal, fontSize: 11, lineHeight: 15, color: renk.soluk, paddingTop: 4 },
+  hataEkran: { flex: 1, backgroundColor: renk.haritaZemin },
+  hataIcerik: { flex: 1, paddingHorizontal: 24, paddingTop: 96, paddingBottom: 34, maxWidth: 520, width: '100%', alignSelf: 'center' },
+  hataUst: { gap: 14 },
+  ikonKutu: { width: 56, height: 56, borderRadius: 18, alignItems: 'center', justifyContent: 'center' },
+  hataAlt: { marginTop: 'auto', gap: 10 },
   altKisim: { marginTop: 'auto', paddingTop: 16, gap: 10 },
   katiliyor: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10, height: 52 },
   katiliyorMetin: { fontFamily: yazi.kalin, fontSize: 14, color: renk.metin },

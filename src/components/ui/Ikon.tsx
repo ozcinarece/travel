@@ -21,6 +21,9 @@ export type IkonAdi =
   | 'kalpOy'
   // #182 (kanvas 24): "Sırayı düzenle" — karşılıklı oklar.
   | 'sirala'
+  // #239 (kanvas 3d): davet linki hata halleri — wifi kapalı (A · Bağlanamadık), kırık bağlantı (B · Bu davet geçersiz).
+  | 'wifiKapali'
+  | 'kirikBag'
   // #30 pin kategori ikonları (16 px çizgi)
   | 'agac'
   | 'catal'
@@ -362,6 +365,23 @@ export function Ikon({ ad, boyut = 24, renk, kalinlik = 2, dolgu }: Props) {
         <Path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z" {...ortak} />
       ) : ad === 'sirala' ? (
         <Path d="M7 7h11l-3-3M17 17H6l3 3" {...ortak} />
+      ) : ad === 'wifiKapali' ? (
+        <>
+          <Path d="M2 8.8a15 15 0 0 1 4.2-2.6" {...ortak} />
+          <Path d="M10.7 5.1A15 15 0 0 1 22 8.8" {...ortak} />
+          <Path d="M5 12.6a10 10 0 0 1 5.2-2.6" {...ortak} />
+          <Path d="M15.6 10.6A10 10 0 0 1 19 12.6" {...ortak} />
+          <Path d="M8.5 16.4a5 5 0 0 1 7 0" {...ortak} />
+          <Path d="M12 20h.01" {...ortak} />
+          <Path d="M3 3l18 18" {...ortak} />
+        </>
+      ) : ad === 'kirikBag' ? (
+        <>
+          <Path d="M9 15l6-6" {...ortak} />
+          <Path d="M11 6l.5-.5a4.2 4.2 0 0 1 6 6l-.5.5" {...ortak} />
+          <Path d="M13 18l-.5.5a4.2 4.2 0 0 1-6-6l.5-.5" {...ortak} />
+          <Path d="M3 3l18 18" {...ortak} />
+        </>
       ) : (
         <>
           <Circle cx={12} cy={8} r={4} {...ortak} />

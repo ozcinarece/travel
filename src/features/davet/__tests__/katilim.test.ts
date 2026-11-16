@@ -21,6 +21,20 @@ describe('davetAdimi (#137)', () => {
   });
 });
 
+describe('#239 davetAdimi: ağ hatası ile geçersiz davet ayrı', () => {
+  it('özet isteği hata verdiyse "ag" (girişli ya da girişsiz)', () => {
+    expect(davetAdimi({ ozet: undefined, ozetBekliyor: false, ozetHata: true, hazir: true, hesapli: false, profilVar: undefined })).toBe('ag');
+    expect(davetAdimi({ ozet: undefined, ozetBekliyor: false, ozetHata: true, hazir: true, hesapli: true, profilVar: true })).toBe('ag');
+  });
+  it('istek başarılı ama davet yoksa "gecersiz"', () => {
+    expect(davetAdimi({ ozet: null, ozetBekliyor: false, ozetHata: false, hazir: true, hesapli: false, profilVar: undefined })).toBe('gecersiz');
+    expect(davetAdimi({ ozet: null, ozetBekliyor: false, ozetHata: false, hazir: true, hesapli: true, profilVar: true })).toBe('gecersiz');
+  });
+  it('önceki özet varken yenileme hatası akışı bozmaz', () => {
+    expect(davetAdimi({ ozet, ozetBekliyor: false, ozetHata: true, hazir: true, hesapli: true, profilVar: true })).toBe('katil');
+  });
+});
+
 describe('yonelmeEki', () => {
   it('ünlü uyumu ve kaynaştırma', () => {
     expect(yonelmeEki('Eskişehir Gezisi')).toBe("Eskişehir Gezisi'ne");
