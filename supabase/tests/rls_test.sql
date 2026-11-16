@@ -2757,7 +2757,7 @@ begin
   assert (select adet from public.places_gunluk_sayac where ozet = repeat('7', 64) and kategori = 'rota') = 2000, 'rota: ret sayacı artırmaz';
   assert (select count(*) from public.places_gunluk_sayac where ozet = repeat('7', 64) and kategori <> 'rota') = 0, 'rota: Places kovaları etkilenmez';
   -- Misafir: kendi sınırı 625 (#253: 25 noktalı ilk matris tek çağrıda sığar); bütün misafirlerin toplamı 3000.
-  assert not public.places_sinir_artir(repeat('8', 64), 'rota', 500, 625, 3000), 'rota: sınırdan büyük ilk çağrı ret';
+  assert not public.places_sinir_artir(repeat('8', 64), 'rota', 500, 625, 3000), 'rota: tek çağrı (625) sınırdan (500) büyükse ret; p_adet en çok 625 olduğu için daha küçük bir sınırla denenir';
   assert (select count(*) from public.places_gunluk_sayac where ozet = 'misafir-toplam' and kategori = 'rota') = 0, 'rota: ilk ret toplamı açmaz';
   assert public.places_sinir_artir(repeat('8', 64), 'rota', 625, 625, 3000), 'rota: misafir 625 tek çağrıda geçer';
   assert not public.places_sinir_artir(repeat('8', 64), 'rota', 625, 1, 3000), 'rota: misafirin 626. elemanı ret';

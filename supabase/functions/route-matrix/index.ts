@@ -66,6 +66,8 @@ Deno.serve(sayacli('route-matrix', async (istek) => {
   for (const b of (eski ?? []) as Bacak[]) bilinen.set(`${b.from_key}>${b.to_key}`, b);
 
   // #253: eksik çiftler en ucuz planla istenir (tek dikdörtgen ya da yeni × hepsi + eski × yeni; en çok iki istek).
+  // Plan dikdörtgen olduğu için eski noktalar arasında da boşluk varsa önbellekteki bazı çiftler yeniden istenir (ve faturalanır);
+  // bunlar da plan.eleman'a, dolayısıyla sayaca dahildir.
   const plan = matrisPlani(anahtarlar, (a, b) => bilinen.has(`${a}>${b}`));
 
   // #246 KK2 / #253 KK2: Google eleman başına faturalar; sayaç planın gerçek eleman sayısıyla artar, sığmazsa 429.
@@ -103,6 +105,9 @@ Deno.serve(sayacli('route-matrix', async (istek) => {
       return json({ bacaklar: [...bilinen.values()], eksik: true });
     }
     console.error('route-matrix', e);
+    // #255: ağ hatası ya da bozuk yanıt ikinci istekte olsa bile ilk isteğin faturalanmış sonucu kaybolmasın; tekrar denemede
+    // Google'a yeniden gidilmez.
+    await onbellegeYaz();
     return hata('sunucu hatası', 500);
   }
 }));
