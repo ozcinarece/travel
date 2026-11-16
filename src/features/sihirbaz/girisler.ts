@@ -3,7 +3,7 @@
 // saat dilimiyle (AdimNereye ile aynı yol).
 import { useQuery } from '@tanstack/react-query';
 
-import { hafifYerler, otomatikTamamla, yeniOturumJetonu } from '@/features/yerler/api';
+import { birKezDene, hafifYerler, otomatikTamamla, yeniOturumJetonu } from '@/features/yerler/api';
 import { useOturum } from '@/lib/oturum';
 import { supabase } from '@/lib/supabase';
 import type { Sehir, SehirSecimi } from '@/lib/tipler';
@@ -32,7 +32,7 @@ export function useIcerikSehirSecimi(sehir: Sehir | undefined) {
     queryKey: ['sihirbaz', 'sehir', sehir?.id],
     enabled: !!sehir,
     staleTime: Infinity,
-    retry: 1,
+    retry: birKezDene,
     queryFn: () => icerikSehirSecimi(sehir!),
   });
 }

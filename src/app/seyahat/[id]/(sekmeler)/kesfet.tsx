@@ -28,7 +28,7 @@ import { kartKamerasi } from '@/features/program/durakKarti';
 import { useOnerilenler, type OnerilenMekan } from '@/features/sihirbaz/onerilenler';
 import { AZ_ONERI, cekmeceListesi, cekmeceSayisi, gorunurOneriSayisi, type CekmeceCipi } from '@/features/yerler/cekmece';
 import { listedekiBenzerler } from '@/features/yerler/benzerYer';
-import { hafifOnbellek, hafifYerler, linkCoz, linkGibiMi, useHafifYerler, useOneriler, useYerFotolari, yeniOturumJetonu, type HafifYer } from '@/features/yerler/api';
+import { hafifOnbellek, hafifYerler, linkCoz, linkGibiMi, useHafifYerler, useOneriler, useYerFotolari, yeniOturumJetonu, placesHatasi, type HafifYer } from '@/features/yerler/api';
 
 import { aktifFiltreSayisi, filtreAktif, filtredenGecer, filtreOzeti, varsayilanMi, type Filtre } from '@/features/yerler/filtre';
 import { useOneCikanlar } from '@/features/yerler/oneCikan';
@@ -256,8 +256,8 @@ function Kesfet({ seyahat, konaklamalar, ilkMekan, cekmeceIstegi, cipIstegi }: {
       odakla(yer.lat, yer.lng, 16);
       setSorgu(yer.ad || ad);
       setJeton(yeniOturumJetonu());
-    } catch {
-      setHata(t('kesfet.secimHata'));
+    } catch (e) {
+      setHata(placesHatasi(e, t('kesfet.secimHata')));
     } finally {
       setMesgul(false);
     }
@@ -279,7 +279,7 @@ function Kesfet({ seyahat, konaklamalar, ilkMekan, cekmeceIstegi, cipIstegi }: {
       odakla(yer.lat, yer.lng, 16);
       setSorgu(yer.ad);
     } catch (e) {
-      setHata((e as Error).message === 'desteklenmeyen_link' ? t('kesfet.linkDesteksiz') : t('kesfet.linkHata'));
+      setHata((e as Error).message === 'desteklenmeyen_link' ? t('kesfet.linkDesteksiz') : placesHatasi(e, t('kesfet.linkHata')));
     } finally {
       setMesgul(false);
     }
@@ -509,7 +509,7 @@ function Kesfet({ seyahat, konaklamalar, ilkMekan, cekmeceIstegi, cipIstegi }: {
       ustEk={
         aramaAcik ? (
           <View style={[s.sonuclar, s.golge]}>
-            {oneriler.isError ? <Text style={s.hataMetin}>{t('kesfet.araHata')}</Text> : null}
+            {oneriler.isError ? <Text style={s.hataMetin}>{placesHatasi(oneriler.error, t('kesfet.araHata'))}</Text> : null}
             {oneriler.data?.length === 0 ? <Text style={s.bos}>{t('kesfet.sonucYok')}</Text> : null}
             {oneriler.data?.map((o) => (
               <Pressable key={o.place_id} accessibilityRole="button" onPress={() => sec(o.place_id, o.ana)} style={s.sonuc}>
@@ -599,7 +599,7 @@ function Kesfet({ seyahat, konaklamalar, ilkMekan, cekmeceIstegi, cipIstegi }: {
           ) : null}
           {yakin.hata ? (
             <View style={s.hataKutu}>
-              <Text style={s.hataMetin}>{t('kesfet.oneriHata')}</Text>
+              <Text style={s.hataMetin}>{yakin.sinir ? t('yerler.gunlukSinir') : t('kesfet.oneriHata')}</Text>
             </View>
           ) : null}
           {!yakin.hata && !yakin.yukleniyor && oneriListesi.length === 0 && !aramaSonucu ? <Text style={s.bosOneri}>{t('kesfet.bolgeBos')}</Text> : null}

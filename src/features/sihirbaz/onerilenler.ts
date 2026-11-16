@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useMemo } from 'react';
 
 import { oneCikanlar, turistikTur } from '@/features/yerler/filtre';
-import { hafifOnbellek, oneriSirala, yakinYerler, type HafifYer, type OneriCipi } from '@/features/yerler/api';
+import { birKezDene, hafifOnbellek, oneriSirala, yakinYerler, type HafifYer, type OneriCipi } from '@/features/yerler/api';
 import { varsayilanDakika } from '@/lib/kategori';
 import { konaklamaMi } from '@/lib/pinIkonu';
 import type { Sehir, Yer } from '@/lib/tipler';
@@ -109,7 +109,7 @@ function useGoogleListesi(anahtar: string, cip: OneriCipi, merkez: { lat: number
     queryKey: ['sihirbaz-oneri', anahtar, cip, merkez.lat.toFixed(3), merkez.lng.toFixed(3)],
     enabled: etkin,
     staleTime: GUN_MS,
-    retry: 1,
+    retry: birKezDene,
     queryFn: async () => {
       nearbySayaci.istek += 1;
       if (__DEV__) console.log(`[sihirbaz] nearby istek #${nearbySayaci.istek} · ${cip}`);

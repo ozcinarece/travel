@@ -1,8 +1,9 @@
 // places-photo — #31: Place Photo (New) adını URI'ye çevirir; istemci galeride fotoğrafı görünür olunca ister (tembel).
 // Fotoğraf başına faturalanır; URI izolat belleğinde 24 sa tutulur. Anahtar istemciye gitmez (PRD §7).
 import { fotoUri } from '../_shared/google.ts';
-import { govde, hata, json, onKontrol } from '../_shared/http.ts';
+import { govde, hata, json, kullaniciDogrula } from '../_shared/http.ts';
 import { sayacli } from '../_shared/sayac.ts';
+import { sinirKontrol } from '../_shared/sinir.ts';
 
 type Istek = { ad: string; genislik?: number };
 
@@ -10,8 +11,8 @@ const TTL_MS = 24 * 60 * 60 * 1000;
 const onbellek = new Map<string, { zaman: number; uri: string | null }>();
 
 Deno.serve(sayacli('places-photo', async (istek) => {
-  const on = onKontrol(istek);
-  if (on) return on;
+  const k = await kullaniciDogrula(istek);
+  if (k instanceof Response) return k;
   const g = await govde<Istek>(istek);
   const ad = typeof g.ad === 'string' ? g.ad : '';
   if (!/^places\/[A-Za-z0-9_-]+\/photos\/[A-Za-z0-9_-]+$/.test(ad)) return hata('fotoğraf adı geçersiz');
@@ -19,6 +20,8 @@ Deno.serve(sayacli('places-photo', async (istek) => {
   const anahtar = `${ad}@${genislik}`;
   const eski = onbellek.get(anahtar);
   if (eski && Date.now() - eski.zaman < TTL_MS) return json({ uri: eski.uri });
+  const sinir = await sinirKontrol(k, 'photo');
+  if (sinir) return sinir;
   try {
     const uri = await fotoUri(ad, genislik);
     onbellek.set(anahtar, { zaman: Date.now(), uri });

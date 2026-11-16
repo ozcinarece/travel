@@ -5,8 +5,9 @@
 // Kota cevabı izolatta 60 sn tutulur. Bilinçli olarak gevşek (fail-open): kota okunamazsa ya da ayar tamsayı değilse istek
 // engellenmez; birden çok izolat aynı anda çalışırsa sınır birkaç istek aşılabilir.
 import { GoogleHatasi, yorumDetay, type YorumOzeti } from '../_shared/google.ts';
-import { govde, hata, json, onKontrol } from '../_shared/http.ts';
+import { govde, hata, json, kullaniciDogrula } from '../_shared/http.ts';
 import { sayacli } from '../_shared/sayac.ts';
+import { sinirKontrol } from '../_shared/sinir.ts';
 
 type Istek = { id: string };
 
@@ -45,13 +46,15 @@ async function kotaVar(): Promise<boolean> {
 }
 
 Deno.serve(sayacli('places-reviews', async (istek) => {
-  const on = onKontrol(istek);
-  if (on) return on;
+  const k = await kullaniciDogrula(istek);
+  if (k instanceof Response) return k;
   const g = await govde<Istek>(istek);
   if (typeof g.id !== 'string' || !g.id) return hata('id gerekli');
   const simdi = Date.now();
   const eski = onbellek.get(g.id);
   if (eski && simdi - eski.zaman < TTL_MS) return json(eski.deger);
+  const sinir = await sinirKontrol(k, 'details');
+  if (sinir) return sinir;
   if (!(await kotaVar())) return json({ place_id: g.id, puan: null, puan_sayisi: null, yorumlar: [], sinir: true });
   try {
     kotaSonrasi += 1;

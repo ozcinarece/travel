@@ -391,6 +391,8 @@ type YakinSecenek = {
    * (tiplerine `museum` ekleyen kuaför 20 kişilik yeri doldurmaz). Bkz. `istekBirincilTipleri`.
    */
   birincilTipler?: string[];
+  /** #226: tip hatasından sonraki her yeniden deneme ayrı bir Google isteği; false dönerse denenmez, ilk hata fırlatılır. */
+  yenidenDenemeIzni?: () => Promise<boolean>;
 };
 
 /** Nearby sonucu + tüm tipleri (#189 süzgeci için; istemciye gönderilmeden önce `hafifYer` ile atılır). */
@@ -411,6 +413,7 @@ export async function yakinAra(secenek: YakinSecenek): Promise<YakinYer[]> {
     } catch (e) {
       if (i === denemeler.length - 1 || !(e instanceof GoogleHatasi) || e.durum !== 400 || !/type/i.test(e.message)) throw e;
       console.error('places-nearby tip listesi reddedildi', d.birincil ? 'includedPrimaryTypes' : 'excludedPrimaryTypes', e.message);
+      if (secenek.yenidenDenemeIzni && !(await secenek.yenidenDenemeIzni())) throw e;
     }
   }
 }

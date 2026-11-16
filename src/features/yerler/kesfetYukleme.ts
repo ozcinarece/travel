@@ -8,7 +8,7 @@ import type { HaritaBolgesi, Konum } from '@/components/harita/tipler';
 import { izBirak } from '@/lib/hataRaporu';
 import { konaklamaMi } from '@/lib/pinIkonu';
 
-import { kesfetYerleri, type HafifYer, type OneriCipi } from './api';
+import { GunlukSinir, kesfetYerleri, type HafifYer, type OneriCipi } from './api';
 import { birikimeEkle, birikimListesi, genisAlan, genisletilmeli, gorunumAlani, VARSAYILAN_SEHIR_YARICAPI_M, type Alan } from './sehirListesi';
 
 type Durum = 'yolda' | 'tamam';
@@ -57,7 +57,7 @@ async function iste(seyahatId: string, cip: OneriCipi, merkez: Konum & { yaricap
 }
 
 /** KK7: şehir listesi — bu şehir için henüz istenmemiş çipler (paralel). Hata olursa false. */
-export async function sehirListesiniYukle(seyahatId: string, merkez: Konum, cipler: OneriCipi[]): Promise<{ istenen: number; hata: boolean }> {
+export async function sehirListesiniYukle(seyahatId: string, merkez: Konum, cipler: OneriCipi[]): Promise<{ istenen: number; hata: boolean; sinir: boolean }> {
   const eksik = cipler.filter((c) => !sehirIstekleri.has(`${c}|${merkezAnahtari(merkez)}`));
   for (const c of eksik) sehirIstekleri.set(`${c}|${merkezAnahtari(merkez)}`, 'yolda');
   const sonuclar = await Promise.allSettled(
@@ -75,10 +75,12 @@ export async function sehirListesiniYukle(seyahatId: string, merkez: Konum, cipl
   );
   const hata = sonuclar.some((s) => s.status === 'rejected');
   if (eksik.length) izBirak('kesfet.sehir', `${eksik.join('+')} ${eksik.length} istek${hata ? ', hata var' : ''} (oturum ${kesfetSayaci.istek})`, hata ? 'error' : 'info');
-  return { istenen: eksik.length, hata };
+  const sinir = sonuclar.some((s) => s.status === 'rejected' && s.reason instanceof GunlukSinir);
+  return { istenen: eksik.length, hata, sinir };
 }
 
-export type AlanSonucu = { istek: number; genisletildi: boolean; alan: Alan; hata: boolean };
+/** `sinir`: #226 günlük Places sınırı doldu (hata da true). */
+export type AlanSonucu = { istek: number; genisletildi: boolean; alan: Alan; hata: boolean; sinir?: boolean };
 
 /**
  * KK9: "Bu alanda ara" — görünüm için tek istek (merkez = görünüm merkezi, yarıçap = yarı köşegen). Süzgeçten 5'ten az yer
@@ -98,8 +100,8 @@ export async function alandaAra(seyahatId: string, bolge: HaritaBolgesi, cip: On
     await iste(seyahatId, cip, { ...alan.merkez, yaricapM: alan.yaricapM }, false);
     b.arananlar.push(alan);
     return { istek, genisletildi: true, alan, hata: false };
-  } catch {
-    return { istek, genisletildi: false, alan, hata: true };
+  } catch (e) {
+    return { istek, genisletildi: false, alan, hata: true, sinir: e instanceof GunlukSinir };
   } finally {
     izBirak('kesfet.alan', `${cip} ${istek} istek (oturum ${kesfetSayaci.istek})`);
   }
@@ -109,6 +111,8 @@ export type KesfetOnerileri = {
   yerler: HafifYer[];
   yukleniyor: boolean;
   hata: boolean;
+  /** #226 KK4: hata günlük Places sınırından (429). */
+  sinir: boolean;
   /** Şehir dairesi (merkez + sunucunun yarıçapı); şehir merkezi yoksa null. */
   sehirAlani: Alan | null;
   /** Bu seyahatte "Bu alanda ara" ile aranmış alanlar. */
@@ -128,6 +132,7 @@ export function useKesfetOnerileri(seyahatId: string, merkez: Konum | null, cipl
   const [surum, setSurum] = useState(() => birikimiAl(seyahatId).surum);
   const [yolda, setYolda] = useState(0);
   const [hata, setHata] = useState(false);
+  const [sinir, setSinir] = useState(false);
   const [yaricap, setYaricap] = useState<number | null>(() => (merkez ? (sehirYaricaplari.get(merkezAnahtari(merkez)) ?? null) : null));
   const [genis, setGenis] = useState<Alan | null>(null);
   const [alanYolda, setAlanYolda] = useState(0);
@@ -151,6 +156,7 @@ export function useKesfetOnerileri(seyahatId: string, merkez: Konum | null, cipl
         .then((s) => {
           if (!canli.current) return;
           setHata(s.hata);
+          setSinir(s.sinir);
           setYaricap(sehirYaricaplari.get(merkezAnahtari(m)) ?? null);
           setSurum(birikimiAl(seyahatId).surum);
         })
@@ -175,6 +181,7 @@ export function useKesfetOnerileri(seyahatId: string, merkez: Konum | null, cipl
         .then((s) => {
           if (!canli.current) return;
           setHata(s.hata);
+          setSinir(s.sinir === true);
           setGenis(s.genisletildi ? s.alan : null);
           setSurum(birikimiAl(seyahatId).surum);
         })
@@ -191,5 +198,5 @@ export function useKesfetOnerileri(seyahatId: string, merkez: Konum | null, cipl
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const arananlar = useMemo(() => [...birikimiAl(seyahatId).arananlar], [seyahatId, surum, alanYolda]);
   const sehirAlani = useMemo(() => (lat == null || lng == null ? null : { merkez: { lat, lng }, yaricapM: yaricap ?? VARSAYILAN_SEHIR_YARICAPI_M }), [lat, lng, yaricap]);
-  return { yerler, yukleniyor: yolda > 0 || alanYolda > 0, hata, sehirAlani, arananlar, genisAlan: genis, alanAraniyor: alanYolda > 0, alandaAra: ara };
+  return { yerler, yukleniyor: yolda > 0 || alanYolda > 0, hata, sinir, sehirAlani, arananlar, genisAlan: genis, alanAraniyor: alanYolda > 0, alandaAra: ara };
 }
