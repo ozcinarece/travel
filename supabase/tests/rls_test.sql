@@ -1128,10 +1128,12 @@ reset role;
 set role authenticated;
 select pg_temp.as_user(:X);
 create temp table onceki_144 as select public.profil_sayilari() as sayilar;
+reset role; -- #263: kimlik istemciden seçilemez; sabit kimlikli kurulum superuser ile
 insert into public.trips (id, owner_id, city_place_id, city_label, lat, lng, tz, start_date, end_date) values
   ('14400000-0000-4000-8000-000000000001', :X, 'ChIJ-esk', 'Eskişehir', 39.77, 30.52, 'Europe/Istanbul', '2026-03-10', '2026-03-12'),
   ('14400000-0000-4000-8000-000000000002', :X, 'ChIJ-esk', 'Eskişehir', 39.77, 30.52, 'Europe/Istanbul', '2099-01-01', '2099-01-02'),
   ('14400000-0000-4000-8000-000000000003', :X, 'ChIJ-bur', 'Bursa', 40.18, 29.06, 'Europe/Istanbul', null, null);
+set role authenticated;
 insert into public.places (id, trip_id, place_id, lat, lng, default_minutes, added_by) values
   ('14400000-0000-4000-8000-0000000000a1', '14400000-0000-4000-8000-000000000001', 'p1', 39.77, 30.52, 60, :X),
   ('14400000-0000-4000-8000-0000000000a2', '14400000-0000-4000-8000-000000000001', 'p2', 39.77, 30.52, 45, :X),
@@ -1168,8 +1170,10 @@ begin
   assert (j->>'sehir')::int = (o->>'sehir')::int + 1, 'profil: şehir aynı mantıkla';
 end $$;
 -- Tekrar kur: yeni tarihli (2 günlük) seyahate aynı plan.
+reset role; -- #263: kimlik istemciden seçilemez; sabit kimlikli kurulum superuser ile
 insert into public.trips (id, owner_id, city_place_id, city_label, lat, lng, tz, start_date, end_date) values
   ('14400000-0000-4000-8000-000000000004', :X, 'ChIJ-esk', 'Eskişehir', 39.77, 30.52, 'Europe/Istanbul', '2099-06-01', '2099-06-02');
+set role authenticated;
 do $$
 begin
   assert public.seyahati_kopyala('14400000-0000-4000-8000-000000000001', '14400000-0000-4000-8000-000000000004') = 3, 'gün 1–2 durakları kopyalanır (3. günün karşılığı yok)';
@@ -2291,7 +2295,9 @@ select pg_temp.rota_doldur();
 -- daha taze satır ezilmez; seyahatin listesinde olmayan place_id kabul edilmez; üye olmayan kopyalayamaz.
 set role authenticated;
 select pg_temp.as_user(:RU);
+reset role; -- #263: kimlik istemciden seçilemez; sabit kimlikli kurulum superuser ile
 insert into public.trips (id, owner_id, city_place_id, city_label, lat, lng, tz) values ('19201920-0000-4000-8000-0000000000f1', :RU, 'ChIJ-rotali-192', 'Rotalı', 39.77, 30.52, 'Europe/Istanbul');
+set role authenticated;
 -- Listede A, C, T1, T2 var; B yok (önce).
 insert into public.places (trip_id, place_id, lat, lng, added_by)
 select '19201920-0000-4000-8000-0000000000f1', p, 39.77, 30.52, :RU from unnest(array['ChIJ-durak-Axxx', 'ChIJ-durak-Cxxx', 'ChIJ-durak-T1xx', 'ChIJ-durak-T2xx']) p;
@@ -2475,8 +2481,10 @@ insert into auth.users (id, is_anonymous) values (:DU, false), (:DN, false);
 insert into public.profiles (id, name, username) values (:DU, 'Dagit', 'dagit200'), (:DN, 'Yabanci', 'yabanci200');
 set role authenticated;
 select pg_temp.as_user(:DU);
+reset role; -- #263: kimlik istemciden seçilemez; sabit kimlikli kurulum superuser ile
 insert into public.trips (id, owner_id, city_place_id, city_label, lat, lng, tz, start_date, end_date)
   values ('20002000-0000-4000-8000-0000000000f1', :DU, 'ChIJ-dagit-200', 'Dağıt', 39.77, 30.52, 'Europe/Istanbul', '2026-11-02', '2026-11-03');
+set role authenticated;
 insert into public.places (id, trip_id, place_id, lat, lng, default_minutes, added_by) values
   ('20002000-0000-4000-8000-0000000000a1', '20002000-0000-4000-8000-0000000000f1', 'ChIJ-dagit-A-200', 39.77, 30.52, 90, :DU),
   ('20002000-0000-4000-8000-0000000000a2', '20002000-0000-4000-8000-0000000000f1', 'ChIJ-dagit-B-200', 39.77, 30.52, 60, :DU),
@@ -3029,5 +3037,54 @@ delete from public.trips where id = '23400000-0000-4000-8000-000000000011';
 delete from storage.objects where name like '23400000-%';
 delete from public.silinecek_klasorler where trip_id::text like '23400000-%';
 delete from auth.users where id = '23400000-0000-4000-8000-000000000001';
+
+-- #263 KK4a: authenticated kimlik veremez; verdiği değer kullanılmaz, sunucu üretir.
+insert into auth.users (id) values ('26300000-0000-4000-8000-000000000001');
+set role authenticated;
+select pg_temp.as_user('26300000-0000-4000-8000-000000000001');
+create temp table if not exists t263 (id uuid);
+grant all on t263 to authenticated, service_role;
+with y as (
+  insert into public.trips (id, owner_id, city_place_id, city_label, lat, lng, tz)
+  values ('26300000-0000-4000-8000-000000000010', auth.uid(), 'p263', 'Kimlik şehri', 40, 30, 'Europe/Istanbul')
+  returning id)
+insert into t263 select id from y;
+do $$
+begin
+  assert (select count(*) from t263) = 1, '#263 KK1: seyahat oluşur';
+  assert (select id from t263) <> '26300000-0000-4000-8000-000000000010', '#263 KK1: istemcinin verdiği kimlik kullanılmaz';
+  assert not exists (select 1 from public.trips where id = '26300000-0000-4000-8000-000000000010'), '#263 KK1: verilen kimlikle satır yok';
+  assert public.is_owner((select id from t263)), '#263 KK1: sahip üyeliği tetikleyiciyle gelir';
+end $$;
+reset role;
+-- #263 KK4b: kuyruktaki kimlikle ekleme reddedilir (service_role ve sahip rolü dahil).
+insert into public.trips (id, owner_id, city_place_id, city_label, lat, lng, tz) values
+  ('26300000-0000-4000-8000-000000000020', '26300000-0000-4000-8000-000000000001', 'p263', 'Kimlik şehri', 40, 30, 'Europe/Istanbul');
+delete from public.trips where id = '26300000-0000-4000-8000-000000000020';
+select pg_temp.hata_bekle($$insert into public.trips (id, owner_id, city_place_id, city_label, lat, lng, tz) values
+  ('26300000-0000-4000-8000-000000000020', '26300000-0000-4000-8000-000000000001', 'p263', 'x', 40, 30, 'Europe/Istanbul')$$, '23505');
+set role service_role;
+select pg_temp.hata_bekle($$insert into public.trips (id, owner_id, city_place_id, city_label, lat, lng, tz) values
+  ('26300000-0000-4000-8000-000000000020', '26300000-0000-4000-8000-000000000001', 'p263', 'x', 40, 30, 'Europe/Istanbul')$$, '23505');
+reset role;
+-- #263 KK4c: kapanmış kuyruk satırı aynı seyahat yeniden silinince açılır.
+update public.silinecek_klasorler set silindi = now(), eklendi = now() - interval '3 days'
+ where trip_id = '26300000-0000-4000-8000-000000000020';
+-- Kimliğin yeniden doğması artık mümkün değil; tetikleyiciyi doğrudan sınamak için denetimi bu blokta atlıyoruz.
+alter table public.trips disable trigger trips_b_kuyruk_denetimi;
+insert into public.trips (id, owner_id, city_place_id, city_label, lat, lng, tz) values
+  ('26300000-0000-4000-8000-000000000020', '26300000-0000-4000-8000-000000000001', 'p263', 'x', 40, 30, 'Europe/Istanbul');
+alter table public.trips enable trigger trips_b_kuyruk_denetimi;
+delete from public.trips where id = '26300000-0000-4000-8000-000000000020';
+do $$
+begin
+  assert (select count(*) from public.silinecek_klasorler
+           where trip_id = '26300000-0000-4000-8000-000000000020' and silindi is null and eklendi > now() - interval '1 minute') = 2,
+    '#263 KK3: kapanmış satır yeniden açılır';
+  assert (select tgenabled from pg_trigger where tgname = 'trips_b_kuyruk_denetimi') = 'O', '#263 KK2: denetim yeniden açık';
+end $$;
+delete from public.trips where owner_id = '26300000-0000-4000-8000-000000000001';
+delete from public.silinecek_klasorler where trip_id::text like '26300000-%' or trip_id in (select id from t263);
+delete from auth.users where id = '26300000-0000-4000-8000-000000000001';
 
 \echo 'rls_test: TÜM TESTLER GEÇTİ'
