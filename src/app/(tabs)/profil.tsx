@@ -18,6 +18,7 @@ import { bosluk, kose, renk, yazi } from '@/theme';
 const GIZLILIKLER: HaritaGizliligi[] = ['friends', 'everyone', 'me'];
 /** Yardım ve geri bildirim e-postası (ortam değişkeni; yoksa satır gösterilmez). */
 const DESTEK_EPOSTA = process.env.EXPO_PUBLIC_DESTEK_EPOSTA ?? '';
+const OSM_TELIF = 'https://www.openstreetmap.org/copyright';
 
 /**
  * #138 → #144 (kanvas 22 · Profil): foto, ad, @kullanıcı adı, Düzenle; sayılar seyahat · mekan gezildi · şehir (KK5 kuralı
@@ -116,6 +117,17 @@ export default function ProfilEkrani() {
             <Text style={s.sil}>{t('profil.hesapSil')}</Text>
           </Pressable>
         </Link>
+
+        {/* #205 KK5: OSM atfı (ODbL) — kanvas 22 · Profil, "Hesabı sil"in altında; 12 px, dokunma alanı ≥ 44. */}
+        <Pressable
+          accessibilityRole="link"
+          accessibilityLabel={`${t('profil.osmAtif')} ${t('profil.osmAtifKaynak')}`}
+          onPress={() => Linking.openURL(OSM_TELIF).catch(() => {})}
+          style={s.osmSatir}>
+          <Text style={s.osm}>
+            {t('profil.osmAtif')} <Text style={s.osmKaynak}>{t('profil.osmAtifKaynak')}</Text>
+          </Text>
+        </Pressable>
       </ScrollView>
       <SecimMenusu
         acik={gizlilikAcik}
@@ -177,4 +189,7 @@ const s = StyleSheet.create({
   taniSil: { fontFamily: yazi.kalin, fontSize: 12, color: renk.ikincil, paddingTop: 10 },
   silSatir: { alignSelf: 'center', paddingVertical: 10 },
   sil: { fontFamily: yazi.ekstra, fontSize: 13, color: renk.ikincil },
+  osmSatir: { alignSelf: 'center', minHeight: 44, justifyContent: 'center' },
+  osm: { fontFamily: yazi.normal, fontSize: 12, color: renk.ikincil },
+  osmKaynak: { textDecorationLine: 'underline' },
 });
