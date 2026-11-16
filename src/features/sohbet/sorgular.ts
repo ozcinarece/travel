@@ -3,6 +3,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import * as ImagePicker from 'expo-image-picker';
 
+import { konumuTemizle } from '@/lib/exifTemizle';
 import { supabase } from '@/lib/supabase';
 import { useOturum } from '@/lib/oturum';
 import type { Degisiklik } from '@/lib/tipler';
@@ -201,7 +202,9 @@ export async function sohbetFotoSecVeYukle(seyahatId: string): Promise<string | 
   const secim = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['images'], quality: 0.6 });
   if (secim.canceled) return null;
   const dosya = secim.assets[0];
-  const govde = await fetch(dosya.uri).then((y) => y.arrayBuffer());
+  // #270: konum (GPS/XMP) meta verisi yüklemeden önce silinir; görüntü verisi değişmez.
+  const ham: ArrayBuffer = await fetch(dosya.uri).then((y) => y.arrayBuffer());
+  const govde = konumuTemizle(new Uint8Array(ham)).slice().buffer;
   const yol = `${seyahatId}/${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}.jpg`;
   const { error } = await supabase.storage.from('sohbet').upload(yol, govde, { contentType: dosya.mimeType ?? 'image/jpeg', upsert: false });
   if (error) throw error;
