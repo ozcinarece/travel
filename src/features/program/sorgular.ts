@@ -1,6 +1,7 @@
 // PRD 3.7 Program: yürüyüş matrisi (route-matrix), durak/gün güncellemeleri, değişiklik akışı (KK9).
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
+import { birKezDene, GunlukSinir, hataDurumu } from '@/features/yerler/api';
 import { useOturum } from '@/lib/oturum';
 import { supabase } from '@/lib/supabase';
 import type { Degisiklik } from '@/lib/tipler';
@@ -43,19 +44,26 @@ export function useYuruyusMatrisi(seyahatId: string | undefined, noktalar: Matri
     enabled: ag && !!session && !!seyahatId && sirali.length >= 2,
     staleTime: 60 * 60 * 1000,
     gcTime: 24 * 60 * 60 * 1000,
-    retry: 1,
+    // #246 KK2: günlük sınır (429) yeniden denenmez.
+    retry: birKezDene,
     queryFn: async () => {
       const { data, error } = await supabase.functions.invoke<{ bacaklar: Bacak[]; eksik?: boolean }>('route-matrix', {
         body: { trip_id: seyahatId, noktalar: sirali },
       });
-      if (error) throw error;
+      if (error) throw hataDurumu(error) === 429 ? new GunlukSinir() : error;
       const harita: Record<string, { sn: number; m: number }> = {};
       for (const b of data?.bacaklar ?? []) harita[`${b.from_key}>${b.to_key}`] = { sn: b.seconds, m: b.meters };
       return { harita, eksik: !!data?.eksik };
     },
   });
   const yuruyus: YuruyusKaynagi = (a, b) => sorgu.data?.harita[`${a}>${b}`] ?? null;
-  return { yuruyus, yukleniyor: ag && sorgu.isPending && sirali.length >= 2, hata: sorgu.isError, eksik: !!sorgu.data?.eksik };
+  return {
+    yuruyus,
+    yukleniyor: ag && sorgu.isPending && sirali.length >= 2,
+    hata: sorgu.isError,
+    sinir: sorgu.error instanceof GunlukSinir,
+    eksik: !!sorgu.data?.eksik,
+  };
 }
 
 /**
@@ -73,12 +81,12 @@ export function useRotaBacaklari(seyahatId: string | undefined, bacaklar: { from
     enabled: ag && !!session && !!seyahatId && temiz.length >= 1,
     staleTime: 24 * 60 * 60 * 1000,
     gcTime: 24 * 60 * 60 * 1000,
-    retry: 1,
+    retry: birKezDene,
     queryFn: async () => {
       const { data, error } = await supabase.functions.invoke<{ bacaklar: RotaBacagi[]; eksik?: boolean }>('route-legs', {
         body: { trip_id: seyahatId, bacaklar: temiz, ...(arac ? { arac: true } : {}) },
       });
-      if (error) throw error;
+      if (error) throw hataDurumu(error) === 429 ? new GunlukSinir() : error;
       const harita: RotaHaritasi = {};
       for (const b of data?.bacaklar ?? []) harita[`${b.from_key}>${b.to_key}`] = b;
       return { harita, eksik: !!data?.eksik };

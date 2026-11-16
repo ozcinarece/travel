@@ -1,4 +1,6 @@
 // #226: Places fonksiyonlarında kullanıcı başına günlük sınır. Sınırlar yalnız bu dosyada.
+// #246: Routes fonksiyonları (route-matrix, route-legs) `rota` kategorisinde sayılır; sayılan şey Google'a giden ELEMAN
+// (matris kaynak × hedef; route-legs'te her computeRoutes 1).
 // Sayaç public.places_gunluk_sayac (kullanıcı kimliğinin SHA-256 özeti × gün × kategori); artırma atomik
 // (places_sinir_artir, yalnız service_role). Sayılan şey Google'a gidecek istektir: izolat önbelleğinden dönen cevap sayılmaz.
 // Misafir (anonim oturum) ayrıca bütün misafirlerin ortak günlük tavanından geçer (MISAFIR_TOPLAM; yeni anonim oturum yeni
@@ -6,8 +8,11 @@
 // Log'a yalnız kategori ve hata kodu yazılır.
 import { hata, type Kullanici } from './http.ts';
 
-/** `metin`: Autocomplete boş dönünce denenen Text Search yedeği (#118). */
-export type SinirKategorisi = 'details' | 'photo' | 'nearby' | 'autocomplete' | 'metin' | 'link';
+/** `metin`: Autocomplete boş dönünce denenen Text Search yedeği (#118). `rota`: Routes elemanı (#246). */
+export type SinirKategorisi = 'details' | 'photo' | 'nearby' | 'autocomplete' | 'metin' | 'link' | 'rota';
+
+/** Tek çağrıda sayılabilecek en çok adet (route-matrix 25 × 25 nokta); `places_sinir_artir` ile aynı. */
+export const EN_FAZLA_ADET = 625;
 
 /** Gün başına sınır: kayıtlı kullanıcı / misafir (anonim oturum). */
 export const GUNLUK_SINIR: Record<SinirKategorisi, { kullanici: number; misafir: number }> = {
@@ -17,6 +22,7 @@ export const GUNLUK_SINIR: Record<SinirKategorisi, { kullanici: number; misafir:
   autocomplete: { kullanici: 300, misafir: 100 },
   metin: { kullanici: 50, misafir: 15 },
   link: { kullanici: 30, misafir: 10 },
+  rota: { kullanici: 2000, misafir: 500 },
 };
 
 /** Bütün misafirlerin toplamı için gün başına tavan. */
@@ -27,6 +33,7 @@ export const MISAFIR_TOPLAM: Record<SinirKategorisi, number> = {
   autocomplete: 1000,
   metin: 150,
   link: 100,
+  rota: 3000,
 };
 
 /** Sınırı dolan kullanıcı bu izolatta günün sonuna kadar RPC'siz reddedilir. */
@@ -75,7 +82,7 @@ export async function sinirKontrol(k: Kullanici, kategori: SinirKategorisi, adet
         p_ozet: k.ozet,
         p_kategori: kategori,
         p_sinir: sinir,
-        p_adet: Math.min(Math.max(Math.trunc(adet), 1), 25),
+        p_adet: Math.min(Math.max(Math.trunc(adet), 1), EN_FAZLA_ADET),
         p_toplam_sinir: k.misafir ? MISAFIR_TOPLAM[kategori] : null,
       }),
     });

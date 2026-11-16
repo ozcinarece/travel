@@ -912,7 +912,7 @@ function ProgramSekmesi({
   const govde = (yukseklik: number) =>
     panel === 'katli' || !gun || !prog ? null : (
       <>
-        {verisi.matrisHata ? <Text style={s.uyariMetin}>{t('program.yuruyusHata')}</Text> : null}
+        {verisi.matrisHata ? <Text style={s.uyariMetin}>{t(verisi.matrisSiniri ? 'yerler.gunlukSinir' : 'program.yuruyusHata')}</Text> : null}
         {bugun && izin === 'reddedildi' ? <Text style={s.uyariMetin}>{t('program.konumIzni')}</Text> : null}
         {hata ? <Text style={s.hata}>{hata}</Text> : null}
         {siralaSatirlari.length === 0 ? (

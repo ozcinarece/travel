@@ -47,7 +47,7 @@ export class GunlukSinir extends Error {
 }
 
 /** supabase-js FunctionsHttpError'ın HTTP durumu (context: Response). */
-function hataDurumu(e: unknown): number | undefined {
+export function hataDurumu(e: unknown): number | undefined {
   const ctx = (e as { context?: { status?: unknown } } | null)?.context;
   return typeof ctx?.status === 'number' ? ctx.status : undefined;
 }

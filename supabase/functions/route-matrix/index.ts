@@ -1,29 +1,32 @@
 // route-matrix — PRD §5.1 / 3.7: gün bazlı yürüyüş matrisi (Routes API computeRouteMatrix, WALK).
-// İstek: { trip_id, noktalar: [{key, lat, lng}] } (key = place_id | 'hotel', ≤ 25 nokta).
+// İstek: { trip_id, noktalar: [{key}] } (key = place_id | stay:<id> | 'hotel', ≤ 25 nokta).
+// #246 KK1: koordinat istemciden alınmaz; anahtar bu seyahatin noktası olmalı, koordinat DB'den okunur (gövdedeki lat/lng yok
+// sayılır). Seyahatte olmayan anahtar → 400, Google'a gidilmez. KK2: Google'a giden eleman sayısı (kaynak × hedef) `rota`
+// sayacından geçer. KK3: walk_cache'e yalnız doğrulanmış anahtar çiftleri yazılır.
 // walk_cache'ten (≤ 30 gün) okunur; yalnızca eksik çiftler Google'a sorulur ve service_role ile yazılır (T9).
 // Üyelik: çağıranın JWT'siyle is_member(trip_id) RLS üzerinden doğrulanır.
 import { createClient } from 'npm:@supabase/supabase-js@2';
 
 import { GoogleHatasi } from '../_shared/google.ts';
-import { govde, hata, json, onKontrol } from '../_shared/http.ts';
+import { govde, hata, json, kullaniciDogrula } from '../_shared/http.ts';
+import { anahtarAl, noktalariCoz, noktalariOku } from '../_shared/rotaNoktalari.ts';
 import { yuruyusMatrisi, type Bacak, type Nokta } from '../_shared/routes.ts';
 import { sayacli } from '../_shared/sayac.ts';
+import { sinirKontrol } from '../_shared/sinir.ts';
 
-type Istek = { trip_id: string; noktalar: Nokta[] };
+type Istek = { trip_id: string; noktalar: unknown[] };
 
 const ONBELLEK_GUN = 30;
 
 Deno.serve(sayacli('route-matrix', async (istek) => {
-  const on = onKontrol(istek);
-  if (on) return on;
+  const k = await kullaniciDogrula(istek);
+  if (k instanceof Response) return k;
   const g = await govde<Istek>(istek);
   const tripId = typeof g.trip_id === 'string' ? g.trip_id : '';
   if (!/^[0-9a-f-]{36}$/.test(tripId)) return hata('trip_id geçersiz');
-  const noktalar = (Array.isArray(g.noktalar) ? g.noktalar : [])
-    .filter((n): n is Nokta => !!n && typeof n.key === 'string' && n.key.length > 0 && Number.isFinite(n.lat) && Number.isFinite(n.lng))
-    .filter((n, i, dizi) => dizi.findIndex((x) => x.key === n.key) === i);
-  if (noktalar.length < 2) return json({ bacaklar: [] });
-  if (noktalar.length > 25) return hata('en fazla 25 nokta');
+  const istenen = [...new Set((Array.isArray(g.noktalar) ? g.noktalar : []).map(anahtarAl).filter((x): x is string => x !== null))];
+  if (istenen.length < 2) return json({ bacaklar: [] });
+  if (istenen.length > 25) return hata('en fazla 25 nokta');
 
   const url = Deno.env.get('SUPABASE_URL')!;
   const kullanici = createClient(url, Deno.env.get('SUPABASE_ANON_KEY')!, {
@@ -35,6 +38,18 @@ Deno.serve(sayacli('route-matrix', async (istek) => {
   if (!seyahat) return hata('seyahat bulunamadı', 404);
 
   const servis = createClient(url, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!);
+  // #246 KK1: koordinat DB'den; seyahatte olmayan anahtar varsa Google'a gidilmez.
+  let db: Awaited<ReturnType<typeof noktalariOku>>;
+  try {
+    db = await noktalariOku(servis, tripId, istenen);
+  } catch {
+    return hata('seyahat noktaları okunamadı', 500);
+  }
+  const cozum = noktalariCoz(istenen, db);
+  if ('bilinmeyen' in cozum) return hata('nokta bu seyahatte yok');
+  const dbNoktalari = cozum.noktalar;
+  const noktalar: Nokta[] = istenen.map((a) => dbNoktalari.get(a)!);
+
   const esik = new Date(Date.now() - ONBELLEK_GUN * 86_400_000).toISOString();
   const anahtarlar = noktalar.map((n) => n.key);
   const { data: eski, error: onbellekHatasi } = await servis
@@ -59,6 +74,12 @@ Deno.serve(sayacli('route-matrix', async (istek) => {
         eksikHedef.add(b.key);
       }
     }
+  }
+
+  // #246 KK2: Google eleman başına faturalar (kaynak × hedef); sığmazsa 429 (gunluk_sinir).
+  if (eksikKaynak.size > 0) {
+    const sinir = await sinirKontrol(k, 'rota', eksikKaynak.size * eksikHedef.size);
+    if (sinir) return sinir;
   }
 
   try {

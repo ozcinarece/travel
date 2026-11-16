@@ -24,6 +24,8 @@ export type ProgramVerisi = {
   yuruyus: YuruyusKaynagi;
   matrisYukleniyor: boolean;
   matrisHata: boolean;
+  /** #246 KK2: matris hatası günlük sınırdan (429). */
+  matrisSiniri: boolean;
   rotalar: RotaHaritasi;
   rotaYukleniyor: boolean;
   rotaHata: boolean;
@@ -165,6 +167,7 @@ export function useProgramVerisi(secenek: {
     yuruyus,
     matrisYukleniyor: matris.yukleniyor,
     matrisHata: matris.hata,
+    matrisSiniri: matris.sinir,
     rotalar,
     rotaYukleniyor: rota.yukleniyor,
     rotaHata: rota.hata,
