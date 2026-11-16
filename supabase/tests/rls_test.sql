@@ -2839,6 +2839,76 @@ begin
 end $$;
 delete from public.places_gunluk_sayac;
 
+-- #205 KK3: icerik_konum_osm_esle — yalnız google_30g satır, yalnız 150 m içi; osm + osm_id yazılır, damga boşalır.
+insert into public.sehirler (id, ad, slug, lat, lng, yayin) values ('20500000-0000-4000-8000-000000000031', 'Eşleme Şehri', 'esleme-sehri', 40, 30, false);
+insert into public.yerler (id, sehir_id, ad, lat, lng) values
+  ('20500000-0000-4000-8000-000000000032', '20500000-0000-4000-8000-000000000031', 'Yakın Yer', 40, 30),
+  ('20500000-0000-4000-8000-000000000033', '20500000-0000-4000-8000-000000000031', 'Uzak Yer', 40, 30);
+insert into public.yerler (id, sehir_id, ad, lat, lng, konum_kaynagi) values
+  ('20500000-0000-4000-8000-000000000034', '20500000-0000-4000-8000-000000000031', 'Elle Yer', 40, 30, 'elle');
+insert into public.geziler (id, sehir_id, baslik, slug) values ('20500000-0000-4000-8000-000000000035', '20500000-0000-4000-8000-000000000031', 'Eşleme gezisi', 'esleme-gezisi');
+insert into public.gezi_gunleri (id, gezi_id, sira) values ('20500000-0000-4000-8000-000000000036', '20500000-0000-4000-8000-000000000035', 1);
+insert into public.gezi_duraklari (id, gezi_gun_id, sira, ad, lat, lng) values ('20500000-0000-4000-8000-000000000037', '20500000-0000-4000-8000-000000000036', 1, 'Durak', 40, 30);
+do $$
+declare
+  r jsonb;
+begin
+  r := public.icerik_konum_osm_esle(jsonb_build_array(
+    jsonb_build_object('tablo', 'sehirler', 'id', '20500000-0000-4000-8000-000000000031', 'osm_id', 'node/1', 'lat', 40.0005, 'lng', 30),
+    jsonb_build_object('tablo', 'yerler', 'id', '20500000-0000-4000-8000-000000000032', 'osm_id', 'way/2', 'lat', 40.001, 'lng', 30),
+    jsonb_build_object('tablo', 'yerler', 'id', '20500000-0000-4000-8000-000000000033', 'osm_id', 'way/3', 'lat', 40.002, 'lng', 30),
+    jsonb_build_object('tablo', 'yerler', 'id', '20500000-0000-4000-8000-000000000034', 'osm_id', 'way/4', 'lat', 40, 'lng', 30),
+    jsonb_build_object('tablo', 'yerler', 'id', '20500000-0000-4000-8000-0000000000ff', 'osm_id', 'way/5', 'lat', 40, 'lng', 30),
+    jsonb_build_object('tablo', 'gezi_duraklari', 'id', '20500000-0000-4000-8000-000000000037', 'osm_id', 'relation/6', 'lat', 40, 'lng', 30.001)));
+  assert r = '{"yazilan": {"sehirler": 1, "yerler": 1, "gezi_duraklari": 1}, "atlanan": {"sehirler": 0, "yerler": 3, "gezi_duraklari": 0}}'::jsonb,
+    format('KK3: sayılar beklenen gibi değil: %s', r);
+  assert (select konum_kaynagi = 'osm' and osm_id = 'way/2' and google_fetched_at is null and lat = 40.001
+            from public.yerler where id = '20500000-0000-4000-8000-000000000032'), 'KK3: 111 m içi eşleşme osm olarak yazılır, damga boşalır';
+  assert (select konum_kaynagi = 'google_30g' and osm_id is null and lat = 40
+            from public.yerler where id = '20500000-0000-4000-8000-000000000033'), 'KK3: 150 m dışı eşleşme yazılmaz';
+  assert (select konum_kaynagi = 'elle' and osm_id is null from public.yerler where id = '20500000-0000-4000-8000-000000000034'),
+    'KK3: elle satıra dokunulmaz';
+  assert (select konum_kaynagi = 'osm' and osm_id = 'node/1' from public.sehirler where id = '20500000-0000-4000-8000-000000000031'), 'KK3: şehir';
+  assert (select konum_kaynagi = 'osm' and osm_id = 'relation/6' from public.gezi_duraklari where id = '20500000-0000-4000-8000-000000000037'), 'KK3: durak';
+  -- İkinci çalıştırma: artık google_30g değil, atlanır (tekrar çalıştırmak güvenli).
+  r := public.icerik_konum_osm_esle(jsonb_build_array(
+    jsonb_build_object('tablo', 'yerler', 'id', '20500000-0000-4000-8000-000000000032', 'osm_id', 'way/9', 'lat', 40, 'lng', 30)));
+  assert (r -> 'atlanan' ->> 'yerler')::int = 1 and (select osm_id = 'way/2' from public.yerler where id = '20500000-0000-4000-8000-000000000032'),
+    'KK3: osm satırın üzerine yazılmaz';
+  -- Bozuk girdi reddedilir.
+  begin
+    perform public.icerik_konum_osm_esle('[{"tablo": "places", "id": "20500000-0000-4000-8000-000000000032", "osm_id": "way/1", "lat": 40, "lng": 30}]');
+    raise exception 'KK3: places tablosu kabul edildi';
+  exception when invalid_parameter_value then null;
+  end;
+  begin
+    perform public.icerik_konum_osm_esle('[{"tablo": "yerler", "id": "20500000-0000-4000-8000-000000000033", "osm_id": "way/1;drop", "lat": 40, "lng": 30}]');
+    raise exception 'KK3: bozuk osm_id kabul edildi';
+  exception when invalid_parameter_value then null;
+  end;
+  begin
+    perform public.icerik_konum_osm_esle('{}');
+    raise exception 'KK3: dizi olmayan girdi kabul edildi';
+  exception when invalid_parameter_value then null;
+  end;
+end $$;
+set role authenticated;
+select pg_temp.as_email(:E, 'ozcinar.ece@gmail.com');
+select pg_temp.hata_bekle($$select public.icerik_konum_osm_esle('[]')$$, '42501');
+reset role;
+set role anon;
+select pg_temp.hata_bekle($$select public.icerik_konum_osm_esle('[]')$$, '42501');
+reset role;
+set role service_role;
+do $$
+begin
+  perform public.icerik_konum_osm_esle('[]');
+  raise exception 'service_role eşleştirmeyi çağırabildi';
+exception when insufficient_privilege then null;
+end $$;
+reset role;
+delete from public.sehirler where id = '20500000-0000-4000-8000-000000000031';
+
 -- #229 KK1: profil yalnız sahibine ve ortak seyahati olana görünür; seyahatten çıkınca görünmez.
 insert into auth.users (id) values ('22900000-0000-4000-8000-000000000001'), ('22900000-0000-4000-8000-000000000002'), ('22900000-0000-4000-8000-000000000003');
 insert into public.profiles (id, name, username) values
