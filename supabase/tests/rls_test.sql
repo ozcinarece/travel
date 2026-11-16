@@ -1961,6 +1961,44 @@ select pg_temp.hata_bekle(format('insert into public.odesmeler (trip_id, kimden,
   current_setting('test.h_trip'), 'aaaaaaaa-1830-0000-0000-000000000003', 'aaaaaaaa-1830-0000-0000-000000000002'), '22023');
 do $$ begin assert public.seyahat_net(current_setting('test.h_trip')::uuid, 'aaaaaaaa-1830-0000-0000-000000000003') = 0, 'ayrılan üyenin borcu kapandı'; end $$;
 
+-- #247: seyahat_net / seyahat_hesabinda yalnız üyeye. Üye olmayan kayıtlı kullanıcı ve misafir (anonim) seyahat kimliğini bilse de
+-- bakiye (null) ya da "hesapta" (false) alamaz; üye doğru değeri alır (tablolardan doğrudan hesaplanan değerle aynı).
+reset role;
+\set HM '''aaaaaaaa-1830-0000-0000-000000000005'''
+insert into auth.users (id, is_anonymous) values (:HM, true);
+select (coalesce((select sum(tl_kurus) from public.harcamalar where trip_id = :'h_trip' and odeyen_id = :HU), 0)
+      - coalesce((select sum(pay_kurus) from public.harcama_paylari where trip_id = :'h_trip' and user_id = :HU), 0)
+      + coalesce((select sum(tl_kurus) from public.odesmeler where trip_id = :'h_trip' and kimden = :HU), 0)
+      - coalesce((select sum(tl_kurus) from public.odesmeler where trip_id = :'h_trip' and kime = :HU), 0))::text as hu_net \gset
+select set_config('test.hu_net', :'hu_net', false);
+do $$ begin assert current_setting('test.hu_net')::bigint <> 0, 'ön koşul: Ayşe''nin bakiyesi sıfır değil'; end $$;
+set role authenticated;
+select pg_temp.as_user(:HN);
+do $$
+declare t uuid := current_setting('test.h_trip')::uuid;
+begin
+  assert not public.is_member(t), 'ön koşul: HN üye değil';
+  assert public.seyahat_net(t, 'aaaaaaaa-1830-0000-0000-000000000002') is null, '#247: üye olmayan kayıtlı kullanıcı bakiye alamaz';
+  assert not public.seyahat_hesabinda(t, 'aaaaaaaa-1830-0000-0000-000000000002'), '#247: üye olmayan kayıtlı kullanıcı true alamaz';
+end $$;
+select pg_temp.as_user(:HM, true);
+do $$
+declare t uuid := current_setting('test.h_trip')::uuid;
+begin
+  assert public.is_anonymous() and not public.is_member(t), 'ön koşul: HM üye olmayan misafir';
+  assert public.seyahat_net(t, 'aaaaaaaa-1830-0000-0000-000000000002') is null, '#247: misafir bakiye alamaz';
+  assert not public.seyahat_hesabinda(t, 'aaaaaaaa-1830-0000-0000-000000000002'), '#247: misafir true alamaz';
+end $$;
+select pg_temp.as_user(:HU);
+do $$
+declare t uuid := current_setting('test.h_trip')::uuid;
+begin
+  assert public.seyahat_net(t, 'aaaaaaaa-1830-0000-0000-000000000002') = current_setting('test.hu_net')::bigint, '#247: üye doğru bakiyeyi alır';
+  assert public.seyahat_hesabinda(t, 'aaaaaaaa-1830-0000-0000-000000000002'), '#247: üye hesapta olanı görür';
+  assert public.seyahat_hesabinda(t, 'aaaaaaaa-1830-0000-0000-000000000003'), '#247: ayrılan üye hâlâ hesapta';
+  assert not public.seyahat_hesabinda(t, 'aaaaaaaa-1830-0000-0000-000000000004'), '#247: hesapta olmayan false';
+end $$;
+
 -- Seyahat silinince harcama, pay ve ödeşmeler gider (ertelenmiş toplam denetimi engel olmaz).
 select pg_temp.as_user(:HS);
 delete from public.trips where id = :'h_trip';
