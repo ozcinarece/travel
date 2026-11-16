@@ -19,6 +19,7 @@ import {
   adSade,
   adUyar,
   osmEslestir,
+  eslemeKareleri,
   eslemeYaricapi,
 } from '../dogrula.mjs';
 import { anahtarCifti, coz, sifrele } from '../sifre.mjs';
@@ -403,6 +404,29 @@ describe('#205 KK3: OSM eşleştirmesi (ad + 150 m)', () => {
 
   it('ikinci adlardan (name:tr, alt_name) da eşleşir', () => {
     expect(osmEslestir(satir, [{ ...yakin, adlar: ['Kursunlu Mosque', 'Kurşunlu Camii'] }])?.osm_id).toBe('way/10');
+  });
+
+  it('Overpass daireyi en çok 6 km kenarlı karelere böler, daireyi kapsar', () => {
+    const m = { lat: 41.9028, lng: 12.4964 };
+    expect(eslemeKareleri(m, 1000)).toHaveLength(1);
+    const k = eslemeKareleri(m, 12000);
+    // 24 km çap → 4×4 ızgara; köşedeki 4 kare de daireye değer (karenin iç köşesi merkeze 8,5 km).
+    expect(k).toHaveLength(16);
+    const k30 = eslemeKareleri(m, 30000);
+    expect(k30.length).toBeLessThan(100);
+    expect(k30.length).toBeGreaterThan(70);
+    for (const [g, b, kz, d] of k30) {
+      expect(kz).toBeGreaterThan(g);
+      expect(d).toBeGreaterThan(b);
+      expect((kz - g) * 111320).toBeLessThanOrEqual(6000 + 12);
+    }
+    // Dairenin dört ucu bir karenin içinde.
+    const dLat = 30000 / 111320;
+    const dLng = 30000 / (111320 * Math.cos((m.lat * Math.PI) / 180));
+    for (const [la, ln] of [[m.lat + dLat * 0.999, m.lng], [m.lat - dLat * 0.999, m.lng], [m.lat, m.lng + dLng * 0.999], [m.lat, m.lng - dLng * 0.999]])
+      expect(k30.some(([g, b, kz, d]) => la >= g && la <= kz && ln >= b && ln <= d)).toBe(true);
+    // Köşeler 4 ondalığa yuvarlanır.
+    for (const v of k30.flat()) expect(Math.round(v * 1e4) / 1e4).toBe(v);
   });
 
   it('Overpass yarıçapı en uzak satırı kapsar; 1–30 km', () => {
