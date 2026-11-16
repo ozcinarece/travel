@@ -16,6 +16,8 @@ type Props = {
   benId: string | null;
   /** "yarın 12:00'de kapanır" / "kapandı" / null (kapanışsız). */
   kapanis: string | null;
+  /** #248 KK2: mekan seçeneğinin metni boşsa ad canlı gelir. */
+  secenekAdi: (s: OylamaSecenegi) => string;
   onOy: (secenekId: string) => void;
   /** Kazanan mekan seçeneği için (planda değilse). */
   onPlanaEkle?: (s: OylamaSecenegi) => void;
@@ -24,7 +26,7 @@ type Props = {
 const KAZANAN = '#ffd9bf';
 const DIGER = '#dce3f6';
 
-export function OylamaKarti({ oylama, ozet, k, benId, kapanis, onOy, onPlanaEkle }: Props) {
+export function OylamaKarti({ oylama, ozet, k, benId, kapanis, secenekAdi, onOy, onPlanaEkle }: Props) {
   const vermeyenler = ozet.oyVermeyenler.filter((id) => id !== benId || ozet.kapali);
   const altMetin = [
     vermeyenler.length ? t('sohbet.oylama.vermedi', { adlar: vermeyenler.map((id) => (id === benId ? t('harcama.sen') : k.ad(id))).join(', ') }) : null,
@@ -46,7 +48,7 @@ export function OylamaKarti({ oylama, ozet, k, benId, kapanis, onOy, onPlanaEkle
             key={secenek.id}
             accessibilityRole="button"
             accessibilityState={{ selected: benim, disabled: ozet.kapali }}
-            accessibilityLabel={t('sohbet.oylama.secenekEtiketi', { metin: secenek.metin, n: oy })}
+            accessibilityLabel={t('sohbet.oylama.secenekEtiketi', { metin: secenekAdi(secenek), n: oy })}
             disabled={ozet.kapali}
             onPress={() => onOy(secenek.id)}
             style={s.secenek}
@@ -55,7 +57,7 @@ export function OylamaKarti({ oylama, ozet, k, benId, kapanis, onOy, onPlanaEkle
             <View style={s.secenekMetin}>
               {benim ? <Ikon ad="tik" boyut={14} renk={renk.ana} kalinlik={2.8} /> : null}
               <Text style={s.secenekAd} numberOfLines={1}>
-                {secenek.metin}
+                {secenekAdi(secenek)}
               </Text>
             </View>
             <View style={{ flexDirection: 'row' }}>

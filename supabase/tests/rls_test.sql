@@ -2125,6 +2125,15 @@ select pg_temp.hata_bekle(format('select public.oylama_olustur(%L, %L, %L, null)
 select pg_temp.hata_bekle(format('select public.oylama_olustur(%L, %L, %L, now() - interval ''1 hour'')', current_setting('test.s_trip'), 'Geçmiş?', '[{"metin":"A"},{"metin":"B"}]'), '22023');
 select pg_temp.hata_bekle(format('select public.oylama_olustur(%L, %L, %L, null)', current_setting('test.s_trip'), 'Biçim?', '[{"metin":"A","place_id":"ChIJ-cibörek"},{"metin":"B"}]'), '23514');
 select pg_temp.hata_bekle(format('insert into public.oylamalar (trip_id, soru) values (%L, %L)', current_setting('test.s_trip'), 'Seçeneksiz?'), '42501');
+-- #248 KK2/KK4: mekan seçeneğinde metin boş olabilir (Google adı yazılmaz, ekranda canlı gelir); mekansız seçenekte boş metin reddedilir.
+select pg_temp.hata_bekle(format('select public.oylama_olustur(%L, %L, %L, null)', current_setting('test.s_trip'), 'Boş?', '[{"metin":""},{"metin":"B"}]'), '23514');
+select public.oylama_olustur(:'s_trip', 'Nereye?', '[{"metin":"","place_id":"ChIJ-ciborek-hb1"},{"metin":"Balık"}]'::jsonb, null) as s_bos_mesaj \gset
+select set_config('test.s_bos_mesaj', :'s_bos_mesaj', false);
+do $$
+begin
+  assert (select s.metin from public.oylama_secenekleri s join public.mesajlar m on m.oylama_id = s.oylama_id
+          where m.id = current_setting('test.s_bos_mesaj')::uuid and s.sira = 1) is not distinct from '', 'mekan seçeneği boş metinle kabul';
+end $$;
 select public.oylama_olustur(:'s_trip', 'Çibörek mi, balık mı?', '[{"metin":"Çibörek · Hacı Baba","place_id":"ChIJ-ciborek-hb1"},{"metin":"Balık"}]'::jsonb, now() + interval '1 day', 'Cumartesi akşamı için:') as s_mesaj \gset
 reset role;
 select oylama_id as s_oylama from public.mesajlar where id = :'s_mesaj' \gset

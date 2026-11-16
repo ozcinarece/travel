@@ -56,7 +56,7 @@ export function GeziSohbetKarti({ mesaj, oylama, saat, okunmamis, k, benId, meka
                   .map((sc) => (
                     <View key={sc.id} style={s.secenek}>
                       <Text style={s.secenekMetin} numberOfLines={1}>
-                        {sc.metin} · {oylama.oylama_oylari.filter((v) => v.secenek_id === sc.id).length}
+                        {sc.metin || (sc.place_id ? mekanAdi(sc.place_id) : '')} · {oylama.oylama_oylari.filter((v) => v.secenek_id === sc.id).length}
                       </Text>
                     </View>
                   ))}

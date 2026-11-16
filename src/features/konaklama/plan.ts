@@ -11,6 +11,29 @@ export type Konaklama = {
   label: string | null;
 };
 
+/**
+ * #248 KK1: yeni `stays` satırı. `place_id` varsa Google'dan gelen ad `label`'a yazılmaz (PRD §7, T1); ad ekranda
+ * places-light ile canlı gösterilir. `place_id`'siz (haritadan seçilen) noktada kullanıcının adı tutulur.
+ */
+export function yeniKonaklamaSatiri(seyahatId: string, secim: { place_id: string | null; ad: string; lat: number; lng: number }, simdi = new Date()) {
+  return {
+    trip_id: seyahatId,
+    place_id: secim.place_id,
+    lat: secim.lat,
+    lng: secim.lng,
+    label: secim.place_id ? null : secim.ad.trim().slice(0, 80) || null,
+    google_fetched_at: secim.place_id ? simdi.toISOString() : null,
+  };
+}
+
+/** #248 KK1: `label`'ı boş, `place_id`'li otellere ad yalnız bellekte (places-light) eklenir; DB'ye yazılmaz. */
+export function adlarlaKonaklamalar(liste: Konaklama[], canliAd: (placeId: string) => string | null | undefined): Konaklama[] {
+  return liste.map((k) => (k.label || !k.place_id ? k : { ...k, label: canliAd(k.place_id) ?? null }));
+}
+
+/** Canlı adı gereken kimlikler (label boş, place_id dolu). */
+export const adiEksikKimlikler = (liste: Konaklama[]) => [...new Set(liste.filter((k) => !k.label && k.place_id).map((k) => k.place_id!))];
+
 /** Matris / rota anahtarı (walk_cache): otel başına ayrı, konum değişince yeni otel = yeni anahtar. */
 export const konaklamaAnahtari = (id: string) => `stay:${id}`;
 

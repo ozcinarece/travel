@@ -267,6 +267,7 @@ function Sohbet({ seyahat, uyeler, mesajlar, oylamalar }: { seyahat: Seyahat; uy
             k={k}
             benId={benId}
             kapanis={kapanis}
+            secenekAdi={(sc) => sc.metin || (sc.place_id ? yerBilgisi(sc.place_id).ad : '')}
             onOy={(secenekId) => oyVer.mutate({ oylamaId: o.id, secenekId }, { onError: () => bildir(t('sohbet.oyVerilemedi')) })}
             onPlanaEkle={kazananPlanda ? undefined : planaEkle}
           />
@@ -431,6 +432,7 @@ function Sohbet({ seyahat, uyeler, mesajlar, oylamalar }: { seyahat: Seyahat; uy
         tz={seyahat.tz}
         mekanlar={mekanlar}
         ad={(m) => mekanAdiYaDaKategori(m, bilinen.ad)}
+        icerikAdi={(m) => bilinen.icerikAdi(m.place_id)}
         gonderiliyor={oylamaOlustur.isPending}
         onGonder={(o) => oylamaOlustur.mutate(o, { onSuccess: () => setAcik(null), onError: () => bildir(t('sohbet.gonderilemedi')) })}
       />

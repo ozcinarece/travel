@@ -2,13 +2,26 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useMemo } from 'react';
 
+import { useHafifYerler } from '@/features/yerler/api';
 import { useOturum } from '@/lib/oturum';
 import { supabase } from '@/lib/supabase';
 import type { Gun, OtelSecimi } from '@/lib/tipler';
 
-import { otelPlani, ucNoktalari, type GunUcNoktalari, type Konaklama, type OtelKapsami } from './plan';
+import { adiEksikKimlikler, adlarlaKonaklamalar, otelPlani, ucNoktalari, yeniKonaklamaSatiri, type GunUcNoktalari, type Konaklama, type OtelKapsami } from './plan';
 
+/**
+ * Seyahatin otelleri. #248 KK1: `place_id`'li otelin adı DB'de tutulmaz; ekranda places-light (Pro maske, puansız; istemcide
+ * 24 sa önbellek) ile canlı doldurulur. Ad gelene kadar `label` null kalır, ekranlar mevcut yedek metni gösterir (KK3).
+ */
 export function useKonaklamalar(seyahatId: string | undefined) {
+  const sorgu = useKonaklamaSatirlari(seyahatId);
+  const eksik = useMemo(() => adiEksikKimlikler(sorgu.data ?? []), [sorgu.data]);
+  const canli = useHafifYerler(eksik, { puan: false });
+  const data = useMemo(() => (sorgu.data ? adlarlaKonaklamalar(sorgu.data, (id) => canli.data?.[id]?.ad) : undefined), [sorgu.data, canli.data]);
+  return { ...sorgu, data };
+}
+
+function useKonaklamaSatirlari(seyahatId: string | undefined) {
   const { session } = useOturum();
   return useQuery({
     queryKey: ['konaklamalar', seyahatId],
@@ -28,14 +41,7 @@ async function konaklamaKimligi(seyahatId: string, secim: OtelSecimi | { stayId:
   if (ayni) return ayni.id;
   const { data, error } = await supabase
     .from('stays')
-    .insert({
-      trip_id: seyahatId,
-      place_id: secim.place_id,
-      lat: secim.lat,
-      lng: secim.lng,
-      label: secim.ad.slice(0, 80) || null,
-      google_fetched_at: secim.place_id ? new Date().toISOString() : null,
-    })
+    .insert(yeniKonaklamaSatiri(seyahatId, secim))
     .select('id')
     .single();
   if (error) throw error;

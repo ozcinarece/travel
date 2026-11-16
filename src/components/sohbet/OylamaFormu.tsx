@@ -22,6 +22,8 @@ type Props = {
   tz: string;
   mekanlar: Mekan[];
   ad: (m: Mekan) => string;
+  /** #248 KK2: bizim içeriğimizdeki ad (Google içeriği değil, yazılabilir); yoksa null. */
+  icerikAdi: (m: Mekan) => string | null;
   gonderiliyor: boolean;
   onGonder: (o: YeniOylama) => void;
 };
@@ -34,9 +36,15 @@ export function OylamaFormu(p: Props) {
   );
 }
 
-type Secenek = { metin: string; place_id: string | null };
+/** `otoAd`: metin mekan seçilince Google'dan gelen adla dolduruldu ve kullanıcı değiştirmedi (#248 KK2: kaydedilmez). */
+type Secenek = { metin: string; place_id: string | null; otoAd?: boolean };
 
-function Icerik({ tz, mekanlar, ad, gonderiliyor, onGonder }: Props) {
+/** #248 KK2: Google'dan gelen ad oylama_secenekleri.metin'e yazılmaz; mekan seçeneğinde metin boş gider, ad ekranda canlı gelir. */
+export function kayitMetni(x: Secenek): string {
+  return x.place_id && x.otoAd ? '' : x.metin.trim().slice(0, 80);
+}
+
+function Icerik({ tz, mekanlar, ad, icerikAdi, gonderiliyor, onGonder }: Props) {
   const [soru, setSoru] = useState('');
   const [secenekler, setSecenekler] = useState<Secenek[]>([
     { metin: '', place_id: null },
@@ -53,7 +61,7 @@ function Icerik({ tz, mekanlar, ad, gonderiliyor, onGonder }: Props) {
   const gonder = () => {
     if (!hazir) return;
     const kap = kapanis === 'yok' ? null : (kapanislar.find((k) => k.anahtar === kapanis)?.an.toISOString() ?? null);
-    onGonder({ soru: soru.trim(), secenekler: doluSecenekler.map((x) => ({ metin: x.metin.trim().slice(0, 80), place_id: x.place_id })), kapanis: kap, metin: not.trim() });
+    onGonder({ soru: soru.trim(), secenekler: doluSecenekler.map((x) => ({ metin: kayitMetni(x), place_id: x.place_id })), kapanis: kap, metin: not.trim() });
   };
 
   return (
@@ -69,7 +77,7 @@ function Icerik({ tz, mekanlar, ad, gonderiliyor, onGonder }: Props) {
             <View style={s.secenekSatiri}>
               <SayfaMetinAlani
                 value={x.metin}
-                onChangeText={(v) => degistir(i, { metin: v })}
+                onChangeText={(v) => degistir(i, { metin: v, otoAd: false })}
                 placeholder={t('sohbet.oylama.secenek', { n: i + 1 })}
                 placeholderTextColor={renk.soluk}
                 maxLength={80}
@@ -96,7 +104,7 @@ function Icerik({ tz, mekanlar, ad, gonderiliyor, onGonder }: Props) {
               <View style={s.mekanListesi}>
                 {x.place_id ? (
                   <Pressable accessibilityRole="button" onPress={() => {
-                      degistir(i, { place_id: null });
+                      degistir(i, x.otoAd ? { place_id: null, metin: '', otoAd: false } : { place_id: null });
                       setMekanAcik(null);
                     }} style={s.mekanSatiri}>
                     <Text style={[s.mekanAd, { color: renk.ikincil }]}>{t('sohbet.oylama.mekanKaldir')}</Text>
@@ -107,7 +115,15 @@ function Icerik({ tz, mekanlar, ad, gonderiliyor, onGonder }: Props) {
                     key={m.id}
                     accessibilityRole="button"
                     onPress={() => {
-                      degistir(i, { place_id: m.place_id, metin: x.metin.trim() ? x.metin : ad(m).slice(0, 80) });
+                      const bizim = icerikAdi(m);
+                      degistir(
+                        i,
+                        x.metin.trim() && !x.otoAd
+                          ? { place_id: m.place_id }
+                          : bizim
+                            ? { place_id: m.place_id, metin: bizim.slice(0, 80), otoAd: false }
+                            : { place_id: m.place_id, metin: ad(m).slice(0, 80), otoAd: true },
+                      );
                       setMekanAcik(null);
                     }}
                     style={s.mekanSatiri}
