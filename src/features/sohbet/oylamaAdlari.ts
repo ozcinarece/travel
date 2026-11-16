@@ -63,7 +63,9 @@ export function secenekAdlari(secenekler: OylamaSecenegi[], b: AdBilgisi): Map<s
 export function useOylamaAdlari(oylamalar: Oylama[], tipKaynagi: (placeId: string) => string | null | undefined = () => null) {
   const ids = useMemo(() => adiCanliYerler(oylamalar), [oylamalar]);
   const bilinen = useBilinenMekanlar(ids);
-  const hafif = useHafifYerler(ids, { puan: false });
+  // Bizim içeriğimizde adı olan için Google'a gidilmez; içerik sorgusu bitmeden istenmez (iki ekranda aynı anahtar).
+  const istenecek = bilinen.yukleniyor ? [] : ids.filter((p) => !bilinen.icerikAdi(p));
+  const hafif = useHafifYerler(istenecek, { puan: false });
   const bilgi: AdBilgisi = {
     ad: (p) => bilinen.ad({ place_id: p }) ?? hafif.data?.[p]?.ad ?? null,
     tip: (p) => tipKaynagi(p) ?? hafif.data?.[p]?.primary_type ?? null,

@@ -380,6 +380,17 @@ describe('#248 Ş3 oylama seçenek adları', () => {
     expect(mockKayit.invoke.filter((a) => a === 'places-light')).toHaveLength(1);
   });
 
+  it('adı bizim içeriğimizde olan mekan seçeneği için Google isteği yok', async () => {
+    (mockTablolar.oylamalar[0] as { oylama_secenekleri: unknown[] }).oylama_secenekleri = [
+      { id: 'x1', oylama_id: 'o1', sira: 1, metin: '', place_id: 'ChIJ-cib' },
+      { id: 'x2', oylama_id: 'o1', sira: 2, metin: 'Balık', place_id: null },
+    ];
+    const { getAllByText, qc } = ciz(<SohbetSekmesi />);
+    await waitFor(() => getAllByText('Hacı Baba Çibörek'));
+    await sakinles(qc);
+    expect(mockKayit.invoke).toEqual([]);
+  });
+
   it('Gezi kartı da aynı adları gösterir', async () => {
     ikiRestoran();
     mockHafif = { 'ChIJ-r1': { ad: 'Lokanta Bir' }, 'ChIJ-r2': { ad: 'Lokanta İki' } };
