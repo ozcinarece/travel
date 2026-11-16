@@ -1,4 +1,4 @@
-// #181 KK1 (kanvas 23 · 27): seyahat içi alt menü — Gezi · Plan · Keşfet · Harcama · Sohbet (uygulama menüsünün yerine). 86 px
+// #181 KK1 (kanvas 23 · 27): seyahat içi alt menü — Gezi · Plan · Yer ekle (#274, kanvas 29e; rota adı `kesfet`) · Harcama · Sohbet (uygulama menüsünün yerine). 86 px
 // beyaz, üstte Çizgi; seçili öğe Gece (çizgi 2,4 + %18 dolgu), diğerleri gri mavi. Sekmeler aynı Tabs düzeninde (durum korunur,
 // haritalar bağlı kalır). Sohbet'in okunmamış rozeti D (#184) ile gelir (`rozetler`).
 import { Pressable, StyleSheet, Text, View } from 'react-native';
@@ -14,7 +14,7 @@ export type SeyahatSekmesi = 'gezi' | 'program' | 'kesfet' | 'harcama' | 'sohbet
 const OGELER: { ad: SeyahatSekmesi; ikon: IkonAdi }[] = [
   { ad: 'gezi', ikon: 'gezi' },
   { ad: 'program', ikon: 'takvim' },
-  { ad: 'kesfet', ikon: 'pusulaCizgi' },
+  { ad: 'kesfet', ikon: 'yerEkle' },
   { ad: 'harcama', ikon: 'cuzdan' },
   { ad: 'sohbet', ikon: 'sohbet' },
 ];

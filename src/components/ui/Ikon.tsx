@@ -13,6 +13,8 @@ export type IkonAdi =
   // (bölüm oku, artı, otel yatağı, oy kalbi).
   | 'gezi'
   | 'pusulaCizgi'
+  // #274 (kanvas 29e): seyahat içi "Yer ekle" sekmesi — artılı harita iğnesi.
+  | 'yerEkle'
   | 'cuzdan'
   | 'sohbet'
   | 'ileri'
@@ -340,6 +342,11 @@ export function Ikon({ ad, boyut = 24, renk, kalinlik = 2, dolgu }: Props) {
         </>
       ) : ad === 'gezi' ? (
         <Path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z" {...ortak} />
+      ) : ad === 'yerEkle' ? (
+        <>
+          <Path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z" {...ortak} />
+          <Path d="M12 6.5v6M9 9.5h6" {...ortak} fill="none" />
+        </>
       ) : ad === 'pusulaCizgi' ? (
         <>
           <Circle cx={12} cy={12} r={9} {...ortak} />
