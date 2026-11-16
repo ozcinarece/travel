@@ -247,14 +247,21 @@ select pg_temp.hata_bekle(
 -- delete/update politikaları satırı görünmez kılar, hata vermez: silme etkisiz kalmalı.
 delete from storage.objects where name like 'aaaaaaaa%';
 update storage.objects set metadata = '{"v": 3}' where name like 'aaaaaaaa%';
+-- #229 KK2: kova listelenemez — misafir ve başka kullanıcı A'nın dosyasını görmez; A kendi klasörünü görür (upsert/remove).
+do $$ begin assert (select count(*) from storage.objects where bucket_id = 'avatars') = 0, '#229: misafir avatars listeleyemez'; end $$;
+select pg_temp.as_user(:B);
+do $$ begin assert (select count(*) from storage.objects where bucket_id = 'avatars') = 0, '#229: başka kullanıcı avatars listeleyemez'; end $$;
+select pg_temp.as_user(:A);
+do $$ begin assert (select count(*) from storage.objects where bucket_id = 'avatars') = 1, '#229: kullanıcı kendi avatarını görür'; end $$;
+set role anon;
+select pg_temp.as_user(null);
+do $$ begin assert (select count(*) from storage.objects where bucket_id = 'avatars') = 0, '#229 KK2: anon avatars listeleyemez'; end $$;
+reset role;
 do $$
 begin
   assert (select metadata from storage.objects where name like 'aaaaaaaa%') = '{"v": 2}', 'misafir başkasının avatarını değiştiremez';
+  assert (select public from storage.buckets where id = 'avatars'), '#229 KK2: kova public kalır (genel adresle okuma)';
 end $$;
-set role anon;
-select pg_temp.as_user(null);
-do $$ begin assert (select count(*) from storage.objects where bucket_id = 'avatars') = 1, 'avatar herkese okunur'; end $$;
-reset role;
 
 -- 11 ── #56 gün bazlı otel (stays): üye ekler, günlere bağlar; başka seyahatin oteli bağlanamaz; başkası göremez;
 -- otel silinince günler "otel yok" olur; günün oteli değişikliği akışa yazılır; eski hotel_* taşıması.
@@ -2831,5 +2838,50 @@ begin
     'KK3: security definer, search_path boş';
 end $$;
 delete from public.places_gunluk_sayac;
+
+-- #229 KK1: profil yalnız sahibine ve ortak seyahati olana görünür; seyahatten çıkınca görünmez.
+insert into auth.users (id) values ('22900000-0000-4000-8000-000000000001'), ('22900000-0000-4000-8000-000000000002'), ('22900000-0000-4000-8000-000000000003');
+insert into public.profiles (id, name, username) values
+  ('22900000-0000-4000-8000-000000000001', 'Profil Bir', 'profil_bir'),
+  ('22900000-0000-4000-8000-000000000002', 'Profil İki', 'profil_iki'),
+  ('22900000-0000-4000-8000-000000000003', 'Profil Üç', 'profil_uc');
+insert into public.trips (id, owner_id, city_place_id, city_label, lat, lng, tz)
+  values ('22900000-0000-4000-8000-000000000010', '22900000-0000-4000-8000-000000000001', 'p229', 'Profil şehri', 40, 30, 'Europe/Istanbul');
+insert into public.members (trip_id, user_id, display_name) values ('22900000-0000-4000-8000-000000000010', '22900000-0000-4000-8000-000000000002', 'Profil İki');
+set role authenticated;
+select pg_temp.as_user('22900000-0000-4000-8000-000000000001');
+do $$
+begin
+  assert (select count(*) from public.profiles where id::text like '22900000-%') = 2, '#229: sahip kendini ve ortak üyeyi görür';
+  assert not exists (select 1 from public.profiles where id = '22900000-0000-4000-8000-000000000003'), '#229: yabancıyı göremez';
+end $$;
+select pg_temp.as_user('22900000-0000-4000-8000-000000000003');
+do $$
+begin
+  assert (select count(*) from public.profiles where id::text like '22900000-%') = 1, '#229: yabancı yalnız kendini görür';
+  assert (select count(*) from public.profiles) = 1, '#229: rehber kapalı (toplu çekim yalnız kendi satırı)';
+end $$;
+select pg_temp.as_user(:G, true);
+do $$ begin assert not exists (select 1 from public.profiles where id::text like '22900000-%'), '#229: misafir başkasının profilini göremez'; end $$;
+reset role;
+delete from public.members where trip_id = '22900000-0000-4000-8000-000000000010' and user_id = '22900000-0000-4000-8000-000000000002';
+set role authenticated;
+select pg_temp.as_user('22900000-0000-4000-8000-000000000002');
+do $$
+begin
+  assert not exists (select 1 from public.profiles where id = '22900000-0000-4000-8000-000000000001'), '#229: seyahatten çıkınca göremez';
+  assert exists (select 1 from public.profiles where id = '22900000-0000-4000-8000-000000000002'), '#229: kendini görür';
+end $$;
+reset role;
+set role anon;
+select pg_temp.hata_bekle($$select public.ortak_seyahat_var('22900000-0000-4000-8000-000000000001')$$, '42501');
+reset role;
+do $$
+begin
+  assert (select prosecdef and proconfig @> array['search_path=""'] from pg_proc where oid = 'public.ortak_seyahat_var(uuid)'::regprocedure),
+    '#229: yardımcı security definer, search_path boş';
+end $$;
+delete from public.trips where id = '22900000-0000-4000-8000-000000000010';
+delete from auth.users where id::text like '22900000-%';
 
 \echo 'rls_test: TÜM TESTLER GEÇTİ'
