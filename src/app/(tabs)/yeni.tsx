@@ -116,7 +116,8 @@ export default function SihirbazEkrani() {
     setHata(null);
     const o = oncekiAdim(adim);
     if (o) setAdim(o);
-    else router.navigate('/(tabs)');
+    else if (router.canGoBack()) router.back();
+    else router.replace('/(tabs)');
   };
   const ileri = () => {
     setHata(null);

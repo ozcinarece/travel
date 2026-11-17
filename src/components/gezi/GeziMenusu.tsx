@@ -75,7 +75,7 @@ export function GeziMenusu({ acik, onKapat, seyahat, gunler, duraklar, sahip, uy
     if (!onay) return;
     try {
       await sil.mutateAsync(seyahat.id);
-      router.replace({ pathname: '/(tabs)/seyahatler', params: { bildirim: 'silindi' } });
+      router.dismissTo({ pathname: '/(tabs)', params: { bildirim: 'silindi' } });
     } catch {
       onHata(t('seyahatler.silHata'));
     }
@@ -85,7 +85,7 @@ export function GeziMenusu({ acik, onKapat, seyahat, gunler, duraklar, sahip, uy
     if (!onay) return;
     try {
       await ayril.mutateAsync(seyahat.id);
-      router.replace('/(tabs)/seyahatler');
+      router.dismissTo('/(tabs)');
     } catch {
       onHata(t('davet.grup.ayrilHata'));
     }

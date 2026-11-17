@@ -1,22 +1,16 @@
-import { Tabs } from 'expo-router';
+import { Stack } from 'expo-router';
 
-import { AltMenu, type AltMenuOgesi } from '@/components/ui/AltMenu';
-
-// #138 KK6: uygulama alt menüsü 5 öğe — Ana sayfa · Seyahatler · [Yeni] · Kaydettiklerim · Profil (Yeni ortada, Mandalina).
-// #98: Yeni sekmesi sihirbazdır; adımlar tam ekran (alt menü gizli).
-export default function SekmeLayout() {
+// #275 (#237 v2, kanvas 29a): uygulama alt menüsü kalktı. Ana ekran (Keşfet) üst çubukta Ara · ♥ Kaydettiklerim · Profil'e,
+// yüzen [+ Yeni seyahat] düğmesiyle sihirbaza gider. Yığın (Stack): Android geri tuşu ve iOS kaydırma bir önceki ekrana döner,
+// ana ekranda uygulamadan çıkar (KK6). Yeni seyahat sihirbazı tam ekran (#98).
+export default function AnaYiginLayout() {
   return (
-    <Tabs
-      screenOptions={{ headerShown: false }}
-      tabBar={({ state }) => {
-        const aktif = state.routes[state.index]?.name as AltMenuOgesi | undefined;
-        return aktif === 'yeni' ? null : <AltMenu aktif={aktif ?? null} />;
-      }}>
-      <Tabs.Screen name="index" />
-      <Tabs.Screen name="seyahatler" />
-      <Tabs.Screen name="yeni" />
-      <Tabs.Screen name="kaydettiklerim" />
-      <Tabs.Screen name="profil" />
-    </Tabs>
+    <Stack screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="index" />
+      <Stack.Screen name="seyahatler" />
+      <Stack.Screen name="yeni" />
+      <Stack.Screen name="kaydettiklerim" />
+      <Stack.Screen name="profil" />
+    </Stack>
   );
 }
