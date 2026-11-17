@@ -1,20 +1,22 @@
 import { router, useFocusEffect } from 'expo-router';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, AppState, Platform, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Path } from 'react-native-svg';
 
-import { IlkSeyahatKarti, YaklasanKart } from '@/components/icerik/AnaSayfaKartlari';
+import { HarcamaKapatKarti } from '@/components/anasayfa/HarcamaKapatKarti';
+import { SERIT_YUKSEKLIK, SeyahatSeridi } from '@/components/anasayfa/SeyahatSeridi';
+import { IlkSeyahatKarti } from '@/components/icerik/AnaSayfaKartlari';
 import { GeziKarti } from '@/components/icerik/GeziKarti';
 import { KesfetAkisi } from '@/components/icerik/KesfetAkisi';
 import { Avatar } from '@/components/ui/Avatar';
 import { Ikon } from '@/components/ui/Ikon';
 import { KisaBildirim, useGelenBildirim } from '@/components/ui/KisaBildirim';
 import { LogoYazi } from '@/components/ui/Logo';
+import { GEZI_PAYLAS_KARTI, kesfetDurumu, seritAdimMetni, useAcikBorc, useSeritAdimi, useSeritIpucu } from '@/features/anasayfa/serit';
 import { bekleyenDavetiOku, bekleyenDavetiSil, useDavetKarsilama, useDavetKarsilandi } from '@/features/davet/sorgular';
 import { kesfetAkisiAcik } from '@/features/icerik/kesfetAkisi';
 import { useGeziler } from '@/features/icerik/sorgular';
-import { hedefSeyahatler } from '@/features/icerik/yerEkle';
 import { useProfil } from '@/features/profil/sorgular';
 import { acilisDurumu, siniflandir } from '@/features/seyahatler/siniflandir';
 import { useSeyahatler } from '@/features/seyahatler/sorgular';
@@ -40,8 +42,6 @@ export default function AnaSayfa() {
   const profil = useProfil();
   const seyahatler = useSeyahatler();
   const geziler = useGeziler();
-  const hedefler = useMemo(() => hedefSeyahatler(seyahatler.data), [seyahatler.data]);
-  const yaklasan = hedefler[0] ?? null;
 
   const { hesapli } = useOturum();
   const altBosluk = useSafeAreaInsets().bottom;
@@ -91,10 +91,15 @@ export default function AnaSayfa() {
   const aktifTz = aktif?.tz ?? null;
   // KK-ek3: uygulama ön plana gelince (`AppState` → `active`) ekran yeniden çizilir; sınıflar o anki saatle yeniden hesaplanır.
   const [onPlan, setOnPlan] = useState(0);
+  // KK-ek7: yenileme kararı yalnız AppState → `active` olayında verilir. Etki aktif seyahat (ya da dilimi) değişince de çalışır;
+  // o zaman (ör. gece yarısından sonra aşağı çekip yenileme) bayrak yeniden açılmaz, Keşfet'i okuyan kullanıcı Gezi'ye atılmaz.
+  const islenenOnPlan = useRef(0);
   useEffect(() => {
+    const onPlanaGeldi = onPlan !== islenenOnPlan.current;
+    islenenOnPlan.current = onPlan;
     if (!aktifSeyahatId) return;
     // Ön plana gelişte, aktif seyahatin diliminde gün değiştiyse (ve kullanıcı o gün Keşfet'e kendisi dönmediyse) kural yeniden işler.
-    if (onPlan > 0 && aktifTz) acilisKarariniYenile(aktifTz);
+    if (onPlanaGeldi && aktifTz) acilisKarariniYenile(aktifTz);
     if (!acilisKarariAl()) return;
     // `acilis: '1'`: kök yığında bu geçiş animasyonsuz (`src/app/_layout.tsx`).
     router.push({ pathname: '/seyahat/[id]/(sekmeler)/gezi', params: { id: aktifSeyahatId, acilis: '1' } });
@@ -137,6 +142,16 @@ export default function AnaSayfa() {
   }, [acilisBekleniyor]);
   const acilisGostergesi = acilisBekleniyor && (kararBekleniyor || !!aktifSeyahatId);
 
+  // #276 2b · KK3 · KK4 · KK-ek4: altta seyahat şeridi (29b) ya da üstte "gezi bitti" kartı (29c).
+  const siniflar = seyahatler.data ? siniflandir(seyahatler.data) : null;
+  const bitenAday = siniflar && !siniflar.aktif[0] && !siniflar.yaklasan[0] ? (siniflar.yeniBiten[0] ?? null) : null;
+  const borc = useAcikBorc(bitenAday);
+  const bitenKartiVar = GEZI_PAYLAS_KARTI || (!!borc && borc.transfer > 0);
+  const durum = siniflar ? kesfetDurumu(siniflar, bitenKartiVar) : null;
+  const seritSeyahati = durum?.tur === 'serit' ? durum.seyahat : null;
+  const seritAdimi = useSeritAdimi(seritSeyahati);
+  const ipucu = useSeritIpucu(!!seritSeyahati);
+
   if (bekleyenDavet === undefined || karsilamaBekleniyor || karsilanan || acilisGostergesi) {
     return (
       <SafeAreaView style={[s.ekran, s.ortala]}>
@@ -152,6 +167,9 @@ export default function AnaSayfa() {
   const yeni = () => router.push('/(tabs)/yeni');
   // Yüzen düğme ekranın altından 28 px (kanvas 29a); ana çubuk (home indicator) varsa onun 8 px üstü.
   const yuzenAlt = Math.max(28, altBosluk + 8);
+  // Şerit ekranın altından 24 px (kanvas 29b); ana çubuk varsa onun 8 px üstü.
+  const seritAlt = Math.max(24, altBosluk + 8);
+  const seyahatiAc = (id: string) => router.push({ pathname: '/seyahat/[id]', params: { id } });
   const geziAc = (slug: string) => router.push({ pathname: '/gezi/[slug]', params: { slug } });
   // #277 KK3 · KK6: akış bayrağı ve yaklaşan seyahatin (≤ 14 gün) şehri; o şehrin gezileri önde.
   const akisAcik = kesfetAkisiAcik();
@@ -211,18 +229,16 @@ export default function AnaSayfa() {
             </Pressable>
 
             <View style={s.kenar}>
-              {yaklasan ? (
-                <YaklasanKart
-                  rozet={yaklasanRozeti(yaklasan)}
-                  ad={seyahatAdi(yaklasan)}
-                  alt={yaklasanAlti(yaklasan)}
-                  uyeler={yaklasan.members}
-                  onPress={() => router.push({ pathname: '/seyahat/[id]', params: { id: yaklasan.id } })}
-                />
-              ) : !seyahatler.isPending ? (
-                <IlkSeyahatKarti baslik={t('anasayfa.yeniBaslik')} onPress={yeni} />
-              ) : null}
+              {/* Yaklaşan / planlanan / aktif seyahat altta şeritte (29b); burada kart yok. */}
+              {!durum && !seyahatler.isPending ? <IlkSeyahatKarti baslik={t('anasayfa.yeniBaslik')} onPress={yeni} /> : null}
             </View>
+            {durum?.tur === 'geziBitti' && borc && borc.transfer > 0 ? (
+              <HarcamaKapatKarti
+                sehir={durum.seyahat.city_label}
+                borc={borc}
+                onBakiyeler={() => router.push({ pathname: '/seyahat/[id]/bakiyeler', params: { id: durum.seyahat.id } })}
+              />
+            ) : null}
 
             {akisAcik ? (
               // #277 KK6: bayrak açıkken bugünkü hazır geziler bölümü yerine Keşfet akışı.
@@ -254,15 +270,28 @@ export default function AnaSayfa() {
           </>
         )}
       </ScrollView>
-      <View style={[s.yuzenKap, { bottom: yuzenAlt }]} pointerEvents="box-none">
-        <Pressable accessibilityRole="button" onPress={yeni} style={({ pressed }) => [s.yuzen, pressed && s.basili]}>
-          <Svg width={24} height={24} viewBox="0 0 24 24" fill="none">
-            <Path d="M12 5v14M5 12h14" stroke={renk.metin} strokeWidth={3} strokeLinecap="round" />
-          </Svg>
-          <Text style={s.yuzenMetin}>{t('anasayfa.yeniSeyahat')}</Text>
-        </Pressable>
-      </View>
-      <KisaBildirim metin={gelenBildirim} alt={yuzenAlt + 68} />
+      {seritSeyahati ? (
+        <SeyahatSeridi
+          rozet={durum?.tur === 'serit' && durum.sinif !== 'planlanan' ? yaklasanRozeti(seritSeyahati) : null}
+          ad={seyahatAdi(seritSeyahati)}
+          alt={seritAdimi ? seritAdimMetni(seritAdimi) : seritAdimi === null ? yaklasanAlti(seritSeyahati) : null}
+          ipucu={ipucu.acik}
+          onAc={() => seyahatiAc(seritSeyahati.id)}
+          onYeni={yeni}
+          onIpucuKapat={ipucu.kapat}
+          alttan={seritAlt}
+        />
+      ) : (
+        <View style={[s.yuzenKap, { bottom: yuzenAlt }]} pointerEvents="box-none">
+          <Pressable accessibilityRole="button" onPress={yeni} style={({ pressed }) => [s.yuzen, pressed && s.basili]}>
+            <Svg width={24} height={24} viewBox="0 0 24 24" fill="none">
+              <Path d="M12 5v14M5 12h14" stroke={renk.metin} strokeWidth={3} strokeLinecap="round" />
+            </Svg>
+            <Text style={s.yuzenMetin}>{t('anasayfa.yeniSeyahat')}</Text>
+          </Pressable>
+        </View>
+      )}
+      <KisaBildirim metin={gelenBildirim} alt={seritSeyahati ? seritAlt + SERIT_YUKSEKLIK + 12 : yuzenAlt + 68} />
     </SafeAreaView>
   );
 }

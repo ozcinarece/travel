@@ -5,7 +5,7 @@ import { act } from '@testing-library/react-native';
 import { renderRouter } from 'expo-router/testing-library';
 import { Text } from 'react-native';
 
-import { acilisGecisi, acilisKarariAcik, acilisKarariAl, acilisKarariniKapat, acilisKarariniSifirla, kesfeteDon } from '../acilis';
+import { acilisGecisi, acilisKarariAcik, acilisKarariAl, acilisKarariniKapat, acilisKarariniSifirla, acilisKarariniYenile, kesfeteDon } from '../acilis';
 
 jest.mock('react-native-safe-area-context', () => jest.requireActual<{ default: object }>('react-native-safe-area-context/jest/mock').default);
 
@@ -74,5 +74,24 @@ describe('acilisGecisi (#283 inceleme 2 · 2)', () => {
     expect(acilisGecisi({ id: 'a', acilis: '1' })).toBe(true);
     expect(acilisGecisi({ id: 'a', screen: '(sekmeler)', params: { id: 'a' } })).toBe(false);
     expect(acilisGecisi(undefined)).toBe(false);
+  });
+});
+
+describe('acilisKarariniYenile (#276 KK-ek3 · 2b test eki)', () => {
+  it('gün değişimi seyahatin diliminden (`trips.tz`) bulunur, cihaz diliminden değil', () => {
+    jest.useFakeTimers({ now: new Date('2026-11-17T14:00:00Z') });
+    try {
+      // Tokyo'da 17 Kas 23:00 (İstanbul 17:00): bayrak kapanır.
+      acilisKarariniSifirla();
+      acilisKarariniKapat();
+      // İki saat sonra: Tokyo'da 18 Kas 01:00 (gün değişti), İstanbul'da hâlâ 17 Kas 19:00.
+      const an = new Date('2026-11-17T16:00:00Z');
+      expect(acilisKarariniYenile('Europe/Istanbul', an)).toBe(false);
+      expect(acilisKarariniYenile('Asia/Tokyo', an)).toBe(true);
+      expect(acilisKarariAcik()).toBe(true);
+    } finally {
+      jest.useRealTimers();
+      acilisKarariniSifirla();
+    }
   });
 });

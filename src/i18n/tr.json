@@ -1276,5 +1276,26 @@
       "git": "Sohbete git",
       "gitYeni": "Sohbete git · {n} yeni"
     }
+  },
+  "serit": {
+    "siradaki": "Sıradaki adım: {adim}",
+    "adim": {
+      "planKur": "planı kur",
+      "dagit": "{n} mekanı güne dağıt",
+      "otel": "otel seç",
+      "davet": "arkadaşlarını davet et",
+      "yemek": "{gun} için öğle yemeği ekle",
+      "harcamaKapat": "harcamaları kapat",
+      "yarin": "yarın başlıyor, çıkış {saat}"
+    },
+    "acIpucu": "Seyahati açar",
+    "ipucuBaslik": "Seyahatin burada",
+    "ipucuMetin": "Keşfet’te gezinirken de planın bir dokunuş uzakta. Seyahate girmek için şeride dokun.",
+    "tamam": "Tamam",
+    "bittiEtiket": "{sehir} GEZİSİ · BİTTİ",
+    "harcamaKapat": "Harcamaları kapat",
+    "sanaBorclular": "Sana borçlular",
+    "odenmedi": "henüz ödenmedi",
+    "bakiyeler": "Bakiyeler"
   }
 }
