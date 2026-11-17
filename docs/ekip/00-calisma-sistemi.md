@@ -14,8 +14,9 @@ Tripmate'i birkaç yapay zekâ ajanı birlikte geliştirir. Ece komut verir, bü
 | **Sadelik savunucusu** | `sadelik.md` | Her yeni şeye "gerçekten gerekli mi, daha basit olur mu?" diye bakar | Yeni özellik önermez |
 | **Büyüme denetçisi** | `buyume.md` | Kullanıcı neden indirir, neden geri gelir, neden arkadaşını çağırır | Ücretli kampanya ya da harcama başlatmaz |
 | **Maliyet ve güvenlik** | `maliyet-guvenlik.md` | Google maliyeti, yetki (RLS), gizlilik, KVKK, Google koşulları | Kod yazmaz; bulgusu engel olarak işaretlenebilir |
+| **Rehber** (içerik editörü) | zamanlanmış görevin istemi | #299 iş listesinden gezi içeriği hazırlar, `İçerik:` PR'ı açar; Ürün onaylayınca birleştirir ve BO'ya **taslak** yükler | Yayınlamaz (yayını Ece yapar); uygulama kodu yazmaz |
 
-Bütün ajanlar aynı GitHub hesabını kullanır. Bu yüzden **her yorum ve issue rol etiketiyle başlar**: `**[Ürün]**`, `**[Geliştirici]**`, `**[UX]**`, `**[Sadelik]**`, `**[Büyüme]**`, `**[Maliyet-Güvenlik]**`. Ece kendi yorumlarını etiketsiz yazar; etiketsiz yorum Ece'nindir ve her şeyden önce gelir.
+Bütün ajanlar aynı GitHub hesabını kullanır. Bu yüzden **her yorum ve issue rol etiketiyle başlar**: `**[Ürün]**`, `**[Geliştirici]**`, `**[UX]**`, `**[Sadelik]**`, `**[Büyüme]**`, `**[Maliyet-Güvenlik]**`, `**[Rehber]**`. Ece kendi yorumlarını etiketsiz yazar; etiketsiz yorum Ece'nindir ve her şeyden önce gelir.
 
 ## 2. Masa: GitHub
 
@@ -60,9 +61,10 @@ Kalan her şeyi Ürün karara bağlar; Ece istediği zaman geri çevirebilir.
 
 | Görev | Ne zaman | Kim |
 |---|---|---|
-| Geliştirme turu | Her gün 6 tur: 08:40, 11:40, 14:40, 17:40, 20:40, 23:40 | Geliştirici |
-| Ürün turu | Her gün 5 tur: 10:10, 13:10, 16:10, 19:10, 22:10 | Ürün |
+| Geliştirme turu | Her saat :40'ta, 08:40–23:40 | Geliştirici |
+| Ürün turu | Her saat :10'da, 09:10–23:10 | Ürün |
 | Denetim kurulu | Pazartesi ve perşembe 11:25 | UX, Sadelik, Büyüme, Maliyet-Güvenlik (aynı turda, birbirinden bağımsız alt ajanlar) |
+| Rehber turu | Her saat :25'te, 08:25–23:25 | Rehber |
 | Haftalık özet | Cuma 17:50 | Ürün → Ece'ye bildirim |
 
 Son turdan beri hiçbir şey değişmediyse tur masaya yazmaz, tek satırla biter.
@@ -71,6 +73,7 @@ Son turdan beri hiçbir şey değişmediyse tur masaya yazmaz, tek satırla bite
 - Geliştirici en çok 2 PR açar ya da günceller.
 - Her denetçi en çok 5 yeni bulgu açar.
 - Ürün en çok 4 yeni iş issue'su açar.
+- Rehber en çok 1 yeni gezi PR'ı açar; aynı anda en çok 2 açık `İçerik:` PR'ı, günde en çok 6 yükleme.
 
 ## 6. Durdurma
 
