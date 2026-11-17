@@ -267,9 +267,11 @@ const s = StyleSheet.create({
   },
   gunNo: { fontFamily: yazi.ekstra, fontSize: 11 },
   kalan: { flexShrink: 0, fontFamily: yazi.ekstra, fontSize: 11, color: renk.ikincil },
-  // #291 KK1: en kötü durumda halkalar kırpılır, komşu güne binmez.
+  // #291 KK1: en kötü durumda hat daralır (flexShrink 1, minWidth 0) ve halkalar kırpılır; komşu güne binmez.
   hat: {
     flexGrow: 1,
+    flexShrink: 1,
+    minWidth: 0,
     overflow: 'hidden',
     height: 10,
     flexDirection: 'row',

@@ -16,12 +16,13 @@ import { rotaPlani } from '../KesfetKarti';
 
 /**
  * #291 KK1: bir rota şeridinin en dar hali (pt): gün karosu 20 + 5 + halkalar (8 pt, aralıksız) + varsa 5 + "+N"
- * (Figtree 800 11 pt'de karakter başına ≈ 7 pt); günler arası 6, varsa "+N gün".
+ * (Figtree 800 11 pt'de karakter başına ≈ 7 pt × yazı ölçeği, en çok 1,3); günler arası 6, varsa "+N gün".
+ * `halkasiz`: kırpılabilen halka hattı sıfıra indiğinde kalan sabit genişlik.
  */
-function enDarRota(gunler: number[]): number {
+function enDarRota(gunler: number[], olcek = 1, halkasiz = false): number {
   const plan = rotaPlani(gunler);
-  const metin = (m: string) => m.length * 7;
-  const gun = plan.gunler.map((g) => 20 + 5 + g.halka * 8 + (g.kalan > 0 ? 5 + metin(`+${g.kalan}`) : 0));
+  const metin = (m: string) => m.length * 7 * Math.min(olcek, 1.3);
+  const gun = plan.gunler.map((g) => 20 + 5 + (halkasiz ? 0 : g.halka * 8) + (g.kalan > 0 ? 5 + metin(`+${g.kalan}`) : 0));
   const ek = plan.kalanGun > 0 ? [metin(`+${plan.kalanGun} gün`)] : [];
   const parcalar = [...gun, ...ek];
   return parcalar.reduce((a, b) => a + b, 0) + 6 * (parcalar.length - 1);
@@ -206,11 +207,26 @@ describe('<KesfetAkisi />', () => {
     }
   });
 
-  it('#291 KK1: halka hattı taşarsa kırpılır (overflow hidden)', () => {
-    mockAkis = { data: [gezi('u', 'İstanbul', [12, 10, 4])], isPending: false, isError: false, isFetching: false, refetch: jest.fn() };
+  it('#291 KK1: taşan durumlarda (1,0 ölçekte 4×15, 1,3 ölçekte 4×7) hat daralır, sabit parçalar sığar, halkalar kırpılır', () => {
+    // Bu iki durum en dar halde 301 pt'yi aşar (309 ve ≈ 313)...
+    expect(enDarRota([15, 15, 15, 15])).toBeGreaterThan(301);
+    expect(enDarRota([7, 7, 7, 7], 1.3)).toBeGreaterThan(301);
+    // ...ama halka hattı dışındaki sabit parçalar (karo, "+N", "+N gün", aralıklar) sığar: taşmayı yalnız hat emer.
+    expect(enDarRota([15, 15, 15, 15], 1, true)).toBeLessThanOrEqual(301);
+    expect(enDarRota([7, 7, 7, 7], 1.3, true)).toBeLessThanOrEqual(301);
+
+    mockAkis = { data: [gezi('u', 'İstanbul', [15, 15, 15, 15])], isPending: false, isError: false, isFetching: false, refetch: jest.fn() };
     render(<KesfetAkisi sehir={null} onYeni={jest.fn()} />);
-    const hat = screen.getAllByTestId('rota-hat')[0];
-    expect(StyleSheet.flatten(hat.props.style)).toEqual(expect.objectContaining({ overflow: 'hidden', flexGrow: 1 }));
+    for (const hat of screen.getAllByTestId('rota-hat')) {
+      // Hat halkaların toplam genişliğinin altına inebilir (flexShrink 1, minWidth 0) ve taşanı kırpar; komşu güne binmez.
+      expect(StyleSheet.flatten(hat.props.style)).toEqual(
+        expect.objectContaining({ overflow: 'hidden', flexGrow: 1, flexShrink: 1, minWidth: 0 }),
+      );
+    }
+    // Yalnız hat daralır: halka, gün karosu ve "+N" küçülmez.
+    for (const halka of screen.getAllByTestId('rota-halka')) {
+      expect(StyleSheet.flatten(halka.props.style).flexShrink ?? 0).toBe(0);
+    }
   });
 
   it('#291 KK2: her gün önce kendi yerini alır (flexBasis auto), kalan yer gerçek durak sayısıyla paylaşılır', () => {
