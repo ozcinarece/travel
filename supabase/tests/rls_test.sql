@@ -3096,4 +3096,46 @@ delete from public.trips where owner_id = '26300000-0000-4000-8000-000000000001'
 delete from public.silinecek_klasorler where trip_id::text like '26300000-%' or trip_id in (select id from t263);
 delete from auth.users where id = '26300000-0000-4000-8000-000000000001';
 
+-- #266 KK1/KK3: seyahat kimliği hiçbir rol için değiştirilemez (authenticated sahip, service_role, tablo sahibi).
+insert into auth.users (id) values ('26600000-0000-4000-8000-000000000001');
+insert into public.trips (id, owner_id, city_place_id, city_label, lat, lng, tz) values
+  ('26600000-0000-4000-8000-000000000010', '26600000-0000-4000-8000-000000000001', 'p266', 'Kimlik şehri', 40, 30, 'Europe/Istanbul');
+set role authenticated;
+select pg_temp.as_user('26600000-0000-4000-8000-000000000001');
+select pg_temp.hata_bekle($$update public.trips set id = gen_random_uuid() where id = '26600000-0000-4000-8000-000000000010'$$, '42501');
+reset role;
+set role service_role;
+select pg_temp.hata_bekle($$update public.trips set id = gen_random_uuid() where id = '26600000-0000-4000-8000-000000000010'$$, '42501');
+reset role;
+select pg_temp.hata_bekle($$update public.trips set id = gen_random_uuid() where id = '26600000-0000-4000-8000-000000000010'$$, '42501');
+do $$
+begin
+  assert exists (select 1 from public.trips where id = '26600000-0000-4000-8000-000000000010'), '#266 KK1: kimlik aynı kaldı';
+end $$;
+-- Kimlik dışındaki güncelleme service_role için çalışmaya devam eder.
+set role service_role;
+update public.trips set city_label = 'Kimlik şehri 2' where id = '26600000-0000-4000-8000-000000000010';
+reset role;
+do $$
+begin
+  assert (select city_label from public.trips where id = '26600000-0000-4000-8000-000000000010') = 'Kimlik şehri 2',
+    '#266 KK1: diğer alanlar güncellenir';
+end $$;
+
+-- #266 KK2/KK3: silme kuyruğunda satır silinemez; service_role da silemez. Kapatma (update) çalışır.
+delete from public.trips where id = '26600000-0000-4000-8000-000000000010';
+set role service_role;
+select pg_temp.hata_bekle($$delete from public.silinecek_klasorler where trip_id = '26600000-0000-4000-8000-000000000010'$$, '42501');
+select public.kova_temizle_bitir('sohbet', '26600000-0000-4000-8000-000000000010');
+reset role;
+do $$
+begin
+  assert (select count(*) from public.silinecek_klasorler where trip_id = '26600000-0000-4000-8000-000000000010') = 2,
+    '#266 KK2: kuyruk satırları duruyor';
+  assert not has_table_privilege('service_role', 'public.silinecek_klasorler', 'delete'), '#266 KK2: service_role delete yetkisi yok';
+  assert has_table_privilege('service_role', 'public.silinecek_klasorler', 'update'), '#266 KK2: service_role kapatabilir';
+end $$;
+delete from public.silinecek_klasorler where trip_id::text like '26600000-%';
+delete from auth.users where id = '26600000-0000-4000-8000-000000000001';
+
 \echo 'rls_test: TÜM TESTLER GEÇTİ'
