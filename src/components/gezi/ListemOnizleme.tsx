@@ -20,9 +20,11 @@ type Props = {
   onTumu: () => void;
   onOy: (mekanId: string) => void;
   onEkle: () => void;
+  /** #293 KK6 (kanvas 23c): bağlantı yokken oy düğmeleri pasif (%40). */
+  oyPasif?: boolean;
 };
 
-export function ListemOnizleme({ toplam, satirlar, ad, foto, onTumu, onOy, onEkle }: Props) {
+export function ListemOnizleme({ toplam, satirlar, ad, foto, onTumu, onOy, onEkle, oyPasif = false }: Props) {
   return (
     <View style={{ gap: 10 }}>
       <BolumBasligi baslik={t('geziSayfasi.listem', { n: toplam })} baglanti={t('geziSayfasi.tumu')} onBaglanti={onTumu} />
@@ -60,10 +62,12 @@ export function ListemOnizleme({ toplam, satirlar, ad, foto, onTumu, onOy, onEkl
                 <Pressable
                   accessibilityRole="button"
                   accessibilityLabel={t('geziSayfasi.oyVer', { n: r.oy })}
-                  accessibilityState={{ selected: r.benimOyum }}
+                  accessibilityState={{ selected: r.benimOyum, disabled: oyPasif }}
+                  accessibilityHint={oyPasif ? t('geziSayfasi.cevrimdisi.baglantiYok') : undefined}
+                  disabled={oyPasif}
                   onPress={() => onOy(r.mekan.id)}
                   hitSlop={6}
-                  style={({ pressed }) => [s.oy, r.benimOyum && { backgroundColor: renk.ana }, pressed && { opacity: 0.8 }]}>
+                  style={({ pressed }) => [s.oy, r.benimOyum && { backgroundColor: renk.ana }, oyPasif && { opacity: 0.4 }, pressed && { opacity: 0.8 }]}>
                   <Ikon ad="kalpOy" boyut={14} renk={r.benimOyum ? renk.zemin : renk.ana} kalinlik={2.4} dolgu={r.benimOyum ? 1 : undefined} />
                   <Text style={[s.oyMetin, r.benimOyum && { color: renk.zemin }]}>{r.oy}</Text>
                 </Pressable>

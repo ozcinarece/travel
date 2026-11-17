@@ -4,7 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { act, fireEvent, render, waitFor, within } from '@testing-library/react-native';
 import type { ReactElement, ReactNode } from 'react';
-import { AppState, type AppStateStatus } from 'react-native';
+import { AppState, StyleSheet, type AppStateStatus } from 'react-native';
 
 import { SeyahatIdSaglayici } from '@/features/seyahatler/baglam';
 import { hafifOnbellek } from '@/features/yerler/api';
@@ -16,6 +16,9 @@ import SohbetSekmesi from '../../../app/seyahat/[id]/(sekmeler)/sohbet';
 
 jest.mock('react-native-safe-area-context', () => jest.requireActual<{ default: object }>('react-native-safe-area-context/jest/mock').default);
 jest.mock('@/lib/hataRaporu', () => ({ izBirak: () => undefined }));
+// #293: bağlantı durumu testte elle verilir.
+let mockCevrimdisi = false;
+jest.mock('@/lib/baglanti', () => ({ ...jest.requireActual<object>('@/lib/baglanti'), useCevrimdisi: () => mockCevrimdisi }));
 jest.mock('react-native-maps', () => ({ __esModule: true, default: () => null, Marker: () => null, Polyline: () => null, Circle: () => null, PROVIDER_GOOGLE: 'google' }));
 jest.mock('@/lib/oturum', () => ({ useOturum: () => ({ session: { user: { id: 'ben', is_anonymous: false } }, hazir: true, hesapli: true }) }));
 jest.mock('@/features/konum/useKonum', () => ({ useKonum: () => ({ konum: null, izin: 'yok' }), yakinDurakId: () => null }));
@@ -238,6 +241,7 @@ beforeEach(() => {
   mockKayit.dosyaSil = [];
   mockTablolar = fikstur();
   mockHafif = null;
+  mockCevrimdisi = false;
   mockHafifIstekleri = [];
   mockHafifBekle = null;
 });
@@ -473,3 +477,85 @@ describe('#248 Ş3 oylama seçenek adları', () => {
     expect(getByLabelText('Lokanta Bir, 0 oy').props.accessibilityState).toEqual(expect.objectContaining({ disabled: false }));
   });
 });
+
+describe('#293 çevrimdışı: sohbet ekranı ve oylama adları', () => {
+  const ikiRestoran = () => {
+    mockTablolar.places.push(
+      { id: 'm3', trip_id: 't1', place_id: 'ChIJ-r1', primary_type: 'restaurant', lat: 39.77, lng: 30.52, google_fetched_at: '', default_minutes: 75, added_by: 'ben', note: null, created_at: '2026-10-03T00:00:00Z' },
+      { id: 'm4', trip_id: 't1', place_id: 'ChIJ-r2', primary_type: 'restaurant', lat: 39.77, lng: 30.53, google_fetched_at: '', default_minutes: 75, added_by: 'ben', note: null, created_at: '2026-10-04T00:00:00Z' },
+    );
+    (mockTablolar.oylamalar[0] as { oylama_secenekleri: unknown[] }).oylama_secenekleri = [
+      { id: 'x1', oylama_id: 'o1', sira: 1, metin: '', place_id: 'ChIJ-r1' },
+      { id: 'x2', oylama_id: 'o1', sira: 2, metin: '', place_id: 'ChIJ-r2' },
+    ];
+    (mockTablolar.oylamalar[0] as { oylama_oylari: unknown[] }).oylama_oylari = [];
+  };
+  const oturumdaGoogleAdi = () =>
+    hafifOnbellek.yaz(
+      [{ place_id: 'ChIJ-r1', ad: 'Lokanta Bir', lat: 39.77, lng: 30.52, primary_type: 'restaurant', tz: null, puan: null, puan_sayisi: null, acik: null, ulke_kodu: null }],
+      'pro',
+    );
+
+  it('KK5: en üstte 23c şeridi; giriş kutusu ve gönder pasif, "Bağlantı yok" ipucuyla', async () => {
+    mockCevrimdisi = true;
+    const { getByText, getByLabelText, qc } = ciz(<SohbetSekmesi />);
+    await waitFor(() => getByText(/Çevrimdışı · son güncelleme/));
+    await sakinles(qc);
+    expect(getByText('Plan okunur; bağlanınca kendiliğinden yenilenir')).toBeTruthy();
+    const giris = getByLabelText('Mesaj yaz…');
+    expect(giris.props.editable).toBe(false);
+    const gonder = getByLabelText('Gönder');
+    expect(gonder.props.accessibilityState?.disabled).toBe(true);
+    expect(gonder.props.accessibilityHint).toBe('Bağlantı yok');
+    fireEvent.press(gonder);
+    expect(mockKayit.yaz).toEqual([]);
+  });
+
+  it('KK5: bağlantı varken şerit yok, giriş açık', async () => {
+    const { getByText, queryByText, getByLabelText, qc } = ciz(<SohbetSekmesi />);
+    await waitFor(() => getByText('Cumartesi akşam için oylama açtım:'));
+    await sakinles(qc);
+    expect(queryByText(/Çevrimdışı/)).toBeNull();
+    expect(getByLabelText('Mesaj yaz…').props.editable).toBe(true);
+  });
+
+  it('KK4: Sohbet, çevrimdışı: oturumdaki Google adı gösterilmez, istek gitmez; kategori numaralanır', async () => {
+    ikiRestoran();
+    oturumdaGoogleAdi();
+    mockHafif = { 'ChIJ-r1': { ad: 'Lokanta Bir' }, 'ChIJ-r2': { ad: 'Lokanta İki' } };
+    mockCevrimdisi = true;
+    const { getByText, queryByText, qc } = ciz(<SohbetSekmesi />);
+    await waitFor(() => getByText('Restoran 1'), { timeout: 4000 });
+    await sakinles(qc);
+    expect(getByText('Restoran 2')).toBeTruthy();
+    expect(queryByText(/Lokanta/)).toBeNull();
+    expect(queryByText('…')).toBeNull();
+    expect(mockKayit.invoke).toEqual([]);
+  });
+
+  it('KK4: Gezi kartı, çevrimdışı: oturumdaki Google adı gösterilmez (Bugün kartındaki kural)', async () => {
+    ikiRestoran();
+    oturumdaGoogleAdi();
+    mockCevrimdisi = true;
+    const { getByText, queryByText, qc } = ciz(<GeziEkrani />);
+    await waitFor(() => getByText('Restoran 1 · 0'), { timeout: 4000 });
+    await sakinles(qc);
+    expect(queryByText(/Lokanta Bir/)).toBeNull();
+    expect(mockKayit.invoke).toEqual([]);
+  });
+
+  it('KK5 (23c): Gezi kartında pasif "Oy ver" açık zeminli (#EEF2FF), lacivert yazılı, %40', async () => {
+    mockCevrimdisi = true;
+    const { getByText, getByRole, qc } = ciz(<GeziEkrani />);
+    await waitFor(() => getByText('Oy ver'));
+    await sakinles(qc);
+    const dugme = getByRole('button', { name: 'Oy ver' });
+    const stil = StyleSheet.flatten(dugme.props.style) as { backgroundColor?: string; opacity?: number };
+    expect(stil.backgroundColor?.toLowerCase()).toBe('#eef2ff');
+    expect(stil.opacity).toBe(0.4);
+    expect(dugme.props.accessibilityHint).toBe('Bağlantı yok');
+    const yazi = StyleSheet.flatten(getByText('Oy ver').props.style) as { color?: string };
+    expect(yazi.color?.toLowerCase()).toBe('#152a6b');
+  });
+});
+

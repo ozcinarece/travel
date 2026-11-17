@@ -57,7 +57,7 @@ import { useCevrimdisi } from '@/lib/baglanti';
 import { mesafeMetni } from '@/lib/mesafe';
 import { useOturum } from '@/lib/oturum';
 import type { Durak, Gun, Mekan, Seyahat, Yer } from '@/lib/tipler';
-import { kacinciGun, yerelSaat, yerelTarih } from '@/lib/zaman';
+import { kacinciGun, yerelTarih } from '@/lib/zaman';
 import { kestirimTaksiSn, kestirimYuruyusSn } from '@/schedule/tempo';
 import { gunRengi, renk, yazi } from '@/theme';
 
@@ -203,7 +203,7 @@ function GeziSayfasi({ seyahat, gunler, duraklar, mekanlar, konaklamalar, katild
   const yerTipi = useMemo(() => new Map(mekanlar.map((m) => [m.place_id, m.primary_type])), [mekanlar]);
   const acikOylama = oylamaListesi.find((o) => !o.kapanis_at || Date.parse(o.kapanis_at) > an.getTime()) ?? null;
   const acikOylamalar = useMemo(() => (acikOylama ? [acikOylama] : []), [acikOylama]);
-  const oylamaAdlari = useOylamaAdlari(acikOylamalar, (p) => yerTipi.get(p));
+  const oylamaAdlari = useOylamaAdlari(acikOylamalar, (p) => yerTipi.get(p), undefined, cevrimdisi);
   const oylamaMesaji = acikOylama ? (mesajlar.data ?? []).find((m) => m.oylama_id === acikOylama.id && !m.silindi_at) : undefined;
   const sonMesaj = (mesajlar.data ?? []).find((m) => !m.silindi_at) ?? null;
   const ozetMesaj = oylamaMesaji ?? sonMesaj;
@@ -389,7 +389,7 @@ function GeziSayfasi({ seyahat, gunler, duraklar, mekanlar, konaklamalar, katild
           cevrimdisi={cevrimdisi}
         />
         <View style={[s.icerik, mod === 'gezi' && s.icerikGezi]}>
-          {cevrimdisi ? <CevrimdisiSeridi saat={guncellendi > 0 ? yerelSaat(new Date(guncellendi), seyahat.tz) : null} /> : null}
+          {cevrimdisi ? <CevrimdisiSeridi guncellendi={guncellendi} tz={seyahat.tz} /> : null}
           {hatirlatmaVakti(seyahat, an) && mod !== 'plan' ? <HatirlatmaSatiri ozet={hOzet} k={kisiler} ibanlar={ibanlar.data} onBakiyeler={bakiyeler} /> : null}
           {mod === 'gezi' ? (
             <>
@@ -413,7 +413,7 @@ function GeziSayfasi({ seyahat, gunler, duraklar, mekanlar, konaklamalar, katild
               {sohbetKarti}
             </>
           ) : gorunenAdim && metin ? (
-            <SiradakiAdimSatiri baslik={metin.baslik} alt={metin.alt} dugme={metin.dugme} mesgul={gorunenAdim.tur === 'planKur' && planUygula.isPending} onPress={() => void adimEylemi(gorunenAdim)} />
+            <SiradakiAdimSatiri baslik={metin.baslik} alt={metin.alt} dugme={metin.dugme} mesgul={gorunenAdim.tur === 'planKur' && planUygula.isPending} onPress={() => void adimEylemi(gorunenAdim)} pasif={cevrimdisi} />
           ) : null}
 
           {/* Gezi modunda (kanvas 23b) Plan özeti, Listem ve rehber önerileri yok: Bugün → Grup → (Harcamalar → Sohbet) → Rehber. */}
@@ -435,9 +435,10 @@ function GeziSayfasi({ seyahat, gunler, duraklar, mekanlar, konaklamalar, katild
                 onTumu={() => listemiAc()}
                 onOy={oyla}
                 onEkle={() => sekme('kesfet')}
+                oyPasif={cevrimdisi}
               />
               {sehir && oneriler.length > 0 ? (
-                <RehberOnerileri sehir={sehir.ad} yerler={oneriler} eklenenler={eklenenler} onEkle={listeyeEkle} onKesfet={() => sekme('kesfet', { cekmece: 'rehber' })} />
+                <RehberOnerileri sehir={sehir.ad} yerler={oneriler} eklenenler={eklenenler} onEkle={listeyeEkle} onKesfet={() => sekme('kesfet', { cekmece: 'rehber' })} eklePasif={cevrimdisi} />
               ) : null}
             </>
           ) : null}

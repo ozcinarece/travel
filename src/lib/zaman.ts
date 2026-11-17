@@ -76,3 +76,15 @@ export function saatEkli(hhmm: string, tur: 'bulunma' | 'yonelme'): string {
   const ek = tur === 'bulunma' ? (bir || !on ? BULUNMA_BIR[bir] : BULUNMA_ON[on]) : bir || !on ? YONELME_BIR[bir] : YONELME_ON[on];
   return `${hhmm}'${ek}`;
 }
+
+/**
+ * #293 KK1: son güncellemenin seyahat dilimine göre günü. Bugünse yalnız saat; dünse "dün"; daha eskiyse gün ve kısa ay
+ * numarası (ay adı arayüzde `takvim.ts`'ten). Gün farkı takvim günüyle hesaplanır (cihaz saatiyle değil, `tz` ile).
+ */
+export function guncellemeGunu(guncellendi: Date, an: Date, tz: string): { tur: 'bugun' | 'dun' | 'once'; saat: string; gun: number; ay: number } {
+  const o = yerelTarih(guncellendi, tz);
+  const b = yerelTarih(an, tz);
+  const fark = Math.round((Date.parse(`${b}T00:00:00Z`) - Date.parse(`${o}T00:00:00Z`)) / 86_400_000);
+  const [, ay, gun] = o.split('-').map(Number);
+  return { tur: fark <= 0 ? 'bugun' : fark === 1 ? 'dun' : 'once', saat: yerelSaat(guncellendi, tz), gun, ay };
+}

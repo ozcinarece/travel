@@ -39,10 +39,10 @@ export function GeziKapagi({ baslik, tarih, uyeler, cip, onKesfet, onPaylas, onM
           <Text style={s.geriMetin}>{t('geziSayfasi.geriKesfet')}</Text>
         </Pressable>
         <View style={{ flexDirection: 'row', gap: 8 }}>
-          <Pressable accessibilityRole="button" accessibilityLabel={t('geziSayfasi.paylas')} accessibilityState={{ disabled: cevrimdisi }} disabled={cevrimdisi} onPress={onPaylas} hitSlop={4} style={({ pressed }) => [s.kare, cevrimdisi && s.pasif, pressed && { opacity: 0.8 }]}>
+          <Pressable accessibilityRole="button" accessibilityLabel={t('geziSayfasi.paylas')} accessibilityState={{ disabled: cevrimdisi }} accessibilityHint={cevrimdisi ? t('geziSayfasi.cevrimdisi.baglantiYok') : undefined} disabled={cevrimdisi} onPress={onPaylas} hitSlop={4} style={({ pressed }) => [s.kare, cevrimdisi && s.pasif, pressed && { opacity: 0.8 }]}>
             <Ikon ad="paylas" boyut={18} renk={renk.zemin} kalinlik={2.3} />
           </Pressable>
-          <Pressable accessibilityRole="button" accessibilityLabel={t('geziSayfasi.menu')} accessibilityState={{ disabled: cevrimdisi }} disabled={cevrimdisi} onPress={onMenu} hitSlop={4} style={({ pressed }) => [s.kare, cevrimdisi && s.pasif, pressed && { opacity: 0.8 }]}>
+          <Pressable accessibilityRole="button" accessibilityLabel={t('geziSayfasi.menu')} accessibilityState={{ disabled: cevrimdisi }} accessibilityHint={cevrimdisi ? t('geziSayfasi.cevrimdisi.baglantiYok') : undefined} disabled={cevrimdisi} onPress={onMenu} hitSlop={4} style={({ pressed }) => [s.kare, cevrimdisi && s.pasif, pressed && { opacity: 0.8 }]}>
             <Ikon ad="daha" boyut={18} renk={renk.zemin} kalinlik={2.3} />
           </Pressable>
         </View>

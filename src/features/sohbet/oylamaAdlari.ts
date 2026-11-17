@@ -75,17 +75,20 @@ export function yuklenenSecenekler(secenekler: OylamaSecenegi[], b: AdBilgisi): 
  * fotoğraf grubuyla istenir; böylece önbellek hangi sırayla gelirse gelsin o kimlik için tek istek (Pro + foto) gider, fotoğrafsız
  * Pro'dan sonra ikinci bir fotoğraflı istek gitmez (#248 inceleme 3, madde 2). `null`: küme henüz belli değil (liste
  * yükleniyor); o sırada istek gitmez, adlar "…" görünür.
+ * `cevrimdisi` (#293 KK4, Bugün kartındaki kural): bağlantı yokken oturumdaki Google adı gösterilmez ve istek gitmez; ad yalnız
+ * bizim içeriğimizden, yoksa yedek ad (kategori ya da sıra) kullanılır.
  */
 export function useOylamaAdlari(
   oylamalar: Oylama[],
   tipKaynagi: (placeId: string) => string | null | undefined = () => null,
   fotoIle: ReadonlySet<string> | null = BOS,
+  cevrimdisi = false,
 ) {
   const ids = useMemo(() => adiCanliYerler(oylamalar), [oylamalar]);
-  const bilinen = useBilinenMekanlar(ids);
-  // Bizim içeriğimizde adı olan için Google'a gidilmez; içerik sorgusu bitmeden istenmez.
-  const bekle = bilinen.yukleniyor || fotoIle === null;
-  const istenecek = bekle ? [] : ids.filter((p) => !bilinen.icerikAdi(p));
+  const bilinen = useBilinenMekanlar(ids, cevrimdisi);
+  // Bizim içeriğimizde adı olan için Google'a gidilmez; içerik sorgusu bitmeden istenmez. Çevrimdışıyken hiç istenmez.
+  const bekle = !cevrimdisi && (bilinen.yukleniyor || fotoIle === null);
+  const istenecek = bekle || cevrimdisi ? [] : ids.filter((p) => !bilinen.icerikAdi(p));
   const hafif = useHafifYerler(
     istenecek.filter((p) => !fotoIle?.has(p)),
     { puan: false },
@@ -96,10 +99,10 @@ export function useOylamaAdlari(
   );
   const veri = (p: string) => (fotoIle?.has(p) ? hafifFoto : hafif);
   const bilgi: AdBilgisi = {
-    ad: (p) => bilinen.ad({ place_id: p }) ?? veri(p).data?.[p]?.ad ?? null,
+    ad: (p) => bilinen.ad({ place_id: p }) ?? (cevrimdisi ? null : (veri(p).data?.[p]?.ad ?? null)),
     tip: (p) => tipKaynagi(p) ?? veri(p).data?.[p]?.primary_type ?? null,
     // Çevrimdışıyken sorgu "paused" kalır, hata sonrası "idle": ikisinde de yedek ada düşülür.
-    yukleniyor: (p) => bekle || (veri(p).fetchStatus === 'fetching' && !veri(p).data?.[p]),
+    yukleniyor: (p) => !cevrimdisi && (bekle || (veri(p).fetchStatus === 'fetching' && !veri(p).data?.[p])),
   };
   return {
     /** Oylamanın seçenek adları (sıra numarası için bütün seçenekler birlikte değerlendirilir). */
