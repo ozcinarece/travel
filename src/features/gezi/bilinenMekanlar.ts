@@ -15,5 +15,7 @@ export function useBilinenMekanlar(placeIds: string[]) {
   useFocusEffect(useCallback(() => yenile(), []));
   const ad: AdKaynagi = (m) => db.data?.get(m.place_id)?.ad ?? hafifOnbellek.oku(m.place_id)?.ad ?? null;
   const foto = (placeId: string): string | null => db.data?.get(placeId)?.foto ?? hafifOnbellek.oku(placeId, ['foto'])?.foto_uri ?? null;
-  return { ad, foto, yukleniyor: db.isPending && placeIds.length > 0 };
+  /** #248 KK2: yalnız bizim içeriğimizdeki ad (Google içeriği değil). */
+  const icerikAdi = (placeId: string): string | null => db.data?.get(placeId)?.ad ?? null;
+  return { ad, icerikAdi, foto, yukleniyor: db.isPending && placeIds.length > 0 };
 }

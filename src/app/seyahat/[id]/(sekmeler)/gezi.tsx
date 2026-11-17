@@ -45,6 +45,7 @@ import { useProgramVerisi } from '@/features/program/useProgramVerisi';
 import { useSeyahatId } from '@/features/seyahatler/baglam';
 import { useSeyahat } from '@/features/seyahatler/sorgular';
 import { usePlaniUygula } from '@/features/sihirbaz/planUygula';
+import { useOylamaAdlari } from '@/features/sohbet/oylamaAdlari';
 import { saatMetni } from '@/features/sohbet/sohbet';
 import { useMesajlar, useOkunmamis, useOylamalar } from '@/features/sohbet/sorgular';
 import { seyahatAdi } from '@/features/sihirbaz/sihirbaz';
@@ -162,7 +163,12 @@ function GeziSayfasi({ seyahat, gunler, duraklar, mekanlar, konaklamalar, katild
   const mesajlar = useMesajlar(seyahat.id);
   const oylamalar = useOylamalar(seyahat.id);
   const okunmamis = useOkunmamis(seyahat.id);
-  const acikOylama = (oylamalar.data ?? []).find((o) => !o.kapanis_at || Date.parse(o.kapanis_at) > an.getTime()) ?? null;
+  // #248: kart yalnız açık oylamayı gösterir; adlar da yalnız onun için istenir (kapanmış oylamalar için Google isteği yok).
+  const oylamaListesi = useMemo(() => oylamalar.data ?? [], [oylamalar.data]);
+  const yerTipi = useMemo(() => new Map(mekanlar.map((m) => [m.place_id, m.primary_type])), [mekanlar]);
+  const acikOylama = oylamaListesi.find((o) => !o.kapanis_at || Date.parse(o.kapanis_at) > an.getTime()) ?? null;
+  const acikOylamalar = useMemo(() => (acikOylama ? [acikOylama] : []), [acikOylama]);
+  const oylamaAdlari = useOylamaAdlari(acikOylamalar, (p) => yerTipi.get(p));
   const oylamaMesaji = acikOylama ? (mesajlar.data ?? []).find((m) => m.oylama_id === acikOylama.id && !m.silindi_at) : undefined;
   const sonMesaj = (mesajlar.data ?? []).find((m) => !m.silindi_at) ?? null;
   const ozetMesaj = oylamaMesaji ?? sonMesaj;
@@ -319,6 +325,7 @@ function GeziSayfasi({ seyahat, gunler, duraklar, mekanlar, konaklamalar, katild
     <GeziSohbetKarti
       mesaj={ozetMesaj}
       oylama={oylamaMesaji ? acikOylama : null}
+      secenekAdlari={oylamaMesaji && acikOylama ? oylamaAdlari.adlar(acikOylama) : null}
       saat={ozetMesaj ? saatMetni(ozetMesaj.created_at, seyahat.tz) : ''}
       okunmamis={okunmamis.data ?? 0}
       k={kisiler}

@@ -32,6 +32,7 @@ import { useMekanEkle, useMekanlar, useUyeler } from '@/features/mekanlar/sorgul
 import { degisiklikGruplari, geriAlinabilir, geriAlmaYetkisi, grupMetni, type DegisiklikGrubu } from '@/features/program/degisiklikMetni';
 import { useSimdi } from '@/features/program/useProgram';
 import { useSeyahatId } from '@/features/seyahatler/baglam';
+import { useOylamaAdlari } from '@/features/sohbet/oylamaAdlari';
 import { useSeyahat } from '@/features/seyahatler/sorgular';
 import { seyahatAdi } from '@/features/sihirbaz/sihirbaz';
 import {
@@ -152,10 +153,17 @@ function Sohbet({ seyahat, uyeler, mesajlar, oylamalar }: { seyahat: Seyahat; uy
   }, [mesajlar, oylamalar]);
   const bilinen = useBilinenMekanlar(useMemo(() => [...mekanlar.map((m) => m.place_id), ...mesajYerleri], [mekanlar, mesajYerleri]));
   // Liste gelmeden istenmez (listedeki mekanın konumu ve türü zaten bizde; yalnız listede olmayanlar places-light'tan).
-  const listedeOlmayan = mekanlarQ.data ? mesajYerleri.filter((p) => !mekanlar.some((m) => m.place_id === p)) : [];
+  const listedeOlmayan = useMemo(
+    () => (mekanlarQ.data ? mesajYerleri.filter((p) => !mekanlar.some((m) => m.place_id === p)) : []),
+    [mekanlarQ.data, mesajYerleri, mekanlar],
+  );
   const hafif = useHafifYerler(listedeOlmayan, { puan: false, foto: true });
   const mekanIle = useMemo(() => new Map(mekanlar.map((m) => [m.id, m])), [mekanlar]);
   const yerIle = useMemo(() => new Map(mekanlar.map((m) => [m.place_id, m])), [mekanlar]);
+  // #248 Ş3: oylama seçeneklerinin adı listedeki mekanlar için de canlı (Gezi'deki kartla aynı sorgu).
+  // Listede olmayan oylama mekanı yukarıdaki fotoğraflı istekle aynı grupla istenir: o kimlik için tek istek (#248 inceleme 3).
+  const fotoIle = useMemo(() => (mekanlarQ.data ? new Set(listedeOlmayan) : null), [mekanlarQ.data, listedeOlmayan]);
+  const oylamaAdlari = useOylamaAdlari(oylamalar, (p) => yerIle.get(p)?.primary_type, fotoIle);
   const durakKonumlari = useMemo(() => {
     const gunIle = new Map(gunler.map((g) => [g.id, g.index]));
     return duraklar
@@ -259,6 +267,8 @@ function Sohbet({ seyahat, uyeler, mesajlar, oylamalar }: { seyahat: Seyahat; uy
         const ozet = oylamaOzeti(o, uyeIdleri, benId, an);
         const kz = o.kapanis_at ? kapanisZamani(o.kapanis_at, an, seyahat.tz) : null;
         const kapanis = o.kapanis_at ? (kz ? t(`sohbet.oylama.kapanir_${kz.gun}`, { saat: kz.saat, tarih: tarihEtiketi(kz.tarih, bugun, { bugun: '', dun: '' }) }) : t('sohbet.oylama.kapandi')) : null;
+        const adlar = oylamaAdlari.adlar(o);
+        const yuklenen = oylamaAdlari.yuklenenler(o);
         const kazananPlanda = ozet.kazanan?.place_id ? yerBilgisi(ozet.kazanan.place_id).planda : true;
         ek = (
           <OylamaKarti
@@ -267,6 +277,8 @@ function Sohbet({ seyahat, uyeler, mesajlar, oylamalar }: { seyahat: Seyahat; uy
             k={k}
             benId={benId}
             kapanis={kapanis}
+            secenekAdi={(sc) => adlar.get(sc.id) ?? sc.metin}
+            yukleniyor={(sc) => yuklenen.has(sc.id)}
             onOy={(secenekId) => oyVer.mutate({ oylamaId: o.id, secenekId }, { onError: () => bildir(t('sohbet.oyVerilemedi')) })}
             onPlanaEkle={kazananPlanda ? undefined : planaEkle}
           />
@@ -431,6 +443,7 @@ function Sohbet({ seyahat, uyeler, mesajlar, oylamalar }: { seyahat: Seyahat; uy
         tz={seyahat.tz}
         mekanlar={mekanlar}
         ad={(m) => mekanAdiYaDaKategori(m, bilinen.ad)}
+        icerikAdi={(m) => bilinen.icerikAdi(m.place_id)}
         gonderiliyor={oylamaOlustur.isPending}
         onGonder={(o) => oylamaOlustur.mutate(o, { onSuccess: () => setAcik(null), onError: () => bildir(t('sohbet.gonderilemedi')) })}
       />

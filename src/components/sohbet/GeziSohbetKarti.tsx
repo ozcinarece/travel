@@ -17,12 +17,14 @@ type Props = {
   okunmamis: number;
   k: Kisiler;
   benId: string | null;
+  /** #248 Ş3: oylama seçeneklerinin adları (features/sohbet/oylamaAdlari; mekan seçeneğinde ad canlı). */
+  secenekAdlari: Map<string, string> | null;
   /** Mekan mesajının adı (DB / önbellek; bilinmiyorsa kategori). */
   mekanAdi: (placeId: string) => string;
   onAc: () => void;
 };
 
-export function GeziSohbetKarti({ mesaj, oylama, saat, okunmamis, k, benId, mekanAdi, onAc }: Props) {
+export function GeziSohbetKarti({ mesaj, oylama, saat, okunmamis, k, benId, secenekAdlari, mekanAdi, onAc }: Props) {
   const metin = !mesaj
     ? ''
     : oylama
@@ -56,7 +58,7 @@ export function GeziSohbetKarti({ mesaj, oylama, saat, okunmamis, k, benId, meka
                   .map((sc) => (
                     <View key={sc.id} style={s.secenek}>
                       <Text style={s.secenekMetin} numberOfLines={1}>
-                        {sc.metin} · {oylama.oylama_oylari.filter((v) => v.secenek_id === sc.id).length}
+                        {secenekAdlari?.get(sc.id) ?? sc.metin} · {oylama.oylama_oylari.filter((v) => v.secenek_id === sc.id).length}
                       </Text>
                     </View>
                   ))}
