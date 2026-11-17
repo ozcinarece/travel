@@ -2,6 +2,7 @@ import type { Session } from '@supabase/supabase-js';
 import { useQueryClient } from '@tanstack/react-query';
 import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from 'react';
 
+import { kaliciOnbellegiSil } from './kaliciOnbellek';
 import { supabase } from './supabase';
 
 type Oturum = {
@@ -28,10 +29,14 @@ export function OturumSaglayici({ children }: { children: ReactNode }) {
     });
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_olay, yeni) => {
+    } = supabase.auth.onAuthStateChange((olay, yeni) => {
       const kullanici = yeni?.user.id ?? null;
-      // Başka bir kullanıcıya geçildiyse ya da çıkış yapıldıysa önbellek sıfırlanır.
-      if (kullanici !== oncekiKullanici.current) qc.clear();
+      // Başka bir kullanıcıya geçildiyse ya da çıkış yapıldıysa önbellek (cihazdaki kopyası dahil, #243 KK1) sıfırlanır.
+      // İlk okuma (INITIAL_SESSION) bir geçiş değildir: cihazdan geri yüklenen son hal silinmez.
+      if (olay !== 'INITIAL_SESSION' && kullanici !== oncekiKullanici.current) {
+        qc.clear();
+        void kaliciOnbellegiSil();
+      }
       oncekiKullanici.current = kullanici;
       setSession(yeni);
     });

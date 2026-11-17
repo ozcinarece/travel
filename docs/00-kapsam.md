@@ -87,7 +87,7 @@ v1'de Program ekranı içinde sürükle-bırak sıralama vardır; ayrı "Gün i�
 
 ### Kapsam dışı (şimdilik)
 
-Yapay zeka ile otomatik plan üretimi · sesli rehber · çevrimdışı mod · ayrıl-buluş özelliği · ödeme / premium · rezervasyon ve komisyon · Google'a yorum yazdırma (API desteklemiyor; yalnızca derin link)
+Yapay zeka ile otomatik plan üretimi · sesli rehber · çevrimdışı düzenleme (son görülen hal okunur, #243) · ayrıl-buluş özelliği · ödeme / premium · rezervasyon ve komisyon · Google'a yorum yazdırma (API desteklemiyor; yalnızca derin link)
 
 ### v0.3 kapsam değişiklikleri (8 Ekim)
 - **v1'e çekildi:** tamamlanan durağı puanlama (yıldız + not; etiket ve fotoğraf yok) · gün bazlı otel (başlangıç/bitiş, taşınma günü; #21'in bir kısmı) · canlı gezi günü (konum, Bitti, otomatik tamamlanma).

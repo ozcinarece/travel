@@ -1,5 +1,6 @@
 import { Figtree_400Regular, Figtree_500Medium, Figtree_600SemiBold, Figtree_700Bold, Figtree_800ExtraBold, useFonts } from '@expo-google-fonts/figtree';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient } from '@tanstack/react-query';
+import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect, useRef, useState } from 'react';
@@ -14,6 +15,7 @@ import { t } from '@/i18n';
 import { renk, yazi } from '@/theme';
 import { acilisGecisi } from '@/lib/acilis';
 import { hataRaporunuBaslat, hataRaporuyla } from '@/lib/hataRaporu';
+import { kaliciSecenekler, profilKilitli, saklananlariAyarla } from '@/lib/kaliciOnbellek';
 import { OturumSaglayici, useOturum } from '@/lib/oturum';
 
 hataRaporunuBaslat();
@@ -21,6 +23,8 @@ SplashScreen.preventAutoHideAsync();
 
 // #226 KK4: günlük Places sınırı (429) yeniden denenmez; diğer hatalarda varsayılan (3 deneme).
 const queryClient = new QueryClient({ defaultOptions: { queries: { retry: (n, e) => !(e instanceof GunlukSinir) && n < 3 } } });
+// #243 KK1: profil, seyahatler, günler, duraklar ve kendi içeriğimiz cihazda 7 gün tutulur (`src/lib/kaliciOnbellek.ts`).
+saklananlariAyarla(queryClient);
 
 function Kok() {
   // #136: Figtree (metin) + Archivo SemiExpanded 850 (başlık; Google Fonts değişken dosyasından üretilmiş statik örnek,
@@ -50,7 +54,8 @@ function Kok() {
   // Profil okunamadı (ör. açılışta çevrimdışı) ya da oluşturulamadı: oturumu olan kullanıcıya giriş ekranı açılamaz →
   // "Tekrar dene". Hata ekranı deneme sürerken de (yükleniyor halinde) kalır; boş ekran yok.
   // Profil hiç okunamadıysa; arka plan yenilemesi düşerse (veri korunur) kullanıcı bulunduğu ekrandan atılmaz.
-  const hataVar = hesapli && ((profil.isError && profil.data === undefined) || (profilYok && hazirla.isError));
+  // #243 KK2: cihazdaki önbellekte profil varsa (bağlantısız açılış) okuma hatası uygulamayı kilitlemez.
+  const hataVar = hesapli && profilKilitli({ hata: profil.isError, profil: profil.data, olusturulamadi: profilYok && hazirla.isError });
   const deneniyor = profil.isFetching || hazirla.isPending;
   const [hataModu, setHataModu] = useState(false);
   if (hataVar && !hataModu) setHataModu(true);
@@ -107,11 +112,11 @@ function KokLayout() {
   return (
     <GestureHandlerRootView style={k.kok}>
       <HataSiniri>
-        <QueryClientProvider client={queryClient}>
+        <PersistQueryClientProvider client={queryClient} persistOptions={kaliciSecenekler}>
           <OturumSaglayici>
             <Kok />
           </OturumSaglayici>
-        </QueryClientProvider>
+        </PersistQueryClientProvider>
       </HataSiniri>
     </GestureHandlerRootView>
   );
