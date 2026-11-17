@@ -1,11 +1,7 @@
 {
  "surum": 1,
  "sehir": {
-  "yeni": {
-   "ad": "Bursa",
-   "slug": "bursa",
-   "place_id": "ChIJlVbU2IIVyhQRkjOX_FUFoGE"
-  }
+  "slug": "bursa"
  },
  "takvim": {
   "ilk_gun": "cumartesi"
