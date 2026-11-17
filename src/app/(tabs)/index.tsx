@@ -1,6 +1,6 @@
 import { router, useFocusEffect } from 'expo-router';
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { ActivityIndicator, Platform, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { ActivityIndicator, AppState, Platform, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Path } from 'react-native-svg';
 
@@ -18,7 +18,7 @@ import { acilisDurumu } from '@/features/seyahatler/siniflandir';
 import { useSeyahatler } from '@/features/seyahatler/sorgular';
 import { gunFarki, seyahatAdi } from '@/features/sihirbaz/sihirbaz';
 import { t } from '@/i18n';
-import { ACILIS_BEKLEME_MS, acilisKarariAcik, acilisKarariAl, acilisKarariniKapat } from '@/lib/acilis';
+import { ACILIS_BEKLEME_MS, acilisKarariAcik, acilisKarariAl, acilisKarariniKapat, acilisKarariniYenile } from '@/lib/acilis';
 import { useOturum } from '@/lib/oturum';
 import { tarihAraligi } from '@/lib/takvim';
 import type { SeyahatOzet } from '@/lib/tipler';
@@ -84,23 +84,56 @@ export default function AnaSayfa() {
   // `replace`'i olmasın (inceleme 2 · 2).
   const davetBitti = bekleyenDavet === null && (!!profil.data || profil.isError) && !karsilamaBekleniyor && !karsilanan && !karsilama.data;
   const acilisSeyahati = davetBitti && seyahatler.data ? acilisDurumu(seyahatler.data) : null;
-  const aktifSeyahatId = acilisSeyahati?.tur === 'aktif' ? acilisSeyahati.seyahat.id : null;
+  const aktif = acilisSeyahati?.tur === 'aktif' ? acilisSeyahati.seyahat : null;
+  const aktifSeyahatId = aktif?.id ?? null;
+  const aktifTz = aktif?.tz ?? null;
+  // KK-ek3: uygulama ön plana gelince (`AppState` → `active`) ekran yeniden çizilir; sınıflar o anki saatle yeniden hesaplanır.
+  const [onPlan, setOnPlan] = useState(0);
   useEffect(() => {
-    if (!aktifSeyahatId || !acilisKarariAl()) return;
+    if (!aktifSeyahatId) return;
+    // Ön plana gelişte, aktif seyahatin diliminde gün değiştiyse (ve kullanıcı o gün Keşfet'e kendisi dönmediyse) kural yeniden işler.
+    if (onPlan > 0 && aktifTz) acilisKarariniYenile(aktifTz);
+    if (!acilisKarariAl()) return;
     // `acilis: '1'`: kök yığında bu geçiş animasyonsuz (`src/app/_layout.tsx`).
     router.push({ pathname: '/seyahat/[id]/(sekmeler)/gezi', params: { id: aktifSeyahatId, acilis: '1' } });
-  }, [aktifSeyahatId]);
-  // Kullanıcı Keşfet'ten kendisi ayrıldıysa (Ara, Profil, Yeni seyahat…) sonradan yüklenen liste onu Gezi'ye itmez.
-  useFocusEffect(useCallback(() => () => acilisKarariniKapat(), []));
+  }, [aktifSeyahatId, aktifTz, onPlan]);
+  // Kullanıcı Keşfet'ten kendisi ayrıldıysa (Ara, Profil, Yeni seyahat…) sonradan yüklenen liste onu Gezi'ye itmez. KK-ek3
+  // yalnız Keşfet odaktayken işler (kullanıcı başka bir ekrandaysa ön plana gelince yerinden oynatılmaz).
+  const odakta = useRef(false);
+  useFocusEffect(
+    useCallback(() => {
+      odakta.current = true;
+      return () => {
+        odakta.current = false;
+        acilisKarariniKapat();
+      };
+    }, []),
+  );
+  useEffect(() => {
+    const abonelik = AppState.addEventListener('change', (durum) => {
+      if (durum === 'active' && odakta.current) setOnPlan((n) => n + 1);
+    });
+    return () => abonelik.remove();
+  }, []);
   // #283 inceleme 2 · 2: karar verilmemişken liste beklenirken Keşfet bir an görünüp kaymasın; en çok 1,5 sn yükleniyor, sonra
   // Keşfet. Gezi'ye geçerken de gösterge kalır (Keşfet arkada bir kare boyanmasın).
   const [acilisBekleniyor, setAcilisBekleniyor] = useState(acilisKarariAcik);
+  const kararBekleniyor = !davetBitti || seyahatler.isPending;
+  const kararBekleniyorRef = useRef(kararBekleniyor);
+  useEffect(() => {
+    kararBekleniyorRef.current = kararBekleniyor;
+  }, [kararBekleniyor]);
   useEffect(() => {
     if (!acilisBekleniyor) return;
-    const z = setTimeout(() => setAcilisBekleniyor(false), ACILIS_BEKLEME_MS);
+    const z = setTimeout(() => {
+      // KK-ek5: süre dolduğunda liste (ya da davet/profil) hâlâ bekleniyorsa bayrak kapanır; Keşfet'i okumaya başlayan
+      // kullanıcı geç gelen kararla habersiz Gezi'ye taşınmaz (aktif seyahat şeritte görünür).
+      if (kararBekleniyorRef.current) acilisKarariniKapat();
+      setAcilisBekleniyor(false);
+    }, ACILIS_BEKLEME_MS);
     return () => clearTimeout(z);
   }, [acilisBekleniyor]);
-  const acilisGostergesi = acilisBekleniyor && (!davetBitti || seyahatler.isPending || !!aktifSeyahatId);
+  const acilisGostergesi = acilisBekleniyor && (kararBekleniyor || !!aktifSeyahatId);
 
   if (bekleyenDavet === undefined || karsilamaBekleniyor || karsilanan || acilisGostergesi) {
     return (

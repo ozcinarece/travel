@@ -1,12 +1,14 @@
-// #276 KK2 · KK5: gezi günündeki kullanıcı açılışta bir kez doğrudan Gezi sayfasına iner; davet akışı önce gelir.
-import { beforeEach, describe, expect, it, jest } from '@jest/globals';
-import { render, waitFor } from '@testing-library/react-native';
+// #276 KK2 · KK5 · KK-ek3 · KK-ek5 · KK-ek6: gezi günündeki kullanıcı açılışta bir kez doğrudan Gezi sayfasına iner; davet akışı önce gelir.
+import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals';
+import { act, fireEvent, render, waitFor } from '@testing-library/react-native';
+import { AppState, type AppStateStatus } from 'react-native';
 
-import { acilisKarariAcik, acilisKarariniSifirla } from '@/lib/acilis';
+import { acilisKarariAcik, acilisKarariniKapat, acilisKarariniSifirla } from '@/lib/acilis';
 import type { SeyahatOzet } from '@/lib/tipler';
 import { yerelTarih } from '@/lib/zaman';
 
 import AnaSayfa from '../../../app/(tabs)/index';
+import DavetEkrani from '../../../app/r/[token]';
 
 jest.mock('react-native-safe-area-context', () => jest.requireActual<{ default: object }>('react-native-safe-area-context/jest/mock').default);
 jest.mock('@/lib/supabase', () => ({ supabase: {} }));
@@ -19,17 +21,28 @@ let mockListe: Sorgu | null = null;
 jest.mock('@/features/seyahatler/sorgular', () => ({
   useSeyahatler: () => ({ ...(mockListe ?? { data: mockSeyahatler, isPending: false, isError: false }), isRefetching: false, refetch: jest.fn() }),
 }));
-jest.mock('@/features/icerik/sorgular', () => ({ useGeziler: () => ({ data: [], refetch: jest.fn() }) }));
 let mockDavet: string | null = null;
 jest.mock('@/features/davet/sorgular', () => ({
   bekleyenDavetiOku: async () => mockDavet,
   bekleyenDavetiSil: async () => undefined,
   useDavetKarsilama: () => ({ data: null, isError: false }),
   useDavetKarsilandi: () => async () => undefined,
+  // #276 KK-ek6: /r/[token] ekranı için (davet geçersiz: özet boş geldi).
+  DAVET_KANALI: 'app',
+  bekleyenDavetiYaz: async () => undefined,
+  useDavetOzeti: () => ({ data: null, isPending: false, isError: false, refetch: jest.fn() }),
+  useDavetleKatil: () => ({ mutateAsync: jest.fn() }),
 }));
+jest.mock('@/features/auth/giris', () => ({
+  appleKullanilabilir: async () => false,
+  appleIleGiris: jest.fn(),
+  googleIleGiris: jest.fn(),
+  iptalMi: () => false,
+}));
+jest.mock('@/features/icerik/sorgular', () => ({ useGeziler: () => ({ data: [], refetch: jest.fn() }), olayYaz: jest.fn() }));
 jest.mock('expo-router', () => ({
   router: { push: jest.fn(), navigate: jest.fn(), replace: jest.fn(), setParams: jest.fn() },
-  useLocalSearchParams: () => ({}),
+  useLocalSearchParams: () => ({ token: 'x' }),
   // Ana ekran testte hiç odak kaybetmez; temizleyici yalnız unmount'ta çalışır.
   useFocusEffect: (cb: () => void | (() => void)) => jest.requireActual<typeof import('react')>('react').useEffect(cb, [cb]),
 }));
@@ -142,5 +155,91 @@ describe('Açılış kuralı (#276 KK2)', () => {
     mockProfil = { data: { name: 'Ece Ö', photo_url: null }, isPending: false, isError: false };
     ekran.rerender(<AnaSayfa />);
     await waitFor(() => expect(router.push).toHaveBeenCalledWith(geziye('aktif')));
+  });
+
+  it('KK-ek5: liste 1,5 sn\'den sonra gelirse Keşfet\'teki kullanıcı Gezi\'ye taşınmaz', async () => {
+    mockSeyahatler = [sy('aktif', gun(-1), gun(1))];
+    mockListe = { data: undefined, isPending: true, isError: false };
+    const ekran = render(<AnaSayfa />);
+    await waitFor(() => expect(ekran.getByRole('button', { name: 'Ara' })).toBeTruthy(), { timeout: 3000 });
+    expect(acilisKarariAcik()).toBe(false);
+    // Liste 2. saniyede gelir: aktif seyahat var ama otomatik geçiş yok.
+    await act(() => new Promise((r) => setTimeout(r, 500)));
+    mockListe = null;
+    ekran.rerender(<AnaSayfa />);
+    await new Promise((r) => setTimeout(r, 50));
+    expect(router.push).not.toHaveBeenCalled();
+  });
+
+  it('KK-ek6: /r/x ile soğuk açılış → davet geçersiz → "Ana sayfa" → Keşfet; Gezi\'ye atılmaz', async () => {
+    mockSeyahatler = [sy('aktif', gun(-1), gun(1))];
+    const davet = render(<DavetEkrani />);
+    fireEvent.press(await davet.findByRole('button', { name: 'Ana sayfaya git' }));
+    expect(router.replace).toHaveBeenCalledWith('/(tabs)');
+    expect(acilisKarariAcik()).toBe(false);
+    davet.unmount();
+    const ekran = render(<AnaSayfa />);
+    await waitFor(() => expect(ekran.getByRole('button', { name: 'Ara' })).toBeTruthy());
+    expect(router.push).not.toHaveBeenCalled();
+  });
+});
+
+describe('Ön plana geliş (#276 KK-ek3)', () => {
+  const dinleyiciler: ((d: AppStateStatus) => void)[] = [];
+  const onPlanaGel = () => act(() => dinleyiciler.forEach((d) => d('active')));
+  let abonelik: ReturnType<typeof jest.spyOn>;
+  const simdi = Date.now();
+
+  beforeEach(() => {
+    acilisKarariniSifirla();
+    router.push.mockClear();
+    mockDavet = null;
+    mockListe = null;
+    mockProfil = { data: { name: 'Ece Ö', photo_url: null }, isPending: false, isError: false };
+    dinleyiciler.length = 0;
+    abonelik = jest.spyOn(AppState, 'addEventListener').mockImplementation(((_: string, d: (x: AppStateStatus) => void) => {
+      dinleyiciler.push(d);
+      return { remove: () => undefined };
+    }) as never);
+    // Yalnız saat sahte: zamanlayıcılar gerçek kalır (waitFor ve 1,5 sn gösterge çalışsın).
+    jest.useFakeTimers({
+      now: simdi,
+      doNotFake: ['setTimeout', 'clearTimeout', 'setInterval', 'clearInterval', 'setImmediate', 'clearImmediate', 'nextTick', 'queueMicrotask', 'requestAnimationFrame', 'cancelAnimationFrame', 'performance', 'hrtime'],
+    });
+  });
+  afterEach(() => {
+    jest.useRealTimers();
+    abonelik.mockRestore();
+  });
+
+  it('gece arka planda kalan uygulama gezi sabahı aktife gelince Gezi\'ye iner', async () => {
+    // Akşam: seyahat yarın başlıyor (yaklaşan), Keşfet açık.
+    mockSeyahatler = [sy('gezi', gun(1), gun(3))];
+    const ekran = render(<AnaSayfa />);
+    await waitFor(() => expect(ekran.getByRole('button', { name: 'Ara' })).toBeTruthy());
+    expect(router.push).not.toHaveBeenCalled();
+    // Ertesi sabah ön plana gelir.
+    jest.setSystemTime(simdi + 86_400_000);
+    onPlanaGel();
+    await waitFor(() => expect(router.push).toHaveBeenCalledWith(geziye('gezi')));
+  });
+
+  it('dün Gezi\'ye inmiş, bugün ön plana gelince yeniden iner; aynı gün "‹ Keşfet"e dönen tekrar atılmaz', async () => {
+    mockSeyahatler = [sy('aktif', gun(-1), gun(2))];
+    render(<AnaSayfa />);
+    await waitFor(() => expect(router.push).toHaveBeenCalledTimes(1));
+    // Aynı gün ön plana gelir: atılmaz.
+    onPlanaGel();
+    await new Promise((r) => setTimeout(r, 50));
+    expect(router.push).toHaveBeenCalledTimes(1);
+    // Ertesi gün: kural yeniden işler.
+    jest.setSystemTime(simdi + 86_400_000);
+    onPlanaGel();
+    await waitFor(() => expect(router.push).toHaveBeenCalledTimes(2));
+    // Kullanıcı o gün "‹ Keşfet"e kendisi döner (bayrak bugün kapanır); aynı gün tekrar ön plana gelince atılmaz.
+    acilisKarariniKapat();
+    onPlanaGel();
+    await new Promise((r) => setTimeout(r, 50));
+    expect(router.push).toHaveBeenCalledTimes(2);
   });
 });
