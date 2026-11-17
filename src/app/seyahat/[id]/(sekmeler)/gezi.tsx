@@ -345,7 +345,7 @@ function GeziSayfasi({ seyahat, gunler, duraklar, mekanlar, konaklamalar, katild
           tarih={tarihSatiri(seyahat, gunler.length)}
           uyeler={uyeListesi}
           cip={durumCipi(seyahat, an)}
-          onSeyahatler={() => router.navigate('/(tabs)/seyahatler')}
+          onKesfet={() => router.dismissTo('/(tabs)')}
           onPaylas={davet.paylas}
           onMenu={() => setMenuAcik(true)}
           onGrup={() => setGrupAcik(true)}

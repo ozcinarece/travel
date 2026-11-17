@@ -96,21 +96,21 @@ export function GrupPenceresi({ acik, onKapat, seyahat, uyeler, mekanlar }: Prop
     try {
       await ayril.mutateAsync(seyahat.id);
       onKapat();
-      router.replace('/(tabs)/seyahatler');
+      router.dismissTo('/(tabs)');
     } catch {
       setBildirim(t('davet.grup.ayrilHata'));
       setTimeout(() => setBildirim(null), 2500);
     }
   };
 
-  // #174 KK2–KK4, KK9: onay (tek başına / başkaları da var), silince Seyahatler'e dönüş + "Seyahat silindi"; hata pencerede.
+  // #174 KK2–KK4, KK9: onay (tek başına / başkaları da var), silince Keşfet'e dönüş + "Seyahat silindi"; hata pencerede.
   const seyahatiSil = async () => {
     const onay = await onayIste(t('seyahatler.silOnay'), silmeMetni(uyeler.length), t('seyahatler.silEvet'), t('genel.vazgec'));
     if (!onay) return;
     try {
       await sil.mutateAsync(seyahat.id);
       onKapat();
-      router.replace({ pathname: '/(tabs)/seyahatler', params: { bildirim: 'silindi' } });
+      router.dismissTo({ pathname: '/(tabs)', params: { bildirim: 'silindi' } });
     } catch {
       setBildirim(t('seyahatler.silHata'));
       setTimeout(() => setBildirim(null), 2500);

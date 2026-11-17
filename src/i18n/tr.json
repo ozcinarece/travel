@@ -8,14 +8,6 @@
     "yenidenDene": "Yeniden dene",
     "bolumHata": "Bu bölüm şu an açılamadı; sayfanın geri kalanı çalışıyor."
   },
-  "sekme": {
-    "seyahatler": "Seyahatler",
-    "yeni": "Yeni",
-    "profil": "Profil",
-    "anasayfa": "Ana sayfa",
-    "kaydettiklerim": "Kaydettiklerim",
-    "yeniEtiket": "Yeni seyahat"
-  },
   "giris": {
     "baslik": "Arkadaşlarınla haritada plan kur, saat saat gez.",
     "alt": "Mekanları seç, günlere dağıt, program kendini kursun. Herkes linkle katılır, kimse uygulama indirmek zorunda değil.",
@@ -52,20 +44,8 @@
   },
   "seyahatler": {
     "baslik": "Seyahatler",
-    "bos": {
-      "baslik": "Henüz seyahatin yok",
-      "alt": "İlk planı 3 dakikada kurarsın: şehir, otel, birkaç mekan. Gerisini harita halleder.",
-      "planla": "İlk seyahatini planla",
-      "davet": "Davet linkin mi var? Yapıştır"
-    },
-    "aktif": {
-      "bitti": "Bugünün programı bitti"
-    },
-    "yaklasan": "YAKLAŞAN",
     "gecmis": "GEÇMİŞ",
     "kisi": "{n} kişi",
-    "mekan": "{n} mekan",
-    "hata": "Seyahatler yüklenemedi; bağlantını kontrol edip aşağı çek.",
     "sen": "Sen",
     "sadeceSen": "sadece sen",
     "sil": "Seyahati sil",
@@ -76,11 +56,9 @@
     "silindi": "Seyahat silindi",
     "silHata": "Silinemedi. Tekrar dene.",
     "silinmis": "Bu seyahat silindi",
-    "taslak": "TASLAK",
     "tarihBelliDegil": "Tarihi belli değil",
     "gezildi": "{n} mekan gezildi",
     "tekrarKur": "Tekrar kur",
-    "siradaki": "Sıradaki: {ad} · {saat}",
     "cip": {
       "planli": "{n} / {gun} gün planlandı",
       "atanmamis": "{n} mekan güne atanmadı",
@@ -91,6 +69,10 @@
     }
   },
   "profil": {
+    "kesfet": "Keşfet",
+    "gezilerim": "Gezilerim · {n}",
+    "gezilerimBos": "Biten seyahatlerin burada durur.",
+    "ayarlar": "Ayarlar",
     "baslik": "Profil",
     "kaydettiklerim": "Kaydettiklerim",
     "sonHata": "Son hata · {zaman}",
@@ -766,6 +748,9 @@
     "kartAlt": "{tarih} · {gun} gün · {mekan} mekan",
     "kartAltTarihsiz": "Tarih belli değil · {mekan} mekan",
     "profil": "Profil",
+    "araEtiket": "Ara",
+    "kaydettiklerim": "Kaydettiklerim",
+    "yeniSeyahat": "Yeni seyahat",
     "yeniBaslik": "Yeni bir seyahat kur"
   },
   "ara": {
@@ -893,7 +878,7 @@
     "kesfeteGit": "Yer ekle"
   },
   "geziSayfasi": {
-    "seyahatler": "Seyahatler",
+    "kesfet": "Yer ekle",
     "paylas": "Davet linkini gönder",
     "menu": "Diğer: yeniden adlandır, tarihleri değiştir, seyahati sil",
     "seyahattekiler": "Seyahattekiler",
@@ -948,7 +933,6 @@
     "listemBosDugme": "Yer ekle",
     "rehberden": "Rehberden öneriler",
     "rehberdenAlt": "Listende olmayan, {sehirde} görmen gerekenler.",
-    "kesfet": "Yer ekle",
     "listeyeEkle": "Listeye ekle",
     "listede": "Listede",
     "rehber": "Rehber",

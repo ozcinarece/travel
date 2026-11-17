@@ -1,12 +1,14 @@
 import { router } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, Platform, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import Svg, { Path } from 'react-native-svg';
 
 import { IlkSeyahatKarti, YaklasanKart } from '@/components/icerik/AnaSayfaKartlari';
 import { GeziKarti } from '@/components/icerik/GeziKarti';
 import { Avatar } from '@/components/ui/Avatar';
 import { Ikon } from '@/components/ui/Ikon';
+import { KisaBildirim, useGelenBildirim } from '@/components/ui/KisaBildirim';
 import { LogoYazi } from '@/components/ui/Logo';
 import { bekleyenDavetiOku, bekleyenDavetiSil, useDavetKarsilama, useDavetKarsilandi } from '@/features/davet/sorgular';
 import { useGeziler } from '@/features/icerik/sorgular';
@@ -26,6 +28,8 @@ import { bosluk, kose, olcek, renk, yazi } from '@/theme';
  * "Gezilecek yerler" mozaiği kalktı (seyahat seçilmeden "+"nın hedefi belirsiz). Hiç seyahat yoksa: "Hoş geldin / İlk gezin
  * nereye?", büyük "İlk seyahatini kur · Başla" kartı ve "Ya da hazır bir geziyle başla" şeridi; başka kutu yok.
  * #137: giriş öncesi görülen davet → /r/{token}; web'de katılıp uygulamayı ilk açan → doğrudan seyahat.
+ * #275 (kanvas 29a): alt menü yok. Üst çubukta sağda Ara · ♥ Kaydettiklerim · Profil (44 px, köşe 14); altta yüzen
+ * [+ Yeni seyahat]. Seyahat silinip buraya dönülünce kısa bildirim.
  */
 export default function AnaSayfa() {
   const profil = useProfil();
@@ -35,6 +39,8 @@ export default function AnaSayfa() {
   const yaklasan = hedefler[0] ?? null;
 
   const { hesapli } = useOturum();
+  const altBosluk = useSafeAreaInsets().bottom;
+  const gelenBildirim = useGelenBildirim();
   // #137: giriş öncesi görülen davet → /r/{token}; web'de katılıp uygulamayı ilk açan → doğrudan seyahat (KK2). İkisi de
   // bilinene kadar yükleniyor gösterilir (ilk açılış ekranı bir an görünüp kaybolmasın); geçişler tek seferlik replace.
   const [bekleyenDavet, setBekleyenDavet] = useState<null | undefined>(undefined);
@@ -73,7 +79,9 @@ export default function AnaSayfa() {
   // KK5: ilk açılış = hiç seyahat yok (geçmiş dahil).
   const ilkAcilis = !seyahatler.isPending && !seyahatler.isError && (seyahatler.data?.length ?? 0) === 0;
   const gezilerListe = geziler.data ?? [];
-  const yeni = () => router.navigate('/(tabs)/yeni');
+  const yeni = () => router.push('/(tabs)/yeni');
+  // Yüzen düğme ekranın altından 28 px (kanvas 29a); ana çubuk (home indicator) varsa onun 8 px üstü.
+  const yuzenAlt = Math.max(28, altBosluk + 8);
   const geziAc = (slug: string) => router.push({ pathname: '/gezi/[slug]', params: { slug } });
 
   return (
@@ -81,9 +89,17 @@ export default function AnaSayfa() {
       <ScrollView contentContainerStyle={s.icerik} refreshControl={<RefreshControl refreshing={seyahatler.isRefetching} onRefresh={() => Promise.all([seyahatler.refetch(), geziler.refetch()])} />}>
         <View style={s.ust}>
           <LogoYazi boyut={36} />
-          <Pressable accessibilityRole="button" accessibilityLabel={t('anasayfa.profil')} onPress={() => router.navigate('/(tabs)/profil')} hitSlop={6}>
-            <Avatar ad={profil.data?.name ?? '?'} url={profil.data?.photo_url} boyut={44} arkaPlan={renk.vurgu} />
-          </Pressable>
+          <View style={s.ustDugmeler}>
+            <Pressable accessibilityRole="button" accessibilityLabel={t('anasayfa.araEtiket')} onPress={() => router.push('/ara')} style={({ pressed }) => [s.kare, pressed && s.basili]}>
+              <Ikon ad="ara" boyut={20} renk={renk.ana} kalinlik={2.4} />
+            </Pressable>
+            <Pressable accessibilityRole="button" accessibilityLabel={t('anasayfa.kaydettiklerim')} onPress={() => router.push('/(tabs)/kaydettiklerim')} style={({ pressed }) => [s.kare, pressed && s.basili]}>
+              <Ikon ad="kalp" boyut={20} renk={renk.ana} kalinlik={2.4} />
+            </Pressable>
+            <Pressable accessibilityRole="button" accessibilityLabel={t('anasayfa.profil')} onPress={() => router.push('/(tabs)/profil')} style={({ pressed }) => pressed && s.basili}>
+              <Avatar ad={profil.data?.name ?? '?'} url={profil.data?.photo_url} boyut={44} arkaPlan={renk.vurgu} />
+            </Pressable>
+          </View>
         </View>
 
         <View style={s.selam}>
@@ -158,6 +174,15 @@ export default function AnaSayfa() {
           </>
         )}
       </ScrollView>
+      <View style={[s.yuzenKap, { bottom: yuzenAlt }]} pointerEvents="box-none">
+        <Pressable accessibilityRole="button" onPress={yeni} style={({ pressed }) => [s.yuzen, pressed && s.basili]}>
+          <Svg width={24} height={24} viewBox="0 0 24 24" fill="none">
+            <Path d="M12 5v14M5 12h14" stroke={renk.metin} strokeWidth={3} strokeLinecap="round" />
+          </Svg>
+          <Text style={s.yuzenMetin}>{t('anasayfa.yeniSeyahat')}</Text>
+        </Pressable>
+      </View>
+      <KisaBildirim metin={gelenBildirim} alt={yuzenAlt + 68} />
     </SafeAreaView>
   );
 }
@@ -181,8 +206,28 @@ function yaklasanAlti(sy: SeyahatOzet): string {
 const s = StyleSheet.create({
   ekran: { flex: 1, backgroundColor: renk.zemin },
   ortala: { alignItems: 'center', justifyContent: 'center' },
-  icerik: { paddingTop: 12, paddingBottom: 32, gap: 20 },
+  icerik: { paddingTop: 12, paddingBottom: 120, gap: 20 },
   ust: { paddingHorizontal: bosluk.kenar, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  ustDugmeler: { flexDirection: 'row', gap: 8 },
+  kare: { width: 44, height: 44, borderRadius: 14, backgroundColor: renk.yuzey, alignItems: 'center', justifyContent: 'center' },
+  basili: { opacity: 0.85 },
+  yuzenKap: { position: 'absolute', left: 0, right: 0, alignItems: 'center' },
+  yuzen: {
+    height: 56,
+    paddingLeft: 18,
+    paddingRight: 22,
+    borderRadius: 18,
+    backgroundColor: renk.vurgu,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    shadowColor: renk.metin,
+    shadowOpacity: 0.22,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 8 },
+    elevation: 8,
+  },
+  yuzenMetin: { fontFamily: yazi.ekstra, fontSize: 16, color: renk.metin },
   selam: { paddingHorizontal: bosluk.kenar, gap: 4 },
   merhaba: { fontFamily: yazi.yari, fontSize: 15, color: renk.ikincil },
   soru: { fontFamily: yazi.baslik, fontSize: olcek.ekran, lineHeight: 34, letterSpacing: -1, color: renk.metin },

@@ -1,4 +1,4 @@
-// #181 KK4 (kanvas 23 · 23b): Gezi sayfasının kapağı — Gece zemin, sağ üstte kesik Mandalina yol süsü. Seyahatler'e dön, paylaş
+// #181 KK4 (kanvas 23 · 23b): Gezi sayfasının kapağı — Gece zemin, sağ üstte kesik Mandalina yol süsü. Keşfet'e dön, paylaş
 // (davet linki), ⋯ menü; başlık, tarih satırı, kişi yığını (dokununca Seyahattekiler) ve durum çipi.
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -17,13 +17,13 @@ type Props = {
   tarih: string;
   uyeler: Uye[];
   cip: { tur: 'kalan' | 'bugun'; metin: string } | null;
-  onSeyahatler: () => void;
+  onKesfet: () => void;
   onPaylas: () => void;
   onMenu: () => void;
   onGrup: () => void;
 };
 
-export function GeziKapagi({ baslik, tarih, uyeler, cip, onSeyahatler, onPaylas, onMenu, onGrup }: Props) {
+export function GeziKapagi({ baslik, tarih, uyeler, cip, onKesfet, onPaylas, onMenu, onGrup }: Props) {
   const ust = useSafeAreaInsets().top;
   return (
     <View style={[s.kapak, { paddingTop: ust + 8 }]}>
@@ -32,9 +32,9 @@ export function GeziKapagi({ baslik, tarih, uyeler, cip, onSeyahatler, onPaylas,
         <Circle cx={214} cy={24} r={6} fill={renk.vurgu} />
       </Svg>
       <View style={s.ustSatir}>
-        <Pressable accessibilityRole="button" onPress={onSeyahatler} hitSlop={6} style={({ pressed }) => [s.geri, pressed && { opacity: 0.8 }]}>
+        <Pressable accessibilityRole="button" onPress={onKesfet} hitSlop={6} style={({ pressed }) => [s.geri, pressed && { opacity: 0.8 }]}>
           <Ikon ad="geri" boyut={20} renk={renk.zemin} kalinlik={2.6} />
-          <Text style={s.geriMetin}>{t('geziSayfasi.seyahatler')}</Text>
+          <Text style={s.geriMetin}>{t('geziSayfasi.kesfet')}</Text>
         </Pressable>
         <View style={{ flexDirection: 'row', gap: 8 }}>
           <Pressable accessibilityRole="button" accessibilityLabel={t('geziSayfasi.paylas')} onPress={onPaylas} hitSlop={4} style={({ pressed }) => [s.kare, pressed && { opacity: 0.8 }]}>

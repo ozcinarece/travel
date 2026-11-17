@@ -74,6 +74,6 @@ function useSilinmeBekcisi(seyahatId: string | undefined) {
     qc.setQueryData<SeyahatOzet[]>(['seyahatler'], (eski) => eski?.filter((sy) => sy.id !== seyahatId));
     qc.invalidateQueries({ queryKey: ['seyahatler'] });
     if (kendiSildiklerim.has(seyahatId)) return;
-    router.replace({ pathname: '/(tabs)/seyahatler', params: { bildirim: 'silinmis' } });
+    router.dismissTo({ pathname: '/(tabs)', params: { bildirim: 'silinmis' } });
   }, [silindi, seyahatId, qc]);
 }

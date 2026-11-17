@@ -1,15 +1,19 @@
 import { useQuery } from '@tanstack/react-query';
 import * as Location from 'expo-location';
-import { Link, router, useFocusEffect } from 'expo-router';
-import { useCallback, useEffect, useState } from 'react';
+import { Link, router, useFocusEffect, useLocalSearchParams } from 'expo-router';
+import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { Gezilerim } from '@/components/profil/Gezilerim';
 import { SecimMenusu } from '@/components/program/SecimMenusu';
 import { Avatar } from '@/components/ui/Avatar';
 import { Ikon } from '@/components/ui/Ikon';
+import { KisaBildirim, useKisaBildirim } from '@/components/ui/KisaBildirim';
 import { cikis } from '@/features/auth/giris';
 import { useProfil, useProfilGuncelle, useProfilSayilari } from '@/features/profil/sorgular';
+import { siniflandir } from '@/features/seyahatler/siniflandir';
+import { useSeyahatler } from '@/features/seyahatler/sorgular';
 import { t } from '@/i18n';
 import { sonHatayiOku, sonHatayiSil, type SonHata } from '@/lib/izler';
 import type { HaritaGizliligi } from '@/lib/tipler';
@@ -24,8 +28,16 @@ const OSM_TELIF = 'https://www.openstreetmap.org/copyright';
  * #138 → #144 (kanvas 22 · Profil): foto, ad, @kullanıcı adı, Düzenle; sayılar seyahat · mekan gezildi · şehir (KK5 kuralı
  * `profil_sayilari`); ayarlar: Haritanı kimler görsün, Bildirimler, Konum (Gezi günlerinde), Dil, Yardım ve geri bildirim, Çıkış
  * yap; Hesabı sil.
+ * #275 KK4 (kanvas 29d): en üstte "‹ Keşfet"; kimliğin altında iki sekme — Gezilerim · N (geçmiş seyahatler, eski Seyahatler
+ * ekranının GEÇMİŞ bölümü) ve Ayarlar (sayılar ve aşağıdaki ayar satırları). Açılışta Gezilerim seçili.
  */
 export default function ProfilEkrani() {
+  const parametre = useLocalSearchParams<{ sekme?: string }>();
+  const [sekme, setSekme] = useState<'gezilerim' | 'ayarlar'>(parametre.sekme === 'ayarlar' ? 'ayarlar' : 'gezilerim');
+  const seyahatler = useSeyahatler();
+  const gecmis = useMemo(() => siniflandir(seyahatler.data ?? []).gecmis, [seyahatler.data]);
+  const bildirim = useKisaBildirim();
+  const kesfeteDon = () => (router.canGoBack() ? router.back() : router.replace('/(tabs)'));
   const profil = useProfil();
   const sayilar = useProfilSayilari();
   const guncelle = useProfilGuncelle();
@@ -50,6 +62,11 @@ export default function ProfilEkrani() {
   return (
     <SafeAreaView style={s.ekran} edges={['top']}>
       <ScrollView contentContainerStyle={s.icerik}>
+        <Pressable accessibilityRole="button" onPress={kesfeteDon} hitSlop={4} style={({ pressed }) => [s.kesfet, pressed && { opacity: 0.8 }]}>
+          <Ikon ad="geri" boyut={20} renk={renk.ana} kalinlik={2.6} />
+          <Text style={s.kesfetMetin}>{t('profil.kesfet')}</Text>
+        </Pressable>
+
         {p ? (
           <View style={s.kimlik}>
             <Avatar ad={p.name} url={p.photo_url} boyut={72} arkaPlan={renk.vurgu} />
@@ -68,67 +85,83 @@ export default function ProfilEkrani() {
           </View>
         ) : null}
 
-        <View style={s.sayilar}>
-          <Sayi n={sayilar.data?.seyahat} etiket={t('profil.sayiSeyahat')} />
-          <Sayi n={sayilar.data?.gezilen} etiket={t('profil.sayiGezilen')} />
-          <Sayi n={sayilar.data?.sehir} etiket={t('profil.sayiSehir')} />
+        <View accessibilityRole="tablist" style={s.sekmeler}>
+          {(['gezilerim', 'ayarlar'] as const).map((k) => {
+            const secili = sekme === k;
+            return (
+              <Pressable key={k} accessibilityRole="tab" accessibilityState={{ selected: secili }} onPress={() => setSekme(k)} style={[s.sekme, secili && s.sekmeSecili]}>
+                <Text style={[s.sekmeMetin, secili && { color: renk.metin }]}>{k === 'gezilerim' ? t('profil.gezilerim', { n: gecmis.length }) : t('profil.ayarlar')}</Text>
+              </Pressable>
+            );
+          })}
         </View>
 
-        <View>
-          <Satir baslik={t('profil.gizlilik')} deger={p ? t(`profilKur.gizlilik.${p.map_visibility}`) : ''} onPress={() => setGizlilikAcik(true)} />
-          <Satir baslik={t('profil.bildirimler')} onPress={ayarlar} />
-          <Satir
-            baslik={t('profil.konum')}
-            deger={konumIzni.data === 'granted' ? t('profil.konumAcik') : konumIzni.data === 'denied' ? t('profil.konumKapali') : konumIzni.data ? t('profil.konumSorulmadi') : ''}
-            onPress={ayarlar}
-          />
-          <Satir baslik={t('profil.dil')} deger={t('profil.dilDeger')} okYok />
-          {DESTEK_EPOSTA ? <Satir baslik={t('profil.yardim')} onPress={() => Linking.openURL(`mailto:${DESTEK_EPOSTA}?subject=${encodeURIComponent(t('profil.yardimKonu'))}`).catch(() => {})} /> : null}
-          <Satir baslik={t('profil.cikis')} tehlike onPress={cikis} okYok />
-        </View>
+        {sekme === 'gezilerim' ? <Gezilerim gecmis={gecmis} onBildirim={bildirim.goster} /> : null}
 
-        {sonHata ? (
-          <View style={s.tani}>
-            <Pressable accessibilityRole="button" onPress={() => setTaniAcik((a) => !a)} style={s.taniBaslikSatir}>
-              <Text style={s.taniBaslik}>{t('profil.sonHata', { zaman: new Date(sonHata.zaman).toLocaleString('tr-TR') })}</Text>
-              <Text style={s.taniOk}>{taniAcik ? '˅' : '›'}</Text>
-            </Pressable>
-            {taniAcik ? (
-              <ScrollView style={s.taniKutu} nestedScrollEnabled>
-                <Text style={s.taniMetin} selectable>
-                  {`${sonHata.ozet}${sonHata.bilesen ? ` · ${sonHata.bilesen}` : ''}\n\n${sonHata.izler.map((i) => `${new Date(i.zaman).toLocaleTimeString('tr-TR')} ${i.kategori}: ${i.mesaj}`).join('\n')}${sonHata.yigin ? `\n\n${sonHata.yigin}` : ''}`}
-                </Text>
-                <Pressable
-                  accessibilityRole="button"
-                  onPress={() => {
-                    sonHatayiSil();
-                    setSonHata(null);
-                  }}
-                  hitSlop={8}>
-                  <Text style={s.taniSil}>{t('profil.sonHataSil')}</Text>
-                </Pressable>
-              </ScrollView>
-            ) : null}
+        <AyarlarSekmesi gorunur={sekme === 'ayarlar'}>
+          <View style={s.sayilar}>
+            <Sayi n={sayilar.data?.seyahat} etiket={t('profil.sayiSeyahat')} />
+            <Sayi n={sayilar.data?.gezilen} etiket={t('profil.sayiGezilen')} />
+            <Sayi n={sayilar.data?.sehir} etiket={t('profil.sayiSehir')} />
           </View>
-        ) : null}
 
-        <Link href="/hesap-sil" asChild>
-          <Pressable accessibilityRole="button" hitSlop={10} style={s.silSatir}>
-            <Text style={s.sil}>{t('profil.hesapSil')}</Text>
+          <View>
+            <Satir baslik={t('profil.gizlilik')} deger={p ? t(`profilKur.gizlilik.${p.map_visibility}`) : ''} onPress={() => setGizlilikAcik(true)} />
+            <Satir baslik={t('profil.bildirimler')} onPress={ayarlar} />
+            <Satir
+              baslik={t('profil.konum')}
+              deger={konumIzni.data === 'granted' ? t('profil.konumAcik') : konumIzni.data === 'denied' ? t('profil.konumKapali') : konumIzni.data ? t('profil.konumSorulmadi') : ''}
+              onPress={ayarlar}
+            />
+            <Satir baslik={t('profil.dil')} deger={t('profil.dilDeger')} okYok />
+            {DESTEK_EPOSTA ? <Satir baslik={t('profil.yardim')} onPress={() => Linking.openURL(`mailto:${DESTEK_EPOSTA}?subject=${encodeURIComponent(t('profil.yardimKonu'))}`).catch(() => {})} /> : null}
+            <Satir baslik={t('profil.cikis')} tehlike onPress={cikis} okYok />
+          </View>
+
+          {sonHata ? (
+            <View style={s.tani}>
+              <Pressable accessibilityRole="button" onPress={() => setTaniAcik((a) => !a)} style={s.taniBaslikSatir}>
+                <Text style={s.taniBaslik}>{t('profil.sonHata', { zaman: new Date(sonHata.zaman).toLocaleString('tr-TR') })}</Text>
+                <Text style={s.taniOk}>{taniAcik ? '˅' : '›'}</Text>
+              </Pressable>
+              {taniAcik ? (
+                <ScrollView style={s.taniKutu} nestedScrollEnabled>
+                  <Text style={s.taniMetin} selectable>
+                    {`${sonHata.ozet}${sonHata.bilesen ? ` · ${sonHata.bilesen}` : ''}\n\n${sonHata.izler.map((i) => `${new Date(i.zaman).toLocaleTimeString('tr-TR')} ${i.kategori}: ${i.mesaj}`).join('\n')}${sonHata.yigin ? `\n\n${sonHata.yigin}` : ''}`}
+                  </Text>
+                  <Pressable
+                    accessibilityRole="button"
+                    onPress={() => {
+                      sonHatayiSil();
+                      setSonHata(null);
+                    }}
+                    hitSlop={8}>
+                    <Text style={s.taniSil}>{t('profil.sonHataSil')}</Text>
+                  </Pressable>
+                </ScrollView>
+              ) : null}
+            </View>
+          ) : null}
+
+          <Link href="/hesap-sil" asChild>
+            <Pressable accessibilityRole="button" hitSlop={10} style={s.silSatir}>
+              <Text style={s.sil}>{t('profil.hesapSil')}</Text>
+            </Pressable>
+          </Link>
+
+          {/* #205 KK5: OSM atfı (ODbL) — kanvas 22 · Profil, "Hesabı sil"in altında; 12 px, dokunma alanı ≥ 44. */}
+          <Pressable
+            accessibilityRole="link"
+            accessibilityLabel={`${t('profil.osmAtif')} ${t('profil.osmAtifKaynak')}`}
+            onPress={() => Linking.openURL(OSM_TELIF).catch(() => {})}
+            style={s.osmSatir}>
+            <Text style={s.osm}>
+              {t('profil.osmAtif')} <Text style={s.osmKaynak}>{t('profil.osmAtifKaynak')}</Text>
+            </Text>
           </Pressable>
-        </Link>
-
-        {/* #205 KK5: OSM atfı (ODbL) — kanvas 22 · Profil, "Hesabı sil"in altında; 12 px, dokunma alanı ≥ 44. */}
-        <Pressable
-          accessibilityRole="link"
-          accessibilityLabel={`${t('profil.osmAtif')} ${t('profil.osmAtifKaynak')}`}
-          onPress={() => Linking.openURL(OSM_TELIF).catch(() => {})}
-          style={s.osmSatir}>
-          <Text style={s.osm}>
-            {t('profil.osmAtif')} <Text style={s.osmKaynak}>{t('profil.osmAtifKaynak')}</Text>
-          </Text>
-        </Pressable>
+        </AyarlarSekmesi>
       </ScrollView>
+      <KisaBildirim metin={bildirim.metin} />
       <SecimMenusu
         acik={gizlilikAcik}
         baslik={t('profil.gizlilikSec')}
@@ -137,6 +170,11 @@ export default function ProfilEkrani() {
       />
     </SafeAreaView>
   );
+}
+
+/** Ayarlar sekmesinin gövdesi: sayılar, ayar satırları, son hata, Hesabı sil ve OSM atfı alt alta (aralık ekranla aynı). */
+function AyarlarSekmesi({ gorunur, children }: { gorunur: boolean; children: ReactNode }) {
+  return gorunur ? <View style={{ gap: 18 }}>{children}</View> : null;
 }
 
 function Sayi({ n, etiket }: { n: number | undefined; etiket: string }) {
@@ -166,7 +204,13 @@ function Satir({ baslik, deger, onPress, tehlike, okYok }: { baslik: string; deg
 
 const s = StyleSheet.create({
   ekran: { flex: 1, backgroundColor: renk.zemin },
-  icerik: { paddingHorizontal: bosluk.kenar, paddingTop: 24, paddingBottom: 32, gap: 18 },
+  icerik: { paddingHorizontal: bosluk.kenar, paddingTop: 8, paddingBottom: 32, gap: 18 },
+  kesfet: { alignSelf: 'flex-start', height: 40, paddingLeft: 8, paddingRight: 14, borderRadius: 999, backgroundColor: renk.yuzey, flexDirection: 'row', alignItems: 'center', gap: 4 },
+  kesfetMetin: { fontFamily: yazi.baslik, fontSize: 15, color: renk.metin },
+  sekmeler: { flexDirection: 'row', gap: 4, padding: 4, borderRadius: 14, backgroundColor: renk.yuzey },
+  sekme: { flex: 1, height: 38, borderRadius: 11, alignItems: 'center', justifyContent: 'center' },
+  sekmeSecili: { backgroundColor: renk.zemin, shadowColor: renk.metin, shadowOpacity: 0.1, shadowRadius: 3, shadowOffset: { width: 0, height: 1 }, elevation: 1 },
+  sekmeMetin: { fontFamily: yazi.ekstra, fontSize: 14, color: renk.ikincil },
   kimlik: { flexDirection: 'row', alignItems: 'center', gap: 14 },
   adKutu: { flex: 1, minWidth: 0, gap: 2 },
   ad: { fontFamily: yazi.baslik, fontSize: 20, letterSpacing: -0.4, color: renk.metin },
