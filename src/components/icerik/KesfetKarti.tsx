@@ -110,7 +110,7 @@ export function KesfetKarti({ gezi, sira, onAc, onPaylas, onAl }: Props) {
 }
 
 /** #291 KK1 (kanvas 29g · B): şeritte en çok bu kadar gün çizilir; fazlası "+N gün". */
-export const EN_COK_GUN = 4;
+export const EN_COK_GUN = 3;
 
 export type RotaPlani = {
   /** Çizilen günler (durağı olan, ilk `EN_COK_GUN`): gün numarası, gerçek durak sayısı, halka sayısı, "+N". */
@@ -120,14 +120,15 @@ export type RotaPlani = {
 };
 
 /**
- * #291 KK1: gün başına en çok floor(16 ÷ gün sayısı) halka (en az 3, en çok 10); fazlası "+N". Gün sayısı şeritteki
- * (durağı olan) gün sayısıdır; 4 günden uzun gezide ilk 4 gün çizilir, kalanı "+N gün".
+ * #291 KK1 (kanvas 29g · B): şeritte en çok 3 gün (durağı olan) çizilir, kalanı "+N gün". Gün başına en çok
+ * floor(12 ÷ çizilen gün) halka (en çok 10): 3 günde 4, 2 günde 6, 1 günde 10; fazlası "+N".
  */
 export function rotaPlani(gunDuraklari: readonly number[]): RotaPlani {
   const dolu = gunDuraklari.map((durak, i) => ({ gun: i + 1, durak })).filter((g) => g.durak > 0);
-  const sinir = Math.min(10, Math.max(3, Math.floor(16 / Math.max(1, dolu.length))));
+  const cizilen = dolu.slice(0, EN_COK_GUN);
+  const sinir = Math.min(10, Math.floor(12 / Math.max(1, cizilen.length)));
   return {
-    gunler: dolu.slice(0, EN_COK_GUN).map((g) => {
+    gunler: cizilen.map((g) => {
       const halka = Math.min(g.durak, sinir);
       return { ...g, halka, kalan: g.durak - halka };
     }),
@@ -156,7 +157,7 @@ export function RotaSeridi({ gunler }: { gunler: number[] }) {
                 {gun}
               </Text>
             </View>
-            <View style={s.hat}>
+            <View testID="rota-hat" style={s.hat}>
               <View style={[s.cizgi, { backgroundColor: r }]} />
               {Array.from({ length: halka }, (_, k) => (
                 <View key={k} testID="rota-halka" style={[s.halka, { borderColor: r }]} />
@@ -171,10 +172,10 @@ export function RotaSeridi({ gunler }: { gunler: number[] }) {
   );
 }
 
-/** #291 KK3 (29g · B): "+N" / "+N gün" — Figtree 800, 11 px, #4A5274; rota etiketi gerçek sayıyı söylediği için okunmaz. */
+/** #291 KK3 (29g · B): "+N" / "+N gün" — Figtree 800, 11 px, #4A5274, en çok 1,3× büyür; rota etiketi gerçek sayıyı söylediği için okunmaz. */
 function Fazlasi({ metin }: { metin: string }) {
   return (
-    <Text style={s.kalan} accessibilityElementsHidden importantForAccessibility="no">
+    <Text style={s.kalan} maxFontSizeMultiplier={1.3} accessibilityElementsHidden importantForAccessibility="no">
       {metin}
     </Text>
   );
@@ -266,8 +267,10 @@ const s = StyleSheet.create({
   },
   gunNo: { fontFamily: yazi.ekstra, fontSize: 11 },
   kalan: { flexShrink: 0, fontFamily: yazi.ekstra, fontSize: 11, color: renk.ikincil },
+  // #291 KK1: en kötü durumda halkalar kırpılır, komşu güne binmez.
   hat: {
     flexGrow: 1,
+    overflow: 'hidden',
     height: 10,
     flexDirection: 'row',
     alignItems: 'center',

@@ -174,30 +174,43 @@ describe('<KesfetAkisi />', () => {
     expect(screen.queryByText('Bağlanamadık')).toBeNull();
   });
 
-  it('#291 KK1: gün başına en çok floor(16 ÷ gün) halka (3–10), fazlası "+N"; 4 günden uzunsa ilk 4 gün + "+N gün"', () => {
+  it('#291 KK1 (29g · B): en çok 3 gün çizilir, fazlası "+N gün"; halka sınırı floor(12 ÷ çizilen gün), en çok 10', () => {
     const halkalar = (gunler: number[]) => rotaPlani(gunler).gunler.map((g) => [g.halka, g.kalan]);
     expect(halkalar([12])).toEqual([[10, 2]]);
-    expect(halkalar([10, 10, 10])).toEqual([[5, 5], [5, 5], [5, 5]]);
-    expect(halkalar([7, 7, 7, 7])).toEqual([[4, 3], [4, 3], [4, 3], [4, 3]]);
-    expect(halkalar([5, 5, 4])).toEqual([[5, 0], [5, 0], [4, 0]]);
+    expect(halkalar([10, 10])).toEqual([[6, 4], [6, 4]]);
+    expect(halkalar([10, 10, 10])).toEqual([[4, 6], [4, 6], [4, 6]]);
+    // Kanvas örneği 12/10/4: 4 halka + "+8", 4 halka + "+6", 4 halka.
+    expect(halkalar([12, 10, 4])).toEqual([[4, 8], [4, 6], [4, 0]]);
+    // Sınır toplam günden değil çizilen günden: 4 × 7 → 3 gün × 4 halka + "+3", "+1 gün".
+    const dort = rotaPlani([7, 7, 7, 7]);
+    expect(dort.gunler.map((g) => [g.gun, g.halka, g.kalan])).toEqual([[1, 4, 3], [2, 4, 3], [3, 4, 3]]);
+    expect(dort.kalanGun).toBe(1);
     const uzun = rotaPlani([4, 4, 4, 4, 4, 4]);
-    expect(uzun.gunler.map((g) => [g.gun, g.halka])).toEqual([[1, 3], [2, 3], [3, 3], [4, 3]]);
-    expect(uzun.kalanGun).toBe(2);
+    expect(uzun.gunler.map((g) => [g.gun, g.halka, g.kalan])).toEqual([[1, 4, 0], [2, 4, 0], [3, 4, 0]]);
+    expect(uzun.kalanGun).toBe(3);
     mockAkis = { data: [gezi('u', 'İstanbul', [10, 10, 10]), gezi('v', 'Bursa', [4, 4, 4, 4, 4, 4])], isPending: false, isError: false, isFetching: false, refetch: jest.fn() };
     render(<KesfetAkisi sehir={null} onYeni={jest.fn()} />);
-    expect(screen.getAllByTestId('rota-halka')).toHaveLength(15 + 12);
-    expect(screen.getAllByText('+5', { includeHiddenElements: true })).toHaveLength(3);
-    expect(screen.getByText('+2 gün', { includeHiddenElements: true })).toBeTruthy();
-    expect(screen.queryByText('+2 gün')).toBeNull();
+    expect(screen.getAllByTestId('rota-halka')).toHaveLength(12 + 12);
+    expect(screen.getAllByText('+6', { includeHiddenElements: true })).toHaveLength(3);
+    expect(screen.getByText('+3 gün', { includeHiddenElements: true })).toBeTruthy();
+    expect(screen.queryByText('+3 gün')).toBeNull();
     // Rota etiketi gerçek sayıları söyler (çizilmeyen günler dahil).
     expect(screen.getByLabelText('Rota: 1. gün 10 durak, 2. gün 10 durak, 3. gün 10 durak')).toBeTruthy();
     expect(screen.getByLabelText(/6\. gün 4 durak$/)).toBeTruthy();
   });
 
-  it('#291 KK1: 375 pt genişlikte 3 gün × 10 durakta her günün en dar hali karta sığar (halkalar komşu güne binmez)', () => {
+  it('#291 KK1: 375 pt genişlikte 4×7, 6×4, 3×10 ve 12/10/4 şeridinin en dar hali karta sığar (komşu güne binmez)', () => {
     // Kart iç genişliği: 375 − 2×20 (akış kenarı) − 2×16 (kart iç boşluğu) − 2×1 (kenar çizgisi) = 301.
-    expect(enDarRota([10, 10, 10])).toBeLessThanOrEqual(301);
-    expect(enDarRota([12, 10, 4])).toBeLessThanOrEqual(301);
+    for (const gunler of [[7, 7, 7, 7], [4, 4, 4, 4, 4, 4], [10, 10, 10], [12, 10, 4], [12], [10, 10]]) {
+      expect(enDarRota(gunler)).toBeLessThanOrEqual(301);
+    }
+  });
+
+  it('#291 KK1: halka hattı taşarsa kırpılır (overflow hidden)', () => {
+    mockAkis = { data: [gezi('u', 'İstanbul', [12, 10, 4])], isPending: false, isError: false, isFetching: false, refetch: jest.fn() };
+    render(<KesfetAkisi sehir={null} onYeni={jest.fn()} />);
+    const hat = screen.getAllByTestId('rota-hat')[0];
+    expect(StyleSheet.flatten(hat.props.style)).toEqual(expect.objectContaining({ overflow: 'hidden', flexGrow: 1 }));
   });
 
   it('#291 KK2: her gün önce kendi yerini alır (flexBasis auto), kalan yer gerçek durak sayısıyla paylaşılır', () => {
@@ -211,11 +224,18 @@ describe('<KesfetAkisi />', () => {
   it('#291 KK3: "+N" Figtree 800, 11 px, #4A5274, ekran okuyucuya okunmaz; gün numarası en çok 1,3× büyür', () => {
     mockAkis = { data: [gezi('u', 'İstanbul', [12, 10, 4])], isPending: false, isError: false, isFetching: false, refetch: jest.fn() };
     render(<KesfetAkisi sehir={null} onYeni={jest.fn()} />);
-    const arti = screen.getByText('+7', { includeHiddenElements: true });
+    const arti = screen.getByText('+8', { includeHiddenElements: true });
     expect(StyleSheet.flatten(arti.props.style)).toEqual(expect.objectContaining({ fontFamily: 'Figtree_800ExtraBold', fontSize: 11, color: '#4a5274', flexShrink: 0 }));
     expect(arti.props.importantForAccessibility).toBe('no');
     expect(arti.props.accessibilityElementsHidden).toBe(true);
     expect(screen.getByText('1').props.maxFontSizeMultiplier).toBe(1.3);
+    expect(arti.props.maxFontSizeMultiplier).toBe(1.3);
+  });
+
+  it('#291 KK1: "+N gün" de en çok 1,3× büyür', () => {
+    mockAkis = { data: [gezi('u', 'İstanbul', [4, 4, 4, 4, 4, 4])], isPending: false, isError: false, isFetching: false, refetch: jest.fn() };
+    render(<KesfetAkisi sehir={null} onYeni={jest.fn()} />);
+    expect(screen.getByText('+3 gün', { includeHiddenElements: true }).props.maxFontSizeMultiplier).toBe(1.3);
   });
 
   it('#291 KK4: Kalp de aç/kapa düğmesi — sabit "Kaydet", durum checked', () => {
