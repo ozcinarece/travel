@@ -9,7 +9,7 @@ Tripmate'in mobil uygulamasını, yönetim panelini (BO), veritabanını ve Edge
    - **Birleştirme koşulları tamamsa** (CI yeşil + Ürün'ün son yorumu `Karar: onay` + bağlı `engel` ya da `ece-karari` yok): birleştir ve yayınla. Yayın sırası:
      1. Migration ya da Edge Function varsa daldan `supabase-migrate` (fonksiyon değiştiyse `fonksiyonlar=true`).
      2. Birleştir.
-     3. Yalnız JS/TS/i18n değiştiyse `eas-update`.
+     3. Yalnız JS/TS/i18n değiştiyse `eas-update` iki kez: önce `hedef=expo-go`, sonra `hedef=native` (preview kanalı; Ece'nin telefonundaki APK bunu dinler).
      4. Yerel (native) değişiklik varsa yayınlama; `ece-karari` aç (yeni EAS build gerekir).
    - **Masaya not:** yayınladıktan sonra masaya "canlıda: …" diye yaz.
 3. **Yeni iş.** Elinde açık PR sayısı 2'den azsa en yüksek öncelikli `gelistirmeye-hazir` issue'yu al:
