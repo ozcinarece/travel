@@ -35,12 +35,12 @@ export function SeyahatSeridi({ rozet, ad, alt, ipucu, onAc, onYeni, onIpucuKapa
   const [seritH, setSeritH] = useState(SERIT_YUKSEKLIK);
   const [ipucuH, setIpucuH] = useState<number | null>(null);
   const ipucuAlt = alttan + seritH + IPUCU_ARALIK;
-  const bildir = (serit: number, ipH: number | null) => onOlcu?.({ serit, ipucuUst: ipucu && ipH !== null ? alttan + serit + IPUCU_ARALIK + ipH : null });
+  // #290 KK6: ölçüler tek yerden, en güncel değerlerle bildirilir (iki onLayout aynı geçişte hangi sırayla gelirse gelsin).
   // İpucu kapanınca kısa bildirim yeniden şeridin üstüne iner.
   useEffect(() => {
-    if (!ipucu) onOlcu?.({ serit: seritH, ipucuUst: null });
+    onOlcu?.({ serit: seritH, ipucuUst: ipucu && ipucuH !== null ? alttan + seritH + IPUCU_ARALIK + ipucuH : null });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ipucu]);
+  }, [seritH, ipucuH, ipucu, alttan]);
   const ac = () => {
     if (ipucu) onIpucuKapat();
     onAc();
@@ -54,9 +54,7 @@ export function SeyahatSeridi({ rozet, ad, alt, ipucu, onAc, onYeni, onIpucuKapa
           testID="serit-ipucu"
           accessibilityViewIsModal={Platform.OS === 'ios'}
           onLayout={(e) => {
-            const h = e.nativeEvent.layout.height;
-            setIpucuH(h);
-            bildir(seritH, h);
+            setIpucuH(e.nativeEvent.layout.height);
           }}
           style={[s.ipucu, { bottom: ipucuAlt }]}>
           <View accessible accessibilityRole="alert" accessibilityLabel={`${t('serit.ipucuBaslik')}. ${t('serit.ipucuMetin')}`} style={s.ipucuMetinler}>
@@ -70,12 +68,11 @@ export function SeyahatSeridi({ rozet, ad, alt, ipucu, onAc, onYeni, onIpucuKapa
         </View>
       ) : null}
       <View
+        testID="serit-kap"
         style={[s.kap, { bottom: alttan }]}
         pointerEvents="box-none"
         onLayout={(e) => {
-          const h = Math.max(SERIT_YUKSEKLIK, e.nativeEvent.layout.height);
-          setSeritH(h);
-          bildir(h, ipucuH);
+          setSeritH(Math.max(SERIT_YUKSEKLIK, e.nativeEvent.layout.height));
         }}>
         <Pressable
           accessibilityRole="button"

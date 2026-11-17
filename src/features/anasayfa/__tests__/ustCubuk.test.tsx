@@ -2,7 +2,7 @@
 // seyahat silinip dönülünce kısa bildirim.
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { beforeEach, describe, expect, it, jest } from '@jest/globals';
-import { fireEvent, render, waitFor } from '@testing-library/react-native';
+import { act, fireEvent, render, waitFor } from '@testing-library/react-native';
 import { ScrollView, StyleSheet } from 'react-native';
 
 import { SERIT_YUKSEKLIK } from '@/components/anasayfa/SeyahatSeridi';
@@ -328,6 +328,27 @@ describe('#290 şerit ve gezi bitti kartı takibi (kanvas 29g · A, 29c, 29f)', 
     // İpucu kapanınca bildirim şeridin üstüne iner.
     fireEvent.press(ekran.getByRole('button', { name: 'Tamam' }));
     await waitFor(() => expect(bildirimAlt()).toBe(24 + SERIT_YUKSEKLIK + 12));
+  });
+
+  it('KK6: aynı geçişte önce ipucu, sonra şerit ölçülse de bildirim ipucunun 8 px üstünde', async () => {
+    await AsyncStorage.removeItem(SERIT_IPUCU_ANAHTARI);
+    mockParametre = { bildirim: 'silindi' };
+    mockSeyahatler = [sy('Eskişehir', gun(4), gun(6))];
+    const ekran = render(<AnaSayfa />);
+    await waitFor(() => expect(ekran.getByText('Seyahatin burada')).toBeTruthy());
+    const balon = ekran.getByTestId('serit-ipucu');
+    const kap = ekran.getByTestId('serit-kap', { includeHiddenElements: true });
+    // Büyük yazıda şerit 80'e uzar; iki ölçü tek act içinde, önce ipucu sonra şerit sırasıyla gelir.
+    act(() => {
+      fireEvent(balon, 'layout', { nativeEvent: { layout: { x: 0, y: 0, width: 290, height: 150 } } });
+      fireEvent(kap, 'layout', { nativeEvent: { layout: { x: 0, y: 0, width: 335, height: 80 } } });
+    });
+    const bildirimAlt = () => {
+      let v = ekran.getByText('Seyahat silindi', { includeHiddenElements: true }).parent;
+      while (v && StyleSheet.flatten(v.props.style)?.bottom === undefined) v = v.parent;
+      return StyleSheet.flatten(v?.props.style).bottom as number;
+    };
+    await waitFor(() => expect(bildirimAlt()).toBe(24 + 80 + 14 + 150 + 8));
   });
 
   it('KK7: ipucu tek öğe olarak okunur (başlık + metin); "Tamam" ayrı düğme', async () => {
