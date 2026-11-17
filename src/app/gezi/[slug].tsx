@@ -297,7 +297,8 @@ export default function GeziEkrani() {
             <BolumSiniri key="yazi" ad="gezi-yazi">
               <View style={s.yazar}>
                 <View style={s.yazarKare}>
-                  <Logo boyut={20} koyuZemin />
+                  {/* #291 KK5 (Ekran 17): 18×11, kesik çizgi. */}
+                  <Logo boyut={18} koyuZemin kesik />
                 </View>
                 <Text style={s.yazarMetin}>
                   {[g.yazar_ad, `${tarih.gun} ${AYLAR[tarih.ay - 1]}`, t('gezi.okuma', { n: okumaSuresiDk(g.yazi_md) }), alinmaSayisi > 0 ? t('gezi.alindi', { n: alinmaSayisi }) : null].filter(Boolean).join(' · ')}

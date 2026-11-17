@@ -2,7 +2,7 @@
 // seyahat silinip dönülünce kısa bildirim.
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { beforeEach, describe, expect, it, jest } from '@jest/globals';
-import { fireEvent, render, waitFor } from '@testing-library/react-native';
+import { act, fireEvent, render, waitFor } from '@testing-library/react-native';
 import { ScrollView, StyleSheet } from 'react-native';
 
 import { SERIT_YUKSEKLIK } from '@/components/anasayfa/SeyahatSeridi';
@@ -21,6 +21,14 @@ jest.mock('@/lib/oturum', () => ({ useOturum: () => ({ session: { user: { id: 'b
 jest.mock('@/features/profil/sorgular', () => ({ useProfil: () => ({ data: { name: 'Ece Ö', photo_url: null } }) }));
 let mockSeyahatler: SeyahatOzet[] = [];
 jest.mock('@/features/seyahatler/sorgular', () => ({ useSeyahatler: () => ({ data: mockSeyahatler, isPending: false, isError: false, isRefetching: false, refetch: jest.fn() }) }));
+// #291 KK6: ana ekran Keşfet akışı sorgusunu da tutar (yenileme için).
+let mockAkisAcik = false;
+const mockAkis = { data: [] as unknown[], isPending: false, isError: false, isFetching: false, refetch: jest.fn(async () => ({ isError: false, data: [] as unknown[] })) };
+jest.mock('@/features/icerik/kesfetAkisi', () => ({
+  ...jest.requireActual<object>('@/features/icerik/kesfetAkisi'),
+  kesfetAkisiAcik: () => mockAkisAcik,
+  useKesfetAkisi: () => mockAkis,
+}));
 jest.mock('@/features/icerik/sorgular', () => ({ useGeziler: () => ({ data: [], refetch: jest.fn() }) }));
 jest.mock('@/features/davet/sorgular', () => ({
   bekleyenDavetiOku: async () => null,
@@ -60,6 +68,36 @@ describe('Ana ekran üst çubuk ve yüzen düğme (#275 KK2–KK3)', () => {
     const ekran = render(<AnaSayfa />);
     fireEvent.press(await waitFor(() => ekran.getByRole('button', { name: 'Yeni seyahat' })));
     expect(router.push).toHaveBeenLastCalledWith('/(tabs)/yeni');
+  });
+
+  it('#291 KK6: aşağı çekip yenileme Keşfet akışını da çeker; veri varken hata verirse kartlar kalır ve bir kez "Güncellenemedi"', async () => {
+    mockAkisAcik = true;
+    const ekran = render(<AnaSayfa />);
+    const yenile = () => ekran.UNSAFE_getByType(ScrollView).props.refreshControl.props.onRefresh as () => Promise<unknown>;
+    await waitFor(() => expect(ekran.getByRole('button', { name: 'Ara' })).toBeTruthy());
+    mockAkis.refetch.mockClear();
+    await act(() => yenile()());
+    expect(mockAkis.refetch).toHaveBeenCalledTimes(1);
+    expect(ekran.queryByText('Güncellenemedi')).toBeNull();
+    mockAkis.refetch.mockResolvedValueOnce({ isError: true, data: [{}] });
+    await act(() => yenile()());
+    expect(ekran.getAllByText('Güncellenemedi')).toHaveLength(1);
+    // Hiç veri yokken hata: akışın kendi "Bağlanamadık" hali gösterir; kısa bildirim çıkmaz.
+    ekran.unmount();
+    const ikinci = render(<AnaSayfa />);
+    await waitFor(() => expect(ikinci.getByRole('button', { name: 'Ara' })).toBeTruthy());
+    mockAkis.refetch.mockResolvedValueOnce({ isError: true, data: undefined as unknown as unknown[] });
+    await act(() => ikinci.UNSAFE_getByType(ScrollView).props.refreshControl.props.onRefresh());
+    expect(ikinci.queryByText('Güncellenemedi')).toBeNull();
+    mockAkisAcik = false;
+  });
+
+  it('#291 KK6: akış bayrağı kapalıyken yenileme akışı çekmez', async () => {
+    const ekran = render(<AnaSayfa />);
+    await waitFor(() => expect(ekran.getByRole('button', { name: 'Ara' })).toBeTruthy());
+    mockAkis.refetch.mockClear();
+    await act(() => ekran.UNSAFE_getByType(ScrollView).props.refreshControl.props.onRefresh());
+    expect(mockAkis.refetch).not.toHaveBeenCalled();
   });
 
   it('silindi parametresiyle gelince "Seyahat silindi" bildirimi', async () => {

@@ -47,6 +47,14 @@ jest.mock('@/features/anasayfa/serit', () => ({
   useAcikBorc: (sy: unknown) => (sy ? mockBorc : null),
   useSeritAdimi: (sy: unknown) => (sy ? mockAdim : undefined),
 }));
+// #291 KK6: ana ekran Keşfet akışı sorgusunu da tutar (yenileme için).
+let mockAkisAcik = false;
+const mockAkis = { data: [] as unknown[], isPending: false, isError: false, isFetching: false, refetch: jest.fn(async () => ({ isError: false, data: [] as unknown[] })) };
+jest.mock('@/features/icerik/kesfetAkisi', () => ({
+  ...jest.requireActual<object>('@/features/icerik/kesfetAkisi'),
+  kesfetAkisiAcik: () => mockAkisAcik,
+  useKesfetAkisi: () => mockAkis,
+}));
 jest.mock('@/features/icerik/sorgular', () => ({ useGeziler: () => ({ data: [], refetch: jest.fn() }), olayYaz: jest.fn() }));
 jest.mock('expo-router', () => ({
   router: { push: jest.fn(), navigate: jest.fn(), replace: jest.fn(), setParams: jest.fn(), dismissTo: jest.fn(), dismissAll: jest.fn() },
