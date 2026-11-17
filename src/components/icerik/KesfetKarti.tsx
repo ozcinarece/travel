@@ -44,7 +44,7 @@ export function KesfetKarti({ gezi, sira, onAc, onPaylas, onAl }: Props) {
       accessibilityLabel={t('gezi.kaydet')}
       accessibilityState={{ checked: kayitli }}
       onPress={() => kaydet.mutate({ tur: 'gezi', hedef_id: gezi.id, kayitli })}
-      style={({ pressed }) => [s.kalp, kayitli && s.kalpDolu, pressed && s.basili]}>
+      style={({ pressed }) => [s.kalp, ikiSatir && s.kalpIki, kayitli && s.kalpDolu, pressed && s.basili]}>
       <Svg width={20} height={20} viewBox="0 0 24 24" fill={kayitli ? renk.vurgu : 'none'} stroke={kayitli ? renk.vurgu : renk.ana} strokeWidth={kayitli ? 2.2 : 2.4} strokeLinejoin="round">
         <Path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z" />
       </Svg>
@@ -109,41 +109,75 @@ export function KesfetKarti({ gezi, sira, onAc, onPaylas, onAl }: Props) {
   );
 }
 
-/** #287 KK4: bir günde bundan fazla durak varsa halkalar taşmasın diye kısaltılır… */
-const HALKA_SINIRI = 10;
-/** …ve en çok bu kadar halka + "+N" gösterilir. */
-const EN_COK_HALKA = 8;
+/** #291 KK1 (kanvas 29g · B): şeritte en çok bu kadar gün çizilir; fazlası "+N gün". */
+export const EN_COK_GUN = 3;
 
-/** Gün renkli küçük rota şeridi: gün numarası karosu + o günün durak sayısı kadar halka; genişlik durak sayısıyla orantılı. */
+export type RotaPlani = {
+  /** Çizilen günler (durağı olan, ilk `EN_COK_GUN`): gün numarası, gerçek durak sayısı, halka sayısı, "+N". */
+  gunler: { gun: number; durak: number; halka: number; kalan: number }[];
+  /** Çizilmeyen günler ("+N gün"). */
+  kalanGun: number;
+};
+
+/**
+ * #291 KK1 (kanvas 29g · B): şeritte en çok 3 gün (durağı olan) çizilir, kalanı "+N gün". Gün başına en çok
+ * floor(12 ÷ çizilen gün) halka (en çok 10): 3 günde 4, 2 günde 6, 1 günde 10; fazlası "+N".
+ */
+export function rotaPlani(gunDuraklari: readonly number[]): RotaPlani {
+  const dolu = gunDuraklari.map((durak, i) => ({ gun: i + 1, durak })).filter((g) => g.durak > 0);
+  const cizilen = dolu.slice(0, EN_COK_GUN);
+  const sinir = Math.min(10, Math.floor(12 / Math.max(1, cizilen.length)));
+  return {
+    gunler: cizilen.map((g) => {
+      const halka = Math.min(g.durak, sinir);
+      return { ...g, halka, kalan: g.durak - halka };
+    }),
+    kalanGun: Math.max(0, dolu.length - EN_COK_GUN),
+  };
+}
+
+/**
+ * Gün renkli küçük rota şeridi: gün numarası karosu + halkalar (+ "+N"). #291 KK2 (29g · B): her gün önce kendi halkaları
+ * ve "+N"i için yer alır (`flexBasis: 'auto'`), kalan yer gerçek durak sayısıyla (`flexGrow`) paylaşılır.
+ */
 export function RotaSeridi({ gunler }: { gunler: number[] }) {
-  const dolu = gunler.filter((n) => n > 0);
-  if (dolu.length === 0) return null;
+  const plan = rotaPlani(gunler);
+  if (plan.gunler.length === 0) return null;
   const etiket = t('kesfetAkisi.rotaEtiket', {
     gunler: gunler.map((n, i) => t('kesfetAkisi.rotaGun', { gun: i + 1, durak: n })).join(', '),
   });
   return (
     <View accessible accessibilityRole="image" accessibilityLabel={etiket} style={s.rota}>
-      {gunler.map((n, i) => {
-        if (n === 0) return null;
-        const r = gunRengi(i + 1);
-        const halka = n > HALKA_SINIRI ? EN_COK_HALKA : n;
-        const kalan = n - halka;
+      {plan.gunler.map(({ gun, durak, halka, kalan }) => {
+        const r = gunRengi(gun);
         return (
-          <View key={i} style={[s.rotaGun, { flex: halka }]}>
+          <View key={gun} testID="rota-gun" style={[s.rotaGun, { flexGrow: durak }]}>
             <View style={[s.gunKaro, { backgroundColor: r }]}>
-              <Text style={[s.gunNo, { color: gunUstuMetin(r) }]}>{i + 1}</Text>
+              <Text style={[s.gunNo, { color: gunUstuMetin(r) }]} maxFontSizeMultiplier={1.3}>
+                {gun}
+              </Text>
             </View>
-            <View style={s.hat}>
+            <View testID="rota-hat" style={s.hat}>
               <View style={[s.cizgi, { backgroundColor: r }]} />
               {Array.from({ length: halka }, (_, k) => (
                 <View key={k} testID="rota-halka" style={[s.halka, { borderColor: r }]} />
               ))}
             </View>
-            {kalan > 0 ? <Text style={s.kalan}>{t('kesfetAkisi.dahaFazlaDurak', { n: kalan })}</Text> : null}
+            {kalan > 0 ? <Fazlasi metin={t('kesfetAkisi.dahaFazlaDurak', { n: kalan })} /> : null}
           </View>
         );
       })}
+      {plan.kalanGun > 0 ? <Fazlasi metin={t('kesfetAkisi.dahaFazlaGun', { n: plan.kalanGun })} /> : null}
     </View>
+  );
+}
+
+/** #291 KK3 (29g · B): "+N" / "+N gün" — Figtree 800, 11 px, #4A5274, en çok 1,3× büyür; rota etiketi gerçek sayıyı söylediği için okunmaz. */
+function Fazlasi({ metin }: { metin: string }) {
+  return (
+    <Text style={s.kalan} maxFontSizeMultiplier={1.3} accessibilityElementsHidden importantForAccessibility="no">
+      {metin}
+    </Text>
   );
 }
 
@@ -222,8 +256,9 @@ const s = StyleSheet.create({
     color: NOT_RENGI,
   },
   rota: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  rotaGun: { flexDirection: 'row', alignItems: 'center', gap: 5 },
+  rotaGun: { flexDirection: 'row', alignItems: 'center', gap: 5, flexShrink: 1, flexBasis: 'auto' },
   gunKaro: {
+    flexShrink: 0,
     width: 20,
     height: 20,
     borderRadius: 6,
@@ -231,9 +266,13 @@ const s = StyleSheet.create({
     justifyContent: 'center',
   },
   gunNo: { fontFamily: yazi.ekstra, fontSize: 11 },
-  kalan: { fontFamily: yazi.ekstra, fontSize: 11, color: renk.ikincil },
+  kalan: { flexShrink: 0, fontFamily: yazi.ekstra, fontSize: 11, color: renk.ikincil },
+  // #291 KK1: en kötü durumda hat daralır (flexShrink 1, minWidth 0) ve halkalar kırpılır; komşu güne binmez.
   hat: {
     flexGrow: 1,
+    flexShrink: 1,
+    minWidth: 0,
+    overflow: 'hidden',
     height: 10,
     flexDirection: 'row',
     alignItems: 'center',
@@ -257,13 +296,16 @@ const s = StyleSheet.create({
   kalp: {
     width: 44,
     height: 44,
+    flexShrink: 0,
     borderRadius: 12,
     backgroundColor: renk.yuzey,
     alignItems: 'center',
     justifyContent: 'center',
   },
   kalpDolu: { backgroundColor: renk.vurguZemin },
-  eylemlerIki: { flexDirection: 'column' },
+  // #291 KK7 (29g · C): iki satır arası 12; kalp en az 44, satırla (paylaş yüksekliğiyle) birlikte büyür.
+  eylemlerIki: { flexDirection: 'column', gap: 12 },
+  kalpIki: { width: 56, height: undefined, minHeight: 44, alignSelf: 'stretch' },
   eylemSatiri: { flexDirection: 'row', gap: 8 },
   paylas: {
     minHeight: 44,
@@ -275,7 +317,8 @@ const s = StyleSheet.create({
     gap: 6,
   },
   paylasMetin: { fontFamily: yazi.ekstra, fontSize: 14, color: renk.ana },
-  paylasGenis: { flexGrow: 1, flexShrink: 1, justifyContent: 'center' },
+  // #291 KK7: paylaş yazıyla büyür (dikey iç boşluk), yatay 14.
+  paylasGenis: { flexGrow: 1, flexShrink: 1, justifyContent: 'center', paddingHorizontal: 14, paddingVertical: 10 },
   al: {
     flexGrow: 1,
     flexShrink: 1,
@@ -287,7 +330,8 @@ const s = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  alGenis: { flexGrow: 0, flexBasis: 'auto', alignSelf: 'stretch' },
+  // #291 KK7: "Seyahatime al" yatay 14, dikey 10 iç boşluk.
+  alGenis: { flexGrow: 0, flexBasis: 'auto', alignSelf: 'stretch', paddingHorizontal: 14 },
   alMetin: { fontFamily: yazi.ekstra, fontSize: 14, color: renk.metin, textAlign: 'center' },
   kendi: {
     borderRadius: kose.kart,

@@ -11,11 +11,11 @@ import { GeziKarti } from '@/components/icerik/GeziKarti';
 import { KesfetAkisi } from '@/components/icerik/KesfetAkisi';
 import { Avatar } from '@/components/ui/Avatar';
 import { Ikon } from '@/components/ui/Ikon';
-import { KisaBildirim, useGelenBildirim } from '@/components/ui/KisaBildirim';
+import { KisaBildirim, useGelenBildirim, useKisaBildirim } from '@/components/ui/KisaBildirim';
 import { LogoYazi } from '@/components/ui/Logo';
 import { banaAcikBorc, GEZI_PAYLAS_KARTI, kesfetDurumu, seritAdimMetni, useAcikBorc, useSeritAdimi, useSeritIpucu } from '@/features/anasayfa/serit';
 import { bekleyenDavetiOku, bekleyenDavetiSil, useDavetKarsilama, useDavetKarsilandi } from '@/features/davet/sorgular';
-import { kesfetAkisiAcik } from '@/features/icerik/kesfetAkisi';
+import { kesfetAkisiAcik, useKesfetAkisi } from '@/features/icerik/kesfetAkisi';
 import { useGeziler } from '@/features/icerik/sorgular';
 import { useProfil } from '@/features/profil/sorgular';
 import { acilisDurumu, siniflandir } from '@/features/seyahatler/siniflandir';
@@ -46,6 +46,21 @@ export default function AnaSayfa() {
   const { hesapli } = useOturum();
   const altBosluk = useSafeAreaInsets().bottom;
   const gelenBildirim = useGelenBildirim();
+  // #291 KK6: aşağı çekip yenileme Keşfet akışını da çeker (KesfetAkisi ile aynı sorgu; ek istek yok). Veri varken
+  // yenileme hata verirse kartlar kalır ve bir kez "Güncellenemedi".
+  const akis = useKesfetAkisi(kesfetAkisiAcik());
+  const bildirim = useKisaBildirim();
+  const yenile = () => {
+    const isler: Promise<unknown>[] = [seyahatler.refetch(), geziler.refetch()];
+    if (kesfetAkisiAcik()) {
+      isler.push(
+        akis.refetch().then((r) => {
+          if (r.isError && r.data) bildirim.goster(t('kesfetAkisi.guncellenemedi'));
+        }),
+      );
+    }
+    return Promise.all(isler);
+  };
   // #137: giriş öncesi görülen davet → /r/{token}; web'de katılıp uygulamayı ilk açan → doğrudan seyahat (KK2). İkisi de
   // bilinene kadar yükleniyor gösterilir (ilk açılış ekranı bir an görünüp kaybolmasın); geçişler tek seferlik replace.
   const [bekleyenDavet, setBekleyenDavet] = useState<null | undefined>(undefined);
@@ -199,7 +214,7 @@ export default function AnaSayfa() {
 
   return (
     <SafeAreaView style={s.ekran} edges={['top']}>
-      <ScrollView contentContainerStyle={[s.icerik, { paddingBottom: listeAlt }]} refreshControl={<RefreshControl refreshing={seyahatler.isRefetching} onRefresh={() => Promise.all([seyahatler.refetch(), geziler.refetch()])} />}>
+      <ScrollView contentContainerStyle={[s.icerik, { paddingBottom: listeAlt }]} refreshControl={<RefreshControl refreshing={seyahatler.isRefetching} onRefresh={yenile} />}>
         <View style={s.ust}>
           <LogoYazi boyut={36} />
           <View style={s.ustDugmeler}>
@@ -311,7 +326,7 @@ export default function AnaSayfa() {
           </Pressable>
         </View>
       )}
-      <KisaBildirim metin={gelenBildirim} alt={bildirimAlt} />
+      <KisaBildirim metin={gelenBildirim ?? bildirim.metin} alt={bildirimAlt} />
     </SafeAreaView>
   );
 }
