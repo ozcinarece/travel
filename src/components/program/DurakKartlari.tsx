@@ -206,6 +206,8 @@ function Kart({ kart, kartlar, genislik, gezi, tz, konum, gunRenk, aktif, fotoIs
         accessibilityRole="button"
         accessibilityLabel={t(tur === 'yol' ? 'program.kart.yolTarifiEtiket' : 'program.kart.mekanRehberiEtiket', { ad: kart.ad })}
         onPress={() => (tur === 'yol' ? onYolTarifi(kart) : onRehber(kart))}
+        // #232 KK3: 40 px görünüm + dikeyde 2'şer = 44 px dokunma alanı (yanda aralık 8, çakışma yok).
+        hitSlop={DUGME_PAYI}
         style={({ pressed }) => [s.dugme, { flex: tur === 'rehber' ? 1.15 : 1 }, birincil ? s.dugmeBirincil : s.dugmeIkincil, pressed && { opacity: 0.85 }]}>
         <View style={s.dugmeIkon}>
           <Ikon ad={tur === 'yol' ? 'pusula' : 'kitap'} boyut={16} renk={yazi} kalinlik={2.3} />
@@ -302,7 +304,7 @@ function Kart({ kart, kartlar, genislik, gezi, tz, konum, gunRenk, aktif, fotoIs
           </View>
         ) : null}
         {sonraki ? (
-          <Pressable accessibilityRole="button" accessibilityLabel={t('program.kart.sonrakiKart', { ad: sonraki.ad })} onPress={() => onSec(sonraki.durakId)} style={({ pressed }) => [s.sonra, pressed && { opacity: 0.7 }]}>
+          <Pressable accessibilityRole="button" accessibilityLabel={t('program.kart.sonrakiKart', { ad: sonraki.ad })} hitSlop={SONRA_PAYI} onPress={() => onSec(sonraki.durakId)} style={({ pressed }) => [s.sonra, pressed && { opacity: 0.7 }]}>
             <Text style={s.sonraMetin} numberOfLines={1}>
               <Text style={s.sonraEtiket}>{`${t('program.kart.sonra')} `}</Text>
               {sonraki.varisDk !== null ? t('program.kart.sonraMetin', { ad: sonraki.ad, saat: dakikaSaat(sonraki.varisDk) }) : sonraki.ad}
@@ -325,6 +327,10 @@ function Kart({ kart, kartlar, genislik, gezi, tz, konum, gunRenk, aktif, fotoIs
 
 /** KK6 (büyük yazı): sekme ve düğme metni en çok 1,6 kat büyür; kutular minHeight ile uzar, metin kırpılmaz. */
 const YAZI_CARPANI = 1.6;
+
+/** #232 KK3: dokunma alanı ≥ 44 pt — Rehber / Yol tarifi 40 + 2 + 2; Sonra satırı 40 + alttaki kart boşluğundan 4. */
+const DUGME_PAYI = { top: 2, bottom: 2 };
+const SONRA_PAYI = { bottom: 4 };
 
 const s = StyleSheet.create({
   kap: { position: 'absolute', left: 0, right: 0, bottom: 12 },

@@ -130,7 +130,7 @@ export default function BakiyelerEkrani() {
                     ) : null}
                   </View>
                   {alan || veren ? (
-                    <Pressable accessibilityRole="button" disabled={odesmeEkle.isPending} onPress={() => odendi(x)} style={({ pressed }) => [s.buz, pressed && { opacity: 0.8 }]}>
+                    <Pressable accessibilityRole="button" disabled={odesmeEkle.isPending} onPress={() => odendi(x)} hitSlop={ODEME_PAYI} style={({ pressed }) => [s.buz, pressed && { opacity: 0.8 }]}>
                       <Ikon ad="tik" boyut={14} renk={renk.ana} kalinlik={2.6} />
                       <Text style={s.buzMetin}>{alan ? t('harcama.bakiye.odendiIsaretle') : t('harcama.bakiye.odedim')}</Text>
                     </Pressable>
@@ -184,6 +184,9 @@ export default function BakiyelerEkrani() {
     </View>
   );
 }
+
+/** #232 KK1: "Ödedim / Ödendi işaretle" 34 px görünüm + dikeyde 5'er = 44 pt dokunma alanı. */
+const ODEME_PAYI = { top: 5, bottom: 5 };
 
 const s = StyleSheet.create({
   ekran: { flex: 1, backgroundColor: renk.haritaZemin },

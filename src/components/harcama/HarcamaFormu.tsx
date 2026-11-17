@@ -420,10 +420,20 @@ function FormIcerigi({ onKapat, seyahat, uyeler, harcama, durakId, onBildirim }:
           const pay = paylar?.get(id) ?? 0;
           return (
             <View key={id} style={s.kisi}>
-              <Avatar ad={k.ad(id)} url={k.foto(id)} boyut={32} arkaPlan={k.renk(id)} />
-              <Text style={[s.kisiAd, !dahil && { color: renk.soluk }]} numberOfLines={1}>
-                {id === benId ? t('harcama.form.sen') : k.ad(id)}
-              </Text>
+              {/* #232 KK2: kişinin avatarı ve adı da onay kutusu gibi çalışır (satır ≥ 44 pt); ekran okuyucu için tek onay kutusu bu. */}
+              <Pressable
+                accessibilityRole={salt ? undefined : 'checkbox'}
+                accessibilityState={salt ? undefined : { checked: dahil }}
+                accessibilityLabel={salt ? undefined : t('harcama.form.kisiSec', { ad: k.ad(id) })}
+                disabled={salt}
+                onPress={() => kisiDegistir(id)}
+                style={s.kisiSec}
+              >
+                <Avatar ad={k.ad(id)} url={k.foto(id)} boyut={32} arkaPlan={k.renk(id)} />
+                <Text style={[s.kisiAd, !dahil && { color: renk.soluk }]} numberOfLines={1}>
+                  {id === benId ? t('harcama.form.sen') : k.ad(id)}
+                </Text>
+              </Pressable>
               {mod === 'tutar' && dahil && !salt ? (
                 <SayfaMetinAlani
                   value={tutarlar[id] ?? ''}
@@ -436,11 +446,11 @@ function FormIcerigi({ onKapat, seyahat, uyeler, harcama, durakId, onBildirim }:
                 />
               ) : mod === 'pay' && dahil && !salt ? (
                 <View style={s.agirlik}>
-                  <Pressable accessibilityRole="button" accessibilityLabel={t('harcama.form.payAzalt', { ad: k.ad(id) })} hitSlop={6} onPress={() => setAgirliklar((e) => ({ ...e, [id]: Math.max(0, (e[id] ?? 1) - 1) }))} style={s.agirlikDugme}>
+                  <Pressable accessibilityRole="button" accessibilityLabel={t('harcama.form.payAzalt', { ad: k.ad(id) })} hitSlop={PAY_PAYI} onPress={() => setAgirliklar((e) => ({ ...e, [id]: Math.max(0, (e[id] ?? 1) - 1) }))} style={s.agirlikDugme}>
                     <Text style={s.agirlikIsaret}>−</Text>
                   </Pressable>
                   <Text style={s.agirlikSayi}>{agirliklar[id] ?? 1}</Text>
-                  <Pressable accessibilityRole="button" accessibilityLabel={t('harcama.form.payArtir', { ad: k.ad(id) })} hitSlop={6} onPress={() => setAgirliklar((e) => ({ ...e, [id]: Math.min(20, (e[id] ?? 1) + 1) }))} style={s.agirlikDugme}>
+                  <Pressable accessibilityRole="button" accessibilityLabel={t('harcama.form.payArtir', { ad: k.ad(id) })} hitSlop={PAY_PAYI} onPress={() => setAgirliklar((e) => ({ ...e, [id]: Math.min(20, (e[id] ?? 1) + 1) }))} style={s.agirlikDugme}>
                     <Text style={s.agirlikIsaret}>+</Text>
                   </Pressable>
                 </View>
@@ -449,11 +459,13 @@ function FormIcerigi({ onKapat, seyahat, uyeler, harcama, durakId, onBildirim }:
                 <Text style={[s.kisiPay, !dahil && { color: renk.soluk }]}>{dahil && pay ? paraMetni(pay, para) : '—'}</Text>
               ) : null}
               {!salt ? (
+                // Görsel kutu: dokunulur (22 + 11 + 11 = 44 pt), ekran okuyucuda satırın başındaki onay kutusuyla tekrar etmesin diye gizli.
                 <Pressable
-                  accessibilityRole="checkbox"
-                  accessibilityState={{ checked: dahil }}
-                  accessibilityLabel={t('harcama.form.kisiSec', { ad: k.ad(id) })}
-                  hitSlop={8}
+                  accessible={false}
+                  importantForAccessibility="no-hide-descendants"
+                  accessibilityElementsHidden
+                  testID={`kisi-kutu-${id}`}
+                  hitSlop={KUTU_PAYI}
                   onPress={() => kisiDegistir(id)}
                   style={[s.kutu, dahil && s.kutuSecili]}
                 >
@@ -499,6 +511,11 @@ function FormIcerigi({ onKapat, seyahat, uyeler, harcama, durakId, onBildirim }:
   );
 }
 
+/** #232 KK1: pay − / + 30 px görünüm + 7'şer yön = 44 pt (aralarında 6 + 18 + 6 px, çakışma yok). */
+const PAY_PAYI = 7;
+/** Onay kutusu 22 px: dikeyde 11'er; solda 8 (yanındaki tutar kutusuyla aralık 10, çakışma yok). */
+const KUTU_PAYI = { top: 11, bottom: 11, left: 8, right: 11 };
+
 const s = StyleSheet.create({
   perde: { flex: 1, backgroundColor: 'rgba(14,20,48,0.45)', justifyContent: 'flex-end' },
   sayfa: { backgroundColor: renk.zemin, borderTopLeftRadius: 30, borderTopRightRadius: 30, paddingTop: 12, maxHeight: '92%' },
@@ -528,7 +545,8 @@ const s = StyleSheet.create({
   etiket: { fontFamily: yazi.ekstra, fontSize: 13, color: renk.metin },
   odeyen: { flexDirection: 'row', alignItems: 'center', gap: 8, height: 40, paddingLeft: 6, paddingRight: 10, borderRadius: 12, backgroundColor: renk.yuzey, maxWidth: '65%' },
   odeyenAd: { fontFamily: yazi.ekstra, fontSize: 14, color: renk.metin, flexShrink: 1 },
-  kisi: { flexDirection: 'row', alignItems: 'center', gap: 10, minHeight: 40 },
+  kisi: { flexDirection: 'row', alignItems: 'center', gap: 10, minHeight: 44 },
+  kisiSec: { flex: 1, minWidth: 0, minHeight: 44, flexDirection: 'row', alignItems: 'center', gap: 10 },
   kisiAd: { flex: 1, fontFamily: yazi.kalin, fontSize: 15, color: renk.metin },
   kisiPay: { fontFamily: yazi.ekstra, fontSize: 14, color: renk.metin },
   kisiGirdi: { width: 96, height: 38, paddingHorizontal: 10, borderRadius: 11, backgroundColor: renk.yuzey, fontFamily: yazi.kalin, fontSize: 15, color: renk.metin, textAlign: 'right' },

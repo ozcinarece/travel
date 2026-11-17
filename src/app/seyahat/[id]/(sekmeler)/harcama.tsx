@@ -131,11 +131,11 @@ function Harcamalar({ seyahat, uyeler, harcamalar, odesmeler, mekanlar }: { seya
             </View>
           </View>
           <View style={s.geceDugmeler}>
-            <Pressable accessibilityRole="button" onPress={bakiyeler} style={({ pressed }) => [s.dugme, { flex: 1, backgroundColor: renk.vurgu }, pressed && { opacity: 0.85 }]}>
+            <Pressable accessibilityRole="button" onPress={bakiyeler} hitSlop={DUGME_PAYI} style={({ pressed }) => [s.dugme, { flex: 1, backgroundColor: renk.vurgu }, pressed && { opacity: 0.85 }]}>
               <Ikon ad="kisiler" boyut={16} renk={renk.metin} kalinlik={2.3} />
               <Text style={[s.dugmeMetin, { color: renk.metin }]}>{t('harcama.bakiyeler')}</Text>
             </Pressable>
-            <Pressable accessibilityRole="button" onPress={() => setOzetAcik(true)} style={({ pressed }) => [s.dugme, { flex: 0.6, backgroundColor: BEYAZ_14 }, pressed && { opacity: 0.85 }]}>
+            <Pressable accessibilityRole="button" onPress={() => setOzetAcik(true)} hitSlop={DUGME_PAYI} style={({ pressed }) => [s.dugme, { flex: 0.6, backgroundColor: BEYAZ_14 }, pressed && { opacity: 0.85 }]}>
               <Text style={[s.dugmeMetin, { color: renk.zemin }]}>{t('harcama.ozetDugme')}</Text>
             </Pressable>
           </View>
@@ -207,6 +207,9 @@ function Harcamalar({ seyahat, uyeler, harcamalar, odesmeler, mekanlar }: { seya
     </View>
   );
 }
+
+/** #232 KK1: Bakiyeler / Özet 38 px görünüm + dikeyde 3'er = 44 pt dokunma alanı (yanda aralık 8, çakışma yok). */
+const DUGME_PAYI = { top: 3, bottom: 3 };
 
 const s = StyleSheet.create({
   ekran: { flex: 1, backgroundColor: renk.haritaZemin },
