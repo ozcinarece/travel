@@ -10,11 +10,12 @@ import { bolusumMetni, harcamaBasligi, type Kisiler } from '@/features/harcama/m
 import { t } from '@/i18n';
 import { renk, yazi } from '@/theme';
 
-type Props = { gezi: boolean; ozet: HarcamaOzeti; adet: number; k: Kisiler; benId: string | null; onTumu: () => void; onEkle: () => void; onBakiyeler: () => void };
+/** `eklePasif`: #243 KK4 (kanvas 23c) bağlantı yokken "Harcama ekle" pasif (%40). */
+type Props = { gezi: boolean; ozet: HarcamaOzeti; adet: number; k: Kisiler; benId: string | null; onTumu: () => void; onEkle: () => void; onBakiyeler: () => void; eklePasif?: boolean };
 
-export function GeziHarcamaKarti({ gezi, ozet, adet, k, benId, onTumu, onEkle, onBakiyeler }: Props) {
+export function GeziHarcamaKarti({ gezi, ozet, adet, k, benId, onTumu, onEkle, onBakiyeler, eklePasif = false }: Props) {
   const ekle = (
-    <Pressable accessibilityRole="button" onPress={onEkle} style={({ pressed }) => [geziStil.dugme, { flex: 1, backgroundColor: renk.ana }, pressed && { opacity: 0.85 }]}>
+    <Pressable accessibilityRole="button" accessibilityState={{ disabled: eklePasif }} disabled={eklePasif} onPress={onEkle} style={({ pressed }) => [geziStil.dugme, { flex: 1, backgroundColor: renk.ana }, eklePasif && { opacity: 0.4 }, pressed && { opacity: 0.85 }]}>
       <Ikon ad="arti" boyut={16} renk={renk.zemin} kalinlik={2.3} />
       <Text style={[geziStil.dugmeMetin, { color: renk.zemin }]}>{t('harcama.ekle')}</Text>
     </Pressable>

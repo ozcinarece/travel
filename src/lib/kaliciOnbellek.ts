@@ -1,6 +1,6 @@
 // #243 KK1: son görülen hal okunur kalsın — React Query önbelleğinin bir kısmı cihazda (AsyncStorage) tutulur.
-// Yalnız bizim veritabanımızdaki kayıtlar saklanır: profil, seyahat listesi, seyahat, günler, duraklar ve kendi içeriğimiz
-// (yerler, rehber metni). Google'dan gelen hiçbir sorgu (places-light, Details, fotoğraf, yorum) cihaza yazılmaz (PRD §7).
+// Yalnız bizim veritabanımızdaki kayıtlar saklanır: profil, seyahat listesi, seyahat, günler, duraklar (ve durakların mekan
+// satırları) ve kendi içeriğimiz (yerler, rehber metni, mekan adları). Google'dan gelen hiçbir sorgu (places-light, Details, fotoğraf, yorum) cihaza yazılmaz (PRD §7).
 // Saklanacak anahtarlar izin listesiyle seçilir: listede olmayan yeni bir sorgu kendiliğinden saklanmaz.
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createAsyncStoragePersister } from '@tanstack/query-async-storage-persister';
@@ -12,12 +12,17 @@ export const ONBELLEK_ANAHTARI = 'tripmate-sorgu-onbellegi';
 /** Önbelleğin ömrü en çok 7 gün (KK1). */
 export const ONBELLEK_OMRU_MS = 7 * 24 * 60 * 60 * 1000;
 /** Kayıt biçimi değişirse eski önbellek okunmaz. */
-const SURUM = '1';
+const SURUM = '2';
 
 /**
  * Saklanan sorgu anahtarlarının başları. Her biri bizim tablolarımızdan okunur (Google içeriği yok):
  * - `profil`: `profiles` satırı; `seyahatler` / `seyahat`: `trips`; `gunler` / `duraklar`: `days` / `stops`;
- * - `icerik › yerler` ve `icerik › rehber` / `yer-rehber`: kendi içeriğimiz (OSM konumu, editör metni).
+ * - `mekanlar`: durakların mekan satırları (`places`: `place_id`, konum, `primary_type`; PRD §7'nin izin verdiği alanlar,
+ *   ad yok). Gezi sayfası bunlarsız açılamaz.
+ * - `icerik › yerler` ve `icerik › rehber` / `yer-rehber`: kendi içeriğimiz (OSM konumu, editör metni);
+ * - `icerik-mekan`: kendi içeriğimizdeki mekan adı ve kategorisi (`icerik_mekan_bilgileri`); çevrimdışı durak adı buradan (KK5).
+ *
+ * Bilerek dışarıda: `konaklamalar` (`stays.label`'da eski Google adları olabilir, #250), sohbet, harcama, üyeler.
  */
 const IZINLI: readonly (readonly string[])[] = [
   ['profil'],
@@ -25,6 +30,8 @@ const IZINLI: readonly (readonly string[])[] = [
   ['seyahat'],
   ['gunler'],
   ['duraklar'],
+  ['mekanlar'],
+  ['icerik-mekan'],
   ['icerik', 'yerler'],
   ['icerik', 'rehber'],
   ['icerik', 'yer-rehber'],
@@ -48,7 +55,21 @@ export function saklananlariAyarla(qc: QueryClient): void {
   for (const bas of IZINLI) qc.setQueryDefaults([...bas], { gcTime: ONBELLEK_OMRU_MS });
 }
 
-const persister = createAsyncStoragePersister({ storage: AsyncStorage, key: ONBELLEK_ANAHTARI, throttleTime: 1000 });
+// `icerik-mekan` bir Map döndürür; düz JSON Map'i boş nesneye çevirir. Map'ler `{ __map: [[k, v], …] }` olarak yazılır.
+export function seriyeCevir(veri: unknown): string {
+  return JSON.stringify(veri, (_k, v: unknown) => (v instanceof Map ? { __map: [...v.entries()] } : v));
+}
+export function seridenCoz(ham: string): unknown {
+  return JSON.parse(ham, (_k, v: unknown) => (v && typeof v === 'object' && Array.isArray((v as { __map?: unknown }).__map) ? new Map((v as { __map: [unknown, unknown][] }).__map) : v));
+}
+
+const persister = createAsyncStoragePersister({
+  storage: AsyncStorage,
+  key: ONBELLEK_ANAHTARI,
+  throttleTime: 1000,
+  serialize: seriyeCevir,
+  deserialize: seridenCoz as (ham: string) => ReturnType<typeof JSON.parse>,
+});
 
 export const kaliciSecenekler: Omit<PersistQueryClientOptions, 'queryClient'> = {
   persister,

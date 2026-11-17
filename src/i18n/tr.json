@@ -899,6 +899,11 @@
     "kesfeteGit": "Yer ekle"
   },
   "geziSayfasi": {
+    "cevrimdisi": {
+      "baslik": "Çevrimdışı · son güncelleme {saat}",
+      "baslikSaatsiz": "Çevrimdışı",
+      "alt": "Plan okunur; bağlanınca kendiliğinden yenilenir"
+    },
     "kesfet": "Yer ekle",
     "geriKesfet": "Keşfet",
     "paylas": "Davet linkini gönder",

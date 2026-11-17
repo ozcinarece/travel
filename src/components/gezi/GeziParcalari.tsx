@@ -64,9 +64,9 @@ export function BolumBasligi({ baslik, baglanti, onBaglanti }: { baslik: string;
 }
 
 /** Küçük Buz düğme (Dağıt, Seç, Mesaj at). */
-export function BuzDugme({ metin, onPress, kucuk }: { metin: string; onPress: () => void; kucuk?: boolean }) {
+export function BuzDugme({ metin, onPress, kucuk, pasif = false }: { metin: string; onPress: () => void; kucuk?: boolean; /** #243: bağlantı yokken %40, dokunulmaz. */ pasif?: boolean }) {
   return (
-    <Pressable accessibilityRole="button" onPress={onPress} hitSlop={6} style={({ pressed }) => [s.buz, kucuk && s.buzKucuk, pressed && { opacity: 0.8 }]}>
+    <Pressable accessibilityRole="button" accessibilityState={{ disabled: pasif }} disabled={pasif} onPress={onPress} hitSlop={6} style={({ pressed }) => [s.buz, kucuk && s.buzKucuk, pasif && { opacity: 0.4 }, pressed && { opacity: 0.8 }]}>
       <Text style={[s.buzMetin, kucuk && { fontSize: 12 }]}>{metin}</Text>
     </Pressable>
   );

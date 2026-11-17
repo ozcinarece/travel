@@ -42,6 +42,12 @@ export function yerelSaatDk(an: Date, tz: string): number {
   return al('hour') * 60 + al('minute');
 }
 
+/** #243 KK3: verilen anın IANA dilimindeki saati, "08:12". */
+export function yerelSaat(an: Date, tz: string): string {
+  const dk = yerelSaatDk(an, tz);
+  return `${String(Math.floor(dk / 60)).padStart(2, '0')}:${String(dk % 60).padStart(2, '0')}`;
+}
+
 /** Seyahat dilimindeki (tarih, gün başından dakika) → UTC an. DST kenarlarında bir düzeltme adımı yeter. */
 export function yerelAn(tarih: string, dk: number, tz: string): Date {
   const [y, a, g] = tarih.split('-').map(Number);

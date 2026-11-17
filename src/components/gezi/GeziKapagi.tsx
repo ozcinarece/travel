@@ -21,9 +21,11 @@ type Props = {
   onPaylas: () => void;
   onMenu: () => void;
   onGrup: () => void;
+  /** #243 KK4 (kanvas 23c): bağlantı yokken davet ve seyahat menüsü pasif (%40). */
+  cevrimdisi?: boolean;
 };
 
-export function GeziKapagi({ baslik, tarih, uyeler, cip, onKesfet, onPaylas, onMenu, onGrup }: Props) {
+export function GeziKapagi({ baslik, tarih, uyeler, cip, onKesfet, onPaylas, onMenu, onGrup, cevrimdisi = false }: Props) {
   const ust = useSafeAreaInsets().top;
   return (
     <View style={[s.kapak, { paddingTop: ust + 8 }]}>
@@ -37,10 +39,10 @@ export function GeziKapagi({ baslik, tarih, uyeler, cip, onKesfet, onPaylas, onM
           <Text style={s.geriMetin}>{t('geziSayfasi.geriKesfet')}</Text>
         </Pressable>
         <View style={{ flexDirection: 'row', gap: 8 }}>
-          <Pressable accessibilityRole="button" accessibilityLabel={t('geziSayfasi.paylas')} onPress={onPaylas} hitSlop={4} style={({ pressed }) => [s.kare, pressed && { opacity: 0.8 }]}>
+          <Pressable accessibilityRole="button" accessibilityLabel={t('geziSayfasi.paylas')} accessibilityState={{ disabled: cevrimdisi }} disabled={cevrimdisi} onPress={onPaylas} hitSlop={4} style={({ pressed }) => [s.kare, cevrimdisi && s.pasif, pressed && { opacity: 0.8 }]}>
             <Ikon ad="paylas" boyut={18} renk={renk.zemin} kalinlik={2.3} />
           </Pressable>
-          <Pressable accessibilityRole="button" accessibilityLabel={t('geziSayfasi.menu')} onPress={onMenu} hitSlop={4} style={({ pressed }) => [s.kare, pressed && { opacity: 0.8 }]}>
+          <Pressable accessibilityRole="button" accessibilityLabel={t('geziSayfasi.menu')} accessibilityState={{ disabled: cevrimdisi }} disabled={cevrimdisi} onPress={onMenu} hitSlop={4} style={({ pressed }) => [s.kare, cevrimdisi && s.pasif, pressed && { opacity: 0.8 }]}>
             <Ikon ad="daha" boyut={18} renk={renk.zemin} kalinlik={2.3} />
           </Pressable>
         </View>
@@ -78,6 +80,7 @@ const s = StyleSheet.create({
   ustSatir: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   geri: { height: 40, paddingLeft: 8, paddingRight: 14, borderRadius: 999, backgroundColor: BEYAZ_14, flexDirection: 'row', alignItems: 'center', gap: 4 },
   geriMetin: { fontFamily: yazi.baslik, fontSize: 15, color: renk.zemin },
+  pasif: { opacity: 0.4 },
   kare: { width: 40, height: 40, borderRadius: 12, backgroundColor: BEYAZ_14, alignItems: 'center', justifyContent: 'center' },
   baslikAlani: { marginTop: 22, gap: 6 },
   baslik: { fontFamily: yazi.baslik, fontSize: 34, lineHeight: 36, letterSpacing: -1, color: renk.zemin },

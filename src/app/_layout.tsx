@@ -14,6 +14,7 @@ import { GunlukSinir } from '@/features/yerler/api';
 import { t } from '@/i18n';
 import { renk, yazi } from '@/theme';
 import { acilisGecisi } from '@/lib/acilis';
+import { baglantiyiIzle } from '@/lib/baglanti';
 import { hataRaporunuBaslat, hataRaporuyla } from '@/lib/hataRaporu';
 import { kaliciSecenekler, profilKilitli, saklananlariAyarla } from '@/lib/kaliciOnbellek';
 import { OturumSaglayici, useOturum } from '@/lib/oturum';
@@ -25,6 +26,8 @@ SplashScreen.preventAutoHideAsync();
 const queryClient = new QueryClient({ defaultOptions: { queries: { retry: (n, e) => !(e instanceof GunlukSinir) && n < 3 } } });
 // #243 KK1: profil, seyahatler, günler, duraklar ve kendi içeriğimiz cihazda 7 gün tutulur (`src/lib/kaliciOnbellek.ts`).
 saklananlariAyarla(queryClient);
+// #243 KK3: bağlantı durumu sorgu sonuçlarından (NetInfo yok); geri gelince sorgular yenilenir.
+baglantiyiIzle(queryClient);
 
 function Kok() {
   // #136: Figtree (metin) + Archivo SemiExpanded 850 (başlık; Google Fonts değişken dosyasından üretilmiş statik örnek,

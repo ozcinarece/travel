@@ -8,6 +8,7 @@ import { KatilimSayfasi } from '@/components/davet/KatilimSayfasi';
 import { ProfilOnayi } from '@/components/davet/ProfilOnayi';
 import { mesafeM } from '@/components/harita/geo';
 import { BugunKarti } from '@/components/gezi/BugunKarti';
+import { CevrimdisiSeridi } from '@/components/gezi/CevrimdisiSeridi';
 import { GeziKapagi } from '@/components/gezi/GeziKapagi';
 import { GeziMenusu } from '@/components/gezi/GeziMenusu';
 import { SiradakiAdimSatiri } from '@/components/gezi/GeziParcalari';
@@ -52,10 +53,11 @@ import { useMesajlar, useOkunmamis, useOylamalar } from '@/features/sohbet/sorgu
 import { seyahatAdi } from '@/features/sihirbaz/sihirbaz';
 import type { HafifYer } from '@/features/yerler/api';
 import { t } from '@/i18n';
+import { useCevrimdisi } from '@/lib/baglanti';
 import { mesafeMetni } from '@/lib/mesafe';
 import { useOturum } from '@/lib/oturum';
 import type { Durak, Gun, Mekan, Seyahat, Yer } from '@/lib/tipler';
-import { kacinciGun, yerelTarih } from '@/lib/zaman';
+import { kacinciGun, yerelSaat, yerelTarih } from '@/lib/zaman';
 import { kestirimTaksiSn, kestirimYuruyusSn } from '@/schedule/tempo';
 import { gunRengi, renk, yazi } from '@/theme';
 
@@ -76,15 +78,45 @@ export default function GeziEkrani() {
   const duraklar = useDuraklar(id);
   const mekanlar = useMekanlar(id);
   const konaklamalar = useKonaklamalar(id);
-  if (!id || !seyahat.data || !gunler.data || !duraklar.data || !mekanlar.data || !konaklamalar.data) {
+  // #243: bağlantı yokken konaklamalar cihazda tutulmaz (stays.label, #250); sayfa onlarsız açılır.
+  const cevrimdisi = useCevrimdisi();
+  const konaklamaVerisi = konaklamalar.data ?? (cevrimdisi ? BOS_KONAKLAMA : undefined);
+  if (!id || !seyahat.data || !gunler.data || !duraklar.data || !mekanlar.data || !konaklamaVerisi) {
     return <SeyahatYukleme sorgular={[seyahat, gunler, duraklar, mekanlar, konaklamalar]} kimlikYok={!id} />;
   }
-  return <GeziSayfasi key={id} seyahat={seyahat.data} gunler={gunler.data} duraklar={duraklar.data} mekanlar={mekanlar.data} konaklamalar={konaklamalar.data} katildin={katildin === '1'} />;
+  // #243 KK3: son başarılı güncelleme — planın üç sorgusundan en yenisi (cihazdaki önbellekten geri yüklenen zaman dahil).
+  const guncellendi = Math.max(seyahat.dataUpdatedAt, gunler.dataUpdatedAt, duraklar.dataUpdatedAt);
+  return (
+    <GeziSayfasi
+      key={id}
+      seyahat={seyahat.data}
+      gunler={gunler.data}
+      duraklar={duraklar.data}
+      mekanlar={mekanlar.data}
+      konaklamalar={konaklamaVerisi}
+      katildin={katildin === '1'}
+      cevrimdisi={cevrimdisi}
+      guncellendi={guncellendi}
+    />
+  );
 }
 
-type SayfaProps = { seyahat: Seyahat; gunler: Gun[]; duraklar: Durak[]; mekanlar: Mekan[]; konaklamalar: Konaklama[]; katildin: boolean };
+const BOS_KONAKLAMA: Konaklama[] = [];
 
-function GeziSayfasi({ seyahat, gunler, duraklar, mekanlar, konaklamalar, katildin }: SayfaProps) {
+type SayfaProps = {
+  seyahat: Seyahat;
+  gunler: Gun[];
+  duraklar: Durak[];
+  mekanlar: Mekan[];
+  konaklamalar: Konaklama[];
+  katildin: boolean;
+  /** #243: bağlantı yok — şerit görünür, düzenleme düğmeleri pasif, Google içeriği gösterilmez. */
+  cevrimdisi: boolean;
+  /** Planın son başarılı güncellemesi (ms). */
+  guncellendi: number;
+};
+
+function GeziSayfasi({ seyahat, gunler, duraklar, mekanlar, konaklamalar, katildin, cevrimdisi, guncellendi }: SayfaProps) {
   const { session } = useOturum();
   const benId = session?.user.id ?? null;
   const uyeler = useUyeler(seyahat.id);
@@ -133,7 +165,8 @@ function GeziSayfasi({ seyahat, gunler, duraklar, mekanlar, konaklamalar, katild
   const bugunGun = mod === 'gezi' ? gunler.find((g) => g.index === bugunIndex) : undefined;
   // KK13: ag=false — yürüyüş matrisi ve rota bacakları istenmez; Plan açıldıysa önbellektekiler, yoksa kuş uçuşu kestirimi.
   const verisi = useProgramVerisi({ seyahat, gunler, duraklar, mekanlar, seciliGun: bugunGun, konaklamalar, ag: false });
-  const bilinen = useBilinenMekanlar(useMemo(() => mekanlar.map((m) => m.place_id), [mekanlar]));
+  // #243 KK5: çevrimdışıyken ad yalnız bizim içeriğimizden (yoksa kategori), fotoğraf yerine kategori ikonu.
+  const bilinen = useBilinenMekanlar(useMemo(() => mekanlar.map((m) => m.place_id), [mekanlar]), cevrimdisi);
   const mekanIle = useMemo(() => new Map(mekanlar.map((m) => [m.id, m])), [mekanlar]);
   const adiYaDaKategori = (mekanId: string) => {
     const m = mekanIle.get(mekanId);
@@ -321,6 +354,7 @@ function GeziSayfasi({ seyahat, gunler, duraklar, mekanlar, konaklamalar, katild
         onTumu={() => router.navigate({ pathname: '/seyahat/[id]/(sekmeler)/harcama', params: { id: seyahat.id } })}
         onEkle={() => setHarcamaFormu(true)}
         onBakiyeler={bakiyeler}
+        eklePasif={cevrimdisi}
       />
     ) : null;
   const sohbetKarti = mesajlar.data ? (
@@ -334,6 +368,7 @@ function GeziSayfasi({ seyahat, gunler, duraklar, mekanlar, konaklamalar, katild
       benId={benId}
       mekanAdi={(placeId) => bilinen.ad({ place_id: placeId }) ?? t('sohbet.mekan.birMekan')}
       onAc={sohbeteGit}
+      yanitPasif={cevrimdisi}
     />
   ) : null;
   const siraNo = (uid: string) => Math.max(0, uyeListesi.findIndex((u) => u.user_id === uid));
@@ -351,8 +386,10 @@ function GeziSayfasi({ seyahat, gunler, duraklar, mekanlar, konaklamalar, katild
           onPaylas={davet.paylas}
           onMenu={() => setMenuAcik(true)}
           onGrup={() => setGrupAcik(true)}
+          cevrimdisi={cevrimdisi}
         />
         <View style={[s.icerik, mod === 'gezi' && s.icerikGezi]}>
+          {cevrimdisi ? <CevrimdisiSeridi saat={guncellendi > 0 ? yerelSaat(new Date(guncellendi), seyahat.tz) : null} /> : null}
           {hatirlatmaVakti(seyahat, an) && mod !== 'plan' ? <HatirlatmaSatiri ozet={hOzet} k={kisiler} ibanlar={ibanlar.data} onBakiyeler={bakiyeler} /> : null}
           {mod === 'gezi' ? (
             <>
@@ -369,8 +406,9 @@ function GeziSayfasi({ seyahat, gunler, duraklar, mekanlar, konaklamalar, katild
                 onHarita={() => plan({ gun: String(bugunGun?.index ?? 1), harita: '1' })}
                 onMenu={setDurakMenu}
                 onPlan={() => plan({ gun: String(bugunGun?.index ?? 1) })}
+                menuPasif={cevrimdisi}
               />
-              <GrupKarti durumlar={grup} sira={siraNo} mekanAdi={adiYaDaKategori} an={an} onSeyahattekiler={() => setGrupAcik(true)} onMesajAt={sohbeteGit} />
+              <GrupKarti durumlar={grup} sira={siraNo} mekanAdi={adiYaDaKategori} an={an} onSeyahattekiler={() => setGrupAcik(true)} onMesajAt={sohbeteGit} mesajPasif={cevrimdisi} />
               {harcamaKarti}
               {sohbetKarti}
             </>
