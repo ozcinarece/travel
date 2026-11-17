@@ -719,6 +719,7 @@
     "kartEtiket": "{sehir}, {gun} gün, {durak} durak, Tripmate gezisi",
     "rotaEtiket": "Rota: {gunler}",
     "rotaGun": "{gun}. gün {durak} durak",
+    "dahaFazlaDurak": "+{n}",
     "paylasEtiket": "WhatsApp’ta paylaş",
     "whatsapp": "WhatsApp",
     "seyahatimeAl": "Seyahatime al",

@@ -39,7 +39,7 @@ export function KesfetKarti({ gezi, sira, onAc, onPaylas, onAl }: Props) {
         <View style={[s.kapak, { backgroundColor: ZEMINLER[sira % ZEMINLER.length] }]}>
           {gezi.kapak_url ? <Image source={{ uri: gezi.kapak_url }} style={StyleSheet.absoluteFill} contentFit="cover" transition={150} /> : null}
           <View style={s.rozet}>
-            <Logo boyut={20} koyuZemin />
+            <Logo boyut={20} koyuZemin kesik />
             <Text style={s.rozetMetin}>{t('kesfetAkisi.tripmate')}</Text>
           </View>
         </View>
@@ -56,10 +56,11 @@ export function KesfetKarti({ gezi, sira, onAc, onPaylas, onAl }: Props) {
         </View>
       </Pressable>
       <View style={s.eylemler}>
+        {/* #287 KK3: aç/kapa düğmesi (kanvas aria-pressed) — ekran okuyucu "Kaydet, açık/kapalı" der. */}
         <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={kayitli ? t('gezi.kaydedildi') : t('gezi.kaydet')}
-          accessibilityState={{ selected: kayitli }}
+          accessibilityRole="togglebutton"
+          accessibilityLabel={t('gezi.kaydet')}
+          accessibilityState={{ checked: kayitli }}
           onPress={() => kaydet.mutate({ tur: 'gezi', hedef_id: gezi.id, kayitli })}
           style={({ pressed }) => [s.kalp, kayitli && s.kalpDolu, pressed && s.basili]}>
           <Svg width={20} height={20} viewBox="0 0 24 24" fill={kayitli ? renk.vurgu : 'none'} stroke={kayitli ? renk.vurgu : renk.ana} strokeWidth={kayitli ? 2.2 : 2.4} strokeLinejoin="round">
@@ -80,6 +81,11 @@ export function KesfetKarti({ gezi, sira, onAc, onPaylas, onAl }: Props) {
   );
 }
 
+/** #287 KK4: bir günde bundan fazla durak varsa halkalar taşmasın diye kısaltılır… */
+const HALKA_SINIRI = 10;
+/** …ve en çok bu kadar halka + "+N" gösterilir. */
+const EN_COK_HALKA = 8;
+
 /** Gün renkli küçük rota şeridi: gün numarası karosu + o günün durak sayısı kadar halka; genişlik durak sayısıyla orantılı. */
 export function RotaSeridi({ gunler }: { gunler: number[] }) {
   const dolu = gunler.filter((n) => n > 0);
@@ -92,17 +98,20 @@ export function RotaSeridi({ gunler }: { gunler: number[] }) {
       {gunler.map((n, i) => {
         if (n === 0) return null;
         const r = gunRengi(i + 1);
+        const halka = n > HALKA_SINIRI ? EN_COK_HALKA : n;
+        const kalan = n - halka;
         return (
-          <View key={i} style={[s.rotaGun, { flex: n }]}>
+          <View key={i} style={[s.rotaGun, { flex: halka }]}>
             <View style={[s.gunKaro, { backgroundColor: r }]}>
               <Text style={[s.gunNo, { color: gunUstuMetin(r) }]}>{i + 1}</Text>
             </View>
             <View style={s.hat}>
               <View style={[s.cizgi, { backgroundColor: r }]} />
-              {Array.from({ length: n }, (_, k) => (
-                <View key={k} style={[s.halka, { borderColor: r }]} />
+              {Array.from({ length: halka }, (_, k) => (
+                <View key={k} testID="rota-halka" style={[s.halka, { borderColor: r }]} />
               ))}
             </View>
+            {kalan > 0 ? <Text style={s.kalan}>{t('kesfetAkisi.dahaFazlaDurak', { n: kalan })}</Text> : null}
           </View>
         );
       })}
@@ -194,6 +203,7 @@ const s = StyleSheet.create({
     justifyContent: 'center',
   },
   gunNo: { fontFamily: yazi.ekstra, fontSize: 11 },
+  kalan: { fontFamily: yazi.ekstra, fontSize: 11, color: renk.ikincil },
   hat: {
     flexGrow: 1,
     height: 10,
@@ -237,13 +247,14 @@ const s = StyleSheet.create({
   paylasMetin: { fontFamily: yazi.ekstra, fontSize: 14, color: renk.ana },
   al: {
     flexGrow: 1,
-    height: 44,
+    minHeight: 44,
+    paddingVertical: 10,
     borderRadius: 12,
     backgroundColor: renk.vurgu,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  alMetin: { fontFamily: yazi.ekstra, fontSize: 14, color: renk.metin },
+  alMetin: { fontFamily: yazi.ekstra, fontSize: 14, color: renk.metin, textAlign: 'center' },
   kendi: {
     borderRadius: kose.kart,
     borderWidth: 1.5,
