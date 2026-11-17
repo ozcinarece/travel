@@ -1,5 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
+import { router, useFocusEffect, useLocalSearchParams, useNavigationContainerRef } from 'expo-router';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Linking, ScrollView, StyleSheet, Text, View } from 'react-native';
 
@@ -25,6 +25,7 @@ import { SeyahatYukleme } from '@/components/seyahatler/SeyahatYukleme';
 import { useDavetPaylas } from '@/features/davet/paylas';
 import { useBilinenMekanlar } from '@/features/gezi/bilinenMekanlar';
 import { durumCipi, geziModu, grupDurumlari, gunKartlari, gunTarihi, listemOnizlemesi, mekanAdi, rehberOnerileri, tarihSatiri } from '@/features/gezi/geziOzeti';
+import { kesfeteDon } from '@/lib/acilis';
 import { siradakiAdim, type SiradakiAdim } from '@/features/gezi/siradakiAdim';
 import { useDuragaAta, useDuraklar, useGunler } from '@/features/gunler/sorgular';
 import { harcamaOzeti, hatirlatmaVakti } from '@/features/harcama/hesap';
@@ -126,6 +127,7 @@ function GeziSayfasi({ seyahat, gunler, duraklar, mekanlar, konaklamalar, katild
   );
 
   const an = useSimdi(true);
+  const kokGezinme = useNavigationContainerRef();
   const mod = geziModu(seyahat, an);
   const bugunIndex = kacinciGun(seyahat, an);
   const bugunGun = mod === 'gezi' ? gunler.find((g) => g.index === bugunIndex) : undefined;
@@ -345,7 +347,7 @@ function GeziSayfasi({ seyahat, gunler, duraklar, mekanlar, konaklamalar, katild
           tarih={tarihSatiri(seyahat, gunler.length)}
           uyeler={uyeListesi}
           cip={durumCipi(seyahat, an)}
-          onKesfet={() => router.dismissTo('/(tabs)')}
+          onKesfet={() => kesfeteDon(kokGezinme.getRootState() as Parameters<typeof kesfeteDon>[0])}
           onPaylas={davet.paylas}
           onMenu={() => setMenuAcik(true)}
           onGrup={() => setGrupAcik(true)}

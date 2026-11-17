@@ -21,7 +21,8 @@ export function GecmisSatiri({ seyahat, durum, onPress, onUzunBas, onTekrar, sir
   if (seyahat.members.length > 1) parcalar.push(kisiMetni(seyahat.members.length));
   return (
     <Pressable accessibilityRole="button" onPress={onPress} onLongPress={onUzunBas} style={({ pressed }) => [s.gecmis, pressed && { opacity: 0.85 }]}>
-      <View style={[s.karo, { backgroundColor: KARO_ZEMINLERI[(sira + 1) % KARO_ZEMINLERI.length] }]}>
+      {/* #276 KK-ek2 (kanvas 29d): GEÇMİŞ ilk satırı #FFE2CC'den başlar. */}
+      <View style={[s.karo, { backgroundColor: KARO_ZEMINLERI[sira % KARO_ZEMINLERI.length] }]}>
         <Text style={s.harf}>{seyahat.city_label.trim().charAt(0).toLocaleUpperCase('tr')}</Text>
       </View>
       <View style={{ flex: 1, minWidth: 0 }}>
@@ -46,7 +47,8 @@ export function YaklasanSatiri({ seyahat, onPress, onUzunBas, sira }: Omit<Ortak
   if (tarih && seyahat.members.length > 1) parcalar.push(kisiMetni(seyahat.members.length));
   return (
     <Pressable accessibilityRole="button" onPress={onPress} onLongPress={onUzunBas} style={({ pressed }) => [s.gecmis, pressed && { opacity: 0.85 }]}>
-      <View style={[s.karo, { backgroundColor: KARO_ZEMINLERI[(sira + 1) % KARO_ZEMINLERI.length] }]}>
+      {/* #276 KK-ek2 (kanvas 29d): tarihli satır #DCE6FF'den başlar, taslak `renk.yuzey`. */}
+      <View style={[s.karo, { backgroundColor: tarih ? KARO_ZEMINLERI[(sira + 1) % KARO_ZEMINLERI.length] : renk.yuzey }]}>
         <Text style={s.harf}>{seyahat.city_label.trim().charAt(0).toLocaleUpperCase('tr')}</Text>
       </View>
       <View style={{ flex: 1, minWidth: 0 }}>

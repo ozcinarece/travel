@@ -13,7 +13,7 @@ import { KesfetHapi } from '@/components/ui/KesfetHapi';
 import { KisaBildirim, useKisaBildirim } from '@/components/ui/KisaBildirim';
 import { cikis } from '@/features/auth/giris';
 import { useProfil, useProfilGuncelle } from '@/features/profil/sorgular';
-import { siniflandir } from '@/features/seyahatler/siniflandir';
+import { biten, bitmemis, siniflandir } from '@/features/seyahatler/siniflandir';
 import { useSeyahatler } from '@/features/seyahatler/sorgular';
 import { t } from '@/i18n';
 import { sonHatayiOku, sonHatayiSil, type SonHata } from '@/lib/izler';
@@ -36,10 +36,11 @@ export default function ProfilEkrani() {
   const parametre = useLocalSearchParams<{ sekme?: string }>();
   const [sekme, setSekme] = useState<'gezilerim' | 'ayarlar'>(parametre.sekme === 'ayarlar' ? 'ayarlar' : 'gezilerim');
   const seyahatler = useSeyahatler();
-  // Bitmemiş = bugün süren + gelecekteki + tarihsiz taslak; sorgu sırası tarihe göre artan, tarihsizler sonda.
+  // Bitmemiş = bugün süren + yaklaşan + planlanan (tarihsiz taslak dahil); tarih sırası, taslaklar sonda.
+  // #276 KK1: GEÇMİŞ = yeniBiten + geçmiş (seyahat bitişin ertesi günü iner, kanvas 29d).
   const { yaklasan, gecmis } = useMemo(() => {
-    const { aktif, yaklasan: gelecek, gecmis: biten } = siniflandir(seyahatler.data ?? []);
-    return { yaklasan: [...aktif, ...gelecek], gecmis: biten };
+    const sinif = siniflandir(seyahatler.data ?? []);
+    return { yaklasan: bitmemis(sinif), gecmis: biten(sinif) };
   }, [seyahatler.data]);
   // Profil yığında açıkken /seyahatler?sekme=… ile yeniden gelinirse sekme parametreye uyar (parametre değişince, render
   // sırasında ayarlanır; efektte setState lint kuralına takılır).

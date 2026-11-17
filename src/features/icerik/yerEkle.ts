@@ -1,7 +1,7 @@
 // #97 A KK6: tek yer "+" → yaklaşan (ya da aktif) seyahatin listesine; birden çok aday varsa ekran seçtirir.
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
-import { siniflandir } from '@/features/seyahatler/siniflandir';
+import { bitmemis, siniflandir } from '@/features/seyahatler/siniflandir';
 import { useOturum } from '@/lib/oturum';
 import { supabase } from '@/lib/supabase';
 import { varsayilanDakika } from '@/lib/kategori';
@@ -12,9 +12,7 @@ import { olayYaz } from './sorgular';
 /** Hedef adayları: aktif + yaklaşan (#143: en erken başlayan önce, tarihsizler sonda). */
 export function hedefSeyahatler(liste: SeyahatOzet[] | undefined): SeyahatOzet[] {
   if (!liste) return [];
-  const { aktif, yaklasan } = siniflandir(liste);
-  const tarih = (s: SeyahatOzet) => s.start_date ?? '9999-12-31';
-  return [...aktif, ...[...yaklasan].sort((a, b) => (tarih(a) < tarih(b) ? -1 : tarih(a) > tarih(b) ? 1 : 0))];
+  return bitmemis(siniflandir(liste));
 }
 
 /** Seyahatin şehir etiketi ("Eskişehir" / "Eskişehir, Türkiye") içerik şehriyle aynı mı. */

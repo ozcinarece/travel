@@ -25,6 +25,7 @@ jest.mock('expo-router', () => ({
   useGlobalSearchParams: () => ({}),
   // eslint-disable-next-line @typescript-eslint/no-require-imports
   useFocusEffect: (cb: () => void) => require('react').useEffect(cb, [cb]),
+  useNavigationContainerRef: () => ({ getRootState: () => undefined }),
 }));
 
 type Tablolar = Record<string, unknown[]>;

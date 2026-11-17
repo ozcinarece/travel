@@ -14,9 +14,11 @@ import { bekleyenDavetiOku, bekleyenDavetiSil, useDavetKarsilama, useDavetKarsil
 import { useGeziler } from '@/features/icerik/sorgular';
 import { hedefSeyahatler } from '@/features/icerik/yerEkle';
 import { useProfil } from '@/features/profil/sorgular';
+import { acilisDurumu } from '@/features/seyahatler/siniflandir';
 import { useSeyahatler } from '@/features/seyahatler/sorgular';
 import { gunFarki, seyahatAdi } from '@/features/sihirbaz/sihirbaz';
 import { t } from '@/i18n';
+import { acilisKarariAl, acilisKarariniKapat } from '@/lib/acilis';
 import { useOturum } from '@/lib/oturum';
 import { tarihAraligi } from '@/lib/takvim';
 import type { SeyahatOzet } from '@/lib/tipler';
@@ -30,6 +32,7 @@ import { bosluk, kose, olcek, renk, yazi } from '@/theme';
  * #137: giriş öncesi görülen davet → /r/{token}; web'de katılıp uygulamayı ilk açan → doğrudan seyahat.
  * #275 (kanvas 29a): alt menü yok. Üst çubukta sağda Ara · ♥ Kaydettiklerim · Profil (44 px, köşe 14); altta yüzen
  * [+ Yeni seyahat]. Seyahat silinip buraya dönülünce kısa bildirim.
+ * #276 KK2: açılış kuralı — gezi günündeki kullanıcı oturumda bir kez doğrudan Gezi sayfasına iner (`src/lib/acilis.ts`).
  */
 export default function AnaSayfa() {
   const profil = useProfil();
@@ -59,6 +62,7 @@ export default function AnaSayfa() {
   if (karsilama.data && karsilanan !== karsilama.data.trip_id) setKarsilanan(karsilama.data.trip_id);
   useEffect(() => {
     if (!karsilanan) return;
+    acilisKarariniKapat();
     bekleyenDavetiSil();
     karsilandi(karsilanan).then(() => {
       // #181 KK14: davetle gelen doğrudan Gezi sayfasına iner.
@@ -66,6 +70,18 @@ export default function AnaSayfa() {
       setKarsilanan(null);
     });
   }, [karsilanan, karsilandi]);
+
+  // #276 KK2 · KK5: davet akışı bittikten (ya da hiç yokken) ve seyahatler gelince bir kez karar verilir. Gezi günündeki
+  // kullanıcı doğrudan o seyahatin Gezi sayfasına iner (altında Keşfet kalır, "‹ Keşfet" buraya döner). Karar bu oturumda bir
+  // kez verilir: Keşfet'e dönen kullanıcı uygulama ön plana gelince tekrar seyahate atılmaz.
+  const davetBitti = bekleyenDavet === null && !karsilamaBekleniyor && !karsilanan && !karsilama.data;
+  const acilisSeyahati = davetBitti && seyahatler.data ? acilisDurumu(seyahatler.data) : null;
+  const aktifSeyahatId = acilisSeyahati?.tur === 'aktif' ? acilisSeyahati.seyahat.id : null;
+  const acilisHazir = acilisSeyahati !== null || (davetBitti && seyahatler.isError);
+  useEffect(() => {
+    if (!acilisHazir || !acilisKarariAl() || !aktifSeyahatId) return;
+    router.push({ pathname: '/seyahat/[id]/(sekmeler)/gezi', params: { id: aktifSeyahatId } });
+  }, [acilisHazir, aktifSeyahatId]);
 
   if (bekleyenDavet === undefined || karsilamaBekleniyor || karsilanan) {
     return (
