@@ -15,6 +15,14 @@ export function acilisKarariAl(): boolean {
   return true;
 }
 
+/** Açılış kararı bu oturumda hâlâ verilebilir mi (bayrak açık mı). */
+export function acilisKarariAcik(): boolean {
+  return !acilisKarariVerildi;
+}
+
+/** Açılışta seyahat listesi beklenirken yükleniyor göstergesi en çok bu kadar kalır; sonra Keşfet açılır (#283 inceleme 2). */
+export const ACILIS_BEKLEME_MS = 1500;
+
 /** Ana ekran açılış kararını beklemeden kurulduysa (ör. davet akışı önce geldi) kural bu oturumda artık işlemez. */
 export function acilisKarariniKapat() {
   acilisKarariVerildi = true;
@@ -47,7 +55,18 @@ function sekmeYiginiDerin(kok: Yigin): boolean {
  * gezinme durumu (`useNavigationContainerRef().getRootState()`).
  */
 export function kesfeteDon(kok: Yigin) {
+  // Kullanıcı Keşfet'e kendisi döndü: bu oturumda açılış kuralı artık işlemez (ana ekran yeniden kurulsa da Gezi'ye atılmaz).
+  acilisKarariniKapat();
   const derin = sekmeYiginiDerin(kok);
   router.dismissTo('/(tabs)');
   if (derin) router.dismissAll();
+}
+
+/**
+ * #283 inceleme 2 · 2: kök yığındaki `seyahat/[id]` rotasına açılış kuralıyla mı gelindi (`acilis=1`). Expo Router iç ekranın
+ * parametrelerini kök rotada `params` altında taşır; ikisine de bakılır.
+ */
+export function acilisGecisi(p: unknown): boolean {
+  const r = p as { acilis?: string; params?: { acilis?: string } } | undefined;
+  return r?.acilis === '1' || r?.params?.acilis === '1';
 }

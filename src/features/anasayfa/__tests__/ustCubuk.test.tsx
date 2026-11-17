@@ -21,6 +21,7 @@ let mockParametre: { bildirim?: string } = {};
 jest.mock('expo-router', () => ({
   router: { push: jest.fn(), navigate: jest.fn(), replace: jest.fn(), setParams: jest.fn() },
   useLocalSearchParams: () => mockParametre,
+  useFocusEffect: () => undefined,
 }));
 const { router } = jest.requireMock<{ router: Record<'push', jest.Mock> }>('expo-router');
 

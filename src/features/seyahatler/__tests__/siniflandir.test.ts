@@ -113,6 +113,14 @@ describe('acilisDurumu (#276 KK2)', () => {
     expect(acilisDurumu([sy('b', '2026-10-25', '2026-10-26'), sy('a', '2026-10-16', '2026-10-17')], an)).toMatchObject({ seyahat: { id: 'a' } });
   });
 
+  it('birden çok aktif seyahatte en geç başlayan açılır (uzun seyahatin içindeki hafta sonu gezisi öne geçer)', () => {
+    const uzun = sy('uzun', '2026-10-01', '2026-10-31');
+    const hafta = sy('hafta', '2026-10-12', '2026-10-14');
+    expect(idler(siniflandir([uzun, hafta], an).aktif)).toEqual(['hafta', 'uzun']);
+    expect(acilisDurumu([uzun, hafta], an)).toMatchObject({ tur: 'aktif', seyahat: { id: 'hafta' } });
+    expect(acilisDurumu([hafta, uzun], an)).toMatchObject({ tur: 'aktif', seyahat: { id: 'hafta' } });
+  });
+
   it('yalnız eski seyahat varsa eski (Keşfet, seyahat Gezilerim’de)', () => {
     expect(acilisDurumu([sy('l', '2026-03-01', '2026-03-05')], an)).toEqual({ tur: 'eski' });
   });

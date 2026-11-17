@@ -12,7 +12,7 @@ function gunArasi(a: string, b: string): number {
 }
 
 export type Siniflar = {
-  /** Bugün [gidiş, dönüş] aralığında (gezi günü). */
+  /** Bugün [gidiş, dönüş] aralığında (gezi günü); en geç başlayan önce (uzun seyahatin içine düşen kısa gezi öne geçer). */
   aktif: SeyahatOzet[];
   /** Tarihli ve başlangıca ≤ 14 gün; en yakın önce. */
   yaklasan: SeyahatOzet[];
@@ -29,6 +29,7 @@ const artan = (a: SeyahatOzet, b: SeyahatOzet) => {
   const y = b.start_date ?? '9999-12-31';
   return x < y ? -1 : x > y ? 1 : 0;
 };
+const azalan = (a: SeyahatOzet, b: SeyahatOzet) => -artan(a, b);
 const yenidenEskiye = (a: SeyahatOzet, b: SeyahatOzet) => (a.end_date! > b.end_date! ? -1 : a.end_date! < b.end_date! ? 1 : 0);
 
 /**
@@ -44,6 +45,7 @@ export function siniflandir(liste: SeyahatOzet[], an = new Date()): Siniflar {
     else if (sy.start_date && gunArasi(bugun, sy.start_date) <= YAKLASAN_GUN) s.yaklasan.push(sy);
     else s.planlanan.push(sy);
   }
+  s.aktif.sort(azalan);
   s.yaklasan.sort(artan);
   s.planlanan.sort(artan);
   s.yeniBiten.sort(yenidenEskiye);
@@ -67,7 +69,7 @@ export type AcilisDurumu =
   | { tur: 'eski' };
 
 /**
- * #276 KK2: açılış durumu. Öncelik aktif > yaklaşan (en yakın) > yeniBiten (en yeni) > planlanan (en yakın; tarihsiz sonda).
+ * #276 KK2: açılış durumu. Öncelik aktif (en geç başlayan) > yaklaşan (en yakın) > yeniBiten (en yeni) > planlanan (en yakın; tarihsiz sonda).
  * Seyahat hiç yoksa `yok` (29a), yalnız eski seyahatler varsa `eski` (Keşfet, seyahat Profil › Gezilerim'de).
  */
 export function acilisDurumu(liste: SeyahatOzet[], an = new Date()): AcilisDurumu {

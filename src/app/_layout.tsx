@@ -12,6 +12,7 @@ import { useProfil, useProfilHazirla } from '@/features/profil/sorgular';
 import { GunlukSinir } from '@/features/yerler/api';
 import { t } from '@/i18n';
 import { renk, yazi } from '@/theme';
+import { acilisGecisi } from '@/lib/acilis';
 import { hataRaporunuBaslat, hataRaporuyla } from '@/lib/hataRaporu';
 import { OturumSaglayici, useOturum } from '@/lib/oturum';
 
@@ -85,7 +86,8 @@ function Kok() {
         <Stack.Screen name="hesap-sil" />
         {/* #98: yalnız sihirbaz / günün oteli "Haritadan" seçimi (secim=1); 3.3 tek başına akış kalktı. */}
         <Stack.Screen name="yeni/otel" />
-        <Stack.Screen name="seyahat/[id]" />
+        {/* #283 inceleme 2 · 2: açılış kuralının Gezi'ye geçişi (`acilis=1`) animasyonsuz. */}
+        <Stack.Screen name="seyahat/[id]" options={({ route }) => ({ animation: acilisGecisi(route.params) ? 'none' : 'default' })} />
         {/* #97: ana sayfa içerik rotaları. */}
         <Stack.Screen name="ara" />
         <Stack.Screen name="geziler" />

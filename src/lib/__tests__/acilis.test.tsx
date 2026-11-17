@@ -5,7 +5,7 @@ import { act } from '@testing-library/react-native';
 import { renderRouter } from 'expo-router/testing-library';
 import { Text } from 'react-native';
 
-import { acilisKarariAl, acilisKarariniKapat, acilisKarariniSifirla, kesfeteDon } from '../acilis';
+import { acilisGecisi, acilisKarariAcik, acilisKarariAl, acilisKarariniKapat, acilisKarariniSifirla, kesfeteDon } from '../acilis';
 
 jest.mock('react-native-safe-area-context', () => jest.requireActual<{ default: object }>('react-native-safe-area-context/jest/mock').default);
 
@@ -39,6 +39,15 @@ describe('kesfeteDon (#276 KK-ek1)', () => {
     expect(icYigin(e)).toEqual({ kok: ['(tabs)'], ic: ['index'] });
   });
 
+  it('"‹ Keşfet" açılış kararını kapatır: ana ekran yeniden kurulsa da Gezi\'ye atılmaz (#283 inceleme 2 · 1)', () => {
+    acilisKarariniSifirla();
+    const e = kur();
+    act(() => router.push({ pathname: '/seyahat/[id]', params: { id: 'a' } } as never));
+    act(() => kesfeteDon(e.getRouterState() as never));
+    expect(acilisKarariAcik()).toBe(false);
+    expect(acilisKarariAl()).toBe(false);
+  });
+
   it('Keşfet → seyahat → "‹ Keşfet": ana ekran', () => {
     const e = kur();
     act(() => router.push({ pathname: '/seyahat/[id]', params: { id: 'a' } } as never));
@@ -56,5 +65,14 @@ describe('açılış kararı (#276 KK2)', () => {
     acilisKarariniSifirla();
     acilisKarariniKapat();
     expect(acilisKarariAl()).toBe(false);
+  });
+});
+
+describe('acilisGecisi (#283 inceleme 2 · 2)', () => {
+  it('kök rotada iç parametrelerden de okunur', () => {
+    expect(acilisGecisi({ id: 'a', screen: '(sekmeler)', params: { id: 'a', acilis: '1' } })).toBe(true);
+    expect(acilisGecisi({ id: 'a', acilis: '1' })).toBe(true);
+    expect(acilisGecisi({ id: 'a', screen: '(sekmeler)', params: { id: 'a' } })).toBe(false);
+    expect(acilisGecisi(undefined)).toBe(false);
   });
 });
