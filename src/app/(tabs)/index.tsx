@@ -6,15 +6,17 @@ import Svg, { Path } from 'react-native-svg';
 
 import { IlkSeyahatKarti, YaklasanKart } from '@/components/icerik/AnaSayfaKartlari';
 import { GeziKarti } from '@/components/icerik/GeziKarti';
+import { KesfetAkisi } from '@/components/icerik/KesfetAkisi';
 import { Avatar } from '@/components/ui/Avatar';
 import { Ikon } from '@/components/ui/Ikon';
 import { KisaBildirim, useGelenBildirim } from '@/components/ui/KisaBildirim';
 import { LogoYazi } from '@/components/ui/Logo';
 import { bekleyenDavetiOku, bekleyenDavetiSil, useDavetKarsilama, useDavetKarsilandi } from '@/features/davet/sorgular';
+import { kesfetAkisiAcik } from '@/features/icerik/kesfetAkisi';
 import { useGeziler } from '@/features/icerik/sorgular';
 import { hedefSeyahatler } from '@/features/icerik/yerEkle';
 import { useProfil } from '@/features/profil/sorgular';
-import { acilisDurumu } from '@/features/seyahatler/siniflandir';
+import { acilisDurumu, siniflandir } from '@/features/seyahatler/siniflandir';
 import { useSeyahatler } from '@/features/seyahatler/sorgular';
 import { gunFarki, seyahatAdi } from '@/features/sihirbaz/sihirbaz';
 import { t } from '@/i18n';
@@ -118,6 +120,9 @@ export default function AnaSayfa() {
   // Yüzen düğme ekranın altından 28 px (kanvas 29a); ana çubuk (home indicator) varsa onun 8 px üstü.
   const yuzenAlt = Math.max(28, altBosluk + 8);
   const geziAc = (slug: string) => router.push({ pathname: '/gezi/[slug]', params: { slug } });
+  // #277 KK3 · KK6: akış bayrağı ve yaklaşan seyahatin (≤ 14 gün) şehri; o şehrin gezileri önde.
+  const akisAcik = kesfetAkisiAcik();
+  const akisSehri = seyahatler.data ? (siniflandir(seyahatler.data).yaklasan[0]?.city_label ?? null) : null;
 
   return (
     <SafeAreaView style={s.ekran} edges={['top']}>
@@ -149,7 +154,9 @@ export default function AnaSayfa() {
             <View style={s.kenar}>
               <IlkSeyahatKarti baslik={t('anasayfa.ilkBaslik')} onPress={yeni} />
             </View>
-            {gezilerListe.length > 0 ? (
+            {akisAcik ? (
+              <KesfetAkisi sehir={null} onYeni={yeni} />
+            ) : gezilerListe.length > 0 ? (
               <View style={s.bolum}>
                 <View style={{ gap: 2, paddingHorizontal: bosluk.kenar }}>
                   <Text style={s.bolumBaslik}>{t('anasayfa.haziraBaslik')}</Text>
@@ -184,28 +191,33 @@ export default function AnaSayfa() {
               ) : null}
             </View>
 
-            <View style={s.bolum}>
-              <View style={s.bolumSatir}>
-                <Text style={s.bolumBaslik}>{t('anasayfa.geziler')}</Text>
-                <Pressable accessibilityRole="button" onPress={() => router.push('/geziler')} hitSlop={8}>
-                  <Text style={s.tumu}>{t('anasayfa.tumu')}</Text>
-                </Pressable>
-              </View>
-              {gezilerListe[0] ? (
-                <View style={s.kenar}>
-                  <GeziKarti gezi={gezilerListe[0]} buyuk kalp onPress={() => geziAc(gezilerListe[0].slug)} />
+            {akisAcik ? (
+              // #277 KK6: bayrak açıkken bugünkü hazır geziler bölümü yerine Keşfet akışı.
+              <KesfetAkisi sehir={akisSehri} onYeni={yeni} />
+            ) : (
+              <View style={s.bolum}>
+                <View style={s.bolumSatir}>
+                  <Text style={s.bolumBaslik}>{t('anasayfa.geziler')}</Text>
+                  <Pressable accessibilityRole="button" onPress={() => router.push('/geziler')} hitSlop={8}>
+                    <Text style={s.tumu}>{t('anasayfa.tumu')}</Text>
+                  </Pressable>
                 </View>
-              ) : (
-                <Text style={[s.bolumAlt, s.kenar]}>{t('anasayfa.bos')}</Text>
-              )}
-              {gezilerListe.length > 1 ? (
-                <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={s.serit}>
-                  {gezilerListe.slice(1).map((g, i) => (
-                    <GeziKarti key={g.id} gezi={g} sira={i + 1} onPress={() => geziAc(g.slug)} />
-                  ))}
-                </ScrollView>
-              ) : null}
-            </View>
+                {gezilerListe[0] ? (
+                  <View style={s.kenar}>
+                    <GeziKarti gezi={gezilerListe[0]} buyuk kalp onPress={() => geziAc(gezilerListe[0].slug)} />
+                  </View>
+                ) : (
+                  <Text style={[s.bolumAlt, s.kenar]}>{t('anasayfa.bos')}</Text>
+                )}
+                {gezilerListe.length > 1 ? (
+                  <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={s.serit}>
+                    {gezilerListe.slice(1).map((g, i) => (
+                      <GeziKarti key={g.id} gezi={g} sira={i + 1} onPress={() => geziAc(g.slug)} />
+                    ))}
+                  </ScrollView>
+                ) : null}
+              </View>
+            )}
           </>
         )}
       </ScrollView>

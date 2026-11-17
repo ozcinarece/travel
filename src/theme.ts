@@ -21,6 +21,8 @@ export const renk = {
   anaAcik: '#c9d2f2',
   /** Mandalina — vurgu: Yeni düğmesi, rozet, sıradaki durak, Listeye ekle. Üstünde yazı Lacivert. */
   vurgu: '#ff7a1a',
+  /** Açık Mandalina: kaydedilmiş kalp düğmesinin zemini (kanvas 29b). */
+  vurguZemin: '#fff1e6',
   uyari: '#d93a2b',
   uyariZemin: '#fbe7e4',
   /** Başarı: Listede ✓ zemini / ikon metni. */
