@@ -29,6 +29,7 @@ import {
   SLUG,
   yuklemeVerisi,
 } from './dogrula.mjs';
+import { OverpassHatasi, overpassBirKez, overpassYeniden, SureBittiHatasi } from './overpass.mjs';
 import { derAl, sifrele } from './sifre.mjs';
 
 const ortam = process.env;
@@ -320,8 +321,6 @@ async function arastir() {
 
 /** OSM etiketlerinden yalnız aday seçimine yarayanlar (ODbL; atıf: © OpenStreetMap katkıcıları). */
 const OSM_ETIKETLERI = ['name', 'name:tr', 'name:en', 'tourism', 'historic', 'amenity', 'leisure', 'religion', 'cuisine', 'opening_hours', 'wikipedia', 'wikidata', 'website', 'heritage'];
-const OVERPASS = ['https://overpass-api.de/api/interpreter', 'https://overpass.kumi.systems/api/interpreter'];
-
 export function overpassSorgusu({ lat, lng }, yaricap) {
   const a = `(around:${Math.round(yaricap)},${lat},${lng})`;
   return `[out:json][timeout:90];
@@ -335,36 +334,16 @@ export function overpassSorgusu({ lat, lng }, yaricap) {
 out center tags;`;
 }
 
-/** Overpass sorgusu (sunucular sırayla denenir). Google'a gidilmez. */
+/** Overpass sorgusu (sunucular sırayla, her istek 120 sn ile sınırlı; `overpass.mjs`). Google'a gidilmez. */
 async function overpass(sorgu) {
-  for (const url of OVERPASS) {
-    try {
-      const cevap = await fetch(url, {
-        method: 'POST',
-        headers: { 'content-type': 'application/x-www-form-urlencoded', 'user-agent': 'tripmate-icerik-hatti (github.com/ozcinarece/travel)' },
-        body: new URLSearchParams({ data: sorgu }),
-      });
-      if (cevap.ok) return await cevap.json();
-    } catch {
-      // sıradaki sunucu
-    }
+  try {
+    return await overpassBirKez(sorgu);
+  } catch (e) {
+    throw new HatHatasi(e instanceof OverpassHatasi ? e.message : 'Overpass yanıt vermedi');
   }
-  throw new HatHatasi('Overpass yanıt vermedi');
 }
 
 const bekle = (ms) => new Promise((r) => setTimeout(r, ms));
-
-/** #205 KK3 takip: Overpass yoğunken (429/504) birkaç kez, artan beklemeyle yeniden dener. */
-async function overpassYeniden(sorgu, deneme = 3) {
-  for (let i = 0; ; i += 1) {
-    try {
-      return await overpass(sorgu);
-    } catch (e) {
-      if (i + 1 >= deneme) throw e;
-      await bekle(5000 * 3 ** i);
-    }
-  }
-}
 
 /** OSM kimliği → konum (Overpass). Bulunamayan kimlik haritada olmaz. */
 async function osmKonumlariOku(idler) {
@@ -422,12 +401,18 @@ export function eslemeSorgusu([g, b, k, d]) {
 out center tags;`;
 }
 
-/** Bir şehrin eşleştirme adayları: kareler sırayla sorulur, OSM kimliğiyle tekilleştirilir. Bir kare düşerse şehir hatalıdır. */
-async function eslemeAdaylari(merkez, yaricap) {
+/**
+ * Bir şehrin eşleştirme adayları: kareler sırayla sorulur, OSM kimliğiyle tekilleştirilir. Bir kare düşerse şehir hatalıdır.
+ * `bitis`: koşu bütçesinin sonu (#266 KK4); dolarsa `SureBittiHatasi`. `ilerleme.kare`: sorulan kare sayısı (özet için).
+ */
+async function eslemeAdaylari(merkez, yaricap, bitis, ilerleme) {
   const adaylar = new Map();
-  for (const [i, kare] of eslemeKareleri(merkez, yaricap).entries()) {
+  const kareler = eslemeKareleri(merkez, yaricap);
+  ilerleme.toplamKare = kareler.length;
+  for (const [i, kare] of kareler.entries()) {
     if (i) await bekle(1000);
-    const veri = await overpassYeniden(eslemeSorgusu(kare));
+    const veri = await overpassYeniden(eslemeSorgusu(kare), { bitis });
+    ilerleme.kare = i + 1;
     for (const e of veri.elements ?? []) {
       const a = {
         osm: `${e.type}/${e.id}`,
@@ -461,6 +446,9 @@ async function googleSatirlari() {
  * KURU (varsayılan): eşleştirir, icerik_konum_osm_esle'yi çağırır ve geri alır; yalnız sayılar raporlanır.
  * Eşleşmeyenler tablo başına sayı ve satır kimliğiyle (uuid) özete girer; ad ve koordinat yazılmaz.
  */
+/** #266 KK4: osm-esle koşusunun toplam süre bütçesi (iş akışı 30 dk'da kesilir; özet yazılacak pay kalır). */
+const OSM_ESLE_BUTCE_MS = 25 * 60_000;
+
 async function osmEsle() {
   const { satirlar, merkezler } = await googleSatirlari();
   const TABLOLAR = ['sehirler', 'yerler', 'gezi_duraklari'];
@@ -472,14 +460,35 @@ async function osmEsle() {
     sehirSatirlari.get(s.sehir_id).push(s);
   }
   const hataliSehir = [];
+  const sehirOzeti = [];
+  let merkezsiz = 0;
+  // #266 KK4: koşunun toplam süre bütçesi; dolunca kalan şehirler hatalı sayılır, özet yine yazılır.
+  const bitis = Date.now() + OSM_ESLE_BUTCE_MS;
   for (const [sehirId, liste] of sehirSatirlari) {
     const merkez = merkezler.get(sehirId);
-    let adaylar = [];
-    try {
-      adaylar = await eslemeAdaylari(merkez, eslemeYaricapi(merkez, liste));
-    } catch {
-      hataliSehir.push(merkez.slug);
+    // #266 KK5: şehir merkezi yoksa satırlar atlanır ve sayılır (eşleşmeyen sayılmaz; yeniden denenecek bir Overpass hatası değil).
+    if (!merkez || !Number.isFinite(merkez.lat) || !Number.isFinite(merkez.lng)) {
+      merkezsiz += liste.length;
+      continue;
     }
+    let adaylar = [];
+    const ilerleme = { kare: 0, toplamKare: 0 };
+    const basla = Date.now();
+    let durum = 'tamam';
+    if (basla >= bitis) {
+      durum = 'bütçe doldu';
+      hataliSehir.push(merkez.slug);
+    } else {
+      try {
+        adaylar = await eslemeAdaylari(merkez, eslemeYaricapi(merkez, liste), bitis, ilerleme);
+      } catch (e) {
+        // Yalnız Overpass/ağ hatası ve bütçe yakalanır; kod hatası koşuyu durdurur.
+        if (!(e instanceof OverpassHatasi) && !(e instanceof SureBittiHatasi)) throw e;
+        durum = e instanceof SureBittiHatasi ? 'bütçe doldu' : `hatalı (${e.durum ?? 'ağ'})`;
+        hataliSehir.push(merkez.slug);
+      }
+    }
+    sehirOzeti.push(`| ${merkez.slug} | ${ilerleme.kare}/${ilerleme.toplamKare} | ${Math.round((Date.now() - basla) / 1000)} sn | ${durum} |`);
     for (const s of liste) {
       sayi[s.tablo].toplam += 1;
       const e = adaylar.length ? osmEslestir(s, adaylar) : null;
@@ -496,12 +505,18 @@ async function osmEsle() {
     (t) =>
       `${t}: google_30g ${sayi[t].toplam} · eşleşen ${sayi[t].eslesen} · ${KURU ? 'yazılacak' : 'yazılan'} ${sonuc.yazilan?.[t] ?? 0} · atlanan ${sonuc.atlanan?.[t] ?? 0} · eşleşmeyen ${sayi[t].eslesmeyen.length}`,
   );
-  if (hataliSehir.length) satir.push(`Overpass yanıt vermedi (bu şehirlerin satırları eşleşmeyen sayıldı): ${hataliSehir.join(', ')}`);
+  if (hataliSehir.length) satir.push(`Overpass yanıt vermedi ya da bütçe doldu (bu şehirlerin satırları eşleşmeyen sayıldı): ${hataliSehir.join(', ')}`);
+  if (merkezsiz) satir.push(`şehir merkezi olmadığı için atlanan satır: ${merkezsiz}`);
   satir.push(KURU ? 'KURU: yazılmadı (işlem geri alındı)' : 'yazıldı');
   duyuru(hataliSehir.length ? 'warning' : 'notice', 'OSM eşleştirmesi', satir);
   await ozet([
     '### OSM eşleştirmesi (#205 KK3)',
     ...satir.map((x) => `- ${x}`),
+    '',
+    '#### Şehirler (#266 KK4)',
+    '| Şehir | Kare | Süre | Durum |',
+    '|---|---|---|---|',
+    ...sehirOzeti,
     '',
     '#### Eşleşmeyen satırlar (kimlik)',
     ...TABLOLAR.flatMap((t) => (sayi[t].eslesmeyen.length ? [`- ${t}: ${sayi[t].eslesmeyen.join(', ')}`] : [])),
