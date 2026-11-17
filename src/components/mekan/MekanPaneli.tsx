@@ -495,20 +495,10 @@ function Yildizlar({ puan, boyut }: { puan: number | null; boyut: number }) {
 
 // ---------------------------------------------------------------- Rehber
 
-/** #142 KK2 (kanvas 14): "Sesli rehberi dinle · YAKINDA" şeridi, rehber yazısı (`yerler.rehber_md`), alıntı → İPUCU kutusu. */
+/** #142 KK2 (kanvas 14): rehber yazısı (`yerler.rehber_md`), alıntı → İPUCU kutusu. #279: sesli rehber şeridi kalktı (sonraya kaldı). */
 function RehberSekmesi({ md }: { md: string | null }) {
   return (
     <View style={{ gap: 14 }}>
-      <View style={s.sesli} accessibilityState={{ disabled: true }}>
-        <View style={s.sesliIkon}>
-          <Ikon ad="kitap" boyut={18} renk={renk.metin} kalinlik={2.4} />
-        </View>
-        <View style={{ flex: 1 }}>
-          <Text style={s.sesliBaslik}>{t('mekan.panel.sesli')}</Text>
-          <Text style={s.sesliAlt}>{t('mekan.panel.sesliAlt')}</Text>
-        </View>
-        <Text style={s.yakinda}>{t('mekan.panel.yakinda')}</Text>
-      </View>
       {md ? (
         <MdYazi kaynak={md} ipucu kenar={0} />
       ) : (
@@ -556,11 +546,6 @@ const s = StyleSheet.create({
   sekmeSecili: { borderBottomColor: renk.vurgu },
   sekmeMetin: { fontFamily: yazi.ekstra, fontSize: 15, color: renk.soluk },
   sekmeMetinSecili: { color: renk.metin },
-  sesli: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 10, paddingHorizontal: 12, borderRadius: 16, backgroundColor: renk.ana },
-  sesliIkon: { width: 38, height: 38, borderRadius: 19, backgroundColor: renk.vurgu, alignItems: 'center', justifyContent: 'center' },
-  sesliBaslik: { fontFamily: yazi.ekstra, fontSize: 14, color: renk.zemin },
-  sesliAlt: { fontFamily: yazi.normal, fontSize: 12, color: renk.anaAcik },
-  yakinda: { fontFamily: yazi.ekstra, fontSize: 11, color: renk.anaAcik },
   googleKutu: { gap: 10, padding: 14, borderRadius: 16, backgroundColor: renk.yuzey },
   googleAc: { alignSelf: 'flex-start', height: 40, paddingHorizontal: 14, borderRadius: kose.alan, backgroundColor: renk.ana, justifyContent: 'center' },
   googleAcMetin: { fontFamily: yazi.ekstra, fontSize: 13, color: renk.zemin },
