@@ -1,0 +1,136 @@
+{
+ "surum": 1,
+ "sehir": {
+  "slug": "bursa"
+ },
+ "takvim": {
+  "ilk_gun": "cumartesi"
+ },
+ "gezi": {
+  "slug": "bursada-bir-gun",
+  "baslik": "Bursa'da bir gün",
+  "ozet": "Günübirlik gelenlere Yeşil, hanlar, İskender ve Muradiye; yürüyerek",
+  "yazar_ad": "Tripmate ekibi",
+  "yazi_md": "Bursa'ya yalnız bir günün varsa bu plan şehrin en çok anılan yerlerini doğudan batıya, tek bir yürüyüş çizgisinde topluyor. Sabah Yeşil'in çinileriyle başlıyor, öğleye doğru hanlar bölgesine iniyor, İskender'le doyup Tophane'den Muradiye'ye uzanıyor. Duraklar arası yürüyüş çoğunlukla on, on beş dakika; yalnız Tophane'ye çıkış biraz yokuş. Otogar ve Mudanya iskelesi merkeze uzak, bu yüzden sabah erken yola çık ve dönüşü akşamüstüne koy.\n\n> Gezdiğin yerlerin çoğu ibadete açık cami ve türbe: omuzları ve dizleri örten kıyafet seç, çantanda bir başörtüsü bulunsun, namaz vakitlerinde ziyareti birkaç dakika ertele.\n\n## 1. gün · Yeşil'den Muradiye'ye\n\nGüne [Yeşil Türbe](mekan:ChIJM38n1N49yhQRcnCWi3B03g4) ile başla. Turkuaz çinili türbe tepede tek başına duruyor; içeride sandukanın çinilerine bak, sonra karşıdaki Yeşil Cami'ye geç ve mihrabın çevresindeki renkleri gör. Sabah erken saatte ikisi de sakin.\n\n::mekan[ChIJM38n1N49yhQRcnCWi3B03g4]\n\nYokuştan aşağı inip Gökdere'nin üstündeki [Irgandı Köprüsü](mekan:ChIJS0lARt49yhQR1LruSgYHKsE)'nden geç. Köprünün iki yanı küçük dükkânlarla dolu; burada uzun kalmana gerek yok, bir bakış ve belki bir hediyelik yeter.\n\nKöprüden on dakikalık yürüyüşle [Ulu Cami](mekan:ChIJ3RmyGj84yhQR4x4TfWyU8SY)'ye varırsın. Yirmi kubbeyi taşıyan ayakların arasında dolaş, ortadaki şadırvanın sesini dinle ve duvarlardaki büyük yazılara bak. Kuzey kapısından çıkınca birkaç adımda [Koza Han](mekan:ChIJSw0QgOE9yhQRzQN7LU1DH8M)'dasın: ipek dükkânlarının arasından avluya gir, ortadaki küçük mescidin yanında ağaçların altında bir çay ya da kahve iç. Vaktin varsa çevredeki [Kapalıçarşı](mekan:ChIJaVFANeI9yhQR-CThVzriC-Y) sokaklarında biraz kaybol; kestane şekeri ve havlu almak için doğru yer.\n\nÖğle yemeği için Heykel'e yürü ve [İskender'in tarihi ahşap dükkânı](mekan:ChIJJYJhbGE9yhQREEAcx4cDnN4)'nda Bursa'nın en bilinen yemeğini ye. Öğle saatinde kapıda kısa bir sıra olabilir; yemek hızlı geldiği için sıra da çabuk ilerliyor.\n\nYemekten sonra yokuşu yavaş yavaş çıkarak Tophane'deki [Osman Gazi ve Orhan Gazi türbeleri](mekan:ChIJjw_bKP09yhQRODXzZChVsnM)'ne git. Osmanlı'nın ilk iki hükümdarı burada yatıyor; saat kulesinin yanındaki terastan şehre ve ovaya bakmak günün en iyi molası.\n\nGünü batıdaki [Muradiye Külliyesi](mekan:ChIJG4meHgAWyhQRk8hSEmB43XU)'nde bitir. Tophane'den Muradiye'ye yürüyüş yirmi dakika kadar; yorulduysan kısa bir taksi yolculuğu da olur. Ağaçlı bahçeye dağılmış türbelerin her biri ayrı bir hikâye: kimi sade, kimi içeriden çinilerle kaplı. İkindi ışığında bahçede oturmak, uzun bir günün iyi bir kapanışı.\n\n::mekan[ChIJG4meHgAWyhQRk8hSEmB43XU]\n\nPlan cumartesiye göre kuruldu. Pazar günü gidersen Koza Han'daki dükkânların çoğu kapalı olabilir; avluyu yine görürsün ama çarşı daha sessiz olur. Akşam saatin varsa Muradiye çevresindeki eski evlerin arasında dolaş. Şehri daha uzun görmek istersen iki günlük planımız Cumalıkızık'ı ve Kent Müzesi'ni de ekliyor."
+ },
+ "gunler": [
+  {
+   "baslik": "Yeşil'den Muradiye'ye",
+   "duraklar": [
+    {
+     "place_id": "ChIJM38n1N49yhQRcnCWi3B03g4",
+     "osm": "way/254313386",
+     "ad": "Yeşil Türbe",
+     "sure_dk": 45,
+     "sure_gerekcesi": "varsayılan 30; karşısındaki Yeşil Cami de geziliyor",
+     "kapali_gunler": [],
+     "rehber": "yesil-turbe"
+    },
+    {
+     "place_id": "ChIJS0lARt49yhQR1LruSgYHKsE",
+     "osm": "way/337402815",
+     "ad": "Irgandı Köprüsü",
+     "sure_dk": 20,
+     "sure_gerekcesi": "varsayılan 45; tek günde yalnız geçiş ve kısa bakış",
+     "kapali_gunler": [],
+     "rehber": "irgandi-koprusu"
+    },
+    {
+     "place_id": "ChIJ3RmyGj84yhQR4x4TfWyU8SY",
+     "osm": "way/26434413",
+     "ad": "Bursa Ulu Cami",
+     "sure_dk": 45,
+     "kapali_gunler": [],
+     "rehber": "ulu-cami"
+    },
+    {
+     "place_id": "ChIJSw0QgOE9yhQRzQN7LU1DH8M",
+     "osm": "relation/1018973",
+     "ad": "Koza Han",
+     "sure_dk": 45,
+     "sure_gerekcesi": "varsayılan 60; avlu, mescit ve bir çay",
+     "kapali_gunler": [
+      "pazar"
+     ],
+     "rehber": "koza-han"
+    },
+    {
+     "place_id": "ChIJJYJhbGE9yhQREEAcx4cDnN4",
+     "osm": "node/4889905023",
+     "ad": "İSKENDER Tarihi Ahşap Dükkan",
+     "sure_dk": 60,
+     "sure_gerekcesi": "varsayılan 45; oturulup yenen öğle yemeği",
+     "kapali_gunler": [],
+     "rehber": "iskender-tarihi-dukkan"
+    },
+    {
+     "place_id": "ChIJjw_bKP09yhQRODXzZChVsnM",
+     "osm": "way/325992025",
+     "ad": "Osman Gazi Türbesi",
+     "sure_dk": 45,
+     "sure_gerekcesi": "varsayılan 60; iki türbe ve manzara terası",
+     "kapali_gunler": [],
+     "rehber": "osman-gazi-orhan-gazi-turbeleri"
+    },
+    {
+     "place_id": "ChIJG4meHgAWyhQRk8hSEmB43XU",
+     "osm": "way/472072853",
+     "ad": "Muradiye Külliyesi",
+     "sure_dk": 60,
+     "sure_gerekcesi": "varsayılan 45; bahçedeki türbeler ve cami",
+     "kapali_gunler": [],
+     "rehber": "muradiye-kulliyesi"
+    }
+   ]
+  }
+ ],
+ "ek_mekanlar": [
+  {
+   "place_id": "ChIJaVFANeI9yhQR-CThVzriC-Y",
+   "ad": "Bursa Kapalı Çarşı"
+  }
+ ],
+ "notlar": {
+  "dogrulanacaklar": [
+   "[Yazı · giriş] · \"Otogar ve Mudanya iskelesi merkeze uzak\" · genel bilgi, mesafe ve ulaşım süresi verilmedi · BURULAŞ hat bilgisi, visitbursa.org ulaşım",
+   "[Yazı · Irgandı] · \"Gökdere'nin üstündeki\" köprü · klasik gezide de aynı ifade yok; dere adı Vikipedi'den · visitbursa.org, yerinde",
+   "[Yazı · Kapalıçarşı] · \"kestane şekeri ve havlu almak için doğru yer\" · yaygın anlatım · visitbursa.org hanlar bölgesi sayfası",
+   "[Yazı · İskender] · \"öğle saatinde kapıda kısa bir sıra\", \"yemek hızlı geliyor\" · yaygın anlatım, yerinde gözlem değil · yerinde",
+   "[Yazı · Tophane → Muradiye] · \"yürüyüş yirmi dakika kadar\" · OSM konumlarından kuş uçuşu × 1,3 ile kestirildi · harita",
+   "[Yazı · Muradiye] · \"kimi içeriden çinilerle kaplı\" · klasik gezinin doğrulanacaklarıyla aynı (Şehzade Mustafa, Cem Sultan türbeleri) · Vakıflar, kulturportali.gov.tr",
+   "[Plan · Koza Han] · kapali_gunler [\"pazar\"] · avlunun pazar açık olup olmadığı belirsiz; yazı \"dükkânların çoğu kapalı olabilir\" diyor · visitbursa.org/mekanlar/koza-han-118",
+   "[Plan · türbeler, İskender] · kapali_gunler [] · resmî kaynakta kapalı gün yok · Vakıflar Bursa Bölge Müdürlüğü, işletme",
+   "[Rehberler] · bu gezide yeni rehber yok; 7 durağın rehberi bursada-iki-gun ile ortak, doğrulanacakları o planda"
+  ],
+  "fotograf_onerileri": [
+   {
+    "ne": "Kapak (3:2): Yeşil Türbe ve Yeşil Cami, sabah ışığı",
+    "altyazi": "Yeşil'de sabah",
+    "arama": "Yeşil Türbe Bursa (Wikimedia Commons, CC BY-SA)"
+   },
+   {
+    "ne": "Irgandı Köprüsü üstündeki dükkânlar",
+    "altyazi": "Irgandı Köprüsü'nün dükkânları",
+    "arama": "Irgandı Bridge Bursa (Wikimedia Commons)"
+   },
+   {
+    "ne": "Muradiye bahçesi ve türbeler",
+    "altyazi": "Muradiye'nin ağaçlı bahçesi",
+    "arama": "Muradiye Complex Bursa garden (Wikimedia Commons)"
+   }
+  ],
+  "varsayimlar": [
+   "Tek gün: cumartesi (Koza Han dükkânları pazar kapalı olabilir)",
+   "Günübirlik gelen, ilk kez gören; tamamen yürüyüş, Tophane → Muradiye isteğe bağlı taksi",
+   "Bütün duraklar bursada-iki-gun'da araştırılmış ve puanlanmış mekanlar; bu gezi için yeni kimlik ya da puan isteği yapılmadı",
+   "Yeşil Cami ayrı durak değil (Google'da işletme kaydı yok); Yeşil Türbe durağında anılıyor",
+   "Kapalıçarşı OSM adayı olmadığı için durak değil, ek mekan"
+  ],
+  "kaynaklar": [
+   "visitbursa.org (Bursa Büyükşehir turizm portalı): mekanlar/yesil-i-mehmed-kulliyesi-101, ulucami-40, koza-han-118, hanlar-bolgesi-orhan-kulliyesi-cevresi-98, tophane-parki-527, muradiye-ii-murad-kulliyesi-102; gezi-rotalari/bursa-kultur-yolu-rotasi-39",
+   "Bursa Alan Başkanlığı UNESCO broşürü (alanbaskanligi.bursa.bel.tr)",
+   "Vikipedi (Irgandı Köprüsü) yalnız çapraz kontrol",
+   "OpenStreetMap (osm kimlikleri, opening_hours) — © OpenStreetMap katkıda bulunanlar"
+  ]
+ }
+}
