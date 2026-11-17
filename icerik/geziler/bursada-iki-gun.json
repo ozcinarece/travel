@@ -1,0 +1,202 @@
+{
+ "surum": 1,
+ "sehir": {
+  "yeni": {
+   "ad": "Bursa",
+   "slug": "bursa",
+   "place_id": "ChIJlVbU2IIVyhQRkjOX_FUFoGE"
+  }
+ },
+ "takvim": {
+  "ilk_gun": "cumartesi"
+ },
+ "gezi": {
+  "slug": "bursada-iki-gun",
+  "baslik": "Bursa'da iki gün",
+  "ozet": "İlk kez gidenlere hanlar, külliyeler ve Cumalıkızık; acelesiz 2 gün",
+  "yazar_ad": "Tripmate ekibi",
+  "yazi_md": "Bursa'yı ilk kez görecekler için iki günlük, acelesiz bir plan. İlk gün Osmanlı'nın ilk başkentinin ticaret kalbi olan hanlar bölgesinde başlıyor, öğle yemeğinde İskender'le devam edip Tophane'den Muradiye'ye uzanıyor. İkinci gün sabah Cumalıkızık'ta köy kahvaltısıyla açılıyor, öğleden sonra Yeşil'in çinileriyle ve Irgandı Köprüsü'nde bir çayla bitiyor. Plan cumartesi başlıyor; müzelerin pazartesi kapalı olduğunu unutma. İlkbahar ve sonbahar en rahat mevsimler; yazın Uludağ'ın gölgesinde şehir yine de serin kalabiliyor.\n\n> Gezdiğin yerlerin çoğu ibadete açık cami ve türbe: omuzları ve dizleri örten kıyafet seç, kadınlar için çantada bir başörtüsü bulunsun, namaz vakitlerinde ziyareti biraz ertele.\n\n## 1. gün · Hanlar ve külliyeler\n\nGüne [Ulu Cami](mekan:ChIJ3RmyGj84yhQR4x4TfWyU8SY) ile başla; yirmi kubbenin altındaki şadırvan sabah sessizliğinde en güzel hâlinde. Kuzey kapısından çıkınca birkaç adımda [Koza Han](mekan:ChIJSw0QgOE9yhQRzQN7LU1DH8M)'dasın: avlunun ortasındaki küçük mescide bak, ağaçların altında ilk çayını iç. Hanlar bölgesinden ayrılmadan [Kapalıçarşı](mekan:ChIJaVFANeI9yhQR-CThVzriC-Y)'nın sokaklarında biraz dolaş.\n\n::mekan[ChIJ3RmyGj84yhQR4x4TfWyU8SY]\n\nÖğleye doğru Heykel'e yürü ve [Bursa Kent Müzesi](mekan:ChIJHzNOwOA9yhQRdMKFcQdb1fw)'ne gir; bodrum kattaki eski esnaf sokağı, sabah gördüğün çarşıyı geçmişe bağlıyor. Öğle yemeği için birkaç adım ötedeki [İskender'in tarihi ahşap dükkânı](mekan:ChIJJYJhbGE9yhQREEAcx4cDnN4) Bursa'nın en bilinen lezzetiyle tanışmanın klasik yolu.\n\nYemekten sonra yokuşu yavaş yavaş çıkıp Tophane'deki [Osman Gazi ve Orhan Gazi türbeleri](mekan:ChIJjw_bKP09yhQRODXzZChVsnM)'ne git; saat kulesinin yanından şehre ve ovaya bak. Günü batıdaki [Muradiye Külliyesi](mekan:ChIJG4meHgAWyhQRk8hSEmB43XU)'nde, türbelerin dağıldığı ağaçlı bahçede bitir; ikindi ışığı burada çok yumuşak.\n\n::mekan[ChIJG4meHgAWyhQRk8hSEmB43XU]\n\n## 2. gün · Cumalıkızık ve Yeşil\n\nSabah erkenden taksiyle ya da belediye otobüsüyle [Cumalıkızık](mekan:ChIJffj8RG05yhQR8psv7HopAm8)'a git. Kahvaltını eski evlerden birinde, ahududu reçeli ve şerbetiyle yap; sonra taş sokaklarda yukarı doğru dolaş. Köy meydanındaki [Köy Müzesi](mekan:ChIJD_M7Q5c5yhQRPLgS_SSdJVU) küçük ama eski gündelik hayatı iyi anlatıyor. Kahvaltı geç ve doyurucu olduğu için bugün öğle yemeğini atlayabilir, akşamüstü bir çayla idare edebilirsin.\n\n::mekan[ChIJffj8RG05yhQR8psv7HopAm8]\n\nÖğleye doğru şehre dön ve [Emir Sultan Camii](mekan:ChIJVVVV9Nc9yhQRvgZ09oyrt44)'nin ağaçlı avlusunda kısa bir mola ver. Oradan on dakikalık bir yürüyüşle [Yeşil Türbe](mekan:ChIJM38n1N49yhQRcnCWi3B03g4)'ye geç; turkuaz çinili türbeyi gördükten sonra karşısındaki Yeşil Cami'nin içindeki çinileri de kaçırma.\n\n::mekan[ChIJM38n1N49yhQRcnCWi3B03g4]\n\nBirkaç yüz metre kuzeydeki [Panorama 1326](mekan:ChIJmW_z7N0_yhQRmdi6Jw3CD_g), iki gündür gezdiğin türbelerin sahiplerini ve Bursa'nın fethini dev bir dairesel resimle anlatıyor. Günü [Irgandı Köprüsü](mekan:ChIJS0lARt49yhQR1LruSgYHKsE)'nde, dükkânların arasında dolaşıp derenin üstünde bir çay içerek kapat; Heykel'e ve çarşıya buradan yürüyerek inebilirsin.\n\nPlanı kısaltmak istersen 1. günden Kent Müzesi'ni, 2. günden Panorama'yı çıkarabilirsin. Uzatmak isteyenler için Çekirge yönünde Hüdavendigar Külliyesi ve Karagöz Müzesi, ya da teleferikle Uludağ yarım günlük iyi eklemeler."
+ },
+ "gunler": [
+  {
+   "baslik": "Hanlar ve külliyeler",
+   "duraklar": [
+    {
+     "place_id": "ChIJ3RmyGj84yhQR4x4TfWyU8SY",
+     "osm": "way/26434413",
+     "ad": "Bursa Ulu Cami",
+     "sure_dk": 45,
+     "kapali_gunler": [],
+     "rehber": "ulu-cami"
+    },
+    {
+     "place_id": "ChIJSw0QgOE9yhQRzQN7LU1DH8M",
+     "osm": "relation/1018973",
+     "ad": "Koza Han",
+     "sure_dk": 45,
+     "sure_gerekcesi": "varsayılan 60; avlu, mescit ve bir çay",
+     "kapali_gunler": [
+      "pazar"
+     ],
+     "rehber": "koza-han"
+    },
+    {
+     "place_id": "ChIJHzNOwOA9yhQRdMKFcQdb1fw",
+     "osm": "node/1786760093",
+     "ad": "Bursa Kent Müzesi",
+     "sure_dk": 60,
+     "sure_gerekcesi": "varsayılan 90; üç katlı orta boy müze",
+     "kapali_gunler": [
+      "pazartesi"
+     ],
+     "rehber": "bursa-kent-muzesi"
+    },
+    {
+     "place_id": "ChIJJYJhbGE9yhQREEAcx4cDnN4",
+     "osm": "node/4889905023",
+     "ad": "İSKENDER Tarihi Ahşap Dükkan",
+     "sure_dk": 60,
+     "sure_gerekcesi": "varsayılan 45; oturulup yenen öğle yemeği",
+     "kapali_gunler": [],
+     "rehber": "iskender-tarihi-dukkan"
+    },
+    {
+     "place_id": "ChIJjw_bKP09yhQRODXzZChVsnM",
+     "osm": "way/325992025",
+     "ad": "Osman Gazi Türbesi",
+     "sure_dk": 45,
+     "sure_gerekcesi": "varsayılan 60; iki türbe ve manzara terası",
+     "kapali_gunler": [],
+     "rehber": "osman-gazi-orhan-gazi-turbeleri"
+    },
+    {
+     "place_id": "ChIJG4meHgAWyhQRk8hSEmB43XU",
+     "osm": "way/472072853",
+     "ad": "Muradiye Külliyesi",
+     "sure_dk": 75,
+     "sure_gerekcesi": "varsayılan 45; bahçede on iki türbe ve cami",
+     "kapali_gunler": [],
+     "rehber": "muradiye-kulliyesi"
+    }
+   ]
+  },
+  {
+   "baslik": "Cumalıkızık ve Yeşil",
+   "duraklar": [
+    {
+     "place_id": "ChIJffj8RG05yhQR8psv7HopAm8",
+     "osm": "way/1502438540",
+     "ad": "Cumalıkızık Köyü",
+     "sure_dk": 120,
+     "sure_gerekcesi": "varsayılan 45; köy kahvaltısı ve köy içi yürüyüş",
+     "kapali_gunler": [],
+     "rehber": "cumalikizik"
+    },
+    {
+     "place_id": "ChIJVVVV9Nc9yhQRvgZ09oyrt44",
+     "osm": "way/254312132",
+     "ad": "Emir Sultan Camii",
+     "sure_dk": 30,
+     "sure_gerekcesi": "varsayılan 45; avlu ve türbe, kısa ziyaret",
+     "kapali_gunler": [],
+     "rehber": "emir-sultan-camii"
+    },
+    {
+     "place_id": "ChIJM38n1N49yhQRcnCWi3B03g4",
+     "osm": "way/254313386",
+     "ad": "Yeşil Türbe",
+     "sure_dk": 60,
+     "sure_gerekcesi": "varsayılan 30; karşısındaki Yeşil Cami de geziliyor",
+     "kapali_gunler": [],
+     "rehber": "yesil-turbe"
+    },
+    {
+     "place_id": "ChIJmW_z7N0_yhQRmdi6Jw3CD_g",
+     "osm": "way/1148944018",
+     "ad": "Panorama 1326 Bursa Fetih Müzesi",
+     "sure_dk": 60,
+     "sure_gerekcesi": "varsayılan 45; sergi salonu ve panorama",
+     "kapali_gunler": [
+      "pazartesi"
+     ],
+     "rehber": "panorama-1326"
+    },
+    {
+     "place_id": "ChIJS0lARt49yhQR1LruSgYHKsE",
+     "osm": "way/337402815",
+     "ad": "Irgandı Köprüsü",
+     "sure_dk": 30,
+     "sure_gerekcesi": "varsayılan 45; köprü üstü dükkânlar ve çay",
+     "kapali_gunler": [],
+     "rehber": "irgandi-koprusu"
+    }
+   ]
+  }
+ ],
+ "ek_mekanlar": [
+  {
+   "place_id": "ChIJaVFANeI9yhQR-CThVzriC-Y",
+   "ad": "Bursa Kapalı Çarşı"
+  },
+  {
+   "place_id": "ChIJD_M7Q5c5yhQRPLgS_SSdJVU",
+   "ad": "Cumalıkız Köy Müzesi"
+  }
+ ],
+ "notlar": {
+  "dogrulanacaklar": [
+   "[Plan · Koza Han] · kapali_gunler [\"pazar\"] · handaki dükkânların çoğu pazar kapalı olabilir, avlu açık mı belirsiz; plan cumartesiye koydu · visitbursa.org/mekanlar/koza-han-118, telefon 444 16 00",
+   "[Plan · Muradiye, Osman Gazi, Yeşil Türbe, Emir Sultan] · kapali_gunler [] · türbelerin kapalı günü resmî kaynakta yok (Vakıflar) · Vakıflar Bursa Bölge Müdürlüğü",
+   "[Plan · İskender, Cumalıkızık] · kapali_gunler [] · restoran/köy için resmî kaynak yok · işletme telefonu",
+   "[Rehber · İskender] · \"ailenin Heykel'deki tarihi ahşap dükkânı\", \"1960'ta bugünkü caddeye taşındı\" · aile kollarından birinin sitesine dayanıyor (iskenderiskenderoglu.com.tr); OSM etiketi iskender.com.tr gösteriyor, hangi kolun dükkânı olduğu net değil · iki sitenin şube listesi",
+   "[Rehber · İskender] · \"şıra ya da ayranla tamamlamak buranın alışkanlığı\", \"kapıda kısa bir sıra\" · kişisel gözlem değil, yaygın anlatım · yerinde",
+   "[Rehber · Osman Gazi] · \"türbeler 1855 depremi sonrası Abdülaziz döneminde yeniden yapıldı\", \"Orhan Gazi türbesinde camlı bölümlerin altında mozaik zemin\" · resmî sayfada yok · Vakıflar / kulturportali.gov.tr",
+   "[Rehber · Muradiye] · \"on iki türbe\" (UNESCO broşürü 12, visitbursa 13 diyor); \"II. Murad türbesinin kubbesi açık\"; \"Şehzade Mustafa ve Cem Sultan türbelerinde çiniler\"; \"medrese bugün müze\" (hangi müze) · Vakıflar, kulturportali.gov.tr",
+   "[Rehber · Muradiye] · \"bekçiye sorarsan kapalı olanı açtığı oluyor\" · yaygın anlatım · yerinde",
+   "[Rehber · Yeşil Türbe] · \"1410'larda\" (külliye 1414–1419 arası; kaynaklar farklı) · \"dış çinilerin bir kısmı 19. yy onarımında yenilendi\" · \"medrese bugün Türk İslam Eserleri Müzesi\" · visitbursa.org/mekanlar/yesil-i-mehmed-kulliyesi-101, muze.gov.tr",
+   "[Rehber · Ulu Cami] · \"yüzü aşkın yazı\" (visitbursa 129 diyor), minber kabartmalarının gök cisimleriyle ilişkisi · visitbursa.org/mekanlar/ulucami-40",
+   "[Rehber · Kent Müzesi] · katların içeriği (zemin kronoloji, birinci kat kültür, bodrum esnaf sokağı ve ipek) · visitbursa.org/mekanlar/bursa-kent-muzesi-240; müzede kontrol",
+   "[Rehber · Cumalıkızık] · \"evler sarı, mor, maviye boyanmış\", \"çınarın çevresi pazar yeri\", \"belediye otobüsü\" · visitbursa.org/mekanlar/cumalikizik-koyu-103, BURULAŞ hat bilgisi",
+   "[Rehber · Emir Sultan] · \"Ulu Cami'yi tek cami olarak yapmayı önerenin o olduğu\" anlatı; \"revakların batı ucundan Yeşil Türbe görünüyor\" (ipucu) · yerinde kontrol",
+   "[Rehber · Panorama] · \"ön planda gerçek boyutlu nesneler\", \"ses ve ışık düzeni\", \"binada kafe\" · visitbursa.org/mekanlar/panorama-1326-bursa-fetih-muzesi-253",
+   "[Rehber · Irgandı] · \"Ponte Vecchio gibi az sayıda kalmış dükkânlı köprü\", \"uçtaki küçük kafe\", \"dereye inen basamaklar\" · yerinde kontrol",
+   "[Yazı · 2. gün] · öğle yemeği durağı yok (doğrulayıcı UYARI) · kahvaltı Cumalıkızık'ta geç saatte · Ece'nin kararı: istenirse Yeşil çevresine bir lokanta eklenir",
+   "[Yazı · uzatma] · Hüdavendigar Külliyesi, Karagöz Müzesi, teleferik bağlantısız anıldı (ek_mekan değil) · istenirse place_id eklenir"
+  ],
+  "fotograf_onerileri": [
+   {
+    "ne": "Kapak (3:2): Cumalıkızık'ın renkli cumbalı evleri ve taş sokak",
+    "altyazi": "Cumalıkızık'ın taş sokakları",
+    "arama": "Cumalıkızık (Wikimedia Commons, CC BY-SA)"
+   },
+   {
+    "ne": "Ulu Cami içinde şadırvan ve hat yazıları",
+    "altyazi": "Ulu Cami'nin şadırvanı, yirmi kubbenin altında",
+    "arama": "Bursa Grand Mosque interior fountain (Wikimedia Commons)"
+   },
+   {
+    "ne": "Koza Han avlusu ve mescit",
+    "altyazi": "Koza Han'ın avlusundaki mescit",
+    "arama": "Koza Han Bursa courtyard (Wikimedia Commons)"
+   },
+   {
+    "ne": "Yeşil Türbe dış cephe, turkuaz çini",
+    "altyazi": "Yeşil Türbe'nin turkuaz çinileri",
+    "arama": "Green Tomb Bursa (Wikimedia Commons)"
+   }
+  ],
+  "varsayimlar": [
+   "2 gün: 1. gün cumartesi (Kent Müzesi ve Panorama pazartesi kapalı)",
+   "İlk kez gidenler, rahat tempo; yürüyüş + Cumalıkızık için taksi/otobüs",
+   "Yeşil Cami ayrı durak değil: Google'da işletme kaydı yok (yükleme OPERATIONAL ister); Yeşil Türbe durağında anılıyor",
+   "Kapalıçarşı OSM adayı olmadığı için durak değil, ek mekan"
+  ],
+  "kaynaklar": [
+   "visitbursa.org (Bursa Büyükşehir turizm portalı): mekanlar/ulucami-40, koza-han-118, hanlar-bolgesi-orhan-kulliyesi-cevresi-98, bursa-kent-muzesi-240, tophane-parki-527, muradiye-ii-murad-kulliyesi-102, yesil-i-mehmed-kulliyesi-101, emir-sultan-kulliyesi-615, cumalikizik-koyu-103, cumalikizik-koyu-muzesi-264, panorama-1326-bursa-fetih-muzesi-253; gezi-rotalari/bursa-kultur-yolu-rotasi-39; blog köy kahvaltısı 119",
+   "Bursa Alan Başkanlığı UNESCO broşürü (alanbaskanligi.bursa.bel.tr)",
+   "iskenderiskenderoglu.com.tr tarihçe",
+   "Vikipedi (Irgandı Köprüsü) yalnız çapraz kontrol",
+   "OpenStreetMap (osm kimlikleri, opening_hours) — © OpenStreetMap katkıda bulunanlar"
+  ]
+ }
+}
