@@ -3138,4 +3138,84 @@ end $$;
 delete from public.silinecek_klasorler where trip_id::text like '26600000-%';
 delete from auth.users where id = '26600000-0000-4000-8000-000000000001';
 
+-- #234 KK6: tetikleyiciden önce silinmiş seyahatlerin klasörleri kuru çalıştırmayla kuyruğa onay bekleyerek girer; silme onaydan sonra.
+insert into auth.users (id) values ('23460000-0000-4000-8000-000000000001');
+insert into public.trips (id, owner_id, city_place_id, city_label, lat, lng, tz) values
+  ('23460000-0000-4000-8000-000000000010', '23460000-0000-4000-8000-000000000001', 'p2346', 'Yetim şehri', 40, 30, 'Europe/Istanbul'),
+  ('23460000-0000-4000-8000-000000000040', '23460000-0000-4000-8000-000000000001', 'p2346', 'Yetim şehri', 40, 30, 'Europe/Istanbul');
+insert into storage.objects (bucket_id, name, metadata) values
+  ('sohbet', '23460000-0000-4000-8000-000000000010/var.jpg', '{"size": 100}'),
+  ('sohbet', '23460000-0000-4000-8000-000000000020/m1.jpg', '{"size": 1048576}'),
+  ('fisler', '23460000-0000-4000-8000-000000000020/f1.jpg', '{"size": 524288}'),
+  ('sohbet', 'uuid-degil/x.jpg', '{"size": 10}'),
+  ('avatars', '23460000-0000-4000-8000-000000000050/a.jpg', '{"size": 10}'),
+  ('fisler', '23460000-0000-4000-8000-000000000030/f.jpg', '{"size": 10}');
+-- C (…30) tetikleyiciyle zaten kuyrukta (onay beklemez).
+insert into public.silinecek_klasorler (kova, trip_id) values ('fisler', '23460000-0000-4000-8000-000000000030');
+do $$
+begin
+  assert not exists (select 1 from public.silinecek_klasorler where onay_bekliyor), '#234 KK6: başlangıçta onay bekleyen yok';
+end $$;
+set role service_role;
+do $$
+declare
+  r record;
+begin
+  select * into r from public.yetim_klasorleri_kuyruga_al();
+  assert r.klasor = 2 and r.dosya = 2 and r.yeni = 2, '#234 KK6: yalnız seyahati olmayan, kuyrukta olmayan iki klasör (sohbet + fisler)';
+  assert r.mb = 1.5, '#234 KK6: toplam MB';
+  assert r.uuid_olmayan = 1, '#234 KK6: uuid olmayan klasör sayılır, kuyruğa girmez';
+  -- Yeniden çalıştırmak aynı sayıyı verir, yeni satır yazmaz.
+  select * into r from public.yetim_klasorleri_kuyruga_al();
+  assert r.klasor = 2 and r.dosya = 2 and r.yeni = 0, '#234 KK6: kuru çalıştırma tekrarlanabilir';
+  -- Onay bekleyen satırı temizleyici listelemez; var olan seyahatin ve avatars kovasının klasörü kuyrukta değil.
+  assert not exists (select 1 from public.kova_temizle_listesi(50) where trip_id = '23460000-0000-4000-8000-000000000020'),
+    '#234 KK6: onay bekleyen silinmez';
+  assert exists (select 1 from public.kova_temizle_listesi(50) where trip_id = '23460000-0000-4000-8000-000000000030'),
+    '#234 KK6: normal kuyruk çalışmaya devam eder';
+end $$;
+reset role;
+do $$
+begin
+  assert not exists (select 1 from public.silinecek_klasorler where trip_id in
+    ('23460000-0000-4000-8000-000000000010', '23460000-0000-4000-8000-000000000050')), '#234 KK6: var olan seyahat ve avatars kuyruğa girmez';
+  assert (select count(*) from storage.objects where name like '23460000-%' or name = 'uuid-degil/x.jpg') = 6, '#234 KK6: kuru çalıştırma dosya silmez';
+  assert (select prosecdef and proconfig @> array['search_path=""'] from pg_proc where oid = 'public.yetim_klasorleri_kuyruga_al()'::regprocedure)
+     and (select prosecdef and proconfig @> array['search_path=""'] from pg_proc where oid = 'public.yetim_klasorleri_onayla()'::regprocedure),
+    '#234 KK6: fonksiyonlar security definer, search_path boş';
+end $$;
+set role authenticated;
+select pg_temp.as_user('23460000-0000-4000-8000-000000000001');
+select pg_temp.hata_bekle($$select * from public.yetim_klasorleri_kuyruga_al()$$, '42501');
+select pg_temp.hata_bekle($$select public.yetim_klasorleri_onayla()$$, '42501');
+select pg_temp.hata_bekle($$update public.silinecek_klasorler set onay_bekliyor = false$$, '42501');
+select pg_temp.as_email(:E, 'ozcinar.ece@gmail.com');
+select pg_temp.hata_bekle($$select public.yetim_klasorleri_onayla()$$, '42501');
+reset role;
+set role anon;
+select pg_temp.hata_bekle($$select * from public.yetim_klasorleri_kuyruga_al()$$, '42501');
+select pg_temp.hata_bekle($$select public.yetim_klasorleri_onayla()$$, '42501');
+reset role;
+set role service_role;
+do $$
+begin
+  assert public.yetim_klasorleri_onayla() = 2, '#234 KK6: onay iki satırı açar';
+  assert (select count(*) from public.kova_temizle_listesi(50) where trip_id = '23460000-0000-4000-8000-000000000020') = 2,
+    '#234 KK6: onaydan sonra temizleyici listeler';
+  assert public.yetim_klasorleri_onayla() = 0, '#234 KK6: onay tekrarlanabilir';
+end $$;
+reset role;
+-- Onay bekleyen bir satırın seyahati normal yoldan silinirse satır onay beklemez.
+insert into public.silinecek_klasorler (kova, trip_id, onay_bekliyor) values ('sohbet', '23460000-0000-4000-8000-000000000040', true);
+delete from public.trips where id = '23460000-0000-4000-8000-000000000040';
+do $$
+begin
+  assert not exists (select 1 from public.silinecek_klasorler where trip_id = '23460000-0000-4000-8000-000000000040' and onay_bekliyor),
+    '#234 KK6: tetikleyici onay işaretini kaldırır';
+end $$;
+delete from public.trips where id = '23460000-0000-4000-8000-000000000010';
+delete from storage.objects where name like '23460000-%' or name = 'uuid-degil/x.jpg';
+delete from public.silinecek_klasorler where trip_id::text like '23460000-%';
+delete from auth.users where id = '23460000-0000-4000-8000-000000000001';
+
 \echo 'rls_test: TÜM TESTLER GEÇTİ'
