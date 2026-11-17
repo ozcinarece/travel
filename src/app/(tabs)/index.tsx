@@ -1,5 +1,5 @@
-import { router } from 'expo-router';
-import { useEffect, useMemo, useState } from 'react';
+import { router, useFocusEffect } from 'expo-router';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, Platform, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Path } from 'react-native-svg';
@@ -14,9 +14,11 @@ import { bekleyenDavetiOku, bekleyenDavetiSil, useDavetKarsilama, useDavetKarsil
 import { useGeziler } from '@/features/icerik/sorgular';
 import { hedefSeyahatler } from '@/features/icerik/yerEkle';
 import { useProfil } from '@/features/profil/sorgular';
+import { acilisDurumu } from '@/features/seyahatler/siniflandir';
 import { useSeyahatler } from '@/features/seyahatler/sorgular';
 import { gunFarki, seyahatAdi } from '@/features/sihirbaz/sihirbaz';
 import { t } from '@/i18n';
+import { ACILIS_BEKLEME_MS, acilisKarariAcik, acilisKarariAl, acilisKarariniKapat } from '@/lib/acilis';
 import { useOturum } from '@/lib/oturum';
 import { tarihAraligi } from '@/lib/takvim';
 import type { SeyahatOzet } from '@/lib/tipler';
@@ -30,6 +32,7 @@ import { bosluk, kose, olcek, renk, yazi } from '@/theme';
  * #137: giriş öncesi görülen davet → /r/{token}; web'de katılıp uygulamayı ilk açan → doğrudan seyahat.
  * #275 (kanvas 29a): alt menü yok. Üst çubukta sağda Ara · ♥ Kaydettiklerim · Profil (44 px, köşe 14); altta yüzen
  * [+ Yeni seyahat]. Seyahat silinip buraya dönülünce kısa bildirim.
+ * #276 KK2: açılış kuralı — gezi günündeki kullanıcı oturumda bir kez doğrudan Gezi sayfasına iner (`src/lib/acilis.ts`).
  */
 export default function AnaSayfa() {
   const profil = useProfil();
@@ -46,7 +49,12 @@ export default function AnaSayfa() {
   const [bekleyenDavet, setBekleyenDavet] = useState<null | undefined>(undefined);
   useEffect(() => {
     bekleyenDavetiOku().then((token) => {
-      if (token) router.replace({ pathname: '/r/[token]', params: { token } });
+      if (token) {
+        // #283 inceleme 2 · 1: davetle gelen bu oturumda açılış kuralına girmez; katılıp "‹ Keşfet"e basınca ana ekran sıfırdan
+        // kurulsa da Gezi'ye geri atılmaz.
+        acilisKarariniKapat();
+        router.replace({ pathname: '/r/[token]', params: { token } });
+      }
       else setBekleyenDavet(null);
     });
   }, []);
@@ -59,6 +67,7 @@ export default function AnaSayfa() {
   if (karsilama.data && karsilanan !== karsilama.data.trip_id) setKarsilanan(karsilama.data.trip_id);
   useEffect(() => {
     if (!karsilanan) return;
+    acilisKarariniKapat();
     bekleyenDavetiSil();
     karsilandi(karsilanan).then(() => {
       // #181 KK14: davetle gelen doğrudan Gezi sayfasına iner.
@@ -67,7 +76,33 @@ export default function AnaSayfa() {
     });
   }, [karsilanan, karsilandi]);
 
-  if (bekleyenDavet === undefined || karsilamaBekleniyor || karsilanan) {
+  // #276 KK2 · KK5: davet akışı bittikten (ya da hiç yokken) ve seyahatler gelince karar verilir. Gezi günündeki kullanıcı
+  // doğrudan o seyahatin Gezi sayfasına iner (altında Keşfet kalır, "‹ Keşfet" buraya döner); birden çok aktifte en geç
+  // başlayan. Bayrak yalnız gerçek yönlendirmede ya da kullanıcı Keşfet'ten kendisi ayrılınca / Keşfet'e kendisi dönünce
+  // kapanır (#283 inceleme 2 · 3, 5): aktif seyahat yokken ya da liste hatasında tüketilmez; bağlantı gelip liste yüklenince
+  // kural işler. `davetBitti` profil yüklenmeden (ya da hata vermeden) true olmaz: önce Gezi'ye push, sonra karşılama
+  // `replace`'i olmasın (inceleme 2 · 2).
+  const davetBitti = bekleyenDavet === null && (!!profil.data || profil.isError) && !karsilamaBekleniyor && !karsilanan && !karsilama.data;
+  const acilisSeyahati = davetBitti && seyahatler.data ? acilisDurumu(seyahatler.data) : null;
+  const aktifSeyahatId = acilisSeyahati?.tur === 'aktif' ? acilisSeyahati.seyahat.id : null;
+  useEffect(() => {
+    if (!aktifSeyahatId || !acilisKarariAl()) return;
+    // `acilis: '1'`: kök yığında bu geçiş animasyonsuz (`src/app/_layout.tsx`).
+    router.push({ pathname: '/seyahat/[id]/(sekmeler)/gezi', params: { id: aktifSeyahatId, acilis: '1' } });
+  }, [aktifSeyahatId]);
+  // Kullanıcı Keşfet'ten kendisi ayrıldıysa (Ara, Profil, Yeni seyahat…) sonradan yüklenen liste onu Gezi'ye itmez.
+  useFocusEffect(useCallback(() => () => acilisKarariniKapat(), []));
+  // #283 inceleme 2 · 2: karar verilmemişken liste beklenirken Keşfet bir an görünüp kaymasın; en çok 1,5 sn yükleniyor, sonra
+  // Keşfet. Gezi'ye geçerken de gösterge kalır (Keşfet arkada bir kare boyanmasın).
+  const [acilisBekleniyor, setAcilisBekleniyor] = useState(acilisKarariAcik);
+  useEffect(() => {
+    if (!acilisBekleniyor) return;
+    const z = setTimeout(() => setAcilisBekleniyor(false), ACILIS_BEKLEME_MS);
+    return () => clearTimeout(z);
+  }, [acilisBekleniyor]);
+  const acilisGostergesi = acilisBekleniyor && (!davetBitti || seyahatler.isPending || !!aktifSeyahatId);
+
+  if (bekleyenDavet === undefined || karsilamaBekleniyor || karsilanan || acilisGostergesi) {
     return (
       <SafeAreaView style={[s.ekran, s.ortala]}>
         <ActivityIndicator color={renk.ana} />
