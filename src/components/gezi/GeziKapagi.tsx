@@ -34,7 +34,7 @@ export function GeziKapagi({ baslik, tarih, uyeler, cip, onKesfet, onPaylas, onM
       <View style={s.ustSatir}>
         <Pressable accessibilityRole="button" onPress={onKesfet} hitSlop={6} style={({ pressed }) => [s.geri, pressed && { opacity: 0.8 }]}>
           <Ikon ad="geri" boyut={20} renk={renk.zemin} kalinlik={2.6} />
-          <Text style={s.geriMetin}>{t('geziSayfasi.kesfet')}</Text>
+          <Text style={s.geriMetin}>{t('geziSayfasi.geriKesfet')}</Text>
         </Pressable>
         <View style={{ flexDirection: 'row', gap: 8 }}>
           <Pressable accessibilityRole="button" accessibilityLabel={t('geziSayfasi.paylas')} onPress={onPaylas} hitSlop={4} style={({ pressed }) => [s.kare, pressed && { opacity: 0.8 }]}>

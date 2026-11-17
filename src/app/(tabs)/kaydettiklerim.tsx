@@ -6,6 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { GeziAlYukleyici } from '@/components/icerik/GeziAl';
 import { Ikon } from '@/components/ui/Ikon';
+import { KesfetHapi } from '@/components/ui/KesfetHapi';
 import { SegmentSecici } from '@/components/ui/SegmentSecici';
 import { useIcerikCanli } from '@/features/icerik/fotolar';
 import { yerGruplari } from '@/features/icerik/kaydedilen';
@@ -114,7 +115,10 @@ export default function KaydettiklerimEkrani() {
 
   return (
     <SafeAreaView style={s.ekran} edges={['top']}>
-      {/* #138 KK6: Kaydettiklerim alt menüde sekme (geri yok). */}
+      {/* #275 (kanvas 21): alt menü yok; başlığın üstünde "‹ Keşfet" hapı. */}
+      <View style={s.ust}>
+        <KesfetHapi />
+      </View>
       <Text accessibilityRole="header" style={s.baslik}>
         {t('kaydettiklerim.baslik')}
       </Text>
@@ -248,6 +252,7 @@ function GeziSatiri({ gezi, sira, onPress, onAl, onKaldir }: { gezi: Gezi; sira:
 
 const s = StyleSheet.create({
   ekran: { flex: 1, backgroundColor: renk.zemin },
+  ust: { paddingHorizontal: bosluk.kenar, paddingTop: 8 },
   baslik: { fontFamily: yazi.baslik, fontSize: 30, letterSpacing: -0.9, color: renk.metin, paddingHorizontal: bosluk.kenar, paddingTop: 14 },
   segment: { paddingHorizontal: bosluk.kenar, paddingTop: 14 },
   icerik: { paddingHorizontal: bosluk.kenar, paddingTop: 18, paddingBottom: 90, gap: 14 },

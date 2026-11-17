@@ -161,7 +161,6 @@ export function useSeyahatSil() {
       qc.setQueryData<SeyahatOzet[]>(['seyahatler'], (eski) => eski?.filter((sy) => sy.id !== seyahatId));
       qc.invalidateQueries({ queryKey: ['seyahatler'] });
       qc.invalidateQueries({ queryKey: ['seyahat-durumlari'] });
-      qc.invalidateQueries({ queryKey: ['profil-sayilari'] });
       // Açık ekranın sorguları ekran kapanınca atılır (açıkken atılırsa boşa yeniden istenir).
       const seyahatinMi = (anahtar: readonly unknown[]) => anahtar.includes(seyahatId);
       qc.removeQueries({ predicate: (q) => seyahatinMi(q.queryKey), type: 'inactive' });

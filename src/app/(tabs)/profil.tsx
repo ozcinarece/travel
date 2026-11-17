@@ -9,9 +9,10 @@ import { Gezilerim } from '@/components/profil/Gezilerim';
 import { SecimMenusu } from '@/components/program/SecimMenusu';
 import { Avatar } from '@/components/ui/Avatar';
 import { Ikon } from '@/components/ui/Ikon';
+import { KesfetHapi } from '@/components/ui/KesfetHapi';
 import { KisaBildirim, useKisaBildirim } from '@/components/ui/KisaBildirim';
 import { cikis } from '@/features/auth/giris';
-import { useProfil, useProfilGuncelle, useProfilSayilari } from '@/features/profil/sorgular';
+import { useProfil, useProfilGuncelle } from '@/features/profil/sorgular';
 import { siniflandir } from '@/features/seyahatler/siniflandir';
 import { useSeyahatler } from '@/features/seyahatler/sorgular';
 import { t } from '@/i18n';
@@ -25,28 +26,36 @@ const DESTEK_EPOSTA = process.env.EXPO_PUBLIC_DESTEK_EPOSTA ?? '';
 const OSM_TELIF = 'https://www.openstreetmap.org/copyright';
 
 /**
- * #138 → #144 (kanvas 22 · Profil): foto, ad, @kullanıcı adı, Düzenle; sayılar seyahat · mekan gezildi · şehir (KK5 kuralı
- * `profil_sayilari`); ayarlar: Haritanı kimler görsün, Bildirimler, Konum (Gezi günlerinde), Dil, Yardım ve geri bildirim, Çıkış
+ * #138 → #144 (kanvas 22 · Profil): foto, ad, @kullanıcı adı, Düzenle; ayarlar: Haritanı kimler görsün, Bildirimler, Konum (Gezi günlerinde), Dil, Yardım ve geri bildirim, Çıkış
  * yap; Hesabı sil.
- * #275 KK4 (kanvas 29d): en üstte "‹ Keşfet"; kimliğin altında iki sekme — Gezilerim · N (geçmiş seyahatler, eski Seyahatler
- * ekranının GEÇMİŞ bölümü) ve Ayarlar (sayılar ve aşağıdaki ayar satırları). Açılışta Gezilerim seçili.
+ * #275 KK4 (kanvas 29d): en üstte "‹ Keşfet"; kimliğin altında iki sekme — Gezilerim · N (YAKLAŞAN: bitmemiş seyahatler ve
+ * taslaklar; GEÇMİŞ: biten seyahatler; N ikisinin toplamı) ve Ayarlar (ayar satırları). Açılışta Gezilerim seçili; 29d'de
+ * sayı kutuları yok, kalktı.
  */
 export default function ProfilEkrani() {
   const parametre = useLocalSearchParams<{ sekme?: string }>();
   const [sekme, setSekme] = useState<'gezilerim' | 'ayarlar'>(parametre.sekme === 'ayarlar' ? 'ayarlar' : 'gezilerim');
   const seyahatler = useSeyahatler();
-  const gecmis = useMemo(() => siniflandir(seyahatler.data ?? []).gecmis, [seyahatler.data]);
+  // Bitmemiş = bugün süren + gelecekteki + tarihsiz taslak; sorgu sırası tarihe göre artan, tarihsizler sonda.
+  const { yaklasan, gecmis } = useMemo(() => {
+    const { aktif, yaklasan: gelecek, gecmis: biten } = siniflandir(seyahatler.data ?? []);
+    return { yaklasan: [...aktif, ...gelecek], gecmis: biten };
+  }, [seyahatler.data]);
+  // Profil yığında açıkken /seyahatler?sekme=… ile yeniden gelinirse sekme parametreye uyar (parametre değişince, render
+  // sırasında ayarlanır; efektte setState lint kuralına takılır).
+  const [oncekiParametre, setOncekiParametre] = useState(parametre.sekme);
+  if (parametre.sekme !== oncekiParametre) {
+    setOncekiParametre(parametre.sekme);
+    if (parametre.sekme === 'ayarlar' || parametre.sekme === 'gezilerim') setSekme(parametre.sekme);
+  }
   const bildirim = useKisaBildirim();
-  const kesfeteDon = () => (router.canGoBack() ? router.back() : router.replace('/(tabs)'));
   const profil = useProfil();
-  const sayilar = useProfilSayilari();
   const guncelle = useProfilGuncelle();
   // Konum yalnız gezi günlerinde (Program) istenir; burada iznin durumu, dokununca telefon ayarları.
   const konumIzni = useQuery({ queryKey: ['konum-izni'], queryFn: async () => (await Location.getForegroundPermissionsAsync()).status });
   useFocusEffect(
     useCallback(() => {
       konumIzni.refetch();
-      sayilar.refetch();
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []),
   );
@@ -62,10 +71,7 @@ export default function ProfilEkrani() {
   return (
     <SafeAreaView style={s.ekran} edges={['top']}>
       <ScrollView contentContainerStyle={s.icerik}>
-        <Pressable accessibilityRole="button" onPress={kesfeteDon} hitSlop={4} style={({ pressed }) => [s.kesfet, pressed && { opacity: 0.8 }]}>
-          <Ikon ad="geri" boyut={20} renk={renk.ana} kalinlik={2.6} />
-          <Text style={s.kesfetMetin}>{t('profil.kesfet')}</Text>
-        </Pressable>
+        <KesfetHapi />
 
         {p ? (
           <View style={s.kimlik}>
@@ -90,21 +96,15 @@ export default function ProfilEkrani() {
             const secili = sekme === k;
             return (
               <Pressable key={k} accessibilityRole="tab" accessibilityState={{ selected: secili }} onPress={() => setSekme(k)} style={[s.sekme, secili && s.sekmeSecili]}>
-                <Text style={[s.sekmeMetin, secili && { color: renk.metin }]}>{k === 'gezilerim' ? t('profil.gezilerim', { n: gecmis.length }) : t('profil.ayarlar')}</Text>
+                <Text style={[s.sekmeMetin, secili && { color: renk.metin }]}>{k === 'gezilerim' ? t('profil.gezilerim', { n: yaklasan.length + gecmis.length }) : t('profil.ayarlar')}</Text>
               </Pressable>
             );
           })}
         </View>
 
-        {sekme === 'gezilerim' ? <Gezilerim gecmis={gecmis} onBildirim={bildirim.goster} /> : null}
+        {sekme === 'gezilerim' ? <Gezilerim yaklasan={yaklasan} gecmis={gecmis} onBildirim={bildirim.goster} /> : null}
 
         <AyarlarSekmesi gorunur={sekme === 'ayarlar'}>
-          <View style={s.sayilar}>
-            <Sayi n={sayilar.data?.seyahat} etiket={t('profil.sayiSeyahat')} />
-            <Sayi n={sayilar.data?.gezilen} etiket={t('profil.sayiGezilen')} />
-            <Sayi n={sayilar.data?.sehir} etiket={t('profil.sayiSehir')} />
-          </View>
-
           <View>
             <Satir baslik={t('profil.gizlilik')} deger={p ? t(`profilKur.gizlilik.${p.map_visibility}`) : ''} onPress={() => setGizlilikAcik(true)} />
             <Satir baslik={t('profil.bildirimler')} onPress={ayarlar} />
@@ -172,20 +172,9 @@ export default function ProfilEkrani() {
   );
 }
 
-/** Ayarlar sekmesinin gövdesi: sayılar, ayar satırları, son hata, Hesabı sil ve OSM atfı alt alta (aralık ekranla aynı). */
+/** Ayarlar sekmesinin gövdesi: ayar satırları, son hata, Hesabı sil ve OSM atfı alt alta (aralık ekranla aynı). */
 function AyarlarSekmesi({ gorunur, children }: { gorunur: boolean; children: ReactNode }) {
   return gorunur ? <View style={{ gap: 18 }}>{children}</View> : null;
-}
-
-function Sayi({ n, etiket }: { n: number | undefined; etiket: string }) {
-  return (
-    <View style={s.sayi}>
-      <Text style={s.sayiDeger}>{n ?? '–'}</Text>
-      <Text style={s.sayiEtiket} numberOfLines={1}>
-        {etiket}
-      </Text>
-    </View>
-  );
 }
 
 function Satir({ baslik, deger, onPress, tehlike, okYok }: { baslik: string; deger?: string; onPress?: () => void; tehlike?: boolean; okYok?: boolean }) {
@@ -205,8 +194,6 @@ function Satir({ baslik, deger, onPress, tehlike, okYok }: { baslik: string; deg
 const s = StyleSheet.create({
   ekran: { flex: 1, backgroundColor: renk.zemin },
   icerik: { paddingHorizontal: bosluk.kenar, paddingTop: 8, paddingBottom: 32, gap: 18 },
-  kesfet: { alignSelf: 'flex-start', height: 40, paddingLeft: 8, paddingRight: 14, borderRadius: 999, backgroundColor: renk.yuzey, flexDirection: 'row', alignItems: 'center', gap: 4 },
-  kesfetMetin: { fontFamily: yazi.baslik, fontSize: 15, color: renk.metin },
   sekmeler: { flexDirection: 'row', gap: 4, padding: 4, borderRadius: 14, backgroundColor: renk.yuzey },
   sekme: { flex: 1, height: 38, borderRadius: 11, alignItems: 'center', justifyContent: 'center' },
   sekmeSecili: { backgroundColor: renk.zemin, shadowColor: renk.metin, shadowOpacity: 0.1, shadowRadius: 3, shadowOffset: { width: 0, height: 1 }, elevation: 1 },
@@ -217,10 +204,6 @@ const s = StyleSheet.create({
   kullaniciAdi: { fontFamily: yazi.normal, fontSize: 14, color: renk.ikincil },
   duzenle: { flexShrink: 0, height: 38, paddingHorizontal: 12, borderRadius: kose.alan, backgroundColor: renk.yuzey, justifyContent: 'center' },
   duzenleMetin: { fontFamily: yazi.ekstra, fontSize: 13, color: renk.ana },
-  sayilar: { flexDirection: 'row', gap: 8 },
-  sayi: { flex: 1, padding: 12, borderRadius: 16, backgroundColor: renk.yuzey, gap: 2 },
-  sayiDeger: { fontFamily: yazi.baslik, fontSize: 22, color: renk.metin },
-  sayiEtiket: { fontFamily: yazi.ekstra, fontSize: 12, color: renk.ikincil },
   satir: { flexDirection: 'row', alignItems: 'center', gap: 10, height: 52, paddingHorizontal: 4, borderBottomWidth: 1, borderBottomColor: renk.ayrac },
   satirBaslik: { flex: 1, fontFamily: yazi.ekstra, fontSize: 15, color: renk.metin },
   satirDeger: { fontFamily: yazi.normal, fontSize: 14, color: renk.ikincil },

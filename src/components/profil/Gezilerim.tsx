@@ -1,7 +1,7 @@
 import { router } from 'expo-router';
 import { StyleSheet, Text, View } from 'react-native';
 
-import { GecmisSatiri } from '@/components/seyahatler/SeyahatSatiri';
+import { GecmisSatiri, YaklasanSatiri } from '@/components/seyahatler/SeyahatSatiri';
 import { useSeyahattenAyril } from '@/features/davet/sorgular';
 import { useSeyahatDurumlari } from '@/features/seyahatler/durum';
 import { eylemMenusu, sahipMi, silmeMetni } from '@/features/seyahatler/silme';
@@ -15,11 +15,12 @@ import type { SeyahatOzet } from '@/lib/tipler';
 import { renk, yazi } from '@/theme';
 
 /**
- * #275 KK4 (kanvas 29d · Profil › Gezilerim): eski Seyahatler ekranının GEÇMİŞ bölümü. Satır: harf karosu, ad,
+ * #275 KK4 (kanvas 29d · Profil › Gezilerim): YAKLAŞAN — bitmemiş bütün seyahatler ve taslaklar (tarih sırası, taslaklar sonda;
+ * boşsa bölüm yok), satır dokununca seyahati açar, sağda chevron. GEÇMİŞ — eski Seyahatler ekranının bölümü. Geçmiş satırı: harf karosu, ad,
  * "Ay yıl · N mekan gezildi · N kişi", Tekrar kur (aynı plan, yeni tarih → sihirbaz 2. adım). Uzun basınca #174 menüsü:
  * sahipte "Seyahati sil", üyede "Seyahatten ayrıl"; onay, kısa bildirim.
  */
-export function Gezilerim({ gecmis, onBildirim }: { gecmis: SeyahatOzet[]; onBildirim: (metin: string) => void }) {
+export function Gezilerim({ yaklasan, gecmis, onBildirim }: { yaklasan: SeyahatOzet[]; gecmis: SeyahatOzet[]; onBildirim: (metin: string) => void }) {
   const durumlar = useSeyahatDurumlari();
   const { session } = useOturum();
   const sil = useSeyahatSil();
@@ -60,10 +61,14 @@ export function Gezilerim({ gecmis, onBildirim }: { gecmis: SeyahatOzet[]; onBil
     }
   };
 
-  if (gecmis.length === 0) return <Text style={s.bos}>{t('profil.gezilerimBos')}</Text>;
+  if (yaklasan.length === 0 && gecmis.length === 0) return <Text style={s.bos}>{t('profil.gezilerimBos')}</Text>;
   return (
     <View style={s.liste}>
-      <Text style={s.baslik}>{t('seyahatler.gecmis')}</Text>
+      {yaklasan.length > 0 ? <Text style={s.baslik}>{t('seyahatler.yaklasan')}</Text> : null}
+      {yaklasan.map((sy, i) => (
+        <YaklasanSatiri key={sy.id} seyahat={sy} sira={i} onPress={() => ac(sy.id)} onUzunBas={() => uzunBas(sy)} />
+      ))}
+      {gecmis.length > 0 ? <Text style={[s.baslik, yaklasan.length > 0 && { marginTop: 6 }]}>{t('seyahatler.gecmis')}</Text> : null}
       {gecmis.map((sy, i) => (
         <GecmisSatiri key={sy.id} seyahat={sy} sira={i} durum={durumlar.data?.get(sy.id)} onPress={() => ac(sy.id)} onUzunBas={() => uzunBas(sy)} onTekrar={() => tekrarKur(sy.id)} />
       ))}
