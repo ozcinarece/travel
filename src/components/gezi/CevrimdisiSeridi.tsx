@@ -1,9 +1,9 @@
 // #243 KK3 (kanvas 23c): bağlantı yokken Gezi sayfasının en üstündeki şerit — üstü çizili Wi-Fi, "Çevrimdışı · son güncelleme
 // 08:12" ve "Plan okunur; bağlanınca kendiliğinden yenilenir". Saat seyahatin saat dilimine göre (trips.tz).
-// #293 KK1: son güncelleme bugün değilse "dün 22:40" ya da "16 Kas 22:40". KK7: şerit çıkınca iOS'ta da duyurulur
-// (`accessibilityLiveRegion` yalnız Android'de çalışır). KK5: sohbet ekranında da aynı şerit.
-import { useEffect } from 'react';
-import { AccessibilityInfo, Platform, StyleSheet, Text, View, type StyleProp, type ViewStyle } from 'react-native';
+// #293 KK1: son güncelleme bugün değilse "dün 22:40" ya da "16 Kas 22:40"; `an` ekranın akan saati (useSimdi), gece yarısı
+// geçince "dün"e döner. KK7: iOS duyurusu burada değil, `baglanti.ts`'te çevrimdışına geçildiği anda bir kez yapılır (Gezi ve
+// Sohbet ikisi de açıkken iki kez okunmasın). KK5: sohbet ekranında da aynı şerit.
+import { StyleSheet, Text, View, type StyleProp, type ViewStyle } from 'react-native';
 
 import { Ikon } from '@/components/ui/Ikon';
 import { t } from '@/i18n';
@@ -20,14 +20,9 @@ export function seritBasligi(guncellendi: number, tz: string, an: Date = new Dat
   return t('geziSayfasi.cevrimdisi.baslikTarih', { gun: g.gun, ay: AYLAR_KISA[g.ay - 1], saat: g.saat });
 }
 
-export function CevrimdisiSeridi({ guncellendi, tz, style }: { guncellendi: number; tz: string; style?: StyleProp<ViewStyle> }) {
-  const baslik = seritBasligi(guncellendi, tz);
+export function CevrimdisiSeridi({ guncellendi, tz, an, style }: { guncellendi: number; tz: string; an?: Date; style?: StyleProp<ViewStyle> }) {
+  const baslik = seritBasligi(guncellendi, tz, an);
   const alt = t('geziSayfasi.cevrimdisi.alt');
-  useEffect(() => {
-    if (Platform.OS === 'ios') AccessibilityInfo.announceForAccessibility(`${baslik}. ${alt}`);
-    // Yalnız şerit çıktığında bir kez duyurulur.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
   return (
     <View accessibilityRole="summary" accessibilityLiveRegion="polite" style={[s.serit, style]}>
       <View style={s.ikon}>

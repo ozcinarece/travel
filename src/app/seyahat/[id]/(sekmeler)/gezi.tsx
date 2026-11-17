@@ -389,7 +389,7 @@ function GeziSayfasi({ seyahat, gunler, duraklar, mekanlar, konaklamalar, katild
           cevrimdisi={cevrimdisi}
         />
         <View style={[s.icerik, mod === 'gezi' && s.icerikGezi]}>
-          {cevrimdisi ? <CevrimdisiSeridi guncellendi={guncellendi} tz={seyahat.tz} /> : null}
+          {cevrimdisi ? <CevrimdisiSeridi guncellendi={guncellendi} tz={seyahat.tz} an={an} /> : null}
           {hatirlatmaVakti(seyahat, an) && mod !== 'plan' ? <HatirlatmaSatiri ozet={hOzet} k={kisiler} ibanlar={ibanlar.data} onBakiyeler={bakiyeler} /> : null}
           {mod === 'gezi' ? (
             <>

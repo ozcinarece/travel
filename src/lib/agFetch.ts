@@ -1,12 +1,16 @@
 // #293 KK3: takılan bağlantı. Supabase istemcisinin `fetch`'i:
 // - 15 sn içinde yanıt gelmezse istek kesilir ve ağ hatası olarak düşer (`TypeError: Network request failed …`;
 //   `agHatasi` bunu tanır, şerit çıkar). Dosya yüklemeleri (Storage'a POST/PUT) hariç: yavaş ağda büyük fotoğraf 15 sn'yi
-//   meşru olarak aşabilir.
+//   meşru olarak aşabilir; onlara 90 sn üst sınır konur (aşılırsa yine ağ hatası; ekranda mevcut "yüklenemedi" metni çıkar).
+//   İmzalı URL, listeleme, taşıma, kopyalama ve bilgi istekleri (`/object/sign|list|move|copy|info`) POST olsa da yükleme
+//   değildir; 15 sn'ye tabidir.
 // - Supabase hiçbir zaman HTML döndürmez. HTML ya da (veritabanı ve oturum uçlarında) JSON olmayan bir yanıt, otel
 //   Wi-Fi'sinin giriş sayfası gibi araya giren bir ağdır: o da ağ hatası sayılır.
 
 /** İstek başına zaman aşımı. */
 export const ZAMAN_ASIMI_MS = 15_000;
+/** Storage'a dosya yükleme başına zaman aşımı. */
+export const YUKLEME_ZAMAN_ASIMI_MS = 90_000;
 
 type Fetch = typeof fetch;
 
@@ -20,8 +24,10 @@ function adres(girdi: Parameters<Fetch>[0]): string {
   return (girdi as { url?: string }).url ?? '';
 }
 
-function yuklemeMi(url: string, yontem: string): boolean {
-  return /\/storage\/v1\/object\//.test(url) && (yontem === 'POST' || yontem === 'PUT');
+export function yuklemeMi(url: string, yontem: string): boolean {
+  if (yontem !== 'POST' && yontem !== 'PUT') return false;
+  if (!/\/storage\/v1\/object\//.test(url)) return false;
+  return !/\/storage\/v1\/object\/(sign|list|move|copy|info)(\/|\?|$)/.test(url);
 }
 
 /** Yanıt araya giren bir ağdan mı (giriş sayfası)? */
@@ -34,11 +40,11 @@ export function arayaGirenYanit(url: string, yanit: Pick<Response, 'headers' | '
 }
 
 /** `fetch`'i zaman aşımı ve giriş sayfası denetimiyle sarar. */
-export function agFetch(temel: Fetch = fetch, zamanAsimiMs: number = ZAMAN_ASIMI_MS): Fetch {
+export function agFetch(temel: Fetch = fetch, zamanAsimiMs: number = ZAMAN_ASIMI_MS, yuklemeZamanAsimiMs: number = YUKLEME_ZAMAN_ASIMI_MS): Fetch {
   return async (girdi, secenek) => {
     const url = adres(girdi);
     const yontem = (secenek?.method ?? 'GET').toUpperCase();
-    if (yuklemeMi(url, yontem)) return temel(girdi, secenek);
+    const sure = yuklemeMi(url, yontem) ? yuklemeZamanAsimiMs : zamanAsimiMs;
 
     const denetci = new AbortController();
     const dis = secenek?.signal;
@@ -51,7 +57,7 @@ export function agFetch(temel: Fetch = fetch, zamanAsimiMs: number = ZAMAN_ASIMI
     const zamanlayici = setTimeout(() => {
       asildi = true;
       denetci.abort();
-    }, zamanAsimiMs);
+    }, sure);
     try {
       const yanit = await temel(girdi, { ...secenek, signal: denetci.signal });
       if (arayaGirenYanit(url, yanit)) throw agHatasiOlustur('giriş sayfası');

@@ -87,12 +87,12 @@ export default function SohbetSekmesi() {
   if (!id || !seyahat.data || !uyeler.data || !mesajlar.data || !oylamalar.data) {
     return <SeyahatYukleme sorgular={[seyahat, uyeler, mesajlar, oylamalar]} kimlikYok={!id} />;
   }
-  return <Sohbet seyahat={seyahat.data} uyeler={uyeler.data} mesajlar={mesajlar.data} oylamalar={oylamalar.data} guncellendi={mesajlar.dataUpdatedAt} />;
+  return <Sohbet seyahat={seyahat.data} uyeler={uyeler.data} mesajlar={mesajlar.data} oylamalar={oylamalar.data} seyahatGuncellendi={seyahat.dataUpdatedAt} />;
 }
 
 type Acik = 'mekan' | 'oylama' | 'harcama' | 'grup' | null;
 
-function Sohbet({ seyahat, uyeler, mesajlar, oylamalar, guncellendi }: { seyahat: Seyahat; uyeler: Uye[]; mesajlar: Mesaj[]; oylamalar: Oylama[]; guncellendi: number }) {
+function Sohbet({ seyahat, uyeler, mesajlar, oylamalar, seyahatGuncellendi }: { seyahat: Seyahat; uyeler: Uye[]; mesajlar: Mesaj[]; oylamalar: Oylama[]; seyahatGuncellendi: number }) {
   // #293 KK5: bağlantı yokken en üstte 23c şeridi; giriş kutusu ve gönder pasif (yazılan metin silinmez, gönderilmez).
   const cevrimdisi = useCevrimdisi();
   const { session } = useOturum();
@@ -108,6 +108,8 @@ function Sohbet({ seyahat, uyeler, mesajlar, oylamalar, guncellendi }: { seyahat
   const mekanlar = useMemo(() => mekanlarQ.data ?? [], [mekanlarQ.data]);
   const duraklar = useMemo(() => duraklarQ.data ?? [], [duraklarQ.data]);
   const gunler = useMemo(() => gunlerQ.data ?? [], [gunlerQ.data]);
+  // Şeridin "son güncelleme" saati Gezi'deki kaynaktan: mesajların zamanı iyimser gönderimle (setQueryData) ilerler.
+  const guncellendi = Math.max(seyahatGuncellendi, gunlerQ.dataUpdatedAt, duraklarQ.dataUpdatedAt);
   const k = useMemo(() => kisiKaynagi(uyeler), [uyeler]);
   const sahip = uyeler.some((u) => u.user_id === benId && u.role === 'owner');
 
@@ -330,7 +332,15 @@ function Sohbet({ seyahat, uyeler, mesajlar, oylamalar, guncellendi }: { seyahat
     setAcik(null);
     const not = metin.trim();
     setMetin('');
-    gonder.mutate({ tur: 'mekan', place_id: placeId, metin: not.slice(0, 2000) }, { onError: () => bildir(t('sohbet.gonderilemedi')) });
+    gonder.mutate(
+      { tur: 'mekan', place_id: placeId, metin: not.slice(0, 2000) },
+      {
+        onError: () => {
+          setMetin((m) => m || not);
+          bildir(t('sohbet.gonderilemedi'));
+        },
+      },
+    );
   };
   const fotoGonder = async () => {
     setFotoYukleniyor(true);
@@ -383,7 +393,7 @@ function Sohbet({ seyahat, uyeler, mesajlar, oylamalar, guncellendi }: { seyahat
         </View>
       </View>
 
-      {cevrimdisi ? <CevrimdisiSeridi guncellendi={guncellendi} tz={seyahat.tz} style={s.serit} /> : null}
+      {cevrimdisi ? <CevrimdisiSeridi guncellendi={guncellendi} tz={seyahat.tz} an={an} style={s.serit} /> : null}
 
       <FlatList
         inverted
@@ -405,7 +415,16 @@ function Sohbet({ seyahat, uyeler, mesajlar, oylamalar, guncellendi }: { seyahat
       <View style={[s.alt, { paddingBottom: 10 }]}>
         <View style={s.ekler}>
           {ekler.map((e) => (
-            <Pressable key={e.ad} accessibilityRole="button" hitSlop={EK_PAYI} onPress={e.onPress} disabled={e.ikon === 'galeri' && fotoYukleniyor} style={({ pressed }) => [s.ek, pressed && { opacity: 0.8 }]}>
+            <Pressable
+              key={e.ad}
+              accessibilityRole="button"
+              accessibilityState={{ disabled: cevrimdisi || (e.ikon === 'galeri' && fotoYukleniyor) }}
+              accessibilityHint={cevrimdisi ? t('geziSayfasi.cevrimdisi.baglantiYok') : undefined}
+              hitSlop={EK_PAYI}
+              onPress={e.onPress}
+              disabled={cevrimdisi || (e.ikon === 'galeri' && fotoYukleniyor)}
+              style={({ pressed }) => [s.ek, cevrimdisi && { opacity: 0.4 }, pressed && { opacity: 0.8 }]}
+            >
               {e.ikon === 'galeri' && fotoYukleniyor ? <ActivityIndicator size="small" color={renk.ana} /> : <Ikon ad={e.ikon} boyut={14} renk={renk.ana} kalinlik={2.4} />}
               <Text style={s.ekMetin}>{e.ad}</Text>
             </Pressable>

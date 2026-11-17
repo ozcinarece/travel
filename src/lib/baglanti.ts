@@ -8,7 +8,9 @@
 // yanıtla ya da ilk başarıdan sonra 3 sn hiç ağ hatası gelmezse.
 import type { QueryClient, QueryKey } from '@tanstack/react-query';
 import { useSyncExternalStore } from 'react';
-import { AppState } from 'react-native';
+import { AccessibilityInfo, AppState, Platform } from 'react-native';
+
+import { t } from '@/i18n';
 
 /** Çevrimdışıyken yeniden deneme aralığı. */
 export const YOKLAMA_MS = 20_000;
@@ -58,6 +60,9 @@ const dinleyiciler = new Set<() => void>();
 function ayarla(deger: boolean) {
   if (cevrimdisi === deger) return;
   cevrimdisi = deger;
+  // #293 KK7: iOS'ta `accessibilityLiveRegion` çalışmaz; çevrimdışına geçildiği anda tek yerden, bir kez duyurulur
+  // (açık ekran sayısından bağımsız). Android'de şeridin canlı bölgesi okur.
+  if (deger && Platform.OS === 'ios') AccessibilityInfo.announceForAccessibility(`${t('geziSayfasi.cevrimdisi.baslikSaatsiz')}. ${t('geziSayfasi.cevrimdisi.alt')}`);
   dinleyiciler.forEach((d) => d());
 }
 

@@ -1,6 +1,7 @@
 // #243 KK3: bağlantı durumu sorgu sonuçlarından çıkarılır (NetInfo yok).
 import { afterEach, describe, expect, it, jest } from "@jest/globals";
 import { QueryClient, QueryObserver } from "@tanstack/react-query";
+import { AccessibilityInfo, Platform } from "react-native";
 
 import {
   agHatasi,
@@ -70,6 +71,44 @@ describe("baglantiyiIzle", () => {
     expect(cevrimdisiMi()).toBe(false);
     expect(yenile).toHaveBeenCalledTimes(1);
     qc.clear();
+  });
+
+  it("#293 KK7: iOS duyurusu çevrimdışına geçildiği anda tek yerden, bir kez yapılır", async () => {
+    const duyur = jest
+      .spyOn(AccessibilityInfo, "announceForAccessibility")
+      .mockImplementation(() => undefined);
+    try {
+      expect(Platform.OS).toBe("ios");
+      const qc = new QueryClient({
+        defaultOptions: { queries: { retry: false } },
+      });
+      birak = baglantiyiIzle(qc, { yoklamaMs: 60_000 });
+      const dus = (k: string) =>
+        qc
+          .fetchQuery({ queryKey: [k], queryFn: () => Promise.reject(AG) })
+          .catch(() => undefined);
+      // Gezi ve Sohbet aynı anda açıkken iki sorgu düşer: duyuru yine bir kez.
+      // Önceki testlerden kalan işler bitsin; sayım temiz başlasın.
+      await new Promise((r) => setTimeout(r, 0));
+      baglantiyiSifirla();
+      duyur.mockClear();
+      await dus("seyahat");
+      await dus("mesajlar");
+      expect(duyur).toHaveBeenCalledTimes(1);
+      expect(duyur).toHaveBeenCalledWith(
+        "Çevrimdışı. Plan okunur; bağlanınca kendiliğinden yenilenir",
+      );
+      // Çevrimiçine dönüşte duyuru yok; yeniden kopunca bir kez daha.
+      for (const k of ["profil-a", "profil-b"])
+        await qc.fetchQuery({ queryKey: [k], queryFn: () => Promise.resolve(1) });
+      expect(cevrimdisiMi()).toBe(false);
+      expect(duyur).toHaveBeenCalledTimes(1);
+      await dus("seyahat-2");
+      expect(duyur).toHaveBeenCalledTimes(2);
+      qc.clear();
+    } finally {
+      duyur.mockRestore();
+    }
   });
 
   it("bağlantı dönünce yalnız bizim sorgularımız yenilenir; Google sorguları (Edge Function) yeniden gitmez", async () => {

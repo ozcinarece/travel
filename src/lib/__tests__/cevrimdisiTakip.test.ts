@@ -4,7 +4,7 @@ import { QueryClient } from '@tanstack/react-query';
 
 import { seritBasligi } from '@/components/gezi/CevrimdisiSeridi';
 
-import { agFetch, arayaGirenYanit } from '../agFetch';
+import { agFetch, arayaGirenYanit, YUKLEME_ZAMAN_ASIMI_MS, yuklemeMi, ZAMAN_ASIMI_MS } from '../agFetch';
 import { agHatasi } from '../baglanti';
 import { cihazaYazilsinMi, ONBELLEK_OMRU_MS } from '../kaliciOnbellek';
 import { guncellemeGunu } from '../zaman';
@@ -76,13 +76,65 @@ describe('KK3: takılan bağlantı', () => {
     expect(arayaGirenYanit(REST, new Response('ok', { headers: { 'content-type': 'text/plain' } }))).toBe(true);
   });
 
-  it('normal yanıtlar geçer: JSON, 204, Storage dosyası; yüklemeye zaman aşımı konmaz', async () => {
+  it('normal yanıtlar geçer: JSON, 204, Storage dosyası', () => {
     expect(arayaGirenYanit(REST, new Response('[]', { headers: { 'content-type': 'application/json; charset=utf-8' } }))).toBe(false);
     expect(arayaGirenYanit(REST, new Response(null, { status: 204 }))).toBe(false);
     expect(arayaGirenYanit('https://x.supabase.co/storage/v1/object/sign/fisler/a.jpg', new Response('x', { headers: { 'content-type': 'image/jpeg' } }))).toBe(false);
-    const temel = jest.fn(async (_g: unknown, _s?: RequestInit) => new Response('{}', { headers: { 'content-type': 'application/json' } }));
-    await agFetch(temel as unknown as typeof fetch)('https://x.supabase.co/storage/v1/object/sohbet/a.jpg', { method: 'POST' });
-    expect((temel.mock.calls[0][1] as RequestInit | undefined)?.signal).toBeUndefined();
+  });
+
+  /** Yanıt vermeyen bir ağ: istek yalnız iptal edilince düşer. */
+  function takilanAg() {
+    let sinyal: AbortSignal | undefined;
+    const temel = jest.fn((_g: unknown, s?: RequestInit) => {
+      sinyal = s?.signal ?? undefined;
+      return new Promise<Response>((_, reddet) => s?.signal?.addEventListener('abort', () => reddet(Object.assign(new Error('Aborted'), { name: 'AbortError' }))));
+    });
+    return { temel: temel as unknown as typeof fetch, iptal: () => sinyal?.aborted };
+  }
+
+  it('yükleme sayılan istekler: yalnız dosya gövdesi giden POST/PUT; imzalı URL, liste, taşıma, kopya, bilgi değil', () => {
+    const S = 'https://x.supabase.co/storage/v1/object';
+    expect(yuklemeMi(`${S}/sohbet/t1/a.jpg`, 'POST')).toBe(true);
+    expect(yuklemeMi(`${S}/profil/u1.jpg`, 'PUT')).toBe(true);
+    for (const yol of ['sign/fisler/t1/a.jpg', 'sign/sohbet', 'list/fisler', 'move', 'copy', 'info/fisler/a.jpg']) expect(yuklemeMi(`${S}/${yol}`, 'POST')).toBe(false);
+    expect(yuklemeMi(`${S}/sohbet/t1/a.jpg`, 'GET')).toBe(false);
+  });
+
+  it('imzalı URL isteği (POST /object/sign/…) 15 sn\'de kesilir', async () => {
+    jest.useFakeTimers();
+    try {
+      const ag = takilanAg();
+      const sonuc = agFetch(ag.temel)('https://x.supabase.co/storage/v1/object/sign/fisler/t1/a.jpg', { method: 'POST', body: '{"expiresIn":3600}' }).then(
+        () => null,
+        (e: unknown) => e,
+      );
+      jest.advanceTimersByTime(ZAMAN_ASIMI_MS - 1);
+      expect(ag.iptal()).toBe(false);
+      jest.advanceTimersByTime(1);
+      expect(agHatasi(await sonuc)).toBe(true);
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
+  it('dosya yüklemesi 15 sn\'de kesilmez, 90 sn\'de kesilir ve ağ hatası sayılır', async () => {
+    jest.useFakeTimers();
+    try {
+      const ag = takilanAg();
+      const sonuc = agFetch(ag.temel)('https://x.supabase.co/storage/v1/object/fisler/t1/a.jpg', { method: 'POST', body: 'x' }).then(
+        () => null,
+        (e: unknown) => e,
+      );
+      jest.advanceTimersByTime(ZAMAN_ASIMI_MS);
+      expect(ag.iptal()).toBe(false);
+      jest.advanceTimersByTime(YUKLEME_ZAMAN_ASIMI_MS - ZAMAN_ASIMI_MS - 1);
+      expect(ag.iptal()).toBe(false);
+      jest.advanceTimersByTime(1);
+      expect(ag.iptal()).toBe(true);
+      expect(agHatasi(await sonuc)).toBe(true);
+    } finally {
+      jest.useRealTimers();
+    }
   });
 
   it('çağıranın iptali iletilir (zaman aşımı sayılmaz); sunucu hatası (4xx) geçer', async () => {

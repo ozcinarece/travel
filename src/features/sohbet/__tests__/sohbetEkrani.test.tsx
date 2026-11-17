@@ -34,13 +34,17 @@ jest.mock('expo-router', () => ({
 type Tablolar = Record<string, unknown[]>;
 let mockTablolar: Tablolar = {};
 const mockKayit = { invoke: [] as string[], rpc: [] as { ad: string; args: Record<string, unknown> }[], yaz: [] as { tablo: string; islem: string; satir: unknown }[], dosyaSil: [] as string[] };
+// #293: verilirse bu tabloya yazma sunucu hatasıyla döner.
+let mockYazmaHatasi: string | null = null;
 function mockSorgu(tablo: string) {
   let tek = false;
+  let yazma = false;
   const zincir: Record<string | symbol, unknown> = new Proxy(
     {},
     {
       get(_hedef, ad) {
         if (ad === 'then') {
+          if (yazma && mockYazmaHatasi === tablo) return (coz: (v: unknown) => unknown) => Promise.resolve({ data: null, error: { message: 'hata', code: '500' } }).then(coz);
           const satirlar = mockTablolar[tablo] ?? [];
           const sonuc = tek ? { data: satirlar[0] ?? null, error: satirlar[0] ? null : { code: 'PGRST116' } } : { data: satirlar, error: null };
           return (coz: (v: unknown) => unknown, red: (e: unknown) => unknown) => Promise.resolve(sonuc).then(coz, red);
@@ -54,6 +58,7 @@ function mockSorgu(tablo: string) {
         if (ad === 'insert' || ad === 'upsert' || ad === 'update') {
           return (satir: unknown) => {
             mockKayit.yaz.push({ tablo, islem: ad, satir });
+            yazma = true;
             return zincir;
           };
         }
@@ -242,6 +247,7 @@ beforeEach(() => {
   mockTablolar = fikstur();
   mockHafif = null;
   mockCevrimdisi = false;
+  mockYazmaHatasi = null;
   mockHafifIstekleri = [];
   mockHafifBekle = null;
 });
@@ -496,9 +502,9 @@ describe('#293 çevrimdışı: sohbet ekranı ve oylama adları', () => {
       'pro',
     );
 
-  it('KK5: en üstte 23c şeridi; giriş kutusu ve gönder pasif, "Bağlantı yok" ipucuyla', async () => {
+  it('KK5: en üstte 23c şeridi; giriş kutusu, gönder ve dört ek pasif, "Bağlantı yok" ipucuyla', async () => {
     mockCevrimdisi = true;
-    const { getByText, getByLabelText, qc } = ciz(<SohbetSekmesi />);
+    const { getByText, getByLabelText, getByRole, queryByText, qc } = ciz(<SohbetSekmesi />);
     await waitFor(() => getByText(/Çevrimdışı · son güncelleme/));
     await sakinles(qc);
     expect(getByText('Plan okunur; bağlanınca kendiliğinden yenilenir')).toBeTruthy();
@@ -509,6 +515,29 @@ describe('#293 çevrimdışı: sohbet ekranı ve oylama adları', () => {
     expect(gonder.props.accessibilityHint).toBe('Bağlantı yok');
     fireEvent.press(gonder);
     expect(mockKayit.yaz).toEqual([]);
+    // Ekler de pasif: iyimser balon "gönderildi" gibi görünüp sonra düşmesin.
+    for (const ad of ['Mekan', 'Oylama', 'Fotoğraf', 'Harcama']) {
+      const ek = getByRole('button', { name: ad });
+      expect(ek.props.accessibilityState?.disabled).toBe(true);
+      expect(ek.props.accessibilityHint).toBe('Bağlantı yok');
+      fireEvent.press(ek);
+    }
+    expect(queryByText('Mekan ara')).toBeNull();
+    expect(mockKayit.yaz).toEqual([]);
+  });
+
+  it('mekan paylaşımı düşerse yazılan not geri gelir', async () => {
+    mockYazmaHatasi = 'mesajlar';
+    const { getByText, getByLabelText, getByRole, getAllByText, qc } = ciz(<SohbetSekmesi />);
+    await waitFor(() => getByText('Çibörek mi, balık mı?'));
+    await sakinles(qc);
+    fireEvent.changeText(getByLabelText('Mesaj yaz…'), 'Buraya gidelim');
+    fireEvent.press(getByRole('button', { name: 'Mekan' }));
+    await waitFor(() => getByLabelText('Mekan ara'));
+    const satirlar = getAllByText('Kurşunlu Külliyesi');
+    fireEvent.press(satirlar[satirlar.length - 1]);
+    await waitFor(() => expect(mockKayit.yaz.some((y) => y.tablo === 'mesajlar')).toBe(true));
+    await waitFor(() => expect(getByLabelText('Mesaj yaz…').props.value).toBe('Buraya gidelim'));
   });
 
   it('KK5: bağlantı varken şerit yok, giriş açık', async () => {

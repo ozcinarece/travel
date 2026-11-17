@@ -4,7 +4,6 @@ import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render, waitFor } from '@testing-library/react-native';
 import type { ReactNode } from 'react';
-import { AccessibilityInfo, Platform } from 'react-native';
 
 import { SeyahatIdSaglayici } from '@/features/seyahatler/baglam';
 import { hafifOnbellek } from '@/features/yerler/api';
@@ -355,28 +354,6 @@ describe('#243 çevrimdışı: son görülen hal okunur (kanvas 23c)', () => {
     for (const el of [getByLabelText('Davet linkini gönder'), getByLabelText('Diğer: Atla, Başka güne al'), getByRole('button', { name: 'Mesaj at' }), getByRole('button', { name: 'Harcama ekle' })])
       expect(el.props.accessibilityHint).toBe('Bağlantı yok');
     expect(getByRole('button', { name: 'Yol tarifi' }).props.accessibilityHint).toBeUndefined();
-  });
-
-  it('#293 KK7: şerit çıkınca iOS\'ta da bir kez duyurulur', async () => {
-    const duyur = jest.spyOn(AccessibilityInfo, 'announceForAccessibility').mockImplementation(() => undefined);
-    try {
-      expect(Platform.OS).toBe('ios');
-      geziModuFiksturu();
-      mockCevrimdisi = true;
-      const { getByText, qc, rerender } = ciz();
-      await waitFor(() => getByText('Eskişehir Gezisi'));
-      await sakinles(qc);
-      const cagrilar = () => duyur.mock.calls.filter(([m]) => /Çevrimdışı/.test(String(m)));
-      expect(cagrilar().length).toBeGreaterThanOrEqual(1);
-      expect(String(cagrilar()[0][0])).toContain('Plan okunur; bağlanınca kendiliğinden yenilenir');
-      // Yeniden çizimde tekrar duyurulmaz (yalnız şerit çıktığında).
-      const once = cagrilar().length;
-      rerender(<GeziEkrani />);
-      await sakinles(qc);
-      expect(cagrilar()).toHaveLength(once);
-    } finally {
-      duyur.mockRestore();
-    }
   });
 
   it('konaklamalar gelmese de (cihazda tutulmaz) sayfa açılır', async () => {

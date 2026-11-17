@@ -20,6 +20,7 @@ jest.mock('react-native-safe-area-context', () => jest.requireActual<{ default: 
 jest.mock('@/lib/hataRaporu', () => ({ izBirak: () => undefined }));
 // Geri hapı harita bileşeniyle aynı dosyada; yerel harita modülü jest'te yok.
 jest.mock('react-native-maps', () => ({ __esModule: true, default: () => null, Marker: () => null, Polyline: () => null, Circle: () => null, PROVIDER_GOOGLE: 'google' }));
+jest.mock('expo-image-picker', () => ({ launchImageLibraryAsync: async () => ({ canceled: false, assets: [{ uri: 'file:///fis.jpg', mimeType: 'image/jpeg' }] }) }));
 jest.mock('@/lib/oturum', () => ({ useOturum: () => ({ session: { user: { id: 'ben', is_anonymous: false } }, hazir: true, hesapli: true }) }));
 jest.mock('@/features/konum/useKonum', () => ({ useKonum: () => ({ konum: null, izin: 'yok' }), yakinDurakId: () => null }));
 jest.mock('expo-router', () => ({
@@ -78,7 +79,13 @@ jest.mock('@/lib/supabase', () => ({
         return { data: null, error: { message: 'Google isteği beklenmiyordu' } };
       },
     },
-    storage: { from: () => ({ createSignedUrl: async () => ({ data: null, error: { message: 'yok' } }) }) },
+    storage: {
+      from: () => ({
+        createSignedUrl: async () => ({ data: null, error: { message: 'yok' } }),
+        // #293: takılan ağda yükleme 90 sn'de kesilir (agFetch); storage-js bunu hata olarak döndürür.
+        upload: async () => ({ data: null, error: new TypeError('Network request failed (zaman aşımı)') }),
+      }),
+    },
     channel: () => ({ on: () => ({ subscribe: () => ({}) }) }),
     removeChannel: () => undefined,
   },
@@ -242,6 +249,25 @@ describe('#183 Harcamalar sekmesi', () => {
       { user_id: 'ayse', pay_kurus: 5000 },
     ]);
     googleYok();
+  });
+
+  it('#293: fiş yüklemesi zaman aşımına düşerse "Fiş yüklenemedi" çıkar, fiş eklenmez, Kaydet yeniden açılır', async () => {
+    mockTablolar = fikstur(tarihEkle(yerelTarih(new Date(), IST), 10));
+    const { getByText, getByLabelText, qc } = ciz(<HarcamaSekmesi />);
+    await waitFor(() => getByText('Toplam · 3 kişi'));
+    await sakinles(qc);
+    fireEvent.press(getByLabelText('Harcama ekle'));
+    await waitFor(() => getByLabelText('Tutar'));
+    fireEvent.changeText(getByLabelText('Tutar'), '100');
+    // Seçilen dosyanın gövdesi cihazdan okunur (yerel dosya, ağ değil).
+    fetchSahte.mockImplementationOnce((async () => ({ arrayBuffer: async () => new ArrayBuffer(4) })) as never);
+    fireEvent.press(getByLabelText('Fiş fotoğrafı ekle'));
+    await waitFor(() => getByText('Fiş yüklenemedi. Tekrar dener misin?'));
+    expect(getByLabelText('Fiş fotoğrafı ekle')).toBeTruthy();
+    fireEvent.press(getByText('Kaydet'));
+    await waitFor(() => expect(mockKayit.rpc.some((r) => r.ad === 'harcama_kaydet')).toBe(true));
+    expect(mockKayit.rpc.find((r) => r.ad === 'harcama_kaydet')!.args).toMatchObject({ p_tutar_kurus: 10000, p_fis_yolu: null });
+    expect(mockKayit.invoke).toEqual([]);
   });
 
   it('#232 KK2/KK4: bölüşümde kişinin adına dokunmak onay kutusu gibi dahil eder ya da çıkarır; rol checkbox, durum doğru', async () => {
