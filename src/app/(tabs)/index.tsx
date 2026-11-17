@@ -155,6 +155,8 @@ export default function AnaSayfa() {
   const seritSeyahati = durum?.tur === 'serit' ? durum.seyahat : null;
   const seritAdimi = useSeritAdimi(seritSeyahati);
   const ipucu = useSeritIpucu(!!seritSeyahati);
+  // #290 KK3 · KK6: şeridin ölçülen yüksekliği (büyük yazıda uzar) ve açıksa ipucunun üst kenarı (ekranın altından).
+  const [seritOlcu, setSeritOlcu] = useState<{ serit: number; ipucuUst: number | null }>({ serit: SERIT_YUKSEKLIK, ipucuUst: null });
 
   if (bekleyenDavet === undefined || karsilamaBekleniyor || karsilanan || acilisGostergesi) {
     return (
@@ -174,7 +176,21 @@ export default function AnaSayfa() {
   // Şerit ekranın altından 24 px (kanvas 29b); ana çubuk varsa onun 8 px üstü.
   const seritAlt = Math.max(24, altBosluk + 8);
   // #289 inceleme 2: listenin sonu şeridin (ya da yüzen düğmenin) 16 px üstünde biter; ana çubuk yüksekliği hesaba girer.
-  const listeAlt = seritSeyahati ? seritAlt + SERIT_YUKSEKLIK + 16 : yuzenAlt + YUZEN_YUKSEKLIK + 16;
+  const listeAlt = seritSeyahati ? seritAlt + seritOlcu.serit + 16 : yuzenAlt + YUZEN_YUKSEKLIK + 16;
+  // #290 KK6: ipucu açıkken kısa bildirim ipucunun üst kenarının 8 px üstünde; yoksa şeridin (ya da yüzen düğmenin) üstünde.
+  const bildirimAlt = seritSeyahati
+    ? ipucu.acik && seritOlcu.ipucuUst !== null
+      ? seritOlcu.ipucuUst + 8
+      : seritAlt + seritOlcu.serit + 12
+    : yuzenAlt + 68;
+  const borcKarti =
+    durum?.tur === 'geziBitti' && borc && banaAcikBorc(borc) ? (
+      <HarcamaKapatKarti
+        sehir={durum.seyahat.city_label}
+        borc={borc}
+        onBakiyeler={() => router.push({ pathname: '/seyahat/[id]/bakiyeler', params: { id: durum.seyahat.id } })}
+      />
+    ) : null;
   const seyahatiAc = (id: string) => router.push({ pathname: '/seyahat/[id]', params: { id } });
   const geziAc = (slug: string) => router.push({ pathname: '/gezi/[slug]', params: { slug } });
   // #277 KK3 · KK6: akış bayrağı ve yaklaşan seyahatin (≤ 14 gün) şehri; o şehrin gezileri önde.
@@ -198,6 +214,9 @@ export default function AnaSayfa() {
             </Pressable>
           </View>
         </View>
+
+        {/* #290 KK2 (29c): "Harcamaları kapat" logonun ve üst düğmelerin hemen altında (aralık 16); selam ve arama altında. */}
+        {borcKarti && !ilkAcilis ? <View style={s.ustKart}>{borcKarti}</View> : null}
 
         <View style={s.selam}>
           <Text style={s.merhaba}>{ilkAcilis ? t('anasayfa.hosGeldin', { ad }) : t('anasayfa.merhaba', { ad })}</Text>
@@ -238,13 +257,6 @@ export default function AnaSayfa() {
               {/* Yaklaşan / planlanan / aktif seyahat altta şeritte (29b); burada kart yok. */}
               {!durum && !seyahatler.isPending && !borcBekleniyor ? <IlkSeyahatKarti baslik={t('anasayfa.yeniBaslik')} onPress={yeni} /> : null}
             </View>
-            {durum?.tur === 'geziBitti' && borc && banaAcikBorc(borc) ? (
-              <HarcamaKapatKarti
-                sehir={durum.seyahat.city_label}
-                borc={borc}
-                onBakiyeler={() => router.push({ pathname: '/seyahat/[id]/bakiyeler', params: { id: durum.seyahat.id } })}
-              />
-            ) : null}
 
             {akisAcik ? (
               // #277 KK6: bayrak açıkken bugünkü hazır geziler bölümü yerine Keşfet akışı.
@@ -280,12 +292,14 @@ export default function AnaSayfa() {
         <SeyahatSeridi
           rozet={durum?.tur === 'serit' && durum.sinif !== 'planlanan' ? yaklasanRozeti(seritSeyahati) : null}
           ad={seyahatAdi(seritSeyahati)}
-          alt={seritAdimi ? seritAdimMetni(seritAdimi) : seritAdimi === null ? yaklasanAlti(seritSeyahati) : null}
+          // #290 KK4: adım yüklenirken, sorgu hata verince ya da adım yokken tarih satırı; satır sayısı değişmez.
+          alt={seritAdimi ? seritAdimMetni(seritAdimi) : yaklasanAlti(seritSeyahati)}
           ipucu={ipucu.acik}
           onAc={() => seyahatiAc(seritSeyahati.id)}
           onYeni={yeni}
           onIpucuKapat={ipucu.kapat}
           alttan={seritAlt}
+          onOlcu={setSeritOlcu}
         />
       ) : borcBekleniyor ? null : (
         <View style={[s.yuzenKap, { bottom: yuzenAlt }]} pointerEvents="box-none">
@@ -297,7 +311,7 @@ export default function AnaSayfa() {
           </Pressable>
         </View>
       )}
-      <KisaBildirim metin={gelenBildirim} alt={seritSeyahati ? seritAlt + SERIT_YUKSEKLIK + 12 : yuzenAlt + 68} />
+      <KisaBildirim metin={gelenBildirim} alt={bildirimAlt} />
     </SafeAreaView>
   );
 }
@@ -325,6 +339,8 @@ const s = StyleSheet.create({
   ekran: { flex: 1, backgroundColor: renk.zemin },
   ortala: { alignItems: 'center', justifyContent: 'center' },
   icerik: { paddingTop: 12, gap: 20 },
+  // Listenin aralığı 20; kart üst çubuğa 16 yaklaşır.
+  ustKart: { marginTop: -4 },
   ust: { paddingHorizontal: bosluk.kenar, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   ustDugmeler: { flexDirection: 'row', gap: 8 },
   kare: { width: 44, height: 44, borderRadius: 14, backgroundColor: renk.yuzey, alignItems: 'center', justifyContent: 'center' },

@@ -3,6 +3,9 @@ import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals
 import { act, fireEvent, render, waitFor } from '@testing-library/react-native';
 import { AppState, type AppStateStatus } from 'react-native';
 
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+import { SERIT_IPUCU_ANAHTARI } from '@/features/anasayfa/serit';
 import { acilisKarariAcik, acilisKarariniSifirla, kesfeteDon } from '@/lib/acilis';
 import type { SeyahatOzet } from '@/lib/tipler';
 import { yerelTarih } from '@/lib/zaman';
@@ -82,6 +85,10 @@ const sy = (id: string, start: string | null, end: string | null): SeyahatOzet =
   created_at: '2026-01-01T00:00:00Z',
   members: [],
   places: [{ count: 0 }],
+});
+// #290 KK7: ipucu iOS'ta modal (arkası okunmaz); bu testler ipucuyla ilgili değil, ipucu görülmüş sayılır.
+beforeEach(async () => {
+  await AsyncStorage.setItem(SERIT_IPUCU_ANAHTARI, '1');
 });
 const geziye = (id: string) => ({ pathname: '/seyahat/[id]/(sekmeler)/gezi', params: { id, acilis: '1' } });
 

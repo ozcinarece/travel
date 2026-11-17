@@ -11,9 +11,13 @@ import type { Harcama, HarcamaKategorisi, Odesme } from './hesap';
 export const harcamaAnahtari = (seyahatId: string | undefined) => ['harcamalar', seyahatId] as const;
 export const odesmeAnahtari = (seyahatId: string | undefined) => ['odesmeler', seyahatId] as const;
 
-export function useHarcamalar(seyahatId: string | undefined) {
+/** Sorgu seçeneği: yeniden deneme sayısı (verilmezse uygulama varsayılanı). */
+export type SorguSecenegi = { retry?: number };
+
+export function useHarcamalar(seyahatId: string | undefined, secenek: SorguSecenegi = {}) {
   const { session } = useOturum();
   return useQuery({
+    ...secenek,
     queryKey: harcamaAnahtari(seyahatId),
     enabled: !!session && !!seyahatId,
     staleTime: 30 * 1000,
@@ -29,9 +33,10 @@ export function useHarcamalar(seyahatId: string | undefined) {
   });
 }
 
-export function useOdesmeler(seyahatId: string | undefined) {
+export function useOdesmeler(seyahatId: string | undefined, secenek: SorguSecenegi = {}) {
   const { session } = useOturum();
   return useQuery({
+    ...secenek,
     queryKey: odesmeAnahtari(seyahatId),
     enabled: !!session && !!seyahatId,
     staleTime: 30 * 1000,
