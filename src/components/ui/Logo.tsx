@@ -5,11 +5,12 @@ import { renk, yazi } from '@/theme';
 
 /**
  * #136 KK7 (kanvas Tur 4 · 1): iki durak noktası (Mandalina + Gece) ve aralarında kesik çizgili gülümseme (rota).
- * Koyu zeminde ikinci nokta beyaz. 24 px altında çizgi kesiksiz (küçükte kesikler okunmaz).
+ * Koyu zeminde ikinci nokta beyaz. 24 px altında çizgi kesiksiz (küçükte kesikler okunmaz); `kesik` verilirse
+ * boyuttan bağımsız kesik çizgi (#287 KK2: kanvas 29a · 29b kart rozeti 20×12'de `stroke-dasharray 7 4.5`).
  */
-export function Logo({ boyut = 36, koyuZemin = false }: { boyut?: number; koyuZemin?: boolean }) {
+export function Logo({ boyut = 36, koyuZemin = false, kesik = false }: { boyut?: number; koyuZemin?: boolean; kesik?: boolean }) {
   const h = (boyut * 48) / 80;
-  const kesiksiz = boyut < 24;
+  const kesiksiz = !kesik && boyut < 24;
   return (
     <Svg width={boyut} height={h} viewBox="0 0 80 48" accessibilityLabel="Tripmate">
       <Circle cx={24} cy={14} r={7} fill={renk.vurgu} />

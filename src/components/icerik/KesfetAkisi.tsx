@@ -1,6 +1,7 @@
 // #277 (#237 v2, kanvas 29a · 29b): ana ekrandaki Keşfet akışı. Yaklaşan seyahat varsa o şehrin gezileri önde,
 // "GİDECEĞİN ŞEHİR · {Şehir}'den geziler" başlığıyla (KK3); sonra diğer şehirler. Akışın sonunda "Kendi gezini kur" (KK5).
 // Yüklenirken iskelet kartlar, hata/çevrimdışında "Bağlanamadık" + Tekrar dene (KK7, #239 dili).
+// #287 KK1: yenileme hata verirse elde veri varken kartlar yerinde kalır; "Bağlanamadık" yalnız hiç veri yokken.
 import { router } from 'expo-router';
 import { useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
@@ -48,7 +49,7 @@ export function KesfetAkisi({ sehir, onYeni }: Props) {
       </View>
     );
   }
-  if (akis.isError) {
+  if (akis.isError && !akis.data) {
     return (
       <View style={[s.akis, s.kenar]}>
         {/* #239 (kanvas 3d-A) dili: ikon kutusu, "Bağlanamadık", açıklama, Tekrar dene. */}
