@@ -13,7 +13,7 @@ import { hafifYerler, useOtelOnerileri, yeniOturumJetonu, placesHatasi, type One
 import { t } from '@/i18n';
 import { puanMetni } from '@/lib/puan';
 import type { OtelSecimi, Seyahat } from '@/lib/tipler';
-import { kose, olcek, renk, yazi } from '@/theme';
+import { baslikStili, kose, olcek, renk, yazi } from '@/theme';
 
 type Props = { acik: boolean; seyahat: Seyahat; geceSayisi: number; onKapat: () => void; onSimdiDegil: () => void; onKaydet: (otel: OtelSecimi) => Promise<void>; onAyriSec: () => void };
 
@@ -162,7 +162,7 @@ const s = StyleSheet.create({
   },
   seritIkon: { width: 30, height: 30, borderRadius: 10, backgroundColor: renk.vurgu, alignItems: 'center', justifyContent: 'center' },
   seritMetin: { flex: 1, fontFamily: yazi.ekstra, fontSize: 14, color: renk.metin },
-  baslik: { fontFamily: yazi.baslik, fontSize: olcek.kart + 1, lineHeight: 28, letterSpacing: -0.6, color: renk.metin },
+  baslik: { ...baslikStili(olcek.kart + 1), lineHeight: 28, color: renk.metin },
   metin: { fontFamily: yazi.normal, fontSize: 15, lineHeight: 22, color: renk.ikincil },
   arama: { height: 52, paddingHorizontal: 16, borderRadius: kose.dugme, backgroundColor: renk.yuzey, flexDirection: 'row', alignItems: 'center', gap: 10 },
   girdi: { flex: 1, fontFamily: yazi.yari, fontSize: 15, color: renk.metin, paddingVertical: 0 },

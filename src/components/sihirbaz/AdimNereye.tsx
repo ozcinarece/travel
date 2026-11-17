@@ -9,7 +9,7 @@ import { icerikSehirSecimi, sehirSecimi } from '@/features/sihirbaz/girisler';
 import { useSehirOnerileri, yeniOturumJetonu, placesHatasi, type Oneri } from '@/features/yerler/api';
 import { t } from '@/i18n';
 import type { Sehir, SehirSecimi } from '@/lib/tipler';
-import { kose, minDokunma, renk, yazi } from '@/theme';
+import { baslikStili, kose, minDokunma, renk, yazi } from '@/theme';
 
 type Props = {
   sehir: SehirSecimi | null;
@@ -216,11 +216,11 @@ const s = StyleSheet.create({
   oneri: { height: minDokunma, paddingLeft: 6, paddingRight: 14, borderRadius: kose.cip, borderWidth: 1.5, borderColor: renk.ayrac, backgroundColor: renk.zemin, flexDirection: 'row', alignItems: 'center', gap: 8 },
   oneriSecili: { backgroundColor: renk.yuzey, borderColor: renk.yuzey, opacity: 0.5 },
   oneriIkon: { width: 32, height: 32, borderRadius: 16, alignItems: 'center', justifyContent: 'center' },
-  oneriHarf: { fontFamily: yazi.baslik, fontSize: 14, color: renk.ana },
+  oneriHarf: { ...baslikStili(14), color: renk.ana },
   oneriMetin: { fontFamily: yazi.ekstra, fontSize: 15, color: renk.metin },
   adKutu: { paddingVertical: 14, paddingHorizontal: 16, borderRadius: 18, backgroundColor: renk.yuzey, flexDirection: 'row', alignItems: 'center', gap: 12 },
-  adMetin: { fontFamily: yazi.baslik, fontSize: 19, letterSpacing: -0.4, color: renk.metin },
-  adGirdi: { fontFamily: yazi.baslik, fontSize: 19, color: renk.metin, paddingVertical: 0, borderBottomWidth: 1.5, borderBottomColor: renk.ana },
+  adMetin: { ...baslikStili(19), color: renk.metin },
+  adGirdi: { ...baslikStili(19), color: renk.metin, paddingVertical: 0, borderBottomWidth: 1.5, borderBottomColor: renk.ana },
   degistir: { height: 40, paddingHorizontal: 14, borderRadius: kose.alan, backgroundColor: renk.zemin, justifyContent: 'center' },
   degistirMetin: { fontFamily: yazi.ekstra, fontSize: 14, color: renk.ana },
   hata: { fontFamily: yazi.yari, fontSize: 12, color: renk.uyari },

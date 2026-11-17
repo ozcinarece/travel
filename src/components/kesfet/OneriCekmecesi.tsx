@@ -14,7 +14,7 @@ import { t } from '@/i18n';
 import { kategoriEtiketi, sureMetni } from '@/lib/kategori';
 import { kategoriPini } from '@/lib/pinIkonu';
 import { puanMetni } from '@/lib/puan';
-import { bosluk, renk, yazi } from '@/theme';
+import { baslikStili, bosluk, renk, yazi } from '@/theme';
 
 /** Satır / kart verisi: Google önerisi ya da rehber yeri (foto, öne çıkan ve süre çekmecenin elindeki veriden; ek istek yok). */
 export type CekmeceOgesi = {
@@ -65,7 +65,7 @@ function ListeGoster({ sayi, yalniz, onPress }: ListeDugmesi) {
 
 /**
  * Üst şerit (tutamakla birlikte sürüklenir; tam halde kaydırırken üstte sabit kalır). Küçük ve yarım halde tek satır başlık; tam
- * halde Archivo başlık + "N yer" + filtre düğmesi, altında `cipler`.
+ * halde Figtree 800 başlık + "N yer" + filtre düğmesi, altında `cipler`.
  */
 export function CekmeceSeridi({
   hal,
@@ -289,7 +289,7 @@ const s = StyleSheet.create({
   listeDugmeMetin: { fontFamily: yazi.ekstra, fontSize: 13, color: renk.metin },
   // #165 KK6 (kanvas 9c): tam hal üstü.
   tamUst: { gap: 12, paddingTop: 2 },
-  tamBaslik: { flex: 1, minWidth: 0, fontFamily: yazi.baslik, fontSize: 21, letterSpacing: -0.42, color: renk.metin },
+  tamBaslik: { flex: 1, minWidth: 0, ...baslikStili(21), color: renk.metin },
   yerSayisi: { flexShrink: 0, fontFamily: yazi.ekstra, fontSize: 13, color: renk.ikincil },
   filtreDugme: { flexShrink: 0, width: 40, height: 40, borderRadius: 12, backgroundColor: renk.yuzey, alignItems: 'center', justifyContent: 'center' },
   // #165 KK3 (kanvas 9b): satırlar.

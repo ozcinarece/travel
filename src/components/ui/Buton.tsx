@@ -48,5 +48,5 @@ const s = StyleSheet.create({
   cerceve: { borderWidth: 1.5, borderColor: renk.ayrac },
   pasif: { opacity: 0.4 },
   basili: { opacity: 0.85 },
-  metin: { fontFamily: yazi.ekstra, fontSize: 16, color: renk.zemin },
+  metin: { fontFamily: yazi.kalin, fontSize: 16, color: renk.zemin },
 });

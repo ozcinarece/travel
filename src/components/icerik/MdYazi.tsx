@@ -7,7 +7,7 @@ import { StyleSheet, Text, View } from 'react-native';
 
 import { t } from '@/i18n';
 import { markdownAyristir, type MdParca } from '@/lib/markdown';
-import { renk, yazi } from '@/theme';
+import { baslikStili, renk, yazi } from '@/theme';
 
 type Props = {
   kaynak: string | null | undefined;
@@ -19,7 +19,7 @@ type Props = {
   ipucu?: boolean;
   /** Yatay iç boşluk (varsayılan 20). */
   kenar?: number;
-  /** Uzun okuma (şehir rehberi, gezi yazısı): paragraf 16, başlık Archivo 21, alıntı Buz kutuda Archivo 17 (kanvas 15 · 18). */
+  /** Uzun okuma (şehir rehberi, gezi yazısı): paragraf 16, başlık Figtree 800 21, alıntı Buz kutuda Figtree 800 17 (kanvas 15 · 18). */
   buyuk?: boolean;
 };
 
@@ -116,7 +116,7 @@ const s = StyleSheet.create({
   kap: { gap: 14 },
   baslik: { fontFamily: yazi.ekstra, fontSize: 18, letterSpacing: -0.4, color: renk.metin, paddingTop: 6 },
   baslik1: { fontSize: 22 },
-  baslikBuyuk: { fontFamily: yazi.baslik, fontSize: 21, lineHeight: 25, letterSpacing: -0.4, paddingTop: 4 },
+  baslikBuyuk: { ...baslikStili(21), lineHeight: 25, paddingTop: 4 },
   paragraf: { fontFamily: yazi.normal, fontSize: 15, lineHeight: 24, color: '#232b48' },
   paragrafBuyuk: { fontSize: 16, lineHeight: 25.6 },
   kalin: { fontFamily: yazi.ekstra },
@@ -126,7 +126,7 @@ const s = StyleSheet.create({
   alinti: { padding: 14, borderRadius: 14, backgroundColor: renk.yuzey, borderLeftWidth: 3, borderLeftColor: renk.vurgu },
   alintiMetin: { fontFamily: yazi.yari, fontSize: 14, lineHeight: 21, color: renk.metin },
   alintiBuyuk: { paddingVertical: 14, paddingHorizontal: 16, borderRadius: 16, backgroundColor: renk.yuzey },
-  alintiMetinBuyuk: { fontFamily: yazi.baslik, fontSize: 17, lineHeight: 24, color: renk.ana },
+  alintiMetinBuyuk: { ...baslikStili(17), lineHeight: 24, color: renk.ana },
   ipucu: { paddingVertical: 12, paddingHorizontal: 14, borderRadius: 16, backgroundColor: '#fff6e6', gap: 4 },
   ipucuBaslik: { fontFamily: yazi.ekstra, fontSize: 11, letterSpacing: 0.66, color: '#8a5a00' },
   ipucuMetin: { fontFamily: yazi.normal, fontSize: 14, lineHeight: 20, color: renk.metin },

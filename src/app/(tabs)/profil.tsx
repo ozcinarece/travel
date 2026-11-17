@@ -18,7 +18,7 @@ import { useSeyahatler } from '@/features/seyahatler/sorgular';
 import { t } from '@/i18n';
 import { sonHatayiOku, sonHatayiSil, type SonHata } from '@/lib/izler';
 import type { HaritaGizliligi } from '@/lib/tipler';
-import { bosluk, kose, renk, yazi } from '@/theme';
+import { baslikStili, bosluk, kose, renk, yazi } from '@/theme';
 
 const GIZLILIKLER: HaritaGizliligi[] = ['friends', 'everyone', 'me'];
 /** Yardım ve geri bildirim e-postası (ortam değişkeni; yoksa satır gösterilmez). */
@@ -201,7 +201,7 @@ const s = StyleSheet.create({
   sekmeMetin: { fontFamily: yazi.ekstra, fontSize: 14, color: renk.ikincil },
   kimlik: { flexDirection: 'row', alignItems: 'center', gap: 14 },
   adKutu: { flex: 1, minWidth: 0, gap: 2 },
-  ad: { fontFamily: yazi.baslik, fontSize: 20, letterSpacing: -0.4, color: renk.metin },
+  ad: { ...baslikStili(20), color: renk.metin },
   kullaniciAdi: { fontFamily: yazi.normal, fontSize: 14, color: renk.ikincil },
   duzenle: { flexShrink: 0, height: 38, paddingHorizontal: 12, borderRadius: kose.alan, backgroundColor: renk.yuzey, justifyContent: 'center' },
   duzenleMetin: { fontFamily: yazi.ekstra, fontSize: 13, color: renk.ana },

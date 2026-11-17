@@ -20,7 +20,7 @@ import type { HafifYer } from '@/features/yerler/api';
 import { t } from '@/i18n';
 import { bilinenKategori, varsayilanDakika } from '@/lib/kategori';
 import type { Sehir } from '@/lib/tipler';
-import { bosluk, kose, renk, yazi } from '@/theme';
+import { baslikStili, bosluk, kose, renk, yazi } from '@/theme';
 
 /** Kapak yüksekliği (kanvas 15). */
 const KAPAK = 300;
@@ -269,7 +269,7 @@ const s = StyleSheet.create({
   geriKare: { width: 40, height: 40, borderRadius: kose.alan, backgroundColor: renk.yuzey, alignItems: 'center', justifyContent: 'center' },
   kapakMetin: { paddingHorizontal: bosluk.kenar, paddingBottom: 26, gap: 6 },
   ustBaslik: { fontFamily: yazi.ekstra, fontSize: 12, letterSpacing: 0.96, color: '#ffb27a' },
-  baslik: { fontFamily: yazi.baslik, fontSize: 36, lineHeight: 38, letterSpacing: -1.08, color: renk.zemin },
+  baslik: { ...baslikStili(36), lineHeight: 38, color: renk.zemin },
   icerik: { paddingHorizontal: bosluk.kenar, paddingTop: 20, gap: 16 },
   ozet: { fontFamily: yazi.normal, fontSize: 16, lineHeight: 25.6, color: '#232b48' },
   cipler: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
@@ -279,21 +279,21 @@ const s = StyleSheet.create({
   cipMetin: { fontFamily: yazi.ekstra, fontSize: 14, color: renk.ana },
   cipMetinAktif: { color: renk.zemin },
   mekanlarKutu: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 14, borderRadius: 18, backgroundColor: renk.vurgu },
-  mekanlarBaslik: { fontFamily: yazi.baslik, fontSize: 17, color: renk.metin },
+  mekanlarBaslik: { ...baslikStili(17), color: renk.metin },
   mekanlarAlt: { fontFamily: yazi.yari, fontSize: 13, color: renk.metin },
   ileri: { transform: [{ rotate: '180deg' }] },
   bolum: { gap: 12, paddingTop: 6 },
   bolumNo: { fontFamily: yazi.ekstra, fontSize: 12, letterSpacing: 0.96, color: renk.ikincil },
-  bolumBaslik: { fontFamily: yazi.baslik, fontSize: 24, letterSpacing: -0.6, color: renk.metin, marginTop: -8 },
+  bolumBaslik: { ...baslikStili(24), color: renk.metin, marginTop: -8 },
   kart: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 10, borderRadius: 18, borderWidth: 1.5, borderColor: renk.ayrac, backgroundColor: renk.zemin },
   kartFoto: { width: 56, height: 56, borderRadius: 14, overflow: 'hidden', backgroundColor: renk.yuzey },
   kartAd: { fontFamily: yazi.ekstra, fontSize: 15, color: renk.metin },
   kartAlt: { fontFamily: yazi.normal, fontSize: 12, color: renk.ikincil },
-  seritBaslik: { fontFamily: yazi.baslik, fontSize: 20, letterSpacing: -0.4, color: renk.metin },
+  seritBaslik: { ...baslikStili(20), color: renk.metin },
   serit: { paddingHorizontal: bosluk.kenar, gap: 12 },
   yapiskan: { position: 'absolute', left: 0, right: 0, top: 0, paddingHorizontal: 16, paddingBottom: 10, gap: 10, backgroundColor: renk.zemin, shadowColor: renk.metin, shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.08, shadowRadius: 16, elevation: 6 },
   yapiskanSatir: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  yapiskanBaslik: { flex: 1, fontFamily: yazi.baslik, fontSize: 17, color: renk.metin },
+  yapiskanBaslik: { flex: 1, ...baslikStili(17), color: renk.metin },
   ilerleme: { height: 3, borderRadius: 2, backgroundColor: renk.ayrac, overflow: 'hidden' },
   ilerlemeDolu: { height: '100%', borderRadius: 2, backgroundColor: renk.vurgu },
   hata: { fontFamily: yazi.kalin, fontSize: 13, color: renk.uyari, textAlign: 'center' },

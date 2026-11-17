@@ -30,15 +30,14 @@ saklananlariAyarla(queryClient);
 baglantiyiIzle(queryClient);
 
 function Kok() {
-  // #136: Figtree (metin) + Archivo SemiExpanded 850 (başlık; Google Fonts değişken dosyasından üretilmiş statik örnek,
-  // assets/fonts). İkisi de JS varlığı — OTA ile gider, yerel derleme gerekmez.
+  // #307: tek aile Figtree (metin 400–600, düğme 700, başlık 800). JS varlığı — OTA ile gider, yerel derleme gerekmez.
+  // Logo yazısı "tripmate" font değil, SVG yolu (Logo.tsx).
   const [fontlar, fontHatasi] = useFonts({
     Figtree_400Regular,
     Figtree_500Medium,
     Figtree_600SemiBold,
     Figtree_700Bold,
     Figtree_800ExtraBold,
-    ArchivoSemiExpanded_850: require('../../assets/fonts/ArchivoSemiExpanded-ExtraBold.ttf'),
   });
   const { hazir, hesapli, session } = useOturum();
   const profil = useProfil();

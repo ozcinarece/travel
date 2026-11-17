@@ -1,7 +1,9 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import Svg, { Circle, Path } from 'react-native-svg';
 
-import { renk, yazi } from '@/theme';
+import { renk } from '@/theme';
+
+import { LOGO_YAZISI_GENISLIK, LOGO_YAZISI_YOLU, LOGO_YAZISI_YUKSEKLIK } from './logoYazisiYolu';
 
 /**
  * #136 KK7 (kanvas Tur 4 · 1): iki durak noktası (Mandalina + Gece) ve aralarında kesik çizgili gülümseme (rota).
@@ -20,17 +22,35 @@ export function Logo({ boyut = 36, koyuZemin = false, kesik = false }: { boyut?:
   );
 }
 
-/** Logo + "tripmate" yazısı (Archivo, Gece; koyu zeminde beyaz). */
+/**
+ * #307 KK7: "tripmate" logo yazısı — metin değil, sabit SVG yolu (Archivo 850 / 115 glifleri; font dosyası yok).
+ * `boyut` = eski metnin font boyutu (px); kutu eski satır kutusuyla aynı (1,088 em yükseklik).
+ */
+export function LogoYazisi({ boyut, renk: dolgu }: { boyut: number; renk: string }) {
+  const olcek = boyut / 1000;
+  return (
+    <Svg
+      width={LOGO_YAZISI_GENISLIK * olcek}
+      height={LOGO_YAZISI_YUKSEKLIK * olcek}
+      viewBox={`0 0 ${LOGO_YAZISI_GENISLIK} ${LOGO_YAZISI_YUKSEKLIK}`}
+      accessible={false}
+      aria-hidden
+    >
+      <Path d={LOGO_YAZISI_YOLU} fill={dolgu} />
+    </Svg>
+  );
+}
+
+/** Logo + "tripmate" yazısı (Gece; koyu zeminde beyaz). */
 export function LogoYazi({ boyut = 36, koyuZemin = false }: { boyut?: number; koyuZemin?: boolean }) {
   return (
-    <View style={s.satir}>
+    <View style={s.satir} accessible accessibilityRole="image" accessibilityLabel="Tripmate">
       <Logo boyut={boyut} koyuZemin={koyuZemin} />
-      <Text style={[s.yazi, { fontSize: boyut * 0.6, color: koyuZemin ? renk.zemin : renk.ana }]}>tripmate</Text>
+      <LogoYazisi boyut={boyut * 0.6} renk={koyuZemin ? renk.zemin : renk.ana} />
     </View>
   );
 }
 
 const s = StyleSheet.create({
   satir: { flexDirection: 'row', alignItems: 'center', gap: 7 },
-  yazi: { fontFamily: yazi.baslik, letterSpacing: -0.8 },
 });

@@ -12,7 +12,7 @@ import { useSeyahatId } from '@/features/seyahatler/baglam';
 import { useSeyahat } from '@/features/seyahatler/sorgular';
 import { seyahatAdi } from '@/features/sihirbaz/sihirbaz';
 import { t } from '@/i18n';
-import { bosluk, olcek, renk, yazi } from '@/theme';
+import { baslikStili, bosluk, olcek, renk, yazi } from '@/theme';
 
 /**
  * #141 KK1 / #142 KK4–5: seyahat içi Rehber — seyahatin şehri yayınlı rehberle eşleşiyorsa şehir rehberi (blog, çipler, yapışkan
@@ -54,6 +54,6 @@ export default function RehberEkrani() {
 const s = StyleSheet.create({
   ekran: { flex: 1, backgroundColor: renk.zemin, paddingHorizontal: bosluk.kenar },
   bos: { flex: 1, justifyContent: 'center', gap: 10, paddingBottom: 60 },
-  baslik: { fontFamily: yazi.baslik, fontSize: olcek.bolum + 2, color: renk.metin },
+  baslik: { ...baslikStili(olcek.bolum + 2), color: renk.metin },
   metin: { fontFamily: yazi.normal, fontSize: 15, lineHeight: 22, color: renk.ikincil, marginBottom: 6 },
 });

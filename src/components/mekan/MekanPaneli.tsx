@@ -35,7 +35,7 @@ import { kategoriPini } from '@/lib/pinIkonu';
 import { puanMetni } from '@/lib/puan';
 import type { Gun } from '@/lib/tipler';
 import { saatEkli } from '@/lib/zaman';
-import { bosluk, gunRengi, gunUstuMetin, kose, renk, yazi } from '@/theme';
+import { baslikStili, bosluk, gunRengi, gunUstuMetin, kose, renk, yazi } from '@/theme';
 
 export type MekanPaneliProps = {
   placeId: string;
@@ -524,7 +524,7 @@ const s = StyleSheet.create({
   cipler: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   cip: { height: 24, paddingHorizontal: 8, borderRadius: 8, justifyContent: 'center' },
   cipMetin: { fontFamily: yazi.ekstra, fontSize: 12 },
-  ad: { fontFamily: yazi.baslik, fontSize: 26, lineHeight: 28, letterSpacing: -0.78, color: renk.metin },
+  ad: { ...baslikStili(26), lineHeight: 28, color: renk.metin },
   bilgiSatiri: { fontFamily: yazi.normal, fontSize: 14, color: renk.ikincil },
   ekleyen: { fontFamily: yazi.normal, fontSize: 12, color: renk.ikincil },
   acik: { fontFamily: yazi.ekstra, color: renk.basariMetin },
@@ -562,7 +562,7 @@ const s = StyleSheet.create({
   gunMetin: { fontFamily: yazi.ekstra, fontSize: 12 },
   hata: { fontFamily: yazi.yari, fontSize: 12, color: renk.uyari, textAlign: 'center', paddingVertical: 12 },
   ozetSatir: { flexDirection: 'row', alignItems: 'center', gap: 14 },
-  buyukPuan: { fontFamily: yazi.baslik, fontSize: 34, letterSpacing: -1, color: renk.metin },
+  buyukPuan: { ...baslikStili(34), color: renk.metin },
   siralar: { flexDirection: 'row', gap: 8 },
   siraHap: { height: 30, paddingHorizontal: 12, borderRadius: 999, backgroundColor: renk.yuzey, justifyContent: 'center' },
   siraHapSecili: { backgroundColor: renk.ana },

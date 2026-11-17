@@ -20,7 +20,7 @@ import { useSeyahatId } from '@/features/seyahatler/baglam';
 import { t } from '@/i18n';
 import { onayIste } from '@/lib/onay';
 import { useOturum } from '@/lib/oturum';
-import { renk, yazi } from '@/theme';
+import { baslikStili, renk, yazi } from '@/theme';
 
 const BEYAZ_14 = 'rgba(255,255,255,0.14)';
 
@@ -194,13 +194,13 @@ const s = StyleSheet.create({
   ust: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12 },
   yuzler: { flexDirection: 'row' },
   yuz: { borderRadius: 11, borderWidth: 2, borderColor: renk.zemin },
-  baslik: { fontFamily: yazi.baslik, fontSize: 28, letterSpacing: -0.84, color: renk.metin },
+  baslik: { ...baslikStili(28), color: renk.metin },
   altBaslik: { fontFamily: yazi.normal, fontSize: 13, color: renk.ikincil },
   kartlar: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   kisiKart: { flexGrow: 1, flexBasis: '30%', padding: 12, borderRadius: 16, backgroundColor: renk.zemin, gap: 6, alignItems: 'flex-start' },
   kisiAd: { fontFamily: yazi.ekstra, fontSize: 13, color: renk.metin },
-  kisiNet: { fontFamily: yazi.baslik, fontSize: 18, letterSpacing: -0.36, color: renk.metin },
-  bolum: { fontFamily: yazi.baslik, fontSize: 18, letterSpacing: -0.36, color: renk.metin },
+  kisiNet: { ...baslikStili(18), color: renk.metin },
+  bolum: { ...baslikStili(18), color: renk.metin },
   satir: { flexDirection: 'row', alignItems: 'center', gap: 10, padding: 12, borderRadius: 16, backgroundColor: renk.zemin },
   satirMetin: { fontFamily: yazi.normal, fontSize: 14, lineHeight: 18, color: renk.metin },
   satirAlt: { fontFamily: yazi.normal, fontSize: 12, color: renk.ikincil },
@@ -210,7 +210,7 @@ const s = StyleSheet.create({
   buzMetin: { fontFamily: yazi.ekstra, fontSize: 13, color: renk.ana },
   geriAl: { fontFamily: yazi.ekstra, fontSize: 12, color: renk.ana },
   gece: { padding: 14, borderRadius: 20, backgroundColor: renk.ana, gap: 8 },
-  geceBaslik: { fontFamily: yazi.baslik, fontSize: 16, color: renk.zemin },
+  geceBaslik: { ...baslikStili(16), color: renk.zemin },
   geceMetin: { fontFamily: yazi.normal, fontSize: 13, lineHeight: 18, color: renk.anaAcik },
   geceDugme: { height: 36, paddingHorizontal: 14, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
   geceDugmeMetin: { fontFamily: yazi.ekstra, fontSize: 14 },

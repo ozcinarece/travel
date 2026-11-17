@@ -11,7 +11,7 @@ import { Avatar } from '@/components/ui/Avatar';
 import { Ikon } from '@/components/ui/Ikon';
 import { t } from '@/i18n';
 import type { Gun, Uye } from '@/lib/tipler';
-import { gunUstuMetin, renk, yazi, yuzRenkleri } from '@/theme';
+import { baslikStili, gunUstuMetin, renk, yazi, yuzRenkleri } from '@/theme';
 
 export type PlanSatirGorunumu = {
   id: string;
@@ -194,7 +194,7 @@ const s = StyleSheet.create({
   ust: { paddingHorizontal: 20, gap: 12 },
   satirArasi: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 10 },
   yuz: { borderWidth: 2, borderColor: renk.zemin, borderRadius: 10 },
-  baslik: { fontFamily: yazi.baslik, fontSize: 28, letterSpacing: -0.84, color: renk.metin },
+  baslik: { ...baslikStili(28), color: renk.metin },
   sirala: { height: 32, paddingHorizontal: 10, borderRadius: 10, backgroundColor: renk.yuzey, flexDirection: 'row', alignItems: 'center', gap: 5 },
   siralaMetin: { fontFamily: yazi.ekstra, fontSize: 13, color: renk.ana },
   cipler: { paddingHorizontal: 20, gap: 6 },
@@ -218,7 +218,7 @@ const s = StyleSheet.create({
   no: { width: 30, height: 30, borderRadius: 9, alignItems: 'center', justifyContent: 'center' },
   noMetin: { fontFamily: yazi.ekstra, fontSize: 13 },
   saatSatiri: { flexDirection: 'row', alignItems: 'baseline', gap: 8 },
-  saat: { fontFamily: yazi.baslik, fontSize: 15, color: renk.metin },
+  saat: { ...baslikStili(15), color: renk.metin },
   sure: { fontFamily: yazi.ekstra, fontSize: 12, color: renk.ikincil },
   ad: { fontFamily: yazi.ekstra, fontSize: 15, lineHeight: 18, color: renk.metin, marginTop: 2 },
   cizili: { textDecorationLine: 'line-through' },

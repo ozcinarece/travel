@@ -12,7 +12,7 @@ import { Ikon } from '@/components/ui/Ikon';
 import { ayrilmaEki } from '@/features/davet/katilim';
 import { akisSirasi, geziyiPaylas, useKesfetAkisi, type AkisGezisi } from '@/features/icerik/kesfetAkisi';
 import { t } from '@/i18n';
-import { bosluk, olcek, renk, yazi } from '@/theme';
+import { baslikStili, bosluk, olcek, renk, yazi } from '@/theme';
 
 import { IskeletKart, KendiGeziniKur, KesfetKarti } from './KesfetKarti';
 
@@ -103,9 +103,7 @@ const s = StyleSheet.create({
     color: renk.ikincil,
   },
   baslik: {
-    fontFamily: yazi.baslik,
-    fontSize: olcek.bolum,
-    letterSpacing: -0.4,
+    ...baslikStili(olcek.bolum),
     color: renk.metin,
   },
   hata: { gap: 14, paddingTop: 6 },
@@ -118,9 +116,7 @@ const s = StyleSheet.create({
     justifyContent: 'center',
   },
   hataBaslik: {
-    fontFamily: yazi.baslik,
-    fontSize: olcek.bolum,
-    letterSpacing: -0.4,
+    ...baslikStili(olcek.bolum),
     color: renk.metin,
   },
   hataMetin: {

@@ -17,7 +17,7 @@ import { t } from '@/i18n';
 import { onayIste } from '@/lib/onay';
 import type { Durak, Gun, Seyahat } from '@/lib/tipler';
 import { gunSayisi } from '@/lib/zaman';
-import { olcek, renk, yazi } from '@/theme';
+import { baslikStili, olcek, renk } from '@/theme';
 
 type Props = {
   acik: boolean;
@@ -123,5 +123,5 @@ export function GeziMenusu({ acik, onKapat, seyahat, gunler, duraklar, sahip, uy
 }
 
 const s = StyleSheet.create({
-  baslik: { fontFamily: yazi.baslik, fontSize: olcek.bolum, color: renk.metin },
+  baslik: { ...baslikStili(olcek.bolum), color: renk.metin },
 });

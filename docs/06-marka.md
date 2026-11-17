@@ -27,8 +27,11 @@ Kontrast: Lacivert / Gri mavi beyaz üstünde ≥ 4,5:1; Mandalina üstünde bey
 
 ## 2. Yazı (`yazi`, `olcek`)
 
-- Başlık **Archivo** genişlik 115 / kalınlık 850 → `yazi.baslik` (`assets/fonts/ArchivoSemiExpanded-ExtraBold.ttf`; Google Fonts değişken dosyasından `fontTools` ile üretilmiş statik örnek, 118 KB). Metin **Figtree** 400 / 500 / 600 / 700 / 800 → `normal · orta · yari · kalin · ekstra` (`@expo-google-fonts/figtree`). İkisi de JS varlığıdır, OTA ile gider. Plus Jakarta Sans kalktı.
-- Ölçek: ekran **32** · kart **24** · bölüm **19–20** · metin **16** · alt **14** · etiket **12** (büyük harf, 800, `Rozet buyukHarf`). Başlıklarda harf aralığı −0,03em; satır 1,05–1,1.
+- **Başlık ve metin: Figtree; başlık 800, düğme 700** (#307, Ece'nin #301 kararı C). Tek aile: 400 / 500 / 600 / 700 / 800 → `normal · orta · yari · kalin · ekstra`; `yazi.baslik` = Figtree 800 (`@expo-google-fonts/figtree`, JS varlığı, OTA ile gider). Archivo kalktı.
+- Başlık stili `baslikStili(boyut)` (`src/theme.ts`): kart (24) ve üstü harf aralığı **−0,5 px**, bölüm boyu (18–23) **−0,3 px**, daha küçük başlıklarda yok.
+- Düğme yazısı `yazi.kalin` (700), 15–17 px.
+- Ölçek: ekran **32** · kart **24** · bölüm **19–20** · metin **16** · alt **14** · etiket **12** (büyük harf, 800, `Rozet buyukHarf`). Gezi kapağı başlığı 32. Satır 1,05–1,1.
+- Logo yazısı "tripmate" font değil, sabit SVG yolu (`src/components/ui/logoYazisiYolu.ts`; Archivo 850 / 115 glifleri bir kez üretildi). Logo değişikliği Ece'nin kararıdır (`docs/ekip/00-calisma-sistemi.md` §4).
 
 ## 3. Köşe, gölge, boşluk
 
@@ -40,16 +43,16 @@ Kontrast: Lacivert / Gri mavi beyaz üstünde ≥ 4,5:1; Mandalina üstünde bey
 
 | Bileşen | Kural |
 |---|---|
-| `Buton` | `birincil` Gece/beyaz · `vurgu` Mandalina/Lacivert · `ikincil` Buz/Gece · `cerceveli` beyaz + 1,5 Çizgi · `tehlike`; köşe 14; boy 54 (`buyuk`) / 52 / 46 (`kucuk`); yazı Figtree 800 16 |
+| `Buton` | `birincil` Gece/beyaz · `vurgu` Mandalina/Lacivert · `ikincil` Buz/Gece · `cerceveli` beyaz + 1,5 Çizgi · `tehlike`; köşe 14; boy 54 (`buyuk`) / 52 / 46 (`kucuk`); yazı Figtree 700 16 |
 | `Cip` | 36 px tam yuvarlak; seçili Gece dolu beyaz yazı, diğerleri beyaz + 1,5 Çizgi; `kucuk` 30 |
 | `Rozet` | 26 px, köşe 8, 12 / 800; `vurgu` · `buz` · `basari` · `gece`; `buyukHarf` etiket dili ("2 GÜNLÜK GEZİ") |
 | `AramaKutusu` | Buz, köşe 14, 52 px, solda Gece büyüteç 2,4 |
 | `SegmentSecici` | Buz kap köşe 12 / 3 px dolgu; seçili beyaz dilim + Gece yazı |
 | `AltPencere` | tutamaçlı alt sayfa: beyaz, üst köşe 30, perde Lacivert %45, `kaydirilir` ile en çok %88 |
 | **`EkleDugmesi`** | **her ekranda tek bileşen**: 38 px kare (köşe 11) — turuncu **+** (Mandalina, Lacivert çizgi 3) ↔ açık yeşil **✓** (`basariZemin`, `basariMetin` 3,2; dokununca çıkar). 32 / 34 px küçük yerlerde |
-| `Avatar` | köşeli yuvarlak kare (köşe ≈ %32), Archivo baş harf; Gece varsayılan, Mandalina / açık zeminde Lacivert harf |
+| `Avatar` | köşeli yuvarlak kare (köşe ≈ %32), Figtree 800 baş harf; Gece varsayılan, Mandalina / açık zeminde Lacivert harf |
 | `MetinAlani` | Buz kutu, köşe 14, odakta Gece kenar |
-| `Logo` / `LogoYazi` | iki nokta (Mandalina + Gece; koyu zeminde beyaz) + kesik çizgili gülümseme; < 24 px kesiksiz; yazı Archivo Gece |
+| `Logo` / `LogoYazi` | iki nokta (Mandalina + Gece; koyu zeminde beyaz) + kesik çizgili gülümseme; < 24 px kesiksiz; yazı SVG yolu (Archivo glifleri), Gece |
 
 İkonlar: 2,2 çizgi, yuvarlak uç; seçili sekme ikonu dolu Gece (`Ikon`).
 

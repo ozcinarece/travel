@@ -16,12 +16,12 @@ import {
 } from '@/features/yonetim/genelBakis';
 import { ty } from '@/features/yonetim/metin';
 import { binlik } from '@/features/yonetim/yer';
-import { yazi } from '@/theme';
+import { baslikStili, yazi } from '@/theme';
 
 import { Kart, KartEtiketi, Rozet } from '../Ortak';
 import { yRenk } from '../tema';
 
-/** Gösterge kartı (kanvas BO-0 üst sıra): etiket, Archivo 34 değer, 13 px alt satır; veri yoksa "veri bekleniyor". */
+/** Gösterge kartı (kanvas BO-0 üst sıra): etiket, Figtree 800 34 değer, 13 px alt satır; veri yoksa "veri bekleniyor". */
 export function GostergeKarti({ baslik, deger, alt, bekleniyor, style }: { baslik: string; deger: string; alt?: ReactNode; bekleniyor?: boolean; style?: StyleProp<ViewStyle> }) {
   return (
     <Kart style={[s.gosterge, style]}>
@@ -204,8 +204,8 @@ export function IcerikSagligi({ sehirler }: { sehirler: IcerikSehri[] }) {
 
 const s = StyleSheet.create({
   gosterge: { flex: 1, minWidth: 0, gap: 10 },
-  deger: { fontFamily: yazi.baslik, fontSize: 34, lineHeight: 36, letterSpacing: -1.02, color: yRenk.metin },
-  bekleniyor: { fontFamily: yazi.baslik, fontSize: 20, lineHeight: 36, letterSpacing: -0.4, color: yRenk.ikincil },
+  deger: { ...baslikStili(34), lineHeight: 36, color: yRenk.metin },
+  bekleniyor: { ...baslikStili(20), lineHeight: 36, color: yRenk.ikincil },
   bekleniyorKucuk: { fontFamily: yazi.ekstra, fontSize: 13, color: yRenk.ikincil },
   altSatir: { flexDirection: 'row', alignItems: 'center', gap: 8, flexWrap: 'wrap' },
   alt: { fontFamily: yazi.normal, fontSize: 13, color: yRenk.ikincil },

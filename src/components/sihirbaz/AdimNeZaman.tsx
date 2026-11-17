@@ -8,7 +8,7 @@ import { gunFarki, tarihDokun, type Aralik } from '@/features/sihirbaz/sihirbaz'
 import { t } from '@/i18n';
 import { AYLAR, GUNLER, ayIzgarasi, ayKaydir, haftaGunu, parcala } from '@/lib/takvim';
 import { yerelTarih } from '@/lib/zaman';
-import { kose, renk, yazi } from '@/theme';
+import { baslikStili, kose, renk, yazi } from '@/theme';
 
 const GUN_KISA = ['Pt', 'Sa', 'Ça', 'Pe', 'Cu', 'Ct', 'Pz'];
 
@@ -103,7 +103,7 @@ const s = StyleSheet.create({
   kart: { borderWidth: 1, borderColor: renk.ayrac, borderRadius: kose.kart, paddingTop: 14, paddingHorizontal: 12, paddingBottom: 10, gap: 8 },
   ayBasi: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 4 },
   ok: { width: 40, height: 40, borderRadius: kose.alan, backgroundColor: renk.yuzey, alignItems: 'center', justifyContent: 'center' },
-  ayAdi: { fontFamily: yazi.baslik, fontSize: 17, color: renk.metin },
+  ayAdi: { ...baslikStili(17), color: renk.metin },
   satir: { flexDirection: 'row' },
   gunAdi: { flex: 1, textAlign: 'center', fontFamily: yazi.ekstra, fontSize: 12, color: renk.ikincil },
   izgara: { flexDirection: 'row', flexWrap: 'wrap', rowGap: 4 },
@@ -118,7 +118,7 @@ const s = StyleSheet.create({
   gunSayiSecili: { color: renk.zemin },
   gecmis: { color: '#b4bbd3' },
   ozet: { paddingVertical: 14, paddingHorizontal: 16, borderRadius: 18, backgroundColor: renk.ana, flexDirection: 'row', alignItems: 'center', gap: 12 },
-  ozetBaslik: { fontFamily: yazi.baslik, fontSize: 19, color: renk.zemin },
+  ozetBaslik: { ...baslikStili(19), color: renk.zemin },
   ozetAlt: { fontFamily: yazi.yari, fontSize: 14, color: renk.anaAcik },
   rozet: { height: 30, paddingHorizontal: 10, borderRadius: kose.rozet, backgroundColor: renk.vurgu, justifyContent: 'center' },
   rozetMetin: { fontFamily: yazi.ekstra, fontSize: 13, color: renk.metin },

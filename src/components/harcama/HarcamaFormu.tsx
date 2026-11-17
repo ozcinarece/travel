@@ -40,7 +40,7 @@ import { t } from '@/i18n';
 import { onayIste } from '@/lib/onay';
 import { useOturum } from '@/lib/oturum';
 import type { Seyahat, Uye } from '@/lib/tipler';
-import { renk, yazi } from '@/theme';
+import { baslikStili, renk, yazi } from '@/theme';
 
 import { durakKategorisi } from './kategori';
 
@@ -522,10 +522,10 @@ const s = StyleSheet.create({
   tutamac: { alignSelf: 'center', width: 44, height: 5, borderRadius: 3, backgroundColor: renk.ayrac },
   icerik: { paddingHorizontal: 20, paddingTop: 12, paddingBottom: 30, gap: 14 },
   ustSatir: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  baslik: { fontFamily: yazi.baslik, fontSize: 22, letterSpacing: -0.5, color: renk.metin },
+  baslik: { ...baslikStili(22), color: renk.metin },
   kapat: { width: 36, height: 36, borderRadius: 12, backgroundColor: renk.yuzey, alignItems: 'center', justifyContent: 'center' },
   tutarKutu: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 16, paddingVertical: 10, borderRadius: 18, backgroundColor: renk.yuzey },
-  tutarGirdi: { flex: 1, fontFamily: yazi.baslik, fontSize: 36, letterSpacing: -1, color: renk.metin, paddingVertical: 0 },
+  tutarGirdi: { flex: 1, ...baslikStili(36), color: renk.metin, paddingVertical: 0 },
   paraDugme: { height: 36, paddingHorizontal: 12, borderRadius: 11, backgroundColor: renk.zemin, justifyContent: 'center' },
   paraMetin: { fontFamily: yazi.ekstra, fontSize: 14, color: renk.ana },
   kurSatiri: { flexDirection: 'row', alignItems: 'center', gap: 8 },
@@ -562,6 +562,6 @@ const s = StyleSheet.create({
   fisDugme: { width: 48, height: 48, borderRadius: 14, backgroundColor: renk.yuzey, alignItems: 'center', justifyContent: 'center' },
   fisVar: { backgroundColor: renk.basariZemin },
   kaydet: { flex: 1, height: 48, borderRadius: 14, backgroundColor: renk.ana, alignItems: 'center', justifyContent: 'center' },
-  kaydetMetin: { fontFamily: yazi.ekstra, fontSize: 15, color: renk.zemin },
+  kaydetMetin: { fontFamily: yazi.kalin, fontSize: 15, color: renk.zemin },
   sil: { fontFamily: yazi.ekstra, fontSize: 14, color: renk.uyari },
 });

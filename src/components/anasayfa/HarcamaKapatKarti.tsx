@@ -7,7 +7,7 @@ import type { AcikBorc } from '@/features/anasayfa/serit';
 import { paraMetni } from '@/features/harcama/hesap';
 import { t } from '@/i18n';
 import { yonelmeEkli } from '@/lib/ek';
-import { renk, yazi } from '@/theme';
+import { baslikStili, renk, yazi } from '@/theme';
 
 type Props = { sehir: string; borc: AcikBorc; onBakiyeler: () => void };
 
@@ -95,9 +95,9 @@ const s = StyleSheet.create({
   ust: { flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between', gap: 10 },
   basliklar: { flex: 1, gap: 2 },
   etiket: { fontFamily: yazi.ekstra, fontSize: 12, letterSpacing: 0.48, color: renk.ikincil },
-  baslik: { fontFamily: yazi.baslik, fontSize: 18, letterSpacing: -0.36, color: renk.metin },
+  baslik: { ...baslikStili(18), color: renk.metin },
   tutarKap: { alignItems: 'flex-end', flexShrink: 0 },
-  tutar: { fontFamily: yazi.baslik, fontSize: 20, letterSpacing: -0.4, color: renk.basariMetin },
+  tutar: { ...baslikStili(20), color: renk.basariMetin },
   tutarBorc: { color: renk.uyari },
   kisiSatir: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   yuzler: { flexDirection: 'row', flexShrink: 0 },

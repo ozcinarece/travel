@@ -4,7 +4,7 @@ import { ty } from '@/features/yonetim/metin';
 import { mekanBaskaBolumde, type TaslakBolum } from '@/features/yonetim/rehberTaslak';
 import type { BilinenMekanlar } from '@/features/icerik/mekanBilgileri';
 import type { HafifYer, Merkez } from '@/features/yerler/api';
-import { yazi } from '@/theme';
+import { baslikStili, yazi } from '@/theme';
 
 import { yRenk } from '../tema';
 import { BlokEditoru } from './BlokEditoru';
@@ -23,7 +23,7 @@ type Props = {
 };
 
 /**
- * #156 KK1 (kanvas BO-1 orta): Buz üstünde beyaz kâğıt (24 köşe, 34 / 44 iç boşluk) — "BÖLÜM 02", Archivo 32 başlık,
+ * #156 KK1 (kanvas BO-1 orta): Buz üstünde beyaz kâğıt (24 köşe, 34 / 44 iç boşluk) — "BÖLÜM 02", Figtree 800 32 başlık,
  * "özet · İÇİNDEKİLER SATIRI", ardından uygulamadaki gibi görünen blok editörü.
  */
 export function RehberKagidi({ bolum, no, bolumler, merkez, fotoYukle, onHata, onMekanSecildi, bilinen, onDegis }: Props) {
@@ -69,7 +69,7 @@ export function RehberKagidi({ bolum, no, bolumler, merkez, fotoYukle, onHata, o
 const c: Record<string, CSSProperties> = {
   kagit: { width: '100%', maxWidth: 620, margin: '0 auto', flexGrow: 1, flexShrink: 0, background: yRenk.zemin, borderRadius: 24, boxShadow: '0 10px 30px rgba(21,42,107,0.08)', padding: '34px 44px', boxSizing: 'border-box', display: 'flex', flexDirection: 'column', gap: 16 },
   no: { fontFamily: yazi.ekstra, fontSize: 12, letterSpacing: '0.08em', color: yRenk.ikincil },
-  baslik: { border: 0, outline: 'none', padding: 0, marginTop: -8, background: 'transparent', fontFamily: yazi.baslik, fontSize: 32, lineHeight: 1.05, letterSpacing: '-0.03em', color: yRenk.metin, width: '100%' },
+  baslik: { border: 0, outline: 'none', padding: 0, marginTop: -8, background: 'transparent', ...baslikStili(32), lineHeight: 1.05, letterSpacing: '-0.03em', color: yRenk.metin, width: '100%' },
   ozetSatir: { marginTop: -6, display: 'flex', alignItems: 'baseline', gap: 6, flexWrap: 'wrap' },
   // Genişlik içeriğe göre (Chromium `field-sizing`); başka tarayıcıda 60 karakterlik kutu.
   ozet: { border: 0, outline: 'none', padding: 0, background: 'transparent', fontFamily: yazi.normal, fontSize: 14, color: yRenk.soluk, maxWidth: '100%', minWidth: 80, fieldSizing: 'content' } as CSSProperties,

@@ -1,5 +1,5 @@
 // #98 KK1 → #139 (kanvas 4 · 5 · 7): her adımın kabuğu — üstte 44 px Buz kare (1. adımda Kapat ×, sonra geri), 3 ilerleme
-// noktası (aktif uzun Mandalina, geçilen Gece) ve "n/3"; başlık (Archivo 30) / üst satır; içerik; altta "Devam" + bağlantı.
+// noktası (aktif uzun Mandalina, geçilen Gece) ve "n/3"; başlık (Figtree 800 30) / üst satır; içerik; altta "Devam" + bağlantı.
 import type { ReactNode } from 'react';
 import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -8,7 +8,7 @@ import { Buton } from '@/components/ui/Buton';
 import { Ikon } from '@/components/ui/Ikon';
 import { ADIMLAR, adimIndeksi, type Adim } from '@/features/sihirbaz/sihirbaz';
 import { t } from '@/i18n';
-import { bosluk, kose, minDokunma, renk, yazi } from '@/theme';
+import { baslikStili, bosluk, kose, minDokunma, renk, yazi } from '@/theme';
 
 type Props = {
   adim: Adim;
@@ -89,7 +89,7 @@ const s = StyleSheet.create({
   sayac: { fontFamily: yazi.ekstra, fontSize: 13, color: renk.ikincil },
   basliklar: { paddingHorizontal: bosluk.kenar, paddingTop: 20, paddingBottom: 6, gap: 4 },
   ustSatir: { fontFamily: yazi.ekstra, fontSize: 14, color: renk.ikincil },
-  baslik: { fontFamily: yazi.baslik, fontSize: 30, lineHeight: 32, letterSpacing: -0.9, color: renk.metin },
+  baslik: { ...baslikStili(30), lineHeight: 32, color: renk.metin },
   alt: { fontFamily: yazi.normal, fontSize: 14, lineHeight: 20, color: renk.ikincil },
   icerik: { paddingHorizontal: bosluk.kenar, paddingTop: 10, paddingBottom: 16, gap: 12 },
   altAlan: { paddingHorizontal: bosluk.kenar, paddingTop: 8, paddingBottom: 10, gap: 8 },

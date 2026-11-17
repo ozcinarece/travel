@@ -20,7 +20,7 @@ import { yonelmeEkli } from '@/lib/ek';
 import { kategoriEtiketi } from '@/lib/kategori';
 import { kategoriPini } from '@/lib/pinIkonu';
 import type { Gezi, KaydedilenTuru, SeyahatOzet } from '@/lib/tipler';
-import { bosluk, renk, yazi } from '@/theme';
+import { baslikStili, bosluk, renk, yazi } from '@/theme';
 
 const ZEMINLER = ['#c9d2f2', '#ffe2cc', '#dce6ff', '#d7f0e6', '#e6e0fa'];
 
@@ -253,21 +253,21 @@ function GeziSatiri({ gezi, sira, onPress, onAl, onKaldir }: { gezi: Gezi; sira:
 const s = StyleSheet.create({
   ekran: { flex: 1, backgroundColor: renk.zemin },
   ust: { paddingHorizontal: bosluk.kenar, paddingTop: 8 },
-  baslik: { fontFamily: yazi.baslik, fontSize: 30, letterSpacing: -0.9, color: renk.metin, paddingHorizontal: bosluk.kenar, paddingTop: 14 },
+  baslik: { ...baslikStili(30), color: renk.metin, paddingHorizontal: bosluk.kenar, paddingTop: 14 },
   segment: { paddingHorizontal: bosluk.kenar, paddingTop: 14 },
   icerik: { paddingHorizontal: bosluk.kenar, paddingTop: 18, paddingBottom: 90, gap: 14 },
   bos: { fontFamily: yazi.normal, fontSize: 13, color: renk.ikincil, paddingVertical: 24 },
   satir: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   satirFoto: { width: 72, height: 72, borderRadius: 16, overflow: 'hidden' },
   rozet: { position: 'absolute', left: 6, bottom: 6, height: 20, lineHeight: 20, paddingHorizontal: 6, borderRadius: 6, overflow: 'hidden', backgroundColor: renk.ana, color: renk.zemin, fontFamily: yazi.ekstra, fontSize: 10 },
-  satirAd: { fontFamily: yazi.baslik, fontSize: 16, letterSpacing: -0.2, color: renk.metin },
+  satirAd: { ...baslikStili(16), color: renk.metin },
   satirAlt: { fontFamily: yazi.normal, fontSize: 13, color: renk.ikincil },
   al: { marginTop: 6, height: 30, paddingHorizontal: 10, borderRadius: 9, backgroundColor: renk.vurgu, justifyContent: 'center' },
   alMetin: { fontFamily: yazi.ekstra, fontSize: 12, color: renk.metin },
   satirKalp: { width: 40, height: 40, borderRadius: 12, backgroundColor: '#fff1e6', alignItems: 'center', justifyContent: 'center' },
   grup: { gap: 10, paddingBottom: 6 },
   grupUst: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  grupBaslik: { flex: 1, fontFamily: yazi.baslik, fontSize: 18, color: renk.metin },
+  grupBaslik: { flex: 1, ...baslikStili(18), color: renk.metin },
   grupSayi: { fontFamily: yazi.ekstra, fontSize: 14, color: renk.ikincil },
   grupDugme: { height: 32, maxWidth: '62%', paddingHorizontal: 10, borderRadius: 10, backgroundColor: renk.vurgu, justifyContent: 'center' },
   grupDugmeMetin: { fontFamily: yazi.ekstra, fontSize: 12, color: renk.metin },
