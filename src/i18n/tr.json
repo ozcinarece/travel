@@ -1303,6 +1303,8 @@
     "bittiEtiket": "{sehir} GEZİSİ · BİTTİ",
     "harcamaKapat": "Harcamaları kapat",
     "sanaBorclular": "Sana borçlular",
+    "borcun": "Borcun",
+    "dahaKisi": "+{n} kişi",
     "odenmedi": "henüz ödenmedi",
     "bakiyeler": "Bakiyeler"
   }

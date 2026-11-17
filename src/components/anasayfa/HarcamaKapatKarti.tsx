@@ -1,4 +1,4 @@
-// #276 2b · KK4 (kanvas 29c, 1. kart): gezi bitti, açık borç var → "Harcamaları kapat". Ürün cevabı (17 Kas) 4: "Hatırlat" yok,
+// #276 2b · KK4 (kanvas 29c, 1. kart; #290 KK1 borçlu hali 29g · A): gezi bitti, açık borç var → "Harcamaları kapat". Ürün cevabı (17 Kas) 4: "Hatırlat" yok,
 // yalnız tam genişlikte "Bakiyeler" (44). Kişi kişi tutarlar mevcut bakiye hesabından (`harcamaOzeti`).
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
@@ -6,17 +6,30 @@ import { Avatar } from '@/components/ui/Avatar';
 import type { AcikBorc } from '@/features/anasayfa/serit';
 import { paraMetni } from '@/features/harcama/hesap';
 import { t } from '@/i18n';
+import { yonelmeEkli } from '@/lib/ek';
 import { renk, yazi } from '@/theme';
 
 type Props = { sehir: string; borc: AcikBorc; onBakiyeler: () => void };
 
 /** Yüzlerde en çok bu kadar kişi (kanvas 29c: iki üst üste kare). */
-const EN_COK_YUZ = 3;
+const EN_COK_YUZ = 2;
+/** #290 KK1 (29g · A): borçlu satırında en çok bu kadar ad; fazlası "+N kişi". */
+const EN_COK_AD = 2;
+
+/** "Ayşe" → "’ye", "Mert" → "’e" (çok kelimeli adda son kelimeye göre); karar verilemezse ek yok. */
+export function yonelmeEki(ad: string): string {
+  const son = ad.trim().split(/\s+/).pop() ?? '';
+  const ekli = yonelmeEkli(son);
+  return ekli ? ekli.slice(son.length).replace("'", '’') : '';
+}
 
 export function HarcamaKapatKarti({ sehir, borc, onBakiyeler }: Props) {
-  // Kanvas yalnız "Sana borçlular" halini çiziyor: tutar sütunu ve kişi satırı bana borçlu olanlar varken görünür.
+  // 29c: "Sana borçlular" (alacaklı); 29g · A: "Borcun" (borçlu). Tutar sütunu ve kişi satırı karşı taraf varken görünür.
   const alacakli = borc.benimNet > 0 && borc.karsilar.length > 0;
+  const borclu = borc.benimNet < 0 && borc.karsilar.length > 0;
   const yuzler = borc.karsilar.slice(0, EN_COK_YUZ);
+  const adlar = borc.karsilar.slice(0, EN_COK_AD);
+  const fazla = borc.karsilar.length - adlar.length;
   return (
     <View style={s.kart}>
       <View style={s.ust}>
@@ -26,31 +39,48 @@ export function HarcamaKapatKarti({ sehir, borc, onBakiyeler }: Props) {
             {t('serit.harcamaKapat')}
           </Text>
         </View>
-        {alacakli ? (
+        {alacakli || borclu ? (
           <View style={s.tutarKap}>
-            <Text style={s.etiket}>{t('serit.sanaBorclular')}</Text>
-            <Text style={s.tutar}>{paraMetni(borc.benimNet, 'TRY', true)}</Text>
+            <Text style={s.etiket}>{alacakli ? t('serit.sanaBorclular') : t('serit.borcun')}</Text>
+            <Text style={[s.tutar, borclu && s.tutarBorc]}>{paraMetni(borc.benimNet, 'TRY', true)}</Text>
           </View>
         ) : null}
       </View>
-      {alacakli ? (
+      {alacakli || borclu ? (
         <View style={s.kisiSatir}>
           <View style={s.yuzler}>
             {yuzler.map((k, i) => (
               <View key={k.id} style={[s.yuz, i > 0 && s.yuzUst]}>
-                <Avatar ad={borc.kisiler.ad(k.id)} url={borc.kisiler.foto(k.id)} boyut={28} arkaPlan={i === 0 ? renk.ana : renk.anaAcik} />
+                <Avatar ad={borc.kisiler.ad(k.id)} url={borc.kisiler.foto(k.id)} boyut={28} arkaPlan={i === 0 ? renk.ana : renk.anaAcik} kucukHarf />
               </View>
             ))}
           </View>
-          <Text style={s.kisiMetin}>
-            {borc.karsilar.map((k, i) => (
-              <Text key={k.id}>
-                {i > 0 ? ' · ' : ''}
-                <Text style={s.kalin}>{borc.kisiler.ad(k.id)}</Text> {paraMetni(k.tutar)}
-              </Text>
-            ))}{' '}
-            <Text style={s.soluk}>{t('serit.odenmedi')}</Text>
-          </Text>
+          {alacakli ? (
+            <Text style={s.kisiMetin}>
+              {borc.karsilar.map((k, i) => (
+                <Text key={k.id}>
+                  {i > 0 ? ' · ' : ''}
+                  <Text style={s.kalin}>{borc.kisiler.ad(k.id)}</Text> {paraMetni(k.tutar)}
+                </Text>
+              ))}{' '}
+              <Text style={s.soluk}>{t('serit.odenmedi')}</Text>
+            </Text>
+          ) : (
+            // 29g · A: "**Ayşe**’ye 250 ₺ henüz ödenmedi"; birden çok alacaklıda en çok 2 ad, sonra "+N kişi".
+            <Text style={s.kisiMetin}>
+              {adlar.map((k, i) => {
+                const ad = borc.kisiler.ad(k.id);
+                return (
+                  <Text key={k.id}>
+                    {i > 0 ? ' · ' : ''}
+                    <Text style={s.kalin}>{ad}</Text>
+                    {yonelmeEki(ad)} {paraMetni(Math.abs(k.tutar))}
+                  </Text>
+                );
+              })}
+              {fazla > 0 ? ` ${t('serit.dahaKisi', { n: fazla })}` : ''} <Text style={s.soluk}>{t('serit.odenmedi')}</Text>
+            </Text>
+          )}
         </View>
       ) : null}
       <Pressable accessibilityRole="button" onPress={onBakiyeler} style={({ pressed }) => [s.dugme, pressed && s.basili]}>
@@ -68,6 +98,7 @@ const s = StyleSheet.create({
   baslik: { fontFamily: yazi.baslik, fontSize: 18, letterSpacing: -0.36, color: renk.metin },
   tutarKap: { alignItems: 'flex-end', flexShrink: 0 },
   tutar: { fontFamily: yazi.baslik, fontSize: 20, letterSpacing: -0.4, color: renk.basariMetin },
+  tutarBorc: { color: renk.uyari },
   kisiSatir: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   yuzler: { flexDirection: 'row', flexShrink: 0 },
   // 32'lik kare = 28'lik yüz + 2 px beyaz kenar; sonrakiler 8 px üst üste.

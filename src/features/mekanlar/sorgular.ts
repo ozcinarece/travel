@@ -20,9 +20,10 @@ export function useMekanlar(seyahatId: string | undefined) {
   });
 }
 
-export function useUyeler(seyahatId: string | undefined) {
+export function useUyeler(seyahatId: string | undefined, secenek: { retry?: number } = {}) {
   const { session } = useOturum();
   return useQuery({
+    ...secenek,
     queryKey: ['uyeler', seyahatId],
     enabled: !!session && !!seyahatId,
     queryFn: async () => {

@@ -1,6 +1,7 @@
 // #276 2b · KK3 (kanvas 29b · 29f): Keşfet'te altta sabit seyahat şeridi + [+] (alt menü yok) ve şeridin ilk görünüşünde bir kez
 // "Seyahatin burada" ipucu. Şeride dokununca seyahat açılır; ipucu Tamam'a ya da şeride dokununca kapanır, bir daha çıkmaz.
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { useEffect, useState } from 'react';
+import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 
 import { t } from '@/i18n';
@@ -18,12 +19,28 @@ type Props = {
   onIpucuKapat: () => void;
   /** Ekranın altından uzaklık (kanvas 24; ana çubuk varsa onun 8 px üstü). */
   alttan: number;
+  /**
+   * #290 KK3 · KK6: şeridin ölçülen yüksekliği (büyük yazıda 64'ten uzun olabilir) ve açıksa ipucunun üst kenarının ekranın altına
+   * uzaklığı; liste boşluğu ve kısa bildirim bunlara göre yerleşir.
+   */
+  onOlcu?: (o: { serit: number; ipucuUst: number | null }) => void;
 };
 
-/** Şerit + [+] yüksekliği; içerik ve kısa bildirim buna göre aşağıdan boşluk bırakır. */
+/** Şerit + [+] en az yüksekliği; içerik ve kısa bildirim buna göre aşağıdan boşluk bırakır (büyük yazıda şerit uzar). */
 export const SERIT_YUKSEKLIK = 64;
+/** 29f: ipucu balonu şeridin 14 px üstünde biter (64 + 14 = 78). */
+const IPUCU_ARALIK = 14;
 
-export function SeyahatSeridi({ rozet, ad, alt, ipucu, onAc, onYeni, onIpucuKapat, alttan }: Props) {
+export function SeyahatSeridi({ rozet, ad, alt, ipucu, onAc, onYeni, onIpucuKapat, alttan, onOlcu }: Props) {
+  const [seritH, setSeritH] = useState(SERIT_YUKSEKLIK);
+  const [ipucuH, setIpucuH] = useState<number | null>(null);
+  const ipucuAlt = alttan + seritH + IPUCU_ARALIK;
+  // #290 KK6: ölçüler tek yerden, en güncel değerlerle bildirilir (iki onLayout aynı geçişte hangi sırayla gelirse gelsin).
+  // İpucu kapanınca kısa bildirim yeniden şeridin üstüne iner.
+  useEffect(() => {
+    onOlcu?.({ serit: seritH, ipucuUst: ipucu && ipucuH !== null ? alttan + seritH + IPUCU_ARALIK + ipucuH : null });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [seritH, ipucuH, ipucu, alttan]);
   const ac = () => {
     if (ipucu) onIpucuKapat();
     onAc();
@@ -32,8 +49,15 @@ export function SeyahatSeridi({ rozet, ad, alt, ipucu, onAc, onYeni, onIpucuKapa
     <>
       {ipucu ? (
         // 29f: şeridin üstünde, sağda [+] payı (86) bırakan balon; altında şeridin sol tarafını gösteren ok.
-        <View accessibilityRole="alert" accessibilityLabel={t('serit.ipucuBaslik')} style={[s.ipucu, { bottom: alttan + 78 }]}>
-          <View style={s.ipucuMetinler}>
+        // #290 KK7: balon tek öğe olarak okunur (başlık + metin); iOS'ta açıkken arkası okunmaz; "Tamam" ayrı düğme.
+        <View
+          testID="serit-ipucu"
+          accessibilityViewIsModal={Platform.OS === 'ios'}
+          onLayout={(e) => {
+            setIpucuH(e.nativeEvent.layout.height);
+          }}
+          style={[s.ipucu, { bottom: ipucuAlt }]}>
+          <View accessible accessibilityRole="alert" accessibilityLabel={`${t('serit.ipucuBaslik')}. ${t('serit.ipucuMetin')}`} style={s.ipucuMetinler}>
             <Text style={s.ipucuBaslik}>{t('serit.ipucuBaslik')}</Text>
             <Text style={s.ipucuMetin}>{t('serit.ipucuMetin')}</Text>
           </View>
@@ -43,7 +67,13 @@ export function SeyahatSeridi({ rozet, ad, alt, ipucu, onAc, onYeni, onIpucuKapa
           <View style={s.ok} />
         </View>
       ) : null}
-      <View style={[s.kap, { bottom: alttan }]} pointerEvents="box-none">
+      <View
+        testID="serit-kap"
+        style={[s.kap, { bottom: alttan }]}
+        pointerEvents="box-none"
+        onLayout={(e) => {
+          setSeritH(Math.max(SERIT_YUKSEKLIK, e.nativeEvent.layout.height));
+        }}>
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={[rozet, ad, alt].filter(Boolean).join(', ')}
@@ -60,15 +90,17 @@ export function SeyahatSeridi({ rozet, ad, alt, ipucu, onAc, onYeni, onIpucuKapa
             <View style={s.ustSatir}>
               {rozet ? (
                 <View style={s.rozet}>
-                  <Text style={s.rozetMetin}>{rozet}</Text>
+                  <Text style={s.rozetMetin} maxFontSizeMultiplier={1.3}>
+                    {rozet}
+                  </Text>
                 </View>
               ) : null}
-              <Text style={s.ad} numberOfLines={1}>
+              <Text style={s.ad} numberOfLines={1} maxFontSizeMultiplier={1.3}>
                 {ad}
               </Text>
             </View>
             {alt ? (
-              <Text style={s.alt} numberOfLines={1}>
+              <Text style={s.alt} numberOfLines={1} maxFontSizeMultiplier={1.3}>
                 {alt}
               </Text>
             ) : null}
@@ -94,7 +126,9 @@ const s = StyleSheet.create({
   serit: {
     flex: 1,
     minWidth: 0,
-    height: SERIT_YUKSEKLIK,
+    // #290 KK3 (29g · C notu): büyük yazıda içerikle büyür.
+    minHeight: SERIT_YUKSEKLIK,
+    paddingVertical: 8,
     paddingLeft: 8,
     paddingRight: 12,
     borderRadius: 20,
@@ -109,7 +143,7 @@ const s = StyleSheet.create({
   gorsel: { width: 48, height: 48, borderRadius: 14, backgroundColor: '#FFE2CC', overflow: 'hidden' },
   metinler: { flex: 1, minWidth: 0, gap: 3 },
   ustSatir: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  rozet: { height: 20, paddingHorizontal: 7, borderRadius: 6, backgroundColor: renk.vurgu, justifyContent: 'center', flexShrink: 0 },
+  rozet: { minHeight: 20, paddingHorizontal: 7, borderRadius: 6, backgroundColor: renk.vurgu, justifyContent: 'center', flexShrink: 0 },
   rozetMetin: { fontFamily: yazi.ekstra, fontSize: 10, color: renk.metin },
   ad: { flexShrink: 1, fontFamily: yazi.baslik, fontSize: 16, letterSpacing: -0.32, color: renk.zemin },
   alt: { fontFamily: yazi.yari, fontSize: 12, color: renk.anaAcik },
