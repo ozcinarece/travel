@@ -366,14 +366,14 @@ function Sohbet({ seyahat, uyeler, mesajlar, oylamalar }: { seyahat: Seyahat; uy
           <GeriHapi baslik={seyahatAdi(seyahat)} onPress={() => geziyeGit(seyahat.id)} duz />
         </View>
         <View style={s.ustSag}>
-          <Pressable accessibilityRole="button" accessibilityLabel={t('harcama.seyahattekiler')} onPress={() => setAcik('grup')} style={{ flexDirection: 'row' }}>
+          <Pressable accessibilityRole="button" accessibilityLabel={t('harcama.seyahattekiler')} onPress={() => setAcik('grup')} hitSlop={YUZ_PAYI} style={{ flexDirection: 'row' }}>
             {uyeler.slice(0, 4).map((u, i) => (
               <View key={u.user_id} style={[s.yuz, i > 0 && { marginLeft: -8 }]}>
                 <Avatar ad={u.display_name} url={u.photo_url} boyut={28} arkaPlan={k.renk(u.user_id)} />
               </View>
             ))}
           </Pressable>
-          <Pressable accessibilityRole="button" accessibilityLabel={t('sohbet.konumlar')} onPress={() => setAcik('grup')} style={s.konum}>
+          <Pressable accessibilityRole="button" accessibilityLabel={t('sohbet.konumlar')} onPress={() => setAcik('grup')} hitSlop={KONUM_PAYI} style={s.konum}>
             <Ikon ad="goz" boyut={18} renk={renk.ana} kalinlik={2.3} />
           </Pressable>
         </View>
@@ -399,7 +399,7 @@ function Sohbet({ seyahat, uyeler, mesajlar, oylamalar }: { seyahat: Seyahat; uy
       <View style={[s.alt, { paddingBottom: 10 }]}>
         <View style={s.ekler}>
           {ekler.map((e) => (
-            <Pressable key={e.ad} accessibilityRole="button" onPress={e.onPress} disabled={e.ikon === 'galeri' && fotoYukleniyor} style={({ pressed }) => [s.ek, pressed && { opacity: 0.8 }]}>
+            <Pressable key={e.ad} accessibilityRole="button" hitSlop={EK_PAYI} onPress={e.onPress} disabled={e.ikon === 'galeri' && fotoYukleniyor} style={({ pressed }) => [s.ek, pressed && { opacity: 0.8 }]}>
               {e.ikon === 'galeri' && fotoYukleniyor ? <ActivityIndicator size="small" color={renk.ana} /> : <Ikon ad={e.ikon} boyut={14} renk={renk.ana} kalinlik={2.4} />}
               <Text style={s.ekMetin}>{e.ad}</Text>
             </Pressable>
@@ -479,6 +479,14 @@ function FotoMesaji({ yol }: { yol: string }) {
   );
 }
 
+/**
+ * #232 KK1: dokunma alanı ≥ 44 pt, görünüm aynı. Hızlı ekler 30 + 7 + 7 (yanda 3'er; aralık 6, çakışma yok; üstte alt çubuğun
+ * 10 px iç boşluğu, altta giriş satırına 8 px). Seyahattekiler (28 px yüzler) 32 + 6 + 6; konumlar 36 + 4'er yön.
+ */
+const EK_PAYI = { top: 7, bottom: 7, left: 3, right: 3 };
+const YUZ_PAYI = { top: 6, bottom: 6 };
+const KONUM_PAYI = 4;
+
 const s = StyleSheet.create({
   ekran: { flex: 1, backgroundColor: renk.haritaZemin },
   ust: { paddingHorizontal: 20, paddingBottom: 12, backgroundColor: renk.zemin, borderBottomWidth: 1, borderBottomColor: renk.ayrac, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12 },
@@ -489,7 +497,8 @@ const s = StyleSheet.create({
   bos: { alignItems: 'center', gap: 8, paddingVertical: 40 },
   bosMetin: { fontFamily: yazi.normal, fontSize: 14, lineHeight: 20, color: renk.ikincil, textAlign: 'center', maxWidth: 280 },
   alt: { paddingHorizontal: 16, paddingTop: 10, backgroundColor: renk.zemin, borderTopWidth: 1, borderTopColor: renk.ayrac, gap: 8 },
-  ekler: { flexDirection: 'row', gap: 6, flexWrap: 'wrap' },
+  // Satır kırılırsa iki satırın dokunma alanları çakışmasın: 30 + 7 + 7, satır arası 14.
+  ekler: { flexDirection: 'row', columnGap: 6, rowGap: 14, flexWrap: 'wrap' },
   ek: { height: 30, paddingLeft: 8, paddingRight: 10, borderRadius: 9, backgroundColor: renk.yuzey, flexDirection: 'row', alignItems: 'center', gap: 4 },
   ekMetin: { fontFamily: yazi.ekstra, fontSize: 12, color: renk.ana },
   girisSatiri: { flexDirection: 'row', alignItems: 'flex-end', gap: 8 },

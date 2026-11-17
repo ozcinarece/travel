@@ -243,6 +243,32 @@ describe('#183 Harcamalar sekmesi', () => {
     googleYok();
   });
 
+  it('#232 KK2/KK4: bölüşümde kişinin adına dokunmak onay kutusu gibi dahil eder ya da çıkarır; rol checkbox, durum doğru', async () => {
+    mockTablolar = fikstur(tarihEkle(yerelTarih(new Date(), IST), 10));
+    const { getByText, getByLabelText, getAllByText, getByTestId, qc } = ciz(<HarcamaSekmesi />);
+    await waitFor(() => getByText('Toplam · 3 kişi'));
+    await sakinles(qc);
+    fireEvent.press(getByLabelText('Harcama ekle'));
+    await waitFor(() => getByLabelText('Tutar'));
+    fireEvent.changeText(getByLabelText('Tutar'), '100');
+    const satir = getByLabelText('Mert bölüşümde');
+    expect(satir.props.accessibilityRole).toBe('checkbox');
+    expect(satir.props.accessibilityState).toMatchObject({ checked: true });
+    // Adın kendisine dokun (kutuya değil) → Mert çıkar, ikiye bölünür.
+    fireEvent.press(getByText('Mert'));
+    await waitFor(() => expect(getAllByText('50 ₺')).toHaveLength(2));
+    expect(getByLabelText('Mert bölüşümde').props.accessibilityState).toMatchObject({ checked: false });
+    // Tekrar dokun → geri dahil, üçe bölünür.
+    fireEvent.press(getByText('Mert'));
+    await waitFor(() => expect(getAllByText('33,33 ₺')).toHaveLength(2));
+    expect(getByLabelText('Mert bölüşümde').props.accessibilityState).toMatchObject({ checked: true });
+    // Görsel kutu da çalışır ama ekran okuyucuda ikinci bir onay kutusu olarak görünmez.
+    const kutu = getByTestId('kisi-kutu-mert', { includeHiddenElements: true });
+    expect(kutu.props.accessible).toBe(false);
+    fireEvent.press(kutu);
+    await waitFor(() => expect(getAllByText('50 ₺')).toHaveLength(2));
+  });
+
   it('KK5: döviz — 45 € × 36,25 = 1.631,25 ₺; paylar ₺ üzerinden', async () => {
     mockTablolar = fikstur(tarihEkle(yerelTarih(new Date(), IST), 10));
     const { getByText, getByLabelText, qc } = ciz(<HarcamaSekmesi />);
