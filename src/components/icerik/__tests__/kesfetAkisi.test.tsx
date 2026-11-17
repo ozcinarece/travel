@@ -2,10 +2,13 @@
 // iskelet ve "Bağlanamadık" (KK7).
 import { beforeEach, describe, expect, it, jest } from '@jest/globals';
 import { fireEvent, render, screen } from '@testing-library/react-native';
-import { Share } from 'react-native';
+import { Share, StyleSheet } from 'react-native';
+import { Path } from 'react-native-svg';
 
 import { ayrilmaEki } from '@/features/davet/katilim';
 import { akisGezisi, akisSirasi, kartEtiketi, kesfetAkisiAcik, type AkisGezisi } from '@/features/icerik/kesfetAkisi';
+
+import { Logo } from '@/components/ui/Logo';
 
 import { KesfetAkisi } from '../KesfetAkisi';
 
@@ -122,11 +125,65 @@ describe('<KesfetAkisi />', () => {
     paylas.mockRestore();
   });
 
-  it('kaydedilmiş gezide kalp "Kaydedildi"; dokununca kaldırır', () => {
+  it('#287 KK3: kalp aç/kapa düğmesi — "Kaydet" + checked (selected değil); dokununca kaldırır', () => {
     mockKayitli = [{ tur: 'gezi', hedef_id: 'a' }];
     render(<KesfetAkisi sehir={null} onYeni={jest.fn()} />);
-    fireEvent.press(screen.getByLabelText('Kaydedildi'));
+    const kalpler = screen.getAllByLabelText('Kaydet');
+    expect(kalpler).toHaveLength(4);
+    kalpler.forEach((k) => {
+      expect(k.props.accessibilityRole).toBe('togglebutton');
+      expect(k.props.accessibilityState?.selected).toBeUndefined();
+    });
+    expect(kalpler.map((k) => k.props.accessibilityState?.checked)).toEqual([true, false, false, false]);
+    fireEvent.press(kalpler[0]);
     expect(mockKaydet).toHaveBeenCalledWith({ tur: 'gezi', hedef_id: 'a', kayitli: true });
+  });
+
+  it('#287 KK2: kart rozetindeki 20 px logo kanvastaki gibi kesik çizgi (7 4.5); başka yerde 24 altı kesiksiz kalır', () => {
+    const rozet = render(<Logo boyut={20} koyuZemin kesik />);
+    expect(rozet.UNSAFE_getByType(Path).props.strokeDasharray).toBe('7 4.5');
+    rozet.unmount();
+    const kucuk = render(<Logo boyut={20} koyuZemin />);
+    expect(kucuk.UNSAFE_getByType(Path).props.strokeDasharray).toBeUndefined();
+    kucuk.unmount();
+    render(<KesfetAkisi sehir={null} onYeni={jest.fn()} />);
+    expect(screen.UNSAFE_getAllByType(Path).filter((p) => p.props.strokeDasharray === '7 4.5')).toHaveLength(4);
+  });
+
+  it('#287 KK1: veri varken yenileme hata verirse kartlar ekranda kalır, "Bağlanamadık" çıkmaz', () => {
+    const e = render(<KesfetAkisi sehir={null} onYeni={jest.fn()} />);
+    expect(screen.getAllByLabelText(/Tripmate gezisi$/)).toHaveLength(4);
+    mockAkis = { data: liste, isPending: false, isError: true, isFetching: false, refetch: jest.fn() };
+    e.rerender(<KesfetAkisi sehir={null} onYeni={jest.fn()} />);
+    expect(screen.getAllByLabelText(/Tripmate gezisi$/)).toHaveLength(4);
+    expect(screen.queryByText('Bağlanamadık')).toBeNull();
+  });
+
+  it('#287 KK4: 10 durağa kadar her durak bir halka; 10’dan fazlaysa en çok 8 halka + "+N"', () => {
+    mockAkis = { data: [gezi('u', 'Bursa', [12]), gezi('v', 'İzmir', [10])], isPending: false, isError: false, isFetching: false, refetch: jest.fn() };
+    render(<KesfetAkisi sehir={null} onYeni={jest.fn()} />);
+    expect(screen.getAllByTestId('rota-halka')).toHaveLength(8 + 10);
+    expect(screen.getByText('+4')).toBeTruthy();
+    expect(screen.getByLabelText('Rota: 1. gün 12 durak')).toBeTruthy();
+  });
+
+  it('#287 KK4 (kanvas 29g · C): yazı ölçeği 1,5 iken "Seyahatime al" ayrı satırda ve tam genişlikte; 1,0 iken tek satır', () => {
+    const RN = jest.requireActual<typeof import('react-native')>('react-native');
+    const olcek = (fontScale: number) => ({ width: 375, height: 812, scale: 2, fontScale });
+    const spy = jest.spyOn(RN, 'useWindowDimensions').mockReturnValue(olcek(1.5));
+    mockAkis = { data: [gezi('a', 'Bursa', [4, 3])], isPending: false, isError: false, isFetching: false, refetch: jest.fn() };
+    const e = render(<KesfetAkisi sehir={null} onYeni={jest.fn()} />);
+    const al = screen.getByTestId('kesfet-al');
+    const kalp = screen.getByRole('togglebutton');
+    // Kalp + paylaş üst satırda (aynı satır kabı); "Seyahatime al" o satırın dışında, eylem kabının doğrudan çocuğu.
+    expect(kalp.parent?.parent).not.toBe(al.parent);
+    expect(StyleSheet.flatten(al.props.style)).toEqual(expect.objectContaining({ alignSelf: 'stretch', flexGrow: 0 }));
+    spy.mockReturnValue(olcek(1));
+    e.rerender(<KesfetAkisi sehir={null} onYeni={jest.fn()} />);
+    const al1 = screen.getByTestId('kesfet-al');
+    expect(StyleSheet.flatten(al1.props.style)).toEqual(expect.objectContaining({ flexGrow: 1, flexShrink: 1, flexBasis: 0 }));
+    expect(StyleSheet.flatten(al1.props.style).alignSelf).toBeUndefined();
+    spy.mockRestore();
   });
 
   it('KK5: akışın sonunda "Kendi gezini kur"; Başla yeni seyahat sihirbazını açar', () => {

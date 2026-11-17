@@ -2,7 +2,7 @@
 // "Tripmate" rozeti; altta "Şehir · N gün · M durak", gün renkli rota şeridi, tek cümle not ve 3 eylem: ♥ Kaydet,
 // WhatsApp'ta paylaş, Seyahatime al. ⋯ menüsü (şikâyet, gizle, engelle) bu işte yok. Akışın sonunda "Kendi gezini kur" kartı.
 import { Image } from 'expo-image';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 
 import { useKayitli } from '@/components/icerik/Kalp';
@@ -14,6 +14,8 @@ import { gunRengi, gunUstuMetin, kose, renk, yazi } from '@/theme';
 
 /** Fotoğrafı olmayan gezide kapak zemini (kanvas 29a: Buz koyusu, açık Mandalina, açık mavi). */
 const ZEMINLER = ['#c9d2f2', '#ffe2cc', '#dce6ff'];
+/** Kanvas 29g · C: bu yazı ölçeğinden itibaren eylemler iki satıra iner. */
+export const IKI_SATIR_OLCEK = 1.3;
 /** Kart notu (kanvas 29a, MdYazi paragrafıyla aynı). */
 const NOT_RENGI = '#232b48';
 
@@ -28,18 +30,50 @@ type Props = {
 export function KesfetKarti({ gezi, sira, onAc, onPaylas, onAl }: Props) {
   const kayitli = useKayitli('gezi', gezi.id);
   const kaydet = useKaydet();
+  const { fontScale } = useWindowDimensions();
+  const ikiSatir = fontScale >= IKI_SATIR_OLCEK;
   const baslik = t('kesfetAkisi.kartBaslik', {
     sehir: gezi.sehirler?.ad ?? gezi.baslik,
     gun: gezi.gun_sayisi,
     durak: gezi.mekan_sayisi,
   });
+  // #287 KK3: aç/kapa düğmesi (kanvas aria-pressed) — ekran okuyucu "Kaydet, açık/kapalı" der.
+  const kalp = (
+    <Pressable
+      accessibilityRole="togglebutton"
+      accessibilityLabel={t('gezi.kaydet')}
+      accessibilityState={{ checked: kayitli }}
+      onPress={() => kaydet.mutate({ tur: 'gezi', hedef_id: gezi.id, kayitli })}
+      style={({ pressed }) => [s.kalp, kayitli && s.kalpDolu, pressed && s.basili]}>
+      <Svg width={20} height={20} viewBox="0 0 24 24" fill={kayitli ? renk.vurgu : 'none'} stroke={kayitli ? renk.vurgu : renk.ana} strokeWidth={kayitli ? 2.2 : 2.4} strokeLinejoin="round">
+        <Path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z" />
+      </Svg>
+    </Pressable>
+  );
+  const paylas = (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={t('kesfetAkisi.paylasEtiket')}
+      onPress={onPaylas}
+      style={({ pressed }) => [s.paylas, ikiSatir && s.paylasGenis, pressed && s.basili]}>
+      <Svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke={renk.ana} strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round">
+        <Path d="M12 15V4M7 9l5-5 5 5M5 14v5h14v-5" />
+      </Svg>
+      <Text style={s.paylasMetin}>{t('kesfetAkisi.whatsapp')}</Text>
+    </Pressable>
+  );
+  const al = (
+    <Pressable accessibilityRole="button" testID="kesfet-al" onPress={onAl} style={({ pressed }) => [s.al, ikiSatir && s.alGenis, pressed && s.basili]}>
+      <Text style={s.alMetin}>{t('kesfetAkisi.seyahatimeAl')}</Text>
+    </Pressable>
+  );
   return (
     <View style={s.kart}>
       <Pressable accessibilityRole="button" accessibilityLabel={kartEtiketi(gezi)} onPress={onAc} style={({ pressed }) => pressed && s.basili}>
         <View style={[s.kapak, { backgroundColor: ZEMINLER[sira % ZEMINLER.length] }]}>
           {gezi.kapak_url ? <Image source={{ uri: gezi.kapak_url }} style={StyleSheet.absoluteFill} contentFit="cover" transition={150} /> : null}
           <View style={s.rozet}>
-            <Logo boyut={20} koyuZemin />
+            <Logo boyut={20} koyuZemin kesik />
             <Text style={s.rozetMetin}>{t('kesfetAkisi.tripmate')}</Text>
           </View>
         </View>
@@ -55,30 +89,30 @@ export function KesfetKarti({ gezi, sira, onAc, onPaylas, onAl }: Props) {
           ) : null}
         </View>
       </Pressable>
-      <View style={s.eylemler}>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={kayitli ? t('gezi.kaydedildi') : t('gezi.kaydet')}
-          accessibilityState={{ selected: kayitli }}
-          onPress={() => kaydet.mutate({ tur: 'gezi', hedef_id: gezi.id, kayitli })}
-          style={({ pressed }) => [s.kalp, kayitli && s.kalpDolu, pressed && s.basili]}>
-          <Svg width={20} height={20} viewBox="0 0 24 24" fill={kayitli ? renk.vurgu : 'none'} stroke={kayitli ? renk.vurgu : renk.ana} strokeWidth={kayitli ? 2.2 : 2.4} strokeLinejoin="round">
-            <Path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z" />
-          </Svg>
-        </Pressable>
-        <Pressable accessibilityRole="button" accessibilityLabel={t('kesfetAkisi.paylasEtiket')} onPress={onPaylas} style={({ pressed }) => [s.paylas, pressed && s.basili]}>
-          <Svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke={renk.ana} strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round">
-            <Path d="M12 15V4M7 9l5-5 5 5M5 14v5h14v-5" />
-          </Svg>
-          <Text style={s.paylasMetin}>{t('kesfetAkisi.whatsapp')}</Text>
-        </Pressable>
-        <Pressable accessibilityRole="button" onPress={onAl} style={({ pressed }) => [s.al, pressed && s.basili]}>
-          <Text style={s.alMetin}>{t('kesfetAkisi.seyahatimeAl')}</Text>
-        </Pressable>
-      </View>
+      {/* #287 KK4 (kanvas 29g · C): yazı ölçeği ≥ 1,3'te üstte kalp + paylaş, altta tam genişlik "Seyahatime al". */}
+      {ikiSatir ? (
+        <View style={[s.eylemler, s.eylemlerIki]}>
+          <View style={s.eylemSatiri}>
+            {kalp}
+            {paylas}
+          </View>
+          {al}
+        </View>
+      ) : (
+        <View style={s.eylemler}>
+          {kalp}
+          {paylas}
+          {al}
+        </View>
+      )}
     </View>
   );
 }
+
+/** #287 KK4: bir günde bundan fazla durak varsa halkalar taşmasın diye kısaltılır… */
+const HALKA_SINIRI = 10;
+/** …ve en çok bu kadar halka + "+N" gösterilir. */
+const EN_COK_HALKA = 8;
 
 /** Gün renkli küçük rota şeridi: gün numarası karosu + o günün durak sayısı kadar halka; genişlik durak sayısıyla orantılı. */
 export function RotaSeridi({ gunler }: { gunler: number[] }) {
@@ -92,17 +126,20 @@ export function RotaSeridi({ gunler }: { gunler: number[] }) {
       {gunler.map((n, i) => {
         if (n === 0) return null;
         const r = gunRengi(i + 1);
+        const halka = n > HALKA_SINIRI ? EN_COK_HALKA : n;
+        const kalan = n - halka;
         return (
-          <View key={i} style={[s.rotaGun, { flex: n }]}>
+          <View key={i} style={[s.rotaGun, { flex: halka }]}>
             <View style={[s.gunKaro, { backgroundColor: r }]}>
               <Text style={[s.gunNo, { color: gunUstuMetin(r) }]}>{i + 1}</Text>
             </View>
             <View style={s.hat}>
               <View style={[s.cizgi, { backgroundColor: r }]} />
-              {Array.from({ length: n }, (_, k) => (
-                <View key={k} style={[s.halka, { borderColor: r }]} />
+              {Array.from({ length: halka }, (_, k) => (
+                <View key={k} testID="rota-halka" style={[s.halka, { borderColor: r }]} />
               ))}
             </View>
+            {kalan > 0 ? <Text style={s.kalan}>{t('kesfetAkisi.dahaFazlaDurak', { n: kalan })}</Text> : null}
           </View>
         );
       })}
@@ -194,6 +231,7 @@ const s = StyleSheet.create({
     justifyContent: 'center',
   },
   gunNo: { fontFamily: yazi.ekstra, fontSize: 11 },
+  kalan: { fontFamily: yazi.ekstra, fontSize: 11, color: renk.ikincil },
   hat: {
     flexGrow: 1,
     height: 10,
@@ -225,8 +263,10 @@ const s = StyleSheet.create({
     justifyContent: 'center',
   },
   kalpDolu: { backgroundColor: renk.vurguZemin },
+  eylemlerIki: { flexDirection: 'column' },
+  eylemSatiri: { flexDirection: 'row', gap: 8 },
   paylas: {
-    height: 44,
+    minHeight: 44,
     paddingHorizontal: 12,
     borderRadius: 12,
     backgroundColor: renk.yuzey,
@@ -235,15 +275,20 @@ const s = StyleSheet.create({
     gap: 6,
   },
   paylasMetin: { fontFamily: yazi.ekstra, fontSize: 14, color: renk.ana },
+  paylasGenis: { flexGrow: 1, flexShrink: 1, justifyContent: 'center' },
   al: {
     flexGrow: 1,
-    height: 44,
+    flexShrink: 1,
+    flexBasis: 0,
+    minHeight: 44,
+    paddingVertical: 10,
     borderRadius: 12,
     backgroundColor: renk.vurgu,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  alMetin: { fontFamily: yazi.ekstra, fontSize: 14, color: renk.metin },
+  alGenis: { flexGrow: 0, flexBasis: 'auto', alignSelf: 'stretch' },
+  alMetin: { fontFamily: yazi.ekstra, fontSize: 14, color: renk.metin, textAlign: 'center' },
   kendi: {
     borderRadius: kose.kart,
     borderWidth: 1.5,
