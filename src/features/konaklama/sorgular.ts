@@ -21,7 +21,8 @@ export function useKonaklamalar(seyahatId: string | undefined) {
   return { ...sorgu, data };
 }
 
-function useKonaklamaSatirlari(seyahatId: string | undefined) {
+/** Yalnız satırlar (ad doldurulmaz, places-light çağrılmaz): ana ekrandaki şerit "otel var mı" diye bakar (#276 2b). */
+export function useKonaklamaSatirlari(seyahatId: string | undefined) {
   const { session } = useOturum();
   return useQuery({
     queryKey: ['konaklamalar', seyahatId],

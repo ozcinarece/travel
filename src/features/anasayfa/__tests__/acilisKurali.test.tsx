@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals
 import { act, fireEvent, render, waitFor } from '@testing-library/react-native';
 import { AppState, type AppStateStatus } from 'react-native';
 
-import { acilisKarariAcik, acilisKarariniKapat, acilisKarariniSifirla } from '@/lib/acilis';
+import { acilisKarariAcik, acilisKarariniSifirla, kesfeteDon } from '@/lib/acilis';
 import type { SeyahatOzet } from '@/lib/tipler';
 import { yerelTarih } from '@/lib/zaman';
 
@@ -39,14 +39,35 @@ jest.mock('@/features/auth/giris', () => ({
   googleIleGiris: jest.fn(),
   iptalMi: () => false,
 }));
+// #276 2b: şerit ve 29c verisi (Supabase sorguları) testte elle verilir; saf hesaplar ve ipucu (AsyncStorage) gerçek.
+let mockBorc: unknown = null;
+let mockAdim: unknown = null;
+jest.mock('@/features/anasayfa/serit', () => ({
+  ...jest.requireActual<object>('@/features/anasayfa/serit'),
+  useAcikBorc: (sy: unknown) => (sy ? mockBorc : null),
+  useSeritAdimi: (sy: unknown) => (sy ? mockAdim : undefined),
+}));
 jest.mock('@/features/icerik/sorgular', () => ({ useGeziler: () => ({ data: [], refetch: jest.fn() }), olayYaz: jest.fn() }));
 jest.mock('expo-router', () => ({
-  router: { push: jest.fn(), navigate: jest.fn(), replace: jest.fn(), setParams: jest.fn() },
+  router: { push: jest.fn(), navigate: jest.fn(), replace: jest.fn(), setParams: jest.fn(), dismissTo: jest.fn(), dismissAll: jest.fn() },
   useLocalSearchParams: () => ({ token: 'x' }),
-  // Ana ekran testte hiç odak kaybetmez; temizleyici yalnız unmount'ta çalışır.
-  useFocusEffect: (cb: () => void | (() => void)) => jest.requireActual<typeof import('react')>('react').useEffect(cb, [cb]),
+  // Ana ekran kendiliğinden odak kaybetmez; temizleyici unmount'ta ya da `odakKaybet()` ile (başka ekran açıldı) çalışır.
+  useFocusEffect: (cb: () => void | (() => void)) =>
+    jest.requireActual<typeof import('react')>('react').useEffect(() => {
+      const temizle = cb();
+      let calisti = false;
+      const bir = () => {
+        if (calisti) return;
+        calisti = true;
+        temizle?.();
+      };
+      mockOdakTemizleyicileri.push(bir);
+      return bir;
+    }, [cb]),
 }));
-const { router } = jest.requireMock<{ router: Record<'push' | 'replace', jest.Mock> }>('expo-router');
+const mockOdakTemizleyicileri: (() => void)[] = [];
+const odakKaybet = () => act(() => mockOdakTemizleyicileri.splice(0).forEach((f) => f()));
+const { router } = jest.requireMock<{ router: Record<'push' | 'replace' | 'dismissTo', jest.Mock> }>('expo-router');
 
 const bugun = yerelTarih(new Date(), 'Europe/Istanbul');
 const gun = (n: number) => new Date(Date.parse(`${bugun}T00:00:00Z`) + n * 86_400_000).toISOString().slice(0, 10);
@@ -236,10 +257,40 @@ describe('Ön plana geliş (#276 KK-ek3)', () => {
     jest.setSystemTime(simdi + 86_400_000);
     onPlanaGel();
     await waitFor(() => expect(router.push).toHaveBeenCalledTimes(2));
-    // Kullanıcı o gün "‹ Keşfet"e kendisi döner (bayrak bugün kapanır); aynı gün tekrar ön plana gelince atılmaz.
-    acilisKarariniKapat();
+    // Kullanıcı o gün "‹ Keşfet"e kendisi döner (bayrak bugün kapanır); aynı gün tekrar ön plana gelince atılmaz. Dönüş Gezi
+    // sayfasındaki düğmenin gerçek yolundan (`kesfeteDon`) geçer.
+    kesfeteDon(undefined);
+    expect(router.dismissTo).toHaveBeenLastCalledWith('/(tabs)');
     onPlanaGel();
     await new Promise((r) => setTimeout(r, 50));
     expect(router.push).toHaveBeenCalledTimes(2);
+  });
+
+  it('başka ekrandayken (Keşfet odakta değil) ön plana gelince yönlendirme yok', async () => {
+    mockSeyahatler = [sy('aktif', gun(-1), gun(2))];
+    render(<AnaSayfa />);
+    await waitFor(() => expect(router.push).toHaveBeenCalledTimes(1));
+    // Kullanıcı Keşfet'ten Profil'e geçti; ertesi gün uygulama ön plana gelir.
+    odakKaybet();
+    jest.setSystemTime(simdi + 86_400_000);
+    onPlanaGel();
+    await new Promise((r) => setTimeout(r, 50));
+    expect(router.push).toHaveBeenCalledTimes(1);
+  });
+
+  it('KK-ek7: ön plana geliş olmadan aktif seyahat değişirse (aşağı çekip yenileme) Gezi\'ye atılmaz', async () => {
+    mockSeyahatler = [sy('aktif', gun(-1), gun(2))];
+    const ekran = render(<AnaSayfa />);
+    await waitFor(() => expect(router.push).toHaveBeenCalledTimes(1));
+    // Aynı gün bir kez ön plana gelmiş (sayaç > 0), atılmamış.
+    onPlanaGel();
+    await new Promise((r) => setTimeout(r, 50));
+    expect(router.push).toHaveBeenCalledTimes(1);
+    // Gece yarısı geçti; kullanıcı Keşfet'te aşağı çekip yeniler: liste yeni bir aktif seyahatle (en geç başlayan) gelir.
+    jest.setSystemTime(simdi + 86_400_000);
+    mockSeyahatler = [sy('aktif', gun(-1), gun(2)), sy('kisa', gun(1), gun(1))];
+    ekran.rerender(<AnaSayfa />);
+    await new Promise((r) => setTimeout(r, 50));
+    expect(router.push).toHaveBeenCalledTimes(1);
   });
 });
