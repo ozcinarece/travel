@@ -7,6 +7,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react-native';
 import fs from 'fs';
 import path from 'path';
+import Svg, { Path } from 'react-native-svg';
 
 import type { GeziDetay } from '@/lib/tipler';
 
@@ -221,6 +222,10 @@ describe('#199 önerilen gezi ekranı', () => {
       await bekle();
       expect(screen.getAllByText(/dk okuma/).length).toBeGreaterThan(0);
       expect(screen.queryByTestId(/^bolum-hata/)).toBeNull();
+      // #291 KK5 (Ekran 17): yazar logosu 18×11, kesik çizgi.
+      const logo = screen.UNSAFE_getAllByType(Svg).find((x) => x.props.accessibilityLabel === 'Tripmate');
+      expect([logo?.props.width, logo?.props.height]).toEqual([18, 10.8]);
+      expect(logo?.findByType(Path).props.strokeDasharray).toBe('7 4.5');
       expect(mockDurum.olaylar).toEqual([expect.objectContaining({ tur: 'gezi_goruntulendi', hedef_id: g.id })]);
     });
   }

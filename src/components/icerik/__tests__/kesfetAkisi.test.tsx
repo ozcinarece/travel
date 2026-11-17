@@ -1,7 +1,7 @@
 // #277: Keşfet akışı — kart (KK1, KK8), kaynak ve sıra (KK2, KK3), eylemler (KK4), "Kendi gezini kur" (KK5), bayrak (KK6),
 // iskelet ve "Bağlanamadık" (KK7).
 import { beforeEach, describe, expect, it, jest } from '@jest/globals';
-import { fireEvent, render, screen } from '@testing-library/react-native';
+import { fireEvent, render, screen, within } from '@testing-library/react-native';
 import { Share, StyleSheet } from 'react-native';
 import { Path } from 'react-native-svg';
 
@@ -10,7 +10,23 @@ import { akisGezisi, akisSirasi, kartEtiketi, kesfetAkisiAcik, type AkisGezisi }
 
 import { Logo } from '@/components/ui/Logo';
 
+import { Kalp } from '../Kalp';
 import { KesfetAkisi } from '../KesfetAkisi';
+import { rotaPlani } from '../KesfetKarti';
+
+/**
+ * #291 KK1: bir rota şeridinin en dar hali (pt): gün karosu 20 + 5 + halkalar (8 pt, aralıksız) + varsa 5 + "+N"
+ * (Figtree 800 11 pt'de karakter başına ≈ 7 pt × yazı ölçeği, en çok 1,3); günler arası 6, varsa "+N gün".
+ * `halkasiz`: kırpılabilen halka hattı sıfıra indiğinde kalan sabit genişlik.
+ */
+function enDarRota(gunler: number[], olcek = 1, halkasiz = false): number {
+  const plan = rotaPlani(gunler);
+  const metin = (m: string) => m.length * 7 * Math.min(olcek, 1.3);
+  const gun = plan.gunler.map((g) => 20 + 5 + (halkasiz ? 0 : g.halka * 8) + (g.kalan > 0 ? 5 + metin(`+${g.kalan}`) : 0));
+  const ek = plan.kalanGun > 0 ? [metin(`+${plan.kalanGun} gün`)] : [];
+  const parcalar = [...gun, ...ek];
+  return parcalar.reduce((a, b) => a + b, 0) + 6 * (parcalar.length - 1);
+}
 
 jest.mock('expo-router', () => ({ router: { push: jest.fn(), replace: jest.fn() } }));
 jest.mock('@/lib/supabase', () => ({ supabase: {} }));
@@ -159,12 +175,97 @@ describe('<KesfetAkisi />', () => {
     expect(screen.queryByText('Bağlanamadık')).toBeNull();
   });
 
-  it('#287 KK4: 10 durağa kadar her durak bir halka; 10’dan fazlaysa en çok 8 halka + "+N"', () => {
-    mockAkis = { data: [gezi('u', 'Bursa', [12]), gezi('v', 'İzmir', [10])], isPending: false, isError: false, isFetching: false, refetch: jest.fn() };
+  it('#291 KK1 (29g · B): en çok 3 gün çizilir, fazlası "+N gün"; halka sınırı floor(12 ÷ çizilen gün), en çok 10', () => {
+    const halkalar = (gunler: number[]) => rotaPlani(gunler).gunler.map((g) => [g.halka, g.kalan]);
+    expect(halkalar([12])).toEqual([[10, 2]]);
+    expect(halkalar([10, 10])).toEqual([[6, 4], [6, 4]]);
+    expect(halkalar([10, 10, 10])).toEqual([[4, 6], [4, 6], [4, 6]]);
+    // Kanvas örneği 12/10/4: 4 halka + "+8", 4 halka + "+6", 4 halka.
+    expect(halkalar([12, 10, 4])).toEqual([[4, 8], [4, 6], [4, 0]]);
+    // Sınır toplam günden değil çizilen günden: 4 × 7 → 3 gün × 4 halka + "+3", "+1 gün".
+    const dort = rotaPlani([7, 7, 7, 7]);
+    expect(dort.gunler.map((g) => [g.gun, g.halka, g.kalan])).toEqual([[1, 4, 3], [2, 4, 3], [3, 4, 3]]);
+    expect(dort.kalanGun).toBe(1);
+    const uzun = rotaPlani([4, 4, 4, 4, 4, 4]);
+    expect(uzun.gunler.map((g) => [g.gun, g.halka, g.kalan])).toEqual([[1, 4, 0], [2, 4, 0], [3, 4, 0]]);
+    expect(uzun.kalanGun).toBe(3);
+    mockAkis = { data: [gezi('u', 'İstanbul', [10, 10, 10]), gezi('v', 'Bursa', [4, 4, 4, 4, 4, 4])], isPending: false, isError: false, isFetching: false, refetch: jest.fn() };
     render(<KesfetAkisi sehir={null} onYeni={jest.fn()} />);
-    expect(screen.getAllByTestId('rota-halka')).toHaveLength(8 + 10);
-    expect(screen.getByText('+4')).toBeTruthy();
-    expect(screen.getByLabelText('Rota: 1. gün 12 durak')).toBeTruthy();
+    expect(screen.getAllByTestId('rota-halka')).toHaveLength(12 + 12);
+    expect(screen.getAllByText('+6', { includeHiddenElements: true })).toHaveLength(3);
+    expect(screen.getByText('+3 gün', { includeHiddenElements: true })).toBeTruthy();
+    expect(screen.queryByText('+3 gün')).toBeNull();
+    // Rota etiketi gerçek sayıları söyler (çizilmeyen günler dahil).
+    expect(screen.getByLabelText('Rota: 1. gün 10 durak, 2. gün 10 durak, 3. gün 10 durak')).toBeTruthy();
+    expect(screen.getByLabelText(/6\. gün 4 durak$/)).toBeTruthy();
+  });
+
+  it('#291 KK1: 375 pt genişlikte 4×7, 6×4, 3×10 ve 12/10/4 şeridinin en dar hali karta sığar (komşu güne binmez)', () => {
+    // Kart iç genişliği: 375 − 2×20 (akış kenarı) − 2×16 (kart iç boşluğu) − 2×1 (kenar çizgisi) = 301.
+    for (const gunler of [[7, 7, 7, 7], [4, 4, 4, 4, 4, 4], [10, 10, 10], [12, 10, 4], [12], [10, 10]]) {
+      expect(enDarRota(gunler)).toBeLessThanOrEqual(301);
+    }
+  });
+
+  it('#291 KK1: taşan durumlarda (1,0 ölçekte 4×15, 1,3 ölçekte 4×7) hat daralır, sabit parçalar sığar, halkalar kırpılır', () => {
+    // Bu iki durum en dar halde 301 pt'yi aşar (309 ve ≈ 313)...
+    expect(enDarRota([15, 15, 15, 15])).toBeGreaterThan(301);
+    expect(enDarRota([7, 7, 7, 7], 1.3)).toBeGreaterThan(301);
+    // ...ama halka hattı dışındaki sabit parçalar (karo, "+N", "+N gün", aralıklar) sığar: taşmayı yalnız hat emer.
+    expect(enDarRota([15, 15, 15, 15], 1, true)).toBeLessThanOrEqual(301);
+    expect(enDarRota([7, 7, 7, 7], 1.3, true)).toBeLessThanOrEqual(301);
+
+    mockAkis = { data: [gezi('u', 'İstanbul', [15, 15, 15, 15])], isPending: false, isError: false, isFetching: false, refetch: jest.fn() };
+    render(<KesfetAkisi sehir={null} onYeni={jest.fn()} />);
+    for (const hat of screen.getAllByTestId('rota-hat')) {
+      // Hat halkaların toplam genişliğinin altına inebilir (flexShrink 1, minWidth 0) ve taşanı kırpar; komşu güne binmez.
+      expect(StyleSheet.flatten(hat.props.style)).toEqual(
+        expect.objectContaining({ overflow: 'hidden', flexGrow: 1, flexShrink: 1, minWidth: 0 }),
+      );
+    }
+    // Yalnız hat daralır: halka, gün karosu ve "+N" küçülmez.
+    for (const halka of screen.getAllByTestId('rota-halka')) {
+      expect(StyleSheet.flatten(halka.props.style).flexShrink ?? 0).toBe(0);
+    }
+  });
+
+  it('#291 KK2: her gün önce kendi yerini alır (flexBasis auto), kalan yer gerçek durak sayısıyla paylaşılır', () => {
+    mockAkis = { data: [gezi('u', 'İstanbul', [12, 10, 4])], isPending: false, isError: false, isFetching: false, refetch: jest.fn() };
+    render(<KesfetAkisi sehir={null} onYeni={jest.fn()} />);
+    const gunler = screen.getAllByTestId('rota-gun').map((g) => StyleSheet.flatten(g.props.style));
+    expect(gunler.map((g) => g.flexGrow)).toEqual([12, 10, 4]);
+    gunler.forEach((g) => expect(g).toEqual(expect.objectContaining({ flexBasis: 'auto', flexShrink: 1 })));
+  });
+
+  it('#291 KK3: "+N" Figtree 800, 11 px, #4A5274, ekran okuyucuya okunmaz; gün numarası en çok 1,3× büyür', () => {
+    mockAkis = { data: [gezi('u', 'İstanbul', [12, 10, 4])], isPending: false, isError: false, isFetching: false, refetch: jest.fn() };
+    render(<KesfetAkisi sehir={null} onYeni={jest.fn()} />);
+    const arti = screen.getByText('+8', { includeHiddenElements: true });
+    expect(StyleSheet.flatten(arti.props.style)).toEqual(expect.objectContaining({ fontFamily: 'Figtree_800ExtraBold', fontSize: 11, color: '#4a5274', flexShrink: 0 }));
+    expect(arti.props.importantForAccessibility).toBe('no');
+    expect(arti.props.accessibilityElementsHidden).toBe(true);
+    expect(screen.getByText('1').props.maxFontSizeMultiplier).toBe(1.3);
+    expect(arti.props.maxFontSizeMultiplier).toBe(1.3);
+  });
+
+  it('#291 KK1: "+N gün" de en çok 1,3× büyür', () => {
+    mockAkis = { data: [gezi('u', 'İstanbul', [4, 4, 4, 4, 4, 4])], isPending: false, isError: false, isFetching: false, refetch: jest.fn() };
+    render(<KesfetAkisi sehir={null} onYeni={jest.fn()} />);
+    expect(screen.getByText('+3 gün', { includeHiddenElements: true }).props.maxFontSizeMultiplier).toBe(1.3);
+  });
+
+  it('#291 KK4: Kalp de aç/kapa düğmesi — sabit "Kaydet", durum checked', () => {
+    mockKayitli = [{ tur: 'yer', hedef_id: 'm1' }];
+    const e = render(<Kalp tur="yer" hedefId="m1" />);
+    const k = screen.getByRole('togglebutton');
+    expect(k.props.accessibilityLabel).toBe('Kaydet');
+    expect(k.props.accessibilityState).toEqual({ checked: true });
+    fireEvent.press(k);
+    expect(mockKaydet).toHaveBeenCalledWith({ tur: 'yer', hedef_id: 'm1', kayitli: true });
+    e.unmount();
+    render(<Kalp tur="yer" hedefId="m2" />);
+    expect(screen.getByRole('togglebutton').props.accessibilityState).toEqual({ checked: false });
+    expect(screen.getByLabelText('Kaydet')).toBeTruthy();
   });
 
   it('#287 KK4 (kanvas 29g · C): yazı ölçeği 1,5 iken "Seyahatime al" ayrı satırda ve tam genişlikte; 1,0 iken tek satır', () => {
@@ -183,6 +284,30 @@ describe('<KesfetAkisi />', () => {
     const al1 = screen.getByTestId('kesfet-al');
     expect(StyleSheet.flatten(al1.props.style)).toEqual(expect.objectContaining({ flexGrow: 1, flexShrink: 1, flexBasis: 0 }));
     expect(StyleSheet.flatten(al1.props.style).alignSelf).toBeUndefined();
+    spy.mockRestore();
+  });
+
+  it('#291 KK7 (29g · C): iki satırda aralık 12; kalp en az 44 ve satırla büyür; paylaş ve "Seyahatime al" iç boşluklu', () => {
+    const RN = jest.requireActual<typeof import('react-native')>('react-native');
+    const spy = jest.spyOn(RN, 'useWindowDimensions').mockReturnValue({ width: 375, height: 812, scale: 2, fontScale: 2 });
+    mockAkis = { data: [gezi('a', 'Bursa', [4, 3])], isPending: false, isError: false, isFetching: false, refetch: jest.fn() };
+    render(<KesfetAkisi sehir={null} onYeni={jest.fn()} />);
+    const kalp = screen.getByRole('togglebutton');
+    const paylas = screen.getByLabelText('WhatsApp’ta paylaş');
+    const al = screen.getByTestId('kesfet-al');
+    const ks = StyleSheet.flatten(kalp.props.style);
+    // Kalp ve paylaş aynı satırda; kalp sabit yükseklik almaz, satırla (paylaşın yazıyla büyüyen yüksekliğiyle) uzar.
+    let satir = kalp.parent;
+    while (satir && StyleSheet.flatten(satir.props.style)?.flexDirection !== 'row') satir = satir.parent;
+    expect(satir && within(satir).queryByLabelText('WhatsApp’ta paylaş') !== null).toBe(true);
+    expect(satir && within(satir).queryByTestId('kesfet-al') === null).toBe(true);
+    expect(ks).toEqual(expect.objectContaining({ width: 56, minHeight: 44, alignSelf: 'stretch' }));
+    expect(ks.height).toBeUndefined();
+    expect(StyleSheet.flatten(paylas.props.style)).toEqual(expect.objectContaining({ minHeight: 44, paddingVertical: 10, paddingHorizontal: 14 }));
+    expect(StyleSheet.flatten(al.props.style)).toEqual(expect.objectContaining({ paddingHorizontal: 14, paddingVertical: 10 }));
+    let kap = al.parent;
+    while (kap && StyleSheet.flatten(kap.props.style)?.flexDirection !== 'column') kap = kap.parent;
+    expect(StyleSheet.flatten(kap?.props.style).gap).toBe(12);
     spy.mockRestore();
   });
 

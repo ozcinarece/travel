@@ -1,4 +1,5 @@
 // #97 B KK3 / #100 KK4: kalp — her yerde aynı (gezi sayfası, kart, mekan paneli); kaydedilenler'e yazar.
+// #291 KK4: Keşfet kartıyla aynı rol — aç/kapa düğmesi, sabit "Kaydet" etiketi, durum `checked` ile okunur.
 import { Pressable, StyleSheet } from 'react-native';
 
 import { Ikon } from '@/components/ui/Ikon';
@@ -33,9 +34,9 @@ export function Kalp({
   const kaydet = useKaydet();
   return (
     <Pressable
-      accessibilityRole="button"
-      accessibilityLabel={kayitli ? t('gezi.kaydedildi') : t('gezi.kaydet')}
-      accessibilityState={{ selected: kayitli }}
+      accessibilityRole="togglebutton"
+      accessibilityLabel={t('gezi.kaydet')}
+      accessibilityState={{ checked: kayitli }}
       onPress={() => kaydet.mutate({ tur, hedef_id: hedefId, kayitli })}
       hitSlop={6}
       style={[s.dugme, { width: boyut, height: boyut, borderRadius: kose ?? boyut / 2 }, koyu ? s.koyu : s.acik, arkaPlan ? { backgroundColor: arkaPlan } : null]}>

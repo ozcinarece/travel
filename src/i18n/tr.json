@@ -720,6 +720,8 @@
     "rotaEtiket": "Rota: {gunler}",
     "rotaGun": "{gun}. gün {durak} durak",
     "dahaFazlaDurak": "+{n}",
+    "dahaFazlaGun": "+{n} gün",
+    "guncellenemedi": "Güncellenemedi",
     "paylasEtiket": "WhatsApp’ta paylaş",
     "whatsapp": "WhatsApp",
     "seyahatimeAl": "Seyahatime al",
