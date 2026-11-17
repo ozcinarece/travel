@@ -3,6 +3,9 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { beforeEach, describe, expect, it, jest } from '@jest/globals';
 import { fireEvent, render, waitFor } from '@testing-library/react-native';
+import { ScrollView, StyleSheet } from 'react-native';
+
+import { SERIT_YUKSEKLIK } from '@/components/anasayfa/SeyahatSeridi';
 
 import { SERIT_IPUCU_ANAHTARI } from '@/features/anasayfa/serit';
 import type { Kisiler } from '@/features/harcama/metin';
@@ -148,6 +151,48 @@ describe('Seyahat şeridi ve gezi bitti (#276 2b · KK3 · KK4 · KK-ek4, kanvas
     const ekran = render(<AnaSayfa />);
     await waitFor(() => expect(ekran.getByRole('button', { name: 'Bursa, Sıradaki adım: 2 mekanı güne dağıt' })).toBeTruthy());
     expect(ekran.queryByText('Harcamaları kapat')).toBeNull();
+  });
+
+  it('#289 inceleme 1: yeni biten seyahatin borcu geç gelirse önce şerit, ilk seyahat kartı ve ipucu çizilmez; bayrak tüketilmez', async () => {
+    await AsyncStorage.removeItem(SERIT_IPUCU_ANAHTARI);
+    mockSeyahatler = [sy('Eskişehir', gun(-5), gun(-3)), sy('Bursa', gun(30), gun(32))];
+    mockBorc = undefined;
+    mockAdim = dagit;
+    const ekran = render(<AnaSayfa />);
+    await waitFor(() => expect(ekran.getByText(/Merhaba/)).toBeTruthy());
+    await new Promise((r) => setTimeout(r, 20));
+    expect(ekran.queryByRole('button', { name: /^Bursa/ })).toBeNull();
+    expect(ekran.queryByText('Seyahatin burada')).toBeNull();
+    expect(ekran.queryByText('Harcamaları kapat')).toBeNull();
+    expect(ekran.queryByText('Yeni seyahat')).toBeNull();
+    expect(ekran.queryByText(/İlk seyahatini kur|Yeni bir seyahat kur/)).toBeNull();
+    expect(await AsyncStorage.getItem(SERIT_IPUCU_ANAHTARI)).toBeNull();
+    // Borç gelir, açık borç bende: doğrudan 29c kartı; şerit hiç çizilmemiş olur.
+    mockBorc = { transfer: 1, benimNet: -25000, karsilar: [{ id: 'a', tutar: -25000 }], kisiler: harcamaKisileri };
+    ekran.rerender(<AnaSayfa />);
+    await waitFor(() => expect(ekran.getByText('Harcamaları kapat')).toBeTruthy());
+    expect(ekran.queryByRole('button', { name: /^Bursa/ })).toBeNull();
+    expect(await AsyncStorage.getItem(SERIT_IPUCU_ANAHTARI)).toBeNull();
+  });
+
+  it('#289 inceleme 3: yalnız başkaları arasında açık transfer varsa kart yok, planlanan seyahatin şeridi', async () => {
+    mockSeyahatler = [sy('Eskişehir', gun(-5), gun(-3)), sy('Bursa', gun(30), gun(32))];
+    // Ayşe → Mert açık; benim net bakiyem 0.
+    mockBorc = { transfer: 1, benimNet: 0, karsilar: [], kisiler: harcamaKisileri };
+    mockAdim = dagit;
+    const ekran = render(<AnaSayfa />);
+    await waitFor(() => expect(ekran.getByRole('button', { name: 'Bursa, Sıradaki adım: 2 mekanı güne dağıt' })).toBeTruthy());
+    expect(ekran.queryByText('Harcamaları kapat')).toBeNull();
+  });
+
+  it('#289 inceleme 2: listenin alt boşluğu ana çubuk yüksekliğiyle büyür (şerit + 16, yoksa yüzen düğme + 16)', async () => {
+    mockSeyahatler = [sy('Eskişehir', gun(4), gun(6))];
+    mockAdim = dagit;
+    const ekran = render(<AnaSayfa />);
+    await waitFor(() => expect(ekran.getByRole('button', { name: /^4 GÜN SONRA, Eskişehir/ })).toBeTruthy());
+    const kap = ekran.UNSAFE_getByType(ScrollView);
+    // Testteki güvenli alan altı 0: şerit 24 + SERIT_YUKSEKLIK + 16.
+    expect(StyleSheet.flatten(kap.props.contentContainerStyle).paddingBottom).toBe(24 + SERIT_YUKSEKLIK + 16);
   });
 
   it('29f: şerit ilk göründüğünde bir kez "Seyahatin burada"; Tamam kapatır ve bir daha çıkmaz', async () => {

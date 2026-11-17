@@ -110,6 +110,14 @@ export type AcikBorc = {
   kisiler: Kisiler;
 };
 
+/**
+ * #289 inceleme 3: "Harcamaları kapat" kartı yalnız benim dahil olduğum açık transfer varken (net bakiyem sıfır değil).
+ * Başka iki kişi arasındaki açık borç bana kart çıkarmaz.
+ */
+export function banaAcikBorc(b: AcikBorc | null | undefined): boolean {
+  return !!b && b.benimNet !== 0;
+}
+
 /** KK4: yeni biten seyahatin açık borcu. Veri gelene kadar `undefined`; seyahat yoksa `null`. */
 export function useAcikBorc(sy: SeyahatOzet | null): AcikBorc | null | undefined {
   const id = sy?.id;
@@ -120,11 +128,13 @@ export function useAcikBorc(sy: SeyahatOzet | null): AcikBorc | null | undefined
   const uyeler = useUyeler(id);
   return useMemo(() => {
     if (!sy) return null;
+    // Sorgu hata verirse beklemede kalınmaz: kart yokmuş gibi sıradaki duruma geçilir (ekran boş kalmasın).
+    if (harcamalar.isError || odesmeler.isError || uyeler.isError) return null;
     if (!harcamalar.data || !odesmeler.data || !uyeler.data) return undefined;
     const bugun = yerelTarih(new Date(), sy.tz);
     const o = harcamaOzeti({ harcamalar: harcamalar.data, odesmeler: odesmeler.data, benId, bugun, gununTarihi: (iso) => yerelTarih(new Date(iso), sy.tz) });
     return { transfer: o.transferler.length, benimNet: o.benimNet, karsilar: o.karsilar, kisiler: kisiKaynagi(uyeler.data) };
-  }, [sy, harcamalar.data, odesmeler.data, uyeler.data, benId]);
+  }, [sy, harcamalar.data, odesmeler.data, uyeler.data, harcamalar.isError, odesmeler.isError, uyeler.isError, benId]);
 }
 
 /** KK3 (kanvas 29f): "Seyahatin burada" ipucu cihazda bir kez gösterilir. */
