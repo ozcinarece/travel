@@ -25,9 +25,6 @@ import { yerelTarih } from '@/lib/zaman';
  */
 export const GEZI_PAYLAS_KARTI = false;
 
-/** Gezi sayfasında kendi satırı olan eksik (Plan bölümündeki otel satırı): şerit de Gezi sayfası gibi onu önermez (#200). */
-const EKRANDAKI_SATIRLAR: readonly SiradakiAdim['tur'][] = ['otel'];
-
 export type KesfetDurumu =
   /** 29b: altta sabit şerit. `sinif` rozeti seçer (planlanan seyahatte rozet yok). */
   | { tur: 'serit'; seyahat: SeyahatOzet; sinif: 'aktif' | 'yaklasan' | 'planlanan' }
@@ -63,7 +60,8 @@ export function seritAdimMetni(a: SiradakiAdim): string {
 
 /**
  * KK3: şeritteki Sıradaki adım, Gezi sayfasındakiyle aynı hesap (`siradakiAdim.ts`). Veri gelene kadar `undefined`; adım yoksa
- * (gezi günü ya da her şey tamam) `null`.
+ * (gezi günü ya da her şey tamam) ya da sorgulardan biri hata verdiyse `null` (#290 KK4: şerit o zaman tarih satırını gösterir).
+ * #290 KK5: Keşfet'te otel satırı yok; Gezi sayfasındaki `['otel']` burada geçmez, otel yoksa "otel seç" önerilir.
  */
 export function useSeritAdimi(sy: SeyahatOzet | null): SiradakiAdim | null | undefined {
   const id = sy?.id;
@@ -79,7 +77,9 @@ export function useSeritAdimi(sy: SeyahatOzet | null): SiradakiAdim | null | und
       .then((v) => setOtelErtelendi(v === '1'))
       .catch(() => undefined);
   }, [id]);
+  const hata = gunler.isError || duraklar.isError || mekanlar.isError || oteller.isError || uyeler.isError;
   return useMemo(() => {
+    if (sy && hata) return null;
     if (!sy || !gunler.data || !duraklar.data || !mekanlar.data || !oteller.data || !uyeler.data) return undefined;
     const an = new Date();
     const mod = geziModu(sy, an);
@@ -95,9 +95,9 @@ export function useSeritAdimi(sy: SeyahatOzet | null): SiradakiAdim | null | und
       bugun: yerelTarih(an, sy.tz),
       baslangic: sy.start_date,
       ilkGunCikis: saatKisa(sirali[0]?.start_time, '09:00'),
-      ekranda: mod === 'plan' ? EKRANDAKI_SATIRLAR : undefined,
+      ekranda: [],
     });
-  }, [sy, gunler.data, duraklar.data, mekanlar.data, oteller.data, uyeler.data, otelErtelendi]);
+  }, [sy, hata, gunler.data, duraklar.data, mekanlar.data, oteller.data, uyeler.data, otelErtelendi]);
 }
 
 export type AcikBorc = {
@@ -118,23 +118,30 @@ export function banaAcikBorc(b: AcikBorc | null | undefined): boolean {
   return !!b && b.benimNet !== 0;
 }
 
-/** KK4: yeni biten seyahatin açık borcu. Veri gelene kadar `undefined`; seyahat yoksa `null`. */
+/** #290 KK9: zayıf ağda alt bölüm ≈7 sn boş kalmasın; bu üç sorgu yalnız bir kez yeniden dener. */
+const BORC_SORGU = { retry: 1 } as const;
+
+/**
+ * KK4: yeni biten seyahatin açık borcu. Veri gelene kadar `undefined`; seyahat yoksa, oturum yoksa (#290 KK11) ya da sorgulardan
+ * biri hata verirse `null`.
+ */
 export function useAcikBorc(sy: SeyahatOzet | null): AcikBorc | null | undefined {
   const id = sy?.id;
   const { session } = useOturum();
   const benId = session?.user.id ?? null;
-  const harcamalar = useHarcamalar(id);
-  const odesmeler = useOdesmeler(id);
-  const uyeler = useUyeler(id);
+  const harcamalar = useHarcamalar(id, BORC_SORGU);
+  const odesmeler = useOdesmeler(id, BORC_SORGU);
+  const uyeler = useUyeler(id, BORC_SORGU);
+  const oturumVar = !!session;
   return useMemo(() => {
-    if (!sy) return null;
+    if (!sy || !oturumVar) return null;
     // Sorgu hata verirse beklemede kalınmaz: kart yokmuş gibi sıradaki duruma geçilir (ekran boş kalmasın).
     if (harcamalar.isError || odesmeler.isError || uyeler.isError) return null;
     if (!harcamalar.data || !odesmeler.data || !uyeler.data) return undefined;
     const bugun = yerelTarih(new Date(), sy.tz);
     const o = harcamaOzeti({ harcamalar: harcamalar.data, odesmeler: odesmeler.data, benId, bugun, gununTarihi: (iso) => yerelTarih(new Date(iso), sy.tz) });
     return { transfer: o.transferler.length, benimNet: o.benimNet, karsilar: o.karsilar, kisiler: kisiKaynagi(uyeler.data) };
-  }, [sy, harcamalar.data, odesmeler.data, uyeler.data, harcamalar.isError, odesmeler.isError, uyeler.isError, benId]);
+  }, [sy, oturumVar, harcamalar.data, odesmeler.data, uyeler.data, harcamalar.isError, odesmeler.isError, uyeler.isError, benId]);
 }
 
 /** KK3 (kanvas 29f): "Seyahatin burada" ipucu cihazda bir kez gösterilir. */

@@ -253,8 +253,161 @@ describe('Seyahat şeridi ve gezi bitti (#276 2b · KK3 · KK4 · KK-ek4, kanvas
     mockSeyahatler = [sy('Eskişehir', gun(4), gun(6))];
     const ekran = render(<AnaSayfa />);
     await waitFor(() => expect(ekran.getByText('Seyahatin burada')).toBeTruthy());
-    fireEvent.press(ekran.getByRole('button', { name: /^4 GÜN SONRA, Eskişehir/ }));
+    // #290 KK7: ipucu iOS'ta modal; şerit ekran okuyucudan gizli ama dokunulabilir.
+    fireEvent.press(ekran.getByLabelText(/^4 GÜN SONRA, Eskişehir/, { includeHiddenElements: true }));
     expect(ekran.queryByText('Seyahatin burada')).toBeNull();
     await waitFor(async () => expect(await AsyncStorage.getItem(SERIT_IPUCU_ANAHTARI)).toBe('1'));
+  });
+});
+
+describe('#290 şerit ve gezi bitti kartı takibi (kanvas 29g · A, 29c, 29f)', () => {
+  beforeEach(async () => {
+    acilisKarariniKapat();
+    router.push.mockClear();
+    mockBorc = null;
+    mockAdim = null;
+    mockParametre = {};
+    await AsyncStorage.setItem(SERIT_IPUCU_ANAHTARI, '1');
+  });
+
+  it('KK1: borçluyken sağda "Borcun" ve kırmızı tutar; satırda "Ayşe’ye 250 ₺ henüz ödenmedi"', async () => {
+    mockSeyahatler = [sy('Eskişehir', gun(-5), gun(-3))];
+    mockBorc = { transfer: 1, benimNet: -25000, karsilar: [{ id: 'a', tutar: 25000 }], kisiler: harcamaKisileri };
+    const ekran = render(<AnaSayfa />);
+    await waitFor(() => expect(ekran.getByText('Borcun')).toBeTruthy());
+    expect(ekran.queryByText('Sana borçlular')).toBeNull();
+    expect(StyleSheet.flatten(ekran.getByText('−250 ₺').props.style).color).toBe('#d93a2b');
+    expect(ekran.getByText('Ayşe')).toBeTruthy();
+    expect(ekran.getByText(/’ye 250 ₺/)).toBeTruthy();
+    expect(ekran.getByText('henüz ödenmedi')).toBeTruthy();
+  });
+
+  it('KK1: birden çok alacaklıda en çok 2 ad + "+N kişi", en çok 2 avatar', async () => {
+    mockSeyahatler = [sy('Eskişehir', gun(-5), gun(-3))];
+    const kisiler: Kisiler = { ...harcamaKisileri, ad: (id) => ({ a: 'Ayşe', m: 'Mert', c: 'Can' })[id] ?? id };
+    mockBorc = { transfer: 3, benimNet: -50000, karsilar: [{ id: 'a', tutar: 25000 }, { id: 'm', tutar: 16000 }, { id: 'c', tutar: 9000 }], kisiler };
+    const ekran = render(<AnaSayfa />);
+    await waitFor(() => expect(ekran.getByText('Borcun')).toBeTruthy());
+    expect(ekran.getByText('Mert')).toBeTruthy();
+    expect(ekran.getByText(/’e 160 ₺/)).toBeTruthy();
+    expect(ekran.queryByText('Can')).toBeNull();
+    expect(ekran.getByText(/\+1 kişi/)).toBeTruthy();
+    expect(ekran.getAllByLabelText(/^(Ayşe|Mert|Can)$/)).toHaveLength(2);
+  });
+
+  it('KK2: kart logonun ve üst düğmelerin hemen altında (aralık 16); selam ve arama altında', async () => {
+    mockSeyahatler = [sy('Eskişehir', gun(-5), gun(-3))];
+    mockBorc = { transfer: 1, benimNet: 41000, karsilar: [{ id: 'a', tutar: 41000 }], kisiler: harcamaKisileri };
+    const ekran = render(<AnaSayfa />);
+    await waitFor(() => expect(ekran.getByText('Harcamaları kapat')).toBeTruthy());
+    const metin = JSON.stringify(ekran.toJSON(), (k, v) => (k === 'refreshControl' ? undefined : v));
+    expect(metin.indexOf('Profil')).toBeLessThan(metin.indexOf('Harcamaları kapat'));
+    expect(metin.indexOf('Harcamaları kapat')).toBeLessThan(metin.indexOf('Merhaba'));
+    expect(metin.indexOf('Harcamaları kapat')).toBeLessThan(metin.indexOf('Şehir, gezi ya da yer ara'));
+    const kap = ekran.UNSAFE_getByType(ScrollView);
+    expect(StyleSheet.flatten(kap.props.contentContainerStyle).gap).toBe(20);
+    let kart = ekran.getByText('Harcamaları kapat').parent;
+    while (kart && StyleSheet.flatten(kart.props.style)?.marginTop !== -4) kart = kart.parent;
+    expect(kart).toBeTruthy();
+  });
+
+  it('KK3: şerit en az 64 ve içerikle büyür; rozet, ad ve alt satır en çok 1,3×; rozet kutusu en az 20', async () => {
+    mockSeyahatler = [sy('Eskişehir', gun(4), gun(6))];
+    mockAdim = dagit;
+    const ekran = render(<AnaSayfa />);
+    const serit = await waitFor(() => ekran.getByRole('button', { name: /^4 GÜN SONRA, Eskişehir/ }));
+    const ss = StyleSheet.flatten(serit.props.style);
+    expect(ss.minHeight).toBe(64);
+    expect(ss.height).toBeUndefined();
+    const rozet = ekran.getByText('4 GÜN SONRA');
+    expect(rozet.props.maxFontSizeMultiplier).toBe(1.3);
+    expect(ekran.getByText('Eskişehir').props.maxFontSizeMultiplier).toBe(1.3);
+    expect(ekran.getByText('Sıradaki adım: 2 mekanı güne dağıt').props.maxFontSizeMultiplier).toBe(1.3);
+    let rozetKutu = rozet.parent;
+    while (rozetKutu && StyleSheet.flatten(rozetKutu.props.style)?.paddingHorizontal !== 7) rozetKutu = rozetKutu.parent;
+    const rs = StyleSheet.flatten(rozetKutu?.props.style);
+    expect(rs.minHeight).toBe(20);
+    expect(rs.height).toBeUndefined();
+  });
+
+  it('KK3: şerit büyük yazıda uzarsa liste alt boşluğu ölçülen yüksekliğe göre', async () => {
+    mockSeyahatler = [sy('Eskişehir', gun(4), gun(6))];
+    mockAdim = dagit;
+    const ekran = render(<AnaSayfa />);
+    const serit = await waitFor(() => ekran.getByRole('button', { name: /^4 GÜN SONRA, Eskişehir/ }));
+    fireEvent(serit.parent!, 'layout', { nativeEvent: { layout: { x: 0, y: 0, width: 350, height: 80 } } });
+    const kap = ekran.UNSAFE_getByType(ScrollView);
+    await waitFor(() => expect(StyleSheet.flatten(kap.props.contentContainerStyle).paddingBottom).toBe(24 + 80 + 16));
+  });
+
+  it('KK4: adım yüklenirken tarih satırı gösterilir (satır sayısı değişmez)', async () => {
+    mockSeyahatler = [sy('İzmir', gun(2), gun(3))];
+    mockAdim = undefined;
+    const ekran = render(<AnaSayfa />);
+    await waitFor(() => expect(ekran.getByText(/2 gün · 2 mekan$/)).toBeTruthy());
+  });
+
+  it('KK6: ipucu açıkken kısa bildirim ipucunun üst kenarının 8 px üstünde (üst üste binmez)', async () => {
+    await AsyncStorage.removeItem(SERIT_IPUCU_ANAHTARI);
+    mockParametre = { bildirim: 'silindi' };
+    mockSeyahatler = [sy('Eskişehir', gun(4), gun(6))];
+    const ekran = render(<AnaSayfa />);
+    await waitFor(() => expect(ekran.getByText('Seyahatin burada')).toBeTruthy());
+    const balon = ekran.getByTestId('serit-ipucu');
+    fireEvent(balon, 'layout', { nativeEvent: { layout: { x: 0, y: 0, width: 290, height: 150 } } });
+    const ipucuAlt = StyleSheet.flatten(balon.props.style).bottom as number;
+    expect(ipucuAlt).toBe(24 + 64 + 14);
+    const bildirimAlt = () => {
+      let v = ekran.getByText('Seyahat silindi', { includeHiddenElements: true }).parent;
+      while (v && StyleSheet.flatten(v.props.style)?.bottom === undefined) v = v.parent;
+      return StyleSheet.flatten(v?.props.style).bottom as number;
+    };
+    await waitFor(() => expect(bildirimAlt()).toBe(ipucuAlt + 150 + 8));
+    // İpucu kapanınca bildirim şeridin üstüne iner.
+    fireEvent.press(ekran.getByRole('button', { name: 'Tamam' }));
+    await waitFor(() => expect(bildirimAlt()).toBe(24 + SERIT_YUKSEKLIK + 12));
+  });
+
+  it('KK6: aynı geçişte önce ipucu, sonra şerit ölçülse de bildirim ipucunun 8 px üstünde', async () => {
+    await AsyncStorage.removeItem(SERIT_IPUCU_ANAHTARI);
+    mockParametre = { bildirim: 'silindi' };
+    mockSeyahatler = [sy('Eskişehir', gun(4), gun(6))];
+    const ekran = render(<AnaSayfa />);
+    await waitFor(() => expect(ekran.getByText('Seyahatin burada')).toBeTruthy());
+    const balon = ekran.getByTestId('serit-ipucu');
+    const kap = ekran.getByTestId('serit-kap', { includeHiddenElements: true });
+    // Büyük yazıda şerit 80'e uzar; iki ölçü tek act içinde, önce ipucu sonra şerit sırasıyla gelir.
+    act(() => {
+      fireEvent(balon, 'layout', { nativeEvent: { layout: { x: 0, y: 0, width: 290, height: 150 } } });
+      fireEvent(kap, 'layout', { nativeEvent: { layout: { x: 0, y: 0, width: 335, height: 80 } } });
+    });
+    const bildirimAlt = () => {
+      let v = ekran.getByText('Seyahat silindi', { includeHiddenElements: true }).parent;
+      while (v && StyleSheet.flatten(v.props.style)?.bottom === undefined) v = v.parent;
+      return StyleSheet.flatten(v?.props.style).bottom as number;
+    };
+    await waitFor(() => expect(bildirimAlt()).toBe(24 + 80 + 14 + 150 + 8));
+  });
+
+  it('KK7: ipucu tek öğe olarak okunur (başlık + metin); "Tamam" ayrı düğme', async () => {
+    await AsyncStorage.removeItem(SERIT_IPUCU_ANAHTARI);
+    mockSeyahatler = [sy('Eskişehir', gun(4), gun(6))];
+    const ekran = render(<AnaSayfa />);
+    await waitFor(() => expect(ekran.getByText('Seyahatin burada')).toBeTruthy());
+    const metin = ekran.getByLabelText(/^Seyahatin burada\. Keşfet’te gezinirken/);
+    expect(metin.props.accessible).toBe(true);
+    expect(ekran.getByRole('button', { name: 'Tamam' })).toBeTruthy();
+    // iOS'ta balon açıkken arkası (üst çubuk) ekran okuyucudan gizli.
+    expect(ekran.getByTestId('serit-ipucu').props.accessibilityViewIsModal).toBe(true);
+    expect(ekran.queryByRole('button', { name: 'Ara' })).toBeNull();
+  });
+
+  it('KK10: şerit yokken liste alt boşluğu yüzen düğme + 56 + 16', async () => {
+    mockSeyahatler = [sy('Eskişehir', gun(-5), gun(-3))];
+    mockBorc = { transfer: 1, benimNet: 41000, karsilar: [{ id: 'a', tutar: 41000 }], kisiler: harcamaKisileri };
+    const ekran = render(<AnaSayfa />);
+    await waitFor(() => expect(ekran.getByText('Yeni seyahat')).toBeTruthy());
+    const kap = ekran.UNSAFE_getByType(ScrollView);
+    expect(StyleSheet.flatten(kap.props.contentContainerStyle).paddingBottom).toBe(28 + 56 + 16);
   });
 });
