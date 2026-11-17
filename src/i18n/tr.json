@@ -710,6 +710,27 @@
     "kapat": "Kapat",
     "sayac": "{n}/{toplam}"
   },
+  "kesfetAkisi": {
+    "geziler": "Geziler",
+    "gidecegin": "GİDECEĞİN ŞEHİR",
+    "sehirGezileri": "{sehir} geziler",
+    "tripmate": "Tripmate",
+    "kartBaslik": "{sehir} · {gun} gün · {durak} durak",
+    "kartEtiket": "{sehir}, {gun} gün, {durak} durak, Tripmate gezisi",
+    "rotaEtiket": "Rota: {gunler}",
+    "rotaGun": "{gun}. gün {durak} durak",
+    "paylasEtiket": "WhatsApp’ta paylaş",
+    "whatsapp": "WhatsApp",
+    "seyahatimeAl": "Seyahatime al",
+    "kendiBaslik": "Kendi gezini kur",
+    "kendiAlt": "Aradığını bulamadın mı? Şehrini ve günlerini seç, planı birlikte kuralım.",
+    "kendiEtiket": "Kendi gezini kur: başla",
+    "basla": "Başla",
+    "yukleniyor": "Geziler yükleniyor",
+    "agBaslik": "Bağlanamadık",
+    "agMetin": "Geziler yüklenemedi. Bağlantın düzelince tekrar dene.",
+    "tekrarDene": "Tekrar dene"
+  },
   "anasayfa": {
     "merhaba": "Merhaba {ad}",
     "soru": "Nereye gidelim?",

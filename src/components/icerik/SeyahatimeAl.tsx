@@ -106,25 +106,28 @@ export function SeyahatimeAl({ gezi, seyahatler, ilkHedefId, kimlik, foto, onKap
               <Text style={s.baslik}>{t('gezi.alBaslik')}</Text>
               <Text style={s.altBaslik}>{`${gezi.baslik} · ${t('gezi.gunMekan', { gun: gezi.gun_sayisi, mekan: gezi.mekan_sayisi })}`}</Text>
             </View>
-            <View style={{ gap: 8 }}>
-              <Text style={s.bolum}>{t('gezi.hangiSeyahate')}</Text>
-              <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={s.cipler} style={s.ciplerSerit}>
-                {seyahatler.map((sy) => {
-                  const secili = hedef?.id === sy.id;
-                  return (
-                    <Pressable key={sy.id} accessibilityRole="button" accessibilityState={{ selected: secili }} onPress={() => setHedefId(sy.id)} style={[s.cip, secili && s.cipSecili]}>
-                      <Text style={[s.cipMetin, secili && s.cipMetinSecili]} numberOfLines={1}>
-                        {`${seyahatAdi(sy)}${sy.start_date && sy.end_date ? ` · ${tarihAraligi(sy.start_date, sy.end_date)}` : ''}`}
-                      </Text>
-                    </Pressable>
-                  );
-                })}
-                <Pressable accessibilityRole="button" accessibilityState={{ selected: !hedef }} onPress={() => setHedefId(YENI)} style={[s.cip, s.cipYeni, !hedef && s.cipSecili]}>
-                  <Ikon ad="arti" boyut={14} renk={!hedef ? renk.zemin : renk.ana} kalinlik={3} />
-                  <Text style={[s.cipMetin, !hedef && s.cipMetinSecili]}>{t('gezi.yeniSeyahat')}</Text>
-                </Pressable>
-              </ScrollView>
-            </View>
+            {/* #277 KK4: kullanıcının seyahati yoksa "Hangi seyahate?" adımı atlanır; yalnız yeni seyahatin tarihi sorulur. */}
+            {seyahatler.length > 0 ? (
+              <View style={{ gap: 8 }}>
+                <Text style={s.bolum}>{t('gezi.hangiSeyahate')}</Text>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={s.cipler} style={s.ciplerSerit}>
+                  {seyahatler.map((sy) => {
+                    const secili = hedef?.id === sy.id;
+                    return (
+                      <Pressable key={sy.id} accessibilityRole="button" accessibilityState={{ selected: secili }} onPress={() => setHedefId(sy.id)} style={[s.cip, secili && s.cipSecili]}>
+                        <Text style={[s.cipMetin, secili && s.cipMetinSecili]} numberOfLines={1}>
+                          {`${seyahatAdi(sy)}${sy.start_date && sy.end_date ? ` · ${tarihAraligi(sy.start_date, sy.end_date)}` : ''}`}
+                        </Text>
+                      </Pressable>
+                    );
+                  })}
+                  <Pressable accessibilityRole="button" accessibilityState={{ selected: !hedef }} onPress={() => setHedefId(YENI)} style={[s.cip, s.cipYeni, !hedef && s.cipSecili]}>
+                    <Ikon ad="arti" boyut={14} renk={!hedef ? renk.zemin : renk.ana} kalinlik={3} />
+                    <Text style={[s.cipMetin, !hedef && s.cipMetinSecili]}>{t('gezi.yeniSeyahat')}</Text>
+                  </Pressable>
+                </ScrollView>
+              </View>
+            ) : null}
             {/* KK1: seyahat seçicinin altında iki sekme. */}
             <View style={s.sekmeler} accessibilityRole="tablist">
               {(['plan', 'mekan'] as const).map((k) => {

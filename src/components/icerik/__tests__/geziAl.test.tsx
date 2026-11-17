@@ -195,6 +195,8 @@ describe('#193 Yeni seyahat akışın içinde (KK2–KK4)', () => {
     const onKapat = ac(null);
     await sehirHazir();
     expect(screen.getByText('Sihirbaza gitmez; bitince yeni seyahatin Plan\'ı açılır.')).toBeTruthy();
+    // #277 KK4: seyahati yoksa "Hangi seyahate?" adımı atlanır; yalnız tarih sorulur.
+    expect(screen.queryByText('HANGİ SEYAHATE?')).toBeNull();
     expect(screen.getAllByText(/Eskişehir'de üç gün/).length).toBeGreaterThan(0);
     // Tarih seçilmeden düğme pasif; başlangıç gününe dokununca 3 gün.
     const bugun = yerelTarih(new Date(), Intl.DateTimeFormat().resolvedOptions().timeZone);

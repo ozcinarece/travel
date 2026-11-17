@@ -62,6 +62,15 @@ export function bulunmaEki(ad: string): string {
   return `${temiz}'${sert}${unlu}`;
 }
 
+/**
+ * #277 KK3: "{Ad}'den / 'dan / 'ten / 'tan" (ayrılma): bulunma ekiyle aynı uyum, sonuna "n". "Eskişehir'den", "Bursa'dan",
+ * "Muş'tan".
+ */
+export function ayrilmaEki(ad: string): string {
+  const b = bulunmaEki(ad);
+  return b ? `${b}n` : '';
+}
+
 /** "{Davet eden} seni {Seyahat}'e ekledi" gibi başlıklar için seyahat adı (ad yoksa şehir). */
 export function davetSeyahatAdi(o: { name: string | null; city_label: string }): string {
   return o.name?.trim() || o.city_label;
