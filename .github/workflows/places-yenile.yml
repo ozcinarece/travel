@@ -1,0 +1,37 @@
+name: places-yenile
+
+# #262 (#205 KK3): seyahat mekânlarının (`places`) Google koordinatını 30 günü geçmeden yeniler (places-yenile Edge
+# Function'ı, service_role). Bir tur en çok 250 place_id; 25 günü geçenler, en eski önce. Ayrı aylık sayaç, 8.000 istekte
+# durur ve masaya (#217) bir kez yazar. Logda yalnız sayı vardır.
+# Gerekli secret: SUPABASE_ACCESS_TOKEN (service_role anahtarı çalışma anında Yönetim API'sinden alınır ve maskelenir).
+on:
+  schedule:
+    - cron: '23 2 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: places-yenile
+  cancel-in-progress: false
+
+jobs:
+  yenile:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      SUPABASE_PROJECT_REF: xwqeobelyeuzoxyuvauw
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Yenile
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: node scripts/places-yenile.mjs

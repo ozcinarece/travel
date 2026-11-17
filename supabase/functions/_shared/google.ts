@@ -94,6 +94,21 @@ export async function otomatikTamamla(secenek: {
     }));
 }
 
+// ---------------------------------------------------------------- Konum yenileme (#262)
+
+/**
+ * #262: Place Details Essentials, yalnız `location`. Koordinat 30 günü geçmeden yenilenir (places-yenile). Yer artık
+ * yoksa (404) null döner; diğer hatalar GoogleHatasi fırlatır.
+ */
+export async function konumYenile(placeId: string, maske: string): Promise<unknown | null> {
+  try {
+    return await istek<unknown>(`places/${encodeURIComponent(placeId)}`, { maske });
+  } catch (e) {
+    if (e instanceof GoogleHatasi && e.durum === 404) return null;
+    throw e;
+  }
+}
+
 // ---------------------------------------------------------------- Details (hafif)
 
 /** PRD §7: liste/seçim için HAFİF maske; tam Details yalnızca 3.8'de (ayrı fonksiyon). */

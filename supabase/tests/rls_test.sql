@@ -3266,4 +3266,78 @@ delete from storage.objects where name like '23460000-%' or name = 'uuid-degil/x
 delete from public.silinecek_klasorler where trip_id::text like '23460000-%';
 delete from auth.users where id = '23460000-0000-4000-8000-000000000001';
 
+-- ---------------------------------------------------------------- #262: places koordinatı 30 günü geçmeden yenilenir
+-- Yenileme yaşı 25 gün; aynı place_id tek istek; ayrı aylık sayaç (8.000'de durur, durma bir kez bildirilir); akışa düşmez;
+-- yalnız service_role.
+insert into auth.users (id, is_anonymous) values ('26200000-0000-4000-8000-000000000001', false);
+insert into public.trips (id, owner_id, city_place_id, city_label, lat, lng, tz) values
+  ('26200000-0000-4000-8000-000000000010', '26200000-0000-4000-8000-000000000001', 'p262', 'Yenileme şehri', 40, 30, 'Europe/Istanbul'),
+  ('26200000-0000-4000-8000-000000000020', '26200000-0000-4000-8000-000000000001', 'p262', 'Yenileme şehri', 40, 30, 'Europe/Istanbul');
+insert into public.places (trip_id, place_id, lat, lng, google_fetched_at) values
+  ('26200000-0000-4000-8000-000000000010', 'ChIJ_262_eski', 40.1, 30.1, now() - interval '40 days'),
+  ('26200000-0000-4000-8000-000000000020', 'ChIJ_262_eski', 40.1, 30.1, now() - interval '31 days'),
+  ('26200000-0000-4000-8000-000000000010', 'ChIJ_262_esik', 40.2, 30.2, now() - interval '26 days'),
+  ('26200000-0000-4000-8000-000000000010', 'ChIJ_262_taze', 40.3, 30.3, now() - interval '24 days');
+delete from public.changes where trip_id::text like '26200000-%';
+set role service_role;
+do $$
+declare
+  v text[];
+begin
+  select array_agg(place_id) into v from public.places_yenilenecekler(500) where place_id like 'ChIJ_262_%';
+  assert v = array['ChIJ_262_eski', 'ChIJ_262_esik'], '#262: 25 günü geçen place_id''ler, en eski önce, tekil: ' || v::text;
+  assert (select count(*) from public.places_yenilenecekler(0)) = 0, '#262: p_adet 0 boş döner';
+  assert public.places_koordinat_yenile('ChIJ_262_eski', 40.15, 30.15) = 2, '#262: aynı place_id''nin iki satırı birlikte yazılır';
+  assert (select count(*) from public.places where place_id = 'ChIJ_262_eski' and lat = 40.15 and lng = 30.15
+    and google_fetched_at > now() - interval '1 minute') = 2, '#262: koordinat ve damga yenilenir';
+  assert public.places_koordinat_yenile('ChIJ_262_eski', 41, 31) = 0, '#262: taze satıra ikinci kez yazılmaz';
+  assert public.places_koordinat_yenile('ChIJ_262_taze', 41, 31) = 0, '#262: yenileme yaşına gelmemiş satıra yazılmaz';
+  assert not exists (select 1 from public.places_yenilenecekler(500) where place_id = 'ChIJ_262_eski'), '#262: yenilenen listeden çıkar';
+  assert not exists (select 1 from public.changes where trip_id::text like '26200000-%'), '#262: yenileme değişiklik akışına düşmez';
+  -- Aylık sayaç: sınıra kadar artar, aşacak istek bütünüyle reddedilir; günlük Places sayacına yazılmaz.
+  delete from public.places_yenileme_sayac;
+  assert public.places_yenileme_artir(300, 500), '#262 sayaç: 300/500';
+  assert public.places_yenileme_artir(200, 500), '#262 sayaç: 500/500 sığar';
+  assert not public.places_yenileme_artir(1, 500), '#262 sayaç: sınır dolunca ret';
+  assert (select adet from public.places_yenileme_sayac) = 500, '#262 sayaç: ret artırmaz';
+  assert not public.places_yenileme_artir(10, 5), '#262 sayaç: sınırdan büyük ilk istek ret';
+  assert public.places_yenileme_durdu(), '#262: ilk durma bildirilir';
+  assert not public.places_yenileme_durdu(), '#262: aynı ay ikinci durma bildirilmez';
+  assert (select relrowsecurity from pg_class where oid = 'public.places_yenileme_sayac'::regclass), '#262: RLS açık';
+  assert not exists (select 1 from pg_policies where tablename = 'places_yenileme_sayac'), '#262: politika yok';
+  delete from public.places_yenileme_sayac;
+end $$;
+select pg_temp.hata_bekle($$select * from public.places_yenilenecekler(501)$$, '22023');
+select pg_temp.hata_bekle($$select public.places_yenileme_artir(0, 8000)$$, '22023');
+select pg_temp.hata_bekle($$select public.places_koordinat_yenile('ChIJ_262_esik', 91, 30)$$, '22023');
+select pg_temp.hata_bekle($$select public.places_koordinat_yenile('', 40, 30)$$, '22023');
+reset role;
+-- Kullanıcının kendi koordinat değişikliği akışa yine düşer (işaret yalnız sistem yenilemesinde).
+update public.places set lat = 40.25 where place_id = 'ChIJ_262_esik';
+do $$
+begin
+  assert exists (select 1 from public.changes where trip_id::text like '26200000-%' and entity = 'places' and field = 'lat'),
+    '#262: normal koordinat değişikliği akışa düşer';
+end $$;
+set role authenticated;
+select pg_temp.as_user('26200000-0000-4000-8000-000000000001');
+select pg_temp.hata_bekle($$select count(*) from public.places_yenileme_sayac$$, '42501');
+select pg_temp.hata_bekle($$select * from public.places_yenilenecekler(10)$$, '42501');
+select pg_temp.hata_bekle($$select public.places_yenileme_artir(1, 8000)$$, '42501');
+select pg_temp.hata_bekle($$select public.places_yenileme_durdu()$$, '42501');
+select pg_temp.hata_bekle($$select public.places_koordinat_yenile('ChIJ_262_esik', 40, 30)$$, '42501');
+select pg_temp.as_email(:E, 'ozcinar.ece@gmail.com');
+select pg_temp.hata_bekle($$select count(*) from public.places_yenileme_sayac$$, '42501');
+select pg_temp.hata_bekle($$select public.places_koordinat_yenile('ChIJ_262_esik', 40, 30)$$, '42501');
+reset role;
+set role anon;
+select pg_temp.hata_bekle($$select count(*) from public.places_yenileme_sayac$$, '42501');
+select pg_temp.hata_bekle($$select * from public.places_yenilenecekler(10)$$, '42501');
+select pg_temp.hata_bekle($$select public.places_yenileme_artir(1, 8000)$$, '42501');
+select pg_temp.hata_bekle($$select public.places_koordinat_yenile('ChIJ_262_esik', 40, 30)$$, '42501');
+reset role;
+delete from public.trips where id::text like '26200000-%';
+delete from public.changes where trip_id::text like '26200000-%';
+delete from auth.users where id = '26200000-0000-4000-8000-000000000001';
+
 \echo 'rls_test: TÜM TESTLER GEÇTİ'
