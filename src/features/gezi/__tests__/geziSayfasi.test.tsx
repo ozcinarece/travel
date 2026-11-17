@@ -16,6 +16,9 @@ jest.mock('react-native-safe-area-context', () => jest.requireActual<{ default: 
 // Sentry içe aktarılınca zamanlayıcı kurar (jest kapanmaz).
 jest.mock('@/lib/hataRaporu', () => ({ izBirak: () => undefined }));
 jest.mock('@/lib/oturum', () => ({ useOturum: () => ({ session: { user: { id: 'ben', is_anonymous: false } }, hazir: true, hesapli: true }) }));
+// #243: bağlantı durumu testte elle verilir.
+let mockCevrimdisi = false;
+jest.mock('@/lib/baglanti', () => ({ useCevrimdisi: () => mockCevrimdisi }));
 jest.mock('@/features/konum/useKonum', () => ({ useKonum: () => ({ konum: null, izin: 'yok' }), yakinDurakId: () => null }));
 jest.mock('expo-router', () => ({
   router: { navigate: jest.fn(), push: jest.fn(), replace: jest.fn(), back: jest.fn(), canGoBack: () => false },
@@ -28,6 +31,8 @@ jest.mock('expo-router', () => ({
 
 type Tablolar = Record<string, unknown[]>;
 let mockTablolar: Tablolar = {};
+/** #243: bu tabloların sorgusu hiç yanıt vermez (bağlantı yok, cihazda kopya yok). */
+const mockAsili = new Set<string>();
 const mockSayac = { invoke: [] as string[], rpc: [] as string[], tablolar: [] as string[] };
 /** PostgREST zincirini taklit eder: her çağrı aynı nesneyi döner; `await` tablonun satırlarını, `.single()` ilk satırı verir. */
 function mockSorgu(tablo: string) {
@@ -37,6 +42,7 @@ function mockSorgu(tablo: string) {
     {
       get(_hedef, ad) {
         if (ad === 'then') {
+          if (mockAsili.has(tablo)) return () => undefined;
           const satirlar = mockTablolar[tablo] ?? [];
           const sonuc = tek ? { data: satirlar[0] ?? null, error: satirlar[0] ? null : { code: 'PGRST116' } } : { data: satirlar, error: null };
           return (coz: (v: unknown) => unknown, red: (e: unknown) => unknown) => Promise.resolve(sonuc).then(coz, red);
@@ -165,6 +171,8 @@ beforeEach(() => {
   fetchSahte.mockClear();
   globalThis.fetch = fetchSahte as unknown as typeof fetch;
   hafifOnbellek.temizle();
+  mockCevrimdisi = false;
+  mockAsili.clear();
 });
 afterEach(() => {
   while (acik.length) {
@@ -245,7 +253,69 @@ describe('#181 KK13: Gezi sayfası açılışında Google isteği yok', () => {
     // KK11: gezi modunda Sıradaki adım satırı yok; KK12: Ayşe'nin varışı yok → konum paylaşmıyor.
     expect(queryByText('Dağıt')).toBeNull();
     expect(getByText('konumunu paylaşmıyor')).toBeTruthy();
+    // #243: bağlantı varken şerit yok.
+    expect(queryByText(/Çevrimdışı/)).toBeNull();
     expect(mockSayac.invoke).toEqual([]);
     expect(fetchSahte).not.toHaveBeenCalled();
+  });
+});
+
+describe('#243 çevrimdışı: son görülen hal okunur (kanvas 23c)', () => {
+  const geziModuFiksturu = () => {
+    mockTablolar = fikstur(bugun());
+    const dk = Math.max(0, yerelSaatDk(new Date(), IST) - 5);
+    (mockTablolar.days[0] as { start_time: string }).start_time = `${String(Math.floor(dk / 60)).padStart(2, '0')}:${String(dk % 60).padStart(2, '0')}:00`;
+  };
+  const pasif = (el: { props: { accessibilityState?: { disabled?: boolean } } }) => el.props.accessibilityState?.disabled === true;
+
+  it('KK3: şerit son güncellemenin saatini seyahat saat dilimiyle gösterir', async () => {
+    geziModuFiksturu();
+    mockCevrimdisi = true;
+    const { getByText, qc } = ciz();
+    await waitFor(() => getByText('Eskişehir Gezisi'));
+    await sakinles(qc);
+    const son = Math.max(...['seyahat', 'gunler', 'duraklar'].map((k) => qc.getQueryState([k, 't1'])?.dataUpdatedAt ?? 0));
+    const dk = yerelSaatDk(new Date(son), IST);
+    const saat = `${String(Math.floor(dk / 60)).padStart(2, '0')}:${String(dk % 60).padStart(2, '0')}`;
+    expect(getByText(`Çevrimdışı · son güncelleme ${saat}`)).toBeTruthy();
+    expect(getByText('Plan okunur; bağlanınca kendiliğinden yenilenir')).toBeTruthy();
+  });
+
+  it('KK4: düzenleme düğmeleri pasif; Yol tarifi ve Haritada gör çalışır', async () => {
+    geziModuFiksturu();
+    mockCevrimdisi = true;
+    const { getByText, getByLabelText, getByRole, qc } = ciz();
+    await waitFor(() => getByText('Eskişehir Gezisi'));
+    await sakinles(qc);
+    expect(pasif(getByLabelText('Davet linkini gönder'))).toBe(true);
+    expect(pasif(getByLabelText('Diğer: yeniden adlandır, tarihleri değiştir, seyahati sil'))).toBe(true);
+    expect(pasif(getByLabelText('Diğer: Atla, Başka güne al'))).toBe(true);
+    expect(pasif(getByRole('button', { name: 'Mesaj at' }))).toBe(true);
+    expect(pasif(getByRole('button', { name: 'Harcama ekle' }))).toBe(true);
+    expect(pasif(getByRole('button', { name: 'Yol tarifi' }))).toBe(false);
+    expect(pasif(getByRole('button', { name: 'Haritada gör' }))).toBe(false);
+  });
+
+  it('KK5: ad yalnız bizim içeriğimizden, yoksa kategori; oturumdaki Google adı kullanılmaz', async () => {
+    geziModuFiksturu();
+    hafifOnbellek.yaz([{ place_id: 'ChIJ-google-2', ad: 'Çibörek Evi', lat: 39.77, lng: 30.52, primary_type: 'restaurant', tz: null, puan: null, puan_sayisi: null, acik: null, ulke_kodu: null }], 'pro');
+    mockCevrimdisi = true;
+    const { getByText, queryByText, qc } = ciz();
+    await waitFor(() => getByText('Eskişehir Gezisi'));
+    await sakinles(qc);
+    expect(getByText('Bugün · Odunpazarı Evleri')).toBeTruthy();
+    expect(queryByText(/Çibörek Evi/)).toBeNull();
+    expect(getByText(/Restoran/)).toBeTruthy();
+  });
+
+  it('konaklamalar gelmese de (cihazda tutulmaz) sayfa açılır', async () => {
+    geziModuFiksturu();
+    mockCevrimdisi = true;
+    // Konaklama sorgusu hiç gelmez (ağ yok, cihazda kopyası yok).
+    mockAsili.add('stays');
+    const { getByText, qc } = ciz();
+    await waitFor(() => getByText('Eskişehir Gezisi'));
+    expect(qc.getQueryData(['konaklamalar', 't1'])).toBeUndefined();
+    expect(getByText(/Çevrimdışı/)).toBeTruthy();
   });
 });

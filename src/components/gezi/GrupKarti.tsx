@@ -19,9 +19,11 @@ type Props = {
   an: Date;
   onSeyahattekiler: () => void;
   onMesajAt?: () => void;
+  /** #243 (kanvas 23c): bağlantı yokken "Mesaj at" pasif (%40). */
+  mesajPasif?: boolean;
 };
 
-export function GrupKarti({ durumlar, sira, mekanAdi, an, onSeyahattekiler, onMesajAt }: Props) {
+export function GrupKarti({ durumlar, sira, mekanAdi, an, onSeyahattekiler, onMesajAt, mesajPasif = false }: Props) {
   if (durumlar.length === 0) return null;
   return (
     <View style={{ gap: 10 }}>
@@ -41,7 +43,7 @@ export function GrupKarti({ durumlar, sira, mekanAdi, an, onSeyahattekiler, onMe
               </Text>
               {varis ? <Text style={s.zaman}>{zamanMetni(varis.at, an.getTime())}</Text> : null}
             </View>
-            {!varis && onMesajAt ? <BuzDugme kucuk metin={t('geziSayfasi.mesajAt')} onPress={onMesajAt} /> : null}
+            {!varis && onMesajAt ? <BuzDugme kucuk pasif={mesajPasif} metin={t('geziSayfasi.mesajAt')} onPress={onMesajAt} /> : null}
           </View>
         ))}
       </Kart>

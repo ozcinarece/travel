@@ -25,6 +25,8 @@ export type IkonAdi =
   | 'sirala'
   // #239 (kanvas 3d): davet linki hata halleri — wifi kapalı (A · Bağlanamadık), kırık bağlantı (B · Bu davet geçersiz).
   | 'wifiKapali'
+  // #243 (kanvas 23c): Gezi sayfasının çevrimdışı şeridi — tam yaylı Wi-Fi, dolu nokta, çapraz çizgi.
+  | 'cevrimdisi'
   | 'kirikBag'
   // #30 pin kategori ikonları (16 px çizgi)
   | 'agac'
@@ -380,6 +382,12 @@ export function Ikon({ ad, boyut = 24, renk, kalinlik = 2, dolgu }: Props) {
           <Path d="M15.6 10.6A10 10 0 0 1 19 12.6" {...ortak} />
           <Path d="M8.5 16.4a5 5 0 0 1 7 0" {...ortak} />
           <Path d="M12 20h.01" {...ortak} />
+          <Path d="M3 3l18 18" {...ortak} />
+        </>
+      ) : ad === 'cevrimdisi' ? (
+        <>
+          <Path d="M2 8.5a15 15 0 0 1 20 0M5.5 12a10 10 0 0 1 13 0M9 15.5a5 5 0 0 1 6 0" {...ortak} />
+          <Circle cx={12} cy={19} r={1.2} fill={renk} />
           <Path d="M3 3l18 18" {...ortak} />
         </>
       ) : ad === 'kirikBag' ? (

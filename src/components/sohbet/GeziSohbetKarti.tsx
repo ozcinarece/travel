@@ -22,9 +22,11 @@ type Props = {
   /** Mekan mesajının adı (DB / önbellek; bilinmiyorsa kategori). */
   mekanAdi: (placeId: string) => string;
   onAc: () => void;
+  /** #243 KK4 (kanvas 23c): bağlantı yokken "Yanıtla" / "Oy ver" pasif (%40). */
+  yanitPasif?: boolean;
 };
 
-export function GeziSohbetKarti({ mesaj, oylama, saat, okunmamis, k, benId, secenekAdlari, mekanAdi, onAc }: Props) {
+export function GeziSohbetKarti({ mesaj, oylama, saat, okunmamis, k, benId, secenekAdlari, mekanAdi, onAc, yanitPasif = false }: Props) {
   const metin = !mesaj
     ? ''
     : oylama
@@ -70,7 +72,7 @@ export function GeziSohbetKarti({ mesaj, oylama, saat, okunmamis, k, benId, sece
         )}
         <View style={{ flexDirection: 'row', gap: 8 }}>
           {mesaj ? (
-            <Pressable accessibilityRole="button" onPress={onAc} style={({ pressed }) => [geziStil.dugme, { flex: 1, backgroundColor: renk.ana }, pressed && { opacity: 0.85 }]}>
+            <Pressable accessibilityRole="button" accessibilityState={{ disabled: yanitPasif }} disabled={yanitPasif} onPress={onAc} style={({ pressed }) => [geziStil.dugme, { flex: 1, backgroundColor: renk.ana }, yanitPasif && { opacity: 0.4 }, pressed && { opacity: 0.85 }]}>
               <Text style={[geziStil.dugmeMetin, { color: renk.zemin }]}>{oylama ? t('sohbet.gezi.oyVer') : t('sohbet.gezi.yanitla')}</Text>
             </Pressable>
           ) : null}

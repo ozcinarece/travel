@@ -26,9 +26,11 @@ type Props = {
   onHarita: (k: DurakKarti) => void;
   onMenu: (k: DurakKarti) => void;
   onPlan: () => void;
+  /** #243 KK4 (kanvas 23c): bağlantı yokken durak menüsü (Atla, Başka güne al) pasif; Yol tarifi ve Haritada gör çalışır. */
+  menuPasif?: boolean;
 };
 
-export function BugunKarti({ baslik, kartlar, odak, sonraki, gunRenk, kalan, foto, tip, onYolTarifi, onHarita, onMenu, onPlan }: Props) {
+export function BugunKarti({ baslik, kartlar, odak, sonraki, gunRenk, kalan, foto, tip, onYolTarifi, onHarita, onMenu, onPlan, menuPasif = false }: Props) {
   const etkin = kartlar.filter((k) => k.numara !== null);
   const gezilen = etkin.filter((k) => k.tamamlandi || k.durum === 'gecildi').length;
   const saat = odak ? kartSaati(odak) : null;
@@ -87,7 +89,7 @@ export function BugunKarti({ baslik, kartlar, odak, sonraki, gunRenk, kalan, fot
               <Ikon ad="harita" boyut={16} renk={renk.ana} kalinlik={2.3} />
               <Text style={[geziStil.dugmeMetin, { color: renk.ana }]}>{t('geziSayfasi.haritadaGor')}</Text>
             </Pressable>
-            <Pressable accessibilityRole="button" accessibilityLabel={t('geziSayfasi.durakMenu')} onPress={() => onMenu(odak)} style={({ pressed }) => [s.daha, pressed && { opacity: 0.85 }]}>
+            <Pressable accessibilityRole="button" accessibilityLabel={t('geziSayfasi.durakMenu')} accessibilityState={{ disabled: menuPasif }} disabled={menuPasif} onPress={() => onMenu(odak)} style={({ pressed }) => [s.daha, menuPasif && { opacity: 0.4 }, pressed && { opacity: 0.85 }]}>
               <Ikon ad="daha" boyut={18} renk={renk.ana} kalinlik={2.3} />
             </Pressable>
           </View>
