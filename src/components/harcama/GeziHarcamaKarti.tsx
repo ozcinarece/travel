@@ -15,7 +15,7 @@ type Props = { gezi: boolean; ozet: HarcamaOzeti; adet: number; k: Kisiler; benI
 
 export function GeziHarcamaKarti({ gezi, ozet, adet, k, benId, onTumu, onEkle, onBakiyeler, eklePasif = false }: Props) {
   const ekle = (
-    <Pressable accessibilityRole="button" accessibilityState={{ disabled: eklePasif }} disabled={eklePasif} onPress={onEkle} style={({ pressed }) => [geziStil.dugme, { flex: 1, backgroundColor: renk.ana }, eklePasif && { opacity: 0.4 }, pressed && { opacity: 0.85 }]}>
+    <Pressable accessibilityRole="button" accessibilityState={{ disabled: eklePasif }} accessibilityHint={eklePasif ? t('geziSayfasi.cevrimdisi.baglantiYok') : undefined} disabled={eklePasif} onPress={onEkle} style={({ pressed }) => [geziStil.dugme, { flex: 1, backgroundColor: renk.ana }, eklePasif && { opacity: 0.4 }, pressed && { opacity: 0.85 }]}>
       <Ikon ad="arti" boyut={16} renk={renk.zemin} kalinlik={2.3} />
       <Text style={[geziStil.dugmeMetin, { color: renk.zemin }]}>{t('harcama.ekle')}</Text>
     </Pressable>

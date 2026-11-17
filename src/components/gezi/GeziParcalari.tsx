@@ -6,6 +6,7 @@ import { ActivityIndicator, Pressable, StyleSheet, Text, View, type StyleProp, t
 
 import { PIN_IKONLARI } from '@/components/harita/pinIkonlari';
 import { Ikon } from '@/components/ui/Ikon';
+import { t } from '@/i18n';
 import { KATEGORI_PIN, pinKategorisi, type PinKategorisi } from '@/lib/pinIkonu';
 import { renk, yazi } from '@/theme';
 
@@ -66,14 +67,14 @@ export function BolumBasligi({ baslik, baglanti, onBaglanti }: { baslik: string;
 /** Küçük Buz düğme (Dağıt, Seç, Mesaj at). */
 export function BuzDugme({ metin, onPress, kucuk, pasif = false }: { metin: string; onPress: () => void; kucuk?: boolean; /** #243: bağlantı yokken %40, dokunulmaz. */ pasif?: boolean }) {
   return (
-    <Pressable accessibilityRole="button" accessibilityState={{ disabled: pasif }} disabled={pasif} onPress={onPress} hitSlop={6} style={({ pressed }) => [s.buz, kucuk && s.buzKucuk, pasif && { opacity: 0.4 }, pressed && { opacity: 0.8 }]}>
+    <Pressable accessibilityRole="button" accessibilityState={{ disabled: pasif }} accessibilityHint={pasif ? t('geziSayfasi.cevrimdisi.baglantiYok') : undefined} disabled={pasif} onPress={onPress} hitSlop={6} style={({ pressed }) => [s.buz, kucuk && s.buzKucuk, pasif && { opacity: 0.4 }, pressed && { opacity: 0.8 }]}>
       <Text style={[s.buzMetin, kucuk && { fontSize: 12 }]}>{metin}</Text>
     </Pressable>
   );
 }
 
 /** KK5: kapağın altındaki tek, sessiz satır — beyaz, solda 3 px Mandalina çizgi, sağda küçük Buz düğme. */
-export function SiradakiAdimSatiri({ baslik, alt, dugme, mesgul, onPress }: { baslik: string; alt: string | null; dugme: string; /** İş sürüyor (Planı kur): düğme beklemede, dokunulmaz. */ mesgul?: boolean; onPress: () => void }) {
+export function SiradakiAdimSatiri({ baslik, alt, dugme, mesgul, onPress, pasif = false }: { baslik: string; alt: string | null; dugme: string; /** İş sürüyor (Planı kur): düğme beklemede, dokunulmaz. */ mesgul?: boolean; onPress: () => void; /** #293 KK6: bağlantı yokken %40, dokunulmaz. */ pasif?: boolean }) {
   return (
     <View style={s.siradaki}>
       <View style={{ flex: 1, minWidth: 0 }}>
@@ -89,7 +90,7 @@ export function SiradakiAdimSatiri({ baslik, alt, dugme, mesgul, onPress }: { ba
           <ActivityIndicator size="small" color={renk.ana} />
         </View>
       ) : (
-        <BuzDugme metin={dugme} onPress={onPress} />
+        <BuzDugme metin={dugme} onPress={onPress} pasif={pasif} />
       )}
     </View>
   );

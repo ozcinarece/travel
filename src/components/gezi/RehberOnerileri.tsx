@@ -17,9 +17,11 @@ type Props = {
   eklenenler: Set<string>;
   onEkle: (y: Yer & { place_id: string }) => void;
   onKesfet: () => void;
+  /** #293 KK6 (kanvas 23c): bağlantı yokken "Listeye ekle" pasif (%40). */
+  eklePasif?: boolean;
 };
 
-export function RehberOnerileri({ sehir, yerler, eklenenler, onEkle, onKesfet }: Props) {
+export function RehberOnerileri({ sehir, yerler, eklenenler, onEkle, onKesfet, eklePasif = false }: Props) {
   return (
     <View style={{ gap: 10 }}>
       <BolumBasligi baslik={t('geziSayfasi.rehberden')} baglanti={t('geziSayfasi.kesfet')} onBaglanti={onKesfet} />
@@ -39,9 +41,11 @@ export function RehberOnerileri({ sehir, yerler, eklenenler, onEkle, onKesfet }:
                 </Text>
                 <Pressable
                   accessibilityRole="button"
-                  disabled={eklendi}
+                  accessibilityState={{ disabled: eklendi || eklePasif }}
+                  accessibilityHint={eklePasif && !eklendi ? t('geziSayfasi.cevrimdisi.baglantiYok') : undefined}
+                  disabled={eklendi || eklePasif}
                   onPress={() => onEkle(y)}
-                  style={({ pressed }) => [s.ekle, eklendi && { backgroundColor: renk.basariZemin }, pressed && { opacity: 0.85 }]}>
+                  style={({ pressed }) => [s.ekle, eklendi && { backgroundColor: renk.basariZemin }, eklePasif && !eklendi && { opacity: 0.4 }, pressed && { opacity: 0.85 }]}>
                   <Ikon ad={eklendi ? 'tik' : 'arti'} boyut={13} renk={eklendi ? renk.basariMetin : renk.metin} kalinlik={3} />
                   <Text style={[s.ekleMetin, eklendi && { color: renk.basariMetin }]}>{eklendi ? t('geziSayfasi.listede') : t('geziSayfasi.listeyeEkle')}</Text>
                 </Pressable>

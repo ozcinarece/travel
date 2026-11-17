@@ -1,16 +1,58 @@
 // #243 KK3: bağlantı durumu. NetInfo native bir paket (Ece'nin şartı: native paket yok), bu yüzden durum sorgu sonuçlarından
 // çıkarılır: bir sorgu ya da işlem ağ hatasıyla düşerse çevrimdışı; ağdan bir sorgu başarıyla gelirse yeniden çevrimiçi.
 // Çevrimdışıyken arada bir (ve uygulama ön plana gelince) profil sorgusu yeniden denenir; başarı gelince bütün etkin sorgular
-// içinden yalnız bizim tablolarımızdan okunanlar (`saklanabilir`) yenilenir (şerit kalkar, plan güncellenir). Google sorguları
-// (Edge Function → Places) bağlantı her döndüğünde tekrar gitmesin diye yenilenmez; kendi süreleri dolunca yenilenir.
-import type { QueryClient } from '@tanstack/react-query';
+// içinden Google'a gitmeyen bütün sorgularımız yenilenir (şerit kalkar, plan ve sohbet güncellenir; #293 KK9). Google sorguları
+// (Edge Function → Places/Routes, Autocomplete) bağlantı her döndüğünde tekrar gitmesin diye yenilenmez; kendi süreleri dolunca
+// yenilenir.
+// #293 KK2: zayıf ağda şerit gidip gelmesin. Çevrimdışına geçiş ilk ağ hatasında; çevrimiçine dönüş ya ard arda 2 başarılı
+// yanıtla ya da ilk başarıdan sonra 3 sn hiç ağ hatası gelmezse.
+import type { QueryClient, QueryKey } from '@tanstack/react-query';
 import { useSyncExternalStore } from 'react';
-import { AppState } from 'react-native';
+import { AccessibilityInfo, AppState, Platform } from 'react-native';
 
-import { saklanabilir } from './kaliciOnbellek';
+import { t } from '@/i18n';
 
 /** Çevrimdışıyken yeniden deneme aralığı. */
 export const YOKLAMA_MS = 20_000;
+/** #293 KK2: çevrimiçine dönmek için gereken ard arda başarı sayısı… */
+export const DONUS_BASARI = 2;
+/** …ya da ilk başarıdan sonra kesintisiz geçmesi gereken süre. */
+export const DONUS_MS = 3_000;
+
+/**
+ * #293 KK9: Google'a (Edge Function → Places/Routes, Autocomplete) giden sorguların anahtar başları. Bağlantı dönünce bunlar
+ * yenilenmez; geri kalan bütün etkin sorgular (bizim tablolarımız, Storage) yenilenir. Google'a giden yeni bir sorgu buraya
+ * eklenmeli (`baglanti.test.ts` bilinen anahtarları sınar).
+ */
+const GOOGLE: readonly (readonly string[])[] = [
+  ['tam-yer'],
+  ['mekan-ozeti'],
+  ['place-foto'],
+  ['yorumlar'],
+  ['onizleme'],
+  ['hafif-yerler'],
+  ['yer-foto'],
+  ['icerik-canli'],
+  ['icerik', 'gezi-rota'],
+  ['rota'],
+  ['yuruyus'],
+  ['sihirbaz-oneri'],
+  ['sihirbaz-rehber'],
+  ['sihirbaz', 'sehir'],
+  // Autocomplete (useOneriler)
+  ['mekan-oneri'],
+  ['otel-oneri'],
+  ['sehir-oneri'],
+  ['sohbet-mekan'],
+  ['yonetim-mekan'],
+  ['yonetim-rehber-mekan'],
+  ['yonetim-sehir'],
+];
+
+/** Bu sorgu Google'a mı gidiyor? */
+export function googleSorgusu(anahtar: QueryKey): boolean {
+  return GOOGLE.some((bas) => bas.every((parca, i) => anahtar[i] === parca));
+}
 
 let cevrimdisi = false;
 const dinleyiciler = new Set<() => void>();
@@ -18,6 +60,9 @@ const dinleyiciler = new Set<() => void>();
 function ayarla(deger: boolean) {
   if (cevrimdisi === deger) return;
   cevrimdisi = deger;
+  // #293 KK7: iOS'ta `accessibilityLiveRegion` çalışmaz; çevrimdışına geçildiği anda tek yerden, bir kez duyurulur
+  // (açık ekran sayısından bağımsız). Android'de şeridin canlı bölgesi okur.
+  if (deger && Platform.OS === 'ios') AccessibilityInfo.announceForAccessibility(`${t('geziSayfasi.cevrimdisi.baslikSaatsiz')}. ${t('geziSayfasi.cevrimdisi.alt')}`);
   dinleyiciler.forEach((d) => d());
 }
 
@@ -60,13 +105,13 @@ type Olay = { type: string; action?: { type: string; error?: unknown; manual?: b
 /**
  * Sorgu ve işlem önbelleğini dinler. Dönen fonksiyon dinlemeyi bırakır (testler için).
  * - Bir deneme ağ hatasıyla düşerse (`failed` / `error`, ilk denemede; 3 yeniden denemeyi beklemeden) → çevrimdışı.
- * - Ağdan bir sorgu başarıyla gelirse (`success`, elle `setQueryData` değil) → çevrimiçi; önceden çevrimdışıysak etkin
- *   sorgular yenilenir.
+ * - Çevrimdışıyken ağdan bir sorgu başarıyla gelirse (`success`, elle `setQueryData` değil) dönüş başlar: ard arda 2. başarıda
+ *   ya da 3 sn içinde ağ hatası gelmezse çevrimiçi; etkin sorgular (Google hariç) yenilenir. Arada gelen ağ hatası dönüşü sıfırlar.
  */
-export function baglantiyiIzle(qc: QueryClient, secenek: { yoklamaMs?: number } = {}): () => void {
+export function baglantiyiIzle(qc: QueryClient, secenek: { yoklamaMs?: number; donusMs?: number } = {}): () => void {
   const yoklamaMs = secenek.yoklamaMs ?? YOKLAMA_MS;
+  const donusMs = secenek.donusMs ?? DONUS_MS;
   let zamanlayici: ReturnType<typeof setInterval> | null = null;
-
   const yokla = () => {
     void qc.refetchQueries({ queryKey: ['profil'] });
   };
@@ -78,16 +123,32 @@ export function baglantiyiIzle(qc: QueryClient, secenek: { yoklamaMs?: number } 
     }
   };
 
+  let basari = 0;
+  let donus: ReturnType<typeof setTimeout> | null = null;
+  const donusuBirak = () => {
+    basari = 0;
+    if (donus) clearTimeout(donus);
+    donus = null;
+  };
+  const cevrimiciOl = () => {
+    donusuBirak();
+    if (!cevrimdisi) return;
+    ayarla(false);
+    yoklamayiAyarla();
+    void qc.invalidateQueries({ predicate: (q) => !googleSorgusu(q.queryKey), refetchType: 'active' });
+  };
+
   const olay = (o: Olay) => {
     if (o.type !== 'updated' || !o.action) return;
     const a = o.action;
     if ((a.type === 'failed' || a.type === 'error') && agHatasi(a.error)) {
+      donusuBirak();
       ayarla(true);
       yoklamayiAyarla();
     } else if (a.type === 'success' && !a.manual && cevrimdisi) {
-      ayarla(false);
-      yoklamayiAyarla();
-      void qc.invalidateQueries({ predicate: (q) => saklanabilir(q.queryKey), refetchType: 'active' });
+      basari += 1;
+      if (basari >= DONUS_BASARI) cevrimiciOl();
+      else if (!donus) donus = setTimeout(cevrimiciOl, donusMs);
     }
   };
   const sorgular = qc.getQueryCache().subscribe((o) => olay(o as Olay));
@@ -99,6 +160,7 @@ export function baglantiyiIzle(qc: QueryClient, secenek: { yoklamaMs?: number } 
     sorgular();
     islemler();
     durum.remove();
+    donusuBirak();
     if (zamanlayici) clearInterval(zamanlayici);
     zamanlayici = null;
   };

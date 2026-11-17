@@ -1,21 +1,36 @@
 // #243 KK3 (kanvas 23c): bağlantı yokken Gezi sayfasının en üstündeki şerit — üstü çizili Wi-Fi, "Çevrimdışı · son güncelleme
 // 08:12" ve "Plan okunur; bağlanınca kendiliğinden yenilenir". Saat seyahatin saat dilimine göre (trips.tz).
-import { StyleSheet, Text, View } from 'react-native';
+// #293 KK1: son güncelleme bugün değilse "dün 22:40" ya da "16 Kas 22:40"; `an` ekranın akan saati (useSimdi), gece yarısı
+// geçince "dün"e döner. KK7: iOS duyurusu burada değil, `baglanti.ts`'te çevrimdışına geçildiği anda bir kez yapılır (Gezi ve
+// Sohbet ikisi de açıkken iki kez okunmasın). KK5: sohbet ekranında da aynı şerit.
+import { StyleSheet, Text, View, type StyleProp, type ViewStyle } from 'react-native';
 
 import { Ikon } from '@/components/ui/Ikon';
 import { t } from '@/i18n';
+import { AYLAR_KISA } from '@/lib/takvim';
+import { guncellemeGunu } from '@/lib/zaman';
 import { renk, yazi } from '@/theme';
 
-/** `saat`: son başarılı güncellemenin saati ("08:12"); bilinmiyorsa null. */
-export function CevrimdisiSeridi({ saat }: { saat: string | null }) {
+/** Şeridin başlığı. `guncellendi`: son başarılı güncellemenin anı (ms); bilinmiyorsa 0. */
+export function seritBasligi(guncellendi: number, tz: string, an: Date = new Date()): string {
+  if (!(guncellendi > 0)) return t('geziSayfasi.cevrimdisi.baslikSaatsiz');
+  const g = guncellemeGunu(new Date(guncellendi), an, tz);
+  if (g.tur === 'bugun') return t('geziSayfasi.cevrimdisi.baslik', { saat: g.saat });
+  if (g.tur === 'dun') return t('geziSayfasi.cevrimdisi.baslikDun', { saat: g.saat });
+  return t('geziSayfasi.cevrimdisi.baslikTarih', { gun: g.gun, ay: AYLAR_KISA[g.ay - 1], saat: g.saat });
+}
+
+export function CevrimdisiSeridi({ guncellendi, tz, an, style }: { guncellendi: number; tz: string; an?: Date; style?: StyleProp<ViewStyle> }) {
+  const baslik = seritBasligi(guncellendi, tz, an);
+  const alt = t('geziSayfasi.cevrimdisi.alt');
   return (
-    <View accessibilityRole="summary" accessibilityLiveRegion="polite" style={s.serit}>
+    <View accessibilityRole="summary" accessibilityLiveRegion="polite" style={[s.serit, style]}>
       <View style={s.ikon}>
         <Ikon ad="cevrimdisi" boyut={16} renk={renk.ana} kalinlik={2.3} />
       </View>
       <View style={{ flex: 1, minWidth: 0 }}>
-        <Text style={s.baslik}>{saat ? t('geziSayfasi.cevrimdisi.baslik', { saat }) : t('geziSayfasi.cevrimdisi.baslikSaatsiz')}</Text>
-        <Text style={s.alt}>{t('geziSayfasi.cevrimdisi.alt')}</Text>
+        <Text style={s.baslik}>{baslik}</Text>
+        <Text style={s.alt}>{alt}</Text>
       </View>
     </View>
   );

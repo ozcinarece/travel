@@ -89,7 +89,7 @@ export function BugunKarti({ baslik, kartlar, odak, sonraki, gunRenk, kalan, fot
               <Ikon ad="harita" boyut={16} renk={renk.ana} kalinlik={2.3} />
               <Text style={[geziStil.dugmeMetin, { color: renk.ana }]}>{t('geziSayfasi.haritadaGor')}</Text>
             </Pressable>
-            <Pressable accessibilityRole="button" accessibilityLabel={t('geziSayfasi.durakMenu')} accessibilityState={{ disabled: menuPasif }} disabled={menuPasif} onPress={() => onMenu(odak)} style={({ pressed }) => [s.daha, menuPasif && { opacity: 0.4 }, pressed && { opacity: 0.85 }]}>
+            <Pressable accessibilityRole="button" accessibilityLabel={t('geziSayfasi.durakMenu')} accessibilityState={{ disabled: menuPasif }} accessibilityHint={menuPasif ? t('geziSayfasi.cevrimdisi.baglantiYok') : undefined} disabled={menuPasif} onPress={() => onMenu(odak)} style={({ pressed }) => [s.daha, menuPasif && { opacity: 0.4 }, pressed && { opacity: 0.85 }]}>
               <Ikon ad="daha" boyut={18} renk={renk.ana} kalinlik={2.3} />
             </Pressable>
           </View>

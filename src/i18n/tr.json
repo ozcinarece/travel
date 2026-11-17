@@ -903,8 +903,11 @@
   "geziSayfasi": {
     "cevrimdisi": {
       "baslik": "Çevrimdışı · son güncelleme {saat}",
+      "baslikDun": "Çevrimdışı · son güncelleme dün {saat}",
+      "baslikTarih": "Çevrimdışı · son güncelleme {gun} {ay} {saat}",
       "baslikSaatsiz": "Çevrimdışı",
-      "alt": "Plan okunur; bağlanınca kendiliğinden yenilenir"
+      "alt": "Plan okunur; bağlanınca kendiliğinden yenilenir",
+      "baglantiYok": "Bağlantı yok"
     },
     "kesfet": "Yer ekle",
     "geriKesfet": "Keşfet",
