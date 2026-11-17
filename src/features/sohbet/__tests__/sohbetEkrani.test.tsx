@@ -31,6 +31,13 @@ jest.mock('expo-router', () => ({
   useNavigationContainerRef: () => ({ getRootState: () => undefined }),
 }));
 
+// #302: verilirse galeri seçimi ve yükleme atlanır, bu yol dönülür.
+let mockFotoYolu: string | null = null;
+jest.mock('@/features/sohbet/sorgular', () => {
+  const gercek = jest.requireActual<Record<string, unknown> & { sohbetFotoSecVeYukle: (id: string) => Promise<string | null> }>('@/features/sohbet/sorgular');
+  return { ...gercek, sohbetFotoSecVeYukle: (id: string) => (mockFotoYolu ? Promise.resolve(mockFotoYolu) : gercek.sohbetFotoSecVeYukle(id)) };
+});
+
 type Tablolar = Record<string, unknown[]>;
 let mockTablolar: Tablolar = {};
 const mockKayit = { invoke: [] as string[], rpc: [] as { ad: string; args: Record<string, unknown> }[], yaz: [] as { tablo: string; islem: string; satir: unknown }[], dosyaSil: [] as string[] };
@@ -248,6 +255,7 @@ beforeEach(() => {
   mockHafif = null;
   mockCevrimdisi = false;
   mockYazmaHatasi = null;
+  mockFotoYolu = null;
   mockHafifIstekleri = [];
   mockHafifBekle = null;
 });
@@ -538,6 +546,19 @@ describe('#293 çevrimdışı: sohbet ekranı ve oylama adları', () => {
     fireEvent.press(satirlar[satirlar.length - 1]);
     await waitFor(() => expect(mockKayit.yaz.some((y) => y.tablo === 'mesajlar')).toBe(true));
     await waitFor(() => expect(getByLabelText('Mesaj yaz…').props.value).toBe('Buraya gidelim'));
+  });
+
+  it('fotoğraf gönderimi düşerse yazılan not geri gelir, yüklenen dosya silinir', async () => {
+    mockYazmaHatasi = 'mesajlar';
+    mockFotoYolu = 't1/deneme.jpg';
+    const { getByText, getByLabelText, getByRole, qc } = ciz(<SohbetSekmesi />);
+    await waitFor(() => getByText('Çibörek mi, balık mı?'));
+    await sakinles(qc);
+    fireEvent.changeText(getByLabelText('Mesaj yaz…'), 'Manzaraya bakın');
+    fireEvent.press(getByRole('button', { name: 'Fotoğraf' }));
+    await waitFor(() => expect(mockKayit.yaz.some((y) => y.tablo === 'mesajlar')).toBe(true));
+    await waitFor(() => expect(getByLabelText('Mesaj yaz…').props.value).toBe('Manzaraya bakın'));
+    await waitFor(() => expect(mockKayit.dosyaSil).toEqual(['t1/deneme.jpg']));
   });
 
   it('KK5: bağlantı varken şerit yok, giriş açık', async () => {

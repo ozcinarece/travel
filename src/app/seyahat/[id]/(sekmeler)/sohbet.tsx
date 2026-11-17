@@ -354,6 +354,7 @@ function Sohbet({ seyahat, uyeler, mesajlar, oylamalar, seyahatGuncellendi }: { 
           {
             onError: () => {
               void sohbetFotoSil(yol);
+              setMetin((m) => m || not);
               bildir(t('sohbet.gonderilemedi'));
             },
           },
