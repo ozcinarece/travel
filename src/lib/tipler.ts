@@ -45,10 +45,6 @@ export type Seyahat = {
   tz: string;
   start_date: string | null;
   end_date: string | null;
-  hotel_place_id: string | null;
-  hotel_lat: number | null;
-  hotel_lng: number | null;
-  hotel_label: string | null;
   /** "HH:MM:SS" (Postgres time) — §5.3 gün başlangıcı/bitişi varsayılanları. */
   day_start: string;
   day_end: string;

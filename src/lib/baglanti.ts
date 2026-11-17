@@ -1,10 +1,13 @@
 // #243 KK3: bağlantı durumu. NetInfo native bir paket (Ece'nin şartı: native paket yok), bu yüzden durum sorgu sonuçlarından
 // çıkarılır: bir sorgu ya da işlem ağ hatasıyla düşerse çevrimdışı; ağdan bir sorgu başarıyla gelirse yeniden çevrimiçi.
 // Çevrimdışıyken arada bir (ve uygulama ön plana gelince) profil sorgusu yeniden denenir; başarı gelince bütün etkin sorgular
-// yenilenir (şerit kalkar, plan güncellenir).
+// içinden yalnız bizim tablolarımızdan okunanlar (`saklanabilir`) yenilenir (şerit kalkar, plan güncellenir). Google sorguları
+// (Edge Function → Places) bağlantı her döndüğünde tekrar gitmesin diye yenilenmez; kendi süreleri dolunca yenilenir.
 import type { QueryClient } from '@tanstack/react-query';
 import { useSyncExternalStore } from 'react';
 import { AppState } from 'react-native';
+
+import { saklanabilir } from './kaliciOnbellek';
 
 /** Çevrimdışıyken yeniden deneme aralığı. */
 export const YOKLAMA_MS = 20_000;
@@ -84,7 +87,7 @@ export function baglantiyiIzle(qc: QueryClient, secenek: { yoklamaMs?: number } 
     } else if (a.type === 'success' && !a.manual && cevrimdisi) {
       ayarla(false);
       yoklamayiAyarla();
-      void qc.invalidateQueries({ refetchType: 'active' });
+      void qc.invalidateQueries({ predicate: (q) => saklanabilir(q.queryKey), refetchType: 'active' });
     }
   };
   const sorgular = qc.getQueryCache().subscribe((o) => olay(o as Olay));

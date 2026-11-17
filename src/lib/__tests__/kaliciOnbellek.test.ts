@@ -4,6 +4,8 @@ import { describe, expect, it } from '@jest/globals';
 import { QueryClient } from '@tanstack/react-query';
 import { persistQueryClientRestore, persistQueryClientSave } from '@tanstack/react-query-persist-client';
 
+import { SEYAHAT_ALANLARI } from '@/features/seyahatler/alanlar';
+
 import { kaliciSecenekler, ONBELLEK_ANAHTARI, ONBELLEK_OMRU_MS, profilKilitli, saklanabilir, saklananlariAyarla, seridenCoz, seriyeCevir } from '../kaliciOnbellek';
 
 /** Uygulamada Google'dan (Edge Function üzerinden) gelen sorguların anahtarları. */
@@ -18,6 +20,12 @@ describe('kalıcı önbellek (#243 KK1)', () => {
     expect(saklanabilir(['mesajlar', 's1'])).toBe(false);
     // stays.label'da eski Google adları olabilir (#250): konaklamalar cihaza yazılmaz.
     expect(saklanabilir(['konaklamalar', 's1'])).toBe(false);
+  });
+
+  it("saklanan `seyahat` sorgusu Google'dan gelmiş olabilecek otel alanlarını okumaz (#250)", () => {
+    const alanlar = SEYAHAT_ALANLARI.split(',').map((a) => a.trim());
+    for (const g of ['hotel_label', 'hotel_place_id', 'hotel_lat', 'hotel_lng']) expect(alanlar).not.toContain(g);
+    expect(alanlar).toContain('invite_token');
   });
 
   it("AsyncStorage'a yazılan JSON'da Google sorgu anahtarı yok; bizimkiler var ve geri yüklenir", async () => {
