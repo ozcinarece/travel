@@ -1,3 +1,4 @@
+import { describe, expect, it } from '@jest/globals';
 import { baslikStili, olcek, yazi } from '@/theme';
 
 // #307 KK1: başlık Figtree 800; harf aralığı kart ve üstü −0,5, bölüm boyu −0,3.
