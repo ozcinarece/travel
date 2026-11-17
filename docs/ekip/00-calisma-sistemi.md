@@ -61,8 +61,8 @@ Kalan her şeyi Ürün karara bağlar; Ece istediği zaman geri çevirebilir.
 
 | Görev | Ne zaman | Kim |
 |---|---|---|
-| Geliştirme turu | Her gün 6 tur: 08:40, 11:40, 14:40, 17:40, 20:40, 23:40 | Geliştirici |
-| Ürün turu | Her gün 5 tur: 10:10, 13:10, 16:10, 19:10, 22:10 | Ürün |
+| Geliştirme turu | Her saat :40'ta, 08:40–23:40 | Geliştirici |
+| Ürün turu | Her saat :10'da, 09:10–23:10 | Ürün |
 | Denetim kurulu | Pazartesi ve perşembe 11:25 | UX, Sadelik, Büyüme, Maliyet-Güvenlik (aynı turda, birbirinden bağımsız alt ajanlar) |
 | Rehber turu | Her saat :25'te, 08:25–23:25 | Rehber |
 | Haftalık özet | Cuma 17:50 | Ürün → Ece'ye bildirim |
