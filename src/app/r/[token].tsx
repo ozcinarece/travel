@@ -15,6 +15,7 @@ import { DAVET_KANALI, bekleyenDavetiSil, bekleyenDavetiYaz, useDavetKarsilandi,
 import { olayYaz } from '@/features/icerik/sorgular';
 import { useProfil } from '@/features/profil/sorgular';
 import { t } from '@/i18n';
+import { acilisKarariniKapat } from '@/lib/acilis';
 import { useOturum } from '@/lib/oturum';
 import { tarihAraligi } from '@/lib/takvim';
 import { bosluk, renk, yazi } from '@/theme';
@@ -108,7 +109,12 @@ export default function DavetEkrani() {
       setMesgul(null);
     }
   };
-  const anaSayfa = () => router.replace('/(tabs)');
+  // #276 KK-ek6: davet bağlantısıyla soğuk açılışta açılış kuralı hâlâ açık; davet geçersiz olsa da "Ana sayfa"ya basan
+  // kullanıcı Keşfet'e gelir, Gezi'ye atılmaz.
+  const anaSayfa = () => {
+    acilisKarariniKapat();
+    router.replace('/(tabs)');
+  };
 
   if (adim === 'yukleniyor') {
     return (

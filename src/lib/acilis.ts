@@ -1,18 +1,42 @@
 // #276 KK2 · KK-ek1: açılış kuralı ve Keşfet'e dönüş.
 import { router } from 'expo-router';
 
+import { yerelTarih } from '@/lib/zaman';
+
 /**
  * KK2: gezi günündeki kullanıcı uygulamayı açınca bir kez doğrudan seyahatin Gezi sayfasına iner. Bayrak JS oturumu boyunca
- * (uygulama süreci) yaşar: kullanıcı Keşfet'e döndükten sonra ana ekran yeniden kurulsa ya da uygulama ön plana gelse de
- * tekrar seyahate atılmaz. Uygulama kapatılıp açılınca kural yeniden işler.
+ * (uygulama süreci) yaşar: kullanıcı Keşfet'e döndükten sonra ana ekran yeniden kurulsa ya da uygulama aynı gün ön plana
+ * gelse de tekrar seyahate atılmaz. Uygulama kapatılıp açılınca ya da seyahatin diliminde gün değişince (KK-ek3) kural
+ * yeniden işler.
  */
 let acilisKarariVerildi = false;
+/** KK-ek3: bayrağın kapandığı an (yönlendirme, Keşfet'e dönüş ya da Keşfet'ten ayrılış). Gün değişimi buna göre bakılır. */
+let kapanisAni: Date | null = null;
+
+function kapat() {
+  acilisKarariVerildi = true;
+  kapanisAni = new Date();
+}
 
 /** Açılış yönlendirmesi bu oturumda yapılacaksa true döner ve bayrağı kapatır (tek seferlik). */
 export function acilisKarariAl(): boolean {
   if (acilisKarariVerildi) return false;
-  acilisKarariVerildi = true;
+  kapat();
   return true;
+}
+
+/**
+ * #276 KK-ek3: uygulama ön plana gelince çağrılır. Bayrak, aktif seyahatin diliminde (`tz`, `trips.tz`) kapandığı günden
+ * farklı bir güne geçildiyse yeniden açılır: gece arka planda kalan uygulama gezi sabahı Gezi'ye iner. Kullanıcı o gün
+ * Keşfet'e kendisi döndüyse bayrak bugün kapanmıştır, açılmaz. Bayrak açıksa (ya da yeniden açıldıysa) true döner.
+ */
+export function acilisKarariniYenile(tz: string, an = new Date()): boolean {
+  if (!acilisKarariVerildi) return true;
+  if (kapanisAni && yerelTarih(kapanisAni, tz) !== yerelTarih(an, tz)) {
+    acilisKarariVerildi = false;
+    return true;
+  }
+  return false;
 }
 
 /** Açılış kararı bu oturumda hâlâ verilebilir mi (bayrak açık mı). */
@@ -25,12 +49,13 @@ export const ACILIS_BEKLEME_MS = 1500;
 
 /** Ana ekran açılış kararını beklemeden kurulduysa (ör. davet akışı önce geldi) kural bu oturumda artık işlemez. */
 export function acilisKarariniKapat() {
-  acilisKarariVerildi = true;
+  kapat();
 }
 
 /** Yalnız testler için. */
 export function acilisKarariniSifirla() {
   acilisKarariVerildi = false;
+  kapanisAni = null;
 }
 
 type Yigin = { routes: { name: string; state?: Partial<Yigin> }[] } | undefined;
