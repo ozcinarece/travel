@@ -23,6 +23,9 @@ const SEVIYE_GRUPLARI: Record<Seviye, AlanGrubu[]> = {
   foto: ['puan', 'foto'],
 };
 
+/** #316 KK1: places-photo toplu çağrısı en çok 12 ad. */
+const FOTO_PARCA = 12;
+
 /** places-light: istek başına en çok 25 kimlik; fotoğraflı istekte en çok 12. */
 const PARCA = (s: Seviye) => (s === 'foto' || s === 'proFoto' || s === 'saatliFoto' ? 12 : 25);
 
@@ -51,6 +54,8 @@ function birlestir(eski: HafifYer | undefined, yeni: HafifYer, gruplar: AlanGrub
   if (gruplar.includes('puan')) Object.assign(yer, { puan: yeni.puan, puan_sayisi: yeni.puan_sayisi, acik: yeni.acik });
   if (gruplar.includes('saat')) yer.periyotlar = yeni.periyotlar;
   if (gruplar.includes('foto')) yer.foto_uri = yeni.foto_uri ?? null;
+  // #316 KK1: Nearby'nin fotoğraf adı, adı taşımayan sonraki cevaplarla silinmez.
+  if (yeni.foto_ad !== undefined) yer.foto_ad = yeni.foto_ad;
   return yer;
 }
 
@@ -64,6 +69,11 @@ export class HafifOnbellek {
   constructor(
     private readonly getir: (ids: string[], seviye: Seviye) => Promise<HafifYer[]>,
     private readonly simdi: () => number = () => Date.now(),
+    /**
+     * #316 KK1: fotoğraf adı → adres (adlarla aynı sırada; en çok FOTO_PARCA). Verilmişse ve kayıtta Nearby'nin fotoğraf adı
+     * varsa eksik fotoğraf için Details istenmez; yalnız Place Photo. Ad null ise (Google'da fotoğraf yok) istek de yok.
+     */
+    private readonly fotoGetir?: (adlar: string[]) => Promise<(string | null)[]>,
   ) {}
 
   /** Geçerli (ömrü dolmamış) kayıt; `gerek` gruplarının hepsi varsa. */
@@ -115,6 +125,15 @@ export class HafifOnbellek {
     });
   }
 
+  /** #316 KK1: yalnız fotoğraf grubunu yazar (temel ve diğer gruplar olduğu gibi kalır). */
+  private fotoYaz(id: string, uri: string | null) {
+    const k = this.kayitlar.get(id);
+    if (!k) return;
+    const zaman = new Map(k.zaman);
+    zaman.set('foto', this.simdi());
+    this.kayitlar.set(id, { yer: { ...k.yer, foto_uri: uri }, zaman });
+  }
+
   private taze(k: Kayit, g: AlanGrubu | 'temel') {
     const z = k.zaman.get(g);
     return z !== undefined && this.simdi() - z < HAFIF_OMUR_MS;
@@ -156,11 +175,24 @@ export class HafifOnbellek {
     }
 
     const seviyeIdleri = new Map<Seviye, string[]>();
+    const fotoAdli: { id: string; ad: string }[] = [];
     for (const [id, gerek] of ihtiyac) {
       const { eksik, kayitVar } = this.eksik(id, gerek);
+      // #316 KK1: fotoğraf adı eldeyse fotoğraf grubu Details'tan değil Place Photo'dan (ad yoksa hiç istenmeden null).
+      const foto_ad = kayitVar && eksik.has('foto') && this.fotoGetir ? this.kayitlar.get(id)!.yer.foto_ad : undefined;
+      if (foto_ad !== undefined) {
+        eksik.delete('foto');
+        if (foto_ad === null) this.fotoYaz(id, null);
+        else fotoAdli.push({ id, ad: foto_ad });
+      }
       for (const s of seviyeler(eksik, kayitVar)) seviyeIdleri.set(s, [...(seviyeIdleri.get(s) ?? []), id]);
     }
     const kimlikSozleri = new Map<string, Promise<void>[]>();
+    for (let i = 0; i < fotoAdli.length; i += FOTO_PARCA) {
+      const parca = fotoAdli.slice(i, i + FOTO_PARCA);
+      const soz = this.fotoGetir!(parca.map((p) => p.ad)).then((uriler) => parca.forEach((p, j) => this.fotoYaz(p.id, uriler[j] ?? null)));
+      for (const { id } of parca) kimlikSozleri.set(id, [...(kimlikSozleri.get(id) ?? []), soz]);
+    }
     for (const [seviye, idler] of seviyeIdleri) {
       const boy = PARCA(seviye);
       for (let i = 0; i < idler.length; i += boy) {
