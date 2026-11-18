@@ -1,7 +1,7 @@
 // Google Places API (New) çağrıları. Anahtar YALNIZCA burada okunur
 // (Supabase secret GOOGLE_SERVER_KEY); istemci paketine asla girmez (PRD §7, teknik not §3).
 
-import { fotoAtfi } from './fotoAtfi.ts';
+import { fotoAtfi, fotoListesi } from './fotoAtfi.ts';
 import { googleSay } from './sayac.ts';
 
 const KOK = 'https://places.googleapis.com/v1';
@@ -694,8 +694,11 @@ export type TamYer = {
   ozet: string | null;
   /** İlk fotoğrafın çözülmüş URI'si (hemen gösterim). */
   foto_uri: string | null;
-  /** #31, #55: en fazla 10 fotoğraf (Places üst sınırı) — adı (places-photo ile tembel çözülür) ve Google atfı (yazar). */
-  fotolar: { ad: string; yazar: string | null }[];
+  /**
+   * #31, #55: en fazla 10 fotoğraf (Places üst sınırı) — adı (places-photo ile tembel çözülür) ve Google atfı (yazar).
+   * #359 KK1: `yazar_uri` yazarın Google sayfası (`fotoAtfi`: yalnız https, ad yoksa null). Yalnız bellekte; DB'ye yazılmaz (PRD §7).
+   */
+  fotolar: { ad: string; yazar: string | null; yazar_uri: string | null }[];
   google_maps_uri: string | null;
 };
 
@@ -706,7 +709,7 @@ export type YorumOzeti = { place_id: string; puan: number | null; puan_sayisi: n
 type TamCevap = DetailsCevap & {
   currentOpeningHours?: { openNow?: boolean; nextCloseTime?: string; nextOpenTime?: string; weekdayDescriptions?: string[] };
   regularOpeningHours?: { weekdayDescriptions?: string[] };
-  photos?: { name: string; authorAttributions?: { displayName?: string }[] }[];
+  photos?: { name: string; authorAttributions?: { displayName?: string; uri?: string }[] }[];
   googleMapsUri?: string;
   shortFormattedAddress?: string;
   formattedAddress?: string;
@@ -809,7 +812,7 @@ export async function tamDetay(placeId: string, tz?: string, oturum?: string): P
     adres: d.shortFormattedAddress?.trim() || d.formattedAddress?.trim() || null,
     ozet: d.editorialSummary?.text?.trim() || null,
     foto_uri: foto,
-    fotolar: (d.photos ?? []).slice(0, 10).map((f) => ({ ad: f.name, yazar: f.authorAttributions?.[0]?.displayName ?? null })),
+    fotolar: fotoListesi(d.photos),
     google_maps_uri: d.googleMapsUri ?? null,
   };
 }

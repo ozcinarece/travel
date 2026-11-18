@@ -310,8 +310,11 @@ export type TamYer = {
   /** #80 KK6 "Bilmen gerekenler". */
   ozet: string | null;
   foto_uri: string | null;
-  /** #31, #55: en fazla 10 fotoğraf (ad + Google atfı); URI'ler tembel (usePlaceFoto). */
-  fotolar: { ad: string; yazar: string | null }[];
+  /**
+   * #31, #55: en fazla 10 fotoğraf (ad + Google atfı); URI'ler tembel (usePlaceFoto). #359 KK1: `yazar_uri` yazarın Google
+   * sayfası (yalnız https); yalnız bellekte, cihaz önbelleğine yazılmaz (`tam-yer` kalıcı listede değil, PRD §7).
+   */
+  fotolar: { ad: string; yazar: string | null; yazar_uri?: string | null }[];
   google_maps_uri: string | null;
 };
 

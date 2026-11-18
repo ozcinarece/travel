@@ -346,6 +346,7 @@ export function FotoKaydirma({ yer, genislik, onAc }: { yer: TamYer; genislik: n
     setSayfa(yeni);
   };
   const yazar = yer.fotolar[sayfa]?.yazar;
+  const yazarUri = yer.fotolar[sayfa]?.yazar_uri;
   return (
     <View style={StyleSheet.absoluteFill}>
       <ScrollView horizontal pagingEnabled showsHorizontalScrollIndicator={false} onMomentumScrollEnd={kaydirildi} onScroll={kaydirildi} scrollEventThrottle={64} testID="foto-kaydirma">
@@ -360,7 +361,8 @@ export function FotoKaydirma({ yer, genislik, onAc }: { yer: TamYer; genislik: n
           <Text style={s.fotoSayacMetin}>{t('mekan.panel.fotoSayac', { n: sayfa + 1, toplam: sayi })}</Text>
         </View>
       ) : null}
-      <GoogleFotoAtfi yazar={yazar} />
+      {/* #359 KK2–KK3: kutunun içi yazarın Google sayfasını açar; kutunun dışı (fotoğraf) galeriyi açmaya devam eder. */}
+      <GoogleFotoAtfi yazar={yazar} uri={yazarUri} />
     </View>
   );
 }
