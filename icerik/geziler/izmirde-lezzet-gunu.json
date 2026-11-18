@@ -1,0 +1,142 @@
+{
+  "surum": 1,
+  "sehir": {
+    "slug": "izmir"
+  },
+  "takvim": {
+    "ilk_gun": "cumartesi"
+  },
+  "gezi": {
+    "slug": "izmirde-lezzet-gunu",
+    "baslik": "İzmir'de bir lezzet günü",
+    "ozet": "Çarşıda boyoz, handa kahve, Boşnak sofrası, Kordon'da akşam yemeği",
+    "yazar_ad": "Tripmate ekibi",
+    "amaclar": [
+      "lezzet",
+      "yavas"
+    ],
+    "yazi_md": "İzmir'i ağzının tadıyla tanımak isteyenler için yürüyerek geçen bir gün. Sabah Kemeraltı'nda boyoz ve gevrekle başlıyor, bir hanın avlusunda Türk kahvesiyle devam ediyor, öğlen Balkan mutfağı pişiren bir lokantada oturuyor. Öğleden sonra Alsancak'a geçip eski bir pastanede tatlı molası veriyor, akşamüstü Kordon boyunca yürüyor ve günü denize bakan bir et lokantasında bitiriyorsun.\n\n> Kahvaltıyı çarşıda ayakta, hafif yap: öğlen büfe, ikindi tatlı, akşam ikramlı bir sofra var. Kemeraltı'dan Alsancak'a geçiş uzun; tramvay ya da kısa bir taksi yolculuğu için yanında İzmirim Kart olsun.\n\n## 1. gün · Çarşıdan Kordon'a\n\nGüne [Kemeraltı Çarşısı](mekan:ChIJ50QX-uPYuxQRyBM2_ZLjFfw)'nda, esnaf kepenk açarken başla. Sokak tezgâhından sıcak bir gevrek ya da katmerli bir boyoz al; yanına haşlanmış yumurta ve demli bir çay, İzmirlilerin bildiği sabah sofrasıdır. Sonra Havra Sokağı'na yürü: zeytin ve peynir tezgâhları, kurutulmuş biber dizileri, mevsiminde enginar ve Ege otları burada. Satıcılar genelde tattırır; birkaç zeytin deneyip küçük bir paket seçebilirsin.\n\n::mekan[ChIJ50QX-uPYuxQRyBM2_ZLjFfw]\n\nÇarşının ortasındaki [Kızlarağası Hanı](mekan:ChIJ4X3zvOTYuxQRIW0mwDcQjpM)'na geç ve avludaki kahvecilerden birinde közde pişen bir Türk kahvesi iç. Revaklı avlu, sabah kalabalığından sonra iyi bir mola; kahveni bitirince üst kata çıkıp avluya yukarıdan bakmayı unutma.\n\nÖğle yemeğinde birkaç sokak ötedeki [Ayşa](mekan:ChIJr3XEROTYuxQRQAfOFkyuQdE)'ya otur. Eski bir hanın zemin katındaki bu lokanta Boşnak böreğiyle tanınıyor; öğlen tezgâhta tencere yemekleri, zeytinyağlılar ve mantı da var. Tabağını tezgâhın önünde kendin kur: ince yufkayla sarılmış bir dilim börek, bir zeytinyağlı ve günün sıcak yemeği. Yer küçük ve rezervasyon almıyor; esnafın öğle saatinden biraz önce gelmek işini kolaylaştırır.\n\n::mekan[ChIJr3XEROTYuxQRQAfOFkyuQdE]\n\nYemekten sonra Alsancak'a geç. Yürümek istersen Kordon boyunca yarım saati aşan düz bir yol; daha kısa bir geçiş için Konak'tan tramvaya binebilirsin. Alsancak'ta 1957'den beri aynı ailenin işlettiği [Sevinç Pastanesi](mekan:ChIJG9lMKlrYuxQRKYqtEb2yjAs)'nde bir tatlı molası ver. Uzun vitrinde kuru pastalar, şerbetli tatlılar ve dondurma yan yana; ağır bir öğle yemeğinin ardından tek bir dilim seç ve paylaş.\n\nPastaneden birkaç sokak yürüyünce denize çıkıyorsun. Akşamüstünü [Kordon](mekan:ChIJjcvmHlvYuxQRcOJSV83Im2o)'da geçir: rıhtım boyunca kuzeye yürü, çimlerde otur, karşı kıyıda Karşıyaka'nın ışıklarının yanmasını izle. Güneş körfezin üstünde batarken İzmirlilerin de burada olduğunu göreceksin.\n\nGünü Kordon'a bakan [Tavacı Recep Usta](mekan:ChIJYbWD60TYuxQRp9yUwEKv1Ww)'da bitir. Mutfak Güneydoğu Anadolu'nun et geleneğinden geliyor: fırında pişen tava yemekleri, kuzu incik ve ızgaralar. Ana yemeği söyledikten sonra masaya mezeler, salata ve lavaş geliyor; yemeğin sonunda çay ve tatlı ikram ediliyor. Bu yüzden ayrıca meze söylemeden önce masaya ne geldiğine bak.\n\nPlan cumartesiye göre kuruldu. Kemeraltı'nın büyük bölümü pazar günü kapalı, Kızlarağası Hanı'ndaki dükkânların çoğu da pazar açılmayabilir; hafta sonu gidiyorsan cumartesiyi seç. Gün boyu börek, tatlı ve et yiyeceğin için porsiyonları paylaşmak iyi bir fikir. Şehrin tarihi duraklarını da görmek istersen iki günlük planımız Agora'yı, Arkeoloji Müzesi'ni ve Asansör'ü ekliyor.\n"
+  },
+  "gunler": [
+    {
+      "baslik": "Çarşıdan Kordon'a",
+      "duraklar": [
+        {
+          "place_id": "ChIJ50QX-uPYuxQRyBM2_ZLjFfw",
+          "osm": "node/12952048301",
+          "ad": "Kemeraltı Çarşısı",
+          "sure_dk": 90,
+          "sure_gerekcesi": "sokakta kahvaltı ve Havra Sokağı tezgâhları",
+          "kapali_gunler": [
+            "pazar"
+          ],
+          "rehber": "kemeralti-carsisi",
+          "amaclar": [
+            "lezzet",
+            "kultur_tarih"
+          ]
+        },
+        {
+          "place_id": "ChIJ4X3zvOTYuxQRIW0mwDcQjpM",
+          "osm": "relation/15607096",
+          "ad": "Kızlarağası Hanı",
+          "sure_dk": 40,
+          "sure_gerekcesi": "kahve molası ve üst kat",
+          "kapali_gunler": [
+            "pazar"
+          ],
+          "rehber": "kizlaragasi-hani",
+          "amaclar": [
+            "kultur_tarih",
+            "yavas"
+          ]
+        },
+        {
+          "place_id": "ChIJr3XEROTYuxQRQAfOFkyuQdE",
+          "osm": "node/12806599002",
+          "ad": "Ayşa",
+          "sure_dk": 60,
+          "sure_gerekcesi": "büfe, salon hızlı dönüyor",
+          "kapali_gunler": [],
+          "rehber": "aysa-bosnak-borekcisi",
+          "amaclar": [
+            "lezzet"
+          ]
+        },
+        {
+          "place_id": "ChIJG9lMKlrYuxQRKYqtEb2yjAs",
+          "osm": "node/11825031470",
+          "ad": "Sevinç Pastanesi",
+          "sure_dk": 45,
+          "sure_gerekcesi": "tatlı ve çay molası",
+          "kapali_gunler": [],
+          "rehber": "sevinc-pastanesi",
+          "amaclar": [
+            "lezzet"
+          ]
+        },
+        {
+          "place_id": "ChIJjcvmHlvYuxQRcOJSV83Im2o",
+          "ad": "Kordon",
+          "sure_dk": 60,
+          "sure_gerekcesi": "akşamüstü yürüyüşü",
+          "kapali_gunler": [],
+          "rehber": "kordon",
+          "amaclar": [
+            "yavas",
+            "doga"
+          ]
+        },
+        {
+          "place_id": "ChIJYbWD60TYuxQRp9yUwEKv1Ww",
+          "osm": "node/5287447547",
+          "ad": "Tavacı Recep Usta",
+          "sure_dk": 90,
+          "sure_gerekcesi": "ikramlarla akşam yemeği",
+          "kapali_gunler": [],
+          "rehber": "tavaci-recep-usta",
+          "amaclar": [
+            "lezzet"
+          ]
+        }
+      ]
+    }
+  ],
+  "notlar": {
+    "dogrulanacaklar": [
+      "[Plan · Kemeraltı Çarşısı] · osm node/12952048301 · OSM'de geniş çarşı tek bir 'attraction' noktası; Google merkezine 150 m'den uzak çıkarsa (Kordon gibi) osm kaldırılır · kuru yukle",
+      "[Plan · Kemeraltı Çarşısı, Kızlarağası Hanı] · kapali_gunler [\"pazar\"] · çarşının büyük kısmı pazar kapalı (yaygın anlatım); plan cumartesiye kondu · izmir.ktb.gov.tr, yerinde",
+      "[Plan · Ayşa, Sevinç Pastanesi, Tavacı Recep Usta] · kapali_gunler [] · resmî kaynak yok; Tavacı için Michelin rehberi her gün açık gösteriyor · işletme telefonu",
+      "[Plan · Ayşa] · place_id · 'Ayşa Boşnak Börekçisi' için hem Kemeraltı hem Alsancak araması aynı kaydı verdi; OSM Kemeraltı noktası seçildi, Michelin adresi Kemeraltı (Anafartalar Cd., Abacıoğlu Hanı) · kuru yukle 150 m denetimi",
+      "[Rehber · Kemeraltı] · \"Havra Sokağı'nın adı çevresindeki eski sinagoglardan; birkaçı restore edildi\" · yaygın anlatım · İzmir Yahudi Mirası projesi, izmir.ktb.gov.tr",
+      "[Rehber · Ayşa] · \"eski bir hanın zemin katında\", \"rezervasyon almıyor\", \"sabahları börek, öğlen büfe\" · Michelin sayfası (Abacıoğlu Hanı, rezervasyon yok); sabah servisi doğrulanmadı · guide.michelin.com, yerinde",
+      "[Rehber · Sevinç] · \"1957'den beri, üçüncü kuşak\", \"fıstıklı dondurma sık anılıyor\" · Yeni Asır 2019 haberi ve gezi blogları · işletme",
+      "[Rehber · Tavacı Recep Usta] · \"Güneydoğu Anadolu mutfağı\", \"meze, lavaş, tatlı ikramı\", \"kaburga dolması\" · Michelin ve Lonely Planet sayfaları; menü değişebilir · işletme",
+      "[Yazı · Ayşa → Sevinç] · tahmini yürüme 30 dk'yı aşıyor (doğrulayıcı uyarısı) · yazı Konak'tan tramvay öneriyor; durak adı verilmedi · İzmir Metro AŞ (tramvay hattı)",
+      "[Yazı · giriş] · \"İzmirim Kart\" · toplu taşımada geçerli kart adı · ESHOT / İzmir Metro"
+    ],
+    "fotograf_onerileri": [
+      {
+        "ne": "Kapak (3:2): Kemeraltı'nda sabah, boyoz ve gevrek tezgâhı",
+        "altyazi": "Kemeraltı'nda sabah",
+        "arama": "Kemeraltı İzmir Wikimedia Commons"
+      },
+      {
+        "ne": "Kızlarağası Hanı avlusu, kahve masaları",
+        "altyazi": "Handa Türk kahvesi",
+        "arama": "Kızlarağası Han Commons"
+      },
+      {
+        "ne": "Kordon'da gün batımı",
+        "altyazi": "Kordon'da akşamüstü",
+        "arama": "Kordon İzmir sunset Commons"
+      }
+    ],
+    "varsayimlar": [
+      "Hafta sonu: 1. gün cumartesi (Kemeraltı pazar sessiz)",
+      "Kızlarağası Hanı ve Kordon rehberleri izmirde-iki-gun ile ortak; 4 yeni rehber",
+      "Kordon (g1.d5) için osm yok: izmirde-iki-gun'deki gibi OSM merkezi Google konumundan uzak; konum google_30g",
+      "Akşam yemeği zaman çizelgesinde erken düşüyor (gün 09:30'da başlıyor); yazı akşamüstü Kordon yürüyüşünden sonra öneriyor"
+    ]
+  }
+}
