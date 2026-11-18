@@ -254,6 +254,7 @@
     "bulunamadi": "Seyahat bulunamadı."
   },
   "yerler": {
+    "atif": "Google Maps",
     "listeBaslik": "Gezilecek yerler",
     "filtreSehir": "Şehir",
     "bos": "Bu şehirde yer yok",

@@ -9,6 +9,7 @@ import type { SayfaHali } from '@/components/harita/AltSayfa';
 import { EkleDugmesi } from '@/components/ui/EkleDugmesi';
 import { Ikon } from '@/components/ui/Ikon';
 import { SayfaKaydirmasi, useSayfaKaydirma } from '@/components/ui/sayfaCekme';
+import { GoogleAtfi } from '@/components/yerler/GoogleAtfi';
 import type { HafifYer } from '@/features/yerler/api';
 import { t } from '@/i18n';
 import { kategoriEtiketi, sureMetni } from '@/lib/kategori';
@@ -108,6 +109,8 @@ export function CekmeceSeridi({
             )}
           </View>
           {liste?.yalniz ? null : tam.cipler}
+          {/* #342 (kanvas 9c): atıf çiplerin altında (Listende modunda başlığın altında), sağa hizalı. */}
+          <GoogleAtfi stil={s.atifTam} />
         </View>
       ) : (
         <View style={s.seritSatir}>
@@ -119,6 +122,8 @@ export function CekmeceSeridi({
           {listeDugmesi ?? (hal === 'katli' ? <Ikon ad="yukari" boyut={18} renk={renk.metin} kalinlik={2.2} /> : null)}
         </View>
       )}
+      {/* #342 (kanvas 9b): yarım halde atıf başlık satırının altında, kendi satırında, sağa hizalı; Listende modunda da. */}
+      {hal === 'yari' ? <GoogleAtfi stil={s.atifYari} /> : null}
     </View>
   );
 }
@@ -291,6 +296,8 @@ const s = StyleSheet.create({
   tamUst: { gap: 12, paddingTop: 2 },
   tamBaslik: { flex: 1, minWidth: 0, ...baslikStili(21), color: renk.metin },
   yerSayisi: { flexShrink: 0, fontFamily: yazi.ekstra, fontSize: 13, color: renk.ikincil },
+  atifYari: { paddingTop: 0 },
+  atifTam: { paddingTop: 0 },
   filtreDugme: { flexShrink: 0, width: 40, height: 40, borderRadius: 12, backgroundColor: renk.yuzey, alignItems: 'center', justifyContent: 'center' },
   // #165 KK3 (kanvas 9b): satırlar.
   satirlar: { paddingHorizontal: bosluk.kenar, paddingBottom: 16 },

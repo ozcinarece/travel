@@ -49,7 +49,7 @@ function FotoSayfasi({ foto, hazirUri, yukle }: { foto: Foto; hazirUri: string |
       {uri ? <Image source={{ uri }} style={StyleSheet.absoluteFill} contentFit="cover" transition={200} /> : null}
       <View style={s.atif} pointerEvents="none">
         <Text style={s.atifMetin} numberOfLines={1}>
-          {foto.yazar ? t('mekan.fotoAtif', { yazar: foto.yazar }) : t('yerler.atif')}
+          {foto.yazar ? t('mekan.fotoAtif', { yazar: foto.yazar }) : t('mekan.panel.fotoGoogle')}
         </Text>
       </View>
     </View>

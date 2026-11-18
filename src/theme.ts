@@ -9,6 +9,8 @@ export const renk = {
   ikincil: '#4a5274',
   /** Yer tutucu, pasif sekme ikonu. */
   soluk: '#6a7290',
+  /** Google atfı ("Google Maps"): Google'ın izin verdiği gri (#342, kanvas 9b/9c). Başka yerde kullanılmaz. */
+  atif: '#5e5e5e',
   /** Buz — yüzey: arama, ikincil düğme, alıntı, kart zemini. */
   yuzey: '#eef2ff',
   /** Çizgi — kenar ve ayraç. */
