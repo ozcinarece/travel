@@ -27,6 +27,8 @@ export type HafifYer = {
   foto_uri?: string | null;
   /** #348: `foto_uri`'nin Google atfı ("Foto: {yazar} · Google Maps"); yalnız bellekte (PRD §7). */
   foto_yazar?: string | null;
+  /** #351 KK1: yazarın Google Maps sayfası; atıfta yazar adına dokununca açılır. Yalnız bellekte (PRD §7). */
+  foto_yazar_uri?: string | null;
   /** Yalnız `ozet: true` ile (#45 pin paneli): Google editoryal özeti. */
   ozet?: string | null;
   /** #316 KK1: yalnız Nearby cevabında — ilk fotoğrafın Place Photo adı (null = fotoğraf yok). Yalnız bellekte (PRD §7). */

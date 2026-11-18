@@ -1,6 +1,7 @@
 // Google Places API (New) çağrıları. Anahtar YALNIZCA burada okunur
 // (Supabase secret GOOGLE_SERVER_KEY); istemci paketine asla girmez (PRD §7, teknik not §3).
 
+import { fotoAtfi } from './fotoAtfi.ts';
 import { googleSay } from './sayac.ts';
 
 const KOK = 'https://places.googleapis.com/v1';
@@ -156,6 +157,8 @@ export type HafifYer = {
   foto_uri?: string | null;
   /** #348: ilk fotoğrafın Google atfı (yalnız `foto: true`; "Foto: {yazar} · Google Maps"). DB'ye yazılmaz (PRD §7). */
   foto_yazar?: string | null;
+  /** #351 KK1: yazarın Google Maps sayfası (`authorAttributions.uri`, yalnız https); atıfta yazar adı buna bağlanır. DB'ye yazılmaz. */
+  foto_yazar_uri?: string | null;
   /** #45: Google editoryal özeti (yalnız `ozet: true`); yoksa null. */
   ozet?: string | null;
   /** #316 KK1: ilk fotoğrafın Place Photo adı (yalnız Nearby); null = fotoğraf yok. DB'ye yazılmaz (PRD §7). */
@@ -175,7 +178,7 @@ type DetailsCevap = {
   currentOpeningHours?: { openNow?: boolean };
   regularOpeningHours?: { periods?: { open?: GunSaat; close?: GunSaat }[] };
   addressComponents?: { shortText?: string; types?: string[] }[];
-  photos?: { name: string; authorAttributions?: { displayName?: string }[] }[];
+  photos?: { name: string; authorAttributions?: { displayName?: string; uri?: string }[] }[];
   editorialSummary?: { text?: string };
 };
 
@@ -214,7 +217,7 @@ export async function hafifDetay(
     ulke_kodu: ulke && /^[A-Z]{2}$/.test(ulke) ? ulke : null,
     periyotlar: secenek.saatler ? (d.regularOpeningHours ? periyotlar! : null) : undefined,
     foto_uri: foto,
-    ...(secenek.foto ? { foto_yazar: foto ? (d.photos?.[0]?.authorAttributions?.[0]?.displayName?.trim() || null) : null } : {}),
+    ...(secenek.foto ? fotoAtfi(foto ? d.photos?.[0]?.authorAttributions?.[0] : undefined) : {}),
     ...(secenek.foto && secenek.ozet ? { ozet: d.editorialSummary?.text?.trim() || null } : {}),
   };
 }

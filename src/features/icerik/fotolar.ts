@@ -4,7 +4,7 @@
 import { useQuery } from '@tanstack/react-query';
 
 import { hafifOnbellek, type HafifYer } from '../yerler/api';
-import { kapakAtfiOku, type FotoAtfi } from './kapakAtfi';
+import { googleYazarBaglantisi, kapakAtfiOku, type FotoAtfi } from './kapakAtfi';
 import { icerikPlaceId } from './sorgular';
 
 export type IcerikSatiri = { id: string; place_id: string | null; ad: string; lat: number; lng: number; kapak_url?: string | null; kapak_atif?: unknown };
@@ -12,9 +12,12 @@ export type IcerikSatiri = { id: string; place_id: string | null; ad: string; la
 export type IcerikCanli = { place_id: string | null; foto_uri: string | null; foto_atif: FotoAtfi | null };
 
 /** Satırın fotoğrafı ve atfı: önce kendi kapağımız (kendi atfıyla), yoksa Google fotoğrafı (Google atfıyla). */
-export function satirFotosu(s: Pick<IcerikSatiri, 'kapak_url' | 'kapak_atif'>, google: Pick<HafifYer, 'foto_uri' | 'foto_yazar'> | undefined): Pick<IcerikCanli, 'foto_uri' | 'foto_atif'> {
+export function satirFotosu(s: Pick<IcerikSatiri, 'kapak_url' | 'kapak_atif'>, google: Pick<HafifYer, 'foto_uri' | 'foto_yazar' | 'foto_yazar_uri'> | undefined): Pick<IcerikCanli, 'foto_uri' | 'foto_atif'> {
   if (s.kapak_url) return { foto_uri: s.kapak_url, foto_atif: { tur: 'kapak', atif: kapakAtfiOku(s.kapak_atif) } };
-  if (google?.foto_uri) return { foto_uri: google.foto_uri, foto_atif: { tur: 'google', yazar: google.foto_yazar?.trim() || null } };
+  if (google?.foto_uri) {
+    const yazar = google.foto_yazar?.trim() || null;
+    return { foto_uri: google.foto_uri, foto_atif: { tur: 'google', yazar, uri: googleYazarBaglantisi(yazar, google.foto_yazar_uri) } };
+  }
   return { foto_uri: null, foto_atif: null };
 }
 

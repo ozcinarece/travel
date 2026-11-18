@@ -146,6 +146,9 @@ export async function commonsBilgisi(dosyalar, { fetchFn = fetch } = {}) {
   return sonuc;
 }
 
+/** #351 KK3: `kapak_atif.kaynak_url` DB'de en çok 500 karakter (20261130000000_kapak_atfi.sql); uzun adres yüklemeden önce HATA. */
+export const EN_UZUN_KAYNAK_URL = 500;
+
 /** İstekleri Commons bilgisiyle eşler; lisansı uygun olmayan, bulunamayan ya da türü desteklenmeyen dosya HATA. */
 export function kapakDenetimi(istekler, bilgi) {
   const hatalar = [];
@@ -158,6 +161,7 @@ export function kapakDenetimi(istekler, bilgi) {
     else if (!TUR_UZANTI[b.mime]) hatalar.push(`${kod} türü desteklenmiyor (${b.mime})`);
     else if (!b.yazar) hatalar.push(`${kod} yazarı yok (Artist, Credit ve Attribution boş); atıfsız yüklenmez`);
     else if (!/^https:\/\//.test(b.kaynakUrl ?? '') || !indirmeAdresiUygun(b.kucukUrl)) hatalar.push(`${kod} adresi alınamadı ya da upload.wikimedia.org değil`);
+    else if (b.kaynakUrl.length > EN_UZUN_KAYNAK_URL) hatalar.push(`${kod} kaynak adresi ${b.kaynakUrl.length} karakter (en çok ${EN_UZUN_KAYNAK_URL}); daha kısa adlı bir dosya seç`);
     else hazir.push({ ...i, ...b, yol: kapakYolu(i.dosya, b.mime) });
   }
   return { hatalar, hazir };

@@ -4,7 +4,7 @@ import { Pressable, StyleSheet, Text, View, type StyleProp, type ViewStyle } fro
 import Svg, { Path } from 'react-native-svg';
 
 import { AltPencere } from '@/components/ui/AltPencere';
-import { commonsMu, lisansKisaAdi, tripmateMi, type KapakAtfi as Atif } from '@/features/icerik/kapakAtfi';
+import { commonsMu, googleYazarBaglantisi, lisansKisaAdi, tripmateMi, type KapakAtfi as Atif } from '@/features/icerik/kapakAtfi';
 import { t } from '@/i18n';
 import { renk, yazi } from '@/theme';
 
@@ -81,10 +81,28 @@ export function KapakAtfi({ atif, stil }: { atif: Atif; stil?: StyleProp<ViewSty
 }
 
 /**
- * Google fotoğrafı (yalnız canlı gösterim: mekan paneli, galeri): aynı kutu, "Foto: {yazar} · Google Maps". Dokunulmaz.
+ * Google fotoğrafı (yalnız canlı gösterim: mekan paneli, galeri): aynı kutu, "Foto: {yazar} · Google Maps".
+ * #351 KK2: Google yazarın sayfası (`uri`) geldiyse kutuya dokununca tarayıcıda açılır; görünüm aynı, dokunma alanı 44 pt.
+ * `uri` yoksa dokunulmaz (bugünkü gibi).
  */
-export function GoogleFotoAtfi({ yazar, stil }: { yazar: string | null | undefined; stil?: StyleProp<ViewStyle> }) {
+export function GoogleFotoAtfi({ yazar, uri, stil }: { yazar: string | null | undefined; uri?: string | null; stil?: StyleProp<ViewStyle> }) {
   const y = yazar?.trim();
+  const baglanti = googleYazarBaglantisi(y, uri);
+  if (y && baglanti) {
+    return (
+      <Pressable
+        accessibilityRole="link"
+        accessibilityLabel={t('kapak.erisimGoogleBaglanti', { atif: t('kapak.erisimGoogle', { yazar: y }) })}
+        onPress={() => {
+          WebBrowser.openBrowserAsync(baglanti).catch(() => {});
+        }}
+        hitSlop={{ top: 11, bottom: 11, left: 8, right: 8 }}
+        style={[s.konum, stil]}
+        testID="google-foto-atfi">
+        <AtifKutusu yazar={y} ek={t('kapak.atifGoogle')} />
+      </Pressable>
+    );
+  }
   return (
     <View style={[s.konum, stil]} pointerEvents="none" accessible accessibilityLabel={y ? t('kapak.erisimGoogle', { yazar: y }) : t('kapak.atifGoogleYazarsiz')}>
       {y ? (
