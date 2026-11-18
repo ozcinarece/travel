@@ -3537,6 +3537,47 @@ begin
   assert (select kapak_url = 'yerler/c.webp' and kapak_atif = '{"yazar": "Tripmate"}' from public.yerler where id = '34500000-0000-4000-8000-000000000012'),
     '#345: admin kapağı değiştirir, atıf Tripmate olur';
 end $$;
+-- #345 KK2: içerik hattı Commons kapağını yazar. Boş kapak yazılır; dolu kapak yalnız taslak satırda ve Commons'tan
+-- geldiyse değişir (Ece'nin kapağı ve yayındaki kapak ezilmez); yer gezinin şehrinden; uygulama rolleri çağıramaz.
+insert into public.yerler (id, sehir_id, ad, lat, lng, yayin, place_id, kapak_url, kapak_atif) values
+  ('34500000-0000-4000-8000-000000000013', '34500000-0000-4000-8000-000000000001', 'Kapaksız taslak', 39.7, 30.5, false, 'ChIJ_345_bos', null, null),
+  ('34500000-0000-4000-8000-000000000014', '34500000-0000-4000-8000-000000000002', 'Başka şehir', 39.7, 30.5, false, 'ChIJ_345_bos', null, null),
+  ('34500000-0000-4000-8000-000000000015', '34500000-0000-4000-8000-000000000001', 'Commons taslak', 39.7, 30.5, false, 'ChIJ_345_commons', 'https://eski',
+    '{"yazar": "Eski", "lisans": "CC0", "kaynak_url": "https://commons.wikimedia.org/wiki/File:Eski.jpg"}');
+update public.yerler set place_id = 'ChIJ_345_tripmate' where id = '34500000-0000-4000-8000-000000000012';
+update public.yerler set place_id = 'ChIJ_345_yayinda' where id = '34500000-0000-4000-8000-000000000011';
+do $$
+declare
+  a constant jsonb := '{"yazar": "Commons Yazarı", "lisans": "CC BY-SA 4.0", "kaynak_url": "https://commons.wikimedia.org/wiki/File:Yeni.jpg"}';
+  r jsonb;
+begin
+  r := public.icerik_kapak_yaz(jsonb_build_object(
+    'sehir_slug', 'atif-acik', 'gezi_slug', 'atif-gezi-taslak',
+    'gezi', jsonb_build_object('kapak_url', 'https://yeni/g', 'kapak_atif', a),
+    'sehir', jsonb_build_object('kapak_url', 'https://yeni/s', 'kapak_atif', a),
+    'yerler', jsonb_build_array(
+      jsonb_build_object('place_id', 'ChIJ_345_bos', 'kapak_url', 'https://yeni/1', 'kapak_atif', a),
+      jsonb_build_object('place_id', 'ChIJ_345_commons', 'kapak_url', 'https://yeni/2', 'kapak_atif', a),
+      jsonb_build_object('place_id', 'ChIJ_345_tripmate', 'kapak_url', 'https://yeni/3', 'kapak_atif', a),
+      jsonb_build_object('place_id', 'ChIJ_345_yayinda', 'kapak_url', 'https://yeni/4', 'kapak_atif', a))));
+  assert (r ->> 'yazilan')::int = 3, '#345 KK2: gezi + 2 yer yazılır, sonuç ' || r::text;
+  assert jsonb_array_length(r -> 'atlanan') = 3, '#345 KK2: yayındaki şehir, Tripmate ve yayındaki yer atlanır';
+  assert (select kapak_url = 'https://yeni/g' and kapak_atif = a from public.geziler where slug = 'atif-gezi-taslak'), '#345 KK2: boş gezi kapağı yazılır';
+  assert (select kapak_url = 'sehirler/a.webp' from public.sehirler where slug = 'atif-acik'), '#345 KK2: yayındaki şehrin kapağı ezilmez';
+  assert (select kapak_url = 'https://yeni/1' from public.yerler where id = '34500000-0000-4000-8000-000000000013'), '#345 KK2: boş yer kapağı yazılır';
+  assert (select kapak_url is null from public.yerler where id = '34500000-0000-4000-8000-000000000014'), '#345 KK2: başka şehirdeki aynı place_id yazılmaz';
+  assert (select kapak_url = 'https://yeni/2' from public.yerler where id = '34500000-0000-4000-8000-000000000015'), '#345 KK2: taslaktaki Commons kapağı yenilenir';
+  assert (select kapak_url = 'yerler/c.webp' from public.yerler where id = '34500000-0000-4000-8000-000000000012'), '#345 KK2: Ece''nin (Tripmate) kapağı ezilmez';
+  assert (select kapak_url = 'yerler/a.webp' from public.yerler where id = '34500000-0000-4000-8000-000000000011'), '#345 KK2: yayındaki yerin kapağı ezilmez';
+end $$;
+select pg_temp.hata_bekle($$select public.icerik_kapak_yaz('{"sehir_slug": "yok-boyle"}')$$, '22023');
+set role authenticated;
+select pg_temp.as_email(:E, 'ozcinar.ece@gmail.com');
+select pg_temp.hata_bekle($$select public.icerik_kapak_yaz('{"sehir_slug": "atif-acik"}')$$, '42501');
+reset role;
+set role anon;
+select pg_temp.hata_bekle($$select public.icerik_kapak_yaz('{"sehir_slug": "atif-acik"}')$$, '42501');
+reset role;
 delete from public.sehirler where id::text like '34500000-%';
 
 delete from public.trips where id::text like '26200000-%';
