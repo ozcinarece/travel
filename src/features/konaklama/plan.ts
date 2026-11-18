@@ -49,6 +49,16 @@ export function gunUclari(gun: Pick<Gun, 'start_stay_id' | 'end_stay_id'> | unde
   };
 }
 
+/**
+ * #318 inceleme 3: listenin başlangıç / bitiş otel satırları. Satırın varlığı ve adı `gunUclari`'ndan gelir (konum süzgeci
+ * yok): koordinatı boşalmış otel "otel yok" görünmez, bitiş satırı kaybolmaz. `ucNoktalari` yalnız hesap ve harita içindir.
+ * `son`: bitiş satırının türü; gün otelsizse null (satır yok).
+ */
+export function otelUcSatirlari(u: GunUclari): { baslangic: Konaklama | null; bitis: Konaklama | null; son: 'donus' | 'bitis' | null } {
+  if (!u.baslangic && !u.bitis) return { baslangic: null, bitis: null, son: null };
+  return { baslangic: u.baslangic, bitis: u.bitis, son: u.bitis && u.bitis.id === u.baslangic?.id ? 'donus' : 'bitis' };
+}
+
 /** Yeni gün varsayılanı: önceki (son) günün bitişinden başlar, aynı yere döner. */
 export function yeniGunUclari(gunler: Pick<Gun, 'index' | 'end_stay_id'>[]): { start_stay_id: string | null; end_stay_id: string | null } {
   const son = [...gunler].sort((a, b) => b.index - a.index)[0];

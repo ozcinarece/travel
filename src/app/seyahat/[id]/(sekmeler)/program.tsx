@@ -28,7 +28,7 @@ import { SiralaListesi, type SiralaSatiri } from '@/components/program/SiralaLis
 import { SeyahatYukleme } from '@/components/seyahatler/SeyahatYukleme';
 import { Avatar } from '@/components/ui/Avatar';
 import { Ikon } from '@/components/ui/Ikon';
-import type { Konaklama } from '@/features/konaklama/plan';
+import { otelUcSatirlari, type Konaklama } from '@/features/konaklama/plan';
 import { useDavetPaylas } from '@/features/davet/paylas';
 import { OTEL_SERIT_ONEKI } from '@/features/konaklama/otelSeridi';
 import { useGunOteliKaydet, useKonaklamalar, useTumGunlereOtel } from '@/features/konaklama/sorgular';
@@ -71,7 +71,8 @@ import { enUcuzEklemeIndeksi, yuruyusDk } from '@/schedule/program';
 import { arasindaAnahtar } from '@/schedule/sira';
 import { varsayilanSira } from '@/schedule/siralama';
 import { bacakModu, dakikaSaat, kestirimTaksiSn, kestirimYuruyusSn, saatDakika, type BacakSecimi } from '@/schedule/tempo';
-import { haritaMerkezi, konumu, konumVar, yolTarifiHedefi } from '@/lib/konum';
+import { haritaMerkezi, konumu, konumVar, YEDEK_ZOOM, yedekMerkezMi, yolTarifiHedefi } from '@/lib/konum';
+import { useSeyahatMerkezi } from '@/features/seyahatler/merkez';
 import { baslikStili, gunRengi, gunUstuMetin, kose, minDokunma, renk, yazi, yuzRenkleri } from '@/theme';
 
 // PRD 3.3 KK3: 20 dk yürüyüş ≈ 1,5 km.
@@ -288,6 +289,15 @@ function ProgramSekmesi({
   const bacakKaydet = useBacakModuKaydet(seyahat.id);
   const [acikBacak, setAcikBacak] = useState<{ from: MatrisNoktasi; to: MatrisNoktasi; kaynak: 'harita' | 'panel' } | null>(null);
   const verisi = useProgramVerisi({ seyahat, gunler, duraklar, mekanlar, seciliGun: gun, konaklamalar, modlar: modlar.data, aracBacagi: acikBacak, ag: harita });
+  const seyahatMerkezi = useSeyahatMerkezi(seyahat);
+  // #318 inceleme 4: harita ilk merkezle kurulur; canlı şehir konumu sonradan gelirse kamera oraya kayar (bir kez).
+  const canliOdaklandi = useRef(false);
+  useEffect(() => {
+    if (canliOdaklandi.current || konumVar(seyahat) || !seyahatMerkezi || verisi.otel || mekanlar.some(konumVar)) return;
+    canliOdaklandi.current = true;
+    setOdak((o) => ({ konum: seyahatMerkezi, zoom: 13, sayac: (o?.sayac ?? 0) + 1 }));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [seyahatMerkezi?.lat, seyahatMerkezi?.lng]);
   // #56: seçili günün başlangıç (otel) ve bitiş noktası.
   const { otel, seciliUclar } = verisi;
   const bitisOtel = seciliUclar.bitis ? { lat: seciliUclar.bitis.lat, lng: seciliUclar.bitis.lng } : null;
@@ -827,18 +837,15 @@ function ProgramSekmesi({
   // #56 §1 → #140 (kanvas 11): listenin başlangıç / bitiş satırları (saat sütunu; otel yoksa kesikli "Otel ekle"). Başlangıç
   // saatine dokununca başlangıç saati seçimi.
   const bitisSaati = prog ? dakikaSaat(prog.canli.bitisDk) : '';
-  const otelAdi = (u: typeof seciliUclar.baslangic) => (u ? (u.konaklama.label ?? t('otel.adsiz')) : null);
+  // #318 inceleme 3: satırın varlığı ve adı konum süzgeci olmadan (koordinatı boşalmış otel "otel yok" görünmez).
+  const otelSatirlari = otelUcSatirlari(verisi.seciliOteller);
+  const otelAdi = (k: Konaklama | null) => (k ? (k.label ?? t('otel.adsiz')) : null);
   const otelAc = () => setOtelSayfasi(true);
-  const basOtelSatiri = <OtelUcSatiri tur="baslangic" ad={otelAdi(seciliUclar.baslangic)} saat={baslangicSaati} onPress={otelAc} onSaat={() => setBaslangicMenu(true)} />;
-  const sonOtelSatiri =
-    !seciliUclar.baslangic && !seciliUclar.bitis ? undefined : (
-      <OtelUcSatiri
-        tur={seciliUclar.bitis && seciliUclar.bitis.key === seciliUclar.baslangic?.key ? 'donus' : 'bitis'}
-        ad={otelAdi(seciliUclar.bitis)}
-        saat={bitisSaati}
-        onPress={otelAc}
-      />
-    );
+  const basOtelSatiri = <OtelUcSatiri tur="baslangic" ad={otelAdi(otelSatirlari.baslangic)} saat={baslangicSaati} onPress={otelAc} onSaat={() => setBaslangicMenu(true)} />;
+  const sonOtelSatiri = !otelSatirlari.son ? undefined : <OtelUcSatiri tur={otelSatirlari.son} ad={otelAdi(otelSatirlari.bitis)} saat={bitisSaati} onPress={otelAc} />;
+  // #318 inceleme 4: seyahat merkezi boşsa şehir kimliğinden anlık konum (saklanmaz); yedek merkezde ülke ölçeği.
+  const acilisMerkezi = otel ?? haritaMerkezi(seyahatMerkezi, gunMekanlari.find(konumVar), mekanlar.find(konumVar));
+  const haritaAcilis = { merkez: acilisMerkezi, zoom: otel ? 14 : yedekMerkezMi(acilisMerkezi) ? YEDEK_ZOOM : 13 };
   // #318: ortalama yalnız koordinatlı mekanlardan.
   const gunKonumlari = gunMekanlari.filter(konumVar);
   const gunMerkezi = gunKonumlari.length
@@ -1262,8 +1269,8 @@ function ProgramSekmesi({
           </>
         }
         harita={{
-          merkez: otel ?? haritaMerkezi(seyahat, gunMekanlari.find(konumVar), mekanlar.find(konumVar)),
-          zoom: otel ? 14 : 13,
+          merkez: haritaAcilis.merkez,
+          zoom: haritaAcilis.zoom,
           pinler,
           cizgiler,
           sigdir: sigdirma,

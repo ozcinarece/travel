@@ -42,10 +42,24 @@ export type YenilemeSonucu = {
   durdu: boolean;
   /** Bu ay ilk durma: masaya yazılır. */
   ilk_durma: boolean;
+  /** #318 inceleme 2: tur Google hatalarıyla kesildi (anahtar, kısıt ya da kota); toplu 30 gün boşaltması ertelendi. */
+  kesildi: boolean;
 };
 
 export function bosSonuc(): YenilemeSonucu {
-  return { aday: 0, yenilenen: 0, satir: 0, bulunamadi: 0, bosaltilan: 0, hatali: 0, durdu: false, ilk_durma: false };
+  return { aday: 0, yenilenen: 0, satir: 0, bulunamadi: 0, bosaltilan: 0, hatali: 0, durdu: false, ilk_durma: false, kesildi: false };
+}
+
+/** Art arda bu kadar Google hatasından sonra tur biter (anahtar ya da kota sorunu; boşuna istek gitmesin). */
+export const ART_ARDA_HATA = 5;
+
+/**
+ * #318 inceleme 2: tur Google hatalarıyla kesildi mi? Art arda `ART_ARDA_HATA` hata ya da istek gitti ama hiçbiri
+ * sonuç vermedi (yenilenen ve bulunamadı 0). O zaman toplu 30 gün boşaltması yapılmaz, bir sonraki başarılı tura kalır:
+ * yenileme 25. günde başladığı için 5 günlük pay var. 404 boşaltması (tek place_id) yine yapılır.
+ */
+export function turKesildi({ artArda, googleHatasi, yenilenen, bulunamadi }: { artArda: number; googleHatasi: number; yenilenen: number; bulunamadi: number }): boolean {
+  return artArda >= ART_ARDA_HATA || (googleHatasi > 0 && yenilenen === 0 && bulunamadi === 0);
 }
 
 /** `places_koordinat_bosalt` cevabındaki dört sayının toplamı; bozuk cevapta 0. */
@@ -61,5 +75,5 @@ export function bosaltilanToplami(satirlar: unknown): number {
 /** Log ve Actions özeti için tek satır; yalnız sayı (place_id, koordinat yazılmaz). */
 export function ozetSatiri(s: Partial<YenilemeSonucu>): string {
   const sayi = (v: unknown) => (Number.isInteger(v) ? String(v) : '?');
-  return `aday ${sayi(s.aday)} · yenilenen ${sayi(s.yenilenen)} · satır ${sayi(s.satir)} · bulunamadı ${sayi(s.bulunamadi)} · boşaltılan ${sayi(s.bosaltilan)} · hata ${sayi(s.hatali)}${s.durdu ? ' · AYLIK SINIR DOLDU' : ''}`;
+  return `aday ${sayi(s.aday)} · yenilenen ${sayi(s.yenilenen)} · satır ${sayi(s.satir)} · bulunamadı ${sayi(s.bulunamadi)} · boşaltılan ${sayi(s.bosaltilan)} · hata ${sayi(s.hatali)}${s.durdu ? ' · AYLIK SINIR DOLDU' : ''}${s.kesildi ? ' · KESİLDİ, toplu boşaltma ertelendi' : ''}`;
 }

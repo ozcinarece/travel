@@ -17,7 +17,7 @@ const cevap = await fetch(`https://${REF}.supabase.co/functions/v1/places-yenile
 });
 const j = await cevap.json().catch(() => ({}));
 const sayi = (v) => (Number.isInteger(v) ? v : '?');
-const satir = `aday ${sayi(j.aday)} · yenilenen ${sayi(j.yenilenen)} · satır ${sayi(j.satir)} · bulunamadı ${sayi(j.bulunamadi)} · boşaltılan ${sayi(j.bosaltilan)} · hata ${sayi(j.hatali)}${j.durdu ? ' · AYLIK SINIR DOLDU' : ''}`;
+const satir = `aday ${sayi(j.aday)} · yenilenen ${sayi(j.yenilenen)} · satır ${sayi(j.satir)} · bulunamadı ${sayi(j.bulunamadi)} · boşaltılan ${sayi(j.bosaltilan)} · hata ${sayi(j.hatali)}${j.durdu ? ' · AYLIK SINIR DOLDU' : ''}${j.kesildi ? ' · KESİLDİ, toplu boşaltma ertelendi' : ''}`;
 console.log(`HTTP ${cevap.status} · ${satir}`);
 if (process.env.GITHUB_STEP_SUMMARY)
   await appendFile(process.env.GITHUB_STEP_SUMMARY, `### Places koordinat yenilemesi (#262)\n- HTTP ${cevap.status} · ${satir}\n`);

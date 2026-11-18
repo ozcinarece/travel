@@ -3,7 +3,7 @@
 import { useMemo } from 'react';
 
 import type { Konum } from '@/components/harita/tipler';
-import { ucNoktalari, type GunUcNoktalari, type Konaklama } from '@/features/konaklama/plan';
+import { gunUclari as gununOtelleri, ucNoktalari, type GunUclari, type GunUcNoktalari, type Konaklama } from '@/features/konaklama/plan';
 import { konumu, konumVar } from '@/lib/konum';
 import type { Durak, Gun, Mekan, Seyahat } from '@/lib/tipler';
 import type { YuruyusKaynagi } from '@/schedule/program';
@@ -19,6 +19,8 @@ export type ProgramVerisi = {
   otel: Konum | null;
   /** #56: seçili günün başlangıç / bitiş noktaları (anahtar + konum). */
   seciliUclar: GunUcNoktalari;
+  /** #318 inceleme 3: seçili günün otelleri, konum süzgeci olmadan (liste satırları; koordinatı boşalmış otel de). */
+  seciliOteller: GunUclari;
   /** #56: her günün başlangıç / bitiş noktaları. */
   gunUclari: Map<string, GunUcNoktalari>;
   /** Yürüyüş matrisi + gerçek bacaklar (anahtar: place_id | stay:<id>). */
@@ -69,6 +71,7 @@ export function useProgramVerisi(secenek: {
     return new Map(gunler.map((g) => [g.id, ucNoktalari(g, k)]));
   }, [gunler, konaklamalar]);
   const seciliUclar = useMemo(() => (seciliGun ? (gunUclari.get(seciliGun.id) ?? BOS_UCLAR) : BOS_UCLAR), [seciliGun, gunUclari]);
+  const seciliOteller = useMemo(() => gununOtelleri(seciliGun, new Map(konaklamalar.map((x) => [x.id, x]))), [seciliGun, konaklamalar]);
   const otel = useMemo(() => (seciliUclar.baslangic ? { lat: seciliUclar.baslangic.lat, lng: seciliUclar.baslangic.lng } : null), [seciliUclar]);
   const mekanIle = useMemo(() => new Map(mekanlar.map((m) => [m.id, m])), [mekanlar]);
 
@@ -165,6 +168,7 @@ export function useProgramVerisi(secenek: {
   return {
     otel,
     seciliUclar,
+    seciliOteller,
     gunUclari,
     yuruyus,
     matrisYukleniyor: matris.yukleniyor,

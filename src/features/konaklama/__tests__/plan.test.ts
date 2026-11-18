@@ -1,6 +1,6 @@
 import { describe, expect, it } from '@jest/globals';
 
-import { gunUclari, konaklamaAnahtari, otelinGeceleri, otelPlani, yeniGunUclari, type Konaklama } from '../plan';
+import { gunUclari, konaklamaAnahtari, otelinGeceleri, otelPlani, otelUcSatirlari, ucNoktalari, yeniGunUclari, type Konaklama } from '../plan';
 
 const gun = (index: number, start: string | null, end: string | null) => ({ id: `g${index}`, index, start_stay_id: start, end_stay_id: end });
 const dort = (s: string | null) => [gun(1, s, s), gun(2, s, s), gun(3, s, s), gun(4, s, s)];
@@ -67,5 +67,28 @@ describe('gün bazlı otel (#56)', () => {
     expect(gunUclari(undefined, k)).toEqual({ baslangic: null, bitis: null });
     expect(konaklamaAnahtari('A')).toBe('stay:A');
     expect(otelinGeceleri([gun(2, 'A', 'A'), gun(1, null, 'A'), gun(3, 'A', 'B')], 'A').map((g) => g.index)).toEqual([1, 2]);
+  });
+});
+
+describe('#318 inceleme 3: konumsuz otel liste satırı', () => {
+  const konumsuz: Konaklama = { id: 's1', trip_id: 't', place_id: 'p1', lat: null, lng: null, label: 'Otel A' };
+  const konumlu: Konaklama = { id: 's2', trip_id: 't', place_id: 'p2', lat: 40.1, lng: 29.1, label: 'Otel B' };
+  const harita = new Map([konumsuz, konumlu].map((k) => [k.id, k]));
+
+  it('koordinatı boşalmış otel "otel yok" görünmez, dönüş satırı kalır; hesapta uç nokta değildir', () => {
+    const gun = { start_stay_id: 's1', end_stay_id: 's1' };
+    expect(otelUcSatirlari(gunUclari(gun, harita))).toEqual({ baslangic: konumsuz, bitis: konumsuz, son: 'donus' });
+    expect(ucNoktalari(gun, harita)).toEqual({ baslangic: null, bitis: null });
+  });
+
+  it('başlangıç konumsuz, bitiş konumlu → iki satır da var, bitiş türü "bitis"', () => {
+    const r = otelUcSatirlari(gunUclari({ start_stay_id: 's1', end_stay_id: 's2' }, harita));
+    expect(r.baslangic?.label).toBe('Otel A');
+    expect(r.bitis?.label).toBe('Otel B');
+    expect(r.son).toBe('bitis');
+  });
+
+  it('otelsiz gün → bitiş satırı yok', () => {
+    expect(otelUcSatirlari(gunUclari({ start_stay_id: null, end_stay_id: null }, harita))).toEqual({ baslangic: null, bitis: null, son: null });
   });
 });

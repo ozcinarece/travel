@@ -4,6 +4,9 @@ name: places-yenile
 # geçen koordinatı boşaltır, satır silinmez (places-yenile Edge Function'ı, service_role). Bir tur en çok 250 place_id;
 # 25 günü geçenler, o gün denenmemiş olanlar, en eski önce. Ayrı aylık sayaç, 8.000 istekte durur ve masaya (#217) bir kez
 # yazar (iş yine yeşil biter). Logda yalnız sayı vardır.
+# #318 inceleme 1: zamanlı çalışma, `PLACES_YENILE_ACIK` depo değişkeni 'true' olana kadar atlanır. Sıra: supabase-migrate,
+# birleştir, eas-update (expo-go, native), güncelleme cihazlara ulaşınca elle (workflow_dispatch) ilk tur, sonra değişken açılır.
+# Eski paketli cihaz null koordinatı native haritaya vermesin diye. Elle çalıştırma her zaman çalışır.
 # Gerekli secret: SUPABASE_ACCESS_TOKEN (service_role anahtarı çalışma anında Yönetim API'sinden alınır ve maskelenir).
 on:
   schedule:
@@ -20,6 +23,7 @@ concurrency:
 
 jobs:
   yenile:
+    if: github.event_name == 'workflow_dispatch' || vars.PLACES_YENILE_ACIK == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     env:

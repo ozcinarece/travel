@@ -43,6 +43,8 @@ export type Seyahat = {
   /** #318: Google koordinatı 30 günde yenilenemezse null (satır kalır). */
   lat: number | null;
   lng: number | null;
+  /** #318 inceleme 4: şehrin Google kimliği (merkez boşaldıysa canlı konum için). */
+  city_place_id?: string | null;
   tz: string;
   start_date: string | null;
   end_date: string | null;

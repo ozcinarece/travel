@@ -9,6 +9,7 @@ import { createClient } from 'npm:@supabase/supabase-js@2';
 import { GoogleHatasi, konumYenile } from '../_shared/google.ts';
 import { hata, json, onKontrol } from '../_shared/http.ts';
 import {
+  ART_ARDA_HATA,
   AYLIK_SINIR,
   bosaltilanToplami,
   bosSonuc,
@@ -17,13 +18,11 @@ import {
   ozetSatiri,
   placeIdGecerli,
   TUR_BASINA,
+  turKesildi,
   type YenilemeSonucu,
 } from '../_shared/placesYenile.ts';
 import { sayacli } from '../_shared/sayac.ts';
 import { servisMi } from '../_shared/servis.ts';
-
-/** Art arda bu kadar Google hatasından sonra tur biter (anahtar ya da kota sorunu; boşuna istek gitmesin). */
-const ART_ARDA_HATA = 5;
 
 Deno.serve(
   sayacli('places-yenile', async (istek) => {
@@ -37,7 +36,13 @@ Deno.serve(
     const sonuc = bosSonuc();
 
     // Her çıkışta (durma ve boş tur dahil) 30 günü geçen koordinatlar boşaltılır: Google koşulu süresiz ihlal edilmesin.
+    // #318 inceleme 2: tur Google hatalarıyla kesildiyse (anahtar eksik ya da kısıtlı, kota) toplu boşaltma yapılmaz; bir
+    // sonraki başarılı tura kalır (yenileme 25. günde başlar, 5 günlük pay var). Bu turdaki 404 boşaltmaları zaten yapıldı.
     const bitir = async (s: YenilemeSonucu) => {
+      if (s.kesildi) {
+        console.log(`places-yenile: ${ozetSatiri(s)}`);
+        return json(s);
+      }
       const { data: bos, error: bosHatasi } = await servis.rpc('places_koordinat_bosalt');
       if (bosHatasi) {
         s.hatali += 1;
@@ -76,6 +81,7 @@ Deno.serve(
     }
 
     let artArda = 0;
+    let googleHatasi = 0;
     for (const placeId of gecerli) {
       if (artArda >= ART_ARDA_HATA) break;
       try {
@@ -111,9 +117,11 @@ Deno.serve(
       } catch (e) {
         sonuc.hatali += 1;
         artArda += 1;
+        googleHatasi += 1;
         console.error('places-yenile: google', e instanceof GoogleHatasi ? e.durum : 'ag');
       }
     }
+    sonuc.kesildi = turKesildi({ artArda, googleHatasi, yenilenen: sonuc.yenilenen, bulunamadi: sonuc.bulunamadi });
     return bitir(sonuc);
   }),
 );

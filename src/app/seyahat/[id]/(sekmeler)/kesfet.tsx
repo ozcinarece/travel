@@ -1,5 +1,5 @@
 import { useLocalSearchParams } from 'expo-router';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { ActivityIndicator, Linking, Pressable, StyleSheet, Text, TextInput, View, useWindowDimensions } from 'react-native';
 
 import { bolgeHesapla, zoomDelta } from '@/components/harita/geo';
@@ -41,7 +41,8 @@ import { kategoriPini } from '@/lib/pinIkonu';
 import { varsayilanDakika } from '@/lib/kategori';
 import type { Mekan, Seyahat } from '@/lib/tipler';
 import { bosluk, renk, yazi, yuzRenkleri } from '@/theme';
-import { haritaMerkezi, konumVar, yolTarifiHedefi } from '@/lib/konum';
+import { haritaMerkezi, konumVar, YEDEK_ZOOM, yedekMerkezMi, yolTarifiHedefi } from '@/lib/konum';
+import { useSeyahatMerkezi } from '@/features/seyahatler/merkez';
 
 // PRD 3.4 Keşfet: HaritaEkrani kabuğu (#17) — üstte şehir hapı + üyeler, arama, çipler; altta öneri kartları; en altta liste çubuğu.
 export default function KesfetEkrani() {
@@ -104,12 +105,23 @@ function Kesfet({ seyahat, konaklamalar, ilkMekan, cekmeceIstegi, cipIstegi }: {
   // #318: koordinatı boşalmış otel / seyahat atlanır; hiçbiri yoksa ilk konumlu mekan, o da yoksa yedek merkez.
   const ilkOtel = konaklamalar.find(konumVar);
   const ilkKonumluMekan = mekanlar.data?.find(konumVar);
+  // #318 inceleme 4: seyahat merkezi boşsa şehir kimliğinden anlık konum (saklanmaz); yedek merkezde ülke ölçeği.
+  const seyahatMerkezi = useSeyahatMerkezi(seyahat);
   const ilkMerkez = useMemo(
-    () => haritaMerkezi(ilkOtel, seyahat, ilkKonumluMekan),
+    () => haritaMerkezi(ilkOtel, seyahatMerkezi, ilkKonumluMekan),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [ilkOtel?.lat, ilkOtel?.lng, seyahat.lat, seyahat.lng, ilkKonumluMekan?.lat, ilkKonumluMekan?.lng],
+    [ilkOtel?.lat, ilkOtel?.lng, seyahatMerkezi?.lat, seyahatMerkezi?.lng, ilkKonumluMekan?.lat, ilkKonumluMekan?.lng],
   );
-  const ilkBolge = useMemo(() => bolgeHesapla(ilkMerkez, zoomDelta(ILK_ZOOM), zoomDelta(ILK_ZOOM)), [ilkMerkez]);
+  const ilkZoom = yedekMerkezMi(ilkMerkez) ? YEDEK_ZOOM : ILK_ZOOM;
+  const ilkBolge = useMemo(() => bolgeHesapla(ilkMerkez, zoomDelta(ilkZoom), zoomDelta(ilkZoom)), [ilkMerkez, ilkZoom]);
+  // Harita ilk merkezle kurulur; canlı şehir konumu sonradan gelirse kamera oraya kayar (bir kez).
+  const canliOdaklandi = useRef(false);
+  useEffect(() => {
+    if (canliOdaklandi.current || konumVar(seyahat) || !seyahatMerkezi || ilkOtel || ilkKonumluMekan) return;
+    canliOdaklandi.current = true;
+    odakla(seyahatMerkezi.lat, seyahatMerkezi.lng, ILK_ZOOM);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [seyahatMerkezi?.lat, seyahatMerkezi?.lng]);
   const [bolge, setBolge] = useKesfetDurumu(seyahat.id, 'bolge');
   // #79 KK1: ekran yeniden kurulduysa harita son görünür bölgeden açılır (kamera aynı kalır); ilk açılışta şehir / otel merkezi.
   const [baslangicBolge] = useState<HaritaBolgesi | null>(() => kesfetDurumunuAl(seyahat.id).bolge);
@@ -127,9 +139,9 @@ function Kesfet({ seyahat, konaklamalar, ilkMekan, cekmeceIstegi, cipIstegi }: {
   // değişip istek iki kez atılmasın). Çip başına bir istek, Turistik üç alt istek; çip seçmek eksik isteği doğurur. KK8: kaydırmak
   // ve yakınlaştırmak istek atmaz — pinler eldeki listeden görünüme göre süzülür.
   const sehirler = useSehirler();
-  const rehberSehir = sehirEslestir(sehirler.data, { ad: seyahat.city_label, lat: seyahat.lat, lng: seyahat.lng });
-  const sehirLat = sehirler.isPending ? null : (rehberSehir?.lat ?? seyahat.lat);
-  const sehirLng = sehirler.isPending ? null : (rehberSehir?.lng ?? seyahat.lng);
+  const rehberSehir = sehirEslestir(sehirler.data, { ad: seyahat.city_label, lat: seyahatMerkezi?.lat ?? null, lng: seyahatMerkezi?.lng ?? null });
+  const sehirLat = sehirler.isPending ? null : (rehberSehir?.lat ?? seyahatMerkezi?.lat ?? null);
+  const sehirLng = sehirler.isPending ? null : (rehberSehir?.lng ?? seyahatMerkezi?.lng ?? null);
   const sehirMerkezi = useMemo(() => (sehirLat == null || sehirLng == null ? null : { lat: sehirLat, lng: sehirLng }), [sehirLat, sehirLng]);
   const cipler = useMemo(() => sehirCipleri(filtre), [filtre]);
   const yakin = useKesfetOnerileri(seyahat.id, sehirMerkezi, cipler);
@@ -635,7 +647,7 @@ function Kesfet({ seyahat, konaklamalar, ilkMekan, cekmeceIstegi, cipIstegi }: {
       }
       harita={{
         merkez: ilkMerkez,
-        zoom: ILK_ZOOM,
+        zoom: ilkZoom,
         pinler,
         odak,
         onPinBas: pinBas,

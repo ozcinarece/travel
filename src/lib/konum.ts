@@ -24,6 +24,12 @@ export function aramaMerkezi(x: { lat: number | null; lng: number | null }, yari
 /** Hiç koordinat kalmadıysa haritanın açılacağı yer (Türkiye ortası); `sigdir` varsa harita noktalara oturur. */
 export const YEDEK_MERKEZ: KonumNoktasi = { lat: 39.0, lng: 35.0 };
 
+/** #318 inceleme 4: yedek merkez kullanılırsa ülke ölçeği (tek bir semte yakın açılıp boş görünmesin). */
+export const YEDEK_ZOOM = 5;
+
+/** Merkez yedek merkez mi (hiç koordinat bulunamadı). */
+export const yedekMerkezMi = (k: KonumNoktasi) => k.lat === YEDEK_MERKEZ.lat && k.lng === YEDEK_MERKEZ.lng;
+
 /** Haritanın merkezi: verilen adaylardan ilk koordinatlısı; hiçbiri yoksa `YEDEK_MERKEZ`. */
 export function haritaMerkezi(...adaylar: ({ lat: number | null; lng: number | null } | null | undefined)[]): KonumNoktasi {
   for (const a of adaylar) {

@@ -382,7 +382,7 @@ function Listem({ seyahat, gunler, duraklar, mekanlar, konaklamalar }: { seyahat
               }
             }}
             onYolTarifi={() =>
-              Linking.openURL(`https://www.google.com/maps/dir/?api=1&destination=${yolTarifiHedefi(panelMekan, '')}&destination_place_id=${encodeURIComponent(panelMekan.place_id)}&travelmode=walking`)
+              Linking.openURL(`https://www.google.com/maps/dir/?api=1&destination=${yolTarifiHedefi(panelMekan, adi(panelMekan))}&destination_place_id=${encodeURIComponent(panelMekan.place_id)}&travelmode=walking`)
             }
             onKapat={() => setPanelId(null)}
           />
