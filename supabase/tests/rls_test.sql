@@ -1626,6 +1626,17 @@ end $$;
 select public.icerik_gezi_taslak_sil('hat-rehber');
 delete from public.yerler where place_id in ('ChIJ-yeni-yer-001', 'ChIJ-yayin-yer-1', 'ChIJ-taslak-yer1', 'ChIJ-dolu-yer-01');
 
+-- #300 KK4: veri migration'ı (20261128000000) place_id'siz Eskişehir tohum yerlerini adla etiketledi; taze kurulumda
+-- yükleme satırı yok, gezi tohumu (eskisehir-iki-gun) listede değil. Aşağıdaki KK1 testleri boş amaçtan başlar.
+do $$
+begin
+  assert (select amaclar from public.yerler where ad = 'Porsuk Çayı Adalar' and place_id is null) = '{yavas,gece}', '#300 KK4: Porsuk Adalar';
+  assert (select amaclar from public.yerler where ad = 'Odunpazarı Evleri' and place_id is null) = '{kultur_tarih,yavas}', '#300 KK4: Odunpazarı Evleri';
+  assert (select amaclar from public.yerler where ad = 'Sazova Parkı') = '{}', '#300 KK4: listede olmayan yer boş kalır';
+  assert (select amaclar from public.geziler where slug = 'eskisehir-iki-gun') = '{}', '#300 KK4: listede olmayan gezi boş kalır';
+end $$;
+update public.yerler set amaclar = '{}' where amaclar <> '{}';
+
 -- #300 KK1–KK2: amaç etiketleri. Değerler yalnız sabit 6'lıdan, tekrarsız (check); okuma kuralı aynı (yayındaki satır);
 -- yükleme gezi.amaclar'ı geziye, durak amaclar'ını yer satırına yazar (yalnız taslak ve amacı boş satır).
 select pg_temp.hata_bekle($$update public.geziler set amaclar = '{plaj}' where slug = 'eskisehir-iki-gun'$$, '23514');

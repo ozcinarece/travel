@@ -2,15 +2,17 @@
 // "GİDECEĞİN ŞEHİR · {Şehir}'den geziler" başlığıyla (KK3); sonra diğer şehirler. Akışın sonunda "Kendi gezini kur" (KK5).
 // Yüklenirken iskelet kartlar, hata/çevrimdışında "Bağlanamadık" + Tekrar dene (KK7, #239 dili).
 // #287 KK1: yenileme hata verirse elde veri varken kartlar yerinde kalır; "Bağlanamadık" yalnız hiç veri yokken.
+// #300 KK5 (kanvas 29a, 29h-A): başlığın altında tek seçimli amaç çipleri; "Sana göre" süzmez, diğerleri `amaclar` ile süzer.
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { GeziAlYukleyici } from '@/components/icerik/GeziAl';
 import { Buton } from '@/components/ui/Buton';
+import { Cip } from '@/components/ui/Cip';
 import { Ikon } from '@/components/ui/Ikon';
 import { ayrilmaEki } from '@/features/davet/katilim';
-import { akisSirasi, geziyiPaylas, useKesfetAkisi, type AkisGezisi } from '@/features/icerik/kesfetAkisi';
+import { akisSirasi, amacaGore, doluAmaclar, geziyiPaylas, useKesfetAkisi, type AkisGezisi, type Amac } from '@/features/icerik/kesfetAkisi';
 import { t } from '@/i18n';
 import { baslikStili, bosluk, olcek, renk, yazi } from '@/theme';
 
@@ -25,8 +27,16 @@ type Props = {
 export function KesfetAkisi({ sehir, onYeni }: Props) {
   const akis = useKesfetAkisi();
   const [alinan, setAlinan] = useState<string | null>(null);
-  const { sehirGezileri, digerleri } = akisSirasi(akis.data ?? [], sehir);
+  const [secilenAmac, setSecilenAmac] = useState<Amac | null>(null);
+  const tumu = akis.data ?? [];
+  // Boş çip gösterilmez; seçili amacın gezisi yenilemede kalmadıysa "Sana göre"ye düşer.
+  const amaclar = doluAmaclar(tumu);
+  const amac = secilenAmac && amaclar.includes(secilenAmac) ? secilenAmac : null;
+  const gorunen = amacaGore(tumu, amac);
+  const { sehirGezileri, digerleri } = akisSirasi(gorunen, sehir);
   const sehirAdi = sehirGezileri[0]?.sehirler?.ad ?? null;
+  // 29h-A kural 8: sayaç yalnız "Geziler" başlığında; şehir başlığı varken gösterilmez (diğer şehirleri de sayardı).
+  const geziSayisi = amac ? <Text style={s.sayi} accessibilityLiveRegion="polite">{t('kesfetAkisi.geziSayisi', { n: gorunen.length })}</Text> : null;
 
   const kart = (g: AkisGezisi, i: number) => (
     <View key={g.id} style={s.kenar}>
@@ -72,17 +82,46 @@ export function KesfetAkisi({ sehir, onYeni }: Props) {
       {sehirAdi ? (
         <View style={[s.kenar, s.sehirBaslik]}>
           <Text style={s.etiket}>{t('kesfetAkisi.gidecegin')}</Text>
-          <Text accessibilityRole="header" style={s.baslik}>
-            {t('kesfetAkisi.sehirGezileri', { sehir: ayrilmaEki(sehirAdi) })}
-          </Text>
+          <View style={s.baslikSatiri}>
+            <Text accessibilityRole="header" style={[s.baslik, s.baslikMetni]}>
+              {t('kesfetAkisi.sehirGezileri', { sehir: ayrilmaEki(sehirAdi) })}
+            </Text>
+          </View>
         </View>
       ) : (
-        <Text accessibilityRole="header" style={[s.baslik, s.kenar, s.ilkBaslik]}>
-          {t('kesfetAkisi.geziler')}
-        </Text>
+        <View style={[s.kenar, s.ilkBaslik, s.baslikSatiri]}>
+          <Text accessibilityRole="header" style={[s.baslik, s.baslikMetni]}>
+            {t('kesfetAkisi.geziler')}
+          </Text>
+          {geziSayisi}
+        </View>
       )}
+      {amaclar.length > 0 ? (
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          accessibilityRole="radiogroup"
+          accessibilityLabel={t('kesfetAkisi.amacGrubu')}
+          style={s.cipSatiri}
+          contentContainerStyle={s.cipler}
+        >
+          <Cip radyo baslik={t('kesfetAkisi.sanaGore')} secili={!amac} onPress={() => setSecilenAmac(null)} />
+          {amaclar.map((a) => (
+            <Cip key={a} radyo baslik={t(`kesfetAkisi.amac.${a}`)} secili={amac === a} onPress={() => setSecilenAmac(amac === a ? null : a)} />
+          ))}
+        </ScrollView>
+      ) : null}
       {sehirGezileri.map(kart)}
       {digerleri.map((g, i) => kart(g, sehirGezileri.length + i))}
+      {amac ? (
+        <View style={s.kenar}>
+          <Text style={s.bilgi}>
+            {t('kesfetAkisi.amacBilgi')}
+            <Text style={s.bilgiKalin}>{t('kesfetAkisi.sanaGore')}</Text>
+            {t('kesfetAkisi.amacBilgiSon')}
+          </Text>
+        </View>
+      ) : null}
       <View style={s.kenar}>
         <KendiGeziniKur onPress={onYeni} />
       </View>
@@ -106,6 +145,25 @@ const s = StyleSheet.create({
     ...baslikStili(olcek.bolum),
     color: renk.metin,
   },
+  baslikSatiri: { flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between', gap: 12 },
+  baslikMetni: { flexShrink: 1 },
+  sayi: { fontFamily: yazi.normal, fontSize: 13, color: renk.ikincil },
+  // Kanvas 29h-A: çip satırı başlığa 12 px (akış aralığı 20 − 8); soldan 20 px, çipler arası 6 px, yatay kayar. Dikey 4 px
+  // iç boşluk 44 px dokunma alanı (hitSlop) kesilmesin diye; dış boşlukla dengelenir.
+  cipSatiri: { marginTop: -12, marginBottom: -4, flexGrow: 0 },
+  cipler: { paddingHorizontal: bosluk.kenar, gap: 6, paddingVertical: 4 },
+  bilgi: {
+    borderRadius: 16,
+    backgroundColor: renk.yuzey,
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    fontFamily: yazi.normal,
+    fontSize: 14,
+    lineHeight: 20,
+    color: '#232b48',
+    overflow: 'hidden',
+  },
+  bilgiKalin: { fontFamily: yazi.kalin },
   hata: { gap: 14, paddingTop: 6 },
   ikonKutu: {
     width: 56,

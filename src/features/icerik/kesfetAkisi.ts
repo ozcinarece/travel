@@ -26,7 +26,7 @@ type HamGezi = Gezi & {
   gezi_gunleri?: { sira: number; gezi_duraklari?: { count: number }[] }[] | null;
 };
 
-const AKIS_ALANLARI = 'id, sehir_id, baslik, slug, kapak_url, ozet, yazar_ad, gun_sayisi, mekan_sayisi, sira, created_at, sehirler(ad, slug, kapak_url), gezi_gunleri(sira, gezi_duraklari(count))';
+const AKIS_ALANLARI = 'id, sehir_id, baslik, slug, kapak_url, ozet, yazar_ad, gun_sayisi, mekan_sayisi, sira, created_at, amaclar, sehirler(ad, slug, kapak_url), gezi_gunleri(sira, gezi_duraklari(count))';
 
 /** Ham satırdan kart verisi: günler sıraya dizilir, her günün durak sayısı alınır. */
 export function akisGezisi(h: HamGezi): AkisGezisi {
@@ -78,4 +78,22 @@ export function geziyiPaylas(g: Pick<Gezi, 'baslik' | 'slug'>) {
       link: davetLinki(`gezi/${g.slug}`).replace('/r/gezi/', '/gezi/'),
     }),
   }).catch(() => {});
+}
+
+/**
+ * #300 KK5 (kanvas 29a, 29h-A): akış çiplerinin amaçları, bu sırayla (veritabanındaki `public.amac_listesi()` ile aynı
+ * değerler). "Sana göre" bunların dışında: süzgeç yok.
+ */
+export const AKIS_AMACLARI = ['kultur_tarih', 'lezzet', 'doga', 'yavas', 'gece', 'cocuklu'] as const;
+export type Amac = (typeof AKIS_AMACLARI)[number];
+
+/** Gösterilecek amaç çipleri: en az bir gezisi olanlar, sabit sırayla (boş çip gösterilmez). */
+export function doluAmaclar(geziler: readonly Pick<Gezi, 'amaclar'>[]): Amac[] {
+  return AKIS_AMACLARI.filter((a) => geziler.some((g) => g.amaclar?.includes(a)));
+}
+
+/** Seçili amaca göre süzgeç; null ("Sana göre") ya da artık boş olan amaç süzmez, sıra korunur. */
+export function amacaGore<T extends Pick<Gezi, 'amaclar'>>(geziler: readonly T[], amac: Amac | null): T[] {
+  if (!amac) return [...geziler];
+  return geziler.filter((g) => g.amaclar?.includes(amac));
 }

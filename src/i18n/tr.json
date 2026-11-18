@@ -735,7 +735,20 @@
     "yukleniyor": "Geziler yükleniyor",
     "agBaslik": "Bağlanamadık",
     "agMetin": "Geziler yüklenemedi. Bağlantın düzelince tekrar dene.",
-    "tekrarDene": "Tekrar dene"
+    "tekrarDene": "Tekrar dene",
+    "amacGrubu": "Gezinin amacı",
+    "sanaGore": "Sana göre",
+    "geziSayisi": "{n} gezi",
+    "amacBilgi": "Akış yalnız bu amaçtaki gezileri gösteriyor. Hepsine dönmek için ",
+    "amacBilgiSon": "'ye dokun.",
+    "amac": {
+      "kultur_tarih": "Kültür ve tarih",
+      "lezzet": "Lezzet",
+      "doga": "Doğa",
+      "yavas": "Yavaş ve keyifli",
+      "gece": "Gece hayatı",
+      "cocuklu": "Çocuklu"
+    }
   },
   "anasayfa": {
     "merhaba": "Merhaba {ad}",

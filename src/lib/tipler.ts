@@ -166,6 +166,8 @@ export type Gezi = {
   mekan_sayisi: number;
   sira: number | null;
   created_at: string;
+  /** #300: amaç etiketleri (`public.amac_listesi()`); eski satırda ya da seçilmemişse boş. */
+  amaclar?: string[] | null;
   /** Gömülü şehir (liste kartlarında "Eskişehir"). */
   sehirler?: { ad: string; slug: string; kapak_url?: string | null } | null;
 };
