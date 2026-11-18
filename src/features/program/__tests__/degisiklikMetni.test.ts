@@ -66,3 +66,26 @@ describe('#200 Günlere dağıt tek kayıt', () => {
     expect(geriAlinabilir(geri)).toBe(false);
   });
 });
+
+describe('#160 KK1: ad değişikliği akışa düşmez', () => {
+  const k = { mekanAdi: () => '…', gunNo: () => null, durakMekani: () => null };
+  it('yalnız display_name değişen üyelik kaydı görünmez; katıldı, ayrıldı, rol bugünkü gibi', () => {
+    const g = degisiklikGruplari([
+      d(5, { entity: 'members', entity_id: 'u3', field: 'display_name', old: 'Mert', new: 'Mert K.', at: '2026-10-13T12:00:00Z' }),
+      d(4, { entity: 'members', entity_id: 'u3', field: 'role', old: 'editor', new: 'viewer', at: '2026-10-13T11:00:00Z' }),
+      d(3, { entity: 'members', entity_id: 'u4', new: { user_id: 'u4' }, at: '2026-10-13T10:00:00Z' }),
+      d(2, { entity: 'members', entity_id: 'u5', old: { user_id: 'u5' }, at: '2026-10-13T09:00:00Z' }),
+    ]);
+    expect(g.map((x) => x.id)).toEqual([4, 3, 2]);
+    expect(g.map((x) => grupMetni(x, k))).toEqual(['üyeliği değişti', 'katıldı', 'ayrıldı']);
+  });
+
+  it('aynı anda ad ve rol değişirse grup rol satırıyla kalır', () => {
+    const g = degisiklikGruplari([
+      d(7, { entity: 'members', entity_id: 'u3', field: 'display_name', old: 'Mert', new: 'Mert K.' }),
+      d(6, { entity: 'members', entity_id: 'u3', field: 'role', old: 'editor', new: 'viewer' }),
+    ]);
+    expect(g).toHaveLength(1);
+    expect(g[0].satirlar.map((x) => x.field)).toEqual(['role']);
+  });
+});

@@ -24,6 +24,7 @@ import {
   osmEslestir,
   eslemeKareleri,
   eslemeYaricapi,
+  yemekMi,
 } from '../dogrula.mjs';
 import { anahtarCifti, coz, sifrele } from '../sifre.mjs';
 
@@ -519,5 +520,13 @@ describe('#335 işletme durumu denetimi', () => {
     );
     expect(r.hatalar).toEqual(['eeeeeeeeee1: detay alınamadı (HTTP 404)', 'eeeeeeeeee2: konum yok']);
     expect(r.uyarilar).toEqual([]);
+  });
+});
+
+describe('#160 KK-ek4: kebapçı yemek sayılır', () => {
+  it('kebab_shop yemek; restoran türleri bugünkü gibi; müze değil', () => {
+    expect(yemekMi('kebab_shop')).toBe(true);
+    expect(yemekMi('turkish_restaurant')).toBe(true);
+    expect(yemekMi('museum')).toBe(false);
   });
 });

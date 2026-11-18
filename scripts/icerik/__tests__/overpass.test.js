@@ -1,5 +1,5 @@
 // #266 KK4–KK5: Overpass istemcisi — süre sınırı, yalnız geçici hatada yeniden deneme, Retry-After, bütçe.
-import { ISTEK_SURESI_MS, OverpassHatasi, overpassBirKez, overpassYeniden, retryAfterMs, SureBittiHatasi } from '../overpass.mjs';
+import { ISTEK_SURESI_MS, istekSuresi, OverpassHatasi, overpassBirKez, overpassYeniden, retryAfterMs, SureBittiHatasi } from '../overpass.mjs';
 
 const yanit = (status, govde = { elements: [] }, basliklar = {}) => ({
   ok: status >= 200 && status < 300,
@@ -99,5 +99,38 @@ describe('overpassYeniden (#266 KK5)', () => {
     const g = sahteFetch(yanit(429, null, { 'retry-after': '60' }), yanit(429, null, { 'retry-after': '60' }));
     await expect(overpassYeniden('q', { fetchFn: g, bekle, simdi: () => 0, bitis: 30_000 })).rejects.toBeInstanceOf(SureBittiHatasi);
     expect(bekle).not.toHaveBeenCalled();
+  });
+});
+
+describe('#160: istek süresi bütçeyle, Retry-After en büyüğü', () => {
+  it('kalan süre 30 sn iken istek en çok 30 sn sürer', async () => {
+    expect(istekSuresi(30_000)).toBe(30_000);
+    expect(istekSuresi(Infinity)).toBe(ISTEK_SURESI_MS);
+    const sureler = [];
+    const zamanAsimi = (ms) => {
+      sureler.push(ms);
+      return AbortSignal.timeout(ms);
+    };
+    const f = sahteFetch(yanit(200));
+    await overpassYeniden('q', { fetchFn: f, simdi: () => 0, bitis: 30_000, zamanAsimi });
+    expect(sureler).toEqual([30_000]);
+  });
+
+  it('bütçe sunucular arasında dolarsa ikinci sunucuya istek gitmez, SureBittiHatasi', async () => {
+    let t = 0;
+    const f = jest.fn(async () => {
+      t = 30_000;
+      throw new Error('zaman aşımı');
+    });
+    await expect(overpassYeniden('q', { fetchFn: f, simdi: () => t, bitis: 30_000 })).rejects.toBeInstanceOf(SureBittiHatasi);
+    expect(f).toHaveBeenCalledTimes(1);
+  });
+
+  it('1. sunucu 429 + Retry-After: 30, 2. sunucu 503 başlıksız → bekleme 30 sn', async () => {
+    const f = sahteFetch(yanit(429, null, { 'retry-after': '30' }), yanit(503));
+    const hata = await overpassBirKez('q', { fetchFn: f }).catch((e) => e);
+    expect(hata).toBeInstanceOf(OverpassHatasi);
+    expect(hata.durum).toBe(503);
+    expect(hata.bekleMs).toBe(30_000);
   });
 });

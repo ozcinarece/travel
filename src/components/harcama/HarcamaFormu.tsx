@@ -424,10 +424,10 @@ function FormIcerigi({ onKapat, seyahat, uyeler, harcama, durakId, onBildirim }:
               <Pressable
                 accessibilityRole={salt ? undefined : 'checkbox'}
                 accessibilityState={salt ? undefined : { checked: dahil }}
-                accessibilityLabel={salt ? undefined : t('harcama.form.kisiSec', { ad: k.ad(id) })}
+                accessibilityLabel={salt ? undefined : k.ad(id)}
                 disabled={salt}
                 onPress={() => kisiDegistir(id)}
-                style={s.kisiSec}
+                style={({ pressed }) => [s.kisiSec, pressed && { opacity: 0.7 }]}
               >
                 <Avatar ad={k.ad(id)} url={k.foto(id)} boyut={32} arkaPlan={k.renk(id)} />
                 <Text style={[s.kisiAd, !dahil && { color: renk.soluk }]} numberOfLines={1}>
@@ -550,6 +550,7 @@ const s = StyleSheet.create({
   kisiAd: { flex: 1, fontFamily: yazi.kalin, fontSize: 15, color: renk.metin },
   kisiPay: { fontFamily: yazi.ekstra, fontSize: 14, color: renk.metin },
   kisiGirdi: { width: 96, height: 38, paddingHorizontal: 10, borderRadius: 11, backgroundColor: renk.yuzey, fontFamily: yazi.kalin, fontSize: 15, color: renk.metin, textAlign: 'right' },
+  // hitSlop ebeveyn dışına taşıyor; arka plan, `testID` ya da `collapsable={false}` eklenirse Android'de alan küçülür.
   agirlik: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   agirlikDugme: { width: 30, height: 30, borderRadius: 9, backgroundColor: renk.yuzey, alignItems: 'center', justifyContent: 'center' },
   agirlikIsaret: { fontFamily: yazi.ekstra, fontSize: 16, color: renk.ana },

@@ -546,7 +546,7 @@ function Yildizlar({ puan, boyut }: { puan: number | null; boyut: number }) {
 /** #142 KK2 (kanvas 14): rehber yazısı (`yerler.rehber_md`), alıntı → İPUCU kutusu. #279: sesli rehber şeridi kalktı (sonraya kaldı). */
 function RehberSekmesi({ md }: { md: string | null }) {
   return (
-    <View style={{ gap: 14 }}>
+    <View style={{ gap: 12 }}>
       {md ? (
         <MdYazi kaynak={md} ipucu kenar={0} />
       ) : (

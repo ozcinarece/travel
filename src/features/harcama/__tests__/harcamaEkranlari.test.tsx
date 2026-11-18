@@ -227,7 +227,7 @@ describe('#183 Harcamalar sekmesi', () => {
 
   it('KK4: "+ Harcama" → 100 ₺ üçe eşit; kuruş farkı ödeyene; harcama_kaydet payları ₺ toplamına eşit', async () => {
     mockTablolar = fikstur(tarihEkle(yerelTarih(new Date(), IST), 10));
-    const { getByText, getByLabelText, getAllByText, qc } = ciz(<HarcamaSekmesi />);
+    const { getByText, getByLabelText, getByRole, getAllByText, qc } = ciz(<HarcamaSekmesi />);
     await waitFor(() => getByText('Toplam · 3 kişi'));
     await sakinles(qc);
     fireEvent.press(getByLabelText('Harcama ekle'));
@@ -238,7 +238,7 @@ describe('#183 Harcamalar sekmesi', () => {
     await waitFor(() => expect(getAllByText('33,34 ₺')).toHaveLength(1));
     expect(getAllByText('33,33 ₺')).toHaveLength(2);
     // Mert bölüşümden çıkar → ikiye.
-    fireEvent.press(getByLabelText('Mert bölüşümde'));
+    fireEvent.press(getByRole('checkbox', { name: 'Mert' }));
     await waitFor(() => expect(getAllByText('50 ₺')).toHaveLength(2));
     fireEvent.press(getByText('Kaydet'));
     await waitFor(() => expect(mockKayit.rpc.some((r) => r.ad === 'harcama_kaydet')).toBe(true));
@@ -272,23 +272,23 @@ describe('#183 Harcamalar sekmesi', () => {
 
   it('#232 KK2/KK4: bölüşümde kişinin adına dokunmak onay kutusu gibi dahil eder ya da çıkarır; rol checkbox, durum doğru', async () => {
     mockTablolar = fikstur(tarihEkle(yerelTarih(new Date(), IST), 10));
-    const { getByText, getByLabelText, getAllByText, getByTestId, qc } = ciz(<HarcamaSekmesi />);
+    const { getByText, getByLabelText, getByRole, getAllByText, getByTestId, qc } = ciz(<HarcamaSekmesi />);
     await waitFor(() => getByText('Toplam · 3 kişi'));
     await sakinles(qc);
     fireEvent.press(getByLabelText('Harcama ekle'));
     await waitFor(() => getByLabelText('Tutar'));
     fireEvent.changeText(getByLabelText('Tutar'), '100');
-    const satir = getByLabelText('Mert bölüşümde');
+    const satir = getByRole('checkbox', { name: 'Mert' });
     expect(satir.props.accessibilityRole).toBe('checkbox');
     expect(satir.props.accessibilityState).toMatchObject({ checked: true });
     // Adın kendisine dokun (kutuya değil) → Mert çıkar, ikiye bölünür.
     fireEvent.press(getByText('Mert'));
     await waitFor(() => expect(getAllByText('50 ₺')).toHaveLength(2));
-    expect(getByLabelText('Mert bölüşümde').props.accessibilityState).toMatchObject({ checked: false });
+    expect(getByRole('checkbox', { name: 'Mert' }).props.accessibilityState).toMatchObject({ checked: false });
     // Tekrar dokun → geri dahil, üçe bölünür.
     fireEvent.press(getByText('Mert'));
     await waitFor(() => expect(getAllByText('33,33 ₺')).toHaveLength(2));
-    expect(getByLabelText('Mert bölüşümde').props.accessibilityState).toMatchObject({ checked: true });
+    expect(getByRole('checkbox', { name: 'Mert' }).props.accessibilityState).toMatchObject({ checked: true });
     // Görsel kutu da çalışır ama ekran okuyucuda ikinci bir onay kutusu olarak görünmez.
     const kutu = getByTestId('kisi-kutu-mert', { includeHiddenElements: true });
     expect(kutu.props.accessible).toBe(false);

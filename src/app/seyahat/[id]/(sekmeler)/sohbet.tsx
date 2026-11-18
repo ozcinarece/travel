@@ -529,6 +529,7 @@ const KONUM_PAYI = 4;
 const s = StyleSheet.create({
   ekran: { flex: 1, backgroundColor: renk.haritaZemin },
   ust: { paddingHorizontal: 20, paddingBottom: 12, backgroundColor: renk.zemin, borderBottomWidth: 1, borderBottomColor: renk.ayrac, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12 },
+  // hitSlop ebeveyn dışına taşıyor; arka plan, `testID` ya da `collapsable={false}` eklenirse Android'de alan küçülür.
   ustSag: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   yuz: { borderRadius: 11, borderWidth: 2, borderColor: renk.zemin },
   konum: { width: 36, height: 36, borderRadius: 11, backgroundColor: renk.yuzey, alignItems: 'center', justifyContent: 'center' },
@@ -538,6 +539,7 @@ const s = StyleSheet.create({
   serit: { marginHorizontal: 16, marginTop: 10 },
   alt: { paddingHorizontal: 16, paddingTop: 10, backgroundColor: renk.zemin, borderTopWidth: 1, borderTopColor: renk.ayrac, gap: 8 },
   // Satır kırılırsa iki satırın dokunma alanları çakışmasın: 30 + 7 + 7, satır arası 14.
+  // hitSlop ebeveyn dışına taşıyor; arka plan, `testID` ya da `collapsable={false}` eklenirse Android'de alan küçülür.
   ekler: { flexDirection: 'row', columnGap: 6, rowGap: 14, flexWrap: 'wrap' },
   ek: { height: 30, paddingLeft: 8, paddingRight: 10, borderRadius: 9, backgroundColor: renk.yuzey, flexDirection: 'row', alignItems: 'center', gap: 4 },
   ekMetin: { fontFamily: yazi.ekstra, fontSize: 12, color: renk.ana },

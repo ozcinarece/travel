@@ -1198,8 +1198,7 @@
       "sil": "Harcamayı sil",
       "silBaslik": "Harcama silinsin mi?",
       "silMetin": "Bakiyeler yeniden hesaplanır. Grup penceresindeki Son değişiklikler'den geri alınabilir.",
-      "silindi": "Harcama silindi",
-      "kisiSec": "{ad} bölüşümde"
+      "silindi": "Harcama silindi"
     },
     "ozet": {
       "baslik": "Özet",

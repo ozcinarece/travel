@@ -338,7 +338,7 @@ export function kapaliGunNo(ad) {
   return k in GUNLER ? GUNLER[k] : null;
 }
 
-const YEMEK = /(^|_)(restaurant|food_court|meal_takeaway|diner|steak_house|brunch_restaurant)$|^restaurant$/;
+const YEMEK = /(^|_)(restaurant|food_court|meal_takeaway|diner|steak_house|brunch_restaurant|kebab_shop)$|^restaurant$/;
 export const yemekMi = (tip) => !!tip && YEMEK.test(tip);
 
 /**

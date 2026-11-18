@@ -1,5 +1,6 @@
 // Overpass istemcisi (içerik hattı, docs/07). Google'a gidilmez. #266 KK4–KK5: her istekte süre sınırı, yalnız geçici
-// hatalarda (429, 502, 503, 504, ağ) yeniden deneme, `Retry-After`'a uyma ve koşu bütçesi. Loglara sorgu ya da yanıt yazılmaz.
+// hatalarda (429, 502, 503, 504, ağ) yeniden deneme, `Retry-After`'a uyma ve koşu bütçesi (#160: istek süresi de bütçeyle
+// sınırlı). Loglara sorgu ya da yanıt yazılmaz.
 
 export const OVERPASS = ['https://overpass-api.de/api/interpreter', 'https://overpass.kumi.systems/api/interpreter'];
 /** KK4: tek bir Overpass isteğinin süre sınırı. */
@@ -37,20 +38,34 @@ export function retryAfterMs(deger, simdi = Date.now()) {
   return Number.isNaN(t) ? null : Math.max(0, t - simdi);
 }
 
+/** #160: tek isteğin süresi = min(`ISTEK_SURESI_MS`, bütçede kalan). Kalan yoksa 0 (istek başlamaz). */
+export function istekSuresi(kalanMs = Infinity) {
+  return Math.max(0, Math.min(ISTEK_SURESI_MS, Math.floor(kalanMs)));
+}
+
 /**
- * Tek deneme: sunucular sırayla sorulur, her istek `ISTEK_SURESI_MS` ile sınırlı. Geçici olmayan bir 4xx (ör. 400 bozuk
- * sorgu) hemen durdurur; diğer sunucu da denenmez. Hepsi düşerse son hata atılır.
+ * Tek deneme: sunucular sırayla sorulur, her istek `istekSuresi(kalanMs())` ile sınırlı (#160: bütçe dolmadan hemen önce
+ * başlayan deneme bütçeyi aşmasın). Bütçe sunucular arasında dolarsa `SureBittiHatasi`. Geçici olmayan bir 4xx (ör. 400 bozuk
+ * sorgu) hemen durdurur; diğer sunucu da denenmez. Hepsi düşerse son hata atılır; `bekleMs` sunucuların `Retry-After`
+ * değerlerinin en büyüğüdür (#160).
  */
-export async function overpassBirKez(sorgu, { fetchFn = fetch } = {}) {
+export async function overpassBirKez(sorgu, { fetchFn = fetch, kalanMs = () => Infinity, zamanAsimi = (ms) => AbortSignal.timeout(ms) } = {}) {
   let son = new OverpassHatasi('Overpass yanıt vermedi', { yeniden: true });
+  let enBuyukBekle = null;
+  const bitir = () => {
+    if (enBuyukBekle != null && (son.bekleMs == null || son.bekleMs < enBuyukBekle)) son.bekleMs = enBuyukBekle;
+    return son;
+  };
   for (const url of OVERPASS) {
+    const sure = istekSuresi(kalanMs());
+    if (sure <= 0) throw new SureBittiHatasi();
     let cevap;
     try {
       cevap = await fetchFn(url, {
         method: 'POST',
         headers: { 'content-type': 'application/x-www-form-urlencoded', 'user-agent': 'tripmate-icerik-hatti (github.com/ozcinarece/travel)' },
         body: new URLSearchParams({ data: sorgu }),
-        signal: AbortSignal.timeout(ISTEK_SURESI_MS),
+        signal: zamanAsimi(sure),
       });
     } catch {
       son = new OverpassHatasi('Overpass ağ hatası ya da zaman aşımı', { yeniden: true });
@@ -65,10 +80,12 @@ export async function overpassBirKez(sorgu, { fetchFn = fetch } = {}) {
       }
     }
     const yeniden = GECICI_DURUMLAR.has(cevap.status);
-    son = new OverpassHatasi(`Overpass HTTP ${cevap.status}`, { durum: cevap.status, yeniden, bekleMs: retryAfterMs(cevap.headers?.get?.('retry-after')) });
+    const bekleMs = retryAfterMs(cevap.headers?.get?.('retry-after'));
+    if (bekleMs != null) enBuyukBekle = Math.max(enBuyukBekle ?? 0, bekleMs);
+    son = new OverpassHatasi(`Overpass HTTP ${cevap.status}`, { durum: cevap.status, yeniden, bekleMs });
     if (!yeniden && cevap.status >= 400 && cevap.status < 500) throw son;
   }
-  throw son;
+  throw bitir();
 }
 
 const uyu = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -78,13 +95,13 @@ const uyu = (ms) => new Promise((r) => setTimeout(r, ms));
  * ona uyar. `bitis` (ms, `simdi()` ile aynı saat) verilirse bekleme bütçeyi aşacaksa ya da bütçe dolmuşsa `SureBittiHatasi`.
  * #323 KK3: atılan hatada `deneme` yapılan deneme sayısıdır (rapor satırı için).
  */
-export async function overpassYeniden(sorgu, { deneme = 3, fetchFn, bekle = uyu, simdi = Date.now, bitis = Infinity } = {}) {
+export async function overpassYeniden(sorgu, { deneme = 3, fetchFn, bekle = uyu, simdi = Date.now, bitis = Infinity, zamanAsimi } = {}) {
   for (let i = 0; ; i += 1) {
     if (simdi() >= bitis) throw new SureBittiHatasi(i);
     try {
-      return await overpassBirKez(sorgu, { fetchFn });
+      return await overpassBirKez(sorgu, { fetchFn, kalanMs: () => bitis - simdi(), zamanAsimi });
     } catch (e) {
-      if (e instanceof OverpassHatasi) e.deneme = i + 1;
+      if (e instanceof OverpassHatasi || e instanceof SureBittiHatasi) e.deneme = i + 1;
       if (!(e instanceof OverpassHatasi) || !e.yeniden || i + 1 >= deneme) throw e;
       const ms = e.bekleMs ?? 5000 * 3 ** i;
       if (simdi() + ms >= bitis) throw new SureBittiHatasi(i + 1);
