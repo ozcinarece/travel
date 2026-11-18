@@ -2,6 +2,7 @@ import { Image } from 'expo-image';
 import { useState } from 'react';
 import { ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 
+import { GoogleFotoAtfi } from '@/components/icerik/KapakAtfi';
 import { usePlaceFoto } from '@/features/yerler/api';
 import { t } from '@/i18n';
 import { renk, yazi } from '@/theme';
@@ -47,19 +48,13 @@ function FotoSayfasi({ foto, hazirUri, yukle }: { foto: Foto; hazirUri: string |
   return (
     <View style={s.sayfa}>
       {uri ? <Image source={{ uri }} style={StyleSheet.absoluteFill} contentFit="cover" transition={200} /> : null}
-      <View style={s.atif} pointerEvents="none">
-        <Text style={s.atifMetin} numberOfLines={1}>
-          {foto.yazar ? t('mekan.fotoAtif', { yazar: foto.yazar }) : t('mekan.panel.fotoGoogle')}
-        </Text>
-      </View>
+      <GoogleFotoAtfi yazar={foto.yazar} />
     </View>
   );
 }
 
 const s = StyleSheet.create({
   sayfa: { flex: 1, backgroundColor: '#d9d9d6' },
-  atif: { position: 'absolute', left: 12, bottom: 10, maxWidth: '70%', paddingHorizontal: 8, paddingVertical: 3, borderRadius: 999, backgroundColor: 'rgba(255,255,255,0.85)' },
-  atifMetin: { fontFamily: yazi.yari, fontSize: 10, color: renk.ikincil },
-  sayac: { position: 'absolute', right: 12, bottom: 10, paddingHorizontal: 8, paddingVertical: 3, borderRadius: 999, backgroundColor: 'rgba(15,15,15,0.55)' },
+  sayac: { position: 'absolute', left: 12, bottom: 10, paddingHorizontal: 8, paddingVertical: 3, borderRadius: 999, backgroundColor: 'rgba(15,15,15,0.55)' },
   sayacMetin: { fontFamily: yazi.kalin, fontSize: 11, color: renk.zemin },
 });

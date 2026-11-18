@@ -17,6 +17,8 @@ import { aktifBolum, bolumYazisi, okumaOrani, rehberKartIdleri, rehberMekanIdler
 import { useGeziler, useSehirRehberi, useSehirYerleri } from '@/features/icerik/sorgular';
 import { useMekanEkle, useMekanGuncelle, useMekanlar, useMekanSil } from '@/features/mekanlar/sorgular';
 import type { HafifYer } from '@/features/yerler/api';
+import { ATIF_BASLIK_BOSLUGU, KapakAtfi } from '@/components/icerik/KapakAtfi';
+import { kapakVeAtif } from '@/features/icerik/kapakAtfi';
 import { t } from '@/i18n';
 import { bilinenKategori, varsayilanDakika } from '@/lib/kategori';
 import type { Sehir } from '@/lib/tipler';
@@ -143,6 +145,8 @@ export function SehirRehberi({ sehir, sehirlerYukleniyor, onGeri, seyahat, onReh
       </Pressable>
     ));
   const mekanSayisi = sehirYerleri.data?.length ?? 0;
+  // #345 KK4: kapak varsa atfı (kanvas 29i · B).
+  const sehirAtif = kapakVeAtif([sehir]).atif;
 
   return (
     <View style={s.ekran} onLayout={(e) => setGorunenH(e.nativeEvent.layout.height)}>
@@ -164,12 +168,13 @@ export function SehirRehberi({ sehir, sehirlerYukleniyor, onGeri, seyahat, onReh
               </Pressable>
             )}
           </View>
-          <View style={s.kapakMetin}>
+          <View style={[s.kapakMetin, sehirAtif && { paddingBottom: ATIF_BASLIK_BOSLUGU }]}>
             <Text style={s.ustBaslik}>{t('rehber.ustBaslik')}</Text>
             <Text accessibilityRole="header" style={s.baslik}>
               {sehir.ad}
             </Text>
           </View>
+          {sehirAtif ? <KapakAtfi atif={sehirAtif} /> : null}
         </View>
         <View style={s.icerik}>
           {sehir.ozet ? <Text style={s.ozet}>{sehir.ozet}</Text> : null}

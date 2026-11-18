@@ -5,11 +5,14 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AltSayfa } from '@/components/harita/AltSayfa';
 import { SayfaKaydirmasi, useSayfaKaydirma } from '@/components/ui/sayfaCekme';
+import { KategoriIkonu, kutuRengi } from '@/components/gezi/GeziParcalari';
 import { Kalp } from '@/components/icerik/Kalp';
+import { GoogleFotoAtfi, KapakAtfi } from '@/components/icerik/KapakAtfi';
 import { MdYazi } from '@/components/icerik/MdYazi';
 import { Avatar } from '@/components/ui/Avatar';
 import { Ikon } from '@/components/ui/Ikon';
 import { FotoGalerisi } from '@/components/yerler/FotoGalerisi';
+import { kapakVeAtif } from '@/features/icerik/kapakAtfi';
 import { useYerRehberi } from '@/features/icerik/sorgular';
 import {
   acikDurumu,
@@ -125,6 +128,7 @@ export function MekanPaneli(p: MekanPaneliProps) {
   const acik = acikDurumu(yer ?? (p.hafif ? { acik: p.hafif.acik } : null));
   const ctaAd = ctaAnahtari(p.baglam, p.icinde);
   const rehberMd = icerikYeri.data?.rehber_md?.trim() || null;
+  const rehberKapak = kapakVeAtif([icerikYeri.data ?? {}]);
   const sekme = panelSekmesi(durum, !!rehberMd);
   const hal = durum.hal === 'kapali' ? 'katli' : durum.hal;
   const googleUrl = yer?.google_maps_uri ?? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(ad || 'yer')}&query_place_id=${encodeURIComponent(p.placeId)}`;
@@ -169,11 +173,24 @@ export function MekanPaneli(p: MekanPaneliProps) {
             <Govde>
               {/* KK1: foto kaydırma "1 / N", kapat; dokununca tam ekran galeri. */}
               <View style={s.fotoAlan}>
-                {yer && yer.fotolar.length > 0 ? (
+                {rehberKapak.uri ? (
+                  // #345 KK4 (kanvas 29i · C): rehberli yerin kendi kapağı (Commons ya da Ece'nin), atfıyla.
+                  <View style={StyleSheet.absoluteFill}>
+                    <Image source={{ uri: rehberKapak.uri }} style={StyleSheet.absoluteFill} contentFit="cover" transition={150} />
+                    {rehberKapak.atif ? <KapakAtfi atif={rehberKapak.atif} /> : null}
+                  </View>
+                ) : yer && yer.fotolar.length > 0 ? (
                   <FotoKaydirma yer={yer} genislik={alanW || ekran.width} onAc={() => galeriAc(true)} />
-                ) : (
+                ) : p.hafif?.foto_uri ? (
                   <View style={[StyleSheet.absoluteFill, { backgroundColor: kategoriRenk + '22' }]}>
-                    {p.hafif?.foto_uri ? <Image source={{ uri: p.hafif.foto_uri }} style={StyleSheet.absoluteFill} contentFit="cover" transition={150} /> : null}
+                    <Image source={{ uri: p.hafif.foto_uri }} style={StyleSheet.absoluteFill} contentFit="cover" transition={150} />
+                  </View>
+                ) : (
+                  // #345 KK5 (kanvas 29i · D): fotoğraf yok → kategori ikonu, kategori renginin açık zemininde.
+                  <View style={[StyleSheet.absoluteFill, s.fotoYok, { backgroundColor: kutuRengi(tip) }]} testID="foto-yok">
+                    <View style={s.fotoYokKare}>
+                      <KategoriIkonu tip={tip} boyut={44} />
+                    </View>
                   </View>
                 )}
                 <Pressable accessibilityRole="button" accessibilityLabel={t('mekan.panel.kapat')} onPress={p.onKapat} hitSlop={8} style={s.kapat}>
@@ -310,9 +327,7 @@ export function FotoKaydirma({ yer, genislik, onAc }: { yer: TamYer; genislik: n
           <Text style={s.fotoSayacMetin}>{t('mekan.panel.fotoSayac', { n: sayfa + 1, toplam: sayi })}</Text>
         </View>
       ) : null}
-      <Text style={s.fotoAtif} pointerEvents="none" numberOfLines={1}>
-        {yazar ? t('mekan.fotoAtif', { yazar }) : t('mekan.panel.fotoGoogle')}
-      </Text>
+      <GoogleFotoAtfi yazar={yazar} />
     </View>
   );
 }
@@ -519,7 +534,8 @@ const s = StyleSheet.create({
   kapat: { position: 'absolute', right: 14, top: 12, width: 40, height: 40, borderRadius: kose.alan, backgroundColor: renk.zemin, alignItems: 'center', justifyContent: 'center', transform: [{ rotate: '45deg' }] },
   fotoSayac: { position: 'absolute', left: 14, bottom: 14, height: 24, paddingHorizontal: 8, borderRadius: 8, backgroundColor: renk.zemin, justifyContent: 'center' },
   fotoSayacMetin: { fontFamily: yazi.ekstra, fontSize: 12, color: renk.metin },
-  fotoAtif: { position: 'absolute', right: 14, bottom: 16, maxWidth: '60%', fontFamily: yazi.ekstra, fontSize: 11, color: renk.zemin, textShadowColor: 'rgba(0,0,0,0.5)', textShadowRadius: 3 },
+  fotoYok: { alignItems: 'center', justifyContent: 'center' },
+  fotoYokKare: { width: 88, height: 88, borderRadius: 26, backgroundColor: renk.zemin },
   icerik: { paddingHorizontal: bosluk.kenar, paddingTop: 16, gap: 12 },
   cipler: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   cip: { height: 24, paddingHorizontal: 8, borderRadius: 8, justifyContent: 'center' },
