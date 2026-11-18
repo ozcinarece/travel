@@ -20,9 +20,11 @@ export class OverpassHatasi extends Error {
 
 /** KK4: koşunun süre bütçesi doldu; kalan iş yapılmaz. */
 export class SureBittiHatasi extends Error {
-  constructor() {
+  constructor(deneme = 0) {
     super('süre bütçesi doldu');
     this.name = 'SureBittiHatasi';
+    /** #323 KK3: bütçe dolana kadar yapılan deneme sayısı. */
+    this.deneme = deneme;
   }
 }
 
@@ -74,16 +76,18 @@ const uyu = (ms) => new Promise((r) => setTimeout(r, ms));
 /**
  * KK5: yalnız geçici hatada (429/502/503/504/ağ) en çok `deneme` kez, artan beklemeyle yeniden dener; `Retry-After` varsa
  * ona uyar. `bitis` (ms, `simdi()` ile aynı saat) verilirse bekleme bütçeyi aşacaksa ya da bütçe dolmuşsa `SureBittiHatasi`.
+ * #323 KK3: atılan hatada `deneme` yapılan deneme sayısıdır (rapor satırı için).
  */
 export async function overpassYeniden(sorgu, { deneme = 3, fetchFn, bekle = uyu, simdi = Date.now, bitis = Infinity } = {}) {
   for (let i = 0; ; i += 1) {
-    if (simdi() >= bitis) throw new SureBittiHatasi();
+    if (simdi() >= bitis) throw new SureBittiHatasi(i);
     try {
       return await overpassBirKez(sorgu, { fetchFn });
     } catch (e) {
+      if (e instanceof OverpassHatasi) e.deneme = i + 1;
       if (!(e instanceof OverpassHatasi) || !e.yeniden || i + 1 >= deneme) throw e;
       const ms = e.bekleMs ?? 5000 * 3 ** i;
-      if (simdi() + ms >= bitis) throw new SureBittiHatasi();
+      if (simdi() + ms >= bitis) throw new SureBittiHatasi(i + 1);
       await bekle(ms);
     }
   }
