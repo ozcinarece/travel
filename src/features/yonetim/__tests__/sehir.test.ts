@@ -44,7 +44,9 @@ describe('fotoğraflar (#111 Sehir19)', () => {
     expect(fotoRolu(yol, { kapak_url: url, genis_kapak_url: null })).toBe('karo');
     expect(fotoRolu(yol, { kapak_url: null, genis_kapak_url: url })).toBe('genis');
     expect(rolAta('genis', yol, { kapak_url: null, genis_kapak_url: null })).toEqual({ genis_kapak_url: url });
-    expect(rolAta(null, yol, { kapak_url: url, genis_kapak_url: 'baska' })).toEqual({ kapak_url: null });
+    expect(rolAta(null, yol, { kapak_url: url, genis_kapak_url: 'baska' })).toEqual({ kapak_url: null, kapak_atif: null });
+    // #345 KK3: Ece'nin fotoğrafı karo kapağı olunca atıf "Tripmate".
+    expect(rolAta('karo', yol, { kapak_url: null, genis_kapak_url: null })).toEqual({ kapak_url: url, kapak_atif: { yazar: 'Tripmate' } });
     expect(yayinEngeli({ kapak_url: null })).toBe('kapak');
     expect(yayinEngeli({ kapak_url: url })).toBeNull();
   });

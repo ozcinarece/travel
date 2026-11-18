@@ -19,14 +19,14 @@ export function useSehirler() {
     queryKey: ['icerik', 'sehirler'],
     staleTime: GUN_MS,
     queryFn: async () => {
-      const { data, error } = await supabase.from('sehirler').select('id, ad, slug, kapak_url, lat, lng, ozet, place_id, tz, ulke_kodu, geziler(count)').order('ad');
+      const { data, error } = await supabase.from('sehirler').select('id, ad, slug, kapak_url, kapak_atif, lat, lng, ozet, place_id, tz, ulke_kodu, geziler(count)').order('ad');
       if (error) throw error;
       return (data as unknown as (Sehir & { geziler: { count: number }[] })[]).map(({ geziler, ...s }) => ({ ...s, gezi_sayisi: geziler?.[0]?.count ?? 0 }) as Sehir);
     },
   });
 }
 
-const YER_ALANLARI = 'id, sehir_id, place_id, ad, kategori, rehber_md, kapak_url, one_cikan_sira, lat, lng';
+const YER_ALANLARI = 'id, sehir_id, place_id, ad, kategori, rehber_md, kapak_url, kapak_atif, one_cikan_sira, lat, lng';
 
 /** Şehrin yayınlı yerleri, öne çıkan sırasıyla (#98 Rehberden, #100 rehber). */
 export function useSehirYerleri(sehirId: string | undefined) {
@@ -55,7 +55,7 @@ export function useTumYerler() {
   });
 }
 
-const GEZI_ALANLARI = 'id, sehir_id, baslik, slug, kapak_url, ozet, yazar_ad, gun_sayisi, mekan_sayisi, sira, created_at, sehirler(ad, slug, kapak_url)';
+const GEZI_ALANLARI = 'id, sehir_id, baslik, slug, kapak_url, kapak_atif, ozet, yazar_ad, gun_sayisi, mekan_sayisi, sira, created_at, sehirler(ad, slug, kapak_url, kapak_atif)';
 
 /** #97 KK4: önerilen geziler (sıra, sonra yeni); `sehirId` ile süzülür. */
 export function useGeziler(sehirId?: string) {
@@ -293,9 +293,9 @@ export function useYerRehberi(placeId: string | undefined) {
     enabled: !!placeId,
     staleTime: GUN_MS,
     queryFn: async () => {
-      const { data, error } = await supabase.from('yerler').select('id, ad, rehber_md, sehirler(ad)').eq('place_id', placeId!).limit(1).maybeSingle();
+      const { data, error } = await supabase.from('yerler').select('id, ad, rehber_md, kapak_url, kapak_atif, sehirler(ad)').eq('place_id', placeId!).limit(1).maybeSingle();
       if (error) throw error;
-      return (data as unknown as { id: string; ad: string; rehber_md: string | null; sehirler: { ad: string } | null } | null) ?? null;
+      return (data as unknown as { id: string; ad: string; rehber_md: string | null; kapak_url: string | null; kapak_atif: unknown; sehirler: { ad: string } | null } | null) ?? null;
     },
   });
 }

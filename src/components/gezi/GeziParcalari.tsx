@@ -39,6 +39,26 @@ export function KategoriIkonu({ tip, boyut }: { tip: string | null | undefined; 
   );
 }
 
+/**
+ * #348 inceleme 4 (kanvas 29i · D): kategorinin koyu rengi, çizgi glifi için. Müze #5B34B8 kanvastan; diğer kategoriler için
+ * kanvasta ayrı koyu ton yok, Temel kanvasındaki glif rengi (KATEGORI_PIN) kullanılır.
+ */
+const KATEGORI_KOYU: Partial<Record<PinKategorisi, string>> = { muze: '#5B34B8' };
+
+export function kategoriKoyuRengi(tip: string | null | undefined): string {
+  const k = pinKategorisi(tip);
+  return KATEGORI_KOYU[k] ?? KATEGORI_PIN[k].renk;
+}
+
+/** #348 inceleme 4: kategori ikonu `Ikon` çizgi glifi olarak (renkli pin PNG'si değil); 2 px çizgi, koyu kategori rengi. */
+export function KategoriGlifi({ tip, boyut }: { tip: string | null | undefined; boyut: number }) {
+  return (
+    <View testID="kategori-glifi" pointerEvents="none">
+      <Ikon ad={KATEGORI_PIN[pinKategorisi(tip)].ikon} boyut={boyut} renk={kategoriKoyuRengi(tip)} kalinlik={2} />
+    </View>
+  );
+}
+
 export function FotoKutusu({ uri, tip, boyut, kose, stil }: { uri: string | null; tip: string | null | undefined; boyut?: number; kose: number; stil?: StyleProp<ViewStyle> }) {
   const olcu = boyut ? { width: boyut, height: boyut } : null;
   return (

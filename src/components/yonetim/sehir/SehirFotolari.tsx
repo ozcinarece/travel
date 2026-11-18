@@ -1,5 +1,5 @@
 import { Image } from 'expo-image';
-import { useRef, useState } from 'react';
+import { useRef, useState, type ReactNode } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 
@@ -11,6 +11,7 @@ import { AYLAR_KISA } from '@/lib/takvim';
 import { yazi } from '@/theme';
 
 import { Hap } from '../Hap';
+import { KapakAtifSatiri } from '../KapakAtifSatiri';
 import { dosyaSec, useBirakmaHedefi, useDosyaBirakma, useSuruklenen } from '../surukle';
 import { yRenk } from '../tema';
 import { GorselYaDaGradyan } from './Gradyan';
@@ -25,6 +26,8 @@ type Props = {
   onAltMetin: (yol: string, alt: string) => void;
   onKaynak: (yol: string, kaynak: FotoKaynagi) => void;
   onSil: (yol: string) => void;
+  /** #345 KK3: karo kapağını (Commons'tan gelen dahil) ve atfını kaldırır. */
+  onKaroKaldir: () => void;
 };
 
 const YUKLE = 'M12 16V4M6 10l6-6 6 6M4 20h16';
@@ -36,7 +39,7 @@ const KAYNAKLAR: FotoKaynagi[] = ['kendi', 'telifsiz', 'izinli'];
  * yükleme şeridi (sürükle ya da seç), galeri (150 × 112 karolar; rol rozeti, "Rol ▾", seçili 2,5 px siyah çerçeve, ad ·
  * ölçü), seçili foto satırı (ad, bilgi, ALT METİN, KAYNAK, Kırp, Sil), not. Rol, fotoyu üstteki role bırakınca da atanır.
  */
-export function SehirFotolari({ sehirId, slug, taslak, fotolar, onYukle, onRol, onAltMetin, onKaynak, onSil }: Props) {
+export function SehirFotolari({ sehirId, slug, taslak, fotolar, onYukle, onRol, onAltMetin, onKaynak, onSil, onKaroKaldir }: Props) {
   const [seciliYol, setSeciliYol] = useState<string | null>(null);
   const [mesgul, setMesgul] = useState(false);
   const yukleAlani = useRef<View>(null);
@@ -57,7 +60,16 @@ export function SehirFotolari({ sehirId, slug, taslak, fotolar, onYukle, onRol, 
     <View style={s.kap}>
       <View style={s.roller}>
         {(['karo', 'genis'] as const).map((rol, i) => (
-          <RolKarti key={rol} rol={rol} sehirId={sehirId} foto={rolFotosu(rol)} url={rol === 'karo' ? taslak.kapak_url : taslak.genis_kapak_url} onBirak={(k) => onRol(fotolar[k].yol, rol)} indeks={i} />
+          <RolKarti
+            key={rol}
+            rol={rol}
+            sehirId={sehirId}
+            foto={rolFotosu(rol)}
+            url={rol === 'karo' ? taslak.kapak_url : taslak.genis_kapak_url}
+            atif={rol === 'karo' && taslak.kapak_url ? <KapakAtifSatiri atif={taslak.kapak_atif} onKaldir={onKaroKaldir} /> : null}
+            onBirak={(k) => onRol(fotolar[k].yol, rol)}
+            indeks={i}
+          />
         ))}
       </View>
       <Pressable ref={yukleAlani} accessibilityRole="button" accessibilityLabel={ty('sehir.foto.yukle')} onPress={() => dosyaSec(true, yukle)} style={s.yukle}>
@@ -87,7 +99,7 @@ export function SehirFotolari({ sehirId, slug, taslak, fotolar, onYukle, onRol, 
 }
 
 /** Galeri karosu üstteki rol kartına bırakılınca o role atanır (aynı sürükleme grubu, yalnız bırakma). */
-function RolKarti({ rol, sehirId, foto, url, onBirak, indeks }: { rol: FotoRolu; sehirId: string; foto: IcerikFotosu | undefined; url: string | null; onBirak: (kaynak: number) => void; indeks: number }) {
+function RolKarti({ rol, sehirId, foto, url, atif, onBirak, indeks }: { rol: FotoRolu; sehirId: string; foto: IcerikFotosu | undefined; url: string | null; atif: ReactNode; onBirak: (kaynak: number) => void; indeks: number }) {
   const ref = useRef<View>(null);
   useBirakmaHedefi(ref, 'sehir-foto', indeks, (kaynak) => onBirak(kaynak));
   return (
@@ -96,9 +108,10 @@ function RolKarti({ rol, sehirId, foto, url, onBirak, indeks }: { rol: FotoRolu;
       <View style={s.rolMetin}>
         <Text style={s.rolEtiket}>{ty(`sehir.foto.rolBaslik.${rol}`)}</Text>
         <Text style={s.rolAd} numberOfLines={1}>
-          {foto ? dosyaAdi(foto.yol) : ty('sehir.foto.rolBos')}
+          {foto ? dosyaAdi(foto.yol) : url ? ty('kapakAtfi.baslik') : ty('sehir.foto.rolBos')}
         </Text>
         <Text style={s.rolAlt}>{ty(`sehir.foto.rolYeri.${rol}`)}</Text>
+        {atif}
       </View>
     </View>
   );

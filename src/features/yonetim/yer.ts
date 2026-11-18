@@ -1,5 +1,7 @@
 // #108 yer editörü — saf kurallar: alanlar, place_id denetimi, öne çıkan sırası. Testli. (Rehber yazısı: #156 bloklar.ts)
 
+import type { KapakAtfi } from '@/features/icerik/kapakAtfi';
+
 /** Editörde tutulan yer alanları (Genel + Rehber). */
 export type YerAlanlari = {
   ad: string;
@@ -8,6 +10,8 @@ export type YerAlanlari = {
   sehir_id: string;
   one_cikan_sira: number | null;
   kapak_url: string | null;
+  /** #345 KK3 */
+  kapak_atif: KapakAtfi | null;
   rehber_md: string | null;
   yayin: boolean;
   lat: number;

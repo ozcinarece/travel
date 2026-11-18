@@ -76,7 +76,7 @@ describe('planlı yayın İstanbul saatiyle (BekleyenTasarim21 ekran 4)', () => 
 });
 
 describe('otomatik kayıt farkı ve sıra (#107 KK4, KK7)', () => {
-  const sunucu: GeziAlanlari = { baslik: 'A', slug: 'a-1', sehir_id: 's', ozet: null, yazar_ad: 'Ece', yazi_md: '', kapak_url: null, yayin: false, yayin_at: null, amaclar: ['lezzet'] };
+  const sunucu: GeziAlanlari = { baslik: 'A', slug: 'a-1', sehir_id: 's', ozet: null, yazar_ad: 'Ece', yazi_md: '', kapak_url: null, kapak_atif: null, yayin: false, yayin_at: null, amaclar: ['lezzet'] };
 
   it('yalnız değişen alanlar; fark yoksa null', () => {
     expect(kayitFarki(sunucu, { ...sunucu })).toBeNull();

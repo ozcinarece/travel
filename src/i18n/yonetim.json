@@ -576,5 +576,13 @@
     "baslik": "Amaç",
     "aciklama": "Birden çok seçilebilir. Keşfet çipleri ve 5 soruda plan bunu kullanır.",
     "bos": "Amaç seçilmedi: bu gezi yalnız Sana göre'de görünür."
+  },
+  "kapakAtfi": {
+    "baslik": "Kapak",
+    "atif": "Foto: {yazar}",
+    "lisans": " · {lisans}",
+    "kaynak": "Kaynak sayfası",
+    "kaldir": "Kaldır",
+    "not": "Değiştirmek için kendi fotoğrafını yükleyip “Kapak yap”a bas; atıf “Tripmate” olur."
   }
 }

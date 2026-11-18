@@ -17,7 +17,7 @@ export const SEHIR_SECICI = ['yonetim', 'sehirler'] as const;
 export const sehirAnahtari = (id: string | undefined) => ['yonetim', 'sehir', id] as const;
 export const rehberAnahtari = (sehirId: string | undefined) => ['yonetim', 'rehber', sehirId] as const;
 
-const ALANLAR = 'id, ad, slug, lat, lng, ozet, yayin, kapak_url, genis_kapak_url, updated_at, geziler(count)';
+const ALANLAR = 'id, ad, slug, lat, lng, ozet, yayin, kapak_url, kapak_atif, genis_kapak_url, updated_at, geziler(count)';
 
 export function useYonetimSehirListesi() {
   return useQuery({
@@ -43,7 +43,7 @@ export function useYonetimSehir(id: string | undefined) {
 }
 
 export function sehirAlanlari(s: SehirAlanlari): SehirAlanlari {
-  return { ad: s.ad, slug: s.slug, lat: s.lat, lng: s.lng, ozet: s.ozet, yayin: s.yayin, kapak_url: s.kapak_url, genis_kapak_url: s.genis_kapak_url };
+  return { ad: s.ad, slug: s.slug, lat: s.lat, lng: s.lng, ozet: s.ozet, yayin: s.yayin, kapak_url: s.kapak_url, kapak_atif: s.kapak_atif ?? null, genis_kapak_url: s.genis_kapak_url };
 }
 
 /**
