@@ -3493,13 +3493,17 @@ delete from auth.users where id = '26200000-0000-4000-8000-000000000001';
 
 -- ---------------------------------------------------------------- #314: gezi yayınlanınca durak yerleri de yayına girer
 -- Y1, Y2 durakta ve taslak; Y3 durakta ama elle yayından kaldırılmış; Y4 durakta değil (taslak kalır).
+-- Y5: Y1'le aynı place_id ama başka (yayındaki) şehirde; gezi açılınca taslak kalmalı.
+insert into public.sehirler (id, ad, slug, lat, lng, yayin) values
+  ('31400000-0000-4000-8000-000000000020', 'Öteki Şehir', 'oteki-sehir-314', 40, 30, true);
 set role authenticated;
 select pg_temp.as_email(:E, 'ozcinar.ece@gmail.com');
 insert into public.yerler (id, sehir_id, place_id, ad, lat, lng, yayin) values
   ('31400000-0000-4000-8000-000000000001', '11111111-1111-4111-8111-000000000001', 'ChIJ_314_yer_bir', 'Y1', 39.7, 30.5, false),
   ('31400000-0000-4000-8000-000000000002', '11111111-1111-4111-8111-000000000001', 'ChIJ_314_yer_iki', 'Y2', 39.7, 30.5, false),
   ('31400000-0000-4000-8000-000000000003', '11111111-1111-4111-8111-000000000001', 'ChIJ_314_yer_uc', 'Y3', 39.7, 30.5, true),
-  ('31400000-0000-4000-8000-000000000004', '11111111-1111-4111-8111-000000000001', 'ChIJ_314_yer_dort', 'Y4', 39.7, 30.5, false);
+  ('31400000-0000-4000-8000-000000000004', '11111111-1111-4111-8111-000000000001', 'ChIJ_314_yer_dort', 'Y4', 39.7, 30.5, false),
+  ('31400000-0000-4000-8000-000000000005', '31400000-0000-4000-8000-000000000020', 'ChIJ_314_yer_bir', 'Y5', 40, 30, false);
 update public.yerler set yayin = false where id = '31400000-0000-4000-8000-000000000003';
 insert into public.geziler (id, sehir_id, baslik, slug) values
   ('31400000-0000-4000-8000-000000000010', '11111111-1111-4111-8111-000000000001', 'Gezi 314', 'gezi-314');
@@ -3535,7 +3539,10 @@ begin
     '#314 KK1/KK5: gezi yayınlanınca durak yerleri görünür';
   assert (select count(*) from public.yerler where id = '31400000-0000-4000-8000-000000000003') = 0, '#314 KK2/KK5: elle kaldırılan yer gizli kalır';
   assert (select count(*) from public.yerler where id = '31400000-0000-4000-8000-000000000004') = 0, '#314: durakta olmayan taslak yer gizli kalır';
+  assert (select count(*) from public.yerler where id = '31400000-0000-4000-8000-000000000005') = 0, '#314: başka şehirdeki aynı place_id gizli kalır';
 end $$;
+select pg_temp.as_email(:E, 'ozcinar.ece@gmail.com');
+do $$ begin assert not (select yayin from public.yerler where id = '31400000-0000-4000-8000-000000000005'), '#314: başka şehirdeki aynı place_id taslak kalır'; end $$;
 -- KK4: gezi yayından kalkınca yerler yayında kalır; yeniden yayında elle kaldırılan yine açılmaz.
 select pg_temp.as_email(:E, 'ozcinar.ece@gmail.com');
 update public.geziler set yayin = false where id = '31400000-0000-4000-8000-000000000010';
@@ -3556,5 +3563,6 @@ select pg_temp.hata_bekle($$select public.gezi_yayini_yerleri_ac()$$, '42501');
 reset role;
 delete from public.geziler where id = '31400000-0000-4000-8000-000000000010';
 delete from public.yerler where id::text like '31400000-%';
+delete from public.sehirler where id = '31400000-0000-4000-8000-000000000020';
 
 \echo 'rls_test: TÜM TESTLER GEÇTİ'
