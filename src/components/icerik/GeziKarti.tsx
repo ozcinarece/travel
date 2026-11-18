@@ -1,12 +1,12 @@
 // #97 A KK4 → #138 (kanvas 3 · 3b): önerilen gezi kartları — Çizgi kenarlı beyaz kart; üstte foto (büyük 170 px · küçük 112 px),
-// sol üstte "N GÜNLÜK GEZİ" rozeti (büyükte Mandalina, küçükte Gece), büyükte sağ üstte kalp; altta başlık (Archivo) + "N mekan · şehir".
+// sol üstte "N GÜNLÜK GEZİ" rozeti (büyükte Mandalina, küçükte Gece), büyükte sağ üstte kalp; altta başlık (Figtree 800) + "N mekan · şehir".
 import { Image } from 'expo-image';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { Rozet } from '@/components/ui/Rozet';
 import { t } from '@/i18n';
 import type { Gezi } from '@/lib/tipler';
-import { kose, renk, yazi } from '@/theme';
+import { baslikStili, kose, renk, yazi } from '@/theme';
 
 import { Kalp } from './Kalp';
 
@@ -49,7 +49,7 @@ const s = StyleSheet.create({
   kalp: { position: 'absolute', right: 10, top: 10 },
   govdeBuyuk: { paddingHorizontal: 16, paddingTop: 14, paddingBottom: 16, gap: 4 },
   govdeKucuk: { paddingHorizontal: 14, paddingTop: 12, paddingBottom: 14, gap: 3 },
-  baslik: { fontFamily: yazi.baslik, fontSize: 16, lineHeight: 20, letterSpacing: -0.3, color: renk.metin },
+  baslik: { ...baslikStili(16), lineHeight: 20, color: renk.metin },
   baslikBuyuk: { fontSize: 19, lineHeight: 23 },
   alt: { fontFamily: yazi.normal, fontSize: 13, color: renk.ikincil },
 });

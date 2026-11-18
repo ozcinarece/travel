@@ -8,7 +8,7 @@ import { kartSaati, type DurakKarti } from '@/features/program/durakKarti';
 import { t } from '@/i18n';
 import { sureMetni } from '@/lib/kategori';
 import { dakikaSaat } from '@/schedule/tempo';
-import { renk, yazi } from '@/theme';
+import { baslikStili, renk, yazi } from '@/theme';
 
 import { FotoKutusu, geziStil } from './GeziParcalari';
 
@@ -116,7 +116,7 @@ export function BugunKarti({ baslik, kartlar, odak, sonraki, gunRenk, kalan, fot
 const s = StyleSheet.create({
   kart: { padding: 14, borderRadius: 20, backgroundColor: renk.zemin, gap: 12 },
   ust: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8 },
-  baslik: { flex: 1, fontFamily: yazi.baslik, fontSize: 18, letterSpacing: -0.36, color: renk.metin },
+  baslik: { flex: 1, ...baslikStili(18), color: renk.metin },
   sayac: { fontFamily: yazi.ekstra, fontSize: 12, color: renk.ikincil },
   ilerleme: { flexDirection: 'row', gap: 4 },
   parca: { flex: 1, height: 4, borderRadius: 2 },
@@ -124,9 +124,9 @@ const s = StyleSheet.create({
   no: { width: 34, height: 34, borderRadius: 10, backgroundColor: renk.vurgu, borderWidth: 2.5, borderColor: renk.ana, alignItems: 'center', justifyContent: 'center' },
   noMetin: { fontFamily: yazi.ekstra, fontSize: 15, color: renk.metin },
   saatSatiri: { flexDirection: 'row', alignItems: 'baseline', gap: 8 },
-  saat: { fontFamily: yazi.baslik, fontSize: 17, color: renk.metin },
+  saat: { ...baslikStili(17), color: renk.metin },
   sure: { fontFamily: yazi.ekstra, fontSize: 12, color: renk.ikincil },
-  ad: { fontFamily: yazi.baslik, fontSize: 21, letterSpacing: -0.42, lineHeight: 24, color: renk.metin },
+  ad: { ...baslikStili(21), lineHeight: 24, color: renk.metin },
   durumSatiri: { flexDirection: 'row', alignItems: 'center', gap: 5 },
   durum: { flexShrink: 1, fontFamily: yazi.normal, fontSize: 13, color: renk.ikincil },
   dugmeler: { flexDirection: 'row', gap: 8 },

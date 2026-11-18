@@ -71,8 +71,8 @@ import { enUcuzEklemeIndeksi, yuruyusDk } from '@/schedule/program';
 import { arasindaAnahtar } from '@/schedule/sira';
 import { varsayilanSira } from '@/schedule/siralama';
 import { bacakModu, dakikaSaat, kestirimTaksiSn, kestirimYuruyusSn, saatDakika, type BacakSecimi } from '@/schedule/tempo';
-import { gunRengi, gunUstuMetin, kose, minDokunma, renk, yazi, yuzRenkleri } from '@/theme';
 import { haritaMerkezi, konumu, konumVar, yolTarifiHedefi } from '@/lib/konum';
+import { baslikStili, gunRengi, gunUstuMetin, kose, minDokunma, renk, yazi, yuzRenkleri } from '@/theme';
 
 // PRD 3.3 KK3: 20 dk yürüyüş ≈ 1,5 km.
 const YURUME_YARICAPI_M = 1500;
@@ -1493,8 +1493,8 @@ const s = StyleSheet.create({
   // #140 (kanvas 11): liste başlığı.
   listeBaslik: { minHeight: 58, flexDirection: 'row', alignItems: 'center', gap: 10, paddingTop: 2, paddingBottom: 4 },
   gunKare: { width: 40, height: 40, borderRadius: kose.alan, alignItems: 'center', justifyContent: 'center' },
-  gunKareMetin: { fontFamily: yazi.baslik, fontSize: 16 },
-  listeGun: { fontFamily: yazi.baslik, fontSize: 19, letterSpacing: -0.38, color: renk.metin },
+  gunKareMetin: { ...baslikStili(16) },
+  listeGun: { ...baslikStili(19), color: renk.metin },
   listeOzet: { fontFamily: yazi.normal, fontSize: 13, color: renk.ikincil },
   haritayaDonKap: { alignItems: 'flex-end', gap: 4 },
   haritayaDon: { height: 36, paddingHorizontal: 12, borderRadius: kose.alan, backgroundColor: renk.yuzey, justifyContent: 'center' },

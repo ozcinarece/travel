@@ -19,7 +19,7 @@ describe('Avatar baş harf rengi ve yazısı', () => {
     expect(harfStili(renk.yuzey).color).toBe(renk.metin);
   });
 
-  it('kucukHarf: Figtree 800, 12 px; verilmezse Archivo, boyutun %40ı', () => {
+  it('kucukHarf: Figtree 800, 12 px; verilmezse başlık fontu, boyutun %40ı', () => {
     expect(harfStili(renk.anaAcik, true)).toEqual(expect.objectContaining({ fontFamily: 'Figtree_800ExtraBold', fontSize: 12 }));
     expect(harfStili(renk.anaAcik)).toEqual(expect.objectContaining({ fontSize: 28 * 0.4 }));
   });

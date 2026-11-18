@@ -7,7 +7,7 @@ import { bulunmaEki } from '@/features/davet/katilim';
 import { t } from '@/i18n';
 import { kategoriEtiketi, sureMetni, varsayilanDakika } from '@/lib/kategori';
 import type { Gezi, Yer } from '@/lib/tipler';
-import { renk, yazi } from '@/theme';
+import { baslikStili, renk, yazi } from '@/theme';
 
 import { BolumBasligi, FotoKutusu } from './GeziParcalari';
 
@@ -113,7 +113,7 @@ const s = StyleSheet.create({
   rehberAlt: { fontFamily: yazi.normal, fontSize: 12, color: renk.ikincil, marginTop: 2 },
   gezi: { padding: 14, borderRadius: 20, backgroundColor: renk.ana, flexDirection: 'row', alignItems: 'center', gap: 12 },
   geziEtiket: { fontFamily: yazi.ekstra, fontSize: 11, letterSpacing: 0.66, color: renk.anaAcik },
-  geziBaslik: { fontFamily: yazi.baslik, fontSize: 16, letterSpacing: -0.32, color: renk.zemin, marginTop: 3 },
+  geziBaslik: { ...baslikStili(16), color: renk.zemin, marginTop: 3 },
   geziMeta: { fontFamily: yazi.normal, fontSize: 12, color: renk.anaAcik, marginTop: 2 },
   geziAl: { height: 36, paddingHorizontal: 14, borderRadius: 12, backgroundColor: renk.vurgu, justifyContent: 'center', flexShrink: 0 },
   geziAlMetin: { fontFamily: yazi.ekstra, fontSize: 14, color: renk.metin },

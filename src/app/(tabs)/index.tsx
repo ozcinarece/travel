@@ -27,7 +27,7 @@ import { useOturum } from '@/lib/oturum';
 import { tarihAraligi } from '@/lib/takvim';
 import type { SeyahatOzet } from '@/lib/tipler';
 import { yerelTarih } from '@/lib/zaman';
-import { bosluk, kose, olcek, renk, yazi } from '@/theme';
+import { baslikStili, bosluk, kose, olcek, renk, yazi } from '@/theme';
 
 /**
  * #138 (kanvas 3 · Ana sayfa, 3b · İlk açılış): logo + profil, selam, arama, yaklaşan seyahat kartı, Önerilen Geziler.
@@ -376,16 +376,16 @@ const s = StyleSheet.create({
     shadowOffset: { width: 0, height: 8 },
     elevation: 8,
   },
-  yuzenMetin: { fontFamily: yazi.ekstra, fontSize: 16, color: renk.metin },
+  yuzenMetin: { fontFamily: yazi.kalin, fontSize: 16, color: renk.metin },
   selam: { paddingHorizontal: bosluk.kenar, gap: 4 },
   merhaba: { fontFamily: yazi.yari, fontSize: 15, color: renk.ikincil },
-  soru: { fontFamily: yazi.baslik, fontSize: olcek.ekran, lineHeight: 34, letterSpacing: -1, color: renk.metin },
+  soru: { ...baslikStili(olcek.ekran), lineHeight: 34, color: renk.metin },
   arama: { marginHorizontal: bosluk.kenar, height: 52, paddingHorizontal: 16, borderRadius: kose.dugme, backgroundColor: renk.yuzey, flexDirection: 'row', alignItems: 'center', gap: 10 },
   aramaMetin: { fontFamily: yazi.yari, fontSize: 15, color: renk.soluk },
   kenar: { paddingHorizontal: bosluk.kenar },
   bolum: { gap: 12, paddingTop: 6 },
   bolumSatir: { paddingHorizontal: bosluk.kenar, flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between' },
-  bolumBaslik: { fontFamily: yazi.baslik, fontSize: olcek.bolum, letterSpacing: -0.4, color: renk.metin },
+  bolumBaslik: { ...baslikStili(olcek.bolum), color: renk.metin },
   bolumAlt: { fontFamily: yazi.normal, fontSize: 14, color: renk.ikincil },
   tumu: { fontFamily: yazi.ekstra, fontSize: 14, color: renk.ana },
   serit: { gap: 12, paddingHorizontal: bosluk.kenar },

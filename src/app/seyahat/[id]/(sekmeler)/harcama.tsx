@@ -32,7 +32,7 @@ import { useOturum } from '@/lib/oturum';
 import { GUNLER, haftaGunu, parcala } from '@/lib/takvim';
 import type { Mekan, Seyahat, Uye } from '@/lib/tipler';
 import { yerelTarih } from '@/lib/zaman';
-import { renk, yazi } from '@/theme';
+import { baslikStili, renk, yazi } from '@/theme';
 
 const BEYAZ_14 = 'rgba(255,255,255,0.14)';
 const ACIK_YESIL = '#7ee2b3';
@@ -217,11 +217,11 @@ const s = StyleSheet.create({
   ust: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12 },
   yuzler: { flexDirection: 'row' },
   yuz: { borderRadius: 11, borderWidth: 2, borderColor: renk.zemin },
-  baslik: { fontFamily: yazi.baslik, fontSize: 28, letterSpacing: -0.84, color: renk.metin },
+  baslik: { ...baslikStili(28), color: renk.metin },
   gece: { padding: 14, borderRadius: 20, backgroundColor: renk.ana, gap: 12 },
   geceUst: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12 },
   geceEtiket: { fontFamily: yazi.ekstra, fontSize: 12, color: renk.anaAcik },
-  geceSayi: { fontFamily: yazi.baslik, fontSize: 28, letterSpacing: -0.84, color: renk.zemin },
+  geceSayi: { ...baslikStili(28), color: renk.zemin },
   geceAlt: { fontFamily: yazi.normal, fontSize: 12, color: renk.anaAcik },
   geceDugmeler: { flexDirection: 'row', gap: 8 },
   dugme: { height: 38, paddingHorizontal: 14, borderRadius: 12, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6 },
@@ -231,7 +231,7 @@ const s = StyleSheet.create({
   dipnot: { fontFamily: yazi.normal, fontSize: 12, color: renk.ikincil, textAlign: 'center', paddingTop: 6 },
   bos: { alignItems: 'center', gap: 8, paddingVertical: 36 },
   bosIkon: { width: 60, height: 60, borderRadius: 18, backgroundColor: renk.yuzey, alignItems: 'center', justifyContent: 'center' },
-  bosBaslik: { fontFamily: yazi.baslik, fontSize: 18, color: renk.metin },
+  bosBaslik: { ...baslikStili(18), color: renk.metin },
   bosMetin: { fontFamily: yazi.normal, fontSize: 14, lineHeight: 20, color: renk.ikincil, textAlign: 'center', maxWidth: 300 },
   fab: {
     position: 'absolute',
@@ -251,7 +251,7 @@ const s = StyleSheet.create({
     shadowRadius: 24,
     elevation: 8,
   },
-  fabMetin: { fontFamily: yazi.ekstra, fontSize: 15, color: renk.metin },
+  fabMetin: { fontFamily: yazi.kalin, fontSize: 15, color: renk.metin },
   bildirim: { position: 'absolute', left: 20, right: 20, bottom: 84, paddingVertical: 12, paddingHorizontal: 16, borderRadius: 14, backgroundColor: renk.metin },
   bildirimMetin: { fontFamily: yazi.yari, fontSize: 14, color: renk.zemin, textAlign: 'center' },
 });

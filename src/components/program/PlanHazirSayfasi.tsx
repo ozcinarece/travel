@@ -9,7 +9,7 @@ import { Rozet } from '@/components/ui/Rozet';
 import { t } from '@/i18n';
 import { GUNLER, haftaGunu } from '@/lib/takvim';
 import type { Gun } from '@/lib/tipler';
-import { gunRengi, gunUstuMetin, olcek, renk, yazi } from '@/theme';
+import { baslikStili, gunRengi, gunUstuMetin, olcek, renk, yazi } from '@/theme';
 
 export type PlanGunOzeti = { gun: Gun; durakSayisi: number; bas: string; bit: string; yolDk: number; araba: boolean; ilkAd: string };
 
@@ -75,11 +75,11 @@ export function PlanHazirSayfasi({ acik, ozetler, bosGunler, atanmamis, onDavet,
 }
 
 const s = StyleSheet.create({
-  baslik: { fontFamily: yazi.baslik, fontSize: olcek.kart, lineHeight: 27, letterSpacing: -0.6, color: renk.metin },
+  baslik: { ...baslikStili(olcek.kart), lineHeight: 27, color: renk.metin },
   satir: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 12, borderRadius: 16 },
   bos: { backgroundColor: 'transparent', borderWidth: 1.5, borderStyle: 'dashed', borderColor: '#b4bbd3' },
   gunKare: { width: 40, height: 40, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
-  gunNo: { fontFamily: yazi.baslik, fontSize: 16 },
+  gunNo: { ...baslikStili(16) },
   satirBaslik: { fontFamily: yazi.ekstra, fontSize: 15, color: renk.metin },
   satirAlt: { fontFamily: yazi.normal, fontSize: 13, color: renk.ikincil },
   not: { fontFamily: yazi.yari, fontSize: 13, color: renk.ikincil },

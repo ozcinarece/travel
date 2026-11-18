@@ -33,7 +33,7 @@ import { kategoriEtiketi, sureMetni, varsayilanDakika } from '@/lib/kategori';
 import { okumaSuresiDk } from '@/lib/markdown';
 import { AYLAR, parcala, tarihAraligi } from '@/lib/takvim';
 import type { GeziDuragi } from '@/lib/tipler';
-import { bosluk, renk, yazi } from '@/theme';
+import { baslikStili, bosluk, renk, yazi } from '@/theme';
 
 type Sekme = 'plan' | 'yazi';
 /** Eklenecek / çıkarılacak mekan (durak satırı ya da yazıdaki mekan kartı). */
@@ -428,7 +428,7 @@ const s = StyleSheet.create({
   kapakMetin: { paddingHorizontal: bosluk.kenar, paddingBottom: 18, gap: 6 },
   rozet: { height: 24, lineHeight: 24, paddingHorizontal: 8, borderRadius: 8, overflow: 'hidden', backgroundColor: renk.vurgu, color: renk.metin, fontFamily: yazi.ekstra, fontSize: 11 },
   rozetSaydam: { backgroundColor: 'rgba(255,255,255,0.16)', color: renk.zemin },
-  baslik: { fontFamily: yazi.baslik, fontSize: 26, lineHeight: 28, letterSpacing: -0.8, color: renk.zemin },
+  baslik: { ...baslikStili(26), lineHeight: 28, color: renk.zemin },
   segmentKap: { marginTop: 12, paddingHorizontal: bosluk.kenar },
   yapisik: { position: 'absolute', left: 0, right: 0, top: 0, paddingHorizontal: bosluk.kenar, paddingBottom: 8, backgroundColor: renk.zemin, borderBottomWidth: 1, borderBottomColor: renk.ayrac },
   hedef: { marginTop: 10, marginHorizontal: bosluk.kenar, height: 40, paddingHorizontal: 12, borderRadius: 12, borderWidth: 1.5, borderStyle: 'dashed', borderColor: '#b4bbd3', flexDirection: 'row', alignItems: 'center', gap: 8 },
@@ -447,7 +447,7 @@ const s = StyleSheet.create({
   kartAlt: { fontFamily: yazi.normal, fontSize: 12, color: renk.ikincil },
   altCubuk: { position: 'absolute', left: 0, right: 0, bottom: 0, paddingHorizontal: bosluk.kenar, paddingTop: 12, backgroundColor: renk.zemin, borderTopWidth: 1, borderTopColor: renk.ayrac, gap: 8 },
   altSatir: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  altBaslik: { fontFamily: yazi.baslik, fontSize: 17, color: renk.metin },
+  altBaslik: { ...baslikStili(17), color: renk.metin },
   altAlt: { fontFamily: yazi.normal, fontSize: 12, color: renk.ikincil },
   hata: { fontFamily: yazi.yari, fontSize: 12, color: renk.uyari, textAlign: 'center' },
   hataKod: { fontFamily: yazi.normal, fontSize: 11, lineHeight: 15, color: renk.ikincil, textAlign: 'center' },

@@ -9,7 +9,7 @@ import { seyahatAdi } from '@/features/sihirbaz/sihirbaz';
 import { t } from '@/i18n';
 import { ayYil, tarihAraligi } from '@/lib/takvim';
 import type { SeyahatOzet } from '@/lib/tipler';
-import { renk, yazi } from '@/theme';
+import { baslikStili, renk, yazi } from '@/theme';
 
 /** #174 KK1: `onUzunBas` — kartın eylem menüsü (sahip: Seyahati sil · üye: Seyahatten ayrıl). */
 type Ortak = { seyahat: SeyahatOzet; durum: SeyahatDurumu | undefined; onPress: () => void; onUzunBas?: () => void };
@@ -69,8 +69,8 @@ export function YaklasanSatiri({ seyahat, onPress, onUzunBas, sira }: Omit<Ortak
 const s = StyleSheet.create({
   ok: { transform: [{ rotate: '180deg' }] },
   karo: { width: 56, height: 56, borderRadius: 16, alignItems: 'center', justifyContent: 'center' },
-  harf: { fontFamily: yazi.baslik, fontSize: 20, color: renk.ana },
-  satirAd: { fontFamily: yazi.baslik, fontSize: 17, color: renk.metin },
+  harf: { ...baslikStili(20), color: renk.ana },
+  satirAd: { ...baslikStili(17), color: renk.metin },
   satirAlt: { fontFamily: yazi.normal, fontSize: 13, color: renk.ikincil },
   gecmis: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 12, borderRadius: 20, backgroundColor: '#f4f6fa' },
   tekrar: { height: 34, paddingHorizontal: 10, borderRadius: 10, backgroundColor: renk.zemin, justifyContent: 'center' },

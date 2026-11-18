@@ -11,6 +11,9 @@
   "baslik": "Bursa'da iki gün",
   "ozet": "İlk kez gidenlere hanlar, külliyeler ve Cumalıkızık; acelesiz 2 gün",
   "yazar_ad": "Tripmate ekibi",
+  "amaclar": [
+   "kultur_tarih"
+  ],
   "yazi_md": "Bursa'yı ilk kez görecekler için iki günlük, acelesiz bir plan. İlk gün Osmanlı'nın ilk başkentinin ticaret kalbi olan hanlar bölgesinde başlıyor, öğle yemeğinde İskender'le devam edip Tophane'den Muradiye'ye uzanıyor. İkinci gün sabah Cumalıkızık'ta köy kahvaltısıyla açılıyor, öğleden sonra Yeşil'in çinileriyle ve Irgandı Köprüsü'nde bir çayla bitiyor. Plan cumartesi başlıyor; müzelerin pazartesi kapalı olduğunu unutma. İlkbahar ve sonbahar en rahat mevsimler; yazın Uludağ'ın gölgesinde şehir yine de serin kalabiliyor.\n\n> Gezdiğin yerlerin çoğu ibadete açık cami ve türbe: omuzları ve dizleri örten kıyafet seç, kadınlar için çantada bir başörtüsü bulunsun, namaz vakitlerinde ziyareti biraz ertele.\n\n## 1. gün · Hanlar ve külliyeler\n\nGüne [Ulu Cami](mekan:ChIJ3RmyGj84yhQR4x4TfWyU8SY) ile başla; yirmi kubbenin altındaki şadırvan sabah sessizliğinde en güzel hâlinde. Kuzey kapısından çıkınca birkaç adımda [Koza Han](mekan:ChIJSw0QgOE9yhQRzQN7LU1DH8M)'dasın: avlunun ortasındaki küçük mescide bak, ağaçların altında ilk çayını iç. Hanlar bölgesinden ayrılmadan [Kapalıçarşı](mekan:ChIJaVFANeI9yhQR-CThVzriC-Y)'nın sokaklarında biraz dolaş.\n\n::mekan[ChIJ3RmyGj84yhQR4x4TfWyU8SY]\n\nÖğleye doğru Heykel'e yürü ve [Bursa Kent Müzesi](mekan:ChIJHzNOwOA9yhQRdMKFcQdb1fw)'ne gir; bodrum kattaki eski esnaf sokağı, sabah gördüğün çarşıyı geçmişe bağlıyor. Öğle yemeği için birkaç adım ötedeki [İskender'in tarihi ahşap dükkânı](mekan:ChIJJYJhbGE9yhQREEAcx4cDnN4) Bursa'nın en bilinen lezzetiyle tanışmanın klasik yolu.\n\nYemekten sonra yokuşu yavaş yavaş çıkıp Tophane'deki [Osman Gazi ve Orhan Gazi türbeleri](mekan:ChIJjw_bKP09yhQRODXzZChVsnM)'ne git; saat kulesinin yanından şehre ve ovaya bak. Günü batıdaki [Muradiye Külliyesi](mekan:ChIJG4meHgAWyhQRk8hSEmB43XU)'nde, türbelerin dağıldığı ağaçlı bahçede bitir; ikindi ışığı burada çok yumuşak.\n\n::mekan[ChIJG4meHgAWyhQRk8hSEmB43XU]\n\n## 2. gün · Cumalıkızık ve Yeşil\n\nSabah erkenden taksiyle ya da belediye otobüsüyle [Cumalıkızık](mekan:ChIJffj8RG05yhQR8psv7HopAm8)'a git. Kahvaltını eski evlerden birinde, ahududu reçeli ve şerbetiyle yap; sonra taş sokaklarda yukarı doğru dolaş. Köy meydanındaki [Köy Müzesi](mekan:ChIJD_M7Q5c5yhQRPLgS_SSdJVU) küçük ama eski gündelik hayatı iyi anlatıyor. Kahvaltı geç ve doyurucu olduğu için bugün öğle yemeğini atlayabilir, akşamüstü bir çayla idare edebilirsin.\n\n::mekan[ChIJffj8RG05yhQR8psv7HopAm8]\n\nÖğleye doğru şehre dön ve [Emir Sultan Camii](mekan:ChIJVVVV9Nc9yhQRvgZ09oyrt44)'nin ağaçlı avlusunda kısa bir mola ver. Oradan on dakikalık bir yürüyüşle [Yeşil Türbe](mekan:ChIJM38n1N49yhQRcnCWi3B03g4)'ye geç; turkuaz çinili türbeyi gördükten sonra karşısındaki Yeşil Cami'nin içindeki çinileri de kaçırma.\n\n::mekan[ChIJM38n1N49yhQRcnCWi3B03g4]\n\nBirkaç yüz metre kuzeydeki [Panorama 1326](mekan:ChIJmW_z7N0_yhQRmdi6Jw3CD_g), iki gündür gezdiğin türbelerin sahiplerini ve Bursa'nın fethini dev bir dairesel resimle anlatıyor. Günü [Irgandı Köprüsü](mekan:ChIJS0lARt49yhQR1LruSgYHKsE)'nde, dükkânların arasında dolaşıp derenin üstünde bir çay içerek kapat; Heykel'e ve çarşıya buradan yürüyerek inebilirsin.\n\nPlanı kısaltmak istersen 1. günden Kent Müzesi'ni, 2. günden Panorama'yı çıkarabilirsin. Uzatmak isteyenler için Çekirge yönünde Hüdavendigar Külliyesi ve Karagöz Müzesi, ya da teleferikle Uludağ yarım günlük iyi eklemeler."
  },
  "gunler": [
@@ -23,7 +26,10 @@
      "ad": "Bursa Ulu Cami",
      "sure_dk": 45,
      "kapali_gunler": [],
-     "rehber": "ulu-cami"
+     "rehber": "ulu-cami",
+     "amaclar": [
+      "kultur_tarih"
+     ]
     },
     {
      "place_id": "ChIJSw0QgOE9yhQRzQN7LU1DH8M",
@@ -34,7 +40,11 @@
      "kapali_gunler": [
       "pazar"
      ],
-     "rehber": "koza-han"
+     "rehber": "koza-han",
+     "amaclar": [
+      "kultur_tarih",
+      "yavas"
+     ]
     },
     {
      "place_id": "ChIJHzNOwOA9yhQRdMKFcQdb1fw",
@@ -45,7 +55,10 @@
      "kapali_gunler": [
       "pazartesi"
      ],
-     "rehber": "bursa-kent-muzesi"
+     "rehber": "bursa-kent-muzesi",
+     "amaclar": [
+      "kultur_tarih"
+     ]
     },
     {
      "place_id": "ChIJJYJhbGE9yhQREEAcx4cDnN4",
@@ -54,7 +67,10 @@
      "sure_dk": 60,
      "sure_gerekcesi": "varsayılan 45; oturulup yenen öğle yemeği",
      "kapali_gunler": [],
-     "rehber": "iskender-tarihi-dukkan"
+     "rehber": "iskender-tarihi-dukkan",
+     "amaclar": [
+      "lezzet"
+     ]
     },
     {
      "place_id": "ChIJjw_bKP09yhQRODXzZChVsnM",
@@ -63,7 +79,10 @@
      "sure_dk": 45,
      "sure_gerekcesi": "varsayılan 60; iki türbe ve manzara terası",
      "kapali_gunler": [],
-     "rehber": "osman-gazi-orhan-gazi-turbeleri"
+     "rehber": "osman-gazi-orhan-gazi-turbeleri",
+     "amaclar": [
+      "kultur_tarih"
+     ]
     },
     {
      "place_id": "ChIJG4meHgAWyhQRk8hSEmB43XU",
@@ -72,7 +91,11 @@
      "sure_dk": 75,
      "sure_gerekcesi": "varsayılan 45; bahçede on iki türbe ve cami",
      "kapali_gunler": [],
-     "rehber": "muradiye-kulliyesi"
+     "rehber": "muradiye-kulliyesi",
+     "amaclar": [
+      "kultur_tarih",
+      "yavas"
+     ]
     }
    ]
   },
@@ -86,7 +109,11 @@
      "sure_dk": 120,
      "sure_gerekcesi": "varsayılan 45; köy kahvaltısı ve köy içi yürüyüş",
      "kapali_gunler": [],
-     "rehber": "cumalikizik"
+     "rehber": "cumalikizik",
+     "amaclar": [
+      "kultur_tarih",
+      "yavas"
+     ]
     },
     {
      "place_id": "ChIJVVVV9Nc9yhQRvgZ09oyrt44",
@@ -95,7 +122,10 @@
      "sure_dk": 30,
      "sure_gerekcesi": "varsayılan 45; avlu ve türbe, kısa ziyaret",
      "kapali_gunler": [],
-     "rehber": "emir-sultan-camii"
+     "rehber": "emir-sultan-camii",
+     "amaclar": [
+      "kultur_tarih"
+     ]
     },
     {
      "place_id": "ChIJM38n1N49yhQRcnCWi3B03g4",
@@ -104,7 +134,10 @@
      "sure_dk": 60,
      "sure_gerekcesi": "varsayılan 30; karşısındaki Yeşil Cami de geziliyor",
      "kapali_gunler": [],
-     "rehber": "yesil-turbe"
+     "rehber": "yesil-turbe",
+     "amaclar": [
+      "kultur_tarih"
+     ]
     },
     {
      "place_id": "ChIJmW_z7N0_yhQRmdi6Jw3CD_g",
@@ -115,7 +148,11 @@
      "kapali_gunler": [
       "pazartesi"
      ],
-     "rehber": "panorama-1326"
+     "rehber": "panorama-1326",
+     "amaclar": [
+      "kultur_tarih",
+      "cocuklu"
+     ]
     },
     {
      "place_id": "ChIJS0lARt49yhQR1LruSgYHKsE",
@@ -124,7 +161,11 @@
      "sure_dk": 30,
      "sure_gerekcesi": "varsayılan 45; köprü üstü dükkânlar ve çay",
      "kapali_gunler": [],
-     "rehber": "irgandi-koprusu"
+     "rehber": "irgandi-koprusu",
+     "amaclar": [
+      "kultur_tarih",
+      "yavas"
+     ]
     }
    ]
   }

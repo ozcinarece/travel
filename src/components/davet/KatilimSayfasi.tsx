@@ -9,7 +9,7 @@ import { Rozet } from '@/components/ui/Rozet';
 import { davetSeyahatAdi, yonelmeEki } from '@/features/davet/katilim';
 import { t } from '@/i18n';
 import type { Uye } from '@/lib/tipler';
-import { olcek, renk, yazi, yuzRenkleri } from '@/theme';
+import { baslikStili, olcek, renk, yazi, yuzRenkleri } from '@/theme';
 
 type Props = {
   acik: boolean;
@@ -61,7 +61,7 @@ const s = StyleSheet.create({
   ustSatir: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   yuzler: { flexDirection: 'row' },
   yuzCerceve: { borderWidth: 3, borderColor: renk.zemin, borderRadius: 17 },
-  baslik: { fontFamily: yazi.baslik, fontSize: olcek.kart + 1, lineHeight: 28, letterSpacing: -0.6, color: renk.metin },
+  baslik: { ...baslikStili(olcek.kart + 1), lineHeight: 28, color: renk.metin },
   metin: { fontFamily: yazi.normal, fontSize: 15, lineHeight: 22, color: renk.ikincil },
   dugmeler: { flexDirection: 'row', gap: 10 },
 });

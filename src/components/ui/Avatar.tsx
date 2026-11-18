@@ -8,14 +8,14 @@ type Props = {
   url?: string | null;
   boyut?: number;
   arkaPlan?: string;
-  /** #290 KK8 (29c): baş harf Figtree 800, 12 px (kart içi küçük yüzler); verilmezse Archivo, boyutun %40'ı. */
+  /** #290 KK8 (29c): baş harf Figtree 800, 12 px (kart içi küçük yüzler); verilmezse başlık fontu (Figtree 800), boyutun %40'ı. */
   kucukHarf?: boolean;
 };
 
 /** Açık zeminlerde (Mandalina, Buz, açık mavi) baş harf Gece; koyularda beyaz. */
 const ACIK_ZEMINLER = new Set<string>([renk.vurgu, renk.yuzey, renk.anaAcik, renk.zemin, renk.basariZemin, '#f5a524']);
 
-/** #136 (kanvas): köşeli yuvarlak kare avatar (köşe ≈ %32), Archivo baş harf; fotoğraf varsa o. Varsayılan zemin Gece. */
+/** #136 (kanvas): köşeli yuvarlak kare avatar (köşe ≈ %32), Figtree 800 baş harf; fotoğraf varsa o. Varsayılan zemin Gece. */
 export function Avatar({ ad, url, boyut = 30, arkaPlan = renk.ana, kucukHarf = false }: Props) {
   const kutu = { width: boyut, height: boyut, borderRadius: Math.round(boyut * 0.32) };
   if (url) {

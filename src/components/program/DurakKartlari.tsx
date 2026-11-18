@@ -27,7 +27,7 @@ import { sureMetni } from '@/lib/kategori';
 import { kategoriPini } from '@/lib/pinIkonu';
 import { puanMetni } from '@/lib/puan';
 import { dakikaSaat } from '@/schedule/tempo';
-import { kose, renk, yazi } from '@/theme';
+import { baslikStili, kose, renk, yazi } from '@/theme';
 
 type Props = {
   kartlar: DurakKarti[];
@@ -361,9 +361,9 @@ const s = StyleSheet.create({
   numaraMetin: { fontFamily: yazi.ekstra, fontSize: 15, color: renk.metin },
   bilgi: { flex: 1, minWidth: 0, gap: 3 },
   saatSatir: { flexDirection: 'row', alignItems: 'baseline', gap: 8 },
-  saat: { flexShrink: 1, fontFamily: yazi.baslik, fontSize: 17, color: renk.metin },
+  saat: { flexShrink: 1, ...baslikStili(17), color: renk.metin },
   sure: { fontFamily: yazi.ekstra, fontSize: 12, color: renk.ikincil },
-  ad: { fontFamily: yazi.baslik, fontSize: 21, lineHeight: 23, letterSpacing: -0.42, color: renk.metin },
+  ad: { ...baslikStili(21), lineHeight: 23, color: renk.metin },
   ozetSatir: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'baseline' },
   ozetKisalir: { flexShrink: 1 },
   ozet: { fontFamily: yazi.normal, fontSize: 13, color: renk.ikincil },

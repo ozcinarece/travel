@@ -5,7 +5,7 @@ import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 
 import { t } from '@/i18n';
-import { renk, yazi } from '@/theme';
+import { baslikStili, renk, yazi } from '@/theme';
 
 type Props = {
   /** "4 GÜN SONRA" · "BUGÜN" · "ŞU AN SEYAHATTE"; planlanan seyahatte yok (yalnız şehir adı). */
@@ -145,7 +145,7 @@ const s = StyleSheet.create({
   ustSatir: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   rozet: { minHeight: 20, paddingHorizontal: 7, borderRadius: 6, backgroundColor: renk.vurgu, justifyContent: 'center', flexShrink: 0 },
   rozetMetin: { fontFamily: yazi.ekstra, fontSize: 10, color: renk.metin },
-  ad: { flexShrink: 1, fontFamily: yazi.baslik, fontSize: 16, letterSpacing: -0.32, color: renk.zemin },
+  ad: { flexShrink: 1, ...baslikStili(16), color: renk.zemin },
   alt: { fontFamily: yazi.yari, fontSize: 12, color: renk.anaAcik },
   arti: { width: 64, height: 64, borderRadius: 20, backgroundColor: renk.vurgu, alignItems: 'center', justifyContent: 'center', ...golge, shadowOpacity: 0.22 },
   basili: { opacity: 0.85 },
@@ -169,7 +169,7 @@ const s = StyleSheet.create({
     elevation: 10,
   },
   ipucuMetinler: { gap: 3 },
-  ipucuBaslik: { fontFamily: yazi.baslik, fontSize: 16, letterSpacing: -0.32, color: renk.metin },
+  ipucuBaslik: { ...baslikStili(16), color: renk.metin },
   ipucuMetin: { fontFamily: yazi.normal, fontSize: 13, lineHeight: 18, color: renk.ikincil },
   tamam: { alignSelf: 'flex-end', minHeight: 44, paddingHorizontal: 18, borderRadius: 12, backgroundColor: renk.yuzey, justifyContent: 'center' },
   tamamMetin: { fontFamily: yazi.ekstra, fontSize: 14, color: renk.ana },

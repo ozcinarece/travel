@@ -8,7 +8,7 @@ import { PIN_IKONLARI } from '@/components/harita/pinIkonlari';
 import { Ikon } from '@/components/ui/Ikon';
 import { t } from '@/i18n';
 import { KATEGORI_PIN, pinKategorisi, type PinKategorisi } from '@/lib/pinIkonu';
-import { renk, yazi } from '@/theme';
+import { baslikStili, renk, yazi } from '@/theme';
 
 /** Fotoğrafı olmayan mekanın kutusu: kategoriye göre açık ton (kanvas 23). */
 const KUTU_RENGI: Record<PinKategorisi, string> = {
@@ -110,7 +110,7 @@ export const geziStil = StyleSheet.create({
 
 const s = StyleSheet.create({
   baslikSatiri: { flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between' },
-  baslik: { fontFamily: yazi.baslik, fontSize: 18, letterSpacing: -0.36, color: renk.metin },
+  baslik: { ...baslikStili(18), color: renk.metin },
   baglanti: { flexDirection: 'row', alignItems: 'center', gap: 2 },
   baglantiMetin: { fontFamily: yazi.ekstra, fontSize: 13, color: renk.ana },
   buz: { height: 32, paddingHorizontal: 12, borderRadius: 10, backgroundColor: renk.yuzey, justifyContent: 'center', flexShrink: 0 },

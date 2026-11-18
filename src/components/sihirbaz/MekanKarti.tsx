@@ -10,7 +10,7 @@ import { t } from '@/i18n';
 import { kategoriEtiketi, sureMetni } from '@/lib/kategori';
 import { kategoriPini, yorumKisa } from '@/lib/pinIkonu';
 import { puanMetni } from '@/lib/puan';
-import { renk, yazi } from '@/theme';
+import { baslikStili, renk, yazi } from '@/theme';
 
 type Props = { mekan: OnerilenMekan; listede: boolean; mesgul?: boolean; onEkle: () => void; onCikar?: () => void; onAc?: () => void };
 
@@ -52,6 +52,6 @@ const s = StyleSheet.create({
   rozet: { position: 'absolute', left: 10, top: 10, flexDirection: 'row', alignItems: 'center', gap: 4, height: 24, paddingHorizontal: 9, borderRadius: 999, backgroundColor: renk.zemin },
   rozetMetin: { fontFamily: yazi.kalin, fontSize: 11, color: renk.metin },
   govde: { flexDirection: 'row', alignItems: 'center', gap: 10, padding: 12 },
-  ad: { fontFamily: yazi.baslik, fontSize: 16, color: renk.metin },
+  ad: { ...baslikStili(16), color: renk.metin },
   meta: { fontFamily: yazi.normal, fontSize: 12, color: renk.ikincil },
 });
