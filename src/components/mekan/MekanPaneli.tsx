@@ -5,7 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AltSayfa } from '@/components/harita/AltSayfa';
 import { SayfaKaydirmasi, useSayfaKaydirma } from '@/components/ui/sayfaCekme';
-import { KategoriIkonu, kutuRengi } from '@/components/gezi/GeziParcalari';
+import { KategoriGlifi, kutuRengi } from '@/components/gezi/GeziParcalari';
 import { Kalp } from '@/components/icerik/Kalp';
 import { GoogleFotoAtfi, KapakAtfi } from '@/components/icerik/KapakAtfi';
 import { MdYazi } from '@/components/icerik/MdYazi';
@@ -129,6 +129,8 @@ export function MekanPaneli(p: MekanPaneliProps) {
   const ctaAd = ctaAnahtari(p.baglam, p.icinde);
   const rehberMd = icerikYeri.data?.rehber_md?.trim() || null;
   const rehberKapak = kapakVeAtif([icerikYeri.data ?? {}]);
+  /** Rehberli yer = `yerler`'de satırı olan yer (BO'da rehberi yazılan). */
+  const fotoHali = fotoAlaniHali({ rehberKapak: !!rehberKapak.uri, rehberli: !!icerikYeri.data, rehberBekliyor: icerikYeri.isPending, googleFotolar: yer?.fotolar.length ?? 0, hafifFoto: !!p.hafif?.foto_uri });
   const sekme = panelSekmesi(durum, !!rehberMd);
   const hal = durum.hal === 'kapali' ? 'katli' : durum.hal;
   const googleUrl = yer?.google_maps_uri ?? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(ad || 'yer')}&query_place_id=${encodeURIComponent(p.placeId)}`;
@@ -173,25 +175,27 @@ export function MekanPaneli(p: MekanPaneliProps) {
             <Govde>
               {/* KK1: foto kaydırma "1 / N", kapat; dokununca tam ekran galeri. */}
               <View style={s.fotoAlan}>
-                {rehberKapak.uri ? (
+                {fotoHali === 'kapak' && rehberKapak.uri ? (
                   // #345 KK4 (kanvas 29i · C): rehberli yerin kendi kapağı (Commons ya da Ece'nin), atfıyla.
                   <View style={StyleSheet.absoluteFill}>
                     <Image source={{ uri: rehberKapak.uri }} style={StyleSheet.absoluteFill} contentFit="cover" transition={150} />
                     {rehberKapak.atif ? <KapakAtfi atif={rehberKapak.atif} /> : null}
                   </View>
-                ) : yer && yer.fotolar.length > 0 ? (
+                ) : fotoHali === 'yok' ? (
+                  // #348 inceleme 3 (kanvas 29i · D): rehberli yerin kendi kapağı yoksa Google fotoğrafı kullanılmaz, doğrudan D.
+                  <FotoYok tip={tip} />
+                ) : fotoHali === 'bekliyor' ? (
+                  // Rehberli mi henüz bilinmiyor: Google fotoğrafı yanıp sönmesin diye yalnız kategori zemini.
+                  <View style={[StyleSheet.absoluteFill, { backgroundColor: kutuRengi(tip) }]} />
+                ) : fotoHali === 'kaydirma' && yer ? (
                   <FotoKaydirma yer={yer} genislik={alanW || ekran.width} onAc={() => galeriAc(true)} />
-                ) : p.hafif?.foto_uri ? (
+                ) : fotoHali === 'hafif' && p.hafif?.foto_uri ? (
                   <View style={[StyleSheet.absoluteFill, { backgroundColor: kategoriRenk + '22' }]}>
                     <Image source={{ uri: p.hafif.foto_uri }} style={StyleSheet.absoluteFill} contentFit="cover" transition={150} />
+                    <GoogleFotoAtfi yazar={p.hafif.foto_yazar} />
                   </View>
                 ) : (
-                  // #345 KK5 (kanvas 29i · D): fotoğraf yok → kategori ikonu, kategori renginin açık zemininde.
-                  <View style={[StyleSheet.absoluteFill, s.fotoYok, { backgroundColor: kutuRengi(tip) }]} testID="foto-yok">
-                    <View style={s.fotoYokKare}>
-                      <KategoriIkonu tip={tip} boyut={44} />
-                    </View>
-                  </View>
+                  <FotoYok tip={tip} />
                 )}
                 <Pressable accessibilityRole="button" accessibilityLabel={t('mekan.panel.kapat')} onPress={p.onKapat} hitSlop={8} style={s.kapat}>
                   <Ikon ad="yeni" boyut={20} renk={renk.ana} kalinlik={2.6} />
@@ -305,6 +309,35 @@ function Govde({ children }: { children: ReactNode }) {
  * komşuları çözülür (foto başına istek). İlk fotoğraf places-full'dan hazır gelir. Dokununca tam ekran galeri.
  * #85 dersi: kaydırma konumu işleyicide eşzamanlı okunur, güncelleyiciye yalnız sayı girer (havuzlanan olay null olur).
  */
+export type FotoAlaniHali = 'kapak' | 'yok' | 'bekliyor' | 'kaydirma' | 'hafif';
+
+/**
+ * Mekan panelinin fotoğraf alanı (kanvas 29i · C/D). Rehberli yer (= `yerler`'de satırı var): kendi kapağı ya da D; Google
+ * fotoğrafı kullanılmaz (#348 inceleme 3). Rehberli olmayan yer bugünkü gibi: Google fotoğrafları, yoksa hafif fotoğraf, yoksa D.
+ * Rehberli mi henüz bilinmiyorsa yalnız zemin (Google fotoğrafı yanıp sönmesin).
+ */
+export function fotoAlaniHali(x: { rehberKapak: boolean; rehberli: boolean; rehberBekliyor: boolean; googleFotolar: number; hafifFoto: boolean }): FotoAlaniHali {
+  if (x.rehberKapak) return 'kapak';
+  if (x.rehberli) return 'yok';
+  if (x.rehberBekliyor) return 'bekliyor';
+  if (x.googleFotolar > 0) return 'kaydirma';
+  return x.hafifFoto ? 'hafif' : 'yok';
+}
+
+/**
+ * #345 KK5 / #348 inceleme 4 (kanvas 29i · D): fotoğraf yok → zemin `kutuRengi`, ortada 88 px beyaz kare, içinde kategorinin
+ * çizgi glifi (44 px, 2 px, kategorinin koyu rengi). Renkli pin PNG'si kullanılmaz; atıf satırı yok.
+ */
+function FotoYok({ tip }: { tip: string | null }) {
+  return (
+    <View style={[StyleSheet.absoluteFill, s.fotoYok, { backgroundColor: kutuRengi(tip) }]} testID="foto-yok">
+      <View style={s.fotoYokKare}>
+        <KategoriGlifi tip={tip} boyut={44} />
+      </View>
+    </View>
+  );
+}
+
 export function FotoKaydirma({ yer, genislik, onAc }: { yer: TamYer; genislik: number; onAc: () => void }) {
   const [sayfa, setSayfa] = useState(0);
   const sayi = yer.fotolar.length;
@@ -532,10 +565,10 @@ const s = StyleSheet.create({
   govde: { paddingBottom: 24 },
   fotoAlan: { height: FOTO_YUKSEKLIK, backgroundColor: '#e6e0fa', overflow: 'hidden' },
   kapat: { position: 'absolute', right: 14, top: 12, width: 40, height: 40, borderRadius: kose.alan, backgroundColor: renk.zemin, alignItems: 'center', justifyContent: 'center', transform: [{ rotate: '45deg' }] },
-  fotoSayac: { position: 'absolute', left: 14, bottom: 14, height: 24, paddingHorizontal: 8, borderRadius: 8, backgroundColor: renk.zemin, justifyContent: 'center' },
+  fotoSayac: { position: 'absolute', left: 14, bottom: 11, height: 24, paddingHorizontal: 8, borderRadius: 8, backgroundColor: renk.zemin, justifyContent: 'center' },
   fotoSayacMetin: { fontFamily: yazi.ekstra, fontSize: 12, color: renk.metin },
   fotoYok: { alignItems: 'center', justifyContent: 'center' },
-  fotoYokKare: { width: 88, height: 88, borderRadius: 26, backgroundColor: renk.zemin },
+  fotoYokKare: { width: 88, height: 88, borderRadius: 26, backgroundColor: renk.zemin, alignItems: 'center', justifyContent: 'center' },
   icerik: { paddingHorizontal: bosluk.kenar, paddingTop: 16, gap: 12 },
   cipler: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   cip: { height: 24, paddingHorizontal: 8, borderRadius: 8, justifyContent: 'center' },

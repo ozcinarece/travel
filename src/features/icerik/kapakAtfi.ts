@@ -48,3 +48,24 @@ export function kapakVeAtif(kaynaklar: { kapak_url?: string | null; kapak_atif?:
   const k = kaynaklar.find((x) => !!x.kapak_url);
   return k ? { uri: k.kapak_url!, atif: kapakAtfiOku(k.kapak_atif) } : { uri: null, atif: null };
 }
+
+/**
+ * #348 inceleme 2: yedek kapağın atfı, fotoğrafı aldığı satırdan. `kapak` = satırın kendi kapağı (Commons ya da Ece'nin;
+ * `kapak_atif` bozuksa atıf yok), `google` = Google fotoğrafı ("Foto: {yazar} · Google Maps"; yazar bilinmiyorsa yazarsız).
+ */
+export type FotoAtfi = { tur: 'kapak'; atif: KapakAtfi | null } | { tur: 'google'; yazar: string | null };
+
+/** Fotoğrafı olan ilk satır ve atfı; hiçbirinde fotoğraf yoksa null. */
+export function ilkFoto<T>(satirlar: T[], oku: (s: T) => { foto_uri: string | null; foto_atif: FotoAtfi | null } | undefined): { uri: string; atif: FotoAtfi | null } | null {
+  for (const x of satirlar) {
+    const f = oku(x);
+    if (f?.foto_uri) return { uri: f.foto_uri, atif: f.foto_atif };
+  }
+  return null;
+}
+
+/** #348 inceleme 1 (kanvas 29i-A): gezi kapağı en az 260 px (güvenli alan dahil); üst boşluk büyükse 166 + üst boşluk. */
+export const GEZI_KAPAK_EN_AZ = 260;
+export function kapakYuksekligi(ustBosluk: number): number {
+  return Math.max(GEZI_KAPAK_EN_AZ, 166 + ustBosluk);
+}
