@@ -26,6 +26,7 @@ import {
   sehirKimligiSql,
   SLUG,
   yuklemeVerisi,
+  mekanDurumuDenetle,
 } from './dogrula.mjs';
 import { osmAdaylariOku } from './aday.mjs';
 import { OsmOkumaHatasi, yuklemeKonumlari } from './konum.mjs';
@@ -525,14 +526,8 @@ async function yukle() {
   }
   const { osmKonumlari, yerler } = konum;
   const detaylar = new Map(yerler.filter((y) => !y.hata).map((y) => [y.place_id, y]));
-  const sorunlar = [];
-  const sehirId = plan.sehir?.yeni?.place_id;
-  for (const id of idler) {
-    const y = yerler.find((x) => x.place_id === id);
-    if (!y || y.hata) sorunlar.push(`${id}: detay alınamadı (${y?.hata ?? 'yok'})`);
-    else if (!y.lat || !y.lng) sorunlar.push(`${id}: konum yok`);
-    else if (id !== sehirId && y.durum !== 'OPERATIONAL') sorunlar.push(`${id}: işletme durumu OPERATIONAL değil (${y.durum ?? 'bilinmiyor'})`);
-  }
+  // #335: boş işletme durumu UYARI; CLOSED_* ve bilinmeyen değer HATA.
+  const { hatalar: sorunlar, uyarilar: durumUyarilari } = mekanDurumuDenetle(idler, yerler, plan.sehir?.yeni?.place_id);
   if (sorunlar.length) {
     duyuru('error', `Mekan sorunu (${sorunlar.length}) · ${plan.gezi.slug}`, sorunlar);
     throw new HatHatasi('kapalı ya da bulunamayan mekan var; yüklenmedi');
@@ -546,7 +541,7 @@ async function yukle() {
   }
 
   const gun = gunleriDenetle(plan, detaylar);
-  const tumUyarilar = [...uyarilar, ...gun.uyarilar];
+  const tumUyarilar = [...uyarilar, ...durumUyarilari, ...gun.uyarilar];
   duyuru('warning', `UYARI (${tumUyarilar.length}) · ${plan.gezi.slug}`, tumUyarilar);
 
   const yukleme = yuklemeVerisi(plan, detaylar, rehberler, osmKonumlari);

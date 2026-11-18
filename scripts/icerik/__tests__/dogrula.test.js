@@ -1,6 +1,7 @@
 // İçerik hattı doğrulayıcısı (docs/07): HATA yüklemeyi durdurur, UYARI rapora girer.
 import {
   detayIdleri,
+  mekanDurumuDenetle,
   dolarEtiketi,
   gunleriDenetle,
   kelimeSayisi,
@@ -477,5 +478,46 @@ describe('#205 KK3: OSM eşleştirmesi (ad + 150 m)', () => {
     expect(eslemeYaricapi(m, [])).toBe(1000);
     expect(eslemeYaricapi(m, [{ lat: 39.7967, lng: 30.5256 }])).toBeGreaterThan(3800);
     expect(eslemeYaricapi(m, [{ lat: 41, lng: 30.5256 }])).toBe(30000);
+  });
+});
+
+describe('#335 işletme durumu denetimi', () => {
+  const yer = (place_id, durum) => ({ place_id, lat: 38.4, lng: 27.1, ...(durum === undefined ? {} : { durum }) });
+
+  test('boş durum (null ya da yok) uyarı; yükleme sürer', () => {
+    const r = mekanDurumuDenetle(['aaaaaaaaaa1', 'aaaaaaaaaa2'], [yer('aaaaaaaaaa1', null), yer('aaaaaaaaaa2')]);
+    expect(r.hatalar).toEqual([]);
+    expect(r.uyarilar).toEqual([
+      "aaaaaaaaaa1: işletme durumu Google'da boş; kapalı günleri elle doğrula",
+      "aaaaaaaaaa2: işletme durumu Google'da boş; kapalı günleri elle doğrula",
+    ]);
+  });
+
+  test('CLOSED_TEMPORARILY ve CLOSED_PERMANENTLY hata, metin aynı', () => {
+    const r = mekanDurumuDenetle(['bbbbbbbbbb1', 'bbbbbbbbbb2'], [yer('bbbbbbbbbb1', 'CLOSED_TEMPORARILY'), yer('bbbbbbbbbb2', 'CLOSED_PERMANENTLY')]);
+    expect(r.hatalar).toEqual([
+      'bbbbbbbbbb1: işletme durumu OPERATIONAL değil (CLOSED_TEMPORARILY)',
+      'bbbbbbbbbb2: işletme durumu OPERATIONAL değil (CLOSED_PERMANENTLY)',
+    ]);
+    expect(r.uyarilar).toEqual([]);
+  });
+
+  test('bilinmeyen değer hata (temkinli)', () => {
+    const r = mekanDurumuDenetle(['cccccccccc1'], [yer('cccccccccc1', 'BUSINESS_STATUS_UNSPECIFIED')]);
+    expect(r.hatalar).toEqual(['cccccccccc1: işletme durumu OPERATIONAL değil (BUSINESS_STATUS_UNSPECIFIED)']);
+  });
+
+  test('OPERATIONAL sorunsuz', () => {
+    expect(mekanDurumuDenetle(['dddddddddd1'], [yer('dddddddddd1', 'OPERATIONAL')])).toEqual({ hatalar: [], uyarilar: [] });
+  });
+
+  test('şehrin kendi place_id\'si durumdan muaf; detay ya da konum yoksa hata', () => {
+    const r = mekanDurumuDenetle(
+      ['sehir000001', 'eeeeeeeeee1', 'eeeeeeeeee2'],
+      [yer('sehir000001', 'CLOSED_PERMANENTLY'), { place_id: 'eeeeeeeeee1', hata: 'HTTP 404' }, { place_id: 'eeeeeeeeee2', durum: 'OPERATIONAL' }],
+      'sehir000001',
+    );
+    expect(r.hatalar).toEqual(['eeeeeeeeee1: detay alınamadı (HTTP 404)', 'eeeeeeeeee2: konum yok']);
+    expect(r.uyarilar).toEqual([]);
   });
 });
