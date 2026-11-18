@@ -76,11 +76,17 @@ describe('planlı yayın İstanbul saatiyle (BekleyenTasarim21 ekran 4)', () => 
 });
 
 describe('otomatik kayıt farkı ve sıra (#107 KK4, KK7)', () => {
-  const sunucu: GeziAlanlari = { baslik: 'A', slug: 'a-1', sehir_id: 's', ozet: null, yazar_ad: 'Ece', yazi_md: '', kapak_url: null, kapak_atif: null, yayin: false, yayin_at: null };
+  const sunucu: GeziAlanlari = { baslik: 'A', slug: 'a-1', sehir_id: 's', ozet: null, yazar_ad: 'Ece', yazi_md: '', kapak_url: null, kapak_atif: null, yayin: false, yayin_at: null, amaclar: ['lezzet'] };
 
   it('yalnız değişen alanlar; fark yoksa null', () => {
     expect(kayitFarki(sunucu, { ...sunucu })).toBeNull();
     expect(kayitFarki(sunucu, { ...sunucu, baslik: 'B', yazi_md: 'x' })).toEqual({ baslik: 'B', yazi_md: 'x' });
+  });
+
+  it('#300 KK3: amaç dizisi içerikle karşılaştırılır', () => {
+    expect(kayitFarki(sunucu, { ...sunucu, amaclar: ['lezzet'] })).toBeNull();
+    expect(kayitFarki(sunucu, { ...sunucu, amaclar: ['lezzet', 'doga'] })).toEqual({ amaclar: ['lezzet', 'doga'] });
+    expect(kayitFarki(sunucu, { ...sunucu, amaclar: [] })).toEqual({ amaclar: [] });
   });
 
   it('sürükle-bırak taşıma', () => {

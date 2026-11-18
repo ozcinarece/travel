@@ -572,6 +572,11 @@
       "fotolar": "Fotoğraflar sekmesinde değiştir"
     }
   },
+  "amac": {
+    "baslik": "Amaç",
+    "aciklama": "Birden çok seçilebilir. Keşfet çipleri ve 5 soruda plan bunu kullanır.",
+    "bos": "Amaç seçilmedi: bu gezi yalnız Sana göre'de görünür."
+  },
   "kapakAtfi": {
     "baslik": "Kapak",
     "atif": "Foto: {yazar}",

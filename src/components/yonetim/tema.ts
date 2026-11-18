@@ -28,6 +28,9 @@ export const yRenk = {
   /** Kanvas "Taslak değişiklik var" rozeti. */
   bekliyorZemin: '#fff6e6',
   bekliyorMetin: '#8a5a00',
+  /** #300 KK3 (kanvas 29h · B): amaç seçilmedi uyarısı. */
+  amacUyariZemin: '#fff1e3',
+  amacUyariMetin: '#8a4b00',
   /** Yazı alanında yer tutucu (kanvas BO-1 "/ ile blok ekle"). */
   yerTutucu: '#b4bbd3',
   /** Genel bakış: içerik sağlığında sorunsuz satır; kapak yoksa küçük resim zeminleri (kanvas BO-0). */

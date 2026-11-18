@@ -16,6 +16,8 @@ export type YerAlanlari = {
   yayin: boolean;
   lat: number;
   lng: number;
+  /** #300 KK3: amaç etiketleri (`public.amac_listesi()` değerleri). */
+  amaclar: string[];
 };
 
 /** KK7: Google place_id biçimi (DB kısıtıyla aynı). */

@@ -28,7 +28,7 @@ describe('yerdenDurak (#107 KK4)', () => {
 
   it('otomatik kayıt yalnız editör alanlarını taşır', () => {
     const alanlar = alanlariAl({ ...{ baslik: 'A', slug: 'a', sehir_id: 's', ozet: null, yazar_ad: null, yazi_md: '', kapak_url: null, yayin: false, yayin_at: null }, ...({ gun_sayisi: 2 } as object) } as never);
-    expect(Object.keys(alanlar).sort()).toEqual(['baslik', 'kapak_atif', 'kapak_url', 'ozet', 'sehir_id', 'slug', 'yayin', 'yayin_at', 'yazar_ad', 'yazi_md']);
+    expect(Object.keys(alanlar).sort()).toEqual(['amaclar', 'baslik', 'kapak_atif', 'kapak_url', 'ozet', 'sehir_id', 'slug', 'yayin', 'yayin_at', 'yazar_ad', 'yazi_md']);
   });
 });
 

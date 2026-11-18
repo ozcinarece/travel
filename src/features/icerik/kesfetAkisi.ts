@@ -9,6 +9,7 @@ import { davetLinki } from '@/lib/davetLinki';
 import { supabase } from '@/lib/supabase';
 import type { Gezi } from '@/lib/tipler';
 
+import { AKIS_AMACLARI, type Amac } from './amaclar';
 import { ayniSehir } from './yerEkle';
 
 /**
@@ -84,8 +85,7 @@ export function geziyiPaylas(g: Pick<Gezi, 'baslik' | 'slug'>) {
  * #300 KK5 (kanvas 29a, 29h-A): akış çiplerinin amaçları, bu sırayla (veritabanındaki `public.amac_listesi()` ile aynı
  * değerler). "Sana göre" bunların dışında: süzgeç yok.
  */
-export const AKIS_AMACLARI = ['kultur_tarih', 'lezzet', 'doga', 'yavas', 'gece', 'cocuklu'] as const;
-export type Amac = (typeof AKIS_AMACLARI)[number];
+export { AKIS_AMACLARI, type Amac } from './amaclar';
 
 /** Gösterilecek amaç çipleri: en az bir gezisi olanlar, sabit sırayla (boş çip gösterilmez). */
 export function doluAmaclar(geziler: readonly Pick<Gezi, 'amaclar'>[]): Amac[] {

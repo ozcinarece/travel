@@ -15,7 +15,7 @@ const taslak: GeziAlanlari = {
   kapak_url: null,
   kapak_atif: null,
   yayin: true,
-  yayin_at: '2099-10-20T06:00:00.000Z',
+  yayin_at: '2099-10-20T06:00:00.000Z', amaclar: []
 };
 const sehirler = [{ id: 's1', ad: 'Eskişehir', slug: 'eskisehir', lat: 39.7, lng: 30.5, yayin: true }];
 
@@ -70,6 +70,14 @@ describe('GeziGenel (kanvas ekran 4)', () => {
     await act(async () => fireEvent.press(getByText('yalnız sen')));
     expect(yayinOnayi).not.toHaveBeenCalled();
     expect(degistir).toHaveBeenCalled();
+  });
+
+  it('#350: amaç çipi hemen kaydedilir; çipler "Amaç" adlı grupta', () => {
+    const degistir = jest.fn();
+    const { UNSAFE_getByProps, getByTestId } = render(<GeziGenel taslak={taslak} sehirler={sehirler} degistir={degistir} slugHatasi={false} />);
+    expect(UNSAFE_getByProps({ role: 'group', 'aria-label': 'Amaç' })).toBeTruthy();
+    fireEvent.press(getByTestId('amac-lezzet'));
+    expect(degistir).toHaveBeenCalledWith({ amaclar: ['lezzet'] }, true);
   });
 
   it('slug çakışması kırmızı satır', () => {
