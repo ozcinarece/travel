@@ -35,7 +35,8 @@ export function KesfetAkisi({ sehir, onYeni }: Props) {
   const gorunen = amacaGore(tumu, amac);
   const { sehirGezileri, digerleri } = akisSirasi(gorunen, sehir);
   const sehirAdi = sehirGezileri[0]?.sehirler?.ad ?? null;
-  const geziSayisi = amac ? <Text style={s.sayi}>{t('kesfetAkisi.geziSayisi', { n: gorunen.length })}</Text> : null;
+  // 29h-A kural 8: sayaç yalnız "Geziler" başlığında; şehir başlığı varken gösterilmez (diğer şehirleri de sayardı).
+  const geziSayisi = amac ? <Text style={s.sayi} accessibilityLiveRegion="polite">{t('kesfetAkisi.geziSayisi', { n: gorunen.length })}</Text> : null;
 
   const kart = (g: AkisGezisi, i: number) => (
     <View key={g.id} style={s.kenar}>
@@ -85,7 +86,6 @@ export function KesfetAkisi({ sehir, onYeni }: Props) {
             <Text accessibilityRole="header" style={[s.baslik, s.baslikMetni]}>
               {t('kesfetAkisi.sehirGezileri', { sehir: ayrilmaEki(sehirAdi) })}
             </Text>
-            {geziSayisi}
           </View>
         </View>
       ) : (

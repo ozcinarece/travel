@@ -378,11 +378,21 @@ describe('#300 KK5: amaç çipleri (kanvas 29a, 29h-A)', () => {
     expect(screen.getAllByRole('button', { name: /Seyahatime al/ })).toHaveLength(2);
     expect(screen.getByText('2 gezi')).toBeTruthy();
     expect(screen.getByText(/Akış yalnız bu amaçtaki gezileri gösteriyor/)).toBeTruthy();
+    expect(screen.getByText(/Hepsine dönmek için Sana göre'ye dokun\.$/)).toBeTruthy();
 
     fireEvent.press(screen.getByRole('radio', { name: 'Çocuklu' }));
     expect(screen.getByRole('radio', { name: 'Sana göre' }).props.accessibilityState).toEqual({ checked: true });
     expect(screen.getAllByRole('button', { name: /Seyahatime al/ })).toHaveLength(4);
     expect(screen.queryByText('2 gezi')).toBeNull();
+  });
+
+  it('29h-A kural 8: şehir başlığı varken "N gezi" sayacı çıkmaz', () => {
+    mockAkis = { ...mockAkis, data: amacli };
+    render(<KesfetAkisi sehir="Eskişehir" onYeni={jest.fn()} />);
+    fireEvent.press(screen.getByRole('radio', { name: 'Çocuklu' }));
+    expect(screen.getByText('GİDECEĞİN ŞEHİR')).toBeTruthy();
+    expect(screen.getAllByRole('button', { name: /Seyahatime al/ })).toHaveLength(2);
+    expect(screen.queryByText(/^\d+ gezi$/)).toBeNull();
   });
 
   it('hiç amaçlı gezi yoksa çip satırı çıkmaz', () => {
