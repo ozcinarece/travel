@@ -101,6 +101,7 @@ export function CekmeceSeridi({
             ) : (
               <>
                 <Text style={s.yerSayisi}>{t('kesfet.cekmece.yerSayisi', { n: tam.yerSayisi })}</Text>
+                <Text style={s.atif}>{t('yerler.atif')}</Text>
                 <Pressable accessibilityRole="button" accessibilityLabel={t('kesfet.filtre.ac')} onPress={tam.onFiltre} hitSlop={2} style={({ pressed }) => [s.filtreDugme, pressed && { opacity: 0.85 }]}>
                   <Ikon ad="filtre" boyut={18} renk={renk.ana} kalinlik={2.4} />
                 </Pressable>
@@ -116,6 +117,8 @@ export function CekmeceSeridi({
               {baslik}
             </Text>
           </Pressable>
+          {/* #315 KK2 (UX kanvası YerEkle_Acilis): açık çekmecenin başlığında "Sonuçlar: Google", 11 px, soluk. */}
+          {hal !== 'katli' && !liste?.yalniz ? <Text style={s.atif}>{t('yerler.atif')}</Text> : null}
           {listeDugmesi ?? (hal === 'katli' ? <Ikon ad="yukari" boyut={18} renk={renk.metin} kalinlik={2.2} /> : null)}
         </View>
       )}
@@ -291,6 +294,7 @@ const s = StyleSheet.create({
   tamUst: { gap: 12, paddingTop: 2 },
   tamBaslik: { flex: 1, minWidth: 0, ...baslikStili(21), color: renk.metin },
   yerSayisi: { flexShrink: 0, fontFamily: yazi.ekstra, fontSize: 13, color: renk.ikincil },
+  atif: { flexShrink: 0, fontFamily: yazi.normal, fontSize: 11, color: renk.soluk },
   filtreDugme: { flexShrink: 0, width: 40, height: 40, borderRadius: 12, backgroundColor: renk.yuzey, alignItems: 'center', justifyContent: 'center' },
   // #165 KK3 (kanvas 9b): satırlar.
   satirlar: { paddingHorizontal: bosluk.kenar, paddingBottom: 16 },
