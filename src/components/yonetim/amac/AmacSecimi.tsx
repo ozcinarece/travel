@@ -1,5 +1,5 @@
 // #300 KK3 (kanvas 29h · B): gezi editöründe ve yer düzenlemede amaç çoklu seçimi. Değerler `public.amac_listesi()` sırasıyla;
-// kayıt editörün otomatik kaydıyla, diğer alanlarla birlikte (yayındaki satırda da düzenlenebilir).
+// kayıt editörün otomatik kaydıyla, hemen (durum ve şehir gibi; yayındaki gezide Keşfet çipleri gecikmeden güncellenir).
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 
@@ -26,14 +26,13 @@ export function AmacSecimi({ secili, onDegis, bosUyari = false }: Props) {
         <Text style={s.baslik}>{ty('amac.baslik')}</Text>
         <Text style={s.aciklama}>{ty('amac.aciklama')}</Text>
       </View>
-      <View accessibilityRole="none" accessibilityLabel={ty('amac.baslik')} style={s.cipler}>
+      <View role="group" aria-label={ty('amac.baslik')} style={s.cipler}>
         {AKIS_AMACLARI.map((a) => {
           const acik = liste.includes(a);
           return (
             <Pressable
               key={a}
               accessibilityRole="button"
-              accessibilityState={{ selected: acik }}
               aria-pressed={acik}
               onPress={() => onDegis(amacDegistir(liste, a))}
               hitSlop={{ top: 4, bottom: 4 }}
@@ -63,5 +62,5 @@ const s = StyleSheet.create({
   cipSecili: { backgroundColor: yRenk.ana, paddingLeft: 10, paddingRight: 14 },
   cipBos: { backgroundColor: yRenk.zemin, borderWidth: 1.5, borderColor: yRenk.cerceve, paddingHorizontal: 14 },
   cipMetin: { fontFamily: yazi.ekstra, fontSize: 13 },
-  uyari: { alignSelf: 'flex-start', fontFamily: yazi.normal, fontSize: 13, color: yRenk.amacUyariMetin, backgroundColor: yRenk.amacUyariZemin, borderRadius: 10, paddingVertical: 10, paddingHorizontal: 12 },
+  uyari: { fontFamily: yazi.normal, fontSize: 13, color: yRenk.amacUyariMetin, backgroundColor: yRenk.amacUyariZemin, borderRadius: 10, paddingVertical: 10, paddingHorizontal: 12 },
 });

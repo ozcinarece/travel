@@ -100,7 +100,7 @@ export function YerEditoru({ yer, sehirler, liste }: { yer: YonetimYeri; sehirle
         {sekme === 'genel' ? <YerGenel taslak={taslak} sehirler={sehirler} degistir={degistir} tekilHatasi={durum.hata === 'tekil'} /> : null}
         {sekme === 'rehber' ? (
           // #300 KK3 (kanvas 29h · B): amaç alanı rehber metninin üstünde.
-          <AmacSecimi secili={taslak.amaclar} onDegis={(amaclar) => degistir({ amaclar })} />
+          <AmacSecimi secili={taslak.amaclar} onDegis={(amaclar) => degistir({ amaclar }, true)} />
         ) : null}
         {sekme === 'rehber' ? (
           // #156 KK14: şehir rehberiyle aynı editör (bölüm listesi olmadan).

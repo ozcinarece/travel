@@ -100,7 +100,7 @@ export function GeziGenel({ taslak, sehirler, degistir, slugHatasi, yayinOnayi }
         </Alan>
       </AlanSatiri>
       {/* #300 KK3 (kanvas 29h · B): başlık ve özetin altında; kayıt diğer alanlarla birlikte. */}
-      <AmacSecimi secili={taslak.amaclar} onDegis={(amaclar) => degistir({ amaclar })} bosUyari />
+      <AmacSecimi secili={taslak.amaclar} onDegis={(amaclar) => degistir({ amaclar }, true)} bosUyari />
     </View>
   );
 }

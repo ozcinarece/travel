@@ -21,8 +21,9 @@ describe('AmacSecimi', () => {
     const { getByTestId, getByText } = render(<AmacSecimi secili={['yavas']} onDegis={onDegis} />);
     expect(getByText('Amaç')).toBeTruthy();
     expect(getByText('Birden çok seçilebilir. Keşfet çipleri ve 5 soruda plan bunu kullanır.')).toBeTruthy();
-    expect(getByTestId('amac-yavas').props.accessibilityState).toEqual({ selected: true });
-    expect(getByTestId('amac-lezzet').props.accessibilityState).toEqual({ selected: false });
+    expect(getByTestId('amac-yavas').props['aria-pressed']).toBe(true);
+    expect(getByTestId('amac-lezzet').props['aria-pressed']).toBe(false);
+    expect(getByTestId('amac-yavas').props.accessibilityState?.selected).toBeUndefined();
     expect(getByText('Yavaş ve keyifli')).toBeTruthy();
     fireEvent.press(getByTestId('amac-cocuklu'));
     expect(onDegis).toHaveBeenLastCalledWith(['yavas', 'cocuklu']);

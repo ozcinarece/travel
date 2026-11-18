@@ -71,6 +71,14 @@ describe('GeziGenel (kanvas ekran 4)', () => {
     expect(degistir).toHaveBeenCalled();
   });
 
+  it('#350: amaç çipi hemen kaydedilir; çipler "Amaç" adlı grupta', () => {
+    const degistir = jest.fn();
+    const { UNSAFE_getByProps, getByTestId } = render(<GeziGenel taslak={taslak} sehirler={sehirler} degistir={degistir} slugHatasi={false} />);
+    expect(UNSAFE_getByProps({ role: 'group', 'aria-label': 'Amaç' })).toBeTruthy();
+    fireEvent.press(getByTestId('amac-lezzet'));
+    expect(degistir).toHaveBeenCalledWith({ amaclar: ['lezzet'] }, true);
+  });
+
   it('slug çakışması kırmızı satır', () => {
     const { getByText } = render(<GeziGenel taslak={{ ...taslak, yayin: false }} sehirler={sehirler} degistir={() => {}} slugHatasi />);
     expect(getByText('Bu slug başka bir gezide')).toBeTruthy();
