@@ -63,6 +63,18 @@ export function yazarTemizle(html) {
 }
 
 /**
+ * #348 inceleme 5: yazar önce `Artist`, boşsa `Credit`, o da boşsa `Attribution` alanından. Üçü de boşsa boş metin döner;
+ * `kapakDenetimi` bunu HATA sayar (atıfsız yükleme yok; "Bilinmeyen yazar" gibi bir yedek yazılmaz).
+ */
+export function yazarBul(meta) {
+  for (const alan of ['Artist', 'Credit', 'Attribution']) {
+    const y = yazarTemizle(meta?.[alan]?.value);
+    if (y) return y;
+  }
+  return '';
+}
+
+/**
  * Lisans: Commons `LicenseShortName` ve `License` alanlarından. Kabul: CC0, kamu malı, CC BY, CC BY-SA (sürümüyle).
  * Ret: NC, ND, GFDL-yalnız, adil kullanım ve tanınmayan her şey. Dönüş {kabul, lisans (≤ 60, uygulamada görünen ad)}.
  */
@@ -103,7 +115,7 @@ export async function commonsBilgisi(dosyalar, { fetchFn = fetch } = {}) {
       formatversion: '2',
       prop: 'imageinfo',
       iiprop: 'url|mime|extmetadata',
-      iiextmetadatafilter: 'LicenseShortName|License|Artist',
+      iiextmetadatafilter: 'LicenseShortName|License|Artist|Credit|Attribution',
       iiurlwidth: String(KAPAK_GENISLIK),
       titles: parca.join('|'),
     })) adres.searchParams.set(k, v);
@@ -125,7 +137,7 @@ export async function commonsBilgisi(dosyalar, { fetchFn = fetch } = {}) {
         mime: bilgi.mime,
         kucukUrl: bilgi.thumburl ?? bilgi.url,
         kaynakUrl: bilgi.descriptionurl,
-        yazar: yazarTemizle(bilgi.extmetadata?.Artist?.value) || 'Bilinmeyen yazar',
+        yazar: yazarBul(bilgi.extmetadata),
         kabul,
         lisans,
       });
@@ -144,7 +156,8 @@ export function kapakDenetimi(istekler, bilgi) {
     if (!b?.var) hatalar.push(`${kod} Commons'ta bulunamadı`);
     else if (!b.kabul) hatalar.push(`${kod} lisansı uygun değil (${b.lisans}); yalnız CC0, PD, CC BY, CC BY-SA`);
     else if (!TUR_UZANTI[b.mime]) hatalar.push(`${kod} türü desteklenmiyor (${b.mime})`);
-    else if (!/^https:\/\//.test(b.kaynakUrl ?? '') || !/^https:\/\//.test(b.kucukUrl ?? '')) hatalar.push(`${kod} adresi alınamadı`);
+    else if (!b.yazar) hatalar.push(`${kod} yazarı yok (Artist, Credit ve Attribution boş); atıfsız yüklenmez`);
+    else if (!/^https:\/\//.test(b.kaynakUrl ?? '') || !indirmeAdresiUygun(b.kucukUrl)) hatalar.push(`${kod} adresi alınamadı ya da upload.wikimedia.org değil`);
     else hazir.push({ ...i, ...b, yol: kapakYolu(i.dosya, b.mime) });
   }
   return { hatalar, hazir };
@@ -163,4 +176,51 @@ export function kapakVerisi(plan, hazir, kokUrl) {
     else veri.yerler.push({ place_id: h.anahtar, ...satir(h) });
   }
   return veri;
+}
+
+/** #348 inceleme 6: indirme yalnız `https://upload.wikimedia.org/…` adresinden. */
+export const INDIRME_KOKU = 'upload.wikimedia.org';
+export const EN_BUYUK_KAPAK = 5 * 1024 * 1024;
+
+export function indirmeAdresiUygun(adres) {
+  try {
+    const u = new URL(String(adres ?? ''));
+    return u.protocol === 'https:' && u.hostname === INDIRME_KOKU && !u.username && !u.password && !u.port;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Kapağı indirir: adres `upload.wikimedia.org` değilse ya da `content-length` 5 MB'ı geçiyorsa gövde hiç okunmaz.
+ * Başlık yoksa ya da yanlışsa okunan gövde de 5 MB'ta kesilir. Yönlendirme izlenmez (başka sunucuya gidemez).
+ */
+export async function kapakIndir(adres, { fetchFn = fetch } = {}) {
+  if (!indirmeAdresiUygun(adres)) throw new Error('adres upload.wikimedia.org değil');
+  const cevap = await fetchFn(adres, { headers: { 'user-agent': KULLANICI_AJANI }, redirect: 'error' });
+  if (!cevap.ok) throw new Error(`indirme ${cevap.status}`);
+  const uzunluk = Number(cevap.headers?.get?.('content-length'));
+  if (Number.isFinite(uzunluk) && uzunluk > EN_BUYUK_KAPAK) {
+    await cevap.body?.cancel?.();
+    throw new Error(`dosya 5 MB'tan büyük (${Math.ceil(uzunluk / 1024 / 1024)} MB)`);
+  }
+  if (!cevap.body?.getReader) {
+    const govde = Buffer.from(await cevap.arrayBuffer());
+    if (govde.length > EN_BUYUK_KAPAK) throw new Error("dosya 5 MB'tan büyük");
+    return govde;
+  }
+  const okuyucu = cevap.body.getReader();
+  const parcalar = [];
+  let toplam = 0;
+  for (;;) {
+    const { done, value } = await okuyucu.read();
+    if (done) break;
+    toplam += value.byteLength;
+    if (toplam > EN_BUYUK_KAPAK) {
+      await okuyucu.cancel();
+      throw new Error("dosya 5 MB'tan büyük");
+    }
+    parcalar.push(Buffer.from(value));
+  }
+  return Buffer.concat(parcalar);
 }

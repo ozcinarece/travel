@@ -1,5 +1,5 @@
 // #345 KK2: Commons kapağı — plan biçimi, lisans kabulü, yazar temizliği, Commons cevabının eşlenmesi.
-import { commonsBilgisi, kapakDenetimi, kapakDenetle, kapakIstekleri, kapakVerisi, kapakYolu, lisansCoz, yazarTemizle } from '../kapak.mjs';
+import { commonsBilgisi, EN_BUYUK_KAPAK, indirmeAdresiUygun, kapakDenetimi, kapakDenetle, kapakIndir, kapakIstekleri, kapakVerisi, kapakYolu, lisansCoz, yazarBul, yazarTemizle } from '../kapak.mjs';
 
 const meta = (kisa, kod, yazar = 'Ad Soyad') => ({ LicenseShortName: { value: kisa }, License: { value: kod }, Artist: { value: yazar } });
 
@@ -117,5 +117,66 @@ describe('commonsBilgisi + kapakDenetimi', () => {
 
   it('Commons hata verirse fırlatır', async () => {
     await expect(commonsBilgisi(['File:A.jpg'], { fetchFn: async () => ({ ok: false, status: 503 }) })).rejects.toThrow('Commons API 503');
+  });
+});
+
+describe('#348 inceleme 5: yazar', () => {
+  it('Artist boşsa Credit, o da boşsa Attribution; üçü de boşsa boş', () => {
+    expect(yazarBul({ Artist: { value: ' ' }, Credit: { value: '<b>Kredi</b>' } })).toBe('Kredi');
+    expect(yazarBul({ Artist: { value: '' }, Credit: { value: '' }, Attribution: { value: 'Atıf Adı' } })).toBe('Atıf Adı');
+    expect(yazarBul({ Artist: { value: '<span> </span>' } })).toBe('');
+  });
+  it('yazarı olmayan CC BY dosyası HATA, yüklenmez', async () => {
+    const cevap = {
+      query: {
+        pages: [
+          {
+            title: 'File:Y.jpg',
+            imageinfo: [{ mime: 'image/jpeg', thumburl: 'https://upload.wikimedia.org/y.jpg', descriptionurl: 'https://commons.wikimedia.org/wiki/File:Y.jpg', extmetadata: meta('CC BY 4.0', 'cc-by-4.0', '') }],
+          },
+        ],
+      },
+    };
+    const bilgi = await commonsBilgisi(['File:Y.jpg'], { fetchFn: async () => ({ ok: true, json: async () => cevap }) });
+    const { hatalar, hazir } = kapakDenetimi([{ hedef: 'gezi', anahtar: 'g', dosya: 'File:Y.jpg' }], bilgi);
+    expect(hazir).toEqual([]);
+    expect(hatalar).toEqual(['gezi g: File:Y.jpg yazarı yok (Artist, Credit ve Attribution boş); atıfsız yüklenmez']);
+  });
+});
+
+describe('#348 inceleme 6: indirme sınırı', () => {
+  it('yalnız https://upload.wikimedia.org', () => {
+    expect(indirmeAdresiUygun('https://upload.wikimedia.org/wikipedia/commons/thumb/a/ab/x.jpg')).toBe(true);
+    expect(indirmeAdresiUygun('http://upload.wikimedia.org/x.jpg')).toBe(false);
+    expect(indirmeAdresiUygun('https://upload.wikimedia.org.kotu.com/x.jpg')).toBe(false);
+    expect(indirmeAdresiUygun('https://kotu.com/upload.wikimedia.org/x.jpg')).toBe(false);
+    expect(indirmeAdresiUygun('https://a@upload.wikimedia.org/x.jpg')).toBe(false);
+    expect(indirmeAdresiUygun(undefined)).toBe(false);
+  });
+  it('başka adres istenmeden reddedilir', async () => {
+    const fetchFn = jest.fn();
+    await expect(kapakIndir('https://ornek.com/x.jpg', { fetchFn })).rejects.toThrow('upload.wikimedia.org');
+    expect(fetchFn).not.toHaveBeenCalled();
+  });
+  it('content-length 5 MB üstündeyse gövde okunmaz', async () => {
+    const arrayBuffer = jest.fn();
+    const fetchFn = jest.fn(async () => ({ ok: true, headers: new Map([['content-length', String(EN_BUYUK_KAPAK + 1)]]), arrayBuffer }));
+    await expect(kapakIndir('https://upload.wikimedia.org/x.jpg', { fetchFn })).rejects.toThrow('5 MB');
+    expect(arrayBuffer).not.toHaveBeenCalled();
+    expect(fetchFn.mock.calls[0][1].redirect).toBe('error');
+  });
+  it('başlık yoksa okunan gövde 5 MB\'ta kesilir', async () => {
+    const parca = new Uint8Array(1024 * 1024);
+    let n = 0;
+    const cancel = jest.fn(async () => {});
+    const body = { getReader: () => ({ read: async () => (n++ < 10 ? { done: false, value: parca } : { done: true }), cancel }) };
+    const fetchFn = async () => ({ ok: true, headers: new Map(), body });
+    await expect(kapakIndir('https://upload.wikimedia.org/x.jpg', { fetchFn })).rejects.toThrow('5 MB');
+    expect(cancel).toHaveBeenCalled();
+    expect(n).toBe(6);
+  });
+  it('küçük dosya iner', async () => {
+    const fetchFn = async () => ({ ok: true, headers: new Map([['content-length', '3']]), arrayBuffer: async () => new Uint8Array([1, 2, 3]).buffer });
+    expect([...(await kapakIndir('https://upload.wikimedia.org/x.jpg', { fetchFn }))]).toEqual([1, 2, 3]);
   });
 });

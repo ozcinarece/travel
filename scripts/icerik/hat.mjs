@@ -29,7 +29,7 @@ import {
   mekanDurumuDenetle,
 } from './dogrula.mjs';
 import { osmAdaylariOku } from './aday.mjs';
-import { commonsBilgisi, kapakDenetimi, kapakIstekleri, kapakVerisi, KULLANICI_AJANI } from './kapak.mjs';
+import { commonsBilgisi, kapakDenetimi, kapakIndir, kapakIstekleri, kapakVerisi } from './kapak.mjs';
 import { OsmOkumaHatasi, yuklemeKonumlari } from './konum.mjs';
 import { OverpassHatasi, overpassYeniden, SureBittiHatasi } from './overpass.mjs';
 import { derAl, sifrele } from './sifre.mjs';
@@ -611,9 +611,7 @@ async function kapaklariYukle(plan, kapaklar) {
   const sorun = [];
   for (const k of kapaklar) {
     try {
-      const indir = await fetch(k.kucukUrl, { headers: { 'user-agent': KULLANICI_AJANI } });
-      if (!indir.ok) throw new Error(`indirme ${indir.status}`);
-      const govde = Buffer.from(await indir.arrayBuffer());
+      const govde = await kapakIndir(k.kucukUrl);
       const koy = await fetch(`${PROJE_URL}/storage/v1/object/icerik/${k.yol}`, {
         method: 'POST',
         headers: { authorization: `Bearer ${anahtar}`, apikey: anahtar, 'content-type': k.mime, 'x-upsert': 'true' },
