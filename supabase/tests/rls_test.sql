@@ -3487,6 +3487,58 @@ select pg_temp.hata_bekle($$select public.places_yenileme_artir(1, 8000)$$, '425
 select pg_temp.hata_bekle($$select public.places_koordinat_yenile('ChIJ_262_esik', 40, 30)$$, '42501');
 select pg_temp.hata_bekle($$select * from public.places_koordinat_bosalt()$$, '42501');
 reset role;
+-- ---------------------------------------------------------------- #345 KK1: kapak atfı (geziler, sehirler, yerler)
+-- Okuma ve yazma satırın mevcut kuralıyla aynı: yayındaki satırın atfı herkese görünür, taslağınki görünmez; yalnız admin yazar.
+-- Biçim denetimi: yalnız yazar / lisans / kaynak_url, yazar zorunlu, kaynak https.
+insert into public.sehirler (id, ad, slug, lat, lng, yayin, kapak_url, kapak_atif) values
+  ('34500000-0000-4000-8000-000000000001', 'Atıf Açık', 'atif-acik', 39.7, 30.5, true, 'sehirler/a.webp',
+    '{"yazar": "Ayşe Y.", "lisans": "CC BY-SA 4.0", "kaynak_url": "https://commons.wikimedia.org/wiki/File:A.jpg"}'),
+  ('34500000-0000-4000-8000-000000000002', 'Atıf Taslak', 'atif-taslak', 39.7, 30.5, false, 'sehirler/b.webp', '{"yazar": "Tripmate"}');
+insert into public.yerler (id, sehir_id, ad, lat, lng, yayin, kapak_url, kapak_atif) values
+  ('34500000-0000-4000-8000-000000000011', '34500000-0000-4000-8000-000000000001', 'Yayındaki yer', 39.7, 30.5, true, 'yerler/a.webp',
+    '{"yazar": "Ali K.", "lisans": "CC0", "kaynak_url": null}'),
+  ('34500000-0000-4000-8000-000000000012', '34500000-0000-4000-8000-000000000001', 'Taslak yer', 39.7, 30.5, false, 'yerler/b.webp',
+    '{"yazar": "Tripmate"}');
+insert into public.geziler (id, sehir_id, baslik, slug, yayin, kapak_url, kapak_atif) values
+  ('34500000-0000-4000-8000-000000000021', '34500000-0000-4000-8000-000000000001', 'Yayındaki gezi', 'atif-gezi-acik', true, 'geziler/a.webp',
+    '{"yazar": "Veli D.", "lisans": "CC BY 2.0", "kaynak_url": "https://commons.wikimedia.org/wiki/File:B.jpg"}'),
+  ('34500000-0000-4000-8000-000000000022', '34500000-0000-4000-8000-000000000001', 'Taslak gezi', 'atif-gezi-taslak', false, null, null);
+-- Biçim dışı atıf reddedilir (tablo sahibi için de).
+select pg_temp.hata_bekle($$update public.yerler set kapak_atif = '{"lisans": "CC0"}' where id = '34500000-0000-4000-8000-000000000011'$$, '23514');
+select pg_temp.hata_bekle($$update public.yerler set kapak_atif = '{"yazar": "  "}' where id = '34500000-0000-4000-8000-000000000011'$$, '23514');
+select pg_temp.hata_bekle($$update public.geziler set kapak_atif = '{"yazar": "X", "foto": "y"}' where id = '34500000-0000-4000-8000-000000000021'$$, '23514');
+select pg_temp.hata_bekle($$update public.sehirler set kapak_atif = '{"yazar": "X", "kaynak_url": "http://ornek"}' where slug = 'atif-acik'$$, '23514');
+select pg_temp.hata_bekle($$update public.sehirler set kapak_atif = '"Tripmate"' where slug = 'atif-acik'$$, '23514');
+set role anon;
+do $$
+begin
+  assert (select kapak_atif ->> 'yazar' from public.sehirler where slug = 'atif-acik') = 'Ayşe Y.', '#345: yayındaki şehrin atfı okunur';
+  assert (select kapak_atif ->> 'lisans' from public.yerler where id = '34500000-0000-4000-8000-000000000011') = 'CC0', '#345: yayındaki yerin atfı okunur';
+  assert (select kapak_atif ->> 'kaynak_url' from public.geziler where slug = 'atif-gezi-acik') like 'https://commons.%', '#345: yayındaki gezinin atfı okunur';
+  assert not exists (select 1 from public.sehirler where slug = 'atif-taslak'), '#345: taslak şehrin atfı görünmez';
+  assert not exists (select 1 from public.yerler where id = '34500000-0000-4000-8000-000000000012'), '#345: taslak yerin atfı görünmez';
+  assert not exists (select 1 from public.geziler where slug = 'atif-gezi-taslak'), '#345: taslak gezi görünmez';
+end $$;
+update public.yerler set kapak_atif = '{"yazar": "Saldırgan"}' where id = '34500000-0000-4000-8000-000000000011';
+reset role;
+set role authenticated;
+select pg_temp.as_user('26200000-0000-4000-8000-000000000001');
+update public.geziler set kapak_atif = '{"yazar": "Saldırgan"}' where slug = 'atif-gezi-acik';
+update public.sehirler set kapak_atif = null where slug = 'atif-acik';
+select pg_temp.as_email(:E, 'ozcinar.ece@gmail.com');
+update public.yerler set kapak_url = 'yerler/c.webp', kapak_atif = '{"yazar": "Tripmate"}' where id = '34500000-0000-4000-8000-000000000012';
+update public.geziler set kapak_atif = null where slug = 'atif-gezi-taslak';
+reset role;
+do $$
+begin
+  assert (select kapak_atif ->> 'yazar' from public.yerler where id = '34500000-0000-4000-8000-000000000011') = 'Ali K.', '#345: anon atıf yazamaz';
+  assert (select kapak_atif ->> 'yazar' from public.geziler where slug = 'atif-gezi-acik') = 'Veli D.', '#345: sıradan hesap atıf yazamaz';
+  assert (select kapak_atif is not null from public.sehirler where slug = 'atif-acik'), '#345: sıradan hesap atfı silemez';
+  assert (select kapak_url = 'yerler/c.webp' and kapak_atif = '{"yazar": "Tripmate"}' from public.yerler where id = '34500000-0000-4000-8000-000000000012'),
+    '#345: admin kapağı değiştirir, atıf Tripmate olur';
+end $$;
+delete from public.sehirler where id::text like '34500000-%';
+
 delete from public.trips where id::text like '26200000-%';
 delete from public.changes where trip_id::text like '26200000-%';
 delete from auth.users where id = '26200000-0000-4000-8000-000000000001';
