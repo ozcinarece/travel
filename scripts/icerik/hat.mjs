@@ -27,8 +27,9 @@ import {
   SLUG,
   yuklemeVerisi,
 } from './dogrula.mjs';
+import { osmAdaylariOku } from './aday.mjs';
 import { OsmOkumaHatasi, yuklemeKonumlari } from './konum.mjs';
-import { OverpassHatasi, overpassBirKez, overpassYeniden, SureBittiHatasi } from './overpass.mjs';
+import { OverpassHatasi, overpassYeniden, SureBittiHatasi } from './overpass.mjs';
 import { derAl, sifrele } from './sifre.mjs';
 
 const ortam = process.env;
@@ -318,47 +319,22 @@ async function arastir() {
   await ozet(['### Araştırma', ...satir.map((x) => `- ${x}`)]);
 }
 
-/** OSM etiketlerinden yalnız aday seçimine yarayanlar (ODbL; atıf: © OpenStreetMap katkıcıları). */
-const OSM_ETIKETLERI = ['name', 'name:tr', 'name:en', 'tourism', 'historic', 'amenity', 'leisure', 'religion', 'cuisine', 'opening_hours', 'wikipedia', 'wikidata', 'website', 'heritage'];
-export function overpassSorgusu({ lat, lng }, yaricap) {
-  const a = `(around:${Math.round(yaricap)},${lat},${lng})`;
-  return `[out:json][timeout:90];
-(
-  nwr${a}["tourism"~"^(museum|attraction|viewpoint|gallery|artwork|zoo|theme_park)$"]["name"];
-  nwr${a}["historic"]["name"];
-  nwr${a}["amenity"="place_of_worship"]["name"];
-  nwr${a}["leisure"~"^(park|garden)$"]["name"];
-  nwr${a}["amenity"~"^(restaurant|cafe)$"]["name"];
-);
-out center tags;`;
-}
-
-/** Overpass sorgusu (sunucular sırayla, her istek 120 sn ile sınırlı; `overpass.mjs`). Google'a gidilmez. */
-async function overpass(sorgu) {
-  try {
-    return await overpassBirKez(sorgu);
-  } catch (e) {
-    throw new HatHatasi(e instanceof OverpassHatasi ? e.message : 'Overpass yanıt vermedi');
-  }
-}
-
 const bekle = (ms) => new Promise((r) => setTimeout(r, ms));
 
-/** OSM aday listesi (Overpass): ad, konum, tür, opening_hours, wikipedia/wikidata. Google'a gidilmez. */
+/** OSM aday listesi (Overpass, `aday.mjs`): ad, konum, tür, opening_hours, wikipedia/wikidata. Google'a gidilmez. */
 async function osm() {
   const istek = istekAl();
   const acik = acikAnahtarAl(istek);
   const merkez = await sehirMerkezi(istek);
   const yaricap = Math.min(Math.max(Number(istek.yaricap_m) || 8000, 500), 30000);
-  const veri = await overpass(overpassSorgusu(merkez, yaricap));
-  const adaylar = (veri.elements ?? [])
-    .map((e) => {
-      const lat = e.lat ?? e.center?.lat;
-      const lng = e.lon ?? e.center?.lon;
-      const etiketler = Object.fromEntries(OSM_ETIKETLERI.filter((k) => e.tags?.[k] !== undefined).map((k) => [k, e.tags[k]]));
-      return { osm: `${e.type}/${e.id}`, ad: e.tags?.['name:tr'] ?? e.tags?.name, lat, lng, etiketler };
-    })
-    .filter((a) => a.ad && typeof a.lat === 'number' && typeof a.lng === 'number');
+  // #328 KK1–KK3: yeniden denemeyle ve süre bütçesiyle; düşerse tek satır ("Overpass 504, 3 deneme").
+  let adaylar;
+  try {
+    adaylar = await osmAdaylariOku(merkez, yaricap);
+  } catch (e) {
+    if (e instanceof OsmOkumaHatasi) throw new HatHatasi(e.message);
+    throw e;
+  }
   await sifreliYaz({ zaman: new Date().toISOString(), kaynak: '© OpenStreetMap katkıcıları (ODbL)', merkez, yaricap_m: yaricap, adaylar }, acik);
   const say = (f) => adaylar.filter(f).length;
   const satir = [
