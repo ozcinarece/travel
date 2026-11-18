@@ -27,6 +27,8 @@ type Props = {
   sehirler: YonetimSehri[];
   degistir: (alanlar: Partial<GeziAlanlari> | ((t: GeziAlanlari) => Partial<GeziAlanlari>), hemen?: boolean) => void;
   slugHatasi: boolean;
+  /** #314 KK3: taslaktan yayına/planlıya geçişte durak yerleri için onay (false → geçiş yapılmaz). */
+  yayinOnayi?: () => Promise<boolean>;
 };
 
 const DURUMLAR: GeziDurumu[] = ['taslak', 'planli', 'yayinda'];
@@ -38,7 +40,7 @@ const KIRMIZI = yRenk.hata;
  * tarihte açılır · Yayında hemen, rozet renkleriyle) + Planlı seçilince turuncu çerçeveli tarih ve saat (İstanbul);
  * SLUG "gezi/" önekli, başlıktan otomatik, elle düzenlenir, çakışma kırmızı satır; ÖZET · YAZAR (110) · OKUMA (130, otomatik).
  */
-export function GeziGenel({ taslak, sehirler, degistir, slugHatasi }: Props) {
+export function GeziGenel({ taslak, sehirler, degistir, slugHatasi, yayinOnayi }: Props) {
   const durum = geziDurumu(taslak);
   // Slug elle değiştirilmediyse başlıkla birlikte yenilenir (yeni gezinin geçici slug'ı dahil).
   const slugOtomatik = taslak.slug === slugUret(taslak.baslik) || /^yeni-gezi-[a-z0-9]{4}$/.test(taslak.slug);
@@ -57,7 +59,13 @@ export function GeziGenel({ taslak, sehirler, degistir, slugHatasi }: Props) {
       </AlanSatiri>
       <View style={[s.satir, s.ustte]}>
         <Alan etiket={ty('gezi.alan.durum')} genislik={200}>
-          <DurumMenusu durum={durum} onSec={(d) => degistir(durumAlanlari(d, taslak.yayin_at), true)} />
+          <DurumMenusu
+            durum={durum}
+            onSec={async (d) => {
+              if (d !== 'taslak' && !taslak.yayin && yayinOnayi && !(await yayinOnayi())) return;
+              degistir(durumAlanlari(d, taslak.yayin_at), true);
+            }}
+          />
         </Alan>
         {durum === 'planli' && taslak.yayin_at ? <YayinTarihi iso={taslak.yayin_at} onDegis={(yayin_at) => degistir({ yayin_at }, true)} /> : null}
       </View>

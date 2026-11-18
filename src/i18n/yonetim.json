@@ -122,6 +122,7 @@
     },
     "planliNot": "Uygulamada {gun} {ay} {saat}’da görünür (İstanbul)",
     "gunSilOnay": "{n}. Gün ve {durak} durağı silinsin mi?",
+    "yayinYerOnay": "Bu geziyle {n} yer de yayına girecek. Devam edilsin mi?",
     "gunSiraNot": "Günleri sürükleyerek sırala",
     "aramaEkle": "↵ Ekle",
     "aramaIpucu": "Google · ↑↓ seç, ↵ ekle, Esc kapat · link yapıştırınca tek sonuç",

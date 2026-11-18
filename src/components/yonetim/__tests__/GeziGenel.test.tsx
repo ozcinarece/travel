@@ -1,5 +1,5 @@
 import { describe, expect, it, jest } from '@jest/globals';
-import { fireEvent, render } from '@testing-library/react-native';
+import { act, fireEvent, render } from '@testing-library/react-native';
 
 import type { GeziAlanlari } from '@/features/yonetim/gezi';
 
@@ -43,6 +43,32 @@ describe('GeziGenel (kanvas ekran 4)', () => {
     fireEvent.press(getByText('yalnız sen'));
     expect(degistir).toHaveBeenCalledWith({ yayin: false, yayin_at: taslak.yayin_at }, true);
     expect(queryByText('yalnız sen')).toBeNull();
+  });
+
+  it('#314 KK3: taslaktan Yayında seçilince yer onayı sorulur; hayır denirse durum değişmez', async () => {
+    const degistir = jest.fn();
+    const yayinOnayi = jest.fn(async () => false);
+    const { getByRole, getByText } = render(
+      <GeziGenel taslak={{ ...taslak, yayin: false, yayin_at: null }} sehirler={sehirler} degistir={degistir} slugHatasi={false} yayinOnayi={yayinOnayi} />,
+    );
+    fireEvent.press(getByRole('button', { name: 'DURUM' }));
+    await act(async () => fireEvent.press(getByText('hemen')));
+    expect(yayinOnayi).toHaveBeenCalledTimes(1);
+    expect(degistir).not.toHaveBeenCalled();
+    yayinOnayi.mockResolvedValueOnce(true);
+    fireEvent.press(getByRole('button', { name: 'DURUM' }));
+    await act(async () => fireEvent.press(getByText('hemen')));
+    expect(degistir).toHaveBeenCalledWith(expect.objectContaining({ yayin: true }), true);
+  });
+
+  it('#314 KK3: zaten yayındaki gezide ya da Taslak seçiminde onay sorulmaz', async () => {
+    const degistir = jest.fn();
+    const yayinOnayi = jest.fn(async () => false);
+    const { getByRole, getByText } = render(<GeziGenel taslak={taslak} sehirler={sehirler} degistir={degistir} slugHatasi={false} yayinOnayi={yayinOnayi} />);
+    fireEvent.press(getByRole('button', { name: 'DURUM' }));
+    await act(async () => fireEvent.press(getByText('yalnız sen')));
+    expect(yayinOnayi).not.toHaveBeenCalled();
+    expect(degistir).toHaveBeenCalled();
   });
 
   it('slug çakışması kırmızı satır', () => {

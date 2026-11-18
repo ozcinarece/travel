@@ -85,6 +85,25 @@ export async function hataVer<T>(istek: PromiseLike<{ data: T; error: unknown }>
   return data;
 }
 
+/** #314 KK3: gezi yayınlanınca onunla yayına girecek taslak durak yeri sayısı (elle kaldırılanlar hariç; DB kuralıyla aynı). */
+export async function yayinaGirecekYerSayisi(geziId: string): Promise<number> {
+  return (await hataVer(supabase.rpc('gezi_yayina_girecek_yer_sayisi', { p_gezi: geziId }))) as number;
+}
+
+/**
+ * #314 KK3: taslak gezi yayına (ya da planlıya) geçerken durak yerleri de açılacaksa onay sorar. Sayı alınamazsa yayın
+ * engellenmez (yerler yine DB tetikleyicisiyle açılır), soru sorulmaz.
+ */
+export async function yayinOnayi(geziId: string, sor: (metin: string) => boolean, metin: (n: number) => string): Promise<boolean> {
+  let n = 0;
+  try {
+    n = await yayinaGirecekYerSayisi(geziId);
+  } catch {
+    return true;
+  }
+  return n > 0 ? sor(metin(n)) : true;
+}
+
 /** "+ Yeni gezi": taslak + 1. gün; slug benzersiz olsun diye kısa ek. */
 export async function geziOlustur(sehirId: string, yazar: string | null): Promise<string> {
   const ek = Math.random().toString(36).slice(2, 6);
