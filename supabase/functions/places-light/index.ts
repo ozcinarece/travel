@@ -39,15 +39,14 @@ Deno.serve(sayacli('places-light', async (istek) => {
   // #45: editorialSummary yalnız pin paneli (tek mekan, fotoğrafla birlikte); 24 sa önbellek.
   const ozet = foto && !saatler && g.ozet === true;
   const puansiz = g.puansiz === true && !sehir && !saatler && !ozet;
-  // #347: otel seçimi Autocomplete oturumunu burada kapatır; token'lı ilk kayıt önbellekten okunmaz.
+  // #347: token yalnız Google'a giden seçimde oturumu kapatır; önbellek isabetinde Google'a gidilmez (bkz. _shared/oturum.ts).
   const oturum = oturumAnahtari(g.sessionToken);
 
   const simdi = Date.now();
   const tekil = [...new Set(ids)];
   const anahtar = (id: string) => onbellekAnahtari(id, sehir, saatler, foto, ozet, puansiz);
-  // #226: önbellekte olmayan her kimlik bir Details isteğidir ve öyle sayılır (önbellekten dönen sayılmaz). #347: token'lı
-  // ilk kayıt da Google'a gider ve sayılır.
-  const eksik = eksikSayisi(tekil, anahtar, onbellek, simdi, TTL_MS, oturum);
+  // #226: önbellekte olmayan her kimlik bir Details isteğidir ve öyle sayılır (önbellekten dönen sayılmaz).
+  const eksik = eksikSayisi(tekil, anahtar, onbellek, simdi, TTL_MS);
   if (eksik > 0) {
     // `foto` ile her eksik kimlik için ayrıca bir Photo isteği gider (hafifDetay → fotoUri); Photo kovasına sığmazsa reddedilir.
     // Photo önce sayılır: Photo'ya sığmayan istek, Details hakkını boşuna yakmadan reddedilir (#226).
