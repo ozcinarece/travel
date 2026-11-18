@@ -4,9 +4,12 @@
 // Saf: ekrandan bağımsız, testli. #141 "Günlere dağıt" aynı fonksiyonu atanmamış mekanlarla çağırır (`mevcut` dolu günler).
 import { mesafeM } from '@/components/harita/geo';
 import type { Konum } from '@/components/harita/tipler';
+import { konumu, konumVar } from '@/lib/konum';
 import { kestirimTaksiSn, kestirimYuruyusSn, TAKSI_ESIGI_SN } from '@/schedule/tempo';
 
-export type PlanMekani = { id: string; lat: number; lng: number; dakika: number; ad?: string };
+/** #318: `lat`/`lng` null = Google koordinatı boşalmış mekan; yol hesabına girmez, sıranın sonuna eklenir. */
+export type PlanMekani = { id: string; lat: number | null; lng: number | null; dakika: number; ad?: string };
+export type KonumluMekan = PlanMekani & Konum;
 /** #200: `kapasiteDk` verilirse o günün penceresi (başlangıç–bitiş); yoksa ortak kapasite. */
 export type PlanGunu = { id: string; index: number; kapasiteDk?: number };
 
@@ -25,8 +28,24 @@ export function bacakDk(a: Konum, b: Konum): { dk: number; araba: boolean } {
   return { dk: kestirimTaksiSn(a, b) / 60, araba: true };
 }
 
+/** #318: iki uçtan biri koordinatsızsa bacak yok (0 dk). */
+export function bacakVarsa(a: PlanMekani | Konum | null, b: PlanMekani): { dk: number; araba: boolean } {
+  const ka = konumu(a);
+  const kb = konumu(b);
+  return ka && kb ? bacakDk(ka, kb) : { dk: 0, araba: false };
+}
+
+/** Listedeki son koordinatlı nokta; yoksa `yedek`. */
+export function sonKonum(liste: PlanMekani[], yedek: Konum | null): Konum | null {
+  for (let i = liste.length - 1; i >= 0; i--) {
+    const k = konumu(liste[i]);
+    if (k) return k;
+  }
+  return yedek;
+}
+
 /** Tek bağlantılı kümeleme: eşiğin altındaki her çift aynı bölgede (birleşim-bul). Sıra girdiyle kararlı. */
-export function bolgeler(mekanlar: PlanMekani[], esikM = BOLGE_ESIGI_M): PlanMekani[][] {
+export function bolgeler<T extends KonumluMekan>(mekanlar: T[], esikM = BOLGE_ESIGI_M): T[][] {
   const ata = mekanlar.map((_, i) => i);
   const kok = (i: number): number => (ata[i] === i ? i : (ata[i] = kok(ata[i])));
   for (let i = 0; i < mekanlar.length; i++) {
@@ -34,7 +53,7 @@ export function bolgeler(mekanlar: PlanMekani[], esikM = BOLGE_ESIGI_M): PlanMek
       if (mesafeM(mekanlar[i], mekanlar[j]) <= esikM) ata[kok(j)] = kok(i);
     }
   }
-  const gruplar = new Map<number, PlanMekani[]>();
+  const gruplar = new Map<number, T[]>();
   mekanlar.forEach((m, i) => {
     const k = kok(i);
     gruplar.set(k, [...(gruplar.get(k) ?? []), m]);
@@ -42,14 +61,14 @@ export function bolgeler(mekanlar: PlanMekani[], esikM = BOLGE_ESIGI_M): PlanMek
   return [...gruplar.values()];
 }
 
-function merkez(grup: PlanMekani[]): Konum {
+function merkez(grup: KonumluMekan[]): Konum {
   return { lat: grup.reduce((t, m) => t + m.lat, 0) / grup.length, lng: grup.reduce((t, m) => t + m.lng, 0) / grup.length };
 }
 
 /** En yakın komşu sırası; `bas` verilirse ondan, yoksa en batıdaki mekandan başlar (kararlı). */
-export function enYakinKomsu(mekanlar: PlanMekani[], bas: Konum | null): PlanMekani[] {
+export function enYakinKomsu<T extends KonumluMekan>(mekanlar: T[], bas: Konum | null): T[] {
   const kalan = [...mekanlar];
-  const sira: PlanMekani[] = [];
+  const sira: T[] = [];
   let simdi: Konum | null = bas;
   while (kalan.length) {
     let en = 0;
@@ -79,7 +98,10 @@ export function enYakinKomsu(mekanlar: PlanMekani[], bas: Konum | null): PlanMek
  * bölge içi en yakın komşu (ilk bölgede otelden / başlangıçtan).
  */
 export function gezmeSirasi(mekanlar: PlanMekani[], baslangic: Konum | null = null): { sira: PlanMekani[]; bolgeSayisi: number } {
-  const gruplar = bolgeler(mekanlar);
+  // #318: koordinatsız mekanlar bölgelere girmez; girdi sırasıyla en sona eklenir.
+  const konumlu = mekanlar.filter((m): m is KonumluMekan => konumVar(m));
+  const konumsuz = mekanlar.filter((m) => !konumVar(m));
+  const gruplar = bolgeler(konumlu);
   const sira: PlanMekani[] = [];
   let son: Konum | null = baslangic;
   const kalan = [...gruplar];
@@ -106,6 +128,7 @@ export function gezmeSirasi(mekanlar: PlanMekani[], baslangic: Konum | null = nu
     sira.push(...dizi);
     son = dizi[dizi.length - 1] ?? son;
   }
+  sira.push(...konumsuz);
   return { sira, bolgeSayisi: gruplar.length };
 }
 
@@ -115,7 +138,7 @@ export function secimOzeti(mekanlar: PlanMekani[]): { mekan: number; bolge: numb
   const { sira, bolgeSayisi } = gezmeSirasi(mekanlar);
   let dk = 0;
   sira.forEach((m, i) => {
-    dk += m.dakika + (i > 0 ? bacakDk(sira[i - 1], m).dk : 0);
+    dk += m.dakika + (i > 0 ? bacakVarsa(sira[i - 1], m).dk : 0);
   });
   return { mekan: mekanlar.length, bolge: bolgeSayisi, saat: Math.max(1, Math.round(dk / 60)) };
 }
@@ -138,10 +161,10 @@ export function planKur(
     const liste = secenek.mevcut?.get(g.id) ?? [];
     let dk = 0;
     liste.forEach((m, i) => {
-      const onceki = i === 0 ? bas : liste[i - 1];
-      dk += m.dakika + (onceki ? bacakDk(onceki, m).dk : 0);
+      const onceki = sonKonum(liste.slice(0, i), bas);
+      dk += m.dakika + (onceki ? bacakVarsa(onceki, m).dk : 0);
     });
-    return { dk, son: (liste[liste.length - 1] as Konum | undefined) ?? bas };
+    return { dk, son: sonKonum(liste, bas) };
   });
   const { sira, bolgeSayisi } = gezmeSirasi(mekanlar, bas);
   const atanmamis: PlanMekani[] = [];
@@ -151,9 +174,9 @@ export function planKur(
     // İmleç yalnız mekan yerleşince ilerler: sığmayan mekan (boş güne bile) önceki günün kalan kapasitesini boşa harcatmaz.
     for (let k = g; k < sonuc.length; k++) {
       const onceki = dolu[k].son;
-      const bacak = onceki ? bacakDk(onceki, m) : { dk: 0, araba: false };
+      const bacak = onceki ? bacakVarsa(onceki, m) : { dk: 0, araba: false };
       if (dolu[k].dk + bacak.dk + m.dakika <= (sirali[k].kapasiteDk ?? kapasite)) {
-        dolu[k] = { dk: dolu[k].dk + bacak.dk + m.dakika, son: m };
+        dolu[k] = { dk: dolu[k].dk + bacak.dk + m.dakika, son: konumu(m) ?? onceki };
         const s = sonuc[k];
         s.mekanlar.push(m);
         s.ziyaretDk += m.dakika;

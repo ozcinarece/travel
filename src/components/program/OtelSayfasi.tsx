@@ -13,6 +13,7 @@ import { hafifYerler, useOtelOnerileri, yeniOturumJetonu, placesHatasi, type One
 import { t } from '@/i18n';
 import { puanMetni } from '@/lib/puan';
 import type { OtelSecimi, Seyahat } from '@/lib/tipler';
+import { aramaMerkezi } from '@/lib/konum';
 import { baslikStili, kose, olcek, renk, yazi } from '@/theme';
 
 type Props = { acik: boolean; seyahat: Seyahat; geceSayisi: number; onKapat: () => void; onSimdiDegil: () => void; onKaydet: (otel: OtelSecimi) => Promise<void>; onAyriSec: () => void };
@@ -28,7 +29,7 @@ export function OtelSayfasi({ acik, seyahat, geceSayisi, onKapat, onSimdiDegil, 
   const [kaydediliyor, setKaydediliyor] = useState(false);
   const [hata, setHata] = useState<string | null>(null);
   const listeAcik = sorgu.trim().length >= 2;
-  const oneriler = useOtelOnerileri(listeAcik ? sorgu : '', jeton, { lat: seyahat.lat, lng: seyahat.lng, yaricapM: 30_000 }, listeAcik);
+  const oneriler = useOtelOnerileri(listeAcik ? sorgu : '', jeton, aramaMerkezi(seyahat, 30_000), listeAcik);
 
   const sec = async (o: Oneri) => {
     setHata(null);

@@ -1,5 +1,5 @@
 import { useLocalSearchParams } from 'expo-router';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { ActivityIndicator, Linking, Pressable, StyleSheet, Text, TextInput, View, useWindowDimensions } from 'react-native';
 
 import { bolgeHesapla, zoomDelta } from '@/components/harita/geo';
@@ -41,6 +41,8 @@ import { kategoriPini } from '@/lib/pinIkonu';
 import { varsayilanDakika } from '@/lib/kategori';
 import type { Mekan, Seyahat } from '@/lib/tipler';
 import { bosluk, renk, yazi, yuzRenkleri } from '@/theme';
+import { haritaMerkezi, konumVar, YEDEK_ZOOM, yedekMerkezMi, yolTarifiHedefi } from '@/lib/konum';
+import { useSeyahatMerkezi } from '@/features/seyahatler/merkez';
 
 // PRD 3.4 Keşfet: HaritaEkrani kabuğu (#17) — üstte şehir hapı + üyeler, arama, çipler; altta öneri kartları; en altta liste çubuğu.
 export default function KesfetEkrani() {
@@ -100,18 +102,30 @@ function Kesfet({ seyahat, konaklamalar, ilkMekan, cekmeceIstegi, cipIstegi }: {
 
   // İlk açılış şehir (ya da otel) merkezi, zoom 13. #56: otel gün bazında (stays); ilk eklenen otel merkez. Öneriler #189 Ek 2:
   // şehir listesinden (aşağıda), görünüme göre süzülür.
-  const ilkOtel = konaklamalar[0];
+  // #318: koordinatı boşalmış otel / seyahat atlanır; hiçbiri yoksa ilk konumlu mekan, o da yoksa yedek merkez.
+  const ilkOtel = konaklamalar.find(konumVar);
+  const ilkKonumluMekan = mekanlar.data?.find(konumVar);
+  // #318 inceleme 4: seyahat merkezi boşsa şehir kimliğinden anlık konum (saklanmaz); yedek merkezde ülke ölçeği.
+  const seyahatMerkezi = useSeyahatMerkezi(seyahat);
   const ilkMerkez = useMemo(
-    () => ({
-      lat: ilkOtel?.lat ?? seyahat.lat,
-      lng: ilkOtel?.lng ?? seyahat.lng,
-    }),
-    [ilkOtel?.lat, ilkOtel?.lng, seyahat.lat, seyahat.lng],
+    () => haritaMerkezi(ilkOtel, seyahatMerkezi, ilkKonumluMekan),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [ilkOtel?.lat, ilkOtel?.lng, seyahatMerkezi?.lat, seyahatMerkezi?.lng, ilkKonumluMekan?.lat, ilkKonumluMekan?.lng],
   );
-  const ilkBolge = useMemo(() => bolgeHesapla(ilkMerkez, zoomDelta(ILK_ZOOM), zoomDelta(ILK_ZOOM)), [ilkMerkez]);
+  const ilkZoom = yedekMerkezMi(ilkMerkez) ? YEDEK_ZOOM : ILK_ZOOM;
+  const ilkBolge = useMemo(() => bolgeHesapla(ilkMerkez, zoomDelta(ilkZoom), zoomDelta(ilkZoom)), [ilkMerkez, ilkZoom]);
   const [bolge, setBolge] = useKesfetDurumu(seyahat.id, 'bolge');
   // #79 KK1: ekran yeniden kurulduysa harita son görünür bölgeden açılır (kamera aynı kalır); ilk açılışta şehir / otel merkezi.
   const [baslangicBolge] = useState<HaritaBolgesi | null>(() => kesfetDurumunuAl(seyahat.id).bolge);
+  // Harita ilk merkezle kurulur; canlı şehir konumu harita kurulduktan sonra gelirse kamera oraya kayar (bir kez).
+  // #318 inceleme 4: kurulumda konum zaten hazırsa ya da kaydedilmiş görünüm varsa kamera kaymaz (#79 KK1 ezilmesin).
+  const merkezBekleniyor = useRef(seyahatMerkezi == null && !baslangicBolge);
+  useEffect(() => {
+    if (!merkezBekleniyor.current || konumVar(seyahat) || !seyahatMerkezi || ilkOtel || ilkKonumluMekan) return;
+    merkezBekleniyor.current = false;
+    odakla(seyahatMerkezi.lat, seyahatMerkezi.lng, ILK_ZOOM);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [seyahatMerkezi?.lat, seyahatMerkezi?.lng]);
 
   // KK2: Autocomplete görünür alan merkezine 15 km yanlı (#28).
   const aramaMerkezi = {
@@ -126,9 +140,9 @@ function Kesfet({ seyahat, konaklamalar, ilkMekan, cekmeceIstegi, cipIstegi }: {
   // değişip istek iki kez atılmasın). Çip başına bir istek, Turistik üç alt istek; çip seçmek eksik isteği doğurur. KK8: kaydırmak
   // ve yakınlaştırmak istek atmaz — pinler eldeki listeden görünüme göre süzülür.
   const sehirler = useSehirler();
-  const rehberSehir = sehirEslestir(sehirler.data, { ad: seyahat.city_label, lat: seyahat.lat, lng: seyahat.lng });
-  const sehirLat = sehirler.isPending ? null : (rehberSehir?.lat ?? seyahat.lat);
-  const sehirLng = sehirler.isPending ? null : (rehberSehir?.lng ?? seyahat.lng);
+  const rehberSehir = sehirEslestir(sehirler.data, { ad: seyahat.city_label, lat: seyahatMerkezi?.lat ?? null, lng: seyahatMerkezi?.lng ?? null });
+  const sehirLat = sehirler.isPending ? null : (rehberSehir?.lat ?? seyahatMerkezi?.lat ?? null);
+  const sehirLng = sehirler.isPending ? null : (rehberSehir?.lng ?? seyahatMerkezi?.lng ?? null);
   const sehirMerkezi = useMemo(() => (sehirLat == null || sehirLng == null ? null : { lat: sehirLat, lng: sehirLng }), [sehirLat, sehirLng]);
   const cipler = useMemo(() => sehirCipleri(filtre), [filtre]);
   const yakin = useKesfetOnerileri(seyahat.id, sehirMerkezi, cipler);
@@ -149,7 +163,7 @@ function Kesfet({ seyahat, konaklamalar, ilkMekan, cekmeceIstegi, cipIstegi }: {
   // #200 KK8: kimliği farklı ama listedeki mekana 60 m'den yakın ve adı benzer öneri de listede sayılır (gösterilmez). Ad eldeki
   // hafif veriden; ek Google isteği yok.
   const listedeSayilan = useMemo(() => {
-    const benzer = listedekiBenzerler(oneriListesi, havuz.map((m) => ({ place_id: m.place_id, lat: m.lat, lng: m.lng, ad: havuzAdlari.data?.[m.place_id]?.ad })));
+    const benzer = listedekiBenzerler(oneriListesi, havuz.filter(konumVar).map((m) => ({ place_id: m.place_id, lat: m.lat, lng: m.lng, ad: havuzAdlari.data?.[m.place_id]?.ad })));
     return benzer.size > 0 ? new Set([...havuzIdleri, ...benzer]) : havuzIdleri;
   }, [oneriListesi, havuz, havuzAdlari.data, havuzIdleri]);
   // #69 §A: öne çıkanlar — şehrin yüklenmiş mekanları arasında en üst %10; liste büyüdükçe en fazla 10 sn'de bir yeniden hesap.
@@ -221,14 +235,15 @@ function Kesfet({ seyahat, konaklamalar, ilkMekan, cekmeceIstegi, cipIstegi }: {
   }, [filtreli, oneriListesi, gecenler, listedeSayilan, secim?.place_id]);
 
   const pinler: HaritaPini[] = [
-    ...konaklamalar.map((k) => ({
+    // #318: koordinatı boşalmış otel ve mekan haritada pin olmaz.
+    ...konaklamalar.filter(konumVar).map((k) => ({
       id: `otel:${k.id}`,
       konum: { lat: k.lat, lng: k.lng },
       renk: renk.metin,
       tur: 'otel' as const,
     })),
     // #61 §4: listeye eklenen = kategori renginde dolu daire + beyaz kategori ikonu; altında ad (öncelikli), yakınken ★ puan · yorum.
-    ...havuz.map((m) => ({
+    ...havuz.filter(konumVar).map((m) => ({
       id: `m:${m.place_id}`,
       konum: { lat: m.lat, lng: m.lng },
       renk: renk.metin,
@@ -329,7 +344,7 @@ function Kesfet({ seyahat, konaklamalar, ilkMekan, cekmeceIstegi, cipIstegi }: {
   const yolTarifi = () => {
     const y = seciliHafif ?? seciliMekan;
     if (!y || !secim) return;
-    Linking.openURL(`https://www.google.com/maps/dir/?api=1&destination=${y.lat},${y.lng}&destination_place_id=${encodeURIComponent(secim.place_id)}&travelmode=walking`);
+    Linking.openURL(`https://www.google.com/maps/dir/?api=1&destination=${yolTarifiHedefi(y, seciliHafif?.ad ?? '')}&destination_place_id=${encodeURIComponent(secim.place_id)}&travelmode=walking`);
   };
 
   // #98 B: öneri çekmecesi — üç hal; görünür alanda olup listede olmayanlar, puan sırası; harita kayınca yeniden süzülür
@@ -633,7 +648,7 @@ function Kesfet({ seyahat, konaklamalar, ilkMekan, cekmeceIstegi, cipIstegi }: {
       }
       harita={{
         merkez: ilkMerkez,
-        zoom: ILK_ZOOM,
+        zoom: ilkZoom,
         pinler,
         odak,
         onPinBas: pinBas,

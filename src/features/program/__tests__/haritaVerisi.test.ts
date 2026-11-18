@@ -3,13 +3,13 @@ import { describe, expect, it, jest } from '@jest/globals';
 import type { Gun } from '@/lib/tipler';
 import type { TempoSonucu } from '@/schedule/tempo';
 
-import type { GunUcNoktalari, Konaklama } from '@/features/konaklama/plan';
+import { ucNoktalari, type GunUcNoktalari, type Konaklama } from '@/features/konaklama/plan';
 
 import { bolgeHesapla } from '@/components/harita/geo';
 import { cizgiAnahtari, yonOklari } from '@/components/harita/rota';
 
 import { GECILEN_RENK, SOLUK_PIN, otelPinleri, programCizgileri, programPinleri, rotaNoktalari } from '../haritaVerisi';
-import type { MatrisNoktasi, RotaHaritasi } from '../sorgular';
+import { matrisNoktalari, type MatrisNoktasi, type RotaHaritasi } from '../sorgular';
 
 // sorgular.ts → supabase istemcisi (AsyncStorage); saf fonksiyon testinde gerekmez (jest.mock yukarı taşınır).
 jest.mock('@/lib/supabase', () => ({ supabase: {} }));
@@ -100,7 +100,7 @@ describe('#88: rota gelmiş bacakta oklar + ayrı Polyline anahtarı', () => {
 
 // #56: gün bazlı otel — pinler ve diğer günlerin rotası.
 const kon = (id: string, lat: number, lng: number): Konaklama => ({ id, trip_id: 't', place_id: null, lat, lng, label: null });
-const uc = (k: Konaklama | null) => (k ? { key: `stay:${k.id}`, lat: k.lat, lng: k.lng, konaklama: k } : null);
+const uc = (k: Konaklama | null) => (k ? { key: `stay:${k.id}`, lat: k.lat!, lng: k.lng!, konaklama: k } : null);
 const X = kon('x', 41.9, 12.49);
 const Y = kon('y', 41.8, 12.3);
 const gunlerIki = [{ id: 'g1', index: 1 }, { id: 'g2', index: 2 }, { id: 'g3', index: 3 }] as unknown as Gun[];
@@ -230,3 +230,48 @@ describe('#140 KK4 programPinleri', () => {
     expect(p[1].opaklik).toBe(SOLUK_PIN);
   });
 });
+
+describe('#262 / #318: Google koordinatı boşalmış mekan ve otel', () => {
+  const gunler2 = [{ id: 'g1', index: 1 }] as never;
+  const duraklar = [
+    { id: 'd1', day_id: 'g1', place_ref: 'm1' },
+    { id: 'd2', day_id: 'g1', place_ref: 'm2' },
+    { id: 'd3', day_id: 'g1', place_ref: 'm3' },
+  ] as never;
+  const tp = new Map([['g1', { sira: ['m1', 'm2', 'm3'] }]]) as never;
+
+  it('koordinatsız mekan pin olmaz; diğerlerinin numarası listedeki sırayla aynı kalır', () => {
+    const mekanlar = [
+      { id: 'm1', place_id: 'p1', lat: 41.9, lng: 12.5, primary_type: null },
+      { id: 'm2', place_id: 'p2', lat: null, lng: null, primary_type: null },
+      { id: 'm3', place_id: 'p3', lat: 41.92, lng: 12.5, primary_type: null },
+    ] as never;
+    const p = programPinleri({ gunUclari: new Map(), mekanlar, duraklar, gunler: gunler2, tempolar: tp, adlar: undefined, seciliGunId: 'g1', seciliMekanId: 'm2', tamamlananMekanIds: new Set(), konum: null });
+    expect(p.map((x) => [x.id, x.etiket])).toEqual([
+      ['m:m1', '1'],
+      ['m:m3', '3'],
+    ]);
+    expect(p.every((x) => Number.isFinite(x.konum.lat) && Number.isFinite(x.konum.lng))).toBe(true);
+  });
+
+  it('koordinatsız otel uç nokta ve pin olmaz; konumlu otel pin olur', () => {
+    const bosOtel: Konaklama = { id: 's1', trip_id: 't', place_id: 'ChIJ_x', lat: null, lng: null, label: 'Otel' };
+    const dolu: Konaklama = { id: 's2', trip_id: 't', place_id: null, lat: 41.9, lng: 12.49, label: 'Pin' };
+    const konaklamalar = new Map([bosOtel, dolu].map((k) => [k.id, k]));
+    const u = ucNoktalari({ start_stay_id: 's1', end_stay_id: 's2' }, konaklamalar);
+    expect(u.baslangic).toBeNull();
+    expect(u.bitis?.key).toBe('stay:s2');
+    const pinler = otelPinleri([{ id: 'g1', index: 1 } as Gun], new Map([['g1', u]]), 'g1');
+    expect(pinler).toHaveLength(1);
+    expect(pinler[0].konum).toEqual({ lat: 41.9, lng: 12.49 });
+  });
+
+  it('koordinatsız mekan rota matrisine girmez (sunucu bilinmeyen noktada isteği reddeder)', () => {
+    const n = matrisNoktalari([], [
+      { place_id: 'p1', lat: 41.9, lng: 12.5 },
+      { place_id: 'p2', lat: null, lng: null },
+    ]);
+    expect(n.map((x) => x.key)).toEqual(['p1']);
+  });
+});
+

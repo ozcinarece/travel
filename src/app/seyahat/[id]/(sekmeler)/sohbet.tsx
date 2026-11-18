@@ -74,6 +74,7 @@ import type { Mekan, Seyahat, Uye } from '@/lib/tipler';
 import { yerelTarih } from '@/lib/zaman';
 import { kestirimYuruyusSn } from '@/schedule/tempo';
 import { renk, yazi } from '@/theme';
+import { konumu } from '@/lib/konum';
 
 /** Aynı kişinin art arda mesajları (bu süre içinde) tek kümede: avatar ve ad yalnız ilkinde. */
 const KUME_MS = 5 * 60 * 1000;
@@ -174,8 +175,9 @@ function Sohbet({ seyahat, uyeler, mesajlar, oylamalar, seyahatGuncellendi }: { 
     const gunIle = new Map(gunler.map((g) => [g.id, g.index]));
     return duraklar
       .filter((d) => !d.skipped)
-      .map((d) => ({ gunIndex: gunIle.get(d.day_id) ?? 1, konum: mekanIle.get(d.place_ref) }))
-      .filter((x): x is { gunIndex: number; konum: Mekan } => !!x.konum);
+      .map((d) => ({ gunIndex: gunIle.get(d.day_id) ?? 1, konum: konumu(mekanIle.get(d.place_ref)) }))
+      // #318: koordinatı boşalmış durak yakınlık hesabına girmez.
+      .filter((x): x is { gunIndex: number; konum: { lat: number; lng: number } } => !!x.konum);
   }, [duraklar, gunler, mekanIle]);
 
   const yerBilgisi = (placeId: string) => {
@@ -183,7 +185,7 @@ function Sohbet({ seyahat, uyeler, mesajlar, oylamalar, seyahatGuncellendi }: { 
     const hy = hafif.data?.[placeId];
     const tip = liste?.primary_type ?? hy?.primary_type ?? null;
     const ad = bilinen.ad({ place_id: placeId }) ?? hy?.ad ?? kategoriEtiketi(tip);
-    const konum = liste ? { lat: liste.lat, lng: liste.lng } : hy ? { lat: hy.lat, lng: hy.lng } : null;
+    const konum = konumu(liste) ?? (hy ? { lat: hy.lat, lng: hy.lng } : null);
     const yakin = konum ? enYakinGun(konum, durakKonumlari, kestirimYuruyusSn) : null;
     const puan = hy?.puan ? `★ ${hy.puan.toFixed(1).replace('.', ',')}` : null;
     const alt = [kategoriEtiketi(tip), puan, yakin ? t('sohbet.mekan.gune', { n: yakin.gunIndex, dk: yakin.dk }) : null].filter(Boolean).join(' · ');
@@ -468,7 +470,7 @@ function Sohbet({ seyahat, uyeler, mesajlar, oylamalar, seyahatGuncellendi }: { 
       <MekanSecici
         acik={acik === 'mekan'}
         onKapat={() => setAcik(null)}
-        merkez={{ lat: seyahat.lat, lng: seyahat.lng }}
+        merkez={konumu(seyahat)}
         mekanlar={mekanlar}
         ad={(m) => mekanAdiYaDaKategori(m, bilinen.ad)}
         foto={bilinen.foto}

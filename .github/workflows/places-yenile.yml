@@ -1,0 +1,42 @@
+name: places-yenile
+
+# #262 (#205 KK3): kullanıcı tablolarının (places, trips, stays) Google koordinatını 30 günü geçmeden yeniler; 404 ve 30 günü
+# geçen koordinatı boşaltır, satır silinmez (places-yenile Edge Function'ı, service_role). Bir tur en çok 250 place_id;
+# 25 günü geçenler, o gün denenmemiş olanlar, en eski önce. Ayrı aylık sayaç, 8.000 istekte durur ve masaya (#217) bir kez
+# yazar (iş yine yeşil biter). Logda yalnız sayı vardır.
+# #318 inceleme 1: zamanlı çalışma, `PLACES_YENILE_ACIK` depo değişkeni 'true' olana kadar atlanır. Sıra: supabase-migrate,
+# birleştir, eas-update (expo-go, native), güncelleme cihazlara ulaşınca elle (workflow_dispatch) ilk tur, sonra değişken açılır.
+# Eski paketli cihaz null koordinatı native haritaya vermesin diye. Elle çalıştırma her zaman çalışır.
+# Gerekli secret: SUPABASE_ACCESS_TOKEN (service_role anahtarı çalışma anında Yönetim API'sinden alınır ve maskelenir).
+on:
+  schedule:
+    - cron: '23 2 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: places-yenile
+  cancel-in-progress: false
+
+jobs:
+  yenile:
+    if: github.event_name == 'workflow_dispatch' || vars.PLACES_YENILE_ACIK == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      SUPABASE_PROJECT_REF: xwqeobelyeuzoxyuvauw
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Yenile
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: node scripts/places-yenile.mjs

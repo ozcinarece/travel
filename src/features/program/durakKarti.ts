@@ -2,6 +2,7 @@
 import { mesafeM, zoomDelta } from '@/components/harita/geo';
 import type { Konum } from '@/components/harita/tipler';
 import type { HafifYer } from '@/features/yerler/api';
+import { konumu } from '@/lib/konum';
 import { kategoriEtiketi } from '@/lib/kategori';
 import { mesafeMetni } from '@/lib/mesafe';
 import { yorumKisa } from '@/lib/pinIkonu';
@@ -32,7 +33,8 @@ export type DurakKarti = {
   durakId: string;
   mekanId: string;
   placeId: string;
-  konum: Konum;
+  /** #318: Google koordinatı boşalmış mekanda null (kamera kaymaz, kalan yol yazılmaz). */
+  konum: Konum | null;
   /** 1'den başlayan kart sırası ("2 / 3"; atlanan dahil). */
   sira: number;
   /** Pin / liste numarası (atlanmayanlar arasında); atlananda null. */
@@ -95,7 +97,7 @@ export function kartListesi(secenek: {
       durakId: d.id,
       mekanId: m.id,
       placeId: m.place_id,
-      konum: { lat: m.lat, lng: m.lng },
+      konum: konumu(m),
       sira: kartlar.length + 1,
       numara: atlandi ? null : numara,
       ad: h?.ad ?? '…',
@@ -152,7 +154,7 @@ export function kartSekmesi(kart: DurakKarti, secenek: { gezi: boolean; konum: K
   if (gezi && kart.durum === 'gecildi') return { metin: t('program.kart.gezildi'), ikon: 'tik', ton: 'gezildi' };
   if (gezi && kart.durum === 'siradaki') {
     let ayrinti = kart.gelis?.metin ?? null;
-    if (konum) {
+    if (konum && kart.konum) {
       const m = mesafeM(konum, kart.konum);
       const sn = kart.gelis?.mod === 'taksi' ? kestirimTaksiSn(konum, kart.konum) : kestirimYuruyusSn(konum, kart.konum);
       ayrinti = t('program.kart.kalan', { dk: Math.max(1, Math.ceil(sn / 60)), mesafe: mesafeMetni(Math.round(m / 10) * 10) });

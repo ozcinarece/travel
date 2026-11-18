@@ -9,7 +9,7 @@ import { supabase } from '@/lib/supabase';
 import type { Sehir, SehirSecimi } from '@/lib/tipler';
 
 /** Google şehir kimliğinden seçim (saat dilimi ve ülke kodu hafif yerden). */
-export async function sehirSecimi(placeId: string, adi: string, ikincil: string, oturum: string): Promise<SehirSecimi> {
+export async function sehirSecimi(placeId: string, adi: string, ikincil: string, oturum?: string): Promise<SehirSecimi> {
   const [yer] = await hafifYerler([placeId], { sehir: true, oturum });
   if (!yer?.tz) throw new Error('tz yok');
   return { place_id: yer.place_id, ad: adi || yer.ad, ikincil, lat: yer.lat, lng: yer.lng, tz: yer.tz, country_code: yer.ulke_kodu };
@@ -37,16 +37,27 @@ export function useIcerikSehirSecimi(sehir: Sehir | undefined) {
   });
 }
 
+type TekrarSatiri = { city_place_id: string; city_label: string; country_code: string | null; lat: number | null; lng: number | null; tz: string };
+
+/** Kaynak seyahatin şehri seçim olarak; merkezi boşaldıysa null (çağıran şehri Google kimliğinden yeniden seçer). */
+export function tekrarSehri(d: TekrarSatiri): SehirSecimi | null {
+  if (typeof d.lat !== 'number' || typeof d.lng !== 'number') return null;
+  return { place_id: d.city_place_id, ad: d.city_label, ikincil: '', lat: d.lat, lng: d.lng, tz: d.tz, country_code: d.country_code };
+}
+
 /** Tekrar kur kaynağı: adı ve şehri (seçim olarak). */
 export function useTekrarKaynagi(id: string | undefined) {
   const { hesapli } = useOturum();
   return useQuery({
     queryKey: ['sihirbaz', 'tekrar', id],
     enabled: hesapli && !!id,
+    // #318 inceleme 4: `sehirSecimi` Google'a (Pro Details) gidebilir; hata anında en çok bir yeniden deneme.
+    retry: birKezDene,
     queryFn: async () => {
       const { data, error } = await supabase.from('trips').select('id, name, city_place_id, city_label, country_code, lat, lng, tz').eq('id', id!).single();
       if (error) throw error;
-      const sehir: SehirSecimi = { place_id: data.city_place_id, ad: data.city_label, ikincil: '', lat: data.lat, lng: data.lng, tz: data.tz, country_code: data.country_code };
+      // #318 inceleme 4: kaynağın merkezi 30 günde boşaldıysa yeni seyahat null merkezle doğmasın; şehir kimliğinden yeniden seçilir.
+      const sehir: SehirSecimi = tekrarSehri(data) ?? (await sehirSecimi(data.city_place_id, data.city_label, ''));
       return { id: data.id as string, ad: (data.name as string | null) ?? null, sehir };
     },
   });

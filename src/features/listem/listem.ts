@@ -5,6 +5,7 @@ import type { Konum } from '@/components/harita/tipler';
 import type { GunUcNoktalari } from '@/features/konaklama/plan';
 import { saatKisa } from '@/features/program/useProgram';
 import { haftaGunu } from '@/lib/takvim';
+import { konumu } from '@/lib/konum';
 import type { Durak, Gun, Mekan, Oy, Seyahat } from '@/lib/tipler';
 import { googleGunu, type Periyot } from '@/schedule/acilis';
 import { enUcuzEklemeIndeksi, programHesapla, type Program, type ProgramDuragi, type YuruyusKaynagi } from '@/schedule/program';
@@ -74,7 +75,7 @@ type GunHesabi = {
 const programDuragi = (m: Pick<Mekan, 'place_id' | 'lat' | 'lng'>, id: string, dakika: number): ProgramDuragi => ({
   id,
   key: m.place_id,
-  konum: { lat: m.lat, lng: m.lng },
+  konum: konumu(m),
   dakika,
   tamamlandiDk: null,
   skipped: false,
@@ -138,14 +139,15 @@ export type GunSecenegi = {
  */
 export function gunSecenekleri(p: GunHesabi & { mekan: Mekan; gunler: Gun[]; duraklar: Durak[]; gunSonuDk?: number }): GunSecenegi[] {
   const sonuDk = p.gunSonuDk ?? 20 * 60;
-  const konum: Konum = { lat: p.mekan.lat, lng: p.mekan.lng };
+  // #318: koordinatı boşalmış mekanda yakınlık yok (mesafe Infinity); gün seçenekleri yine listelenir.
+  const konum = konumu(p.mekan);
   const yeni = programDuragi(p.mekan, `yeni:${p.mekan.id}`, p.mekan.default_minutes);
   const sirali = [...p.gunler].sort((a, b) => a.index - b.index);
   const sonIndex = sirali.length ? sirali[sirali.length - 1].index : 0;
   const secenekler = sirali.map((g): GunSecenegi => {
     const duraklar = gunDuraklari(g, p.duraklar.filter((d) => d.place_ref !== p.mekan.id), p.mekanIle);
     const aktif = duraklar.filter((d) => !d.skipped);
-    const mesafeler = aktif.map((d) => mesafeM(konum, d.konum));
+    const mesafeler = konum ? aktif.flatMap((d) => (d.konum ? [mesafeM(konum, d.konum)] : [])) : [];
     const u = p.gunUclari.get(g.id);
     const otel = u?.baslangic ? { lat: u.baslangic.lat, lng: u.baslangic.lng } : null;
     const ekleIndeksi = enUcuzEklemeIndeksi(

@@ -1,9 +1,9 @@
 import { describe, expect, it } from '@jest/globals';
 
-import { bacakDk, bolgeler, durakDakikasi, enYakinKomsu, GUN_KAPASITESI_DK, planKur, secimOzeti, type PlanMekani } from '../planKur';
+import { bacakDk, bolgeler, durakDakikasi, enYakinKomsu, GUN_KAPASITESI_DK, planKur, secimOzeti, type KonumluMekan } from '../planKur';
 
 // Eskişehir: Odunpazarı kümesi (birbirine ~300–600 m) ve Sazova kümesi (~5 km batıda).
-const m = (id: string, lat: number, lng: number, dakika = 60): PlanMekani => ({ id, lat, lng, dakika });
+const m = (id: string, lat: number, lng: number, dakika = 60): KonumluMekan => ({ id, lat, lng, dakika });
 const odunpazari = [m('o1', 39.7637, 30.5243), m('o2', 39.7660, 30.5260), m('o3', 39.7620, 30.5280)];
 const sazova = [m('s1', 39.7700, 30.4600, 120), m('s2', 39.7715, 30.4630, 90)];
 const gunler = [

@@ -107,12 +107,15 @@ export function useGeziAlinma(geziId: string | undefined) {
 }
 
 /** Seçili Google şehrini yayınlı bir şehirle eşleştir: ad eşitliği ya da merkeze 25 km. */
-export function sehirEslestir(sehirler: Sehir[] | undefined, secim: { ad: string; lat: number; lng: number } | null): Sehir | undefined {
+export function sehirEslestir(sehirler: Sehir[] | undefined, secim: { ad: string; lat: number | null; lng: number | null } | null): Sehir | undefined {
   if (!sehirler || !secim) return undefined;
   const ad = secim.ad.trim().toLocaleLowerCase('tr');
   const adla = sehirler.find((s) => s.ad.toLocaleLowerCase('tr') === ad);
   if (adla) return adla;
-  return sehirler.find((s) => Math.hypot((s.lat - secim.lat) * 111, (s.lng - secim.lng) * 111 * Math.cos((secim.lat * Math.PI) / 180)) <= 25);
+  // #318: seyahat koordinatı boşaldıysa yalnız adla eşleşir.
+  const { lat, lng } = secim;
+  if (lat === null || lng === null) return undefined;
+  return sehirler.find((s) => Math.hypot((s.lat - lat) * 111, (s.lng - lng) * 111 * Math.cos((lat * Math.PI) / 180)) <= 25);
 }
 
 const cozulen = new Map<string, Promise<string | null>>();

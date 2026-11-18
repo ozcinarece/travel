@@ -40,8 +40,11 @@ export type Seyahat = {
   name: string | null;
   city_label: string;
   country_code: string | null;
-  lat: number;
-  lng: number;
+  /** #318: Google koordinatı 30 günde yenilenemezse null (satır kalır). */
+  lat: number | null;
+  lng: number | null;
+  /** #318 inceleme 4: şehrin Google kimliği (merkez boşaldıysa canlı konum için). */
+  city_place_id?: string | null;
   tz: string;
   start_date: string | null;
   end_date: string | null;
@@ -230,8 +233,9 @@ export type Mekan = {
   trip_id: string;
   place_id: string;
   primary_type: string | null;
-  lat: number;
-  lng: number;
+  /** #318: Google koordinatı 30 günde yenilenemezse null; mekan listede kalır, haritada pin olmaz. */
+  lat: number | null;
+  lng: number | null;
   google_fetched_at: string;
   default_minutes: number;
   added_by: string | null;

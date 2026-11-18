@@ -16,7 +16,8 @@ import { KlavyeliPencere } from './KlavyeliPencere';
 type Props = {
   acik: boolean;
   onKapat: () => void;
-  merkez: { lat: number; lng: number };
+  /** Arama yanlılığı; seyahat koordinatı boşaldıysa null (#318). */
+  merkez: { lat: number; lng: number } | null;
   mekanlar: Mekan[];
   ad: (m: Mekan) => string;
   foto: (placeId: string) => string | null;
@@ -36,7 +37,7 @@ function Icerik({ merkez, mekanlar, ad, foto, onSec, baslik, acik }: Omit<Props,
   const [girdi, setGirdi] = useState('');
   // Otomatik tamamlama oturumu seçimle biter; sonraki arama yeni jetonla başlar (diğer arama ekranları gibi).
   const [oturum, setOturum] = useState(yeniOturumJetonu);
-  const oneriler = useOneriler('sohbet-mekan', girdi, oturum, undefined, { lat: merkez.lat, lng: merkez.lng, yaricapM: 20_000 }, acik);
+  const oneriler = useOneriler('sohbet-mekan', girdi, oturum, undefined, merkez ? { lat: merkez.lat, lng: merkez.lng, yaricapM: 20_000 } : undefined, acik);
   const sirali = useMemo(() => [...mekanlar].sort((a, b) => ad(a).localeCompare(ad(b), 'tr')), [mekanlar, ad]);
   const aramada = girdi.trim().length >= 2;
   return (

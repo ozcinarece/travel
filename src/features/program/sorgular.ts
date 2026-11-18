@@ -2,6 +2,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { birKezDene, GunlukSinir, hataDurumu } from '@/features/yerler/api';
+import { konumVar } from '@/lib/konum';
 import { useOturum } from '@/lib/oturum';
 import { supabase } from '@/lib/supabase';
 import type { Degisiklik } from '@/lib/tipler';
@@ -268,10 +269,11 @@ export function useDegisiklikler(seyahatId: string | undefined, etkin = true) {
 }
 
 /** Matris noktaları: günlerin otelleri (stay:<id>, #56) + durakların mekanları (place_id). */
-export function matrisNoktalari(oteller: MatrisNoktasi[], mekanlar: { place_id: string; lat: number; lng: number }[]): MatrisNoktasi[] {
+export function matrisNoktalari(oteller: MatrisNoktasi[], mekanlar: { place_id: string; lat: number | null; lng: number | null }[]): MatrisNoktasi[] {
   const n: MatrisNoktasi[] = [];
   for (const o of oteller) if (!n.some((x) => x.key === o.key)) n.push({ key: o.key, lat: o.lat, lng: o.lng });
-  for (const m of mekanlar) n.push({ key: m.place_id, lat: m.lat, lng: m.lng });
+  // #318: koordinatı boşalmış mekan matrise girmez (sunucu bilinmeyen noktada bütün isteği reddeder).
+  for (const m of mekanlar) if (konumVar(m)) n.push({ key: m.place_id, lat: m.lat, lng: m.lng });
   return n;
 }
 

@@ -17,7 +17,8 @@ export type ProgramDuragi = {
   id: string;
   /** walk_cache anahtarı (place_id). */
   key: string;
-  konum: Konum;
+  /** #318: Google koordinatı boşalmış mekanda null — bacak hesaplanmaz, sonraki bacak önceki konumlu noktadan. */
+  konum: Konum | null;
   dakika: number;
   /** #43: tamamlanma anı (seyahat dilimine göre gün başından dakika); yoksa null. */
   tamamlandiDk: number | null;
@@ -137,7 +138,7 @@ export function programHesapla(secenek: {
     }
     toplam++;
     let y: Yuruyus | null = null;
-    if (oncekiKey && oncekiKonum) {
+    if (oncekiKey && oncekiKonum && d.konum) {
       y = bacak(oncekiKey, oncekiKonum, d.key, d.konum);
       topla(y);
     }
@@ -165,8 +166,10 @@ export function programHesapla(secenek: {
     if (durum === 'gecildi') tamamlanan++;
     satirlar.push({ durak: d, varisDk, ayrilisDk, yuruyus: y, durum, otomatik, bosluk });
     saat = ayrilisDk;
-    oncekiKey = d.key;
-    oncekiKonum = d.konum;
+    if (d.konum) {
+      oncekiKey = d.key;
+      oncekiKonum = d.konum;
+    }
   }
 
   // Son duraktan günün bitiş noktasına (aynı otele dönüş ya da taşınma günü yeni otel, #56).
@@ -207,14 +210,17 @@ export function yuruyusDk(y: Yuruyus): number {
  * Dönen değer: yeni durağın gireceği indeks (0 = en başa).
  */
 export function enUcuzEklemeIndeksi(
-  sira: { key: string; konum: Konum }[],
-  yeni: { key: string; konum: Konum },
+  sira: { key: string; konum: Konum | null }[],
+  yeni: { key: string; konum: Konum | null },
   otel: Konum | null,
   yuruyus: YuruyusKaynagi,
   /** #56: başlangıç anahtarı ve (varsa) günün bitiş noktası — sona eklemede son bacak da hesaba katılır. */
   uclar?: { otelKey?: string; bitis?: { key: string; konum: Konum } | null },
 ): number {
-  const maliyet = (a: { key: string; konum: Konum }, b: { key: string; konum: Konum }) => yuruyus(a.key, b.key)?.sn ?? kestirimYuruyusSn(a.konum, b.konum);
+  // #318: koordinatı boşalmış yeni durak sona girer; sıradaki koordinatsız noktaya maliyet 0 (konumu bilinmiyor).
+  if (!yeni.konum) return sira.length;
+  type Nokta = { key: string; konum: Konum | null };
+  const maliyet = (a: Nokta, b: Nokta) => yuruyus(a.key, b.key)?.sn ?? (a.konum && b.konum ? kestirimYuruyusSn(a.konum, b.konum) : 0);
   const noktalar = otel ? [{ key: uclar?.otelKey ?? 'hotel', konum: otel }, ...sira] : sira;
   const bitis = uclar?.bitis === undefined ? (otel ? noktalar[0] : null) : uclar.bitis;
   if (noktalar.length === 0) return 0;
