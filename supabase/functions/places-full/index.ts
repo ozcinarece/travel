@@ -4,6 +4,7 @@
 // istek önbelleği okumaz: önbellekten dönülürse Google'a Details gitmez, oturum kapanmaz ve her tuş ayrı faturalanır.
 import { GoogleHatasi, tamDetay, type TamYer } from '../_shared/google.ts';
 import { govde, hata, json, kullaniciDogrula } from '../_shared/http.ts';
+import { oturumAnahtari } from '../_shared/oturum.ts';
 import { sayacli } from '../_shared/sayac.ts';
 import { sinirKontrol } from '../_shared/sinir.ts';
 
@@ -18,7 +19,7 @@ Deno.serve(sayacli('places-full', async (istek) => {
   const g = await govde<Istek>(istek);
   if (typeof g.id !== 'string' || !g.id) return hata('id gerekli');
   const tz = typeof g.tz === 'string' && g.tz.length < 64 ? g.tz : undefined;
-  const oturum = typeof g.sessionToken === 'string' && /^[A-Za-z0-9_-]{8,64}$/.test(g.sessionToken) ? g.sessionToken : undefined;
+  const oturum = oturumAnahtari(g.sessionToken);
   const anahtar = `${tz ?? '-'}:${g.id}`;
   const simdi = Date.now();
   const eski = onbellek.get(anahtar);

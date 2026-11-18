@@ -1,6 +1,7 @@
 // places-autocomplete — PRD 3.2 KK1 / 3.3 KK1 / 3.4 arama kutusu.
-// İstemci Autocomplete'i doğrudan çağırmaz; oturum token'ı istemcide üretilir, seçimde
-// places-light'a aynı token'la gidilir ve oturum kapanır. Sonuçlar önbelleklenmez.
+// İstemci Autocomplete'i doğrudan çağırmaz; oturum token'ı istemcide üretilir ve seçimde aynı token'la tek bir Details
+// isteği oturumu kapatır: Yer ekle'de `places-full` (#316), otel seçiminde `places-light` (#347; token'lı kayıt önbellekten
+// okunmaz). Sonuçlar önbelleklenmez.
 import { GoogleHatasi, metinAra, otomatikTamamla } from '../_shared/google.ts';
 import { govde, hata, json, kullaniciDogrula } from '../_shared/http.ts';
 import { sayacli } from '../_shared/sayac.ts';

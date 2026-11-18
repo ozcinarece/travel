@@ -5,6 +5,7 @@
 // istekte yok sayılır (açılış saatleri zaten Enterprise). `saatler` + `foto`: saat ve fotoğraf tek istekte (≤ 12 kimlik).
 import { GoogleHatasi, hafifDetay, type HafifYer } from '../_shared/google.ts';
 import { govde, hata, json, kullaniciDogrula } from '../_shared/http.ts';
+import { eksikSayisi, oturumAnahtari, topluOku } from '../_shared/oturum.ts';
 import { sayacli } from '../_shared/sayac.ts';
 import { sinirKontrol } from '../_shared/sinir.ts';
 
@@ -38,15 +39,15 @@ Deno.serve(sayacli('places-light', async (istek) => {
   // #45: editorialSummary yalnız pin paneli (tek mekan, fotoğrafla birlikte); 24 sa önbellek.
   const ozet = foto && !saatler && g.ozet === true;
   const puansiz = g.puansiz === true && !sehir && !saatler && !ozet;
-  const oturum = typeof g.sessionToken === 'string' && /^[A-Za-z0-9_-]{8,64}$/.test(g.sessionToken) ? g.sessionToken : undefined;
+  // #347: otel seçimi Autocomplete oturumunu burada kapatır; token'lı ilk kayıt önbellekten okunmaz.
+  const oturum = oturumAnahtari(g.sessionToken);
 
   const simdi = Date.now();
   const tekil = [...new Set(ids)];
-  // #226: önbellekte olmayan her kimlik bir Details isteğidir ve öyle sayılır (önbellekten dönen sayılmaz).
-  const eksik = tekil.filter((id) => {
-    const eski = onbellek.get(onbellekAnahtari(id, sehir, saatler, foto, ozet, puansiz));
-    return !eski || simdi - eski.zaman >= TTL_MS;
-  }).length;
+  const anahtar = (id: string) => onbellekAnahtari(id, sehir, saatler, foto, ozet, puansiz);
+  // #226: önbellekte olmayan her kimlik bir Details isteğidir ve öyle sayılır (önbellekten dönen sayılmaz). #347: token'lı
+  // ilk kayıt da Google'a gider ve sayılır.
+  const eksik = eksikSayisi(tekil, anahtar, onbellek, simdi, TTL_MS, oturum);
   if (eksik > 0) {
     // `foto` ile her eksik kimlik için ayrıca bir Photo isteği gider (hafifDetay → fotoUri); Photo kovasına sığmazsa reddedilir.
     // Photo önce sayılır: Photo'ya sığmayan istek, Details hakkını boşuna yakmadan reddedilir (#226).
@@ -58,17 +59,8 @@ Deno.serve(sayacli('places-light', async (istek) => {
     if (sinir) return sinir;
   }
   try {
-    const yerler = await Promise.all(
-      tekil.map(async (id, i) => {
-        const anahtar = onbellekAnahtari(id, sehir, saatler, foto, ozet, puansiz);
-        const eski = onbellek.get(anahtar);
-        if (eski && simdi - eski.zaman < TTL_MS) return eski.deger;
-        // Oturum token'ı yalnızca ilk (seçilen) kayda bağlanır; oturumu kapatır.
-        const yer = await hafifDetay(id, { sehir, saatler, foto, ozet, puansiz, oturum: i === 0 ? oturum : undefined });
-        onbellek.set(anahtar, { zaman: simdi, deger: yer });
-        return yer;
-      }),
-    );
+    // Oturum token'ı yalnızca ilk (seçilen) kayda bağlanır; oturumu kapatır.
+    const yerler = await topluOku(tekil, anahtar, onbellek, simdi, TTL_MS, oturum, (id, o) => hafifDetay(id, { sehir, saatler, foto, ozet, puansiz, oturum: o }));
     return json({ yerler });
   } catch (e) {
     if (e instanceof GoogleHatasi) {
