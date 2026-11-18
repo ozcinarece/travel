@@ -252,6 +252,9 @@ describe('#199 önerilen gezi ekranı', () => {
     expect(await screen.findByTestId('bolum-hata:gezi-harita')).toBeTruthy();
     expect(screen.getByText('harita bozuk')).toBeTruthy();
     expect(screen.getByText(g.baslik)).toBeTruthy();
+    // #351 KK4: kapak başlığı en çok 2 satır, taşan kısım "…" ile biter.
+    expect(screen.getByText(g.baslik).props.numberOfLines).toBe(2);
+    expect(screen.getByText(g.baslik).props.ellipsizeMode).toBe('tail');
     expect(screen.getByText(g.gezi_gunleri[0].gezi_duraklari[6].ad)).toBeTruthy();
     expect(screen.getByText('Seyahatime al')).toBeTruthy();
     // Harita düzelince "Yeniden dene" bölümü geri getirir.

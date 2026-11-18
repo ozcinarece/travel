@@ -258,9 +258,9 @@ export default function GeziEkrani() {
               <Text style={s.rozet}>{t('gezi.rozetGun', { n: g.gun_sayisi })}</Text>
               {alinmaSayisi > 0 ? <Text style={[s.rozet, s.rozetSaydam]}>{t('gezi.alindi', { n: alinmaSayisi })}</Text> : null}
             </View>
-            <Text style={s.baslik}>{g.baslik}</Text>
+            <Text style={s.baslik} numberOfLines={2} ellipsizeMode="tail">{g.baslik}</Text>
           </View>
-          {kapakAtif?.tur === 'kapak' && kapakAtif.atif ? <KapakAtfi atif={kapakAtif.atif} /> : kapakAtif?.tur === 'google' ? <GoogleFotoAtfi yazar={kapakAtif.yazar} /> : null}
+          {kapakAtif?.tur === 'kapak' && kapakAtif.atif ? <KapakAtfi atif={kapakAtif.atif} /> : kapakAtif?.tur === 'google' ? <GoogleFotoAtfi yazar={kapakAtif.yazar} uri={kapakAtif.uri} /> : null}
         </View>
         {yaziVar ? (
           <View style={s.segmentKap} onLayout={(e) => setSegmentY(e.nativeEvent.layout.y)}>

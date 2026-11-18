@@ -43,6 +43,13 @@ export function commonsMu(a: KapakAtfi): boolean {
   }
 }
 
+/** #351 KK1–KK2: Google yazar bağlantısı yalnız https ve yalnız yazar adı varken kullanılır. */
+export function googleYazarBaglantisi(yazar: string | null | undefined, uri: string | null | undefined): string | null {
+  if (!yazar?.trim() || typeof uri !== 'string') return null;
+  const u = uri.trim();
+  return /^https:\/\/\S+$/.test(u) ? u : null;
+}
+
 /** Kapağın kendisi hangi satırdan geliyorsa atıf da oradan: kapak yoksa atıf da yok. */
 export function kapakVeAtif(kaynaklar: { kapak_url?: string | null; kapak_atif?: unknown }[]): { uri: string | null; atif: KapakAtfi | null } {
   const k = kaynaklar.find((x) => !!x.kapak_url);
@@ -51,9 +58,9 @@ export function kapakVeAtif(kaynaklar: { kapak_url?: string | null; kapak_atif?:
 
 /**
  * #348 inceleme 2: yedek kapağın atfı, fotoğrafı aldığı satırdan. `kapak` = satırın kendi kapağı (Commons ya da Ece'nin;
- * `kapak_atif` bozuksa atıf yok), `google` = Google fotoğrafı ("Foto: {yazar} · Google Maps"; yazar bilinmiyorsa yazarsız).
+ * `kapak_atif` bozuksa atıf yok), `google` = Google fotoğrafı ("Foto: {yazar} · Google Maps"; yazar bilinmiyorsa yazarsız; #351 `uri` = yazarın Google sayfası).
  */
-export type FotoAtfi = { tur: 'kapak'; atif: KapakAtfi | null } | { tur: 'google'; yazar: string | null };
+export type FotoAtfi = { tur: 'kapak'; atif: KapakAtfi | null } | { tur: 'google'; yazar: string | null; uri?: string | null };
 
 /** Fotoğrafı olan ilk satır ve atfı; hiçbirinde fotoğraf yoksa null. */
 export function ilkFoto<T>(satirlar: T[], oku: (s: T) => { foto_uri: string | null; foto_atif: FotoAtfi | null } | undefined): { uri: string; atif: FotoAtfi | null } | null {

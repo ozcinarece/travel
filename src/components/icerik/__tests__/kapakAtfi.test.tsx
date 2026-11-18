@@ -38,4 +38,26 @@ describe('#345 KK4 KapakAtfi (kanvas 29i)', () => {
     expect(screen.getByText('Foto: Ali')).toBeTruthy();
     expect(screen.getByText('· Google Maps')).toBeTruthy();
   });
+
+  it('#351 KK2: Google yazar bağlantısı varsa dokununca tarayıcıda açılır; görünüm aynı, 44 pt', () => {
+    const uri = 'https://maps.google.com/maps/contrib/123';
+    render(<GoogleFotoAtfi yazar="Ali" uri={uri} />);
+    expect(screen.getByText('Foto: Ali')).toBeTruthy();
+    expect(screen.getByText('· Google Maps')).toBeTruthy();
+    const dugme = screen.getByTestId('google-foto-atfi');
+    expect(dugme.props.accessibilityRole).toBe('link');
+    expect(screen.getByLabelText('Fotoğraf: Ali, Google Maps. Yazarın sayfasını aç')).toBeTruthy();
+    fireEvent.press(dugme);
+    expect(WebBrowser.openBrowserAsync).toHaveBeenCalledWith(uri);
+  });
+
+  it('#351 KK2: bağlantı yoksa, https değilse ya da yazar yoksa dokunulmaz (bugünkü gibi)', () => {
+    const { rerender } = render(<GoogleFotoAtfi yazar="Ali" />);
+    expect(screen.queryByTestId('google-foto-atfi')).toBeNull();
+    rerender(<GoogleFotoAtfi yazar="Ali" uri="javascript:alert(1)" />);
+    expect(screen.queryByTestId('google-foto-atfi')).toBeNull();
+    rerender(<GoogleFotoAtfi yazar={null} uri="https://maps.google.com/maps/contrib/1" />);
+    expect(screen.queryByTestId('google-foto-atfi')).toBeNull();
+    expect(screen.getByText('Foto: Google Maps')).toBeTruthy();
+  });
 });

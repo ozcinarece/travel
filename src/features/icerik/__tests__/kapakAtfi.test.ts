@@ -53,8 +53,12 @@ describe('#348 inceleme 1–2', () => {
   it('yedek kapak atfı fotoğrafın geldiği satırdan', () => {
     const commons = satirFotosu({ kapak_url: 'https://x/k.jpg', kapak_atif: { yazar: 'Ahmet Y.', lisans: 'CC BY-SA 4.0', kaynak_url: 'https://commons.wikimedia.org/wiki/File:K.jpg' } }, { foto_uri: 'https://g/1.jpg', foto_yazar: 'G' });
     expect(commons).toEqual({ foto_uri: 'https://x/k.jpg', foto_atif: { tur: 'kapak', atif: { yazar: 'Ahmet Y.', lisans: 'CC BY-SA 4.0', kaynak_url: 'https://commons.wikimedia.org/wiki/File:K.jpg' } } });
-    expect(satirFotosu({}, { foto_uri: 'https://g/1.jpg', foto_yazar: ' Ayşe ' })).toEqual({ foto_uri: 'https://g/1.jpg', foto_atif: { tur: 'google', yazar: 'Ayşe' } });
-    expect(satirFotosu({}, { foto_uri: 'https://g/1.jpg' })).toEqual({ foto_uri: 'https://g/1.jpg', foto_atif: { tur: 'google', yazar: null } });
+    expect(satirFotosu({}, { foto_uri: 'https://g/1.jpg', foto_yazar: ' Ayşe ' })).toEqual({ foto_uri: 'https://g/1.jpg', foto_atif: { tur: 'google', yazar: 'Ayşe', uri: null } });
+    expect(satirFotosu({}, { foto_uri: 'https://g/1.jpg' })).toEqual({ foto_uri: 'https://g/1.jpg', foto_atif: { tur: 'google', yazar: null, uri: null } });
+    // #351 KK1: yazar bağlantısı yalnız https ve yalnız yazar varken.
+    expect(satirFotosu({}, { foto_uri: 'https://g/1.jpg', foto_yazar: 'Ayşe', foto_yazar_uri: 'https://maps.google.com/maps/contrib/9' }).foto_atif).toEqual({ tur: 'google', yazar: 'Ayşe', uri: 'https://maps.google.com/maps/contrib/9' });
+    expect(satirFotosu({}, { foto_uri: 'https://g/1.jpg', foto_yazar: 'Ayşe', foto_yazar_uri: 'http://x' }).foto_atif).toEqual({ tur: 'google', yazar: 'Ayşe', uri: null });
+    expect(satirFotosu({}, { foto_uri: 'https://g/1.jpg', foto_yazar_uri: 'https://maps.google.com/maps/contrib/9' }).foto_atif).toEqual({ tur: 'google', yazar: null, uri: null });
     expect(satirFotosu({}, undefined)).toEqual({ foto_uri: null, foto_atif: null });
   });
   it('ilkFoto: fotoğrafı olan ilk durak ve onun atfı', () => {

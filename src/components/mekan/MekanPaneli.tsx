@@ -192,7 +192,7 @@ export function MekanPaneli(p: MekanPaneliProps) {
                 ) : fotoHali === 'hafif' && p.hafif?.foto_uri ? (
                   <View style={[StyleSheet.absoluteFill, { backgroundColor: kategoriRenk + '22' }]}>
                     <Image source={{ uri: p.hafif.foto_uri }} style={StyleSheet.absoluteFill} contentFit="cover" transition={150} />
-                    <GoogleFotoAtfi yazar={p.hafif.foto_yazar} />
+                    <GoogleFotoAtfi yazar={p.hafif.foto_yazar} uri={p.hafif.foto_yazar_uri} />
                   </View>
                 ) : (
                   <FotoYok tip={tip} />

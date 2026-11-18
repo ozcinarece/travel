@@ -1,5 +1,5 @@
 // #345 KK2: Commons kapağı — plan biçimi, lisans kabulü, yazar temizliği, Commons cevabının eşlenmesi.
-import { commonsBilgisi, EN_BUYUK_KAPAK, indirmeAdresiUygun, kapakDenetimi, kapakDenetle, kapakIndir, kapakIstekleri, kapakVerisi, kapakYolu, lisansCoz, yazarBul, yazarTemizle } from '../kapak.mjs';
+import { commonsBilgisi, COMMONS_DOSYA, EN_BUYUK_KAPAK, EN_UZUN_KAYNAK_URL, indirmeAdresiUygun, kapakDenetimi, kapakDenetle, kapakIndir, kapakIstekleri, kapakVerisi, kapakYolu, lisansCoz, yazarBul, yazarTemizle } from '../kapak.mjs';
 
 const meta = (kisa, kod, yazar = 'Ad Soyad') => ({ LicenseShortName: { value: kisa }, License: { value: kod }, Artist: { value: yazar } });
 
@@ -141,6 +141,30 @@ describe('#348 inceleme 5: yazar', () => {
     const { hatalar, hazir } = kapakDenetimi([{ hedef: 'gezi', anahtar: 'g', dosya: 'File:Y.jpg' }], bilgi);
     expect(hazir).toEqual([]);
     expect(hatalar).toEqual(['gezi g: File:Y.jpg yazarı yok (Artist, Credit ve Attribution boş); atıfsız yüklenmez']);
+  });
+});
+
+describe('#351 KK3: kaynak_url uzunluğu yüklemeden önce denetlenir', () => {
+  const bilgiIle = (dosya, kaynakUrl) =>
+    new Map([[dosya, { var: true, mime: 'image/jpeg', kucukUrl: 'https://upload.wikimedia.org/x.jpg', kaynakUrl, yazar: 'Ad Soyad', kabul: true, lisans: 'CC BY 4.0' }]]);
+
+  it("Türkçe karakterli uzun ad: dosya adı kabul edilir ama yüzde-kodlu adres 500'ü aşar → HATA, hazır yok", () => {
+    const dosya = `File:${'Şişli Çarşı Ğ '.repeat(17)}.jpg`;
+    expect(COMMONS_DOSYA.test(dosya)).toBe(true);
+    const kaynak = `https://commons.wikimedia.org/wiki/${encodeURIComponent(dosya.replace(/ /g, '_'))}`;
+    expect(kaynak.length).toBeGreaterThan(EN_UZUN_KAYNAK_URL);
+    const { hatalar, hazir } = kapakDenetimi([{ hedef: 'gezi', anahtar: 'g', dosya }], bilgiIle(dosya, kaynak));
+    expect(hazir).toEqual([]);
+    expect(hatalar).toHaveLength(1);
+    expect(hatalar[0]).toContain(`kaynak adresi ${kaynak.length} karakter (en çok 500)`);
+  });
+
+  it('tam 500 karakter geçer', () => {
+    const kaynak = `https://commons.wikimedia.org/wiki/File:${'a'.repeat(500 - 44)}.jpg`;
+    expect(kaynak.length).toBe(500);
+    const { hatalar, hazir } = kapakDenetimi([{ hedef: 'gezi', anahtar: 'g', dosya: 'File:A.jpg' }], bilgiIle('File:A.jpg', kaynak));
+    expect(hatalar).toEqual([]);
+    expect(hazir).toHaveLength(1);
   });
 });
 
