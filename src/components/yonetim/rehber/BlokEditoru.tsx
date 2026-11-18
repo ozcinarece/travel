@@ -685,7 +685,7 @@ const c: Record<string, CSSProperties> = {
   oluk: { position: 'absolute', left: -36, top: 2, display: 'flex', flexDirection: 'column', gap: 2 },
   olukDugme: { width: 24, height: 24, border: 0, borderRadius: 7, background: yRenk.yuzey, color: yRenk.ana, fontFamily: yazi.ekstra, fontSize: 15, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', padding: 0 },
   paragraf: { fontFamily: yazi.normal, fontSize: 17, lineHeight: 1.65, color: METIN, minHeight: 28, whiteSpace: 'pre-wrap' },
-  araBaslik: { ...baslikStili(22), lineHeight: 1.2, letterSpacing: '-0.02em', color: yRenk.metin, minHeight: 26 },
+  araBaslik: { ...baslikStili(22), lineHeight: 1.2, color: yRenk.metin, minHeight: 26 },
   ipucu: { padding: '12px 14px', borderRadius: 16, background: yRenk.bekliyorZemin, display: 'flex', flexDirection: 'column', gap: 4 },
   ipucuEtiket: { fontFamily: yazi.ekstra, fontSize: 11, letterSpacing: '0.06em', color: yRenk.bekliyorMetin },
   ipucuMetin: { fontFamily: yazi.normal, fontSize: 15, lineHeight: 1.5, color: yRenk.metin, minHeight: 22 },

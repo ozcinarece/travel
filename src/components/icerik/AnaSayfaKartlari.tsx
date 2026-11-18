@@ -92,5 +92,5 @@ const s = StyleSheet.create({
   ilkGovde: { paddingHorizontal: 20, paddingTop: 4, paddingBottom: 20, gap: 10 },
   ilkMetin: { fontFamily: yazi.normal, fontSize: 15, lineHeight: 22, color: renk.anaAcik },
   basla: { marginTop: 4, height: 52, borderRadius: kose.dugme, backgroundColor: renk.vurgu, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 },
-  baslaMetin: { fontFamily: yazi.ekstra, fontSize: 16, color: renk.metin },
+  baslaMetin: { fontFamily: yazi.kalin, fontSize: 16, color: renk.metin },
 });

@@ -9,7 +9,7 @@ import type { YonetimYeri } from '@/features/yonetim/yerSorgulari';
 import { t } from '@/i18n';
 import { bolumKimlikleri, cizimBloklari, gorunenBolumler } from '@/lib/anaSayfa';
 import type { Gezi } from '@/lib/tipler';
-import { bosluk, renk, yazi } from '@/theme';
+import { baslikStili, bosluk, olcek, renk, yazi } from '@/theme';
 
 export const ANA_SAYFA_TELEFON = { genislik: 390, yukseklik: 1180 } as const;
 
@@ -140,7 +140,7 @@ const s = StyleSheet.create({
   kartDugmeMetin: { fontFamily: yazi.kalin, fontSize: 13, color: renk.metin },
   bolum: { paddingTop: 24, paddingHorizontal: bosluk.kenar, gap: 12 },
   bolumSatir: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  bolumBaslik: { fontFamily: yazi.ekstra, fontSize: 18, letterSpacing: -0.4, color: renk.metin },
+  bolumBaslik: { ...baslikStili(olcek.bolum), color: renk.metin },
   tumu: { fontFamily: yazi.kalin, fontSize: 13, color: renk.ikincil },
   seritKaydirma: { marginHorizontal: -bosluk.kenar },
   serit: { gap: 10, paddingHorizontal: bosluk.kenar },

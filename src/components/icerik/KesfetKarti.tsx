@@ -359,6 +359,6 @@ const s = StyleSheet.create({
     alignItems: 'center',
     gap: 6,
   },
-  baslaMetin: { fontFamily: yazi.ekstra, fontSize: 15, color: renk.zemin },
+  baslaMetin: { fontFamily: yazi.kalin, fontSize: 15, color: renk.zemin },
   iskelet: { borderRadius: 6, backgroundColor: renk.yuzey },
 });

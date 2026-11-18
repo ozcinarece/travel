@@ -7,6 +7,7 @@ import Svg, { Circle, Path } from 'react-native-svg';
 import { Logo, LogoYazisi } from '@/components/ui/Logo';
 import { aktifMenu, GENIS_EKRAN, MENU, type MenuOgesi } from '@/features/yonetim/menu';
 import { ty } from '@/features/yonetim/metin';
+import { t } from '@/i18n';
 import { baslikStili, yazi } from '@/theme';
 
 import { AltCizgiliSekmeler, type SekmeTanimi } from './Ortak';
@@ -29,10 +30,11 @@ function MenuRotasi() {
 /** Logo (36 × 22, koyu zemin) + "tripmate" (SVG yolu, 19 px) + "YÖNETİM" (10 px 800, #FFB27A). */
 function Marka() {
   return (
-    <View style={s.marka}>
-      <Logo boyut={36} koyuZemin />
-      <View style={s.markaYazi}>
-        <View style={s.markaAd} accessible accessibilityRole="image" accessibilityLabel="Tripmate">
+    // Tek grup etiketi (#319): "Tripmate, Yönetim"; logo SVG'si ve yazılar ayrıca okunmaz.
+    <View style={s.marka} accessible accessibilityRole="image" accessibilityLabel={`${t('marka.ad')}, ${ty('marka')}`}>
+      <Logo boyut={36} koyuZemin gizli />
+      <View style={s.markaYazi} importantForAccessibility="no-hide-descendants" aria-hidden>
+        <View style={s.markaAd}>
           <LogoYazisi boyut={19} renk={yRenk.zemin} />
         </View>
         <Text style={s.markaAlt}>{ty('marka').toLocaleUpperCase('tr-TR')}</Text>

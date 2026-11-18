@@ -114,8 +114,8 @@ export function MdYazi({ kaynak, onMekan, mekanKarti, ipucu, kenar = 20, buyuk }
 
 const s = StyleSheet.create({
   kap: { gap: 14 },
-  baslik: { fontFamily: yazi.ekstra, fontSize: 18, letterSpacing: -0.4, color: renk.metin, paddingTop: 6 },
-  baslik1: { fontSize: 22 },
+  baslik: { ...baslikStili(18), color: renk.metin, paddingTop: 6 },
+  baslik1: baslikStili(22),
   baslikBuyuk: { ...baslikStili(21), lineHeight: 25, paddingTop: 4 },
   paragraf: { fontFamily: yazi.normal, fontSize: 15, lineHeight: 24, color: '#232b48' },
   paragrafBuyuk: { fontSize: 16, lineHeight: 25.6 },

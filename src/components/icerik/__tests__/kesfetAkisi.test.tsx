@@ -8,7 +8,7 @@ import { Path } from 'react-native-svg';
 import { ayrilmaEki } from '@/features/davet/katilim';
 import { akisGezisi, akisSirasi, kartEtiketi, kesfetAkisiAcik, type AkisGezisi } from '@/features/icerik/kesfetAkisi';
 
-import { Logo } from '@/components/ui/Logo';
+import { Logo, LogoYazi } from '@/components/ui/Logo';
 
 import { Kalp } from '../Kalp';
 import { KesfetAkisi } from '../KesfetAkisi';
@@ -164,6 +164,15 @@ describe('<KesfetAkisi />', () => {
     kucuk.unmount();
     render(<KesfetAkisi sehir={null} onYeni={jest.fn()} />);
     expect(screen.UNSAFE_getAllByType(Path).filter((p) => p.props.strokeDasharray === '7 4.5')).toHaveLength(4);
+  });
+
+  it('#319: logo etiketi tr.json\'dan; LogoYazi tek grup etiketi, içindeki logo SVG\'si ekran okuyucudan gizli', () => {
+    const tek = render(<Logo boyut={36} />);
+    expect(tek.getAllByLabelText('Tripmate')).toHaveLength(1);
+    tek.unmount();
+    render(<LogoYazi boyut={36} />);
+    expect(screen.getAllByLabelText('Tripmate')).toHaveLength(1);
+    expect(screen.UNSAFE_getAllByProps({ 'aria-hidden': true }).length).toBeGreaterThanOrEqual(2);
   });
 
   it('#287 KK1: veri varken yenileme hata verirse kartlar ekranda kalır, "Bağlanamadık" çıkmaz', () => {

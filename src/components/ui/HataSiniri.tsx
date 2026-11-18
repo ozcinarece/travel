@@ -4,7 +4,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { t } from '@/i18n';
 import { hataBildir } from '@/lib/hataRaporu';
 import { hataOzeti, ilkBilesen, sonHatayiSakla, sonIzler } from '@/lib/izler';
-import { bosluk, renk, yazi } from '@/theme';
+import { baslikStili, bosluk, renk, yazi } from '@/theme';
 
 type Props = { children: ReactNode };
 type Durum = { hata: Error | null; bilesen: string | null };
@@ -60,7 +60,7 @@ export class HataSiniri extends Component<Props, Durum> {
 const s = StyleSheet.create({
   ekran: { flex: 1, backgroundColor: renk.yuzey, alignItems: 'center', justifyContent: 'center', padding: bosluk.kenar },
   kart: { width: '100%', maxWidth: 360, padding: 20, borderRadius: 18, backgroundColor: renk.zemin, gap: 10 },
-  baslik: { fontFamily: yazi.ekstra, fontSize: 18, letterSpacing: -0.3, color: renk.metin },
+  baslik: { ...baslikStili(18), color: renk.metin },
   metin: { fontFamily: yazi.normal, fontSize: 13, lineHeight: 19, color: renk.ikincil },
   kod: { fontFamily: yazi.yari, fontSize: 11, lineHeight: 15, color: renk.ikincil },
   izler: { fontFamily: yazi.normal, fontSize: 10, lineHeight: 14, color: renk.soluk },

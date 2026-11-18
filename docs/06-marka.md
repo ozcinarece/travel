@@ -30,7 +30,7 @@ Kontrast: Lacivert / Gri mavi beyaz üstünde ≥ 4,5:1; Mandalina üstünde bey
 - **Başlık ve metin: Figtree; başlık 800, düğme 700** (#307, Ece'nin #301 kararı C). Tek aile: 400 / 500 / 600 / 700 / 800 → `normal · orta · yari · kalin · ekstra`; `yazi.baslik` = Figtree 800 (`@expo-google-fonts/figtree`, JS varlığı, OTA ile gider). Archivo kalktı.
 - Başlık stili `baslikStili(boyut)` (`src/theme.ts`): kart (24) ve üstü harf aralığı **−0,5 px**, bölüm boyu (18–23) **−0,3 px**, daha küçük başlıklarda yok.
 - Düğme yazısı `yazi.kalin` (700), 15–17 px.
-- Ölçek: ekran **32** · kart **24** · bölüm **19–20** · metin **16** · alt **14** · etiket **12** (büyük harf, 800, `Rozet buyukHarf`). Gezi kapağı başlığı 32. Satır 1,05–1,1.
+- Ölçek: ekran **32** · kart **24** · bölüm **20** (−0,3 px; 18 altında harf aralığı yok) · metin **16** · alt **14** · etiket **12** (büyük harf, 800, `Rozet buyukHarf`). Gezi kapağı başlığı 32. Satır 1,05–1,1.
 - Logo yazısı "tripmate" font değil, sabit SVG yolu (`src/components/ui/logoYazisiYolu.ts`; Archivo 850 / 115 glifleri bir kez üretildi). Logo değişikliği Ece'nin kararıdır (`docs/ekip/00-calisma-sistemi.md` §4).
 
 ## 3. Köşe, gölge, boşluk
