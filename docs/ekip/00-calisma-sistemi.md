@@ -14,9 +14,12 @@ Tripmate'i birkaç yapay zekâ ajanı birlikte geliştirir. Ece komut verir, bü
 | **Sadelik savunucusu** | `sadelik.md` | Her yeni şeye "gerçekten gerekli mi, daha basit olur mu?" diye bakar | Yeni özellik önermez |
 | **Büyüme denetçisi** | `buyume.md` | Kullanıcı neden indirir, neden geri gelir, neden arkadaşını çağırır | Ücretli kampanya ya da harcama başlatmaz |
 | **Maliyet ve güvenlik** | `maliyet-guvenlik.md` | Google maliyeti, yetki (RLS), gizlilik, KVKK, Google koşulları | Kod yazmaz; bulgusu engel olarak işaretlenebilir |
+| **AI denetçisi** | `ai-denetci.md` | Ekran, metin ve içerik "AI kokuyor mu?" diye bakar, 0–3 puan verir; Ürün'ün Ece'ye göstereceği her tasarımın ön kontrolü | Marka kararına dokunmaz, zevk tartışması açmaz |
+| **Sosyallik denetçisi** | `sosyallik.md` | Her karar ve ekran arkadaşlarla gezmeye ve paylaşmaya yaklaştırıyor mu, ana amaçtan uzaklaşıyor muyuz diye bakar | Kapsam kararı vermez |
+| **AR-GE** | `arge.md` | Haftada bir 3 gelecek fikri üretir (yakın, orta, uçuk); sahne, fizibilite ve en küçük deneyle | Fikri Ece onaylamadan işe çevirmez |
 | **Rehber** (içerik editörü) | zamanlanmış görevin istemi | #299 iş listesinden gezi içeriği hazırlar, `İçerik:` PR'ı açar; Ürün onaylayınca birleştirir ve BO'ya **taslak** yükler | Yayınlamaz (yayını Ece yapar); uygulama kodu yazmaz |
 
-Bütün ajanlar aynı GitHub hesabını kullanır. Bu yüzden **her yorum ve issue rol etiketiyle başlar**: `**[Ürün]**`, `**[Geliştirici]**`, `**[UX]**`, `**[Sadelik]**`, `**[Büyüme]**`, `**[Maliyet-Güvenlik]**`, `**[Rehber]**`. Ece kendi yorumlarını etiketsiz yazar; etiketsiz yorum Ece'nindir ve her şeyden önce gelir.
+Bütün ajanlar aynı GitHub hesabını kullanır. Bu yüzden **her yorum ve issue rol etiketiyle başlar**: `**[Ürün]**`, `**[Geliştirici]**`, `**[UX]**`, `**[Sadelik]**`, `**[Büyüme]**`, `**[Maliyet-Güvenlik]**`, `**[Rehber]**`, `**[AI Denetçi]**`, `**[Sosyallik]**`, `**[AR-GE]**`. Ece kendi yorumlarını etiketsiz yazar; etiketsiz yorum Ece'nindir ve her şeyden önce gelir.
 
 ## 2. Masa: GitHub
 
@@ -27,7 +30,7 @@ Bütün ajanlar aynı GitHub hesabını kullanır. Bu yüzden **her yorum ve iss
   - `tasarim-bekliyor`: kanvasta karşılığı yok; Ürün çizince kaldırır.
   - `ece-karari`: Ece'nin kararı gerekiyor (bkz. §4). Bu etiketli iş, Ece cevap verene kadar ilerlemez.
   - `engel`: birleştirmeyi durduran bulgu (güvenlik, veri kaybı, Google koşulu, çökme).
-- **Denetçi etiketleri:** `ux-denetim`, `sadelik`, `buyume`, `maliyet-guvenlik`. Denetçi bulgusu bu etiketle açılır. Ürün altına **Kabul / Ret / Soru** yazar; kabul edilen bulgu ya iş issue'suna dönüşür ya da mevcut bir işe eklenir.
+- **Denetçi etiketleri:** `ux-denetim`, `sadelik`, `buyume`, `maliyet-guvenlik`, `ai-kokusu`, `sosyallik`. AR-GE fikirleri `arge` etiketiyle açılır; bunlar bulgu değil, Ece'nin tepkisini bekleyen fikirdir. Denetçi bulgusu bu etiketle açılır. Ürün altına **Kabul / Ret / Soru** yazar; kabul edilen bulgu ya iş issue'suna dönüşür ya da mevcut bir işe eklenir.
 
 ## 3. Akış
 
@@ -63,7 +66,8 @@ Kalan her şeyi Ürün karara bağlar; Ece istediği zaman geri çevirebilir.
 |---|---|---|
 | Geliştirme turu | Her saat :40'ta, 08:40–23:40 | Geliştirici |
 | Ürün turu | Her saat :10'da, 09:10–23:10 | Ürün |
-| Denetim kurulu | Pazartesi ve perşembe 11:25 | UX, Sadelik, Büyüme, Maliyet-Güvenlik (aynı turda, birbirinden bağımsız alt ajanlar) |
+| Denetim kurulu | Pazartesi ve perşembe 11:25 | UX, Sadelik, Büyüme, Maliyet-Güvenlik, AI Denetçi, Sosyallik (aynı turda, birbirinden bağımsız alt ajanlar) |
+| AR-GE turu | Çarşamba 14:21 | AR-GE |
 | Rehber turu | Her saat :25'te, 08:25–23:25 | Rehber |
 | Haftalık özet | Cuma 17:50 | Ürün → Ece'ye bildirim |
 
@@ -82,6 +86,7 @@ Son turdan beri hiçbir şey değişmediyse tur masaya yazmaz, tek satırla bite
 
 ## 7. Değişmez kurallar (hepsi için)
 
+- **AI kokusu ön kontrolü.** Ürün, Ece'ye gösterilecek her tasarımı ya da karar sayfasını önce AI Denetçi rolüyle bir alt ajana puanlatır. Puan 2 ya da üstüyse önce düzeltir.
 - **Tasarım kaynağı kanvas** (CLAUDE.md). Görünen her şeyi Ürün kanvasta çizer; geliştirici kanvasta olmayanı uygulamaz, `tasarim-bekliyor` yazar.
 - **Google verisi** yalnız PRD §7'deki kadar saklanır. Places/Routes çağrısı yalnız Edge Function'dan. Her yeni dış istek için "kullanıcı başına kaç istek, ne kadar" yazılır.
 - **Repo herkese açık.** Hiçbir yere anahtar, şifre, kişisel veri ya da Google'dan gelen içerik yazılmaz; Actions loglarına da basılmaz.

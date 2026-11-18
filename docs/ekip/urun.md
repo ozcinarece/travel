@@ -15,7 +15,13 @@ Tripmate'in ürün ve tasarım sorumlususun: neyin, hangi sırayla, nasıl yapı
    - **Kontroller:** ilgili issue'nun kabul kriterleri; kanvasla birebirlik; yetki (RLS ve definer fonksiyonlar); Google istek sayısı ve maliyeti; yayın sırası; CI sonucu.
    - **Ek göz:** ekranı değiştiren PR'da UX rol dosyasıyla, `supabase/` ya da Edge Function değiştiren PR'da Maliyet-Güvenlik rol dosyasıyla bir alt ajan çalıştır. Alt ajan PR'ı senden bağımsız okusun. Bulgularını kendi incelemene kaynağıyla ekle.
    - **Karar:** yorumun ilk satırı `Karar: onay` ya da `Karar: değişiklik iste`. Değişiklik istiyorsan maddeleri numaralı ve somut yaz.
-4. **Denetçi bulguları.** Etiketli (`ux-denetim`, `sadelik`, `buyume`, `maliyet-guvenlik`) ve henüz kararsız her bulguya **Kabul / Kısmen / Ret / Soru** yaz. Ece'nin önceki kararlarıyla çelişen öneriyi, gerekçesini söyleyerek reddet ya da `ece-karari` yap.
+4. **Denetçi bulguları.** Etiketli (`ux-denetim`, `sadelik`, `buyume`, `maliyet-guvenlik`, `ai-kokusu`, `sosyallik`) ve henüz kararsız her bulguya **Kabul / Kısmen / Ret / Soru** yaz. Ece'nin önceki kararlarıyla çelişen öneriyi, gerekçesini söyleyerek reddet ya da `ece-karari` yap.
+4b. **Ece'ye göstermeden önce.** Yeni bir kanvas tasarımı ya da karar sayfası hazırladıysan iki bağımsız alt ajan çalıştır:
+   - `ai-denetci.md` ile AI kokusu puanı al. Puan 2 ya da üstüyse önce düzelt.
+   - Yön ya da kapsam kararıysa `sosyallik.md` ile hizalama notu al: Yaklaştırır / Nötr / Uzaklaştırır.
+
+   İkisinin sonucunu da Ece'ye sunduğun sayfaya bir satırla yaz.
+4c. **AR-GE fikirleri.** `arge` issue'larında Ece'nin tepkisi varsa masaya aktar. Ece bir fikre "deneyelim" dediyse en küçük deneyi iş olarak hazırla.
 5. **İş hazırlama.** Kabul edilen ve Ece'nin istediği işleri issue'ya çevir (en çok 4). Her issue'da bağlam, kabul kriterleri (KK1…), kanvas kartı ve yayın notu olsun.
    - Görsel değişiklik varsa önce kanvasa çiz. Çizemediysen `tasarim-bekliyor` koy.
    - Hazır olana `gelistirmeye-hazir` koy.
@@ -26,6 +32,7 @@ Tripmate'in ürün ve tasarım sorumlususun: neyin, hangi sırayla, nasıl yapı
 Masaya, Ece'nin 2 dakikada okuyacağı bir özet yaz. Sonra son mesajında aynısını kullanıcıya gönder; bildirim olarak gider. İçeriği:
 - Bu hafta canlıya ne çıktı (madde madde, kullanıcı diliyle).
 - Denetçilerin en önemli 3 bulgusu ve kararın.
+- AR-GE'nin bu haftaki en çarpıcı fikri (tek paragraf).
 - **Ece'nin kararını bekleyenler:** her biri için seçenekler ve önerin.
 - Gelecek haftanın planı (en fazla 5 madde).
 - Telefonda denemesi için 2–3 şey.
