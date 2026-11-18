@@ -130,6 +130,7 @@ Google'dan taze alınır. Mekan rehberleri ayrı dosyalarda: `icerik/yerler/<şe
     "baslik": "Eskişehir'de bir hafta sonu",
     "ozet": "Yürüyerek, rahat tempoda; ilk kez gidenler için",
     "yazar_ad": "Tripmate ekibi",
+    "amaclar": ["kultur_tarih", "yavas"],
     "yazi_md": "…"
   },
   "gunler": [
@@ -138,7 +139,7 @@ Google'dan taze alınır. Mekan rehberleri ayrı dosyalarda: `icerik/yerler/<şe
       "duraklar": [
         {
           "place_id": "ChIJ…", "osm": "way/123456", "ad": "…", "sure_dk": 75, "sure_gerekcesi": "varsayılan 90; koleksiyon küçük",
-          "kapali_gunler": ["pazartesi"], "rehber": "odunpazari-modern-muze"
+          "kapali_gunler": ["pazartesi"], "rehber": "odunpazari-modern-muze", "amaclar": ["kultur_tarih"]
         }
       ]
     }
@@ -159,6 +160,10 @@ Google'dan taze alınır. Mekan rehberleri ayrı dosyalarda: `icerik/yerler/<şe
   alanı: `node/…`, `way/…`, `relation/…`). Varsa konum OSM'den süresiz tutulur; yoksa Google konumu `google_30g` olarak
   30 gün tutulur.
 - `rehber` (isteğe bağlı, yoksa UYARI): mekan rehberi dosyasının adı → `icerik/yerler/<şehir>/<rehber>.md`.
+- `amaclar` (isteğe bağlı; gezide ve durakta, #300): sabit 6 etiketten sıfır ya da daha fazlası, tekrarsız:
+  `kultur_tarih` Kültür ve tarih · `lezzet` Lezzet · `doga` Doğa · `yavas` Yavaş ve keyifli · `gece` Gece hayatı ·
+  `cocuklu` Çocuklu. Gezininki `geziler.amaclar`'a yazılır (yeniden yüklemede plan kaynaktır). Durağınki `yerler.amaclar`'a
+  yazılır: rehberle aynı kural, yalnız taslak ve amaçları boş yer satırına; yer satırı yoksa açılmaz. Atlananlar raporda.
 - `ek_mekanlar` (isteğe bağlı): yazıda anılan ama durak olmayan mekanlar (araştırmadan). Yüklemede bunların da kapalı
   olup olmadığına bakılır; veritabanına durak olarak girmez.
 - Yeni şehir (yalnız Ece'nin onayıyla): `"sehir": {"yeni": {"ad": "…", "slug": "…", "place_id": "ChIJ…"}}`; şehrin
@@ -182,6 +187,7 @@ HATA yüklemeyi durdurur, UYARI rapora girer. İletilerde durak adı yazılmaz; 
 | yazıdaki `mekan:id` / `::mekan[id]` ne durakta ne `ek_mekanlar`'da | aynı mekan iki durakta |
 | `kapali_gunler` yok ya da gün adı değil | durağın mekan rehberi yok |
 | `osm` biçimi geçersiz; yüklemede OSM nesnesi yok ya da Google konumundan > 150 m (#205) | durağın OSM adayı (`osm`) yok |
+| `amaclar` dizi değil, listede olmayan değer ya da tekrar (#300) | |
 | rehber dosyası yok; rehberde tek `>` İPUCU değil, `::mekan` kartı, yukarıdaki sözdizimi hataları | rehber 150–300 kelime dışı; fiyat ya da saat geçiyor; klişe |
 
 Gezi yazısında durak başına 1–3 cümle; ayrıntı mekan rehberinde.

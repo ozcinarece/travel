@@ -13,6 +13,8 @@ import {
   slugUret,
   yuklemeVerisi,
   yurumeDk,
+  AMACLAR,
+  amacHatasi,
   osmIdleri,
   osmKimlikSorgusu,
   osmKonumDenetle,
@@ -269,6 +271,47 @@ describe('gunleriDenetle', () => {
         'g1.d4: süre 400 dk, varsayılan 45; sure_gerekcesi yaz',
       ]),
     );
+  });
+});
+
+describe('#300 amaç etiketleri', () => {
+  it('sabit 6 etiket; amaclar yoksa ya da null ise sorun yok', () => {
+    expect(AMACLAR).toEqual(['kultur_tarih', 'lezzet', 'doga', 'yavas', 'gece', 'cocuklu']);
+    expect(amacHatasi(undefined)).toBeNull();
+    expect(amacHatasi(null)).toBeNull();
+    expect(amacHatasi([])).toBeNull();
+    expect(amacHatasi(['lezzet', 'doga'])).toBeNull();
+  });
+
+  it('listede olmayan değer, tekrar ya da dizi olmayan alan HATA', () => {
+    const plan = ornekPlan();
+    plan.gezi.amaclar = ['lezzet', 'plaj'];
+    plan.gunler[0].duraklar[1].amaclar = ['doga', 'doga'];
+    plan.gunler[0].duraklar[2].amaclar = 'gece';
+    const { hatalar } = planDenetle(plan, { rehberler: REHBERLER });
+    expect(hatalar).toEqual(
+      expect.arrayContaining([
+        expect.stringMatching(/^gezi\.amaclar listede olmayan değer/),
+        expect.stringMatching(/^g1\.d2: amaclar aynı değeri iki kez/),
+        expect.stringMatching(/^g1\.d3: amaclar bir dizi olmalı/),
+      ]),
+    );
+    plan.gezi.amaclar = ['lezzet', 'kultur_tarih'];
+    plan.gunler[0].duraklar[1].amaclar = ['doga'];
+    plan.gunler[0].duraklar[2].amaclar = ['gece'];
+    expect(planDenetle(plan, { rehberler: REHBERLER }).hatalar.filter((h) => h.includes('amaclar'))).toEqual([]);
+  });
+
+  it('yükleme verisi amaçları taşır; boş ya da verilmemişse alan yok', () => {
+    const plan = ornekPlan();
+    expect(yuklemeVerisi(plan, detaylar()).gezi).not.toHaveProperty('amaclar');
+    plan.gezi.amaclar = ['kultur_tarih'];
+    plan.gunler[0].duraklar[0].amaclar = ['lezzet', 'yavas'];
+    plan.gunler[0].duraklar[1].amaclar = [];
+    const v = yuklemeVerisi(plan, detaylar());
+    expect(v.gezi.amaclar).toEqual(['kultur_tarih']);
+    expect(v.gunler[0].duraklar[0].amaclar).toEqual(['lezzet', 'yavas']);
+    expect(v.gunler[0].duraklar[1]).not.toHaveProperty('amaclar');
   });
 });
 

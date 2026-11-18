@@ -592,6 +592,7 @@ async function yukle() {
     `${KURU ? 'KURU: denetimler geçti, hiçbir şey yazılmadı' : 'YÜKLENDİ (taslak)'} · ${r.slug} · gezi_id ${r.gezi_id}${KURU ? ' (geri alındı)' : ''}`,
     `${r.gun_sayisi} gün · ${r.mekan_sayisi} durak · yazıda ${r.yazidaki_mekan} mekan izi · ${r.yeniden ? 'yeniden yazıldı' : 'yeni'}${r.yeni_sehir ? ' · yeni şehir (taslak)' : ''} · updated_at ${r.updated_at}`,
     `mekan rehberi: ${r.rehber_yazilan ?? 0} yazıldı (${r.yer_acilan ?? 0} yeni taslak yer) · atlanan ${(r.rehber_atlanan ?? []).length}${(r.rehber_atlanan ?? []).length ? ` (yayında ya da dolu: ${r.rehber_atlanan.join(', ')})` : ''}`,
+    `amaç: ${r.amac_yazilan ?? 0} yere yazıldı · atlanan ${(r.amac_atlanan ?? []).length}${(r.amac_atlanan ?? []).length ? ` (yer satırı yok, yayında ya da dolu: ${r.amac_atlanan.join(', ')})` : ''}`,
     `konum: ${osmDurak} durak OSM · ${durakSayisi - osmDurak} durak Google (30 gün)`,
     ...gunSatirlari,
     ...(KURU ? [] : [`BO: ${editorLinki(r.gezi_id)}`]),
