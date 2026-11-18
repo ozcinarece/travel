@@ -4,18 +4,23 @@ import { ActivityIndicator, Pressable, StyleSheet, Text, TextInput, View } from 
 import Svg, { Path } from 'react-native-svg';
 
 import { fotoDosyaAdi, tasi } from '@/features/yonetim/gezi';
+import type { KapakAtfi } from '@/features/icerik/kapakAtfi';
 import type { IcerikFotosu } from '@/features/yonetim/fotolar';
 import { ty } from '@/features/yonetim/metin';
 import { icerikFotoUrl } from '@/lib/markdown';
 import { yazi } from '@/theme';
 
 import { Hap } from './Hap';
+import { KapakAtifSatiri } from './KapakAtifSatiri';
 import { dosyaSec, useDosyaBirakma, useSuruklenen } from './surukle';
 import { yRenk } from './tema';
 
 type Props = {
   fotolar: IcerikFotosu[];
   kapakUrl: string | null;
+  /** #345 KK3: kapağın atfı; verilirse kapak, atıf satırı ve "Kaldır" ile listenin üstünde görünür. */
+  kapakAtif?: KapakAtfi | null;
+  onKapakKaldir?: () => void;
   /** Yazıda kullanılan foto silinmek istenirse uyarılır. */
   yazidaMi?: (yol: string) => boolean;
   onYukle: (dosyalar: File[]) => Promise<void>;
@@ -34,7 +39,7 @@ const TUTAMAC = 'M9 6h.01M15 6h.01M9 12h.01M15 12h.01M9 18h.01M15 18h.01';
  * sıra), 88 × 60 küçük resim (kapaksa "Kapak" rozeti ve siyah çerçeve), "dosya adı · ölçü", altyazı alanı, "Kapak ✓" /
  * "Kapak yap", "Yazıya ekle", ×; altta not. Storage `icerik/<geziler|yerler>/<id>/`, tablo `icerik_fotolari`.
  */
-export function IcerikFotolari({ fotolar, kapakUrl, yazidaMi, onYukle, onKapak, onYaziyaEkle, onAltyazi, onSirala, onSil }: Props) {
+export function IcerikFotolari({ fotolar, kapakUrl, kapakAtif, onKapakKaldir, yazidaMi, onYukle, onKapak, onYaziyaEkle, onAltyazi, onSirala, onSil }: Props) {
   const alan = useRef<View>(null);
   const [mesgul, setMesgul] = useState(false);
   const yukle = async (dosyalar: File[]) => {
@@ -55,6 +60,21 @@ export function IcerikFotolari({ fotolar, kapakUrl, yazidaMi, onYukle, onKapak, 
 
   return (
     <View style={s.kap}>
+      {kapakUrl && onKapakKaldir ? (
+        // #345 KK3: içerik hattının Commons kapağı fotoğraf listesinde yok; kapak hangi kaynaktan gelirse gelsin burada.
+        <View style={[s.satir, s.satirKapak]} testID="kapak-ozeti">
+          <View style={s.kucuk}>
+            <Image source={{ uri: kapakUrl }} style={StyleSheet.absoluteFill} contentFit="cover" accessibilityLabel={ty('kapakAtfi.baslik')} />
+            <View style={s.rozet}>
+              <Text style={s.rozetMetin}>{ty('gezi.kapak')}</Text>
+            </View>
+          </View>
+          <View style={s.orta}>
+            <KapakAtifSatiri atif={kapakAtif ?? null} onKaldir={onKapakKaldir} />
+            <Text style={s.not}>{ty('kapakAtfi.not')}</Text>
+          </View>
+        </View>
+      ) : null}
       <Pressable ref={alan} accessibilityRole="button" accessibilityLabel={ty('gezi.fotoYukle')} disabled={mesgul} onPress={() => dosyaSec(true, yukle)} style={s.birak}>
         {mesgul ? (
           <ActivityIndicator size="small" color={yRenk.ikincil} />

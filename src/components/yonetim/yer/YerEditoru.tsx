@@ -3,7 +3,7 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import Svg, { Circle, Path } from 'react-native-svg';
 
 import { fotoHataAnahtari, useFotoIslemleri, useIcerikFotolari } from '@/features/yonetim/fotolar';
-import { blokEkle, gorselSatiri, saatMetni } from '@/features/yonetim/gezi';
+import { blokEkle, gorselSatiri, kapakDegisikligi, saatMetni } from '@/features/yonetim/gezi';
 import type { YonetimSehri } from '@/features/yonetim/geziSorgulari';
 import { ty } from '@/features/yonetim/metin';
 import { useOtomatikKayit } from '@/features/yonetim/otomatikKayit';
@@ -114,6 +114,8 @@ export function YerEditoru({ yer, sehirler, liste }: { yer: YonetimYeri; sehirle
           <IcerikFotolari
             fotolar={fotolar.data ?? []}
             kapakUrl={taslak.kapak_url}
+            kapakAtif={taslak.kapak_atif}
+            onKapakKaldir={() => degistir(kapakDegisikligi(null), true)}
             yazidaMi={(yol) => (taslak.rehber_md ?? '').includes(`foto:${yol}`)}
             onYukle={async (dosyalar) => {
               for (const d of dosyalar) {
@@ -124,7 +126,7 @@ export function YerEditoru({ yer, sehirler, liste }: { yer: YonetimYeri; sehirle
                 }
               }
             }}
-            onKapak={(kapak_url) => degistir({ kapak_url }, true)}
+            onKapak={(kapak_url) => degistir(kapakDegisikligi(kapak_url), true)}
             onYaziyaEkle={(f) => {
               degistir((t) => {
                 const md = t.rehber_md ?? '';
@@ -135,7 +137,7 @@ export function YerEditoru({ yer, sehirler, liste }: { yer: YonetimYeri; sehirle
             onAltyazi={(yol, a) => fotoIs.altyazi(yol, a).catch(islemHatasi)}
             onSirala={(yollar) => fotoIs.sirala(yollar).catch(islemHatasi)}
             onSil={(yol) => {
-              if (taslak.kapak_url?.endsWith(yol)) degistir({ kapak_url: null }, true);
+              if (taslak.kapak_url?.endsWith(yol)) degistir(kapakDegisikligi(null), true);
               fotoIs.sil(yol).catch(islemHatasi);
             }}
           />

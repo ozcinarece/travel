@@ -1,6 +1,7 @@
 // İçerik hattı (docs/07): plan dosyası doğrulayıcısı — saf işlevler (jest: scripts/icerik/__tests__).
 // HATA yüklemeyi durdurur, UYARI rapora girer. İletiler herkese açık loga düşer: durak adı, koordinat, saat gibi Google
 // verisi YAZILMAZ; duraklar "g2.d3" (2. gün 3. durak) ve place_id ile anılır.
+import { kapakDenetle } from './kapak.mjs';
 
 export const SINIR = {
   baslik: 50,
@@ -209,6 +210,9 @@ export function planDenetle(plan, { bilinenIdler = [], rehberler = new Map() } =
     if (!(uzunluk(sehir.yeni.ad?.trim()) >= 1 && uzunluk(sehir.yeni.ad) <= 80)) hatalar.push('sehir.yeni.ad: 1–80 karakter');
     if (!PLACE_ID.test(sehir.yeni.place_id ?? '')) hatalar.push('sehir.yeni.place_id: şehrin koordinatı yüklemede bundan alınır');
   } else if (!SEHIR_SLUG.test(sehir.slug ?? '')) hatalar.push('sehir.slug: ^[a-z0-9-]{2,60}$');
+
+  // #345 KK2: isteğe bağlı Commons kapakları (gezi, şehir, durak); lisans yüklemede Commons'tan okunur.
+  hatalar.push(...kapakDenetle(plan));
 
   // Gezi
   const gezi = plan.gezi ?? {};

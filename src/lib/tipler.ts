@@ -135,6 +135,8 @@ export type Sehir = {
   ad: string;
   slug: string;
   kapak_url: string | null;
+  /** #345: {yazar, lisans, kaynak_url} (`features/icerik/kapakAtfi`); sorgu seçmediyse yok. */
+  kapak_atif?: unknown;
   lat: number;
   lng: number;
   /** #97: yayınlı gezi sayısı ("N gezi"). */
@@ -159,6 +161,8 @@ export type Gezi = {
   baslik: string;
   slug: string;
   kapak_url: string | null;
+  /** #345: {yazar, lisans, kaynak_url} (`features/icerik/kapakAtfi`); sorgu seçmediyse yok. */
+  kapak_atif?: unknown;
   ozet: string | null;
   yazi_md: string | null;
   yazar_ad: string | null;
@@ -169,7 +173,7 @@ export type Gezi = {
   /** #300: amaç etiketleri (`public.amac_listesi()`); eski satırda ya da seçilmemişse boş. */
   amaclar?: string[] | null;
   /** Gömülü şehir (liste kartlarında "Eskişehir"). */
-  sehirler?: { ad: string; slug: string; kapak_url?: string | null } | null;
+  sehirler?: { ad: string; slug: string; kapak_url?: string | null; kapak_atif?: unknown } | null;
 };
 export type GeziDuragi = { id: string; gezi_gun_id: string; sira: number; place_id: string | null; ad: string; kategori: string | null; sure_dk: number; lat: number; lng: number;
   /** #205 KK7: koordinat Google'dan geldiyse alınma anı (osm/elle durakta null); "Seyahatime al" places'a taşır. */
@@ -214,6 +218,8 @@ export type Yer = {
   kategori: string | null;
   rehber_md: string | null;
   kapak_url: string | null;
+  /** #345: {yazar, lisans, kaynak_url} (`features/icerik/kapakAtfi`); sorgu seçmediyse yok. */
+  kapak_atif?: unknown;
   one_cikan_sira: number | null;
   lat: number;
   lng: number;

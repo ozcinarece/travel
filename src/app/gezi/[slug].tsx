@@ -26,6 +26,8 @@ import { useMekanGuncelle, useMekanlar, useMekanSil } from '@/features/mekanlar/
 import { useSeyahatler } from '@/features/seyahatler/sorgular';
 import { seyahatAdi } from '@/features/sihirbaz/sihirbaz';
 import type { HafifYer } from '@/features/yerler/api';
+import { ATIF_BASLIK_BOSLUGU, GoogleFotoAtfi, KapakAtfi } from '@/components/icerik/KapakAtfi';
+import { ilkFoto, kapakVeAtif, kapakYuksekligi, type FotoAtfi } from '@/features/icerik/kapakAtfi';
 import { t } from '@/i18n';
 import { davetLinki } from '@/lib/davetLinki';
 import { hataOzeti } from '@/lib/izler';
@@ -110,7 +112,13 @@ export default function GeziEkrani() {
   const g = gezi.data;
   const yaziVar = !!g.yazi_md?.trim();
   const aktifSekme: Sekme = yaziVar ? sekme : 'plan';
-  const kapakUri = g.kapak_url ?? g.sehirler?.kapak_url ?? (duraklar.map((d) => canli.data?.get(d.id)?.foto_uri).find((u): u is string => !!u) ?? null);
+  // #345 KK4: atıf, kapağın geldiği satırdan (gezi ya da şehir). #348: yedek durak fotoğrafı da kendi atfıyla (Commons ya da
+  // Ece'nin kapağıysa `kapak_atif`, Google fotoğrafıysa "Foto: {yazar} · Google Maps").
+  const kendiKapak = kapakVeAtif([g, g.sehirler ?? {}]);
+  const yedek = kendiKapak.uri ? null : ilkFoto(duraklar, (d) => canli.data?.get(d.id));
+  const kapakUri = kendiKapak.uri ?? yedek?.uri ?? null;
+  const kapakAtif: FotoAtfi | null = kendiKapak.uri ? (kendiKapak.atif ? { tur: 'kapak', atif: kendiKapak.atif } : null) : (yedek?.atif ?? null);
+  const atifVar = kapakAtif?.tur === 'google' || !!(kapakAtif?.tur === 'kapak' && kapakAtif.atif);
   const tarih = parcala(g.created_at.slice(0, 10));
   const alinmaSayisi = alinma.data ?? 0;
   const paylas = () => Share.share({ message: t('gezi.paylasMetin', { baslik: g.baslik, link: davetLinki(`gezi/${g.slug}`).replace('/r/gezi/', '/gezi/') }) }).catch(() => {});
@@ -226,7 +234,8 @@ export default function GeziEkrani() {
           const yeni = yaziVar && segmentY > 0 && y >= yapismaY;
           if (yeni !== yapisik) setYapisik(yeni);
         }}>
-        <View style={[s.kapak, { height: 166 + kenar.top }]}>
+        {/* #348 inceleme 1 (kanvas 29i-A): kapak en az 260 px (güvenli alan dahil); iki satırlık başlık düğmelere binmez. */}
+        <View style={[s.kapak, { height: kapakYuksekligi(kenar.top) }]}>
           {kapakUri ? (
             <>
               <Image source={{ uri: kapakUri }} style={StyleSheet.absoluteFill} contentFit="cover" transition={150} />
@@ -244,13 +253,14 @@ export default function GeziEkrani() {
               </Pressable>
             </View>
           </View>
-          <View style={s.kapakMetin}>
+          <View style={[s.kapakMetin, atifVar && { paddingBottom: ATIF_BASLIK_BOSLUGU }]}>
             <View style={{ flexDirection: 'row', gap: 6 }}>
               <Text style={s.rozet}>{t('gezi.rozetGun', { n: g.gun_sayisi })}</Text>
               {alinmaSayisi > 0 ? <Text style={[s.rozet, s.rozetSaydam]}>{t('gezi.alindi', { n: alinmaSayisi })}</Text> : null}
             </View>
             <Text style={s.baslik}>{g.baslik}</Text>
           </View>
+          {kapakAtif?.tur === 'kapak' && kapakAtif.atif ? <KapakAtfi atif={kapakAtif.atif} /> : kapakAtif?.tur === 'google' ? <GoogleFotoAtfi yazar={kapakAtif.yazar} /> : null}
         </View>
         {yaziVar ? (
           <View style={s.segmentKap} onLayout={(e) => setSegmentY(e.nativeEvent.layout.y)}>

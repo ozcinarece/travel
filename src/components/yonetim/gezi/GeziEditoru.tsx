@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import Svg, { Circle, Path } from 'react-native-svg';
 
-import { blokEkle, geziDurumu, gorselSatiri, saatMetni, yayinlaAlanlari } from '@/features/yonetim/gezi';
+import { blokEkle, geziDurumu, gorselSatiri, kapakDegisikligi, saatMetni, yayinlaAlanlari } from '@/features/yonetim/gezi';
 import { fotoHataAnahtari, useFotoIslemleri, useIcerikFotolari } from '@/features/yonetim/fotolar';
 import {
   alanlariAl,
@@ -126,6 +126,8 @@ export function GeziEditoru({ gezi, sehirler, liste }: { gezi: YonetimGezi; sehi
           <IcerikFotolari
             fotolar={fotolar.data ?? []}
             kapakUrl={taslak.kapak_url}
+            kapakAtif={taslak.kapak_atif}
+            onKapakKaldir={() => degistir(kapakDegisikligi(null), true)}
             yazidaMi={(yol) => (taslak.yazi_md ?? '').includes(`foto:${yol}`)}
             onYukle={async (dosyalar) => {
               for (const d of dosyalar) {
@@ -136,12 +138,12 @@ export function GeziEditoru({ gezi, sehirler, liste }: { gezi: YonetimGezi; sehi
                 }
               }
             }}
-            onKapak={(kapak_url) => degistir({ kapak_url }, true)}
+            onKapak={(kapak_url) => degistir(kapakDegisikligi(kapak_url), true)}
             onYaziyaEkle={(f) => yaziyaEkle(f.yol, f.altyazi ?? '')}
             onAltyazi={(yol, a) => fotoIs.altyazi(yol, a).catch(islemHatasi)}
             onSirala={(yollar) => fotoIs.sirala(yollar).catch(islemHatasi)}
             onSil={(yol) => {
-              if (taslak.kapak_url?.endsWith(yol)) degistir({ kapak_url: null }, true);
+              if (taslak.kapak_url?.endsWith(yol)) degistir(kapakDegisikligi(null), true);
               fotoIs.sil(yol).catch(islemHatasi);
             }}
           />

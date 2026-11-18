@@ -13,6 +13,7 @@ const taslak: GeziAlanlari = {
   yazar_ad: 'Ece',
   yazi_md: '',
   kapak_url: null,
+  kapak_atif: null,
   yayin: true,
   yayin_at: '2099-10-20T06:00:00.000Z',
 };

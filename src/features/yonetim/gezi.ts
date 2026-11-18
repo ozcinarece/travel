@@ -1,4 +1,5 @@
 // #107 gezi editörü — saf kurallar (slug, yayın durumu, markdown araç çubuğu, sıra, otomatik kayıt farkı). Testli.
+import { TRIPMATE, type KapakAtfi } from '@/features/icerik/kapakAtfi';
 import { AYLAR_KISA } from '@/lib/takvim';
 
 export type GeziDurumu = 'yayinda' | 'taslak' | 'planli';
@@ -12,9 +13,19 @@ export type GeziAlanlari = {
   yazar_ad: string | null;
   yazi_md: string | null;
   kapak_url: string | null;
+  /** #345 KK3: kapağın atfı; Ece'nin fotoğrafında {yazar: 'Tripmate'}, kapak kalkınca null. */
+  kapak_atif: KapakAtfi | null;
   yayin: boolean;
   yayin_at: string | null;
 };
+
+/**
+ * #345 KK3: kapak değişikliği atfıyla birlikte (gezi ve yer editörü). Ece'nin yüklediği fotoğraf kapak olunca atıf
+ * "Tripmate"; kapak kaldırılınca ikisi de boşalır (Commons kapağı da).
+ */
+export function kapakDegisikligi(url: string | null): { kapak_url: string | null; kapak_atif: KapakAtfi | null } {
+  return url ? { kapak_url: url, kapak_atif: { yazar: TRIPMATE } } : { kapak_url: null, kapak_atif: null };
+}
 
 const TR: Record<string, string> = { ç: 'c', ğ: 'g', ı: 'i', ö: 'o', ş: 's', ü: 'u' };
 

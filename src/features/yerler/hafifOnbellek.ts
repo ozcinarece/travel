@@ -50,10 +50,10 @@ type Is = { ids: string[]; gerek: AlanGrubu[]; coz: () => void; red: (e: unknown
 function birlestir(eski: HafifYer | undefined, yeni: HafifYer, gruplar: AlanGrubu[]): HafifYer {
   const yer: HafifYer = eski
     ? { ...eski, place_id: yeni.place_id, ad: yeni.ad, lat: yeni.lat, lng: yeni.lng, primary_type: yeni.primary_type, tz: yeni.tz }
-    : { ...yeni, puan: null, puan_sayisi: null, acik: null, periyotlar: undefined, foto_uri: undefined };
+    : { ...yeni, puan: null, puan_sayisi: null, acik: null, periyotlar: undefined, foto_uri: undefined, foto_yazar: undefined };
   if (gruplar.includes('puan')) Object.assign(yer, { puan: yeni.puan, puan_sayisi: yeni.puan_sayisi, acik: yeni.acik });
   if (gruplar.includes('saat')) yer.periyotlar = yeni.periyotlar;
-  if (gruplar.includes('foto')) yer.foto_uri = yeni.foto_uri ?? null;
+  if (gruplar.includes('foto')) Object.assign(yer, { foto_uri: yeni.foto_uri ?? null, foto_yazar: yeni.foto_yazar ?? null });
   // #316 KK1: Nearby'nin fotoğraf adı, adı taşımayan sonraki cevaplarla silinmez.
   if (yeni.foto_ad !== undefined) yer.foto_ad = yeni.foto_ad;
   return yer;
@@ -131,7 +131,8 @@ export class HafifOnbellek {
     if (!k) return;
     const zaman = new Map(k.zaman);
     zaman.set('foto', this.simdi());
-    this.kayitlar.set(id, { yer: { ...k.yer, foto_uri: uri }, zaman });
+    // #348: Nearby'den gelen fotoğrafın yazarı bilinmez; atıf "Google Maps" olarak görünür.
+    this.kayitlar.set(id, { yer: { ...k.yer, foto_uri: uri, foto_yazar: null }, zaman });
   }
 
   private taze(k: Kayit, g: AlanGrubu | 'temel') {
