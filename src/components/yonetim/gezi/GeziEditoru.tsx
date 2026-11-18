@@ -4,7 +4,15 @@ import Svg, { Circle, Path } from 'react-native-svg';
 
 import { blokEkle, geziDurumu, gorselSatiri, saatMetni, yayinlaAlanlari } from '@/features/yonetim/gezi';
 import { fotoHataAnahtari, useFotoIslemleri, useIcerikFotolari } from '@/features/yonetim/fotolar';
-import { alanlariAl, GEZI_LISTESI, geziAnahtari, useGeziIslemleri, type YonetimGezi, type YonetimSehri } from '@/features/yonetim/geziSorgulari';
+import {
+  alanlariAl,
+  GEZI_LISTESI,
+  geziAnahtari,
+  useGeziIslemleri,
+  yayinOnayi,
+  type YonetimGezi,
+  type YonetimSehri,
+} from '@/features/yonetim/geziSorgulari';
 import { useOtomatikKayit } from '@/features/yonetim/otomatikKayit';
 import { ty } from '@/features/yonetim/metin';
 import type { GeziDetay } from '@/lib/tipler';
@@ -45,6 +53,12 @@ export function GeziEditoru({ gezi, sehirler, liste }: { gezi: YonetimGezi; sehi
   const merkez = sehir ? { lat: sehir.lat, lng: sehir.lng, yaricapM: 20000 } : undefined;
   const onizleme = useMemo(() => onizlemeGezisi(gezi, taslak), [gezi, taslak]);
   const islemHatasi = () => setHata(ty('gezi.islemHata'));
+  // #314 KK3: taslak gezi yayına girerken durak yerleri de açılacaksa sor (window.confirm, BO'daki diğer onaylar gibi).
+  const yerOnayi = () => yayinOnayi(gezi.id, (m) => window.confirm(m), (n) => ty('gezi.yayinYerOnay', { n }));
+  const yayinla = async () => {
+    if (!taslak.yayin && !(await yerOnayi())) return;
+    degistir((t) => yayinlaAlanlari(t), true);
+  };
 
   const onizle = async () => {
     const pencere = window.open('about:blank', '_blank');
@@ -86,7 +100,7 @@ export function GeziEditoru({ gezi, sehirler, liste }: { gezi: YonetimGezi; sehi
       eylemler={
         <>
           <Hap baslik={ty('gezi.onizle')} onPress={onizle} ikon={<GozIkonu />} />
-          <Hap tur="vurgu" baslik={ty('gezi.yayinla')} onPress={() => degistir((t) => yayinlaAlanlari(t), true)} />
+          <Hap tur="vurgu" baslik={ty('gezi.yayinla')} onPress={yayinla} />
         </>
       }>
       {liste}
@@ -97,7 +111,7 @@ export function GeziEditoru({ gezi, sehirler, liste }: { gezi: YonetimGezi; sehi
             <Text style={s.hata}>{hata}</Text>
           </Pressable>
         ) : null}
-        {sekme === 'genel' ? <GeziGenel taslak={taslak} sehirler={sehirler} degistir={degistir} slugHatasi={durum.hata === 'tekil'} /> : null}
+        {sekme === 'genel' ? <GeziGenel taslak={taslak} sehirler={sehirler} degistir={degistir} slugHatasi={durum.hata === 'tekil'} yayinOnayi={yerOnayi} /> : null}
         {sekme === 'yazi' ? (
           <GeziYazi
             metin={taslak.yazi_md ?? ''}
