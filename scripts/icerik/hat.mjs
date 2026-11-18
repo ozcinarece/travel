@@ -17,8 +17,6 @@ import {
   eslemeKareleri,
   eslemeYaricapi,
   gunleriDenetle,
-  osmIdleri,
-  osmKimlikSorgusu,
   osmEslestir,
   osmKonumDenetle,
   planDenetle,
@@ -29,6 +27,7 @@ import {
   SLUG,
   yuklemeVerisi,
 } from './dogrula.mjs';
+import { OsmOkumaHatasi, yuklemeKonumlari } from './konum.mjs';
 import { OverpassHatasi, overpassBirKez, overpassYeniden, SureBittiHatasi } from './overpass.mjs';
 import { derAl, sifrele } from './sifre.mjs';
 
@@ -345,19 +344,6 @@ async function overpass(sorgu) {
 
 const bekle = (ms) => new Promise((r) => setTimeout(r, ms));
 
-/** OSM kimliği → konum (Overpass). Bulunamayan kimlik haritada olmaz. */
-async function osmKonumlariOku(idler) {
-  const harita = new Map();
-  if (!idler.length) return harita;
-  const veri = await overpass(osmKimlikSorgusu(idler));
-  for (const e of veri.elements ?? []) {
-    const lat = e.lat ?? e.center?.lat;
-    const lng = e.lon ?? e.center?.lon;
-    if (typeof lat === 'number' && typeof lng === 'number') harita.set(`${e.type}/${e.id}`, { lat, lng });
-  }
-  return harita;
-}
-
 /** OSM aday listesi (Overpass): ad, konum, tür, opening_hours, wikipedia/wikidata. Google'a gidilmez. */
 async function osm() {
   const istek = istekAl();
@@ -553,7 +539,15 @@ async function yukle() {
 
   const idler = detayIdleri(plan);
   if (idler.length > EN_COK_DETAY) throw new HatHatasi(`en çok ${EN_COK_DETAY} mekan`);
-  const { yerler } = await google({ islem: 'detay', idler });
+  // #323 KK1: önce OSM (yeniden denemeyle), sonra Google detayı; Overpass düşerse Google'a istek gitmez.
+  let konum;
+  try {
+    konum = await yuklemeKonumlari(plan, { googleFn: google });
+  } catch (e) {
+    if (e instanceof OsmOkumaHatasi) throw new HatHatasi(e.message);
+    throw e;
+  }
+  const { osmKonumlari, yerler } = konum;
   const detaylar = new Map(yerler.filter((y) => !y.hata).map((y) => [y.place_id, y]));
   const sorunlar = [];
   const sehirId = plan.sehir?.yeni?.place_id;
@@ -569,7 +563,6 @@ async function yukle() {
   }
 
   // #205 KK2: OSM adayı olan duraklarda konum OSM'den (süresiz, atıfla); aday Google'daki yerle aynı mekan olmalı (≤ 150 m).
-  const osmKonumlari = await osmKonumlariOku(osmIdleri(plan));
   const osmSorunlari = osmKonumDenetle(plan, detaylar, osmKonumlari);
   if (osmSorunlari.length) {
     duyuru('error', `OSM sorunu (${osmSorunlari.length}) · ${plan.gezi.slug}`, osmSorunlari);
