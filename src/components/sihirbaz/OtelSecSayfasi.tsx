@@ -15,6 +15,7 @@ import { hafifYerler, linkCoz, linkGibiMi, useOtelOnerileri, yeniOturumJetonu, p
 import { t } from '@/i18n';
 import type { OtelSecimi, Seyahat } from '@/lib/tipler';
 import { minDokunma, renk, yazi } from '@/theme';
+import { aramaMerkezi } from '@/lib/konum';
 
 type Props = {
   acik: boolean;
@@ -31,7 +32,7 @@ export function OtelSecSayfasi({ acik, baslik, seyahat, konaklamalar, onKapat, o
   const [mesgul, setMesgul] = useState(false);
   const [hata, setHata] = useState<string | null>(null);
   const [haritada, setHaritada] = useState(false);
-  const merkez = { lat: seyahat.lat, lng: seyahat.lng, yaricapM: 30_000 };
+  const merkez = aramaMerkezi(seyahat, 30_000);
   const linkMi = linkGibiMi(sorgu);
   const listeAcik = !linkMi && sorgu.trim().length >= 2;
   const oneriler = useOtelOnerileri(listeAcik ? sorgu : '', jeton, merkez, listeAcik && acik);

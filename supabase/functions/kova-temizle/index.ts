@@ -6,45 +6,12 @@
 import { createClient } from 'npm:@supabase/supabase-js@2';
 import { hata, json, onKontrol } from '../_shared/http.ts';
 import { onekKur, parcala, silinecekler, type KuyrukSatiri } from '../_shared/kovaTemizle.ts';
-
-/** Sabit zamanlı karşılaştırma (anahtar uzunluğu dışında bilgi sızdırmaz). */
-function esit(a: string, b: string): boolean {
-  const x = new TextEncoder().encode(a);
-  const y = new TextEncoder().encode(b);
-  if (x.length !== y.length) return false;
-  let fark = 0;
-  for (let i = 0; i < x.length; i++) fark |= x[i] ^ y[i];
-  return fark === 0;
-}
-
-/**
- * Taşıyıcı ortamdaki service_role anahtarıyla aynıysa ya da PostgREST onu service_role kabul ediyorsa (yalnız service_role'e
- * açık `kova_temizle_listesi(0)` çağrılabiliyorsa) yetkilidir. Geçide (verify_jwt) güvenilmez.
- */
-async function servisMi(istek: Request): Promise<boolean> {
-  const token = (istek.headers.get('authorization') ?? '').replace(/^Bearer\s+/i, '').trim();
-  if (!token) return false;
-  const servis = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
-  if (servis && esit(token, servis)) return true;
-  const url = Deno.env.get('SUPABASE_URL');
-  if (!url) return false;
-  try {
-    const cevap = await fetch(`${url}/rest/v1/rpc/kova_temizle_listesi`, {
-      method: 'POST',
-      headers: { 'content-type': 'application/json', apikey: token, authorization: `Bearer ${token}` },
-      body: JSON.stringify({ p_adet: 0 }),
-    });
-    await cevap.body?.cancel();
-    return cevap.ok;
-  } catch {
-    return false;
-  }
-}
+import { servisMi } from '../_shared/servis.ts';
 
 Deno.serve(async (istek) => {
   const on = onKontrol(istek);
   if (on) return on;
-  if (!(await servisMi(istek))) return hata('yalnız service_role', 403);
+  if (!(await servisMi(istek, { rpc: 'kova_temizle_listesi', govde: { p_adet: 0 } }))) return hata('yalnız service_role', 403);
   const url = Deno.env.get('SUPABASE_URL');
   const anahtar = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
   if (!url || !anahtar) return hata('yapılandırma eksik', 500);

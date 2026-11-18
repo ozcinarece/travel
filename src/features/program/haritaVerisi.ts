@@ -3,6 +3,7 @@ import { mesafeM } from '@/components/harita/geo';
 import type { HaritaCizgisi, HaritaPini, Konum } from '@/components/harita/tipler';
 import type { GunUcNoktalari } from '@/features/konaklama/plan';
 import type { HafifYer } from '@/features/yerler/api';
+import { konumu } from '@/lib/konum';
 import { polylineCoz } from '@/lib/polyline';
 import type { Durak, Gun, Mekan } from '@/lib/tipler';
 import { bacakModu, type BacakKaynagi, type TempoSonucu } from '@/schedule/tempo';
@@ -68,9 +69,12 @@ export function programPinleri(secenek: {
     const hafif = adlar?.[m.place_id];
     const secili = m.id === seciliMekanId;
     const seciliGunde = !!d && d.day_id === seciliGunId;
+    // #318: Google koordinatı boşalmış mekan haritada pin olmaz (listede kalır); numarası diğerlerinde aynı kalır.
+    const mekanKonumu = konumu(m);
+    if (!mekanKonumu) continue;
     const ortak = {
       id: `m:${m.id}`,
-      konum: { lat: m.lat, lng: m.lng },
+      konum: mekanKonumu,
       ad: hafif?.ad ?? '…',
       puan: hafif?.puan ?? null,
       yorumSayisi: hafif?.puan_sayisi ?? null,

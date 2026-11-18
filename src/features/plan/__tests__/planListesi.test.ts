@@ -106,3 +106,31 @@ describe('#182 KK5 akşam boş önerisi', () => {
     expect(aksamOnerisi({ satirlar: [], mekanlar, duraklar, yerler: [] })).toBeNull();
   });
 });
+
+describe('#262 / #318: Google koordinatı boşalmış mekan', () => {
+  const bos = { ...mekan('bos', 'museum'), lat: null, lng: null } as Mekan;
+  const a = mekan('a', 'park', 39.77, 30.52);
+  const b = mekan('b', 'cafe', 39.771, 30.521);
+  const mekanIle = new Map([a, bos, b].map((m) => [m.id, m]));
+  const d = [durak('d1', 'a', 'a0'), durak('d2', 'bos', 'a1'), durak('d3', 'b', 'a2')];
+
+  it('plan listesinde kalır, numarası ve saati diğerleri gibi', () => {
+    const r = planSatirlari(d, mekanIle, [satir(d[0], 600, 645), satir(d[1], 660, 705), satir(d[2], 720, 765)]);
+    expect(r.map((x) => [x.mekan.id, x.numara, x.varisDk])).toEqual([
+      ['a', 1, 600],
+      ['bos', 2, 660],
+      ['b', 3, 720],
+    ]);
+  });
+
+  it('akşam önerisi son konumlu duraktan hesaplanır; koordinatsız aday önerilmez', () => {
+    const uzak = mekan('uzak', 'park', 39.9, 30.7);
+    const bosAday = { ...mekan('bosAday', 'park'), lat: null, lng: null } as Mekan;
+    const satirlar = planSatirlari([d[0], d[1]], mekanIle, [satir(d[0], 600, 645), satir(d[1], 660, 705)]);
+    const o = aksamOnerisi({ satirlar, mekanlar: [a, bos, bosAday, uzak], duraklar: [d[0], d[1]], yerler: [] });
+    expect(o?.liste?.id).toBe('uzak');
+    // Günün bütün durakları koordinatsızsa yakınlık bilinmez: öneri yok, çökme yok.
+    const yalnizBos = planSatirlari([d[1]], mekanIle, [satir(d[1], 660, 705)]);
+    expect(aksamOnerisi({ satirlar: yalnizBos, mekanlar: [bos, uzak], duraklar: [d[1]], yerler: [] })).toBeNull();
+  });
+});

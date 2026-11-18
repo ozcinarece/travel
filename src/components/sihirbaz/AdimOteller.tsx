@@ -35,8 +35,8 @@ export function AdimOteller({ seyahat, gunler, konaklamalar, onHata }: Props) {
     onHata(null);
     try {
       if (hedef === 'hepsi') {
-        const o = otel && 'stayId' in otel ? konaklamalar.find((k) => k.id === otel.stayId) : otel;
-        await hepsine.mutateAsync(o ? { place_id: o.place_id, ad: 'label' in o ? (o.label ?? t('otel.adsiz')) : o.ad, lat: o.lat, lng: o.lng } : null);
+        // #318: kayıtlı otel kimliğiyle gider (koordinatı boşalmış olabilir; yeni satır açılmaz).
+        await hepsine.mutateAsync(otel);
       } else if (hedef) {
         await geceye.mutateAsync({ konaklamalar, otel, guncellemeler: (id) => gecePlani(hedef, id) });
       }

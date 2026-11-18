@@ -169,7 +169,7 @@ describe('#168 durak kartı', () => {
     const sec = { gezi: true, konum: null, tz: 'Europe/Istanbul' };
     expect(kartSekmesi(k[1], sec)).toEqual({ metin: 'Sıradaki · 1. duraktan 12 dk yürüyüş', ikon: 'yurume', ton: 'normal' });
     // ~300 m kuzeyde: kuş uçuşu kestirim (#140 KK9 ile aynı hesap).
-    const konum = { lat: k[1].konum.lat + 0.0027, lng: k[1].konum.lng };
+    const konum = { lat: k[1].konum!.lat + 0.0027, lng: k[1].konum!.lng };
     expect(kartSekmesi(k[1], { ...sec, konum }).metin).toMatch(/^Sıradaki · \d+ dk kaldı · 300 m$/);
     expect(kartSekmesi(k[0], sec)).toEqual({ metin: 'Gezildi', ikon: 'tik', ton: 'gezildi' });
     expect(kartSekmesi(k[2], sec).metin).toBe('2. duraktan 8 dk araba');

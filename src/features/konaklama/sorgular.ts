@@ -95,7 +95,7 @@ export function useGeceOteliKaydet(seyahatId: string) {
 export function useTumGunlereOtel(seyahatId: string) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (otel: OtelSecimi | null) => tumGunlereOtel(seyahatId, otel),
+    mutationFn: (otel: OtelSecimi | { stayId: string } | null) => tumGunlereOtel(seyahatId, otel),
     onSettled: () => {
       qc.invalidateQueries({ queryKey: ['gunler', seyahatId] });
       qc.invalidateQueries({ queryKey: ['konaklamalar', seyahatId] });
@@ -105,7 +105,7 @@ export function useTumGunlereOtel(seyahatId: string) {
 }
 
 /** 3.3 Otel ekranı: seçilen otel (ya da otel yok) tüm günlere uygulanır. */
-export async function tumGunlereOtel(seyahatId: string, otel: OtelSecimi | null) {
+export async function tumGunlereOtel(seyahatId: string, otel: OtelSecimi | { stayId: string } | null) {
   const [{ data: mevcut, error: e1 }, { data: gunler, error: e2 }] = await Promise.all([
     supabase.from('stays').select('id, trip_id, place_id, lat, lng, label').eq('trip_id', seyahatId),
     supabase.from('days').select('id').eq('trip_id', seyahatId),

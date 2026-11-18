@@ -3,6 +3,7 @@
 // noktalar düz bağlanır), "Akşam boş" önerisi listedeki atanmamış mekanlardan ve rehberden (DB). Google'a istek yok (KK7).
 import { mesafeM } from '@/components/harita/geo';
 import type { Konum } from '@/components/harita/tipler';
+import { konumu, konumVar } from '@/lib/konum';
 import { pinKategorisi } from '@/lib/pinIkonu';
 import type { Durak, Mekan, Yer } from '@/lib/tipler';
 import type { ProgramSatiri, Yuruyus } from '@/schedule/program';
@@ -96,10 +97,13 @@ export function aksamOnerisi(p: { satirlar: PlanSatiri[]; mekanlar: Mekan[]; dur
   const etkin = p.satirlar.filter((s) => s.numara !== null && s.ayrilisDk !== null);
   const son = etkin[etkin.length - 1];
   if (!son || son.ayrilisDk! >= AKSAM_ESIGI_DK) return null;
-  const nokta = { lat: son.mekan.lat, lng: son.mekan.lng };
+  // #318: koordinatı boşalmış durak (0,0) sayılmaz; yakınlık son konumlu duraktan. Hiçbiri konumlu değilse öneri yok.
+  const nokta = konumu([...etkin].reverse().find((s) => konumVar(s.mekan))?.mekan);
+  if (!nokta) return null;
   const atanan = new Set(p.duraklar.map((d) => d.place_ref));
-  const enYakin = <T extends { lat: number; lng: number }>(adaylar: T[], sinir = Infinity): T | null =>
+  const enYakin = <T extends { lat: number | null; lng: number | null }>(adaylar: T[], sinir = Infinity): T | null =>
     adaylar
+      .filter(konumVar)
       .map((a) => ({ a, m: mesafeM(nokta, a) }))
       .filter((x) => x.m <= sinir)
       .sort((x, y) => x.m - y.m)[0]?.a ?? null;

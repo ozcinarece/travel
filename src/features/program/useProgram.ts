@@ -5,6 +5,7 @@ import type { GunUcNoktalari } from '@/features/konaklama/plan';
 import type { Konum } from '@/components/harita/tipler';
 import { haftaGunu } from '@/lib/takvim';
 import type { Durak, Gun, Mekan, Seyahat } from '@/lib/tipler';
+import { konumu } from '@/lib/konum';
 import { yerelSaatDk, yerelTarih } from '@/lib/zaman';
 import { googleGunu, type Periyot } from '@/schedule/acilis';
 import { miniCubuk, type MiniCubuk } from '@/schedule/kaydir';
@@ -80,7 +81,7 @@ export function useGunProgrami(secenek: {
         .map(({ d, m }) => ({
           id: d.id,
           key: m.place_id,
-          konum: { lat: m.lat, lng: m.lng },
+          konum: konumu(m),
           dakika: d.minutes,
           tamamlandiDk: tamamlanmayla && d.completed_at ? yerelSaatDk(new Date(d.completed_at), seyahat.tz) : null,
           skipped: d.skipped,
