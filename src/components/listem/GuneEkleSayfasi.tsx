@@ -11,7 +11,7 @@ import { t } from '@/i18n';
 import { sureMetni } from '@/lib/kategori';
 import { mesafeMetni } from '@/lib/mesafe';
 import { dakikaSaat } from '@/schedule/tempo';
-import { gunRengi, gunUstuMetin, olcek, renk, yazi } from '@/theme';
+import { baslikStili, gunRengi, gunUstuMetin, olcek, renk, yazi } from '@/theme';
 
 type Props = {
   acik: boolean;
@@ -91,7 +91,7 @@ export function GuneEkleSayfasi({ acik, ad, foto, dakika, secenekler, ilkAd, mes
 const s = StyleSheet.create({
   ust: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   foto: { width: 48, height: 48, borderRadius: 14, overflow: 'hidden', backgroundColor: renk.yuzey },
-  ad: { fontFamily: yazi.baslik, fontSize: olcek.bolum, letterSpacing: -0.4, color: renk.metin },
+  ad: { ...baslikStili(olcek.bolum), color: renk.metin },
   alt: { fontFamily: yazi.normal, fontSize: 13, color: renk.ikincil },
   secenek: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 12, borderRadius: 18, borderWidth: 1.5, borderColor: renk.ayrac, backgroundColor: renk.zemin },
   onerilen: { borderWidth: 2, borderColor: renk.vurgu, backgroundColor: '#fff4ec' },

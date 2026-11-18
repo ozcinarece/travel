@@ -4,10 +4,11 @@ import { useState, type ReactNode } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import Svg, { Circle, Path } from 'react-native-svg';
 
-import { Logo } from '@/components/ui/Logo';
+import { Logo, LogoYazisi } from '@/components/ui/Logo';
 import { aktifMenu, GENIS_EKRAN, MENU, type MenuOgesi } from '@/features/yonetim/menu';
 import { ty } from '@/features/yonetim/metin';
-import { yazi } from '@/theme';
+import { t } from '@/i18n';
+import { baslikStili, yazi } from '@/theme';
 
 import { AltCizgiliSekmeler, type SekmeTanimi } from './Ortak';
 import { yRenk } from './tema';
@@ -26,13 +27,16 @@ function MenuRotasi() {
   );
 }
 
-/** Logo (36 × 22, koyu zemin) + "tripmate" (Archivo 19) + "YÖNETİM" (10 px 800, #FFB27A). */
+/** Logo (36 × 22, koyu zemin) + "tripmate" (SVG yolu, 19 px) + "YÖNETİM" (10 px 800, #FFB27A). */
 function Marka() {
   return (
-    <View style={s.marka}>
-      <Logo boyut={36} koyuZemin />
-      <View style={s.markaYazi}>
-        <Text style={s.markaAd}>tripmate</Text>
+    // Tek grup etiketi (#319): "Tripmate, Yönetim"; logo SVG'si ve yazılar ayrıca okunmaz.
+    <View style={s.marka} accessible accessibilityRole="image" accessibilityLabel={`${t('marka.ad')}, ${ty('marka')}`}>
+      <Logo boyut={36} koyuZemin gizli />
+      <View style={s.markaYazi} importantForAccessibility="no-hide-descendants" aria-hidden>
+        <View style={s.markaAd}>
+          <LogoYazisi boyut={19} renk={yRenk.zemin} />
+        </View>
         <Text style={s.markaAlt}>{ty('marka').toLocaleUpperCase('tr-TR')}</Text>
       </View>
     </View>
@@ -153,7 +157,7 @@ type BaslikProps = {
 };
 
 /**
- * #155 KK2 (kanvas BO-0 / BO-1): beyaz başlık, 18 / 28 iç boşluk, alt çizgi; [kapak] üst etiket + Archivo 26 başlık
+ * #155 KK2 (kanvas BO-0 / BO-1): beyaz başlık, 18 / 28 iç boşluk, alt çizgi; [kapak] üst etiket + Figtree 800 26 başlık
  * [+ rozet]; sağda kayıt durumu + eylemler (10 aralık); altında alt çizgili sekmeler, sekme yoksa 10 px boşluk.
  */
 export function SayfaBasligi({ ust, baslik, kapak, rozet, durum, eylemler, sekmeler }: BaslikProps) {
@@ -241,7 +245,8 @@ const s = StyleSheet.create({
   rota: { position: 'absolute', left: 0, bottom: 70, opacity: 0.35 },
   marka: { flexDirection: 'row', alignItems: 'center', gap: 9, paddingHorizontal: 8, paddingBottom: 22 },
   markaYazi: { gap: 4 },
-  markaAd: { fontFamily: yazi.baslik, fontSize: 19, lineHeight: 19, letterSpacing: -0.67, color: yRenk.zemin },
+  // #307 KK7: "tripmate" SVG yolu; 19 px satır kutusunda ortalı (eski metin: 19 px, satır 19).
+  markaAd: { height: 19, justifyContent: 'center' },
   markaAlt: { fontFamily: yazi.ekstra, fontSize: 10, lineHeight: 10, letterSpacing: 1, color: yRenk.menuEtiket },
   oge: { flexDirection: 'row', alignItems: 'center', gap: 10, height: 42, paddingHorizontal: 12, borderRadius: 12 },
   ogeSecili: { backgroundColor: 'rgba(255,255,255,0.12)' },
@@ -250,14 +255,14 @@ const s = StyleSheet.create({
   ogeNokta: { marginLeft: 'auto', width: 7, height: 7, borderRadius: 4, backgroundColor: yRenk.vurgu },
   kullanici: { marginTop: 'auto', flexDirection: 'row', alignItems: 'center', gap: 10, padding: 10, borderRadius: 14, backgroundColor: 'rgba(255,255,255,0.08)' },
   avatar: { width: 36, height: 36, borderRadius: 11, backgroundColor: yRenk.vurgu, alignItems: 'center', justifyContent: 'center' },
-  avatarHarf: { fontFamily: yazi.baslik, fontSize: 15, color: yRenk.metin },
+  avatarHarf: { ...baslikStili(15), color: yRenk.metin },
   kullaniciYazi: { flex: 1, minWidth: 0 },
   kullaniciAd: { fontFamily: yazi.ekstra, fontSize: 13, lineHeight: 15.6, color: yRenk.zemin },
   kullaniciRol: { fontFamily: yazi.normal, fontSize: 11, lineHeight: 13.2, color: yRenk.menuMetin },
   darUst: { height: 56, flexShrink: 0, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 18, backgroundColor: yRenk.ana },
   darMarka: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   darAvatar: { width: 30, height: 30, borderRadius: 9, backgroundColor: yRenk.vurgu, alignItems: 'center', justifyContent: 'center' },
-  darAvatarHarf: { fontFamily: yazi.baslik, fontSize: 13, color: yRenk.metin },
+  darAvatarHarf: { ...baslikStili(13), color: yRenk.metin },
   darMenu: {
     position: 'absolute',
     left: 0,
@@ -285,7 +290,7 @@ const s = StyleSheet.create({
   baslikMetin: { flexShrink: 1, minWidth: 0, gap: 2 },
   ust: { fontFamily: yazi.ekstra, fontSize: 11, letterSpacing: 0.88, color: yRenk.soluk },
   baslikIc: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  baslik: { flexShrink: 1, fontFamily: yazi.baslik, fontSize: 26, lineHeight: 30, letterSpacing: -0.78, color: yRenk.metin },
+  baslik: { flexShrink: 1, ...baslikStili(26), lineHeight: 30, color: yRenk.metin },
   eylemler: { marginLeft: 'auto', flexDirection: 'row', alignItems: 'center', gap: 10 },
   sekmesiz: { height: 10 },
   govde: { flex: 1 },

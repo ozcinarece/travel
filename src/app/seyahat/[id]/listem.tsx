@@ -36,7 +36,7 @@ import { kategoriEtiketi, sureMetni } from '@/lib/kategori';
 import { useOturum } from '@/lib/oturum';
 import type { Durak, Gun, Mekan, Seyahat } from '@/lib/tipler';
 import { dakikaSaat } from '@/schedule/tempo';
-import { bosluk, gunRengi, gunUstuMetin, kose, renk, yazi } from '@/theme';
+import { baslikStili, bosluk, gunRengi, gunUstuMetin, kose, renk, yazi } from '@/theme';
 
 /** #141 KK4: Çıkar'dan sonra bu kadar "Geri al" süresi; sonra mekan listeden silinir. */
 const GERI_AL_MS = 5000;
@@ -436,7 +436,7 @@ const s = StyleSheet.create({
   dahaYuz: { width: 32, height: 32, borderRadius: 10, marginLeft: -8, backgroundColor: renk.anaAcik, alignItems: 'center', justifyContent: 'center' },
   dahaYuzMetin: { fontFamily: yazi.ekstra, fontSize: 12, color: renk.ana },
   baslikSatir: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 2 },
-  baslik: { fontFamily: yazi.baslik, fontSize: 28, letterSpacing: -0.84, color: renk.metin },
+  baslik: { ...baslikStili(28), color: renk.metin },
   sirala: { height: 32, paddingHorizontal: 10, borderRadius: 10, backgroundColor: renk.yuzey, flexDirection: 'row', alignItems: 'center', gap: 4 },
   siralaMetin: { fontFamily: yazi.ekstra, fontSize: 13, color: renk.ana },
   atanmamisKutu: { padding: 12, borderRadius: 20, backgroundColor: '#fff6e6', gap: 10, marginTop: 4 },
@@ -463,7 +463,7 @@ const s = StyleSheet.create({
   gunSayi: { fontFamily: yazi.normal, fontSize: 12, color: renk.ikincil },
   gunBos: { fontFamily: yazi.normal, fontSize: 13, color: renk.soluk, paddingVertical: 4 },
   bos: { paddingVertical: 32, gap: 8, alignItems: 'flex-start' },
-  bosBaslik: { fontFamily: yazi.baslik, fontSize: 20, color: renk.metin },
+  bosBaslik: { ...baslikStili(20), color: renk.metin },
   bosAlt: { fontFamily: yazi.normal, fontSize: 14, lineHeight: 20, color: renk.ikincil },
   bosDugme: { marginTop: 6, height: 44, paddingHorizontal: 16, borderRadius: kose.dugme, backgroundColor: renk.ana, justifyContent: 'center' },
   bosDugmeMetin: { fontFamily: yazi.ekstra, fontSize: 14, color: renk.zemin },

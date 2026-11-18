@@ -7,7 +7,7 @@ import { Buton } from '@/components/ui/Buton';
 import { LogoYazi } from '@/components/ui/Logo';
 import { appleIleGiris, appleKullanilabilir, googleIleGiris, iptalMi } from '@/features/auth/giris';
 import { t } from '@/i18n';
-import { haritaGolgesi, kose, renk, yazi } from '@/theme';
+import { baslikStili, haritaGolgesi, kose, renk, yazi } from '@/theme';
 
 type Saglayici = 'google' | 'apple';
 
@@ -101,7 +101,7 @@ const s = StyleSheet.create({
   ust: { flex: 1, overflow: 'hidden' },
   logo: { paddingHorizontal: 24, paddingTop: 24 },
   sayfa: { backgroundColor: renk.zemin, borderTopLeftRadius: 30, borderTopRightRadius: 30, paddingHorizontal: 24, paddingTop: 30, paddingBottom: 12, gap: 14 },
-  baslik: { fontFamily: yazi.baslik, fontSize: 29, lineHeight: 31, letterSpacing: -0.9, color: renk.metin },
+  baslik: { ...baslikStili(29), lineHeight: 31, color: renk.metin },
   alt: { fontFamily: yazi.normal, fontSize: 15, lineHeight: 22, color: renk.ikincil },
   dugmeler: { gap: 10, marginTop: 6 },
   kosullar: { fontFamily: yazi.normal, fontSize: 12, lineHeight: 17, textAlign: 'center', color: renk.ikincil, paddingBottom: 8 },

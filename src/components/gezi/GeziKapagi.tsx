@@ -8,7 +8,7 @@ import { Avatar } from '@/components/ui/Avatar';
 import { Ikon } from '@/components/ui/Ikon';
 import { t } from '@/i18n';
 import type { Uye } from '@/lib/tipler';
-import { renk, yazi, yuzRenkleri } from '@/theme';
+import { baslikStili, renk, yazi, yuzRenkleri } from '@/theme';
 
 const BEYAZ_14 = 'rgba(255,255,255,0.14)';
 
@@ -79,11 +79,11 @@ const s = StyleSheet.create({
   sus: { position: 'absolute', right: -10, top: 30, opacity: 0.9 },
   ustSatir: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   geri: { height: 40, paddingLeft: 8, paddingRight: 14, borderRadius: 999, backgroundColor: BEYAZ_14, flexDirection: 'row', alignItems: 'center', gap: 4 },
-  geriMetin: { fontFamily: yazi.baslik, fontSize: 15, color: renk.zemin },
+  geriMetin: { ...baslikStili(15), color: renk.zemin },
   pasif: { opacity: 0.4 },
   kare: { width: 40, height: 40, borderRadius: 12, backgroundColor: BEYAZ_14, alignItems: 'center', justifyContent: 'center' },
   baslikAlani: { marginTop: 22, gap: 6 },
-  baslik: { fontFamily: yazi.baslik, fontSize: 34, lineHeight: 36, letterSpacing: -1, color: renk.zemin },
+  baslik: { ...baslikStili(32), lineHeight: 34, color: renk.zemin },
   tarih: { fontFamily: yazi.yari, fontSize: 14, color: renk.anaAcik },
   altSatir: { marginTop: 16, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   kisiler: { flexDirection: 'row', alignItems: 'center', gap: 10, minHeight: 44 },

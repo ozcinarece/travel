@@ -1,5 +1,5 @@
 // #136 Tripmate kimliği (kanvas "Marka kimliği" → Temel): Gece ana renk, Mandalina vurgu, Lacivert metin, Buz yüzey;
-// başlık Archivo (genişlik 115, kalınlık 850), metin Figtree. Jetonlar: docs/06-marka.md. Hex'ler KÜÇÜK harf (pin PNG anahtarları).
+// başlık ve metin Figtree (başlık 800, düğme 700; #307). Jetonlar: docs/06-marka.md. Hex'ler KÜÇÜK harf (pin PNG anahtarları).
 
 export const renk = {
   zemin: '#ffffff',
@@ -58,19 +58,28 @@ export function rotaRengi(gunIndex: number): string {
   return rotaRenkleri[(gunIndex - 1) % rotaRenkleri.length];
 }
 
-/** Figtree: metin; Archivo SemiExpanded 850: başlıklar (`baslik`). Eski adlar (normal · orta · yari · kalin · ekstra) korunur. */
+/** Tek aile Figtree (#307): metin 400–600, düğme `kalin` (700), başlık `baslik` (800). Eski adlar korunur. */
 export const yazi = {
   normal: 'Figtree_400Regular',
   orta: 'Figtree_500Medium',
   yari: 'Figtree_600SemiBold',
   kalin: 'Figtree_700Bold',
   ekstra: 'Figtree_800ExtraBold',
-  /** Archivo wdth 115 / wght 850 — ekran, kart ve bölüm başlıkları (assets/fonts, statik örnek). */
-  baslik: 'ArchivoSemiExpanded_850',
+  /** Ekran, kart ve bölüm başlıkları: Figtree 800 (#307). Harf aralığı için `baslikStili`. */
+  baslik: 'Figtree_800ExtraBold',
 } as const;
 
-/** Yazı ölçeği (px): başlıklar Archivo, gerisi Figtree; etiket büyük harf 800. */
+/** Yazı ölçeği (px): başlıklar Figtree 800, gerisi Figtree; etiket büyük harf 800. */
 export const olcek = { ekran: 32, kart: 24, bolum: 20, metin: 16, alt: 14, etiket: 12 } as const;
+
+/**
+ * #307 KK1 (kanvas Temel · YAZI): başlık stili — Figtree 800, verilen boyut ve harf aralığı.
+ * Kart (24) ve üstü −0,5; bölüm boyu (18–23) −0,3; daha küçük başlıklarda harf aralığı yok.
+ */
+export function baslikStili(boyut: number) {
+  const letterSpacing = boyut >= olcek.kart ? -0.5 : boyut >= 18 ? -0.3 : 0;
+  return { fontFamily: yazi.baslik, fontSize: boyut, letterSpacing } as const;
+}
 
 /** Köşeler: düğme/giriş 14 · kart 22 · rozet 8 · çip tam yuvarlak. */
 export const kose = { dugme: 14, kart: 22, rozet: 8, cip: 999, alan: 12 } as const;

@@ -3,7 +3,7 @@ import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-nati
 
 import { Ikon } from '@/components/ui/Ikon';
 import { t } from '@/i18n';
-import { kose, renk, yazi } from '@/theme';
+import { baslikStili, kose, renk, yazi } from '@/theme';
 
 type Props = { ozet: { mekan: number; bolge: number; saat: number }; onPlaniKur: () => void; onHaritayaGec: () => void; yukleniyor?: boolean };
 
@@ -39,9 +39,9 @@ export function PlanCubugu({ ozet, onPlaniKur, onHaritayaGec, yukleniyor }: Prop
 
 const s = StyleSheet.create({
   cubuk: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingTop: 12, borderTopWidth: 1, borderTopColor: renk.ayrac },
-  baslik: { fontFamily: yazi.baslik, fontSize: 18, color: renk.metin },
+  baslik: { ...baslikStili(18), color: renk.metin },
   alt: { fontFamily: yazi.normal, fontSize: 13, color: renk.ikincil },
   baglanti: { fontFamily: yazi.ekstra, fontSize: 13, color: renk.ana },
   dugme: { height: 54, paddingHorizontal: 22, borderRadius: kose.dugme, backgroundColor: renk.vurgu, flexDirection: 'row', alignItems: 'center', gap: 8 },
-  dugmeMetin: { fontFamily: yazi.ekstra, fontSize: 16, color: renk.metin },
+  dugmeMetin: { fontFamily: yazi.kalin, fontSize: 16, color: renk.metin },
 });

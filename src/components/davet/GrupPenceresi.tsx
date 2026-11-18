@@ -24,7 +24,7 @@ import { t } from '@/i18n';
 import { onayIste } from '@/lib/onay';
 import { useOturum } from '@/lib/oturum';
 import type { Mekan, Seyahat, Uye } from '@/lib/tipler';
-import { kose, minDokunma, olcek, renk, yazi, yuzRenkleri } from '@/theme';
+import { baslikStili, kose, minDokunma, olcek, renk, yazi, yuzRenkleri } from '@/theme';
 
 import { ProfilOnayi } from './ProfilOnayi';
 
@@ -208,14 +208,14 @@ export function GrupPenceresi({ acik, onKapat, seyahat, uyeler, mekanlar }: Prop
 
 const s = StyleSheet.create({
   baslikSatiri: { flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between', gap: 10 },
-  baslik: { fontFamily: yazi.baslik, fontSize: olcek.kart, letterSpacing: -0.6, color: renk.metin },
+  baslik: { ...baslikStili(olcek.kart), color: renk.metin },
   baslikAlt: { flexShrink: 1, fontFamily: yazi.kalin, fontSize: 13, color: renk.ikincil },
   uye: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   uyeAd: { fontFamily: yazi.kalin, fontSize: 15, color: renk.metin },
   uyeSen: { fontFamily: yazi.yari, color: renk.ikincil },
   uyeAlt: { fontFamily: yazi.normal, fontSize: 13, color: renk.ikincil },
   davetKart: { padding: 14, borderRadius: 18, backgroundColor: renk.ana, gap: 10 },
-  davetBaslik: { fontFamily: yazi.baslik, fontSize: 17, color: renk.zemin },
+  davetBaslik: { ...baslikStili(17), color: renk.zemin },
   davetAlt: { fontFamily: yazi.normal, fontSize: 13, color: renk.anaAcik },
   bolum: { fontFamily: yazi.kalin, fontSize: 15, color: renk.metin },
   not: { fontFamily: yazi.normal, fontSize: 13, color: renk.ikincil },

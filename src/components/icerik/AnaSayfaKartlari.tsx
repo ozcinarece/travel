@@ -6,7 +6,7 @@ import { Avatar } from '@/components/ui/Avatar';
 import { Ikon } from '@/components/ui/Ikon';
 import { Rozet } from '@/components/ui/Rozet';
 import { t } from '@/i18n';
-import { kose, renk, yazi } from '@/theme';
+import { baslikStili, kose, renk, yazi } from '@/theme';
 
 const YUZ = [renk.vurgu, renk.zemin, renk.anaAcik];
 
@@ -78,13 +78,13 @@ export function IlkSeyahatKarti({ baslik, onPress }: { baslik: string; onPress: 
 const s = StyleSheet.create({
   kart: { borderRadius: kose.kart, backgroundColor: renk.ana, padding: 20, gap: 14, overflow: 'hidden' },
   sus: { position: 'absolute', right: -8, top: 0 },
-  ad: { fontFamily: yazi.baslik, fontSize: 26, lineHeight: 28, letterSpacing: -0.8, color: renk.zemin },
+  ad: { ...baslikStili(26), lineHeight: 28, color: renk.zemin },
   alt: { fontFamily: yazi.yari, fontSize: 15, color: renk.anaAcik },
   altSatir: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   yuzler: { flexDirection: 'row' },
   yuzCerceve: { borderWidth: 2, borderColor: renk.ana, borderRadius: 12 },
   dugme: { height: 46, paddingHorizontal: 18, borderRadius: kose.dugme, backgroundColor: renk.zemin, flexDirection: 'row', alignItems: 'center', gap: 6 },
-  dugmeMetin: { fontFamily: yazi.ekstra, fontSize: 15, color: renk.ana },
+  dugmeMetin: { fontFamily: yazi.kalin, fontSize: 15, color: renk.ana },
   ilkKart: { padding: 0, gap: 0, borderRadius: 26 },
   ilkHarita: { height: 168 },
   pin: { position: 'absolute', width: 30, height: 30, borderRadius: 9, borderWidth: 3, borderColor: renk.zemin, alignItems: 'center', justifyContent: 'center' },
@@ -92,5 +92,5 @@ const s = StyleSheet.create({
   ilkGovde: { paddingHorizontal: 20, paddingTop: 4, paddingBottom: 20, gap: 10 },
   ilkMetin: { fontFamily: yazi.normal, fontSize: 15, lineHeight: 22, color: renk.anaAcik },
   basla: { marginTop: 4, height: 52, borderRadius: kose.dugme, backgroundColor: renk.vurgu, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 },
-  baslaMetin: { fontFamily: yazi.ekstra, fontSize: 16, color: renk.metin },
+  baslaMetin: { fontFamily: yazi.kalin, fontSize: 16, color: renk.metin },
 });

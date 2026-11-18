@@ -6,7 +6,7 @@ import { Avatar } from '@/components/ui/Avatar';
 import { kategoriOzeti, paraMetni, type Harcama } from '@/features/harcama/hesap';
 import type { Kisiler } from '@/features/harcama/metin';
 import { t } from '@/i18n';
-import { renk, yazi } from '@/theme';
+import { baslikStili, renk, yazi } from '@/theme';
 
 import { KategoriKutusu } from './HarcamaSatiri';
 import { KATEGORI_GORUNUMU } from './kategori';
@@ -64,7 +64,7 @@ export function OzetPenceresi({ acik, onKapat, harcamalar, k, benId }: { acik: b
 }
 
 const s = StyleSheet.create({
-  baslik: { fontFamily: yazi.baslik, fontSize: 22, letterSpacing: -0.5, color: renk.metin },
+  baslik: { ...baslikStili(22), color: renk.metin },
   alt: { fontFamily: yazi.normal, fontSize: 13, color: renk.ikincil, marginTop: -8 },
   bolum: { fontFamily: yazi.ekstra, fontSize: 12, letterSpacing: 0.5, color: renk.ikincil, textTransform: 'uppercase' },
   satir: { flexDirection: 'row', alignItems: 'center', gap: 10 },

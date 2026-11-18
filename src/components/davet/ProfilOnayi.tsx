@@ -7,7 +7,7 @@ import { Avatar } from '@/components/ui/Avatar';
 import { Buton } from '@/components/ui/Buton';
 import { useProfil } from '@/features/profil/sorgular';
 import { t } from '@/i18n';
-import { kose, olcek, renk, yazi } from '@/theme';
+import { baslikStili, kose, olcek, renk, yazi } from '@/theme';
 
 type Props = { acik: boolean; onKapat: () => void; onGonder: () => void };
 
@@ -49,10 +49,10 @@ export function ProfilOnayi({ acik, onKapat, onGonder }: Props) {
 }
 
 const s = StyleSheet.create({
-  baslik: { fontFamily: yazi.baslik, fontSize: olcek.kart, lineHeight: 27, letterSpacing: -0.6, color: renk.metin },
+  baslik: { ...baslikStili(olcek.kart), lineHeight: 27, color: renk.metin },
   metin: { fontFamily: yazi.normal, fontSize: 15, lineHeight: 22, color: renk.ikincil },
   kart: { flexDirection: 'row', alignItems: 'center', gap: 14, padding: 14, borderRadius: 20, backgroundColor: renk.yuzey },
-  ad: { fontFamily: yazi.baslik, fontSize: 19, color: renk.metin },
+  ad: { ...baslikStili(19), color: renk.metin },
   kullanici: { fontFamily: yazi.normal, fontSize: 14, color: renk.ikincil },
   degistir: { height: 40, paddingHorizontal: 14, borderRadius: kose.alan, backgroundColor: renk.zemin, justifyContent: 'center' },
   degistirMetin: { fontFamily: yazi.ekstra, fontSize: 14, color: renk.ana },

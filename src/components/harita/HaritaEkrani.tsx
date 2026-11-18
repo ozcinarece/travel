@@ -8,7 +8,7 @@ import { Ikon } from '@/components/ui/Ikon';
 import { AltSayfa, type SayfaHali } from './AltSayfa';
 
 import { t } from '@/i18n';
-import { bosluk, renk, yazi } from '@/theme';
+import { baslikStili, bosluk, renk, yazi } from '@/theme';
 
 import { Harita } from './Harita';
 import type { HaritaProps } from './tipler';
@@ -177,7 +177,7 @@ export function HaritaEkrani({ baslik, geri, baslikHapi, sagUst, arama, aramaSag
   );
 }
 
-/** Sol üst beyaz geri hapı ("‹ Eskişehir Gezisi"); #140 (kanvas 10): 40 px, Gece ok, Archivo 15. */
+/** Sol üst beyaz geri hapı ("‹ Eskişehir Gezisi"); #140 (kanvas 10): 40 px, Gece ok, Figtree 800 15. */
 export function GeriHapi({ baslik, onPress, duz }: { baslik: string; onPress: () => void; /** Beyaz sayfada (Listem): Buz zemin, gölgesiz. */ duz?: boolean }) {
   return (
     <Pressable
@@ -194,7 +194,7 @@ export function GeriHapi({ baslik, onPress, duz }: { baslik: string; onPress: ()
   );
 }
 
-/** #274 (kanvas 29e): ekran başlığı hapı — 40 px beyaz, gölgeli, Archivo 17; geri oku yok. */
+/** #274 (kanvas 29e): ekran başlığı hapı — 40 px beyaz, gölgeli, Figtree 800 17; geri oku yok. */
 function BaslikHapi({ baslik }: { baslik: string }) {
   return (
     <View style={[s.baslikHap, s.golge]}>
@@ -282,9 +282,9 @@ const s = StyleSheet.create({
     backgroundColor: renk.zemin,
     maxWidth: '62%',
   },
-  geriMetin: { fontFamily: yazi.baslik, fontSize: 15, letterSpacing: -0.2, color: renk.metin, flexShrink: 1 },
+  geriMetin: { ...baslikStili(15), color: renk.metin, flexShrink: 1 },
   baslikHap: { height: 40, paddingHorizontal: 16, borderRadius: 999, backgroundColor: renk.zemin, justifyContent: 'center', maxWidth: '62%' },
-  baslikMetin: { fontFamily: yazi.baslik, fontSize: 17, letterSpacing: -0.34, color: renk.metin },
+  baslikMetin: { ...baslikStili(17), color: renk.metin },
   bilgiHap: { height: 36, paddingHorizontal: 12, borderRadius: 999, backgroundColor: renk.zemin, justifyContent: 'center' },
   bilgiMetin: { fontFamily: yazi.kalin, fontSize: 12, color: renk.ikincil },
   aramaSatir: { flexDirection: 'row', alignItems: 'center', gap: 8 },

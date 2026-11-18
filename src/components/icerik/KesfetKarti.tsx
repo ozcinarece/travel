@@ -10,7 +10,7 @@ import { Logo } from '@/components/ui/Logo';
 import { kartEtiketi, type AkisGezisi } from '@/features/icerik/kesfetAkisi';
 import { useKaydet } from '@/features/icerik/sorgular';
 import { t } from '@/i18n';
-import { gunRengi, gunUstuMetin, kose, renk, yazi } from '@/theme';
+import { baslikStili, gunRengi, gunUstuMetin, kose, renk, yazi } from '@/theme';
 
 /** Fotoğrafı olmayan gezide kapak zemini (kanvas 29a: Buz koyusu, açık Mandalina, açık mavi). */
 const ZEMINLER = ['#c9d2f2', '#ffe2cc', '#dce6ff'];
@@ -243,10 +243,8 @@ const s = StyleSheet.create({
   rozetMetin: { fontFamily: yazi.ekstra, fontSize: 12, color: renk.zemin },
   ustGovde: { paddingHorizontal: 16, paddingTop: 14, gap: 10 },
   baslik: {
-    fontFamily: yazi.baslik,
-    fontSize: 19,
+    ...baslikStili(19),
     lineHeight: 23,
-    letterSpacing: -0.38,
     color: renk.metin,
   },
   not: {
@@ -343,9 +341,7 @@ const s = StyleSheet.create({
     alignItems: 'flex-start',
   },
   kendiBaslik: {
-    fontFamily: yazi.baslik,
-    fontSize: 19,
-    letterSpacing: -0.38,
+    ...baslikStili(19),
     color: renk.metin,
   },
   kendiAlt: {
@@ -363,6 +359,6 @@ const s = StyleSheet.create({
     alignItems: 'center',
     gap: 6,
   },
-  baslaMetin: { fontFamily: yazi.ekstra, fontSize: 15, color: renk.zemin },
+  baslaMetin: { fontFamily: yazi.kalin, fontSize: 15, color: renk.zemin },
   iskelet: { borderRadius: 6, backgroundColor: renk.yuzey },
 });

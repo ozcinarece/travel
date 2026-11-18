@@ -9,7 +9,7 @@ import { SayfaMetinAlani } from '@/components/ui/sayfaCekme';
 import { useOneriler, yeniOturumJetonu } from '@/features/yerler/api';
 import { t } from '@/i18n';
 import type { Mekan } from '@/lib/tipler';
-import { renk, yazi } from '@/theme';
+import { baslikStili, renk, yazi } from '@/theme';
 
 import { KlavyeliPencere } from './KlavyeliPencere';
 
@@ -94,7 +94,7 @@ function Icerik({ merkez, mekanlar, ad, foto, onSec, baslik, acik }: Omit<Props,
 }
 
 const s = StyleSheet.create({
-  baslik: { fontFamily: yazi.baslik, fontSize: 22, letterSpacing: -0.5, color: renk.metin },
+  baslik: { ...baslikStili(22), color: renk.metin },
   ara: { height: 46, flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 14, borderRadius: 14, backgroundColor: renk.yuzey },
   girdi: { flex: 1, fontFamily: yazi.yari, fontSize: 15, color: renk.metin, paddingVertical: 0 },
   bolum: { fontFamily: yazi.ekstra, fontSize: 12, letterSpacing: 0.5, color: renk.ikincil, textTransform: 'uppercase', marginBottom: 4 },

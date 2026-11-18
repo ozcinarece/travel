@@ -57,7 +57,7 @@ import { kategoriEtiketi, sureMetni } from '@/lib/kategori';
 import { AYLAR, GUNLER_KISA, haftaGunu, kisaTarih, parcala, tarihAraligi, tarihEkle } from '@/lib/takvim';
 import type { GeziDetay, GeziDuragi, SehirSecimi, SeyahatOzet } from '@/lib/tipler';
 import { yerelTarih } from '@/lib/zaman';
-import { gunRengi, gunUstuMetin, renk, yazi } from '@/theme';
+import { baslikStili, gunRengi, gunUstuMetin, renk, yazi } from '@/theme';
 
 export type AlSecenegi = 'tum' | 'gunler' | 'mekan';
 export type YeniSeyahatIstegi = {
@@ -547,7 +547,7 @@ const s = StyleSheet.create({
   perde: { flex: 1, backgroundColor: 'rgba(14,20,48,0.5)', justifyContent: 'flex-end' },
   kutu: { maxHeight: '92%', backgroundColor: renk.zemin, borderTopLeftRadius: 30, borderTopRightRadius: 30, paddingTop: 12, paddingHorizontal: 20, paddingBottom: 30, gap: 16 },
   tutamak: { alignSelf: 'center', width: 44, height: 5, borderRadius: 3, backgroundColor: renk.ayrac },
-  baslik: { fontFamily: yazi.baslik, fontSize: 24, letterSpacing: -0.6, color: renk.metin },
+  baslik: { ...baslikStili(24), color: renk.metin },
   altBaslik: { fontFamily: yazi.normal, fontSize: 14, color: renk.ikincil },
   bolum: { fontFamily: yazi.ekstra, fontSize: 12, letterSpacing: 0.48, color: renk.ikincil },
   ciplerSerit: { marginHorizontal: -20, flexGrow: 0 },

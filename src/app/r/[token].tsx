@@ -18,7 +18,7 @@ import { t } from '@/i18n';
 import { acilisKarariniKapat } from '@/lib/acilis';
 import { useOturum } from '@/lib/oturum';
 import { tarihAraligi } from '@/lib/takvim';
-import { bosluk, renk, yazi } from '@/theme';
+import { baslikStili, bosluk, renk, yazi } from '@/theme';
 
 type Saglayici = 'google' | 'apple';
 
@@ -210,7 +210,7 @@ const s = StyleSheet.create({
   icerik: { flexGrow: 1, padding: bosluk.kenar, paddingTop: 28, gap: 12, maxWidth: 520, width: '100%', alignSelf: 'center' },
   davetci: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   davetciMetin: { fontFamily: yazi.kalin, fontSize: 13, color: renk.ikincil },
-  baslik: { fontFamily: yazi.baslik, fontSize: 28, lineHeight: 32, letterSpacing: -0.8, color: renk.metin },
+  baslik: { ...baslikStili(28), lineHeight: 32, color: renk.metin },
   alt: { fontFamily: yazi.normal, fontSize: 15, lineHeight: 22, color: renk.ikincil },
   plan: { marginTop: 8, padding: 16, borderRadius: 22, backgroundColor: renk.yuzey, gap: 8 },
   planBaslik: { fontFamily: yazi.ekstra, fontSize: 12, letterSpacing: 0.5, color: renk.ikincil },

@@ -13,7 +13,7 @@ import { t } from '@/i18n';
 import { GUNLER_KISA, haftaGunu, parcala } from '@/lib/takvim';
 import type { Gun } from '@/lib/tipler';
 import { dakikaSaat } from '@/schedule/tempo';
-import { gunRengi, gunUstuMetin, renk, yazi } from '@/theme';
+import { baslikStili, gunRengi, gunUstuMetin, renk, yazi } from '@/theme';
 
 type Props = {
   hesap: DagitimHesabi;
@@ -131,12 +131,12 @@ export function SigmayanlarSayfasi({ hesap, gunler, mekanAdi, mesgul, onDagit, o
   );
 }
 
-// Kanvas 28: beyaz sayfa (üst köşe 30), tutamak 44×5; başlık Archivo 24; seçenek kartı köşe 18, seçili 2 px Gece çerçeve; radyo 22.
+// Kanvas 28: beyaz sayfa (üst köşe 30), tutamak 44×5; başlık Figtree 800 24; seçenek kartı köşe 18, seçili 2 px Gece çerçeve; radyo 22.
 const s = StyleSheet.create({
   perde: { flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(14,20,48,0.5)' },
   kutu: { maxHeight: '92%', backgroundColor: renk.zemin, borderTopLeftRadius: 30, borderTopRightRadius: 30, paddingTop: 12, paddingHorizontal: 20, paddingBottom: 30, gap: 14 },
   tutamak: { alignSelf: 'center', width: 44, height: 5, borderRadius: 3, backgroundColor: renk.ayrac },
-  baslik: { fontFamily: yazi.baslik, fontSize: 24, letterSpacing: -0.6, color: renk.metin },
+  baslik: { ...baslikStili(24), color: renk.metin },
   alt: { fontFamily: yazi.normal, fontSize: 14, color: renk.ikincil },
   soru: { fontFamily: yazi.ekstra, fontSize: 12, letterSpacing: 0.5, color: renk.ikincil },
   secenek: { flexDirection: 'row', alignItems: 'flex-start', gap: 12, paddingVertical: 12, paddingHorizontal: 14, borderRadius: 18, borderWidth: 1.5, borderColor: renk.ayrac },

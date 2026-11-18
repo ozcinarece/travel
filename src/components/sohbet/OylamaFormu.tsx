@@ -12,7 +12,7 @@ import type { YeniOylama } from '@/features/sohbet/sorgular';
 import { t } from '@/i18n';
 import type { Mekan } from '@/lib/tipler';
 import { yerelAn } from '@/lib/zaman';
-import { renk, yazi } from '@/theme';
+import { baslikStili, renk, yazi } from '@/theme';
 
 import { KlavyeliPencere } from './KlavyeliPencere';
 
@@ -168,7 +168,7 @@ function Icerik({ tz, mekanlar, ad, icerikAdi, gonderiliyor, onGonder }: Props) 
 }
 
 const s = StyleSheet.create({
-  baslik: { fontFamily: yazi.baslik, fontSize: 22, letterSpacing: -0.5, color: renk.metin },
+  baslik: { ...baslikStili(22), color: renk.metin },
   etiket: { fontFamily: yazi.ekstra, fontSize: 13, color: renk.metin },
   girdi: { height: 46, paddingHorizontal: 14, borderRadius: 12, backgroundColor: renk.yuzey, fontFamily: yazi.yari, fontSize: 15, color: renk.metin },
   secenekSatiri: { flexDirection: 'row', alignItems: 'center', gap: 8 },
@@ -180,5 +180,5 @@ const s = StyleSheet.create({
   ekleMetin: { fontFamily: yazi.ekstra, fontSize: 14, color: renk.ana },
   ciplar: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   gonder: { height: 48, borderRadius: 14, backgroundColor: renk.ana, alignItems: 'center', justifyContent: 'center' },
-  gonderMetin: { fontFamily: yazi.ekstra, fontSize: 15, color: renk.zemin },
+  gonderMetin: { fontFamily: yazi.kalin, fontSize: 15, color: renk.zemin },
 });

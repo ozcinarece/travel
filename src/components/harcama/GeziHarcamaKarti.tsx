@@ -8,7 +8,7 @@ import { Ikon } from '@/components/ui/Ikon';
 import { paraMetni, sayiYonelme, type Harcama, type HarcamaOzeti } from '@/features/harcama/hesap';
 import { bolusumMetni, harcamaBasligi, type Kisiler } from '@/features/harcama/metin';
 import { t } from '@/i18n';
-import { renk, yazi } from '@/theme';
+import { baslikStili, renk, yazi } from '@/theme';
 
 /** `eklePasif`: #243 KK4 (kanvas 23c) bağlantı yokken "Harcama ekle" pasif (%40). */
 type Props = { gezi: boolean; ozet: HarcamaOzeti; adet: number; k: Kisiler; benId: string | null; onTumu: () => void; onEkle: () => void; onBakiyeler: () => void; eklePasif?: boolean };
@@ -76,7 +76,7 @@ function sonAlt(h: Harcama, benId: string | null, k: Kisiler): string {
 const s = StyleSheet.create({
   ust: { flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between', gap: 10 },
   etiket: { fontFamily: yazi.ekstra, fontSize: 12, color: renk.ikincil },
-  sayi: { fontFamily: yazi.baslik, fontSize: 24, letterSpacing: -0.48, color: renk.metin },
+  sayi: { ...baslikStili(24), color: renk.metin },
   sonTutar: { fontFamily: yazi.ekstra, fontSize: 14, color: renk.metin },
   bos: { fontFamily: yazi.normal, fontSize: 13, lineHeight: 18, color: renk.ikincil },
 });
