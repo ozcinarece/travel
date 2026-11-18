@@ -5,7 +5,7 @@
 // Gün kapasitesi günün penceresidir (days.start_time / end_time, yoksa seyahatin day_start / day_end). Yol kuş uçuşu tahmini
 // (planKur ile aynı); ek Google isteği yok.
 import type { Konum } from '@/components/harita/tipler';
-import { durakDakikasi, planKur, bacakDk, type PlanMekani, type PlanSonucu } from '@/features/sihirbaz/planKur';
+import { bacakVarsa, durakDakikasi, planKur, sonKonum, type PlanMekani, type PlanSonucu } from '@/features/sihirbaz/planKur';
 import { pinKategorisi } from '@/lib/pinIkonu';
 import type { Durak, Gun, Mekan } from '@/lib/tipler';
 import { dakikaSaat, saatDakika } from '@/schedule/tempo';
@@ -87,8 +87,8 @@ export function kisalt(dk: number, oran: number, yemek: boolean): number {
 function gunSuresi(liste: PlanMekani[], bas: Konum | null): number {
   let dk = 0;
   liste.forEach((m, i) => {
-    const onceki = i === 0 ? bas : liste[i - 1];
-    dk += m.dakika + (onceki ? bacakDk(onceki, m).dk : 0);
+    const onceki = sonKonum(liste.slice(0, i), bas);
+    dk += m.dakika + (onceki ? bacakVarsa(onceki, m).dk : 0);
   });
   return dk;
 }

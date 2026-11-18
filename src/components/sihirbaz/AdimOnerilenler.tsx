@@ -10,6 +10,7 @@ import { useHafifYerler } from '@/features/yerler/api';
 import { t } from '@/i18n';
 import type { Mekan, Sehir, Seyahat } from '@/lib/tipler';
 import { bosluk, kose, renk, yazi } from '@/theme';
+import { haritaMerkezi, konumVar } from '@/lib/konum';
 
 import { SecimHaritasi, type HaritaNoktasi } from './SecimHaritasi';
 import { SecimKarti } from './SecimKarti';
@@ -40,7 +41,8 @@ export function AdimOnerilenler({ seyahat, rehberSehir, havuz, tutulan, onTut, o
   // #172 KK3: listedeki mekanların yalnız adı (harita etiketi) — Pro maske.
   const adlar = useHafifYerler(havuz.map((m) => m.place_id), { puan: false });
   const secilenler = useMemo<HaritaNoktasi[]>(
-    () => havuz.map((m) => ({ id: m.place_id, lat: m.lat, lng: m.lng, ad: liste.find((x) => x.place_id === m.place_id)?.ad ?? adlar.data?.[m.place_id]?.ad ?? '', primary_type: m.primary_type })),
+    // #318: koordinatı boşalmış mekan mini haritada yok.
+    () => havuz.filter(konumVar).map((m) => ({ id: m.place_id, lat: m.lat, lng: m.lng, ad: liste.find((x) => x.place_id === m.place_id)?.ad ?? adlar.data?.[m.place_id]?.ad ?? '', primary_type: m.primary_type })),
     [havuz, liste, adlar.data],
   );
   const digerleri = useMemo<HaritaNoktasi[]>(() => liste.filter((m) => !havuzIdleri.has(m.place_id)).map((m) => ({ id: m.place_id, lat: m.lat, lng: m.lng, ad: m.ad, primary_type: m.primary_type })), [liste, havuzIdleri]);
@@ -74,7 +76,7 @@ export function AdimOnerilenler({ seyahat, rehberSehir, havuz, tutulan, onTut, o
 
   const ust = (
     <View style={s.ust}>
-      <SecimHaritasi secilenler={secilenler} digerleri={digerleri} odakId={odakId && havuzIdleri.has(odakId) ? odakId : null} merkez={{ lat: seyahat.lat, lng: seyahat.lng }} baslik={seyahat.name ?? seyahat.city_label} />
+      <SecimHaritasi secilenler={secilenler} digerleri={digerleri} odakId={odakId && havuzIdleri.has(odakId) ? odakId : null} merkez={haritaMerkezi(seyahat, secilenler[0], digerleri[0])} baslik={seyahat.name ?? seyahat.city_label} />
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={s.cipler} style={s.ciplerKap} keyboardShouldPersistTaps="handled">
         {cipler.map((c) => (
           <Pressable key={c} accessibilityRole="button" accessibilityState={{ selected: cip === c }} onPress={() => setCip(c)} style={[s.cip, cip === c && s.cipSecili]}>

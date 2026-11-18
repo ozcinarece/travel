@@ -1,13 +1,24 @@
-// places-yenile — #262 (#205 KK3, Ece'nin kararı A): seyahat mekânlarının (`places`) Google koordinatı 30 günü geçmeden
-// yenilenir. Yalnız service_role çağırır (günlük GitHub Actions işi, places-yenile.yml); kullanıcı oturumu ve anon anahtar
+// places-yenile — #262 (#205 KK3, Ece'nin kararı A): kullanıcı tablolarının (places, trips şehri ve oteli, stays) Google
+// koordinatı 30 günü geçmeden yenilenir; Google 404 dönen place_id'nin koordinatı hemen, 30 günü geçen her koordinat turun
+// sonunda boşaltılır (satır silinmez; place_id ve kullanıcının yazdıkları kalır). Yalnız service_role çağırır (günlük GitHub Actions işi, places-yenile.yml); kullanıcı oturumu ve anon anahtar
 // 403 alır. İstek gövdesi okunmaz: place_id'ler yalnız veritabanından (`places_yenilenecekler`, 25 günü geçen, en eski önce)
-// gelir. Her place_id için tek Place Details Essentials isteği (yalnız `location`); koordinat o place_id'nin bütün satırlarına
+// gelir; o gün denenen place_id ikinci kez verilmez (son_deneme). Her place_id için tek Place Details Essentials isteği (yalnız `location`); koordinat o place_id'nin bütün satırlarına
 // yazılır. Sayaç kullanıcıların günlük Places sınırından ayrı ve aylık (`places_yenileme_artir`); 8.000'de durur.
 // Log ve cevapta yalnız sayı vardır: place_id ya da koordinat yazılmaz.
 import { createClient } from 'npm:@supabase/supabase-js@2';
 import { GoogleHatasi, konumYenile } from '../_shared/google.ts';
 import { hata, json, onKontrol } from '../_shared/http.ts';
-import { AYLIK_SINIR, bosSonuc, KONUM_MASKESI, konumAyikla, ozetSatiri, placeIdGecerli, TUR_BASINA } from '../_shared/placesYenile.ts';
+import {
+  AYLIK_SINIR,
+  bosaltilanToplami,
+  bosSonuc,
+  KONUM_MASKESI,
+  konumAyikla,
+  ozetSatiri,
+  placeIdGecerli,
+  TUR_BASINA,
+  type YenilemeSonucu,
+} from '../_shared/placesYenile.ts';
 import { sayacli } from '../_shared/sayac.ts';
 import { servisMi } from '../_shared/servis.ts';
 
@@ -25,32 +36,43 @@ Deno.serve(
     const servis = createClient(url, anahtar, { auth: { persistSession: false, autoRefreshToken: false } });
     const sonuc = bosSonuc();
 
+    // Her çıkışta (durma ve boş tur dahil) 30 günü geçen koordinatlar boşaltılır: Google koşulu süresiz ihlal edilmesin.
+    const bitir = async (s: YenilemeSonucu) => {
+      const { data: bos, error: bosHatasi } = await servis.rpc('places_koordinat_bosalt');
+      if (bosHatasi) {
+        s.hatali += 1;
+        console.error('places-yenile: boşaltma', bosHatasi.code ?? '');
+      } else {
+        s.bosaltilan += bosaltilanToplami(bos);
+      }
+      console.log(`places-yenile: ${ozetSatiri(s)}`);
+      return json(s);
+    };
+
     const { data, error } = await servis.rpc('places_yenilenecekler', { p_adet: TUR_BASINA });
     if (error) {
       console.error('places-yenile: liste okunamadı', error.code ?? '');
+      await bitir(sonuc);
       return hata('liste okunamadı', 500);
     }
     const adaylar = ((data ?? []) as { place_id: unknown }[]).map((r) => r.place_id);
     const gecerli = adaylar.filter(placeIdGecerli);
     sonuc.aday = adaylar.length;
     sonuc.hatali += adaylar.length - gecerli.length;
-    if (gecerli.length === 0) {
-      console.log(`places-yenile: ${ozetSatiri(sonuc)}`);
-      return json(sonuc);
-    }
+    if (gecerli.length === 0) return bitir(sonuc);
 
     // Aylık sayaç Google isteğinden önce, bütün tur için bir kez artar; sığmazsa hiç istek gitmez.
     const { data: sigdi, error: sayacHatasi } = await servis.rpc('places_yenileme_artir', { p_adet: gecerli.length, p_sinir: AYLIK_SINIR });
     if (sayacHatasi) {
       console.error('places-yenile: sayaç okunamadı', sayacHatasi.code ?? '');
+      await bitir(sonuc);
       return hata('sayaç okunamadı', 500);
     }
     if (sigdi !== true) {
       sonuc.durdu = true;
       const { data: ilk } = await servis.rpc('places_yenileme_durdu');
       sonuc.ilk_durma = ilk === true;
-      console.log(`places-yenile: ${ozetSatiri(sonuc)}`);
-      return json(sonuc);
+      return bitir(sonuc);
     }
 
     let artArda = 0;
@@ -59,8 +81,12 @@ Deno.serve(
       try {
         const cevap = await konumYenile(placeId, KONUM_MASKESI);
         if (cevap === null) {
+          // 404: place_id artık yok → koordinatı hemen boşalt (satır kalır); listeden de çıkar.
           sonuc.bulunamadi += 1;
           artArda = 0;
+          const { data: bos, error: bosHatasi } = await servis.rpc('places_koordinat_bosalt', { p_place_id: placeId });
+          if (bosHatasi) sonuc.hatali += 1;
+          else sonuc.bosaltilan += bosaltilanToplami(bos);
           continue;
         }
         const konum = konumAyikla(cevap);
@@ -88,7 +114,6 @@ Deno.serve(
         console.error('places-yenile: google', e instanceof GoogleHatasi ? e.durum : 'ag');
       }
     }
-    console.log(`places-yenile: ${ozetSatiri(sonuc)}`);
-    return json(sonuc);
+    return bitir(sonuc);
   }),
 );

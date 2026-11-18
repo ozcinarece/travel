@@ -72,6 +72,7 @@ import { arasindaAnahtar } from '@/schedule/sira';
 import { varsayilanSira } from '@/schedule/siralama';
 import { bacakModu, dakikaSaat, kestirimTaksiSn, kestirimYuruyusSn, saatDakika, type BacakSecimi } from '@/schedule/tempo';
 import { gunRengi, gunUstuMetin, kose, minDokunma, renk, yazi, yuzRenkleri } from '@/theme';
+import { haritaMerkezi, konumu, konumVar, yolTarifiHedefi } from '@/lib/konum';
 
 // PRD 3.3 KK3: 20 dk yürüyüş ≈ 1,5 km.
 const YURUME_YARICAPI_M = 1500;
@@ -345,7 +346,7 @@ function ProgramSekmesi({
   const an = useSimdi(true);
   const { konum, izin } = useKonum(bugun);
   const buradaId = useMemo(
-    () => (konum ? yakinDurakId(konum, gunDurak.filter((d) => !d.skipped && !d.completed_at).map((d) => ({ id: d.id, konum: mekanIle.get(d.place_ref) ?? { lat: 0, lng: 0 } }))) : null),
+    () => (konum ? yakinDurakId(konum, gunDurak.filter((d) => !d.skipped && !d.completed_at).map((d) => ({ id: d.id, konum: konumu(mekanIle.get(d.place_ref)) }))) : null),
     [konum, gunDurak, mekanIle],
   );
   const prog = useGunProgrami({ seyahat, gun, duraklar, mekanlar, yuruyus: verisi.yuruyus, an, buradaId: konum ? buradaId : undefined, uclar: seciliUclar, saatler: yerler.data });
@@ -358,11 +359,13 @@ function ProgramSekmesi({
     const aktifler = gunDurak.filter((d) => !d.skipped);
     const noktalar = aktifler.map((d) => mekanIle.get(d.place_ref)).filter((m): m is Mekan => !!m);
     if (noktalar.length !== aktifler.length) return;
+    // #318: koordinatı boşalmış durak varken sıra otomatik yazılmaz (mesafe bilinmiyor; mevcut sıra kalır).
+    if (!noktalar.every(konumVar)) return;
     // #56: -1 günün başlangıç oteli, -2 (taşınma günü) bitiş oteli.
     const { baslangic: bas, bitis: bit } = seciliUclar;
     const key = (i: number) => (i === -2 ? bit!.key : i < 0 ? bas!.key : noktalar[i].place_id);
-    const konumu = (i: number) => (i === -2 ? bit! : i < 0 ? bas! : { lat: noktalar[i].lat, lng: noktalar[i].lng });
-    const mesafe = (a: number, b: number) => verisi.yuruyus(key(a), key(b))?.sn ?? kestirimYuruyusSn(konumu(a), konumu(b));
+    const noktaKonumu = (i: number) => (i === -2 ? bit! : i < 0 ? bas! : { lat: noktalar[i].lat!, lng: noktalar[i].lng! });
+    const mesafe = (a: number, b: number) => verisi.yuruyus(key(a), key(b))?.sn ?? kestirimYuruyusSn(noktaKonumu(a), noktaKonumu(b));
     const sira = varsayilanSira(noktalar.length, mesafe, !!bas, !bit ? 'yok' : bas && bas.key === bit.key ? 'ayni' : 'ayri');
     const hedef = sira.map((i) => aktifler[i].id);
     const mevcut = aktifler.map((d) => d.id);
@@ -442,7 +445,7 @@ function ProgramSekmesi({
     const m = mekanIle.get(d.place_ref);
     if (!m) return;
     Linking.openURL(
-      `https://www.google.com/maps/dir/?api=1&destination=${m.lat},${m.lng}&destination_place_id=${encodeURIComponent(m.place_id)}&travelmode=${mod === 'taksi' ? 'driving' : 'walking'}`,
+      `https://www.google.com/maps/dir/?api=1&destination=${yolTarifiHedefi(m, yerler.data?.[m.place_id]?.ad ?? '')}&destination_place_id=${encodeURIComponent(m.place_id)}&travelmode=${mod === 'taksi' ? 'driving' : 'walking'}`,
     );
   };
   const guneAta = (mekan: Mekan, hedef: Gun) => {
@@ -453,8 +456,8 @@ function ProgramSekmesi({
     const hu = verisi.gunUclari.get(hedef.id);
     const ekleIndeksi = hedef.order_manual
       ? enUcuzEklemeIndeksi(
-          hedefDuraklar.filter((d) => !d.skipped).map((d) => mekanIle.get(d.place_ref)).filter((m): m is Mekan => !!m).map((m) => ({ key: m.place_id, konum: { lat: m.lat, lng: m.lng } })),
-          { key: mekan.place_id, konum: { lat: mekan.lat, lng: mekan.lng } },
+          hedefDuraklar.filter((d) => !d.skipped).map((d) => mekanIle.get(d.place_ref)).filter((m): m is Mekan => !!m).map((m) => ({ key: m.place_id, konum: konumu(m) })),
+          { key: mekan.place_id, konum: konumu(mekan) },
           hu?.baslangic ? { lat: hu.baslangic.lat, lng: hu.baslangic.lng } : null,
           verisi.yuruyus,
           { otelKey: hu?.baslangic?.key, bitis: hu?.bitis ? { key: hu.bitis.key, konum: { lat: hu.bitis.lat, lng: hu.bitis.lng } } : null },
@@ -534,10 +537,11 @@ function ProgramSekmesi({
   const geriKalma = useMemo(() => {
     if (!prog?.bugun || prog.simdiDk === null || !konum) return null;
     const hedef = prog.canli.satirlar.find((x) => x.durum === 'siradaki' || x.durum === 'buradasin');
-    if (!hedef) return null;
+    if (!hedef || !hedef.durak.konum) return null;
     const d = gunDurak.find((x) => x.id === hedef.durak.id);
     const varisDk = d?.arrived_at ? yerelSaatDk(new Date(d.arrived_at), seyahat.tz) : null;
-    const kalanSn = hedef.yuruyus?.mod === 'taksi' ? kestirimTaksiSn(konum, hedef.durak.konum) : kestirimYuruyusSn(konum, hedef.durak.konum);
+    const hedefKonum = hedef.durak.konum;
+    const kalanSn = hedef.yuruyus?.mod === 'taksi' ? kestirimTaksiSn(konum, hedefKonum) : kestirimYuruyusSn(konum, hedefKonum);
     const g = gecikme(prog.canli, { simdiDk: prog.simdiDk, buradaId: buradaId ?? null, varisDk, kalanDk: kalanSn / 60 });
     return g ? { ...g, burada: hedef.durum === 'buradasin' } : null;
   }, [prog, konum, gunDurak, buradaId, seyahat.tz]);
@@ -634,8 +638,10 @@ function ProgramSekmesi({
     if (!k) return;
     setSeciliMekanId(null);
     setKartDurakId(durakId);
-    // KK2: kamera pine yumuşak kayar; pin kartın üstünde kalır (merkez güneye kaydırılır).
-    setOdak((o) => ({ ...kartKamerasi({ konum: k.konum, zoom: sonZoom.current, ekranYukseklik: ekran.height }), sayac: (o?.sayac ?? 0) + 1 }));
+    // KK2: kamera pine yumuşak kayar; pin kartın üstünde kalır (merkez güneye kaydırılır). #318: koordinatsız durakta kamera kalır.
+    const kartKonumu = k.konum;
+    if (!kartKonumu) return;
+    setOdak((o) => ({ ...kartKamerasi({ konum: kartKonumu, zoom: sonZoom.current, ekranYukseklik: ekran.height }), sayac: (o?.sayac ?? 0) + 1 }));
   };
   const kartKapat = () => setKartDurakId(null);
   const kartDuragi = (k: DurakKarti) => gunDurak.find((d) => d.id === k.durakId);
@@ -648,7 +654,7 @@ function ProgramSekmesi({
   const gunHapi = gunHapiVerisi({
     mekanId: gunHapiMekanId,
     durak: gunHapiMekanId ? durakIle.get(gunHapiMekanId) : undefined,
-    konum: hapMekan ? { lat: hapMekan.lat, lng: hapMekan.lng } : undefined,
+    konum: konumu(hapMekan) ?? undefined,
     gunler,
     seciliGunId: gun?.id,
     hafif: hapMekan ? yerler.data?.[hapMekan.place_id] : undefined,
@@ -666,7 +672,7 @@ function ProgramSekmesi({
   const sigdirImza = gun && panel !== 'tam' ? `${gun.id}:${panel}:${ustYukseklik}:${gunMekanlari.map((m) => m.id).join(',')}` : '';
   const sigdirma = useMemo((): HaritaSigdirma | undefined => {
     if (!sigdirImza) return undefined;
-    const noktalar = [...(otel ? [otel] : []), ...gunMekanlari.map((m) => ({ lat: m.lat, lng: m.lng })), ...(bitisOtel ? [bitisOtel] : [])];
+    const noktalar = [...(otel ? [otel] : []), ...gunMekanlari.filter(konumVar).map((m) => ({ lat: m.lat, lng: m.lng })), ...(bitisOtel ? [bitisOtel] : [])];
     return noktalar.length ? { noktalar, ust: ustYukseklik + 16, alt: 24 } : undefined;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sigdirImza]);
@@ -810,7 +816,7 @@ function ProgramSekmesi({
       onCta={() => (seciliGunde && seciliDurak ? gundenCikar(seciliDurak) : gun && guneAta(seciliMekan, gun))}
       onYolTarifi={() =>
         Linking.openURL(
-          `https://www.google.com/maps/dir/?api=1&destination=${seciliMekan.lat},${seciliMekan.lng}&destination_place_id=${encodeURIComponent(seciliMekan.place_id)}&travelmode=walking`,
+          `https://www.google.com/maps/dir/?api=1&destination=${yolTarifiHedefi(seciliMekan, yerler.data?.[seciliMekan.place_id]?.ad ?? '')}&destination_place_id=${encodeURIComponent(seciliMekan.place_id)}&travelmode=walking`,
         )
       }
       onKapat={() => setSeciliMekanId(null)}
@@ -833,8 +839,10 @@ function ProgramSekmesi({
         onPress={otelAc}
       />
     );
-  const gunMerkezi = gunMekanlari.length
-    ? { lat: gunMekanlari.reduce((a, m) => a + m.lat, 0) / gunMekanlari.length, lng: gunMekanlari.reduce((a, m) => a + m.lng, 0) / gunMekanlari.length }
+  // #318: ortalama yalnız koordinatlı mekanlardan.
+  const gunKonumlari = gunMekanlari.filter(konumVar);
+  const gunMerkezi = gunKonumlari.length
+    ? { lat: gunKonumlari.reduce((a, m) => a + m.lat, 0) / gunKonumlari.length, lng: gunKonumlari.reduce((a, m) => a + m.lng, 0) / gunKonumlari.length }
     : null;
   // #140 KK4: güne atanmamış mekanlar haritada yok — listenin altında kesikli kutu → Listem (#141).
   const atanmamisSayisi = mekanlar.filter((m) => !durakIle.has(m.id)).length;
@@ -973,7 +981,7 @@ function ProgramSekmesi({
     const k = odakKarti(kartlar, prog.bugun);
     if (k) {
       setKartDurakId(k.durakId);
-      if (prog.bugun) setOdak({ ...kartKamerasi({ konum: k.konum, zoom: 15, ekranYukseklik: ekran.height }), sayac: 1 });
+      if (prog.bugun && k.konum) setOdak({ ...kartKamerasi({ konum: k.konum, zoom: 15, ekranYukseklik: ekran.height }), sayac: 1 });
     }
   }
 
@@ -1059,7 +1067,8 @@ function ProgramSekmesi({
   // KK3: şerit — yalnız bu günün koordinatları; önbellekte gerçek yol çizgisi varsa o, yoksa noktalar düz bağlanır.
   const seritNoktalari = [
     ...(seciliUclar.baslangic ? [{ key: seciliUclar.baslangic.key, konum: { lat: seciliUclar.baslangic.lat, lng: seciliUclar.baslangic.lng } }] : []),
-    ...planSatir.filter((r) => r.numara !== null).map((r) => ({ key: r.mekan.place_id, konum: { lat: r.mekan.lat, lng: r.mekan.lng } })),
+    // #318: koordinatı boşalmış durak şeritte pin ve çizgi ucu değil (listede kalır).
+    ...planSatir.filter((r) => r.numara !== null && konumVar(r.mekan)).map((r) => ({ key: r.mekan.place_id, konum: { lat: r.mekan.lat!, lng: r.mekan.lng! } })),
     ...(seciliUclar.bitis && planSatir.some((r) => r.numara !== null) ? [{ key: seciliUclar.bitis.key, konum: { lat: seciliUclar.bitis.lat, lng: seciliUclar.bitis.lng } }] : []),
   ];
   const seritCizgileri = seritNoktalari.slice(1).map((b, i) => {
@@ -1139,8 +1148,8 @@ function ProgramSekmesi({
         gun ? (
           <HaritaSeridi
             pinler={planSatir
-              .filter((r) => r.numara !== null)
-              .map((r) => ({ id: r.durak.id, konum: { lat: r.mekan.lat, lng: r.mekan.lng }, numara: r.numara!, renk: r.yemek ? YEMEK_RENGI : gunRengi(gun.index) }))}
+              .filter((r) => r.numara !== null && konumVar(r.mekan))
+              .map((r) => ({ id: r.durak.id, konum: { lat: r.mekan.lat!, lng: r.mekan.lng! }, numara: r.numara!, renk: r.yemek ? YEMEK_RENGI : gunRengi(gun.index) }))}
             otel={seciliUclar.baslangic ? { lat: seciliUclar.baslangic.lat, lng: seciliUclar.baslangic.lng } : null}
             cizgiler={seritCizgileri}
             cizgiRengi={gunRengi(gun.index)}
@@ -1253,7 +1262,7 @@ function ProgramSekmesi({
           </>
         }
         harita={{
-          merkez: otel ?? { lat: seyahat.lat, lng: seyahat.lng },
+          merkez: otel ?? haritaMerkezi(seyahat, gunMekanlari.find(konumVar), mekanlar.find(konumVar)),
           zoom: otel ? 14 : 13,
           pinler,
           cizgiler,

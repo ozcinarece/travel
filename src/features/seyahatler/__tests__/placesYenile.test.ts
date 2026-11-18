@@ -2,6 +2,7 @@ import { describe, expect, it } from '@jest/globals';
 
 import {
   AYLIK_SINIR,
+  bosaltilanToplami,
   bosSonuc,
   KONUM_MASKESI,
   konumAyikla,
@@ -43,9 +44,16 @@ describe('#262 places koordinat yenilemesi', () => {
 
   it('özet satırında yalnız sayı var; sınır dolunca açıkça yazılır', () => {
     expect(ozetSatiri({ ...bosSonuc(), aday: 67, yenilenen: 66, satir: 67, bulunamadi: 1 })).toBe(
-      'aday 67 · yenilenen 66 · satır 67 · bulunamadı 1 · hata 0',
+      'aday 67 · yenilenen 66 · satır 67 · bulunamadı 1 · boşaltılan 0 · hata 0',
     );
     expect(ozetSatiri({ ...bosSonuc(), aday: 250, durdu: true })).toContain('AYLIK SINIR DOLDU');
     expect(ozetSatiri({ aday: 'ChIJ' as unknown as number })).toContain('aday ?');
+  });
+
+  it('boşaltma cevabı: dört kaynağın toplamı; bozuk cevapta 0', () => {
+    expect(bosaltilanToplami([{ yer: 3, seyahat: 1, otel: 0, konaklama: 2 }])).toBe(6);
+    expect(bosaltilanToplami({ yer: 1 })).toBe(1);
+    expect(bosaltilanToplami([{ yer: '3', seyahat: -1 }])).toBe(0);
+    expect(bosaltilanToplami(null)).toBe(0);
   });
 });

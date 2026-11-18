@@ -1,4 +1,5 @@
-// #262: seyahat mekânlarının (`places`) Google koordinatı 30 günü geçmeden yenilenir (places-yenile). Saf yardımcılar
+// #262: kullanıcı tablolarının (places, trips, stays) Google koordinatı 30 günü geçmeden yenilenir; yenilenemeyen 30. günde
+// boşaltılır (places-yenile). Saf yardımcılar
 // burada (Jest de sınar); Google ve veritabanı çağrıları fonksiyonda.
 
 /** Aylık üst sınır: bu kadar Essentials isteğinden sonra iş durur ve masaya bir kez yazılır (ücretsiz kota 10.000/ay). */
@@ -30,10 +31,12 @@ export type YenilemeSonucu = {
   aday: number;
   /** Koordinatı yazılan place_id. */
   yenilenen: number;
-  /** Yazılan `places` satırı (aynı place_id birden çok seyahatte olabilir). */
+  /** Yazılan satır (places, trips, stays; aynı place_id birden çok yerde olabilir). */
   satir: number;
-  /** Google 404: place_id artık yok; satıra dokunulmaz. */
+  /** Google 404: place_id artık yok; koordinatı hemen boşaltılır (satır silinmez). */
   bulunamadi: number;
+  /** Turun sonunda boşaltılan koordinat (404 + 30 günü geçen); satır silinmez. */
+  bosaltilan: number;
   hatali: number;
   /** Aylık sınır doldu, Google'a istek gitmedi. */
   durdu: boolean;
@@ -42,11 +45,21 @@ export type YenilemeSonucu = {
 };
 
 export function bosSonuc(): YenilemeSonucu {
-  return { aday: 0, yenilenen: 0, satir: 0, bulunamadi: 0, hatali: 0, durdu: false, ilk_durma: false };
+  return { aday: 0, yenilenen: 0, satir: 0, bulunamadi: 0, bosaltilan: 0, hatali: 0, durdu: false, ilk_durma: false };
+}
+
+/** `places_koordinat_bosalt` cevabındaki dört sayının toplamı; bozuk cevapta 0. */
+export function bosaltilanToplami(satirlar: unknown): number {
+  const satir = Array.isArray(satirlar) ? satirlar[0] : satirlar;
+  if (!satir || typeof satir !== 'object') return 0;
+  return ['yer', 'seyahat', 'otel', 'konaklama'].reduce((t, k) => {
+    const v = (satir as Record<string, unknown>)[k];
+    return t + (Number.isInteger(v) && (v as number) > 0 ? (v as number) : 0);
+  }, 0);
 }
 
 /** Log ve Actions özeti için tek satır; yalnız sayı (place_id, koordinat yazılmaz). */
 export function ozetSatiri(s: Partial<YenilemeSonucu>): string {
   const sayi = (v: unknown) => (Number.isInteger(v) ? String(v) : '?');
-  return `aday ${sayi(s.aday)} · yenilenen ${sayi(s.yenilenen)} · satır ${sayi(s.satir)} · bulunamadı ${sayi(s.bulunamadi)} · hata ${sayi(s.hatali)}${s.durdu ? ' · AYLIK SINIR DOLDU' : ''}`;
+  return `aday ${sayi(s.aday)} · yenilenen ${sayi(s.yenilenen)} · satır ${sayi(s.satir)} · bulunamadı ${sayi(s.bulunamadi)} · boşaltılan ${sayi(s.bosaltilan)} · hata ${sayi(s.hatali)}${s.durdu ? ' · AYLIK SINIR DOLDU' : ''}`;
 }

@@ -60,6 +60,7 @@ import type { Durak, Gun, Mekan, Seyahat, Yer } from '@/lib/tipler';
 import { kacinciGun, yerelTarih } from '@/lib/zaman';
 import { kestirimTaksiSn, kestirimYuruyusSn } from '@/schedule/tempo';
 import { gunRengi, renk, yazi } from '@/theme';
+import { konumu, yolTarifiHedefi } from '@/lib/konum';
 
 /**
  * #181 (kanvas 23 · 23b · 27): seyahatin ana sayfası (açılış sekmesi). Plan modunda kapak + Sıradaki adım + Plan özeti + Listem +
@@ -234,7 +235,7 @@ function GeziSayfasi({ seyahat, gunler, duraklar, mekanlar, konaklamalar, katild
   const { konum } = useKonum(mod === 'gezi' && odakta);
   const bugunDuraklari = useMemo(() => (bugunGun ? gunDuraklari(bugunGun, duraklar) : []), [bugunGun, duraklar]);
   const buradaId = useMemo(
-    () => (konum ? yakinDurakId(konum, bugunDuraklari.filter((d) => !d.skipped && !d.completed_at).map((d) => ({ id: d.id, konum: mekanIle.get(d.place_ref) ?? { lat: 0, lng: 0 } }))) : null),
+    () => (konum ? yakinDurakId(konum, bugunDuraklari.filter((d) => !d.skipped && !d.completed_at).map((d) => ({ id: d.id, konum: konumu(mekanIle.get(d.place_ref)) }))) : null),
     [konum, bugunDuraklari, mekanIle],
   );
   const prog = useGunProgrami({ seyahat, gun: bugunGun, duraklar, mekanlar, yuruyus: verisi.yuruyus, an, buradaId: konum ? buradaId : undefined, uclar: verisi.seciliUclar });
@@ -243,14 +244,15 @@ function GeziSayfasi({ seyahat, gunler, duraklar, mekanlar, konaklamalar, katild
     const adlar: Record<string, HafifYer> = {};
     for (const m of mekanlar) {
       const ad = bilinen.ad(m);
-      if (ad) adlar[m.place_id] = { place_id: m.place_id, ad, lat: m.lat, lng: m.lng, primary_type: m.primary_type, tz: null, puan: null, puan_sayisi: null, acik: null, ulke_kodu: null };
+      // Kart yalnız adı okur; koordinatı boşalmış mekanın adı da gösterilir (#318).
+      if (ad) adlar[m.place_id] = { place_id: m.place_id, ad, lat: m.lat ?? NaN, lng: m.lng ?? NaN, primary_type: m.primary_type, tz: null, puan: null, puan_sayisi: null, acik: null, ulke_kodu: null };
     }
     return kartListesi({ gunDurak: bugunDuraklari, mekanIle, adlar, satirlar: prog?.canli.satirlar ?? [] }).map((k) => (k.ad === '…' ? { ...k, ad: k.kategori } : k));
   }, [mekanlar, bilinen, bugunDuraklari, mekanIle, prog]);
   const odak = odakKarti(bugunKartlari, true);
   const sonraki = odak ? sonrakiKart(bugunKartlari, odak.durakId) : null;
   const kalan = (() => {
-    if (!konum || !odak || odak.durum !== 'siradaki') return null;
+    if (!konum || !odak || !odak.konum || odak.durum !== 'siradaki') return null;
     const m = mesafeM(konum, odak.konum);
     const sn = odak.gelis?.mod === 'taksi' ? kestirimTaksiSn(konum, odak.konum) : kestirimYuruyusSn(konum, odak.konum);
     return t('program.kart.kalan', { dk: Math.max(1, Math.ceil(sn / 60)), mesafe: mesafeMetni(Math.round(m / 10) * 10) });
@@ -332,7 +334,7 @@ function GeziSayfasi({ seyahat, gunler, duraklar, mekanlar, konaklamalar, katild
   };
   const yolTarifi = (k: DurakKarti) => {
     Linking.openURL(
-      `https://www.google.com/maps/dir/?api=1&destination=${k.konum.lat},${k.konum.lng}&destination_place_id=${encodeURIComponent(k.placeId)}&travelmode=${k.gelis?.mod === 'taksi' ? 'driving' : 'walking'}`,
+      `https://www.google.com/maps/dir/?api=1&destination=${yolTarifiHedefi(k.konum, k.ad)}&destination_place_id=${encodeURIComponent(k.placeId)}&travelmode=${k.gelis?.mod === 'taksi' ? 'driving' : 'walking'}`,
     );
   };
   const durakTasi = (k: DurakKarti, hedef: Gun) => {

@@ -1,8 +1,9 @@
 name: places-yenile
 
-# #262 (#205 KK3): seyahat mekânlarının (`places`) Google koordinatını 30 günü geçmeden yeniler (places-yenile Edge
-# Function'ı, service_role). Bir tur en çok 250 place_id; 25 günü geçenler, en eski önce. Ayrı aylık sayaç, 8.000 istekte
-# durur ve masaya (#217) bir kez yazar. Logda yalnız sayı vardır.
+# #262 (#205 KK3): kullanıcı tablolarının (places, trips, stays) Google koordinatını 30 günü geçmeden yeniler; 404 ve 30 günü
+# geçen koordinatı boşaltır, satır silinmez (places-yenile Edge Function'ı, service_role). Bir tur en çok 250 place_id;
+# 25 günü geçenler, o gün denenmemiş olanlar, en eski önce. Ayrı aylık sayaç, 8.000 istekte durur ve masaya (#217) bir kez
+# yazar (iş yine yeşil biter). Logda yalnız sayı vardır.
 # Gerekli secret: SUPABASE_ACCESS_TOKEN (service_role anahtarı çalışma anında Yönetim API'sinden alınır ve maskelenir).
 on:
   schedule:

@@ -17,6 +17,7 @@ import { t } from '@/i18n';
 import { mesafeMetni } from '@/lib/mesafe';
 import type { Gun, OtelSecimi, Seyahat } from '@/lib/tipler';
 import { minDokunma, renk, yazi } from '@/theme';
+import { aramaMerkezi, konumVar } from '@/lib/konum';
 
 import { gunEtiketKisa } from './GunKartlari';
 
@@ -65,7 +66,7 @@ export function GunOteliSayfasi({ seyahat, gun, gunler, konaklamalar, referans, 
   const [haritada, setHaritada] = useState(false);
 
   const uc: Uc = tasinma ? aktif : 'baslangic';
-  const merkez = { lat: seyahat.lat, lng: seyahat.lng, yaricapM: 30_000 };
+  const merkez = aramaMerkezi(seyahat, 30_000);
   const linkMi = linkGibiMi(sorgu);
   const listeAcik = !linkMi && sorgu.trim().length >= 2;
   const oneriler = useOtelOnerileri(listeAcik ? sorgu : '', jeton, merkez, listeAcik);
@@ -144,7 +145,7 @@ export function GunOteliSayfasi({ seyahat, gun, gunler, konaklamalar, referans, 
       const geceler = otelinGeceleri(gunler, k.id);
       const ids = new Set(geceler.map((g) => g.id));
       const parcalar = [geceler.length ? t('gunOteli.geceleri', { geceler: geceMetni(gunler.filter((g) => ids.has(g.id))) }) : t('gunOteli.geceYok')];
-      if (referans) parcalar.push(mesafeMetni(Math.round(mesafeM(referans, k) / 100) * 100));
+      if (referans && konumVar(k)) parcalar.push(mesafeMetni(Math.round(mesafeM(referans, k) / 100) * 100));
       return { anahtar: k.id, secim: { tur: 'kayitli', stayId: k.id } as Secim, ad: k.label ?? t('otel.adsiz'), alt: parcalar.join(' · ') };
     }),
     { anahtar: 'yok', secim: { tur: 'yok' }, ad: t('gunOteli.otelYok'), alt: t('gunOteli.otelYokAlt') },

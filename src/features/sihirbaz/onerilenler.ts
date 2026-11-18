@@ -8,6 +8,7 @@ import { birKezDene, hafifOnbellek, oneriSirala, yakinYerler, type HafifYer, typ
 import { varsayilanDakika } from '@/lib/kategori';
 import { konaklamaMi } from '@/lib/pinIkonu';
 import type { Sehir, Yer } from '@/lib/tipler';
+import { konumu } from '@/lib/konum';
 
 import { useSehirYerleri, yerPlaceId } from '../icerik/sorgular';
 
@@ -104,17 +105,18 @@ const YARICAP_M = 6000;
 const GUN_MS = 24 * 60 * 60 * 1000;
 
 /** Şehir merkezi etrafında bir çipin Google listesi (fotoğraflı); 24 sa önbellek. */
-function useGoogleListesi(anahtar: string, cip: OneriCipi, merkez: { lat: number; lng: number }, etkin: boolean) {
+function useGoogleListesi(anahtar: string, cip: OneriCipi, merkez: { lat: number; lng: number } | null, etkin: boolean) {
   return useQuery({
-    queryKey: ['sihirbaz-oneri', anahtar, cip, merkez.lat.toFixed(3), merkez.lng.toFixed(3)],
-    enabled: etkin,
+    // #318: seyahat merkezinin koordinatı boşaldıysa Google listesi istenmez (rehber listesi çalışır).
+    queryKey: ['sihirbaz-oneri', anahtar, cip, merkez?.lat.toFixed(3) ?? '-', merkez?.lng.toFixed(3) ?? '-'],
+    enabled: etkin && !!merkez,
     staleTime: GUN_MS,
     retry: birKezDene,
     queryFn: async () => {
       nearbySayaci.istek += 1;
       if (__DEV__) console.log(`[sihirbaz] nearby istek #${nearbySayaci.istek} · ${cip}`);
       // #164 KK2: konaklama önerilmez (sunucu da dışlar).
-      const yerler = (await yakinYerler({ cip, merkez: { ...merkez, yaricapM: YARICAP_M }, enFazla: 20 })).filter((y) => !konaklamaMi(y.primary_type));
+      const yerler = (await yakinYerler({ cip, merkez: { ...merkez!, yaricapM: YARICAP_M }, enFazla: 20 })).filter((y) => !konaklamaMi(y.primary_type));
       // Kart fotoğrafı (400 px). #172 KK2–KK3: ad ve puan Nearby'den geldi — yalnız fotoğraf, ortak önbellekten (Pro foto
       // maskesi, 12'lik parçalar; aynı kimlik oturumda bir kez).
       const foto = await hafifOnbellek.getirHepsi(yerler.map((y) => y.place_id), ['foto']).catch(() => ({}) as Record<string, HafifYer>);
@@ -123,8 +125,8 @@ function useGoogleListesi(anahtar: string, cip: OneriCipi, merkez: { lat: number
   });
 }
 
-export function useOnerilenler(seyahat: { id: string; lat: number; lng: number; city_label: string }, rehberSehir: Sehir | undefined, cip: OnerilenCipi, havuz: Set<string> = new Set(), tut: Set<string> = new Set()) {
-  const merkez = { lat: seyahat.lat, lng: seyahat.lng };
+export function useOnerilenler(seyahat: { id: string; lat: number | null; lng: number | null; city_label: string }, rehberSehir: Sehir | undefined, cip: OnerilenCipi, havuz: Set<string> = new Set(), tut: Set<string> = new Set()) {
+  const merkez = konumu(seyahat);
   const yerler = useSehirYerleri(rehberSehir?.id);
   // Rehber yerleri (öne çıkanlar). #172 KK7–KK8: ad, kategori, konum DB'den; Google kimliği (listeye ekleme) DB'den ya da
   // cihazda saklı çözümden; fotoğraf yalnız kapağı olmayan yerler için Google'dan (Pro foto maskesi).

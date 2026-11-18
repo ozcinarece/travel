@@ -100,7 +100,7 @@ describe('#88: rota gelmiş bacakta oklar + ayrı Polyline anahtarı', () => {
 
 // #56: gün bazlı otel — pinler ve diğer günlerin rotası.
 const kon = (id: string, lat: number, lng: number): Konaklama => ({ id, trip_id: 't', place_id: null, lat, lng, label: null });
-const uc = (k: Konaklama | null) => (k ? { key: `stay:${k.id}`, lat: k.lat, lng: k.lng, konaklama: k } : null);
+const uc = (k: Konaklama | null) => (k ? { key: `stay:${k.id}`, lat: k.lat!, lng: k.lng!, konaklama: k } : null);
 const X = kon('x', 41.9, 12.49);
 const Y = kon('y', 41.8, 12.3);
 const gunlerIki = [{ id: 'g1', index: 1 }, { id: 'g2', index: 2 }, { id: 'g3', index: 3 }] as unknown as Gun[];

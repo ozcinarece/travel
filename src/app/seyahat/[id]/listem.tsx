@@ -37,6 +37,7 @@ import { useOturum } from '@/lib/oturum';
 import type { Durak, Gun, Mekan, Seyahat } from '@/lib/tipler';
 import { dakikaSaat } from '@/schedule/tempo';
 import { bosluk, gunRengi, gunUstuMetin, kose, renk, yazi } from '@/theme';
+import { yolTarifiHedefi } from '@/lib/konum';
 
 /** #141 KK4: Çıkar'dan sonra bu kadar "Geri al" süresi; sonra mekan listeden silinir. */
 const GERI_AL_MS = 5000;
@@ -381,7 +382,7 @@ function Listem({ seyahat, gunler, duraklar, mekanlar, konaklamalar }: { seyahat
               }
             }}
             onYolTarifi={() =>
-              Linking.openURL(`https://www.google.com/maps/dir/?api=1&destination=${panelMekan.lat},${panelMekan.lng}&destination_place_id=${encodeURIComponent(panelMekan.place_id)}&travelmode=walking`)
+              Linking.openURL(`https://www.google.com/maps/dir/?api=1&destination=${yolTarifiHedefi(panelMekan, '')}&destination_place_id=${encodeURIComponent(panelMekan.place_id)}&travelmode=walking`)
             }
             onKapat={() => setPanelId(null)}
           />

@@ -4,6 +4,7 @@ import { useMemo } from 'react';
 
 import type { Konum } from '@/components/harita/tipler';
 import { ucNoktalari, type GunUcNoktalari, type Konaklama } from '@/features/konaklama/plan';
+import { konumu, konumVar } from '@/lib/konum';
 import type { Durak, Gun, Mekan, Seyahat } from '@/lib/tipler';
 import type { YuruyusKaynagi } from '@/schedule/program';
 import { kestirimYuruyusSn, tempoHesapla, type BacakKaynagi, type TempoEtiketi, type TempoSonucu } from '@/schedule/tempo';
@@ -86,7 +87,7 @@ export function useProgramVerisi(secenek: {
   const konumKey = useMemo(() => {
     const k = new Map<string, string>();
     for (const o of oteller) k.set(`${o.lat},${o.lng}`, o.key);
-    for (const m of mekanlar) k.set(`${m.lat},${m.lng}`, m.place_id);
+    for (const m of mekanlar) if (konumVar(m)) k.set(`${m.lat},${m.lng}`, m.place_id);
     return k;
   }, [mekanlar, oteller]);
 
@@ -101,7 +102,8 @@ export function useProgramVerisi(secenek: {
       .filter((m): m is Mekan => !!m);
   }, [seciliGun, duraklar, mekanIle]);
   const seciliNoktalar = useMemo((): MatrisNoktasi[] => {
-    const n = seciliSira.map((m) => ({ key: m.place_id, lat: m.lat, lng: m.lng }));
+    // #318: koordinatı boşalmış mekan rota bacağına girmez; bacak önceki ve sonraki konumlu nokta arasında.
+    const n = seciliSira.filter(konumVar).map((m) => ({ key: m.place_id, lat: m.lat, lng: m.lng }));
     if (n.length === 0) return n;
     const { baslangic: b, bitis: s } = seciliUclar;
     return [...(b ? [{ key: b.key, lat: b.lat, lng: b.lng }] : []), ...n, ...(s ? [{ key: s.key, lat: s.lat, lng: s.lng }] : [])];
@@ -137,7 +139,7 @@ export function useProgramVerisi(secenek: {
       sonuc.set(
         g.id,
         tempoHesapla({
-          duraklar: gunDuraklari.map(({ durak, mekan }) => ({ id: mekan.id, konum: { lat: mekan.lat, lng: mekan.lng }, dakika: durak.minutes })),
+          duraklar: gunDuraklari.map(({ durak, mekan }) => ({ id: mekan.id, konum: konumu(mekan), dakika: durak.minutes })),
           otel: u?.baslangic ? { lat: u.baslangic.lat, lng: u.baslangic.lng } : null,
           bitisOtel: u?.bitis ? { lat: u.bitis.lat, lng: u.bitis.lng } : null,
           baslangic: saat(g.start_time, saat(seyahat.day_start, '09:00')),

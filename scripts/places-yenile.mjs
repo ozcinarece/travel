@@ -1,4 +1,4 @@
-// #262: günlük places koordinat yenilemesi. places-yenile Edge Function'ını service_role ile bir kez çağırır ve yalnız
+// #262: günlük Google koordinat yenilemesi ve 30 gün boşaltması (places, trips, stays). places-yenile Edge Function'ını service_role ile bir kez çağırır ve yalnız
 // sayıları yazar (repo ve Actions logları herkese açık: place_id, koordinat ya da kullanıcı kimliği yazılmaz).
 // Aylık 8.000 istek sınırı ilk kez dolduğunda masaya (#217) bir kez yorum yazar.
 // Ortam: SUPABASE_ACCESS_TOKEN, SUPABASE_PROJECT_REF, GITHUB_TOKEN ve GITHUB_REPOSITORY (masa yorumu), GITHUB_STEP_SUMMARY.
@@ -17,7 +17,7 @@ const cevap = await fetch(`https://${REF}.supabase.co/functions/v1/places-yenile
 });
 const j = await cevap.json().catch(() => ({}));
 const sayi = (v) => (Number.isInteger(v) ? v : '?');
-const satir = `aday ${sayi(j.aday)} · yenilenen ${sayi(j.yenilenen)} · satır ${sayi(j.satir)} · bulunamadı ${sayi(j.bulunamadi)} · hata ${sayi(j.hatali)}${j.durdu ? ' · AYLIK SINIR DOLDU' : ''}`;
+const satir = `aday ${sayi(j.aday)} · yenilenen ${sayi(j.yenilenen)} · satır ${sayi(j.satir)} · bulunamadı ${sayi(j.bulunamadi)} · boşaltılan ${sayi(j.bosaltilan)} · hata ${sayi(j.hatali)}${j.durdu ? ' · AYLIK SINIR DOLDU' : ''}`;
 console.log(`HTTP ${cevap.status} · ${satir}`);
 if (process.env.GITHUB_STEP_SUMMARY)
   await appendFile(process.env.GITHUB_STEP_SUMMARY, `### Places koordinat yenilemesi (#262)\n- HTTP ${cevap.status} · ${satir}\n`);
@@ -28,7 +28,7 @@ if (j.ilk_durma === true) {
   const govde = [
     '**[Geliştirici]** Otomatik uyarı (#262): `places` koordinat yenilemesi bu ay **8.000 Place Details Essentials** isteğine ulaştı ve durdu.',
     '',
-    '- Ay sonuna kadar 25 günü geçen koordinatlar yenilenmeyecek; ay başında iş kendiliğinden devam eder.',
+    '- Ay sonuna kadar 25 günü geçen koordinatlar yenilenmeyecek; 30 günü geçen koordinat boşaltılmaya devam eder (satır silinmez). Ay başında yenileme kendiliğinden sürer.',
     '- Ücretsiz kota 10.000/ay; sınırı yükseltmek §4 (Para) gereği Ece kararıdır.',
     '',
     '---',
@@ -44,4 +44,5 @@ if (j.ilk_durma === true) {
   console.log(`masa yorumu: ${yorum ? yorum.status : 'token yok'}`);
 }
 
-process.exit(cevap.ok && j.hatali === 0 && !j.durdu ? 0 : 1);
+// Aylık sınırda durmak hata değil (masaya bir kez yazıldı); ay sonuna kadar her gün kırmızı iş olmasın.
+process.exit(cevap.ok && j.hatali === 0 ? 0 : 1);

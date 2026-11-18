@@ -1,13 +1,15 @@
 // #56: gün bazlı otel — saf kurallar (testli). Her günün başlangıç ve bitiş noktası days.start_stay_id / end_stay_id;
 // null = otel yok (gün ilk duraktan başlar, son durakta biter).
+import { konumVar } from '@/lib/konum';
 import type { Gun } from '@/lib/tipler';
 
 export type Konaklama = {
   id: string;
   trip_id: string;
   place_id: string | null;
-  lat: number;
-  lng: number;
+  /** #318: Google koordinatı 30 günde yenilenemezse null; otel haritada ve rota hesabında yok sayılır. */
+  lat: number | null;
+  lng: number | null;
   label: string | null;
 };
 
@@ -105,6 +107,8 @@ export type GunUcNoktalari = { baslangic: UcNokta | null; bitis: UcNokta | null 
 
 export function ucNoktalari(gun: Pick<Gun, 'start_stay_id' | 'end_stay_id'> | undefined, konaklamalar: Map<string, Konaklama>): GunUcNoktalari {
   const u = gunUclari(gun, konaklamalar);
-  const nokta = (k: Konaklama | null): UcNokta | null => (k ? { key: konaklamaAnahtari(k.id), lat: k.lat, lng: k.lng, konaklama: k } : null);
+  // #318: koordinatı boşalmış otel uç nokta sayılmaz (gün otelsiz gibi hesaplanır; haritada pin yok).
+  const nokta = (k: Konaklama | null): UcNokta | null =>
+    k && konumVar(k) ? { key: konaklamaAnahtari(k.id), lat: k.lat, lng: k.lng, konaklama: k } : null;
   return { baslangic: nokta(u.baslangic), bitis: nokta(u.bitis) };
 }

@@ -45,10 +45,12 @@ export function useKonum(aktif: boolean): { konum: Konum | null; izin: KonumIzni
  * Kullanıcının 100 m içindeki en yakın durağı (kimlik); yoksa null. Çağıran yalnız tamamlanmamış (ve atlanmamış) durakları
  * verir: birbirine yakın duraklarda geçilmiş durakta "Buradasın" takılı kalmaz.
  */
-export function yakinDurakId(konum: Konum | null, duraklar: { id: string; konum: Konum }[]): string | null {
+export function yakinDurakId(konum: Konum | null, duraklar: { id: string; konum: Konum | null }[]): string | null {
   if (!konum) return null;
   let enYakin: { id: string; m: number } | null = null;
   for (const d of duraklar) {
+    // #318: koordinatı boşalmış durakta "buradasın" algılanmaz.
+    if (!d.konum) continue;
     const m = mesafeM(konum, d.konum);
     if (m <= DURAK_YARICAPI_M && (!enYakin || m < enYakin.m)) enYakin = { id: d.id, m };
   }

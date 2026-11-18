@@ -29,6 +29,7 @@ import { t } from '@/i18n';
 import { puanMetni } from '@/lib/puan';
 import type { Gun, OtelSecimi, Seyahat } from '@/lib/tipler';
 import { minDokunma, renk, yazi } from '@/theme';
+import { aramaMerkezi, haritaMerkezi, konumVar } from '@/lib/konum';
 
 // PRD 3.3 KK3: 20 dk yürüyüş ≈ 1,5 km.
 const YURUME_YARICAPI_M = 1500;
@@ -77,7 +78,8 @@ export default function OtelEkrani() {
 function ilkGununOteli(gunler: Gun[], konaklamalar: Konaklama[]): OtelGorunumu | null {
   const ilk = [...gunler].sort((a, b) => a.index - b.index)[0];
   const k = ilk?.start_stay_id ? konaklamalar.find((x) => x.id === ilk.start_stay_id) : undefined;
-  return k ? { place_id: k.place_id, ad: k.label ?? t('otel.adsiz'), lat: k.lat, lng: k.lng } : null;
+  // #318: koordinatı boşalmış otel form başlangıcı olmaz (yeniden seçilir).
+  return k && konumVar(k) ? { place_id: k.place_id, ad: k.label ?? t('otel.adsiz'), lat: k.lat, lng: k.lng } : null;
 }
 
 function OtelFormu({ trip, sehir, mevcut, secimModu }: { trip: string; sehir: Seyahat; mevcut: OtelGorunumu | null; secimModu: boolean }) {
@@ -97,7 +99,7 @@ function OtelFormu({ trip, sehir, mevcut, secimModu }: { trip: string; sehir: Se
   const [adayMesgul, setAdayMesgul] = useState(false);
   const [adayNot, setAdayNot] = useState<string | null>(null);
 
-  const merkez = { lat: sehir.lat, lng: sehir.lng, yaricapM: 30_000 };
+  const merkez = aramaMerkezi(sehir, 30_000);
   const linkMi = linkGibiMi(sorgu);
   const oneriler = useOtelOnerileri(otel ? '' : sorgu, jeton, merkez, !linkMi);
 
@@ -148,7 +150,7 @@ function OtelFormu({ trip, sehir, mevcut, secimModu }: { trip: string; sehir: Se
 
   // #17 KK3: görünür alanda lodging ara; kaydırmada otomatik yenilenmez, düğmeyle.
   const bolgedeAra = async () => {
-    const hedef: HaritaBolgesi = bolge ?? bolgeHesapla({ lat: sehir.lat, lng: sehir.lng }, 0.05, 0.05);
+    const hedef: HaritaBolgesi = bolge ?? bolgeHesapla(haritaMerkezi(sehir), 0.05, 0.05);
     setAdayNot(null);
     setAdayMesgul(true);
     try {
@@ -313,7 +315,7 @@ function OtelFormu({ trip, sehir, mevcut, secimModu }: { trip: string; sehir: Se
         </>
       }
       harita={{
-        merkez: otel ? { lat: otel.lat, lng: otel.lng } : { lat: sehir.lat, lng: sehir.lng },
+        merkez: otel ? { lat: otel.lat, lng: otel.lng } : haritaMerkezi(sehir),
         zoom: otel ? 14 : 12,
         pinler,
         daireler: otel ? [{ id: 'yurume', merkez: { lat: otel.lat, lng: otel.lng }, yaricapM: YURUME_YARICAPI_M, renk: renk.metin }] : [],

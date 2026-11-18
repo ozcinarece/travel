@@ -4,7 +4,8 @@ import type { Konum } from '@/components/harita/tipler';
 
 import { varsayilanSira, type Bitis } from './siralama';
 
-export type TempoDuragi = { id: string; konum: Konum; dakika: number };
+/** #318: `konum` null = Google koordinatı boşalmış mekan; süresi sayılır, yol bacağına girmez. */
+export type TempoDuragi = { id: string; konum: Konum | null; dakika: number };
 
 export type TempoEtiketi = 'rahat' | 'normal' | 'yogun';
 
@@ -109,18 +110,25 @@ export function tempoHesapla(secenek: {
     (secenek.yuruyusSn
       ? (a, b) => ({ yuruyusSn: secenek.yuruyusSn!(a, b), taksiSn: null, kestirim: false })
       : (a, b) => ({ yuruyusSn: kestirimYuruyusSn(a, b), taksiSn: null, kestirim: true }));
-  const konum = (i: number): Konum => (i === -2 ? bitisOtel! : i < 0 ? otel! : duraklar[i].konum);
-  const mesafe = (a: number, b: number) => bacak(konum(a), konum(b)).yuruyusSn;
+  const konum = (i: number): Konum | null => (i === -2 ? bitisOtel! : i < 0 ? otel! : duraklar[i].konum);
+  const mesafe = (a: number, b: number) => {
+    const ka = konum(a);
+    const kb = konum(b);
+    return ka && kb ? bacak(ka, kb).yuruyusSn : 0;
+  };
   const verilen = secenek.sira?.map((id) => duraklar.findIndex((d) => d.id === id)).filter((i) => i >= 0);
   const siraIdx = verilen && verilen.length === duraklar.length ? verilen : varsayilanSira(duraklar.length, mesafe, !!otel, bitis);
   let yuruyusSn = 0;
   let taksiSn = 0;
   let kestirim = false;
   if (duraklar.length > 0) {
-    const yol = [...(otel ? [-1] : []), ...siraIdx, ...(bitis === 'yok' ? [] : [bitis === 'ayri' ? -2 : -1])];
+    // #318: koordinatsız durak yolda atlanır; bacak önceki ve sonraki konumlu nokta arasında.
+    const yol = [...(otel ? [-1] : []), ...siraIdx, ...(bitis === 'yok' ? [] : [bitis === 'ayri' ? -2 : -1])]
+      .map(konum)
+      .filter((k): k is Konum => k !== null);
     for (let i = 1; i < yol.length; i++) {
-      const a = konum(yol[i - 1]);
-      const b = konum(yol[i]);
+      const a = yol[i - 1];
+      const b = yol[i];
       const m = bacakModu(a, b, bacak(a, b));
       if (m.mod === 'taksi') taksiSn += m.sn;
       else yuruyusSn += m.sn;
