@@ -459,6 +459,27 @@ export function yuklemeVerisi(plan, detaylar, rehberler = new Map(), osmKonumlar
   };
 }
 
+/**
+ * #335: yüklemede her place_id'nin Google detayını denetler. HATA yüklemeyi durdurur, UYARI rapora girer.
+ * - detay ya da konum yoksa HATA;
+ * - işletme durumu boşsa (`null` ya da yok) UYARI (tarihî yerlerde Google çoğu zaman boş döndürür, KK1);
+ * - `CLOSED_*` ve bilinmeyen her değer HATA (KK2, KK3);
+ * - şehrin kendi place_id'si durum denetiminden muaf (KK4).
+ */
+export function mekanDurumuDenetle(idler, yerler, sehirId = null) {
+  const hatalar = [];
+  const uyarilar = [];
+  for (const id of idler) {
+    const y = yerler.find((x) => x.place_id === id);
+    if (!y || y.hata) hatalar.push(`${id}: detay alınamadı (${y?.hata ?? 'yok'})`);
+    else if (!y.lat || !y.lng) hatalar.push(`${id}: konum yok`);
+    else if (id === sehirId || y.durum === 'OPERATIONAL') continue;
+    else if (y.durum == null || y.durum === '') uyarilar.push(`${id}: işletme durumu Google'da boş; kapalı günleri elle doğrula`);
+    else hatalar.push(`${id}: işletme durumu OPERATIONAL değil (${y.durum})`);
+  }
+  return { hatalar, uyarilar };
+}
+
 /** Yüklemede detayı alınacak place_id'ler: duraklar + yeni şehir (ek mekanların durumu araştırmadaki kısa listeden). */
 export function detayIdleri(plan) {
   const idler = new Set();
