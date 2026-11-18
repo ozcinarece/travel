@@ -1,0 +1,137 @@
+{
+ "surum": 1,
+ "sehir": {
+  "slug": "bursa"
+ },
+ "takvim": {
+  "ilk_gun": "cumartesi"
+ },
+ "gezi": {
+  "slug": "bursada-lezzet-gunu",
+  "baslik": "Bursa'da bir lezzet günü",
+  "ozet": "Fırında tahanlı, hanlarda çay, öğlen kebap, Merinos'ta süt helvası",
+  "yazar_ad": "Tripmate ekibi",
+  "yazi_md": "Bursa'yı ağzının tadıyla tanımak isteyenler için yürüyerek geçen bir gün. Sabah odun fırınında simit ve tahanlıyla başlıyor, hanlarda bir çayla devam ediyor, öğlen şehrin kebap geleneğinin ikinci büyük adında oturuyor ve Merinos'ta, eski bir fabrikanın gölgesinde süt helvasıyla bitiyor. Arada Bursa'nın ipek ve yün ticaretini anlatan iki durak var; lezzetin arkasındaki şehri de görmüş oluyorsun.\n\n> Kahvaltıyı fırında hafif tut: öğlen kebap, ikindi helva var. Su şişeni yanına al; duraklar arası yürüyüşler kısa ama Tophane'ye çıkış ve hanlardan kuzeye yürüyüş biraz uzun.\n\n## 1. gün · Fırından helvaya\n\nGüne Tuzpazarı'ndaki [Abdal Simit Fırını](mekan:ChIJ_YudwQo-yhQRMoiOdwjk8Es)'nda başla. Odun ateşiyle ısınan taş fırından yeni çıkmış ince, susamlı Bursa simidini ve tahinli pideyi, yani Bursalıların tahanlısını sıcakken al; fırının önünde ya da yakındaki bir çay ocağında ye.\n\n::mekan[ChIJ_YudwQo-yhQRMoiOdwjk8Es]\n\nYokuşu birkaç dakika çıkıp Tophane'ye var ve [Tophane Saat Kulesi](mekan:ChIJNwvkyuI9yhQRmORbmMWi9ps)'nin yanındaki teraslardan şehre bak. Hanlar bölgesi hemen aşağıda, öğleden sonra gideceğin Merinos kuzeydeki yeşil alanda; günün haritası buradan görünüyor.\n\nTophane'den hanlara in ve [Fidan Han](mekan:ChIJFxeADeI9yhQReXrzL8HiP2U)'ın avlusunda, esnafın arasında ince belli bardakta bir çay iç. Hanlardan Atatürk Caddesi'ne çıkınca Heykel tarafındaki [Kafkas](mekan:ChIJvf8rGOE9yhQRoarn2aeNI9E) dükkânından kestane şekeri alabilirsin; Bursa'nın bu tatlısı yolda taşımaya da uygun. Pideli köfteyi merak ediyorsan Kayhan Çarşısı'ndaki [Mahir Usta'nın dükkânı](mekan:ChIJd0Rj3d89yhQRPvepBtkurm0) da birkaç adım ötede; ama öğle yemeği için yer bırak.\n\nÖğle yemeğinde kuzeye, eski garaj bölgesine yürü ve [Uludağ Kebapçısı](mekan:ChIJ_bGCWg4-yhQRyQz3qhnX-qY)'nda otur. Bursa kebabının bu dükkândaki hâli tanıdık ama kendine özgü: etin dilimlenişine, sosun kıvamına ve masada dökülen tereyağına dikkat et. İki günlük planımızda İskender'in tarihi dükkânını gördüysen farkı burada karşılaştırırsın.\n\n::mekan[ChIJ_bGCWg4-yhQRyQz3qhnX-qY]\n\nYemekten sonra batıya, Merinos Parkı'na doğru düz bir yolda on beş dakika yürü. [Merinos Tekstil Sanayi Müzesi](mekan:ChIJbaMkOwM-yhQRjGflEPJU364) eski yünlü kumaş fabrikasının iplik binasında; yapağının kumaşa dönüşmesini fabrikanın kendi makinelerinin arasından izliyorsun. İpek bölümünde kozadan iplik çekmeyi de dene; sabah hanlarda gördüğün ticaretin arkasındaki emek burada.\n\nGünü parkın kıyısındaki [Hayat Lokantası](mekan:ChIJsxiPJRA-yhQRaiuKzUv0A5w)'nda bitir. Buraya tatlı için geliyorsun: Bursa süt helvası sıcak gelir, üstü kızarmış, içi yumuşaktır. Bir porsiyon helva ve bir çay, ağır bir öğle yemeğinden iki saat sonra tam kıvamında.\n\nPlan cumartesiye göre kuruldu. Merinos'taki müze pazartesi kapalı, hanlardaki dükkânların çoğu da pazar kapalı olabilir; bu yüzden hafta sonu gidiyorsan cumartesiyi seç. Akşam yemeği için yer arıyorsan aynı gün kebabı tekrar etme: Tuzpazarı'ndaki cantıkçılar ya da Kayhan'daki pideli köfteciler iyi bir değişiklik olur. Şehrin tarihi duraklarını da görmek istersen iki günlük planımız hanları, külliyeleri ve Cumalıkızık'ı ekliyor.\n"
+ },
+ "gunler": [
+  {
+   "baslik": "Fırından helvaya",
+   "duraklar": [
+    {
+     "place_id": "ChIJ_YudwQo-yhQRMoiOdwjk8Es",
+     "ad": "Abdal Simit Fırını",
+     "sure_dk": 45,
+     "sure_gerekcesi": "varsayılan 20; kahvaltı burada yapılıyor",
+     "kapali_gunler": [],
+     "rehber": "abdal-simit-firini"
+    },
+    {
+     "place_id": "ChIJNwvkyuI9yhQRmORbmMWi9ps",
+     "osm": "way/253586064",
+     "ad": "Tophane Saat Kulesi",
+     "sure_dk": 20,
+     "sure_gerekcesi": "manzara molası; kule içi gezilmiyor",
+     "kapali_gunler": [],
+     "rehber": "tophane-saat-kulesi"
+    },
+    {
+     "place_id": "ChIJFxeADeI9yhQReXrzL8HiP2U",
+     "osm": "relation/2368801",
+     "ad": "Fidan Han",
+     "sure_dk": 40,
+     "sure_gerekcesi": "çay molası ve kısa dolaşma",
+     "kapali_gunler": [],
+     "rehber": "fidan-han"
+    },
+    {
+     "place_id": "ChIJ_bGCWg4-yhQRyQz3qhnX-qY",
+     "osm": "node/5103370133",
+     "ad": "Uludağ Kebapçısı Cemal Cemil Usta",
+     "sure_dk": 60,
+     "sure_gerekcesi": "varsayılan 75; tek tabak, salon hızlı dönüyor",
+     "kapali_gunler": [],
+     "rehber": "uludag-kebapcisi"
+    },
+    {
+     "place_id": "ChIJbaMkOwM-yhQRjGflEPJU364",
+     "osm": "node/1786721373",
+     "ad": "Merinos Tekstil Sanayi Müzesi",
+     "sure_dk": 60,
+     "sure_gerekcesi": "varsayılan 90; makine salonları ve ipek bölümü için yeterli",
+     "kapali_gunler": [
+      "pazartesi"
+     ],
+     "rehber": "merinos-tekstil-sanayi-muzesi"
+    },
+    {
+     "place_id": "ChIJsxiPJRA-yhQRaiuKzUv0A5w",
+     "osm": "way/530848649",
+     "ad": "Hayat Lokantası",
+     "sure_dk": 30,
+     "sure_gerekcesi": "varsayılan 75; yalnız tatlı ve çay",
+     "kapali_gunler": [],
+     "rehber": "hayat-lokantasi"
+    }
+   ]
+  }
+ ],
+ "ek_mekanlar": [
+  {
+   "place_id": "ChIJvf8rGOE9yhQRoarn2aeNI9E",
+   "ad": "Kafkas Kestane Şekeri - Heykel"
+  },
+  {
+   "place_id": "ChIJd0Rj3d89yhQRPvepBtkurm0",
+   "ad": "Yeşil Pideli Köfte - Mahir Usta"
+  }
+ ],
+ "notlar": {
+  "dogrulanacaklar": [
+   "[Plan · Abdal Simit Fırını] · osm yok · fırın OSM aday listesinde değil (sorgu yalnız restoran/kafe alıyor); konum Google'dan 30 gün · OSM'de shop=bakery olarak var mı, yoksa BO'da elle işaretle (#220 B)",
+   "[Plan · Uludağ Kebapçısı] · osm node/5103370133 · OSM düğümü Kent Meydanı çevresinde; Google kaydının Şirin Sokak dükkânıyla 150 m içinde olup olmadığı yüklemede görülecek · kuru yukle",
+   "[Plan · bütün duraklar] · kapali_gunler [] (Merinos dışında) · fırın, lokanta ve kebapçının kapalı günü resmî kaynakta bulunamadı · işletmeler, yerinde",
+   "[Plan · Fidan Han] · kapali_gunler [] · Koza Han gibi pazar dükkânların çoğu kapalı olabilir; avlu açık mı belirsiz · visitbursa.org/mekanlar/fidan-han-121, yerinde",
+   "[Rehber · Uludağ Kebapçısı] · \"yarım asrı aşkın süredir\", \"Bursa kebabının gelişmesinde payı büyük\" · kuruluş yılı kaynaklarda 1964 olarak geçiyor, resmî kaynak yok · işletme, Bilkent HIST200 çalışması (2019)",
+   "[Rehber · Hayat Lokantası] · \"bugün Merinos Parkı'nın yanında\" · taşınma bilgisi tek kaynakta; OSM way/530848649 de Merinos'ta · yerinde",
+   "[Rehber · Hayat Lokantası] · \"kuzu tandır ve dana kavurmayla biliniyor\", süt helvası her gün var mı · tek kaynak · işletme",
+   "[Rehber · Abdal] · \"1969'dan beri\", Abdal Mehmet rivayeti, \"karşısındaki türbe\" · tek gazete yazısı · işletme, Osmangazi Belediyesi",
+   "[Rehber · Fidan Han] · \"avlunun bir köşesinde çay ocağı\" · OSM'de han içinde çay ocağı var; yerinde açık mı bilinmiyor · yerinde",
+   "[Rehber · Tophane] · \"parkta bu geleneği hatırlatan izler var\" (Ramazan topları) · visitbursa yalnız topların eskiden kullanıldığını söylüyor · yerinde",
+   "[Rehber · Merinos] · \"Atatürk'ün kullandığı oda\", \"bazı makinelerin nasıl çalıştığı gösteriliyor\", çocuk atölyeleri · 2015 açılış haberleri ve visitbursa · bursamuze.com",
+   "[Yazı · Kafkas] · Heykel'deki dükkân Atatürk Caddesi'nde · Google kaydı \"Heykel\" şubesi; ek mekan · yerinde",
+   "[Yazı · kapanış] · \"Tuzpazarı'ndaki cantıkçılar\" · kaynak: yemek.com ve oggusto listeleri · yerinde"
+  ],
+  "fotograf_onerileri": [
+   {
+    "ne": "Kapak (3:2): Bursa simidi ya da tahanlı, fırın tepsisinde",
+    "altyazi": "Tuzpazarı'nda sabah",
+    "arama": "Bursa simit tahinli pide (Wikimedia Commons, CC BY-SA)"
+   },
+   {
+    "ne": "Tophane Saat Kulesi ve şehir",
+    "altyazi": "Tophane'den Bursa",
+    "arama": "Tophane Clock Tower Bursa (Wikimedia Commons)"
+   },
+   {
+    "ne": "Merinos fabrikası binası ya da parkı",
+    "altyazi": "Merinos'ta eski fabrika",
+    "arama": "Merinos Bursa textile museum (Wikimedia Commons)"
+   }
+  ],
+  "varsayimlar": [
+   "Tek gün: cumartesi (Merinos müzesi pazartesi, han dükkânları pazar kapalı olabilir)",
+   "Tema lezzet; Bursa'nın üçüncü gezisi (Ürün kararı, #306): klasik gezilerle kesişmeyen yeni mekanlar, yalnız Tophane bölgesi ortak",
+   "Tamamen yürüyüş; en uzun bacak Fidan Han → Uludağ Kebapçısı (≈ 23 dk)",
+   "Kafkas (Heykel) ve Mahir Usta durak değil, ek mekan: Heykel dükkânının OSM nesnesi yok, adaydaki Kafkas düğümü başka şube; durak yapılsaydı osm oranı %80'in altına düşerdi",
+   "Kimlik: 10 sorgu (ücretsiz); puan: 14 id (kısa liste ≤ 25)"
+  ],
+  "kaynaklar": [
+   "visitbursa.org (Bursa Büyükşehir turizm portalı): mekanlar/tophane-saat-kulesi-104, fidan-han-121, merinos-tekstil-sanayi-muzesi-243",
+   "gzt.com seyahat: \"Bursa'da her gidişimde aynı durak: Abdal Simit Fırını\"",
+   "Bilkent Üniversitesi HIST200 öğrenci çalışması (2019): \"Yarım asırlık lezzet Uludağ Kebapçısı Cemal ve Cemil Usta\" (özet)",
+   "oggusto.com \"Bursa'nın en iyi mekanları\", yemek.com \"Bursa mekanları\" ve \"Bursa süt helvası nerede yenir\" (yalnız mekan ve adres çapraz kontrolü)",
+   "Hürriyet Daily News: Merinos Tekstil Sanayi Müzesi açılış haberi",
+   "OpenStreetMap (osm kimlikleri, opening_hours) — © OpenStreetMap katkıda bulunanlar"
+  ]
+ }
+}
