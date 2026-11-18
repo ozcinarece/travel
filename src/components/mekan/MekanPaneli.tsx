@@ -181,12 +181,10 @@ export function MekanPaneli(p: MekanPaneliProps) {
                     <Image source={{ uri: rehberKapak.uri }} style={StyleSheet.absoluteFill} contentFit="cover" transition={150} />
                     {rehberKapak.atif ? <KapakAtfi atif={rehberKapak.atif} /> : null}
                   </View>
-                ) : fotoHali === 'yok' ? (
-                  // #348 inceleme 3 (kanvas 29i · D): rehberli yerin kendi kapağı yoksa Google fotoğrafı kullanılmaz, doğrudan D.
+                ) : fotoYokGosterilir(fotoHali) ? (
+                  // #348 inceleme 3: rehberli yerin kendi kapağı yoksa Google fotoğrafı kullanılmaz, doğrudan D.
+                  // #352 KK2: rehberli mi henüz bilinmiyorken (çevrimdışı dahil) de D; Google fotoğrafı yanıp sönmez, gelince yerine geçer.
                   <FotoYok tip={tip} />
-                ) : fotoHali === 'bekliyor' ? (
-                  // Rehberli mi henüz bilinmiyor: Google fotoğrafı yanıp sönmesin diye yalnız kategori zemini.
-                  <View style={[StyleSheet.absoluteFill, { backgroundColor: kutuRengi(tip) }]} />
                 ) : fotoHali === 'kaydirma' && yer ? (
                   <FotoKaydirma yer={yer} genislik={alanW || ekran.width} onAc={() => galeriAc(true)} />
                 ) : fotoHali === 'hafif' && p.hafif?.foto_uri ? (
@@ -324,11 +322,16 @@ export function fotoAlaniHali(x: { rehberKapak: boolean; rehberli: boolean; rehb
   return x.hafifFoto ? 'hafif' : 'yok';
 }
 
+/** #352 KK2: D hali hem "fotoğraf yok" hem "rehberli mi bekleniyor" (çevrimdışı dahil) için gösterilir. */
+export function fotoYokGosterilir(hali: FotoAlaniHali): boolean {
+  return hali === 'yok' || hali === 'bekliyor';
+}
+
 /**
  * #345 KK5 / #348 inceleme 4 (kanvas 29i · D): fotoğraf yok → zemin `kutuRengi`, ortada 88 px beyaz kare, içinde kategorinin
  * çizgi glifi (44 px, 2 px, kategorinin koyu rengi). Renkli pin PNG'si kullanılmaz; atıf satırı yok.
  */
-function FotoYok({ tip }: { tip: string | null }) {
+export function FotoYok({ tip }: { tip: string | null }) {
   return (
     <View style={[StyleSheet.absoluteFill, s.fotoYok, { backgroundColor: kutuRengi(tip) }]} testID="foto-yok">
       <View style={s.fotoYokKare}>
