@@ -114,7 +114,6 @@
         },
         {
           "place_id": "ChIJjcvmHlvYuxQRcOJSV83Im2o",
-          "osm": "way/93204922",
           "ad": "Kordon",
           "sure_dk": 75,
           "kapali_gunler": [],
@@ -186,7 +185,8 @@
     "varsayimlar": [
       "Hafta sonu: 1. gün cumartesi",
       "Kemeraltı pazar kapalı olabildiği için ilk güne kondu",
-      "Saat Kulesi ve Kadifekale yazıda bağlantısız: yükleme denetiminden geçmiyor (Fidan Han gibi)"
+      "Saat Kulesi ve Kadifekale yazıda bağlantısız: yükleme denetiminden geçmiyor (Fidan Han gibi)",
+      "Kordon (g2.d2) için osm yok: uzun kıyı yolu olduğundan OSM nesnesinin merkezi Google konumundan 294 m uzak çıktı (kuru yukle 44285492884); konum google_30g, 30 günde yenilenir"
     ]
   }
 }
