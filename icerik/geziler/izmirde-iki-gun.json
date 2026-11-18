@@ -1,0 +1,192 @@
+{
+  "surum": 1,
+  "sehir": {
+    "yeni": {
+      "ad": "İzmir",
+      "slug": "izmir",
+      "place_id": "ChIJzcpip2LYuxQR_uicpaG7jGI"
+    }
+  },
+  "takvim": {
+    "ilk_gun": "cumartesi"
+  },
+  "gezi": {
+    "slug": "izmirde-iki-gun",
+    "baslik": "İzmir'de iki gün",
+    "ozet": "Kemeraltı, Kordon ve Asansör; yürüyerek, ilk kez gidenler için",
+    "yazar_ad": "Tripmate ekibi",
+    "amaclar": [
+      "kultur_tarih",
+      "lezzet",
+      "yavas"
+    ],
+    "yazi_md": "İzmir'i ilk kez görecekler için iki günlük, yürüyerek geçen bir plan. İlk gün antik Smyrna ile Osmanlı çarşısı Kemeraltı'nın iç içe geçtiği Konak'ta geçiyor: müze, cami, han, agora ve arada söğüşle şambali. İkinci gün sabah boyozla Alsancak'ta başlıyor, Kordon'da denize bakarak sürüyor ve akşamüstü Karataş'ta Asansör'ün terasında bitiyor. Plan cumartesi başlıyor; çarşının dükkânlarının çoğu pazar kapalı olduğu için Kemeraltı'yı ilk güne koyduk.\n\n> Rahat bir ayakkabı seç ve suyunu yanına al. Kemeraltı'nın sokakları dar ve kalabalık, Kordon'da ise gölge az; yazın şapka, rüzgârlı günlerde ince bir ceket işine yarar.\n\n## 1. gün · Konak ve Kemeraltı\n\nGüne Bahribaba Parkı'ndaki [İzmir Arkeoloji Müzesi](mekan:ChIJzdNI2d_YuxQR73CkeG3uZWg)'nde başla. Bahçedeki lahitlerden sonra içerideki heykellere geç; öğleden sonra göreceğin agoradan gelen parçaları da aklında tut. Müzeden yokuşu inince Konak Meydanı'ndasın: 1901'de yapılan Saat Kulesi'nin önünde kısa bir mola ver.\n\n::mekan[ChIJzdNI2d_YuxQR73CkeG3uZWg]\n\nMeydandan çarşıya gir ve [Hisar Camii](mekan:ChIJDRzetuTYuxQRZk7hl5YOQlc)'ne yürü; içerideki kalem işi süslemeler sade dış cephenin tersine çok renkli. Birkaç adım ötedeki [Kızlarağası Hanı](mekan:ChIJ4X3zvOTYuxQRIW0mwDcQjpM)'nın avlusunda közde pişmiş bir kahve iç, sonra üst kata çıkıp revaklardan avluya bak.\n\n::mekan[ChIJ4X3zvOTYuxQRIW0mwDcQjpM]\n\nÖğle yemeğinde İzmir'in kendine has lezzetini dene: [Söğüşçü Cimbom](mekan:ChIJJXi0j-PYuxQRrw1mmJkkGPg)'da ince doğranmış dil ve yanağı bol maydanozla ekmek arasında ye. Yemekten sonra doğuya, [Agora](mekan:ChIJz4HKgu_YuxQRbTOT_QxqU4U)'ya yürü. Antik kentin pazar yerinin altındaki tonozlu bodrum kat, serin ve sessiz; kemerlerin arasındaki eski su kanalını bul.\n\nGünü yeniden çarşıda, [Hisarönü Şambalicisi](mekan:ChIJm-wTsuTYuxQREHrr3Pi3PJ8)'nde bir dilim şambali ve bir çayla kapat. Akşamüstü enerjin kalırsa taksiyle Kadifekale'ye çık; şehrin ve körfezin tamamını yukarıdan görürsün.\n\n## 2. gün · Alsancak, Kordon ve Asansör\n\nSabah Alsancak'taki [Dostlar Fırını](mekan:ChIJE5Hqq0TYuxQRAI_uq7bnrNU)'nda boyoz, haşlanmış yumurta ve çayla İzmirliler gibi kahvaltı yap. Oradan birkaç dakikada denize in.\n\n::mekan[ChIJE5Hqq0TYuxQRAI_uq7bnrNU]\n\n[Kordon](mekan:ChIJjcvmHlvYuxQRcOJSV83Im2o)'da acele etmeden yürü; çimenlerde oturanlara, körfezin karşısındaki Karşıyaka'ya ve vapurlara bak. Öğleye doğru kıyıdan ayrılıp Alsancak'ın iç sokaklarına gir ve [Sakız](mekan:ChIJyxgxrfnYuxQREt9dxixAWuA)'da Ege otları, zeytinyağlılar ve mevsim balığıyla öğle yemeği ye.\n\nYemekten sonra taksiyle ya da otobüsle Karataş'a geç; yürümek istersen kıyı boyunca bir saate yakın sürer. Günü [Asansör](mekan:ChIJ9yZupyXZuxQRRy6zC9zfQLU)'de bitir: yukarıdaki terastan körfeze bak, inerken Dario Moreno Sokağı'nda ve eski Yahudi mahallesinin dar sokaklarında yürü. Gün batımına doğru burada olmak iki günün en güzel kapanışı.\n\n::mekan[ChIJ9yZupyXZuxQRRy6zC9zfQLU]\n\nPlanı kısaltmak istersen 1. günden şambali molasını, 2. günden Kordon yürüyüşünün bir kısmını çıkarabilirsin. Uzatmak isteyenler için vapurla Karşıyaka'ya geçmek, Kültürpark'ta dolaşmak ya da günübirlik Efes ve Şirince iyi eklemeler.\n"
+  },
+  "gunler": [
+    {
+      "baslik": "Konak ve Kemeraltı",
+      "duraklar": [
+        {
+          "place_id": "ChIJzdNI2d_YuxQR73CkeG3uZWg",
+          "osm": "node/4815186885",
+          "ad": "İzmir Arkeoloji Müzesi",
+          "sure_dk": 75,
+          "sure_gerekcesi": "varsayılan 90; orta boy müze ve bahçe",
+          "kapali_gunler": [],
+          "rehber": "izmir-arkeoloji-muzesi",
+          "amaclar": [
+            "kultur_tarih"
+          ]
+        },
+        {
+          "place_id": "ChIJDRzetuTYuxQRZk7hl5YOQlc",
+          "osm": "way/49422242",
+          "ad": "Hisar Camii",
+          "sure_dk": 30,
+          "kapali_gunler": [],
+          "rehber": "hisar-camii",
+          "amaclar": [
+            "kultur_tarih"
+          ]
+        },
+        {
+          "place_id": "ChIJ4X3zvOTYuxQRIW0mwDcQjpM",
+          "osm": "relation/15607096",
+          "ad": "Kızlarağası Hanı",
+          "sure_dk": 45,
+          "kapali_gunler": [
+            "pazar"
+          ],
+          "rehber": "kizlaragasi-hani",
+          "amaclar": [
+            "kultur_tarih",
+            "yavas"
+          ]
+        },
+        {
+          "place_id": "ChIJJXi0j-PYuxQRrw1mmJkkGPg",
+          "osm": "node/7140774985",
+          "ad": "Söğüşçü Cimbom",
+          "sure_dk": 60,
+          "kapali_gunler": [],
+          "rehber": "sogusucu-cimbom",
+          "amaclar": [
+            "lezzet"
+          ]
+        },
+        {
+          "place_id": "ChIJz4HKgu_YuxQRbTOT_QxqU4U",
+          "osm": "way/256317190",
+          "ad": "Agora Ören Yeri",
+          "sure_dk": 60,
+          "kapali_gunler": [],
+          "rehber": "izmir-agorasi",
+          "amaclar": [
+            "kultur_tarih"
+          ]
+        },
+        {
+          "place_id": "ChIJm-wTsuTYuxQREHrr3Pi3PJ8",
+          "osm": "node/10022375717",
+          "ad": "Meşhur Hisarönü Şambalicisi",
+          "sure_dk": 30,
+          "kapali_gunler": [],
+          "rehber": "hisaronu-sambalicisi",
+          "amaclar": [
+            "lezzet"
+          ]
+        }
+      ]
+    },
+    {
+      "baslik": "Alsancak, Kordon ve Asansör",
+      "duraklar": [
+        {
+          "place_id": "ChIJE5Hqq0TYuxQRAI_uq7bnrNU",
+          "osm": "node/5287460075",
+          "ad": "Alsancak Dostlar Fırını",
+          "sure_dk": 30,
+          "kapali_gunler": [],
+          "rehber": "alsancak-dostlar-firini",
+          "amaclar": [
+            "lezzet"
+          ]
+        },
+        {
+          "place_id": "ChIJjcvmHlvYuxQRcOJSV83Im2o",
+          "osm": "way/93204922",
+          "ad": "Kordon",
+          "sure_dk": 75,
+          "kapali_gunler": [],
+          "rehber": "kordon",
+          "amaclar": [
+            "yavas",
+            "doga"
+          ]
+        },
+        {
+          "place_id": "ChIJyxgxrfnYuxQREt9dxixAWuA",
+          "osm": "node/8040416385",
+          "ad": "Sakız Alsancak",
+          "sure_dk": 60,
+          "kapali_gunler": [],
+          "rehber": "izmir-sakiz-alsancak",
+          "amaclar": [
+            "lezzet"
+          ]
+        },
+        {
+          "place_id": "ChIJ9yZupyXZuxQRRy6zC9zfQLU",
+          "osm": "way/882072895",
+          "ad": "İzmir Tarihi Asansör",
+          "sure_dk": 60,
+          "kapali_gunler": [],
+          "rehber": "izmir-tarihi-asansor",
+          "amaclar": [
+            "kultur_tarih",
+            "yavas"
+          ]
+        }
+      ]
+    }
+  ],
+  "notlar": {
+    "dogrulanacaklar": [
+      "[Plan · Kızlarağası Hanı] · kapali_gunler [\"pazar\"] · handaki dükkânların çoğu pazar kapalı olabilir, avlu açık mı belirsiz; plan cumartesiye koydu · izmir.ktb.gov.tr, yerinde",
+      "[Plan · Arkeoloji Müzesi, Agora] · kapali_gunler [] · turkishmuseums.com her gün açık gösteriyor (OSM Arkeoloji 08:30-18:30 her gün); bayram arifelerinde değişebilir · muze.gov.tr",
+      "[Plan · Söğüşçü Cimbom, Hisarönü Şambalicisi, Dostlar Fırını, Sakız, Hisar Camii, Kordon, Asansör] · kapali_gunler [] · resmî kaynak yok · işletme telefonu / İzBB",
+      "[Rehber · Kızlarağası Hanı] · \"1744'te, Hacı Beşir Ağa tarafından\" · İl Kültür Turizm sayfası hem 1598 (Yakup Bey) hem 1744 veriyor · izmir.ktb.gov.tr/EN-239238",
+      "[Rehber · Hisar Camii] · \"16. yüzyılın sonunda, Aydınlı Yakup Bey\" ve \"adını limanı koruyan iç kaleden alıyor\" · yaygın anlatım, yıl kesin değil · Vakıflar İzmir Bölge Müdürlüğü",
+      "[Rehber · Agora] · \"MS 178 depreminden sonra yeniden inşa\", \"bazilika bodrumunda su kanalı ve duvar yazıları\" · turkishmuseums sayfası depremi anmıyor · smyrnaagorasi.com",
+      "[Yazı · Saat Kulesi] · \"1901'de yapılan\" · Saat Kulesi durak değil (yükleme denetiminden geçmiyor, Fidan Han gibi) · Vikipedi, İzBB",
+      "[Rehber · Söğüşçü Cimbom] · söğüşün içeriği (dil, yanak, beyin) ve dükkânın servis biçimi · yaygın anlatım, işletme sitesi yok · yerinde",
+      "[Rehber · Dostlar Fırını] · \"Sefarad mutfağından geçtiği anlatılıyor\", \"ıspanaklı/peynirli çeşitler\" · yaygın anlatım · yerinde",
+      "[Rehber · Sakız] · menüde Ege otları, deniz börülcesi, radika, günün balığı · menü değişebilir · işletme sitesi",
+      "[Rehber · Kordon] · \"rıhtım 19. yüzyıl sonu\", \"bazı binalar 1922 yangınından sonra yeniden yapıldı\" · genel tarih, ayrıntı doğrulanmadı · İzBB Kent Arşivi (Ahmet Piriştina)",
+      "[Rehber · Asansör] · \"1907, Nesim Levi Bayraklıoğlu\", \"Dario Moreno 1940'larda burada yaşadı\" · Vikipedi · İzBB",
+      "[Yazı · 2. gün] · Sakız'dan Karataş'a yürüyüş ~45 dk (doğrulayıcı uyarısı) · yazıda taksi/otobüs öneriliyor"
+    ],
+    "fotograf_onerileri": [
+      {
+        "ne": "Asansör kulesi ve körfez",
+        "altyazi": "Karataş'ta Asansör, 1907",
+        "arama": "Asansör İzmir Wikimedia Commons"
+      },
+      {
+        "ne": "Konak Saat Kulesi",
+        "altyazi": "Konak Meydanı",
+        "arama": "İzmir Clock Tower Commons"
+      },
+      {
+        "ne": "Kızlarağası Hanı avlusu",
+        "altyazi": "Kemeraltı'nda han avlusu",
+        "arama": "Kızlarağası Hanı Commons"
+      }
+    ],
+    "varsayimlar": [
+      "Hafta sonu: 1. gün cumartesi",
+      "Kemeraltı pazar kapalı olabildiği için ilk güne kondu",
+      "Saat Kulesi ve Kadifekale yazıda bağlantısız: yükleme denetiminden geçmiyor (Fidan Han gibi)"
+    ]
+  }
+}
