@@ -171,6 +171,9 @@ Google'dan taze alınır. Mekan rehberleri ayrı dosyalarda: `icerik/yerler/<şe
   yüklemede Commons'ın 1600 px küçük boyu `icerik` kovasına (`kapak/commons/…`) konur; `kapak_url` ve `kapak_atif`
   (`{yazar, lisans, kaynak_url}`) yazılır. Boş kapak yazılır; dolu kapak yalnız taslak satırda ve yine Commons'tan geldiyse
   değişir; Ece'nin kapağı ve yayındaki kapak ezilmez. Google fotoğrafı hiç kullanılmaz.
+  Yazar `Artist`'ten, boşsa `Credit`'ten, o da boşsa `Attribution`'dan okunur; üçü de boşsa HATA (atıfsız yükleme yok).
+  İndirme yalnız `https://upload.wikimedia.org` adresinden ve en çok 5 MB (#348). BO'da Commons kapağı "Kaldır"la
+  kaldırılırsa geri getirmek için içerik hattı (`yukle`) yeniden çalıştırılır.
 - Yeni şehir (yalnız Ece'nin onayıyla): `"sehir": {"yeni": {"ad": "…", "slug": "…", "place_id": "ChIJ…"}}`; şehrin
   koordinatı yüklemede bu place_id'den alınır, şehir taslak açılır.
 
