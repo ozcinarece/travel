@@ -223,6 +223,7 @@ const s = StyleSheet.create({
   geceEtiket: { fontFamily: yazi.ekstra, fontSize: 12, color: renk.anaAcik },
   geceSayi: { ...baslikStili(28), color: renk.zemin },
   geceAlt: { fontFamily: yazi.normal, fontSize: 12, color: renk.anaAcik },
+  // hitSlop ebeveyn dışına taşıyor; arka plan, `testID` ya da `collapsable={false}` eklenirse Android'de alan küçülür.
   geceDugmeler: { flexDirection: 'row', gap: 8 },
   dugme: { height: 38, paddingHorizontal: 14, borderRadius: 12, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6 },
   dugmeMetin: { fontFamily: yazi.ekstra, fontSize: 14, lineHeight: 16 },

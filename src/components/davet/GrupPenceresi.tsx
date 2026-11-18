@@ -13,7 +13,7 @@ import { useDavetPaylas } from '@/features/davet/paylas';
 import { useSeyahattenAyril } from '@/features/davet/sorgular';
 import { useDuraklar, useGunler } from '@/features/gunler/sorgular';
 import { useDegisikligiGeriAl } from '@/features/listem/sorgular';
-import { degisiklikGruplari, geriAlinabilir, geriAlmaYetkisi, grupMetni, zamanMetni } from '@/features/program/degisiklikMetni';
+import { degisiklikGruplari, degisiklikYok, geriAlinabilir, geriAlmaYetkisi, grupMetni, zamanMetni } from '@/features/program/degisiklikMetni';
 import { useDegisiklikler } from '@/features/program/sorgular';
 import { useSimdi } from '@/features/program/useProgram';
 import { silmeMetni } from '@/features/seyahatler/silme';
@@ -167,7 +167,7 @@ export function GrupPenceresi({ acik, onKapat, seyahat, uyeler, mekanlar }: Prop
       <View style={{ gap: 8 }}>
         <Text style={s.bolum}>{t('davet.grup.degisiklikler')}</Text>
         {degisiklikler.isPending ? <ActivityIndicator color={renk.ikincil} /> : null}
-        {degisiklikler.data?.length === 0 ? <Text style={s.not}>{t('davet.grup.degisiklikYok')}</Text> : null}
+        {degisiklikYok(degisiklikler.data) ? <Text style={s.not}>{t('davet.grup.degisiklikYok')}</Text> : null}
         {gruplar.map((g) => {
           const geriAlinir = sonMu(g.entity, g.entity_id) && geriAlinabilir(g) && geriAlmaYetkisi(g, session?.user.id ?? null, sahipMi);
           return (

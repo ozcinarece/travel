@@ -74,9 +74,20 @@ export function degisiklikMetni(d: Degisiklik, mekanAdi: (placesId: string | nul
  */
 export type DegisiklikGrubu = { id: number; kim: string | null; at: string; entity: string; entity_id: string; satirlar: Degisiklik[] };
 
+/** #160 KK1: profilde ad değişince her seyahatin üyelik satırı güncellenir; bu kayıt akışta görünmez. */
+export function akistaGorunur(d: Degisiklik): boolean {
+  return !(d.entity === 'members' && d.field === 'display_name');
+}
+
+/** #160 (#354 inceleme): yükleme bitmiş ve akışta görünecek kayıt yoksa "değişiklik yok" gösterilir (yalnız ad değişikliği de dahil). */
+export function degisiklikYok(liste: Degisiklik[] | undefined): boolean {
+  return liste !== undefined && !liste.some(akistaGorunur);
+}
+
 export function degisiklikGruplari(liste: Degisiklik[]): DegisiklikGrubu[] {
   const gruplar: DegisiklikGrubu[] = [];
   for (const d of liste) {
+    if (!akistaGorunur(d)) continue;
     const son = gruplar[gruplar.length - 1];
     if (son && son.at === d.at && son.kim === d.user_id && son.entity === d.entity && son.entity_id === d.entity_id) son.satirlar.push(d);
     else gruplar.push({ id: d.id, kim: d.user_id, at: d.at, entity: d.entity, entity_id: d.entity_id, satirlar: [d] });

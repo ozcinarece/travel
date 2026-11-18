@@ -258,6 +258,8 @@ export function useDegisiklikler(seyahatId: string | undefined, etkin = true) {
         .eq('trip_id', seyahatId!)
         // #183: harcama payları harcamanın satırıyla birlikte anlatılır ve geri alınır; listeyi doldurmasın.
         .neq('entity', 'harcama_paylari')
+        // #160 KK1: profilde ad değişikliği (members.display_name) akışta yer kaplamasın; süzme limit'ten önce.
+        .or('entity.neq.members,field.is.null,field.neq.display_name')
         // #200: toplu işlemin (Günlere dağıt) satırları kaydıyla birlikte tek satır.
         .is('grup', null)
         .order('at', { ascending: false })

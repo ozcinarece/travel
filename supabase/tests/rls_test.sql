@@ -981,6 +981,17 @@ select pg_temp.hata_bekle($$update public.trips set tz = 'Mars/Olympus' where id
 reset role;
 select pg_temp.as_user(null);
 do $$ begin assert public.gecmis_varislari_temizle() >= 0, 'oturumsuz (cron) çağrı çalışır'; end $$;
+-- #160 KK2: geçersiz `tz`'li bir satır (doğrulama tetikleyicisinden önce yazılmış olabilir) temizliği düşürmez.
+alter table public.trips disable trigger trips_tz_dogrula;
+insert into public.trips (owner_id, city_place_id, city_label, lat, lng, tz, start_date, end_date, name)
+values (:VT, 'ChIJ-varis-3', 'Bursa', 40.18, 29.06, 'Mars/Olympus', current_date - 10, current_date - 8, 'Bozuk dilim');
+alter table public.trips enable trigger trips_tz_dogrula;
+do $$ begin assert public.gecmis_varislari_temizle() >= 0, 'geçersiz tz satırı varken temizlik hata vermeden çalışır'; end $$;
+delete from public.trips where city_place_id = 'ChIJ-varis-3';
+do $$ begin
+  assert (select prosecdef from pg_proc where oid = 'public.gecmis_varislari_temizle(uuid)'::regprocedure), 'temizlik security definer kalır';
+  assert not has_function_privilege('anon', 'public.gecmis_varislari_temizle(uuid)', 'execute'), 'anon temizliği çağıramaz';
+end $$;
 
 
 -- #141 oylar (tekil, yalnız üye, yalnız kendi adına) ve değişiklik geri alma (taşıma, mekan silme + bağlı durak, ekleme).

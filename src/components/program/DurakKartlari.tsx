@@ -369,6 +369,7 @@ const s = StyleSheet.create({
   ozet: { fontFamily: yazi.normal, fontSize: 13, color: renk.ikincil },
   acik: { fontFamily: yazi.ekstra, color: renk.basariMetin },
   foto: { width: 60, height: 60, borderRadius: 14, overflow: 'hidden' },
+  // hitSlop ebeveyn dışına taşıyor; arka plan, `testID` ya da `collapsable={false}` eklenirse Android'de alan küçülür.
   dugmeler: { flexDirection: 'row', gap: 8 },
   dugme: { minHeight: 40, paddingHorizontal: 10, paddingVertical: 6, borderRadius: 12, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6 },
   dugmeBirincil: { backgroundColor: renk.ana },

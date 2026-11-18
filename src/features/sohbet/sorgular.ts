@@ -88,6 +88,8 @@ export function useSohbetDegisiklikleri(seyahatId: string | undefined) {
         .select('id, user_id, entity, entity_id, field, old, new, at')
         .eq('trip_id', seyahatId!)
         .neq('entity', 'harcama_paylari')
+        // #160 KK1: profilde ad değişikliği (members.display_name) akışta yer kaplamasın; süzme limit'ten önce.
+        .or('entity.neq.members,field.is.null,field.neq.display_name')
         // #200: Günlere dağıt tek sistem satırı (işlemin satırları kayda bağlı).
         .is('grup', null)
         .order('at', { ascending: false })
