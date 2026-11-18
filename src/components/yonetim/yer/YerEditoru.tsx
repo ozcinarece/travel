@@ -20,6 +20,7 @@ import { IcerikFotolari } from '../IcerikFotolari';
 import { sutun, YonetimSayfasi } from '../Kabuk';
 import { KayitDurumu } from '../Ortak';
 import { OlcekliTelefon } from '../gezi/GeziOnizleme';
+import { AmacSecimi } from '../amac/AmacSecimi';
 import { BlokEditoru } from '../rehber/BlokEditoru';
 import { yRenk } from '../tema';
 import { YerGenel } from './YerGenel';
@@ -97,6 +98,10 @@ export function YerEditoru({ yer, sehirler, liste }: { yer: YonetimYeri; sehirle
           </Pressable>
         ) : null}
         {sekme === 'genel' ? <YerGenel taslak={taslak} sehirler={sehirler} degistir={degistir} tekilHatasi={durum.hata === 'tekil'} /> : null}
+        {sekme === 'rehber' ? (
+          // #300 KK3 (kanvas 29h · B): amaç alanı rehber metninin üstünde.
+          <AmacSecimi secili={taslak.amaclar} onDegis={(amaclar) => degistir({ amaclar })} />
+        ) : null}
         {sekme === 'rehber' ? (
           // #156 KK14: şehir rehberiyle aynı editör (bölüm listesi olmadan).
           <BlokEditoru

@@ -19,6 +19,7 @@ import { okumaSuresiDk } from '@/lib/markdown';
 import { AYLAR_KISA } from '@/lib/takvim';
 import { yazi } from '@/theme';
 
+import { AmacSecimi } from '../amac/AmacSecimi';
 import { Alan, AlanSatiri, DurumRozeti, MetinKutusu, SecimKutusu } from '../Form';
 import { yRenk } from '../tema';
 
@@ -98,6 +99,8 @@ export function GeziGenel({ taslak, sehirler, degistir, slugHatasi, yayinOnayi }
           </View>
         </Alan>
       </AlanSatiri>
+      {/* #300 KK3 (kanvas 29h · B): başlık ve özetin altında; kayıt diğer alanlarla birlikte. */}
+      <AmacSecimi secili={taslak.amaclar} onDegis={(amaclar) => degistir({ amaclar })} bosUyari />
     </View>
   );
 }

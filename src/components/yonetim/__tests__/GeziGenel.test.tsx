@@ -14,7 +14,7 @@ const taslak: GeziAlanlari = {
   yazi_md: '',
   kapak_url: null,
   yayin: true,
-  yayin_at: '2099-10-20T06:00:00.000Z',
+  yayin_at: '2099-10-20T06:00:00.000Z', amaclar: []
 };
 const sehirler = [{ id: 's1', ad: 'Eskişehir', slug: 'eskisehir', lat: 39.7, lng: 30.5, yayin: true }];
 

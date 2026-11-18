@@ -183,5 +183,6 @@ export function alanlariAl(g: GeziAlanlari): GeziAlanlari {
     kapak_url: g.kapak_url,
     yayin: g.yayin,
     yayin_at: g.yayin_at,
+    amaclar: g.amaclar ?? [],
   };
 }

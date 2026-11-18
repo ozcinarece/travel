@@ -14,6 +14,8 @@ export type GeziAlanlari = {
   kapak_url: string | null;
   yayin: boolean;
   yayin_at: string | null;
+  /** #300 KK3: amaç etiketleri (`public.amac_listesi()` değerleri). */
+  amaclar: string[];
 };
 
 const TR: Record<string, string> = { ç: 'c', ğ: 'g', ı: 'i', ö: 'o', ş: 's', ü: 'u' };
@@ -91,10 +93,16 @@ export function yayinlaAlanlari(g: { yayin_at: string | null }, simdi: Date = ne
 }
 
 /** Otomatik kayıtta yalnız değişen alanlar yazılır; fark yoksa null. */
+/** #300 KK3: dizi alanlar (amaçlar) içerikle karşılaştırılır; diğerleri `===`. */
+function esit(a: unknown, b: unknown): boolean {
+  if (Array.isArray(a) && Array.isArray(b)) return a.length === b.length && a.every((x, i) => x === b[i]);
+  return a === b;
+}
+
 export function kayitFarki<T extends object>(sunucu: T, taslak: T): Partial<T> | null {
   const fark: Partial<T> = {};
   for (const k of Object.keys(taslak) as (keyof T)[]) {
-    if (taslak[k] !== sunucu[k]) fark[k] = taslak[k];
+    if (!esit(taslak[k], sunucu[k])) fark[k] = taslak[k];
   }
   return Object.keys(fark).length ? fark : null;
 }
