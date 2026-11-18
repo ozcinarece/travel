@@ -308,6 +308,54 @@ describe('#243 çevrimdışı: son görülen hal okunur (kanvas 23c)', () => {
     expect(getByText(/Restoran/)).toBeTruthy();
   });
 
+  it('#293 KK6: plan modunda şerit görünür; Sıradaki adım, Listem oyu ve rehberden ekle pasif (KK7: "Bağlantı yok" ipucu)', async () => {
+    mockTablolar = fikstur(tarihEkle(bugun(), 12));
+    mockCevrimdisi = true;
+    const { getByText, getByRole, getAllByRole, getAllByLabelText, qc } = ciz();
+    await waitFor(() => getByText('Eskişehir Gezisi'));
+    await sakinles(qc);
+    expect(getByText(/Çevrimdışı · son güncelleme/)).toBeTruthy();
+    const ipucu = (el: { props: { accessibilityHint?: string } }) => el.props.accessibilityHint;
+    const dagit = getByRole('button', { name: 'Dağıt' });
+    expect(pasif(dagit)).toBe(true);
+    expect(ipucu(dagit)).toBe('Bağlantı yok');
+    const oylar = getAllByLabelText(/oy/i).filter((el) => el.props.accessibilityRole === 'button' && el.props.accessibilityState?.selected !== undefined);
+    expect(oylar.length).toBeGreaterThan(0);
+    for (const o of oylar) {
+      expect(pasif(o)).toBe(true);
+      expect(ipucu(o)).toBe('Bağlantı yok');
+    }
+    const ekle = getAllByRole('button', { name: 'Listeye ekle' });
+    expect(ekle.length).toBeGreaterThan(0);
+    for (const e of ekle) {
+      expect(pasif(e)).toBe(true);
+      expect(ipucu(e)).toBe('Bağlantı yok');
+    }
+    // Okuma eylemleri çalışır.
+    expect(pasif(getByRole('link', { name: 'Tümü' }))).toBe(false);
+  });
+
+  it('#293 KK6: bağlantı varken plan modunda düğmeler etkin, ipucu yok', async () => {
+    mockTablolar = fikstur(tarihEkle(bugun(), 12));
+    const { getByText, getByRole, qc } = ciz();
+    await waitFor(() => getByText('Eskişehir Gezisi'));
+    await sakinles(qc);
+    const dagit = getByRole('button', { name: 'Dağıt' });
+    expect(pasif(dagit)).toBe(false);
+    expect(dagit.props.accessibilityHint).toBeUndefined();
+  });
+
+  it('#293 KK7: gezi modunda pasif düğmeler "Bağlantı yok" ipucunu taşır', async () => {
+    geziModuFiksturu();
+    mockCevrimdisi = true;
+    const { getByText, getByLabelText, getByRole, qc } = ciz();
+    await waitFor(() => getByText('Eskişehir Gezisi'));
+    await sakinles(qc);
+    for (const el of [getByLabelText('Davet linkini gönder'), getByLabelText('Diğer: Atla, Başka güne al'), getByRole('button', { name: 'Mesaj at' }), getByRole('button', { name: 'Harcama ekle' })])
+      expect(el.props.accessibilityHint).toBe('Bağlantı yok');
+    expect(getByRole('button', { name: 'Yol tarifi' }).props.accessibilityHint).toBeUndefined();
+  });
+
   it('konaklamalar gelmese de (cihazda tutulmaz) sayfa açılır', async () => {
     geziModuFiksturu();
     mockCevrimdisi = true;

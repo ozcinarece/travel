@@ -22,7 +22,7 @@ type Props = {
   /** Mekan mesajının adı (DB / önbellek; bilinmiyorsa kategori). */
   mekanAdi: (placeId: string) => string;
   onAc: () => void;
-  /** #243 KK4 (kanvas 23c): bağlantı yokken "Yanıtla" / "Oy ver" pasif (%40). */
+  /** #243 KK4 (kanvas 23c): bağlantı yokken "Yanıtla" / "Oy ver" pasif (%40). #293 KK5: pasifken açık zemin (#EEF2FF), lacivert yazı. */
   yanitPasif?: boolean;
 };
 
@@ -72,8 +72,8 @@ export function GeziSohbetKarti({ mesaj, oylama, saat, okunmamis, k, benId, sece
         )}
         <View style={{ flexDirection: 'row', gap: 8 }}>
           {mesaj ? (
-            <Pressable accessibilityRole="button" accessibilityState={{ disabled: yanitPasif }} disabled={yanitPasif} onPress={onAc} style={({ pressed }) => [geziStil.dugme, { flex: 1, backgroundColor: renk.ana }, yanitPasif && { opacity: 0.4 }, pressed && { opacity: 0.85 }]}>
-              <Text style={[geziStil.dugmeMetin, { color: renk.zemin }]}>{oylama ? t('sohbet.gezi.oyVer') : t('sohbet.gezi.yanitla')}</Text>
+            <Pressable accessibilityRole="button" accessibilityState={{ disabled: yanitPasif }} accessibilityHint={yanitPasif ? t('geziSayfasi.cevrimdisi.baglantiYok') : undefined} disabled={yanitPasif} onPress={onAc} style={({ pressed }) => [geziStil.dugme, { flex: 1, backgroundColor: yanitPasif ? renk.yuzey : renk.ana }, yanitPasif && { opacity: 0.4 }, pressed && { opacity: 0.85 }]}>
+              <Text style={[geziStil.dugmeMetin, { color: yanitPasif ? renk.ana : renk.zemin }]}>{oylama ? t('sohbet.gezi.oyVer') : t('sohbet.gezi.yanitla')}</Text>
             </Pressable>
           ) : null}
           <Pressable accessibilityRole="button" onPress={onAc} style={({ pressed }) => [geziStil.dugme, { flex: 1, backgroundColor: renk.yuzey }, pressed && { opacity: 0.85 }]}>

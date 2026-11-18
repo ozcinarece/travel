@@ -42,9 +42,13 @@ export function saklanabilir(anahtar: QueryKey): boolean {
   return IZINLI.some((bas) => bas.every((parca, i) => anahtar[i] === parca));
 }
 
-/** Yalnız başarılı ve izin listesindeki sorgular cihaza yazılır. */
-export function cihazaYazilsinMi(q: Query): boolean {
-  return defaultShouldDehydrateQuery(q) && saklanabilir(q.queryKey);
+/**
+ * Yalnız başarılı ve izin listesindeki sorgular cihaza yazılır. #293 KK8: sorgunun verisi son 7 gün içinde sunucudan gelmiş
+ * olmalı. Önbellek her yazımda yenilendiği için `maxAge` tek başına yetmez: uzun süre yenilenmeyen bir sorgu (ör. Google
+ * konumu taşıyan `mekanlar`) cihazda 30 günü aşabilirdi.
+ */
+export function cihazaYazilsinMi(q: Query, an: number = Date.now()): boolean {
+  return defaultShouldDehydrateQuery(q) && saklanabilir(q.queryKey) && an - q.state.dataUpdatedAt <= ONBELLEK_OMRU_MS;
 }
 
 /**
@@ -75,7 +79,7 @@ export const kaliciSecenekler: Omit<PersistQueryClientOptions, 'queryClient'> = 
   persister,
   maxAge: ONBELLEK_OMRU_MS,
   buster: SURUM,
-  dehydrateOptions: { shouldDehydrateQuery: cihazaYazilsinMi, shouldDehydrateMutation: () => false },
+  dehydrateOptions: { shouldDehydrateQuery: (q) => cihazaYazilsinMi(q), shouldDehydrateMutation: () => false },
 };
 
 /** Çıkışta (ya da başka kullanıcıya geçişte) cihazdaki kopya silinir (KK1). */

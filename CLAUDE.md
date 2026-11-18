@@ -16,6 +16,7 @@
 - `npm run typecheck` · `npm run lint` · `npm test`
 - `npm run db:test` — migration'lar + RLS testleri (PGHOST/PGPORT/PGUSER ile bir Postgres 16 gerekir)
 - Paket eklerken `npx expo install <paket>`
+- JS yayını (`eas-update` iş akışı) her seferinde iki kez: önce `hedef=expo-go`, sonra `hedef=native` (preview kanalı, runtime = `app.config.ts` `version`). Yalnız biri çalışırsa diğer kanaldaki uygulamalar güncellemeyi almaz. Native değişiklikte `eas-update` yok, yeni EAS build gerekir (yukarıdaki kural).
 
 ## Çalışma
 Her iş ayrı dalda, PR ile `main`'e. PR açıklaması ilgili KK'leri listeler.

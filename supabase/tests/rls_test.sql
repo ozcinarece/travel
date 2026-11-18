@@ -1626,6 +1626,64 @@ end $$;
 select public.icerik_gezi_taslak_sil('hat-rehber');
 delete from public.yerler where place_id in ('ChIJ-yeni-yer-001', 'ChIJ-yayin-yer-1', 'ChIJ-taslak-yer1', 'ChIJ-dolu-yer-01');
 
+-- #300 KK1–KK2: amaç etiketleri. Değerler yalnız sabit 6'lıdan, tekrarsız (check); okuma kuralı aynı (yayındaki satır);
+-- yükleme gezi.amaclar'ı geziye, durak amaclar'ını yer satırına yazar (yalnız taslak ve amacı boş satır).
+select pg_temp.hata_bekle($$update public.geziler set amaclar = '{plaj}' where slug = 'eskisehir-iki-gun'$$, '23514');
+select pg_temp.hata_bekle($$update public.geziler set amaclar = '{lezzet,lezzet}' where slug = 'eskisehir-iki-gun'$$, '23514');
+select pg_temp.hata_bekle($$update public.yerler set amaclar = '{Lezzet}' where ad = 'Taslak Yer'$$, '23514');
+update public.geziler set amaclar = '{kultur_tarih,yavas}' where slug = 'eskisehir-iki-gun';
+update public.yerler set amaclar = '{cocuklu}' where ad = 'Odunpazarı Evleri';
+update public.yerler set amaclar = '{gece}' where ad = 'Taslak Yer';
+set role anon;
+do $$
+begin
+  assert (select amaclar from public.geziler where slug = 'eskisehir-iki-gun') = '{kultur_tarih,yavas}', '#300 KK1: yayındaki gezinin amaçları herkese açık';
+  assert (select count(*) from public.geziler where amaclar @> '{yavas}') = 1, '#300 KK1: amaçla süzülür';
+  assert (select count(*) from public.yerler where amaclar @> '{cocuklu}') = 1, '#300 KK1: yayındaki yerin amacı okunur';
+  assert not exists (select 1 from public.yerler where amaclar @> '{gece}'), '#300 KK1: taslak yerin amacı görünmez (mevcut kural)';
+end $$;
+reset role;
+update public.geziler set amaclar = '{}' where slug = 'eskisehir-iki-gun';
+update public.yerler set amaclar = '{}' where ad in ('Odunpazarı Evleri', 'Taslak Yer');
+
+insert into public.yerler (sehir_id, place_id, ad, kategori, lat, lng, yayin, amaclar) values
+  ('11111111-1111-4111-8111-000000000001', 'ChIJ-amac-yayin-1', 'Yayındaki yer', 'museum', 39.76, 30.52, true, '{}'),
+  ('11111111-1111-4111-8111-000000000001', 'ChIJ-amac-bos-001', 'Amaçsız taslak', 'cafe', 39.76, 30.52, false, '{}'),
+  ('11111111-1111-4111-8111-000000000001', 'ChIJ-amac-dolu-01', 'Amaçlı taslak', 'park', 39.76, 30.52, false, '{doga}');
+create function pg_temp.amacli(p_slug text) returns jsonb
+language sql as $$
+  select jsonb_set(jsonb_set(pg_temp.icerik_ornek(p_slug), '{gezi,amaclar}', '["lezzet", "kultur_tarih"]'), '{gunler,0,duraklar}', jsonb_build_array(
+    jsonb_build_object('place_id', 'ChIJ-amac-yeni-01', 'ad', 'Yeni yer', 'kategori', 'restaurant', 'sure_dk', 60, 'lat', 39.76, 'lng', 30.52, 'rehber_md', 'Rehber.', 'amaclar', jsonb_build_array('lezzet')),
+    jsonb_build_object('place_id', 'ChIJ-amac-yayin-1', 'ad', 'Yayındaki yer', 'kategori', 'museum', 'sure_dk', 60, 'lat', 39.76, 'lng', 30.52, 'amaclar', jsonb_build_array('kultur_tarih')),
+    jsonb_build_object('place_id', 'ChIJ-amac-bos-001', 'ad', 'Amaçsız taslak', 'kategori', 'cafe', 'sure_dk', 30, 'lat', 39.76, 'lng', 30.52, 'amaclar', jsonb_build_array('yavas', 'lezzet')),
+    jsonb_build_object('place_id', 'ChIJ-amac-dolu-01', 'ad', 'Amaçlı taslak', 'kategori', 'park', 'sure_dk', 45, 'lat', 39.76, 'lng', 30.52, 'amaclar', jsonb_build_array('gece')),
+    jsonb_build_object('place_id', 'ChIJ-amac-yok-001', 'ad', 'Yer satırı yok', 'kategori', 'park', 'sure_dk', 45, 'lat', 39.76, 'lng', 30.52, 'amaclar', jsonb_build_array('doga')),
+    jsonb_build_object('place_id', 'ChIJ-amacsiz-0001', 'ad', 'Amaç verilmedi', 'kategori', 'park', 'sure_dk', 45, 'lat', 39.76, 'lng', 30.52, 'amaclar', null)));
+$$;
+select pg_temp.hata_bekle($$select public.icerik_gezi_taslak_yukle(jsonb_set(pg_temp.amacli('hat-amac-bozuk'), '{gezi,amaclar}', '["plaj"]'))$$, '22023');
+select pg_temp.hata_bekle($$select public.icerik_gezi_taslak_yukle(jsonb_set(pg_temp.amacli('hat-amac-bozuk'), '{gezi,amaclar}', '["doga", "doga"]'))$$, '22023');
+select pg_temp.hata_bekle($$select public.icerik_gezi_taslak_yukle(jsonb_set(pg_temp.amacli('hat-amac-bozuk'), '{gezi,amaclar}', '"lezzet"'))$$, '22023');
+select pg_temp.hata_bekle($$select public.icerik_gezi_taslak_yukle(jsonb_set(pg_temp.amacli('hat-amac-bozuk'), '{gunler,0,duraklar,0,amaclar}', '["gece", 1]'))$$, '22023');
+select pg_temp.hata_bekle($$select public.icerik_gezi_taslak_yukle(jsonb_set(pg_temp.amacli('hat-amac-bozuk'), '{gunler,0,duraklar,2,amaclar}', '["cocuk"]'))$$, '22023');
+do $$ begin assert not exists (select 1 from public.geziler where slug = 'hat-amac-bozuk') and not exists (select 1 from public.yerler where place_id = 'ChIJ-amac-yeni-01'), '#300 KK2: bozuk amaç iz bırakmaz'; end $$;
+do $$
+declare r jsonb := public.icerik_gezi_taslak_yukle(pg_temp.amacli('hat-amac'));
+begin
+  assert (select amaclar from public.geziler where slug = 'hat-amac') = '{lezzet,kultur_tarih}' and r -> 'amaclar' = '["lezzet", "kultur_tarih"]', format('#300 KK2 gezi: %s', r);
+  assert (select amaclar from public.yerler where place_id = 'ChIJ-amac-yeni-01') = '{lezzet}', '#300 KK2: yeni yer satırı amaçla açılır';
+  assert (select amaclar from public.yerler where place_id = 'ChIJ-amac-bos-001') = '{yavas,lezzet}', '#300 KK2: amaçsız taslağa yazılır';
+  assert (select amaclar from public.yerler where place_id = 'ChIJ-amac-yayin-1') = '{}', '#300 KK2: yayındaki yere dokunulmaz';
+  assert (select amaclar from public.yerler where place_id = 'ChIJ-amac-dolu-01') = '{doga}', '#300 KK2: amacı dolu taslağa dokunulmaz';
+  assert not exists (select 1 from public.yerler where place_id in ('ChIJ-amac-yok-001', 'ChIJ-amacsiz-0001')), '#300 KK2: amaç yüzünden yer satırı açılmaz';
+  assert (r ->> 'amac_yazilan')::int = 2 and r -> 'amac_atlanan' @> '["ChIJ-amac-yayin-1", "ChIJ-amac-dolu-01", "ChIJ-amac-yok-001"]'
+    and jsonb_array_length(r -> 'amac_atlanan') = 3, format('#300 KK2 sayılar: %s', r);
+  -- Yeniden yükleme: plan dosyası kaynaktır; amaçsız yüklenirse gezinin amaçları boşalır.
+  r := public.icerik_gezi_taslak_yukle(pg_temp.icerik_ornek('hat-amac'), true);
+  assert (select amaclar from public.geziler where slug = 'hat-amac') = '{}' and r -> 'amaclar' = '[]', format('#300 KK2 yeniden: %s', r);
+end $$;
+select public.icerik_gezi_taslak_sil('hat-amac');
+delete from public.yerler where place_id like 'ChIJ-amac-%';
+
 -- #174 KK8 Seyahat silme: yalnız sahip siler (trips_delete = is_owner). Üye ve dışarıdan birinin silmesi RLS ile süzülür
 -- (hata yok, 0 satır); sahip silince bağlı satırlar (günler, mekanlar, duraklar, üyeler, değişiklikler, oylar, puanlar) kalmaz.
 reset role;

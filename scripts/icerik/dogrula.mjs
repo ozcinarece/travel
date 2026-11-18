@@ -27,6 +27,22 @@ export const SINIR = {
 export const SLUG = /^[a-z0-9-]{2,80}$/;
 export const SEHIR_SLUG = /^[a-z0-9-]{2,60}$/;
 export const PLACE_ID = /^[A-Za-z0-9_-]{10,255}$/;
+/**
+ * #300 amaç etiketleri (ilk sürüm, sözlük #201 docs/09 §4.12). Veritabanındaki `public.amac_listesi()` ile aynı olmalı;
+ * listeyi değiştirmek yeni migration ister.
+ */
+export const AMACLAR = ['kultur_tarih', 'lezzet', 'doga', 'yavas', 'gece', 'cocuklu'];
+
+/** `amaclar` alanı: yoksa ya da null ise sorun yok; varsa listeden, tekrarsız bir dizi olmalı. HATA metni ya da null. */
+export function amacHatasi(amaclar) {
+  if (amaclar === undefined || amaclar === null) return null;
+  if (!Array.isArray(amaclar)) return `amaclar bir dizi olmalı (${AMACLAR.join(', ')})`;
+  const yabanci = amaclar.filter((a) => typeof a !== 'string' || !AMACLAR.includes(a));
+  if (yabanci.length) return `amaclar listede olmayan değer içeriyor; geçerli: ${AMACLAR.join(', ')}`;
+  if (new Set(amaclar).size !== amaclar.length) return 'amaclar aynı değeri iki kez içeriyor';
+  return null;
+}
+
 /** OSM nesne kimliği (#205 KK2): `osm` işleminin aday listesindeki `osm` alanı. */
 export const OSM_ID = /^(node|way|relation)\/[0-9]{1,19}$/;
 /** #205: OSM adayı ile Google yeri aynı mekan sayılırken konumlar arası en çok mesafe (KK3 eşleşme kuralı ile aynı). */
@@ -203,6 +219,8 @@ export function planDenetle(plan, { bilinenIdler = [], rehberler = new Map() } =
   else if (uzunluk(gezi.ozet) > SINIR.ozet) hatalar.push(`gezi.ozet: ${uzunluk(gezi.ozet)} karakter (en çok ${SINIR.ozet})`);
   if (!gezi.yazar_ad?.trim() || uzunluk(gezi.yazar_ad) > SINIR.yazarAd) hatalar.push(`gezi.yazar_ad: 1–${SINIR.yazarAd} karakter`);
   if (!gezi.yazi_md?.trim()) hatalar.push('gezi.yazi_md: boş');
+  const geziAmac = amacHatasi(gezi.amaclar);
+  if (geziAmac) hatalar.push(`gezi.${geziAmac}`);
 
   // Günler ve duraklar
   const gunler = Array.isArray(plan.gunler) ? plan.gunler : [];
@@ -232,6 +250,8 @@ export function planDenetle(plan, { bilinenIdler = [], rehberler = new Map() } =
       // #205 KK2: OSM adayı verilirse konum OSM'den yazılır (süresiz, atıfla); verilmezse Google konumu 30 gün tutulur.
       if (d?.osm === undefined) uyarilar.push(`${dk}: OSM adayı yok (osm); konum Google'dan, 30 günde yenilenmeli`);
       else if (typeof d.osm !== 'string' || !OSM_ID.test(d.osm)) hatalar.push(`${dk}: osm "node/123", "way/45" ya da "relation/6" olmalı`);
+      const durakAmac = amacHatasi(d?.amaclar);
+      if (durakAmac) hatalar.push(`${dk}: ${durakAmac}`);
       if (d?.rehber === undefined) uyarilar.push(`${dk}: mekan rehberi yok (rehber)`);
       else if (typeof d.rehber !== 'string' || !REHBER_DOSYA.test(d.rehber)) hatalar.push(`${dk}: rehber dosya adı ^[a-z0-9-]{2,80}$ olmalı`);
       else if (!rehberler.has(d.rehber)) hatalar.push(`${dk}: rehber dosyası bulunamadı (${d.rehber}.md)`);
@@ -424,6 +444,7 @@ export function yuklemeVerisi(plan, detaylar, rehberler = new Map(), osmKonumlar
       ozet: plan.gezi.ozet.trim(),
       yazar_ad: plan.gezi.yazar_ad.trim(),
       yazi_md: plan.gezi.yazi_md.replace(/\r\n?/g, '\n').trim(),
+      ...(Array.isArray(plan.gezi.amaclar) ? { amaclar: plan.gezi.amaclar } : {}),
     },
     gunler: plan.gunler.map((g) => ({
       baslik: g.baslik.trim(),
@@ -432,7 +453,7 @@ export function yuklemeVerisi(plan, detaylar, rehberler = new Map(), osmKonumlar
         const rehber = d.rehber ? rehberler.get(d.rehber)?.replace(/\r\n?/g, '\n').trim() : undefined;
         const osm = typeof d.osm === 'string' ? osmKonumlari.get(d.osm) : undefined;
         const konum = osm ? { lat: osm.lat, lng: osm.lng, osm_id: d.osm } : { lat: det.lat, lng: det.lng };
-        return { place_id: d.place_id, ad: d.ad.trim(), kategori: det.primary_type ?? null, sure_dk: d.sure_dk, ...konum, ...(rehber ? { rehber_md: rehber } : {}) };
+        return { place_id: d.place_id, ad: d.ad.trim(), kategori: det.primary_type ?? null, sure_dk: d.sure_dk, ...konum, ...(rehber ? { rehber_md: rehber } : {}), ...(Array.isArray(d.amaclar) && d.amaclar.length ? { amaclar: d.amaclar } : {}) };
       }),
     })),
   };

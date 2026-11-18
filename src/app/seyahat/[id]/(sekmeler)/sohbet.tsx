@@ -12,6 +12,7 @@ import { GrupPenceresi } from '@/components/davet/GrupPenceresi';
 import { HarcamaFormu } from '@/components/harcama/HarcamaFormu';
 import { GeriHapi } from '@/components/harita/HaritaEkrani';
 import { SecimMenusu } from '@/components/program/SecimMenusu';
+import { CevrimdisiSeridi } from '@/components/gezi/CevrimdisiSeridi';
 import { SeyahatYukleme } from '@/components/seyahatler/SeyahatYukleme';
 import { MekanKarti } from '@/components/sohbet/MekanKarti';
 import { MekanSecici } from '@/components/sohbet/MekanSecici';
@@ -66,6 +67,7 @@ import {
 } from '@/features/sohbet/sorgular';
 import { useHafifYerler } from '@/features/yerler/api';
 import { t } from '@/i18n';
+import { useCevrimdisi } from '@/lib/baglanti';
 import { kategoriEtiketi } from '@/lib/kategori';
 import { useOturum } from '@/lib/oturum';
 import type { Mekan, Seyahat, Uye } from '@/lib/tipler';
@@ -85,12 +87,14 @@ export default function SohbetSekmesi() {
   if (!id || !seyahat.data || !uyeler.data || !mesajlar.data || !oylamalar.data) {
     return <SeyahatYukleme sorgular={[seyahat, uyeler, mesajlar, oylamalar]} kimlikYok={!id} />;
   }
-  return <Sohbet seyahat={seyahat.data} uyeler={uyeler.data} mesajlar={mesajlar.data} oylamalar={oylamalar.data} />;
+  return <Sohbet seyahat={seyahat.data} uyeler={uyeler.data} mesajlar={mesajlar.data} oylamalar={oylamalar.data} seyahatGuncellendi={seyahat.dataUpdatedAt} />;
 }
 
 type Acik = 'mekan' | 'oylama' | 'harcama' | 'grup' | null;
 
-function Sohbet({ seyahat, uyeler, mesajlar, oylamalar }: { seyahat: Seyahat; uyeler: Uye[]; mesajlar: Mesaj[]; oylamalar: Oylama[] }) {
+function Sohbet({ seyahat, uyeler, mesajlar, oylamalar, seyahatGuncellendi }: { seyahat: Seyahat; uyeler: Uye[]; mesajlar: Mesaj[]; oylamalar: Oylama[]; seyahatGuncellendi: number }) {
+  // #293 KK5: bağlantı yokken en üstte 23c şeridi; giriş kutusu ve gönder pasif (yazılan metin silinmez, gönderilmez).
+  const cevrimdisi = useCevrimdisi();
   const { session } = useOturum();
   const benId = session?.user.id ?? null;
   const kenar = useSafeAreaInsets();
@@ -104,6 +108,8 @@ function Sohbet({ seyahat, uyeler, mesajlar, oylamalar }: { seyahat: Seyahat; uy
   const mekanlar = useMemo(() => mekanlarQ.data ?? [], [mekanlarQ.data]);
   const duraklar = useMemo(() => duraklarQ.data ?? [], [duraklarQ.data]);
   const gunler = useMemo(() => gunlerQ.data ?? [], [gunlerQ.data]);
+  // Şeridin "son güncelleme" saati Gezi'deki kaynaktan: mesajların zamanı iyimser gönderimle (setQueryData) ilerler.
+  const guncellendi = Math.max(seyahatGuncellendi, gunlerQ.dataUpdatedAt, duraklarQ.dataUpdatedAt);
   const k = useMemo(() => kisiKaynagi(uyeler), [uyeler]);
   const sahip = uyeler.some((u) => u.user_id === benId && u.role === 'owner');
 
@@ -163,7 +169,7 @@ function Sohbet({ seyahat, uyeler, mesajlar, oylamalar }: { seyahat: Seyahat; uy
   // #248 Ş3: oylama seçeneklerinin adı listedeki mekanlar için de canlı (Gezi'deki kartla aynı sorgu).
   // Listede olmayan oylama mekanı yukarıdaki fotoğraflı istekle aynı grupla istenir: o kimlik için tek istek (#248 inceleme 3).
   const fotoIle = useMemo(() => (mekanlarQ.data ? new Set(listedeOlmayan) : null), [mekanlarQ.data, listedeOlmayan]);
-  const oylamaAdlari = useOylamaAdlari(oylamalar, (p) => yerIle.get(p)?.primary_type, fotoIle);
+  const oylamaAdlari = useOylamaAdlari(oylamalar, (p) => yerIle.get(p)?.primary_type, fotoIle, cevrimdisi);
   const durakKonumlari = useMemo(() => {
     const gunIle = new Map(gunler.map((g) => [g.id, g.index]));
     return duraklar
@@ -310,7 +316,7 @@ function Sohbet({ seyahat, uyeler, mesajlar, oylamalar }: { seyahat: Seyahat; uy
   // ---------------------------------------------------------------- gönderme
   const metniGonder = () => {
     const temiz = metin.trim();
-    if (!temiz) return;
+    if (!temiz || cevrimdisi) return;
     setMetin('');
     gonder.mutate(
       { tur: 'metin', metin: temiz.slice(0, 2000) },
@@ -326,7 +332,15 @@ function Sohbet({ seyahat, uyeler, mesajlar, oylamalar }: { seyahat: Seyahat; uy
     setAcik(null);
     const not = metin.trim();
     setMetin('');
-    gonder.mutate({ tur: 'mekan', place_id: placeId, metin: not.slice(0, 2000) }, { onError: () => bildir(t('sohbet.gonderilemedi')) });
+    gonder.mutate(
+      { tur: 'mekan', place_id: placeId, metin: not.slice(0, 2000) },
+      {
+        onError: () => {
+          setMetin((m) => m || not);
+          bildir(t('sohbet.gonderilemedi'));
+        },
+      },
+    );
   };
   const fotoGonder = async () => {
     setFotoYukleniyor(true);
@@ -340,6 +354,7 @@ function Sohbet({ seyahat, uyeler, mesajlar, oylamalar }: { seyahat: Seyahat; uy
           {
             onError: () => {
               void sohbetFotoSil(yol);
+              setMetin((m) => m || not);
               bildir(t('sohbet.gonderilemedi'));
             },
           },
@@ -379,6 +394,8 @@ function Sohbet({ seyahat, uyeler, mesajlar, oylamalar }: { seyahat: Seyahat; uy
         </View>
       </View>
 
+      {cevrimdisi ? <CevrimdisiSeridi guncellendi={guncellendi} tz={seyahat.tz} an={an} style={s.serit} /> : null}
+
       <FlatList
         inverted
         data={tersCizelge}
@@ -399,7 +416,16 @@ function Sohbet({ seyahat, uyeler, mesajlar, oylamalar }: { seyahat: Seyahat; uy
       <View style={[s.alt, { paddingBottom: 10 }]}>
         <View style={s.ekler}>
           {ekler.map((e) => (
-            <Pressable key={e.ad} accessibilityRole="button" hitSlop={EK_PAYI} onPress={e.onPress} disabled={e.ikon === 'galeri' && fotoYukleniyor} style={({ pressed }) => [s.ek, pressed && { opacity: 0.8 }]}>
+            <Pressable
+              key={e.ad}
+              accessibilityRole="button"
+              accessibilityState={{ disabled: cevrimdisi || (e.ikon === 'galeri' && fotoYukleniyor) }}
+              accessibilityHint={cevrimdisi ? t('geziSayfasi.cevrimdisi.baglantiYok') : undefined}
+              hitSlop={EK_PAYI}
+              onPress={e.onPress}
+              disabled={cevrimdisi || (e.ikon === 'galeri' && fotoYukleniyor)}
+              style={({ pressed }) => [s.ek, cevrimdisi && { opacity: 0.4 }, pressed && { opacity: 0.8 }]}
+            >
               {e.ikon === 'galeri' && fotoYukleniyor ? <ActivityIndicator size="small" color={renk.ana} /> : <Ikon ad={e.ikon} boyut={14} renk={renk.ana} kalinlik={2.4} />}
               <Text style={s.ekMetin}>{e.ad}</Text>
             </Pressable>
@@ -414,9 +440,20 @@ function Sohbet({ seyahat, uyeler, mesajlar, oylamalar }: { seyahat: Seyahat; uy
             multiline
             maxLength={2000}
             accessibilityLabel={t('sohbet.yaz')}
-            style={s.giris}
+            accessibilityState={{ disabled: cevrimdisi }}
+            accessibilityHint={cevrimdisi ? t('geziSayfasi.cevrimdisi.baglantiYok') : undefined}
+            editable={!cevrimdisi}
+            style={[s.giris, cevrimdisi && { opacity: 0.4 }]}
           />
-          <Pressable accessibilityRole="button" accessibilityLabel={t('sohbet.gonder')} disabled={!metin.trim()} onPress={metniGonder} style={({ pressed }) => [s.gonder, !metin.trim() && { opacity: 0.5 }, pressed && { opacity: 0.85 }]}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={t('sohbet.gonder')}
+            accessibilityState={{ disabled: cevrimdisi || !metin.trim() }}
+            accessibilityHint={cevrimdisi ? t('geziSayfasi.cevrimdisi.baglantiYok') : undefined}
+            disabled={cevrimdisi || !metin.trim()}
+            onPress={metniGonder}
+            style={({ pressed }) => [s.gonder, !metin.trim() && { opacity: 0.5 }, cevrimdisi && { opacity: 0.4 }, pressed && { opacity: 0.85 }]}
+          >
             <Ikon ad="gonder" boyut={20} renk={renk.metin} kalinlik={2.4} />
           </Pressable>
         </View>
@@ -496,6 +533,7 @@ const s = StyleSheet.create({
   liste: { paddingHorizontal: 16, paddingVertical: 14, gap: 12 },
   bos: { alignItems: 'center', gap: 8, paddingVertical: 40 },
   bosMetin: { fontFamily: yazi.normal, fontSize: 14, lineHeight: 20, color: renk.ikincil, textAlign: 'center', maxWidth: 280 },
+  serit: { marginHorizontal: 16, marginTop: 10 },
   alt: { paddingHorizontal: 16, paddingTop: 10, backgroundColor: renk.zemin, borderTopWidth: 1, borderTopColor: renk.ayrac, gap: 8 },
   // Satır kırılırsa iki satırın dokunma alanları çakışmasın: 30 + 7 + 7, satır arası 14.
   ekler: { flexDirection: 'row', columnGap: 6, rowGap: 14, flexWrap: 'wrap' },
