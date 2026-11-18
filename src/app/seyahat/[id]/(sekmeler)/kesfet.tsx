@@ -114,17 +114,18 @@ function Kesfet({ seyahat, konaklamalar, ilkMekan, cekmeceIstegi, cipIstegi }: {
   );
   const ilkZoom = yedekMerkezMi(ilkMerkez) ? YEDEK_ZOOM : ILK_ZOOM;
   const ilkBolge = useMemo(() => bolgeHesapla(ilkMerkez, zoomDelta(ilkZoom), zoomDelta(ilkZoom)), [ilkMerkez, ilkZoom]);
-  // Harita ilk merkezle kurulur; canlı şehir konumu sonradan gelirse kamera oraya kayar (bir kez).
-  const canliOdaklandi = useRef(false);
-  useEffect(() => {
-    if (canliOdaklandi.current || konumVar(seyahat) || !seyahatMerkezi || ilkOtel || ilkKonumluMekan) return;
-    canliOdaklandi.current = true;
-    odakla(seyahatMerkezi.lat, seyahatMerkezi.lng, ILK_ZOOM);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [seyahatMerkezi?.lat, seyahatMerkezi?.lng]);
   const [bolge, setBolge] = useKesfetDurumu(seyahat.id, 'bolge');
   // #79 KK1: ekran yeniden kurulduysa harita son görünür bölgeden açılır (kamera aynı kalır); ilk açılışta şehir / otel merkezi.
   const [baslangicBolge] = useState<HaritaBolgesi | null>(() => kesfetDurumunuAl(seyahat.id).bolge);
+  // Harita ilk merkezle kurulur; canlı şehir konumu harita kurulduktan sonra gelirse kamera oraya kayar (bir kez).
+  // #318 inceleme 4: kurulumda konum zaten hazırsa ya da kaydedilmiş görünüm varsa kamera kaymaz (#79 KK1 ezilmesin).
+  const merkezBekleniyor = useRef(seyahatMerkezi == null && !baslangicBolge);
+  useEffect(() => {
+    if (!merkezBekleniyor.current || konumVar(seyahat) || !seyahatMerkezi || ilkOtel || ilkKonumluMekan) return;
+    merkezBekleniyor.current = false;
+    odakla(seyahatMerkezi.lat, seyahatMerkezi.lng, ILK_ZOOM);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [seyahatMerkezi?.lat, seyahatMerkezi?.lng]);
 
   // KK2: Autocomplete görünür alan merkezine 15 km yanlı (#28).
   const aramaMerkezi = {

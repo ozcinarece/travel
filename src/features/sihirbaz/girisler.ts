@@ -51,6 +51,8 @@ export function useTekrarKaynagi(id: string | undefined) {
   return useQuery({
     queryKey: ['sihirbaz', 'tekrar', id],
     enabled: hesapli && !!id,
+    // #318 inceleme 4: `sehirSecimi` Google'a (Pro Details) gidebilir; hata anında en çok bir yeniden deneme.
+    retry: birKezDene,
     queryFn: async () => {
       const { data, error } = await supabase.from('trips').select('id, name, city_place_id, city_label, country_code, lat, lng, tz').eq('id', id!).single();
       if (error) throw error;

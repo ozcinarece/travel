@@ -17,6 +17,7 @@ import {
   konumAyikla,
   ozetSatiri,
   placeIdGecerli,
+  topluBosalt,
   TUR_BASINA,
   turKesildi,
   type YenilemeSonucu,
@@ -35,21 +36,11 @@ Deno.serve(
     const servis = createClient(url, anahtar, { auth: { persistSession: false, autoRefreshToken: false } });
     const sonuc = bosSonuc();
 
-    // Her çıkışta (durma ve boş tur dahil) 30 günü geçen koordinatlar boşaltılır: Google koşulu süresiz ihlal edilmesin.
-    // #318 inceleme 2: tur Google hatalarıyla kesildiyse (anahtar eksik ya da kısıtlı, kota) toplu boşaltma yapılmaz; bir
-    // sonraki başarılı tura kalır (yenileme 25. günde başlar, 5 günlük pay var). Bu turdaki 404 boşaltmaları zaten yapıldı.
+    // Her çıkışta (durma ve boş tur dahil) süresi geçen koordinatlar boşaltılır: Google koşulu süresiz ihlal edilmesin.
+    // #318 inceleme 2 ve 4: tur Google hatalarıyla kesildiyse (anahtar eksik ya da kısıtlı, kota) eşik 32 gün; 30–32 gün
+    // arası bir sonraki başarılı tura kalır, daha eskisi her gün boşalır. Bu turdaki 404 boşaltmaları zaten yapıldı.
     const bitir = async (s: YenilemeSonucu) => {
-      if (s.kesildi) {
-        console.log(`places-yenile: ${ozetSatiri(s)}`);
-        return json(s);
-      }
-      const { data: bos, error: bosHatasi } = await servis.rpc('places_koordinat_bosalt');
-      if (bosHatasi) {
-        s.hatali += 1;
-        console.error('places-yenile: boşaltma', bosHatasi.code ?? '');
-      } else {
-        s.bosaltilan += bosaltilanToplami(bos);
-      }
+      await topluBosalt((ad, arg) => servis.rpc(ad, arg), s);
       console.log(`places-yenile: ${ozetSatiri(s)}`);
       return json(s);
     };

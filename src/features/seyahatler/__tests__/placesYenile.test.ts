@@ -1,14 +1,16 @@
-import { describe, expect, it } from '@jest/globals';
+import { describe, expect, it, jest } from '@jest/globals';
 
 import {
   ART_ARDA_HATA,
   AYLIK_SINIR,
   bosaltilanToplami,
   bosSonuc,
+  KESIK_TUR_GUN,
   KONUM_MASKESI,
   konumAyikla,
   ozetSatiri,
   placeIdGecerli,
+  topluBosalt,
   TUR_BASINA,
   turKesildi,
 } from '../../../../supabase/functions/_shared/placesYenile';
@@ -59,7 +61,7 @@ describe('#262 places koordinat yenilemesi', () => {
     expect(bosaltilanToplami(null)).toBe(0);
   });
 
-  it('#318 inceleme 2: Google hatalarıyla kesilen turda toplu boşaltma yapılmaz', () => {
+  it('#318 inceleme 2: Google hatalarıyla kesilen tur tanınır', () => {
     // Anahtar eksik ya da kota: art arda 5 hata, hiç sonuç yok → kesildi.
     expect(turKesildi({ artArda: ART_ARDA_HATA, googleHatasi: 5, yenilenen: 0, bulunamadi: 0 })).toBe(true);
     // Az aday, hepsi Google hatası → kesildi (5'e ulaşmasa da).
@@ -76,7 +78,34 @@ describe('#262 places koordinat yenilemesi', () => {
 
   it('#318 inceleme 2: kesilen tur özet satırında görünür', () => {
     expect(bosSonuc().kesildi).toBe(false);
-    expect(ozetSatiri({ ...bosSonuc(), hatali: 5, kesildi: true })).toContain('KESİLDİ, toplu boşaltma ertelendi');
+    expect(ozetSatiri({ ...bosSonuc(), hatali: 5, kesildi: true })).toContain('KESİLDİ, yalnız 32 günü geçen boşaltıldı');
     expect(ozetSatiri(bosSonuc())).not.toContain('KESİLDİ');
+  });
+
+  it('#318 inceleme 4: normal tur 30, kesilen tur 32 gün eşiğiyle toplu boşaltır', async () => {
+    const cevap = { data: [{ yer: 2, seyahat: 1, otel: 0, konaklama: 1 }], error: null };
+    const rpc = jest.fn(async (_ad: string, _arg?: Record<string, unknown>) => cevap);
+
+    const normal = bosSonuc();
+    await topluBosalt(rpc, normal);
+    expect(rpc).toHaveBeenLastCalledWith('places_koordinat_bosalt');
+    expect(normal.bosaltilan).toBe(4);
+
+    const kesik = { ...bosSonuc(), kesildi: true };
+    await topluBosalt(rpc, kesik);
+    expect(KESIK_TUR_GUN).toBe(32);
+    expect(rpc).toHaveBeenLastCalledWith('places_koordinat_bosalt', { p_gun: 32 });
+    expect(kesik.bosaltilan).toBe(4);
+    expect(rpc).toHaveBeenCalledTimes(2);
+  });
+
+  it('#318 inceleme 4: boşaltma hatası sayılır, sonuç bozulmaz', async () => {
+    const hata = jest.spyOn(console, 'error').mockImplementation(() => {});
+    const rpc = async () => ({ data: null, error: { code: '42501' } });
+    const s = { ...bosSonuc(), kesildi: true };
+    await topluBosalt(rpc, s);
+    expect(s.hatali).toBe(1);
+    expect(s.bosaltilan).toBe(0);
+    hata.mockRestore();
   });
 });

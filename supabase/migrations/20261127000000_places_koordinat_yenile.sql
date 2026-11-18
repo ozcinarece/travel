@@ -191,9 +191,11 @@ revoke execute on function public.places_koordinat_yenile(text, double precision
 grant execute on function public.places_koordinat_yenile(text, double precision, double precision) to service_role;
 
 -- Koordinat boşaltma (satır silinmez). p_place_id verilirse (Google 404) o place_id'nin yenileme yaşındaki bütün
--- koordinatları; verilmezse 30 günü geçen her koordinat. Damga, place_id ve kullanıcı alanları değişmez.
+-- koordinatları; verilmezse p_gun (en az 30, varsayılan 30) günü geçen her koordinat. Google hatasıyla kesilen tur 32 ile
+-- çağırır (#318 inceleme 4): 30–32 gün arası bir sonraki başarılı tura kalır, daha eskisi her gün boşalır (PRD §7).
+-- Damga, place_id ve kullanıcı alanları değişmez.
 -- Döner: kaynak başına boşaltılan satır sayısı (yer = places, seyahat = trips şehri, otel = trips oteli, konaklama = stays).
-create function public.places_koordinat_bosalt(p_place_id text default null)
+create function public.places_koordinat_bosalt(p_place_id text default null, p_gun integer default 30)
 returns table (yer integer, seyahat integer, otel integer, konaklama integer)
 language plpgsql security definer set search_path = ''
 as $$
@@ -203,7 +205,10 @@ begin
   if p_place_id is not null and (p_place_id = '' or char_length(p_place_id) > 300) then
     raise exception 'place_id geçersiz' using errcode = '22023';
   end if;
-  v_sinir := case when p_place_id is null then now() - interval '30 days' else public.places_yenileme_esigi() end;
+  if p_gun is null or p_gun < 30 or p_gun > 60 then
+    raise exception 'gün eşiği 30–60 olmalı' using errcode = '22023';
+  end if;
+  v_sinir := case when p_place_id is null then now() - make_interval(days => p_gun) else public.places_yenileme_esigi() end;
   perform set_config('tripmate.koordinat_yenileme', 'evet', true);
   update public.places p set lat = null, lng = null
   where p.lat is not null and p.google_fetched_at < v_sinir and (p_place_id is null or p.place_id = p_place_id);
@@ -226,8 +231,8 @@ begin
   return next;
 end;
 $$;
-revoke execute on function public.places_koordinat_bosalt(text) from public, anon, authenticated;
-grant execute on function public.places_koordinat_bosalt(text) to service_role;
+revoke execute on function public.places_koordinat_bosalt(text, integer) from public, anon, authenticated;
+grant execute on function public.places_koordinat_bosalt(text, integer) to service_role;
 
 -- log_change (20261001000000 sürümü) + tek ek: sistem yenilemesi ve boşaltmasının yazdığı koordinat akışa düşmez.
 create or replace function public.log_change()

@@ -3393,11 +3393,17 @@ begin
   delete from public.places_yenileme_deneme where place_id like 'ChIJ_262_%';
 
   -- 30. gün: süresi geçen her koordinat boşalır (places, trips şehri ve oteli, stays); taze ve place_id'siz otel kalır.
+  -- #318 inceleme 4: kesilen tur 32 gün eşiğiyle çağırır; 32 günü geçen boşalır, 30–32 gün arası sonraki başarılı tura kalır.
   update public.trips set google_fetched_at = now() - interval '31 days' where id = '26200000-0000-4000-8000-000000000010';
+  select * into b from public.places_koordinat_bosalt(null, 32);
+  assert b.yer = 1 and b.seyahat = 0, '#262 32 gün eşiği: 33 günlük places boşalır, 31 günlük trips şehri kalır';
+  assert (select lat is null and note = 'kalır' from public.places where place_id = 'ChIJ_262_suresi'), '#262 32 gün: 33 günlük koordinat boşalır';
+  assert (select lat is not null from public.trips where id = '26200000-0000-4000-8000-000000000010'), '#262 32 gün: 31 günlük koordinat kalır';
+
   update public.trips set hotel_fetched_at = now() - interval '31 days' where id = '26200000-0000-4000-8000-000000000020';
   update public.stays set google_fetched_at = now() - interval '31 days' where place_id = 'ChIJ_262_otel';
   select * into b from public.places_koordinat_bosalt();
-  assert b.yer >= 1 and b.seyahat >= 1 and b.otel >= 1 and b.konaklama >= 1, '#262 30 gün: dört kaynak boşalır';
+  assert b.yer = 0 and b.seyahat >= 1 and b.otel >= 1 and b.konaklama >= 1, '#262 30 gün: trips şehri ve oteli, stays boşalır (places yukarıda 32 günde boşaldı)';
   assert (select lat is null and note = 'kalır' from public.places where place_id = 'ChIJ_262_suresi'), '#262 30 gün: places boşalır, not kalır';
   assert (select lat is null and lng is null and city_place_id = 'ChIJ_262_sehir' and city_label = 'Yenileme şehri' from public.trips
     where id = '26200000-0000-4000-8000-000000000010'), '#262 30 gün: trips şehri boşalır, place_id ve ad kalır';
@@ -3433,6 +3439,8 @@ select pg_temp.hata_bekle($$select public.places_yenileme_artir(0, 8000)$$, '220
 select pg_temp.hata_bekle($$select public.places_koordinat_yenile('ChIJ_262_esik', 91, 30)$$, '22023');
 select pg_temp.hata_bekle($$select public.places_koordinat_yenile('', 40, 30)$$, '22023');
 select pg_temp.hata_bekle($$select * from public.places_koordinat_bosalt('')$$, '22023');
+select pg_temp.hata_bekle($$select * from public.places_koordinat_bosalt(null, 29)$$, '22023');
+select pg_temp.hata_bekle($$select * from public.places_koordinat_bosalt(null, 61)$$, '22023');
 reset role;
 -- Koordinatın yarısı boşalamaz.
 select pg_temp.hata_bekle($$update public.places set lat = null where place_id = 'ChIJ_262_taze'$$, '23514');

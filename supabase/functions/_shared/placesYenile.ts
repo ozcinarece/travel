@@ -42,7 +42,7 @@ export type YenilemeSonucu = {
   durdu: boolean;
   /** Bu ay ilk durma: masaya yazılır. */
   ilk_durma: boolean;
-  /** #318 inceleme 2: tur Google hatalarıyla kesildi (anahtar, kısıt ya da kota); toplu 30 gün boşaltması ertelendi. */
+  /** #318 inceleme 2 ve 4: tur Google hatalarıyla kesildi (anahtar, kısıt ya da kota); toplu boşaltma 32 gün eşiğiyle yapıldı. */
   kesildi: boolean;
 };
 
@@ -55,11 +55,35 @@ export const ART_ARDA_HATA = 5;
 
 /**
  * #318 inceleme 2: tur Google hatalarıyla kesildi mi? Art arda `ART_ARDA_HATA` hata ya da istek gitti ama hiçbiri
- * sonuç vermedi (yenilenen ve bulunamadı 0). O zaman toplu 30 gün boşaltması yapılmaz, bir sonraki başarılı tura kalır:
- * yenileme 25. günde başladığı için 5 günlük pay var. 404 boşaltması (tek place_id) yine yapılır.
+ * sonuç vermedi (yenilenen ve bulunamadı 0). O zaman toplu boşaltma `KESIK_TUR_GUN` eşiğiyle yapılır (bkz. topluBosalt).
+ * 404 boşaltması (tek place_id) yine yapılır.
  */
 export function turKesildi({ artArda, googleHatasi, yenilenen, bulunamadi }: { artArda: number; googleHatasi: number; yenilenen: number; bulunamadi: number }): boolean {
   return artArda >= ART_ARDA_HATA || (googleHatasi > 0 && yenilenen === 0 && bulunamadi === 0);
+}
+
+/**
+ * #318 inceleme 4: kesilen turda toplu boşaltma eşiği. Anahtar ya da kota günlerce bozuk kalsa da koordinat 32 günü
+ * geçmez (PRD §7); 30–32 gün arası, Google geçici olarak hata verdiyse bir sonraki başarılı tura kalır.
+ */
+export const KESIK_TUR_GUN = 32;
+
+type Rpc = (ad: string, arg?: Record<string, unknown>) => PromiseLike<{ data: unknown; error: { code?: string } | null }>;
+
+/**
+ * Turun sonunda toplu boşaltma (her çıkışta çağrılır). Normal turda 30 günü geçen, kesilen turda `KESIK_TUR_GUN` günü
+ * geçen koordinatlar boşaltılır; satır silinmez. Sonucu `s`'ye yazar.
+ */
+export async function topluBosalt(rpc: Rpc, s: YenilemeSonucu): Promise<void> {
+  const { data, error } = s.kesildi
+    ? await rpc('places_koordinat_bosalt', { p_gun: KESIK_TUR_GUN })
+    : await rpc('places_koordinat_bosalt');
+  if (error) {
+    s.hatali += 1;
+    console.error('places-yenile: boşaltma', error.code ?? '');
+  } else {
+    s.bosaltilan += bosaltilanToplami(data);
+  }
 }
 
 /** `places_koordinat_bosalt` cevabındaki dört sayının toplamı; bozuk cevapta 0. */
@@ -75,5 +99,5 @@ export function bosaltilanToplami(satirlar: unknown): number {
 /** Log ve Actions özeti için tek satır; yalnız sayı (place_id, koordinat yazılmaz). */
 export function ozetSatiri(s: Partial<YenilemeSonucu>): string {
   const sayi = (v: unknown) => (Number.isInteger(v) ? String(v) : '?');
-  return `aday ${sayi(s.aday)} · yenilenen ${sayi(s.yenilenen)} · satır ${sayi(s.satir)} · bulunamadı ${sayi(s.bulunamadi)} · boşaltılan ${sayi(s.bosaltilan)} · hata ${sayi(s.hatali)}${s.durdu ? ' · AYLIK SINIR DOLDU' : ''}${s.kesildi ? ' · KESİLDİ, toplu boşaltma ertelendi' : ''}`;
+  return `aday ${sayi(s.aday)} · yenilenen ${sayi(s.yenilenen)} · satır ${sayi(s.satir)} · bulunamadı ${sayi(s.bulunamadi)} · boşaltılan ${sayi(s.bosaltilan)} · hata ${sayi(s.hatali)}${s.durdu ? ' · AYLIK SINIR DOLDU' : ''}${s.kesildi ? ' · KESİLDİ, yalnız 32 günü geçen boşaltıldı' : ''}`;
 }

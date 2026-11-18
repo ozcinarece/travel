@@ -290,11 +290,12 @@ function ProgramSekmesi({
   const [acikBacak, setAcikBacak] = useState<{ from: MatrisNoktasi; to: MatrisNoktasi; kaynak: 'harita' | 'panel' } | null>(null);
   const verisi = useProgramVerisi({ seyahat, gunler, duraklar, mekanlar, seciliGun: gun, konaklamalar, modlar: modlar.data, aracBacagi: acikBacak, ag: harita });
   const seyahatMerkezi = useSeyahatMerkezi(seyahat);
-  // #318 inceleme 4: harita ilk merkezle kurulur; canlı şehir konumu sonradan gelirse kamera oraya kayar (bir kez).
-  const canliOdaklandi = useRef(false);
+  // #318 inceleme 4: harita ilk merkezle kurulur; canlı şehir konumu harita kurulduktan sonra gelirse kamera oraya kayar
+  // (bir kez). Kurulumda konum zaten hazırsa (kalıcı önbellek) harita onunla açılır, kamera kaymaz.
+  const merkezBekleniyor = useRef(seyahatMerkezi == null);
   useEffect(() => {
-    if (canliOdaklandi.current || konumVar(seyahat) || !seyahatMerkezi || verisi.otel || mekanlar.some(konumVar)) return;
-    canliOdaklandi.current = true;
+    if (!merkezBekleniyor.current || konumVar(seyahat) || !seyahatMerkezi || verisi.otel || mekanlar.some(konumVar)) return;
+    merkezBekleniyor.current = false;
     setOdak((o) => ({ konum: seyahatMerkezi, zoom: 13, sayac: (o?.sayac ?? 0) + 1 }));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [seyahatMerkezi?.lat, seyahatMerkezi?.lng]);
@@ -1171,7 +1172,8 @@ function ProgramSekmesi({
               renk: gunRengi(gun.index),
               index: gun.index,
               baslik: gunTemasi ? `${gunAdiUzun} · ${gunTemasi}` : gunAdiUzun,
-              cikis: seciliUclar.baslangic ? t('plan.otelCikis', { saat: baslangicSaati }) : t('plan.cikis', { saat: baslangicSaati }),
+              // #318 inceleme 4: başlık otel satırıyla aynı (konum süzgeçsiz); mesafe hesabı `seciliUclar`'da kalır.
+              cikis: otelSatirlari.baslangic ? t('plan.otelCikis', { saat: baslangicSaati }) : t('plan.cikis', { saat: baslangicSaati }),
               onCikis: () => setBaslangicMenu(true),
             }
           : null
