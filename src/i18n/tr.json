@@ -384,7 +384,6 @@
     "artir": "Süreyi artır",
     "gunSecBaslik": "Hangi güne?",
     "fotoSayac": "{i}/{n}",
-    "fotoAtif": "Fotoğraf: {yazar} · Google",
     "panel": {
       "kapat": "Paneli kapat",
       "sekmeRehber": "Rehber",
@@ -425,8 +424,7 @@
       "ipucu": "İPUCU",
       "googleAc": "Google'da aç",
       "yorumSiniri": "Bugünlük Google yorumu sınırına ulaşıldı. Yorumları Google Haritalar'da okuyabilirsin.",
-      "fotoSayac": "{n} / {toplam}",
-      "fotoGoogle": "Foto · Google"
+      "fotoSayac": "{n} / {toplam}"
     }
   },
   "gunler": {
@@ -1327,5 +1325,21 @@
     "dahaKisi": "+{n} kişi",
     "odenmedi": "henüz ödenmedi",
     "bakiyeler": "Bakiyeler"
+  },
+  "kapak": {
+    "atif": "Foto: {yazar}",
+    "atifLisans": "· {lisans}",
+    "atifTripmate": "Foto: Tripmate",
+    "atifGoogle": "· Google Maps",
+    "atifGoogleYazarsiz": "Foto: Google Maps",
+    "erisim": "Fotoğraf: {yazar}, lisans {lisans}",
+    "erisimLisanssiz": "Fotoğraf: {yazar}",
+    "erisimKaynak": "{atif}. Kaynağı aç",
+    "erisimTripmate": "Fotoğraf: Tripmate",
+    "erisimGoogle": "Fotoğraf: {yazar}, Google Maps",
+    "pencereBaslik": "Fotoğraf hakkında",
+    "pencereCommons": "Wikimedia Commons’tan, küçültülerek kullanıldı.",
+    "kaynakAc": "Kaynak sayfasını aç",
+    "kapat": "Kapat"
   }
 }

@@ -29,6 +29,7 @@ import {
   mekanDurumuDenetle,
 } from './dogrula.mjs';
 import { osmAdaylariOku } from './aday.mjs';
+import { commonsBilgisi, kapakDenetimi, kapakIndir, kapakIstekleri, kapakVerisi } from './kapak.mjs';
 import { OsmOkumaHatasi, yuklemeKonumlari } from './konum.mjs';
 import { OverpassHatasi, overpassYeniden, SureBittiHatasi } from './overpass.mjs';
 import { derAl, sifrele } from './sifre.mjs';
@@ -514,6 +515,9 @@ async function yukle() {
     throw new HatHatasi(`plan dosyasında ${hatalar.length} hata; yüklenmedi`);
   }
 
+  // #345 KK2: kapak lisansları Google'dan ve yazmadan önce, kuru çalıştırmada da denetlenir.
+  const kapaklar = await kapakHazirla(plan);
+
   const idler = detayIdleri(plan);
   if (idler.length > EN_COK_DETAY) throw new HatHatasi(`en çok ${EN_COK_DETAY} mekan`);
   // #323 KK1: önce OSM (yeniden denemeyle), sonra Google detayı; Overpass düşerse Google'a istek gitmez.
@@ -563,6 +567,8 @@ async function yukle() {
   ];
   duyuru('notice', `${KURU ? 'Kuru yükleme' : 'Yükleme'} · ${r.slug}`, satir);
   await ozet([`### ${KURU ? 'Kuru yükleme' : 'Yükleme'}`, ...satir.map((s) => `- ${s}`), ...tumUyarilar.map((u) => `- UYARI: ${u}`)]);
+  if (!KURU && kapaklar.length) await kapaklariYukle(plan, kapaklar);
+  else if (kapaklar.length) duyuru('notice', `Kapak · ${plan.gezi.slug}`, [`KURU: ${kapaklar.length} kapağın lisansı uygun; indirilmedi, yazılmadı`]);
   if (!KURU) await kontrol(r.slug);
   // #197: yeni şehir kimliğiyle açılır (place_id plandan; saat dilimi ve ülke kodu tek hafif yer isteğiyle). Olmazsa yükleme
   // bozulmaz: `sehirler` işlemi sonra doldurur.
@@ -578,6 +584,57 @@ async function yukle() {
     }
     duyuru(sonuc === 'yazıldı' ? 'notice' : 'warning', `Şehir kimliği · ${yeni.slug}`, [sonuc]);
   }
+}
+
+/** #345 KK2: plandaki Commons kapaklarının lisansı; uygun olmayan varsa yükleme hiç başlamaz. */
+async function kapakHazirla(plan) {
+  const istekler = kapakIstekleri(plan);
+  if (!istekler.length) return [];
+  let bilgi;
+  try {
+    bilgi = await commonsBilgisi(istekler.map((i) => i.dosya));
+  } catch (e) {
+    throw new HatHatasi(`kapak lisansı okunamadı (${e.message}); yüklenmedi`);
+  }
+  const { hatalar, hazir } = kapakDenetimi(istekler, bilgi);
+  if (hatalar.length) {
+    duyuru('error', `Kapak sorunu (${hatalar.length}) · ${plan.gezi.slug}`, hatalar);
+    throw new HatHatasi('kapak lisansı uygun değil ya da dosya bulunamadı; yüklenmedi');
+  }
+  return hazir;
+}
+
+/** Commons'ın 1600 px küçük boyunu indirir, `icerik` kovasına koyar (aynı dosya aynı yol), sonra kapak alanlarını yazar. */
+async function kapaklariYukle(plan, kapaklar) {
+  const anahtar = await servisAnahtari();
+  const yuklenen = [];
+  const sorun = [];
+  for (const k of kapaklar) {
+    try {
+      const govde = await kapakIndir(k.kucukUrl);
+      const koy = await fetch(`${PROJE_URL}/storage/v1/object/icerik/${k.yol}`, {
+        method: 'POST',
+        headers: { authorization: `Bearer ${anahtar}`, apikey: anahtar, 'content-type': k.mime, 'x-upsert': 'true' },
+        body: govde,
+      });
+      if (!koy.ok) throw new Error(`kova ${koy.status}`);
+      yuklenen.push(k);
+    } catch (e) {
+      sorun.push(`${k.hedef} · ${k.dosya}: ${e.message}`);
+    }
+  }
+  let yazim = { yazilan: 0, atlanan: [] };
+  if (yuklenen.length) {
+    const veri = JSON.stringify(kapakVerisi(plan, yuklenen, PROJE_URL));
+    const etiket = dolarEtiketi(veri);
+    yazim = jsonAl((await sql(`select public.icerik_kapak_yaz(${etiket}${veri}${etiket}::jsonb) as r`))[0].r);
+  }
+  const satir = [
+    `${yuklenen.length}/${kapaklar.length} kapak kovaya kondu · ${yazim.yazilan} satıra yazıldı · ${(yazim.atlanan ?? []).length} atlandı (Ece'nin kapağı ya da yayında)`,
+    ...yuklenen.map((k) => `${k.hedef} · ${k.dosya} · ${k.lisans}`),
+  ];
+  duyuru(sorun.length ? 'warning' : 'notice', `Kapak · ${plan.gezi.slug}`, [...satir, ...sorun]);
+  await ozet(['### Kapak', ...satir.map((s) => `- ${s}`), ...sorun.map((s) => `- UYARI: ${s}`)]);
 }
 
 async function kontrol(slug = slugAl()) {

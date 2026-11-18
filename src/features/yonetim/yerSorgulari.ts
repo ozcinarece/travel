@@ -12,7 +12,7 @@ export type YonetimYeri = YerAlanlari & { id: string; ses_url: string | null; up
 export const YER_LISTESI = ['yonetim', 'yerler'] as const;
 export const yerAnahtari = (id: string | undefined) => ['yonetim', 'yer', id] as const;
 
-const ALANLAR = 'id, ad, place_id, kategori, sehir_id, one_cikan_sira, kapak_url, rehber_md, yayin, lat, lng, ses_url, updated_at, sehirler(ad)';
+const ALANLAR = 'id, ad, place_id, kategori, sehir_id, one_cikan_sira, kapak_url, kapak_atif, rehber_md, yayin, lat, lng, ses_url, updated_at, sehirler(ad)';
 
 /** KK1: tüm yerler (taslak dahil); öne çıkanlar sırayla üstte, sonra ada göre. */
 export function useYonetimYerleri() {
@@ -58,6 +58,7 @@ export function yerAlanlari(y: YerAlanlari): YerAlanlari {
     sehir_id: y.sehir_id,
     one_cikan_sira: y.one_cikan_sira,
     kapak_url: y.kapak_url,
+    kapak_atif: y.kapak_atif ?? null,
     rehber_md: y.rehber_md,
     yayin: y.yayin,
     lat: y.lat,

@@ -571,5 +571,13 @@
       "kapakYok": "Geniş kapak yok",
       "fotolar": "Fotoğraflar sekmesinde değiştir"
     }
+  },
+  "kapakAtfi": {
+    "baslik": "Kapak",
+    "atif": "Foto: {yazar}",
+    "lisans": " · {lisans}",
+    "kaynak": "Kaynak sayfası",
+    "kaldir": "Kaldır",
+    "not": "Değiştirmek için kendi fotoğrafını yükleyip “Kapak yap”a bas; atıf “Tripmate” olur."
   }
 }
