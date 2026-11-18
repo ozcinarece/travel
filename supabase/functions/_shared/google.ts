@@ -156,6 +156,8 @@ export type HafifYer = {
   foto_uri?: string | null;
   /** #45: Google editoryal özeti (yalnız `ozet: true`); yoksa null. */
   ozet?: string | null;
+  /** #316 KK1: ilk fotoğrafın Place Photo adı (yalnız Nearby); null = fotoğraf yok. DB'ye yazılmaz (PRD §7). */
+  foto_ad?: string | null;
 };
 
 type DetailsCevap = {
@@ -446,8 +448,9 @@ async function yakinAraBir(secenek: YakinSecenek, birincil: boolean, haric: stri
         circle: { center: { latitude: secenek.merkez.lat, longitude: secenek.merkez.lng }, radius: Math.min(secenek.yaricapM, 50_000) },
       },
     },
-    // `places.types` Pro alanı: puan ve "şu an açık" zaten Enterprise SKU'sunda — fiyat değişmez.
-    maske: 'places.id,places.location,places.displayName,places.primaryType,places.types,places.rating,places.userRatingCount,places.currentOpeningHours.openNow',
+    // `places.types` ve `places.photos` Pro alanı: puan ve "şu an açık" zaten Enterprise SKU'sunda — fiyat değişmez.
+    // #316 KK1: `photos` ile çekmece fotoğrafı için ayrıca Details istenmez; istemci yalnız Place Photo ister.
+    maske: 'places.id,places.location,places.displayName,places.primaryType,places.types,places.rating,places.userRatingCount,places.currentOpeningHours.openNow,places.photos',
   });
   const yerler = cevap.places ?? [];
   return (secenek.ibadetSuzgeci ? yerler.filter(turistikDegeriVar) : yerler).map((d) => ({
@@ -461,6 +464,8 @@ async function yakinAraBir(secenek: YakinSecenek, birincil: boolean, haric: stri
     puan_sayisi: d.userRatingCount ?? null,
     acik: d.currentOpeningHours?.openNow ?? null,
     ulke_kodu: null,
+    // #316 KK1: ilk fotoğrafın adı (yalnız bellekte; null = Google'da fotoğraf yok, istemci istek atmaz).
+    foto_ad: d.photos?.[0]?.name ?? null,
     tipler: d.types ?? [],
   }));
 }
@@ -774,8 +779,11 @@ export async function fotoUri(ad: string, genislik = 800): Promise<string | null
   return j.photoUri ?? null;
 }
 
-export async function tamDetay(placeId: string, tz?: string): Promise<TamYer> {
-  const d = await istek<TamCevap>(`places/${encodeURIComponent(placeId)}?languageCode=${DIL}`, { maske: TAM_MASKE });
+/** #316 KK2: `oturum` verilirse Autocomplete oturum token'ı bu Details isteğine bağlanır ve oturumu kapatır. */
+export async function tamDetay(placeId: string, tz?: string, oturum?: string): Promise<TamYer> {
+  const parametreler = new URLSearchParams({ languageCode: DIL });
+  if (oturum) parametreler.set('sessionToken', oturum);
+  const d = await istek<TamCevap>(`places/${encodeURIComponent(placeId)}?${parametreler}`, { maske: TAM_MASKE });
   const foto = d.photos?.[0]?.name ? await fotoUri(d.photos[0].name) : null;
   const kapanis = d.currentOpeningHours?.nextCloseTime ? yerelSaat(d.currentOpeningHours.nextCloseTime, tz) : null;
   const saatler = d.regularOpeningHours?.weekdayDescriptions ?? d.currentOpeningHours?.weekdayDescriptions ?? [];

@@ -1,3 +1,4 @@
+import { useQueryClient } from '@tanstack/react-query';
 import { useLocalSearchParams } from 'expo-router';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { ActivityIndicator, Linking, Pressable, StyleSheet, Text, TextInput, View, useWindowDimensions } from 'react-native';
@@ -27,7 +28,7 @@ import { kartKamerasi } from '@/features/program/durakKarti';
 import { useOnerilenler, type OnerilenMekan } from '@/features/sihirbaz/onerilenler';
 import { AZ_ONERI, cekmeceListesi, cekmeceSayisi, gorunurOneriSayisi, type CekmeceCipi } from '@/features/yerler/cekmece';
 import { listedekiBenzerler } from '@/features/yerler/benzerYer';
-import { hafifOnbellek, hafifYerler, linkCoz, linkGibiMi, useHafifYerler, useOneriler, useYerFotolari, yeniOturumJetonu, placesHatasi, type HafifYer } from '@/features/yerler/api';
+import { aramaSecimi, linkCoz, linkGibiMi, useHafifYerler, useOneriler, useYerFotolari, yeniOturumJetonu, placesHatasi, type HafifYer } from '@/features/yerler/api';
 
 import { aktifFiltreSayisi, filtreAktif, filtredenGecer, filtreOzeti, varsayilanMi, type Filtre } from '@/features/yerler/filtre';
 import { useOneCikanlar } from '@/features/yerler/oneCikan';
@@ -61,6 +62,7 @@ const ILK_ZOOM = 13;
 
 function Kesfet({ seyahat, konaklamalar, ilkMekan, cekmeceIstegi, cipIstegi }: { seyahat: Seyahat; konaklamalar: Konaklama[]; ilkMekan?: string; cekmeceIstegi: 'rehber' | null; cipIstegi: string | null }) {
   const mekanlar = useMekanlar(seyahat.id);
+  const queryClient = useQueryClient();
   const uyeler = useUyeler(seyahat.id);
   // #137 KK6: Grup penceresi (yüzlere dokununca; Grup sekmesi kalktı).
   const [grupAcik, setGrupAcik] = useState(false);
@@ -261,10 +263,8 @@ function Kesfet({ seyahat, konaklamalar, ilkMekan, cekmeceIstegi, cipIstegi }: {
     setHata(null);
     setMesgul(true);
     try {
-      const [yer] = await hafifYerler([placeId], { oturum: jeton });
-      // #172: seçim ad ve puanla gelir (pin etiketi, panel) — ortak önbelleğe yazılır, listeye eklenince yeniden istenmez.
-      if (yer) hafifOnbellek.yaz([yer], 'hafif', [placeId]);
-      if (!yer) throw new Error('yer yok');
+      // #316 KK2: oturumu panelin places-full isteği kapatır; cevap panele ve ortak önbelleğe yazılır (ikinci Details yok).
+      const yer = await aramaSecimi(queryClient, placeId, jeton, seyahat.tz);
       setAramaSonucu({ ...yer, ad: yer.ad || ad });
       setSecim({ place_id: yer.place_id, kaynak: 'arama' });
       odakla(yer.lat, yer.lng, 16);
