@@ -11,6 +11,9 @@
   "baslik": "Bursa'da bir lezzet günü",
   "ozet": "Fırında tahanlı, hanlarda çay, öğlen kebap, Merinos'ta süt helvası",
   "yazar_ad": "Tripmate ekibi",
+  "amaclar": [
+   "lezzet"
+  ],
   "yazi_md": "Bursa'yı ağzının tadıyla tanımak isteyenler için yürüyerek geçen bir gün. Sabah odun fırınında simit ve tahanlıyla başlıyor, hanlarda bir çayla devam ediyor, öğlen şehrin kebap geleneğinin ikinci büyük adında oturuyor ve Merinos'ta, eski bir fabrikanın gölgesinde süt helvasıyla bitiyor. Arada Bursa'nın ipek ve yün ticaretini anlatan iki durak var; lezzetin arkasındaki şehri de görmüş oluyorsun.\n\n> Kahvaltıyı fırında hafif tut: öğlen kebap, ikindi helva var. Su şişeni yanına al; duraklar arası yürüyüşler kısa ama Tophane'ye çıkış ve hanlardan kuzeye yürüyüş biraz uzun.\n\n## 1. gün · Fırından helvaya\n\nGüne Tuzpazarı'ndaki [Abdal Simit Fırını](mekan:ChIJ_YudwQo-yhQRMoiOdwjk8Es)'nda başla. Odun ateşiyle ısınan taş fırından yeni çıkmış ince, susamlı Bursa simidini ve tahinli pideyi, yani Bursalıların tahanlısını sıcakken al; fırının önünde ya da yakındaki bir çay ocağında ye.\n\n::mekan[ChIJ_YudwQo-yhQRMoiOdwjk8Es]\n\nYokuşu birkaç dakika çıkıp Tophane'ye var ve [Tophane Saat Kulesi](mekan:ChIJNwvkyuI9yhQRmORbmMWi9ps)'nin yanındaki teraslardan şehre bak. Hanlar bölgesi hemen aşağıda, öğleden sonra gideceğin Merinos kuzeydeki yeşil alanda; günün haritası buradan görünüyor.\n\nTophane'den hanlara in ve [Fidan Han](mekan:ChIJFxeADeI9yhQReXrzL8HiP2U)'ın avlusunda, esnafın arasında ince belli bardakta bir çay iç. Hanlardan Atatürk Caddesi'ne çıkınca Heykel tarafındaki [Kafkas](mekan:ChIJvf8rGOE9yhQRoarn2aeNI9E) dükkânından kestane şekeri alabilirsin; Bursa'nın bu tatlısı yolda taşımaya da uygun. Pideli köfteyi merak ediyorsan Kayhan Çarşısı'ndaki [Mahir Usta'nın dükkânı](mekan:ChIJd0Rj3d89yhQRPvepBtkurm0) da birkaç adım ötede; ama öğle yemeği için yer bırak.\n\nÖğle yemeğinde kuzeye, eski garaj bölgesine yürü ve [Uludağ Kebapçısı](mekan:ChIJ_bGCWg4-yhQRyQz3qhnX-qY)'nda otur. Bursa kebabının bu dükkândaki hâli tanıdık ama kendine özgü: etin dilimlenişine, sosun kıvamına ve masada dökülen tereyağına dikkat et. İki günlük planımızda İskender'in tarihi dükkânını gördüysen farkı burada karşılaştırırsın.\n\n::mekan[ChIJ_bGCWg4-yhQRyQz3qhnX-qY]\n\nYemekten sonra batıya, Merinos Parkı'na doğru düz bir yolda on beş dakika yürü. [Merinos Tekstil Sanayi Müzesi](mekan:ChIJbaMkOwM-yhQRjGflEPJU364) eski yünlü kumaş fabrikasının iplik binasında; yapağının kumaşa dönüşmesini fabrikanın kendi makinelerinin arasından izliyorsun. İpek bölümünde kozadan iplik çekmeyi de dene; sabah hanlarda gördüğün ticaretin arkasındaki emek burada.\n\nGünü parkın kıyısındaki [Hayat Lokantası](mekan:ChIJsxiPJRA-yhQRaiuKzUv0A5w)'nda bitir. Buraya tatlı için geliyorsun: Bursa süt helvası sıcak gelir, üstü kızarmış, içi yumuşaktır. Bir porsiyon helva ve bir çay, ağır bir öğle yemeğinden iki saat sonra tam kıvamında.\n\nPlan cumartesiye göre kuruldu. Merinos'taki müze pazartesi kapalı, hanlardaki dükkânların çoğu da pazar kapalı olabilir; bu yüzden hafta sonu gidiyorsan cumartesiyi seç. Akşam yemeği için yer arıyorsan aynı gün kebabı tekrar etme: Tuzpazarı'ndaki cantıkçılar ya da Kayhan'daki pideli köfteciler iyi bir değişiklik olur. Şehrin tarihi duraklarını da görmek istersen iki günlük planımız hanları, külliyeleri ve Cumalıkızık'ı ekliyor.\n"
  },
  "gunler": [
@@ -23,7 +26,10 @@
      "sure_dk": 45,
      "sure_gerekcesi": "varsayılan 20; kahvaltı burada yapılıyor",
      "kapali_gunler": [],
-     "rehber": "abdal-simit-firini"
+     "rehber": "abdal-simit-firini",
+     "amaclar": [
+      "lezzet"
+     ]
     },
     {
      "place_id": "ChIJNwvkyuI9yhQRmORbmMWi9ps",
@@ -32,7 +38,10 @@
      "sure_dk": 20,
      "sure_gerekcesi": "manzara molası; kule içi gezilmiyor",
      "kapali_gunler": [],
-     "rehber": "tophane-saat-kulesi"
+     "rehber": "tophane-saat-kulesi",
+     "amaclar": [
+      "kultur_tarih"
+     ]
     },
     {
      "place_id": "ChIJFxeADeI9yhQReXrzL8HiP2U",
@@ -41,7 +50,11 @@
      "sure_dk": 40,
      "sure_gerekcesi": "çay molası ve kısa dolaşma",
      "kapali_gunler": [],
-     "rehber": "fidan-han"
+     "rehber": "fidan-han",
+     "amaclar": [
+      "kultur_tarih",
+      "yavas"
+     ]
     },
     {
      "place_id": "ChIJ_bGCWg4-yhQRyQz3qhnX-qY",
@@ -50,7 +63,10 @@
      "sure_dk": 60,
      "sure_gerekcesi": "varsayılan 75; tek tabak, salon hızlı dönüyor",
      "kapali_gunler": [],
-     "rehber": "uludag-kebapcisi"
+     "rehber": "uludag-kebapcisi",
+     "amaclar": [
+      "lezzet"
+     ]
     },
     {
      "place_id": "ChIJbaMkOwM-yhQRjGflEPJU364",
@@ -61,7 +77,10 @@
      "kapali_gunler": [
       "pazartesi"
      ],
-     "rehber": "merinos-tekstil-sanayi-muzesi"
+     "rehber": "merinos-tekstil-sanayi-muzesi",
+     "amaclar": [
+      "kultur_tarih"
+     ]
     },
     {
      "place_id": "ChIJsxiPJRA-yhQRaiuKzUv0A5w",
@@ -70,7 +89,10 @@
      "sure_dk": 30,
      "sure_gerekcesi": "varsayılan 75; yalnız tatlı ve çay",
      "kapali_gunler": [],
-     "rehber": "hayat-lokantasi"
+     "rehber": "hayat-lokantasi",
+     "amaclar": [
+      "lezzet"
+     ]
     }
    ]
   }
