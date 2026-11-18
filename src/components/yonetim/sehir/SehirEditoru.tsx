@@ -118,6 +118,7 @@ export function SehirEditoru({ sehir, sehirler, liste, sekme, onSekme }: Props) 
               }
             }}
             onRol={(yol, rol) => degistir((t) => rolAta(rol, yol, t), true)}
+            onKaroKaldir={() => degistir({ kapak_url: null, kapak_atif: null }, true)}
             onAltMetin={(yol, a) => fotoIs.altyazi(yol, a).catch(islemHatasi)}
             onKaynak={(yol, k) => fotoIs.kaynak(yol, k).catch(islemHatasi)}
             onSil={(yol) => {

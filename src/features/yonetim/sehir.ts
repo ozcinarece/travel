@@ -1,4 +1,5 @@
 // #111 şehir editörü — saf kurallar: alanlar, rehber bölümleri, yazıdaki mekanlar, foto rolleri ve WebP boyutları. Testli.
+import { TRIPMATE, type KapakAtfi } from '@/features/icerik/kapakAtfi';
 import { icerikFotoUrl } from '@/lib/markdown';
 
 import type { IcerikFotosu } from './fotolar';
@@ -12,6 +13,8 @@ export type SehirAlanlari = {
   ozet: string | null;
   yayin: boolean;
   kapak_url: string | null;
+  /** #345 KK3: karo kapağının atfı (Commons ya da 'Tripmate'). */
+  kapak_atif: KapakAtfi | null;
   genis_kapak_url: string | null;
 };
 
@@ -55,9 +58,10 @@ export function fotoRolu(yol: string, s: Pick<SehirAlanlari, 'kapak_url' | 'geni
 /** Role atama: rolün sütununa fotoğrafın adresi; aynı foto öbür roldeyse oradan düşmez (iki rol tek foto olabilir). */
 export function rolAta(rol: FotoRolu | null, yol: string, s: Pick<SehirAlanlari, 'kapak_url' | 'genis_kapak_url'>): Partial<SehirAlanlari> {
   const url = icerikFotoUrl(yol);
-  if (rol === 'karo') return { kapak_url: url };
+  // #345 KK3: Ece'nin yüklediği foto karo kapağı olunca atıf "Tripmate"; karo kapağı kalkınca atıf da kalkar.
+  if (rol === 'karo') return { kapak_url: url, kapak_atif: { yazar: TRIPMATE } };
   if (rol === 'genis') return { genis_kapak_url: url };
-  return { ...(s.kapak_url === url ? { kapak_url: null } : {}), ...(s.genis_kapak_url === url ? { genis_kapak_url: null } : {}) };
+  return { ...(s.kapak_url === url ? { kapak_url: null, kapak_atif: null } : {}), ...(s.genis_kapak_url === url ? { genis_kapak_url: null } : {}) };
 }
 
 /** Kanvas: yayına almak için karo kapağı zorunlu (uyarı). */
