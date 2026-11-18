@@ -11,7 +11,10 @@
 //   ≈5 tuşlu bir seçimde: kapatmamak ≈ $0,014; `id,location` ile ≈ $0,019; Pro/Enterprise maskeyle ≈ $0,025.
 //   Kaynak: https://developers.google.com/maps/documentation/places/web-service/session-pricing ve
 //   https://developers.google.com/maps/billing-and-pricing/pricing (0–100k dilimi).
+//   (Teyit #353, session-pricing sayfası: Pro, Enterprise ya da Enterprise + Atmosphere alanıyla kapatan Details istenen
+//   alanlardan bağımsız "Place Details Enterprise + Atmosphere" faturalanır; Essentials ile kapatan "Place Details Essentials".)
 // Önbellek ıskalanınca token'lı Details zaten gider ve oturumu kapatır (main'deki davranış).
+// Aynı kural places-full'da da geçerli (#353): token gelse de önbellekte geçerli kayıt varsa o döner (`tekOku`).
 
 /** Google Places (New) oturum anahtarı en çok 36 ASCII karakter (places-autocomplete ile aynı kural). */
 export function oturumAnahtari(x: unknown): string | undefined {
@@ -48,4 +51,24 @@ export async function topluOku<T>(
       return deger;
     }),
   );
+}
+
+/**
+ * #353: tek kayıtlık okuma (places-full). Geçerli önbellek kaydı varsa token gelse de Google'a gidilmez. Iskalamada önce
+ * sınır denetimi (`sinir`; bir sonuç dönerse istek reddedilir), sonra token'lı `detay` gider ve cevap `yaz` ile önbelleğe girer.
+ */
+export async function tekOku<T, R>(p: {
+  eski: Kayit<T> | undefined;
+  gecerli: (k: Kayit<T>) => boolean;
+  oturum: string | undefined;
+  sinir: () => Promise<R | null>;
+  detay: (oturum: string | undefined) => Promise<T>;
+  yaz: (deger: T) => void;
+}): Promise<{ deger: T } | { red: R }> {
+  if (p.eski && p.gecerli(p.eski)) return { deger: p.eski.deger };
+  const red = await p.sinir();
+  if (red) return { red };
+  const deger = await p.detay(p.oturum);
+  p.yaz(deger);
+  return { deger };
 }

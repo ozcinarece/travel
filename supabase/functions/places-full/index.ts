@@ -1,10 +1,11 @@
 // places-full — #80 mekan paneli (Genel): fotoğraf adları (≤ 10), saatler, adres, editoryal özet. Yorumlar burada DEĞİL
 // (places-reviews; yalnız Yorumlar sekmesinde). Cevap bu izolatta 24 saat önbelleklenir (bellek; DB'ye yazılmaz, PRD §7).
-// #316 KK2: arama seçimi `sessionToken` ile gelir — bu istek Autocomplete oturumunu kapatır (ayrı hafif Details yok). Token'lı
-// istek önbelleği okumaz: önbellekten dönülürse Google'a Details gitmez, oturum kapanmaz ve her tuş ayrı faturalanır.
+// #316 KK2: arama seçimi `sessionToken` ile gelir — Google'a giden bu istek Autocomplete oturumunu kapatır (ayrı hafif Details yok).
+// #353: seçilen yer önbellekteyse token gelse de Google'a gidilmez; oturum kapanmaz ve tuşlar tek tek faturalanır. Bu bilerek
+// böyle: 12 tuşun altında oturumu kapatmak hiçbir alan maskesinde ucuzlatmıyor (hesap ve kaynak: _shared/oturum.ts).
 import { GoogleHatasi, tamDetay, type TamYer } from '../_shared/google.ts';
 import { govde, hata, json, kullaniciDogrula } from '../_shared/http.ts';
-import { oturumAnahtari } from '../_shared/oturum.ts';
+import { oturumAnahtari, tekOku } from '../_shared/oturum.ts';
 import { sayacli } from '../_shared/sayac.ts';
 import { sinirKontrol } from '../_shared/sinir.ts';
 
@@ -22,18 +23,22 @@ Deno.serve(sayacli('places-full', async (istek) => {
   const oturum = oturumAnahtari(g.sessionToken);
   const anahtar = `${tz ?? '-'}:${g.id}`;
   const simdi = Date.now();
-  const eski = onbellek.get(anahtar);
   // "Bugün" satırı ve açık/kapalı günle değişir: önbellek aynı takvim gününde geçerli (TTL içinde gün değiştiyse yenilenir).
-  if (!oturum && eski && simdi - eski.zaman < TTL_MS && new Date(eski.zaman).toDateString() === new Date(simdi).toDateString()) return json({ yer: eski.deger });
-  const sinir = await sinirKontrol(k, 'details');
-  if (sinir) return sinir;
-  // #226: tamDetay ilk fotoğrafı ayrıca Place Photo ile URI'ye çeviriyor (fotoUri); o istek de Photo kovasından düşülür.
-  const fotoSiniri = await sinirKontrol(k, 'photo');
-  if (fotoSiniri) return fotoSiniri;
+  const gecerli = (kayit: { zaman: number }) => simdi - kayit.zaman < TTL_MS && new Date(kayit.zaman).toDateString() === new Date(simdi).toDateString();
   try {
-    const yer = await tamDetay(g.id, tz, oturum);
-    onbellek.set(anahtar, { zaman: simdi, deger: yer });
-    return json({ yer });
+    const sonuc = await tekOku({
+      eski: onbellek.get(anahtar),
+      gecerli,
+      oturum,
+      sinir: async () =>
+        (await sinirKontrol(k, 'details')) ??
+        // #226: tamDetay ilk fotoğrafı ayrıca Place Photo ile URI'ye çeviriyor (fotoUri); o istek de Photo kovasından düşülür.
+        (await sinirKontrol(k, 'photo')),
+      detay: (o) => tamDetay(g.id, tz, o),
+      yaz: (yer) => onbellek.set(anahtar, { zaman: simdi, deger: yer }),
+    });
+    if ('red' in sonuc) return sonuc.red;
+    return json({ yer: sonuc.deger });
   } catch (e) {
     if (e instanceof GoogleHatasi) {
       console.error('places-full google', e.durum, e.message);
