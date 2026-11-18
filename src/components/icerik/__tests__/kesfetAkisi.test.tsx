@@ -6,7 +6,7 @@ import { Share, StyleSheet } from 'react-native';
 import { Path } from 'react-native-svg';
 
 import { ayrilmaEki } from '@/features/davet/katilim';
-import { akisGezisi, akisSirasi, kartEtiketi, kesfetAkisiAcik, type AkisGezisi } from '@/features/icerik/kesfetAkisi';
+import { akisGezisi, akisSirasi, amacaGore, doluAmaclar, kartEtiketi, kesfetAkisiAcik, type AkisGezisi } from '@/features/icerik/kesfetAkisi';
 
 import { Logo, LogoYazi } from '@/components/ui/Logo';
 
@@ -338,5 +338,55 @@ describe('<KesfetAkisi />', () => {
     expect(screen.getByText('Bağlanamadık')).toBeTruthy();
     fireEvent.press(screen.getByText('Tekrar dene'));
     expect(refetch).toHaveBeenCalled();
+  });
+});
+
+describe('#300 KK5: amaç çipleri (kanvas 29a, 29h-A)', () => {
+  const amacli = [
+    { ...gezi('a', 'Bursa', [4, 3]), amaclar: ['lezzet'] },
+    { ...gezi('b', 'Eskişehir', [5, 5, 4]), amaclar: ['kultur_tarih', 'cocuklu', 'yavas'] },
+    { ...gezi('c', 'İzmir', [6]), amaclar: [] },
+    { ...gezi('d', 'Eskişehir', [7]), amaclar: ['cocuklu'] },
+  ];
+
+  it('saf: dolu amaçlar sabit sırayla, boş amaç yok; süzgeç sırayı korur, null süzmez', () => {
+    expect(doluAmaclar(amacli)).toEqual(['kultur_tarih', 'lezzet', 'yavas', 'cocuklu']);
+    expect(doluAmaclar([gezi('x', 'Bursa', [1])])).toEqual([]);
+    expect(amacaGore(amacli, 'cocuklu').map((g) => g.id)).toEqual(['b', 'd']);
+    expect(amacaGore(amacli, null).map((g) => g.id)).toEqual(['a', 'b', 'c', 'd']);
+  });
+
+  it('açılışta Sana göre seçili, hepsi görünür; boş amaç (Doğa, Gece hayatı) çip olarak çıkmaz', () => {
+    mockAkis = { ...mockAkis, data: amacli };
+    render(<KesfetAkisi sehir={null} onYeni={jest.fn()} />);
+    const grup = screen.getByLabelText('Gezinin amacı');
+    const cipler = within(grup).getAllByRole('radio');
+    expect(cipler.map((c) => within(c).getByText(/.+/).props.children)).toEqual(['Sana göre', 'Kültür ve tarih', 'Lezzet', 'Yavaş ve keyifli', 'Çocuklu']);
+    expect(cipler[0].props.accessibilityState).toEqual({ checked: true });
+    expect(screen.queryByText('Doğa')).toBeNull();
+    expect(screen.queryByText('Gece hayatı')).toBeNull();
+    expect(screen.getAllByRole('button', { name: /Seyahatime al/ })).toHaveLength(4);
+    expect(screen.queryByText(/gezi$/)).toBeNull();
+    expect(screen.queryByText(/Akış yalnız bu amaçtaki/)).toBeNull();
+  });
+
+  it('çip süzer, başlıkta "N gezi" ve sonda bilgi kutusu; aynı çipe yeniden dokunmak Sana göre’ye döner', () => {
+    mockAkis = { ...mockAkis, data: amacli };
+    render(<KesfetAkisi sehir={null} onYeni={jest.fn()} />);
+    fireEvent.press(screen.getByRole('radio', { name: 'Çocuklu' }));
+    expect(screen.getByRole('radio', { name: 'Çocuklu' }).props.accessibilityState).toEqual({ checked: true });
+    expect(screen.getAllByRole('button', { name: /Seyahatime al/ })).toHaveLength(2);
+    expect(screen.getByText('2 gezi')).toBeTruthy();
+    expect(screen.getByText(/Akış yalnız bu amaçtaki gezileri gösteriyor/)).toBeTruthy();
+
+    fireEvent.press(screen.getByRole('radio', { name: 'Çocuklu' }));
+    expect(screen.getByRole('radio', { name: 'Sana göre' }).props.accessibilityState).toEqual({ checked: true });
+    expect(screen.getAllByRole('button', { name: /Seyahatime al/ })).toHaveLength(4);
+    expect(screen.queryByText('2 gezi')).toBeNull();
+  });
+
+  it('hiç amaçlı gezi yoksa çip satırı çıkmaz', () => {
+    render(<KesfetAkisi sehir={null} onYeni={jest.fn()} />);
+    expect(screen.queryByLabelText('Gezinin amacı')).toBeNull();
   });
 });

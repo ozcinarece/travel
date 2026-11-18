@@ -2,12 +2,25 @@ import { Pressable, StyleSheet, Text } from 'react-native';
 
 import { kose, renk, yazi } from '@/theme';
 
-type Props = { baslik: string; secili: boolean; onPress: () => void; kucuk?: boolean };
+type Props = {
+  baslik: string;
+  secili: boolean;
+  onPress: () => void;
+  kucuk?: boolean;
+  /** Tek seçimli grupta (`radiogroup`) radyo olarak duyurulur; varsayılan düğme + seçili hali. */
+  radyo?: boolean;
+};
 
 /** #136 (kanvas Temel): çip tam yuvarlak 36 px — seçili Gece dolu, diğerleri beyaz + 1,5 px Çizgi kenar. */
-export function Cip({ baslik, secili, onPress, kucuk }: Props) {
+export function Cip({ baslik, secili, onPress, kucuk, radyo }: Props) {
   return (
-    <Pressable accessibilityRole="button" accessibilityState={{ selected: secili }} onPress={onPress} hitSlop={6} style={[s.kap, kucuk && s.kucuk, secili && s.secili]}>
+    <Pressable
+      accessibilityRole={radyo ? 'radio' : 'button'}
+      accessibilityState={radyo ? { checked: secili } : { selected: secili }}
+      onPress={onPress}
+      hitSlop={6}
+      style={[s.kap, kucuk && s.kucuk, secili && s.secili]}
+    >
       <Text style={[s.metin, kucuk && { fontSize: 12 }, secili && s.seciliMetin]}>{baslik}</Text>
     </Pressable>
   );
