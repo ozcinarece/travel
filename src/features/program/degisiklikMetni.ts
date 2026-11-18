@@ -79,6 +79,11 @@ export function akistaGorunur(d: Degisiklik): boolean {
   return !(d.entity === 'members' && d.field === 'display_name');
 }
 
+/** #160 (#354 inceleme): yükleme bitmiş ve akışta görünecek kayıt yoksa "değişiklik yok" gösterilir (yalnız ad değişikliği de dahil). */
+export function degisiklikYok(liste: Degisiklik[] | undefined): boolean {
+  return liste !== undefined && !liste.some(akistaGorunur);
+}
+
 export function degisiklikGruplari(liste: Degisiklik[]): DegisiklikGrubu[] {
   const gruplar: DegisiklikGrubu[] = [];
   for (const d of liste) {

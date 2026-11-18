@@ -19,6 +19,8 @@ type Props = {
   ipucu?: boolean;
   /** Yatay iç boşluk (varsayılan 20). */
   kenar?: number;
+  /** Bloklar arası boşluk (varsayılan 14; mekan rehberi 12, kanvas 14). */
+  aralik?: number;
   /** Uzun okuma (şehir rehberi, gezi yazısı): paragraf 16, başlık Figtree 800 21, alıntı Buz kutuda Figtree 800 17 (kanvas 15 · 18). */
   buyuk?: boolean;
 };
@@ -48,11 +50,11 @@ function Parcalar({ parcalar, metin, onMekan }: { parcalar?: MdParca[]; metin: s
   );
 }
 
-export function MdYazi({ kaynak, onMekan, mekanKarti, ipucu, kenar = 20, buyuk }: Props) {
+export function MdYazi({ kaynak, onMekan, mekanKarti, ipucu, kenar = 20, aralik, buyuk }: Props) {
   const bloklar = markdownAyristir(kaynak);
   const paragraf = [s.paragraf, buyuk && s.paragrafBuyuk];
   return (
-    <View style={[s.kap, { paddingHorizontal: kenar }]}>
+    <View style={[s.kap, { paddingHorizontal: kenar }, aralik !== undefined && { gap: aralik }]}>
       {bloklar.map((b, i) => {
         switch (b.tur) {
           case 'baslik':

@@ -988,6 +988,10 @@ values (:VT, 'ChIJ-varis-3', 'Bursa', 40.18, 29.06, 'Mars/Olympus', current_date
 alter table public.trips enable trigger trips_tz_dogrula;
 do $$ begin assert public.gecmis_varislari_temizle() >= 0, 'geçersiz tz satırı varken temizlik hata vermeden çalışır'; end $$;
 delete from public.trips where city_place_id = 'ChIJ-varis-3';
+do $$ begin
+  assert (select prosecdef from pg_proc where oid = 'public.gecmis_varislari_temizle(uuid)'::regprocedure), 'temizlik security definer kalır';
+  assert not has_function_privilege('anon', 'public.gecmis_varislari_temizle(uuid)', 'execute'), 'anon temizliği çağıramaz';
+end $$;
 
 
 -- #141 oylar (tekil, yalnız üye, yalnız kendi adına) ve değişiklik geri alma (taşıma, mekan silme + bağlı durak, ekleme).
