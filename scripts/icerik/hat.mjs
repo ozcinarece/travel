@@ -7,7 +7,6 @@
 // ve kullanıcı verisi yazılmaz. service_role anahtarı çalışma anında Yönetim API'sinden alınır, maskelenir, hiçbir yere
 // yazılmaz. Yazma yalnız icerik_gezi_taslak_yukle / icerik_gezi_taslak_sil (ve #197 icerik_sehir_kimligi_yaz) ile; KURU=true iken
 // işlem hatayla geri alınır, `sehirler` Google'a gitmez.
-import { randomUUID } from 'node:crypto';
 import { appendFile, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 
@@ -22,7 +21,6 @@ import {
   planDenetle,
   REHBER_DOSYA,
   SEHIR_SLUG,
-  sehirKimligi,
   sehirKimligiSql,
   SLUG,
   yuklemeVerisi,
@@ -32,6 +30,7 @@ import { osmAdaylariOku } from './aday.mjs';
 import { commonsBilgisi, kapakDenetimi, kapakIndir, kapakIstekleri, kapakVerisi } from './kapak.mjs';
 import { OsmOkumaHatasi, yuklemeKonumlari } from './konum.mjs';
 import { OverpassHatasi, overpassYeniden, SureBittiHatasi } from './overpass.mjs';
+import { sehirKimligiCoz as sehirKimligiCozGoogle } from './sehir.mjs';
 import { derAl, sifrele } from './sifre.mjs';
 
 const ortam = process.env;
@@ -139,35 +138,8 @@ async function google(govde) {
   return j;
 }
 
-/** Uygulamanın kendi Edge Function'ı (service_role ile). Google isteği o fonksiyonun sayacına yazılır; hata iletisi onundur. */
-async function fonksiyon(ad, govde) {
-  const anahtar = await servisAnahtari();
-  const cevap = await fetch(`${PROJE_URL}/functions/v1/${ad}`, {
-    method: 'POST',
-    headers: { authorization: `Bearer ${anahtar}`, apikey: anahtar, 'content-type': 'application/json' },
-    body: JSON.stringify(govde),
-  });
-  const j = await cevap.json().catch(() => ({}));
-  if (!cevap.ok) throw new HatHatasi(`${ad} ${cevap.status}: ${typeof j.hata === 'string' ? j.hata.slice(0, 200) : 'hata'}`);
-  return j;
-}
-
-/**
- * #197: şehrin kimliği — uygulamanın şehir seçimiyle aynı yol: place_id biliniyorsa yalnız hafif yer (şehir modu: saat dilimi,
- * ülke kodu), yoksa önce Autocomplete (cities, şehrin konumuna yanlı, ilk öneri). Google'ın şehri bizimkinden 50 km'den uzaksa
- * null. Google verisi loga yazılmaz.
- */
-async function sehirKimligiCoz(sehir, placeId) {
-  const oturum = randomUUID().replace(/-/g, '');
-  let id = placeId;
-  if (!id) {
-    const { oneriler } = await fonksiyon('places-autocomplete', { input: sehir.ad, sessionToken: oturum, tur: 'cities', limit: 1, merkez: { lat: sehir.lat, lng: sehir.lng, yaricapM: 50_000 } });
-    id = Array.isArray(oneriler) ? oneriler[0]?.place_id : undefined;
-    if (!id) return null;
-  }
-  const { yerler } = await fonksiyon('places-light', { ids: [id], sehir: true, sessionToken: oturum });
-  return sehirKimligi({ lat: Number(sehir.lat), lng: Number(sehir.lng) }, Array.isArray(yerler) ? yerler[0] : null);
-}
+/** #197 / #368: şehrin kimliği — `icerik-google` (service_role) üzerinden; bkz. `sehir.mjs`. */
+const sehirKimligiCoz = (sehir, placeId) => sehirKimligiCozGoogle(google, sehir, placeId);
 
 /** Kimliği bir kez yazar (dolu alan ezilmez). Döner: yazıldı mı. */
 async function sehirKimligiYaz(slug, k) {
@@ -265,8 +237,10 @@ async function sehirler() {
     }
   }
   const satir = [`dolduruldu ${dolan.length}${dolan.length ? `: ${dolan.join(', ')}` : ''}`, ...(olmayan.length ? [`doldurulamadı ${olmayan.length}: ${olmayan.join(', ')}`] : [])];
-  duyuru(olmayan.length ? 'warning' : 'notice', 'Şehir kimliği', satir);
-  await ozet(['### Şehir kimliği', ...satir.map((s) => `- ${s}`)]);
+  // #368 KK4: doldurulamayan şehir HATA'dır (uyarı değil); iş akışı da başarısız biter.
+  duyuru(olmayan.length ? 'error' : 'notice', 'Şehir kimliği', satir);
+  await ozet(['### Şehir kimliği', ...satir.map((s) => `- ${olmayan.length && s.startsWith('doldurulamadı') ? 'HATA: ' : ''}${s}`)]);
+  if (olmayan.length) process.exitCode = 1;
 }
 
 function acikAnahtarAl(istek) {
@@ -575,14 +549,19 @@ async function yukle() {
   if (!KURU && r.yeni_sehir) {
     const yeni = plan.sehir.yeni;
     const konum = detaylar.get(yeni.place_id);
-    let sonuc = 'doldurulamadı (sehirler işlemi doldurur)';
+    let sonuc = 'yazıldı';
     try {
       const k = konum ? await sehirKimligiCoz({ ad: yeni.ad, lat: konum.lat, lng: konum.lng }, yeni.place_id) : null;
-      if (k && (await sehirKimligiYaz(yeni.slug, k))) sonuc = 'yazıldı';
-    } catch {
-      // aşağıda uyarı
+      if (!konum) sonuc = 'doldurulamadı: şehrin Google detayı yok';
+      else if (!k) sonuc = 'doldurulamadı: eşleşmedi';
+      else if (!(await sehirKimligiYaz(yeni.slug, k))) sonuc = 'doldurulamadı: yazılmadı';
+    } catch (e) {
+      sonuc = `doldurulamadı: ${e instanceof HatHatasi ? e.message : 'hata'}`;
     }
-    duyuru(sonuc === 'yazıldı' ? 'notice' : 'warning', `Şehir kimliği · ${yeni.slug}`, [sonuc]);
+    // #368 KK4: hata yutulmaz — duyuru `error`, özette HATA (gezi yüklendi; `sehirler kuru=false` tekrar dener).
+    const tamam = sonuc === 'yazıldı';
+    duyuru(tamam ? 'notice' : 'error', `Şehir kimliği · ${yeni.slug}`, [tamam ? sonuc : `${sonuc} (sehirler kuru=false ile tekrar dene)`]);
+    await ozet([`- ${tamam ? '' : 'HATA: '}şehir kimliği · ${yeni.slug}: ${sonuc}`]);
   }
 }
 
