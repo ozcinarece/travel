@@ -24,9 +24,11 @@ type Props = {
   onAc: () => void;
   /** KK10: alt satırın yerine geçecek kaynak satırı (kullanıcı gezisi); verilmezse "… · Tripmate rehberi". */
   altSatir?: string;
+  /** #395 KK4 (Kaydettiklerim): ♥ kaydı doğrudan değiştirmez, ekran çıkarır ve "Geri al" gösterir. */
+  onKalp?: () => void;
 };
 
-export function AnaGeziKarti({ gezi, ton, onAc, altSatir }: Props) {
+export function AnaGeziKarti({ gezi, ton, onAc, altSatir, onKalp }: Props) {
   const alt = altSatir ?? kartAltSatiri(gezi);
   return (
     <View style={s.kart}>
@@ -52,7 +54,7 @@ export function AnaGeziKarti({ gezi, ton, onAc, altSatir }: Props) {
           </Text>
         </View>
       </Pressable>
-      <KartKalbi geziId={gezi.id} />
+      <KartKalbi geziId={gezi.id} onKalp={onKalp} />
     </View>
   );
 }
@@ -61,7 +63,7 @@ export function AnaGeziKarti({ gezi, ton, onAc, altSatir }: Props) {
  * Kapak üstündeki ♥ (kanvas `Ana_v5_Ayrinti` §2): her kartta (fotoğraflıda da) 32 px beyaz daire (%92), içinde 18 px kalp.
  * Boş: Lacivert 2,2 çizgi. Kayıtlı: Mandalina dolgu, #C25200 1,6 kenar. Dokunma alanı 44 px, daireyi ortalar.
  */
-function KartKalbi({ geziId }: { geziId: string }) {
+function KartKalbi({ geziId, onKalp }: { geziId: string; onKalp?: () => void }) {
   const kayitli = useKayitli('gezi', geziId);
   const kaydet = useKaydet();
   return (
@@ -69,7 +71,7 @@ function KartKalbi({ geziId }: { geziId: string }) {
       accessibilityRole="togglebutton"
       accessibilityLabel={t('anasayfa.v5.kaydet')}
       accessibilityState={{ checked: kayitli }}
-      onPress={() => kaydet.mutate({ tur: 'gezi', hedef_id: geziId, kayitli })}
+      onPress={onKalp ?? (() => kaydet.mutate({ tur: 'gezi', hedef_id: geziId, kayitli }))}
       style={s.kalp}
       testID="kart-kalp"
     >
