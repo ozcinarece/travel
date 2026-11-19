@@ -1,4 +1,6 @@
 // #401 KK4: BO › İl önerileri saf kuralları.
+import { describe, expect, it } from '@jest/globals';
+
 import { ilceler, kategoriSayilari, kategoriTahmini, silindiSirasi, suz, tasi, yeniSira, zamanEtiketi, type IlKategori, type IlOneri } from '../ilOneri';
 
 const yer = (id: string, sira: number, kategori: IlKategori, ilce: string | null = 'Merkez'): IlOneri => ({
