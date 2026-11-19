@@ -275,7 +275,7 @@ export function SehirRehberi({ sehir, sehirlerYukleniyor, onGeri, seyahat, onReh
         </View>
       ) : null}
       {geriAlinabilir.bekleyen ? (
-        <GeriAlBandi metin={geriAlinabilir.bekleyen.metin} onGeriAl={geriAlinabilir.geriAl} alt={kenar.bottom + 16} />
+        <GeriAlBandi metin={geriAlinabilir.bekleyen.metin} olay={geriAlinabilir.bekleyen} onGeriAl={geriAlinabilir.geriAl} alt={kenar.bottom + 16} />
       ) : bildirim ? (
         <GeriAlBandi metin={bildirim} alt={kenar.bottom + 16} />
       ) : null}

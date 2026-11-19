@@ -93,17 +93,19 @@ describe('Kaydettiklerim v5 (#395)', () => {
     expect(screen.queryByRole('togglebutton', { name: 'Kaydet' })).toBeNull();
   });
 
-  it('#410 inceleme 2: Kaldırıldı · Geri al bandı iOS\'ta duyurulur, 5 sn kalır', () => {
+  it.each(['ios', 'android'] as const)("#410 inceleme 2: %s'ta Kaldırıldı · Geri al duyurulur, canlı bölge yok, 5 sn kalır", (os) => {
     jest.useFakeTimers();
     const eski = Platform.OS;
-    Platform.OS = 'ios';
+    Platform.OS = os;
     const duyuru = jest.spyOn(AccessibilityInfo, 'announceForAccessibility').mockImplementation(() => {});
     try {
       mockVeri.kayitlar = [{ tur: 'gezi', hedef_id: 'g1' }];
       mockVeri.geziler = [GEZI];
       render(<KaydettiklerimEkrani />);
       fireEvent.press(screen.getByTestId('kart-kalp'));
+      expect(duyuru).toHaveBeenCalledTimes(1);
       expect(duyuru).toHaveBeenCalledWith('Kaldırıldı. Geri al');
+      expect(screen.UNSAFE_root.findAll((n) => n.props.accessibilityLiveRegion !== undefined && typeof n.type === 'string')).toHaveLength(0);
       act(() => jest.advanceTimersByTime(4500));
       expect(screen.getByRole('button', { name: 'Geri al' })).toBeTruthy();
       act(() => jest.advanceTimersByTime(600));
@@ -112,6 +114,23 @@ describe('Kaydettiklerim v5 (#395)', () => {
       Platform.OS = eski;
       duyuru.mockRestore();
       jest.useRealTimers();
+    }
+  });
+
+  it('#410 inceleme 2: art arda iki kaldırmada ikisi de duyurulur (metin aynı olsa da)', () => {
+    const eski = Platform.OS;
+    Platform.OS = 'android';
+    const duyuru = jest.spyOn(AccessibilityInfo, 'announceForAccessibility').mockImplementation(() => {});
+    try {
+      mockVeri.kayitlar = [{ tur: 'gezi', hedef_id: 'g1' }];
+      mockVeri.geziler = [GEZI];
+      render(<KaydettiklerimEkrani />);
+      fireEvent.press(screen.getByTestId('kart-kalp'));
+      fireEvent.press(screen.getByTestId('kart-kalp'));
+      expect(duyuru.mock.calls.filter(([m]) => m === 'Kaldırıldı. Geri al')).toHaveLength(2);
+    } finally {
+      Platform.OS = eski;
+      duyuru.mockRestore();
     }
   });
 

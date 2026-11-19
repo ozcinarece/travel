@@ -7,7 +7,7 @@ import { FotoKutusu } from '@/components/gezi/GeziParcalari';
 import { AnaGeziKarti } from '@/components/ortak/AnaGeziKarti';
 import { Sekme, SekmeSatiri } from '@/components/ortak/Sekme';
 import { Ikon } from '@/components/ui/Ikon';
-import { TEKRAR_HIT_SLOP, useIosDuyuru } from '@/components/ui/EklemeDurumSatiri';
+import { TEKRAR_HIT_SLOP } from '@/components/ui/EklemeDurumSatiri';
 import { eklemeHatasi } from '@/features/ekleme/eklemeDurumu';
 import { kapakTonu } from '@/features/anasayfa/v5';
 import { useIcerikCanli } from '@/features/icerik/fotolar';
@@ -19,6 +19,7 @@ import { yeniGirisNo } from '@/features/sihirbaz/girisler';
 import { seyahatAdi } from '@/features/sihirbaz/sihirbaz';
 import { t } from '@/i18n';
 import { useCevrimdisi } from '@/lib/baglanti';
+import { useOlayDuyurusu } from '@/lib/duyuru';
 import { yonelmeEkli } from '@/lib/ek';
 import { kategoriEtiketi } from '@/lib/kategori';
 import type { KaydedilenTuru, SeyahatOzet } from '@/lib/tipler';
@@ -66,6 +67,8 @@ export default function KaydettiklerimEkrani() {
   const [bildirim, setBildirim] = useState<string | null>(null);
   // #388 KK1: bağlantı hatasında bildirimde "Tekrar dene".
   const [tekrar, setTekrar] = useState<(() => void) | null>(null);
+  // #410 inceleme 2: her `goster` yeni bir bant olayı; art arda iki kaldırmada metin aynı olsa da ikisi de duyurulur.
+  const [bantOlayi, setBantOlayi] = useState(0);
   // #388 KK5 (kanvas 23c): bağlantı yokken "listesine ekle" pasif.
   const cevrimdisi = useCevrimdisi();
   const zamanlayici = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -76,6 +79,7 @@ export default function KaydettiklerimEkrani() {
     setKaldirilan(b.kaldirilan ?? null);
     setBildirim(b.metin ?? null);
     setTekrar(() => b.tekrar ?? null);
+    setBantOlayi((n) => n + 1);
     if (zamanlayici.current) clearTimeout(zamanlayici.current);
     zamanlayici.current = setTimeout(
       () => {
@@ -89,8 +93,9 @@ export default function KaydettiklerimEkrani() {
   // #388 inceleme: çevrimdışıyken "listesine ekle" pasif; nedeni bantta (mevcut `ekleme.baglantiYok`, düğmesiz).
   const cevrimdisiEkle = cevrimdisi && sekme === 'yer' && gruplar.some((g) => !!g.sehirId && !!varsayilanHedef(hedefler, g.sehirAd));
   const bandMetni = bildirim ?? (kaldirilan ? t('kaydettiklerim.kaldirildi') : cevrimdisiEkle ? t('ekleme.baglantiYok') : '');
-  // #410 inceleme: bandın her hali (Kaldırıldı · Geri al dahil) iOS'ta duyurulur; Android'de bant canlı bölge.
-  useIosDuyuru(kaldirilan ? `${bandMetni}. ${t('kaydettiklerim.geriAl')}` : bandMetni || null);
+  // #410 inceleme 2: bandın her hali iki platformda da `announceForAccessibility` ile duyurulur (#387 kalıbı; canlı bölge yok).
+  const bantDuyurusu = kaldirilan ? `${bandMetni}. ${t('kaydettiklerim.geriAl')}` : bandMetni || null;
+  useOlayDuyurusu(bantDuyurusu, `${bantOlayi}:${bantDuyurusu ?? ''}`);
   const kaldir = (tur: KaydedilenTuru, id: string) => {
     kaydet.mutate({ tur, hedef_id: id, kayitli: true });
     goster({ kaldirilan: { tur, id } });
@@ -214,7 +219,7 @@ export default function KaydettiklerimEkrani() {
         )}
       </ScrollView>
       {kaldirilan || bildirim || cevrimdisiEkle ? (
-        <View style={s.bildirim} accessibilityLiveRegion="polite">
+        <View style={s.bildirim}>
           <Text style={s.bildirimMetin}>{bandMetni}</Text>
           {kaldirilan ? (
             <Pressable accessibilityRole="button" onPress={geriAl} hitSlop={TEKRAR_HIT_SLOP}>
