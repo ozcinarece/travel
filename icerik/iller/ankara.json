@@ -1,0 +1,594 @@
+{
+  "il": "Ankara",
+  "slug": "ankara",
+  "guncelleme": "2026-11-19",
+  "oneriler": [
+    {
+      "sira": 1,
+      "ad": "Anıtkabir",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Çankaya",
+      "merkeze_km": 2,
+      "neden": "Aslanlı Yol'dan Tören Meydanı'na yürünen anıt mezar, altında Kurtuluş Savaşı müzesi",
+      "osm": "node/34668145",
+      "place_id": "ChIJj-qcChlP0xQRoAiNJKguhtM"
+    },
+    {
+      "sira": 2,
+      "ad": "Anadolu Medeniyetleri Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Altındağ",
+      "merkeze_km": 2,
+      "neden": "Çatalhöyük duvar resimleri ve Hitit kabartmaları, Mahmut Paşa'nın on kubbeli bedesteninde",
+      "osm": "way/363095473",
+      "place_id": "ChIJ9ws3eGdO0xQRRmf05EeskZs"
+    },
+    {
+      "sira": 3,
+      "ad": "Ankara Kalesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Altındağ",
+      "merkeze_km": 2,
+      "neden": "Surların içinde hâlâ oturulan mahalle: ahşap çıkmalı evler, duvarlarda Roma taşları",
+      "osm": "node/3058034430",
+      "place_id": "ChIJezGjUW9O0xQRwAGUkwTgFXQ"
+    },
+    {
+      "sira": 4,
+      "ad": "Hamamönü Tarihi Ankara Evleri",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Altındağ",
+      "merkeze_km": 2,
+      "neden": "Onarılan cumbalı evlerde çay bahçeleri; Sanat Sokağı'nda ebru ve hat ustaları çalışır",
+      "osm": "node/14366356080",
+      "place_id": "ChIJSxhUe0NO0xQRXwTCW64axC8"
+    },
+    {
+      "sira": 5,
+      "ad": "Beypazarı",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas",
+        "lezzet"
+      ],
+      "ilce": "Beypazarı",
+      "merkeze_km": 84,
+      "neden": "Yamaca dizilmiş çok katlı Osmanlı evleri; çarşıda Beypazarı kurusu ve güveç",
+      "place_id": "ChIJb0PCYey50hQRMK-EAWiA6N4"
+    },
+    {
+      "sira": 6,
+      "ad": "Hacı Bayram Veli Camii",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Altındağ",
+      "merkeze_km": 3,
+      "neden": "Augustus Tapınağı'na yaslanan 15. yüzyıl camisi ve arkasında Hacı Bayram'ın türbesi",
+      "osm": "way/155197582",
+      "place_id": "ChIJEcVIjmNO0xQRFl54K-VCnps"
+    },
+    {
+      "sira": 7,
+      "ad": "Kurtuluş Savaşı Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Altındağ",
+      "merkeze_km": 2,
+      "neden": "Meclis 23 Nisan 1920'de bu taş binada açıldı; Genel Kurul salonu ilk günkü düzeninde",
+      "osm": "way/419393108",
+      "place_id": "ChIJQ1SOxWFO0xQRU9MYRfTLmwY"
+    },
+    {
+      "sira": 8,
+      "ad": "Gordion",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Polatlı",
+      "merkeze_km": 81,
+      "neden": "Frig başkentinin kazı alanı; Midas Tümülüsü'nün içinde ahşap mezar odası",
+      "osm": "way/181388931",
+      "place_id": "ChIJAwKjUrpg0hQRDlg6lHloGSs"
+    },
+    {
+      "sira": 9,
+      "ad": "Augustus Tapınağı",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Altındağ",
+      "merkeze_km": 3,
+      "neden": "Augustus'un kendi işlerini anlattığı Res Gestae, duvarlarda Latince ve Yunanca",
+      "osm": "way/469691342",
+      "place_id": "ChIJSfDZ7WNO0xQRO72uv7Fq0rs"
+    },
+    {
+      "sira": 10,
+      "ad": "Ahi Şerafettin (Arslanhane) Camii",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Altındağ",
+      "merkeze_km": 2,
+      "neden": "Yirmi dört ahşap direkli Ahi camisi, 2023'te UNESCO Dünya Mirası Listesi'ne girdi",
+      "osm": "way/363095476",
+      "place_id": "ChIJnTiwMWBO0xQRZUDpBPYlXqo"
+    },
+    {
+      "sira": 11,
+      "ad": "Boğaziçi Lokantası",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Altındağ",
+      "merkeze_km": 2,
+      "neden": "Ulus'un eski esnaf lokantası: Ankara tavayı ve tencere yemeklerini camekâna bakıp seç",
+      "osm": "node/12057076369",
+      "place_id": "ChIJgSlUCF5O0xQROIVPNcoFjxA"
+    },
+    {
+      "sira": 12,
+      "ad": "Etnografya Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Altındağ",
+      "merkeze_km": 1,
+      "neden": "Holü on beş yıl Atatürk'ün geçici mezarıydı; salonlarda Anadolu'nun gündelik eşyaları",
+      "osm": "way/217483084",
+      "place_id": "ChIJvwNfXlhO0xQRoKeCYdSYrTE"
+    },
+    {
+      "sira": 13,
+      "ad": "Eymir Gölü",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Gölbaşı",
+      "merkeze_km": 11,
+      "neden": "ODTÜ arazisindeki göl; kıyıyı dolaşan yolda koşu, bisiklet ve kürek",
+      "place_id": "ChIJCcJAWQtE0xQRUm_kGruWJEE"
+    },
+    {
+      "sira": 14,
+      "ad": "Cumhuriyet Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Altındağ",
+      "merkeze_km": 2,
+      "neden": "Meclis 1924'ten 1960'a kadar Vedat Tek'in tasarladığı bu ikinci binada toplandı",
+      "osm": "way/419393082",
+      "place_id": "ChIJufZUxYpO0xQRon6J4Qkk13M"
+    },
+    {
+      "sira": 15,
+      "ad": "Yıldız Aspava",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet",
+        "gece"
+      ],
+      "ilce": "Çankaya",
+      "merkeze_km": 2,
+      "neden": "Soslu soğanlı döner; yanında cips, salata, tatlı ve çay ikram gelir",
+      "osm": "node/75324389",
+      "place_id": "ChIJR4TKTKVP0xQRfDnHQo5O_Mo"
+    },
+    {
+      "sira": 16,
+      "ad": "Akkale",
+      "kategori": "manzara",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Altındağ",
+      "merkeze_km": 3,
+      "neden": "Kalenin en yüksek burcu: bir yanda Ulus'un damları, öbür yanda Çankaya",
+      "osm": "way/874846724",
+      "place_id": "ChIJAd5RLQBP0xQR9sT3VKc8cNs"
+    },
+    {
+      "sira": 17,
+      "ad": "Rahmi M. Koç Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "cocuklu",
+        "kultur_tarih"
+      ],
+      "ilce": "Altındağ",
+      "merkeze_km": 2,
+      "neden": "1523 tarihli Çengelhan'da eski otomobiller, buharlı lokomotif ve canlandırılmış dükkânlar",
+      "osm": "way/874846748",
+      "place_id": "ChIJ9b_Z9mdO0xQRNU5BMBpIICo"
+    },
+    {
+      "sira": 18,
+      "ad": "Soğuksu Milli Parkı",
+      "kategori": "doga",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Kızılcahamam",
+      "merkeze_km": 63,
+      "neden": "Kızılcahamam'ın üstünde karaçam ormanı; yamaçlarında kara akbaba yuva yapar",
+      "place_id": "ChIJbY82oVL0gkARTQ6Y4VVuD7w"
+    },
+    {
+      "sira": 19,
+      "ad": "Roma Hamamı",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Altındağ",
+      "merkeze_km": 3,
+      "neden": "Caracalla döneminden kalan hamamın planı, yükseltilmiş yoldan yukarıdan okunur",
+      "osm": "node/10303257801",
+      "place_id": "ChIJcY5gZmJO0xQRs7tMopOZzQo"
+    },
+    {
+      "sira": 20,
+      "ad": "Gençlik Parkı",
+      "kategori": "aktivite",
+      "amaclar": [
+        "cocuklu",
+        "yavas"
+      ],
+      "ilce": "Altındağ",
+      "merkeze_km": 2,
+      "neden": "Kurutulan bataklığın yerinde 1943'te açılan park: büyük havuz, lunapark, çay bahçeleri",
+      "osm": "way/10711293",
+      "place_id": "ChIJLbRQIfRO0xQRIZZ2_dlkOqk"
+    },
+    {
+      "sira": 21,
+      "ad": "Samanpazarı",
+      "kategori": "carsi",
+      "amaclar": [
+        "kultur_tarih",
+        "lezzet"
+      ],
+      "ilce": "Altındağ",
+      "merkeze_km": 2,
+      "neden": "Kale yokuşunda bakırcılar, aktarlar ve halıcılar; eski Ankara'nın alışveriş yeri",
+      "place_id": "ChIJ__8Y9ltO0xQRzZkiADTFEi4"
+    },
+    {
+      "sira": 22,
+      "ad": "Hatun Pastanesi",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Çankaya",
+      "merkeze_km": 3,
+      "neden": "Ankara'nın ayakta kalan eski pastanelerinden; yazın limonata ve ev yapımı dondurma",
+      "place_id": "ChIJC_dNIMlN0xQRF_ou9KP_1Zg"
+    },
+    {
+      "sira": 23,
+      "ad": "CerModern",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Altındağ",
+      "merkeze_km": 1,
+      "neden": "Lokomotif tamir atölyelerinde çağdaş sanat; çelik çatı makasları olduğu gibi duruyor",
+      "osm": "way/435399786",
+      "place_id": "ChIJtXHx6_lO0xQRrPnb4V4RjX8"
+    },
+    {
+      "sira": 24,
+      "ad": "Kuğulu Park",
+      "kategori": "aktivite",
+      "amaclar": [
+        "yavas",
+        "cocuklu"
+      ],
+      "ilce": "Çankaya",
+      "merkeze_km": 2,
+      "neden": "Tunalı'nın başında kuğulu havuz; Ankaralılar buluşmak için burayı seçer",
+      "osm": "way/10126955",
+      "place_id": "ChIJT7AhDqJP0xQRfUIL_yqAcTM"
+    },
+    {
+      "sira": 25,
+      "ad": "Atakule",
+      "kategori": "manzara",
+      "amaclar": [
+        "yavas",
+        "gece"
+      ],
+      "ilce": "Çankaya",
+      "merkeze_km": 4,
+      "neden": "Çankaya sırtındaki kulenin terasından bütün Ankara ve ötesinde bozkır",
+      "place_id": "ChIJizavZldP0xQR0AKPUsRGmts"
+    },
+    {
+      "sira": 26,
+      "ad": "Nallıhan Kuş Cenneti",
+      "kategori": "doga",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Nallıhan",
+      "merkeze_km": 124,
+      "neden": "Aladağ Çayı'nın Sarıyar Barajı'na karıştığı sazlık; kara leylek ve balıkçıllar ürer",
+      "place_id": "ChIJZQjlKEJgzRQRWH4Ylj3M0p0"
+    },
+    {
+      "sira": 27,
+      "ad": "Tarihi Doğuş Simit Fırını",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Altındağ",
+      "merkeze_km": 2,
+      "neden": "Kale Mahallesi'nde odun fırınından çıkan pekmezli, bol susamlı Ankara simidi",
+      "place_id": "ChIJk5I4smlO0xQRnO7uYgWWOpA"
+    },
+    {
+      "sira": 28,
+      "ad": "Gordion Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Polatlı",
+      "merkeze_km": 79,
+      "neden": "Yassıhöyük'te Frig seramikleri, çakıl taşı mozaikler ve tümülüs buluntuları",
+      "osm": "relation/3223333",
+      "place_id": "ChIJmacrfR9e0hQRUykaKIppFcE"
+    },
+    {
+      "sira": 29,
+      "ad": "Tunalı Hilmi Caddesi",
+      "kategori": "carsi",
+      "amaclar": [
+        "gece",
+        "yavas"
+      ],
+      "ilce": "Çankaya",
+      "merkeze_km": 2,
+      "neden": "Kuğulu Park'tan başlayan Kavaklıdere caddesi: dükkânlar, pasajlar ve kafeler",
+      "place_id": "ChIJxR3TUaRP0xQRp0ao0yKHSKQ"
+    },
+    {
+      "sira": 30,
+      "ad": "Café des Cafés",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "yavas"
+      ],
+      "ilce": "Çankaya",
+      "merkeze_km": 2,
+      "neden": "Tunalı'nın yan sokağında, kuşaklardır Ankaralıların buluştuğu küçük kafe",
+      "osm": "node/93807636",
+      "place_id": "ChIJE0LYoaVP0xQR1oH0vjMWsX4"
+    },
+    {
+      "sira": 31,
+      "ad": "Mogan Gölü",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas",
+        "cocuklu"
+      ],
+      "ilce": "Gölbaşı",
+      "merkeze_km": 18,
+      "neden": "Gölbaşı'nda sazlıklı göl; kıyı parkında yürüyüş ve su kuşları",
+      "place_id": "ChIJ4T-9OXhB0xQR9ha4DWu9NuU"
+    },
+    {
+      "sira": 32,
+      "ad": "İnözü Vadisi",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "kultur_tarih"
+      ],
+      "ilce": "Beypazarı",
+      "merkeze_km": 85,
+      "neden": "Beypazarı'nın hemen kuzeyinde kayalara oyulmuş odaları olan dere vadisi",
+      "osm": "node/6712164385",
+      "place_id": "ChIJe2-qgU-30hQRF7zrvyvN378"
+    },
+    {
+      "sira": 33,
+      "ad": "Erimtan Arkeoloji ve Sanat Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Altındağ",
+      "merkeze_km": 2,
+      "neden": "Kale eteğinde Tunç Çağı'ndan Bizans'a Anadolu eserlerini gösteren özel müze",
+      "osm": "way/871035195",
+      "place_id": "ChIJVWVakmdO0xQRnEaxWENl_IU"
+    },
+    {
+      "sira": 34,
+      "ad": "Kocatepe Camii",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Çankaya",
+      "merkeze_km": 1,
+      "neden": "Kızılay'ın üstünde dört minareli büyük cami; 1987'de tamamlandı",
+      "osm": "relation/6276462",
+      "place_id": "ChIJSUtsaKxP0xQRdMQOgnjnRfA"
+    },
+    {
+      "sira": 35,
+      "ad": "Atatürk Orman Çiftliği",
+      "kategori": "aktivite",
+      "amaclar": [
+        "cocuklu",
+        "kultur_tarih"
+      ],
+      "ilce": "Yenimahalle",
+      "merkeze_km": 5,
+      "neden": "Atatürk'ün 1925'te bozkırda kurdurduğu örnek çiftlik; Atatürk Evi müze olarak gezilir",
+      "place_id": "ChIJM5yfjK9J0xQRV_cV3gyyOqg"
+    },
+    {
+      "sira": 36,
+      "ad": "Sakarya Caddesi",
+      "kategori": "carsi",
+      "amaclar": [
+        "gece",
+        "lezzet"
+      ],
+      "ilce": "Çankaya",
+      "merkeze_km": 0,
+      "neden": "Kızılay'ın yaya sokağı; akşamları balıkçı tezgâhları ve birahaneler dolar",
+      "place_id": "ChIJ69jm8FRO0xQRAGFxboi5mdk"
+    },
+    {
+      "sira": 37,
+      "ad": "MTA Şehit Cuma Dağ Tabiat Tarihi Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "cocuklu"
+      ],
+      "ilce": "Çankaya",
+      "merkeze_km": 5,
+      "neden": "Dinozor iskeletleri, mineraller ve fosiller; çocuklarla gidilecek müze",
+      "osm": "way/422026047",
+      "place_id": "ChIJe24LnwJG0xQR2kHecO69jt0"
+    },
+    {
+      "sira": 38,
+      "ad": "Kalecik Kalesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Kalecik",
+      "merkeze_km": 51,
+      "neden": "İlçeye adını veren tepe kalesi; aşağıda Kalecik karası üzümünün bağları",
+      "osm": "way/170012181",
+      "place_id": "ChIJi1ctwZLzgUAR8n7rcpwYruw"
+    },
+    {
+      "sira": 39,
+      "ad": "Haymana Kaplıcaları",
+      "kategori": "aktivite",
+      "amaclar": [
+        "yavas"
+      ],
+      "ilce": "Haymana",
+      "merkeze_km": 62,
+      "neden": "İlçe merkezinde termal sular; eski kaplıca binasının temeli Roma dönemine uzanır",
+      "place_id": "ChIJHdEfJwCv0xQRBYIS-nPBHsk"
+    },
+    {
+      "sira": 40,
+      "ad": "Nallıhan renkli tepeleri",
+      "kategori": "manzara",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Nallıhan",
+      "merkeze_km": 124,
+      "neden": "Kuş Cenneti çevresinde sarı, kahverengi ve kızıl katmanlı jips ve kil tepeler"
+    },
+    {
+      "sira": 41,
+      "ad": "Çubuk turşusu",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Çubuk",
+      "merkeze_km": 38,
+      "neden": "Çubuk'un coğrafi işaretli turşusu; kornişon ve biber, ilçedeki tezgâhlarda"
+    },
+    {
+      "sira": 42,
+      "ad": "Pembe Köşk",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Çankaya",
+      "merkeze_km": 3,
+      "neden": "İsmet İnönü'nün Çankaya'daki evi, eşyalarıyla birlikte müze",
+      "osm": "way/404138723",
+      "place_id": "ChIJIX6CpJtP0xQRQzUlYIpcqq0"
+    },
+    {
+      "sira": 43,
+      "ad": "Resim ve Heykel Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Altındağ",
+      "merkeze_km": 1,
+      "neden": "Eski Türk Ocağı binasında Cumhuriyet dönemi ressam ve heykeltıraşlarının eserleri",
+      "osm": "way/318274938",
+      "place_id": "ChIJBSGy-lhO0xQRE8eE3AaXKjw"
+    },
+    {
+      "sira": 44,
+      "ad": "Çubuk Karagöl",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Çubuk",
+      "merkeze_km": 53,
+      "neden": "Çubuk'un kuzeyinde çam ormanıyla çevrili küçük göl; piknik ve kısa yürüyüş",
+      "place_id": "ChIJr5lIudFEgkAR7ebhNzRcvlk"
+    },
+    {
+      "sira": 45,
+      "ad": "Gül Kahve",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet",
+        "yavas"
+      ],
+      "ilce": "Altındağ",
+      "merkeze_km": 3,
+      "neden": "Ulus'ta Cumhuriyet'ten bir yıl önce açılan kahveci; Türk kahvesi dükkânda kavrulur",
+      "place_id": "ChIJh2gGbGFO0xQR_vDTR6ZRLBA"
+    }
+  ]
+}

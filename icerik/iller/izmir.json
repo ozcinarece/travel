@@ -1,0 +1,648 @@
+{
+  "il": "İzmir",
+  "slug": "izmir",
+  "guncelleme": "2026-11-19",
+  "oneriler": [
+    {
+      "sira": 1,
+      "ad": "Efes Antik Kenti",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Selçuk",
+      "merkeze_km": 56,
+      "neden": "Mermer caddeden Celsus Kütüphanesi'ne, oradan büyük tiyatroya yürünen Roma kenti",
+      "osm": "way/244582409",
+      "place_id": "ChIJRwSz8EitvhQR-LYkCYrx-9A"
+    },
+    {
+      "sira": 2,
+      "ad": "Kemeraltı Çarşısı",
+      "kategori": "carsi",
+      "amaclar": [
+        "kultur_tarih",
+        "lezzet"
+      ],
+      "ilce": "Konak",
+      "merkeze_km": 0,
+      "neden": "Konak'tan Agora'ya hanlar, camiler ve meslek sokakları; Havra Sokağı'nda zeytin tezgâhları",
+      "osm": "node/12952048301",
+      "place_id": "ChIJ50QX-uPYuxQRyBM2_ZLjFfw"
+    },
+    {
+      "sira": 3,
+      "ad": "Kordon",
+      "kategori": "manzara",
+      "amaclar": [
+        "yavas",
+        "gece"
+      ],
+      "ilce": "Konak",
+      "merkeze_km": 2,
+      "neden": "Alsancak'tan Konak'a çimenli rıhtım; gün batarken körfezin karşısında Karşıyaka",
+      "osm": "way/93204922",
+      "place_id": "ChIJjcvmHlvYuxQRcOJSV83Im2o"
+    },
+    {
+      "sira": 4,
+      "ad": "Şirince",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas",
+        "lezzet"
+      ],
+      "ilce": "Selçuk",
+      "merkeze_km": 59,
+      "neden": "Selçuk'un üstündeki bağ köyü: yokuş sokaklarda taş evler ve meyve şarabı tezgâhları",
+      "place_id": "ChIJhQs2r79MuRQRHKH6Hsq4pTc"
+    },
+    {
+      "sira": 5,
+      "ad": "Bergama Akropolü",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Bergama",
+      "merkeze_km": 79,
+      "neden": "Pergamon'un tepesi: yamaca oturtulmuş dik tiyatro ve mermer Trajan Tapınağı",
+      "osm": "way/220481156",
+      "place_id": "ChIJA50aoZD4uRQRFRtp8SsklPw"
+    },
+    {
+      "sira": 6,
+      "ad": "İzmir Saat Kulesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Konak",
+      "merkeze_km": 0,
+      "neden": "Konak Meydanı'nın ortasındaki 1901 yapımı kule; birkaç adım ötede çinili Konak Camii",
+      "osm": "way/863380997",
+      "place_id": "ChIJLVn3L-LYuxQRegvv_rHXvcM"
+    },
+    {
+      "sira": 7,
+      "ad": "Alaçatı",
+      "kategori": "tarih",
+      "amaclar": [
+        "yavas",
+        "lezzet",
+        "gece"
+      ],
+      "ilce": "Çeşme",
+      "merkeze_km": 68,
+      "neden": "Taş evli dar sokaklar, tepede yel değirmenleri; akşamları sokaklar sofrayla dolar",
+      "place_id": "ChIJ2VYNr994uxQR4yuWhtQl2Ck"
+    },
+    {
+      "sira": 8,
+      "ad": "İzmir Arkeoloji Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Konak",
+      "merkeze_km": 1,
+      "neden": "Smyrna, Efes ve Teos'tan heykeller; bahçede lahitler ve yazıtlı mezar taşları",
+      "osm": "node/4815186885",
+      "place_id": "ChIJzdNI2d_YuxQR73CkeG3uZWg"
+    },
+    {
+      "sira": 9,
+      "ad": "Agora Ören Yeri",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Konak",
+      "merkeze_km": 1,
+      "neden": "Antik Smyrna'nın meydanı; ayağa kaldırılmış sütunlar ve bazilikanın tonozlu bodrumu",
+      "osm": "way/256317190",
+      "place_id": "ChIJz4HKgu_YuxQRbTOT_QxqU4U"
+    },
+    {
+      "sira": 10,
+      "ad": "Alsancak Dostlar Fırını",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Konak",
+      "merkeze_km": 3,
+      "neden": "Boyoz, haşlanmış yumurta ve çay: İzmir kahvaltısını tezgâhın önünde dene",
+      "osm": "node/5287460075",
+      "place_id": "ChIJE5Hqq0TYuxQRAI_uq7bnrNU"
+    },
+    {
+      "sira": 11,
+      "ad": "Efes Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Selçuk",
+      "merkeze_km": 56,
+      "neden": "Efes kazılarından iki Artemis heykeli ve yamaç evlerden çıkan ev eşyaları",
+      "osm": "node/785102629",
+      "place_id": "ChIJrZqwqkmtvhQRAnnGbORgiQY"
+    },
+    {
+      "sira": 12,
+      "ad": "Kızlarağası Hanı",
+      "kategori": "carsi",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Konak",
+      "merkeze_km": 0,
+      "neden": "İzmir'de ayakta kalan en büyük Osmanlı hanı; avluda kahve, revaklarda el işi dükkânları",
+      "osm": "relation/15607096",
+      "place_id": "ChIJ4X3zvOTYuxQRIW0mwDcQjpM"
+    },
+    {
+      "sira": 13,
+      "ad": "Söğüşçü Cimbom",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Konak",
+      "merkeze_km": 0,
+      "neden": "Haşlanmış dil ve yanak, domates ve maydanozla ekmeğe girer: İzmir söğüşü",
+      "osm": "node/7140774985",
+      "place_id": "ChIJJXi0j-PYuxQRrw1mmJkkGPg"
+    },
+    {
+      "sira": 14,
+      "ad": "Meryem Ana Evi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Selçuk",
+      "merkeze_km": 59,
+      "neden": "Bülbül Dağı'nın ormanında, Meryem'in son yıllarını geçirdiğine inanılan taş şapel",
+      "osm": "way/1412797204",
+      "place_id": "ChIJ8SyGPgqtvhQRnWwu6Q8eMyo"
+    },
+    {
+      "sira": 15,
+      "ad": "İzmir Tarihi Asansör",
+      "kategori": "manzara",
+      "amaclar": [
+        "yavas",
+        "cocuklu"
+      ],
+      "ilce": "Konak",
+      "merkeze_km": 1,
+      "neden": "Karataş'ta kıyıyla yamacı bağlayan tuğla kule; üst terastan körfezin tamamı",
+      "osm": "way/882072895",
+      "place_id": "ChIJ9yZupyXZuxQRRy6zC9zfQLU"
+    },
+    {
+      "sira": 16,
+      "ad": "Kadifekale",
+      "kategori": "manzara",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Konak",
+      "merkeze_km": 2,
+      "neden": "Pagos Tepesi'ndeki sur kalıntıları; körfez ve şehir buradan tek bakışta okunur",
+      "osm": "node/1936293144",
+      "place_id": "ChIJCWvYicfYuxQRr-3bXSNaHAU"
+    },
+    {
+      "sira": 17,
+      "ad": "Meşhur Hisarönü Şambalicisi",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Konak",
+      "merkeze_km": 1,
+      "neden": "İrmik ve yoğurtla pişip şerbetlenen şambaliyi Kemeraltı'nda, çayla ye",
+      "osm": "node/10022375717",
+      "place_id": "ChIJm-wTsuTYuxQREHrr3Pi3PJ8"
+    },
+    {
+      "sira": 18,
+      "ad": "Hisar Camii",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Konak",
+      "merkeze_km": 1,
+      "neden": "Kemeraltı'nın en büyük camisi; içeride kalem işi kubbe ve ahşap kadınlar mahfili",
+      "osm": "way/49422242",
+      "place_id": "ChIJDRzetuTYuxQRZk7hl5YOQlc"
+    },
+    {
+      "sira": 19,
+      "ad": "Sevinç Pastanesi",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet",
+        "yavas"
+      ],
+      "ilce": "Konak",
+      "merkeze_km": 2,
+      "neden": "Alsancak'ın aile pastanesi: kuru pasta, şerbetli tatlı ve dondurma aynı vitrinde",
+      "osm": "node/11825031470",
+      "place_id": "ChIJG9lMKlrYuxQRKYqtEb2yjAs"
+    },
+    {
+      "sira": 20,
+      "ad": "Çeşme Kalesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Çeşme",
+      "merkeze_km": 73,
+      "neden": "II. Bayezid'in limana yaptırdığı kale; içinde Çeşme Müzesi, surlardan liman görünür",
+      "osm": "relation/15606421",
+      "place_id": "ChIJhfrPDTV6uxQRti_HdO2Dk2k"
+    },
+    {
+      "sira": 21,
+      "ad": "Artemis Tapınağı",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Selçuk",
+      "merkeze_km": 56,
+      "neden": "Antik dünyanın yedi harikasından birinin yerinde tek sütun ve sazlık",
+      "osm": "way/244592660",
+      "place_id": "ChIJgXKl_FZNuRQRJEV_YFnjpvo"
+    },
+    {
+      "sira": 22,
+      "ad": "Aziz Yuhanna Bazilikası",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Selçuk",
+      "merkeze_km": 56,
+      "neden": "Ayasuluk Tepesi'nde Yuhanna'nın mezarı üstüne kurulan Bizans kilisesi; altında Selçuk",
+      "osm": "way/277610262",
+      "place_id": "ChIJ7fJ3TVdNuRQRLPDGRqxvBRE"
+    },
+    {
+      "sira": 23,
+      "ad": "İsa Bey Camii",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Selçuk",
+      "merkeze_km": 56,
+      "neden": "Aydınoğlu İsa Bey'in 14. yüzyılda yaptırdığı cami; avlusunda antik devşirme sütunlar",
+      "osm": "way/186411899",
+      "place_id": "ChIJ50HRQVdNuRQRQ9ExHPOmkzM"
+    },
+    {
+      "sira": 24,
+      "ad": "Asklepion",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Bergama",
+      "merkeze_km": 78,
+      "neden": "Pergamon'un şifa merkezi: sütunlu yol, küçük tiyatro ve tedavi binasına giden tünel",
+      "place_id": "ChIJWS46KH4CuhQRN5FyfVy4yzI"
+    },
+    {
+      "sira": 25,
+      "ad": "Kızıl Avlu",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Bergama",
+      "merkeze_km": 78,
+      "neden": "Bergama'nın ortasında kırmızı tuğladan dev Roma tapınağı; Mısır tanrılarına adanmış",
+      "osm": "way/220480903",
+      "place_id": "ChIJTSc-ol34uRQRwbb8LIQHGHY"
+    },
+    {
+      "sira": 26,
+      "ad": "Birgi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Ödemiş",
+      "merkeze_km": 84,
+      "neden": "Aydınoğulları'nın ilk merkezi; oyma ahşap minberli Ulu Cami ve Bozdağ eteğinde eski evler",
+      "place_id": "ChIJYWU8UuT6uBQR481HGM0wiOw"
+    },
+    {
+      "sira": 27,
+      "ad": "Çakırağa Konağı",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Ödemiş",
+      "merkeze_km": 84,
+      "neden": "Birgi'de duvarlarına İstanbul ve İzmir manzaraları resmedilmiş ahşap ağa konağı",
+      "osm": "way/1289268763",
+      "place_id": "ChIJEf_m6eH6uBQRjrfucmqCahs"
+    },
+    {
+      "sira": 28,
+      "ad": "Bergama Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Bergama",
+      "merkeze_km": 78,
+      "neden": "Pergamon ve çevre kazılarından heykeller, sikkeler ve küçük buluntular",
+      "osm": "relation/18734984",
+      "place_id": "ChIJO0ybo4MCuhQRAM82TwF6ms8"
+    },
+    {
+      "sira": 29,
+      "ad": "Sığacık",
+      "kategori": "tarih",
+      "amaclar": [
+        "yavas",
+        "lezzet"
+      ],
+      "ilce": "Seferihisar",
+      "merkeze_km": 39,
+      "neden": "Kale surlarının içine kurulmuş balıkçı köyü; birkaç kilometre güneyinde antik Teos",
+      "osm": "node/2117857604",
+      "place_id": "ChIJN14em8CMuxQRPnBW5_5QjeY"
+    },
+    {
+      "sira": 30,
+      "ad": "Klazomenai",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Urla",
+      "merkeze_km": 32,
+      "neden": "Urla İskelesi'nde antik zeytinyağı işliğinin yeniden kurulduğu kazı alanı",
+      "osm": "way/178315357",
+      "place_id": "ChIJg0YhBuGUuxQRe8sjWT-RXLM"
+    },
+    {
+      "sira": 31,
+      "ad": "Urla Bağ Yolu",
+      "kategori": "aktivite",
+      "amaclar": [
+        "lezzet",
+        "yavas"
+      ],
+      "ilce": "Urla",
+      "merkeze_km": 36,
+      "neden": "Urla'nın bağ evlerini birbirine bağlayan rota; bağların arasında şarap tadımı"
+    },
+    {
+      "sira": 32,
+      "ad": "Tire Salı Pazarı",
+      "kategori": "carsi",
+      "amaclar": [
+        "lezzet",
+        "kultur_tarih"
+      ],
+      "ilce": "Tire",
+      "merkeze_km": 65,
+      "neden": "Çevre köylerin ürününü getirdiği büyük pazar; çevresinde Beylikler dönemi camileri",
+      "place_id": "ChIJfU9HMyY9uRQRkHNsvcdK_wA"
+    },
+    {
+      "sira": 33,
+      "ad": "Tire köftesi",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Tire",
+      "merkeze_km": 65,
+      "neden": "Kıymadan uzun şişlerde pişen Tire köftesini pide ve tereyağıyla, ilçesinde ye"
+    },
+    {
+      "sira": 34,
+      "ad": "Foça",
+      "kategori": "tarih",
+      "amaclar": [
+        "yavas",
+        "doga",
+        "kultur_tarih"
+      ],
+      "ilce": "Foça",
+      "merkeze_km": 43,
+      "neden": "Antik Phokaia'nın üstünde taş evli liman; açıktaki adalarda Akdeniz foku yaşar",
+      "place_id": "ChIJKV0nGFO0uxQRZJR3IFlZ2U0"
+    },
+    {
+      "sira": 35,
+      "ad": "Gediz Deltası",
+      "kategori": "doga",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Çiğli",
+      "merkeze_km": 23,
+      "neden": "Şehrin kuzeyinde flamingoların kalabalık koloniler kurduğu tuzla ve sazlıklar",
+      "place_id": "ChIJaZ3uNsvJuxQRdYBl5If-GUQ"
+    },
+    {
+      "sira": 36,
+      "ad": "Ilıca Plajı",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Çeşme",
+      "merkeze_km": 67,
+      "neden": "Sığ, ince kumlu koy; denizin dibinden çıkan ılık su yer yer hissedilir",
+      "place_id": "ChIJbzHexKd5uxQRvvNz-lA85DE"
+    },
+    {
+      "sira": 37,
+      "ad": "Karaburun",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Karaburun",
+      "merkeze_km": 59,
+      "neden": "Yarımadanın ucuna dolanan kıyı yolu; kalabalıksız koylar ve dağ köyleri",
+      "place_id": "ChIJK1eQjK2ouxQR2oOUx9lhjzw"
+    },
+    {
+      "sira": 38,
+      "ad": "Gölcük",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Ödemiş",
+      "merkeze_km": 79,
+      "neden": "Bozdağlar'ın yüksek düzlüğünde, kıyısında yayla evleri olan dağ gölü",
+      "place_id": "ChIJNfeU_Pv7uBQR0wX8C7hpE4M"
+    },
+    {
+      "sira": 39,
+      "ad": "Bozdağ Kayak Merkezi",
+      "kategori": "aktivite",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Ödemiş",
+      "merkeze_km": 85,
+      "neden": "Bozdağlar'ın sırtında pistler; İzmir'den günübirlik kayağa gidilen yer",
+      "place_id": "ChIJeUeJl_33uBQRMsFFfN3ubFY"
+    },
+    {
+      "sira": 40,
+      "ad": "Alaçatı Sörf Koyu",
+      "kategori": "aktivite",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Çeşme",
+      "merkeze_km": 67,
+      "neden": "Düzenli esen kuzey rüzgârı ve sığ su; rüzgâr sörfüne başlamak için okullar burada"
+    },
+    {
+      "sira": 41,
+      "ad": "Kültürpark",
+      "kategori": "aktivite",
+      "amaclar": [
+        "cocuklu",
+        "yavas"
+      ],
+      "ilce": "Konak",
+      "merkeze_km": 2,
+      "neden": "1936'da fuar alanı olarak kurulan park; Paraşüt Kulesi, göl ve çay bahçeleri",
+      "osm": "way/555908291",
+      "place_id": "ChIJx2s8MPbYuxQRdgdXSysPTd8"
+    },
+    {
+      "sira": 42,
+      "ad": "Körfez vapuru",
+      "kategori": "aktivite",
+      "amaclar": [
+        "yavas",
+        "cocuklu"
+      ],
+      "ilce": "Konak",
+      "merkeze_km": 0,
+      "neden": "Konak İskelesi'nden Karşıyaka'ya vapurla geç; körfez denizden görülür"
+    },
+    {
+      "sira": 43,
+      "ad": "Atatürk Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Konak",
+      "merkeze_km": 2,
+      "neden": "Atatürk'ün İzmir'e geldiğinde kaldığı Birinci Kordon'daki ev",
+      "osm": "node/4167431689",
+      "place_id": "ChIJkeJbMFrYuxQRV_DQMvjsjdk"
+    },
+    {
+      "sira": 44,
+      "ad": "Ahmet Piriştina Kent Arşivi ve Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Konak",
+      "merkeze_km": 1,
+      "neden": "Eski itfaiye binasında şehrin geçmişi fotoğraflar, belgeler ve maketlerle",
+      "osm": "way/955410254",
+      "place_id": "ChIJGVwZCfrYuxQRmRHbvtzWtmE"
+    },
+    {
+      "sira": 45,
+      "ad": "Arkas Sanat Merkezi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Konak",
+      "merkeze_km": 2,
+      "neden": "Kordon'daki eski Fransız konsolosluğu binasında dönemsel resim sergileri",
+      "osm": "node/4815177744",
+      "place_id": "ChIJy20mmlfYuxQRZvUFG4A_bZ8"
+    },
+    {
+      "sira": 46,
+      "ad": "İzmir Etnografya Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Konak",
+      "merkeze_km": 1,
+      "neden": "Eski bir hastane binasında İzmir evleri, zanaatlar ve yerel giysiler",
+      "osm": "node/4815186884",
+      "place_id": "ChIJO_6mer_ZuxQRQ7XTGVJTh1s"
+    },
+    {
+      "sira": 47,
+      "ad": "Ayşa",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Konak",
+      "merkeze_km": 1,
+      "neden": "Kemeraltı'nda el açması Boşnak böreği; tezgâhtan seçilen Balkan tencere yemekleri",
+      "osm": "node/12806599002",
+      "place_id": "ChIJr3XEROTYuxQRQAfOFkyuQdE"
+    },
+    {
+      "sira": 48,
+      "ad": "Sakız Alsancak",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet",
+        "gece"
+      ],
+      "ilce": "Konak",
+      "merkeze_km": 1,
+      "neden": "Ege otları, zeytinyağlılar ve günün balığı üzerine kurulu Alsancak lokantası",
+      "osm": "node/8040416385",
+      "place_id": "ChIJyxgxrfnYuxQREt9dxixAWuA"
+    },
+    {
+      "sira": 49,
+      "ad": "Rumeli Pastanesi",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Çeşme",
+      "merkeze_km": 72,
+      "neden": "Çeşme çarşısında sakız aromalı dondurma, muhallebi ve ev yapımı reçeller",
+      "place_id": "ChIJQ110MDR6uxQR4mNGMCpZRbk"
+    }
+  ]
+}
