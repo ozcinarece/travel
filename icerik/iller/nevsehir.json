@@ -1,0 +1,527 @@
+{
+  "il": "Nevşehir",
+  "slug": "nevsehir",
+  "guncelleme": "2026-11-19",
+  "oneriler": [
+    {
+      "sira": 1,
+      "ad": "Göreme Açık Hava Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 12,
+      "neden": "Kayaya oyulmuş manastır ve kiliseler; Karanlık Kilise'nin freskleri renklerini koruyor",
+      "osm": "way/26045752",
+      "place_id": "ChIJ7eS75-xnKhUR_syP0bAUyrs"
+    },
+    {
+      "sira": 2,
+      "ad": "Sıcak hava balonu",
+      "kategori": "aktivite",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 11,
+      "neden": "Gün doğumunda vadilerin üstünden geçen balonlar; uçmasan da kalkışı izlemeye değer"
+    },
+    {
+      "sira": 3,
+      "ad": "Uçhisar Kalesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "doga"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 8,
+      "neden": "Bölgenin en yüksek kaya kütlesi; tepesinden Erciyes'e kadar bütün vadiler görünür",
+      "osm": "node/707408836",
+      "place_id": "ChIJxb0Tce5oKhURycWROqZOpUg"
+    },
+    {
+      "sira": 4,
+      "ad": "Paşabağları",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Avanos",
+      "merkeze_km": 14,
+      "neden": "Birkaç başlıklı peri bacalarının en sık durduğu yer; bir bacada keşiş hücresi var",
+      "osm": "node/9382198517",
+      "place_id": "ChIJu28TZHlnKhURu02RVFXJs3I"
+    },
+    {
+      "sira": 5,
+      "ad": "Derinkuyu Yeraltı Şehri",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Derinkuyu",
+      "merkeze_km": 28,
+      "neden": "Kat kat yerin altına inen tüneller, ahırlar ve sürgü taşlı kapılar",
+      "place_id": "ChIJd8QGwXwaKhURb4-IR633Sa8"
+    },
+    {
+      "sira": 6,
+      "ad": "Kızılçukur Vadisi",
+      "kategori": "manzara",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Avanos",
+      "merkeze_km": 13,
+      "neden": "Gün batımında kayalar kızıla döner; tepedeki seyir noktasına yürüyerek de çıkılır",
+      "place_id": "ChIJqcctr4pnKhURBlBum4JXgpE"
+    },
+    {
+      "sira": 7,
+      "ad": "Zelve Açık Hava Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih",
+        "doga"
+      ],
+      "ilce": "Avanos",
+      "merkeze_km": 14,
+      "neden": "1950'lere kadar yaşanan kaya köyü; üç vadide oyma evler, cami ve kiliseler",
+      "osm": "way/22271687",
+      "place_id": "ChIJ____v3doKhURDVATlblKsSY"
+    },
+    {
+      "sira": 8,
+      "ad": "Kaymaklı Yeraltı Şehri",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 18,
+      "neden": "Dar geçitlerle birbirine bağlanan katlar; Derinkuyu'yla aynı yolda, 9 km kuzeyde",
+      "place_id": "ChIJk9bxn8ITKhURGcquDqMYZDA"
+    },
+    {
+      "sira": 9,
+      "ad": "Güvercinlik Vadisi",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 10,
+      "neden": "Yamaçlara oyulmuş güvercinlikler; Uçhisar'dan Göreme'ye inen patika vadiden geçer",
+      "osm": "node/5338426121",
+      "place_id": "ChIJM5r3OOVoKhURdOZ_Jxgobmk"
+    },
+    {
+      "sira": 10,
+      "ad": "Avanos çömlekçileri",
+      "kategori": "aktivite",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Avanos",
+      "merkeze_km": 16,
+      "neden": "Kızılırmak'ın kırmızı kiliyle çömlek yapılan kasaba; atölyede tezgâhta sen de dene"
+    },
+    {
+      "sira": 11,
+      "ad": "Ortahisar Kalesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Ürgüp",
+      "merkeze_km": 13,
+      "neden": "Köyün ortasında yükselen oyma kaya; çevresindeki tüflerde limon depoları var",
+      "osm": "node/306877927",
+      "place_id": "ChIJ-YJvI6dCKhUR56sjg0FMSBQ"
+    },
+    {
+      "sira": 12,
+      "ad": "Çavuşin Eski Köyü",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Avanos",
+      "merkeze_km": 12,
+      "neden": "Yamaca oyulmuş terk edilmiş köy; tepede Vaftizci Yahya Kilisesi",
+      "osm": "node/7043126867",
+      "place_id": "ChIJ6QZMoJdnKhURswmZWTvmTYo"
+    },
+    {
+      "sira": 13,
+      "ad": "Aşk Vadisi",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 11,
+      "neden": "Uzun, ince peri bacalarının sıralandığı vadi; tepeden ve içinden iki yolla gezilir",
+      "osm": "node/13199843301",
+      "place_id": "ChIJr00FEABnKhURZ3vln-phkAA"
+    },
+    {
+      "sira": 14,
+      "ad": "Devrent Vadisi",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Ürgüp",
+      "merkeze_km": 16,
+      "neden": "Kayalarda hayvan biçimleri aranan pembe vadi; deve kayası en bilineni",
+      "osm": "node/297447938",
+      "place_id": "ChIJ-_ysQ41dKhUR3AYfRiGbVQo"
+    },
+    {
+      "sira": 15,
+      "ad": "Mustafapaşa",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Ürgüp",
+      "merkeze_km": 16,
+      "neden": "Eski adıyla Sinasos; taş oymalı Rum konakları ve Konstantin Helena Kilisesi",
+      "place_id": "ChIJB8RcK1ZCKhURaN8oreKC6Qw"
+    },
+    {
+      "sira": 16,
+      "ad": "Üç Güzeller",
+      "kategori": "manzara",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Ürgüp",
+      "merkeze_km": 15,
+      "neden": "Ürgüp girişinde şapkalı üç peri bacası; bölgenin simgesi sayılan kare",
+      "osm": "node/417913277",
+      "place_id": "ChIJs5AqJDpdKhURxJ7HR014_9s"
+    },
+    {
+      "sira": 17,
+      "ad": "Temenni Tepesi",
+      "kategori": "manzara",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Ürgüp",
+      "merkeze_km": 17,
+      "neden": "Ürgüp'ün ortasındaki tepe; Kılıçarslan türbesi ve kasabanın tamamı ayağının altında",
+      "osm": "node/344940289",
+      "place_id": "ChIJm89JNtlcKhURrBAl9fbC1B0"
+    },
+    {
+      "sira": 18,
+      "ad": "Seten Restaurant",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 10,
+      "neden": "Göreme'de Kapadokya mutfağı; testi kebabı ve çekirdekli erişte",
+      "osm": "node/6577452287",
+      "place_id": "ChIJVRqu0XtoKhURz78s--OMArA"
+    },
+    {
+      "sira": 19,
+      "ad": "Fatıma'nın Sofrası",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Avanos",
+      "merkeze_km": 16,
+      "neden": "Avanos'ta aile işletmesi; Kayseri tipi mantı, kavurmalı pilav ve testi kebabı",
+      "place_id": "ChIJyXVMYQthKhURvjo5AVJRgfY"
+    },
+    {
+      "sira": 20,
+      "ad": "Hacıbektaş Veli Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Hacıbektaş",
+      "merkeze_km": 38,
+      "neden": "Hacı Bektaş Veli'nin dergâhı; türbe, meydan evi ve çilehane bir arada",
+      "place_id": "ChIJb6qlQXKBKhURY64P_WmYQ-U"
+    },
+    {
+      "sira": 21,
+      "ad": "Nevşehir Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "Kapadokya buluntuları tek yerde; vadilere çıkmadan önce bölgenin tarihine giriş",
+      "osm": "way/233586090",
+      "place_id": "ChIJaepx42duKhURDPZljTbjds8"
+    },
+    {
+      "sira": 22,
+      "ad": "Gülşehir Açıksaray",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Gülşehir",
+      "merkeze_km": 17,
+      "neden": "Avlulu kaya yapıları ve mantar biçimli kaya; kalabalıktan uzak bir ören yeri",
+      "place_id": "ChIJAwAKAuB6KhURD68Q9gM1qW8"
+    },
+    {
+      "sira": 23,
+      "ad": "Güllüdere Vadisi",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Avanos",
+      "merkeze_km": 12,
+      "neden": "Çavuşin'den Kızılçukur'a uzanan yürüyüş vadisi; yol üstünde kaya kiliseleri",
+      "osm": "node/2402626256",
+      "place_id": "ChIJndxIMOpnKhURC0UwP-5X5U4"
+    },
+    {
+      "sira": 24,
+      "ad": "Saklı Konak",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 8,
+      "neden": "Uçhisar'da testi kebabı ve düğü çorbası; kahvaltısı da bilinir",
+      "osm": "node/6724795495",
+      "place_id": "ChIJayHu-u5oKhURyXBnfCa9D7g"
+    },
+    {
+      "sira": 25,
+      "ad": "Tık Tık Kadın Emeği",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Ürgüp",
+      "merkeze_km": 17,
+      "neden": "Kadın kooperatifinin mutfağı; çekirdekli erişte, Ürgüp köftesi ve mantı",
+      "place_id": "ChIJLRIp4XldKhUR1H_un9eQ6BU"
+    },
+    {
+      "sira": 26,
+      "ad": "El Nazar Kilisesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 11,
+      "neden": "Tek bir peri bacasına oyulmuş kilise; müzenin yolunda, daha sakin",
+      "osm": "node/249554168",
+      "place_id": "ChIJBVs513loKhUREki4uBfBSKw"
+    },
+    {
+      "sira": 27,
+      "ad": "Güray Seramik Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Avanos",
+      "merkeze_km": 14,
+      "neden": "Yerin altına oyulmuş galerilerde Avanos çömlekçiliğinin eski ve yeni örnekleri",
+      "osm": "node/2905381216",
+      "place_id": "ChIJwWKkzjBnKhURYohCdw3afMQ"
+    },
+    {
+      "sira": 28,
+      "ad": "Sarıhan Kervansarayı",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Avanos",
+      "merkeze_km": 20,
+      "neden": "Selçuklu kervansarayı; taç kapısı ve geniş avlusu ayakta",
+      "osm": "relation/7655709",
+      "place_id": "ChIJV5XXHfVeKhUR-wuwMxPG4kI"
+    },
+    {
+      "sira": 29,
+      "ad": "Özkonak Yeraltı Şehri",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Avanos",
+      "merkeze_km": 21,
+      "neden": "Avanos'un kuzeyinde; katlar arası haberleşme delikleri ve daha az kalabalık",
+      "place_id": "ChIJw-VP8L-KKhURbMHi4Q4hisY"
+    },
+    {
+      "sira": 30,
+      "ad": "Damat İbrahim Paşa Külliyesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Nevşehir'i kuran sadrazamın külliyesi; kurşun kubbeli cami, medrese ve kütüphane",
+      "osm": "relation/9594233",
+      "place_id": "ChIJsV1S8m5uKhURdXU_JrW9KZs"
+    },
+    {
+      "sira": 31,
+      "ad": "Tandır Restaurant",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Ürgüp",
+      "merkeze_km": 13,
+      "neden": "Ortahisar'da kuzu tandır ve testi kebabı; kalenin dibinde",
+      "osm": "node/9796044115",
+      "place_id": "ChIJdRWvZadCKhURC9IufHQvrfM"
+    },
+    {
+      "sira": 32,
+      "ad": "Turasan Şarap Evi",
+      "kategori": "aktivite",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Ürgüp",
+      "merkeze_km": 17,
+      "neden": "Ürgüp'te eski bağcı ailesinin şaraphanesi; Kapadokya'nın emir üzümünü tat",
+      "place_id": "ChIJecU-3yZdKhURrrrWDgqcmBA"
+    },
+    {
+      "sira": 33,
+      "ad": "Ürgüp Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Ürgüp",
+      "merkeze_km": 17,
+      "neden": "Kasaba merkezinde küçük müze; çevre ören yerlerinin buluntuları ve etnografya",
+      "osm": "way/133728196",
+      "place_id": "ChIJw8pZPNxcKhURFt5y1X3abUI"
+    },
+    {
+      "sira": 34,
+      "ad": "Keşlik Manastırı",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Ürgüp",
+      "merkeze_km": 19,
+      "neden": "Cemil yolunda kaya manastırı; kararmış kilise içinde fresk izleri ve mutfak",
+      "place_id": "ChIJb3YfKzZBKhUR0HifWCMZktc"
+    },
+    {
+      "sira": 35,
+      "ad": "Gülşehir Karşı Kilise",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Gülşehir",
+      "merkeze_km": 15,
+      "neden": "Gülşehir girişinde iki katlı kaya kilisesi; Son Yargı freski iyi korunmuş",
+      "place_id": "ChIJf63ZuUl6KhURfG0J1ZaL51M"
+    },
+    {
+      "sira": 36,
+      "ad": "Nevşehir Kalesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Şehrin tepesindeki Selçuklu kalesi; Erciyes ve Hasandağı'na bakan surlar",
+      "place_id": "ChIJcwtDCHJuKhUROd-6mya0bbU"
+    },
+    {
+      "sira": 37,
+      "ad": "Pancarlık Kilisesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Ürgüp",
+      "merkeze_km": 16,
+      "neden": "Ortahisar ile Ürgüp arasında freskleri renkli kalmış küçük kaya kilisesi",
+      "osm": "node/4898773810",
+      "place_id": "ChIJ14u7BMRCKhUREdxf30nZRO4"
+    },
+    {
+      "sira": 38,
+      "ad": "Sobesos Antik Kenti",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Ürgüp",
+      "merkeze_km": 24,
+      "neden": "Şahinefendi köyünde Roma dönemi hamam ve mozaikli tabanlar",
+      "place_id": "ChIJKXMwi0pHKhURuGtLv4jW9nY"
+    },
+    {
+      "sira": 39,
+      "ad": "Kozaklı Kaplıcaları",
+      "kategori": "aktivite",
+      "amaclar": [
+        "yavas"
+      ],
+      "ilce": "Kozaklı",
+      "merkeze_km": 67,
+      "neden": "İlin kuzeyinde sıcak su kaplıcaları; gezi gününün yorgunluğunu at",
+      "place_id": "ChIJ-Y928wu4KhUR6lA1AQAcvy8"
+    },
+    {
+      "sira": 40,
+      "ad": "Damsa Barajı",
+      "kategori": "manzara",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Ürgüp",
+      "merkeze_km": 21,
+      "neden": "Mustafapaşa'nın güneyinde baraj gölü; Soğanlı yoluna giderken durulan seyir yeri",
+      "osm": "node/6734800885",
+      "place_id": "ChIJa2WYvcZDKhURdzhFyfT5a1M"
+    }
+  ]
+}
