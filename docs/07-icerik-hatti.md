@@ -128,7 +128,7 @@ Google'dan taze alınır. Mekan rehberleri ayrı dosyalarda: `icerik/yerler/<şe
   "gezi": {
     "slug": "eskisehir-hafta-sonu",
     "baslik": "Eskişehir'de bir hafta sonu",
-    "ozet": "Yürüyerek, rahat tempoda; ilk kez gidenler için",
+    "ozet": "Odunpazarı evleri, OMM, Porsuk'ta gondol ve Sazova",
     "yazar_ad": "Tripmate ekibi",
     "amaclar": ["kultur_tarih", "yavas"],
     "yazi_md": "…"
