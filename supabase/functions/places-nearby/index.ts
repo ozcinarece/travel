@@ -65,8 +65,8 @@ Deno.serve(sayacli('places-nearby', async (istek) => {
   try {
     // #164 KK2: otel adayları dışındaki tüm istekler (Turistik, Tümü, kategoriler) konaklamayı dışlar.
     const haric = cip === 'otel' ? undefined : KONAKLAMA_TIPLERI;
-    // #178 KK2: Turistik'te mahalle camisi yok — ibadet yeri yalnız turistik tip ya da ≥ 1.000 yorumla.
-    const yerler = await yakinAra({ merkez: { lat, lng }, yaricapM, tipler, enFazla, haric, ibadetSuzgeci: cip === 'turistik', birincilTipler: istekBirincilTipleri(cip), yenidenDenemeIzni });
+    // #178 KK2 (#400: sihirbazın `gormen` isteğinde de): Turistik'te mahalle camisi yok — ibadet yeri yalnız turistik tip ya da ≥ 1.000 yorumla.
+    const yerler = await yakinAra({ merkez: { lat, lng }, yaricapM, tipler, enFazla, haric, ibadetSuzgeci: cip === 'turistik' || cip === 'gormen', birincilTipler: istekBirincilTipleri(cip), yenidenDenemeIzni });
     onbellekYaz(anahtar, yerler);
     return await cevapla(yerler, false);
   } catch (e) {

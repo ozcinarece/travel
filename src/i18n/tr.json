@@ -1046,6 +1046,7 @@
     "oyGeriAl": "Oyunu geri al, {n} oy",
     "cikar": "Çıkar",
     "cikti": "{ad} listeden çıktı",
+    "gundenCikti": "{ad} {n}. günden de çıktı",
     "geriAl": "Geri al",
     "bos": "Listen boş",
     "bosAlt": "Yer ekle sekmesinde beğendiğin mekanları listeye ekle; burada günlere dağıtırsın.",

@@ -5,12 +5,14 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { EkranBasligi } from '@/components/EkranBasligi';
 import { YerKarosu } from '@/components/icerik/YerKarosu';
+import { GeriAlBandi } from '@/components/listem/GeriAlBandi';
 import { SecimMenusu } from '@/components/program/SecimMenusu';
 import { Cip } from '@/components/ui/Cip';
 import { useIcerikCanli } from '@/features/icerik/fotolar';
 import { useSehirler, useTumYerler } from '@/features/icerik/sorgular';
 import { hedefSeyahatler, useYereEkle } from '@/features/icerik/yerEkle';
-import { useMekanlar, useMekanSil } from '@/features/mekanlar/sorgular';
+import { useGeriAlinabilirSil } from '@/features/mekanlar/geriAlinabilirSil';
+import { useMekanlar } from '@/features/mekanlar/sorgular';
 import { useSeyahatler } from '@/features/seyahatler/sorgular';
 import { seyahatAdi } from '@/features/sihirbaz/sihirbaz';
 import { t } from '@/i18n';
@@ -26,14 +28,20 @@ export default function YerlerEkrani() {
   const hedefler = useMemo(() => hedefSeyahatler(seyahatler.data), [seyahatler.data]);
   const hedef = hedefler[0] ?? null;
   const hedefMekanlar = useMekanlar(hedef?.id);
-  const hedefIdleri = useMemo(() => new Set((hedefMekanlar.data ?? []).map((m) => m.place_id)), [hedefMekanlar.data]);
+  const [mesgulId, setMesgulId] = useState<string | null>(null);
+  const [bildirim, setBildirim] = useState<string | null>(null);
+  // #387: ✓ ile çıkarılan mekan 5 sn "Geri al" bandında bekler; o sürede listede sayılmaz.
+  // #387 inceleme 2: silme hatası bandı da 3,5 sn sonra kalkar.
+  const geriAlinabilir = useGeriAlinabilirSil(hedef?.id, () => {
+    setBildirim(t('listem.hata'));
+    setTimeout(() => setBildirim((b) => (b === t('listem.hata') ? null : b)), 3500);
+  });
+  const cikanId = geriAlinabilir.bekleyen?.mekanId;
+  const hedefIdleri = useMemo(() => new Set((hedefMekanlar.data ?? []).filter((m) => m.id !== cikanId).map((m) => m.place_id)), [hedefMekanlar.data, cikanId]);
   const liste = useMemo(() => (yerler.data ?? []).filter((y) => !sehirId || y.sehir_id === sehirId), [yerler.data, sehirId]);
   const canli = useIcerikCanli(liste, (y) => (y as (typeof liste)[number]).sehirler?.ad ?? '');
   const ekle = useYereEkle();
-  const sil = useMekanSil(hedef?.id ?? '');
   const [secimYeri, setSecimYeri] = useState<(typeof liste)[number] | null>(null);
-  const [mesgulId, setMesgulId] = useState<string | null>(null);
-  const [bildirim, setBildirim] = useState<string | null>(null);
 
   const yereEkle = async (y: (typeof liste)[number], seyahatId: string) => {
     const c = canli.data?.get(y.id);
@@ -51,19 +59,17 @@ export default function YerlerEkrani() {
       setMesgulId(null);
     }
   };
-  // ✓'ye dokununca listeden çıkar (hedef seyahatin listesi).
-  const cikar = async (y: (typeof liste)[number]) => {
+  // ✓'ye dokununca listeden çıkar (hedef seyahatin listesi). #387 KK1: hemen silinmez; 5 sn "Geri al" bandı.
+  const cikar = (y: (typeof liste)[number]) => {
     const pid = canli.data?.get(y.id)?.place_id;
-    const m = pid ? hedefMekanlar.data?.find((x) => x.place_id === pid) : undefined;
+    const m = pid ? hedefMekanlar.data?.find((x) => x.place_id === pid && x.id !== cikanId) : undefined;
     if (!m) return;
-    setMesgulId(y.id);
-    try {
-      await sil.mutateAsync(m.id);
-    } finally {
-      setMesgulId(null);
-    }
+    geriAlinabilir.cikar(m, y.ad);
   };
   const artiBas = (y: (typeof liste)[number]) => {
+    // #387: bant açıkken aynı mekana + basılırsa çıkarma geri alınır (silinmemişti).
+    const pid = canli.data?.get(y.id)?.place_id;
+    if (pid && geriAlinabilir.bekleyen?.placeId === pid) return geriAlinabilir.geriAl();
     if (hedefler.length === 0) return router.navigate('/(tabs)/yeni');
     if (hedefler.length === 1) return yereEkle(y, hedefler[0].id);
     setSecimYeri(y);
@@ -111,7 +117,9 @@ export default function YerlerEkrani() {
         </View>
         {!yerler.isPending && liste.length === 0 ? <Text style={s.bos}>{t('yerler.bos')}</Text> : null}
       </ScrollView>
-      {bildirim ? (
+      {geriAlinabilir.bekleyen ? (
+        <GeriAlBandi metin={geriAlinabilir.bekleyen.metin} onGeriAl={geriAlinabilir.geriAl} />
+      ) : bildirim ? (
         <View style={s.bildirim} pointerEvents="none">
           <Text style={s.bildirimMetin}>{bildirim}</Text>
         </View>

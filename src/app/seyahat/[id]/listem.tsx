@@ -1,12 +1,13 @@
 import { Image } from 'expo-image';
 import { router, useLocalSearchParams } from 'expo-router';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { GrupPenceresi } from '@/components/davet/GrupPenceresi';
 import { KategoriIkonu } from '@/components/gezi/GeziParcalari';
 import { GeriHapi } from '@/components/harita/HaritaEkrani';
+import { GeriAlBandi } from '@/components/listem/GeriAlBandi';
 import { GuneEkleSayfasi } from '@/components/listem/GuneEkleSayfasi';
 import { KaydirilirSatir } from '@/components/listem/KaydirilirSatir';
 import { SigmayanlarSayfasi } from '@/components/listem/SigmayanlarSayfasi';
@@ -24,7 +25,8 @@ import { useKonaklamalar } from '@/features/konaklama/sorgular';
 import { gunProgramlari, gunSecenekleri, listemGruplari, type GunSecenegi, type ListemSatiri, type ListemSiralama } from '@/features/listem/listem';
 import { dagitimSecenekleri, type DagitimHesabi, type DagitimSecenegi } from '@/features/listem/sigmayanlar';
 import { useGunlereDagit, useOylar, useOyVer } from '@/features/listem/sorgular';
-import { useMekanGuncelle, useMekanlar, useMekanSil, useUyeler } from '@/features/mekanlar/sorgular';
+import { useGeriAlinabilirSil } from '@/features/mekanlar/geriAlinabilirSil';
+import { useMekanGuncelle, useMekanlar, useUyeler } from '@/features/mekanlar/sorgular';
 import { useDurakGuncelle } from '@/features/program/sorgular';
 import { useProgramVerisi } from '@/features/program/useProgramVerisi';
 import { useSeyahatId } from '@/features/seyahatler/baglam';
@@ -38,9 +40,6 @@ import type { Durak, Gun, Mekan, Seyahat } from '@/lib/tipler';
 import { dakikaSaat } from '@/schedule/tempo';
 import { yolTarifiHedefi } from '@/lib/konum';
 import { baslikStili, bosluk, gunRengi, gunUstuMetin, kose, renk, yazi } from '@/theme';
-
-/** #141 KK4: Çıkar'dan sonra bu kadar "Geri al" süresi; sonra mekan listeden silinir. */
-const GERI_AL_MS = 5000;
 
 type Segment = 'tumu' | 'gunlerde' | 'atanmamis';
 
@@ -70,7 +69,6 @@ function Listem({ seyahat, gunler, duraklar, mekanlar, konaklamalar }: { seyahat
   const uyeler = useUyeler(seyahat.id);
   const oylar = useOylar(seyahat.id);
   const oyVer = useOyVer(seyahat.id);
-  const sil = useMekanSil(seyahat.id);
   const ata = useDuragaAta(seyahat.id);
   const kaldir = useDurakKaldir(seyahat.id);
   const durakGuncelle = useDurakGuncelle(seyahat.id);
@@ -88,41 +86,8 @@ function Listem({ seyahat, gunler, duraklar, mekanlar, konaklamalar }: { seyahat
   const [panelId, setPanelId] = useState<string | null>(null);
   const [bildirim, setBildirim] = useState<string | null>(null);
 
-  // KK4: Çıkar → satır gizlenir, 5 sn "Geri al"; süre dolunca (ya da ekrandan çıkınca) silinir. Aynı anda tek bekleyen.
-  const [bekleyen, setBekleyen] = useState<{ mekan: Mekan; ad: string } | null>(null);
-  const bekleyenRef = useRef<{ id: string; zaman: ReturnType<typeof setTimeout> } | null>(null);
-  const silMutate = sil.mutate;
-  const kesinlestir = () => {
-    const b = bekleyenRef.current;
-    if (!b) return;
-    clearTimeout(b.zaman);
-    bekleyenRef.current = null;
-    silMutate(b.id, { onError: () => setBildirim(t('listem.hata')) });
-  };
-  useEffect(
-    () => () => {
-      const b = bekleyenRef.current;
-      if (!b) return;
-      clearTimeout(b.zaman);
-      silMutate(b.id);
-    },
-    [silMutate],
-  );
-  const cikar = (m: Mekan, ad: string) => {
-    kesinlestir();
-    const zaman = setTimeout(() => {
-      kesinlestir();
-      setBekleyen(null);
-    }, GERI_AL_MS);
-    bekleyenRef.current = { id: m.id, zaman };
-    setBekleyen({ mekan: m, ad });
-  };
-  const geriAl = () => {
-    const b = bekleyenRef.current;
-    if (b) clearTimeout(b.zaman);
-    bekleyenRef.current = null;
-    setBekleyen(null);
-  };
+  // KK4 → #387: Çıkar → satır gizlenir, 5 sn "Geri al"; süre dolunca (ekrandan çıkınca ya da arka planda) silinir. Ortak kanca.
+  const { bekleyen, cikar, geriAl } = useGeriAlinabilirSil(seyahat.id, () => setBildirim(t('listem.hata')));
   useEffect(() => {
     if (!bildirim) return;
     const z = setTimeout(() => setBildirim(null), 3500);
@@ -141,7 +106,7 @@ function Listem({ seyahat, gunler, duraklar, mekanlar, konaklamalar }: { seyahat
     () => gunProgramlari({ seyahat, gunler, duraklar, mekanIle, gunUclari: verisi.gunUclari, yuruyus: verisi.yuruyus, saatler: yerler.data }),
     [seyahat, gunler, duraklar, mekanIle, verisi.gunUclari, verisi.yuruyus, yerler.data],
   );
-  const gizli = bekleyen?.mekan.id;
+  const gizli = bekleyen?.mekanId;
   const gruplar = useMemo(
     () =>
       listemGruplari({
@@ -341,20 +306,7 @@ function Listem({ seyahat, gunler, duraklar, mekanlar, konaklamalar }: { seyahat
           : null}
       </ScrollView>
 
-      {bekleyen ? (
-        <View style={[s.bant, { bottom: 16 }]}>
-          <Text style={s.bantMetin} numberOfLines={1}>
-            {t('listem.cikti', { ad: bekleyen.ad })}
-          </Text>
-          <Pressable accessibilityRole="button" onPress={geriAl} hitSlop={8} style={s.bantDugme}>
-            <Text style={s.bantDugmeMetin}>{t('listem.geriAl')}</Text>
-          </Pressable>
-        </View>
-      ) : bildirim ? (
-        <View style={[s.bant, { bottom: 16 }]} pointerEvents="none">
-          <Text style={s.bantMetin}>{bildirim}</Text>
-        </View>
-      ) : null}
+      {bekleyen ? <GeriAlBandi metin={bekleyen.metin} onGeriAl={geriAl} /> : bildirim ? <GeriAlBandi metin={bildirim} /> : null}
 
       {panelMekan ? (
         <View style={StyleSheet.absoluteFill} pointerEvents="box-none">
@@ -468,8 +420,4 @@ const s = StyleSheet.create({
   bosAlt: { fontFamily: yazi.normal, fontSize: 14, lineHeight: 20, color: renk.ikincil },
   bosDugme: { marginTop: 6, height: 44, paddingHorizontal: 16, borderRadius: kose.dugme, backgroundColor: renk.ana, justifyContent: 'center' },
   bosDugmeMetin: { fontFamily: yazi.ekstra, fontSize: 14, color: renk.zemin },
-  bant: { position: 'absolute', left: 16, right: 16, minHeight: 48, paddingLeft: 16, paddingRight: 8, borderRadius: 14, backgroundColor: renk.ana, flexDirection: 'row', alignItems: 'center', gap: 8, shadowColor: renk.metin, shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.2, shadowRadius: 12, elevation: 8 },
-  bantMetin: { flex: 1, fontFamily: yazi.kalin, fontSize: 13, color: renk.zemin, paddingVertical: 12 },
-  bantDugme: { height: 34, paddingHorizontal: 12, borderRadius: 10, backgroundColor: renk.vurgu, justifyContent: 'center' },
-  bantDugmeMetin: { fontFamily: yazi.ekstra, fontSize: 13, color: renk.metin },
 });

@@ -3,7 +3,7 @@ import { describe, expect, it, jest } from '@jest/globals';
 import type { HafifYer } from '@/features/yerler/api';
 import type { Yer } from '@/lib/tipler';
 
-import { cipListesi, GORMEN_EN_AZ, googleMekani, rehberMekani } from '../onerilenler';
+import { cipListesi, GORMEN_EN_AZ, googleMekani, muzeSiniri, rehberMekani } from '../onerilenler';
 
 jest.mock('@/lib/supabase', () => ({ supabase: {} }));
 
@@ -60,5 +60,29 @@ describe('görmen gerekenler listesi (#98 KK6)', () => {
     expect(g).not.toContain('h');
     expect(g).not.toContain('o');
     expect(g).toContain('t1');
+  });
+});
+
+describe('#400 öneri kalitesi', () => {
+  it('KK1: doğa tipleri girer (milli park, tabiat parkı, yürüyüş alanı); park yalnız ≥ 200 yorumla', () => {
+    const turistik = [hafif('np', 4.8, 900, 'national_park'), hafif('sp', 4.6, 50, 'state_park'), hafif('ha', 4.5, 40, 'hiking_area'), hafif('pb', 4.7, 450, 'park'), hafif('pk', 4.9, 120, 'park')];
+    const g = cipListesi('gormen', [], [], undefined, turistik).map((m) => m.place_id);
+    expect(g).toEqual(expect.arrayContaining(['np', 'sp', 'ha', 'pb']));
+    expect(g).not.toContain('pk');
+  });
+  it('KK3: müze ve galeri en çok %30; sıra korunur, fazla müzenin yerini sıradaki doğa ve tarihî yerler alır', () => {
+    const muzeler = Array.from({ length: 7 }, (_, i) => hafif(`m${i}`, 4.9 - i * 0.01, 5000, i % 2 ? 'art_gallery' : 'museum'));
+    const diger = [hafif('d1', 4.5, 800, 'national_park'), hafif('d2', 4.4, 700, 'historical_landmark'), hafif('d3', 4.3, 600, 'hiking_area'), hafif('d4', 4.2, 500, 'monument'), hafif('d5', 4.1, 400, 'tourist_attraction'), hafif('d6', 4.0, 300, 'castle'), hafif('d7', 3.9, 250, 'park')];
+    const g = cipListesi('gormen', [], [], undefined, [...muzeler, ...diger]);
+    const muze = g.filter((m) => ['museum', 'art_gallery'].includes(m.primary_type ?? ''));
+    expect(muze.length / g.length).toBeLessThanOrEqual(0.3);
+    expect(muze.map((m) => m.place_id)).toEqual(['m0', 'm1', 'm2']);
+    expect(g.map((m) => m.place_id)).toEqual(expect.arrayContaining(diger.map((d) => d.place_id)));
+    expect(g[0].place_id).toBe('m0');
+  });
+  it('KK3: rehber yerleri sınırla çıkmaz, ama sayılır', () => {
+    const r = rehberMekani({ ...yer('y9', 'Rehber müzesi'), kategori: 'museum' }, 'rm', null)!;
+    const g = muzeSiniri([r, googleMekani(hafif('m', 4.9, 9000, 'museum'), false), googleMekani(hafif('d', 4.5, 900, 'national_park'), false)]);
+    expect(g.map((m) => m.place_id)).toEqual(['rm', 'd']);
   });
 });
