@@ -1,0 +1,578 @@
+{
+  "il": "Bolu",
+  "slug": "bolu",
+  "guncelleme": "2026-11-19",
+  "oneriler": [
+    {
+      "sira": 1,
+      "ad": "Abant Gölü",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Mudurnu",
+      "merkeze_km": 31,
+      "neden": "Göl kıyısını dolaşan 7 km'lik yol; yürüyerek, bisikletle ya da elektrikli araçla",
+      "osm": "node/3015469233",
+      "place_id": "ChIJs13emcRmnUARCbOVpuq01mk"
+    },
+    {
+      "sira": 2,
+      "ad": "Yedigöller Milli Parkı",
+      "kategori": "doga",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Mengen",
+      "merkeze_km": 26,
+      "neden": "Orman içinde birbirine akan yedi göl; kar ve buzda yol kapanabilir",
+      "place_id": "ChIJ8dcXWBo_nUARM6kPTfod8vY"
+    },
+    {
+      "sira": 3,
+      "ad": "Gölcük Tabiat Parkı",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas",
+        "cocuklu"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 9,
+      "neden": "Şehre en yakın göl: kıyıda kısa yürüyüş ve piknik, yarım günde gidilip dönülür",
+      "place_id": "ChIJC6wS-1xGnUARarWWaEMm0qc"
+    },
+    {
+      "sira": 4,
+      "ad": "Mudurnu Arasta Çarşısı",
+      "kategori": "carsi",
+      "amaclar": [
+        "kultur_tarih",
+        "lezzet",
+        "yavas"
+      ],
+      "ilce": "Mudurnu",
+      "merkeze_km": 45,
+      "neden": "Ahilik geleneğini sürdüren esnaf sokakları; ahşap konaklar ve dükkânda saray helvası",
+      "place_id": "ChIJu93KcIE2zRQRqmV5wcXoXew"
+    },
+    {
+      "sira": 5,
+      "ad": "Kartalkaya Kayak Merkezi",
+      "kategori": "aktivite",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 20,
+      "neden": "Köroğlu Dağları'nda kayak; kar yokken çam ormanında yürüyüş",
+      "place_id": "ChIJy2Dio7BLnUAR0g_T6Z4fxpE"
+    },
+    {
+      "sira": 6,
+      "ad": "Mengen",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet",
+        "kultur_tarih"
+      ],
+      "ilce": "Mengen",
+      "merkeze_km": 45,
+      "neden": "Türkiye'nin ilk aşçılık okulu 1985'te burada açıldı; Mengen pilavı ve Bolu keşkeği",
+      "place_id": "ChIJXUBfrDbXnEARoRYl3WTGRi4"
+    },
+    {
+      "sira": 7,
+      "ad": "Göynük",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Göynük",
+      "merkeze_km": 79,
+      "neden": "Yüze yakın Osmanlı evi onarılmış sakin kasaba; dar sokaklar ve kadınların kurduğu pazar",
+      "place_id": "ChIJq_QDts7dzBQRaIJT3HrGfO8"
+    },
+    {
+      "sira": 8,
+      "ad": "Taşhan",
+      "kategori": "carsi",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Bolu çarşısının ortasındaki taş han; avlusunda kafe, çevresinde eski esnaf sokakları",
+      "osm": "node/12462647331",
+      "place_id": "ChIJiWfjU2s_nUARzCbYyMEWiC4"
+    },
+    {
+      "sira": 9,
+      "ad": "Yıldırım Bayezid Camii",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Çarşının ortasındaki Büyük Cami; Bolu'nun eski merkezi bu avlunun çevresinde",
+      "osm": "way/233878434",
+      "place_id": "ChIJz89jUms_nUARVjBIoA8HBqs"
+    },
+    {
+      "sira": 10,
+      "ad": "Sünnet Gölü Tabiat Parkı",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Göynük",
+      "merkeze_km": 65,
+      "neden": "Karaçam ormanında göl; ahşap iskele, orman patikaları ve kano",
+      "place_id": "ChIJ1cnp0_YmzRQRv4c8vgSoXjk"
+    },
+    {
+      "sira": 11,
+      "ad": "Akkaya Travertenleri",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 10,
+      "neden": "Kireçli suyun yamaçta bıraktığı beyaz basamaklar, şehrin hemen dışında",
+      "osm": "node/6617659820",
+      "place_id": "ChIJ4T9mc3lBnUARSkHkrDDL4_w"
+    },
+    {
+      "sira": 12,
+      "ad": "Bolu Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Bölgenin arkeolojisi ve etnografyası tek binada; bahçede açık hava taş eserleri",
+      "osm": "way/598840585",
+      "place_id": "ChIJ640Ghg0_nUARWcDMenyhCAs"
+    },
+    {
+      "sira": 13,
+      "ad": "Sülüklü Göl Tabiat Parkı",
+      "kategori": "doga",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Mudurnu",
+      "merkeze_km": 85,
+      "neden": "Kuru ağaç gövdeleri sudan yükselen orman gölü; kıyısında kamp yapılır",
+      "place_id": "ChIJYxegmsnXzBQRcKMKAUCsnc8"
+    },
+    {
+      "sira": 14,
+      "ad": "Hanzade",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "Abant kebabı, ovmaç çorbası ve paşa pilavı gibi Bolu yemekleri",
+      "osm": "node/13992666501",
+      "place_id": "ChIJCbx05Gs_nUARym6xCpK_4PE"
+    },
+    {
+      "sira": 15,
+      "ad": "Mudurnu Yıldırım Bayezid Camii",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Mudurnu",
+      "merkeze_km": 45,
+      "neden": "1382'de yapılan geniş kubbeli cami; yanındaki hamamla aynı külliyeden",
+      "osm": "way/96686723",
+      "place_id": "ChIJgzXY8YE2zRQRUmnLjxjtbS8"
+    },
+    {
+      "sira": 16,
+      "ad": "Kapankaya Seyir Terası",
+      "kategori": "manzara",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Mengen",
+      "merkeze_km": 25,
+      "neden": "Yedigöller yolunda gölleri ve vadiyi tepeden gösteren seyir kulesi",
+      "place_id": "ChIJo-qtenIfnUARzgFNwg52KKk"
+    },
+    {
+      "sira": 17,
+      "ad": "Kubbealtı",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Çarşıda el açması gözleme; yoğurtlu gözleme ve Abant kebabı",
+      "place_id": "ChIJ0zJeZGs_nUARe0X7Y58KTCI"
+    },
+    {
+      "sira": 18,
+      "ad": "Akşemseddin Türbesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Göynük",
+      "merkeze_km": 79,
+      "neden": "Fatih'in hocası Akşemseddin'in türbesi; mayısın üçüncü haftası adına şenlik yapılır",
+      "place_id": "ChIJH_9KKs_dzBQRSWHc_CMH0gE"
+    },
+    {
+      "sira": 19,
+      "ad": "Gazi Süleyman Paşa Camii",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Göynük",
+      "merkeze_km": 78,
+      "neden": "Orhan Gazi'nin oğlunun 14. yüzyılda yaptırdığı cami; yanındaki hamam hâlâ çalışıyor",
+      "osm": "way/752723113",
+      "place_id": "ChIJ-dbdKc_dzBQRscMCRCjFpbk"
+    },
+    {
+      "sira": 20,
+      "ad": "Zafer Kulesi",
+      "kategori": "manzara",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Göynük",
+      "merkeze_km": 79,
+      "neden": "Göynük'ün üstündeki 1923 yapımı ahşap kule; kuleye girilmiyor, tepeden kasaba görünür",
+      "osm": "node/5856791093",
+      "place_id": "ChIJWaoOI8ndzBQR6RMAuUjs2-E"
+    },
+    {
+      "sira": 21,
+      "ad": "Solaklar Kaya Evleri",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "doga"
+      ],
+      "ilce": "Seben",
+      "merkeze_km": 36,
+      "neden": "Seben'de yamaçtaki kayalara oyulmuş eski yerleşim odaları",
+      "place_id": "ChIJ9S2LTHBVnUARg7TDIfhnmGY"
+    },
+    {
+      "sira": 22,
+      "ad": "Yeniçağa Gölü",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Yeniçağa",
+      "merkeze_km": 36,
+      "neden": "Göçmen kuşların konakladığı göl; kıyısında kuş gözlemevi var",
+      "place_id": "ChIJk5xTNFYsnUARvXXLBjmdiOo"
+    },
+    {
+      "sira": 23,
+      "ad": "Mercan-i Restaurant",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "Bolu patatesi, Mengen pilavı ve Yedigöller kebabı gibi yöresel tabaklar",
+      "place_id": "ChIJXU5kCGw_nUARgoFCILDAOtY"
+    },
+    {
+      "sira": 24,
+      "ad": "Abant Çamlık Restoran",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet",
+        "doga"
+      ],
+      "ilce": "Mudurnu",
+      "merkeze_km": 31,
+      "neden": "Abant Gölü'nün yanında et yemekleri; Abant kebabıyla anılır",
+      "place_id": "ChIJzS3vOulmnUARZmV4XsIuUTc"
+    },
+    {
+      "sira": 25,
+      "ad": "Mudurnu Ahiler Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Mudurnu",
+      "merkeze_km": 45,
+      "neden": "Çarşının içinde Ahilik geleneğini ve eski zanaatları anlatan küçük müze",
+      "place_id": "ChIJ93CP4YE2zRQRN2ZyAOsb0GM"
+    },
+    {
+      "sira": 26,
+      "ad": "Bolu Kent Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "Bolu'nun şehir tarihini ve gündelik hayatını anlatan müze"
+    },
+    {
+      "sira": 27,
+      "ad": "Abant Tabiat Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Mudurnu",
+      "merkeze_km": 30,
+      "neden": "Göl girişinde bölgenin hayvanlarını tahnitlerle tanıtan küçük müze",
+      "place_id": "ChIJIdIiyepmnUARHrQVDrNd3KI"
+    },
+    {
+      "sira": 28,
+      "ad": "Sarıalan Yaylası",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 15,
+      "neden": "Kartalkaya yolunda ahşap evleri olan geniş yayla; yazın piknikçilerin yeri",
+      "place_id": "ChIJsXFaBDlKnUARc3sAGs8LpdE"
+    },
+    {
+      "sira": 29,
+      "ad": "Esentepe Kayak Merkezi",
+      "kategori": "aktivite",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Gerede",
+      "merkeze_km": 50,
+      "neden": "Gerede'nin çam ormanında küçük kayak merkezi ve mesire alanı",
+      "place_id": "ChIJ27LukibVgkARzv8EKaZgHi8"
+    },
+    {
+      "sira": 30,
+      "ad": "Babas Kaplıcası",
+      "kategori": "aktivite",
+      "amaclar": [
+        "yavas"
+      ],
+      "ilce": "Mudurnu",
+      "merkeze_km": 45,
+      "neden": "Mudurnu yakınında köklü termal kaplıca",
+      "place_id": "ChIJYfd9Mis0zRQR-QJsmRblXRk"
+    },
+    {
+      "sira": 31,
+      "ad": "Köroğlu Anıtı",
+      "kategori": "manzara",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 2,
+      "neden": "Alpagut'ta şehre bakan dev Köroğlu heykeli; parkın durumunu gitmeden kontrol et",
+      "place_id": "ChIJkwknZ2s_nUARPRD5gzMyq0g"
+    },
+    {
+      "sira": 32,
+      "ad": "Kadı Camii",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "1499 tarihli, ahşap tavanlı Osmanlı camisi; çarşıya birkaç adım",
+      "osm": "way/423635034",
+      "place_id": "ChIJjxzfeGs_nUAR4gds2muio6g"
+    },
+    {
+      "sira": 33,
+      "ad": "Tabaklar Hamamı",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "16. yüzyıldan kalma çifte hamam; hâlâ yıkanılabilir",
+      "place_id": "ChIJxZOoCWw_nUARWz6iLWm0yBM"
+    },
+    {
+      "sira": 34,
+      "ad": "Karagöl Tabiat Parkı",
+      "kategori": "doga",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Kıbrıscık",
+      "merkeze_km": 40,
+      "neden": "Kıbrıscık yolunda orman içinde kalabalıksız göl; kampçıların yeri",
+      "place_id": "ChIJmW2qmyungkARJqs7vF1H0VA"
+    },
+    {
+      "sira": 35,
+      "ad": "Çubuk Gölü",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "lezzet"
+      ],
+      "ilce": "Göynük",
+      "merkeze_km": 75,
+      "neden": "Göynük'te kıyısında balık lokantaları olan göl",
+      "place_id": "ChIJQ3T5nbnZzBQRp5Y4KgZ2_b4"
+    },
+    {
+      "sira": 36,
+      "ad": "Keçi Kalesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Gerede",
+      "merkeze_km": 50,
+      "neden": "Gerede'nin üstündeki kale kalıntısı; tepeden ilçeyi görürsün",
+      "place_id": "ChIJ0e4qyJ_VgkARit_sGwMTsvI"
+    },
+    {
+      "sira": 37,
+      "ad": "Mudurnu Demirciler Caddesi",
+      "kategori": "carsi",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Mudurnu",
+      "merkeze_km": 45,
+      "neden": "Demircilerin hâlâ çalıştığı sokak; Ahilik geleneği dükkânlarda sürüyor",
+      "place_id": "ChIJT8Q1CCo0zRQRQmjEQ6m4Eqw"
+    },
+    {
+      "sira": 38,
+      "ad": "Armutçular Konağı",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Mudurnu",
+      "merkeze_km": 45,
+      "neden": "19. yüzyıl sonundan ahşap oymalı konak; bugün otel ve restoran",
+      "place_id": "ChIJlbRIJII2zRQRG5LCSeoQjWw"
+    },
+    {
+      "sira": 39,
+      "ad": "At Yaylası",
+      "kategori": "doga",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 20,
+      "neden": "Yılkı atlarının dolaştığı yayla; kamp ve uzun yürüyüş için",
+      "place_id": "ChIJwSQUpFAVnUARLx58j7uQzdo"
+    },
+    {
+      "sira": 40,
+      "ad": "Çeşmi Cihan",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 2,
+      "neden": "Aşağısoku'da tencere yemekleri; kuru fasulye ve pilavıyla bilinen esnaf lokantası",
+      "place_id": "ChIJE59lJj0_nUARqdBqkIj0Gt0"
+    },
+    {
+      "sira": 41,
+      "ad": "Hacı Şakirler Konağı",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet",
+        "yavas"
+      ],
+      "ilce": "Mudurnu",
+      "merkeze_km": 45,
+      "neden": "Mudurnu'da eski bir ahşap konakta köy kahvaltısı",
+      "place_id": "ChIJn6EYByo0zRQR-r0e2Fz6n54"
+    },
+    {
+      "sira": 42,
+      "ad": "Akşemsettinoğlu Konağı",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet",
+        "yavas"
+      ],
+      "ilce": "Göynük",
+      "merkeze_km": 79,
+      "neden": "Göynük'te tarihi konakta bal-kaymak ve gözleme kahvaltısı",
+      "place_id": "ChIJYd8b1cGUzBQRA74AEXINpMM"
+    },
+    {
+      "sira": 43,
+      "ad": "Mudurnu Saray Helvası",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Mudurnu",
+      "merkeze_km": 45,
+      "neden": "Coğrafi işaretli saray helvasını yapıldığı kasabada al",
+      "place_id": "ChIJYfuc64M1zRQRqEo690nDTYk"
+    },
+    {
+      "sira": 44,
+      "ad": "Kule Kahve Evi",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "yavas"
+      ],
+      "ilce": "Göynük",
+      "merkeze_km": 79,
+      "neden": "Zafer Kulesi'nin birkaç adım ötesinde kahve evi; tepeye çıkınca mola yerin",
+      "osm": "node/5856799087",
+      "place_id": "ChIJpawsFR_dzBQROEQ336Cpzlc"
+    },
+    {
+      "sira": 45,
+      "ad": "Eskiçağa köy çay ocağı",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "yavas"
+      ],
+      "ilce": "Yeniçağa",
+      "merkeze_km": 40,
+      "neden": "85 yıllık köy çay ocağı: çay odun ateşinde demlenir, ücretini içen belirler"
+    }
+  ]
+}
