@@ -1,4 +1,4 @@
-import { Image } from 'expo-image';
+import { Foto } from '@/components/ui/Foto';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { MdYazi } from '@/components/icerik/MdYazi';
@@ -26,7 +26,7 @@ export function YerOnizleme({ yer, canli }: { yer: YerAlanlari; canli: HafifYer 
         <View style={s.ust}>
           <View style={s.tutamac} />
           <View style={s.baslik}>
-            <View style={s.kapak}>{yer.kapak_url ? <Image source={{ uri: yer.kapak_url }} style={StyleSheet.absoluteFill} contentFit="cover" /> : null}</View>
+            <View style={s.kapak}>{yer.kapak_url ? <Foto source={{ uri: yer.kapak_url }} style={StyleSheet.absoluteFill} contentFit="cover" /> : null}</View>
             <View style={s.baslikMetin}>
               <Text style={s.ad} numberOfLines={1}>
                 {yer.ad}

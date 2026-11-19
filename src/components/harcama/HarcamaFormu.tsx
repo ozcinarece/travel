@@ -3,7 +3,7 @@
 // Tutar · Pay; kişi başına onay kutusu ve hesaplanan pay), fiş fotoğrafı, Kaydet. Kuruş farkı ödeyene yazılır. Var olan harcama
 // aynı formda açılır: ekleyen ya da sahip düzenler/siler, diğer üyeler yalnız görür. Seçimler (para birimi, ödeyen, durak)
 // iç içe pencere açmadan formun içinde açılır.
-import { Image } from 'expo-image';
+import { Foto } from '@/components/ui/Foto';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { ActivityIndicator, KeyboardAvoidingView, Modal, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
@@ -481,7 +481,7 @@ function FormIcerigi({ onKapat, seyahat, uyeler, harcama, durakId, onBildirim }:
         {para !== 'TRY' && tl ? <Text style={s.ipucu}>{t('harcama.form.tlNotu', { tutar: paraMetni(tl) })}</Text> : null}
       </View>
 
-      {fis && fisAdresi.data ? <Image source={{ uri: fisAdresi.data }} style={s.fisOnizleme} contentFit="cover" accessibilityLabel={t('harcama.form.fis')} /> : null}
+      {fis && fisAdresi.data ? <Foto source={{ uri: fisAdresi.data }} style={s.fisOnizleme} contentFit="cover" accessibilityLabel={t('harcama.form.fis')} /> : null}
       {hata ? <Text style={[s.ipucu, { color: renk.uyari }]}>{hata}</Text> : null}
 
       {!salt ? (

@@ -1,7 +1,7 @@
 // #98 B → #164 / #165 (kanvas 9 · 9b · 9c): Keşfet öneri çekmecesi — üç hal: küçük (tutamak + tek satır "Bu bölgede önerilen · N"
 // + "Listende N") → yarım (aynı başlık + satırlar: foto 52, ad, "Kategori · ★ puan · süre", EkleDugmesi) → tam (durum çubuğunun
 // altına kadar; sabit başlık + "N yer" + filtre + hızlı çipler, iki sütun fotoğraflı kart, yüzen "Haritaya dön").
-import { Image } from 'expo-image';
+import { Foto as UzakFoto } from '@/components/ui/Foto';
 import type { ReactNode } from 'react';
 import { ActivityIndicator, FlatList, Pressable, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 
@@ -275,7 +275,7 @@ function OneriKarti({ oge, genislik, ...o }: Ortak & { oge: CekmeceOgesi; genisl
 function Foto({ oge, stil }: { oge: CekmeceOgesi; stil: object }) {
   return (
     <View style={[stil, { backgroundColor: kategoriPini(oge.primary_type).kategoriRenk }]}>
-      {oge.foto_uri ? <Image source={{ uri: oge.foto_uri }} style={StyleSheet.absoluteFill} contentFit="cover" transition={120} /> : null}
+      {oge.foto_uri ? <UzakFoto source={{ uri: oge.foto_uri }} style={StyleSheet.absoluteFill} contentFit="cover" transition={120} /> : null}
     </View>
   );
 }

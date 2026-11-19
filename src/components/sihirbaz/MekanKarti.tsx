@@ -1,6 +1,6 @@
 // #98 KK6 / B KK1 (kanvas TripWizard14 adım 5 ve çekmece tam ekran): büyük mekan kartı — foto 150 px, neden rozeti
 // (★ Öne çıkan / ★ Rehberde), ad, "kategori · süre · ★ puan · yorum", "Listeye ekle" ↔ "Listede".
-import { Image } from 'expo-image';
+import { Foto } from '@/components/ui/Foto';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { EkleDugmesi } from '@/components/ui/EkleDugmesi';
@@ -22,7 +22,7 @@ export function MekanKarti({ mekan, listede, mesgul, onEkle, onCikar, onAc }: Pr
   return (
     <Pressable accessibilityRole={onAc ? 'button' : undefined} onPress={onAc} disabled={!onAc} style={s.kart}>
       <View style={[s.foto, { backgroundColor: kategoriRenk }]}>
-        {mekan.foto_uri ? <Image source={{ uri: mekan.foto_uri }} style={StyleSheet.absoluteFill} contentFit="cover" transition={150} /> : null}
+        {mekan.foto_uri ? <Foto source={{ uri: mekan.foto_uri }} style={StyleSheet.absoluteFill} contentFit="cover" transition={150} /> : null}
         {mekan.neden ? (
           <View style={s.rozet}>
             <Ikon ad="yildiz" boyut={10} renk={renk.vurgu} />

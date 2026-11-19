@@ -1,7 +1,7 @@
 // #97 B KK1: gezi yazısı — markdown blokları: paragraf, başlık, alıntı kutusu, madde, 2'li foto satırı + altyazı.
 // #142 KK4: satır içi biçim (kalın, italik) ve mekan bağlantısı (turuncu alt çizgi, dokununca mekan rehberi); `::mekan[id]`
 // satırı paragraf altında mekan kartı (`mekanKarti` çizer); mekan rehberinde alıntı İPUCU kutusu olur (`ipucu`).
-import { Image } from 'expo-image';
+import { Foto } from '@/components/ui/Foto';
 import type { ReactNode } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
@@ -100,7 +100,7 @@ export function MdYazi({ kaynak, onMekan, mekanKarti, ipucu, kenar = 20, aralik,
               <View key={i} style={{ gap: 6 }}>
                 <View style={s.fotoSatir}>
                   {b.fotolar.map((f) => (
-                    <Image key={f.url} source={{ uri: f.url }} style={[s.foto, b.fotolar.length === 1 && s.fotoTek]} contentFit="cover" transition={150} accessibilityLabel={f.alt} />
+                    <Foto key={f.url} source={{ uri: f.url }} style={[s.foto, b.fotolar.length === 1 && s.fotoTek]} contentFit="cover" transition={150} accessibilityLabel={f.alt} />
                   ))}
                 </View>
                 {b.altyazi ? <Text style={s.altyazi}>{b.altyazi}</Text> : null}

@@ -1,4 +1,4 @@
-import { Image } from 'expo-image';
+import { Foto } from '@/components/ui/Foto';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { renk, yazi } from '@/theme';
@@ -19,7 +19,7 @@ const ACIK_ZEMINLER = new Set<string>([renk.vurgu, renk.yuzey, renk.anaAcik, ren
 export function Avatar({ ad, url, boyut = 30, arkaPlan = renk.ana, kucukHarf = false }: Props) {
   const kutu = { width: boyut, height: boyut, borderRadius: Math.round(boyut * 0.32) };
   if (url) {
-    return <Image source={{ uri: url }} style={kutu} contentFit="cover" accessibilityLabel={ad} />;
+    return <Foto source={{ uri: url }} style={kutu} contentFit="cover" accessibilityLabel={ad} />;
   }
   const harf = ad.trim().charAt(0).toLocaleUpperCase('tr') || '?';
   const zemin = arkaPlan.toLowerCase();

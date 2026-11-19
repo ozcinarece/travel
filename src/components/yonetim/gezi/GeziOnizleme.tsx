@@ -1,4 +1,4 @@
-import { Image } from 'expo-image';
+import { Foto } from '@/components/ui/Foto';
 import { useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
@@ -41,7 +41,7 @@ function YaziSayfasi({ gezi, sehirAdi }: { gezi: GeziDetay; sehirAdi: string }) 
     <>
       <ScrollView style={s.govde} contentContainerStyle={s.govdeIc}>
         <View style={s.kapak}>
-          {gezi.kapak_url ? <Image source={{ uri: gezi.kapak_url }} style={StyleSheet.absoluteFill} contentFit="cover" /> : null}
+          {gezi.kapak_url ? <Foto source={{ uri: gezi.kapak_url }} style={StyleSheet.absoluteFill} contentFit="cover" /> : null}
           <View style={s.kapakGolge} />
           <View style={[s.yuvarlak, s.solUst]}>
             <CizgiIkon d="M15 18l-6-6 6-6" />

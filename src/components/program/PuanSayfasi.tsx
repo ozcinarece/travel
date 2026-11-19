@@ -1,4 +1,4 @@
-import { Image } from 'expo-image';
+import { Foto } from '@/components/ui/Foto';
 import { useState } from 'react';
 import { KeyboardAvoidingView, Linking, Modal, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
@@ -49,7 +49,7 @@ export function PuanSayfasi(p: Props) {
           <Pressable style={StyleSheet.absoluteFill} onPress={p.onKapat} accessibilityLabel={t('program.puan.sonra')} />
           <CekilenSayfa onKapat={p.onKapat} style={s.kutu}>
             <View style={s.ust}>
-              {p.foto ? <Image source={{ uri: p.foto }} style={s.foto} contentFit="cover" /> : null}
+              {p.foto ? <Foto source={{ uri: p.foto }} style={s.foto} contentFit="cover" /> : null}
               <View style={{ flex: 1, minWidth: 0, gap: 2 }}>
                 <Text style={s.ad} numberOfLines={2}>
                   {p.ad}

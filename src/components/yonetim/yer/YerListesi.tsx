@@ -1,4 +1,4 @@
-import { Image } from 'expo-image';
+import { Foto } from '@/components/ui/Foto';
 import { useMemo, useState, type CSSProperties } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
@@ -78,7 +78,7 @@ export function YerListesi({ yerler, sehirler, sehirId, onSehir, seciliId, onSec
           return (
             <Pressable key={y.id} accessibilityRole="button" accessibilityState={{ selected: secili }} onPress={() => onSec(y.id)} style={StyleSheet.flatten([s.satir, secili && s.satirSecili])}>
               <View style={[s.kapak, { backgroundColor: kat.kategoriRenk }]}>
-                {y.kapak_url ? <Image source={{ uri: y.kapak_url }} style={StyleSheet.absoluteFill} contentFit="cover" /> : null}
+                {y.kapak_url ? <Foto source={{ uri: y.kapak_url }} style={StyleSheet.absoluteFill} contentFit="cover" /> : null}
               </View>
               <View style={s.metinler}>
                 <Text style={s.ad} numberOfLines={1}>

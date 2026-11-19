@@ -1,4 +1,4 @@
-import { Image } from 'expo-image';
+import { Foto } from '@/components/ui/Foto';
 import { router, useLocalSearchParams, type ErrorBoundaryProps } from 'expo-router';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ActivityIndicator, Linking, Pressable, ScrollView, Share, StyleSheet, Text, View } from 'react-native';
@@ -225,7 +225,7 @@ export default function GeziEkrani() {
     const y: Yer = { anahtar: placeId, place_id: placeId, ad: hafif.ad, primary_type: hafif.primary_type, lat: hafif.lat, lng: hafif.lng, dakika: durak?.sure_dk };
     return (
       <Pressable accessibilityRole="button" onPress={() => paneliAc(placeId, hafif, listedeki(placeId)?.default_minutes ?? durak?.sure_dk)} style={({ pressed }) => [s.kart, pressed && { opacity: 0.85 }]}>
-        <View style={s.kartFoto}>{foto ? <Image source={{ uri: foto }} style={StyleSheet.absoluteFill} contentFit="cover" transition={150} /> : null}</View>
+        <View style={s.kartFoto}>{foto ? <Foto source={{ uri: foto }} style={StyleSheet.absoluteFill} contentFit="cover" transition={150} /> : null}</View>
         <View style={{ flex: 1, minWidth: 0 }}>
           <Text style={s.kartAd} numberOfLines={1}>
             {hafif.ad}
@@ -255,7 +255,7 @@ export default function GeziEkrani() {
         <View style={[s.kapak, { height: kapakYuksekligi(kenar.top) }]}>
           {kapakUri ? (
             <>
-              <Image source={{ uri: kapakUri }} style={StyleSheet.absoluteFill} contentFit="cover" transition={150} />
+              <Foto source={{ uri: kapakUri }} style={StyleSheet.absoluteFill} contentFit="cover" transition={150} />
               <View style={s.kapakGolge} />
             </>
           ) : null}

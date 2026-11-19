@@ -1,4 +1,4 @@
-import { Image } from 'expo-image';
+import { Foto } from '@/components/ui/Foto';
 import { useRef, useState, type ReactNode } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
@@ -124,7 +124,7 @@ function GaleriKaro({ foto, indeks, rol, secili, onSec, onRol }: { foto: IcerikF
     <View style={s.karo}>
       <Pressable ref={ref} accessibilityRole="button" accessibilityState={{ selected: secili }} accessibilityLabel={dosyaAdi(foto.yol)} onPress={onSec} style={StyleSheet.flatten([s.karoCerceve, secili && s.karoSecili])}>
         <View style={s.karoGorsel}>
-          <Image source={{ uri: icerikFotoUrl(foto.yol) }} style={StyleSheet.absoluteFill} contentFit="cover" accessibilityLabel={foto.altyazi ?? undefined} />
+          <Foto source={{ uri: icerikFotoUrl(foto.yol) }} style={StyleSheet.absoluteFill} contentFit="cover" accessibilityLabel={foto.altyazi ?? undefined} />
           {rol ? (
             <View style={s.rozet}>
               <Text style={s.rozetMetin}>{ty(`sehir.foto.rol.${rol}`)}</Text>

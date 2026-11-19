@@ -1,4 +1,4 @@
-import { Image } from 'expo-image';
+import { Foto } from '@/components/ui/Foto';
 import { Link } from 'expo-router';
 import type { ReactNode } from 'react';
 import type { StyleProp, ViewStyle } from 'react-native';
@@ -156,7 +156,7 @@ export function EnCokAlinanlar({ geziler }: { geziler: Genel['en_cok_alinan'] })
       {geziler.map((g, i) => (
         <View key={g.id} style={s.geziSatir}>
           <View style={[s.kapak, { backgroundColor: renkler[i % renkler.length] }]}>
-            {g.kapak_url ? <Image source={{ uri: g.kapak_url }} style={StyleSheet.absoluteFill} contentFit="cover" /> : null}
+            {g.kapak_url ? <Foto source={{ uri: g.kapak_url }} style={StyleSheet.absoluteFill} contentFit="cover" /> : null}
           </View>
           <View style={s.geziMetin}>
             <View style={s.geziUst}>

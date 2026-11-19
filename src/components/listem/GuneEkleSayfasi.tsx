@@ -1,7 +1,7 @@
 // #141 KK5 (kanvas 13b · Güne ekle): "{Mekan} · Hangi güne ekleyelim?" — önerilen gün en üstte Mandalina çerçeve + "ÖNERİLEN"
 // ("Yakınında 2 mekan · 1,1 km", "4 mekan · biter 15:20 → 17:40"); diğer günler en yakın mesafe / boş gün bilgisiyle.
 // Dokun = ekle (saatler Program'da yeniden hesaplanır). Mesafe koordinattan; istek yok.
-import { Image } from 'expo-image';
+import { Foto } from '@/components/ui/Foto';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { gunAdi } from '@/components/program/PlanHazirSayfasi';
@@ -32,7 +32,7 @@ export function GuneEkleSayfasi({ acik, ad, foto, dakika, secenekler, ilkAd, mes
   return (
     <AltPencere acik={acik} onKapat={onKapat} kapatEtiketi={t('genel.vazgec')} kaydirilir stil={{ paddingHorizontal: 20, gap: 12 }}>
       <View style={s.ust}>
-        <View style={s.foto}>{foto ? <Image source={{ uri: foto }} style={StyleSheet.absoluteFill} contentFit="cover" /> : null}</View>
+        <View style={s.foto}>{foto ? <Foto source={{ uri: foto }} style={StyleSheet.absoluteFill} contentFit="cover" /> : null}</View>
         <View style={{ flex: 1, minWidth: 0 }}>
           <Text accessibilityRole="header" style={s.ad} numberOfLines={2}>
             {ad}
