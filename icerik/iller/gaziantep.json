@@ -1,0 +1,489 @@
+{
+  "il": "Gaziantep",
+  "slug": "gaziantep",
+  "guncelleme": "2026-11-19",
+  "oneriler": [
+    {
+      "sira": 1,
+      "ad": "Zeugma Mozaik Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Şehitkamil",
+      "merkeze_km": 1,
+      "neden": "Zeugma kazısından çıkan 2.448 m² mozaik; Çingene Kızı ayrı bir bölümde.",
+      "osm": "way/322631331",
+      "place_id": "ChIJyaU5d6rmMRURVotkWaeUJ7E"
+    },
+    {
+      "sira": 2,
+      "ad": "Gaziantep Kalesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Şahinbey",
+      "merkeze_km": 0,
+      "neden": "2023 depreminde burçları yıkılan kale, Bakanlık restorasyonuyla surlarına yeniden kavuştu.",
+      "osm": "way/237058550",
+      "place_id": "ChIJP__QMU3hMRURGSnqQ-TLVxc"
+    },
+    {
+      "sira": 3,
+      "ad": "Bakırcılar Çarşısı",
+      "kategori": "carsi",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Şahinbey",
+      "merkeze_km": 1,
+      "neden": "Kale eteğinde bakır döven ustaların dükkânları; Tahmis Kahvesi bu çarşının yanında",
+      "osm": "node/4889958236",
+      "place_id": "ChIJ51KvdbPmMRURjA_si3jDxR4"
+    },
+    {
+      "sira": 4,
+      "ad": "İmam Çağdaş",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Şahinbey",
+      "merkeze_km": 0,
+      "neden": "1887'den beri Uzun Çarşı'da; ali nazik kebabı ve ince yufkalı baklava aynı masada.",
+      "osm": "node/3485983758",
+      "place_id": "ChIJJfZ_PLrmMRURtQHmGRFj2-8"
+    },
+    {
+      "sira": 5,
+      "ad": "Rumkale",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "doga"
+      ],
+      "ilce": "Yavuzeli",
+      "merkeze_km": 46,
+      "neden": "Merzimen Çayı'nın Fırat'a karıştığı yarımadada; içinde Barşavma Manastırı var.",
+      "place_id": "ChIJGZCmxv_gMRURX079o5Z8v6Y"
+    },
+    {
+      "sira": 6,
+      "ad": "Almacı Pazarı",
+      "kategori": "carsi",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Şahinbey",
+      "merkeze_km": 0,
+      "neden": "Taze ve kavrulmuş Antep fıstığı, kurutmalık sebze, salça ve üzüm pekmezi tezgâhları.",
+      "place_id": "ChIJz6a-9LPmMRURO0G4lTp94rs"
+    },
+    {
+      "sira": 7,
+      "ad": "Tarihi Tahmis Kahvesi",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet",
+        "yavas"
+      ],
+      "ilce": "Şahinbey",
+      "merkeze_km": 1,
+      "neden": "Yaklaşık 400 yıllık kahvehane; menengiç kahvesi ve zahter çayı burada içilir.",
+      "osm": "way/237176907",
+      "place_id": "ChIJrTFmsLLmMRURDtSV5IhfEaU"
+    },
+    {
+      "sira": 8,
+      "ad": "Koçak Baklava",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Şehitkamil",
+      "merkeze_km": 2,
+      "neden": "Antep usulü ince yufkalı fıstıklı baklava; yalnız Gaziantep'teki dükkânlarında",
+      "osm": "node/5020521122",
+      "place_id": "ChIJcwJvHl3hMRURgGwW0IoInzk"
+    },
+    {
+      "sira": 9,
+      "ad": "Metanet Lokantası",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Şahinbey",
+      "merkeze_km": 1,
+      "neden": "Antep'in sabah çorbası beyranın bilinen adresi; yanında katmer de yapılıyor",
+      "osm": "node/12717921301",
+      "place_id": "ChIJRUABV7HmMRURaqHYf4SJqrc"
+    },
+    {
+      "sira": 10,
+      "ad": "Zincirli Bedesten",
+      "kategori": "carsi",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Şahinbey",
+      "merkeze_km": 0,
+      "neden": "1718'de Darendeli Hüseyin Paşa'nın yaptırdığı L planlı çarşı; yöresel ürün dükkânları.",
+      "osm": "way/237176143",
+      "place_id": "ChIJKcmetn3nMRUR-8gpVaFhTRw"
+    },
+    {
+      "sira": 11,
+      "ad": "Emine Göğüş Mutfak Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "lezzet",
+        "kultur_tarih"
+      ],
+      "ilce": "Şahinbey",
+      "merkeze_km": 0,
+      "neden": "Kale eteğindeki Göğüş konağında yuvalama, mırra ve bastık yapımı mankenlerle anlatılıyor.",
+      "place_id": "ChIJZ2vK00zhMRURI1f-QF51PbU"
+    },
+    {
+      "sira": 12,
+      "ad": "Mutfak Sanatları Merkezi (MSM)",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Şehitkamil",
+      "merkeze_km": 3,
+      "neden": "Büyükşehir'in UNESCO gastronomi sürecinde açtığı mutfak; meyveli kebap ve tadım menüsü.",
+      "osm": "node/5451600724",
+      "place_id": "ChIJO6VN4hHhMRURGJImz7YXErg"
+    },
+    {
+      "sira": 13,
+      "ad": "Bey Mahallesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Şahinbey",
+      "merkeze_km": 1,
+      "neden": "2007'de sokakları yenilenen taş konaklar; Atatürk Evi ve Oyuncak Müzesi de burada.",
+      "place_id": "ChIJ7fZxZUnhMRURRhCTvDh8X4k"
+    },
+    {
+      "sira": 14,
+      "ad": "Hasan Süzer Evlilik ve Yaşam Kültürü Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Şahinbey",
+      "merkeze_km": 1,
+      "neden": "Eski adı Etnografya Müzesi; Antep konağında kına gecesinden düğüne evlilik gelenekleri.",
+      "place_id": "ChIJA8jKJ0rhMRURqGJsMKT13pY"
+    },
+    {
+      "sira": 15,
+      "ad": "Dülük Antik Kenti",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "doga"
+      ],
+      "ilce": "Şehitkamil",
+      "merkeze_km": 9,
+      "neden": "Roma ordusunda yayılan Jupiter Dolichenus kültünün merkezi; yeraltı Mithras tapınağı var.",
+      "place_id": "ChIJFeQnHADjMRURht7r5fqZF_k"
+    },
+    {
+      "sira": 16,
+      "ad": "Dülükbaba Tabiat Parkı",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Şehitkamil",
+      "merkeze_km": 8,
+      "neden": "1950'lerden beri dikilen 306 hektarlık kızılçam ormanı; içinde kaya mezarları.",
+      "place_id": "ChIJh4ErWEfiMRURg0Ls88S0Q24"
+    },
+    {
+      "sira": 17,
+      "ad": "Zeugma Antik Kenti (Belkıs)",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Nizip",
+      "merkeze_km": 43,
+      "neden": "Fırat'ın batı kıyısındaki kent; mozaiklerin bir kısmı yerinde, bir bölümü baraj altında.",
+      "place_id": "ChIJh-OsLZSGMRUR6IPaLI4d7HA"
+    },
+    {
+      "sira": 18,
+      "ad": "Rumkale tekne turu",
+      "kategori": "aktivite",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Yavuzeli",
+      "merkeze_km": 44,
+      "neden": "Kasaba köyünden kalkan teknelerle kaleye ve sular altındaki caminin üstüne gidilir."
+    },
+    {
+      "sira": 19,
+      "ad": "Rumkale Cam Seyir Terası",
+      "kategori": "manzara",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Yavuzeli",
+      "merkeze_km": 46,
+      "neden": "Kayalığa kurulu 270 m² cam teras; 150 metre aşağıda Fırat ve Rumkale.",
+      "place_id": "ChIJa-hQBUjhMRUR-0VDxMSSWFI"
+    },
+    {
+      "sira": 20,
+      "ad": "Yesemek Açık Hava Heykel Atölyesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "İslahiye",
+      "merkeze_km": 60,
+      "neden": "Hitit dönemi taş ocağı; yarım kalmış yaklaşık 300 aslan ve sfenks yontusu yerinde.",
+      "place_id": "ChIJ8ZkjK_6sLxURvVqJl63NCug"
+    },
+    {
+      "sira": 21,
+      "ad": "Kurtuluş Camii",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Şahinbey",
+      "merkeze_km": 1,
+      "neden": "Sarkis Balyan'ın 1893'te Ermeni katedrali olarak tasarladığı yapı; depremde kubbesi çöktü.",
+      "osm": "way/300646387",
+      "place_id": "ChIJWUtXKDbhMRURGAVeMIuaw1c"
+    },
+    {
+      "sira": 22,
+      "ad": "Çulcuoğlu Et Lokantası",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Şahinbey",
+      "merkeze_km": 1,
+      "neden": "Kıyma ve patlıcan kebabının adresi; yanında cevizli içli köfte",
+      "osm": "node/4461677796",
+      "place_id": "ChIJR9R0MrTmMRURAdE2XAzAH8o"
+    },
+    {
+      "sira": 23,
+      "ad": "Baklavacı Zeki İnal",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Şahinbey",
+      "merkeze_km": 1,
+      "neden": "Atatürk Bulvarı'nda dördüncü kuşağın sürdürdüğü aile baklavacısı.",
+      "place_id": "ChIJ9wytEUjhMRURG-qH260NYrY"
+    },
+    {
+      "sira": 24,
+      "ad": "Katmerci Murat",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Şahinbey",
+      "merkeze_km": 1,
+      "neden": "Bey Mahallesi'nde küçük aile dükkânı; fıstıklı katmeri sütle birlikte gelir.",
+      "place_id": "ChIJWR1glEvhMRUR2kleDMhyF6w"
+    },
+    {
+      "sira": 25,
+      "ad": "Yesemek Gaziantep Mutfağı",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Şahinbey",
+      "merkeze_km": 0,
+      "neden": "Her gün 15–20 çeşit Antep ev yemeği; yuvalama ve beyran öne çıkıyor.",
+      "osm": "node/11254595954",
+      "place_id": "ChIJ3VfQN_vnMRURviEfr03FeaY"
+    },
+    {
+      "sira": 26,
+      "ad": "Gaziantep Hamam Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Şahinbey",
+      "merkeze_km": 0,
+      "neden": "1577 tarihli Lala Mustafa Paşa Hamamı; hamam âdetleri balmumu figürlerle anlatılıyor.",
+      "osm": "relation/8263842",
+      "place_id": "ChIJZ9201LLmMRURKVzGs8Dbmm0"
+    },
+    {
+      "sira": 27,
+      "ad": "Hışva Han (Lala Mustafa Paşa Hanı)",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Şahinbey",
+      "merkeze_km": 0,
+      "neden": "Kentin bilinen en eski hanı; restore edilip butik otel ve lokanta olarak kullanılıyor.",
+      "place_id": "ChIJv1lx1LLmMRURqnW_m9yWaEk"
+    },
+    {
+      "sira": 28,
+      "ad": "Karkamış Arkeopark",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Karkamış",
+      "merkeze_km": 62,
+      "neden": "Hitit dönemi kentinin 55 hektarı Türkiye'de; 2019'dan beri rehberle gezilen arkeopark.",
+      "place_id": "ChIJbRSM4J91MRURKGSOdSc1Drk"
+    },
+    {
+      "sira": 29,
+      "ad": "Gaziantep Doğal Yaşam Parkı",
+      "kategori": "aktivite",
+      "amaclar": [
+        "cocuklu"
+      ],
+      "ilce": "Şahinbey",
+      "merkeze_km": 8,
+      "neden": "Burç ormanında Türkiye'nin alanca en büyük hayvanat bahçesi; safari parkı ve akvaryum.",
+      "place_id": "ChIJZ6UteTjhMRURv78CpdHi8S8"
+    },
+    {
+      "sira": 30,
+      "ad": "Habeş Kanyonu",
+      "kategori": "doga",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Araban",
+      "merkeze_km": 49,
+      "neden": "Ardıl Çayı'nın oyduğu 8,6 km'lik kanyon; girişte Septimius Severus dönemi köprüsü.",
+      "place_id": "ChIJryFOTABLMhURcsIC3xpGPVI"
+    },
+    {
+      "sira": 31,
+      "ad": "Gaziantep Arkeoloji Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Şehitkamil",
+      "merkeze_km": 1,
+      "neden": "Depremden sonra güçlendirilip Ağustos 2026'da yeniden açılan üç bloklu müze.",
+      "place_id": "ChIJHZtfDFLhMRURJx1s7F_Se0s"
+    },
+    {
+      "sira": 32,
+      "ad": "Gaziantep Oyun ve Oyuncak Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "cocuklu"
+      ],
+      "ilce": "Şahinbey",
+      "merkeze_km": 1,
+      "neden": "1700–1990 arasından yaklaşık 600 el yapımı oyuncak; binanın altında iki kat mağara.",
+      "osm": "way/1047087214",
+      "place_id": "ChIJzVUOKkrhMRURZVHlip0v1Dc"
+    },
+    {
+      "sira": 33,
+      "ad": "Bayazhan Gaziantep Kent Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Şahinbey",
+      "merkeze_km": 1,
+      "neden": "1909'da tütün tüccarı Bayaz Ahmet Efendi'nin yaptırdığı han; kent maketi ve fasıl gecesi.",
+      "osm": "node/4889959437",
+      "place_id": "ChIJvXWmBUjhMRURImzXfnafNwo"
+    },
+    {
+      "sira": 34,
+      "ad": "Papirüs Cafe",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "yavas"
+      ],
+      "ilce": "Şahinbey",
+      "merkeze_km": 1,
+      "neden": "1884 tarihli eski Ermeni konağının asmalı avlusunda tavla ve kahve.",
+      "osm": "node/5316441921",
+      "place_id": "ChIJH8621kvhMRURIXADmBp5yDs"
+    },
+    {
+      "sira": 35,
+      "ad": "Kültür Yolu yürüyüşü",
+      "kategori": "aktivite",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Şahinbey",
+      "merkeze_km": 0,
+      "neden": "Kaleden Almacı Pazarı'na hanlar, bedestenler ve kahvehaneleri bağlayan yaya rotası."
+    },
+    {
+      "sira": 36,
+      "ad": "Burç Tabiat Parkı",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Şahinbey",
+      "merkeze_km": 8,
+      "neden": "350 hektarlık orman; mangal alanları ve hemen yanında Doğal Yaşam Parkı.",
+      "place_id": "ChIJL6rtaAQgLhURZ9_Vba1gDRo"
+    },
+    {
+      "sira": 37,
+      "ad": "Alleben Göleti",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Şahinbey",
+      "merkeze_km": 6,
+      "neden": "Şahinbey'de gölet kıyısı; piknik alanı, bisiklet ve yürüyüş yolları.",
+      "place_id": "ChIJSxDE5ckfLhURY7VKtEdD4vw"
+    },
+    {
+      "sira": 38,
+      "ad": "Belkıs Tepesi",
+      "kategori": "manzara",
+      "amaclar": [
+        "doga",
+        "kultur_tarih"
+      ],
+      "ilce": "Nizip",
+      "merkeze_km": 42,
+      "neden": "Zeugma'nın yamaç villaları bu tepede; aşağıda Birecik Barajı'nın kapladığı Fırat.",
+      "place_id": "ChIJy77BIGyHMRURSVWLmb3X8Ew"
+    }
+  ]
+}
