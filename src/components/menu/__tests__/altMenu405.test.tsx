@@ -1,0 +1,46 @@
+// #405 KK1 · KK6 (kanvas `Ana_v6_Kesfet` · `Ana_v6_Seyahatlerim` alt menüsü): Keşfet · Seyahatlerim · Profil; seçili sekmede
+// ikon Mandalina ve yazı Gece; Arkadaşlar yok (#407'ye kadar). Sekmeye dokununca `sekme_acildi` (meta: sekme) ve geçiş.
+import { describe, expect, it, jest } from '@jest/globals';
+import { fireEvent, render, screen } from '@testing-library/react-native';
+import type { BottomTabBarProps } from 'expo-router/js-tabs';
+
+import { AltMenu, altMenuRenk } from '../AltMenu';
+
+jest.mock('react-native-safe-area-context', () => jest.requireActual<{ default: object }>('react-native-safe-area-context/jest/mock').default);
+jest.mock('@/lib/supabase', () => ({ supabase: {} }));
+const mockOlay = jest.fn();
+jest.mock('@/features/icerik/sorgular', () => ({ olayYaz: (...a: unknown[]) => mockOlay(...a) }));
+
+const routes = [
+  { key: 'k1', name: 'index', params: undefined },
+  { key: 'k2', name: 'seyahatler', params: undefined },
+  { key: 'k3', name: 'profil', params: undefined },
+];
+
+function ciz(index: number) {
+  const navigation = { emit: jest.fn(() => ({ defaultPrevented: false })), navigate: jest.fn() };
+  const props = { state: { index, routes }, navigation, descriptors: {}, insets: { top: 0, bottom: 0, left: 0, right: 0 } } as unknown as BottomTabBarProps;
+  render(<AltMenu {...props} />);
+  return navigation;
+}
+
+describe('#405 alt menü', () => {
+  it('KK1: 3 sekme; seçili sekmede yazı Gece 700, ikon Mandalina; Arkadaşlar yok', () => {
+    ciz(1);
+    expect(screen.getAllByRole('tab').map((n) => n.props.accessibilityLabel)).toEqual(['Keşfet', 'Seyahatlerim', 'Profil']);
+    expect(screen.getByRole('tab', { name: 'Seyahatlerim' }).props.accessibilityState).toMatchObject({ selected: true });
+    expect(screen.getByRole('tab', { name: 'Keşfet' }).props.accessibilityState).toMatchObject({ selected: false });
+    expect(screen.queryByText('Arkadaşlar')).toBeNull();
+    expect(altMenuRenk).toEqual({ secili: '#ff7a1a', pasif: '#8A91A3', cizgi: '#E4E7EE' });
+  });
+
+  it('KK6: başka sekmeye dokununca sekme_acildi ve geçiş; seçili sekmeye dokununca olay yok', () => {
+    const navigation = ciz(0);
+    fireEvent.press(screen.getByRole('tab', { name: 'Seyahatlerim' }));
+    expect(mockOlay).toHaveBeenCalledWith('sekme_acildi', null, { sekme: 'seyahatlerim' });
+    expect(navigation.navigate).toHaveBeenCalledWith('seyahatler', undefined);
+    mockOlay.mockClear();
+    fireEvent.press(screen.getByRole('tab', { name: 'Keşfet' }));
+    expect(mockOlay).not.toHaveBeenCalled();
+  });
+});

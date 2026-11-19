@@ -1,5 +1,5 @@
 // #205 KK5: Profil'de OSM atfı — "Hesabı sil"in altında, dokununca OSM telif sayfası açılır.
-// #275 KK4 (kanvas 29d): Profil › Gezilerim · N (geçmiş seyahatler, Tekrar kur) ve Ayarlar sekmeleri; "‹ Keşfet" dönüşü.
+// #405 KK2: Gezilerim Seyahatlerim sekmesine taşındı; Profil'de sekme ve "‹ Keşfet" yok, ayar satırları doğrudan.
 import { afterEach, describe, expect, it, jest } from '@jest/globals';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { fireEvent, render, waitFor } from '@testing-library/react-native';
@@ -78,80 +78,14 @@ describe('Profil OSM atfı', () => {
   });
 });
 
-describe('Profil › Gezilerim (#275 KK4)', () => {
-  it('açılışta Gezilerim seçili; YAKLAŞAN (tarih sırası, taslak sonda) ve GEÇMİŞ; sayı ikisinin toplamı; Tekrar kur sihirbazı açar', async () => {
-    mockSeyahatler = [
-      seyahat('eski', 'Eskişehir', '2026-10-01', '2026-10-03'),
-      seyahat('gelecek', 'Bursa', '2099-01-12', '2099-01-14'),
-      seyahat('sonraki', 'Mardin', '2099-03-01', '2099-03-02'),
-      seyahat('taslak', 'İzmir', null, null),
-    ];
-    const ekran = ciz();
-    await waitFor(() => expect(istemci?.isFetching()).toBe(0));
-    const sekme = ekran.getByRole('tab', { name: 'Gezilerim · 4' });
-    expect(sekme.props.accessibilityState).toMatchObject({ selected: true });
-    // Başlık ve satır sırası: YAKLAŞAN → Bursa, Mardin, İzmir (taslak) → GEÇMİŞ → Eskişehir.
-    const agac = JSON.stringify(ekran.toJSON());
-    const konumlar = ['YAKLAŞAN', 'Bursa', 'Mardin', 'İzmir', 'GEÇMİŞ', 'Eskişehir'].map((m) => agac.indexOf(`"${m}"`));
-    expect(konumlar.every((k) => k >= 0)).toBe(true);
-    expect(konumlar).toEqual([...konumlar].sort((a, b) => a - b));
-    expect(ekran.getByText('12–14 Ocak · 2 kişi')).toBeTruthy();
-    expect(ekran.getByText('Taslak · tarih yok')).toBeTruthy();
-    expect(ekran.getByText('Ekim 2026 · 12 mekan gezildi · 2 kişi')).toBeTruthy();
-    // Yaklaşan satırında düğme yok: tek Tekrar kur geçmiş satırında.
-    expect(ekran.getAllByText('Tekrar kur')).toHaveLength(1);
-    fireEvent.press(ekran.getByText('Mardin'));
-    expect(mockRouter.push).toHaveBeenCalledWith({ pathname: '/seyahat/[id]', params: { id: 'sonraki' } });
-    // Ayarlar satırları bu sekmede yok.
-    expect(ekran.queryByText('Çıkış yap')).toBeNull();
-    fireEvent.press(ekran.getByText('Tekrar kur'));
-    expect(mockRouter.navigate).toHaveBeenCalledWith(expect.objectContaining({ pathname: '/(tabs)/yeni', params: expect.objectContaining({ tekrar: 'eski' }) }));
-  });
-
-  it('yalnız yaklaşan varsa GEÇMİŞ başlığı yok; yaklaşan yoksa YAKLAŞAN başlığı yok', async () => {
-    mockSeyahatler = [seyahat('taslak', 'İzmir', null, null)];
-    const ekran = ciz();
-    await waitFor(() => expect(istemci?.isFetching()).toBe(0));
-    expect(ekran.getByText('YAKLAŞAN')).toBeTruthy();
-    expect(ekran.queryByText('GEÇMİŞ')).toBeNull();
-    ekran.unmount();
-    istemci?.clear();
+describe('Profil (#405 KK2)', () => {
+  it('Gezilerim sekmesi ve ‹ Keşfet yok; ayar satırları doğrudan görünür', async () => {
     mockSeyahatler = [seyahat('eski', 'Eskişehir', '2026-10-01', '2026-10-03')];
-    const ikinci = ciz();
-    await waitFor(() => expect(istemci?.isFetching()).toBe(0));
-    expect(ikinci.queryByText('YAKLAŞAN')).toBeNull();
-    expect(ikinci.getByText('GEÇMİŞ')).toBeTruthy();
-  });
-
-  it('Profil açıkken sekme parametresi değişince sekme değişir; Ayarlar\'da sayı kutuları yok', async () => {
     const ekran = ciz();
     await waitFor(() => expect(istemci?.isFetching()).toBe(0));
-    expect(ekran.getByRole('tab', { name: 'Ayarlar' }).props.accessibilityState).toMatchObject({ selected: false });
-    mockParametre = { sekme: 'ayarlar' };
-    ekran.rerender(
-      <QueryClientProvider client={istemci!}>
-        <ProfilEkrani />
-      </QueryClientProvider>,
-    );
-    await waitFor(() => expect(ekran.getByRole('tab', { name: 'Ayarlar' }).props.accessibilityState).toMatchObject({ selected: true }));
-    expect(ekran.queryByText('mekan gezildi')).toBeNull();
-    mockParametre = { sekme: 'gezilerim' };
-    ekran.rerender(
-      <QueryClientProvider client={istemci!}>
-        <ProfilEkrani />
-      </QueryClientProvider>,
-    );
-    await waitFor(() => expect(ekran.getByRole('tab', { name: 'Gezilerim · 0' }).props.accessibilityState).toMatchObject({ selected: true }));
-  });
-
-  it('geçmiş yoksa boş metin; Ayarlar sekmesine geçilir; ‹ Keşfet geri döner', async () => {
-    const ekran = ciz();
-    await waitFor(() => expect(istemci?.isFetching()).toBe(0));
-    expect(ekran.getByRole('tab', { name: 'Gezilerim · 0' })).toBeTruthy();
-    expect(ekran.getByText('Biten seyahatlerin burada durur.')).toBeTruthy();
-    fireEvent.press(ekran.getByRole('tab', { name: 'Ayarlar' }));
-    await waitFor(() => expect(ekran.getByText('Çıkış yap')).toBeTruthy());
-    fireEvent.press(ekran.getByRole('button', { name: 'Keşfet' }));
-    expect(mockRouter.back).toHaveBeenCalled();
+    expect(ekran.queryByRole('tab')).toBeNull();
+    expect(ekran.queryByText('Eskişehir')).toBeNull();
+    expect(ekran.queryByRole('button', { name: 'Keşfet' })).toBeNull();
+    expect(ekran.getByText('Çıkış yap')).toBeTruthy();
   });
 });

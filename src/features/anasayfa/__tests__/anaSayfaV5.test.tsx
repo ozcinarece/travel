@@ -105,7 +105,7 @@ beforeEach(async () => {
 });
 
 describe('#361 KK2 üst satır', () => {
-  it('♥ Kaydettiklerim, "+ Seyahat" sihirbaz, profil; ayrı Ara ikonu yok', async () => {
+  it('♥ Kaydettiklerim, "+ Seyahat" sihirbaz; profil dairesi yok (#405 KK3); ayrı Ara ikonu yok', async () => {
     mockAkis.data = [gezi('g1', ['lezzet'])];
     const e = render(<AnaSayfa />);
     fireEvent.press(await kaydettiklerim(e));
@@ -113,8 +113,7 @@ describe('#361 KK2 üst satır', () => {
     fireEvent.press(e.getByRole('button', { name: 'Yeni seyahat' }));
     expect(router.push).toHaveBeenLastCalledWith('/(tabs)/yeni');
     expect(e.getByText('Seyahat')).toBeTruthy();
-    fireEvent.press(e.getByRole('button', { name: 'Profil' }));
-    expect(router.push).toHaveBeenLastCalledWith('/(tabs)/profil');
+    expect(e.queryByRole('button', { name: 'Profil' })).toBeNull();
     expect(e.queryByRole('button', { name: 'Ara' })).toBeNull();
     // Eski ana sayfa öğeleri yok (KK1).
     expect(e.queryByText(/Merhaba/)).toBeNull();
