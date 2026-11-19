@@ -1,18 +1,18 @@
 // #141 KK4 → #387 KK1 · KK4 (kanvas 21, Listem "Çıkar · Geri al"): ekranın altında Gece bant; metin ve Mandalina "Geri al".
 // `onGeriAl` yoksa yalnız bilgi bandı (dokunulmaz). Ekran okuyucu: iki platformda da `announceForAccessibility` (#387 inceleme:
 // Android'de `accessibilityLiveRegion` yeni açılan görünümde çoğu zaman okunmuyordu; çift okunmasın diye canlı bölge kalktı).
-import { useEffect } from 'react';
-import { AccessibilityInfo, Pressable, StyleSheet, Text, View } from 'react-native';
+// #410 inceleme: `olay` (ör. bekleyen silme nesnesi) değişince aynı metin de yeniden duyurulur; art arda iki çıkarma iki duyuru.
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { t } from '@/i18n';
+import { useOlayDuyurusu } from '@/lib/duyuru';
 import { renk, yazi } from '@/theme';
 
-type Props = { metin: string; onGeriAl?: () => void; alt?: number };
+type Props = { metin: string; onGeriAl?: () => void; alt?: number; olay?: unknown };
 
-export function GeriAlBandi({ metin, onGeriAl, alt = 16 }: Props) {
-  useEffect(() => {
-    AccessibilityInfo.announceForAccessibility(onGeriAl ? `${metin}. ${t('listem.geriAl')}` : metin);
-  }, [metin, onGeriAl]);
+export function GeriAlBandi({ metin, onGeriAl, alt = 16, olay }: Props) {
+  const duyuru = onGeriAl ? `${metin}. ${t('listem.geriAl')}` : metin;
+  useOlayDuyurusu(duyuru, olay);
   return (
     <View style={[s.bant, { bottom: alt }]} pointerEvents={onGeriAl ? 'auto' : 'none'} testID="geri-al-bandi">
       <Text style={s.metin} numberOfLines={onGeriAl ? 1 : undefined}>

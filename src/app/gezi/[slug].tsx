@@ -410,7 +410,7 @@ export default function GeziEkrani() {
         </View>
       ) : null}
       {/* #387 inceleme 1: "Geri al" bandı alt çubuğun hemen üstünde ve mekan panelinden SONRA çizilir (paneldeki ✓'te de görünür). */}
-      {cikan ? <GeriAlBandi metin={cikan.metin} onGeriAl={geriAlinabilir.geriAl} alt={altCubukH + 8} /> : silHata ? <GeriAlBandi metin={silHata} alt={altCubukH + 8} /> : null}
+      {cikan ? <GeriAlBandi metin={cikan.metin} olay={cikan} onGeriAl={geriAlinabilir.geriAl} alt={altCubukH + 8} /> : silHata ? <GeriAlBandi metin={silHata} alt={altCubukH + 8} /> : null}
     </View>
   );
 }

@@ -1,15 +1,15 @@
-import { Image } from 'expo-image';
 import { router } from 'expo-router';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { GeziAlYukleyici } from '@/components/icerik/GeziAl';
+import { FotoKutusu } from '@/components/gezi/GeziParcalari';
+import { AnaGeziKarti } from '@/components/ortak/AnaGeziKarti';
+import { Sekme, SekmeSatiri } from '@/components/ortak/Sekme';
 import { Ikon } from '@/components/ui/Ikon';
-import { TEKRAR_HIT_SLOP, useIosDuyuru } from '@/components/ui/EklemeDurumSatiri';
-import { KesfetHapi } from '@/components/ui/KesfetHapi';
-import { SegmentSecici } from '@/components/ui/SegmentSecici';
+import { TEKRAR_HIT_SLOP } from '@/components/ui/EklemeDurumSatiri';
 import { eklemeHatasi } from '@/features/ekleme/eklemeDurumu';
+import { kapakTonu } from '@/features/anasayfa/v5';
 import { useIcerikCanli } from '@/features/icerik/fotolar';
 import { yerGruplari } from '@/features/icerik/kaydedilen';
 import { icerikPlaceId, useGezilerIle, useKaydedilenler, useKaydet, useYerlerIle } from '@/features/icerik/sorgular';
@@ -19,19 +19,18 @@ import { yeniGirisNo } from '@/features/sihirbaz/girisler';
 import { seyahatAdi } from '@/features/sihirbaz/sihirbaz';
 import { t } from '@/i18n';
 import { useCevrimdisi } from '@/lib/baglanti';
+import { useOlayDuyurusu } from '@/lib/duyuru';
 import { yonelmeEkli } from '@/lib/ek';
 import { kategoriEtiketi } from '@/lib/kategori';
-import { kategoriPini } from '@/lib/pinIkonu';
-import type { Gezi, KaydedilenTuru, SeyahatOzet } from '@/lib/tipler';
-import { baslikStili, bosluk, renk, yazi } from '@/theme';
-
-const ZEMINLER = ['#c9d2f2', '#ffe2cc', '#dce6ff', '#d7f0e6', '#e6e0fa'];
+import type { KaydedilenTuru, SeyahatOzet } from '@/lib/tipler';
+import { anaV5, baslikStili, bosluk, minDokunma, renk, yazi } from '@/theme';
 
 /**
- * #100 A → #144 (kanvas 21 · 21b): Kaydettiklerim — segment Geziler · N / Yerler · N. Gezi satırı: 72 px kapak + "2 GÜN",
- * ad, şehir · mekan, doğrudan [Seyahatime al] (#143 alt sayfası), kalp = kaydedilenlerden çıkar (4 sn Geri al). Yerler şehirlere
- * göre gruplu: başlıkta "{seyahat}'e ekle" (aynı şehirdeki en yakın tarihli seyahat; grubun tamamı, mükerrer atlanır) ya da
- * "Bu şehre seyahat kur" (sihirbaz şehir seçili, mekanlar listede); 2 sütun kart → o seyahatin Keşfet'inde mekan paneli.
+ * #100 A → #144 → #395 (UX önerileri kanvası, `Sayfa_v5_Kaydettiklerim`): ‹ geri, "Kaydettiklerim" (28 px), altı çizili
+ * sekmeler Geziler · N / Yerler · N. Geziler tek sütun `AnaGeziKarti` (büyük kapak, dolu ♥, 3 satır; kapaksızda `AmacKapagi`),
+ * satırda Seyahatime al yok. Yerler şehirlere göre gruplu (başlıkta "{seyahat}'e ekle" ya da "Bu şehre seyahat kur"), her yer
+ * sade satır: 56 px kare foto ya da kategori ikonu, ad, kategori, sağda ♥ → o seyahatin Keşfet'inde mekan paneli.
+ * ♥ = kayıttan çıkar + altta "Geri al" (5 sn, #387 bandıyla aynı). Boş halde tek satır yazı ve "Keşfet'e göz at" bağlantısı.
  */
 export default function KaydettiklerimEkrani() {
   const kaydedilenler = useKaydedilenler();
@@ -57,15 +56,19 @@ export default function KaydettiklerimEkrani() {
   );
   const yerListesi = useMemo(() => gruplar.flatMap((g) => g.yerler), [gruplar]);
   const canli = useIcerikCanli(yerListesi, (y) => yerListesi.find((x) => x.id === y.id)?.sehirler?.ad ?? '', sekme === 'yer' && yerListesi.length > 0);
+  // #410 inceleme: sekme sayısı yüklenen öğelerden (yayından kalkmış gezi/yer sayılmaz); yüklenene kadar kayıt sayısı.
+  const geziSayisi = geziler.isSuccess ? geziListesi.length : geziIdleri.length;
+  const yerSayisi = yerler.isSuccess ? yerListesi.length : yerIdleri.length;
   const yerleriEkle = useYerleriEkle();
-  const [alSlug, setAlSlug] = useState<string | null>(null);
   const [mesgulGrup, setMesgulGrup] = useState<string | null>(null);
 
-  // Kaldır + geri al bildirimi (4 sn); diğer bildirimler 3 sn.
+  // Kaldır + geri al bildirimi 5 sn (#387 ile aynı), Tekrar dene 4 sn, diğer bildirimler 3 sn.
   const [kaldirilan, setKaldirilan] = useState<{ tur: KaydedilenTuru; id: string } | null>(null);
   const [bildirim, setBildirim] = useState<string | null>(null);
   // #388 KK1: bağlantı hatasında bildirimde "Tekrar dene".
   const [tekrar, setTekrar] = useState<(() => void) | null>(null);
+  // #410 inceleme 2: her `goster` yeni bir bant olayı; art arda iki kaldırmada metin aynı olsa da ikisi de duyurulur.
+  const [bantOlayi, setBantOlayi] = useState(0);
   // #388 KK5 (kanvas 23c): bağlantı yokken "listesine ekle" pasif.
   const cevrimdisi = useCevrimdisi();
   const zamanlayici = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -76,6 +79,7 @@ export default function KaydettiklerimEkrani() {
     setKaldirilan(b.kaldirilan ?? null);
     setBildirim(b.metin ?? null);
     setTekrar(() => b.tekrar ?? null);
+    setBantOlayi((n) => n + 1);
     if (zamanlayici.current) clearTimeout(zamanlayici.current);
     zamanlayici.current = setTimeout(
       () => {
@@ -83,14 +87,15 @@ export default function KaydettiklerimEkrani() {
         setBildirim(null);
         setTekrar(null);
       },
-      b.kaldirilan || b.tekrar ? 4000 : 3000,
+      b.kaldirilan ? 5000 : b.tekrar ? 4000 : 3000,
     );
   };
   // #388 inceleme: çevrimdışıyken "listesine ekle" pasif; nedeni bantta (mevcut `ekleme.baglantiYok`, düğmesiz).
   const cevrimdisiEkle = cevrimdisi && sekme === 'yer' && gruplar.some((g) => !!g.sehirId && !!varsayilanHedef(hedefler, g.sehirAd));
   const bandMetni = bildirim ?? (kaldirilan ? t('kaydettiklerim.kaldirildi') : cevrimdisiEkle ? t('ekleme.baglantiYok') : '');
-  // iOS'ta bildirim de duyurulur (Android'de bant yeni açılınca okunmuyor; iki platformda tek yol).
-  useIosDuyuru(bildirim ?? (cevrimdisiEkle ? t('ekleme.baglantiYok') : null));
+  // #410 inceleme 2: bandın her hali iki platformda da `announceForAccessibility` ile duyurulur (#387 kalıbı; canlı bölge yok).
+  const bantDuyurusu = kaldirilan ? `${bandMetni}. ${t('kaydettiklerim.geriAl')}` : bandMetni || null;
+  useOlayDuyurusu(bantDuyurusu, `${bantOlayi}:${bantDuyurusu ?? ''}`);
   const kaldir = (tur: KaydedilenTuru, id: string) => {
     kaydet.mutate({ tur, hedef_id: id, kayitli: true });
     goster({ kaldirilan: { tur, id } });
@@ -127,46 +132,41 @@ export default function KaydettiklerimEkrani() {
       setMesgulGrup(null);
     }
   };
+  // ‹: yığında önceki ekran varsa ona, yoksa (derin bağlantı) ana ekrana.
+  const geri = () => (router.canGoBack() ? router.back() : router.replace('/(tabs)'));
   const sehreKur = (g: (typeof gruplar)[number]) => router.navigate({ pathname: '/(tabs)/yeni', params: { sehir: g.sehirId, yerler: g.yerler.map((y) => y.id).join(','), n: yeniGirisNo() } });
 
   return (
     <SafeAreaView style={s.ekran} edges={['top']}>
-      {/* #275 (kanvas 21): alt menü yok; başlığın üstünde "‹ Keşfet" hapı. */}
       <View style={s.ust}>
-        <KesfetHapi />
+        <Pressable accessibilityRole="button" accessibilityLabel={t('genel.geri')} onPress={geri} style={({ pressed }) => [s.geri, pressed && { opacity: 0.7 }]}>
+          <Ikon ad="geri" boyut={22} renk={renk.metin} kalinlik={2.4} />
+        </Pressable>
       </View>
       <Text accessibilityRole="header" style={s.baslik}>
         {t('kaydettiklerim.baslik')}
       </Text>
-      <View style={s.segment}>
-        <SegmentSecici
-          buyuk
-          deger={sekme}
-          onDeger={setSekme}
-          secenekler={[
-            { deger: 'gezi', etiket: t('kaydettiklerim.geziler', { n: geziIdleri.length }) },
-            { deger: 'yer', etiket: t('kaydettiklerim.yerler', { n: yerIdleri.length }) },
-          ]}
-        />
-      </View>
+      <SekmeSatiri aralik={24}>
+        <Sekme boyut={15} baslik={t('kaydettiklerim.geziler', { n: geziSayisi })} secili={sekme === 'gezi'} onPress={() => setSekme('gezi')} />
+        <Sekme boyut={15} baslik={t('kaydettiklerim.yerler', { n: yerSayisi })} secili={sekme === 'yer'} onPress={() => setSekme('yer')} />
+      </SekmeSatiri>
       <ScrollView contentContainerStyle={s.icerik}>
         {sekme === 'gezi' ? (
           geziIdleri.length === 0 || (geziler.isSuccess && geziListesi.length === 0) ? (
-            <Text style={s.bos}>{t('kaydettiklerim.bosGezi')}</Text>
+            <BosHal metin={t('kaydettiklerim.bosGezi')} />
           ) : (
-            geziListesi.map((g, i) => (
-              <GeziSatiri
+            geziListesi.map((g) => (
+              <AnaGeziKarti
                 key={g.id}
                 gezi={g}
-                sira={i}
-                onPress={() => router.push({ pathname: '/gezi/[slug]', params: { slug: g.slug } })}
-                onAl={() => setAlSlug(g.slug)}
-                onKaldir={() => kaldir('gezi', g.id)}
+                ton={kapakTonu(g.amaclar, null)}
+                onAc={() => router.push({ pathname: '/gezi/[slug]', params: { slug: g.slug } })}
+                onKalp={() => kaldir('gezi', g.id)}
               />
             ))
           )
         ) : yerIdleri.length === 0 || (yerler.isSuccess && yerListesi.length === 0) ? (
-          <Text style={s.bos}>{t('kaydettiklerim.bosYer')}</Text>
+          <BosHal metin={t('kaydettiklerim.bosYer')} />
         ) : (
           gruplar.map((g) => {
             const hedef = g.sehirId ? varsayilanHedef(hedefler, g.sehirAd) : null;
@@ -191,36 +191,28 @@ export default function KaydettiklerimEkrani() {
                     </Pressable>
                   ) : null}
                 </View>
-                {/* 2 sütun: çiftler halinde satır; tek kalan kart yarım genişlikte. */}
-                {g.yerler
-                  .filter((_, i) => i % 2 === 0)
-                  .map((y, i) => [y, g.yerler[i * 2 + 1]] as const)
-                  .map(([sol, sag]) => (
-                    <View key={sol.id} style={s.izgaraSatir}>
-                      {[sol, sag].map((y, k) => {
-                        if (!y) return <View key={k} style={s.kart} />;
-                        const c = canli.data?.get(y.id);
-                        // #172 KK7–KK9: kaydedilen yer bizim içeriğimiz — kategori DB'den, puan gösterilmez.
-                        const tur = y.kategori;
-                        return (
-                          <Pressable key={y.id} accessibilityRole="button" accessibilityLabel={y.ad} onPress={() => yerAc(y, hedef)} style={({ pressed }) => [s.kart, pressed && { opacity: 0.9 }]}>
-                            <View style={[s.kartFoto, { backgroundColor: kategoriPini(tur).kategoriRenk }]}>
-                              {c?.foto_uri ? <Image source={{ uri: c.foto_uri }} style={StyleSheet.absoluteFill} contentFit="cover" transition={150} /> : null}
-                              <Pressable accessibilityRole="button" accessibilityLabel={t('kaydettiklerim.kaldir')} onPress={() => kaldir('yer', y.id)} hitSlop={6} style={s.kartKalp}>
-                                <Ikon ad="kalpDolu" boyut={18} renk={renk.vurgu} kalinlik={2.2} />
-                              </Pressable>
-                            </View>
-                            <Text style={s.kartAd} numberOfLines={2}>
-                              {y.ad}
-                            </Text>
-                            <Text style={s.kartAlt} numberOfLines={1}>
-                              {kategoriEtiketi(tur)}
-                            </Text>
-                          </Pressable>
-                        );
-                      })}
+                {g.yerler.map((y) => {
+                  const c = canli.data?.get(y.id);
+                  // #172 KK7–KK9: kaydedilen yer bizim içeriğimiz — kategori DB'den, puan gösterilmez.
+                  return (
+                    <View key={y.id} style={s.yerSatiri}>
+                      <Pressable accessibilityRole="button" accessibilityLabel={[y.ad, kategoriEtiketi(y.kategori), y.sehirler?.ad].filter(Boolean).join(', ')} onPress={() => yerAc(y, hedef)} style={({ pressed }) => [s.yerGovde, pressed && { opacity: 0.85 }]}>
+                        <FotoKutusu uri={c?.foto_uri ?? null} tip={y.kategori} boyut={56} kose={12} />
+                        <View style={s.yerMetin}>
+                          <Text style={s.yerAd} numberOfLines={1}>
+                            {y.ad}
+                          </Text>
+                          <Text style={s.yerAlt} numberOfLines={1}>
+                            {[kategoriEtiketi(y.kategori), y.sehirler?.ad].filter(Boolean).join(' · ')}
+                          </Text>
+                        </View>
+                      </Pressable>
+                      <Pressable accessibilityRole="button" accessibilityLabel={t('kaydettiklerim.kaldir')} onPress={() => kaldir('yer', y.id)} style={s.yerKalp}>
+                        <Ikon ad="kalpDolu" boyut={22} renk={renk.vurgu} kalinlik={2.2} />
+                      </Pressable>
                     </View>
-                  ))}
+                  );
+                })}
               </View>
             );
           })
@@ -247,63 +239,45 @@ export default function KaydettiklerimEkrani() {
           ) : null}
         </View>
       ) : null}
-      {alSlug ? <GeziAlYukleyici slug={alSlug} onKapat={() => setAlSlug(null)} /> : null}
     </SafeAreaView>
   );
 }
 
-function GeziSatiri({ gezi, sira, onPress, onAl, onKaldir }: { gezi: Gezi; sira: number; onPress: () => void; onAl: () => void; onKaldir: () => void }) {
+/** KK5: tek satır yazı ve "Keşfet'e göz at" bağlantısı; çizim yok. */
+function BosHal({ metin }: { metin: string }) {
   return (
-    <Pressable accessibilityRole="button" accessibilityLabel={gezi.baslik} onPress={onPress} style={({ pressed }) => [s.satir, pressed && { opacity: 0.85 }]}>
-      <View style={[s.satirFoto, { backgroundColor: ZEMINLER[sira % ZEMINLER.length] }]}>
-        {gezi.kapak_url ? <Image source={{ uri: gezi.kapak_url }} style={StyleSheet.absoluteFill} contentFit="cover" transition={150} /> : null}
-        <Text style={s.rozet}>{t('kaydettiklerim.gunluk', { n: gezi.gun_sayisi })}</Text>
-      </View>
-      <View style={{ flex: 1, minWidth: 0, alignItems: 'flex-start' }}>
-        <Text style={s.satirAd} numberOfLines={2}>
-          {gezi.baslik}
-        </Text>
-        <Text style={s.satirAlt} numberOfLines={1}>
-          {t('kaydettiklerim.sehirMekan', { sehir: gezi.sehirler?.ad ?? '', n: gezi.mekan_sayisi })}
-        </Text>
-        <Pressable accessibilityRole="button" onPress={onAl} hitSlop={4} style={({ pressed }) => [s.al, pressed && { opacity: 0.85 }]}>
-          <Text style={s.alMetin}>{t('kaydettiklerim.seyahatimeAl')}</Text>
-        </Pressable>
-      </View>
-      <Pressable accessibilityRole="button" accessibilityLabel={t('kaydettiklerim.kaldir')} onPress={onKaldir} hitSlop={6} style={s.satirKalp}>
-        <Ikon ad="kalpDolu" boyut={18} renk={renk.vurgu} kalinlik={2.2} />
+    <View style={s.bos}>
+      <Text style={s.bosMetin}>{metin}</Text>
+      <Pressable accessibilityRole="link" onPress={() => router.navigate('/(tabs)')} hitSlop={10} style={({ pressed }) => [s.bosBaglanti, pressed && { opacity: 0.6 }]}>
+        <Text style={s.bosBaglantiMetin}>{t('kaydettiklerim.kesfeteGozAt')}</Text>
       </Pressable>
-    </Pressable>
+    </View>
   );
 }
 
 const s = StyleSheet.create({
   ekran: { flex: 1, backgroundColor: renk.zemin },
-  ust: { paddingHorizontal: bosluk.kenar, paddingTop: 8 },
-  baslik: { ...baslikStili(30), color: renk.metin, paddingHorizontal: bosluk.kenar, paddingTop: 14 },
-  segment: { paddingHorizontal: bosluk.kenar, paddingTop: 14 },
-  icerik: { paddingHorizontal: bosluk.kenar, paddingTop: 18, paddingBottom: 90, gap: 14 },
-  bos: { fontFamily: yazi.normal, fontSize: 13, color: renk.ikincil, paddingVertical: 24 },
-  satir: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  satirFoto: { width: 72, height: 72, borderRadius: 16, overflow: 'hidden' },
-  rozet: { position: 'absolute', left: 6, bottom: 6, height: 20, lineHeight: 20, paddingHorizontal: 6, borderRadius: 6, overflow: 'hidden', backgroundColor: renk.ana, color: renk.zemin, fontFamily: yazi.ekstra, fontSize: 10 },
-  satirAd: { ...baslikStili(16), color: renk.metin },
-  satirAlt: { fontFamily: yazi.normal, fontSize: 13, color: renk.ikincil },
-  al: { marginTop: 6, height: 30, paddingHorizontal: 10, borderRadius: 9, backgroundColor: renk.vurgu, justifyContent: 'center' },
-  alMetin: { fontFamily: yazi.ekstra, fontSize: 12, color: renk.metin },
-  satirKalp: { width: 40, height: 40, borderRadius: 12, backgroundColor: '#fff1e6', alignItems: 'center', justifyContent: 'center' },
-  grup: { gap: 10, paddingBottom: 6 },
+  // Kanvas: geri satırı 44 px, 16 px kenar; başlık 28 px 800, üstte 4 altta 6.
+  ust: { paddingHorizontal: 16, height: minDokunma, justifyContent: 'center' },
+  geri: { width: minDokunma, height: minDokunma, marginLeft: -11, alignItems: 'center', justifyContent: 'center' },
+  baslik: { ...baslikStili(28), color: renk.metin, paddingHorizontal: 16, paddingTop: 4, paddingBottom: 6 },
+  icerik: { paddingHorizontal: 16, paddingTop: 16, paddingBottom: 90, gap: 20 },
+  bos: { paddingVertical: 24, gap: 6, alignItems: 'flex-start' },
+  bosMetin: { fontFamily: yazi.normal, fontSize: 15, color: anaV5.ikincil },
+  bosBaglanti: { minHeight: minDokunma, justifyContent: 'center' },
+  bosBaglantiMetin: { fontFamily: yazi.kalin, fontSize: 15, color: renk.ana, textDecorationLine: 'underline' },
+  grup: { gap: 12, paddingBottom: 6 },
+  yerSatiri: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  yerGovde: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 12, minWidth: 0 },
+  yerMetin: { flex: 1, minWidth: 0, gap: 1 },
+  yerAd: { fontFamily: yazi.kalin, fontSize: 15, color: renk.metin },
+  yerAlt: { fontFamily: yazi.normal, fontSize: 14, color: anaV5.ikincil },
+  yerKalp: { width: minDokunma, height: minDokunma, alignItems: 'center', justifyContent: 'center', marginRight: -10 },
   grupUst: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   grupBaslik: { flex: 1, ...baslikStili(18), color: renk.metin },
   grupSayi: { fontFamily: yazi.ekstra, fontSize: 14, color: renk.ikincil },
   grupDugme: { height: 32, maxWidth: '62%', paddingHorizontal: 10, borderRadius: 10, backgroundColor: renk.vurgu, justifyContent: 'center' },
   grupDugmeMetin: { fontFamily: yazi.ekstra, fontSize: 12, color: renk.metin },
-  izgaraSatir: { flexDirection: 'row', gap: 12 },
-  kart: { flex: 1, gap: 6 },
-  kartFoto: { height: 104, borderRadius: 16, overflow: 'hidden' },
-  kartKalp: { position: 'absolute', right: 6, top: 6, width: 34, height: 34, borderRadius: 10, backgroundColor: renk.zemin, alignItems: 'center', justifyContent: 'center' },
-  kartAd: { fontFamily: yazi.ekstra, fontSize: 14, lineHeight: 17, color: renk.metin },
-  kartAlt: { fontFamily: yazi.normal, fontSize: 12, color: renk.ikincil, marginTop: -4 },
   bildirim: { position: 'absolute', left: bosluk.kenar, right: bosluk.kenar, bottom: 16, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12, paddingHorizontal: 16, paddingVertical: 12, borderRadius: 14, backgroundColor: renk.metin },
   bildirimMetin: { flex: 1, fontFamily: yazi.kalin, fontSize: 13, color: renk.zemin },
   geriAl: { fontFamily: yazi.ekstra, fontSize: 13, color: renk.vurgu },

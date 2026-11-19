@@ -1,10 +1,11 @@
 import { router, useFocusEffect } from 'expo-router';
-import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ActivityIndicator, AppState, Platform, Pressable, RefreshControl, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
-import Svg, { Circle, Path } from 'react-native-svg';
 
-import { AnaGeziKarti } from '@/components/anasayfa/AnaGeziKarti';
+import { AnaGeziKarti } from '@/components/ortak/AnaGeziKarti';
+import { KurSatiri } from '@/components/ortak/KurSatiri';
+import { Sekme, SekmeSatiri } from '@/components/ortak/Sekme';
 import { HarcamaKapatKarti } from '@/components/anasayfa/HarcamaKapatKarti';
 import { PlanlamayaDevam } from '@/components/anasayfa/PlanlamayaDevam';
 import { Buton } from '@/components/ui/Buton';
@@ -315,12 +316,12 @@ export default function AnaSayfa() {
           <>
             {/* KK6: yalnız en az 2 gezisi olan amaçlar (en çok 4) + "Hepsi"; yatay kaymaz; 2'den az doluysa satır yok. */}
             {sekmeler.length > 0 ? (
-              <View style={s.sekmeler} accessibilityRole="tablist">
+              <SekmeSatiri>
                 <Sekme baslik={t('anasayfa.v5.hepsi')} secili={!sekme} onPress={() => setSecilenSekme(null)} />
                 {sekmeler.map((a) => (
                   <Sekme key={a} baslik={t(`anasayfa.v5.sekme.${a}`)} etiket={t(`kesfetAkisi.amac.${a}`)} secili={sekme === a} onPress={() => setSecilenSekme(a)} />
                 ))}
-              </View>
+              </SekmeSatiri>
             ) : null}
             {akis.isPending ? (
               <ActivityIndicator color={renk.ana} style={s.yukleniyor} accessibilityLabel={t('anasayfa.v5.yukleniyor')} />
@@ -369,40 +370,6 @@ function KaydettiklerimDugmesi() {
   );
 }
 
-
-/** KK6: sekme — seçili 700 Lacivert ve 2 px alt çizgi; değilse 500 ikincil. */
-function Sekme({ baslik, etiket, secili, onPress }: { baslik: string; /** Ekran okuyucu için uzun ad (#386 onay notu 1). */ etiket?: string; secili: boolean; onPress: () => void }) {
-  return (
-    <Pressable accessibilityRole="tab" accessibilityLabel={etiket ?? baslik} accessibilityState={{ selected: secili }} onPress={onPress} style={[s.sekme, secili && s.sekmeSecili]}>
-      <Text style={[s.sekmeMetin, secili && s.sekmeMetinSecili]} numberOfLines={1}>
-        {baslik}
-      </Text>
-    </Pressable>
-  );
-}
-
-/**
- * KK5 (`Ana_v5_Ayrinti` §3): "{Şehir} için seyahat kur ›" iğne ikonuyla, eşleşmeyen metinde "“{metin}” için seyahat kur ›"
- * + ikonuyla. Zemin #F6F7FA, köşe 16, en az 52 px.
- */
-function KurSatiri({ children, ikon, onPress }: { children: ReactNode; ikon: 'sehir' | 'metin'; onPress: () => void }) {
-  return (
-    <Pressable accessibilityRole="button" onPress={onPress} style={({ pressed }) => [s.kurSatiri, pressed && s.basili]}>
-      {ikon === 'sehir' ? (
-        <Svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke={renk.ana} strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round">
-          <Path d="M12 21s-6-5.3-6-10a6 6 0 0 1 12 0c0 4.7-6 10-6 10z" />
-          <Circle cx={12} cy={11} r={2.2} />
-        </Svg>
-      ) : (
-        <Ikon ad="arti" boyut={20} renk={renk.ana} kalinlik={2.4} />
-      )}
-      <Text style={s.kurMetin} numberOfLines={2}>
-        {children}
-      </Text>
-      <Ikon ad="ileri" boyut={18} renk={anaV5.ok} kalinlik={2.4} />
-    </Pressable>
-  );
-}
 
 /** KK3: "4 gün kaldı · Ece, Mert, Ayşe" (bugün başlıyorsa "Bugün"; tarihsizse yalnız kişiler). */
 function kalanVeKisiler(sy: SeyahatOzet): string {
@@ -460,18 +427,11 @@ const s = StyleSheet.create({
   bosBaslik: { fontFamily: yazi.kalin, fontSize: 15, color: renk.metin },
   bosMetin: { fontFamily: yazi.normal, fontSize: 14, color: anaV5.ikincil },
   bosDugme: { alignSelf: 'flex-start', marginTop: 6, height: minDokunma, paddingHorizontal: 18, borderRadius: 22, backgroundColor: renk.vurgu, justifyContent: 'center' },
-  sekmeler: { paddingHorizontal: 16, flexDirection: 'row', gap: 20, borderBottomWidth: 1, borderBottomColor: anaV5.cizgi },
-  sekme: { height: minDokunma, minWidth: 44, justifyContent: 'center', alignItems: 'center', borderBottomWidth: 2, borderBottomColor: 'transparent', flexShrink: 1 },
-  sekmeSecili: { borderBottomColor: renk.metin },
-  sekmeMetin: { fontFamily: yazi.orta, fontSize: 14, color: anaV5.ikincil },
-  sekmeMetinSecili: { fontFamily: yazi.kalin, color: renk.metin },
   liste: { paddingHorizontal: 16, paddingTop: 4, gap: 20 },
   aramaListe: { gap: 16 },
   yukleniyor: { marginTop: 24 },
   hata: { gap: 14, paddingTop: 6 },
   hataBaslik: { fontFamily: yazi.ekstra, fontSize: 20, color: renk.metin },
   hataMetin: { fontFamily: yazi.normal, fontSize: 14, lineHeight: 20, color: anaV5.ikincil },
-  kurSatiri: { minHeight: 52, flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 14, paddingVertical: 10, borderRadius: 16, backgroundColor: anaV5.satirZemin },
-  kurMetin: { flex: 1, fontFamily: yazi.normal, fontSize: 15, color: renk.metin },
   kurKalin: { fontFamily: yazi.kalin },
 });
