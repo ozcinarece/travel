@@ -17,7 +17,8 @@ export const GENISLETME_KATI = 3;
 /** places-nearby'nin kabul ettiği en büyük yarıçap (m). */
 export const ALAN_EN_BUYUK_M = 15_000;
 
-export type Alan = { merkez: Konum; yaricapM: number };
+/** #317 KK2: "Bu alanda ara" ile aranan alan, arandığı çiple kaydedilir (çip değişince aynı alan yeniden aranabilir). */
+export type Alan = { merkez: Konum; yaricapM: number; cip?: OneriCipi };
 
 const TURISTIK_ALT: Partial<Record<PinKategorisi, OneriCipi>> = {
   muze: 'turistik_muze',
@@ -83,11 +84,12 @@ export function sehirDisinda(b: HaritaBolgesi, sehir: Alan): boolean {
 /**
  * KK9: "Bu alanda ara" hapı görünür mü. Şehir dışına kaydırınca, ya da şehir içinde görünümde az öneri kalınca (kullanıcı
  * açıkça bakıyor) çıkar; daha önce aranmış bir alanın içindeyse (aynı alan) çıkmaz. Otomatik istek yok: hap yalnız bir öneridir.
+ * #317 KK2: `cip` verilirse yalnız aynı çiple aranmış alanlar sayılır: çip değişince hap yeniden çıkar.
  */
-export function alandaAraGorunur(s: { bolge: HaritaBolgesi | null; sehir: Alan | null; arananlar: Alan[]; oneriler: HafifYer[] }): boolean {
+export function alandaAraGorunur(s: { bolge: HaritaBolgesi | null; sehir: Alan | null; arananlar: Alan[]; oneriler: HafifYer[]; cip?: OneriCipi }): boolean {
   if (!s.bolge || !s.sehir) return false;
   const g = gorunumAlani(s.bolge);
-  if (s.arananlar.some((a) => alanIcinde(g, a))) return false;
+  if (s.arananlar.some((a) => (s.cip === undefined || a.cip === undefined || a.cip === s.cip) && alanIcinde(g, a))) return false;
   if (sehirDisinda(s.bolge, s.sehir)) return true;
   return gorunurOneriSayisi(s.oneriler, s.bolge) < AZ_ONERI;
 }
