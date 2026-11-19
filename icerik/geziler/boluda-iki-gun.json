@@ -1,0 +1,220 @@
+{
+  "surum": 1,
+  "sehir": {
+    "yeni": {
+      "ad": "Bolu",
+      "slug": "bolu",
+      "place_id": "ChIJ0QaE3BY_nUAR6YJLtTo2zIM"
+    }
+  },
+  "takvim": {
+    "ilk_gun": "cumartesi"
+  },
+  "gezi": {
+    "slug": "boluda-iki-gun",
+    "baslik": "Bolu'da iki gün",
+    "ozet": "Sabah çarşı, öğleden sonra Gölcük; ertesi gün Abant ve Mudurnu",
+    "yazar_ad": "Tripmate ekibi",
+    "amaclar": [
+      "doga",
+      "lezzet",
+      "kultur_tarih"
+    ],
+    "yazi_md": "Bolu'yu çoğu kişi otoyoldan geçerken tanıyor: bir mola, bir gözleme, sonra yola devam. Bu plan şehri iki güne yayıyor ve ilin asıl gücü olan göllere, ormana ve mutfağa yer açıyor. İlk gün sabah çarşının eski çekirdeğinde başlıyor, öğlen Bolu mutfağıyla doyuruyor, öğleden sonra şehrin hemen üstündeki Gölcük'te yürüyerek bitiyor. İkinci gün Abant'ın kıyısında başlıyor, Ahilik geleneğinin yaşadığı Mudurnu'da devam ediyor ve dönüş yolunda travertenlerde bitiyor.\n\n> İkinci gün araçsız olmaz: Abant, Mudurnu ve Akkaya arasında toplu taşıma seyrek. Kış aylarında göl yollarında kar olur; zincir ya da kış lastiği bulundur, yanına kalın bir ceket al.\n\n## 1. gün · Çarşıdan Gölcük'e\n\nGüne çarşının eski çekirdeğinde, küçük [Kadı Camii](mekan:ChIJjxzfeGs_nUAR4gds2muio6g)'nde başla; ahşap tavanını sabahın sessizliğinde görürsün. Birkaç sokak ötede Bolulular [Yıldırım Bayezid Camii](mekan:ChIJz89jUms_nUARVjBIoA8HBqs)'ne Büyük Cami der; şehrin eski merkezi bu avlunun çevresinde kuruldu. Ardından [Taşhan](mekan:ChIJiWfjU2s_nUARzCbYyMEWiC4)'ın avlusuna gir ve taş duvarların arasında bir çay iç; çevredeki esnaf sokaklarında bal ve yöresel ürün satan dükkânlara da bakabilirsin.\n\nÖğleye kadar vaktin varsa [Bolu Müzesi](mekan:ChIJ640Ghg0_nUARWcDMenyhCAs)'ne uğra. Göllere çıkmadan önce bu toprakların Roma'dan Osmanlı'ya kimlere ev sahipliği yaptığını bir saatte görürsün; bahçedeki lahitleri ve mezar taşlarını atlama.\n\n::mekan[ChIJ640Ghg0_nUARWcDMenyhCAs]\n\nÖğle yemeği için şehrin güneyindeki [Hanzade](mekan:ChIJCbx05Gs_nUARym6xCpK_4PE)'ye geç. Abant kebabını, kışın da ovmaç çorbasını dene. Öğleden sonra yürüyüş var; porsiyonu ona göre seç.\n\n::mekan[ChIJCbx05Gs_nUARym6xCpK_4PE]\n\nGünün son durağı [Gölcük Tabiat Parkı](mekan:ChIJC6wS-1xGnUARarWWaEMm0qc). Şehirden araçla yirmi dakika kadar; yol ormanın içinden tırmanıyor. Küçük gölün kıyısını yavaş adımlarla dolaş, sonra patikalardan birinde ormana gir. Kıyıya güneş batmadan en az bir saat önce varmaya çalış; göl ormanın içinde olduğu için ışık erken çekilir. Akşam yemeğini Bolu'da, çarşı çevresindeki gözlemecilerden birinde hafif tutabilirsin.\n\n## 2. gün · Abant, Mudurnu, Akkaya\n\nSabah erken yola çık ve [Abant Gölü](mekan:ChIJs13emcRmnUARCbOVpuq01mk)'ne git. Hafta sonu öğleye doğru girişte kuyruk oluşabiliyor; erken gelirsen gölü sakin bulursun. Göl çevresindeki yedi kilometrelik yolu yürü; atlı faytonlar milli parktan kaldırıldı, tur artık adım adım. Kıyıdaki çam ormanı ve ayna gibi su, Bolu'ya gelmenin en büyük nedeni.\n\n::mekan[ChIJs13emcRmnUARCbOVpuq01mk]\n\nAbant'tan güneye, Mudurnu'ya in. Öğle yemeğini çarşının içindeki [Kanaat Lokantası](mekan:ChIJv9IOEEU0zRQR4Lzl8UqlRxM)'nda ye; tezgâhtaki tencere yemeklerinden seç, tatlıya yer bırak.\n\nYemekten sonra 1382'de yapılan [Mudurnu Yıldırım Bayezid Camii](mekan:ChIJgzXY8YE2zRQRUmnLjxjtbS8)'ne gir ve geniş tek kubbesine bak; yanındaki aynı yaşta hamamın kapısını da gör. Ardından [Arasta](mekan:ChIJu93KcIE2zRQRqmV5wcXoXew)'nın birbirine paralel sokaklarında dolaş. Demirci ve bakırcı dükkânları hâlâ çalışıyor; kepenkleri açılınca gölgelik, kapanınca tezgâh oluyor. Mudurnu'dan çıkmadan [saray helvası](mekan:ChIJYfuc64M1zRQRqEo690nDTYk) al; yolda iyi gider.\n\n::mekan[ChIJgzXY8YE2zRQRUmnLjxjtbS8]\n\nBolu'ya dönerken Mudurnu Çayı vadisinde [Akkaya Travertenleri](mekan:ChIJ4T9mc3lBnUARSkHkrDDL4_w)'nde dur. Sıcak suyun yamaçta bıraktığı beyaz kireç basamakları yürüyüş yolundan izle; basamakların üstüne çıkma.\n\nPlan cumartesi başlıyor; 2. gün pazara düşüyor, Mudurnu'da lokantanın açık olduğunu gitmeden sor. Gölleri en canlı renkleriyle görmek istersen ekim ve kasım; kar görmek istersen ocak ve şubat. Bir günün daha varsa Yedigöller'i ve aşçılarıyla ünlü Mengen'i ekle; ikinci planımız onlara ayrılacak.\n"
+  },
+  "gunler": [
+    {
+      "baslik": "Çarşıdan Gölcük'e",
+      "duraklar": [
+        {
+          "place_id": "ChIJjxzfeGs_nUAR4gds2muio6g",
+          "osm": "way/423635034",
+          "ad": "Kadı Camii",
+          "sure_dk": 20,
+          "sure_gerekcesi": "varsayılan 45; küçük cami, kısa ziyaret",
+          "kapali_gunler": [],
+          "rehber": "kadi-camii",
+          "amaclar": [
+            "kultur_tarih"
+          ]
+        },
+        {
+          "place_id": "ChIJz89jUms_nUARVjBIoA8HBqs",
+          "osm": "way/233878434",
+          "ad": "Yıldırım Bayezid Camii",
+          "sure_dk": 30,
+          "sure_gerekcesi": "varsayılan 45; tek yapı, kısa ziyaret",
+          "kapali_gunler": [],
+          "rehber": "yildirim-bayezid-camii",
+          "amaclar": [
+            "kultur_tarih"
+          ]
+        },
+        {
+          "place_id": "ChIJiWfjU2s_nUARzCbYyMEWiC4",
+          "osm": "node/12462647331",
+          "ad": "Taşhan",
+          "sure_dk": 30,
+          "kapali_gunler": [],
+          "rehber": "tashan",
+          "amaclar": [
+            "kultur_tarih",
+            "yavas"
+          ]
+        },
+        {
+          "place_id": "ChIJ640Ghg0_nUARWcDMenyhCAs",
+          "osm": "way/598840585",
+          "ad": "Bolu Müzesi",
+          "sure_dk": 60,
+          "sure_gerekcesi": "varsayılan 90; tek katlı orta boy müze ve bahçe",
+          "kapali_gunler": [],
+          "rehber": "bolu-muzesi",
+          "amaclar": [
+            "kultur_tarih",
+            "cocuklu"
+          ]
+        },
+        {
+          "place_id": "ChIJCbx05Gs_nUARym6xCpK_4PE",
+          "osm": "node/13992666501",
+          "ad": "Hanzade",
+          "sure_dk": 60,
+          "sure_gerekcesi": "varsayılan 45; oturarak öğle yemeği",
+          "kapali_gunler": [],
+          "rehber": "hanzade",
+          "amaclar": [
+            "lezzet"
+          ]
+        },
+        {
+          "place_id": "ChIJC6wS-1xGnUARarWWaEMm0qc",
+          "ad": "Gölcük Tabiat Parkı",
+          "sure_dk": 120,
+          "sure_gerekcesi": "varsayılan 45; göl turu ve orman patikası",
+          "kapali_gunler": [],
+          "rehber": "golcuk-tabiat-parki",
+          "amaclar": [
+            "doga",
+            "yavas",
+            "cocuklu"
+          ]
+        }
+      ]
+    },
+    {
+      "baslik": "Abant, Mudurnu, Akkaya",
+      "duraklar": [
+        {
+          "place_id": "ChIJs13emcRmnUARCbOVpuq01mk",
+          "osm": "node/3015469233",
+          "ad": "Abant Gölü",
+          "sure_dk": 150,
+          "sure_gerekcesi": "varsayılan 45; göl çevresinde 7 km yürüyüş",
+          "kapali_gunler": [],
+          "rehber": "abant-golu",
+          "amaclar": [
+            "doga",
+            "yavas"
+          ]
+        },
+        {
+          "place_id": "ChIJv9IOEEU0zRQR4Lzl8UqlRxM",
+          "ad": "Kanaat Lokantası",
+          "sure_dk": 60,
+          "sure_gerekcesi": "varsayılan 75; esnaf lokantası, hızlı servis",
+          "kapali_gunler": [],
+          "rehber": "kanaat-lokantasi-mudurnu",
+          "amaclar": [
+            "lezzet"
+          ]
+        },
+        {
+          "place_id": "ChIJgzXY8YE2zRQRUmnLjxjtbS8",
+          "osm": "way/96686723",
+          "ad": "Mudurnu Yıldırım Bayezid Camii",
+          "sure_dk": 90,
+          "sure_gerekcesi": "varsayılan 45; cami, hamam ve Arasta sokakları",
+          "kapali_gunler": [],
+          "rehber": "mudurnu-yildirim-bayezid-camii",
+          "amaclar": [
+            "kultur_tarih",
+            "yavas"
+          ]
+        },
+        {
+          "place_id": "ChIJ4T9mc3lBnUARSkHkrDDL4_w",
+          "osm": "node/6617659820",
+          "ad": "Akkaya Travertenleri",
+          "sure_dk": 45,
+          "kapali_gunler": [],
+          "rehber": "akkaya-travertenleri",
+          "amaclar": [
+            "doga",
+            "cocuklu"
+          ]
+        }
+      ]
+    }
+  ],
+  "ek_mekanlar": [
+    {
+      "place_id": "ChIJu93KcIE2zRQRqmV5wcXoXew",
+      "ad": "Mudurnu Arasta"
+    },
+    {
+      "place_id": "ChIJYfuc64M1zRQRqEo690nDTYk",
+      "ad": "Mudurnu Saray Helvası"
+    }
+  ],
+  "notlar": {
+    "dogrulanacaklar": [
+      "[Plan · Bolu Müzesi] · kapali_gunler [] · turkishmuseums.com (19 Kasım) her gün 08:30–17:30 veriyor, kapalı gün yazmıyor; OSM'de saat yok · muze.gov.tr, il kültür turizm müdürlüğü",
+      "[Plan · Bolu Müzesi] · place_id müzenin kendi kaydı mı · aynı binada il kültür turizm müdürlüğü de olabilir; ad sorgusu ve konum aynı kaydı verdi · BO'da haritadan",
+      "[Plan · Kadı Camii] · place_id ad sorgusuyla eşlendi, ayrıca adla kontrol edilmedi · BO'da haritadan",
+      "[Plan · Gölcük, Kanaat Lokantası] · osm yok · Gölcük OSM'de su alanı (way/relation) ama hattın aday sorgusu natural=water getirmiyor; bu oturumdan Overpass/OSM'e erişim yok, kimlik okunamadı · BO'da elle ya da aday sorgusu genişleyince osm-esle",
+      "[Plan · Kanaat Lokantası] · kapali_gunler [] kaynaksız; 2. gün pazar · OSM'de opening_hours yok, işletme sitesi bulunamadı · işletmeyi ara",
+      "[Plan · Abant Gölü] · osm node/3015469233 göl kaydının konumuna 150 m'den uzaksa kuru yükleme HATA verir; o durumda osm kaldırılacak",
+      "[Rehber · Bolu Müzesi] · 1976 kuruluş, 1981 açılış, Herakles heykeli, Hermes büstü, gladyatör steli, tuğla Roma mezarı, sikke ve etnografya salonu, bahçede lahitler · turkishmuseums.com · yerinde",
+      "[Rehber · Yıldırım Bayezid Camii (Bolu)] · \"14. yüzyıl sonu\", \"yangın ve depremlerden sonra yeniden yapıldı\", \"iki minare\" · TDV İslâm Ansiklopedisi 'Bolu' çifte minareli Ulucami diyor, yeniden yapım tarihleri bulunamadı · Vakıflar Kastamonu Bölge Müdürlüğü",
+      "[Rehber · Kadı Camii] · \"1499\", \"ahşap tavan ve son cemaat yeri\" · il listesindeki bilgi, birincil kaynak okunmadı · Vakıflar, yerinde",
+      "[Rehber · Taşhan] · \"Yukarı Taşhan\", \"odalar avluya açılır\", \"bakırcı, kunduracı, aktar dükkânları\" · OSM adı Yukarı Taşhan; yapım dönemi bulunamadığı için yazılmadı · Bolu Belediyesi, yerinde",
+      "[Rehber · Hanzade] · menü (Abant kebabı, ovmaç, paşa pilavı, yayla ve kızılcık tarhanası çorbası) · enuygun.com Bolu yemekleri derlemesi; işletme sitesi okunmadı · işletme",
+      "[Rehber · Hanzade] · \"Mengen aşçıları saray mutfaklarında\" · yaygın anlatım · Mengen Belediyesi, Mengen Aşçılık Festivali sayfası",
+      "[Rehber · Gölcük] · 1958 set gölü, 13 km, 1.217 m, 2011 tabiat parkı, köknar/sarıçam/kayın, nilüfer · Kure Ansiklopedi · Doğa Koruma ve Milli Parklar 10. Bölge",
+      "[Rehber · Gölcük] · \"gölün kıyısındaki ahşap ev\", \"kıyı turu bir saat sürmez\" · fotoğraflardan bilinen yapı, adı ve kullanımı doğrulanmadı · yerinde",
+      "[Rehber · Gölcük] · işletme 2024'te belediyeden Milli Parklar'a geçti (Sözcü, 10 Mayıs 2024); giriş düzeni değişmiş olabilir · DKMP",
+      "[Rehber · Abant] · heyelan set gölü, ~1.350 m, 7 km yol · yolcu360.com; fayton yok: Milli Parklar 2022'de faytoncu kooperatifleriyle sözleşmeyi uzatmadı (TRT Haber, 20 Temmuz 2022); bisiklet kiralama olup olmadığı doğrulanmadı · DKMP; milli park statüsü · DKMP; \"Abant alası\" · yaygın · DKMP",
+      "[Rehber · Kanaat Lokantası] · \"köklü\", paça çorbası · yemek.com Bolu kahvaltı derlemesi; tezgâhtaki yemek çeşitleri (kuru fasulye, pilav) doğrulanmadı · yerinde",
+      "[Rehber · Mudurnu Yıldırım Bayezid] · 1382, şehzade Bayezid, tek geniş kubbe, aynı yıl hamam, kapı ve kurnalarda özgün taş, Arasta'nın dört paralel sokağı, kepenk tezgâh/gölgelik, esnaf duası · UNESCO geçici liste 6038 · Mudurnu Belediyesi",
+      "[Rehber · Akkaya] · Çepni köyü, ~7,5 ha, 1997 birinci derece doğal sit, 2012 kiralama ve havuz, kuruma · Kure Ansiklopedi; \"Karacasu ve Babas aynı hat üzerinde\" · harita · yerinde",
+      "[Yazı · 1. gün] · \"Gölcük'e araçla yirmi dakika\" · 13 km'den tahmin · harita",
+      "[Yazı · 2. gün] · Abant → Mudurnu ve Mudurnu → Akkaya → Bolu araç süreleri ölçülmedi; günün araç payı ~2,5 saat · harita"
+    ],
+    "fotograf_onerileri": [
+      {
+        "ne": "Kapak (3:2): Abant Gölü ve çam ormanı",
+        "altyazi": "Abant Gölü",
+        "arama": "Abant Lake Commons"
+      },
+      {
+        "ne": "Gölcük Tabiat Parkı, göl ve ahşap ev",
+        "altyazi": "Gölcük, Bolu",
+        "arama": "Gölcük Tabiat Parkı Bolu Commons"
+      },
+      {
+        "ne": "Mudurnu Arasta ve Yıldırım Bayezid Camii",
+        "altyazi": "Mudurnu",
+        "arama": "Mudurnu Commons"
+      }
+    ],
+    "varsayimlar": [
+      "Hafta sonu: 1. gün cumartesi; 2. gün araçla (Abant, Mudurnu, Akkaya); 1. gün Gölcük'e araçla",
+      "Bolu'nun olmazsa olmazları (icerik/iller/bolu.json ilk sıralar, #299 Ece kuralı): Abant Gölü, Yedigöller, Gölcük, Mudurnu Arasta, Kartalkaya, Mengen, Göynük, Taşhan, Yıldırım Bayezid Camii, Sünnet Gölü, Akkaya Travertenleri, Bolu Müzesi",
+      "Gezide olmayanlar: Yedigöller (il listesi 2) ve Mengen (6) Bolu'nun ikinci gezisine ayrıldı; ikisi aynı kuzey hattında ve tek güne sığıyor. Kartalkaya (5) kayak merkezi, kış dışında yalnız orman yürüyüşü; ikinci gezide mevsim notuyla. Göynük (7) ve Sünnet Gölü (10) merkeze ~65–80 km, iki günlük plana sığmıyor",
+      "Yeni şehir: sehir.yeni Bolu (#299, Ece 19 Kasım 14:06 Bolu'yu sıranın başına aldı)",
+      "Mudurnu Arasta ve saray helvası ayrı durak değil, ek_mekanlar'da; Arasta cami durağının süresine dahil",
+      "Google: 8 kimlik sorgusu (ücretsiz), 16 puan isteği"
+    ]
+  }
+}
