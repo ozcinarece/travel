@@ -145,7 +145,7 @@
       ],
       "ilce": "Merkez",
       "merkeze_km": 10,
-      "neden": "Kireçli suyun yamaçta bıraktığı beyaz basamaklar; kısa yürüyüşle ulaşılır",
+      "neden": "Kireçli suyun yamaçta bıraktığı beyaz basamaklar, şehrin hemen dışında",
       "osm": "node/6617659820",
       "place_id": "ChIJ4T9mc3lBnUARSkHkrDDL4_w"
     },
@@ -171,8 +171,8 @@
         "doga"
       ],
       "ilce": "Mudurnu",
-      "merkeze_km": 60,
-      "neden": "Heyelanla oluşmuş göl; kuru ağaç gövdeleri sudan yükselir, kıyısında kamp yapılır",
+      "merkeze_km": 85,
+      "neden": "Kuru ağaç gövdeleri sudan yükselen orman gölü; kıyısında kamp yapılır",
       "place_id": "ChIJYxegmsnXzBQRcKMKAUCsnc8"
     },
     {
@@ -398,7 +398,7 @@
       ],
       "ilce": "Merkez",
       "merkeze_km": 2,
-      "neden": "Alpagut'ta şehre bakan dev Köroğlu heykeli; çevresindeki park 2020'de kapalıydı",
+      "neden": "Alpagut'ta şehre bakan dev Köroğlu heykeli; parkın durumunu gitmeden kontrol et",
       "place_id": "ChIJkwknZ2s_nUARPRD5gzMyq0g"
     },
     {
@@ -552,25 +552,27 @@
     },
     {
       "sira": 44,
-      "ad": "Göynük uğut tatlısı",
+      "ad": "Kule Kahve Evi",
       "kategori": "tatli_kahve",
       "amaclar": [
-        "lezzet"
+        "yavas"
       ],
       "ilce": "Göynük",
       "merkeze_km": 79,
-      "neden": "Filizlenmiş Çalıbasan buğdayından koyu, pekmez kıvamında tatlı; 2020'den beri tescilli"
+      "neden": "Zafer Kulesi'nin birkaç adım ötesinde kahve evi; tepeye çıkınca mola yerin",
+      "osm": "node/5856799087",
+      "place_id": "ChIJpawsFR_dzBQROEQ336Cpzlc"
     },
     {
       "sira": 45,
-      "ad": "Bolu çikolatası",
+      "ad": "Eskiçağa köy çay ocağı",
       "kategori": "tatli_kahve",
       "amaclar": [
-        "lezzet"
+        "yavas"
       ],
-      "ilce": "Merkez",
-      "merkeze_km": 0,
-      "neden": "Şehrin kendi adıyla anılan çikolatası; merkezdeki çikolatacılarda tadına bakarsın"
+      "ilce": "Yeniçağa",
+      "merkeze_km": 40,
+      "neden": "85 yıllık köy çay ocağı: çay odun ateşinde demlenir, ücretini içen belirler"
     }
   ]
 }
