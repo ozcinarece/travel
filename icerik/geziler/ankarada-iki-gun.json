@@ -1,0 +1,235 @@
+{
+  "surum": 1,
+  "sehir": {
+    "yeni": {
+      "ad": "Ankara",
+      "slug": "ankara",
+      "place_id": "ChIJsS1zINVH0xQRjSuEwLBX3As"
+    }
+  },
+  "takvim": {
+    "ilk_gun": "cumartesi"
+  },
+  "gezi": {
+    "slug": "ankarada-iki-gun",
+    "baslik": "Ankara'da iki gün",
+    "ozet": "Kale, Ulus ve Anıtkabir; yürüyerek, ilk kez gidenler için",
+    "yazar_ad": "Tripmate ekibi",
+    "amaclar": [
+      "kultur_tarih",
+      "lezzet"
+    ],
+    "yazi_md": "Ankara'yı ilk kez görecekler için iki günlük bir plan. İlk gün şehrin kurulduğu tepede, Kale'nin eteğinde geçiyor: Anadolu'nun on bin yılını anlatan müze, surların üstünden manzara, Ulus'ta esnaf lokantası, bir Osmanlı hanında sanayi müzesi, ahşap direkli bir Selçuklu camisi ve akşamüstü Hamamönü'nün restore edilmiş sokakları. İkinci gün Ulus'ta Roma'dan Cumhuriyet'e yürüyor ve Anıtkabir'de bitiyor. Plan cumartesi başlıyor; pazartesi kapalı olan müzeleri hafta sonuna koyduk.\n\n> Ankara'nın eski merkezi yokuşlu; rahat ayakkabı giy ve yanına ince bir ceket al. Kale'de ve Anıtkabir'de rüzgâr şehrin geri kalanından sert eser.\n\n## 1. gün · Kale ve Hamamönü\n\nGüne [Anadolu Medeniyetleri Müzesi](mekan:ChIJ9ws3eGdO0xQRRmf05EeskZs)'nde başla. Salonlar kronolojik dizilmiş: Çatalhöyük'ün duvar resimlerinden Hitit kabartmalarına, oradan Frig kralının mezar odasına kadar ok yönünde ilerle. Bina eski bir bedesten, kubbelerin altında yürürken bunu da fark edeceksin.\n\n::mekan[ChIJ9ws3eGdO0xQRRmf05EeskZs]\n\nMüzeden yokuşu çıkınca [Ankara Kalesi](mekan:ChIJezGjUW9O0xQRwAGUkwTgFXQ)'ndesin. Surların arasındaki mahallede dolaş, sonra Akkale'ye çık; eski Ankara ile Cumhuriyet'in planlı şehri aynı anda önüne serilir.\n\nÖğle yemeği için yokuşu inip Ulus'a doğru yürü ve [Boğaziçi Lokantası](mekan:ChIJgSlUCF5O0xQROIVPNcoFjxA)'nda camekândan seç. Ankara tavayı burada denemeden geçme.\n\nYemekten sonra Kale'nin dibindeki [Rahmi M. Koç Müzesi](mekan:ChIJ9b_Z9mdO0xQRNU5BMBpIICo)'ne gir. 16. yüzyıldan kalma Çengelhan'ın avlusunda eski otomobiller, lokomotif ve makineler, odalarında ise bilim aletleri ve eski dükkânlar seni bekliyor.\n\n::mekan[ChIJ9b_Z9mdO0xQRNU5BMBpIICo]\n\nBirkaç adım ötedeki [Arslanhane Camii](mekan:ChIJnTiwMWBO0xQRZUDpBPYlXqo)'ne uğra. Dışarıdan sade görünen bu Selçuklu camisinin içinde ahşap tavanı taşıyan yirmi dört ağaç direk var; UNESCO Dünya Mirası Listesi'nde.\n\nGünü güneye yürüyüp [Hamamönü](mekan:ChIJSxhUe0NO0xQRXwTCW64axC8)'nde bitir. Restore edilmiş cumbalı evlerin arasında dolaş, Mehmet Akif Ersoy'un evine bak ve bir çay bahçesinde otur. Akşam ışıkları yanınca sokaklar en güzel hâlini alır.\n\n## 2. gün · Ulus'tan Anıtkabir'e\n\nSabah [Hacı Bayram Veli Camii](mekan:ChIJEcVIjmNO0xQRFl54K-VCnps)'nde başla. Caminin çinilerine ve arkasındaki türbeye bak; Ankara'nın her yerinden gelen ziyaretçilerle meydan sabahtan hareketlidir.\n\nCaminin hemen yanındaki [Augustus Tapınağı](mekan:ChIJSfDZ7WNO0xQRO72uv7Fq0rs)'nın duvarlarında, Roma imparatorunun kendi hayatını anlattığı metin Latince ve Yunanca olarak taşa kazınmış. Satırları yandan bakarak seçmeye çalış.\n\n::mekan[ChIJSfDZ7WNO0xQRO72uv7Fq0rs]\n\nOradan kuzeye birkaç dakika yürüyüp [Roma Hamamı](mekan:ChIJcY5gZmJO0xQRs7tMopOZzQo)'na geç. Yürüyüş yolundan hamamın bölümlerini ve yerden ısıtma sisteminin tuğla ayaklarını görürsün; avludaki yazıtlı mezar taşlarına da bak.\n\nUlus Meydanı'na dönüp [Kurtuluş Savaşı Müzesi](mekan:ChIJQ1SOxWFO0xQRU9MYRfTLmwY)'ne gir. Meclis'in 1920'de açıldığı bu küçük binada Genel Kurul salonu ilk günkü gibi duruyor.\n\nÖğle yemeğinde [Uludağ Kebapçısı](mekan:ChIJ6b7DzF5O0xQRie5kQUghkqs)'nda İskender ye; tereyağı masada dökülür.\n\nYemekten sonra taksiyle [Anıtkabir](mekan:ChIJj-qcChlP0xQRoAiNJKguhtM)'e geç; yürümek yarım saati aşar, metroyla gitmek de aktarma ister. Anıtkabir kışın erken kapanır, yemeği uzatma. Aslanlı Yol'dan yürü, Şeref Holü'nde dur ve müzeye mutlaka gir. Tören Meydanı'ndan şehre bakarak iki günü kapat.\n\n::mekan[ChIJj-qcChlP0xQRoAiNJKguhtM]\n\nPlanı kısaltmak istersen 1. günden Hamamönü'nü akşam yemeğine bırakabilir, 2. günden Roma Hamamı'nı çıkarabilirsin. Uzatmak isteyenler için Cumhuriyet Müzesi, Etnografya Müzesi, Erimtan Arkeoloji ve Sanat Müzesi ve CerModern iyi eklemeler; günübirlik Gordion da düşünülebilir.\n"
+  },
+  "gunler": [
+    {
+      "baslik": "Kale ve Hamamönü",
+      "duraklar": [
+        {
+          "place_id": "ChIJ9ws3eGdO0xQRRmf05EeskZs",
+          "osm": "way/363095473",
+          "ad": "Anadolu Medeniyetleri Müzesi",
+          "sure_dk": 120,
+          "sure_gerekcesi": "varsayılan 90; büyük ve yoğun koleksiyon",
+          "kapali_gunler": [],
+          "rehber": "anadolu-medeniyetleri-muzesi",
+          "amaclar": [
+            "kultur_tarih"
+          ]
+        },
+        {
+          "place_id": "ChIJezGjUW9O0xQRwAGUkwTgFXQ",
+          "ad": "Ankara Kalesi",
+          "sure_dk": 60,
+          "sure_gerekcesi": "varsayılan 45; iç kale, Akkale ve sokaklar",
+          "kapali_gunler": [],
+          "rehber": "ankara-kalesi",
+          "amaclar": [
+            "kultur_tarih",
+            "yavas"
+          ]
+        },
+        {
+          "place_id": "ChIJgSlUCF5O0xQROIVPNcoFjxA",
+          "osm": "node/12057076369",
+          "ad": "Boğaziçi Lokantası",
+          "sure_dk": 60,
+          "sure_gerekcesi": "varsayılan 45; öğle yemeği ve çay",
+          "kapali_gunler": [],
+          "rehber": "bogazici-lokantasi",
+          "amaclar": [
+            "lezzet"
+          ]
+        },
+        {
+          "place_id": "ChIJ9b_Z9mdO0xQRNU5BMBpIICo",
+          "osm": "way/874846748",
+          "ad": "Rahmi M. Koç Müzesi",
+          "sure_dk": 90,
+          "kapali_gunler": [
+            "pazartesi"
+          ],
+          "rehber": "rahmi-m-koc-muzesi-ankara",
+          "amaclar": [
+            "kultur_tarih",
+            "cocuklu"
+          ]
+        },
+        {
+          "place_id": "ChIJnTiwMWBO0xQRZUDpBPYlXqo",
+          "osm": "way/363095476",
+          "ad": "Ahi Şerafettin (Arslanhane) Camii",
+          "sure_dk": 30,
+          "sure_gerekcesi": "varsayılan 45; tek salonlu küçük cami",
+          "kapali_gunler": [],
+          "rehber": "arslanhane-camii",
+          "amaclar": [
+            "kultur_tarih"
+          ]
+        },
+        {
+          "place_id": "ChIJSxhUe0NO0xQRXwTCW64axC8",
+          "ad": "Hamamönü Tarihi Ankara Evleri",
+          "sure_dk": 60,
+          "kapali_gunler": [],
+          "rehber": "hamamonu",
+          "amaclar": [
+            "kultur_tarih",
+            "yavas"
+          ]
+        }
+      ]
+    },
+    {
+      "baslik": "Ulus'tan Anıtkabir'e",
+      "duraklar": [
+        {
+          "place_id": "ChIJEcVIjmNO0xQRFl54K-VCnps",
+          "osm": "way/155197582",
+          "ad": "Hacı Bayram Veli Camii",
+          "sure_dk": 30,
+          "sure_gerekcesi": "varsayılan 45; cami ve türbe kısa ziyaret",
+          "kapali_gunler": [],
+          "rehber": "haci-bayram-veli-camii",
+          "amaclar": [
+            "kultur_tarih"
+          ]
+        },
+        {
+          "place_id": "ChIJSfDZ7WNO0xQRO72uv7Fq0rs",
+          "osm": "way/469691342",
+          "ad": "Augustus Tapınağı",
+          "sure_dk": 30,
+          "sure_gerekcesi": "varsayılan 45; dışarıdan, seyir yolundan izleniyor",
+          "kapali_gunler": [],
+          "rehber": "augustus-tapinagi",
+          "amaclar": [
+            "kultur_tarih"
+          ]
+        },
+        {
+          "place_id": "ChIJcY5gZmJO0xQRs7tMopOZzQo",
+          "osm": "node/10303257801",
+          "ad": "Roma Hamamı",
+          "sure_dk": 45,
+          "sure_gerekcesi": "varsayılan 90; küçük açık hava örenyeri",
+          "kapali_gunler": [
+            "pazartesi"
+          ],
+          "rehber": "roma-hamami",
+          "amaclar": [
+            "kultur_tarih"
+          ]
+        },
+        {
+          "place_id": "ChIJQ1SOxWFO0xQRU9MYRfTLmwY",
+          "osm": "way/419393108",
+          "ad": "Kurtuluş Savaşı Müzesi",
+          "sure_dk": 60,
+          "sure_gerekcesi": "varsayılan 45; Genel Kurul salonu ve odalar",
+          "kapali_gunler": [],
+          "rehber": "kurtulus-savasi-muzesi",
+          "amaclar": [
+            "kultur_tarih"
+          ]
+        },
+        {
+          "place_id": "ChIJ6b7DzF5O0xQRie5kQUghkqs",
+          "osm": "node/824237315",
+          "ad": "Uludağ Kebapçısı",
+          "sure_dk": 60,
+          "sure_gerekcesi": "varsayılan 45; öğle yemeği",
+          "kapali_gunler": [],
+          "rehber": "uludag-kebapcisi",
+          "amaclar": [
+            "lezzet"
+          ]
+        },
+        {
+          "place_id": "ChIJj-qcChlP0xQRoAiNJKguhtM",
+          "osm": "node/34668145",
+          "ad": "Anıtkabir",
+          "sure_dk": 120,
+          "sure_gerekcesi": "varsayılan 45; anıt, Aslanlı Yol ve müze",
+          "kapali_gunler": [],
+          "rehber": "anitkabir",
+          "amaclar": [
+            "kultur_tarih"
+          ]
+        }
+      ]
+    }
+  ],
+  "notlar": {
+    "dogrulanacaklar": [
+      "[Plan · Anadolu Medeniyetleri Müzesi, Kurtuluş Savaşı Müzesi] · kapali_gunler [] · OSM opening_hours Mo-Su; bayram arifelerinde ve mevsimde değişebilir · muze.gov.tr, Ankara İl Kültür Turizm",
+      "[Plan · Rahmi M. Koç Müzesi] · kapali_gunler [\"pazartesi\"] · OSM 'Mo off' · rmk-museum.org.tr/ankara",
+      "[Plan · Roma Hamamı] · kapali_gunler [\"pazartesi\"] · OSM 'Tu-Su' · muze.gov.tr",
+      "[Plan · Augustus Tapınağı] · kapali_gunler [] · OSM'de saat yok; turkishmuseums sayfası ziyaret saati vermiyor · muze.gov.tr",
+      "[Plan · Boğaziçi Lokantası, Uludağ Kebapçısı, Kale, Arslanhane, Hacı Bayram, Hamamönü, Anıtkabir] · kapali_gunler [] · Boğaziçi için OSM Mo-Su; diğerleri için resmî kaynak yok · işletme telefonu / anitkabir.tsk.tr",
+      "[Rehber · Kurtuluş Savaşı Müzesi] · \"gaz lambalarıyla aydınlatılan tavan\" · yaygın anlatım, doğrulanmadı · yerinde",
+      "[Rehber · Arslanhane Camii] · \"13. yüzyılın sonunda (1290), Ahi önderleri\", \"yirmi dört ağaç direk\", \"mihrapta Selçuklu çinileri\" · Vikipedi, Kure · Vakıflar Ankara Bölge Müdürlüğü, UNESCO WHC 1694",
+      "[Rehber · Anadolu Medeniyetleri] · \"Gordion tümülüsünün mezar odası yeniden kurulmuş\" · Vikipedi 'reproduction' diyor · muze.gov.tr",
+      "[Rehber · Rahmi M. Koç Müzesi] · \"1523\", \"2005'te açıldı\", \"buharlı lokomotif\", \"avludaki kafe\" · Vikipedi · rmk-museum.org.tr",
+      "[Rehber · Hamamönü] · \"Mehmet Akif Ersoy evi müze olarak ziyaret edilebiliyor\", \"Sanat Sokağı atölyeleri\" · OSM'de müze kaydı var (Tu-Su); atölyeler değişebilir · Altındağ Belediyesi",
+      "[Rehber · Augustus Tapınağı] · \"içeri girilmesi sınırlı olabilir\", Latince metin giriş iç duvarlarında, Yunanca dış duvarda · turkishmuseums · yerinde",
+      "[Rehber · Roma Hamamı] · \"128 mermer sütun\", \"1937–1943 kazıları\" · Vikipedi · muze.gov.tr",
+      "[Rehber · Boğaziçi Lokantası] · menü (Ankara tava, işkembe, sütlaç) ve \"eski esnaf lokantası\" · Yetkin Report 2020 · yerinde",
+      "[Rehber · Uludağ Kebapçısı] · \"onlarca yıldır\", şıra servisi · kuruluş yılı bulunamadı; Bursa'daki Uludağ Kebapçısı ile bağı belirsiz · işletme",
+      "[Rehber · Anıtkabir] · \"1944'te başladı\", \"10 Kasım 1953\", \"yirmi dört aslan\", \"saat başı nöbet değişimi\", müze girişi Misak-ı Millî Kulesi yanında · genel bilgi · anitkabir.tsk.tr",
+      "[Yazı · 2. gün] · Uludağ → Anıtkabir arası yürüme ~35 dk (doğrulayıcı uyarısı beklenir) · yazıda taksi/metro öneriliyor",
+      "[Rehber · Hacı Bayram Veli Camii] · \"1427'de yapılmaya başlandı\", \"1430'da öldü\" · ölüm yılı kaynaklarda 1429/1430 · Diyanet İslâm Ansiklopedisi, Vakıflar",
+      "[Rehber · Hacı Bayram Veli Camii] · \"kare planlı türbe, kurşun kaplı kubbe\" · kaynaklar kare plan + sekizgen kasnak diyor; kaplama doğrulanmadı · Vakıflar Ankara Bölge Müdürlüğü",
+      "[Rehber · Hacı Bayram Veli Camii] · İPUCU: caminin tapınağa bitişik duvarı · yön yazılmadı; birleşme yeri yerinde görülmeli · yerinde",
+      "[Plan · Anıtkabir] · 2. gün Anıtkabir'e ~14:25 varış, ~16:25 bitiş · kış kapanış saati kısa olabilir (basında 1 Kasım–31 Ocak için 16:00 civarı geçiyor, resmî sayfadan doğrulanmadı); yazıda ve rehberde saatsiz 'kışın erken kapanır' notu var · anitkabir.tsk.tr",
+      "[Rehber · Rahmi M. Koç Müzesi] · \"Ankara'nın eski fotoğraflarıyla kurulan şehir bölümü\", \"içine girilebilen araçlar\" · doğrulanmadı · rmk-museum.org.tr/ankara",
+      "[Rehber · Kurtuluş Savaşı Müzesi] · \"İstiklal Marşı'na ayrılmış oda\" · doğrulanmadı · Ankara İl Kültür Turizm, yerinde",
+      "[Rehber · Kurtuluş Savaşı Müzesi] · kapalı gün · resmî sayfada ziyaret günü bulunamadı (rehber metninden çıkarıldı) · Ankara İl Kültür Turizm",
+      "[Plan · g1.d2 Ankara Kalesi, g1.d6 Hamamönü] · osm alanı kaldırıldı · kuru yüklemede OSM noktası Google konumundan 273 m ve 160 m uzak çıktı (sınır 150); konum google_30g tutulur, sonra osm-esle ya da BO'da elle · Ürün kararı #366"
+    ],
+    "fotograf_onerileri": [
+      {
+        "ne": "Anıtkabir Aslanlı Yol ve Şeref Holü",
+        "altyazi": "Anıtkabir, Rasattepe",
+        "arama": "Anıtkabir Wikimedia Commons"
+      },
+      {
+        "ne": "Ankara Kalesi surları ve Akkale'den şehir",
+        "altyazi": "Kale'den Ankara",
+        "arama": "Ankara Castle Commons"
+      },
+      {
+        "ne": "Augustus Tapınağı ve Hacı Bayram Veli Camii",
+        "altyazi": "Ulus'ta iki çağ yan yana",
+        "arama": "Temple of Augustus Ankara Commons"
+      }
+    ],
+    "varsayimlar": [
+      "Hafta sonu: 1. gün cumartesi",
+      "Pazartesi kapalı müzeler (Rahmi M. Koç, Roma Hamamı) hafta sonuna kondu",
+      "Hamamönü için 'Hamamönü' sorgusunun Google kaydı işletme durumu boş geldi; 'Hamamönü Tarihi Ankara Evleri' kaydı kullanıldı",
+      "Tahtakale Kahvecisi yazıya alınmadı: Google kaydı kalıcı kapalı",
+      "Kapak alanı (kapak.ara) #357 canlıya çıkınca toplu PR'la eklenecek"
+    ]
+  }
+}
