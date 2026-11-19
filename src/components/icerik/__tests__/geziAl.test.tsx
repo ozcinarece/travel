@@ -302,6 +302,32 @@ describe('#193 Yeni seyahat akışın içinde (KK2–KK4)', () => {
     await waitFor(() => expect(mockDb.rpc.filter((r) => r.ad === 'geziden_seyahat_ac').length).toBe(once + 1));
   });
 
+  it('#388 inceleme: "Tekrar dene" alt bileşenin ac()\'ından geçer — bekleme kilidi atlanmaz, iki seyahat açılmaz', async () => {
+    mockDb.rpcHata = { message: 'TypeError: Network request failed', code: '' };
+    ac(null);
+    await sehirHazir();
+    fireEvent.press(screen.getByText('Tarih sonra'));
+    fireEvent.press(screen.getByText('Seyahati aç ve planı al'));
+    await waitFor(() => expect(screen.getByText('Tekrar dene')).toBeTruthy());
+    const once = mockDb.rpc.filter((r) => r.ad === 'geziden_seyahat_ac').length;
+    mockDb.rpcHata = null;
+    const tekrar = screen.getByText('Tekrar dene');
+    fireEvent.press(tekrar);
+    fireEvent.press(tekrar);
+    await waitFor(() => expect(mockRouter.replace).toHaveBeenCalledTimes(1));
+    expect(mockDb.rpc.filter((r) => r.ad === 'geziden_seyahat_ac')).toHaveLength(once + 1);
+  });
+
+  it('#388 inceleme: çevrimdışıyken pasif düğmenin nedeni satırda ve ipucunda', async () => {
+    mockCevrimdisi = true;
+    ac(null);
+    await sehirHazir();
+    expect(screen.getByText('Bağlantı yok. Hiçbir şey eklenmedi; bağlanınca tekrar dene.')).toBeTruthy();
+    expect(screen.queryByText('Tekrar dene')).toBeNull();
+    fireEvent.press(screen.getByText('Tarih sonra'));
+    expect(screen.getByRole('button', { name: 'Seyahati aç ve planı al' }).props.accessibilityHint).toBe('Bağlantı yok; bağlanınca eklenebilir.');
+  });
+
   it('KK10: "Yalnız mekanlar" + yeni seyahat — boş günler, seçilen mekanlar atanmamış; Gezi sayfasına dönülür', async () => {
     ac(null);
     await sehirHazir();

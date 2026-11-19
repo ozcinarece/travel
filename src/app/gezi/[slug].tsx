@@ -17,7 +17,7 @@ import { EkleDugmesi } from '@/components/ui/EkleDugmesi';
 import { Ikon } from '@/components/ui/Ikon';
 import { Logo } from '@/components/ui/Logo';
 import { SegmentSecici } from '@/components/ui/SegmentSecici';
-import { eklemeHatasi, type EklemeDurumu } from '@/features/ekleme/eklemeDurumu';
+import { cevrimdisiDurumu, eklemeHatasi, type EklemeDurumu } from '@/features/ekleme/eklemeDurumu';
 import { kalinParcalar } from '@/features/icerik/aktar';
 import { icerikHafif, useIcerikCanli } from '@/features/icerik/fotolar';
 import { useIcerikMekanlari } from '@/features/icerik/mekanBilgileri';
@@ -330,7 +330,8 @@ export default function GeziEkrani() {
       {yapisik ? <View style={[s.yapisik, { paddingTop: kenar.top + 6 }]}>{segment}</View> : null}
 
       <View style={[s.altCubuk, { paddingBottom: Math.max(kenar.bottom, 12) + 8 }]}>
-        {alHata && !alAcik ? <EklemeDurumSatiri durum={alHata} metinStili={s.hata} /> : null}
+        {/* #388 inceleme: çevrimdışıyken + / ✓ pasif; nedeni aynı satırda. */}
+        {alAcik ? null : alHata ? <EklemeDurumSatiri durum={alHata} metinStili={s.hata} /> : cevrimdisi ? <EklemeDurumSatiri durum={cevrimdisiDurumu()} metinStili={s.hata} /> : null}
         <View style={s.altSatir}>
           <View style={{ flex: 1, minWidth: 0 }}>
             <Text style={s.altBaslik} numberOfLines={1}>

@@ -39,7 +39,8 @@ type Props = {
 function eklenmediSebebi(cozumsuzler: { ad: string; sebep: string }[]): EklemeDurumu {
   const ilkHata = cozumsuzler[0];
   if (!ilkHata) return hepsiListedeBilgisi();
-  if (ilkHata.sebep === 'bulunamadi') return { metin: t('gezi.hicEklenmedi', { sebep: t('gezi.sebepBulunamadi', { ad: ilkHata.ad }) }), tur: 'hata' };
+  // #388 inceleme: hiç eklenmediyse yalnız ilk cümle (mekan adıyla ikinci cümle tekrar ediyordu).
+  if (ilkHata.sebep === 'bulunamadi') return { metin: t('gezi.hicEklenmedi'), tur: 'hata' };
   return { metin: t('anasayfa.ekleHata'), tur: 'hata' };
 }
 

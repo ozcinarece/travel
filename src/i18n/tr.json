@@ -805,9 +805,8 @@
     "alBaslik": "Seyahatime al",
     "yeniSeyahat": "Yeni seyahat",
     "listeye": "Listeye",
-    "cozumYok": "{n} mekan şu an eklenemiyor; diğerleri eklendi.",
-    "hicEklenmedi": "Hiçbir mekan eklenemedi — {sebep}",
-    "sebepBulunamadi": "{ad} şu an eklenemiyor",
+    "cozumYok": "{n} mekan eklenemedi.",
+    "hicEklenmedi": "Hiçbir mekan eklenemedi.",
     "kaydet": "Kaydet",
     "kaydedildi": "Kaydedildi",
     "paylas": "Paylaş",
@@ -1321,6 +1320,7 @@
   },
   "ekleme": {
     "baglantiYok": "Bağlantı yok. Hiçbir şey eklenmedi; bağlanınca tekrar dene.",
+    "baglantiYokIpucu": "Bağlantı yok; bağlanınca eklenebilir.",
     "tekrarDene": "Tekrar dene",
     "hepsiListede": "Bu mekanların hepsi zaten listende."
   }

@@ -90,7 +90,7 @@ export function GeziPlani({ gezi, canli, listede, mesgulId, onDurakEkle, eklePas
                     {`${kategoriEtiketi(d.kategori)} · ${sureMetni(d.sure_dk)}`}
                   </Text>
                 </View>
-                <EkleDugmesi listede={icinde} mesgul={mesgulId === d.id} pasif={eklePasif} onPress={() => onDurakEkle(d)} />
+                <EkleDugmesi listede={icinde} mesgul={mesgulId === d.id} pasif={eklePasif} ipucu={eklePasif ? t('ekleme.baglantiYokIpucu') : undefined} onPress={() => onDurakEkle(d)} />
               </Pressable>
             </View>
           );

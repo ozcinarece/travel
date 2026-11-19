@@ -3,7 +3,7 @@
 // seyahatten fazla gün varsayılan seçilmez, seçilirse sona eklenir "Paz 18 +") ve "Yalnız mekanlar" (günlere göre gruplu,
 // kutucukla seçim; listede olan "Listende"). "Yeni seyahat" sihirbaza gitmez: aynı sayfada şehir (gezinin, kilitli), kaç gün,
 // ne zaman; seyahat ve plan tek işlemde açılır.
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { ActivityIndicator, Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
@@ -13,7 +13,7 @@ import { Buton } from '@/components/ui/Buton';
 import { EklemeDurumSatiri } from '@/components/ui/EklemeDurumSatiri';
 import { Ikon } from '@/components/ui/Ikon';
 import { CekilenSayfa, modalKokuStili, SayfaKaydirici } from '@/components/ui/sayfaCekme';
-import type { EklemeDurumu } from '@/features/ekleme/eklemeDurumu';
+import { cevrimdisiDurumu, type EklemeDurumu } from '@/features/ekleme/eklemeDurumu';
 import { useDuraklar, useGunler } from '@/features/gunler/sorgular';
 import {
   aktarmaBilgisi,
@@ -159,6 +159,14 @@ export function SeyahatimeAl({ gezi, seyahatler, ilkHedefId, kimlik, foto, onKap
 
 // ---------------------------------------------------------------- 19 · Planı al (mevcut seyahat)
 
+/**
+ * #388 inceleme: görünen satır; hata yokken çevrimdışıysa pasif düğmenin nedeni. "Tekrar dene" satıra `yeniden` ile verilen
+ * bu bileşenin `al()` / `ac()`'ını çağırır (bekleme göstergesi + düğme kilidi atlanmasın, iki seyahat açılmasın).
+ */
+function gorunenDurum(hata: EklemeDurumu | null, cevrimdisi: boolean): EklemeDurumu | null {
+  return hata ?? (cevrimdisi ? cevrimdisiDurumu() : null);
+}
+
 function HedefGunleri({ gezi, seyahatId, kimlik, onAl, hata }: { gezi: GeziDetay; seyahatId: string; kimlik: (d: GeziDuragi) => string | null; onAl: Props['onAl']; hata: EklemeDurumu | null }) {
   // #388 KK5 (kanvas 23c): bağlantı yokken ekleme düğmesi pasif.
   const cevrimdisi = useCevrimdisi();
@@ -190,14 +198,19 @@ function HedefGunleri({ gezi, seyahatId, kimlik, onAl, hata }: { gezi: GeziDetay
     return g ? gunHucresi(g, 0).ust : t('gezi.listeye');
   };
 
+  const kilit = useRef(false);
   const al = async () => {
+    if (kilit.current) return;
+    kilit.current = true;
     setMesgul(true);
     try {
       await onAl(seyahatId, plan, aktarmaSecenegi(gezi, secim), eklenecekGunler(plan, sira));
     } finally {
+      kilit.current = false;
       setMesgul(false);
     }
   };
+  const durum = gorunenDurum(hata, cevrimdisi);
 
   return (
     <>
@@ -268,9 +281,9 @@ function HedefGunleri({ gezi, seyahatId, kimlik, onAl, hata }: { gezi: GeziDetay
           })
         )}
         {bilgi && !yukleniyor ? <BilgiKutusu metin={bilgi} /> : null}
-        {hata ? <EklemeDurumSatiri durum={hata} /> : null}
+        {durum ? <EklemeDurumSatiri durum={durum} yeniden={() => void al()} /> : null}
       </SayfaKaydirici>
-      <Buton baslik={dugme.metin} tur="vurgu" boy="buyuk" onPress={() => void al()} pasif={dugme.pasif || yukleniyor || mesgul || cevrimdisi} yukleniyor={mesgul} />
+      <Buton baslik={dugme.metin} tur="vurgu" boy="buyuk" onPress={() => void al()} pasif={dugme.pasif || yukleniyor || mesgul || cevrimdisi} yukleniyor={mesgul} ipucu={cevrimdisi ? t('ekleme.baglantiYokIpucu') : undefined} />
     </>
   );
 }
@@ -288,20 +301,25 @@ function HedefMekanlari({ gezi, seyahatId, kimlik, foto, onAl, hata }: { gezi: G
   const [mesgul, setMesgul] = useState(false);
   const n = secilebilirler(gruplar).filter((x) => secili.has(x.durak.id)).length;
   const hepsiListede = !mekanlarQ.isPending && secilebilirler(gruplar).length === 0;
+  const kilit = useRef(false);
   const al = async () => {
+    if (kilit.current) return;
+    kilit.current = true;
     setMesgul(true);
     try {
       await onAl(seyahatId, mekanSecimPlani(gruplar, secili), 'mekan');
     } finally {
+      kilit.current = false;
       setMesgul(false);
     }
   };
+  const durum = gorunenDurum(hata, cevrimdisi);
   return (
     <>
       <SayfaKaydirici style={s.kaydirma} contentContainerStyle={{ gap: 12 }}>
         {mekanlarQ.isPending ? <ActivityIndicator color={renk.ana} /> : <MekanListesi gruplar={gruplar} secili={secili} setSecili={setSecili} foto={foto} />}
         <Text style={s.not}>{t('gezi.mekanNotu')}</Text>
-        {hata ? <EklemeDurumSatiri durum={hata} /> : null}
+        {durum ? <EklemeDurumSatiri durum={durum} yeniden={() => void al()} /> : null}
       </SayfaKaydirici>
       <Buton
         baslik={hepsiListede ? t('gezi.hepsiListede') : n > 0 ? t('gezi.mekanlariEkle', { n }) : t('gezi.mekanSecin')}
@@ -310,6 +328,7 @@ function HedefMekanlari({ gezi, seyahatId, kimlik, foto, onAl, hata }: { gezi: G
         onPress={() => void al()}
         pasif={n === 0 || mekanlarQ.isPending || mesgul || cevrimdisi}
         yukleniyor={mesgul}
+        ipucu={cevrimdisi ? t('ekleme.baglantiYokIpucu') : undefined}
       />
     </>
   );
@@ -443,15 +462,19 @@ function YeniSeyahat({
   const [mesgul, setMesgul] = useState(false);
   const tarihHazir = form.tarihsiz || !!form.baslangic;
   const bilgi = yeniSeyahatBilgisi(gezi.baslik, ozet, sekme === 'mekan' ? n : undefined);
+  const kilit = useRef(false);
   const ac = async () => {
-    if (!sehir.data) return;
+    if (!sehir.data || kilit.current) return;
+    kilit.current = true;
     setMesgul(true);
     try {
       await onYeni({ sehir: sehir.data, gunSayisi: form.gunSayisi, baslangic, secim: sekme === 'plan' ? { tur: 'plan' } : { tur: 'mekan', duraklar: mekanSecimPlani(gruplar, secili).duraklar } });
     } finally {
+      kilit.current = false;
       setMesgul(false);
     }
   };
+  const durum = gorunenDurum(hata, cevrimdisi);
   return (
     <>
       <SayfaKaydirici style={s.kaydirma} contentContainerStyle={{ gap: 12 }}>
@@ -468,7 +491,7 @@ function YeniSeyahat({
             ) : null}
           </View>
         ) : null}
-        {hata ? <EklemeDurumSatiri durum={hata} /> : null}
+        {durum ? <EklemeDurumSatiri durum={durum} yeniden={() => void ac()} /> : null}
       </SayfaKaydirici>
       <Buton
         baslik={sekme === 'plan' ? t('gezi.yeniAcPlan') : n > 0 ? t('gezi.yeniAcMekan', { n }) : t('gezi.mekanSecin')}
@@ -477,6 +500,7 @@ function YeniSeyahat({
         onPress={() => void ac()}
         pasif={!sehir.data || !tarihHazir || (sekme === 'mekan' && n === 0) || mesgul || cevrimdisi}
         yukleniyor={mesgul}
+        ipucu={cevrimdisi ? t('ekleme.baglantiYokIpucu') : undefined}
       />
       <Text style={s.dipnot}>{sekme === 'plan' ? t('gezi.yeniDipnotPlan') : t('gezi.yeniDipnotMekan')}</Text>
     </>

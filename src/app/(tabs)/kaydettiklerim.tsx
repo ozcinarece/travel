@@ -6,6 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { GeziAlYukleyici } from '@/components/icerik/GeziAl';
 import { Ikon } from '@/components/ui/Ikon';
+import { TEKRAR_HIT_SLOP, useIosDuyuru } from '@/components/ui/EklemeDurumSatiri';
 import { KesfetHapi } from '@/components/ui/KesfetHapi';
 import { SegmentSecici } from '@/components/ui/SegmentSecici';
 import { eklemeHatasi } from '@/features/ekleme/eklemeDurumu';
@@ -85,6 +86,11 @@ export default function KaydettiklerimEkrani() {
       b.kaldirilan || b.tekrar ? 4000 : 3000,
     );
   };
+  // #388 inceleme: çevrimdışıyken "listesine ekle" pasif; nedeni bantta (mevcut `ekleme.baglantiYok`, düğmesiz).
+  const cevrimdisiEkle = cevrimdisi && sekme === 'yer' && gruplar.some((g) => !!g.sehirId && !!varsayilanHedef(hedefler, g.sehirAd));
+  const bandMetni = bildirim ?? (kaldirilan ? t('kaydettiklerim.kaldirildi') : cevrimdisiEkle ? t('ekleme.baglantiYok') : '');
+  // iOS'ta bildirim de duyurulur (Android'de bant yeni açılınca okunmuyor; iki platformda tek yol).
+  useIosDuyuru(bildirim ?? (cevrimdisiEkle ? t('ekleme.baglantiYok') : null));
   const kaldir = (tur: KaydedilenTuru, id: string) => {
     kaydet.mutate({ tur, hedef_id: id, kayitli: true });
     goster({ kaldirilan: { tur, id } });
@@ -174,7 +180,7 @@ export default function KaydettiklerimEkrani() {
                     <Text style={s.grupSayi}>{t('kaydettiklerim.sehirSayi', { n: g.yerler.length })}</Text>
                   </Text>
                   {g.sehirId ? (
-                    <Pressable accessibilityRole="button" disabled={mesgulGrup !== null || (!!hedef && cevrimdisi)} accessibilityState={{ disabled: mesgulGrup !== null || (!!hedef && cevrimdisi) }} onPress={() => (hedef ? grubaEkle(g, hedef) : sehreKur(g))} style={({ pressed }) => [s.grupDugme, pressed && { opacity: 0.85 }, !!hedef && cevrimdisi && { opacity: 0.4 }]}>
+                    <Pressable accessibilityRole="button" accessibilityHint={hedef && cevrimdisi ? t('ekleme.baglantiYokIpucu') : undefined} disabled={mesgulGrup !== null || (!!hedef && cevrimdisi)} accessibilityState={{ disabled: mesgulGrup !== null || (!!hedef && cevrimdisi) }} onPress={() => (hedef ? grubaEkle(g, hedef) : sehreKur(g))} style={({ pressed }) => [s.grupDugme, pressed && { opacity: 0.85 }, !!hedef && cevrimdisi && { opacity: 0.4 }]}>
                       {mesgulGrup === g.sehirId ? (
                         <ActivityIndicator color={renk.metin} />
                       ) : (
@@ -220,11 +226,11 @@ export default function KaydettiklerimEkrani() {
           })
         )}
       </ScrollView>
-      {kaldirilan || bildirim ? (
+      {kaldirilan || bildirim || cevrimdisiEkle ? (
         <View style={s.bildirim}>
-          <Text style={s.bildirimMetin}>{bildirim ?? t('kaydettiklerim.kaldirildi')}</Text>
+          <Text style={s.bildirimMetin}>{bandMetni}</Text>
           {kaldirilan ? (
-            <Pressable accessibilityRole="button" onPress={geriAl} hitSlop={8}>
+            <Pressable accessibilityRole="button" onPress={geriAl} hitSlop={TEKRAR_HIT_SLOP}>
               <Text style={s.geriAl}>{t('kaydettiklerim.geriAl')}</Text>
             </Pressable>
           ) : tekrar ? (
@@ -235,7 +241,7 @@ export default function KaydettiklerimEkrani() {
                 setTekrar(null);
                 tekrar();
               }}
-              hitSlop={8}>
+              hitSlop={TEKRAR_HIT_SLOP}>
               <Text style={s.geriAl}>{t('ekleme.tekrarDene')}</Text>
             </Pressable>
           ) : null}

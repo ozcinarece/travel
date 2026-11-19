@@ -19,6 +19,11 @@ export function eklemeHatasi(e: unknown, baglam: string, tekrar?: () => void): E
   return { metin: t('anasayfa.ekleHata'), tur: 'hata' };
 }
 
+/** #388 inceleme: çevrimdışıyken pasif ekleme düğmesinin nedeni (mevcut `ekleme.baglantiYok` satırı, düğmesiz). */
+export function cevrimdisiDurumu(): EklemeDurumu {
+  return { metin: t('ekleme.baglantiYok'), tur: 'hata' };
+}
+
 /** KK3: hepsi zaten listede (hata değil). */
 export function hepsiListedeBilgisi(): EklemeDurumu {
   return { metin: t('ekleme.hepsiListede'), tur: 'bilgi' };
