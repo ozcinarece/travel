@@ -26,7 +26,7 @@
       ],
       "ilce": "Mengen",
       "merkeze_km": 26,
-      "neden": "Orman içinde yedi göl ve 1969'da kurulan ilk alabalık üretme yeri; kışın Bolu yolu kapalı",
+      "neden": "Orman içinde birbirine akan yedi göl; kar ve buzda yol kapanabilir",
       "place_id": "ChIJ8dcXWBo_nUARM6kPTfod8vY"
     },
     {
@@ -137,31 +137,6 @@
     },
     {
       "sira": 11,
-      "ad": "Köroğlu Anıtı",
-      "kategori": "manzara",
-      "amaclar": [
-        "kultur_tarih"
-      ],
-      "ilce": "Merkez",
-      "merkeze_km": 2,
-      "neden": "Şehre bakan tepedeki dev Köroğlu heykeli; Bolu'yu yukarıdan görürsün",
-      "place_id": "ChIJkwknZ2s_nUARPRD5gzMyq0g"
-    },
-    {
-      "sira": 12,
-      "ad": "Hanzade",
-      "kategori": "yemek",
-      "amaclar": [
-        "lezzet"
-      ],
-      "ilce": "Merkez",
-      "merkeze_km": 1,
-      "neden": "Abant kebabı, ovmaç çorbası ve paşa pilavı gibi Bolu yemekleri",
-      "osm": "node/13992666501",
-      "place_id": "ChIJCbx05Gs_nUARym6xCpK_4PE"
-    },
-    {
-      "sira": 13,
       "ad": "Akkaya Travertenleri",
       "kategori": "doga",
       "amaclar": [
@@ -175,7 +150,7 @@
       "place_id": "ChIJ4T9mc3lBnUARSkHkrDDL4_w"
     },
     {
-      "sira": 14,
+      "sira": 12,
       "ad": "Bolu Müzesi",
       "kategori": "muze",
       "amaclar": [
@@ -189,7 +164,7 @@
       "place_id": "ChIJ640Ghg0_nUARWcDMenyhCAs"
     },
     {
-      "sira": 15,
+      "sira": 13,
       "ad": "Sülüklü Göl Tabiat Parkı",
       "kategori": "doga",
       "amaclar": [
@@ -201,7 +176,20 @@
       "place_id": "ChIJYxegmsnXzBQRcKMKAUCsnc8"
     },
     {
-      "sira": 16,
+      "sira": 14,
+      "ad": "Hanzade",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "Abant kebabı, ovmaç çorbası ve paşa pilavı gibi Bolu yemekleri",
+      "osm": "node/13992666501",
+      "place_id": "ChIJCbx05Gs_nUARym6xCpK_4PE"
+    },
+    {
+      "sira": 15,
       "ad": "Mudurnu Yıldırım Bayezid Camii",
       "kategori": "tarih",
       "amaclar": [
@@ -214,7 +202,7 @@
       "place_id": "ChIJgzXY8YE2zRQRUmnLjxjtbS8"
     },
     {
-      "sira": 17,
+      "sira": 16,
       "ad": "Kapankaya Seyir Terası",
       "kategori": "manzara",
       "amaclar": [
@@ -226,7 +214,7 @@
       "place_id": "ChIJo-qtenIfnUARzgFNwg52KKk"
     },
     {
-      "sira": 18,
+      "sira": 17,
       "ad": "Kubbealtı",
       "kategori": "yemek",
       "amaclar": [
@@ -238,7 +226,7 @@
       "place_id": "ChIJ0zJeZGs_nUARe0X7Y58KTCI"
     },
     {
-      "sira": 19,
+      "sira": 18,
       "ad": "Akşemseddin Türbesi",
       "kategori": "tarih",
       "amaclar": [
@@ -250,7 +238,7 @@
       "place_id": "ChIJH_9KKs_dzBQRSWHc_CMH0gE"
     },
     {
-      "sira": 20,
+      "sira": 19,
       "ad": "Gazi Süleyman Paşa Camii",
       "kategori": "tarih",
       "amaclar": [
@@ -263,7 +251,7 @@
       "place_id": "ChIJ-dbdKc_dzBQRscMCRCjFpbk"
     },
     {
-      "sira": 21,
+      "sira": 20,
       "ad": "Zafer Kulesi",
       "kategori": "manzara",
       "amaclar": [
@@ -271,12 +259,12 @@
       ],
       "ilce": "Göynük",
       "merkeze_km": 79,
-      "neden": "Göynük'ün üstündeki 1923 yapımı ahşap kule; içi kapalı, tepeden kasaba görünür",
+      "neden": "Göynük'ün üstündeki 1923 yapımı ahşap kule; kuleye girilmiyor, tepeden kasaba görünür",
       "osm": "node/5856791093",
       "place_id": "ChIJWaoOI8ndzBQR6RMAuUjs2-E"
     },
     {
-      "sira": 22,
+      "sira": 21,
       "ad": "Solaklar Kaya Evleri",
       "kategori": "tarih",
       "amaclar": [
@@ -289,7 +277,7 @@
       "place_id": "ChIJ9S2LTHBVnUARg7TDIfhnmGY"
     },
     {
-      "sira": 23,
+      "sira": 22,
       "ad": "Yeniçağa Gölü",
       "kategori": "doga",
       "amaclar": [
@@ -302,7 +290,7 @@
       "place_id": "ChIJk5xTNFYsnUARvXXLBjmdiOo"
     },
     {
-      "sira": 24,
+      "sira": 23,
       "ad": "Mercan-i Restaurant",
       "kategori": "yemek",
       "amaclar": [
@@ -314,7 +302,7 @@
       "place_id": "ChIJXU5kCGw_nUARgoFCILDAOtY"
     },
     {
-      "sira": 25,
+      "sira": 24,
       "ad": "Abant Çamlık Restoran",
       "kategori": "yemek",
       "amaclar": [
@@ -327,7 +315,7 @@
       "place_id": "ChIJzS3vOulmnUARZmV4XsIuUTc"
     },
     {
-      "sira": 26,
+      "sira": 25,
       "ad": "Mudurnu Ahiler Müzesi",
       "kategori": "muze",
       "amaclar": [
@@ -339,7 +327,7 @@
       "place_id": "ChIJ93CP4YE2zRQRN2ZyAOsb0GM"
     },
     {
-      "sira": 27,
+      "sira": 26,
       "ad": "Bolu Kent Müzesi",
       "kategori": "muze",
       "amaclar": [
@@ -351,7 +339,7 @@
       "neden": "Bolu'nun şehir tarihini ve gündelik hayatını anlatan müze"
     },
     {
-      "sira": 28,
+      "sira": 27,
       "ad": "Abant Tabiat Müzesi",
       "kategori": "muze",
       "amaclar": [
@@ -364,7 +352,7 @@
       "place_id": "ChIJIdIiyepmnUARHrQVDrNd3KI"
     },
     {
-      "sira": 29,
+      "sira": 28,
       "ad": "Sarıalan Yaylası",
       "kategori": "doga",
       "amaclar": [
@@ -377,7 +365,7 @@
       "place_id": "ChIJsXFaBDlKnUARc3sAGs8LpdE"
     },
     {
-      "sira": 30,
+      "sira": 29,
       "ad": "Esentepe Kayak Merkezi",
       "kategori": "aktivite",
       "amaclar": [
@@ -390,7 +378,7 @@
       "place_id": "ChIJ27LukibVgkARzv8EKaZgHi8"
     },
     {
-      "sira": 31,
+      "sira": 30,
       "ad": "Babas Kaplıcası",
       "kategori": "aktivite",
       "amaclar": [
@@ -400,6 +388,18 @@
       "merkeze_km": 45,
       "neden": "Mudurnu yakınında köklü termal kaplıca",
       "place_id": "ChIJYfd9Mis0zRQR-QJsmRblXRk"
+    },
+    {
+      "sira": 31,
+      "ad": "Köroğlu Anıtı",
+      "kategori": "manzara",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 2,
+      "neden": "Alpagut'ta şehre bakan dev Köroğlu heykeli; çevresindeki park 2020'de kapalıydı",
+      "place_id": "ChIJkwknZ2s_nUARPRD5gzMyq0g"
     },
     {
       "sira": 32,
@@ -540,30 +540,6 @@
     },
     {
       "sira": 43,
-      "ad": "Şehr-i Bolu",
-      "kategori": "tatli_kahve",
-      "amaclar": [
-        "lezzet"
-      ],
-      "ilce": "Merkez",
-      "merkeze_km": 1,
-      "neden": "Bolu Beyi tatlısı, künefe ve katmer",
-      "place_id": "ChIJ3YWQbhA_nUAR0W-lndA85KM"
-    },
-    {
-      "sira": 44,
-      "ad": "Hakgül",
-      "kategori": "tatli_kahve",
-      "amaclar": [
-        "lezzet"
-      ],
-      "ilce": "Merkez",
-      "merkeze_km": 1,
-      "neden": "Bolu Beyi tatlısıyla anılan tatlıcı",
-      "place_id": "ChIJRRFZTZo_nUAR4s9CF93pqhY"
-    },
-    {
-      "sira": 45,
       "ad": "Mudurnu Saray Helvası",
       "kategori": "tatli_kahve",
       "amaclar": [
@@ -573,6 +549,28 @@
       "merkeze_km": 45,
       "neden": "Coğrafi işaretli saray helvasını yapıldığı kasabada al",
       "place_id": "ChIJYfuc64M1zRQRqEo690nDTYk"
+    },
+    {
+      "sira": 44,
+      "ad": "Göynük uğut tatlısı",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Göynük",
+      "merkeze_km": 79,
+      "neden": "Filizlenmiş Çalıbasan buğdayından koyu, pekmez kıvamında tatlı; 2020'den beri tescilli"
+    },
+    {
+      "sira": 45,
+      "ad": "Bolu çikolatası",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Şehrin kendi adıyla anılan çikolatası; merkezdeki çikolatacılarda tadına bakarsın"
     }
   ]
 }
