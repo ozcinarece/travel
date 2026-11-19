@@ -882,6 +882,8 @@ insert into public.olaylar (tur, hedef_id, meta) values ('ana_kart_acildi', null
 select pg_temp.hata_bekle($$insert into public.olaylar (tur) values ('ana_bilinmeyen')$$, '23514');
 -- #396 KK7 Plan hazır davet olayı (kendi adına, seyahat kimliğiyle).
 insert into public.olaylar (tur, hedef_id) values ('plan_hazir_davet', '88888888-8888-4888-8888-000000000001');
+-- #405 KK6 alt menü sekme olayı (meta: sekme).
+insert into public.olaylar (tur, meta) values ('sekme_acildi', '{"sekme": "seyahatlerim"}');
 reset role;
 
 -- #138 Otomatik profil: ad/foto sağlayıcıdan, kullanıcı adı addan (alınmışsa sayı), Apple gizli ad → Gezgin; misafir alamaz; bir kez.

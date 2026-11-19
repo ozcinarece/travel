@@ -8,7 +8,7 @@ import { acilisKarariAcik, acilisKarariniSifirla, kesfeteDon } from '@/lib/acili
 import type { SeyahatOzet } from '@/lib/tipler';
 import { yerelTarih } from '@/lib/zaman';
 
-import AnaSayfa from '../../../app/(tabs)/index';
+import AnaSayfa from '../../../app/(tabs)/(menu)/index';
 import DavetEkrani from '../../../app/r/[token]';
 
 jest.mock('react-native-safe-area-context', () => jest.requireActual<{ default: object }>('react-native-safe-area-context/jest/mock').default);

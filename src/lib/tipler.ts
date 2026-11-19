@@ -189,7 +189,9 @@ export type OlayTuru = 'gezi_goruntulendi' | 'gezi_alindi' | 'yer_eklendi' | 'da
   | 'ana_ara'
   | 'planlamaya_devam'
   // #396 KK7: Plan hazır'da "Arkadaşlarını çağır".
-  | 'plan_hazir_davet';
+  | 'plan_hazir_davet'
+  // #405 KK6: alt menüde sekme açıldı (meta: sekme).
+  | 'sekme_acildi';
 
 /** #137: /r/{token} özeti (davet_ozeti; giriş gerektirmez). Google verisi yok: yalnız sayılar ve günler. */
 export type DavetOzeti = {

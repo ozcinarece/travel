@@ -1,4 +1,3 @@
-import { Foto } from '@/components/ui/Foto';
 import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ActivityIndicator, AppState, Platform, Pressable, RefreshControl, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
@@ -250,7 +249,7 @@ export default function AnaSayfa() {
         contentContainerStyle={[s.icerik, { paddingBottom: Math.max(24, altBosluk + 16) }]}
         refreshControl={<RefreshControl refreshing={seyahatler.isRefetching} onRefresh={yenile} />}
       >
-        {/* KK2: logo · ♥ · "+ Seyahat" · profil; ayrı Ara ikonu yok. ♥ ve profil ayrı bileşen (alt menü gelince taşınır). */}
+        {/* KK2 → #405 KK3: logo · ♥ · "+ Seyahat"; profil dairesi kalktı (alt menüde Profil sekmesi var). */}
         <View style={s.ust}>
           <LogoYazi boyut={36} />
           <View style={s.ustDugmeler}>
@@ -259,7 +258,6 @@ export default function AnaSayfa() {
               <Text style={s.seyahatArti}>+</Text>
               <Text style={s.seyahatMetin}>{t('anasayfa.v5.seyahat')}</Text>
             </Pressable>
-            <ProfilDugmesi ad={profil.data?.name ?? '?'} url={profil.data?.photo_url ?? null} />
           </View>
         </View>
 
@@ -372,15 +370,6 @@ function KaydettiklerimDugmesi() {
   );
 }
 
-/** KK2: profil dairesi (36 px; fotoğraf yoksa baş harf, Gece 800 üstünde açık gri). */
-function ProfilDugmesi({ ad, url }: { ad: string; url: string | null }) {
-  const harf = ad.trim().charAt(0).toLocaleUpperCase('tr') || '?';
-  return (
-    <Pressable accessibilityRole="button" accessibilityLabel={t('anasayfa.profil')} onPress={() => router.push('/(tabs)/profil')} hitSlop={4} style={({ pressed }) => [s.daire, s.profil, pressed && s.basili]}>
-      {url ? <Foto source={{ uri: url }} style={s.profilFoto} contentFit="cover" accessible={false} /> : <Text style={s.profilHarf}>{harf}</Text>}
-    </Pressable>
-  );
-}
 
 /** KK3: "4 gün kaldı · Ece, Mert, Ayşe" (bugün başlıyorsa "Bugün"; tarihsizse yalnız kişiler). */
 function kalanVeKisiler(sy: SeyahatOzet): string {
@@ -410,9 +399,6 @@ const s = StyleSheet.create({
   seyahatDugme: { height: 36, paddingHorizontal: 14, borderRadius: 18, backgroundColor: renk.vurgu, flexDirection: 'row', alignItems: 'center', gap: 4 },
   seyahatArti: { fontFamily: yazi.kalin, fontSize: 18, lineHeight: 20, color: renk.metin },
   seyahatMetin: { fontFamily: yazi.kalin, fontSize: 14, color: renk.metin },
-  profil: { backgroundColor: anaV5.profilZemin, overflow: 'hidden' },
-  profilFoto: { width: 36, height: 36 },
-  profilHarf: { fontFamily: yazi.ekstra, fontSize: 14, color: renk.ana },
   arama: {
     marginHorizontal: 16,
     height: 52,

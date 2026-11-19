@@ -122,7 +122,7 @@ export function AnaSayfaOnizleme({ bolumler, geziler, yerler, sehirler, enCokAli
   );
 }
 
-// Uygulama ana sayfasının ölçüleri (src/app/(tabs)/index.tsx) — aynı görünüm; üst güvenli alan 56 px (kanvas önizlemesi).
+// Uygulama ana sayfasının ölçüleri (src/app/(tabs)/(menu)/index.tsx) — aynı görünüm; üst güvenli alan 56 px (kanvas önizlemesi).
 const s = StyleSheet.create({
   telefon: { width: ANA_SAYFA_TELEFON.genislik, height: ANA_SAYFA_TELEFON.yukseklik, borderRadius: 28, overflow: 'hidden', borderWidth: 1, borderColor: renk.ayrac, backgroundColor: renk.zemin },
   icerik: { paddingTop: 42, paddingBottom: 28 },
