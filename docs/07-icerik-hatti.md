@@ -123,23 +123,23 @@ Google'dan taze alınır. Mekan rehberleri ayrı dosyalarda: `icerik/yerler/<şe
 ```json
 {
   "surum": 1,
-  "sehir": { "slug": "eskisehir" },
+  "sehir": { "slug": "mardin" },
   "takvim": { "ilk_gun": "cumartesi" },
   "gezi": {
-    "slug": "eskisehir-hafta-sonu",
-    "baslik": "Eskişehir'de bir hafta sonu",
-    "ozet": "Yürüyerek, rahat tempoda; ilk kez gidenler için",
+    "slug": "mardinde-hafta-sonu",
+    "baslik": "Mardin'de bir hafta sonu",
+    "ozet": "Sabah Kasımiye'nin avlusu, akşamüstü Deyrulzafaran yolunda gün batımı",
     "yazar_ad": "Tripmate ekibi",
     "amaclar": ["kultur_tarih", "yavas"],
     "yazi_md": "…"
   },
   "gunler": [
     {
-      "baslik": "Odunpazarı",
+      "baslik": "Eski çarşı",
       "duraklar": [
         {
           "place_id": "ChIJ…", "osm": "way/123456", "ad": "…", "sure_dk": 75, "sure_gerekcesi": "varsayılan 90; koleksiyon küçük",
-          "kapali_gunler": ["pazartesi"], "rehber": "odunpazari-modern-muze", "amaclar": ["kultur_tarih"]
+          "kapali_gunler": ["pazartesi"], "rehber": "mardin-muzesi", "amaclar": ["kultur_tarih"]
         }
       ]
     }

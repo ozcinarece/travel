@@ -9,7 +9,7 @@
  "gezi": {
   "slug": "bursada-iki-gun",
   "baslik": "Bursa'da iki gün",
-  "ozet": "İlk kez gidenlere hanlar, külliyeler ve Cumalıkızık; acelesiz 2 gün",
+  "ozet": "Ulu Cami, Koza Han, Muradiye, Cumalıkızık ve Emir Sultan",
   "yazar_ad": "Tripmate ekibi",
   "amaclar": [
    "kultur_tarih"
@@ -225,7 +225,7 @@
   "varsayimlar": [
    "2 gün: 1. gün cumartesi (Kent Müzesi ve Panorama pazartesi kapalı)",
    "İlk kez gidenler, rahat tempo; yürüyüş + Cumalıkızık için taksi/otobüs",
-   "Yeşil Cami ayrı durak değil: Google'da işletme kaydı yok (yükleme OPERATIONAL ister); Yeşil Türbe durağında anılıyor",
+   "Yeşil Cami ayrı durak değil; Yeşil Türbe durağında anılıyor (yerinde doğrulanmalı)",
    "Kapalıçarşı OSM adayı olmadığı için durak değil, ek mekan"
   ],
   "kaynaklar": [
