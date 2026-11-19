@@ -3743,6 +3743,22 @@ begin
   assert exists (select 1 from public.il_oneriler where il_slug = 'il-deneme' and not gorunur), '#401 KK4: admin yayındaki listede gizli satırı okur';
 end $$;
 reset role;
+-- Yayındaki liste sıradan hesaba görünür: yazma politikası burada ölçülür (taslakta satır zaten görünmez).
+set role authenticated;
+select pg_temp.as_user(:A);
+do $$ begin assert (select count(*) from public.il_oneriler where il_slug = 'il-deneme') = 3, '#401 KK2: sıradan hesap yayındaki görünür satırları görür'; end $$;
+update public.il_oneriler set gorunur = false, ad = 'x' where il_slug = 'il-deneme';
+delete from public.il_oneriler where il_slug = 'il-deneme';
+update public.il_listeleri set yayinda = false where il_slug = 'il-deneme';
+delete from public.il_listeleri where il_slug = 'il-deneme';
+reset role;
+do $$
+begin
+  assert (select count(*) from public.il_oneriler where il_slug = 'il-deneme') = 4, '#401 KK2: sıradan hesap yayındaki satırı silemez';
+  assert (select count(*) from public.il_oneriler where il_slug = 'il-deneme' and gorunur) = 3, '#401 KK2: sıradan hesap yayındaki satırı gizleyemez';
+  assert not exists (select 1 from public.il_oneriler where il_slug = 'il-deneme' and ad = 'x'), '#401 KK2: sıradan hesap yayındaki satırın adını değiştiremez';
+  assert (select yayinda from public.il_listeleri where il_slug = 'il-deneme'), '#401 KK2: sıradan hesap yayındaki listeyi geri çekemez';
+end $$;
 -- Yayında: herkes görünür satırları okur, gizli satır görünmez; yükleme yayındaki listeye yazmaz.
 set role anon;
 do $$

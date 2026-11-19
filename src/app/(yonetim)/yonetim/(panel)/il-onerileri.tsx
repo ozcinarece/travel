@@ -40,7 +40,7 @@ export default function IlOnerileriSayfasi() {
   const [ilce, setIlce] = useState<string | null>(null);
   const [aramaAcik, setAramaAcik] = useState(false);
   // PRD §7: seçilen yerden yalnız kimlik ve tür tutulur; listede görünecek ad Ece'nin yazdığı metindir.
-  const [secilen, setSecilen] = useState<{ place_id: string; tip: string | null } | null>(null);
+  const [secilen, setSecilen] = useState<MekanKimligi | null>(null);
   const [yeniAd, setYeniAd] = useState('');
   const [hata, setHata] = useState(false);
   const [yayinMesgul, setYayinMesgul] = useState(false);
@@ -52,15 +52,19 @@ export default function IlOnerileriSayfasi() {
   const sehir = sehirler.data?.find((s) => s.slug === slug);
   const anahtar = ilOnerileriAnahtari(slug);
 
-  const yaz = async (is: () => Promise<void>, iyimser?: (l: IlOneri[]) => IlOneri[]) => {
+  /** Yazar, önbelleği tazeler; başarılıysa true. */
+  const yaz = async (is: () => Promise<void>, iyimser?: (l: IlOneri[]) => IlOneri[]): Promise<boolean> => {
     setHata(false);
     if (iyimser) qc.setQueryData<IlOneri[]>(anahtar, (l) => (l ? iyimser(l) : l));
+    let tamam = true;
     try {
       await is();
     } catch {
+      tamam = false;
       setHata(true);
     }
     await Promise.all([qc.invalidateQueries({ queryKey: anahtar }), qc.invalidateQueries({ queryKey: IL_LISTELERI })]);
+    return tamam;
   };
 
   const degis = (id: string, alanlar: IlOneriAlanlari) =>
@@ -92,9 +96,18 @@ export default function IlOnerileriSayfasi() {
     const ad = yeniAd.trim();
     if (!slug || !secilen || !ad) return;
     const yer = secilen;
-    setSecilen(null);
-    setYeniAd('');
-    await yaz(() => ilOneriEkle(slug, { ...yer, ad }, kategoriTahmini(yer.tip, kategori), yeniSira(tum)));
+    // Alanlar yalnız yazma başarılıysa temizlenir; hata olursa yazılan ad kutuda kalır, altında "kaydedilemedi" çıkar.
+    if (await yaz(() => ilOneriEkle(slug, { place_id: yer.place_id, tip: yer.tip, ad }, kategoriTahmini(yer.tip, kategori), yeniSira(tum)))) {
+      setSecilen(null);
+      setYeniAd('');
+    }
+  };
+  const aramaAcKapa = () => {
+    if (aramaAcik) {
+      setSecilen(null);
+      setYeniAd('');
+    }
+    setAramaAcik(!aramaAcik);
   };
   const yayinla = async () => {
     if (!slug) return;
@@ -148,7 +161,7 @@ export default function IlOnerileriSayfasi() {
       eylemler={
         liste ? (
           <>
-            <Dugme baslik={ty('ilOneri.yerEkle')} onPress={() => setAramaAcik((a) => !a)} />
+            <Dugme baslik={ty('ilOneri.yerEkle')} onPress={aramaAcKapa} />
             <Dugme vurgu baslik={ty('ilOneri.yayinla')} yukleniyor={yayinMesgul} onPress={() => void yayinla()} />
           </>
         ) : undefined
@@ -159,7 +172,7 @@ export default function IlOnerileriSayfasi() {
         <View style={s.govde}>
           {aramaAcik ? (
             <View style={s.arama}>
-              <MekanArama merkez={sehir ? { lat: sehir.lat, lng: sehir.lng } : undefined} onKimlik={sec} etiket={ty('ilOneri.ara')} />
+              <MekanArama merkez={sehir ? { lat: sehir.lat, lng: sehir.lng } : undefined} onKimlik={sec} seciliKimlik={secilen?.place_id ?? null} etiket={ty('ilOneri.ara')} />
             </View>
           ) : null}
           {secilen ? (
@@ -175,7 +188,14 @@ export default function IlOnerileriSayfasi() {
                 style={s.yeniAd}
               />
               {yeniAd.trim() ? <Hap kucuk tur="birincil" baslik={ty('ilOneri.kaydet')} onPress={() => void ekle()} /> : null}
-              <Hap kucuk baslik={ty('ilOneri.vazgec')} onPress={() => setSecilen(null)} />
+              <Hap
+                kucuk
+                baslik={ty('ilOneri.vazgec')}
+                onPress={() => {
+                  setSecilen(null);
+                  setYeniAd('');
+                }}
+              />
             </View>
           ) : null}
           <View style={s.cipler}>
