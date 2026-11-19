@@ -4,10 +4,13 @@
 //            istek sayısı ayrı, ücretsiz sayaca (`icerik-kimlik`) yazılır. Başka alan istenirse reddedilir.
 //   puan   — kısa liste (≤ 30): ad, tip, işletme durumu, puan, yorum sayısı (Place Details Enterprise).
 //   detay  — yükleme (≤ 60): ad, tip, konum, işletme durumu (Place Details Pro).
-// puan ve detay Google'a gitmeden önce günlük bütçeyi (yonetim_ayarlari.google_gunluk_butce) bu isteğin tahmini maliyetiyle
+//   sehir  — #368: şehir kimliği (place_id, saat dilimi, ülke kodu). place_id yoksa önce 1 kimlik araması (IDs Only,
+//            ücretsiz, `icerik-kimlik` sayacı), sonra 1 Details (şehir maskesi, Pro).
+// puan, detay ve sehir Google'a gitmeden önce günlük bütçeyi (yonetim_ayarlari.google_gunluk_butce) bu isteğin tahmini maliyetiyle
 // denetler; okunamazsa istek yapılmaz. Cevap yalnız çağırana döner; gövde ve Google verisi loga, DB'ye yazılmaz (PRD §7).
-import { GoogleHatasi, icerikDetay, icerikKimlik, icerikPuan, type IcerikDetay, type IcerikPuan } from '../_shared/google.ts';
+import { GoogleHatasi, icerikDetay, icerikKimlik, icerikPuan, icerikSehir, type IcerikDetay, type IcerikPuan } from '../_shared/google.ts';
 import { govde, hata, json, onKontrol } from '../_shared/http.ts';
+import { sehirIstegiAl, sehirYeriBul } from '../_shared/icerikSehir.ts';
 import { sayacli } from '../_shared/sayac.ts';
 
 const EN_COK_KIMLIK = 80;
@@ -19,7 +22,7 @@ const KIMLIK_ANAHTARLARI = new Set(['islem', 'sorgular', 'merkez', 'yaricap_m'])
 
 type KimlikSorgusu = { metin: string; lat?: number; lng?: number; yaricap_m?: number };
 type Istek = {
-  islem: 'kimlik' | 'puan' | 'detay';
+  islem: 'kimlik' | 'puan' | 'detay' | 'sehir';
   merkez: { lat: number; lng: number };
   yaricap_m: number;
   sorgular: KimlikSorgusu[];
@@ -190,5 +193,28 @@ Deno.serve(sayacli('icerik-google', async (istek) => {
     return json({ islem: g.islem, yerler });
   }
 
-  return hata("islem 'kimlik', 'puan' ya da 'detay' olmalı");
+  if (g.islem === 'sehir') {
+    const s = sehirIstegiAl(g as Record<string, unknown>);
+    if (typeof s === 'string') return hata(s);
+    // Bütçe tek Details için denetlenir (kimlik araması ücretsiz); okunamazsa Google'a gidilmez.
+    const butce = await butceVar(1);
+    if (!butce) return hata('bütçe denetlenemedi; Google çağrısı yapılmadı', 503);
+    if (!butce.yeterli) return json({ hata: 'günlük Google bütçesi dolu', harcanan: butce.harcanan, butce: butce.butce }, 429);
+    let kimlikAdet = s.place_id ? 0 : 1;
+    try {
+      const r = await sehirYeriBul(s, {
+        kimlik: (metin, merkez, yaricapM) => icerikKimlik({ metin, merkez, yaricapM, tip: 'locality' }),
+        detay: icerikSehir,
+      });
+      kimlikAdet = r.kimlikAdet;
+      return json({ islem: 'sehir', yer: r.yer });
+    } catch (e) {
+      console.error('icerik-google sehir', googleDurumu(e));
+      return hata(`Google ${googleDurumu(e)}`, 502);
+    } finally {
+      await kimlikSay(kimlikAdet);
+    }
+  }
+
+  return hata("islem 'kimlik', 'puan', 'detay' ya da 'sehir' olmalı");
 }));

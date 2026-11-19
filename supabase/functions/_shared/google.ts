@@ -268,6 +268,8 @@ const ICERIK_KIMLIK_MASKE = 'places.id';
 const ICERIK_PUAN_MASKE = 'id,displayName,primaryType,businessStatus,rating,userRatingCount';
 /** Yükleme: kapalı mı, taze konum ve kategori — Place Details Pro SKU (açılış saatleri istenmez; kapalı gün plandan). */
 const ICERIK_DETAY_MASKE = 'id,displayName,primaryType,location,businessStatus';
+/** #368: şehir kimliği — konum ve ülke kodu Essentials, saat dilimi Pro: Place Details Pro SKU. */
+const ICERIK_SEHIR_MASKE = 'id,location,timeZone,addressComponents';
 
 export type IcerikPuan = {
   place_id: string;
@@ -290,12 +292,14 @@ export type IcerikDetay = {
 type IcerikCevap = DetailsCevap & { businessStatus?: string };
 
 /** Ada ve konuma (OSM noktası) en yakın en çok 3 place_id, Google sırasıyla. */
-export async function icerikKimlik(secenek: { metin: string; merkez: { lat: number; lng: number }; yaricapM: number }): Promise<string[]> {
+export async function icerikKimlik(secenek: { metin: string; merkez: { lat: number; lng: number }; yaricapM: number; tip?: 'locality' }): Promise<string[]> {
   const cevap = await istek<{ places?: { id: string }[] }>('places:searchText', {
     govde: {
       textQuery: secenek.metin,
       languageCode: DIL,
       maxResultCount: 3,
+      // #368: şehir kimliğinde şehirler öne alınır (katı değil). İstek parametresi; SKU'yu alan maskesi belirler (IDs Only kalır).
+      ...(secenek.tip ? { includedType: secenek.tip } : {}),
       locationBias: {
         circle: { center: { latitude: secenek.merkez.lat, longitude: secenek.merkez.lng }, radius: Math.min(Math.max(secenek.yaricapM, 50), 50_000) },
       },
@@ -304,6 +308,22 @@ export async function icerikKimlik(secenek: { metin: string; merkez: { lat: numb
     say: false,
   });
   return (cevap.places ?? []).map((p) => p.id);
+}
+
+/**
+ * #368: içerik hattının şehir kimliği — saat dilimi ve ülke kodu. Uygulamanın şehir maskesinden ad ve tip çıkarılmış hali:
+ * `timeZone` Pro alanı olduğundan Place Details Pro SKU (uygulamanın şehir seçimiyle aynı fiyat). Puan, saat istenmez.
+ */
+export async function icerikSehir(placeId: string): Promise<{ place_id: string; lat: number; lng: number; tz: string | null; ulke_kodu: string | null }> {
+  const d = await istek<DetailsCevap>(`places/${encodeURIComponent(placeId)}?languageCode=${DIL}`, { maske: ICERIK_SEHIR_MASKE });
+  const ulke = d.addressComponents?.find((b) => b.types?.includes('country'))?.shortText ?? null;
+  return {
+    place_id: d.id,
+    lat: d.location?.latitude ?? 0,
+    lng: d.location?.longitude ?? 0,
+    tz: d.timeZone?.id ?? null,
+    ulke_kodu: ulke && /^[A-Z]{2}$/.test(ulke) ? ulke : null,
+  };
 }
 
 export async function icerikPuan(placeId: string): Promise<IcerikPuan> {
