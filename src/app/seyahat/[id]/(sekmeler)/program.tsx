@@ -33,7 +33,7 @@ import { useDavetPaylas } from '@/features/davet/paylas';
 import { OTEL_SERIT_ONEKI } from '@/features/konaklama/otelSeridi';
 import { useGunOteliKaydet, useKonaklamalar, useTumGunlereOtel } from '@/features/konaklama/sorgular';
 import { useDuragaAta, useDuraklar, useDurakKaldir, useGunEkle, useGunler, useGunSil } from '@/features/gunler/sorgular';
-import { sehirEslestir, useSehirler, useSehirYerleri } from '@/features/icerik/sorgular';
+import { olayYaz, sehirEslestir, useSehirler, useSehirYerleri } from '@/features/icerik/sorgular';
 import { useYereEkle } from '@/features/icerik/yerEkle';
 import { useKonum, yakinDurakId } from '@/features/konum/useKonum';
 import { gunSecenekleri as listemGunSecenekleri, type GunSecenegi } from '@/features/listem/listem';
@@ -233,7 +233,8 @@ function ProgramSekmesi({
   const [seciliGunId, setSeciliGunId] = useState<string | null>(null);
   // #182 KK1: Plan sekmesi "liste önce"; harita (kanvas 10 · 12) "Haritayı aç" ya da "Sırayı düzenle" ile tam ekran açılır.
   // KK7: listede Google'a istek yok — yürüyüş / rota yalnız önbellekten, adlar DB'den ya da oturum önbelleğinden.
-  const [gorunum, setGorunum] = useState<'liste' | 'harita'>(haritaAcik ? 'harita' : 'liste');
+  // #396 KK1 (`Sayfa_v5_PlanHazir`): Plan hazır çekmecesi haritanın üstünde açılır.
+  const [gorunum, setGorunum] = useState<'liste' | 'harita'>(haritaAcik || planKuruldu ? 'harita' : 'liste');
   // Harita Gezi'den ("Haritada gör") açıldıysa geri Gezi'ye döner, listeye değil.
   const [haritaGezidenAcildi, setHaritaGezidenAcildi] = useState(!!haritaAcik);
   const harita = gorunum === 'harita';
@@ -246,7 +247,7 @@ function ProgramSekmesi({
     if (hedef) setSeciliGunId(hedef.id);
     if (otelAcik) setNereKaliyorAcik(true);
     if (planKuruldu) setPlanHazirAcik(true);
-    setGorunum(haritaAcik ? 'harita' : 'liste');
+    setGorunum(haritaAcik || planKuruldu ? 'harita' : 'liste');
     setHaritaGezidenAcildi(!!haritaAcik);
   }
   const gun = gunler.find((g) => g.id === seciliGunId) ?? gunler.find((g) => String(g.index) === gunParam) ?? gunler.find((g) => g.index === bugunIndex) ?? gunler[0];
@@ -1417,17 +1418,27 @@ function ProgramSekmesi({
       <HarcamaFormu acik={!!harcamaDuragi} onKapat={() => setHarcamaDuragi(null)} seyahat={seyahat} uyeler={uyeler.data ?? []} durakId={harcamaDuragi} />
       <PlanHazirSayfasi
         acik={planHazirAcik && planOzeti.ozetler.length > 0}
+        sehir={seyahat.city_label}
         ozetler={planOzeti.ozetler}
         bosGunler={planOzeti.bosGunler}
         atanmamis={atanmamis}
+        grupVar={(uyeler.data ?? []).some((u) => u.user_id !== session?.user.id)}
         onDavet={() => {
           setPlanHazirAcik(false);
+          // #396 KK7: ölçüm; paylaşma sayfası davet linkiyle (davet_paylasildi ayrıca yazılır).
+          olayYaz('plan_hazir_davet', seyahat.id);
           davet.paylas();
         }}
-        onGune={() => {
+        onPlan={() => {
           setPlanHazirAcik(false);
           const ilk = planOzeti.ozetler[0]?.gun ?? gunler[0];
           if (ilk) setSeciliGunId(ilk.id);
+          setGorunum('liste');
+        }}
+        onGun={(g) => {
+          setPlanHazirAcik(false);
+          setSeciliGunId(g.id);
+          setGorunum('liste');
         }}
         onKapat={() => setPlanHazirAcik(false)}
       />

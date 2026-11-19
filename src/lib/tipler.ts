@@ -187,7 +187,9 @@ export type OlayTuru = 'gezi_goruntulendi' | 'gezi_alindi' | 'yer_eklendi' | 'da
   // #361 KK8: ana sayfa v5.
   | 'ana_kart_acildi'
   | 'ana_ara'
-  | 'planlamaya_devam';
+  | 'planlamaya_devam'
+  // #396 KK7: Plan hazır'da "Arkadaşlarını çağır".
+  | 'plan_hazir_davet';
 
 /** #137: /r/{token} özeti (davet_ozeti; giriş gerektirmez). Google verisi yok: yalnız sayılar ve günler. */
 export type DavetOzeti = {
