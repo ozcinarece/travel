@@ -93,12 +93,13 @@ export async function alandaAra(seyahatId: string, bolge: HaritaBolgesi, cip: On
   try {
     istek += 1;
     const ilk = await iste(seyahatId, cip, { ...alan.merkez, yaricapM: alan.yaricapM }, false);
-    b.arananlar.push(alan);
+    // #317 KK2: alan çipiyle kaydedilir.
+    b.arananlar.push({ ...alan, cip });
     if (!genisletilmeli(ilk.gelen)) return { istek, genisletildi: false, alan, hata: false };
     alan = genisAlan(alan);
     istek += 1;
     await iste(seyahatId, cip, { ...alan.merkez, yaricapM: alan.yaricapM }, false);
-    b.arananlar.push(alan);
+    b.arananlar.push({ ...alan, cip });
     return { istek, genisletildi: true, alan, hata: false };
   } catch (e) {
     return { istek, genisletildi: false, alan, hata: true, sinir: e instanceof GunlukSinir };

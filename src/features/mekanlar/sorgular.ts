@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect } from 'react';
 
+import { olayYaz } from '@/features/icerik/sorgular';
 import { varsayilanDakika } from '@/lib/kategori';
 import { useOturum } from '@/lib/oturum';
 import { supabase } from '@/lib/supabase';
@@ -41,15 +42,25 @@ export function useUyeler(seyahatId: string | undefined, secenek: { retry?: numb
 /** #80 KK7: `default_minutes` verilirse (panelde ayarlanan süre) §6 varsayılanı yerine o yazılır. */
 export type YeniMekan = { place_id: string; primary_type: string | null; lat: number; lng: number; default_minutes?: number };
 
+/** #317 KK4: `yer_eklendi` olayının `meta.kaynak` değeri — eklemenin yapıldığı yer. */
+export type EklemeKaynagi = 'oneri' | 'arama' | 'rehber' | 'pin' | 'kaydettiklerim';
+
+/** #317 KK3: iyimser eklemede listeye hemen giren geçici satırın kimlik öneki (sunucu cevabıyla gerçek satır gelir). */
+export const GECICI_ONEK = 'gecici:';
+export const geciciMi = (m: Pick<Mekan, 'id'>) => m.id.startsWith(GECICI_ONEK);
+
 /**
  * PRD 3.4 KK5/KK7: havuza ekler; ekleyen = oturum kullanıcısı, süre §6 varsayılanı.
  * Aynı mekan ikinci kez eklenirse (23505) sessizce mevcut sayılır.
+ * #317 KK3: `iyimser` ise satır listeye hemen girer (pin ve satır tik alır); hata olursa geri alınır.
+ * #317 KK4: `kaynak` verilirse yeni eklemede `olaylar`a `yer_eklendi` yazılır (mevcut tablo; yeni kişisel veri yok).
  */
-export function useMekanEkle(seyahatId: string) {
+export function useMekanEkle(seyahatId: string, secenek: { iyimser?: boolean } = {}) {
   const { session } = useOturum();
   const qc = useQueryClient();
+  const anahtar = ['mekanlar', seyahatId];
   return useMutation({
-    mutationFn: async (yeni: YeniMekan) => {
+    mutationFn: async (yeni: YeniMekan & { kaynak?: EklemeKaynagi; yerId?: string | null }) => {
       if (!session) throw new Error('oturum yok');
       const { error } = await supabase.from('places').insert({
         trip_id: seyahatId,
@@ -61,8 +72,33 @@ export function useMekanEkle(seyahatId: string) {
         added_by: session.user.id,
       });
       if (error && error.code !== '23505') throw error;
+      if (!error && yeni.kaynak) await olayYaz('yer_eklendi', yeni.yerId ?? null, { seyahat: seyahatId, place_id: yeni.place_id, kaynak: yeni.kaynak });
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['mekanlar', seyahatId] }),
+    onMutate: async (yeni) => {
+      if (!secenek.iyimser) return undefined;
+      await qc.cancelQueries({ queryKey: anahtar });
+      const onceki = qc.getQueryData<Mekan[]>(anahtar);
+      if (onceki?.some((m) => m.place_id === yeni.place_id)) return { onceki };
+      const gecici: Mekan = {
+        id: `${GECICI_ONEK}${yeni.place_id}`,
+        trip_id: seyahatId,
+        place_id: yeni.place_id,
+        primary_type: yeni.primary_type,
+        lat: yeni.lat,
+        lng: yeni.lng,
+        google_fetched_at: new Date().toISOString(),
+        default_minutes: yeni.default_minutes ?? varsayilanDakika(yeni.primary_type),
+        added_by: session?.user.id ?? null,
+        note: null,
+        created_at: new Date().toISOString(),
+      };
+      qc.setQueryData<Mekan[]>(anahtar, [...(onceki ?? []), gecici]);
+      return { onceki };
+    },
+    onError: (_e, _y, baglam) => {
+      if (baglam) qc.setQueryData(anahtar, baglam.onceki);
+    },
+    onSettled: () => qc.invalidateQueries({ queryKey: anahtar }),
   });
 }
 

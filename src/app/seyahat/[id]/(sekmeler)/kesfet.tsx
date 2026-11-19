@@ -14,7 +14,7 @@ import type { Konaklama } from '@/features/konaklama/plan';
 import { useKonaklamalar } from '@/features/konaklama/sorgular';
 import { GrupPenceresi } from '@/components/davet/GrupPenceresi';
 import { MekanPaneli } from '@/components/mekan/MekanPaneli';
-import { useMekanEkle, useMekanGuncelle, useMekanlar, useMekanSil, useUyeler } from '@/features/mekanlar/sorgular';
+import { geciciMi, useMekanEkle, useMekanGuncelle, useMekanlar, useMekanSil, useUyeler, type EklemeKaynagi } from '@/features/mekanlar/sorgular';
 import { geziyeGit } from '@/features/gezi/gezinti';
 import { useSeyahatId } from '@/features/seyahatler/baglam';
 import { useSeyahat } from '@/features/seyahatler/sorgular';
@@ -37,6 +37,7 @@ import { alanCipi, alandaAraGorunur, alanIcinde, gorunumAlani, gorunurOneriler, 
 import { kesfetDurumunuAl, useKesfetDurumu } from '@/features/yerler/kesfetDurumu';
 import { t } from '@/i18n';
 import { bulunmaEkli } from '@/lib/ek';
+import { agHatasi, useCevrimdisi } from '@/lib/baglanti';
 import { izBirak } from '@/lib/hataRaporu';
 import { kategoriPini } from '@/lib/pinIkonu';
 import { varsayilanDakika } from '@/lib/kategori';
@@ -66,7 +67,8 @@ function Kesfet({ seyahat, konaklamalar, ilkMekan, cekmeceIstegi, cipIstegi }: {
   const uyeler = useUyeler(seyahat.id);
   // #137 KK6: Grup penceresi (yüzlere dokununca; Grup sekmesi kalktı).
   const [grupAcik, setGrupAcik] = useState(false);
-  const ekle = useMekanEkle(seyahat.id);
+  // #317 KK3: iyimser ekleme — satır ve pin hemen tik alır, hata olursa geri döner.
+  const ekle = useMekanEkle(seyahat.id, { iyimser: true });
   const sil = useMekanSil(seyahat.id);
   const guncelle = useMekanGuncelle(seyahat.id);
 
@@ -89,7 +91,8 @@ function Kesfet({ seyahat, konaklamalar, ilkMekan, cekmeceIstegi, cipIstegi }: {
     izBirak('kesfet', `kuruldu #${taniSayaclari.kesfetKurulum} · seçim ${d.secim?.place_id ? 'var' : 'yok'} · bölge ${d.bolge ? 'bellekte' : 'yok'}`);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-  const [aramaSonucu, setAramaSonucu] = useState<HafifYer | null>(null);
+  // #317 KK2: arama sonucu (pini) seyahat belleğinde: ekran yeniden kurulunca pin geri gelir.
+  const [aramaSonucu, setAramaSonucu] = useKesfetDurumu(seyahat.id, 'aramaSonucu');
   const [secim, setSecim] = useKesfetDurumu(seyahat.id, 'secim');
   // #80 KK12: derin linkle gelen mekan panelde açılır (bir kez).
   useEffect(() => {
@@ -99,6 +102,8 @@ function Kesfet({ seyahat, konaklamalar, ilkMekan, cekmeceIstegi, cipIstegi }: {
   const [sureAyari, setSureAyari] = useState<Record<string, number>>({});
   const [mesgul, setMesgul] = useState(false);
   const [hata, setHata] = useState<string | null>(null);
+  // #317 KK1: bağlantı yoksa (#243) hata katmanında "Bağlantı yok".
+  const cevrimdisi = useCevrimdisi();
   const [odak, setOdak] = useState<HaritaOdagi | undefined>();
   const odakla = (lat: number, lng: number, zoom: number) => setOdak((o) => ({ konum: { lat, lng }, zoom, sayac: (o?.sayac ?? 0) + 1 }));
 
@@ -177,7 +182,8 @@ function Kesfet({ seyahat, konaklamalar, ilkMekan, cekmeceIstegi, cipIstegi }: {
   const gecenler = useMemo(() => (filtreli ? oneriListesi.filter((y) => filtredenGecer(y, filtre, oneCikan)) : oneriListesi), [oneriListesi, filtreli, filtre, oneCikan]);
   // #189 Ek 2 KK9: "Bu alanda ara" hapı — şehir dışına kaydırınca ya da şehir içinde görünümde az öneri kalınca; aynı alan için bir
   // kez. Dokununca görünüm için tek istek (az sonuçta bir kez 3 kat yarıçap).
-  const alanHapi = !yakin.yukleniyor && alandaAraGorunur({ bolge, sehir: yakin.sehirAlani, arananlar: yakin.arananlar, oneriler: gecenler });
+  // #317 KK2: aranan alan çipiyle kaydedilir; çip değişince hap aynı alanda yeniden çıkar.
+  const alanHapi = !yakin.yukleniyor && alandaAraGorunur({ bolge, sehir: yakin.sehirAlani, arananlar: yakin.arananlar, oneriler: gecenler, cip: alanCipi(filtre) });
   const alandaAra = () => {
     if (bolge) yakin.alandaAra(bolge, alanCipi(filtre));
   };
@@ -259,6 +265,14 @@ function Kesfet({ seyahat, konaklamalar, ilkMekan, cekmeceIstegi, cipIstegi }: {
     ...(yalnizListe ? [] : oneriPinleri),
   ];
 
+  // #121 KK7 / #317 KK2: seçilen yerin pini panelin (ekranın %55'i) altında kalmasın — merkez panelin üstünde kalacak kadar
+  // güneye alınır (Program kartıyla aynı hesap, zoom 16).
+  const ekran = useWindowDimensions();
+  const paneleOdakla = (lat: number, lng: number) => {
+    const kamera = kartKamerasi({ konum: { lat, lng }, zoom: 16, ekranYukseklik: ekran.height, kartYukseklik: Math.round(ekran.height * 0.55), altPay: 0 });
+    odakla(kamera.konum.lat, kamera.konum.lng, kamera.zoom);
+  };
+
   const sec = async (placeId: string, ad: string) => {
     setHata(null);
     setMesgul(true);
@@ -267,7 +281,7 @@ function Kesfet({ seyahat, konaklamalar, ilkMekan, cekmeceIstegi, cipIstegi }: {
       const yer = await aramaSecimi(queryClient, placeId, jeton, seyahat.tz);
       setAramaSonucu({ ...yer, ad: yer.ad || ad });
       setSecim({ place_id: yer.place_id, kaynak: 'arama' });
-      odakla(yer.lat, yer.lng, 16);
+      paneleOdakla(yer.lat, yer.lng);
       setSorgu(yer.ad || ad);
       setJeton(yeniOturumJetonu());
     } catch (e) {
@@ -290,7 +304,7 @@ function Kesfet({ seyahat, konaklamalar, ilkMekan, cekmeceIstegi, cipIstegi }: {
       }
       setAramaSonucu(yer);
       setSecim({ place_id: yer.place_id, kaynak: 'arama' });
-      odakla(yer.lat, yer.lng, 16);
+      paneleOdakla(yer.lat, yer.lng);
       setSorgu(yer.ad);
     } catch (e) {
       setHata((e as Error).message === 'desteklenmeyen_link' ? t('kesfet.linkDesteksiz') : placesHatasi(e, t('kesfet.linkHata')));
@@ -308,7 +322,8 @@ function Kesfet({ seyahat, konaklamalar, ilkMekan, cekmeceIstegi, cipIstegi }: {
   };
 
   // #29 KK / #80 KK3: panelden ekle; eklenince pin dolu olur, düğme "Listeden çıkar"a döner. Oturumda ayarlanan süre yazılır.
-  const listeyeEkle = async (y: HafifYer) => {
+  // #317 KK3: iyimser (kanca listeye hemen yazar, hatada geri alır); KK4: `kaynak` `yer_eklendi` olayına yazılır.
+  const listeyeEkle = async (y: HafifYer, kaynak: EklemeKaynagi) => {
     setHata(null);
     try {
       await ekle.mutateAsync({
@@ -317,12 +332,15 @@ function Kesfet({ seyahat, konaklamalar, ilkMekan, cekmeceIstegi, cipIstegi }: {
         lat: y.lat,
         lng: y.lng,
         default_minutes: sureAyari[y.place_id],
+        kaynak,
       });
-    } catch {
-      setHata(t('kesfet.ekleHata'));
+    } catch (e) {
+      setHata(agHatasi(e) ? t('kesfet.baglantiYok') : t('kesfet.ekleHata'));
     }
   };
   const listedenCikar = async (m: Mekan) => {
+    // #317 KK3: iyimser satır henüz sunucuda değil; ekleme bitmeden çıkarılamaz.
+    if (geciciMi(m)) return;
     setHata(null);
     try {
       await sil.mutateAsync(m.id);
@@ -337,7 +355,7 @@ function Kesfet({ seyahat, konaklamalar, ilkMekan, cekmeceIstegi, cipIstegi }: {
     const placeId = pinId.slice(2);
     setSecim({
       place_id: placeId,
-      kaynak: pinId.startsWith('m:') ? 'liste' : 'oneri',
+      kaynak: pinId.startsWith('m:') ? 'liste' : 'pin',
     });
   };
   // #80 KK3: Yol tarifi — Google Maps derin linki (yürüyüş).
@@ -392,11 +410,10 @@ function Kesfet({ seyahat, konaklamalar, ilkMekan, cekmeceIstegi, cipIstegi }: {
   const fotolar = useYerFotolari(cekmece !== 'katli' ? fotoIdleri : []);
   // "Rehberden" çipi (tam hal): şehir yayınlı rehberle eşleşiyorsa içerik ekibinin yerleri (#98 KK6 ile aynı kaynak).
   const rehber = useOnerilenler(seyahat, rehberSehir, 'rehber');
+  // #317 KK3: iyimser — satır beklemeden tik alır (meşgul hali yok); hata olursa tik geri gider, hata katmanda görünür.
   const cekmecedenEkle = async (y: HafifYer) => {
-    setCekmeceMesgul(y.place_id);
-    await listeyeEkle(y);
     setTutulan((t0) => new Set(t0).add(y.place_id));
-    setCekmeceMesgul(null);
+    await listeyeEkle(y, rehberGorunur ? 'rehber' : 'oneri');
   };
   const cekmecedenCikar = async (placeId: string) => {
     const m = havuz.find((x) => x.place_id === placeId);
@@ -405,15 +422,12 @@ function Kesfet({ seyahat, konaklamalar, ilkMekan, cekmeceIstegi, cipIstegi }: {
     await listedenCikar(m);
     setCekmeceMesgul(null);
   };
-  // #121 KK7: satıra dokunma → panel + kamera o pine kayar (pin iğne olur). Merkez, yarım panelin (ekranın %55'i) üstünde
-  // kalacak kadar güneye alınır (Program kartıyla aynı hesap, zoom 16).
-  const ekran = useWindowDimensions();
+  // #121 KK7: satıra dokunma → panel + kamera o pine kayar (pin iğne olur; panelin altında kalmaz).
   const cekmecedenAc = (placeId: string) => {
-    setSecim({ place_id: placeId, kaynak: 'oneri' });
+    setSecim({ place_id: placeId, kaynak: rehberGorunur ? 'rehber' : 'oneri' });
     const y = oneriListesi.find((x) => x.place_id === placeId);
     if (!y) return;
-    const kamera = kartKamerasi({ konum: { lat: y.lat, lng: y.lng }, zoom: 16, ekranYukseklik: ekran.height, kartYukseklik: Math.round(ekran.height * 0.55), altPay: 0 });
-    odakla(kamera.konum.lat, kamera.konum.lng, kamera.zoom);
+    paneleOdakla(y.lat, y.lng);
   };
   // #189 KK3: süzgeçten sonra görünür alanda 3'ten az öneri kaldıysa çöp yerine yönlendirme satırı. Tarama sürerken, hata varken,
   // yalnız liste / rehber görünümünde ve kullanıcının kendi koşulu (öne çıkan, puan, yorum) varken çıkmaz.
@@ -463,6 +477,10 @@ function Kesfet({ seyahat, konaklamalar, ilkMekan, cekmeceIstegi, cipIstegi }: {
     }));
   }, [rehberGorunur, rehberListesi, cekmeceGosterilen, listeSureleri, sureAyari, fotoHaritasi, oneCikan]);
   const haritayaDon = () => setCekmece('katli');
+  // #317 KK1: bağlantı yokken tek uyarı; değilse son işlem hatası ve öneri hatası (429 dahil).
+  const hataMetinleri = cevrimdisi
+    ? [t('kesfet.baglantiYok')]
+    : [hata, yakin.hata ? (yakin.sinir ? t('yerler.gunlukSinir') : t('kesfet.oneriHata')) : null].filter((m, i, a): m is string => !!m && a.indexOf(m) === i);
 
 
   return (
@@ -607,16 +625,6 @@ function Kesfet({ seyahat, konaklamalar, ilkMekan, cekmeceIstegi, cipIstegi }: {
               </Text>
             </View>
           ) : null}
-          {hata ? (
-            <View style={s.hataKutu}>
-              <Text style={s.hataMetin}>{hata}</Text>
-            </View>
-          ) : null}
-          {yakin.hata ? (
-            <View style={s.hataKutu}>
-              <Text style={s.hataMetin}>{yakin.sinir ? t('yerler.gunlukSinir') : t('kesfet.oneriHata')}</Text>
-            </View>
-          ) : null}
           {!yakin.hata && !yakin.yukleniyor && oneriListesi.length === 0 && !aramaSonucu ? <Text style={s.bosOneri}>{t('kesfet.bolgeBos')}</Text> : null}
 
         </View>
@@ -638,14 +646,16 @@ function Kesfet({ seyahat, konaklamalar, ilkMekan, cekmeceIstegi, cipIstegi }: {
             onSure={sureDegistir}
             baglam="kesfet"
             icinde={!!seciliMekan}
-            mesgul={ekle.isPending || sil.isPending}
-            onCta={() => (seciliMekan ? listedenCikar(seciliMekan) : seciliHafif && listeyeEkle(seciliHafif))}
+            mesgul={sil.isPending || (!!seciliMekan && geciciMi(seciliMekan))}
+            onCta={() => (seciliMekan ? listedenCikar(seciliMekan) : seciliHafif && listeyeEkle(seciliHafif, secimKaynagi(secim.kaynak)))}
             onYolTarifi={yolTarifi}
             onKapat={() => setSecim(null)}
           />
           ) : null}
         </>
       }
+      // #317 KK1: hatalar (ekleme, öneri, 429) ve "Bağlantı yok" çekmecenin ve panelin her halinde görünür.
+      hata={hataMetinleri.length > 0 ? hataMetinleri.map((m) => <HataKutusu key={m} metin={m} />) : null}
       harita={{
         merkez: ilkMerkez,
         zoom: ilkZoom,
@@ -659,6 +669,20 @@ function Kesfet({ seyahat, konaklamalar, ilkMekan, cekmeceIstegi, cipIstegi }: {
       }}
     />
   );
+}
+
+/** #317 KK1: bugünkü hata kutusu (uyarı zemini); ekran okuyucuya duyurulur. */
+function HataKutusu({ metin }: { metin: string }) {
+  return (
+    <View style={s.hataKutu} accessibilityRole="alert" accessibilityLiveRegion="polite">
+      <Text style={s.hataMetin}>{metin}</Text>
+    </View>
+  );
+}
+
+/** #317 KK4: panel seçiminin kaynağı → `yer_eklendi` kaynağı (listedeki pin zaten eklidir; öneri sayılır). */
+function secimKaynagi(k: 'oneri' | 'arama' | 'liste' | 'pin' | 'rehber'): EklemeKaynagi {
+  return k === 'liste' ? 'oneri' : k;
 }
 
 const s = StyleSheet.create({

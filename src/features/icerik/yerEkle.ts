@@ -73,7 +73,8 @@ export function useYerleriEkle() {
           .from('places')
           .insert(yeni.map((y) => ({ trip_id: seyahatId, place_id: y.place_id, primary_type: y.primary_type, lat: y.lat, lng: y.lng, default_minutes: varsayilanDakika(y.primary_type), added_by: session.user.id })));
         if (e) throw e;
-        await Promise.all(yeni.map((y) => olayYaz('yer_eklendi', y.yerId, { seyahat: seyahatId, place_id: y.place_id })));
+        // #317 KK4: bu kanca yalnız Kaydettiklerim'den (şehrin tüm yerleri, ya da Kaydettiklerim'den kurulan seyahat) çağrılır.
+        await Promise.all(yeni.map((y) => olayYaz('yer_eklendi', y.yerId, { seyahat: seyahatId, place_id: y.place_id, kaynak: 'kaydettiklerim' })));
       }
       const cozumsuz = yerler.filter((y) => !y.place_id).length;
       return { eklenen: yeni.length, zaten: yerler.length - cozumsuz - yeni.length, cozumsuz };

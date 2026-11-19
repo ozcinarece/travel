@@ -75,4 +75,11 @@ describe('KK9 "Bu alanda ara"', () => {
     expect(alandaAraGorunur({ bolge: null, sehir, arananlar: [], oneriler: [] })).toBe(false);
     expect(alandaAraGorunur({ bolge: merkezde, sehir: null, arananlar: [], oneriler: [] })).toBe(false);
   });
+
+  it('#317 KK2: aranan alan çipiyle sayılır — çip değişince aynı alanda hap yeniden çıkar', () => {
+    const disarida = ekran(13, { lat: eskisehir.lat + 0.25, lng: eskisehir.lng });
+    const aranan = [{ ...gorunumAlani(disarida), cip: 'turistik' as const }];
+    expect(alandaAraGorunur({ bolge: disarida, sehir, arananlar: aranan, oneriler: [], cip: 'turistik' })).toBe(false);
+    expect(alandaAraGorunur({ bolge: disarida, sehir, arananlar: aranan, oneriler: [], cip: 'yemek' })).toBe(true);
+  });
 });

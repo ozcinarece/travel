@@ -60,6 +60,11 @@ type Props = {
    * belirler (absoluteFill içinde alt sayfa). Dokunuşlar yalnız kendi alanında yakalanır.
    */
   ustKatman?: ReactNode;
+  /**
+   * #317 KK1: hata ve bağlantı uyarıları — her katmanın (alt sayfa her halde, mekan paneli) üstünde, arama satırının hemen
+   * altında yüzer; dokunuşu geçirir. Alt sayfa tam halde ya da panel açıkken de görünür.
+   */
+  hata?: ReactNode;
   harita: HaritaProps;
 };
 
@@ -74,12 +79,15 @@ const GECIS_YUKSEKLIK = 250;
  * #17 KK2: tam ekran harita kabuğu — 3.3 Otel, 3.4 Keşfet ve 3.5 bunu paylaşır.
  * Harita ekranın tamamını kaplar; üstte ve altta yüzen katmanlar dokunuşu yalnız kendi alanlarında yakalar.
  */
-export function HaritaEkrani({ baslik, geri, baslikHapi, sagUst, arama, aramaSag, ustEk, altNot, altSerbest, altPanel, onUstYukseklik, altMenuVar, panelTam, altBaslik, altSayfa, altSayfaGizli, ustKatman, harita }: Props) {
+export function HaritaEkrani({ baslik, geri, baslikHapi, sagUst, arama, aramaSag, ustEk, altNot, altSerbest, altPanel, onUstYukseklik, altMenuVar, panelTam, altBaslik, altSayfa, altSayfaGizli, ustKatman, hata, harita }: Props) {
   const kenar = useSafeAreaInsets();
   const [ustY, setUstY] = useState(0);
   const [panelY, setPanelY] = useState(0);
   const [ekranH, setEkranH] = useState(0);
   const [seritH, setSeritH] = useState(52);
+  // #317 KK1: hata katmanı başlık / arama satırının altından başlar (üst katmana göre ölçülür).
+  const [baslikAlt, setBaslikAlt] = useState(0);
+  const [aramaAlt, setAramaAlt] = useState(0);
   const altDolgu = altMenuVar ? 0 : altPanel ? Math.max(kenar.bottom, 14) : kenar.bottom;
   // #55 §B7: sayfa yükseklikleri — katlı = üst şerit, yarı ≈ %45, tam = başlık alanının altından alta.
   const sayfaAlt = altMenuVar ? 0 : kenar.bottom;
@@ -121,12 +129,12 @@ export function HaritaEkrani({ baslik, geri, baslikHapi, sagUst, arama, aramaSag
           setUstY(h);
           onUstYukseklik?.(h);
         }}>
-        <View style={s.ustSatir} pointerEvents="box-none">
+        <View style={s.ustSatir} pointerEvents="box-none" onLayout={(e) => setBaslikAlt(e.nativeEvent.layout.y + e.nativeEvent.layout.height)}>
           {altBaslik !== undefined ? <BuyukBaslik baslik={baslik} alt={altBaslik} onGeri={geri} /> : baslikHapi ? <BaslikHapi baslik={baslik} /> : <GeriHapi baslik={baslik} onPress={geri} />}
           {sagUst}
         </View>
         {arama ? (
-          <View style={s.aramaSatir} pointerEvents="box-none">
+          <View style={s.aramaSatir} pointerEvents="box-none" onLayout={(e) => setAramaAlt(e.nativeEvent.layout.y + e.nativeEvent.layout.height)}>
             <View style={[s.arama, s.golge, { flex: 1 }]}>{arama}</View>
             {aramaSag}
           </View>
@@ -171,6 +179,11 @@ export function HaritaEkrani({ baslik, geri, baslikHapi, sagUst, arama, aramaSag
       {ustKatman ? (
         <View style={StyleSheet.absoluteFill} pointerEvents="box-none">
           {ustKatman}
+        </View>
+      ) : null}
+      {hata ? (
+        <View testID="harita-hata" style={[s.hata, { top: Math.max(arama ? aramaAlt : baslikAlt, kenar.top) + 10 }]} pointerEvents="none">
+          {hata}
         </View>
       ) : null}
     </View>
@@ -255,6 +268,7 @@ export function EylemHapi({ metin, onPress, yukleniyor }: { metin: string; onPre
 
 const s = StyleSheet.create({
   gizli: { opacity: 0 },
+  hata: { position: 'absolute', left: 0, right: 0, gap: 8 },
   ekran: { flex: 1, backgroundColor: renk.yuzey },
   gecis: { position: 'absolute', left: 0, right: 0, top: 0, height: GECIS_YUKSEKLIK },
   buyukBaslik: { flexDirection: 'row', alignItems: 'center', gap: 10, flexShrink: 1 },
