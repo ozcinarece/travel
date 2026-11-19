@@ -125,7 +125,7 @@
     {
       "sira": 10,
       "ad": "Avanos çömlekçileri",
-      "kategori": "aktivite",
+      "kategori": "carsi",
       "amaclar": [
         "kultur_tarih",
         "cocuklu"
@@ -251,7 +251,7 @@
       ],
       "ilce": "Avanos",
       "merkeze_km": 16,
-      "neden": "Avanos'ta aile işletmesi; Kayseri tipi mantı, kavurmalı pilav ve testi kebabı",
+      "neden": "Avanos'ta aile işletmesi; testi kebabı ve kavurmalı pilav ev usulü",
       "place_id": "ChIJyXVMYQthKhURvjo5AVJRgfY"
     },
     {
@@ -315,7 +315,7 @@
       ],
       "ilce": "Merkez",
       "merkeze_km": 8,
-      "neden": "Uçhisar'da testi kebabı ve düğü çorbası; kahvaltısı da bilinir",
+      "neden": "Uçhisar'da testi kebabı ve düğü çorbası",
       "osm": "node/6724795495",
       "place_id": "ChIJayHu-u5oKhURyXBnfCa9D7g"
     },
@@ -506,7 +506,7 @@
       ],
       "ilce": "Kozaklı",
       "merkeze_km": 67,
-      "neden": "İlin kuzeyinde sıcak su kaplıcaları; gezi gününün yorgunluğunu at",
+      "neden": "İlin kuzeyindeki termal ilçe; kaplıca otelleri ve sıcak su havuzları",
       "place_id": "ChIJ-Y928wu4KhUR6lA1AQAcvy8"
     },
     {
@@ -522,6 +522,80 @@
       "neden": "Mustafapaşa'nın güneyinde baraj gölü; Soğanlı yoluna giderken durulan seyir yeri",
       "osm": "node/6734800885",
       "place_id": "ChIJa2WYvcZDKhURdzhFyfT5a1M"
+    },
+    {
+      "sira": 41,
+      "ad": "Chez Galip",
+      "kategori": "carsi",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Avanos",
+      "merkeze_km": 15,
+      "neden": "Avanos'un bilinen çömlek atölyesi; ustaların işleri satış galerisinde",
+      "place_id": "ChIJoXG5b7NgKhURe0m20GRvCgs"
+    },
+    {
+      "sira": 42,
+      "ad": "Ürgüp cumartesi pazarı",
+      "kategori": "carsi",
+      "amaclar": [
+        "lezzet",
+        "yavas"
+      ],
+      "ilce": "Ürgüp",
+      "merkeze_km": 17,
+      "neden": "Cumartesi kurulan halk pazarı; mevsim sebzesi, meyve ve köy ürünleri"
+    },
+    {
+      "sira": 43,
+      "ad": "İstanbullu Bozacının Yeri",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet",
+        "yavas"
+      ],
+      "ilce": "Ürgüp",
+      "merkeze_km": 13,
+      "neden": "Ortahisar'ın Tepebaşı meydanında boza; kalenin dibinde kısa mola",
+      "place_id": "ChIJdatNnzZDKhUR-jjSymiWIbY"
+    },
+    {
+      "sira": 44,
+      "ad": "Ürgüp Naturel Kuruyemiş",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Ürgüp",
+      "merkeze_km": 17,
+      "neden": "İstiklal Caddesi'nde köftür, dut pekmezli pestil ve Ürgüp üzüm pekmezi",
+      "place_id": "ChIJ3SShQNlcKhURe4wswpRIntM"
+    },
+    {
+      "sira": 45,
+      "ad": "King's Coffee Shop",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 10,
+      "neden": "Göreme'de balon sabahından sonra kahve ve kahvaltı; vegan seçenekler de var",
+      "place_id": "ChIJN7_1yhdpKhURqfiEplodDMc"
+    },
+    {
+      "sira": 46,
+      "ad": "Göreme Kadın Kooperatifi",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet",
+        "yavas"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 10,
+      "neden": "Göremeli kadınların işlettiği kafe; gözleme, çay ve sade kahvaltı",
+      "place_id": "ChIJw27MfidpKhURKIBbd5zUVX8"
     }
   ]
 }
