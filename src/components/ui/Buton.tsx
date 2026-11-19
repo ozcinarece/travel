@@ -16,18 +16,21 @@ type Props = {
   stil?: StyleProp<ViewStyle>;
   /** Büyük CTA (54 px) ya da satır içi (46 px); varsayılan 52. */
   boy?: 'buyuk' | 'normal' | 'kucuk';
+  /** Ekran okuyucu ipucu (ör. #388: çevrimdışıyken neden pasif). */
+  ipucu?: string;
 };
 
 const ZEMIN: Record<Tur, string> = { birincil: renk.ana, vurgu: renk.vurgu, ikincil: renk.yuzey, cerceveli: renk.zemin, tehlike: renk.uyari };
 const METIN: Record<Tur, string> = { birincil: renk.zemin, vurgu: renk.metin, ikincil: renk.ana, cerceveli: renk.metin, tehlike: renk.zemin };
 const BOY = { buyuk: 54, normal: 52, kucuk: 46 } as const;
 
-export function Buton({ baslik, onPress, tur = 'birincil', pasif, yukleniyor, ikon, stil, boy = 'normal' }: Props) {
+export function Buton({ baslik, onPress, tur = 'birincil', pasif, yukleniyor, ikon, stil, boy = 'normal', ipucu }: Props) {
   const kapali = !!pasif || !!yukleniyor;
   return (
     <Pressable
       accessibilityRole="button"
       accessibilityState={{ disabled: kapali, busy: !!yukleniyor }}
+      accessibilityHint={ipucu}
       disabled={kapali}
       onPress={onPress}
       style={({ pressed }) => [s.kap, { backgroundColor: ZEMIN[tur], height: BOY[boy] }, tur === 'cerceveli' && s.cerceve, pasif && s.pasif, pressed && s.basili, stil]}>

@@ -12,6 +12,7 @@ import Svg, { Path } from 'react-native-svg';
 import type { GeziDetay } from '@/lib/tipler';
 
 import GeziEkrani from '@/app/gezi/[slug]';
+import { MekanPaneli } from '@/components/mekan/MekanPaneli';
 
 type Satir = Record<string, unknown>;
 const mockDurum = {
@@ -26,12 +27,17 @@ const mockDurum = {
   haritaPatlasin: false,
   yaziPatlasin: false,
   haritaCizgileri: 0,
+  cevrimdisi: false,
 };
 
 jest.mock('react-native-safe-area-context', () => jest.requireActual<{ default: object }>('react-native-safe-area-context/jest/mock').default);
 jest.mock('expo-router', () => ({
   router: { back: jest.fn(), push: jest.fn(), navigate: jest.fn(), replace: jest.fn() },
   useLocalSearchParams: () => ({ slug: mockDurum.slug }),
+}));
+jest.mock('@/lib/baglanti', () => ({
+  ...jest.requireActual<object>('@/lib/baglanti'),
+  useCevrimdisi: () => mockDurum.cevrimdisi,
 }));
 jest.mock('@/lib/oturum', () => ({ useOturum: () => ({ session: { user: { id: 'ben', is_anonymous: false } }, hazir: true, hesapli: true }) }));
 // Harita yerel modül ister; yerine koordinatları denetleyen basit bileşen (KK2: NaN koordinat haritaya gitmez).
@@ -199,6 +205,7 @@ describe('#199 önerilen gezi ekranı', () => {
     mockDurum.olaylar = [];
     mockDurum.haritaPatlasin = false;
     mockDurum.yaziPatlasin = false;
+    mockDurum.cevrimdisi = false;
     // Hata sınırı testlerinde React'in beklenen hata günlüğü.
     konsol = jest.spyOn(console, 'error').mockImplementation(() => {});
   });
@@ -283,5 +290,31 @@ describe('#199 önerilen gezi ekranı', () => {
     expect(await screen.findByText(g.gezi_gunleri[0].gezi_duraklari[2].ad)).toBeTruthy();
     expect(screen.getByTestId('harita')).toBeTruthy();
     expect(screen.queryByTestId(/^bolum-hata/)).toBeNull();
+  });
+  it('#388 KK5: çevrimdışıyken Gezi yazısındaki mekan kartı ve mekan panelindeki ekleme düğmesi pasif, ipucu var', async () => {
+    const g = geziKur('cevrimdisi-gezi', {
+      gezi: { baslik: 'Çevrimdışı gezi', yazi_md: 'Kaleye çık.\n\n::mekan[ChIJkaleTest01]' },
+      gunler: [{ baslik: 'Gün', duraklar: [{ place_id: 'ChIJkaleTest01', ad: 'Kale', sure_dk: 45 }, { place_id: null, ad: 'Çarşı', sure_dk: 30 }] }],
+    });
+    mockDurum.geziler = { 'cevrimdisi-gezi': g };
+    mockDurum.cevrimdisi = true;
+    ac('cevrimdisi-gezi');
+    expect(await screen.findByText('Çevrimdışı gezi')).toBeTruthy();
+    fireEvent.press(screen.getByText('Gezi yazısı'));
+    await bekle();
+    const ipucu = 'Bağlantı yok; bağlanınca eklenebilir.';
+    const kartDugmesi = screen.getAllByHintText(ipucu).find((d) => d.props.accessibilityLabel === 'Listeye ekle');
+    expect(kartDugmesi?.props.accessibilityState).toEqual(expect.objectContaining({ disabled: true }));
+    // Karta dokununca mekan paneli açılır; ana eylemi de pasif ve ipuçlu.
+    const once = screen.getAllByHintText(ipucu).length;
+    fireEvent.press(screen.getAllByText('Kale').at(-1)!);
+    await bekle();
+    // Panel gövdesi yerleşim ölçülünce çizilir (MekanPaneli onLayout).
+    const panelKok = screen.UNSAFE_getByType(MekanPaneli).findAll((n) => typeof (n.props as { onLayout?: unknown }).onLayout === 'function')[0];
+    act(() => (panelKok.props as { onLayout: (e: unknown) => void }).onLayout({ nativeEvent: { layout: { width: 400, height: 800 } } }));
+    expect(screen.getByText('Yol tarifi')).toBeTruthy();
+    const sonra = screen.getAllByHintText(ipucu);
+    expect(sonra.length).toBe(once + 1);
+    expect(sonra.every((d) => d.props.accessibilityState?.disabled === true)).toBe(true);
   });
 });

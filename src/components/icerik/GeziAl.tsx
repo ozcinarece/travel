@@ -10,6 +10,7 @@ import { Buton } from '@/components/ui/Buton';
 import type { AktarmaPlani } from '@/features/icerik/aktar';
 import { useGeziAktar, useGezidenSeyahatAc } from '@/features/icerik/aktarSorgu';
 import { useIcerikCanli } from '@/features/icerik/fotolar';
+import { eklemeHatasi, hepsiListedeBilgisi, type EklemeDurumu } from '@/features/ekleme/eklemeDurumu';
 import { useGezi } from '@/features/icerik/sorgular';
 import { hedefSeyahatler, varsayilanHedef } from '@/features/icerik/yerEkle';
 import { useSeyahatler } from '@/features/seyahatler/sorgular';
@@ -34,10 +35,13 @@ type Props = {
 };
 
 /** #118 KK4: hiçbir şey eklenmediyse sebep (ilk çözülemeyen mekan ya da "hepsi zaten listende"). */
-function eklenmediSebebi(cozumsuzler: { ad: string; sebep: string }[]): string {
+/** #118 KK4 → #388: hiçbir şey eklenmediyse sebep. Hepsi zaten listedeyse bilgi (KK3); sunucunun ham sebebi gösterilmez (KK2). */
+function eklenmediSebebi(cozumsuzler: { ad: string; sebep: string }[]): EklemeDurumu {
   const ilkHata = cozumsuzler[0];
-  const sebep = ilkHata ? (ilkHata.sebep === 'bulunamadi' ? t('gezi.sebepBulunamadi', { ad: ilkHata.ad }) : t('gezi.sebepSunucu', { ad: ilkHata.ad, sebep: ilkHata.sebep })) : t('gezi.hepsiZatenVar');
-  return t('gezi.hicEklenmedi', { sebep });
+  if (!ilkHata) return hepsiListedeBilgisi();
+  // #388 inceleme: hiç eklenmediyse yalnız ilk cümle (mekan adıyla ikinci cümle tekrar ediyordu).
+  if (ilkHata.sebep === 'bulunamadi') return { metin: t('gezi.hicEklenmedi'), tur: 'hata' };
+  return { metin: t('anasayfa.ekleHata'), tur: 'hata' };
 }
 
 export function GeziAl({ gezi, kimlik, ilkHedefId, onKapat, gecis = 'replace', foto, acikSeyahatId }: Props) {
@@ -46,7 +50,7 @@ export function GeziAl({ gezi, kimlik, ilkHedefId, onKapat, gecis = 'replace', f
   const ilk = ilkHedefId !== undefined ? ilkHedefId : (varsayilanHedef(hedefler, gezi.sehirler?.ad)?.id ?? null);
   const aktar = useGeziAktar();
   const yeni = useGezidenSeyahatAc();
-  const [hata, setHata] = useState<string | null>(null);
+  const [hata, setHata] = useState<EklemeDurumu | null>(null);
   // KK3: "plan kuruldu" süresi sayfanın açılışından ölçülür (sihirbazla aynı).
   const [acilis] = useState(() => Date.now());
 
@@ -77,7 +81,7 @@ export function GeziAl({ gezi, kimlik, ilkHedefId, onKapat, gecis = 'replace', f
         params: { id: seyahatId, eklenenDurak: String(sonuc.eklenenDurak), eklenenMekan: String(sonuc.eklenenMekan + sonuc.zatenVar), atlanan: String(sonuc.cozumsuz), ...(sonuc.ilkGunIndex !== null ? { gun: String(sonuc.ilkGunIndex) } : {}) },
       });
     } catch (e) {
-      setHata(t('gezi.alHata', { sebep: e instanceof Error ? e.message : String(e) }));
+      setHata(eklemeHatasi(e, 'gezi-al', () => void al(seyahatId, plan, secenek, ekGunler)));
     }
   };
   // KK2–KK4 · KK10: yeni seyahat akışın içinde; bitince Plan (1. gün) ya da yalnız mekanlarda Gezi sayfası.
@@ -96,7 +100,7 @@ export function GeziAl({ gezi, kimlik, ilkHedefId, onKapat, gecis = 'replace', f
         params: { id: sonuc.seyahatId, gun: '1', eklenenGun: String(sonuc.gun), eklenenDurak: String(sonuc.eklenenDurak), atlanan: String(sonuc.cozumsuz) },
       });
     } catch (e) {
-      setHata(t('gezi.alHata', { sebep: e instanceof Error ? e.message : String(e) }));
+      setHata(eklemeHatasi(e, 'gezi-al-yeni', () => void yeniSeyahat(istek)));
     }
   };
   return <SeyahatimeAl gezi={gezi} seyahatler={hedefler} ilkHedefId={ilk} kimlik={kimlik} foto={foto} onKapat={onKapat} onAl={al} onYeni={yeniSeyahat} hata={hata} />;

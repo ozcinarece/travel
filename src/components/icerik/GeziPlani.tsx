@@ -26,6 +26,8 @@ type Props = {
   listede: (d: GeziDuragi) => boolean;
   mesgulId: string | null;
   onDurakEkle: (d: GeziDuragi) => void;
+  /** #388 KK5 (kanvas 23c): bağlantı yokken + / ✓ pasif (%40). */
+  eklePasif?: boolean;
   /** Satıra dokunuldu (mekan rehberi). */
   onDurak?: (d: GeziDuragi) => void;
   /** Seçili gün (sıra indeksi); sayfada tutulur, sekme değişince korunur. */
@@ -33,7 +35,7 @@ type Props = {
   onGunSira: (i: number) => void;
 };
 
-export function GeziPlani({ gezi, canli, listede, mesgulId, onDurakEkle, onDurak, gunSira, onGunSira }: Props) {
+export function GeziPlani({ gezi, canli, listede, mesgulId, onDurakEkle, eklePasif, onDurak, gunSira, onGunSira }: Props) {
   const gun = gezi.gezi_gunleri[gunSira] ?? gezi.gezi_gunleri[0];
   const { rotalar } = useGeziRotasi(gun);
   const ozet = useMemo(() => geziGunOzeti(gun?.gezi_duraklari ?? [], rotalar), [gun, rotalar]);
@@ -88,7 +90,7 @@ export function GeziPlani({ gezi, canli, listede, mesgulId, onDurakEkle, onDurak
                     {`${kategoriEtiketi(d.kategori)} · ${sureMetni(d.sure_dk)}`}
                   </Text>
                 </View>
-                <EkleDugmesi listede={icinde} mesgul={mesgulId === d.id} onPress={() => onDurakEkle(d)} />
+                <EkleDugmesi listede={icinde} mesgul={mesgulId === d.id} pasif={eklePasif} ipucu={eklePasif ? t('ekleme.baglantiYokIpucu') : undefined} onPress={() => onDurakEkle(d)} />
               </Pressable>
             </View>
           );

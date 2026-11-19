@@ -6,8 +6,10 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { GeziAlYukleyici } from '@/components/icerik/GeziAl';
 import { Ikon } from '@/components/ui/Ikon';
+import { TEKRAR_HIT_SLOP, useIosDuyuru } from '@/components/ui/EklemeDurumSatiri';
 import { KesfetHapi } from '@/components/ui/KesfetHapi';
 import { SegmentSecici } from '@/components/ui/SegmentSecici';
+import { eklemeHatasi } from '@/features/ekleme/eklemeDurumu';
 import { useIcerikCanli } from '@/features/icerik/fotolar';
 import { yerGruplari } from '@/features/icerik/kaydedilen';
 import { icerikPlaceId, useGezilerIle, useKaydedilenler, useKaydet, useYerlerIle } from '@/features/icerik/sorgular';
@@ -16,6 +18,7 @@ import { useSeyahatler } from '@/features/seyahatler/sorgular';
 import { yeniGirisNo } from '@/features/sihirbaz/girisler';
 import { seyahatAdi } from '@/features/sihirbaz/sihirbaz';
 import { t } from '@/i18n';
+import { useCevrimdisi } from '@/lib/baglanti';
 import { yonelmeEkli } from '@/lib/ek';
 import { kategoriEtiketi } from '@/lib/kategori';
 import { kategoriPini } from '@/lib/pinIkonu';
@@ -61,22 +64,33 @@ export default function KaydettiklerimEkrani() {
   // Kaldır + geri al bildirimi (4 sn); diğer bildirimler 3 sn.
   const [kaldirilan, setKaldirilan] = useState<{ tur: KaydedilenTuru; id: string } | null>(null);
   const [bildirim, setBildirim] = useState<string | null>(null);
+  // #388 KK1: bağlantı hatasında bildirimde "Tekrar dene".
+  const [tekrar, setTekrar] = useState<(() => void) | null>(null);
+  // #388 KK5 (kanvas 23c): bağlantı yokken "listesine ekle" pasif.
+  const cevrimdisi = useCevrimdisi();
   const zamanlayici = useRef<ReturnType<typeof setTimeout> | null>(null);
   useEffect(() => () => {
     if (zamanlayici.current) clearTimeout(zamanlayici.current);
   }, []);
-  const goster = (b: { kaldirilan?: { tur: KaydedilenTuru; id: string }; metin?: string }) => {
+  const goster = (b: { kaldirilan?: { tur: KaydedilenTuru; id: string }; metin?: string; tekrar?: () => void }) => {
     setKaldirilan(b.kaldirilan ?? null);
     setBildirim(b.metin ?? null);
+    setTekrar(() => b.tekrar ?? null);
     if (zamanlayici.current) clearTimeout(zamanlayici.current);
     zamanlayici.current = setTimeout(
       () => {
         setKaldirilan(null);
         setBildirim(null);
+        setTekrar(null);
       },
-      b.kaldirilan ? 4000 : 3000,
+      b.kaldirilan || b.tekrar ? 4000 : 3000,
     );
   };
+  // #388 inceleme: çevrimdışıyken "listesine ekle" pasif; nedeni bantta (mevcut `ekleme.baglantiYok`, düğmesiz).
+  const cevrimdisiEkle = cevrimdisi && sekme === 'yer' && gruplar.some((g) => !!g.sehirId && !!varsayilanHedef(hedefler, g.sehirAd));
+  const bandMetni = bildirim ?? (kaldirilan ? t('kaydettiklerim.kaldirildi') : cevrimdisiEkle ? t('ekleme.baglantiYok') : '');
+  // iOS'ta bildirim de duyurulur (Android'de bant yeni açılınca okunmuyor; iki platformda tek yol).
+  useIosDuyuru(bildirim ?? (cevrimdisiEkle ? t('ekleme.baglantiYok') : null));
   const kaldir = (tur: KaydedilenTuru, id: string) => {
     kaydet.mutate({ tur, hedef_id: id, kayitli: true });
     goster({ kaldirilan: { tur, id } });
@@ -106,7 +120,9 @@ export default function KaydettiklerimEkrani() {
           sonuc.eklenen === 0 ? t('kaydettiklerim.hepsiListede', { seyahat: ad }) : sonuc.zaten > 0 ? t('kaydettiklerim.eklendiZaten', { n: sonuc.eklenen, zaten: sonuc.zaten }) : t('kaydettiklerim.eklendi', { n: sonuc.eklenen, seyahat: ad }),
       });
     } catch (e) {
-      goster({ metin: t('kaydettiklerim.eklemeHata', { sebep: e instanceof Error ? e.message : String(e) }) });
+      // #388 KK1 · KK2: ham hata yalnız Sentry'ye.
+      const durum = eklemeHatasi(e, 'kaydettiklerim-ekle', () => void grubaEkle(g, hedef));
+      goster({ metin: durum.metin, tekrar: durum.tekrar });
     } finally {
       setMesgulGrup(null);
     }
@@ -164,7 +180,7 @@ export default function KaydettiklerimEkrani() {
                     <Text style={s.grupSayi}>{t('kaydettiklerim.sehirSayi', { n: g.yerler.length })}</Text>
                   </Text>
                   {g.sehirId ? (
-                    <Pressable accessibilityRole="button" disabled={mesgulGrup !== null} onPress={() => (hedef ? grubaEkle(g, hedef) : sehreKur(g))} style={({ pressed }) => [s.grupDugme, pressed && { opacity: 0.85 }]}>
+                    <Pressable accessibilityRole="button" accessibilityHint={hedef && cevrimdisi ? t('ekleme.baglantiYokIpucu') : undefined} disabled={mesgulGrup !== null || (!!hedef && cevrimdisi)} accessibilityState={{ disabled: mesgulGrup !== null || (!!hedef && cevrimdisi) }} onPress={() => (hedef ? grubaEkle(g, hedef) : sehreKur(g))} style={({ pressed }) => [s.grupDugme, pressed && { opacity: 0.85 }, !!hedef && cevrimdisi && { opacity: 0.4 }]}>
                       {mesgulGrup === g.sehirId ? (
                         <ActivityIndicator color={renk.metin} />
                       ) : (
@@ -210,12 +226,23 @@ export default function KaydettiklerimEkrani() {
           })
         )}
       </ScrollView>
-      {kaldirilan || bildirim ? (
+      {kaldirilan || bildirim || cevrimdisiEkle ? (
         <View style={s.bildirim}>
-          <Text style={s.bildirimMetin}>{bildirim ?? t('kaydettiklerim.kaldirildi')}</Text>
+          <Text style={s.bildirimMetin}>{bandMetni}</Text>
           {kaldirilan ? (
-            <Pressable accessibilityRole="button" onPress={geriAl} hitSlop={8}>
+            <Pressable accessibilityRole="button" onPress={geriAl} hitSlop={TEKRAR_HIT_SLOP}>
               <Text style={s.geriAl}>{t('kaydettiklerim.geriAl')}</Text>
+            </Pressable>
+          ) : tekrar ? (
+            <Pressable
+              accessibilityRole="button"
+              onPress={() => {
+                setBildirim(null);
+                setTekrar(null);
+                tekrar();
+              }}
+              hitSlop={TEKRAR_HIT_SLOP}>
+              <Text style={s.geriAl}>{t('ekleme.tekrarDene')}</Text>
             </Pressable>
           ) : null}
         </View>
