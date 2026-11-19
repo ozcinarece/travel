@@ -378,6 +378,9 @@ export const CIP_TIPLERI: Record<string, string[]> = {
   turistik_muze: ['museum', 'art_gallery'],
   turistik_tarihi: ['tourist_attraction', 'historical_landmark', 'cultural_landmark', 'monument'],
   turistik_manzara: ['observation_deck', 'park', 'garden', 'botanical_garden', 'national_park'],
+  // #400 KK1: sihirbazın "Görmen gerekenler" isteği — Turistik + doğa (milli park, tabiat parkı, yürüyüş alanı, park). İstek
+  // `includedPrimaryTypes` ile gider (ALT_ISTEK_TIPLERI.gormen); bu liste yalnız yedek istek içindir.
+  gormen: ['tourist_attraction', 'historical_landmark', 'cultural_landmark', 'monument', 'museum', 'art_gallery', 'observation_deck', 'national_park', 'state_park', 'hiking_area', 'park'],
   // Eski istemciler (#69 öncesi çipler) bir sürüm daha kabul edilir; OTA'yı almamış istemci 400 almasın.
   populer: ['tourist_attraction'],
   sanat: ['museum', 'art_gallery'],
@@ -630,6 +633,8 @@ const ALT_ISTEK_TIPLERI: Record<string, readonly string[]> = {
   turistik_muze: ['museum', 'art_museum', 'history_museum', 'art_gallery'],
   turistik_tarihi: ['tourist_attraction', 'historical_landmark', 'historical_place', 'cultural_landmark', 'monument', 'sculpture', 'castle'],
   turistik_manzara: ['observation_deck', ...BIRINCIL_TIPLER.park],
+  // #400 KK1: Turistik kümesi + doğa tipleri (Table A; toplam 16 < 50). Park ≥ 200 yorum şartı istemcide (`gormenTur`).
+  gormen: [...BIRINCIL_TIPLER.turistik, 'national_park', 'state_park', 'hiking_area', 'park'],
 };
 
 /** #189 Ek 2: şehir listesinin yarıçapı (m): `kesfet_esikleri.sehir_yaricap_m`, varsayılan 8 km, 2–15 km arası. */
@@ -649,7 +654,7 @@ const TURISTIK_ISTISNA = ['tourist_attraction', 'historical_landmark'];
 function cipGruplari(cip: string): readonly KesfetGrubu[] | null {
   if (cip === 'hepsi') return GRUPLAR;
   if ((GRUPLAR as string[]).includes(cip)) return [cip as KesfetGrubu];
-  if (cip === 'turistik_manzara') return ['turistik', 'park'];
+  if (cip === 'turistik_manzara' || cip === 'gormen') return ['turistik', 'park'];
   if (['gezilecek', 'muze', 'manzara', 'populer', 'sanat', 'turistik_muze', 'turistik_tarihi'].includes(cip)) return ['turistik'];
   return null;
 }

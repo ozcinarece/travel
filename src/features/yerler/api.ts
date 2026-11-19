@@ -219,7 +219,9 @@ export type OneriCipi =
   // #189 Ek 2: Keşfet şehir listesinde Turistik'in üç alt isteği.
   | 'turistik_muze'
   | 'turistik_tarihi'
-  | 'turistik_manzara';
+  | 'turistik_manzara'
+  // #400: sihirbazın "Görmen gerekenler" isteği (Turistik + doğa).
+  | 'gormen';
 
 /** Popülerlik puanı: puan × log10(yorum + 1); eşitlikte place_id (deterministik). */
 export function oneriSirala<T extends { place_id: string; puan: number | null; puan_sayisi: number | null }>(yerler: T[]): T[] {
