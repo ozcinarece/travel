@@ -1,4 +1,4 @@
-// #142 KK4–5: şehir rehberi sekmesi — saf hesaplar: yazılardaki mekanlar, okunan bölüm ve okuma ilerlemesi (test edilir).
+// #142 KK4–5 → #397: şehir rehberi — saf hesaplar: yazılardaki mekanlar ve sekme olacak (içi dolu) bölümler (test edilir).
 import { markdownAyristir } from '@/lib/markdown';
 
 /** Bölüm yazılarındaki mekanlar (kart `::mekan[id]` + satır içi `[ad](mekan:id)`), ilk görülme sırasıyla tekil. */
@@ -20,27 +20,13 @@ export function rehberKartIdleri(yazilar: (string | null | undefined)[]): string
   return [...gorulen];
 }
 
-/**
- * Okunan bölüm: üstü yapışkan başlığın altına (`pay`) gelmiş son bölüm; hiçbiri gelmediyse ilk bölüm. Konumlar bölüm
- * sırasıyla içerikteki y (ölçülmemiş = undefined, atlanır).
- */
-export function aktifBolum(kaydirmaY: number, konumlar: (number | undefined)[], pay: number): number {
-  let aktif = 0;
-  konumlar.forEach((y, i) => {
-    if (y !== undefined && y <= kaydirmaY + pay + 1) aktif = i;
-  });
-  return aktif;
-}
-
-/** Turuncu okuma çizgisi: kaydırılan / kaydırılabilir (0–1). */
-export function okumaOrani(kaydirmaY: number, icerikYukseklik: number, gorunenYukseklik: number): number {
-  const kaydirilabilir = icerikYukseklik - gorunenYukseklik;
-  if (kaydirilabilir <= 0) return 1;
-  return Math.min(1, Math.max(0, kaydirmaY / kaydirilabilir));
-}
-
 /** Bölüm yazısının ilk `#` başlığı bölüm başlığıyla çizildiği için düşer. */
 export function bolumYazisi(md: string | null | undefined): string {
   // Gövdesi boş bölümde yazı yalnız `# Başlık` (satır sonu yok).
   return (md ?? '').replace(/^#\s+[^\n]*(\n+|$)/, '');
+}
+
+/** #397 KK4: yalnız içi dolu bölüm sekme olur (başlığı düştükten sonra yazısı boş olan bölüm gösterilmez). */
+export function doluBolumler<T extends { yazi_md: string | null | undefined }>(bolumler: readonly T[]): T[] {
+  return bolumler.filter((b) => bolumYazisi(b.yazi_md).trim().length > 0);
 }
