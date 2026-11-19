@@ -133,13 +133,21 @@ function Satir({
   );
 }
 
-/** ⋯: neden metnini düzenle, amaçları seç, sil (kanvas yardım satırı). */
+/** ⋯: adı ve neden metnini düzenle, amaçları seç, sil (kanvas yardım satırı). Ad Ece'nin içerik metni (PRD §7). */
 function Ayrinti({ oneri: o, onDegis, onSil }: { oneri: IlOneri; onDegis: (a: IlOneriAlanlari) => void; onSil: () => void }) {
+  const [ad, setAd] = useState(o.ad);
   const [neden, setNeden] = useState(o.neden ?? '');
   const [silOnay, setSilOnay] = useState(false);
+  const adDegisti = ad.trim() !== o.ad && ad.trim().length > 0;
   const degisti = neden.trim() !== (o.neden ?? '');
   return (
     <View style={s.ayrinti}>
+      <Alan etiket={ty('ilOneri.ad')}>
+        <View style={s.nedenSatir}>
+          <MetinKutusu value={ad} onChangeText={setAd} maxLength={120} accessibilityLabel={ty('ilOneri.ad')} style={s.nedenKutu} />
+          {adDegisti ? <Hap kucuk tur="birincil" baslik={ty('ilOneri.kaydet')} onPress={() => onDegis({ ad: ad.trim() })} /> : null}
+        </View>
+      </Alan>
       <Alan etiket={ty('ilOneri.neden')}>
         <View style={s.nedenSatir}>
           <MetinKutusu

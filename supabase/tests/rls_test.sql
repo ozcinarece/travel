@@ -3706,7 +3706,21 @@ reset role;
 set role authenticated;
 select pg_temp.as_user(:A);
 update public.il_listeleri set yayinda = true where il_slug = 'il-deneme';
+reset role;
+do $$ begin assert (select not yayinda from public.il_listeleri where il_slug = 'il-deneme'), '#401 KK2: sıradan hesap listeyi yayınlayamaz, yayinda hâlâ false'; end $$;
+set role authenticated;
+select pg_temp.as_user(:A);
 update public.il_oneriler set ad = 'Saldırgan' where il_slug = 'il-deneme';
+delete from public.il_oneriler where il_slug = 'il-deneme';
+delete from public.il_listeleri where il_slug = 'il-deneme';
+reset role;
+do $$
+begin
+  assert exists (select 1 from public.il_listeleri where il_slug = 'il-deneme'), '#401 KK2: sıradan hesap listeyi silemez';
+  assert (select count(*) from public.il_oneriler where il_slug = 'il-deneme') = 3, '#401 KK2: sıradan hesap satır silemez';
+end $$;
+set role authenticated;
+select pg_temp.as_user(:A);
 select pg_temp.hata_bekle($$insert into public.il_oneriler (il_slug, sira, ad, kategori) values ('il-deneme', 4, 'X', 'doga')$$, '42501');
 select pg_temp.hata_bekle($$select public.il_oneri_sirala('il-deneme', '{}')$$, '42501');
 select pg_temp.hata_bekle($$select public.icerik_il_taslak_yukle('{}'::jsonb)$$, '42501');
@@ -3724,6 +3738,9 @@ begin
   assert (select sira from public.il_oneriler where ad = 'Yeni yer' and il_slug = 'il-deneme') = 1, '#401 KK4: sürüklenen sıra 1..n yazıldı';
   assert (select array_agg(sira order by sira) from public.il_oneriler where il_slug = 'il-deneme') = '{1,2,3,4}', '#401 KK4: sıra ardışık';
   assert (select degistiren = 'yonetim' from public.il_listeleri where il_slug = 'il-deneme'), '#401 KK4: son değişiklik BO';
+  assert (select yayinda from public.il_listeleri where il_slug = 'il-deneme'), '#401 KK4: admin yayınladı';
+  assert (select count(*) from public.il_oneriler where il_slug = 'il-deneme') = 4, '#401 KK4: admin yayındaki listenin bütün satırlarını okur';
+  assert exists (select 1 from public.il_oneriler where il_slug = 'il-deneme' and not gorunur), '#401 KK4: admin yayındaki listede gizli satırı okur';
 end $$;
 reset role;
 -- Yayında: herkes görünür satırları okur, gizli satır görünmez; yükleme yayındaki listeye yazmaz.

@@ -19,12 +19,12 @@ const satir = (id: string, sira: number, gorunur = true): IlOneri => ({
   gorunur,
 });
 
-// #401 KK4: satır — sıra, ad, ilçe, km, neden; görünürlük anahtarı; ⋯ ile neden, amaç ve iki adımlı silme.
+// #401 KK4: satır — sıra, ad, ilçe, km, neden; görünürlük anahtarı; ⋯ ile ad, neden, amaç ve iki adımlı silme.
 describe('IlOneriTablosu (#401 KK4)', () => {
   it('satır, anahtar ve ⋯', () => {
     const onDegis = jest.fn();
     const onSil = jest.fn();
-    const { getByText, getAllByText, getAllByRole, getByRole } = render(
+    const { getByText, getAllByText, getAllByRole, getByRole, getByDisplayValue } = render(
       <IlOneriTablosu satirlar={[satir('a', 1), satir('b', 2, false)]} onDegis={onDegis} onTasi={() => {}} onSil={onSil} />,
     );
     expect(getByText('Yer 1')).toBeTruthy();
@@ -34,7 +34,11 @@ describe('IlOneriTablosu (#401 KK4)', () => {
     fireEvent.press(anahtarlar[0]);
     expect(onDegis).toHaveBeenCalledWith('a', { gorunur: false });
 
-    fireEvent.press(getByRole('button', { name: 'Yer 1: neden, amaçlar, sil' }));
+    fireEvent.press(getByRole('button', { name: 'Yer 1: ad, neden, amaçlar, sil' }));
+    // PRD §7: ad Ece'nin metni, ⋯ alanında düzenlenir.
+    fireEvent.changeText(getByDisplayValue('Yer 1'), '  Abant Gölü  ');
+    fireEvent.press(getByRole('button', { name: 'Kaydet' }));
+    expect(onDegis).toHaveBeenCalledWith('a', { ad: 'Abant Gölü' });
     fireEvent.press(getByRole('button', { name: 'Sil' }));
     expect(onSil).not.toHaveBeenCalled();
     fireEvent.press(getByRole('button', { name: 'Sil · emin misin?' }));

@@ -26,7 +26,7 @@ export function useIlOnerileri(slug: string | undefined) {
   });
 }
 
-export type IlOneriAlanlari = Partial<Pick<IlOneri, 'kategori' | 'amaclar' | 'neden' | 'gorunur'>>;
+export type IlOneriAlanlari = Partial<Pick<IlOneri, 'ad' | 'kategori' | 'amaclar' | 'neden' | 'gorunur'>>;
 
 export async function ilOneriGuncelle(id: string, alanlar: IlOneriAlanlari): Promise<void> {
   await hataVer(supabase.from('il_oneriler').update(alanlar).eq('id', id));
@@ -43,8 +43,8 @@ export async function ilOneriSil(slug: string, id: string, kalanSira: string[]):
 }
 
 /**
- * "+ Yer ekle": yalnız arama önerisinin kimliği ve adı yazılır (Place Details isteği yok, PRD §7: ad Ece'nin listesi için
- * içerik adı). Konum boş kalır; içerik hattı OSM'den doldurur.
+ * "+ Yer ekle": arama önerisinden yalnız `place_id` ve `primary_type` yazılır (Place Details isteği yok). PRD §7: Google'ın
+ * adı saklanmaz; `ad` Ece'nin BO'da kendi yazdığı içerik metnidir. Konum boş kalır; içerik hattı OSM'den doldurur.
  */
 export async function ilOneriEkle(slug: string, yer: { place_id: string; ad: string; tip: string | null }, kategori: IlKategori, sira: number): Promise<void> {
   await hataVer(
