@@ -20,14 +20,30 @@ type Satir = { anahtar: string; ad: string; tip: string | undefined; alt: string
  * Google Maps linki yapıştırınca tek sonuç (resolve-link). Arama places-autocomplete (şehre yanlı, 300 ms, ≥ 2 harf),
  * seçimde places-light (oturumu kapatır). Karede fotoğraf yerine kategori rengi (foto ayrı Google isteği olurdu).
  */
-export function MekanArama({ merkez, onSec, etiket = ty('gezi.mekanAra') }: { merkez: Merkez | undefined; onSec: (yer: HafifYer) => Promise<void> | void; etiket?: string }) {
+export type MekanKimligi = { place_id: string; ad: string; tip: string | null };
+
+/**
+ * `onKimlik` verilirse (#401 İl önerileri) seçimde Place Details isteği atılmaz: yalnız öneri satırının kimliği, adı ve tipi
+ * döner (Autocomplete oturumu, IDs Only). Link yapıştırma bu kipte kapalıdır (resolve-link ayrı istek olurdu).
+ */
+export function MekanArama({
+  merkez,
+  onSec,
+  onKimlik,
+  etiket = ty('gezi.mekanAra'),
+}: {
+  merkez: Merkez | undefined;
+  onSec?: (yer: HafifYer) => Promise<void> | void;
+  onKimlik?: (yer: MekanKimligi) => Promise<void> | void;
+  etiket?: string;
+}) {
   const [girdi, setGirdi] = useState('');
   const [oturum, setOturum] = useState(yeniOturumJetonu);
   const [odak, setOdak] = useState(false);
   const [secili, setSecili] = useState(0);
   const [mesgul, setMesgul] = useState(false);
   const [hata, setHata] = useState(false);
-  const link = linkGibiMi(girdi);
+  const link = !onKimlik && linkGibiMi(girdi);
   const oneriler = useOneriler('yonetim-mekan', girdi, oturum, undefined, merkez, !link);
   const cozum = useQuery({
     queryKey: ['yonetim-link', girdi.trim()],
@@ -57,9 +73,13 @@ export function MekanArama({ merkez, onSec, etiket = ty('gezi.mekanAra') }: { me
     setHata(false);
     setMesgul(true);
     try {
-      const yer = await satir.al();
-      if (!yer) throw new Error('bos');
-      await onSec(yer);
+      if (onKimlik) {
+        await onKimlik({ place_id: satir.anahtar, ad: satir.ad, tip: satir.tip ?? null });
+      } else {
+        const yer = await satir.al();
+        if (!yer) throw new Error('bos');
+        await onSec?.(yer);
+      }
       setGirdi('');
       setSecili(0);
       setOturum(yeniOturumJetonu());

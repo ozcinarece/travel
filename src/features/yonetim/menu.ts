@@ -1,5 +1,5 @@
 // #106 KK4 / #155: sol menü sırası kanvastaki gibi (BO-0: Genel bakış, Ana sayfa, Geziler, Şehirler, Yerler, …). Saf: kabuk ve testler buradan okur.
-export type MenuAnahtari = 'genel' | 'geziler' | 'yerler' | 'sehirler' | 'anaSayfa' | 'kullanicilar' | 'ayarlar';
+export type MenuAnahtari = 'genel' | 'geziler' | 'yerler' | 'ilOnerileri' | 'sehirler' | 'anaSayfa' | 'kullanicilar' | 'ayarlar';
 
 export type MenuOgesi = { anahtar: MenuAnahtari; yol: string };
 
@@ -13,6 +13,8 @@ export const MENU: readonly MenuOgesi[] = [
   { anahtar: 'geziler', yol: '/yonetim/geziler' },
   { anahtar: 'sehirler', yol: '/yonetim/sehirler' },
   { anahtar: 'yerler', yol: '/yonetim/yerler' },
+  // #401 KK4 (kanvas BO_IlOnerileri): Yerler'in altında.
+  { anahtar: 'ilOnerileri', yol: '/yonetim/il-onerileri' },
   { anahtar: 'kullanicilar', yol: '/yonetim/kullanicilar' },
   { anahtar: 'ayarlar', yol: '/yonetim/ayarlar' },
 ];
