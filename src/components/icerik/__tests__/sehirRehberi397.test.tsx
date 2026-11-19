@@ -20,9 +20,10 @@ jest.mock('@/features/mekanlar/sorgular', () => ({
   useMekanGuncelle: () => ({ mutate: jest.fn() }),
 }));
 const BOLUMLER = [
-  { id: 'b1', baslik: 'Nasıl gezilir', yazi_md: '# Nasıl gezilir\n\nTramvayla gez.', sira: 1 },
-  { id: 'b2', baslik: 'Ne yenir', yazi_md: '# Ne yenir\n\nÇibörek ye.\n\n::mekan[ChIJ-ciborek-01]\n\n::mekan[ChIJ-balaban-02]', sira: 2 },
-  { id: 'b3', baslik: 'Mahalleler', yazi_md: '# Mahalleler', sira: 3 },
+  { id: 'b1', bolum: 'ulasim', baslik: 'Nasıl gidilir, nasıl gezilir', yazi_md: '# Nasıl gezilir\n\nTramvayla gez.', sira: 1 },
+  { id: 'b2', bolum: 'yemek', baslik: 'Ne yenir (uzun DB başlığı)', yazi_md: '# Ne yenir\n\nÇibörek ye.\n\n::mekan[ChIJ-ciborek-01]\n\n::mekan[ChIJ-balaban-02]', sira: 2 },
+  { id: 'b3', bolum: 'mahalle', baslik: 'Mahalleler', yazi_md: '# Mahalleler', sira: 3 },
+  { id: 'b4', bolum: null, baslik: 'Kış', yazi_md: '# Kış\n\nKat giy.', sira: 4 },
 ];
 const GEZILER = [
   { id: 'g1', slug: 'eskisehirde-bir-gun', baslik: 'Eskişehir’de bir gün', ozet: null, kapak_url: null, gun_sayisi: 1, mekan_sayisi: 5, amaclar: ['lezzet'] },
@@ -67,10 +68,10 @@ describe('#397 şehir rehberi v5', () => {
     expect(screen.queryByLabelText(t('ui.ekle.ekle'))).toBeNull();
   });
 
-  it('KK4: yalnız içi dolu bölüm sekme; sekme seçili bölümün yazısını gösterir', () => {
+  it('KK4: yalnız içi dolu bölüm sekme; ad bölüm türünden kısa ad (serbest bölümde başlık); sekme seçili bölümün yazısını gösterir', () => {
     render(<SehirRehberi sehir={SEHIR} sehirlerYukleniyor={false} onGeri={() => undefined} seyahat={SEYAHAT} />);
     const sekmeler = screen.getAllByRole('tab');
-    expect(sekmeler.map((s) => s.props.accessibilityLabel)).toEqual(['Nasıl gezilir', 'Ne yenir']);
+    expect(sekmeler.map((s) => s.props.accessibilityLabel)).toEqual(['Nasıl gezilir', 'Ne yenir', 'Kış']);
     expect(screen.getByText('Tramvayla gez.')).toBeTruthy();
     expect(screen.queryByText('Çibörek ye.')).toBeNull();
     fireEvent.press(screen.getByRole('tab', { name: 'Ne yenir' }));

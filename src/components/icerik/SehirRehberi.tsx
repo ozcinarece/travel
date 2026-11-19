@@ -125,7 +125,7 @@ export function SehirRehberi({ sehir, sehirlerYukleniyor, onGeri, seyahat, onReh
     const foto = icerik.foto(placeId);
     const listede = !!listedeki(placeId);
     return (
-      <Pressable accessibilityRole="button" accessibilityLabel={[y.ad, bilinenKategori(y.primary_type)].join(', ')} onPress={() => setPanelId(placeId)} style={({ pressed }) => [s.satir, pressed && { opacity: 0.85 }]}>
+      <Pressable accessibilityRole="button" accessibilityLabel={[y.ad, bilinenKategori(y.primary_type)].filter(Boolean).join(', ')} onPress={() => setPanelId(placeId)} style={({ pressed }) => [s.satir, pressed && { opacity: 0.85 }]}>
         <View style={s.satirFoto}>{foto ? <Foto source={{ uri: foto }} style={StyleSheet.absoluteFill} contentFit="cover" transition={150} /> : <Kamera />}</View>
         <View style={s.satirMetin}>
           <Text style={s.satirAd} numberOfLines={1}>
@@ -175,7 +175,7 @@ export function SehirRehberi({ sehir, sehirlerYukleniyor, onGeri, seyahat, onReh
         {doluBolum.length > 0 ? (
           <SekmeSatiri aralik={24}>
             {doluBolum.map((b, i) => (
-              <Sekme key={b.id} baslik={b.baslik} boyut={15} secili={i === secIndex} onPress={() => setSeciliId(b.id)} />
+              <Sekme key={b.id} baslik={b.bolum ? t(`rehber.bolum.${b.bolum}`) : b.baslik} boyut={15} secili={i === secIndex} onPress={() => setSeciliId(b.id)} />
             ))}
           </SekmeSatiri>
         ) : null}
