@@ -789,7 +789,20 @@
     "araEtiket": "Ara",
     "kaydettiklerim": "Kaydettiklerim",
     "yeniSeyahat": "Yeni seyahat",
-    "yeniBaslik": "Yeni bir seyahat kur"
+    "yeniBaslik": "Yeni bir seyahat kur",
+    "v5": {
+      "seyahat": "Seyahat",
+      "yeniSeyahatEtiket": "Yeni seyahat",
+      "ara": "Şehir ya da gezi ara",
+      "hepsi": "Hepsi",
+      "kartAlt": "{gun} gün · {durak} durak · Tripmate rehberi",
+      "kalan": "{n} gün kaldı",
+      "kalanBugun": "Bugün",
+      "sehirleKur": "{sehir} için seyahat kur",
+      "metinleKur": "“{metin}” ile seyahat kur",
+      "kaydet": "Kaydet",
+      "kaydedildi": "Kaydedildi"
+    }
   },
   "ara": {
     "baslik": "Ara",
