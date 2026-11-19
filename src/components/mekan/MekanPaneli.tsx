@@ -1,4 +1,4 @@
-import { Image } from 'expo-image';
+import { Foto } from '@/components/ui/Foto';
 import { useEffect, useReducer, useState, type ReactNode } from 'react';
 import { ActivityIndicator, BackHandler, Linking, Platform, Pressable, ScrollView, Share, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -181,7 +181,7 @@ export function MekanPaneli(p: MekanPaneliProps) {
                 {fotoHali === 'kapak' && rehberKapak.uri ? (
                   // #345 KK4 (kanvas 29i · C): rehberli yerin kendi kapağı (Commons ya da Ece'nin), atfıyla.
                   <View style={StyleSheet.absoluteFill}>
-                    <Image source={{ uri: rehberKapak.uri }} style={StyleSheet.absoluteFill} contentFit="cover" transition={150} />
+                    <Foto source={{ uri: rehberKapak.uri }} style={StyleSheet.absoluteFill} contentFit="cover" transition={150} />
                     {rehberKapak.atif ? <KapakAtfi atif={rehberKapak.atif} /> : null}
                   </View>
                 ) : fotoYokGosterilir(fotoHali) ? (
@@ -192,7 +192,7 @@ export function MekanPaneli(p: MekanPaneliProps) {
                   <FotoKaydirma yer={yer} genislik={alanW || ekran.width} onAc={() => galeriAc(true)} />
                 ) : fotoHali === 'hafif' && p.hafif?.foto_uri ? (
                   <View style={[StyleSheet.absoluteFill, { backgroundColor: kategoriRenk + '22' }]}>
-                    <Image source={{ uri: p.hafif.foto_uri }} style={StyleSheet.absoluteFill} contentFit="cover" transition={150} />
+                    <Foto source={{ uri: p.hafif.foto_uri }} style={StyleSheet.absoluteFill} contentFit="cover" transition={150} />
                     <GoogleFotoAtfi yazar={p.hafif.foto_yazar} uri={p.hafif.foto_yazar_uri} />
                   </View>
                 ) : (
@@ -380,7 +380,7 @@ function BuyukFoto({ ad, hazirUri, yukle, testID }: { ad: string; hazirUri: stri
   const uri = hazirUri ?? sorgu.data ?? null;
   return (
     <View style={[StyleSheet.absoluteFill, { backgroundColor: '#d9d9d6' }]} testID={testID} accessibilityState={{ busy: yukle && !uri }}>
-      {uri ? <Image source={{ uri }} style={StyleSheet.absoluteFill} contentFit="cover" transition={150} /> : null}
+      {uri ? <Foto source={{ uri }} style={StyleSheet.absoluteFill} contentFit="cover" transition={150} /> : null}
     </View>
   );
 }

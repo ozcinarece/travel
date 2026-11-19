@@ -2,7 +2,7 @@
 // (benim sağda Gece, diğerleri solda beyaz + avatar ve ad; saat, kendi mesajımda "okundu"), mekan kartı, oylama, fotoğraf ve plan /
 // harcama değişikliklerinin gri satırları (changes akışından; aynı kişinin 2 dk içindekiler tek satır, "Geri al"). Altta hızlı ekler
 // (Mekan · Oylama · Fotoğraf · Harcama) ve giriş + Mandalina gönder. Ekran açıkken okundu işaretlenir (rozet sıfırlanır).
-import { Image } from 'expo-image';
+import { Foto } from '@/components/ui/Foto';
 import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { ActivityIndicator, AppState, FlatList, KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
@@ -513,7 +513,7 @@ function FotoMesaji({ yol }: { yol: string }) {
   const adres = useSohbetFotoAdresi(yol);
   return (
     <View style={s.foto}>
-      {adres.data ? <Image source={{ uri: adres.data }} style={StyleSheet.absoluteFill} contentFit="cover" transition={150} accessibilityLabel={t('sohbet.ek.foto')} /> : <ActivityIndicator color={renk.ana} />}
+      {adres.data ? <Foto source={{ uri: adres.data }} style={StyleSheet.absoluteFill} contentFit="cover" transition={150} accessibilityLabel={t('sohbet.ek.foto')} /> : <ActivityIndicator color={renk.ana} />}
     </View>
   );
 }

@@ -1,4 +1,4 @@
-import { Image } from 'expo-image';
+import { Foto } from '@/components/ui/Foto';
 import { Link, usePathname } from 'expo-router';
 import { useState, type ReactNode } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
@@ -164,7 +164,7 @@ export function SayfaBasligi({ ust, baslik, kapak, rozet, durum, eylemler, sekme
   return (
     <View style={s.baslikKap}>
       <View style={s.baslikSatir}>
-        {kapak ? <Image source={{ uri: kapak }} style={s.kapak} contentFit="cover" accessibilityIgnoresInvertColors /> : null}
+        {kapak ? <Foto source={{ uri: kapak }} style={s.kapak} contentFit="cover" accessibilityIgnoresInvertColors /> : null}
         <View style={s.baslikMetin}>
           {ust ? <Text style={s.ust}>{ust.toLocaleUpperCase('tr-TR')}</Text> : null}
           <View style={s.baslikIc}>

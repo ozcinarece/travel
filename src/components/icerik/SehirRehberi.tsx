@@ -1,4 +1,4 @@
-import { Image } from 'expo-image';
+import { Foto } from '@/components/ui/Foto';
 import { router } from 'expo-router';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { ActivityIndicator, Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
@@ -135,7 +135,7 @@ export function SehirRehberi({ sehir, sehirlerYukleniyor, onGeri, seyahat, onReh
     const listede = !!listedeki(placeId);
     return (
       <Pressable accessibilityRole="button" onPress={() => setPanelId(placeId)} style={({ pressed }) => [s.kart, pressed && { opacity: 0.85 }]}>
-        <View style={s.kartFoto}>{foto ? <Image source={{ uri: foto }} style={StyleSheet.absoluteFill} contentFit="cover" transition={150} /> : null}</View>
+        <View style={s.kartFoto}>{foto ? <Foto source={{ uri: foto }} style={StyleSheet.absoluteFill} contentFit="cover" transition={150} /> : null}</View>
         <View style={{ flex: 1, minWidth: 0, gap: 2 }}>
           <Text style={s.kartAd} numberOfLines={1}>
             {y.ad}
@@ -170,7 +170,7 @@ export function SehirRehberi({ sehir, sehirlerYukleniyor, onGeri, seyahat, onReh
         onContentSizeChange={(_w, h) => setIcerikH(h)}
         contentContainerStyle={{ paddingBottom: Math.max(kenar.bottom, 16) + 24 }}>
         <View style={s.kapak}>
-          {sehir.kapak_url ? <Image source={{ uri: sehir.kapak_url }} style={StyleSheet.absoluteFill} contentFit="cover" transition={150} /> : null}
+          {sehir.kapak_url ? <Foto source={{ uri: sehir.kapak_url }} style={StyleSheet.absoluteFill} contentFit="cover" transition={150} /> : null}
           <View style={s.kapakGolge} />
           <View style={[s.kapakUst, { top: kenar.top + 12 }]}>
             {seyahat ? (

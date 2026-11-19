@@ -1,4 +1,4 @@
-import { Image } from 'expo-image';
+import { Foto } from '@/components/ui/Foto';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
@@ -187,7 +187,7 @@ function Listem({ seyahat, gunler, duraklar, mekanlar, konaklamalar }: { seyahat
     const icerik = (
       <View style={[s.satir, atanmamis && s.satirKutuda]}>
         <Pressable accessibilityRole="button" onPress={() => setPanelId(m.id)} style={s.satirIc}>
-          <View style={s.foto}>{foto ? <Image source={{ uri: foto }} style={StyleSheet.absoluteFill} contentFit="cover" transition={150} /> : <KategoriIkonu tip={m.primary_type} boyut={22} />}</View>
+          <View style={s.foto}>{foto ? <Foto source={{ uri: foto }} style={StyleSheet.absoluteFill} contentFit="cover" transition={150} /> : <KategoriIkonu tip={m.primary_type} boyut={22} />}</View>
           <View style={{ flex: 1, minWidth: 0 }}>
             <Text style={[s.ad, x.durak?.skipped && s.cizili]} numberOfLines={1}>
               {ad}

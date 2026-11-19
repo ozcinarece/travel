@@ -1,6 +1,6 @@
 // #97 A KK5–7 (kanvas Home13): gezilecek yer karosu — foto mozaiği (150/190 px dönüşümlü), ad + şehir + ★ puan · yorum,
 // sağ üstte EkleDugmesi (38 px; listede ise ✓, dokununca çıkarır). Foto yoksa kategori renginde düz zemin.
-import { Image } from 'expo-image';
+import { Foto } from '@/components/ui/Foto';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { EkleDugmesi } from '@/components/ui/EkleDugmesi';
@@ -29,7 +29,7 @@ export function YerKarosu({ ad, sehir, kategori, fotoUri, puan, yorum, yukseklik
   const y = yorumKisa(yorum);
   return (
     <Pressable accessibilityRole="button" accessibilityLabel={ad} onPress={onAc} style={({ pressed }) => [s.karo, { height: yukseklik, backgroundColor: kategoriPini(kategori).kategoriRenk }, pressed && { opacity: 0.9 }]}>
-      {fotoUri ? <Image source={{ uri: fotoUri }} style={StyleSheet.absoluteFill} contentFit="cover" transition={150} /> : null}
+      {fotoUri ? <Foto source={{ uri: fotoUri }} style={StyleSheet.absoluteFill} contentFit="cover" transition={150} /> : null}
       <View style={s.golgelik} />
       <View style={s.arti}>
         <EkleDugmesi listede={listede} mesgul={mesgul} pasif={listede && !onCikar} onPress={listede ? (onCikar ?? onEkle) : onEkle} />

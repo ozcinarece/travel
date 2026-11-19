@@ -1,4 +1,4 @@
-import { Image } from 'expo-image';
+import { Foto } from '@/components/ui/Foto';
 import { StyleSheet, View, type ViewStyle } from 'react-native';
 import Svg, { Defs, LinearGradient, Rect, Stop } from 'react-native-svg';
 
@@ -25,7 +25,7 @@ export function GorselYaDaGradyan({ uri, anahtar, style, children }: { uri: stri
   return (
     <View style={[s.kap, style]}>
       {uri ? (
-        <Image source={{ uri }} style={StyleSheet.absoluteFill} contentFit="cover" />
+        <Foto source={{ uri }} style={StyleSheet.absoluteFill} contentFit="cover" />
       ) : (
         <Svg style={StyleSheet.absoluteFill} width="100%" height="100%" preserveAspectRatio="none" viewBox="0 0 100 100" aria-hidden>
           <Defs>

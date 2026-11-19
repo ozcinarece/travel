@@ -2,7 +2,7 @@
 // renk noktası), seçili günün mini haritası (büyüt), gün özeti ("5 sa 40 dk · 3,4 km yürüyüş"), numaralı duraklar (foto 46,
 // ad, kategori · süre, EkleDugmesi) ve aralarında noktalı çizgiyle "N dk yürüyüş". #192: süreler ve çizgi gerçek yoldan
 // (gezi_rota_onbellek; gün başına bir kez hesaplanır, 30 gün saklanır); yol gelene kadar kestirim ve özet "~" ile.
-import { Image } from 'expo-image';
+import { Foto } from '@/components/ui/Foto';
 import { useMemo } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
@@ -81,7 +81,7 @@ export function GeziPlani({ gezi, canli, listede, mesgulId, onDurakEkle, eklePas
                 <View style={[s.numara, { backgroundColor: rengi }]}>
                   <Text style={[s.numaraMetin, { color: gunUstuMetin(rengi) }]}>{i + 1}</Text>
                 </View>
-                <View style={[s.foto, { backgroundColor: kategoriPini(d.kategori).kategoriRenk }]}>{c?.foto_uri ? <Image source={{ uri: c.foto_uri }} style={StyleSheet.absoluteFill} contentFit="cover" transition={120} /> : null}</View>
+                <View style={[s.foto, { backgroundColor: kategoriPini(d.kategori).kategoriRenk }]}>{c?.foto_uri ? <Foto source={{ uri: c.foto_uri }} style={StyleSheet.absoluteFill} contentFit="cover" transition={120} /> : null}</View>
                 <View style={{ flex: 1, minWidth: 0 }}>
                   <Text style={s.ad} numberOfLines={1}>
                     {d.ad}

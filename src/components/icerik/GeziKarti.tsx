@@ -1,6 +1,6 @@
 // #97 A KK4 → #138 (kanvas 3 · 3b): önerilen gezi kartları — Çizgi kenarlı beyaz kart; üstte foto (büyük 170 px · küçük 112 px),
 // sol üstte "N GÜNLÜK GEZİ" rozeti (büyükte Mandalina, küçükte Gece), büyükte sağ üstte kalp; altta başlık (Figtree 800) + "N mekan · şehir".
-import { Image } from 'expo-image';
+import { Foto } from '@/components/ui/Foto';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { Rozet } from '@/components/ui/Rozet';
@@ -21,7 +21,7 @@ export function GeziKarti({ gezi, buyuk, sira = 0, onPress, kalp, genislik }: Pr
   return (
     <Pressable accessibilityRole="button" accessibilityLabel={gezi.baslik} onPress={onPress} style={({ pressed }) => [s.kart, buyuk ? null : { width: genislik ?? 232 }, pressed && { opacity: 0.9 }]}>
       <View style={[buyuk ? s.fotoBuyuk : s.fotoKucuk, { backgroundColor: zemin }]}>
-        {gezi.kapak_url ? <Image source={{ uri: gezi.kapak_url }} style={StyleSheet.absoluteFill} contentFit="cover" transition={150} /> : null}
+        {gezi.kapak_url ? <Foto source={{ uri: gezi.kapak_url }} style={StyleSheet.absoluteFill} contentFit="cover" transition={150} /> : null}
         <Rozet metin={t('anasayfa.gunlukGezi', { n: gezi.gun_sayisi })} tur={buyuk ? 'vurgu' : 'gece'} stil={s.rozet} />
         {buyuk && kalp ? (
           <View style={s.kalp}>

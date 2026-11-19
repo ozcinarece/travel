@@ -1,4 +1,4 @@
-import { Image } from 'expo-image';
+import { GoogleFoto } from '@/components/ui/Foto';
 import { useState } from 'react';
 import { ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 
@@ -47,7 +47,7 @@ export function FotoSayfasi({ foto, hazirUri, yukle }: { foto: Foto; hazirUri: s
   const uri = hazirUri ?? sorgu.data ?? null;
   return (
     <View style={s.sayfa}>
-      {uri ? <Image source={{ uri }} style={StyleSheet.absoluteFill} contentFit="cover" transition={200} /> : null}
+      {uri ? <GoogleFoto source={{ uri }} style={StyleSheet.absoluteFill} contentFit="cover" transition={200} /> : null}
       {/* #359 KK2: yazarın Google sayfası varsa kutu bağlantı (#351 ile aynı davranış). */}
       <GoogleFotoAtfi yazar={foto.yazar} uri={foto.yazar_uri} />
     </View>

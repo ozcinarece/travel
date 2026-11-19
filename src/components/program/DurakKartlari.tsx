@@ -1,4 +1,4 @@
-import { Image } from 'expo-image';
+import { Foto } from '@/components/ui/Foto';
 import { useEffect, useMemo, useRef } from 'react';
 import { FlatList, PanResponder, Pressable, StyleSheet, Text, View, useWindowDimensions, type NativeScrollEvent, type NativeSyntheticEvent } from 'react-native';
 
@@ -287,7 +287,7 @@ function Kart({ kart, kartlar, genislik, gezi, tz, konum, gunRenk, aktif, fotoIs
           </View>
           {/* 12c-C: atlananda foto zemini Buz. */}
           <View style={[s.foto, { backgroundColor: hal === 'atlandi' ? renk.yuzey : kategoriRenk + '33' }]}>
-            {foto ? <Image source={{ uri: foto }} style={StyleSheet.absoluteFill} contentFit="cover" transition={200} /> : null}
+            {foto ? <Foto source={{ uri: foto }} style={StyleSheet.absoluteFill} contentFit="cover" transition={200} /> : null}
           </View>
         </View>
         <View style={s.dugmeler}>
