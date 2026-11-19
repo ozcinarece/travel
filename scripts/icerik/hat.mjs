@@ -1,11 +1,11 @@
-// İçerik hattı (docs/07): .github/workflows/icerik.yml'in çalıştırdığı işlemler — sehirler, osm, osm-esle (#205 KK3), arastir,
+// İçerik hattı (docs/07): .github/workflows/icerik.yml'in çalıştırdığı işlemler — sehirler, il (#401 il önerileri), osm, osm-esle (#205 KK3), arastir,
 // yukle, kontrol, sil, kesfet-olc (#190: Keşfet · Turistik isteğinin ölçümü, yalnız sayı). #197: `sehirler` kimliği (Google kimliği, saat dilimi,
 // ülke kodu) eksik şehirleri bir kez doldurur (KURU=false); yeni şehirli yükleme kendi şehrini doldurur.
 // Ortam: ISLEM, DOSYA, ISTEK, KURU, SUPABASE_ACCESS_TOKEN, SUPABASE_PROJECT_REF, YONETIM_URL, CIKTI (osm, arastir), GITHUB_RUN_ID;
 // yerel deneme için SUPABASE_API_URL ve SUPABASE_URL.
 // Loglar ve duyurular HERKESE AÇIK: yalnız sayı, slug, id ve sonuç yazılır. Google verisi (ad, puan, adres, saat, koordinat)
 // ve kullanıcı verisi yazılmaz. service_role anahtarı çalışma anında Yönetim API'sinden alınır, maskelenir, hiçbir yere
-// yazılmaz. Yazma yalnız icerik_gezi_taslak_yukle / icerik_gezi_taslak_sil (ve #197 icerik_sehir_kimligi_yaz) ile; KURU=true iken
+// yazılmaz. Yazma yalnız icerik_gezi_taslak_yukle / icerik_gezi_taslak_sil / icerik_il_taslak_yukle (ve #197 icerik_sehir_kimligi_yaz) ile; KURU=true iken
 // işlem hatayla geri alınır, `sehirler` Google'a gitmez.
 import { appendFile, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
@@ -28,7 +28,8 @@ import {
 } from './dogrula.mjs';
 import { osmAdaylariOku } from './aday.mjs';
 import { commonsBilgisi, kapakDenetimi, kapakIndir, kapakIstekleri, kapakVerisi } from './kapak.mjs';
-import { OsmOkumaHatasi, yuklemeKonumlari } from './konum.mjs';
+import { ilDenetle, ilOsmIdleri, ilYuklemeVerisi, kategoriDagilimi } from './il.mjs';
+import { OsmOkumaHatasi, osmKonumlariOku, yuklemeKonumlari } from './konum.mjs';
 import { OverpassHatasi, overpassYeniden, SureBittiHatasi } from './overpass.mjs';
 import { sehirKimligiCoz as sehirKimligiCozGoogle } from './sehir.mjs';
 import { derAl, sifrele } from './sifre.mjs';
@@ -720,7 +721,40 @@ async function kesfetOlc() {
   await ozet(['### Keşfet · Turistik ölçümü', '', baslik, '|---|---|---|---|---|---|', ...satirlar, '', `- istek ${toplam.istek} · Google ${toplam.google} · eşikte ibadet toplamı ${toplam.ibadetEsikte}`]);
 }
 
-const ISLEMLER = { sehirler, osm, 'osm-esle': osmEsle, arastir, yukle, kontrol: () => kontrol(), sil, 'kesfet-olc': kesfetOlc };
+// ---------------------------------------------------------------- #401 KK3: il önerileri
+
+/** `il`: icerik/iller/<il>.json doğrulanır, konumlar OSM'den okunur, liste BO'ya taslak yüklenir (Google isteği yok). */
+async function ilYukle() {
+  const dosya = (ortam.DOSYA ?? '').trim();
+  if (!/^icerik\/iller\/[a-z0-9-]{2,60}\.json$/.test(dosya)) throw new HatHatasi('dosya: icerik/iller/<il>.json olmalı');
+  const veri = JSON.parse(await readFile(dosya, 'utf8'));
+  const { hatalar, uyarilar } = ilDenetle(veri, { dosyaSlug: path.basename(dosya, '.json') });
+  if (hatalar.length) {
+    duyuru('error', `HATA (${hatalar.length}) · il ${veri?.slug ?? ''}`, hatalar);
+    throw new HatHatasi(`il dosyasında ${hatalar.length} hata; yüklenmedi`);
+  }
+  duyuru('warning', `UYARI (${uyarilar.length}) · il ${veri.slug}`, uyarilar);
+  let osmKonumlari;
+  try {
+    osmKonumlari = await osmKonumlariOku(ilOsmIdleri(veri));
+  } catch (e) {
+    if (e instanceof OsmOkumaHatasi) throw new HatHatasi(e.message);
+    throw e;
+  }
+  const yukleme = JSON.stringify(ilYuklemeVerisi(veri, osmKonumlari));
+  const etiket = dolarEtiketi(yukleme);
+  const r = await yazanCagri(`public.icerik_il_taslak_yukle(${etiket}${yukleme}${etiket}::jsonb)`, yukleme);
+  const satir = [
+    `${KURU ? 'KURU: denetimler geçti, hiçbir şey yazılmadı' : 'YÜKLENDİ (taslak)'} · il ${r.slug} · ${r.yer} yer · ${r.yeni ? 'yeni' : 'yeniden yazıldı'}`,
+    `kategori: ${kategoriDagilimi(veri)}`,
+    `konum: ${r.konum} yer OSM · ${r.yer - r.konum} yer konumsuz`,
+    ...(KURU ? [] : [`BO: ${YONETIM_URL}/yonetim/il-onerileri?il=${r.slug}`]),
+  ];
+  duyuru('notice', `${KURU ? 'Kuru il yüklemesi' : 'İl yüklemesi'} · ${r.slug}`, satir);
+  await ozet([`### ${KURU ? 'Kuru il yüklemesi' : 'İl yüklemesi'}`, ...satir.map((x) => `- ${x}`), ...uyarilar.map((u) => `- UYARI: ${u}`)]);
+}
+
+const ISLEMLER = { sehirler, osm, 'osm-esle': osmEsle, arastir, yukle, il: ilYukle, kontrol: () => kontrol(), sil, 'kesfet-olc': kesfetOlc };
 
 if (process.argv[1] && import.meta.url === new URL(`file://${path.resolve(process.argv[1])}`).href) {
   const is = ISLEMLER[ortam.ISLEM];

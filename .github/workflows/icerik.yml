@@ -8,12 +8,12 @@ on:
   workflow_dispatch:
     inputs:
       islem:
-        description: sehirler · osm · osm-esle (#205 KK3, mevcut satırlar OSM'e) · arastir · yukle · kontrol · sil · temizle · kesfet-olc (Keşfet ölçümü, yalnız sayı)
+        description: sehirler · il (il önerileri listesi, #401) · osm · osm-esle (#205 KK3, mevcut satırlar OSM'e) · arastir · yukle · kontrol · sil · temizle · kesfet-olc (Keşfet ölçümü, yalnız sayı)
         required: true
         type: choice
-        options: [sehirler, osm, osm-esle, arastir, yukle, kontrol, sil, temizle, kesfet-olc]
+        options: [sehirler, il, osm, osm-esle, arastir, yukle, kontrol, sil, temizle, kesfet-olc]
       dosya:
-        description: 'yukle: plan dosyası (icerik/geziler/<slug>.json; ref olarak içerik dalını seç)'
+        description: 'yukle: plan dosyası (icerik/geziler/<slug>.json) · il: icerik/iller/<il>.json; ref olarak içerik dalını seç'
         required: false
         type: string
       istek:
@@ -21,7 +21,7 @@ on:
         required: false
         type: string
       kuru:
-        description: 'yukle/sil/osm-esle: her şeyi dener, yazmaz · sehirler: kimliği eksik şehirleri yalnız listeler (doldurmak için false)'
+        description: 'yukle/il/sil/osm-esle: her şeyi dener, yazmaz · sehirler: kimliği eksik şehirleri yalnız listeler (doldurmak için false)'
         default: true
         type: boolean
 
