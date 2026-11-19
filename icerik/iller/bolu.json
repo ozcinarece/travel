@@ -1,0 +1,205 @@
+{
+  "il": "Bolu",
+  "slug": "bolu",
+  "guncelleme": "2026-11-19",
+  "oneriler": [
+    {
+      "sira": 1,
+      "ad": "Abant Gölü",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "neden": "Göl kıyısını saran 7 km'lik yol; güzün kızıl ormanı, kışın karlı kıyısıyla",
+      "osm": "node/3015469233",
+      "place_id": "ChIJs13emcRmnUARCbOVpuq01mk",
+      "merkeze_km": 31
+    },
+    {
+      "sira": 2,
+      "ad": "Yedigöller Milli Parkı",
+      "amaclar": [
+        "doga"
+      ],
+      "neden": "Orman içinde basamak basamak yedi göl; ekimde yapraklar sararınca en kalabalık hali",
+      "osm": null,
+      "place_id": "ChIJ8dcXWBo_nUARM6kPTfod8vY",
+      "merkeze_km": 26
+    },
+    {
+      "sira": 3,
+      "ad": "Gölcük Tabiat Parkı",
+      "amaclar": [
+        "doga",
+        "yavas",
+        "cocuklu"
+      ],
+      "neden": "Şehre en yakın göl: kıyıda kısa yürüyüş ve piknik, yarım günde gidilip dönülür",
+      "osm": null,
+      "place_id": "ChIJC6wS-1xGnUARarWWaEMm0qc",
+      "merkeze_km": 9
+    },
+    {
+      "sira": 4,
+      "ad": "Mudurnu Arasta Çarşısı",
+      "amaclar": [
+        "kultur_tarih",
+        "lezzet",
+        "yavas"
+      ],
+      "neden": "Ahilik geleneğini süren esnaf sokakları; ahşap konaklar ve dükkânda saray helvası",
+      "osm": null,
+      "place_id": "ChIJu93KcIE2zRQRqmV5wcXoXew",
+      "merkeze_km": 45
+    },
+    {
+      "sira": 5,
+      "ad": "Hanzade",
+      "amaclar": [
+        "lezzet"
+      ],
+      "neden": "Merkezde Bolu yemekleri: keşli erişte, Mengen pilavı gibi yöresel tabaklar",
+      "osm": "node/13992666501",
+      "place_id": "ChIJCbx05Gs_nUARym6xCpK_4PE",
+      "merkeze_km": 1
+    },
+    {
+      "sira": 6,
+      "ad": "Kartalkaya Kayak Merkezi",
+      "amaclar": [
+        "doga"
+      ],
+      "neden": "Köroğlu Dağları'nda kayak; kar yokken çam ormanında yürüyüş",
+      "osm": null,
+      "place_id": "ChIJy2Dio7BLnUAR0g_T6Z4fxpE",
+      "merkeze_km": 20
+    },
+    {
+      "sira": 7,
+      "ad": "Abant Çamlık Restoran",
+      "amaclar": [
+        "lezzet",
+        "doga"
+      ],
+      "neden": "Göl kıyısında çamların altında Abant kebabı: patlıcan, kuzu, mantar ve kaşar",
+      "osm": null,
+      "place_id": "ChIJzS3vOulmnUARZmV4XsIuUTc",
+      "merkeze_km": 31
+    },
+    {
+      "sira": 8,
+      "ad": "Yıldırım Bayezid Camii",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "neden": "Çarşının ortasındaki Büyük Cami; Bolu'nun eski merkezi bu avlunun çevresinde",
+      "osm": "way/233878434",
+      "place_id": "ChIJz89jUms_nUARVjBIoA8HBqs",
+      "merkeze_km": 0
+    },
+    {
+      "sira": 9,
+      "ad": "Taşhan",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "neden": "Çarşının içindeki taş han; avlusu ve dükkânlarıyla eski Bolu'nun çarşı hayatından bir iz",
+      "osm": "node/12462647331",
+      "place_id": "ChIJiWfjU2s_nUARzCbYyMEWiC4",
+      "merkeze_km": 0
+    },
+    {
+      "sira": 10,
+      "ad": "Çeşmi Cihan",
+      "amaclar": [
+        "lezzet"
+      ],
+      "neden": "Aşağısoku'da tencere yemekleri; kuru fasulye ve pilavıyla bilinen esnaf lokantası",
+      "osm": null,
+      "place_id": "ChIJE59lJj0_nUARqdBqkIj0Gt0",
+      "merkeze_km": 2
+    },
+    {
+      "sira": 11,
+      "ad": "Akkaya Travertenleri",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "neden": "Kireçli suyun yamaçta bıraktığı beyaz basamaklar; kısa yürüyüşle ulaşılır",
+      "osm": "node/6617659820",
+      "place_id": "ChIJ4T9mc3lBnUARSkHkrDDL4_w",
+      "merkeze_km": 10
+    },
+    {
+      "sira": 12,
+      "ad": "Bolu Müzesi",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "neden": "Bölgenin arkeolojisi ve etnografyası tek binada; yağmurlu günün durağı",
+      "osm": "way/598840585",
+      "place_id": "ChIJ640Ghg0_nUARWcDMenyhCAs",
+      "merkeze_km": 0
+    },
+    {
+      "sira": 13,
+      "ad": "Mudurnu Yıldırım Bayezid Camii",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "neden": "1382'de yapılan geniş kubbeli cami; yanındaki hamamla aynı dönemden",
+      "osm": null,
+      "place_id": "ChIJgzXY8YE2zRQRUmnLjxjtbS8",
+      "merkeze_km": 45
+    },
+    {
+      "sira": 14,
+      "ad": "Kubbealtı",
+      "amaclar": [
+        "lezzet"
+      ],
+      "neden": "Yoğurtlu gözlemesiyle bilinen merkezde bir durak; kahvaltı ya da hafif öğle için",
+      "osm": null,
+      "place_id": "ChIJ0zJeZGs_nUARe0X7Y58KTCI",
+      "merkeze_km": 0
+    },
+    {
+      "sira": 15,
+      "ad": "Bolçi",
+      "amaclar": [
+        "lezzet",
+        "cocuklu"
+      ],
+      "neden": "Bolu çikolatasının yerel markası; yol için kutu almak isteyenlere",
+      "osm": "node/5646579383",
+      "place_id": "ChIJGTqq_5Y_nUARpfilUWHRGZg",
+      "merkeze_km": 2
+    },
+    {
+      "sira": 16,
+      "ad": "Seben Kaya Mezarları",
+      "amaclar": [
+        "kultur_tarih",
+        "doga"
+      ],
+      "neden": "Seben'in kayalık yamaçlarına oyulmuş eski mezar odaları",
+      "osm": null,
+      "place_id": "ChIJ9S2LTHBVnUARg7TDIfhnmGY",
+      "merkeze_km": 36
+    },
+    {
+      "sira": 17,
+      "ad": "Mudurnu Saat Kulesi",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "neden": "Yangınlardan sonra yeniden yapılan ahşap kule; Mudurnu'ya tepeden bakış",
+      "osm": null,
+      "place_id": "ChIJFVCexoE2zRQRLEJnkQnhsgk",
+      "merkeze_km": 45
+    }
+  ]
+}
