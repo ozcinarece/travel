@@ -130,7 +130,7 @@ export function MekanPaneli(p: MekanPaneliProps) {
   const rehberMd = icerikYeri.data?.rehber_md?.trim() || null;
   const rehberKapak = kapakVeAtif([icerikYeri.data ?? {}]);
   /** Rehberli yer = `yerler`'de satırı olan yer (BO'da rehberi yazılan). */
-  const fotoHali = fotoAlaniHali({ rehberKapak: !!rehberKapak.uri, rehberli: !!icerikYeri.data, rehberBekliyor: icerikYeri.isPending, googleFotolar: yer?.fotolar.length ?? 0, hafifFoto: !!p.hafif?.foto_uri });
+  const fotoHali = fotoAlaniHali({ rehberKapak: !!rehberKapak.uri, rehberli: !!icerikYeri.data, rehberBekliyor: icerikYeri.isPending, rehberHata: icerikYeri.isError, googleFotolar: yer?.fotolar.length ?? 0, hafifFoto: !!p.hafif?.foto_uri });
   const sekme = panelSekmesi(durum, !!rehberMd);
   const hal = durum.hal === 'kapali' ? 'katli' : durum.hal;
   const googleUrl = yer?.google_maps_uri ?? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(ad || 'yer')}&query_place_id=${encodeURIComponent(p.placeId)}`;
@@ -183,7 +183,7 @@ export function MekanPaneli(p: MekanPaneliProps) {
                   </View>
                 ) : fotoYokGosterilir(fotoHali) ? (
                   // #348 inceleme 3: rehberli yerin kendi kapağı yoksa Google fotoğrafı kullanılmaz, doğrudan D.
-                  // #352 KK2: rehberli mi henüz bilinmiyorken (çevrimdışı dahil) de D; Google fotoğrafı yanıp sönmez, gelince yerine geçer.
+                  // #352 KK2: rehberli mi bilinmiyorken (sorgu bekliyor ya da hata verdi, çevrimdışı dahil) de D; Google fotoğrafı yanıp sönmez, gelince yerine geçer.
                   <FotoYok tip={tip} />
                 ) : fotoHali === 'kaydirma' && yer ? (
                   <FotoKaydirma yer={yer} genislik={alanW || ekran.width} onAc={() => galeriAc(true)} />
@@ -312,12 +312,13 @@ export type FotoAlaniHali = 'kapak' | 'yok' | 'bekliyor' | 'kaydirma' | 'hafif';
 /**
  * Mekan panelinin fotoğraf alanı (kanvas 29i · C/D). Rehberli yer (= `yerler`'de satırı var): kendi kapağı ya da D; Google
  * fotoğrafı kullanılmaz (#348 inceleme 3). Rehberli olmayan yer bugünkü gibi: Google fotoğrafları, yoksa hafif fotoğraf, yoksa D.
- * Rehberli mi henüz bilinmiyorsa yalnız zemin (Google fotoğrafı yanıp sönmesin).
+ * Rehberli mi bilinmiyorsa — sorgu bekliyor ya da hata verdi (çevrimdışında yeniden denemeler bitince hata olur; uygulamada
+ * `onlineManager` bağlı değil) — D hali (#352 KK2); Google fotoğrafı yanıp sönmez, rehber gelince yerine geçer.
  */
-export function fotoAlaniHali(x: { rehberKapak: boolean; rehberli: boolean; rehberBekliyor: boolean; googleFotolar: number; hafifFoto: boolean }): FotoAlaniHali {
+export function fotoAlaniHali(x: { rehberKapak: boolean; rehberli: boolean; rehberBekliyor: boolean; rehberHata?: boolean; googleFotolar: number; hafifFoto: boolean }): FotoAlaniHali {
   if (x.rehberKapak) return 'kapak';
   if (x.rehberli) return 'yok';
-  if (x.rehberBekliyor) return 'bekliyor';
+  if (x.rehberBekliyor || x.rehberHata) return 'bekliyor';
   if (x.googleFotolar > 0) return 'kaydirma';
   return x.hafifFoto ? 'hafif' : 'yok';
 }

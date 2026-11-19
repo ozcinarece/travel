@@ -63,8 +63,14 @@ describe('kategoriKoyuRengi (KK1)', () => {
 describe('bekleme ve çevrimdışı (KK2)', () => {
   const temel = { rehberKapak: false, rehberli: false, rehberBekliyor: false, googleFotolar: 0, hafifFoto: false };
 
-  it('rehberli mi bekleniyorken (çevrimdışında sorgu duraklar) D hali gösterilir', () => {
+  it('rehberli mi bekleniyorken D hali gösterilir', () => {
     const hali = fotoAlaniHali({ ...temel, rehberBekliyor: true, googleFotolar: 5, hafifFoto: true });
+    expect(hali).toBe('bekliyor');
+    expect(fotoYokGosterilir(hali)).toBe(true);
+  });
+
+  it('rehber sorgusu hata verince (çevrimdışında yeniden denemeler bitince) de D hali kalır', () => {
+    const hali = fotoAlaniHali({ ...temel, rehberHata: true, googleFotolar: 5, hafifFoto: true });
     expect(hali).toBe('bekliyor');
     expect(fotoYokGosterilir(hali)).toBe(true);
   });
