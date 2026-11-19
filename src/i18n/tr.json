@@ -280,7 +280,6 @@
     "eklendi": "{n} mekan {seyahat} listesine eklendi",
     "eklendiZaten": "{n} mekan eklendi · {zaten} zaten listedeydi",
     "hepsiListede": "Hepsi zaten {seyahat} listesinde",
-    "eklemeHata": "Eklenemedi: {sebep}",
     "diger": "Diğer"
   },
   "rehber": {
@@ -740,9 +739,8 @@
     "ekle": "Listeye ekle",
     "eklendi": "Listene eklendi · {seyahat}",
     "hangiSeyahat": "Hangi seyahate?",
-    "ekleHata": "Eklenemedi. Tekrar dene.",
-    "ekleHataSebep": "Eklenemedi: {sebep}",
-    "bulunamadi": "Google'da bulunamadı",
+    "ekleHata": "Eklenemedi. Tekrar dener misin?",
+    "bulunamadi": "Bu mekan şu an eklenemiyor.",
     "cozuluyor": "Mekan kimliği çözülüyor, bir saniye…",
     "bos": "İçerik hazırlanıyor",
     "kartAlt": "{tarih} · {gun} gün · {mekan} mekan",
@@ -773,7 +771,9 @@
       "temizle": "Aramayı temizle",
       "bosBaslik": "Henüz hazır gezi yok",
       "bosMetin": "Kendi seyahatini kurabilirsin.",
-      "yukleniyor": "Geziler yükleniyor"
+      "yukleniyor": "Geziler yükleniyor",
+      "artiSeyahat": "+ Seyahat",
+      "hazirGezilerEtiket": "Hazır geziler, {n}"
     }
   },
   "ara": {
@@ -805,12 +805,9 @@
     "alBaslik": "Seyahatime al",
     "yeniSeyahat": "Yeni seyahat",
     "listeye": "Listeye",
-    "alHata": "Aktarılamadı: {sebep}",
-    "cozumYok": "{n} mekan Google'da bulunamadı; onlar atlandı.",
+    "cozumYok": "{n} mekan şu an eklenemiyor; diğerleri eklendi.",
     "hicEklenmedi": "Hiçbir mekan eklenemedi — {sebep}",
-    "sebepBulunamadi": "Google'da bulunamadı ({ad})",
-    "sebepSunucu": "{sebep} ({ad})",
-    "hepsiZatenVar": "mekanların hepsi zaten listende",
+    "sebepBulunamadi": "{ad} şu an eklenemiyor",
     "kaydet": "Kaydet",
     "kaydedildi": "Kaydedildi",
     "paylas": "Paylaş",
@@ -846,7 +843,6 @@
     "bilgiYeniYok": "Eklenecek yeni durak yok.",
     "bilgiKalan": "Kalan **{n} yeni durak** eklenir, saatler yeniden hesaplanır.",
     "bilgiYeni": "**{n} yeni durak** mevcutların sonuna eklenir, saatler yeniden hesaplanır.",
-    "mekanEkleHata": "Eklenemedi: {sebep}",
     "planiAl": "Planı al",
     "yalnizMekanlar": "Yalnız mekanlar",
     "ve": " ve ",
@@ -1322,5 +1318,10 @@
     "pencereCommons": "Wikimedia Commons’tan, küçültülerek kullanıldı.",
     "kaynakAc": "Kaynak sayfasını aç",
     "kapat": "Kapat"
+  },
+  "ekleme": {
+    "baglantiYok": "Bağlantı yok. Hiçbir şey eklenmedi; bağlanınca tekrar dene.",
+    "tekrarDene": "Tekrar dene",
+    "hepsiListede": "Bu mekanların hepsi zaten listende."
   }
 }

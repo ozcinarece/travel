@@ -29,7 +29,10 @@ const mockDb = {
 const mockOlay = jest.fn();
 
 jest.mock('expo-router', () => ({ router: { replace: jest.fn(), push: jest.fn(), navigate: jest.fn() } }));
-jest.mock('@/lib/hataRaporu', () => ({ izBirak: () => undefined }));
+let mockCevrimdisi = false;
+jest.mock('@/lib/baglanti', () => ({ ...jest.requireActual<object>('@/lib/baglanti'), useCevrimdisi: () => mockCevrimdisi }));
+const mockHataBildir = jest.fn();
+jest.mock('@/lib/hataRaporu', () => ({ izBirak: () => undefined, hataBildir: (...a: unknown[]) => mockHataBildir(...a) }));
 jest.mock('@/lib/oturum', () => ({ useOturum: () => ({ session: { user: { id: 'ben', is_anonymous: false } }, hazir: true, hesapli: true }) }));
 jest.mock('@/features/icerik/geziRota', () => ({ GEZI_ROTA_TAZE_MS: 1000, geziRotaAnahtari: (g: { id: string }) => ['gezi-rota', g.id], gunRotasiniGetir: async () => [] }));
 jest.mock('@/features/icerik/sorgular', () => ({
@@ -176,6 +179,7 @@ async function sehirHazir() {
 }
 
 beforeEach(() => {
+  mockCevrimdisi = false;
   mockDb.sehir = KIMLIKLI_SEHIR;
   mockDb.invoke = [];
   mockGoogle.otomatikTamamla.mockClear();
@@ -262,11 +266,40 @@ describe('#193 Yeni seyahat akışın içinde (KK2–KK4)', () => {
     await sehirHazir();
     fireEvent.press(screen.getByText('Tarih sonra'));
     fireEvent.press(screen.getByText('Seyahati aç ve planı al'));
-    await waitFor(() => expect(screen.getByText(/Aktarılamadı/)).toBeTruthy());
+    // #388 KK2: ham sunucu metni kullanıcıya gösterilmez, yalnız Sentry'ye gider.
+    await waitFor(() => expect(screen.getByText('Eklenemedi. Tekrar dener misin?')).toBeTruthy());
+    expect(screen.queryByText(/durak yazılamadı/)).toBeNull();
+    expect(mockHataBildir).toHaveBeenCalledWith(expect.objectContaining({ message: 'durak yazılamadı' }), 'gezi-al-yeni');
+    expect(screen.queryByText('Tekrar dene')).toBeNull();
     expect(mockRouter.replace).not.toHaveBeenCalled();
     expect(onKapat).not.toHaveBeenCalled();
     expect(mockDb.yazilan).toEqual([]);
     expect(mockOlay).not.toHaveBeenCalled();
+  });
+
+  it('#388 KK5: çevrimdışıyken "Seyahati aç ve planı al" pasif', async () => {
+    mockCevrimdisi = true;
+    ac(null);
+    await sehirHazir();
+    fireEvent.press(screen.getByText('Tarih sonra'));
+    const dugme = screen.getByRole('button', { name: 'Seyahati aç ve planı al' });
+    expect(dugme.props.accessibilityState).toEqual(expect.objectContaining({ disabled: true }));
+    fireEvent.press(dugme);
+    expect(mockDb.rpc.filter((r) => r.ad === 'geziden_seyahat_ac')).toHaveLength(0);
+  });
+
+  it('#388 KK1: ağ hatasında "Bağlantı yok…" ve "Tekrar dene" son denemeyi yineler', async () => {
+    mockDb.rpcHata = { message: 'TypeError: Network request failed', code: '' };
+    ac(null);
+    await sehirHazir();
+    fireEvent.press(screen.getByText('Tarih sonra'));
+    fireEvent.press(screen.getByText('Seyahati aç ve planı al'));
+    await waitFor(() => expect(screen.getByText('Bağlantı yok. Hiçbir şey eklenmedi; bağlanınca tekrar dene.')).toBeTruthy());
+    expect(screen.queryByText(/Network request failed/)).toBeNull();
+    const once = mockDb.rpc.filter((r) => r.ad === 'geziden_seyahat_ac').length;
+    mockDb.rpcHata = null;
+    fireEvent.press(screen.getByText('Tekrar dene'));
+    await waitFor(() => expect(mockDb.rpc.filter((r) => r.ad === 'geziden_seyahat_ac').length).toBe(once + 1));
   });
 
   it('KK10: "Yalnız mekanlar" + yeni seyahat — boş günler, seçilen mekanlar atanmamış; Gezi sayfasına dönülür', async () => {

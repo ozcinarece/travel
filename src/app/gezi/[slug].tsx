@@ -12,10 +12,12 @@ import { MekanPaneli } from '@/components/mekan/MekanPaneli';
 import { SecimMenusu } from '@/components/program/SecimMenusu';
 import { BolumSiniri } from '@/components/ui/BolumSiniri';
 import { Buton } from '@/components/ui/Buton';
+import { EklemeDurumSatiri } from '@/components/ui/EklemeDurumSatiri';
 import { EkleDugmesi } from '@/components/ui/EkleDugmesi';
 import { Ikon } from '@/components/ui/Ikon';
 import { Logo } from '@/components/ui/Logo';
 import { SegmentSecici } from '@/components/ui/SegmentSecici';
+import { eklemeHatasi, type EklemeDurumu } from '@/features/ekleme/eklemeDurumu';
 import { kalinParcalar } from '@/features/icerik/aktar';
 import { icerikHafif, useIcerikCanli } from '@/features/icerik/fotolar';
 import { useIcerikMekanlari } from '@/features/icerik/mekanBilgileri';
@@ -29,6 +31,7 @@ import type { HafifYer } from '@/features/yerler/api';
 import { ATIF_BASLIK_BOSLUGU, GoogleFotoAtfi, KapakAtfi } from '@/components/icerik/KapakAtfi';
 import { ilkFoto, kapakVeAtif, kapakYuksekligi, type FotoAtfi } from '@/features/icerik/kapakAtfi';
 import { t } from '@/i18n';
+import { useCevrimdisi } from '@/lib/baglanti';
 import { davetLinki } from '@/lib/davetLinki';
 import { hataOzeti } from '@/lib/izler';
 import { kategoriEtiketi, sureMetni, varsayilanDakika } from '@/lib/kategori';
@@ -58,7 +61,9 @@ export default function GeziEkrani() {
   const [segmentY, setSegmentY] = useState(0);
   const [yapisik, setYapisik] = useState(false);
   const [alAcik, setAlAcik] = useState(false);
-  const [alHata, setAlHata] = useState<string | null>(null);
+  const [alHata, setAlHata] = useState<EklemeDurumu | null>(null);
+  // #388 KK5 (kanvas 23c): bağlantı yokken + düğmeleri pasif.
+  const cevrimdisi = useCevrimdisi();
 
   // KK3: hedef seyahat — kullanıcı seçtiyse o, değilse aynı şehirdeki en yakın tarihli seyahat.
   const seyahatler = useSeyahatler();
@@ -130,7 +135,7 @@ export default function GeziEkrani() {
       await ekle.mutateAsync({ seyahatId, yerId: null, place_id: y.place_id, primary_type: y.primary_type, lat: y.lat, lng: y.lng, dakika: y.dakika });
       setAlHata(null);
     } catch (e) {
-      setAlHata(t('gezi.mekanEkleHata', { sebep: e instanceof Error ? e.message : String(e) }));
+      setAlHata(eklemeHatasi(e, 'gezi-mekan-ekle', () => void hedefeEkle(y, seyahatId)));
     } finally {
       setMesgulId(null);
     }
@@ -155,7 +160,8 @@ export default function GeziEkrani() {
     if (!pid) {
       // #118: sebebi söyle — kimlik henüz çözülüyor / Google'da yok / sunucu hatası.
       const sebep = cozumSebebi(d.id);
-      setAlHata(canli.isPending ? t('anasayfa.cozuluyor') : t('anasayfa.ekleHataSebep', { sebep: sebep === 'bulunamadi' || !sebep ? t('anasayfa.bulunamadi') : sebep }));
+      // #388 KK2 · KK4: sunucunun ham sebebi gösterilmez; Google adı da geçmez.
+      setAlHata({ metin: canli.isPending ? t('anasayfa.cozuluyor') : sebep === 'bulunamadi' || !sebep ? t('anasayfa.bulunamadi') : t('anasayfa.ekleHata'), tur: 'hata' });
       return null;
     }
     return { anahtar: d.id, place_id: pid, primary_type: d.kategori, lat: d.lat, lng: d.lng, dakika: d.sure_dk };
@@ -295,6 +301,7 @@ export default function GeziEkrani() {
                 listede={durakListede}
                 mesgulId={mesgulId}
                 onDurakEkle={durakArti}
+                eklePasif={cevrimdisi}
                 onDurak={(d) => {
                   const pid = kimlik(d);
                   if (pid) paneliAc(pid, icerikHafif(pid, d), listedeki(pid)?.default_minutes ?? d.sure_dk);
@@ -323,7 +330,7 @@ export default function GeziEkrani() {
       {yapisik ? <View style={[s.yapisik, { paddingTop: kenar.top + 6 }]}>{segment}</View> : null}
 
       <View style={[s.altCubuk, { paddingBottom: Math.max(kenar.bottom, 12) + 8 }]}>
-        {alHata && !alAcik ? <Text style={s.hata}>{alHata}</Text> : null}
+        {alHata && !alAcik ? <EklemeDurumSatiri durum={alHata} metinStili={s.hata} /> : null}
         <View style={s.altSatir}>
           <View style={{ flex: 1, minWidth: 0 }}>
             <Text style={s.altBaslik} numberOfLines={1}>

@@ -305,7 +305,7 @@ export default function AnaSayfa() {
               </KurSatiri>
             ) : null}
             {arama.geziler.length > 0 ? (
-              <Text accessibilityRole="header" style={s.bolumBaslik}>
+              <Text accessibilityRole="header" accessibilityLabel={t('anasayfa.v5.hazirGezilerEtiket', { n: arama.geziler.length })} style={s.bolumBaslik}>
                 {t('anasayfa.v5.hazirGeziler', { n: arama.geziler.length })}
               </Text>
             ) : null}
@@ -320,7 +320,7 @@ export default function AnaSayfa() {
               <View style={s.sekmeler} accessibilityRole="tablist">
                 <Sekme baslik={t('anasayfa.v5.hepsi')} secili={!sekme} onPress={() => setSecilenSekme(null)} />
                 {sekmeler.map((a) => (
-                  <Sekme key={a} baslik={t(`anasayfa.v5.sekme.${a}`)} secili={sekme === a} onPress={() => setSecilenSekme(a)} />
+                  <Sekme key={a} baslik={t(`anasayfa.v5.sekme.${a}`)} etiket={t(`kesfetAkisi.amac.${a}`)} secili={sekme === a} onPress={() => setSecilenSekme(a)} />
                 ))}
               </View>
             ) : null}
@@ -343,7 +343,7 @@ export default function AnaSayfa() {
                   </Text>
                   <Text style={s.bosMetin}>{t('anasayfa.v5.bosMetin')}</Text>
                   <Pressable accessibilityRole="button" accessibilityLabel={t('anasayfa.v5.yeniSeyahatEtiket')} onPress={yeni} style={({ pressed }) => [s.bosDugme, pressed && s.basili]}>
-                    <Text style={s.seyahatMetin}>{`+ ${t('anasayfa.v5.seyahat')}`}</Text>
+                    <Text style={s.seyahatMetin}>{t('anasayfa.v5.artiSeyahat')}</Text>
                   </Pressable>
                 </View>
               </View>
@@ -382,9 +382,9 @@ function ProfilDugmesi({ ad, url }: { ad: string; url: string | null }) {
 }
 
 /** KK6: sekme — seçili 700 Lacivert ve 2 px alt çizgi; değilse 500 ikincil. */
-function Sekme({ baslik, secili, onPress }: { baslik: string; secili: boolean; onPress: () => void }) {
+function Sekme({ baslik, etiket, secili, onPress }: { baslik: string; /** Ekran okuyucu için uzun ad (#386 onay notu 1). */ etiket?: string; secili: boolean; onPress: () => void }) {
   return (
-    <Pressable accessibilityRole="tab" accessibilityState={{ selected: secili }} onPress={onPress} style={[s.sekme, secili && s.sekmeSecili]}>
+    <Pressable accessibilityRole="tab" accessibilityLabel={etiket ?? baslik} accessibilityState={{ selected: secili }} onPress={onPress} style={[s.sekme, secili && s.sekmeSecili]}>
       <Text style={[s.sekmeMetin, secili && s.sekmeMetinSecili]} numberOfLines={1}>
         {baslik}
       </Text>

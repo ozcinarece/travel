@@ -66,7 +66,8 @@ export default function ProfilEkrani() {
   const [sonHata, setSonHata] = useState<SonHata | null>(null);
   const [taniAcik, setTaniAcik] = useState(false);
   useEffect(() => {
-    sonHatayiOku().then(setSonHata);
+    // #388 KK6 (#385): "Son hata" yalnız geliştirmede; yayında Sentry var, kullanıcıya ham yığın gösterilmez.
+    if (__DEV__) sonHatayiOku().then(setSonHata);
   }, []);
   const p = profil.data;
   return (
@@ -119,7 +120,7 @@ export default function ProfilEkrani() {
             <Satir baslik={t('profil.cikis')} tehlike onPress={cikis} okYok />
           </View>
 
-          {sonHata ? (
+          {__DEV__ && sonHata ? (
             <View style={s.tani}>
               <Pressable accessibilityRole="button" onPress={() => setTaniAcik((a) => !a)} style={s.taniBaslikSatir}>
                 <Text style={s.taniBaslik}>{t('profil.sonHata', { zaman: new Date(sonHata.zaman).toLocaleString('tr-TR') })}</Text>

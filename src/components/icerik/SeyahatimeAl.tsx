@@ -10,8 +10,10 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { FotoKutusu } from '@/components/gezi/GeziParcalari';
 import { gunHucresi } from '@/components/program/GunKartlari';
 import { Buton } from '@/components/ui/Buton';
+import { EklemeDurumSatiri } from '@/components/ui/EklemeDurumSatiri';
 import { Ikon } from '@/components/ui/Ikon';
 import { CekilenSayfa, modalKokuStili, SayfaKaydirici } from '@/components/ui/sayfaCekme';
+import type { EklemeDurumu } from '@/features/ekleme/eklemeDurumu';
 import { useDuraklar, useGunler } from '@/features/gunler/sorgular';
 import {
   aktarmaBilgisi,
@@ -52,6 +54,7 @@ import { useMekanlar } from '@/features/mekanlar/sorgular';
 import { useIcerikSehirSecimi } from '@/features/sihirbaz/girisler';
 import { seyahatAdi } from '@/features/sihirbaz/sihirbaz';
 import { t } from '@/i18n';
+import { useCevrimdisi } from '@/lib/baglanti';
 import { iyelikEkli } from '@/lib/ek';
 import { kategoriEtiketi, sureMetni } from '@/lib/kategori';
 import { AYLAR, GUNLER_KISA, haftaGunu, kisaTarih, parcala, tarihAraligi, tarihEkle } from '@/lib/takvim';
@@ -85,7 +88,7 @@ type Props = {
   /** Mevcut seyahate; `ekGunler`: sona eklenecek sanal günler (KK5). */
   onAl: (seyahatId: string, plan: AktarmaPlani, secenek: AlSecenegi, ekGunler?: string[]) => Promise<void>;
   onYeni: (istek: YeniSeyahatIstegi) => Promise<void>;
-  hata: string | null;
+  hata: EklemeDurumu | null;
 };
 
 const YENI = 'yeni';
@@ -156,7 +159,9 @@ export function SeyahatimeAl({ gezi, seyahatler, ilkHedefId, kimlik, foto, onKap
 
 // ---------------------------------------------------------------- 19 · Planı al (mevcut seyahat)
 
-function HedefGunleri({ gezi, seyahatId, kimlik, onAl, hata }: { gezi: GeziDetay; seyahatId: string; kimlik: (d: GeziDuragi) => string | null; onAl: Props['onAl']; hata: string | null }) {
+function HedefGunleri({ gezi, seyahatId, kimlik, onAl, hata }: { gezi: GeziDetay; seyahatId: string; kimlik: (d: GeziDuragi) => string | null; onAl: Props['onAl']; hata: EklemeDurumu | null }) {
+  // #388 KK5 (kanvas 23c): bağlantı yokken ekleme düğmesi pasif.
+  const cevrimdisi = useCevrimdisi();
   const gunlerQ = useGunler(seyahatId);
   const duraklarQ = useDuraklar(seyahatId);
   const mekanlarQ = useMekanlar(seyahatId);
@@ -263,16 +268,18 @@ function HedefGunleri({ gezi, seyahatId, kimlik, onAl, hata }: { gezi: GeziDetay
           })
         )}
         {bilgi && !yukleniyor ? <BilgiKutusu metin={bilgi} /> : null}
-        {hata ? <Text style={s.hata}>{hata}</Text> : null}
+        {hata ? <EklemeDurumSatiri durum={hata} /> : null}
       </SayfaKaydirici>
-      <Buton baslik={dugme.metin} tur="vurgu" boy="buyuk" onPress={() => void al()} pasif={dugme.pasif || yukleniyor || mesgul} yukleniyor={mesgul} />
+      <Buton baslik={dugme.metin} tur="vurgu" boy="buyuk" onPress={() => void al()} pasif={dugme.pasif || yukleniyor || mesgul || cevrimdisi} yukleniyor={mesgul} />
     </>
   );
 }
 
 // ---------------------------------------------------------------- 19c · Yalnız mekanlar (mevcut seyahat)
 
-function HedefMekanlari({ gezi, seyahatId, kimlik, foto, onAl, hata }: { gezi: GeziDetay; seyahatId: string; kimlik: (d: GeziDuragi) => string | null; foto?: Props['foto']; onAl: Props['onAl']; hata: string | null }) {
+function HedefMekanlari({ gezi, seyahatId, kimlik, foto, onAl, hata }: { gezi: GeziDetay; seyahatId: string; kimlik: (d: GeziDuragi) => string | null; foto?: Props['foto']; onAl: Props['onAl']; hata: EklemeDurumu | null }) {
+  // #388 KK5 (kanvas 23c): bağlantı yokken ekleme düğmesi pasif.
+  const cevrimdisi = useCevrimdisi();
   const mekanlarQ = useMekanlar(seyahatId);
   const listede = useMemo(() => new Set((mekanlarQ.data ?? []).map((m) => m.place_id)), [mekanlarQ.data]);
   const gruplar = useMemo(() => mekanGruplari(gezi, kimlik, listede), [gezi, kimlik, listede]);
@@ -294,14 +301,14 @@ function HedefMekanlari({ gezi, seyahatId, kimlik, foto, onAl, hata }: { gezi: G
       <SayfaKaydirici style={s.kaydirma} contentContainerStyle={{ gap: 12 }}>
         {mekanlarQ.isPending ? <ActivityIndicator color={renk.ana} /> : <MekanListesi gruplar={gruplar} secili={secili} setSecili={setSecili} foto={foto} />}
         <Text style={s.not}>{t('gezi.mekanNotu')}</Text>
-        {hata ? <Text style={s.hata}>{hata}</Text> : null}
+        {hata ? <EklemeDurumSatiri durum={hata} /> : null}
       </SayfaKaydirici>
       <Buton
         baslik={hepsiListede ? t('gezi.hepsiListede') : n > 0 ? t('gezi.mekanlariEkle', { n }) : t('gezi.mekanSecin')}
         tur="vurgu"
         boy="buyuk"
         onPress={() => void al()}
-        pasif={n === 0 || mekanlarQ.isPending || mesgul}
+        pasif={n === 0 || mekanlarQ.isPending || mesgul || cevrimdisi}
         yukleniyor={mesgul}
       />
     </>
@@ -417,8 +424,10 @@ function YeniSeyahat({
   kimlik: (d: GeziDuragi) => string | null;
   foto?: Props['foto'];
   onYeni: Props['onYeni'];
-  hata: string | null;
+  hata: EklemeDurumu | null;
 }) {
+  // #388 KK5 (kanvas 23c): bağlantı yokken ekleme düğmesi pasif.
+  const cevrimdisi = useCevrimdisi();
   // Gezinin şehri, kilitli: Google kimliği ve saat dilimi sihirbazın "Bu şehre seyahat kur"uyla aynı yoldan (oturumda bir kez).
   const sehirler = useSehirler();
   const sehirKaydi = sehirler.data?.find((k) => k.id === gezi.sehir_id);
@@ -459,14 +468,14 @@ function YeniSeyahat({
             ) : null}
           </View>
         ) : null}
-        {hata ? <Text style={s.hata}>{hata}</Text> : null}
+        {hata ? <EklemeDurumSatiri durum={hata} /> : null}
       </SayfaKaydirici>
       <Buton
         baslik={sekme === 'plan' ? t('gezi.yeniAcPlan') : n > 0 ? t('gezi.yeniAcMekan', { n }) : t('gezi.mekanSecin')}
         tur="vurgu"
         boy="buyuk"
         onPress={() => void ac()}
-        pasif={!sehir.data || !tarihHazir || (sekme === 'mekan' && n === 0) || mesgul}
+        pasif={!sehir.data || !tarihHazir || (sekme === 'mekan' && n === 0) || mesgul || cevrimdisi}
         yukleniyor={mesgul}
       />
       <Text style={s.dipnot}>{sekme === 'plan' ? t('gezi.yeniDipnotPlan') : t('gezi.yeniDipnotMekan')}</Text>
