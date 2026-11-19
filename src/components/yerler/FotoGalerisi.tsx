@@ -7,7 +7,7 @@ import { usePlaceFoto } from '@/features/yerler/api';
 import { t } from '@/i18n';
 import { renk, yazi } from '@/theme';
 
-type Foto = { ad: string; yazar: string | null };
+type Foto = { ad: string; yazar: string | null; yazar_uri?: string | null };
 
 type Props = { fotolar: Foto[]; ilkUri: string | null; yukseklik: number };
 
@@ -42,13 +42,14 @@ export function FotoGalerisi({ fotolar, ilkUri, yukseklik }: Props) {
   );
 }
 
-function FotoSayfasi({ foto, hazirUri, yukle }: { foto: Foto; hazirUri: string | null; yukle: boolean }) {
+export function FotoSayfasi({ foto, hazirUri, yukle }: { foto: Foto; hazirUri: string | null; yukle: boolean }) {
   const sorgu = usePlaceFoto(yukle && !hazirUri ? foto.ad : undefined);
   const uri = hazirUri ?? sorgu.data ?? null;
   return (
     <View style={s.sayfa}>
       {uri ? <Image source={{ uri }} style={StyleSheet.absoluteFill} contentFit="cover" transition={200} /> : null}
-      <GoogleFotoAtfi yazar={foto.yazar} />
+      {/* #359 KK2: yazarın Google sayfası varsa kutu bağlantı (#351 ile aynı davranış). */}
+      <GoogleFotoAtfi yazar={foto.yazar} uri={foto.yazar_uri} />
     </View>
   );
 }
