@@ -165,19 +165,6 @@
     },
     {
       "sira": 13,
-      "ad": "Uludağ Kebapçısı",
-      "kategori": "yemek",
-      "amaclar": [
-        "lezzet"
-      ],
-      "ilce": "Altındağ",
-      "merkeze_km": 2,
-      "neden": "Ulus'ta Bursa usulü İskender; kızgın tereyağı masada dökülür",
-      "osm": "node/824237315",
-      "place_id": "ChIJ6b7DzF5O0xQRie5kQUghkqs"
-    },
-    {
-      "sira": 14,
       "ad": "Eymir Gölü",
       "kategori": "doga",
       "amaclar": [
@@ -190,7 +177,7 @@
       "place_id": "ChIJCcJAWQtE0xQRUm_kGruWJEE"
     },
     {
-      "sira": 15,
+      "sira": 14,
       "ad": "Cumhuriyet Müzesi",
       "kategori": "muze",
       "amaclar": [
@@ -203,7 +190,7 @@
       "place_id": "ChIJufZUxYpO0xQRon6J4Qkk13M"
     },
     {
-      "sira": 16,
+      "sira": 15,
       "ad": "Yıldız Aspava",
       "kategori": "yemek",
       "amaclar": [
@@ -217,7 +204,7 @@
       "place_id": "ChIJR4TKTKVP0xQRfDnHQo5O_Mo"
     },
     {
-      "sira": 17,
+      "sira": 16,
       "ad": "Akkale",
       "kategori": "manzara",
       "amaclar": [
@@ -231,7 +218,7 @@
       "place_id": "ChIJAd5RLQBP0xQR9sT3VKc8cNs"
     },
     {
-      "sira": 18,
+      "sira": 17,
       "ad": "Rahmi M. Koç Müzesi",
       "kategori": "muze",
       "amaclar": [
@@ -245,7 +232,7 @@
       "place_id": "ChIJ9b_Z9mdO0xQRNU5BMBpIICo"
     },
     {
-      "sira": 19,
+      "sira": 18,
       "ad": "Soğuksu Milli Parkı",
       "kategori": "doga",
       "amaclar": [
@@ -257,7 +244,7 @@
       "place_id": "ChIJbY82oVL0gkARTQ6Y4VVuD7w"
     },
     {
-      "sira": 20,
+      "sira": 19,
       "ad": "Roma Hamamı",
       "kategori": "tarih",
       "amaclar": [
@@ -270,7 +257,7 @@
       "place_id": "ChIJcY5gZmJO0xQRs7tMopOZzQo"
     },
     {
-      "sira": 21,
+      "sira": 20,
       "ad": "Gençlik Parkı",
       "kategori": "aktivite",
       "amaclar": [
@@ -284,7 +271,7 @@
       "place_id": "ChIJLbRQIfRO0xQRIZZ2_dlkOqk"
     },
     {
-      "sira": 22,
+      "sira": 21,
       "ad": "Samanpazarı",
       "kategori": "carsi",
       "amaclar": [
@@ -297,7 +284,7 @@
       "place_id": "ChIJ__8Y9ltO0xQRzZkiADTFEi4"
     },
     {
-      "sira": 23,
+      "sira": 22,
       "ad": "Hatun Pastanesi",
       "kategori": "tatli_kahve",
       "amaclar": [
@@ -309,7 +296,7 @@
       "place_id": "ChIJC_dNIMlN0xQRF_ou9KP_1Zg"
     },
     {
-      "sira": 24,
+      "sira": 23,
       "ad": "CerModern",
       "kategori": "muze",
       "amaclar": [
@@ -322,7 +309,7 @@
       "place_id": "ChIJtXHx6_lO0xQRrPnb4V4RjX8"
     },
     {
-      "sira": 25,
+      "sira": 24,
       "ad": "Kuğulu Park",
       "kategori": "aktivite",
       "amaclar": [
@@ -336,7 +323,7 @@
       "place_id": "ChIJT7AhDqJP0xQRfUIL_yqAcTM"
     },
     {
-      "sira": 26,
+      "sira": 25,
       "ad": "Atakule",
       "kategori": "manzara",
       "amaclar": [
@@ -349,7 +336,7 @@
       "place_id": "ChIJizavZldP0xQR0AKPUsRGmts"
     },
     {
-      "sira": 27,
+      "sira": 26,
       "ad": "Nallıhan Kuş Cenneti",
       "kategori": "doga",
       "amaclar": [
@@ -361,9 +348,9 @@
       "place_id": "ChIJZQjlKEJgzRQRWH4Ylj3M0p0"
     },
     {
-      "sira": 28,
+      "sira": 27,
       "ad": "Tarihi Doğuş Simit Fırını",
-      "kategori": "tatli_kahve",
+      "kategori": "yemek",
       "amaclar": [
         "lezzet"
       ],
@@ -373,7 +360,7 @@
       "place_id": "ChIJk5I4smlO0xQRnO7uYgWWOpA"
     },
     {
-      "sira": 29,
+      "sira": 28,
       "ad": "Gordion Müzesi",
       "kategori": "muze",
       "amaclar": [
@@ -386,7 +373,7 @@
       "place_id": "ChIJmacrfR9e0hQRUykaKIppFcE"
     },
     {
-      "sira": 30,
+      "sira": 29,
       "ad": "Tunalı Hilmi Caddesi",
       "kategori": "carsi",
       "amaclar": [
@@ -399,7 +386,7 @@
       "place_id": "ChIJxR3TUaRP0xQRp0ao0yKHSKQ"
     },
     {
-      "sira": 31,
+      "sira": 30,
       "ad": "Café des Cafés",
       "kategori": "tatli_kahve",
       "amaclar": [
@@ -412,7 +399,7 @@
       "place_id": "ChIJE0LYoaVP0xQR1oH0vjMWsX4"
     },
     {
-      "sira": 32,
+      "sira": 31,
       "ad": "Mogan Gölü",
       "kategori": "doga",
       "amaclar": [
@@ -426,7 +413,7 @@
       "place_id": "ChIJ4T-9OXhB0xQR9ha4DWu9NuU"
     },
     {
-      "sira": 33,
+      "sira": 32,
       "ad": "İnözü Vadisi",
       "kategori": "doga",
       "amaclar": [
@@ -440,7 +427,7 @@
       "place_id": "ChIJe2-qgU-30hQRF7zrvyvN378"
     },
     {
-      "sira": 34,
+      "sira": 33,
       "ad": "Erimtan Arkeoloji ve Sanat Müzesi",
       "kategori": "muze",
       "amaclar": [
@@ -453,7 +440,7 @@
       "place_id": "ChIJVWVakmdO0xQRnEaxWENl_IU"
     },
     {
-      "sira": 35,
+      "sira": 34,
       "ad": "Kocatepe Camii",
       "kategori": "tarih",
       "amaclar": [
@@ -466,7 +453,7 @@
       "place_id": "ChIJSUtsaKxP0xQRdMQOgnjnRfA"
     },
     {
-      "sira": 36,
+      "sira": 35,
       "ad": "Atatürk Orman Çiftliği",
       "kategori": "aktivite",
       "amaclar": [
@@ -479,7 +466,7 @@
       "place_id": "ChIJM5yfjK9J0xQRV_cV3gyyOqg"
     },
     {
-      "sira": 37,
+      "sira": 36,
       "ad": "Sakarya Caddesi",
       "kategori": "carsi",
       "amaclar": [
@@ -492,7 +479,7 @@
       "place_id": "ChIJ69jm8FRO0xQRAGFxboi5mdk"
     },
     {
-      "sira": 38,
+      "sira": 37,
       "ad": "MTA Şehit Cuma Dağ Tabiat Tarihi Müzesi",
       "kategori": "muze",
       "amaclar": [
@@ -505,7 +492,7 @@
       "place_id": "ChIJe24LnwJG0xQR2kHecO69jt0"
     },
     {
-      "sira": 39,
+      "sira": 38,
       "ad": "Kalecik Kalesi",
       "kategori": "tarih",
       "amaclar": [
@@ -518,7 +505,7 @@
       "place_id": "ChIJi1ctwZLzgUAR8n7rcpwYruw"
     },
     {
-      "sira": 40,
+      "sira": 39,
       "ad": "Haymana Kaplıcaları",
       "kategori": "aktivite",
       "amaclar": [
@@ -530,7 +517,7 @@
       "place_id": "ChIJHdEfJwCv0xQRBYIS-nPBHsk"
     },
     {
-      "sira": 41,
+      "sira": 40,
       "ad": "Nallıhan renkli tepeleri",
       "kategori": "manzara",
       "amaclar": [
@@ -541,7 +528,7 @@
       "neden": "Kuş Cenneti çevresinde sarı, kahverengi ve kızıl katmanlı jips ve kil tepeler"
     },
     {
-      "sira": 42,
+      "sira": 41,
       "ad": "Çubuk turşusu",
       "kategori": "yemek",
       "amaclar": [
@@ -552,7 +539,7 @@
       "neden": "Çubuk'un coğrafi işaretli turşusu; kornişon ve biber, ilçedeki tezgâhlarda"
     },
     {
-      "sira": 43,
+      "sira": 42,
       "ad": "Pembe Köşk",
       "kategori": "muze",
       "amaclar": [
@@ -565,7 +552,7 @@
       "place_id": "ChIJIX6CpJtP0xQRQzUlYIpcqq0"
     },
     {
-      "sira": 44,
+      "sira": 43,
       "ad": "Resim ve Heykel Müzesi",
       "kategori": "muze",
       "amaclar": [
@@ -578,7 +565,7 @@
       "place_id": "ChIJBSGy-lhO0xQRE8eE3AaXKjw"
     },
     {
-      "sira": 45,
+      "sira": 44,
       "ad": "Çubuk Karagöl",
       "kategori": "doga",
       "amaclar": [
@@ -589,6 +576,19 @@
       "merkeze_km": 53,
       "neden": "Çubuk'un kuzeyinde çam ormanıyla çevrili küçük göl; piknik ve kısa yürüyüş",
       "place_id": "ChIJr5lIudFEgkAR7ebhNzRcvlk"
+    },
+    {
+      "sira": 45,
+      "ad": "Gül Kahve",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet",
+        "yavas"
+      ],
+      "ilce": "Altındağ",
+      "merkeze_km": 3,
+      "neden": "Ulus'ta Cumhuriyet'ten bir yıl önce açılan kahveci; Türk kahvesi dükkânda kavrulur",
+      "place_id": "ChIJh2gGbGFO0xQR_vDTR6ZRLBA"
     }
   ]
 }
