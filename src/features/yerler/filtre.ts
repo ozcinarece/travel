@@ -65,6 +65,25 @@ export function turistikTur(primaryType: string | null | undefined): boolean {
   return TURISTIK.some((k) => kategoriyeUyar(k, primaryType));
 }
 
+/** #400 KK1: "Görmen gerekenler"in doğa tipleri (sunucunun `gormen` isteğiyle aynı). `park` yalnız çok yorumluysa. */
+const GORMEN_DOGA = ['national_park', 'state_park', 'hiking_area'];
+export const GORMEN_PARK_EN_AZ_YORUM = 200;
+
+/**
+ * #400 KK1: sihirbazın "Görmen gerekenler" izin listesi = Turistik + doğa. Keşfet'in Turistik grubu (`turistikTur`) değişmez;
+ * orada park kendi çipinde.
+ */
+export function gormenTur(y: { primary_type: string | null | undefined; puan_sayisi?: number | null }): boolean {
+  if (turistikTur(y.primary_type)) return true;
+  if (GORMEN_DOGA.includes(y.primary_type ?? '')) return true;
+  return y.primary_type === 'park' && (y.puan_sayisi ?? 0) >= GORMEN_PARK_EN_AZ_YORUM;
+}
+
+/** #400 KK3: müze ve galeri (Turistik'in müze kategorisi). */
+export function muzeMi(primaryType: string | null | undefined): boolean {
+  return kategoriyeUyar('muze', primaryType);
+}
+
 /** Turistik grubunun tamamı seçili mi. */
 export function turistikSecili(f: Filtre): boolean {
   return TURISTIK.every((k) => f.kategoriler.includes(k));

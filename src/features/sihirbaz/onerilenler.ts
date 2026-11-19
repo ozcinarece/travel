@@ -3,7 +3,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { useMemo } from 'react';
 
-import { oneCikanlar, turistikTur } from '@/features/yerler/filtre';
+import { gormenTur, muzeMi, oneCikanlar } from '@/features/yerler/filtre';
 import { birKezDene, hafifOnbellek, oneriSirala, yakinYerler, type HafifYer, type OneriCipi } from '@/features/yerler/api';
 import { varsayilanDakika } from '@/lib/kategori';
 import { konaklamaMi } from '@/lib/pinIkonu';
@@ -65,6 +65,25 @@ export function googleMekani(y: HafifYer, oneCikan: boolean): OnerilenMekan {
   };
 }
 
+/** #400 KK3: "Görmen gerekenler"de müze ve galerinin en büyük payı. */
+export const MUZE_EN_COK_PAY = 0.3;
+
+/**
+ * #400 KK3: sıralamadan sonra müze ve galeri listenin en çok %30'u. Sıra korunur; sınırı aşan (sıradaki) Google müzeleri
+ * çıkar, yerlerini sıradaki doğa ve tarihî yerler alır. Rehber yerleri (içerik ekibinin seçimi) çıkarılmaz ama sayılır.
+ */
+export function muzeSiniri(liste: OnerilenMekan[]): OnerilenMekan[] {
+  const muzesiz = liste.filter((m) => !muzeMi(m.primary_type)).length;
+  // m / (muzesiz + m) ≤ pay  ⇔  m ≤ pay · muzesiz / (1 − pay)
+  const enCok = Math.floor((MUZE_EN_COK_PAY * muzesiz) / (1 - MUZE_EN_COK_PAY) + 1e-9);
+  let muze = 0;
+  return liste.filter((m) => {
+    if (!muzeMi(m.primary_type)) return true;
+    muze += 1;
+    return m.neden === 'rehber' || muze <= enCok;
+  });
+}
+
 /** #121 KK1: "Görmen gerekenler" en az bu kadar kart hedefler; öne çıkanlar yetmezse turistik liste puan sırasıyla doldurur. */
 export const GORMEN_EN_AZ = 10;
 
@@ -87,12 +106,13 @@ export function cipListesi(cip: OnerilenCipi, rehber: OnerilenMekan[], hepsi: Ha
       sonuc.push(m);
     };
     rehber.forEach(ekle);
-    const turistikHepsi = hepsi.filter((y) => turistikTur(y.primary_type));
+    // #400 KK1: Turistik + doğa (milli park, tabiat parkı, yürüyüş alanı; park ≥ 200 yorum).
+    const turistikHepsi = hepsi.filter(gormenTur);
     oneriSirala(turistikHepsi.filter((y) => oneCikan.has(y.place_id))).forEach((y) => ekle(googleMekani(y, true)));
-    // Turistik türler (tourist_attraction, museum, landmark…) puan sırasıyla; hâlâ azsa `hepsi`nin turistik kalanı.
-    oneriSirala(turistik.filter((y) => turistikTur(y.primary_type))).forEach((y) => ekle(googleMekani(y, oneCikan.has(y.place_id))));
+    // Turistik ve doğa türleri puan sırasıyla; hâlâ azsa `hepsi`nin kalanı.
+    oneriSirala(turistik.filter(gormenTur)).forEach((y) => ekle(googleMekani(y, oneCikan.has(y.place_id))));
     if (sonuc.length < GORMEN_EN_AZ) oneriSirala(turistikHepsi).forEach((y) => sonuc.length < GORMEN_EN_AZ && ekle(googleMekani(y, oneCikan.has(y.place_id))));
-    return sonuc;
+    return muzeSiniri(sonuc);
   }
   return oneriSirala(kategori ?? []).map((y) => googleMekani(y, oneCikan.has(y.place_id))).filter((m) => !gizli(m.place_id));
 }
@@ -101,7 +121,8 @@ export function cipListesi(cip: OnerilenCipi, rehber: OnerilenMekan[], hepsi: Ha
 export const nearbySayaci = { istek: 0 };
 
 const GOOGLE_CIP: Record<Exclude<OnerilenCipi, 'gormen' | 'rehber'>, OneriCipi> = { yemek: 'yemek', kafe: 'kafe', manzara: 'manzara' };
-const YARICAP_M = 6000;
+// #400 KK2: 6 km → 15 km (places-nearby'nin üst sınırı); merkez yine seyahatin konumu.
+const YARICAP_M = 15_000;
 const GUN_MS = 24 * 60 * 60 * 1000;
 
 /** Şehir merkezi etrafında bir çipin Google listesi (fotoğraflı); 24 sa önbellek. */
@@ -146,7 +167,8 @@ export function useOnerilenler(seyahat: { id: string; lat: number | null; lng: n
   const hepsi = useGoogleListesi(seyahat.id, 'hepsi', merkez, cip !== 'rehber');
   // #121 KK1 / #164: turistik türler — Keşfet'in Turistik kümesiyle tek Nearby isteği (tarihi yer, müze, manzara, ibadet);
   // toplam 2, 24 sa önbellek.
-  const turistikSorgu = useGoogleListesi(seyahat.id, 'turistik', merkez, cip === 'gormen');
+  // #400 KK1: Turistik + doğa tek istekte (`gormen`); istek sayısı aynı.
+  const turistikSorgu = useGoogleListesi(seyahat.id, 'gormen', merkez, cip === 'gormen');
   const googleCip = cip === 'gormen' || cip === 'rehber' ? null : GOOGLE_CIP[cip];
   const kategori = useGoogleListesi(seyahat.id, googleCip ?? 'hepsi', merkez, !!googleCip);
   const turistik = useMemo(() => turistikSorgu.data ?? [], [turistikSorgu.data]);

@@ -58,6 +58,7 @@ const ETIKET: Record<string, string> = {
   observation_deck: 'Manzara',
   botanical_garden: 'Botanik bahçesi',
   national_park: 'Milli park',
+  state_park: 'Tabiat parkı',
   city_park: 'Park',
   hiking_area: 'Yürüyüş alanı',
   beach: 'Plaj',
