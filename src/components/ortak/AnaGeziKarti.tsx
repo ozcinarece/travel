@@ -2,7 +2,7 @@
 // (230 px, köşe 16), sağ üstte ♥ (Kaydet); altında başlık, `ozet`, "N gün · N durak · Tripmate rehberi". Kartta düğme yok,
 // dokununca gezi sayfası. Kapak yoksa amacın renkli zemini (gri kutu yok).
 // KK10: 26 Kasım'da aynı kart kullanıcı gezisiyle "Selin'in gezisi" satırıyla gelecek — `kaynak` satırı bunun için dışarıdan.
-import { Image } from 'expo-image';
+import { Foto } from '@/components/ui/Foto';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 
@@ -35,7 +35,7 @@ export function AnaGeziKarti({ gezi, ton, onAc, altSatir, onKalp }: Props) {
       <Pressable accessibilityRole="button" accessibilityLabel={[gezi.baslik, gezi.ozet, alt].filter(Boolean).join(', ')} onPress={onAc} style={({ pressed }) => [s.govde, pressed && s.basili]}>
         <View style={s.kapak}>
           {gezi.kapak_url ? (
-            <Image source={{ uri: gezi.kapak_url }} style={StyleSheet.absoluteFill} contentFit="cover" transition={150} accessible={false} />
+            <Foto source={{ uri: gezi.kapak_url }} style={StyleSheet.absoluteFill} contentFit="cover" transition={150} accessible={false} />
           ) : (
             <AmacKapagi ton={ton} yukseklik={KAPAK_YUKSEKLIK} />
           )}

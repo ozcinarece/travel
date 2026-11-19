@@ -1,7 +1,7 @@
 // #182 KK1–KK6 (kanvas 24): Plan sekmesi "liste önce" — üstte "‹ {seyahat}" + kişiler, "Plan" + Sırayı düzenle, gün çipleri
 // (+ gün ekle), 112 px harita şeridi, seçili günün başlığı (çıkış saati), duraklar ve aralarında bacak satırları (yürüme / araç
 // ikonu + süre), gün sonunda boşluk varsa sessiz "Akşam boş" önerisi. Durağa dokununca mekan paneli (mevcut).
-import { Image } from 'expo-image';
+import { Foto } from '@/components/ui/Foto';
 import type { ReactNode } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -160,7 +160,7 @@ export function PlanListesi(p: Props) {
                   </Text>
                 ) : null}
               </View>
-              <View style={[s.foto, { backgroundColor: r.fotoZemin }]}>{r.foto ? <Image source={{ uri: r.foto }} style={StyleSheet.absoluteFill} contentFit="cover" transition={150} /> : null}</View>
+              <View style={[s.foto, { backgroundColor: r.fotoZemin }]}>{r.foto ? <Foto source={{ uri: r.foto }} style={StyleSheet.absoluteFill} contentFit="cover" transition={150} /> : null}</View>
             </Pressable>
           </View>
         ))}

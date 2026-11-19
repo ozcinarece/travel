@@ -1,4 +1,4 @@
-import { Image } from 'expo-image';
+import { Foto } from '@/components/ui/Foto';
 import { useRef, useState } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
@@ -64,7 +64,7 @@ export function IcerikFotolari({ fotolar, kapakUrl, kapakAtif, onKapakKaldir, ya
         // #345 KK3: içerik hattının Commons kapağı fotoğraf listesinde yok; kapak hangi kaynaktan gelirse gelsin burada.
         <View style={[s.satir, s.satirKapak]} testID="kapak-ozeti">
           <View style={s.kucuk}>
-            <Image source={{ uri: kapakUrl }} style={StyleSheet.absoluteFill} contentFit="cover" accessibilityLabel={ty('kapakAtfi.baslik')} />
+            <Foto source={{ uri: kapakUrl }} style={StyleSheet.absoluteFill} contentFit="cover" accessibilityLabel={ty('kapakAtfi.baslik')} />
             <View style={s.rozet}>
               <Text style={s.rozetMetin}>{ty('gezi.kapak')}</Text>
             </View>
@@ -144,7 +144,7 @@ function FotoSatiri({
         <Path d={TUTAMAC} />
       </Svg>
       <View style={s.kucuk}>
-        <Image
+        <Foto
           source={{ uri: icerikFotoUrl(foto.yol) }}
           style={StyleSheet.absoluteFill}
           contentFit="cover"

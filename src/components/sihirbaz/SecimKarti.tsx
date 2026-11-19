@@ -1,6 +1,6 @@
 // #139 KK4 (kanvas 7): kompakt mekan kartı — foto 56, ad, "Kategori · süre · ★ puan", EkleDugmesi. Odaktaki kart Mandalina kenar
 // + açık turuncu zemin (haritada Mandalina pin). Karta dokunma: odak + mekan paneli (#121).
-import { Image } from 'expo-image';
+import { Foto } from '@/components/ui/Foto';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { EkleDugmesi } from '@/components/ui/EkleDugmesi';
@@ -17,7 +17,7 @@ export function SecimKarti({ mekan, listede, mesgul, odak, onEkle, onCikar, onAc
   const meta = [kategoriEtiketi(mekan.primary_type), sureMetni(mekan.dakika), puan ? `★ ${puan}` : null].filter(Boolean).join(' · ');
   return (
     <Pressable accessibilityRole="button" accessibilityLabel={mekan.ad} onPress={onAc} style={({ pressed }) => [s.kart, odak && s.odak, pressed && { opacity: 0.9 }]}>
-      <View style={[s.foto, { backgroundColor: kategoriPini(mekan.primary_type).kategoriRenk }]}>{mekan.foto_uri ? <Image source={{ uri: mekan.foto_uri }} style={StyleSheet.absoluteFill} contentFit="cover" transition={120} /> : null}</View>
+      <View style={[s.foto, { backgroundColor: kategoriPini(mekan.primary_type).kategoriRenk }]}>{mekan.foto_uri ? <Foto source={{ uri: mekan.foto_uri }} style={StyleSheet.absoluteFill} contentFit="cover" transition={120} /> : null}</View>
       <View style={{ flex: 1, minWidth: 0, gap: 2 }}>
         <Text style={s.ad} numberOfLines={1}>
           {mekan.ad}

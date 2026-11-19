@@ -1,4 +1,4 @@
-import { Image } from 'expo-image';
+import { Foto } from '@/components/ui/Foto';
 import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ActivityIndicator, AppState, Platform, Pressable, RefreshControl, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
@@ -377,7 +377,7 @@ function ProfilDugmesi({ ad, url }: { ad: string; url: string | null }) {
   const harf = ad.trim().charAt(0).toLocaleUpperCase('tr') || '?';
   return (
     <Pressable accessibilityRole="button" accessibilityLabel={t('anasayfa.profil')} onPress={() => router.push('/(tabs)/profil')} hitSlop={4} style={({ pressed }) => [s.daire, s.profil, pressed && s.basili]}>
-      {url ? <Image source={{ uri: url }} style={s.profilFoto} contentFit="cover" accessible={false} /> : <Text style={s.profilHarf}>{harf}</Text>}
+      {url ? <Foto source={{ uri: url }} style={s.profilFoto} contentFit="cover" accessible={false} /> : <Text style={s.profilHarf}>{harf}</Text>}
     </Pressable>
   );
 }
