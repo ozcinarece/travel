@@ -1,9 +1,9 @@
 Gençlik Parkı, Ulus Meydanı ile Ankara Garı arasında, Opera binasının batısında uzanan büyük şehir parkı. Burası eskiden bir bataklıktı. Alan kurutuldu, Fransız mimar Theo Leveau'nun planıyla park yapıldı ve 19 Mayıs 1943'te açıldı. Açılış gününün Gençlik Bayramı olması parkın adını da açıklıyor.
 
-Parkın ortasını kocaman bir havuz kaplıyor. Erken Cumhuriyet'in Ankara'sında burası, başkentte denizi olmayan bir şehrin "sahili" gibiydi: havuzda kayıklar dolaşır, kıyıdaki çay bahçelerinde aileler hafta sonunu geçirirdi. Lunaparkı ve açık hava tiyatrosuyla park, birkaç kuşak Ankaralı için hafta sonu gezmesinin adresi oldu.
+Parkın ortasında büyük bir havuz var. Erken Cumhuriyet'in Ankara'sında bu havuz, denizi olmayan başkentin "sahili" gibi kullanıldı: kayıklar dolaşır, kıyıdaki çay bahçelerinde aileler hafta sonunu geçirirdi. Lunaparkı ve açık hava tiyatrosuyla park, birkaç kuşak Ankaralının hafta sonu gittiği yerdi. Son yıllarda havuzun bir kısmı zaman zaman susuz kalıyor; suyun durumu mevsime ve bakıma göre değişiyor.
 
-Bugün havuzun çevresi yürüyüş yolları ve çay bahçeleriyle çevrili, akşamları suda ışık gösterileri yapılıyor. Kuzey kapısından girip havuzun kıyısından güneye doğru yürürsen parkı boydan boya geçer, garın ve demiryolu hattının yanına çıkarsın.
+Parkı gezmenin en kolay yolu boydan boya yürümek. Kuzey kapısından girip havuzun çevresindeki yoldan güneye ilerlersen ağaçlık alanların ve çay bahçelerinin arasından geçer, garın ve demiryolu hattının yanına çıkarsın.
 
-Havuzun çevresini dolaşıp bir çay içmek için yarım saat ile kırk beş dakika yeter. Ağaçlar yeşilken ve havuz doluyken, yani ilkbahardan sonbahara kadar daha güzel; kışın da yürüyüş yolu açık ve sakin.
+Parkı geçip bir çay içmek için yarım saat ile kırk beş dakika yeter. Ağaçlar yeşilken, ilkbahardan sonbahara kadar daha güzel; kışın daha sakin.
 
-> Havuzun güney ucuna geldiğinde arkana dön: Ulus'un binaları ve en yukarıda Ankara Kalesi, suyun üstünden tek karede görünür.
+> Parkın kuzey kapısı Ulus Meydanı'na, güney ucu gara bakar. Gara ya da CerModern'e gidiyorsan havuzun yanından güneye yürü.
