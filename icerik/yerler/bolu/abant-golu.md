@@ -1,6 +1,6 @@
 Abant Gölü, Bolu'nun en bilinen yeri. Şehrin batısında, 1.300 metreyi aşan yükseklikte, bir heyelanın vadiyi kapatmasıyla oluşmuş bir göl. Çevresi karaçam ve sarıçam ormanıyla kaplı; alan milli park olarak korunuyor.
 
-Gölün çevresini dolaşan yaklaşık 7 kilometrelik yol, Abant'a gelmenin asıl nedeni. Yürüyerek iki saat kadar sürer; acelen varsa faytona binebilirsin. Yolun bir yanı göl, diğer yanı orman. Kıyı boyunca suya inen küçük düzlükler ve bankların yanında durup gölün karşı yakasına bak; rüzgârsız sabahlarda su ayna gibi olur.
+Gölün çevresini dolaşan yaklaşık 7 kilometrelik yol, Abant'a gelmenin asıl nedeni. Yürüyerek iki saat kadar sürer. Atlı faytonlar 2022'de milli parktan kaldırıldı; turu kendi adımınla yaparsın. Yolun bir yanı göl, diğer yanı orman. Kıyı boyunca suya inen küçük düzlükler ve bankların yanında durup gölün karşı yakasına bak; rüzgârsız sabahlarda su ayna gibi olur.
 
 Göl, kendine özgü Abant alası ile tanınır. Kıyıdaki lokantalarda alabalık ve gözleme bulursun; tam yemek için Mudurnu'ya ya da Bolu'ya dönebilirsin.
 
@@ -8,4 +8,4 @@ Abant hafta sonları çok kalabalık olur ve girişte araç kuyruğu oluşabilir
 
 Göl turuyla birlikte iki, iki buçuk saat ayır.
 
-> Fayton tutacaksan turun yarısını faytonla, yarısını yürüyerek yap; kıyının en sessiz bölümleri adım adım daha güzel.
+> Turu sabah erken başlat: rüzgâr çıkmadan su ayna gibi durur, kıyıdaki banklar da boş olur.

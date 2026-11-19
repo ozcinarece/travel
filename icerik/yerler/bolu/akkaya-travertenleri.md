@@ -6,6 +6,6 @@ Alanda bir havuz ve dinlenme tesisleri var; ama buraya yüzmekten çok bu doğa 
 
 Mudurnu Çayı vadisi, Bolu'nun termal kaynaklarıyla bilinen bölgesi; Karacasu ve Babas gibi kaplıcalar da bu hattın üstünde. Travertenler, bu sıcak suyun yeryüzüne bıraktığı en görünür iz.
 
-Kırk beş dakika yeter. Travertenlerin üstüne basma: kireç tabakası kırılgan ve her adım yüzeyi kalıcı olarak bozar.
+Kırk beş dakika yeter.
 
 > Islak basamakların üstüne çıkma: kireç kabuğu hem kaygan hem kırılgan. Fotoğraf için yürüyüş yolunun kenarı yeter.
