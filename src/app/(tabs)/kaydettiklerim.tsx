@@ -29,7 +29,7 @@ import { anaV5, baslikStili, bosluk, minDokunma, renk, yazi } from '@/theme';
  * sekmeler Geziler · N / Yerler · N. Geziler tek sütun `AnaGeziKarti` (büyük kapak, dolu ♥, 3 satır; kapaksızda `AmacKapagi`),
  * satırda Seyahatime al yok. Yerler şehirlere göre gruplu (başlıkta "{seyahat}'e ekle" ya da "Bu şehre seyahat kur"), her yer
  * sade satır: 56 px kare foto ya da kategori ikonu, ad, kategori, sağda ♥ → o seyahatin Keşfet'inde mekan paneli.
- * ♥ = kayıttan çıkar + altta "Geri al" (4 sn). Boş halde tek satır yazı ve "Keşfet'e göz at" bağlantısı.
+ * ♥ = kayıttan çıkar + altta "Geri al" (5 sn, #387 bandıyla aynı). Boş halde tek satır yazı ve "Keşfet'e göz at" bağlantısı.
  */
 export default function KaydettiklerimEkrani() {
   const kaydedilenler = useKaydedilenler();
@@ -55,10 +55,13 @@ export default function KaydettiklerimEkrani() {
   );
   const yerListesi = useMemo(() => gruplar.flatMap((g) => g.yerler), [gruplar]);
   const canli = useIcerikCanli(yerListesi, (y) => yerListesi.find((x) => x.id === y.id)?.sehirler?.ad ?? '', sekme === 'yer' && yerListesi.length > 0);
+  // #410 inceleme: sekme sayısı yüklenen öğelerden (yayından kalkmış gezi/yer sayılmaz); yüklenene kadar kayıt sayısı.
+  const geziSayisi = geziler.isSuccess ? geziListesi.length : geziIdleri.length;
+  const yerSayisi = yerler.isSuccess ? yerListesi.length : yerIdleri.length;
   const yerleriEkle = useYerleriEkle();
   const [mesgulGrup, setMesgulGrup] = useState<string | null>(null);
 
-  // Kaldır + geri al bildirimi (4 sn); diğer bildirimler 3 sn.
+  // Kaldır + geri al bildirimi 5 sn (#387 ile aynı), Tekrar dene 4 sn, diğer bildirimler 3 sn.
   const [kaldirilan, setKaldirilan] = useState<{ tur: KaydedilenTuru; id: string } | null>(null);
   const [bildirim, setBildirim] = useState<string | null>(null);
   // #388 KK1: bağlantı hatasında bildirimde "Tekrar dene".
@@ -80,14 +83,14 @@ export default function KaydettiklerimEkrani() {
         setBildirim(null);
         setTekrar(null);
       },
-      b.kaldirilan || b.tekrar ? 4000 : 3000,
+      b.kaldirilan ? 5000 : b.tekrar ? 4000 : 3000,
     );
   };
   // #388 inceleme: çevrimdışıyken "listesine ekle" pasif; nedeni bantta (mevcut `ekleme.baglantiYok`, düğmesiz).
   const cevrimdisiEkle = cevrimdisi && sekme === 'yer' && gruplar.some((g) => !!g.sehirId && !!varsayilanHedef(hedefler, g.sehirAd));
   const bandMetni = bildirim ?? (kaldirilan ? t('kaydettiklerim.kaldirildi') : cevrimdisiEkle ? t('ekleme.baglantiYok') : '');
-  // iOS'ta bildirim de duyurulur (Android'de bant yeni açılınca okunmuyor; iki platformda tek yol).
-  useIosDuyuru(bildirim ?? (cevrimdisiEkle ? t('ekleme.baglantiYok') : null));
+  // #410 inceleme: bandın her hali (Kaldırıldı · Geri al dahil) iOS'ta duyurulur; Android'de bant canlı bölge.
+  useIosDuyuru(kaldirilan ? `${bandMetni}. ${t('kaydettiklerim.geriAl')}` : bandMetni || null);
   const kaldir = (tur: KaydedilenTuru, id: string) => {
     kaydet.mutate({ tur, hedef_id: id, kayitli: true });
     goster({ kaldirilan: { tur, id } });
@@ -139,8 +142,8 @@ export default function KaydettiklerimEkrani() {
         {t('kaydettiklerim.baslik')}
       </Text>
       <SekmeSatiri aralik={24}>
-        <Sekme boyut={15} baslik={t('kaydettiklerim.geziler', { n: geziIdleri.length })} secili={sekme === 'gezi'} onPress={() => setSekme('gezi')} />
-        <Sekme boyut={15} baslik={t('kaydettiklerim.yerler', { n: yerIdleri.length })} secili={sekme === 'yer'} onPress={() => setSekme('yer')} />
+        <Sekme boyut={15} baslik={t('kaydettiklerim.geziler', { n: geziSayisi })} secili={sekme === 'gezi'} onPress={() => setSekme('gezi')} />
+        <Sekme boyut={15} baslik={t('kaydettiklerim.yerler', { n: yerSayisi })} secili={sekme === 'yer'} onPress={() => setSekme('yer')} />
       </SekmeSatiri>
       <ScrollView contentContainerStyle={s.icerik}>
         {sekme === 'gezi' ? (
@@ -188,14 +191,14 @@ export default function KaydettiklerimEkrani() {
                   // #172 KK7–KK9: kaydedilen yer bizim içeriğimiz — kategori DB'den, puan gösterilmez.
                   return (
                     <View key={y.id} style={s.yerSatiri}>
-                      <Pressable accessibilityRole="button" accessibilityLabel={[y.ad, kategoriEtiketi(y.kategori)].filter(Boolean).join(', ')} onPress={() => yerAc(y, hedef)} style={({ pressed }) => [s.yerGovde, pressed && { opacity: 0.85 }]}>
+                      <Pressable accessibilityRole="button" accessibilityLabel={[y.ad, kategoriEtiketi(y.kategori), y.sehirler?.ad].filter(Boolean).join(', ')} onPress={() => yerAc(y, hedef)} style={({ pressed }) => [s.yerGovde, pressed && { opacity: 0.85 }]}>
                         <FotoKutusu uri={c?.foto_uri ?? null} tip={y.kategori} boyut={56} kose={12} />
                         <View style={s.yerMetin}>
                           <Text style={s.yerAd} numberOfLines={1}>
                             {y.ad}
                           </Text>
                           <Text style={s.yerAlt} numberOfLines={1}>
-                            {kategoriEtiketi(y.kategori)}
+                            {[kategoriEtiketi(y.kategori), y.sehirler?.ad].filter(Boolean).join(' · ')}
                           </Text>
                         </View>
                       </Pressable>
@@ -211,7 +214,7 @@ export default function KaydettiklerimEkrani() {
         )}
       </ScrollView>
       {kaldirilan || bildirim || cevrimdisiEkle ? (
-        <View style={s.bildirim}>
+        <View style={s.bildirim} accessibilityLiveRegion="polite">
           <Text style={s.bildirimMetin}>{bandMetni}</Text>
           {kaldirilan ? (
             <Pressable accessibilityRole="button" onPress={geriAl} hitSlop={TEKRAR_HIT_SLOP}>

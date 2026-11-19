@@ -1,7 +1,8 @@
 // #275 → #395 (UX önerileri kanvası, `Sayfa_v5_Kaydettiklerim`): ‹ geri, başlık, altı çizili sekmeler; Geziler'de ana sayfa
 // kartı (Seyahatime al yok), Yerler'de sade satır; ♥ → kayıttan çıkar + "Geri al"; boş halde "Keşfet'e göz at".
 import { beforeEach, describe, expect, it, jest } from '@jest/globals';
-import { fireEvent, render, screen } from '@testing-library/react-native';
+import { act, fireEvent, render, screen } from '@testing-library/react-native';
+import { AccessibilityInfo, Platform } from 'react-native';
 
 import KaydettiklerimEkrani from '../../../app/(tabs)/kaydettiklerim';
 
@@ -43,6 +44,8 @@ describe('Kaydettiklerim v5 (#395)', () => {
 
   it('‹ geri dokununca geri döner; başlık ve iki sekme (sayılı)', () => {
     mockVeri.kayitlar = [{ tur: 'gezi', hedef_id: 'g1' }, { tur: 'yer', hedef_id: 'y1' }];
+    mockVeri.geziler = [GEZI];
+    mockVeri.yerler = [YER];
     render(<KaydettiklerimEkrani />);
     expect(screen.getByRole('header', { name: 'Kaydettiklerim' })).toBeTruthy();
     expect(screen.getByRole('tab', { name: 'Geziler · 1', selected: true })).toBeTruthy();
@@ -81,5 +84,44 @@ describe('Kaydettiklerim v5 (#395)', () => {
     expect(screen.getByText('Beğendiğin gezilere kalp bırak')).toBeTruthy();
     fireEvent.press(screen.getByRole('link', { name: "Keşfet'e göz at" }));
     expect(mockRouter.navigate).toHaveBeenCalledWith('/(tabs)');
+  });
+  it('#410 inceleme 1: Kaydettiklerim\'de gezi ♥ "Kaydedilenlerden kaldır" diye okunur', () => {
+    mockVeri.kayitlar = [{ tur: 'gezi', hedef_id: 'g1' }];
+    mockVeri.geziler = [GEZI];
+    render(<KaydettiklerimEkrani />);
+    expect(screen.getByTestId('kart-kalp').props.accessibilityLabel).toBe('Kaydedilenlerden kaldır');
+    expect(screen.queryByRole('togglebutton', { name: 'Kaydet' })).toBeNull();
+  });
+
+  it('#410 inceleme 2: Kaldırıldı · Geri al bandı iOS\'ta duyurulur, 5 sn kalır', () => {
+    jest.useFakeTimers();
+    const eski = Platform.OS;
+    Platform.OS = 'ios';
+    const duyuru = jest.spyOn(AccessibilityInfo, 'announceForAccessibility').mockImplementation(() => {});
+    try {
+      mockVeri.kayitlar = [{ tur: 'gezi', hedef_id: 'g1' }];
+      mockVeri.geziler = [GEZI];
+      render(<KaydettiklerimEkrani />);
+      fireEvent.press(screen.getByTestId('kart-kalp'));
+      expect(duyuru).toHaveBeenCalledWith('Kaldırıldı. Geri al');
+      act(() => jest.advanceTimersByTime(4500));
+      expect(screen.getByRole('button', { name: 'Geri al' })).toBeTruthy();
+      act(() => jest.advanceTimersByTime(600));
+      expect(screen.queryByRole('button', { name: 'Geri al' })).toBeNull();
+    } finally {
+      Platform.OS = eski;
+      duyuru.mockRestore();
+      jest.useRealTimers();
+    }
+  });
+
+  it('#410 inceleme 3: sekme sayısı yüklenen öğelerden (yayından kalkmış gezi sayılmaz); yer satırı "kategori · şehir"', () => {
+    mockVeri.kayitlar = [{ tur: 'gezi', hedef_id: 'g1' }, { tur: 'gezi', hedef_id: 'kalkmis' }, { tur: 'yer', hedef_id: 'y1' }];
+    mockVeri.geziler = [GEZI];
+    mockVeri.yerler = [YER];
+    render(<KaydettiklerimEkrani />);
+    expect(screen.getByRole('tab', { name: 'Geziler · 1' })).toBeTruthy();
+    fireEvent.press(screen.getByRole('tab', { name: 'Yerler · 1' }));
+    expect(screen.getByText(/ · Eskişehir$/)).toBeTruthy();
   });
 });

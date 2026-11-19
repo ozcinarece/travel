@@ -68,9 +68,10 @@ function KartKalbi({ geziId, onKalp }: { geziId: string; onKalp?: () => void }) 
   const kaydet = useKaydet();
   return (
     <Pressable
-      accessibilityRole="togglebutton"
-      accessibilityLabel={t('anasayfa.v5.kaydet')}
-      accessibilityState={{ checked: kayitli }}
+      // #410 inceleme: Kaydettiklerim'de ♥ kayıttan çıkarır; etiket yer ♥'iyle aynı ("Kaydedilenlerden kaldır").
+      accessibilityRole={onKalp ? 'button' : 'togglebutton'}
+      accessibilityLabel={onKalp ? t('kaydettiklerim.kaldir') : t('anasayfa.v5.kaydet')}
+      accessibilityState={onKalp ? undefined : { checked: kayitli }}
       onPress={onKalp ?? (() => kaydet.mutate({ tur: 'gezi', hedef_id: geziId, kayitli }))}
       style={s.kalp}
       testID="kart-kalp"
