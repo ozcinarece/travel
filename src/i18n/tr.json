@@ -73,10 +73,21 @@
       "gunSonra": "{n} GÜN SONRA"
     }
   },
+  "seyahatlerim": {
+    "baslik": "Seyahatlerim",
+    "bos": "Henüz seyahatin yok.",
+    "gun": "{n} gün",
+    "durak": "{n} durak",
+    "planYarim": "plan yarım",
+    "ile": "{ad} ile"
+  },
+  "menu": {
+    "kesfet": "Keşfet",
+    "seyahatlerim": "Seyahatlerim",
+    "profil": "Profil"
+  },
   "profil": {
     "kesfet": "Keşfet",
-    "gezilerim": "Gezilerim · {n}",
-    "gezilerimBos": "Biten seyahatlerin burada durur.",
     "ayarlar": "Ayarlar",
     "baslik": "Profil",
     "kaydettiklerim": "Kaydettiklerim",

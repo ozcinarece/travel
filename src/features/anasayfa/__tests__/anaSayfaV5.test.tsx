@@ -11,7 +11,7 @@ import { acilisKarariniKapat } from '@/lib/acilis';
 import type { SeyahatOzet } from '@/lib/tipler';
 import { yerelTarih } from '@/lib/zaman';
 
-import AnaSayfa from '../../../app/(tabs)/index';
+import AnaSayfa from '../../../app/(tabs)/(menu)/index';
 
 jest.mock('react-native-safe-area-context', () => jest.requireActual<{ default: object }>('react-native-safe-area-context/jest/mock').default);
 jest.mock('@/lib/supabase', () => ({ supabase: {} }));

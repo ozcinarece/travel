@@ -1,20 +1,16 @@
 import { useQuery } from '@tanstack/react-query';
 import * as Location from 'expo-location';
-import { Link, router, useFocusEffect, useLocalSearchParams } from 'expo-router';
-import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
+import { Link, router, useFocusEffect } from 'expo-router';
+import { useCallback, useEffect, useState } from 'react';
 import { Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { Gezilerim } from '@/components/profil/Gezilerim';
 import { SecimMenusu } from '@/components/program/SecimMenusu';
 import { Avatar } from '@/components/ui/Avatar';
 import { Ikon } from '@/components/ui/Ikon';
-import { KesfetHapi } from '@/components/ui/KesfetHapi';
 import { KisaBildirim, useKisaBildirim } from '@/components/ui/KisaBildirim';
 import { cikis } from '@/features/auth/giris';
 import { useProfil, useProfilGuncelle } from '@/features/profil/sorgular';
-import { biten, bitmemis, siniflandir } from '@/features/seyahatler/siniflandir';
-import { useSeyahatler } from '@/features/seyahatler/sorgular';
 import { t } from '@/i18n';
 import { sonHatayiOku, sonHatayiSil, type SonHata } from '@/lib/izler';
 import type { HaritaGizliligi } from '@/lib/tipler';
@@ -28,27 +24,10 @@ const OSM_TELIF = 'https://www.openstreetmap.org/copyright';
 /**
  * #138 → #144 (kanvas 22 · Profil): foto, ad, @kullanıcı adı, Düzenle; ayarlar: Haritanı kimler görsün, Bildirimler, Konum (Gezi günlerinde), Dil, Yardım ve geri bildirim, Çıkış
  * yap; Hesabı sil.
- * #275 KK4 (kanvas 29d): en üstte "‹ Keşfet"; kimliğin altında iki sekme — Gezilerim · N (YAKLAŞAN: bitmemiş seyahatler ve
- * taslaklar; GEÇMİŞ: biten seyahatler; N ikisinin toplamı) ve Ayarlar (ayar satırları). Açılışta Gezilerim seçili; 29d'de
- * sayı kutuları yok, kalktı.
+ * #275 KK4 → #405 KK2: Gezilerim Seyahatlerim sekmesine taşındı; Profil sekmesinde kimlik ve ayar satırları kalır. Alt menü
+ * olduğu için "‹ Keşfet" hapı kalktı.
  */
 export default function ProfilEkrani() {
-  const parametre = useLocalSearchParams<{ sekme?: string }>();
-  const [sekme, setSekme] = useState<'gezilerim' | 'ayarlar'>(parametre.sekme === 'ayarlar' ? 'ayarlar' : 'gezilerim');
-  const seyahatler = useSeyahatler();
-  // Bitmemiş = bugün süren + yaklaşan + planlanan (tarihsiz taslak dahil); tarih sırası, taslaklar sonda.
-  // #276 KK1: GEÇMİŞ = yeniBiten + geçmiş (seyahat bitişin ertesi günü iner, kanvas 29d).
-  const { yaklasan, gecmis } = useMemo(() => {
-    const sinif = siniflandir(seyahatler.data ?? []);
-    return { yaklasan: bitmemis(sinif), gecmis: biten(sinif) };
-  }, [seyahatler.data]);
-  // Profil yığında açıkken /seyahatler?sekme=… ile yeniden gelinirse sekme parametreye uyar (parametre değişince, render
-  // sırasında ayarlanır; efektte setState lint kuralına takılır).
-  const [oncekiParametre, setOncekiParametre] = useState(parametre.sekme);
-  if (parametre.sekme !== oncekiParametre) {
-    setOncekiParametre(parametre.sekme);
-    if (parametre.sekme === 'ayarlar' || parametre.sekme === 'gezilerim') setSekme(parametre.sekme);
-  }
   const bildirim = useKisaBildirim();
   const profil = useProfil();
   const guncelle = useProfilGuncelle();
@@ -73,8 +52,6 @@ export default function ProfilEkrani() {
   return (
     <SafeAreaView style={s.ekran} edges={['top']}>
       <ScrollView contentContainerStyle={s.icerik}>
-        <KesfetHapi />
-
         {p ? (
           <View style={s.kimlik}>
             <Avatar ad={p.name} url={p.photo_url} boyut={72} arkaPlan={renk.vurgu} />
@@ -93,20 +70,7 @@ export default function ProfilEkrani() {
           </View>
         ) : null}
 
-        <View accessibilityRole="tablist" style={s.sekmeler}>
-          {(['gezilerim', 'ayarlar'] as const).map((k) => {
-            const secili = sekme === k;
-            return (
-              <Pressable key={k} accessibilityRole="tab" accessibilityState={{ selected: secili }} onPress={() => setSekme(k)} style={[s.sekme, secili && s.sekmeSecili]}>
-                <Text style={[s.sekmeMetin, secili && { color: renk.metin }]}>{k === 'gezilerim' ? t('profil.gezilerim', { n: yaklasan.length + gecmis.length }) : t('profil.ayarlar')}</Text>
-              </Pressable>
-            );
-          })}
-        </View>
-
-        {sekme === 'gezilerim' ? <Gezilerim yaklasan={yaklasan} gecmis={gecmis} onBildirim={bildirim.goster} /> : null}
-
-        <AyarlarSekmesi gorunur={sekme === 'ayarlar'}>
+        <View style={{ gap: 18 }}>
           <View>
             <Satir baslik={t('profil.gizlilik')} deger={p ? t(`profilKur.gizlilik.${p.map_visibility}`) : ''} onPress={() => setGizlilikAcik(true)} />
             <Satir baslik={t('profil.bildirimler')} onPress={ayarlar} />
@@ -161,7 +125,7 @@ export default function ProfilEkrani() {
               {t('profil.osmAtif')} <Text style={s.osmKaynak}>{t('profil.osmAtifKaynak')}</Text>
             </Text>
           </Pressable>
-        </AyarlarSekmesi>
+        </View>
       </ScrollView>
       <KisaBildirim metin={bildirim.metin} />
       <SecimMenusu
@@ -172,11 +136,6 @@ export default function ProfilEkrani() {
       />
     </SafeAreaView>
   );
-}
-
-/** Ayarlar sekmesinin gövdesi: ayar satırları, son hata, Hesabı sil ve OSM atfı alt alta (aralık ekranla aynı). */
-function AyarlarSekmesi({ gorunur, children }: { gorunur: boolean; children: ReactNode }) {
-  return gorunur ? <View style={{ gap: 18 }}>{children}</View> : null;
 }
 
 function Satir({ baslik, deger, onPress, tehlike, okYok }: { baslik: string; deger?: string; onPress?: () => void; tehlike?: boolean; okYok?: boolean }) {
@@ -196,10 +155,6 @@ function Satir({ baslik, deger, onPress, tehlike, okYok }: { baslik: string; deg
 const s = StyleSheet.create({
   ekran: { flex: 1, backgroundColor: renk.zemin },
   icerik: { paddingHorizontal: bosluk.kenar, paddingTop: 8, paddingBottom: 32, gap: 18 },
-  sekmeler: { flexDirection: 'row', gap: 4, padding: 4, borderRadius: 14, backgroundColor: renk.yuzey },
-  sekme: { flex: 1, height: 38, borderRadius: 11, alignItems: 'center', justifyContent: 'center' },
-  sekmeSecili: { backgroundColor: renk.zemin, shadowColor: renk.metin, shadowOpacity: 0.1, shadowRadius: 3, shadowOffset: { width: 0, height: 1 }, elevation: 1 },
-  sekmeMetin: { fontFamily: yazi.ekstra, fontSize: 14, color: renk.ikincil },
   kimlik: { flexDirection: 'row', alignItems: 'center', gap: 14 },
   adKutu: { flex: 1, minWidth: 0, gap: 2 },
   ad: { ...baslikStili(20), color: renk.metin },

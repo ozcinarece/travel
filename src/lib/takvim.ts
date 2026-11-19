@@ -66,6 +66,12 @@ export function ayYil(t: Tarih): string {
   return `${AYLAR[ay - 1]} ${yil}`;
 }
 
+/** #405: "Eylül" — Seyahatlerim GEÇMİŞ satırı; bu yıldan değilse "Eylül 2025". */
+export function ayAdi(t: Tarih, buYil: number = new Date().getFullYear()): string {
+  const { yil, ay } = parcala(t);
+  return yil === buYil ? AYLAR[ay - 1] : `${AYLAR[ay - 1]} ${yil}`;
+}
+
 /**
  * Seyahat listesi tarih metni (3.1): aynı ay "12–15 Ekim", farklı ay "28 Eki – 2 Kas",
  * farklı yıl "30 Ara 2026 – 2 Oca 2027", tek gün "12 Ekim".
