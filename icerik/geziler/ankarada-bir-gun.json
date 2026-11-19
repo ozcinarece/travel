@@ -1,0 +1,151 @@
+{
+  "surum": 1,
+  "sehir": {
+    "slug": "ankara"
+  },
+  "takvim": {
+    "ilk_gun": "cumartesi"
+  },
+  "gezi": {
+    "slug": "ankarada-bir-gun",
+    "baslik": "Ankara'da bir gün",
+    "ozet": "Anıtkabir, ilk Meclis, Augustus Tapınağı ve Kale bir günde",
+    "yazar_ad": "Tripmate ekibi",
+    "amaclar": [
+      "kultur_tarih"
+    ],
+    "yazi_md": "Anıtkabir'in kapısı 09:00'da açılıyor ve Aslanlı Yol o saatte neredeyse boş. Bu plan şehrin iki kuruluş hikâyesini aynı güne sığdırıyor: sabah Cumhuriyet'in anıtına çıkıyorsun, öğleye doğru Meclis'in ilk açıldığı Ulus'a iniyorsun, öğleden sonra Roma ve Selçuklu izlerinin arasından geçip günü şehrin en eski yerleşim yeri olan tepede, Kale'de bitiriyorsun. Tek taksi yolculuğu sabah; gerisi yürüyerek. Pazartesi Kurtuluş Savaşı Müzesi kapalı; o gün geliyorsan binayı dışarıdan görüp yemeğe geç.\n\n> Günü Anıtkabir'le açmanın bir nedeni var: 1 Kasım–31 Ocak arası 16:00'da kapanıyor ve sabah saatlerinde daha sakin. Rahat ayakkabı giy, yanına ince bir ceket al; Rasattepe'de ve Kale'de rüzgâr şehrin içinden daha sert eser.\n\n## 1. gün · Anıtkabir'den Kale'ye\n\nGüne Rasattepe'deki [Anıtkabir](mekan:ChIJj-qcChlP0xQRoAiNJKguhtM)'de başla. Aslanlı Yol'u acele etmeden yürü; yolun sonunda Tören Meydanı birden açılır. Şeref Holü'nü gördükten sonra altındaki müzeye de gir: Kurtuluş Savaşı'nı anlatan bölümler sabahın geri kalanına iyi bir giriş olur.\n\n::mekan[ChIJj-qcChlP0xQRoAiNJKguhtM]\n\nAnıtkabir'den Ulus'a taksiyle geç; yürüyerek gitmek bir saate yakın sürer. Ulus Meydanı'nın köşesindeki taş binada [Kurtuluş Savaşı Müzesi](mekan:ChIJQ1SOxWFO0xQRU9MYRfTLmwY) var. Meclis 1920'de bu binada toplandı; sıraları ve kürsüsüyle Genel Kurul salonunu sabah Anıtkabir'de dinlediğin hikâyenin devamı olarak düşün.\n\nÖğle yemeği meydana birkaç dakika uzaklıktaki [Uludağ Kebapçısı](mekan:ChIJ6b7DzF5O0xQRie5kQUghkqs)'nda. Ankara'nın eski kebapçılarından biri; İskender'in yanında masaya gelen kızgın tereyağının dökülüşünü izle. Masada şıra da sorabilirsin. Öğleden sonra yokuş çıkacağın için porsiyonu ağır tutma, tatlıyı sonraya bırak.\n\nYemekten sonra yokuşu çıkıp [Hacı Bayram Veli Camii](mekan:ChIJEcVIjmNO0xQRFl54K-VCnps)'ne yürü. Caminin arkasındaki türbeyi de gör. Namaz sırasında ziyaretçi alınmayabilir; o saate denk gelirsen önce tapınağa bak. Caminin bir duvarı, hemen yanındaki [Augustus Tapınağı](mekan:ChIJSfDZ7WNO0xQRO72uv7Fq0rs)'na dayanıyor. Tapınağın taş duvarlarında bir Roma imparatorunun kendi yaptıklarını anlattığı uzun metin hâlâ okunabiliyor.\n\nOradan doğuya, Kale'nin eteğine yürü ve [Anadolu Medeniyetleri Müzesi](mekan:ChIJ9ws3eGdO0xQRRmf05EeskZs)'ne gir. Tek günde her salona yetişemezsin; Çatalhöyük'ün duvar resimleri, Hitit kabartmaları ve Frig bölümüne odaklan. Müze eski bir Osmanlı çarşısında kurulu; kubbeli salonların arasında yürürken binanın kendisine de bak. Bahçedeki taş eserler, içerideki kalabalıktan kaçmak için iyi bir mola yeri.\n\n::mekan[ChIJ9ws3eGdO0xQRRmf05EeskZs]\n\nGünü müzenin arkasındaki yokuştan [Ankara Kalesi](mekan:ChIJezGjUW9O0xQRwAGUkwTgFXQ)'ne çıkarak bitir. Surların içindeki dar sokaklarda eski evlerin arasından geç ve Akkale'ye tırman. Buradan baktığında sabah gittiğin Anıtkabir'i ve aradaki şehrin tamamını görürsün. Kışın güneş erken battığı için Kale'ye vardığında şehrin ışıkları yanmaya başlamış olabilir. Gün ışığında görmek istersen müzede fazla oyalanma.\n\nVaktin kalırsa Kale'den güneye inip Hamamönü'nün restore edilmiş sokaklarında akşam yemeği yiyebilirsin. Ankara'da bir gece kalacaksan iki günlük planımız Kale çevresine ve Ulus'a daha geniş yer ayırıyor; Rahmi M. Koç Müzesi'ni ve Roma Hamamı'nı da ekliyor.\n"
+  },
+  "gunler": [
+    {
+      "baslik": "Anıtkabir'den Kale'ye",
+      "duraklar": [
+        {
+          "place_id": "ChIJj-qcChlP0xQRoAiNJKguhtM",
+          "osm": "node/34668145",
+          "ad": "Anıtkabir",
+          "sure_dk": 90,
+          "kapali_gunler": [],
+          "rehber": "anitkabir",
+          "amaclar": [
+            "kultur_tarih"
+          ],
+          "sure_gerekcesi": "varsayılan 45; anıt, Aslanlı Yol ve müze, tek günde kısaltılmış"
+        },
+        {
+          "place_id": "ChIJQ1SOxWFO0xQRU9MYRfTLmwY",
+          "osm": "way/419393108",
+          "ad": "Kurtuluş Savaşı Müzesi",
+          "sure_dk": 45,
+          "kapali_gunler": [
+            "pazartesi"
+          ],
+          "rehber": "kurtulus-savasi-muzesi",
+          "amaclar": [
+            "kultur_tarih"
+          ]
+        },
+        {
+          "place_id": "ChIJ6b7DzF5O0xQRie5kQUghkqs",
+          "osm": "node/824237315",
+          "ad": "Uludağ Kebapçısı",
+          "sure_dk": 45,
+          "kapali_gunler": [],
+          "rehber": "uludag-kebapcisi",
+          "amaclar": [
+            "lezzet"
+          ]
+        },
+        {
+          "place_id": "ChIJEcVIjmNO0xQRFl54K-VCnps",
+          "osm": "way/155197582",
+          "ad": "Hacı Bayram Veli Camii",
+          "sure_dk": 30,
+          "kapali_gunler": [],
+          "rehber": "haci-bayram-veli-camii",
+          "amaclar": [
+            "kultur_tarih"
+          ],
+          "sure_gerekcesi": "varsayılan 45; cami ve türbe kısa ziyaret"
+        },
+        {
+          "place_id": "ChIJSfDZ7WNO0xQRO72uv7Fq0rs",
+          "osm": "way/469691342",
+          "ad": "Augustus Tapınağı",
+          "sure_dk": 30,
+          "kapali_gunler": [],
+          "rehber": "augustus-tapinagi",
+          "amaclar": [
+            "kultur_tarih"
+          ],
+          "sure_gerekcesi": "varsayılan 45; dışarıdan, seyir yolundan izleniyor"
+        },
+        {
+          "place_id": "ChIJ9ws3eGdO0xQRRmf05EeskZs",
+          "osm": "way/363095473",
+          "ad": "Anadolu Medeniyetleri Müzesi",
+          "sure_dk": 90,
+          "kapali_gunler": [],
+          "rehber": "anadolu-medeniyetleri-muzesi",
+          "amaclar": [
+            "kultur_tarih"
+          ]
+        },
+        {
+          "place_id": "ChIJezGjUW9O0xQRwAGUkwTgFXQ",
+          "ad": "Ankara Kalesi",
+          "sure_dk": 45,
+          "kapali_gunler": [],
+          "rehber": "ankara-kalesi",
+          "amaclar": [
+            "kultur_tarih",
+            "yavas"
+          ]
+        }
+      ]
+    }
+  ],
+  "notlar": {
+    "dogrulanacaklar": [
+      "[Yazı · giriş] · diğer 4 durağın (Uludağ, Hacı Bayram, Augustus, Kale) kapali_gunler'i [] (OSM opening_hours ya da resmî kaynak yok); bayram arifeleri ve resmî tören günleri ayrı · muze.gov.tr",
+      "[Yazı · Anıtkabir] · \"Şeref Holü'nün altındaki müze\", \"Kurtuluş Savaşı'nı anlatan bölümler\" · Atatürk ve Kurtuluş Savaşı Müzesi'nin konumu ve panoramalar genel bilgi · anitkabir.tsk.tr",
+      "[Yazı · Anıtkabir → Ulus] · \"yürüyerek bir saate yakın\" · kuş uçuşu × 1,3 ÷ 75 m/dk ile kestirildi; doğrulayıcı yürüme uyarısı verirse beklenen · harita",
+      "[Yazı · Kurtuluş Savaşı Müzesi] · \"Meclis 1920'de bu binada toplandı\", \"sıraları ve kürsüsüyle Genel Kurul salonu\" · genel bilgi · Ankara İl Kültür Turizm, yerinde",
+      "[Yazı · Uludağ Kebapçısı] · \"Ankara'nın eski kebapçılarından biri\", \"şıra\", \"masada dökülen tereyağı\" · iki günlük planın rehberiyle aynı kaynak; kuruluş yılı bulunamadı · işletme",
+      "[Yazı · Hacı Bayram / Augustus] · \"caminin bir duvarı tapınağa dayanıyor\", \"metin hâlâ okunabiliyor\" · genel bilgi; tapınağın içine girilmesi sınırlı olabilir · muze.gov.tr, yerinde",
+      "[Yazı · Hacı Bayram] · \"Namaz sırasında ziyaretçi alınmayabilir\" · genel cami kuralı, yumuşatıldı (Ürün #371); turistik ziyaret için ayrı tabela ya da sayfa bulunmadı · yerinde, Diyanet",
+      "[Yazı · Anadolu Medeniyetleri Müzesi] · \"eski bir Osmanlı çarşısında\", \"bahçedeki taş eserler\" · Mahmut Paşa Bedesteni ve Kurşunlu Han; bahçe sergisi doğrulanmadı · muze.gov.tr",
+      "[Yazı · Ankara Kalesi] · \"Akkale'den Anıtkabir görülür\" · bakış hattı doğrulanmadı · yerinde",
+      "[Plan · g1.d7 Ankara Kalesi] · osm yok · iki günlük gezide OSM noktası Google konumundan 273 m çıktı; konum google_30g (Ürün kararı #366)",
+      "[Rehberler] · bu gezide yeni rehber yok; 7 durağın rehberi ankarada-iki-gun ile ortak ve BO'da dolu, doğrulanacakları o planda",
+      "[Plan · gün süresi] · kuru yükleme 486 dk verdi (Anıtkabir → Ulus taksi ayağı 41 dk yürüme sayılıyor); Uludağ 45 dk'ya indirildi, beklenen ~471 dk · Kale'ye varış kışın gün batımı civarı, yazıda belirtildi"
+    ],
+    "fotograf_onerileri": [
+      {
+        "ne": "Kapak (3:2): Anıtkabir, Aslanlı Yol'dan anıta",
+        "altyazi": "Anıtkabir, Rasattepe",
+        "arama": "Anıtkabir Wikimedia Commons"
+      },
+      {
+        "ne": "Akkale'den şehir, akşamüstü",
+        "altyazi": "Kale'den Ankara",
+        "arama": "Ankara Castle Akkale Commons"
+      },
+      {
+        "ne": "Augustus Tapınağı ve Hacı Bayram Veli Camii yan yana",
+        "altyazi": "Ulus'ta iki çağ",
+        "arama": "Temple of Augustus Ankara Commons"
+      }
+    ],
+    "varsayimlar": [
+      "Günübirlik: takvim cumartesi; pazartesi Kurtuluş Savaşı Müzesi kapalı (yazıda not var)",
+      "Kurtuluş Savaşı Müzesi kışın 09:00–17:00, gişe 16:30 (turkishmuseums.com); planda öğleden önce",
+      "Kaynaklar: Anıtkabir saatleri anitkabir.tsk.tr (ziyaret saatleri); Kurtuluş Savaşı Müzesi pazartesi kapalı, turkishmuseums.com (Ürün #371)",
+      "Anadolu Medeniyetleri Müzesi: kapalı gün yok, kışın 08:30–17:30, gişe 16:45 (Ürün #371 doğruladı); plandaki ~14:35–16:05 yetişiyor",
+      "Bu gezi ankarada-iki-gun yüklendikten sonra yüklenir: şehir ve 7 rehber o gezide açıldı (sehir.slug)",
+      "Yeni Google araştırma isteği yok: 7 durağın place_id'si ve osm'i ankarada-iki-gun'un kısa listesinden",
+      "Anıtkabir saatleri (anitkabir.tsk.tr, Ürün #371): 1 Kasım–31 Ocak 09:00–16:00, 1 Şubat–14 Mayıs 09:00–16:30, 15 Mayıs–31 Ekim 09:00–17:00; kışın erken kapandığı için sabaha kondu",
+      "Kapak alanı (kapak.ara) #357 canlıya çıkınca toplu PR'la eklenecek"
+    ]
+  }
+}
