@@ -5,6 +5,7 @@ import { ActivityIndicator, Linking, Pressable, ScrollView, Share, StyleSheet, T
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { GeziPlani } from '@/components/icerik/GeziPlani';
+import { GeriAlBandi } from '@/components/listem/GeriAlBandi';
 import { Kalp } from '@/components/icerik/Kalp';
 import { MdYazi } from '@/components/icerik/MdYazi';
 import { GeziAl } from '@/components/icerik/GeziAl';
@@ -22,7 +23,8 @@ import { useIcerikMekanlari } from '@/features/icerik/mekanBilgileri';
 import { rehberKartIdleri, rehberMekanIdleri } from '@/features/icerik/rehber';
 import { cozumSebebi, olayYaz, useGezi, useGeziAlinma } from '@/features/icerik/sorgular';
 import { hedefSeyahatler, useYereEkle, varsayilanHedef } from '@/features/icerik/yerEkle';
-import { useMekanGuncelle, useMekanlar, useMekanSil } from '@/features/mekanlar/sorgular';
+import { useGeriAlinabilirSil } from '@/features/mekanlar/geriAlinabilirSil';
+import { useMekanGuncelle, useMekanlar } from '@/features/mekanlar/sorgular';
 import { useSeyahatler } from '@/features/seyahatler/sorgular';
 import { seyahatAdi } from '@/features/sihirbaz/sihirbaz';
 import type { HafifYer } from '@/features/yerler/api';
@@ -39,7 +41,7 @@ import { baslikStili, bosluk, renk, yazi } from '@/theme';
 
 type Sekme = 'plan' | 'yazi';
 /** Eklenecek / çıkarılacak mekan (durak satırı ya da yazıdaki mekan kartı). */
-type Yer = { anahtar: string; place_id: string; primary_type: string | null; lat: number; lng: number; dakika?: number };
+type Yer = { anahtar: string; place_id: string; ad: string; primary_type: string | null; lat: number; lng: number; dakika?: number };
 
 /**
  * #97 B → #143 (kanvas 17 · 18 · 19): önerilen gezi tek sayfa — kapak (geri / kalp / paylaş, "2 GÜNLÜK GEZİ", "N kez alındı",
@@ -59,6 +61,7 @@ export default function GeziEkrani() {
   const [yapisik, setYapisik] = useState(false);
   const [alAcik, setAlAcik] = useState(false);
   const [alHata, setAlHata] = useState<string | null>(null);
+  const [altCubukH, setAltCubukH] = useState(88);
 
   // KK3: hedef seyahat — kullanıcı seçtiyse o, değilse aynı şehirdeki en yakın tarihli seyahat.
   const seyahatler = useSeyahatler();
@@ -67,9 +70,18 @@ export default function GeziEkrani() {
   const hedef = hedefler.find((s) => s.id === secilenHedefId) ?? varsayilanHedef(hedefler, gezi.data?.sehirler?.ad);
   const [hedefMenusu, setHedefMenusu] = useState<{ bekleyen: Yer | null } | null>(null);
   const hedefMekanlar = useMekanlar(hedef?.id);
-  const listedeki = (placeId: string) => hedefMekanlar.data?.find((m) => m.place_id === placeId);
+  // #387: ✓ ile çıkarılan mekan 5 sn "Geri al" bandında bekler; o sürede listede sayılmaz (düğme + olur).
+  // #387 inceleme 2: silme hatası alt çubuk yerine bant yerinde (panel açıkken de görünür), 3,5 sn sonra kalkar.
+  const [silHata, setSilHata] = useState<string | null>(null);
+  const geriAlinabilir = useGeriAlinabilirSil(hedef?.id, () => setSilHata(t('listem.hata')));
+  useEffect(() => {
+    if (!silHata) return;
+    const z = setTimeout(() => setSilHata(null), 3500);
+    return () => clearTimeout(z);
+  }, [silHata]);
+  const cikan = geriAlinabilir.bekleyen;
+  const listedeki = (placeId: string) => hedefMekanlar.data?.find((m) => m.place_id === placeId && m.id !== cikan?.mekanId);
   const ekle = useYereEkle();
-  const sil = useMekanSil(hedef?.id ?? '');
   const guncelle = useMekanGuncelle(hedef?.id ?? '');
   const [mesgulId, setMesgulId] = useState<string | null>(null);
 
@@ -136,17 +148,11 @@ export default function GeziEkrani() {
     }
   };
   // KK3: ✓ → listeden çıkar; + → hedef seyahate ekle; hedef yoksa önce "Hangi seyahate?".
+  // #387 KK1: ✓ hemen silmez; bant kapanınca silinir. Bant açıkken aynı mekana + basılırsa çıkarma geri alınır.
   const degistir = async (y: Yer) => {
     const m = listedeki(y.place_id);
-    if (m && hedef) {
-      setMesgulId(y.anahtar);
-      try {
-        await sil.mutateAsync(m.id);
-      } finally {
-        setMesgulId(null);
-      }
-      return;
-    }
+    if (m && hedef) return geriAlinabilir.cikar(m, y.ad);
+    if (hedef && cikan?.placeId === y.place_id) return geriAlinabilir.geriAl();
     if (hedef) return hedefeEkle(y, hedef.id);
     setHedefMenusu({ bekleyen: y });
   };
@@ -158,7 +164,7 @@ export default function GeziEkrani() {
       setAlHata(canli.isPending ? t('anasayfa.cozuluyor') : t('anasayfa.ekleHataSebep', { sebep: sebep === 'bulunamadi' || !sebep ? t('anasayfa.bulunamadi') : sebep }));
       return null;
     }
-    return { anahtar: d.id, place_id: pid, primary_type: d.kategori, lat: d.lat, lng: d.lng, dakika: d.sure_dk };
+    return { anahtar: d.id, place_id: pid, ad: d.ad, primary_type: d.kategori, lat: d.lat, lng: d.lng, dakika: d.sure_dk };
   };
   const durakArti = (d: GeziDuragi) => {
     const y = durakYeri(d);
@@ -205,7 +211,7 @@ export default function GeziEkrani() {
     if (!bilgi) return null;
     const { hafif, durak } = bilgi;
     const foto = yaziMekan.mekan(placeId)?.foto ?? (durak ? canli.data?.get(durak.id)?.foto_uri : null) ?? yaziMekan.foto(placeId);
-    const y: Yer = { anahtar: placeId, place_id: placeId, primary_type: hafif.primary_type, lat: hafif.lat, lng: hafif.lng, dakika: durak?.sure_dk };
+    const y: Yer = { anahtar: placeId, place_id: placeId, ad: hafif.ad, primary_type: hafif.primary_type, lat: hafif.lat, lng: hafif.lng, dakika: durak?.sure_dk };
     return (
       <Pressable accessibilityRole="button" onPress={() => paneliAc(placeId, hafif, listedeki(placeId)?.default_minutes ?? durak?.sure_dk)} style={({ pressed }) => [s.kart, pressed && { opacity: 0.85 }]}>
         <View style={s.kartFoto}>{foto ? <Image source={{ uri: foto }} style={StyleSheet.absoluteFill} contentFit="cover" transition={150} /> : null}</View>
@@ -322,7 +328,7 @@ export default function GeziEkrani() {
 
       {yapisik ? <View style={[s.yapisik, { paddingTop: kenar.top + 6 }]}>{segment}</View> : null}
 
-      <View style={[s.altCubuk, { paddingBottom: Math.max(kenar.bottom, 12) + 8 }]}>
+      <View style={[s.altCubuk, { paddingBottom: Math.max(kenar.bottom, 12) + 8 }]} onLayout={(e) => setAltCubukH(e.nativeEvent.layout.height)}>
         {alHata && !alAcik ? <Text style={s.hata}>{alHata}</Text> : null}
         <View style={s.altSatir}>
           <View style={{ flex: 1, minWidth: 0 }}>
@@ -379,7 +385,7 @@ export default function GeziEkrani() {
               baglam="kesfet"
               icinde={!!panelMekani}
               mesgul={mesgulId === panel.placeId}
-              onCta={() => degistir({ anahtar: panel.placeId, place_id: panel.placeId, primary_type: panel.hafif.primary_type, lat: panel.hafif.lat, lng: panel.hafif.lng, dakika: panel.dakika })}
+              onCta={() => degistir({ anahtar: panel.placeId, place_id: panel.placeId, ad: panel.hafif.ad, primary_type: panel.hafif.primary_type, lat: panel.hafif.lat, lng: panel.hafif.lng, dakika: panel.dakika })}
               onYolTarifi={() =>
                 Linking.openURL(`https://www.google.com/maps/dir/?api=1&destination=${panel.hafif.lat},${panel.hafif.lng}&destination_place_id=${encodeURIComponent(panel.placeId)}&travelmode=walking`)
               }
@@ -388,6 +394,8 @@ export default function GeziEkrani() {
           </BolumSiniri>
         </View>
       ) : null}
+      {/* #387 inceleme 1: "Geri al" bandı alt çubuğun hemen üstünde ve mekan panelinden SONRA çizilir (paneldeki ✓'te de görünür). */}
+      {cikan ? <GeriAlBandi metin={cikan.metin} onGeriAl={geriAlinabilir.geriAl} alt={altCubukH + 8} /> : silHata ? <GeriAlBandi metin={silHata} alt={altCubukH + 8} /> : null}
     </View>
   );
 }
