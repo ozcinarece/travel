@@ -118,7 +118,7 @@ export default function YerlerEkrani() {
         {!yerler.isPending && liste.length === 0 ? <Text style={s.bos}>{t('yerler.bos')}</Text> : null}
       </ScrollView>
       {geriAlinabilir.bekleyen ? (
-        <GeriAlBandi metin={geriAlinabilir.bekleyen.metin} onGeriAl={geriAlinabilir.geriAl} />
+        <GeriAlBandi metin={geriAlinabilir.bekleyen.metin} olay={geriAlinabilir.bekleyen} onGeriAl={geriAlinabilir.geriAl} />
       ) : bildirim ? (
         <View style={s.bildirim} pointerEvents="none">
           <Text style={s.bildirimMetin}>{bildirim}</Text>

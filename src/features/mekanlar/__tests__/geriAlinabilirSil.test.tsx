@@ -132,4 +132,19 @@ describe('#387 KK4 bant ekran okuyucu', () => {
       duyuru.mockRestore();
     }
   });
+  it('#410 inceleme 2: aynı metinle yeni çıkarma (yeni olay) yeniden duyurulur; olay aynıysa duyurulmaz', () => {
+    const duyuru = jest.spyOn(AccessibilityInfo, 'announceForAccessibility').mockImplementation(() => undefined);
+    try {
+      const ilk = { metin: 'Atlıhan listeden çıktı' };
+      const { rerender } = render(<GeriAlBandi metin={ilk.metin} olay={ilk} onGeriAl={() => undefined} />);
+      rerender(<GeriAlBandi metin={ilk.metin} olay={ilk} onGeriAl={() => undefined} />);
+      expect(duyuru).toHaveBeenCalledTimes(1);
+      const ikinci = { metin: 'Atlıhan listeden çıktı' };
+      rerender(<GeriAlBandi metin={ikinci.metin} olay={ikinci} onGeriAl={() => undefined} />);
+      expect(duyuru).toHaveBeenCalledTimes(2);
+      expect(duyuru).toHaveBeenLastCalledWith('Atlıhan listeden çıktı. Geri al');
+    } finally {
+      duyuru.mockRestore();
+    }
+  });
 });

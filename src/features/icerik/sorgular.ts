@@ -247,7 +247,8 @@ export function useGezilerIle(ids: string[]) {
     enabled: ids.length > 0,
     staleTime: GUN_MS,
     queryFn: async () => {
-      const { data, error } = await supabase.from('geziler').select(GEZI_ALANLARI).in('id', ids);
+      // #395 KK2: kapaksız kartın tonu için `amaclar`.
+      const { data, error } = await supabase.from('geziler').select(`${GEZI_ALANLARI}, amaclar`).in('id', ids);
       if (error) throw error;
       return data as unknown as Gezi[];
     },

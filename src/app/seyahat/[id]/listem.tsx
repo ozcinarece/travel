@@ -306,7 +306,7 @@ function Listem({ seyahat, gunler, duraklar, mekanlar, konaklamalar }: { seyahat
           : null}
       </ScrollView>
 
-      {bekleyen ? <GeriAlBandi metin={bekleyen.metin} onGeriAl={geriAl} /> : bildirim ? <GeriAlBandi metin={bildirim} /> : null}
+      {bekleyen ? <GeriAlBandi metin={bekleyen.metin} olay={bekleyen} onGeriAl={geriAl} /> : bildirim ? <GeriAlBandi metin={bildirim} /> : null}
 
       {panelMekan ? (
         <View style={StyleSheet.absoluteFill} pointerEvents="box-none">
