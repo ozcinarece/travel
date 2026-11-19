@@ -147,7 +147,9 @@
           "ad": "Kurtuluş Savaşı Müzesi",
           "sure_dk": 60,
           "sure_gerekcesi": "varsayılan 45; Genel Kurul salonu ve odalar",
-          "kapali_gunler": [],
+          "kapali_gunler": [
+            "pazartesi"
+          ],
           "rehber": "kurtulus-savasi-muzesi",
           "amaclar": [
             "kultur_tarih"
@@ -182,7 +184,7 @@
   ],
   "notlar": {
     "dogrulanacaklar": [
-      "[Plan · Anadolu Medeniyetleri Müzesi, Kurtuluş Savaşı Müzesi] · kapali_gunler [] · OSM opening_hours Mo-Su; bayram arifelerinde ve mevsimde değişebilir · muze.gov.tr, Ankara İl Kültür Turizm",
+      "[Plan · Anadolu Medeniyetleri Müzesi] · kapali_gunler [] · OSM opening_hours Mo-Su; bayram arifelerinde ve mevsimde değişebilir · muze.gov.tr",
       "[Plan · Rahmi M. Koç Müzesi] · kapali_gunler [\"pazartesi\"] · OSM 'Mo off' · rmk-museum.org.tr/ankara",
       "[Plan · Roma Hamamı] · kapali_gunler [\"pazartesi\"] · OSM 'Tu-Su' · muze.gov.tr",
       "[Plan · Augustus Tapınağı] · kapali_gunler [] · OSM'de saat yok; turkishmuseums sayfası ziyaret saati vermiyor · muze.gov.tr",
@@ -204,7 +206,7 @@
       "[Plan · Anıtkabir] · 2. gün Anıtkabir'e ~14:25 varış, ~16:25 bitiş · kış kapanış saati kısa olabilir (basında 1 Kasım–31 Ocak için 16:00 civarı geçiyor, resmî sayfadan doğrulanmadı); yazıda ve rehberde saatsiz 'kışın erken kapanır' notu var · anitkabir.tsk.tr",
       "[Rehber · Rahmi M. Koç Müzesi] · \"Ankara'nın eski fotoğraflarıyla kurulan şehir bölümü\", \"içine girilebilen araçlar\" · doğrulanmadı · rmk-museum.org.tr/ankara",
       "[Rehber · Kurtuluş Savaşı Müzesi] · \"İstiklal Marşı'na ayrılmış oda\" · doğrulanmadı · Ankara İl Kültür Turizm, yerinde",
-      "[Rehber · Kurtuluş Savaşı Müzesi] · kapalı gün · resmî sayfada ziyaret günü bulunamadı (rehber metninden çıkarıldı) · Ankara İl Kültür Turizm",
+      "[Plan · Kurtuluş Savaşı Müzesi] · kapali_gunler [\"pazartesi\"] · Bakanlık sayfası (turkishmuseums.com, Ürün #371): pazartesi kapalı, kışın 09:00–17:00, gişe 16:30; OSM Mo-Su yanlış · durak 2. gün (pazar), plan etkilenmez",
       "[Plan · g1.d2 Ankara Kalesi, g1.d6 Hamamönü] · osm alanı kaldırıldı · kuru yüklemede OSM noktası Google konumundan 273 m ve 160 m uzak çıktı (sınır 150); konum google_30g tutulur, sonra osm-esle ya da BO'da elle · Ürün kararı #366"
     ],
     "fotograf_onerileri": [
@@ -226,7 +228,7 @@
     ],
     "varsayimlar": [
       "Hafta sonu: 1. gün cumartesi",
-      "Pazartesi kapalı müzeler (Rahmi M. Koç, Roma Hamamı) hafta sonuna kondu",
+      "Pazartesi kapalı müzeler (Rahmi M. Koç, Roma Hamamı, Kurtuluş Savaşı Müzesi) hafta sonuna kondu",
       "Hamamönü için 'Hamamönü' sorgusunun Google kaydı işletme durumu boş geldi; 'Hamamönü Tarihi Ankara Evleri' kaydı kullanıldı",
       "Tahtakale Kahvecisi yazıya alınmadı: Google kaydı kalıcı kapalı",
       "Kapak alanı (kapak.ara) #357 canlıya çıkınca toplu PR'la eklenecek"
