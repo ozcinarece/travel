@@ -40,14 +40,22 @@ export function KategoriIkonu({ tip, boyut }: { tip: string | null | undefined; 
 }
 
 /**
- * #348 inceleme 4 (kanvas 29i · D): kategorinin koyu rengi, çizgi glifi için. Müze #5B34B8 kanvastan; diğer kategoriler için
- * kanvasta ayrı koyu ton yok, Temel kanvasındaki glif rengi (KATEGORI_PIN) kullanılır.
+ * #352 (kanvas 29i · D2 "Fotoğraf yok · 8 kategorinin tonu"): çizgi glifinin koyu tonu. Yalnız bu glif içindir; harita pin
+ * renkleri (`KATEGORI_PIN`) ve pin PNG'leri değişmez. Her ton beyazda ve kendi `kutuRengi` zemininde ≥ 4,5:1.
  */
-const KATEGORI_KOYU: Partial<Record<PinKategorisi, string>> = { muze: '#5B34B8' };
+export const KATEGORI_KOYU: Record<PinKategorisi, string> = {
+  gezilecek: '#2350C4',
+  muze: '#5B34B8',
+  ibadet: '#4B5563',
+  yemek: '#B23A0A',
+  kafe: '#7A4520',
+  park: '#16703C',
+  manzara: '#0369A1',
+  alisveris: '#A3154D',
+};
 
 export function kategoriKoyuRengi(tip: string | null | undefined): string {
-  const k = pinKategorisi(tip);
-  return KATEGORI_KOYU[k] ?? KATEGORI_PIN[k].renk;
+  return KATEGORI_KOYU[pinKategorisi(tip)];
 }
 
 /** #348 inceleme 4: kategori ikonu `Ikon` çizgi glifi olarak (renkli pin PNG'si değil); 2 px çizgi, koyu kategori rengi. */

@@ -38,8 +38,8 @@ describe('KategoriGlifi (D)', () => {
     expect(svg.length).toBeGreaterThan(0);
     expect((svg[0].props as { strokeWidth?: number }).strokeWidth).toBe(2);
   });
-  it('koyu renk: Müze kanvastan, diğerleri Temel kanvasındaki glif rengi', () => {
+  it('koyu renk: Müze kanvastan; diğer kategoriler artık pin rengine düşmez (#352)', () => {
     expect(kategoriKoyuRengi('museum')).toBe('#5B34B8');
-    expect(kategoriKoyuRengi('restaurant')).toBe(KATEGORI_PIN.yemek.renk);
+    expect(kategoriKoyuRengi('restaurant')).not.toBe(KATEGORI_PIN.yemek.renk);
   });
 });

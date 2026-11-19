@@ -130,7 +130,7 @@ export function MekanPaneli(p: MekanPaneliProps) {
   const rehberMd = icerikYeri.data?.rehber_md?.trim() || null;
   const rehberKapak = kapakVeAtif([icerikYeri.data ?? {}]);
   /** Rehberli yer = `yerler`'de satırı olan yer (BO'da rehberi yazılan). */
-  const fotoHali = fotoAlaniHali({ rehberKapak: !!rehberKapak.uri, rehberli: !!icerikYeri.data, rehberBekliyor: icerikYeri.isPending, googleFotolar: yer?.fotolar.length ?? 0, hafifFoto: !!p.hafif?.foto_uri });
+  const fotoHali = fotoAlaniHali({ rehberKapak: !!rehberKapak.uri, rehberli: !!icerikYeri.data, rehberBekliyor: icerikYeri.isPending, rehberHata: icerikYeri.isError, googleFotolar: yer?.fotolar.length ?? 0, hafifFoto: !!p.hafif?.foto_uri });
   const sekme = panelSekmesi(durum, !!rehberMd);
   const hal = durum.hal === 'kapali' ? 'katli' : durum.hal;
   const googleUrl = yer?.google_maps_uri ?? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(ad || 'yer')}&query_place_id=${encodeURIComponent(p.placeId)}`;
@@ -181,12 +181,10 @@ export function MekanPaneli(p: MekanPaneliProps) {
                     <Image source={{ uri: rehberKapak.uri }} style={StyleSheet.absoluteFill} contentFit="cover" transition={150} />
                     {rehberKapak.atif ? <KapakAtfi atif={rehberKapak.atif} /> : null}
                   </View>
-                ) : fotoHali === 'yok' ? (
-                  // #348 inceleme 3 (kanvas 29i · D): rehberli yerin kendi kapağı yoksa Google fotoğrafı kullanılmaz, doğrudan D.
+                ) : fotoYokGosterilir(fotoHali) ? (
+                  // #348 inceleme 3: rehberli yerin kendi kapağı yoksa Google fotoğrafı kullanılmaz, doğrudan D.
+                  // #352 KK2: rehberli mi bilinmiyorken (sorgu bekliyor ya da hata verdi, çevrimdışı dahil) de D; Google fotoğrafı yanıp sönmez, gelince yerine geçer.
                   <FotoYok tip={tip} />
-                ) : fotoHali === 'bekliyor' ? (
-                  // Rehberli mi henüz bilinmiyor: Google fotoğrafı yanıp sönmesin diye yalnız kategori zemini.
-                  <View style={[StyleSheet.absoluteFill, { backgroundColor: kutuRengi(tip) }]} />
                 ) : fotoHali === 'kaydirma' && yer ? (
                   <FotoKaydirma yer={yer} genislik={alanW || ekran.width} onAc={() => galeriAc(true)} />
                 ) : fotoHali === 'hafif' && p.hafif?.foto_uri ? (
@@ -314,21 +312,27 @@ export type FotoAlaniHali = 'kapak' | 'yok' | 'bekliyor' | 'kaydirma' | 'hafif';
 /**
  * Mekan panelinin fotoğraf alanı (kanvas 29i · C/D). Rehberli yer (= `yerler`'de satırı var): kendi kapağı ya da D; Google
  * fotoğrafı kullanılmaz (#348 inceleme 3). Rehberli olmayan yer bugünkü gibi: Google fotoğrafları, yoksa hafif fotoğraf, yoksa D.
- * Rehberli mi henüz bilinmiyorsa yalnız zemin (Google fotoğrafı yanıp sönmesin).
+ * Rehberli mi bilinmiyorsa — sorgu bekliyor ya da hata verdi (çevrimdışında yeniden denemeler bitince hata olur; uygulamada
+ * `onlineManager` bağlı değil) — D hali (#352 KK2); Google fotoğrafı yanıp sönmez, rehber gelince yerine geçer.
  */
-export function fotoAlaniHali(x: { rehberKapak: boolean; rehberli: boolean; rehberBekliyor: boolean; googleFotolar: number; hafifFoto: boolean }): FotoAlaniHali {
+export function fotoAlaniHali(x: { rehberKapak: boolean; rehberli: boolean; rehberBekliyor: boolean; rehberHata?: boolean; googleFotolar: number; hafifFoto: boolean }): FotoAlaniHali {
   if (x.rehberKapak) return 'kapak';
   if (x.rehberli) return 'yok';
-  if (x.rehberBekliyor) return 'bekliyor';
+  if (x.rehberBekliyor || x.rehberHata) return 'bekliyor';
   if (x.googleFotolar > 0) return 'kaydirma';
   return x.hafifFoto ? 'hafif' : 'yok';
+}
+
+/** #352 KK2: D hali hem "fotoğraf yok" hem "rehberli mi bekleniyor" (çevrimdışı dahil) için gösterilir. */
+export function fotoYokGosterilir(hali: FotoAlaniHali): boolean {
+  return hali === 'yok' || hali === 'bekliyor';
 }
 
 /**
  * #345 KK5 / #348 inceleme 4 (kanvas 29i · D): fotoğraf yok → zemin `kutuRengi`, ortada 88 px beyaz kare, içinde kategorinin
  * çizgi glifi (44 px, 2 px, kategorinin koyu rengi). Renkli pin PNG'si kullanılmaz; atıf satırı yok.
  */
-function FotoYok({ tip }: { tip: string | null }) {
+export function FotoYok({ tip }: { tip: string | null }) {
   return (
     <View style={[StyleSheet.absoluteFill, s.fotoYok, { backgroundColor: kutuRengi(tip) }]} testID="foto-yok">
       <View style={s.fotoYokKare}>
