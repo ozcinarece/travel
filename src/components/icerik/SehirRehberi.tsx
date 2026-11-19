@@ -6,6 +6,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { GeriHapi } from '@/components/harita/HaritaEkrani';
 import { GeziKarti } from '@/components/icerik/GeziKarti';
+import { GeriAlBandi } from '@/components/listem/GeriAlBandi';
 import { MdYazi } from '@/components/icerik/MdYazi';
 import { MekanPaneli } from '@/components/mekan/MekanPaneli';
 import { Buton } from '@/components/ui/Buton';
@@ -15,7 +16,8 @@ import { icerikHafif } from '@/features/icerik/fotolar';
 import { useIcerikMekanlari, type BilinenMekanlar } from '@/features/icerik/mekanBilgileri';
 import { aktifBolum, bolumYazisi, okumaOrani, rehberKartIdleri, rehberMekanIdleri } from '@/features/icerik/rehber';
 import { useGeziler, useSehirRehberi, useSehirYerleri } from '@/features/icerik/sorgular';
-import { useMekanEkle, useMekanGuncelle, useMekanlar, useMekanSil } from '@/features/mekanlar/sorgular';
+import { useGeriAlinabilirSil } from '@/features/mekanlar/geriAlinabilirSil';
+import { useMekanEkle, useMekanGuncelle, useMekanlar } from '@/features/mekanlar/sorgular';
 import type { HafifYer } from '@/features/yerler/api';
 import { ATIF_BASLIK_BOSLUGU, KapakAtfi } from '@/components/icerik/KapakAtfi';
 import { kapakVeAtif } from '@/features/icerik/kapakAtfi';
@@ -66,17 +68,21 @@ export function SehirRehberi({ sehir, sehirlerYukleniyor, onGeri, seyahat, onReh
   // Seyahat listesi: kartta EkleDugmesi (Listeye ekle / Listende ✓), mekan rehberinde aynı.
   const mekanlar = useMekanlar(seyahat?.id);
   const ekle = useMekanEkle(seyahat?.id ?? '');
-  const sil = useMekanSil(seyahat?.id ?? '');
   const guncelle = useMekanGuncelle(seyahat?.id ?? '');
-  const listedeki = (placeId: string) => mekanlar.data?.find((m) => m.place_id === placeId);
+  // #387: ✓ ile çıkarılan mekan 5 sn "Geri al" bandında bekler; o sürede listede sayılmaz.
+  const geriAlinabilir = useGeriAlinabilirSil(seyahat?.id);
+  const cikanId = geriAlinabilir.bekleyen?.mekanId;
+  const listedeki = (placeId: string) => mekanlar.data?.find((m) => m.place_id === placeId && m.id !== cikanId);
   const [mesgulId, setMesgulId] = useState<string | null>(null);
   const degistir = async (y: HafifYer) => {
     if (!seyahat) return;
+    const m = listedeki(y.place_id);
+    // #387 KK1: ✓ hemen silmez (bant kapanınca silinir); bant açıkken aynı mekana + basılırsa çıkarma geri alınır.
+    if (m) return geriAlinabilir.cikar(m, y.ad);
+    if (geriAlinabilir.bekleyen?.placeId === y.place_id) return geriAlinabilir.geriAl();
     setMesgulId(y.place_id);
     try {
-      const m = listedeki(y.place_id);
-      if (m) await sil.mutateAsync(m.id);
-      else await ekle.mutateAsync({ place_id: y.place_id, primary_type: y.primary_type, lat: y.lat, lng: y.lng });
+      await ekle.mutateAsync({ place_id: y.place_id, primary_type: y.primary_type, lat: y.lat, lng: y.lng });
     } finally {
       setMesgulId(null);
     }
@@ -261,6 +267,7 @@ export function SehirRehberi({ sehir, sehirlerYukleniyor, onGeri, seyahat, onReh
           />
         </View>
       ) : null}
+      {geriAlinabilir.bekleyen ? <GeriAlBandi metin={geriAlinabilir.bekleyen.metin} onGeriAl={geriAlinabilir.geriAl} alt={kenar.bottom + 16} /> : null}
     </View>
   );
 }

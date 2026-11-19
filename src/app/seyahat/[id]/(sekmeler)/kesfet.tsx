@@ -13,8 +13,11 @@ import { GoogleAtfi } from '@/components/yerler/GoogleAtfi';
 import type { Konaklama } from '@/features/konaklama/plan';
 import { useKonaklamalar } from '@/features/konaklama/sorgular';
 import { GrupPenceresi } from '@/components/davet/GrupPenceresi';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { GeriAlBandi } from '@/components/listem/GeriAlBandi';
 import { MekanPaneli } from '@/components/mekan/MekanPaneli';
-import { geciciMi, useMekanEkle, useMekanGuncelle, useMekanlar, useMekanSil, useUyeler, type EklemeKaynagi } from '@/features/mekanlar/sorgular';
+import { useGeriAlinabilirSil } from '@/features/mekanlar/geriAlinabilirSil';
+import { geciciMi, useMekanEkle, useMekanGuncelle, useMekanlar, useUyeler, type EklemeKaynagi } from '@/features/mekanlar/sorgular';
 import { geziyeGit } from '@/features/gezi/gezinti';
 import { useSeyahatId } from '@/features/seyahatler/baglam';
 import { useSeyahat } from '@/features/seyahatler/sorgular';
@@ -64,13 +67,13 @@ const ILK_ZOOM = 13;
 
 function Kesfet({ seyahat, konaklamalar, ilkMekan, cekmeceIstegi, cipIstegi }: { seyahat: Seyahat; konaklamalar: Konaklama[]; ilkMekan?: string; cekmeceIstegi: 'rehber' | null; cipIstegi: string | null }) {
   const mekanlar = useMekanlar(seyahat.id);
+  const altKenar = useSafeAreaInsets().bottom;
   const queryClient = useQueryClient();
   const uyeler = useUyeler(seyahat.id);
   // #137 KK6: Grup penceresi (yüzlere dokununca; Grup sekmesi kalktı).
   const [grupAcik, setGrupAcik] = useState(false);
   // #317 KK3: iyimser ekleme — satır ve pin hemen tik alır, hata olursa geri döner.
   const ekle = useMekanEkle(seyahat.id, { iyimser: true });
-  const sil = useMekanSil(seyahat.id);
   const guncelle = useMekanGuncelle(seyahat.id);
 
   const [sorgu, setSorgu] = useState('');
@@ -161,10 +164,15 @@ function Kesfet({ seyahat, konaklamalar, ilkMekan, cekmeceIstegi, cipIstegi }: {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cipIstegi]);
 
-  const havuz = useMemo(() => mekanlar.data ?? [], [mekanlar.data]);
+  // #387: ✓ ile çıkarılan mekan 5 sn "Geri al" bandında bekler; o sürede listede sayılmaz (pin öneriye döner).
+  const geriAlinabilir = useGeriAlinabilirSil(seyahat.id, () => setHata(t('kesfet.ekleHata')));
+  const cikanId = geriAlinabilir.bekleyen?.mekanId;
+  const tumHavuz = useMemo(() => mekanlar.data ?? [], [mekanlar.data]);
+  const havuz = useMemo(() => (cikanId ? tumHavuz.filter((m) => m.id !== cikanId) : tumHavuz), [tumHavuz, cikanId]);
   // #30: listedeki pinlerin altında ad etiketi (canlı ad, PRD §7).
-  // #172 KK3: listedeki pinlerin etiketinde ve çekmecede ★ puan — Enterprise maske (Keşfet'te puan kalır, KK9).
-  const havuzAdlari = useHafifYerler(havuz.map((m) => m.place_id), { puan: true });
+  // #172 KK3: listedeki pinlerin etiketinde ve çekmecede ★ puan — Enterprise maske (Keşfet'te puan kalır, KK9). Bekleyen
+  // çıkarma istek kümesini değiştirmesin diye tüm liste (#387).
+  const havuzAdlari = useHafifYerler(tumHavuz.map((m) => m.place_id), { puan: true });
   const uyeAdi = (uid: string | null) => uyeler.data?.find((u) => u.user_id === uid)?.display_name ?? '';
   const oneriListesi: HafifYer[] = yakin.yerler;
   const havuzIdleri = useMemo(() => new Set(havuz.map((m) => m.place_id)), [havuz]);
@@ -326,6 +334,8 @@ function Kesfet({ seyahat, konaklamalar, ilkMekan, cekmeceIstegi, cipIstegi }: {
   // #317 KK3: iyimser (kanca listeye hemen yazar, hatada geri alır); KK4: `kaynak` `yer_eklendi` olayına yazılır.
   const listeyeEkle = async (y: HafifYer, kaynak: EklemeKaynagi) => {
     setHata(null);
+    // #387: bant açıkken aynı mekan yeniden eklenirse çıkarma geri alınır (silinmemişti).
+    if (geriAlinabilir.bekleyen?.placeId === y.place_id) return geriAlinabilir.geriAl();
     try {
       await ekle.mutateAsync({
         place_id: y.place_id,
@@ -339,15 +349,12 @@ function Kesfet({ seyahat, konaklamalar, ilkMekan, cekmeceIstegi, cipIstegi }: {
       setHata(agHatasi(e) ? t('geziSayfasi.cevrimdisi.baglantiYok') : t('kesfet.ekleHata'));
     }
   };
+  // #387 KK1: hemen silinmez; 5 sn "Geri al" bandı, silme bant kapanınca (hata olursa katmanda "Eklenemedi").
   const listedenCikar = async (m: Mekan) => {
     // #317 KK3: iyimser satır henüz sunucuda değil; ekleme bitmeden çıkarılamaz.
     if (geciciMi(m)) return;
     setHata(null);
-    try {
-      await sil.mutateAsync(m.id);
-    } catch {
-      setHata(t('kesfet.ekleHata'));
-    }
+    geriAlinabilir.cikar(m, havuzAdlari.data?.[m.place_id]?.ad ?? seciliHafif?.ad ?? '');
   };
 
   // #29: pine dokunmak seçimdir (ekleme karttan). #32: harita kaymaz.
@@ -676,12 +683,13 @@ function Kesfet({ seyahat, konaklamalar, ilkMekan, cekmeceIstegi, cipIstegi }: {
             onSure={sureDegistir}
             baglam="kesfet"
             icinde={!!seciliMekan}
-            mesgul={sil.isPending || (!!seciliMekan && geciciMi(seciliMekan))}
+            mesgul={!!seciliMekan && geciciMi(seciliMekan)}
             onCta={() => (seciliMekan ? listedenCikar(seciliMekan) : seciliHafif && listeyeEkle(seciliHafif, secimKaynagi(secim.kaynak)))}
             onYolTarifi={yolTarifi}
             onKapat={() => setSecim(null)}
           />
           ) : null}
+          {geriAlinabilir.bekleyen ? <GeriAlBandi metin={geriAlinabilir.bekleyen.metin} onGeriAl={geriAlinabilir.geriAl} alt={altKenar + 16} /> : null}
         </>
       }
       // #317 KK1: hatalar (ekleme, öneri, 429) ve "Bağlantı yok" çekmecenin ve panelin her halinde görünür.
