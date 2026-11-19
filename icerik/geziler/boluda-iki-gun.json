@@ -107,7 +107,6 @@
       "duraklar": [
         {
           "place_id": "ChIJs13emcRmnUARCbOVpuq01mk",
-          "osm": "node/2821261858",
           "ad": "Abant Gölü",
           "sure_dk": 150,
           "sure_gerekcesi": "varsayılan 45; göl çevresinde 7 km yürüyüş",
@@ -174,7 +173,7 @@
       "[Plan · Kadı Camii] · place_id ad sorgusuyla eşlendi, ayrıca adla kontrol edilmedi · BO'da haritadan",
       "[Plan · Gölcük, Kanaat Lokantası] · osm yok · Gölcük OSM'de su alanı (way/relation) ama hattın aday sorgusu natural=water getirmiyor; bu oturumdan Overpass/OSM'e erişim yok, kimlik okunamadı · BO'da elle ya da aday sorgusu genişleyince osm-esle",
       "[Plan · Kanaat Lokantası] · kapali_gunler [] kaynaksız; 2. gün pazar · OSM'de opening_hours yok, işletme sitesi bulunamadı · işletmeyi ara",
-      "[Plan · Abant Gölü] · osm node/3015469233 göl kaydının konumuna 150 m'den uzaksa kuru yükleme HATA verir; o durumda osm kaldırılacak",
+      "[Plan · Abant Gölü] · osm kaldırıldı: iki OSM adayı da (node/3015469233, node/2821261858) göl kaydının konumundan 150 m'den uzak çıktı (kuru yükleme, 19 Kasım); durak google_30g kalır, BO'da elle işaretlenebilir (#220 B)",
       "[Rehber · Bolu Müzesi] · 1976 kuruluş, 1981 açılış, Herakles heykeli, Hermes büstü, gladyatör steli, tuğla Roma mezarı, sikke ve etnografya salonu, bahçede lahitler · turkishmuseums.com · yerinde",
       "[Rehber · Yıldırım Bayezid Camii (Bolu)] · \"14. yüzyıl sonu\", \"yangın ve depremlerden sonra yeniden yapıldı\", \"iki minare\" · TDV İslâm Ansiklopedisi 'Bolu' çifte minareli Ulucami diyor, yeniden yapım tarihleri bulunamadı · Vakıflar Kastamonu Bölge Müdürlüğü",
       "[Rehber · Kadı Camii] · \"1499\", \"ahşap tavan ve son cemaat yeri\" · il listesindeki bilgi, birincil kaynak okunmadı · Vakıflar, yerinde",
