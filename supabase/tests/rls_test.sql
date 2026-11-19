@@ -880,6 +880,8 @@ insert into public.olaylar (tur, meta) values ('sihirbaz_bitti', null), ('plan_k
 -- #361 KK8 ana sayfa v5 olayları; bilinmeyen tür yine reddedilir.
 insert into public.olaylar (tur, hedef_id, meta) values ('ana_kart_acildi', null, '{"amac": "hepsi"}'), ('ana_ara', null, '{"sonuc": "gezi"}'), ('planlamaya_devam', null, null);
 select pg_temp.hata_bekle($$insert into public.olaylar (tur) values ('ana_bilinmeyen')$$, '23514');
+-- #396 KK7 Plan hazır davet olayı (kendi adına, seyahat kimliğiyle).
+insert into public.olaylar (tur, hedef_id) values ('plan_hazir_davet', '88888888-8888-4888-8888-000000000001');
 reset role;
 
 -- #138 Otomatik profil: ad/foto sağlayıcıdan, kullanıcı adı addan (alınmışsa sayı), Apple gizli ad → Gezgin; misafir alamaz; bir kez.
