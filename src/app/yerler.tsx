@@ -31,7 +31,11 @@ export default function YerlerEkrani() {
   const [mesgulId, setMesgulId] = useState<string | null>(null);
   const [bildirim, setBildirim] = useState<string | null>(null);
   // #387: ✓ ile çıkarılan mekan 5 sn "Geri al" bandında bekler; o sürede listede sayılmaz.
-  const geriAlinabilir = useGeriAlinabilirSil(hedef?.id, () => setBildirim(t('listem.hata')));
+  // #387 inceleme 2: silme hatası bandı da 3,5 sn sonra kalkar.
+  const geriAlinabilir = useGeriAlinabilirSil(hedef?.id, () => {
+    setBildirim(t('listem.hata'));
+    setTimeout(() => setBildirim((b) => (b === t('listem.hata') ? null : b)), 3500);
+  });
   const cikanId = geriAlinabilir.bekleyen?.mekanId;
   const hedefIdleri = useMemo(() => new Set((hedefMekanlar.data ?? []).filter((m) => m.id !== cikanId).map((m) => m.place_id)), [hedefMekanlar.data, cikanId]);
   const liste = useMemo(() => (yerler.data ?? []).filter((y) => !sehirId || y.sehir_id === sehirId), [yerler.data, sehirId]);

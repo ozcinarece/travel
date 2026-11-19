@@ -71,7 +71,14 @@ export default function GeziEkrani() {
   const [hedefMenusu, setHedefMenusu] = useState<{ bekleyen: Yer | null } | null>(null);
   const hedefMekanlar = useMekanlar(hedef?.id);
   // #387: ✓ ile çıkarılan mekan 5 sn "Geri al" bandında bekler; o sürede listede sayılmaz (düğme + olur).
-  const geriAlinabilir = useGeriAlinabilirSil(hedef?.id, () => setAlHata(t('listem.hata')));
+  // #387 inceleme 2: silme hatası alt çubuk yerine bant yerinde (panel açıkken de görünür), 3,5 sn sonra kalkar.
+  const [silHata, setSilHata] = useState<string | null>(null);
+  const geriAlinabilir = useGeriAlinabilirSil(hedef?.id, () => setSilHata(t('listem.hata')));
+  useEffect(() => {
+    if (!silHata) return;
+    const z = setTimeout(() => setSilHata(null), 3500);
+    return () => clearTimeout(z);
+  }, [silHata]);
   const cikan = geriAlinabilir.bekleyen;
   const listedeki = (placeId: string) => hedefMekanlar.data?.find((m) => m.place_id === placeId && m.id !== cikan?.mekanId);
   const ekle = useYereEkle();
@@ -388,7 +395,7 @@ export default function GeziEkrani() {
         </View>
       ) : null}
       {/* #387 inceleme 1: "Geri al" bandı alt çubuğun hemen üstünde ve mekan panelinden SONRA çizilir (paneldeki ✓'te de görünür). */}
-      {cikan ? <GeriAlBandi metin={cikan.metin} onGeriAl={geriAlinabilir.geriAl} alt={altCubukH + 8} /> : null}
+      {cikan ? <GeriAlBandi metin={cikan.metin} onGeriAl={geriAlinabilir.geriAl} alt={altCubukH + 8} /> : silHata ? <GeriAlBandi metin={silHata} alt={altCubukH + 8} /> : null}
     </View>
   );
 }

@@ -13,7 +13,6 @@ import { GoogleAtfi } from '@/components/yerler/GoogleAtfi';
 import type { Konaklama } from '@/features/konaklama/plan';
 import { useKonaklamalar } from '@/features/konaklama/sorgular';
 import { GrupPenceresi } from '@/components/davet/GrupPenceresi';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { GeriAlBandi } from '@/components/listem/GeriAlBandi';
 import { MekanPaneli } from '@/components/mekan/MekanPaneli';
 import { useGeriAlinabilirSil } from '@/features/mekanlar/geriAlinabilirSil';
@@ -67,7 +66,6 @@ const ILK_ZOOM = 13;
 
 function Kesfet({ seyahat, konaklamalar, ilkMekan, cekmeceIstegi, cipIstegi }: { seyahat: Seyahat; konaklamalar: Konaklama[]; ilkMekan?: string; cekmeceIstegi: 'rehber' | null; cipIstegi: string | null }) {
   const mekanlar = useMekanlar(seyahat.id);
-  const altKenar = useSafeAreaInsets().bottom;
   const queryClient = useQueryClient();
   const uyeler = useUyeler(seyahat.id);
   // #137 KK6: Grup penceresi (yüzlere dokununca; Grup sekmesi kalktı).
@@ -349,7 +347,7 @@ function Kesfet({ seyahat, konaklamalar, ilkMekan, cekmeceIstegi, cipIstegi }: {
       setHata(agHatasi(e) ? t('geziSayfasi.cevrimdisi.baglantiYok') : t('kesfet.ekleHata'));
     }
   };
-  // #387 KK1: hemen silinmez; 5 sn "Geri al" bandı, silme bant kapanınca (hata olursa katmanda "Eklenemedi").
+  // #387 KK1: hemen silinmez; 5 sn "Geri al" bandı, silme bant kapanınca (hata olursa katmanda `listem.hata`).
   const listedenCikar = async (m: Mekan) => {
     // #317 KK3: iyimser satır henüz sunucuda değil; ekleme bitmeden çıkarılamaz.
     if (geciciMi(m)) return;
@@ -689,7 +687,7 @@ function Kesfet({ seyahat, konaklamalar, ilkMekan, cekmeceIstegi, cipIstegi }: {
             onKapat={() => setSecim(null)}
           />
           ) : null}
-          {geriAlinabilir.bekleyen ? <GeriAlBandi metin={geriAlinabilir.bekleyen.metin} onGeriAl={geriAlinabilir.geriAl} alt={altKenar + 16} /> : null}
+          {geriAlinabilir.bekleyen ? <GeriAlBandi metin={geriAlinabilir.bekleyen.metin} onGeriAl={geriAlinabilir.geriAl} alt={16} /> : null}
         </>
       }
       // #317 KK1: hatalar (ekleme, öneri, 429) ve "Bağlantı yok" çekmecenin ve panelin her halinde görünür.
