@@ -72,6 +72,8 @@ export default function KaydettiklerimEkrani() {
   useEffect(() => {
     if (yuklemeHatasi) hataBildir(yuklemeHatasi, 'kaydettiklerim-yukle');
   }, [yuklemeHatasi]);
+  // #411 inceleme 1: Tekrar dene'den sonra yeniden deneme sürerken (varsayılan 3 deneme, ~7 sn) geri bildirim.
+  const yenileniyor = (kaydedilenler.isError && kaydedilenler.isRefetching) || (sekmeIdleri.length > 0 && sekmeSorgusu.isError && sekmeSorgusu.isRefetching);
   const tekrarYukle = () => {
     if (kaydedilenler.isError) void kaydedilenler.refetch();
     if (sekmeSorgusu.isError) void sekmeSorgusu.refetch();
@@ -171,21 +173,24 @@ export default function KaydettiklerimEkrani() {
         <Sekme boyut={15} baslik={t('kaydettiklerim.yerler', { n: yerSayisi })} secili={sekme === 'yer'} onPress={() => setSekme('yer')} />
       </SekmeSatiri>
       <ScrollView contentContainerStyle={s.icerik}>
-        {hataDurumu ? (
+        {hataDurumu && (veriVar || !yenileniyor) ? (
           // KK2 · KK3: önbellek varsa hata satırı listenin üstünde, yoksa sekme içeriğinin yerinde.
+          // #411 inceleme 1: veri varken yeniden deneme sürerken Tekrar dene pasif.
           <View style={veriVar ? undefined : s.durum}>
-            <EklemeDurumSatiri durum={hataDurumu} />
+            <EklemeDurumSatiri durum={hataDurumu} pasif={yenileniyor} />
           </View>
         ) : null}
         {!veriVar ? (
-          !hataDurumu ? (
+          !hataDurumu || yenileniyor ? (
+            // #411 inceleme 1 · 3: veri yokken yeniden deneme sürerken hata satırının yerinde gösterge; ekran okuyucu etiketi.
             <View style={s.durum}>
-              <ActivityIndicator color={renk.ana} />
+              <ActivityIndicator color={renk.ana} accessibilityLabel={t('genel.yukleniyor')} />
             </View>
           ) : null
         ) : sekme === 'gezi' ? (
           geziIdleri.length === 0 || (geziler.isSuccess && geziListesi.length === 0) ? (
-            <BosHal metin={t('kaydettiklerim.bosGezi')} />
+            // #411 inceleme 2: hata varken boş hal gösterilmez (önbellekteki kayıt listesi [] olsa da).
+            hataDurumu ? null : <BosHal metin={t('kaydettiklerim.bosGezi')} />
           ) : (
             geziListesi.map((g) => (
               <AnaGeziKarti
@@ -198,7 +203,7 @@ export default function KaydettiklerimEkrani() {
             ))
           )
         ) : yerIdleri.length === 0 || (yerler.isSuccess && yerListesi.length === 0) ? (
-          <BosHal metin={t('kaydettiklerim.bosYer')} />
+          hataDurumu ? null : <BosHal metin={t('kaydettiklerim.bosYer')} />
         ) : (
           gruplar.map((g) => {
             const hedef = g.sehirId ? varsayilanHedef(hedefler, g.sehirAd) : null;

@@ -13,7 +13,9 @@ const mockVeri = {
   yerler: [] as object[],
   mutate: jest.fn(),
   // #411: gezi sorgusunun hali; undefined = başarılı.
-  geziSorgu: undefined as undefined | { data?: object[]; isPending?: boolean; isError?: boolean; error?: unknown },
+  geziSorgu: undefined as undefined | { data?: object[]; isPending?: boolean; isError?: boolean; isRefetching?: boolean; error?: unknown },
+  // #411 inceleme: kayıt listesi sorgusunun hali; undefined = başarılı.
+  kayitSorgu: undefined as undefined | { data?: Kayit[]; isError?: boolean; isRefetching?: boolean; error?: unknown },
   refetch: jest.fn(),
 };
 
@@ -22,7 +24,7 @@ jest.mock('@/lib/supabase', () => ({ supabase: {} }));
 jest.mock('@/lib/hataRaporu', () => ({ hataBildir: jest.fn() }));
 jest.mock('@/features/icerik/fotolar', () => ({ useIcerikCanli: () => ({ data: undefined }) }));
 jest.mock('@/features/icerik/sorgular', () => ({
-  useKaydedilenler: () => ({ data: mockVeri.kayitlar }),
+  useKaydedilenler: () => (mockVeri.kayitSorgu ? { refetch: mockVeri.refetch, ...mockVeri.kayitSorgu } : { data: mockVeri.kayitlar }),
   useKaydet: () => ({ mutate: mockVeri.mutate }),
   useGezilerIle: () => (mockVeri.geziSorgu ? { refetch: mockVeri.refetch, ...mockVeri.geziSorgu } : { data: mockVeri.geziler, isSuccess: true }),
   useYerlerIle: () => ({ data: mockVeri.yerler, isSuccess: true }),
@@ -43,6 +45,7 @@ describe('Kaydettiklerim v5 (#395)', () => {
     mockVeri.geziler = [];
     mockVeri.yerler = [];
     mockVeri.geziSorgu = undefined;
+    mockVeri.kayitSorgu = undefined;
     mockVeri.mutate.mockClear();
     jest.clearAllMocks();
   });
@@ -154,7 +157,7 @@ describe('Kaydettiklerim v5 (#395)', () => {
     mockVeri.kayitlar = [{ tur: 'gezi', hedef_id: 'g1' }];
     mockVeri.geziSorgu = { data: undefined, isPending: true };
     render(<KaydettiklerimEkrani />);
-    expect(screen.UNSAFE_getByType(ActivityIndicator)).toBeTruthy();
+    expect(screen.UNSAFE_getByType(ActivityIndicator).props.accessibilityLabel).toBe('Yükleniyor…');
     expect(screen.queryByText('Beğendiğin gezilere kalp bırak')).toBeNull();
   });
 
@@ -185,5 +188,35 @@ describe('Kaydettiklerim v5 (#395)', () => {
     render(<KaydettiklerimEkrani />);
     expect(screen.getByText('Kaydettiklerin yüklenemedi.')).toBeTruthy();
     expect(screen.getByText('Eskişehir’de üç gün')).toBeTruthy();
+  });
+
+  it('#411 inceleme 1: veri yokken yeniden deneme sürerken hata satırının yerinde gösterge', () => {
+    mockVeri.kayitlar = [{ tur: 'gezi', hedef_id: 'g1' }];
+    mockVeri.geziSorgu = { data: undefined, isError: true, isRefetching: true, error: new Error('x') };
+    render(<KaydettiklerimEkrani />);
+    expect(screen.UNSAFE_getByType(ActivityIndicator).props.accessibilityLabel).toBe('Yükleniyor…');
+    expect(screen.queryByText('Kaydettiklerin yüklenemedi.')).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Tekrar dene' })).toBeNull();
+  });
+
+  it('#411 inceleme 1: veri varken yeniden deneme sürerken Tekrar dene pasif', () => {
+    mockVeri.kayitlar = [{ tur: 'gezi', hedef_id: 'g1' }];
+    mockVeri.geziSorgu = { data: [GEZI], isError: true, isRefetching: true, error: new Error('x') };
+    render(<KaydettiklerimEkrani />);
+    expect(screen.getByText('Eskişehir’de üç gün')).toBeTruthy();
+    const dugme = screen.getByRole('button', { name: 'Tekrar dene' });
+    expect(dugme).toBeDisabled();
+    fireEvent.press(dugme);
+    expect(mockVeri.refetch).not.toHaveBeenCalled();
+  });
+
+  it('#411 inceleme 2: önbellekteki kayıt listesi boşken hata olursa boş hal gösterilmez', () => {
+    mockVeri.kayitSorgu = { data: [], isError: true, error: new Error('x') };
+    render(<KaydettiklerimEkrani />);
+    expect(screen.getByText('Kaydettiklerin yüklenemedi.')).toBeTruthy();
+    expect(screen.queryByText('Beğendiğin gezilere kalp bırak')).toBeNull();
+    fireEvent.press(screen.getByRole('tab', { name: 'Yerler · 0' }));
+    expect(screen.getByText('Kaydettiklerin yüklenemedi.')).toBeTruthy();
+    expect(screen.queryByText(/kalp bırak|Keşfet'e göz at/)).toBeNull();
   });
 });
