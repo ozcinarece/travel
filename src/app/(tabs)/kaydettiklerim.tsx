@@ -7,8 +7,8 @@ import { FotoKutusu } from '@/components/gezi/GeziParcalari';
 import { AnaGeziKarti } from '@/components/ortak/AnaGeziKarti';
 import { Sekme, SekmeSatiri } from '@/components/ortak/Sekme';
 import { Ikon } from '@/components/ui/Ikon';
-import { TEKRAR_HIT_SLOP } from '@/components/ui/EklemeDurumSatiri';
-import { eklemeHatasi } from '@/features/ekleme/eklemeDurumu';
+import { EklemeDurumSatiri, TEKRAR_HIT_SLOP } from '@/components/ui/EklemeDurumSatiri';
+import { eklemeHatasi, type EklemeDurumu } from '@/features/ekleme/eklemeDurumu';
 import { kapakTonu } from '@/features/anasayfa/v5';
 import { useIcerikCanli } from '@/features/icerik/fotolar';
 import { yerGruplari } from '@/features/icerik/kaydedilen';
@@ -18,9 +18,10 @@ import { useSeyahatler } from '@/features/seyahatler/sorgular';
 import { yeniGirisNo } from '@/features/sihirbaz/girisler';
 import { seyahatAdi } from '@/features/sihirbaz/sihirbaz';
 import { t } from '@/i18n';
-import { useCevrimdisi } from '@/lib/baglanti';
+import { agHatasi, useCevrimdisi } from '@/lib/baglanti';
 import { useOlayDuyurusu } from '@/lib/duyuru';
 import { yonelmeEkli } from '@/lib/ek';
+import { hataBildir } from '@/lib/hataRaporu';
 import { kategoriEtiketi } from '@/lib/kategori';
 import type { KaydedilenTuru, SeyahatOzet } from '@/lib/tipler';
 import { anaV5, baslikStili, bosluk, minDokunma, renk, yazi } from '@/theme';
@@ -37,8 +38,8 @@ export default function KaydettiklerimEkrani() {
   const kaydet = useKaydet();
   const geziIdleri = useMemo(() => (kaydedilenler.data ?? []).filter((k) => k.tur === 'gezi').map((k) => k.hedef_id), [kaydedilenler.data]);
   const yerIdleri = useMemo(() => (kaydedilenler.data ?? []).filter((k) => k.tur === 'yer').map((k) => k.hedef_id), [kaydedilenler.data]);
-  const geziler = useGezilerIle(geziIdleri);
-  const yerler = useYerlerIle(yerIdleri);
+  const geziler = useGezilerIle(geziIdleri, { oncekiniTut: true });
+  const yerler = useYerlerIle(yerIdleri, { oncekiniTut: true });
   const [sekme, setSekme] = useState<KaydedilenTuru>('gezi');
   const seyahatler = useSeyahatler();
   const hedefler = useMemo(() => hedefSeyahatler(seyahatler.data), [seyahatler.data]);
@@ -46,11 +47,15 @@ export default function KaydettiklerimEkrani() {
   const sira = (tur: KaydedilenTuru) => new Map((kaydedilenler.data ?? []).filter((k) => k.tur === tur).map((k, i) => [k.hedef_id, i]));
   const geziListesi = useMemo(() => {
     const s0 = sira('gezi');
-    return [...(geziler.data ?? [])].sort((a, b) => (s0.get(a.id) ?? 0) - (s0.get(b.id) ?? 0));
+    // Önceki veri tutulurken (#411) kayıttan çıkan öğe hemen düşer.
+    return (geziler.data ?? []).filter((g) => s0.has(g.id)).sort((a, b) => (s0.get(a.id) ?? 0) - (s0.get(b.id) ?? 0));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [geziler.data, kaydedilenler.data]);
   const gruplar = useMemo(
-    () => yerGruplari(yerler.data ?? [], sira('yer'), t('kaydettiklerim.diger')),
+    () => {
+      const s0 = sira('yer');
+      return yerGruplari((yerler.data ?? []).filter((y) => s0.has(y.id)), s0, t('kaydettiklerim.diger'));
+    },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [yerler.data, kaydedilenler.data],
   );
@@ -59,6 +64,21 @@ export default function KaydettiklerimEkrani() {
   // #410 inceleme: sekme sayısı yüklenen öğelerden (yayından kalkmış gezi/yer sayılmaz); yüklenene kadar kayıt sayısı.
   const geziSayisi = geziler.isSuccess ? geziListesi.length : geziIdleri.length;
   const yerSayisi = yerler.isSuccess ? yerListesi.length : yerIdleri.length;
+  // #411: açık sekmenin yükleme ve hata hali. Kayıt listesi de sekme sorgusu da hata verebilir; ham hata yalnız Sentry'ye.
+  const sekmeSorgusu = sekme === 'gezi' ? geziler : yerler;
+  const sekmeIdleri = sekme === 'gezi' ? geziIdleri : yerIdleri;
+  const veriVar = kaydedilenler.data !== undefined && (sekmeIdleri.length === 0 || sekmeSorgusu.data !== undefined);
+  const yuklemeHatasi = kaydedilenler.isError ? kaydedilenler.error : sekmeIdleri.length > 0 && sekmeSorgusu.isError ? sekmeSorgusu.error : null;
+  useEffect(() => {
+    if (yuklemeHatasi) hataBildir(yuklemeHatasi, 'kaydettiklerim-yukle');
+  }, [yuklemeHatasi]);
+  const tekrarYukle = () => {
+    if (kaydedilenler.isError) void kaydedilenler.refetch();
+    if (sekmeSorgusu.isError) void sekmeSorgusu.refetch();
+  };
+  const hataDurumu: EklemeDurumu | null = yuklemeHatasi
+    ? { metin: t(agHatasi(yuklemeHatasi) ? 'kaydettiklerim.baglantiYok' : 'kaydettiklerim.yuklenemedi'), tur: 'hata', tekrar: tekrarYukle }
+    : null;
   const yerleriEkle = useYerleriEkle();
   const [mesgulGrup, setMesgulGrup] = useState<string | null>(null);
 
@@ -151,7 +171,19 @@ export default function KaydettiklerimEkrani() {
         <Sekme boyut={15} baslik={t('kaydettiklerim.yerler', { n: yerSayisi })} secili={sekme === 'yer'} onPress={() => setSekme('yer')} />
       </SekmeSatiri>
       <ScrollView contentContainerStyle={s.icerik}>
-        {sekme === 'gezi' ? (
+        {hataDurumu ? (
+          // KK2 · KK3: önbellek varsa hata satırı listenin üstünde, yoksa sekme içeriğinin yerinde.
+          <View style={veriVar ? undefined : s.durum}>
+            <EklemeDurumSatiri durum={hataDurumu} />
+          </View>
+        ) : null}
+        {!veriVar ? (
+          !hataDurumu ? (
+            <View style={s.durum}>
+              <ActivityIndicator color={renk.ana} />
+            </View>
+          ) : null
+        ) : sekme === 'gezi' ? (
           geziIdleri.length === 0 || (geziler.isSuccess && geziListesi.length === 0) ? (
             <BosHal metin={t('kaydettiklerim.bosGezi')} />
           ) : (
@@ -257,6 +289,8 @@ function BosHal({ metin }: { metin: string }) {
 
 const s = StyleSheet.create({
   ekran: { flex: 1, backgroundColor: renk.zemin },
+  // #411: yükleme göstergesi ve ilk hata sekme içeriğinin yerinde, ortada.
+  durum: { alignItems: 'center', justifyContent: 'center', paddingVertical: 48 },
   // Kanvas: geri satırı 44 px, 16 px kenar; başlık 28 px 800, üstte 4 altta 6.
   ust: { paddingHorizontal: 16, height: minDokunma, justifyContent: 'center' },
   geri: { width: minDokunma, height: minDokunma, marginLeft: -11, alignItems: 'center', justifyContent: 'center' },
