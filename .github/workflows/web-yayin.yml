@@ -33,8 +33,6 @@ jobs:
       APP_DOMAIN: ${{ vars.APP_DOMAIN || 'gezi-web.pages.dev' }}
       # #144: Profil › Yardım ve geri bildirim e-postası (repo değişkeni; boşsa satır gösterilmez).
       EXPO_PUBLIC_DESTEK_EPOSTA: ${{ vars.DESTEK_EPOSTA }}
-      # #277 KK6: Keşfet akışı yayın bayrağı (repo değişkeni; '1' açık, boş/başka kapalı). Ece açar: en az 8 şehir ve 40 kart.
-      EXPO_PUBLIC_KESFET_AKISI: ${{ vars.KESFET_AKISI }}
       EXPO_PUBLIC_SUPABASE_URL: https://xwqeobelyeuzoxyuvauw.supabase.co
       EXPO_PUBLIC_SUPABASE_ANON_KEY: sb_publishable_XB3vg3rrcdIK9Bafkv-Uug_G-5IEyyN
       EXPO_PUBLIC_APPLE_SIGN_IN: '0'

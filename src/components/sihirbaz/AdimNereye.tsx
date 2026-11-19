@@ -21,10 +21,12 @@ type Props = {
   sehirler: Sehir[] | undefined;
   /** Seyahat oluşturulduysa şehir değiştirilemez (ad değişir). */
   kilitli: boolean;
+  /** #361 KK5: ana aramadan gelen metin; arama kutusu bununla dolu açılır. */
+  ilkSorgu?: string;
 };
 
-export function AdimNereye({ sehir, onSehir, ad, onerilenAd, onAd, sehirler, kilitli }: Props) {
-  const [sorgu, setSorgu] = useState('');
+export function AdimNereye({ sehir, onSehir, ad, onerilenAd, onAd, sehirler, kilitli, ilkSorgu }: Props) {
+  const [sorgu, setSorgu] = useState(ilkSorgu ?? '');
   const [jeton, setJeton] = useState(yeniOturumJetonu);
   const [mesgul, setMesgul] = useState<string | null>(null);
   const [hata, setHata] = useState<string | null>(null);

@@ -1,22 +1,21 @@
+import { Image } from 'expo-image';
 import { router, useFocusEffect } from 'expo-router';
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, AppState, Platform, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { ActivityIndicator, AppState, Platform, Pressable, RefreshControl, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
-import Svg, { Path } from 'react-native-svg';
 
+import { AnaGeziKarti } from '@/components/anasayfa/AnaGeziKarti';
 import { HarcamaKapatKarti } from '@/components/anasayfa/HarcamaKapatKarti';
-import { SERIT_YUKSEKLIK, SeyahatSeridi } from '@/components/anasayfa/SeyahatSeridi';
-import { IlkSeyahatKarti } from '@/components/icerik/AnaSayfaKartlari';
-import { GeziKarti } from '@/components/icerik/GeziKarti';
-import { KesfetAkisi } from '@/components/icerik/KesfetAkisi';
-import { Avatar } from '@/components/ui/Avatar';
+import { PlanlamayaDevam } from '@/components/anasayfa/PlanlamayaDevam';
+import { Buton } from '@/components/ui/Buton';
 import { Ikon } from '@/components/ui/Ikon';
 import { KisaBildirim, useGelenBildirim, useKisaBildirim } from '@/components/ui/KisaBildirim';
 import { LogoYazi } from '@/components/ui/Logo';
-import { banaAcikBorc, GEZI_PAYLAS_KARTI, kesfetDurumu, seritAdimMetni, useAcikBorc, useSeritAdimi, useSeritIpucu } from '@/features/anasayfa/serit';
+import { banaAcikBorc, GEZI_PAYLAS_KARTI, seritAdimMetni, useAcikBorc, useSeritAdimi } from '@/features/anasayfa/serit';
+import { anaArama, kapakTonu, sekmeAmaclari, ustSatir } from '@/features/anasayfa/v5';
 import { bekleyenDavetiOku, bekleyenDavetiSil, useDavetKarsilama, useDavetKarsilandi } from '@/features/davet/sorgular';
-import { kesfetAkisiAcik, useKesfetAkisi } from '@/features/icerik/kesfetAkisi';
-import { useGeziler } from '@/features/icerik/sorgular';
+import { amacaGore, useKesfetAkisi, type AkisGezisi, type Amac } from '@/features/icerik/kesfetAkisi';
+import { olayYaz, useSehirler } from '@/features/icerik/sorgular';
 import { useProfil } from '@/features/profil/sorgular';
 import { acilisDurumu, siniflandir } from '@/features/seyahatler/siniflandir';
 import { useSeyahatler } from '@/features/seyahatler/sorgular';
@@ -27,12 +26,13 @@ import { useOturum } from '@/lib/oturum';
 import { tarihAraligi } from '@/lib/takvim';
 import type { SeyahatOzet } from '@/lib/tipler';
 import { yerelTarih } from '@/lib/zaman';
-import { baslikStili, bosluk, kose, olcek, renk, yazi } from '@/theme';
+import { anaV5, renk, yazi } from '@/theme';
 
 /**
- * #138 (kanvas 3 · Ana sayfa, 3b · İlk açılış): logo + profil, selam, arama, yaklaşan seyahat kartı, Önerilen Geziler.
- * "Gezilecek yerler" mozaiği kalktı (seyahat seçilmeden "+"nın hedefi belirsiz). Hiç seyahat yoksa: "Hoş geldin / İlk gezin
- * nereye?", büyük "İlk seyahatini kur · Başla" kartı ve "Ya da hazır bir geziyle başla" şeridi; başka kutu yok.
+ * #361 ana sayfa v5 (UX önerileri kanvası, "#358 Ana sayfa v5 · harman": `Ana_v5_Yok` · `Ana_v5_Var` · `Ana_v5_Bitti`): tek
+ * ana sayfa. Üstte logo, ♥ Kaydettiklerim, "+ Seyahat", profil (KK2); bitmemiş en yakın seyahat için "Planlamaya devam"
+ * satırı (KK3) ya da gezi bitince "Harcamaları kapat" (KK4); düz arama (KK5, yerel süzgeç, Google yok); amaç sekmeleri (KK6);
+ * tek sütun hazır gezi kartları (KK7). Bayrak (`KESFET_AKISI`) ve eski iki ana sayfa kalktı (KK1).
  * #137: giriş öncesi görülen davet → /r/{token}; web'de katılıp uygulamayı ilk açan → doğrudan seyahat.
  * #275 (kanvas 29a): alt menü yok. Üst çubukta sağda Ara · ♥ Kaydettiklerim · Profil (44 px, köşe 14); altta yüzen
  * [+ Yeni seyahat]. Seyahat silinip buraya dönülünce kısa bildirim.
@@ -41,26 +41,22 @@ import { baslikStili, bosluk, kose, olcek, renk, yazi } from '@/theme';
 export default function AnaSayfa() {
   const profil = useProfil();
   const seyahatler = useSeyahatler();
-  const geziler = useGeziler();
+  const akis = useKesfetAkisi();
+  const sehirler = useSehirler();
 
   const { hesapli } = useOturum();
   const altBosluk = useSafeAreaInsets().bottom;
   const gelenBildirim = useGelenBildirim();
-  // #291 KK6: aşağı çekip yenileme Keşfet akışını da çeker (KesfetAkisi ile aynı sorgu; ek istek yok). Veri varken
-  // yenileme hata verirse kartlar kalır ve bir kez "Güncellenemedi".
-  const akis = useKesfetAkisi(kesfetAkisiAcik());
+  // #291 KK6: aşağı çekip yenileme gezileri de çeker; veri varken yenileme hata verirse kartlar kalır ve bir kez
+  // "Güncellenemedi".
   const bildirim = useKisaBildirim();
-  const yenile = () => {
-    const isler: Promise<unknown>[] = [seyahatler.refetch(), geziler.refetch()];
-    if (kesfetAkisiAcik()) {
-      isler.push(
-        akis.refetch().then((r) => {
-          if (r.isError && r.data) bildirim.goster(t('kesfetAkisi.guncellenemedi'));
-        }),
-      );
-    }
-    return Promise.all(isler);
-  };
+  const yenile = () =>
+    Promise.all([
+      seyahatler.refetch(),
+      akis.refetch().then((r) => {
+        if (r.isError && r.data) bildirim.goster(t('kesfetAkisi.guncellenemedi'));
+      }),
+    ]);
   // #137: giriş öncesi görülen davet → /r/{token}; web'de katılıp uygulamayı ilk açan → doğrudan seyahat (KK2). İkisi de
   // bilinene kadar yükleniyor gösterilir (ilk açılış ekranı bir an görünüp kaybolmasın); geçişler tek seferlik replace.
   const [bekleyenDavet, setBekleyenDavet] = useState<null | undefined>(undefined);
@@ -157,21 +153,37 @@ export default function AnaSayfa() {
   }, [acilisBekleniyor]);
   const acilisGostergesi = acilisBekleniyor && (kararBekleniyor || !!aktifSeyahatId);
 
-  // #276 2b · KK3 · KK4 · KK-ek4: altta seyahat şeridi (29b) ya da üstte "gezi bitti" kartı (29c).
+  // #361 KK3 · KK4: üstteki tek satır — "Planlamaya devam" ya da gezi bitince "Harcamaları kapat" (gezi günü yok).
   const siniflar = seyahatler.data ? siniflandir(seyahatler.data) : null;
   const bitenAday = siniflar && !siniflar.aktif[0] && !siniflar.yaklasan[0] ? (siniflar.yeniBiten[0] ?? null) : null;
   const borc = useAcikBorc(bitenAday);
-  // #289 inceleme 1: yeni biten seyahatin harcama verisi gelene kadar ne kart ne şerit ne de ilk seyahat kartı çizilir
-  // (sonradan kaybolup ekran zıplamasın; ipucu bayrağı da tüketilmez).
+  // #289 inceleme 1: yeni biten seyahatin harcama verisi gelene kadar satır çizilmez (sonradan zıplamasın).
   const borcBekleniyor = !!bitenAday && borc === undefined;
-  // #289 inceleme 3: kart yalnız beni ilgilendiren açık borçta (başkaları arasındaki transfer bana kart çıkarmaz).
+  // #289 inceleme 3: kart yalnız beni ilgilendiren açık borçta.
   const bitenKartiVar = GEZI_PAYLAS_KARTI || banaAcikBorc(borc);
-  const durum = siniflar && !borcBekleniyor ? kesfetDurumu(siniflar, bitenKartiVar) : null;
-  const seritSeyahati = durum?.tur === 'serit' ? durum.seyahat : null;
-  const seritAdimi = useSeritAdimi(seritSeyahati);
-  const ipucu = useSeritIpucu(!!seritSeyahati);
-  // #290 KK3 · KK6: şeridin ölçülen yüksekliği (büyük yazıda uzar) ve açıksa ipucunun üst kenarı (ekranın altından).
-  const [seritOlcu, setSeritOlcu] = useState<{ serit: number; ipucuUst: number | null }>({ serit: SERIT_YUKSEKLIK, ipucuUst: null });
+  const durum = siniflar && !borcBekleniyor ? ustSatir(siniflar, bitenKartiVar) : null;
+  const devamSeyahati = durum?.tur === 'serit' ? durum.seyahat : null;
+  const seritAdimi = useSeritAdimi(devamSeyahati);
+
+  // KK5 · KK6: arama ve amaç sekmesi.
+  const [sorgu, setSorgu] = useState('');
+  const [secilenSekme, setSecilenSekme] = useState<Amac | null>(null);
+  const tumGeziler = useMemo(() => akis.data ?? [], [akis.data]);
+  const sekmeler = useMemo(() => sekmeAmaclari(tumGeziler), [tumGeziler]);
+  const sekme = secilenSekme && sekmeler.includes(secilenSekme) ? secilenSekme : null;
+  const arama = useMemo(() => anaArama(sorgu, tumGeziler, sehirler.data ?? []), [sorgu, tumGeziler, sehirler.data]);
+  // KK8 (Büyüme notu): `ana_ara` yalnız sonucu yazar (yazılan metin kaydedilmez). Aramadan bir şeye dokunmadan çıkılırsa `yok`.
+  const aramaSonucYazildi = useRef(false);
+  const aramaVardi = useRef(false);
+  useEffect(() => {
+    if (arama) {
+      aramaVardi.current = true;
+      return;
+    }
+    if (aramaVardi.current && !aramaSonucYazildi.current) olayYaz('ana_ara', null, { sonuc: 'yok' });
+    aramaVardi.current = false;
+    aramaSonucYazildi.current = false;
+  }, [arama]);
 
   if (bekleyenDavet === undefined || karsilamaBekleniyor || karsilanan || acilisGostergesi) {
     return (
@@ -181,212 +193,243 @@ export default function AnaSayfa() {
     );
   }
 
-  const ad = profil.data?.name?.split(' ')[0] ?? '';
-  // KK5: ilk açılış = hiç seyahat yok (geçmiş dahil).
-  const ilkAcilis = !seyahatler.isPending && !seyahatler.isError && (seyahatler.data?.length ?? 0) === 0;
-  const gezilerListe = geziler.data ?? [];
   const yeni = () => router.push('/(tabs)/yeni');
-  // Yüzen düğme ekranın altından 28 px (kanvas 29a); ana çubuk (home indicator) varsa onun 8 px üstü.
-  const yuzenAlt = Math.max(28, altBosluk + 8);
-  // Şerit ekranın altından 24 px (kanvas 29b); ana çubuk varsa onun 8 px üstü.
-  const seritAlt = Math.max(24, altBosluk + 8);
-  // #289 inceleme 2: listenin sonu şeridin (ya da yüzen düğmenin) 16 px üstünde biter; ana çubuk yüksekliği hesaba girer.
-  const listeAlt = seritSeyahati ? seritAlt + seritOlcu.serit + 16 : yuzenAlt + YUZEN_YUKSEKLIK + 16;
-  // #290 KK6: ipucu açıkken kısa bildirim ipucunun üst kenarının 8 px üstünde; yoksa şeridin (ya da yüzen düğmenin) üstünde.
-  const bildirimAlt = seritSeyahati
-    ? ipucu.acik && seritOlcu.ipucuUst !== null
-      ? seritOlcu.ipucuUst + 8
-      : seritAlt + seritOlcu.serit + 12
-    : yuzenAlt + 68;
-  const borcKarti =
+  const geziAc = (g: AkisGezisi, kaynak: 'liste' | 'arama') => {
+    olayYaz('ana_kart_acildi', g.id, { kaynak, amac: sekme });
+    router.push({ pathname: '/gezi/[slug]', params: { slug: g.slug } });
+  };
+  const aramaGezisi = (g: AkisGezisi) => {
+    aramaSonucYazildi.current = true;
+    olayYaz('ana_ara', null, { sonuc: 'gezi' });
+    geziAc(g, 'arama');
+  };
+  const sehirleKur = (sehir: { id: string }) => {
+    aramaSonucYazildi.current = true;
+    const slug = sehirler.data?.find((x) => x.id === sehir.id)?.slug ?? null;
+    olayYaz('ana_ara', null, { sonuc: 'sehir', sehir_slug: slug });
+    router.push({ pathname: '/(tabs)/yeni', params: { sehir: sehir.id, n: String(Date.now()) } });
+  };
+  const metinleKur = (metin: string) => {
+    aramaSonucYazildi.current = true;
+    olayYaz('ana_ara', null, { sonuc: 'metin' });
+    router.push({ pathname: '/(tabs)/yeni', params: { metin, n: String(Date.now()) } });
+  };
+  const devamAc = (sy: SeyahatOzet) => {
+    olayYaz('planlamaya_devam', sy.id);
+    router.push({ pathname: '/seyahat/[id]', params: { id: sy.id } });
+  };
+
+  const ustKart =
     durum?.tur === 'geziBitti' && borc && banaAcikBorc(borc) ? (
-      <HarcamaKapatKarti
-        sehir={durum.seyahat.city_label}
-        borc={borc}
-        onBakiyeler={() => router.push({ pathname: '/seyahat/[id]/bakiyeler', params: { id: durum.seyahat.id } })}
+      <View style={s.kenar}>
+        <HarcamaKapatKarti
+          sehir={durum.seyahat.city_label}
+          borc={borc}
+          onBakiyeler={() => router.push({ pathname: '/seyahat/[id]/bakiyeler', params: { id: durum.seyahat.id } })}
+        />
+      </View>
+    ) : devamSeyahati ? (
+      <PlanlamayaDevam
+        ad={seyahatAdi(devamSeyahati)}
+        // KK3: adım yüklenirken, hata verince ya da adım yokken tarih satırı.
+        adim={seritAdimi ? { metin: seritAdimMetni(seritAdimi), turuncu: true } : { metin: tarihSatiri(devamSeyahati), turuncu: false }}
+        alt={kalanVeKisiler(devamSeyahati)}
+        onAc={() => devamAc(devamSeyahati)}
       />
     ) : null;
-  const seyahatiAc = (id: string) => router.push({ pathname: '/seyahat/[id]', params: { id } });
-  const geziAc = (slug: string) => router.push({ pathname: '/gezi/[slug]', params: { slug } });
-  // #277 KK3 · KK6: akış bayrağı ve yaklaşan seyahatin (≤ 14 gün) şehri; o şehrin gezileri önde.
-  const akisAcik = kesfetAkisiAcik();
-  const akisSehri = seyahatler.data ? (siniflandir(seyahatler.data).yaklasan[0]?.city_label ?? null) : null;
+
+  const liste = amacaGore(tumGeziler, sekme);
 
   return (
     <SafeAreaView style={s.ekran} edges={['top']}>
-      <ScrollView contentContainerStyle={[s.icerik, { paddingBottom: listeAlt }]} refreshControl={<RefreshControl refreshing={seyahatler.isRefetching} onRefresh={yenile} />}>
+      <ScrollView
+        keyboardShouldPersistTaps="handled"
+        contentContainerStyle={[s.icerik, { paddingBottom: Math.max(24, altBosluk + 16) }]}
+        refreshControl={<RefreshControl refreshing={seyahatler.isRefetching} onRefresh={yenile} />}
+      >
+        {/* KK2: logo · ♥ · "+ Seyahat" · profil; ayrı Ara ikonu yok. ♥ ve profil ayrı bileşen (alt menü gelince taşınır). */}
         <View style={s.ust}>
           <LogoYazi boyut={36} />
           <View style={s.ustDugmeler}>
-            <Pressable accessibilityRole="button" accessibilityLabel={t('anasayfa.araEtiket')} onPress={() => router.push('/ara')} style={({ pressed }) => [s.kare, pressed && s.basili]}>
-              <Ikon ad="ara" boyut={20} renk={renk.ana} kalinlik={2.4} />
+            <KaydettiklerimDugmesi />
+            <Pressable accessibilityRole="button" accessibilityLabel={t('anasayfa.v5.yeniSeyahatEtiket')} onPress={yeni} hitSlop={4} style={({ pressed }) => [s.seyahatDugme, pressed && s.basili]}>
+              <Text style={s.seyahatArti}>+</Text>
+              <Text style={s.seyahatMetin}>{t('anasayfa.v5.seyahat')}</Text>
             </Pressable>
-            <Pressable accessibilityRole="button" accessibilityLabel={t('anasayfa.kaydettiklerim')} onPress={() => router.push('/(tabs)/kaydettiklerim')} style={({ pressed }) => [s.kare, pressed && s.basili]}>
-              <Ikon ad="kalp" boyut={20} renk={renk.ana} kalinlik={2.4} />
-            </Pressable>
-            <Pressable accessibilityRole="button" accessibilityLabel={t('anasayfa.profil')} onPress={() => router.push('/(tabs)/profil')} style={({ pressed }) => pressed && s.basili}>
-              <Avatar ad={profil.data?.name ?? '?'} url={profil.data?.photo_url} boyut={44} arkaPlan={renk.vurgu} />
-            </Pressable>
+            <ProfilDugmesi ad={profil.data?.name ?? '?'} url={profil.data?.photo_url ?? null} />
           </View>
         </View>
 
-        {/* #290 KK2 (29c): "Harcamaları kapat" logonun ve üst düğmelerin hemen altında (aralık 16); selam ve arama altında. */}
-        {borcKarti && !ilkAcilis ? <View style={s.ustKart}>{borcKarti}</View> : null}
+        {ustKart}
 
-        <View style={s.selam}>
-          <Text style={s.merhaba}>{ilkAcilis ? t('anasayfa.hosGeldin', { ad }) : t('anasayfa.merhaba', { ad })}</Text>
-          <Text accessibilityRole="header" style={s.soru}>
-            {ilkAcilis ? t('anasayfa.ilkSoru') : t('anasayfa.soru')}
-          </Text>
+        {/* KK5: düz arama kutusu; "Ne zaman" yok. */}
+        <View style={s.arama}>
+          <Ikon ad="ara" boyut={18} renk={renk.metin} kalinlik={2.4} />
+          <TextInput
+            value={sorgu}
+            onChangeText={setSorgu}
+            placeholder={t('anasayfa.v5.ara')}
+            placeholderTextColor={anaV5.ikincil}
+            accessibilityLabel={t('anasayfa.v5.ara')}
+            returnKeyType="search"
+            autoCorrect={false}
+            style={s.aramaGirdi}
+          />
         </View>
 
-        {ilkAcilis ? (
-          <>
-            <View style={s.kenar}>
-              <IlkSeyahatKarti baslik={t('anasayfa.ilkBaslik')} onPress={yeni} />
-            </View>
-            {akisAcik ? (
-              <KesfetAkisi sehir={null} onYeni={yeni} />
-            ) : gezilerListe.length > 0 ? (
-              <View style={s.bolum}>
-                <View style={{ gap: 2, paddingHorizontal: bosluk.kenar }}>
-                  <Text style={s.bolumBaslik}>{t('anasayfa.haziraBaslik')}</Text>
-                  <Text style={s.bolumAlt}>{t('anasayfa.haziraAlt')}</Text>
-                </View>
-                <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={s.serit}>
-                  {gezilerListe.map((g, i) => (
-                    <GeziKarti key={g.id} gezi={g} sira={i} genislik={250} onPress={() => geziAc(g.slug)} />
-                  ))}
-                </ScrollView>
-              </View>
+        {arama ? (
+          <View style={s.liste} testID="ana-arama-sonuc">
+            {arama.geziler.map((g) => (
+              <AnaGeziKarti key={g.id} gezi={g} ton={kapakTonu(g.amaclar, null)} onAc={() => aramaGezisi(g)} />
+            ))}
+            {arama.sehir ? (
+              <KurSatiri onPress={() => sehirleKur(arama.sehir!)}>
+                {t('anasayfa.v5.sehirleKurOnce')}
+                <Text style={s.kurKalin}>{arama.sehir.ad}</Text>
+                {t('anasayfa.v5.sehirleKurSon')}
+              </KurSatiri>
+            ) : arama.metin ? (
+              <KurSatiri onPress={() => metinleKur(arama.metin!)}>{t('anasayfa.v5.metinleKur', { metin: arama.metin })}</KurSatiri>
             ) : null}
-          </>
+          </View>
         ) : (
           <>
-            <Pressable accessibilityRole="search" onPress={() => router.push('/ara')} style={s.arama}>
-              <Ikon ad="ara" boyut={20} renk={renk.ana} kalinlik={2.4} />
-              <Text style={s.aramaMetin}>{t('anasayfa.ara')}</Text>
-            </Pressable>
-
-            <View style={s.kenar}>
-              {/* Yaklaşan / planlanan / aktif seyahat altta şeritte (29b); burada kart yok. */}
-              {!durum && !seyahatler.isPending && !borcBekleniyor ? <IlkSeyahatKarti baslik={t('anasayfa.yeniBaslik')} onPress={yeni} /> : null}
-            </View>
-
-            {akisAcik ? (
-              // #277 KK6: bayrak açıkken bugünkü hazır geziler bölümü yerine Keşfet akışı.
-              <KesfetAkisi sehir={akisSehri} onYeni={yeni} />
+            {/* KK6: yalnız en az 2 gezisi olan amaçlar (en çok 4) + "Hepsi"; yatay kaymaz; 2'den az doluysa satır yok. */}
+            {sekmeler.length > 0 ? (
+              <View style={s.sekmeler} accessibilityRole="tablist">
+                <Sekme baslik={t('anasayfa.v5.hepsi')} secili={!sekme} onPress={() => setSecilenSekme(null)} />
+                {sekmeler.map((a) => (
+                  <Sekme key={a} baslik={t(`kesfetAkisi.amac.${a}`)} secili={sekme === a} onPress={() => setSecilenSekme(a)} />
+                ))}
+              </View>
+            ) : null}
+            {akis.isPending ? (
+              <ActivityIndicator color={renk.ana} style={s.yukleniyor} />
+            ) : akis.isError && !akis.data ? (
+              <View style={[s.kenar, s.hata]}>
+                <Text accessibilityRole="header" style={s.hataBaslik}>
+                  {t('kesfetAkisi.agBaslik')}
+                </Text>
+                <Text style={s.hataMetin}>{t('kesfetAkisi.agMetin')}</Text>
+                <Buton baslik={t('kesfetAkisi.tekrarDene')} onPress={() => akis.refetch()} yukleniyor={akis.isFetching} />
+              </View>
             ) : (
-              <View style={s.bolum}>
-                <View style={s.bolumSatir}>
-                  <Text style={s.bolumBaslik}>{t('anasayfa.geziler')}</Text>
-                  <Pressable accessibilityRole="button" onPress={() => router.push('/geziler')} hitSlop={8}>
-                    <Text style={s.tumu}>{t('anasayfa.tumu')}</Text>
-                  </Pressable>
-                </View>
-                {gezilerListe[0] ? (
-                  <View style={s.kenar}>
-                    <GeziKarti gezi={gezilerListe[0]} buyuk kalp onPress={() => geziAc(gezilerListe[0].slug)} />
-                  </View>
-                ) : (
-                  <Text style={[s.bolumAlt, s.kenar]}>{t('anasayfa.bos')}</Text>
-                )}
-                {gezilerListe.length > 1 ? (
-                  <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={s.serit}>
-                    {gezilerListe.slice(1).map((g, i) => (
-                      <GeziKarti key={g.id} gezi={g} sira={i + 1} onPress={() => geziAc(g.slug)} />
-                    ))}
-                  </ScrollView>
-                ) : null}
+              <View style={s.liste}>
+                {liste.map((g) => (
+                  <AnaGeziKarti key={g.id} gezi={g} ton={kapakTonu(g.amaclar, sekme)} onAc={() => geziAc(g, 'liste')} />
+                ))}
               </View>
             )}
           </>
         )}
       </ScrollView>
-      {seritSeyahati ? (
-        <SeyahatSeridi
-          rozet={durum?.tur === 'serit' && durum.sinif !== 'planlanan' ? yaklasanRozeti(seritSeyahati) : null}
-          ad={seyahatAdi(seritSeyahati)}
-          // #290 KK4: adım yüklenirken, sorgu hata verince ya da adım yokken tarih satırı; satır sayısı değişmez.
-          alt={seritAdimi ? seritAdimMetni(seritAdimi) : yaklasanAlti(seritSeyahati)}
-          ipucu={ipucu.acik}
-          onAc={() => seyahatiAc(seritSeyahati.id)}
-          onYeni={yeni}
-          onIpucuKapat={ipucu.kapat}
-          alttan={seritAlt}
-          onOlcu={setSeritOlcu}
-        />
-      ) : borcBekleniyor ? null : (
-        <View style={[s.yuzenKap, { bottom: yuzenAlt }]} pointerEvents="box-none">
-          <Pressable accessibilityRole="button" onPress={yeni} style={({ pressed }) => [s.yuzen, pressed && s.basili]}>
-            <Svg width={24} height={24} viewBox="0 0 24 24" fill="none">
-              <Path d="M12 5v14M5 12h14" stroke={renk.metin} strokeWidth={3} strokeLinecap="round" />
-            </Svg>
-            <Text style={s.yuzenMetin}>{t('anasayfa.yeniSeyahat')}</Text>
-          </Pressable>
-        </View>
-      )}
-      <KisaBildirim metin={gelenBildirim ?? bildirim.metin} alt={bildirimAlt} />
+      <KisaBildirim metin={gelenBildirim ?? bildirim.metin} alt={Math.max(24, altBosluk + 8)} />
     </SafeAreaView>
   );
 }
 
-/** "4 GÜN SONRA" · "BUGÜN" · "ŞU AN SEYAHATTE" · tarihsizse "TASLAK". */
-function yaklasanRozeti(sy: SeyahatOzet): string {
-  if (!sy.start_date) return t('anasayfa.tarihsizRozet');
-  const kalan = gunFarki(yerelTarih(new Date(), sy.tz), sy.start_date);
-  if (kalan < 0) return t('anasayfa.aktif');
-  if (kalan === 0) return t('anasayfa.yaklasanBugun');
-  return t('anasayfa.yaklasan', { n: kalan });
+/** KK2: ♥ → Kaydettiklerim (22 px, Gece, 2,4 çizgi; 36 px daire, 44 px dokunma). */
+function KaydettiklerimDugmesi() {
+  return (
+    <Pressable accessibilityRole="button" accessibilityLabel={t('anasayfa.kaydettiklerim')} onPress={() => router.push('/(tabs)/kaydettiklerim')} hitSlop={4} style={({ pressed }) => [s.daire, pressed && s.basili]}>
+      <Ikon ad="kalp" boyut={22} renk={renk.ana} kalinlik={2.4} />
+    </Pressable>
+  );
 }
 
-/** "16 – 19 Ekim · 4 gün · 12 mekan" (tarihsizse "Tarih belli değil · N mekan"). */
-function yaklasanAlti(sy: SeyahatOzet): string {
+/** KK2: profil dairesi (36 px; fotoğraf yoksa baş harf, Gece 800 üstünde açık gri). */
+function ProfilDugmesi({ ad, url }: { ad: string; url: string | null }) {
+  const harf = ad.trim().charAt(0).toLocaleUpperCase('tr') || '?';
+  return (
+    <Pressable accessibilityRole="button" accessibilityLabel={t('anasayfa.profil')} onPress={() => router.push('/(tabs)/profil')} hitSlop={4} style={({ pressed }) => [s.daire, s.profil, pressed && s.basili]}>
+      {url ? <Image source={{ uri: url }} style={s.profilFoto} contentFit="cover" accessible={false} /> : <Text style={s.profilHarf}>{harf}</Text>}
+    </Pressable>
+  );
+}
+
+/** KK6: sekme — seçili 700 Lacivert ve 2 px alt çizgi; değilse 500 ikincil. */
+function Sekme({ baslik, secili, onPress }: { baslik: string; secili: boolean; onPress: () => void }) {
+  return (
+    <Pressable accessibilityRole="tab" accessibilityState={{ selected: secili }} onPress={onPress} style={[s.sekme, secili && s.sekmeSecili]}>
+      <Text style={[s.sekmeMetin, secili && s.sekmeMetinSecili]} numberOfLines={1}>
+        {baslik}
+      </Text>
+    </Pressable>
+  );
+}
+
+/** KK5: "{Şehir} için seyahat kur ›" / "“{metin}” ile seyahat kur ›" (Planlamaya devam satırının zemini). */
+function KurSatiri({ children, onPress }: { children: ReactNode; onPress: () => void }) {
+  return (
+    <Pressable accessibilityRole="button" onPress={onPress} style={({ pressed }) => [s.kurSatiri, pressed && s.basili]}>
+      <Text style={s.kurMetin} numberOfLines={2}>
+        {children}
+      </Text>
+      <Ikon ad="ileri" boyut={18} renk={anaV5.ok} kalinlik={2.4} />
+    </Pressable>
+  );
+}
+
+/** KK3: "4 gün kaldı · Ece, Mert, Ayşe" (bugün başlıyorsa "Bugün"; tarihsizse yalnız kişiler). */
+function kalanVeKisiler(sy: SeyahatOzet): string {
+  const kisiler = sy.members.map((m) => m.display_name.trim().split(' ')[0]).filter(Boolean).join(', ');
+  if (!sy.start_date) return kisiler;
+  const kalan = gunFarki(yerelTarih(new Date(), sy.tz), sy.start_date);
+  const ilk = kalan <= 0 ? t('anasayfa.v5.kalanBugun') : t('anasayfa.v5.kalan', { n: kalan });
+  return kisiler ? `${ilk} · ${kisiler}` : ilk;
+}
+
+/** KK3: adım yokken tarih satırı — "16 – 19 Ekim · 4 gün · 12 mekan" (tarihsizse "Tarih belli değil · N mekan"). */
+function tarihSatiri(sy: SeyahatOzet): string {
   const mekan = sy.places[0]?.count ?? 0;
   if (!sy.start_date || !sy.end_date) return t('anasayfa.kartAltTarihsiz', { mekan });
   return t('anasayfa.kartAlt', { tarih: tarihAraligi(sy.start_date, sy.end_date), gun: gunFarki(sy.start_date, sy.end_date) + 1, mekan });
 }
 
-/** Yüzen "+ Yeni seyahat" düğmesinin yüksekliği (kanvas 29a). */
-const YUZEN_YUKSEKLIK = 56;
-
 const s = StyleSheet.create({
   ekran: { flex: 1, backgroundColor: renk.zemin },
   ortala: { alignItems: 'center', justifyContent: 'center' },
-  icerik: { paddingTop: 12, gap: 20 },
-  // Listenin aralığı 20; kart üst çubuğa 16 yaklaşır.
-  ustKart: { marginTop: -4 },
-  ust: { paddingHorizontal: bosluk.kenar, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  ustDugmeler: { flexDirection: 'row', gap: 8 },
-  kare: { width: 44, height: 44, borderRadius: 14, backgroundColor: renk.yuzey, alignItems: 'center', justifyContent: 'center' },
+  icerik: { gap: 14 },
+  kenar: { paddingHorizontal: 16 },
+  ust: { paddingHorizontal: 16, height: 48, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  ustDugmeler: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  daire: { width: 36, height: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center' },
   basili: { opacity: 0.85 },
-  yuzenKap: { position: 'absolute', left: 0, right: 0, alignItems: 'center' },
-  yuzen: {
-    height: YUZEN_YUKSEKLIK,
-    paddingLeft: 18,
-    paddingRight: 22,
-    borderRadius: 18,
-    backgroundColor: renk.vurgu,
+  seyahatDugme: { height: 36, paddingHorizontal: 14, borderRadius: 18, backgroundColor: renk.vurgu, flexDirection: 'row', alignItems: 'center', gap: 4 },
+  seyahatArti: { fontFamily: yazi.kalin, fontSize: 18, lineHeight: 20, color: renk.metin },
+  seyahatMetin: { fontFamily: yazi.kalin, fontSize: 14, color: renk.metin },
+  profil: { backgroundColor: anaV5.profilZemin, overflow: 'hidden' },
+  profilFoto: { width: 36, height: 36 },
+  profilHarf: { fontFamily: yazi.ekstra, fontSize: 14, color: renk.ana },
+  arama: {
+    marginHorizontal: 16,
+    height: 52,
+    borderRadius: 26,
+    borderWidth: 1,
+    borderColor: anaV5.cizgi,
+    backgroundColor: renk.zemin,
+    paddingHorizontal: 18,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: 10,
     shadowColor: renk.metin,
-    shadowOpacity: 0.22,
-    shadowRadius: 12,
-    shadowOffset: { width: 0, height: 8 },
-    elevation: 8,
+    shadowOpacity: 0.08,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 2,
   },
-  yuzenMetin: { fontFamily: yazi.kalin, fontSize: 16, color: renk.metin },
-  selam: { paddingHorizontal: bosluk.kenar, gap: 4 },
-  merhaba: { fontFamily: yazi.yari, fontSize: 15, color: renk.ikincil },
-  soru: { ...baslikStili(olcek.ekran), lineHeight: 34, color: renk.metin },
-  arama: { marginHorizontal: bosluk.kenar, height: 52, paddingHorizontal: 16, borderRadius: kose.dugme, backgroundColor: renk.yuzey, flexDirection: 'row', alignItems: 'center', gap: 10 },
-  aramaMetin: { fontFamily: yazi.yari, fontSize: 15, color: renk.soluk },
-  kenar: { paddingHorizontal: bosluk.kenar },
-  bolum: { gap: 12, paddingTop: 6 },
-  bolumSatir: { paddingHorizontal: bosluk.kenar, flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between' },
-  bolumBaslik: { ...baslikStili(olcek.bolum), color: renk.metin },
-  bolumAlt: { fontFamily: yazi.normal, fontSize: 14, color: renk.ikincil },
-  tumu: { fontFamily: yazi.ekstra, fontSize: 14, color: renk.ana },
-  serit: { gap: 12, paddingHorizontal: bosluk.kenar },
+  aramaGirdi: { flex: 1, fontFamily: yazi.normal, fontSize: 15, color: renk.metin, paddingVertical: 0 },
+  sekmeler: { paddingHorizontal: 16, flexDirection: 'row', gap: 24, borderBottomWidth: 1, borderBottomColor: anaV5.cizgi },
+  sekme: { height: 40, minWidth: 44, justifyContent: 'center', alignItems: 'center', borderBottomWidth: 2, borderBottomColor: 'transparent', flexShrink: 1 },
+  sekmeSecili: { borderBottomColor: renk.metin },
+  sekmeMetin: { fontFamily: yazi.orta, fontSize: 14, color: anaV5.ikincil },
+  sekmeMetinSecili: { fontFamily: yazi.kalin, color: renk.metin },
+  liste: { paddingHorizontal: 16, paddingTop: 4, gap: 20 },
+  yukleniyor: { marginTop: 24 },
+  hata: { gap: 14, paddingTop: 6 },
+  hataBaslik: { fontFamily: yazi.ekstra, fontSize: 20, color: renk.metin },
+  hataMetin: { fontFamily: yazi.normal, fontSize: 14, lineHeight: 20, color: anaV5.ikincil },
+  kurSatiri: { minHeight: 52, flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 14, paddingVertical: 10, borderRadius: 16, backgroundColor: anaV5.satirZemin },
+  kurMetin: { flex: 1, fontFamily: yazi.normal, fontSize: 15, color: renk.metin },
+  kurKalin: { fontFamily: yazi.kalin },
 });

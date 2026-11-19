@@ -42,6 +42,18 @@ export const renk = {
 /** Kişi yüzleri (avatar zemini) sırası: Mandalina, Gece, Gece açık. */
 export const yuzRenkleri = [renk.vurgu, renk.ana, renk.anaAcik] as const;
 
+/** #361 ana sayfa v5 (kanvas `Ana_v5_Var` · `Ana_v5_Yok` · `Ana_v5_Bitti`): panolardaki ikincil metin, çizgi ve satır zemini. */
+export const anaV5 = {
+  ikincil: '#5B6178',
+  cizgi: '#E4E7EE',
+  satirZemin: '#F6F7FA',
+  /** "Sıradaki adım: …" turuncusu. */
+  adim: '#C25200',
+  /** Profil dairesi ve kapaksız küçük kapak zemini. */
+  profilZemin: '#ECEEF2',
+  ok: '#9AA1B2',
+} as const;
+
 /**
  * #361 KK7 (UX önerileri kanvası, `Ana_v5_Amaclar`): kapaksız gezi kartının amaca göre zemini, tepesi (%85 opak) ve
  * dairesi; daire üstünde beyaz ikon. Anahtarlar `features/icerik/amaclar.ts` ile aynı; `yok` = amacı olmayan gezi.
