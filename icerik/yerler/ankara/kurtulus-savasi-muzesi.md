@@ -2,6 +2,6 @@ Kurtuluş Savaşı Müzesi, Türkiye Büyük Millet Meclisi'nin 23 Nisan 1920'de
 
 İçerideki en etkileyici yer, ilk günkü düzeniyle korunan Genel Kurul salonu: ahşap sıralar, başkanlık kürsüsü ve gaz lambalarıyla aydınlatılan tavan. Milletvekillerinin bu küçük salonda savaşı nasıl yönettiğini hayal etmek kolay. Mustafa Kemal'in Meclis başkanı olarak kullandığı oda, eşyalarıyla birlikte duruyor. Koridorlardaki belgeler ve fotoğraflar, Mondros'tan Cumhuriyet'e uzanan yılları sırayla anlatıyor; İstiklal Marşı'na ayrılmış bir oda da var.
 
-Bina küçük; bir saat rahat bir ziyaret için yeterli. Çıkışta binanın andezit taş cephesine ve önündeki meydana bir kez daha bak. Cumhuriyet Müzesi olarak kullanılan ikinci Meclis binası aynı caddede, birkaç dakika ötede. Kapalı günü değişebildiği için gitmeden resmî sayfaya bakmak iyi olur.
+Bina küçük; bir saat rahat bir ziyaret için yeterli. Çıkışta binanın taş cephesine ve önündeki meydana bir kez daha bak. Cumhuriyet Müzesi olarak kullanılan ikinci Meclis binası aynı caddede, birkaç dakika ötede. Kapalı günü değişebildiği için gitmeden resmî sayfaya bakmak iyi olur.
 
 > Genel Kurul salonuna girdiğinde arka sıralardan birinin yanında dur ve kürsüye bak: 1920'de milletvekillerinin gördüğü manzara bu.
