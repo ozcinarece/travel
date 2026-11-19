@@ -13,7 +13,7 @@
       ],
       "ilce": "Odunpazarı",
       "merkeze_km": 1,
-      "neden": "Cumbaları sokağa taşan boyalı ahşap evler; mahalle 2012'den beri UNESCO Geçici Listesi'nde",
+      "neden": "Cumbaları sokağa taşan boyalı ahşap evlerin mahallesi, UNESCO Geçici Listesi'nde",
       "osm": "node/5298913021",
       "place_id": "ChIJ5_GtZRsWzBQRGTOXuJedBOI"
     },
@@ -26,7 +26,7 @@
       ],
       "ilce": "Odunpazarı",
       "merkeze_km": 1,
-      "neden": "Kengo Kuma'nın üst üste ahşap kutulardan binası; 2019'da açılan modern sanat müzesi",
+      "neden": "Kengo Kuma'nın üst üste ahşap kutulardan kurduğu modern sanat müzesi, 2019'da açıldı",
       "place_id": "ChIJ1x9xnBwWzBQRTxacdVqN824"
     },
     {
@@ -39,11 +39,25 @@
       ],
       "ilce": "Han",
       "merkeze_km": 75,
-      "neden": "Kayaya oyulmuş Frig cephesi, yazıtında Midas adı geçer; 506 km'lik Frig Yolu burada biter",
+      "neden": "Yazıtında Midas adı okunan, kayaya oyulmuş dev Frig cephesi",
       "place_id": "ChIJE6gKs1mNzhQRGrLRtX29gvE"
     },
     {
       "sira": 4,
+      "ad": "Sazova Bilim Kültür ve Sanat Parkı",
+      "kategori": "aktivite",
+      "amaclar": [
+        "cocuklu",
+        "yavas"
+      ],
+      "ilce": "Tepebaşı",
+      "merkeze_km": 6,
+      "neden": "Masal Şatosu, Kalyon gemisi, Japon Bahçesi ve gölet aynı parkta",
+      "osm": "way/261834480",
+      "place_id": "ChIJt_pBuGcXzBQRKqnZ_xVwdNQ"
+    },
+    {
+      "sira": 5,
       "ad": "Porsuk Çayı ve Adalar",
       "kategori": "manzara",
       "amaclar": [
@@ -56,18 +70,20 @@
       "place_id": "ChIJBcv-hEo_zBQRTRQBqMICTnE"
     },
     {
-      "sira": 5,
-      "ad": "Seyyid Battal Gazi Külliyesi",
-      "kategori": "tarih",
+      "sira": 6,
+      "ad": "Kırım Tatar Kültür Çibörek Evi",
+      "kategori": "yemek",
       "amaclar": [
-        "kultur_tarih"
+        "lezzet"
       ],
-      "ilce": "Seyitgazi",
-      "merkeze_km": 43,
-      "neden": "Tepe yamacında 1208 tarihli cami, medrese, türbeler ve Bektaşi dergâhı aynı avluda"
+      "ilce": "Odunpazarı",
+      "merkeze_km": 1,
+      "neden": "Tatar kadınlarının açtığı hamurla çibörek ve Tatar mantısı",
+      "osm": "node/10858769964",
+      "place_id": "ChIJuYINDR0WzBQR8AlAMEKzs7k"
     },
     {
-      "sira": 6,
+      "sira": 7,
       "ad": "Sivrihisar Ulu Camii",
       "kategori": "tarih",
       "amaclar": [
@@ -75,22 +91,8 @@
       ],
       "ilce": "Sivrihisar",
       "merkeze_km": 100,
-      "neden": "67 ahşap direkli 13. yüzyıl camisi; ceviz minberi çivisiz, 2023'te UNESCO listesine girdi",
+      "neden": "67 ahşap direğin taşıdığı 13. yüzyıl camisi, 2023'te UNESCO listesine girdi",
       "place_id": "ChIJ3eQJ2Mz2zRQRYYgB2a0C2GA"
-    },
-    {
-      "sira": 7,
-      "ad": "Sazova Bilim Kültür ve Sanat Parkı",
-      "kategori": "aktivite",
-      "amaclar": [
-        "cocuklu",
-        "yavas"
-      ],
-      "ilce": "Tepebaşı",
-      "merkeze_km": 6,
-      "neden": "Masal Şatosu, Kalyon gemisi, Japon Bahçesi ve gölet aynı parkta; içinde dekovil treni",
-      "osm": "way/261834480",
-      "place_id": "ChIJt_pBuGcXzBQRKqnZ_xVwdNQ"
     },
     {
       "sira": 8,
@@ -101,7 +103,7 @@
       ],
       "ilce": "Odunpazarı",
       "merkeze_km": 1,
-      "neden": "16. yüzyıl külliyesi; içinde Lületaşı Müzesi ve camın üflenerek biçimlendiği atölyeler",
+      "neden": "Lületaşı Müzesi ve camın üflenerek biçimlendiği atölyeler 16. yüzyıl külliyesinde",
       "osm": "way/308879113",
       "place_id": "ChIJFfXmpx0WzBQR6FaqjLXJt9k"
     },
@@ -114,24 +116,12 @@
       ],
       "ilce": "Odunpazarı",
       "merkeze_km": 1,
-      "neden": "1938'den beri balaban: et suyuna yatırılmış ekmek üstünde köfte, yoğurt ve tereyağı",
+      "neden": "Et suyuna yatırılmış ekmeğin üstünde köfte, yoğurt ve kızgın tereyağı: balaban",
       "osm": "node/13283330001",
       "place_id": "ChIJOzMzLQQWzBQRjX00MHiemBg"
     },
     {
       "sira": 10,
-      "ad": "Pessinus Antik Kenti",
-      "kategori": "tarih",
-      "amaclar": [
-        "kultur_tarih"
-      ],
-      "ilce": "Sivrihisar",
-      "merkeze_km": 113,
-      "neden": "Ballıhisar köyünde Kibele kültünün merkezi; tapınak temeli, basamaklı tiyatro ve kanal",
-      "place_id": "ChIJW9HXA-D4zRQR1q5ORAda0jo"
-    },
-    {
-      "sira": 11,
       "ad": "ETİ Arkeoloji Müzesi",
       "kategori": "muze",
       "amaclar": [
@@ -140,25 +130,61 @@
       ],
       "ilce": "Odunpazarı",
       "merkeze_km": 2,
-      "neden": "Pessinus, Şarhöyük ve Küllüoba buluntuları kronolojik sırada; bahçede büyük taş eserler",
+      "neden": "Pessinus, Şarhöyük ve Küllüoba buluntularını kronolojik sırayla gösterir",
       "osm": "way/273507558",
       "place_id": "ChIJ86a5IBEWzBQRXQcAK-e59qI"
     },
     {
-      "sira": 12,
-      "ad": "Kırım Tatar Kültür Çibörek Evi",
-      "kategori": "yemek",
+      "sira": 11,
+      "ad": "Tanınmış Helvacı",
+      "kategori": "tatli_kahve",
       "amaclar": [
         "lezzet"
       ],
       "ilce": "Odunpazarı",
       "merkeze_km": 1,
-      "neden": "Hamuru Tatar kadınlarının açtığı çibörek ve mantı; yanında kırmızı biber turşusu",
-      "osm": "node/10858769964",
-      "place_id": "ChIJuYINDR0WzBQR8AlAMEKzs7k"
+      "neden": "Coğrafi işaretli met helvası, kürek ve nuga helvası aynı tezgâhta",
+      "osm": "node/11958099070",
+      "place_id": "ChIJjZ274AYWzBQRc0BxvXxK5yk"
+    },
+    {
+      "sira": 12,
+      "ad": "Porsuk'ta gondol turu",
+      "kategori": "aktivite",
+      "amaclar": [
+        "yavas",
+        "cocuklu"
+      ],
+      "ilce": "Odunpazarı",
+      "merkeze_km": 0,
+      "neden": "Köprübaşı ile Adalar arasında gondol ya da tekneyle kısa tur",
+      "place_id": "ChIJh2k79QcWzBQR-eTFh4ssW6A"
     },
     {
       "sira": 13,
+      "ad": "Seyyid Battal Gazi Külliyesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Seyitgazi",
+      "merkeze_km": 43,
+      "neden": "1208 tarihli cami, medrese ve türbeler tepe yamacında aynı avluyu paylaşır"
+    },
+    {
+      "sira": 14,
+      "ad": "Pessinus Antik Kenti",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Sivrihisar",
+      "merkeze_km": 113,
+      "neden": "Kibele kültünün merkezi Ballıhisar köyünde: tapınak temeli, basamaklı tiyatro ve kanal",
+      "place_id": "ChIJW9HXA-D4zRQR1q5ORAda0jo"
+    },
+    {
+      "sira": 15,
       "ad": "Balıkdamı Kuş Cenneti",
       "kategori": "doga",
       "amaclar": [
@@ -171,20 +197,7 @@
       "place_id": "ChIJN1SXVsH_0RQR_OdxZ01QVLU"
     },
     {
-      "sira": 14,
-      "ad": "Porsuk'ta gondol turu",
-      "kategori": "aktivite",
-      "amaclar": [
-        "yavas",
-        "cocuklu"
-      ],
-      "ilce": "Odunpazarı",
-      "merkeze_km": 0,
-      "neden": "Köprübaşı ile Adalar arasında gondol ya da tekneyle kısa tur; teknede yalnız kart geçer",
-      "place_id": "ChIJh2k79QcWzBQR-eTFh4ssW6A"
-    },
-    {
-      "sira": 15,
+      "sira": 16,
       "ad": "Yazılıkaya Vadisi",
       "kategori": "manzara",
       "amaclar": [
@@ -197,7 +210,7 @@
       "place_id": "ChIJp4RjNfGNzhQRIkRLCUpAtOE"
     },
     {
-      "sira": 16,
+      "sira": 17,
       "ad": "Papağan Çiğbörek",
       "kategori": "yemek",
       "amaclar": [
@@ -205,22 +218,9 @@
       ],
       "ilce": "Odunpazarı",
       "merkeze_km": 1,
-      "neden": "1975'ten beri çibörek; ince hamur, sulu kıymalı iç, yanında ayran",
+      "neden": "İnce hamur, sulu kıymalı iç ve soğuk ayran: şehrin bilinen çibörekçilerinden",
       "osm": "node/4244682597",
       "place_id": "ChIJh-vcZQcWzBQRqELlM-wt4Ic"
-    },
-    {
-      "sira": 17,
-      "ad": "Tanınmış Helvacı",
-      "kategori": "tatli_kahve",
-      "amaclar": [
-        "lezzet"
-      ],
-      "ilce": "Odunpazarı",
-      "merkeze_km": 1,
-      "neden": "Coğrafi işaretli met helvası, kürek ve nuga helvası; kuruluşu 1875'e dayanır",
-      "osm": "node/11958099070",
-      "place_id": "ChIJjZ274AYWzBQRc0BxvXxK5yk"
     },
     {
       "sira": 18,
@@ -296,7 +296,7 @@
       ],
       "ilce": "Tepebaşı",
       "merkeze_km": 1,
-      "neden": "1927'de açılan muhallebici; keşkül, fırın sütlaç ve kazandibi",
+      "neden": "Keşkül, fırın sütlaç ve kazandibiyle şehrin eski muhallebicisi",
       "osm": "node/11944330369",
       "place_id": "ChIJtwvvmeYVzBQRT4G2BxRvw44"
     },
@@ -335,7 +335,7 @@
       ],
       "ilce": "Tepebaşı",
       "merkeze_km": 6,
-      "neden": "Sazova'nın içinde hayvanat bahçesi; aynı yerde kapalı akvaryum, pazartesi kapalı",
+      "neden": "Sazova'nın içindeki hayvanat bahçesiyle kapalı akvaryum bir arada",
       "osm": "way/607133244",
       "place_id": "ChIJ3c-F7JMWzBQRDvSlXyik1dQ"
     },
@@ -373,7 +373,7 @@
       ],
       "ilce": "Sivrihisar",
       "merkeze_km": 100,
-      "neden": "Lahana yaprağına sarılıp muska gibi katlanan bulgurlu dolma; 2022'de coğrafi işaret aldı"
+      "neden": "Muska gibi katlanan lahana yaprağında kıymalı-bulgurlu iç, 2022'de tescillendi"
     },
     {
       "sira": 30,
@@ -436,7 +436,7 @@
       ],
       "ilce": "Odunpazarı",
       "merkeze_km": 8,
-      "neden": "Osman Gazi'nin 1288'de aldığı kale; tepede surlar, 1999'dan beri kazı sürüyor",
+      "neden": "Osman Gazi'nin 1288'de aldığı kalenin surları; kazı 1999'da başladı",
       "osm": "way/703836361",
       "place_id": "ChIJQfnG9U8XzBQR3zoMOghd4M4"
     },
@@ -523,7 +523,7 @@
       ],
       "ilce": "Odunpazarı",
       "merkeze_km": 0,
-      "neden": "1925'te helvacı olarak açılan dükkân; kışın mısır bozası, yazın limonata ve dondurma",
+      "neden": "Kışın mısır bozası, yazın limonata ve dondurma satan eski helvacı dükkânı",
       "place_id": "ChIJH4X7agQWzBQROdH5kwOx--M"
     },
     {
@@ -561,6 +561,43 @@
       "merkeze_km": 70,
       "neden": "Kayaya oyulmuş katlı odalar ve galeriler; 1990'larda başlayan kazı yarım kaldı",
       "place_id": "ChIJfdT-DNCKzhQRBShKyBg2LYo"
+    },
+    {
+      "sira": 45,
+      "ad": "Hamam Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Odunpazarı",
+      "merkeze_km": 1,
+      "neden": "Antik Çağ'dan bugüne yıkanma kültürü; Büyükşehir müzelerinin ortak gişesi burada",
+      "place_id": "ChIJ7f8EZsQ9zBQRJrW_stpzEUI"
+    },
+    {
+      "sira": 46,
+      "ad": "Anadolu Üniversitesi Cumhuriyet Tarihi Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Odunpazarı",
+      "merkeze_km": 1,
+      "neden": "1916 yapımı Turan Numune Mektebi binasında Millî Mücadele ve ilk Cumhuriyet yılları",
+      "place_id": "ChIJt9fDzhwWzBQReNandcQyMHI"
+    },
+    {
+      "sira": 47,
+      "ad": "Vecihi Hürkuş Havacılık Parkı",
+      "kategori": "muze",
+      "amaclar": [
+        "cocuklu"
+      ],
+      "ilce": "Tepebaşı",
+      "merkeze_km": 2,
+      "neden": "Askerî ve sivil uçakların açık havada durduğu havacılık parkı, Adalar'a yakın",
+      "place_id": "ChIJy-jen94VzBQRJ5aVdaAqHpA"
     }
   ]
 }

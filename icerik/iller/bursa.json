@@ -12,7 +12,7 @@
       ],
       "ilce": "Osmangazi",
       "merkeze_km": 0,
-      "neden": "Yıldırım Bayezid'in yirmi kubbeli camisi; içeride şadırvan, duvarlarda hat yazıları",
+      "neden": "Yıldırım Bayezid'in yirmi kubbeli camisinde şadırvan içeride, duvarlar hat yazısıyla dolu",
       "osm": "way/26434413",
       "place_id": "ChIJ3RmyGj84yhQR4x4TfWyU8SY"
     },
@@ -41,7 +41,7 @@
       ],
       "ilce": "Osmangazi",
       "merkeze_km": 0,
-      "neden": "II. Bayezid'in 1490'da yaptırdığı ipek hanı; avluda mescit ve çay, dükkânlarda ipek",
+      "neden": "II. Bayezid'in 1490'da yaptırdığı ipek hanının avlusunda mescit ve çay ocağı",
       "osm": "relation/1018973",
       "place_id": "ChIJSw0QgOE9yhQRzQN7LU1DH8M"
     },
@@ -68,7 +68,7 @@
       ],
       "ilce": "Osmangazi",
       "merkeze_km": 36,
-      "neden": "2543 metrelik dağ, 1961'den beri milli park; yazın orman ve yayla, kışın kar",
+      "neden": "1961'de milli park ilan edilen 2543 metrelik dağ: yazın orman ve yayla, kışın kar",
       "place_id": "ChIJk2a7OMU6yhQRRiyjwYM8kdA"
     },
     {
@@ -126,6 +126,79 @@
     },
     {
       "sira": 10,
+      "ad": "Osman Gazi ve Orhan Gazi Türbeleri",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Osmangazi",
+      "merkeze_km": 1,
+      "neden": "Osmanlı'nın ilk iki hükümdarının türbeleri; depremden sonra 1863'te yeniden yapıldı",
+      "osm": "way/325992025",
+      "place_id": "ChIJjw_bKP09yhQRODXzZChVsnM"
+    },
+    {
+      "sira": 11,
+      "ad": "Uludağ Teleferiği",
+      "kategori": "manzara",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Yıldırım",
+      "merkeze_km": 4,
+      "neden": "Teferrüç'ten Sarıalan ve Oteller'e yaklaşık 9 km'lik hat; kabinden şehir ve orman görünür",
+      "place_id": "ChIJR2TKyc89yhQRUxNVPy6TY4Q"
+    },
+    {
+      "sira": 12,
+      "ad": "Bursa kestane şekeri",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Osmangazi",
+      "merkeze_km": 0,
+      "neden": "Şurupta pişirilip parlatılan kestane, 2021'de coğrafi işaret aldı"
+    },
+    {
+      "sira": 13,
+      "ad": "İnegöl",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "İnegöl",
+      "merkeze_km": 45,
+      "neden": "Kalıpla şekillenen ince İnegöl köftesini doğduğu ilçede ye"
+    },
+    {
+      "sira": 14,
+      "ad": "Uludağ Kebapçısı",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Osmangazi",
+      "merkeze_km": 1,
+      "neden": "Cemal ve Cemil ustaların Şirin Sokak'taki dükkânı; tereyağı masada dökülen Bursa kebabı",
+      "osm": "node/5103370133",
+      "place_id": "ChIJ_bGCWg4-yhQRyQz3qhnX-qY"
+    },
+    {
+      "sira": 15,
+      "ad": "Mahir Usta Yeşil Pideli Köfte",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Osmangazi",
+      "merkeze_km": 0,
+      "neden": "Kayhan Çarşısı'nda pideli köfte: tereyağı ve domates soslu, yanında yoğurt",
+      "place_id": "ChIJd0Rj3d89yhQRPvepBtkurm0"
+    },
+    {
+      "sira": 16,
       "ad": "Tirilye",
       "kategori": "tarih",
       "amaclar": [
@@ -139,45 +212,7 @@
       "place_id": "ChIJ_aobN8dzyhQRihWqqsXtvgo"
     },
     {
-      "sira": 11,
-      "ad": "Osman Gazi ve Orhan Gazi Türbeleri",
-      "kategori": "tarih",
-      "amaclar": [
-        "kultur_tarih"
-      ],
-      "ilce": "Osmangazi",
-      "merkeze_km": 1,
-      "neden": "Osmanlı'nın ilk iki hükümdarının türbeleri; depremden sonra 1863'te yeniden yapıldı",
-      "osm": "way/325992025",
-      "place_id": "ChIJjw_bKP09yhQRODXzZChVsnM"
-    },
-    {
-      "sira": 12,
-      "ad": "Uludağ Teleferiği",
-      "kategori": "manzara",
-      "amaclar": [
-        "doga",
-        "cocuklu"
-      ],
-      "ilce": "Yıldırım",
-      "merkeze_km": 4,
-      "neden": "Teferrüç'ten Sarıalan ve Oteller'e yaklaşık 9 km'lik hat; kabinden şehir ve orman görünür",
-      "place_id": "ChIJR2TKyc89yhQRUxNVPy6TY4Q"
-    },
-    {
-      "sira": 13,
-      "ad": "İznik Surları",
-      "kategori": "tarih",
-      "amaclar": [
-        "kultur_tarih"
-      ],
-      "ilce": "İznik",
-      "merkeze_km": 85,
-      "neden": "Şehri çeviren yaklaşık 5 km'lik Roma-Bizans suru; İstanbul ve Lefke kapılarından girilir",
-      "place_id": "ChIJT_ftVwALyxQRCLooJjoNGNE"
-    },
-    {
-      "sira": 14,
+      "sira": 17,
       "ad": "Suuçtu Şelalesi",
       "kategori": "doga",
       "amaclar": [
@@ -189,20 +224,30 @@
       "place_id": "ChIJcz1JFBkUthQR1n7mFSbASLw"
     },
     {
-      "sira": 15,
-      "ad": "Uludağ Kebapçısı",
-      "kategori": "yemek",
+      "sira": 18,
+      "ad": "İznik Surları",
+      "kategori": "tarih",
       "amaclar": [
-        "lezzet"
+        "kultur_tarih"
       ],
-      "ilce": "Osmangazi",
-      "merkeze_km": 1,
-      "neden": "Cemal ve Cemil ustaların Şirin Sokak'taki dükkânı; tereyağı masada dökülen Bursa kebabı",
-      "osm": "node/5103370133",
-      "place_id": "ChIJ_bGCWg4-yhQRyQz3qhnX-qY"
+      "ilce": "İznik",
+      "merkeze_km": 85,
+      "neden": "Şehri çeviren yaklaşık 5 km'lik Roma-Bizans suru; İstanbul ve Lefke kapılarından girilir",
+      "place_id": "ChIJT_ftVwALyxQRCLooJjoNGNE"
     },
     {
-      "sira": 16,
+      "sira": 19,
+      "ad": "Çekirge kaplıcaları",
+      "kategori": "aktivite",
+      "amaclar": [
+        "yavas"
+      ],
+      "ilce": "Osmangazi",
+      "merkeze_km": 3,
+      "neden": "Bizans temeli üstüne I. Murad'ın yaptırdığı Eski Kaplıca'nın semti, termal hamamlarıyla"
+    },
+    {
+      "sira": 20,
       "ad": "Kapalıçarşı ve Bedesten",
       "kategori": "carsi",
       "amaclar": [
@@ -214,7 +259,7 @@
       "place_id": "ChIJaVFANeI9yhQR-CThVzriC-Y"
     },
     {
-      "sira": 17,
+      "sira": 21,
       "ad": "Emir Sultan Camii",
       "kategori": "tarih",
       "amaclar": [
@@ -228,7 +273,7 @@
       "place_id": "ChIJVVVV9Nc9yhQRvgZ09oyrt44"
     },
     {
-      "sira": 18,
+      "sira": 22,
       "ad": "Panorama 1326 Bursa Fetih Müzesi",
       "kategori": "muze",
       "amaclar": [
@@ -242,7 +287,7 @@
       "place_id": "ChIJmW_z7N0_yhQRmdi6Jw3CD_g"
     },
     {
-      "sira": 19,
+      "sira": 23,
       "ad": "Bursa Kent Müzesi",
       "kategori": "muze",
       "amaclar": [
@@ -256,7 +301,7 @@
       "place_id": "ChIJHzNOwOA9yhQRdMKFcQdb1fw"
     },
     {
-      "sira": 20,
+      "sira": 24,
       "ad": "İznik Yeşil Cami",
       "kategori": "tarih",
       "amaclar": [
@@ -268,7 +313,7 @@
       "place_id": "ChIJa2GmQ7wLyxQRzDxB_rmw5XE"
     },
     {
-      "sira": 21,
+      "sira": 25,
       "ad": "İznik Müzesi",
       "kategori": "muze",
       "amaclar": [
@@ -280,7 +325,7 @@
       "place_id": "ChIJO8huz7ELyxQRnt0G9aBHRok"
     },
     {
-      "sira": 22,
+      "sira": 26,
       "ad": "Irgandı Köprüsü",
       "kategori": "carsi",
       "amaclar": [
@@ -294,7 +339,7 @@
       "place_id": "ChIJS0lARt49yhQR1LruSgYHKsE"
     },
     {
-      "sira": 23,
+      "sira": 27,
       "ad": "Uludağ Kayak Merkezi",
       "kategori": "aktivite",
       "amaclar": [
@@ -306,7 +351,7 @@
       "place_id": "ChIJK-EEla48yhQR6sjhr8uuNR4"
     },
     {
-      "sira": 24,
+      "sira": 28,
       "ad": "Merinos Tekstil Sanayi Müzesi",
       "kategori": "muze",
       "amaclar": [
@@ -320,7 +365,7 @@
       "place_id": "ChIJbaMkOwM-yhQRjGflEPJU364"
     },
     {
-      "sira": 25,
+      "sira": 29,
       "ad": "Hüdavendigar Külliyesi",
       "kategori": "tarih",
       "amaclar": [
@@ -333,7 +378,7 @@
       "place_id": "ChIJBWe-at4VyhQRrf_HHR50qgg"
     },
     {
-      "sira": 26,
+      "sira": 30,
       "ad": "İznik Çini Çarşısı",
       "kategori": "carsi",
       "amaclar": [
@@ -345,30 +390,7 @@
       "place_id": "ChIJ23woAbwLyxQR0gBeiZHbwxI"
     },
     {
-      "sira": 27,
-      "ad": "Bursa kestane şekeri",
-      "kategori": "tatli_kahve",
-      "amaclar": [
-        "lezzet"
-      ],
-      "ilce": "Osmangazi",
-      "merkeze_km": 0,
-      "neden": "2021'den beri coğrafi işaretli; çarşıdaki şekercilerde kutuyla satılır"
-    },
-    {
-      "sira": 28,
-      "ad": "Mahir Usta Yeşil Pideli Köfte",
-      "kategori": "yemek",
-      "amaclar": [
-        "lezzet"
-      ],
-      "ilce": "Osmangazi",
-      "merkeze_km": 0,
-      "neden": "Kayhan Çarşısı'nda pideli köfte: tereyağı ve domates soslu, yanında yoğurt",
-      "place_id": "ChIJd0Rj3d89yhQRPvepBtkurm0"
-    },
-    {
-      "sira": 29,
+      "sira": 31,
       "ad": "Abdal Simit Fırını",
       "kategori": "yemek",
       "amaclar": [
@@ -376,11 +398,11 @@
       ],
       "ilce": "Osmangazi",
       "merkeze_km": 1,
-      "neden": "1969'dan beri odun ateşli taş fırında ince Bursa simidi ve tahinli pide",
+      "neden": "Odun ateşli taş fırından ince Bursa simidi ve tahinli pide çıkar",
       "place_id": "ChIJ_YudwQo-yhQRMoiOdwjk8Es"
     },
     {
-      "sira": 30,
+      "sira": 32,
       "ad": "Tophane Saat Kulesi",
       "kategori": "manzara",
       "amaclar": [
@@ -389,12 +411,12 @@
       ],
       "ilce": "Osmangazi",
       "merkeze_km": 1,
-      "neden": "1905'te açılan kule; çevresindeki parktan Uludağ eteklerine ve ovaya bakılır",
+      "neden": "1905'te açılan kulenin çevresindeki parktan ova ve Uludağ etekleri görünür",
       "osm": "way/253586064",
       "place_id": "ChIJNwvkyuI9yhQRmORbmMWi9ps"
     },
     {
-      "sira": 31,
+      "sira": 33,
       "ad": "Mudanya Mütareke Evi Müzesi",
       "kategori": "muze",
       "amaclar": [
@@ -407,7 +429,7 @@
       "place_id": "ChIJK-zNiOdtyhQRn0_SKFkQ1Uw"
     },
     {
-      "sira": 32,
+      "sira": 34,
       "ad": "Karagöz Müzesi",
       "kategori": "muze",
       "amaclar": [
@@ -421,7 +443,7 @@
       "place_id": "ChIJcTxqruYVyhQRRZuJl6nxQP0"
     },
     {
-      "sira": 33,
+      "sira": 35,
       "ad": "Misi",
       "kategori": "tarih",
       "amaclar": [
@@ -430,11 +452,11 @@
       ],
       "ilce": "Nilüfer",
       "merkeze_km": 12,
-      "neden": "Nilüfer Çayı vadisinde Osmanlı evli köy; 1989'dan beri kentsel sit alanı",
+      "neden": "Nilüfer Çayı vadisinde Osmanlı evli köy, 1989'da kentsel sit alanı oldu",
       "place_id": "ChIJhQloyNgWyhQRih4QmJ0pzlA"
     },
     {
-      "sira": 34,
+      "sira": 36,
       "ad": "İnkaya Çınarı",
       "kategori": "doga",
       "amaclar": [
@@ -443,11 +465,11 @@
       ],
       "ilce": "Osmangazi",
       "merkeze_km": 8,
-      "neden": "600 yaşında sayılan çınarın gölgesinde çay; yaz aylarında İnkaya köyünün meyvesi",
+      "neden": "Gölgesinde çay içilen, 600 yaşında sayılan çınar",
       "place_id": "ChIJaTFLimkWyhQRkV_8DJScEhc"
     },
     {
-      "sira": 35,
+      "sira": 37,
       "ad": "Karabaş-i Veli Kültür Merkezi",
       "kategori": "aktivite",
       "amaclar": [
@@ -456,11 +478,11 @@
       ],
       "ilce": "Osmangazi",
       "merkeze_km": 2,
-      "neden": "16. yüzyıldan kalma dergâh binasında her akşam sema gösterisi",
+      "neden": "16. yüzyıldan kalma dergâh binasında sema gösterisi",
       "place_id": "ChIJ8e-x2OU9yhQRzg4hyFkHtUk"
     },
     {
-      "sira": 36,
+      "sira": 38,
       "ad": "Mahfel",
       "kategori": "tatli_kahve",
       "amaclar": [
@@ -469,11 +491,11 @@
       ],
       "ilce": "Osmangazi",
       "merkeze_km": 1,
-      "neden": "Setbaşı'ndaki asırlık çay bahçesi; çay, kahve ve kışın salep",
+      "neden": "Kışın salep içilen asırlık çay bahçesi, Setbaşı'nda",
       "place_id": "ChIJxwTN2d09yhQRTLM-HKkvVcc"
     },
     {
-      "sira": 37,
+      "sira": 39,
       "ad": "Türk İslam Eserleri Müzesi",
       "kategori": "muze",
       "amaclar": [
@@ -486,18 +508,7 @@
       "place_id": "ChIJAZkt5t49yhQRIc_Tk3vIn3g"
     },
     {
-      "sira": 38,
-      "ad": "İnegöl",
-      "kategori": "yemek",
-      "amaclar": [
-        "lezzet"
-      ],
-      "ilce": "İnegöl",
-      "merkeze_km": 45,
-      "neden": "2006'dan beri coğrafi işaretli İnegöl köftesi; kalıpla şekillenen ince köfte"
-    },
-    {
-      "sira": 39,
+      "sira": 40,
       "ad": "Kemalpaşa tatlısı",
       "kategori": "tatli_kahve",
       "amaclar": [
@@ -508,7 +519,7 @@
       "neden": "Taze peynirli hamur şerbette kaynatılır; kaymak ya da dondurmayla yenir"
     },
     {
-      "sira": 40,
+      "sira": 41,
       "ad": "Oylat Mağarası",
       "kategori": "doga",
       "amaclar": [
@@ -517,11 +528,11 @@
       ],
       "ilce": "İnegöl",
       "merkeze_km": 62,
-      "neden": "650 metresi gezilebilen mağara; yanında Oylat kaplıcaları",
+      "neden": "İnegöl dağlarında sarkıt ve dikitli mağara, Oylat kaplıcalarına yakın",
       "place_id": "ChIJIUEMOwvQyxQR02UB48GfAQE"
     },
     {
-      "sira": 41,
+      "sira": 42,
       "ad": "Uludağ Buzul Gölleri",
       "kategori": "aktivite",
       "amaclar": [
@@ -533,7 +544,7 @@
       "place_id": "ChIJ6eVYXAA7yhQRh2bNFSapVRc"
     },
     {
-      "sira": 42,
+      "sira": 43,
       "ad": "Abdülvahap Tepesi",
       "kategori": "manzara",
       "amaclar": [
@@ -542,11 +553,11 @@
       ],
       "ilce": "İznik",
       "merkeze_km": 87,
-      "neden": "İznik'in doğusundaki tepe; bayraklarla anılan türbe, şehir ve göl yukarıdan görünür",
+      "neden": "İznik'in doğusundaki tepeden surlarla çevrili şehir ve göl bir arada görünür",
       "place_id": "ChIJwQIVuZ4LyxQRK7o8m-hbvLY"
     },
     {
-      "sira": 43,
+      "sira": 44,
       "ad": "Tofaş Anadolu Arabaları Müzesi",
       "kategori": "muze",
       "amaclar": [
@@ -560,7 +571,7 @@
       "place_id": "ChIJhZyNimQ9yhQRhVQjRrUYtek"
     },
     {
-      "sira": 44,
+      "sira": 45,
       "ad": "Kocaçay Deltası",
       "kategori": "doga",
       "amaclar": [
