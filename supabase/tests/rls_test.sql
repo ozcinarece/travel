@@ -878,7 +878,7 @@ select pg_temp.hata_bekle($$insert into public.olaylar (tur) values ('davet_bili
 -- #139 sihirbaz olayları.
 insert into public.olaylar (tur, meta) values ('sihirbaz_bitti', null), ('plan_kuruldu', '{"mekan": 5, "gun": 2, "sure_sn": 140}');
 -- #361 KK8 ana sayfa v5 olayları; bilinmeyen tür yine reddedilir.
-insert into public.olaylar (tur, hedef_id, meta) values ('ana_kart_acildi', null, '{"amac": "hepsi"}'), ('ana_ara', null, '{"sonuc": 2}'), ('planlamaya_devam', null, null);
+insert into public.olaylar (tur, hedef_id, meta) values ('ana_kart_acildi', null, '{"amac": "hepsi"}'), ('ana_ara', null, '{"sonuc": "gezi"}'), ('planlamaya_devam', null, null);
 select pg_temp.hata_bekle($$insert into public.olaylar (tur) values ('ana_bilinmeyen')$$, '23514');
 reset role;
 

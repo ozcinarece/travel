@@ -52,6 +52,10 @@ export const anaV5 = {
   /** Profil dairesi ve kapaksız küçük kapak zemini. */
   profilZemin: '#ECEEF2',
   ok: '#9AA1B2',
+  /** Kart ♥ kayıtlıyken kenar (`Ana_v5_Ayrinti` §2). */
+  kalpKenar: '#C25200',
+  /** Kart ♥ dairesi (`Ana_v5_Ayrinti` §2). */
+  kalpDaire: 'rgba(255,255,255,0.92)',
 } as const;
 
 /**

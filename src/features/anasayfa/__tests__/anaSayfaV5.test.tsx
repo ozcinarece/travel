@@ -3,7 +3,8 @@
 // #275/#276/#290'dan kalan davranışlar (silindi bildirimi, yenileme, borç kartı) burada da sınanır.
 import { beforeEach, describe, expect, it, jest } from '@jest/globals';
 import { act, fireEvent, render, waitFor, within } from '@testing-library/react-native';
-import { ScrollView } from 'react-native';
+import { ScrollView, StyleSheet, View } from 'react-native';
+import Svg from 'react-native-svg';
 
 import type { Kisiler } from '@/features/harcama/metin';
 import { acilisKarariniKapat } from '@/lib/acilis';
@@ -105,6 +106,7 @@ beforeEach(async () => {
 
 describe('#361 KK2 üst satır', () => {
   it('♥ Kaydettiklerim, "+ Seyahat" sihirbaz, profil; ayrı Ara ikonu yok', async () => {
+    mockAkis.data = [gezi('g1', ['lezzet'])];
     const e = render(<AnaSayfa />);
     fireEvent.press(await kaydettiklerim(e));
     expect(router.push).toHaveBeenLastCalledWith('/(tabs)/kaydettiklerim');
@@ -181,13 +183,56 @@ describe('#361 KK5 arama', () => {
     expect(mockOlayYaz).toHaveBeenCalledWith('ana_ara', null, { sonuc: 'sehir', sehir_slug: 'eskisehir' });
   });
 
-  it('rehberli olmayan metin: "“{metin}” ile seyahat kur" sihirbazı metinle açar; yazılan metin ölçüme yazılmaz', async () => {
+  it('rehberli olmayan metin: "“{metin}” için seyahat kur" sihirbazı metinle açar; yazılan metin ölçüme yazılmaz', async () => {
     const e = render(<AnaSayfa />);
     fireEvent.changeText(await waitFor(() => e.getByLabelText('Şehir ya da gezi ara')), 'Mardin');
-    fireEvent.press(e.getByText('“Mardin” ile seyahat kur'));
+    fireEvent.press(e.getByText('“Mardin” için seyahat kur'));
     expect(router.push).toHaveBeenLastCalledWith({ pathname: '/(tabs)/yeni', params: expect.objectContaining({ metin: 'Mardin' }) });
     expect(mockOlayYaz).toHaveBeenCalledWith('ana_ara', null, { sonuc: 'metin' });
     expect(JSON.stringify(mockOlayYaz.mock.calls)).not.toContain('Mardin');
+  });
+
+  it('Ana_v5_Ayrinti §3: "için seyahat kur" satırı gezilerden önce, sonra "Hazır geziler · N"', async () => {
+    const e = render(<AnaSayfa />);
+    fireEvent.changeText(await waitFor(() => e.getByLabelText('Şehir ya da gezi ara')), 'eskiş');
+    const metinler = within(e.getByTestId('ana-arama-sonuc'))
+      .getAllByText(/için seyahat kur|Hazır geziler|Eskişehir gezisi g1/)
+      .map((x) => ([x.props.children] as unknown[]).flat(3).filter((c) => typeof c === 'string' || typeof c === 'number').join(''));
+    expect(metinler[0]).toContain('için seyahat kur');
+    expect(metinler[1]).toContain('Hazır geziler · 1');
+    expect(metinler[2]).toContain('Eskişehir gezisi g1');
+  });
+
+  it('eşleşen gezi yoksa "Hazır geziler" başlığı yok; × aramayı temizler', async () => {
+    const e = render(<AnaSayfa />);
+    const kutu = await waitFor(() => e.getByLabelText('Şehir ya da gezi ara'));
+    expect(e.queryByRole('button', { name: 'Aramayı temizle' })).toBeNull();
+    fireEvent.changeText(kutu, 'Mardin');
+    expect(e.queryByText(/Hazır geziler/)).toBeNull();
+    fireEvent.press(e.getByRole('button', { name: 'Aramayı temizle' }));
+    expect(e.queryByTestId('ana-arama-sonuc')).toBeNull();
+    expect(e.getByLabelText('Şehir ya da gezi ara').props.value).toBe('');
+  });
+
+  it('kutu odaktayken 2 px Gece kenar', async () => {
+    const e = render(<AnaSayfa />);
+    const kutu = await waitFor(() => e.getByLabelText('Şehir ya da gezi ara'));
+    const kenar = () => StyleSheet.flatten(e.getByTestId('ana-arama-kutu').props.style) as { borderWidth: number; borderColor: string };
+    expect(kenar().borderWidth).toBe(1);
+    fireEvent(kutu, 'focus');
+    expect(kenar()).toMatchObject({ borderWidth: 2, borderColor: '#152a6b' });
+    fireEvent(kutu, 'blur');
+    expect(kenar().borderWidth).toBe(1);
+  });
+
+  it('geziler yüklenemezse arama yalnız "için seyahat kur" satırını gösterir', async () => {
+    mockAkis.data = undefined;
+    mockAkis.isError = true;
+    const e = render(<AnaSayfa />);
+    fireEvent.changeText(await waitFor(() => e.getByLabelText('Şehir ya da gezi ara')), 'eskiş');
+    const sonuc = e.getByTestId('ana-arama-sonuc');
+    expect(within(sonuc).getByText(/için seyahat kur/)).toBeTruthy();
+    expect(within(sonuc).queryByText(/Hazır geziler/)).toBeNull();
   });
 
   it('arama sonuçtan bir şey seçmeden temizlenirse ana_ara sonuc=yok', async () => {
@@ -222,12 +267,52 @@ describe('#361 KK6 · KK7 sekmeler ve kartlar', () => {
     expect(e.getAllByTestId('amac-kapagi-doga', { includeHiddenElements: true })).toHaveLength(2);
   });
 
+  it('Ana_v5_Ayrinti §1: sekmede kısa ad (Kültür, Yavaş); en çok 4 amaç + Hepsi; sekme 44 px', async () => {
+    mockAkis.data = [
+      gezi('g1', ['kultur_tarih', 'yavas', 'lezzet', 'doga', 'cocuklu']),
+      gezi('g2', ['kultur_tarih', 'yavas', 'lezzet', 'doga', 'cocuklu']),
+    ];
+    const e = render(<AnaSayfa />);
+    await waitFor(() => expect(e.getAllByRole('tab')).toHaveLength(5));
+    expect(e.getAllByRole('tab').map((x) => within(x).getByText(/.+/).props.children)).toEqual(['Hepsi', 'Kültür', 'Lezzet', 'Doğa', 'Yavaş']);
+    expect(StyleSheet.flatten(e.getAllByRole('tab')[0].props.style)).toMatchObject({ height: 44 });
+    expect(e.queryByText('Kültür ve tarih')).toBeNull();
+  });
+
+  it('Ana_v5_Ayrinti §2: kart ♥ beyaz dairede; boş Lacivert çizgi, kayıtlı Mandalina dolgu', async () => {
+    mockAkis.data = [gezi('g1', ['lezzet'], 'Eskişehir', 'https://ornek/kapak.jpg')];
+    const e = render(<AnaSayfa />);
+    const kalp = await waitFor(() => e.getByRole('togglebutton', { name: 'Kaydet' }));
+    const daire = StyleSheet.flatten(kalp.props.children ? within(kalp).UNSAFE_getByType(View).props.style : {}) as Record<string, unknown>;
+    expect(daire).toMatchObject({ width: 32, height: 32, borderRadius: 16, backgroundColor: 'rgba(255,255,255,0.92)' });
+    expect(within(kalp).UNSAFE_getByType(Svg).props).toMatchObject({ fill: 'none', stroke: '#0e1430', strokeWidth: 2.2 });
+  });
+
   it('karta dokununca gezi sayfası ve ana_kart_acildi', async () => {
     mockAkis.data = [gezi('g1', ['lezzet'])];
     const e = render(<AnaSayfa />);
     fireEvent.press(await waitFor(() => e.getByText('Eskişehir gezisi g1')));
     expect(router.push).toHaveBeenLastCalledWith({ pathname: '/gezi/[slug]', params: { slug: 'g1' } });
     expect(mockOlayYaz).toHaveBeenCalledWith('ana_kart_acildi', 'g1', { kaynak: 'liste', amac: null });
+  });
+});
+
+describe('Ana_v5_Ayrinti §4 boş hal ve yükleniyor', () => {
+  it('yayında gezi yoksa "Henüz hazır gezi yok" ve + Seyahat sihirbazı açar', async () => {
+    const e = render(<AnaSayfa />);
+    const bos = await waitFor(() => e.getByTestId('ana-bos'));
+    expect(within(bos).getByText('Henüz hazır gezi yok')).toBeTruthy();
+    expect(within(bos).getByText('Kendi seyahatini kurabilirsin.')).toBeTruthy();
+    fireEvent.press(within(bos).getByRole('button', { name: 'Yeni seyahat' }));
+    expect(router.push).toHaveBeenLastCalledWith('/(tabs)/yeni');
+  });
+
+  it('geziler yüklenirken gösterge ekran okuyucu etiketi taşır; boş hal görünmez', async () => {
+    mockAkis.data = undefined;
+    mockAkis.isPending = true;
+    const e = render(<AnaSayfa />);
+    await waitFor(() => expect(e.getByLabelText('Geziler yükleniyor')).toBeTruthy());
+    expect(e.queryByTestId('ana-bos')).toBeNull();
   });
 });
 

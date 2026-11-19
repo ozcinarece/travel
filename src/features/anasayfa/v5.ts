@@ -49,7 +49,7 @@ export type AramaSonucu<G> = {
   geziler: G[];
   /** Rehberli şehre denk geldiyse o şehir ("{Şehir} için seyahat kur ›"); yoksa null. */
   sehir: Pick<Sehir, 'id' | 'ad'> | null;
-  /** Şehre denk gelmediyse yazılan metin ("“{metin}” ile seyahat kur ›"). */
+  /** Şehre denk gelmediyse yazılan metin ("“{metin}” için seyahat kur ›"). */
   metin: string | null;
 };
 

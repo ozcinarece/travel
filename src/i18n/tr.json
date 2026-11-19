@@ -757,10 +757,23 @@
       "kartAlt": "{gun} gün · {durak} durak · Tripmate rehberi",
       "kalan": "{n} gün kaldı",
       "kalanBugun": "Bugün",
-      "metinleKur": "“{metin}” ile seyahat kur",
+      "metinleKur": "“{metin}” için seyahat kur",
       "kaydet": "Kaydet",
       "sehirleKurOnce": "",
-      "sehirleKurSon": " için seyahat kur"
+      "sehirleKurSon": " için seyahat kur",
+      "sekme": {
+        "kultur_tarih": "Kültür",
+        "lezzet": "Lezzet",
+        "doga": "Doğa",
+        "yavas": "Yavaş",
+        "gece": "Gece",
+        "cocuklu": "Çocuklu"
+      },
+      "hazirGeziler": "Hazır geziler · {n}",
+      "temizle": "Aramayı temizle",
+      "bosBaslik": "Henüz hazır gezi yok",
+      "bosMetin": "Kendi seyahatini kurabilirsin.",
+      "yukleniyor": "Geziler yükleniyor"
     }
   },
   "ara": {

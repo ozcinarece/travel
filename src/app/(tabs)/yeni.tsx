@@ -57,7 +57,7 @@ export default function SihirbazEkrani() {
   const girisYerleri = useYerlerIle(girisYerIdleri);
   const yerleriEkle = useYerleriEkle();
   // `n`: her dokunuşta yeni (aynı seyahat için ikinci "Tekrar kur" da uygulanır).
-  // #361 KK5: ana aramadan "“{metin}” ile seyahat kur" → sihirbaz Nereye adımında arama kutusu o metinle dolu açılır.
+  // #361 KK5: ana aramadan "“{metin}” için seyahat kur" → sihirbaz Nereye adımında arama kutusu o metinle dolu açılır.
   const girisAnahtari = giris.tekrar
     ? `tekrar:${giris.tekrar}:${giris.n ?? ''}`
     : giris.sehir

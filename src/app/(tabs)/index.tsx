@@ -3,6 +3,7 @@ import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { ActivityIndicator, AppState, Platform, Pressable, RefreshControl, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import Svg, { Circle, Path } from 'react-native-svg';
 
 import { AnaGeziKarti } from '@/components/anasayfa/AnaGeziKarti';
 import { HarcamaKapatKarti } from '@/components/anasayfa/HarcamaKapatKarti';
@@ -26,7 +27,7 @@ import { useOturum } from '@/lib/oturum';
 import { tarihAraligi } from '@/lib/takvim';
 import type { SeyahatOzet } from '@/lib/tipler';
 import { yerelTarih } from '@/lib/zaman';
-import { anaV5, renk, yazi } from '@/theme';
+import { anaV5, minDokunma, renk, yazi } from '@/theme';
 
 /**
  * #361 ana sayfa v5 (UX önerileri kanvası, "#358 Ana sayfa v5 · harman": `Ana_v5_Yok` · `Ana_v5_Var` · `Ana_v5_Bitti`): tek
@@ -167,6 +168,7 @@ export default function AnaSayfa() {
 
   // KK5 · KK6: arama ve amaç sekmesi.
   const [sorgu, setSorgu] = useState('');
+  const [aramaOdakta, setAramaOdakta] = useState(false);
   const [secilenSekme, setSecilenSekme] = useState<Amac | null>(null);
   const tumGeziler = useMemo(() => akis.data ?? [], [akis.data]);
   const sekmeler = useMemo(() => sekmeAmaclari(tumGeziler), [tumGeziler]);
@@ -263,11 +265,14 @@ export default function AnaSayfa() {
         {ustKart}
 
         {/* KK5: düz arama kutusu; "Ne zaman" yok. */}
-        <View style={s.arama}>
+        {/* `Ana_v5_Arama`: odaktayken 2 px Gece kenar; yazı varken sağda × temizle (44 pt, 24 px ikincil daire). */}
+        <View style={[s.arama, aramaOdakta && s.aramaOdak, sorgu ? s.aramaDolu : null]} testID="ana-arama-kutu">
           <Ikon ad="ara" boyut={18} renk={renk.metin} kalinlik={2.4} />
           <TextInput
             value={sorgu}
             onChangeText={setSorgu}
+            onFocus={() => setAramaOdakta(true)}
+            onBlur={() => setAramaOdakta(false)}
             placeholder={t('anasayfa.v5.ara')}
             placeholderTextColor={anaV5.ikincil}
             accessibilityLabel={t('anasayfa.v5.ara')}
@@ -275,22 +280,38 @@ export default function AnaSayfa() {
             autoCorrect={false}
             style={s.aramaGirdi}
           />
+          {sorgu ? (
+            <Pressable accessibilityRole="button" accessibilityLabel={t('anasayfa.v5.temizle')} onPress={() => setSorgu('')} style={s.temizle}>
+              <View style={s.temizleDaire}>
+                <Ikon ad="kapat" boyut={12} renk={renk.zemin} kalinlik={3.4} />
+              </View>
+            </Pressable>
+          ) : null}
         </View>
 
         {arama ? (
-          <View style={s.liste} testID="ana-arama-sonuc">
-            {arama.geziler.map((g) => (
-              <AnaGeziKarti key={g.id} gezi={g} ton={kapakTonu(g.amaclar, null)} onAc={() => aramaGezisi(g)} />
-            ))}
+          // `Ana_v5_Arama` · `Ana_v5_Ayrinti` §3: "… için seyahat kur" satırı klavyenin üstünde kalsın diye gezilerden önce;
+          // sonra "Hazır geziler · N" ve kartlar. Geziler yüklenemediyse yalnız satır.
+          <View style={[s.liste, s.aramaListe]} testID="ana-arama-sonuc">
             {arama.sehir ? (
-              <KurSatiri onPress={() => sehirleKur(arama.sehir!)}>
+              <KurSatiri ikon="sehir" onPress={() => sehirleKur(arama.sehir!)}>
                 {t('anasayfa.v5.sehirleKurOnce')}
                 <Text style={s.kurKalin}>{arama.sehir.ad}</Text>
                 {t('anasayfa.v5.sehirleKurSon')}
               </KurSatiri>
             ) : arama.metin ? (
-              <KurSatiri onPress={() => metinleKur(arama.metin!)}>{t('anasayfa.v5.metinleKur', { metin: arama.metin })}</KurSatiri>
+              <KurSatiri ikon="metin" onPress={() => metinleKur(arama.metin!)}>
+                {t('anasayfa.v5.metinleKur', { metin: arama.metin })}
+              </KurSatiri>
             ) : null}
+            {arama.geziler.length > 0 ? (
+              <Text accessibilityRole="header" style={s.bolumBaslik}>
+                {t('anasayfa.v5.hazirGeziler', { n: arama.geziler.length })}
+              </Text>
+            ) : null}
+            {arama.geziler.map((g) => (
+              <AnaGeziKarti key={g.id} gezi={g} ton={kapakTonu(g.amaclar, null)} onAc={() => aramaGezisi(g)} />
+            ))}
           </View>
         ) : (
           <>
@@ -299,12 +320,12 @@ export default function AnaSayfa() {
               <View style={s.sekmeler} accessibilityRole="tablist">
                 <Sekme baslik={t('anasayfa.v5.hepsi')} secili={!sekme} onPress={() => setSecilenSekme(null)} />
                 {sekmeler.map((a) => (
-                  <Sekme key={a} baslik={t(`kesfetAkisi.amac.${a}`)} secili={sekme === a} onPress={() => setSecilenSekme(a)} />
+                  <Sekme key={a} baslik={t(`anasayfa.v5.sekme.${a}`)} secili={sekme === a} onPress={() => setSecilenSekme(a)} />
                 ))}
               </View>
             ) : null}
             {akis.isPending ? (
-              <ActivityIndicator color={renk.ana} style={s.yukleniyor} />
+              <ActivityIndicator color={renk.ana} style={s.yukleniyor} accessibilityLabel={t('anasayfa.v5.yukleniyor')} />
             ) : akis.isError && !akis.data ? (
               <View style={[s.kenar, s.hata]}>
                 <Text accessibilityRole="header" style={s.hataBaslik}>
@@ -312,6 +333,19 @@ export default function AnaSayfa() {
                 </Text>
                 <Text style={s.hataMetin}>{t('kesfetAkisi.agMetin')}</Text>
                 <Buton baslik={t('kesfetAkisi.tekrarDene')} onPress={() => akis.refetch()} yukleniyor={akis.isFetching} />
+              </View>
+            ) : tumGeziler.length === 0 ? (
+              // `Ana_v5_Ayrinti` §4: yayında hiç gezi yok.
+              <View style={s.kenar}>
+                <View style={s.bos} testID="ana-bos">
+                  <Text accessibilityRole="header" style={s.bosBaslik}>
+                    {t('anasayfa.v5.bosBaslik')}
+                  </Text>
+                  <Text style={s.bosMetin}>{t('anasayfa.v5.bosMetin')}</Text>
+                  <Pressable accessibilityRole="button" accessibilityLabel={t('anasayfa.v5.yeniSeyahatEtiket')} onPress={yeni} style={({ pressed }) => [s.bosDugme, pressed && s.basili]}>
+                    <Text style={s.seyahatMetin}>{`+ ${t('anasayfa.v5.seyahat')}`}</Text>
+                  </Pressable>
+                </View>
               </View>
             ) : (
               <View style={s.liste}>
@@ -358,10 +392,21 @@ function Sekme({ baslik, secili, onPress }: { baslik: string; secili: boolean; o
   );
 }
 
-/** KK5: "{Şehir} için seyahat kur ›" / "“{metin}” ile seyahat kur ›" (Planlamaya devam satırının zemini). */
-function KurSatiri({ children, onPress }: { children: ReactNode; onPress: () => void }) {
+/**
+ * KK5 (`Ana_v5_Ayrinti` §3): "{Şehir} için seyahat kur ›" iğne ikonuyla, eşleşmeyen metinde "“{metin}” için seyahat kur ›"
+ * + ikonuyla. Zemin #F6F7FA, köşe 16, en az 52 px.
+ */
+function KurSatiri({ children, ikon, onPress }: { children: ReactNode; ikon: 'sehir' | 'metin'; onPress: () => void }) {
   return (
     <Pressable accessibilityRole="button" onPress={onPress} style={({ pressed }) => [s.kurSatiri, pressed && s.basili]}>
+      {ikon === 'sehir' ? (
+        <Svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke={renk.ana} strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round">
+          <Path d="M12 21s-6-5.3-6-10a6 6 0 0 1 12 0c0 4.7-6 10-6 10z" />
+          <Circle cx={12} cy={11} r={2.2} />
+        </Svg>
+      ) : (
+        <Ikon ad="arti" boyut={20} renk={renk.ana} kalinlik={2.4} />
+      )}
       <Text style={s.kurMetin} numberOfLines={2}>
         {children}
       </Text>
@@ -418,13 +463,24 @@ const s = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     elevation: 2,
   },
+  // Odakta 2 px kenar: iç boşluk 1 px azalır, içerik yerinde kalır. × varken sağ boşluk 4 (44 pt düğme).
+  aramaOdak: { borderWidth: 2, borderColor: renk.ana, paddingLeft: 17, paddingRight: 17 },
+  aramaDolu: { paddingRight: 4 },
   aramaGirdi: { flex: 1, fontFamily: yazi.normal, fontSize: 15, color: renk.metin, paddingVertical: 0 },
-  sekmeler: { paddingHorizontal: 16, flexDirection: 'row', gap: 24, borderBottomWidth: 1, borderBottomColor: anaV5.cizgi },
-  sekme: { height: 40, minWidth: 44, justifyContent: 'center', alignItems: 'center', borderBottomWidth: 2, borderBottomColor: 'transparent', flexShrink: 1 },
+  temizle: { width: minDokunma, height: minDokunma, alignItems: 'center', justifyContent: 'center' },
+  temizleDaire: { width: 24, height: 24, borderRadius: 12, backgroundColor: anaV5.ikincil, alignItems: 'center', justifyContent: 'center' },
+  bolumBaslik: { fontFamily: yazi.kalin, fontSize: 13, color: anaV5.ikincil },
+  bos: { paddingVertical: 20, paddingHorizontal: 16, borderRadius: 16, backgroundColor: anaV5.satirZemin, gap: 6 },
+  bosBaslik: { fontFamily: yazi.kalin, fontSize: 15, color: renk.metin },
+  bosMetin: { fontFamily: yazi.normal, fontSize: 14, color: anaV5.ikincil },
+  bosDugme: { alignSelf: 'flex-start', marginTop: 6, height: minDokunma, paddingHorizontal: 18, borderRadius: 22, backgroundColor: renk.vurgu, justifyContent: 'center' },
+  sekmeler: { paddingHorizontal: 16, flexDirection: 'row', gap: 20, borderBottomWidth: 1, borderBottomColor: anaV5.cizgi },
+  sekme: { height: minDokunma, minWidth: 44, justifyContent: 'center', alignItems: 'center', borderBottomWidth: 2, borderBottomColor: 'transparent', flexShrink: 1 },
   sekmeSecili: { borderBottomColor: renk.metin },
   sekmeMetin: { fontFamily: yazi.orta, fontSize: 14, color: anaV5.ikincil },
   sekmeMetinSecili: { fontFamily: yazi.kalin, color: renk.metin },
   liste: { paddingHorizontal: 16, paddingTop: 4, gap: 20 },
+  aramaListe: { gap: 16 },
   yukleniyor: { marginTop: 24 },
   hata: { gap: 14, paddingTop: 6 },
   hataBaslik: { fontFamily: yazi.ekstra, fontSize: 20, color: renk.metin },

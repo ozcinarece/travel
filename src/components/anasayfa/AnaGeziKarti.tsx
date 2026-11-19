@@ -6,7 +6,6 @@ import { Image } from 'expo-image';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 
-import { Ikon } from '@/components/ui/Ikon';
 import { kartAltSatiri } from '@/features/anasayfa/v5';
 import { useKayitli } from '@/components/icerik/Kalp';
 import { useKaydet } from '@/features/icerik/sorgular';
@@ -58,7 +57,10 @@ export function AnaGeziKarti({ gezi, ton, onAc, altSatir }: Props) {
   );
 }
 
-/** Kapak üstündeki ♥: 22 px beyaz çizgi, yarı saydam dolgu (kanvas); kayıtlıysa dolu Mandalina kalp. Dokunma alanı 44 px. */
+/**
+ * Kapak üstündeki ♥ (kanvas `Ana_v5_Ayrinti` §2): her kartta (fotoğraflıda da) 32 px beyaz daire (%92), içinde 18 px kalp.
+ * Boş: Lacivert 2,2 çizgi. Kayıtlı: Mandalina dolgu, #C25200 1,6 kenar. Dokunma alanı 44 px, daireyi ortalar.
+ */
 function KartKalbi({ geziId }: { geziId: string }) {
   const kayitli = useKayitli('gezi', geziId);
   const kaydet = useKaydet();
@@ -69,17 +71,18 @@ function KartKalbi({ geziId }: { geziId: string }) {
       accessibilityState={{ checked: kayitli }}
       onPress={() => kaydet.mutate({ tur: 'gezi', hedef_id: geziId, kayitli })}
       style={s.kalp}
+      testID="kart-kalp"
     >
-      {kayitli ? (
-        <Ikon ad="kalpDolu" boyut={22} renk={renk.vurgu} kalinlik={2} />
-      ) : (
-        <Svg width={22} height={22} viewBox="0 0 24 24" fill="rgba(14,20,48,0.25)" stroke={renk.zemin} strokeWidth={2} strokeLinejoin="round">
-          <Path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z" />
+      <View style={s.kalpDaire}>
+        <Svg width={18} height={18} viewBox="0 0 24 24" fill={kayitli ? renk.vurgu : 'none'} stroke={kayitli ? anaV5.kalpKenar : renk.metin} strokeWidth={kayitli ? 1.6 : 2.2} strokeLinejoin="round">
+          <Path d={KALP_YOLU} />
         </Svg>
-      )}
+      </View>
     </Pressable>
   );
 }
+
+const KALP_YOLU = 'M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z';
 
 const s = StyleSheet.create({
   kart: { position: 'relative' },
@@ -89,6 +92,7 @@ const s = StyleSheet.create({
   metinler: { gap: 1 },
   baslik: { fontFamily: yazi.kalin, fontSize: 15, color: renk.metin },
   alt: { fontFamily: yazi.normal, fontSize: 14, color: anaV5.ikincil },
-  // Kanvas: ikon sağdan ve üstten 12 px; 44 px dokunma alanı ikonu ortalar (12 − (44 − 22) / 2 = 1).
-  kalp: { position: 'absolute', right: 1, top: 1, width: minDokunma, height: minDokunma, alignItems: 'center', justifyContent: 'center' },
+  // Kanvas: daire sağdan ve üstten 8 px; 44 px dokunma alanı daireyi ortalar (8 − (44 − 32) / 2 = 2).
+  kalp: { position: 'absolute', right: 2, top: 2, width: minDokunma, height: minDokunma, alignItems: 'center', justifyContent: 'center' },
+  kalpDaire: { width: 32, height: 32, borderRadius: 16, backgroundColor: anaV5.kalpDaire, alignItems: 'center', justifyContent: 'center' },
 });
