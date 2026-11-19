@@ -1,24 +1,12 @@
-// #277 (#237 v2, kanvas 29a · 29b): Keşfet akışı — yalnız bizim hazır gezilerimiz. Kart verisi kendi içerik tablolarımızdan
+// #277 → #361: ana sayfanın hazır gezileri (Keşfet akışı sorgusu) — yalnız bizim hazır gezilerimiz. Kart verisi kendi içerik tablolarımızdan
 // (`geziler`, `gezi_gunleri`, `gezi_duraklari` sayısı, `sehirler.ad`); Google'dan ad, fotoğraf, puan ya da saat yok, akışta
 // Places çağrısı yok (PRD §7).
 import { useQuery } from '@tanstack/react-query';
-import { Share } from 'react-native';
 
-import { t } from '@/i18n';
-import { davetLinki } from '@/lib/davetLinki';
 import { supabase } from '@/lib/supabase';
 import type { Gezi } from '@/lib/tipler';
 
-import { AKIS_AMACLARI, type Amac } from './amaclar';
-import { ayniSehir } from './yerEkle';
-
-/**
- * KK6: akış bir yayın bayrağının arkasında. Ece en az 8 şehir ve 40 kart olunca repo değişkeni `KESFET_AKISI=1` yapar ve
- * `eas-update` çalıştırır (`.github/workflows/eas-update.yml`). Kapalıyken ana ekran bugünkü hazır geziler bölümünü gösterir.
- */
-export function kesfetAkisiAcik(): boolean {
-  return process.env.EXPO_PUBLIC_KESFET_AKISI === '1';
-}
+import type { Amac } from './amaclar';
 
 /** Akış kartı: gezi + günlerin durak sayıları (rota şeridi, 1. günden başlayarak). */
 export type AkisGezisi = Gezi & { gunDuraklari: number[] };
@@ -51,46 +39,10 @@ export function useKesfetAkisi(etkin = true) {
 }
 
 /**
- * KK3: yaklaşan seyahatin şehrinin gezileri önde, sonra diğerleri; her iki grupta da sorgu sırası korunur. Şehir yoksa
- * (yaklaşan seyahat yok) ya da o şehrin gezisi yoksa `sehirGezileri` boş döner.
- */
-export function akisSirasi<T extends Pick<Gezi, 'sehirler'>>(geziler: readonly T[], sehir: string | null | undefined): { sehirGezileri: T[]; digerleri: T[] } {
-  if (!sehir) return { sehirGezileri: [], digerleri: [...geziler] };
-  const sehirGezileri: T[] = [];
-  const digerleri: T[] = [];
-  for (const g of geziler) (g.sehirler?.ad && ayniSehir(sehir, g.sehirler.ad) ? sehirGezileri : digerleri).push(g);
-  return { sehirGezileri, digerleri };
-}
-
-/** KK8: ekran okuyucu etiketi — "Eskişehir, 3 gün, 14 durak, Tripmate gezisi". */
-export function kartEtiketi(g: Pick<Gezi, 'gun_sayisi' | 'mekan_sayisi' | 'sehirler' | 'baslik'>): string {
-  return t('kesfetAkisi.kartEtiket', {
-    sehir: g.sehirler?.ad ?? g.baslik,
-    gun: g.gun_sayisi,
-    durak: g.mekan_sayisi,
-  });
-}
-
-/** KK4: WhatsApp'ta paylaş — sistemin paylaş sayfası, bugünkü hazır gezi linkiyle (gezi sayfasıyla aynı metin). */
-export function geziyiPaylas(g: Pick<Gezi, 'baslik' | 'slug'>) {
-  return Share.share({
-    message: t('gezi.paylasMetin', {
-      baslik: g.baslik,
-      link: davetLinki(`gezi/${g.slug}`).replace('/r/gezi/', '/gezi/'),
-    }),
-  }).catch(() => {});
-}
-
-/**
  * #300 KK5 (kanvas 29a, 29h-A): akış çiplerinin amaçları, bu sırayla (veritabanındaki `public.amac_listesi()` ile aynı
  * değerler). "Sana göre" bunların dışında: süzgeç yok.
  */
 export { AKIS_AMACLARI, type Amac } from './amaclar';
-
-/** Gösterilecek amaç çipleri: en az bir gezisi olanlar, sabit sırayla (boş çip gösterilmez). */
-export function doluAmaclar(geziler: readonly Pick<Gezi, 'amaclar'>[]): Amac[] {
-  return AKIS_AMACLARI.filter((a) => geziler.some((g) => g.amaclar?.includes(a)));
-}
 
 /** Seçili amaca göre süzgeç; null ("Sana göre") ya da artık boş olan amaç süzmez, sıra korunur. */
 export function amacaGore<T extends Pick<Gezi, 'amaclar'>>(geziler: readonly T[], amac: Amac | null): T[] {

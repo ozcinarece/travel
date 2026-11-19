@@ -143,30 +143,3 @@ export function useAcikBorc(sy: SeyahatOzet | null): AcikBorc | null | undefined
     return { transfer: o.transferler.length, benimNet: o.benimNet, karsilar: o.karsilar, kisiler: kisiKaynagi(uyeler.data) };
   }, [sy, oturumVar, harcamalar.data, odesmeler.data, uyeler.data, harcamalar.isError, odesmeler.isError, uyeler.isError, benId]);
 }
-
-/** KK3 (kanvas 29f): "Seyahatin burada" ipucu cihazda bir kez gösterilir. */
-export const SERIT_IPUCU_ANAHTARI = 'serit-ipucu:goruldu';
-
-/** İpucu gösterilecek mi: okunana kadar false (bir an görünüp kaybolmasın); okunamazsa gösterilmez. */
-export function useSeritIpucu(gorunur: boolean): { acik: boolean; kapat: () => void } {
-  const [durum, setDurum] = useState<'bilinmiyor' | 'goster' | 'gizle'>('bilinmiyor');
-  useEffect(() => {
-    if (!gorunur || durum !== 'bilinmiyor') return;
-    let iptal = false;
-    AsyncStorage.getItem(SERIT_IPUCU_ANAHTARI)
-      .then((v) => {
-        if (!iptal) setDurum(v === '1' ? 'gizle' : 'goster');
-      })
-      .catch(() => {
-        if (!iptal) setDurum('gizle');
-      });
-    return () => {
-      iptal = true;
-    };
-  }, [gorunur, durum]);
-  const kapat = () => {
-    setDurum('gizle');
-    AsyncStorage.setItem(SERIT_IPUCU_ANAHTARI, '1').catch(() => undefined);
-  };
-  return { acik: gorunur && durum === 'goster', kapat };
-}

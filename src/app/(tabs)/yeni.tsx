@@ -50,14 +50,22 @@ export default function SihirbazEkrani() {
 
   const sehirler = useSehirler();
   // #144: dışarıdan giriş parametreleri bir kez uygulanır (sekme ekranı açık kalır; aynı parametreyle tekrar uygulanmaz).
-  const giris = useLocalSearchParams<{ tekrar?: string; sehir?: string; yerler?: string; n?: string }>();
+  const giris = useLocalSearchParams<{ tekrar?: string; sehir?: string; yerler?: string; n?: string; metin?: string }>();
   const tekrarKaynagi = useTekrarKaynagi(giris.tekrar);
   const girisSehri = useIcerikSehirSecimi(giris.tekrar ? undefined : sehirler.data?.find((k) => k.id === giris.sehir));
   const girisYerIdleri = useMemo(() => (giris.tekrar ? [] : (giris.yerler?.split(',').filter(Boolean) ?? [])), [giris.tekrar, giris.yerler]);
   const girisYerleri = useYerlerIle(girisYerIdleri);
   const yerleriEkle = useYerleriEkle();
   // `n`: her dokunuşta yeni (aynı seyahat için ikinci "Tekrar kur" da uygulanır).
-  const girisAnahtari = giris.tekrar ? `tekrar:${giris.tekrar}:${giris.n ?? ''}` : giris.sehir ? `sehir:${giris.sehir}:${giris.yerler ?? ''}:${giris.n ?? ''}` : null;
+  // #361 KK5: ana aramadan "“{metin}” için seyahat kur" → sihirbaz Nereye adımında arama kutusu o metinle dolu açılır.
+  const girisAnahtari = giris.tekrar
+    ? `tekrar:${giris.tekrar}:${giris.n ?? ''}`
+    : giris.sehir
+      ? `sehir:${giris.sehir}:${giris.yerler ?? ''}:${giris.n ?? ''}`
+      : giris.metin
+        ? `metin:${giris.metin}:${giris.n ?? ''}`
+        : null;
+  const [ilkSorgu, setIlkSorgu] = useState<{ metin: string; anahtar: string } | null>(null);
   const [uygulananGiris, setUygulananGiris] = useState<string | null>(null);
   /** Uygulanan giriş: kopyalanacak seyahat ya da listeye eklenecek kaydedilen yerler (yalnız şehir değişmediyse). */
   const [girisPlani, setGirisPlani] = useState<{ tur: 'tekrar'; kaynak: string; sehirId: string } | { tur: 'yerler'; sehirId: string } | null>(null);
@@ -87,7 +95,7 @@ export default function SihirbazEkrani() {
   }, [profil.data?.onboarding_done_at]);
 
   if (girisAnahtari && girisAnahtari !== uygulananGiris) {
-    const hazir = giris.tekrar ? tekrarKaynagi.data : girisSehri.data;
+    const hazir = giris.tekrar ? tekrarKaynagi.data : giris.sehir ? girisSehri.data : giris.metin;
     if (hazir) {
       setUygulananGiris(girisAnahtari);
       setTripId(null);
@@ -99,10 +107,16 @@ export default function SihirbazEkrani() {
         setAd(tekrarKaynagi.data.ad);
         setGirisPlani({ tur: 'tekrar', kaynak: tekrarKaynagi.data.id, sehirId: tekrarKaynagi.data.sehir.place_id });
         setAdim('nezaman');
-      } else if (girisSehri.data) {
+      } else if (giris.sehir && girisSehri.data) {
         setSehir(girisSehri.data);
         setAd(null);
         setGirisPlani({ tur: 'yerler', sehirId: girisSehri.data.place_id });
+        setAdim('nereye');
+      } else if (giris.metin) {
+        setSehir(null);
+        setAd(null);
+        setGirisPlani(null);
+        setIlkSorgu({ metin: giris.metin, anahtar: girisAnahtari });
         setAdim('nereye');
       }
     }
@@ -203,7 +217,7 @@ export default function SihirbazEkrani() {
   if (adim === 'nereye') {
     return (
       <AdimKabugu adim={adim} baslik={t('sihirbaz.nereye.baslik')} onGeri={geri} hata={hata} devam={{ onPress: nereyeDevam, pasif: !sehir, yukleniyor: adKaydet.isPending }}>
-        <AdimNereye sehir={sehir} onSehir={setSehir} ad={ad} onerilenAd={onerilenAd} onAd={setAd} sehirler={sehirler.data} kilitli={kilitli} />
+        <AdimNereye key={ilkSorgu?.anahtar} ilkSorgu={ilkSorgu?.metin} sehir={sehir} onSehir={setSehir} ad={ad} onerilenAd={onerilenAd} onAd={setAd} sehirler={sehirler.data} kilitli={kilitli} />
       </AdimKabugu>
     );
   }
