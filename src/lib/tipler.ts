@@ -183,7 +183,11 @@ export type GeziGunu = { id: string; gezi_id: string; sira: number; baslik: stri
 export type GeziDetay = Gezi & { gezi_gunleri: GeziGunu[] };
 export type KaydedilenTuru = 'gezi' | 'yer';
 export type Kaydedilen = { tur: KaydedilenTuru; hedef_id: string; created_at: string };
-export type OlayTuru = 'gezi_goruntulendi' | 'gezi_alindi' | 'yer_eklendi' | 'davet_paylasildi' | 'davet_acildi' | 'davet_katildi' | 'sihirbaz_bitti' | 'plan_kuruldu';
+export type OlayTuru = 'gezi_goruntulendi' | 'gezi_alindi' | 'yer_eklendi' | 'davet_paylasildi' | 'davet_acildi' | 'davet_katildi' | 'sihirbaz_bitti' | 'plan_kuruldu'
+  // #361 KK8: ana sayfa v5.
+  | 'ana_kart_acildi'
+  | 'ana_ara'
+  | 'planlamaya_devam';
 
 /** #137: /r/{token} özeti (davet_ozeti; giriş gerektirmez). Google verisi yok: yalnız sayılar ve günler. */
 export type DavetOzeti = {
