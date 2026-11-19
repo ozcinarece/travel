@@ -2,8 +2,8 @@ Cumhuriyet Müzesi, Ulus'ta Kurtuluş Savaşı Müzesi'nin birkaç yüz metre ö
 
 Sonraki yıllarda bina başka işlerde de kullanıldı. 1961'den 1979'a kadar CENTO, yani Merkezi Antlaşma Teşkilatı'nın merkeziydi. Örgüt dağılınca Kültür Bakanlığı'na geçti ve 30 Ekim 1981'de müze olarak açıldı.
 
-İçerideki en etkileyici yer, ahşap sıraları ve kürsüsüyle Genel Kurul salonu. İlk Meclis'in sade salonunu sabah gördüysen aradaki farkı hemen fark edersin: daha geniş, daha aydınlık ve yeni bir devletin kendine güvenini gösteren bir oda. Koridorlardaki fotoğraflar ve belgeler, harf devriminden kadınların seçme ve seçilme hakkına kadar erken Cumhuriyet'in reformlarını anlatıyor. Cephedeki kemerler, saçak altındaki çiniler ve geniş merdiven de Birinci Ulusal Mimarlık'ın tipik özellikleri.
+İçerideki en etkileyici yer, ahşap sıraları ve kürsüsüyle Genel Kurul salonu. Birkaç yüz metre ötedeki ilk Meclis'in salonuyla karşılaştırınca daha geniş ve daha aydınlık; dört yıl içinde devletin ölçeğinin nasıl büyüdüğü odanın boyutundan okunuyor. Koridorlardaki fotoğraflar ve belgeler, harf devriminden kadınların seçme ve seçilme hakkına kadar erken Cumhuriyet'in reformlarını anlatıyor. Cephedeki kemerler, saçak altındaki çiniler ve geniş merdiven de Birinci Ulusal Mimarlık'ın tipik özellikleri.
 
-Bir saat, salonları dolaşmak için yeter. Karşı köşedeki Ankara Palas, Meclis'e gelen milletvekillerini ağırlamak için yapılan otel.
+Kırk beş dakika, Genel Kurul salonunu ve koridorları görmek için yeter. Karşı köşedeki Ankara Palas, Meclis'e gelen milletvekillerini ağırlamak için yapılan otel.
 
-> Sabah ilk Meclis'i gördüysen iki Genel Kurul salonunu kafanda yan yana koy: dört yılda devletin ölçeği nasıl büyümüş, salonların boyutundan okunuyor.
+> Genel Kurul salonunda kürsüye değil arka sıralara otur: milletvekillerinin salonu nereden gördüğünü oradan anlarsın.
