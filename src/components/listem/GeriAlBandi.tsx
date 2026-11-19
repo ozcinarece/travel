@@ -1,7 +1,8 @@
 // #141 KK4 → #387 KK1 · KK4 (kanvas 21, Listem "Çıkar · Geri al"): ekranın altında Gece bant; metin ve Mandalina "Geri al".
-// `onGeriAl` yoksa yalnız bilgi bandı (dokunulmaz). Ekran okuyucu: `accessibilityLiveRegion` (Android) ve iOS'ta duyuru.
+// `onGeriAl` yoksa yalnız bilgi bandı (dokunulmaz). Ekran okuyucu: iki platformda da `announceForAccessibility` (#387 inceleme:
+// Android'de `accessibilityLiveRegion` yeni açılan görünümde çoğu zaman okunmuyordu; çift okunmasın diye canlı bölge kalktı).
 import { useEffect } from 'react';
-import { AccessibilityInfo, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
+import { AccessibilityInfo, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { t } from '@/i18n';
 import { renk, yazi } from '@/theme';
@@ -10,10 +11,10 @@ type Props = { metin: string; onGeriAl?: () => void; alt?: number };
 
 export function GeriAlBandi({ metin, onGeriAl, alt = 16 }: Props) {
   useEffect(() => {
-    if (Platform.OS === 'ios') AccessibilityInfo.announceForAccessibility(onGeriAl ? `${metin}. ${t('listem.geriAl')}` : metin);
+    AccessibilityInfo.announceForAccessibility(onGeriAl ? `${metin}. ${t('listem.geriAl')}` : metin);
   }, [metin, onGeriAl]);
   return (
-    <View style={[s.bant, { bottom: alt }]} pointerEvents={onGeriAl ? 'auto' : 'none'} accessibilityLiveRegion="polite" testID="geri-al-bandi">
+    <View style={[s.bant, { bottom: alt }]} pointerEvents={onGeriAl ? 'auto' : 'none'} testID="geri-al-bandi">
       <Text style={s.metin} numberOfLines={onGeriAl ? 1 : undefined}>
         {metin}
       </Text>

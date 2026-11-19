@@ -56,13 +56,16 @@ const GEZI = {
 };
 type MockDurak = { id: string };
 jest.mock('@/components/icerik/GeziPlani', () => {
-  const { View } = jest.requireActual<typeof import('react-native')>('react-native');
+  const { Pressable, View } = jest.requireActual<typeof import('react-native')>('react-native');
   const { EkleDugmesi } = jest.requireActual<typeof import('@/components/ui/EkleDugmesi')>('@/components/ui/EkleDugmesi');
   return {
-    GeziPlani: ({ gezi, listede, onDurakEkle }: { gezi: { gezi_gunleri: { gezi_duraklari: MockDurak[] }[] }; listede: (d: MockDurak) => boolean; onDurakEkle: (d: MockDurak) => void }) => (
+    GeziPlani: ({ gezi, listede, onDurakEkle, onDurak }: { gezi: { gezi_gunleri: { gezi_duraklari: MockDurak[] }[] }; listede: (d: MockDurak) => boolean; onDurakEkle: (d: MockDurak) => void; onDurak: (d: MockDurak) => void }) => (
       <View>
         {gezi.gezi_gunleri[0].gezi_duraklari.map((d) => (
-          <EkleDugmesi key={d.id} listede={listede(d)} onPress={() => onDurakEkle(d)} />
+          <View key={d.id}>
+            <EkleDugmesi listede={listede(d)} onPress={() => onDurakEkle(d)} />
+            <Pressable accessibilityLabel="durak-ac" onPress={() => onDurak(d)} />
+          </View>
         ))}
       </View>
     ),
@@ -93,7 +96,17 @@ jest.mock('@/components/icerik/MdYazi', () => {
   const { View } = jest.requireActual<typeof import('react-native')>('react-native');
   return { MdYazi: ({ mekanKarti }: { mekanKarti: (id: string) => unknown }) => <View>{mekanKarti('p1') as never}</View> };
 });
-jest.mock('@/components/mekan/MekanPaneli', () => ({ MekanPaneli: () => null }));
+// Panel: yalnız sabit bir kimlik ve CTA (✓); bandın panelin üstünde çizildiğini sıradan kontrol etmek için.
+jest.mock('@/components/mekan/MekanPaneli', () => {
+  const { Pressable, View } = jest.requireActual<typeof import('react-native')>('react-native');
+  return {
+    MekanPaneli: ({ onCta }: { onCta: () => void }) => (
+      <View testID="mekan-paneli">
+        <Pressable accessibilityLabel="panel-cta" onPress={onCta} />
+      </View>
+    ),
+  };
+});
 jest.mock('@/components/harita/Harita', () => ({ Harita: () => null }));
 
 beforeEach(() => {
@@ -153,5 +166,26 @@ describe.each(EKRANLAR)('#387 %s: ✓ geri alınabilir', (_ad, ekran) => {
     expect(screen.queryByTestId('geri-al-bandi')).toBeNull();
     expect(mockEkle).not.toHaveBeenCalled();
     expect(mockSil).not.toHaveBeenCalled();
+  });
+});
+
+describe('#387 inceleme', () => {
+  it('Hazır gezi: paneldeki ✓ sonrası bant panelden sonra çizilir (panelin üstünde görünür)', () => {
+    render(<GeziEkrani />);
+    fireEvent.press(screen.getByLabelText('durak-ac'));
+    fireEvent.press(screen.getByLabelText('panel-cta'));
+    const agac = JSON.stringify(screen.toJSON());
+    expect(agac.indexOf('"geri-al-bandi"')).toBeGreaterThan(agac.indexOf('"mekan-paneli"'));
+    expect(agac.indexOf('"mekan-paneli"')).toBeGreaterThan(-1);
+  });
+
+  it('Şehir rehberi: silme hatası bilgi bandında "listem.hata" olarak görünür', () => {
+    jest.useFakeTimers();
+    mockSil.mockImplementation((_id, o) => (o as { onError?: () => void } | undefined)?.onError?.());
+    render(<SehirRehberi sehir={SEHIR} sehirlerYukleniyor={false} onGeri={() => undefined} seyahat={HEDEF as never} />);
+    fireEvent.press(screen.getByLabelText(t('ui.ekle.listede')));
+    act(() => jest.advanceTimersByTime(5000));
+    expect(mockSil).toHaveBeenCalledTimes(1);
+    expect(within(screen.getByTestId('geri-al-bandi')).getByText(t('listem.hata'))).toBeTruthy();
   });
 });

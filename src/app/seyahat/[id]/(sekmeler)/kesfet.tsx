@@ -165,7 +165,7 @@ function Kesfet({ seyahat, konaklamalar, ilkMekan, cekmeceIstegi, cipIstegi }: {
   }, [cipIstegi]);
 
   // #387: ✓ ile çıkarılan mekan 5 sn "Geri al" bandında bekler; o sürede listede sayılmaz (pin öneriye döner).
-  const geriAlinabilir = useGeriAlinabilirSil(seyahat.id, () => setHata(t('kesfet.ekleHata')));
+  const geriAlinabilir = useGeriAlinabilirSil(seyahat.id, () => setHata(t('listem.hata')));
   const cikanId = geriAlinabilir.bekleyen?.mekanId;
   const tumHavuz = useMemo(() => mekanlar.data ?? [], [mekanlar.data]);
   const havuz = useMemo(() => (cikanId ? tumHavuz.filter((m) => m.id !== cikanId) : tumHavuz), [tumHavuz, cikanId]);

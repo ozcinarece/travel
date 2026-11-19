@@ -120,16 +120,16 @@ describe('#387 KK1 · KK3 silme zamanı', () => {
 });
 
 describe('#387 KK4 bant ekran okuyucu', () => {
-  it('bant canlı bölge; iOS\'ta metin ve "Geri al" duyurulur', () => {
+  it.each(['ios', 'android'])('%s: metin ve "Geri al" duyurulur', (os) => {
     const duyuru = jest.spyOn(AccessibilityInfo, 'announceForAccessibility').mockImplementation(() => undefined);
     const eskiOS = Platform.OS;
-    Object.defineProperty(Platform, 'OS', { get: () => 'ios', configurable: true });
+    Object.defineProperty(Platform, 'OS', { get: () => os, configurable: true });
     try {
-      const e = render(<GeriAlBandi metin="Atlıhan 2. günden de çıktı" onGeriAl={() => undefined} />);
-      expect(e.getByTestId('geri-al-bandi').props.accessibilityLiveRegion).toBe('polite');
+      render(<GeriAlBandi metin="Atlıhan 2. günden de çıktı" onGeriAl={() => undefined} />);
       expect(duyuru).toHaveBeenCalledWith('Atlıhan 2. günden de çıktı. Geri al');
     } finally {
       Object.defineProperty(Platform, 'OS', { get: () => eskiOS, configurable: true });
+      duyuru.mockRestore();
     }
   });
 });

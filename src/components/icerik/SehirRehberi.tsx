@@ -1,6 +1,6 @@
 import { Image } from 'expo-image';
 import { router } from 'expo-router';
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { ActivityIndicator, Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -70,7 +70,14 @@ export function SehirRehberi({ sehir, sehirlerYukleniyor, onGeri, seyahat, onReh
   const ekle = useMekanEkle(seyahat?.id ?? '');
   const guncelle = useMekanGuncelle(seyahat?.id ?? '');
   // #387: ✓ ile çıkarılan mekan 5 sn "Geri al" bandında bekler; o sürede listede sayılmaz.
-  const geriAlinabilir = useGeriAlinabilirSil(seyahat?.id);
+  // #387 inceleme 2: silme hatası Listem'deki gibi bilgi bandında (3,5 sn).
+  const [bildirim, setBildirim] = useState<string | null>(null);
+  useEffect(() => {
+    if (!bildirim) return;
+    const z = setTimeout(() => setBildirim(null), 3500);
+    return () => clearTimeout(z);
+  }, [bildirim]);
+  const geriAlinabilir = useGeriAlinabilirSil(seyahat?.id, () => setBildirim(t('listem.hata')));
   const cikanId = geriAlinabilir.bekleyen?.mekanId;
   const listedeki = (placeId: string) => mekanlar.data?.find((m) => m.place_id === placeId && m.id !== cikanId);
   const [mesgulId, setMesgulId] = useState<string | null>(null);
@@ -267,7 +274,11 @@ export function SehirRehberi({ sehir, sehirlerYukleniyor, onGeri, seyahat, onReh
           />
         </View>
       ) : null}
-      {geriAlinabilir.bekleyen ? <GeriAlBandi metin={geriAlinabilir.bekleyen.metin} onGeriAl={geriAlinabilir.geriAl} alt={kenar.bottom + 16} /> : null}
+      {geriAlinabilir.bekleyen ? (
+        <GeriAlBandi metin={geriAlinabilir.bekleyen.metin} onGeriAl={geriAlinabilir.geriAl} alt={kenar.bottom + 16} />
+      ) : bildirim ? (
+        <GeriAlBandi metin={bildirim} alt={kenar.bottom + 16} />
+      ) : null}
     </View>
   );
 }

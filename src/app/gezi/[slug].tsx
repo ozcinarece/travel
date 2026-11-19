@@ -341,9 +341,6 @@ export default function GeziEkrani() {
         </View>
       </View>
 
-      {/* #387: "Geri al" bandı alt çubuğun hemen üstünde. */}
-      {cikan ? <GeriAlBandi metin={cikan.metin} onGeriAl={geriAlinabilir.geriAl} alt={altCubukH + 8} /> : null}
-
       {alAcik ? (
         <BolumSiniri ad="gezi-al" yedek={() => <AlHatasi onKapat={() => setAlAcik(false)} />}>
           <GeziAl gezi={g} kimlik={kimlik} foto={(d) => canli.data?.get(d.id)?.foto_uri ?? null} ilkHedefId={hedef?.id ?? null} onKapat={() => setAlAcik(false)} />
@@ -390,6 +387,8 @@ export default function GeziEkrani() {
           </BolumSiniri>
         </View>
       ) : null}
+      {/* #387 inceleme 1: "Geri al" bandı alt çubuğun hemen üstünde ve mekan panelinden SONRA çizilir (paneldeki ✓'te de görünür). */}
+      {cikan ? <GeriAlBandi metin={cikan.metin} onGeriAl={geriAlinabilir.geriAl} alt={altCubukH + 8} /> : null}
     </View>
   );
 }
