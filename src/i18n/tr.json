@@ -298,18 +298,17 @@
     "diger": "Diğer"
   },
   "rehber": {
-    "ustBaslik": "ŞEHİR REHBERİ",
     "bolum": {
-      "ulasim": "Nasıl gidilir, nasıl gezilir",
+      "ulasim": "Nasıl gezilir",
       "yemek": "Ne yenir",
       "mahalle": "Mahalleler",
       "ipucu": "İpuçları"
     },
     "geziler": "Bu şehirde hazır geziler",
     "hata": "Rehber yüklenemedi",
-    "mekanlar": "Rehberdeki {n} mekan",
-    "mekanlarAlt": "Hepsi bir listede, tek dokunuşla ekle",
-    "yapiskan": "{sehir} rehberi"
+    "mekanSayisi": "{n} rehber mekânı",
+    "listeyeEkle": "Seyahat listesine ekle",
+    "geriSeyahat": "Geri: {seyahat}"
   },
   "kesfet": {
     "ekranBasligi": "Yer ekle",

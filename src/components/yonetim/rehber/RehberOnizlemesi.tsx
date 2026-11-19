@@ -5,7 +5,7 @@ import { View } from 'react-native';
 import { SehirRehberi } from '@/components/icerik/SehirRehberi';
 import type { BilinenMekanlar } from '@/features/icerik/mekanBilgileri';
 import { ty } from '@/features/yonetim/metin';
-import { onizlemeNo, onizlemeSatirlari, type TaslakBolum } from '@/features/yonetim/rehberTaslak';
+import { onizlemeSatirlari, type TaslakBolum } from '@/features/yonetim/rehberTaslak';
 import type { Sehir } from '@/lib/tipler';
 import { yazi } from '@/theme';
 
@@ -29,7 +29,7 @@ type Props = {
 /**
  * #156 KK12 (kanvas BO-1 sağ sütun, 360 px): "UYGULAMADA" + Bu bölüm / Tüm sayfa + × (gizle → 56 px şerit, editör genişler).
  * Telefon önizlemesi **uygulamanın kendi `SehirRehberi` bileşeniyle** çizilir: taslak, ayrı bir sorgu istemcisinde uygulamanın
- * rehber sorgusunun yerine konur (yapışkan çipler, okuma çizgisi, kart, alıntı uygulamadaki gibi); yazdıkça güncellenir.
+ * rehber sorgusunun yerine konur (sekmeler, mekan satırları, alıntı uygulamadaki gibi); yazdıkça güncellenir.
  */
 export function RehberOnizlemesi({ sehir, bolumler, bilinen, seciliId, acik, onAcik }: Props) {
   const [kapsam, setKapsam] = useState<'bolum' | 'sayfa'>('sayfa');
@@ -75,7 +75,7 @@ export function RehberOnizlemesi({ sehir, bolumler, bilinen, seciliId, acik, onA
         <div style={c.olcek}>
           <QueryClientProvider client={istemci}>
             <View style={{ width: GENISLIK, height: YUKSEKLIK }}>
-              <SehirRehberi key={yalniz ?? 'sayfa'} sehir={sehir} sehirlerYukleniyor={false} onGeri={() => {}} ilkNo={yalniz ? onizlemeNo(bolumler, yalniz) : 1} bilinen={bilinen} />
+              <SehirRehberi key={yalniz ?? 'sayfa'} sehir={sehir} sehirlerYukleniyor={false} onGeri={() => {}} bilinen={bilinen} />
             </View>
           </QueryClientProvider>
         </div>

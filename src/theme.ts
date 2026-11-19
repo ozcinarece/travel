@@ -56,6 +56,10 @@ export const anaV5 = {
   kalpKenar: '#C25200',
   /** Kart ♥ dairesi (`Ana_v5_Ayrinti` §2). */
   kalpDaire: 'rgba(255,255,255,0.92)',
+  /** #397 (`Sayfa_v5_SehirRehberi`): fotoğrafsız kapak ve 56 px mekan kutusunun zemini (ortada `ok` renginde kamera). */
+  fotoYok: '#D9DDE5',
+  /** #397: mekan satırındaki ince "+" dairesinin kenarı. */
+  inceKenar: '#C3C9D6',
 } as const;
 
 /**
