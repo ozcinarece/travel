@@ -62,6 +62,19 @@ jest.mock('@/components/mekan/MekanPaneli', () => {
   };
 });
 
+// Arama: öneri listesi ve seçim (places-full) taklit edilir; seçim hatası testte ayarlanır.
+let mockAramaSonuclari: { place_id: string; ana: string; ikincil: string }[] = [];
+let mockSecimHatasi: unknown = null;
+jest.mock('@/features/yerler/api', () => {
+  const gercek = jest.requireActual<typeof import('@/features/yerler/api')>('@/features/yerler/api');
+  return {
+    ...gercek,
+    useOneriler: () => ({ data: mockAramaSonuclari, isFetching: false, isError: false, error: null }),
+    aramaSecimi: async () => {
+      throw mockSecimHatasi ?? new Error('seçim beklenmiyordu');
+    },
+  };
+});
 const ONERI: HafifYer = { place_id: 'ChIJ-oneri-1', ad: 'Eti Arkeoloji Müzesi', lat: 39.78, lng: 30.48, primary_type: 'museum', tz: null, puan: 4.6, puan_sayisi: 900, acik: null, ulke_kodu: 'TR' };
 let mockYakin = { hata: false, sinir: false };
 // Liste kimliği sabit (ekran liste değişince çekmece durumunu sıfırlar).
@@ -79,6 +92,7 @@ jest.mock('@/features/yerler/kesfetYukleme', () => ({
     alanAraniyor: false,
     alandaAra: () => undefined,
   }),
+  kesfetSayaci: { istek: 0, hata: 0 },
 }));
 
 // Supabase: tablolar fikstürden; `places` eklemesi bekletilebilir / hata verebilir; `olaylar` eklemesi kaydedilir.
@@ -145,6 +159,8 @@ beforeEach(() => {
   mockCevrimdisi = false;
   mockYakin = { hata: false, sinir: false };
   mockParametre = {};
+  mockAramaSonuclari = [];
+  mockSecimHatasi = null;
   kesfetDurumunuSifirla();
 });
 afterEach(async () => {
@@ -266,14 +282,35 @@ describe('#317 inceleme: hata kutusu takılmaları', () => {
     await waitFor(() => expect(screen.queryByTestId('harita-hata')).toBeNull());
   });
 
-  it('2: arama sonuçları açıkken hata katmanı gizlenir', async () => {
+  it('2: arama sonuçları açıkken hata katmanı gizlenir, 429 sonuç listesinin altına iner', async () => {
     mockYakin = { hata: true, sinir: true };
     ciz();
     await hataKatmani();
     fireEvent.changeText(screen.getByLabelText(t('kesfet.ara')), 'Odun');
     await waitFor(() => expect(screen.queryByTestId('harita-hata')).toBeNull());
-    expect(screen.queryByText(t('yerler.gunlukSinir'))).toBeNull();
+    expect(within(await screen.findByTestId('sonuc-alti-hata')).getByText(t('yerler.gunlukSinir'))).toBeTruthy();
   });
+
+  it('inceleme 2 (KK1): arama sonucu seçimi başarısız olunca hata sonuç listesinin altında görünür', async () => {
+    mockAramaSonuclari = [{ place_id: 'ChIJ-arama-1', ana: 'Odunpazarı Modern Müze', ikincil: 'Eskişehir' }];
+    mockSecimHatasi = new Error('places-full 500');
+    ciz();
+    fireEvent.changeText(await screen.findByLabelText(t('kesfet.ara')), 'Odun');
+    fireEvent.press(await screen.findByText('Odunpazarı Modern Müze'));
+    const alt = await screen.findByTestId('sonuc-alti-hata');
+    expect(within(alt).getByText(t('kesfet.secimHata'))).toBeTruthy();
+    expect(screen.queryByTestId('harita-hata')).toBeNull();
+  });
+
+  it('inceleme 2 (KK1): seçim hatası görünürken 5 sn işler, sonra kalkar', async () => {
+    mockAramaSonuclari = [{ place_id: 'ChIJ-arama-1', ana: 'Odunpazarı Modern Müze', ikincil: 'Eskişehir' }];
+    mockSecimHatasi = new Error('places-full 500');
+    ciz();
+    fireEvent.changeText(await screen.findByLabelText(t('kesfet.ara')), 'Odun');
+    fireEvent.press(await screen.findByText('Odunpazarı Modern Müze'));
+    expect(within(await screen.findByTestId('sonuc-alti-hata')).getByText(t('kesfet.secimHata'))).toBeTruthy();
+    await waitFor(() => expect(screen.queryByTestId('sonuc-alti-hata')).toBeNull(), { timeout: 7000 });
+  }, 10000);
 
   it('2: arama açıkken "Bağlantı yok" sonuç listesinin altında', async () => {
     mockCevrimdisi = true;
@@ -289,11 +326,16 @@ describe('#317 inceleme: hata kutusu takılmaları', () => {
     const eskiOS = Platform.OS;
     Object.defineProperty(Platform, 'OS', { value: 'ios', configurable: true });
     const duyur = jest.spyOn(AccessibilityInfo, 'announceForAccessibility').mockImplementation(() => undefined);
+    duyur.mockClear();
     try {
       mockYakin = { hata: true, sinir: true };
       ciz();
       await hataKatmani();
       await waitFor(() => expect(duyur).toHaveBeenCalledWith(t('yerler.gunlukSinir')));
+      // Kutu sonuç listesinin altına geçince (yeniden kurulum) duyuru tekrar edilmez.
+      fireEvent.changeText(screen.getByLabelText(t('kesfet.ara')), 'Odun');
+      await screen.findByTestId('sonuc-alti-hata');
+      expect(duyur.mock.calls.filter(([m]) => m === t('yerler.gunlukSinir'))).toHaveLength(1);
     } finally {
       duyur.mockRestore();
       Object.defineProperty(Platform, 'OS', { value: eskiOS, configurable: true });

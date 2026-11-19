@@ -495,8 +495,19 @@ function Kesfet({ seyahat, konaklamalar, ilkMekan, cekmeceIstegi, cipIstegi }: {
     : [eklemeHatasiGorunur ? hata : null, oneriHatasiGorunur ? (yakin.sinir ? t('yerler.gunlukSinir') : t('kesfet.oneriHata')) : null].filter(
         (m, i, a): m is string => !!m && a.indexOf(m) === i,
       );
-  // #317 inceleme 2: arama sonuçları açıkken hata katmanı sonuçları örtmez; "Bağlantı yok" sonuç listesinin altına iner.
+  // #317 inceleme 2–3: arama sonuçları açıkken hata katmanı sonuçları örtmez; bütün hata kutuları (seçim hatası, 429,
+  // "Bağlantı yok") sonuç listesinin altına iner. Kutular iki konumdan birinde hep çizildiği için 5 sn'lik süre, kutu
+  // görünürken işler.
   const hataKutulari = hataMetinleri.map((m) => <HataKutusu key={m} metin={m} />);
+  // #317 inceleme 3 (not): iOS duyurusu yalnız ilk görünüşte; kutu bir konumdan ötekine geçince (key/yeniden kurulum)
+  // tekrar edilmez. Android'de accessibilityLiveRegion zaten okur.
+  const hataAnahtari = hataMetinleri.join('\n');
+  const duyurulanlar = useRef<string[]>([]);
+  useEffect(() => {
+    const simdiki = hataAnahtari ? hataAnahtari.split('\n') : [];
+    if (Platform.OS === 'ios') for (const m of simdiki) if (!duyurulanlar.current.includes(m)) AccessibilityInfo.announceForAccessibility(m);
+    duyurulanlar.current = simdiki;
+  }, [hataAnahtari]);
 
 
   return (
@@ -573,7 +584,7 @@ function Kesfet({ seyahat, konaklamalar, ilkMekan, cekmeceIstegi, cipIstegi }: {
             ))}
             {oneriler.data && oneriler.data.length > 0 ? <GoogleAtfi /> : null}
           </View>
-          {cevrimdisi ? <View testID="sonuc-alti-hata" style={s.sonucAltiHata}>{hataKutulari}</View> : null}
+          {hataKutulari.length > 0 ? <View testID="sonuc-alti-hata" style={s.sonucAltiHata}>{hataKutulari}</View> : null}
           </>
         ) : (
           <>
@@ -690,13 +701,8 @@ function Kesfet({ seyahat, konaklamalar, ilkMekan, cekmeceIstegi, cipIstegi }: {
   );
 }
 
-/** #317 KK1: bugünkü hata kutusu (uyarı zemini); ekran okuyucuya duyurulur. */
+/** #317 KK1: bugünkü hata kutusu (uyarı zemini); ekran okuyucuya duyurulur (iOS duyurusu ekranda, ilk görünüşte). */
 function HataKutusu({ metin }: { metin: string }) {
-  // #317 inceleme 3: accessibilityLiveRegion yalnız Android'de; iOS ekran okuyucusuna kutu ilk göründüğünde duyurulur
-  // (Android'de canlı bölge zaten okur; iki kez okunmasın).
-  useEffect(() => {
-    if (Platform.OS === 'ios') AccessibilityInfo.announceForAccessibility(metin);
-  }, [metin]);
   return (
     <View style={s.hataKutu} accessibilityRole="alert" accessibilityLiveRegion="polite">
       <Text style={s.hataMetin}>{metin}</Text>
