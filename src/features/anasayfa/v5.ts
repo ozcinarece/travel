@@ -4,6 +4,7 @@ import { AKIS_AMACLARI, type Amac } from '@/features/icerik/amaclar';
 import type { KesfetDurumu } from '@/features/anasayfa/serit';
 import type { Siniflar } from '@/features/seyahatler/siniflandir';
 import { t } from '@/i18n';
+import type { AmacTonu } from '@/theme';
 import type { Gezi, Sehir } from '@/lib/tipler';
 
 /** KK6: en çok bu kadar amaç sekmesi ("Hepsi" hariç). */
@@ -68,4 +69,14 @@ export function anaArama<G extends Pick<Gezi, 'baslik' | 'ozet' | 'sehirler'>>(s
     sehir: sehir ? { id: sehir.id, ad: sehir.ad } : null,
     metin: sehir ? null : ham,
   };
+}
+
+/**
+ * KK7 (kanvas `Ana_v5_Amaclar`, "Hangi ton?"): kapaksız kartın tonu. 1) bir amaç sekmesi seçiliyse o amaç; 2) "Hepsi"nde
+ * gezinin ilk amacı (`amaclar[0]`, BO'daki sıra); 3) amacı yoksa (ya da tanınmıyorsa) gri zemin ve pusula (`yok`).
+ */
+export function kapakTonu(amaclar: readonly string[] | null | undefined, seciliSekme: Amac | null): AmacTonu {
+  if (seciliSekme) return seciliSekme;
+  const ilk = amaclar?.[0];
+  return ilk && (AKIS_AMACLARI as readonly string[]).includes(ilk) ? (ilk as Amac) : 'yok';
 }

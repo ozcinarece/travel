@@ -42,6 +42,21 @@ export const renk = {
 /** Kişi yüzleri (avatar zemini) sırası: Mandalina, Gece, Gece açık. */
 export const yuzRenkleri = [renk.vurgu, renk.ana, renk.anaAcik] as const;
 
+/**
+ * #361 KK7 (UX önerileri kanvası, `Ana_v5_Amaclar`): kapaksız gezi kartının amaca göre zemini, tepesi (%85 opak) ve
+ * dairesi; daire üstünde beyaz ikon. Anahtarlar `features/icerik/amaclar.ts` ile aynı; `yok` = amacı olmayan gezi.
+ */
+export const amacTonlari = {
+  kultur_tarih: { zemin: '#E6E0FA', tepe: '#A48BE8', daire: '#5B34B8' },
+  lezzet: { zemin: '#FFE2CC', tepe: '#FF9A4D', daire: '#C25200' },
+  doga: { zemin: '#D7F0E6', tepe: '#6CC59C', daire: '#16703C' },
+  yavas: { zemin: '#D3F0EF', tepe: '#62C2C2', daire: '#0E6B73' },
+  gece: { zemin: '#DDE1EF', tepe: '#7C88BC', daire: '#152A6B' },
+  cocuklu: { zemin: '#FFF0C2', tepe: '#F5C04A', daire: '#8A5300' },
+  yok: { zemin: '#ECEEF2', tepe: '#C3C9D6', daire: '#4B5563' },
+} as const;
+export type AmacTonu = keyof typeof amacTonlari;
+
 export const gunRenkleri = ['#2c64f5', '#f5a524', '#16a06e', '#7b4fe0', '#e0457b', '#0ea5e9'] as const;
 
 export function gunRengi(gunIndex: number): string {

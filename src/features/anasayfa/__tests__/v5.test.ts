@@ -4,7 +4,10 @@ import { describe, expect, it } from '@jest/globals';
 import type { Siniflar } from '@/features/seyahatler/siniflandir';
 import type { SeyahatOzet } from '@/lib/tipler';
 
-import { anaArama, kartAltSatiri, sekmeAmaclari, ustSatir } from '../v5';
+import { AKIS_AMACLARI } from '@/features/icerik/amaclar';
+import { amacTonlari } from '@/theme';
+
+import { anaArama, kapakTonu, kartAltSatiri, sekmeAmaclari, ustSatir } from '../v5';
 
 const g = (amaclar: string[]) => ({ amaclar });
 
@@ -76,5 +79,24 @@ describe('#361 KK5 anaArama', () => {
   });
   it('özetten de eşleşir', () => {
     expect(anaArama('boyoz', geziler, sehirler)!.geziler).toHaveLength(1);
+  });
+});
+
+describe('#361 KK7 kapakTonu (kanvas Ana_v5_Amaclar)', () => {
+  it('seçili amaç sekmesi gezinin ilk amacından önce gelir', () => {
+    expect(kapakTonu(['lezzet', 'doga'], 'doga')).toBe('doga');
+  });
+  it('"Hepsi"nde gezinin ilk amacı (BO sırası)', () => {
+    expect(kapakTonu(['gece', 'lezzet'], null)).toBe('gece');
+  });
+  it('amacı yoksa ya da tanınmıyorsa gri (yok)', () => {
+    expect(kapakTonu([], null)).toBe('yok');
+    expect(kapakTonu(null, null)).toBe('yok');
+    expect(kapakTonu(['bilinmeyen'], null)).toBe('yok');
+  });
+  it('ton tablosu amaç listesiyle birebir ve kanvastaki değerlerde', () => {
+    expect(Object.keys(amacTonlari).sort()).toEqual([...AKIS_AMACLARI, 'yok'].sort());
+    expect(amacTonlari.lezzet).toEqual({ zemin: '#FFE2CC', tepe: '#FF9A4D', daire: '#C25200' });
+    expect(amacTonlari.yok).toEqual({ zemin: '#ECEEF2', tepe: '#C3C9D6', daire: '#4B5563' });
   });
 });
