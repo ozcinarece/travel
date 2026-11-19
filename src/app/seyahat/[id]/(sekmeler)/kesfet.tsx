@@ -1,7 +1,7 @@
 import { useQueryClient } from '@tanstack/react-query';
 import { useLocalSearchParams } from 'expo-router';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { ActivityIndicator, Linking, Pressable, StyleSheet, Text, TextInput, View, useWindowDimensions } from 'react-native';
+import { AccessibilityInfo, ActivityIndicator, Linking, Platform, Pressable, StyleSheet, Text, TextInput, View, useWindowDimensions } from 'react-native';
 
 import { bolgeHesapla, zoomDelta } from '@/components/harita/geo';
 import { medyan, secimSuresiKaydet, taniSayaclari, useTani } from '@/components/harita/tani';
@@ -35,6 +35,7 @@ import { useOneCikanlar } from '@/features/yerler/oneCikan';
 import { useKesfetOnerileri } from '@/features/yerler/kesfetYukleme';
 import { alanCipi, alandaAraGorunur, alanIcinde, gorunumAlani, gorunurOneriler, sehirCipleri } from '@/features/yerler/sehirListesi';
 import { kesfetDurumunuAl, useKesfetDurumu } from '@/features/yerler/kesfetDurumu';
+import { useGeciciGorunur } from '@/features/yerler/geciciHata';
 import { t } from '@/i18n';
 import { bulunmaEkli } from '@/lib/ek';
 import { agHatasi, useCevrimdisi } from '@/lib/baglanti';
@@ -335,7 +336,7 @@ function Kesfet({ seyahat, konaklamalar, ilkMekan, cekmeceIstegi, cipIstegi }: {
         kaynak,
       });
     } catch (e) {
-      setHata(agHatasi(e) ? t('kesfet.baglantiYok') : t('kesfet.ekleHata'));
+      setHata(agHatasi(e) ? t('geziSayfasi.cevrimdisi.baglantiYok') : t('kesfet.ekleHata'));
     }
   };
   const listedenCikar = async (m: Mekan) => {
@@ -478,9 +479,24 @@ function Kesfet({ seyahat, konaklamalar, ilkMekan, cekmeceIstegi, cipIstegi }: {
   }, [rehberGorunur, rehberListesi, cekmeceGosterilen, listeSureleri, sureAyari, fotoHaritasi, oneCikan]);
   const haritayaDon = () => setCekmece('katli');
   // #317 KK1: bağlantı yokken tek uyarı; değilse son işlem hatası ve öneri hatası (429 dahil).
+  // #317 inceleme 1: ekleme ve öneri hatası (429 dahil) 5 sn sonra ya da panel kapanınca kalkar; "Bağlantı yok" bağlantı dönünce.
+  const [eklemeHatasiGorunur, eklemeHatasiniKapat] = useGeciciGorunur(!!hata, hata);
+  const [oneriHatasiGorunur, oneriHatasiniKapat] = useGeciciGorunur(yakin.hata, yakin.sinir ? 'sinir' : 'hata');
+  const oncekiSecim = useRef(secim);
+  useEffect(() => {
+    if (oncekiSecim.current && !secim) {
+      eklemeHatasiniKapat();
+      oneriHatasiniKapat();
+    }
+    oncekiSecim.current = secim;
+  }, [secim, eklemeHatasiniKapat, oneriHatasiniKapat]);
   const hataMetinleri = cevrimdisi
-    ? [t('kesfet.baglantiYok')]
-    : [hata, yakin.hata ? (yakin.sinir ? t('yerler.gunlukSinir') : t('kesfet.oneriHata')) : null].filter((m, i, a): m is string => !!m && a.indexOf(m) === i);
+    ? [t('geziSayfasi.cevrimdisi.baglantiYok')]
+    : [eklemeHatasiGorunur ? hata : null, oneriHatasiGorunur ? (yakin.sinir ? t('yerler.gunlukSinir') : t('kesfet.oneriHata')) : null].filter(
+        (m, i, a): m is string => !!m && a.indexOf(m) === i,
+      );
+  // #317 inceleme 2: arama sonuçları açıkken hata katmanı sonuçları örtmez; "Bağlantı yok" sonuç listesinin altına iner.
+  const hataKutulari = hataMetinleri.map((m) => <HataKutusu key={m} metin={m} />);
 
 
   return (
@@ -541,6 +557,7 @@ function Kesfet({ seyahat, konaklamalar, ilkMekan, cekmeceIstegi, cipIstegi }: {
       }
       ustEk={
         aramaAcik ? (
+          <>
           <View style={[s.sonuclar, s.golge]}>
             {oneriler.isError ? <Text style={s.hataMetin}>{placesHatasi(oneriler.error, t('kesfet.araHata'))}</Text> : null}
             {oneriler.data?.length === 0 ? <Text style={s.bos}>{t('kesfet.sonucYok')}</Text> : null}
@@ -556,6 +573,8 @@ function Kesfet({ seyahat, konaklamalar, ilkMekan, cekmeceIstegi, cipIstegi }: {
             ))}
             {oneriler.data && oneriler.data.length > 0 ? <GoogleAtfi /> : null}
           </View>
+          {cevrimdisi ? <View testID="sonuc-alti-hata" style={s.sonucAltiHata}>{hataKutulari}</View> : null}
+          </>
         ) : (
           <>
             {/* #164 KK3 (kanvas 9): Turistik · Yemek · Kafe · Park · Alışveriş · Tümü; varsayılan Turistik, tek seçim (kategori
@@ -655,7 +674,7 @@ function Kesfet({ seyahat, konaklamalar, ilkMekan, cekmeceIstegi, cipIstegi }: {
         </>
       }
       // #317 KK1: hatalar (ekleme, öneri, 429) ve "Bağlantı yok" çekmecenin ve panelin her halinde görünür.
-      hata={hataMetinleri.length > 0 ? hataMetinleri.map((m) => <HataKutusu key={m} metin={m} />) : null}
+      hata={hataMetinleri.length > 0 && !aramaAcik ? hataKutulari : null}
       harita={{
         merkez: ilkMerkez,
         zoom: ilkZoom,
@@ -673,6 +692,11 @@ function Kesfet({ seyahat, konaklamalar, ilkMekan, cekmeceIstegi, cipIstegi }: {
 
 /** #317 KK1: bugünkü hata kutusu (uyarı zemini); ekran okuyucuya duyurulur. */
 function HataKutusu({ metin }: { metin: string }) {
+  // #317 inceleme 3: accessibilityLiveRegion yalnız Android'de; iOS ekran okuyucusuna kutu ilk göründüğünde duyurulur
+  // (Android'de canlı bölge zaten okur; iki kez okunmasın).
+  useEffect(() => {
+    if (Platform.OS === 'ios') AccessibilityInfo.announceForAccessibility(metin);
+  }, [metin]);
   return (
     <View style={s.hataKutu} accessibilityRole="alert" accessibilityLiveRegion="polite">
       <Text style={s.hataMetin}>{metin}</Text>
@@ -748,6 +772,7 @@ const s = StyleSheet.create({
   },
   tani: { marginHorizontal: bosluk.kenar, paddingHorizontal: 8, paddingVertical: 4, borderRadius: 8, backgroundColor: 'rgba(15,15,15,0.8)' },
   taniMetin: { fontFamily: yazi.kalin, fontSize: 10, lineHeight: 14, color: renk.zemin },
+  sonucAltiHata: { marginTop: 10 },
   hataKutu: {
     marginHorizontal: bosluk.kenar,
     padding: 10,

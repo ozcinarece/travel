@@ -74,6 +74,8 @@ const SAYFA_UST_DOLGU = 10;
 
 /** #53 §3: haritanın üstündeki yumuşak geçiş (#f6f6f4 %98 → %0). */
 const GECIS_YUKSEKLIK = 250;
+/** #317: hata katmanının zIndex / elevation değeri (alt sayfa 12). */
+export const HATA_KATMANI = 16;
 
 /**
  * #17 KK2: tam ekran harita kabuğu — 3.3 Otel, 3.4 Keşfet ve 3.5 bunu paylaşır.
@@ -268,7 +270,8 @@ export function EylemHapi({ metin, onPress, yukleniyor }: { metin: string; onPre
 
 const s = StyleSheet.create({
   gizli: { opacity: 0 },
-  hata: { position: 'absolute', left: 0, right: 0, gap: 8 },
+  // #317 inceleme 4: alt sayfanın (elevation 12) ve panelin (4) üstünde; Android'de katman sırası elevation'la belirlenir.
+  hata: { position: 'absolute', left: 0, right: 0, gap: 8, zIndex: HATA_KATMANI, elevation: HATA_KATMANI },
   ekran: { flex: 1, backgroundColor: renk.yuzey },
   gecis: { position: 'absolute', left: 0, right: 0, top: 0, height: GECIS_YUKSEKLIK },
   buyukBaslik: { flexDirection: 'row', alignItems: 'center', gap: 10, flexShrink: 1 },

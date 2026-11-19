@@ -4,11 +4,13 @@
 import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react-native';
+import { AccessibilityInfo, Platform, StyleSheet } from 'react-native';
 import type { ReactNode } from 'react';
 
 import { SeyahatIdSaglayici } from '@/features/seyahatler/baglam';
 import { kesfetDurumunuAl, kesfetDurumunuSifirla } from '@/features/yerler/kesfetDurumu';
 import { hafifOnbellek, type HafifYer } from '@/features/yerler/api';
+import { HATA_KATMANI } from '@/components/harita/HaritaEkrani';
 import { t } from '@/i18n';
 
 import KesfetEkrani from '../../../app/seyahat/[id]/(sekmeler)/kesfet';
@@ -47,10 +49,15 @@ jest.mock('@/components/harita/Harita', () => {
 jest.mock('@/components/mekan/MekanPaneli', () => {
   const { Pressable, Text } = jest.requireActual<typeof import('react-native')>('react-native');
   return {
-    MekanPaneli: ({ icinde, mesgul, onCta }: { icinde: boolean; mesgul: boolean; onCta: () => void }) => (
-      <Pressable testID="panel-cta" onPress={onCta} accessibilityState={{ busy: mesgul }}>
-        <Text>{icinde ? 'cikar' : 'ekle'}</Text>
-      </Pressable>
+    MekanPaneli: ({ icinde, mesgul, onCta, onKapat }: { icinde: boolean; mesgul: boolean; onCta: () => void; onKapat: () => void }) => (
+      <>
+        <Pressable testID="panel-cta" onPress={onCta} accessibilityState={{ busy: mesgul }}>
+          <Text>{icinde ? 'cikar' : 'ekle'}</Text>
+        </Pressable>
+        <Pressable testID="panel-kapat" onPress={onKapat}>
+          <Text>kapat</Text>
+        </Pressable>
+      </>
     ),
   };
 });
@@ -215,7 +222,7 @@ describe('#317 Yer ekle: hatalar ve iyimser ekleme', () => {
     mockCevrimdisi = true;
     mockYakin = { hata: true, sinir: false };
     ciz();
-    expect(await (await hataKatmani()).findByText(t('kesfet.baglantiYok'))).toBeTruthy();
+    expect(await (await hataKatmani()).findByText(t('geziSayfasi.cevrimdisi.baglantiYok'))).toBeTruthy();
     expect(screen.queryByText(t('kesfet.oneriHata'))).toBeNull();
   });
 
@@ -224,6 +231,83 @@ describe('#317 Yer ekle: hatalar ve iyimser ekleme', () => {
     ciz();
     fireEvent.press(await screen.findByTestId(`pin-o:${ONERI.place_id}`));
     fireEvent.press(await screen.findByTestId('panel-cta'));
-    expect(await (await hataKatmani()).findByText(t('kesfet.baglantiYok'))).toBeTruthy();
+    expect(await (await hataKatmani()).findByText(t('geziSayfasi.cevrimdisi.baglantiYok'))).toBeTruthy();
   });
 });
+
+describe('#317 inceleme: hata kutusu takılmaları', () => {
+  it('1: ekleme hatası panel kapanınca kalkar', async () => {
+    mockEkleme.hata = { code: '42501', message: 'izin yok' };
+    ciz();
+    fireEvent.press(await screen.findByTestId(`pin-o:${ONERI.place_id}`));
+    fireEvent.press(await screen.findByTestId('panel-cta'));
+    expect(await (await hataKatmani()).findByText(t('kesfet.ekleHata'))).toBeTruthy();
+    fireEvent.press(screen.getByTestId('panel-kapat'));
+    await waitFor(() => expect(screen.queryByTestId('harita-hata')).toBeNull());
+  });
+
+  it('1: 429 panel kapanınca kalkar', async () => {
+    mockYakin = { hata: true, sinir: true };
+    ciz();
+    expect(await (await hataKatmani()).findByText(t('yerler.gunlukSinir'))).toBeTruthy();
+    fireEvent.press(await screen.findByTestId(`pin-o:${ONERI.place_id}`));
+    fireEvent.press(await screen.findByTestId('panel-kapat'));
+    await waitFor(() => expect(screen.queryByTestId('harita-hata')).toBeNull());
+  });
+
+  it('1: "Bağlantı yok" panel kapanınca kalmaz, yalnız bağlantı dönünce kalkar', async () => {
+    mockCevrimdisi = true;
+    const r = ciz();
+    fireEvent.press(await screen.findByTestId(`pin-o:${ONERI.place_id}`));
+    fireEvent.press(await screen.findByTestId('panel-kapat'));
+    expect((await hataKatmani()).getByText(t('geziSayfasi.cevrimdisi.baglantiYok'))).toBeTruthy();
+    mockCevrimdisi = false;
+    r.rerender(<KesfetEkrani />);
+    await waitFor(() => expect(screen.queryByTestId('harita-hata')).toBeNull());
+  });
+
+  it('2: arama sonuçları açıkken hata katmanı gizlenir', async () => {
+    mockYakin = { hata: true, sinir: true };
+    ciz();
+    await hataKatmani();
+    fireEvent.changeText(screen.getByLabelText(t('kesfet.ara')), 'Odun');
+    await waitFor(() => expect(screen.queryByTestId('harita-hata')).toBeNull());
+    expect(screen.queryByText(t('yerler.gunlukSinir'))).toBeNull();
+  });
+
+  it('2: arama açıkken "Bağlantı yok" sonuç listesinin altında', async () => {
+    mockCevrimdisi = true;
+    ciz();
+    await hataKatmani();
+    fireEvent.changeText(screen.getByLabelText(t('kesfet.ara')), 'Odun');
+    const alt = await screen.findByTestId('sonuc-alti-hata');
+    expect(within(alt).getByText(t('geziSayfasi.cevrimdisi.baglantiYok'))).toBeTruthy();
+    expect(screen.queryByTestId('harita-hata')).toBeNull();
+  });
+
+  it('3: iOS ekran okuyucusuna kutu göründüğünde duyurulur', async () => {
+    const eskiOS = Platform.OS;
+    Object.defineProperty(Platform, 'OS', { value: 'ios', configurable: true });
+    const duyur = jest.spyOn(AccessibilityInfo, 'announceForAccessibility').mockImplementation(() => undefined);
+    try {
+      mockYakin = { hata: true, sinir: true };
+      ciz();
+      await hataKatmani();
+      await waitFor(() => expect(duyur).toHaveBeenCalledWith(t('yerler.gunlukSinir')));
+    } finally {
+      duyur.mockRestore();
+      Object.defineProperty(Platform, 'OS', { value: eskiOS, configurable: true });
+    }
+  });
+
+  it('4: hata katmanı alt sayfanın (elevation 12) üstünde', async () => {
+    mockYakin = { hata: true, sinir: true };
+    ciz();
+    await hataKatmani();
+    const stil = StyleSheet.flatten(screen.getByTestId('harita-hata').props.style);
+    expect(HATA_KATMANI).toBeGreaterThan(12);
+    expect(stil.zIndex).toBe(HATA_KATMANI);
+    expect(stil.elevation).toBe(HATA_KATMANI);
+  });
+});
+
