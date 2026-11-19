@@ -1,0 +1,577 @@
+{
+  "il": "Trabzon",
+  "slug": "trabzon",
+  "guncelleme": "2026-11-19",
+  "oneriler": [
+    {
+      "sira": 1,
+      "ad": "Sümela Manastırı",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "doga"
+      ],
+      "ilce": "Maçka",
+      "merkeze_km": 36,
+      "neden": "Altındere Vadisi'nde 1.200 m'de kaya yüzüne oturtulmuş manastır; freskli kaya kilisesi",
+      "place_id": "ChIJi1a_zZhUZEARB00b4pkinzk"
+    },
+    {
+      "sira": 2,
+      "ad": "Uzungöl",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas",
+        "cocuklu"
+      ],
+      "ilce": "Çaykara",
+      "merkeze_km": 64,
+      "neden": "Heyelanın Haldizen Deresi'ni kesmesiyle oluşmuş göl; çevresi 1989'dan beri tabiat parkı",
+      "place_id": "ChIJ57Ka5F2UZUARrUgKC8tak04"
+    },
+    {
+      "sira": 3,
+      "ad": "Ayasofya Camii (Trabzon Ayasofya)",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Ortahisar",
+      "merkeze_km": 3,
+      "neden": "13. yy Trabzon İmparatorluğu kilisesi; bugün cami, narteks freskleri ünlü",
+      "osm": "way/220046416",
+      "place_id": "ChIJ2XaESHI9ZEARjE3-h4ZvRR0"
+    },
+    {
+      "sira": 4,
+      "ad": "Boztepe",
+      "kategori": "manzara",
+      "amaclar": [
+        "yavas",
+        "gece",
+        "cocuklu"
+      ],
+      "ilce": "Ortahisar",
+      "merkeze_km": 1,
+      "neden": "Şehrin ve limanın tamamını yukarıdan gören tepe; çay bahçeleriyle akşamların buluşma yeri",
+      "place_id": "ChIJHxuLHxQ8ZEARmEaSP9UmItM"
+    },
+    {
+      "sira": 5,
+      "ad": "Hamsiköy (Tunç Sütlaç)",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet",
+        "yavas"
+      ],
+      "ilce": "Maçka",
+      "merkeze_km": 47,
+      "neden": "Coğrafi işaretli Hamsiköy sütlacını köyün kendisinde, fındıkla, Zigana yolunda ye",
+      "place_id": "ChIJ-3HjxtJXZEARjiDR-TJHTmw"
+    },
+    {
+      "sira": 6,
+      "ad": "Akçaabat Ortamahalle",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Akçaabat",
+      "merkeze_km": 14,
+      "neden": "Yüze yakın tescilli ahşap-taş evli Arnavut kaldırımlı mahalle; 1988'den beri sit alanı",
+      "place_id": "ChIJKz5vksAVZEARgYB5Qkykb6g"
+    },
+    {
+      "sira": 7,
+      "ad": "Köfteci Nihat Usta",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet",
+        "cocuklu"
+      ],
+      "ilce": "Akçaabat",
+      "merkeze_km": 13,
+      "neden": "Akçaabat köftesini kendi ilçesinde ye; 1974'te 40 kişilik dükkân, şimdi limanda",
+      "place_id": "ChIJQR4cgTUUZEAR2zE8oRVw8JM"
+    },
+    {
+      "sira": 8,
+      "ad": "Trabzon Müzesi (Kostaki Konağı)",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Ortahisar",
+      "merkeze_km": 0,
+      "neden": "1900'lerin başı konakta; Düzköy mağarasından taş aletlerden Zeus başına buluntular",
+      "osm": "way/391984327",
+      "place_id": "ChIJp5QT0kU8ZEARoqf5jQ7Y40g"
+    },
+    {
+      "sira": 9,
+      "ad": "Atatürk Köşkü",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Ortahisar",
+      "merkeze_km": 4,
+      "neden": "Soğuksu'da çamlar arasında 1890 köşkü; Atatürk vasiyetini burada yazdı",
+      "osm": "way/278850858",
+      "place_id": "ChIJ11rFGH8-ZEAR0nL4tPeMcHA"
+    },
+    {
+      "sira": 10,
+      "ad": "Atatürk Alanı (Meydan) ve Uzun Sokak",
+      "kategori": "carsi",
+      "amaclar": [
+        "lezzet",
+        "gece",
+        "yavas"
+      ],
+      "ilce": "Ortahisar",
+      "merkeze_km": 0,
+      "neden": "Şehrin merkez meydanı ve ondan batıya uzanan yaya caddesi; pideci ve sütlaççı aksı",
+      "place_id": "ChIJwxPUZ0Q8ZEARSLp3wprj2OA"
+    },
+    {
+      "sira": 11,
+      "ad": "Kemeraltı Çarşısı ve Bedesten",
+      "kategori": "carsi",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Ortahisar",
+      "merkeze_km": 1,
+      "neden": "Çarşı Camii çevresindeki dar sokaklı esnaf çarşısı; hasır bilezik ve kazaziye burada",
+      "osm": "way/391978297",
+      "place_id": "ChIJKdaUD088ZEARxMI5W9v2z6E"
+    },
+    {
+      "sira": 12,
+      "ad": "Hıdırnebi Yaylası",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Akçaabat",
+      "merkeze_km": 26,
+      "neden": "1.742 m'de Akçaabat yaylası; temmuz sonunda şenlik, sabahları vadiyi bulut doldurur",
+      "place_id": "ChIJdwn5pOprZEARZr5lkdpkZ8M"
+    },
+    {
+      "sira": 13,
+      "ad": "Tarihi Kalkanoğlu Pilavı",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Ortahisar",
+      "merkeze_km": 1,
+      "neden": "Pazarkapı'da kavurmalı pilav, kuru fasulye ve kayısı hoşafı üçlüsünün klasik adresi",
+      "osm": "node/6584244515",
+      "place_id": "ChIJq8zn6k48ZEARw8yhJiO4dy0"
+    },
+    {
+      "sira": 14,
+      "ad": "Sera Gölü",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "cocuklu",
+        "yavas"
+      ],
+      "ilce": "Ortahisar",
+      "merkeze_km": 10,
+      "neden": "Şehrin batısında Yıldızlı'da heyelan gölü; kıyısında yürüyüş, tekne ve piknik",
+      "place_id": "ChIJkWpDUc0_ZEARg4gwAQoYR3I"
+    },
+    {
+      "sira": 15,
+      "ad": "Çal Mağarası",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Düzköy",
+      "merkeze_km": 29,
+      "neden": "İçinden yeraltı deresi akan mağara; 150 m sonra sarkıt ve dikitler başlar",
+      "place_id": "ChIJgZACAHRoZEAR2lEUCWyecUI"
+    },
+    {
+      "sira": 16,
+      "ad": "Hayrat Rafting Parkuru",
+      "kategori": "aktivite",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Hayrat",
+      "merkeze_km": 55,
+      "neden": "Yeniköy ve Taflancık derelerinde toplam 10 km'lik dört parkur; Ayder'e yakın alternatif"
+    },
+    {
+      "sira": 17,
+      "ad": "Uzungöl Yamaç Paraşütü",
+      "kategori": "aktivite",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Çaykara",
+      "merkeze_km": 65,
+      "neden": "Göl çevresinde 2.000 m civarından tandem uçuş; en yoğun temmuz-ağustos"
+    },
+    {
+      "sira": 18,
+      "ad": "Sultan Murat Yaylası",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "kultur_tarih"
+      ],
+      "ilce": "Çaykara",
+      "merkeze_km": 66,
+      "neden": "Çaykara'nın yüksek yaylası; adı IV. Murat'ın Revan seferine bağlanır",
+      "place_id": "ChIJnYXesvzHZUARSdWi6U0onco"
+    },
+    {
+      "sira": 19,
+      "ad": "Kızlar Manastırı (Panagia Theoskepastos)",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Ortahisar",
+      "merkeze_km": 1,
+      "neden": "Boztepe eteğinde mağara kiliseli kadın manastırı; Boztepe yolu üstünde",
+      "osm": "node/2534963775",
+      "place_id": "ChIJ45BM8D88ZEARID1HTZ52I-s"
+    },
+    {
+      "sira": 20,
+      "ad": "Pekünlü Merkez Pide",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Ortahisar",
+      "merkeze_km": 0,
+      "neden": "Kemerkaya'da yuvarlak kıymalı ve tereyağlı peynirli Trabzon pidesi",
+      "osm": "node/11945659479",
+      "place_id": "ChIJ29xPSkQ8ZEAREASfABToz8w"
+    },
+    {
+      "sira": 21,
+      "ad": "Bordo Mavi Balık (Erşan Yılmaz)",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet",
+        "gece"
+      ],
+      "ilce": "Ortahisar",
+      "merkeze_km": 1,
+      "neden": "Boztepe yamacında Trabzon mezgiti, levrek ve karides güveci yapan balıkçı",
+      "place_id": "ChIJ1aZoyBA8ZEAR2dl2IGmTBOU"
+    },
+    {
+      "sira": 22,
+      "ad": "Beton Helva",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Ortahisar",
+      "merkeze_km": 0,
+      "neden": "Gazipaşa'da sade ve fıstıklı tahin helvası yapan helvacı",
+      "place_id": "ChIJl4Sb_WY9ZEARp301_SGks18"
+    },
+    {
+      "sira": 23,
+      "ad": "Zağnos Vadisi Parkı",
+      "kategori": "doga",
+      "amaclar": [
+        "yavas",
+        "cocuklu",
+        "kultur_tarih"
+      ],
+      "ilce": "Ortahisar",
+      "merkeze_km": 1,
+      "neden": "Ortahisar surlarının dibindeki dere vadisi park oldu; Zağnos ve Tabakhane köprüleri arası",
+      "osm": "way/391989873",
+      "place_id": "ChIJ1VOzOkg8ZEARytqtYVREcP8"
+    },
+    {
+      "sira": 24,
+      "ad": "Ortahisar (Fatih) Camii ve Trabzon Kalesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Ortahisar",
+      "merkeze_km": 1,
+      "neden": "Bizans Panagia Khrysokephalos kilisesinden çevrilen cami, iç kale surları içinde",
+      "osm": "way/132930872",
+      "place_id": "ChIJ_9dcZ0g8ZEARuFLje4R04m0"
+    },
+    {
+      "sira": 25,
+      "ad": "Gülbahar Hatun Camii ve Türbesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Ortahisar",
+      "merkeze_km": 1,
+      "neden": "Yavuz Sultan Selim'in annesi adına yapılan külliye; türbesi yanında",
+      "osm": "way/376957664",
+      "place_id": "ChIJbyQQ0Dc8ZEARfKqZ1Bab6So"
+    },
+    {
+      "sira": 26,
+      "ad": "Yılmaz Pide",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Sürmene",
+      "merkeze_km": 34,
+      "neden": "Coğrafi işaretli Sürmene pidesini ilçesinde ince, çıtır, tereyağlı peynirle dene",
+      "place_id": "ChIJabrnJbzSZUAR5tSKo3bERCQ"
+    },
+    {
+      "sira": 27,
+      "ad": "Sürmene Bıçakçıları",
+      "kategori": "carsi",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Sürmene",
+      "merkeze_km": 34,
+      "neden": "El dövmesi Sürmene bıçağını ustasından al; taklitlere karşı imalatçıdan almak önerilir"
+    },
+    {
+      "sira": 28,
+      "ad": "Memişağa Konağı",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Sürmene",
+      "merkeze_km": 37,
+      "neden": "Sürmene'nin 4 km doğusunda taş konak; doğu Karadeniz ağa konaklarının örneği",
+      "place_id": "ChIJKdnuW03SZUARFqanoRByjNc"
+    },
+    {
+      "sira": 29,
+      "ad": "Beşikdüzü Teleferiği",
+      "kategori": "manzara",
+      "amaclar": [
+        "cocuklu",
+        "doga"
+      ],
+      "ilce": "Beşikdüzü",
+      "merkeze_km": 42,
+      "neden": "3.600 m ile bölgenin en uzun hattı; kıyıdan zirveye çıkarken Büyükliman'ı görürsün",
+      "place_id": "ChIJFVQsM2V0ZEARuAklV_IspXs"
+    },
+    {
+      "sira": 30,
+      "ad": "Ganita Sahili",
+      "kategori": "manzara",
+      "amaclar": [
+        "yavas",
+        "gece",
+        "cocuklu"
+      ],
+      "ilce": "Ortahisar",
+      "merkeze_km": 0,
+      "neden": "Eski şehrin hemen altındaki kıyı parkı; dalgakıranda akşam yürüyüşü ve çay",
+      "osm": "relation/16175531",
+      "place_id": "ChIJGzgdKxs9ZEAR8B_ESBZ2B9o"
+    },
+    {
+      "sira": 31,
+      "ad": "Kaymaklı Manastırı",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Ortahisar",
+      "merkeze_km": 3,
+      "neden": "Değirmendere'ye bakan Ermeni manastırı; kilisede üç bölümlü Kıyamet fresk duvarı",
+      "place_id": "ChIJhSb8K_g7ZEARr6IrhdbWyYM"
+    },
+    {
+      "sira": 32,
+      "ad": "Metin Usta Hamsiköy Sütlacı (Meydan)",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet",
+        "gece"
+      ],
+      "ilce": "Ortahisar",
+      "merkeze_km": 0,
+      "neden": "Fırın sütlacının dondurmalı, ballı-bademli, tahinli-fındıklı çeşitleri Meydan'da",
+      "place_id": "ChIJy0-4keA9ZEARGk1hH5EVg3k"
+    },
+    {
+      "sira": 33,
+      "ad": "Uğur Usta Hamsiköy Sütlaçları (Ayasofya)",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Ortahisar",
+      "merkeze_km": 3,
+      "neden": "Ayasofya ziyaretinin yanında klasik sütlaç ya da kadayıflı-dondurmalı 'atom' sütlaç",
+      "osm": "node/6856412918",
+      "place_id": "ChIJUQ7Oqs09ZEARxyhxv3K_Poc"
+    },
+    {
+      "sira": 34,
+      "ad": "Marzuba Cafe Restoran",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet",
+        "doga"
+      ],
+      "ilce": "Maçka",
+      "merkeze_km": 26,
+      "neden": "Sümela yolunda kuymak ve kaygananın olduğu serpme Karadeniz kahvaltısı",
+      "place_id": "ChIJHWi2hGtHZEARcG4qVd2Nyzw"
+    },
+    {
+      "sira": 35,
+      "ad": "Haldizen Yaylası",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Çaykara",
+      "merkeze_km": 68,
+      "neden": "Uzungöl'ü besleyen Haldizen Deresi'nin yukarı vadisinde yayla evleri",
+      "place_id": "ChIJp4AKbWyOZUARzaBpdmZeK7o"
+    },
+    {
+      "sira": 36,
+      "ad": "Kadırga Yaylası",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "kultur_tarih"
+      ],
+      "ilce": "Tonya",
+      "merkeze_km": 45,
+      "neden": "2.300 m'de üç ilin buluştuğu yayla; temmuzda on binlerin geldiği Kadırga şenliği",
+      "place_id": "ChIJCaUS95BZZEARplgqx7M-jKs"
+    },
+    {
+      "sira": 37,
+      "ad": "Mavura–Şolma Yayla Yürüyüşü",
+      "kategori": "aktivite",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Maçka",
+      "merkeze_km": 42,
+      "neden": "Mavura'dan Kulin Dağı eteğindeki 1.700 m'lik Şolma'ya 3,5 km'lik yayla patikası"
+    },
+    {
+      "sira": 38,
+      "ad": "Yomra Dağ Kızağı (Kaşüstü)",
+      "kategori": "aktivite",
+      "amaclar": [
+        "cocuklu"
+      ],
+      "ilce": "Yomra",
+      "merkeze_km": 8,
+      "neden": "Kaşüstü'nde 2026 yazında açılan 850 m'lik raylı dağ kızağı",
+      "place_id": "ChIJaYscEgA7ZEARQ7c0fwIfxpQ"
+    },
+    {
+      "sira": 39,
+      "ad": "Kadınlar Pazarı",
+      "kategori": "carsi",
+      "amaclar": [
+        "lezzet",
+        "kultur_tarih"
+      ],
+      "ilce": "Ortahisar",
+      "merkeze_km": 0,
+      "neden": "Köylü kadınların tereyağı, mısır unu, karalahana ve yayla peyniri sattığı pazar",
+      "place_id": "ChIJ4xym2048ZEARo3uCw0YuNGI"
+    },
+    {
+      "sira": 40,
+      "ad": "Trabzon Balık Pazarı",
+      "kategori": "carsi",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Ortahisar",
+      "merkeze_km": 0,
+      "neden": "Hamsi, mezgit ve palamudun tezgâha ilk düştüğü yer; mevsimi kış",
+      "place_id": "ChIJOYFk8E48ZEARrU--dKkkzfQ"
+    },
+    {
+      "sira": 41,
+      "ad": "Erikbeli Yaylası",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Tonya",
+      "merkeze_km": 41,
+      "neden": "Tonya'nın 1.800 m'deki kavşak yaylası; Sis Dağı, Sazalanı ve Kadırga buradan ayrılır",
+      "place_id": "ChIJo5L0ZrX1ZEAR7jeMKXSBAd8"
+    },
+    {
+      "sira": 42,
+      "ad": "Haçka Obası (Düzköy Yaylası)",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "kultur_tarih"
+      ],
+      "ilce": "Düzköy",
+      "merkeze_km": 31,
+      "neden": "Haçkalı Baba türbesinin bulunduğu 1.784 m yayla; 14 Ağustos'ta Karaabdal şenliği",
+      "place_id": "ChIJOWuB7fdcZEARNNNOtAVkiNM"
+    },
+    {
+      "sira": 43,
+      "ad": "Çakırgöl",
+      "kategori": "doga",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Maçka",
+      "merkeze_km": 50,
+      "neden": "2.504 m'de buzul gölü; yol yayla köylerinden geçen uzun bir toprak güzergâh",
+      "place_id": "ChIJMUls1Q8HZUAR8XGRUY9iJyk"
+    },
+    {
+      "sira": 44,
+      "ad": "Cevdet Sunay Müze Evi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Çaykara",
+      "merkeze_km": 52,
+      "neden": "5. Cumhurbaşkanı Cevdet Sunay'ın Ataköy'deki evi müzeye çevrildi",
+      "place_id": "ChIJH9Vk7pvAZUAR0n_1lfzjacU"
+    }
+  ]
+}
