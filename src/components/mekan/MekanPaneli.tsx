@@ -56,6 +56,9 @@ export type MekanPaneliProps = {
   baglam: 'kesfet' | 'program';
   icinde: boolean;
   mesgul?: boolean;
+  /** #388 KK5 (kanvas 23c): bağlantı yokken ana eylem pasif (%40); `ipucu` nedeni ekran okuyucuya söyler. */
+  pasif?: boolean;
+  ipucu?: string;
   onCta: () => void;
   onYolTarifi: () => void;
   onKapat: () => void;
@@ -241,10 +244,11 @@ export function MekanPaneli(p: MekanPaneliProps) {
                   <Pressable
                     accessibilityRole="button"
                     accessibilityLabel={ctaAd === 'listede' ? t('mekan.panel.listedeA11y') : undefined}
-                    accessibilityState={{ disabled: !!p.mesgul }}
-                    disabled={p.mesgul}
+                    accessibilityState={{ disabled: !!p.mesgul || !!p.pasif }}
+                    accessibilityHint={p.ipucu}
+                    disabled={!!p.mesgul || !!p.pasif}
                     onPress={p.onCta}
-                    style={({ pressed }) => [s.eylem, s.eylemBirincil, (pressed || p.mesgul) && { opacity: 0.8 }]}>
+                    style={({ pressed }) => [s.eylem, s.eylemBirincil, (pressed || p.mesgul) && { opacity: 0.8 }, p.pasif && { opacity: 0.4 }]}>
                     <Text style={[s.eylemMetin, { color: renk.zemin }]}>{t(`mekan.panel.${ctaAd}`)}</Text>
                   </Pressable>
                   <Pressable accessibilityRole="button" onPress={p.onYolTarifi} style={({ pressed }) => [s.eylem, s.eylemIkincil, pressed && { opacity: 0.8 }]}>

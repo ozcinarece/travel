@@ -56,6 +56,8 @@ export default function GeziEkrani() {
   const alinma = useGeziAlinma(gezi.data?.id);
   const kenar = useSafeAreaInsets();
   const kaydirici = useRef<ScrollView>(null);
+  // #388: çift basış / üst üste "Tekrar dene" ikinci ekleme isteğini göndermez (Seyahatime al'daki kilit).
+  const eklemeKilidi = useRef(false);
   const [sekme, setSekme] = useState<Sekme>('plan');
   const [gunSira, setGunSira] = useState(0);
   const [segmentY, setSegmentY] = useState(0);
@@ -130,6 +132,8 @@ export default function GeziEkrani() {
   const yapismaY = segmentY - kenar.top - 6;
 
   const hedefeEkle = async (y: Yer, seyahatId: string) => {
+    if (eklemeKilidi.current) return;
+    eklemeKilidi.current = true;
     setMesgulId(y.anahtar);
     try {
       await ekle.mutateAsync({ seyahatId, yerId: null, place_id: y.place_id, primary_type: y.primary_type, lat: y.lat, lng: y.lng, dakika: y.dakika });
@@ -137,6 +141,7 @@ export default function GeziEkrani() {
     } catch (e) {
       setAlHata(eklemeHatasi(e, 'gezi-mekan-ekle', () => void hedefeEkle(y, seyahatId)));
     } finally {
+      eklemeKilidi.current = false;
       setMesgulId(null);
     }
   };
@@ -223,7 +228,7 @@ export default function GeziEkrani() {
             {[kategoriEtiketi(y.primary_type), durak ? sureMetni(durak.sure_dk) : null].filter(Boolean).join(' · ')}
           </Text>
         </View>
-        <EkleDugmesi listede={!!listedeki(placeId)} mesgul={mesgulId === placeId} onPress={() => degistir(y)} />
+        <EkleDugmesi listede={!!listedeki(placeId)} mesgul={mesgulId === placeId} pasif={cevrimdisi} ipucu={cevrimdisi ? t('ekleme.baglantiYokIpucu') : undefined} onPress={() => degistir(y)} />
       </Pressable>
     );
   };
@@ -387,6 +392,8 @@ export default function GeziEkrani() {
               baglam="kesfet"
               icinde={!!panelMekani}
               mesgul={mesgulId === panel.placeId}
+              pasif={cevrimdisi}
+              ipucu={cevrimdisi ? t('ekleme.baglantiYokIpucu') : undefined}
               onCta={() => degistir({ anahtar: panel.placeId, place_id: panel.placeId, primary_type: panel.hafif.primary_type, lat: panel.hafif.lat, lng: panel.hafif.lng, dakika: panel.dakika })}
               onYolTarifi={() =>
                 Linking.openURL(`https://www.google.com/maps/dir/?api=1&destination=${panel.hafif.lat},${panel.hafif.lng}&destination_place_id=${encodeURIComponent(panel.placeId)}&travelmode=walking`)
