@@ -28,10 +28,15 @@ jest.mock('@/components/yonetim/Kabuk', () => {
 jest.mock('@/components/yonetim/gezi/MekanArama', () => {
   const { Pressable, Text } = jest.requireActual<typeof import('react-native')>('react-native');
   return {
-    MekanArama: ({ onKimlik }: { onKimlik: (y: { place_id: string; tip: string | null }) => void }) => (
-      <Pressable accessibilityRole="button" onPress={() => onKimlik({ place_id: 'ChIJ-test', tip: 'park' })}>
-        <Text>öneri</Text>
-      </Pressable>
+    MekanArama: ({ onKimlik, onKimlikBirak }: { onKimlik: (y: { place_id: string; tip: string | null }) => void; onKimlikBirak?: () => void }) => (
+      <>
+        <Pressable accessibilityRole="button" onPress={() => onKimlik({ place_id: 'ChIJ-test', tip: 'park' })}>
+          <Text>öneri</Text>
+        </Pressable>
+        <Pressable accessibilityRole="button" onPress={() => onKimlikBirak?.()}>
+          <Text>metni değiştir</Text>
+        </Pressable>
+      </>
     ),
   };
 });
@@ -93,6 +98,18 @@ describe('İl önerileri: + Yer ekle (#401)', () => {
     expect(queryByLabelText('AD')).toBeNull();
     fireEvent.press(getByRole('button', { name: '+ Yer ekle' }));
     expect(queryByLabelText('AD')).toBeNull();
+  });
+
+  it('seçimden sonra arama metni değişince seçim bırakılır, ad satırı ve Kaydet kapanır', () => {
+    mockEkle.mockClear();
+    const { getByRole, getByLabelText, queryByLabelText, queryByRole } = sayfa();
+    fireEvent.press(getByRole('button', { name: '+ Yer ekle' }));
+    fireEvent.press(getByRole('button', { name: 'öneri' }));
+    fireEvent.changeText(getByLabelText('AD'), 'Gölcük');
+    fireEvent.press(getByRole('button', { name: 'metni değiştir' }));
+    expect(queryByLabelText('AD')).toBeNull();
+    expect(queryByRole('button', { name: 'Kaydet' })).toBeNull();
+    expect(mockEkle).not.toHaveBeenCalled();
   });
 });
 

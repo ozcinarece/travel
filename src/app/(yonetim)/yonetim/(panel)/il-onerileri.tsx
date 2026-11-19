@@ -102,6 +102,10 @@ export default function IlOnerileriSayfasi() {
       setYeniAd('');
     }
   };
+  const secimiBirak = () => {
+    setSecilen(null);
+    setYeniAd('');
+  };
   const aramaAcKapa = () => {
     if (aramaAcik) {
       setSecilen(null);
@@ -172,7 +176,7 @@ export default function IlOnerileriSayfasi() {
         <View style={s.govde}>
           {aramaAcik ? (
             <View style={s.arama}>
-              <MekanArama merkez={sehir ? { lat: sehir.lat, lng: sehir.lng } : undefined} onKimlik={sec} seciliKimlik={secilen?.place_id ?? null} etiket={ty('ilOneri.ara')} />
+              <MekanArama merkez={sehir ? { lat: sehir.lat, lng: sehir.lng } : undefined} onKimlik={sec} onKimlikBirak={secimiBirak} seciliKimlik={secilen?.place_id ?? null} etiket={ty('ilOneri.ara')} />
             </View>
           ) : null}
           {secilen ? (
@@ -191,10 +195,7 @@ export default function IlOnerileriSayfasi() {
               <Hap
                 kucuk
                 baslik={ty('ilOneri.vazgec')}
-                onPress={() => {
-                  setSecilen(null);
-                  setYeniAd('');
-                }}
+                onPress={secimiBirak}
               />
             </View>
           ) : null}

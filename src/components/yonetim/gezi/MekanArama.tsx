@@ -33,6 +33,7 @@ export function MekanArama({
   merkez,
   onSec,
   onKimlik,
+  onKimlikBirak,
   seciliKimlik,
   etiket = ty('gezi.mekanAra'),
 }: {
@@ -40,6 +41,8 @@ export function MekanArama({
   onSec?: (yer: HafifYer) => Promise<void> | void;
   onKimlik?: (yer: MekanKimligi) => Promise<void> | void;
   seciliKimlik?: string | null;
+  /** `onKimlik` kipinde seçimden sonra arama metni değişince çağrılır: üst bileşen seçimi sıfırlar (Vazgeç ile aynı yol). */
+  onKimlikBirak?: () => void;
   etiket?: string;
 }) {
   const [girdi, setGirdi] = useState('');
@@ -73,12 +76,15 @@ export function MekanArama({
   const acik = odak && girdi.trim().length >= 2;
   // #401: seçim Kaydet ya da Vazgeç ile bitince (seciliKimlik boşalınca) arama temizlenir, yeni oturum açılır.
   const oncekiSecim = useRef(seciliKimlik);
+  // Seçim, Ece arama metnini değiştirdiği için bırakıldıysa yeni yazdığı metin silinmez.
+  const yaziylaBirakildi = useRef(false);
   useEffect(() => {
-    if (oncekiSecim.current && !seciliKimlik) {
+    if (oncekiSecim.current && !seciliKimlik && !yaziylaBirakildi.current) {
       setGirdi('');
       setSecili(0);
       setOturum(yeniOturumJetonu());
     }
+    if (!seciliKimlik) yaziylaBirakildi.current = false;
     oncekiSecim.current = seciliKimlik;
   }, [seciliKimlik]);
   const seciliSatir = onKimlik && seciliKimlik && !acik ? satirlar.find((r) => r.anahtar === seciliKimlik) : undefined;
@@ -124,6 +130,11 @@ export function MekanArama({
           value={girdi}
           onChangeText={(m) => {
             setGirdi(m);
+            // #401: seçimden sonra metin değişirse seçim eski yere bağlı kalmasın; ad satırı ve Kaydet kapanır.
+            if (onKimlik && seciliKimlik) {
+              yaziylaBirakildi.current = true;
+              onKimlikBirak?.();
+            }
             setSecili(0);
             setHata(false);
             setOdak(true);
@@ -147,7 +158,7 @@ export function MekanArama({
       </View>
       {hata ? <Text style={s.hata}>{ty('gezi.araHata')}</Text> : null}
       {seciliSatir ? (
-        <View style={[s.satir, s.satirSecili]} accessibilityLabel={[seciliSatir.ad, kategoriEtiketi(seciliSatir.tip), seciliSatir.alt].filter(Boolean).join(', ')}>
+        <View style={[s.satir, s.satirSecili]} accessibilityState={{ selected: true }} accessibilityLabel={[seciliSatir.ad, kategoriEtiketi(seciliSatir.tip), seciliSatir.alt].filter(Boolean).join(', ')}>
           <SatirIcerigi satir={seciliSatir} />
         </View>
       ) : null}

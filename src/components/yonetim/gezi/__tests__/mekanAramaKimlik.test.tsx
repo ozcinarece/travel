@@ -1,6 +1,6 @@
 import { describe, expect, it, jest } from '@jest/globals';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { fireEvent, render } from '@testing-library/react-native';
+import { act, fireEvent, render } from '@testing-library/react-native';
 
 import { MekanArama } from '@/components/yonetim/gezi/MekanArama';
 import { ty } from '@/features/yonetim/metin';
@@ -34,5 +34,28 @@ describe('MekanArama onKimlik kipi (#401)', () => {
     rerender(ui(null));
     expect(getByLabelText('Ara').props.value).toBe('');
     expect(queryByText('Öneri A')).toBeNull();
+  });
+
+  it('seçimden sonra metin değişirse seçim bırakılır, yeni yazılan metin silinmez', async () => {
+    const onKimlik = jest.fn((_: unknown) => undefined);
+    const onKimlikBirak = jest.fn();
+    const qc = new QueryClient({ defaultOptions: { queries: { retry: false, gcTime: Infinity }, mutations: { gcTime: Infinity } } });
+    const ui = (secili: string | null) => (
+      <QueryClientProvider client={qc}>
+        <MekanArama merkez={undefined} onKimlik={onKimlik} onKimlikBirak={onKimlikBirak} seciliKimlik={secili} etiket="Ara" />
+      </QueryClientProvider>
+    );
+    const { getByLabelText, getByRole, rerender } = render(ui(null));
+    fireEvent.changeText(getByLabelText('Ara'), 'abant');
+    // Seçimden önce metin değişmesi seçim bırakmaz.
+    expect(onKimlikBirak).not.toHaveBeenCalled();
+    await act(async () => {
+      fireEvent.press(getByRole('menuitem'));
+    });
+    rerender(ui('ChIJ-a'));
+    fireEvent.changeText(getByLabelText('Ara'), 'abant gö');
+    expect(onKimlikBirak).toHaveBeenCalledTimes(1);
+    rerender(ui(null));
+    expect(getByLabelText('Ara').props.value).toBe('abant gö');
   });
 });
