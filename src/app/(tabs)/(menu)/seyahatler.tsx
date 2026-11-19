@@ -1,9 +1,10 @@
 import { router } from 'expo-router';
 import { useMemo } from 'react';
-import { Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { SeyahatlerimListesi } from '@/components/seyahatler/SeyahatlerimListesi';
+import { Buton } from '@/components/ui/Buton';
 import { KisaBildirim, useKisaBildirim } from '@/components/ui/KisaBildirim';
 import { biten, bitmemis, siniflandir } from '@/features/seyahatler/siniflandir';
 import { useSeyahatler } from '@/features/seyahatler/sorgular';
@@ -37,7 +38,17 @@ export default function SeyahatlerimEkrani() {
             <Text style={s.seyahatMetin}>{t('anasayfa.v5.seyahat')}</Text>
           </Pressable>
         </View>
-        {seyahatler.data ? <SeyahatlerimListesi yaklasan={yaklasan} gecmis={gecmis} onBildirim={bildirim.goster} /> : null}
+        {seyahatler.data ? (
+          <SeyahatlerimListesi yaklasan={yaklasan} gecmis={gecmis} onBildirim={bildirim.goster} />
+        ) : seyahatler.isError ? (
+          // #405 inceleme 2: veri yokken boş başlık "seyahatlerim silindi" sanılmasın; #388 kalıbı, ham hata gösterilmez.
+          <View style={s.hata}>
+            <Text style={s.hataMetin}>{t('seyahatlerim.hata')}</Text>
+            <Buton baslik={t('seyahatlerim.tekrarDene')} tur="ikincil" onPress={() => seyahatler.refetch()} yukleniyor={seyahatler.isFetching} />
+          </View>
+        ) : (
+          <ActivityIndicator color={renk.ana} style={s.yukleniyor} accessibilityLabel={t('seyahatlerim.yukleniyor')} />
+        )}
       </ScrollView>
       <KisaBildirim metin={bildirim.metin} />
     </SafeAreaView>
@@ -52,4 +63,7 @@ const s = StyleSheet.create({
   seyahatDugme: { height: 36, paddingHorizontal: 14, borderRadius: 18, backgroundColor: renk.vurgu, flexDirection: 'row', alignItems: 'center', gap: 4 },
   seyahatArti: { fontFamily: yazi.kalin, fontSize: 18, lineHeight: 20, color: renk.metin },
   seyahatMetin: { fontFamily: yazi.kalin, fontSize: 14, color: renk.metin },
+  yukleniyor: { marginTop: 24 },
+  hata: { paddingTop: 24, gap: 12, alignItems: 'flex-start' },
+  hataMetin: { fontFamily: yazi.normal, fontSize: 15, lineHeight: 21, color: renk.metin },
 });

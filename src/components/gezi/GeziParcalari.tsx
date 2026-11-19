@@ -67,11 +67,12 @@ export function KategoriGlifi({ tip, boyut }: { tip: string | null | undefined; 
   );
 }
 
-export function FotoKutusu({ uri, tip, boyut, kose, stil }: { uri: string | null; tip: string | null | undefined; boyut?: number; kose: number; stil?: StyleProp<ViewStyle> }) {
+/** `yerTutucu`: fotoğraf yokken kategori ikonu yerine gösterilecek içerik (#405: seyahat kapağının gökyüzü/toprak yer tutucusu). */
+export function FotoKutusu({ uri, tip, boyut, kose, stil, yerTutucu }: { uri: string | null; tip: string | null | undefined; boyut?: number; kose: number; stil?: StyleProp<ViewStyle>; yerTutucu?: ReactNode }) {
   const olcu = boyut ? { width: boyut, height: boyut } : null;
   return (
     <View style={[{ borderRadius: kose, overflow: 'hidden', backgroundColor: KUTU_RENGI[pinKategorisi(tip)] }, olcu, stil]}>
-      {uri ? <Image source={{ uri }} style={StyleSheet.absoluteFill} contentFit="cover" transition={150} /> : <KategoriIkonu tip={tip} boyut={Math.round((boyut ?? 46) * 0.45)} />}
+      {uri ? <Image source={{ uri }} style={StyleSheet.absoluteFill} contentFit="cover" transition={150} /> : (yerTutucu ?? <KategoriIkonu tip={tip} boyut={Math.round((boyut ?? 46) * 0.45)} />)}
     </View>
   );
 }

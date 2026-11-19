@@ -6,7 +6,7 @@ import { SeyahatKapagi } from '@/components/seyahatler/SeyahatKapagi';
 import { seritAdimMetni, useSeritAdimi } from '@/features/anasayfa/serit';
 import { useSeyahattenAyril } from '@/features/davet/sorgular';
 import { useSeyahatDurumlari, type SeyahatDurumu } from '@/features/seyahatler/durum';
-import { eylemMenusu, sahipMi, silmeMetni } from '@/features/seyahatler/silme';
+import { eylemlerMenusu, sahipMi, silmeMetni } from '@/features/seyahatler/silme';
 import { useSeyahatSil } from '@/features/seyahatler/sorgular';
 import { yeniGirisNo } from '@/features/sihirbaz/girisler';
 import { gunFarki, seyahatAdi } from '@/features/sihirbaz/sihirbaz';
@@ -22,8 +22,9 @@ import { anaV5, renk, yazi, yuzRenkleri } from '@/theme';
  * #275 KK4 → #405 KK2 (UX önerileri kanvası, `Ana_v6_Seyahatlerim`): Seyahatlerim sekmesinin listesi.
  * YAKLAŞAN — bitmemiş seyahatler ve taslaklar (tarih sırası, taslaklar sonda). En yakını büyük kapakla: "N gün kaldı"
  * etiketi, ad, "tarih · gün · durak", turuncu "Sıradaki adım: …" (`serit.ts`), sağda kişi yüzleri; diğerleri satır.
- * GEÇMİŞ — satır: "ay · gün · kişiler". Satır dokununca seyahati açar. Uzun basınca #174 menüsü: sahipte "Seyahati sil",
- * üyede "Seyahatten ayrıl"; onay, kısa bildirim. Geçmiş satırında "Tekrar kur" (aynı plan, yeni tarih) korunur (#405 soru 1).
+ * GEÇMİŞ — satır: "ay · gün · kişiler". Satır dokununca seyahati açar; sağda kanvastaki ok. Uzun basınca #174 menüsü: sahipte
+ * "Seyahati sil", üyede "Seyahatten ayrıl"; onay, kısa bildirim. #405 inceleme 1: geçmişte "Tekrar kur" (aynı plan, yeni tarih)
+ * aynı menünün ilk eylemi; ekran okuyucu için hepsi satırın `accessibilityActions`'ında (iç içe düğme yok).
  */
 export function SeyahatlerimListesi({ yaklasan, gecmis, onBildirim }: { yaklasan: SeyahatOzet[]; gecmis: SeyahatOzet[]; onBildirim: (metin: string) => void }) {
   const durumlar = useSeyahatDurumlari();
@@ -37,17 +38,18 @@ export function SeyahatlerimListesi({ yaklasan, gecmis, onBildirim }: { yaklasan
       pathname: '/(tabs)/yeni',
       params: { tekrar: id, n: yeniGirisNo() },
     });
-  const uzunBas = async (sy: SeyahatOzet) => {
+  /** Satırın eylemleri: geçmişte önce "Tekrar kur", sonra sahipte sil / üyede ayrıl. Uzun basma menüsü ve ekran okuyucu aynı listeyi kullanır. */
+  const eylemler = (sy: SeyahatOzet, tekrar: boolean): Eylem[] => {
     const sahip = sahipMi(sy.members, session?.user.id);
-    const secildi = await eylemMenusu(
-      seyahatAdi(sy),
-      {
-        metin: t(sahip ? 'seyahatler.sil' : 'davet.grup.ayril'),
-        yikici: sahip,
-      },
-      t('genel.vazgec'),
-    );
-    if (!secildi) return;
+    const ayrilSil: Eylem = { ad: 'sil', metin: t(sahip ? 'seyahatler.sil' : 'davet.grup.ayril'), yikici: sahip, calistir: () => silYaDaAyril(sy, sahip) };
+    return tekrar ? [{ ad: 'tekrar', metin: t('seyahatler.tekrarKur'), calistir: () => tekrarKur(sy.id) }, ayrilSil] : [ayrilSil];
+  };
+  const uzunBas = async (sy: SeyahatOzet, tekrar = false) => {
+    const liste = eylemler(sy, tekrar);
+    const i = await eylemlerMenusu(seyahatAdi(sy), liste, t('genel.vazgec'));
+    if (i !== null) await liste[i].calistir();
+  };
+  const silYaDaAyril = async (sy: SeyahatOzet, sahip: boolean) => {
     if (sahip) {
       if (!(await onayIste(t('seyahatler.silOnay'), silmeMetni(sy.members.length), t('seyahatler.silEvet'), t('genel.vazgec')))) return;
       try {
@@ -66,8 +68,15 @@ export function SeyahatlerimListesi({ yaklasan, gecmis, onBildirim }: { yaklasan
     }
   };
 
-  // KK5: seyahat yoksa tek satır yazı (üstteki "+ Seyahat" düğmesi yeter).
-  if (yaklasan.length === 0 && gecmis.length === 0) return <Text style={s.bos}>{t('seyahatlerim.bos')}</Text>;
+  // KK5 · inceleme 4: seyahat yoksa tek satır yazı (üstteki "+ Seyahat" düğmesi yeter).
+  if (yaklasan.length === 0 && gecmis.length === 0)
+    return (
+      <Text style={s.bos}>
+        {t('seyahatlerim.bosOnce')}
+        <Text style={s.bosVurgu}>{t('seyahatlerim.bosVurgu')}</Text>
+        {t('seyahatlerim.bosSonra')}
+      </Text>
+    );
   const [enYakin, ...digerYaklasan] = yaklasan;
   const benimId = session?.user.id;
   return (
@@ -75,11 +84,11 @@ export function SeyahatlerimListesi({ yaklasan, gecmis, onBildirim }: { yaklasan
       {enYakin ? (
         <>
           <Text style={s.baslikYaklasan}>{t('seyahatler.yaklasan')}</Text>
-          <BuyukKart seyahat={enYakin} onPress={() => ac(enYakin.id)} onUzunBas={() => uzunBas(enYakin)} />
+          <BuyukKart seyahat={enYakin} eylemler={eylemler(enYakin, false)} onPress={() => ac(enYakin.id)} onUzunBas={() => uzunBas(enYakin)} />
           {digerYaklasan.length > 0 ? (
             <View style={{ paddingTop: 14 }}>
               {digerYaklasan.map((sy) => (
-                <Satir key={sy.id} seyahat={sy} alt={yaklasanAlt(sy, durumlar.data?.get(sy.id))} onPress={() => ac(sy.id)} onUzunBas={() => uzunBas(sy)} />
+                <Satir key={sy.id} seyahat={sy} alt={yaklasanAlt(sy, durumlar.data?.get(sy.id))} eylemler={eylemler(sy, false)} onPress={() => ac(sy.id)} onUzunBas={() => uzunBas(sy)} />
               ))}
             </View>
           ) : null}
@@ -89,7 +98,7 @@ export function SeyahatlerimListesi({ yaklasan, gecmis, onBildirim }: { yaklasan
         <>
           <Text style={s.baslikGecmis}>{t('seyahatler.gecmis')}</Text>
           {gecmis.map((sy) => (
-            <Satir key={sy.id} seyahat={sy} alt={gecmisAlt(sy, benimId)} onPress={() => ac(sy.id)} onUzunBas={() => uzunBas(sy)} onTekrar={() => tekrarKur(sy.id)} />
+            <Satir key={sy.id} seyahat={sy} alt={gecmisAlt(sy, benimId)} eylemler={eylemler(sy, true)} onPress={() => ac(sy.id)} onUzunBas={() => uzunBas(sy, true)} />
           ))}
         </>
       ) : null}
@@ -130,14 +139,21 @@ export function gecmisAlt(sy: SeyahatOzet, benimId: string | undefined): string 
   return parcalar.join(' · ');
 }
 
-/** "4 gün kaldı" / "Bugün"; tarihsizde null. */
-function kalanEtiketi(sy: SeyahatOzet): string | null {
+/** "4 gün kaldı"; başladıysa #405 inceleme 4: "Gezide · N. gün" (ilk gün 1); tarihsizde null. Gün `trips.tz` ile. */
+export function kalanEtiketi(sy: Pick<SeyahatOzet, 'start_date' | 'tz'>, simdi = new Date()): string | null {
   if (!sy.start_date) return null;
-  const kalan = gunFarki(yerelTarih(new Date(), sy.tz), sy.start_date);
-  return kalan <= 0 ? t('anasayfa.v5.kalanBugun') : t('anasayfa.v5.kalan', { n: kalan });
+  const kalan = gunFarki(yerelTarih(simdi, sy.tz), sy.start_date);
+  return kalan <= 0 ? t('seyahatlerim.gezide', { n: 1 - kalan }) : t('anasayfa.v5.kalan', { n: kalan });
 }
 
-function BuyukKart({ seyahat, onPress, onUzunBas }: { seyahat: SeyahatOzet; onPress: () => void; onUzunBas: () => void }) {
+type Eylem = { ad: string; metin: string; yikici?: boolean; calistir: () => void | Promise<void> };
+
+const erisimEylemleri = (eylemler: Eylem[]) => eylemler.map((e) => ({ name: e.ad, label: e.metin }));
+const erisimEylemi = (eylemler: Eylem[]) => (o: { nativeEvent: { actionName: string } }) => {
+  void eylemler.find((e) => e.ad === o.nativeEvent.actionName)?.calistir();
+};
+
+function BuyukKart({ seyahat, eylemler, onPress, onUzunBas }: { seyahat: SeyahatOzet; eylemler: Eylem[]; onPress: () => void; onUzunBas: () => void }) {
   const adim = useSeritAdimi(seyahat);
   const adimMetni = adim ? seritAdimMetni(adim) : null;
   const kalan = kalanEtiketi(seyahat);
@@ -148,11 +164,13 @@ function BuyukKart({ seyahat, onPress, onUzunBas }: { seyahat: SeyahatOzet; onPr
       testID="seyahatlerim-buyuk-kart"
       accessibilityRole="button"
       accessibilityLabel={[kalan, seyahatAdi(seyahat), alt, adimMetni].filter(Boolean).join(', ')}
+      accessibilityActions={erisimEylemleri(eylemler)}
+      onAccessibilityAction={erisimEylemi(eylemler)}
       onPress={onPress}
       onLongPress={onUzunBas}
       style={({ pressed }) => [s.buyuk, pressed && s.basili]}>
       <View>
-        <SeyahatKapagi yukseklik={190} kose={16} />
+        <SeyahatKapagi kimlik={seyahat.id} yukseklik={190} kose={16} />
         {kalan ? (
           <View style={s.kalan}>
             <Text style={s.kalanMetin}>{kalan}</Text>
@@ -185,10 +203,17 @@ function BuyukKart({ seyahat, onPress, onUzunBas }: { seyahat: SeyahatOzet; onPr
   );
 }
 
-function Satir({ seyahat, alt, onPress, onUzunBas, onTekrar }: { seyahat: SeyahatOzet; alt: string; onPress: () => void; onUzunBas: () => void; onTekrar?: () => void }) {
+function Satir({ seyahat, alt, eylemler, onPress, onUzunBas }: { seyahat: SeyahatOzet; alt: string; eylemler: Eylem[]; onPress: () => void; onUzunBas: () => void }) {
   return (
-    <Pressable accessibilityRole="button" accessibilityLabel={`${seyahatAdi(seyahat)}, ${alt}`} onPress={onPress} onLongPress={onUzunBas} style={({ pressed }) => [s.satir, pressed && s.basili]}>
-      <SeyahatKapagi yukseklik={56} genislik={56} kose={12} />
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={`${seyahatAdi(seyahat)}, ${alt}`}
+      accessibilityActions={erisimEylemleri(eylemler)}
+      onAccessibilityAction={erisimEylemi(eylemler)}
+      onPress={onPress}
+      onLongPress={onUzunBas}
+      style={({ pressed }) => [s.satir, pressed && s.basili]}>
+      <SeyahatKapagi kimlik={seyahat.id} yukseklik={56} genislik={56} kose={12} />
       <View style={s.metinler}>
         <Text style={s.satirAd} numberOfLines={1}>
           {seyahatAdi(seyahat)}
@@ -197,15 +222,9 @@ function Satir({ seyahat, alt, onPress, onUzunBas, onTekrar }: { seyahat: Seyaha
           {alt}
         </Text>
       </View>
-      {onTekrar ? (
-        <Pressable accessibilityRole="button" onPress={onTekrar} hitSlop={6} style={s.tekrar}>
-          <Text style={s.tekrarMetin}>{t('seyahatler.tekrarKur')}</Text>
-        </Pressable>
-      ) : (
-        <Svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke={anaV5.ok} strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round">
-          <Path d="M9 6l6 6-6 6" />
-        </Svg>
-      )}
+      <Svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke={anaV5.ok} strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round">
+        <Path d="M9 6l6 6-6 6" />
+      </Svg>
     </Pressable>
   );
 }
@@ -228,7 +247,6 @@ const s = StyleSheet.create({
   satir: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: anaV5.cizgi },
   satirAd: { fontFamily: yazi.kalin, fontSize: 16, color: renk.metin },
   satirAlt: { fontFamily: yazi.normal, fontSize: 13, color: anaV5.ikincil },
-  tekrar: { height: 34, paddingHorizontal: 10, borderRadius: 10, backgroundColor: renk.yuzey, justifyContent: 'center' },
-  tekrarMetin: { fontFamily: yazi.ekstra, fontSize: 12, color: renk.ana },
   bos: { fontFamily: yazi.normal, fontSize: 15, lineHeight: 21, color: anaV5.ikincil, paddingTop: 14 },
+  bosVurgu: { fontFamily: yazi.kalin, color: renk.metin },
 });

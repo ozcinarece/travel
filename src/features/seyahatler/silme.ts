@@ -40,12 +40,22 @@ export async function yerelKayitlariTemizle(seyahatId: string): Promise<void> {
  * penceresi (window.confirm) seçimi karşılar.
  */
 export function eylemMenusu(baslik: string, eylem: { metin: string; yikici?: boolean }, vazgec: string): Promise<boolean> {
-  if (Platform.OS === 'web') return Promise.resolve(true);
+  return eylemlerMenusu(baslik, [eylem], vazgec).then((i) => i === 0);
+}
+
+/**
+ * #405 inceleme 1: birden çok eylemli uzun basma menüsü (ör. geçmiş seyahatte "Tekrar kur" + "Seyahati sil"). Seçilen eylemin
+ * sırası ya da vazgeçte null. Android Alert en çok 3 düğme gösterir: vazgeç + en çok 2 eylem. Web'de menü yok; eskisi gibi son
+ * (yıkıcı) eylem seçilir, ardından gelen onay penceresi korur.
+ */
+export function eylemlerMenusu(baslik: string, eylemler: { metin: string; yikici?: boolean }[], vazgec: string): Promise<number | null> {
+  if (Platform.OS === 'web') return Promise.resolve(eylemler.length - 1);
   return new Promise((coz) => {
     if (Platform.OS === 'ios') {
+      const yikici = eylemler.findIndex((e) => e.yikici);
       ActionSheetIOS.showActionSheetWithOptions(
-        { title: baslik, options: [eylem.metin, vazgec], destructiveButtonIndex: eylem.yikici ? 0 : undefined, cancelButtonIndex: 1 },
-        (i) => coz(i === 0),
+        { title: baslik, options: [...eylemler.map((e) => e.metin), vazgec], destructiveButtonIndex: yikici >= 0 ? yikici : undefined, cancelButtonIndex: eylemler.length },
+        (i) => coz(i < eylemler.length ? i : null),
       );
       return;
     }
@@ -53,10 +63,10 @@ export function eylemMenusu(baslik: string, eylem: { metin: string; yikici?: boo
       baslik,
       undefined,
       [
-        { text: vazgec, style: 'cancel', onPress: () => coz(false) },
-        { text: eylem.metin, style: eylem.yikici ? 'destructive' : 'default', onPress: () => coz(true) },
+        { text: vazgec, style: 'cancel', onPress: () => coz(null) },
+        ...eylemler.map((e, i) => ({ text: e.metin, style: e.yikici ? ('destructive' as const) : ('default' as const), onPress: () => coz(i) })),
       ],
-      { cancelable: true, onDismiss: () => coz(false) },
+      { cancelable: true, onDismiss: () => coz(null) },
     );
   });
 }

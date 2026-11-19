@@ -60,7 +60,7 @@ export function acilisKarariniSifirla() {
 
 type Yigin = { routes: { name: string; state?: Partial<Yigin> }[] } | undefined;
 
-/** Kök durumda `(tabs)` iç yığınında ana ekranın üstünde ekran (ör. Profil) var mı. */
+/** Kök durumda `(tabs)` iç yığınında ana ekranın üstünde ekran (ör. Kaydettiklerim) var mı. */
 function sekmeYiginiDerin(kok: Yigin): boolean {
   const ara = (d: Yigin): number => {
     for (const r of d?.routes ?? []) {
@@ -75,8 +75,9 @@ function sekmeYiginiDerin(kok: Yigin): boolean {
 
 /**
  * KK-ek1: "‹ Keşfet" her yoldan ana ekrana (`(tabs)/index`) döner. `dismissTo('/(tabs)')` kök yığında seyahati kapatır ama
- * `(tabs)` iç yığınında üstte Profil varsa onun üstüne yeni bir ana ekran koyar (Profil › Gezilerim yolu; geri tuşu Profil'e
- * döner). Bu durumda ardından `dismissAll` iç yığını ana ekrana indirir: yığın yalnız Keşfet olur. `kok`: çağrı anındaki kök
+ * `(tabs)` iç yığınında ana ekranın üstünde başka bir ekran varsa (ör. Kaydettiklerim; #405'ten beri seyahat çoğunlukla alt
+ * menünün Seyahatlerim sekmesinden açılır) onun üstüne yeni bir ana ekran koyabilir ve geri tuşu o ekrana döner. Bu durumda
+ * ardından `dismissAll` iç yığını ana ekrana indirir: yığın yalnız Keşfet olur. `kok`: çağrı anındaki kök
  * gezinme durumu (`useNavigationContainerRef().getRootState()`).
  */
 export function kesfeteDon(kok: Yigin) {
