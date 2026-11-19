@@ -39,7 +39,6 @@
         },
         {
           "place_id": "ChIJezGjUW9O0xQRwAGUkwTgFXQ",
-          "osm": "node/3058034430",
           "ad": "Ankara Kalesi",
           "sure_dk": 60,
           "sure_gerekcesi": "varsayılan 45; iç kale, Akkale ve sokaklar",
@@ -90,7 +89,6 @@
         },
         {
           "place_id": "ChIJSxhUe0NO0xQRXwTCW64axC8",
-          "osm": "node/14268227435",
           "ad": "Hamamönü Tarihi Ankara Evleri",
           "sure_dk": 60,
           "kapali_gunler": [],
@@ -206,7 +204,8 @@
       "[Plan · Anıtkabir] · 2. gün Anıtkabir'e ~14:25 varış, ~16:25 bitiş · kış kapanış saati kısa olabilir (basında 1 Kasım–31 Ocak için 16:00 civarı geçiyor, resmî sayfadan doğrulanmadı); yazıda ve rehberde saatsiz 'kışın erken kapanır' notu var · anitkabir.tsk.tr",
       "[Rehber · Rahmi M. Koç Müzesi] · \"Ankara'nın eski fotoğraflarıyla kurulan şehir bölümü\", \"içine girilebilen araçlar\" · doğrulanmadı · rmk-museum.org.tr/ankara",
       "[Rehber · Kurtuluş Savaşı Müzesi] · \"İstiklal Marşı'na ayrılmış oda\" · doğrulanmadı · Ankara İl Kültür Turizm, yerinde",
-      "[Rehber · Kurtuluş Savaşı Müzesi] · kapalı gün · resmî sayfada ziyaret günü bulunamadı (rehber metninden çıkarıldı) · Ankara İl Kültür Turizm"
+      "[Rehber · Kurtuluş Savaşı Müzesi] · kapalı gün · resmî sayfada ziyaret günü bulunamadı (rehber metninden çıkarıldı) · Ankara İl Kültür Turizm",
+      "[Plan · g1.d2 Ankara Kalesi, g1.d6 Hamamönü] · osm alanı kaldırıldı · kuru yüklemede OSM noktası Google konumundan 273 m ve 160 m uzak çıktı (sınır 150); konum google_30g tutulur, sonra osm-esle ya da BO'da elle · Ürün kararı #366"
     ],
     "fotograf_onerileri": [
       {
