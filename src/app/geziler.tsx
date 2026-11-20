@@ -1,11 +1,12 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { useMemo, useState } from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { EkranBasligi } from '@/components/EkranBasligi';
 import { GeziKarti } from '@/components/icerik/GeziKarti';
 import { Cip } from '@/components/ui/Cip';
+import { EklemeDurumSatiri } from '@/components/ui/EklemeDurumSatiri';
 import { rafBul } from '@/features/anasayfa/raflar';
 import { useKesfetAkisi } from '@/features/icerik/kesfetAkisi';
 import { useGeziler, useSehirler } from '@/features/icerik/sorgular';
@@ -26,16 +27,34 @@ export default function GezilerEkrani() {
 function RafListesi({ rafId }: { rafId: string }) {
   const bolumler = useAnaSayfaBolumleri();
   const akis = useKesfetAkisi();
-  const r = rafBul(rafId, bolumler.data, akis.data ?? []);
+  // #428 inceleme 3: bölümler ya da geziler yüklenirken gösterge (başlık bir an "Önerilen geziler" olmasın); okunamazsa
+  // Tekrar dene; raf bulunamaz ya da boşsa "Bu rafta şu an gezi yok" (bu ekranda süzgeç yok).
+  const yukleniyor = bolumler.isPending || akis.isPending;
+  const bolumHatasi = bolumler.isError && !bolumler.data;
+  const akisHatasi = akis.isError && !akis.data;
+  const hata = !yukleniyor && (bolumHatasi || akisHatasi);
+  const r = yukleniyor || hata ? null : rafBul(rafId, bolumler.data, akis.data ?? []);
+  const tekrarDene = () => {
+    if (bolumHatasi) bolumler.refetch();
+    if (akisHatasi) akis.refetch();
+  };
   return (
     <SafeAreaView style={s.ekran} edges={['top']}>
-      <EkranBasligi baslik={r?.baslik ?? t('gezi.listeBaslik')} geri={() => router.back()} />
+      <EkranBasligi baslik={r?.baslik ?? ''} geri={() => router.back()} />
       <ScrollView contentContainerStyle={s.icerik}>
         <View style={{ gap: 12, paddingTop: 6 }}>
-          {(r?.geziler ?? []).map((g, i) => (
-            <GeziKarti key={g.id} gezi={g} buyuk sira={i} onPress={() => router.push({ pathname: '/gezi/[slug]', params: { slug: g.slug } })} />
-          ))}
-          {!akis.isPending && !r ? <Text style={s.bos}>{t('gezi.bos')}</Text> : null}
+          {yukleniyor ? (
+            <ActivityIndicator color={renk.ana} style={s.yukleniyor} accessibilityLabel={t('genel.yukleniyor')} testID="raf-yukleniyor" />
+          ) : hata ? (
+            <EklemeDurumSatiri durum={{ metin: t('kesfetAkisi.agMetin'), tur: 'hata', tekrar: tekrarDene }} />
+          ) : (
+            <>
+              {(r?.geziler ?? []).map((g, i) => (
+                <GeziKarti key={g.id} gezi={g} buyuk sira={i} onPress={() => router.push({ pathname: '/gezi/[slug]', params: { slug: g.slug } })} />
+              ))}
+              {!r || r.geziler.length === 0 ? <Text style={s.bos}>{t('anasayfa.v6.rafBos')}</Text> : null}
+            </>
+          )}
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -84,4 +103,5 @@ const s = StyleSheet.create({
   filtreBaslik: { fontFamily: yazi.kalin, fontSize: 12, color: renk.ikincil },
   cipler: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   bos: { fontFamily: yazi.normal, fontSize: 13, color: renk.ikincil, paddingVertical: 12 },
+  yukleniyor: { paddingVertical: 24 },
 });

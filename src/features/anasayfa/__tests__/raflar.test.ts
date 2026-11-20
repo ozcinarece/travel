@@ -26,6 +26,11 @@ describe('#406 KK3 kesfetRaflari', () => {
     const r = kesfetRaflari([banner({}), raf('x', { raf_turu: 'amac', amac: 'doga' }), { id: 's', tur: 'serit', baslik: 'Eski', icerik: {} }, raf('y', { raf_turu: 'elle', gezi_idler: ['a', 'b'] })], geziler);
     expect(r.map((x) => [x.id, x.geziler.length])).toEqual([['x', 3]]);
   });
+  it('#428 inceleme 1: yayındaki rafların hiçbiri uygun değilse (3\'ten az gezi, yalnız arkadaşlardan) amaç raflarına, o da yoksa "Hazır geziler"e düşülür', () => {
+    const uygunsuz = [raf('y', { raf_turu: 'elle', gezi_idler: ['a', 'b'] }), raf('k', { raf_turu: 'arkadaslardan' })];
+    expect(kesfetRaflari(uygunsuz, geziler).map((x) => x.id)).toEqual(['amac:lezzet', 'amac:doga']);
+    expect(kesfetRaflari(uygunsuz, [g('a'), g('b')]).map((x) => x.id)).toEqual(['hepsi']);
+  });
   it('yayında raf yoksa (ya da bölümler okunamadıysa) amaç rafları, sabit amaç sırasıyla', () => {
     expect(kesfetRaflari(undefined, geziler).map((x) => [x.id, x.baslik])).toEqual([
       ['amac:lezzet', 'Lezzet için'],
@@ -72,5 +77,7 @@ describe('#406 KK3 rafKartAltSatiri', () => {
   it('durak günlerden, yer şehir adı; şehir yoksa yalnız durak', () => {
     expect(rafKartAltSatiri({ mekan_sayisi: 99, gunDuraklari: [6, 5], sehirler: { ad: 'Bursa' } })).toBe('11 durak · Bursa');
     expect(rafKartAltSatiri({ mekan_sayisi: 9, sehirler: null })).toBe('9 durak');
+    // Şehir rafında başlık şehri söylüyor: yalnız "N durak".
+    expect(rafKartAltSatiri({ mekan_sayisi: 99, gunDuraklari: [6, 5], sehirler: { ad: 'Bursa' } }, 'sehir')).toBe('11 durak');
   });
 });

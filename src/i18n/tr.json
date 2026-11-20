@@ -788,7 +788,8 @@
       "hazirGezilerEtiket": "Hazır geziler, {n}"
     },
     "v6": {
-      "tumuEtiket": "{baslik}: tümü",
+      "tumuEtiket": "{baslik}, tümünü gör",
+      "rafBos": "Bu rafta şu an gezi yok",
       "kartAlt": "{durak} durak · {yer}",
       "kartAltYersiz": "{durak} durak",
       "hazirGeziler": "Hazır geziler",

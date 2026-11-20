@@ -329,9 +329,10 @@ export default function AnaSayfa() {
           </View>
         ) : (
           <>
-            {/* #406 KK2: tek banner, Planlamaya devam'ın altında. */}
-            {banner ? <Banner banner={banner} onAc={() => bannerAc(banner)} /> : null}
-            {akis.isPending ? (
+            {/* #406 KK2: tek banner, Planlamaya devam'ın altında. #428 inceleme 2: bölümler gelene kadar banner ve raf
+                alanında gösterge; amaç raflarına yalnız hata ya da yayında uygun raf yokken düşülür (içerik kaymasın). */}
+            {banner && !bolumler.isPending ? <Banner banner={banner} onAc={() => bannerAc(banner)} /> : null}
+            {akis.isPending || bolumler.isPending ? (
               <ActivityIndicator color={renk.ana} style={s.yukleniyor} accessibilityLabel={t('anasayfa.v5.yukleniyor')} />
             ) : akis.isError && !akis.data ? (
               <View style={[s.kenar, s.hata]}>

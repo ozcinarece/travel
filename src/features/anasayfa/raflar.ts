@@ -43,17 +43,17 @@ export function rafGezileri<G extends RafGezisi>(icerik: AnaSayfaBolumu['icerik'
 }
 
 /**
- * KK3: Keşfet'in rafları. Yayında raf varsa onlar, sırayla; 3'ten az gezisi olan raf düşer. Yayında hiç raf yoksa (ya da
- * bölümler okunamadıysa) amaç rafları kurulur (sabit amaç sırasıyla, aynı 3 kuralı). O da boş kalırsa ve gezi varsa tek raf:
- * bütün hazır geziler (ekran boş kalmasın).
+ * KK3: Keşfet'in rafları. Yayında raf varsa onlar, sırayla; 3'ten az gezisi olan raf düşer. Yayında uygun raf kalmazsa
+ * (hiç raf yok, hepsi 3'ten az gezili ya da yalnız henüz boş `arkadaslardan` rafı var) ya da bölümler okunamadıysa amaç
+ * rafları kurulur (sabit amaç sırasıyla, aynı 3 kuralı). O da boş kalırsa ve gezi varsa tek raf: bütün hazır geziler
+ * (#428 inceleme 1: Keşfet boş kalmasın).
  */
 export function kesfetRaflari<G extends RafGezisi>(bolumler: readonly RafBolumu[] | null | undefined, geziler: readonly G[]): Raf<G>[] {
-  const yayindakiler = (bolumler ?? []).filter((b) => b.tur === 'raf');
-  if (yayindakiler.length > 0) {
-    return yayindakiler
-      .map((b) => ({ id: b.id, baslik: b.baslik, tur: b.icerik.raf_turu ?? 'elle', geziler: rafGezileri(b.icerik, geziler) }))
-      .filter((r) => r.geziler.length >= RAF_EN_AZ);
-  }
+  const yayindakiler = (bolumler ?? [])
+    .filter((b) => b.tur === 'raf')
+    .map((b) => ({ id: b.id, baslik: b.baslik, tur: b.icerik.raf_turu ?? 'elle', geziler: rafGezileri(b.icerik, geziler) }))
+    .filter((r) => r.geziler.length >= RAF_EN_AZ);
+  if (yayindakiler.length > 0) return yayindakiler;
   const amacRaflari = AKIS_AMACLARI.map((a) => ({ id: `amac:${a}`, baslik: amacRafBasligi(a), tur: 'amac' as const, geziler: rafGezileri({ raf_turu: 'amac', amac: a }, geziler) })).filter(
     (r) => r.geziler.length >= RAF_EN_AZ,
   );
@@ -123,9 +123,15 @@ export function aktifBanner<G extends BannerGezisi>(
   return { id: b.id, baslik: b.baslik, ustYazi, kapak: kaynak?.kapak_url ?? null, atif: kaynak ? kapakAtfiOku(kaynak.kapak_atif) : null, hedef, geziSayisi: sayi, slug };
 }
 
-/** KK3 kartın alt satırı: "11 durak · Bursa" (durak günlerden; gün verisi yoksa gezinin sayacı). */
-export function rafKartAltSatiri(g: Pick<Gezi, 'mekan_sayisi'> & { gunDuraklari?: readonly number[]; sehirler?: { ad: string } | null }): string {
+/**
+ * KK3 kartın alt satırı: "11 durak · Bursa" (durak günlerden; gün verisi yoksa gezinin sayacı). Şehir rafında yalnız
+ * "N durak": başlık zaten şehri söylüyor (#428 inceleme, soru 2).
+ */
+export function rafKartAltSatiri(
+  g: Pick<Gezi, 'mekan_sayisi'> & { gunDuraklari?: readonly number[]; sehirler?: { ad: string } | null },
+  rafTuru?: RafTuru,
+): string {
   const durak = g.gunDuraklari && g.gunDuraklari.length > 0 ? g.gunDuraklari.reduce((a, b) => a + b, 0) : g.mekan_sayisi;
-  const yer = g.sehirler?.ad;
+  const yer = rafTuru === 'sehir' ? null : g.sehirler?.ad;
   return yer ? t('anasayfa.v6.kartAlt', { durak, yer }) : t('anasayfa.v6.kartAltYersiz', { durak });
 }

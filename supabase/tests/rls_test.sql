@@ -640,7 +640,7 @@ select pg_temp.hata_bekle($$insert into public.ana_sayfa_bolumleri (tur, baslik,
 select pg_temp.hata_bekle($$insert into public.ana_sayfa_bolumleri (tur, baslik, sira, icerik) values ('raf', 'x', 21, '{"raf_turu": "amac", "amac": "lezzet"}')$$, '42501');
 select pg_temp.as_email(:E, 'ozcinar.ece@gmail.com');
 insert into public.ana_sayfa_bolumleri (tur, baslik, sira, icerik) values
-  ('banner', 'Kapadokya''da balon sabahı', 20, '{"ust_yazi": "Bu kış", "kapak_url": "https://ornek.com/k.jpg", "kapak_atif": {"yazar": "Tripmate"}, "hedef": {"tur": "raf", "id": "66666666-6666-4666-8666-000000000001"}}'),
+  ('banner', 'Kapadokya''da balon sabahı', 20, '{"ust_yazi": "Bu kış", "kapak_url": "https://upload.wikimedia.org/wikipedia/commons/a/ab/K.jpg", "kapak_atif": {"yazar": "Tripmate", "lisans": "CC BY 4.0"}, "hedef": {"tur": "raf", "id": "66666666-6666-4666-8666-000000000001"}}'),
   ('raf', 'Lezzet için', 21, '{"raf_turu": "amac", "amac": "lezzet"}'),
   ('raf', 'Hafta sonu kaçamakları', 22, '{"raf_turu": "elle", "gezi_idler": ["33333333-3333-4333-8333-000000000001"]}'),
   ('raf', 'Bursa', 23, '{"raf_turu": "sehir", "sehir_id": "77777777-7777-4777-8777-000000000001"}'),
@@ -650,6 +650,20 @@ insert into public.ana_sayfa_bolumleri (tur, baslik, sira, icerik) values
 select pg_temp.hata_bekle($$insert into public.ana_sayfa_bolumleri (tur, baslik, sira, icerik) values ('banner', 'x', 30, '{"baska": 1}')$$, '23514');
 select pg_temp.hata_bekle($$insert into public.ana_sayfa_bolumleri (tur, baslik, sira, icerik) values ('banner', 'x', 30, '{"kapak_url": "http://ornek.com/k.jpg"}')$$, '23514');
 select pg_temp.hata_bekle($$insert into public.ana_sayfa_bolumleri (tur, baslik, sira, icerik) values ('banner', 'x', 30, '{"kapak_atif": {"yazar": "Tripmate"}}')$$, '23514');
+-- #428 inceleme 4–6: atıfsız görsel; izinli olmayan görsel adresi (Google Places fotoğrafı, başka site); bilinmeyen hedef
+-- anahtarı; nesne olmayan içerik (23514, 22023 değil).
+select pg_temp.hata_bekle($$insert into public.ana_sayfa_bolumleri (tur, baslik, sira, icerik) values ('banner', 'x', 30, '{"kapak_url": "https://upload.wikimedia.org/wikipedia/commons/a/ab/K.jpg"}')$$, '23514');
+select pg_temp.hata_bekle($$insert into public.ana_sayfa_bolumleri (tur, baslik, sira, icerik) values ('banner', 'x', 30, '{"kapak_url": "https://places.googleapis.com/v1/places/x/photos/y/media?maxWidthPx=800", "kapak_atif": {"yazar": "Tripmate"}}')$$, '23514');
+select pg_temp.hata_bekle($$insert into public.ana_sayfa_bolumleri (tur, baslik, sira, icerik) values ('banner', 'x', 30, '{"kapak_url": "https://lh3.googleusercontent.com/p/abc", "kapak_atif": {"yazar": "Tripmate"}}')$$, '23514');
+select pg_temp.hata_bekle($$insert into public.ana_sayfa_bolumleri (tur, baslik, sira, icerik) values ('banner', 'x', 30, '{"kapak_url": "https://ornek.com/k.jpg", "kapak_atif": {"yazar": "Tripmate"}}')$$, '23514');
+select pg_temp.hata_bekle($$insert into public.ana_sayfa_bolumleri (tur, baslik, sira, icerik) values ('banner', 'x', 30, '{"kapak_url": "https://upload.wikimedia.org.ornek.com/k.jpg", "kapak_atif": {"yazar": "Tripmate"}}')$$, '23514');
+select pg_temp.hata_bekle($$insert into public.ana_sayfa_bolumleri (tur, baslik, sira, icerik) values ('banner', 'x', 30, '{"hedef": {"tur": "gezi", "id": "66666666-6666-4666-8666-000000000001", "baska": 1}}')$$, '23514');
+select pg_temp.hata_bekle($$insert into public.ana_sayfa_bolumleri (tur, baslik, sira, icerik) values ('banner', 'x', 30, '[]')$$, '23514');
+select pg_temp.hata_bekle($$insert into public.ana_sayfa_bolumleri (tur, baslik, sira, icerik) values ('raf', 'x', 30, '"amac"')$$, '23514');
+-- Kendi Storage alanımızdaki görsel (atıflı) kabul edilir.
+insert into public.ana_sayfa_bolumleri (tur, baslik, sira, icerik) values
+  ('banner', 'Storage görselli', 25, '{"kapak_url": "https://xwqeobelyeuzoxyuvauw.supabase.co/storage/v1/object/public/icerik/banner/k.webp", "kapak_atif": {"yazar": "Tripmate"}}');
+delete from public.ana_sayfa_bolumleri where sira = 25;
 select pg_temp.hata_bekle($$insert into public.ana_sayfa_bolumleri (tur, baslik, sira, icerik) values ('banner', 'x', 30, '{"hedef": {"tur": "yer", "id": "66666666-6666-4666-8666-000000000001"}}')$$, '23514');
 select pg_temp.hata_bekle($$insert into public.ana_sayfa_bolumleri (tur, baslik, sira, icerik) values ('banner', 'x', 30, '{"hedef": {"tur": "gezi", "id": "bozuk"}}')$$, '23514');
 select pg_temp.hata_bekle($$insert into public.ana_sayfa_bolumleri (tur, baslik, sira, icerik) values ('banner', 'x', 30, '{"ust_yazi": "   "}')$$, '23514');
@@ -931,7 +945,7 @@ insert into public.olaylar (tur, hedef_id) values ('plan_hazir_davet', '88888888
 -- #405 KK6 alt menü sekme olayı (meta: sekme).
 insert into public.olaylar (tur, meta) values ('sekme_acildi', '{"sekme": "seyahatlerim"}');
 -- #406 KK6 raflı ana sayfa olayları (kendi adına).
-insert into public.olaylar (tur, hedef_id, meta) values ('banner_acildi', null, '{"hedef": "raf"}'), ('raf_kart_acildi', '33333333-3333-4333-8333-000000000001', '{"raf": "Lezzet için"}');
+insert into public.olaylar (tur, hedef_id, meta) values ('banner_acildi', null, '{"hedef": "raf"}'), ('raf_kart_acildi', '33333333-3333-4333-8333-000000000001', '{"raf": "66666666-6666-4666-8666-000000000001", "raf_turu": "amac"}');
 reset role;
 
 -- #138 Otomatik profil: ad/foto sağlayıcıdan, kullanıcı adı addan (alınmışsa sayı), Apple gizli ad → Gezgin; misafir alamaz; bir kez.

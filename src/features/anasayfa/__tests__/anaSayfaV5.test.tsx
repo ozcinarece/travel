@@ -4,7 +4,6 @@
 import { beforeEach, describe, expect, it, jest } from '@jest/globals';
 import { act, fireEvent, render, waitFor, within } from '@testing-library/react-native';
 import { ScrollView, StyleSheet, View } from 'react-native';
-import Svg from 'react-native-svg';
 
 import type { Kisiler } from '@/features/harcama/metin';
 import { acilisKarariniKapat } from '@/lib/acilis';
@@ -38,7 +37,8 @@ jest.mock('@/features/icerik/kesfetAkisi', () => ({
   useKesfetAkisi: () => mockAkis,
 }));
 let mockBolumler: unknown[] | undefined = undefined;
-jest.mock('@/lib/anaSayfa', () => ({ useAnaSayfaBolumleri: () => ({ data: mockBolumler, refetch: jest.fn(async () => ({})) }) }));
+let mockBolumlerBekliyor = false;
+jest.mock('@/lib/anaSayfa', () => ({ useAnaSayfaBolumleri: () => ({ data: mockBolumler, isPending: mockBolumlerBekliyor, refetch: jest.fn(async () => ({})) }) }));
 const mockOlayYaz = jest.fn();
 const mockSehirler = [
   { id: 's-esk', ad: 'Eskişehir', slug: 'eskisehir', gezi_sayisi: 3 },
@@ -103,6 +103,7 @@ beforeEach(async () => {
   mockParametre = {};
   mockAkis.data = [];
   mockBolumler = undefined;
+  mockBolumlerBekliyor = false;
   mockAkis.isPending = false;
   mockAkis.isError = false;
 });
@@ -284,7 +285,7 @@ describe('#406 raflar ve banner (Ana_v6_Kesfet)', () => {
     fireEvent.press(e.getByRole('button', { name: 'Eskişehir gezisi g2, 7 durak · Eskişehir' }));
     expect(router.push).toHaveBeenLastCalledWith({ pathname: '/gezi/[slug]', params: { slug: 'g2' } });
     expect(mockOlayYaz).toHaveBeenCalledWith('raf_kart_acildi', 'g2', { raf: 'amac:lezzet', raf_turu: 'amac' });
-    fireEvent.press(e.getByRole('button', { name: 'Lezzet için: tümü' }));
+    fireEvent.press(e.getByRole('button', { name: 'Lezzet için, tümünü gör' }));
     expect(router.push).toHaveBeenLastCalledWith({ pathname: '/geziler', params: { raf: 'amac:lezzet' } });
   });
 
@@ -303,6 +304,24 @@ describe('#406 raflar ve banner (Ana_v6_Kesfet)', () => {
     fireEvent.press(e.getByRole('button', { name: "Bu kış, Kapadokya'da balon sabahı, 3 hazır gezi" }));
     expect(mockOlayYaz).toHaveBeenCalledWith('banner_acildi', 'b1', { hedef: 'raf' });
     expect(router.push).toHaveBeenLastCalledWith({ pathname: '/geziler', params: { raf: 'r2' } });
+  });
+
+  it('#428 inceleme 2: bölümler gelene kadar banner ve raf alanında gösterge; amaç rafları önce çizilip kaymaz', async () => {
+    mockAkis.data = [gezi('g1', ['lezzet']), gezi('g2', ['lezzet']), gezi('g3', ['lezzet'])];
+    mockBolumlerBekliyor = true;
+    const e = render(<AnaSayfa />);
+    await waitFor(() => expect(e.getByLabelText('Geziler yükleniyor')).toBeTruthy());
+    expect(e.queryByText('Lezzet için')).toBeNull();
+    expect(e.queryByTestId('ana-banner')).toBeNull();
+  });
+
+  it('#428 inceleme 1: yayındaki raflar 3 geziye ulaşmıyorsa Keşfet boş kalmaz, amaç raflarına düşülür', async () => {
+    mockAkis.data = [gezi('g1', ['lezzet']), gezi('g2', ['lezzet']), gezi('g3', ['lezzet'])];
+    mockBolumler = [raf('r1', 1, 'İki gezilik', { raf_turu: 'elle', gezi_idler: ['g1', 'g2'] }), raf('r2', 2, 'Arkadaşlarından', { raf_turu: 'arkadaslardan' })];
+    const e = render(<AnaSayfa />);
+    await waitFor(() => expect(e.getByText('Lezzet için')).toBeTruthy());
+    expect(e.queryByText('İki gezilik')).toBeNull();
+    expect(e.queryByText('Arkadaşlarından')).toBeNull();
   });
 
   it('KK2: hedefi yayında olmayan banner gösterilmez', async () => {

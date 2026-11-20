@@ -1,5 +1,6 @@
 // #406 KK3 (UX önerileri kanvası, `Ana_v6_Kesfet`): raf — başlık (19/800) + "Tümü" (14/700 Gece), altında yana kayan kartlar.
-// Kart 236 px: 160 px kapak (köşe 14), sağ üstte 30 px ♥ dairesi; altında başlık (15/700) ve "N durak · yer" (13, ikincil).
+// Kart 236 px: 160 px kapak (köşe 14), sağ üstte 30 px ♥ dairesi; altında başlık (15/700) ve "N durak · yer" (13, ikincil;
+// şehir rafında yalnız "N durak").
 // Kapaksız gezide kanvastaki yer tutucu (gökyüzü + toprak, ortada kamera; ton gezi kimliğinden). Google fotoğrafı yok.
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
@@ -33,15 +34,15 @@ export function Raf({ raf, onKart, onTumu }: Props) {
       </View>
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={s.kartlar} decelerationRate="fast" snapToInterval={RAF_KART_GENISLIK + 12}>
         {raf.geziler.slice(0, RAF_EN_COK).map((g) => (
-          <RafKarti key={g.id} gezi={g} onAc={() => onKart(g)} />
+          <RafKarti key={g.id} gezi={g} rafTuru={raf.tur} onAc={() => onKart(g)} />
         ))}
       </ScrollView>
     </View>
   );
 }
 
-export function RafKarti({ gezi, onAc }: { gezi: AkisGezisi; onAc: () => void }) {
-  const alt = rafKartAltSatiri(gezi);
+export function RafKarti({ gezi, rafTuru, onAc }: { gezi: AkisGezisi; rafTuru?: RafVerisi<AkisGezisi>['tur']; onAc: () => void }) {
+  const alt = rafKartAltSatiri(gezi, rafTuru);
   return (
     <View style={s.kart}>
       <Pressable accessibilityRole="button" accessibilityLabel={`${gezi.baslik}, ${alt}`} onPress={onAc} style={({ pressed }) => [s.govde, pressed && s.basili]}>
