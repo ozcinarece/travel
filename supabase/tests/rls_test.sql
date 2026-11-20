@@ -3775,8 +3775,9 @@ delete from public.il_listeleri where il_slug = 'il-deneme';
 \set PA '''43200000-0000-4000-8000-0000000000a1'''
 \set PB '''43200000-0000-4000-8000-0000000000b2'''
 \set PX '''43200000-0000-4000-8000-0000000000e4'''
+\set PM '''43200000-0000-4000-8000-0000000000f5'''
 reset role;
-insert into auth.users (id, is_anonymous) values (:PA, false), (:PB, false), (:PX, false);
+insert into auth.users (id, is_anonymous) values (:PA, false), (:PB, false), (:PX, false), (:PM, true);
 insert into public.profiles (id, name, username) values (:PA, 'Ece', 'ece432');
 insert into public.trips (id, owner_id, name, city_place_id, city_label, country_code, lat, lng, tz, start_date, end_date) values
   ('43200000-0000-4000-8000-000000000001', :PA, 'Paylaşılan Roma', 'ChIJ-roma-432', 'Roma', 'IT', 41.9, 12.49, 'Europe/Rome', '2026-10-12', '2026-10-13');
@@ -3902,6 +3903,45 @@ insert into public.olaylar (tur) values ('paylasim_acildi');
 reset role;
 do $$ begin assert (select kaynak_paylasim from public.trips where id = current_setting('test.alinan')::uuid) = (select id from public.gezi_paylasim where token = current_setting('test.paylasim_token')), '#432 KK6: kaynak_paylasim doğru paylaşım'; end $$;
 
+-- PRD §7: 30 günü geçen Google koordinatı girişsiz özette dönmez, Seyahatime al'da kopyalanmaz (place_id ve damga kalır).
+reset role;
+update public.places set google_fetched_at = now() - interval '31 days' where id = '43200000-0000-4000-8000-000000000011';
+set role anon;
+do $$
+declare o jsonb := public.paylasim_ozeti(current_setting('test.paylasim_token'));
+begin
+  assert o #>> '{gunler,0,duraklar,1,ad}' = 'Kolezyum', 'ön koşul: eski damgalı durak Kolezyum';
+  assert o #> '{gunler,0,duraklar,1,lat}' = 'null'::jsonb and o #> '{gunler,0,duraklar,1,lng}' = 'null'::jsonb, '#435: 31 günlük koordinat null: ' || o::text;
+  assert (o #>> '{gunler,0,duraklar,0,lat}')::numeric = 41.90, '#435: taze koordinat döner';
+end $$;
+reset role;
+set role authenticated;
+select pg_temp.as_user(:PX);
+select set_config('test.alinan2', public.paylasimdan_al(current_setting('test.paylasim_token'))::text, false);
+reset role;
+do $$
+declare
+  v uuid := current_setting('test.alinan2')::uuid;
+  e public.places;
+  t public.places;
+begin
+  select * into e from public.places where trip_id = v and place_id = 'ChIJ-kolezyum-432';
+  select * into t from public.places where trip_id = v and place_id = 'ChIJ-muze-432';
+  assert e.lat is null and e.lng is null, '#435: eski koordinat boş kopyalanır';
+  assert e.google_fetched_at = (select google_fetched_at from public.places where id = '43200000-0000-4000-8000-000000000011'), '#435: google_fetched_at korunur';
+  assert t.lat = 41.90 and t.lng = 12.45, '#435: taze koordinat kopyalanır';
+end $$;
+delete from public.trips where id = current_setting('test.alinan2')::uuid;
+
+-- #435: misafir (anonim) üye link açamaz.
+insert into public.members (trip_id, user_id, display_name) values ('43200000-0000-4000-8000-000000000001', :PM, 'Misafir');
+set role authenticated;
+select pg_temp.as_user(:PM, true);
+do $$ begin assert public.is_member('43200000-0000-4000-8000-000000000001') and public.is_anonymous(), 'ön koşul: PM misafir üye'; end $$;
+select pg_temp.hata_bekle($$insert into public.gezi_paylasim (trip_id) values ('43200000-0000-4000-8000-000000000001')$$, '42501');
+reset role;
+delete from public.members where trip_id = '43200000-0000-4000-8000-000000000001' and user_id = :PM;
+
 -- KK3: kapatılan link "kapalı" döner, yeniden açılamaz, Seyahatime al yapılamaz; oluşturan seyahatten çıkınca da kapalı sayılır.
 set role authenticated;
 select pg_temp.as_user(:PA);
@@ -3924,10 +3964,16 @@ delete from public.members where trip_id = '43200000-0000-4000-8000-000000000001
 set role anon;
 do $$ begin assert public.paylasim_ozeti(current_setting('test.paylasim_token_b')) = '{"kapali": true}'::jsonb, '#432: oluşturan çıkınca link kapalı sayılır'; end $$;
 reset role;
+do $$ begin assert (select not acik and kapatildi_at is not null from public.gezi_paylasim where token = current_setting('test.paylasim_token_b')), '#435: oluşturan çıkınca link kapanır'; end $$;
+-- Yeniden üye olsa da eski link canlanmaz.
+insert into public.members (trip_id, user_id, display_name) values ('43200000-0000-4000-8000-000000000001', :PB, 'Berk');
+set role anon;
+do $$ begin assert public.paylasim_ozeti(current_setting('test.paylasim_token_b')) = '{"kapali": true}'::jsonb, '#435: yeniden üyelikte eski link kapalı kalır'; end $$;
+reset role;
 delete from public.trips where id = current_setting('test.alinan')::uuid or id = '43200000-0000-4000-8000-000000000001';
 delete from public.olaylar where tur in ('paylasimdan_alindi', 'paylasim_acildi');
 delete from public.sehirler where id = '43200000-0000-4000-8000-000000000020';
-delete from auth.users where id in (:PA, :PB, :PX);
+delete from auth.users where id in (:PA, :PB, :PX, :PM);
 do $$ begin assert (select count(*) from public.gezi_paylasim) = 0, '#432: seyahat silinince linkler de silinir'; end $$;
 
 \echo 'rls_test: TÜM TESTLER GEÇTİ'

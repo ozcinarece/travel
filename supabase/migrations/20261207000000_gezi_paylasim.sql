@@ -36,10 +36,11 @@ grant select on public.gezi_paylasim to authenticated;
 grant insert (trip_id, kisi_adlari_acik) on public.gezi_paylasim to authenticated;
 grant update (acik, kisi_adlari_acik) on public.gezi_paylasim to authenticated;
 
+-- Yalnız seyahatin hesabı olan üyesi kendi adına link oluşturur; misafir (anonim) oturum açamaz (Ürün kararı, #435).
 -- Yalnız seyahatin üyesi kendi adına link oluşturur; linki yalnız oluşturan görür, değiştirir ve kapatır. Silme yok (kapatılır).
 create policy gezi_paylasim_select on public.gezi_paylasim for select to authenticated using (olusturan = auth.uid());
 create policy gezi_paylasim_insert on public.gezi_paylasim for insert to authenticated
-  with check (olusturan = auth.uid() and public.is_member(trip_id));
+  with check (olusturan = auth.uid() and public.is_member(trip_id) and not public.is_anonymous());
 create policy gezi_paylasim_update on public.gezi_paylasim for update to authenticated
   using (olusturan = auth.uid()) with check (olusturan = auth.uid());
 
@@ -76,6 +77,19 @@ end;
 $$;
 create trigger trips_kaynak_guard before insert or update of kaynak_paylasim on public.trips
   for each row execute function public.trips_kaynak_guard();
+
+-- Oluşturan seyahatten çıkınca linkleri kapanır; aynı kişi yeniden üye olursa eski link canlanmaz.
+create function public.gezi_paylasim_uye_cikti() returns trigger
+language plpgsql security definer set search_path = ''
+as $$
+begin
+  update public.gezi_paylasim set acik = false
+   where trip_id = old.trip_id and olusturan = old.user_id and acik;
+  return old;
+end;
+$$;
+create trigger gezi_paylasim_uye_cikti after delete on public.members
+  for each row execute function public.gezi_paylasim_uye_cikti();
 
 -- Açık ve oluşturanı hâlâ seyahatin üyesi olan link. Oluşturan seyahatten çıktıysa link kapalı sayılır.
 create function public.paylasim_gecerli(p_token text) returns public.gezi_paylasim
@@ -128,8 +142,9 @@ begin
                join public.geziler gz on gz.id = gg.gezi_id
              where gd.place_id = p.place_id and gz.yayin order by gz.created_at limit 1)),
           'tur', p.primary_type,
-          'lat', p.lat,
-          'lng', p.lng
+          -- PRD §7: Google koordinatı yalnız 30 gün içinde alınmışsa döner; eskiyse null (istemci haritaya koymaz).
+          'lat', case when p.google_fetched_at > now() - interval '30 days' then p.lat end,
+          'lng', case when p.google_fetched_at > now() - interval '30 days' then p.lng end
         ) order by s.order_key)
         from public.stops s join public.places p on p.id = s.place_ref
         where s.day_id = d.id), '[]'::jsonb)) order by d.index)
@@ -156,7 +171,8 @@ end;
 $$;
 
 -- KK5/KK6: "Seyahatime al". Girişli kullanıcı için tarihsiz yeni seyahat kurar: aynı gün sayısı, duraklar, süreler.
--- Koordinatın 30 günlük damgası (google_fetched_at) kopyalanır, sıfırlanmaz (emsal seyahati_kopyala). Notlar kopyalanmaz.
+-- Koordinatın 30 günlük damgası (google_fetched_at) kopyalanır, sıfırlanmaz (emsal seyahati_kopyala). 30 günü geçen
+-- koordinat kopyalanmaz (null; place_id ve damga kalır, PRD §7). Notlar kopyalanmaz.
 create function public.paylasimdan_al(p_token text) returns uuid
 language plpgsql security definer set search_path = ''
 as $$
@@ -189,7 +205,10 @@ begin
   where od.trip_id = t.id and nd.trip_id = v_trip and nd.index = od.index;
 
   insert into public.places (trip_id, place_id, primary_type, lat, lng, google_fetched_at, default_minutes, added_by)
-  select v_trip, p.place_id, p.primary_type, p.lat, p.lng, p.google_fetched_at, p.default_minutes, auth.uid()
+  select v_trip, p.place_id, p.primary_type,
+         case when p.google_fetched_at > now() - interval '30 days' then p.lat end,
+         case when p.google_fetched_at > now() - interval '30 days' then p.lng end,
+         p.google_fetched_at, p.default_minutes, auth.uid()
   from public.places p
   where p.trip_id = t.id and exists (select 1 from public.stops s where s.place_ref = p.id);
 
@@ -207,7 +226,7 @@ begin
 end;
 $$;
 
-revoke all on function public.paylasim_token_uret(), public.gezi_paylasim_guard(), public.trips_kaynak_guard(),
+revoke all on function public.paylasim_token_uret(), public.gezi_paylasim_guard(), public.trips_kaynak_guard(), public.gezi_paylasim_uye_cikti(),
   public.paylasim_gecerli(text), public.paylasim_ozeti(text), public.paylasim_harita_izni(text), public.paylasimdan_al(text)
   from public, anon, authenticated;
 grant execute on function public.paylasim_token_uret() to authenticated;
