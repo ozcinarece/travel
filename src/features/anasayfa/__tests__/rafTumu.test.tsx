@@ -128,3 +128,24 @@ describe('#428 2. inceleme: amaç rafında sahte hata yok, Tekrar dene tepki ver
     expect(e.getByRole('header', { name: 'Hafta sonu kaçamakları' })).toBeTruthy();
   });
 });
+
+describe('#428 3. inceleme: yerel raf akıştan kurulur', () => {
+  it('bölümler bu kez dolu gelse de (3+ gezili yayında raf) `amac:lezzet` dolu gelir', () => {
+    mockRafId = 'amac:lezzet';
+    mockBolumler.data = [raf(['a', 'b', 'c'])];
+    mockAkis.data = [gezi('a'), gezi('b'), gezi('c')];
+    const e = render(<GezilerEkrani />);
+    expect(e.getByRole('header', { name: 'Lezzet için' })).toBeTruthy();
+    expect(e.getAllByText(/^Gezi /)).toHaveLength(3);
+    expect(e.queryByText('Bu rafta şu an gezi yok')).toBeNull();
+  });
+
+  it('yerel raf bölümleri beklemez: bölümler yüklenirken akış hazırsa raf görünür', () => {
+    mockRafId = 'amac:lezzet';
+    mockBolumler.isPending = true;
+    mockAkis.data = [gezi('a'), gezi('b'), gezi('c')];
+    const e = render(<GezilerEkrani />);
+    expect(e.queryByLabelText('Yükleniyor…')).toBeNull();
+    expect(e.getAllByText(/^Gezi /)).toHaveLength(3);
+  });
+});

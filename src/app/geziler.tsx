@@ -36,9 +36,11 @@ function RafListesi({ rafId }: { rafId: string }) {
   // Tekrar dene; raf bulunamaz ya da boşsa "Bu rafta şu an gezi yok" (bu ekranda süzgeç yok).
   // 2. inceleme 2: Tekrar dene'ye basılınca yeniden okunurken de aynı gösterge (Keşfet'teki gibi görünür tepki).
   const yenileniyor = (bolumHatasi && bolumler.isFetching) || (akisHatasi && akis.isFetching);
-  const yukleniyor = bolumler.isPending || akis.isPending || yenileniyor;
+  // 3. inceleme: yerel raf bölümleri beklemez (yeniden denemeleri sürebilir) ve bölümlere bakmadan akıştan kurulur; bölümler
+  // bu kez gelse de Keşfet'te az önce dolu görülen amaç rafı "gezi yok"a dönmez.
+  const yukleniyor = (!yerelRaf && bolumler.isPending) || akis.isPending || yenileniyor;
   const hata = !yukleniyor && (bolumHatasi || akisHatasi);
-  const r = yukleniyor || hata ? null : rafBul(rafId, bolumler.data, akis.data ?? []);
+  const r = yukleniyor || hata ? null : rafBul(rafId, yerelRaf ? null : bolumler.data, akis.data ?? []);
   // 2. inceleme (isteğe bağlı): başlık biliniyorsa yüklenirken ve boş halde de görünsün.
   const baslik = r?.baslik ?? bilinenRafBasligi(rafId, bolumler.data) ?? '';
   const tekrarDene = () => {
