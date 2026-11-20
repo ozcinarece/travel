@@ -3933,6 +3933,32 @@ begin
 end $$;
 delete from public.trips where id = current_setting('test.alinan2')::uuid;
 
+-- #435: 30 günü geçen şehir koordinatı da kopyalanmaz (place_id ve damga kalır).
+update public.trips set google_fetched_at = now() - interval '90 days' where id = '43200000-0000-4000-8000-000000000001';
+set role authenticated;
+select pg_temp.as_user(:PX);
+select set_config('test.alinan3', public.paylasimdan_al(current_setting('test.paylasim_token'))::text, false);
+reset role;
+do $$
+declare
+  y public.trips;
+  k public.trips;
+begin
+  select * into y from public.trips where id = current_setting('test.alinan3')::uuid;
+  select * into k from public.trips where id = '43200000-0000-4000-8000-000000000001';
+  assert k.lat is not null, 'ön koşul: kaynakta şehir koordinatı var';
+  assert y.lat is null and y.lng is null, '#435: 90 günlük şehir koordinatı null kopyalanır';
+  assert y.city_place_id is not distinct from k.city_place_id and y.google_fetched_at = k.google_fetched_at, '#435: şehir place_id ve damga korunur';
+end $$;
+delete from public.trips where id = current_setting('test.alinan3')::uuid;
+update public.trips set google_fetched_at = now() where id = '43200000-0000-4000-8000-000000000001';
+
+-- #435: misafir (anonim) Seyahatime al ile seyahat kuramaz.
+set role authenticated;
+select pg_temp.as_user(:PM, true);
+select pg_temp.hata_bekle($$select public.paylasimdan_al(current_setting('test.paylasim_token'))$$, '42501');
+reset role;
+
 -- #435: misafir (anonim) üye link açamaz.
 insert into public.members (trip_id, user_id, display_name) values ('43200000-0000-4000-8000-000000000001', :PM, 'Misafir');
 set role authenticated;

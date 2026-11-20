@@ -172,7 +172,8 @@ $$;
 
 -- KK5/KK6: "Seyahatime al". Girişli kullanıcı için tarihsiz yeni seyahat kurar: aynı gün sayısı, duraklar, süreler.
 -- Koordinatın 30 günlük damgası (google_fetched_at) kopyalanır, sıfırlanmaz (emsal seyahati_kopyala). 30 günü geçen
--- koordinat kopyalanmaz (null; place_id ve damga kalır, PRD §7). Notlar kopyalanmaz.
+-- koordinat kopyalanmaz (null; place_id ve damga kalır, PRD §7); seyahatin şehir koordinatı da aynı kuralla. Notlar kopyalanmaz.
+-- Misafir (anonim) kullanıcı seyahat kuramaz (trips_insert ile aynı kural).
 create function public.paylasimdan_al(p_token text) returns uuid
 language plpgsql security definer set search_path = ''
 as $$
@@ -182,7 +183,8 @@ declare
   v_trip uuid;
   v_gun integer;
 begin
-  if auth.uid() is null then
+  -- Definer fonksiyon trips_insert politikasını atlar; misafir (anonim) burada durdurulur.
+  if auth.uid() is null or public.is_anonymous() then
     raise exception 'oturum yok' using errcode = '42501';
   end if;
   g := public.paylasim_gecerli(p_token);
@@ -194,7 +196,10 @@ begin
 
   insert into public.trips (owner_id, name, city_place_id, city_label, country_code, lat, lng, tz, google_fetched_at,
                             day_start, day_end, kaynak_paylasim)
-  values (auth.uid(), t.name, t.city_place_id, t.city_label, t.country_code, t.lat, t.lng, t.tz, t.google_fetched_at,
+  values (auth.uid(), t.name, t.city_place_id, t.city_label, t.country_code,
+          case when t.google_fetched_at > now() - interval '30 days' then t.lat end,
+          case when t.google_fetched_at > now() - interval '30 days' then t.lng end,
+          t.tz, t.google_fetched_at,
           t.day_start, t.day_end, g.id)
   returning id into v_trip;
   if v_gun > 1 then
