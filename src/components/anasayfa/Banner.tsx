@@ -1,6 +1,6 @@
 // #406 KK2 (UX önerileri kanvası, `Ana_v6_Kesfet`): ana sayfa banner'ı — 150 px, köşe 18, kenarlardan 16. Görsel (Ece'nin ya da
 // hedefin Commons kapağı); yoksa kanvastaki sıcak zemin. Altta 90 px koyu geçiş; üstünde beyaz küçük üst yazı (12/700, %90),
-// başlık (21/800) ve "N hazır gezi ›" (13/600). Atıf sağ üstte. Tek dokunma alanı: hedefi açar.
+// başlık (21/800) ve "N hazır gezi ›" ya da tek gezi hedefinde "Geziyi gör ›" (13/600). Atıf sağ üstte. Tek dokunma alanı: hedefi açar.
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import Svg, { Defs, LinearGradient, Rect, Stop } from 'react-native-svg';
 
@@ -18,11 +18,17 @@ const ZEMIN = ['#F2C9A5', '#E8A36F', '#B9693C'] as const;
 const GECIS = '#0E1430';
 
 export function Banner({ banner, onAc }: { banner: BannerVerisi; onAc: () => void }) {
+  // Kanvas #406 notu: hedef tek gezi ise "Geziyi gör ›", şehir ya da raf hedefinde "N hazır gezi ›".
+  const tekGezi = banner.hedef.tur === 'gezi';
+  const etiket = tekGezi
+    ? t('anasayfa.v6.bannerGeziyiGorEtiket', { baslik: banner.baslik })
+    : t('anasayfa.v6.bannerEtiket', { baslik: banner.baslik, n: banner.geziSayisi });
+  const altSatir = tekGezi ? t('anasayfa.v6.bannerGeziyiGor') : t('anasayfa.v6.bannerSayi', { n: banner.geziSayisi });
   return (
     <View style={s.kap} testID="ana-banner">
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel={[banner.ustYazi, t('anasayfa.v6.bannerEtiket', { baslik: banner.baslik, n: banner.geziSayisi })].filter(Boolean).join(', ')}
+        accessibilityLabel={[banner.ustYazi, etiket].filter(Boolean).join(', ')}
         onPress={onAc}
         style={({ pressed }) => [StyleSheet.absoluteFill, pressed && s.basili]}
       >
@@ -58,7 +64,7 @@ export function Banner({ banner, onAc }: { banner: BannerVerisi; onAc: () => voi
           <Text style={s.baslik} numberOfLines={1}>
             {banner.baslik}
           </Text>
-          <Text style={s.sayi}>{t('anasayfa.v6.bannerSayi', { n: banner.geziSayisi })}</Text>
+          <Text style={s.sayi}>{altSatir}</Text>
         </View>
       </Pressable>
       {banner.atif ? <KapakAtfi atif={banner.atif} stil={s.atif} /> : null}

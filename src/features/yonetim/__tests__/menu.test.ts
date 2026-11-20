@@ -42,6 +42,7 @@ describe('menü (#106 KK4)', () => {
       'Geziler',
       'Şehirler',
       'Yerler',
+      'İl önerileri',
       'Kullanıcılar',
       'Ayarlar',
     ]);
@@ -53,6 +54,7 @@ describe('menü (#106 KK4)', () => {
     expect(aktifMenu('/yonetim/geziler')).toBe('geziler');
     expect(aktifMenu('/yonetim/geziler/abc')).toBe('geziler');
     expect(aktifMenu('/yonetim/ana-sayfa')).toBe('anaSayfa');
+    expect(aktifMenu('/yonetim/il-onerileri')).toBe('ilOnerileri');
     expect(aktifMenu('/yonetim/giris')).toBeNull();
     expect(aktifMenu('/yonetim/gezilerx')).toBeNull();
   });

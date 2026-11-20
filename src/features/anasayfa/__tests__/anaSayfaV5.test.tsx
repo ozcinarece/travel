@@ -324,6 +324,17 @@ describe('#406 raflar ve banner (Ana_v6_Kesfet)', () => {
     expect(e.queryByText('Arkadaşlarından')).toBeNull();
   });
 
+  it('#438 inceleme 3: tek gezi hedefli banner "Geziyi gör ›" der; etiket "…, geziyi gör"', async () => {
+    mockAkis.data = [gezi('g1', ['lezzet']), gezi('g2', ['lezzet']), gezi('g3', ['lezzet'])];
+    mockBolumler = [banner({ hedef: { tur: 'gezi', id: 'g2' } })];
+    const e = render(<AnaSayfa />);
+    await waitFor(() => expect(e.getByTestId('ana-banner')).toBeTruthy());
+    expect(e.getByText('Geziyi gör ›')).toBeTruthy();
+    expect(e.queryByText('1 hazır gezi ›')).toBeNull();
+    fireEvent.press(e.getByRole('button', { name: "Kapadokya'da balon sabahı, geziyi gör" }));
+    expect(router.push).toHaveBeenLastCalledWith({ pathname: '/gezi/[slug]', params: { slug: 'g2' } });
+  });
+
   it('KK2: hedefi yayında olmayan banner gösterilmez', async () => {
     mockAkis.data = [gezi('g1', ['lezzet'])];
     mockBolumler = [banner({ hedef: { tur: 'gezi', id: 'kalkmis' } })];

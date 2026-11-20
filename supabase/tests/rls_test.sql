@@ -667,6 +667,33 @@ select pg_temp.hata_bekle($$insert into public.ana_sayfa_bolumleri (tur, baslik,
 select pg_temp.hata_bekle($$insert into public.ana_sayfa_bolumleri (tur, baslik, sira, icerik) values ('banner', 'x', 30, '{"kapak_url": "https://upload.wikimedia.org/x\\y.jpg", "kapak_atif": {"yazar": "Tripmate"}}')$$, '23514');
 -- #428 3. inceleme (isteğe bağlı): çift kodlanmış `%252e` de reddedilir.
 select pg_temp.hata_bekle($$insert into public.ana_sayfa_bolumleri (tur, baslik, sira, icerik) values ('banner', 'x', 30, '{"kapak_url": "https://xwqeobelyeuzoxyuvauw.supabase.co/storage/v1/object/public/icerik/%252e%252e/avatars/u1/a.jpg", "kapak_atif": {"yazar": "Tripmate"}}')$$, '23514');
+-- #406 2/2 KK-ek1: izin listesi. Sekme ve satır sonuyla yol hilesi (`.<TAB>.`, `.<LF>.`), boşluk ve `?`/`#`/`@` reddedilir.
+select pg_temp.hata_bekle($$insert into public.ana_sayfa_bolumleri (tur, baslik, sira, icerik) values ('banner', 'x', 30, jsonb_build_object('kapak_url', 'https://xwqeobelyeuzoxyuvauw.supabase.co/storage/v1/object/public/icerik/.' || chr(9) || './avatars/u1/a.jpg', 'kapak_atif', '{"yazar": "Tripmate"}'::jsonb))$$, '23514');
+select pg_temp.hata_bekle($$insert into public.ana_sayfa_bolumleri (tur, baslik, sira, icerik) values ('banner', 'x', 30, jsonb_build_object('kapak_url', 'https://xwqeobelyeuzoxyuvauw.supabase.co/storage/v1/object/public/icerik/.' || chr(10) || './avatars/u1/a.jpg', 'kapak_atif', '{"yazar": "Tripmate"}'::jsonb))$$, '23514');
+select pg_temp.hata_bekle($$insert into public.ana_sayfa_bolumleri (tur, baslik, sira, icerik) values ('banner', 'x', 30, '{"kapak_url": "https://upload.wikimedia.org/wikipedia/commons/a/ab/a b.jpg", "kapak_atif": {"yazar": "Tripmate"}}')$$, '23514');
+select pg_temp.hata_bekle($$insert into public.ana_sayfa_bolumleri (tur, baslik, sira, icerik) values ('banner', 'x', 30, '{"kapak_url": "https://upload.wikimedia.org/wikipedia/commons/a/ab/a.jpg?x=1", "kapak_atif": {"yazar": "Tripmate"}}')$$, '23514');
+do $$
+begin
+  assert public.banner_gorsel_adresi_gecerli('https://upload.wikimedia.org/wikipedia/commons/a/ab/Bursa_Ulu_Cami.jpg'), '#406 KK-ek1: düz Commons adresi geçer';
+  assert public.banner_gorsel_adresi_gecerli('https://xwqeobelyeuzoxyuvauw.supabase.co/storage/v1/object/public/icerik/banner/kis-2026.jpg'), '#406 KK-ek1: kova adresi geçer';
+end $$;
+select pg_temp.hata_bekle($$insert into public.ana_sayfa_bolumleri (tur, baslik, sira, icerik) values ('banner', 'x', 30, jsonb_build_object('kapak_url', 'https://xwqeobelyeuzoxyuvauw.supabase.co/storage/v1/object/public/icerik/.' || chr(13) || './avatars/u1/a.jpg', 'kapak_atif', '{"yazar": "Tripmate"}'::jsonb))$$, '23514');
+do $$
+begin
+  -- #438 inceleme 1 ve 7: parantez ve virgül geçer; `'`, unicode nokta, kodlanmış kontrol karakteri ve yerel viki reddedilir.
+  assert public.banner_gorsel_adresi_gecerli('https://upload.wikimedia.org/wikipedia/commons/a/ab/Ulu_Cami_(Bursa),_2019.jpg'), '#438: parantez ve virgül geçer';
+  assert public.banner_gorsel_adresi_gecerli('https://upload.wikimedia.org/wikipedia/commons/a/ab/G%C3%B6l.jpg'), '#438: %XX geçer';
+  assert not public.banner_gorsel_adresi_gecerli('https://upload.wikimedia.org/wikipedia/commons/a/ab/Ece''s.jpg'), '#438: tek tırnak reddedilir';
+  assert not public.banner_gorsel_adresi_gecerli('https://xwqeobelyeuzoxyuvauw.supabase.co/storage/v1/object/public/icerik/' || chr(65294) || chr(65294) || '/avatars/a.jpg'), '#438: unicode nokta reddedilir';
+  assert not public.banner_gorsel_adresi_gecerli('https://upload.wikimedia.org/wikipedia/commons/a/ab/x' || chr(13) || '.jpg'), '#438: CR reddedilir';
+  assert not public.banner_gorsel_adresi_gecerli('https://upload.wikimedia.org/wikipedia/commons/a/%09/x.jpg'), '#438: %09 reddedilir';
+  assert not public.banner_gorsel_adresi_gecerli('https://upload.wikimedia.org/wikipedia/commons/a/%00/x.jpg'), '#438: %00 reddedilir';
+  assert not public.banner_gorsel_adresi_gecerli('https://upload.wikimedia.org/wikipedia/commons/a/%1f/x.jpg'), '#438: %1f reddedilir';
+  assert not public.banner_gorsel_adresi_gecerli('https://upload.wikimedia.org/wikipedia/commons/a/%7F/x.jpg'), '#438: %7F reddedilir';
+  assert not public.banner_gorsel_adresi_gecerli('https://upload.wikimedia.org/wikipedia/commons/a/%2/x.jpg'), '#438: yarım %X reddedilir';
+  assert not public.banner_gorsel_adresi_gecerli('https://upload.wikimedia.org/wikipedia/en/a/ab/Poster.jpg'), '#438: yerel viki (adil kullanım) reddedilir';
+  assert not public.banner_gorsel_adresi_gecerli('https://upload.wikimedia.org/a.jpg'), '#438: commons öneki şart';
+end $$;
 -- Kendi Storage alanımızdaki görsel (atıflı) kabul edilir.
 insert into public.ana_sayfa_bolumleri (tur, baslik, sira, icerik) values
   ('banner', 'Storage görselli', 25, '{"kapak_url": "https://xwqeobelyeuzoxyuvauw.supabase.co/storage/v1/object/public/icerik/banner/k.webp", "kapak_atif": {"yazar": "Tripmate"}}');
@@ -3745,5 +3772,100 @@ reset role;
 delete from public.geziler where id = '31400000-0000-4000-8000-000000000010';
 delete from public.yerler where id::text like '31400000-%';
 delete from public.sehirler where id = '31400000-0000-4000-8000-000000000020';
+
+-- ---------------------------------------------------------------- #401 KK2–KK4: il önerileri
+-- Yayındaki listenin görünür satırlarını herkes okur; taslak liste ve gizli satır yalnız admin'e görünür; yalnız admin yazar.
+-- Yükleme yalnız içerik hattının (postgres); yayındaki listeye yazmaz. Sıralama tek çağrıda 1..n olur.
+select public.icerik_il_taslak_yukle('{"il": "Deneme", "slug": "il-deneme", "oneriler": [
+  {"sira": 1, "ad": "Göl", "kategori": "doga", "amaclar": ["doga"], "ilce": "Merkez", "merkeze_km": 9, "neden": "Kısa yürüyüş", "osm": "node/1", "lat": 40.6, "lng": 31.6},
+  {"sira": 2, "ad": "Çarşı", "kategori": "carsi", "amaclar": [], "neden": "Esnaf sokakları", "place_id": "ChIJ_401_b"},
+  {"sira": 3, "ad": "Müze", "kategori": "muze", "amaclar": ["kultur_tarih"], "neden": "Yağmurlu gün"}]}'::jsonb);
+do $$
+begin
+  assert (select degistiren = 'rehber' and not yayinda from public.il_listeleri where il_slug = 'il-deneme'), '#401 KK3: yükleme taslak, Rehber yazdı';
+  assert (select count(*) from public.il_oneriler where il_slug = 'il-deneme') = 3, '#401 KK3: 3 yer yüklendi';
+end $$;
+-- Biçim dışı satır reddedilir: bilinmeyen kategori, 90 karakteri aşan neden, geçersiz amaç, yinelenen sıra.
+select pg_temp.hata_bekle($$insert into public.il_oneriler (il_slug, sira, ad, kategori) values ('il-deneme', 9, 'X', 'gece')$$, '23514');
+select pg_temp.hata_bekle($$insert into public.il_oneriler (il_slug, sira, ad, kategori, neden) values ('il-deneme', 9, 'X', 'doga', repeat('a', 91))$$, '23514');
+select pg_temp.hata_bekle($$insert into public.il_oneriler (il_slug, sira, ad, kategori, amaclar) values ('il-deneme', 9, 'X', 'doga', '{deniz}')$$, '23514');
+select pg_temp.hata_bekle($$insert into public.il_oneriler (il_slug, sira, ad, kategori) values ('il-deneme', 1, 'X', 'doga')$$, '23505');
+-- Taslak liste: anon ve sıradan hesap görmez, yazamaz.
+set role anon;
+do $$
+begin
+  assert not exists (select 1 from public.il_listeleri where il_slug = 'il-deneme'), '#401 KK2: taslak liste anon''a görünmez';
+  assert not exists (select 1 from public.il_oneriler where il_slug = 'il-deneme'), '#401 KK2: taslak satır anon''a görünmez';
+end $$;
+select pg_temp.hata_bekle($$select public.il_oneri_sirala('il-deneme', '{}')$$, '42501');
+select pg_temp.hata_bekle($$select public.icerik_il_taslak_yukle('{}'::jsonb)$$, '42501');
+reset role;
+set role authenticated;
+select pg_temp.as_user(:A);
+update public.il_listeleri set yayinda = true where il_slug = 'il-deneme';
+reset role;
+do $$ begin assert (select not yayinda from public.il_listeleri where il_slug = 'il-deneme'), '#401 KK2: sıradan hesap listeyi yayınlayamaz, yayinda hâlâ false'; end $$;
+set role authenticated;
+select pg_temp.as_user(:A);
+update public.il_oneriler set ad = 'Saldırgan' where il_slug = 'il-deneme';
+delete from public.il_oneriler where il_slug = 'il-deneme';
+delete from public.il_listeleri where il_slug = 'il-deneme';
+reset role;
+do $$
+begin
+  assert exists (select 1 from public.il_listeleri where il_slug = 'il-deneme'), '#401 KK2: sıradan hesap listeyi silemez';
+  assert (select count(*) from public.il_oneriler where il_slug = 'il-deneme') = 3, '#401 KK2: sıradan hesap satır silemez';
+end $$;
+set role authenticated;
+select pg_temp.as_user(:A);
+select pg_temp.hata_bekle($$insert into public.il_oneriler (il_slug, sira, ad, kategori) values ('il-deneme', 4, 'X', 'doga')$$, '42501');
+select pg_temp.hata_bekle($$select public.il_oneri_sirala('il-deneme', '{}')$$, '42501');
+select pg_temp.hata_bekle($$select public.icerik_il_taslak_yukle('{}'::jsonb)$$, '42501');
+do $$ begin assert not exists (select 1 from public.il_oneriler where il_slug = 'il-deneme'), '#401 KK2: taslak satır sıradan hesaba görünmez'; end $$;
+-- Admin: okur, gizler, ekler, sıralar, yayınlar; her değişiklik "son değişiklik"i BO'ya çevirir.
+select pg_temp.as_email(:E, 'ozcinar.ece@gmail.com');
+do $$ begin assert (select count(*) from public.il_oneriler where il_slug = 'il-deneme' and ad <> 'Saldırgan') = 3, '#401 KK2: sıradan hesap yazamadı, admin taslağı okur'; end $$;
+update public.il_oneriler set gorunur = false where il_slug = 'il-deneme' and sira = 3;
+insert into public.il_oneriler (il_slug, sira, ad, kategori, place_id, primary_type) values ('il-deneme', 4, 'Yeni yer', 'manzara', 'ChIJ_401_d', 'park');
+select public.il_oneri_sirala('il-deneme', array(select id from public.il_oneriler where il_slug = 'il-deneme' order by sira desc));
+select pg_temp.hata_bekle($$select public.il_oneri_sirala('il-deneme', array(select id from public.il_oneriler where il_slug = 'il-deneme' and sira > 1))$$, '22023');
+update public.il_listeleri set yayinda = true, yayinlandi_at = now() where il_slug = 'il-deneme';
+do $$
+begin
+  assert (select sira from public.il_oneriler where ad = 'Yeni yer' and il_slug = 'il-deneme') = 1, '#401 KK4: sürüklenen sıra 1..n yazıldı';
+  assert (select array_agg(sira order by sira) from public.il_oneriler where il_slug = 'il-deneme') = '{1,2,3,4}', '#401 KK4: sıra ardışık';
+  assert (select degistiren = 'yonetim' from public.il_listeleri where il_slug = 'il-deneme'), '#401 KK4: son değişiklik BO';
+  assert (select yayinda from public.il_listeleri where il_slug = 'il-deneme'), '#401 KK4: admin yayınladı';
+  assert (select count(*) from public.il_oneriler where il_slug = 'il-deneme') = 4, '#401 KK4: admin yayındaki listenin bütün satırlarını okur';
+  assert exists (select 1 from public.il_oneriler where il_slug = 'il-deneme' and not gorunur), '#401 KK4: admin yayındaki listede gizli satırı okur';
+end $$;
+reset role;
+-- Yayındaki liste sıradan hesaba görünür: yazma politikası burada ölçülür (taslakta satır zaten görünmez).
+set role authenticated;
+select pg_temp.as_user(:A);
+do $$ begin assert (select count(*) from public.il_oneriler where il_slug = 'il-deneme') = 3, '#401 KK2: sıradan hesap yayındaki görünür satırları görür'; end $$;
+update public.il_oneriler set gorunur = false, ad = 'x' where il_slug = 'il-deneme';
+delete from public.il_oneriler where il_slug = 'il-deneme';
+update public.il_listeleri set yayinda = false where il_slug = 'il-deneme';
+delete from public.il_listeleri where il_slug = 'il-deneme';
+reset role;
+do $$
+begin
+  assert (select count(*) from public.il_oneriler where il_slug = 'il-deneme') = 4, '#401 KK2: sıradan hesap yayındaki satırı silemez';
+  assert (select count(*) from public.il_oneriler where il_slug = 'il-deneme' and gorunur) = 3, '#401 KK2: sıradan hesap yayındaki satırı gizleyemez';
+  assert not exists (select 1 from public.il_oneriler where il_slug = 'il-deneme' and ad = 'x'), '#401 KK2: sıradan hesap yayındaki satırın adını değiştiremez';
+  assert (select yayinda from public.il_listeleri where il_slug = 'il-deneme'), '#401 KK2: sıradan hesap yayındaki listeyi geri çekemez';
+end $$;
+-- Yayında: herkes görünür satırları okur, gizli satır görünmez; yükleme yayındaki listeye yazmaz.
+set role anon;
+do $$
+begin
+  assert (select count(*) from public.il_oneriler where il_slug = 'il-deneme') = 3, '#401 KK2: yayındaki listenin görünür satırları okunur';
+  assert not exists (select 1 from public.il_oneriler where il_slug = 'il-deneme' and ad = 'Müze'), '#401 KK4: gizli yer görünmez';
+end $$;
+reset role;
+select pg_temp.hata_bekle($$select public.icerik_il_taslak_yukle('{"il": "Deneme", "slug": "il-deneme", "oneriler": []}'::jsonb)$$, '55000');
+do $$ begin assert (select count(*) from public.il_oneriler where il_slug = 'il-deneme') = 4, '#401 KK3: yayındaki listeye dokunulmaz'; end $$;
+delete from public.il_listeleri where il_slug = 'il-deneme';
 
 \echo 'rls_test: TÜM TESTLER GEÇTİ'
