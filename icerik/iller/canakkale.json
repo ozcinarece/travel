@@ -1,0 +1,648 @@
+{
+  "il": "Çanakkale",
+  "slug": "canakkale",
+  "guncelleme": "2026-11-20",
+  "oneriler": [
+    {
+      "sira": 1,
+      "ad": "Troya Antik Kenti (Troya Ören Yeri)",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 26,
+      "neden": "Dokuz yerleşim katmanlı Hisarlık höyüğü; 1998'den beri UNESCO Dünya Mirası listesinde",
+      "osm": "way/423938794",
+      "place_id": "ChIJUSINQiVQsBQRE-r5LO-_c7U"
+    },
+    {
+      "sira": 2,
+      "ad": "Çanakkale Şehitler Abidesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Eceabat",
+      "merkeze_km": 19,
+      "neden": "41,7 m'lik anıt; yanındaki sembolik mezarlıkta 59.408 şehidin adı yazılı",
+      "place_id": "ChIJmUG1CXlNsBQRmr_q3gacMm0"
+    },
+    {
+      "sira": 3,
+      "ad": "Troya Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 25,
+      "neden": "Polyxena lahdi ve Triton heykeli burada; 2020'de Avrupa Yılın Müzesi özel ödülü aldı",
+      "osm": "way/1033194996",
+      "place_id": "ChIJWR3fcgJRsBQR7zQ2_pr98D8"
+    },
+    {
+      "sira": 4,
+      "ad": "57. Piyade Alayı Şehitliği",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Eceabat",
+      "merkeze_km": 14,
+      "neden": "25 Nisan 1915'te Anzaklarla ilk çatışan alay; son gazi Hüseyin Kaçmaz'ın heykeli girişte",
+      "place_id": "ChIJ8S-QypelsRQRVHKKe58lvJc"
+    },
+    {
+      "sira": 5,
+      "ad": "Assos Antik Kenti ve Athena Tapınağı (Behramkale)",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Ayvacık",
+      "merkeze_km": 73,
+      "neden": "MÖ 530'da yapılan Dor düzenli Athena Tapınağı; Aristoteles burada akademi kurdu",
+      "osm": "way/249314420",
+      "place_id": "ChIJB17aCtB-sBQRq9USVUsdGo8"
+    },
+    {
+      "sira": 6,
+      "ad": "Çanakkale Destanı Tanıtım Merkezi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Eceabat",
+      "merkeze_km": 12,
+      "neden": "11 salonda Çanakkale Savaşları'nı canlandırma ve simülasyonla anlatan merkez",
+      "osm": "node/2605564781",
+      "place_id": "ChIJ6apX7HSvsRQRT2CFJwbSOAk"
+    },
+    {
+      "sira": 7,
+      "ad": "Conkbayırı Atatürk Zafer Anıtı",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Eceabat",
+      "merkeze_km": 14,
+      "neden": "10 Ağustos 1915 Conkbayırı taarruzunu anan Mustafa Kemal'in bronz heykeli",
+      "osm": "way/676486345",
+      "place_id": "ChIJ-ymoLsmlsRQR3NgF7iO_z4c"
+    },
+    {
+      "sira": 8,
+      "ad": "Anzak Koyu (Arıburnu)",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Eceabat",
+      "merkeze_km": 15,
+      "neden": "Arıburnu'ndaki 600 m'lik koy; adını 1915'te buraya çıkan Anzak birliklerinden alır",
+      "osm": "node/6337630463",
+      "place_id": "ChIJh20PFJilsRQR6GSIkUHxiPw"
+    },
+    {
+      "sira": 9,
+      "ad": "Kilitbahir Kalesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Eceabat",
+      "merkeze_km": 2,
+      "neden": "Fatih'in 1463'te Boğaz'ın en dar yerine yaptırdığı, yukarıdan yonca yaprağı biçimli kale",
+      "osm": "relation/7330312",
+      "place_id": "ChIJI9rnkqOpsRQR6uVEAMDwN60"
+    },
+    {
+      "sira": 10,
+      "ad": "Bozcaada Kalesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Bozcaada",
+      "merkeze_km": 45,
+      "neden": "Fatih'in 1455'te adayı alınca yeniden yaptırdığı kale, adanın kuzeydoğusunda",
+      "osm": "way/1536604394",
+      "place_id": "ChIJAx5IXkdAsBQRwXXToNXiFZc"
+    },
+    {
+      "sira": 11,
+      "ad": "Çanakkale Deniz Müzesi ve Çimenlik Kalesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Çimenlik Kalesi ve bahçesinde Boğaz savunmasında kullanılmış toplarla deniz müzesi",
+      "osm": "way/330206322",
+      "place_id": "ChIJtxwsncipsRQRqrRswVEC-mU"
+    },
+    {
+      "sira": 12,
+      "ad": "Çanakkale Kordonu ve Tahta At",
+      "kategori": "manzara",
+      "amaclar": [
+        "yavas",
+        "cocuklu",
+        "gece"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Boğaz kıyısında gün batımı yürüyüşü; kuzey ucunda Troy filminde kullanılan tahta at durur",
+      "osm": "node/3153627490",
+      "place_id": "ChIJa34V2s2psRQRmLDTS9okB4I"
+    },
+    {
+      "sira": 13,
+      "ad": "Aynalı Çarşı",
+      "kategori": "carsi",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Kitabesi 1890 tarihli özgün taş kapı; içerideki 57 dükkânda seramik ve yöresel ürün var",
+      "place_id": "ChIJC2K-l8WpsRQRuS0Gn_uzeI0"
+    },
+    {
+      "sira": 14,
+      "ad": "Alexandria Troas Antik Kenti",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Ezine",
+      "merkeze_km": 49,
+      "neden": "Herodes Atticus'un 135'te yaptırdığı hamam kalıntısı; Pavlus Avrupa'ya buradan yola çıktı",
+      "place_id": "ChIJN-25aZ1psBQRrCxCYvZlOUY"
+    },
+    {
+      "sira": 15,
+      "ad": "Zeytinliköy (Agioi Theodoroi)",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Gökçeada",
+      "merkeze_km": 46,
+      "neden": "Üç Ortodoks kilisesi olan, adanın en eski sürekli yerleşimlerinden Rum köyü",
+      "place_id": "ChIJafig5kHNsRQRrY1OZ_fagQc"
+    },
+    {
+      "sira": 16,
+      "ad": "Ayazma Plajı",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Bozcaada",
+      "merkeze_km": 50,
+      "neden": "Adanın güneybatısında ince kumlu, soğuk ve berrak sulu halk plajı",
+      "place_id": "ChIJZfwQYgsVsBQRucV0og5nvrw"
+    },
+    {
+      "sira": 17,
+      "ad": "Polente Feneri ve Günbatımı Mevkii",
+      "kategori": "manzara",
+      "amaclar": [
+        "yavas",
+        "doga"
+      ],
+      "ilce": "Bozcaada",
+      "merkeze_km": 51,
+      "neden": "Adanın batısındaki Günbatımı mevkii; 32 m'lik uçurum kenarından güneşin batışı izlenir",
+      "place_id": "ChIJIYYoupQVsBQRewcTJ3J1eyM"
+    },
+    {
+      "sira": 18,
+      "ad": "Gelibolu Tarihi Sualtı Parkı",
+      "kategori": "aktivite",
+      "amaclar": [
+        "kultur_tarih",
+        "doga"
+      ],
+      "ilce": "Eceabat",
+      "merkeze_km": 13,
+      "neden": "HMS Majestic ve HMS Triumph gibi 1915 batıklarına dalış yapılan tarihi sualtı parkı"
+    },
+    {
+      "sira": 19,
+      "ad": "Apollon Smintheion",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Ayvacık",
+      "merkeze_km": 72,
+      "neden": "Homeros'un andığı, farelerden koruyan Apollon Smintheus'a adanmış kutsal alan",
+      "osm": "way/478361435",
+      "place_id": "ChIJOfv5cDN0sBQRJoGLp8wu03c"
+    },
+    {
+      "sira": 20,
+      "ad": "Baba Burnu ve Babakale Kalesi",
+      "kategori": "manzara",
+      "amaclar": [
+        "yavas",
+        "kultur_tarih"
+      ],
+      "ilce": "Ayvacık",
+      "merkeze_km": 80,
+      "neden": "Türkiye anakarasının en batı ucu; burunda 1722-29 arası yapılmış Osmanlı kalesi",
+      "place_id": "ChIJ-7KPDZifuhQRICAyAM6oLwo"
+    },
+    {
+      "sira": 21,
+      "ad": "Yalova Restoran",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet",
+        "gece"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "1940'tan beri kordonda iki katlı balıkçı; ahlat sirkeli füme kolyoz öne çıkıyor",
+      "osm": "node/6506623986",
+      "place_id": "ChIJd7UIl8ipsRQRfBN1LCaqhqk"
+    },
+    {
+      "sira": 22,
+      "ad": "Kadir Usta Peynir Helvası",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "1979'dan beri koyun sütü yağıyla peynir helvası; taze ya da fırınlanmış servis edilir",
+      "place_id": "ChIJb5ElqcWpsRQRoxf6YJ2_Dlg"
+    },
+    {
+      "sira": 23,
+      "ad": "Seyit Onbaşı Heykeli ve Rumeli Mecidiye Tabyası",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Eceabat",
+      "merkeze_km": 3,
+      "neden": "18 Mart 1915 savunmasını simgeleyen Seyit Onbaşı heykeli, Rumeli Mecidiye Tabyası'nda",
+      "osm": "way/1316767903",
+      "place_id": "ChIJXyoTiZ6psRQRcTxWebDW5vI"
+    },
+    {
+      "sira": 24,
+      "ad": "Ayazma Pınarı (Kazdağları)",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Bayramiç",
+      "merkeze_km": 58,
+      "neden": "Kazdağları'nda derin vadide coşkun dere; Kara Menderes'i besleyen kaynaklar burada",
+      "place_id": "ChIJvY9uSf7CsBQRWqLdQtfCoU4"
+    },
+    {
+      "sira": 25,
+      "ad": "Aydıncık Plajı (sörf)",
+      "kategori": "aktivite",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Gökçeada",
+      "merkeze_km": 38,
+      "neden": "Gökçeada'nın rüzgâr sörfü koyu; sığ ve geniş körfezin hemen arkasında Tuz Gölü var",
+      "place_id": "ChIJd26PdmQzsBQR3PNCDuifrnI"
+    },
+    {
+      "sira": 26,
+      "ad": "Gökçeada Sualtı Milli Parkı (Yıldız Koy)",
+      "kategori": "aktivite",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Gökçeada",
+      "merkeze_km": 43,
+      "neden": "1999'da ilan edilen Türkiye'nin ilk sualtı milli parkı; 4-8 m derinlikte şnorkel parkuru",
+      "place_id": "ChIJjaJIayzMsRQR_LKNMFcuFJ0"
+    },
+    {
+      "sira": 27,
+      "ad": "Bigalı Atatürk Evi ve Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Eceabat",
+      "merkeze_km": 10,
+      "neden": "Mustafa Kemal'in cepheye gitmeden önce kaldığı köy evi; çalışma masası sergileniyor",
+      "place_id": "ChIJu01kiVqmsRQR4-vBQbfd-HI"
+    },
+    {
+      "sira": 28,
+      "ad": "Adatepe Zeytinyağı Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih",
+        "lezzet"
+      ],
+      "ilce": "Ayvacık",
+      "merkeze_km": 69,
+      "neden": "Eski bir sabunhanede 2001'de açılan Türkiye'nin ilk zeytinyağı müzesi",
+      "place_id": "ChIJgS_qGNSPsBQRIuPQROMsJdo"
+    },
+    {
+      "sira": 29,
+      "ad": "İlissos İmbros",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet",
+        "yavas"
+      ],
+      "ilce": "Gökçeada",
+      "merkeze_km": 46,
+      "neden": "130 yıllık taş zeytinyağı değirmeninde Rum mezeleri; vişneli yaprak sarma var",
+      "place_id": "ChIJXbv78S_NsRQRZdbwIQcjqlw"
+    },
+    {
+      "sira": 30,
+      "ad": "Mehmetçik Feneri",
+      "kategori": "manzara",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Eceabat",
+      "merkeze_km": 23,
+      "neden": "1856 yapımı fener yarımadanın güney ucunda; içinde 1915 deniz batıkları sergisi",
+      "place_id": "ChIJA_kVH0lMsBQRJMua3ohZvq4"
+    },
+    {
+      "sira": 31,
+      "ad": "Troya Kültür Rotası",
+      "kategori": "aktivite",
+      "amaclar": [
+        "doga",
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 25,
+      "neden": "Troya Müzesi'nden Assos'a uzanan 120 km'lik yürüyüş rotası"
+    },
+    {
+      "sira": 32,
+      "ad": "1915 Çanakkale Köprüsü",
+      "kategori": "manzara",
+      "amaclar": [
+        "cocuklu"
+      ],
+      "ilce": "Gelibolu",
+      "merkeze_km": 29,
+      "neden": "2.023 m ile dünyanın en uzun orta açıklıklı asma köprüsü; 2022'de açıldı",
+      "place_id": "ChIJczDfm41tsRQRZfvemNZ0kAE"
+    },
+    {
+      "sira": 33,
+      "ad": "Çanakkale–Kilitbahir/Eceabat Feribotu",
+      "kategori": "aktivite",
+      "amaclar": [
+        "yavas",
+        "cocuklu"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Boğaz'ı yaklaşık 15 dakikada geçen feribot; karşı kıyıda Kilitbahir köyü ve kalesi",
+      "place_id": "ChIJNw3ZwcipsRQRDrfEaB_wxm4"
+    },
+    {
+      "sira": 34,
+      "ad": "Anadolu Hamidiye Tabyası",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "18 Mart 1915'te Müttefik donanmasının ana hedeflerinden tabya; 2018'den beri müze",
+      "osm": "node/10216826112",
+      "place_id": "ChIJF1O6WrKpsRQRN3coVHQ-v3Q"
+    },
+    {
+      "sira": 35,
+      "ad": "Ezine Pazartesi Pazarı",
+      "kategori": "carsi",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Ezine",
+      "merkeze_km": 40,
+      "neden": "Peyniriyle bilinen Ezine'nin haftalık pazarı; yanında yerel sebze ve meyve tezgâhları",
+      "place_id": "ChIJ88_3mKxfsBQRNTjDjUY8Czo"
+    },
+    {
+      "sira": 36,
+      "ad": "Ayvacık Cuma Pazarı",
+      "kategori": "carsi",
+      "amaclar": [
+        "lezzet",
+        "yavas"
+      ],
+      "ilce": "Ayvacık",
+      "merkeze_km": 61,
+      "neden": "Köylülerin ev peyniri, yabani ot, mantar ve odun fırını ekmeği sattığı pazar",
+      "place_id": "ChIJqYHXo09jsBQRtlqah4ye33Q"
+    },
+    {
+      "sira": 37,
+      "ad": "Sardunya Ev Yemekleri",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet",
+        "yavas"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Yüz yıllık evde tezgâhtan seçilen ev yemekleri; arka avlu asmalarla gölgeli",
+      "place_id": "ChIJDzqbt9OpsRQR-V8gCdeshF8"
+    },
+    {
+      "sira": 38,
+      "ad": "Vahit'in Yeri",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Bozcaada",
+      "merkeze_km": 50,
+      "neden": "Ayazma'da kalamar, Girit ezmesi ve köpoğlu gibi mezeleriyle ada klasiği",
+      "osm": "node/4840438119",
+      "place_id": "ChIJ8yKHYwdAsBQRcZD1Pnim_YI"
+    },
+    {
+      "sira": 39,
+      "ad": "Çınaraltı",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet",
+        "yavas"
+      ],
+      "ilce": "Bozcaada",
+      "merkeze_km": 45,
+      "neden": "İskeleye birkaç adım, büyük çınar altında sakızlı Türk kahvesi ve patlıcanlı börek",
+      "osm": "node/4833807785",
+      "place_id": "ChIJCfMnTj9AsBQRmjYdqT3IEI0"
+    },
+    {
+      "sira": 40,
+      "ad": "Madam Paraskevi",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet",
+        "yavas"
+      ],
+      "ilce": "Gökçeada",
+      "merkeze_km": 46,
+      "neden": "Zeytinliköy'de dibek kahvesi, sakızlı muhallebi ve Selanik tatlısı",
+      "place_id": "ChIJo_gu30HNsRQRWEtNZAGTHoE"
+    },
+    {
+      "sira": 41,
+      "ad": "Meydani Pastanesi",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "Rum evlerinden derlenen tarifle efi badem kurabiyesi ve sakızlı muhallebi",
+      "osm": "node/6537106787",
+      "place_id": "ChIJCRLSH8-psRQRVLZMyYUEnQ4"
+    },
+    {
+      "sira": 42,
+      "ad": "Çiçek Pastanesi",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Bozcaada",
+      "merkeze_km": 45,
+      "neden": "Rum mahallesinde damla sakızlı bademli kurabiyesiyle bilinen pastane",
+      "osm": "node/4833807753",
+      "place_id": "ChIJqRolXj9AsBQRy7d9AfELdFE"
+    },
+    {
+      "sira": 43,
+      "ad": "Marmaros Şelalesi",
+      "kategori": "doga",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Gökçeada",
+      "merkeze_km": 54,
+      "neden": "Kayalıklardan dökülen şelaleye ada manzaralı patikadan yürüyerek ulaşılır",
+      "osm": "node/4102086407",
+      "place_id": "ChIJVzbQX6MssBQR0FpJAiGpG8A"
+    },
+    {
+      "sira": 44,
+      "ad": "Gökçeada Tuz Gölü",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Gökçeada",
+      "merkeze_km": 37,
+      "neden": "Kışın flamingoların toplandığı, kur danslarının fotoğraflandığı tuzlu göl",
+      "place_id": "ChIJ3Rf7mZg0sBQR_dnFeRbsNc0"
+    },
+    {
+      "sira": 45,
+      "ad": "Mıhlı Şelalesi",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Ayvacık",
+      "merkeze_km": 65,
+      "neden": "Roma dönemi taş köprü ve eski su değirmeni yanında 4-5 m'lik şelale",
+      "place_id": "ChIJGWefJJyRsBQRdAVJDZevhXw"
+    },
+    {
+      "sira": 46,
+      "ad": "Gelibolu Tersanesi Piri Reis Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Gelibolu",
+      "merkeze_km": 37,
+      "neden": "Gelibolu Kalesi'nin kalan kulesinde Kitab-ı Bahriye haritaları ve Piri Reis heykeli",
+      "osm": "way/1078489558",
+      "place_id": "ChIJJ8pRlhBvsRQRfJlG6LO1D1Y"
+    },
+    {
+      "sira": 47,
+      "ad": "Bozcaada Yerel Tarih Araştırma Merkezi ve Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Bozcaada",
+      "merkeze_km": 45,
+      "neden": "Eski Rum mahallesinde ada haritaları, gravürler, fotoğraflar ve deniz kabukları",
+      "osm": "way/1237837053",
+      "place_id": "ChIJLSd3Qj9AsBQR9KAGoSxETlk"
+    },
+    {
+      "sira": 48,
+      "ad": "Meraklis Taverna",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet",
+        "gece"
+      ],
+      "ilce": "Gökçeada",
+      "merkeze_km": 49,
+      "neden": "Tepeköy'de akşamları Rum ve Türk şarkılarıyla dans edilen mezeci taverna",
+      "osm": "way/996650034",
+      "place_id": "ChIJc8BA-Q_TsRQRP0AhoWD0RBM"
+    },
+    {
+      "sira": 49,
+      "ad": "Çanakkale Saat Kulesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "1897'de II. Abdülhamid döneminde yapılan, dört yüzünde kadranı olan dört katlı kule",
+      "osm": "node/1556176710",
+      "place_id": "ChIJB3BmdrepsRQRt2RDXM-ivvc"
+    }
+  ]
+}

@@ -42,6 +42,8 @@ alınır, yazma kalıcı olamaz. Gerçek yazma için `kuru=false`.
 
 ### Veritabanı işlevleri (yalnız `postgres`; public, anon, authenticated, service_role çalıştıramaz)
 
+- `icerik_il_taslak_yukle(p_veri jsonb)` (#401): il önerileri listesini (`il_listeleri` + `il_oneriler`) taslak olarak
+  yeniden yazar; liste yayındaysa reddeder (yayındaki liste BO › İl önerileri'nden düzenlenir). Konum yalnız OSM'den gelir.
 - `icerik_gezi_taslak_yukle(p_veri jsonb, p_yeniden boolean default false)` — tek işlem; hata olursa hiçbir şey yazılmaz.
   `yayin=false`, `yayin_at=null` işlevin kendisinden gelir; girdide `yayin`/`yayin_at` varsa reddeder. Slug varsa reddeder;
   `p_yeniden=true` yalnız taslağın günlerini, duraklarını ve yazısını yeniden yazar (kimlik, kapak, sıra, fotoğraflar
@@ -245,6 +247,9 @@ gh api -X POST …/dispatches -f ref=main -f 'inputs[islem]=arastir' \
 # yükle: ref = içerik dalı (dosya o dalda); önce kuru, sonra gerçek
 gh api -X POST repos/ozcinarece/travel/actions/workflows/icerik.yml/dispatches -f ref=claude/icerik-<slug> \
   -f 'inputs[islem]=yukle' -f 'inputs[dosya]=icerik/geziler/<slug>.json' -F 'inputs[kuru]=true'
+
+# il önerileri (#401): icerik/iller/<il>.json doğrulanır, konum OSM'den, BO'ya taslak; Google'a gidilmez
+gh api -X POST …/dispatches -f ref=main -f 'inputs[islem]=il' -f 'inputs[dosya]=icerik/iller/<il>.json' -F 'inputs[kuru]=true'
 
 gh api -X POST …/dispatches -f ref=main -f 'inputs[islem]=kontrol' -f 'inputs[istek]=<slug>'
 gh api -X POST …/dispatches -f ref=main -f 'inputs[islem]=sil' -f 'inputs[istek]=<slug>' -F 'inputs[kuru]=false'

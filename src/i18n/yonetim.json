@@ -4,6 +4,7 @@
     "genel": "Genel bakış",
     "geziler": "Geziler",
     "yerler": "Yerler",
+    "ilOnerileri": "İl önerileri",
     "sehirler": "Şehirler",
     "anaSayfa": "Ana sayfa",
     "kullanicilar": "Kullanıcılar",
@@ -639,5 +640,62 @@
     "kaynak": "Kaynak sayfası",
     "kaldir": "Kaldır",
     "not": "Değiştirmek için kendi fotoğrafını yükleyip “Kapak yap”a bas; atıf “Tripmate” olur."
+  },
+  "ilOneri": {
+    "il": "İl",
+    "ozet": "{yer} yer · {gorunur} görünür · {durum}, son değişiklik {kim} · {zaman}",
+    "durum": {
+      "yayinda": "yayında",
+      "taslak": "taslak"
+    },
+    "kim": {
+      "rehber": "Rehber",
+      "yonetim": "Yönetim"
+    },
+    "bugun": "bugün",
+    "yerEkle": "+ Yer ekle",
+    "yayinla": "Yayınla",
+    "yayinlandi": "Yayınlandı",
+    "hepsi": "Hepsi · {sayi}",
+    "kategoriSayi": "{kategori} · {sayi}",
+    "ilceHepsi": "İlçe: Hepsi",
+    "ilce": "İlçe: {ilce}",
+    "kategori": {
+      "doga": "Doğa",
+      "yemek": "Yemek",
+      "tatli_kahve": "Tatlı-kahve",
+      "muze": "Müze",
+      "tarih": "Tarih",
+      "carsi": "Çarşı",
+      "aktivite": "Aktivite",
+      "manzara": "Manzara"
+    },
+    "sutun": {
+      "sira": "SIRA",
+      "yer": "YER",
+      "kategori": "KATEGORİ",
+      "ilce": "İLÇE",
+      "merkeze": "MERKEZE",
+      "neden": "NEDEN GİDİLİR (≤ 90)",
+      "gorunur": "GÖRÜNÜR"
+    },
+    "km": "{km} km",
+    "surukle": "{ad}: sırayı değiştirmek için sürükle",
+    "kategoriSec": "{ad} kategorisi",
+    "gorunurEtiket": "{ad} uygulamada görünsün",
+    "menu": "{ad}: ad, neden, amaçlar, sil",
+    "neden": "NEDEN GİDİLİR",
+    "nedenYerTutucu": "Kısa bir cümle, en çok 90 karakter",
+    "kaydet": "Kaydet",
+    "vazgec": "Vazgeç",
+    "ad": "AD",
+    "adYerTutucu": "Listede görünecek adı yaz",
+    "sil": "Sil",
+    "silOnay": "Sil · emin misin?",
+    "ara": "Google'da yer ara → listenin sonuna eklenir",
+    "yardim": "Satırı sürükleyerek sırayı değiştir. Kategoriye dokununca değişir. ⋯: neden metnini düzenle, amaçları seç, sil. Gizlenen yer uygulamada görünmez ama listede kalır.",
+    "bos": "Henüz il listesi yok. Rehber'in listesi içerik hattının il adımıyla yüklenince burada görünür.",
+    "yuklenemedi": "Liste yüklenemedi. Sayfayı yenile.",
+    "kaydedilemedi": "Değişiklik kaydedilemedi, tekrar dene."
   }
 }

@@ -1,6 +1,6 @@
 // #97 / #98 / #100: içerik tabloları (sehirler, yerler, geziler, kaydedilenler, olaylar) — yayınlı okunur; backoffice yazar.
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { useOturum } from '@/lib/oturum';
 import { supabase } from '@/lib/supabase';
@@ -241,10 +241,12 @@ export async function olayYaz(tur: OlayTuru, hedef_id: string | null, meta?: Rec
 }
 
 /** #100 A: kalp bırakılan geziler (kimlik listesiyle; yayınlı olmayan düşer). */
-export function useGezilerIle(ids: string[]) {
+export function useGezilerIle(ids: string[], { oncekiniTut = false }: { oncekiniTut?: boolean } = {}) {
   return useQuery({
     queryKey: ['icerik', 'geziler', 'ile', [...ids].sort().join(',')],
     enabled: ids.length > 0,
+    // #411: Kaydettiklerim'de ♥ ile çıkarınca anahtar değişir; önceki liste tutulur, yükleme göstergesi yanıp sönmez.
+    placeholderData: oncekiniTut ? keepPreviousData : undefined,
     staleTime: GUN_MS,
     queryFn: async () => {
       // #395 KK2: kapaksız kartın tonu için `amaclar`.
@@ -256,10 +258,12 @@ export function useGezilerIle(ids: string[]) {
 }
 
 /** #100 A: kalp bırakılan yerler (şehir adıyla). */
-export function useYerlerIle(ids: string[]) {
+export function useYerlerIle(ids: string[], { oncekiniTut = false }: { oncekiniTut?: boolean } = {}) {
   return useQuery({
     queryKey: ['icerik', 'yerler', 'ile', [...ids].sort().join(',')],
     enabled: ids.length > 0,
+    // #411: Kaydettiklerim'de ♥ ile çıkarınca anahtar değişir; önceki liste tutulur, yükleme göstergesi yanıp sönmez.
+    placeholderData: oncekiniTut ? keepPreviousData : undefined,
     staleTime: GUN_MS,
     queryFn: async () => {
       const { data, error } = await supabase.from('yerler').select(`${YER_ALANLARI}, sehirler(ad, slug, lat, lng)`).in('id', ids);

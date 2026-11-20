@@ -3773,4 +3773,99 @@ delete from public.geziler where id = '31400000-0000-4000-8000-000000000010';
 delete from public.yerler where id::text like '31400000-%';
 delete from public.sehirler where id = '31400000-0000-4000-8000-000000000020';
 
+-- ---------------------------------------------------------------- #401 KK2–KK4: il önerileri
+-- Yayındaki listenin görünür satırlarını herkes okur; taslak liste ve gizli satır yalnız admin'e görünür; yalnız admin yazar.
+-- Yükleme yalnız içerik hattının (postgres); yayındaki listeye yazmaz. Sıralama tek çağrıda 1..n olur.
+select public.icerik_il_taslak_yukle('{"il": "Deneme", "slug": "il-deneme", "oneriler": [
+  {"sira": 1, "ad": "Göl", "kategori": "doga", "amaclar": ["doga"], "ilce": "Merkez", "merkeze_km": 9, "neden": "Kısa yürüyüş", "osm": "node/1", "lat": 40.6, "lng": 31.6},
+  {"sira": 2, "ad": "Çarşı", "kategori": "carsi", "amaclar": [], "neden": "Esnaf sokakları", "place_id": "ChIJ_401_b"},
+  {"sira": 3, "ad": "Müze", "kategori": "muze", "amaclar": ["kultur_tarih"], "neden": "Yağmurlu gün"}]}'::jsonb);
+do $$
+begin
+  assert (select degistiren = 'rehber' and not yayinda from public.il_listeleri where il_slug = 'il-deneme'), '#401 KK3: yükleme taslak, Rehber yazdı';
+  assert (select count(*) from public.il_oneriler where il_slug = 'il-deneme') = 3, '#401 KK3: 3 yer yüklendi';
+end $$;
+-- Biçim dışı satır reddedilir: bilinmeyen kategori, 90 karakteri aşan neden, geçersiz amaç, yinelenen sıra.
+select pg_temp.hata_bekle($$insert into public.il_oneriler (il_slug, sira, ad, kategori) values ('il-deneme', 9, 'X', 'gece')$$, '23514');
+select pg_temp.hata_bekle($$insert into public.il_oneriler (il_slug, sira, ad, kategori, neden) values ('il-deneme', 9, 'X', 'doga', repeat('a', 91))$$, '23514');
+select pg_temp.hata_bekle($$insert into public.il_oneriler (il_slug, sira, ad, kategori, amaclar) values ('il-deneme', 9, 'X', 'doga', '{deniz}')$$, '23514');
+select pg_temp.hata_bekle($$insert into public.il_oneriler (il_slug, sira, ad, kategori) values ('il-deneme', 1, 'X', 'doga')$$, '23505');
+-- Taslak liste: anon ve sıradan hesap görmez, yazamaz.
+set role anon;
+do $$
+begin
+  assert not exists (select 1 from public.il_listeleri where il_slug = 'il-deneme'), '#401 KK2: taslak liste anon''a görünmez';
+  assert not exists (select 1 from public.il_oneriler where il_slug = 'il-deneme'), '#401 KK2: taslak satır anon''a görünmez';
+end $$;
+select pg_temp.hata_bekle($$select public.il_oneri_sirala('il-deneme', '{}')$$, '42501');
+select pg_temp.hata_bekle($$select public.icerik_il_taslak_yukle('{}'::jsonb)$$, '42501');
+reset role;
+set role authenticated;
+select pg_temp.as_user(:A);
+update public.il_listeleri set yayinda = true where il_slug = 'il-deneme';
+reset role;
+do $$ begin assert (select not yayinda from public.il_listeleri where il_slug = 'il-deneme'), '#401 KK2: sıradan hesap listeyi yayınlayamaz, yayinda hâlâ false'; end $$;
+set role authenticated;
+select pg_temp.as_user(:A);
+update public.il_oneriler set ad = 'Saldırgan' where il_slug = 'il-deneme';
+delete from public.il_oneriler where il_slug = 'il-deneme';
+delete from public.il_listeleri where il_slug = 'il-deneme';
+reset role;
+do $$
+begin
+  assert exists (select 1 from public.il_listeleri where il_slug = 'il-deneme'), '#401 KK2: sıradan hesap listeyi silemez';
+  assert (select count(*) from public.il_oneriler where il_slug = 'il-deneme') = 3, '#401 KK2: sıradan hesap satır silemez';
+end $$;
+set role authenticated;
+select pg_temp.as_user(:A);
+select pg_temp.hata_bekle($$insert into public.il_oneriler (il_slug, sira, ad, kategori) values ('il-deneme', 4, 'X', 'doga')$$, '42501');
+select pg_temp.hata_bekle($$select public.il_oneri_sirala('il-deneme', '{}')$$, '42501');
+select pg_temp.hata_bekle($$select public.icerik_il_taslak_yukle('{}'::jsonb)$$, '42501');
+do $$ begin assert not exists (select 1 from public.il_oneriler where il_slug = 'il-deneme'), '#401 KK2: taslak satır sıradan hesaba görünmez'; end $$;
+-- Admin: okur, gizler, ekler, sıralar, yayınlar; her değişiklik "son değişiklik"i BO'ya çevirir.
+select pg_temp.as_email(:E, 'ozcinar.ece@gmail.com');
+do $$ begin assert (select count(*) from public.il_oneriler where il_slug = 'il-deneme' and ad <> 'Saldırgan') = 3, '#401 KK2: sıradan hesap yazamadı, admin taslağı okur'; end $$;
+update public.il_oneriler set gorunur = false where il_slug = 'il-deneme' and sira = 3;
+insert into public.il_oneriler (il_slug, sira, ad, kategori, place_id, primary_type) values ('il-deneme', 4, 'Yeni yer', 'manzara', 'ChIJ_401_d', 'park');
+select public.il_oneri_sirala('il-deneme', array(select id from public.il_oneriler where il_slug = 'il-deneme' order by sira desc));
+select pg_temp.hata_bekle($$select public.il_oneri_sirala('il-deneme', array(select id from public.il_oneriler where il_slug = 'il-deneme' and sira > 1))$$, '22023');
+update public.il_listeleri set yayinda = true, yayinlandi_at = now() where il_slug = 'il-deneme';
+do $$
+begin
+  assert (select sira from public.il_oneriler where ad = 'Yeni yer' and il_slug = 'il-deneme') = 1, '#401 KK4: sürüklenen sıra 1..n yazıldı';
+  assert (select array_agg(sira order by sira) from public.il_oneriler where il_slug = 'il-deneme') = '{1,2,3,4}', '#401 KK4: sıra ardışık';
+  assert (select degistiren = 'yonetim' from public.il_listeleri where il_slug = 'il-deneme'), '#401 KK4: son değişiklik BO';
+  assert (select yayinda from public.il_listeleri where il_slug = 'il-deneme'), '#401 KK4: admin yayınladı';
+  assert (select count(*) from public.il_oneriler where il_slug = 'il-deneme') = 4, '#401 KK4: admin yayındaki listenin bütün satırlarını okur';
+  assert exists (select 1 from public.il_oneriler where il_slug = 'il-deneme' and not gorunur), '#401 KK4: admin yayındaki listede gizli satırı okur';
+end $$;
+reset role;
+-- Yayındaki liste sıradan hesaba görünür: yazma politikası burada ölçülür (taslakta satır zaten görünmez).
+set role authenticated;
+select pg_temp.as_user(:A);
+do $$ begin assert (select count(*) from public.il_oneriler where il_slug = 'il-deneme') = 3, '#401 KK2: sıradan hesap yayındaki görünür satırları görür'; end $$;
+update public.il_oneriler set gorunur = false, ad = 'x' where il_slug = 'il-deneme';
+delete from public.il_oneriler where il_slug = 'il-deneme';
+update public.il_listeleri set yayinda = false where il_slug = 'il-deneme';
+delete from public.il_listeleri where il_slug = 'il-deneme';
+reset role;
+do $$
+begin
+  assert (select count(*) from public.il_oneriler where il_slug = 'il-deneme') = 4, '#401 KK2: sıradan hesap yayındaki satırı silemez';
+  assert (select count(*) from public.il_oneriler where il_slug = 'il-deneme' and gorunur) = 3, '#401 KK2: sıradan hesap yayındaki satırı gizleyemez';
+  assert not exists (select 1 from public.il_oneriler where il_slug = 'il-deneme' and ad = 'x'), '#401 KK2: sıradan hesap yayındaki satırın adını değiştiremez';
+  assert (select yayinda from public.il_listeleri where il_slug = 'il-deneme'), '#401 KK2: sıradan hesap yayındaki listeyi geri çekemez';
+end $$;
+-- Yayında: herkes görünür satırları okur, gizli satır görünmez; yükleme yayındaki listeye yazmaz.
+set role anon;
+do $$
+begin
+  assert (select count(*) from public.il_oneriler where il_slug = 'il-deneme') = 3, '#401 KK2: yayındaki listenin görünür satırları okunur';
+  assert not exists (select 1 from public.il_oneriler where il_slug = 'il-deneme' and ad = 'Müze'), '#401 KK4: gizli yer görünmez';
+end $$;
+reset role;
+select pg_temp.hata_bekle($$select public.icerik_il_taslak_yukle('{"il": "Deneme", "slug": "il-deneme", "oneriler": []}'::jsonb)$$, '55000');
+do $$ begin assert (select count(*) from public.il_oneriler where il_slug = 'il-deneme') = 4, '#401 KK3: yayındaki listeye dokunulmaz'; end $$;
+delete from public.il_listeleri where il_slug = 'il-deneme';
+
 \echo 'rls_test: TÜM TESTLER GEÇTİ'

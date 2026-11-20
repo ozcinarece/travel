@@ -24,6 +24,13 @@ const CIZIM: Record<MenuAnahtari, React.ReactNode> = {
       <Circle cx="12" cy="10" r="2.5" />
     </>
   ),
+  // #401: kanvasta il önerileri ikonu yok (tasarım bekliyor); şimdilik Yerler'in iğnesi.
+  ilOnerileri: (
+    <>
+      <Path d="M12 21s-7-6.1-7-11a7 7 0 0 1 14 0c0 4.9-7 11-7 11z" />
+      <Circle cx="12" cy="10" r="2.5" />
+    </>
+  ),
   kullanicilar: (
     <>
       <Circle cx="9" cy="8" r="3.5" />
