@@ -1,4 +1,4 @@
-Safranbolu Sofrası, çarşının ortasında, Cinci Hamamı'nın hemen arkasında küçük bir aile lokantası. Menü, çarşıda en çok sorulan yöre yemeklerinden oluşuyor.
+Safranbolu Sofrası, çarşının ortasında, Cinci Hamamı'nın hemen arkasında küçük bir aile lokantası. Menüde Safranbolu'nun ev yemekleri ağırlıkta; çarşıda öğle yemeği için yöresel bir sofra arıyorsan iyi bir adres.
 
 Buraya peruhi için gel. Safranbolu'ya özgü bu mantıda iç harcı önceden kurutulduğu için tadı hafif ekşidir; üstüne yoğurt yerine tereyağı, nane ve pul biber konur. Yanına yaprak sarması ya da sac tava söyle. Kahvaltıya yakın bir saatte geldiysen kuymak da var: mısır unu ve peynirle tavada pişen, sıcak yenen bir yemek. Bükme pide, içi doldurulup katlanan ince hamurla yapılır; paylaşmak için iyi.
 

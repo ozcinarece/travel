@@ -1,11 +1,11 @@
-Atiş Butik Restoran, Safranbolu çarşısında, Cinci Hanı'nın arkasından geçen Han Arkası Sokağı'nda küçük bir lokanta. Çarşının en kalabalık noktasına birkaç adım uzakta, ama sokak daha sakin.
+Atiş Butik Restoran, Safranbolu çarşısında, Cinci Hanı'nın arka tarafındaki sokaklardan birinde küçük bir lokanta. Ana meydana birkaç adım uzakta olsa da sokak daha sakin; kanyondan ve mağaradan dönüp çarşıya girdiğin gün öğle için uygun bir durak.
 
-Buraya Safranbolu'nun ev yemekleri için gel. Peruhi burada da var: iç harcı kurutulduğu için hafif ekşi, sossuz, tereyağı ve naneyle gelen yöreye özgü bir mantı. Menüde Rum mantısı ve safranlı pilav da görürsen dene; safranlı pilav, kentin adını aldığı baharatı sofrada tatmanın en kolay yolu. Ne söyleyeceğine karar veremiyorsan günün tencere yemeğini sor.
+Buraya arabayla geçen bir sabahtan sonra oturup dinlenmek için gel. Menü mevsime ve güne göre değişebilir; masaya oturunca o gün ocakta ne olduğunu sor ve seçimini ona göre yap. Safranbolu mutfağında hamur işi ve tencere yemekleri öne çıkar; listede yöreye özgü bir yemek görürsen onu dene, adını bilmiyorsan ne olduğunu sormaktan çekinme.
 
-Yemek için bir saat ayır. Hafta sonu öğlen masa bulmak zorlaşabilir; erken otur ya da önceden yer sor.
+İki günlük gezide ikinci öğle yemeğin burası. İlk gün başka bir lokantada yediysen bugün farklı bir yemek seç; böylece iki gün sonunda yöre mutfağından daha geniş bir tat listesiyle dönersin.
 
-Tatlıda safranlı zerde varsa onu iste. Pirinç, şeker ve safranla pişirilen bu tatlı, Safranbolu'da düğün ve bayram sofralarının tatlısı sayılır. Yemekten sonra çarşıya dönmeden kahveni burada iç; sokağın sessizliği, kalabalık meydana göre iyi bir mola.
+Yemek için bir saat ayır. Kalabalık günlerde masa bulmak zorlaşabilir; öğlen erken otur. Yemekten sonra çarşıya dönmeden kısa bir çay molası vermek, öğleden sonra Yörük Köyü yoluna çıkmadan önce iyi bir ara olur.
 
-Safranbolu'da safran hâlâ yakındaki köylerde yetiştiriliyor ve ekim ile kasım aylarında toplanıyor; bu aylarda geldiysen sofradaki safranın nereden geldiğini sor.
+Lokanta küçük; büyük bir grupla geliyorsan önceden yer olup olmadığını sor.
 
-> Siparişten önce peruhinin o gün açılıp açılmadığını sor; hamuru taze açıldığında daha ince olur.
+> Siparişten önce günün yemeklerinden hangisinin o sabah piştiğini sor; taze pişeni seç.

@@ -4,6 +4,6 @@ Buraya manzara için gel. Tepeden bakınca çarşının vadilerin birleştiği y
 
 Çarşıdan tepeye dik bir yokuşla çıkılır; nefesin yetmiyorsa yolda birkaç kez dur. Tepede suyunu ve bir şeyler atıştırmak istiyorsan yiyeceğini yanında getir. Burada yarım saat ile bir saat arası kalırsın.
 
-En güzel zamanı akşamüstü: güneş batarken karşıdaki evlerin cephesi turuncuya döner ve aşağıda çarşının ışıkları yanmaya başlar. Hava kararınca inişte telefonunun ışığını kullan; yol taşlık.
+Akşamüstü gelmek için iyi bir neden var: güneş batarken karşıdaki evlerin cephesi turuncuya döner ve aşağıda çarşının ışıkları yanmaya başlar. Hava kararınca inişte telefonunun ışığını kullan; yol taşlık.
 
 > Türbenin yanından geçip tepenin çarşıya bakan kenarına yürü; aşağıdaki minareleri tek tek saymaya çalış, kentin ne kadar sık camiyle örüldüğünü böyle fark edersin.

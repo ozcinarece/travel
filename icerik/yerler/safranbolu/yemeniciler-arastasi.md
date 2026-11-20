@@ -1,4 +1,4 @@
-Yemeniciler Arastası, Safranbolu çarşısının ortasında, Köprülü Mehmet Paşa Camii'nin hemen yanında uzanan üstü örtülü dar bir sokak. Adını, burada çalışan yemenicilerden alıyor: yemeni, ince deriden dikilen, hafif ve düz tabanlı bir ayakkabı. Bir zamanlar arastada kırkı aşkın dükkân vardı ve her birinde birkaç usta çalışırdı.
+Yemeniciler Arastası, Safranbolu çarşısının ortasında, Köprülü Mehmet Paşa Camii'nin hemen yanında uzanan üstü örtülü dar bir sokak. Adını, burada çalışan yemenicilerden alıyor: yemeni, ince deriden dikilen, hafif ve düz tabanlı bir ayakkabı. Bir zamanlar sokak boyunca dükkânların çoğunda yemeni dikilirdi.
 
 Bugün dükkânların çoğu el işi, bakır, ahşap oyma ve yöresel ürün satıyor. Yine de sokağı yavaş yürü ve tezgâhlara bak: ahşap kepenkli, alçak tavanlı dükkânların düzeni eski haliyle duruyor. Köşelerden birinde hâlâ elle yemeni diken bir usta bulabilirsin; dikişi izlemek için sormaktan çekinme.
 

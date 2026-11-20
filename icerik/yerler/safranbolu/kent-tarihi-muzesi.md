@@ -2,7 +2,7 @@ Safranbolu Kent Tarihi Müzesi, çarşının kuzeybatısındaki Kale tepesinde, 
 
 Buraya, kenti gezmeden önce neye bakacağını öğrenmek için gel. Zemin katta eski çarşı esnafının canlandırmaları var: eczacı, lokumcu, papuççu, demirci ve bakırcı dükkânları. Sokakta göreceğin lonca düzenini burada küçük ölçekte görürsün. Üst katlarda kentin tarihi, Roma'dan Cumhuriyet'e uzanan sikkeler, ev eşyaları ve giysiler sergileniyor.
 
-Binanın hemen yanında 1797'de Sadrazam İzzet Mehmet Paşa'nın yaptırdığı, yaklaşık 12 metrelik taş saat kulesi duruyor. Kulenin çevresindeki açık alanda Anadolu'nun başka şehirlerindeki saat kulelerinin küçültülmüş kopyaları sıralanmış; çocuklu gezenlerin en çok vakit geçirdiği köşe burası.
+Binanın hemen yanında 1797'de Sadrazam İzzet Mehmet Paşa'nın yaptırdığı, yaklaşık 12 metrelik taş saat kulesi duruyor. Kulenin çevresindeki açık alanda Anadolu'nun başka şehirlerindeki saat kulelerinin küçültülmüş kopyaları sıralanmış; çocukla geziyorsan onlara burada biraz zaman tanı.
 
 İçeride bir saat yeter, kule ve minyatürlerle birlikte bir buçuk saat ayır. Sabah erken gelirsen tepeye çıkan yokuş daha serin olur ve aşağıdaki evlerin damlarına güneş daha yumuşak vurur.
 
