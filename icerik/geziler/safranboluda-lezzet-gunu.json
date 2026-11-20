@@ -1,0 +1,150 @@
+{
+  "surum": 1,
+  "sehir": {
+    "slug": "safranbolu"
+  },
+  "takvim": {
+    "ilk_gun": "cumartesi"
+  },
+  "gezi": {
+    "slug": "safranboluda-lezzet-gunu",
+    "baslik": "Safranbolu'da lezzet günü",
+    "ozet": "Köyde gözleme, çarşıda peruhi ve lokum, közde kahve, kel simit",
+    "yazar_ad": "Tripmate ekibi",
+    "amaclar": [
+      "lezzet",
+      "yavas"
+    ],
+    "yazi_md": "Safranbolu'yu bu kez konaklarıyla değil sofrasıyla gez. Bu plan sabahı Yörük Köyü'nde bir kahvaltıyla başlatıyor, öğleyi ve öğleden sonrayı çarşının birkaç sokağında geçiriyor: lokum, peruhi, közde kahve ve kel simit. Günün tek araba yolu köye gidiş ve dönüş; çarşıda arabayı otoparka bırakıp yürüyorsun. Duraklar yakın ama yemek çok, porsiyonları paylaş.\n\n> Kasımdan marta gün kısa ve Yörük Köyü yolu karlı olabilir. Köydeki kahvaltı yerini gitmeden ara; kapalıysa günü çarşıda başlat ve kahvaltıyı simitle yap.\n\n## 1. gün · Gözlemeden lokuma\n\nSabah arabayla çarşının yaklaşık on kilometre doğusundaki Yörük Köyü'ne çık. Kahvaltıyı köyün içindeki [Yörük Sofrası](mekan:ChIJuU2-4suqnEARo7c1yyezfyE)'nda yap; köy kahvaltısının yanında gözleme ve ev baklavası iste. Kalkınca taş ve ahşap evlerin arasında kısa bir tur at: 1997'de koruma altına alınan köyde doksanı aşkın tescilli yapı var.\n\n::mekan[ChIJuU2-4suqnEARo7c1yyezfyE]\n\nÇarşıya dön, arabayı otoparka bırak ve Cinci Hanı Sokağı'ndaki [İmren Lokumları](mekan:ChIJeRYIRD7EyhQRMioT2R82LD4)'na gir. 1942'den beri lokum kaynatan bu firmada safranlı lokumla klasik fındıklıyı yan yana tat. Safranbolu lokumu 2014'ten beri mahreç işaretli: bakır kazanda saatlerce kaynatılıyor, Hindistan cevizine bulanıyor ve içine fındık konuyor. Tadım dükkânın içinde yapılıyor; belediye sokakta tepsiyle ikramı yıllar önce yasakladı.\n\nÖğle yemeği için Han Arkası Sokağı'na yürü ve [Atiş Butik Restoran](mekan:ChIJvYK0WilVg0ARN3nh0r_JisU)'a otur. Burada peruhi söyle: mantıya benzeyen, hafif ekşi, tereyağı, nane ve pul biberle gelen yöresel bir yemek. Yanına Rum mantısını dene; içi et, kırmızı ve yeşil biberle hazırlanıyor, üstünde ne salça ne sarımsaklı yoğurt var. Kalabalıksan etli keşkek ya da safranlı pilavla masayı tamamla.\n\n::mekan[ChIJvYK0WilVg0ARN3nh0r_JisU]\n\nSafranbolu adını safrandan alıyor ama kentte safranlı yemek az; safranın tadını en kolay, pirinçle pişip sarıya dönen zerdede bulursun. Öğle yemeğinin sonunda menüde zerde var mı diye sor.\n\nKahve için [Saraçoğlu Kahve Evi](mekan:ChIJFYk6ZylVg0ARSflvJG3giyo)'ne geç. Kahve burada ocakta değil közde pişiyor ve köpüğü koyu geliyor. Kahve istemiyorsan safran çayını dene; sabah aldığın lokumdan bir parçayı fincanın yanına ayır.\n\nGünü [Tarihi Safranbolu Simitçisi](mekan:ChIJdaet6dOqnEAR8gIavux0ITA)'nde bitir. Burada susamsız kel simit pişiyor; yanına 1936'dan beri Safranbolu'da üretilen Bağlar gazozunu al. Eve götürmek için birkaç simit daha iste ve kâğıt torbada taşı.\n\nAkşam da kentte kalıyorsan kuyu kebabı için [Kadıoğlu Şehzade Sofrası](mekan:ChIJYxTzwitVg0ARU7daC0NABMI)'na yer ayırt: kuzu, yerde açılmış derin bir kuyuda yavaş pişiyor. Ekimde ya da kasımda geldiysen safranın nerede yetiştiğini sor; Safranbolu çevresinde hasat bu aylarda yapılıyor ve çiçekler tek tek elle toplanıyor."
+  },
+  "gunler": [
+    {
+      "baslik": "Gözlemeden lokuma",
+      "duraklar": [
+        {
+          "place_id": "ChIJuU2-4suqnEARo7c1yyezfyE",
+          "ad": "Yörük Sofrası",
+          "sure_dk": 90,
+          "sure_gerekcesi": "kahvaltı ve köy sokaklarında kısa tur; restoran varsayılanı 75",
+          "kapali_gunler": [],
+          "rehber": "yoruk-sofrasi",
+          "amaclar": [
+            "lezzet",
+            "yavas",
+            "kultur_tarih"
+          ]
+        },
+        {
+          "place_id": "ChIJeRYIRD7EyhQRMioT2R82LD4",
+          "ad": "İmren Lokumları",
+          "sure_dk": 30,
+          "sure_gerekcesi": "lokum tadımı ve alışveriş; dükkân",
+          "kapali_gunler": [],
+          "rehber": "imren-lokumlari",
+          "amaclar": [
+            "lezzet"
+          ]
+        },
+        {
+          "place_id": "ChIJvYK0WilVg0ARN3nh0r_JisU",
+          "ad": "Atiş Butik Restoran",
+          "sure_dk": 75,
+          "sure_gerekcesi": "öğle yemeği; restoran varsayılanı 75",
+          "kapali_gunler": [],
+          "rehber": "atis-butik-restoran",
+          "amaclar": [
+            "lezzet"
+          ]
+        },
+        {
+          "place_id": "ChIJFYk6ZylVg0ARSflvJG3giyo",
+          "ad": "Saraçoğlu Kahve Evi",
+          "sure_dk": 45,
+          "sure_gerekcesi": "közde kahve ve safran çayı; kafe varsayılanı 30",
+          "kapali_gunler": [],
+          "rehber": "saracoglu-kahve-evi",
+          "amaclar": [
+            "lezzet",
+            "yavas"
+          ]
+        },
+        {
+          "place_id": "ChIJdaet6dOqnEAR8gIavux0ITA",
+          "ad": "Tarihi Safranbolu Simitçisi",
+          "sure_dk": 20,
+          "kapali_gunler": [],
+          "rehber": "tarihi-safranbolu-simitcisi",
+          "amaclar": [
+            "lezzet"
+          ]
+        }
+      ]
+    }
+  ],
+  "ek_mekanlar": [
+    {
+      "place_id": "ChIJYxTzwitVg0ARU7daC0NABMI",
+      "ad": "Kadıoğlu Şehzade Sofrası"
+    }
+  ],
+  "notlar": {
+    "dogrulanacaklar": [
+      "[Plan · tüm duraklar] · kapali_gunler [] kaynaksız: beş işletmenin hiçbirinde resmî kapalı gün bilgisi bulunamadı · işletmeleri ara; özellikle Yörük Sofrası kışın açık mı",
+      "[Plan · tema] · doğa yerine lezzet teması seçildi; gerekçe kaynaklar.md'de (Şeker Kanyonu'nda 2025 heyelanı ve 2026 DSİ inşaatı, kış koşulları) · ürün kararı",
+      "[Plan · g1.d1 Yörük Sofrası] · 'organik kahvaltı, gözleme, ev baklavası', adres Ulusoy Cd., Yörük · tek kaynak lezzet.com.tr (güncelleme 28 Kasım 2025) · işletme, yerinde; kış açıklığı bilinmiyor",
+      "[Yazı · Yörük Köyü] · 'çarşının yaklaşık on kilometre doğusu', '1997 koruma, doksanı aşkın tescilli yapı' · safranboluda-iki-gun ile ortak (NTV); mesafe il listesindeki 14 km ile tutmuyor (o Karabük merkezine göre) · harita",
+      "[Rehber · Yörük Sofrası] · 'gözleme siparişle açılıp pişiyor', 'ortak çamaşırhane', 'geniş saçaklar' · genel bilgi/iki günlük gezinin notu, işletmeye özgü kaynak yok · yerinde",
+      "[Plan · g1.d2 İmren Lokumları] · hangi şube: il listesindeki place_id (ChIJeRYIRD7EyhQRMioT2R82LD4) 'Cinci Han'ın karşısındaki' diye geçiyor; firmanın sitesinde çarşıda iki şube var (Nostalji: Çeşme Mah. Cinci Hanı Sk. No:13; Kazdağı: Kazdağı Meydanı, Eski Çarşı No:2). Yazı 'Cinci Hanı Sokağı'ndaki' diyor · imrenlokumlari.com/subelerimiz, kimlik sorgusu",
+      "[Rehber · İmren] · '1942'den beri' (firmanın sitesi); 'kolonya da satılıyor' (sitede kolonya sayfası) · işletme",
+      "[Yazı + Rehber · lokum] · 'mahreç işareti 2014, tescil no 183; bakır kazanda 3–3,5 saat, tahta kalıpta en az 16 saat, Hindistan cevizi, 13–15 fındık' · Türk Patent tescil belgesi (ci.turkpatent.gov.tr, 15.07.2014) · ilk tescil sahibi tek firma (Safranbolu Lati Gıda); belgenin tüm üreticileri kapsadığını teyit et",
+      "[Yazı + Rehber · lokum ikramı] · 'belediye sokakta tepsiyle ikramı yasakladı' · Türkiye Gazetesi, 17 Ağustos 2019; hâlâ yürürlükte mi bilinmiyor · Safranbolu Belediyesi zabıta",
+      "[Plan · g1.d3 Atiş Butik Restoran] · menü (peruhi, Rum mantısı, etli keşkek, yaprak sarma, bükme pide, safranlı pilav) ve adres Han Arkası Sk. No:34 · lezzet.com.tr (Kasım 2025) ve nefisyemektarifleri.com (2023); il listesindeki ad 'Atiş Butik Restoran', sitelerde 'Atiş Butik Restaurant' / 'Atiş Cafe & Butik Restaurant' · işletme",
+      "[Yazı + Rehber · peruhi] · 'mantıya benzeyen, hafif ekşi, tereyağı, nane ve pul biberle' · NTV, Buse Yıldırım, 30 Temmuz 2026; içinin ne olduğu kaynaklarda çelişkili (NTV 'kurutulmuş', iki günlük gezinin notu 'iç harcı kurutulduğu için') bu yüzden yazıya girmedi · İl Kültür ve Turizm",
+      "[Yazı + Rehber · Rum mantısı] · 'et, kırmızı ve yeşil biber; salça ve sarımsaklı yoğurt yok' · tek kaynak NTV 2026 · işletmeye sor",
+      "[Yazı + Rehber · zerde] · 'pirinçle pişen, safranla sarıya dönen tatlı' · genel bilgi, NTV 2026 safranın zerde ve lokumda kullanıldığını yazıyor · yalnız bilgi",
+      "[Plan · g1.d5 Saraçoğlu Kahve Evi] · adres çelişkili: lezzet.com.tr 2025 'Çeşme Mah. İzzet Paşa Sk.', nefisyemektarifleri 2023 'Semerciler Sk.'; il listesinde yok · kimlik sorgusu",
+      "[Rehber · Saraçoğlu] · 'közde kahve, safran çayı' (lezzet.com.tr 2025), 'lokum, ev yapımı şerbet, akşam rezervasyonla canlı müzik' (nefisyemektarifleri 2023) · canlı müzik güncel mi, işletme",
+      "[Plan · g1.d6 Tarihi Safranbolu Simitçisi] · adres çelişkili: lezzet.com.tr 2025 'Atatürk Mah. Çelik Gülersoy Cd.', nefisyemektarifleri 2023 'Çeşme Mah. Eczacı Hidayet Derman Sk.'; iki ayrı şube olabilir · kimlik sorgusu; Google birincil tipi bakery ise süre varsayılanla aynı",
+      "[Yazı + Rehber · kel simit] · 'susamsız kel simit' (NTV 2026 'kel simit', lezzet.com.tr 'susamsız simit'); 'çıtırlığıyla biliniyor' (nefisyemektarifleri 2023) · yalnız bilgi",
+      "[Yazı + Rehber · Bağlar gazozu] · '1936'dan beri Safranbolu'da üretiliyor' · haberler.com/İHA, 6 Temmuz 2025 · simitçide gazoz satılıyor mu bilinmiyor (2023 kaynağı birlikte öneriyor) · yerinde",
+      "[Yazı · Kadıoğlu Şehzade Sofrası] · ek mekan; place_id ve kuyu kebabı tarifi safranboluda-iki-gun planından · doğrulanacakları o planda",
+      "[Yazı · safran hasadı] · 'ekim–kasım, çiçekler elle toplanıyor' · DHA, 20 Ekim 2026 (Yukarı Çiftlik köyü, Keten Mahallesi; 55 üretici, 115 dekar) · tarlalar ziyarete açık değil, yazı yalnız 'sor' diyor",
+      "[Plan · lezzet öğle durağı] · Atiş'in Google birincil tipi restaurant değilse (ör. cafe) kuru yüklemede öğle UYARISI çıkabilir · kuru yükle",
+      "[Plan · g1.d5 Tarihi Safranbolu Simitçisi] · kimlik sorgusu iki benzer adlı işletme döndürdü ('Tarihi Safranbolu Simitçisi' ve 'Safranbolu Tarihi Simitçisi'); ad birebir tutan seçildi · BO'da konumu kontrol et",
+      "[Plan · g1.d2 İmren Lokumları] · kimlik sorgusu Cinci Hanı Sokağı için üç id döndürdü; il listesindeki id kullanıldı · hangi şube olduğunu BO'da konumdan kontrol et"
+    ],
+    "fotograf_onerileri": [
+      {
+        "ne": "Kapak (3:2): Safranbolu lokumu, safranlı ve fındıklı, Hindistan cevizine bulanmış",
+        "altyazi": "Safranbolu lokumu",
+        "arama": "Safranbolu lokumu Turkish delight (Wikimedia Commons)"
+      },
+      {
+        "ne": "Peruhi tabağı",
+        "altyazi": "Peruhi",
+        "arama": "Safranbolu peruhi (Wikimedia Commons)"
+      },
+      {
+        "ne": "Safran çiçeği hasadı",
+        "altyazi": "Safranbolu'da safran hasadı",
+        "arama": "Crocus sativus Safranbolu (Wikimedia Commons)"
+      },
+      {
+        "ne": "Yörük Köyü sokağı",
+        "altyazi": "Yörük Köyü",
+        "arama": "Yörük Köyü Safranbolu (Wikimedia Commons)"
+      }
+    ],
+    "varsayimlar": [
+      "Tek gün, cumartesi; sabah Yörük Köyü'ne araçla, sonra çarşıda yürüyerek. Gün yaklaşık 15:30'da biter (kış ışığı)",
+      "Tema lezzet: önce doğa denendi (Şeker Kanyonu, Yenice ormanları, Tokatlı Kanyonu); gerekçe kaynaklar.md'de",
+      "Karabük il listesinin (icerik/iller/karabuk.json) ilk 5'inden hiçbiri durak değil: 1 Çarşı (öğleden sonra çarşıda yüründüğü için zaten içinden geçiliyor), 2 Hıdırlık, 3 Cinci Hanı (yalnız sokak adıyla anılıyor), 4 Kaymakamlar ve 5 Yemeniciler lezzet teması dışında ve iki gezide de durak",
+      "İl listesinden durak: 16 İmren Lokumları, 22 Atiş Butik Restoran. 8 Yörük Köyü köy olarak değil, köydeki Yörük Sofrası durağıyla. 23 Eyvan ve 25 Safrantat yedek",
+      "Kuyu kebabı (Kadıoğlu) ve peruhi (Safranbolu Sofrası) iki gezide durak; tekrar olmasın diye Kadıoğlu yalnız ek mekan, peruhi başka bir lokantada (Atiş)",
+      "Lokum ve Safran Müzesi (Çavuş Mah., 2022'de açıldı, AA) durak yapılmadı: 2024 sonrası açık olduğuna dair kaynak bulunamadı",
+      "Nil Yörem Mutfak (zerde durağı) çıkarıldı: ön araştırmada kalıcı olarak kapandığı görüldü. Zerde yazıda öğle yemeğinde sorulacak tatlı olarak kaldı",
+      "OSM 0/5: çarşı içindeki işletmeler ve Yörük Köyü'ndeki kahvaltı yeri 15 km'lik Overpass aday listesinde yok. Ek mekan Kadıoğlu Şehzade Sofrası OSM'de var (node/9697997817)",
+      "Google: 6 kimlik sorgusu (ücretsiz), 8 puan isteği"
+    ]
+  }
+}
