@@ -1,0 +1,481 @@
+{
+  "il": "Rize",
+  "slug": "rize",
+  "guncelleme": "2026-11-20",
+  "oneriler": [
+    {
+      "sira": 1,
+      "ad": "Ayder Yaylası",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Çamlıhemşin",
+      "merkeze_km": 85,
+      "neden": "Kaçkarların eteğinde 1.350 m'de kaplıcalı yayla; ahşap evlerin karşısında şelaleler",
+      "place_id": "ChIJkz3I-A0YZkAR_t6nEjiL4dg"
+    },
+    {
+      "sira": 2,
+      "ad": "Fırtına Vadisi",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Çamlıhemşin",
+      "merkeze_km": 65,
+      "neden": "Kaçkarlardan inen Fırtına Deresi boyunca taş kemer köprüler ve yamaçta ahşap köy evleri",
+      "place_id": "ChIJTa6ZplIAZkARxxHXQTIBbvs"
+    },
+    {
+      "sira": 3,
+      "ad": "Zil Kale",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "doga"
+      ],
+      "ilce": "Çamlıhemşin",
+      "merkeze_km": 80,
+      "neden": "Fırtına'ya bakan kayalığın üstünde, ormandan yükselen kulesiyle orta çağ kalesi",
+      "osm": "way/297314092",
+      "place_id": "ChIJhRHLuN4QZkAR4EM5ordKnoM"
+    },
+    {
+      "sira": 4,
+      "ad": "Palovit Şelalesi",
+      "kategori": "doga",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Çamlıhemşin",
+      "merkeze_km": 110,
+      "neden": "Çat'tan Elevit'e giden yoldan sapan vadide, kayalıklardan köpürerek düşen dere",
+      "place_id": "ChIJ-XlP4ysXZkARwJmkAxEAm2M"
+    },
+    {
+      "sira": 5,
+      "ad": "Pokut Yaylası",
+      "kategori": "manzara",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Çamlıhemşin",
+      "merkeze_km": 95,
+      "neden": "Yaklaşık 2.000 m'de sırta dizilmiş ahşap evler; sabahları vadiyi bulut denizi doldurur",
+      "place_id": "ChIJK6hBDgAXZkAR2uORp6SYMzQ"
+    },
+    {
+      "sira": 6,
+      "ad": "Kaçkar Dağları Milli Parkı",
+      "kategori": "doga",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Çamlıhemşin",
+      "merkeze_km": 90,
+      "neden": "1994'te ilan edildi; 3.937 m'lik Kaçkar zirvesi ve buzul gölleri parkın içinde",
+      "place_id": "ChIJtW6DwCAcZkARdv6OlVCzAe0"
+    },
+    {
+      "sira": 7,
+      "ad": "Çamlıhemşin Kemer Köprüleri (Şenyuva Köprüsü)",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Çamlıhemşin",
+      "merkeze_km": 72,
+      "neden": "Fırtına'yı tek gözle aşan taş köprüler; Şenyuva'daki köyün girişinde dereye iner"
+    },
+    {
+      "sira": 8,
+      "ad": "Rize Kalesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 2,
+      "neden": "Bizans'tan kalan iç kale tepede; içindeki çay bahçesinden kent ve liman görülür",
+      "osm": "way/247789320",
+      "place_id": "ChIJoaZ6Svt6ZkARBMPfVkix2Ck"
+    },
+    {
+      "sira": 9,
+      "ad": "Ziraat Çay Bahçesi",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "yavas",
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 2,
+      "neden": "1924'te Zihni Derin'in kurduğu çay-narenciye fidanlığı; terasta demlik çay",
+      "place_id": "ChIJPadUmvp6ZkARsOBZMcfJqTI"
+    },
+    {
+      "sira": 10,
+      "ad": "Elevit Yaylası",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Çamlıhemşin",
+      "merkeze_km": 105,
+      "neden": "Çat'tan Hazindak'a giden yolda, dere boyuna dizilmiş taş temelli ahşap yayla evleri",
+      "place_id": "ChIJazUcXz8bZkARq7VMw4R0ct8"
+    },
+    {
+      "sira": 11,
+      "ad": "Huser Yaylası",
+      "kategori": "doga",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Çamlıhemşin",
+      "merkeze_km": 98,
+      "neden": "Ayder'in yukarısındaki sırt yaylası; karşıda Kaçkar sırtları, aşağıda bulutlar",
+      "place_id": "ChIJrVSmObQiZkARfFSttmiW2MA"
+    },
+    {
+      "sira": 12,
+      "ad": "Anzer Yaylası",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "lezzet"
+      ],
+      "ilce": "İkizdere",
+      "merkeze_km": 95,
+      "neden": "İkizdere'nin yüksek yaylası; coğrafi işaretli Anzer balı adını buradan alır",
+      "place_id": "ChIJk0_Hvx_zZUAR0S9KrNMwvQk"
+    },
+    {
+      "sira": 13,
+      "ad": "Evvel Zaman Yöresel Yemek ve Kültür Evi",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet",
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Piriçelebi'de eski evde hamsili pilav, Rize kavurması, korkoto çorbası ve pepeçura",
+      "osm": "node/6613081685",
+      "place_id": "ChIJy0tq7eV6ZkARDaO5OUPgdTU"
+    },
+    {
+      "sira": 14,
+      "ad": "Rize Müzesi (Sarı Ev)",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "19. yy Sarı Ev'de 1998'den beri; alt katta ahır-kiler, içinde etnografya ve sikkeler",
+      "place_id": "ChIJc4Jnk-V6ZkAR64KFtdFdyWI"
+    },
+    {
+      "sira": 15,
+      "ad": "Atatürk Evi Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "1921 yapımı üç katlı köşk; Mustafa Kemal 1924'te burada kaldı, 1985'te müze oldu",
+      "place_id": "ChIJRzb_Y5V6ZkARtr95Vx3840o"
+    },
+    {
+      "sira": 16,
+      "ad": "Fırtına Deresi Rafting",
+      "kategori": "aktivite",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Çamlıhemşin",
+      "merkeze_km": 60,
+      "neden": "Çamlıhemşin'den Ardeşen'e Fırtına'da kürek; mayıs-haziranda kar suyuyla debi yüksek"
+    },
+    {
+      "sira": 17,
+      "ad": "Lale 1973",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet",
+        "cocuklu"
+      ],
+      "ilce": "Çayeli",
+      "merkeze_km": 22,
+      "neden": "1973'te köfte salonu olarak açıldı; Çayeli kuru fasulyesi ve sütlaçlı kadayıf",
+      "osm": "node/5773732329",
+      "place_id": "ChIJSYRFwxxoZkARy0pA-5TI6TY"
+    },
+    {
+      "sira": 18,
+      "ad": "Sal Yaylası",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Çamlıhemşin",
+      "merkeze_km": 92,
+      "neden": "Pokut'un yanındaki sırtta sık dizili ahşap evler; iki yayla patikayla birbirine bağlı",
+      "place_id": "ChIJCeyOt6oXZkAR-s3HorqZKZg"
+    },
+    {
+      "sira": 19,
+      "ad": "Gito Yaylası",
+      "kategori": "doga",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Çamlıhemşin",
+      "merkeze_km": 100,
+      "neden": "Ayder'in üstündeki yaylalardan; yazın toprak yolla araçla çıkılır",
+      "place_id": "ChIJhx6r1EsQZkARgEXza4rSYj8"
+    },
+    {
+      "sira": 20,
+      "ad": "Kale-i Bala",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "doga"
+      ],
+      "ilce": "Çamlıhemşin",
+      "merkeze_km": 95,
+      "neden": "Zil Kale'nin yukarısında, Çat yönünde daha küçük ikinci kale; patikayla çıkılır",
+      "osm": "node/3881513042",
+      "place_id": "ChIJodTqL2oEZkARKJ6YtJ3H3lQ"
+    },
+    {
+      "sira": 21,
+      "ad": "Gelintülü Şelalesi",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Çamlıhemşin",
+      "merkeze_km": 85,
+      "neden": "Ayder'in karşı yamacından ince şeritler hâlinde iner; adı gelin tülüne benzetilmesinden",
+      "osm": "node/4868117722",
+      "place_id": "ChIJ6zdeLHIYZkARaLJOmXIZ07I"
+    },
+    {
+      "sira": 22,
+      "ad": "Liman Lokantası",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Çarşı'da esnaf lokantası: karalahana çorbası, muhlama, kavurma ve Laz böreği",
+      "place_id": "ChIJHbZCEeZ6ZkARUzkFsUHllNk"
+    },
+    {
+      "sira": 23,
+      "ad": "Kaçkar Zirve Tırmanışı",
+      "kategori": "aktivite",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Çamlıhemşin",
+      "merkeze_km": 95,
+      "neden": "Yukarı Kavrun'dan çıkılan 3.937 m'lik zirve; temmuz-ağustosta buzul kenarından geçilir"
+    },
+    {
+      "sira": 24,
+      "ad": "Pokut–Sal–Hazindak Yayla Yürüyüşü",
+      "kategori": "aktivite",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Çamlıhemşin",
+      "merkeze_km": 95,
+      "neden": "Üç yaylayı birbirine bağlayan orman ve çayır patikası; yaz aylarında işaretli"
+    },
+    {
+      "sira": 25,
+      "ad": "Kız Kalesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Pazar",
+      "merkeze_km": 40,
+      "neden": "Pazar'ın Kalecik kıyısında denizin içindeki kayaya oturan küçük orta çağ kalesi",
+      "osm": "way/1156322748",
+      "place_id": "ChIJAwPxEydFZkARc9rHukDyLIo"
+    },
+    {
+      "sira": 26,
+      "ad": "Çamlıhemşin Konakları",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Çamlıhemşin",
+      "merkeze_km": 68,
+      "neden": "19. yy taş-ahşap konaklar; yanlarında serender denen direkler üstünde ahşap ambarlar"
+    },
+    {
+      "sira": 27,
+      "ad": "Hüsrev Lokantası",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Çayeli",
+      "merkeze_km": 22,
+      "neden": "Büyüktaşhane'de tencere yemekleri; Çayeli'nin etli kuru fasulyesi ve köfte",
+      "osm": "node/5792758914",
+      "place_id": "ChIJ43rJuBRoZkARwdaHrBfNTOY"
+    },
+    {
+      "sira": 28,
+      "ad": "Kuzey Balık Lokantası",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 4,
+      "neden": "Sahil yolunda hamsi kolu, hamsi çığırtması ve pazı tavalısı; mevsimi kış",
+      "place_id": "ChIJCfomlZlFZkAR3TkoWGS1QyQ"
+    },
+    {
+      "sira": 29,
+      "ad": "Aksu Lokantası",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Hemşin",
+      "merkeze_km": 55,
+      "neden": "Hemşin'de kavurma, Hemşin usulü kuru fasulye ve sütlaçlı kadayıf",
+      "place_id": "ChIJZeYQradqZkARgXqigChKdZQ"
+    },
+    {
+      "sira": 30,
+      "ad": "Laz böreği",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "neden": "Yufka katları arasında muhallebi, üstünde şerbet; Rize'de pastane ve lokanta tatlısı"
+    },
+    {
+      "sira": 31,
+      "ad": "Dağmaran",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "yavas"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 5,
+      "neden": "Balsu'daki tepede sütlaç ve demlik çay; aşağıda kent ve sahil dolgu alanı",
+      "osm": "node/9378925717",
+      "place_id": "ChIJG10sUod6ZkARvahODnVLKHI"
+    },
+    {
+      "sira": 32,
+      "ad": "Ayder Kaplıcası",
+      "kategori": "aktivite",
+      "amaclar": [
+        "yavas"
+      ],
+      "ilce": "Çamlıhemşin",
+      "merkeze_km": 85,
+      "neden": "Yaylanın ortasında sıcak su kaynağından beslenen kaplıca; yürüyüş sonrası durak"
+    },
+    {
+      "sira": 33,
+      "ad": "Çay Enstitüsü",
+      "kategori": "manzara",
+      "amaclar": [
+        "yavas",
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 2,
+      "neden": "Kentin üstündeki teraslı çay bahçesi; çay sıraları arasından Karadeniz'e bakış",
+      "place_id": "ChIJJfamnfp6ZkARiOFRwg6isaU"
+    },
+    {
+      "sira": 34,
+      "ad": "Şahin Tepesi",
+      "kategori": "manzara",
+      "amaclar": [
+        "yavas",
+        "gece"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 3,
+      "neden": "Fatih Mahallesi'nin üstündeki tepe; kentin ışıkları ve liman, yanında muhlama",
+      "place_id": "ChIJ5TMfH5t6ZkARC1JgXihOGCU"
+    },
+    {
+      "sira": 35,
+      "ad": "Tarihi Rize Evi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 3,
+      "neden": "1939'da Kaptan Osman Çilli'nin evi; üst katta 19-20. yy'dan 113 ev eşyası"
+    },
+    {
+      "sira": 36,
+      "ad": "Rize Çarşısı",
+      "kategori": "carsi",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Osman Karavin Caddesi çevresi: dökme çay, Rize bezi, kel simit ve yayla peyniri"
+    },
+    {
+      "sira": 37,
+      "ad": "Ayder Dükkânları",
+      "kategori": "carsi",
+      "amaclar": [
+        "lezzet",
+        "yavas"
+      ],
+      "ilce": "Çamlıhemşin",
+      "merkeze_km": 85,
+      "neden": "Yayla yolu boyunca kestane balı, tel peyniri, Hemşin çorabı ve yün işi"
+    },
+    {
+      "sira": 38,
+      "ad": "Çamlıhemşin Çarşısı",
+      "kategori": "carsi",
+      "amaclar": [
+        "lezzet",
+        "yavas"
+      ],
+      "ilce": "Çamlıhemşin",
+      "merkeze_km": 67,
+      "neden": "Fırtına kıyısındaki dükkânlarda Laz böreği ve içi helvalı Hemşin ketesi"
+    }
+  ]
+}
