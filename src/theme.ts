@@ -60,6 +60,8 @@ export const anaV5 = {
   fotoYok: '#D9DDE5',
   /** #397: mekan satırındaki ince "+" dairesinin kenarı. */
   inceKenar: '#C3C9D6',
+  /** #401 (`Ekran07cIlOnerileri`): yer satırındaki `neden` cümlesi. */
+  nedenMetin: '#232B48',
 } as const;
 
 /**

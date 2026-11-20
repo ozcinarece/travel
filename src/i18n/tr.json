@@ -720,7 +720,10 @@
       "haritaBuyut": "Haritayı büyüt",
       "haritaKapat": "Haritayı kapat",
       "planHata": "Plan kurulamadı. Tekrar dene.",
-      "kmUzak": "{ad} · {km} km"
+      "kmUzak": "{ad} · {km} km",
+      "altIl": "{il} · seçtiklerini günlere biz dağıtalım.",
+      "ozetYer": "{n} yer",
+      "ozetDoluluk": "· {gun} günün {dolu} dolu"
     },
     "kapat": "Kapat",
     "sayac": "{n}/{toplam}"
@@ -1355,5 +1358,30 @@
     "baglantiYokIpucu": "Bağlantı yok; bağlanınca eklenebilir.",
     "tekrarDene": "Tekrar dene",
     "hepsiListede": "Bu mekanların hepsi zaten listende."
+  },
+  "ilOneri": {
+    "hepsi": "Hepsi",
+    "kategoriEtiketi": "Kategori",
+    "kategori": {
+      "doga": "Doğa",
+      "yemek": "Yemek",
+      "tatli_kahve": "Tatlı ve kahve",
+      "muze": "Müze",
+      "tarih": "Tarih",
+      "carsi": "Çarşı",
+      "aktivite": "Aktivite",
+      "manzara": "Manzara"
+    },
+    "km": "{km} km",
+    "yakindaki": "Yakındaki diğer yerler",
+    "googleAtif": "Sonuçlar: Google",
+    "ekle": "{ad}, listeye ekle",
+    "listende": "{ad} listende, çıkarmak için dokun",
+    "eylemEkle": "Listeye ekle",
+    "eylemCikar": "Listeden çıkar",
+    "yakinHata": "Yakındaki yerler alınamadı.",
+    "yakinYukleniyor": "Yakındaki yerler yükleniyor",
+    "listeYukleniyor": "Öneriler yükleniyor",
+    "tekrarDene": "Tekrar dene"
   }
 }
