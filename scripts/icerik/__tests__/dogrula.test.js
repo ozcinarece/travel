@@ -530,3 +530,11 @@ describe('#160 KK-ek4: kebapçı yemek sayılır', () => {
     expect(yemekMi('museum')).toBe(false);
   });
 });
+
+describe('#440: cafeteria yemek durağı', () => {
+  it('cafeteria yemek; cafe ve coffee_shop değil', () => {
+    expect(yemekMi('cafeteria')).toBe(true);
+    expect(yemekMi('cafe')).toBe(false);
+    expect(yemekMi('coffee_shop')).toBe(false);
+  });
+});

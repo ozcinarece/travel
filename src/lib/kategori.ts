@@ -13,6 +13,8 @@ const VARSAYILAN_DAKIKA: Record<string, number> = {
   viewpoint: 20,
   scenic_point: 20,
   restaurant: 75,
+  // #440: lokanta (self servis) restoran kadar.
+  cafeteria: 75,
   // #83: kafe / kahveci 30 dk (45 uzun geliyordu).
   cafe: 30,
   coffee_shop: 30,
@@ -63,6 +65,7 @@ const ETIKET: Record<string, string> = {
   hiking_area: 'Yürüyüş alanı',
   beach: 'Plaj',
   restaurant: 'Restoran',
+  cafeteria: 'Lokanta',
   turkish_restaurant: 'Türk restoranı',
   italian_restaurant: 'İtalyan restoranı',
   pizza_restaurant: 'Pizzacı',

@@ -21,6 +21,8 @@ export const KATEGORI_PIN: Record<PinKategorisi, { renk: string; ikon: PinIkonu 
 const KATEGORI_ESLEME: [RegExp, PinKategorisi][] = [
   [/church|mosque|synagogue|place_of_worship|temple|cathedral|basilica|hindu|shrine/, 'ibadet'],
   [/museum|art_gallery|gallery/, 'muze'],
+  // #440: cafeteria (lokanta) `cafe` desenine takılmadan yemek.
+  [/cafeteria/, 'yemek'],
   [/cafe|bakery|coffee|tea_house|dessert|ice_cream|confectionery/, 'kafe'],
   [/restaurant|food|meal|pizza|steak|sushi|diner|bistro|brunch|breakfast|barbecue|seafood|deli|sandwich|kebab|bar$|pub|wine_bar/, 'yemek'],
   [/park|garden|national_park|zoo|botanical|beach|hiking/, 'park'],
@@ -48,7 +50,7 @@ export function konaklamaMi(primaryType: string | null | undefined): boolean {
 
 const ESLEME: [RegExp, PinIkonu][] = [
   [/park|garden|zoo|botanical|national_park|hiking|beach|campground/, 'agac'],
-  [/restaurant|food|meal|pizza|steak|sushi|bakery|diner|bistro|brunch|breakfast|barbecue|seafood|deli|sandwich/, 'catal'],
+  [/restaurant|cafeteria|food|meal|pizza|steak|sushi|bakery|diner|bistro|brunch|breakfast|barbecue|seafood|deli|sandwich/, 'catal'],
   [/cafe|coffee|tea_house|dessert|ice_cream|bar$|pub|wine_bar|cocktail/, 'fincan'],
   [/museum|art_gallery|gallery|aquarium|planetarium|cultural|performing_arts|library|visitor_center/, 'muze'],
   [/tourist_attraction|historical|landmark|monument|church|mosque|synagogue|temple|hindu|cathedral|basilica|castle|palace|fountain|plaza|square$|stadium|amusement|opera|theater|theatre|bridge|tower|ruins|archaeolog/, 'anit'],
