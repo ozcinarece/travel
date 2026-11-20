@@ -1,0 +1,602 @@
+{
+  "il": "Konya",
+  "slug": "konya",
+  "guncelleme": "2026-11-20",
+  "oneriler": [
+    {
+      "sira": 1,
+      "ad": "Mevlana Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Karatay",
+      "merkeze_km": 0,
+      "neden": "Yeşil kubbe altında Mevlana'nın sandukası; 1927'de dergâh kapatılınca müze oldu",
+      "osm": "way/491583514",
+      "place_id": "ChIJo7nXQRCF0BQREJS6hYaxO4Q"
+    },
+    {
+      "sira": 2,
+      "ad": "Çatalhöyük",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Çumra",
+      "merkeze_km": 52,
+      "neden": "MÖ 7400'den kalma höyük; damından girilen kerpiç evler, 2012'den UNESCO listesinde",
+      "place_id": "ChIJLVGO7D6n0BQReRtSrypsOpY"
+    },
+    {
+      "sira": 3,
+      "ad": "Alaeddin Camii ve Alaeddin Tepesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Selçuklu",
+      "merkeze_km": 1,
+      "neden": "1221'de I. Alaeddin Keykubad tamamladı; avluda sekiz Selçuklu sultanının türbesi",
+      "osm": "way/128082061",
+      "place_id": "ChIJrVKzKqiF0BQRsIbEwZy3HzY"
+    },
+    {
+      "sira": 4,
+      "ad": "Karatay Medresesi (Çini Eserleri Müzesi)",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Karatay",
+      "merkeze_km": 1,
+      "neden": "1251'de Celaleddin Karatay yaptırdı; kubbe içi firuze ve siyah çini yıldızlarla kaplı",
+      "place_id": "ChIJqSxYOgiF0BQRBG6Co68sYfw"
+    },
+    {
+      "sira": 5,
+      "ad": "İnce Minareli Medrese (Taş ve Ahşap Eserler Müzesi)",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Selçuklu",
+      "merkeze_km": 1,
+      "neden": "1264 Sahip Ata medresesi; yazı şeritli taçkapı, minarenin üstü 1901'de yıldırımla düştü",
+      "osm": "way/264740887",
+      "place_id": "ChIJAQDAQqiF0BQRL9Azfc2VjF4"
+    },
+    {
+      "sira": 6,
+      "ad": "Sille ve Aya Elena Kilisesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Selçuklu",
+      "merkeze_km": 10,
+      "neden": "Taş evli eski Rum köyü; kilisenin 327'de Helena'nın emriyle yapıldığı anlatılır",
+      "osm": "way/150634871",
+      "place_id": "ChIJW7cj7CeG0BQRCW4xMMyILk4"
+    },
+    {
+      "sira": 7,
+      "ad": "Beyşehir Gölü Milli Parkı",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Beyşehir",
+      "merkeze_km": 95,
+      "neden": "Türkiye'nin en büyük tatlı su gölü; içinde 20'yi aşkın ada, kıyıda sazlık ve balıkçılar",
+      "place_id": "ChIJ0QGP_J80xRQR53T7GHqF7r0"
+    },
+    {
+      "sira": 8,
+      "ad": "Eşrefoğlu Camii",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Beyşehir",
+      "merkeze_km": 94,
+      "neden": "1299'da bitti; ahşap direkler ve boyalı tavan, 2023'te UNESCO'ya ahşap camilerle girdi",
+      "osm": "way/312369311",
+      "place_id": "ChIJaRQyVQe22hQRoFnAL9tMvBk"
+    },
+    {
+      "sira": 9,
+      "ad": "Kilistra Antik Kenti",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "doga"
+      ],
+      "ilce": "Meram",
+      "merkeze_km": 48,
+      "neden": "Gökyurt'ta kayaya oyulmuş ev ve kiliseler; Pavlus'un Lystra yolunda geçtiği anlatılır",
+      "place_id": "ChIJv3RsNACP2hQRQq03_NYRiSg"
+    },
+    {
+      "sira": 10,
+      "ad": "Sema Töreni (Mevlana Kültür Merkezi)",
+      "kategori": "aktivite",
+      "amaclar": [
+        "kultur_tarih",
+        "gece"
+      ],
+      "ilce": "Karatay",
+      "merkeze_km": 1,
+      "neden": "Cumartesi akşamları semazenler döner; 7-17 Aralık Şeb-i Arus haftası en kalabalığıdır"
+    },
+    {
+      "sira": 11,
+      "ad": "Hacı Şükrü Fırın Kebap",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Meram",
+      "merkeze_km": 2,
+      "neden": "1907'den beri odun fırınında fırın kebabı; yanında kuru bamya çorbası ve tirit",
+      "place_id": "ChIJsY_VSa-F0BQRyeISGaRVfM0"
+    },
+    {
+      "sira": 12,
+      "ad": "Bolu Lokantası",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Karatay",
+      "merkeze_km": 0,
+      "neden": "Mevlana'nın hemen yanında Türbeönü'nde; ince, uzun etli ekmek ve tahinli pide",
+      "place_id": "ChIJ4dkIk4eF0BQRZ9tXgnBkatI"
+    },
+    {
+      "sira": 13,
+      "ad": "Kubadabad Sarayı",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "doga"
+      ],
+      "ilce": "Beyşehir",
+      "merkeze_km": 110,
+      "neden": "Keykubad'ın 1236 dolayında göl kıyısına yaptırdığı saray; figürlü çinileri Karatay'da",
+      "place_id": "ChIJh_QZthg4xRQR1IOmsdLn_Do"
+    },
+    {
+      "sira": 14,
+      "ad": "Nasreddin Hoca Türbesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Akşehir",
+      "merkeze_km": 135,
+      "neden": "Dört yanı açık türbenin kapısında koca bir kilit; şenlik her yıl 5-10 Temmuz'da",
+      "place_id": "ChIJzY9_X0HozxQRBa1NHRJozlk"
+    },
+    {
+      "sira": 15,
+      "ad": "İvriz Kaya Anıtı",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "doga"
+      ],
+      "ilce": "Halkapınar",
+      "merkeze_km": 165,
+      "neden": "MÖ 8. yy: Kral Warpalawa üzüm ve başak tutan Tarhunza'ya dua eder; kaynak dibinde",
+      "place_id": "ChIJ-wWtZN7s1xQRNfgyOWOKYQQ"
+    },
+    {
+      "sira": 16,
+      "ad": "Konya Arkeoloji Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Meram",
+      "merkeze_km": 1,
+      "neden": "Çatalhöyük buluntuları ve Herakles'in on iki görevini anlatan Roma lahdi",
+      "osm": "way/366780475",
+      "place_id": "ChIJWUrxuACF0BQRDLyBiLDL0wg"
+    },
+    {
+      "sira": 17,
+      "ad": "Tropikal Kelebek Bahçesi",
+      "kategori": "aktivite",
+      "amaclar": [
+        "cocuklu",
+        "doga"
+      ],
+      "ilce": "Selçuklu",
+      "merkeze_km": 12,
+      "neden": "Kelebek biçimli cam kubbede tropik bitkiler arasında uçuşan kelebekler; 2015'te açıldı",
+      "osm": "way/823558298",
+      "place_id": "ChIJ7SyncCeP0BQRt0FvygZcOTo"
+    },
+    {
+      "sira": 18,
+      "ad": "Sırçalı Medrese (Mezar Anıtları Müzesi)",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Meram",
+      "merkeze_km": 1,
+      "neden": "1242 medresesi, adını sırlı çinilerinden alır; avluda Selçuklu-Osmanlı mezar taşları",
+      "osm": "relation/5813421",
+      "place_id": "ChIJHRnV1FKE0BQRmoKXhv65TGw"
+    },
+    {
+      "sira": 19,
+      "ad": "Gazyağcı Furun Kebabı",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Meram",
+      "merkeze_km": 4,
+      "neden": "1891'den beri fırın kebabı ve kebap çorbası; tatlıda dondurmalı sac arası",
+      "place_id": "ChIJBVo5ICuE0BQRPbd4b9dH1Cw"
+    },
+    {
+      "sira": 20,
+      "ad": "Konya Bedesteni",
+      "kategori": "carsi",
+      "amaclar": [
+        "kultur_tarih",
+        "lezzet"
+      ],
+      "ilce": "Karatay",
+      "merkeze_km": 1,
+      "neden": "Kapu Camii çevresindeki dar sokaklar: bakırcı, baharatçı, yemenici ve terlikçiler",
+      "osm": "node/13202480946",
+      "place_id": "ChIJ0wjPtwWF0BQRk_6K1CqRVFo"
+    },
+    {
+      "sira": 21,
+      "ad": "Meke Gölü",
+      "kategori": "doga",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Karapınar",
+      "merkeze_km": 105,
+      "neden": "Volkan krateri içinde göl ve ortasında kara bir koni; su 2010'lardan beri çok azaldı",
+      "place_id": "ChIJOa8F0cly1xQREJXmT9rGP4U"
+    },
+    {
+      "sira": 22,
+      "ad": "Tuz Gölü (Cihanbeyli kıyısı)",
+      "kategori": "doga",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Cihanbeyli",
+      "merkeze_km": 110,
+      "neden": "Yazın kuruyup bembeyaz tuz kabuğuna dönen sığ göl; baharda flamingolar kuluçkaya yatar",
+      "place_id": "ChIJfXmbc89r1BQRNKrTMf-RX9o"
+    },
+    {
+      "sira": 23,
+      "ad": "Japon Parkı",
+      "kategori": "doga",
+      "amaclar": [
+        "cocuklu",
+        "yavas"
+      ],
+      "ilce": "Selçuklu",
+      "merkeze_km": 4,
+      "neden": "Japon bahçe düzeninde gölet, küçük şelale ve köprü; Selçuklu'da sakin bir mola",
+      "osm": "way/1279989002",
+      "place_id": "ChIJ_fWFO-aN0BQRajEP2vNLR-0"
+    },
+    {
+      "sira": 24,
+      "ad": "Tülü Taşlar",
+      "kategori": "doga",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Derbent",
+      "merkeze_km": 60,
+      "neden": "Aladağ eteğinde rüzgârın yonttuğu granit kayalar; üst üste konmuş dev taş kümeleri",
+      "place_id": "ChIJC65wTseF0BQR0Ypyzj3528E"
+    },
+    {
+      "sira": 25,
+      "ad": "Aladağ Kayak Merkezi",
+      "kategori": "aktivite",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Derbent",
+      "merkeze_km": 65,
+      "neden": "Kentin en yakın kayak alanı; kar yeterli kışlarda Derbent'in Aladağ yamaçlarında pist",
+      "place_id": "ChIJl5aje6Rz0BQRICzJS09FgV8"
+    },
+    {
+      "sira": 26,
+      "ad": "Zazadin Hanı",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Selçuklu",
+      "merkeze_km": 22,
+      "neden": "1236'da Sadeddin Köpek yaptırdı; duvarlarında devşirme Roma taşları, Aksaray yolunda",
+      "osm": "relation/3203038",
+      "place_id": "ChIJj9o5Itfq0BQRGXYmcyk9epk"
+    },
+    {
+      "sira": 27,
+      "ad": "Kabakçı Ali Lokantası",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Selçuklu",
+      "merkeze_km": 1,
+      "neden": "Devri Cedid'de tirit: yağlı ekmek dilimleri üstünde kuzu eti, yanında şiş köfte",
+      "osm": "node/5117564023",
+      "place_id": "ChIJqeIGyKiF0BQRbrn5bFS0Iw0"
+    },
+    {
+      "sira": 28,
+      "ad": "Tarihi Mithat Tirit",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Karatay",
+      "merkeze_km": 1,
+      "neden": "Aziziye'de 1988'den beri tek iş: kuzu tirit, yoğurt ve kızgın tereyağıyla",
+      "osm": "node/6796545285",
+      "place_id": "ChIJ_yHtCAWF0BQRLwKriky_GXs"
+    },
+    {
+      "sira": 29,
+      "ad": "Akyokuş Köşkü",
+      "kategori": "manzara",
+      "amaclar": [
+        "yavas",
+        "cocuklu"
+      ],
+      "ilce": "Meram",
+      "merkeze_km": 7,
+      "neden": "Kentin batısındaki çamlık tepede dört katlı köşk; üst kat terastan bütün Konya ovası",
+      "osm": "way/1274679858",
+      "place_id": "ChIJUzfPg4yG0BQR9gwGPO54Uec"
+    },
+    {
+      "sira": 30,
+      "ad": "Panorama Konya Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Karatay",
+      "merkeze_km": 0,
+      "neden": "13. yy Konya'sını ve Mevlana'nın hayatını 360 derece yağlı boya tabloyla gösterir",
+      "osm": "way/1527936720",
+      "place_id": "ChIJKbxC_xaF0BQROYPer9UakgY"
+    },
+    {
+      "sira": 31,
+      "ad": "Aziziye Camii",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Karatay",
+      "merkeze_km": 0,
+      "neden": "1867 yangınından sonra 1876'da yeniden yapıldı; şerefeleri köşk gibi kapalı barok cami",
+      "osm": "way/264414101",
+      "place_id": "ChIJRfW9dgWF0BQRbu5IvTtoIgk"
+    },
+    {
+      "sira": 32,
+      "ad": "Kadınlar Pazarı",
+      "kategori": "carsi",
+      "amaclar": [
+        "lezzet",
+        "kultur_tarih"
+      ],
+      "ilce": "Karatay",
+      "merkeze_km": 1,
+      "neden": "Akçeşme'de küflü testi peyniri, bulgur, kuru bamya ve köy tereyağı tezgâhları",
+      "place_id": "ChIJ7zy3BAWF0BQR-HhuMkc0Hbo"
+    },
+    {
+      "sira": 33,
+      "ad": "Hasan Şendağlı Yağ Somunu",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Karatay",
+      "merkeze_km": 0,
+      "neden": "Türbe Caddesi'nde sıcak yağ somunu, höşmerim ve şerbetli sac arası",
+      "osm": "node/12441739082",
+      "place_id": "ChIJgY-4Bj6F0BQRLu8OxtqkrLQ"
+    },
+    {
+      "sira": 34,
+      "ad": "Köfteci Sofu",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet",
+        "cocuklu"
+      ],
+      "ilce": "Selçuklu",
+      "merkeze_km": 4,
+      "neden": "1952'den beri kuzu köftesi; tatlı olarak fırın sütlaç",
+      "place_id": "ChIJZaGDTs6F0BQRBh21_RfcoxM"
+    },
+    {
+      "sira": 35,
+      "ad": "Cemo Etliekmek",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet",
+        "cocuklu"
+      ],
+      "ilce": "Selçuklu",
+      "merkeze_km": 3,
+      "neden": "1985'ten beri etli ekmek ve bıçakarası; tatlıda höşmerim ve sac arası",
+      "place_id": "ChIJnfa_dlqO0BQREy4CNpYBaYI"
+    },
+    {
+      "sira": 36,
+      "ad": "Lokmahane",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet",
+        "kultur_tarih"
+      ],
+      "ilce": "Karatay",
+      "merkeze_km": 1,
+      "neden": "Bamya ve tarhun çorbası, kayısılı yahni, kemikli büttüm: eski Konya sofrası",
+      "place_id": "ChIJiUgT2xqF0BQRGKiuCMl-SjM"
+    },
+    {
+      "sira": 37,
+      "ad": "Ali Baba Fırın Kebap",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Karatay",
+      "merkeze_km": 1,
+      "neden": "Şemsitebrizi'nde 1974'ten beri kuzu fırın kebabı, pide üstünde servis",
+      "osm": "node/4451503190",
+      "place_id": "ChIJgWMFDg-F0BQRbdtZlI9wy4w"
+    },
+    {
+      "sira": 38,
+      "ad": "Meşhur Helvacı Öksüzler",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet",
+        "yavas"
+      ],
+      "ilce": "Akşehir",
+      "merkeze_km": 135,
+      "neden": "1938'de Arasta Çarşısı'nda açıldı; dördüncü kuşak aynı tezgâhta helva yapıyor",
+      "place_id": "ChIJlW2ld0bozxQR5vmkKQKHiP8"
+    },
+    {
+      "sira": 39,
+      "ad": "Karamanoğlu Tatlıpark",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Karatay",
+      "merkeze_km": 0,
+      "neden": "Mevlana Caddesi'nde tatlıcı; sac arası, baklava ve künefe",
+      "place_id": "ChIJ0yPrPw-F0BQRvFFoTdUkUDs"
+    },
+    {
+      "sira": 40,
+      "ad": "Türbeönü Çarşısı",
+      "kategori": "carsi",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Karatay",
+      "merkeze_km": 0,
+      "neden": "Mevlana Müzesi karşısındaki dükkânlar: sikke, tesbih, semazen biblosu ve Mevlana şekeri"
+    },
+    {
+      "sira": 41,
+      "ad": "Gevale Kalesi (Takkeli Dağ)",
+      "kategori": "manzara",
+      "amaclar": [
+        "kultur_tarih",
+        "doga"
+      ],
+      "ilce": "Selçuklu",
+      "merkeze_km": 14,
+      "neden": "Takkeli Dağ'ın tepesindeki antik kale; restorasyonla 360 derece kent ve gün batımı",
+      "osm": "way/1007113842",
+      "place_id": "ChIJi9_rhnSH0BQR3gRDWR8Eof0"
+    },
+    {
+      "sira": 42,
+      "ad": "Kızlar Kayası",
+      "kategori": "manzara",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Meram",
+      "merkeze_km": 7,
+      "neden": "Dere Mahallesi'nde rüzgârın yonttuğu peribacaları; merdiven ve seyir terası, akşam ışıklı",
+      "place_id": "ChIJFw8CQouH0BQRT5n91vJ_EGU"
+    },
+    {
+      "sira": 43,
+      "ad": "Kızören Obruğu",
+      "kategori": "doga",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Karatay",
+      "merkeze_km": 70,
+      "neden": "Bozkırda çöken yeraltı boşluğunun dibinde göl; kenarından 100 m'yi aşan çukura bakılır",
+      "place_id": "ChIJoU_BhmHW1hQRQ8hFHGQRSLw"
+    },
+    {
+      "sira": 44,
+      "ad": "Selimiye Camii",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Karatay",
+      "merkeze_km": 0,
+      "neden": "II. Selim şehzadeyken başlatıldı, 1570'te bitti; Mevlana Müzesi'nin bitişiğinde",
+      "place_id": "ChIJM9RUBRCF0BQR1tE3md6Baak"
+    },
+    {
+      "sira": 45,
+      "ad": "Şems-i Tebrizi Türbesi ve Camii",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Karatay",
+      "merkeze_km": 1,
+      "neden": "Mevlana'nın yol arkadaşı Şems'e adanan türbe; 16. yy camisiyle aynı avluda",
+      "osm": "node/4327734312",
+      "place_id": "ChIJLwbu0giF0BQRYebKIxoICe8"
+    },
+    {
+      "sira": 46,
+      "ad": "Kebapçı Dedeler",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Meram",
+      "merkeze_km": 3,
+      "neden": "1929'dan beri fırın kebabı; kuzu, ince pide üstünde kendi yağıyla gelir",
+      "place_id": "ChIJRa_8gAWF0BQR9kv-gQbBepY"
+    }
+  ]
+}

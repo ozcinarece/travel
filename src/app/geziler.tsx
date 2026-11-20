@@ -1,18 +1,76 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { useMemo, useState } from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { EkranBasligi } from '@/components/EkranBasligi';
 import { GeziKarti } from '@/components/icerik/GeziKarti';
 import { Cip } from '@/components/ui/Cip';
+import { EklemeDurumSatiri } from '@/components/ui/EklemeDurumSatiri';
+import { bilinenRafBasligi, rafBul, yerelRafMi } from '@/features/anasayfa/raflar';
+import { useKesfetAkisi } from '@/features/icerik/kesfetAkisi';
 import { useGeziler, useSehirler } from '@/features/icerik/sorgular';
 import { t } from '@/i18n';
+import { useAnaSayfaBolumleri } from '@/lib/anaSayfa';
 import { bosluk, renk, yazi } from '@/theme';
 
-/** #97 A KK4 "Tümü": gezi listesi — şehir + gün sayısı filtresi; büyük kartlar. */
+/**
+ * #97 A KK4 "Tümü": gezi listesi — şehir + gün sayısı filtresi; büyük kartlar.
+ * #406: `raf` verilirse Keşfet rafının "Tümü"sü (ya da raf hedefli banner): başlık rafın adı, rafın bütün gezileri, süzgeç yok.
+ */
 export default function GezilerEkrani() {
-  const { sehir } = useLocalSearchParams<{ sehir?: string }>();
+  const { sehir, raf } = useLocalSearchParams<{ sehir?: string; raf?: string }>();
+  if (raf) return <RafListesi rafId={raf} />;
+  return <GeziListesi sehir={sehir} />;
+}
+
+function RafListesi({ rafId }: { rafId: string }) {
+  const bolumler = useAnaSayfaBolumleri();
+  const akis = useKesfetAkisi();
+  // #428 2. inceleme 1: amaç rafları (`amac:*`) ve "Hazır geziler" (`hepsi`) Keşfet'in kendi kurduğu raflar; bölümler
+  // okunamadığında Keşfet zaten bunlara düşer. Bu kimliklerde bölüm hatası yok sayılır, raf akıştan kurulur.
+  const yerelRaf = yerelRafMi(rafId);
+  const bolumHatasi = !yerelRaf && bolumler.isError && !bolumler.data;
+  const akisHatasi = akis.isError && !akis.data;
+  // #428 inceleme 3: bölümler ya da geziler yüklenirken gösterge (başlık bir an "Önerilen geziler" olmasın); okunamazsa
+  // Tekrar dene; raf bulunamaz ya da boşsa "Bu rafta şu an gezi yok" (bu ekranda süzgeç yok).
+  // 2. inceleme 2: Tekrar dene'ye basılınca yeniden okunurken de aynı gösterge (Keşfet'teki gibi görünür tepki).
+  const yenileniyor = (bolumHatasi && bolumler.isFetching) || (akisHatasi && akis.isFetching);
+  // 3. inceleme: yerel raf bölümleri beklemez (yeniden denemeleri sürebilir) ve bölümlere bakmadan akıştan kurulur; bölümler
+  // bu kez gelse de Keşfet'te az önce dolu görülen amaç rafı "gezi yok"a dönmez.
+  const yukleniyor = (!yerelRaf && bolumler.isPending) || akis.isPending || yenileniyor;
+  const hata = !yukleniyor && (bolumHatasi || akisHatasi);
+  const r = yukleniyor || hata ? null : rafBul(rafId, yerelRaf ? null : bolumler.data, akis.data ?? []);
+  // 2. inceleme (isteğe bağlı): başlık biliniyorsa yüklenirken ve boş halde de görünsün.
+  const baslik = r?.baslik ?? bilinenRafBasligi(rafId, bolumler.data) ?? '';
+  const tekrarDene = () => {
+    if (bolumHatasi) bolumler.refetch();
+    if (akisHatasi) akis.refetch();
+  };
+  return (
+    <SafeAreaView style={s.ekran} edges={['top']}>
+      <EkranBasligi baslik={baslik} geri={() => router.back()} />
+      <ScrollView contentContainerStyle={s.icerik}>
+        <View style={{ gap: 12, paddingTop: 6 }}>
+          {yukleniyor ? (
+            <ActivityIndicator color={renk.ana} style={s.yukleniyor} accessibilityLabel={t('genel.yukleniyor')} testID="raf-yukleniyor" />
+          ) : hata ? (
+            <EklemeDurumSatiri durum={{ metin: t('kesfetAkisi.agMetin'), tur: 'hata', tekrar: tekrarDene }} />
+          ) : (
+            <>
+              {(r?.geziler ?? []).map((g, i) => (
+                <GeziKarti key={g.id} gezi={g} buyuk sira={i} onPress={() => router.push({ pathname: '/gezi/[slug]', params: { slug: g.slug } })} />
+              ))}
+              {!r || r.geziler.length === 0 ? <Text style={s.bos}>{t('anasayfa.v6.rafBos')}</Text> : null}
+            </>
+          )}
+        </View>
+      </ScrollView>
+    </SafeAreaView>
+  );
+}
+
+function GeziListesi({ sehir }: { sehir?: string }) {
   const [sehirId, setSehirId] = useState<string | null>(sehir ?? null);
   const [gun, setGun] = useState<number | null>(null);
   const sehirler = useSehirler();
@@ -54,4 +112,5 @@ const s = StyleSheet.create({
   filtreBaslik: { fontFamily: yazi.kalin, fontSize: 12, color: renk.ikincil },
   cipler: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   bos: { fontFamily: yazi.normal, fontSize: 13, color: renk.ikincil, paddingVertical: 12 },
+  yukleniyor: { paddingVertical: 24 },
 });

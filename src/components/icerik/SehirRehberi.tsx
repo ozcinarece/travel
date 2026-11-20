@@ -2,13 +2,14 @@ import { router } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import Svg, { Circle, Path } from 'react-native-svg';
+import Svg, { Path } from 'react-native-svg';
 
 import { KapakAtfi } from '@/components/icerik/KapakAtfi';
 import { MdYazi } from '@/components/icerik/MdYazi';
 import { GeriAlBandi } from '@/components/listem/GeriAlBandi';
 import { MekanPaneli } from '@/components/mekan/MekanPaneli';
 import { AnaGeziKarti } from '@/components/ortak/AnaGeziKarti';
+import { InceEkle, Kamera } from '@/components/ortak/YerSatiri';
 import { Sekme, SekmeSatiri } from '@/components/ortak/Sekme';
 import { Buton } from '@/components/ui/Buton';
 import { Foto } from '@/components/ui/Foto';
@@ -236,45 +237,10 @@ export function SehirRehberi({ sehir, sehirlerYukleniyor, onGeri, seyahat, onReh
   );
 }
 
-/** Fotoğraf yoksa (kanvas): düz zemin, ortada 22 px kamera. */
-function Kamera() {
-  return (
-    <View style={s.fotoYok} accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
-      <Svg width={22} height={22} viewBox="0 0 24 24" fill="none" stroke={anaV5.ok} strokeWidth={1.8} strokeLinejoin="round">
-        <Path d="M4 8h3l1.5-2.5h7L17 8h3v11H4z" />
-        <Circle cx={12} cy={13.5} r={3.5} />
-      </Svg>
-    </View>
-  );
-}
-
-/** #397 KK5: ince "+" (32 px daire, 1,5 kenar) ↔ tik (satır zemini, yeşil). Etiketler `EkleDugmesi` ile aynı; dokunma alanı 44. */
-function InceEkle({ listede, mesgul, onPress }: { listede: boolean; mesgul: boolean; onPress: () => void }) {
-  return (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityLabel={listede ? t('ui.ekle.listede') : t('ui.ekle.ekle')}
-      accessibilityState={{ selected: listede, busy: mesgul }}
-      disabled={mesgul}
-      onPress={onPress}
-      hitSlop={6}
-      style={({ pressed }) => [s.ince, listede ? s.inceListede : s.inceBos, pressed && { opacity: 0.7 }]}>
-      {mesgul ? (
-        <ActivityIndicator size="small" color={renk.metin} />
-      ) : (
-        <Svg width={16} height={16} viewBox="0 0 24 24" fill="none" strokeLinecap="round" strokeLinejoin="round">
-          {listede ? <Path d="M5 12.5l4.5 4.5L19 7.5" stroke={renk.basari} strokeWidth={2.8} /> : <Path d="M12 6v12M6 12h12" stroke={renk.metin} strokeWidth={2.2} />}
-        </Svg>
-      )}
-    </Pressable>
-  );
-}
-
 const s = StyleSheet.create({
   ekran: { flex: 1, backgroundColor: renk.zemin },
   ortala: { alignItems: 'center', justifyContent: 'center', gap: 12, padding: 20 },
   kapak: { height: KAPAK, backgroundColor: anaV5.fotoYok },
-  fotoYok: { position: 'absolute', left: 0, right: 0, top: 0, bottom: 0, backgroundColor: anaV5.fotoYok, alignItems: 'center', justifyContent: 'center' },
   geri: { position: 'absolute', left: 16, width: 40, height: 40, borderRadius: 20, backgroundColor: renk.zemin, alignItems: 'center', justifyContent: 'center', shadowColor: renk.metin, shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.12, shadowRadius: 4, elevation: 2 },
   baslikBlok: { paddingTop: 16, paddingHorizontal: 16, paddingBottom: 12, gap: 6 },
   baslik: { fontFamily: yazi.ekstra, fontSize: 28, letterSpacing: -0.28, color: renk.metin },
@@ -288,9 +254,6 @@ const s = StyleSheet.create({
   satirMetin: { flex: 1, minWidth: 0, gap: 1 },
   satirAd: { fontFamily: yazi.kalin, fontSize: 15, color: renk.metin },
   satirAlt: { fontFamily: yazi.normal, fontSize: 13, color: anaV5.ikincil },
-  ince: { width: 32, height: 32, borderRadius: 16, alignItems: 'center', justifyContent: 'center' },
-  inceBos: { borderWidth: 1.5, borderColor: anaV5.inceKenar },
-  inceListede: { backgroundColor: anaV5.satirZemin },
   geziler: { paddingHorizontal: 16, paddingTop: 24, gap: 16 },
   gezilerBaslik: { fontFamily: yazi.ekstra, fontSize: 20, color: renk.metin },
   hata: { fontFamily: yazi.kalin, fontSize: 13, color: renk.uyari, textAlign: 'center' },

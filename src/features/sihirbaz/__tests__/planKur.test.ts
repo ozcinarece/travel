@@ -1,6 +1,6 @@
 import { describe, expect, it } from '@jest/globals';
 
-import { bacakDk, bolgeler, durakDakikasi, enYakinKomsu, GUN_KAPASITESI_DK, planKur, secimOzeti, type KonumluMekan } from '../planKur';
+import { bacakDk, bolgeler, durakDakikasi, enYakinKomsu, GUN_KAPASITESI_DK, gunDolulugu, gunEki, planKur, secimOzeti, type KonumluMekan } from '../planKur';
 
 // Eskişehir: Odunpazarı kümesi (birbirine ~300–600 m) ve Sazova kümesi (~5 km batıda).
 const m = (id: string, lat: number, lng: number, dakika = 60): KonumluMekan => ({ id, lat, lng, dakika });
@@ -88,5 +88,29 @@ describe('planKur (#139 KK5)', () => {
     expect(durakDakikasi(50)).toBe(50);
     expect(durakDakikasi(5)).toBe(15);
     expect(durakDakikasi(700)).toBe(480);
+  });
+});
+
+// #401 (`Ekran07cIlOnerileri` A–B alt çubuğu): "2 günün 1,2'si dolu" ve gün çubukları.
+describe('#401 gün doluluğu ve iyelik eki', () => {
+  it('ek okunuşa göre çekimlenir', () => {
+    expect(gunEki(1.2)).toBe("1,2'si");
+    expect(gunEki(1.6)).toBe("1,6'sı");
+    expect(gunEki(1)).toBe("1'i");
+    expect(gunEki(0.5)).toBe("0,5'i");
+    expect(gunEki(2)).toBe("2'si");
+    expect(gunEki(3.3)).toBe("3,3'ü");
+    expect(gunEki(0.9)).toBe("0,9'u");
+    expect(gunEki(0)).toBe("0'ı");
+    expect(gunEki(10)).toBe("10'u");
+    expect(gunEki(20)).toBe("20'si");
+    expect(gunEki(1.04)).toBe("1'i");
+  });
+
+  it('günler sırayla dolar; kapasite GUN_KAPASITESI_DK', () => {
+    const tek = [{ id: 'a', lat: 39.76, lng: 30.52, dakika: GUN_KAPASITESI_DK * 1.2 }];
+    expect(gunDolulugu(tek, 2)).toEqual({ dolu: 1.2, cubuklar: [1, expect.closeTo(0.2, 5)] });
+    expect(gunDolulugu([], 2)).toEqual({ dolu: 0, cubuklar: [0, 0] });
+    expect(gunDolulugu(tek, 0).cubuklar).toEqual([]);
   });
 });

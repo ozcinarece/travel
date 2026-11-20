@@ -4,11 +4,32 @@ import { useQuery } from '@tanstack/react-query';
 
 import { supabase } from './supabase';
 
-export type BolumTuru = 'tek_kart' | 'serit' | 'mozaik' | 'sehir_seckisi';
+/** #406: `banner` ve `raf` v6 Keşfet'in bölümleri; eski dört tür (#109) uygulamada artık çizilmez, panelde kalır. */
+export type BolumTuru = 'tek_kart' | 'serit' | 'mozaik' | 'sehir_seckisi' | 'banner' | 'raf';
 export type BolumKaynagi = 'otomatik' | 'elle';
 
-/** tek_kart: {gezi_id} · serit: {gezi_idler} · mozaik: {yer_idler} · sehir_seckisi: {sehir_idler}. Otomatikte liste boş olabilir. */
-export type BolumIcerigi = { gezi_id?: string | null; gezi_idler?: string[]; yer_idler?: string[]; sehir_idler?: string[] };
+/** #406 KK2: banner'ın dokununca açtığı yer. */
+export type BannerHedefi = { tur: 'gezi' | 'sehir' | 'raf'; id: string };
+/** #406 KK3 · KK5: raf türü (`arkadaslardan` 26 Kasım paylaşımından sonra dolar; şimdilik çizilmez). */
+export type RafTuru = 'amac' | 'sehir' | 'elle' | 'arkadaslardan';
+
+/**
+ * tek_kart: {gezi_id} · serit: {gezi_idler} · mozaik: {yer_idler} · sehir_seckisi: {sehir_idler}. Otomatikte liste boş olabilir.
+ * #406 banner: {ust_yazi, kapak_url, kapak_atif, hedef} · raf: {raf_turu, amac | sehir_id | gezi_idler}.
+ */
+export type BolumIcerigi = {
+  gezi_id?: string | null;
+  gezi_idler?: string[];
+  yer_idler?: string[];
+  sehir_idler?: string[];
+  ust_yazi?: string;
+  kapak_url?: string;
+  kapak_atif?: unknown;
+  hedef?: BannerHedefi;
+  raf_turu?: RafTuru;
+  amac?: string;
+  sehir_id?: string;
+};
 
 export type AnaSayfaBolumu = {
   id: string;
@@ -98,5 +119,9 @@ export function bolumKimlikleri(
       ).slice(0, enFazla);
     case 'sehir_seckisi':
       return varOlan(b.icerik.sehir_idler, kaynak.sehirler).slice(0, enFazla);
+    case 'banner':
+    case 'raf':
+      // #406: v6 bölümleri `features/anasayfa/raflar.ts` ile çözülür.
+      return [];
   }
 }
