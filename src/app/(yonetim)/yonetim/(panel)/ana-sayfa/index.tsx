@@ -54,7 +54,7 @@ export default function AnaSayfaDuzeniSayfasi() {
       else yeni.delete(id);
       return yeni;
     });
-  const kaydedilmemis = liste.some((b) => kirliler.has(b.id));
+  const kaydedilmemis = liste.find((b) => kirliler.has(b.id)) ?? null;
   const dene = (p: Promise<unknown>) => p.catch(() => setHata(ty('gezi.islemHata')));
   const secenekler = {
     geziler: geziler.data ?? [],
@@ -67,7 +67,7 @@ export default function AnaSayfaDuzeniSayfasi() {
   const planli = planliSatirlar(bolumler, ty);
 
   const yayinla = async () => {
-    if (kaydedilmemis) return setHata(ty('anaSayfa.yayinGorselBekliyor'));
+    if (kaydedilmemis) return setHata(ty('anaSayfa.yayinGorselBekliyor', { baslik: kaydedilmemis.baslik }));
     setMesgul(true);
     setHata(null);
     try {

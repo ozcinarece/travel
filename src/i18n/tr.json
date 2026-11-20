@@ -797,6 +797,8 @@
       "hazirGeziler": "Hazır geziler",
       "bannerSayi": "{n} hazır gezi ›",
       "bannerEtiket": "{baslik}, {n} hazır gezi",
+      "bannerGeziyiGor": "Geziyi gör ›",
+      "bannerGeziyiGorEtiket": "{baslik}, geziyi gör",
       "amacRafi": {
         "kultur_tarih": "Kültür ve tarih için",
         "lezzet": "Lezzet için",

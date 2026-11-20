@@ -332,6 +332,9 @@ function BannerAlanlari({
     (!!adres.trim() && (yazar.trim() !== (atif?.yazar ?? '') || lisans.trim() !== (atif?.lisans ?? '') || kaynak.trim() !== (atif?.kaynak_url ?? '')));
   const kirliBildir = useEffectEvent((k: boolean) => onKirli(k));
   useEffect(() => kirliBildir(kirli), [kirli]);
+  // #438 inceleme 2 (3. tur): tür rafa dönünce ya da banner alanları sökülünce yazılan görsel gider; "kaydedilmemiş" kalmasın.
+  const kirliTemizle = useEffectEvent(() => onKirli(false));
+  useEffect(() => () => kirliTemizle(), []);
   const yaz = (degisen: Parameters<typeof bannerIcerigi>[1]) => onGuncelle({ icerik: bannerIcerigi(i, degisen) });
   // Hedef türü yerel: tür seçilip henüz öğe seçilmeden DB'ye hedefsiz yazılır (hedef = tür + kimlik).
   const [hedefTuru, setHedefTuru] = useState<BannerHedefi['tur'] | ''>(i.hedef?.tur ?? '');
@@ -425,7 +428,8 @@ function BannerAlanlari({
       ) : null}
       <View style={s.gorselEylem}>
         <Hap kucuk baslik={ty('anaSayfa.gorselKaydet')} onPress={gorselKaydet} />
-        {i.kapak_url ? <Hap kucuk baslik={ty('anaSayfa.gorselKaldir')} onPress={gorselKaldir} /> : null}
+        {/* #438 inceleme 3 (3. tur): Yayınla uyarısı bu düğmeyi gösteriyor; kaydedilmemiş görsel varken de görünür. */}
+        {i.kapak_url || kirli ? <Hap kucuk baslik={ty('anaSayfa.gorselKaldir')} onPress={gorselKaldir} /> : null}
       </View>
       <Text style={s.not}>{ty('anaSayfa.bannerNotu')}</Text>
     </>

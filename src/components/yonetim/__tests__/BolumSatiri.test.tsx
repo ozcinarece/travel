@@ -90,6 +90,29 @@ describe('BolumSatiri v6 (#406 2/2)', () => {
     expect(r.getByLabelText('GÖRSEL ADRESİ (boşsa hedefin kapağı)', { includeHiddenElements: true }).props.value).toBe('https://upload.wikimedia.org/wikipedia/commons/a/ab/Bursa.jpg');
   });
 
+  it('#438 3. inceleme: kirliyken "Görseli kaldır" görünür; tür rafa dönünce kaydedilmemiş bilgisi temizlenir', () => {
+    const onKirli = jest.fn();
+    const onGuncelle = jest.fn();
+    const banner: TaslakBolum = { ...bolum, tur: 'banner', icerik: {} };
+    const ortak = { indeks: 0, secenekler: v6Secenekler, onAcKapa: () => {}, onGuncelle, onSil: () => {}, onBirak: () => {}, onKirli };
+    const r = render(<BolumSatiri bolum={banner} acik {...ortak} />);
+    expect(r.queryByRole('button', { name: 'Görseli kaldır' })).toBeNull();
+    fireEvent.changeText(r.getByLabelText('GÖRSEL ADRESİ (boşsa hedefin kapağı)'), 'https://upload.wikimedia.org/wikipedia/commons/a/ab/Bursa.jpg');
+    expect(onKirli).toHaveBeenLastCalledWith(true);
+    // Kaydedilmemiş yazıyı silen "Görseli kaldır" görünür ve kirliliği kaldırır.
+    fireEvent.press(r.getByRole('button', { name: 'Görseli kaldır' }));
+    expect(onKirli).toHaveBeenLastCalledWith(false);
+    expect(r.queryByText('Görsel kaydedilmedi')).toBeNull();
+    // Yeniden yaz, kaydetmeden tür Raf: içerik boş olduğu için onay sorulmaz; kirli bilgisi sıfırlanır.
+    fireEvent.changeText(r.getByLabelText('GÖRSEL ADRESİ (boşsa hedefin kapağı)'), 'https://upload.wikimedia.org/wikipedia/commons/a/ab/Bursa.jpg');
+    expect(onKirli).toHaveBeenLastCalledWith(true);
+    sec(r.getByLabelText('TÜR') as never, 'raf');
+    expect(onGuncelle).toHaveBeenLastCalledWith({ tur: 'raf', kaynak: 'elle', icerik: { raf_turu: 'elle', gezi_idler: [] } });
+    r.rerender(<BolumSatiri bolum={{ ...banner, tur: 'raf', icerik: { raf_turu: 'elle', gezi_idler: [] } }} acik {...ortak} />);
+    expect(onKirli).toHaveBeenLastCalledWith(false);
+    expect(r.queryByText('Görsel kaydedilmedi')).toBeNull();
+  });
+
   it('#438: hata yalnız ait olduğu alanı kırmızı yapar', () => {
     const banner: TaslakBolum = { ...bolum, tur: 'banner', icerik: {} };
     const { getByLabelText, getByRole } = satir(banner);
@@ -120,7 +143,7 @@ describe('BolumSatiri v6 (#406 2/2)', () => {
 
     fireEvent.changeText(getByLabelText('GÖRSEL ADRESİ (boşsa hedefin kapağı)'), 'https://xwqeobelyeuzoxyuvauw.supabase.co/storage/v1/object/public/icerik/.\t./avatars/u1/a.jpg');
     fireEvent.press(getByRole('button', { name: 'Görseli kaydet' }));
-    expect(getByText(/Commons'tan ya da Tripmate'e yüklenmiş olmalı/)).toBeTruthy();
+    expect(getByText(/Görsel Wikimedia Commons'tan olmalı\./)).toBeTruthy();
     expect(onGuncelle).not.toHaveBeenCalled();
 
     fireEvent.changeText(getByLabelText('GÖRSEL ADRESİ (boşsa hedefin kapağı)'), 'https://upload.wikimedia.org/wikipedia/commons/a/ab/Bursa.jpg');
