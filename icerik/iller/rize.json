@@ -373,13 +373,15 @@
     },
     {
       "sira": 30,
-      "ad": "Laz böreği",
+      "ad": "Dergah Pastanesi",
       "kategori": "tatli_kahve",
       "amaclar": [
         "lezzet"
       ],
       "ilce": "Merkez",
-      "neden": "Yufka katları arasında muhallebi, üstünde şerbet; Rize'de pastane ve lokanta tatlısı"
+      "merkeze_km": 0,
+      "neden": "Merkezde pastane; üzüm suyu ve mısır unuyla koyulaşan pepeçura tatlısıyla anılır",
+      "place_id": "ChIJOfHa3hF7ZkAR43BBHB-SY_M"
     },
     {
       "sira": 31,

@@ -124,18 +124,6 @@
     },
     {
       "sira": 10,
-      "ad": "Meke Gölü",
-      "kategori": "doga",
-      "amaclar": [
-        "doga"
-      ],
-      "ilce": "Karapınar",
-      "merkeze_km": 105,
-      "neden": "Volkan krateri içinde göl ve ortasında kara bir koni; su 2010'lardan beri çok azaldı",
-      "place_id": "ChIJOa8F0cly1xQREJXmT9rGP4U"
-    },
-    {
-      "sira": 11,
       "ad": "Sema Töreni (Mevlana Kültür Merkezi)",
       "kategori": "aktivite",
       "amaclar": [
@@ -147,7 +135,7 @@
       "neden": "Cumartesi akşamları semazenler döner; 7-17 Aralık Şeb-i Arus haftası en kalabalığıdır"
     },
     {
-      "sira": 12,
+      "sira": 11,
       "ad": "Hacı Şükrü Fırın Kebap",
       "kategori": "yemek",
       "amaclar": [
@@ -159,7 +147,7 @@
       "place_id": "ChIJsY_VSa-F0BQRyeISGaRVfM0"
     },
     {
-      "sira": 13,
+      "sira": 12,
       "ad": "Bolu Lokantası",
       "kategori": "yemek",
       "amaclar": [
@@ -171,7 +159,7 @@
       "place_id": "ChIJ4dkIk4eF0BQRZ9tXgnBkatI"
     },
     {
-      "sira": 14,
+      "sira": 13,
       "ad": "Kubadabad Sarayı",
       "kategori": "tarih",
       "amaclar": [
@@ -184,7 +172,7 @@
       "place_id": "ChIJh_QZthg4xRQR1IOmsdLn_Do"
     },
     {
-      "sira": 15,
+      "sira": 14,
       "ad": "Nasreddin Hoca Türbesi",
       "kategori": "tarih",
       "amaclar": [
@@ -197,7 +185,7 @@
       "place_id": "ChIJzY9_X0HozxQRBa1NHRJozlk"
     },
     {
-      "sira": 16,
+      "sira": 15,
       "ad": "İvriz Kaya Anıtı",
       "kategori": "tarih",
       "amaclar": [
@@ -210,7 +198,7 @@
       "place_id": "ChIJ-wWtZN7s1xQRNfgyOWOKYQQ"
     },
     {
-      "sira": 17,
+      "sira": 16,
       "ad": "Konya Arkeoloji Müzesi",
       "kategori": "muze",
       "amaclar": [
@@ -223,7 +211,7 @@
       "place_id": "ChIJWUrxuACF0BQRDLyBiLDL0wg"
     },
     {
-      "sira": 18,
+      "sira": 17,
       "ad": "Tropikal Kelebek Bahçesi",
       "kategori": "aktivite",
       "amaclar": [
@@ -237,7 +225,7 @@
       "place_id": "ChIJ7SyncCeP0BQRt0FvygZcOTo"
     },
     {
-      "sira": 19,
+      "sira": 18,
       "ad": "Sırçalı Medrese (Mezar Anıtları Müzesi)",
       "kategori": "muze",
       "amaclar": [
@@ -251,7 +239,7 @@
       "place_id": "ChIJHRnV1FKE0BQRmoKXhv65TGw"
     },
     {
-      "sira": 20,
+      "sira": 19,
       "ad": "Gazyağcı Furun Kebabı",
       "kategori": "yemek",
       "amaclar": [
@@ -263,7 +251,7 @@
       "place_id": "ChIJBVo5ICuE0BQRPbd4b9dH1Cw"
     },
     {
-      "sira": 21,
+      "sira": 20,
       "ad": "Konya Bedesteni",
       "kategori": "carsi",
       "amaclar": [
@@ -275,6 +263,18 @@
       "neden": "Kapu Camii çevresindeki dar sokaklar: bakırcı, baharatçı, yemenici ve terlikçiler",
       "osm": "node/13202480946",
       "place_id": "ChIJ0wjPtwWF0BQRk_6K1CqRVFo"
+    },
+    {
+      "sira": 21,
+      "ad": "Meke Gölü",
+      "kategori": "doga",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Karapınar",
+      "merkeze_km": 105,
+      "neden": "Volkan krateri içinde göl ve ortasında kara bir koni; su 2010'lardan beri çok azaldı",
+      "place_id": "ChIJOa8F0cly1xQREJXmT9rGP4U"
     },
     {
       "sira": 22,
@@ -500,14 +500,15 @@
     },
     {
       "sira": 39,
-      "ad": "Mevlana şekeri",
+      "ad": "Karamanoğlu Tatlıpark",
       "kategori": "tatli_kahve",
       "amaclar": [
-        "lezzet",
-        "kultur_tarih"
+        "lezzet"
       ],
       "ilce": "Karatay",
-      "neden": "Beyaz, aromasız sert şeker; türbe ziyaretinden sonra Türbeönü dükkânlarından alınır"
+      "merkeze_km": 0,
+      "neden": "Mevlana Caddesi'nde tatlıcı; sac arası, baklava ve künefe",
+      "place_id": "ChIJ0yPrPw-F0BQRvFFoTdUkUDs"
     },
     {
       "sira": 40,
@@ -536,16 +537,16 @@
     },
     {
       "sira": 42,
-      "ad": "Selçuklu Kulesi",
+      "ad": "Kızlar Kayası",
       "kategori": "manzara",
       "amaclar": [
-        "gece",
-        "cocuklu"
+        "doga",
+        "yavas"
       ],
-      "ilce": "Selçuklu",
-      "merkeze_km": 6,
-      "neden": "42 katlı gökdelenin üst katlarından ovaya ve Alaeddin Tepesi'ne bakış",
-      "place_id": "ChIJRcd_PnaF0BQRkcVXlwV1zKg"
+      "ilce": "Meram",
+      "merkeze_km": 7,
+      "neden": "Dere Mahallesi'nde rüzgârın yonttuğu peribacaları; merdiven ve seyir terası, akşam ışıklı",
+      "place_id": "ChIJFw8CQouH0BQRT5n91vJ_EGU"
     },
     {
       "sira": 43,
