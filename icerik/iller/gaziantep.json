@@ -25,7 +25,7 @@
       ],
       "ilce": "Şahinbey",
       "merkeze_km": 0,
-      "neden": "2023 depreminde burçları yıkılan kale, Bakanlık restorasyonuyla surlarına yeniden kavuştu.",
+      "neden": "Şehrin ortasındaki höyükte kale; 2023 depreminde yıkılan burçları restore edildi.",
       "osm": "way/237058550",
       "place_id": "ChIJP__QMU3hMRURGSnqQ-TLVxc"
     },
@@ -268,7 +268,7 @@
       ],
       "ilce": "Şahinbey",
       "merkeze_km": 1,
-      "neden": "Sarkis Balyan'ın 1893'te Ermeni katedrali olarak tasarladığı yapı; depremde kubbesi çöktü.",
+      "neden": "Sarkis Balyan'ın 1893'te katedral olarak tasarladığı yapı; depremden sonra onarıldı.",
       "osm": "way/300646387",
       "place_id": "ChIJWUtXKDbhMRURGAVeMIuaw1c"
     },
@@ -374,7 +374,7 @@
     {
       "sira": 30,
       "ad": "Habeş Kanyonu",
-      "kategori": "doga",
+      "kategori": "manzara",
       "amaclar": [
         "doga"
       ],
