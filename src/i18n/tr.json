@@ -1388,5 +1388,33 @@
     "yakinYukleniyor": "Yakındaki yerler yükleniyor",
     "listeYukleniyor": "Öneriler yükleniyor",
     "tekrarDene": "Tekrar dene"
+  },
+  "paylasim": {
+    "menu": "Geziyi paylaş",
+    "baslik": "Geziyi paylaş",
+    "kapat": "Kapat",
+    "onizleme": "Arkadaşın bunu görecek",
+    "kimin": "{ad} {sehir} gezisi",
+    "kiminsiz": "{sehir} gezisi",
+    "gun": "{n} gün",
+    "durak": "{n} durak",
+    "kisi": "{n} kişi gezdi",
+    "kisiAdlari": "Kişi adlarını göster",
+    "kisiAdlariAlt": "Kapalıyken yalnız “{n} kişi gezdi” yazar",
+    "kisiAdlariUyari": "Seyahatteki herkesin adı linki açan kişiye görünür.",
+    "gizli": "Notlar, harcamalar ve sohbet",
+    "gizliAlt": "Hiçbir zaman paylaşılmaz",
+    "kilitli": "Kilitli",
+    "linkiGonder": "Linki gönder",
+    "linkAlt": "Linki olan herkes geziyi görür, düzenleyemez.",
+    "linkAcik": "Link açık",
+    "acildi": "{n} kez açıldı",
+    "paylasimiKapat": "Paylaşımı kapat",
+    "kapatOnayMetin": "Link kapanır, açan kişiler geziyi göremez.",
+    "kapatEvet": "Kapat",
+    "arkadasSoru": "Birlikte planlamak mı istiyorsun?",
+    "arkadasEkle": "Arkadaş ekle ›",
+    "mesaj": "{baslik} · {ozet}\n{link}",
+    "hata": "Link şu an oluşturulamadı. Biraz sonra yeniden dene."
   }
 }
