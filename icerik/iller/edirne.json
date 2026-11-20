@@ -1,0 +1,527 @@
+{
+  "il": "Edirne",
+  "slug": "edirne",
+  "guncelleme": "2026-11-20",
+  "oneriler": [
+    {
+      "sira": 1,
+      "ad": "Selimiye Camii",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Mimar Sinan 1568-74'te yaptı; dört minaresi 70,89 m, 2011'de UNESCO listesine girdi",
+      "osm": "relation/3376582",
+      "place_id": "ChIJlbOvxnUvsxQReyK2HRS8dUU"
+    },
+    {
+      "sira": 2,
+      "ad": "Eski Cami",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "1402-1414'te yapılan dokuz kubbeli ulu cami; iç duvarlarda dev boyutlu hat yazıları var",
+      "osm": "way/211425197",
+      "place_id": "ChIJ__8_lHcvsxQR0QsBO0kfpBI"
+    },
+    {
+      "sira": 3,
+      "ad": "Üç Şerefeli Cami",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "1438-47 yapımı; üç şerefeli minaresi 67 m'yi aşar, döneminin en yüksek Osmanlı minaresiydi",
+      "osm": "way/211425199",
+      "place_id": "ChIJC-d3XHEvsxQRdRvRs1A89rE"
+    },
+    {
+      "sira": 4,
+      "ad": "Sultan II. Bayezid Külliyesi Sağlık Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "1488'de biten darüşşifada akıl hastalarının müzik, su sesi ve kokuyla tedavisi anlatılıyor",
+      "osm": "node/11716355894",
+      "place_id": "ChIJuYZ_VWsvsxQRBOMaJIJeVd0"
+    },
+    {
+      "sira": 5,
+      "ad": "Selimiye Arastası (Kavaflar Arastası)",
+      "kategori": "carsi",
+      "amaclar": [
+        "kultur_tarih",
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Selimiye'ye gelir sağlamak için yapılan 73 kemerli çarşı; dükkânların çoğu şekerlemeci",
+      "place_id": "ChIJ3cCG0XUvsxQRIccxh9UMIPI"
+    },
+    {
+      "sira": 6,
+      "ad": "Meriç Köprüsü (Mecidiye Köprüsü)",
+      "kategori": "manzara",
+      "amaclar": [
+        "yavas",
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 2,
+      "neden": "1843'te tamamlanan 263 m'lik köprü; ortasındaki köşkten Meriç'te gün batımı izlenir",
+      "osm": "way/170145203",
+      "place_id": "ChIJCzwgqoclsxQRqSB6reIpQTg"
+    },
+    {
+      "sira": 7,
+      "ad": "Ciğerci Niyazi Usta",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "1983'te açılan ciğerci; ince tava ciğerin yanında dondurmalı irmik tatlısı da var",
+      "osm": "node/9176373617",
+      "place_id": "ChIJ42xg9HAvsxQRCcSrmnF8AoU"
+    },
+    {
+      "sira": 8,
+      "ad": "Ali Paşa Çarşısı (Semiz Ali Paşa Çarşısı)",
+      "kategori": "carsi",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Mimar Sinan'ın Semiz Ali Paşa için 1560'larda yaptığı, yaklaşık 300 m'lik kapalı çarşı",
+      "place_id": "ChIJZQxubS0vsxQROSCqjSs8Lgs"
+    },
+    {
+      "sira": 9,
+      "ad": "Edirne Arkeoloji ve Etnografya Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "Selimiye'nin yanında; Kalkolitik'ten Osmanlı'ya eserler, fil ve gergedan kemikleri",
+      "osm": "node/2181137651",
+      "place_id": "ChIJ_Sk-hHUvsxQR93N2Ch8zZ58"
+    },
+    {
+      "sira": 10,
+      "ad": "Uzunköprü (Ergene Köprüsü)",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Uzunköprü",
+      "merkeze_km": 46,
+      "neden": "1427-1443'te Ergene üzerine yapılan, 1.300 m'yi aşan taş köprü; ilçe adını ondan aldı",
+      "osm": "way/27705333",
+      "place_id": "ChIJxWHZlcEOsxQRtIcxh-7AAPY"
+    },
+    {
+      "sira": 11,
+      "ad": "Gala Gölü Milli Parkı",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Enez",
+      "merkeze_km": 106,
+      "neden": "Meriç Deltası'nda 6.090 hektarlık sulak alan; kışın flamingo, pelikan ve kuğular gelir",
+      "place_id": "ChIJ_aaaP-QmshQRSCaVgOdAZv4"
+    },
+    {
+      "sira": 12,
+      "ad": "Tarihi Kırkpınar Yağlı Güreşleri (Sarayiçi Er Meydanı)",
+      "kategori": "aktivite",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 2,
+      "neden": "Her yaz Sarayiçi'nde yapılan yağlı güreş; 2010'da UNESCO somut olmayan miras listesinde",
+      "place_id": "ChIJHU7DNf4vsxQRIwfwC-VC1r4"
+    },
+    {
+      "sira": 13,
+      "ad": "Aydın Tava Ciğer",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "1998'den beri Tahmis Çarşısı'nda; ciğer kuru Edirne biberiyle, tatlısı peynir helvası",
+      "osm": "node/7947259045",
+      "place_id": "ChIJPbBD13AvsxQRdljl_WOKltI"
+    },
+    {
+      "sira": 14,
+      "ad": "Muradiye Camii",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "1435-36'da mevlevihane olarak yapıldı; altıgen çinileri ilk Osmanlı sıraltı çinileri",
+      "osm": "way/281702066",
+      "place_id": "ChIJBSNRpKEvsxQR6IJK7KgBy5M"
+    },
+    {
+      "sira": 15,
+      "ad": "Edirne Büyük Sinagogu",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "1909'da açılan Türkiye'nin en büyük sinagogu; beş yıllık restorasyonla 2015'te açıldı",
+      "osm": "way/687828278",
+      "place_id": "ChIJb7WeBXsvsxQRjQ8p4aH8_hg"
+    },
+    {
+      "sira": 16,
+      "ad": "Tunca Köprüsü",
+      "kategori": "manzara",
+      "amaclar": [
+        "yavas",
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "1608-15 yapımı on kemerli, ortası kuleli köprü; gün batımında Tunca'ya bakılan köprü",
+      "place_id": "ChIJd2n9PHwvsxQRjWpOkLSzato"
+    },
+    {
+      "sira": 17,
+      "ad": "Milli Mücadele ve Lozan Müzesi ile Lozan Anıtı",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 4,
+      "neden": "Karaağaç'ın eski tren garında; Lozan belgeleri ve İnönü'nün eşyaları sergileniyor",
+      "osm": "way/745995506",
+      "place_id": "ChIJMaYeqN0lsxQR2Yvej2zQmaU"
+    },
+    {
+      "sira": 18,
+      "ad": "Hıdırlık Tabya Balkan Tarihi Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 3,
+      "neden": "1829 tarihli tabyanın 44 odasında Balkanlardaki 600 yıllık Türk tarihi anlatılıyor",
+      "osm": "way/655487472",
+      "place_id": "ChIJ622p2tEvsxQRCF8nRchkt3o"
+    },
+    {
+      "sira": 19,
+      "ad": "Makedonya Kulesi (Kule Müzesi ve Arkeopark)",
+      "kategori": "manzara",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Hadrian döneminden kalan 48 m'lik kule; seyir terası ve arkeoparkla ziyarete açık",
+      "osm": "way/609031025",
+      "place_id": "ChIJuerjCXEvsxQRJw7zDujvlMI"
+    },
+    {
+      "sira": 20,
+      "ad": "Meşhur Edirne Ciğercisi Kazım ve İlhan Usta",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "1964'ten beri Balıkpazarı'nda; tava ciğerin yanında Hayrabolu tatlısı da var",
+      "place_id": "ChIJJTy3ZHovsxQRXLOgslOz8IA"
+    },
+    {
+      "sira": 21,
+      "ad": "Arslanzade",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Arif Meriç'in dükkânı; 41 baharatlı deva-i misk helvası ve tereyağlı kavala kurabiyesi",
+      "place_id": "ChIJgYxFtnUvsxQR65wkfFrwab0"
+    },
+    {
+      "sira": 22,
+      "ad": "Enez Kalesi ve Ayasofya (Fatih) Camii",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Enez",
+      "merkeze_km": 113,
+      "neden": "Kale içindeki 12. yy. kilisesi 1965 depreminde yıkıldı, 2021'de camiye yeniden açıldı",
+      "osm": "way/249613428",
+      "place_id": "ChIJNR3RE4SKsRQRzAOr0IvvBbc"
+    },
+    {
+      "sira": 23,
+      "ad": "Necmi İğe Evi Etnografya Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "Geleneksel bir Edirne evinde Rumeli düğünleri eşya ve videolarla anlatılıyor",
+      "osm": "way/1434310306",
+      "place_id": "ChIJS15HLm8vsxQRS6hg1v_2gl0"
+    },
+    {
+      "sira": 24,
+      "ad": "İbrice Limanı dalış noktaları",
+      "kategori": "aktivite",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Keşan",
+      "merkeze_km": 119,
+      "neden": "Altı dalış okulunun olduğu liman; 500 m açıkta batırılan tank deneme dalışında görülür",
+      "place_id": "ChIJmzgYM5F9sRQRClDgiFDw6hA"
+    },
+    {
+      "sira": 25,
+      "ad": "Gazi Baba Meyhanesi",
+      "kategori": "yemek",
+      "amaclar": [
+        "gece",
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "1967'den beri açık meyhane; borani mezesi ve canlı fasıl",
+      "place_id": "ChIJl9yCSnovsxQRkdlrTjl-hYo"
+    },
+    {
+      "sira": 26,
+      "ad": "Rüstem Paşa Kervansarayı",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Mimar Sinan'ın 1561'de Rüstem Paşa için yaptığı kervansaray; bugün 110 odalı otel",
+      "osm": "relation/3378747",
+      "place_id": "ChIJCWSXQF0vsxQRW_GTyVIZNxo"
+    },
+    {
+      "sira": 27,
+      "ad": "Erikli Plajı",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Keşan",
+      "merkeze_km": 112,
+      "neden": "Saros kıyısında suyu çok berrak bir kumsal; hemen arkasında Erikli Tuz Gölü var",
+      "place_id": "ChIJfZ6_Krp_sRQRtoiTPV0vy9I"
+    },
+    {
+      "sira": 28,
+      "ad": "Tunca Café",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "yavas",
+        "cocuklu"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Eski Cami'nin tam karşısında, uzun ağaçlar altında çay bahçesi; çocuk oyun alanı var",
+      "osm": "node/14014641494",
+      "place_id": "ChIJk1-fZMEvsxQRUCntV5BL53M"
+    },
+    {
+      "sira": 29,
+      "ad": "Enez Dalyan Gölü",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Enez",
+      "merkeze_km": 115,
+      "neden": "Enez'in yanındaki lagün; göç döneminde kuş gözlemi için gidilen bir alan",
+      "place_id": "ChIJeW7cwJOKsRQR9QjZfAa2N3s"
+    },
+    {
+      "sira": 30,
+      "ad": "Doğa Kır Lokantası",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Keşan",
+      "merkeze_km": 100,
+      "neden": "Keşan-Gelibolu yolunda Bahçeköy'de; yöreye özgü satır köfte yapılıyor",
+      "place_id": "ChIJ1X7AdEPEsxQRqFtPluxXuGw"
+    },
+    {
+      "sira": 31,
+      "ad": "Balıkçı Halil",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet",
+        "yavas"
+      ],
+      "ilce": "Enez",
+      "merkeze_km": 113,
+      "neden": "Enez limanının yanında; ekmek arası ve porsiyon balık, midye, limana bakan terasta",
+      "place_id": "ChIJw3qLRSaLsRQRN8inTAoMzis"
+    },
+    {
+      "sira": 32,
+      "ad": "Lozan Cafe",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "yavas"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 3,
+      "neden": "Karaağaç'ta Kışla Caddesi'nde; açık hava masalarında demli çay, tost ve gözleme",
+      "place_id": "ChIJTU9ec90lsxQR_2t26NBoxXo"
+    },
+    {
+      "sira": 33,
+      "ad": "Altınkum Plajı",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Enez",
+      "merkeze_km": 115,
+      "neden": "Enez'in 2 km güneyinde altın renkli kumsal; rüzgârlı olduğu için sörfçüler geliyor",
+      "place_id": "ChIJUf0DCGiLsRQRWfukDs_9kIo"
+    },
+    {
+      "sira": 34,
+      "ad": "Bedesten (Eski Cami Çarşısı)",
+      "kategori": "carsi",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Eski Cami'nin bitişiğindeki kapalı çarşı; giyim, gıda ve yöresel el işi dükkânları var",
+      "osm": "way/251671763",
+      "place_id": "ChIJGV6CLnEvsxQRAAJ9goBSQEo"
+    },
+    {
+      "sira": 35,
+      "ad": "Gökçetepe Tabiat Parkı",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Keşan",
+      "merkeze_km": 113,
+      "neden": "Saros kıyısında ormanın kumsala kadar indiği tabiat parkı",
+      "place_id": "ChIJy3RpKtXZsxQRWrNd0IYOlR8"
+    },
+    {
+      "sira": 36,
+      "ad": "Karaağaç Kahvaltı Evi",
+      "kategori": "yemek",
+      "amaclar": [
+        "cocuklu",
+        "yavas"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 4,
+      "neden": "Lozan Caddesi'nde ağaçlı bahçe; yanındaki manejde atlar var, serpme kahvaltı ve pişi",
+      "place_id": "ChIJlaR9U4MlsxQROnUiczWdhkc"
+    },
+    {
+      "sira": 37,
+      "ad": "Sokullu Mehmed Paşa Camii ve Külliyesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Havsa",
+      "merkeze_km": 26,
+      "neden": "Sinan ekibinin 1576-77'de bitirdiği külliyeden cami, hamam ve arasta kubbesi ayakta",
+      "place_id": "ChIJDS8EZxJHsxQRzcI6wmLrLwc"
+    },
+    {
+      "sira": 38,
+      "ad": "Has Yunus Bey Türbesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Enez",
+      "merkeze_km": 114,
+      "neden": "Enez'i alan Has Yunus Bey, Bizans şapelinden dönüştürülen bu yapıda yatıyor",
+      "osm": "way/478035251",
+      "place_id": "ChIJw0hvZI-KsRQRO723EjA3mLA"
+    },
+    {
+      "sira": 39,
+      "ad": "Lalapaşa Dolmenleri (Hacılar)",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "doga"
+      ],
+      "ilce": "Lalapaşa",
+      "merkeze_km": 35,
+      "neden": "Trakya'daki ilk dolmen kazısı 1983'te Hacılar'da yapıldı; yapılar yaklaşık 3.500 yıllık",
+      "place_id": "ChIJNS-tB3Vkp0ARYl4IBP2Ve3g"
+    },
+    {
+      "sira": 40,
+      "ad": "Meriç Nehri kano turu",
+      "kategori": "aktivite",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 2,
+      "neden": "Akşamüstü Meriç'te kürek çekip Mecidiye Köprüsü'ne sudan bakılan kano turları"
+    }
+  ]
+}
