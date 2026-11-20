@@ -219,7 +219,7 @@
     }
   },
   "anaSayfa": {
-    "aciklama": "Sıra sürükleyerek değişir. \"Yaklaşan seyahat\" kartı ve selam sabittir, listede değildir.",
+    "aciklama": "Rafların sırası sürükleyerek değişir. Banner rafların üstünde sabittir; uygulamada yalnız ilk banner görünür. \"Planlamaya devam\" satırı sabittir, listede değildir.",
     "tur": {
       "tek_kart": "tam genişlik kart",
       "serit": "yatay şerit",
@@ -250,7 +250,8 @@
     "duzenle": "Düzenle",
     "kapat": "Kapat",
     "acikKapali": "{baslik} açık / kapalı",
-    "ekle": "+ Bölüm ekle (raf · banner)",
+    "ekleRaf": "+ Raf",
+    "ekleBanner": "+ Banner",
     "yeniBaslik": "Yeni bölüm",
     "planliBaslik": "Planlı yayın:",
     "planliYok": "Planlı bölüm yok.",
@@ -309,12 +310,23 @@
     },
     "rafNotu": "3'ten az gezisi olan raf uygulamada görünmez.",
     "ustYaziOrnek": "Bu kış",
-    "gorselAdresHata": "Bu adres kabul edilmiyor. Görsel yalnız Wikimedia Commons'tan (upload.wikimedia.org) ya da kendi içerik kovamızdan olabilir; adreste boşluk, ?, #, parantez ya da %25 olamaz.",
+    "gorselAdresHata": "Bu adres kabul edilmiyor. Görsel Wikimedia Commons'tan ya da Tripmate'e yüklenmiş olmalı. Adreste boşluk ya da ' varsa görseli boş bırak; hedefin kapağı kullanılır.",
     "gorselAtifHata": "Görselin atfı için fotoğrafın yazarını yaz.",
     "gorselKaynakHata": "Kaynak sayfası https:// ile başlamalı.",
     "gorselKaydet": "Görseli kaydet",
     "gorselKaldir": "Görseli kaldır",
-    "bannerNotu": "Görsel boşsa hedefin kapağı kullanılır. Uygulamada aynı anda yalnız ilk banner görünür; hedefi seçilmemiş banner görünmez."
+    "bannerNotu": "Görsel boşsa hedefin kapağı kullanılır. Uygulamada aynı anda yalnız ilk banner görünür; hedefi seçilmemiş banner görünmez.",
+    "gorunmez": "görünmez",
+    "uyari": {
+      "hedefYayinda": "Uygulamada görünmüyor: hedef yayında değil",
+      "rafAz": "Uygulamada görünmüyor: rafta 3'ten az yayındaki gezi var"
+    },
+    "gorselKaydedilmedi": "Görsel kaydedilmedi",
+    "yayinGorselBekliyor": "Kaydedilmemiş görsel var. Önce \"Görseli kaydet\"e bas ya da \"Görseli kaldır\".",
+    "turDegisOnay": "Tür değişince içerik silinir; değiştirmek için yeniden seç",
+    "gezilerYukleniyor": "Geziler yükleniyor",
+    "onizlemeHata": "Geziler okunamadı; önizleme eksik olabilir.",
+    "onizlemeAmacNotu": "Rafların görünmüyor; uygulamanın amaç rafları gösteriliyor"
   },
   "genel": {
     "ust": "GENEL BAKIŞ · {tarih}",

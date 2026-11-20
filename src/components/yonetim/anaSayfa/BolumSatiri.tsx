@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useEffect, useEffectEvent, useRef, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 
@@ -11,6 +11,7 @@ import {
   BOLUM_TURLERI,
   bolumOzeti,
   eskiTurMu,
+  icerikDoluMu,
   icerikTuru,
   icerikYaz,
   RAF_TURLERI,
@@ -18,6 +19,7 @@ import {
   seciliIdler,
   V6_TURLERI,
   v6BosIcerik,
+  type BannerUyarisi,
   type TaslakBolum,
 } from '@/features/yonetim/anaSayfa';
 import { tasi, yerelTarihGirdisi, yerelTarihtenIso } from '@/features/yonetim/gezi';
@@ -38,6 +40,8 @@ export type IcerikSecenekleri = {
   sehirler: readonly Adli[];
   /** #406 2/2: banner hedefi olabilecek raf bölümleri (taslaktaki). */
   raflar?: readonly Adli[];
+  /** #438 inceleme 8: gezi listesi henüz gelmedi ("Geziler yükleniyor"). */
+  gezilerYukleniyor?: boolean;
 };
 
 type Props = {
@@ -49,6 +53,10 @@ type Props = {
   onGuncelle: (alanlar: Partial<Omit<TaslakBolum, 'id'>>) => void;
   onSil: () => void;
   onBirak: (kaynak: number, hedef: number) => void;
+  /** #438 inceleme 1 ve 4: banner uygulamada neden görünmüyor ('ikinci': gri, "görünmez"). */
+  uyari?: BannerUyarisi | null;
+  /** #438 inceleme 2: kaydedilmemiş görsel var mı (sayfa Yayınla'yı durdurur). */
+  onKirli?: (kirli: boolean) => void;
 };
 
 const TUTAMAC = 'M9 6h.01M15 6h.01M9 12h.01M15 12h.01M9 18h.01M15 18h.01';
@@ -57,17 +65,27 @@ const TUTAMAC = 'M9 6h.01M15 6h.01M9 12h.01M15 12h.01M9 18h.01M15 18h.01';
  * KK3 (kanvas ekran 3 satırı): 16 px tutamaç (sürükle = sıra), başlık + "· tür", alt satırda içerik ve kaynak, 38 × 22
  * anahtar (açık/kapalı), "Düzenle". Düzenleyici kanvasta yok (tasarım bekliyor): alan kutusu ve satır stiliyle.
  */
-export function BolumSatiri({ bolum, indeks, secenekler, acik, onAcKapa, onGuncelle, onSil, onBirak }: Props) {
+export function BolumSatiri({ bolum, indeks, secenekler, acik, onAcKapa, onGuncelle, onSil, onBirak, uyari = null, onKirli }: Props) {
   const ref = useRef<View>(null);
-  useSuruklenen(ref, 'ana-sayfa', indeks, onBirak);
-  // #406 2/2 (#428 soru 6): eski türler v6 Keşfet'te çizilmez; panelde gri durur.
+  // #438 inceleme 4: banner listenin başında sabit (uygulamada hep rafların üstünde); tutamaç yok, sürüklenmez.
+  const sabit = bolum.tur === 'banner';
+  useSuruklenen(ref, 'ana-sayfa', indeks, onBirak, !sabit);
+  const [kirli, setKirli] = useState(false);
+  const kirliDegis = (k: boolean) => {
+    setKirli(k);
+    onKirli?.(k);
+  };
+  // #406 2/2 (#428 soru 6): eski türler v6 Keşfet'te çizilmez; panelde gri durur. İkinci banner da gri (#438 inceleme 4).
   const eski = eskiTurMu(bolum.tur);
+  const ikinci = uyari === 'ikinci';
   return (
-    <View style={[s.kap, eski && s.eski]} testID={`bolum-${bolum.id}`}>
+    <View style={[s.kap, (eski || ikinci) && s.eski]} testID={`bolum-${bolum.id}`}>
       <View ref={ref} style={s.satir}>
-        <Svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke={yRenk.yerTutucu} strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-          <Path d={TUTAMAC} />
-        </Svg>
+        {sabit ? null : (
+          <Svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke={yRenk.yerTutucu} strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+            <Path d={TUTAMAC} />
+          </Svg>
+        )}
         <View style={s.metinler}>
           <Text style={s.baslik} numberOfLines={1}>
             {bolum.baslik}
@@ -76,12 +94,28 @@ export function BolumSatiri({ bolum, indeks, secenekler, acik, onAcKapa, onGunce
           <Text style={s.ozet} numberOfLines={1}>
             {bolumOzeti(bolum, secenekler, ty)}
           </Text>
+          {uyari === 'hedefYayinda' || uyari === 'rafAz' ? (
+            <Text style={s.hata} numberOfLines={1}>
+              {ty(`anaSayfa.uyari.${uyari}`)}
+            </Text>
+          ) : null}
+          {kirli ? (
+            <Text style={s.hata} numberOfLines={1}>
+              {ty('anaSayfa.gorselKaydedilmedi')}
+            </Text>
+          ) : null}
         </View>
         {eski ? <Text style={s.eskiEtiket}>{ty('anaSayfa.v6Gorunmez')}</Text> : null}
+        {ikinci ? <Text style={s.eskiEtiket}>{ty('anaSayfa.gorunmez')}</Text> : null}
         <Anahtar acik={bolum.acik} etiket={ty('anaSayfa.acikKapali', { baslik: bolum.baslik })} onDegis={(a) => onGuncelle({ acik: a })} />
         <Hap kucuk baslik={ty(acik ? 'anaSayfa.kapat' : 'anaSayfa.duzenle')} onPress={onAcKapa} />
       </View>
-      {acik ? <Duzenleyici bolum={bolum} secenekler={secenekler} onGuncelle={onGuncelle} onSil={onSil} /> : null}
+      {/* Kaydedilmemiş görsel varken düzenleyici kapanınca da yazılanlar kalsın: gizlenir, sökülmez. */}
+      {acik || kirli ? (
+        <View style={acik ? null : s.gizli}>
+          <Duzenleyici bolum={bolum} secenekler={secenekler} onGuncelle={onGuncelle} onSil={onSil} onKirli={kirliDegis} />
+        </View>
+      ) : null}
     </View>
   );
 }
@@ -95,9 +129,23 @@ export function Anahtar({ acik, etiket, onDegis }: { acik: boolean; etiket: stri
   );
 }
 
-function Duzenleyici({ bolum, secenekler, onGuncelle, onSil }: { bolum: TaslakBolum; secenekler: IcerikSecenekleri; onGuncelle: Props['onGuncelle']; onSil: () => void }) {
+function Duzenleyici({
+  bolum,
+  secenekler,
+  onGuncelle,
+  onSil,
+  onKirli,
+}: {
+  bolum: TaslakBolum;
+  secenekler: IcerikSecenekleri;
+  onGuncelle: Props['onGuncelle'];
+  onSil: () => void;
+  onKirli: (kirli: boolean) => void;
+}) {
   const [baslik, setBaslik] = useState(bolum.baslik);
   const [silOnay, setSilOnay] = useState(false);
+  // #438 inceleme 3: içerik doluyken tür değişimi silme gibi ikinci seçimle onaylanır.
+  const [bekleyenTur, setBekleyenTur] = useState<'banner' | 'raf' | null>(null);
   const tur = icerikTuru(bolum.tur);
   const liste: Adli[] = tur === 'gezi' ? secenekler.geziler.map((g) => ({ id: g.id, ad: g.baslik })) : tur === 'yer' ? [...secenekler.yerler] : [...secenekler.sehirler];
   const secili = seciliIdler(bolum);
@@ -118,7 +166,12 @@ function Duzenleyici({ bolum, secenekler, onGuncelle, onSil }: { bolum: TaslakBo
             <SecimKutusu<'banner' | 'raf'>
               etiket={ty('anaSayfa.alan.tur')}
               deger={bolum.tur as 'banner' | 'raf'}
-              onDegis={(yeni) => yeni !== bolum.tur && onGuncelle({ tur: yeni, kaynak: 'elle', icerik: v6BosIcerik(yeni) })}
+              onDegis={(yeni) => {
+                if (yeni === bolum.tur) return setBekleyenTur(null);
+                if (icerikDoluMu(bolum) && bekleyenTur !== yeni) return setBekleyenTur(yeni);
+                setBekleyenTur(null);
+                onGuncelle({ tur: yeni, kaynak: 'elle', icerik: v6BosIcerik(yeni) });
+              }}
               secenekler={V6_TURLERI.map((x) => ({ deger: x, etiket: ty(`anaSayfa.turAd.${x}`) }))}
             />
           </Alan>
@@ -146,8 +199,13 @@ function Duzenleyici({ bolum, secenekler, onGuncelle, onSil }: { bolum: TaslakBo
           </Alan>
         ) : null}
       </AlanSatiri>
+      {bekleyenTur ? (
+        <Text accessibilityRole="alert" style={s.hata}>
+          {ty('anaSayfa.turDegisOnay')}
+        </Text>
+      ) : null}
       {bolum.tur === 'raf' ? <RafAlanlari bolum={bolum} secenekler={secenekler} onGuncelle={onGuncelle} /> : null}
-      {bolum.tur === 'banner' ? <BannerAlanlari key={bolum.id} bolum={bolum} secenekler={secenekler} onGuncelle={onGuncelle} /> : null}
+      {bolum.tur === 'banner' ? <BannerAlanlari key={bolum.id} bolum={bolum} secenekler={secenekler} onGuncelle={onGuncelle} onKirli={onKirli} /> : null}
       {!v6 && elleSecim ? (
         <Alan etiket={ty('anaSayfa.alan.icerik')}>
           <View style={s.secililer}>
@@ -226,7 +284,9 @@ function RafAlanlari({ bolum, secenekler, onGuncelle }: { bolum: TaslakBolum; se
             {secili.map((id, n) => (
               <IcerikSatiri key={id} id={id} indeks={n} bolumId={bolum.id} ad={geziAd(id)} onCikar={() => yaz(secili.filter((x) => x !== id))} onBirak={(k, h) => yaz(tasi(secili, k, h))} />
             ))}
-            {kalan.length && secili.length < 30 ? (
+            {secenekler.gezilerYukleniyor ? (
+              <Text style={s.not}>{ty('anaSayfa.gezilerYukleniyor')}</Text>
+            ) : kalan.length && secili.length < 30 ? (
               <SecimKutusu
                 etiket={ty('anaSayfa.alan.ekle')}
                 deger=""
@@ -246,7 +306,17 @@ function RafAlanlari({ bolum, secenekler, onGuncelle }: { bolum: TaslakBolum; se
  * #406 2/2 KK4: banner — üst yazı, hedef (gezi, şehir ya da raf) ve görsel. Görsel boşsa uygulama hedefin Commons kapağını
  * kullanır. Görsel adresi yalnız Commons ya da kendi kovamızdan (KK-ek1); atıfsız görsel kaydedilmez (DB kuralı).
  */
-function BannerAlanlari({ bolum, secenekler, onGuncelle }: { bolum: TaslakBolum; secenekler: IcerikSecenekleri; onGuncelle: Props['onGuncelle'] }) {
+function BannerAlanlari({
+  bolum,
+  secenekler,
+  onGuncelle,
+  onKirli,
+}: {
+  bolum: TaslakBolum;
+  secenekler: IcerikSecenekleri;
+  onGuncelle: Props['onGuncelle'];
+  onKirli: (kirli: boolean) => void;
+}) {
   const i = bolum.icerik;
   const atif = kapakAtfiOku(i.kapak_atif);
   const [ustYazi, setUstYazi] = useState(i.ust_yazi ?? '');
@@ -254,7 +324,14 @@ function BannerAlanlari({ bolum, secenekler, onGuncelle }: { bolum: TaslakBolum;
   const [yazar, setYazar] = useState(atif?.yazar ?? '');
   const [lisans, setLisans] = useState(atif?.lisans ?? '');
   const [kaynak, setKaynak] = useState(atif?.kaynak_url ?? '');
-  const [gorselHata, setGorselHata] = useState<string | null>(null);
+  // #438 inceleme 5: hata hangi alana aitse kırmızı kenar orada.
+  const [gorselHata, setGorselHata] = useState<{ alan: 'adres' | 'yazar' | 'kaynak'; metin: string } | null>(null);
+  // #438 inceleme 2: yazılan görsel alanları kayıtlı olandan farklıysa "Görsel kaydedilmedi".
+  const kirli =
+    adres.trim() !== (i.kapak_url ?? '') ||
+    (!!adres.trim() && (yazar.trim() !== (atif?.yazar ?? '') || lisans.trim() !== (atif?.lisans ?? '') || kaynak.trim() !== (atif?.kaynak_url ?? '')));
+  const kirliBildir = useEffectEvent((k: boolean) => onKirli(k));
+  useEffect(() => kirliBildir(kirli), [kirli]);
   const yaz = (degisen: Parameters<typeof bannerIcerigi>[1]) => onGuncelle({ icerik: bannerIcerigi(i, degisen) });
   // Hedef türü yerel: tür seçilip henüz öğe seçilmeden DB'ye hedefsiz yazılır (hedef = tür + kimlik).
   const [hedefTuru, setHedefTuru] = useState<BannerHedefi['tur'] | ''>(i.hedef?.tur ?? '');
@@ -268,10 +345,10 @@ function BannerAlanlari({ bolum, secenekler, onGuncelle }: { bolum: TaslakBolum;
       yaz({ kapak_url: undefined, kapak_atif: undefined });
       return;
     }
-    if (!bannerAdresiGecerli(a)) return setGorselHata(ty('anaSayfa.gorselAdresHata'));
-    if (!yazar.trim()) return setGorselHata(ty('anaSayfa.gorselAtifHata'));
+    if (!bannerAdresiGecerli(a)) return setGorselHata({ alan: 'adres', metin: ty('anaSayfa.gorselAdresHata') });
+    if (!yazar.trim()) return setGorselHata({ alan: 'yazar', metin: ty('anaSayfa.gorselAtifHata') });
     const k = kaynak.trim();
-    if (k && !/^https:\/\//.test(k)) return setGorselHata(ty('anaSayfa.gorselKaynakHata'));
+    if (k && !/^https:\/\//.test(k)) return setGorselHata({ alan: 'kaynak', metin: ty('anaSayfa.gorselKaynakHata') });
     setGorselHata(null);
     yaz({ kapak_url: a, kapak_atif: { yazar: yazar.trim(), ...(lisans.trim() ? { lisans: lisans.trim() } : {}), ...(k ? { kaynak_url: k } : {}) } });
   };
@@ -323,7 +400,7 @@ function BannerAlanlari({ bolum, secenekler, onGuncelle }: { bolum: TaslakBolum;
             setAdres(x);
             setGorselHata(null);
           }}
-          hatali={!!gorselHata}
+          hatali={gorselHata?.alan === 'adres'}
           autoCapitalize="none"
           autoCorrect={false}
           placeholder="https://upload.wikimedia.org/…"
@@ -332,18 +409,18 @@ function BannerAlanlari({ bolum, secenekler, onGuncelle }: { bolum: TaslakBolum;
       </Alan>
       <AlanSatiri>
         <Alan etiket={ty('anaSayfa.alan.atifYazar')}>
-          <MetinKutusu value={yazar} onChangeText={setYazar} maxLength={200} accessibilityLabel={ty('anaSayfa.alan.atifYazar')} />
+          <MetinKutusu value={yazar} onChangeText={setYazar} hatali={gorselHata?.alan === 'yazar'} maxLength={200} accessibilityLabel={ty('anaSayfa.alan.atifYazar')} />
         </Alan>
         <Alan etiket={ty('anaSayfa.alan.atifLisans')} genislik={150}>
           <MetinKutusu value={lisans} onChangeText={setLisans} maxLength={60} placeholder="CC BY-SA 4.0" accessibilityLabel={ty('anaSayfa.alan.atifLisans')} />
         </Alan>
       </AlanSatiri>
       <Alan etiket={ty('anaSayfa.alan.atifKaynak')}>
-        <MetinKutusu value={kaynak} onChangeText={setKaynak} maxLength={500} autoCapitalize="none" autoCorrect={false} placeholder="https://commons.wikimedia.org/wiki/File:…" accessibilityLabel={ty('anaSayfa.alan.atifKaynak')} />
+        <MetinKutusu value={kaynak} onChangeText={setKaynak} hatali={gorselHata?.alan === 'kaynak'} maxLength={500} autoCapitalize="none" autoCorrect={false} placeholder="https://commons.wikimedia.org/wiki/File:…" accessibilityLabel={ty('anaSayfa.alan.atifKaynak')} />
       </Alan>
       {gorselHata ? (
         <Text accessibilityRole="alert" style={s.hata}>
-          {gorselHata}
+          {gorselHata.metin}
         </Text>
       ) : null}
       <View style={s.gorselEylem}>
@@ -390,6 +467,7 @@ function IcerikSatiri({ id, indeks, bolumId, ad, onCikar, onBirak }: { id: strin
 const s = StyleSheet.create({
   kap: { borderRadius: 12, borderWidth: 1, borderColor: yRenk.ayrac, backgroundColor: yRenk.zemin },
   eski: { opacity: 0.55 },
+  gizli: { display: 'none' },
   eskiEtiket: { fontFamily: yazi.kalin, fontSize: 11, color: yRenk.ikincil },
   hata: { fontFamily: yazi.yari, fontSize: 11.5, color: yRenk.hata },
   gorselEylem: { flexDirection: 'row', gap: 8 },

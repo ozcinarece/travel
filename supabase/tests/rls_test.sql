@@ -677,6 +677,23 @@ begin
   assert public.banner_gorsel_adresi_gecerli('https://upload.wikimedia.org/wikipedia/commons/a/ab/Bursa_Ulu_Cami.jpg'), '#406 KK-ek1: düz Commons adresi geçer';
   assert public.banner_gorsel_adresi_gecerli('https://xwqeobelyeuzoxyuvauw.supabase.co/storage/v1/object/public/icerik/banner/kis-2026.jpg'), '#406 KK-ek1: kova adresi geçer';
 end $$;
+select pg_temp.hata_bekle($$insert into public.ana_sayfa_bolumleri (tur, baslik, sira, icerik) values ('banner', 'x', 30, jsonb_build_object('kapak_url', 'https://xwqeobelyeuzoxyuvauw.supabase.co/storage/v1/object/public/icerik/.' || chr(13) || './avatars/u1/a.jpg', 'kapak_atif', '{"yazar": "Tripmate"}'::jsonb))$$, '23514');
+do $$
+begin
+  -- #438 inceleme 1 ve 7: parantez ve virgül geçer; `'`, unicode nokta, kodlanmış kontrol karakteri ve yerel viki reddedilir.
+  assert public.banner_gorsel_adresi_gecerli('https://upload.wikimedia.org/wikipedia/commons/a/ab/Ulu_Cami_(Bursa),_2019.jpg'), '#438: parantez ve virgül geçer';
+  assert public.banner_gorsel_adresi_gecerli('https://upload.wikimedia.org/wikipedia/commons/a/ab/G%C3%B6l.jpg'), '#438: %XX geçer';
+  assert not public.banner_gorsel_adresi_gecerli('https://upload.wikimedia.org/wikipedia/commons/a/ab/Ece''s.jpg'), '#438: tek tırnak reddedilir';
+  assert not public.banner_gorsel_adresi_gecerli('https://xwqeobelyeuzoxyuvauw.supabase.co/storage/v1/object/public/icerik/' || chr(65294) || chr(65294) || '/avatars/a.jpg'), '#438: unicode nokta reddedilir';
+  assert not public.banner_gorsel_adresi_gecerli('https://upload.wikimedia.org/wikipedia/commons/a/ab/x' || chr(13) || '.jpg'), '#438: CR reddedilir';
+  assert not public.banner_gorsel_adresi_gecerli('https://upload.wikimedia.org/wikipedia/commons/a/%09/x.jpg'), '#438: %09 reddedilir';
+  assert not public.banner_gorsel_adresi_gecerli('https://upload.wikimedia.org/wikipedia/commons/a/%00/x.jpg'), '#438: %00 reddedilir';
+  assert not public.banner_gorsel_adresi_gecerli('https://upload.wikimedia.org/wikipedia/commons/a/%1f/x.jpg'), '#438: %1f reddedilir';
+  assert not public.banner_gorsel_adresi_gecerli('https://upload.wikimedia.org/wikipedia/commons/a/%7F/x.jpg'), '#438: %7F reddedilir';
+  assert not public.banner_gorsel_adresi_gecerli('https://upload.wikimedia.org/wikipedia/commons/a/%2/x.jpg'), '#438: yarım %X reddedilir';
+  assert not public.banner_gorsel_adresi_gecerli('https://upload.wikimedia.org/wikipedia/en/a/ab/Poster.jpg'), '#438: yerel viki (adil kullanım) reddedilir';
+  assert not public.banner_gorsel_adresi_gecerli('https://upload.wikimedia.org/a.jpg'), '#438: commons öneki şart';
+end $$;
 -- Kendi Storage alanımızdaki görsel (atıflı) kabul edilir.
 insert into public.ana_sayfa_bolumleri (tur, baslik, sira, icerik) values
   ('banner', 'Storage görselli', 25, '{"kapak_url": "https://xwqeobelyeuzoxyuvauw.supabase.co/storage/v1/object/public/icerik/banner/k.webp", "kapak_atif": {"yazar": "Tripmate"}}');

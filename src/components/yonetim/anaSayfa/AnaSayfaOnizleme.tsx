@@ -5,13 +5,16 @@ import { Banner } from '@/components/anasayfa/Banner';
 import { Raf } from '@/components/anasayfa/Raf';
 import { Ikon } from '@/components/ui/Ikon';
 import { LogoYazi } from '@/components/ui/Logo';
-import { aktifBanner, kesfetRaflari } from '@/features/anasayfa/raflar';
-import { useKesfetAkisi } from '@/features/icerik/kesfetAkisi';
+import { aktifBanner, kesfetRaflari, yerelRafMi } from '@/features/anasayfa/raflar';
 import { useSehirler } from '@/features/icerik/sorgular';
 import type { TaslakBolum } from '@/features/yonetim/anaSayfa';
+import { useYayindakiAkis } from '@/features/yonetim/anaSayfaSorgulari';
+import { ty } from '@/features/yonetim/metin';
 import { t } from '@/i18n';
 import { gorunenBolumler } from '@/lib/anaSayfa';
 import { anaV5, renk, yazi } from '@/theme';
+
+import { yRenk } from '../tema';
 
 export const ANA_SAYFA_TELEFON = { genislik: 390, yukseklik: 1180 } as const;
 
@@ -20,20 +23,29 @@ const bos = () => {};
 /**
  * #406 2/2 KK4 (UX önerileri kanvası, `Ana_v6_Kesfet`): telefon önizlemesi taslakla — uygulamanın Keşfet'i: üst satır,
  * arama, banner, raflar. Banner ve raflar uygulamanın kendi bileşenleri ve kuralları (`aktifBanner`, `kesfetRaflari`);
- * geziler uygulamanın Keşfet akışından (yalnız yayındakiler; uygulama da yalnız onları görür). Taslakta açık ve tarih
- * aralığındaki bölümler gösterilir. Kullanıcıya özel "Planlamaya devam" satırı önizlemede yok.
+ * geziler uygulamanın Keşfet akışından, yayın durumuna göre süzülmüş (`useYayindakiAkis`; uygulama yalnız yayındakileri görür).
+ * Taslakta açık ve tarih aralığındaki bölümler gösterilir. Kullanıcıya özel "Planlamaya devam" satırı önizlemede yok.
+ * #438 inceleme 6: akış okunamazsa hata satırı; Ece'nin açık rafı var ama hiçbiri 3 yayındaki geziye ulaşmıyorsa üstte not.
  */
 export function AnaSayfaOnizleme({ bolumler }: { bolumler: readonly TaslakBolum[] }) {
-  const akis = useKesfetAkisi();
+  const akis = useYayindakiAkis();
   const sehirler = useSehirler();
   const gorunen = useMemo(() => gorunenBolumler(bolumler), [bolumler]);
   const geziler = useMemo(() => akis.data ?? [], [akis.data]);
   const raflar = useMemo(() => kesfetRaflari(gorunen, geziler), [gorunen, geziler]);
+  const amacRaflarinda = !akis.isPending && gorunen.some((b) => b.tur === 'raf') && raflar.every((r) => yerelRafMi(r.id));
   const banner = useMemo(() => aktifBanner(gorunen, geziler, sehirler.data ?? [], raflar), [gorunen, geziler, sehirler.data, raflar]);
 
   return (
     <View style={s.telefon} testID="ana-sayfa-onizleme">
       <ScrollView contentContainerStyle={s.icerik}>
+        {akis.isError ? (
+          <Text accessibilityRole="alert" style={s.not}>
+            {ty('anaSayfa.onizlemeHata')}
+          </Text>
+        ) : amacRaflarinda ? (
+          <Text style={s.not}>{ty('anaSayfa.onizlemeAmacNotu')}</Text>
+        ) : null}
         <View style={s.ust}>
           <LogoYazi boyut={36} />
           <View style={s.ustDugmeler}>
@@ -94,5 +106,7 @@ const s = StyleSheet.create({
   },
   aramaMetin: { fontFamily: yazi.normal, fontSize: 15, color: anaV5.ikincil },
   raflar: { gap: 16 },
+  // Panel notu (uygulamada yok): mevcut panel hata/uyarı satırı stili.
+  not: { marginHorizontal: 16, fontFamily: yazi.yari, fontSize: 13, color: yRenk.hata },
   yukleniyor: { marginTop: 24 },
 });

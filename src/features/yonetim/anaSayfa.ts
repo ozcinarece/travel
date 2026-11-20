@@ -1,4 +1,5 @@
 // #109 ana sayfa düzeni — panelin saf kuralları: satır özeti, planlı yayın metni, yeni bölüm, taslak/yayın farkı. Testli.
+import { t } from '@/i18n';
 import type { AnaSayfaBolumu, BannerHedefi, BolumTuru, RafTuru } from '@/lib/anaSayfa';
 import { AYLAR_KISA } from '@/lib/takvim';
 
@@ -43,14 +44,16 @@ export function bannerIcerigi(eski: AnaSayfaBolumu['icerik'], degisen: Partial<P
 
 /**
  * KK-ek1 · KK-ek2: banner görsel adresi DB kuralının (`banner_gorsel_adresi_gecerli`) aynısı; panel kaydetmeden önce
- * anlaşılır hata gösterir. Yalnız Commons (`upload.wikimedia.org`) ya da kendi `icerik` kovamız; izin listesi dışındaki
- * karakter (boşluk, sekme, satır sonu, `?`, `#`, `(` …) ve yol hilesi reddedilir.
+ * anlaşılır hata gösterir. Yalnız Commons (`upload.wikimedia.org/wikipedia/commons/`) ya da kendi `icerik` kovamız; izin
+ * listesi (`A-Z a-z 0-9 . _ ~ / : ( ) , -` ve `%XX`) dışındaki karakter (boşluk, sekme, `'`, `?`, `#` …), kodlanmış kontrol
+ * karakteri ve yol hilesi reddedilir.
  */
 export function bannerAdresiGecerli(adres: string): boolean {
   return (
     adres.length <= 500 &&
-    /^[A-Za-z0-9._~/:%-]+$/.test(adres) &&
-    /^https:\/\/(upload\.wikimedia\.org\/|xwqeobelyeuzoxyuvauw\.supabase\.co\/storage\/v1\/object\/public\/icerik\/)/.test(adres) &&
+    /^(?:[A-Za-z0-9._~/:(),-]|%[0-9A-Fa-f]{2})+$/.test(adres) &&
+    !/%(?:[01][0-9a-f]|7f)/i.test(adres) &&
+    /^https:\/\/(upload\.wikimedia\.org\/wikipedia\/commons\/|xwqeobelyeuzoxyuvauw\.supabase\.co\/storage\/v1\/object\/public\/icerik\/)/.test(adres) &&
     !/(\.\.|%2e|%2f|%5c|%25|\\)/i.test(adres)
   );
 }
@@ -120,7 +123,8 @@ function v6Ozeti(b: TaslakBolum, adlar: { sehirler: readonly Adli[] }, metin: (a
   }
   switch (i.raf_turu) {
     case 'amac':
-      return metin('anaSayfa.v6Ozet.raf.amac', { amac: i.amac ?? '—' });
+      // #438 inceleme 8: amacın Türkçe adı ("amaç: Lezzet"), kimliği değil.
+      return metin('anaSayfa.v6Ozet.raf.amac', { amac: i.amac ? t(`kesfetAkisi.amac.${i.amac}`) : '—' });
     case 'sehir':
       return metin('anaSayfa.v6Ozet.raf.sehir', { sehir: adlar.sehirler.find((x) => x.id === i.sehir_id)?.ad ?? '—' });
     case 'arkadaslardan':
@@ -145,9 +149,75 @@ export function planliSatirlar(bolumler: readonly TaslakBolum[], metin: (anahtar
     );
 }
 
-/** "+ Bölüm ekle": sona, kapalı, elle seçimli boş raf (#406 2/2; açılınca görünür, yayınlanmadıkça uygulamada yok). */
-export function yeniBolum(bolumler: readonly { sira: number }[], baslik: string): Omit<TaslakBolum, 'id'> {
-  return { tur: 'raf', baslik, sira: Math.max(0, ...bolumler.map((b) => b.sira)) + 1, acik: false, kaynak: 'elle', icerik: v6BosIcerik('raf'), baslangic_at: null, bitis_at: null };
+/**
+ * "+ Raf" / "+ Banner" (#438 inceleme 3): sona, kapalı, boş bölüm (açılınca görünür, yayınlanmadıkça uygulamada yok). Raf elle
+ * seçimli ve boş; banner hedefsiz.
+ */
+export function yeniBolum(bolumler: readonly { sira: number }[], baslik: string, tur: 'raf' | 'banner' = 'raf'): Omit<TaslakBolum, 'id'> {
+  return { tur, baslik, sira: Math.max(0, ...bolumler.map((b) => b.sira)) + 1, acik: false, kaynak: 'elle', icerik: v6BosIcerik(tur), baslangic_at: null, bitis_at: null };
+}
+
+/** Tür değişince içerik silinecek mi (#438 inceleme 3: doluysa "yeniden bas" onayı). */
+export function icerikDoluMu(b: Pick<AnaSayfaBolumu, 'tur' | 'icerik'>): boolean {
+  const i = b.icerik;
+  if (b.tur === 'banner') return Object.keys(i).length > 0;
+  if (b.tur === 'raf') return !!i.amac || !!i.sehir_id || (i.gezi_idler?.length ?? 0) > 0;
+  return seciliIdler(b).length > 0;
+}
+
+/**
+ * #438 inceleme 4: panel listesi — banner'lar başta sabit (sırayla; uygulama hep rafların üstünde ve yalnız ilkini çizer),
+ * sonra diğerleri sırayla. Sürükleme yalnız banner olmayanlar arasında.
+ */
+export function paneldeSirala<T extends Pick<AnaSayfaBolumu, 'tur' | 'sira'>>(bolumler: readonly T[]): T[] {
+  const sirali = [...bolumler].sort((a, c) => a.sira - c.sira);
+  return [...sirali.filter((b) => b.tur === 'banner'), ...sirali.filter((b) => b.tur !== 'banner')];
+}
+
+export type BannerUyarisi = 'hedefYayinda' | 'rafAz' | 'ikinci';
+
+/**
+ * #438 inceleme 1 ve 4: banner uygulamada neden görünmüyor (görünüyorsa null). Uygulamanın kuralı (`aktifBanner`): hedef
+ * yayında olmalı — gezi yayında, şehrin yayında gezisi var, raf açık/tarihinde ve en az 3 yayındaki gezili. Aynı anda
+ * yalnız ilk görünen hedefli banner ('ikinci': gri, "görünmez"). Hedefsiz banner'ı satırın kendi notu söyler (null).
+ *   gorunen:  taslaktan uygulamada görünecek bölümler (`gorunenBolumler`: açık ve tarih aralığında)
+ *   geziler:  uygulamanın Keşfet akışı (yalnız yayındakiler)
+ *   rafSayilari: görünen rafların yayındaki gezi sayısı (`kesfetRaflari` öncesi, 3 süzgeci olmadan)
+ */
+export function bannerUyarisi(
+  b: Pick<TaslakBolum, 'id' | 'tur' | 'icerik'>,
+  gorunen: readonly Pick<TaslakBolum, 'id' | 'tur' | 'icerik'>[],
+  geziler: readonly { id: string; sehir_id: string | null }[],
+  rafSayilari: ReadonlyMap<string, number>,
+  enAz: number,
+): BannerUyarisi | null {
+  if (b.tur !== 'banner') return null;
+  // Uygulama görünen ilk hedefli banner'ı alır; o çizilemese bile sonrakine geçmez.
+  const ilk = gorunen.find((x) => x.tur === 'banner' && !!x.icerik.hedef);
+  if (ilk && ilk.id !== b.id && gorunen.some((x) => x.id === b.id)) return 'ikinci';
+  const h = b.icerik.hedef;
+  if (!h) return null;
+  if (h.tur === 'gezi' && !geziler.some((g) => g.id === h.id)) return 'hedefYayinda';
+  if (h.tur === 'sehir' && !geziler.some((g) => g.sehir_id === h.id)) return 'hedefYayinda';
+  if (h.tur === 'raf') {
+    if (!gorunen.some((x) => x.id === h.id && x.tur === 'raf')) return 'hedefYayinda';
+    if ((rafSayilari.get(h.id) ?? 0) < enAz) return 'rafAz';
+  }
+  return null;
+}
+
+/** Uygulamanın göreceği geziler (`geziler_select` kuralı): yayında, yayın zamanı gelmiş, şehri yayında. */
+export function yayindakiGeziler<G extends { id: string }>(
+  akis: readonly G[],
+  durum: readonly { id: string; yayin: boolean; yayin_at: string | null; sehir_id: string | null }[],
+  sehirler: readonly { id: string; yayin: boolean }[],
+  simdi: Date = new Date(),
+): G[] {
+  const acikSehir = new Set(sehirler.filter((x) => x.yayin).map((x) => x.id));
+  const yayinda = new Set(
+    durum.filter((g) => g.yayin && (!g.yayin_at || new Date(g.yayin_at).getTime() <= simdi.getTime()) && !!g.sehir_id && acikSehir.has(g.sehir_id)).map((g) => g.id),
+  );
+  return akis.filter((g) => yayinda.has(g.id));
 }
 
 const KARSILASTIR = ['id', 'tur', 'baslik', 'sira', 'acik', 'kaynak', 'icerik', 'baslangic_at', 'bitis_at'] as const;

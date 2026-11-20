@@ -53,6 +53,55 @@ describe('BolumSatiri v6 (#406 2/2)', () => {
     expect(onGuncelle).toHaveBeenLastCalledWith({ icerik: { raf_turu: 'amac' } });
   });
 
+  it('#438: dolu içerikte tür değişimi ikinci seçimle onaylanır', () => {
+    const onGuncelle = jest.fn();
+    const { getByLabelText, getByText } = satir({ ...bolum, tur: 'raf', icerik: { raf_turu: 'amac', amac: 'lezzet' } }, onGuncelle);
+    sec(getByLabelText('TÜR') as never, 'banner');
+    expect(onGuncelle).not.toHaveBeenCalled();
+    expect(getByText(/yeniden seç/)).toBeTruthy();
+    sec(getByLabelText('TÜR') as never, 'banner');
+    expect(onGuncelle).toHaveBeenLastCalledWith({ tur: 'banner', kaynak: 'elle', icerik: {} });
+  });
+
+  it('#438: banner uyarısı, ikinci banner gri ve tutamaçsız; gezi listesi yüklenirken not', () => {
+    const banner: TaslakBolum = { ...bolum, tur: 'banner', icerik: { hedef: { tur: 'gezi', id: 'g9' } } };
+    const ortak = { indeks: 0, secenekler: v6Secenekler, acik: false, onAcKapa: () => {}, onGuncelle: () => {}, onSil: () => {}, onBirak: () => {} };
+    const r = render(<BolumSatiri bolum={banner} uyari="hedefYayinda" {...ortak} />);
+    expect(r.getByText('Uygulamada görünmüyor: hedef yayında değil')).toBeTruthy();
+    r.rerender(<BolumSatiri bolum={banner} uyari="rafAz" {...ortak} />);
+    expect(r.getByText("Uygulamada görünmüyor: rafta 3'ten az yayındaki gezi var")).toBeTruthy();
+    r.rerender(<BolumSatiri bolum={banner} uyari="ikinci" {...ortak} />);
+    expect(r.getByText('görünmez')).toBeTruthy();
+    const raf: TaslakBolum = { ...bolum, tur: 'raf', icerik: { raf_turu: 'elle', gezi_idler: [] } };
+    const y = render(<BolumSatiri bolum={raf} {...ortak} acik secenekler={{ ...v6Secenekler, gezilerYukleniyor: true }} />);
+    expect(y.getByText('Geziler yükleniyor')).toBeTruthy();
+  });
+
+  it('#438: kaydedilmemiş görsel satırda yazar, kapatınca da kalır', () => {
+    const onKirli = jest.fn();
+    const banner: TaslakBolum = { ...bolum, tur: 'banner', icerik: {} };
+    const ortak = { indeks: 0, secenekler: v6Secenekler, onAcKapa: () => {}, onGuncelle: () => {}, onSil: () => {}, onBirak: () => {}, onKirli };
+    const r = render(<BolumSatiri bolum={banner} acik {...ortak} />);
+    fireEvent.changeText(r.getByLabelText('GÖRSEL ADRESİ (boşsa hedefin kapağı)'), 'https://upload.wikimedia.org/wikipedia/commons/a/ab/Bursa.jpg');
+    expect(r.getByText('Görsel kaydedilmedi')).toBeTruthy();
+    expect(onKirli).toHaveBeenLastCalledWith(true);
+    r.rerender(<BolumSatiri bolum={banner} acik={false} {...ortak} />);
+    expect(r.getByText('Görsel kaydedilmedi')).toBeTruthy();
+    expect(r.getByLabelText('GÖRSEL ADRESİ (boşsa hedefin kapağı)', { includeHiddenElements: true }).props.value).toBe('https://upload.wikimedia.org/wikipedia/commons/a/ab/Bursa.jpg');
+  });
+
+  it('#438: hata yalnız ait olduğu alanı kırmızı yapar', () => {
+    const banner: TaslakBolum = { ...bolum, tur: 'banner', icerik: {} };
+    const { getByLabelText, getByRole } = satir(banner);
+    fireEvent.changeText(getByLabelText('GÖRSEL ADRESİ (boşsa hedefin kapağı)'), 'https://upload.wikimedia.org/wikipedia/commons/a/ab/Bursa.jpg');
+    fireEvent.press(getByRole('button', { name: 'Görseli kaydet' }));
+    expect(getByRole('alert')).toBeTruthy();
+    // Hatalı alanın stili diğerlerinden ayrışır (kırmızı kenar); `false`/`null` boş stil sayılır.
+    const kenar = (etiket: string) => JSON.stringify(getByLabelText(etiket).props.style).replace(/false/g, 'null');
+    expect(kenar('FOTOĞRAFIN YAZARI')).not.toEqual(kenar('LİSANS'));
+    expect(kenar('GÖRSEL ADRESİ (boşsa hedefin kapağı)')).toEqual(kenar('LİSANS'));
+  });
+
   it('tür değişince içerik sıfırlanır (banner ↔ raf)', () => {
     const onGuncelle = jest.fn();
     const { getByLabelText } = satir({ ...bolum, tur: 'raf', icerik: { raf_turu: 'elle', gezi_idler: [] } }, onGuncelle);
@@ -71,7 +120,7 @@ describe('BolumSatiri v6 (#406 2/2)', () => {
 
     fireEvent.changeText(getByLabelText('GÖRSEL ADRESİ (boşsa hedefin kapağı)'), 'https://xwqeobelyeuzoxyuvauw.supabase.co/storage/v1/object/public/icerik/.\t./avatars/u1/a.jpg');
     fireEvent.press(getByRole('button', { name: 'Görseli kaydet' }));
-    expect(getByText(/yalnız Wikimedia Commons'tan/)).toBeTruthy();
+    expect(getByText(/Commons'tan ya da Tripmate'e yüklenmiş olmalı/)).toBeTruthy();
     expect(onGuncelle).not.toHaveBeenCalled();
 
     fireEvent.changeText(getByLabelText('GÖRSEL ADRESİ (boşsa hedefin kapağı)'), 'https://upload.wikimedia.org/wikipedia/commons/a/ab/Bursa.jpg');
