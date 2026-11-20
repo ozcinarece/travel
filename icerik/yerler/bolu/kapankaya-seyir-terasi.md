@@ -6,4 +6,4 @@ Sabahları vadide çoğu zaman sis olur. Erken gelirsen bulutun içinden yüksel
 
 Yarım saat yeter. Yolun bu kısmı virajlı ve kışın kar nedeniyle kapanabiliyor; kış aylarında Kapankaya'yı atlamak ve göllere Mengen tarafından girmek gerekebilir. Gitmeden önce yol durumunu milli park müdürlüğünden ya da jandarmadan öğren.
 
-> Kuleye çıkınca vadinin dibindeki en büyük su yüzeyini bul: o Büyükgöl, birazdan arabayı bırakıp yürüyüşe başlayacağın yer.
+> Kuleye çıkınca vadinin dibindeki en büyük su yüzeyini bul: o Büyükgöl, Yedigöller'in yürüyüş yollarının çoğu onun kıyısından başlar.
