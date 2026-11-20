@@ -46,7 +46,8 @@ export function PlanCubugu({ ozet, onPlaniKur, onHaritayaGec, yukleniyor, dolulu
           <>
             <View style={dar ? s.satirDar : s.satir} testID={dar ? 'doluluk-dar' : 'doluluk-tek'}>
               <Text style={s.baslik}>{t('sihirbaz.onerilenler.ozetYer', { n: ozet.mekan })}</Text>
-              <Text style={s.doluluk} numberOfLines={dar ? 2 : 1}>
+              {/* #450 inceleme 1: taşmada satır sınırı yok; büyük yazıda kırmızı "K yer sığmıyor" kesilmesin. */}
+              <Text style={s.doluluk} numberOfLines={tasma ? undefined : dar ? 2 : 1}>
                 {tasma ? (
                   <>
                     {t('sihirbaz.onerilenler.ozetDoldu', { gun: doluluk.gun })}

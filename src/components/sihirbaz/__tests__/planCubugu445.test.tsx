@@ -12,9 +12,10 @@ import { anaV5 } from '@/theme';
 
 jest.mock('@/lib/supabase', () => ({ supabase: {} }));
 let mockGenislik = 390;
+let mockFontScale = 1;
 jest.mock('react-native/Libraries/Utilities/useWindowDimensions', () => ({
   __esModule: true,
-  default: () => ({ width: mockGenislik, height: 800, scale: 2, fontScale: 1 }),
+  default: () => ({ width: mockGenislik, height: 800, scale: 2, fontScale: mockFontScale }),
 }));
 
 const cubuk = (doluluk: { gun: number; dolu: number; cubuklar: number[]; sigmayan?: number }) => (
@@ -63,6 +64,27 @@ describe('#445 alt çubuk taşma hali', () => {
     expect(r.getByText('7 yer sığmıyor')).toBeTruthy();
     expect(StyleSheet.flatten(r.getByTestId('tasma-parcasi').props.style).width).toBe(24);
     mockGenislik = 390;
+  });
+
+  it('#450 inceleme 1: 360 px + fontScale 2 taşmada satır sınırı yok, "sığmıyor" tam görünür', () => {
+    mockGenislik = 360;
+    mockFontScale = 2;
+    render(cubuk({ gun: 2, dolu: 4, cubuklar: [1, 1], sigmayan: 13 }));
+    expect(screen.getByTestId('doluluk-dar')).toBeTruthy();
+    const sigmiyor = screen.getByText('13 yer sığmıyor');
+    // Kırmızı parça üst metnin içinde; üst metinde satır sınırı (kesme) yok.
+    const ust = screen.getByText(/2 gün doldu ·/);
+    expect(ust.props.numberOfLines).toBeUndefined();
+    expect(sigmiyor.props.numberOfLines).toBeUndefined();
+    mockGenislik = 390;
+    mockFontScale = 1;
+  });
+
+  it('taşma yokken büyük yazıda iki satır sınırı korunur', () => {
+    mockFontScale = 2;
+    render(cubuk({ gun: 2, dolu: 1.2, cubuklar: [1, 0.2], sigmayan: 0 }));
+    expect(screen.getByText("· 2 günün 1,2'si dolu").props.numberOfLines).toBe(2);
+    mockFontScale = 1;
   });
 
   it('KK2: K, Planı kur ile aynı hesaptan: hiçbir güne sığmayanlar', () => {

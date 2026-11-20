@@ -218,6 +218,12 @@ export default function SihirbazEkrani() {
     }
   };
 
+  // #445 KK2: K, "Planı kur"un kullandığı aynı hesapla (planiKur ile aynı girdi); her render'da değil, veri değişince.
+  const sigmayanSayisi = useMemo(
+    () => (gunler.data && duraklar.data ? planiHesapla({ mekanlar: mekanlar.data ?? [], gunler: gunler.data, duraklar: duraklar.data }).atanmamis.length : 0),
+    [mekanlar.data, gunler.data, duraklar.data],
+  );
+
   if (adim === 'nereye') {
     return (
       <AdimKabugu adim={adim} baslik={t('sihirbaz.nereye.baslik')} onGeri={geri} hata={hata} devam={{ onPress: nereyeDevam, pasif: !sehir, yukleniyor: adKaydet.isPending }}>
@@ -300,8 +306,7 @@ export default function SihirbazEkrani() {
                 ? {
                     gun: gunler.data.length,
                     ...gunDolulugu(secim, gunler.data.length),
-                    // #445 KK2: K, "Planı kur"un kullandığı aynı hesapla (planiKur ile aynı girdi).
-                    sigmayan: planiHesapla({ mekanlar: havuz, gunler: gunler.data, duraklar: duraklar.data }).atanmamis.length,
+                    sigmayan: sigmayanSayisi,
                   }
                 : undefined
             }
