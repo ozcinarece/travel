@@ -4,6 +4,6 @@ Bulak Mencilis Mağarası, Safranbolu'nun batısında, Bulak köyünün yakını
 
 İçerisi yaz kış serin; yazın bile ince bir mont al ve tabanı tutan ayakkabı giy. Aydınlatılmış bölümü gidip gelmek yaklaşık bir saat sürer. Mağara içinde fotoğraf çekerken flaş kullanmamaya çalış; taş yüzeylerdeki renkleri flaş düzleştirir.
 
-Mağara Safranbolu çarşısına araçla yarım saatten kısa bir mesafede. Kalabalık turlar genelde öğleden sonra gelir; sabah gidersen içeride daha sessiz yürürsün. Bu gezide mağaradan sonra Tokatlı Kanyonu'na geçiyorsun; mağarayı sabah erken görmek günün geri kalanını rahatlatır.
+Mağara Safranbolu çarşısına araçla yarım saatten kısa bir mesafede. Kalabalık turlar genelde öğleden sonra gelir; sabah gidersen içeride daha sessiz yürürsün. Çocuklarla geliyorsan merdivenli ve ıslak bölümlerde küçüklerin elini tut, mağarada koşmalarına izin verme.
 
 > Yürüyüş yolunun bir yerinde dur ve birkaç saniye sessizce dinle: suyu çoğu zaman görmeden önce duyarsın.

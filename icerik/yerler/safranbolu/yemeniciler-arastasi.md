@@ -4,6 +4,6 @@ Bugün dükkânların çoğu el işi, bakır, ahşap oyma ve yöresel ürün sat
 
 Arastanın bir ucunda 1660'larda yapılmış Köprülü Mehmet Paşa Camii var. Avlusundaki taş kaidenin üstündeki güneş saati, kentin tescilli eserleri arasında sayılıyor.
 
-Burada yarım saat ile bir saat arası geçirirsin, çünkü sokak kısa ama her dükkân ayrı bir zanaat; alışveriş yapacaksan daha uzun. Öğleden sonra kalabalık artar, en sakin hali sabah dükkânlar yeni açılırken.
+Burada yarım saat ile bir saat arası geçirirsin, çünkü sokak kısa ama her dükkân ayrı bir zanaat; alışveriş yapacaksan daha uzun. Öğleden sonra kalabalık artar; sabah dükkânlar yeni açılırken sokak daha sakin.
 
 > Bir dükkânda safranlı lokum ikram edilirse safranın nereden geldiğini sor; Safranbolu yakınındaki köylerde safran hâlâ yetiştiriliyor.
