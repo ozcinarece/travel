@@ -201,30 +201,18 @@
     {
       "sira": 16,
       "ad": "Ulukaya Şelalesi ve Drahna Kanyonu",
-      "kategori": "aktivite",
+      "kategori": "doga",
       "amaclar": [
         "doga"
       ],
       "ilce": "Ulus",
       "merkeze_km": 36,
-      "neden": "Kanyon yürüyüşü: 1 km sonunda kaya oyuğundan ~25 m düşen şelale; 1998'den doğal sit",
+      "neden": "1 km'lik kanyonun sonunda kaya oyuğundan ~25 m düşer; 1998'den doğal sit alanı",
       "osm": "node/2313850765",
       "place_id": "ChIJe7vx15Q9m0ARPpiNaonUSts"
     },
     {
       "sira": 17,
-      "ad": "Tavşan Adası tekne gezisi",
-      "kategori": "aktivite",
-      "amaclar": [
-        "doga"
-      ],
-      "ilce": "Amasra",
-      "merkeze_km": 14,
-      "neden": "Boztepe açığındaki adada Bizans manastır kalıntısı; kıyıya kaya basamaklardan çıkılır",
-      "place_id": "ChIJNanB3eALm0ARqm0LYqvzSTs"
-    },
-    {
-      "sira": 18,
       "ad": "Yukarı Alpı Seyir Terası",
       "kategori": "manzara",
       "amaclar": [
@@ -237,18 +225,7 @@
       "place_id": "ChIJucaTo48Vm0AReebEyyCWHTI"
     },
     {
-      "sira": 19,
-      "ad": "Yukarı Alpı zipline",
-      "kategori": "aktivite",
-      "amaclar": [
-        "doga"
-      ],
-      "ilce": "Ulus",
-      "merkeze_km": 33,
-      "neden": "Küre Dağları Milli Parkı'nda, seyir terasının yanından vadi üstüne iki etaplı hat"
-    },
-    {
-      "sira": 20,
+      "sira": 18,
       "ad": "Kaf Konak Rukiye Restoran",
       "kategori": "yemek",
       "amaclar": [
@@ -261,7 +238,7 @@
       "place_id": "ChIJVYuFTDBym0ARam9KBCC6uHg"
     },
     {
-      "sira": 21,
+      "sira": 19,
       "ad": "Çınar Balık Restaurant",
       "kategori": "yemek",
       "amaclar": [
@@ -274,7 +251,7 @@
       "place_id": "ChIJzeQ7UzkLm0ARj9ZS8GXIpP8"
     },
     {
-      "sira": 22,
+      "sira": 20,
       "ad": "Amasra Sofrası",
       "kategori": "yemek",
       "amaclar": [
@@ -288,7 +265,7 @@
       "place_id": "ChIJDQ60_eULm0ARtrkiRyudzTQ"
     },
     {
-      "sira": 23,
+      "sira": 21,
       "ad": "Bartın ağda tatlısı",
       "kategori": "tatli_kahve",
       "amaclar": [
@@ -298,7 +275,7 @@
       "neden": "2020'de coğrafi işaret aldı; çöven kökü ve şekerle çırpılan beyaz, macun kıvamlı tatlı"
     },
     {
-      "sira": 24,
+      "sira": 22,
       "ad": "Hamam Cafe",
       "kategori": "tatli_kahve",
       "amaclar": [
@@ -311,7 +288,7 @@
       "place_id": "ChIJ7bRL--ULm0ARyHitUo3OrHA"
     },
     {
-      "sira": 25,
+      "sira": 23,
       "ad": "Ağlayan Ağaç Çay Bahçesi",
       "kategori": "manzara",
       "amaclar": [
@@ -323,7 +300,7 @@
       "place_id": "ChIJ_amgUOcLm0ARnaUizxFCSbw"
     },
     {
-      "sira": 26,
+      "sira": 24,
       "ad": "Bartın Kent Müzesi",
       "kategori": "muze",
       "amaclar": [
@@ -337,7 +314,7 @@
       "place_id": "ChIJb3sowzNym0ARCOftl5So-Bk"
     },
     {
-      "sira": 27,
+      "sira": 25,
       "ad": "Kemerköprü",
       "kategori": "tarih",
       "amaclar": [
@@ -349,7 +326,7 @@
       "place_id": "ChIJ74vfyChym0ARcmTS9LAKQyU"
     },
     {
-      "sira": 28,
+      "sira": 26,
       "ad": "Kemal Samancıoğlu Etnografya Müzesi",
       "kategori": "muze",
       "amaclar": [
@@ -362,7 +339,7 @@
       "place_id": "ChIJV1fqIDdym0ARPsCSUa0a8s0"
     },
     {
-      "sira": 29,
+      "sira": 27,
       "ad": "Türkan Hanımın Yeri",
       "kategori": "yemek",
       "amaclar": [
@@ -376,7 +353,7 @@
       "place_id": "ChIJcxHX3ugLm0AR1146d2HxAqA"
     },
     {
-      "sira": 30,
+      "sira": 28,
       "ad": "Kocagöz Konağı (Ulus Ziyaretçi Merkezi)",
       "kategori": "muze",
       "amaclar": [
@@ -388,7 +365,7 @@
       "place_id": "ChIJ35YgamlAm0ARcm-T9d8gqRc"
     },
     {
-      "sira": 31,
+      "sira": 29,
       "ad": "Turgut Reis Cafe",
       "kategori": "yemek",
       "amaclar": [
@@ -400,7 +377,7 @@
       "place_id": "ChIJaVZox-ULm0ARMZwVmjhWdeU"
     },
     {
-      "sira": 32,
+      "sira": 30,
       "ad": "Bartın Tarihi Çarşısı",
       "kategori": "carsi",
       "amaclar": [
@@ -413,7 +390,7 @@
       "place_id": "ChIJETbNnTRym0AR_6osDi7L2sc"
     },
     {
-      "sira": 33,
+      "sira": 31,
       "ad": "Marina Cafe",
       "kategori": "tatli_kahve",
       "amaclar": [
