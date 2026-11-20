@@ -1,6 +1,7 @@
 // #401 KK5–KK6 (`Ekran07cIlOnerileri`): il listesinin kategori satırı — v5 altı çizili sekme (Ana sayfa ve Şehir rehberiyle
 // aynı: seçili 700 ve Mürekkep alt çizgi, diğerleri 500 gri), 15 px, 22 aralık; yatayda kayar, dokunma alanı 44 px.
-// Sıra: Hepsi + yalnız dolu kategoriler (BO `SUZGEC_SIRASI`). Sihirbaz, Yer ekle ve şehir listesi aynı bileşeni kullanır.
+// Sıra: Hepsi + yalnız dolu kategoriler (BO `SUZGEC_SIRASI`). Bugün yalnız sihirbazın il listesi kullanır (listenin dışında,
+// başlığın altında sabit); Yer ekle ve Şehir rehberi 2/2b'de aynı bileşene geçecek.
 import { ScrollView, StyleSheet, View } from 'react-native';
 
 import { Sekme } from '@/components/ortak/Sekme';

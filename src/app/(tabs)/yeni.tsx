@@ -302,7 +302,7 @@ export default function SihirbazEkrani() {
           />
         }>
         {ilBekliyor ? (
-          <ActivityIndicator color={renk.ana} style={{ marginTop: 40 }} />
+          <ActivityIndicator color={renk.ana} style={{ marginTop: 40 }} accessibilityLabel={t('ilOneri.listeYukleniyor')} />
         ) : ilListesi ? (
           <AdimIlOnerileri seyahat={seyahat.data} yerler={ilListesi} havuz={havuz} onTut={tut} onHata={setHata} onAc={setPanel} />
         ) : (

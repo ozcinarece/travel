@@ -1,9 +1,11 @@
 // #401 KK5 (`Ekran07cIlOnerileri` A–B): sihirbazda il listesi — Hepsi + dolu kategori sekmeleri, sıra `sira`, satırda
 // "Kategori · İlçe · N km" ve neden, ✓ / +, "Yakındaki diğer yerler" kapalıyken Google'a istek yok.
 import { describe, expect, it, jest } from '@jest/globals';
-import { fireEvent, render, screen } from '@testing-library/react-native';
+import { fireEvent, render, screen, within } from '@testing-library/react-native';
+import { FlatList } from 'react-native';
 
 import { AdimIlOnerileri } from '@/components/sihirbaz/AdimIlOnerileri';
+import { PlanCubugu } from '@/components/sihirbaz/PlanCubugu';
 import type { IlYeri } from '@/features/icerik/ilOnerileri';
 import { t } from '@/i18n';
 
@@ -14,7 +16,14 @@ jest.mock('@/features/mekanlar/sorgular', () => ({
   useMekanEkle: () => ({ mutateAsync: mockEkle }),
   useMekanSil: () => ({ mutateAsync: jest.fn(async () => undefined) }),
 }));
-const mockGoogle = jest.fn((..._a: unknown[]) => ({ data: [] as unknown[], isPending: false, isError: false }));
+const mockRefetch = jest.fn();
+const mockGoogle = jest.fn((..._a: unknown[]) => ({ data: [] as unknown[], isPending: false, isError: false, isFetching: false, refetch: mockRefetch }));
+let mockGenislik = 390;
+let mockYazi = 1;
+jest.mock('react-native/Libraries/Utilities/useWindowDimensions', () => ({
+  __esModule: true,
+  default: () => ({ width: mockGenislik, height: 800, scale: 2, fontScale: mockYazi }),
+}));
 jest.mock('@/features/sihirbaz/onerilenler', () => ({
   ...jest.requireActual<object>('@/features/sihirbaz/onerilenler'),
   useGoogleListesi: (...a: unknown[]) => mockGoogle(...a),
@@ -84,5 +93,61 @@ describe('#401 sihirbaz il listesi', () => {
     fireEvent.press(screen.getByRole('tab', { name: 'Doğa' }));
     fireEvent.press(screen.getByText(t('ilOneri.yakindaki')));
     expect(mockGoogle).toHaveBeenLastCalledWith('t1', 'park', { lat: 40.73, lng: 31.6 }, true);
+  });
+
+  // #443 inceleme
+  it('1: sekme satırı listenin dışında (kaydırınca kaybolmaz)', () => {
+    const r = render(<AdimIlOnerileri seyahat={SEYAHAT} yerler={YERLER} havuz={HAVUZ} onTut={jest.fn()} onHata={jest.fn()} onAc={jest.fn()} />);
+    const liste = r.UNSAFE_getByType(FlatList);
+    expect(within(liste).queryAllByRole('tab')).toHaveLength(0);
+    expect(screen.getAllByRole('tab')).toHaveLength(3);
+  });
+
+  it('2: satırda ekle/çıkar erişilebilirlik eylemi; etikette neden', async () => {
+    const onTut = jest.fn();
+    mockEkle.mockClear();
+    render(<AdimIlOnerileri seyahat={SEYAHAT} yerler={YERLER} havuz={HAVUZ} onTut={onTut} onHata={jest.fn()} onAc={jest.fn()} />);
+    const satir = screen.getByLabelText('Yedigöller Milli Parkı, Doğa · Mengen · 26 km, Orman içinde birbirine akan yedi göl');
+    expect(satir.props.accessibilityActions).toEqual([{ name: 'ekle', label: t('ilOneri.eylemEkle') }]);
+    fireEvent(satir, 'accessibilityAction', { nativeEvent: { actionName: 'ekle' } });
+    await screen.findByText('Yedigöller Milli Parkı');
+    expect(mockEkle).toHaveBeenCalledWith(expect.objectContaining({ place_id: 'p2' }));
+    const listede = screen.getByLabelText('Abant Gölü, Doğa · Mudurnu · 31 km, Göl kıyısını dolaşan 7 km’lik yol');
+    expect(listede.props.accessibilityActions).toEqual([{ name: 'ekle', label: t('ilOneri.eylemCikar') }]);
+  });
+
+  it('5: place_id ya da konumu olmayan satır düz metin; düğme ve + yok', () => {
+    const konumsuz = { ...yer(5, 'Konumsuz Yer', 'carsi', 'Merkez', null, null), place_id: null, lat: null, lng: null } as unknown as IlYeri;
+    render(<AdimIlOnerileri seyahat={SEYAHAT} yerler={[...YERLER, konumsuz]} havuz={HAVUZ} onTut={jest.fn()} onHata={jest.fn()} onAc={jest.fn()} />);
+    const satir = screen.getByLabelText('Konumsuz Yer, Çarşı · Merkez');
+    expect(satir.props.accessibilityRole).toBeUndefined();
+    expect(screen.queryByLabelText(t('ilOneri.ekle', { ad: 'Konumsuz Yer' }))).toBeNull();
+  });
+
+  it('4: Yakındaki diğer yerler hata halinde Tekrar dene', () => {
+    mockGoogle.mockImplementation(() => ({ data: [], isPending: false, isError: true, isFetching: false, refetch: mockRefetch }));
+    render(<AdimIlOnerileri seyahat={SEYAHAT} yerler={YERLER} havuz={HAVUZ} onTut={jest.fn()} onHata={jest.fn()} onAc={jest.fn()} />);
+    fireEvent.press(screen.getByText(t('ilOneri.yakindaki')));
+    expect(screen.getByText(t('ilOneri.yakinHata'))).toBeTruthy();
+    fireEvent.press(screen.getByRole('button', { name: t('ilOneri.tekrarDene') }));
+    expect(mockRefetch).toHaveBeenCalled();
+    mockGoogle.mockImplementation(() => ({ data: [], isPending: false, isError: false, isFetching: false, refetch: mockRefetch }));
+  });
+
+  it('3: 360 px ya da büyük yazıda doluluk ikinci satıra iner, 390 px tek satır', () => {
+    const cubuk = () => <PlanCubugu ozet={{ mekan: 5, bolge: 2, saat: 9 }} doluluk={{ gun: 2, dolu: 1.2, cubuklar: [1, 0.2] }} onPlaniKur={jest.fn()} onHaritayaGec={jest.fn()} />;
+    mockGenislik = 390;
+    mockYazi = 1;
+    const r = render(cubuk());
+    expect(r.getByTestId('doluluk-tek')).toBeTruthy();
+    r.unmount();
+    mockGenislik = 360;
+    const r2 = render(cubuk());
+    expect(r2.getByTestId('doluluk-dar')).toBeTruthy();
+    r2.unmount();
+    mockGenislik = 390;
+    mockYazi = 1.3;
+    expect(render(cubuk()).getByTestId('doluluk-dar')).toBeTruthy();
+    mockYazi = 1;
   });
 });

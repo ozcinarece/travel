@@ -1,12 +1,14 @@
 // #401 KK5 (Marka kimliği kanvası, `Ekran07cIlOnerileri` A–B): ilin yayında listesi varsa sihirbazın 3. adımı. Üstte
 // altı çizili kategori sekmeleri (Hepsi + dolu kategoriler), altında 132 px mini harita; liste ve harita seçili sekmeye göre
 // birlikte süzülür, sıra her zaman `sira`. Satır v5 sade yer satırı ("Kategori · İlçe · N km" + neden). En altta kapalı
-// "Yakındaki diğer yerler": dokununca o sekmenin Google yakın araması çalışır (kapalıyken 0 istek), satırlarda ★ puan kalır.
-// Listede olanlar gizlenmez (✓ ile kalır); karta dokunma mekan panelini açar.
+// "Yakındaki diğer yerler": dokununca o sekmenin Google yakın araması çalışır (kapalıyken 0 istek), satırlarda ★ puan kalır;
+// alınamazsa hata metni ve "Tekrar dene". Listede olanlar gizlenmez (✓ ile kalır); karta dokunma mekan panelini açar.
+// #443 inceleme 1: sekme satırı listenin dışında, başlığın altında sabit; kayan yalnız harita ve liste.
 import { useMemo, useState } from 'react';
 import { ActivityIndicator, FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 
+import { Buton } from '@/components/ui/Buton';
 import { KategoriSekmeleri } from '@/components/ortak/KategoriSekmeleri';
 import { YerSatiri } from '@/components/ortak/YerSatiri';
 import {
@@ -92,13 +94,8 @@ export function AdimIlOnerileri({ seyahat, yerler, havuz, onTut, onHata, onAc }:
   );
 
   const ust = (
-    <View style={s.ust}>
-      <View style={s.tamGenislik}>
-        <KategoriSekmeleri kategoriler={kategoriler} secili={sekme} onSec={setSekme} />
-      </View>
-      <View style={s.harita}>
-        <SecimHaritasi kisa secilenler={secilenler} digerleri={haritadakiler} odakId={odakId && havuzIle.has(odakId) ? odakId : null} merkez={haritaMerkezi(seyahat, secilenler[0], haritadakiler[0])} baslik={seyahat.name ?? seyahat.city_label} />
-      </View>
+    <View style={s.harita}>
+      <SecimHaritasi kisa secilenler={secilenler} digerleri={haritadakiler} odakId={odakId && havuzIle.has(odakId) ? odakId : null} merkez={haritaMerkezi(seyahat, secilenler[0], haritadakiler[0])} baslik={seyahat.name ?? seyahat.city_label} />
     </View>
   );
 
@@ -113,9 +110,15 @@ export function AdimIlOnerileri({ seyahat, yerler, havuz, onTut, onHata, onAc }:
       </Pressable>
       {yakinAcik ? (
         google.isPending ? (
-          <ActivityIndicator color={renk.ana} style={{ marginVertical: 16 }} />
-        ) : google.isError || digerleri.length === 0 ? (
-          <Text style={s.bos}>{google.isError ? t('sihirbaz.onerilenler.hata') : t('sihirbaz.onerilenler.bos')}</Text>
+          <ActivityIndicator color={renk.ana} style={{ marginVertical: 16 }} accessibilityLabel={t('ilOneri.yakinYukleniyor')} />
+        ) : google.isError ? (
+          // #443 inceleme 4: uygulamadaki hata kalıbı — metin ve altında "Tekrar dene" (burada harita yok).
+          <View style={s.hata} testID="yakin-hata">
+            <Text style={s.bos}>{t('ilOneri.yakinHata')}</Text>
+            <Buton baslik={t('ilOneri.tekrarDene')} tur="ikincil" onPress={() => google.refetch()} yukleniyor={google.isFetching} />
+          </View>
+        ) : digerleri.length === 0 ? (
+          <Text style={s.bos}>{t('sihirbaz.onerilenler.bos')}</Text>
         ) : (
           digerleri.map((y, i) => {
             const m = googleMekani(y, false);
@@ -140,46 +143,49 @@ export function AdimIlOnerileri({ seyahat, yerler, havuz, onTut, onHata, onAc }:
   );
 
   return (
-    <FlatList
-      data={gorunen}
-      keyExtractor={(y) => y.id}
-      contentContainerStyle={s.liste}
-      ListHeaderComponent={ust}
-      ListFooterComponent={alt}
-      ListEmptyComponent={<Text style={s.bos}>{t('sihirbaz.onerilenler.bos')}</Text>}
-      keyboardShouldPersistTaps="handled"
-      onEndReachedThreshold={0.5}
-      onEndReached={() => setFotoSiniri((n) => (n < gorunen.length ? n + FOTO_PARCASI : n))}
-      renderItem={({ item, index }) => {
-        const m = ilYeriMekani(item, item.place_id ? fotolar.data?.[item.place_id] : null);
-        return (
-          <YerSatiri
-            ad={item.ad}
-            alt={ilYeriAltSatiri(item)}
-            neden={item.neden}
-            foto={m?.foto_uri}
-            ayrac={index < gorunen.length - 1}
-            ekle={m ? { listede: havuzIle.has(m.place_id), mesgul: mesgul === m.place_id, onPress: () => degistir(m) } : undefined}
-            onPress={
-              m
-                ? () => {
-                    setOdakId(m.place_id);
-                    onAc(m);
-                  }
-                : undefined
-            }
-          />
-        );
-      }}
-    />
+    <View style={s.kap}>
+      <KategoriSekmeleri kategoriler={kategoriler} secili={sekme} onSec={setSekme} />
+      <FlatList
+        data={gorunen}
+        keyExtractor={(y) => y.id}
+        contentContainerStyle={s.liste}
+        ListHeaderComponent={ust}
+        ListFooterComponent={alt}
+        ListEmptyComponent={<Text style={s.bos}>{t('sihirbaz.onerilenler.bos')}</Text>}
+        keyboardShouldPersistTaps="handled"
+        onEndReachedThreshold={0.5}
+        onEndReached={() => setFotoSiniri((n) => (n < gorunen.length ? n + FOTO_PARCASI : n))}
+        renderItem={({ item, index }) => {
+          const m = ilYeriMekani(item, item.place_id ? fotolar.data?.[item.place_id] : null);
+          return (
+            <YerSatiri
+              ad={item.ad}
+              alt={ilYeriAltSatiri(item)}
+              neden={item.neden}
+              foto={m?.foto_uri}
+              ayrac={index < gorunen.length - 1}
+              ekle={m ? { listede: havuzIle.has(m.place_id), mesgul: mesgul === m.place_id, onPress: () => degistir(m) } : undefined}
+              onPress={
+                m
+                  ? () => {
+                      setOdakId(m.place_id);
+                      onAc(m);
+                    }
+                  : undefined
+              }
+            />
+          );
+        }}
+      />
+    </View>
   );
 }
 
 const s = StyleSheet.create({
+  kap: { flex: 1 },
   liste: { paddingHorizontal: KENAR, paddingBottom: 16 },
-  ust: { paddingBottom: 4 },
-  tamGenislik: { marginHorizontal: -KENAR },
-  harita: { marginTop: 12 },
+  harita: { marginTop: 12, paddingBottom: 4 },
+  hata: { alignItems: 'center', gap: 4, paddingBottom: 16 },
   yakin: { marginTop: 14, paddingTop: 12, borderTopWidth: 6, borderTopColor: anaV5.satirZemin },
   yakinBaslik: { minHeight: minDokunma, flexDirection: 'row', alignItems: 'center', gap: 10 },
   yakinMetin: { flex: 1, fontFamily: yazi.kalin, fontSize: 15, color: renk.metin },

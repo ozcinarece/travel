@@ -1,7 +1,10 @@
 // #397 KK5 → #401 KK5–KK6 (`Sayfa_v5_SehirRehberi`, `Ekran07cIlOnerileri`): v5 sade yer satırı — 56 px foto ya da kamera,
 // ad (15/700), alt satır (13, ikincil), isteğe bağlı `neden` (en çok 2 satır); sağda 44 px dokunma alanında 32 px ince "+"
-// ya da yeşil tik. Seçili satıra çerçeve ya da zemin yok. Sihirbaz, Yer ekle ve Şehir rehberi aynı satırı kullanır.
-import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
+// ya da yeşil tik. Seçili satıra çerçeve ya da zemin yok. Bugün sihirbazın il listesi (`AdimIlOnerileri`) satırın tamamını,
+// Şehir rehberi `Kamera` ve `InceEkle`'yi kullanır; Yer ekle 2/2b'de bu satıra geçecek.
+// #443 inceleme 2: iOS'ta satırın içindeki "+" ayrı odak almaz; ekle/çıkar satırın erişilebilirlik eylemi olarak da sunulur,
+// etikete `neden` girer. inceleme 5: dokunulacak bir şey yoksa (place_id ya da konum yok) satır düğme değil, düz metindir.
+import { ActivityIndicator, Pressable, StyleSheet, Text, View, type AccessibilityActionEvent } from 'react-native';
 import Svg, { Circle, Path } from 'react-native-svg';
 
 import { Foto } from '@/components/ui/Foto';
@@ -54,9 +57,15 @@ type Props = {
   ayrac?: boolean;
 };
 
+/** Ekran okuyucu etiketi: ad, alt satır ve varsa neden. */
+export function yerSatiriEtiketi(ad: string, alt: string, neden?: string | null) {
+  return [ad, alt, neden].filter(Boolean).join(', ');
+}
+
 export function YerSatiri({ ad, alt, neden, foto, ekle, onPress, ayrac }: Props) {
-  return (
-    <Pressable accessibilityRole="button" accessibilityLabel={[ad, alt].filter(Boolean).join(', ')} disabled={!onPress} onPress={onPress} style={({ pressed }) => [s.satir, ayrac && s.ayrac, pressed && { opacity: 0.85 }]}>
+  const etiket = yerSatiriEtiketi(ad, alt, neden);
+  const icerik = (
+    <>
       <View style={s.foto}>{foto ? <Foto source={{ uri: foto }} style={StyleSheet.absoluteFill} contentFit="cover" transition={150} /> : <Kamera />}</View>
       <View style={s.metin}>
         <Text style={s.ad} numberOfLines={1}>
@@ -78,6 +87,30 @@ export function YerSatiri({ ad, alt, neden, foto, ekle, onPress, ayrac }: Props)
           <InceEkle listede={ekle.listede} mesgul={ekle.mesgul} onPress={ekle.onPress} etiket={ekle.listede ? t('ilOneri.listende', { ad }) : t('ilOneri.ekle', { ad })} />
         </View>
       ) : null}
+    </>
+  );
+  if (!onPress) {
+    // inceleme 5: düğme rolü yok, "+" yok; ekran okuyucu düz metin okur.
+    return (
+      <View accessible accessibilityLabel={etiket} style={[s.satir, ayrac && s.ayrac]}>
+        {icerik}
+      </View>
+    );
+  }
+  const eylemler = ekle && !ekle.mesgul ? [{ name: 'ekle', label: ekle.listede ? t('ilOneri.eylemCikar') : t('ilOneri.eylemEkle') }] : undefined;
+  const eylem = (e: AccessibilityActionEvent) => {
+    if (e.nativeEvent.actionName === 'ekle') ekle?.onPress();
+  };
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={etiket}
+      accessibilityState={ekle ? { selected: ekle.listede, busy: ekle.mesgul } : undefined}
+      accessibilityActions={eylemler}
+      onAccessibilityAction={eylem}
+      onPress={onPress}
+      style={({ pressed }) => [s.satir, ayrac && s.ayrac, pressed && { opacity: 0.85 }]}>
+      {icerik}
     </Pressable>
   );
 }

@@ -1376,6 +1376,12 @@
     "yakindaki": "Yakındaki diğer yerler",
     "googleAtif": "Sonuçlar: Google",
     "ekle": "{ad}, listeye ekle",
-    "listende": "{ad} listende, çıkarmak için dokun"
+    "listende": "{ad} listende, çıkarmak için dokun",
+    "eylemEkle": "Listeye ekle",
+    "eylemCikar": "Listeden çıkar",
+    "yakinHata": "Yakındaki yerler alınamadı.",
+    "yakinYukleniyor": "Yakındaki yerler yükleniyor",
+    "listeYukleniyor": "Öneriler yükleniyor",
+    "tekrarDene": "Tekrar dene"
   }
 }
