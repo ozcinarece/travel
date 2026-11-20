@@ -1,0 +1,681 @@
+{
+  "il": "İstanbul",
+  "slug": "istanbul",
+  "guncelleme": "2026-11-20",
+  "oneriler": [
+    {
+      "sira": 1,
+      "ad": "Ayasofya-i Kebir Camii",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Fatih",
+      "merkeze_km": 0,
+      "neden": "537'de bitirilen Justinianus kilisesi; dev kubbe, mermer kaplamalar ve Bizans mozaikleri",
+      "osm": "relation/1555271",
+      "place_id": "ChIJJxwBkr65yhQRrk9EN29vbiM"
+    },
+    {
+      "sira": 2,
+      "ad": "Topkapı Sarayı Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Fatih",
+      "merkeze_km": 1,
+      "neden": "1478'den 1856'ya padişah sarayı; Harem, Hazine ve Sarayburnu'na bakan dört avlu",
+      "osm": "node/10284696709",
+      "place_id": "ChIJM_ilr7i5yhQRAFMBw0MZqhU"
+    },
+    {
+      "sira": 3,
+      "ad": "Sultanahmet Camii",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Fatih",
+      "merkeze_km": 0,
+      "neden": "Sedefkâr Mehmed Ağa'nın 1617'de bitirdiği altı minareli cami; içi mavi İznik çinili",
+      "osm": "relation/18055570",
+      "place_id": "ChIJ4fRwZb25yhQRpHwVijb3LeU"
+    },
+    {
+      "sira": 4,
+      "ad": "Yerebatan Sarnıcı",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Fatih",
+      "merkeze_km": 0,
+      "neden": "532'de yapılan yeraltı su deposu; 336 sütun arasında yürüyüş ve iki Medusa başı",
+      "osm": "way/1184924695",
+      "place_id": "ChIJyWrG4L25yhQRcYRt7uEvwGA"
+    },
+    {
+      "sira": 5,
+      "ad": "Şehir Hatları Uzun Boğaz Turu",
+      "kategori": "aktivite",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Fatih",
+      "merkeze_km": 1,
+      "neden": "Eminönü'nden Anadolu Kavağı'na vapurla; yalılar, iki hisar ve Karadeniz'e açılan ağız",
+      "place_id": "ChIJBeFXN-q5yhQRp_mDfYVONUI"
+    },
+    {
+      "sira": 6,
+      "ad": "Kapalıçarşı",
+      "kategori": "carsi",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Fatih",
+      "merkeze_km": 1,
+      "neden": "15. yy'da Cevahir Bedesteni çevresinde büyüyen kapalı çarşı; kuyumcu, halıcı ve hanlar",
+      "osm": "way/303807317",
+      "place_id": "ChIJJwXXYpG5yhQRq5jBWgtoyGQ"
+    },
+    {
+      "sira": 7,
+      "ad": "Süleymaniye Camii",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Fatih",
+      "merkeze_km": 2,
+      "neden": "Mimar Sinan'ın 1557'de bitirdiği külliye; avluda Sinan ve Kanuni türbeleri, Haliç'e bakar",
+      "osm": "relation/1564032",
+      "place_id": "ChIJMRDAOo25yhQR7c9XIQT1zIo"
+    },
+    {
+      "sira": 8,
+      "ad": "Galata Kulesi",
+      "kategori": "manzara",
+      "amaclar": [
+        "kultur_tarih",
+        "gece"
+      ],
+      "ilce": "Beyoğlu",
+      "merkeze_km": 2,
+      "neden": "1348'de Cenevizlilerin yaptığı taş kule; tepe balkonundan Haliç ve Tarihi Yarımada",
+      "osm": "way/23236783",
+      "place_id": "ChIJQ3x3p-e5yhQRCzOLzD3Pdkw"
+    },
+    {
+      "sira": 9,
+      "ad": "Mısır Çarşısı",
+      "kategori": "carsi",
+      "amaclar": [
+        "lezzet",
+        "kultur_tarih"
+      ],
+      "ilce": "Fatih",
+      "merkeze_km": 1,
+      "neden": "1660'ta tamamlanan L biçimli çarşı; baharat, kuruyemiş, lokum ve peynir tezgâhları",
+      "place_id": "ChIJn9t8b-u5yhQRXVCwl43vu0Q"
+    },
+    {
+      "sira": 10,
+      "ad": "Dolmabahçe Sarayı",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Beşiktaş",
+      "merkeze_km": 4,
+      "neden": "Balyanların 1856'da bitirdiği Boğaz sarayı; Muayede Salonu ve Atatürk'ün son odası",
+      "osm": "way/24826707",
+      "place_id": "ChIJ4307Gna3yhQRC4M7zzg-09w"
+    },
+    {
+      "sira": 11,
+      "ad": "Kariye Camii",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Fatih",
+      "merkeze_km": 4,
+      "neden": "14. yy başında Metokhites'in yaptırdığı mozaik ve freskler; Edirnekapı surlarının dibinde",
+      "osm": "relation/7614527",
+      "place_id": "ChIJ2cMuRRC6yhQRDNb0n0-3SXA"
+    },
+    {
+      "sira": 12,
+      "ad": "Sultanahmet Meydanı (Hipodrom)",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Fatih",
+      "merkeze_km": 0,
+      "neden": "Bizans hipodromunun yeri; Mısır'dan getirilen dikilitaş, Yılanlı Sütun ve Alman Çeşmesi",
+      "osm": "way/25512790",
+      "place_id": "ChIJ2XlLfO25yhQR8Hcxg0Af5V4"
+    },
+    {
+      "sira": 13,
+      "ad": "İstanbul Arkeoloji Müzeleri",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Fatih",
+      "merkeze_km": 1,
+      "neden": "Osman Hamdi'nin kurduğu müze; İskender Lahdi, Eski Şark Eserleri ve 1472'den Çinili Köşk",
+      "osm": "way/335374188",
+      "place_id": "ChIJQbdCWr-5yhQRKTjvSx6RF7M"
+    },
+    {
+      "sira": 14,
+      "ad": "Kız Kulesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Üsküdar",
+      "merkeze_km": 3,
+      "neden": "Salacak açığında adacık üstünde kule; 2023'teki restorasyondan sonra tekneyle gidilen müze",
+      "osm": "relation/4429796",
+      "place_id": "ChIJX0SZ6iu4yhQRbEe0zrr0124"
+    },
+    {
+      "sira": 15,
+      "ad": "Rüstem Paşa Camii",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Fatih",
+      "merkeze_km": 1,
+      "neden": "Sinan'ın Tahtakale dükkânları üstüne kurduğu cami; duvarları baştan sona İznik çinisi",
+      "osm": "way/175518494",
+      "place_id": "ChIJqUoa9ey5yhQRdUxypVCNHQY"
+    },
+    {
+      "sira": 16,
+      "ad": "Fener Rum Patrikhanesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Fatih",
+      "merkeze_km": 3,
+      "neden": "1601'den beri Fener'de; Aya Yorgi Kilisesi'nde ikonalar, yokuşta kırmızı Rum Lisesi",
+      "osm": "way/526875901",
+      "place_id": "ChIJeVp8SR26yhQRNPDtEH3LWIU"
+    },
+    {
+      "sira": 17,
+      "ad": "Sveti Stefan Bulgar Kilisesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Fatih",
+      "merkeze_km": 4,
+      "neden": "1898'de Viyana'da dökülen demir parçalarla kurulan Haliç kıyısındaki kilise",
+      "osm": "way/175519383",
+      "place_id": "ChIJkw0lAwO6yhQRQQE7adsz2M4"
+    },
+    {
+      "sira": 18,
+      "ad": "Eyüp Sultan Camii",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Eyüpsultan",
+      "merkeze_km": 6,
+      "neden": "Ebu Eyyub el-Ensari'nin türbesi ve III. Selim'in yeniden yaptırdığı cami; çınarlı avlu",
+      "osm": "way/261821356",
+      "place_id": "ChIJF_StIdCxyhQRXV-7_f2jows"
+    },
+    {
+      "sira": 19,
+      "ad": "Pierre Loti Tepesi",
+      "kategori": "manzara",
+      "amaclar": [
+        "yavas",
+        "kultur_tarih"
+      ],
+      "ilce": "Eyüpsultan",
+      "merkeze_km": 6,
+      "neden": "Fransız yazarın adını taşıyan tepe kahvesi; mezarlık yamacının ardında bütün Haliç",
+      "osm": "node/414982463",
+      "place_id": "ChIJcSSWkbywyhQRJLkb04VnrPM"
+    },
+    {
+      "sira": 20,
+      "ad": "Eyüp–Piyer Loti Teleferiği",
+      "kategori": "aktivite",
+      "amaclar": [
+        "cocuklu",
+        "yavas"
+      ],
+      "ilce": "Eyüpsultan",
+      "merkeze_km": 6,
+      "neden": "2005'ten beri işleyen kısa kabin hattı; Eyüp Sultan'dan mezarlık üstünden tepeye",
+      "place_id": "ChIJhanVPQCxyhQRd_PLXiR6REE"
+    },
+    {
+      "sira": 21,
+      "ad": "Pandeli",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet",
+        "kultur_tarih"
+      ],
+      "ilce": "Fatih",
+      "merkeze_km": 1,
+      "neden": "1901'den beri Mısır Çarşısı kapısının üstünde; turkuaz çinili salonda patlıcan böreği",
+      "osm": "node/3079823142",
+      "place_id": "ChIJP2joPWa3yhQR-5rFKbT0saE"
+    },
+    {
+      "sira": 22,
+      "ad": "Kadıköy Çarşısı",
+      "kategori": "carsi",
+      "amaclar": [
+        "lezzet",
+        "yavas"
+      ],
+      "ilce": "Kadıköy",
+      "merkeze_km": 5,
+      "neden": "Güneşlibahçe ve çevresinde balıkçı, turşucu, şarküteri ve kuruyemişçi sokakları",
+      "place_id": "ChIJGboMYwC5yhQRQMgExP-G0tc"
+    },
+    {
+      "sira": 23,
+      "ad": "Moda Sahili",
+      "kategori": "doga",
+      "amaclar": [
+        "yavas",
+        "gece"
+      ],
+      "ilce": "Kadıköy",
+      "merkeze_km": 5,
+      "neden": "Moda Burnu çevresinde sahil yolu ve çay bahçeleri; karşıda Tarihi Yarımada silueti",
+      "place_id": "ChIJxX8aa4q4yhQRKiIKntQmhCo"
+    },
+    {
+      "sira": 24,
+      "ad": "Çiya Sofrası",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Kadıköy",
+      "merkeze_km": 5,
+      "neden": "Musa Dağdeviren'in Güneşlibahçe'deki lokantası; Anadolu'dan otlu yemekler, dolmalar",
+      "osm": "node/9869626517",
+      "place_id": "ChIJhToLome4yhQRE1EMuLSuqlg"
+    },
+    {
+      "sira": 25,
+      "ad": "Baylan Pastanesi",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet",
+        "yavas"
+      ],
+      "ilce": "Kadıköy",
+      "merkeze_km": 4,
+      "neden": "1923'te Beyoğlu'nda açıldı, 1961'den beri Kadıköy'de; karamelli, bademli kup griye",
+      "osm": "node/1394941165",
+      "place_id": "ChIJYeZr6me4yhQRRtlqAlFv5_A"
+    },
+    {
+      "sira": 26,
+      "ad": "Kanaat Lokantası",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Üsküdar",
+      "merkeze_km": 4,
+      "neden": "1933'ten beri Üsküdar iskelesi yakınında; tencere yemekleri, dondurma ve ayva tatlısı",
+      "osm": "node/5427228422",
+      "place_id": "ChIJeZicrI63yhQRy6SwuJ6_aHI"
+    },
+    {
+      "sira": 27,
+      "ad": "Şemsi Ahmed Paşa Camii",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Üsküdar",
+      "merkeze_km": 4,
+      "neden": "Sinan'ın 1580'de Üsküdar kıyısına yaptığı küçük külliye; önünde deniz ve Kız Kulesi",
+      "osm": "way/237833983",
+      "place_id": "ChIJi6DZn4i3yhQRLcpYTadUVzI"
+    },
+    {
+      "sira": 28,
+      "ad": "Büyük Çamlıca Tepesi",
+      "kategori": "manzara",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Üsküdar",
+      "merkeze_km": 8,
+      "neden": "268 metrelik tepe; korudan iki Boğaz köprüsü, Kız Kulesi ve Tarihi Yarımada görülür",
+      "place_id": "ChIJM_wBSqXJyhQRx17gdpw5I88"
+    },
+    {
+      "sira": 29,
+      "ad": "Rumeli Hisarı Müzesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Sarıyer",
+      "merkeze_km": 11,
+      "neden": "Fatih'in 1452'de dört ayda yaptırdığı hisar; avluda toplar, Boğaz'ın dar yerine bakar",
+      "osm": "relation/7318154",
+      "place_id": "ChIJ-X6_lwLKyhQR-sYaKaSqV0Y"
+    },
+    {
+      "sira": 30,
+      "ad": "Ortaköy Camii",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "gece"
+      ],
+      "ilce": "Beşiktaş",
+      "merkeze_km": 6,
+      "neden": "Nikoğos Balyan'ın 1856'da bitirdiği neobarok cami; 15 Temmuz Şehitler Köprüsü'nün dibinde",
+      "osm": "way/498861735",
+      "place_id": "ChIJrYco5Mi3yhQRvMivnqLyc_0"
+    },
+    {
+      "sira": 31,
+      "ad": "Emirgan Korusu",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "cocuklu",
+        "yavas"
+      ],
+      "ilce": "Sarıyer",
+      "merkeze_km": 13,
+      "neden": "Sarı, Pembe ve Beyaz köşklü Boğaz korusu; nisanda lale festivali burada yapılır",
+      "osm": "way/569310851",
+      "place_id": "ChIJgbO-UnHKyhQRuxVN_8igPRY"
+    },
+    {
+      "sira": 32,
+      "ad": "Belgrad Ormanı",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Sarıyer",
+      "merkeze_km": 19,
+      "neden": "Kent suyunu toplayan Osmanlı bentleri arasında yürüyüş ve koşu yolları; Neşet Suyu girişi",
+      "place_id": "ChIJE6H1dRDin0ARcQg-b4fLOzw"
+    },
+    {
+      "sira": 33,
+      "ad": "Büyükada",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas",
+        "cocuklu"
+      ],
+      "ilce": "Adalar",
+      "merkeze_km": 20,
+      "neden": "Vapurla gidilen ada; ahşap köşkler, çam yamaçları ve Yücetepe'deki Aya Yorgi Manastırı",
+      "place_id": "ChIJo3rvAuzByhQRBJD4EB8adb8"
+    },
+    {
+      "sira": 34,
+      "ad": "Polonezköy Tabiat Parkı",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Beykoz",
+      "merkeze_km": 23,
+      "neden": "1842'de Polonyalı göçmenlerin kurduğu köy; meşe ormanında yürüyüş ve köy kahvaltısı",
+      "place_id": "ChIJU0zs1nTYn0ARfNNAoMdLcdY"
+    },
+    {
+      "sira": 35,
+      "ad": "Ağva",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Şile",
+      "merkeze_km": 75,
+      "neden": "Göksu ve Yeşilçay derelerinin denize döküldüğü Şile köyü; dere kıyısında kayık",
+      "place_id": "ChIJ0X1lKpE7nkARsnQpM9wQhuo"
+    },
+    {
+      "sira": 36,
+      "ad": "Yoros Kalesi",
+      "kategori": "manzara",
+      "amaclar": [
+        "doga",
+        "kultur_tarih"
+      ],
+      "ilce": "Beykoz",
+      "merkeze_km": 22,
+      "neden": "Anadolu Kavağı üstündeki Bizans-Ceneviz kalesi; Boğaz'ın Karadeniz'e açıldığı ağız",
+      "osm": "way/403116670",
+      "place_id": "ChIJ8_qvSavfn0AR5lp-Z5lvgvw"
+    },
+    {
+      "sira": 37,
+      "ad": "Türk ve İslam Eserleri Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Fatih",
+      "merkeze_km": 0,
+      "neden": "1520'lerde yapılan İbrahim Paşa Sarayı'nda; Selçuklu ve Osmanlı halıları, el yazmaları",
+      "osm": "node/5113500256",
+      "place_id": "ChIJnbx_x5e5yhQRlPF66tEpPfs"
+    },
+    {
+      "sira": 38,
+      "ad": "İstanbul Modern",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Beyoğlu",
+      "merkeze_km": 2,
+      "neden": "Renzo Piano'nun Karaköy rıhtımına tasarladığı binada 2023'ten beri modern sanat",
+      "osm": "node/5640069827",
+      "place_id": "ChIJw8JuD9m5yhQRnegQbG9Irjs"
+    },
+    {
+      "sira": 39,
+      "ad": "Pera Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Beyoğlu",
+      "merkeze_km": 3,
+      "neden": "Osman Hamdi'nin Kaplumbağa Terbiyecisi, Kütahya çinileri ve Anadolu ağırlık ölçüleri",
+      "osm": "way/112676117",
+      "place_id": "ChIJLTINFuC5yhQRyRbXfXliR9k"
+    },
+    {
+      "sira": 40,
+      "ad": "Rahmi M. Koç Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "cocuklu",
+        "kultur_tarih"
+      ],
+      "ilce": "Beyoğlu",
+      "merkeze_km": 5,
+      "neden": "Hasköy'deki eski lenger hanesi ve tersanede denizaltı, tren, uçak ve antika otomobiller",
+      "osm": "way/988346544",
+      "place_id": "ChIJwdTlr6uwyhQRXrwLsScTNkQ"
+    },
+    {
+      "sira": 41,
+      "ad": "Hacı Abdullah Lokantası",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet",
+        "kultur_tarih"
+      ],
+      "ilce": "Beyoğlu",
+      "merkeze_km": 3,
+      "neden": "1888'den beri; vitrinde kavanoz kavanoz komposto, kuzu tandır ve hünkâr beğendi",
+      "place_id": "ChIJ7bMVNGG3yhQRtW5c_ryodFQ"
+    },
+    {
+      "sira": 42,
+      "ad": "Meşhur Filibe Köftecisi",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Fatih",
+      "merkeze_km": 1,
+      "neden": "1893'ten beri Sirkeci'de; ızgara köfte, piyaz ve çoban salata, tatlıda revani",
+      "osm": "node/5108837431",
+      "place_id": "ChIJ4c9Zb5W5yhQRKwI6sG4rqrw"
+    },
+    {
+      "sira": 43,
+      "ad": "Köfteci Arnavut",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Fatih",
+      "merkeze_km": 4,
+      "neden": "1937'den beri Balat'ta, Haliç'e yakın; Balkan usulü köfte ve sütlü trileçe",
+      "osm": "node/8829968818",
+      "place_id": "ChIJ4Q0CdwO6yhQRYNXyxvghq2o"
+    },
+    {
+      "sira": 44,
+      "ad": "Tarihi Haliç İşkembecisi",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet",
+        "gece"
+      ],
+      "ilce": "Fatih",
+      "merkeze_km": 4,
+      "neden": "1938'den beri Haliç kıyısında; işkembe çorbası, kelle, şirden ve sütlaç",
+      "place_id": "ChIJ04dOxiO7yhQRdcdiTjGH9N8"
+    },
+    {
+      "sira": 45,
+      "ad": "Vefa Bozacısı",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet",
+        "kultur_tarih"
+      ],
+      "ilce": "Fatih",
+      "merkeze_km": 2,
+      "neden": "1876'dan beri Vefa'da; leblebili boza, duvarda Atatürk'ün içtiği bardak",
+      "osm": "node/5110342187",
+      "place_id": "ChIJNRVgoIy5yhQRdNH4KPnjiTo"
+    },
+    {
+      "sira": 46,
+      "ad": "Mandabatmaz",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet",
+        "yavas"
+      ],
+      "ilce": "Beyoğlu",
+      "merkeze_km": 3,
+      "neden": "İstiklal'in yan geçidinde küçük kahveci; köpüğü kalın, koyu Türk kahvesi",
+      "osm": "node/5115410024",
+      "place_id": "ChIJey_CUGS3yhQR8We58TT5ifM"
+    },
+    {
+      "sira": 47,
+      "ad": "Meşhur Bebek Badem Ezmesi",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet",
+        "yavas"
+      ],
+      "ilce": "Beşiktaş",
+      "merkeze_km": 10,
+      "neden": "1904'ten beri Bebek'te aynı ailenin işlettiği dükkân; badem ve fıstık ezmesi",
+      "place_id": "ChIJLSBYMB22yhQRXQ-T77zbJBs"
+    },
+    {
+      "sira": 48,
+      "ad": "Sahaflar Çarşısı",
+      "kategori": "carsi",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Fatih",
+      "merkeze_km": 1,
+      "neden": "Beyazıt Camii ile Kapalıçarşı arasındaki çınarlı avlu; eski baskılar, hat ve kitapçılar",
+      "place_id": "ChIJi-brEJG5yhQRM-Yt0LMlpRw"
+    },
+    {
+      "sira": 49,
+      "ad": "Çemberlitaş Hamamı",
+      "kategori": "aktivite",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Fatih",
+      "merkeze_km": 0,
+      "neden": "Sinan'ın 1584'te Nurbanu Sultan adına yaptığı çifte hamam; mermer göbek taşında kese",
+      "osm": "node/663391267",
+      "place_id": "ChIJxXDLuZa5yhQRwgxFEF2R3E8"
+    },
+    {
+      "sira": 50,
+      "ad": "Taksim–Tünel Nostaljik Tramvayı",
+      "kategori": "aktivite",
+      "amaclar": [
+        "cocuklu",
+        "gece"
+      ],
+      "ilce": "Beyoğlu",
+      "merkeze_km": 3,
+      "neden": "İstiklal Caddesi boyunca Taksim'den Tünel'e giden kırmızı tramvay; Galatasaray'da durur",
+      "place_id": null
+    }
+  ]
+}
