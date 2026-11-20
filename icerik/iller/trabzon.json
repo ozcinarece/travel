@@ -167,19 +167,6 @@
     },
     {
       "sira": 13,
-      "ad": "Tarihi Kalkanoğlu Pilavı",
-      "kategori": "yemek",
-      "amaclar": [
-        "lezzet"
-      ],
-      "ilce": "Ortahisar",
-      "merkeze_km": 1,
-      "neden": "Pazarkapı'da kavurmalı pilav, kuru fasulye ve kayısı hoşafı üçlüsünün klasik adresi",
-      "osm": "node/6584244515",
-      "place_id": "ChIJq8zn6k48ZEARw8yhJiO4dy0"
-    },
-    {
-      "sira": 14,
       "ad": "Sera Gölü",
       "kategori": "doga",
       "amaclar": [
@@ -193,7 +180,7 @@
       "place_id": "ChIJkWpDUc0_ZEARg4gwAQoYR3I"
     },
     {
-      "sira": 15,
+      "sira": 14,
       "ad": "Çal Mağarası",
       "kategori": "doga",
       "amaclar": [
@@ -206,7 +193,7 @@
       "place_id": "ChIJgZACAHRoZEAR2lEUCWyecUI"
     },
     {
-      "sira": 16,
+      "sira": 15,
       "ad": "Hayrat Rafting Parkuru",
       "kategori": "aktivite",
       "amaclar": [
@@ -215,10 +202,10 @@
       ],
       "ilce": "Hayrat",
       "merkeze_km": 55,
-      "neden": "Yeniköy ve Taflancık derelerinde toplam 10 km'lik dört parkur; Ayder'e yakın alternatif"
+      "neden": "Yeniköy ve Taflancık derelerinde dört etaplı, toplam 10 km'lik parkur; 2025'te açıldı"
     },
     {
-      "sira": 17,
+      "sira": 16,
       "ad": "Uzungöl Yamaç Paraşütü",
       "kategori": "aktivite",
       "amaclar": [
@@ -229,7 +216,7 @@
       "neden": "Göl çevresinde 2.000 m civarından tandem uçuş; en yoğun temmuz-ağustos"
     },
     {
-      "sira": 18,
+      "sira": 17,
       "ad": "Sultan Murat Yaylası",
       "kategori": "doga",
       "amaclar": [
@@ -242,7 +229,7 @@
       "place_id": "ChIJnYXesvzHZUARSdWi6U0onco"
     },
     {
-      "sira": 19,
+      "sira": 18,
       "ad": "Kızlar Manastırı (Panagia Theoskepastos)",
       "kategori": "tarih",
       "amaclar": [
@@ -255,7 +242,7 @@
       "place_id": "ChIJ45BM8D88ZEARID1HTZ52I-s"
     },
     {
-      "sira": 20,
+      "sira": 19,
       "ad": "Pekünlü Merkez Pide",
       "kategori": "yemek",
       "amaclar": [
@@ -268,7 +255,7 @@
       "place_id": "ChIJ29xPSkQ8ZEAREASfABToz8w"
     },
     {
-      "sira": 21,
+      "sira": 20,
       "ad": "Bordo Mavi Balık (Erşan Yılmaz)",
       "kategori": "yemek",
       "amaclar": [
@@ -281,7 +268,7 @@
       "place_id": "ChIJ1aZoyBA8ZEAR2dl2IGmTBOU"
     },
     {
-      "sira": 22,
+      "sira": 21,
       "ad": "Beton Helva",
       "kategori": "tatli_kahve",
       "amaclar": [
@@ -293,7 +280,7 @@
       "place_id": "ChIJl4Sb_WY9ZEARp301_SGks18"
     },
     {
-      "sira": 23,
+      "sira": 22,
       "ad": "Zağnos Vadisi Parkı",
       "kategori": "doga",
       "amaclar": [
@@ -308,7 +295,7 @@
       "place_id": "ChIJ1VOzOkg8ZEARytqtYVREcP8"
     },
     {
-      "sira": 24,
+      "sira": 23,
       "ad": "Ortahisar (Fatih) Camii ve Trabzon Kalesi",
       "kategori": "tarih",
       "amaclar": [
@@ -321,7 +308,7 @@
       "place_id": "ChIJ_9dcZ0g8ZEARuFLje4R04m0"
     },
     {
-      "sira": 25,
+      "sira": 24,
       "ad": "Gülbahar Hatun Camii ve Türbesi",
       "kategori": "tarih",
       "amaclar": [
@@ -334,7 +321,7 @@
       "place_id": "ChIJbyQQ0Dc8ZEARfKqZ1Bab6So"
     },
     {
-      "sira": 26,
+      "sira": 25,
       "ad": "Yılmaz Pide",
       "kategori": "yemek",
       "amaclar": [
@@ -346,7 +333,7 @@
       "place_id": "ChIJabrnJbzSZUAR5tSKo3bERCQ"
     },
     {
-      "sira": 27,
+      "sira": 26,
       "ad": "Sürmene Bıçakçıları",
       "kategori": "carsi",
       "amaclar": [
@@ -357,7 +344,7 @@
       "neden": "El dövmesi Sürmene bıçağını ustasından al; taklitlere karşı imalatçıdan almak önerilir"
     },
     {
-      "sira": 28,
+      "sira": 27,
       "ad": "Memişağa Konağı",
       "kategori": "tarih",
       "amaclar": [
@@ -369,7 +356,7 @@
       "place_id": "ChIJKdnuW03SZUARFqanoRByjNc"
     },
     {
-      "sira": 29,
+      "sira": 28,
       "ad": "Beşikdüzü Teleferiği",
       "kategori": "manzara",
       "amaclar": [
@@ -378,11 +365,11 @@
       ],
       "ilce": "Beşikdüzü",
       "merkeze_km": 42,
-      "neden": "3.600 m ile bölgenin en uzun hattı; kıyıdan zirveye çıkarken Büyükliman'ı görürsün",
+      "neden": "Karadeniz'in en uzunu olarak anılan hat; kıyıdan yukarı çıkarken Büyükliman'ı görürsün",
       "place_id": "ChIJFVQsM2V0ZEARuAklV_IspXs"
     },
     {
-      "sira": 30,
+      "sira": 29,
       "ad": "Ganita Sahili",
       "kategori": "manzara",
       "amaclar": [
@@ -397,7 +384,7 @@
       "place_id": "ChIJGzgdKxs9ZEAR8B_ESBZ2B9o"
     },
     {
-      "sira": 31,
+      "sira": 30,
       "ad": "Kaymaklı Manastırı",
       "kategori": "tarih",
       "amaclar": [
@@ -410,20 +397,7 @@
       "place_id": "ChIJhSb8K_g7ZEARr6IrhdbWyYM"
     },
     {
-      "sira": 32,
-      "ad": "Metin Usta Hamsiköy Sütlacı (Meydan)",
-      "kategori": "tatli_kahve",
-      "amaclar": [
-        "lezzet",
-        "gece"
-      ],
-      "ilce": "Ortahisar",
-      "merkeze_km": 0,
-      "neden": "Fırın sütlacının dondurmalı, ballı-bademli, tahinli-fındıklı çeşitleri Meydan'da",
-      "place_id": "ChIJy0-4keA9ZEARGk1hH5EVg3k"
-    },
-    {
-      "sira": 33,
+      "sira": 31,
       "ad": "Uğur Usta Hamsiköy Sütlaçları (Ayasofya)",
       "kategori": "tatli_kahve",
       "amaclar": [
@@ -436,7 +410,7 @@
       "place_id": "ChIJUQ7Oqs09ZEARxyhxv3K_Poc"
     },
     {
-      "sira": 34,
+      "sira": 32,
       "ad": "Marzuba Cafe Restoran",
       "kategori": "yemek",
       "amaclar": [
@@ -449,7 +423,7 @@
       "place_id": "ChIJHWi2hGtHZEARcG4qVd2Nyzw"
     },
     {
-      "sira": 35,
+      "sira": 33,
       "ad": "Haldizen Yaylası",
       "kategori": "doga",
       "amaclar": [
@@ -462,7 +436,7 @@
       "place_id": "ChIJp4AKbWyOZUARzaBpdmZeK7o"
     },
     {
-      "sira": 36,
+      "sira": 34,
       "ad": "Kadırga Yaylası",
       "kategori": "doga",
       "amaclar": [
@@ -475,7 +449,7 @@
       "place_id": "ChIJCaUS95BZZEARplgqx7M-jKs"
     },
     {
-      "sira": 37,
+      "sira": 35,
       "ad": "Mavura–Şolma Yayla Yürüyüşü",
       "kategori": "aktivite",
       "amaclar": [
@@ -487,7 +461,7 @@
       "neden": "Mavura'dan Kulin Dağı eteğindeki 1.700 m'lik Şolma'ya 3,5 km'lik yayla patikası"
     },
     {
-      "sira": 38,
+      "sira": 36,
       "ad": "Yomra Dağ Kızağı (Kaşüstü)",
       "kategori": "aktivite",
       "amaclar": [
@@ -499,7 +473,7 @@
       "place_id": "ChIJaYscEgA7ZEARQ7c0fwIfxpQ"
     },
     {
-      "sira": 39,
+      "sira": 37,
       "ad": "Kadınlar Pazarı",
       "kategori": "carsi",
       "amaclar": [
@@ -512,7 +486,7 @@
       "place_id": "ChIJ4xym2048ZEARo3uCw0YuNGI"
     },
     {
-      "sira": 40,
+      "sira": 38,
       "ad": "Trabzon Balık Pazarı",
       "kategori": "carsi",
       "amaclar": [
@@ -524,7 +498,7 @@
       "place_id": "ChIJOYFk8E48ZEARrU--dKkkzfQ"
     },
     {
-      "sira": 41,
+      "sira": 39,
       "ad": "Erikbeli Yaylası",
       "kategori": "doga",
       "amaclar": [
@@ -537,7 +511,7 @@
       "place_id": "ChIJo5L0ZrX1ZEAR7jeMKXSBAd8"
     },
     {
-      "sira": 42,
+      "sira": 40,
       "ad": "Haçka Obası (Düzköy Yaylası)",
       "kategori": "doga",
       "amaclar": [
@@ -550,7 +524,7 @@
       "place_id": "ChIJOWuB7fdcZEARNNNOtAVkiNM"
     },
     {
-      "sira": 43,
+      "sira": 41,
       "ad": "Çakırgöl",
       "kategori": "doga",
       "amaclar": [
@@ -562,7 +536,7 @@
       "place_id": "ChIJMUls1Q8HZUAR8XGRUY9iJyk"
     },
     {
-      "sira": 44,
+      "sira": 42,
       "ad": "Cevdet Sunay Müze Evi",
       "kategori": "muze",
       "amaclar": [
