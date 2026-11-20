@@ -1,0 +1,560 @@
+{
+  "il": "Mardin",
+  "slug": "mardin",
+  "guncelleme": "2026-11-19",
+  "oneriler": [
+    {
+      "sira": 1,
+      "ad": "Deyrulzafaran Manastırı",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Artuklu",
+      "merkeze_km": 5,
+      "neden": "1160-1932 Süryani patrikliği; harcına safran katıldığı anlatılan sarımsı duvarlar",
+      "place_id": "ChIJVVVVVb6ICkARTNudwSsz6Z0"
+    },
+    {
+      "sira": 2,
+      "ad": "Zinciriye (Sultan İsa) Medresesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Artuklu",
+      "merkeze_km": 1,
+      "neden": "1385'te Sultan İsa yaptırdı; iki avlulu külliye, damından eski şehir ve ova görünür",
+      "osm": "relation/5694257",
+      "place_id": "ChIJvav4acCICkARgEok6EKMxP0"
+    },
+    {
+      "sira": 3,
+      "ad": "Kasımiye Medresesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Artuklu",
+      "merkeze_km": 1,
+      "neden": "Avludaki havuza akan su doğumdan ölüme insan ömrünü simgeler; Akkoyunlu yapısı, 1445",
+      "osm": "relation/5694256",
+      "place_id": "ChIJZQlkIqSICkARh0rP8FJZehI"
+    },
+    {
+      "sira": 4,
+      "ad": "Midyat Tarihi Sokakları (Eski Midyat)",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Midyat",
+      "merkeze_km": 55,
+      "neden": "Süryani konakları ve çan kuleleri arasında; taş oymalı cepheler Mardin'dekinden süslü",
+      "place_id": "ChIJDzq6u7FNCkARUiu2DsvVL48"
+    },
+    {
+      "sira": 5,
+      "ad": "Mor Gabriel (Deyrulumur) Manastırı",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Midyat",
+      "merkeze_km": 71,
+      "neden": "397'de kurulan, bugün de keşişlerin yaşadığı manastır; Tur Abdin metropolitliği burada",
+      "place_id": "ChIJmxwPjCA0CkARZC8hlP_d4h8"
+    },
+    {
+      "sira": 6,
+      "ad": "Dara Antik Kenti",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Artuklu",
+      "merkeze_km": 24,
+      "neden": "505'te Doğu Roma sınır garnizonu; Oğuz köyünün altındaki dev sarnıçlara inilebiliyor",
+      "place_id": "ChIJN4ZsuU1wCkARSEZbRG-ze1s"
+    },
+    {
+      "sira": 7,
+      "ad": "Mardin Ulu Camii",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Artuklu",
+      "merkeze_km": 0,
+      "neden": "Minaresi çarşının üstünden yükselir; kuzey duvarı ve oymalı minberi Artuklu döneminden",
+      "osm": "way/377249224",
+      "place_id": "ChIJEdeIC-aJCkAREpKbMhTgjrY"
+    },
+    {
+      "sira": 8,
+      "ad": "Mor Behnam (Kırklar) Kilisesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Artuklu",
+      "merkeze_km": 0,
+      "neden": "Süryani Ortodoks cemaatinin hâlâ ayin yaptığı kilise; ana caddeden dar bir sokakla girilir",
+      "osm": "way/1466074455",
+      "place_id": "ChIJ43wdK7mICkARbKFiQZcMFGs"
+    },
+    {
+      "sira": 9,
+      "ad": "Mardin Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Artuklu",
+      "merkeze_km": 0,
+      "neden": "2000'de eski Süryani Katolik Patrikhanesi binasında açılan il arkeoloji müzesi",
+      "osm": "node/11980754538",
+      "place_id": "ChIJh9idQL-ICkARwEAvgKazumE"
+    },
+    {
+      "sira": 10,
+      "ad": "Bağdadi Restoran",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Artuklu",
+      "merkeze_km": 0,
+      "neden": "Alluciye (erikli et) ve kaburga dolması gibi Mardin sofrası yemekleri",
+      "osm": "node/4450738389",
+      "place_id": "ChIJT_iIZL-ICkARRgnhcCQZ3kY"
+    },
+    {
+      "sira": 11,
+      "ad": "Sakıp Sabancı Mardin Kent Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Artuklu",
+      "merkeze_km": 1,
+      "neden": "1889 süvari kışlası; kentin dinlerini, zanaatlarını ve giyimini canlandırmalarla anlatıyor",
+      "osm": "way/219001206",
+      "place_id": "ChIJZdtwi-mICkARzElf6D4RvAo"
+    },
+    {
+      "sira": 12,
+      "ad": "Abbaralar ve Taş Sokaklar",
+      "kategori": "aktivite",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Artuklu",
+      "merkeze_km": 0,
+      "neden": "Evlerin altından geçen tonozlu geçitler; merdivenli sokaklarla birbirine bağlanır"
+    },
+    {
+      "sira": 13,
+      "ad": "Cumhuriyet Meydanı",
+      "kategori": "manzara",
+      "amaclar": [
+        "yavas",
+        "gece"
+      ],
+      "ilce": "Artuklu",
+      "merkeze_km": 1,
+      "neden": "Eski şehrin doğu ucundaki açıklık; Mezopotamya Ovası'nın güneye uzandığı geniş bakış",
+      "place_id": "ChIJTw7lFr-ICkARMR6ZvT_EeUg"
+    },
+    {
+      "sira": 14,
+      "ad": "Midyat Devlet Konukevi",
+      "kategori": "manzara",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Midyat",
+      "merkeze_km": 55,
+      "neden": "Dizilere set olan üç katlı taş konak; tepeden Eski Midyat'ın damları seyredilir",
+      "place_id": "ChIJrfl5X6VNCkARKA4j5XI8fTs"
+    },
+    {
+      "sira": 15,
+      "ad": "Kayseriye Bedesteni",
+      "kategori": "carsi",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Artuklu",
+      "merkeze_km": 0,
+      "neden": "Eski şehrin kapalı bedesteni; kalın taş duvarlı dükkânlar ana caddeye yakın",
+      "place_id": "ChIJ829zir-ICkARifgVTy5NlNE"
+    },
+    {
+      "sira": 16,
+      "ad": "Bakırcılar Çarşısı",
+      "kategori": "carsi",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Artuklu",
+      "merkeze_km": 0,
+      "neden": "Örs sesinin duyulduğu dar çarşı; kazan ve siniler hâlâ elde dövülüyor",
+      "place_id": "ChIJTQR2FMCICkARY8yLzOeSmR4"
+    },
+    {
+      "sira": 17,
+      "ad": "Marangozlar Kahvesi",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet",
+        "yavas"
+      ],
+      "ilce": "Artuklu",
+      "merkeze_km": 1,
+      "neden": "Marangozlar Çarşısı'nda eski usul kahvehane; mırra ve Süryani kahvesi",
+      "osm": "node/5814978353",
+      "place_id": "ChIJX8IJoFyJCkARyeEbEJfPo-c"
+    },
+    {
+      "sira": 18,
+      "ad": "Zeynel Abidin Camii ve Türbesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Nusaybin",
+      "merkeze_km": 51,
+      "neden": "1159 Zengi yapısı; Zeynel Abidin ile kız kardeşi Sitti Zeynep'in türbeleri burada",
+      "place_id": "ChIJ-c2_pqMPCkARGNtFXBTFvlM"
+    },
+    {
+      "sira": 19,
+      "ad": "Mor Yakup Kilisesi (Nusaybin)",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Nusaybin",
+      "merkeze_km": 51,
+      "neden": "313-320'de Nusaybinli Yakup'un yaptırdığı vaftizhane; bölgenin en eski kiliselerinden",
+      "place_id": "ChIJ57R7BaMPCkAR5URcAGJ5tBA"
+    },
+    {
+      "sira": 20,
+      "ad": "Midyat Telkari Çarşısı",
+      "kategori": "carsi",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Midyat",
+      "merkeze_km": 55,
+      "neden": "2021'de coğrafi işaret alan Midyat telkarisi; ustalar gümüş teli dükkânda büküyor",
+      "place_id": "ChIJrXV5sbtNCkAR0v-bisj-TLI"
+    },
+    {
+      "sira": 21,
+      "ad": "Leyli Muse Mutfak",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Artuklu",
+      "merkeze_km": 1,
+      "neden": "Kitel ve irok gibi içli köfte çeşitleri; Bademci Sokak'ta ev usulü",
+      "place_id": "ChIJI65hAZGJCkARa39Hwd_SW34"
+    },
+    {
+      "sira": 22,
+      "ad": "Latifiye (Abdüllatif) Camii",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Artuklu",
+      "merkeze_km": 0,
+      "neden": "Artuklu dönemi cami; oymalı taç kapısı çarşı tarafındaki dar sokağa açılır",
+      "osm": "relation/17646327",
+      "place_id": "ChIJmdJcG7-ICkARkLX_CZb5pac"
+    },
+    {
+      "sira": 23,
+      "ad": "Anıtlı (Hah) Meryem Ana Kilisesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Midyat",
+      "merkeze_km": 61,
+      "neden": "Tur Abdin'in eski kiliselerinden; Hah köyünde katmanlı kubbe kulesiyle bilinir",
+      "place_id": "ChIJxVwXdh-3C0AR1vB3JGihO28"
+    },
+    {
+      "sira": 24,
+      "ad": "Beyazsu (Ava Sıpi) Vadisi",
+      "kategori": "aktivite",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Nusaybin",
+      "merkeze_km": 51,
+      "neden": "Bagok Dağı eteğinde soğuk kaynak suyu; dere üstü kamelyalarda serinleniyor",
+      "place_id": "ChIJucaVGAA_CkARW0p_nzdzgOc"
+    },
+    {
+      "sira": 25,
+      "ad": "Emir Hamamı",
+      "kategori": "aktivite",
+      "amaclar": [
+        "yavas",
+        "kultur_tarih"
+      ],
+      "ilce": "Artuklu",
+      "merkeze_km": 0,
+      "neden": "Eski şehrin ana caddesindeki tarihi hamam; kubbe ışıklıkları altında hâlâ yıkanılıyor",
+      "place_id": "ChIJOSijLMCICkARzImlurh2ltU"
+    },
+    {
+      "sira": 26,
+      "ad": "Mezopotamya Çay Bahçesi",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "yavas",
+        "gece"
+      ],
+      "ilce": "Artuklu",
+      "merkeze_km": 1,
+      "neden": "Şehidiye'de açık hava çay bahçesi; kakuleli Mardin kahvesi ve ova manzarası",
+      "osm": "node/4838905352",
+      "place_id": "ChIJVczPd-qICkARyQtKmkFG3dc"
+    },
+    {
+      "sira": 27,
+      "ad": "Yay Konağı",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet",
+        "yavas"
+      ],
+      "ilce": "Artuklu",
+      "merkeze_km": 0,
+      "neden": "Kaburga dolması ve Mardin kebabı; Medrese Mahallesi'nde avlulu konak",
+      "place_id": "ChIJ481S3wiJCkAR6Rl5rJW4W_s"
+    },
+    {
+      "sira": 28,
+      "ad": "Tarihi Gelüşke Hanı",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet",
+        "kultur_tarih"
+      ],
+      "ilce": "Midyat",
+      "merkeze_km": 55,
+      "neden": "Midyat'ta eski bir handa içli köfte ve yöresel tencere yemekleri",
+      "place_id": "ChIJfXBVZsxNCkAROVe2Kdpg07k"
+    },
+    {
+      "sira": 29,
+      "ad": "Savur Tarihi Yerleşimi",
+      "kategori": "manzara",
+      "amaclar": [
+        "yavas",
+        "kultur_tarih"
+      ],
+      "ilce": "Savur",
+      "merkeze_km": 29,
+      "neden": "Yamaca basamak basamak kurulu taş evler; Ökmen Konağı'ndan dere vadisi görünür",
+      "place_id": "ChIJselheUnlCkARMeyVLRUf1OI"
+    },
+    {
+      "sira": 30,
+      "ad": "Dereiçi (Killit)",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Savur",
+      "merkeze_km": 34,
+      "neden": "Savur'a 9 km Süryani köyü; kiliseleri ve evleri Bir Bulut Olsam'a set oldu",
+      "place_id": "ChIJVza77rjkCkARLnONKRuhbcQ"
+    },
+    {
+      "sira": 31,
+      "ad": "Çağçağ Suyu ve Vadisi",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "lezzet"
+      ],
+      "ilce": "Nusaybin",
+      "merkeze_km": 50,
+      "neden": "Aksu ve Karasu'nun birleştiği dere; kıyıda suyun üstüne kurulu balık sofraları",
+      "place_id": "ChIJo99LRAAPCkARobcFHI4ckLU"
+    },
+    {
+      "sira": 32,
+      "ad": "Şehidiye Camii",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Artuklu",
+      "merkeze_km": 1,
+      "neden": "İnce minaresi 1916-17'de yenilenen cami; ana caddeden avlusu görünür",
+      "osm": "way/491802772",
+      "place_id": "ChIJY7AjdOqICkARJxOYy-6lK5s"
+    },
+    {
+      "sira": 33,
+      "ad": "Revaklı Çarşı (Sipahiler Çarşısı)",
+      "kategori": "carsi",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Artuklu",
+      "merkeze_km": 0,
+      "neden": "Kemerli revakların altında sıralanan dükkânlar; ana caddenin batı ucunda",
+      "place_id": "ChIJ57QiJsCICkARE9ztVbUpdOM"
+    },
+    {
+      "sira": 34,
+      "ad": "Midyat Telkari Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Midyat",
+      "merkeze_km": 55,
+      "neden": "Gümüş telkari işçiliğinin aşamaları ve eski parçalar; çarşıdaki atölyelerin hikâyesi",
+      "place_id": "ChIJxRHLSABNCkARu-Fo7SJ2ZrM"
+    },
+    {
+      "sira": 35,
+      "ad": "Midyat Kent Müzesi (Estel Han)",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Midyat",
+      "merkeze_km": 56,
+      "neden": "Estel'deki eski han şehir müzesine çevrildi; Midyat'ın gündelik hayatını anlatıyor",
+      "place_id": "ChIJhZwVVXVSCkARs5e0h_ResIk"
+    },
+    {
+      "sira": 36,
+      "ad": "Kebapçı Yusuf Usta",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Artuklu",
+      "merkeze_km": 1,
+      "neden": "Patlıcanla şişe dizilen Mardin kebabının yerel adreslerinden; Yalım Mahallesi",
+      "place_id": "ChIJVVVVVb6ICkARlMFo5FtmXhc"
+    },
+    {
+      "sira": 37,
+      "ad": "Midyat Saray Lokantası",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Midyat",
+      "merkeze_km": 56,
+      "neden": "Estel tarafında esnaf lokantası; Mardin kebabı ve içli köfte",
+      "place_id": "ChIJJaPhzGFNCkARoMNKXJPjjYI"
+    },
+    {
+      "sira": 38,
+      "ad": "Kana Cafe Shop",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Artuklu",
+      "merkeze_km": 0,
+      "neden": "Hurmalı ve bademli Süryani çöreği; eski şehir caddesinde kahve molası",
+      "place_id": "ChIJkcH5J8mICkARJRwKATO6z8U"
+    },
+    {
+      "sira": 39,
+      "ad": "Kültür Kafe",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet",
+        "yavas"
+      ],
+      "ilce": "Artuklu",
+      "merkeze_km": 0,
+      "neden": "Kültür Sokak'ta reyhan şerbeti; nişanlarda ikram edilen fesleğenli içecek",
+      "osm": "node/5758502623",
+      "place_id": "ChIJEX0dSc1xCkARoJ30cFSSyqw"
+    },
+    {
+      "sira": 40,
+      "ad": "Kızıltepe Ulu Camii",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Kızıltepe",
+      "merkeze_km": 19,
+      "neden": "Artukluların Dunaysır kentinden kalan cami; taç kapısı 2019'da onarıldı",
+      "place_id": "ChIJ2f7ev93VShUR7uhdUXEQ1zw"
+    },
+    {
+      "sira": 41,
+      "ad": "223. Tabiat Parkı GAP Şelalesi",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Derik",
+      "merkeze_km": 41,
+      "neden": "Derik merkezine 3,6 km; 527 dekarlık tabiat parkında şelale ve yürüyüş alanı",
+      "place_id": "ChIJmX-iLAChCkARj6G3KS5XfTg"
+    },
+    {
+      "sira": 42,
+      "ad": "Rabat Kalesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "doga"
+      ],
+      "ilce": "Derik",
+      "merkeze_km": 42,
+      "neden": "Derik'in üstündeki kayalığa oturan kale kalıntısı; ilçeyi ve zeytinlikleri görür",
+      "place_id": "ChIJhXin9VAncUARZ7X_NbO_IQ8"
+    },
+    {
+      "sira": 43,
+      "ad": "Yardere Köyü Şelalesi",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Artuklu",
+      "merkeze_km": 6,
+      "neden": "Şehre yakın köy mesire alanı; şelale çevresi hafta sonu piknik yeri",
+      "place_id": "ChIJoeyUYKFlCkARAX-lOXbhZlE"
+    }
+  ]
+}
