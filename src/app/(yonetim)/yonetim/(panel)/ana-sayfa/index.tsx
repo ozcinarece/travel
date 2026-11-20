@@ -8,30 +8,26 @@ import { AnaSayfaOnizleme, ANA_SAYFA_TELEFON } from '@/components/yonetim/anaSay
 import { BolumSatiri } from '@/components/yonetim/anaSayfa/BolumSatiri';
 import { yRenk } from '@/components/yonetim/tema';
 import { planliSatirlar, yayindanFarkli, yeniBolum } from '@/features/yonetim/anaSayfa';
-import { useBolumIslemleri, useEnCokAlinan, useSonYayin, useTaslakBolumler } from '@/features/yonetim/anaSayfaSorgulari';
+import { useBolumIslemleri, useSonYayin, useTaslakBolumler } from '@/features/yonetim/anaSayfaSorgulari';
 import { saatMetni, tasi } from '@/features/yonetim/gezi';
 import { useYonetimGezileri, useYonetimSehirleri } from '@/features/yonetim/geziSorgulari';
-import { kullaniciEtiketi } from '@/features/yonetim/menu';
 import { ty } from '@/features/yonetim/metin';
 import { useYonetimYerleri } from '@/features/yonetim/yerSorgulari';
-import { useOturum } from '@/lib/oturum';
 import { yazi } from '@/theme';
 
 const OLCEK = 0.56;
 
 /**
- * #109 ana sayfa düzeni (kanvas ekran 3): bölüm listesi (sürükle = sıra, anahtar = açık/kapalı, Düzenle = içerik),
+ * #109 ana sayfa düzeni (kanvas ekran 3; #406 2/2: raf ve banner düzenleyicisi, v6 önizleme): bölüm listesi (sürükle = sıra, anahtar = açık/kapalı, Düzenle = içerik),
  * "+ Bölüm ekle", planlı yayın kutusu; sağda uygulama ana sayfası önizlemesi. Düzenlemeler taslağa anında yazılır;
  * "Yayınla" taslağı canlıya çıkarır.
  */
 export default function AnaSayfaDuzeniSayfasi() {
-  const { session } = useOturum();
   const taslak = useTaslakBolumler();
   const yayin = useSonYayin();
   const geziler = useYonetimGezileri();
   const yerler = useYonetimYerleri();
   const sehirler = useYonetimSehirleri();
-  const enCokAlinan = useEnCokAlinan();
   const is = useBolumIslemleri();
   const [acikId, setAcikId] = useState<string | null>(null);
   const [hata, setHata] = useState<string | null>(null);
@@ -42,6 +38,7 @@ export default function AnaSayfaDuzeniSayfasi() {
     geziler: geziler.data ?? [],
     yerler: (yerler.data ?? []).map((y) => ({ id: y.id, ad: y.ad })),
     sehirler: (sehirler.data ?? []).map((sh) => ({ id: sh.id, ad: sh.ad })),
+    raflar: bolumler.filter((b) => b.tur === 'raf').map((b) => ({ id: b.id, ad: b.baslik })),
   };
   const farkli = yayindanFarkli(bolumler, yayin.data?.bolumler ?? null);
   const planli = planliSatirlar(bolumler, ty);
@@ -113,14 +110,7 @@ export default function AnaSayfaDuzeniSayfasi() {
         <Text style={s.etiket}>{ty('anaSayfa.onizleme')}</Text>
         <View style={[s.cerceve, { width: ANA_SAYFA_TELEFON.genislik * OLCEK, height: ANA_SAYFA_TELEFON.yukseklik * OLCEK }]}>
           <View style={[s.olcek, { transform: [{ scale: OLCEK }] }]}>
-            <AnaSayfaOnizleme
-              bolumler={bolumler}
-              geziler={geziler.data ?? []}
-              yerler={yerler.data ?? []}
-              sehirler={sehirler.data ?? []}
-              enCokAlinan={enCokAlinan.data ?? null}
-              ad={kullaniciEtiketi(session?.user.user_metadata?.full_name as string | undefined, session?.user.email).ad.split(' ')[0]}
-            />
+            <AnaSayfaOnizleme bolumler={bolumler} />
           </View>
         </View>
       </View>

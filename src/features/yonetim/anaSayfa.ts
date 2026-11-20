@@ -1,11 +1,59 @@
 // #109 ana sayfa düzeni — panelin saf kuralları: satır özeti, planlı yayın metni, yeni bölüm, taslak/yayın farkı. Testli.
-import type { AnaSayfaBolumu, BolumTuru } from '@/lib/anaSayfa';
+import type { AnaSayfaBolumu, BannerHedefi, BolumTuru, RafTuru } from '@/lib/anaSayfa';
 import { AYLAR_KISA } from '@/lib/takvim';
 
 /** Taslak satırı (tablo): görünümdeki alanlar + açık/kapalı. */
 export type TaslakBolum = AnaSayfaBolumu & { acik: boolean };
 
 export const BOLUM_TURLERI: BolumTuru[] = ['serit', 'mozaik', 'tek_kart', 'sehir_seckisi'];
+
+/** #406 2/2: v6 Keşfet'in türleri; "+ Bölüm ekle" ve tür seçimi yalnız bunları sunar (#428, soru 6). */
+export const V6_TURLERI = ['raf', 'banner'] as const satisfies readonly BolumTuru[];
+/** Panelde seçilebilen raf türleri (`arkadaslardan` 26 Kasım paylaşımından sonra). */
+export const RAF_TURLERI = ['amac', 'sehir', 'elle'] as const satisfies readonly RafTuru[];
+export const BANNER_HEDEF_TURLERI = ['gezi', 'sehir', 'raf'] as const satisfies readonly BannerHedefi['tur'][];
+
+/** v6 Keşfet'te çizilmeyen eski tür mü (panelde gri, "v6'da görünmez"). */
+export function eskiTurMu(tur: BolumTuru): boolean {
+  return tur !== 'banner' && tur !== 'raf';
+}
+
+/** v6 türünün boş içeriği (tür değişince eski alanlar düşer). Raf elle ve boş başlar; banner hedefsiz. */
+export function v6BosIcerik(tur: 'banner' | 'raf'): AnaSayfaBolumu['icerik'] {
+  return tur === 'raf' ? { raf_turu: 'elle', gezi_idler: [] } : {};
+}
+
+/** Raf türü değişince içerik: yalnız o türün alanı kalır. */
+export function rafIcerigi(raf_turu: (typeof RAF_TURLERI)[number], deger: { amac?: string; sehir_id?: string; gezi_idler?: string[] } = {}): AnaSayfaBolumu['icerik'] {
+  if (raf_turu === 'amac') return deger.amac ? { raf_turu, amac: deger.amac } : { raf_turu };
+  if (raf_turu === 'sehir') return deger.sehir_id ? { raf_turu, sehir_id: deger.sehir_id } : { raf_turu };
+  return { raf_turu, gezi_idler: deger.gezi_idler ?? [] };
+}
+
+/** Banner içeriğine alan yazar; boş metin ve `null` alanı siler (DB fazladan anahtar ve boş üst yazı kabul etmez). */
+export function bannerIcerigi(eski: AnaSayfaBolumu['icerik'], degisen: Partial<Pick<AnaSayfaBolumu['icerik'], 'ust_yazi' | 'kapak_url' | 'kapak_atif' | 'hedef'>>): AnaSayfaBolumu['icerik'] {
+  const yeni: Record<string, unknown> = {};
+  for (const k of ['ust_yazi', 'kapak_url', 'kapak_atif', 'hedef'] as const) {
+    const v = k in degisen ? degisen[k] : eski[k];
+    if (v === undefined || v === null || (typeof v === 'string' && !v.trim())) continue;
+    yeni[k] = typeof v === 'string' ? v.trim() : v;
+  }
+  return yeni as AnaSayfaBolumu['icerik'];
+}
+
+/**
+ * KK-ek1 · KK-ek2: banner görsel adresi DB kuralının (`banner_gorsel_adresi_gecerli`) aynısı; panel kaydetmeden önce
+ * anlaşılır hata gösterir. Yalnız Commons (`upload.wikimedia.org`) ya da kendi `icerik` kovamız; izin listesi dışındaki
+ * karakter (boşluk, sekme, satır sonu, `?`, `#`, `(` …) ve yol hilesi reddedilir.
+ */
+export function bannerAdresiGecerli(adres: string): boolean {
+  return (
+    adres.length <= 500 &&
+    /^[A-Za-z0-9._~/:%-]+$/.test(adres) &&
+    /^https:\/\/(upload\.wikimedia\.org\/|xwqeobelyeuzoxyuvauw\.supabase\.co\/storage\/v1\/object\/public\/icerik\/)/.test(adres) &&
+    !/(\.\.|%2e|%2f|%5c|%25|\\)/i.test(adres)
+  );
+}
 
 type Adli = { id: string; ad: string };
 
@@ -97,9 +145,9 @@ export function planliSatirlar(bolumler: readonly TaslakBolum[], metin: (anahtar
     );
 }
 
-/** "+ Bölüm ekle": sona, kapalı, elle (açılınca görünür; yayınlanmadıkça uygulamada yok). */
+/** "+ Bölüm ekle": sona, kapalı, elle seçimli boş raf (#406 2/2; açılınca görünür, yayınlanmadıkça uygulamada yok). */
 export function yeniBolum(bolumler: readonly { sira: number }[], baslik: string): Omit<TaslakBolum, 'id'> {
-  return { tur: 'serit', baslik, sira: Math.max(0, ...bolumler.map((b) => b.sira)) + 1, acik: false, kaynak: 'elle', icerik: { gezi_idler: [] }, baslangic_at: null, bitis_at: null };
+  return { tur: 'raf', baslik, sira: Math.max(0, ...bolumler.map((b) => b.sira)) + 1, acik: false, kaynak: 'elle', icerik: v6BosIcerik('raf'), baslangic_at: null, bitis_at: null };
 }
 
 const KARSILASTIR = ['id', 'tur', 'baslik', 'sira', 'acik', 'kaynak', 'icerik', 'baslangic_at', 'bitis_at'] as const;

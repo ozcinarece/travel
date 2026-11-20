@@ -1,150 +1,98 @@
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useMemo } from 'react';
+import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native';
 
-import { GeziKarti } from '@/components/icerik/GeziKarti';
-import { YerKarosu } from '@/components/icerik/YerKarosu';
+import { Banner } from '@/components/anasayfa/Banner';
+import { Raf } from '@/components/anasayfa/Raf';
 import { Ikon } from '@/components/ui/Ikon';
+import { LogoYazi } from '@/components/ui/Logo';
+import { aktifBanner, kesfetRaflari } from '@/features/anasayfa/raflar';
+import { useKesfetAkisi } from '@/features/icerik/kesfetAkisi';
+import { useSehirler } from '@/features/icerik/sorgular';
 import type { TaslakBolum } from '@/features/yonetim/anaSayfa';
-import type { YonetimGeziOzeti, YonetimSehri } from '@/features/yonetim/geziSorgulari';
-import type { YonetimYeri } from '@/features/yonetim/yerSorgulari';
 import { t } from '@/i18n';
-import { bolumKimlikleri, cizimBloklari, gorunenBolumler } from '@/lib/anaSayfa';
-import type { Gezi } from '@/lib/tipler';
-import { baslikStili, bosluk, olcek, renk, yazi } from '@/theme';
+import { gorunenBolumler } from '@/lib/anaSayfa';
+import { anaV5, renk, yazi } from '@/theme';
 
 export const ANA_SAYFA_TELEFON = { genislik: 390, yukseklik: 1180 } as const;
 
-type Props = {
-  bolumler: readonly TaslakBolum[];
-  geziler: readonly YonetimGeziOzeti[];
-  yerler: readonly YonetimYeri[];
-  sehirler: readonly YonetimSehri[];
-  enCokAlinan: string | null;
-  ad: string;
-};
+const bos = () => {};
 
 /**
- * KK5 (kanvas "ÖNİZLEME · ANA SAYFA"): uygulama ana sayfası taslakla — selam, arama ve sabit kart (uygulamanın
- * "İlk seyahatini kur" kartı; kullanıcının seyahati önizlemede yok), sonra açık ve aralıktaki bölümler `cizimBloklari`
- * ile. Kartlar uygulamanın `GeziKarti` / `YerKarosu` bileşenleri; metinler uygulamanın tr.json'undan. Yalnız yayınlı
- * içerik gösterilir (uygulama da yalnız onu görür).
+ * #406 2/2 KK4 (UX önerileri kanvası, `Ana_v6_Kesfet`): telefon önizlemesi taslakla — uygulamanın Keşfet'i: üst satır,
+ * arama, banner, raflar. Banner ve raflar uygulamanın kendi bileşenleri ve kuralları (`aktifBanner`, `kesfetRaflari`);
+ * geziler uygulamanın Keşfet akışından (yalnız yayındakiler; uygulama da yalnız onları görür). Taslakta açık ve tarih
+ * aralığındaki bölümler gösterilir. Kullanıcıya özel "Planlamaya devam" satırı önizlemede yok.
  */
-export function AnaSayfaOnizleme({ bolumler, geziler, yerler, sehirler, enCokAlinan, ad }: Props) {
-  const yayinliGeziler = geziler.filter((g) => g.yayin && (!g.yayin_at || new Date(g.yayin_at) <= new Date()));
-  const yayinliYerler = yerler.filter((y) => y.yayin);
-  const kaynak = { geziler: yayinliGeziler, yerler: yayinliYerler, sehirler: sehirler.filter((s) => s.yayin) };
-  const gezi = (id: string) => yayinliGeziler.find((g) => g.id === id) as unknown as Gezi | undefined;
-  const bloklar = cizimBloklari(gorunenBolumler(bolumler));
+export function AnaSayfaOnizleme({ bolumler }: { bolumler: readonly TaslakBolum[] }) {
+  const akis = useKesfetAkisi();
+  const sehirler = useSehirler();
+  const gorunen = useMemo(() => gorunenBolumler(bolumler), [bolumler]);
+  const geziler = useMemo(() => akis.data ?? [], [akis.data]);
+  const raflar = useMemo(() => kesfetRaflari(gorunen, geziler), [gorunen, geziler]);
+  const banner = useMemo(() => aktifBanner(gorunen, geziler, sehirler.data ?? [], raflar), [gorunen, geziler, sehirler.data, raflar]);
 
   return (
-    <View style={s.telefon}>
+    <View style={s.telefon} testID="ana-sayfa-onizleme">
       <ScrollView contentContainerStyle={s.icerik}>
         <View style={s.ust}>
-          <View style={{ flex: 1 }}>
-            <Text style={s.merhaba}>{t('anasayfa.merhaba', { ad })}</Text>
-            <Text style={s.soru}>{t('anasayfa.soru')}</Text>
-          </View>
-          <View style={s.avatar}>
-            <Text style={s.avatarHarf}>{ad.charAt(0).toLocaleUpperCase('tr-TR')}</Text>
+          <LogoYazi boyut={36} />
+          <View style={s.ustDugmeler}>
+            <View style={s.daire}>
+              <Ikon ad="kalp" boyut={22} renk={renk.ana} kalinlik={2.4} />
+            </View>
+            <View style={s.seyahatDugme}>
+              <Text style={s.seyahatArti}>+</Text>
+              <Text style={s.seyahatMetin}>{t('anasayfa.v5.seyahat')}</Text>
+            </View>
           </View>
         </View>
         <View style={s.arama}>
-          <Ikon ad="ara" boyut={18} renk={renk.ikincil} kalinlik={2.2} />
-          <Text style={s.aramaMetin}>{t('anasayfa.ara')}</Text>
+          <Ikon ad="ara" boyut={18} renk={renk.metin} kalinlik={2.4} />
+          <Text style={s.aramaMetin}>{t('anasayfa.v5.ara')}</Text>
         </View>
-        <View style={s.kart}>
-          <Text style={s.kartAd}>{t('anasayfa.ilkBaslik')}</Text>
-          <Text style={s.kartAlt}>{t('anasayfa.ilkAlt')}</Text>
-          <View style={s.kartDugme}>
-            <Text style={s.kartDugmeMetin}>{`${t('anasayfa.ilkDugme')} →`}</Text>
+        {banner ? <Banner banner={banner} onAc={bos} /> : null}
+        {akis.isPending ? (
+          <ActivityIndicator color={renk.ana} style={s.yukleniyor} />
+        ) : (
+          <View style={s.raflar}>
+            {raflar.map((r) => (
+              <Raf key={r.id} raf={r} onKart={bos} onTumu={bos} />
+            ))}
           </View>
-        </View>
-        {bloklar.map((blok) => (
-          <View key={blok.bolumler[0].id} style={s.bolum}>
-            <View style={s.bolumSatir}>
-              <Text style={s.bolumBaslik}>{blok.baslik}</Text>
-              <Text style={s.tumu}>{t('anasayfa.tumu')}</Text>
-            </View>
-            {blok.bolumler.map((b) => {
-              const idler = bolumKimlikleri(b.tur === 'tek_kart' && b.kaynak === 'otomatik' ? { ...b, icerik: { gezi_id: enCokAlinan } } : b, kaynak);
-              if (b.tur === 'tek_kart') {
-                const g = idler[0] ? gezi(idler[0]) : undefined;
-                return g ? <GeziKarti key={b.id} gezi={g} buyuk onPress={() => {}} /> : <Text key={b.id} style={s.bos}>{t('anasayfa.bos')}</Text>;
-              }
-              if (b.tur === 'serit') {
-                return (
-                  <ScrollView key={b.id} horizontal showsHorizontalScrollIndicator={false} style={s.seritKaydirma} contentContainerStyle={s.serit}>
-                    {idler.map((id, i) => {
-                      const g = gezi(id);
-                      return g ? <GeziKarti key={id} gezi={g} sira={i + 1} onPress={() => {}} /> : null;
-                    })}
-                  </ScrollView>
-                );
-              }
-              if (b.tur === 'mozaik') {
-                const liste = idler.map((id) => yayinliYerler.find((y) => y.id === id)).filter((y): y is YonetimYeri => !!y);
-                return (
-                  <View key={b.id} style={s.mozaik}>
-                    {[0, 1].map((sutun) => (
-                      <View key={sutun} style={s.sutun}>
-                        {liste
-                          .filter((_, i) => i % 2 === sutun)
-                          .map((y, i) => (
-                            <YerKarosu
-                              key={y.id}
-                              ad={y.ad}
-                              sehir={y.sehirler?.ad ?? null}
-                              kategori={y.kategori}
-                              fotoUri={y.kapak_url}
-                              puan={null}
-                              yorum={null}
-                              yukseklik={(i + sutun) % 2 === 0 ? 190 : 150}
-                              listede={false}
-                              onEkle={() => {}}
-                              onAc={() => {}}
-                            />
-                          ))}
-                      </View>
-                    ))}
-                  </View>
-                );
-              }
-              // Şehir seçkisi: uygulamada henüz bileşeni yok (tasarım bekliyor) — şehir adları.
-              return (
-                <Text key={b.id} style={s.bos}>
-                  {idler.map((id) => sehirler.find((sh) => sh.id === id)?.ad).filter(Boolean).join(' · ') || t('anasayfa.bos')}
-                </Text>
-              );
-            })}
-          </View>
-        ))}
+        )}
       </ScrollView>
     </View>
   );
 }
 
-// Uygulama ana sayfasının ölçüleri (src/app/(tabs)/(menu)/index.tsx) — aynı görünüm; üst güvenli alan 56 px (kanvas önizlemesi).
+// Uygulama Keşfet'inin ölçüleri (src/app/(tabs)/(menu)/index.tsx) — aynı görünüm; üst güvenli alan 42 px.
 const s = StyleSheet.create({
   telefon: { width: ANA_SAYFA_TELEFON.genislik, height: ANA_SAYFA_TELEFON.yukseklik, borderRadius: 28, overflow: 'hidden', borderWidth: 1, borderColor: renk.ayrac, backgroundColor: renk.zemin },
-  icerik: { paddingTop: 42, paddingBottom: 28 },
-  ust: { paddingHorizontal: bosluk.kenar, paddingTop: 14, flexDirection: 'row', alignItems: 'center', gap: 12 },
-  merhaba: { fontFamily: yazi.kalin, fontSize: 13, color: renk.ikincil },
-  soru: { fontFamily: yazi.ekstra, fontSize: 28, letterSpacing: -0.9, color: renk.metin },
-  avatar: { width: 36, height: 36, borderRadius: 18, backgroundColor: renk.metin, alignItems: 'center', justifyContent: 'center' },
-  avatarHarf: { fontFamily: yazi.kalin, fontSize: 13, color: renk.zemin },
-  arama: { marginHorizontal: bosluk.kenar, marginTop: 14, height: 48, paddingHorizontal: 16, borderRadius: 14, backgroundColor: renk.yuzey, flexDirection: 'row', alignItems: 'center', gap: 10 },
-  aramaMetin: { fontFamily: yazi.yari, fontSize: 14, color: renk.soluk },
-  kart: { marginHorizontal: bosluk.kenar, marginTop: 16, padding: 18, borderRadius: 22, backgroundColor: renk.metin, gap: 4 },
-  kartAd: { fontFamily: yazi.ekstra, fontSize: 22, letterSpacing: -0.5, color: renk.zemin },
-  kartAlt: { fontFamily: yazi.normal, fontSize: 12, color: '#c4c4c4' },
-  kartDugme: { alignSelf: 'flex-start', marginTop: 10, height: 38, paddingHorizontal: 16, borderRadius: 999, backgroundColor: renk.zemin, justifyContent: 'center' },
-  kartDugmeMetin: { fontFamily: yazi.kalin, fontSize: 13, color: renk.metin },
-  bolum: { paddingTop: 24, paddingHorizontal: bosluk.kenar, gap: 12 },
-  bolumSatir: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  bolumBaslik: { ...baslikStili(olcek.bolum), color: renk.metin },
-  tumu: { fontFamily: yazi.kalin, fontSize: 13, color: renk.ikincil },
-  seritKaydirma: { marginHorizontal: -bosluk.kenar },
-  serit: { gap: 10, paddingHorizontal: bosluk.kenar },
-  mozaik: { flexDirection: 'row', gap: 10 },
-  sutun: { flex: 1, gap: 10 },
-  bos: { fontFamily: yazi.normal, fontSize: 13, color: renk.ikincil, paddingVertical: 12 },
+  icerik: { paddingTop: 42, paddingBottom: 28, gap: 16 },
+  ust: { paddingHorizontal: 16, height: 48, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  ustDugmeler: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  daire: { width: 36, height: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center' },
+  seyahatDugme: { height: 36, paddingHorizontal: 14, borderRadius: 18, backgroundColor: renk.vurgu, flexDirection: 'row', alignItems: 'center', gap: 4 },
+  seyahatArti: { fontFamily: yazi.kalin, fontSize: 18, lineHeight: 20, color: renk.metin },
+  seyahatMetin: { fontFamily: yazi.kalin, fontSize: 14, color: renk.metin },
+  arama: {
+    marginHorizontal: 16,
+    height: 48,
+    borderRadius: 24,
+    borderWidth: 1,
+    borderColor: anaV5.cizgi,
+    backgroundColor: renk.zemin,
+    paddingHorizontal: 18,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    shadowColor: renk.metin,
+    shadowOpacity: 0.08,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 2,
+  },
+  aramaMetin: { fontFamily: yazi.normal, fontSize: 15, color: anaV5.ikincil },
+  raflar: { gap: 16 },
+  yukleniyor: { marginTop: 24 },
 });

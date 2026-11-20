@@ -1,6 +1,6 @@
 import { describe, expect, it } from '@jest/globals';
 
-import { bolumOzeti, icerikYaz, planliSatirlar, seciliIdler, yayindanFarkli, yeniBolum, type TaslakBolum } from '../anaSayfa';
+import { bannerAdresiGecerli, bannerIcerigi, bolumOzeti, eskiTurMu, icerikYaz, planliSatirlar, rafIcerigi, seciliIdler, yayindanFarkli, yeniBolum, type TaslakBolum } from '../anaSayfa';
 import { ty } from '../metin';
 
 const b = (alan: Partial<TaslakBolum>): TaslakBolum => ({
@@ -54,8 +54,8 @@ describe('ana sayfa düzeni — panel kuralları (#109)', () => {
     expect(seciliIdler(b({ tur: 'tek_kart', icerik: { gezi_id: null } }))).toEqual([]);
   });
 
-  it('yeni bölüm sona, kapalı, elle', () => {
-    expect(yeniBolum([{ sira: 1 }, { sira: 4 }], 'Yeni bölüm')).toMatchObject({ sira: 5, acik: false, kaynak: 'elle', tur: 'serit' });
+  it('yeni bölüm sona, kapalı, elle seçimli boş raf (#406 2/2)', () => {
+    expect(yeniBolum([{ sira: 1 }, { sira: 4 }], 'Yeni bölüm')).toMatchObject({ sira: 5, acik: false, kaynak: 'elle', tur: 'raf', icerik: { raf_turu: 'elle', gezi_idler: [] } });
     expect(yeniBolum([], 'x').sira).toBe(1);
   });
 
@@ -66,5 +66,47 @@ describe('ana sayfa düzeni — panel kuralları (#109)', () => {
     expect(yayindanFarkli([{ ...t[0], acik: false }], yayin)).toBe(true);
     expect(yayindanFarkli(t, null)).toBe(true);
     expect(yayindanFarkli([...t, b({ id: 'b2', sira: 2 })], yayin)).toBe(true);
+  });
+
+  describe('#406 2/2 v6 düzenleyici', () => {
+    it('eski türler v6\'da görünmez', () => {
+      expect(eskiTurMu('serit')).toBe(true);
+      expect(eskiTurMu('sehir_seckisi')).toBe(true);
+      expect(eskiTurMu('raf')).toBe(false);
+      expect(eskiTurMu('banner')).toBe(false);
+    });
+
+    it('raf türü değişince yalnız o türün alanı kalır', () => {
+      expect(rafIcerigi('amac', { amac: 'lezzet', gezi_idler: ['x'] })).toEqual({ raf_turu: 'amac', amac: 'lezzet' });
+      expect(rafIcerigi('sehir')).toEqual({ raf_turu: 'sehir' });
+      expect(rafIcerigi('elle', { amac: 'lezzet' })).toEqual({ raf_turu: 'elle', gezi_idler: [] });
+    });
+
+    it('banner içeriği: boş metin ve null alan silinir, metin kırpılır', () => {
+      const eski = { ust_yazi: 'Bu kış', hedef: { tur: 'raf' as const, id: 'r1' } };
+      expect(bannerIcerigi(eski, { ust_yazi: '  ' })).toEqual({ hedef: { tur: 'raf', id: 'r1' } });
+      expect(bannerIcerigi(eski, { hedef: null as never })).toEqual({ ust_yazi: 'Bu kış' });
+      expect(bannerIcerigi({}, { kapak_url: ' https://upload.wikimedia.org/a.jpg ', kapak_atif: { yazar: 'X' } })).toEqual({ kapak_url: 'https://upload.wikimedia.org/a.jpg', kapak_atif: { yazar: 'X' } });
+    });
+
+    it('banner görsel adresi: DB kuralıyla aynı (KK-ek1)', () => {
+      const kova = 'https://xwqeobelyeuzoxyuvauw.supabase.co/storage/v1/object/public/icerik/';
+      expect(bannerAdresiGecerli('https://upload.wikimedia.org/wikipedia/commons/a/ab/Bursa.jpg')).toBe(true);
+      expect(bannerAdresiGecerli(`${kova}banner/kis.jpg`)).toBe(true);
+      for (const kotu of [
+        `${kova}.\t./avatars/u1/a.jpg`,
+        `${kova}.\n./avatars/u1/a.jpg`,
+        `${kova}../avatars/u1/a.jpg`,
+        `${kova}%2E%2e/avatars/a.jpg`,
+        `${kova}%252e/a.jpg`,
+        'https://upload.wikimedia.org/a b.jpg',
+        'https://upload.wikimedia.org/a.jpg?x=1',
+        'https://lh3.googleusercontent.com/places/a.jpg',
+        'http://upload.wikimedia.org/a.jpg',
+        'https://upload.wikimedia.org.evil.com/a.jpg',
+      ]) {
+        expect([kotu, bannerAdresiGecerli(kotu)]).toEqual([kotu, false]);
+      }
+    });
   });
 });

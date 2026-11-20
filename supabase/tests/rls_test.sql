@@ -667,6 +667,16 @@ select pg_temp.hata_bekle($$insert into public.ana_sayfa_bolumleri (tur, baslik,
 select pg_temp.hata_bekle($$insert into public.ana_sayfa_bolumleri (tur, baslik, sira, icerik) values ('banner', 'x', 30, '{"kapak_url": "https://upload.wikimedia.org/x\\y.jpg", "kapak_atif": {"yazar": "Tripmate"}}')$$, '23514');
 -- #428 3. inceleme (isteğe bağlı): çift kodlanmış `%252e` de reddedilir.
 select pg_temp.hata_bekle($$insert into public.ana_sayfa_bolumleri (tur, baslik, sira, icerik) values ('banner', 'x', 30, '{"kapak_url": "https://xwqeobelyeuzoxyuvauw.supabase.co/storage/v1/object/public/icerik/%252e%252e/avatars/u1/a.jpg", "kapak_atif": {"yazar": "Tripmate"}}')$$, '23514');
+-- #406 2/2 KK-ek1: izin listesi. Sekme ve satır sonuyla yol hilesi (`.<TAB>.`, `.<LF>.`), boşluk ve `?`/`#`/`@` reddedilir.
+select pg_temp.hata_bekle($$insert into public.ana_sayfa_bolumleri (tur, baslik, sira, icerik) values ('banner', 'x', 30, jsonb_build_object('kapak_url', 'https://xwqeobelyeuzoxyuvauw.supabase.co/storage/v1/object/public/icerik/.' || chr(9) || './avatars/u1/a.jpg', 'kapak_atif', '{"yazar": "Tripmate"}'::jsonb))$$, '23514');
+select pg_temp.hata_bekle($$insert into public.ana_sayfa_bolumleri (tur, baslik, sira, icerik) values ('banner', 'x', 30, jsonb_build_object('kapak_url', 'https://xwqeobelyeuzoxyuvauw.supabase.co/storage/v1/object/public/icerik/.' || chr(10) || './avatars/u1/a.jpg', 'kapak_atif', '{"yazar": "Tripmate"}'::jsonb))$$, '23514');
+select pg_temp.hata_bekle($$insert into public.ana_sayfa_bolumleri (tur, baslik, sira, icerik) values ('banner', 'x', 30, '{"kapak_url": "https://upload.wikimedia.org/a b.jpg", "kapak_atif": {"yazar": "Tripmate"}}')$$, '23514');
+select pg_temp.hata_bekle($$insert into public.ana_sayfa_bolumleri (tur, baslik, sira, icerik) values ('banner', 'x', 30, '{"kapak_url": "https://upload.wikimedia.org/a.jpg?x=1", "kapak_atif": {"yazar": "Tripmate"}}')$$, '23514');
+do $$
+begin
+  assert public.banner_gorsel_adresi_gecerli('https://upload.wikimedia.org/wikipedia/commons/a/ab/Bursa_Ulu_Cami.jpg'), '#406 KK-ek1: düz Commons adresi geçer';
+  assert public.banner_gorsel_adresi_gecerli('https://xwqeobelyeuzoxyuvauw.supabase.co/storage/v1/object/public/icerik/banner/kis-2026.jpg'), '#406 KK-ek1: kova adresi geçer';
+end $$;
 -- Kendi Storage alanımızdaki görsel (atıflı) kabul edilir.
 insert into public.ana_sayfa_bolumleri (tur, baslik, sira, icerik) values
   ('banner', 'Storage görselli', 25, '{"kapak_url": "https://xwqeobelyeuzoxyuvauw.supabase.co/storage/v1/object/public/icerik/banner/k.webp", "kapak_atif": {"yazar": "Tripmate"}}');

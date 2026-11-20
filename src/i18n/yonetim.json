@@ -250,7 +250,7 @@
     "duzenle": "Düzenle",
     "kapat": "Kapat",
     "acikKapali": "{baslik} açık / kapalı",
-    "ekle": "+ Bölüm ekle (şerit · mozaik · tek kart · şehir seçkisi)",
+    "ekle": "+ Bölüm ekle (raf · banner)",
     "yeniBaslik": "Yeni bölüm",
     "planliBaslik": "Planlı yayın:",
     "planliYok": "Planlı bölüm yok.",
@@ -265,7 +265,17 @@
       "icerik": "İÇERİK (sürükle = sıra)",
       "ekle": "EKLE",
       "baslangic": "BAŞLANGIÇ",
-      "bitis": "BİTİŞ"
+      "bitis": "BİTİŞ",
+      "rafTuru": "RAF TÜRÜ",
+      "amac": "AMAÇ",
+      "sehir": "ŞEHİR",
+      "ustYazi": "ÜST YAZI",
+      "hedefTuru": "HEDEF TÜRÜ",
+      "hedef": "HEDEF",
+      "gorsel": "GÖRSEL ADRESİ (boşsa hedefin kapağı)",
+      "atifYazar": "FOTOĞRAFIN YAZARI",
+      "atifLisans": "LİSANS",
+      "atifKaynak": "KAYNAK SAYFASI"
     },
     "kaynak": {
       "otomatik": "Otomatik",
@@ -289,9 +299,22 @@
         "sehir": "şehir: {sehir}",
         "elle": "elle seçilmiş {n} gezi",
         "arkadaslardan": "arkadaşlardan"
-      },
-      "duzenleyiciYakinda": "Banner ve raf içeriği bir sonraki sürümde buradan düzenlenecek; şimdilik başlık, tarih, aç/kapa ve sıra değişir."
-    }
+      }
+    },
+    "v6Gorunmez": "v6'da görünmez",
+    "rafTuru": {
+      "amac": "Amaç",
+      "sehir": "Şehir",
+      "elle": "Elle seçim"
+    },
+    "rafNotu": "3'ten az gezisi olan raf uygulamada görünmez.",
+    "ustYaziOrnek": "Bu kış",
+    "gorselAdresHata": "Bu adres kabul edilmiyor. Görsel yalnız Wikimedia Commons'tan (upload.wikimedia.org) ya da kendi içerik kovamızdan olabilir; adreste boşluk, ?, #, parantez ya da %25 olamaz.",
+    "gorselAtifHata": "Görselin atfı için fotoğrafın yazarını yaz.",
+    "gorselKaynakHata": "Kaynak sayfası https:// ile başlamalı.",
+    "gorselKaydet": "Görseli kaydet",
+    "gorselKaldir": "Görseli kaldır",
+    "bannerNotu": "Görsel boşsa hedefin kapağı kullanılır. Uygulamada aynı anda yalnız ilk banner görünür; hedefi seçilmemiş banner görünmez."
   },
   "genel": {
     "ust": "GENEL BAKIŞ · {tarih}",
