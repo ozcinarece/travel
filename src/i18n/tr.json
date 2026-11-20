@@ -295,7 +295,9 @@
     "eklendi": "{n} mekan {seyahat} listesine eklendi",
     "eklendiZaten": "{n} mekan eklendi · {zaten} zaten listedeydi",
     "hepsiListede": "Hepsi zaten {seyahat} listesinde",
-    "diger": "Diğer"
+    "diger": "Diğer",
+    "yuklenemedi": "Kaydettiklerin yüklenemedi.",
+    "baglantiYok": "Bağlantı yok. Bağlanınca tekrar dene."
   },
   "rehber": {
     "bolum": {
