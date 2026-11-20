@@ -1,0 +1,662 @@
+{
+  "il": "Antalya",
+  "slug": "antalya",
+  "guncelleme": "2026-11-20",
+  "oneriler": [
+    {
+      "sira": 1,
+      "ad": "Kaleiçi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas",
+        "gece"
+      ],
+      "ilce": "Muratpaşa",
+      "merkeze_km": 0,
+      "neden": "Hadrian Kapısı'ndan girilen surlu kent: kiremit çatılı evler, eski limana inen sokaklar",
+      "place_id": "ChIJX5StnAaQwxQRc7qzVRv65do"
+    },
+    {
+      "sira": 2,
+      "ad": "Aspendos Tiyatrosu",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Serik",
+      "merkeze_km": 42,
+      "neden": "MS 161-180'de Aspendoslu Zenon'un yaptığı Roma tiyatrosu; sahne binası hâlâ ayakta",
+      "place_id": "ChIJ3W73OHaexBQRtjbW352tqoI"
+    },
+    {
+      "sira": 3,
+      "ad": "Perge Antik Kenti",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Aksu",
+      "merkeze_km": 16,
+      "neden": "Ana caddenin ortasından basamaklı su kanalı akar; Plancia Magna'nın genişlettiği kapı",
+      "place_id": "ChIJQwc3aqmBwxQRB7Tr2OhnhMY"
+    },
+    {
+      "sira": 4,
+      "ad": "Side Antik Kenti ve Apollon Tapınağı",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "gece"
+      ],
+      "ilce": "Manavgat",
+      "merkeze_km": 62,
+      "neden": "Yarımada kent: limanda MS 150 dolayı Apollon Tapınağı, boyunda üç katlı sahneli tiyatro",
+      "osm": "way/129747059",
+      "place_id": "ChIJKwq8WDRZwxQRYhBDLNmnmXQ"
+    },
+    {
+      "sira": 5,
+      "ad": "Aşağı Düden Şelalesi",
+      "kategori": "manzara",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Muratpaşa",
+      "merkeze_km": 8,
+      "neden": "Düden Çayı Lara'da 40 metrelik yardan denize dökülür; yar üstündeki parktan izlenir",
+      "place_id": "ChIJCx42HgCbwxQRr-WJXGvgAAQ"
+    },
+    {
+      "sira": 6,
+      "ad": "Kekova Batık Şehir tekne turu",
+      "kategori": "aktivite",
+      "amaclar": [
+        "kultur_tarih",
+        "doga"
+      ],
+      "ilce": "Demre",
+      "merkeze_km": 108,
+      "neden": "Tekneyle 2. yüzyıl depreminde kısmen batan Dolikisthe kalıntılarının üstünden geçilir",
+      "place_id": "ChIJK779rt7twRQRQghH2mQUx7A"
+    },
+    {
+      "sira": 7,
+      "ad": "Olympos Antik Kenti",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Kumluca",
+      "merkeze_km": 59,
+      "neden": "Çıralı kumsalının ucunda dere boyunca Roma köprüsü, hamamlar ve Bizans kiliseleri",
+      "osm": "way/244857692",
+      "place_id": "ChIJkYfx8I42whQRAK8eQC4WCoc"
+    },
+    {
+      "sira": 8,
+      "ad": "Myra Antik Kenti",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Demre",
+      "merkeze_km": 95,
+      "neden": "Yamaca oyulmuş ev cepheli Likya kaya mezarları ve hemen altında Roma tiyatrosu",
+      "osm": "way/28320690",
+      "place_id": "ChIJq6qqqg3ywRQRwu0X2acjCFs"
+    },
+    {
+      "sira": 9,
+      "ad": "Aziz Nikolaos Kilisesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Demre",
+      "merkeze_km": 96,
+      "neden": "Noel Baba diye bilinen Nikolaos'un kilisesi; 520'de yenilendi, kemikleri 1087'de Bari'ye",
+      "osm": "way/1418062505",
+      "place_id": "ChIJq6qqqg3ywRQR6XWGmtbJ2No"
+    },
+    {
+      "sira": 10,
+      "ad": "Alanya Kalesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Alanya",
+      "merkeze_km": 121,
+      "neden": "1226'dan Selçuklu kalesi; yarımadayı saran surlar liman kıyısındaki Kızıl Kule'ye iner",
+      "osm": "node/475024457",
+      "place_id": "ChIJXdDn8KCi3BQROXVcSLcms1s"
+    },
+    {
+      "sira": 11,
+      "ad": "Termessos",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "doga"
+      ],
+      "ilce": "Döşemealtı",
+      "merkeze_km": 24,
+      "neden": "Güllük Dağı'nda 1.000 metrede kent; İskender kuşatıp alamadı, tiyatrosu ovaya bakar",
+      "osm": "node/6130722001",
+      "place_id": "ChIJOam7IwGMwxQRY8hKqb5xIlE"
+    },
+    {
+      "sira": 12,
+      "ad": "Olympos Teleferik (Tahtalı Dağı)",
+      "kategori": "aktivite",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Kemer",
+      "merkeze_km": 43,
+      "neden": "Tekirova yakınından 4.350 metrelik hatla 2.365 metredeki Tahtalı zirvesine çıkılır",
+      "osm": "node/432009306",
+      "place_id": "ChIJgUd4cJm3wxQRCE06qzqSwIM"
+    },
+    {
+      "sira": 13,
+      "ad": "Köprülü Kanyon rafting",
+      "kategori": "aktivite",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Manavgat",
+      "merkeze_km": 54,
+      "neden": "Beşkonak'ta 1990'ların ortasından beri Köprüçay'da rafting; kanyonda Oluk Köprüsü",
+      "place_id": "ChIJKwq8WDRZwxQRxJCvFDTqZM0"
+    },
+    {
+      "sira": 14,
+      "ad": "Topçu Kebap",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Muratpaşa",
+      "merkeze_km": 0,
+      "neden": "1885'ten beri Kazım Özalp Caddesi'nde şiş köfte yanında tahinli Antalya piyazı",
+      "osm": "node/9630928920",
+      "place_id": "ChIJq6qqqtqEwxQRVikFThT2iJQ"
+    },
+    {
+      "sira": 15,
+      "ad": "Yivli Minare Camii",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Muratpaşa",
+      "merkeze_km": 0,
+      "neden": "Keykubad döneminden yivli tuğla minare kentin simgesi; yanındaki cami 1373'te yenilendi",
+      "osm": "way/154761774",
+      "place_id": "ChIJbfZlcwSQwxQROK2m_tlcLzg"
+    },
+    {
+      "sira": 16,
+      "ad": "Hıdırlık Kulesi ve Karaalioğlu Parkı",
+      "kategori": "manzara",
+      "amaclar": [
+        "yavas",
+        "cocuklu"
+      ],
+      "ilce": "Muratpaşa",
+      "merkeze_km": 1,
+      "neden": "Kaleiçi'nin güney ucunda 14 metrelik 2. yüzyıl Roma kulesi; yanındaki parktan körfez",
+      "osm": "way/110321832",
+      "place_id": "ChIJT42ERg-QwxQRoauX74ECnjI"
+    },
+    {
+      "sira": 17,
+      "ad": "Konyaaltı Plajı",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Konyaaltı",
+      "merkeze_km": 7,
+      "neden": "Kentin batısında 13 km'lik ince çakıllı mavi bayraklı kıyı; arkasında Beach Park",
+      "place_id": "ChIJVVomOEuQwxQRmQMLiTqogSQ"
+    },
+    {
+      "sira": 18,
+      "ad": "Kaputaş Plajı",
+      "kategori": "doga",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Kaş",
+      "merkeze_km": 134,
+      "neden": "Kaş–Kalkan yolunda, kayalık bir vadinin denize açıldığı koy; yoldan merdivenle inilir",
+      "osm": "relation/19705864",
+      "place_id": "ChIJaQPCYHDTwRQR1cQU17ycULA"
+    },
+    {
+      "sira": 19,
+      "ad": "Phaselis",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "doga"
+      ],
+      "ilce": "Kemer",
+      "merkeze_km": 43,
+      "neden": "Rodoslular MÖ 7. yüzyılda kurdu; çam ormanı içinde üç limanı ve su kanalları var",
+      "osm": "relation/9978345",
+      "place_id": "ChIJdxGBP8C1wxQR15xEVYuzZWs"
+    },
+    {
+      "sira": 20,
+      "ad": "Antiphellos Tiyatrosu (Kaş)",
+      "kategori": "manzara",
+      "amaclar": [
+        "yavas",
+        "gece"
+      ],
+      "ilce": "Kaş",
+      "merkeze_km": 122,
+      "neden": "Kaş'ın batısındaki Helenistik tiyatro; basamaklardan Meis görülür, caz konserleri olur",
+      "osm": "way/93463933",
+      "place_id": "ChIJAQAAACstwBQRslW1-2qzS6A"
+    },
+    {
+      "sira": 21,
+      "ad": "Yanartaş (Kimera)",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "gece"
+      ],
+      "ilce": "Kemer",
+      "merkeze_km": 55,
+      "neden": "Çıralı yamacında kaya yarıklarından çıkan gazlar sürekli yanar; Kimera efsanesinin yeri",
+      "osm": "way/238778994",
+      "place_id": "ChIJxyYrOj80whQR71dIyDFT2xk"
+    },
+    {
+      "sira": 22,
+      "ad": "Patara Antik Kenti",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Kaş",
+      "merkeze_km": 142,
+      "neden": "Likya Birliği'nin 1.400 kişilik meclis binası ve Nero döneminden kalma deniz feneri",
+      "osm": "way/183321148",
+      "place_id": "ChIJzafpnyktwBQR4YsQf-mOSRU"
+    },
+    {
+      "sira": 23,
+      "ad": "Kaleköy (Simena)",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Demre",
+      "merkeze_km": 108,
+      "neden": "Yalnız denizden ulaşılan köy; antik Simena'nın üstünde, tepesinde kale",
+      "osm": "way/202065363",
+      "place_id": "ChIJC-7lBaPowRQRrD8WzucemRE"
+    },
+    {
+      "sira": 24,
+      "ad": "Kurşunlu Şelalesi",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Aksu",
+      "merkeze_km": 16,
+      "neden": "Aksu Çayı kolunun platodan ovaya düştüğü çam ormanlık tabiat parkı; yazın su azalır",
+      "osm": "way/131469378",
+      "place_id": "ChIJQQo5g7yAwxQRzCqoL4ytaB8"
+    },
+    {
+      "sira": 25,
+      "ad": "Kızıl Kule ve Tersane",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Alanya",
+      "merkeze_km": 122,
+      "neden": "1226'da Halepli Ebu Ali'nin yaptığı sekizgen kule; yanında 1221 Selçuklu tersanesi",
+      "osm": "way/57956094",
+      "place_id": "ChIJi5WCj3SY3BQRnrNu9DdC86M"
+    },
+    {
+      "sira": 26,
+      "ad": "Damlataş Mağarası",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Alanya",
+      "merkeze_km": 121,
+      "neden": "1948'de liman için taş çıkarılırken bulunan sarkıtlı mağara; içi yıl boyu 22-23 °C",
+      "place_id": "ChIJF3muFJyi3BQRjLvNQprzYas"
+    },
+    {
+      "sira": 27,
+      "ad": "Kalkan",
+      "kategori": "manzara",
+      "amaclar": [
+        "yavas",
+        "lezzet"
+      ],
+      "ilce": "Kaş",
+      "merkeze_km": 135,
+      "neden": "Beyaz evleri denize basamaklanan eski Kalamaki; 1923 mübadelesine dek Rum kasabasıydı",
+      "place_id": "ChIJFSEg39AswBQR-M3p-nvb-3U"
+    },
+    {
+      "sira": 28,
+      "ad": "Side Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Manavgat",
+      "merkeze_km": 62,
+      "neden": "MS 2. yüzyıl hamamında Side heykelleri, lahitler ve 9 binden çok sikke; 2024'te yenilendi",
+      "osm": "way/484336466",
+      "place_id": "ChIJB56FB9dbwxQRxXcFaZT1DsQ"
+    },
+    {
+      "sira": 29,
+      "ad": "Suna-İnan Kıraç Kaleiçi Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Muratpaşa",
+      "merkeze_km": 0,
+      "neden": "1863'te yeniden yapılan Aya Yorgi Kilisesi'nde Çanakkale seramikleri; 1996'dan beri müze",
+      "osm": "node/4446644395",
+      "place_id": "ChIJ73TP7QaQwxQRH0NU1AbB8TQ"
+    },
+    {
+      "sira": 30,
+      "ad": "Meşhur 18 Bağaçaları",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Muratpaşa",
+      "merkeze_km": 0,
+      "neden": "1940'tan beri Kalekapısı'nda tarçınlı, tahinli bağaça ve acıbadem kurabiyesi",
+      "place_id": "ChIJt1zZ9TyPwxQR9T7vpKTFvR4"
+    },
+    {
+      "sira": 31,
+      "ad": "Kaleiçi Eski Çarşı (Uzun Çarşı)",
+      "kategori": "carsi",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Muratpaşa",
+      "merkeze_km": 0,
+      "neden": "Kalekapısı ile Hadrian Kapısı arası Uzun Çarşı: baharat, kilim, el boyaması seramik",
+      "place_id": "ChIJ6fd6AQSQwxQRrWaZeYp7Mhs"
+    },
+    {
+      "sira": 32,
+      "ad": "Ksanthos (Xanthos)",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Kaş",
+      "merkeze_km": 137,
+      "neden": "Likya'nın başkenti; Harpy Anıtı yerinde ama kabartmaları kopya, 1988'den UNESCO'da",
+      "osm": "way/183321152",
+      "place_id": "ChIJAQAAACstwBQRAdrXxoqgx9Q"
+    },
+    {
+      "sira": 33,
+      "ad": "Kaş'ta dalış",
+      "kategori": "aktivite",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Kaş",
+      "merkeze_km": 122,
+      "neden": "Kaş limanından kalkan dalış tekneleri; batırılmış DC-3 uçağı, ahtapot ve kaplumbağalar",
+      "place_id": null
+    },
+    {
+      "sira": 34,
+      "ad": "7 Mehmet",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Konyaaltı",
+      "merkeze_km": 4,
+      "neden": "1937'de çorbacı olarak açıldı; odun fırınında kabak tatlısı ve zeytinyağlılar",
+      "osm": "node/3569129293",
+      "place_id": "ChIJz8XP05slwhQRASBCV1vS2Ec"
+    },
+    {
+      "sira": 35,
+      "ad": "Hasan Antalya",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Muratpaşa",
+      "merkeze_km": 0,
+      "neden": "1946'dan beri Zincirli Han'da kelle, tandır, şiş köfte ve tahinli hibeş",
+      "place_id": "ChIJYbQx6gOQwxQRgSk9jgncvs0"
+    },
+    {
+      "sira": 36,
+      "ad": "Dilara Yaşar",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet",
+        "cocuklu"
+      ],
+      "ilce": "Muratpaşa",
+      "merkeze_km": 0,
+      "neden": "1954'ten beri tulumba tatlısı ve yayla keçi-koyun sütünden yanık dondurma",
+      "place_id": "ChIJTy5lPAKQwxQR-GArYSeWfpA"
+    },
+    {
+      "sira": 37,
+      "ad": "Yukarı Düden Şelalesi",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Kepez",
+      "merkeze_km": 9,
+      "neden": "Düden Çayı'nın Kepez'deki yukarı şelalesi; ağaçlı parkta, denize döküldüğü yerin kuzeyinde",
+      "place_id": "ChIJu3F7zgmGwxQRiKcatsput3I"
+    },
+    {
+      "sira": 38,
+      "ad": "Alanya Arkeoloji Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Alanya",
+      "merkeze_km": 121,
+      "neden": "1967'de açıldı; MÖ 2. yüzyıldan 52 cm'lik bronz Herakles heykeli ayrı salonda",
+      "osm": "way/72231171",
+      "place_id": "ChIJX42N7Zyi3BQRxg5SQR3tnRY"
+    },
+    {
+      "sira": 39,
+      "ad": "Esma Hanım'ın Yeri",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Alanya",
+      "merkeze_km": 121,
+      "neden": "Alanya ev yemekleri: köfteli güllük çorbası, taratorlu kızartma, kabak çiçeği dolması",
+      "place_id": "ChIJKYHfsIOi3BQR1XG63c0JlNY"
+    },
+    {
+      "sira": 40,
+      "ad": "Ruhi Bey Meyhanesi",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet",
+        "gece"
+      ],
+      "ilce": "Kaş",
+      "merkeze_km": 122,
+      "neden": "1949'dan beri Kaş'ta meze ve sütte pişen dil balığı",
+      "osm": "node/10979667205",
+      "place_id": "ChIJzQ4hyVbawRQR9yP3ykrB4FE"
+    },
+    {
+      "sira": 41,
+      "ad": "Altınbeşik Mağarası",
+      "kategori": "doga",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "İbradı",
+      "merkeze_km": 84,
+      "neden": "Mağaranın içinde kat kat yeraltı gölleri; kış ve baharda su yükselince ziyarete kapanır",
+      "osm": "node/1404431604",
+      "place_id": "ChIJGVayWTRL2xQR48siBSApX2k"
+    },
+    {
+      "sira": 42,
+      "ad": "Likya Yolu",
+      "kategori": "aktivite",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Konyaaltı",
+      "merkeze_km": 21,
+      "neden": "1999'da açılan kırmızı-beyaz işaretli yürüyüş yolu; Antalya ucu Geyikbayırı'nda",
+      "place_id": null
+    },
+    {
+      "sira": 43,
+      "ad": "Selge",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "doga"
+      ],
+      "ilce": "Manavgat",
+      "merkeze_km": 53,
+      "neden": "Köprülü Kanyon Milli Parkı içinde kalan antik kent; Oluk Köprüsü'nden sonra dağa çıkılır",
+      "place_id": "ChIJPZ2XjCiTxBQRIkhGn8P4Z6Q"
+    },
+    {
+      "sira": 44,
+      "ad": "Manavgat Pazarı",
+      "kategori": "carsi",
+      "amaclar": [
+        "lezzet",
+        "yavas"
+      ],
+      "ilce": "Manavgat",
+      "merkeze_km": 66,
+      "neden": "Manavgat'ta haftada iki gün kurulan büyük köylü pazarı; sebze, meyve, yufka ve köy peyniri",
+      "place_id": "ChIJqw7wXdhZwxQRCKQqRQX3kEA"
+    },
+    {
+      "sira": 45,
+      "ad": "Börekçi Tevfik",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Muratpaşa",
+      "merkeze_km": 0,
+      "neden": "Karakaş Camii arkasında Ay İşhanı'nda, 70 yıllık fırında kıymalı ya da lorlu börek",
+      "place_id": "ChIJwd3IxACQwxQRCORJLGCzwMw"
+    },
+    {
+      "sira": 46,
+      "ad": "Alanya Cuma Pazarı",
+      "kategori": "carsi",
+      "amaclar": [
+        "lezzet",
+        "yavas"
+      ],
+      "ilce": "Alanya",
+      "merkeze_km": 121,
+      "neden": "Şekerhane'de cuma kurulan pazar: tütsülenmiş zeytin, köy yağı, taze nar suyu, gözleme",
+      "place_id": "ChIJOTLhJXqY3BQRmADYR3BxpaM"
+    },
+    {
+      "sira": 47,
+      "ad": "Elmalı Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Elmalı",
+      "merkeze_km": 72,
+      "neden": "Eski hükümet konağında; 1999'da yurda dönen 1.900 gümüş sikkelik Elmalı Definesi",
+      "osm": "way/1299803848",
+      "place_id": "ChIJe51kMxZxwRQRJE0Q3rWIFvY"
+    },
+    {
+      "sira": 48,
+      "ad": "Antalya Atatürk Evi Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Muratpaşa",
+      "merkeze_km": 1,
+      "neden": "Antalyalıların Atatürk'e hazırladığı iki katlı taş ev; 1986'dan beri müze",
+      "osm": "way/432156876",
+      "place_id": "ChIJsTtsJwaQwxQRVRMRm_xourI"
+    },
+    {
+      "sira": 49,
+      "ad": "Demircileriçi Çarşısı",
+      "kategori": "carsi",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Muratpaşa",
+      "merkeze_km": 1,
+      "neden": "Demirci ve bakırcıların hâlâ tezgâh başında olduğu eski zanaat çarşısı",
+      "place_id": "ChIJe78iUQOQwxQRxC8KDeCTD1E"
+    },
+    {
+      "sira": 50,
+      "ad": "Kemer Pastanesi",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Kemer",
+      "merkeze_km": 34,
+      "neden": "Kemer çarşısında baklava, lokum ve yaş pasta yapan pastane-fırın",
+      "place_id": "ChIJB7YeY723wxQRN284FWB0U6s"
+    }
+  ]
+}
