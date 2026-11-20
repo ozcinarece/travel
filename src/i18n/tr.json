@@ -723,7 +723,12 @@
       "kmUzak": "{ad} · {km} km",
       "altIl": "{il} · seçtiklerini günlere biz dağıtalım.",
       "ozetYer": "{n} yer",
-      "ozetDoluluk": "· {gun} günün {dolu} dolu"
+      "ozetDoluluk": "· {gun} günün {dolu} dolu",
+      "ozetDolulukTam": "· {gun} gün dolu",
+      "ozetDoldu": "{gun} gün doldu · ",
+      "ozetSigmiyor": "{k} yer sığmıyor",
+      "dolulukEtiketTam": "{gun} gün dolu",
+      "dolulukEtiketTasma": "{gun} gün doldu, {k} yer sığmıyor"
     },
     "kapat": "Kapat",
     "sayac": "{n}/{toplam}"

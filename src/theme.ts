@@ -62,6 +62,8 @@ export const anaV5 = {
   inceKenar: '#C3C9D6',
   /** #401 (`Ekran07cIlOnerileri`): yer satırındaki `neden` cümlesi. */
   nedenMetin: '#232B48',
+  /** #445 (`Ekran07dDolulukTasma`): "K yer sığmıyor" metni ve gün çubuklarının arkasındaki taşma parçası (beyazda 4,6:1). */
+  tasma: '#D93A2B',
 } as const;
 
 /**

@@ -19,7 +19,7 @@ import { useSeyahat, useSeyahatAdiKaydet, useSeyahatOlustur } from '@/features/s
 import { seyahatiKopyala, useIcerikSehirSecimi, useTekrarKaynagi } from '@/features/sihirbaz/girisler';
 import type { OnerilenMekan } from '@/features/sihirbaz/onerilenler';
 import { gunDolulugu, secimOzeti } from '@/features/sihirbaz/planKur';
-import { usePlaniUygula } from '@/features/sihirbaz/planUygula';
+import { planiHesapla, usePlaniUygula } from '@/features/sihirbaz/planUygula';
 import { oncekiAdim, seyahatAdiOner, sonrakiAdim, type Adim, type Aralik } from '@/features/sihirbaz/sihirbaz';
 import type { HafifYer } from '@/features/yerler/api';
 import { t } from '@/i18n';
@@ -218,6 +218,12 @@ export default function SihirbazEkrani() {
     }
   };
 
+  // #445 KK2: K, "Planı kur"un kullandığı aynı hesapla (planiKur ile aynı girdi); her render'da değil, veri değişince.
+  const sigmayanSayisi = useMemo(
+    () => (gunler.data && duraklar.data ? planiHesapla({ mekanlar: mekanlar.data ?? [], gunler: gunler.data, duraklar: duraklar.data }).atanmamis.length : 0),
+    [mekanlar.data, gunler.data, duraklar.data],
+  );
+
   if (adim === 'nereye') {
     return (
       <AdimKabugu adim={adim} baslik={t('sihirbaz.nereye.baslik')} onGeri={geri} hata={hata} devam={{ onPress: nereyeDevam, pasif: !sehir, yukleniyor: adKaydet.isPending }}>
@@ -295,7 +301,15 @@ export default function SihirbazEkrani() {
         altIcerik={
           <PlanCubugu
             ozet={secimOzeti(secim)}
-            doluluk={ilListesi && gunler.data.length > 0 ? { gun: gunler.data.length, ...gunDolulugu(secim, gunler.data.length) } : undefined}
+            doluluk={
+              ilListesi && gunler.data.length > 0
+                ? {
+                    gun: gunler.data.length,
+                    ...gunDolulugu(secim, gunler.data.length),
+                    sigmayan: sigmayanSayisi,
+                  }
+                : undefined
+            }
             onPlaniKur={planiKur}
             onHaritayaGec={haritayaGec}
             yukleniyor={planUygula.isPending}
