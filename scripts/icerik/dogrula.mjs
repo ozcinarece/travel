@@ -64,6 +64,8 @@ export const VARSAYILAN_DAKIKA = {
   viewpoint: 20,
   scenic_point: 20,
   restaurant: 75,
+  // #440: lokanta (self servis) restoran kadar.
+  cafeteria: 75,
   cafe: 30,
   coffee_shop: 30,
   bar: 90,

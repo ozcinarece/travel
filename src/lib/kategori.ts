@@ -1,8 +1,8 @@
 // Google birincil tip → kategori etiketi ve varsayılan kalınacak süre (PRD §6).
 import { eslesenKategori, konaklamaMi, type PinKategorisi } from './pinIkonu';
 
-/** PRD §6: dakika. Listede olmayan tip 45. */
-const VARSAYILAN_DAKIKA: Record<string, number> = {
+/** PRD §6: dakika. Listede olmayan tip 45. İçerik hattı (`scripts/icerik/dogrula.mjs`) aynı tabloyu kullanır; test eşitliği denetler. */
+export const VARSAYILAN_DAKIKA: Record<string, number> = {
   museum: 90,
   art_gallery: 60,
   tourist_attraction: 60,
