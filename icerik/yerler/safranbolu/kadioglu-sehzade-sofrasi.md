@@ -6,6 +6,6 @@ Et yemek istemiyorsan menüde bükme ve peruhi de var. Bükme, ince açılan ham
 
 Havalar ılıksa bahçede otur; lokantanın açık havada yemek yenen bir bölümü var. Yemeğe bir saat ayır; kuyu kebabı doyurucu bir tabak, acıktığın bir öğlene denk getir.
 
-Safranbolu'da Kadıoğlu adını taşıyan konaklama yerleri ve aynı adla anılan başka bir lokanta da var. Yol sorarken lokantanın tam adını söyle; çarşının içinde, yürüyerek kolayca bulunur.
+Safranbolu'da Kadıoğlu adını taşıyan konaklama yerleri de var. Yol sorarken lokantanın tam adını söyle ve "çarşıdaki" diye ekle; çarşının içinde, yürüyerek kolayca bulunur.
 
-> Siparişte kuyu kebabının yanına evin adını taşıyan şehzade pilavını iste; et yemeyen varsa ortaya bir bükme söyle.
+> Aynı adla bir "Sofrası 2" de var. Bu rehber çarşının içindeki lokantayı anlatıyor; haritada konumun çarşıyı gösterdiğine bak.
