@@ -63,6 +63,7 @@
           "osm": "node/13760915322",
           "ad": "Paşazade Göynük Sofrası",
           "sure_dk": 75,
+          "sure_gerekcesi": "öğle yemeği; restoran varsayılanı 75",
           "kapali_gunler": [],
           "rehber": "pasazade-goynuk-sofrasi",
           "amaclar": [
