@@ -236,7 +236,7 @@ export default function SihirbazEkrani() {
       <AdimKabugu
         adim={adim}
         baslik={t('sihirbaz.nezaman.baslik')}
-        ust={seyahat.data ? (seyahat.data.name ?? seyahat.data.city_label) : (ad ?? onerilenAd)}
+        alt={seyahat.data ? (seyahat.data.name ?? seyahat.data.city_label) : (ad ?? onerilenAd)}
         onGeri={geri}
         hata={hata}
         devam={{ onPress: () => seyahatiKur(false), pasif: !aralik && !kilitli, yukleniyor: olustur.isPending }}
