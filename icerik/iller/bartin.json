@@ -177,14 +177,13 @@
     {
       "sira": 14,
       "ad": "Kurucaşile Ahşap Tekne Atölyeleri",
-      "kategori": "aktivite",
+      "kategori": "carsi",
       "amaclar": [
         "kultur_tarih"
       ],
       "ilce": "Kurucaşile",
       "merkeze_km": 36,
-      "neden": "Ovatekkeönü ve Kapısuyu'ndaki atölyelerde kestane ve meşeden tekne yapılıyor",
-      "place_id": "ChIJVVVVlfwcm0AROvSDnk2ztK0"
+      "neden": "Ovatekkeönü ve Kapısuyu'ndaki atölyelerde kestane ve meşeden tekne yapılıyor"
     },
     {
       "sira": 15,
@@ -202,13 +201,13 @@
     {
       "sira": 16,
       "ad": "Ulukaya Şelalesi ve Drahna Kanyonu",
-      "kategori": "doga",
+      "kategori": "aktivite",
       "amaclar": [
         "doga"
       ],
       "ilce": "Ulus",
       "merkeze_km": 36,
-      "neden": "1 km'lik kanyonun sonunda kaya oyuğundan ~25 m düşer; 1998'den doğal sit alanı",
+      "neden": "Kanyon yürüyüşü: 1 km sonunda kaya oyuğundan ~25 m düşen şelale; 1998'den doğal sit",
       "osm": "node/2313850765",
       "place_id": "ChIJe7vx15Q9m0ARPpiNaonUSts"
     },
@@ -226,18 +225,6 @@
     },
     {
       "sira": 18,
-      "ad": "Bartın Irmağı tekne turu",
-      "kategori": "aktivite",
-      "amaclar": [
-        "yavas",
-        "cocuklu"
-      ],
-      "ilce": "Merkez",
-      "merkeze_km": 0,
-      "neden": "Antik adı Parthenios; kentle deniz arasında gemi geçebilen ırmakta tekne gezisi"
-    },
-    {
-      "sira": 19,
       "ad": "Yukarı Alpı Seyir Terası",
       "kategori": "manzara",
       "amaclar": [
@@ -246,8 +233,19 @@
       ],
       "ilce": "Ulus",
       "merkeze_km": 33,
-      "neden": "Üç katlı terastan Drahna Vadisi'ne bakış; yanında iki etaplı zipline hattı",
+      "neden": "Üç katlı terastan Drahna Vadisi'ne ve Ulus ormanlarına bakış",
       "place_id": "ChIJucaTo48Vm0AReebEyyCWHTI"
+    },
+    {
+      "sira": 19,
+      "ad": "Yukarı Alpı zipline",
+      "kategori": "aktivite",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Ulus",
+      "merkeze_km": 33,
+      "neden": "Küre Dağları Milli Parkı'nda, seyir terasının yanından vadi üstüne iki etaplı hat"
     },
     {
       "sira": 20,
@@ -291,6 +289,16 @@
     },
     {
       "sira": 23,
+      "ad": "Bartın ağda tatlısı",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "neden": "2020'de coğrafi işaret aldı; çöven kökü ve şekerle çırpılan beyaz, macun kıvamlı tatlı"
+    },
+    {
+      "sira": 24,
       "ad": "Hamam Cafe",
       "kategori": "tatli_kahve",
       "amaclar": [
@@ -303,7 +311,7 @@
       "place_id": "ChIJ7bRL--ULm0ARyHitUo3OrHA"
     },
     {
-      "sira": 24,
+      "sira": 25,
       "ad": "Ağlayan Ağaç Çay Bahçesi",
       "kategori": "manzara",
       "amaclar": [
@@ -315,7 +323,7 @@
       "place_id": "ChIJ_amgUOcLm0ARnaUizxFCSbw"
     },
     {
-      "sira": 25,
+      "sira": 26,
       "ad": "Bartın Kent Müzesi",
       "kategori": "muze",
       "amaclar": [
@@ -329,7 +337,7 @@
       "place_id": "ChIJb3sowzNym0ARCOftl5So-Bk"
     },
     {
-      "sira": 26,
+      "sira": 27,
       "ad": "Kemerköprü",
       "kategori": "tarih",
       "amaclar": [
@@ -341,7 +349,7 @@
       "place_id": "ChIJ74vfyChym0ARcmTS9LAKQyU"
     },
     {
-      "sira": 27,
+      "sira": 28,
       "ad": "Kemal Samancıoğlu Etnografya Müzesi",
       "kategori": "muze",
       "amaclar": [
@@ -354,7 +362,7 @@
       "place_id": "ChIJV1fqIDdym0ARPsCSUa0a8s0"
     },
     {
-      "sira": 28,
+      "sira": 29,
       "ad": "Türkan Hanımın Yeri",
       "kategori": "yemek",
       "amaclar": [
@@ -368,7 +376,7 @@
       "place_id": "ChIJcxHX3ugLm0AR1146d2HxAqA"
     },
     {
-      "sira": 29,
+      "sira": 30,
       "ad": "Kocagöz Konağı (Ulus Ziyaretçi Merkezi)",
       "kategori": "muze",
       "amaclar": [
@@ -380,19 +388,19 @@
       "place_id": "ChIJ35YgamlAm0ARcm-T9d8gqRc"
     },
     {
-      "sira": 30,
+      "sira": 31,
       "ad": "Turgut Reis Cafe",
-      "kategori": "tatli_kahve",
+      "kategori": "yemek",
       "amaclar": [
         "yavas"
       ],
       "ilce": "Amasra",
       "merkeze_km": 13,
-      "neden": "Kaleiçi'nde denize bakan kahvaltı ve kahve yeri; bazlamayla serpme kahvaltı",
+      "neden": "Kaleiçi'nde denize bakan bahçe; bazlamayla gelen serpme kahvaltı",
       "place_id": "ChIJaVZox-ULm0ARMZwVmjhWdeU"
     },
     {
-      "sira": 31,
+      "sira": 32,
       "ad": "Bartın Tarihi Çarşısı",
       "kategori": "carsi",
       "amaclar": [
@@ -405,7 +413,7 @@
       "place_id": "ChIJETbNnTRym0AR_6osDi7L2sc"
     },
     {
-      "sira": 32,
+      "sira": 33,
       "ad": "Marina Cafe",
       "kategori": "tatli_kahve",
       "amaclar": [

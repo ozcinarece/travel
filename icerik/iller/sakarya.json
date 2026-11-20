@@ -38,7 +38,7 @@
       ],
       "ilce": "Adapazarı",
       "merkeze_km": 5,
-      "neden": "6. yy Bizans taş köprüsü, 12 kemer; 8 yıllık restorasyonun ardından 2026'da açıldı",
+      "neden": "6. yy Bizans taş köprüsü, 12 kemerli; restorasyonun ardından Temmuz 2026'da açıldı",
       "osm": "way/189584048",
       "place_id": "ChIJ4SWSIpSzzBQRi0TK_I3-4-E"
     },
@@ -246,15 +246,13 @@
     },
     {
       "sira": 20,
-      "ad": "Kabak Evi",
+      "ad": "Adapazarı kabak tatlısı",
       "kategori": "tatli_kahve",
       "amaclar": [
         "lezzet"
       ],
       "ilce": "Adapazarı",
-      "merkeze_km": 0,
-      "neden": "2011'de ev mutfağında başladı; Sakarya kabağı ve pancar şekeriyle kabak tatlısı",
-      "place_id": "ChIJXRX2BpSyzBQRzwrFt2F9KqM"
+      "neden": "2021'de coğrafi işaret aldı; Uzunçarşı çevresindeki tatlıcılarda kış boyunca bulunur"
     },
     {
       "sira": 21,
