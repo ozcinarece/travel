@@ -251,7 +251,7 @@
       ],
       "ilce": "Merkez",
       "merkeze_km": 0,
-      "neden": "Hadrian döneminden kalan 48 m'lik kule; 2026'da seyir terası ve arkeoparkla açıldı",
+      "neden": "Hadrian döneminden kalan 48 m'lik kule; seyir terası ve arkeoparkla ziyarete açık",
       "osm": "way/609031025",
       "place_id": "ChIJuerjCXEvsxQRJw7zDujvlMI"
     },
@@ -302,7 +302,7 @@
       ],
       "ilce": "Merkez",
       "merkeze_km": 1,
-      "neden": "Bölgenin en eski geleneksel Türk evinde Rumeli düğünleri eşya ve videolarla anlatılıyor",
+      "neden": "Geleneksel bir Edirne evinde Rumeli düğünleri eşya ve videolarla anlatılıyor",
       "osm": "way/1434310306",
       "place_id": "ChIJS15HLm8vsxQRS6hg1v_2gl0"
     },
@@ -328,7 +328,7 @@
       ],
       "ilce": "Merkez",
       "merkeze_km": 0,
-      "neden": "1967'den beri açık, şehrin en eski meyhanesi; borani mezesi ve canlı fasıl",
+      "neden": "1967'den beri açık meyhane; borani mezesi ve canlı fasıl",
       "place_id": "ChIJl9yCSnovsxQRkdlrTjl-hYo"
     },
     {
@@ -374,7 +374,7 @@
     {
       "sira": 29,
       "ad": "Enez Dalyan Gölü",
-      "kategori": "aktivite",
+      "kategori": "doga",
       "amaclar": [
         "doga",
         "yavas"
@@ -463,7 +463,7 @@
     {
       "sira": 36,
       "ad": "Karaağaç Kahvaltı Evi",
-      "kategori": "tatli_kahve",
+      "kategori": "yemek",
       "amaclar": [
         "cocuklu",
         "yavas"
@@ -510,6 +510,18 @@
       "merkeze_km": 35,
       "neden": "Trakya'daki ilk dolmen kazısı 1983'te Hacılar'da yapıldı; yapılar yaklaşık 3.500 yıllık",
       "place_id": "ChIJNS-tB3Vkp0ARYl4IBP2Ve3g"
+    },
+    {
+      "sira": 40,
+      "ad": "Meriç Nehri kano turu",
+      "kategori": "aktivite",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 2,
+      "neden": "Akşamüstü Meriç'te kürek çekip Mecidiye Köprüsü'ne sudan bakılan kano turları"
     }
   ]
 }
