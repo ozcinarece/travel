@@ -78,8 +78,8 @@ export function kategoriTahmini(tip: string | null | undefined, secili: IlKatego
   if (secili) return secili;
   const t = tip ?? '';
   if (/museum|art_gallery/.test(t)) return 'muze';
-  if (/cafe|coffee|bakery|dessert|ice_cream|confectionery|tea_house|pastry/.test(t)) return 'tatli_kahve';
-  if (/restaurant|food|meal|steak|kebab|bar_and_grill/.test(t)) return 'yemek';
+  if (/cafe(?!teria)|coffee|bakery|dessert|ice_cream|confectionery|tea_house|pastry/.test(t)) return 'tatli_kahve';
+  if (/restaurant|cafeteria|food|meal|steak|kebab|bar_and_grill/.test(t)) return 'yemek';
   if (/market|shopping|store|bazaar|mall/.test(t)) return 'carsi';
   if (/ski|hiking|adventure|amusement|sports|marina|golf|water_park/.test(t)) return 'aktivite';
   if (/observation|scenic|viewpoint/.test(t)) return 'manzara';

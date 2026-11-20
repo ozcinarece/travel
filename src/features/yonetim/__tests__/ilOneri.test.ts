@@ -69,6 +69,8 @@ describe('yeni yerin kategorisi', () => {
     expect(kategoriTahmini('national_park', null)).toBe('doga');
     expect(kategoriTahmini('cafe', null)).toBe('tatli_kahve');
     expect(kategoriTahmini('turkish_restaurant', null)).toBe('yemek');
+    // #440: lokanta yemek durağı, kafe değil.
+    expect(kategoriTahmini('cafeteria', null)).toBe('yemek');
     expect(kategoriTahmini('ski_resort', null)).toBe('aktivite');
     expect(kategoriTahmini('observation_deck', null)).toBe('manzara');
     expect(kategoriTahmini('mosque', null)).toBe('tarih');
