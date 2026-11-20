@@ -62,8 +62,9 @@ export function AnaGeziKarti({ gezi, ton, onAc, altSatir, onKalp }: Props) {
 /**
  * Kapak üstündeki ♥ (kanvas `Ana_v5_Ayrinti` §2): her kartta (fotoğraflıda da) 32 px beyaz daire (%92), içinde 18 px kalp.
  * Boş: Lacivert 2,2 çizgi. Kayıtlı: Mandalina dolgu, #C25200 1,6 kenar. Dokunma alanı 44 px, daireyi ortalar.
+ * #406 (`Ana_v6_Kesfet` raf kartı): `kucuk` → 30 px daire, 16 px kalp, sağdan ve üstten 10 px.
  */
-function KartKalbi({ geziId, onKalp }: { geziId: string; onKalp?: () => void }) {
+export function KartKalbi({ geziId, onKalp, kucuk }: { geziId: string; onKalp?: () => void; kucuk?: boolean }) {
   const kayitli = useKayitli('gezi', geziId);
   const kaydet = useKaydet();
   return (
@@ -73,11 +74,11 @@ function KartKalbi({ geziId, onKalp }: { geziId: string; onKalp?: () => void }) 
       accessibilityLabel={onKalp ? t('kaydettiklerim.kaldir') : t('anasayfa.v5.kaydet')}
       accessibilityState={onKalp ? undefined : { checked: kayitli }}
       onPress={onKalp ?? (() => kaydet.mutate({ tur: 'gezi', hedef_id: geziId, kayitli }))}
-      style={s.kalp}
+      style={[s.kalp, kucuk && s.kalpKucuk]}
       testID="kart-kalp"
     >
-      <View style={s.kalpDaire}>
-        <Svg width={18} height={18} viewBox="0 0 24 24" fill={kayitli ? renk.vurgu : 'none'} stroke={kayitli ? anaV5.kalpKenar : renk.metin} strokeWidth={kayitli ? 1.6 : 2.2} strokeLinejoin="round">
+      <View style={[s.kalpDaire, kucuk && s.kalpDaireKucuk]}>
+        <Svg width={kucuk ? 16 : 18} height={kucuk ? 16 : 18} viewBox="0 0 24 24" fill={kayitli ? renk.vurgu : 'none'} stroke={kayitli ? anaV5.kalpKenar : renk.metin} strokeWidth={kayitli ? 1.6 : 2.2} strokeLinejoin="round">
           <Path d={KALP_YOLU} />
         </Svg>
       </View>
@@ -98,4 +99,7 @@ const s = StyleSheet.create({
   // Kanvas: daire sağdan ve üstten 8 px; 44 px dokunma alanı daireyi ortalar (8 − (44 − 32) / 2 = 2).
   kalp: { position: 'absolute', right: 2, top: 2, width: minDokunma, height: minDokunma, alignItems: 'center', justifyContent: 'center' },
   kalpDaire: { width: 32, height: 32, borderRadius: 16, backgroundColor: anaV5.kalpDaire, alignItems: 'center', justifyContent: 'center' },
+  // #406: 30 px daire sağdan ve üstten 10 px → 10 − (44 − 30) / 2 = 3.
+  kalpKucuk: { right: 3, top: 3 },
+  kalpDaireKucuk: { width: 30, height: 30, borderRadius: 15 },
 });

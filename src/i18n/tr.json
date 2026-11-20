@@ -788,6 +788,23 @@
       "yukleniyor": "Geziler yükleniyor",
       "artiSeyahat": "+ Seyahat",
       "hazirGezilerEtiket": "Hazır geziler, {n}"
+    },
+    "v6": {
+      "tumuEtiket": "{baslik}, tümünü gör",
+      "rafBos": "Bu rafta şu an gezi yok",
+      "kartAlt": "{durak} durak · {yer}",
+      "kartAltYersiz": "{durak} durak",
+      "hazirGeziler": "Hazır geziler",
+      "bannerSayi": "{n} hazır gezi ›",
+      "bannerEtiket": "{baslik}, {n} hazır gezi",
+      "amacRafi": {
+        "kultur_tarih": "Kültür ve tarih için",
+        "lezzet": "Lezzet için",
+        "doga": "Doğa için",
+        "yavas": "Yavaş ve keyifli",
+        "gece": "Gece hayatı için",
+        "cocuklu": "Çocuklarla"
+      }
     }
   },
   "ara": {

@@ -15,7 +15,7 @@ type HamGezi = Gezi & {
   gezi_gunleri?: { sira: number; gezi_duraklari?: { count: number }[] }[] | null;
 };
 
-const AKIS_ALANLARI = 'id, sehir_id, baslik, slug, kapak_url, ozet, yazar_ad, gun_sayisi, mekan_sayisi, sira, created_at, amaclar, sehirler(ad, slug, kapak_url), gezi_gunleri(sira, gezi_duraklari(count))';
+const AKIS_ALANLARI = 'id, sehir_id, baslik, slug, kapak_url, kapak_atif, ozet, yazar_ad, gun_sayisi, mekan_sayisi, sira, created_at, amaclar, sehirler(ad, slug, kapak_url), gezi_gunleri(sira, gezi_duraklari(count))';
 
 /** Ham satırdan kart verisi: günler sıraya dizilir, her günün durak sayısı alınır. */
 export function akisGezisi(h: HamGezi): AkisGezisi {

@@ -50,6 +50,7 @@ jest.mock('@/features/anasayfa/serit', () => ({
 }));
 // #291 KK6: ana ekran Keşfet akışı sorgusunu da tutar (yenileme için).
 const mockAkis = { data: [] as unknown[], isPending: false, isError: false, isFetching: false, refetch: jest.fn(async () => ({ isError: false, data: [] as unknown[] })) };
+jest.mock('@/lib/anaSayfa', () => ({ useAnaSayfaBolumleri: () => ({ data: undefined, refetch: async () => ({}) }) }));
 jest.mock('@/features/icerik/kesfetAkisi', () => ({
   ...jest.requireActual<object>('@/features/icerik/kesfetAkisi'),
   useKesfetAkisi: () => mockAkis,

@@ -191,7 +191,10 @@ export type OlayTuru = 'gezi_goruntulendi' | 'gezi_alindi' | 'yer_eklendi' | 'da
   // #396 KK7: Plan hazır'da "Arkadaşlarını çağır".
   | 'plan_hazir_davet'
   // #405 KK6: alt menüde sekme açıldı (meta: sekme).
-  | 'sekme_acildi';
+  | 'sekme_acildi'
+  // #406 KK6: raflı ana sayfa (banner: hedef_id bölüm, meta hedef türü; raf kartı: hedef_id gezi, meta raf).
+  | 'banner_acildi'
+  | 'raf_kart_acildi';
 
 /** #137: /r/{token} özeti (davet_ozeti; giriş gerektirmez). Google verisi yok: yalnız sayılar ve günler. */
 export type DavetOzeti = {
