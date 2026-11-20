@@ -6,13 +6,43 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { EkranBasligi } from '@/components/EkranBasligi';
 import { GeziKarti } from '@/components/icerik/GeziKarti';
 import { Cip } from '@/components/ui/Cip';
+import { rafBul } from '@/features/anasayfa/raflar';
+import { useKesfetAkisi } from '@/features/icerik/kesfetAkisi';
 import { useGeziler, useSehirler } from '@/features/icerik/sorgular';
 import { t } from '@/i18n';
+import { useAnaSayfaBolumleri } from '@/lib/anaSayfa';
 import { bosluk, renk, yazi } from '@/theme';
 
-/** #97 A KK4 "Tümü": gezi listesi — şehir + gün sayısı filtresi; büyük kartlar. */
+/**
+ * #97 A KK4 "Tümü": gezi listesi — şehir + gün sayısı filtresi; büyük kartlar.
+ * #406: `raf` verilirse Keşfet rafının "Tümü"sü (ya da raf hedefli banner): başlık rafın adı, rafın bütün gezileri, süzgeç yok.
+ */
 export default function GezilerEkrani() {
-  const { sehir } = useLocalSearchParams<{ sehir?: string }>();
+  const { sehir, raf } = useLocalSearchParams<{ sehir?: string; raf?: string }>();
+  if (raf) return <RafListesi rafId={raf} />;
+  return <GeziListesi sehir={sehir} />;
+}
+
+function RafListesi({ rafId }: { rafId: string }) {
+  const bolumler = useAnaSayfaBolumleri();
+  const akis = useKesfetAkisi();
+  const r = rafBul(rafId, bolumler.data, akis.data ?? []);
+  return (
+    <SafeAreaView style={s.ekran} edges={['top']}>
+      <EkranBasligi baslik={r?.baslik ?? t('gezi.listeBaslik')} geri={() => router.back()} />
+      <ScrollView contentContainerStyle={s.icerik}>
+        <View style={{ gap: 12, paddingTop: 6 }}>
+          {(r?.geziler ?? []).map((g, i) => (
+            <GeziKarti key={g.id} gezi={g} buyuk sira={i} onPress={() => router.push({ pathname: '/gezi/[slug]', params: { slug: g.slug } })} />
+          ))}
+          {!akis.isPending && !r ? <Text style={s.bos}>{t('gezi.bos')}</Text> : null}
+        </View>
+      </ScrollView>
+    </SafeAreaView>
+  );
+}
+
+function GeziListesi({ sehir }: { sehir?: string }) {
   const [sehirId, setSehirId] = useState<string | null>(sehir ?? null);
   const [gun, setGun] = useState<number | null>(null);
   const sehirler = useSehirler();

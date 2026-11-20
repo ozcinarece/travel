@@ -5,23 +5,26 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { AnaGeziKarti } from '@/components/ortak/AnaGeziKarti';
 import { KurSatiri } from '@/components/ortak/KurSatiri';
-import { Sekme, SekmeSatiri } from '@/components/ortak/Sekme';
+import { Banner } from '@/components/anasayfa/Banner';
 import { HarcamaKapatKarti } from '@/components/anasayfa/HarcamaKapatKarti';
 import { PlanlamayaDevam } from '@/components/anasayfa/PlanlamayaDevam';
+import { Raf } from '@/components/anasayfa/Raf';
 import { Buton } from '@/components/ui/Buton';
 import { Ikon } from '@/components/ui/Ikon';
 import { KisaBildirim, useGelenBildirim, useKisaBildirim } from '@/components/ui/KisaBildirim';
 import { LogoYazi } from '@/components/ui/Logo';
 import { banaAcikBorc, GEZI_PAYLAS_KARTI, seritAdimMetni, useAcikBorc, useSeritAdimi } from '@/features/anasayfa/serit';
-import { anaArama, kapakTonu, sekmeAmaclari, ustSatir } from '@/features/anasayfa/v5';
+import { aktifBanner, kesfetRaflari, type Banner as BannerVerisi, type Raf as RafVerisi } from '@/features/anasayfa/raflar';
+import { anaArama, kapakTonu, ustSatir } from '@/features/anasayfa/v5';
 import { bekleyenDavetiOku, bekleyenDavetiSil, useDavetKarsilama, useDavetKarsilandi } from '@/features/davet/sorgular';
-import { amacaGore, useKesfetAkisi, type AkisGezisi, type Amac } from '@/features/icerik/kesfetAkisi';
+import { useKesfetAkisi, type AkisGezisi } from '@/features/icerik/kesfetAkisi';
 import { olayYaz, useSehirler } from '@/features/icerik/sorgular';
 import { useProfil } from '@/features/profil/sorgular';
 import { acilisDurumu, siniflandir } from '@/features/seyahatler/siniflandir';
 import { useSeyahatler } from '@/features/seyahatler/sorgular';
 import { gunFarki, seyahatAdi } from '@/features/sihirbaz/sihirbaz';
 import { t } from '@/i18n';
+import { useAnaSayfaBolumleri } from '@/lib/anaSayfa';
 import { ACILIS_BEKLEME_MS, acilisKarariAcik, acilisKarariAl, acilisKarariniKapat, acilisKarariniYenile } from '@/lib/acilis';
 import { useOturum } from '@/lib/oturum';
 import { tarihAraligi } from '@/lib/takvim';
@@ -34,6 +37,8 @@ import { anaV5, minDokunma, renk, yazi } from '@/theme';
  * ana sayfa. Üstte logo, ♥ Kaydettiklerim, "+ Seyahat", profil (KK2); bitmemiş en yakın seyahat için "Planlamaya devam"
  * satırı (KK3) ya da gezi bitince "Harcamaları kapat" (KK4); düz arama (KK5, yerel süzgeç, Google yok); amaç sekmeleri (KK6);
  * tek sütun hazır gezi kartları (KK7). Bayrak (`KESFET_AKISI`) ve eski iki ana sayfa kalktı (KK1).
+ * #406 (kanvas `Ana_v6_Kesfet`): sıra üst satır · arama · Planlamaya devam · banner · raflar; amaç sekmeleri ve tek sütun
+ * liste kalktı. Banner ve raflar BO'nun yayınladığı bölümlerden (`ana_sayfa_gorunen`); yayında raf yoksa amaç rafları.
  * #137: giriş öncesi görülen davet → /r/{token}; web'de katılıp uygulamayı ilk açan → doğrudan seyahat.
  * #275 (kanvas 29a): alt menü yok. Üst çubukta sağda Ara · ♥ Kaydettiklerim · Profil (44 px, köşe 14); altta yüzen
  * [+ Yeni seyahat]. Seyahat silinip buraya dönülünce kısa bildirim.
@@ -44,6 +49,7 @@ export default function AnaSayfa() {
   const seyahatler = useSeyahatler();
   const akis = useKesfetAkisi();
   const sehirler = useSehirler();
+  const bolumler = useAnaSayfaBolumleri();
 
   const { hesapli } = useOturum();
   const altBosluk = useSafeAreaInsets().bottom;
@@ -54,6 +60,7 @@ export default function AnaSayfa() {
   const yenile = () =>
     Promise.all([
       seyahatler.refetch(),
+      bolumler.refetch(),
       akis.refetch().then((r) => {
         if (r.isError && r.data) bildirim.goster(t('kesfetAkisi.guncellenemedi'));
       }),
@@ -166,13 +173,13 @@ export default function AnaSayfa() {
   const devamSeyahati = durum?.tur === 'serit' ? durum.seyahat : null;
   const seritAdimi = useSeritAdimi(devamSeyahati);
 
-  // KK5 · KK6: arama ve amaç sekmesi.
+  // KK5: arama.
   const [sorgu, setSorgu] = useState('');
   const [aramaOdakta, setAramaOdakta] = useState(false);
-  const [secilenSekme, setSecilenSekme] = useState<Amac | null>(null);
   const tumGeziler = useMemo(() => akis.data ?? [], [akis.data]);
-  const sekmeler = useMemo(() => sekmeAmaclari(tumGeziler), [tumGeziler]);
-  const sekme = secilenSekme && sekmeler.includes(secilenSekme) ? secilenSekme : null;
+  // #406 KK2 · KK3: raflar ve banner. Bölümler okunamazsa (ya da yayında raf yoksa) amaç rafları kurulur.
+  const raflar = useMemo(() => kesfetRaflari(bolumler.data, tumGeziler), [bolumler.data, tumGeziler]);
+  const banner = useMemo(() => aktifBanner(bolumler.data, tumGeziler, sehirler.data ?? [], raflar), [bolumler.data, tumGeziler, sehirler.data, raflar]);
   const arama = useMemo(() => anaArama(sorgu, tumGeziler, sehirler.data ?? []), [sorgu, tumGeziler, sehirler.data]);
   // KK8 (Büyüme notu): `ana_ara` yalnız sonucu yazar (yazılan metin kaydedilmez). Aramadan bir şeye dokunmadan çıkılırsa `yok`.
   const aramaSonucYazildi = useRef(false);
@@ -196,14 +203,24 @@ export default function AnaSayfa() {
   }
 
   const yeni = () => router.push('/(tabs)/yeni');
-  const geziAc = (g: AkisGezisi, kaynak: 'liste' | 'arama') => {
-    olayYaz('ana_kart_acildi', g.id, { kaynak, amac: sekme });
-    router.push({ pathname: '/gezi/[slug]', params: { slug: g.slug } });
-  };
+  const geziyiAc = (g: AkisGezisi) => router.push({ pathname: '/gezi/[slug]', params: { slug: g.slug } });
   const aramaGezisi = (g: AkisGezisi) => {
     aramaSonucYazildi.current = true;
     olayYaz('ana_ara', null, { sonuc: 'gezi' });
-    geziAc(g, 'arama');
+    olayYaz('ana_kart_acildi', g.id, { kaynak: 'arama', amac: null });
+    geziyiAc(g);
+  };
+  // KK6: raf kartı ve banner ölçümü.
+  const rafKarti = (r: RafVerisi<AkisGezisi>, g: AkisGezisi) => {
+    olayYaz('raf_kart_acildi', g.id, { raf: r.id, raf_turu: r.tur });
+    geziyiAc(g);
+  };
+  const rafTumu = (r: RafVerisi<AkisGezisi>) => router.push({ pathname: '/geziler', params: { raf: r.id } });
+  const bannerAc = (b: BannerVerisi) => {
+    olayYaz('banner_acildi', b.id, { hedef: b.hedef.tur });
+    if (b.hedef.tur === 'gezi' && b.slug) router.push({ pathname: '/gezi/[slug]', params: { slug: b.slug } });
+    else if (b.hedef.tur === 'sehir') router.push({ pathname: '/geziler', params: { sehir: b.hedef.id } });
+    else router.push({ pathname: '/geziler', params: { raf: b.hedef.id } });
   };
   const sehirleKur = (sehir: { id: string }) => {
     aramaSonucYazildi.current = true;
@@ -239,8 +256,6 @@ export default function AnaSayfa() {
         onAc={() => devamAc(devamSeyahati)}
       />
     ) : null;
-
-  const liste = amacaGore(tumGeziler, sekme);
 
   return (
     <SafeAreaView style={s.ekran} edges={['top']}>
@@ -314,15 +329,8 @@ export default function AnaSayfa() {
           </View>
         ) : (
           <>
-            {/* KK6: yalnız en az 2 gezisi olan amaçlar (en çok 4) + "Hepsi"; yatay kaymaz; 2'den az doluysa satır yok. */}
-            {sekmeler.length > 0 ? (
-              <SekmeSatiri>
-                <Sekme baslik={t('anasayfa.v5.hepsi')} secili={!sekme} onPress={() => setSecilenSekme(null)} />
-                {sekmeler.map((a) => (
-                  <Sekme key={a} baslik={t(`anasayfa.v5.sekme.${a}`)} etiket={t(`kesfetAkisi.amac.${a}`)} secili={sekme === a} onPress={() => setSecilenSekme(a)} />
-                ))}
-              </SekmeSatiri>
-            ) : null}
+            {/* #406 KK2: tek banner, Planlamaya devam'ın altında. */}
+            {banner ? <Banner banner={banner} onAc={() => bannerAc(banner)} /> : null}
             {akis.isPending ? (
               <ActivityIndicator color={renk.ana} style={s.yukleniyor} accessibilityLabel={t('anasayfa.v5.yukleniyor')} />
             ) : akis.isError && !akis.data ? (
@@ -347,9 +355,9 @@ export default function AnaSayfa() {
                 </View>
               </View>
             ) : (
-              <View style={s.liste}>
-                {liste.map((g) => (
-                  <AnaGeziKarti key={g.id} gezi={g} ton={kapakTonu(g.amaclar, sekme)} onAc={() => geziAc(g, 'liste')} />
+              <View style={s.raflar}>
+                {raflar.map((r) => (
+                  <Raf key={r.id} raf={r} onKart={(g) => rafKarti(r, g)} onTumu={() => rafTumu(r)} />
                 ))}
               </View>
             )}
@@ -390,7 +398,8 @@ function tarihSatiri(sy: SeyahatOzet): string {
 const s = StyleSheet.create({
   ekran: { flex: 1, backgroundColor: renk.zemin },
   ortala: { alignItems: 'center', justifyContent: 'center' },
-  icerik: { gap: 14 },
+  // `Ana_v6_Kesfet`: bölümler arası 16.
+  icerik: { gap: 16 },
   kenar: { paddingHorizontal: 16 },
   ust: { paddingHorizontal: 16, height: 48, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   ustDugmeler: { flexDirection: 'row', alignItems: 'center', gap: 8 },
@@ -401,8 +410,8 @@ const s = StyleSheet.create({
   seyahatMetin: { fontFamily: yazi.kalin, fontSize: 14, color: renk.metin },
   arama: {
     marginHorizontal: 16,
-    height: 52,
-    borderRadius: 26,
+    height: 48,
+    borderRadius: 24,
     borderWidth: 1,
     borderColor: anaV5.cizgi,
     backgroundColor: renk.zemin,
@@ -428,6 +437,7 @@ const s = StyleSheet.create({
   bosMetin: { fontFamily: yazi.normal, fontSize: 14, color: anaV5.ikincil },
   bosDugme: { alignSelf: 'flex-start', marginTop: 6, height: minDokunma, paddingHorizontal: 18, borderRadius: 22, backgroundColor: renk.vurgu, justifyContent: 'center' },
   liste: { paddingHorizontal: 16, paddingTop: 4, gap: 20 },
+  raflar: { gap: 16 },
   aramaListe: { gap: 16 },
   yukleniyor: { marginTop: 24 },
   hata: { gap: 14, paddingTop: 6 },

@@ -224,13 +224,17 @@
       "tek_kart": "tam genişlik kart",
       "serit": "yatay şerit",
       "mozaik": "foto mozaiği",
-      "sehir_seckisi": "şehir seçkisi"
+      "sehir_seckisi": "şehir seçkisi",
+      "banner": "banner",
+      "raf": "raf"
     },
     "turAd": {
       "tek_kart": "Tek kart",
       "serit": "Şerit",
       "mozaik": "Mozaik",
-      "sehir_seckisi": "Şehir seçkisi"
+      "sehir_seckisi": "Şehir seçkisi",
+      "banner": "Banner",
+      "raf": "Raf"
     },
     "otomatik": {
       "tek_kart": "otomatik: en çok alınan (son 30 gün)",
@@ -271,7 +275,23 @@
     "cikar": "{ad} içerikten çıkar",
     "sil": "Bölümü sil",
     "silOnay": "Silmek için yeniden bas",
-    "onizleme": "ÖNİZLEME · ANA SAYFA"
+    "onizleme": "ÖNİZLEME · ANA SAYFA",
+    "v6Ozet": {
+      "bannerHedef": "hedef: {hedef}",
+      "bannerHedefsiz": "hedef seçilmedi",
+      "hedef": {
+        "gezi": "gezi",
+        "sehir": "şehir",
+        "raf": "raf"
+      },
+      "raf": {
+        "amac": "amaç: {amac}",
+        "sehir": "şehir: {sehir}",
+        "elle": "elle seçilmiş {n} gezi",
+        "arkadaslardan": "arkadaşlardan"
+      },
+      "duzenleyiciYakinda": "Banner ve raf içeriği bir sonraki sürümde buradan düzenlenecek; şimdilik başlık, tarih, aç/kapa ve sıra değişir."
+    }
   },
   "genel": {
     "ust": "GENEL BAKIŞ · {tarih}",

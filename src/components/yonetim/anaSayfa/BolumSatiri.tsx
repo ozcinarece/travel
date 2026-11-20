@@ -77,6 +77,9 @@ function Duzenleyici({ bolum, secenekler, onGuncelle, onSil }: { bolum: TaslakBo
   const kalan = liste.filter((x) => !secili.includes(x.id));
   const yaz = (idler: string[]) => onGuncelle({ icerik: icerikYaz(bolum.tur, idler) });
   const elleSecim = bolum.kaynak === 'elle' || bolum.tur === 'sehir_seckisi';
+  // #406 1/2: banner ve raf içeriği 2/2'de düzenlenir; burada eski türlerin alanları (tür, kaynak, içerik) gösterilmez ki
+  // içerikleri bozulmasın.
+  const v6 = bolum.tur === 'banner' || bolum.tur === 'raf';
 
   return (
     <View style={s.duzenleyici}>
@@ -84,15 +87,17 @@ function Duzenleyici({ bolum, secenekler, onGuncelle, onSil }: { bolum: TaslakBo
         <Alan etiket={ty('anaSayfa.alan.baslik')}>
           <MetinKutusu value={baslik} onChangeText={setBaslik} onBlur={() => baslik.trim() && baslik !== bolum.baslik && onGuncelle({ baslik: baslik.trim() })} maxLength={80} accessibilityLabel={ty('anaSayfa.alan.baslik')} />
         </Alan>
-        <Alan etiket={ty('anaSayfa.alan.tur')} genislik={150}>
-          <SecimKutusu<BolumTuru>
-            etiket={ty('anaSayfa.alan.tur')}
-            deger={bolum.tur}
-            onDegis={(t) => onGuncelle({ tur: t, icerik: icerikYaz(t, []), kaynak: t === 'sehir_seckisi' ? 'elle' : bolum.kaynak })}
-            secenekler={BOLUM_TURLERI.map((t) => ({ deger: t, etiket: ty(`anaSayfa.turAd.${t}`) }))}
-          />
-        </Alan>
-        {bolum.tur !== 'sehir_seckisi' ? (
+        {v6 ? null : (
+          <Alan etiket={ty('anaSayfa.alan.tur')} genislik={150}>
+            <SecimKutusu<BolumTuru>
+              etiket={ty('anaSayfa.alan.tur')}
+              deger={bolum.tur}
+              onDegis={(t) => onGuncelle({ tur: t, icerik: icerikYaz(t, []), kaynak: t === 'sehir_seckisi' ? 'elle' : bolum.kaynak })}
+              secenekler={BOLUM_TURLERI.map((t) => ({ deger: t, etiket: ty(`anaSayfa.turAd.${t}`) }))}
+            />
+          </Alan>
+        )}
+        {!v6 && bolum.tur !== 'sehir_seckisi' ? (
           <Alan etiket={ty('anaSayfa.alan.kaynak')} genislik={120}>
             <SecimKutusu<BolumKaynagi>
               etiket={ty('anaSayfa.alan.kaynak')}
@@ -106,7 +111,8 @@ function Duzenleyici({ bolum, secenekler, onGuncelle, onSil }: { bolum: TaslakBo
           </Alan>
         ) : null}
       </AlanSatiri>
-      {elleSecim ? (
+      {v6 ? <Text style={s.not}>{ty('anaSayfa.v6Ozet.duzenleyiciYakinda')}</Text> : null}
+      {!v6 && elleSecim ? (
         <Alan etiket={ty('anaSayfa.alan.icerik')}>
           <View style={s.secililer}>
             {secili.map((id, i) => (
@@ -163,6 +169,7 @@ const s = StyleSheet.create({
   baslik: { fontFamily: yazi.ekstra, fontSize: 13, color: yRenk.metin },
   tur: { fontFamily: yazi.kalin, fontSize: 11, color: yRenk.ikincil },
   ozet: { fontFamily: yazi.yari, fontSize: 12, color: yRenk.ikincil },
+  not: { fontFamily: yazi.normal, fontSize: 12, color: yRenk.ikincil },
   anahtar: { width: 38, height: 22, borderRadius: 999 },
   dugme: { position: 'absolute', top: 3, width: 16, height: 16, borderRadius: 8, backgroundColor: yRenk.zemin },
   duzenleyici: { gap: 12, paddingHorizontal: 14, paddingBottom: 14, borderTopWidth: 1, borderTopColor: yRenk.ayrac, paddingTop: 12 },

@@ -32,6 +32,14 @@ describe('ana sayfa düzeni — panel kuralları (#109)', () => {
     expect(bolumOzeti(b({ icerik: { gezi_idler: [] } }), adlar, ty)).toBe('içerik seçilmedi');
   });
 
+  it('#406: banner ve raf satırının özeti', () => {
+    expect(bolumOzeti(b({ tur: 'banner', icerik: { ust_yazi: 'Bu kış', hedef: { tur: 'raf', id: 'r1' } } }), adlar, ty)).toBe('Bu kış · hedef: raf');
+    expect(bolumOzeti(b({ tur: 'banner', icerik: {} }), adlar, ty)).toBe('hedef seçilmedi');
+    expect(bolumOzeti(b({ tur: 'raf', icerik: { raf_turu: 'amac', amac: 'lezzet' } }), adlar, ty)).toBe('amaç: lezzet');
+    expect(bolumOzeti(b({ tur: 'raf', icerik: { raf_turu: 'sehir', sehir_id: 's1' } }), adlar, ty)).toBe('şehir: Eskişehir');
+    expect(bolumOzeti(b({ tur: 'raf', icerik: { raf_turu: 'elle', gezi_idler: ['g0', 'g1'] } }), adlar, ty)).toBe('elle seçilmiş 2 gezi');
+  });
+
   it('planlı bölüm: özet ve kutu açılış/kapanış taşır', () => {
     const p = b({ baslik: 'Mevsim seçkisi', baslangic_at: '2026-10-20T06:00:00Z', bitis_at: '2026-11-01T06:00:00Z', icerik: { gezi_idler: ['g0'] } });
     expect(bolumOzeti(p, adlar, ty)).toMatch(/^Bursa \(sıra: elle\) · açılış 20 Eki \d\d:00 · kapanış 1 Kas \d\d:00$/);
