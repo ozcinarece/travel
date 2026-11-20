@@ -1,0 +1,340 @@
+{
+  "il": "Kars",
+  "slug": "kars",
+  "guncelleme": "2026-11-20",
+  "oneriler": [
+    {
+      "sira": 1,
+      "ad": "Ani Ören Yeri",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 42,
+      "neden": "Arpaçay kanyonunun kıyısında orta çağ başkenti; 2016'dan beri UNESCO listesinde",
+      "osm": "way/157441696",
+      "place_id": "ChIJexWYzxEWakARyS5E2mqaTqc"
+    },
+    {
+      "sira": 2,
+      "ad": "Kars Kalesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "Bazalt surlarıyla kentin tepesinde; burçlardan Kars Çayı ve Baltık sokakları görünür",
+      "osm": "way/189989602",
+      "place_id": "ChIJT1wZLOmOaUARbaTrzYlpMZs"
+    },
+    {
+      "sira": 3,
+      "ad": "Kümbet Camii (On İki Havariler Kilisesi)",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "10. yüzyıl Bagratlı kilisesi; kubbe kasnağında on iki havarinin kabartması",
+      "place_id": "ChIJy5OufOiOaUARMoxjaCWg0AY"
+    },
+    {
+      "sira": 4,
+      "ad": "Sarıkamış Kayak Merkezi",
+      "kategori": "aktivite",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Sarıkamış",
+      "merkeze_km": 54,
+      "neden": "Sarıçam ormanının içinden inen pistler; kuru ve hafif karıyla bilinir",
+      "place_id": "ChIJlVhyyNxgaUARzvK2_YQIO8g"
+    },
+    {
+      "sira": 5,
+      "ad": "Çıldır Gölü",
+      "kategori": "aktivite",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Arpaçay",
+      "merkeze_km": 70,
+      "neden": "Kışın bir metreye yaklaşan buzun üstünde atlı kızak ve buzu delerek balık avı",
+      "place_id": "ChIJA_7vzmZ2QkAR8eYf7vUINBk"
+    },
+    {
+      "sira": 6,
+      "ad": "Kafkas Cephesi Harp Tarihi Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 2,
+      "neden": "Kanlı Tabya'da; 1828'den Sarıkamış'a Kars savunmasını canlandırmalarla anlatır",
+      "osm": "way/1058901042",
+      "place_id": "ChIJJywOlSyPaUARTwcZoNSNWCU"
+    },
+    {
+      "sira": 7,
+      "ad": "Taş Köprü",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "Kalenin eteğinde Kars Çayı'nı üç kemerle geçen kesme bazalt köprü",
+      "place_id": "ChIJKxBcoeiOaUARLTGyZSzPo0A"
+    },
+    {
+      "sira": 8,
+      "ad": "Kars Kaz Evi",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "Kars'ın kış sofrası kaz eti: fırında kaz, bulgur pilavının üstünde",
+      "place_id": "ChIJdeFZkdmOaUARxQ5XeyQ7C3I"
+    },
+    {
+      "sira": 9,
+      "ad": "Hanımeli Kars Mutfağı",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "Piti, hangel ve kaz gibi Kars ev yemekleri; bazı akşamlar âşık atışması olur",
+      "place_id": "ChIJWUd6BdyOaUAR39N0xCTj0vw"
+    },
+    {
+      "sira": 10,
+      "ad": "Boğatepe Köyü",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet",
+        "yavas"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 50,
+      "neden": "Gravyer mandıraları ve peynir müzesiyle bilinen yayla köyü; köy kahvaltısı için git",
+      "place_id": "ChIJWe_s00K_aUARGipF51GhtMY"
+    },
+    {
+      "sira": 11,
+      "ad": "Sarıkamış Sarıçam Ormanları",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Sarıkamış",
+      "merkeze_km": 54,
+      "neden": "Kayak merkezini saran sarıçamlar; kışın karlı orman yürüyüşü, yazın serin gölge",
+      "place_id": "ChIJUeseKABhaUAR0D4jOeclSwI"
+    },
+    {
+      "sira": 12,
+      "ad": "Fethiye Camii",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "19. yüzyıl sonunda Rus katedrali olarak yapıldı, sonra camiye çevrildi",
+      "osm": "way/547018532",
+      "place_id": "ChIJsYjnOdeOaUARma2ZAnj3uHw"
+    },
+    {
+      "sira": 13,
+      "ad": "Kars Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 2,
+      "neden": "Ani kazılarından buluntular ve Kars'ın halı, kilim ve giyim koleksiyonu",
+      "osm": "way/455450081",
+      "place_id": "ChIJS1x7ybiOaUARbtkPi7-hho0"
+    },
+    {
+      "sira": 14,
+      "ad": "Kars Peynir Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "lezzet",
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "Gravyer ve eski kaşarın nasıl yapıldığını anlatır; çıkışta peynir alabilirsin",
+      "osm": "node/9860883418",
+      "place_id": "ChIJAUDhUx-PaUARLS5rBqLx9YA"
+    },
+    {
+      "sira": 15,
+      "ad": "Allahuekber Dağları Milli Parkı",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "kultur_tarih"
+      ],
+      "ilce": "Sarıkamış",
+      "merkeze_km": 65,
+      "neden": "Sarıkamış Harekâtı'nda donarak ölen askerlerin anısına korunan dağlık orman",
+      "place_id": null
+    },
+    {
+      "sira": 16,
+      "ad": "Gazi Ahmet Muhtar Paşa Konağı",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "93 Harbi'nde Kafkas Cephesi komutanının karargâhı; bugün müze ve galeri",
+      "place_id": "ChIJ7dNVwNuOaUARanRff7bIi3o"
+    },
+    {
+      "sira": 17,
+      "ad": "Katerina Av Köşkü",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "doga"
+      ],
+      "ilce": "Sarıkamış",
+      "merkeze_km": 55,
+      "neden": "Çar II. Nikola için çivisiz ahşapla yapılan av köşkünün sarıçamlar arasındaki kalıntısı",
+      "place_id": "ChIJNS3A-0ZnaUARM17rtEm-Yo0"
+    },
+    {
+      "sira": 18,
+      "ad": "Kuyucuk Gölü",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Arpaçay",
+      "merkeze_km": 40,
+      "neden": "Göçmen kuşların konakladığı küçük bozkır gölü; 2009'da Ramsar alanı oldu",
+      "place_id": "ChIJS1m6aLb5aUARDryVxGGflpE"
+    },
+    {
+      "sira": 19,
+      "ad": "Mazlum Ağa Hamamı",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "Taş Köprü'nün yanında, Kars Çayı kıyısında 16. yüzyıl Osmanlı hamamı",
+      "place_id": "ChIJZUhDGeaOaUARf0ETVuApOvM"
+    },
+    {
+      "sira": 20,
+      "ad": "Hasan Harakani Türbesi ve Evliya Camii",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "11. yüzyıl mutasavvıfı Harakani'nin türbesi, kale eteğindeki caminin yanında",
+      "osm": "way/258071078",
+      "place_id": "ChIJk0UcDeiOaUARD-WEW3spojw"
+    },
+    {
+      "sira": 21,
+      "ad": "Baltık mimarisi sokakları",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "Rus döneminden kalan bazalt cepheli binalar; Atatürk ve Faik Bey caddelerinde yürü",
+      "place_id": null
+    },
+    {
+      "sira": 22,
+      "ad": "Kars Garı",
+      "kategori": "aktivite",
+      "amaclar": [
+        "yavas"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "Ankara'dan gelen Doğu Ekspresi'nin son durağı; trenle gelmenin ya da dönmenin yeri",
+      "place_id": "ChIJsUThlc-OaUARK2clkQs2JKM"
+    },
+    {
+      "sira": 23,
+      "ad": "Sarıkamış Şehitler Anıtı",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Sarıkamış",
+      "merkeze_km": 55,
+      "neden": "1914-15 kışında Allahuekber'de donarak ölen askerler için ilçe girişindeki anıt",
+      "place_id": null
+    },
+    {
+      "sira": 24,
+      "ad": "Menuçehr Camii",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 42,
+      "neden": "Ani'de Arpaçay'a bakan Selçuklu camisi; sekizgen minaresi uzaktan seçilir",
+      "osm": "way/102632380",
+      "place_id": "ChIJjYVkKz4WakARJnI4nth5WN8"
+    },
+    {
+      "sira": 25,
+      "ad": "Tigran Honents Kilisesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 42,
+      "neden": "Ani'de 13. yüzyıl başında bir tüccarın yaptırdığı kilise; içinde renkli freskler",
+      "osm": "way/215296019",
+      "place_id": "ChIJ2wFxeAgWakARYmDUEHW_KuI"
+    },
+    {
+      "sira": 26,
+      "ad": "Camuşlu Kaya Resimleri",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Kağızman",
+      "merkeze_km": 90,
+      "neden": "Kayalara kazınmış av ve dans sahneleri; Aras vadisinin en eski izlerinden",
+      "place_id": "ChIJ0dcRoQHDa0ARcFqqbxqSo1M"
+    }
+  ]
+}
