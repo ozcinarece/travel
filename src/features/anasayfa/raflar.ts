@@ -65,6 +65,21 @@ export function amacRafBasligi(a: Amac): string {
   return t(`anasayfa.v6.amacRafi.${a}`);
 }
 
+/** Keşfet'in yayına bakmadan kurduğu raflar: amaç rafları (`amac:{amac}`) ve "Hazır geziler" (`hepsi`). */
+export function yerelRafMi(id: string): boolean {
+  return id === 'hepsi' || id.startsWith('amac:');
+}
+
+/** "Tümü" başlığı, raf henüz kurulmadan biliniyorsa: yerel raflarda sabit başlık, yayındaki rafta bölümün başlığı. */
+export function bilinenRafBasligi(id: string, bolumler: readonly Pick<AnaSayfaBolumu, 'id' | 'baslik'>[] | null | undefined): string | null {
+  if (id === 'hepsi') return t('anasayfa.v6.hazirGeziler');
+  if (id.startsWith('amac:')) {
+    const a = id.slice(5) as Amac;
+    return (AKIS_AMACLARI as readonly string[]).includes(a) ? amacRafBasligi(a) : null;
+  }
+  return bolumler?.find((b) => b.id === id)?.baslik ?? null;
+}
+
 /** "Tümü" ekranı (`/geziler?raf=…`): aynı kuralla kurulan raflardan biri; bulunmazsa null. */
 export function rafBul<G extends RafGezisi>(id: string, bolumler: readonly RafBolumu[] | null | undefined, geziler: readonly G[]): Raf<G> | null {
   return kesfetRaflari(bolumler, geziler).find((r) => r.id === id) ?? null;

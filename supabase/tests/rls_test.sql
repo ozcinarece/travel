@@ -660,6 +660,11 @@ select pg_temp.hata_bekle($$insert into public.ana_sayfa_bolumleri (tur, baslik,
 select pg_temp.hata_bekle($$insert into public.ana_sayfa_bolumleri (tur, baslik, sira, icerik) values ('banner', 'x', 30, '{"hedef": {"tur": "gezi", "id": "66666666-6666-4666-8666-000000000001", "baska": 1}}')$$, '23514');
 select pg_temp.hata_bekle($$insert into public.ana_sayfa_bolumleri (tur, baslik, sira, icerik) values ('banner', 'x', 30, '[]')$$, '23514');
 select pg_temp.hata_bekle($$insert into public.ana_sayfa_bolumleri (tur, baslik, sira, icerik) values ('raf', 'x', 30, '"amac"')$$, '23514');
+-- #428 2. inceleme 3: yol hilesi (`..`, kodlanmış `%2e`/`%2E`/`%2f`/`%5c`, ters bölü) reddedilir.
+select pg_temp.hata_bekle($$insert into public.ana_sayfa_bolumleri (tur, baslik, sira, icerik) values ('banner', 'x', 30, '{"kapak_url": "https://xwqeobelyeuzoxyuvauw.supabase.co/storage/v1/object/public/icerik/../avatars/u1/a.jpg", "kapak_atif": {"yazar": "Tripmate"}}')$$, '23514');
+select pg_temp.hata_bekle($$insert into public.ana_sayfa_bolumleri (tur, baslik, sira, icerik) values ('banner', 'x', 30, '{"kapak_url": "https://xwqeobelyeuzoxyuvauw.supabase.co/storage/v1/object/public/icerik/%2E%2e/avatars/u1/a.jpg", "kapak_atif": {"yazar": "Tripmate"}}')$$, '23514');
+select pg_temp.hata_bekle($$insert into public.ana_sayfa_bolumleri (tur, baslik, sira, icerik) values ('banner', 'x', 30, '{"kapak_url": "https://xwqeobelyeuzoxyuvauw.supabase.co/storage/v1/object/public/icerik/x%2Favatars%5Ca.jpg", "kapak_atif": {"yazar": "Tripmate"}}')$$, '23514');
+select pg_temp.hata_bekle($$insert into public.ana_sayfa_bolumleri (tur, baslik, sira, icerik) values ('banner', 'x', 30, '{"kapak_url": "https://upload.wikimedia.org/x\\y.jpg", "kapak_atif": {"yazar": "Tripmate"}}')$$, '23514');
 -- Kendi Storage alanımızdaki görsel (atıflı) kabul edilir.
 insert into public.ana_sayfa_bolumleri (tur, baslik, sira, icerik) values
   ('banner', 'Storage görselli', 25, '{"kapak_url": "https://xwqeobelyeuzoxyuvauw.supabase.co/storage/v1/object/public/icerik/banner/k.webp", "kapak_atif": {"yazar": "Tripmate"}}');
@@ -945,7 +950,8 @@ insert into public.olaylar (tur, hedef_id) values ('plan_hazir_davet', '88888888
 -- #405 KK6 alt menü sekme olayı (meta: sekme).
 insert into public.olaylar (tur, meta) values ('sekme_acildi', '{"sekme": "seyahatlerim"}');
 -- #406 KK6 raflı ana sayfa olayları (kendi adına).
-insert into public.olaylar (tur, hedef_id, meta) values ('banner_acildi', null, '{"hedef": "raf"}'), ('raf_kart_acildi', '33333333-3333-4333-8333-000000000001', '{"raf": "66666666-6666-4666-8666-000000000001", "raf_turu": "amac"}');
+insert into public.olaylar (tur, hedef_id, meta) values ('banner_acildi', '66666666-6666-4666-8666-000000000001', '{"hedef": "raf"}'), ('raf_kart_acildi', '33333333-3333-4333-8333-000000000001', '{"raf": "66666666-6666-4666-8666-000000000001", "raf_turu": "elle"}'),
+  ('raf_kart_acildi', '33333333-3333-4333-8333-000000000001', '{"raf": "amac:lezzet", "raf_turu": "amac"}');
 reset role;
 
 -- #138 Otomatik profil: ad/foto sağlayıcıdan, kullanıcı adı addan (alınmışsa sayı), Apple gizli ad → Gezgin; misafir alamaz; bir kez.

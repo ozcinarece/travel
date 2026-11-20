@@ -16,13 +16,16 @@ language sql immutable parallel safe set search_path = ''
 as $$ select p is not null and p ~ '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$' $$;
 
 -- Banner görseli yalnız Commons (`upload.wikimedia.org`) ya da kendi Storage alanımız (`icerik` kovası) olabilir: Google
--- Places foto adresi yapıştırılıp herkese yayınlanamasın (PRD §7, #428 inceleme 5).
+-- Places foto adresi yapıştırılıp herkese yayınlanamasın (PRD §7, #428 inceleme 5). Yol hilesi de kapalı: `..`, kodlanmış
+-- nokta/bölü (`%2e`, `%2f`, `%5c`) ve ters bölü reddedilir; yoksa `…/icerik/../avatars/…` ile public avatar kovası
+-- banner'da yayınlanabilirdi (#428 2. inceleme 3).
 create function public.banner_gorsel_adresi_gecerli(p text) returns boolean
 language sql immutable parallel safe set search_path = ''
 as $$
   select p is not null
     and char_length(p) <= 500
     and p ~ '^https://(upload\.wikimedia\.org/|xwqeobelyeuzoxyuvauw\.supabase\.co/storage/v1/object/public/icerik/)'
+    and p !~* '(\.\.|%2e|%2f|%5c|\\)'
 $$;
 
 -- Banner ve raf içeriğinin biçimi. Eski türler (#109) burada denetlenmez (önceki davranış). Eksik alan null üretip
