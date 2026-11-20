@@ -3,17 +3,46 @@ import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-nati
 
 import { Ikon } from '@/components/ui/Ikon';
 import { t } from '@/i18n';
-import { baslikStili, kose, renk, yazi } from '@/theme';
+import { gunEki } from '@/features/sihirbaz/planKur';
+import { anaV5, baslikStili, gunRengi, kose, renk, yazi } from '@/theme';
 
-type Props = { ozet: { mekan: number; bolge: number; saat: number }; onPlaniKur: () => void; onHaritayaGec: () => void; yukleniyor?: boolean };
+type Props = {
+  ozet: { mekan: number; bolge: number; saat: number };
+  onPlaniKur: () => void;
+  onHaritayaGec: () => void;
+  yukleniyor?: boolean;
+  /**
+   * #401 (`Ekran07cIlOnerileri` A–B): il listesi olan şehirde "N yer · G günün X'i dolu" ve gün çubukları (gün renkleri,
+   * sırayla dolar). Verilmezse bugünkü "N mekan / K bölge · ~S saat".
+   */
+  doluluk?: { gun: number; dolu: number; cubuklar: number[] };
+};
 
-export function PlanCubugu({ ozet, onPlaniKur, onHaritayaGec, yukleniyor }: Props) {
+export function PlanCubugu({ ozet, onPlaniKur, onHaritayaGec, yukleniyor, doluluk }: Props) {
   const bos = ozet.mekan === 0;
   return (
     <View style={s.cubuk}>
-      <View style={{ flex: 1, gap: 1 }}>
-        <Text style={s.baslik}>{bos ? t('sihirbaz.onerilenler.ozetBos') : t('sihirbaz.onerilenler.ozetMekan', { n: ozet.mekan })}</Text>
-        {bos ? (
+      <View style={{ flex: 1, gap: doluluk && !bos ? 6 : 1 }}>
+        {doluluk && !bos ? (
+          <>
+            <View style={s.satir}>
+              <Text style={s.baslik}>{t('sihirbaz.onerilenler.ozetYer', { n: ozet.mekan })}</Text>
+              <Text style={s.doluluk} numberOfLines={1}>
+                {t('sihirbaz.onerilenler.ozetDoluluk', { gun: doluluk.gun, dolu: gunEki(doluluk.dolu) })}
+              </Text>
+            </View>
+            <View style={s.cubuklar} accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
+              {doluluk.cubuklar.map((o, i) => (
+                <View key={i} style={s.gunCubugu}>
+                  <View style={{ width: `${Math.round(o * 100)}%`, backgroundColor: gunRengi(i + 1) }} />
+                </View>
+              ))}
+            </View>
+          </>
+        ) : (
+          <Text style={s.baslik}>{bos ? t('sihirbaz.onerilenler.ozetBos') : t('sihirbaz.onerilenler.ozetMekan', { n: ozet.mekan })}</Text>
+        )}
+        {doluluk && !bos ? null : bos ? (
           <Text onPress={onHaritayaGec} accessibilityRole="button" style={s.baglanti}>
             {t('sihirbaz.onerilenler.haritayaGec')}
           </Text>
@@ -40,6 +69,10 @@ export function PlanCubugu({ ozet, onPlaniKur, onHaritayaGec, yukleniyor }: Prop
 const s = StyleSheet.create({
   cubuk: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingTop: 12, borderTopWidth: 1, borderTopColor: renk.ayrac },
   baslik: { ...baslikStili(18), color: renk.metin },
+  satir: { flexDirection: 'row', alignItems: 'baseline', gap: 6 },
+  doluluk: { flexShrink: 1, fontFamily: yazi.kalin, fontSize: 13, color: anaV5.ikincil },
+  cubuklar: { flexDirection: 'row', gap: 4 },
+  gunCubugu: { flex: 1, height: 6, borderRadius: 3, backgroundColor: renk.ayrac, overflow: 'hidden', flexDirection: 'row' },
   alt: { fontFamily: yazi.normal, fontSize: 13, color: renk.ikincil },
   baglanti: { fontFamily: yazi.ekstra, fontSize: 13, color: renk.ana },
   dugme: { height: 54, paddingHorizontal: 22, borderRadius: kose.dugme, backgroundColor: renk.vurgu, flexDirection: 'row', alignItems: 'center', gap: 8 },
