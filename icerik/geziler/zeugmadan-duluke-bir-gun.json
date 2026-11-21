@@ -62,7 +62,6 @@
         },
         {
           "place_id": "ChIJFeQnHADjMRURht7r5fqZF_k",
-          "osm": "way/466308695",
           "ad": "Dülük Antik Kenti",
           "sure_dk": 60,
           "kapali_gunler": [],
@@ -130,7 +129,7 @@
       "Bu gezideki il listesi yerleri: 15 Dülük, 16 Dülükbaba, 17 Zeugma Antik Kenti, 25 Yesemek Gaziantep Mutfağı, 31 Arkeoloji Müzesi",
       "Gezide olmayanlar: Yesemek Açık Hava Heykel Atölyesi (İslahiye, 60 km, güneybatı; ters yön) ve Karkamış Arkeopark (62 km, sınırda, rehberle) — üçüncü bir Gaziantep gezisine",
       "Google: 7 kimlik sorgusu (0 $), 10 puan isteği (2'si il listesi düzeltmesi için Kale)",
-      "OSM 4/5: Dülükbaba Tabiat Parkı merkez 12 km aday listesinde yok"
+      "OSM 3/5: Dülükbaba Tabiat Parkı merkez 12 km aday listesinde yok; Dülük Antik Kenti OSM alanı (way/466308695) geniş bir poligon, merkezi Google konumundan 2.888 m uzak çıktı (kuru yukle 44880892148), bu yüzden osm boş bırakıldı"
     ]
   }
 }
