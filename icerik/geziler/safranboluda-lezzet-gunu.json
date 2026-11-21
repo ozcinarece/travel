@@ -142,8 +142,9 @@
       "Kuyu kebabı (Kadıoğlu) ve peruhi (Safranbolu Sofrası) iki gezide durak; tekrar olmasın diye Kadıoğlu yalnız ek mekan, peruhi başka bir lokantada (Atiş)",
       "Lokum ve Safran Müzesi (Çavuş Mah., 2022'de açıldı, AA) durak yapılmadı: 2024 sonrası açık olduğuna dair kaynak bulunamadı",
       "Nil Yörem Mutfak (zerde durağı) çıkarıldı: ön araştırmada kalıcı olarak kapandığı görüldü. Zerde yazıda öğle yemeğinde sorulacak tatlı olarak kaldı",
-      "OSM 0/5: çarşı içindeki işletmeler ve Yörük Köyü'ndeki kahvaltı yeri 15 km'lik Overpass aday listesinde yok. Ek mekan Kadıoğlu Şehzade Sofrası OSM'de var (node/9697997817)",
-      "Google: 6 kimlik sorgusu (ücretsiz), 8 puan isteği"
+      "OSM 0/5: çarşı içindeki işletmeler ve Yörük Köyü'ndeki kahvaltı yeri 15 km'lik Overpass aday listesinde yok. Ek mekan Kadıoğlu Şehzade Sofrası OSM'de var (node/9697997817). Sebep #449'daki çarşı sorunuyla aynı; Ürün 0/5'i kabul etti (#455). Konumlar Google'dan, 30 günde yenileniyor (#318). Overpass'a erişilen bir turda yeniden denenecek",
+      "Google: 6 kimlik sorgusu (ücretsiz), 8 puan isteği",
+      "Yörük Sofrası kış açıklığı: 20 Kasım kuru yukle'nin detay denetimi (#335) g1.d1 için işletme durumunda ne uyarı ne hata verdi, yani Google'da açık görünüyor. Kış saatleri yine de işletmeden sorulmalı (dogrulanacaklar'da)"
     ]
   }
 }
