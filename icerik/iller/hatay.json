@@ -1,0 +1,378 @@
+{
+  "il": "Hatay",
+  "slug": "hatay",
+  "guncelleme": "2026-11-21",
+  "oneriler": [
+    {
+      "sira": 1,
+      "ad": "Habib-i Neccar Camii",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Antakya",
+      "merkeze_km": 0,
+      "neden": "Depremde çöken cami yeniden yapıldı; 27 Aralık 2025'te ibadete açıldı",
+      "osm": "way/102165117",
+      "place_id": "ChIJl_ahqNLDJRURSf4HgsH-6Rw"
+    },
+    {
+      "sira": 2,
+      "ad": "St. Pierre Kilisesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Antakya",
+      "merkeze_km": 2,
+      "neden": "Habib-i Neccar Dağı'na oyulmuş mağara kilise; depremi atlattı, anıt müze olarak açık",
+      "osm": "node/364696567",
+      "place_id": "ChIJZbltUojBJRURVgNkmUyZPD8"
+    },
+    {
+      "sira": 3,
+      "ad": "Hatay künefesi",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet",
+        "gece"
+      ],
+      "ilce": "Antakya",
+      "merkeze_km": 0,
+      "neden": "Tuzsuz künefelik peynirle ocakta pişer; 2008'den beri tescilli, sıcak servis edilir"
+    },
+    {
+      "sira": 4,
+      "ad": "Necmi Asfuroğlu Arkeoloji Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Antakya",
+      "merkeze_km": 1,
+      "neden": "Otelin altındaki kazı alanında 1.050 m² tek parça taban mozaiği; Haziran 2024'te açıldı",
+      "place_id": "ChIJ1zQZ8S_DJRURF0aZFBh7uQY"
+    },
+    {
+      "sira": 5,
+      "ad": "Vespasianus-Titus Tüneli ve Beşikli Mağara",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "doga"
+      ],
+      "ilce": "Samandağ",
+      "merkeze_km": 35,
+      "neden": "Seleukeia limanını selden korumak için kayaya oyulan Roma kanalı; içinden yürünür"
+    },
+    {
+      "sira": 6,
+      "ad": "Hatay tepsi kebabı",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Antakya",
+      "merkeze_km": 0,
+      "neden": "Kıyma tepsiye yayılıp fırına verilir; Aralık 2025'te Hatay adıyla tescillendi"
+    },
+    {
+      "sira": 7,
+      "ad": "Harbiye Şelaleleri",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas",
+        "cocuklu"
+      ],
+      "ilce": "Defne",
+      "merkeze_km": 8,
+      "neden": "Antik Daphne'nin su kaynakları; 2026 baharında yağışlarla debisi yeniden arttı",
+      "osm": "node/5804310353",
+      "place_id": "ChIJG_MrDrLFJRURsaI-pqcuGCg"
+    },
+    {
+      "sira": 8,
+      "ad": "Hatay humusu",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Antakya",
+      "merkeze_km": 0,
+      "neden": "Nohut, tahin ve limonla ezilir, üstüne kırmızı biberli yağ; 2024'ten beri tescilli"
+    },
+    {
+      "sira": 9,
+      "ad": "Antakya kağıt kebabı",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Antakya",
+      "merkeze_km": 0,
+      "neden": "Kıyma yağlı kâğıda yayılıp fırında pişer; kâğıt etin suyunu içinde tutar"
+    },
+    {
+      "sira": 10,
+      "ad": "Vakıflı Köyü",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas",
+        "doga"
+      ],
+      "ilce": "Samandağ",
+      "merkeze_km": 33,
+      "neden": "Musa Dağı yamacında Türkiye'de kalan tek Ermeni köyü; kilisesi Ağustos 2024'te açıldı",
+      "place_id": "ChIJj528huHWJRURELoWEEh1DOo"
+    },
+    {
+      "sira": 11,
+      "ad": "Samandağ sahili",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Samandağ",
+      "merkeze_km": 28,
+      "neden": "Uzun kumsal yeşil deniz kaplumbağalarının yuva alanı; yaz sonu yavrular denize iner"
+    },
+    {
+      "sira": 12,
+      "ad": "Hatay oruğu",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Antakya",
+      "merkeze_km": 0,
+      "neden": "Bulgur hamuruna kıymalı iç doldurulan içli köfte; 2022'den beri tescilli"
+    },
+    {
+      "sira": 13,
+      "ad": "Kharon Maskı",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Antakya",
+      "merkeze_km": 3,
+      "neden": "Veba için kayaya oyulmuş Helenistik kabartma; St. Pierre'e yakın, depremde sağlam kaldı",
+      "osm": "node/10752712802",
+      "place_id": "ChIJZduPv8bBJRURXr_j8MUg94g"
+    },
+    {
+      "sira": 14,
+      "ad": "Hıdırbey Musa Ağacı",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Samandağ",
+      "merkeze_km": 31,
+      "neden": "Gövdesi 7,5 m'yi bulan dev çınar; köylüler Hz. Musa'nın diktiğine inanır",
+      "place_id": "ChIJQ6-s-RDXJRURzuaVoKH-mas"
+    },
+    {
+      "sira": 15,
+      "ad": "Payas Sokullu Mehmet Paşa Külliyesi",
+      "kategori": "carsi",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Payas",
+      "merkeze_km": 83,
+      "neden": "Sinan'ın külliyesi depremi hasarsız atlattı; çarşısında çoğu kadın esnaf yerel ürün satar",
+      "place_id": "ChIJ8Use_GFBLxURO-8j_Rc4JU8"
+    },
+    {
+      "sira": 16,
+      "ad": "Hatay kömbesi",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Antakya",
+      "merkeze_km": 0,
+      "neden": "Bayram öncesi kalıpla basılan baharatlı çörek; 2022'de Hatay kömbesi adıyla tescillendi"
+    },
+    {
+      "sira": 17,
+      "ad": "Soğukoluk Yaylası",
+      "kategori": "manzara",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Belen",
+      "merkeze_km": 47,
+      "neden": "785 m'de Nur Dağları yamacında yazlık köy; İskenderun Körfezi'ne bakar"
+    },
+    {
+      "sira": 18,
+      "ad": "İskenderun sahili",
+      "kategori": "manzara",
+      "amaclar": [
+        "yavas",
+        "cocuklu",
+        "gece"
+      ],
+      "ilce": "İskenderun",
+      "merkeze_km": 58,
+      "neden": "Depremde çöken kıyı yenilendi; gün doğumu ve batımı için seyir platformları var"
+    },
+    {
+      "sira": 19,
+      "ad": "Arsuz",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Arsuz",
+      "merkeze_km": 88,
+      "neden": "Amanos Dağları denize iner; 68 km kıyısı yüzme ve balık için Hatay'ın tatil ilçesi",
+      "place_id": "ChIJ7fTckIgJJhURFZRQeSkZ3uA"
+    },
+    {
+      "sira": 20,
+      "ad": "Uzun Çarşı (geçici çarşı)",
+      "kategori": "carsi",
+      "amaclar": [
+        "kultur_tarih",
+        "lezzet"
+      ],
+      "ilce": "Antakya",
+      "merkeze_km": 1,
+      "neden": "Tarihi çarşı yeniden yapılıyor; esnaf Haraparası'ndaki 374 dükkanlık geçici çarşıda"
+    },
+    {
+      "sira": 21,
+      "ad": "Atatürk Caddesi",
+      "kategori": "carsi",
+      "amaclar": [
+        "gece",
+        "cocuklu"
+      ],
+      "ilce": "Antakya",
+      "merkeze_km": 0,
+      "neden": "Depremden sonra yeniden yapılan ana ticaret caddesi; Eylül 2026'da 612 dükkanla açıldı"
+    },
+    {
+      "sira": 22,
+      "ad": "Hatay Arkeoloji Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Antakya",
+      "merkeze_km": 3,
+      "neden": "Kapalı: depremden beri onarımda, 2026 sonunda aşamalı açılması planlanıyor",
+      "osm": "way/1039441368",
+      "place_id": "ChIJ686ymfHBJRURDdcnW4ZRzkA"
+    },
+    {
+      "sira": 23,
+      "ad": "Saint Simeon Manastırı",
+      "kategori": "manzara",
+      "amaclar": [
+        "kultur_tarih",
+        "doga"
+      ],
+      "ilce": "Samandağ",
+      "merkeze_km": 25,
+      "neden": "Saman Dağı'nda 6. yüzyıl manastır kalıntısı; tepeden Samandağ ovası ve deniz görülür",
+      "place_id": "ChIJ17XeCAvRJRURECrhn6AAcyc"
+    },
+    {
+      "sira": 24,
+      "ad": "Reyhanlı Barajı kuş gözlemi",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Reyhanlı",
+      "merkeze_km": 50,
+      "neden": "Kurutulan Amik Gölü'nün yerini tutan sulak alan; 228 kuş türü kaydedildi"
+    },
+    {
+      "sira": 25,
+      "ad": "Yenişehir Gölü",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "cocuklu",
+        "yavas"
+      ],
+      "ilce": "Reyhanlı",
+      "merkeze_km": 45,
+      "neden": "1865'te bataklığı azaltmak için açılan küçük göl; Reyhanlılıların piknik yeri",
+      "place_id": "ChIJVS_r_iadJRURfT4WHs2ko24"
+    },
+    {
+      "sira": 26,
+      "ad": "Hatay haytalı",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet",
+        "cocuklu"
+      ],
+      "ilce": "Antakya",
+      "merkeze_km": 0,
+      "neden": "Nişasta muhallebisi, kar ya da buz ve gül şerbetiyle; Ocak 2026'da tescillendi"
+    },
+    {
+      "sira": 27,
+      "ad": "Biberli ekmek",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Antakya",
+      "merkeze_km": 0,
+      "neden": "Biber salçası, soğan ve baharatlı hamur fırında; kahvaltıda ve ara öğünde yenir"
+    },
+    {
+      "sira": 28,
+      "ad": "Hatay yoğurtlu kebap",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Antakya",
+      "merkeze_km": 0,
+      "neden": "Izgara kebap sarımsaklı yoğurtla buluşur; Aralık 2025'te Hatay adıyla tescillendi"
+    },
+    {
+      "sira": 29,
+      "ad": "Antakya sürkü",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Antakya",
+      "merkeze_km": 0,
+      "neden": "Çökelekten yapılıp kırmızı biber ve baharatla yuvarlanan peynir; zeytinyağıyla yenir"
+    },
+    {
+      "sira": 30,
+      "ad": "Antakya simidi",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet",
+        "cocuklu"
+      ],
+      "ilce": "Antakya",
+      "merkeze_km": 0,
+      "neden": "Susamlı, kendine özgü Antakya simidi; 2024'te coğrafi işaretle tescillendi"
+    }
+  ]
+}
