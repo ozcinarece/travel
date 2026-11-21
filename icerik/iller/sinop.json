@@ -1,0 +1,293 @@
+{
+  "il": "Sinop",
+  "slug": "sinop",
+  "guncelleme": "2026-11-21",
+  "oneriler": [
+    {
+      "sira": 1,
+      "ad": "Tarihi Sinop Cezaevi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "1999'a dek cezaevi; iç kalenin avlusunda koğuşlar ve Sabahattin Ali'nin anısı",
+      "osm": "relation/11763662"
+    },
+    {
+      "sira": 2,
+      "ad": "Sinop Kalesi ve surları",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Yarımadayı kesen antik surlar; Kumkapı ve Lonca Kapısı bugün de ayakta",
+      "osm": "way/229855105"
+    },
+    {
+      "sira": 3,
+      "ad": "Hamsilos Koyu",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 12,
+      "neden": "Ormanın içine sokulan dar koy; 1991'den beri sit, çevresi tabiat parkı",
+      "osm": "way/244779535",
+      "place_id": "ChIJZxUUrcEMj0AR9iQ_oMF7Eck"
+    },
+    {
+      "sira": 4,
+      "ad": "Sinop mantısı",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Coğrafi işaretli; ince açılan mantı, cevizli ve sarımsaklı yoğurtla"
+    },
+    {
+      "sira": 5,
+      "ad": "Erfelek Tatlıca Şelaleleri",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Erfelek",
+      "merkeze_km": 45,
+      "neden": "Kayın ormanlı vadide art arda 28 şelale; parkur boyunca eski su değirmenleri"
+    },
+    {
+      "sira": 6,
+      "ad": "İnceburun Feneri",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 22,
+      "neden": "Türkiye'nin en kuzey ucu; 1863'ten kalma fener ve dalgaların dövdüğü kayalar",
+      "osm": "way/244779246",
+      "place_id": "ChIJi_4zGL4Kj0AR2VGU63HHYC0"
+    },
+    {
+      "sira": 7,
+      "ad": "Sinop Arkeoloji Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Antik Sinope buluntuları; hemen yanında Serapis Tapınağı kalıntısı",
+      "osm": "way/229763876",
+      "place_id": "ChIJdbYW3UekyhQRUDv5f2flw2k"
+    },
+    {
+      "sira": 8,
+      "ad": "Alaeddin Camii",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "1214 fethinden sonra yapıldığı düşünülen Selçuklu camisi; mermer mihrap",
+      "osm": "way/229858778",
+      "place_id": "ChIJ9bP8IOgSj0ARU12WFECnNkQ"
+    },
+    {
+      "sira": 9,
+      "ad": "Sinop nokulu",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Coğrafi işaretli; cevizli, üzümlü ya da kıymalı sarılıp dilimlenen çörek"
+    },
+    {
+      "sira": 10,
+      "ad": "Pervane Medresesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "1262'de Pervane Süleyman'ın yaptırdığı medrese; bugün el sanatları çarşısı",
+      "osm": "relation/3322529",
+      "place_id": "ChIJ40wRMOgSj0AR-NFINb69mao"
+    },
+    {
+      "sira": 11,
+      "ad": "Balatlar Kilisesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Roma yapısının üstüne kurulan Bizans kilisesi; kazısı şehrin ortasında",
+      "osm": "way/891388146",
+      "place_id": "ChIJj17R2OYSj0ARQ7ythvicm9Q"
+    },
+    {
+      "sira": 12,
+      "ad": "Sinop Etnografya Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Aslan Torun Konağı'nda; Sinop ve Boyabat evlerinin odaları, dokuma tezgâhları",
+      "osm": "way/236822088",
+      "place_id": "ChIJCZfg0-cSj0ARxzmg2vNu43E"
+    },
+    {
+      "sira": 13,
+      "ad": "Akliman",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 10,
+      "neden": "Ormanın kumsala indiği sahil; Hamsilos yolunda piknik ve kamp",
+      "osm": "node/1885534194",
+      "place_id": "ChIJGSYhFLkMj0ARDx5vEplZY_0"
+    },
+    {
+      "sira": 14,
+      "ad": "Boyabat Kalesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Boyabat",
+      "merkeze_km": 90,
+      "neden": "Gökırmak vadisine bakan kayalık tepedeki kale",
+      "osm": "node/6365046078",
+      "place_id": "ChIJcbnbOLjDhUARIUvonLetbZ4"
+    },
+    {
+      "sira": 15,
+      "ad": "Sırık kebabı",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Boyabat",
+      "merkeze_km": 90,
+      "neden": "Kuzunun sırığa geçirilip odun ateşinde döndürüldüğü Boyabat kebabı"
+    },
+    {
+      "sira": 16,
+      "ad": "Karakum",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 3,
+      "neden": "Şehre en yakın kumsallardan; yaz akşamları yüzmeye gidilir"
+    },
+    {
+      "sira": 17,
+      "ad": "Paşa Tabyaları",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 2,
+      "neden": "Kırım Savaşı'ndan sonra kıyıya kurulan top tabyaları; denize bakan sırt",
+      "osm": "node/2383029487",
+      "place_id": "ChIJS2N5CxcTj0ARvx3XUBc34Mg"
+    },
+    {
+      "sira": 18,
+      "ad": "İnaltı Mağarası",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Ayancık",
+      "merkeze_km": 80,
+      "neden": "Orman içindeki mağaranın 300 m'lik bölümü yürüme yoluyla gezilir"
+    },
+    {
+      "sira": 19,
+      "ad": "Sinop keşkeği",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Düğünde ve Hıdrellez'de kazanda pişen buğdaylı, etli keşkek"
+    },
+    {
+      "sira": 20,
+      "ad": "Taktak helvası",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Boyabat",
+      "merkeze_km": 90,
+      "neden": "Tahta kalıpta kesilirken çıkan sesten adını alan Boyabat helvası"
+    },
+    {
+      "sira": 21,
+      "ad": "Akgöl",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Ayancık",
+      "merkeze_km": 80,
+      "neden": "Ayancık dağlarında, yayla üstündeki göl"
+    },
+    {
+      "sira": 22,
+      "ad": "Kestaneli iç pilav",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Kestane, et ve kuru meyveyle pişen Sinop pilavı"
+    },
+    {
+      "sira": 23,
+      "ad": "Hamursuz tatlısı",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Nişasta ve sütle yapılan, üstüne ceviz ya da fındık serpilen tatlı"
+    }
+  ]
+}

@@ -1,0 +1,386 @@
+{
+  "il": "Kastamonu",
+  "slug": "kastamonu",
+  "guncelleme": "2026-11-21",
+  "oneriler": [
+    {
+      "sira": 1,
+      "ad": "Valla Kanyonu",
+      "kategori": "doga",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Pınarbaşı",
+      "merkeze_km": 95,
+      "neden": "Yer yer 1000 m'yi aşan duvarlar; seyir terasları ve tek yönlü zorlu geçiş",
+      "osm": "node/5062532035"
+    },
+    {
+      "sira": 2,
+      "ad": "Kasaba Köyü Mahmut Bey Camii",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 17,
+      "neden": "Çivisiz ahşap tavanlı Candaroğlu camisi; 2023'te UNESCO listesine girdi",
+      "osm": "way/638668252",
+      "place_id": "ChIJe-k2NxLkhEARFIRmoOKOxqk"
+    },
+    {
+      "sira": 3,
+      "ad": "Kastamonu Kalesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "Şehrin ortasındaki kayalık tepede; surlardan eski mahalleler ayağının altında",
+      "osm": "way/175508293",
+      "place_id": "ChIJN5Q6g7DwhEARdiWv6CQQUKs"
+    },
+    {
+      "sira": 4,
+      "ad": "Horma Kanyonu",
+      "kategori": "aktivite",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Pınarbaşı",
+      "merkeze_km": 85,
+      "neden": "Kaya duvarına tutturulmuş 3 km'lik ahşap yolda dere boyunca yürüyüş"
+    },
+    {
+      "sira": 5,
+      "ad": "Kastamonu etli ekmeği",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Coğrafi işaretli; uzun ince hamura kıyma serilip taş fırında pişer"
+    },
+    {
+      "sira": 6,
+      "ad": "Nasrullah Camii ve Meydanı",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "16. yüzyıl başından cami; meydandaki çifte şadırvan şehrin buluşma yeri",
+      "osm": "way/179538825",
+      "place_id": "ChIJqYzwva_whEAR6fKZQjIa7Eo"
+    },
+    {
+      "sira": 7,
+      "ad": "Ilıca Şelalesi",
+      "kategori": "doga",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Pınarbaşı",
+      "merkeze_km": 95,
+      "neden": "Köyden çeyrek saatlik yürüyüş; 10 m'den doğal havuza dökülen su"
+    },
+    {
+      "sira": 8,
+      "ad": "Kastamonu Arkeoloji Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Pompeiopolis kazılarından buluntular ve Paflagonya dönemi eserleri",
+      "osm": "way/217743159",
+      "place_id": "ChIJ61ZkhLHwhEARebIIi-Wf1hk"
+    },
+    {
+      "sira": 9,
+      "ad": "Pompeiopolis Antik Kenti",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Taşköprü",
+      "merkeze_km": 45,
+      "neden": "Roma döneminde Paflagonya'nın merkezi; kazılar sürüyor"
+    },
+    {
+      "sira": 10,
+      "ad": "Küre Dağları Milli Parkı",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Pınarbaşı",
+      "merkeze_km": 85,
+      "neden": "Kanyonların, mağaraların ve kayın ormanlarının toplandığı karstik dağlar"
+    },
+    {
+      "sira": 11,
+      "ad": "Liva Paşa Konağı Etnografya Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Döşenmiş odalarıyla 19. yüzyıl Kastamonu konağının içi",
+      "osm": "way/225418788",
+      "place_id": "ChIJG3a72rHwhEARU9MJYffvEYo"
+    },
+    {
+      "sira": 12,
+      "ad": "Gideros Koyu",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Cide",
+      "merkeze_km": 125,
+      "neden": "Ormanın denize indiği dar ve sakin koy; Cide'ye yakın"
+    },
+    {
+      "sira": 13,
+      "ad": "Çatak Kanyonu Cam Seyir Terası",
+      "kategori": "manzara",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Azdavay",
+      "merkeze_km": 75,
+      "neden": "Kanyonun 450 m üstüne uzanan cam teras",
+      "osm": "node/5688265634",
+      "place_id": "ChIJX7byBLfUhEARQvxklCMTrlk"
+    },
+    {
+      "sira": 14,
+      "ad": "Kastamonu pastırması",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Coğrafi işaretli; güneşte kurutulup Taşköprü sarımsaklı çemene sarılır"
+    },
+    {
+      "sira": 15,
+      "ad": "Kastamonu çekme helvası",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Coğrafi işaretli; ince tel tel çekilen, ağızda dağılan helva"
+    },
+    {
+      "sira": 16,
+      "ad": "İsmail Bey Külliyesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "Candaroğlu İsmail Bey'in cami, medrese, türbe ve sıbyan mektebi",
+      "osm": "way/310949903",
+      "place_id": "ChIJUZUHeqfwhEARVS9lyDe92Po"
+    },
+    {
+      "sira": 17,
+      "ad": "Ilgaz Dağı Yurduntepe Kayak Merkezi",
+      "kategori": "aktivite",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 40,
+      "neden": "Ilgaz'ın Kastamonu yüzündeki pistler; yazın yayla ve orman yürüyüşü"
+    },
+    {
+      "sira": 18,
+      "ad": "Saat Kulesi",
+      "kategori": "manzara",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Kule dibindeki çay bahçesinde otur; kale ve eski çarşı tam karşında",
+      "osm": "way/217398148",
+      "place_id": "ChIJb89s-K3whEARD8uYGpv-uDY"
+    },
+    {
+      "sira": 19,
+      "ad": "Hindi banduma",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Devrekani",
+      "merkeze_km": 30,
+      "neden": "Coğrafi işaretli; Devrekani hindisinin suyuyla ıslanan yufka"
+    },
+    {
+      "sira": 20,
+      "ad": "Ilgarini Mağarası",
+      "kategori": "aktivite",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Pınarbaşı",
+      "merkeze_km": 95,
+      "neden": "Köyden iki saate yakın orman yürüyüşü; içinde Bizans dönemi şapel izi",
+      "osm": "node/5684316922",
+      "place_id": "ChIJm6JPeMEnm0ARRVsmuJACMG0"
+    },
+    {
+      "sira": 21,
+      "ad": "Seyrangah Tepesi",
+      "kategori": "manzara",
+      "amaclar": [
+        "yavas"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "Akşamüstü çık; gün batarken kale aydınlanır, şehrin ışıkları yanar",
+      "osm": "node/3583829033",
+      "place_id": "ChIJ76vLsqTwhEARWPH_kMtOdPc"
+    },
+    {
+      "sira": 22,
+      "ad": "Kastamonu simidi",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Susamsız, pekmezle fırınlanan kel simit; çorba ve tiritte de kullanılır"
+    },
+    {
+      "sira": 23,
+      "ad": "Taş Köprü",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Taşköprü",
+      "merkeze_km": 44,
+      "neden": "Gökırmak üstündeki eski taş köprü; ilçeye adını veren yapı"
+    },
+    {
+      "sira": 24,
+      "ad": "İnebolu konakları",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "İnebolu",
+      "merkeze_km": 95,
+      "neden": "Arduvaz çatılı, aşı boyalı ahşap sahil konakları"
+    },
+    {
+      "sira": 25,
+      "ad": "Taşköprü biryan (kuyu) kebabı",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Taşköprü",
+      "merkeze_km": 44,
+      "neden": "Kuzunun kuyu fırınında saatlerce pişirildiği Taşköprü kebabı"
+    },
+    {
+      "sira": 26,
+      "ad": "Yakup Ağa Külliyesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Cami, medrese ve aşevinden oluşan 16. yüzyıl külliyesi",
+      "osm": "way/225132718",
+      "place_id": "ChIJ0QBmU6XwhEARdsIMf2r5D9A"
+    },
+    {
+      "sira": 27,
+      "ad": "Şeyh Şaban-ı Veli Külliyesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "Halveti şeyhi Şaban-ı Veli'nin türbesi, camisi ve tekke yapıları",
+      "osm": "way/225426624"
+    },
+    {
+      "sira": 28,
+      "ad": "Ginolu Koyu",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Cide",
+      "merkeze_km": 130,
+      "neden": "Havuz gibi sığ suyu ve iki küçük limanı olan koy"
+    },
+    {
+      "sira": 29,
+      "ad": "Şapka Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 2,
+      "neden": "Atatürk'ün 1925'te şapka devrimini Kastamonu'da duyurmasını anlatan müze",
+      "osm": "way/1448669874",
+      "place_id": "ChIJcQqWSvvxhEAR_asT0YkIiUs"
+    },
+    {
+      "sira": 30,
+      "ad": "Kastamonu Kent Tarihi Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Şehrin tarihine ayrılmış müze; kaleye ve Nasrullah'a yürüme mesafesinde",
+      "osm": "node/12005804834"
+    },
+    {
+      "sira": 31,
+      "ad": "Devrekani cırık tatlısı",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Devrekani",
+      "merkeze_km": 30,
+      "neden": "İki kez kızartılıp şerbete batırılan hamur tatlısı"
+    }
+  ]
+}
