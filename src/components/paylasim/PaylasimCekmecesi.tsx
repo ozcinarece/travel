@@ -5,6 +5,8 @@
 // #454 inceleme: hata ve bildirimler çekmecenin içinde, "Linki gönder"in üstünde (#317 hata kutusu biçimi); çevrimdışıyken ve
 // link okunamazken düğmeler pasif, okuma hatasında "Tekrar dene". 2. inceleme: başarı mesajı kutusuz düz satır (kırmızı kutu
 // yalnız hatada), anahtar/kapatma hatasına kendi metni, çevrimdışı nedeni kutuda, iOS'ta mesaj duyurulur (#317 kalıbı).
+// 3. inceleme: iOS duyurusu yalnız çekmece açıkken (kapalıyken susar, çevrimdışı açılınca okunur); link okunurken anahtar
+// pasif ve "link yok" satırı yerine yükleniyor göstergesi; "Arkadaş ekle ›" pencere açtığı için düğme rolünde.
 import { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
 
@@ -62,6 +64,8 @@ export function PaylasimCekmecesi({ acik, onKapat, seyahat, benimAdim, gunSayisi
   // Link okunamadıysa "link yok" sanılmaz: yeni link denemesi tek açık link kısıtına takılır, "Paylaşımı kapat" görünmez.
   const okumaHatasi = paylasim.isError;
   const pasif = cevrimdisi || okumaHatasi;
+  // Link okunurken "link yok" sanılmasın: anahtar pasif, durum satırının yerinde yükleniyor göstergesi.
+  const linkYukleniyor = paylasim.isLoading;
   const ipucu = cevrimdisi ? t('geziSayfasi.cevrimdisi.baglantiYok') : undefined;
 
   // Hata ve bildirim çekmecenin içinde gösterilir (sayfa bildirimi Modal'ın altında kalır). Hata kırmızı kutuda, başarı düz satırda.
@@ -120,7 +124,8 @@ export function PaylasimCekmecesi({ acik, onKapat, seyahat, benimAdim, gunSayisi
   // Öncelik: çevrimdışı nedeni, okuma hatası, son işlemin mesajı.
   const hataMetni = cevrimdisi ? t('geziSayfasi.cevrimdisi.baglantiYok') : okumaHatasi ? t('paylasim.okumaHata') : mesaj?.tur === 'hata' ? mesaj.metin : null;
   const bilgiMetni = !hataMetni && mesaj?.tur === 'bilgi' ? mesaj.metin : null;
-  useIosDuyuru(hataMetni ?? bilgiMetni);
+  // Çekmece sayfada hep bağlı; kapalıyken duyurmaz, açılınca (null → metin) mevcut neden okunur.
+  useIosDuyuru(acik ? (hataMetni ?? bilgiMetni) : null);
 
   return (
     <AltPencere acik={acik} onKapat={kapanis} kapatEtiketi={t('paylasim.kapat')} gorunus="v6" kaydirilir>
@@ -149,11 +154,11 @@ export function PaylasimCekmecesi({ acik, onKapat, seyahat, benimAdim, gunSayisi
       <View>
         <Pressable
           accessibilityRole="checkbox"
-          accessibilityState={{ checked: adlarAcik, disabled: mesgul || pasif }}
+          accessibilityState={{ checked: adlarAcik, disabled: mesgul || pasif || linkYukleniyor }}
           accessibilityLabel={t('paylasim.kisiAdlari')}
           accessibilityHint={ipucu}
           onPress={anahtar}
-          disabled={mesgul || pasif}
+          disabled={mesgul || pasif || linkYukleniyor}
           style={[s.satir, pasif && s.pasif]}>
           <View style={s.satirMetin}>
             <Text style={s.satirBaslik}>{t('paylasim.kisiAdlari')}</Text>
@@ -214,13 +219,15 @@ export function PaylasimCekmecesi({ acik, onKapat, seyahat, benimAdim, gunSayisi
             style={[s.kapatLink, pasif && s.pasif]}>
             <Text style={s.kapatLinkMetin}>{t('paylasim.paylasimiKapat')}</Text>
           </Pressable>
+        ) : linkYukleniyor ? (
+          <ActivityIndicator testID="paylasim-yukleniyor" color={anaV5.ikincil} accessibilityLabel={t('genel.yukleniyor')} />
         ) : (
           <Text style={[s.alt, s.orta]}>{t('paylasim.linkAlt')}</Text>
         )}
       </View>
 
       <Pressable
-        accessibilityRole="link"
+        accessibilityRole="button"
         onPress={arkadasEkle}
         style={s.arkadas}>
         <Text style={s.arkadasMetin}>

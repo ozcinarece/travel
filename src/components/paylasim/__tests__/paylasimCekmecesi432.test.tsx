@@ -3,13 +3,14 @@
 // "Link açık · N kez açıldı" ve onaylı "Paylaşımı kapat", KK9'daki "Arkadaş ekle ›" satırı.
 import { beforeEach, describe, expect, it, jest } from '@jest/globals';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react-native';
+import { AccessibilityInfo, Platform } from 'react-native';
 
 import { t } from '@/i18n';
 
 import { PaylasimCekmecesi } from '../PaylasimCekmecesi';
 
 type Link = { id: string; token: string; kisi_adlari_acik: boolean; acilma_sayisi: number } | null;
-const mockDurum = { link: null as Link, hata: false };
+const mockDurum = { link: null as Link, hata: false, yukleniyor: false };
 const mockYenile = jest.fn();
 const mockOlustur = jest.fn(async (adlar: boolean) => ({ id: 'P1', token: 'A'.repeat(24), kisi_adlari_acik: adlar, acilma_sayisi: 0 }));
 type GuncelleSecenek = { onSuccess?: () => void; onError?: () => void };
@@ -20,7 +21,7 @@ const mockOnay = jest.fn(async () => true);
 jest.mock('@/components/seyahatler/SeyahatKapagi', () => ({ SeyahatKapagi: () => null }));
 jest.mock('@/lib/onay', () => ({ onayIste: (...a: unknown[]) => mockOnay(...(a as [])) }));
 jest.mock('@/features/paylasim/sorgular', () => ({
-  useAcikPaylasim: () => ({ data: mockDurum.hata ? undefined : mockDurum.link, isLoading: false, isError: mockDurum.hata, isFetching: false, refetch: mockYenile }),
+  useAcikPaylasim: () => ({ data: mockDurum.hata || mockDurum.yukleniyor ? undefined : mockDurum.link, isLoading: mockDurum.yukleniyor, isError: mockDurum.hata, isFetching: false, refetch: mockYenile }),
   usePaylasimOlustur: () => ({ mutateAsync: mockOlustur, isPending: false }),
   usePaylasimGuncelle: () => ({ mutate: mockGuncelle, isPending: false }),
   paylasimLinki: (token: string) => `https://gezi-web.pages.dev/r/g/${token}`,
@@ -29,6 +30,19 @@ jest.mock('@/features/paylasim/sorgular', () => ({
 
 const onKapat = jest.fn();
 const onArkadasEkle = jest.fn();
+const cekmeceOgesi = (cevrimdisi = false, acik = true) => (
+  <PaylasimCekmecesi
+    acik={acik}
+    onKapat={onKapat}
+    seyahat={{ id: 'T1', city_label: 'Eskişehir' }}
+    benimAdim="Ayşe"
+    gunSayisi={3}
+    durakSayisi={12}
+    kisiSayisi={3}
+    onArkadasEkle={onArkadasEkle}
+    cevrimdisi={cevrimdisi}
+  />
+);
 const cekmece = (cevrimdisi = false) =>
   render(
     <PaylasimCekmecesi
@@ -47,6 +61,7 @@ const cekmece = (cevrimdisi = false) =>
 beforeEach(() => {
   mockDurum.link = null;
   mockDurum.hata = false;
+  mockDurum.yukleniyor = false;
   jest.clearAllMocks();
 });
 
@@ -107,7 +122,7 @@ describe('PaylasimCekmecesi (#432 2/3)', () => {
     jest.useFakeTimers();
     try {
       cekmece();
-      fireEvent.press(screen.getByRole('link'));
+      fireEvent.press(screen.getByRole('button', { name: new RegExp(t('paylasim.arkadasEkle')) }));
       expect(onKapat).toHaveBeenCalled();
       expect(onArkadasEkle).not.toHaveBeenCalled();
       act(() => jest.advanceTimersByTime(400));
@@ -189,5 +204,40 @@ describe('PaylasimCekmecesi (#432 2/3)', () => {
     expect(tekrar.props.accessibilityState.disabled).toBe(true);
     fireEvent.press(tekrar);
     expect(mockYenile).not.toHaveBeenCalled();
+  });
+
+  it('#454 3. inceleme: iOS duyurusu yalnız çekmece açıkken; çevrimdışıyken kapalı → açık geçişinde neden okunur', () => {
+    const eskiOS = Platform.OS;
+    Object.defineProperty(Platform, 'OS', { value: 'ios', configurable: true });
+    const duyur = jest.spyOn(AccessibilityInfo, 'announceForAccessibility').mockImplementation(() => undefined);
+    duyur.mockClear();
+    try {
+      // Çekmece kapalıyken bağlantı kesilir: VoiceOver bir şey demez.
+      const { rerender } = render(cekmeceOgesi(false, false));
+      rerender(cekmeceOgesi(true, false));
+      expect(duyur).not.toHaveBeenCalled();
+      // Çevrimdışıyken açılır: neden bir kez okunur.
+      rerender(cekmeceOgesi(true, true));
+      expect(duyur).toHaveBeenCalledTimes(1);
+      expect(duyur).toHaveBeenCalledWith(t('geziSayfasi.cevrimdisi.baglantiYok'));
+      // Kapanınca yeniden okunmaz.
+      rerender(cekmeceOgesi(true, false));
+      expect(duyur).toHaveBeenCalledTimes(1);
+    } finally {
+      duyur.mockRestore();
+      Object.defineProperty(Platform, 'OS', { value: eskiOS, configurable: true });
+    }
+  });
+
+  it('#454 3. inceleme: link okunurken anahtar pasif, "link yok" satırı yerine yükleniyor göstergesi', () => {
+    mockDurum.yukleniyor = true;
+    cekmece();
+    expect(screen.getByTestId('paylasim-yukleniyor')).toBeTruthy();
+    expect(screen.queryByText(t('paylasim.linkAlt'))).toBeNull();
+    const anahtar = screen.getByRole('checkbox', { name: t('paylasim.kisiAdlari') });
+    expect(anahtar.props.accessibilityState.disabled).toBe(true);
+    fireEvent.press(anahtar);
+    expect(screen.getByTestId('kisi-adlari-kutu').props.children).toBeNull();
+    expect(screen.getByRole('button', { name: t('paylasim.linkiGonder') }).props.accessibilityState.disabled).toBe(true);
   });
 });
