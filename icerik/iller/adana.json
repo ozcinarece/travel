@@ -1,0 +1,440 @@
+{
+  "il": "Adana",
+  "slug": "adana",
+  "guncelleme": "2026-11-21",
+  "oneriler": [
+    {
+      "sira": 1,
+      "ad": "Taşköprü",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas",
+        "gece"
+      ],
+      "ilce": "Seyhan",
+      "merkeze_km": 1,
+      "neden": "Roma döneminden kalma 300 metreyi aşkın taş köprü; 2007'den beri yalnız yayalara açık.",
+      "osm": "node/13232327220",
+      "place_id": "ChIJ9SMYKGWPKBURAlG4jevRyuM"
+    },
+    {
+      "sira": 2,
+      "ad": "Adana kebabı",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet",
+        "gece"
+      ],
+      "ilce": "Seyhan",
+      "merkeze_km": 0,
+      "neden": "Zırhla kıyılan kuzu eti ve kuyruk yağı geniş şişte közde; yanında közlenmiş biber, soğan."
+    },
+    {
+      "sira": 3,
+      "ad": "Sabancı Merkez Camii",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Seyhan",
+      "merkeze_km": 1,
+      "neden": "1998'de açılan altı minareli cami; Seyhan kıyısında, Merkez Park'ın başında.",
+      "osm": "relation/1653339",
+      "place_id": "ChIJ11hRrm-PKBURaKBlnub_6mo"
+    },
+    {
+      "sira": 4,
+      "ad": "Anavarza Antik Kenti",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "doga"
+      ],
+      "ilce": "Kozan",
+      "merkeze_km": 59,
+      "neden": "Sarp kayalığın eteğinde Roma kenti: zafer takı, tiyatro ve stadyum; tepede Kilikya kalesi.",
+      "osm": "node/1838858878"
+    },
+    {
+      "sira": 5,
+      "ad": "Yılankale",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "doga"
+      ],
+      "ilce": "Ceyhan",
+      "merkeze_km": 37,
+      "neden": "Ceyhan Nehri'ne bakan kayalıkta Ermeni Kilikya kalesi; surlardan Çukurova ovası görünür.",
+      "osm": "node/1301162534",
+      "place_id": "ChIJM7zpCGHIKBURlGyPGt2z_-k"
+    },
+    {
+      "sira": 6,
+      "ad": "Adana Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Seyhan",
+      "merkeze_km": 2,
+      "neden": "Eski Milli Mensucat fabrikasında; arkeoloji salonlarının yanında pamuk ve sanayi bölümü.",
+      "osm": "node/5014570422",
+      "place_id": "ChIJVVVVVVyPKBURHE4edLTtgn0"
+    },
+    {
+      "sira": 7,
+      "ad": "Şalgam",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Seyhan",
+      "merkeze_km": 0,
+      "neden": "Mor havuç, şalgam turpu ve bulgur unuyla fermente edilen ekşi içecek; kebabın yanında."
+    },
+    {
+      "sira": 8,
+      "ad": "Ulu Camii",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Seyhan",
+      "merkeze_km": 0,
+      "neden": "Ramazanoğulları külliyesi; minarede siyah-beyaz taş şeritler, içeride İznik çinileri.",
+      "osm": "way/989830261"
+    },
+    {
+      "sira": 9,
+      "ad": "Varda Köprüsü",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "doga"
+      ],
+      "ilce": "Karaisalı",
+      "merkeze_km": 43,
+      "neden": "Hacıkırı'da vadiyi geçen taş demiryolu viyadüğü; Bağdat Demiryolu için 1912'de bitti.",
+      "osm": "node/10231247217",
+      "place_id": "ChIJQzd9x9xpKBURiqxN7qQny7g"
+    },
+    {
+      "sira": 10,
+      "ad": "Kapıkaya Kanyonu",
+      "kategori": "doga",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Karaisalı",
+      "merkeze_km": 39,
+      "neden": "Karaisalı'da derenin oyduğu dar kanyon; yazın suyun içinden yürüyerek ilerlenir.",
+      "osm": "node/14269313022",
+      "place_id": "ChIJy20jidxpKBURBnWV93ARTtA"
+    },
+    {
+      "sira": 11,
+      "ad": "Kozan Kalesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "doga"
+      ],
+      "ilce": "Kozan",
+      "merkeze_km": 66,
+      "neden": "Kilikya Ermeni Krallığı başkenti Sis'in kalesi; sırt boyunca uzanan surlar ve burçlar.",
+      "osm": "node/6463825599",
+      "place_id": "ChIJza1oHZcxKRURitWtTtmQv1o"
+    },
+    {
+      "sira": 12,
+      "ad": "Büyük Saat Kulesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Seyhan",
+      "merkeze_km": 0,
+      "neden": "Eski çarşıların ortasında 19. yüzyıl sonundan kalma taş kule; kentin buluşma yeri.",
+      "osm": "way/1193995628",
+      "place_id": "ChIJ5ehY2GOPKBUR4_HZT-K0HdU"
+    },
+    {
+      "sira": 13,
+      "ad": "Merkez Park",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas",
+        "cocuklu"
+      ],
+      "ilce": "Seyhan",
+      "merkeze_km": 2,
+      "neden": "Seyhan kıyısında, Sabancı Camii ile baraj arasında geniş park; nehir boyu yürüyüş yolu.",
+      "osm": "way/1106843555",
+      "place_id": "ChIJiR20ZA2PKBURYnyyMqCaCMI"
+    },
+    {
+      "sira": 14,
+      "ad": "Adana ciğer kebabı",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Seyhan",
+      "merkeze_km": 0,
+      "neden": "Sabahları şişte kuzu ciğeri; Adana'da kahvaltı yerine yenir, yanında nane ve soğan."
+    },
+    {
+      "sira": 15,
+      "ad": "Bici bici",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet",
+        "cocuklu"
+      ],
+      "ilce": "Seyhan",
+      "merkeze_km": 0,
+      "neden": "Nişasta pelteği rendelenmiş buzun üstünde; gül şurubu ve pudra şekeriyle yaz tatlısı."
+    },
+    {
+      "sira": 16,
+      "ad": "Kahve Müzesi (Kahve Evi Müzesi)",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Seyhan",
+      "merkeze_km": 1,
+      "neden": "Tepebağ'da 2024'te açıldı; Paksoy ailesinin binden fazla cezve, fincan ve değirmeni.",
+      "osm": "node/12092510816"
+    },
+    {
+      "sira": 17,
+      "ad": "Misis (Mopsuestia) ve Misis Köprüsü",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Yüreğir",
+      "merkeze_km": 26,
+      "neden": "Ceyhan Nehri'ni geçen Roma köprüsü; çevresinde Mopsuestia kalıntıları ve kervansaray.",
+      "osm": "way/57849335",
+      "place_id": "ChIJYaks7pu-KBURa1WLHujTh3g"
+    },
+    {
+      "sira": 18,
+      "ad": "Atatürk Evi Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Seyhan",
+      "merkeze_km": 1,
+      "neden": "Atatürk'ün Adana ziyaretlerinde kaldığı Tepebağ'daki konak; eşyaları ve fotoğrafları.",
+      "osm": "node/12092510814",
+      "place_id": "ChIJnS9xlWWPKBURq-NtEEIxeTc"
+    },
+    {
+      "sira": 19,
+      "ad": "Sinema Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Seyhan",
+      "merkeze_km": 1,
+      "neden": "Yılmaz Güney ve Orhan Kemal'in kenti; Adana sinemasının afiş ve makineleri eski bir evde.",
+      "osm": "node/12092510813",
+      "place_id": "ChIJuzTzvWWPKBUR-hrXEhw8DZ4"
+    },
+    {
+      "sira": 20,
+      "ad": "Ayas Kalesi ve Kızkalesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "doga"
+      ],
+      "ilce": "Yumurtalık",
+      "merkeze_km": 48,
+      "neden": "Marco Polo'nun uğradığı Ayas limanı; kıyıda kale, hemen açıkta küçük deniz kalesi.",
+      "osm": "node/9312955525",
+      "place_id": "ChIJndL_DOeuKBURy5U_2SYT254"
+    },
+    {
+      "sira": 21,
+      "ad": "Akyatan Lagünü",
+      "kategori": "doga",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Karataş",
+      "merkeze_km": 40,
+      "neden": "Yeşil deniz kaplumbağasının yumurtladığı kumsal; lagünde flamingo ve su kuşları."
+    },
+    {
+      "sira": 22,
+      "ad": "Analı kızlı",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Seyhan",
+      "merkeze_km": 0,
+      "neden": "Büyük içli köfte (ana) ve küçük bulgur köfteler (kız) nohutlu, ekşili bir çorbada."
+    },
+    {
+      "sira": 23,
+      "ad": "Seyhan Baraj Gölü",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas",
+        "cocuklu"
+      ],
+      "ilce": "Çukurova",
+      "merkeze_km": 4,
+      "neden": "Kentin kuzey ucunda göl; kıyı parkında akşamüstü yürüyüş, gölde kürek ve yelken.",
+      "osm": "way/745119062"
+    },
+    {
+      "sira": 24,
+      "ad": "Karakuş tatlısı",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Seyhan",
+      "merkeze_km": 0,
+      "neden": "İçi ceviz, tarçın ve şekerle doldurulup şerbete batırılan Adana tatlısı."
+    },
+    {
+      "sira": 25,
+      "ad": "Kapalı Çarşı (Arasta)",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Seyhan",
+      "merkeze_km": 0,
+      "neden": "Ulu Camii ile Saat Kulesi arasında tonozlu eski çarşı; dükkânlar hâlâ açık.",
+      "osm": "way/1194031710"
+    },
+    {
+      "sira": 26,
+      "ad": "Yağ Camii",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Seyhan",
+      "merkeze_km": 0,
+      "neden": "Eski bir kiliseden çevrildiği anlatılan cami; Ramazanoğulları döneminde camiye döndü.",
+      "osm": "way/691641715",
+      "place_id": "ChIJdcs-UmCPKBURUl7YDlZPyzQ"
+    },
+    {
+      "sira": 27,
+      "ad": "Taş kadayıf",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Seyhan",
+      "merkeze_km": 0,
+      "neden": "Yumuşak hamur cevizle ya da kaymakla doldurulup kapatılır, kızartılıp şerbetlenir."
+    },
+    {
+      "sira": 28,
+      "ad": "Magarsus Antik Tiyatrosu",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "doga"
+      ],
+      "ilce": "Karataş",
+      "merkeze_km": 49,
+      "neden": "Karataş burnunda denize bakan antik tiyatro; Megarsos kentinden kalan en belirgin yapı.",
+      "osm": "way/369379182",
+      "place_id": "ChIJTanDTrM3JhUR8zjrHGxV91U"
+    },
+    {
+      "sira": 29,
+      "ad": "Yumurtalık Lagünü Milli Parkı",
+      "kategori": "doga",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Yumurtalık",
+      "merkeze_km": 40,
+      "neden": "Ceyhan deltasında sazlık ve lagünler; kışın su kuşlarıyla dolar."
+    },
+    {
+      "sira": 30,
+      "ad": "Feke Kalesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "doga"
+      ],
+      "ilce": "Feke",
+      "merkeze_km": 112,
+      "neden": "Feke'nin üstündeki sarp kayalıkta Ermeni Kilikya kalesi; ilçe ve vadi ayağının altında.",
+      "osm": "way/1029012462",
+      "place_id": "ChIJD7mau-YALBURNf4KqK9V_jU"
+    },
+    {
+      "sira": 31,
+      "ad": "Saimbeyli Kalesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "doga"
+      ],
+      "ilce": "Saimbeyli",
+      "merkeze_km": 130,
+      "neden": "Saimbeyli'nin içinden yükselen kayalıkta kale; ilçe çam ormanlı dağların arasında.",
+      "osm": "way/300759363",
+      "place_id": "ChIJaa4m1wESLBUR3zCvu2j1qAA"
+    },
+    {
+      "sira": 32,
+      "ad": "Şar (Komana) Antik Kenti",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Tufanbeyli",
+      "merkeze_km": 162,
+      "neden": "Kapadokya Komana'sı; köyün ortasında Ak Kapı denen Roma tapınak kapısı ayakta."
+    },
+    {
+      "sira": 33,
+      "ad": "Kurtkulağı Kervansarayı",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Ceyhan",
+      "merkeze_km": 58,
+      "neden": "Hac yolunda Osmanlı kervansarayı; yanında cami ve hamam, taş duvarlar onarılmış."
+    },
+    {
+      "sira": 34,
+      "ad": "Belemedik Tabiat Parkı",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Pozantı",
+      "merkeze_km": 54,
+      "neden": "Toros eteğinde Bağdat Demiryolu'nun tünelleri ve Alman mühendislerin kurduğu köyün izleri."
+    }
+  ]
+}
