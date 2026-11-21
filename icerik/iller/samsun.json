@@ -349,13 +349,14 @@
     },
     {
       "sira": 30,
-      "ad": "Turşu kavurması",
+      "ad": "Çarşamba keşkeği",
       "kategori": "yemek",
       "amaclar": [
         "lezzet"
       ],
-      "merkeze_km": 0,
-      "neden": "Fasulye turşusunun yağda kavrulmasıyla yapılan Karadeniz yemeği"
+      "ilce": "Çarşamba",
+      "merkeze_km": 35,
+      "neden": "Buğdayla etin kazanda saatlerce pişip dövüldüğü, Çarşamba'ya tescilli keşkek"
     }
   ]
 }
