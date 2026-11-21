@@ -1,0 +1,371 @@
+{
+  "il": "Sivas",
+  "slug": "sivas",
+  "guncelleme": "2026-11-21",
+  "oneriler": [
+    {
+      "sira": 1,
+      "ad": "Divriği Ulu Camii ve Darüşşifası",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Divriği",
+      "merkeze_km": 155,
+      "neden": "1228 tarihli cami ve şifahane, UNESCO listesinde; taç kapılardaki taş oyması incelenmeli"
+    },
+    {
+      "sira": 2,
+      "ad": "Çifte Minareli Medrese",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "gece"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "1271'de Şemseddin Cüveyni yaptırdı; bugün yalnız çifte minareli taç kapısı ayakta",
+      "osm": "relation/19685648",
+      "place_id": "ChIJb85bOiSrfkARSleg8dlCBVA"
+    },
+    {
+      "sira": 3,
+      "ad": "Gök Medrese",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Sahib Ata'nın 1271 medresesi; firuze çinili minareleri var, onarımdan sonra müze oldu",
+      "osm": "node/13028478143",
+      "place_id": "ChIJC36oFS-rfkARq1veQBn0X34"
+    },
+    {
+      "sira": 4,
+      "ad": "Şifaiye Medresesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "I. İzzeddin Keykavus'un 1217 şifahanesi; sultanın türbesi içinde, avluda çay içilir",
+      "osm": "relation/5956847",
+      "place_id": "ChIJAQAAkCarfkARqDGlbXQSCEg"
+    },
+    {
+      "sira": 5,
+      "ad": "Sivas köftesi",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Kıyma yalnız tuz ve karabiberle yoğrulup ızgarada pişer; közlenmiş biberle gelir"
+    },
+    {
+      "sira": 6,
+      "ad": "Atatürk Kongre ve Etnografya Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "1919 Sivas Kongresi'nin toplandığı okul; Atatürk'ün kaldığı oda korunuyor",
+      "osm": "relation/19145891"
+    },
+    {
+      "sira": 7,
+      "ad": "Kangal Balıklı Kaplıca",
+      "kategori": "aktivite",
+      "amaclar": [
+        "yavas",
+        "cocuklu"
+      ],
+      "ilce": "Kangal",
+      "merkeze_km": 100,
+      "neden": "Kangal yakınında ılık suyunda küçük balıkların yaşadığı kaplıca"
+    },
+    {
+      "sira": 8,
+      "ad": "Buruciye Medresesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "1271 tarihli Selçuklu medresesi; Çifte Minareli'nin karşısında, avlusu oturmaya açık",
+      "osm": "relation/7111070",
+      "place_id": "ChIJXa30oSarfkAR3-HXr4uh0k0"
+    },
+    {
+      "sira": 9,
+      "ad": "Gökpınar Gölü",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Gürün",
+      "merkeze_km": 160,
+      "neden": "Gürün'de kaynaktan beslenen berrak, turkuaz göl; dibi metrelerce derinden görünür"
+    },
+    {
+      "sira": 10,
+      "ad": "Sivas Arkeoloji Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "Kayalıpınar'ın Hitit buluntuları; Tunç Çağı'ndan Osmanlı'ya il tarihi",
+      "osm": "way/443114316",
+      "place_id": "ChIJjwEnJeCqfkAR6VAEDWtyjGU"
+    },
+    {
+      "sira": 11,
+      "ad": "Madımak",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "İlkbaharda toplanan madımak otu soğan ve bulgurla kavrulur; yanına yoğurt"
+    },
+    {
+      "sira": 12,
+      "ad": "Sivas Kalesi (Kale Parkı)",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas",
+        "cocuklu"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Şehrin ortasındaki tepe; surların kalıntıları arasında park ve çay bahçeleri",
+      "osm": "node/4407518351"
+    },
+    {
+      "sira": 13,
+      "ad": "Sivas katmeri",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Tereyağıyla kat kat açılan hamur sacda pişer; kahvaltıda sıcak yenir, tescilli"
+    },
+    {
+      "sira": 14,
+      "ad": "Divriği Kalesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "doga"
+      ],
+      "ilce": "Divriği",
+      "merkeze_km": 155,
+      "neden": "Ulu Cami'nin üstündeki tepede Mengücekli kalesi; Divriği'ye yukarıdan bakılır"
+    },
+    {
+      "sira": 15,
+      "ad": "Sıcak Çermik Kaplıcası",
+      "kategori": "aktivite",
+      "amaclar": [
+        "yavas"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 30,
+      "neden": "Şehrin batısında termal su; açık havuzlu tesis ve mesire alanı",
+      "osm": "way/648199451",
+      "place_id": "ChIJJyW8xj6lfkARW2gs0JSFlvo"
+    },
+    {
+      "sira": 16,
+      "ad": "Peskütan çorbası",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Yoğurdun suyundan yapılan peskütan peyniriyle pişen, ekşimsi bir Sivas çorbası"
+    },
+    {
+      "sira": 17,
+      "ad": "Şuğul Vadisi",
+      "kategori": "doga",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Gürün",
+      "merkeze_km": 165,
+      "neden": "Gürün'de Tohma Çayı'nın kayalar arasında açtığı vadi; kıyı boyunca yürünür"
+    },
+    {
+      "sira": 18,
+      "ad": "Sivas kellesi",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Kuzu kellesi taş fırında uzun süre pişer; Sivas sabahlarında yenir, tescilli"
+    },
+    {
+      "sira": 19,
+      "ad": "Behrampaşa Hanı",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "16. yüzyıl sonu Osmanlı hanı; avludaki dükkânlarda bıçakçı ve halıcılar var",
+      "place_id": "ChIJhwcvxyirfkARr2bCnO5QPLo"
+    },
+    {
+      "sira": 20,
+      "ad": "Yıldız Dağı Kayak Merkezi",
+      "kategori": "aktivite",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Yıldızeli",
+      "merkeze_km": 60,
+      "neden": "Kış aylarında açılan kayak merkezi; pistler 2.500 m üstünden iner"
+    },
+    {
+      "sira": 21,
+      "ad": "Hafik Gölü",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Hafik",
+      "merkeze_km": 38,
+      "neden": "Hafik ilçesinin yanı başında göl; kışın aylarca buz tutar, yazın kıyısı piknik yeri"
+    },
+    {
+      "sira": 22,
+      "ad": "Tödürge Gölü",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Zara",
+      "merkeze_km": 55,
+      "neden": "Zara yolunda bozkırın ortasında tatlı su gölü; kıyıda kamp ve balık yerleri"
+    },
+    {
+      "sira": 23,
+      "ad": "Divriği pilavı",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Divriği",
+      "merkeze_km": 155,
+      "neden": "Divriği'nin etli, tereyağlı pilavı; ilçenin yöresel tarifleri arasında tescilli"
+    },
+    {
+      "sira": 24,
+      "ad": "Sivas pastırması",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Çemenle kaplanıp kurutulan dana eti; Kayseri'ye komşu Sivas'ın kendi pastırması"
+    },
+    {
+      "sira": 25,
+      "ad": "Sanayi Mektebi Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Osmanlı sanayi okulu binasında, şehrin zanaat ve eğitim tarihi",
+      "place_id": "ChIJd2omHtGrfkARZY0wQ0PvlAU"
+    },
+    {
+      "sira": 26,
+      "ad": "Sivas hurma tatlısı",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Hurma biçiminde şekillenen hamur kızartılıp şerbete bırakılır"
+    },
+    {
+      "sira": 27,
+      "ad": "Sivas fırın çöreği",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Taş fırında pişen yağlı, susamlı çörek; çayla kahvaltıda yenir"
+    },
+    {
+      "sira": 28,
+      "ad": "Kızılırmak üstündeki Eğri Köprü",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 3,
+      "neden": "Kızılırmak üstünde 18 gözlü Selçuklu-Osmanlı köprüsü; şehrin kuzey girişinde"
+    },
+    {
+      "sira": 29,
+      "ad": "Paşabahçe Mesire Alanı",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "cocuklu",
+        "yavas"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 5,
+      "neden": "Şehrin yanı başında çam ormanı; hafta sonu piknik ve yürüyüş yeri"
+    },
+    {
+      "sira": 30,
+      "ad": "Ulu Cami",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "1197 tarihli Danişmendli camisi; tuğladan eğik minaresi uzaktan seçilir",
+      "osm": "way/404561290",
+      "place_id": "ChIJJ5119CWrfkARaMZalShWnIk"
+    }
+  ]
+}
