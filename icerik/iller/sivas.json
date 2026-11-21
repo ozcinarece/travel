@@ -293,7 +293,7 @@
       ],
       "ilce": "Merkez",
       "merkeze_km": 0,
-      "neden": "Çemenle kaplanıp kurutulan dana eti; Kayseri'ye komşu Sivas'ın kendi pastırması"
+      "neden": "Sivas'ta en az 18 ay beslenen danadan, yerel kaya tuzuyla; açık havada kurur, tescilli"
     },
     {
       "sira": 25,
@@ -309,14 +309,14 @@
     },
     {
       "sira": 26,
-      "ad": "Sivas hurma tatlısı",
+      "ad": "Gürün dut pekmezi",
       "kategori": "tatli_kahve",
       "amaclar": [
         "lezzet"
       ],
-      "ilce": "Merkez",
-      "merkeze_km": 0,
-      "neden": "Hurma biçiminde şekillenen hamur kızartılıp şerbete bırakılır"
+      "ilce": "Gürün",
+      "merkeze_km": 150,
+      "neden": "Gürün bahçelerindeki dutun şırası kaynatılarak yapılır; kahvaltıda ekmekle yenir"
     },
     {
       "sira": 27,
@@ -331,7 +331,7 @@
     },
     {
       "sira": 28,
-      "ad": "Kızılırmak üstündeki Eğri Köprü",
+      "ad": "Eğri Köprü",
       "kategori": "tarih",
       "amaclar": [
         "kultur_tarih",
