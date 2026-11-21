@@ -1,0 +1,316 @@
+{
+  "il": "Adıyaman",
+  "slug": "adiyaman",
+  "guncelleme": "2026-11-21",
+  "oneriler": [
+    {
+      "sira": 1,
+      "ad": "Nemrut Dağı",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "doga"
+      ],
+      "ilce": "Kahta",
+      "merkeze_km": 90,
+      "neden": "2.150 m zirvede I. Antiokhos'un tümülüsü; doğu ve batı teraslarında dev tanrı başları",
+      "osm": "way/274793641"
+    },
+    {
+      "sira": 2,
+      "ad": "Arsameia (Eski Kale)",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Kahta",
+      "merkeze_km": 62,
+      "neden": "Kommagene yazlık başkenti; kralın Herakles'le tokalaştığı kabartma ve uzun Grekçe yazıt",
+      "osm": "way/274793322"
+    },
+    {
+      "sira": 3,
+      "ad": "Cendere Köprüsü",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Kahta",
+      "merkeze_km": 55,
+      "neden": "MS 200 dolayında Roma köprüsü; Severus ailesinin sütunlarından Geta'nınki kaldırılmış",
+      "osm": "way/47036373"
+    },
+    {
+      "sira": 4,
+      "ad": "Karakuş Tümülüsü",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Kahta",
+      "merkeze_km": 45,
+      "neden": "II. Mithridates'in annesi ve kız kardeşi için yığma tepe; sütun başında kartal heykeli",
+      "osm": "way/274793330",
+      "place_id": "ChIJy0Ku1eFZMxURxmlMoT31438"
+    },
+    {
+      "sira": 5,
+      "ad": "Perre Antik Kenti",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 5,
+      "neden": "Örenli'de Kommagene kenti; kaya mezarları, hâlâ akan pınar ve 5. yy taban mozaiği",
+      "osm": "way/274903350",
+      "place_id": "ChIJoRX2dNkUMxURdHB9GpSTJtw"
+    },
+    {
+      "sira": 6,
+      "ad": "Adıyaman etsiz çiğ köftesi",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Etsiz yapılır: ince bulgur, isot, nar ekşisi ve cevizle yoğrulur; tescilli"
+    },
+    {
+      "sira": 7,
+      "ad": "Yeni Kale (Eski Kâhta Kalesi)",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "doga"
+      ],
+      "ilce": "Kahta",
+      "merkeze_km": 60,
+      "neden": "Memlûklerin son biçimini verdiği kale; çarşı, zindan ve Kahta Çayı'na inen gizli su yolu",
+      "osm": "way/274793331",
+      "place_id": "ChIJd8wMdoBVMxURfS3pCGUv4k0"
+    },
+    {
+      "sira": 8,
+      "ad": "Kahta balcanı dev çorbası",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Kahta",
+      "merkeze_km": 33,
+      "neden": "Yoğurt, bulgur ve ezilmiş patlıcanla pişer, üstüne tereyağlı soğan; 2026'da tescillendi"
+    },
+    {
+      "sira": 9,
+      "ad": "Kızılin Kanyonu",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "kultur_tarih"
+      ],
+      "ilce": "Besni",
+      "merkeze_km": 70,
+      "neden": "Fırat kıyısında 300 kadar mağaralı kanyon; iskeleden tekneyle kaya mezarlarına gidilir",
+      "place_id": "ChIJMbfcwvCxMxURinotK8xkcGY"
+    },
+    {
+      "sira": 10,
+      "ad": "Gölbaşı Gölleri Tabiat Parkı",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas",
+        "cocuklu"
+      ],
+      "ilce": "Gölbaşı",
+      "merkeze_km": 70,
+      "neden": "Gölbaşı, İnekli ve Azaplı göllerini kapsar; kıyıda yürüyüş yolu, iskele ve çimenlik",
+      "place_id": "ChIJZ9Qcq2pkMhURu7t_kOf1B9U"
+    },
+    {
+      "sira": 11,
+      "ad": "Adıyaman tene helvası",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Nişasta, üzüm pekmezi ve tereyağı tane tane olana dek karıştırılır; sıcak yenir; tescilli"
+    },
+    {
+      "sira": 12,
+      "ad": "Besni üzümü",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Besni",
+      "merkeze_km": 45,
+      "neden": "Çekirdekli kurutmalık üzüm; potaslı suya batırılıp kurutulur, ağustos–eylülde; tescilli"
+    },
+    {
+      "sira": 13,
+      "ad": "Kavurmalı hıtap",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Kavurma, soğan ve maydanoz mayasız hamura kapanıp taş fırında pişer; kış yemeği"
+    },
+    {
+      "sira": 14,
+      "ad": "Gerger Kalesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "doga"
+      ],
+      "ilce": "Gerger",
+      "merkeze_km": 117,
+      "neden": "Fırat'a bakan sarp kayada kale; batı duvarında Kral Samos'un 4 m'lik kabartması",
+      "place_id": "ChIJ4SleqQ3vdUAR1uiera-P15M"
+    },
+    {
+      "sira": 15,
+      "ad": "Musalla Camii",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "1938–1972 arası cezaevi olarak kullanılan cami; depremden sonra Eylül 2026'da açıldı",
+      "place_id": "ChIJMyy-9HYTMxURBaKgQBEKWEU"
+    },
+    {
+      "sira": 16,
+      "ad": "Besni Kurşunlu Camii",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Besni",
+      "merkeze_km": 45,
+      "neden": "Besni'nin tarihi camisi; deprem hasarı onarılıp Eylül 2026'da yeniden ibadete açıldı",
+      "place_id": "ChIJ1WJ2CohXMhUR9D1f1jJwRgg"
+    },
+    {
+      "sira": 17,
+      "ad": "Kahta bademli irmik helvası",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Kahta",
+      "merkeze_km": 33,
+      "neden": "Kahta bademi ve rendelenmiş kaşarla yapılan sarı renkli irmik helvası; tescilli"
+    },
+    {
+      "sira": 18,
+      "ad": "Kahta bulgur pilavı",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Kahta",
+      "merkeze_km": 33,
+      "neden": "Tavuk, iri pilavlık bulgur, sarımsak ve karabiberle pişen sarı renkli pilav; tescilli"
+    },
+    {
+      "sira": 19,
+      "ad": "Besni tavası",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Besni",
+      "merkeze_km": 45,
+      "neden": "Kuzu eti patlıcan, domates, biber, soğan ve sarımsakla geniş tavada pişirilir"
+    },
+    {
+      "sira": 20,
+      "ad": "Kahta narı",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Kahta",
+      "merkeze_km": 33,
+      "neden": "Katırbaşı çeşidi; 350–700 g'lık iri meyve, açık kırmızı kolay ayrılan daneler; tescilli"
+    },
+    {
+      "sira": 21,
+      "ad": "Tut dutu",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Tut",
+      "merkeze_km": 60,
+      "neden": "Akdağlar eteğinde ağaç altına serilen filelerde kurutulur; hasat haziran sonu; tescilli"
+    },
+    {
+      "sira": 22,
+      "ad": "Çat Barajı yüzen adaları",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Çelikhan",
+      "merkeze_km": 60,
+      "neden": "Baraj gölünde sürüklenen turba adacıkları; kıyıda piknik yeri ve oyun alanı var"
+    },
+    {
+      "sira": 23,
+      "ad": "Meyir çorbası",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Yoğurtlu Adıyaman çorbası; nohut, dövme buğday ve patlıcanla kaynatılır"
+    },
+    {
+      "sira": 24,
+      "ad": "Adıyaman içli köftesi",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Bulgur ve irmik hamuru kıymalı soğanlı harçla doldurulur, burada fırında pişirilir"
+    },
+    {
+      "sira": 25,
+      "ad": "Şıllık tatlısı",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Un ve sütle yapılan ince yufkalar şerbete batırılır, ceviz ya da fıstıkla katlanır"
+    },
+    {
+      "sira": 26,
+      "ad": "Pirpirim salatası",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Pirpirim semizotunun yerel adı; limonla salata ya da yoğurtla cacık yapılır"
+    }
+  ]
+}

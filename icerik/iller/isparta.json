@@ -1,0 +1,507 @@
+{
+  "il": "Isparta",
+  "slug": "isparta",
+  "guncelleme": "2026-11-21",
+  "oneriler": [
+    {
+      "sira": 1,
+      "ad": "Eğirdir Gölü",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Eğirdir",
+      "merkeze_km": 36,
+      "neden": "Kasabayı yarımadaya çeviren göl; kuraklıkla kıyı son yıllarda belirgin geriledi",
+      "place_id": "ChIJL_ANCJ-AxRQRGEY18Lkmdpk"
+    },
+    {
+      "sira": 2,
+      "ad": "Güneykent gül bahçeleri",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Gönen",
+      "merkeze_km": 18,
+      "neden": "Yağ gülü hasadı Mayıs ortası–Haziran sonu, güneş yükselmeden sabah erken yapılır"
+    },
+    {
+      "sira": 3,
+      "ad": "Pisidia Antiokheia Antik Kenti",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Yalvaç",
+      "merkeze_km": 106,
+      "neden": "Yalvaç'ın kuzeyindeki Roma kolonisi; Augustus Tapınağı ve 70 m'lik St. Paul Bazilikası",
+      "osm": "way/173176689",
+      "place_id": "ChIJ-Znq7BOSzxQRXNfQTgKWaZA"
+    },
+    {
+      "sira": 4,
+      "ad": "Isparta kebabı (fırın kebabı)",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Kuzu, odun ateşli fırında tuzsuz ve baharatsız yaklaşık 3 saat pişer, ince pideyle gelir"
+    },
+    {
+      "sira": 5,
+      "ad": "Kuyucak lavanta tarlaları",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Keçiborlu",
+      "merkeze_km": 50,
+      "neden": "1975'te ilk fideyle başlayan lavanta; tarlalar Haziran sonu–Temmuz ortası morlaşır",
+      "osm": "node/5826410354"
+    },
+    {
+      "sira": 6,
+      "ad": "Yazılı Kanyon Tabiat Parkı",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Sütçüler",
+      "merkeze_km": 75,
+      "neden": "Çandır'da Göksu Çayı boyunca yürüyüş yolu; kayada Epiktetos'a atfedilen şiir yazıtı",
+      "place_id": "ChIJsauefRr4xBQRAHYady59lY8"
+    },
+    {
+      "sira": 7,
+      "ad": "Davraz Kayak Merkezi",
+      "kategori": "aktivite",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 26,
+      "neden": "1.650–2.150 m arası pistlerden Eğirdir Gölü görünür; kayak sezonu Aralık–Nisan"
+    },
+    {
+      "sira": 8,
+      "ad": "Isparta gül lokumu",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Yağ gülü yapraklarından çekilen gül suyuyla tatlandırılır, çayın yanında ikram edilir"
+    },
+    {
+      "sira": 9,
+      "ad": "Yalvaç Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Yalvaç",
+      "merkeze_km": 105,
+      "neden": "Antiokheia buluntuları burada; Res Gestae yazıtı ve iri bir Zeus heykeli sergilenir",
+      "osm": "way/1218266237",
+      "place_id": "ChIJfwnCUviNzxQR12vw6EqlyOI"
+    },
+    {
+      "sira": 10,
+      "ad": "Prof. Dr. Turan Yazgan Etnografya Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 2,
+      "neden": "Gökçay girişindeki 11 katlı binada 3.500'ü aşkın halı ve kilim; en üstte seyir terası",
+      "osm": "way/1054494723",
+      "place_id": "ChIJecWaVp-1xRQRKhoEPXmRyt4"
+    },
+    {
+      "sira": 11,
+      "ad": "Isparta kabune pilavı",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Bakır kazanda soğan halkaları üstünde etli ve nohutlu pişen düğün pilavı; tescilli"
+    },
+    {
+      "sira": 12,
+      "ad": "Kovada Gölü Milli Parkı",
+      "kategori": "doga",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Eğirdir",
+      "merkeze_km": 60,
+      "neden": "Eğirdir Gölü'nün güneydeki uzantısı; 2025'te su kıyıdan 300 m'den fazla çekildi",
+      "place_id": "ChIJW8veOjVVxBQRyY1afbEwb9E"
+    },
+    {
+      "sira": 13,
+      "ad": "Akpınar köyü seyir terası",
+      "kategori": "manzara",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Eğirdir",
+      "merkeze_km": 42,
+      "neden": "Eğirdir'in üstündeki köyden göl, kasaba ve Can Ada ile Yeşilada aynı karede görünür"
+    },
+    {
+      "sira": 14,
+      "ad": "Hızır Bey Camii",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Eğirdir",
+      "merkeze_km": 36,
+      "neden": "Hamitoğlu Hızır Bey'in adını taşıyan cami; oymalı ahşap kapısı ve taş taç kapısı var",
+      "osm": "way/173176368"
+    },
+    {
+      "sira": 15,
+      "ad": "Dündar Bey Medresesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Eğirdir",
+      "merkeze_km": 36,
+      "neden": "Selçuklu hanını Hamitoğlu Dündar Bey 1301'de medreseye çevirdi; bugün içi çarşı",
+      "osm": "relation/5545486",
+      "place_id": "ChIJHXC0jd-gxRQRR6bqPBj4sTg"
+    },
+    {
+      "sira": 16,
+      "ad": "Gölcük Tabiat Parkı",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 12,
+      "neden": "Şehre 12 km'lik volkanik krater gölü; çevresinde karaçam, sedir ve meşe ormanı"
+    },
+    {
+      "sira": 17,
+      "ad": "Eğirdir Kalesi",
+      "kategori": "manzara",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Eğirdir",
+      "merkeze_km": 36,
+      "neden": "Göle uzanan kıstağın başında; kitabesine göre Dündar Bey 1307'de onarttı",
+      "osm": "node/9766455960",
+      "place_id": "ChIJ8UKcgeCgxRQR6YwKKPAQodc"
+    },
+    {
+      "sira": 18,
+      "ad": "Yeşilada",
+      "kategori": "doga",
+      "amaclar": [
+        "yavas",
+        "doga"
+      ],
+      "ilce": "Eğirdir",
+      "merkeze_km": 38,
+      "neden": "Eğirdir'e yolla bağlanan ada; kasabada ayakta kalan tek Ortodoks kilisesi burada",
+      "place_id": "ChIJO8DT-_GgxRQRLIBEwP7MeYg"
+    },
+    {
+      "sira": 19,
+      "ad": "Misparta Koku Medeniyeti Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "1750'lerin Aya Baniya Kilisesi'nde; 4.500 yıllık bir parfüm formülü sergilenir",
+      "osm": "way/1541296466",
+      "place_id": "ChIJy6TCDAC1xRQRrMdfGGeaaTE"
+    },
+    {
+      "sira": 20,
+      "ad": "Ertokuş Hanı",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Gelendost",
+      "merkeze_km": 60,
+      "neden": "Göl kıyısında, Atabey Ertokuş'un 1223–24'te yaptırdığı Selçuklu kervansarayı",
+      "place_id": "ChIJX2MIL7l2xRQRecKe1sV7xi0"
+    },
+    {
+      "sira": 21,
+      "ad": "Men Kutsal Alanı",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "doga"
+      ],
+      "ilce": "Yalvaç",
+      "merkeze_km": 110,
+      "neden": "Yalvaç'a 5 km, ormanlık tepede ay tanrısı Men'in tapınağı; podyum ve sunak izleri",
+      "place_id": "ChIJ641fuXaTzxQRu7SLnKKcgSY"
+    },
+    {
+      "sira": 22,
+      "ad": "Zindan Mağarası",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Aksu",
+      "merkeze_km": 65,
+      "neden": "Roma köprüsünden girilen mağarada 765 m ışıklı yol; girişte Eurymedon mozaiği",
+      "place_id": "ChIJT5ukdXQSxRQRv41I8IgZM9E"
+    },
+    {
+      "sira": 23,
+      "ad": "Adada Antik Kenti",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "doga"
+      ],
+      "ilce": "Sütçüler",
+      "merkeze_km": 100,
+      "neden": "Sağrak yakınında Pisidya kenti; Zeus Sarapis tapınağı ve agoradan çıkan taş merdiven"
+    },
+    {
+      "sira": 24,
+      "ad": "Eğirdir'de göl kereviti (istakoz)",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Eğirdir",
+      "merkeze_km": 36,
+      "neden": "Yerelde istakoz denen göl kereviti; av sezonu 15 Haziran–15 Kasım arası"
+    },
+    {
+      "sira": 25,
+      "ad": "Uluborlu banağı",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Uluborlu",
+      "merkeze_km": 60,
+      "neden": "Kemikli kuzu odun ateşinde 3 saat kaynar, suyuna batırılmış pide üstünde gelir; tescilli"
+    },
+    {
+      "sira": 26,
+      "ad": "Isparta gül reçeli",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Yağ gülü yaprakları şekerle kaynatılır; kahvaltıda ve hamur tatlılarında kullanılır"
+    },
+    {
+      "sira": 27,
+      "ad": "St. Paul Yolu (Eğirdir–Yalvaç etapları)",
+      "kategori": "aktivite",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Eğirdir",
+      "merkeze_km": 36,
+      "neden": "Perge'den gelen 500 km'lik işaretli rota Eğirdir Gölü'nü dolaşıp Yalvaç'ta biter"
+    },
+    {
+      "sira": 28,
+      "ad": "Ertokuş Medresesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Atabey",
+      "merkeze_km": 23,
+      "neden": "1224 kitabeli kapalı avlulu Selçuklu medresesi; yanında çinili lahitli türbe",
+      "osm": "way/313651614",
+      "place_id": "ChIJKVNtSEq8xRQRNpg6m8C_Vsw"
+    },
+    {
+      "sira": 29,
+      "ad": "Firdevs Paşa Camii",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "1561'de Firdevs Paşa yaptırdı, Mimar Sinan'a atfedilir; aynı yıl yanına bedesten kondu",
+      "osm": "way/302368581",
+      "place_id": "ChIJoXh4mb61xRQRNuFTVhHpee0"
+    },
+    {
+      "sira": 30,
+      "ad": "Yalvaç hamursuzu",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Yalvaç",
+      "merkeze_km": 105,
+      "neden": "Patates, tahin ve çörek otlu mayasız çörek; odun ateşli taş fırında pişer; tescilli"
+    },
+    {
+      "sira": 31,
+      "ad": "Senirkent samsa tatlısı",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Senirkent",
+      "merkeze_km": 50,
+      "neden": "Pekmezli cevizli harç muska biçimli yufkaya sarılır, kızartılıp şerbetlenir; tescilli"
+    },
+    {
+      "sira": 32,
+      "ad": "Isparta Ulu Camii",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Selçuklu temelli, Kutlu Bey'in yenilediği cami; 1914 depreminden sonra yeniden yapıldı",
+      "osm": "way/302368579",
+      "place_id": "ChIJzfbnVLm1xRQROiX7TZAaBr8"
+    },
+    {
+      "sira": 33,
+      "ad": "Uluborlu Kalesi",
+      "kategori": "manzara",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Uluborlu",
+      "merkeze_km": 60,
+      "neden": "Antik adı Apollonia olan kasabanın tepesinde, iki kapılı 200 m'lik sur",
+      "place_id": "ChIJr7R4Q0XqxRQRjZBzm8iHjxE"
+    },
+    {
+      "sira": 34,
+      "ad": "Uluborlu Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Uluborlu",
+      "merkeze_km": 60,
+      "neden": "Kültür sarayında 2007'de açıldı; demircilik aletleri, gelin giysisi ve dokuma araçları",
+      "place_id": "ChIJx3KShjDqxRQRzvJm8XboECY"
+    },
+    {
+      "sira": 35,
+      "ad": "Uluborlu kuyruğu sulu böreği",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Uluborlu",
+      "merkeze_km": 60,
+      "neden": "Satırla kıyılan koyun etli yarım ay börek sacda pişer, suyu kenardan taşar; tescilli"
+    },
+    {
+      "sira": 36,
+      "ad": "Isparta elması",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Eğirdir",
+      "merkeze_km": 36,
+      "neden": "Beş çıkıntılı uzun meyve göl kıyısı bahçelerinde yetişir; hasat Ağustos–Kasım; tescilli"
+    },
+    {
+      "sira": 37,
+      "ad": "Senirkent üzüm pekmezi",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Senirkent",
+      "merkeze_km": 50,
+      "neden": "Yerel dimrit üzümünden bakır kazanda, pekmez toprağıyla durultularak yapılır; tescilli"
+    },
+    {
+      "sira": 38,
+      "ad": "Davraz yamaç paraşütü",
+      "kategori": "aktivite",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 26,
+      "neden": "Davraz'ın doğu yamacında yaklaşık 1.800 m'den kalkışlı tek ve tandem uçuşlar"
+    },
+    {
+      "sira": 39,
+      "ad": "Kızıldağ Milli Parkı",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Şarkikaraağaç",
+      "merkeze_km": 120,
+      "neden": "Şarkikaraağaç'ın 5 km güneyinde, Beyşehir Gölü'nün kuzey kıyısında sedir ormanları",
+      "place_id": "ChIJ6f60jjBZxRQR_bonEe-7GYo"
+    },
+    {
+      "sira": 40,
+      "ad": "Eğirdir sazan dolması",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Eğirdir",
+      "merkeze_km": 36,
+      "neden": "Göl sazanı bulgur, pirinç, çam fıstığı ve kuş üzümlü iç harçla doldurulup fırınlanır"
+    },
+    {
+      "sira": 41,
+      "ad": "Yalvaç kesmik güllacı",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Yalvaç",
+      "merkeze_km": 105,
+      "neden": "Sütle ıslanan güllaç yapraklarının arasına bol kesmik serilip şerbet dökülür"
+    }
+  ]
+}
