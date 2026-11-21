@@ -156,7 +156,6 @@
         },
         {
           "place_id": "ChIJVVVVVcqICkARO24LIgli-74",
-          "osm": "node/1024958647",
           "ad": "Dara Antik Kenti",
           "sure_dk": 120,
           "sure_gerekcesi": "sarnıçlar, nekropol ve köye dağılmış kalıntılar",
@@ -198,7 +197,7 @@
       "[Rehber · Kasımiye Medresesi] · Kasım bin Cihangir, 1469 civarı tamamlanma; Artuklu Üniversitesi 2020'den beri ders veriyor ve ziyarete açık (NTV, 21.04.2026; Daily Sabah, 22.04.2026); türbede kız kardeşinin sandukası ve kapı süslemeleri rivayeti · Vakıflar, üniversite",
       "[Rehber · Deyrulzafaran] · 493 kuruluş (Wikipedia), 1160-1932 patriklik; yeraltı odasının güneş tapınağı olduğu ve harçsız tonoz rivayet olarak yazıldı; rehberli grup düzeni ve pazar ayini saatleri kaynaksız · manastır",
       "[Rehber · Kebapçı Yusuf Usta] · Mardin kebabının tarifi (kıyma ve patlıcan aynı şişte) il listesinden; OSM'de iki nokta var: Google konumuna uyan node/8648589017 (eski şehrin kuzeyi) kullanıldı; il listesindeki 'Yalım Mahallesi' ve osm alanı bu noktayla karşılaştırılmalı; Google'da üç benzer ad var · işletme",
-      "[Rehber · Dara] · 505 kuruluş (mardin.ktb.gov.tr), 503-507 (turkishmuseums); giriş ücretsiz, pazartesi kapalı, toplu taşıma yok (KTB); 'zindan' yapısının ziyarete açık olduğu (Milliyet haberi) ; OSM'de üç Dara nesnesi var, Google konumuna uyan node/1024958647 kullanıldı · Mardin Müzesi",
+      "[Rehber · Dara] · 505 kuruluş (mardin.ktb.gov.tr), 503-507 (turkishmuseums); giriş ücretsiz, pazartesi kapalı, toplu taşıma yok (KTB); 'zindan' yapısının ziyarete açık olduğu (Milliyet haberi) . OSM'deki üç Dara nesnesi (way/124023954, node/1024958647, way/326589894) Google konumundan 596–1017 m uzak; durak osm'siz (google_30g), BO'da elle işaretlenebilir · Mardin Müzesi",
       "[Yazı · Dara] · 'yaklaşık yarım saat' yol süresi tahmin (kuş uçuşu 24 km) · harita",
       "[Plan · Dara place_id] · il listesindeki Dara id'si (ChIJN4Zs…) köy kaydı (birincil tipi yok); gezide 'Dara Antik Kenti' adlı ayrı id kullanıldı. il listesi düzeltilmeli · BO",
       "[Plan · Deyrulzafaran place_id] · kimlik iki sonuç verdi (ChIJVVVV… ve ChIJuep1…), ikisi de aynı manastır; il listesindekiyle aynı olan birincisi seçildi · BO",
