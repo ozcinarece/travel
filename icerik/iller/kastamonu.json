@@ -12,7 +12,8 @@
       ],
       "ilce": "Pınarbaşı",
       "merkeze_km": 95,
-      "neden": "Yer yer 1000 m'yi aşan duvarlar; seyir terasları ve tek yönlü zorlu geçiş"
+      "neden": "Yer yer 1000 m'yi aşan duvarlar; seyir terasları ve tek yönlü zorlu geçiş",
+      "osm": "node/5062532035"
     },
     {
       "sira": 2,
@@ -160,7 +161,9 @@
       ],
       "ilce": "Azdavay",
       "merkeze_km": 75,
-      "neden": "Kanyonun 450 m üstüne uzanan cam teras"
+      "neden": "Kanyonun 450 m üstüne uzanan cam teras",
+      "osm": "node/5688265634",
+      "place_id": "ChIJX7byBLfUhEARQvxklCMTrlk"
     },
     {
       "sira": 14,
@@ -219,7 +222,7 @@
       ],
       "ilce": "Merkez",
       "merkeze_km": 0,
-      "neden": "Kalenin karşı tepesinde; çay bahçesinden kale ve şehir karşında",
+      "neden": "Kule dibindeki çay bahçesinde otur; kale ve eski çarşı tam karşında",
       "osm": "way/217398148",
       "place_id": "ChIJb89s-K3whEARD8uYGpv-uDY"
     },
@@ -243,7 +246,9 @@
       ],
       "ilce": "Pınarbaşı",
       "merkeze_km": 95,
-      "neden": "Köyden iki saate yakın orman yürüyüşü; içinde Bizans dönemi şapel izi"
+      "neden": "Köyden iki saate yakın orman yürüyüşü; içinde Bizans dönemi şapel izi",
+      "osm": "node/5684316922",
+      "place_id": "ChIJm6JPeMEnm0ARRVsmuJACMG0"
     },
     {
       "sira": 21,
@@ -254,7 +259,7 @@
       ],
       "ilce": "Merkez",
       "merkeze_km": 1,
-      "neden": "Kaleye karşıdan bakan tepe; akşamüstü şehrin ışıkları",
+      "neden": "Akşamüstü çık; gün batarken kale aydınlanır, şehrin ışıkları yanar",
       "osm": "node/3583829033",
       "place_id": "ChIJ76vLsqTwhEARWPH_kMtOdPc"
     },
