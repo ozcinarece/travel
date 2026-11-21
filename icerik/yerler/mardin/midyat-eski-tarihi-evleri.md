@@ -8,4 +8,4 @@ Sokaklarda evlerin arasına sıkışmış kiliseler var: Mor Şmuni, Mor Şarbel
 
 Evler ve sokaklarla bir saat ayır. Akşamüstü taşlar en sıcak rengini alır; günün son durağı olarak uygun.
 
-> Damdan aşağı inmeden önce batıya bak: güneş alçalırken Midyat'ın taşları sarıdan turuncuya döner, çan kuleleri karşı damların üstünde gölge olur.
+> Damdan inmeden önce avluya yukarıdan bak: odaların hepsi avluya açılır, sokağa bakan pencere azdır. Konağın kendi içine dönük düzenini en iyi buradan görürsün.
