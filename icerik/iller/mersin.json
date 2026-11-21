@@ -1,0 +1,563 @@
+{
+  "il": "Mersin",
+  "slug": "mersin",
+  "guncelleme": "2026-11-21",
+  "oneriler": [
+    {
+      "sira": 1,
+      "ad": "Kızkalesi (Korykos Deniz Kalesi)",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Erdemli",
+      "merkeze_km": 57,
+      "neden": "Kıyının hemen açığındaki adacıkta deniz kalesi; karşı kıyıda Korykos kara kalesi duruyor.",
+      "osm": "way/557210886",
+      "place_id": "ChIJlfh0YKny2BQRVlWKBwncZ5w"
+    },
+    {
+      "sira": 2,
+      "ad": "Cennet ve Cehennem Obrukları",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "kultur_tarih"
+      ],
+      "ilce": "Silifke",
+      "merkeze_km": 60,
+      "neden": "Cennet'in dibine 400'ü aşkın basamak iner, dipte şapel var; Cehennem'e yukarıdan bakılır.",
+      "osm": "node/1207140416",
+      "place_id": "ChIJkaz17Mbd2BQRwL4hk_s62H0"
+    },
+    {
+      "sira": 3,
+      "ad": "Uzuncaburç (Diokaisareia)",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Silifke",
+      "merkeze_km": 67,
+      "neden": "Olba yaylasında Zeus Olbios tapınağının sütunları ayakta; tiyatro ve Tyche tapınağı yakın.",
+      "osm": "way/208370225",
+      "place_id": "ChIJ-euUxbP72BQRWqh87FyYtCY"
+    },
+    {
+      "sira": 4,
+      "ad": "Saint Paul Kuyusu",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Tarsus",
+      "merkeze_km": 27,
+      "neden": "Pavlus'un Tarsus'taki evinin avlusunda olduğu anlatılan kuyu ve kazı alanı.",
+      "osm": "node/3050723723",
+      "place_id": "ChIJE0EQO8nYJxURiHTKfStoegU"
+    },
+    {
+      "sira": 5,
+      "ad": "Mersin Arkeoloji Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Yenişehir",
+      "merkeze_km": 3,
+      "neden": "Soli, Yumuktepe ve Gözlükule buluntuları; Deniz Müzesi ile aynı yerleşkede.",
+      "osm": "way/830804707",
+      "place_id": "ChIJMXEm5lnzJxURRopLXLLvYwM"
+    },
+    {
+      "sira": 6,
+      "ad": "Tantuni",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet",
+        "gece"
+      ],
+      "ilce": "Akdeniz",
+      "merkeze_km": 0,
+      "neden": "Dana eti sacda pamuk yağı ve az suyla kavrulur, domates ve maydanozla lavaşa sarılır."
+    },
+    {
+      "sira": 7,
+      "ad": "Anemurium Antik Kenti",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Anamur",
+      "merkeze_km": 184,
+      "neden": "Anadolu'nun en güney burnunda; kıyı boyunca kubbeli mezar yapıları, tiyatro ve hamamlar.",
+      "osm": "way/189320392",
+      "place_id": "ChIJmfjO1ls53BQR6eWrX-0JTGQ"
+    },
+    {
+      "sira": 8,
+      "ad": "Mamure Kalesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Anamur",
+      "merkeze_km": 174,
+      "neden": "Hendeğine deniz suyu verilen kıyı kalesi; içindeki küçük camide hâlâ namaz kılınıyor.",
+      "osm": "node/1532708950",
+      "place_id": "ChIJSTZXjVM93BQRtjr4jY1G99c"
+    },
+    {
+      "sira": 9,
+      "ad": "Alahan Manastırı",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Mut",
+      "merkeze_km": 114,
+      "neden": "Göksu vadisine bakan yamaçta 5. yüzyıl kiliseleri; kapı sövesinde İncil yazarları.",
+      "osm": "way/173069883",
+      "place_id": "ChIJg-Rmqv9z2RQRjNXUnjBybiM"
+    },
+    {
+      "sira": 10,
+      "ad": "Tarsus Şelalesi",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas",
+        "cocuklu"
+      ],
+      "ilce": "Tarsus",
+      "merkeze_km": 28,
+      "neden": "Berdan (Kydnos) Irmağı şehrin içinde kayalardan dökülür; kıyıda çay bahçeleri sıralanır.",
+      "osm": "node/13844593021"
+    },
+    {
+      "sira": 11,
+      "ad": "Kanlıdivane (Kanytelis)",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Erdemli",
+      "merkeze_km": 50,
+      "neden": "Derin bir obruğun çevresine dizili antik kent; kiliseler, kule ve kaya mezarları.",
+      "osm": "way/183122708",
+      "place_id": "ChIJN_1PgZ6M2BQRGkI9NLBt3K0"
+    },
+    {
+      "sira": 12,
+      "ad": "Tarsus kebabı",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Tarsus",
+      "merkeze_km": 27,
+      "neden": "2020'de coğrafi işaret aldı; dana ve kuzu kıyması salçayla yoğrulup odun ateşinde pişer."
+    },
+    {
+      "sira": 13,
+      "ad": "Narlıkuyu Mozaik Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Silifke",
+      "merkeze_km": 61,
+      "neden": "Roma hamamının tabanında Üç Güzeller mozaiği; koydaki balık lokantalarının hemen yanında.",
+      "osm": "way/1005778353",
+      "place_id": "ChIJ3VGkHAbt2BQRnLvEw07FOQg"
+    },
+    {
+      "sira": 14,
+      "ad": "Aya Tekla Yeraltı Kilisesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Silifke",
+      "merkeze_km": 79,
+      "neden": "Pavlus'un öğrencisi Tekla'nın sığındığı anlatılan yeraltı kilisesi ve bazilika kalıntısı.",
+      "osm": "node/1755062873",
+      "place_id": "ChIJD1Xu8XXd2BQR54cydd4_Zdc"
+    },
+    {
+      "sira": 15,
+      "ad": "Eski Tarsus Evleri",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Tarsus",
+      "merkeze_km": 27,
+      "neden": "Saint Paul Kuyusu çevresinde avlulu taş evler; bir kısmı kafe ve konukevi olarak açık.",
+      "osm": "node/3050719573",
+      "place_id": "ChIJVVXFRmjeJxURdrCiiE3Lmc0"
+    },
+    {
+      "sira": 16,
+      "ad": "Kleopatra Kapısı",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Tarsus",
+      "merkeze_km": 27,
+      "neden": "Roma dönemi kent kapısı; Kleopatra'nın Antonius'la buluşmaya buradan girdiği anlatılır.",
+      "osm": "node/10841615158",
+      "place_id": "ChIJp2hAn2jeJxURNkyisE569VM"
+    },
+    {
+      "sira": 17,
+      "ad": "Saint Paul Anıt Müzesi (St. Paul Kilisesi)",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Tarsus",
+      "merkeze_km": 27,
+      "neden": "19. yüzyıl kilisesi; tavanda İncil yazarlarının freskleri, hacı grupları ayin için gelir.",
+      "osm": "way/856839748"
+    },
+    {
+      "sira": 18,
+      "ad": "Göksu Deltası",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Silifke",
+      "merkeze_km": 79,
+      "neden": "Akgöl ve Paradeniz lagünleri; mor sultan tavuğu ve flamingo için kuş gözlem alanı.",
+      "osm": "node/5313792337"
+    },
+    {
+      "sira": 19,
+      "ad": "Soli Pompeiopolis Antik Kenti",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Mezitli",
+      "merkeze_km": 10,
+      "neden": "Limana inen sütunlu cadde; 'soloikismos' sözcüğü bu kentin bozuk Yunancasından gelir.",
+      "osm": "way/869828272"
+    },
+    {
+      "sira": 20,
+      "ad": "Cezerye",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Tarsus",
+      "merkeze_km": 27,
+      "neden": "Havuç şekerle koyulaşana dek kaynatılır, cevizlenip hindistancevizine bulanır."
+    },
+    {
+      "sira": 21,
+      "ad": "Kerebiç",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Akdeniz",
+      "merkeze_km": 0,
+      "neden": "İrmikli hamur cevizle doldurulur; üstüne çöven kökünden çırpılmış beyaz köpük konur."
+    },
+    {
+      "sira": 22,
+      "ad": "Tarsus humusu",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Tarsus",
+      "merkeze_km": 27,
+      "neden": "Tarsus'ta ana yemek: sıcak, tereyağlı ve kimyonlu gelir; isteyene üstü pastırmalı."
+    },
+    {
+      "sira": 23,
+      "ad": "Batırık",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Akdeniz",
+      "merkeze_km": 0,
+      "neden": "İnce bulgur, domates, salça ve yeşillikle yapılan sulu, soğuk Mersin mezesi."
+    },
+    {
+      "sira": 24,
+      "ad": "Kelenderis Antik Kenti",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Aydıncık",
+      "merkeze_km": 137,
+      "neden": "Aydıncık limanının üstünde; bir liman sahnesi işlenmiş mozaik, odeon ve kaya mezarları.",
+      "osm": "way/330459586"
+    },
+    {
+      "sira": 25,
+      "ad": "Elaiussa Sebaste",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Erdemli",
+      "merkeze_km": 54,
+      "neden": "Ayaş'ta eskiden ada olan yarımadada tiyatro ve agora; kıyı boyunca mezar anıtları.",
+      "osm": "way/278146315"
+    },
+    {
+      "sira": 26,
+      "ad": "Adamkayalar",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "doga"
+      ],
+      "ilce": "Erdemli",
+      "merkeze_km": 58,
+      "neden": "Şeytan Deresi kanyonunun kaya yüzüne oyulmuş Roma dönemi insan figürleri.",
+      "osm": "node/1757257688"
+    },
+    {
+      "sira": 27,
+      "ad": "Lamas Kanyonu",
+      "kategori": "aktivite",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Erdemli",
+      "merkeze_km": 45,
+      "neden": "Limonlu'dan kanyon boyunca, Korykos'a su taşıyan Roma kanalının kenarından yürünür.",
+      "osm": "node/13202132467"
+    },
+    {
+      "sira": 28,
+      "ad": "Mersin Deniz Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Yenişehir",
+      "merkeze_km": 3,
+      "neden": "Gemi maketleri ve liman kentinin denizcilik geçmişi; Arkeoloji Müzesi ile yan yana.",
+      "osm": "way/830804708",
+      "place_id": "ChIJn9YdeVfzJxUR6-dxOVNQff0"
+    },
+    {
+      "sira": 29,
+      "ad": "Gözne Kalesi",
+      "kategori": "manzara",
+      "amaclar": [
+        "yavas",
+        "doga"
+      ],
+      "ilce": "Toroslar",
+      "merkeze_km": 22,
+      "neden": "Mersinlilerin eski yaz yaylası; kale tepesinden çam ormanları ve kıyı şeridi görünür.",
+      "osm": "way/1418266870",
+      "place_id": "ChIJIUaZwjn5JxURLX_8gqZUw-U"
+    },
+    {
+      "sira": 30,
+      "ad": "Namrun Kalesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "doga"
+      ],
+      "ilce": "Çamlıyayla",
+      "merkeze_km": 41,
+      "neden": "Çamlıyayla'nın ortasındaki kayalığa oturan Ermeni Kilikya kalesi.",
+      "osm": "node/4939944574",
+      "place_id": "ChIJ57MZLAsEKBURMjpUnnM9S5A"
+    },
+    {
+      "sira": 31,
+      "ad": "Zevzek Tepesi Seyir Terası",
+      "kategori": "manzara",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Çamlıyayla",
+      "merkeze_km": 40,
+      "neden": "Çamlıyayla üstünde seyir terası; Toros sırtları ve aşağıda Namrun kalesi görünür.",
+      "osm": "node/13096130260"
+    },
+    {
+      "sira": 32,
+      "ad": "Gülek Kalesi",
+      "kategori": "manzara",
+      "amaclar": [
+        "kultur_tarih",
+        "doga"
+      ],
+      "ilce": "Tarsus",
+      "merkeze_km": 54,
+      "neden": "Toroslar'ı Çukurova'ya bağlayan Gülek Boğazı'na hâkim tepe; seyir noktası kalenin yanında.",
+      "osm": "node/13201586516",
+      "place_id": "ChIJ9cLAtzYUKBURAHsiU5CJP_A"
+    },
+    {
+      "sira": 33,
+      "ad": "Mersin Sahil Yolu",
+      "kategori": "aktivite",
+      "amaclar": [
+        "yavas",
+        "cocuklu"
+      ],
+      "ilce": "Yenişehir",
+      "merkeze_km": 3,
+      "neden": "Akdeniz ilçesinden Mezitli yönüne kıyı boyunca uzanan yürüyüş ve bisiklet yolu."
+    },
+    {
+      "sira": 34,
+      "ad": "Kızkalesi sahili ve deniz kalesine geçiş",
+      "kategori": "aktivite",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Erdemli",
+      "merkeze_km": 58,
+      "neden": "Kumsaldan deniz kalesine yaz aylarında tekneyle geçilir, iyi yüzücüler yüzerek gider.",
+      "osm": "node/10255318209"
+    },
+    {
+      "sira": 35,
+      "ad": "Bici bici",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet",
+        "cocuklu"
+      ],
+      "ilce": "Akdeniz",
+      "merkeze_km": 0,
+      "neden": "Nişasta pelteği rendelenmiş buzun üstünde; gül şurubu ve pudra şekeriyle yaz tatlısı."
+    },
+    {
+      "sira": 36,
+      "ad": "Anamur kumsalı",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Anamur",
+      "merkeze_km": 175,
+      "neden": "Mamure ile Anemurium arasındaki uzun kumsal; deniz kaplumbağalarının yumurtlama alanı."
+    },
+    {
+      "sira": 37,
+      "ad": "Mut Kalesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Mut",
+      "merkeze_km": 108,
+      "neden": "Mut'un ortasındaki tepede kale; eteğinde Karamanoğulları dönemi Lal Ağa Camii.",
+      "osm": "way/252886870",
+      "place_id": "ChIJ1QboUtJs2RQR8vw2R91Jx1Y"
+    },
+    {
+      "sira": 38,
+      "ad": "Softa Kalesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "doga"
+      ],
+      "ilce": "Bozyazı",
+      "merkeze_km": 163,
+      "neden": "Bozyazı'da denize bakan sarp tepede kale; eteklerinde muz seraları uzanır.",
+      "osm": "way/234491706",
+      "place_id": "ChIJrQBXgsEe3BQRO2AnqNiLK7g"
+    },
+    {
+      "sira": 39,
+      "ad": "Astım Mağarası",
+      "kategori": "doga",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Silifke",
+      "merkeze_km": 61,
+      "neden": "Cennet obruğunun yakınında damlataşlı mağara; nemli havası astıma iyi gelir diye bilinir."
+    },
+    {
+      "sira": 40,
+      "ad": "Anamur Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Anamur",
+      "merkeze_km": 177,
+      "neden": "Anemurium kazılarından çıkan buluntular; ören yerine gitmeden önce iyi bir giriş.",
+      "osm": "way/1116878741",
+      "place_id": "ChIJ1XlEtKnzJxURcqHPqb_Qb6E"
+    },
+    {
+      "sira": 41,
+      "ad": "Taşucu Amfora Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Silifke",
+      "merkeze_km": 86,
+      "neden": "Aslan Eyce'nin denizden çıkan amfora koleksiyonu; Taşucu limanının yanında.",
+      "osm": "node/13202607298",
+      "place_id": "ChIJ9ReKJFPZ2BQRtUu8LDsP8is"
+    },
+    {
+      "sira": 42,
+      "ad": "Kırkkaşık Bedesteni",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "lezzet"
+      ],
+      "ilce": "Tarsus",
+      "merkeze_km": 27,
+      "neden": "Tarsus Ulu Camii'nin yanındaki Osmanlı bedesteni; içinde kafeler ve yöresel ürünler.",
+      "osm": "node/6853130674",
+      "place_id": "ChIJK-yEFWbeJxUR9cFzFREtH8Y"
+    },
+    {
+      "sira": 43,
+      "ad": "Danyal Peygamber Makamı (Makam Camii)",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Tarsus",
+      "merkeze_km": 27,
+      "neden": "Danyal Peygamber'in yattığı anlatılan türbe; Berdan kıyısındaki caminin altında.",
+      "osm": "way/376520800",
+      "place_id": "ChIJb76Vs2feJxURpDJtImyW0hY"
+    }
+  ]
+}
