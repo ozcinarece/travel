@@ -1,0 +1,366 @@
+{
+  "il": "Artvin",
+  "slug": "artvin",
+  "guncelleme": "2026-11-21",
+  "oneriler": [
+    {
+      "sira": 1,
+      "ad": "Macahel (Camili Havzası)",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Borçka",
+      "merkeze_km": 95,
+      "neden": "2005'ten beri biyosfer rezervi; Gürcistan sınırında ahşap camiler ve Kafkas arısı"
+    },
+    {
+      "sira": 2,
+      "ad": "Şavşat Karagöl",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas",
+        "cocuklu"
+      ],
+      "ilce": "Şavşat",
+      "merkeze_km": 105,
+      "neden": "Ladin ve köknarla çevrili göl; Karagöl-Sahara Milli Parkı'nın en çok gezilen yeri"
+    },
+    {
+      "sira": 3,
+      "ad": "Kaçkar güney yamaçları (Yaylalar)",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Yusufeli",
+      "merkeze_km": 145,
+      "neden": "Hevek de denen Yaylalar köyünden buzul vadileri ve yaylalara yürüyüş; Haziran–Eylül"
+    },
+    {
+      "sira": 4,
+      "ad": "Cehennem Deresi Kanyonu",
+      "kategori": "doga",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Ardanuç",
+      "merkeze_km": 28,
+      "neden": "Kireçtaşına oyulmuş dar ve derin kanyon; yol kenarında seyir noktası, Ardanuç'a 7 km",
+      "osm": "node/9364375662",
+      "place_id": "ChIJ4SFP4M5zaEARW346pgEQBkk"
+    },
+    {
+      "sira": 5,
+      "ad": "Borçka Karagöl",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas",
+        "cocuklu"
+      ],
+      "ilce": "Borçka",
+      "merkeze_km": 58,
+      "neden": "Heyelanla oluşmuş 1450 m'deki iki gözlü göl; ekimde kızaran kayın ormanı"
+    },
+    {
+      "sira": 6,
+      "ad": "Dolishane Kilisesi (Hamamlı)",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Şavşat",
+      "merkeze_km": 30,
+      "neden": "Kral Sumbat döneminden 10. yy kilisesi; dış duvarda kabartmalar, sonra cami oldu",
+      "osm": "way/313279872",
+      "place_id": "ChIJazCr_OZzaEARxL_ntx0FWEg"
+    },
+    {
+      "sira": 7,
+      "ad": "Sahara Yaylası",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Şavşat",
+      "merkeze_km": 81,
+      "neden": "Şavşat'a 17 km; geniş çayırlar, ladin ormanı ve yaz sonu yayla şenlikleri"
+    },
+    {
+      "sira": 8,
+      "ad": "Hatila Vadisi Milli Parkı",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 12,
+      "neden": "Şehrin hemen dışında V biçimli vadi; şelaleler ve 1994'ten beri milli park"
+    },
+    {
+      "sira": 9,
+      "ad": "Barhal Kilisesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "doga"
+      ],
+      "ilce": "Yusufeli",
+      "merkeze_km": 110,
+      "neden": "961–973 arasında yapılan üç nefli bazilika; Altıparmak köyünde bugün cami"
+    },
+    {
+      "sira": 10,
+      "ad": "Porta Manastırı (Hanzta)",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "doga"
+      ],
+      "ilce": "Şavşat",
+      "merkeze_km": 55,
+      "neden": "8. yy sonunda kurulan Gürcü manastırı; patikayla ulaşılan kilise, çan kulesi, çeşme",
+      "osm": "node/3191908287",
+      "place_id": "ChIJXdctkW8MaEARa5JgDVux9PU"
+    },
+    {
+      "sira": 11,
+      "ad": "Laz böreği (Hopa)",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Hopa",
+      "merkeze_km": 70,
+      "neden": "Yufka arasında muhallebi, üstüne şerbet; Hopa adıyla coğrafi işaretli tatlı börek"
+    },
+    {
+      "sira": 12,
+      "ad": "Atatepe",
+      "kategori": "manzara",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 5,
+      "neden": "22 m'lik Atatürk heykelinin durduğu tepe; Çoruh vadisine ve şehre tepeden bakış",
+      "osm": "node/5141353421",
+      "place_id": "ChIJ4XO4mLJ3aEARuwLT7g0dG60"
+    },
+    {
+      "sira": 13,
+      "ad": "Kafkasör boğa güreşleri",
+      "kategori": "aktivite",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 8,
+      "neden": "Temmuzda Kafkasör Yaylası'ndaki festivalde boğalar güreşir; 2026'da 45. kez yapıldı"
+    },
+    {
+      "sira": 14,
+      "ad": "Hamsili ekmek (Hopa)",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Hopa",
+      "merkeze_km": 70,
+      "neden": "Mısır unlu hamura karışan hamsi; kışın, hamsi mevsiminde fırından sıcak yenir"
+    },
+    {
+      "sira": 15,
+      "ad": "Şavşat ketesi",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet",
+        "yavas"
+      ],
+      "ilce": "Şavşat",
+      "merkeze_km": 64,
+      "neden": "Yayla tereyağıyla kat kat sarılıp odun sobasında pişen çörek; 2021'de tescillendi"
+    },
+    {
+      "sira": 16,
+      "ad": "Kaçkar Dağı zirve tırmanışı",
+      "kategori": "aktivite",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Yusufeli",
+      "merkeze_km": 150,
+      "neden": "3937 m'lik zirveye Olgunlar'dan iki-üç günlük çıkış; temmuz–ağustos, rehberle"
+    },
+    {
+      "sira": 17,
+      "ad": "Hatila balı",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 12,
+      "neden": "Hatila Vadisi'nde Kafkas arısından süzülen amber renkli bal; menşe adı 2021'de alındı"
+    },
+    {
+      "sira": 18,
+      "ad": "Yusufeli Barajı Gölü",
+      "kategori": "manzara",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Yusufeli",
+      "merkeze_km": 75,
+      "neden": "Eski ilçe merkezini örten 275 m'lik barajın gölü; yeni viyadüklerden izlenir"
+    },
+    {
+      "sira": 19,
+      "ad": "Deliklikaya Şelalesi",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Murgul",
+      "merkeze_km": 65,
+      "neden": "Kayadaki delikten dökülen şelale; Murgul'un ormanlık vadisinde kısa yürüyüşle",
+      "osm": "node/8832065621",
+      "place_id": "ChIJ3Woqw3TFZ0AR1hxsFCY3ORA"
+    },
+    {
+      "sira": 20,
+      "ad": "Tibeti Kilisesi (Cevizli)",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Şavşat",
+      "merkeze_km": 78,
+      "neden": "9.–10. yy'da kurulan büyük katedralin kalıntısı; kubbesi 1953'te çöktü"
+    },
+    {
+      "sira": 21,
+      "ad": "Kestane balı (Arhavi)",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Arhavi",
+      "merkeze_km": 86,
+      "neden": "Koyu renkli, hafif acı kestane balı; Arhavi adıyla coğrafi işaretli"
+    },
+    {
+      "sira": 22,
+      "ad": "Puçuko",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Yazın güneşte kurutulan taze fasulyeyle kışın pişen yemek; 2017'de tescillendi"
+    },
+    {
+      "sira": 23,
+      "ad": "Mencuna Şelalesi",
+      "kategori": "doga",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Arhavi",
+      "merkeze_km": 100,
+      "neden": "Arhavi Küçükköy'de, yoldan bir saatlik patikayla ulaşılan yüksek şelale"
+    },
+    {
+      "sira": 24,
+      "ad": "Yeni Rabat Kilisesi (Bulanık)",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Ardanuç",
+      "merkeze_km": 50,
+      "neden": "10.–11. yy Gürcü kilisesi; serbest haç planı ve kapı üstü yazıtlar"
+    },
+    {
+      "sira": 25,
+      "ad": "Atabarı Kayak Merkezi",
+      "kategori": "aktivite",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 18,
+      "neden": "Mersivan Dağı'nda 2200 m'de; telesiyej ve teleski, sezon aralıktan nisana"
+    },
+    {
+      "sira": 26,
+      "ad": "İskender Paşa Camii",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Ardanuç",
+      "merkeze_km": 33,
+      "neden": "Ardanuç'un 1551'de Osmanlı'ya geçmesinin ardından yapılan, ilçenin en eski camisi",
+      "osm": "way/96535237"
+    },
+    {
+      "sira": 27,
+      "ad": "Arsiyan Yaylası",
+      "kategori": "manzara",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Şavşat",
+      "merkeze_km": 90,
+      "neden": "Gürcistan sınırındaki yüksek yayla; temmuzda çiçekli çayırlar, sınır ötesine bakış"
+    },
+    {
+      "sira": 28,
+      "ad": "Demir elma (Borçka)",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Borçka",
+      "merkeze_km": 33,
+      "neden": "İlaçsız yetişen, dokuz aya dek saklanabilen sert elma; 2023'te tescillendi"
+    },
+    {
+      "sira": 29,
+      "ad": "Kemalpaşa Plajı",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Kemalpaşa",
+      "merkeze_km": 82,
+      "neden": "Sarp sınır kapısına yakın 2 km'lik sahil; temmuz–ağustos denize girilir"
+    },
+    {
+      "sira": 30,
+      "ad": "Opiza Manastırı (Bağcılar)",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Şavşat",
+      "merkeze_km": 55,
+      "neden": "Gürcü kaynaklarında 5. yy'a uzanan manastırdan kalan yıkık kilise duvarları",
+      "osm": "node/3192034783",
+      "place_id": "ChIJb2lPseUNaEARQbORO2_K2Lo"
+    }
+  ]
+}
