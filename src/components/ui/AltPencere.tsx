@@ -17,7 +17,11 @@ type Props = {
    * #396 (`Sayfa_v5_PlanHazir`): haritanın üstündeki v5 çekmece — perde yok (harita görünür), üst köşeler 24, tutamaç 40 × 5
    * `#E4E7EE`, üstte 10 px, yukarı hafif gölge.
    */
-  gorunus?: 'v5';
+  /**
+   * #432 (`Sos_v6_Paylas`): v6 çekmece — perde Lacivert %50, üst köşeler 24, tutamaç 40 × 5 `#E4E7EE` üstte 10 px, kenar payı
+   * 16, alt 30, öğeler arası 16.
+   */
+  gorunus?: 'v5' | 'v6';
 };
 
 /**
@@ -26,19 +30,20 @@ type Props = {
  */
 export function AltPencere({ acik, onKapat, children, kaydirilir, kapatEtiketi, stil, gorunus }: Props) {
   const v5 = gorunus === 'v5';
+  const v6 = gorunus === 'v6';
   return (
     <Modal visible={acik} transparent animationType="slide" onRequestClose={onKapat}>
       <GestureHandlerRootView style={modalKokuStili}>
-        <View style={[s.perde, v5 && s.perdeYok]}>
+        <View style={[s.perde, v5 && s.perdeYok, v6 && s.perdeV6]}>
           <Pressable style={StyleSheet.absoluteFill} onPress={onKapat} accessibilityLabel={kapatEtiketi} />
-          <CekilenSayfa onKapat={onKapat} style={[s.sayfa, v5 && s.sayfaV5, kaydirilir && s.sinirli]}>
-            <View style={[s.tutamac, v5 && s.tutamacV5]} />
+          <CekilenSayfa onKapat={onKapat} style={[s.sayfa, v5 && s.sayfaV5, v6 && s.sayfaV6, kaydirilir && s.sinirli]}>
+            <View style={[s.tutamac, (v5 || v6) && s.tutamacV5, v6 && s.tutamacV6]} />
             {kaydirilir ? (
-              <SayfaKaydirici contentContainerStyle={[s.icerik, stil]} showsVerticalScrollIndicator={false}>
+              <SayfaKaydirici contentContainerStyle={[s.icerik, v6 && s.icerikV6, stil]} showsVerticalScrollIndicator={false}>
                 {children}
               </SayfaKaydirici>
             ) : (
-              <View style={[s.icerik, stil]}>{children}</View>
+              <View style={[s.icerik, v6 && s.icerikV6, stil]}>{children}</View>
             )}
           </CekilenSayfa>
         </View>
@@ -56,4 +61,8 @@ const s = StyleSheet.create({
   sayfaV5: { borderTopLeftRadius: 24, borderTopRightRadius: 24, paddingTop: 10, shadowColor: renk.metin, shadowOffset: { width: 0, height: -6 }, shadowOpacity: 0.08, shadowRadius: 20, elevation: 12 },
   tutamacV5: { width: 40, backgroundColor: anaV5.cizgi, marginBottom: 12 },
   icerik: { paddingHorizontal: 24, paddingTop: 14, paddingBottom: 34, gap: 16 },
+  perdeV6: { backgroundColor: 'rgba(14,20,48,0.5)' },
+  sayfaV6: { borderTopLeftRadius: 24, borderTopRightRadius: 24, paddingTop: 10 },
+  tutamacV6: { marginBottom: 0 },
+  icerikV6: { paddingHorizontal: 16, paddingTop: 16, paddingBottom: 30 },
 });

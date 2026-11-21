@@ -1,4 +1,4 @@
-// #181 KK4: kapaktaki ⋯ menü — Yeniden adlandır · Tarihleri değiştir · Seyahati sil (sahip) / Seyahatten ayrıl (üye). Silme ve
+// #181 KK4: kapaktaki ⋯ menü — (#432: Geziyi paylaş ·) Yeniden adlandır · Tarihleri değiştir · Seyahati sil (sahip) / Seyahatten ayrıl (üye). Silme ve
 // ayrılma #174 ile aynı onay ve dönüş (Seyahatler + bildirim). Tarih kısalırsa sondaki günlerin durakları için onay istenir.
 import { router } from 'expo-router';
 import { useState } from 'react';
@@ -28,9 +28,11 @@ type Props = {
   sahip: boolean;
   uyeSayisi: number;
   onHata: (metin: string) => void;
+  /** #432 KK1 (karar 11): "Geziyi paylaş" (plan ve gezi modunda aynı menü); misafire verilmez, satır görünmez. */
+  onPaylas?: () => void;
 };
 
-export function GeziMenusu({ acik, onKapat, seyahat, gunler, duraklar, sahip, uyeSayisi, onHata }: Props) {
+export function GeziMenusu({ acik, onKapat, seyahat, gunler, duraklar, sahip, uyeSayisi, onHata, onPaylas }: Props) {
   const [adAcik, setAdAcik] = useState(false);
   const [tarihAcik, setTarihAcik] = useState(false);
   const [ad, setAd] = useState('');
@@ -98,6 +100,7 @@ export function GeziMenusu({ acik, onKapat, seyahat, gunler, duraklar, sahip, uy
         baslik={seyahatAdi(seyahat)}
         onKapat={onKapat}
         secenekler={[
+          ...(onPaylas ? [{ etiket: t('paylasim.menu'), onPress: onPaylas }] : []),
           { etiket: t('geziSayfasi.adlandir'), onPress: adlandir },
           { etiket: t('geziSayfasi.tarihleriDegistir'), onPress: () => setTarihAcik(true) },
           sahip ? { etiket: t('seyahatler.sil'), onPress: seyahatiSil, tehlike: true } : { etiket: t('davet.grup.ayril'), onPress: seyahattenAyril, tehlike: true },
