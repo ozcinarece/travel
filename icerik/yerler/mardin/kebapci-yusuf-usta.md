@@ -1,4 +1,4 @@
-Kebapçı Yusuf Usta, eski şehrin hemen dışında, Yalım Mahallesi tarafında Mardin kebabıyla bilinen bir kebapçı. Turistik konak restoranlarından farklı olarak burada daha çok yerli müşteri görürsün; salon sade, servis hızlı.
+Kebapçı Yusuf Usta, eski şehrin dışında, yeni şehir tarafında Mardin kebabıyla bilinen bir kebapçı. Turistik konak restoranlarından farklı olarak burada daha çok yerli müşteri görürsün; salon sade, servis hızlı.
 
 Mardin kebabı, şişe dizilmiş kıyma ile patlıcanın birlikte közde pişirilmesiyle yapılır. Patlıcanın közlenmiş kabuğu soyulup etle karıştırılarak yenir. Yanında ince lavaş, közlenmiş domates ve biber, soğan salatası gelir. Acılı seviyorsan isot isteyebilirsin. Kebabın yanında bir ayran ya da şalgam iyi gider.
 
