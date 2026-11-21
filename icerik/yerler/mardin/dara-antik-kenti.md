@@ -1,4 +1,4 @@
-Dara Antik Kenti, Mardin'in yaklaşık 30 kilometre güneydoğusunda, Oğuz köyünün altında ve çevresinde uzanan bir ören yeri. Doğu Roma imparatoru Anastasius'un 6. yüzyılın başında, Sasani sınırına karşı kurdurduğu bir garnizon kenti. Yüzyıllar boyunca el değiştirdi, 14. yüzyılda terk edildi; bugünkü köy kalıntıların üstüne sonradan kuruldu.
+Dara Antik Kenti, Mardin'den arabayla yaklaşık yarım saat güneydoğuda, Oğuz köyünün altında ve çevresinde uzanan bir ören yeri. Doğu Roma imparatoru Anastasius'un 6. yüzyılın başında, Sasani sınırına karşı kurdurduğu bir garnizon kenti. Yüzyıllar boyunca el değiştirdi; bugünkü köy kalıntıların üstüne sonradan kuruldu.
 
 Kentin en etkileyici yeri yeraltındaki sarnıçlar. Merdivenle inilen dev mekânlarda ışık tavandaki açıklıklardan süzülür; serin ve yankılı bir ortam. Kentin kuzeyindeki nekropolde, kayaya oyulmuş katlı galeri mezarlar var; yan yana sıralanan mezar odalarının girişleri vadi boyunca dizilir. Ayrıca surların bir bölümünü, su bendini ve agoraya giden caddeyi görürsün. Zindan diye anılan kaya oyması yapı da gezilebiliyor.
 

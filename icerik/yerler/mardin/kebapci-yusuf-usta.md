@@ -6,6 +6,6 @@ Mardin kebabı, şişe dizilmiş kıyma ile patlıcanın birlikte közde pişiri
 
 Kalabalık bir öğle saatinde sıra olabilir. Masa beklerken ocakbaşına bak: ustalar patlıcanları ve şişleri aynı ateşte çevirir, hangisinin ne zaman kalkacağını göz kararıyla bilir.
 
-Tatlı istersen etrafta künefe ve şıllık yapan yerler var. Ama Dara yolu bir saatten kısa; ağır bir tatlıdan sonra sıcakta ören yerini gezmek yorabilir.
+Tatlı istersen etrafta künefe ve şıllık yapan yerler var. Ama Dara arabayla yaklaşık yarım saat; ağır bir tatlıdan sonra sıcakta ören yerini gezmek yorabilir.
 
 > Patlıcanı kebaptan ayırma: közlenmiş kabuğunu soy, eti patlıcanla birlikte lavaşa sar, Mardin kebabının tadı bu karışımdadır.

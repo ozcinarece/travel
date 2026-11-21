@@ -1,4 +1,4 @@
-Deyrulzafaran Manastırı, Mardin'in yaklaşık 5 kilometre doğusunda, kayalık bir yamacın eteğinde duran Süryani Ortodoks manastırı. 5. yüzyıla uzanan bir geçmişi var. 12. yüzyıldan 20. yüzyılın başına kadar Süryani Ortodoks patriklerinin merkezi oldu. Bugün de keşişler ve öğrenciler burada yaşıyor.
+Deyrulzafaran Manastırı, Mardin'in yaklaşık 5 kilometre doğusunda, kayalık bir yamacın eteğinde duran Süryani Ortodoks manastırı. 5. yüzyıla uzanan bir geçmişi var. 12. yüzyıldan 1932'ye kadar Süryani Ortodoks patriklerinin merkezi oldu. Bugün de keşişler ve öğrenciler burada yaşıyor.
 
 Adı Arapçada safran manastırı anlamına gelir. Duvarların sarımsı rengi, rivayete göre harca safran katılmasından gelir; taşın kendi rengi olduğunu söyleyenler de var.
 
