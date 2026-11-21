@@ -4,10 +4,8 @@ Akçaabat köftesi Türkiye'nin her yerinde menülerde görülür ama aslı ilç
 
 Akçaabat'ta köfteden sonra genellikle bir tatlı yenir; menüde sütlaç ya da kadayıf bulunur. Sabah Hamsiköy'de sütlaç yediysen bu kez farklı bir tatlı seç.
 
-Yemek için bir saat ayır. Hafta sonu akşamları salon dolabilir; kalabalık bir grupla gidiyorsan masa ayırtmayı düşün.
+Yemek için bir saat ayır. Grupla gidiyorsan önce herkese birer porsiyon söyle; köfte doyurucu, eksik kalırsa sonra eklersin, fazlası ise soğur. Hafta sonu akşamları salon dolabilir; kalabalık bir grupla gidiyorsan masa ayırtmayı düşün.
 
-Yemekten sonra Trabzon'a dönüş sahil yolundan yirmi dakika sürer. Akşam kıyı boyunca şehrin ışıkları görünür.
+Yemekten sonra Trabzon'a dönüş sahil yolundan yirmi dakika sürer. Akşam yol boyunca solda kıyının ve şehrin ışıkları görünür.
 
-Akçaabat'ta köfte salonları çok ve çoğu "Akçaabat köftesi" yazısı taşır. Bu durak, ilçede köfteyi yerinde yemek için seçildi.
-
-> Köfteyi söylerken yanına piyaz da iste; Akçaabat'ta köfte ile piyaz birlikte gelir, ayrı söylenmezse tabağa konmayabilir.
+> Köfteyi söylerken piyazı ayrıca iste.

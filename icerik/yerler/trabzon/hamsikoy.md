@@ -4,7 +4,7 @@ Hamsiköy sütlacı coğrafi işaretli. Farkını yöredeki ineklerin sütü, pi
 
 Sütlaççıların çoğu aynı zamanda lokanta. Öğle yemeğini burada yapmak istersen kuymak ya da karalahana çorbası söyleyebilirsin; tatlı olarak da sütlacı al. Bazı yerlerde paketli sütlaç ve yayla tereyağı satılır.
 
-Köy Sümela'dan arabayla yarım saatlik yolda. Sümela dönüşü güneye, Zigana yönüne devam ederek gelirsin, sonra aynı yoldan Maçka üzerinden Trabzon'a dönersin. Yarım saat ile 45 dakika arası ayır.
+Köy Sümela'dan arabayla yarım saatlik yolda. Sümela dönüşü güneye, Zigana yönüne devam ederek gelirsin, sonra aynı yoldan Maçka üzerinden Trabzon'a dönersin. Yemekle birlikte bir saat ayır.
 
 Kışın köy karlı olur, yol açık ama dikkat ister. Yazın ise yayla havası nedeniyle Trabzon'dan daha serindir.
 
