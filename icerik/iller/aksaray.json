@@ -1,0 +1,438 @@
+{
+  "il": "Aksaray",
+  "slug": "aksaray",
+  "guncelleme": "2026-11-21",
+  "oneriler": [
+    {
+      "sira": 1,
+      "ad": "Ihlara Vadisi",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Güzelyurt",
+      "merkeze_km": 39,
+      "neden": "Melendiz Çayı'nın oyduğu 14 km'lik kanyon; yamaçlarda freskli kaya kiliseleri sıralanır",
+      "place_id": "ChIJkZt1iMEP1hQR0Fm4ZfNrAOs"
+    },
+    {
+      "sira": 2,
+      "ad": "Selime Katedrali",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Güzelyurt",
+      "merkeze_km": 28,
+      "neden": "Ihlara'nın kuzey ucunda Türkiye'nin en büyük kaya manastırı; önünde Selime Sultan Türbesi",
+      "osm": "node/503576514",
+      "place_id": "ChIJq4oXo74O1hQRew9vVWkJWfM"
+    },
+    {
+      "sira": 3,
+      "ad": "Sultanhanı Kervansarayı",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 42,
+      "neden": "1229'da I. Alaeddin Keykubad yaptırdı; 1278 yangınından sonra onarılan 50x110 m'lik han",
+      "place_id": "ChIJg5TN8qDu1hQRHe6c3v97AaU"
+    },
+    {
+      "sira": 4,
+      "ad": "Güzelyurt Kilise Camii (Aziz Gregorios Kilisesi)",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Güzelyurt",
+      "merkeze_km": 40,
+      "neden": "385'te Aziz Gregorios adına yapılan kilise 1924'ten sonra camiye çevrildi; altında ayazma",
+      "place_id": "ChIJwbcoh3FuKhUR7jNZC_P7gTo"
+    },
+    {
+      "sira": 5,
+      "ad": "Aksaray Müzesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 3,
+      "neden": "Ihlara'dan çıkan insan ve kedi mumyaları, Aşıklı'nın ameliyatlı kafatası; giriş ücretsiz",
+      "osm": "way/359634500"
+    },
+    {
+      "sira": 6,
+      "ad": "Ihlara Cam Teras",
+      "kategori": "manzara",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Güzelyurt",
+      "merkeze_km": 39,
+      "neden": "2024'te açılan, vadinin 150 m üstüne uzanan cam seyir terası; aynı anda 200 kişi alır",
+      "osm": "node/13081298382",
+      "place_id": "ChIJxdcLdAAP1hQRf8aW-ezma2Q"
+    },
+    {
+      "sira": 7,
+      "ad": "Aksaray tulum kebabı",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Kuzu eti kendi derisine dikilip toprak altında közle 5–6 saat pişer; pilavla, tescilli"
+    },
+    {
+      "sira": 8,
+      "ad": "Eğri Minare (Kızıl Minare)",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "1221–1236 arasında kırmızı tuğladan yapılan Selçuklu minaresi; eğik gövdesi şehrin simgesi",
+      "osm": "node/9779576021"
+    },
+    {
+      "sira": 9,
+      "ad": "Manastır Vadisi",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Güzelyurt",
+      "merkeze_km": 40,
+      "neden": "Kilise Camii'nden başlayan 5,5 km'lik patika; Sivişli ve Papaz Evi gibi kaya kiliseleri"
+    },
+    {
+      "sira": 10,
+      "ad": "Ihlara'da sıcak hava balonu",
+      "kategori": "aktivite",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Güzelyurt",
+      "merkeze_km": 38,
+      "neden": "Ihlara ve Belisırma'dan gün doğumu uçuşları; yılda 160–170 gün havalanılabiliyor"
+    },
+    {
+      "sira": 11,
+      "ad": "Aksaray şerbetli pidesi",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Üç peynirli pide meşe ateşinde pişer, tereyağı sürülüp soğuk şerbetle gelir; tescilli"
+    },
+    {
+      "sira": 12,
+      "ad": "Hasandağı",
+      "kategori": "aktivite",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 49,
+      "neden": "3.268 m'lik volkan; Yardıbaşı Yaylası'ndan zirve parkuru başlar, eteklerde yılkı atları",
+      "place_id": "ChIJF_u1M1wU1hQRmnQ4n-ZGItc"
+    },
+    {
+      "sira": 13,
+      "ad": "Belisırma Melendiz kıyısı lokantaları",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet",
+        "yavas",
+        "doga"
+      ],
+      "ilce": "Güzelyurt",
+      "merkeze_km": 36,
+      "neden": "Ihlara yürüyüşünün ortasındaki köy; Melendiz kıyısında çardaklı lokantalarda mola"
+    },
+    {
+      "sira": 14,
+      "ad": "Aşıklı Höyük",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Gülağaç",
+      "merkeze_km": 23,
+      "neden": "Orta Anadolu'nun bilinen en eski köyü; koyun ve keçinin ilk evcilleştirildiği yerlerden",
+      "osm": "way/168569016",
+      "place_id": "ChIJt6vORcML1hQRLJ5LlA5fCyo"
+    },
+    {
+      "sira": 15,
+      "ad": "Saratlı Kırkgöz Yeraltı Şehri",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Gülağaç",
+      "merkeze_km": 31,
+      "neden": "Girişleri yuvarlak sürgü taşlarıyla kapanan yeraltı şehri; içinde 8 m derinlikte kuyu",
+      "osm": "node/3090482562",
+      "place_id": "ChIJia1EF3vh1RQRw54bpKo0fWo"
+    },
+    {
+      "sira": 16,
+      "ad": "Tuz Gölü (Eskil kıyısı)",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Eskil",
+      "merkeze_km": 60,
+      "neden": "Eskil kıyısında yazın on binlerce flamingo yavrular; temmuz-ağustosta su kızıla döner",
+      "place_id": "ChIJq4EgzbW_1hQRaJCt3cKf3EY"
+    },
+    {
+      "sira": 17,
+      "ad": "Aksaray köpük helvası",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Çöven otunun kaynatılmış suyuyla şeker şurubu köpürtülerek yapılan beyaz helva; tescilli"
+    },
+    {
+      "sira": 18,
+      "ad": "Yüksek Kilise",
+      "kategori": "manzara",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Güzelyurt",
+      "merkeze_km": 38,
+      "neden": "Güzelyurt'un dışında kayalık tepedeki kilise; gün batımı Hasandağı'yla birlikte izlenir",
+      "place_id": "ChIJHcuJoOkF1hQRabdWE6XfQBY"
+    },
+    {
+      "sira": 19,
+      "ad": "Tarihi Gelveri evleri",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Güzelyurt",
+      "merkeze_km": 39,
+      "neden": "1924'e dek Rum ve Türklerin birlikte yaşadığı Güzelyurt'ta 100–200 yıllık taş evler"
+    },
+    {
+      "sira": 20,
+      "ad": "Ziga Kaplıcası",
+      "kategori": "aktivite",
+      "amaclar": [
+        "yavas"
+      ],
+      "ilce": "Güzelyurt",
+      "merkeze_km": 32,
+      "neden": "Yaprakhisar yakınında 45–52 °C suyu çıkan kaplıca; çevresinde traverten oluşumları"
+    },
+    {
+      "sira": 21,
+      "ad": "Aksaray şeker böreği (kalburabastı)",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Cevizli hamur kalburdan bastırılıp fırınlanır, soğuk limonlu şerbete yatırılır; tescilli"
+    },
+    {
+      "sira": 22,
+      "ad": "Kızıl Kilise",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Güzelyurt",
+      "merkeze_km": 46,
+      "neden": "Sivrihisar köyünde 5.–6. yüzyıl kilisesi; adını kırmızımsı kesme taşından alır",
+      "place_id": "ChIJ28opf_0D1hQRNCU27SanpKI"
+    },
+    {
+      "sira": 23,
+      "ad": "Aksaray Ulu Camii",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "1408–1409'da Karamanoğlu Mehmet Bey yaptırdı; abanoz ağacından oyma minberi var"
+    },
+    {
+      "sira": 24,
+      "ad": "Gelveri ekmeği",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Güzelyurt",
+      "merkeze_km": 40,
+      "neden": "Güzelyurt'ta ekşi mayayla yoğrulup odun ateşli taş fırında ya da tandırda pişer; tescilli"
+    },
+    {
+      "sira": 25,
+      "ad": "Aksaray inceelek tatlısı",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "14 kat ince yufka cevizle dizilir, sıcakken şerbetlenir; 24 saat içinde yenir, tescilli"
+    },
+    {
+      "sira": 26,
+      "ad": "Zinciriye Medresesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "14. yüzyıl Karamanoğlu medresesi; 1927–1945 arası cezaeviydi, bugün kültür merkezi",
+      "osm": "way/764275751"
+    },
+    {
+      "sira": 27,
+      "ad": "Aksaray tahinlisi",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Tahin ve tereyağıyla sarılan hamur burulup tepsiye dizilir, odun ateşli taş fırında pişer"
+    },
+    {
+      "sira": 28,
+      "ad": "Mamasın Barajı",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 15,
+      "neden": "Aksaray'ın en büyük baraj gölü; flamingolar Tuz Gölü'ne geçmeden önce burada beslenir",
+      "place_id": "ChIJRVUpaiJ11hQRoE3AmQdMAsk"
+    },
+    {
+      "sira": 29,
+      "ad": "Azmi Milli Bilim ve Sanayi Müzesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "1924'te kurulan un fabrikası; makineleri, defterleri ve işçi listeleriyle müze oldu",
+      "place_id": "ChIJ5w4Z1h5x1hQRdGr6EDJELAY"
+    },
+    {
+      "sira": 30,
+      "ad": "Gaziemir Yeraltı Şehri",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Güzelyurt",
+      "merkeze_km": 46,
+      "neden": "İki kilisesi, küplerle dolu şarap işliği ve uyku nişleri olan yeraltı şehri",
+      "place_id": "ChIJLQaGzYj91RQR9GFGMvZmH4w"
+    },
+    {
+      "sira": 31,
+      "ad": "Ağzıkara Han",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 15,
+      "neden": "1231'de kapalı bölümü biten Selçuklu hanı; avlu ortasında merdivenle çıkılan köşk mescit",
+      "osm": "relation/2057692",
+      "place_id": "ChIJvydbKe_f1RQRJow7d_-crjc"
+    },
+    {
+      "sira": 32,
+      "ad": "Aksaray un kurabiyesi (asker kurabiyesi)",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Tereyağı, şeker ve undan S biçiminde kurabiye; fırın kapağı açılmadan pişer, tescilli"
+    },
+    {
+      "sira": 33,
+      "ad": "Güzelyurt Göleti",
+      "kategori": "manzara",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Güzelyurt",
+      "merkeze_km": 38,
+      "neden": "Güzelyurt'un batısındaki sulama göleti; gün batımında Yüksek Kilise ve Hasandağı silueti",
+      "place_id": "ChIJpQ1198IF1hQRVLVXpB8iyk0"
+    },
+    {
+      "sira": 34,
+      "ad": "Taptuk Emre Türbesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 28,
+      "neden": "Yunus Emre'nin hocası Taptuk Emre'nin türbesi; Ekecik Dağı eteğinde, çam korusu içinde",
+      "place_id": "ChIJjYNi_BTd1RQRyZjqwQ74bMk"
+    },
+    {
+      "sira": 35,
+      "ad": "Aksaray kabak çekirdeği",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Kadın tırnağı denen yerel kabaktan; güneşte kurutulan çekirdek menşe adıyla tescilli"
+    }
+  ]
+}
