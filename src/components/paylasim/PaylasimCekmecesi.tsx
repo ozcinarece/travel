@@ -2,11 +2,14 @@
 // Önizleme kartı (seyahat kapağı yer tutucusu, "Ayşe'nin Eskişehir gezisi", "3 gün · 12 durak · 3 kişi gezdi"), "Kişi adlarını
 // göster" (varsayılan kapalı), kilitli "Notlar, harcamalar ve sohbet" satırı, turuncu "Linki gönder". Link açıkken üstte
 // "Link açık · N kez açıldı", altta kırmızı "Paylaşımı kapat" (sistem onayıyla). En altta davet akışına giden gri satır (KK9).
-import { useState } from 'react';
+// #454 inceleme: hata ve bildirimler çekmecenin içinde, "Linki gönder"in üstünde (#317 hata kutusu biçimi); çevrimdışıyken ve
+// link okunamazken düğmeler pasif, okuma hatasında "Tekrar dene".
+import { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { SeyahatKapagi } from '@/components/seyahatler/SeyahatKapagi';
 import { AltPencere } from '@/components/ui/AltPencere';
+import { Buton } from '@/components/ui/Buton';
 import { Ikon } from '@/components/ui/Ikon';
 import { linkiGonder, paylasimLinki, useAcikPaylasim, usePaylasimGuncelle, usePaylasimOlustur } from '@/features/paylasim/sorgular';
 import { t } from '@/i18n';
@@ -25,8 +28,12 @@ type Props = {
   kisiSayisi: number;
   /** KK9: "Arkadaş ekle ›" davet akışını açar. */
   onArkadasEkle: () => void;
-  onBildirim: (metin: string) => void;
+  /** Bağlantı yokken "Linki gönder", anahtar ve "Paylaşımı kapat" pasif. */
+  cevrimdisi: boolean;
 };
+
+/** Çekmece kapanma animasyonu bitmeden ikinci Modal açılırsa iOS onu göstermeyebilir. */
+export const ARKADAS_GECIKME_MS = 350;
 
 /** "Ayşe'nin Eskişehir gezisi"; ad ek alamıyorsa "Eskişehir gezisi". */
 export function paylasimBasligi(ad: string | null, sehir: string): string {
@@ -38,7 +45,7 @@ export function paylasimOzeti(gun: number, durak: number, kisi: number): string 
   return [t('paylasim.gun', { n: gun }), t('paylasim.durak', { n: durak }), t('paylasim.kisi', { n: kisi })].join(' · ');
 }
 
-export function PaylasimCekmecesi({ acik, onKapat, seyahat, benimAdim, gunSayisi, durakSayisi, kisiSayisi, onArkadasEkle, onBildirim }: Props) {
+export function PaylasimCekmecesi({ acik, onKapat, seyahat, benimAdim, gunSayisi, durakSayisi, kisiSayisi, onArkadasEkle, cevrimdisi }: Props) {
   const paylasim = useAcikPaylasim(seyahat.id, acik);
   const olustur = usePaylasimOlustur(seyahat.id);
   const guncelle = usePaylasimGuncelle(seyahat.id);
@@ -50,22 +57,39 @@ export function PaylasimCekmecesi({ acik, onKapat, seyahat, benimAdim, gunSayisi
   const baslik = paylasimBasligi(benimAdim, seyahat.city_label);
   const ozet = paylasimOzeti(gunSayisi, durakSayisi, kisiSayisi);
   const mesgul = olustur.isPending || guncelle.isPending;
+  // Link okunamadıysa "link yok" sanılmaz: yeni link denemesi tek açık link kısıtına takılır, "Paylaşımı kapat" görünmez.
+  const okumaHatasi = paylasim.isError;
+  const pasif = cevrimdisi || okumaHatasi;
+  const ipucu = cevrimdisi ? t('geziSayfasi.cevrimdisi.baglantiYok') : undefined;
+
+  // Hata ve bildirim çekmecenin içinde gösterilir (sayfa bildirimi Modal'ın altında kalır).
+  const [mesaj, setMesaj] = useState<string | null>(null);
+  const kapanis = () => {
+    setMesaj(null);
+    onKapat();
+  };
+  const zamanlayici = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => () => {
+    if (zamanlayici.current) clearTimeout(zamanlayici.current);
+  }, []);
 
   const anahtar = () => {
     const yeni = !adlarAcik;
+    setMesaj(null);
     // Açık linkte hemen yazılır (linki açan kişi bir sonraki açılışta görür); hata olursa eski değere döner.
-    if (link) guncelle.mutate({ id: link.id, degisiklik: { kisi_adlari_acik: yeni } }, { onError: () => onBildirim(t('paylasim.hata')) });
+    if (link) guncelle.mutate({ id: link.id, degisiklik: { kisi_adlari_acik: yeni } }, { onError: () => setMesaj(t('paylasim.hata')) });
     else setYerelAdlar(yeni);
   };
 
   const gonder = async () => {
+    setMesaj(null);
     try {
       const hedef = link ?? (await olustur.mutateAsync(adlarAcik));
       const url = paylasimLinki(hedef.token);
       const sonuc = await linkiGonder(t('paylasim.mesaj', { baslik, ozet: [t('paylasim.gun', { n: gunSayisi }), t('paylasim.durak', { n: durakSayisi })].join(' · '), link: url }), url);
-      if (sonuc === 'kopyalandi') onBildirim(t('davet.linkKopyalandi'));
+      if (sonuc === 'kopyalandi') setMesaj(t('davet.linkKopyalandi'));
     } catch {
-      onBildirim(t('paylasim.hata'));
+      setMesaj(t('paylasim.hata'));
     }
   };
 
@@ -73,16 +97,24 @@ export function PaylasimCekmecesi({ acik, onKapat, seyahat, benimAdim, gunSayisi
     if (!link) return;
     const onay = await onayIste(t('paylasim.paylasimiKapat'), t('paylasim.kapatOnayMetin'), t('paylasim.kapatEvet'), t('genel.vazgec'));
     if (!onay) return;
-    guncelle.mutate({ id: link.id, degisiklik: { acik: false } }, { onError: () => onBildirim(t('paylasim.hata')) });
+    setMesaj(null);
+    guncelle.mutate({ id: link.id, degisiklik: { acik: false } }, { onSuccess: () => setMesaj(t('paylasim.kapatildi')), onError: () => setMesaj(t('paylasim.hata')) });
   };
 
+  const arkadasEkle = () => {
+    kapanis();
+    zamanlayici.current = setTimeout(onArkadasEkle, ARKADAS_GECIKME_MS);
+  };
+
+  const kutuMetni = okumaHatasi ? t('paylasim.okumaHata') : mesaj;
+
   return (
-    <AltPencere acik={acik} onKapat={onKapat} kapatEtiketi={t('paylasim.kapat')} gorunus="v6" kaydirilir>
+    <AltPencere acik={acik} onKapat={kapanis} kapatEtiketi={t('paylasim.kapat')} gorunus="v6" kaydirilir>
       <View style={s.ust}>
         <Text style={s.baslik} accessibilityRole="header">
           {t('paylasim.baslik')}
         </Text>
-        <Pressable accessibilityRole="button" accessibilityLabel={t('paylasim.kapat')} onPress={onKapat} style={s.kapatDugme}>
+        <Pressable accessibilityRole="button" accessibilityLabel={t('paylasim.kapat')} onPress={kapanis} style={s.kapatDugme}>
           <Ikon ad="kapat" boyut={18} renk={renk.metin} kalinlik={2.4} />
         </Pressable>
       </View>
@@ -101,7 +133,14 @@ export function PaylasimCekmecesi({ acik, onKapat, seyahat, benimAdim, gunSayisi
       </View>
 
       <View>
-        <Pressable accessibilityRole="checkbox" accessibilityState={{ checked: adlarAcik, disabled: olustur.isPending }} accessibilityLabel={t('paylasim.kisiAdlari')} onPress={anahtar} disabled={olustur.isPending} style={s.satir}>
+        <Pressable
+          accessibilityRole="checkbox"
+          accessibilityState={{ checked: adlarAcik, disabled: olustur.isPending || pasif }}
+          accessibilityLabel={t('paylasim.kisiAdlari')}
+          accessibilityHint={ipucu}
+          onPress={anahtar}
+          disabled={olustur.isPending || pasif}
+          style={[s.satir, pasif && s.pasif]}>
           <View style={s.satirMetin}>
             <Text style={s.satirBaslik}>{t('paylasim.kisiAdlari')}</Text>
             <Text style={s.alt}>{t('paylasim.kisiAdlariAlt', { n: kisiSayisi })}</Text>
@@ -130,11 +169,30 @@ export function PaylasimCekmecesi({ acik, onKapat, seyahat, benimAdim, gunSayisi
             </Text>
           </View>
         ) : null}
-        <Pressable accessibilityRole="button" accessibilityState={{ disabled: mesgul || paylasim.isLoading }} disabled={mesgul || paylasim.isLoading} onPress={gonder} style={s.gonder}>
+        {kutuMetni ? (
+          <View testID="paylasim-mesaj" style={s.hataKutu} accessibilityRole="alert" accessibilityLiveRegion="polite">
+            <Text style={s.hataMetin}>{kutuMetni}</Text>
+          </View>
+        ) : null}
+        {okumaHatasi ? <Buton baslik={t('paylasim.tekrarDene')} tur="ikincil" onPress={() => paylasim.refetch()} yukleniyor={paylasim.isFetching} /> : null}
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={t('paylasim.linkiGonder')}
+          accessibilityHint={ipucu}
+          accessibilityState={{ disabled: mesgul || paylasim.isLoading || pasif, busy: olustur.isPending }}
+          disabled={mesgul || paylasim.isLoading || pasif}
+          onPress={gonder}
+          style={[s.gonder, pasif && s.pasif]}>
           {olustur.isPending ? <ActivityIndicator color={renk.metin} /> : <Text style={s.gonderMetin}>{t('paylasim.linkiGonder')}</Text>}
         </Pressable>
         {link ? (
-          <Pressable accessibilityRole="button" disabled={mesgul} onPress={kapat} style={s.kapatLink}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityHint={ipucu}
+            accessibilityState={{ disabled: mesgul || pasif }}
+            disabled={mesgul || pasif}
+            onPress={kapat}
+            style={[s.kapatLink, pasif && s.pasif]}>
             <Text style={s.kapatLinkMetin}>{t('paylasim.paylasimiKapat')}</Text>
           </Pressable>
         ) : (
@@ -144,10 +202,7 @@ export function PaylasimCekmecesi({ acik, onKapat, seyahat, benimAdim, gunSayisi
 
       <Pressable
         accessibilityRole="link"
-        onPress={() => {
-          onKapat();
-          onArkadasEkle();
-        }}
+        onPress={arkadasEkle}
         style={s.arkadas}>
         <Text style={s.arkadasMetin}>
           {t('paylasim.arkadasSoru')}
@@ -186,4 +241,8 @@ const s = StyleSheet.create({
   arkadas: { minHeight: 44, borderTopWidth: 1, borderTopColor: anaV5.cizgi, paddingTop: 6, alignItems: 'center', justifyContent: 'center' },
   arkadasMetin: { fontFamily: yazi.normal, fontSize: 14, color: anaV5.ikincil, textAlign: 'center' },
   arkadasEkle: { fontFamily: yazi.kalin, color: renk.ana },
+  pasif: { opacity: 0.4 },
+  // #317 hata kutusu (Yer ekle) ile aynı biçim.
+  hataKutu: { padding: 10, borderRadius: 12, backgroundColor: renk.uyariZemin },
+  hataMetin: { fontFamily: yazi.yari, fontSize: 12, color: renk.uyari, textAlign: 'center' },
 });

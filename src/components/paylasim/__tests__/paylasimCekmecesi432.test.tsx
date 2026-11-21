@@ -2,23 +2,25 @@
 // "Kişi adlarını göster" ve KK-ek satırı, "Linki gönder" (link yoksa oluşturur, varsa aynısını gönderir), link açıkken
 // "Link açık · N kez açıldı" ve onaylı "Paylaşımı kapat", KK9'daki "Arkadaş ekle ›" satırı.
 import { beforeEach, describe, expect, it, jest } from '@jest/globals';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react-native';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react-native';
 
 import { t } from '@/i18n';
 
 import { PaylasimCekmecesi } from '../PaylasimCekmecesi';
 
 type Link = { id: string; token: string; kisi_adlari_acik: boolean; acilma_sayisi: number } | null;
-const mockDurum = { link: null as Link };
+const mockDurum = { link: null as Link, hata: false };
+const mockYenile = jest.fn();
 const mockOlustur = jest.fn(async (adlar: boolean) => ({ id: 'P1', token: 'A'.repeat(24), kisi_adlari_acik: adlar, acilma_sayisi: 0 }));
-const mockGuncelle = jest.fn();
+type GuncelleSecenek = { onSuccess?: () => void; onError?: () => void };
+const mockGuncelle = jest.fn((_d: unknown, _s?: GuncelleSecenek) => undefined);
 const mockGonder = jest.fn(async (_metin: string, _link: string) => 'paylasildi');
 const mockOnay = jest.fn(async () => true);
 
 jest.mock('@/components/seyahatler/SeyahatKapagi', () => ({ SeyahatKapagi: () => null }));
 jest.mock('@/lib/onay', () => ({ onayIste: (...a: unknown[]) => mockOnay(...(a as [])) }));
 jest.mock('@/features/paylasim/sorgular', () => ({
-  useAcikPaylasim: () => ({ data: mockDurum.link, isLoading: false }),
+  useAcikPaylasim: () => ({ data: mockDurum.hata ? undefined : mockDurum.link, isLoading: false, isError: mockDurum.hata, isFetching: false, refetch: mockYenile }),
   usePaylasimOlustur: () => ({ mutateAsync: mockOlustur, isPending: false }),
   usePaylasimGuncelle: () => ({ mutate: mockGuncelle, isPending: false }),
   paylasimLinki: (token: string) => `https://gezi-web.pages.dev/r/g/${token}`,
@@ -27,7 +29,7 @@ jest.mock('@/features/paylasim/sorgular', () => ({
 
 const onKapat = jest.fn();
 const onArkadasEkle = jest.fn();
-const cekmece = () =>
+const cekmece = (cevrimdisi = false) =>
   render(
     <PaylasimCekmecesi
       acik
@@ -38,12 +40,13 @@ const cekmece = () =>
       durakSayisi={12}
       kisiSayisi={3}
       onArkadasEkle={onArkadasEkle}
-      onBildirim={() => undefined}
+      cevrimdisi={cevrimdisi}
     />,
   );
 
 beforeEach(() => {
   mockDurum.link = null;
+  mockDurum.hata = false;
   jest.clearAllMocks();
 });
 
@@ -100,10 +103,71 @@ describe('PaylasimCekmecesi (#432 2/3)', () => {
     expect(mockGuncelle).not.toHaveBeenCalled();
   });
 
-  it('KK9: "Arkadaş ekle ›" çekmeceyi kapatıp davet akışını açar', () => {
+  it('KK9: "Arkadaş ekle ›" çekmeceyi kapatır, davet akışını kapanış bittikten sonra açar (iOS iki Modal)', () => {
+    jest.useFakeTimers();
+    try {
+      cekmece();
+      fireEvent.press(screen.getByRole('link'));
+      expect(onKapat).toHaveBeenCalled();
+      expect(onArkadasEkle).not.toHaveBeenCalled();
+      act(() => jest.advanceTimersByTime(400));
+      expect(onArkadasEkle).toHaveBeenCalled();
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
+  it('#454: link oluşturma hatası çekmecenin içinde, "Linki gönder"in üstünde görünür', async () => {
+    mockOlustur.mockRejectedValueOnce(new Error('x'));
     cekmece();
-    fireEvent.press(screen.getByRole('link'));
-    expect(onKapat).toHaveBeenCalled();
-    expect(onArkadasEkle).toHaveBeenCalled();
+    fireEvent.press(screen.getByText('Linki gönder'));
+    expect(await screen.findByText(t('paylasim.hata'))).toBeTruthy();
+    expect(screen.getByTestId('paylasim-mesaj').props.accessibilityRole).toBe('alert');
+  });
+
+  it('#454: web\'de panoya kopyalanınca "Link kopyalandı" çekmecede görünür', async () => {
+    mockGonder.mockResolvedValueOnce('kopyalandi');
+    cekmece();
+    fireEvent.press(screen.getByText('Linki gönder'));
+    expect(await screen.findByText(t('davet.linkKopyalandi'))).toBeTruthy();
+  });
+
+  it('#454: anahtar ve kapatma hatası çekmecede; kapatılınca "Paylaşım kapatıldı"', async () => {
+    mockDurum.link = { id: 'P9', token: 'B'.repeat(24), kisi_adlari_acik: false, acilma_sayisi: 0 };
+    cekmece();
+    fireEvent.press(screen.getByRole('checkbox', { name: t('paylasim.kisiAdlari') }));
+    act(() => mockGuncelle.mock.calls[0][1]?.onError?.());
+    expect(screen.getByText(t('paylasim.hata'))).toBeTruthy();
+
+    fireEvent.press(screen.getByText('Paylaşımı kapat'));
+    await waitFor(() => expect(mockGuncelle).toHaveBeenCalledTimes(2));
+    act(() => mockGuncelle.mock.calls[1][1]?.onSuccess?.());
+    expect(screen.getByText(t('paylasim.kapatildi'))).toBeTruthy();
+    expect(screen.queryByText(t('paylasim.hata'))).toBeNull();
+  });
+
+  it('#454: link okunamazsa hata satırı ve "Tekrar dene"; gönder pasif, yeni link denenmez', () => {
+    mockDurum.hata = true;
+    cekmece();
+    expect(screen.getByText(t('paylasim.okumaHata'))).toBeTruthy();
+    const gonder = screen.getByRole('button', { name: t('paylasim.linkiGonder') });
+    expect(gonder.props.accessibilityState.disabled).toBe(true);
+    fireEvent.press(gonder);
+    expect(mockOlustur).not.toHaveBeenCalled();
+    expect(screen.getByRole('checkbox', { name: t('paylasim.kisiAdlari') }).props.accessibilityState.disabled).toBe(true);
+    fireEvent.press(screen.getByRole('button', { name: t('paylasim.tekrarDene') }));
+    expect(mockYenile).toHaveBeenCalled();
+  });
+
+  it('#454: çevrimdışıyken "Linki gönder", anahtar ve "Paylaşımı kapat" pasif', () => {
+    mockDurum.link = { id: 'P9', token: 'B'.repeat(24), kisi_adlari_acik: false, acilma_sayisi: 0 };
+    cekmece(true);
+    const gonder = screen.getByRole('button', { name: t('paylasim.linkiGonder') });
+    expect(gonder.props.accessibilityState.disabled).toBe(true);
+    expect(gonder.props.accessibilityHint).toBe(t('geziSayfasi.cevrimdisi.baglantiYok'));
+    expect(screen.getByRole('checkbox', { name: t('paylasim.kisiAdlari') }).props.accessibilityState.disabled).toBe(true);
+    expect(screen.getByRole('button', { name: t('paylasim.paylasimiKapat') }).props.accessibilityState.disabled).toBe(true);
+    fireEvent.press(screen.getByText('Paylaşımı kapat'));
+    expect(mockOnay).not.toHaveBeenCalled();
   });
 });

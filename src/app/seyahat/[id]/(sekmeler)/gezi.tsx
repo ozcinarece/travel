@@ -489,7 +489,7 @@ function GeziSayfasi({ seyahat, gunler, duraklar, mekanlar, konaklamalar, katild
           durakSayisi={duraklar.length}
           kisiSayisi={uyeListesi.length || 1}
           onArkadasEkle={() => setGrupAcik(true)}
-          onBildirim={setBildirim}
+          cevrimdisi={cevrimdisi}
         />
       ) : null}
       <SecimMenusu
