@@ -1,0 +1,487 @@
+{
+  "il": "Diyarbakır",
+  "slug": "diyarbakir",
+  "guncelleme": "2026-11-21",
+  "oneriler": [
+    {
+      "sira": 1,
+      "ad": "Diyarbakır Surları",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Sur",
+      "merkeze_km": 1,
+      "neden": "5,8 km'lik bazalt sur; 82 burcun çoğu ayakta, 2015'te Hevsel ile UNESCO listesine girdi",
+      "place_id": "ChIJx7dzeGHCdEARBPNr3xx7fZg"
+    },
+    {
+      "sira": 2,
+      "ad": "Hevsel Bahçeleri",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas",
+        "cocuklu"
+      ],
+      "ilce": "Sur",
+      "merkeze_km": 3,
+      "neden": "Surla Dicle arasında ~700 hektar teraslı bahçe; kavaklık ve sebze tarlaları",
+      "place_id": "ChIJg9YqXKshdUARoylyBGXdwXQ"
+    },
+    {
+      "sira": 3,
+      "ad": "Ulu Cami",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Sur",
+      "merkeze_km": 1,
+      "neden": "1091'de Melikşah yaptırdı; avlu revaklarında Bizans sütunları, yanında Mesudiye Medresesi",
+      "osm": "relation/7840464",
+      "place_id": "ChIJhbl8FTggdUARYTWZFrWCdpQ"
+    },
+    {
+      "sira": 4,
+      "ad": "Dicle (On Gözlü) Köprüsü",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "gece",
+        "yavas"
+      ],
+      "ilce": "Sur",
+      "merkeze_km": 3,
+      "neden": "1065 Mervani yapısı, 10 gözlü 178 m bazalt köprü; trafiğe kapalı, kıyısı akşam dolar",
+      "osm": "way/129614304"
+    },
+    {
+      "sira": 5,
+      "ad": "Diyarbakır ciğer kebabı",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet",
+        "gece"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Kuzu ciğeri lavaşla sarılır; 2022'de TÜRKPATENT tescili aldı, kahvaltıda da yenir"
+    },
+    {
+      "sira": 6,
+      "ad": "Hasan Paşa Hanı",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "lezzet",
+        "yavas"
+      ],
+      "ilce": "Sur",
+      "merkeze_km": 1,
+      "neden": "1575'te tamamlanan Osmanlı hanı; avlusu bugün kahvaltı salonları ve dükkânlarla dolu",
+      "osm": "relation/1749254",
+      "place_id": "ChIJmQn-YzggdUARexGBKxcjl-Q"
+    },
+    {
+      "sira": 7,
+      "ad": "Keçi Burcu",
+      "kategori": "manzara",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Sur",
+      "merkeze_km": 2,
+      "neden": "Mardin Kapı'nın doğusundaki burç; Dicle, Hevsel ve On Gözlü Köprü'ye bakar, sergi alanı",
+      "osm": "node/3350749882",
+      "place_id": "ChIJS7HdFUwgdUAReEpwgijes28"
+    },
+    {
+      "sira": 8,
+      "ad": "Zerzevan Kalesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Çınar",
+      "merkeze_km": 45,
+      "neden": "Roma sınır garnizonu; kayaya oyulmuş Mithras tapınağı var, UNESCO geçici listesinde",
+      "place_id": "ChIJ7_AlwLYjdUAR9OdHrLczRPs"
+    },
+    {
+      "sira": 9,
+      "ad": "Dört Ayaklı Minare",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Sur",
+      "merkeze_km": 1,
+      "neden": "1500'lerden Şeyh Mutahhar Camii minaresi dört sütun üstünde; 2018'de onarılıp açıldı",
+      "osm": "node/3350765397",
+      "place_id": "ChIJdWgU30cgdUAR_GcrNwZ2XSo"
+    },
+    {
+      "sira": 10,
+      "ad": "Meryem Ana Kilisesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Sur",
+      "merkeze_km": 1,
+      "neden": "Süryani Ortodoks kilisesi; hâlâ ibadete açık, kökeni MÖ 1. yy tapınağına dayanır"
+    },
+    {
+      "sira": 11,
+      "ad": "Diyarbakır Arkeoloji Müzesi (İçkale)",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Sur",
+      "merkeze_km": 2,
+      "neden": "İçkale'deki 14 tescilli yapılı müze kompleksi; envanterde ~36 bin eser, 1.615'i sergide",
+      "osm": "node/8836322687",
+      "place_id": "ChIJ753bET8gdUARJcVg2koeYwM"
+    },
+    {
+      "sira": 12,
+      "ad": "Diyarbakır kaburga dolması",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Kuzu kaburgası baharatlı pilavla doldurulup pişer; 2021'de TÜRKPATENT tescili aldı"
+    },
+    {
+      "sira": 13,
+      "ad": "Surp Giragos Ermeni Kilisesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Sur",
+      "merkeze_km": 1,
+      "neden": "Bölgenin en büyük Ermeni kiliselerinden; onarımdan sonra Mayıs 2022'de yeniden açıldı",
+      "osm": "node/5600193052",
+      "place_id": "ChIJmRgo0kcgdUAR4RKreF548f4"
+    },
+    {
+      "sira": 14,
+      "ad": "Eğil Peygamber Kabirleri",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Eğil",
+      "merkeze_km": 52,
+      "neden": "Zülkifl ve Elyesa'nın da gömülü olduğuna inanılan tepe; yılda ~400 bin ziyaretçi"
+    },
+    {
+      "sira": 15,
+      "ad": "Diyarbakır kahvaltısı",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet",
+        "cocuklu"
+      ],
+      "ilce": "Sur",
+      "merkeze_km": 1,
+      "neden": "Sur'daki han ve salonlarda serpme kahvaltı; ciğer kebabı sabah da sofraya gelir"
+    },
+    {
+      "sira": 16,
+      "ad": "Diyarbakır burma kadayıfı",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Cevizli, şerbetli burma kadayıf; 2017'de Diyarbakır adına coğrafi işaret aldı"
+    },
+    {
+      "sira": 17,
+      "ad": "Sülüklü Han",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet",
+        "yavas"
+      ],
+      "ilce": "Sur",
+      "merkeze_km": 1,
+      "neden": "Tarihi han avlusunda menengiç kahvesi içilir; Hasan Paşa Hanı'na yürüme mesafesinde",
+      "osm": "relation/7840524",
+      "place_id": "ChIJh9e_8UcgdUARfLz8iWZAAF4"
+    },
+    {
+      "sira": 18,
+      "ad": "Malabadi Köprüsü",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "doga"
+      ],
+      "ilce": "Silvan",
+      "merkeze_km": 100,
+      "neden": "Batman Çayı üstünde tek kemerli Artuklu köprüsü; ayaklarının içinde yolcu odaları var",
+      "place_id": "ChIJgX7HbC1Vc0ARAkdm25ZF1yI"
+    },
+    {
+      "sira": 19,
+      "ad": "Hilar Mağaraları ve Çayönü",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "doga"
+      ],
+      "ilce": "Ergani",
+      "merkeze_km": 50,
+      "neden": "MS 100-325 kaya mezarları; 2024'te ilin ilk ören yeri oldu, Çayönü höyüğü 500 m kuzeyde",
+      "place_id": "ChIJv-NqFg9MdEAR-1nCpknOAfE"
+    },
+    {
+      "sira": 20,
+      "ad": "Deliller Hanı",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Sur",
+      "merkeze_km": 1,
+      "neden": "1527'de Hüsrev Paşa yaptırdı; Mardin Kapı'nın hemen içinde, bugün otel olarak işliyor",
+      "osm": "relation/1749253"
+    },
+    {
+      "sira": 21,
+      "ad": "Mardin Kapı",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Sur",
+      "merkeze_km": 2,
+      "neden": "Surların güney kapısı; 909'da yeniden yapıldı, İslam öncesi yazıt taşıyan iki kapıdan biri",
+      "osm": "node/10704280655",
+      "place_id": "ChIJlczh90sgdUARDlsmSe1grVQ"
+    },
+    {
+      "sira": 22,
+      "ad": "Cahit Sıtkı Tarancı Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Sur",
+      "merkeze_km": 1,
+      "neden": "Şairin doğduğu 1733 tarihli bazalt avlulu ev; Kültür Bakanlığı ev-müzesi",
+      "osm": "node/8250864317",
+      "place_id": "ChIJUUlZTjggdUAR9o0HcMD7iYg"
+    },
+    {
+      "sira": 23,
+      "ad": "Diyarbakır meftunesi",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Sarımsaklı, ekşili sulu yemek; patlıcan (2022) ve bakla (2024) meftunesi tescilli"
+    },
+    {
+      "sira": 24,
+      "ad": "Diyarbakır içli köftesi",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet",
+        "cocuklu"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Bulgur kabuklu, kıymalı içli köfte; 2021'de TÜRKPATENT coğrafi işaret tescili aldı"
+    },
+    {
+      "sira": 25,
+      "ad": "Dengbêj Evi",
+      "kategori": "aktivite",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Sur",
+      "merkeze_km": 1,
+      "neden": "Kürtçe sözlü anlatı geleneği dengbêjleri canlı dinleme yeri; pazartesi kapalı",
+      "osm": "node/4890671022",
+      "place_id": "ChIJow2UK0ggdUARoqKRYguSRLU"
+    },
+    {
+      "sira": 26,
+      "ad": "Eğil Baraj Gölü",
+      "kategori": "aktivite",
+      "amaclar": [
+        "doga",
+        "cocuklu",
+        "yavas"
+      ],
+      "ilce": "Eğil",
+      "merkeze_km": 52,
+      "neden": "Göl kıyısında çardaklar, kır kahveleri; tekne turu ve su sporları yapılabiliyor",
+      "place_id": "ChIJeyPhk9VddEAR2eX-vLG4Iuk"
+    },
+    {
+      "sira": 27,
+      "ad": "Dicle kıyısı çay bahçeleri",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "yavas",
+        "gece",
+        "cocuklu"
+      ],
+      "ilce": "Sur",
+      "merkeze_km": 3,
+      "neden": "On Gözlü Köprü çevresindeki çay bahçeleri yaz akşamları serinlemek için dolar"
+    },
+    {
+      "sira": 28,
+      "ad": "Birkleyn Mağaraları (Dicle Tüneli)",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "kultur_tarih"
+      ],
+      "ilce": "Lice",
+      "merkeze_km": 105,
+      "neden": "Dicle'nin kaynak tünelinde I. Tiglat-Pileser ve III. Salmanasar'ın Asur kabartmaları",
+      "place_id": "ChIJJTzULsWFc0ARIK2VxQJHYEQ"
+    },
+    {
+      "sira": 29,
+      "ad": "Kuyumcular Çarşısı",
+      "kategori": "carsi",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Sur",
+      "merkeze_km": 1,
+      "neden": "Ulu Cami karşısındaki han ve dükkânlarda altın, gümüş takı ve telkâri",
+      "place_id": "ChIJG0ggdDggdUARw1-q9pUkqYU"
+    },
+    {
+      "sira": 30,
+      "ad": "Bakırcılar Çarşısı",
+      "kategori": "carsi",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Sur",
+      "merkeze_km": 1,
+      "neden": "Ulu Cami yakınında birkaç usta hâlâ kalaycılık ve bakır dövme işi yapıyor",
+      "place_id": "ChIJ82xXHUggdUAR7DclzFGDQmk"
+    },
+    {
+      "sira": 31,
+      "ad": "Ayakkabıcılar Çarşısı",
+      "kategori": "carsi",
+      "amaclar": [
+        "yavas"
+      ],
+      "ilce": "Sur",
+      "merkeze_km": 1,
+      "neden": "Kalabalık Sur çarşısı; el yapımı ipek puşi ve hasır bilezik bulunur",
+      "place_id": "ChIJUfr7tzcgdUARqrrjQPpdvYI"
+    },
+    {
+      "sira": 32,
+      "ad": "Ziya Gökalp Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Sur",
+      "merkeze_km": 1,
+      "neden": "Gökalp'in doğduğu 1808 tarihli bazalt ev; 2014 yangınından sonra onarıldı",
+      "place_id": "ChIJtSSr8zcgdUARodNzVJRNZz4"
+    },
+    {
+      "sira": 33,
+      "ad": "Çermik Kaplıcası",
+      "kategori": "aktivite",
+      "amaclar": [
+        "yavas"
+      ],
+      "ilce": "Çermik",
+      "merkeze_km": 90,
+      "neden": "İlçe adını kaplıcadan alır; 1993'te termal turizm merkezi ilan edildi"
+    },
+    {
+      "sira": 34,
+      "ad": "Diyarbakır armut tatlısı",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Armutla yapılan yöresel tatlı; 2021'de TÜRKPATENT coğrafi işaret tescili aldı"
+    },
+    {
+      "sira": 35,
+      "ad": "Diyarbakır karpuzu",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet",
+        "cocuklu"
+      ],
+      "ilce": "Bismil",
+      "merkeze_km": 50,
+      "neden": "Dicle kıyısı kumlarında yetişen iri karpuz; 2008'den tescilli, yalnız yaz aylarında"
+    },
+    {
+      "sira": 36,
+      "ad": "Timsah Kanyonu",
+      "kategori": "doga",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Dicle",
+      "merkeze_km": 62,
+      "neden": "Taşağıl'da timsaha benzeyen kanyon; meşelik içinden ~10 dakika yürüyüşle ulaşılır"
+    },
+    {
+      "sira": 37,
+      "ad": "Eğil Kalesi",
+      "kategori": "manzara",
+      "amaclar": [
+        "kultur_tarih",
+        "doga"
+      ],
+      "ilce": "Eğil",
+      "merkeze_km": 52,
+      "neden": "Asur Kralı III. Salmanasar figürlü kale; çevresinde Arşak dönemi kral mezarları",
+      "place_id": "ChIJ8yCkbGdfdEAR2w2oa_SY-0g"
+    },
+    {
+      "sira": 38,
+      "ad": "Kefrun Kalesi",
+      "kategori": "manzara",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Kulp",
+      "merkeze_km": 170,
+      "neden": "Konuklu'da havada duruyormuş gibi görünen kaya kütleleri; köyden kısa yürüyüş",
+      "place_id": "ChIJAfw7hm5rc0ARJbGhOayqcac"
+    }
+  ]
+}
