@@ -130,6 +130,9 @@ describe('PaylasimCekmecesi (#432 2/3)', () => {
     cekmece();
     fireEvent.press(screen.getByText('Linki gönder'));
     expect(await screen.findByText(t('davet.linkKopyalandi'))).toBeTruthy();
+    // 2. inceleme: başarı kırmızı kutuda değil, düz satırda.
+    expect(screen.queryByTestId('paylasim-mesaj')).toBeNull();
+    expect(screen.getByTestId('paylasim-bilgi')).toBeTruthy();
   });
 
   it('#454: anahtar ve kapatma hatası çekmecede; kapatılınca "Paylaşım kapatıldı"', async () => {
@@ -137,13 +140,19 @@ describe('PaylasimCekmecesi (#432 2/3)', () => {
     cekmece();
     fireEvent.press(screen.getByRole('checkbox', { name: t('paylasim.kisiAdlari') }));
     act(() => mockGuncelle.mock.calls[0][1]?.onError?.());
-    expect(screen.getByText(t('paylasim.hata'))).toBeTruthy();
+    expect(screen.getByText(t('paylasim.anahtarHata'))).toBeTruthy();
 
     fireEvent.press(screen.getByText('Paylaşımı kapat'));
     await waitFor(() => expect(mockGuncelle).toHaveBeenCalledTimes(2));
-    act(() => mockGuncelle.mock.calls[1][1]?.onSuccess?.());
-    expect(screen.getByText(t('paylasim.kapatildi'))).toBeTruthy();
+    act(() => mockGuncelle.mock.calls[1][1]?.onError?.());
+    expect(screen.getByText(t('paylasim.kapatHata'))).toBeTruthy();
     expect(screen.queryByText(t('paylasim.hata'))).toBeNull();
+
+    fireEvent.press(screen.getByText('Paylaşımı kapat'));
+    await waitFor(() => expect(mockGuncelle).toHaveBeenCalledTimes(3));
+    act(() => mockGuncelle.mock.calls[2][1]?.onSuccess?.());
+    expect(screen.getByText(t('paylasim.kapatildi'))).toBeTruthy();
+    expect(screen.queryByTestId('paylasim-mesaj')).toBeNull();
   });
 
   it('#454: link okunamazsa hata satırı ve "Tekrar dene"; gönder pasif, yeni link denenmez', () => {
@@ -169,5 +178,16 @@ describe('PaylasimCekmecesi (#432 2/3)', () => {
     expect(screen.getByRole('button', { name: t('paylasim.paylasimiKapat') }).props.accessibilityState.disabled).toBe(true);
     fireEvent.press(screen.getByText('Paylaşımı kapat'));
     expect(mockOnay).not.toHaveBeenCalled();
+  });
+
+  it('#454 2. inceleme: çevrimdışı ve okuma hatası birlikte; kutuda çevrimdışı nedeni, "Tekrar dene" pasif', () => {
+    mockDurum.hata = true;
+    cekmece(true);
+    expect(screen.getByText(t('geziSayfasi.cevrimdisi.baglantiYok'))).toBeTruthy();
+    expect(screen.queryByText(t('paylasim.okumaHata'))).toBeNull();
+    const tekrar = screen.getByRole('button', { name: t('paylasim.tekrarDene') });
+    expect(tekrar.props.accessibilityState.disabled).toBe(true);
+    fireEvent.press(tekrar);
+    expect(mockYenile).not.toHaveBeenCalled();
   });
 });
