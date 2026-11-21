@@ -68,6 +68,7 @@
           "osm": "way/377249224",
           "ad": "Mardin Ulu Camii",
           "sure_dk": 30,
+          "sure_gerekcesi": "cami ve avlu; çarşı ayrı",
           "kapali_gunler": [],
           "rehber": "mardin-ulu-camii",
           "amaclar": [
@@ -79,6 +80,7 @@
           "osm": "node/4898005721",
           "ad": "Cercis Murat Konağı",
           "sure_dk": 75,
+          "sure_gerekcesi": "öğle yemeği, birkaç tabak paylaşılır; restoran süresi",
           "kapali_gunler": [],
           "rehber": "cercis-murat-konagi",
           "amaclar": [
@@ -90,6 +92,7 @@
           "osm": "node/5814978353",
           "ad": "Marangozlar Kahvesi",
           "sure_dk": 30,
+          "sure_gerekcesi": "kahve molası",
           "kapali_gunler": [],
           "rehber": "marangozlar-kahvesi",
           "amaclar": [
@@ -173,6 +176,7 @@
           "osm": "node/4450738389",
           "ad": "Bağdadi Restaurant",
           "sure_dk": 75,
+          "sure_gerekcesi": "akşam yemeği, paylaşılan tabaklar",
           "kapali_gunler": [],
           "rehber": "bagdadi-restaurant",
           "amaclar": [
