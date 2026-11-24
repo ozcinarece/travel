@@ -1,7 +1,7 @@
 {
   "il": "Hatay",
   "slug": "hatay",
-  "guncelleme": "2026-11-21",
+  "guncelleme": "2026-11-24",
   "oneriler": [
     {
       "sira": 1,
@@ -20,7 +20,7 @@
     {
       "sira": 2,
       "ad": "St. Pierre Kilisesi",
-      "kategori": "muze",
+      "kategori": "tarih",
       "amaclar": [
         "kultur_tarih"
       ],
@@ -45,7 +45,7 @@
     {
       "sira": 4,
       "ad": "Necmi Asfuroğlu Arkeoloji Müzesi",
-      "kategori": "muze",
+      "kategori": "tarih",
       "amaclar": [
         "kultur_tarih",
         "cocuklu"
@@ -254,20 +254,6 @@
     },
     {
       "sira": 21,
-      "ad": "Hatay Arkeoloji Müzesi",
-      "kategori": "muze",
-      "amaclar": [
-        "kultur_tarih",
-        "cocuklu"
-      ],
-      "ilce": "Antakya",
-      "merkeze_km": 3,
-      "neden": "Kapalı: depremden beri onarımda, 2026 sonunda aşamalı açılması planlanıyor",
-      "osm": "way/1039441368",
-      "place_id": "ChIJ686ymfHBJRURDdcnW4ZRzkA"
-    },
-    {
-      "sira": 22,
       "ad": "Saint Simeon Manastırı",
       "kategori": "manzara",
       "amaclar": [
@@ -280,7 +266,7 @@
       "place_id": "ChIJ17XeCAvRJRURECrhn6AAcyc"
     },
     {
-      "sira": 23,
+      "sira": 22,
       "ad": "Reyhanlı Barajı kuş gözlemi",
       "kategori": "doga",
       "amaclar": [
@@ -292,7 +278,7 @@
       "neden": "Kurutulan Amik Gölü'nün yerini tutan sulak alan; 228 kuş türü kaydedildi"
     },
     {
-      "sira": 24,
+      "sira": 23,
       "ad": "Yenişehir Gölü",
       "kategori": "doga",
       "amaclar": [
@@ -306,7 +292,7 @@
       "place_id": "ChIJVS_r_iadJRURfT4WHs2ko24"
     },
     {
-      "sira": 25,
+      "sira": 24,
       "ad": "Hatay haytalı",
       "kategori": "tatli_kahve",
       "amaclar": [
@@ -318,7 +304,7 @@
       "neden": "Nişasta muhallebisi, kar ya da buz ve gül şerbetiyle; Ocak 2026'da tescillendi"
     },
     {
-      "sira": 26,
+      "sira": 25,
       "ad": "Biberli ekmek",
       "kategori": "yemek",
       "amaclar": [
@@ -329,7 +315,7 @@
       "neden": "Biber salçası, soğan ve baharatlı hamur fırında; kahvaltıda ve ara öğünde yenir"
     },
     {
-      "sira": 27,
+      "sira": 26,
       "ad": "Hatay yoğurtlu kebap",
       "kategori": "yemek",
       "amaclar": [
@@ -340,7 +326,7 @@
       "neden": "Izgara kebap sarımsaklı yoğurtla buluşur; Aralık 2025'te Hatay adıyla tescillendi"
     },
     {
-      "sira": 28,
+      "sira": 27,
       "ad": "Antakya sürkü",
       "kategori": "yemek",
       "amaclar": [
@@ -351,7 +337,7 @@
       "neden": "Çökelekten yapılıp kırmızı biber ve baharatla yuvarlanan peynir; zeytinyağıyla yenir"
     },
     {
-      "sira": 29,
+      "sira": 28,
       "ad": "Antakya simidi",
       "kategori": "yemek",
       "amaclar": [
@@ -363,7 +349,7 @@
       "neden": "Odunlu taş fırında pişen ince, geniş halka; tuz ve kimyon karışımına batırılarak yenir"
     },
     {
-      "sira": 30,
+      "sira": 29,
       "ad": "Vespasianus-Titus Tüneli ve Beşikli Mağara",
       "kategori": "tarih",
       "amaclar": [
