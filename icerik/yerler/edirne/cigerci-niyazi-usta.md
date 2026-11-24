@@ -1,4 +1,4 @@
-Edirne'de öğle yemeği denince akla gelen yemek tava ciğer. Ciğer kâğıt inceliğinde dilimlenir, una bulanır ve geniş tavada kızgın yağda kısa sürede kızartılır. Yanına kızartılmış kuru kırmızı biber, soğan, domates ve cacık gelir. Biber, Edirne'nin Karaağaç tarafında yetiştirilen acı biberdir ve kurutulup yağda bir an çevrilir; yemeğin tadını bu çıtır acı tamamlar.
+Edirne'de öğle yemeği denince akla gelen yemek tava ciğer. Ciğer kâğıt inceliğinde dilimlenir, una bulanır ve geniş tavada kızgın yağda kısa sürede kızartılır. Yanına kızartılmış kuru kırmızı biber, soğan, domates ve cacık gelir. Biber kurutulup yağda bir an çevrilir; yemeğin tadını bu çıtır acı tamamlar.
 
 Ciğerci Niyazi Usta, il merkezinde, çarşı bölgesinde 1983'ten beri tava ciğer yapan bir lokanta. Menü kısadır: ciğer porsiyonu, yanında ayran ya da şalgam. Bir kişi için bir porsiyon yeterli; açsan yarım porsiyon daha iste, ciğer soğuyunca tadı kaçtığı için ikinci tabağı sonradan söylemek daha iyi.
 
