@@ -37,7 +37,7 @@
       ],
       "ilce": "Süleymanpaşa",
       "merkeze_km": 0,
-      "neden": "Coğrafi işaretli, uzun ve yassı ızgara köfte; yanında piyaz ve acı biberle gelir"
+      "neden": "Coğrafi işaretli, uzun ve yassı biçimli ızgara köfte; kent merkezindeki köftecilerde yenir"
     },
     {
       "sira": 4,
@@ -294,17 +294,6 @@
     },
     {
       "sira": 25,
-      "ad": "Şarköy lakör böreği",
-      "kategori": "yemek",
-      "amaclar": [
-        "lezzet"
-      ],
-      "ilce": "Şarköy",
-      "merkeze_km": 52,
-      "neden": "Şarköy'e özgü börek; ilçede peynir helvası ve dondurmayla birlikte aranan tat"
-    },
-    {
-      "sira": 26,
       "ad": "Tekirdağ Uluslararası Kiraz Festivali",
       "kategori": "aktivite",
       "amaclar": [
@@ -316,7 +305,7 @@
       "neden": "Kiraz hasadı zamanı Süleymanpaşa'da yapılan festival; tarihi her yıl ilan edilir"
     },
     {
-      "sira": 27,
+      "sira": 26,
       "ad": "Eriklice",
       "kategori": "doga",
       "amaclar": [
@@ -329,7 +318,7 @@
       "place_id": "ChIJb6ujKicItBQRLiD63ilIdCU"
     },
     {
-      "sira": 28,
+      "sira": 27,
       "ad": "Saint Ioannis Theologos Manastırı kalıntıları",
       "kategori": "tarih",
       "amaclar": [
@@ -342,20 +331,7 @@
       "place_id": "ChIJgxlWmNQMtBQRQY7BvmwB0gc"
     },
     {
-      "sira": 29,
-      "ad": "Şarköy Kent Müzesi",
-      "kategori": "muze",
-      "amaclar": [
-        "kultur_tarih"
-      ],
-      "ilce": "Şarköy",
-      "merkeze_km": 52,
-      "neden": "Şarköy merkezinde, ilçenin geçmişini anlatan kent müzesi",
-      "osm": "way/280114878",
-      "place_id": "ChIJ9x1-RMX5sxQR10wCLV6BjJE"
-    },
-    {
-      "sira": 30,
+      "sira": 28,
       "ad": "Yapıncak salamura asma yaprağı sarması",
       "kategori": "yemek",
       "amaclar": [
