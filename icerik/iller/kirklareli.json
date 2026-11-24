@@ -87,7 +87,7 @@
       ],
       "ilce": "Vize",
       "merkeze_km": 48,
-      "neden": "Trakya'da ortaya çıkarılan tek antik tiyatro; Roma dönemi oturma sıraları",
+      "neden": "Türkiye Trakyası'nda bulunan tek antik tiyatro; Roma dönemi oturma sıraları",
       "place_id": "ChIJ-0Rd356coEARE8CyVvT_800"
     },
     {
@@ -111,7 +111,7 @@
       ],
       "ilce": "Lüleburgaz",
       "merkeze_km": 42,
-      "neden": "2026'da AB tescili alan, katkısız etle kömür ateşinde pişen köfte"
+      "neden": "Coğrafi işaretli; katkısız etle kömür ateşinde pişen köfte"
     },
     {
       "sira": 10,
@@ -190,14 +190,14 @@
     {
       "sira": 16,
       "ad": "Aşağıpınar Höyüğü",
-      "kategori": "muze",
+      "kategori": "tarih",
       "amaclar": [
         "kultur_tarih",
         "cocuklu"
       ],
       "ilce": "Merkez",
       "merkeze_km": 3,
-      "neden": "Neolitik köy kazısı; yeniden yapılmış evler ve buluntu sergisiyle arkeopark"
+      "neden": "Neolitik köy kazısı; buluntuları Kırklareli Müzesi'nde"
     },
     {
       "sira": 17,
@@ -208,7 +208,7 @@
       ],
       "ilce": "Merkez",
       "merkeze_km": 30,
-      "neden": "Yıldız Dağları'nın 1031 metrelik zirvesi, Trakya'nın en yüksek noktası",
+      "neden": "Yıldız Dağları'nın 1031 metrelik zirvesi, Türkiye Trakyası'nın en yüksek noktası",
       "place_id": "ChIJf3AE-Rq5oEAR8jGgbR7lSbY"
     },
     {
