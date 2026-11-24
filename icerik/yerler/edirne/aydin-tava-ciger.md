@@ -1,6 +1,6 @@
 Aydın Tava Ciğer, Tahmis Çarşısı'nın içinde, Edirne'nin ciğercilerinin en sık sayılan adlarından. 1998'den beri aynı işi yapıyor: Edirne usulü tava ciğer.
 
-Edirne ciğerinin farkı kesiminde. Ciğer soğukta sertleştirilip kâğıt inceliğinde dilimlenir, sonra una bulanıp kızgın yağda kısa sürede kızartılır. Bu yüzden dışı çıtır, içi yumuşak kalır. Tabakta yanına kızgın yağa bir an atılmış kuru kırmızı biber gelir; sert ve acıdır. Yanında soğan ve domates gelir. Ayran ya da şalgamla iç.
+Edirne ciğerinin farkı kesiminde. Ciğer soğukta sertleştirilip kâğıt inceliğinde dilimlenir, sonra una bulanıp kızgın yağda kısa sürede kızartılır. Bu yüzden dışı çıtır, içi yumuşak kalır. Tabakta yanına kızgın yağa bir an atılmış kuru kırmızı biber gelir; sert ve acıdır. Yanına soğan ve domates isteyebilirsin.
 
 Tatlıda Edirne'nin kendi helvası var: peynir helvası, sıcak servis edilir. Ciğerden sonra tok hissetsen de yarım porsiyon iste.
 

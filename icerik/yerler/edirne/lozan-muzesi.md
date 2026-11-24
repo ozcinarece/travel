@@ -2,7 +2,7 @@ Milli Mücadele ve Lozan Müzesi, Karaağaç'ta, şehir merkezinin güneybatıs�
 
 Salonlarda Lozan görüşmelerine ait belgeler, fotoğraflar, İsmet İnönü'nün kişisel eşyaları ve dönemin gazetelerinde çıkan karikatürleri var. Karikatürlere özellikle bak; masadaki pazarlığın dışarıdan nasıl görüldüğünü belgelerden daha açık anlatıyorlar.
 
-Müzenin birkaç yüz metre ötesinde Lozan Anıtı duruyor. 1998'de dört ayda yapılan ve aynı yıl temmuzda açılan anıtın en uzun beton sütunu 36,45 metre. Anıtın önünden eski gar binasına doğru bakınca, bu sessiz mahallenin bir zamanlar Edirne'nin Avrupa'ya açılan kapısı olduğunu düşün.
+Müzenin birkaç yüz metre ötesinde Lozan Anıtı duruyor. 1998'de yapılan ve aynı yıl temmuzda açılan anıtın en uzun beton sütunu 36,45 metre. Anıtın önünden eski gar binasına doğru bakınca, bu sessiz mahallenin bir zamanlar Edirne'nin Avrupa'ya açılan kapısı olduğunu düşün.
 
 Müze ve anıt için kırk beş dakika yeter. Karaağaç'ın sokakları dar ve sakin; dönüşte Kışla Caddesi'nde bir çay molası ver, sonra Meriç ve Tunca köprülerini geçerek merkeze dön.
 
