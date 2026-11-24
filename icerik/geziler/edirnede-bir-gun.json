@@ -58,7 +58,8 @@
           "rehber": "uc-serefeli-cami",
           "amaclar": [
             "kultur_tarih"
-          ]
+          ],
+          "sure_gerekcesi": "varsayılan 45; tek yapı, avlu ve iç mekân yarım saatte gezilir"
         },
         {
           "place_id": "ChIJ__8_lHcvsxQR0QsBO0kfpBI",
@@ -69,7 +70,8 @@
           "rehber": "eski-cami",
           "amaclar": [
             "kultur_tarih"
-          ]
+          ],
+          "sure_gerekcesi": "varsayılan 45; tek yapı, avlu ve iç mekân yarım saatte gezilir"
         },
         {
           "place_id": "ChIJ42xg9HAvsxQRCcSrmnF8AoU",
