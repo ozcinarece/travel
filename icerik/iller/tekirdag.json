@@ -1,0 +1,369 @@
+{
+  "il": "Tekirdağ",
+  "slug": "tekirdag",
+  "guncelleme": "2026-11-24",
+  "oneriler": [
+    {
+      "sira": 1,
+      "ad": "Uçmakdere",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Şarköy",
+      "merkeze_km": 24,
+      "neden": "Ganos Fayı'nın açtığı vadide denize inen köy; tepeden bağlar ve Marmara birlikte görünür",
+      "place_id": "ChIJG7WjXhxutBQRirUJZNVDCCU"
+    },
+    {
+      "sira": 2,
+      "ad": "Rakoczi Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Süleymanpaşa",
+      "merkeze_km": 1,
+      "neden": "Macar prensi II. Ferenc Rákóczi 1720-1735'te bu ahşap evde sürgünde yaşadı",
+      "place_id": "ChIJj52c6ilgtBQRBgPDspBdRRU"
+    },
+    {
+      "sira": 3,
+      "ad": "Tekirdağ köftesi",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Süleymanpaşa",
+      "merkeze_km": 0,
+      "neden": "Coğrafi işaretli, uzun ve yassı ızgara köfte; yanında piyaz ve acı biberle gelir"
+    },
+    {
+      "sira": 4,
+      "ad": "Mürefte ve Hoşköy bağları",
+      "kategori": "aktivite",
+      "amaclar": [
+        "lezzet",
+        "yavas"
+      ],
+      "ilce": "Şarköy",
+      "merkeze_km": 40,
+      "neden": "Ganos eteğindeki bağ evlerinde tadım; Mürefte'de yapıncak ve papazkarası üzümü yetişir"
+    },
+    {
+      "sira": 5,
+      "ad": "Tekirdağ Arkeoloji ve Etnografya Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Süleymanpaşa",
+      "merkeze_km": 1,
+      "neden": "1967'de kuruldu; Trakya kralı Kersebleptes'in yüz canlandırması ve Kybele heykeli var",
+      "place_id": "ChIJgcw5-7mLtBQRnMuKv0KX9HA"
+    },
+    {
+      "sira": 6,
+      "ad": "Namık Kemal Evi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Süleymanpaşa",
+      "merkeze_km": 1,
+      "neden": "Vatan şairinin doğduğu evin 19. yüzyıl düzeninde yeniden yapımı; 1993'ten beri açık",
+      "place_id": "ChIJwYovcpuKtBQRu-jJih4Iw6o"
+    },
+    {
+      "sira": 7,
+      "ad": "Tekirdağ peynir helvası",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Süleymanpaşa",
+      "merkeze_km": 0,
+      "neden": "Tuzsuz peynir ve irmikle fırında pişen coğrafi işaretli helva; sıcak yenir"
+    },
+    {
+      "sira": 8,
+      "ad": "Rüstem Paşa Camii ve Bedesteni",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Süleymanpaşa",
+      "merkeze_km": 0,
+      "neden": "Kitabesine göre 1553'te Sadrazam Rüstem Paşa yaptırdı; külliyeden cami ve bedesten ayakta",
+      "place_id": "ChIJQb5zfpuKtBQRL3RKbEJ505o"
+    },
+    {
+      "sira": 9,
+      "ad": "Gaziköy (Ganos)",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Şarköy",
+      "merkeze_km": 27,
+      "neden": "Antik Ganos'un yerindeki köy; Osmanlı çeşmesi ve denize kurulu ahşap balıkçı iskeleleri",
+      "place_id": "ChIJZUBXzu1ytBQREO5A--W3k4A"
+    },
+    {
+      "sira": 10,
+      "ad": "Kumbağ",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Süleymanpaşa",
+      "merkeze_km": 14,
+      "neden": "Eski adı Kumbos olan balıkçı köyü; merkeze en yakın uzun kumsal",
+      "place_id": "ChIJ1dHYR4FmtBQRladhbb7z5C4"
+    },
+    {
+      "sira": 11,
+      "ad": "Uçmakdere yamaç paraşütü",
+      "kategori": "aktivite",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Şarköy",
+      "merkeze_km": 22,
+      "neden": "600 m'lik Nişantepe'den kalkıp Ayvasıl'da deniz kıyısına inilen tandem uçuşlar",
+      "osm": "node/12348311114"
+    },
+    {
+      "sira": 12,
+      "ad": "Hayrabolu tatlısı",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Hayrabolu",
+      "merkeze_km": 43,
+      "neden": "1972'de Kadı Göbeği adıyla doğan irmik ve peynirli şerbetli tatlı; 2021'de tescillendi"
+    },
+    {
+      "sira": 13,
+      "ad": "Şarköy sahili",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Şarköy",
+      "merkeze_km": 52,
+      "neden": "İlçenin önünde kilometrelerce uzanan kumsal; poyrazlı günlerde rüzgâr sörfü yapılır"
+    },
+    {
+      "sira": 14,
+      "ad": "Hora Deniz Feneri",
+      "kategori": "manzara",
+      "amaclar": [
+        "yavas"
+      ],
+      "ilce": "Şarköy",
+      "merkeze_km": 32,
+      "neden": "Hoşköy'ün üstündeki fener; bağların arasından Marmara ve Ganos yamaçları görünür",
+      "place_id": "ChIJCShcYdgMtBQRagm4iel_E78"
+    },
+    {
+      "sira": 15,
+      "ad": "Malkara eski kaşarı",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Malkara",
+      "merkeze_km": 52,
+      "neden": "Coğrafi işaretli, aylarca olgunlaştırılan sert ve keskin kaşar; köy pazarlarında satılır"
+    },
+    {
+      "sira": 16,
+      "ad": "Perinthos (Marmara Ereğlisi)",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Marmaraereğlisi",
+      "merkeze_km": 37,
+      "neden": "MÖ 600 dolayında Samoslu kolonistlerin kurduğu Perinthos'un kalıntıları kıyıda"
+    },
+    {
+      "sira": 17,
+      "ad": "Kastro (Çamlıkoy)",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Saray",
+      "merkeze_km": 78,
+      "neden": "Istranca ormanının Karadeniz'e indiği koy; Bahçedere ağzında kumsal ve kamp alanı",
+      "place_id": "ChIJQ7VSCg1joEARmf7G_-ynKGo"
+    },
+    {
+      "sira": 18,
+      "ad": "Ganos Dağı (Işıklar Dağı)",
+      "kategori": "manzara",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Şarköy",
+      "merkeze_km": 29,
+      "neden": "945 m ile Tekir Dağları'nın en yüksek yeri; doruktan Marmara ve Saros yönü görünür",
+      "place_id": "ChIJb5uxE3h0tBQRgXRgEOI3C2o"
+    },
+    {
+      "sira": 19,
+      "ad": "Tekirdağ Ramazan çöreği",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Süleymanpaşa",
+      "merkeze_km": 0,
+      "neden": "Ramazanda fırınlarda çıkan, 2026'da coğrafi işaret alan çörek"
+    },
+    {
+      "sira": 20,
+      "ad": "Kartaltepe Tabiat Parkı",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Süleymanpaşa",
+      "merkeze_km": 20,
+      "neden": "Uçmakdere'nin hemen üstünde, Marmara'ya bakan ormanlık tabiat parkı",
+      "osm": "node/11950724238",
+      "place_id": "ChIJ010zX0dutBQREPhhWHinJxY"
+    },
+    {
+      "sira": 21,
+      "ad": "Bahçedere kayık gezisi",
+      "kategori": "aktivite",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Saray",
+      "merkeze_km": 78,
+      "neden": "Kastro'da dere ağzından ormanın içine yaklaşık 2 km kürekle girilir"
+    },
+    {
+      "sira": 22,
+      "ad": "Atlayan Şelalesi",
+      "kategori": "doga",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Saray",
+      "merkeze_km": 60,
+      "neden": "Istranca eteğinde, sonbahar ve kışta fotoğrafçıların uğradığı orman içi şelale",
+      "place_id": "ChIJrzApTAB9oEAREdi-vkkpdOc"
+    },
+    {
+      "sira": 23,
+      "ad": "Velimeşe bozası",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Ergene",
+      "merkeze_km": 43,
+      "neden": "Ergene'ye bağlı Velimeşe'nin coğrafi işaretli bozası; soğuk aylarda içilir"
+    },
+    {
+      "sira": 24,
+      "ad": "Tekirdağ sahili",
+      "kategori": "manzara",
+      "amaclar": [
+        "yavas",
+        "cocuklu"
+      ],
+      "ilce": "Süleymanpaşa",
+      "merkeze_km": 0,
+      "neden": "Kentin önündeki kıyı parkı; akşamüstü Marmara'da gün batımına karşı yürünür"
+    },
+    {
+      "sira": 25,
+      "ad": "Şarköy lakör böreği",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Şarköy",
+      "merkeze_km": 52,
+      "neden": "Şarköy'e özgü börek; ilçede peynir helvası ve dondurmayla birlikte aranan tat"
+    },
+    {
+      "sira": 26,
+      "ad": "Tekirdağ Uluslararası Kiraz Festivali",
+      "kategori": "aktivite",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Süleymanpaşa",
+      "merkeze_km": 0,
+      "neden": "Kiraz hasadı zamanı Süleymanpaşa'da yapılan festival; tarihi her yıl ilan edilir"
+    },
+    {
+      "sira": 27,
+      "ad": "Eriklice",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Şarköy",
+      "merkeze_km": 47,
+      "neden": "Şarköy'e komşu kıyı köyü; zeytinlik ve bağların arasından inilen sakin koylar",
+      "place_id": "ChIJb6ujKicItBQRLiD63ilIdCU"
+    },
+    {
+      "sira": 28,
+      "ad": "Saint Ioannis Theologos Manastırı kalıntıları",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Şarköy",
+      "merkeze_km": 32,
+      "neden": "Ganos Dağı yamacındaki Bizans manastırının yıkıntısı; Hoşköy üstünde",
+      "osm": "node/9880629233",
+      "place_id": "ChIJgxlWmNQMtBQRQY7BvmwB0gc"
+    },
+    {
+      "sira": 29,
+      "ad": "Şarköy Kent Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Şarköy",
+      "merkeze_km": 52,
+      "neden": "Şarköy merkezinde, ilçenin geçmişini anlatan kent müzesi",
+      "osm": "way/280114878",
+      "place_id": "ChIJ9x1-RMX5sxQR10wCLV6BjJE"
+    },
+    {
+      "sira": 30,
+      "ad": "Yapıncak salamura asma yaprağı sarması",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Süleymanpaşa",
+      "merkeze_km": 0,
+      "neden": "Coğrafi işaretli yapıncak yaprağı ince ve yumuşaktır; zeytinyağlı sarması yapılır"
+    }
+  ]
+}
