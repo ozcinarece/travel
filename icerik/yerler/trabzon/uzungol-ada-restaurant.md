@@ -4,6 +4,6 @@ Uzungöl'de öğle sofrası dağın ve derenin ürünleriyle kurulur. Vadinin so
 
 Yemeğe bir saat ayır. Yaz aylarında ve hafta sonları göl kıyısındaki lokantalar öğle saatlerinde dolar; on ikiden önce gelirsen göle bakan bir masa bulman kolaylaşır. Serin bir günse içeride, cam kenarında otur: Uzungöl'de öğleden sonra hava çabuk değişir.
 
-Yemekten sonra çay söyle ve acele etme. Dönüş yolu uzun; Sürmene'de akşam pidesi için yer bırakmak istiyorsan öğlende hafif ye.
+Yemekten sonra çay söyle ve acele etme. Dönüş yolu uzun; Sürmene'de pideye yer bırakmak istiyorsan öğlende hafif ye.
 
 > Alabalığı söylerken ızgara mı tava mı olacağını sor; tavada mısır ununa bulanarak pişirilir.
