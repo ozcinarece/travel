@@ -51,7 +51,6 @@
         },
         {
           "place_id": "ChIJ57Ka5F2UZUARrUgKC8tak04",
-          "osm": "node/6364833513",
           "ad": "Uzungöl",
           "sure_dk": 90,
           "sure_gerekcesi": "kıyı boyunca güney ucuna kadar yürüyüş ve dönüş",
@@ -134,7 +133,7 @@
       "Trabzon 2/2. #299'daki çalışma adı 'Uzungöl ve yaylalar'dı; yayla yolları büyük ölçüde toprak ve mevsimlik olduğu, OSM'de de yayla adayı çıkmadığı için yaylalar durak olmadı, yazıda yaz seçeneği olarak anıldı. Başlık 'Uzungöl'de bir gün'",
       "Trabzon il listesinin ilk 5'i: 2 Uzungöl bu gezide; 1 Sümela, 3 Ayasofya, 4 Boztepe, 5 Hamsiköy trabzonda-iki-gun'de. Bu gezide il listesinden ayrıca 25 Yılmaz Pide durak, 27 Memiş Ağa Konağı ek mekân; 16 Uzungöl Yamaç Paraşütü ve 17 Sultan Murat Yaylası mevsimlik olduğu için girmedi",
       "Müzeden Ada Restaurant'a kadar dört durak yürüme mesafesinde (her biri 15 dakikadan kısa); Ada'dan Sürmene'ye araçla yaklaşık bir buçuk saat. Doğrulayıcı bu bacağı yürüme sayar (#311)",
-      "Google: kimlik 9 sorgu (0 $), puan 10; OSM 5/5"
+      "Google: kimlik 9 sorgu (0 $), puan 10, 2 kuru yükleme. OSM 4/5: Uzungöl'ün OSM noktası (node/6364833513, tourism=attraction) Google konumundan 508 m uzak çıktı; göl durağı google_30g, gölün OSM su alanı sonraki turda denenebilir"
     ]
   }
 }
