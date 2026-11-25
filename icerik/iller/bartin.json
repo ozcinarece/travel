@@ -1,7 +1,7 @@
 {
   "il": "Bartın",
   "slug": "bartin",
-  "guncelleme": "2026-11-20",
+  "guncelleme": "2026-11-25",
   "oneriler": [
     {
       "sira": 1,
@@ -276,16 +276,14 @@
     },
     {
       "sira": 22,
-      "ad": "Hamam Cafe",
+      "ad": "Bartın beyaz baklavası",
       "kategori": "tatli_kahve",
       "amaclar": [
-        "yavas",
-        "kultur_tarih"
+        "lezzet"
       ],
-      "ilce": "Amasra",
-      "merkeze_km": 13,
-      "neden": "Osmanlı hamamında kafe; içeride eski göbek taşı duruyor, önü Büyük Liman",
-      "place_id": "ChIJ7bRL--ULm0ARyHitUo3OrHA"
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Yalnız Bartın'da yapılan açık renkli baklava; 2020'de coğrafi işaret aldı"
     },
     {
       "sira": 23,
