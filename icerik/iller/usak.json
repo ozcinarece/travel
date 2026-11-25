@@ -1,0 +1,328 @@
+{
+  "il": "Uşak",
+  "slug": "usak",
+  "guncelleme": "2026-11-25",
+  "oneriler": [
+    {
+      "sira": 1,
+      "ad": "Uşak Arkeoloji Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "1993'te ABD'den dönen Karun Hazinesi ve kanatlı denizatı broşu 3. katta sergileniyor",
+      "osm": "way/1038716853",
+      "place_id": "ChIJAQAAAMV_yBQRA_-hlvWaCfw"
+    },
+    {
+      "sira": 2,
+      "ad": "Ulubey Kanyonu ve Cam Seyir Terası",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Ulubey",
+      "merkeze_km": 30,
+      "neden": "2015'te açılan 135 m²'lik cam teras, kanyon tabanının yaklaşık 131 m üstüne uzanıyor",
+      "place_id": "ChIJRYVEAG3JxxQRdr8YypaybUw"
+    },
+    {
+      "sira": 3,
+      "ad": "Blaundos Antik Kenti",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "doga"
+      ],
+      "ilce": "Ulubey",
+      "merkeze_km": 40,
+      "neden": "Vadilerle çevrili tek girişli sırtta Makedon garnizon kenti; tiyatro, stadyum, kaya mezarı",
+      "place_id": "ChIJReE4WTW4xxQRuScpiDGiaoA"
+    },
+    {
+      "sira": 4,
+      "ad": "Atatürk ve Etnografya Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "Atatürk'ün Yunan başkomutanı Trikopis'i kabul ettiği 1890'lar konağı; altta Eşme kilimleri",
+      "place_id": "ChIJGX0eCbh_yBQR01hm6xah3cY"
+    },
+    {
+      "sira": 5,
+      "ad": "Uşak Ulu Camii",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Germiyanoğlu yapısı, şadırvan kitabesi 1419 tarihli; kuzeyde beş kubbeli son cemaat yeri",
+      "osm": "way/116016802",
+      "place_id": "ChIJn97xwc9_yBQRyxf8HgW3Iuo"
+    },
+    {
+      "sira": 6,
+      "ad": "Dokur Evi",
+      "kategori": "carsi",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "180 yıllık evde 40 tezgâhta el düğümlü Uşak halısı dokunuşunu yakından izleyebilirsin",
+      "place_id": "ChIJR77cQwB_yBQRHf2WiYKYPu4"
+    },
+    {
+      "sira": 7,
+      "ad": "Taşyaran Vadisi Tabiat Parkı",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 45,
+      "neden": "Renk renk katmanlı kayalar arasında 2,5 km parkur; kışın güneş girmeyen dere donuyor",
+      "place_id": "ChIJpzetqn9_yBQROMOtpWOtLvc"
+    },
+    {
+      "sira": 8,
+      "ad": "Kent Tarihi Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Maketlerle Uşak'ın kurtuluşu, ilk elektrik santrali ve tarhana yapımı 992 m² kapalı alanda",
+      "place_id": "ChIJ6yrdgtp_yBQRK6qXjPWJhDM"
+    },
+    {
+      "sira": 9,
+      "ad": "Akmonia Antik Kenti",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Banaz",
+      "merkeze_km": 40,
+      "neden": "Kral Yolu'nda Ahat köyü tepesinde; bir mozaiği 1. yüzyılda voleybol benzeri oyun gösterir",
+      "place_id": "ChIJ5YlkZmiZyBQRZsfvXmqVMEU"
+    },
+    {
+      "sira": 10,
+      "ad": "Tarihi Uşak Evleri",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "Aybey ve Karaağaç mahallelerinde alt katı taş, üst katı ahşap iki katlı Osmanlı evleri",
+      "place_id": "ChIJW02Tq89_yBQRmHNOYnee8zA"
+    },
+    {
+      "sira": 11,
+      "ad": "Burma Camii",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Adını yivli, sarmal kırmızı tuğla minaresinden alır; kapı kitabesi 1769 onarımını yazar",
+      "osm": "way/492793630",
+      "place_id": "ChIJbY41IdB_yBQRDkZxpFywNX0"
+    },
+    {
+      "sira": 12,
+      "ad": "Sebaste Antik Kenti",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Sivaslı",
+      "merkeze_km": 35,
+      "neden": "MÖ 20 civarı Augustus'un kurduğu kent, Sivaslı'nın 2 km güneybatısında Selçikler'de",
+      "place_id": "ChIJXRwYSS4kxhQRTtghAp7NdP8"
+    },
+    {
+      "sira": 13,
+      "ad": "Clandras (Cilandıras) Köprüsü",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "doga"
+      ],
+      "ilce": "Karahallı",
+      "merkeze_km": 35,
+      "neden": "Banaz Çayı'nı tek kemerle 17 m yükseklikten geçiyor; yanında küçük bir şelale akar",
+      "place_id": "ChIJJ5ku3JIzxhQR_xXnGT-nMKI"
+    },
+    {
+      "sira": 14,
+      "ad": "Pepouza Antik Kenti",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Karahallı",
+      "merkeze_km": 40,
+      "neden": "Montanist hareketin merkezi; kazıda 60'tan fazla odalı üç katlı Bizans manastırı çıktı",
+      "place_id": "ChIJE0-sMGQ1xhQRsBFnbWsAEqU"
+    },
+    {
+      "sira": 15,
+      "ad": "Asırlık Lokanta İlyas Usta",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "1923'ten beri açık, dördüncü kuşağın işlettiği lokanta; kuzu kapama ve gerdan güveci",
+      "osm": "node/12632078231",
+      "place_id": "ChIJYXrTHNB_yBQRpWZSlECcTok"
+    },
+    {
+      "sira": 16,
+      "ad": "Tarhana Baba (Mustafa Yeldanlı)",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "1974'ten beri Uşak tarhanası üreten aile işi; yılda yaklaşık 25 ton tarhana çıkarıyor",
+      "osm": "node/4853548385",
+      "place_id": "ChIJXxT-5cF_yBQRFxjJhxTzf3o"
+    },
+    {
+      "sira": 17,
+      "ad": "Halime Abla Döndürme Evi",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "Ulubey'de pazarları yapılan döndürme böreği ile demir tatlısı ve ebem köftesi burada",
+      "place_id": "ChIJsc55V9V_yBQRmjSkWBzl2Ac"
+    },
+    {
+      "sira": 18,
+      "ad": "Dokuyan Eller Halı Kilim Evi",
+      "kategori": "carsi",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Restore Çeşmeli Çift Konağı'nda kadınlar eski Uşak halısı desenlerini aslına uygun dokuyor",
+      "place_id": "ChIJAaO-qMh_yBQRsAAevQ8PAjU"
+    },
+    {
+      "sira": 19,
+      "ad": "Paşa Hanı",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "1898'de Fransız mimara yaptırılan iki katlı taş han; önündeki yol 1932'de ilk asfaltı aldı",
+      "place_id": "ChIJCWJATjB_yBQReoJqGy5OMtU"
+    },
+    {
+      "sira": 20,
+      "ad": "Diorama 1922 Uşak Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "Kurtuluşun 100. yılında 2022'de açıldı; Milli Mücadele 12 katta dioramayla anlatılıyor",
+      "place_id": "ChIJAZpF8l9_yBQRdLDK-b467tc"
+    },
+    {
+      "sira": 21,
+      "ad": "Hacı Gedik Hanı (Halıpazarı)",
+      "kategori": "carsi",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Halıpazarı'nda her katında 30 dükkân olan iki katlı taş han; zemin katta kahvehanesi var",
+      "place_id": "ChIJ8aeIJ9B_yBQRdiDfe84RmMU"
+    },
+    {
+      "sira": 22,
+      "ad": "Eşme Kilim Evi ve Kent Arşivi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Eşme",
+      "merkeze_km": 65,
+      "neden": "Belediye binası üst katında eski Eşme kilimleri; ilçede kilim hâlâ el tezgâhında dokunuyor",
+      "place_id": null
+    },
+    {
+      "sira": 23,
+      "ad": "Atatürk ve Kurtuluş Anıtı",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Tankut Öktem'in 17 m yüksek, 30 m uzun anıtında süvariler ve kitap tutan gençler var",
+      "osm": "node/13828192759",
+      "place_id": "ChIJBxTnpcR_yBQRtKcLVEnVOzg"
+    },
+    {
+      "sira": 24,
+      "ad": "Bahadır Köyü Anıt Karaçamı",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Banaz",
+      "merkeze_km": 60,
+      "neden": "800–1000 yaşında olduğu söylenen, gövde çapı 3 m'yi bulan karaçam, yaklaşık 1870 m rakımda",
+      "place_id": null
+    },
+    {
+      "sira": 25,
+      "ad": "Büyükoturak Barajı",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Banaz",
+      "merkeze_km": 50,
+      "neden": "Murat Dağı eteğindeki çam ormanında piknik ve oyun alanları olan baraj kıyısı",
+      "place_id": "ChIJQRyCJTTHyBQRTKYjJDaer1w"
+    }
+  ]
+}
