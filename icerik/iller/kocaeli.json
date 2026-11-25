@@ -1,0 +1,427 @@
+{
+  "il": "Kocaeli",
+  "slug": "kocaeli",
+  "guncelleme": "2026-11-25",
+  "oneriler": [
+    {
+      "sira": 1,
+      "ad": "Kartepe Teleferiği",
+      "kategori": "aktivite",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Kartepe",
+      "merkeze_km": 10,
+      "neden": "4.832 m'lik hat Derbent'ten 1.423 m'deki Kuzuyayla'ya 14–22 dakikada çıkıyor",
+      "place_id": "ChIJZzX6LwBZyxQRy031kOBTkkE"
+    },
+    {
+      "sira": 2,
+      "ad": "SEKA Kağıt Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "İzmit",
+      "merkeze_km": 1,
+      "neden": "2004'te üretimi biten SEKA fabrikası; 1 numaralı kâğıt makinesi yerinde duruyor",
+      "osm": "way/1157956158",
+      "place_id": "ChIJBQuu9o1FyxQRbwjZFSd-wok"
+    },
+    {
+      "sira": 3,
+      "ad": "Maşukiye",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "lezzet",
+        "yavas"
+      ],
+      "ilce": "Kartepe",
+      "merkeze_km": 18,
+      "neden": "Dereler ve kaynaklar arasında bir orman köyü; sofrada alabalık var",
+      "place_id": "ChIJG5pDPvBXyxQRpH7Ila3p6lE"
+    },
+    {
+      "sira": 4,
+      "ad": "Kartepe Kayak Merkezi",
+      "kategori": "aktivite",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Kartepe",
+      "merkeze_km": 19,
+      "neden": "1.600 m'deki merkezde uzunluğu 400 ile 3.500 m arasında 12 pist var",
+      "place_id": "ChIJsQwxTjFZyxQR9auSrPqpYcs"
+    },
+    {
+      "sira": 5,
+      "ad": "Ormanya",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Kartepe",
+      "merkeze_km": 12,
+      "neden": "200 hektarlık orman parkında geyik, karaca, ceylan dahil 70'i aşkın tür",
+      "place_id": "ChIJiep7UyqozBQRJgDb4sq6P94"
+    },
+    {
+      "sira": 6,
+      "ad": "Kasr-ı Hümayun (Av Köşkü) Saray Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "İzmit",
+      "merkeze_km": 0.1,
+      "neden": "Abdülaziz döneminde yapılan saray köşkü, Saat Kulesi'nin hemen yanında",
+      "osm": "way/223406450",
+      "place_id": "ChIJWcSuL4RFyxQRIO4ypSDbgMM"
+    },
+    {
+      "sira": 7,
+      "ad": "Kerpe ve Kartal Kayalıkları",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Kandıra",
+      "merkeze_km": 50,
+      "neden": "Mavi Bayraklı, sığ ve sakin koy; üstündeki Kartal Kayalıkları gün batımı yeri",
+      "osm": "node/5758432821",
+      "place_id": "ChIJBYiqGuZsnkAR0A0DLhjtrqc"
+    },
+    {
+      "sira": 8,
+      "ad": "Orhan Camii",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "İzmit",
+      "merkeze_km": 0.6,
+      "neden": "Gazi Süleyman Paşa'nın 1332'de yaptırdığı cami; bayram hutbesi kılıçla okunuyor",
+      "osm": "way/1081117581",
+      "place_id": "ChIJkzuch31PyxQRZsVbQJKCXrY"
+    },
+    {
+      "sira": 9,
+      "ad": "İzmit Saat Kulesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "İzmit",
+      "merkeze_km": 0,
+      "neden": "II. Abdülhamid'in tahta çıkışının 25. yılı için yapılan 16 m'lik dört katlı kule",
+      "osm": "node/1364314632",
+      "place_id": "ChIJ2TXxNoRFyxQR91zi_AUSfZw"
+    },
+    {
+      "sira": 10,
+      "ad": "Ballıkayalar Tabiat Parkı",
+      "kategori": "doga",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Gebze",
+      "merkeze_km": 36,
+      "neden": "Dar ve derin vadide küçük şelaleler, göletler; Mısır akbabası da görülüyor",
+      "place_id": "ChIJv5-k_iskyxQRHYPaWHiclIo"
+    },
+    {
+      "sira": 11,
+      "ad": "Çoban Mustafa Paşa Külliyesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Gebze",
+      "merkeze_km": 43,
+      "neden": "1523–24 tarihli külliyede renkli taş panolar ve kündekâri kapılar var",
+      "osm": "way/499545499",
+      "place_id": "ChIJ2_bVM48gyxQRNkLl9khLuBo"
+    },
+    {
+      "sira": 12,
+      "ad": "Hereke Kalesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Körfez",
+      "merkeze_km": 27,
+      "neden": "Matrakçı Nasuh'un 16. yüzyıl çizimlerine göre onarılan körfez kalesi",
+      "place_id": "ChIJX4yVRzI7yxQRDJzz427Nw-0"
+    },
+    {
+      "sira": 13,
+      "ad": "Kuzuyayla Tabiat Parkı",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Kartepe",
+      "merkeze_km": 17,
+      "neden": "Teleferiğin 1.423 m'deki üst istasyonu; ormanla çevrili yayla",
+      "place_id": "ChIJVcKTaddYyxQRt6ZcV56fZNg"
+    },
+    {
+      "sira": 14,
+      "ad": "Kefken Pembe Kayalıklar",
+      "kategori": "doga",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Kandıra",
+      "merkeze_km": 52,
+      "neden": "Havayla sertleşen pembe kayalar; yakınında Yeşil Koy ve Midye Koyu",
+      "place_id": "ChIJRy-VBjBsnkARC0rEmK_MtZ0"
+    },
+    {
+      "sira": 15,
+      "ad": "Kefken Adası",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "doga"
+      ],
+      "ilce": "Kandıra",
+      "merkeze_km": 52,
+      "neden": "Cebeci'nin 400 m açığında; Ceneviz surları, sarnıçlar ve 1870'lerden bir fener",
+      "place_id": "ChIJ_aSUEu9unkARio2x3S9Rr6I"
+    },
+    {
+      "sira": 16,
+      "ad": "Tarihi Kapanca Sokağı",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "İzmit",
+      "merkeze_km": 0.4,
+      "neden": "Yokuştaki ahşap evler; Tarih Koridoru yürüyüş rotasının duraklarından",
+      "place_id": "ChIJn0K37IZFyxQRlXSn0hbdiYQ"
+    },
+    {
+      "sira": 17,
+      "ad": "Eskihisar Kalesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Gebze",
+      "merkeze_km": 43,
+      "neden": "1329'daki Palekanon Savaşı'na adını veren, körfez geçişini tutan kale",
+      "osm": "way/372680297",
+      "place_id": "ChIJ2XkhgREgyxQRoQ6661bNMso"
+    },
+    {
+      "sira": 18,
+      "ad": "Hereke İpekli Dokuma Fabrikası",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Körfez",
+      "merkeze_km": 27,
+      "neden": "1843'te Abdülmecid döneminde kurulan fabrikada ipek halı hâlâ dokunuyor",
+      "place_id": "ChIJ7xUtY1c7yxQRSuYoTL3ev-o"
+    },
+    {
+      "sira": 19,
+      "ad": "Serindere Kanyonu",
+      "kategori": "aktivite",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Başiskele",
+      "merkeze_km": 16,
+      "neden": "10–20 m'lik altı şelale; suda yürümek gereken, ilin en zorlu parkuru",
+      "place_id": "ChIJAfzMmoJdyxQRewmSJ8r5Z6U"
+    },
+    {
+      "sira": 20,
+      "ad": "Çınar Lokantası",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "İzmit",
+      "merkeze_km": 0.5,
+      "neden": "1974'ten beri esnaf lokantası; Elbasan tava ve perde pilavı pişiyor",
+      "place_id": "ChIJS1wBb39FyxQRPl4sJ5Aj7_A"
+    },
+    {
+      "sira": 21,
+      "ad": "Şehr-i İzmit Kafe (Süleyman Paşa Hamamı)",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "İzmit",
+      "merkeze_km": 0.5,
+      "neden": "14. yüzyıldan kalma hamamda Türk kahvesi; içeride bir kahve sergisi var",
+      "place_id": "ChIJDQitP4dFyxQRgKrLCKmsZ9c"
+    },
+    {
+      "sira": 22,
+      "ad": "Atatürk, Redif ve Etnografya Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "İzmit",
+      "merkeze_km": 0.3,
+      "neden": "1889–90 tarihli Redif binasında kent tarihi ve etnografya; giriş ücretsiz",
+      "osm": "way/1080801378",
+      "place_id": "ChIJlboPuoZFyxQR791JRuRvV5c"
+    },
+    {
+      "sira": 23,
+      "ad": "Kocaeli Bilim Merkezi",
+      "kategori": "aktivite",
+      "amaclar": [
+        "cocuklu"
+      ],
+      "ilce": "İzmit",
+      "merkeze_km": 2,
+      "neden": "TÜBİTAK destekli 3.000 m²'lik merkezde 220 kadar deney düzeneği var",
+      "place_id": "ChIJi3DJfJJFyxQRZJhgINsYt58"
+    },
+    {
+      "sira": 24,
+      "ad": "Hannibal Anıtı",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Gebze",
+      "merkeze_km": 41,
+      "neden": "Hannibal'in eski Libyssa'da, bugünkü Gebze'de öldüğü düşünülüyor",
+      "osm": "node/2241752492",
+      "place_id": "ChIJ4ysir0IgyxQRESc9qkTAEQ0"
+    },
+    {
+      "sira": 25,
+      "ad": "Cebeci Plajı",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Kandıra",
+      "merkeze_km": 52,
+      "neden": "Mavi Bayraklı kumsal; Kefken Adası'na tekneler buradan kalkıyor",
+      "place_id": "ChIJe3Z-69xtnkARAjdb_56uDKk"
+    },
+    {
+      "sira": 26,
+      "ad": "Köyevi Restoran",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet",
+        "doga"
+      ],
+      "ilce": "Kartepe",
+      "merkeze_km": 18,
+      "neden": "Maşukiye'de köy ürünleriyle çalışan, orman içinde bir restoran",
+      "place_id": "ChIJi_Eu7ztYyxQROXKxktr1PbY"
+    },
+    {
+      "sira": 27,
+      "ad": "Balıkçı Asiye",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet",
+        "gece"
+      ],
+      "ilce": "İzmit",
+      "merkeze_km": 1,
+      "neden": "Ömerağa'da balık ve meze; körfez kentinde akşam sofrası",
+      "place_id": "ChIJ-UseTxpFyxQR9ad1mAooIV4"
+    },
+    {
+      "sira": 28,
+      "ad": "Kumcağız Plajı",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Kandıra",
+      "merkeze_km": 46,
+      "neden": "Mavi Bayraklı, suyu sığ, çadır alanı olan kumsal",
+      "place_id": "ChIJ5eaEswBtnkARRJUyiofAlS0"
+    },
+    {
+      "sira": 29,
+      "ad": "Doğu Kışla Pazarı",
+      "kategori": "carsi",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "İzmit",
+      "merkeze_km": 1,
+      "neden": "Perşembe kurulan, kentin en büyük semt pazarı; cumartesi de açık",
+      "place_id": "ChIJkb9aII1PyxQRdBW3Wqdiwl4"
+    },
+    {
+      "sira": 30,
+      "ad": "Antika Pazarı",
+      "kategori": "carsi",
+      "amaclar": [
+        "yavas"
+      ],
+      "ilce": "İzmit",
+      "merkeze_km": 1,
+      "neden": "Her ayın ikinci pazarı Doğu Kışla'da plak, eski para ve oyuncak tezgâhları",
+      "place_id": "ChIJW0gMEFtPyxQRpLQbOeB7ous"
+    },
+    {
+      "sira": 31,
+      "ad": "Yahya Kaptan Pazarı",
+      "kategori": "carsi",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "İzmit",
+      "merkeze_km": 3,
+      "neden": "Arasta Park'ta pazar günleri kurulan semt pazarı",
+      "place_id": "ChIJYQ9qKxxQyxQRCxCwRAZ9xpM"
+    },
+    {
+      "sira": 32,
+      "ad": "Garniture Cafe Restaurant Patisserie",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "İzmit",
+      "merkeze_km": 0.5,
+      "neden": "Fethiye Caddesi'nde pasta vitrini, kahvaltı ve hafif öğle yemeği",
+      "place_id": "ChIJP_meQ4BFyxQRo4eujEGbucM"
+    },
+    {
+      "sira": 33,
+      "ad": "MAZİ Plak & Cafe",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "yavas",
+        "gece"
+      ],
+      "ilce": "İzmit",
+      "merkeze_km": 1,
+      "neden": "Karabaş'ta plak dinleyerek kahve içebileceğin küçük bir kafe",
+      "place_id": "ChIJf-ScbH5FyxQRTSDhjnOrxPs"
+    }
+  ]
+}
