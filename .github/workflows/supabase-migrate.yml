@@ -2,13 +2,25 @@ name: supabase-migrate
 
 # Migration'ları ve Edge Function'ları Supabase projesine uygular (Yönetim API + Supabase CLI).
 # Gerekli secret: SUPABASE_ACCESS_TOKEN (supabase.com/dashboard/account/tokens).
+# #494: `main`'e migration ya da Edge Function getiren her birleştirmede kendiliğinden çalışır. Migration'ı `main`'e
+# yalnız CI'da `db:test` geçmiş ve Ürün onaylı bir PR getirebilir. Elle çalıştırma (workflow_dispatch) olduğu gibi kalır.
 on:
+  push:
+    branches: [main]
+    paths:
+      - 'supabase/migrations/**'
+      - 'supabase/functions/**'
   workflow_dispatch:
     inputs:
       fonksiyonlar:
         description: Edge Function'ları da dağıt
         default: true
         type: boolean
+
+# İki birleşme arka arkaya gelirse çalışmalar sırayla yürür; yarıda kesilen migration olmaz.
+concurrency:
+  group: supabase-migrate
+  cancel-in-progress: false
 
 env:
   SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
@@ -19,16 +31,38 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          # Push'ta önceki commit'le karşılaştırmak için geçmiş gerekiyor.
+          fetch-depth: ${{ github.event_name == 'push' && '0' || '1' }}
       - uses: actions/setup-node@v4
         with:
           node-version: 22
       - name: Ön koşul
         run: |
           if [ -z "$SUPABASE_ACCESS_TOKEN" ]; then echo "::error::SUPABASE_ACCESS_TOKEN secret'ı tanımlı değil"; exit 1; fi
+      - name: Fonksiyonlar dağıtılacak mı
+        id: kapsam
+        env:
+          OLAY: ${{ github.event_name }}
+          GIRDI: ${{ inputs.fonksiyonlar }}
+          ONCE: ${{ github.event.before }}
+          SONRA: ${{ github.sha }}
+        run: |
+          if [ "$OLAY" != "push" ]; then
+            echo "fonksiyonlar=$GIRDI" >> "$GITHUB_OUTPUT"
+          elif ! degisen=$(git diff --name-only "$ONCE" "$SONRA" 2>/dev/null); then
+            # Önceki commit bulunamadıysa (ör. zorla push) güvenli taraf: fonksiyonları da dağıt.
+            echo "::warning::Önceki commit bulunamadı; Edge Function'lar da dağıtılacak."
+            echo "fonksiyonlar=true" >> "$GITHUB_OUTPUT"
+          elif printf '%s\n' "$degisen" | grep -q '^supabase/functions/'; then
+            echo "fonksiyonlar=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "fonksiyonlar=false" >> "$GITHUB_OUTPUT"
+          fi
       - name: Migration'ları uygula
         run: node scripts/supabase-migrate.mjs | tee migrate.log
       - name: Edge Function'ları dağıt
-        if: inputs.fonksiyonlar
+        if: steps.kapsam.outputs.fonksiyonlar == 'true'
         run: |
           # Tüm fonksiyonlar (supabase/functions/*; _shared atlanır), JWT doğrulaması açık.
           # --yes: güncel CLI etkileşimsiz çalıştırmada onay istiyor, yoksa hiçbir şey dağıtmadan çıkıyor.

@@ -39,9 +39,12 @@ Ece fikri / denetçi bulgusu
         → Ürün: karar + issue (KK) + gerekirse kanvas  → `gelistirmeye-hazir`
         → Geliştirici: dal + PR (ilgili KK'ler, CI yeşil)
         → Ürün: inceleme (+ gerekiyorsa denetçi gözü) → "Karar: onay" ya da "Değişiklik iste"
-        → Geliştirici: birleştir + yayınla (CLAUDE.md'deki sıra) → masaya not
+        → Geliştirici: birleştir → otomatik `supabase-migrate` başarıyla biter (migration varsa)
+                       → `eas-update` (expo-go, sonra native) → masaya not
         → Denetçiler: haftalık turda canlı hale ve yeni tasarımlara bakar → yeni bulgu
 ```
+
+**Yayın sırası (#494).** 1) Birleştir. 2) Migration ya da Edge Function varsa `supabase-migrate` `main` push'uyla kendiliğinden çalışır; başarıyla bitmesi beklenir. BO ve web yayını da onun bitmesini bekler. 3) `eas-update`: önce `expo-go`, sonra `native`. Migration düşerse `eas-update` yapılmaz, masaya yazılır.
 
 **Birleştirme kuralı.** Geliştirici bir PR'ı yalnız şu üçü birlikte doğruysa birleştirir:
 1. CI yeşil.
