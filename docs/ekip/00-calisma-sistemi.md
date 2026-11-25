@@ -44,7 +44,7 @@ Ece fikri / denetçi bulgusu
         → Denetçiler: haftalık turda canlı hale ve yeni tasarımlara bakar → yeni bulgu
 ```
 
-**Yayın sırası (#494).** 1) Birleştir. 2) Migration ya da Edge Function varsa `supabase-migrate` `main` push'uyla kendiliğinden çalışır; başarıyla bitmesi beklenir. BO ve web yayını da onun bitmesini bekler. 3) `eas-update`: önce `expo-go`, sonra `native`. Migration düşerse `eas-update` yapılmaz, masaya yazılır.
+**Yayın sırası (#494).** 1) Birleştir. 2) Migration ya da Edge Function varsa `supabase-migrate` `main` push'uyla kendiliğinden çalışır; başarıyla bitmesi beklenir. BO ve web yayını da onun bitmesini bekler. 3) `eas-update`: önce `expo-go`, sonra `native`. Migration düşerse `eas-update` yapılmaz, masaya yazılır. Veri silen migration otomatik gitmez (§4); Ece onayından sonra `main`'den elle çalıştırılır.
 
 **Birleştirme kuralı.** Geliştirici bir PR'ı yalnız şu üçü birlikte doğruysa birleştirir:
 1. CI yeşil.

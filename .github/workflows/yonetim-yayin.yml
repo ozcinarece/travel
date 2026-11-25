@@ -41,6 +41,8 @@ jobs:
           MIGRATE_OLAY: ${{ github.event.workflow_run.event }}
           MIGRATE_DAL: ${{ github.event.workflow_run.head_branch }}
           MIGRATE_SONUC: ${{ github.event.workflow_run.conclusion }}
+          MIGRATE_REPO: ${{ github.event.workflow_run.head_repository.full_name }}
+          REPO: ${{ github.repository }}
         run: |
           case "$OLAY" in
             push)
@@ -54,7 +56,8 @@ jobs:
               fi ;;
             workflow_run)
               # Yalnız main push'uyla başlayan ve başarıyla biten migrate. Düşerse yayın yapılmaz.
-              if [ "$MIGRATE_OLAY" = "push" ] && [ "$MIGRATE_DAL" = "main" ] && [ "$MIGRATE_SONUC" = "success" ]; then
+              if [ "$MIGRATE_OLAY" = "push" ] && [ "$MIGRATE_DAL" = "main" ] && [ "$MIGRATE_SONUC" = "success" ] \
+                && [ "$MIGRATE_REPO" = "$REPO" ]; then
                 echo "yayinla=true" >> "$GITHUB_OUTPUT"
               else
                 echo "::warning::supabase-migrate ($MIGRATE_OLAY, $MIGRATE_DAL) sonucu: $MIGRATE_SONUC; yayın yapılmadı."
@@ -96,8 +99,8 @@ jobs:
       - uses: actions/checkout@v4
         if: steps.kosul.outputs.hazir == '1'
         with:
-          # workflow_run'da migration'ı uygulanan commit yayınlanır.
-          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+          # workflow_run'da main'in o anki ucu yayınlanır: migrate beklerken birleşen daha yeni bir PR eski commit'le ezilmesin.
+          ref: ${{ github.event_name == 'workflow_run' && 'main' || github.sha }}
       - uses: actions/setup-node@v4
         if: steps.kosul.outputs.hazir == '1'
         with:

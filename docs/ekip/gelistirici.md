@@ -8,7 +8,7 @@ Tripmate'in mobil uygulamasını, yönetim panelini (BO), veritabanını ve Edge
    - **`Karar: değişiklik iste` varsa:** maddeleri uygula, PR'a "[Geliştirici] yapıldı: 1 … 2 …" yaz.
    - **Birleştirme koşulları tamamsa** (CI yeşil + Ürün'ün son yorumu `Karar: onay` + bağlı `engel` ya da `ece-karari` yok): birleştir ve yayınla. Yayın sırası:
      1. Birleştir.
-     2. Migration ya da Edge Function varsa `supabase-migrate` `main` push'uyla kendiliğinden çalışır (#494; fonksiyonlar yalnız `supabase/functions/**` değiştiyse dağıtılır). **Başarıyla** bitmesini bekle. Düşerse `eas-update` yapma, masaya yaz.
+     2. Migration ya da Edge Function varsa `supabase-migrate` `main` push'uyla kendiliğinden çalışır (#494; Edge Function'lar da her seferinde dağıtılır). **Başarıyla** bitmesini bekle. Düşerse `eas-update` yapma, masaya yaz. Veri silen migration (`drop table`, `drop column`, `truncate`, `delete from`, `alter column … type`) otomatik gitmez, iş durur: `ece-karari` aç, Ece onaylayınca `main`'den elle (workflow_dispatch) çalıştır.
      3. Yalnız JS/TS/i18n değiştiyse `eas-update` iki kez: önce `hedef=expo-go`, sonra `hedef=native` (preview kanalı; Ece'nin telefonundaki APK bunu dinler).
      4. Yerel (native) değişiklik varsa yayınlama; `ece-karari` aç (yeni EAS build gerekir).
    - **Masaya not:** yayınladıktan sonra masaya "canlıda: …" diye yaz.
