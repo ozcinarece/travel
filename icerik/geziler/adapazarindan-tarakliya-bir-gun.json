@@ -1,0 +1,128 @@
+{
+  "surum": 1,
+  "sehir": {
+    "slug": "sapanca"
+  },
+  "takvim": {
+    "ilk_gun": "pazar"
+  },
+  "gezi": {
+    "slug": "adapazarindan-tarakliya-bir-gun",
+    "baslik": "Adapazarı'ndan Taraklı'ya bir gün",
+    "ozet": "Sabah Bizans köprüsü ve ıslama köfte, öğleden sonra Taraklı çarşısı",
+    "yazar_ad": "Tripmate ekibi",
+    "amaclar": [
+      "kultur_tarih",
+      "lezzet",
+      "yavas"
+    ],
+    "yazi_md": "Sapanca'da bir gün geçirdiysen ikinci günü gölün öbür tarafına ayır. Bu plan seni sabah Adapazarı'na, 1.500 yıllık bir Bizans köprüsüne ve şehrin ıslama köftesine götürüyor, öğleden sonra da güneye, ahşap konaklarıyla bilinen Taraklı'ya çıkarıyor. Bütün gün arabayla gideceksin; öğle yemeğini Adapazarı'nda yiyip yola karnın tok çıkacaksın. Sapanca'dan Adapazarı yarım saat bile değil; Adapazarı'ndan Taraklı'ya Geyve üzerinden bir saati biraz aşan bir yol var.\n\n> Plan pazar günü için yazıldı. Sakarya Müzesi pazartesi kapalı; günü pazartesiye kaydırırsan müzenin yerine Adapazarı'nın çarşısında dolaş.\n\n## 1. gün · Beşköprü'den Taraklı'ya\n\nGüne Adapazarı'nın batı ucundaki [Justinianus Köprüsü](mekan:ChIJ4SWSIpSzzBQRi0TK_I3-4-E) ile başla. Halk ona Beşköprü der. 6. yüzyılda İstanbul'dan Anadolu'ya giden yol Sakarya Nehri'ni burada geçiyordu. Nehir zamanla yatağını değiştirdi; bugün on iki kemerin altından yalnız Çark Deresi akıyor. Sekiz yıllık kazı ve onarımdan sonra 2026 yazında yeniden açıldı. Üstünde bir uçtan öbürüne yürü, sonra aşağı inip ayaklara bak.\n\n::mekan[ChIJ4SWSIpSzzBQRi0TK_I3-4-E]\n\nArabayla şehir merkezine geç ve [Sakarya Müzesi](mekan:ChIJB12e5i2zzBQReJ9L_3kjnHs)'ni gez. Müze, 1910'larda yapılmış üç katlı bir konakta. Mustafa Kemal Haziran 1922'de bu evde kaldı ve annesi Zübeyde Hanım'la burada buluştu. İçeride bölgenin arkeolojisi ve etnografyası var. Bahçedeki Roma ve Bizans mezar taşlarına da bak.\n\nÖğle yemeği için Yeni Cami'nin yakınındaki [Meşhur Köfteci Mustafa](mekan:ChIJ-Rc5ezGzzBQRYwCEX4FuNnQ)'ya yürü. Burası 1912'den beri ıslama köfte yapıyor: közlenmiş ekmek pul biberli et suyuna batırılır, üstüne küçük köfteler dizilir. Yanına manda yoğurdu ve piyaz söyle. Öğleden sonra yol uzun, doyarak çık.\n\nYemekten sonra güneye, Geyve'ye doğru sür; Sakarya Nehri'nin açtığı boğazdan geçip Taraklı'ya çıkarsın. Kasabanın ortasındaki [Yunus Paşa Camii](mekan:ChIJf-oA6Y2UzBQRBUnGXZEzOp4) 1516–1517'de Yavuz'un veziri Yunus Paşa için yapıldı. Kubbesi kurşun kaplı olduğu için herkes ona Kurşunlu Cami der. Onarımdan sonra 2026 baharında yeniden ibadete açıldı.\n\n::mekan[ChIJf-oA6Y2UzBQRBUnGXZEzOp4]\n\nCamiden sonra çevresindeki çarşıda dolaş. Tahta kaşık ve tarak ustalarının dükkânlarına, tarhana, çam reçeli ve uğut tatlısı satan tezgâhlara bak. Uğut, çimlendirilmiş buğdaydan yapılan koyu bir tatlı; bir kavanoz almadan dönme. Kasabada tescilli iki yüzü aşkın eski yapı var. Çarşının üst sokaklarında cumbalı ahşap konakların arasından yürü.\n\nSonra konak sokaklarından aşağı inerek kasabanın güney ucundaki [Yedi Asırlık Çınar](mekan:ChIJT4JfL5CUzBQRUVXchZAf_aQ)'a git. Yaşının yedi yüz yılı bulduğu söylenen ağaç, Yusuf Bey Camii'nin yanında. Çarşıdan aldıklarını gölgesinde tat, sonra arabana dön. Dönüşte aynı boğazdan inersin; Sapanca'ya akşam yemeğine yetişirsin."
+  },
+  "gunler": [
+    {
+      "baslik": "Beşköprü'den Taraklı'ya",
+      "duraklar": [
+        {
+          "place_id": "ChIJ4SWSIpSzzBQRi0TK_I3-4-E",
+          "osm": "way/189584048",
+          "ad": "Justinianus Köprüsü",
+          "sure_dk": 45,
+          "kapali_gunler": [],
+          "rehber": "justinianus-koprusu",
+          "amaclar": [
+            "kultur_tarih"
+          ]
+        },
+        {
+          "place_id": "ChIJB12e5i2zzBQReJ9L_3kjnHs",
+          "ad": "Sakarya Müzesi",
+          "sure_dk": 60,
+          "sure_gerekcesi": "varsayılan 90; tek konakta küçük bir müze, bahçesiyle bir saat",
+          "kapali_gunler": [
+            "pazartesi"
+          ],
+          "rehber": "sakarya-muzesi",
+          "amaclar": [
+            "kultur_tarih",
+            "cocuklu"
+          ]
+        },
+        {
+          "place_id": "ChIJ-Rc5ezGzzBQRYwCEX4FuNnQ",
+          "osm": "node/4395766733",
+          "ad": "Meşhur Köfteci Mustafa",
+          "sure_dk": 45,
+          "sure_gerekcesi": "varsayılan 75; tek tabaklık köfteci, servis hızlı",
+          "kapali_gunler": [],
+          "rehber": "kofteci-mustafa",
+          "amaclar": [
+            "lezzet"
+          ]
+        },
+        {
+          "place_id": "ChIJf-oA6Y2UzBQRBUnGXZEzOp4",
+          "osm": "way/1253179777",
+          "ad": "Yunus Paşa Camii (Kurşunlu Cami)",
+          "sure_dk": 75,
+          "sure_gerekcesi": "varsayılan 45; cami yarım saat, çevresindeki çarşı ve konak sokakları da bu durakta",
+          "kapali_gunler": [],
+          "rehber": "yunus-pasa-camii-tarakli",
+          "amaclar": [
+            "kultur_tarih",
+            "yavas"
+          ]
+        },
+        {
+          "place_id": "ChIJT4JfL5CUzBQRUVXchZAf_aQ",
+          "osm": "node/11017679707",
+          "ad": "Yedi Asırlık Çınar",
+          "sure_dk": 20,
+          "sure_gerekcesi": "varsayılan 45; tek ağaç, gölgesinde kısa bir mola",
+          "kapali_gunler": [],
+          "rehber": "tarakli-yedi-asirlik-cinar",
+          "amaclar": [
+            "yavas",
+            "doga"
+          ]
+        }
+      ]
+    }
+  ],
+  "ek_mekanlar": [],
+  "notlar": {
+    "dogrulanacaklar": [
+      "[Yazı · süre] · 'Sapanca'dan Adapazarı yarım saat bile değil', 'Adapazarı'ndan Taraklı'ya Geyve üzerinden bir saati biraz aşan yol' kuş uçuşu ve bilinen yol güzergâhından kestirildi · harita",
+      "[Yazı, rehber · Justinianus Köprüsü] · 12 kemer (DHA 05.08.2026, Milliyet 25.12.2024); boy kaynaklarda 365 m (DHA) ve 429 m (Milliyet) diye çelişiyor, metinde 'üç yüz metreyi aşan' dendi; ayak kalınlığı ~6 m Milliyet; 2026 yazında açılış DHA haber tarihi (5 Ağustos 2026); hamam ve sarnıç DHA; UNESCO Geçici Listesi DHA, NTV · Kültür ve Turizm Bakanlığı / Serdivan Belediyesi",
+      "[Rehber · Justinianus Köprüsü] · 'Nehir yatağını doğuya kaydırdı' ve 'ayakların akıntıya bakan yüzü sivri' genel bilgiden; 'hamam doğu ucunda' Milliyet'teki 'köprünün doğusunda, demiryolu yanında' ifadesinden; 'Sapanca yönünden gelirken yolun üstünde' haritadan çıkarım · yerinde, Vikipedi 'Sangarius Bridge'",
+      "[Rehber · Sakarya Müzesi] · Konak 1910–1915 Binbaşı Baha Bey, Atatürk 14–21/22 Haziran 1922 (kaynaklar bir gün farklı), müze 1993, 1999 depremi, 2003 yeniden açılış: en.wikipedia 'Sakarya Museum', Küre Ansiklopedi (AI destekli sayfa), turkishmuseums.com · Pazartesi kapalı yalnız Küre'de; turkishmuseums.com kapalı gün yazmıyor · müze telefonu ya da muze.gov.tr",
+      "[Rehber · Köfteci Mustafa] · 1912 ve kuruluş hikâyesi işletmenin kendi anlatısı (yemek.com 17.12.2017); mahreç işareti tescili 8 Ocak 2013, no 167 (Küre Ansiklopedi tablosu; metinde '2005' de geçiyor) · TÜRKPATENT coğrafi işaret sayfası · Kapalı gün bilinmiyor, [] · işletme",
+      "[Rehber · Yunus Paşa Camii] · 1516/1517 ve Yunus Paşa (haber7 30.04.2024, gazetebirlik 02.05.2026, en.wikipedia 'Taraklı'). 'Mimar Sinan' atfı kaynaklarda var ama Sinan 1538'de baş mimar oldu; metinde 'halk arasında anılır' dendi. 'Onarımdan sonra 2026 baharında ibadete açıldı' gazetebirlik'in 2 Mayıs 2026 haberinden, kesin tarih yok. Hamam buharı anlatısı haber7 · Vakıflar",
+      "[Rehber · Yedi Asırlık Çınar] · 'Yedi asırlık çınar' Daily Sabah/AA 30.09.2015; ağacın Yusuf Bey Camii yanında olduğu OSM konumlarından (yaklaşık 50 m) çıkarım · yerinde",
+      "[Yazı, rehber · Taraklı] · tescilli 200'ü aşkın yapı CNN Türk/AA 23.10.2021 (2016 tarihli haber7'de 111); Cittaslow 2011 ve EDEN 2013 UNWTO Best Tourism Villages sayfası; uğut, tarhana, çam reçeli CNN Türk; tahta kaşık Daily Sabah ve haber7; 'tarak ustaları' il listesi (sakarya.json); uğutun çimlendirilmiş buğdaydan yapıldığı genel bilgi · Taraklı Belediyesi",
+      "[Plan · Taraklı çarşısı] · Çarşı durak yapılmadı: il listesindeki place_id (ChIJ43hb…) Google'da bir giyim dükkânına çıkıyor. Çarşı Yunus Paşa Camii durağının süresine katıldı · il listesindeki id de düzeltilmeli",
+      "[Plan · osm] · Sakarya Müzesi Adapazarı OSM aday listesinde (4,5 km) yok; konum Google'dan (30 gün)"
+    ],
+    "fotograf_onerileri": [
+      {
+        "ne": "Justinianus Köprüsü, kemerler boyunca",
+        "altyazi": "Beşköprü'nün on iki kemeri",
+        "arama": "Commons: Category:Sangarius Bridge"
+      },
+      {
+        "ne": "Taraklı'da ahşap konaklar ve Kurşunlu Cami kubbesi",
+        "altyazi": "Taraklı'nın çarşısı",
+        "arama": "Commons: Category:Taraklı"
+      },
+      {
+        "ne": "Islama köfte tabağı",
+        "altyazi": "Adapazarı ıslama köftesi",
+        "arama": "Commons: Islama köfte"
+      }
+    ],
+    "varsayimlar": [
+      "Sapanca'nın ikinci gezisi: Sapanca'da kalan gezgin için günübirlik; 1. gün pazar",
+      "Bütün gün araçla; duraklar arası yürüme uyarıları araç bacakları (#311)",
+      "İl listesinin (sakarya.json) ilk 5'i: Sapanca Gölü 1. gezide; Taraklı, Justinianus Köprüsü, Köfteci Mustafa bu gezide; Acarlar Longozu Karasu'da, kuzeyde ve ters yönde (Adapazarı'ndan ~35 km kuzey), Taraklı ile aynı güne sığmıyor"
+    ]
+  }
+}
