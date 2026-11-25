@@ -63,7 +63,6 @@
         },
         {
           "place_id": "ChIJ3VdapZpzm0ARc1nFNz1LWAo",
-          "osm": "way/99583839",
           "ad": "Kemerköprü",
           "sure_dk": 15,
           "sure_gerekcesi": "kısa taş köprü; müzeden yürüyüş ve fotoğraf molası",
@@ -105,7 +104,7 @@
     "dogrulanacaklar": [
       "[Plan · g1.d1 place_id] · Güzelcehisar'ın place_id'si il listesinden; o zaman kimlik sorgusu birden çok sonuç vermiş, ilk sonuç alınmıştı. Bu turda puan isteğiyle adı kontrol edildi (bkz. PR) · BO'da yerin haritadaki konumu",
       "[Plan · osm] · Kuru yüklemede Güzelcehisar'ın OSM alanı Google konumundan 195 m, Kuşkayası'nın OSM düğümü 953 m uzak çıktı (Kuşkayası'nda OSM düğümü Vikipedi koordinatına da ~900 m uzak); iki durakta osm kaldırıldı, konum Google'dan 30 gün · BO'da elle işaretleme (#220 B)",
-      "[Plan · g1.d4 place_id] · Kemerköprü'nün il listesindeki place_id'si OSM köprüsünden 660 m uzaktı (büyük olasılıkla mahalle); köprü OSM konumu yanlılığıyla yeniden soruldu, ilk sonuç alındı · BO",
+      "[Plan · g1.d4] · Kemerköprü'nün il listesindeki place_id'si OSM köprüsünden 660 m uzaktı (büyük olasılıkla mahalle); köprü OSM konumu yanlılığıyla yeniden soruldu, yeni id OSM'den 185 m uzak çıktı, osm kaldırıldı · BO'da konumu köprüye çek; il listesindeki (bartin.json) id de düzeltilmeli",
       "[Plan · kapali_gunler] · Kent Müzesi pazartesi kapalı: OSM opening_hours (iki nesne: Tu-Su ve 'Pazartesi Hariç'); belediye sayfasından bakılmadı. Öbür duraklar açık alan ya da lokanta; lokantanın kapalı günü bilinmiyor, [] · Bartın Belediyesi, işletme",
       "[Yazı] · 'toplam yol yaklaşık 70 km' ve 'duraklar arası 10–40 dk' kuş uçuşu ve kaynaklardaki mesafelerden (Bartın–Güzelcehisar 17 km, amasra.net; Amasra–Güzelcehisar 35–40 dk) kestirildi · harita",
       "[Rehber · Güzelcehisar] · 80 milyon yıl, beş köşeli prizma, 50–100 cm çap, yatık ve dik sütunlar, 800 m ahşap yol 2018 (amasra.net, Daily Sabah/AA 13.11.2018); tabiat anıtı 14.08.2017, 14,3 ha (Tarım ve Orman 10. Bölge sayfası)",
