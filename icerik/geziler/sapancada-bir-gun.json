@@ -52,7 +52,6 @@
         },
         {
           "place_id": "ChIJpzx1LAqvzBQR3WDrKKytwxs",
-          "osm": "node/8015388985",
           "ad": "Sapanca Gölü Yürüyüş Yolu",
           "sure_dk": 60,
           "sure_gerekcesi": "varsayılan 45; doğuya yarım saat gidip dönen kıyı yürüyüşü",
@@ -131,7 +130,7 @@
       "[Rehber · Rüstem Paşa] · Kitabe 1554, ahşap çatı ve kiremit, kerpiç-ahşap, iç alan 250 m² (Hürriyet 2018); 1555 ve Sinan'ın çırakları (en.wikipedia 'Sapanca'); Sinan atfı kaynaklar arasında tartışmalı, metinde 'atfedilir' · kulturportali.gov.tr/turkiye/sakarya/gezilecekyer/rustempasa-camii",
       "[Rehber · Rüstem Paşa] · Hamam temelleri 2015 kent meydanı kazısı (Hürriyet Daily News; CNN Türk 2017). Bugün kalıntının görülebilir olup olmadığı doğrulanmadı · yerinde, Sapanca Belediyesi",
       "[Rehber · Göl] · ~16×5 km, en derin ~52 m, Sakarya içme suyunun ~%90'ı, 69 kuş türü (en.wikipedia 'Lake Sapanca'); Sapanca Park 1. etap Kırkpınar'dan 6 km, 2. etap Serdivan'a (Habertürk 10.08.2026)",
-      "[Rehber · Göl] · OSM 'Sapanca Sahil' noktası (node/8015388985) ile Google'ın 'Sapanca Gölü Yürüyüş Yolu' konumu 150 m içinde mi; kuru yukle gösterecek",
+      "[Plan · g1.d3] · OSM 'Sapanca Sahil' noktası (node/8015388985) Google'ın yürüyüş yolu konumundan 208 m uzak çıktı (kuru yukle 45649448519); osm boş bırakıldı, konum Google'dan 30 gün · OSM'de kıyı yolu çizgisi",
       "[Rehber · Eker] · Esnaf lokantası, sulu yemek, kahvaltı (sapancaevleri.com); kuruluş yılı bulunamadı, metne yazılmadı. Kabak tatlısı Adapazarı'nın (il listesi sakarya.json) · işletme",
       "[Rehber · Hasan Fehmi Paşa] · 1885, taş-tuğla-ahşap, içi işlemeli, koruma kurulu tescilli (Hürriyet 2018; en.wikipedia 'Sapanca'). Kapının vakit dışında açık olup olmadığı · yerinde",
       "[Rehber · Maşukiye] · Aygır Deresi, alabalık lokantaları, kiremitte alabalık, ATV ve zipline, ilkbahar-sonbahar (bizevdeyokuz.com); Sapanca'ya ~10 km (aynı kaynak ve OSM)",
