@@ -1,0 +1,398 @@
+{
+  "il": "Zonguldak",
+  "slug": "zonguldak",
+  "guncelleme": "2026-11-25",
+  "oneriler": [
+    {
+      "sira": 1,
+      "ad": "Gökgöl Mağarası",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 4,
+      "neden": "3.350 m'lik mağaranın 875 m'lik yürüyüş yolu kent merkezine birkaç km uzakta",
+      "osm": "node/4763076034",
+      "place_id": "ChIJrWWezm98nEARIhkUPMlsjBg"
+    },
+    {
+      "sira": 2,
+      "ad": "Zonguldak Maden Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 2,
+      "neden": "Türkiye'nin ilk maden müzesi; Avrupa Endüstriyel Miras Rotası üyesi",
+      "osm": "way/1303447544",
+      "place_id": "ChIJTVN_ZkN8nEARX_AMOJ75Sr0"
+    },
+    {
+      "sira": 3,
+      "ad": "Cehennemağzı Mağaraları",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "doga"
+      ],
+      "ilce": "Ereğli",
+      "merkeze_km": 35,
+      "neden": "Herakles'in Kerberos'u yakaladığı yer sayılan mağarada erken Hristiyanlık mozaiği var",
+      "place_id": "ChIJy12EMp9EnEARoAszeK-wRrg"
+    },
+    {
+      "sira": 4,
+      "ad": "Tios (Tieion) Antik Kenti",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Çaycuma",
+      "merkeze_km": 23,
+      "neden": "Filyos'taki Tios'ta 5.000 kişilik Roma tiyatrosu ve Bizans sarnıcı görülüyor",
+      "osm": "way/375464877",
+      "place_id": "ChIJgQ0OdwCDm0ARWD4F2YPDkRE"
+    },
+    {
+      "sira": 5,
+      "ad": "Karadeniz Ereğli Müzesi (Halil Paşa Konağı)",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Ereğli",
+      "merkeze_km": 36,
+      "neden": "Halil Paşa Konağı'nda Lidya'dan Osmanlı'ya 5 binden fazla eser sergileniyor",
+      "osm": "way/232652640",
+      "place_id": "ChIJUU_gZgBFnEARi_YrrOtYfDA"
+    },
+    {
+      "sira": 6,
+      "ad": "Kömür Deneyim Ocağı",
+      "kategori": "aktivite",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 2,
+      "neden": "Maden Müzesi yanındaki eski eğitim ocağı, maden asansörü canlandırmasıyla geziliyor",
+      "place_id": "ChIJO_FQ8el9nEARQY6QrSV7Wgs"
+    },
+    {
+      "sira": 7,
+      "ad": "Gümeli Porsuğu (Anıt Porsuk Ağacı)",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Alaplı",
+      "merkeze_km": 48,
+      "neden": "Gümeli ormanındaki porsuk ağacının yaşı KTÜ ölçümüyle 4 binin üzerinde",
+      "place_id": "ChIJn8j1pMn8nEARTiHj_MFpums"
+    },
+    {
+      "sira": 8,
+      "ad": "Ereğli pidesi: Meşhur Pideci Hasan Kuru",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Ereğli",
+      "merkeze_km": 36,
+      "neden": "Ereğli pidesinin açık ve kapalı 18 çeşidini yapan bilinen pideci",
+      "osm": "node/12569822397",
+      "place_id": "ChIJT20YNrVEnEARdwnEeKE-T6M"
+    },
+    {
+      "sira": 9,
+      "ad": "Filyos Kalesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "doga"
+      ],
+      "ilce": "Çaycuma",
+      "merkeze_km": 23,
+      "neden": "Filyos Çayı'nın denize kavuştuğu burundaki kale",
+      "osm": "way/225603956",
+      "place_id": "ChIJK8NHSBeCm0AR1RtUTfe6eWs"
+    },
+    {
+      "sira": 10,
+      "ad": "Fener Mahallesi",
+      "kategori": "manzara",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "Fransızların 1890'larda kurduğu maden yerleşimi; adını burundaki deniz fenerinden alır",
+      "place_id": "ChIJ_wpXknV8nEARDCjsiZe4zKI"
+    },
+    {
+      "sira": 11,
+      "ad": "Uzun Mehmet Anıtı",
+      "kategori": "manzara",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 2,
+      "neden": "1973'te TTK'nın diktiği anıt; asker, madenci ve kömürü bulan Uzun Mehmet'i gösterir",
+      "osm": "way/1213300776",
+      "place_id": "ChIJTwnL9Xd7nEARJz6RsCswq7s"
+    },
+    {
+      "sira": 12,
+      "ad": "Gazi Alemdar Gemi Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Ereğli",
+      "merkeze_km": 36,
+      "neden": "Kurtuluş Savaşı'nın Alemdar gemisinin birebir kopyası, 2008'den beri müze",
+      "osm": "way/232652641",
+      "place_id": "ChIJ2_YwA7ZEnEARVTVqFPA7o80"
+    },
+    {
+      "sira": 13,
+      "ad": "Devrek Baston Park ve Baston Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Devrek",
+      "merkeze_km": 29,
+      "neden": "35 dönümlük parkta baston müzesi, atölye ve kızılcık bastonu satan dükkân var",
+      "place_id": "ChIJQ9pcNASTnEARBkXnkeRLEWI"
+    },
+    {
+      "sira": 14,
+      "ad": "Harmankaya Şelaleleri Tabiat Parkı",
+      "kategori": "doga",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 10,
+      "neden": "Elvanpazarcık'taki şelaleler tabiat parkı olarak korunuyor",
+      "place_id": "ChIJla5xzFt9nEARrv-O-PpRlcs"
+    },
+    {
+      "sira": 15,
+      "ad": "Kapuz Plajı",
+      "kategori": "aktivite",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "Kent merkezinde belediyenin işlettiği, cankurtaranlı plaj",
+      "osm": "way/1303213232",
+      "place_id": "ChIJ2TNBhwZ9nEAR32HghENxIUQ"
+    },
+    {
+      "sira": 16,
+      "ad": "İstanbul Pastanesi",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet",
+        "yavas"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "1954'te Aziz Alpak'ın açtığı, kentin en eski pastanelerinden biri",
+      "place_id": "ChIJd42Nont8nEARXeBvKuJTF2U"
+    },
+    {
+      "sira": 17,
+      "ad": "Rıhtım Balık Evi",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet",
+        "gece"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "Merkezde mevsim balığı ve kabak tatlısıyla bilinen balık evi",
+      "place_id": "ChIJoYQQzXt8nEARmiL8YtNWZOg"
+    },
+    {
+      "sira": 18,
+      "ad": "Karadeniz Ereğli Kalesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Ereğli",
+      "merkeze_km": 36,
+      "neden": "1404'te İspanyol elçi Clavijo'nun kentin üstündeki tepede andığı kale",
+      "osm": "node/2418361093",
+      "place_id": "ChIJ9TpxYgBFnEARwpW8jYpJguc"
+    },
+    {
+      "sira": 19,
+      "ad": "Krispos Anıt Mezarı",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Ereğli",
+      "merkeze_km": 36,
+      "neden": "29 yaşında ölen Mısırlı pandomim sanatçısı için yapılmış 2. yy Roma anıt mezarı"
+    },
+    {
+      "sira": 20,
+      "ad": "Fetih Çınarları",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Ereğli",
+      "merkeze_km": 36,
+      "neden": "İstanbul'un fethinden sonra dikildiği anlatılan, tescilli sekiz çınar",
+      "place_id": "ChIJ3SiOE_xFnEARTCCl1nprhD0"
+    },
+    {
+      "sira": 21,
+      "ad": "Radar Tepesi",
+      "kategori": "manzara",
+      "amaclar": [
+        "yavas",
+        "gece"
+      ],
+      "ilce": "Ereğli",
+      "merkeze_km": 35,
+      "neden": "Cehennemağzı yolundaki tepe; Ereğli'ye akşamüstü yukarıdan bakılır",
+      "place_id": "ChIJhUES2jdbnEARfZDzHerVXzM"
+    },
+    {
+      "sira": 22,
+      "ad": "Filyos Kuş Cenneti",
+      "kategori": "aktivite",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Çaycuma",
+      "merkeze_km": 23,
+      "neden": "Filyos Vadisi'ndeki 100 hektarlık alan göç yolunda; ilde 300'ü aşkın kuş türü kayıtlı",
+      "place_id": "ChIJoZ7CpUODm0ARh9tepkteyzY"
+    },
+    {
+      "sira": 23,
+      "ad": "Milli Egemenlik Tabiat Parkı",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Çaycuma",
+      "merkeze_km": 22,
+      "neden": "Çayköy'deki 27 hektarlık kayın-gürgen ormanında doğa müzesi ve kır evleri var",
+      "place_id": "ChIJlRmWFqCanEARby-33zqCiRU"
+    },
+    {
+      "sira": 24,
+      "ad": "Kdz. Ereğli Kent Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Ereğli",
+      "merkeze_km": 36,
+      "neden": "Belediyenin 2014'te açtığı müzede kentin eşyaları ve belgeleri sergileniyor",
+      "osm": "node/9920028188",
+      "place_id": "ChIJfceGm7lEnEARNLcv4r4DjOM"
+    },
+    {
+      "sira": 25,
+      "ad": "Çaycuma Müze Evi (Kantarcılar Evi)",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "yavas",
+        "kultur_tarih"
+      ],
+      "ilce": "Çaycuma",
+      "merkeze_km": 24,
+      "neden": "Belediyenin yeniden yaptığı Kantarcılar Evi bugün müze-kafe olarak çalışıyor",
+      "place_id": "ChIJxS4UpGGDnEARtQFKZ-F7F0g"
+    },
+    {
+      "sira": 26,
+      "ad": "Çakaloğlu Değirmen Restoran",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet",
+        "yavas"
+      ],
+      "ilce": "Devrek",
+      "merkeze_km": 29,
+      "neden": "Devrek'te ağaçların arasında meze ve taze balık sunan restoran",
+      "place_id": "ChIJkTQNFGGTnEARToLStSUCPhs"
+    },
+    {
+      "sira": 27,
+      "ad": "Filyos Yakamoz Restoran",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet",
+        "gece"
+      ],
+      "ilce": "Çaycuma",
+      "merkeze_km": 23,
+      "neden": "Filyos sahilinde mevsim balığı ve meze",
+      "place_id": "ChIJ86mZR_GBm0ARsrHBgnSSX-U"
+    },
+    {
+      "sira": 28,
+      "ad": "Fırın Tatte",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "Kurabiye ve pastaların yanında mantısıyla da bilinen fırın-kafe",
+      "place_id": "ChIJgwbYnXt8nEARyNvmK0g3Zxs"
+    },
+    {
+      "sira": 29,
+      "ad": "Kdz. Ereğli Belediyesi Oyuncak Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "cocuklu"
+      ],
+      "ilce": "Ereğli",
+      "merkeze_km": 36,
+      "neden": "Belediyenin oyuncak müzesi; köy okulları projesiyle kırsalda 2.200 çocuğa ulaştı",
+      "osm": "way/1339055104",
+      "place_id": "ChIJPyCbzUlFnEARiwMUCUPVKqw"
+    },
+    {
+      "sira": 30,
+      "ad": "Karaelmas Maden Şehitleri Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 3,
+      "neden": "2020'de Üzülmez'de açılan müze TTK tarihini ve madenci hayatını anlatıyor",
+      "place_id": "ChIJD8QEwdB9nEARfSaIs0QF__g"
+    }
+  ]
+}
