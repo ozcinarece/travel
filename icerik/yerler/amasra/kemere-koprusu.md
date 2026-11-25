@@ -1,4 +1,4 @@
-Kemere Köprüsü, Kaleiçi'ni Boztepe adasına bağlayan tek kemerli taş köprü. Küçük Liman'ın ağzında, iki kara parçası arasındaki dar boğazın üstünde duruyor. Kaynakların çoğu köprünün Bizans dönemine ait olduğunu söylüyor, bazıları ise onu Roma köprüsü olarak anıyor. Kesin olan şu: köprü yüzyıllardır kalenin iki bölümü, Zindan ile Sormagir arasındaki tek geçit.
+Kemere Köprüsü, Kaleiçi'ni Boztepe adasına bağlayan tek kemerli taş köprü. Küçük Liman'ın ağzında, iki kara parçası arasındaki dar boğazın üstünde duruyor. Kaynakların çoğu köprünün Bizans dönemine ait olduğunu söylüyor, bazıları ise onu Roma köprüsü olarak anıyor. Kesin olan şu: köprü yüzyıllardır kalenin iki bölümü, Kaleiçi ile Boztepe arasındaki tek geçit.
 
 Köprü kısa; yürüyerek bir dakikada geçersin. Asıl görülecek şey köprüden çok çevresi. Köprünün ortasında durursan bir yanda Küçük Liman'ın balıkçı tekneleri ve lokantaları, öbür yanda açık deniz görünür. Kemerin altından bakmak için Küçük Liman kıyısından köprüye doğru biraz yürümek gerekir; kemerin biçimi en iyi oradan görünür.
 

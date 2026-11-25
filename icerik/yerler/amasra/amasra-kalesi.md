@@ -1,4 +1,4 @@
-Amasra Kalesi tek bir yapı değil, kasabanın yarımadasını saran surların hepsi. Kale iki parçadan oluşur. Küçük ve Büyük Liman arasındaki dar kara parçasının üstündeki bölüme Zindan ya da Kaleiçi denir; antik kentin akropolü burasıydı. Karşıdaki Boztepe adasında da Sormagir kalesi var. İki bölüm Kemere Köprüsü ile birbirine bağlanır.
+Amasra Kalesi tek bir yapı değil, kasabanın yarımadasını saran surların hepsi. Kale iki parçadan oluşur: Küçük ve Büyük Liman arasındaki yarımadanın üstündeki Kaleiçi ve karşıdaki Boztepe adasını çevreleyen surlar. İki bölüm Kemere Köprüsü ile birbirine bağlanır.
 
 Bugün gördüğün duvarların çoğunu Cenevizliler yaptı. Ceneviz tüccarlar 1260'lardan sonra Karadeniz'de ticaret hakkı aldı, Amasra'yı üs yaptı ve 14. ile 15. yüzyılda surları güçlendirdi. Fatih Sultan Mehmed kaleyi 1461'de aldı. Kalıntılar UNESCO Dünya Mirası geçici listesinde.
 

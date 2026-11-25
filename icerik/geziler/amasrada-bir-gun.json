@@ -13,7 +13,7 @@
   "gezi": {
     "slug": "amasrada-bir-gun",
     "baslik": "Amasra'da bir gün",
-    "ozet": "Sabah Ceneviz surları, öğlen Küçük Liman'da balık, akşam Boztepe",
+    "ozet": "Sabah müze ve surlar, öğlen Küçük Liman'da balık, sonra Boztepe",
     "yazar_ad": "Tripmate ekibi",
     "amaclar": [
       "kultur_tarih",
@@ -132,14 +132,15 @@
       "[Plan · Sehir] · Amasra şehri sehir.yeni ile açılıyor (Bartın'ın ilçesi; Safranbolu gibi); place_id 'Amasra' kimlik sorgusundan (tek sonuç) · BO'da şehir satırı",
       "[Plan · g1.d6] · Ağlayan Ağaç'ın place_id'si yanındaki çay bahçesine ait; OSM'de ağaç ya da çay bahçesi nesnesi bulunamadı, osm boş · OSM, yerinde",
       "[Rehber · Müze] · 1884 bahriye mektebi, 1975 satın alma, 1982 açılış (en.wikipedia 'Amasra Museum', amasra.net, Küre Ansiklopedi); salon içerikleri aynı kaynaklardan",
-      "[Rehber · Kale] · Ceneviz 1263'ten, surlar 14–15. yy, Fatih 1461 (castles.nl); UNESCO geçici listesi (castles.nl, yolcu360) · KTB, UNESCO",
+      "[Rehber · Kale] · Ceneviz 1263'ten, surlar 14–15. yy, Fatih 1461 (castles.nl); UNESCO geçici listesi: whc.unesco.org/en/tentativelists/7030 ve Hürriyet Daily News 'Amasra's old tower enters UNESCO's temporary list' adayları bu turda açılamadı · UNESCO sayfası",
       "[Rehber · Kale] · Büyük Liman tarafındaki kapıdan girilip Kaleiçi'nden Küçük Liman'a yürünebildiği; surların üstüne çıkılan yerler · yerinde",
-      "[Rehber · Fatih Camii] · 9. yy kilise, fetihten sonra camiye çevrildi (CNN Türk 2022, Lonely Planet); taş-tuğla sıraları, doğu cephesi ve minarenin sonradan eklendiği bellekten · Vakıflar, yerinde",
+      "[Rehber · Fatih Camii] · 9. yy kilise, fetihten sonra camiye çevrildi (CNN Türk 2022, Lonely Planet). Ürün'ün notuyla kaynaksız mimari ayrıntılar (doğu cephesi, apsis, minare eki) ve Kaleiçi'ndeki 'Bizans şapeli' çıkarıldı; yalnız genel 'taş ve tuğla örgüsü' kaldı · Vakıflar, yerinde",
       "[Rehber · Canlı Balık] · 1945 ve koruk ekşili Amasra salatası (il listesi bartin.json) · işletme",
       "[Rehber · Kemere] · Tarih kaynaklarda Bizans (castles.nl) ya da Roma (Lonely Planet, yolcu360); metinde ikisi de anıldı",
       "[Rehber · Ağlayan Ağaç] · '350 yıllık' (CNN Türk 2022) metinde 'üç yüz yılın üstünde' diye geçti; yapraklardan damlama anlatısı; köprüden 10–15 dk (yolcu360) · yerinde",
       "[Rehber · Ağlayan Ağaç] · Tavşan Adası'nda manastır kalıntısı ve Büyük Liman'dan yaz tekne turları (Lonely Planet, yolcu360)",
-      "[Yazı · Çekiciler] · Çarşıda kullanılan ağaç: il listesi fındık ve ceviz, yolcu360 ıhlamur ve şimşir diyor; metinde ağaç adı verilmedi · Amasra Belediyesi"
+      "[Yazı · Çekiciler] · Çarşıda kullanılan ağaç: il listesi fındık ve ceviz, yolcu360 ıhlamur ve şimşir diyor; metinde ağaç adı verilmedi · Amasra Belediyesi",
+      "[Rehber · Kale/Kemere, yazı] · Kale bölümleri üç dosyada tek adla yazıldı: Kaleiçi (yarımada) ve Boztepe (ada), köprü ikisini bağlar. Zindan ve Sormagir adları kaynak (en.wikipedia 'Amasra Fortress', KTB) bu turda açılamadığı için çıkarıldı · Amasra Fortress, KTB"
     ],
     "fotograf_onerileri": [
       {
