@@ -4,6 +4,6 @@ Köprünün asıl değeri çevresiyle birlikte görülünce anlaşılıyor. Merk
 
 Köprü için on beş dakika yeter. Kemerleri yandan görmek için kıyıdan biraz uzaklaş; köprünün üstünden geçerken kemerleri göremezsin. Sonra gelen yoldan müzeye ya da arabana dön.
 
-Bartın'da daha uzun kalmak istersen salı ve cuma günleri kurulan kadınlar pazarına, yerel adıyla Galla Pazarı'na bak. Köylerden gelen kadınlar peynir, pekmez, tarhana ve köy ekmeği satar. Bu gezi pazar günü olduğu için pazar planda yok.
+Bartın'da daha uzun kalmak istersen haftanın belli günlerinde kurulan kadınlar pazarına, yerel adıyla Galla Pazarı'na bak. Köylerden gelen kadınlar peynir, pekmez, tarhana ve köy ekmeği satar. Pazarın hangi günler kurulduğunu gitmeden belediyeden öğren.
 
 > Köprünün yanından kıyıya in ve iki kemeri birlikte gör; köprünün yaşını en iyi kemer taşlarının aşınmasından okursun.

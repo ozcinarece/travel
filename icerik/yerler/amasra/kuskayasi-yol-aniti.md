@@ -2,7 +2,7 @@ Kuşkayası Yol Anıtı, Amasra–Bartın yolunun yaklaşık dört kilometresind
 
 Yoldan basamaklarla çıkılıyor. Kaya yüzünde üç şey göreceksin. Birincisi yaklaşık iki buçuk metre boyunda, başı kırılmış bir insan figürü; imparatoru mu, valiyi mi gösterdiği bilinmiyor. Yanında yine başsız bir Roma kartalı var. İkisinin arasında da Latince ve Yunanca yazılmış iki dilli yazıt duruyor. Eskiden burada bir çeşme de varmış, bugün yerinde yok. Anıt çitle çevrili, yakından değil önden bakılıyor.
 
-Yirmi dakika yeter. Arabayı yol kenarındaki kısa park yerine bırakabilirsin. Öğlen güneşi kaya yüzünü düz aydınlattığı için yazıtı öğleden sonranın erken saatlerinde okumak daha kolay.
+Yirmi dakika yeter. Arabayı yol kenarındaki kısa park yerine bırakabilirsin.
 
 Anıtın yakınında, aynı yol üzerinde Kemerdere'deki eski taş köprü de var. Vaktin kalırsa ona da bak.
 
