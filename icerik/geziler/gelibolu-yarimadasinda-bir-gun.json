@@ -25,7 +25,6 @@
         },
         {
           "place_id": "ChIJh20PFJilsRQR6GSIkUHxiPw",
-          "osm": "node/6337630463",
           "ad": "Anzak Koyu",
           "sure_dk": 45,
           "kapali_gunler": [],
@@ -90,7 +89,7 @@
       "[Plan · kapali_gunler] · Yedi durağın hepsine [] yazıldı; Tanıtım Merkezi, Kilitbahir Kalesi ve Abide müzesi için resmî kaynakta kapalı gün bulunamadı (OSM'de opening_hours yok) · Gelibolu Tarihi Alan Başkanlığı (canakkaletarihialan.gov.tr), KTB müze sayfası",
       "[Plan · Sehir] · Gezi Çanakkale şehrine bağlı; duraklar merkeze 2–25 km. Ayrı bir Eceabat/Gelibolu şehri açılmadı · Ürün",
       "[Plan · g1] · Bütün bacaklar araçla; #311 gelene kadar doğrulayıcı bunları yürüme sayar, gün süresi ve 25 dk uyarısı verir",
-      "[Plan · g1.d2 osm] · Google'da bu place_id 'Arıburnu yarları' adıyla; OSM node/6337630463 Arıburnu Anıtı. Kuru yüklemede 150 m denetimi bakacak",
+      "[Plan · g1.d2 osm] · Google'daki yer (Arıburnu yarları) OSM'deki Arıburnu Anıtı'ndan (node/6337630463) 1015 m uzak çıktı, osm kaldırıldı; konum Google'dan (30 gün). BO'da koyun konumu elle düzeltilebilir",
       "[Plan · g1.d3] · 57. Alay Şehitliği OSM aday listesinde yok; konum Google'dan (30 gün)",
       "[Yazı · Feribot] · \"Eceabat'a yarım saat\", Kilitbahir'den de dönüş olduğu · Gestaş / Çanakkale Belediyesi feribot sayfası",
       "[Rehber · Tanıtım Merkezi] · Salonların konu sırası, hareketli zemin/koltuk, grup halinde seanslar ve gezinin 1,5 saat sürdüğü · Tarihi Alan Başkanlığı",
