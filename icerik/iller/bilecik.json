@@ -1,0 +1,343 @@
+{
+  "il": "Bilecik",
+  "slug": "bilecik",
+  "guncelleme": "2026-11-25",
+  "oneriler": [
+    {
+      "sira": 1,
+      "ad": "Ertuğrul Gazi Türbesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Söğüt",
+      "merkeze_km": 30,
+      "neden": "Osman Gazi'nin babasının mezarı; bugünkü yapı 1886'da II. Abdülhamid onarımından kalma",
+      "place_id": "ChIJDeRgigp2zBQRQ8wPOvXfvRk"
+    },
+    {
+      "sira": 2,
+      "ad": "Şeyh Edebali Türbesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "Osman Gazi'nin kayınpederinin türbesi; Bala Hatun türbesi ve küçük bir müzeyle aynı yerde",
+      "place_id": "ChIJI88q6O-PyxQRjxbPgtSEVkg"
+    },
+    {
+      "sira": 3,
+      "ad": "Osmaneli Tarihi Konakları ve Lefke Çarşısı",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Osmaneli",
+      "merkeze_km": 38,
+      "neden": "350 bin m² sit alanında 150 tescilli konak; 2014'ten beri yarısı onarıldı, çoğu otel oldu",
+      "place_id": null
+    },
+    {
+      "sira": 4,
+      "ad": "Harmankaya Kanyonu Tabiat Parkı",
+      "kategori": "doga",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Yenipazar",
+      "merkeze_km": 45,
+      "neden": "3,9 km kanyon, 22 m'lik iki şelale; 2012'de tabiat parkı oldu. Harmanköy'den girilir",
+      "place_id": null
+    },
+    {
+      "sira": 5,
+      "ad": "Orhan Gazi Camii",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "Kurşunlu Cami de denir; eski minaresi camiden 30 m ötede, bir kayanın üstünde duruyor",
+      "place_id": "ChIJZwkouu-PyxQRpKG7AwvZ-zw"
+    },
+    {
+      "sira": 6,
+      "ad": "Soydan Boza",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet",
+        "yavas"
+      ],
+      "ilce": "Pazaryeri",
+      "merkeze_km": 30,
+      "neden": "1936'dan beri aynı aile, şimdi dördüncü kuşak, kazanda boza kaynatıyor; helva da satar",
+      "place_id": "ChIJnwIltgvtyxQRxQXYrzekgQ0"
+    },
+    {
+      "sira": 7,
+      "ad": "Osmaneli Kadın Girişimi Kooperatifi",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Osmaneli",
+      "merkeze_km": 38,
+      "neden": "Coğrafi işaretli ayva lokumu yalnız ayvadan yapılır; nar lokumu ve ayva pekmezi de var",
+      "place_id": null
+    },
+    {
+      "sira": 8,
+      "ad": "Akkoç Lokantası",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "1935'te Ferit Akkoç'un açtığı esnaf lokantası; fırın kebabı ve kabak tatlısı yenir",
+      "place_id": null
+    },
+    {
+      "sira": 9,
+      "ad": "Rüstem Paşa Camii",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Osmaneli",
+      "merkeze_km": 38,
+      "neden": "16. yüzyıl; Kanuni'nin damadı Rüstem Paşa yaptırdı, Sinan'ın kalfası Yüzgeç Mehmed çizdi",
+      "place_id": "ChIJVc1nrJt5yxQRN4EeJFKJAMU"
+    },
+    {
+      "sira": 10,
+      "ad": "Küçükelmalı Tabiat Parkı",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Pazaryeri",
+      "merkeze_km": 50,
+      "neden": "Kayın ve karaçam ormanında 9 hektarlık gölet; yürüyüş yolu, oyun alanı ve kamp yeri var",
+      "place_id": "ChIJPwysb3nqyxQR4dZq4aGpwZI"
+    },
+    {
+      "sira": 11,
+      "ad": "Çelebi Sultan Mehmed Camii",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Söğüt",
+      "merkeze_km": 30,
+      "neden": "1414-1420'de yapıldı, Abdülhamid döneminde genişletildi; on iki küçük kubbesi var",
+      "place_id": "ChIJzVbjtcJ1zBQR28IcKOMJYFA"
+    },
+    {
+      "sira": 12,
+      "ad": "Köprülü Mehmet Paşa Kervansarayı",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 20,
+      "neden": "Vezirhan'da Köprülü Mehmet Paşa'nın 17. yüzyıl hanı; yaklaşık 3.000 m², yanında camisi",
+      "place_id": "ChIJVVVVFaeDyxQRT0GdurIt0l4"
+    },
+    {
+      "sira": 13,
+      "ad": "Suuçtu Şelalesi",
+      "kategori": "doga",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Yenipazar",
+      "merkeze_km": 25,
+      "neden": "Yukarıçaylı köyünde, 875 m rakımda 30 m'den küçük bir havuza dökülen şelale",
+      "place_id": "ChIJ7zFEaLn1zBQRPKb5U4Vt4k4"
+    },
+    {
+      "sira": 14,
+      "ad": "Gül Ana Çiğ Börek Mantı Evi",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet",
+        "cocuklu"
+      ],
+      "ilce": "Bozüyük",
+      "merkeze_km": 33,
+      "neden": "İlçenin adını taşıyan mercimekli Bozüyük mantısı için adı geçen yer",
+      "place_id": "ChIJxfu9g2_xyxQRaPZRszSEjcA"
+    },
+    {
+      "sira": 15,
+      "ad": "Söğüt Ertuğrul Gazi Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Söğüt",
+      "merkeze_km": 30,
+      "neden": "Eski bir dispanserin ahşap binasında, 2001'de açıldı; Yörük giysileri ve halıları var",
+      "place_id": "ChIJ7YKw9ud1zBQR9guG8py47GY"
+    },
+    {
+      "sira": 16,
+      "ad": "Aya Yorgi Kilisesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Osmaneli",
+      "merkeze_km": 38,
+      "neden": "Yanan eski kilisenin yerine 1876-1878'de yapılan üç nefli Rum Ortodoks kilisesi",
+      "place_id": "ChIJ14gADpl5yxQRJ7BVD6J53Zk"
+    },
+    {
+      "sira": 17,
+      "ad": "Bilecik Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "Eski adliye binasında, 2006'da açıldı; Paleolitikten Osmanlı'ya buluntu ve yöre giysileri",
+      "place_id": "ChIJu0dkWOSPyxQRH2S56Dz3a04"
+    },
+    {
+      "sira": 18,
+      "ad": "Kınık Şelalesi",
+      "kategori": "doga",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 25,
+      "neden": "Çınar ve incir ağaçları arasında 10 m'den dökülür; Okluca ya da Kınık köyünden gidilir",
+      "place_id": null
+    },
+    {
+      "sira": 19,
+      "ad": "Pelitözü Göleti",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 6,
+      "neden": "Çam ormanıyla çevrili sulama göleti; kamp ve karavan alanı var, şehre birkaç dakika",
+      "place_id": "ChIJSa4zJ3GQyxQR7i28cdM9H3Q"
+    },
+    {
+      "sira": 20,
+      "ad": "Bozüyük Kent Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Bozüyük",
+      "merkeze_km": 33,
+      "neden": "1930'da Albay İbrahim Çolak için yapılan konak; 44 köyden 1.700 eser, tank ve uçak",
+      "place_id": "ChIJ_7tdz3vxyxQRO1uOqBeOTHs"
+    },
+    {
+      "sira": 21,
+      "ad": "Çifte Minareli Hamidiye Camii",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Söğüt",
+      "merkeze_km": 30,
+      "neden": "1903-1905'te II. Abdülhamid yaptırdı; kırmızı kesme taş, tek kubbe, iki minare",
+      "place_id": "ChIJvehBjOd1zBQRmrWg5ernzjE"
+    },
+    {
+      "sira": 22,
+      "ad": "Metristepe Zafer Anıtı",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Bozüyük",
+      "merkeze_km": 40,
+      "neden": "İnönü savaşlarını anan yaklaşık 24 m'lik anıt; İnönü Şehitliği'ne yakın tepede",
+      "place_id": "ChIJp-1vFZgKzBQRnO9RxHaba08"
+    },
+    {
+      "sira": 23,
+      "ad": "Türbin Mesire Yeri",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Bozüyük",
+      "merkeze_km": 40,
+      "neden": "Bozüyük'e 7 km, dere kenarında; adını elektrik üreten şelaleden alır, mangal alanı var",
+      "place_id": "ChIJnycC4QTwyxQRpD9JzYbXruc"
+    },
+    {
+      "sira": 24,
+      "ad": "Dursun Fakih Türbesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Söğüt",
+      "merkeze_km": 35,
+      "neden": "Küre köyünde 550 m'lik tepede; 1299'da Osman Bey adına ilk hutbeyi okuyan ilk kadı",
+      "place_id": "ChIJMbYuksaJyxQRvtKLYgKXlVA"
+    },
+    {
+      "sira": 25,
+      "ad": "Bilecik Saat Kulesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "1907'de II. Abdülhamid döneminde yapıldı, 1987'de onarıldı; belediye binasının yanında",
+      "place_id": "ChIJSyFJo-ePyxQRxD3NPSxzbk0"
+    },
+    {
+      "sira": 26,
+      "ad": "Osmanlı Padişahları Tarih Şeridi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "Ertuğrul'dan Vahdettin'e 36 padişah, 140 m'lik açık hava şeridinde sırayla dizili",
+      "place_id": "ChIJNwHyme-PyxQRXlkPfPHoTXE"
+    },
+    {
+      "sira": 27,
+      "ad": "Kömürsu Yaylası",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Bozüyük",
+      "merkeze_km": 60,
+      "neden": "1.650 m'de göknar, kayın ve ardıç ormanı, dört pınar; yolu bozuk, yürüyüşe uygun",
+      "place_id": "ChIJEWENvMDdyxQR8hB7mbOlM3c"
+    }
+  ]
+}

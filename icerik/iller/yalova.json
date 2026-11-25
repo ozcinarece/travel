@@ -1,0 +1,373 @@
+{
+  "il": "Yalova",
+  "slug": "yalova",
+  "guncelleme": "2026-11-25",
+  "oneriler": [
+    {
+      "sira": 1,
+      "ad": "Termal Kaplıcaları",
+      "kategori": "aktivite",
+      "amaclar": [
+        "yavas",
+        "doga"
+      ],
+      "ilce": "Termal",
+      "merkeze_km": 12,
+      "neden": "Açık havuzda 38–40 °C su; kaplıca geçmişi Roma ve Bizans dönemine uzanır",
+      "place_id": "ChIJb226iNL2yhQR1bE4LWvLjJA"
+    },
+    {
+      "sira": 2,
+      "ad": "Termal Atatürk Köşkü",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Termal",
+      "merkeze_km": 12,
+      "neden": "Seyr-i Sefain 1929'da 38 günde yaptı; mutfaksız ahşap köşk, bilardo masası Dolmabahçe'den",
+      "place_id": null
+    },
+    {
+      "sira": 3,
+      "ad": "Yürüyen Köşk",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 3,
+      "neden": "Çınarın dalı kesilmesin diye 1930'da raylar üstünde 4,80 m kaydırılan Atatürk köşkü",
+      "osm": "way/665876362",
+      "place_id": "ChIJeUQmuurkyhQRUUHp28SqWqA"
+    },
+    {
+      "sira": 4,
+      "ad": "Delmece Yaylası",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Çınarcık",
+      "merkeze_km": 30,
+      "neden": "Teşvikiye'den çıkılan 700–1.000 m'lik yayla; 400 dönüm çayır, ahşap yayla evleri",
+      "place_id": "ChIJR-takUlgyhQRNeqnZR_5UtI"
+    },
+    {
+      "sira": 5,
+      "ad": "Karaca Arboretumu",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas",
+        "cocuklu"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 5,
+      "neden": "Hayrettin Karaca'nın 1980'de Samanlı'da kurduğu ağaç müzesi; yaklaşık 7.000 takson",
+      "osm": "way/562677594",
+      "place_id": "ChIJCSFKlXvwyhQRzDrnGZC6MSQ"
+    },
+    {
+      "sira": 6,
+      "ad": "Erikli Çifte Şelale",
+      "kategori": "doga",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Çınarcık",
+      "merkeze_km": 29,
+      "neden": "Teşvikiye'den Erikli Yaylası yolunda iki kademeli şelale; son kısım orman patikası",
+      "place_id": "ChIJS5EiB-H1yhQR3AqTt5lokys"
+    },
+    {
+      "sira": 7,
+      "ad": "Termal Atatürk Arboretumu",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Termal",
+      "merkeze_km": 11,
+      "neden": "Atatürk'ün 1929 talimatıyla Henri Prost'un planladığı 108 hektarlık ağaçlık alan",
+      "place_id": "ChIJbWZ4e9L2yhQROIl-JwkGLY4"
+    },
+    {
+      "sira": 8,
+      "ad": "Hersek Lagünü",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas",
+        "cocuklu"
+      ],
+      "ilce": "Altınova",
+      "merkeze_km": 25,
+      "neden": "'Kuş oteli' denen lagünde 248 kuş türü kaydedildi; gözlem kulesi ve flamingolar",
+      "place_id": null
+    },
+    {
+      "sira": 9,
+      "ad": "Dipsiz Göller",
+      "kategori": "doga",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Çınarcık",
+      "merkeze_km": 32,
+      "neden": "Erikli Yaylası yakınında Büyük ve Küçük Dipsiz Göl; çökme çanaklarında durgun sular",
+      "place_id": null
+    },
+    {
+      "sira": 10,
+      "ad": "Armutlu Kaplıcaları",
+      "kategori": "aktivite",
+      "amaclar": [
+        "yavas"
+      ],
+      "ilce": "Armutlu",
+      "merkeze_km": 48,
+      "neden": "Yamaçtan yaklaşık 60 °C çıkan termal su; ana kaynak ilçenin 4 km kuzeyinde",
+      "place_id": null
+    },
+    {
+      "sira": 11,
+      "ad": "Kurşunlu Hamamı",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Termal",
+      "merkeze_km": 12,
+      "neden": "İustinianos'a atfedilen 6. yy hamamı; II. Abdülhamid 1900'de üç yıllık onarım yaptırdı",
+      "place_id": "ChIJi0rznM32yhQRrhlieHCWKn4"
+    },
+    {
+      "sira": 12,
+      "ad": "Hersekzade Ahmed Paşa Camii",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Altınova",
+      "merkeze_km": 25,
+      "neden": "II. Bayezid'in sadrazamının Hersek'teki camisi ve açık türbesi; vakfiyesi 1511 tarihli",
+      "osm": "way/167423888",
+      "place_id": "ChIJn9FnU0kfyxQRbkXNN5hi26g"
+    },
+    {
+      "sira": 13,
+      "ad": "Yalova Kent Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "1908–13 Hükümet Konağı'nın yeniden yapılan binasında, 2013'ten beri kent tarihi sergisi",
+      "osm": "way/252910309",
+      "place_id": "ChIJ9SsUgC7lyhQRP-14ALtQFVo"
+    },
+    {
+      "sira": 14,
+      "ad": "Dilburnu Fener Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Altınova",
+      "merkeze_km": 20,
+      "neden": "Fransızların 1863'te yaptığı fener; Gündoğdu ailesinin bekçiliği müzede anlatılıyor",
+      "place_id": "ChIJE_AIfF0jyxQRGfirhgFrfYU"
+    },
+    {
+      "sira": 15,
+      "ad": "Yalova Bonsai Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "cocuklu",
+        "yavas"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 6,
+      "neden": "2024'te Kadıköy'de açıldı; 70 türden 200 kadar bonsai, Karaca'nın 1974 çamı da var",
+      "place_id": null
+    },
+    {
+      "sira": 16,
+      "ad": "Atatürk ve Çocuk Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "cocuklu",
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "Atatürk'ün Yürüyen Köşk'ten önce kaldığı Baltacı Çiftliği köşkü; 2014'te müze oldu",
+      "osm": "way/407461628",
+      "place_id": null
+    },
+    {
+      "sira": 17,
+      "ad": "Çınarlı Yol (Çınarlı Hıyaban)",
+      "kategori": "manzara",
+      "amaclar": [
+        "yavas",
+        "doga"
+      ],
+      "ilce": "Termal",
+      "merkeze_km": 6,
+      "neden": "Yalova–Termal arasında 12 km; iki yanda anıt ağaç tescilli yaklaşık 2.250 çınar",
+      "place_id": null
+    },
+    {
+      "sira": 18,
+      "ad": "Hasanbaba Mesire Alanı",
+      "kategori": "manzara",
+      "amaclar": [
+        "doga",
+        "yavas",
+        "cocuklu"
+      ],
+      "ilce": "Çınarcık",
+      "merkeze_km": 13,
+      "neden": "Çınarcık'a 3 km; yaşlı meşeler, soğuk kaynak suyu, Hasan Baba türbesi, Marmara manzarası",
+      "place_id": "ChIJ1eCgFPHzyhQRghzw8Ds0JUs"
+    },
+    {
+      "sira": 19,
+      "ad": "Bozburun Feneri",
+      "kategori": "manzara",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Armutlu",
+      "merkeze_km": 60,
+      "neden": "Yarımadanın ucunda 1949 yapımı taş fener; batıda İmralı Adası görünür",
+      "place_id": null
+    },
+    {
+      "sira": 20,
+      "ad": "Esenköy",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Çınarcık",
+      "merkeze_km": 34,
+      "neden": "Dallabaş Dağı eteğinde, ormanla çevrili yaklaşık 5 km'lik çakıllı sahil beldesi",
+      "place_id": "ChIJvfzj-CWKyhQR_kNGC_UY7Ro"
+    },
+    {
+      "sira": 21,
+      "ad": "Erikli Yaylası kamp ve yürüyüş",
+      "kategori": "aktivite",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Çınarcık",
+      "merkeze_km": 30,
+      "neden": "Teşvikiye üstünde elektrik ve sulu kamp alanı; Çifte Şelale'ye 15–20 dk yürüyüş",
+      "place_id": null
+    },
+    {
+      "sira": 22,
+      "ad": "Taş Köprü (Kılıç Deresi)",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Çiftlikköy",
+      "merkeze_km": 9,
+      "neden": "Kılıç Deresi üstünde 400 yılı aşkın kesme taş köprü; yapanı bilinmiyor, hâlâ kullanımda",
+      "place_id": null
+    },
+    {
+      "sira": 23,
+      "ad": "Elmalık Kalesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "doga"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 9,
+      "neden": "Güney kapısı ve birkaç batı kulesi kalan kale; Elmalık köyünden yürüyüşle çıkılır",
+      "place_id": "ChIJzX81AHT7yhQR80e6op0_S3w"
+    },
+    {
+      "sira": 24,
+      "ad": "Sepetçioğlu Restoran",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 6,
+      "neden": "Bursa yolu 6. km'de, Soğucak'ta kuyu kebabı, yoğurt ve dondurmalı irmik helvası",
+      "osm": "node/5356029321",
+      "place_id": "ChIJa3uUiOT6yhQRxdnXXsQOhsA"
+    },
+    {
+      "sira": 25,
+      "ad": "Doyum Lokantası",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Merkezde esnaf lokantası; lahana yaprağı, kıyma ve yoğurtla yapılan yöresel pavli",
+      "place_id": "ChIJGf5kyy3lyhQRS3Tq6IX3KO4"
+    },
+    {
+      "sira": 26,
+      "ad": "Yalova Altın Balık",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet",
+        "gece"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Merkezde mevsim balığı ve meze için uzun yıllardır önerilen balıkçı",
+      "place_id": null
+    },
+    {
+      "sira": 27,
+      "ad": "Ünsal Balık",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet",
+        "gece"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "Osmanlı Parkı yanında meze ve mevsim balığı servis eden deniz kıyısı balıkçı",
+      "osm": "node/5356037021",
+      "place_id": "ChIJyW6gsynlyhQR0HKGVwrCRoA"
+    },
+    {
+      "sira": 28,
+      "ad": "Yalova Sütlüsü",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "2005'ten beri yapılan, 2010'da patentlenen baklava hamurlu soğuk sütlü tatlı",
+      "osm": "node/4460205592",
+      "place_id": "ChIJeWOepS7lyhQRNE_e8q-YjGM"
+    }
+  ]
+}
