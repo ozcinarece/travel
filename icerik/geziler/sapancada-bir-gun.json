@@ -1,0 +1,163 @@
+{
+  "surum": 1,
+  "sehir": {
+    "yeni": {
+      "ad": "Sapanca",
+      "slug": "sapanca",
+      "place_id": "ChIJgcKjGDivzBQRKMZivhSpaqE"
+    }
+  },
+  "takvim": {
+    "ilk_gun": "cumartesi"
+  },
+  "gezi": {
+    "slug": "sapancada-bir-gun",
+    "baslik": "Sapanca'da bir gün",
+    "ozet": "Sabah üç cami ve göl kıyısı, öğleden sonra Maşukiye ve teleferik",
+    "yazar_ad": "Tripmate ekibi",
+    "amaclar": [
+      "kultur_tarih",
+      "doga",
+      "yavas"
+    ],
+    "yazi_md": "Sapanca, İstanbul ile Ankara arasındaki eski yolun göl kıyısındaki konak yeri. 16. yüzyılda Rüstem Paşa burada bir kervansaray kurdurdu, 19. yüzyılın sonunda saray çevresinden gelenler kıyıya cami yaptırdı, bugün de hafta sonu kaçamağının adresi. Bu plan sabahı kasabanın üç camisi ve göl kıyısıyla geçiriyor, öğleden sonra seni batıya, Maşukiye'nin deresine ve Kartepe'ye çıkan teleferiğe götürüyor. Duraklar arasında arabayla gideceksin; en uzun bacak Sapanca'dan Derbent'e yarım saati bulmaz.\n\n> Teleferik her yıl kış öncesi birkaç haftalık bakıma girer ve fırtınada durur. Yola çıkmadan önce o günün sefer durumuna bak; kapalıysa öğleden sonrayı Maşukiye'de ve göl kıyısında geçir.\n\n## 1. gün · Gölden Kartepe'ye\n\nGüne kasabanın doğusunda, Uzunkum'daki [Rahime Sultan Camii](mekan:ChIJyagOyU-uzBQRP6OP0N_88sY) ile başla. Sultan Abdülmecid'in eşi Perestu Rahime Sultan 1892'de yaptırdı. Tek kubbeli küçük yapının içinde dönemin asma yapraklı çinileri ve ilk minberi duruyor. Minaresi 1999 depreminde yıkıldı, yeniden yapıldı.\n\nOradan merkeze dön ve [Rüstem Paşa Camii](mekan:ChIJyQbPDTyvzBQRIHd3d5cTi88)'ne geç. Kanuni'nin sadrazamı Rüstem Paşa'nın 1550'lerde kurdurduğu külliyeden ayakta kalan tek yapı bu. Kubbe yerine kiremit çatısı var; yan cephedeki kitabede 1554 yazıyor. Hamamın temelleri 2015'te kent meydanındaki kazıda bulundu, meydandan geçerken bak.\n\n::mekan[ChIJyQbPDTyvzBQRIHd3d5cTi88]\n\nMeydandan birkaç adımla göle inersin. [Sapanca Gölü Yürüyüş Yolu](mekan:ChIJpzx1LAqvzBQR3WDrKKytwxs) kıyı boyunca düz bir yol; bir saat doğuya yürü ve aynı yoldan dön. Göl Sakarya'nın içme suyunun büyük kısmını veriyor, kıyıya bu gözle bak.\n\nÖğle yemeği için merkezdeki [Eker Lokantası](mekan:ChIJt8gxIjyvzBQR99Y-vWpOg9Y)'na git. Bir esnaf lokantası: menü yerine tezgâh var, o günün tencerelerinden seçiyorsun. Çorba, bir sulu yemek ve pilav, yeter de artar.\n\n::mekan[ChIJt8gxIjyvzBQR99Y-vWpOg9Y]\n\nYemekten sonra arabayla üç kilometre batıdaki Mahmudiye'ye git. [Hasan Fehmi Paşa Camii](mekan:ChIJBcoh26GozBQRpp5u-4AojAo) 1885'te yapıldı; dışı sade, içi baştan sona işlemeli. Sabah gördüğün iki camiyle birlikte kasabanın üç yüzyılını bir arada görmüş olursun.\n\nYola batıya devam et ve Kocaeli sınırını geçip [Maşukiye](mekan:ChIJ-zXxtUVYyxQRhS_XBWQ-R-M)'ye in. Aygır Deresi köyün içinden akar, iki yanında alabalık lokantaları ve kahvaltı yerleri sıralanır. Dere kenarında yarım saat yürü, bir çay iç.\n\nMaşukiye'den kısa bir yolla Derbent'e geç ve [Kartepe Teleferiği](mekan:ChIJZzX6LwBZyxQRy031kOBTkkE)'ne bin. 4.832 metrelik hat seni 334 metreden 1.423 metreye, [Kuzuyayla Tabiat Parkı](mekan:ChIJVcKTaddYyxQRt6ZcV56fZNg)'na çıkarır. Yolculuk 14 ile 22 dakika sürer; çıkarken arkanda Sapanca Gölü ve İzmit Körfezi açılır. Yukarıda çam ormanında bir saat dolaş ve gün kararmadan in.\n\nYukarısı aşağıdan belirgin biçimde soğuk; mevsim ne olursa olsun yanına kalın bir şey al. Akşam yemeğini Sapanca'ya dönüp göl kıyısında ya da Maşukiye'de dere başında yiyebilirsin. Sapanca'nın öbür yüzü, il merkezi Adapazarı ve Taraklı'nın ahşap evleri için ikinci bir gün ayır."
+  },
+  "gunler": [
+    {
+      "baslik": "Gölden Kartepe'ye",
+      "duraklar": [
+        {
+          "place_id": "ChIJyagOyU-uzBQRP6OP0N_88sY",
+          "osm": "way/683842187",
+          "ad": "Rahime Sultan Camii",
+          "sure_dk": 20,
+          "sure_gerekcesi": "varsayılan 45; tek kubbeli küçük cami, yirmi dakika",
+          "kapali_gunler": [],
+          "rehber": "rahime-sultan-camii",
+          "amaclar": [
+            "kultur_tarih"
+          ]
+        },
+        {
+          "place_id": "ChIJyQbPDTyvzBQRIHd3d5cTi88",
+          "osm": "way/1084007747",
+          "ad": "Rüstem Paşa Camii",
+          "sure_dk": 30,
+          "sure_gerekcesi": "varsayılan 45; cami ve kent meydanındaki hamam yeri yarım saat",
+          "kapali_gunler": [],
+          "rehber": "rustem-pasa-camii",
+          "amaclar": [
+            "kultur_tarih"
+          ]
+        },
+        {
+          "place_id": "ChIJpzx1LAqvzBQR3WDrKKytwxs",
+          "osm": "node/8015388985",
+          "ad": "Sapanca Gölü Yürüyüş Yolu",
+          "sure_dk": 60,
+          "sure_gerekcesi": "varsayılan 45; doğuya yarım saat gidip dönen kıyı yürüyüşü",
+          "kapali_gunler": [],
+          "rehber": "sapanca-golu-yuruyus-yolu",
+          "amaclar": [
+            "doga",
+            "yavas",
+            "cocuklu"
+          ]
+        },
+        {
+          "place_id": "ChIJt8gxIjyvzBQR99Y-vWpOg9Y",
+          "ad": "Eker Lokantası",
+          "sure_dk": 60,
+          "sure_gerekcesi": "varsayılan 75; esnaf lokantasında tezgâhtan seçilen öğle yemeği daha kısa",
+          "kapali_gunler": [],
+          "rehber": "eker-lokantasi",
+          "amaclar": [
+            "lezzet"
+          ]
+        },
+        {
+          "place_id": "ChIJBcoh26GozBQRpp5u-4AojAo",
+          "osm": "way/1154916369",
+          "ad": "Hasan Fehmi Paşa Camii",
+          "sure_dk": 20,
+          "sure_gerekcesi": "varsayılan 45; küçük köy camisi, yirmi dakika",
+          "kapali_gunler": [],
+          "rehber": "hasan-fehmi-pasa-camii",
+          "amaclar": [
+            "kultur_tarih"
+          ]
+        },
+        {
+          "place_id": "ChIJ-zXxtUVYyxQRhS_XBWQ-R-M",
+          "ad": "Maşukiye Şelalesi",
+          "sure_dk": 45,
+          "kapali_gunler": [],
+          "rehber": "masukiye",
+          "amaclar": [
+            "doga",
+            "yavas",
+            "cocuklu"
+          ]
+        },
+        {
+          "place_id": "ChIJZzX6LwBZyxQRy031kOBTkkE",
+          "ad": "Kartepe Teleferiği (Derbent istasyonu)",
+          "sure_dk": 120,
+          "sure_gerekcesi": "varsayılan 45; gidiş-dönüş 30–45 dk ve Kuzuyayla'da bir saat",
+          "kapali_gunler": [],
+          "rehber": "kartepe-teleferigi",
+          "amaclar": [
+            "doga",
+            "cocuklu"
+          ]
+        }
+      ]
+    }
+  ],
+  "ek_mekanlar": [
+    {
+      "place_id": "ChIJVcKTaddYyxQRt6ZcV56fZNg",
+      "ad": "Kuzuyayla Tabiat Parkı"
+    }
+  ],
+  "notlar": {
+    "dogrulanacaklar": [
+      "[Plan · Sehir] · Sapanca şehri sehir.yeni ile açılıyor (Sakarya'nın ilçesi; Safranbolu ve Amasra gibi); place_id 'Sapanca' kimlik sorgusundan (tek sonuç) · BO'da şehir satırı",
+      "[Plan · kapali_gunler] · Yedi durağın hiçbirinde resmî kapalı gün bulunamadı, hepsi [] · OSM opening_hours yalnız camilerde var (vakit aralığı); Eker Lokantası ve teleferik için işletme",
+      "[Plan · g1.d7] · Kartepe Teleferiği her yıl kış öncesi bakıma giriyor: gazeteabc haberinde 17–30 Kasım (yıl yazmıyor, gün adları 2025'e uyuyor) ve 1 Aralık'ta açılış. 2026 bakım tarihleri ve kış çalışma saatleri doğrulanmadı · UlaşımPark duyuruları",
+      "[Plan · g1.d4, g1.d6, g1.d7] · Eker Lokantası, Maşukiye ve teleferik OSM aday listesinde yok (osm boş); konum Google'dan, 30 gün · OSM'e eklenebilir",
+      "[Plan · g1.d6] · Maşukiye durağının place_id'si 'Maşukiye Şelalesi' kimlik sorgusundan (doğa koruma alanı tipi); şelalenin resmî adı ve yeri kaynaklarda net değil, rehber köy ve Aygır Deresi üzerine yazıldı · Kartepe Belediyesi",
+      "[Rehber · Rahime Sultan] · 1892, Perestu Rahime Sultan, çini karolar, minber, 1967 onarım, 1999 minare (Posta 16.04.2022; Hürriyet 11.07.2018). 'Abdülhamid'i büyüten' bilgisi genel tarih bilgisi, bu turda kaynakla eşleştirilmedi · kulturportali.gov.tr sayfası bu oturumdan açılamadı",
+      "[Rehber · Rüstem Paşa] · Kitabe 1554, ahşap çatı ve kiremit, kerpiç-ahşap, iç alan 250 m² (Hürriyet 2018); 1555 ve Sinan'ın çırakları (en.wikipedia 'Sapanca'); Sinan atfı kaynaklar arasında tartışmalı, metinde 'atfedilir' · kulturportali.gov.tr/turkiye/sakarya/gezilecekyer/rustempasa-camii",
+      "[Rehber · Rüstem Paşa] · Hamam temelleri 2015 kent meydanı kazısı (Hürriyet Daily News; CNN Türk 2017). Bugün kalıntının görülebilir olup olmadığı doğrulanmadı · yerinde, Sapanca Belediyesi",
+      "[Rehber · Göl] · ~16×5 km, en derin ~52 m, Sakarya içme suyunun ~%90'ı, 69 kuş türü (en.wikipedia 'Lake Sapanca'); Sapanca Park 1. etap Kırkpınar'dan 6 km, 2. etap Serdivan'a (Habertürk 10.08.2026)",
+      "[Rehber · Göl] · OSM 'Sapanca Sahil' noktası (node/8015388985) ile Google'ın 'Sapanca Gölü Yürüyüş Yolu' konumu 150 m içinde mi; kuru yukle gösterecek",
+      "[Rehber · Eker] · Esnaf lokantası, sulu yemek, kahvaltı (sapancaevleri.com); kuruluş yılı bulunamadı, metne yazılmadı. Kabak tatlısı Adapazarı'nın (il listesi sakarya.json) · işletme",
+      "[Rehber · Hasan Fehmi Paşa] · 1885, taş-tuğla-ahşap, içi işlemeli, koruma kurulu tescilli (Hürriyet 2018; en.wikipedia 'Sapanca'). Kapının vakit dışında açık olup olmadığı · yerinde",
+      "[Rehber · Maşukiye] · Aygır Deresi, alabalık lokantaları, kiremitte alabalık, ATV ve zipline, ilkbahar-sonbahar (bizevdeyokuz.com); Sapanca'ya ~10 km (aynı kaynak ve OSM)",
+      "[Rehber · Teleferik] · 4.832 m, 334→1.423 m, 14–22 dk, Mart 2024, göl ve körfez manzarası (Daily Sabah 22.10.2025; A Haber 15.03.2024)"
+    ],
+    "fotograf_onerileri": [
+      {
+        "ne": "Sapanca Gölü ve kıyı",
+        "altyazi": "Sapanca Gölü, kasaba kıyısından",
+        "arama": "commons:Category:Lake Sapanca"
+      },
+      {
+        "ne": "Rüstem Paşa Camii",
+        "altyazi": "Rüstem Paşa Camii'nin kiremit çatısı",
+        "arama": "commons:Category:Rüstem Pasha Mosque (Sapanca)"
+      },
+      {
+        "ne": "Kartepe teleferiği kabinleri",
+        "altyazi": "Derbent'ten Kuzuyayla'ya teleferik",
+        "arama": "commons:Category:Kartepe"
+      }
+    ],
+    "varsayimlar": [
+      "Tek gün cumartesi; hiçbir durakta bilinen kapalı gün yok",
+      "Bütün gün araçla; duraklar arası yürüme uyarıları bu yüzden beklenen",
+      "Sakarya il listesinin ilk 5'inden yalnız Sapanca Gölü gezide. Taraklı Evleri (43 km), Justinianus Köprüsü (Adapazarı), Acarlar Longozu (Karasu) ve Köfteci Mustafa (Adapazarı) Sapanca'nın dışında; Sapanca 2/2 (iki gün) için ayrıldı. Köfteci Mustafa yerine öğlen Sapanca'da Eker seçildi, çünkü gün batıya, Kartepe'ye ilerliyor"
+    ]
+  }
+}
