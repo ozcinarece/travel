@@ -1,4 +1,4 @@
-Arıburnu'ndan Conkbayırı'na çıkan yolun üstünde, Kırmızı Sırt'ın yamacında 57. Piyade Alayı Şehitliği var. 25 Nisan 1915'te kıyıya çıkan Anzak birliklerini durdurmak için Mustafa Kemal'in ilk savaşa soktuğu birlik 57. Alay'dı. Alay o gün ve sonraki günlerde ağır kayıp verdi. Türk ordusunda bu numara bugün yeni bir alaya verilmiyor.
+Arıburnu'ndan Conkbayırı'na çıkan yolun üstünde, Kırmızı Sırt'ın yamacında 57. Piyade Alayı Şehitliği var. 25 Nisan 1915'te kıyıya çıkan Anzak birliklerini durdurmak için Mustafa Kemal'in ilk savaşa soktuğu birlik 57. Alay'dı. Alay o gün ve sonraki günlerde ağır kayıp verdi. Türk ordusunda bu numaranın bugün yeni bir alaya verilmediği söylenir.
 
 Girişte, yaşlı bir adamın bir çocuğun elini tuttuğu heykel seni karşılar. Heykeldeki kişi, Çanakkale'nin son gazisi olarak bilinen Hüseyin Kaçmaz. Şehitliğin içinde sembolik mezar taşları, ortada bir anıt ve küçük bir cami var. Duvarlardaki yazılar alayın o günlerini ve Mustafa Kemal'in birliğe verdiği emri anlatır.
 
