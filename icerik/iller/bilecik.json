@@ -13,6 +13,7 @@
       "ilce": "Söğüt",
       "merkeze_km": 30,
       "neden": "Osman Gazi'nin babasının mezarı; bugünkü yapı 1886'da II. Abdülhamid onarımından kalma",
+      "osm": "way/396740824",
       "place_id": "ChIJDeRgigp2zBQRQ8wPOvXfvRk"
     },
     {
@@ -25,6 +26,7 @@
       "ilce": "Merkez",
       "merkeze_km": 1,
       "neden": "Osman Gazi'nin kayınpederinin türbesi; Bala Hatun türbesi ve küçük bir müzeyle aynı yerde",
+      "osm": "way/398375447",
       "place_id": "ChIJI88q6O-PyxQRjxbPgtSEVkg"
     },
     {
@@ -37,7 +39,7 @@
       ],
       "ilce": "Osmaneli",
       "merkeze_km": 38,
-      "neden": "350 bin m² sit alanında 150 tescilli konak; 2014'ten beri yarısı onarıldı, çoğu otel oldu",
+      "neden": "350 bin m² sit alanında 150 tescilli konak; 2014'ten beri yarısı onarıldı, bir kısmı otel",
       "place_id": null
     },
     {
@@ -62,12 +64,13 @@
       "ilce": "Merkez",
       "merkeze_km": 1,
       "neden": "Kurşunlu Cami de denir; eski minaresi camiden 30 m ötede, bir kayanın üstünde duruyor",
+      "osm": "way/398373802",
       "place_id": "ChIJZwkouu-PyxQRpKG7AwvZ-zw"
     },
     {
       "sira": 6,
       "ad": "Soydan Boza",
-      "kategori": "yemek",
+      "kategori": "tatli_kahve",
       "amaclar": [
         "lezzet",
         "yavas"
@@ -80,13 +83,13 @@
     {
       "sira": 7,
       "ad": "Osmaneli Kadın Girişimi Kooperatifi",
-      "kategori": "yemek",
+      "kategori": "tatli_kahve",
       "amaclar": [
         "lezzet"
       ],
       "ilce": "Osmaneli",
       "merkeze_km": 38,
-      "neden": "Coğrafi işaretli ayva lokumu yalnız ayvadan yapılır; nar lokumu ve ayva pekmezi de var",
+      "neden": "Coğrafi işaretli Osmaneli ayva lokumunu yapan kadın kooperatifi; ayva pekmezi de satıyor",
       "place_id": null
     },
     {
@@ -111,6 +114,7 @@
       "ilce": "Osmaneli",
       "merkeze_km": 38,
       "neden": "16. yüzyıl; Kanuni'nin damadı Rüstem Paşa yaptırdı, Sinan'ın kalfası Yüzgeç Mehmed çizdi",
+      "osm": "way/303730818",
       "place_id": "ChIJVc1nrJt5yxQRN4EeJFKJAMU"
     },
     {
@@ -124,6 +128,7 @@
       "ilce": "Pazaryeri",
       "merkeze_km": 50,
       "neden": "Kayın ve karaçam ormanında 9 hektarlık gölet; yürüyüş yolu, oyun alanı ve kamp yeri var",
+      "osm": "node/5760321124",
       "place_id": "ChIJPwysb3nqyxQR4dZq4aGpwZI"
     },
     {
@@ -136,6 +141,7 @@
       "ilce": "Söğüt",
       "merkeze_km": 30,
       "neden": "1414-1420'de yapıldı, Abdülhamid döneminde genişletildi; on iki küçük kubbesi var",
+      "osm": "way/396081829",
       "place_id": "ChIJzVbjtcJ1zBQR28IcKOMJYFA"
     },
     {
@@ -148,6 +154,7 @@
       "ilce": "Merkez",
       "merkeze_km": 20,
       "neden": "Vezirhan'da Köprülü Mehmet Paşa'nın 17. yüzyıl hanı; yaklaşık 3.000 m², yanında camisi",
+      "osm": "way/97552068",
       "place_id": "ChIJVVVVFaeDyxQRT0GdurIt0l4"
     },
     {
@@ -158,8 +165,8 @@
         "doga"
       ],
       "ilce": "Yenipazar",
-      "merkeze_km": 25,
-      "neden": "Yukarıçaylı köyünde, 875 m rakımda 30 m'den küçük bir havuza dökülen şelale",
+      "merkeze_km": 50,
+      "neden": "Yenipazar'ın Yukarıçaylı köyünde, 875 m rakımda 30 m'den dökülen şelale",
       "place_id": "ChIJ7zFEaLn1zBQRPKb5U4Vt4k4"
     },
     {
@@ -177,6 +184,20 @@
     },
     {
       "sira": 15,
+      "ad": "Cennet Vadisi",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet",
+        "doga"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 9,
+      "neden": "Şehrin güneyinde vadide bir restoran; bıldırcın kebabıyla anılıyor",
+      "osm": "node/5003183822",
+      "place_id": null
+    },
+    {
+      "sira": 16,
       "ad": "Söğüt Ertuğrul Gazi Müzesi",
       "kategori": "muze",
       "amaclar": [
@@ -186,10 +207,11 @@
       "ilce": "Söğüt",
       "merkeze_km": 30,
       "neden": "Eski bir dispanserin ahşap binasında, 2001'de açıldı; Yörük giysileri ve halıları var",
+      "osm": "way/396743449",
       "place_id": "ChIJ7YKw9ud1zBQR9guG8py47GY"
     },
     {
-      "sira": 16,
+      "sira": 17,
       "ad": "Aya Yorgi Kilisesi",
       "kategori": "tarih",
       "amaclar": [
@@ -201,7 +223,7 @@
       "place_id": "ChIJ14gADpl5yxQRJ7BVD6J53Zk"
     },
     {
-      "sira": 17,
+      "sira": 18,
       "ad": "Bilecik Müzesi",
       "kategori": "muze",
       "amaclar": [
@@ -214,7 +236,7 @@
       "place_id": "ChIJu0dkWOSPyxQRH2S56Dz3a04"
     },
     {
-      "sira": 18,
+      "sira": 19,
       "ad": "Kınık Şelalesi",
       "kategori": "doga",
       "amaclar": [
@@ -226,7 +248,7 @@
       "place_id": null
     },
     {
-      "sira": 19,
+      "sira": 20,
       "ad": "Pelitözü Göleti",
       "kategori": "doga",
       "amaclar": [
@@ -239,7 +261,7 @@
       "place_id": "ChIJSa4zJ3GQyxQR7i28cdM9H3Q"
     },
     {
-      "sira": 20,
+      "sira": 21,
       "ad": "Bozüyük Kent Müzesi",
       "kategori": "muze",
       "amaclar": [
@@ -252,7 +274,7 @@
       "place_id": "ChIJ_7tdz3vxyxQRO1uOqBeOTHs"
     },
     {
-      "sira": 21,
+      "sira": 22,
       "ad": "Çifte Minareli Hamidiye Camii",
       "kategori": "tarih",
       "amaclar": [
@@ -261,10 +283,11 @@
       "ilce": "Söğüt",
       "merkeze_km": 30,
       "neden": "1903-1905'te II. Abdülhamid yaptırdı; kırmızı kesme taş, tek kubbe, iki minare",
+      "osm": "way/396743634",
       "place_id": "ChIJvehBjOd1zBQRmrWg5ernzjE"
     },
     {
-      "sira": 22,
+      "sira": 23,
       "ad": "Metristepe Zafer Anıtı",
       "kategori": "tarih",
       "amaclar": [
@@ -273,10 +296,11 @@
       "ilce": "Bozüyük",
       "merkeze_km": 40,
       "neden": "İnönü savaşlarını anan yaklaşık 24 m'lik anıt; İnönü Şehitliği'ne yakın tepede",
+      "osm": "node/1869792472",
       "place_id": "ChIJp-1vFZgKzBQRnO9RxHaba08"
     },
     {
-      "sira": 23,
+      "sira": 24,
       "ad": "Türbin Mesire Yeri",
       "kategori": "doga",
       "amaclar": [
@@ -286,10 +310,11 @@
       "ilce": "Bozüyük",
       "merkeze_km": 40,
       "neden": "Bozüyük'e 7 km, dere kenarında; adını elektrik üreten şelaleden alır, mangal alanı var",
+      "osm": "way/426270313",
       "place_id": "ChIJnycC4QTwyxQRpD9JzYbXruc"
     },
     {
-      "sira": 24,
+      "sira": 25,
       "ad": "Dursun Fakih Türbesi",
       "kategori": "tarih",
       "amaclar": [
@@ -298,11 +323,12 @@
       ],
       "ilce": "Söğüt",
       "merkeze_km": 35,
-      "neden": "Küre köyünde 550 m'lik tepede; 1299'da Osman Bey adına ilk hutbeyi okuyan ilk kadı",
+      "neden": "Küre köyünde tepede; rivayete göre Osman Bey adına ilk hutbeyi okuyan ilk kadı",
+      "osm": "way/413017948",
       "place_id": "ChIJMbYuksaJyxQRvtKLYgKXlVA"
     },
     {
-      "sira": 25,
+      "sira": 26,
       "ad": "Bilecik Saat Kulesi",
       "kategori": "tarih",
       "amaclar": [
@@ -311,10 +337,11 @@
       "ilce": "Merkez",
       "merkeze_km": 1,
       "neden": "1907'de II. Abdülhamid döneminde yapıldı, 1987'de onarıldı; belediye binasının yanında",
+      "osm": "node/467025390",
       "place_id": "ChIJSyFJo-ePyxQRxD3NPSxzbk0"
     },
     {
-      "sira": 26,
+      "sira": 27,
       "ad": "Osmanlı Padişahları Tarih Şeridi",
       "kategori": "tarih",
       "amaclar": [
@@ -323,11 +350,12 @@
       ],
       "ilce": "Merkez",
       "merkeze_km": 1,
-      "neden": "Ertuğrul'dan Vahdettin'e 36 padişah, 140 m'lik açık hava şeridinde sırayla dizili",
+      "neden": "Osman Gazi'den Vahdettin'e 36 padişahın portresi, 140 m'lik açık hava şeridinde",
+      "osm": "node/11018211305",
       "place_id": "ChIJNwHyme-PyxQRXlkPfPHoTXE"
     },
     {
-      "sira": 27,
+      "sira": 28,
       "ad": "Kömürsu Yaylası",
       "kategori": "doga",
       "amaclar": [
@@ -338,6 +366,18 @@
       "merkeze_km": 60,
       "neden": "1.650 m'de göknar, kayın ve ardıç ormanı, dört pınar; yolu bozuk, yürüyüşe uygun",
       "place_id": "ChIJEWENvMDdyxQR8hB7mbOlM3c"
+    },
+    {
+      "sira": 29,
+      "ad": "Tekke Seyir Tepesi Aile Çay Bahçesi",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "yavas"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 2,
+      "neden": "Şehre bakan seyir tepesinde aile çay bahçesi; boza ve helvadan sonra sade bir çay molası",
+      "place_id": null
     }
   ]
 }
