@@ -4,7 +4,7 @@ Rüstem Paşa Camii, Sapanca'nın tam ortasında, kasabanın tarihini başlatan 
 
 Caminin üstü kubbe değil, ahşap çatı ve kiremitle örtülü; duvarlarda kerpiç ve ahşap birlikte kullanılmış. Bu yüzden dışarıdan bir İstanbul camisinden çok bir menzil kasabasının yapısına benzer. İç alan 250 metrekare kadar.
 
-Hamamın yerini görmek istersen kent meydanına bak. 2015'teki kazıda hamamın temelleri burada ortaya çıktı ve koruma altına alındı.
+Hamamın temelleri 2015'te kent meydanındaki kazıda bulundu.
 
 Cami ve meydan için yarım saat yeter. Cuma öğlesi dışında her saat kalabalık değildir.
 

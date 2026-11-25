@@ -6,4 +6,4 @@ Kuzuyayla'da çam ormanının içinde yürüyüş yolları, oturma alanları ve 
 
 Teleferik her yıl kış sezonundan önce birkaç haftalık bakıma girer ve fırtınalı günlerde seferler durdurulur. Gitmeden önce işletmeci UlaşımPark'ın duyurularından o günün durumuna bak.
 
-> Kabine binerken sırtını dağa, yüzünü göle verecek tarafa otur; inişte değil, çıkışta göl arkanda kalır ve manzara bu tarafta açılır.
+> Çıkarken arkana, göle bakan cama dön; göl ve körfez bu tarafta açılır.
