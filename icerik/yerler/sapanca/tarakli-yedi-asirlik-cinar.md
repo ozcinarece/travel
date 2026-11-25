@@ -4,6 +4,6 @@ Yedi Asırlık Çınar, Taraklı'nın güney ucunda, Yusuf Bey Camii'nin yanınd
 
 Ağacın altında bir süre otur. Çarşıdan aldığın uğut tatlısını ya da çam reçelini burada tatmak için iyi bir yer. Uğut, çimlendirilmiş buğdaydan yapılan ve yöreye özgü koyu bir tatlı. Taraklı'nın tahta kaşıkları da çarşıda hâlâ elde oyuluyor.
 
-Burada yirmi dakika yeter. Sonra arabana dön; Sapanca'ya dönüş yolu aynı vadiden geçer, gün batarken Geyve Boğazı'nın kenarından inersin.
+Burada yirmi dakika yeter. Sonra arabana dön; Sapanca'ya dönüş yolu aynı vadiden, Geyve Boğazı'nın kenarından geçer.
 
 > Ağacın yanındaki Yusuf Bey Camii'ne de bir bak: çınarın yaşını, yanındaki yapının taşlarıyla karşılaştırınca daha iyi kavrarsın.
