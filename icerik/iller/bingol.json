@@ -1,0 +1,253 @@
+{
+  "il": "Bingöl",
+  "slug": "bingol",
+  "guncelleme": "2026-11-26",
+  "oneriler": [
+    {
+      "sira": 1,
+      "ad": "Yüzen Adalar Tabiat Anıtı",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas",
+        "cocuklu"
+      ],
+      "ilce": "Solhan",
+      "merkeze_km": 55,
+      "neden": "Hazarşah köyündeki Turna Gölü'nde rüzgârla yer değiştiren, üstünde yürünebilen adacıklar",
+      "place_id": "ChIJ1_j_FmtIckARIbFMxGzxomk"
+    },
+    {
+      "sira": 2,
+      "ad": "Çır Şelalesi",
+      "kategori": "doga",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 28,
+      "neden": "Ilıcalar'a bağlı Uzundere'de kar suyuyla Nisan-Mayıs'ta coşan yaklaşık 50 m'lik şelale",
+      "place_id": "ChIJPxSMeYsuckARpoo-xNZkRck"
+    },
+    {
+      "sira": 3,
+      "ad": "Ilıcalar Kaplıcaları",
+      "kategori": "aktivite",
+      "amaclar": [
+        "yavas",
+        "cocuklu"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 20,
+      "neden": "Erzurum yolunun 20. km'sinde 40-50°C sıcak su; Bingöllülerin yaz-kış kaplıca durağı"
+    },
+    {
+      "sira": 4,
+      "ad": "Zağ Mağaraları",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "doga"
+      ],
+      "ilce": "Solhan",
+      "merkeze_km": 40,
+      "neden": "Murat Nehri'ne bakan yamaca oyulmuş 5 katlı, 26 odalı erken Hristiyan dönemi mağaraları"
+    },
+    {
+      "sira": 5,
+      "ad": "Soğukçeşme Kavurma 1965",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 2,
+      "neden": "Domatesli-biberli Bingöl tavası ve kavurmasıyla 1965'ten beri bilinen esnaf lokantası"
+    },
+    {
+      "sira": 6,
+      "ad": "Buban Peri Bacaları",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 35,
+      "neden": "Sancak beldesi Oğuldere'de rüzgârın tüf kayayı yonttuğu Kapadokya benzeri sütunlar",
+      "place_id": "ChIJxXJYmfIrckARcu1h8OlbfOg"
+    },
+    {
+      "sira": 7,
+      "ad": "Şerafettin Yaylası",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Solhan",
+      "merkeze_km": 70,
+      "neden": "2.600 m'de göçerlerin çadır kurduğu, yazın on binlerce koyunun otladığı yayla",
+      "place_id": "ChIJtY4LBeVpckARKU7EYbuZ-ls"
+    },
+    {
+      "sira": 8,
+      "ad": "Kale Tepesi (Karlıova)",
+      "kategori": "aktivite",
+      "amaclar": [
+        "doga",
+        "gece"
+      ],
+      "ilce": "Karlıova",
+      "merkeze_km": 75,
+      "neden": "Bingöl Dağları'nda 3.250 m'lik tepeye gece tırmanıp gün doğumunu izleme rotası"
+    },
+    {
+      "sira": 9,
+      "ad": "Hesarek Kayak Merkezi",
+      "kategori": "aktivite",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 25,
+      "neden": "Kentin yakınında üç pistli kayak merkezi; kar kalınsa sezon Mart ortasına uzuyor"
+    },
+    {
+      "sira": 10,
+      "ad": "Berti Et Lokantası",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "Kaleönü'nde et yemekleri, kuru fasulye-pilavıyla bilinen yerel esnaf lokantası",
+      "place_id": "ChIJj4LAQ0rOc0AR6sFSjtl3I1g"
+    },
+    {
+      "sira": 11,
+      "ad": "İsfahan Bey Camii",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 8,
+      "neden": "16. yy'da Çapakçur Beyi İsfahan Bey'in yaptırdığı, kentin ayakta kalan tek eski yapısı"
+    },
+    {
+      "sira": 12,
+      "ad": "Balaban Bey Camii",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Kiğı",
+      "merkeze_km": 85,
+      "neden": "Kiğı'nın eski mahallesinde 1402 kitabeli cami; mihrabında kırmızı lale motifleri var",
+      "place_id": "ChIJWTeIwOKVcUARjoNVE_nsaxE"
+    },
+    {
+      "sira": 13,
+      "ad": "Kiğı Kalesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "doga"
+      ],
+      "ilce": "Kiğı",
+      "merkeze_km": 85,
+      "neden": "Kasabanın tepesindeki kayalık üzerinde kale kalıntısı; Peri vadisine geniş bakış"
+    },
+    {
+      "sira": 14,
+      "ad": "Sülbüs Dağı",
+      "kategori": "doga",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Yayladere",
+      "merkeze_km": 100,
+      "neden": "Yayladere'nin kuzeyinde 2.884 m volkanik koni; karı geç eriyen yaylası ve şenliği var"
+    },
+    {
+      "sira": 15,
+      "ad": "Peri Suyu Vadisi",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Kiğı",
+      "merkeze_km": 90,
+      "neden": "Kiğı-Yedisu-Yayladere arasında akan Peri Suyu'nun kamp ve yürüyüş vadisi",
+      "place_id": "ChIJJZu0QS2acUARKhgWnkCdkIc"
+    },
+    {
+      "sira": 16,
+      "ad": "Büyüksülüklü Gölü",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Kiğı",
+      "merkeze_km": 95,
+      "neden": "Eskikavak yakınında toprak yolla ulaşılan volkanik krater gölü; çadır kurulabiliyor"
+    },
+    {
+      "sira": 17,
+      "ad": "Özlüce Baraj Gölü",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Yayladere",
+      "merkeze_km": 95,
+      "neden": "Dağların yansıdığı Peri Suyu üzerindeki baraj gölü; balık tutanların uğrak yeri",
+      "place_id": "ChIJB1jfCPV0cUAR-tKbF32LuoU"
+    },
+    {
+      "sira": 18,
+      "ad": "Bingöl Kent Ormanı",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 4,
+      "neden": "Kent merkezine yakın yürüyüş yolları, piknik ve oyun alanları olan geniş koruluk",
+      "place_id": "ChIJ33WEz_rPc0ARLGTcVnP6z9Q"
+    },
+    {
+      "sira": 19,
+      "ad": "Bingöl Kültür Park",
+      "kategori": "doga",
+      "amaclar": [
+        "cocuklu",
+        "yavas"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "İnönü Mahallesi'nde göletli, yürüyüş yollu ve oyun alanlı şehir parkı",
+      "osm": "way/231900632",
+      "place_id": "ChIJr4cYxZPPc0ARFeP0EbotgVc"
+    },
+    {
+      "sira": 20,
+      "ad": "Kübik Mağarası",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "doga"
+      ],
+      "ilce": "Karlıova",
+      "merkeze_km": 80,
+      "neden": "Kübik köyünde ilk yerleşim izleri taşıyan tarih öncesi mağara; araçtan sonra yürüyüş"
+    }
+  ]
+}
