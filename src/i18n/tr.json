@@ -90,7 +90,27 @@
   "menu": {
     "kesfet": "Keşfet",
     "seyahatlerim": "Seyahatlerim",
+    "arkadaslar": "Arkadaşlar",
     "profil": "Profil"
+  },
+  "arkadaslar": {
+    "baslik": "Arkadaşlar",
+    "davetEt": "Davet et",
+    "paylasti": "{sehir} gezisini paylaştı",
+    "bos": "Arkadaşların gezilerini paylaşınca burada görünür.",
+    "bosKisi": "Bir seyahate arkadaşını davet edince burada görünür.",
+    "kapattiMetin": "{ad} bu paylaşımı kapattı.",
+    "begen": "Beğen",
+    "kartEtiket": "{ad}, {sehir} gezisi. Açar",
+    "hata": "Arkadaşların yüklenemedi.",
+    "tekrarDene": "Tekrar dene",
+    "yukleniyor": "Arkadaşlar yükleniyor",
+    "azOnce": "az önce",
+    "saatOnce": "{n} saat önce",
+    "gunOnce": "{n} gün önce",
+    "haftaOnce": "{n} hafta önce",
+    "ayOnce": "{n} ay önce",
+    "yilOnce": "{n} yıl önce"
   },
   "profil": {
     "kesfet": "Keşfet",
@@ -1397,7 +1417,7 @@
     "gizliAlt": "Hiçbir zaman paylaşılmaz",
     "kilitli": "Kilitli",
     "linkiGonder": "Linki gönder",
-    "linkAlt": "Linki olan herkes geziyi görür, düzenleyemez.",
+    "linkAlt": "Linki olan herkes ve birlikte gezdiğin arkadaşların görür, düzenleyemez.",
     "linkAcik": "Link açık",
     "acildi": "{n} kez açıldı",
     "paylasimiKapat": "Paylaşımı kapat",

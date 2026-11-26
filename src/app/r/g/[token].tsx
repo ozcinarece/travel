@@ -23,6 +23,7 @@ import {
   bekleyenPaylasimiYaz,
   durakSatiri,
   haritaIzniAl,
+  kimlikMi,
   usePaylasimdanAl,
   usePaylasimOzeti,
   type AcikPaylasimOzeti,
@@ -41,7 +42,8 @@ const konumlu = (d: PaylasimDuragi): d is PaylasimDuragi & Konum =>
 export default function PaylasimEkrani() {
   const { token: ham } = useLocalSearchParams<{ token: string | string[] }>();
   const token = Array.isArray(ham) ? ham[0] : ham;
-  const ozet = usePaylasimOzeti(token);
+  const { hesapli, hazir } = useOturum();
+  const ozet = usePaylasimOzeti(token, hesapli, hazir);
   const [kapandi, setKapandi] = useState(false);
 
   if (ozet.isPending) {
@@ -57,7 +59,11 @@ export default function PaylasimEkrani() {
   const o = ozet.data;
   if (!o || o.kapali || kapandi) {
     const kapali = kapandi || !!o?.kapali;
-    return <KapaliEkran baslik={t(kapali ? 'paylasim.kapaliBaslik' : 'paylasim.gecersizBaslik')} metin={t(kapali ? 'paylasim.kapaliMetin' : 'paylasim.gecersizMetin')} />;
+    // #533 incelemesi 4: akıştan (kimlikle) açılan kapalı paylaşımda metin linkten söz etmez.
+    const akistan = kapali && !!token && kimlikMi(token);
+    const ad = (o?.kapali ? o.paylasan : null) ?? t('seyahatV7.adsiz');
+    const metin = akistan ? t('arkadaslar.kapattiMetin', { ad }) : t(kapali ? 'paylasim.kapaliMetin' : 'paylasim.gecersizMetin');
+    return <KapaliEkran baslik={t(kapali ? 'paylasim.kapaliBaslik' : 'paylasim.gecersizBaslik')} metin={metin} />;
   }
   return <AcikEkran token={token!} o={o} onKapandi={() => setKapandi(true)} />;
 }
@@ -236,10 +242,17 @@ function KapaliEkran({ baslik, metin }: { baslik: string; metin: string }) {
   return <BilgiEkrani ikon="kirikBag" baslik={baslik} metin={metin} dugme={t('paylasim.hazirGeziler')} onDugme={git} />;
 }
 
-/** Logo (görünüm aynı): girişli kişiyi ana sayfaya, girişsizi girişe götürür. */
+/**
+ * Logo (görünüm aynı): yığında önceki ekran varsa (ör. Arkadaşlar akışından açıldı) ona döner (#533 incelemesi 3); yoksa
+ * girişli kişiyi ana sayfaya, girişsizi girişe götürür.
+ */
 function UstLogo() {
   const { hesapli } = useOturum();
   const git = () => {
+    if (router.canGoBack()) {
+      router.back();
+      return;
+    }
     acilisKarariniKapat();
     router.replace(hesapli ? '/(tabs)' : '/giris');
   };

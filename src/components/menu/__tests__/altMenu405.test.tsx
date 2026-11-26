@@ -1,5 +1,5 @@
 // #405 KK1 · KK6 (kanvas `Ana_v6_Kesfet` · `Ana_v6_Seyahatlerim` alt menüsü): Keşfet · Seyahatlerim · Profil; seçili sekmede
-// ikon Mandalina ve yazı Gece; Arkadaşlar yok (#407'ye kadar). Sekmeye dokununca `sekme_acildi` (meta: sekme) ve geçiş.
+// ikon Mandalina ve yazı Gece; #407 KK5: Arkadaşlar Seyahatlerim ile Profil arasında. Sekmeye dokununca `sekme_acildi` (meta: sekme) ve geçiş.
 import { describe, expect, it, jest } from '@jest/globals';
 import { fireEvent, render, screen } from '@testing-library/react-native';
 import type { BottomTabBarProps } from 'expo-router/js-tabs';
@@ -14,6 +14,7 @@ jest.mock('@/features/icerik/sorgular', () => ({ olayYaz: (...a: unknown[]) => m
 const routes = [
   { key: 'k1', name: 'index', params: undefined },
   { key: 'k2', name: 'seyahatler', params: undefined },
+  { key: 'k4', name: 'arkadaslar', params: undefined },
   { key: 'k3', name: 'profil', params: undefined },
 ];
 
@@ -25,12 +26,11 @@ function ciz(index: number) {
 }
 
 describe('#405 alt menü', () => {
-  it('KK1: 3 sekme; seçili sekmede yazı Gece 700, ikon Mandalina; Arkadaşlar yok', () => {
+  it('KK1 (#407 KK5): 4 sekme; seçili sekmede yazı Gece 700, ikon Mandalina', () => {
     ciz(1);
-    expect(screen.getAllByRole('tab').map((n) => n.props.accessibilityLabel)).toEqual(['Keşfet', 'Seyahatlerim', 'Profil']);
+    expect(screen.getAllByRole('tab').map((n) => n.props.accessibilityLabel)).toEqual(['Keşfet', 'Seyahatlerim', 'Arkadaşlar', 'Profil']);
     expect(screen.getByRole('tab', { name: 'Seyahatlerim' }).props.accessibilityState).toMatchObject({ selected: true });
     expect(screen.getByRole('tab', { name: 'Keşfet' }).props.accessibilityState).toMatchObject({ selected: false });
-    expect(screen.queryByText('Arkadaşlar')).toBeNull();
     expect(altMenuRenk).toEqual({ secili: '#ff7a1a', pasif: '#8A91A3', cizgi: '#E4E7EE' });
   });
 
@@ -42,5 +42,8 @@ describe('#405 alt menü', () => {
     mockOlay.mockClear();
     fireEvent.press(screen.getByRole('tab', { name: 'Keşfet' }));
     expect(mockOlay).not.toHaveBeenCalled();
+    fireEvent.press(screen.getByRole('tab', { name: 'Arkadaşlar' }));
+    expect(mockOlay).toHaveBeenCalledWith('sekme_acildi', null, { sekme: 'arkadaslar' });
+    expect(navigation.navigate).toHaveBeenCalledWith('arkadaslar', undefined);
   });
 });

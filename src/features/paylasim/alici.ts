@@ -24,18 +24,30 @@ export type AcikPaylasimOzeti = {
   kisi_kip?: 'gidiyor' | 'geziyor' | 'gezdi';
   gunler: PaylasimGunu[];
 };
-/** null: bilinmeyen link ("Bu link açılmıyor"); `kapali`: "Bu paylaşım kapatıldı". */
-export type PaylasimOzeti = AcikPaylasimOzeti | { kapali: true } | null;
+/**
+ * null: bilinmeyen link ("Bu link açılmıyor"); `kapali`: "Bu paylaşım kapatıldı". Akıştan (kimlikle) açılan kapalı paylaşımda
+ * `paylasan` ilk adı gelir: "{ad} bu paylaşımı kapattı." (#533 incelemesi 4).
+ */
+export type PaylasimOzeti = AcikPaylasimOzeti | { kapali: true; paylasan?: string | null } | null;
 
 export const TOKEN_BICIMI = /^[A-Za-z0-9_-]{24}$/;
+/** #407 KK3: Arkadaşlar akışındaki kart alıcı ekranını paylaşımın kimliğiyle açar (`/r/g/{uuid}`); token istemciye gelmez. */
+export const KIMLIK_BICIMI = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+export const kimlikMi = (anahtar: string) => KIMLIK_BICIMI.test(anahtar);
 
-export function usePaylasimOzeti(token: string | undefined) {
+export function usePaylasimOzeti(token: string | undefined, hesapli: boolean, oturumHazir = true) {
   return useQuery({
-    queryKey: ['paylasim_ozeti', token],
-    // Biçimi bozuk token sunucuya gitmez; doğrudan "Bu link açılmıyor".
+    queryKey: ['paylasim_ozeti', token, hesapli],
+    // Kimlikli linkte oturum yüklenene kadar beklenir (yoksa "açılmıyor" bir an görünür).
+    enabled: oturumHazir || !token || !kimlikMi(token),
+    // Biçimi bozuk token sunucuya gitmez; doğrudan "Bu link açılmıyor". Kimlikli link (`/r/g/{uuid}`) yalnız akıştan, girişli
+    // kişiye açılır; oturumsuz ya da misafirken sunucuya gitmez (#533 incelemesi 9).
     queryFn: async (): Promise<PaylasimOzeti> => {
-      if (!token || !TOKEN_BICIMI.test(token)) return null;
-      const { data, error } = await supabase.rpc('paylasim_ozeti', { p_token: token });
+      if (!token || (!TOKEN_BICIMI.test(token) && !kimlikMi(token))) return null;
+      if (kimlikMi(token) && !hesapli) return null;
+      const { data, error } = kimlikMi(token)
+        ? await supabase.rpc('paylasim_ozeti_kimlik', { p_id: token })
+        : await supabase.rpc('paylasim_ozeti', { p_token: token });
       if (error) throw error;
       return (data as PaylasimOzeti) ?? null;
     },
@@ -50,7 +62,9 @@ export function usePaylasimOzeti(token: string | undefined) {
 
 /** "Haritada gör": günlük 200 yükleme sınırı sunucuda (Ürün kararı 2). false → gri satır, harita yüklenmez. */
 export async function haritaIzniAl(token: string): Promise<boolean> {
-  const { data, error } = await supabase.rpc('paylasim_harita_izni', { p_token: token });
+  const { data, error } = kimlikMi(token)
+    ? await supabase.rpc('paylasim_harita_izni_kimlik', { p_id: token })
+    : await supabase.rpc('paylasim_harita_izni', { p_token: token });
   if (error) return false;
   return data === true;
 }
@@ -60,7 +74,9 @@ export function usePaylasimdanAl() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (token: string): Promise<string> => {
-      const { data, error } = await supabase.rpc('paylasimdan_al', { p_token: token });
+      const { data, error } = kimlikMi(token)
+        ? await supabase.rpc('paylasimdan_al_kimlik', { p_id: token })
+        : await supabase.rpc('paylasimdan_al', { p_token: token });
       if (error) throw error;
       return data as string;
     },

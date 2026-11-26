@@ -41,6 +41,8 @@ export const renk = {
 // Gün renkleri (kanvas Temel · harita dili): 1 mavi · 2 sarı (üstünde Lacivert yazı) · 3 yeşil · 4 mor; 5–6 ek, 7. günden sonra döner.
 /** Kişi yüzleri (avatar zemini) sırası: Mandalina, Gece, Gece açık. */
 export const yuzRenkleri = [renk.vurgu, renk.ana, renk.anaAcik] as const;
+/** #407 (kanvas `Ana_v6_Arkadaslar`): Arkadaşlar sekmesindeki kişi yüzleri sırası: Lacivert, açık mavi, mor, petrol. */
+export const arkadasRenkleri = [renk.ana, renk.anaAcik, '#7A3FC0', '#0E6A85'] as const;
 
 /** #361 ana sayfa v5 (kanvas `Ana_v5_Var` · `Ana_v5_Yok` · `Ana_v5_Bitti`): panolardaki ikincil metin, çizgi ve satır zemini. */
 export const anaV5 = {

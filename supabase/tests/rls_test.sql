@@ -4301,4 +4301,170 @@ delete from public.sehirler where id = '43200000-0000-4000-8000-000000000020';
 delete from auth.users where id in (:PA, :PB, :PX, :PM);
 do $$ begin assert (select count(*) from public.gezi_paylasim) = 0, '#432: seyahat silinince linkler de silinir'; end $$;
 
+-- #407 Arkadaşlar sekmesi: kişiler (birlikte gezdiklerin), açık paylaşımların akışı, ♥ (KK1, KK2, KK3, KK3b) + #533 incelemesi.
+-- A: Bursa (A, B, D, misafir G) ve tek başına Antalya, Eskişehir. C: İzmir. B, Bursa'nın üyesi: Bursa linki B'nin akışına girmez
+-- (kendi seyahati), Antalya linki girer. Eskişehir linki bu sürümden önce açılmış sayılır (akista = false), akışa girmez.
+\set FA '''40700000-0000-4000-8000-0000000000a1'''
+\set FB '''40700000-0000-4000-8000-0000000000b2'''
+\set FC '''40700000-0000-4000-8000-0000000000c3'''
+\set FD '''40700000-0000-4000-8000-0000000000d4'''
+\set FG '''40700000-0000-4000-8000-0000000000e5'''
+reset role;
+insert into auth.users (id, is_anonymous) values (:FA, false), (:FB, false), (:FC, false), (:FD, false), (:FG, true);
+insert into public.profiles (id, name, username, photo_url) values
+  (:FA, 'Ayşe Yılmaz', 'ayse407', 'https://lh3.googleusercontent.com/a/ayse407'), (:FC, 'Can', 'can407', null);
+insert into public.trips (id, owner_id, name, city_place_id, city_label, country_code, lat, lng, tz) values
+  ('40700000-0000-4000-8000-000000000001', :FA, null, 'ChIJ-bursa-407', 'Bursa', 'TR', 40.18, 29.06, 'Europe/Istanbul'),
+  ('40700000-0000-4000-8000-000000000002', :FC, null, 'ChIJ-izmir-407', 'İzmir', 'TR', 38.42, 27.14, 'Europe/Istanbul'),
+  ('40700000-0000-4000-8000-000000000003', :FA, null, 'ChIJ-antalya-407', 'Antalya', 'TR', 36.88, 30.70, 'Europe/Istanbul'),
+  ('40700000-0000-4000-8000-000000000004', :FA, null, 'ChIJ-eskisehir-407', 'Eskişehir', 'TR', 39.77, 30.52, 'Europe/Istanbul');
+update public.members set display_name = 'Ayşe' || chr(160) || 'Yılmaz' where user_id = :FA;
+insert into public.members (trip_id, user_id, display_name, guest) values
+  ('40700000-0000-4000-8000-000000000001', :FB, 'Berk', false), ('40700000-0000-4000-8000-000000000001', :FD, 'Deniz Kaya', false),
+  ('40700000-0000-4000-8000-000000000001', :FG, 'Misafir', true);
+set role authenticated;
+select pg_temp.as_user(:FA);
+insert into public.gezi_paylasim (trip_id) values
+  ('40700000-0000-4000-8000-000000000001'), ('40700000-0000-4000-8000-000000000003'), ('40700000-0000-4000-8000-000000000004');
+select pg_temp.as_user(:FC);
+insert into public.gezi_paylasim (trip_id) values ('40700000-0000-4000-8000-000000000002');
+reset role;
+-- İnceleme 2: bu sürümden önce açılmış link (migration var olan satırları false yapar; yenilerin varsayılanı true).
+update public.gezi_paylasim set akista = false where trip_id = '40700000-0000-4000-8000-000000000004';
+do $$ begin assert (select bool_and(akista) from public.gezi_paylasim where trip_id <> '40700000-0000-4000-8000-000000000004'), '#533: yeni link akışa açık'; end $$;
+select set_config('test.l1', (select id::text from public.gezi_paylasim where trip_id = '40700000-0000-4000-8000-000000000001'), false);
+select set_config('test.l2', (select id::text from public.gezi_paylasim where trip_id = '40700000-0000-4000-8000-000000000002'), false);
+select set_config('test.l3', (select id::text from public.gezi_paylasim where trip_id = '40700000-0000-4000-8000-000000000003'), false);
+select set_config('test.l4', (select id::text from public.gezi_paylasim where trip_id = '40700000-0000-4000-8000-000000000004'), false);
+select set_config('test.l3_token', (select token from public.gezi_paylasim where trip_id = '40700000-0000-4000-8000-000000000003'), false);
+set role authenticated;
+-- KK1/KK2/KK3: B, A ile birlikte gezdi: kişilerde A ve D var (yalnız ilk ad), C ve kendisi yok; akışta yalnız A'nın Antalya
+-- linki (Bursa B'nin kendi seyahati, Eskişehir eski link); token, soyadı ve ♥ sayısı yok.
+select pg_temp.as_user(:FB);
+do $$
+declare r record; m text;
+begin
+  assert (select array_agg(user_id order by user_id) from public.arkadaslarim()) = array['40700000-0000-4000-8000-0000000000a1', '40700000-0000-4000-8000-0000000000d4', '40700000-0000-4000-8000-0000000000e5']::uuid[], '#407 KK1: birlikte gezdiklerin';
+  assert (select ad from public.arkadaslarim() where user_id = '40700000-0000-4000-8000-0000000000a1') = 'Ayşe', '#533 8a: kişi satırında ilk ad (U+00A0)';
+  assert (select ad from public.arkadaslarim() where user_id = '40700000-0000-4000-8000-0000000000d4') = 'Deniz', '#533 8a: kişi satırında ilk ad';
+  assert (select count(*) from public.arkadas_paylasimlari()) = 1, '#407 KK2 + #533 1, 2: yalnız birlikte gezilen kişinin, kendi seyahatin olmayan, yeni linki';
+  select * into r from public.arkadas_paylasimlari();
+  m := row_to_json(r)::text;
+  assert r.id = current_setting('test.l3')::uuid and r.paylasan_ad = 'Ayşe' and r.sehir = 'Antalya', '#407 KK2: kart: ' || m;
+  assert r.foto = 'https://lh3.googleusercontent.com/a/ayse407', '#533: kartta kişinin fotoğrafı: ' || m;
+  assert r.gun_sayisi = 1 and r.kisi_sayisi = 1 and r.kisi_kip = 'gidiyor' and not r.begendim, '#407 KK2: özet: ' || m;
+  assert position(current_setting('test.l3_token') in m) = 0 and position('Yılmaz' in m) = 0, '#407 KK3: token ve soyadı akışta yok';
+  assert position('begeni_sayisi' in m) = 0, '#533 soru 1: ♥ sayısı istemciye dönmez';
+  assert (select count(*) from public.gezi_paylasim) = 0, '#407 KK3: gezi_paylasim select kuralı değişmedi';
+  assert (public.paylasim_ozeti_kimlik(current_setting('test.l3')::uuid) ->> 'kapali')::boolean is false, '#407 KK3: kart alıcı ekranını kimlikle açar';
+  assert public.paylasim_ozeti_kimlik(current_setting('test.l3')::uuid) ->> 'paylasan' = 'Ayşe', '#407 KK3: alıcı ekranında ilk ad';
+  assert public.paylasim_ozeti_kimlik(current_setting('test.l2')::uuid) is null, '#407 KK3: birlikte gezilmeyenin linki açılmaz';
+  assert public.paylasim_ozeti_kimlik(current_setting('test.l4')::uuid) is null, '#533 2: eski link kimlikle açılmaz';
+  assert public.paylasim_harita_izni_kimlik(current_setting('test.l3')::uuid), '#407 KK3: harita izni kimlikle';
+  assert not public.paylasim_harita_izni_kimlik(current_setting('test.l2')::uuid), '#533 8c: birlikte gezilmeyenin haritası kimlikle açılmaz';
+  assert not public.paylasim_harita_izni_kimlik(current_setting('test.l4')::uuid), '#533 8c: eski linkin haritası kimlikle açılmaz';
+end $$;
+select pg_temp.hata_bekle($$select public.paylasimdan_al_kimlik(current_setting('test.l2')::uuid)$$, 'P0002');
+select pg_temp.hata_bekle($$select public.paylasimdan_al_kimlik(current_setting('test.l4')::uuid)$$, 'P0002');
+select pg_temp.hata_bekle($$insert into public.paylasim_begeni (paylasim_id) values (current_setting('test.l4')::uuid)$$, '42501');
+do $$ begin assert public.paylasimdan_al_kimlik(current_setting('test.l3')::uuid) is not null, '#407 KK3: Seyahatime al kimlikle'; end $$;
+-- Soru 4: kimlikle açılış `acilma_sayisi`'na sayılır ama 500/gün tavanına sayılmaz; tavan dolu olsa da sayaç artar.
+reset role;
+update public.gezi_paylasim set acilma_sayisi = 0, acilma_gunu = current_date, acilma_gun_sayisi = 500 where id = current_setting('test.l3')::uuid;
+set role authenticated;
+select pg_temp.as_user(:FB);
+select public.paylasim_ozeti_kimlik(current_setting('test.l3')::uuid);
+reset role;
+do $$ begin assert (select acilma_sayisi = 1 and acilma_gun_sayisi = 500 from public.gezi_paylasim where id = current_setting('test.l3')::uuid), '#533 soru 4: akıştan açılış tavana sayılmaz'; end $$;
+-- Linkle açılış tavanı değişmedi: tavan doluyken sayaç durur.
+set role anon;
+select pg_temp.as_user(null);
+select public.paylasim_ozeti(current_setting('test.l3_token'));
+reset role;
+do $$ begin assert (select acilma_sayisi = 1 from public.gezi_paylasim where id = current_setting('test.l3')::uuid), '#517 KK-ek2: linkle açılış tavanı sürüyor'; end $$;
+set role authenticated;
+-- A kendi paylaşımını akışta görmez; D, B ile aynı: Bursa (kendi seyahati) yok, Antalya var.
+select pg_temp.as_user(:FA);
+do $$ begin assert (select count(*) from public.arkadas_paylasimlari()) = 0, '#407 KK2: kendi paylaşımın akışta yok'; end $$;
+select pg_temp.as_user(:FD);
+do $$ begin assert (select array_agg(id) from public.arkadas_paylasimlari()) = array[current_setting('test.l3')::uuid], '#533 1: üyesi olduğun seyahatin linki akışta yok'; end $$;
+-- C (birlikte gezmedi) A'nın linkini görmez, açamaz, beğenemez.
+select pg_temp.as_user(:FC);
+do $$
+begin
+  assert (select count(*) from public.arkadaslarim()) = 0 and (select count(*) from public.arkadas_paylasimlari()) = 0, '#407 KK3: C kimseyi görmez';
+  assert public.paylasim_ozeti_kimlik(current_setting('test.l3')::uuid) is null and not public.paylasim_harita_izni_kimlik(current_setting('test.l3')::uuid), '#407 KK3: C açamaz';
+end $$;
+select pg_temp.hata_bekle($$insert into public.paylasim_begeni (paylasim_id) values (current_setting('test.l3')::uuid)$$, '42501');
+select pg_temp.hata_bekle($$select public.paylasimdan_al_kimlik(current_setting('test.l3')::uuid)$$, 'P0002');
+-- #533 8b: misafir oturum (Bursa üyesi G) akışı görmez, kimlikle açamaz, ♥ veremez.
+select pg_temp.as_user(:FG, true);
+do $$
+begin
+  assert (select count(*) from public.arkadas_paylasimlari()) = 0, '#533 8b: misafir akışı görmez';
+  assert public.paylasim_ozeti_kimlik(current_setting('test.l3')::uuid) is null, '#533 8b: misafir kimlikle açamaz';
+  assert not public.paylasim_harita_izni_kimlik(current_setting('test.l3')::uuid), '#533 8b: misafir haritayı kimlikle açamaz';
+end $$;
+select pg_temp.hata_bekle($$insert into public.paylasim_begeni (paylasim_id) values (current_setting('test.l3')::uuid)$$, '42501');
+select pg_temp.hata_bekle($$select public.paylasimdan_al_kimlik(current_setting('test.l3')::uuid)$$, 'P0002');
+-- KK3b: B ve D beğenir, kişi başına bir kez; başkası adına beğenemez; kim beğendi yalnız kendine görünür.
+select pg_temp.as_user(:FB);
+insert into public.paylasim_begeni (paylasim_id) values (current_setting('test.l3')::uuid);
+select pg_temp.hata_bekle($$insert into public.paylasim_begeni (paylasim_id) values (current_setting('test.l3')::uuid)$$, '23505');
+select pg_temp.hata_bekle($$insert into public.paylasim_begeni (paylasim_id, user_id) values (current_setting('test.l3')::uuid, '40700000-0000-4000-8000-0000000000d4')$$, '42501');
+select pg_temp.hata_bekle($$insert into public.paylasim_begeni (paylasim_id) values (current_setting('test.l2')::uuid)$$, '42501');
+select pg_temp.as_user(:FD);
+insert into public.paylasim_begeni (paylasim_id) values (current_setting('test.l3')::uuid);
+do $$ begin assert (select count(*) from public.paylasim_begeni) = 1, '#407 KK3b: yalnız kendi beğenini görürsün'; end $$;
+select pg_temp.as_user(:FB);
+do $$ begin assert (select begendim from public.arkadas_paylasimlari()), '#407 KK3b: benim beğenim'; end $$;
+delete from public.paylasim_begeni where paylasim_id = current_setting('test.l3')::uuid;
+select pg_temp.as_user(:FA);
+do $$ begin assert (select count(*) from public.paylasim_begeni) = 0, '#407 KK3b: paylaşan kim beğendi görmez'; end $$;
+delete from public.paylasim_begeni;
+reset role;
+do $$ begin assert (select count(*) from public.paylasim_begeni where paylasim_id = current_setting('test.l3')::uuid) = 1, '#407 KK3b: B geri aldı, başkasınınki silinmez'; end $$;
+-- KK3: seyahatten çıkarılan (D) artık kişileri ve paylaşımları görmez, beğenemez.
+delete from public.members where trip_id = '40700000-0000-4000-8000-000000000001' and user_id = :FD;
+set role authenticated;
+select pg_temp.as_user(:FD);
+do $$
+begin
+  assert (select count(*) from public.arkadaslarim()) = 0 and (select count(*) from public.arkadas_paylasimlari()) = 0, '#407 KK3: çıkarılan kişi görmez';
+  assert public.paylasim_ozeti_kimlik(current_setting('test.l3')::uuid) is null, '#407 KK3: çıkarılan kişi açamaz';
+end $$;
+select pg_temp.hata_bekle($$insert into public.paylasim_begeni (paylasim_id) values (current_setting('test.l3')::uuid)$$, '42501');
+-- KK2: link kapanınca kart akıştan düşer; akıştan açılan ekran "{ad} bu paylaşımı kapattı." der (#533 4).
+select pg_temp.as_user(:FA);
+update public.gezi_paylasim set acik = false where id = current_setting('test.l3')::uuid;
+select pg_temp.as_user(:FB);
+do $$
+declare o jsonb := public.paylasim_ozeti_kimlik(current_setting('test.l3')::uuid);
+begin
+  assert (select count(*) from public.arkadas_paylasimlari()) = 0, '#407 KK2: kapanan link düşer';
+  assert (o ->> 'kapali')::boolean and o ->> 'paylasan' = 'Ayşe' and o - 'kapali' - 'paylasan' = '{}'::jsonb, '#533 4: kapalı + ilk ad, başka alan yok: ' || o::text;
+end $$;
+select pg_temp.hata_bekle($$select public.paylasimdan_al_kimlik(current_setting('test.l3')::uuid)$$, 'P0002');
+select pg_temp.as_user(:FC);
+do $$ begin assert public.paylasim_ozeti_kimlik(current_setting('test.l3')::uuid) is null, '#533 4: birlikte gezmeyene kapalı link de görünmez'; end $$;
+reset role;
+-- #533 8c: anon rolü hiçbir arkadaş fonksiyonunu çağıramaz.
+set role anon;
+select pg_temp.as_user(null);
+select pg_temp.hata_bekle($$select * from public.arkadas_paylasimlari()$$, '42501');
+select pg_temp.hata_bekle($$select * from public.arkadaslarim()$$, '42501');
+select pg_temp.hata_bekle($$select public.paylasim_ozeti_kimlik(current_setting('test.l2')::uuid)$$, '42501');
+select pg_temp.hata_bekle($$select public.paylasim_harita_izni_kimlik(current_setting('test.l2')::uuid)$$, '42501');
+select pg_temp.hata_bekle($$select public.paylasimdan_al_kimlik(current_setting('test.l2')::uuid)$$, '42501');
+select pg_temp.hata_bekle($$select public.ilk_kelime('a b')$$, '42501');
+reset role;
+set role authenticated;
+select pg_temp.as_user(:FB);
+select pg_temp.hata_bekle($$select public.paylasim_ozeti_govde(current_setting('test.l3')::uuid)$$, '42501');
+reset role;
+delete from public.trips where owner_id in (:FA, :FB, :FC, :FD, :FG);
+delete from public.olaylar where user_id in (:FA, :FB, :FC, :FD, :FG);
+delete from auth.users where id in (:FA, :FB, :FC, :FD, :FG);
+do $$ begin assert (select count(*) from public.paylasim_begeni) = 0, '#407: hesap silinince beğeniler de silinir'; end $$;
+
 \echo 'rls_test: TÜM TESTLER GEÇTİ'

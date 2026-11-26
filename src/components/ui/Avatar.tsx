@@ -10,14 +10,18 @@ type Props = {
   arkaPlan?: string;
   /** #290 KK8 (29c): baş harf Figtree 800, 12 px (kart içi küçük yüzler); verilmezse başlık fontu (Figtree 800), boyutun %40'ı. */
   kucukHarf?: boolean;
+  /** #407 (`Ana_v6_Arkadaslar`): tam daire. */
+  yuvarlak?: boolean;
+  /** Baş harfin punto boyutu (verilmezse yukarıdaki kural). */
+  harfBoyutu?: number;
 };
 
 /** Açık zeminlerde (Mandalina, Buz, açık mavi) baş harf Gece; koyularda beyaz. */
 const ACIK_ZEMINLER = new Set<string>([renk.vurgu, renk.yuzey, renk.anaAcik, renk.zemin, renk.basariZemin, '#f5a524']);
 
 /** #136 (kanvas): köşeli yuvarlak kare avatar (köşe ≈ %32), Figtree 800 baş harf; fotoğraf varsa o. Varsayılan zemin Gece. */
-export function Avatar({ ad, url, boyut = 30, arkaPlan = renk.ana, kucukHarf = false }: Props) {
-  const kutu = { width: boyut, height: boyut, borderRadius: Math.round(boyut * 0.32) };
+export function Avatar({ ad, url, boyut = 30, arkaPlan = renk.ana, kucukHarf = false, yuvarlak = false, harfBoyutu }: Props) {
+  const kutu = { width: boyut, height: boyut, borderRadius: yuvarlak ? boyut / 2 : Math.round(boyut * 0.32) };
   if (url) {
     return <Foto source={{ uri: url }} style={kutu} contentFit="cover" accessibilityLabel={ad} />;
   }
@@ -27,7 +31,7 @@ export function Avatar({ ad, url, boyut = 30, arkaPlan = renk.ana, kucukHarf = f
   const metin = zemin === renk.anaAcik ? renk.ana : ACIK_ZEMINLER.has(zemin) ? renk.metin : renk.zemin;
   return (
     <View style={[s.kap, kutu, { backgroundColor: arkaPlan }]} accessibilityLabel={ad}>
-      <Text style={[s.harf, kucukHarf ? s.kucukHarf : { fontSize: boyut * 0.4 }, { color: metin }]}>{harf}</Text>
+      <Text style={[s.harf, harfBoyutu ? { fontSize: harfBoyutu } : kucukHarf ? s.kucukHarf : { fontSize: boyut * 0.4 }, { color: metin }]}>{harf}</Text>
     </View>
   );
 }
