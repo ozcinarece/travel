@@ -1,12 +1,12 @@
 // #432 2/3 (KK2, KK3, KK9, KK-ek; kanvas `Sos_v6_Paylas` ve `Sos_v6_PaylasAcik`): "Geziyi paylaş" çekmecesi.
-// Önizleme kartı (seyahat kapağı yer tutucusu, "Ayşe'nin Eskişehir gezisi", "3 gün · 12 durak · 3 kişi gezdi"), "Kişi adlarını
-// göster" (varsayılan kapalı), kilitli "Notlar, harcamalar ve sohbet" satırı, turuncu "Linki gönder". Link açıkken üstte
+// Önizleme kartı (seyahat kapağı yer tutucusu, "Ayşe'nin Eskişehir gezisi", "3 gün · 12 durak · 3 kişi gezdi"), kilitli "Notlar, harcamalar ve sohbet" satırı, turuncu "Linki gönder". Link açıkken üstte
 // "Link açık · N kez açıldı", altta kırmızı "Paylaşımı kapat" (sistem onayıyla). En altta davet akışına giden gri satır (KK9).
 // #454 inceleme: hata ve bildirimler çekmecenin içinde, "Linki gönder"in üstünde (#317 hata kutusu biçimi); çevrimdışıyken ve
 // link okunamazken düğmeler pasif, okuma hatasında "Tekrar dene". 2. inceleme: başarı mesajı kutusuz düz satır (kırmızı kutu
 // yalnız hatada), anahtar/kapatma hatasına kendi metni, çevrimdışı nedeni kutuda, iOS'ta mesaj duyurulur (#317 kalıbı).
 // 3. inceleme: iOS duyurusu yalnız çekmece açıkken (kapalıyken susar, çevrimdışı açılınca okunur); link okunurken anahtar
 // pasif ve "link yok" satırı yerine yükleniyor göstergesi; "Arkadaş ekle ›" pencere açtığı için düğme rolünde.
+// #510 (Ece kararı, 26 Kasım): "Kişi adlarını göster" anahtarı kalktı; linkte yalnız paylaşanın adı ve "{n} kişi gezdi" yazar.
 import { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
 
@@ -32,7 +32,7 @@ type Props = {
   kisiSayisi: number;
   /** KK9: "Arkadaş ekle ›" davet akışını açar. */
   onArkadasEkle: () => void;
-  /** Bağlantı yokken "Linki gönder", anahtar ve "Paylaşımı kapat" pasif. */
+  /** Bağlantı yokken "Linki gönder" ve "Paylaşımı kapat" pasif. */
   cevrimdisi: boolean;
 };
 
@@ -54,9 +54,6 @@ export function PaylasimCekmecesi({ acik, onKapat, seyahat, benimAdim, gunSayisi
   const olustur = usePaylasimOlustur(seyahat.id);
   const guncelle = usePaylasimGuncelle(seyahat.id);
   const link = paylasim.data ?? null;
-  // Link yokken anahtar yerel (varsayılan kapalı, KK2); açık linkte linkin değeri.
-  const [yerelAdlar, setYerelAdlar] = useState(false);
-  const adlarAcik = link ? link.kisi_adlari_acik : yerelAdlar;
 
   const baslik = paylasimBasligi(benimAdim, seyahat.city_label);
   const ozet = paylasimOzeti(gunSayisi, durakSayisi, kisiSayisi);
@@ -64,7 +61,7 @@ export function PaylasimCekmecesi({ acik, onKapat, seyahat, benimAdim, gunSayisi
   // Link okunamadıysa "link yok" sanılmaz: yeni link denemesi tek açık link kısıtına takılır, "Paylaşımı kapat" görünmez.
   const okumaHatasi = paylasim.isError;
   const pasif = cevrimdisi || okumaHatasi;
-  // Link okunurken "link yok" sanılmasın: anahtar pasif, durum satırının yerinde yükleniyor göstergesi.
+  // Link okunurken "link yok" sanılmasın: durum satırının yerinde yükleniyor göstergesi.
   const linkYukleniyor = paylasim.isLoading;
   const ipucu = cevrimdisi ? t('geziSayfasi.cevrimdisi.baglantiYok') : undefined;
 
@@ -88,18 +85,10 @@ export function PaylasimCekmecesi({ acik, onKapat, seyahat, benimAdim, gunSayisi
     if (zamanlayici.current) clearTimeout(zamanlayici.current);
   }, []);
 
-  const anahtar = () => {
-    const yeni = !adlarAcik;
-    setMesaj(null);
-    // Açık linkte hemen yazılır (linki açan kişi bir sonraki açılışta görür); hata olursa eski değere döner.
-    if (link) guncelle.mutate({ id: link.id, degisiklik: { kisi_adlari_acik: yeni } }, { onError: () => hata(t('paylasim.anahtarHata')) });
-    else setYerelAdlar(yeni);
-  };
-
   const gonder = async () => {
     setMesaj(null);
     try {
-      const hedef = link ?? (await olustur.mutateAsync(adlarAcik));
+      const hedef = link ?? (await olustur.mutateAsync());
       const url = paylasimLinki(hedef.token);
       const sonuc = await linkiGonder(t('paylasim.mesaj', { baslik, ozet: [t('paylasim.gun', { n: gunSayisi }), t('paylasim.durak', { n: durakSayisi })].join(' · '), link: url }), url);
       if (sonuc === 'kopyalandi') bilgi(t('davet.linkKopyalandi'));
@@ -152,22 +141,7 @@ export function PaylasimCekmecesi({ acik, onKapat, seyahat, benimAdim, gunSayisi
       </View>
 
       <View>
-        <Pressable
-          accessibilityRole="checkbox"
-          accessibilityState={{ checked: adlarAcik, disabled: mesgul || pasif || linkYukleniyor }}
-          accessibilityLabel={t('paylasim.kisiAdlari')}
-          accessibilityHint={ipucu}
-          onPress={anahtar}
-          disabled={mesgul || pasif || linkYukleniyor}
-          style={[s.satir, pasif && s.pasif]}>
-          <View style={s.satirMetin}>
-            <Text style={s.satirBaslik}>{t('paylasim.kisiAdlari')}</Text>
-            <Text style={s.alt}>{t('paylasim.kisiAdlariAlt', { n: kisiSayisi })}</Text>
-            <Text style={s.alt}>{t('paylasim.kisiAdlariUyari')}</Text>
-          </View>
-          <View testID="kisi-adlari-kutu" style={[s.kutu, adlarAcik && s.kutuSecili]}>{adlarAcik ? <Ikon ad="tik" boyut={16} renk={renk.zemin} kalinlik={3} /> : null}</View>
-        </Pressable>
-        <View style={[s.satir, s.cizgi]}>
+        <View style={s.satir}>
           <View style={s.satirMetin}>
             <Text style={s.satirBaslik}>{t('paylasim.gizli')}</Text>
             <Text style={s.alt}>{t('paylasim.gizliAlt')}</Text>
@@ -251,11 +225,8 @@ const s = StyleSheet.create({
   kartBaslik: { fontFamily: yazi.ekstra, fontSize: 16, color: renk.metin },
   alt: { fontFamily: yazi.normal, fontSize: 13, color: anaV5.ikincil },
   satir: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', minHeight: 56, gap: 12, paddingVertical: 6 },
-  cizgi: { borderTopWidth: 1, borderTopColor: anaV5.cizgi },
   satirMetin: { flex: 1, gap: 2 },
   satirBaslik: { fontFamily: yazi.kalin, fontSize: 15, color: renk.metin },
-  kutu: { width: 24, height: 24, borderRadius: 4, borderWidth: 1.5, borderColor: renk.yerTutucu, alignItems: 'center', justifyContent: 'center' },
-  kutuSecili: { backgroundColor: renk.ana, borderColor: renk.ana },
   durum: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   nokta: { width: 8, height: 8, borderRadius: 4, backgroundColor: renk.basari },
   durumKoyu: { fontFamily: yazi.kalin, color: renk.metin },

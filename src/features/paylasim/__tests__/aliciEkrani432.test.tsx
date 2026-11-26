@@ -16,6 +16,7 @@ const mockSorgu = { data: null as PaylasimOzeti, isPending: false, isError: fals
 const mockIzin = jest.fn(async (_t: string) => true);
 const mockAl = jest.fn(async (_t: string) => 'YENI');
 const mockBekleyen = jest.fn(async (_t: string) => undefined);
+const mockBekleyenSil = jest.fn(async () => undefined);
 const mockOlay = jest.fn();
 const mockRouter = { push: jest.fn(), replace: jest.fn() };
 
@@ -36,6 +37,7 @@ jest.mock('@/features/paylasim/alici', () => {
     usePaylasimOzeti: () => mockSorgu,
     haritaIzniAl: (tk: string) => mockIzin(tk),
     bekleyenPaylasimiYaz: (tk: string) => mockBekleyen(tk),
+    bekleyenPaylasimiSil: () => mockBekleyenSil(),
     usePaylasimdanAl: () => ({ mutateAsync: (tk: string) => mockAl(tk), isPending: false }),
   };
 });
@@ -49,7 +51,6 @@ const acik: PaylasimOzeti = {
   gun_sayisi: 2,
   durak_sayisi: 3,
   kisi_sayisi: 3,
-  kisi_adlari: null,
   gunler: [
     {
       gun: 1,
@@ -102,6 +103,32 @@ describe('#432 2/3b alıcı ekranı', () => {
   it('girişsiz açılışta olay yazılmaz', () => {
     render(<PaylasimEkrani />);
     expect(mockOlay).not.toHaveBeenCalled();
+  });
+
+  it('#515 inceleme 1: girişten sonra bu ekrana dönünce bekleyen link silinir (girişsizken silinmez)', () => {
+    const { rerender } = render(<PaylasimEkrani />);
+    expect(mockBekleyenSil).not.toHaveBeenCalled();
+    mockOturum.hesapli = true;
+    rerender(<PaylasimEkrani />);
+    expect(mockBekleyenSil).toHaveBeenCalledTimes(1);
+  });
+
+  it('#515 inceleme 2: logo dokunulabilir; girişliyi ana sayfaya, girişsizi girişe götürür', () => {
+    const { unmount } = render(<PaylasimEkrani />);
+    const logo = screen.getByRole('link', { name: t('paylasim.logoEtiket') });
+    fireEvent.press(logo);
+    expect(mockRouter.replace).toHaveBeenLastCalledWith('/giris');
+    unmount();
+    mockOturum.hesapli = true;
+    render(<PaylasimEkrani />);
+    fireEvent.press(screen.getByRole('link', { name: t('paylasim.logoEtiket') }));
+    expect(mockRouter.replace).toHaveBeenLastCalledWith('/(tabs)');
+  });
+
+  it('#515 inceleme 2: kapalı link ekranında da logo ana sayfa bağlantısı', () => {
+    mockSorgu.data = { kapali: true };
+    render(<PaylasimEkrani />);
+    expect(screen.getByRole('link', { name: t('paylasim.logoEtiket') })).toBeTruthy();
   });
 
   it('harita yalnız "Haritada gör"e basınca izin sorar; izin varsa harita açılır', async () => {

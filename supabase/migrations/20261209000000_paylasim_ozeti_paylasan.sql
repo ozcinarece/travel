@@ -1,5 +1,8 @@
 -- #432 2/3b: alıcı ekranı (`Sos_v6_Alici`) için paylasim_ozeti'ne üç alan: `paylasan` (linki gönderenin adı; kişi adları
 -- anahtarı kapalıyken de, Ürün kararı 21 Kasım), `id` (girişli açılış olayının hedefi) ve durak başına `dakika`.
+-- #510 (Ece kararı, 26 Kasım): "Kişi adlarını göster" anahtarı kalktı, adlar hep gizli. Özet `kisi_adlari` alanını artık hiç
+-- döndürmez; diğer üyelerin adı linki açana gitmez. İstemci `kisi_adlari_acik` kolonunu yazamaz (yetki aşağıda geri alınır).
+-- Kolonun kendisi veri silen bir migration'la ayrıca kalkacak (§4, elle çalıştırılır); burada otomatik migrate durmasın diye yok.
 -- Gövdenin geri kalanı 20261207000000 ile aynı; Google'a yeni istek yok, saklanan Google verisi değişmez.
 create or replace function public.paylasim_ozeti(p_token text) returns jsonb
 language plpgsql volatile security definer set search_path = ''
@@ -24,18 +27,13 @@ begin
     'kapali', false,
     -- Olay hedefi (girişli açılışta paylasim_acildi).
     'id', g.id,
-    -- 2/3b (Ürün kararı, 21 Kasım): başlık "Ayşe paylaştı"; linki gönderen kişinin adı anahtar kapalıyken de döner.
-    -- Diğer üyelerin adları yalnız kisi_adlari_acik iken (aşağıda).
+    -- 2/3b (Ürün kararı, 21 Kasım): başlık "Ayşe paylaştı"; yalnız linki gönderen kişinin adı döner (#510: diğerleri hiç).
     'paylasan', (select m.display_name from public.members m where m.trip_id = t.id and m.user_id = g.olusturan),
     'ad', coalesce(t.name, t.city_label),
     'sehir', t.city_label,
     'gun_sayisi', (select count(*) from public.days d where d.trip_id = t.id),
     'durak_sayisi', (select count(*) from public.stops s where s.trip_id = t.id),
     'kisi_sayisi', (select count(*) from public.members m where m.trip_id = t.id),
-    -- KK2: "Kişi adları görünsün" kapalıysa (varsayılan) ad hiç dönmez.
-    'kisi_adlari', case when g.kisi_adlari_acik then
-      (select coalesce(jsonb_agg(m.display_name order by m.joined_at), '[]'::jsonb) from public.members m where m.trip_id = t.id)
-    end,
     'gunler', coalesce((
       select jsonb_agg(jsonb_build_object('gun', d.index, 'duraklar', coalesce((
         select jsonb_agg(jsonb_build_object(
@@ -58,3 +56,6 @@ begin
   );
 end;
 $$;
+
+-- #510: anahtar kalktı; istemci kolonu ne oluşturmada ne güncellemede yazabilir (varsayılan false kalır).
+revoke insert (kisi_adlari_acik), update (kisi_adlari_acik) on public.gezi_paylasim from authenticated;

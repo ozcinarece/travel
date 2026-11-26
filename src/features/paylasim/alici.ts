@@ -20,7 +20,6 @@ export type AcikPaylasimOzeti = {
   gun_sayisi: number;
   durak_sayisi: number;
   kisi_sayisi: number;
-  kisi_adlari: string[] | null;
   gunler: PaylasimGunu[];
 };
 /** null: bilinmeyen link ("Bu link açılmıyor"); `kapali`: "Bu paylaşım kapatıldı". */

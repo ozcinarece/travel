@@ -3,6 +3,8 @@
 // Salt okunur: başlık, "N gün · N durak · N kişi gezdi", "Haritada gör" (basınca 220 px harita; günlük sınır doluysa gri satır),
 // gün çipleri, durak listesi (adı yoksa "Durak 3" + tür adı), altta "Seyahatime al". Girişsiz kişi girişe gider, sonra
 // buraya döner. Places isteği yok; harita yalnız "Haritada gör"e basınca yüklenir (açılış başına en çok 1 yükleme).
+// #515 inceleme: girişli açılışta bekleyen link silinir (girişten sonra ana sayfa bir daha buraya atmasın); logo dokunulabilir,
+// girişliyi ana sayfaya, girişsizi girişe götürür (uygulama kapalıyken açılan linkte yığında başka ekran yok).
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
@@ -17,6 +19,7 @@ import { LogoYazi } from '@/components/ui/Logo';
 import { olayYaz } from '@/features/icerik/sorgular';
 import {
   aliciBasligi,
+  bekleyenPaylasimiSil,
   bekleyenPaylasimiYaz,
   durakSatiri,
   haritaIzniAl,
@@ -63,6 +66,11 @@ function AcikEkran({ token, o, onKapandi }: { token: string; o: AcikPaylasimOzet
   const { hesapli } = useOturum();
   const kenar = useSafeAreaInsets();
   const al = usePaylasimdanAl();
+
+  // Girişten sonra bu ekrana dönen kişi için bekleyen link artık gerekmez; kalırsa ana sayfa onu yeniden buraya atar.
+  useEffect(() => {
+    if (hesapli) void bekleyenPaylasimiSil();
+  }, [hesapli]);
   const [gunSira, setGunSira] = useState(0);
   const [harita, setHarita] = useState<HaritaDurumu>('kapali');
   const [alHata, setAlHata] = useState(false);
@@ -114,9 +122,7 @@ function AcikEkran({ token, o, onKapandi }: { token: string; o: AcikPaylasimOzet
 
   return (
     <SafeAreaView edges={['top']} style={s.ekran}>
-      <View style={s.ust}>
-        <LogoYazi boyut={36} />
-      </View>
+      <UstLogo />
       <ScrollView contentContainerStyle={{ paddingBottom: altH + 16 }}>
         <View style={s.baslikSatiri}>
           <SeyahatKapagi kimlik={token} yukseklik={64} genislik={64} kose={12} />
@@ -167,6 +173,7 @@ function AcikEkran({ token, o, onKapandi }: { token: string; o: AcikPaylasimOzet
                   accessibilityRole="tab"
                   accessibilityState={{ selected: secili }}
                   onPress={() => setGunSira(i)}
+                  hitSlop={{ top: 5, bottom: 5 }}
                   style={[s.cip, secili && s.cipSecili]}>
                   <View style={[s.cipNokta, { backgroundColor: paylasimGunRengi(g.gun) }]} />
                   <Text style={[s.cipMetin, secili && s.cipMetinSecili]}>{t('paylasim.gunCip', { n: g.gun })}</Text>
@@ -181,7 +188,7 @@ function AcikEkran({ token, o, onKapandi }: { token: string; o: AcikPaylasimOzet
           {duraklar.map((d, i) => {
             const satir = durakSatiri(d, i + 1);
             return (
-              <View key={i} style={[s.durak, i < duraklar.length - 1 && s.durakCizgi]} accessible accessibilityLabel={`${i + 1}. ${satir.ust}, ${satir.alt}`}>
+              <View key={i} style={[s.durak, i < duraklar.length - 1 && s.durakCizgi]} accessible accessibilityLabel={d.ad ? `${i + 1}. ${satir.ust}, ${satir.alt}` : `${satir.ust}, ${satir.alt}`}>
                 <View style={[s.no, { backgroundColor: paylasimGunRengi(gunNo) }]}>
                   <Text style={s.noMetin}>{i + 1}</Text>
                 </View>
@@ -229,13 +236,27 @@ function KapaliEkran({ baslik, metin }: { baslik: string; metin: string }) {
   return <BilgiEkrani ikon="kirikBag" baslik={baslik} metin={metin} dugme={t('paylasim.hazirGeziler')} onDugme={git} />;
 }
 
+/** Logo (görünüm aynı): girişli kişiyi ana sayfaya, girişsizi girişe götürür. */
+function UstLogo() {
+  const { hesapli } = useOturum();
+  const git = () => {
+    acilisKarariniKapat();
+    router.replace(hesapli ? '/(tabs)' : '/giris');
+  };
+  return (
+    <View style={s.ust}>
+      <Pressable accessibilityRole="link" accessibilityLabel={t('paylasim.logoEtiket')} onPress={git} hitSlop={{ top: 4, bottom: 4, left: 4, right: 4 }} style={s.logo}>
+        <LogoYazi boyut={36} />
+      </Pressable>
+    </View>
+  );
+}
+
 function BilgiEkrani({ ikon, baslik, metin, dugme, onDugme, mesgul }: { ikon: IkonAdi; baslik: string; metin: string; dugme: string; onDugme: () => void; mesgul?: boolean }) {
   const kenar = useSafeAreaInsets();
   return (
     <SafeAreaView edges={['top']} style={s.ekran}>
-      <View style={s.ust}>
-        <LogoYazi boyut={36} />
-      </View>
+      <UstLogo />
       <View style={s.bilgi}>
         <View style={s.bilgiIkon} accessible={false} importantForAccessibility="no-hide-descendants">
           <Ikon ad={ikon} boyut={30} renk={anaV5.ikincil} kalinlik={2} />
@@ -262,6 +283,7 @@ function BilgiEkrani({ ikon, baslik, metin, dugme, onDugme, mesgul }: { ikon: Ik
 const s = StyleSheet.create({
   ekran: { flex: 1, backgroundColor: renk.zemin },
   ust: { height: 48, paddingHorizontal: 16, flexDirection: 'row', alignItems: 'center' },
+  logo: { minHeight: 44, justifyContent: 'center' },
   baslikSatiri: { paddingTop: 8, paddingHorizontal: 16, paddingBottom: 14, flexDirection: 'row', alignItems: 'center', gap: 12 },
   baslikMetinleri: { flex: 1, gap: 2 },
   paylasti: { fontFamily: yazi.kalin, fontSize: 13, color: anaV5.adim },

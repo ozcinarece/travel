@@ -3943,10 +3943,10 @@ begin
   assert not (o ->> 'kapali')::boolean, '#432 KK5: açık link';
   assert o ->> 'ad' = 'Paylaşılan Roma' and (o ->> 'gun_sayisi')::int = 2 and (o ->> 'durak_sayisi')::int = 3, '#432 KK2: ad, gün, durak: ' || m;
   assert (o ->> 'kisi_sayisi')::int = 2, '#432 KK2: N kişi gezdi';
-  assert o -> 'kisi_adlari' = 'null'::jsonb or o -> 'kisi_adlari' is null, '#432 KK2: kişi adları kapalıyken dönmez';
-  -- 2/3b (Ürün kararı, 21 Kasım): anahtar kapalıyken yalnız paylaşanın (A, Ece) adı döner, diğer üyenin (B, Berk) adı dönmez.
-  assert o ->> 'paylasan' = 'Ece', '#432 2/3b: paylaşanın adı anahtar kapalıyken de döner: ' || m;
-  assert position('Berk' in m) = 0, '#432 2/3b: diğer üyenin adı anahtar kapalıyken dönmez';
+  assert not (o ? 'kisi_adlari'), '#510: kişi adları alanı hiç dönmez';
+  -- 2/3b (Ürün kararı, 21 Kasım): yalnız paylaşanın (A, Ece) adı döner, diğer üyenin (B, Berk) adı dönmez.
+  assert o ->> 'paylasan' = 'Ece', '#432 2/3b: paylaşanın adı döner: ' || m;
+  assert position('Berk' in m) = 0, '#510: diğer üyenin adı dönmez';
   assert (o ->> 'id')::uuid is not null, '#432 2/3b: olay hedefi (paylaşım kimliği) döner';
   assert o #>> '{gunler,0,duraklar,0,dakika}' is not null, '#432 2/3b: durak süresi döner: ' || m;
   assert position('gizli not' in m) = 0, '#432 KK2: not dönmez';
@@ -3959,11 +3959,21 @@ begin
 end $$;
 reset role;
 do $$ begin assert (select acilma_sayisi from public.gezi_paylasim where token = current_setting('test.paylasim_token')) = 1, '#432 KK8: girişsiz açılış sayacı +1'; end $$;
--- Kişi adları açılınca adlar döner (oluşturan değiştirir).
+-- #510: anahtar kalktı. Oluşturan da kolonu yazamaz; eski bir satırda kolon açık kalmış olsa bile adlar dönmez.
 set role authenticated;
 select pg_temp.as_user(:PA);
-update public.gezi_paylasim set kisi_adlari_acik = true;
-do $$ begin assert public.paylasim_ozeti(current_setting('test.paylasim_token')) -> 'kisi_adlari' = '["Ece", "Berk"]'::jsonb, '#432 KK2: kişi adları açıkken döner'; end $$;
+select pg_temp.hata_bekle($$update public.gezi_paylasim set kisi_adlari_acik = true$$, '42501');
+select pg_temp.hata_bekle($$insert into public.gezi_paylasim (trip_id, kisi_adlari_acik) values ('43200000-0000-4000-8000-000000000001', true)$$, '42501');
+reset role;
+update public.gezi_paylasim set kisi_adlari_acik = true where token = current_setting('test.paylasim_token');
+set role anon;
+do $$
+declare m text := public.paylasim_ozeti(current_setting('test.paylasim_token'))::text;
+begin
+  assert position('kisi_adlari' in m) = 0 and position('Berk' in m) = 0, '#510: kolon açıkken de kişi adları dönmez: ' || m;
+end $$;
+reset role;
+update public.gezi_paylasim set kisi_adlari_acik = false where token = current_setting('test.paylasim_token');
 
 -- Harita izni: günde 200 yükleme.
 reset role;
@@ -4007,13 +4017,15 @@ do $$ begin assert (select kaynak_paylasim from public.trips where id = current_
 -- PRD §7: 30 günü geçen Google koordinatı girişsiz özette dönmez, Seyahatime al'da kopyalanmaz (place_id ve damga kalır).
 reset role;
 update public.places set google_fetched_at = now() - interval '31 days' where id = '43200000-0000-4000-8000-000000000011';
+-- #515 inceleme 5: 29 günlük koordinat sınırın içinde, döner.
+update public.places set google_fetched_at = now() - interval '29 days' where id = '43200000-0000-4000-8000-000000000012';
 set role anon;
 do $$
 declare o jsonb := public.paylasim_ozeti(current_setting('test.paylasim_token'));
 begin
   assert o #>> '{gunler,0,duraklar,1,ad}' = 'Kolezyum', 'ön koşul: eski damgalı durak Kolezyum';
   assert o #> '{gunler,0,duraklar,1,lat}' = 'null'::jsonb and o #> '{gunler,0,duraklar,1,lng}' = 'null'::jsonb, '#435: 31 günlük koordinat null: ' || o::text;
-  assert (o #>> '{gunler,0,duraklar,0,lat}')::numeric = 41.90, '#435: taze koordinat döner';
+  assert (o #>> '{gunler,0,duraklar,0,lat}')::numeric = 41.90 and (o #>> '{gunler,0,duraklar,0,lng}')::numeric = 12.45, '#515: 29 günlük koordinat döner: ' || o::text;
 end $$;
 reset role;
 set role authenticated;
