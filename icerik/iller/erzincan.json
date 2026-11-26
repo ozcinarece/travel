@@ -175,7 +175,7 @@
       ],
       "ilce": "Kemaliye",
       "merkeze_km": 100,
-      "neden": "Fırat'ta tekneyle kanyon gezisi, ardından suyun üstünde 200 m'lik iki zipline hattı"
+      "neden": "Fırat'ta tekneyle kanyon gezisi, suyun üstünde 200 m'lik iki zipline; yalnız yazın"
     },
     {
       "sira": 15,
@@ -310,21 +310,10 @@
       ],
       "ilce": "Kemaliye",
       "merkeze_km": 102,
-      "neden": "Osman Özçelik'in odun fırını; aylarca bozulmayan ince Eğin ekmeği köyde yalnız burada"
+      "neden": "Tecer'in köyünde odun fırınında pişen ince Eğin ekmeği; kuru tutulunca aylarca dayanır"
     },
     {
       "sira": 26,
-      "ad": "Bozkurt Otel restoranı (Kemaliye)",
-      "kategori": "yemek",
-      "amaclar": [
-        "lezzet"
-      ],
-      "ilce": "Kemaliye",
-      "merkeze_km": 101,
-      "neden": "Eğin kavurması ve baharda közde pişen çaşır mantarıyla anılan otel lokantası"
-    },
-    {
-      "sira": 27,
       "ad": "Kemaliye kapı tokmağı atölyeleri",
       "kategori": "aktivite",
       "amaclar": [
@@ -336,7 +325,7 @@
       "neden": "Altı kuşaktır süren tokmak yapımı; büyük ve küçük tokmak sesi gelenin işini belli eder"
     },
     {
-      "sira": 28,
+      "sira": 27,
       "ad": "Kadıköy Kilisesi (Refahiye)",
       "kategori": "tarih",
       "amaclar": [
@@ -348,7 +337,7 @@
       "place_id": "ChIJYdw-ogUDe0ARgIjwI1ogDnI"
     },
     {
-      "sira": 29,
+      "sira": 28,
       "ad": "Acemoğlu Boğazı Köprüsü",
       "kategori": "tarih",
       "amaclar": [
@@ -359,7 +348,7 @@
       "neden": "Erzincan–Kemah yolunda Karasu üstünde tek kemerli kesme taş köprü; yanında şehit anıtı"
     },
     {
-      "sira": 30,
+      "sira": 29,
       "ad": "Turistik Doğu Ekspresi İliç molası",
       "kategori": "aktivite",
       "amaclar": [
