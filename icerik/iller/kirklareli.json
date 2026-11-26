@@ -1,0 +1,324 @@
+{
+  "il": "Kırklareli",
+  "slug": "kirklareli",
+  "guncelleme": "2026-11-24",
+  "oneriler": [
+    {
+      "sira": 1,
+      "ad": "İğneada Longoz Ormanları Milli Parkı",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas",
+        "cocuklu"
+      ],
+      "ilce": "Demirköy",
+      "merkeze_km": 64,
+      "neden": "Kökleri suda duran subasar orman; göller, yürüyüş yolları ve kuş gözlem kulesi",
+      "place_id": "ChIJi1ttVQDnoEAROYSDQ0Mach0"
+    },
+    {
+      "sira": 2,
+      "ad": "Dupnisa Mağarası",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Demirköy",
+      "merkeze_km": 30,
+      "neden": "Sarpdere'de iki katlı, yeraltı nehirli mağara; 2003'ten beri ziyarete açık"
+    },
+    {
+      "sira": 3,
+      "ad": "Hızırbey Külliyesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "1383 yapımı cami, karşısında hamam ve hamama bitişik on iki dükkânlı arasta",
+      "place_id": "ChIJzQ6KTahTp0ARzAGEAgxvzIU"
+    },
+    {
+      "sira": 4,
+      "ad": "Kırklareli köftesi",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Kıvırcık koyun etinden yapılan şehrin köftesi; merkezdeki köftecilerde yenir"
+    },
+    {
+      "sira": 5,
+      "ad": "Kıyıköy",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Vize",
+      "merkeze_km": 73,
+      "neden": "Karadeniz kıyısında, iki derenin denize kavuştuğu sur kapılı balıkçı köyü",
+      "place_id": "ChIJu75BI_SJoEARua1XEUjPZ-g"
+    },
+    {
+      "sira": 6,
+      "ad": "Kırklareli Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "1894'te belediye binası olarak yapıldı; Aşağıpınar buluntuları ve Vize kabartmaları",
+      "place_id": "ChIJAUlXv0FTp0ARjOkav2cPI80"
+    },
+    {
+      "sira": 7,
+      "ad": "Vize Antik Tiyatrosu",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Vize",
+      "merkeze_km": 48,
+      "neden": "Türkiye Trakyası'nda bulunan tek antik tiyatro; Roma dönemi oturma sıraları",
+      "place_id": "ChIJ-0Rd356coEARE8CyVvT_800"
+    },
+    {
+      "sira": 8,
+      "ad": "Vize Küçük Ayasofya (Gazi Süleyman Paşa Camii)",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Vize",
+      "merkeze_km": 48,
+      "neden": "Bizans kilisesi olarak yapılıp Osmanlı'da camiye çevrilen yapı",
+      "place_id": "ChIJdaqOxZ2coEARe5xUaTVxS_4"
+    },
+    {
+      "sira": 9,
+      "ad": "Ahmetbey köftesi",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Lüleburgaz",
+      "merkeze_km": 42,
+      "neden": "Coğrafi işaretli; katkısız etle kömür ateşinde pişen köfte"
+    },
+    {
+      "sira": 10,
+      "ad": "Kırklareli hardaliyesi",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Üzüm suyu, hardal tohumu ve vişne yaprağıyla mayalanan alkolsüz içecek; tescilli"
+    },
+    {
+      "sira": 11,
+      "ad": "Fatih Dökümhanesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Demirköy",
+      "merkeze_km": 46,
+      "neden": "İstanbul kuşatmasının toplarının döküldüğü anlatılan demir dökümhanesinin kalıntısı",
+      "place_id": "ChIJr1oRsSjAoEARGgAmlxPWsmc"
+    },
+    {
+      "sira": 12,
+      "ad": "Mert Gölü kano turu",
+      "kategori": "aktivite",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Demirköy",
+      "merkeze_km": 64,
+      "neden": "Longozun içindeki gölde kanoyla ağaç gövdelerinin arasından geçilir",
+      "place_id": "ChIJi09rMNnooEARkDSbzKLBW-A"
+    },
+    {
+      "sira": 13,
+      "ad": "Kırklareli Kültür ve Sanat Evi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Peterkof Konağı'nda köy düğünü, peynir ve pekmez yapımını anlatan etnografya evi",
+      "place_id": "ChIJE4RdfAtTp0AROit5wSzuR1c"
+    },
+    {
+      "sira": 14,
+      "ad": "Sokullu Mehmed Paşa Külliyesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Lüleburgaz",
+      "merkeze_km": 42,
+      "neden": "Mimar Sinan'ın Lüleburgaz'daki külliyesi; cami, medrese ve arasta bir arada",
+      "place_id": "ChIJv9OL37ektBQR6aycIANzKsQ",
+      "osm": "way/1029103213"
+    },
+    {
+      "sira": 15,
+      "ad": "Kıyıköy'de balık",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet",
+        "yavas"
+      ],
+      "ilce": "Vize",
+      "merkeze_km": 73,
+      "neden": "Limandaki balıkçılarda o gün tutulan Karadeniz balığı"
+    },
+    {
+      "sira": 16,
+      "ad": "Aşağıpınar Höyüğü",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 3,
+      "neden": "Yeniden yapılmış üç Neolitik evli açık hava müzesi; gitmeden Kırklareli Müzesi'ne sorun"
+    },
+    {
+      "sira": 17,
+      "ad": "Mahya Dağı",
+      "kategori": "manzara",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 30,
+      "neden": "Yıldız Dağları'nın 1031 metrelik zirvesi, Türkiye Trakyası'nın en yüksek noktası",
+      "place_id": "ChIJf3AE-Rq5oEAR8jGgbR7lSbY"
+    },
+    {
+      "sira": 18,
+      "ad": "Saka Gölü",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Demirköy",
+      "merkeze_km": 62,
+      "neden": "Longoz ormanının içindeki göllerden biri; Saka Gölü Tabiat Koruma Alanı"
+    },
+    {
+      "sira": 19,
+      "ad": "Beğendik",
+      "kategori": "manzara",
+      "amaclar": [
+        "yavas"
+      ],
+      "ilce": "Demirköy",
+      "merkeze_km": 70,
+      "neden": "Sınır köyünden dere ağzının karşısındaki Bulgar köyü Rezova görünür",
+      "place_id": "ChIJKQMl583goEARTpSaRB9ttLo"
+    },
+    {
+      "sira": 20,
+      "ad": "Cedid Ali Paşa Camii",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Babaeski",
+      "merkeze_km": 36,
+      "neden": "Babaeski'nin ortasında, Mimar Sinan'a atfedilen tek kubbeli cami",
+      "place_id": "ChIJB4u2gJFesxQRJS-nuEGtk6g",
+      "osm": "way/280691731"
+    },
+    {
+      "sira": 21,
+      "ad": "İğneada kuş gözlemi",
+      "kategori": "aktivite",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Demirköy",
+      "merkeze_km": 64,
+      "neden": "Göç yolundaki longozda iki yüzü aşkın kuş türü kaydedildi; gözlem kulesi var"
+    },
+    {
+      "sira": 22,
+      "ad": "Limanköy",
+      "kategori": "manzara",
+      "amaclar": [
+        "yavas",
+        "lezzet"
+      ],
+      "ilce": "Demirköy",
+      "merkeze_km": 68,
+      "neden": "İğneada'nın kuzeyindeki küçük liman; balık lokantaları ve gün batımı",
+      "place_id": "ChIJKx6hvZLloEARgiXsj-tTMkY"
+    },
+    {
+      "sira": 23,
+      "ad": "Aya Nikola Manastırı",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Vize",
+      "merkeze_km": 73,
+      "neden": "Kıyıköy'ün dışında kayaya oyulmuş Bizans manastırı",
+      "place_id": "ChIJlcwage2JoEARFYtSf9dMuBY"
+    },
+    {
+      "sira": 24,
+      "ad": "Erikli Gölü",
+      "kategori": "doga",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Demirköy",
+      "merkeze_km": 63,
+      "neden": "İğneada kıyısında, kumsalın hemen arkasındaki longoz gölü",
+      "place_id": "ChIJOV5YPwDpoEARpj8SzfomvEc"
+    },
+    {
+      "sira": 25,
+      "ad": "Kırklareli bağ rotası",
+      "kategori": "aktivite",
+      "amaclar": [
+        "lezzet",
+        "yavas"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 10,
+      "neden": "Istranca eteğindeki bağ evlerinde şarap ve üzüm tadımı"
+    },
+    {
+      "sira": 26,
+      "ad": "Vize Kalesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Vize",
+      "merkeze_km": 48,
+      "neden": "Antik tiyatronun hemen üstünde, Bizans surlarından kalan kale",
+      "place_id": "ChIJKSbi7Z2coEARojN69Z0QeXo"
+    }
+  ]
+}

@@ -135,12 +135,46 @@ export function gezmeSirasi(mekanlar: PlanMekani[], baslangic: Konum | null = nu
 /** Alt çubuk özeti (#139 KK4): "N mekan · K bölge · ~S saat" — S tek sırada ziyaret + yol, saate yuvarlanır (≈, en az 1). */
 export function secimOzeti(mekanlar: PlanMekani[]): { mekan: number; bolge: number; saat: number } {
   if (mekanlar.length === 0) return { mekan: 0, bolge: 0, saat: 0 };
+  const { dk, bolgeSayisi } = secimSuresi(mekanlar);
+  return { mekan: mekanlar.length, bolge: bolgeSayisi, saat: Math.max(1, Math.round(dk / 60)) };
+}
+
+/** Tek gezme sırasında ziyaret + yol (dk). */
+function secimSuresi(mekanlar: PlanMekani[]): { dk: number; bolgeSayisi: number } {
   const { sira, bolgeSayisi } = gezmeSirasi(mekanlar);
   let dk = 0;
   sira.forEach((m, i) => {
     dk += m.dakika + (i > 0 ? bacakVarsa(sira[i - 1], m).dk : 0);
   });
-  return { mekan: mekanlar.length, bolge: bolgeSayisi, saat: Math.max(1, Math.round(dk / 60)) };
+  return { dk, bolgeSayisi };
+}
+
+/**
+ * #401 (`Ekran07cIlOnerileri` A–B alt çubuğu): seçimin kaç gün doldurduğu, bir ondalıkla ("2 günün 1,2'si dolu") ve gün
+ * çubuklarının doluluğu (1. gün dolunca 2. gün; her biri 0–1). Gün kapasitesi `GUN_KAPASITESI_DK`.
+ */
+export function gunDolulugu(mekanlar: PlanMekani[], gunSayisi: number): { dolu: number; cubuklar: number[] } {
+  const dk = mekanlar.length ? secimSuresi(mekanlar).dk : 0;
+  const dolu = Math.round((dk / GUN_KAPASITESI_DK) * 10) / 10;
+  const kesin = dk / GUN_KAPASITESI_DK;
+  return { dolu, cubuklar: Array.from({ length: Math.max(0, gunSayisi) }, (_, i) => Math.min(1, Math.max(0, kesin - i))) };
+}
+
+// Son okunan sözcüğün ünlüsüne göre iyelik eki (bir → 'i, iki → 'si, üç → 'ü, altı → 'sı, dokuz → 'u …).
+const BIRLER = ["'ı", "'i", "'si", "'ü", "'ü", "'i", "'sı", "'si", "'i", "'u"] as const;
+const ONLAR = ['', "'u", "'si", "'u", "'ı", "'si", "'ı", "'i", "'i", "'ı"] as const;
+
+/** "1,2'si", "1,6'sı", "1'i", "0,5'i", "10'u", "20'si": sayı Türkçe ondalıkla yazılır, ek okunuşa göre çekimlenir. */
+export function gunEki(sayi: number): string {
+  const metin = String(Math.round(sayi * 10) / 10).replace('.', ',');
+  const rakamlar = metin.replace(/\D/g, '');
+  const son = Number(rakamlar[rakamlar.length - 1] ?? 0);
+  // Tam sayının son basamağı 0 ise onlar basamağı okunur (10 "on", 20 "yirmi"); 100 ve üstü "yüz" → 'ü.
+  if (son === 0 && !metin.includes(',') && rakamlar.length >= 2) {
+    if (rakamlar.length >= 3 && rakamlar.endsWith('00')) return `${metin}'ü`;
+    return `${metin}${ONLAR[Number(rakamlar[rakamlar.length - 2])]}`;
+  }
+  return `${metin}${BIRLER[son]}`;
 }
 
 /**

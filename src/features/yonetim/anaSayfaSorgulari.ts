@@ -1,12 +1,13 @@
 // #109 ana sayfa düzeni — taslak bölümler (admin), son yayın, yayınla. Her düzenleme anında taslağa yazılır; uygulama
 // yalnız "Yayınla" sonrası görür.
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 
+import { useKesfetAkisi } from '@/features/icerik/kesfetAkisi';
 import { supabase } from '@/lib/supabase';
 
-import type { TaslakBolum } from './anaSayfa';
-import { hataVer } from './geziSorgulari';
+import { yayindakiGeziler, type TaslakBolum } from './anaSayfa';
+import { hataVer, useYonetimGezileri, useYonetimSehirleri } from './geziSorgulari';
 
 const TASLAK = ['yonetim', 'ana-sayfa', 'taslak'] as const;
 const YAYIN = ['yonetim', 'ana-sayfa', 'yayin'] as const;
@@ -68,5 +69,24 @@ export function useBolumIslemleri() {
     sirala: (bolumler: TaslakBolum[]) => yap(() => hataVer(supabase.from('ana_sayfa_bolumleri').upsert(bolumler.map((b, i) => ({ ...b, sira: i + 1 }))))),
     /** KK5: taslağı canlıya çıkarır. */
     yayinla: () => yap(async () => (await hataVer(supabase.rpc('ana_sayfa_yayinla'))) as string),
+  };
+}
+
+/**
+ * #438 inceleme 1 ve 6: uygulamanın Keşfet akışı, panelde de yalnız yayındaki gezilerle. Panelde admin taslak gezileri de
+ * okur (`geziler_admin`); uygulama yalnız yayındakileri görür (`geziler_select`). Akış yayın durumuna göre süzülür.
+ */
+export function useYayindakiAkis() {
+  const akis = useKesfetAkisi();
+  const geziler = useYonetimGezileri();
+  const sehirler = useYonetimSehirleri();
+  const data = useMemo(
+    () => (akis.data && geziler.data && sehirler.data ? yayindakiGeziler(akis.data, geziler.data, sehirler.data) : undefined),
+    [akis.data, geziler.data, sehirler.data],
+  );
+  return {
+    data,
+    isPending: akis.isPending || geziler.isPending || sehirler.isPending,
+    isError: akis.isError || geziler.isError || sehirler.isError,
   };
 }

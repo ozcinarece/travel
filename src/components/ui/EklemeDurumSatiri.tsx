@@ -17,8 +17,11 @@ export function useIosDuyuru(metin: string | null | undefined) {
   }, [metin]);
 }
 
-/** `yeniden`: "Tekrar dene" satırı gösteren bileşenin kendi deneme yolundan geçsin (#388 inceleme; bekleme kilidi atlanmaz). */
-export function EklemeDurumSatiri({ durum, metinStili, yeniden }: { durum: EklemeDurumu; metinStili?: TextStyle; yeniden?: () => void }) {
+/**
+ * `yeniden`: "Tekrar dene" satırı gösteren bileşenin kendi deneme yolundan geçsin (#388 inceleme; bekleme kilidi atlanmaz).
+ * `pasif`: yeniden deneme sürerken "Tekrar dene" basılamaz (#411 inceleme; art arda basılmasın).
+ */
+export function EklemeDurumSatiri({ durum, metinStili, yeniden, pasif }: { durum: EklemeDurumu; metinStili?: TextStyle; yeniden?: () => void; pasif?: boolean }) {
   useIosDuyuru(durum.metin);
   const metin = (
     <Text style={[durum.tur === 'bilgi' ? s.bilgi : s.hata, metinStili, durum.tur === 'bilgi' && { color: anaV5.ikincil }, durum.tekrar && { flex: 1 }]} accessibilityLiveRegion="polite">
@@ -29,7 +32,7 @@ export function EklemeDurumSatiri({ durum, metinStili, yeniden }: { durum: Eklem
   return (
     <View style={s.satir}>
       {metin}
-      <Pressable accessibilityRole="button" onPress={yeniden ?? durum.tekrar} hitSlop={TEKRAR_HIT_SLOP}>
+      <Pressable accessibilityRole="button" onPress={yeniden ?? durum.tekrar} disabled={pasif} accessibilityState={pasif ? { disabled: true } : undefined} hitSlop={TEKRAR_HIT_SLOP} style={pasif ? { opacity: 0.4 } : undefined}>
         <Text style={s.tekrar}>{t('ekleme.tekrarDene')}</Text>
       </Pressable>
     </View>

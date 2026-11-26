@@ -64,6 +64,8 @@ export const VARSAYILAN_DAKIKA = {
   viewpoint: 20,
   scenic_point: 20,
   restaurant: 75,
+  // #440: lokanta (self servis) restoran kadar.
+  cafeteria: 75,
   cafe: 30,
   coffee_shop: 30,
   bar: 90,
@@ -338,7 +340,8 @@ export function kapaliGunNo(ad) {
   return k in GUNLER ? GUNLER[k] : null;
 }
 
-const YEMEK = /(^|_)(restaurant|food_court|meal_takeaway|diner|steak_house|brunch_restaurant|kebab_shop)$|^restaurant$/;
+// #440: `cafeteria` (lokanta, self servis) yemek; `cafe` ve `coffee_shop` bilerek dışarıda.
+const YEMEK = /(^|_)(restaurant|food_court|meal_takeaway|diner|steak_house|brunch_restaurant|kebab_shop|cafeteria)$|^restaurant$/;
 export const yemekMi = (tip) => !!tip && YEMEK.test(tip);
 
 /**

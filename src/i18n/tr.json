@@ -295,7 +295,9 @@
     "eklendi": "{n} mekan {seyahat} listesine eklendi",
     "eklendiZaten": "{n} mekan eklendi · {zaten} zaten listedeydi",
     "hepsiListede": "Hepsi zaten {seyahat} listesinde",
-    "diger": "Diğer"
+    "diger": "Diğer",
+    "yuklenemedi": "Kaydettiklerin yüklenemedi.",
+    "baglantiYok": "Bağlantı yok. Bağlanınca tekrar dene."
   },
   "rehber": {
     "bolum": {
@@ -718,7 +720,15 @@
       "haritaBuyut": "Haritayı büyüt",
       "haritaKapat": "Haritayı kapat",
       "planHata": "Plan kurulamadı. Tekrar dene.",
-      "kmUzak": "{ad} · {km} km"
+      "kmUzak": "{ad} · {km} km",
+      "altIl": "{il} · seçtiklerini günlere biz dağıtalım.",
+      "ozetYer": "{n} yer",
+      "ozetDoluluk": "· {gun} günün {dolu} dolu",
+      "ozetDolulukTam": "· {gun} gün dolu",
+      "ozetDoldu": "{gun} gün doldu · ",
+      "ozetSigmiyor": "{k} yer sığmıyor",
+      "dolulukEtiketTam": "{gun} gün dolu",
+      "dolulukEtiketTasma": "{gun} gün doldu, {k} yer sığmıyor"
     },
     "kapat": "Kapat",
     "sayac": "{n}/{toplam}"
@@ -795,6 +805,8 @@
       "hazirGeziler": "Hazır geziler",
       "bannerSayi": "{n} hazır gezi ›",
       "bannerEtiket": "{baslik}, {n} hazır gezi",
+      "bannerGeziyiGor": "Geziyi gör ›",
+      "bannerGeziyiGorEtiket": "{baslik}, geziyi gör",
       "amacRafi": {
         "kultur_tarih": "Kültür ve tarih için",
         "lezzet": "Lezzet için",
@@ -1353,5 +1365,63 @@
     "baglantiYokIpucu": "Bağlantı yok; bağlanınca eklenebilir.",
     "tekrarDene": "Tekrar dene",
     "hepsiListede": "Bu mekanların hepsi zaten listende."
+  },
+  "ilOneri": {
+    "hepsi": "Hepsi",
+    "kategoriEtiketi": "Kategori",
+    "kategori": {
+      "doga": "Doğa",
+      "yemek": "Yemek",
+      "tatli_kahve": "Tatlı ve kahve",
+      "muze": "Müze",
+      "tarih": "Tarih",
+      "carsi": "Çarşı",
+      "aktivite": "Aktivite",
+      "manzara": "Manzara"
+    },
+    "km": "{km} km",
+    "yakindaki": "Yakındaki diğer yerler",
+    "googleAtif": "Sonuçlar: Google",
+    "ekle": "{ad}, listeye ekle",
+    "listende": "{ad} listende, çıkarmak için dokun",
+    "eylemEkle": "Listeye ekle",
+    "eylemCikar": "Listeden çıkar",
+    "yakinHata": "Yakındaki yerler alınamadı.",
+    "yakinYukleniyor": "Yakındaki yerler yükleniyor",
+    "listeYukleniyor": "Öneriler yükleniyor",
+    "tekrarDene": "Tekrar dene"
+  },
+  "paylasim": {
+    "menu": "Geziyi paylaş",
+    "baslik": "Geziyi paylaş",
+    "kapat": "Kapat",
+    "onizleme": "Arkadaşın bunu görecek",
+    "kimin": "{ad} {sehir} gezisi",
+    "kiminsiz": "{sehir} gezisi",
+    "gun": "{n} gün",
+    "durak": "{n} durak",
+    "kisi": "{n} kişi gezdi",
+    "kisiAdlari": "Kişi adlarını göster",
+    "kisiAdlariAlt": "Kapalıyken yalnız “{n} kişi gezdi” yazar",
+    "kisiAdlariUyari": "Seyahatteki herkesin adı linki açan kişiye görünür.",
+    "gizli": "Notlar, harcamalar ve sohbet",
+    "gizliAlt": "Hiçbir zaman paylaşılmaz",
+    "kilitli": "Kilitli",
+    "linkiGonder": "Linki gönder",
+    "linkAlt": "Linki olan herkes geziyi görür, düzenleyemez.",
+    "linkAcik": "Link açık",
+    "acildi": "{n} kez açıldı",
+    "paylasimiKapat": "Paylaşımı kapat",
+    "kapatOnayMetin": "Link kapanır, açan kişiler geziyi göremez.",
+    "kapatEvet": "Kapat",
+    "arkadasSoru": "Birlikte planlamak mı istiyorsun?",
+    "arkadasEkle": "Arkadaş ekle ›",
+    "mesaj": "{baslik} · {ozet}\n{link}",
+    "hata": "Link şu an oluşturulamadı. Biraz sonra yeniden dene.",
+    "anahtarHata": "Ayar kaydedilemedi. Biraz sonra yeniden dene.",
+    "kapatHata": "Paylaşım kapatılamadı, link hâlâ açık. Biraz sonra yeniden dene.",
+    "okumaHata": "Paylaşım durumu alınamadı.",
+    "tekrarDene": "Tekrar dene",
+    "kapatildi": "Paylaşım kapatıldı"
   }
 }

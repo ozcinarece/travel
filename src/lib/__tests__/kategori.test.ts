@@ -1,6 +1,7 @@
 import { describe, expect, it } from '@jest/globals';
 
 import { bilinenKategori, kategoriEtiketi, sureMetni, varsayilanDakika } from '@/lib/kategori';
+import { pinIkonu, pinKategorisi } from '@/lib/pinIkonu';
 
 describe('kategori ve süre (PRD §6)', () => {
   it('varsayılan dakika tabloya göre, bilinmeyen 45', () => {
@@ -43,6 +44,14 @@ describe('kategori ve süre (PRD §6)', () => {
       expect(etiket).not.toMatch(/_/);
       expect(etiket).not.toBe(tip.replace(/_/g, ' '));
     }
+  });
+
+  it('#440: cafeteria Lokanta, 75 dk, restoranla aynı kategori ve ikon', () => {
+    expect(kategoriEtiketi('cafeteria')).toBe('Lokanta');
+    expect(varsayilanDakika('cafeteria')).toBe(75);
+    expect(pinKategorisi('cafeteria')).toBe(pinKategorisi('restaurant'));
+    expect(pinIkonu('cafeteria')).toBe(pinIkonu('restaurant'));
+    expect(pinKategorisi('cafe')).toBe('kafe');
   });
 
   it('süre metni', () => {

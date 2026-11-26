@@ -2,7 +2,7 @@
 // kartı (Seyahatime al yok), Yerler'de sade satır; ♥ → kayıttan çıkar + "Geri al"; boş halde "Keşfet'e göz at".
 import { beforeEach, describe, expect, it, jest } from '@jest/globals';
 import { act, fireEvent, render, screen } from '@testing-library/react-native';
-import { AccessibilityInfo, Platform } from 'react-native';
+import { AccessibilityInfo, ActivityIndicator, Platform } from 'react-native';
 
 import KaydettiklerimEkrani from '../../../app/(tabs)/kaydettiklerim';
 
@@ -12,15 +12,21 @@ const mockVeri = {
   geziler: [] as object[],
   yerler: [] as object[],
   mutate: jest.fn(),
+  // #411: gezi sorgusunun hali; undefined = başarılı.
+  geziSorgu: undefined as undefined | { data?: object[]; isPending?: boolean; isError?: boolean; isRefetching?: boolean; error?: unknown },
+  // #411 inceleme: kayıt listesi sorgusunun hali; undefined = başarılı.
+  kayitSorgu: undefined as undefined | { data?: Kayit[]; isError?: boolean; isRefetching?: boolean; error?: unknown },
+  refetch: jest.fn(),
 };
 
 jest.mock('react-native-safe-area-context', () => jest.requireActual<{ default: object }>('react-native-safe-area-context/jest/mock').default);
 jest.mock('@/lib/supabase', () => ({ supabase: {} }));
+jest.mock('@/lib/hataRaporu', () => ({ hataBildir: jest.fn() }));
 jest.mock('@/features/icerik/fotolar', () => ({ useIcerikCanli: () => ({ data: undefined }) }));
 jest.mock('@/features/icerik/sorgular', () => ({
-  useKaydedilenler: () => ({ data: mockVeri.kayitlar }),
+  useKaydedilenler: () => (mockVeri.kayitSorgu ? { refetch: mockVeri.refetch, ...mockVeri.kayitSorgu } : { data: mockVeri.kayitlar }),
   useKaydet: () => ({ mutate: mockVeri.mutate }),
-  useGezilerIle: () => ({ data: mockVeri.geziler, isSuccess: true }),
+  useGezilerIle: () => (mockVeri.geziSorgu ? { refetch: mockVeri.refetch, ...mockVeri.geziSorgu } : { data: mockVeri.geziler, isSuccess: true }),
   useYerlerIle: () => ({ data: mockVeri.yerler, isSuccess: true }),
   icerikPlaceId: jest.fn(),
 }));
@@ -38,6 +44,8 @@ describe('Kaydettiklerim v5 (#395)', () => {
     mockVeri.kayitlar = [];
     mockVeri.geziler = [];
     mockVeri.yerler = [];
+    mockVeri.geziSorgu = undefined;
+    mockVeri.kayitSorgu = undefined;
     mockVeri.mutate.mockClear();
     jest.clearAllMocks();
   });
@@ -142,5 +150,73 @@ describe('Kaydettiklerim v5 (#395)', () => {
     expect(screen.getByRole('tab', { name: 'Geziler · 1' })).toBeTruthy();
     fireEvent.press(screen.getByRole('tab', { name: 'Yerler · 1' }));
     expect(screen.getByText(/ · Eskişehir$/)).toBeTruthy();
+  });
+
+  // #411: yükleme ve hata hali; boş ekran kalmaz.
+  it('#411 KK1: ilk yüklemede gösterge, boş hal yok', () => {
+    mockVeri.kayitlar = [{ tur: 'gezi', hedef_id: 'g1' }];
+    mockVeri.geziSorgu = { data: undefined, isPending: true };
+    render(<KaydettiklerimEkrani />);
+    expect(screen.UNSAFE_getByType(ActivityIndicator).props.accessibilityLabel).toBe('Yükleniyor…');
+    expect(screen.queryByText('Beğendiğin gezilere kalp bırak')).toBeNull();
+  });
+
+  it('#411 KK2: hata metni ve Tekrar dene; ham hata gösterilmez, Sentry\'ye gider', () => {
+    mockVeri.kayitlar = [{ tur: 'gezi', hedef_id: 'g1' }];
+    mockVeri.geziSorgu = { data: undefined, isError: true, error: new Error('JWT expired ham metin') };
+    render(<KaydettiklerimEkrani />);
+    expect(screen.getByText('Kaydettiklerin yüklenemedi.')).toBeTruthy();
+    expect(screen.queryByText(/JWT/)).toBeNull();
+    expect(screen.UNSAFE_queryByType(ActivityIndicator)).toBeNull();
+    const { hataBildir } = jest.requireMock<{ hataBildir: jest.Mock }>('@/lib/hataRaporu');
+    expect(hataBildir).toHaveBeenCalledWith(expect.any(Error), 'kaydettiklerim-yukle');
+    fireEvent.press(screen.getByRole('button', { name: 'Tekrar dene' }));
+    expect(mockVeri.refetch).toHaveBeenCalled();
+  });
+
+  it('#411 KK2: ağ hatasında "Bağlantı yok"', () => {
+    mockVeri.kayitlar = [{ tur: 'gezi', hedef_id: 'g1' }];
+    mockVeri.geziSorgu = { data: undefined, isError: true, error: new TypeError('Network request failed') };
+    render(<KaydettiklerimEkrani />);
+    expect(screen.getByText('Bağlantı yok. Bağlanınca tekrar dene.')).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Tekrar dene' })).toBeTruthy();
+  });
+
+  it('#411 KK3: önbellekte veri varken hata satırı listenin üstünde, liste görünür', () => {
+    mockVeri.kayitlar = [{ tur: 'gezi', hedef_id: 'g1' }];
+    mockVeri.geziSorgu = { data: [GEZI], isError: true, error: new Error('x') };
+    render(<KaydettiklerimEkrani />);
+    expect(screen.getByText('Kaydettiklerin yüklenemedi.')).toBeTruthy();
+    expect(screen.getByText('Eskişehir’de üç gün')).toBeTruthy();
+  });
+
+  it('#411 inceleme 1: veri yokken yeniden deneme sürerken hata satırının yerinde gösterge', () => {
+    mockVeri.kayitlar = [{ tur: 'gezi', hedef_id: 'g1' }];
+    mockVeri.geziSorgu = { data: undefined, isError: true, isRefetching: true, error: new Error('x') };
+    render(<KaydettiklerimEkrani />);
+    expect(screen.UNSAFE_getByType(ActivityIndicator).props.accessibilityLabel).toBe('Yükleniyor…');
+    expect(screen.queryByText('Kaydettiklerin yüklenemedi.')).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Tekrar dene' })).toBeNull();
+  });
+
+  it('#411 inceleme 1: veri varken yeniden deneme sürerken Tekrar dene pasif', () => {
+    mockVeri.kayitlar = [{ tur: 'gezi', hedef_id: 'g1' }];
+    mockVeri.geziSorgu = { data: [GEZI], isError: true, isRefetching: true, error: new Error('x') };
+    render(<KaydettiklerimEkrani />);
+    expect(screen.getByText('Eskişehir’de üç gün')).toBeTruthy();
+    const dugme = screen.getByRole('button', { name: 'Tekrar dene' });
+    expect(dugme).toBeDisabled();
+    fireEvent.press(dugme);
+    expect(mockVeri.refetch).not.toHaveBeenCalled();
+  });
+
+  it('#411 inceleme 2: önbellekteki kayıt listesi boşken hata olursa boş hal gösterilmez', () => {
+    mockVeri.kayitSorgu = { data: [], isError: true, error: new Error('x') };
+    render(<KaydettiklerimEkrani />);
+    expect(screen.getByText('Kaydettiklerin yüklenemedi.')).toBeTruthy();
+    expect(screen.queryByText('Beğendiğin gezilere kalp bırak')).toBeNull();
+    fireEvent.press(screen.getByRole('tab', { name: 'Yerler · 0' }));
+    expect(screen.getByText('Kaydettiklerin yüklenemedi.')).toBeTruthy();
+    expect(screen.queryByText(/kalp bırak|Keşfet'e göz at/)).toBeNull();
   });
 });

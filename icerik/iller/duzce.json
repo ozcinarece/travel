@@ -1,0 +1,332 @@
+{
+  "il": "Düzce",
+  "slug": "duzce",
+  "guncelleme": "2026-11-25",
+  "oneriler": [
+    {
+      "sira": 1,
+      "ad": "Prusias ad Hypium Antik Tiyatrosu",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 7,
+      "neden": "Konuralp'te 'Kırk Basamaklar' denen tiyatro; basamak uçlarında aslan pençesi oymaları",
+      "osm": "way/286555251",
+      "place_id": "ChIJ8VlX286hnUAR-Itg84NA2Y0"
+    },
+    {
+      "sira": 2,
+      "ad": "Güzeldere Şelalesi Tabiat Parkı",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Gölyaka",
+      "merkeze_km": 28,
+      "neden": "Su 120 m'yi aşan kayalıktan iner; merdivenli patikalar ve seyir terasları var",
+      "place_id": "ChIJ722JWDp4nUARXqq8P_F5ieM"
+    },
+    {
+      "sira": 3,
+      "ad": "Samandere Şelalesi Tabiat Anıtı",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 24,
+      "neden": "1988'de tabiat anıtı ilan edildi; 500 m'lik dere boyunca üç şelale",
+      "place_id": "ChIJ2Xb0cb1vnUARlQZPPlFWoIw"
+    },
+    {
+      "sira": 4,
+      "ad": "Efteni Gölü Kuş Cenneti",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas",
+        "cocuklu"
+      ],
+      "ilce": "Gölyaka",
+      "merkeze_km": 25,
+      "neden": "150 kadar kuş türü görülür, 35'i yıl boyu burada yaşar; kuş gözlem terası var",
+      "osm": "node/7842534885"
+    },
+    {
+      "sira": 5,
+      "ad": "Akçakoca Ceneviz Kalesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "doga"
+      ],
+      "ilce": "Akçakoca",
+      "merkeze_km": 38,
+      "neden": "İlçe merkezinin batısında, iki koy arasındaki yalıyarın üstünde sur kalıntıları",
+      "osm": "node/1581236397",
+      "place_id": "ChIJRZUtvVyxnUARMWn4go7OgoI"
+    },
+    {
+      "sira": 6,
+      "ad": "Akçakoca Sahili",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "cocuklu",
+        "yavas"
+      ],
+      "ilce": "Akçakoca",
+      "merkeze_km": 35,
+      "neden": "İlçe boyunca 35 km kadar kıyı; yazın kumsallar, kışın balıkçı barınağı canlı"
+    },
+    {
+      "sira": 7,
+      "ad": "Aydınpınar Şelaleleri",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 10,
+      "neden": "Kızılpınar Deresi üstünde art arda şelaleler; şehre 10 km, yaz günü serin",
+      "place_id": "ChIJWayFrAd3nUARqlNbg81iwuc"
+    },
+    {
+      "sira": 8,
+      "ad": "Melen Çayı Rafting",
+      "kategori": "aktivite",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Cumayeri",
+      "merkeze_km": 24,
+      "neden": "Dokuzdeğirmen'den başlayan 13–16 km'lik parkur; su en çok mart ve nisanda yüksek"
+    },
+    {
+      "sira": 9,
+      "ad": "Orhangazi Camii (Çayağzı)",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Akçakoca",
+      "merkeze_km": 45,
+      "neden": "1323'te yapıldığı kabul edilen, çivi kullanılmadan kurulmuş ahşap köy camisi"
+    },
+    {
+      "sira": 10,
+      "ad": "Fakıllı Mağarası",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Akçakoca",
+      "merkeze_km": 42,
+      "neden": "Bin metreyi aşan mağaranın 350 m'si gezilir; içerisi yıl boyu 8–10 °C",
+      "osm": "node/3763010166",
+      "place_id": "ChIJARr2mhWunUARBvRjJpuad3I"
+    },
+    {
+      "sira": 11,
+      "ad": "Kardüz Yaylası",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Gölyaka",
+      "merkeze_km": 48,
+      "neden": "Elmacık Dağları'nda 1.830 m'de; kışın yol karla kapanabilir",
+      "place_id": "ChIJt9UK-jd_nUARBe8nwayzes8"
+    },
+    {
+      "sira": 12,
+      "ad": "Hemşin Köyü Camii",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Akçakoca",
+      "merkeze_km": 30,
+      "neden": "1834'te II. Mahmud yaptırdı; altı taş, üstü geçme ahşap iki katlı cami",
+      "osm": "node/2818278466"
+    },
+    {
+      "sira": 13,
+      "ad": "Sarıkaya Mağarası",
+      "kategori": "doga",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Yığılca",
+      "merkeze_km": 40,
+      "neden": "717 m uzunluğunda, tavanı yer yer 40 m'ye çıkan mağara; içinde küçük bir şelale",
+      "place_id": "ChIJjR0EffsFnUARA6NwbXTNNVI"
+    },
+    {
+      "sira": 14,
+      "ad": "Akçakoca Tarihi Evleri",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Akçakoca",
+      "merkeze_km": 35,
+      "neden": "Çarşıya yürüme mesafesindeki sit alanında 160 kadar eski ev"
+    },
+    {
+      "sira": 15,
+      "ad": "Hasanlar Baraj Gölü",
+      "kategori": "aktivite",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Yığılca",
+      "merkeze_km": 22,
+      "neden": "Kano ve kürek yapılan göl; her yıl yelken yarışlarına ev sahipliği yapıyor",
+      "place_id": "ChIJKdQv8lcInUARMjyVMWsLxis"
+    },
+    {
+      "sira": 16,
+      "ad": "Akçakoca mancarlı pidesi",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Akçakoca",
+      "merkeze_km": 35,
+      "neden": "2017'de coğrafi işaret aldı; yabani ot mancarla yapılan, odun fırınında pide"
+    },
+    {
+      "sira": 17,
+      "ad": "Tarihi Börekçi İsmet Usta",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Su böreği ve Boşnak böreği; otlu peynirli ve ıspanaklı kıymalı çeşitleri",
+      "place_id": "ChIJvYuD5xd1nUARUzvi-aZOenY"
+    },
+    {
+      "sira": 18,
+      "ad": "Hamsi Balık Lokantası",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Akçakoca",
+      "merkeze_km": 35,
+      "neden": "Balıkçı barınağının yanında; kasımda hamsi ve palamut, kiremitte palamut",
+      "osm": "node/3757986476",
+      "place_id": "ChIJmxJr29mznUARvRG1gAK8fUs"
+    },
+    {
+      "sira": 19,
+      "ad": "Köydeyiz Kır Bahçesi",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet",
+        "yavas"
+      ],
+      "ilce": "Gölyaka",
+      "merkeze_km": 18,
+      "neden": "Bahçede serpme kahvaltının yanında Çerkez hamur işi haluj gelir",
+      "place_id": "ChIJLyVCkXWfnUARvIBszKXVkGQ"
+    },
+    {
+      "sira": 20,
+      "ad": "Akçakoca melengücceği tatlısı",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet",
+        "kultur_tarih"
+      ],
+      "ilce": "Akçakoca",
+      "merkeze_km": 35,
+      "neden": "Kaymak, dartı ve fındıkla yapılıp kızartılan Akçakoca tatlısı; coğrafi işaretli"
+    },
+    {
+      "sira": 21,
+      "ad": "Gümüş Konak 1927",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet",
+        "yavas"
+      ],
+      "ilce": "Akçakoca",
+      "merkeze_km": 35,
+      "neden": "Eski konakta sıcak melengücceği, ev reçelleri ve yöre peynirleri",
+      "place_id": "ChIJgXT8AQ6xnUARnzJcjxTvnrc"
+    },
+    {
+      "sira": 22,
+      "ad": "Esentepe Cafe",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet",
+        "yavas"
+      ],
+      "ilce": "Akçakoca",
+      "merkeze_km": 36,
+      "neden": "Akçakoca'ya yukarıdan bakan kafe; kahvaltıda kuymak",
+      "place_id": "ChIJY0U7pNiznUARDas6C3gu8mI"
+    },
+    {
+      "sira": 23,
+      "ad": "Kurugöl Kanyonu",
+      "kategori": "aktivite",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Akçakoca",
+      "merkeze_km": 45,
+      "neden": "Akçakoca'ya 13 km; kanyon parkurunda kolay ve zor bölümler var",
+      "place_id": "ChIJBQ2AQgCxnUARdSas4TmcrRo"
+    },
+    {
+      "sira": 24,
+      "ad": "Yığılca–Yedigöller Yürüyüş Rotası",
+      "kategori": "aktivite",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Yığılca",
+      "merkeze_km": 35,
+      "neden": "Karakaş ve Mengen köylerinden geçen 35 km'lik rota Yedigöller'de biter"
+    },
+    {
+      "sira": 25,
+      "ad": "Topuk Yaylası ve Göleti",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Kaynaşlı",
+      "merkeze_km": 30,
+      "neden": "1.300 m'de, D-100'e 10 km; Samandere Şelalesi'ne 15 km"
+    },
+    {
+      "sira": 26,
+      "ad": "Soyat Yalıyarları",
+      "kategori": "doga",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Akçakoca",
+      "merkeze_km": 37,
+      "neden": "Ceneviz Kalesi ile Değirmenağzı arasında 30 m'ye varan deniz falezleri"
+    }
+  ]
+}

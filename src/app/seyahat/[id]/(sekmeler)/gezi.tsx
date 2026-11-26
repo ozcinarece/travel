@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Linking, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { GrupPenceresi } from '@/components/davet/GrupPenceresi';
+import { PaylasimCekmecesi } from '@/components/paylasim/PaylasimCekmecesi';
 import { KatilimSayfasi } from '@/components/davet/KatilimSayfasi';
 import { ProfilOnayi } from '@/components/davet/ProfilOnayi';
 import { mesafeM } from '@/components/harita/geo';
@@ -118,7 +119,7 @@ type SayfaProps = {
 };
 
 function GeziSayfasi({ seyahat, gunler, duraklar, mekanlar, konaklamalar, katildin, cevrimdisi, guncellendi }: SayfaProps) {
-  const { session } = useOturum();
+  const { session, hesapli } = useOturum();
   const benId = session?.user.id ?? null;
   const uyeler = useUyeler(seyahat.id);
   const oylar = useOylar(seyahat.id);
@@ -139,6 +140,7 @@ function GeziSayfasi({ seyahat, gunler, duraklar, mekanlar, konaklamalar, katild
   }, [bildirim]);
   const [grupAcik, setGrupAcik] = useState(false);
   const [menuAcik, setMenuAcik] = useState(false);
+  const [paylasimAcik, setPaylasimAcik] = useState(false);
   const [karsilamaAcik, setKarsilamaAcik] = useState(katildin);
   const [geziAlSlug, setGeziAlSlug] = useState<string | null>(null);
   const [durakMenu, setDurakMenu] = useState<DurakKarti | null>(null);
@@ -475,7 +477,21 @@ function GeziSayfasi({ seyahat, gunler, duraklar, mekanlar, konaklamalar, katild
         sahip={benUye?.role === 'owner'}
         uyeSayisi={uyeListesi.length}
         onHata={setBildirim}
+        onPaylas={hesapli ? () => setPaylasimAcik(true) : undefined}
       />
+      {hesapli ? (
+        <PaylasimCekmecesi
+          acik={paylasimAcik}
+          onKapat={() => setPaylasimAcik(false)}
+          seyahat={seyahat}
+          benimAdim={benUye?.display_name ?? null}
+          gunSayisi={gunler.length}
+          durakSayisi={duraklar.length}
+          kisiSayisi={uyeListesi.length || 1}
+          onArkadasEkle={() => setGrupAcik(true)}
+          cevrimdisi={cevrimdisi}
+        />
+      ) : null}
       <SecimMenusu
         acik={!!durakMenu}
         baslik={durakMenu?.ad}

@@ -1,0 +1,389 @@
+{
+  "il": "Karabük",
+  "slug": "karabuk",
+  "guncelleme": "2026-11-19",
+  "oneriler": [
+    {
+      "sira": 1,
+      "ad": "Safranbolu Tarihi Kent Merkezi (Çarşı)",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Safranbolu",
+      "merkeze_km": 7,
+      "neden": "1994'ten beri UNESCO listesinde; kışlık evler bu vadide, yazlıklar Bağlar'da.",
+      "place_id": "ChIJRTl5KipVg0ARuteJZ0yIYXc"
+    },
+    {
+      "sira": 2,
+      "ad": "Hıdırlık Tepesi",
+      "kategori": "manzara",
+      "amaclar": [
+        "yavas",
+        "kultur_tarih"
+      ],
+      "ilce": "Safranbolu",
+      "merkeze_km": 7,
+      "neden": "Çarşı vadisine yukarıdan bakılan tepe; eskiden bayram namazları burada kılınırmış.",
+      "place_id": "ChIJeQ9OAQpVg0ARcEMEeSh_MAk"
+    },
+    {
+      "sira": 3,
+      "ad": "Cinci Hanı",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Safranbolu",
+      "merkeze_km": 7,
+      "neden": "Cinci Hoca'nın 1640'larda yaptırdığı kesme taş kervansaray; bugün otel olarak açık.",
+      "osm": "way/1088181508",
+      "place_id": "ChIJ76PyVilVg0ARR_j74X8aiOY"
+    },
+    {
+      "sira": 4,
+      "ad": "Kaymakamlar Gezi Evi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Safranbolu",
+      "merkeze_km": 7,
+      "neden": "Harem ve selamlığıyla ayakta kalan konak; mutfak, giysi ve ahşap işleri içinde sergili.",
+      "osm": "node/4460520394",
+      "place_id": "ChIJ39VEFSlVg0AR1UwBDOvECew"
+    },
+    {
+      "sira": 5,
+      "ad": "Yemeniciler Arastası",
+      "kategori": "carsi",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Safranbolu",
+      "merkeze_km": 7,
+      "neden": "Köprülü Camii'nin yanında 48 ahşap dükkân; içlerinden biri hâlâ elde yemeni dikiyor.",
+      "place_id": "ChIJz-ao5ytVg0ARHUGCdn7R7-g"
+    },
+    {
+      "sira": 6,
+      "ad": "Kristal Cam Teras ve Tokatlı Kanyonu",
+      "kategori": "manzara",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Safranbolu",
+      "merkeze_km": 10,
+      "neden": "Kanyonun 80 m üstüne uzanan cam zeminli platform; altında Tokatlı Deresi akıyor.",
+      "place_id": "ChIJl2I92ZyqnEARTsRyecDmnyo"
+    },
+    {
+      "sira": 7,
+      "ad": "İncekaya Su Kemeri",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "doga"
+      ],
+      "ilce": "Safranbolu",
+      "merkeze_km": 10,
+      "neden": "Altı kemerli, 116 m'lik kemer; İzzet Mehmet Paşa'nın onarımıyla şehre su taşımış.",
+      "place_id": "ChIJaYx2p2JVm0ARzXCPB1paCGo"
+    },
+    {
+      "sira": 8,
+      "ad": "Yörük Köyü",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Safranbolu",
+      "merkeze_km": 14,
+      "neden": "1997'de koruma altına alınan köy; 93 tescilli yapı ve Sipahioğlu Konağı burada.",
+      "place_id": "ChIJaQ7My3NWg0ARmsXlqoieH6Y"
+    },
+    {
+      "sira": 9,
+      "ad": "Bulak Mencilis Mağarası",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 8,
+      "neden": "6 km'yi aşan mağaranın yaklaşık 400 m'si yürüyüş yoluyla aydınlatılmış; üç katlı.",
+      "place_id": "ChIJYcv7UDCrnEAR3voN4E07lIw"
+    },
+    {
+      "sira": 10,
+      "ad": "Köprülü Mehmet Paşa Camii",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Safranbolu",
+      "merkeze_km": 7,
+      "neden": "1661'de yapılmış, kentin en büyük camisi; avlusunda taş kaide üstünde güneş saati var.",
+      "place_id": "ChIJTURqXylVg0ARDqbPEA-UkI4"
+    },
+    {
+      "sira": 11,
+      "ad": "Kent Tarihi Müzesi ve Saat Kulesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Safranbolu",
+      "merkeze_km": 7,
+      "neden": "Eski hükümet konağında; bodrumda minyatür çarşı, yanında 1797 yapımı saat kulesi.",
+      "osm": "way/372728989",
+      "place_id": "ChIJq6q6oitVg0ARzdNbTobor1E"
+    },
+    {
+      "sira": 12,
+      "ad": "Şeker Kanyonu",
+      "kategori": "doga",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Yenice",
+      "merkeze_km": 22,
+      "neden": "6,5 km uzunluğunda; yamaçlar 250 m'ye çıkıyor, Şeker Deresi boyunca patika var.",
+      "place_id": "ChIJP-n0fKa7nEAR3rF5SGYLND4"
+    },
+    {
+      "sira": 13,
+      "ad": "Hadrianopolis Antik Kenti",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Eskipazar",
+      "merkeze_km": 34,
+      "neden": "Kuş, geyik ve cennet nehirleri tasvirli erken Hristiyan dönemi mozaikleri burada.",
+      "place_id": "ChIJTz0G61gwg0ARU6K6HuaYXU8"
+    },
+    {
+      "sira": 14,
+      "ad": "Demirciler Arastası",
+      "kategori": "carsi",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Safranbolu",
+      "merkeze_km": 7,
+      "neden": "Akçasu kıyısında demirci ve bakırcıların hâlâ örs başında çalıştığı tek lonca çarşısı.",
+      "place_id": "ChIJZUO5ZSlVg0AR6dr9BXW7U50"
+    },
+    {
+      "sira": 15,
+      "ad": "Yenice Ormanları",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Yenice",
+      "merkeze_km": 25,
+      "neden": "WWF'nin Avrupa'nın biyolojik açıdan en değerli alanları arasında saydığı ormanlar."
+    },
+    {
+      "sira": 16,
+      "ad": "İmren Lokumları",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Safranbolu",
+      "merkeze_km": 7,
+      "neden": "Cinci Han'ın karşısındaki köklü lokumcu; sakızlı ve safranlı lokumuyla bilinir.",
+      "place_id": "ChIJeRYIRD7EyhQRMioT2R82LD4"
+    },
+    {
+      "sira": 17,
+      "ad": "Safranbolu Sofrası",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Safranbolu",
+      "merkeze_km": 7,
+      "neden": "Cinci Hamamı'nın arkasında; bükme, peruhi ve sac tava gibi yöre yemekleri çıkarır.",
+      "osm": "node/9735559774",
+      "place_id": "ChIJeRYIRD7EyhQRkTypUlagSNI"
+    },
+    {
+      "sira": 18,
+      "ad": "Türkiye Kahve Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih",
+        "lezzet"
+      ],
+      "ilce": "Safranbolu",
+      "merkeze_km": 7,
+      "neden": "Cinci Hanı içinde; cezve, kavurma tavası, el değirmenleri ve 20'yi aşkın kahve tadımı.",
+      "place_id": "ChIJz86ARvJVg0ARpXAIP-9zyV8"
+    },
+    {
+      "sira": 19,
+      "ad": "Arasta Kahvesi",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet",
+        "yavas"
+      ],
+      "ilce": "Safranbolu",
+      "merkeze_km": 7,
+      "neden": "Yemeniciler Arastası'nın ortasında; közde kahve ve ev yapımı salep yapılıyor.",
+      "place_id": "ChIJ58Xh5StVg0ARs6uXL5_Zdhs"
+    },
+    {
+      "sira": 20,
+      "ad": "İzzet Mehmet Paşa Camii",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Safranbolu",
+      "merkeze_km": 7,
+      "neden": "1796 yapımı; avlusu ve minaresi Akçasu deresi üstündeki kemerlere oturuyor.",
+      "osm": "way/303761202",
+      "place_id": "ChIJ5e86cClVg0AR-Dl7Uqou5as"
+    },
+    {
+      "sira": 21,
+      "ad": "Kazdağlıoğlu Meydanı",
+      "kategori": "carsi",
+      "amaclar": [
+        "lezzet",
+        "yavas"
+      ],
+      "ilce": "Safranbolu",
+      "merkeze_km": 7,
+      "neden": "Safran, lokum ve yöresel ürün dükkânlarının toplandığı çarşı meydanı.",
+      "place_id": "ChIJM-w59itVg0AR-f323nJB0B8"
+    },
+    {
+      "sira": 22,
+      "ad": "Atiş Butik Restoran",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Safranbolu",
+      "merkeze_km": 7,
+      "neden": "Han Arkası Sokak'ta; peruhi, Rum mantısı ve safranlı pilav pişiriyor.",
+      "place_id": "ChIJvYK0WilVg0ARN3nh0r_JisU"
+    },
+    {
+      "sira": 23,
+      "ad": "Eyvan Yöresel Mutfak",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Safranbolu",
+      "merkeze_km": 7,
+      "neden": "Eski Çarşı'da Altuğ Sokak'ta, Safranbolu ev yemekleri yapan lokanta.",
+      "place_id": "ChIJuU2-4suqnEARhzuPkvyM3c4"
+    },
+    {
+      "sira": 24,
+      "ad": "Çevrikköprü Restaurant",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet",
+        "cocuklu"
+      ],
+      "ilce": "Safranbolu",
+      "merkeze_km": 12,
+      "neden": "Safranbolu'dan Kastamonu yoluna çıkınca 6. km'de, çarşı dışındaki yerel lokanta.",
+      "place_id": "ChIJeRYIRD7EyhQR8dLjxubgXL8"
+    },
+    {
+      "sira": 25,
+      "ad": "Safrantat",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Safranbolu",
+      "merkeze_km": 7,
+      "neden": "Kaya Erdem Caddesi'nde lokum ve safranlı ürünler yapan yerel imalathane.",
+      "place_id": "ChIJ942P-tOqnEARAWQuXonq9zs"
+    },
+    {
+      "sira": 26,
+      "ad": "Keltepe Kayak Merkezi",
+      "kategori": "aktivite",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 20,
+      "neden": "İlin en yüksek noktası 1.999 m Keltepe'de; kar mayıs sonuna kadar kalabiliyor.",
+      "place_id": "ChIJXajhazZLg0ARP7EDkCCLkrk"
+    },
+    {
+      "sira": 27,
+      "ad": "Taş Han",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Eflani",
+      "merkeze_km": 37,
+      "neden": "Hacı Mustafa'nın 1884'te yaptırdığı han; 2013 sonrası restore edildi.",
+      "place_id": "ChIJ7RVg1bS1hEARkgzCQLIvt6g"
+    },
+    {
+      "sira": 28,
+      "ad": "Eflani Katır Yolu",
+      "kategori": "aktivite",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Eflani",
+      "merkeze_km": 33,
+      "neden": "Safranbolu-Eflani arası 33 km'lik eski yol; taş kemer köprüler ve çeşmeler geçiyor."
+    },
+    {
+      "sira": 29,
+      "ad": "Davutobası Safran Tarlaları",
+      "kategori": "aktivite",
+      "amaclar": [
+        "doga",
+        "lezzet"
+      ],
+      "ilce": "Safranbolu",
+      "merkeze_km": 20,
+      "neden": "Safranın hâlâ yetiştirildiği köy; ekim-kasımda hasat görülebiliyor."
+    },
+    {
+      "sira": 30,
+      "ad": "Yenice Ihlamur Teras",
+      "kategori": "manzara",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Yenice",
+      "merkeze_km": 27,
+      "neden": "Çevresindeki ıhlamurlardan adını alan seyir terası; vadi ve kanyonlara bakıyor.",
+      "place_id": "ChIJ6-ZmdG-6nEARFBsjXSFeX2E"
+    }
+  ]
+}

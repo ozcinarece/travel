@@ -15,9 +15,10 @@ import { gunRengi, kose, renk, yazi } from '@/theme';
 
 export type HaritaNoktasi = { id: string; lat: number; lng: number; ad: string; primary_type: string | null };
 
-type Props = { secilenler: HaritaNoktasi[]; digerleri: HaritaNoktasi[]; odakId: string | null; merkez: Konum; baslik: string };
+/** `kisa`: #401 il listesi ekranı (`Ekran07cIlOnerileri`) — 132 px, 16 köşe, 44 px büyüt düğmesi. */
+type Props = { secilenler: HaritaNoktasi[]; digerleri: HaritaNoktasi[]; odakId: string | null; merkez: Konum; baslik: string; kisa?: boolean };
 
-export function SecimHaritasi({ secilenler, digerleri, odakId, merkez, baslik }: Props) {
+export function SecimHaritasi({ secilenler, digerleri, odakId, merkez, baslik, kisa }: Props) {
   const [acik, setAcik] = useState(false);
   const kenar = useSafeAreaInsets();
   const pinler = useMemo<HaritaPini[]>(
@@ -42,11 +43,11 @@ export function SecimHaritasi({ secilenler, digerleri, odakId, merkez, baslik }:
   const seciliId = odakId ? `s:${odakId}` : null;
   return (
     <>
-      <Pressable accessibilityRole="button" accessibilityLabel={t('sihirbaz.onerilenler.haritaBuyut')} onPress={() => setAcik(true)} style={s.kucuk}>
+      <Pressable accessibilityRole="button" accessibilityLabel={t('sihirbaz.onerilenler.haritaBuyut')} onPress={() => setAcik(true)} style={[s.kucuk, kisa && s.kisa]}>
         <View style={StyleSheet.absoluteFill} pointerEvents="none">
-          <Harita merkez={merkez} zoom={12} pinler={pinler} daireler={daireler} sigdir={sigdir(24, 24)} seciliId={seciliId} />
+          <Harita merkez={merkez} zoom={12} pinler={pinler} daireler={daireler} sigdir={sigdir(kisa ? 16 : 24, kisa ? 16 : 24)} seciliId={seciliId} />
         </View>
-        <View style={s.buyut}>
+        <View style={[s.buyut, kisa && s.buyutKisa]}>
           <Ikon ad="genislet" boyut={16} renk={renk.ana} kalinlik={2.6} />
         </View>
       </Pressable>
@@ -71,6 +72,8 @@ export function SecimHaritasi({ secilenler, digerleri, odakId, merkez, baslik }:
 
 const s = StyleSheet.create({
   kucuk: { height: 196, borderRadius: kose.kart, overflow: 'hidden', backgroundColor: renk.haritaZemin },
+  kisa: { height: 132, borderRadius: 16 },
+  buyutKisa: { right: 8, bottom: 8, width: 44, height: 44 },
   buyut: { position: 'absolute', right: 10, bottom: 10, width: 40, height: 40, borderRadius: kose.alan, backgroundColor: renk.zemin, alignItems: 'center', justifyContent: 'center' },
   ust: { position: 'absolute', left: 16, right: 16, flexDirection: 'row', alignItems: 'center', gap: 10 },
   kapat: { width: 44, height: 44, borderRadius: kose.dugme, backgroundColor: renk.zemin, alignItems: 'center', justifyContent: 'center' },

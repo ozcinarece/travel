@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import Svg, { Circle, Path } from 'react-native-svg';
 
@@ -20,14 +20,38 @@ type Satir = { anahtar: string; ad: string; tip: string | undefined; alt: string
  * Google Maps linki yapıştırınca tek sonuç (resolve-link). Arama places-autocomplete (şehre yanlı, 300 ms, ≥ 2 harf),
  * seçimde places-light (oturumu kapatır). Karede fotoğraf yerine kategori rengi (foto ayrı Google isteği olurdu).
  */
-export function MekanArama({ merkez, onSec, etiket = ty('gezi.mekanAra') }: { merkez: Merkez | undefined; onSec: (yer: HafifYer) => Promise<void> | void; etiket?: string }) {
+/** PRD §7: `onKimlik` kipinde Google adı dışarı verilmez; böylece `{...yer}` yazılsa bile DB'ye gidemez. */
+export type MekanKimligi = { place_id: string; tip: string | null };
+
+/**
+ * `onKimlik` verilirse (#401 İl önerileri) seçimde Place Details isteği atılmaz: yalnız öneri satırının kimliği ve tipi döner.
+ * Details ile kapanmayan Autocomplete oturumu istek başına ücretlenir (yalnız Ece kullanır). Link yapıştırma bu kipte kapalıdır
+ * (resolve-link ayrı istek olurdu). Bu kipte arama metni ve seçili satır, üst bileşen `seciliKimlik`'i boşaltana kadar
+ * (Kaydet ya da Vazgeç) ekranda kalır; Ece hangi yeri seçtiğini görür. Satır yalnız gösterilir, saklanmaz.
+ */
+export function MekanArama({
+  merkez,
+  onSec,
+  onKimlik,
+  onKimlikBirak,
+  seciliKimlik,
+  etiket = ty('gezi.mekanAra'),
+}: {
+  merkez: Merkez | undefined;
+  onSec?: (yer: HafifYer) => Promise<void> | void;
+  onKimlik?: (yer: MekanKimligi) => Promise<void> | void;
+  seciliKimlik?: string | null;
+  /** `onKimlik` kipinde seçimden sonra arama metni değişince çağrılır: üst bileşen seçimi sıfırlar (Vazgeç ile aynı yol). */
+  onKimlikBirak?: () => void;
+  etiket?: string;
+}) {
   const [girdi, setGirdi] = useState('');
   const [oturum, setOturum] = useState(yeniOturumJetonu);
   const [odak, setOdak] = useState(false);
   const [secili, setSecili] = useState(0);
   const [mesgul, setMesgul] = useState(false);
   const [hata, setHata] = useState(false);
-  const link = linkGibiMi(girdi);
+  const link = !onKimlik && linkGibiMi(girdi);
   const oneriler = useOneriler('yonetim-mekan', girdi, oturum, undefined, merkez, !link);
   const cozum = useQuery({
     queryKey: ['yonetim-link', girdi.trim()],
@@ -50,6 +74,20 @@ export function MekanArama({ merkez, onSec, etiket = ty('gezi.mekanAra') }: { me
         al: async () => (await hafifYerler([o.place_id], { oturum, puansiz: true }))[0],
       }));
   const acik = odak && girdi.trim().length >= 2;
+  // #401: seçim Kaydet ya da Vazgeç ile bitince (seciliKimlik boşalınca) arama temizlenir, yeni oturum açılır.
+  const oncekiSecim = useRef(seciliKimlik);
+  // Seçim, Ece arama metnini değiştirdiği için bırakıldıysa yeni yazdığı metin silinmez.
+  const yaziylaBirakildi = useRef(false);
+  useEffect(() => {
+    if (oncekiSecim.current && !seciliKimlik && !yaziylaBirakildi.current) {
+      setGirdi('');
+      setSecili(0);
+      setOturum(yeniOturumJetonu());
+    }
+    if (!seciliKimlik) yaziylaBirakildi.current = false;
+    oncekiSecim.current = seciliKimlik;
+  }, [seciliKimlik]);
+  const seciliSatir = onKimlik && seciliKimlik && !acik ? satirlar.find((r) => r.anahtar === seciliKimlik) : undefined;
   const indeks = Math.min(secili, Math.max(0, satirlar.length - 1));
 
   const ekle = async (satir: Satir | undefined) => {
@@ -57,12 +95,17 @@ export function MekanArama({ merkez, onSec, etiket = ty('gezi.mekanAra') }: { me
     setHata(false);
     setMesgul(true);
     try {
-      const yer = await satir.al();
-      if (!yer) throw new Error('bos');
-      await onSec(yer);
-      setGirdi('');
-      setSecili(0);
-      setOturum(yeniOturumJetonu());
+      if (onKimlik) {
+        await onKimlik({ place_id: satir.anahtar, tip: satir.tip ?? null });
+        setOdak(false);
+      } else {
+        const yer = await satir.al();
+        if (!yer) throw new Error('bos');
+        await onSec?.(yer);
+        setGirdi('');
+        setSecili(0);
+        setOturum(yeniOturumJetonu());
+      }
     } catch {
       setHata(true);
     } finally {
@@ -87,6 +130,11 @@ export function MekanArama({ merkez, onSec, etiket = ty('gezi.mekanAra') }: { me
           value={girdi}
           onChangeText={(m) => {
             setGirdi(m);
+            // #401: seçimden sonra metin değişirse seçim eski yere bağlı kalmasın; ad satırı ve Kaydet kapanır.
+            if (onKimlik && seciliKimlik) {
+              yaziylaBirakildi.current = true;
+              onKimlikBirak?.();
+            }
             setSecili(0);
             setHata(false);
             setOdak(true);
@@ -109,39 +157,51 @@ export function MekanArama({ merkez, onSec, etiket = ty('gezi.mekanAra') }: { me
         {mesgul || oneriler.isFetching || cozum.isFetching ? <ActivityIndicator size="small" color={yRenk.ikincil} /> : null}
       </View>
       {hata ? <Text style={s.hata}>{ty('gezi.araHata')}</Text> : null}
+      {seciliSatir ? (
+        <View style={[s.satir, s.satirSecili]} accessibilityState={{ selected: true }} accessibilityLabel={[seciliSatir.ad, kategoriEtiketi(seciliSatir.tip), seciliSatir.alt].filter(Boolean).join(', ')}>
+          <SatirIcerigi satir={seciliSatir} />
+        </View>
+      ) : null}
       {acik && satirlar.length ? (
         <View style={s.liste} accessibilityRole="menu">
-          {satirlar.map((r, i) => {
-            const kat = kategoriPini(r.tip);
-            return (
-              <Pressable
-                key={r.anahtar}
-                accessibilityRole="menuitem"
-                accessibilityState={{ selected: i === indeks }}
-                disabled={mesgul}
-                onPress={() => void ekle(r)}
-                onHoverIn={() => setSecili(i)}
-                style={StyleSheet.flatten([s.satir, i === indeks && s.satirSecili])}>
-                <View style={[s.kare, { backgroundColor: kat.kategoriRenk }]} />
-                <View style={s.metinler}>
-                  <Text style={s.ad} numberOfLines={1}>
-                    {r.ad}
-                  </Text>
-                  <View style={s.altSatir}>
-                    <Ikon ad={kat.ikon} boyut={10} renk={kat.kategoriRenk} kalinlik={2.2} />
-                    <Text style={s.alt} numberOfLines={1}>
-                      {[kategoriEtiketi(r.tip), r.alt].filter(Boolean).join(' · ')}
-                    </Text>
-                  </View>
-                </View>
-                {i === indeks ? <Text style={s.ekle}>{ty('gezi.aramaEkle')}</Text> : null}
-              </Pressable>
-            );
-          })}
+          {satirlar.map((r, i) => (
+            <Pressable
+              key={r.anahtar}
+              accessibilityRole="menuitem"
+              accessibilityState={{ selected: i === indeks }}
+              disabled={mesgul}
+              onPress={() => void ekle(r)}
+              onHoverIn={() => setSecili(i)}
+              style={StyleSheet.flatten([s.satir, i === indeks && s.satirSecili])}>
+              <SatirIcerigi satir={r} />
+              {i === indeks ? <Text style={s.ekle}>{ty('gezi.aramaEkle')}</Text> : null}
+            </Pressable>
+          ))}
           <Text style={s.ipucu}>{ty('gezi.aramaIpucu')}</Text>
         </View>
       ) : null}
     </View>
+  );
+}
+
+/** Öneri satırı: 34 px kategori karesi, ad 12,5 px 800, kategori ikonu + "kategori · adres". */
+function SatirIcerigi({ satir: r }: { satir: Satir }) {
+  const kat = kategoriPini(r.tip);
+  return (
+    <>
+      <View style={[s.kare, { backgroundColor: kat.kategoriRenk }]} />
+      <View style={s.metinler}>
+        <Text style={s.ad} numberOfLines={1}>
+          {r.ad}
+        </Text>
+        <View style={s.altSatir}>
+          <Ikon ad={kat.ikon} boyut={10} renk={kat.kategoriRenk} kalinlik={2.2} />
+          <Text style={s.alt} numberOfLines={1}>
+            {[kategoriEtiketi(r.tip), r.alt].filter(Boolean).join(' · ')}
+          </Text>
+        </View>
+      </View>
+    </>
   );
 }
 

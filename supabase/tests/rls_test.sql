@@ -667,6 +667,33 @@ select pg_temp.hata_bekle($$insert into public.ana_sayfa_bolumleri (tur, baslik,
 select pg_temp.hata_bekle($$insert into public.ana_sayfa_bolumleri (tur, baslik, sira, icerik) values ('banner', 'x', 30, '{"kapak_url": "https://upload.wikimedia.org/x\\y.jpg", "kapak_atif": {"yazar": "Tripmate"}}')$$, '23514');
 -- #428 3. inceleme (isteğe bağlı): çift kodlanmış `%252e` de reddedilir.
 select pg_temp.hata_bekle($$insert into public.ana_sayfa_bolumleri (tur, baslik, sira, icerik) values ('banner', 'x', 30, '{"kapak_url": "https://xwqeobelyeuzoxyuvauw.supabase.co/storage/v1/object/public/icerik/%252e%252e/avatars/u1/a.jpg", "kapak_atif": {"yazar": "Tripmate"}}')$$, '23514');
+-- #406 2/2 KK-ek1: izin listesi. Sekme ve satır sonuyla yol hilesi (`.<TAB>.`, `.<LF>.`), boşluk ve `?`/`#`/`@` reddedilir.
+select pg_temp.hata_bekle($$insert into public.ana_sayfa_bolumleri (tur, baslik, sira, icerik) values ('banner', 'x', 30, jsonb_build_object('kapak_url', 'https://xwqeobelyeuzoxyuvauw.supabase.co/storage/v1/object/public/icerik/.' || chr(9) || './avatars/u1/a.jpg', 'kapak_atif', '{"yazar": "Tripmate"}'::jsonb))$$, '23514');
+select pg_temp.hata_bekle($$insert into public.ana_sayfa_bolumleri (tur, baslik, sira, icerik) values ('banner', 'x', 30, jsonb_build_object('kapak_url', 'https://xwqeobelyeuzoxyuvauw.supabase.co/storage/v1/object/public/icerik/.' || chr(10) || './avatars/u1/a.jpg', 'kapak_atif', '{"yazar": "Tripmate"}'::jsonb))$$, '23514');
+select pg_temp.hata_bekle($$insert into public.ana_sayfa_bolumleri (tur, baslik, sira, icerik) values ('banner', 'x', 30, '{"kapak_url": "https://upload.wikimedia.org/wikipedia/commons/a/ab/a b.jpg", "kapak_atif": {"yazar": "Tripmate"}}')$$, '23514');
+select pg_temp.hata_bekle($$insert into public.ana_sayfa_bolumleri (tur, baslik, sira, icerik) values ('banner', 'x', 30, '{"kapak_url": "https://upload.wikimedia.org/wikipedia/commons/a/ab/a.jpg?x=1", "kapak_atif": {"yazar": "Tripmate"}}')$$, '23514');
+do $$
+begin
+  assert public.banner_gorsel_adresi_gecerli('https://upload.wikimedia.org/wikipedia/commons/a/ab/Bursa_Ulu_Cami.jpg'), '#406 KK-ek1: düz Commons adresi geçer';
+  assert public.banner_gorsel_adresi_gecerli('https://xwqeobelyeuzoxyuvauw.supabase.co/storage/v1/object/public/icerik/banner/kis-2026.jpg'), '#406 KK-ek1: kova adresi geçer';
+end $$;
+select pg_temp.hata_bekle($$insert into public.ana_sayfa_bolumleri (tur, baslik, sira, icerik) values ('banner', 'x', 30, jsonb_build_object('kapak_url', 'https://xwqeobelyeuzoxyuvauw.supabase.co/storage/v1/object/public/icerik/.' || chr(13) || './avatars/u1/a.jpg', 'kapak_atif', '{"yazar": "Tripmate"}'::jsonb))$$, '23514');
+do $$
+begin
+  -- #438 inceleme 1 ve 7: parantez ve virgül geçer; `'`, unicode nokta, kodlanmış kontrol karakteri ve yerel viki reddedilir.
+  assert public.banner_gorsel_adresi_gecerli('https://upload.wikimedia.org/wikipedia/commons/a/ab/Ulu_Cami_(Bursa),_2019.jpg'), '#438: parantez ve virgül geçer';
+  assert public.banner_gorsel_adresi_gecerli('https://upload.wikimedia.org/wikipedia/commons/a/ab/G%C3%B6l.jpg'), '#438: %XX geçer';
+  assert not public.banner_gorsel_adresi_gecerli('https://upload.wikimedia.org/wikipedia/commons/a/ab/Ece''s.jpg'), '#438: tek tırnak reddedilir';
+  assert not public.banner_gorsel_adresi_gecerli('https://xwqeobelyeuzoxyuvauw.supabase.co/storage/v1/object/public/icerik/' || chr(65294) || chr(65294) || '/avatars/a.jpg'), '#438: unicode nokta reddedilir';
+  assert not public.banner_gorsel_adresi_gecerli('https://upload.wikimedia.org/wikipedia/commons/a/ab/x' || chr(13) || '.jpg'), '#438: CR reddedilir';
+  assert not public.banner_gorsel_adresi_gecerli('https://upload.wikimedia.org/wikipedia/commons/a/%09/x.jpg'), '#438: %09 reddedilir';
+  assert not public.banner_gorsel_adresi_gecerli('https://upload.wikimedia.org/wikipedia/commons/a/%00/x.jpg'), '#438: %00 reddedilir';
+  assert not public.banner_gorsel_adresi_gecerli('https://upload.wikimedia.org/wikipedia/commons/a/%1f/x.jpg'), '#438: %1f reddedilir';
+  assert not public.banner_gorsel_adresi_gecerli('https://upload.wikimedia.org/wikipedia/commons/a/%7F/x.jpg'), '#438: %7F reddedilir';
+  assert not public.banner_gorsel_adresi_gecerli('https://upload.wikimedia.org/wikipedia/commons/a/%2/x.jpg'), '#438: yarım %X reddedilir';
+  assert not public.banner_gorsel_adresi_gecerli('https://upload.wikimedia.org/wikipedia/en/a/ab/Poster.jpg'), '#438: yerel viki (adil kullanım) reddedilir';
+  assert not public.banner_gorsel_adresi_gecerli('https://upload.wikimedia.org/a.jpg'), '#438: commons öneki şart';
+end $$;
 -- Kendi Storage alanımızdaki görsel (atıflı) kabul edilir.
 insert into public.ana_sayfa_bolumleri (tur, baslik, sira, icerik) values
   ('banner', 'Storage görselli', 25, '{"kapak_url": "https://xwqeobelyeuzoxyuvauw.supabase.co/storage/v1/object/public/icerik/banner/k.webp", "kapak_atif": {"yazar": "Tripmate"}}');
@@ -3745,5 +3772,331 @@ reset role;
 delete from public.geziler where id = '31400000-0000-4000-8000-000000000010';
 delete from public.yerler where id::text like '31400000-%';
 delete from public.sehirler where id = '31400000-0000-4000-8000-000000000020';
+
+-- ---------------------------------------------------------------- #401 KK2–KK4: il önerileri
+-- Yayındaki listenin görünür satırlarını herkes okur; taslak liste ve gizli satır yalnız admin'e görünür; yalnız admin yazar.
+-- Yükleme yalnız içerik hattının (postgres); yayındaki listeye yazmaz. Sıralama tek çağrıda 1..n olur.
+select public.icerik_il_taslak_yukle('{"il": "Deneme", "slug": "il-deneme", "oneriler": [
+  {"sira": 1, "ad": "Göl", "kategori": "doga", "amaclar": ["doga"], "ilce": "Merkez", "merkeze_km": 9, "neden": "Kısa yürüyüş", "osm": "node/1", "lat": 40.6, "lng": 31.6},
+  {"sira": 2, "ad": "Çarşı", "kategori": "carsi", "amaclar": [], "neden": "Esnaf sokakları", "place_id": "ChIJ_401_b"},
+  {"sira": 3, "ad": "Müze", "kategori": "muze", "amaclar": ["kultur_tarih"], "neden": "Yağmurlu gün"}]}'::jsonb);
+do $$
+begin
+  assert (select degistiren = 'rehber' and not yayinda from public.il_listeleri where il_slug = 'il-deneme'), '#401 KK3: yükleme taslak, Rehber yazdı';
+  assert (select count(*) from public.il_oneriler where il_slug = 'il-deneme') = 3, '#401 KK3: 3 yer yüklendi';
+end $$;
+-- Biçim dışı satır reddedilir: bilinmeyen kategori, 90 karakteri aşan neden, geçersiz amaç, yinelenen sıra.
+select pg_temp.hata_bekle($$insert into public.il_oneriler (il_slug, sira, ad, kategori) values ('il-deneme', 9, 'X', 'gece')$$, '23514');
+select pg_temp.hata_bekle($$insert into public.il_oneriler (il_slug, sira, ad, kategori, neden) values ('il-deneme', 9, 'X', 'doga', repeat('a', 91))$$, '23514');
+select pg_temp.hata_bekle($$insert into public.il_oneriler (il_slug, sira, ad, kategori, amaclar) values ('il-deneme', 9, 'X', 'doga', '{deniz}')$$, '23514');
+select pg_temp.hata_bekle($$insert into public.il_oneriler (il_slug, sira, ad, kategori) values ('il-deneme', 1, 'X', 'doga')$$, '23505');
+-- Taslak liste: anon ve sıradan hesap görmez, yazamaz.
+set role anon;
+do $$
+begin
+  assert not exists (select 1 from public.il_listeleri where il_slug = 'il-deneme'), '#401 KK2: taslak liste anon''a görünmez';
+  assert not exists (select 1 from public.il_oneriler where il_slug = 'il-deneme'), '#401 KK2: taslak satır anon''a görünmez';
+end $$;
+select pg_temp.hata_bekle($$select public.il_oneri_sirala('il-deneme', '{}')$$, '42501');
+select pg_temp.hata_bekle($$select public.icerik_il_taslak_yukle('{}'::jsonb)$$, '42501');
+reset role;
+set role authenticated;
+select pg_temp.as_user(:A);
+update public.il_listeleri set yayinda = true where il_slug = 'il-deneme';
+reset role;
+do $$ begin assert (select not yayinda from public.il_listeleri where il_slug = 'il-deneme'), '#401 KK2: sıradan hesap listeyi yayınlayamaz, yayinda hâlâ false'; end $$;
+set role authenticated;
+select pg_temp.as_user(:A);
+update public.il_oneriler set ad = 'Saldırgan' where il_slug = 'il-deneme';
+delete from public.il_oneriler where il_slug = 'il-deneme';
+delete from public.il_listeleri where il_slug = 'il-deneme';
+reset role;
+do $$
+begin
+  assert exists (select 1 from public.il_listeleri where il_slug = 'il-deneme'), '#401 KK2: sıradan hesap listeyi silemez';
+  assert (select count(*) from public.il_oneriler where il_slug = 'il-deneme') = 3, '#401 KK2: sıradan hesap satır silemez';
+end $$;
+set role authenticated;
+select pg_temp.as_user(:A);
+select pg_temp.hata_bekle($$insert into public.il_oneriler (il_slug, sira, ad, kategori) values ('il-deneme', 4, 'X', 'doga')$$, '42501');
+select pg_temp.hata_bekle($$select public.il_oneri_sirala('il-deneme', '{}')$$, '42501');
+select pg_temp.hata_bekle($$select public.icerik_il_taslak_yukle('{}'::jsonb)$$, '42501');
+do $$ begin assert not exists (select 1 from public.il_oneriler where il_slug = 'il-deneme'), '#401 KK2: taslak satır sıradan hesaba görünmez'; end $$;
+-- Admin: okur, gizler, ekler, sıralar, yayınlar; her değişiklik "son değişiklik"i BO'ya çevirir.
+select pg_temp.as_email(:E, 'ozcinar.ece@gmail.com');
+do $$ begin assert (select count(*) from public.il_oneriler where il_slug = 'il-deneme' and ad <> 'Saldırgan') = 3, '#401 KK2: sıradan hesap yazamadı, admin taslağı okur'; end $$;
+update public.il_oneriler set gorunur = false where il_slug = 'il-deneme' and sira = 3;
+insert into public.il_oneriler (il_slug, sira, ad, kategori, place_id, primary_type) values ('il-deneme', 4, 'Yeni yer', 'manzara', 'ChIJ_401_d', 'park');
+select public.il_oneri_sirala('il-deneme', array(select id from public.il_oneriler where il_slug = 'il-deneme' order by sira desc));
+select pg_temp.hata_bekle($$select public.il_oneri_sirala('il-deneme', array(select id from public.il_oneriler where il_slug = 'il-deneme' and sira > 1))$$, '22023');
+update public.il_listeleri set yayinda = true, yayinlandi_at = now() where il_slug = 'il-deneme';
+do $$
+begin
+  assert (select sira from public.il_oneriler where ad = 'Yeni yer' and il_slug = 'il-deneme') = 1, '#401 KK4: sürüklenen sıra 1..n yazıldı';
+  assert (select array_agg(sira order by sira) from public.il_oneriler where il_slug = 'il-deneme') = '{1,2,3,4}', '#401 KK4: sıra ardışık';
+  assert (select degistiren = 'yonetim' from public.il_listeleri where il_slug = 'il-deneme'), '#401 KK4: son değişiklik BO';
+  assert (select yayinda from public.il_listeleri where il_slug = 'il-deneme'), '#401 KK4: admin yayınladı';
+  assert (select count(*) from public.il_oneriler where il_slug = 'il-deneme') = 4, '#401 KK4: admin yayındaki listenin bütün satırlarını okur';
+  assert exists (select 1 from public.il_oneriler where il_slug = 'il-deneme' and not gorunur), '#401 KK4: admin yayındaki listede gizli satırı okur';
+end $$;
+reset role;
+-- Yayındaki liste sıradan hesaba görünür: yazma politikası burada ölçülür (taslakta satır zaten görünmez).
+set role authenticated;
+select pg_temp.as_user(:A);
+do $$ begin assert (select count(*) from public.il_oneriler where il_slug = 'il-deneme') = 3, '#401 KK2: sıradan hesap yayındaki görünür satırları görür'; end $$;
+update public.il_oneriler set gorunur = false, ad = 'x' where il_slug = 'il-deneme';
+delete from public.il_oneriler where il_slug = 'il-deneme';
+update public.il_listeleri set yayinda = false where il_slug = 'il-deneme';
+delete from public.il_listeleri where il_slug = 'il-deneme';
+reset role;
+do $$
+begin
+  assert (select count(*) from public.il_oneriler where il_slug = 'il-deneme') = 4, '#401 KK2: sıradan hesap yayındaki satırı silemez';
+  assert (select count(*) from public.il_oneriler where il_slug = 'il-deneme' and gorunur) = 3, '#401 KK2: sıradan hesap yayındaki satırı gizleyemez';
+  assert not exists (select 1 from public.il_oneriler where il_slug = 'il-deneme' and ad = 'x'), '#401 KK2: sıradan hesap yayındaki satırın adını değiştiremez';
+  assert (select yayinda from public.il_listeleri where il_slug = 'il-deneme'), '#401 KK2: sıradan hesap yayındaki listeyi geri çekemez';
+end $$;
+-- Yayında: herkes görünür satırları okur, gizli satır görünmez; yükleme yayındaki listeye yazmaz.
+set role anon;
+do $$
+begin
+  assert (select count(*) from public.il_oneriler where il_slug = 'il-deneme') = 3, '#401 KK2: yayındaki listenin görünür satırları okunur';
+  assert not exists (select 1 from public.il_oneriler where il_slug = 'il-deneme' and ad = 'Müze'), '#401 KK4: gizli yer görünmez';
+end $$;
+reset role;
+select pg_temp.hata_bekle($$select public.icerik_il_taslak_yukle('{"il": "Deneme", "slug": "il-deneme", "oneriler": []}'::jsonb)$$, '55000');
+do $$ begin assert (select count(*) from public.il_oneriler where il_slug = 'il-deneme') = 4, '#401 KK3: yayındaki listeye dokunulmaz'; end $$;
+delete from public.il_listeleri where il_slug = 'il-deneme';
+
+-- #432 1/3: gezi paylaşımı (KK3 link + RLS, KK5 girişsiz özet, KK6 kaynak_paylasim, KK8 ölçüm).
+\set PA '''43200000-0000-4000-8000-0000000000a1'''
+\set PB '''43200000-0000-4000-8000-0000000000b2'''
+\set PX '''43200000-0000-4000-8000-0000000000e4'''
+\set PM '''43200000-0000-4000-8000-0000000000f5'''
+reset role;
+insert into auth.users (id, is_anonymous) values (:PA, false), (:PB, false), (:PX, false), (:PM, true);
+insert into public.profiles (id, name, username) values (:PA, 'Ece', 'ece432');
+insert into public.trips (id, owner_id, name, city_place_id, city_label, country_code, lat, lng, tz, start_date, end_date) values
+  ('43200000-0000-4000-8000-000000000001', :PA, 'Paylaşılan Roma', 'ChIJ-roma-432', 'Roma', 'IT', 41.9, 12.49, 'Europe/Rome', '2026-10-12', '2026-10-13');
+insert into public.members (trip_id, user_id, display_name) values ('43200000-0000-4000-8000-000000000001', :PB, 'Berk');
+update public.days set start_time = '10:00' where trip_id = '43200000-0000-4000-8000-000000000001' and index = 2;
+insert into public.places (id, trip_id, place_id, primary_type, lat, lng, note, added_by) values
+  ('43200000-0000-4000-8000-000000000011', '43200000-0000-4000-8000-000000000001', 'ChIJ-kolezyum-432', 'tourist_attraction', 41.89, 12.49, 'gizli not', :PA),
+  ('43200000-0000-4000-8000-000000000012', '43200000-0000-4000-8000-000000000001', 'ChIJ-muze-432', 'museum', 41.90, 12.45, null, :PA),
+  ('43200000-0000-4000-8000-000000000013', '43200000-0000-4000-8000-000000000001', 'ChIJ-havuz-432', 'park', 41.91, 12.48, null, :PA);
+insert into public.stops (trip_id, day_id, place_ref, order_key, minutes)
+select '43200000-0000-4000-8000-000000000001', d.id, x.p::uuid, x.k, 60
+from (values ('43200000-0000-4000-8000-000000000011', 1, 'b'), ('43200000-0000-4000-8000-000000000012', 1, 'a'), ('43200000-0000-4000-8000-000000000013', 2, 'a')) x(p, g, k)
+join public.days d on d.trip_id = '43200000-0000-4000-8000-000000000001' and d.index = x.g;
+insert into public.sehirler (id, ad, slug, lat, lng, yayin) values ('43200000-0000-4000-8000-000000000020', 'Roma 432', 'roma-432', 41.9, 12.49, true);
+insert into public.yerler (sehir_id, place_id, ad, lat, lng, yayin) values
+  ('43200000-0000-4000-8000-000000000020', 'ChIJ-kolezyum-432', 'Kolezyum', 41.89, 12.49, true),
+  ('43200000-0000-4000-8000-000000000020', 'ChIJ-havuz-432', 'Yayında olmayan ad', 41.91, 12.48, false);
+
+set role authenticated;
+-- KK3: dışarıdan biri (X) başkasının seyahati için link oluşturamaz; kendi adına olmayan link de yok.
+select pg_temp.as_user(:PX);
+select pg_temp.hata_bekle($$insert into public.gezi_paylasim (trip_id) values ('43200000-0000-4000-8000-000000000001')$$, '42501');
+-- A link oluşturur; token 24 karakter base64url, kişi adları varsayılan kapalı.
+select pg_temp.as_user(:PA);
+insert into public.gezi_paylasim (trip_id) values ('43200000-0000-4000-8000-000000000001');
+do $$
+declare g public.gezi_paylasim;
+begin
+  select * into g from public.gezi_paylasim where trip_id = '43200000-0000-4000-8000-000000000001';
+  assert g.token ~ '^[A-Za-z0-9_-]{24}$', '#432 KK3: token 24 karakter base64url: ' || g.token;
+  assert not g.kisi_adlari_acik, '#432 KK2: kişi adları varsayılan kapalı';
+  assert g.acik and g.olusturan = auth.uid(), '#432 KK3: açık, oluşturan A';
+end $$;
+-- Aynı kişi aynı seyahatte ikinci açık link açamaz (tek link).
+select pg_temp.hata_bekle($$insert into public.gezi_paylasim (trip_id) values ('43200000-0000-4000-8000-000000000001')$$, '23505');
+-- Token, oluşturan ve sayaçlar istemciden yazılamaz.
+select pg_temp.hata_bekle($$insert into public.gezi_paylasim (trip_id, token) values ('43200000-0000-4000-8000-000000000001', 'aaaaaaaaaaaaaaaaaaaaaaaa')$$, '42501');
+select pg_temp.hata_bekle($$update public.gezi_paylasim set token = 'aaaaaaaaaaaaaaaaaaaaaaaa'$$, '42501');
+select pg_temp.hata_bekle($$update public.gezi_paylasim set acilma_sayisi = 999$$, '42501');
+select pg_temp.hata_bekle($$delete from public.gezi_paylasim$$, '42501');
+-- B (üye) A'nın linkini görmez ve kapatamaz; kendi linkini açabilir.
+select pg_temp.as_user(:PB);
+do $$ begin assert (select count(*) from public.gezi_paylasim) = 0, '#432 KK3: B, A''nın linkini görmez'; end $$;
+update public.gezi_paylasim set acik = false;
+reset role;
+do $$ begin assert (select bool_and(acik) from public.gezi_paylasim where trip_id = '43200000-0000-4000-8000-000000000001'), '#432 KK3: B, A''nın linkini kapatamaz'; end $$;
+-- kaynak_paylasim istemciden yazılamaz.
+set role authenticated;
+select pg_temp.as_user(:PA);
+select pg_temp.hata_bekle($$update public.trips set kaynak_paylasim = (select id from public.gezi_paylasim limit 1) where id = '43200000-0000-4000-8000-000000000001'$$, '42501');
+reset role;
+
+-- KK5: girişsiz özet. Notlar, davet token'ı, kişi adları (kapalıyken) dönmez; durak adı yalnız yayındaki içeriğimizden.
+reset role;
+select set_config('test.paylasim_token', (select token from public.gezi_paylasim where trip_id = '43200000-0000-4000-8000-000000000001'), false);
+set role anon;
+select pg_temp.as_user(null);
+select pg_temp.hata_bekle($$select * from public.gezi_paylasim$$, '42501');
+reset role;
+set role anon;
+do $$
+declare
+  o jsonb := public.paylasim_ozeti(current_setting('test.paylasim_token'));
+  m text := o::text;
+begin
+  assert not (o ->> 'kapali')::boolean, '#432 KK5: açık link';
+  assert o ->> 'ad' = 'Paylaşılan Roma' and (o ->> 'gun_sayisi')::int = 2 and (o ->> 'durak_sayisi')::int = 3, '#432 KK2: ad, gün, durak: ' || m;
+  assert (o ->> 'kisi_sayisi')::int = 2, '#432 KK2: N kişi gezdi';
+  assert o -> 'kisi_adlari' = 'null'::jsonb or o -> 'kisi_adlari' is null, '#432 KK2: kişi adları kapalıyken dönmez';
+  assert position('Berk' in m) = 0 and position('Ece' in m) = 0, '#432 KK2: ad hiç geçmez';
+  assert position('gizli not' in m) = 0, '#432 KK2: not dönmez';
+  assert position('invite' in m) = 0, '#432: davet token anahtarı yok';
+  assert position('ChIJ' in m) = 0, '#432: place_id dönmez';
+  assert o #>> '{gunler,0,duraklar,0,tur}' = 'museum' and o #>> '{gunler,0,duraklar,0,ad}' is null, '#432 KK5: sıra order_key ile; içeriğimizde yoksa ad null: ' || m;
+  assert o #>> '{gunler,0,duraklar,1,ad}' = 'Kolezyum', '#432 KK5: yayındaki yer adı';
+  assert o #>> '{gunler,1,duraklar,0,ad}' is null, '#432 KK5: yayında olmayan içeriğin adı dönmez';
+  assert public.paylasim_ozeti('bilinmeyen-token-xxxxxxxx') is null and public.paylasim_ozeti('kisa') is null, '#432: bilinmeyen token null';
+end $$;
+reset role;
+do $$ begin assert (select acilma_sayisi from public.gezi_paylasim where token = current_setting('test.paylasim_token')) = 1, '#432 KK8: girişsiz açılış sayacı +1'; end $$;
+-- Kişi adları açılınca adlar döner (oluşturan değiştirir).
+set role authenticated;
+select pg_temp.as_user(:PA);
+update public.gezi_paylasim set kisi_adlari_acik = true;
+do $$ begin assert public.paylasim_ozeti(current_setting('test.paylasim_token')) -> 'kisi_adlari' = '["Ece", "Berk"]'::jsonb, '#432 KK2: kişi adları açıkken döner'; end $$;
+
+-- Harita izni: günde 200 yükleme.
+reset role;
+update public.gezi_paylasim set harita_gunu = current_date, harita_sayisi = 199 where token = current_setting('test.paylasim_token');
+set role anon;
+do $$
+begin
+  assert public.paylasim_harita_izni(current_setting('test.paylasim_token')), '#432: 200. harita yüklemesi izinli';
+  assert not public.paylasim_harita_izni(current_setting('test.paylasim_token')), '#432: 201. harita yüklemesi izinsiz';
+end $$;
+reset role;
+update public.gezi_paylasim set harita_gunu = current_date - 1 where token = current_setting('test.paylasim_token');
+set role anon;
+do $$ begin assert public.paylasim_harita_izni(current_setting('test.paylasim_token')), '#432: ertesi gün sayaç sıfırlanır'; end $$;
+-- Girişsiz "Seyahatime al" yok.
+select pg_temp.hata_bekle($$select public.paylasimdan_al(current_setting('test.paylasim_token'))$$, '42501');
+reset role;
+
+-- KK6: X "Seyahatime al" yapar: tarihsiz yeni seyahat, aynı gün ve duraklar, not yok, kaynak_paylasim dolu, olay yazılır.
+set role authenticated;
+select pg_temp.as_user(:PX);
+select set_config('test.alinan', public.paylasimdan_al(current_setting('test.paylasim_token'))::text, false);
+do $$
+declare v uuid := current_setting('test.alinan')::uuid;
+begin
+  assert (select owner_id from public.trips where id = v) = auth.uid(), '#432 KK5: yeni seyahatin sahibi X';
+  assert (select kaynak_paylasim from public.trips where id = v) is not null, '#432 KK6: kaynak_paylasim dolu';
+  assert (select start_date from public.trips where id = v) is null, '#432: tarihsiz';
+  assert (select count(*) from public.days where trip_id = v) = 2, '#432: 2 gün';
+  assert (select start_time from public.days where trip_id = v and index = 2) = '10:00', '#432: gün saati taşınır';
+  assert (select count(*) from public.stops where trip_id = v) = 3, '#432: 3 durak';
+  assert (select count(*) from public.places where trip_id = v and note is not null) = 0, '#432 KK2: not taşınmaz';
+  assert (select count(*) from public.members where trip_id = v) = 1, '#432: üyeler taşınmaz';
+  assert not public.is_member('43200000-0000-4000-8000-000000000001'), '#432: X kaynak seyahate üye olmaz';
+  assert (select count(*) from public.olaylar where tur = 'paylasimdan_alindi' and user_id = auth.uid()) = 1, '#432 KK8: paylasimdan_alindi';
+end $$;
+insert into public.olaylar (tur) values ('paylasim_acildi');
+reset role;
+do $$ begin assert (select kaynak_paylasim from public.trips where id = current_setting('test.alinan')::uuid) = (select id from public.gezi_paylasim where token = current_setting('test.paylasim_token')), '#432 KK6: kaynak_paylasim doğru paylaşım'; end $$;
+
+-- PRD §7: 30 günü geçen Google koordinatı girişsiz özette dönmez, Seyahatime al'da kopyalanmaz (place_id ve damga kalır).
+reset role;
+update public.places set google_fetched_at = now() - interval '31 days' where id = '43200000-0000-4000-8000-000000000011';
+set role anon;
+do $$
+declare o jsonb := public.paylasim_ozeti(current_setting('test.paylasim_token'));
+begin
+  assert o #>> '{gunler,0,duraklar,1,ad}' = 'Kolezyum', 'ön koşul: eski damgalı durak Kolezyum';
+  assert o #> '{gunler,0,duraklar,1,lat}' = 'null'::jsonb and o #> '{gunler,0,duraklar,1,lng}' = 'null'::jsonb, '#435: 31 günlük koordinat null: ' || o::text;
+  assert (o #>> '{gunler,0,duraklar,0,lat}')::numeric = 41.90, '#435: taze koordinat döner';
+end $$;
+reset role;
+set role authenticated;
+select pg_temp.as_user(:PX);
+select set_config('test.alinan2', public.paylasimdan_al(current_setting('test.paylasim_token'))::text, false);
+reset role;
+do $$
+declare
+  v uuid := current_setting('test.alinan2')::uuid;
+  e public.places;
+  t public.places;
+begin
+  select * into e from public.places where trip_id = v and place_id = 'ChIJ-kolezyum-432';
+  select * into t from public.places where trip_id = v and place_id = 'ChIJ-muze-432';
+  assert e.lat is null and e.lng is null, '#435: eski koordinat boş kopyalanır';
+  assert e.google_fetched_at = (select google_fetched_at from public.places where id = '43200000-0000-4000-8000-000000000011'), '#435: google_fetched_at korunur';
+  assert t.lat = 41.90 and t.lng = 12.45, '#435: taze koordinat kopyalanır';
+end $$;
+delete from public.trips where id = current_setting('test.alinan2')::uuid;
+
+-- #435: 30 günü geçen şehir koordinatı da kopyalanmaz (place_id ve damga kalır).
+update public.trips set google_fetched_at = now() - interval '90 days' where id = '43200000-0000-4000-8000-000000000001';
+set role authenticated;
+select pg_temp.as_user(:PX);
+select set_config('test.alinan3', public.paylasimdan_al(current_setting('test.paylasim_token'))::text, false);
+reset role;
+do $$
+declare
+  y public.trips;
+  k public.trips;
+begin
+  select * into y from public.trips where id = current_setting('test.alinan3')::uuid;
+  select * into k from public.trips where id = '43200000-0000-4000-8000-000000000001';
+  assert k.lat is not null, 'ön koşul: kaynakta şehir koordinatı var';
+  assert y.lat is null and y.lng is null, '#435: 90 günlük şehir koordinatı null kopyalanır';
+  assert y.city_place_id is not distinct from k.city_place_id and y.google_fetched_at = k.google_fetched_at, '#435: şehir place_id ve damga korunur';
+end $$;
+delete from public.trips where id = current_setting('test.alinan3')::uuid;
+update public.trips set google_fetched_at = now() where id = '43200000-0000-4000-8000-000000000001';
+
+-- #435: misafir (anonim) Seyahatime al ile seyahat kuramaz.
+set role authenticated;
+select pg_temp.as_user(:PM, true);
+select pg_temp.hata_bekle($$select public.paylasimdan_al(current_setting('test.paylasim_token'))$$, '42501');
+reset role;
+
+-- #435: misafir (anonim) üye link açamaz.
+insert into public.members (trip_id, user_id, display_name) values ('43200000-0000-4000-8000-000000000001', :PM, 'Misafir');
+set role authenticated;
+select pg_temp.as_user(:PM, true);
+do $$ begin assert public.is_member('43200000-0000-4000-8000-000000000001') and public.is_anonymous(), 'ön koşul: PM misafir üye'; end $$;
+select pg_temp.hata_bekle($$insert into public.gezi_paylasim (trip_id) values ('43200000-0000-4000-8000-000000000001')$$, '42501');
+reset role;
+delete from public.members where trip_id = '43200000-0000-4000-8000-000000000001' and user_id = :PM;
+
+-- KK3: kapatılan link "kapalı" döner, yeniden açılamaz, Seyahatime al yapılamaz; oluşturan seyahatten çıkınca da kapalı sayılır.
+set role authenticated;
+select pg_temp.as_user(:PA);
+update public.gezi_paylasim set acik = false;
+do $$ begin assert (select kapatildi_at from public.gezi_paylasim where token = current_setting('test.paylasim_token')) is not null, '#432 KK3: kapatma damgası'; end $$;
+select pg_temp.hata_bekle($$update public.gezi_paylasim set acik = true$$, '42501');
+reset role;
+set role anon;
+do $$ begin assert public.paylasim_ozeti(current_setting('test.paylasim_token')) = '{"kapali": true}'::jsonb, '#432 KK3: kapalı link'; end $$;
+do $$ begin assert not public.paylasim_harita_izni(current_setting('test.paylasim_token')), '#432: kapalı linkte harita yok'; end $$;
+reset role;
+set role authenticated;
+select pg_temp.as_user(:PX);
+select pg_temp.hata_bekle($$select public.paylasimdan_al(current_setting('test.paylasim_token'))$$, 'P0002');
+select pg_temp.as_user(:PB);
+insert into public.gezi_paylasim (trip_id) values ('43200000-0000-4000-8000-000000000001');
+reset role;
+select set_config('test.paylasim_token_b', (select token from public.gezi_paylasim where olusturan = :PB and acik), false);
+delete from public.members where trip_id = '43200000-0000-4000-8000-000000000001' and user_id = :PB;
+set role anon;
+do $$ begin assert public.paylasim_ozeti(current_setting('test.paylasim_token_b')) = '{"kapali": true}'::jsonb, '#432: oluşturan çıkınca link kapalı sayılır'; end $$;
+reset role;
+do $$ begin assert (select not acik and kapatildi_at is not null from public.gezi_paylasim where token = current_setting('test.paylasim_token_b')), '#435: oluşturan çıkınca link kapanır'; end $$;
+-- Yeniden üye olsa da eski link canlanmaz.
+insert into public.members (trip_id, user_id, display_name) values ('43200000-0000-4000-8000-000000000001', :PB, 'Berk');
+set role anon;
+do $$ begin assert public.paylasim_ozeti(current_setting('test.paylasim_token_b')) = '{"kapali": true}'::jsonb, '#435: yeniden üyelikte eski link kapalı kalır'; end $$;
+reset role;
+delete from public.trips where id = current_setting('test.alinan')::uuid or id = '43200000-0000-4000-8000-000000000001';
+delete from public.olaylar where tur in ('paylasimdan_alindi', 'paylasim_acildi');
+delete from public.sehirler where id = '43200000-0000-4000-8000-000000000020';
+delete from auth.users where id in (:PA, :PB, :PX, :PM);
+do $$ begin assert (select count(*) from public.gezi_paylasim) = 0, '#432: seyahat silinince linkler de silinir'; end $$;
 
 \echo 'rls_test: TÜM TESTLER GEÇTİ'

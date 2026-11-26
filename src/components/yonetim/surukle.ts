@@ -6,14 +6,14 @@ import { useEffect, useEffectEvent, type RefObject } from 'react';
 type Ogesi = RefObject<unknown>;
 const dom = (ref: Ogesi) => ref.current as HTMLElement | null;
 
-/** Liste öğesi: `grup` içinde sürüklenir; bırakılınca onBirak(kaynakIndeks, buIndeks). */
-export function useSuruklenen(ref: Ogesi, grup: string, indeks: number, onBirak: (kaynak: number, hedef: number) => void) {
+/** Liste öğesi: `grup` içinde sürüklenir; bırakılınca onBirak(kaynakIndeks, buIndeks). `etkin` false ise ne sürüklenir ne bırakma hedefidir. */
+export function useSuruklenen(ref: Ogesi, grup: string, indeks: number, onBirak: (kaynak: number, hedef: number) => void, etkin = true) {
   const tur = `application/x-yonetim-${grup}`;
   const birak = useEffectEvent((kaynak: number) => onBirak(kaynak, indeks));
   const bas = useEffectEvent((e: DragEvent) => e.dataTransfer?.setData(tur, String(indeks)));
   useEffect(() => {
     const el = dom(ref);
-    if (!el || typeof el.addEventListener !== 'function') return;
+    if (!el || typeof el.addEventListener !== 'function' || !etkin) return;
     el.setAttribute('draggable', 'true');
     const ustunde = (e: DragEvent) => {
       if (e.dataTransfer?.types.includes(tur)) e.preventDefault();
@@ -31,8 +31,9 @@ export function useSuruklenen(ref: Ogesi, grup: string, indeks: number, onBirak:
       el.removeEventListener('dragstart', bas);
       el.removeEventListener('dragover', ustunde);
       el.removeEventListener('drop', bitti);
+      el.removeAttribute('draggable');
     };
-  }, [ref, tur]);
+  }, [ref, tur, etkin]);
 }
 
 /** #111: yalnız bırakma hedefi (sürüklenmez): `grup`tan gelen öğe bu indekse bırakılır (ör. mekan kartı paragraf altına). */

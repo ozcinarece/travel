@@ -42,6 +42,31 @@ export const yRenk = {
   menuEtiket: '#ffb27a',
 } as const;
 
+/**
+ * #401 kanvas BO_IlOnerileri: tablo ve süzgeç renkleri. Kategori çipi zemin/metin çiftleri kanvastaki satırlardan; kanvasta
+ * satırı olmayan Tatlı-kahve ve Manzara süzgeç çipinin nötr renklerini alır (tasarım bekliyor).
+ */
+export const yIl = {
+  metin: '#0E1430',
+  ikincil: '#5B6178',
+  cizgi: '#E4E7EE',
+  baslikZemin: '#F6F7FA',
+  tutamac: '#9AA1B2',
+  acik: '#16A06E',
+  kapali: '#C3C9D6',
+  gizliSoluk: 0.45,
+  kategori: {
+    doga: { zemin: '#E3F5EE', metin: '#0E7A52' },
+    carsi: { zemin: '#FDF3DC', metin: '#8A6A12' },
+    aktivite: { zemin: '#E0F2F7', metin: '#0E6A85' },
+    yemek: { zemin: '#FFF1E6', metin: '#C25200' },
+    tarih: { zemin: '#EEF2FF', metin: '#152A6B' },
+    muze: { zemin: '#F1EBFB', metin: '#5B34B8' },
+    tatli_kahve: { zemin: '#F6F7FA', metin: '#0E1430' },
+    manzara: { zemin: '#F6F7FA', metin: '#0E1430' },
+  },
+} as const;
+
 /** Kart gölgesi (kanvas: 0 10px 30px rgba(21,42,107,.06); editör kâğıdı .08). */
 export const yGolge = '0 10px 30px rgba(21,42,107,0.06)';
 export const yGolgeKagit = '0 10px 30px rgba(21,42,107,0.08)';

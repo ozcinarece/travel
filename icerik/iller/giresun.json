@@ -1,0 +1,320 @@
+{
+  "il": "Giresun",
+  "slug": "giresun",
+  "guncelleme": "2026-11-21",
+  "oneriler": [
+    {
+      "sira": 1,
+      "ad": "Giresun Adası (Aretias)",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "doga"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "Amazon tapınağı ve Bizans manastırı kalıntıları; tekneyle gidilir, Hamza Taşı burada"
+    },
+    {
+      "sira": 2,
+      "ad": "Giresun Kalesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "Şehre tepeden bakan surlar ve Pontus kaya mezarları; adaya bakan piknik alanı",
+      "osm": "way/297689058",
+      "place_id": "ChIJmVuZ1KxtY0ARN0aSh4wEjAg"
+    },
+    {
+      "sira": 3,
+      "ad": "Kümbet Yaylası",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Dereli",
+      "merkeze_km": 52,
+      "neden": "1640 m'de kamp ve piknik yaylası; temmuzda Aymaç tepesinde yayla şenliği yapılır"
+    },
+    {
+      "sira": 4,
+      "ad": "Zeytinlik Mahallesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "Kalenin doğu yamacında alt katı taş, üstü ahşap cumbalı Rum evleri; kentsel sit"
+    },
+    {
+      "sira": 5,
+      "ad": "Giresun Müzesi (Gogora Kilisesi)",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "Bir dönem cezaevi olan eski Rum kilisesinde ada kazısı buluntuları ve amforalar"
+    },
+    {
+      "sira": 6,
+      "ad": "Şebinkarahisar Kalesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Şebinkarahisar",
+      "merkeze_km": 115,
+      "neden": "Sarp kaya üstünde Selçuklu kapısı, kayaya oyulmuş sarnıçlar ve Kırk Badal su yolu"
+    },
+    {
+      "sira": 7,
+      "ad": "Giresun fındık ezmesi",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Yalnız yöre fındığı ve pancar şekeri; fındık parçaları dişe gelir; mahreç tescilli"
+    },
+    {
+      "sira": 8,
+      "ad": "Meryem Ana Manastırı (Kayadibi)",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "doga"
+      ],
+      "ilce": "Şebinkarahisar",
+      "merkeze_km": 126,
+      "neden": "Yalçın kayaya oyulmuş dört katlı manastır; restorasyon sonrası ören yeri olarak açık"
+    },
+    {
+      "sira": 9,
+      "ad": "Bektaş Yaylası",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Dereli",
+      "merkeze_km": 59,
+      "neden": "Orman sınırında, 2000 m civarında yayla; yolda Gelin ve Despot kayaları görülür"
+    },
+    {
+      "sira": 10,
+      "ad": "Görele dondurması",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet",
+        "cocuklu"
+      ],
+      "ilce": "Görele",
+      "merkeze_km": 57,
+      "neden": "Meyan kökü özütüyle yapılan, krema kıvamında yumuşak dondurma; mahreç tescilli"
+    },
+    {
+      "sira": 11,
+      "ad": "Kuzalan Tabiat Parkı ve Mavi Göl",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Dereli",
+      "merkeze_km": 65,
+      "neden": "Şelale, maden suyu kaynakları ve kısa orman yoluyla varılan turkuaz renkli göller"
+    },
+    {
+      "sira": 12,
+      "ad": "Tirebolu Kalesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Tirebolu",
+      "merkeze_km": 44,
+      "neden": "İki koy arasındaki burunda deniz kalesi; eski kaynaklarda Saint Jean adıyla geçer"
+    },
+    {
+      "sira": 13,
+      "ad": "Giresun karalahana çorbası",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Pancar denen karalahana, mısır unu ve tereyağıyla koyulaşan yöre çorbası"
+    },
+    {
+      "sira": 14,
+      "ad": "Giresun fındık ezmeli kadayıf tatlısı",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Fındık unuyla yoğrulup sütlü şerbetle ıslatılan, helva kıvamlı kadayıf; mahreç tescilli"
+    },
+    {
+      "sira": 15,
+      "ad": "Kuşköy (ıslık dili)",
+      "kategori": "aktivite",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Çanakçı",
+      "merkeze_km": 85,
+      "neden": "Köylüler vadiler arası ıslıkla konuşur; UNESCO acil koruma listesinde"
+    },
+    {
+      "sira": 16,
+      "ad": "Alucra oğlak kebabı",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Alucra",
+      "merkeze_km": 160,
+      "neden": "Yaz-güz kesilen kara oğlak, yöreye özgü yöntemle fırında pişirilir; coğrafi işaretli"
+    },
+    {
+      "sira": 17,
+      "ad": "Görele Çavuşlu ekmeği",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Görele",
+      "merkeze_km": 62,
+      "neden": "Ekşi mayalı, sert kabuklu, üstü sırlı ekmek; oda sıcaklığında 7-10 gün dayanır; tescilli"
+    },
+    {
+      "sira": 18,
+      "ad": "Aksu Şenliği (Aksu Deresi ağzı)",
+      "kategori": "aktivite",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 4,
+      "neden": "Her 20 Mayıs'ta dere ağzında bahar kutlaması; yürüyüş adadaki Hamza Taşı'ndan başlar"
+    },
+    {
+      "sira": 19,
+      "ad": "Sis Dağı Yaylası",
+      "kategori": "manzara",
+      "amaclar": [
+        "doga",
+        "kultur_tarih"
+      ],
+      "ilce": "Görele",
+      "merkeze_km": 95,
+      "neden": "Trabzon sınırında 2000 m üstü zirve; yaz şenliğine iki ilden yöresel kıyafetle gelinir"
+    },
+    {
+      "sira": 20,
+      "ad": "Yedideğirmenler Tabiat Parkı",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Espiye",
+      "merkeze_km": 62,
+      "neden": "Dere üstünde sıra sıra su değirmenleri, mağara ve taş köprüler; çoğu hâlâ öğütüyor"
+    },
+    {
+      "sira": 21,
+      "ad": "Giresun ısırgan çorbası",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Haşlanıp ezilen ısırgan mısır unuyla koyulaştırılır; Giresun ısırganı tescilli"
+    },
+    {
+      "sira": 22,
+      "ad": "Karagöl Dağları ve buzul gölleri",
+      "kategori": "aktivite",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Dereli",
+      "merkeze_km": 100,
+      "neden": "3107 m zirvenin altında Aygır Gölü dahil buzul gölleri; yaz yürüyüş rotası"
+    },
+    {
+      "sira": 23,
+      "ad": "Katolik Kilisesi (Çocuk Kütüphanesi)",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "Kesme taş eski Katolik kilisesi uzun süredir çocuk kütüphanesi olarak kullanılıyor"
+    },
+    {
+      "sira": 24,
+      "ad": "Deliklitaş",
+      "kategori": "manzara",
+      "amaclar": [
+        "yavas"
+      ],
+      "ilce": "Görele",
+      "merkeze_km": 55,
+      "neden": "Sahildeki delikli kaya; deliğinden geçenin derdinden kurtulacağına inanılır"
+    },
+    {
+      "sira": 25,
+      "ad": "Gelin Kaya ve Despot Kaya",
+      "kategori": "manzara",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Dereli",
+      "merkeze_km": 57,
+      "neden": "Bektaş Yaylası yolunda yoldan görülen iki doğal kaya oluşumu"
+    },
+    {
+      "sira": 26,
+      "ad": "Gölyanı Obası",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Yağlıdere",
+      "merkeze_km": 95,
+      "neden": "Çam ormanı içinde sazlı küçük göl ve 'hartama' denen ahşap yayla evleri"
+    },
+    {
+      "sira": 27,
+      "ad": "Bedrama Kalesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Tirebolu",
+      "merkeze_km": 50,
+      "neden": "Tirebolu yakınında falezler üzerinde, denizi gözeten Orta Çağ kalesi kalıntısı"
+    }
+  ]
+}

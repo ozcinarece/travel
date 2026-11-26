@@ -1,0 +1,153 @@
+{
+  "surum": 1,
+  "sehir": {
+    "slug": "mardin"
+  },
+  "takvim": {
+    "ilk_gun": "cumartesi"
+  },
+  "gezi": {
+    "slug": "midyat-ve-tur-abdinde-bir-gun",
+    "baslik": "Midyat ve Tur Abdin'de bir gün",
+    "ozet": "Sabah Mor Gabriel ve Hah, öğleden sonra Eski Midyat'ın taş evleri",
+    "yazar_ad": "Tripmate ekibi",
+    "amaclar": [
+      "kultur_tarih",
+      "yavas"
+    ],
+    "yazi_md": "Mardin'i gezdiysen bu gün doğuya, Tur Abdin'e ayrılıyor. Tur Abdin, Süryanice \"Tanrı'nın kullarının dağı\" demek: Midyat'ın çevresindeki bu taşlık yaylada yüzyıllardır manastırlar ve köy kiliseleri ayakta. Plan araçla. Sabah erken çıkıp önce Midyat'ın ötesindeki Mor Gabriel Manastırı'na, sonra Hah köyündeki kubbeli kiliseye gidiyorsun. Öğlen Midyat'a inip eski bir handa yemek yiyor, öğleden sonrayı Eski Midyat'ın taş sokaklarında yürüyerek geçiriyorsun. Akşam Mardin'e dönüş bir saat kadar.\n\n> Manastırlar ve köy kiliseleri yaşayan ibadet yerleri. Omuzları ve dizleri örten giysiler giy, yanına bir şal al; ayin sırasında içeri girme, fotoğraf için önce izin iste.\n\n## 1. gün · Manastırdan Midyat'a\n\nMardin'den sabah sekiz gibi çık; Midyat üzerinden Cizre yoluna devam edip bir buçuk saate yakın sonra [Mor Gabriel Manastırı](mekan:ChIJmxwPjCA0CkARZC8hlP_d4h8)'na varırsın. 397'de kurulan manastır bugün Tur Abdin metropolitinin oturduğu yer; keşişler ve öğrenciler burada yaşıyor. Gezi görevlilerle, gruplar halinde yapılır. Ana kilisenin apsisindeki 6. yüzyıldan kalma altın zeminli mozaiklere ve sekiz kemerli yüksek kubbeye bak. Manastır öğlen bir süre ziyareti durduruyor; bu yüzden günün ilk durağı burası.\n\n::mekan[ChIJmxwPjCA0CkARZC8hlP_d4h8]\n\nManastırdan Midyat üzerinden, kırk dakikaya yakın yolla Anıtlı köyüne, eski adıyla Hah'a git. Köyün girişindeki [Anıtlı Meryem Ana Kilisesi](mekan:ChIJxVwXdh-3C0AR1vB3JGihO28) Tur Abdin'in en eski kiliselerinden; kare planı ve oymalı kubbe kasnağıyla bölgedeki öteki kiliselere benzemez. Kapı kapalıysa köyde sor, anahtar köyde durur. Çatıya çıkıp kubbeyi yakından görmeyi unutma.\n\nÖğlen Midyat'a in ve arabayı Eski Midyat'ın çarşı ucuna bırak. Öğle yemeği [Gelüşke Hanı](mekan:ChIJfXBVZsxNCkAROVe2Kdpg07k)'nda: 20. yüzyılın başında yapılmış kervan hanının avlusunda, çeşmenin yanında kebap ve Midyat'ın ev yemekleri yenir. Kebabın yanına buğdaylı soğuk yoğurt çorbası iste.\n\nHandan çıkınca birkaç adım ötedeki [Midyat Telkari Müzesi](mekan:ChIJxRHLSABNCkARu-Fo7SJ2ZrM)'ne gir. Gümüşün saç inceliğinde tele çekilip örülmesini aşama aşama gösteren küçük bir müze; içindeki atölyede usta çalışıyorsa tezgâhın başında dur. Çıkınca çevredeki telkari dükkânlarına ve hemen yanındaki [Mor Barsavmo Kilisesi](mekan:ChIJjR0cFwBNCkAR0Em2A_4Zqiw)'nin avlusuna bak.\n\nSonra yukarı yürü ve [Midyat Konuk Evi](mekan:ChIJrfl5X6VNCkARKA4j5XI8fTs)'ne çık. Alt katı kayaya oyulmuş üç katlı bu konak dizilerden tanıdık gelecek. Taş merdivenlerle terasları dolaş ve en sona damı bırak: Eski Midyat'ın düz damları ve çan kuleleri buradan bir arada görünür.\n\n::mekan[ChIJrfl5X6VNCkARKA4j5XI8fTs]\n\nGünü [Midyat Eski Tarihi Evleri](mekan:ChIJDzq6u7FNCkARUiu2DsvVL48)'nde bitir. Mahallenin ortasındaki bu iki konakta pencere çerçevelerindeki taş oymalara bak, sonra damlarına çık. İndikten sonra evlerin altından geçen tonozlu abbaralardan ve dar sokaklardan biraz daha yürü; akşamüstü Midyat'ın taşları sarıdan turuncuya döner. Hava kararmadan Mardin yoluna çık.\n"
+  },
+  "gunler": [
+    {
+      "baslik": "Manastırdan Midyat'a",
+      "duraklar": [
+        {
+          "place_id": "ChIJmxwPjCA0CkARZC8hlP_d4h8",
+          "osm": "way/555289010",
+          "ad": "Mor Gabriel Manastırı",
+          "sure_dk": 75,
+          "sure_gerekcesi": "görevli eşliğinde grup gezisi, bir saat ve grup bekleme",
+          "kapali_gunler": [],
+          "rehber": "mor-gabriel-manastiri",
+          "amaclar": [
+            "kultur_tarih",
+            "yavas"
+          ]
+        },
+        {
+          "place_id": "ChIJxVwXdh-3C0AR1vB3JGihO28",
+          "osm": "way/93651375",
+          "ad": "Anıtlı Meryem Ana Kilisesi",
+          "sure_dk": 40,
+          "sure_gerekcesi": "tek küçük kilise ve çatı; anahtar beklenebilir",
+          "kapali_gunler": [],
+          "rehber": "anitli-meryem-ana-kilisesi",
+          "amaclar": [
+            "kultur_tarih"
+          ]
+        },
+        {
+          "place_id": "ChIJfXBVZsxNCkAROVe2Kdpg07k",
+          "osm": "node/4894974022",
+          "ad": "Gelüşke Hanı",
+          "sure_dk": 75,
+          "sure_gerekcesi": "öğle yemeği; restoran süresi",
+          "kapali_gunler": [],
+          "rehber": "geluske-hani",
+          "amaclar": [
+            "lezzet"
+          ]
+        },
+        {
+          "place_id": "ChIJxRHLSABNCkARu-Fo7SJ2ZrM",
+          "osm": "node/11915867173",
+          "ad": "Midyat Telkari Müzesi",
+          "sure_dk": 40,
+          "sure_gerekcesi": "tek konulu küçük müze ve atölye; varsayılan 90 uzun",
+          "kapali_gunler": [],
+          "rehber": "midyat-telkari-muzesi",
+          "amaclar": [
+            "kultur_tarih",
+            "cocuklu"
+          ]
+        },
+        {
+          "place_id": "ChIJrfl5X6VNCkARKA4j5XI8fTs",
+          "osm": "node/4895085621",
+          "ad": "Midyat Konuk Evi",
+          "sure_dk": 45,
+          "sure_gerekcesi": "tek konak, teraslar ve dam; varsayılan 90 uzun",
+          "kapali_gunler": [],
+          "rehber": "midyat-konuk-evi",
+          "amaclar": [
+            "kultur_tarih"
+          ]
+        },
+        {
+          "place_id": "ChIJDzq6u7FNCkARUiu2DsvVL48",
+          "ad": "Midyat Eski Tarihi Evleri",
+          "sure_dk": 60,
+          "sure_gerekcesi": "iki konak ve çevredeki sokaklarda yürüyüş",
+          "kapali_gunler": [],
+          "rehber": "midyat-eski-tarihi-evleri",
+          "amaclar": [
+            "kultur_tarih",
+            "yavas"
+          ]
+        }
+      ]
+    }
+  ],
+  "ek_mekanlar": [
+    {
+      "place_id": "ChIJjR0cFwBNCkAR0Em2A_4Zqiw",
+      "ad": "Mor Barsavmo Kilisesi"
+    }
+  ],
+  "notlar": {
+    "dogrulanacaklar": [
+      "[Plan · kapali_gunler] · Mor Gabriel: dini tatiller hariç haftanın 7 günü açık, öğle arası var (mardin.ktb.gov.tr Mor Gabriel sayfası); Midyat Konuk Evi: 7 gün açık (mardin.ktb.gov.tr). Anıtlı Meryem Ana, Gelüşke Hanı, Telkari Müzesi ve Eski Tarihi Evler için kapalı gün kaynaksız, [] bırakıldı; OSM adaylarında opening_hours yok · Midyat Belediyesi, işletmeler",
+      "[Yazı · Mor Gabriel] · 'öğlen bir süre ziyareti durduruyor' KTB'deki saat aralığından; dini bayramlarda (Paskalya, Noel, Meryem Ana yortusu) kapalı olabilir, gezi tarihi bayrama denk gelirse plan değişir · manastır telefonu (KTB sayfasında)",
+      "[Rehber · Mor Gabriel] · 397 kuruluş, Mor Şmuel ve Mor Şemun, adın 634–668 metropoliti Mor Gabriel'den geldiği, Midyat'a ~23 km (mardin.ktb.gov.tr); 512 Anastasius, 6. yy figürsüz mozaikler, sekiz kemerli Theodora kubbesi, Meryem Ana Kilisesi, keşiş/rahibe/öğrenci topluluğu (İngilizce Vikipedi); mozaikte 'asma dalları' ayrıntısı ve 'fotoğraf için izin' düzeni yerinde görülmedi; ana yoldan 2 km ayrılış (sailingstonetravel.com) · manastır",
+      "[Rehber · Anıtlı Meryem Ana] · Yoldath Aloho adı, 1. yy Roma yapısı geleneği, 5–6. yy kiliseye çevrilme, kare plan ve merkezi kubbe, 20. yy kubbe katı ve çan kulesi (mardin.ktb.gov.tr); Hah'ın ilk piskoposluk merkezlerinden olduğu, avludaki açık dua yeri, Mor Sobo kalıntıları (turkeyfromtheinside.com); çatıya merdivenle çıkılıp kubbeye bakılabildiği (Lonely Planet). Anahtarın köyde bir ailede durduğu ve bağış kutusu kaynaksız · köy, Mor Gabriel",
+      "[Yazı · yol süreleri] · Mardin → Mor Gabriel 'bir buçuk saate yakın' (~90 km yol tahmini), Mor Gabriel → Anıtlı 'yarım saat' (kuş uçuşu ~18 km), Mardin'e dönüş 'bir saat kadar' (Midyat–Mardin ~65 km) · harita",
+      "[Rehber · Gelüşke Hanı] · 1903 tarihi ve onarılıp restorana çevrildiği (Columbia MCID, Mapping Mesopotamian Monuments); avlu çeşmesi, yer sofralı oda, kebap yanında ekşili domates salatası ve buğdaylı soğuk yoğurt çorbası, dobonun bir gün önceden söylenmesi (Fodor's); içli köfte ve tencere yemekleri il listesinden (#28) · işletme",
+      "[Plan · Gelüşke Hanı place_id] · kimlik sorgusu (OSM noktası, 100 m yanlılık) iki id döndü; ilki başka bir işletme, il listesindeki (#28) ikinci id kullanıldı. OSM node/4894974022 ile Google konumu arasındaki mesafe kuru yüklemede ölçülür · BO",
+      "[Rehber · Telkari Müzesi] · 10 Aralık 2023 açılış, Midyat Belediyesi, Süryani Çarşısı, atölye (KÜRE Ansiklopedi; sayfa yapay zekâ destekli, resmî kaynakla doğrulanmalı); 2021 coğrafi işaret ve tel çekme, örme, lehim tekniği, usta çırak geleneği (Hürriyet Daily News, 7 Ekim 2026); 'onlarca usta' ve vitrin düzeni yerinde görülmedi · Midyat Belediyesi, mardin.ktb.gov.tr Telkari Müzesi sayfası (oturumdan açılamadı)",
+      "[Rehber · Midyat Konuk Evi] · üç kat, kayaya oyulmuş alt kat, avlu mutfağında kuyu, teraslar ve dam (mardin.ktb.gov.tr); 1903 ve Süryani aile evi (KÜRE) ile 'Protestan cemaat önderinin evi' (turkeyfromtheinside.com) çelişiyor, rehberde yalnız '20. yüzyılın başı, aile evi' yazıldı; resmî ağırlamada odaların kapalı olabileceği, merdiven ve korkuluk ayrıntısı, damdaki metal sedirler (turkeyfromtheinside.com) yerinde görülmedi · kaymakamlık",
+      "[Rehber · Eski Tarihi Evler] · 'biri ücretsiz, diğeri ücretli iki bitişik konak, damlara çıkılır' (sailingstonetravel.com, tarihsiz blog); taşın havayla sertleşen yumuşak kalker olduğu ve asma, nar motifleri genel bilgi (KTB 'katori taşı' diyor); 2020 sokak sağlıklaştırması (mardin.ktb.gov.tr); Süryani göçü genel bilgi; Mor Şmuni, Mor Şarbel, Mor Barsavmo'nun ayin dışında çoğunlukla kilitli olduğu (turkeyfromtheinside.com, sailingstonetravel.com) · yerinde",
+      "[Yazı · Tur Abdin] · 'Tanrı'nın kullarının dağı' anlamı yaygın çeviri · Süryani kaynakları",
+      "[Plan · Eski Tarihi Evler] · durak osm'siz (google_30g): OSM'de bu konaklara ait aday yok; il listesindeki #4 'Midyat Tarihi Sokakları' place_id'si bu kayıt. BO'da elle işaretlenebilir · BO",
+      "[Plan · Anıtlı Meryem Ana] · OSM'de iki nesne var: way/93651375 (kilise, wikidata'lı) ve node/13255654301 ('Meryem Ana Manastiri', ~50 m güneyde); kilise yapısı olan way seçildi · kuru yükleme"
+    ],
+    "fotograf_onerileri": [
+      {
+        "ne": "Kapak (3:2): Eski Midyat'ın taş evleri ve çan kuleleri",
+        "altyazi": "Eski Midyat",
+        "arama": "Commons File:Midyat (2013) old town 1.JPG"
+      },
+      {
+        "ne": "Mor Gabriel Manastırı, çan kuleleri ve avlu",
+        "altyazi": "Mor Gabriel Manastırı",
+        "arama": "Commons File:Mor Gabriel Monastery 1310566 nevit.jpg"
+      },
+      {
+        "ne": "Hah'taki Meryem Ana Kilisesi'nin oymalı kubbe kasnağı",
+        "altyazi": "Anıtlı Meryem Ana Kilisesi",
+        "arama": "Commons File:MuttergotteskircheHah.JPG"
+      }
+    ],
+    "varsayimlar": [
+      "1 gün, cumartesi; Mardin çıkışlı, tamamı araçla. Mor Gabriel (Midyat'ın ~23 km güneydoğusu) → Anıtlı/Hah (~18 km kuzey) → Midyat (öğle ve öğleden sonra yürüyerek) → Mardin'e dönüş",
+      "Mardin'in 2. ve son gezisi; 1. gezi mardinde-iki-gun. Oradaki durakların hiçbiri tekrarlanmadı",
+      "1. gezinin varsayımında verilen söz yerine getirildi: il listesinin 4. (Eski Midyat) ve 5. (Mor Gabriel) önerisi bu gezide durak",
+      "İlk 5'ten gezide olmayan: 1 Deyrulzafaran, 2 Zinciriye, 3 Kasımiye. Neden: üçü de Mardin merkezde ve 1. gezide (mardinde-iki-gun) durak; iki gezi birlikte ilk 10'un 10'unu kapsıyor",
+      "İlk 10'dan bu gezide 2'si var (4 Eski Midyat, 5 Mor Gabriel). İlk 10 dışından: 14 Midyat Devlet Konukevi, 23 Anıtlı Meryem Ana, 28 Gelüşke Hanı, 34 Telkari Müzesi (20 Telkari Çarşısı yazıda çevre olarak)",
+      "Mor Gabriel sabah ilk durak: öğle arasından önce gezilsin diye. Öğleden sonra gidilirse son grup kaçabilir",
+      "Dereiçi (Savur) ve Hasankeyf (Batman) alınmadı: Midyat'ın ters yönünde ya da il dışında. Estel Han (Kent Müzesi) ve Mor Abrohom Manastırı yedek; Mor Abrohom'un bugün ziyarete açık olduğu doğrulanamadığı için alınmadı",
+      "Araç bacakları (Mor Gabriel → Anıtlı → Midyat) #311 gelene kadar yürüme olarak hesaplanır; uzun yürüme ve gün süresi UYARI'ları beklenen",
+      "OSM 150 m ön denetimi: Overpass ve Google konumu oturumdan okunamıyor (Overpass oturum ağında kapalı; Google koordinatı yalnız yüklemedeki detayla gelir). Yerine her OSM adayının konumu 100 m yanlılıkla kimlik sorgusuna verildi; Mor Gabriel, Anıtlı, Telkari Müzesi ve Konuk Evi için tek sonuç plandaki id, Gelüşke için ikinci sonuç. Kesin mesafe tek kuru yüklemede",
+      "Google: 1 osm koşusu (Google'a gitmez), 16 kimlik sorgusu (ücretsiz), 18 puan isteği (tek koşu), kuru yüklemede 7 detay (6 durak + 1 ek mekan)"
+    ]
+  }
+}
