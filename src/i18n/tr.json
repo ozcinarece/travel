@@ -1375,7 +1375,7 @@
     "tekrarDene": "Tekrar dene"
   },
   "degisiklik": {
-    "paylasimAcildi": "geziyi link olarak paylaştı",
+    "paylasimAcildi": "geziyi linkle paylaştı",
     "paylasimKapandi": "paylaşım linkini kapattı"
   },
   "paylasim": {
@@ -1389,6 +1389,7 @@
     "durak": "{n} durak",
     "kisi": "{n} kişi gezdi",
     "kisiGidiyor": "{n} kişi gidiyor",
+    "kisiGeziyor": "{n} kişi geziyor",
     "adinGorunur": "Linkte senin adın görünür",
     "adinGorunurAlt": "Diğer üyelerin adı ve fotoğrafı görünmez",
     "gizli": "Notlar, harcamalar ve sohbet",

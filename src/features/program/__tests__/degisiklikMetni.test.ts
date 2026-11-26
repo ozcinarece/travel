@@ -104,7 +104,7 @@ describe('#517 KK1: paylaşım linki kaydı', () => {
   it('link oluşunca ve kapanınca gri satır cümlesi; geri alınamaz', () => {
     const acildi = d(1, { entity: 'gezi_paylasim', entity_id: 'g1', field: 'acik', old: null, new: true });
     const kapandi = d(2, { entity: 'gezi_paylasim', entity_id: 'g1', field: 'acik', old: true, new: false });
-    expect(degisiklikMetni(acildi, ad)).toBe('geziyi link olarak paylaştı');
+    expect(degisiklikMetni(acildi, ad)).toBe('geziyi linkle paylaştı');
     expect(degisiklikMetni(kapandi, ad)).toBe('paylaşım linkini kapattı');
     expect(geriAlinabilir(degisiklikGruplari([acildi])[0])).toBe(false);
     expect(geriAlinabilir(degisiklikGruplari([kapandi])[0])).toBe(false);

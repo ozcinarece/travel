@@ -30,6 +30,22 @@ export function useAcikPaylasim(tripId: string, etkin: boolean) {
   });
 }
 
+/**
+ * #530 inceleme 2: seyahatte (kim açmış olursa olsun) açık link var mı. RLS başkasının linkini göstermez; sunucu yalnız evet/hayır
+ * döner (token yok). Sıradaki adım "Gezini paylaş" bununla düşer.
+ */
+export function usePaylasimAcikVar(tripId: string, etkin: boolean) {
+  return useQuery({
+    queryKey: [...anahtar(tripId), 'acikVar'] as const,
+    enabled: etkin,
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc('paylasim_acik_var', { p_trip: tripId });
+      if (error) throw error;
+      return data === true;
+    },
+  });
+}
+
 /** #517 KK8: paylaşımın açıldığı yer (olay `meta.kaynak`). */
 export type PaylasimKaynagi = 'siradaki_adim' | 'menu';
 
@@ -48,7 +64,10 @@ export function usePaylasimOlustur(tripId: string, kaynak: PaylasimKaynagi = 'me
       void olayYaz('paylasim_olustu', yeni.id, { kaynak });
       return yeni;
     },
-    onSuccess: (yeni) => qc.setQueryData(anahtar(tripId), yeni),
+    onSuccess: (yeni) => {
+      qc.setQueryData(anahtar(tripId), yeni);
+      qc.setQueryData([...anahtar(tripId), 'acikVar'], true);
+    },
   });
 }
 
@@ -61,7 +80,11 @@ export function usePaylasimGuncelle(tripId: string) {
       if (error) throw error;
       return degisiklik;
     },
-    onSuccess: () => qc.setQueryData(anahtar(tripId), null),
+    onSuccess: () => {
+      qc.setQueryData(anahtar(tripId), null);
+      // Başka bir üyenin linki hâlâ açık olabilir: sunucudan yeniden sorulur.
+      void qc.invalidateQueries({ queryKey: [...anahtar(tripId), 'acikVar'] });
+    },
   });
 }
 

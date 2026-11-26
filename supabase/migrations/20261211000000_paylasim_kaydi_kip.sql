@@ -2,8 +2,9 @@
 -- KK1: link oluşunca ve kapanınca `changes`'a kayıt düşer; seyahatin bütün üyeleri Sohbet'te ve Grup › Son değişiklikler'de
 --      gri satırı görür (changes_select politikası). Kayıtta token yok: field = 'acik', old/new yalnız true/false.
 --      Bu kayıt geri alınamaz (degisikligi_geri_al `gezi_paylasim` varlığını tanımaz, 22023).
--- KK3: özet seyahatin kipini döndürür (`kisi_kip`: 'gidiyor' | 'gezdi'); tarih döndürülmez.
--- KK-ek1 (#515 incelemesi): linkte paylaşanın yalnız ilk adı döner.
+-- KK3: özet seyahatin kipini döndürür (`kisi_kip`: 'gidiyor' | 'geziyor' | 'gezdi'); tarih döndürülmez.
+-- KK-ek1 (#515 incelemesi): linkte paylaşanın yalnız ilk adı döner (sekme, bölünmez boşluk dahil her boşlukta bölünür).
+-- KK8 (#530 incelemesi 2): üye, seyahatte kim açmış olursa olsun açık link var mı öğrenir (`paylasim_acik_var`); token dönmez.
 -- KK-ek2 (#515 incelemesi): girişsiz açılış sayacı token başına günde en çok 500 artar.
 
 create function public.gezi_paylasim_log() returns trigger
@@ -45,6 +46,7 @@ declare
   g public.gezi_paylasim;
   t public.trips;
   bugun date;
+  ad text;
 begin
   if p_token is null or p_token !~ '^[A-Za-z0-9_-]{24}$' then
     return null;
@@ -64,19 +66,25 @@ begin
    where x.id = g.id
      and not (x.acilma_gunu = current_date and x.acilma_gun_sayisi >= 500);
   select * into t from public.trips where id = g.trip_id;
-  -- KK3: istemcideki geziModu ile aynı: başlamamış (ya da tarihsiz) seyahat "gidiyor", başlamış ya da bitmiş "gezdi".
+  -- KK3: istemcideki geziModu ile aynı: tarihsiz ya da başlamamış "gidiyor", tarihler içinde "geziyor", dönüş geçtiyse "gezdi".
   bugun := (now() at time zone coalesce(t.tz, 'Europe/Istanbul'))::date;
+  -- KK-ek1: ilk boşluksuz parça. [[:space:]] C yerelinde U+00A0'ı kapsamadığı için açıkça eklendi; baştaki boşluk da atlanır.
+  ad := (regexp_match((select m.display_name from public.members m where m.trip_id = t.id and m.user_id = g.olusturan),
+                      '[^[:space:]\u00a0]+'))[1];
   return jsonb_build_object(
     'kapali', false,
     'id', g.id,
     -- KK-ek1: yalnız ilk kelime ("Ayşe paylaştı"); soyadı linki olana gitmez. Diğer üyelerin adı hiç dönmez (#510).
-    'paylasan', nullif(split_part(btrim((select m.display_name from public.members m where m.trip_id = t.id and m.user_id = g.olusturan)), ' ', 1), ''),
+    'paylasan', ad,
     'ad', t.name,
     'sehir', t.city_label,
     'gun_sayisi', (select count(*) from public.days d where d.trip_id = t.id),
     'durak_sayisi', (select count(*) from public.stops s where s.trip_id = t.id),
     'kisi_sayisi', (select count(*) from public.members m where m.trip_id = t.id),
-    'kisi_kip', case when t.start_date is null or t.start_date > bugun then 'gidiyor' else 'gezdi' end,
+    'kisi_kip', case
+      when t.start_date is null or t.end_date is null or t.start_date > bugun then 'gidiyor'
+      when t.end_date < bugun then 'gezdi'
+      else 'geziyor' end,
     'gunler', coalesce((
       select jsonb_agg(jsonb_build_object('gun', d.index, 'duraklar', coalesce((
         select jsonb_agg(jsonb_build_object(
@@ -98,3 +106,12 @@ begin
   );
 end;
 $$;
+
+-- KK8 (#530 incelemesi 2): seyahatte (kim açmış olursa olsun) açık link var mı. Yalnız üyeye true döner; token ya da kim açtı dönmez.
+create function public.paylasim_acik_var(p_trip uuid) returns boolean
+language sql stable security definer set search_path = ''
+as $$
+  select public.is_member(p_trip) and exists (select 1 from public.gezi_paylasim g where g.trip_id = p_trip and g.acik)
+$$;
+revoke execute on function public.paylasim_acik_var(uuid) from public, anon;
+grant execute on function public.paylasim_acik_var(uuid) to authenticated;

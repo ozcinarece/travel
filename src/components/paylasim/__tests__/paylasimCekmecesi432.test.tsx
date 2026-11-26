@@ -122,6 +122,37 @@ describe('PaylasimCekmecesi (#432 2/3)', () => {
     expect(screen.queryByText(t('paylasim.paylasimiKapat'))).toBeNull();
   });
 
+  it('#530 inceleme 1: kartta ve mesajda yalnız ilk ad (sekme ve bölünmez boşluk dahil)', async () => {
+    for (const ad of ['Ayşe Yılmaz', 'Ayşe\tYılmaz', '\u00a0Ayşe\u00a0Yılmaz ']) {
+      mockGonder.mockClear();
+      const { unmount } = render(
+        <PaylasimCekmecesi acik onKapat={onKapat} seyahat={{ id: 'T1', city_label: 'Eskişehir' }} benimAdim={ad} gunSayisi={3} durakSayisi={12} kisiSayisi={3} kisiKip="gezdi" onArkadasEkle={onArkadasEkle} cevrimdisi={false} />,
+      );
+      expect(screen.getByText('Ayşe paylaştı')).toBeTruthy();
+      expect(screen.queryByText(/Yılmaz/)).toBeNull();
+      fireEvent.press(screen.getByText('Linki gönder'));
+      await waitFor(() => expect(mockGonder).toHaveBeenCalled());
+      expect(mockGonder.mock.calls[0][0]).toMatch(/^Ayşe'nin Eskişehir gezisi · /);
+      expect(mockGonder.mock.calls[0][0]).not.toContain('Yılmaz');
+      unmount();
+    }
+  });
+
+  it('#530 inceleme 3 ve 5: gezi sürerken "geziyor"; üye listesi gelmeden "Linki gönder" pasif', () => {
+    render(
+      <PaylasimCekmecesi acik onKapat={onKapat} seyahat={{ id: 'T1', city_label: 'Eskişehir' }} benimAdim="Ayşe" gunSayisi={3} durakSayisi={12} kisiSayisi={null} kisiKip="geziyor" onArkadasEkle={onArkadasEkle} cevrimdisi={false} />,
+    );
+    const gonder = screen.getByRole('button', { name: t('paylasim.linkiGonder') });
+    expect(gonder.props.accessibilityState.disabled).toBe(true);
+    fireEvent.press(screen.getByText('Linki gönder'));
+    expect(mockOlustur).not.toHaveBeenCalled();
+    screen.rerender(
+      <PaylasimCekmecesi acik onKapat={onKapat} seyahat={{ id: 'T1', city_label: 'Eskişehir' }} benimAdim="Ayşe" gunSayisi={3} durakSayisi={12} kisiSayisi={3} kisiKip="geziyor" onArkadasEkle={onArkadasEkle} cevrimdisi={false} />,
+    );
+    expect(screen.getByText('3 gün · 12 durak · 3 kişi geziyor')).toBeTruthy();
+    expect(screen.getByRole('button', { name: t('paylasim.linkiGonder') }).props.accessibilityState.disabled).toBe(false);
+  });
+
   it('link yokken "Linki gönder" link oluşturur ve sistem paylaşımına linki verir', async () => {
     cekmece();
     fireEvent.press(screen.getByText('Linki gönder'));

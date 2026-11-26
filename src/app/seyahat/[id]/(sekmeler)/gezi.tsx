@@ -6,7 +6,7 @@ import { Linking, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { GrupPenceresi } from '@/components/davet/GrupPenceresi';
 import { PaylasimCekmecesi } from '@/components/paylasim/PaylasimCekmecesi';
 import { kisiKipi } from '@/features/paylasim/baslik';
-import type { PaylasimKaynagi } from '@/features/paylasim/sorgular';
+import { usePaylasimAcikVar, type PaylasimKaynagi } from '@/features/paylasim/sorgular';
 import { KatilimSayfasi } from '@/components/davet/KatilimSayfasi';
 import { ProfilOnayi } from '@/components/davet/ProfilOnayi';
 import { CevrimdisiSeridi } from '@/components/gezi/CevrimdisiSeridi';
@@ -213,6 +213,8 @@ function GeziSayfasi({ seyahat, gunler, duraklar, mekanlar, konaklamalar, katild
   const oylamaMesaji = acikOylama ? (mesajlar.data ?? []).find((m) => m.oylama_id === acikOylama.id && !m.silindi_at) : undefined;
   const sonMesaj = (mesajlar.data ?? []).find((m) => !m.silindi_at) ?? null;
   const sohbeteGit = () => router.navigate({ pathname: '/seyahat/[id]/(sekmeler)/sohbet', params: { id: seyahat.id } });
+  // #530 inceleme 2: seyahatte açık link varsa (kim açmış olursa olsun) "Gezini paylaş" düşer. Yalnız bitmiş gezide sorulur.
+  const acikLink = usePaylasimAcikVar(seyahat.id, hesapli && mod === 'bitti');
   const adim = siradakiAdim({
     mod,
     gunler,
@@ -227,6 +229,8 @@ function GeziSayfasi({ seyahat, gunler, duraklar, mekanlar, konaklamalar, katild
     acikTransfer: harcamalar.data && odesmeler.data ? hOzet.transferler.length : 0,
     // #517 KK8: misafir link paylaşamaz; harcama verisi gelmeden de "paylaş" önerilmez (açık borç varken yanıp sönmesin).
     paylasabilir: hesapli && !!harcamalar.data && !!odesmeler.data,
+    // Cevap gelmeden (ya da hata) açık sayılır: adım yalnız "açık link yok" kesinleşince çıkar.
+    acikLinkVar: acikLink.data !== false,
     // #308: v7'de Plan özetinin otel satırı yok; otel adımı Sıradaki adımda görünür.
   });
   // Uye listesi gelmeden "Davet et" gösterilmez (tek kişi sanılmasın).
@@ -536,7 +540,8 @@ function GeziSayfasi({ seyahat, gunler, duraklar, mekanlar, konaklamalar, katild
           benimAdim={benUye?.display_name ?? null}
           gunSayisi={gunler.length}
           durakSayisi={duraklar.length}
-          kisiSayisi={uyeListesi.length || 1}
+          // #530 inceleme 5: üye listesi gelmeden null; "Linki gönder" pasif kalır (mesaj kişi sayısız gitmesin).
+          kisiSayisi={uyeler.data ? uyeListesi.length || 1 : null}
           kisiKip={paylasimKipi}
           kaynak={paylasimKaynagi ?? 'menu'}
           onArkadasEkle={() => setGrupAcik(true)}

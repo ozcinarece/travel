@@ -47,6 +47,8 @@ export type SiradakiGirdi = {
   ekranda?: readonly SiradakiAdim['tur'][];
   /** #517 KK8: bu kişi link paylaşabilir mi (hesaplı üye; misafir paylaşamaz). Yoksa bitmiş gezide paylaş adımı çıkmaz. */
   paylasabilir?: boolean;
+  /** #530 inceleme 2: seyahatte (kim açmış olursa olsun) açık paylaşım linki var; paylaş adımı çıkmaz. */
+  acikLinkVar?: boolean;
 };
 
 const sira = (a: { order_key: string }, b: { order_key: string }) => (a.order_key < b.order_key ? -1 : a.order_key > b.order_key ? 1 : 0);
@@ -63,7 +65,7 @@ export function siradakiAdim(g: SiradakiGirdi): SiradakiAdim | null {
   if (g.mod === 'bitti') {
     if (g.acikTransfer) return ekranda('harcamaKapat') ? null : { tur: 'harcamaKapat', transfer: g.acikTransfer };
     // #517 KK8: harcamalar kapandıktan sonra (ya da harcama yoksa) Gezini paylaş.
-    return g.paylasabilir && !ekranda('paylas') ? { tur: 'paylas' } : null;
+    return g.paylasabilir && !g.acikLinkVar && !ekranda('paylas') ? { tur: 'paylas' } : null;
   }
   if (g.mod !== 'plan') return null;
   const aktif = g.duraklar.filter((d) => !d.skipped);

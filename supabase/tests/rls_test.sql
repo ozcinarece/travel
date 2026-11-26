@@ -3961,8 +3961,11 @@ begin
   assert c.user_id = '43200000-0000-4000-8000-0000000000a1', '#517 KK1: kaydı A yazdı';
 end $$;
 select pg_temp.hata_bekle($$select public.degisikligi_geri_al((select id from public.changes where entity = 'gezi_paylasim' limit 1))$$, '22023');
+-- #530 inceleme 2: B'nin kendi linki yok ama seyahatte açık link olduğunu bilir (Sıradaki adım "Gezini paylaş" düşer).
+do $$ begin assert public.paylasim_acik_var('43200000-0000-4000-8000-000000000001'), '#530-2: üye, başkasının açık linkini bilir'; end $$;
 select pg_temp.as_user(:PX);
 do $$ begin assert not exists (select 1 from public.changes where entity = 'gezi_paylasim'), '#517 KK5: başka seyahatin üyesi kaydı görmez'; end $$;
+do $$ begin assert not public.paylasim_acik_var('43200000-0000-4000-8000-000000000001'), '#530-2: üye olmayan öğrenemez'; end $$;
 select pg_temp.as_user(:PA);
 -- Token, oluşturan ve sayaçlar istemciden yazılamaz.
 select pg_temp.hata_bekle($$insert into public.gezi_paylasim (trip_id, token) values ('43200000-0000-4000-8000-000000000001', 'aaaaaaaaaaaaaaaaaaaaaaaa')$$, '42501');
@@ -4024,6 +4027,19 @@ begin
   assert position('2026-10' in o::text) = 0, '#517 KK3: tarih dönmez';
 end $$;
 reset role;
+-- #530 inceleme 1: sekme, bölünmez boşluk (U+00A0) ve baştaki boşlukta da yalnız ilk ad.
+update public.members set display_name = E'Ece\tSoyadıgizli' where trip_id = '43200000-0000-4000-8000-000000000001' and user_id = :PA;
+set role anon;
+do $$ begin assert public.paylasim_ozeti(current_setting('test.paylasim_token')) ->> 'paylasan' = 'Ece', '#530-1: sekmede bölünür'; end $$;
+reset role;
+update public.members set display_name = E'\u00a0Ece\u00a0Soyadıgizli' where trip_id = '43200000-0000-4000-8000-000000000001' and user_id = :PA;
+set role anon;
+do $$ begin assert public.paylasim_ozeti(current_setting('test.paylasim_token')) ->> 'paylasan' = 'Ece', '#530-1: bölünmez boşlukta bölünür: ' || (public.paylasim_ozeti(current_setting('test.paylasim_token')) ->> 'paylasan'); end $$;
+reset role;
+update public.trips set start_date = current_date - 1, end_date = current_date + 1 where id = '43200000-0000-4000-8000-000000000001';
+set role anon;
+do $$ begin assert public.paylasim_ozeti(current_setting('test.paylasim_token')) ->> 'kisi_kip' = 'geziyor', '#530-3: süren seyahat geziyor'; end $$;
+reset role;
 update public.trips set start_date = current_date + 10, end_date = current_date + 11 where id = '43200000-0000-4000-8000-000000000001';
 set role anon;
 do $$ begin assert public.paylasim_ozeti(current_setting('test.paylasim_token')) ->> 'kisi_kip' = 'gidiyor', '#517 KK3: başlamamış seyahat gidiyor'; end $$;
@@ -4038,12 +4054,13 @@ update public.members set display_name = 'Ece' where trip_id = '43200000-0000-40
 update public.gezi_paylasim set acilma_gunu = current_date, acilma_gun_sayisi = 499, acilma_sayisi = 10 where token = current_setting('test.paylasim_token');
 set role anon;
 select public.paylasim_ozeti(current_setting('test.paylasim_token'));
-select public.paylasim_ozeti(current_setting('test.paylasim_token'));
+-- #530 inceleme 6: tavandaki (501.) açılış da özeti döndürür; `acilma_gunu` henüz değişmedi.
+do $$ begin assert (public.paylasim_ozeti(current_setting('test.paylasim_token')) ->> 'kapali')::boolean is false, '#517 KK-ek2: tavanda da özet döner'; end $$;
 reset role;
-do $$ begin assert (select acilma_sayisi = 11 and acilma_gun_sayisi = 500 from public.gezi_paylasim where token = current_setting('test.paylasim_token')), '#517 KK-ek2: 500. açılıştan sonra sayaç durur'; end $$;
+do $$ begin assert (select acilma_sayisi = 11 and acilma_gun_sayisi = 500 and acilma_gunu = current_date from public.gezi_paylasim where token = current_setting('test.paylasim_token')), '#517 KK-ek2: 500. açılıştan sonra sayaç durur'; end $$;
 update public.gezi_paylasim set acilma_gunu = current_date - 1 where token = current_setting('test.paylasim_token');
 set role anon;
-do $$ begin assert (public.paylasim_ozeti(current_setting('test.paylasim_token')) ->> 'kapali')::boolean is false, '#517 KK-ek2: tavanda da özet döner'; end $$;
+select public.paylasim_ozeti(current_setting('test.paylasim_token'));
 reset role;
 do $$ begin assert (select acilma_sayisi = 12 and acilma_gun_sayisi = 1 from public.gezi_paylasim where token = current_setting('test.paylasim_token')), '#517 KK-ek2: ertesi gün yeniden sayar'; end $$;
 -- #510: anahtar kalktı. Oluşturan kolonu güncelleyemez; kolon açık olsa bile (eski satır ya da eski uygulamanın insert'ü) adlar dönmez.
@@ -4205,6 +4222,7 @@ update public.gezi_paylasim set acik = false;
 select pg_temp.as_user(:PB);
 do $$ begin assert exists (select 1 from public.changes where trip_id = '43200000-0000-4000-8000-000000000001' and entity = 'gezi_paylasim'
   and field = 'acik' and old = 'true'::jsonb and new = 'false'::jsonb and user_id = '43200000-0000-4000-8000-0000000000a1'), '#517 KK1: B kapatma kaydını görür'; end $$;
+do $$ begin assert not public.paylasim_acik_var('43200000-0000-4000-8000-000000000001'), '#530-2: link kapanınca açık link yok'; end $$;
 select pg_temp.as_user(:PX);
 do $$ begin assert not exists (select 1 from public.changes where entity = 'gezi_paylasim'), '#517 KK5: X kapatma kaydını görmez'; end $$;
 reset role;
@@ -4236,7 +4254,14 @@ insert into public.members (trip_id, user_id, display_name) values ('43200000-00
 set role anon;
 do $$ begin assert public.paylasim_ozeti(current_setting('test.paylasim_token_b')) = '{"kapali": true}'::jsonb, '#435: yeniden üyelikte eski link kapalı kalır'; end $$;
 reset role;
+-- #530 inceleme 6: açık linki olan seyahat silinir; hata yok, `changes`'ta paylaşım satırı kalmaz (cascade bekçisi).
+set role authenticated;
+select pg_temp.as_user(:PB);
+insert into public.gezi_paylasim (trip_id) values ('43200000-0000-4000-8000-000000000001');
+reset role;
+do $$ begin assert exists (select 1 from public.gezi_paylasim where trip_id = '43200000-0000-4000-8000-000000000001' and acik), 'ön koşul: açık link var'; end $$;
 delete from public.trips where id = current_setting('test.alinan')::uuid or id = '43200000-0000-4000-8000-000000000001';
+do $$ begin assert not exists (select 1 from public.changes where entity = 'gezi_paylasim' and trip_id = '43200000-0000-4000-8000-000000000001'), '#530-6: silinen seyahatte paylaşım kaydı kalmaz'; end $$;
 delete from public.olaylar where tur in ('paylasimdan_alindi', 'paylasim_acildi');
 delete from public.sehirler where id = '43200000-0000-4000-8000-000000000020';
 delete from auth.users where id in (:PA, :PB, :PX, :PM);
