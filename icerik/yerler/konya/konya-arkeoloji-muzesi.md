@@ -4,6 +4,6 @@ Neolitik salonda Çatalhöyük, Erbaba ve Süberde'den çömlekler, obsidyen ve 
 
 Müzenin en çok bilinen eseri Roma salonundaki Herakles lahdi. Beyşehir'den getirilen sütunlu lahdin yanlarında kahramanın on iki görevi sırayla işlenmiş; aslanla, çok başlı yılanla, yaban domuzuyla boğuşmasını tek tek bulabilirsin. Aynı salonda Konya mezarlığından çıkan girlandlı lahitler, bronz Hermes ve Eros heykelcikleri, Sille ve Tatköy'den gelen 6. yüzyıl Bizans mozaikleri var.
 
-Müze küçüktür; bir saat yeter. Sahib-i Ata ve Sırçalı Medrese birkaç dakika yürüme uzaklığında, üçünü art arda gezebilirsin.
+Müze küçüktür; bir saat yeter. Sahib-i Ata birkaç dakika yürüme uzaklığında; ikisini art arda gezebilirsin.
 
 > Herakles lahdinin çevresini dolaş: görevler yalnız ön yüzde değil, yan ve arka yüzlerde de sürüyor.
