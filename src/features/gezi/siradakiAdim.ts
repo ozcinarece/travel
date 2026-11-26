@@ -53,7 +53,7 @@ function ertesiGun(tarih: string): string {
   return new Date(Date.UTC(y, a - 1, g + 1)).toISOString().slice(0, 10);
 }
 
-/** Öncelik: plan kur → dağıt → otel → davet → yemek → yarın. Gezi modunda null; bitmiş gezide yalnız harcamaları kapat. */
+/** Öncelik: plan kur → dağıt → davet (tek kişi; #308 KK5, #517 KK7) → otel → yemek → yarın. Gezi modunda null; bitmiş gezide yalnız harcamaları kapat. */
 export function siradakiAdim(g: SiradakiGirdi): SiradakiAdim | null {
   const ekranda = (tur: SiradakiAdim['tur']) => !!g.ekranda?.includes(tur);
   if (g.mod === 'bitti') return g.acikTransfer && !ekranda('harcamaKapat') ? { tur: 'harcamaKapat', transfer: g.acikTransfer } : null;
@@ -65,8 +65,9 @@ export function siradakiAdim(g: SiradakiGirdi): SiradakiAdim | null {
   const atanmamis = g.mekanlar.filter((m) => !atanan.has(m.id)).sort((a, b) => (a.created_at < b.created_at ? -1 : a.created_at > b.created_at ? 1 : 0));
   if (atanmamis.length > 0 && !ekranda('dagit')) return { tur: 'dagit', mekanIdleri: atanmamis.map((m) => m.id), otelYok: !g.otelVar && !ekranda('otel') };
 
-  if (!g.otelVar && !g.otelErtelendi && !ekranda('otel')) return { tur: 'otel' };
+  // #308 KK5 (#517 KK7): tek kişilik seyahatte davet otelden önce gelir.
   if (g.uyeSayisi <= 1 && !ekranda('davet')) return { tur: 'davet' };
+  if (!g.otelVar && !g.otelErtelendi && !ekranda('otel')) return { tur: 'otel' };
 
   const mekanIle = new Map(g.mekanlar.map((m) => [m.id, m]));
   for (const gun of [...g.gunler].sort((a, b) => a.index - b.index)) {

@@ -68,6 +68,22 @@ export const anaV5 = {
   kapat: '#B42318',
 } as const;
 
+/** #308 (kanvas `Sayfa_v7_Seyahat_*`): seyahat sayfası v7. */
+export const seyahatV7 = {
+  /** Harita yüklenene kadar 260 pt alanın zemini. */
+  haritaZemin: '#EEF0F4',
+  /** Harita üstü beyaz düğmelerin gölgesi. */
+  golge: 'rgba(14,20,48,0.12)',
+  /** Kişiler satırındaki kesikli "+" dairesi. */
+  kesikKenar: '#9AA6C8',
+  /** Gezilen durağın tik dairesi. */
+  tikZemin: '#E3F4EC',
+  /** Kişi yüzleri: Mandalina, açık mavi, Gece (kanvas sırası). */
+  yuzler: ['#FF7A1A', '#C9D2F2', '#152A6B'],
+  /** Boş gün öneri satırındaki "+" dairesinin kenarı. */
+  artiKenar: '#C3C9D6',
+} as const;
+
 /**
  * #361 KK7 (UX önerileri kanvası, `Ana_v5_Amaclar`): kapaksız gezi kartının amaca göre zemini, tepesi (%85 opak) ve
  * dairesi; daire üstünde beyaz ikon. Anahtarlar `features/icerik/amaclar.ts` ile aynı; `yok` = amacı olmayan gezi.
