@@ -64,6 +64,8 @@ export const anaV5 = {
   nedenMetin: '#232B48',
   /** #445 (`Ekran07dDolulukTasma`): "K yer sığmıyor" metni ve gün çubuklarının arkasındaki taşma parçası (beyazda 4,6:1). */
   tasma: '#D93A2B',
+  /** #432 (`Sos_v6_PaylasAcik`): "Paylaşımı kapat" kırmızı metin düğmesi. */
+  kapat: '#B42318',
 } as const;
 
 /**

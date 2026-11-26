@@ -194,7 +194,11 @@ export type OlayTuru = 'gezi_goruntulendi' | 'gezi_alindi' | 'yer_eklendi' | 'da
   | 'sekme_acildi'
   // #406 KK6: raflı ana sayfa (banner: hedef_id bölüm, meta hedef türü; raf kartı: hedef_id gezi, meta raf).
   | 'banner_acildi'
-  | 'raf_kart_acildi';
+  | 'raf_kart_acildi'
+  // #432 KK8: gezi paylaşımı (hedef_id: paylaşım; girişsiz açılış yalnız sayaçta).
+  | 'paylasim_olustu'
+  | 'paylasim_acildi'
+  | 'paylasimdan_alindi';
 
 /** #137: /r/{token} özeti (davet_ozeti; giriş gerektirmez). Google verisi yok: yalnız sayılar ve günler. */
 export type DavetOzeti = {
