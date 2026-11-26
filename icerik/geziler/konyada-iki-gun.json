@@ -24,7 +24,6 @@
       "duraklar": [
         {
           "place_id": "ChIJLVGO7D6n0BQReRtSrypsOpY",
-          "osm": "way/321336136",
           "ad": "Çatalhöyük",
           "sure_dk": 90,
           "sure_gerekcesi": "varsayılan 60; ziyaretçi merkezi, iki kazı alanı ve kopya ev",
@@ -143,7 +142,8 @@
       "[Rehber · Kelebek] · Temmuz 2015, Selçuklu Belediyesi, cam panel sayısı 1.730/1.760, 28 °C ve %80 nem, 40–45 tür, 195 bitki türü, Böcek Köyü, büyütülmüş yumurta modelleri (DHA 23 Mart 2026, Sözcü 30 Kasım 2023, TÜBİTAK Bilim Genç 2015)",
       "[Rehber · Maruf] · TGA Lezzet Noktası ve önerilen tabaklar (Habertürk 26 Temmuz 2026); bamya çorbasının limonla ekşitildiği ve etli ekmeğin tarifi genel bilgi",
       "[Rehber · Koyunoğlu] · 1901–1974, DDY müfettişi, 1973 bağış, 1984 bina, ~11 bin eser, kat düzeni, Topraklık'taki aile evi (TDV İslâm Ansiklopedisi, 2002 baskı): kat düzeni ve evin ziyarete açık olduğu bugün geçerli mi · Konya Büyükşehir",
-      "[Plan · g1.d1→g1.d2, g2.d1→g2.d2→g2.d3] · araçla; doğrulayıcının yürüme uyarısı beklenen"
+      "[Plan · g1.d1→g1.d2, g2.d1→g2.d2→g2.d3] · araçla; doğrulayıcının yürüme uyarısı beklenen",
+      "[Plan · g1.d1] · Çatalhöyük osm boş: OSM'deki genel alan (way/192245191) Google konumundan 185 m, Güney kazı alanı (way/321336136) 246 m uzak çıktı; konum Google'dan 30 gün · BO'da elle işaretlenebilir"
     ],
     "fotograf_onerileri": [
       {
