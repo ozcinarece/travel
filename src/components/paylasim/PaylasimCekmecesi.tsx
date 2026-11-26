@@ -7,6 +7,8 @@
 // 3. inceleme: iOS duyurusu yalnız çekmece açıkken (kapalıyken susar, çevrimdışı açılınca okunur); link okunurken anahtar
 // pasif ve "link yok" satırı yerine yükleniyor göstergesi; "Arkadaş ekle ›" pencere açtığı için düğme rolünde.
 // #510 (Ece kararı, 26 Kasım): "Kişi adlarını göster" anahtarı kalktı; linkte yalnız paylaşanın adı ve "{n} kişi gezdi" yazar.
+// #515 2. inceleme (kanvas `Sos_v6_Paylas` sürüm 43): anahtarın yerinde dokunulmaz bilgi satırı "Linkte senin adın görünür";
+// önizleme kartı alıcı ekranıyla aynı: turuncu "Ayşe paylaştı", altında seyahat adı ya da "Eskişehir gezisi".
 import { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
 
@@ -15,6 +17,7 @@ import { SeyahatKapagi } from '@/components/seyahatler/SeyahatKapagi';
 import { AltPencere } from '@/components/ui/AltPencere';
 import { Buton } from '@/components/ui/Buton';
 import { Ikon } from '@/components/ui/Ikon';
+import { aliciBasligi } from '@/features/paylasim/baslik';
 import { linkiGonder, paylasimLinki, useAcikPaylasim, usePaylasimGuncelle, usePaylasimOlustur } from '@/features/paylasim/sorgular';
 import { t } from '@/i18n';
 import { ilgiEkli } from '@/lib/ek';
@@ -24,7 +27,7 @@ import { anaV5, renk, yazi } from '@/theme';
 type Props = {
   acik: boolean;
   onKapat: () => void;
-  seyahat: { id: string; city_label: string };
+  seyahat: { id: string; city_label: string; name?: string | null };
   /** Paylaşanın görünen adı (önizleme başlığı "Ayşe'nin …"). */
   benimAdim: string | null;
   gunSayisi: number;
@@ -55,7 +58,9 @@ export function PaylasimCekmecesi({ acik, onKapat, seyahat, benimAdim, gunSayisi
   const guncelle = usePaylasimGuncelle(seyahat.id);
   const link = paylasim.data ?? null;
 
+  // Paylaşım mesajındaki başlık ("Ayşe'nin Eskişehir gezisi") aynı kalır; kart alıcının göreceği gibidir.
   const baslik = paylasimBasligi(benimAdim, seyahat.city_label);
+  const kartBasligi = aliciBasligi({ ad: seyahat.name ?? null, sehir: seyahat.city_label });
   const ozet = paylasimOzeti(gunSayisi, durakSayisi, kisiSayisi);
   const mesgul = olustur.isPending || guncelle.isPending;
   // Link okunamadıysa "link yok" sanılmaz: yeni link denemesi tek açık link kısıtına takılır, "Paylaşımı kapat" görünmez.
@@ -132,8 +137,9 @@ export function PaylasimCekmecesi({ acik, onKapat, seyahat, benimAdim, gunSayisi
         <View style={s.kart}>
           <SeyahatKapagi kimlik={seyahat.id} yukseklik={112} kose={0} />
           <View style={s.kartGovde}>
+            {benimAdim ? <Text style={s.paylasti}>{t('paylasim.paylasti', { ad: benimAdim })}</Text> : null}
             <Text style={s.kartBaslik} numberOfLines={2}>
-              {baslik}
+              {kartBasligi}
             </Text>
             <Text style={s.alt}>{ozet}</Text>
           </View>
@@ -142,6 +148,13 @@ export function PaylasimCekmecesi({ acik, onKapat, seyahat, benimAdim, gunSayisi
 
       <View>
         <View style={s.satir}>
+          <View style={s.satirMetin}>
+            <Text style={s.satirBaslik}>{t('paylasim.adinGorunur')}</Text>
+            <Text style={s.alt}>{t('paylasim.adinGorunurAlt')}</Text>
+          </View>
+          <Ikon ad="kisiV6" boyut={22} renk={anaV5.ikincil} kalinlik={2.2} />
+        </View>
+        <View style={[s.satir, s.satirCizgi]}>
           <View style={s.satirMetin}>
             <Text style={s.satirBaslik}>{t('paylasim.gizli')}</Text>
             <Text style={s.alt}>{t('paylasim.gizliAlt')}</Text>
@@ -222,9 +235,11 @@ const s = StyleSheet.create({
   etiket: { fontFamily: yazi.kalin, fontSize: 13, color: anaV5.ikincil },
   kart: { borderRadius: 16, borderWidth: 1, borderColor: anaV5.cizgi, overflow: 'hidden' },
   kartGovde: { paddingVertical: 12, paddingHorizontal: 14, gap: 2 },
+  paylasti: { fontFamily: yazi.kalin, fontSize: 13, color: anaV5.adim },
   kartBaslik: { fontFamily: yazi.ekstra, fontSize: 16, color: renk.metin },
   alt: { fontFamily: yazi.normal, fontSize: 13, color: anaV5.ikincil },
   satir: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', minHeight: 56, gap: 12, paddingVertical: 6 },
+  satirCizgi: { borderTopWidth: 1, borderTopColor: anaV5.cizgi },
   satirMetin: { flex: 1, gap: 2 },
   satirBaslik: { fontFamily: yazi.kalin, fontSize: 15, color: renk.metin },
   durum: { flexDirection: 'row', alignItems: 'center', gap: 8 },

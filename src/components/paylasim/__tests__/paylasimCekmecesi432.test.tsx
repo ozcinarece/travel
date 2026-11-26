@@ -66,9 +66,32 @@ beforeEach(() => {
 });
 
 describe('PaylasimCekmecesi (#432 2/3)', () => {
-  it('önizleme: "Ayşe\'nin Eskişehir gezisi" ve "3 gün · 12 durak · 3 kişi gezdi"; KK-ek satırı var, kişi adları anahtarı yok (#510)', () => {
+  it('#515: seyahatin adı varsa kart başlığı o; adı olmayan paylaşanda "paylaştı" satırı yok', () => {
+    render(
+      <PaylasimCekmecesi
+        acik
+        onKapat={onKapat}
+        seyahat={{ id: 'T1', city_label: 'Eskişehir', name: 'Kız kıza Eskişehir' }}
+        benimAdim={null}
+        gunSayisi={3}
+        durakSayisi={12}
+        kisiSayisi={3}
+        onArkadasEkle={onArkadasEkle}
+        cevrimdisi={false}
+      />,
+    );
+    expect(screen.getByText('Kız kıza Eskişehir')).toBeTruthy();
+    expect(screen.queryByText(/paylaştı/)).toBeNull();
+  });
+
+  it('önizleme alıcı ekranıyla aynı: "Ayşe paylaştı", "Eskişehir gezisi", "3 gün · 12 durak · 3 kişi gezdi"; ad bilgi satırı ve KK-ek satırı var, anahtar yok (#510, #515)', () => {
     cekmece();
-    expect(screen.getByText("Ayşe'nin Eskişehir gezisi")).toBeTruthy();
+    expect(screen.getByText('Ayşe paylaştı')).toBeTruthy();
+    expect(screen.getByText('Eskişehir gezisi')).toBeTruthy();
+    expect(screen.queryByText("Ayşe'nin Eskişehir gezisi")).toBeNull();
+    expect(screen.getByText('Linkte senin adın görünür')).toBeTruthy();
+    expect(screen.getByText('Diğer üyelerin adı ve fotoğrafı görünmez')).toBeTruthy();
+    expect(screen.queryByRole('switch')).toBeNull();
     expect(screen.getByText('3 gün · 12 durak · 3 kişi gezdi')).toBeTruthy();
     expect(screen.queryByRole('checkbox')).toBeNull();
     expect(screen.queryByText('Kişi adlarını göster')).toBeNull();

@@ -1401,6 +1401,8 @@
     "gun": "{n} gün",
     "durak": "{n} durak",
     "kisi": "{n} kişi gezdi",
+    "adinGorunur": "Linkte senin adın görünür",
+    "adinGorunurAlt": "Diğer üyelerin adı ve fotoğrafı görünmez",
     "gizli": "Notlar, harcamalar ve sohbet",
     "gizliAlt": "Hiçbir zaman paylaşılmaz",
     "kilitli": "Kilitli",

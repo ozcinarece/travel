@@ -66,10 +66,7 @@ export function usePaylasimdanAl() {
   });
 }
 
-/** Başlık: "Eskişehir gezisi" (kanvas); seyahatin adı varsa o. */
-export function aliciBasligi(o: Pick<AcikPaylasimOzeti, 'ad' | 'sehir'>): string {
-  return o.ad?.trim() || t('paylasim.kiminsiz', { sehir: o.sehir });
-}
+export { aliciBasligi } from './baslik';
 
 /** Durak satırı (Ürün kararı 9): adı varsa "Ad" / "Müze · 45 dk"; yoksa "Durak 3" / "Kafe". */
 export function durakSatiri(d: PaylasimDuragi, sira: number): { ust: string; alt: string } {

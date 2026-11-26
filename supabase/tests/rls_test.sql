@@ -3973,6 +3973,31 @@ begin
 end $$;
 reset role;
 update public.gezi_paylasim set kisi_adlari_acik = false where token = current_setting('test.paylasim_token');
+-- #515 2. inceleme 3: seyahatin harcaması ve paylaşanın IBAN'ı girişsiz özette dönmez.
+with h as (
+  insert into public.harcamalar (trip_id, aciklama, tutar_kurus, tl_kurus, odeyen_id)
+    values ('43200000-0000-4000-8000-000000000001', 'gizli harcama 515', 51515, 51515, :PA) returning id, trip_id
+)
+insert into public.harcama_paylari (harcama_id, trip_id, user_id, pay_kurus) select id, trip_id, :PA, 51515 from h;
+insert into public.odeme_bilgileri (user_id, iban) values (:PA, 'TR515151515151515151515151');
+set role anon;
+do $$
+declare m text := public.paylasim_ozeti(current_setting('test.paylasim_token'))::text;
+begin
+  assert position('gizli harcama' in m) = 0 and position('51515' in m) = 0, '#515: harcama dönmez: ' || m;
+  assert position('TR5151' in m) = 0 and position('iban' in lower(m)) = 0, '#515: IBAN dönmez: ' || m;
+end $$;
+reset role;
+-- #515 2. inceleme 2: `ad` yalnız seyahatin kendi adı; adsız seyahatte null (istemci "Roma gezisi" yazar).
+update public.trips set name = null where id = '43200000-0000-4000-8000-000000000001';
+set role anon;
+do $$
+declare o jsonb := public.paylasim_ozeti(current_setting('test.paylasim_token'));
+begin
+  assert o -> 'ad' = 'null'::jsonb and o ->> 'sehir' = 'Roma', '#515: adsız seyahatte ad null, şehir döner: ' || o::text;
+end $$;
+reset role;
+update public.trips set name = 'Paylaşılan Roma' where id = '43200000-0000-4000-8000-000000000001';
 
 -- Harita izni: günde 200 yükleme.
 reset role;

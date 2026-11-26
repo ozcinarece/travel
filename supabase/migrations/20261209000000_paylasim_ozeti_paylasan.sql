@@ -29,7 +29,8 @@ begin
     'id', g.id,
     -- 2/3b (Ürün kararı, 21 Kasım): başlık "Ayşe paylaştı"; yalnız linki gönderen kişinin adı döner (#510: diğerleri hiç).
     'paylasan', (select m.display_name from public.members m where m.trip_id = t.id and m.user_id = g.olusturan),
-    'ad', coalesce(t.name, t.city_label),
+    -- #515 2. inceleme: yalnız seyahatin kendi adı; boşsa istemci "{şehir} gezisi" yazar (kanvas `Sos_v6_Alici`).
+    'ad', t.name,
     'sehir', t.city_label,
     'gun_sayisi', (select count(*) from public.days d where d.trip_id = t.id),
     'durak_sayisi', (select count(*) from public.stops s where s.trip_id = t.id),
