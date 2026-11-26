@@ -1,0 +1,367 @@
+{
+  "il": "Erzincan",
+  "slug": "erzincan",
+  "guncelleme": "2026-11-26",
+  "oneriler": [
+    {
+      "sira": 1,
+      "ad": "Taş Yol (Kemaliye–Divriği)",
+      "kategori": "aktivite",
+      "amaclar": [
+        "doga",
+        "kultur_tarih"
+      ],
+      "ilce": "Kemaliye",
+      "merkeze_km": 101,
+      "neden": "Eğinliler 1870'te kazmaya başladı, 2002'de bitti; Fırat kıyısında 38 tünelden geçer",
+      "place_id": "ChIJsYhcklwBekAR2bmY84265q8"
+    },
+    {
+      "sira": 2,
+      "ad": "Karanlık Kanyon",
+      "kategori": "doga",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Kemaliye",
+      "merkeze_km": 100,
+      "neden": "Karasu'nun Munzurlar'ı yararak açtığı 25 km'lik vadi; duvarlar yer yer 1000 m'yi bulur",
+      "osm": "node/6744134045",
+      "place_id": "ChIJUf_VLIkAekARGDNJ8gAa2z0"
+    },
+    {
+      "sira": 3,
+      "ad": "Kemaliye tarihi evleri ve Mani Sokağı",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Kemaliye",
+      "merkeze_km": 101,
+      "neden": "Taş-ahşap Eğin evleri 2021'de UNESCO geçici listesine girdi; sokakta gurbet manileri asılı"
+    },
+    {
+      "sira": 4,
+      "ad": "Girlevik Şelalesi",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 28,
+      "neden": "Kalecik kaynağından beslenen traverten basamaklı şelale; sert kışlarda buz tutar",
+      "place_id": "ChIJ6Y6TrkFBcEARVTX4rvgYMKM"
+    },
+    {
+      "sira": 5,
+      "ad": "Altıntepe Urartu Kalesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Üzümlü",
+      "merkeze_km": 14,
+      "neden": "1938'de demiryolu yapılırken bulundu; MÖ 8-7. yy Urartu tapınağı ve Bizans kilisesi izi",
+      "osm": "way/130188095",
+      "place_id": "ChIJmXiNEVwTcEARwc7Z4rEfFnU"
+    },
+    {
+      "sira": 6,
+      "ad": "Erzincan Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Mayıs 2023'te açıldı; Altıntepe buluntuları, kilise mozaiği ve 1939 depremi bölümü var",
+      "place_id": "ChIJsVqGYswNcEARXD-_5mTM1bQ"
+    },
+    {
+      "sira": 7,
+      "ad": "Kemah Kalesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "gece"
+      ],
+      "ilce": "Kemah",
+      "merkeze_km": 42,
+      "neden": "Mengücek başkentiydi; kazıda Bey Camii ve 350 m su tüneli çıktı, geceleri ışıklandırılır",
+      "place_id": "ChIJY1KOBOt_ekARz_ZJ94oTa_s"
+    },
+    {
+      "sira": 8,
+      "ad": "Mama Hatun Kümbeti",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Tercan",
+      "merkeze_km": 76,
+      "neden": "Ahlatlı usta imzalı, dairesel çevre duvarlı nadir Saltuklu kümbeti (12. yy sonu)",
+      "place_id": "ChIJS9LEYF_Rb0ARf-Glas6JpsM"
+    },
+    {
+      "sira": 9,
+      "ad": "Mama Hatun Kervansarayı",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Tercan",
+      "merkeze_km": 76,
+      "neden": "Saltuklu Mama Hatun'un kervan yolu hanı; restorasyondan sonra Temmuz 2026'da sergi açıldı",
+      "place_id": "ChIJP6HoWV_Rb0ARF5D4WXEM4hk"
+    },
+    {
+      "sira": 10,
+      "ad": "Ergan Dağı Kayak Merkezi",
+      "kategori": "aktivite",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 11,
+      "neden": "Şehre 12 km; tek parça 12 km'lik pisti, telesiyej ve teleferiği, çocuk kızak alanı var",
+      "place_id": "ChIJ5WwFVeFucEAR7YAda3NEOW4"
+    },
+    {
+      "sira": 11,
+      "ad": "Terzibaba Türbesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "1848 kolerasında ölen Nakşî şeyh Terzi Baba'nın kabri; bugünkü taş türbe 1980'lerden",
+      "osm": "way/301746835"
+    },
+    {
+      "sira": 12,
+      "ad": "Kemaliye Kültür ve Etnografya Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Kemaliye",
+      "merkeze_km": 101,
+      "neden": "Fırat'a bakan eski taş cezaevi 1999'da müze oldu; Eğinlilerin bağışı ~600 eşya ve giysi",
+      "osm": "node/12892871523",
+      "place_id": "ChIJMWlAMXkAekARGo4WbGdm5TY"
+    },
+    {
+      "sira": 13,
+      "ad": "Prof. Dr. Ali Demirsoy Doğa Tarihi Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "cocuklu",
+        "doga"
+      ],
+      "ilce": "Kemaliye",
+      "merkeze_km": 101,
+      "neden": "Türkiye'nin ilk doğa tarihi müzesi; ~5000 tür, 200'e yakın doldurulmuş kuş ve mineraller",
+      "place_id": "ChIJ0Rydf9oBekARlh9GYMEYPFs"
+    },
+    {
+      "sira": 14,
+      "ad": "Karanlık Kanyon tekne turu ve zipline",
+      "kategori": "aktivite",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Kemaliye",
+      "merkeze_km": 100,
+      "neden": "Fırat'ta tekneyle kanyon gezisi, suyun üstünde 200 m'lik iki zipline; yalnız yazın"
+    },
+    {
+      "sira": 15,
+      "ad": "Apçağa Köyü ve Ahmet Kutsi Tecer Kültür Evi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Kemaliye",
+      "merkeze_km": 102,
+      "neden": "'Orda Bir Köy Var Uzakta'nın köyü; 2014'te açılan evde Tecer'in kitap ve mektupları",
+      "place_id": "ChIJD7xhIL-qcEARQdBuIetwoIM"
+    },
+    {
+      "sira": 16,
+      "ad": "Otlukbeli Gölü",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Otlukbeli",
+      "merkeze_km": 52,
+      "neden": "1885 m'de mineralli suların traverten setle kapattığı, ~20 m derin küçük doğal anıt göl",
+      "place_id": "ChIJOTOhhYfwb0ARn2xt4KM79ro"
+    },
+    {
+      "sira": 17,
+      "ad": "Otlukbeli Savaşı Şehitler Anıtı",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Otlukbeli",
+      "merkeze_km": 52,
+      "neden": "Fatih ile Uzun Hasan'ın 1473'te çarpıştığı yerde, iki tarafa adanmış 2008 tarihli anıt",
+      "place_id": "ChIJSa_cfYjwb0ARNs3OpZ4gbZI"
+    },
+    {
+      "sira": 18,
+      "ad": "Ekşisu Mesire Alanı ve Sazlığı",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 10,
+      "neden": "Ekşi, kükürtlü, sıcak, tatlı ve maden suyu yan yana çıkar; sazlıkta 149 kuş türü sayıldı"
+    },
+    {
+      "sira": 19,
+      "ad": "Dumanlı Tabiat Parkı",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Refahiye",
+      "merkeze_km": 64,
+      "neden": "2017'de tabiat parkı ilan edilen ~2000 m'lik çam yaylası; kamp alanı ve macera parkı var",
+      "place_id": "ChIJDTE5j5TvekARIaQl8jjA_20"
+    },
+    {
+      "sira": 20,
+      "ad": "Gülabibey Camii",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Kemah",
+      "merkeze_km": 42,
+      "neden": "Emir Gülabi Bey'in 1454 tarihli camisi; Vakıflar 2011-2018'de onardı, ibadete açık",
+      "place_id": "ChIJQ1HtR-t_ekARdGmirREqyfg"
+    },
+    {
+      "sira": 21,
+      "ad": "Kalecik Kalesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "doga"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 28,
+      "neden": "Girlevik'e komşu köyde sarp kaya tepesinde, gizli girişli ve basamaklı Tunç Çağı kalesi"
+    },
+    {
+      "sira": 22,
+      "ad": "Cimin üzümü bağları (Pişkidağ)",
+      "kategori": "doga",
+      "amaclar": [
+        "lezzet",
+        "doga"
+      ],
+      "ilce": "Üzümlü",
+      "merkeze_km": 18,
+      "neden": "Pişkidağ'da 100-200 yıllık asmalar; tescilli Cimin üzümü Eylül-Ekim'de toplanır"
+    },
+    {
+      "sira": 23,
+      "ad": "Ocak Köyü Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Kemaliye",
+      "merkeze_km": 101,
+      "neden": "Mustafa Gürer'in kaza kurbanı oğlu anısına 1994'te kurduğu, ~3000 eşyalı köy müzesi"
+    },
+    {
+      "sira": 24,
+      "ad": "Lökhane (Kemaliye)",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Kemaliye",
+      "merkeze_km": 101,
+      "neden": "Dut, ceviz ve balla yapılan saray tatlısı lök ile cevizli sucuk burada yapılıp satılır",
+      "place_id": "ChIJceaDmnwAekARR4arGwI3uUQ"
+    },
+    {
+      "sira": 25,
+      "ad": "Apçağa Eğin ekmeği fırını",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet",
+        "yavas"
+      ],
+      "ilce": "Kemaliye",
+      "merkeze_km": 102,
+      "neden": "Tecer'in köyünde odun fırınında pişen ince Eğin ekmeği; kuru tutulunca aylarca dayanır"
+    },
+    {
+      "sira": 26,
+      "ad": "Kemaliye kapı tokmağı atölyeleri",
+      "kategori": "aktivite",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Kemaliye",
+      "merkeze_km": 101,
+      "neden": "Altı kuşaktır süren tokmak yapımı; büyük ve küçük tokmak sesi gelenin işini belli eder"
+    },
+    {
+      "sira": 27,
+      "ad": "Kadıköy Kilisesi (Refahiye)",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Refahiye",
+      "merkeze_km": 91,
+      "neden": "Kesme taş kilise; kapı üstündeki atkı taşında kabartma haç, içeride fresk izleri var",
+      "place_id": "ChIJYdw-ogUDe0ARgIjwI1ogDnI"
+    },
+    {
+      "sira": 28,
+      "ad": "Acemoğlu Boğazı Köprüsü",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Kemah",
+      "merkeze_km": 25,
+      "neden": "Erzincan–Kemah yolunda Karasu üstünde tek kemerli kesme taş köprü; yanında şehit anıtı"
+    },
+    {
+      "sira": 29,
+      "ad": "Turistik Doğu Ekspresi İliç molası",
+      "kategori": "aktivite",
+      "amaclar": [
+        "yavas",
+        "doga"
+      ],
+      "ilce": "İliç",
+      "merkeze_km": 86,
+      "neden": "Ankara–Kars treninden İliç garında inilip Kemaliye ve Karanlık Kanyon'a gidilir"
+    }
+  ]
+}
