@@ -1,7 +1,7 @@
 // #308: seyahat sayfası v7 metinleri (kanvas `Sayfa_v7_Seyahat_*`).
 import { describe, expect, it } from '@jest/globals';
 
-import { baslikAltSatiri, bosGunOnerileri, bugununPlaniSatirlari, gunSatiri, kisiAdlari, simdiEtiketi, simdiHedefi, varanlarMetni } from '../seyahatV7';
+import { baslikAltSatiri, bosGunOnerileri, bugununPlaniSatirlari, durakSayaci, gezildiMi, gunSatiri, kisiAdlari, simdiEtiketi, simdiHedefi, varanlarMetni } from '../seyahatV7';
 
 const seyahat = { start_date: '2026-11-24', end_date: '2026-11-29', tz: 'Europe/Istanbul' };
 const an = new Date('2026-11-20T09:00:00Z');
@@ -47,12 +47,33 @@ describe('seyahat v7 (#308)', () => {
     expect(varanlarMetni({ varanlar: [{ user_id: 'm', display_name: '' }], benId: 'e', yerAdi: null })).toBe('Bir arkadaşın orada');
   });
 
-  it('#522 inceleme 1: Bugünün planı gezilenler + sıradaki; kalanlar gizli', () => {
-    const k = (id: string, tamamlandi: boolean, numara: number | null = 1) => ({ id, tamamlandi, numara });
-    const kartlar = [k('a', true), k('otel', false, null), k('b', true), k('c', false), k('d', false), k('e', false)];
-    expect(bugununPlaniSatirlari(kartlar).map((x) => x.id)).toEqual(['a', 'b', 'c']);
-    expect(bugununPlaniSatirlari([k('a', true), k('b', true)]).map((x) => x.id)).toEqual(['a', 'b']);
-    expect(bugununPlaniSatirlari([k('a', false), k('b', false)]).map((x) => x.id)).toEqual(['a']);
+  it('#522 2. inceleme 1: Bugünün planı Şimdi durağında kesilir, en çok 3 satır; otomatik geçilen de gezildi', () => {
+    const k = (durakId: string, durum: string | null, tamamlandi = false, numara: number | null = 1) => ({ durakId, durum, tamamlandi, numara });
+    // "Bitti"ye hiç basılmamış: program iki durağı kendisi geçti saydı.
+    const oto = [k('a', 'gecildi'), k('otel', null, false, null), k('b', 'gecildi'), k('c', 'siradaki'), k('d', 'bekliyor'), k('e', 'bekliyor')];
+    expect(bugununPlaniSatirlari(oto, 'c').map((x) => x.durakId)).toEqual(['a', 'b', 'c']);
+    expect(oto.filter(gezildiMi).map((x) => x.durakId)).toEqual(['a', 'b']);
+    // Akşama doğru: 5 gezilen + sıradaki → son 2 gezilen + sıradaki.
+    const aksam = [k('a', 'gecildi', true), k('b', 'gecildi'), k('c', 'gecildi'), k('d', 'gecildi', true), k('e', 'gecildi'), k('f', 'siradaki')];
+    expect(bugununPlaniSatirlari(aksam, 'f').map((x) => x.durakId)).toEqual(['d', 'e', 'f']);
+    // Duraktayken Şimdi bir sonrakini gösterir: kesme orada, aradaki durak da listede.
+    const burada = [k('a', 'gecildi'), k('b', 'gecildi'), k('c', 'buradasin'), k('d', 'bekliyor'), k('e', 'bekliyor')];
+    expect(bugununPlaniSatirlari(burada, 'd').map((x) => x.durakId)).toEqual(['b', 'c', 'd']);
+    // Durak kalmadı: son 3.
+    expect(bugununPlaniSatirlari([k('a', 'gecildi'), k('b', 'gecildi'), k('c', 'gecildi'), k('d', 'gecildi')], null).map((x) => x.durakId)).toEqual(['b', 'c', 'd']);
+    // Sayaç aynı tanım: otel sayılmaz, otomatik geçilen gezildi.
+    expect(durakSayaci(oto)).toEqual({ gezilen: 2, toplam: 5 });
+  });
+
+  it('#522 2. inceleme 3: adsız üye cümle içinde küçük harf', () => {
+    expect(kisiAdlari([{ user_id: 'e', display_name: 'Ece' }, { user_id: 'm', display_name: '' }], 'e')).toBe('Ece, bir arkadaşın');
+    expect(kisiAdlari([{ user_id: 'm', display_name: '' }, { user_id: 'a', display_name: 'Ayşe' }], 'm')).toBe('Bir arkadaşın, Ayşe');
+    const varanlar = [
+      { user_id: 'e', display_name: 'Ece' },
+      { user_id: 'm', display_name: ' ' },
+    ];
+    expect(varanlarMetni({ varanlar, benId: 'e', yerAdi: 'Sazova' })).toBe("Sen ve bir arkadaşın Sazova'da");
+    expect(varanlarMetni({ varanlar: [{ user_id: 'a', display_name: 'Ayşe' }, { user_id: 'm', display_name: '' }], benId: 'e', yerAdi: null })).toBe('Ayşe ve bir arkadaşın orada');
   });
 
   it('#522 inceleme 3: Şimdi sıradakini, duraktayken bir sonrakini gösterir; durak kalmadıysa yok', () => {

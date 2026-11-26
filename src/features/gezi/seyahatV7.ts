@@ -47,7 +47,8 @@ export function baslikAltSatiri(p: {
 /** KK3 grup: "Ece, Mert, Ayşe" (benim adım başta). */
 export function kisiAdlari(uyeler: Pick<Uye, 'user_id' | 'display_name'>[], benId: string | null): string {
   const sirali = [...uyeler].sort((a, b) => Number(b.user_id === benId) - Number(a.user_id === benId));
-  return sirali.map((u) => u.display_name?.trim() || t('seyahatV7.adsiz')).join(', ');
+  // #522 2. inceleme 3: liste içinde küçük harf ("Ece, bir arkadaşın"); başta büyük.
+  return sirali.map((u, i) => u.display_name?.trim() || t(i === 0 ? 'seyahatV7.adsiz' : 'seyahatV7.adsizKucuk')).join(', ');
 }
 
 /**
@@ -57,7 +58,10 @@ export function kisiAdlari(uyeler: Pick<Uye, 'user_id' | 'display_name'>[], benI
 export function varanlarMetni(p: { varanlar: Pick<Uye, 'user_id' | 'display_name'>[]; benId: string | null; yerAdi: string | null }): string | null {
   if (p.varanlar.length === 0) return null;
   const ben = p.varanlar.some((u) => u.user_id === p.benId);
-  const digerleri = p.varanlar.filter((u) => u.user_id !== p.benId).map((u) => u.display_name?.trim() || t('seyahatV7.adsiz'));
+  // #522 2. inceleme 3: cümle başı değilse küçük harf ("Sen ve bir arkadaşın", "Mert ve bir arkadaşın").
+  const digerleri = p.varanlar
+    .filter((u) => u.user_id !== p.benId)
+    .map((u, i) => u.display_name?.trim() || t(!ben && i === 0 ? 'seyahatV7.adsiz' : 'seyahatV7.adsizKucuk'));
   const yer = p.yerAdi ? bulunmaEkli(p.yerAdi) : null;
   // "Sazova'dasın", "Köprü'desin": ekin ünlüsüne göre -sın/-sin.
   if (ben && digerleri.length === 0) return yer ? t(yer.endsWith('a') ? 'seyahatV7.senDa' : 'seyahatV7.senDe', { yer }) : t('seyahatV7.senOrada');
@@ -104,11 +108,27 @@ export function bosGunOnerileri<Y extends Pick<Yer, 'lat' | 'lng'> & { place_id:
     .slice(0, adet);
 }
 
-/** #522 inceleme 1 (kanvas `_GeziModu`): "Bugünün planı" gezilenleri ve sıradaki durağı gösterir; kalanlar "Planı aç ›". */
-export function bugununPlaniSatirlari<T extends { numara: number | null; tamamlandi: boolean }>(kartlar: T[]): T[] {
+/** #522 2. inceleme 1: gezildi = "Bitti"ye basıldı ya da program pay geçince kendisi geçildi saydı (`program.ts`, otomatik). */
+export function gezildiMi(k: { tamamlandi: boolean; durum: string | null }): boolean {
+  return k.tamamlandi || k.durum === 'gecildi';
+}
+
+/**
+ * #522 inceleme 1 + 2. inceleme 1 (kanvas `_GeziModu`): "Bugünün planı" Şimdi bölümünün durağında (`hedefId`, `simdiHedefi`)
+ * kesilir; o durak ve öncesinden en çok `sinir` satır (son gezilenler + sıradaki). Kalanlar "Planı aç ›". Hedef yoksa
+ * (durak kalmadı) son `sinir` durak.
+ */
+export function bugununPlaniSatirlari<T extends { durakId: string; numara: number | null }>(kartlar: T[], hedefId: string | null, sinir = 3): T[] {
   const numarali = kartlar.filter((k) => k.numara !== null);
-  const ilkKalan = numarali.findIndex((k) => !k.tamamlandi);
-  return numarali.filter((k, i) => k.tamamlandi || i === ilkKalan);
+  const kesme = hedefId ? numarali.findIndex((k) => k.durakId === hedefId) : -1;
+  const once = kesme >= 0 ? numarali.slice(0, kesme + 1) : numarali;
+  return once.slice(Math.max(0, once.length - sinir));
+}
+
+/** Başlıktaki "N / M durak" sayacı: Bugünün planı ile aynı tanım. */
+export function durakSayaci(kartlar: { numara: number | null; tamamlandi: boolean; durum: string | null }[]): { gezilen: number; toplam: number } {
+  const numarali = kartlar.filter((k) => k.numara !== null);
+  return { gezilen: numarali.filter(gezildiMi).length, toplam: numarali.length };
 }
 
 /** #522 inceleme 3: Şimdi bölümünün durağı. Sıradaki durak; duraktayken (`buradasin`) bir sonraki; durak kalmadıysa null. */

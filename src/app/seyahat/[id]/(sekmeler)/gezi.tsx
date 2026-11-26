@@ -16,7 +16,7 @@ import { SeyahatYukleme } from '@/components/seyahatler/SeyahatYukleme';
 import { useDavetPaylas } from '@/features/davet/paylas';
 import { useBilinenMekanlar } from '@/features/gezi/bilinenMekanlar';
 import { useBugunEkle } from '@/features/gezi/bugunEkle';
-import { baslikAltSatiri, bosGunOnerileri, bugununPlaniSatirlari, gunSatiri, kisiAdlari, simdiEtiketi, simdiHedefi, varanlarMetni } from '@/features/gezi/seyahatV7';
+import { baslikAltSatiri, bosGunOnerileri, bugununPlaniSatirlari, durakSayaci, gezildiMi, gunSatiri, kisiAdlari, simdiEtiketi, simdiHedefi, varanlarMetni } from '@/features/gezi/seyahatV7';
 import { ustHaritaVerisi, type UstHaritaHali } from '@/features/gezi/ustHarita';
 import { programCizgileri } from '@/features/program/haritaVerisi';
 import {
@@ -347,8 +347,9 @@ function GeziSayfasi({ seyahat, gunler, duraklar, mekanlar, konaklamalar, katild
     [hal, gunler, duraklar, mekanlar, bugunGun, konum, verisi.otel, bosOneriler, bugunCizgileri],
   );
   const haritaMerkezi = ustHarita.pinler[0]?.konum ?? konumu(seyahat) ?? { lat: 39.0, lng: 35.0 };
-  const gezilen = bugunAktif.filter((d) => !!d.completed_at).length;
-  const altSatir = baslikAltSatiri({ seyahat, mod, an, bugunIndex: mod === 'gezi' ? bugunIndex : null, bugunTarih: bugunGun?.date ?? null, gezilen, toplam: bugunAktif.length });
+  // #522 2. inceleme 1: sayaç Bugünün planı ile aynı tanımı kullanır (otomatik geçilen durak da gezildi).
+  const sayac = durakSayaci(bugunKartlari);
+  const altSatir = baslikAltSatiri({ seyahat, mod, an, bugunIndex: mod === 'gezi' ? bugunIndex : null, bugunTarih: bugunGun?.date ?? null, ...sayac });
 
   // KK3: gezi modunda bugünün en son varılan durağına varmış kişiler (grup konum verisi; yeni veri yok).
   const varis = (() => {
@@ -374,13 +375,14 @@ function GeziSayfasi({ seyahat, gunler, duraklar, mekanlar, konaklamalar, katild
   const kisilerSag = varanMetni ?? kisiAdlari(uyeListesi, benId);
 
   // KK4: sohbet ipucu yalnız grupta; açık oylama ya da okunmamış son mesaj, ikisi de yoksa satır yok.
-  const adBul = (uid: string | null) => uyeListesi.find((u) => u.user_id === uid)?.display_name ?? null;
+  // #522 2. inceleme 2: boş dize de yedek ada düşer.
+  const adBul = (uid: string | null) => uyeListesi.find((u) => u.user_id === uid)?.display_name?.trim() || t('seyahatV7.adsiz');
   const ipucu =
     uyeListesi.length > 1
       ? acikOylama && oylamaMesaji
         ? { kim: adBul(acikOylama.olusturan), metin: t('seyahatV7.oylamaActi', { soru: acikOylama.soru }) }
         : (okunmamis.data ?? 0) > 0 && sonMesaj
-          ? { kim: adBul(sonMesaj.user_id) ?? t('seyahatV7.adsiz'), metin: sonMesaj.metin.trim() || t('seyahatV7.yeniMesaj') }
+          ? { kim: adBul(sonMesaj.user_id), metin: sonMesaj.metin.trim() || t('seyahatV7.yeniMesaj') }
           : null
       : null;
 
@@ -403,15 +405,15 @@ function GeziSayfasi({ seyahat, gunler, duraklar, mekanlar, konaklamalar, katild
     const sn = simdiKart.gelis?.mod === 'taksi' ? kestirimTaksiSn(konum, simdiKart.konum) : kestirimYuruyusSn(konum, simdiKart.konum);
     return Math.max(1, Math.ceil(sn / 60));
   })();
-  // #522 inceleme 1: gezilenler ve sıradaki durak; kalanlar "Planı aç ›" ile.
-  const planSatirlari: PlanSatiriV7[] = bugununPlaniSatirlari(bugunKartlari)
+  // #522 inceleme 1 + 2. inceleme 1: Şimdi'nin durağında kesilir; en çok 3 satır (son gezilenler + sıradaki).
+  const planSatirlari: PlanSatiriV7[] = bugununPlaniSatirlari(bugunKartlari, simdiKart?.durakId ?? null)
     .map((k) => ({
       id: k.durakId,
       ad: k.ad,
-      gezildi: k.tamamlandi,
+      gezildi: gezildiMi(k),
       sira: k.numara,
       renk: gunRengi(bugunGun?.index ?? 1),
-      alt: k.tamamlandi
+      alt: gezildiMi(k)
         ? k.varisDk !== null
           ? t('seyahatV7.gezildi', { saat: dakikaSaat(k.varisDk) })
           : t('seyahatV7.gezildiSaatsiz')
@@ -459,7 +461,7 @@ function GeziSayfasi({ seyahat, gunler, duraklar, mekanlar, konaklamalar, katild
         {ipucu ? <SohbetIpucu kim={ipucu.kim} metin={ipucu.metin} onPress={sohbeteGit} /> : null}
         {hatirlatmaVakti(seyahat, an) && mod === 'gezi' ? (
           <View style={s.serit}>
-            <HatirlatmaSatiri ozet={hOzet} k={kisiler} ibanlar={ibanlar.data} onBakiyeler={bakiyeler} />
+            <HatirlatmaSatiri ozet={hOzet} k={kisiler} ibanlar={ibanlar.data} onBakiyeler={bakiyeler} kenarsiz />
           </View>
         ) : null}
 
@@ -474,12 +476,12 @@ function GeziSayfasi({ seyahat, gunler, duraklar, mekanlar, konaklamalar, katild
         ) : hal === 'bos' ? (
           <View style={s.bolum}>
             <BolumBasligi baslik={t('seyahatV7.bugunBos')} baglanti={sehir ? t('seyahatV7.rehber') : undefined} onBaglanti={() => router.push({ pathname: '/seyahat/[id]/rehber', params: { id: seyahat.id } })} />
-            {/* #522 inceleme 4: öneri yoksa ya da şehir bilinmiyorsa tek satır "Bugüne yer ekle ›" (Yer ekle sekmesi). */}
-            {bosOneriler.length > 0 && sehir ? (
+            {/* #522 inceleme 4 + 2. inceleme 4: öneri yoksa, şehir bilinmiyorsa ya da bugünün günü yoksa tek satır "Bugüne yer ekle ›". */}
+            {bosOneriler.length > 0 && sehir && bugunGun ? (
               <BugunBosV7
                 yerler={bosOneriler.map((y) => ({ id: y.place_id, ad: y.ad, foto: null, alt: [kategoriEtiketi(y.kategori), y.mesafeM !== null ? mesafeMetni(Math.round(y.mesafeM / 10) * 10) : null].filter(Boolean).join(' · ') }))}
                 eklenenler={eklenenler}
-                onEkle={bugunGun ? bugunaEkle : undefined}
+                onEkle={bugunaEkle}
                 pasif={cevrimdisi}
               />
             ) : (
