@@ -3,19 +3,37 @@
 // 32 px avatar + "{Ad} {şehir} gezisini paylaştı" + zaman, 200 px kapak (16 köşe) ve sağ üstte 30 px ♥, 14 px gri özet.
 // Karta dokununca alıcı ekranı paylaşımın kimliğiyle açılır (token istemciye gelmez, KK3). Paylaşım yoksa kişi satırı ve tek
 // cümle (KK4). Google'a istek yok.
-import Constants from 'expo-constants';
+// #533 incelemesi: kartın tamamı dokunulabilir (♥ ayrı); sekmeye dönünce bayat akış tazelenir; "Davet et" etkin ya da yaklaşan
+// seyahatin davetini paylaşır, yoksa "Yeni seyahat" açılır; veri varken yenileme hatası listeyi silmez; ♥ hatası genel uyarı.
 import { router } from 'expo-router';
-import { ActivityIndicator, Pressable, RefreshControl, ScrollView, Share, StyleSheet, Text, View } from 'react-native';
+import { useState } from 'react';
+import { ActivityIndicator, Alert, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Svg, { Path } from 'react-native-svg';
 
 import { SeyahatKapagi } from '@/components/seyahatler/SeyahatKapagi';
 import { Avatar } from '@/components/ui/Avatar';
+import { ProfilOnayi } from '@/components/davet/ProfilOnayi';
 import { Buton } from '@/components/ui/Buton';
-import { useArkadaslarim, useArkadasPaylasimlari, useBegeni, type Arkadas, type ArkadasPaylasimi } from '@/features/arkadaslar/sorgular';
+import {
+  useArkadaslarim,
+  useArkadasPaylasimlari,
+  useBegeni,
+  useOdaktaTazele,
+  type Arkadas,
+  type ArkadasPaylasimi,
+} from '@/features/arkadaslar/sorgular';
 import { gecenZaman } from '@/features/arkadaslar/zaman';
+import { davetiPaylas } from '@/features/davet/paylas';
+import { profilOnayiniYaz, profilOnayiVerildiMi } from '@/features/davet/sorgular';
+import { useSeyahatler } from '@/features/seyahatler/sorgular';
+import { siniflandir } from '@/features/seyahatler/siniflandir';
+import { SEYAHAT_ALANLARI } from '@/features/seyahatler/alanlar';
 import { ilkAd, paylasimOzeti } from '@/features/paylasim/baslik';
 import { t } from '@/i18n';
+import { useOturum } from '@/lib/oturum';
+import { supabase } from '@/lib/supabase';
+import type { Seyahat } from '@/lib/tipler';
 import { anaV5, arkadasRenkleri, renk, yazi } from '@/theme';
 
 /** Kanvastaki kesikli "Davet et" dairesinin kenarı. */
@@ -23,27 +41,58 @@ const DAVET_KENAR = '#B4BBD3';
 
 const kisiRengi = (sira: number) => arkadasRenkleri[sira % arkadasRenkleri.length];
 
-/** Uygulamanın web adresi (davet mesajı); alan adı yoksa yalnız metin. */
-function uygulamaLinki(): string {
-  const alan = (Constants.expoConfig?.extra as { appDomain?: string } | undefined)?.appDomain;
-  return alan ? `https://${alan}` : '';
+const hataUyarisi = () => Alert.alert(t('genel.hataBaslik'), t('genel.hataMetin'));
+
+/**
+ * #533 incelemesi 5: "Davet et" etkin (yoksa en yakın yaklaşan) seyahatin davet linkini paylaşır (ilk seferde profil onayı,
+ * #137 KK5); böyle bir seyahat yoksa "Yeni seyahat" sihirbazı açılır.
+ */
+function useDavetEt() {
+  const { session } = useOturum();
+  const seyahatler = useSeyahatler();
+  const [bekleyen, setBekleyen] = useState<Seyahat | null>(null);
+  const davetEt = async () => {
+    const s = seyahatler.data ? siniflandir(seyahatler.data) : null;
+    const hedef = s?.aktif[0] ?? s?.yaklasan[0] ?? null;
+    if (!hedef) {
+      router.push('/(tabs)/yeni');
+      return;
+    }
+    const { data, error } = await supabase.from('trips').select(SEYAHAT_ALANLARI).eq('id', hedef.id).single();
+    if (error || !data) {
+      hataUyarisi();
+      return;
+    }
+    const seyahat = data as unknown as Seyahat;
+    if (await profilOnayiVerildiMi(session?.user.id)) await davetiPaylas(seyahat);
+    else setBekleyen(seyahat);
+  };
+  const onayla = async () => {
+    const seyahat = bekleyen;
+    setBekleyen(null);
+    if (!seyahat) return;
+    await profilOnayiniYaz(session?.user.id);
+    await davetiPaylas(seyahat);
+  };
+  return { davetEt, onayAcik: !!bekleyen, onayKapat: () => setBekleyen(null), onayla };
 }
 
 export default function ArkadaslarEkrani() {
   const kisiler = useArkadaslarim();
   const akis = useArkadasPaylasimlari();
   const begeni = useBegeni();
+  const davet = useDavetEt();
+  useOdaktaTazele();
   const yenile = () => {
     void kisiler.refetch();
     void akis.refetch();
   };
-  const davetEt = () => {
-    Share.share({ message: t('arkadaslar.davetMetin', { link: uygulamaLinki() }).trim() }).catch(() => undefined);
-  };
+  const begen = (p: ArkadasPaylasimi) => begeni.mutate({ id: p.id, begen: !p.begendim }, { onError: hataUyarisi });
   const liste = kisiler.data ?? [];
   // Akıştaki kişinin avatar rengi kişi satırındakiyle aynı.
   const sira = new Map(liste.map((k, i) => [k.user_id, i]));
-  const hata = kisiler.isError || akis.isError;
+  // #533 incelemesi 9: veri varken yenileme hatası listeyi silmez; tam ekran hata yalnız hiç veri yokken.
+  const hata = (kisiler.isError && !kisiler.data) || (akis.isError && !akis.data);
 
   return (
     <SafeAreaView style={s.ekran} edges={['top']}>
@@ -66,7 +115,7 @@ export default function ArkadaslarEkrani() {
               {liste.map((k, i) => (
                 <KisiOgesi key={k.user_id} kisi={k} renk={kisiRengi(i)} />
               ))}
-              <Pressable accessibilityRole="button" accessibilityLabel={t('arkadaslar.davetEt')} onPress={davetEt} style={s.kisi} testID="arkadaslar-davet">
+              <Pressable accessibilityRole="button" accessibilityLabel={t('arkadaslar.davetEt')} onPress={() => void davet.davetEt()} style={s.kisi} testID="arkadaslar-davet">
                 <View style={s.davetDaire}>
                   <Svg width={22} height={22} viewBox="0 0 24 24" fill="none" stroke={renk.ana} strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round">
                     <Path d="M12 6v12M6 12h12" />
@@ -75,7 +124,9 @@ export default function ArkadaslarEkrani() {
                 <Text style={s.davetYazi}>{t('arkadaslar.davetEt')}</Text>
               </Pressable>
             </ScrollView>
-            {akis.data.length === 0 ? (
+            {liste.length === 0 ? (
+              <Text style={s.bos}>{t('arkadaslar.bosKisi')}</Text>
+            ) : akis.data.length === 0 ? (
               <Text style={s.bos}>{t('arkadaslar.bos')}</Text>
             ) : (
               akis.data.map((p) => (
@@ -83,14 +134,16 @@ export default function ArkadaslarEkrani() {
                   key={p.id}
                   p={p}
                   ad={ilkAd(p.paylasan_ad) ?? ilkAd(liste.find((k) => k.user_id === p.paylasan)?.ad) ?? t('seyahatV7.adsiz')}
+                  foto={p.foto ?? liste.find((k) => k.user_id === p.paylasan)?.foto ?? null}
                   renk={kisiRengi(sira.get(p.paylasan) ?? 0)}
-                  onBegen={() => begeni.mutate({ id: p.id, begen: !p.begendim })}
+                  onBegen={() => begen(p)}
                 />
               ))
             )}
           </>
         )}
       </ScrollView>
+      <ProfilOnayi acik={davet.onayAcik} onKapat={davet.onayKapat} onGonder={davet.onayla} />
     </SafeAreaView>
   );
 }
@@ -107,19 +160,21 @@ function KisiOgesi({ kisi, renk: zemin }: { kisi: Arkadas; renk: string }) {
   );
 }
 
-function PaylasimKarti({ p, ad, renk: zemin, onBegen }: { p: ArkadasPaylasimi; ad: string; renk: string; onBegen: () => void }) {
+function PaylasimKarti({ p, ad, foto, renk: zemin, onBegen }: { p: ArkadasPaylasimi; ad: string; foto: string | null; renk: string; onBegen: () => void }) {
   const ac = () => router.push({ pathname: '/r/g/[token]', params: { token: p.id } });
+  // #533 incelemesi 7: başlık satırı, kapak ve özet aynı ekranı açar; ♥ kapağın üstünde ayrı Pressable. Ekran okuyucu için kart
+  // tek düğme (başlık satırı), kapak ve özet ikinci kez okunmaz.
   return (
     <View style={s.kart} testID={`arkadas-paylasim-${p.id}`}>
-      <View style={s.kartUst}>
-        <Avatar ad={ad} boyut={32} arkaPlan={zemin} yuvarlak harfBoyutu={13} />
+      <Pressable accessibilityRole="button" accessibilityLabel={t('arkadaslar.kartEtiket', { ad, sehir: p.sehir })} onPress={ac} style={s.kartUst}>
+        <Avatar ad={ad} url={foto} boyut={32} arkaPlan={zemin} yuvarlak harfBoyutu={13} />
         <Text style={s.kartMetin} numberOfLines={2}>
           <Text style={s.kalin}>{ad}</Text> {t('arkadaslar.paylasti', { sehir: p.sehir })}
         </Text>
         <Text style={s.zaman}>{gecenZaman(p.olusturuldu)}</Text>
-      </View>
+      </Pressable>
       <View>
-        <Pressable accessibilityRole="button" accessibilityLabel={t('arkadaslar.kartEtiket', { ad, sehir: p.sehir })} onPress={ac}>
+        <Pressable onPress={ac} accessible={false} accessibilityElementsHidden importantForAccessibility="no-hide-descendants" testID={`arkadas-kapak-${p.id}`}>
           <SeyahatKapagi kimlik={p.id} yukseklik={200} kose={16} />
         </Pressable>
         <Pressable
@@ -136,7 +191,9 @@ function PaylasimKarti({ p, ad, renk: zemin, onBegen }: { p: ArkadasPaylasimi; a
           </Svg>
         </Pressable>
       </View>
-      <Text style={s.ozet}>{paylasimOzeti(p.gun_sayisi, p.durak_sayisi, p.kisi_sayisi, p.kisi_kip)}</Text>
+      <Pressable onPress={ac} accessible={false} accessibilityElementsHidden importantForAccessibility="no-hide-descendants" testID={`arkadas-ozet-${p.id}`}>
+        <Text style={s.ozet}>{paylasimOzeti(p.gun_sayisi, p.durak_sayisi, p.kisi_sayisi, p.kisi_kip)}</Text>
+      </Pressable>
     </View>
   );
 }

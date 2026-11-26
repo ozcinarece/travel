@@ -18,7 +18,7 @@ const mockAl = jest.fn(async (_t: string) => 'YENI');
 const mockBekleyen = jest.fn(async (_t: string) => undefined);
 const mockBekleyenSil = jest.fn(async () => undefined);
 const mockOlay = jest.fn();
-const mockRouter = { push: jest.fn(), replace: jest.fn() };
+const mockRouter = { push: jest.fn(), replace: jest.fn(), back: jest.fn(), geriVar: false };
 
 jest.mock('react-native-safe-area-context', () => jest.requireActual<{ default: object }>('react-native-safe-area-context/jest/mock').default);
 jest.mock('@/lib/supabase', () => ({ supabase: {} }));
@@ -28,8 +28,14 @@ jest.mock('@/components/seyahatler/SeyahatKapagi', () => ({ SeyahatKapagi: () =>
 jest.mock('@/components/harita/Harita', () => ({ Harita: () => null }));
 jest.mock('@/features/icerik/sorgular', () => ({ olayYaz: (...a: unknown[]) => mockOlay(...a) }));
 jest.mock('expo-router', () => ({
-  router: { push: (...a: unknown[]) => mockRouter.push(...a), replace: (...a: unknown[]) => mockRouter.replace(...a) },
-  useLocalSearchParams: () => ({ token: 'A'.repeat(24) }) }));
+  router: {
+    push: (...a: unknown[]) => mockRouter.push(...a),
+    replace: (...a: unknown[]) => mockRouter.replace(...a),
+    back: () => mockRouter.back(),
+    canGoBack: () => mockRouter.geriVar,
+  },
+  useLocalSearchParams: () => ({ token: mockToken.deger }) }));
+const mockToken = { deger: 'A'.repeat(24) };
 jest.mock('@/features/paylasim/alici', () => {
   const gercek = jest.requireActual<typeof import('../alici')>('../alici');
   return {
@@ -65,6 +71,8 @@ const acik: PaylasimOzeti = {
 
 beforeEach(() => {
   jest.clearAllMocks();
+  mockRouter.geriVar = false;
+  mockToken.deger = 'A'.repeat(24);
   mockOturum.hesapli = false;
   mockSorgu.data = acik;
   mockSorgu.isPending = false;
@@ -132,6 +140,24 @@ describe('#432 2/3b alıcı ekranı', () => {
     render(<PaylasimEkrani />);
     fireEvent.press(screen.getByRole('link', { name: t('paylasim.logoEtiket') }));
     expect(mockRouter.replace).toHaveBeenLastCalledWith('/(tabs)');
+  });
+
+  it('#533 3: önceki ekran varsa (Arkadaşlar akışı) logo geri döner', () => {
+    mockRouter.geriVar = true;
+    mockOturum.hesapli = true;
+    render(<PaylasimEkrani />);
+    fireEvent.press(screen.getByRole('link', { name: t('paylasim.logoEtiket') }));
+    expect(mockRouter.back).toHaveBeenCalledTimes(1);
+    expect(mockRouter.replace).not.toHaveBeenCalled();
+  });
+
+  it('#533 4: akıştan açılan kapalı paylaşım linkten söz etmez', () => {
+    mockToken.deger = '11111111-1111-4111-8111-111111111111';
+    mockOturum.hesapli = true;
+    mockSorgu.data = { kapali: true, paylasan: 'Ayşe' };
+    render(<PaylasimEkrani />);
+    expect(screen.getByText('Ayşe bu paylaşımı kapattı.')).toBeTruthy();
+    expect(screen.queryByText(t('paylasim.kapaliMetin'))).toBeNull();
   });
 
   it('#515 inceleme 2: kapalı link ekranında da logo ana sayfa bağlantısı', () => {
