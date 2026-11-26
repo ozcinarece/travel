@@ -191,30 +191,6 @@
     },
     {
       "sira": 16,
-      "ad": "Malatya Fotoğraf Makinesi Müzesi",
-      "kategori": "muze",
-      "amaclar": [
-        "kultur_tarih",
-        "cocuklu"
-      ],
-      "ilce": "Yeşilyurt",
-      "merkeze_km": 1,
-      "neden": "2017'de açılan müzede 2.023 fotoğraf makinesi ve 170 kadar casus kamera sergileniyor",
-      "place_id": "ChIJY_n8Nqw2dkARtsQc3ItAM9c"
-    },
-    {
-      "sira": 17,
-      "ad": "Malatya Yeni Cami",
-      "kategori": "tarih",
-      "amaclar": [
-        "kultur_tarih"
-      ],
-      "ilce": "Battalgazi",
-      "merkeze_km": 0,
-      "neden": "1912'de bitirilen cami 2023'te yıkıldı; aslına uygun yeniden yapılıyor, dışarıdan görülür"
-    },
-    {
-      "sira": 18,
       "ad": "Levent Vadisi Kaya Mezarları",
       "kategori": "tarih",
       "amaclar": [
@@ -227,7 +203,7 @@
       "place_id": "ChIJedn_XrTZd0ARNixEc092UKU"
     },
     {
-      "sira": 19,
+      "sira": 17,
       "ad": "Hekimhan Taşhan",
       "kategori": "tarih",
       "amaclar": [
@@ -239,7 +215,7 @@
       "place_id": "ChIJVVVVFSqCd0AR5r_3_RWZiXM"
     },
     {
-      "sira": 20,
+      "sira": 18,
       "ad": "Girmana Kanyonu",
       "kategori": "doga",
       "amaclar": [
@@ -251,20 +227,7 @@
       "place_id": "ChIJyYvkaV6Zd0ARg8gs5RevQzM"
     },
     {
-      "sira": 21,
-      "ad": "Kayaarası Kanyonu",
-      "kategori": "doga",
-      "amaclar": [
-        "doga",
-        "yavas"
-      ],
-      "ilce": "Arapgir",
-      "merkeze_km": 115,
-      "neden": "Kozluk Çayı boyunca, Arapgir'e 7 km; yazın yüzülür, çevrede endemik bitkiler var",
-      "place_id": "ChIJxyX1dwBFd0ARVZHLMdszD-E"
-    },
-    {
-      "sira": 22,
+      "sira": 19,
       "ad": "Arapgir Millet Han",
       "kategori": "tarih",
       "amaclar": [
@@ -276,7 +239,7 @@
       "neden": "İpek Yolu üzerindeki tarihi han bugün butik otel; avlusunda oturup çay içilir"
     },
     {
-      "sira": 23,
+      "sira": 20,
       "ad": "Arapgir Meydan Köprüsü",
       "kategori": "tarih",
       "amaclar": [
@@ -289,7 +252,7 @@
       "place_id": "ChIJcxg8_EtFd0ARhWZmzVh1gGk"
     },
     {
-      "sira": 24,
+      "sira": 21,
       "ad": "Malatya Atatürk Evi ve Etnografya Müzesi",
       "kategori": "muze",
       "amaclar": [
@@ -301,7 +264,7 @@
       "place_id": "ChIJkdd9TMI2dkARA4c_1dwaLqs"
     },
     {
-      "sira": 25,
+      "sira": 22,
       "ad": "Darende Şire Pazarı",
       "kategori": "carsi",
       "amaclar": [
@@ -313,7 +276,7 @@
       "neden": "İslim kayısısı, gün kurusu, kayısı çekirdeği, pekmez, dut kurusu; hasat sonrası canlanır"
     },
     {
-      "sira": 26,
+      "sira": 23,
       "ad": "Sultansuyu Tarım İşletmesi",
       "kategori": "aktivite",
       "amaclar": [
@@ -326,7 +289,7 @@
       "place_id": "ChIJfwS5KV7Sd0ARvPnqa2wX2wo"
     },
     {
-      "sira": 27,
+      "sira": 24,
       "ad": "Turgut Özal Tabiat Parkı",
       "kategori": "doga",
       "amaclar": [
@@ -339,7 +302,7 @@
       "place_id": "ChIJIxy9Wp83dkARw4ZtXcpTt8g"
     },
     {
-      "sira": 28,
+      "sira": 25,
       "ad": "Karakaya Baraj Gölü",
       "kategori": "aktivite",
       "amaclar": [
@@ -348,11 +311,11 @@
       ],
       "ilce": "Kale",
       "merkeze_km": 40,
-      "neden": "Fırat üzerindeki baraj gölünde Temmuz 2026'da yakala-bırak turna balığı yarışması yapıldı",
+      "neden": "Fırat'ın baraj gölü; kıyısında olta balıkçılığı yapılır, Önemli Doğa Alanı sayılır",
       "place_id": "ChIJLbpqIqxddkARw3MuZ2NyKuQ"
     },
     {
-      "sira": 29,
+      "sira": 26,
       "ad": "Kernek Parkı",
       "kategori": "doga",
       "amaclar": [
@@ -362,11 +325,11 @@
       ],
       "ilce": "Yeşilyurt",
       "merkeze_km": 3,
-      "neden": "Yaz gecelerinde ailelerin toplandığı park; 35 dönüme büyütülmesi, teleferik planlanıyor",
+      "neden": "Yaz gecelerinde ailelerin toplandığı, merkeze 3 km'lik kent parkı",
       "place_id": "ChIJa0xgudo2dkAREgsfD5vU_mk"
     },
     {
-      "sira": 30,
+      "sira": 27,
       "ad": "Kırkkardeşler Mezarlığı",
       "kategori": "tarih",
       "amaclar": [
