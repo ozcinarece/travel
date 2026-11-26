@@ -15,8 +15,10 @@ import { SecimMenusu } from '@/components/program/SecimMenusu';
 import { SeyahatYukleme } from '@/components/seyahatler/SeyahatYukleme';
 import { useDavetPaylas } from '@/features/davet/paylas';
 import { useBilinenMekanlar } from '@/features/gezi/bilinenMekanlar';
-import { useBugunEkle } from '@/features/gezi/bugunEkle';
-import { baslikAltSatiri, bosGunOnerileri, bugununPlaniSatirlari, durakSayaci, gezildiMi, gunSatiri, kisiAdlari, simdiEtiketi, simdiHedefi, varanlarMetni } from '@/features/gezi/seyahatV7';
+import { useGuneEkle } from '@/features/gezi/bugunEkle';
+import { REHBER_YAKIN_M } from '@/features/plan/planListesi';
+import { adayKonumu, AKSAM_DK, eklenenleriSabitle, yakindaAdaylari, yakindaGorunur, type YakinAday } from '@/features/gezi/yakinda';
+import { baslikAltSatiri, bugununPlaniSatirlari, durakSayaci, gezildiMi, gunSatiri, kisiAdlari, simdiEtiketi, simdiHedefi, varanlarMetni } from '@/features/gezi/seyahatV7';
 import { ustHaritaVerisi, type UstHaritaHali } from '@/features/gezi/ustHarita';
 import { programCizgileri } from '@/features/program/haritaVerisi';
 import {
@@ -44,6 +46,7 @@ import { useDuragaAta, useDuraklar, useGunler } from '@/features/gunler/sorgular
 import { harcamaOzeti, hatirlatmaVakti } from '@/features/harcama/hesap';
 import { kisiler as kisiKaynagi } from '@/features/harcama/metin';
 import { useHarcamalar, useIbanlar, useOdesmeler } from '@/features/harcama/sorgular';
+import { ilSlugu, kategoriAdi, useIlYerleri } from '@/features/icerik/ilOnerileri';
 import { sehirEslestir, useSehirler, useSehirYerleri } from '@/features/icerik/sorgular';
 import { OTEL_SERIT_ONEKI } from '@/features/konaklama/otelSeridi';
 import type { Konaklama } from '@/features/konaklama/plan';
@@ -65,7 +68,7 @@ import { useCevrimdisi } from '@/lib/baglanti';
 import { mesafeMetni } from '@/lib/mesafe';
 import { useOturum } from '@/lib/oturum';
 import type { Durak, Gun, Mekan, Seyahat } from '@/lib/tipler';
-import { kacinciGun, saatEkli, yerelTarih } from '@/lib/zaman';
+import { kacinciGun, saatEkli, yerelSaatDk, yerelTarih } from '@/lib/zaman';
 import { kategoriEtiketi, sureMetni } from '@/lib/kategori';
 import { dakikaSaat, kestirimTaksiSn, kestirimYuruyusSn } from '@/schedule/tempo';
 import { gunRengi, renk, yazi } from '@/theme';
@@ -184,6 +187,8 @@ function GeziSayfasi({ seyahat, gunler, duraklar, mekanlar, konaklamalar, katild
   const sehirler = useSehirler();
   const sehir = sehirEslestir(sehirler.data, { ad: seyahat.city_label, lat: seyahat.lat, lng: seyahat.lng });
   const sehirYerleri = useSehirYerleri(sehir?.id);
+  // #532 KK2: il listesi (#401) de aday kaynağı; seyahat açılışında bir sorgu, kendi veritabanımız.
+  const ilYerleri = useIlYerleri(ilSlugu(sehir, seyahat.city_label));
 
   const uyeListesi = useMemo(() => uyeler.data ?? [], [uyeler.data]);
 
@@ -251,7 +256,7 @@ function GeziSayfasi({ seyahat, gunler, duraklar, mekanlar, konaklamalar, katild
 
   // ---------------------------------------------------------------- gezinti
   // Her istekte yeni `n`; önceki isteğin anahtarları (otel, gün, plan hazır, çip) açıkça boşaltılır (parametre birleşmesin).
-  const BOS_ISTEK = { program: { gun: '', otel: '', planKuruldu: '', atanmamis: '', harita: '' }, kesfet: { cip: '', cekmece: '' } };
+  const BOS_ISTEK = { program: { gun: '', otel: '', planKuruldu: '', atanmamis: '', harita: '' }, kesfet: { cip: '', cekmece: '', gun: '' } };
   const sekme = (ad: 'program' | 'kesfet', params: Record<string, string> = {}) =>
     router.navigate({ pathname: `/seyahat/[id]/(sekmeler)/${ad}`, params: { id: seyahat.id, ...BOS_ISTEK[ad], ...params, n: String(Date.now()) } });
   const plan = (params: Record<string, string> = {}) => sekme('program', params);
@@ -319,11 +324,27 @@ function GeziSayfasi({ seyahat, gunler, duraklar, mekanlar, konaklamalar, katild
   // ---------------------------------------------------------------- #308 v7: hal, üst harita, başlık, kişiler, sohbet ipucu
   const bugunAktif = useMemo(() => bugunDuraklari.filter((d) => !d.skipped), [bugunDuraklari]);
   const hal: UstHaritaHali = mod !== 'gezi' ? 'plan' : bugunAktif.length === 0 ? 'bos' : 'gezi';
-  const merkezNokta = konum ?? verisi.otel ?? konumu(seyahat);
-  const bosOneriler = useMemo(
-    () => (hal === 'bos' ? bosGunOnerileri(sehirYerleri.data ?? [], mekanlar, merkezNokta) : []),
-    [hal, sehirYerleri.data, mekanlar, merkezNokta],
+  // #532 KK2: "Yakında, bugüne ekle" — gezi modunda gün bitiyorsa; boş günde aynı adaylar (3 yer). Referans: son gezilen ya da
+  // sıradaki durak, yoksa konum, yoksa otel / şehir.
+  const yakindaAcik = hal === 'bos' || (hal === 'gezi' && yakindaGorunur(bugunKartlari.map((k) => ({ numara: k.numara, gezildi: gezildiMi(k), varisDk: k.varisDk, dakika: k.dakika }))));
+  const referansNokta = (() => {
+    const etkin = bugunKartlari.filter((k) => k.numara !== null && k.konum);
+    const sonGezilen = [...etkin].reverse().find((k) => gezildiMi(k));
+    const siradaki = etkin.find((k) => !gezildiMi(k));
+    return sonGezilen?.konum ?? siradaki?.konum ?? konum ?? verisi.otel ?? konumu(seyahat);
+  })();
+  const aksamMi = yerelSaatDk(an, seyahat.tz) >= AKSAM_DK;
+  const yakinAdaylarHam = useMemo(
+    () =>
+      yakindaAcik
+        ? yakindaAdaylari({ mekanlar, duraklar, ilYerleri: ilYerleri.data ?? [], rehberYerleri: sehirYerleri.data ?? [], referans: referansNokta, aksam: aksamMi, adet: hal === 'bos' ? 3 : 2, icerikSiniriM: REHBER_YAKIN_M })
+        : [],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [yakindaAcik, mekanlar, duraklar, ilYerleri.data, sehirYerleri.data, referansNokta?.lat, referansNokta?.lng, aksamMi, hal],
   );
+  // KK2: eklenen satır ✓ ile yerinde kalır (eklenince yeni hesapta düşer); eklenirken görünen sırası tutulur.
+  const [sabitYakinAdaylar, setSabitYakinAdaylar] = useState<Map<string, { aday: YakinAday; sira: number }>>(() => new Map());
+  const yakinAdaylar = useMemo(() => eklenenleriSabitle(sabitYakinAdaylar, yakinAdaylarHam, hal === 'bos' ? 3 : 2), [sabitYakinAdaylar, yakinAdaylarHam, hal]);
   const bugunCizgileri = useMemo(
     () =>
       hal === 'gezi' && bugunGun
@@ -341,12 +362,16 @@ function GeziSayfasi({ seyahat, gunler, duraklar, mekanlar, konaklamalar, katild
         bugunGunId: bugunGun?.id ?? null,
         konum,
         otel: verisi.otel,
-        oneriler: bosOneriler.map((y) => ({ id: y.place_id, konum: { lat: y.lat, lng: y.lng } })),
+        oneriler: yakinAdaylar.flatMap((a) => {
+          const k = adayKonumu(a);
+          return k ? [{ id: a.place_id, konum: k }] : [];
+        }),
         bugunCizgileri,
       }),
-    [hal, gunler, duraklar, mekanlar, bugunGun, konum, verisi.otel, bosOneriler, bugunCizgileri],
+    [hal, gunler, duraklar, mekanlar, bugunGun, konum, verisi.otel, yakinAdaylar, bugunCizgileri],
   );
-  const haritaMerkezi = ustHarita.pinler[0]?.konum ?? konumu(seyahat) ?? { lat: 39.0, lng: 35.0 };
+  // #532 KK1: kadraj boşsa şehir merkezi (zoom 13).
+  const haritaMerkezi = ustHarita.sigdir[0] ?? konumu(seyahat) ?? ustHarita.pinler[0]?.konum ?? { lat: 39.0, lng: 35.0 };
   // #522 2. inceleme 1: sayaç Bugünün planı ile aynı tanımı kullanır (otomatik geçilen durak da gezildi).
   const sayac = durakSayaci(bugunKartlari);
   const altSatir = baslikAltSatiri({ seyahat, mod, an, bugunIndex: mod === 'gezi' ? bugunIndex : null, bugunTarih: bugunGun?.date ?? null, ...sayac });
@@ -419,17 +444,29 @@ function GeziSayfasi({ seyahat, gunler, duraklar, mekanlar, konaklamalar, katild
           : t('seyahatV7.gezildiSaatsiz')
         : [k.varisDk !== null ? dakikaSaat(k.varisDk) : null, sureMetni(k.dakika)].filter(Boolean).join(' · '),
     }));
-  const bugunEkle = useBugunEkle(seyahat.id);
+  const guneEkle = useGuneEkle(seyahat.id);
+  const adayAdi = (a: YakinAday) => (a.kaynak === 'liste' ? adiYaDaKategori(a.mekan.id) : a.ad);
+  // #532 KK2: + soru sormadan bugünün sonuna ekler; bildirim "{ad}, bugüne eklendi", satır ✓.
   const bugunaEkle = (placeId: string) => {
-    const yer = bosOneriler.find((y) => y.place_id === placeId);
-    if (!yer || !bugunGun) return;
+    const a = yakinAdaylar.find((y) => y.place_id === placeId);
+    // #536 inceleme 5: çift dokunuşta ikinci ekleme yok.
+    if (!a || !bugunGun || eklenenler.has(placeId)) return;
     setEklenenler((e) => new Set(e).add(placeId));
-    bugunEkle.mutate(
-      { yer, gunId: bugunGun.id, gunDuraklari: bugunDuraklari },
+    setSabitYakinAdaylar((m) => new Map(m).set(placeId, { aday: a, sira: yakinAdaylar.indexOf(a) }));
+    guneEkle.mutate(
+      a.kaynak === 'liste'
+        ? { mekan: a.mekan, gunId: bugunGun.id, gunDuraklari: bugunDuraklari }
+        : { yer: { place_id: a.place_id, yerId: a.yerId, primary_type: a.tip, lat: a.lat, lng: a.lng }, gunId: bugunGun.id, gunDuraklari: bugunDuraklari },
       {
+        onSuccess: () => setBildirim(t('seyahatV7.bugunEklendi', { ad: adayAdi(a) })),
         onError: () => {
           setEklenenler((e) => {
             const y = new Set(e);
+            y.delete(placeId);
+            return y;
+          });
+          setSabitYakinAdaylar((m) => {
+            const y = new Map(m);
             y.delete(placeId);
             return y;
           });
@@ -439,6 +476,15 @@ function GeziSayfasi({ seyahat, gunler, duraklar, mekanlar, konaklamalar, katild
     );
   };
 
+  const yakinSatirlari = yakinAdaylar.map((a) => ({
+    id: a.place_id,
+    ad: adayAdi(a),
+    foto: null,
+    alt: [a.ilKategori ? kategoriAdi(a.ilKategori) : kategoriEtiketi(a.tip), a.mesafeM !== null ? mesafeMetni(Math.round(a.mesafeM / 10) * 10) : null].filter(Boolean).join(' · '),
+  }));
+  // #532 KK4: "Tümü ›" ve "Bugüne yer ekle ›" Yer ekle'yi bugün seçili açar.
+  const bugunYerEkle = () => sekme('kesfet', bugunGun ? { gun: String(bugunGun.index) } : {});
+
   return (
     <View style={s.ekran}>
       <ScrollView contentContainerStyle={{ paddingBottom: 28 }} showsVerticalScrollIndicator={false}>
@@ -446,6 +492,7 @@ function GeziSayfasi({ seyahat, gunler, duraklar, mekanlar, konaklamalar, katild
           merkez={haritaMerkezi}
           pinler={ustHarita.pinler}
           cizgiler={ustHarita.cizgiler}
+          sigdir={ustHarita.sigdir}
           onHarita={() => plan(hal === 'plan' ? { harita: '1' } : { gun: String(bugunGun?.index ?? 1), harita: '1' })}
           onGeri={() => kesfeteDon(kokGezinme.getRootState() as Parameters<typeof kesfeteDon>[0])}
           onPaylas={hesapli ? () => setPaylasimAcik(true) : undefined}
@@ -471,21 +518,27 @@ function GeziSayfasi({ seyahat, gunler, duraklar, mekanlar, konaklamalar, katild
             <View style={s.bolum}>
               <BolumBasligi baslik={t('seyahatV7.bugununPlani')} baglanti={t('seyahatV7.planiAc')} onBaglanti={() => plan({ gun: String(bugunGun?.index ?? 1) })} />
               <BugununPlaniV7 satirlar={planSatirlari} />
+              {/* #536 inceleme 1: aday yoksa başlık kalır, altında boş gündeki gibi tek satır "Bugüne yer ekle ›". */}
+              {yakindaAcik ? (
+                <>
+                  <BolumBasligi baslik={t('seyahatV7.yakindaBugune')} baglanti={t('seyahatV7.tumu')} onBaglanti={bugunYerEkle} />
+                  {yakinSatirlari.length > 0 && bugunGun ? (
+                    <BugunBosV7 yerler={yakinSatirlari} eklenenler={eklenenler} onEkle={bugunaEkle} pasif={cevrimdisi} />
+                  ) : (
+                    <BaglantiSatiri metin={t('seyahatV7.bugunYerEkle')} onPress={bugunYerEkle} />
+                  )}
+                </>
+              ) : null}
             </View>
           </>
         ) : hal === 'bos' ? (
           <View style={s.bolum}>
             <BolumBasligi baslik={t('seyahatV7.bugunBos')} baglanti={sehir ? t('seyahatV7.rehber') : undefined} onBaglanti={() => router.push({ pathname: '/seyahat/[id]/rehber', params: { id: seyahat.id } })} />
             {/* #522 inceleme 4 + 2. inceleme 4: öneri yoksa, şehir bilinmiyorsa ya da bugünün günü yoksa tek satır "Bugüne yer ekle ›". */}
-            {bosOneriler.length > 0 && sehir && bugunGun ? (
-              <BugunBosV7
-                yerler={bosOneriler.map((y) => ({ id: y.place_id, ad: y.ad, foto: null, alt: [kategoriEtiketi(y.kategori), y.mesafeM !== null ? mesafeMetni(Math.round(y.mesafeM / 10) * 10) : null].filter(Boolean).join(' · ') }))}
-                eklenenler={eklenenler}
-                onEkle={bugunaEkle}
-                pasif={cevrimdisi}
-              />
+            {yakinSatirlari.length > 0 && bugunGun ? (
+              <BugunBosV7 yerler={yakinSatirlari} eklenenler={eklenenler} onEkle={bugunaEkle} pasif={cevrimdisi} />
             ) : (
-              <BaglantiSatiri metin={t('seyahatV7.bugunYerEkle')} onPress={() => sekme('kesfet')} />
+              <BaglantiSatiri metin={t('seyahatV7.bugunYerEkle')} onPress={bugunYerEkle} />
             )}
           </View>
         ) : (

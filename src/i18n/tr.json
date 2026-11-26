@@ -313,6 +313,9 @@
     "geriSeyahat": "Geri: {seyahat}"
   },
   "kesfet": {
+    "guneEkliyorsun": "{n}. güne ekliyorsun",
+    "gunSeciminiKaldir": "Gün seçimini kaldır",
+    "guneEklendi": "{ad} {n}. güne eklendi",
     "ekranBasligi": "Yer ekle",
     "ara": "Mekan ara",
     "araYer": "Mekan ara ya da link yapıştır",
@@ -978,7 +981,9 @@
     "bugunEkle": "{ad}, bugüne ekle",
     "bugunEklendi": "{ad}, bugüne eklendi",
     "yeniMesaj": "yeni mesaj gönderdi",
-    "bugunYerEkle": "Bugüne yer ekle ›"
+    "bugunYerEkle": "Bugüne yer ekle ›",
+    "yakindaBugune": "Yakında, bugüne ekle",
+    "tumu": "Tümü ›"
   },
   "geziSayfasi": {
     "cevrimdisi": {
@@ -1048,11 +1053,7 @@
     "atlandi": "Atlandı",
     "oy": "{n} oy",
     "onerdi": "{ad} önerdi",
-    "aksam": "Akşam boş.",
-    "aksamIkisi": "{rehber} ya da listedeki {liste}?",
-    "aksamListe": "Listedeki {liste}?",
-    "aksamRehber": "Rehberden {rehber}?",
-    "oner": "Öner",
+    "aksamYakinda": "Akşam için yakında",
     "gunBos": "Bu günde henüz durak yok. Yer ekle sekmesinden ya da listenden mekan ekle.",
     "mekanEkle": "Mekan ekle",
     "rehberVar": "Mekan rehberi var"

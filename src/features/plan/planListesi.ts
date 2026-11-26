@@ -1,11 +1,10 @@
 // #182 (kanvas 24): Plan sekmesinin "liste önce" görünümü — saf hesaplar. Durak satırları ve aralarındaki bacaklar eldeki plandan
 // (Program'ın canlı hesabı), harita şeridi yalnız bu günün koordinatlarıyla çizilir (önbellekteki rota çizgisi varsa o, yoksa
 // noktalar düz bağlanır), "Akşam boş" önerisi listedeki atanmamış mekanlardan ve rehberden (DB). Google'a istek yok (KK7).
-import { mesafeM } from '@/components/harita/geo';
 import type { Konum } from '@/components/harita/tipler';
 import { konumu, konumVar } from '@/lib/konum';
 import { pinKategorisi } from '@/lib/pinIkonu';
-import type { Durak, Mekan, Yer } from '@/lib/tipler';
+import type { Durak, Mekan } from '@/lib/tipler';
 import type { ProgramSatiri, Yuruyus } from '@/schedule/program';
 
 /** Yemek durağının numarası Yemek turuncusu (kanvas 24); diğerleri gün rengi. */
@@ -82,36 +81,18 @@ export function seritProjeksiyonu(konumlar: Konum[], genislik: number, yukseklik
   return (k) => (tek ? { x: genislik / 2, y: yukseklik / 2 } : { x: ox + (k.lng * kx - minX) * olcek, y: oy + (maxY - k.lat) * olcek });
 }
 
-export type AksamOnerisi = { liste: Mekan | null; rehber: (Yer & { place_id: string }) | null };
-
-/** KK5: "Akşam boş" eşiği — son durak bu dakikadan önce bitiyorsa öneri satırı. */
+/** KK5: "Akşam boş" eşiği — son durak bu dakikadan önce bitiyorsa öneri satırları. */
 export const AKSAM_ESIGI_DK = 17 * 60;
-/** Rehberden önerilecek yerin son durağa uzaklık sınırı. */
-const REHBER_YAKIN_M = 3000;
+/** İçerikten (rehber, il listesi) önerilecek yerin son durağa uzaklık sınırı. */
+export const REHBER_YAKIN_M = 3000;
 
 /**
- * KK5: gün sonunda boşluk varsa (son atlanmamış durak 17:00'den önce bitiyor) listedeki atanmamış mekanlardan ve rehberin
- * listede olmayan yerlerinden son durağa en yakın birer tane. Boşluk yoksa ya da aday yoksa null.
+ * KK5 + #532 KK3: gün sonunda boşluk varsa (son atlanmamış durak 17:00'den önce bitiyor) adayların yakınlık referansı: son
+ * konumlu durak. Boşluk yoksa ya da hiçbir durak konumlu değilse null (#318: (0,0) sayılmaz).
  */
-export function aksamOnerisi(p: { satirlar: PlanSatiri[]; mekanlar: Mekan[]; duraklar: Durak[]; yerler: Yer[] }): AksamOnerisi | null {
-  const etkin = p.satirlar.filter((s) => s.numara !== null && s.ayrilisDk !== null);
+export function aksamBoslugu(satirlar: PlanSatiri[]): Konum | null {
+  const etkin = satirlar.filter((s) => s.numara !== null && s.ayrilisDk !== null);
   const son = etkin[etkin.length - 1];
   if (!son || son.ayrilisDk! >= AKSAM_ESIGI_DK) return null;
-  // #318: koordinatı boşalmış durak (0,0) sayılmaz; yakınlık son konumlu duraktan. Hiçbiri konumlu değilse öneri yok.
-  const nokta = konumu([...etkin].reverse().find((s) => konumVar(s.mekan))?.mekan);
-  if (!nokta) return null;
-  const atanan = new Set(p.duraklar.map((d) => d.place_ref));
-  const enYakin = <T extends { lat: number | null; lng: number | null }>(adaylar: T[], sinir = Infinity): T | null =>
-    adaylar
-      .filter(konumVar)
-      .map((a) => ({ a, m: mesafeM(nokta, a) }))
-      .filter((x) => x.m <= sinir)
-      .sort((x, y) => x.m - y.m)[0]?.a ?? null;
-  const listede = new Set(p.mekanlar.map((m) => m.place_id));
-  const liste = enYakin(p.mekanlar.filter((m) => !atanan.has(m.id)));
-  const rehber = enYakin(
-    p.yerler.filter((y): y is Yer & { place_id: string } => !!y.place_id && !listede.has(y.place_id)),
-    REHBER_YAKIN_M,
-  );
-  return liste || rehber ? { liste, rehber } : null;
+  return konumu([...etkin].reverse().find((s) => konumVar(s.mekan))?.mekan);
 }

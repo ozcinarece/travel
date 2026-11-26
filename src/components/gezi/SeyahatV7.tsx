@@ -17,6 +17,8 @@ export function UstHarita(p: {
   merkez: Konum;
   pinler: HaritaPini[];
   cizgiler: HaritaCizgisi[];
+  /** #532 KK1: kadraj noktaları (`ustHaritaVerisi.sigdir`); boşsa `merkez` zoom 13. */
+  sigdir: Konum[];
   onHarita: () => void;
   onGeri: () => void;
   /** #454 çekmecesi; hesapsız oturumda yok. */
@@ -24,7 +26,7 @@ export function UstHarita(p: {
   onMenu: () => void;
 }) {
   const ust = useSafeAreaInsets().top;
-  const noktalar = p.pinler.map((x) => x.konum);
+  const noktalar = p.sigdir;
   return (
     <View style={s.harita}>
       <Pressable accessibilityRole="button" accessibilityLabel={t('seyahatV7.haritayiAc')} onPress={p.onHarita} style={StyleSheet.absoluteFill}>
