@@ -1,0 +1,255 @@
+{
+  "il": "Siirt",
+  "slug": "siirt",
+  "guncelleme": "2026-11-26",
+  "oneriler": [
+    {
+      "sira": 1,
+      "ad": "İsmail Fakirullah ve İbrahim Hakkı Türbeleri",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Aydınlar",
+      "merkeze_km": 13,
+      "neden": "21 Mart ve 23 Eylül şafağında aynayla yönlenen güneş ışığı kabrin başucuna düşüyor",
+      "osm": "way/1379093736"
+    },
+    {
+      "sira": 2,
+      "ad": "Siirt Ulu Camii",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "1129 tarihli Selçuklu camisi; minarede firuze sırlı tuğla ve Kufi yazılı kuşaklar",
+      "osm": "way/700302482"
+    },
+    {
+      "sira": 3,
+      "ad": "Botan Vadisi Milli Parkı",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 12,
+      "neden": "Baraj suyuyla dolan kanyon; nisan-mayısta yamaçlarda Siirt'e özgü sümbüller açar"
+    },
+    {
+      "sira": 4,
+      "ad": "Bahattin Büryan Salonu",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "Gece kuyu tandırda asılarak pişen kuzu büryanı; sabah erken git, çabuk tükeniyor",
+      "place_id": "ChIJ2RrXFpqHDEAR9pfajSAN28o"
+    },
+    {
+      "sira": 5,
+      "ad": "Delikli Taş (Rasıl Hacar)",
+      "kategori": "manzara",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 10,
+      "neden": "Ortası oyuk kayanın durduğu 350 m'lik tepeden Botan'ın kıvrımlarına bakılıyor",
+      "osm": "node/6566052485"
+    },
+    {
+      "sira": 6,
+      "ad": "Botan Tekne Turu",
+      "kategori": "aktivite",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 15,
+      "neden": "Ilısu suyunun yükseldiği Botan kanyonunda kaya duvarlar arasında tekneyle gezinti"
+    },
+    {
+      "sira": 7,
+      "ad": "Veysel Karani Külliyesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Baykan",
+      "merkeze_km": 45,
+      "neden": "16-17 Mayıs anmalarında kalabalıklaşan ziyaretgâh; cami açık, türbe yeniden yapılıyor"
+    },
+    {
+      "sira": 8,
+      "ad": "Osman Lokantası",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "1989'dan beri açık esnaf lokantası; kitel, bumbar dolması, perde pilavı ve büryan",
+      "place_id": "ChIJoX8QQ5qHDEAR-rRfpLvC0SM"
+    },
+    {
+      "sira": 9,
+      "ad": "Tarım ve Ağaç Müzesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 3,
+      "neden": "Coğrafi işaretli şal-şepik kumaşının tezgâhta dokunduğu atölyeye ev sahipliği yapıyor"
+    },
+    {
+      "sira": 10,
+      "ad": "Sabat Restoran",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet",
+        "yavas"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 3,
+      "neden": "Ağaç Müzesi'nde 2026'da açıldı; kuru dolma, perde pilavı ve mektup tatlısı var"
+    },
+    {
+      "sira": 11,
+      "ad": "Beğendik Köprüsü",
+      "kategori": "manzara",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Pervari",
+      "merkeze_km": 85,
+      "neden": "Botan'ı 165 m yukarıdan aşan, Türkiye'nin en yüksek köprüsü; vadi tam altta kalır",
+      "place_id": "ChIJrdqLEd03DEARmxFgeLEQjx0"
+    },
+    {
+      "sira": 12,
+      "ad": "Kilis Mezrası",
+      "kategori": "manzara",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Pervari",
+      "merkeze_km": 60,
+      "neden": "Pervari yolunda Alkumru baraj gölüne bakan tepede çay molası verilen küçük mezra"
+    },
+    {
+      "sira": 13,
+      "ad": "Zirin Gölü",
+      "kategori": "doga",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Pervari",
+      "merkeze_km": 80,
+      "neden": "Kışın donan, baharda büyüyen, haziran-ağustosta tamamen kuruyan karstik göl"
+    },
+    {
+      "sira": 14,
+      "ad": "Botan'da Kano ve SUP (Tahta Mendik)",
+      "kategori": "aktivite",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 15,
+      "neden": "Tahta Mendik'te durgun baraj suyunda hafta sonları kano ve SUP küreği çekiliyor"
+    },
+    {
+      "sira": 15,
+      "ad": "Botan Vadisi Yamaç Paraşütü",
+      "kategori": "aktivite",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 10,
+      "neden": "Delikli Taş çevresinden kalkıp Botan vadisinin üstünden süzülen uçuşlar yapılıyor"
+    },
+    {
+      "sira": 16,
+      "ad": "Siirt Saat Kulesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "Hükümet Caddesi'nde; Ulu Cami'den taşınan Osmanlı mekanizmalı saat hâlâ çalışıyor",
+      "place_id": "ChIJoc872JmHDEARNDESDWp5a8g"
+    },
+    {
+      "sira": 17,
+      "ad": "Gavs-ul Memduh (Sultan Memduh) Türbesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Aydınlar",
+      "merkeze_km": 13,
+      "neden": "1847'de ölen, geniş bir divan bırakan Tillolu şair-velinin türbesi"
+    },
+    {
+      "sira": 18,
+      "ad": "Ağaçlı Türbe (Şeyh Muhammed Kazım el-Hazin)",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Aydınlar",
+      "merkeze_km": 20,
+      "neden": "Duvarından çıkan yaşlı menengiç ağacının dalları kubbeye kadar uzanıyor"
+    },
+    {
+      "sira": 19,
+      "ad": "Cumhuriyet Camii (Hıdrul Ahdar)",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "Kentin en eski ibadet yerlerinden; yapım yılı bilinmiyor, 1926'da onarılmış",
+      "place_id": "ChIJeUD0WISHDEARtNtwGX6H5rQ"
+    },
+    {
+      "sira": 20,
+      "ad": "Kurtalan Garı",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Kurtalan",
+      "merkeze_km": 30,
+      "neden": "1944'te açılan istasyon; Ankara'dan 1212 km gelen Güney Kurtalan Ekspresi'nin son durağı"
+    },
+    {
+      "sira": 21,
+      "ad": "Herekol Dağı",
+      "kategori": "doga",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Pervari",
+      "merkeze_km": 100,
+      "neden": "Haziran-ekim arası 2600 m'ye dek kovanların kurulduğu, Pervari balının dağı"
+    }
+  ]
+}

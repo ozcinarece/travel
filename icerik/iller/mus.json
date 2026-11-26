@@ -1,0 +1,340 @@
+{
+  "il": "Muş",
+  "slug": "mus",
+  "guncelleme": "2026-11-26",
+  "oneriler": [
+    {
+      "sira": 1,
+      "ad": "Malazgirt Meydan Muharebesi Tarihi Milli Parkı",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Malazgirt",
+      "merkeze_km": 115,
+      "neden": "1071 zaferinin anıldığı 238 hektarlık alan; 24-26 Ağustos'ta otağlar, cirit ve okçuluk"
+    },
+    {
+      "sira": 2,
+      "ad": "Muş Lalesi Alanı (Laleli)",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 17,
+      "neden": "Nisan sonu-mayıs başında ovada kendiliğinden açan kırmızı endemik lale; üç hafta sürer"
+    },
+    {
+      "sira": 3,
+      "ad": "Tarihi Murat Köprüsü",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 13,
+      "neden": "Murat Nehri'ni 12 kemerle aşan Selçuklu izli köprü; kıyıda piknik, akşam ışıklandırılır",
+      "osm": "node/8639208584"
+    },
+    {
+      "sira": 4,
+      "ad": "Malazgirt Kalesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Malazgirt",
+      "merkeze_km": 115,
+      "neden": "İlçe merkezini saran koyu taş surlar; onarıldı, gezilebiliyor, iç kapıda kazı sürüyor",
+      "place_id": "ChIJB43A8Bc8bUARTZ3FaFHfAaU"
+    },
+    {
+      "sira": 5,
+      "ad": "Hamurpet (Akdoğan) Gölleri",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Varto",
+      "merkeze_km": 90,
+      "neden": "2.150 m'de büyük ve küçük iki volkanik göl; yazın kamp ve kıyı yürüyüşü, kışın yol kapanır",
+      "place_id": "ChIJY25d5UOAbUAR4hMSLfAwpQw"
+    },
+    {
+      "sira": 6,
+      "ad": "Muş Müzesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "1938 yapımı eski okul binasında Urartu adakları, Osmanlı silahları ve Malazgirt salonu",
+      "osm": "way/168719534",
+      "place_id": "ChIJHwKy3xrlckARgttBhJ2sIxc"
+    },
+    {
+      "sira": 7,
+      "ad": "Haçlı Gölü",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Bulanık",
+      "merkeze_km": 75,
+      "neden": "Lavın set çektiği göl; ilkbahar ve güz göçünde kaz sürüleri ve leylekler izlenir"
+    },
+    {
+      "sira": 8,
+      "ad": "Güzeltepe Kayak Merkezi",
+      "kategori": "aktivite",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 8,
+      "neden": "Kente 8 km'lik üç pistli kayak alanı; şubatta kar festivali ve çocuklar için kızak",
+      "place_id": "ChIJoT3P07T6ckAR94qQOO42dJo"
+    },
+    {
+      "sira": 9,
+      "ad": "Alaaddin Bey Camii",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "Alaaddin Bey'in 18. yüzyılda yaptırdığı kare planlı cami; külliyede çeşme ve hamam var",
+      "osm": "way/709884836"
+    },
+    {
+      "sira": 10,
+      "ad": "Kurtik Dağı",
+      "kategori": "aktivite",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 15,
+      "neden": "2.645 m'lik zirveye 8 km'lik parkur; yazın karda kamp, haziranda yamaç paraşütü yarışı",
+      "place_id": "ChIJO0WmyB3hckARUbE0-n0Zpyo"
+    },
+    {
+      "sira": 11,
+      "ad": "Malazgirt Müzesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Malazgirt",
+      "merkeze_km": 115,
+      "neden": "1071'den 2071'e uzanan zaman tüneli; heykel ve resimler, bahçede 100 yıllık traktör",
+      "place_id": "ChIJUSeSMUI9bUAR3qiaOm_pwls"
+    },
+    {
+      "sira": 12,
+      "ad": "Haspet Kalesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "doga"
+      ],
+      "ilce": "Varto",
+      "merkeze_km": 70,
+      "neden": "Varto'nun 5 km doğusunda yüksek tepedeki Urartu izli kale; sur ve kule kalıntıları",
+      "place_id": "ChIJ_bkfC2fmckARrBqhgFPoSiI"
+    },
+    {
+      "sira": 13,
+      "ad": "Hanımeli Kafe",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Bulanık",
+      "merkeze_km": 70,
+      "neden": "Bulanıklı kadınların günlük ev yemekleri pişirdiği iki katlı kafe; kaz eti istekle yapılır",
+      "place_id": "ChIJoRi-dCFpbUAR6DHc7oqBbRM"
+    },
+    {
+      "sira": 14,
+      "ad": "Muş Ovası",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 10,
+      "neden": "Murat ve Karasu kıyısındaki sazlıklar; baharda göçmen kuşlar, yazın turna ve toy kuşu"
+    },
+    {
+      "sira": 15,
+      "ad": "Esenlik Camii",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Bulanık",
+      "merkeze_km": 55,
+      "neden": "Esenlik köyünde Ahlat taşından tek kubbeli cami; kuzey kapısında 1325 tarihli kitabe",
+      "place_id": "ChIJm13I1Y9hbUARmXZDfhfIWJ8"
+    },
+    {
+      "sira": 16,
+      "ad": "Muş Ulu Camii",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "14. yüzyıldan kalma, Şeyh Muhammed-i Mağribi'ye bağlanan cami; depremden sonra onarıldı",
+      "osm": "way/709884839",
+      "place_id": "ChIJEx_--8TlckARrUpfs7DnWs4"
+    },
+    {
+      "sira": 17,
+      "ad": "Hacı Şeref Camii",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "1571 kayıtlarında geçen cami; kökeninin Selçuklu dönemine uzandığı düşünülüyor",
+      "osm": "way/247187873"
+    },
+    {
+      "sira": 18,
+      "ad": "Murat Paşa Camii",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "1823 yapımı, 1940'ta yıkılan cami; Vakıflar 2025'te aslına göre yeniden ayağa kaldırdı",
+      "place_id": "ChIJMeSuMdHlckARYjtRipgO3tk"
+    },
+    {
+      "sira": 19,
+      "ad": "Alaaddin Bey Hamamı",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "Alaaddin Bey Camii ile aynı dönemde yapılan Osmanlı hamamı; bugün de yıkanılıyor"
+    },
+    {
+      "sira": 20,
+      "ad": "Sultan Alparslan Parkı",
+      "kategori": "aktivite",
+      "amaclar": [
+        "cocuklu",
+        "doga"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 13,
+      "neden": "Murat Köprüsü yanında zipline, macera parkuru, atlama kulesi ve küçük hayvanat bahçesi"
+    },
+    {
+      "sira": 21,
+      "ad": "Karaağaçlı Ters Lale Yamaçları",
+      "kategori": "doga",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 20,
+      "neden": "1.800 m'deki yamaçlarda nisan sonunda 15-20 gün açan ters laleler; yokuş yürüyerek çıkılır",
+      "place_id": "ChIJr4c3KgDnckARV65rIiNOwBc"
+    },
+    {
+      "sira": 22,
+      "ad": "Muş Park Lokantası",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "Tereyağlı suda pişen bulgurlu Muş köftesi, yani 'hafta direği' için adı geçen lokanta",
+      "osm": "node/1799416679",
+      "place_id": "ChIJffDLlcPlckARNeEw1w44TpI"
+    },
+    {
+      "sira": 23,
+      "ad": "Şor Gölü",
+      "kategori": "doga",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Bulanık",
+      "merkeze_km": 80,
+      "neden": "Sazlıkları telli turnanın Türkiye'de son kuluçka yeri sayılan küçük göl; dürbün götür"
+    },
+    {
+      "sira": 24,
+      "ad": "Kaz Gölü",
+      "kategori": "doga",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Malazgirt",
+      "merkeze_km": 135,
+      "neden": "Aktuzla'nın kuzeydoğusunda tuzlu karstik göl; göç mevsiminde kuşların mola yeri",
+      "place_id": "ChIJl_pdbd8FbUARIqMu9peSMqs"
+    },
+    {
+      "sira": 25,
+      "ad": "Yıldızlı Han",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "1307 tarihli iki katlı kervansaray; onarım bekliyor, şimdilik dışarıdan görülür",
+      "place_id": "ChIJB9j0MPblckARiZ0IMt70AC0"
+    },
+    {
+      "sira": 26,
+      "ad": "Yünören Camii",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Korkut",
+      "merkeze_km": 30,
+      "neden": "Altınova'ya bağlı Yünören köyünde Selçuklu özellikleri taşıyan köy camisi",
+      "place_id": "ChIJKz9nvvu2ckARdDl2Hm9z0DM"
+    },
+    {
+      "sira": 27,
+      "ad": "Kız Köprüsü (Malazgirt)",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Malazgirt",
+      "merkeze_km": 117,
+      "neden": "Malazgirt'in 2 km dışında eski taş köprü; kale ziyaretine kısa bir ek durak",
+      "place_id": "ChIJlQpOP2I9bUARNpkCehydfi4"
+    }
+  ]
+}
