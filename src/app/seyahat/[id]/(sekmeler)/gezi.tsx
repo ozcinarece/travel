@@ -16,14 +16,16 @@ import { SeyahatYukleme } from '@/components/seyahatler/SeyahatYukleme';
 import { useDavetPaylas } from '@/features/davet/paylas';
 import { useBilinenMekanlar } from '@/features/gezi/bilinenMekanlar';
 import { useBugunEkle } from '@/features/gezi/bugunEkle';
-import { baslikAltSatiri, bosGunOnerileri, gunSatiri, kisiAdlari, simdiEtiketi, varanlarMetni } from '@/features/gezi/seyahatV7';
+import { baslikAltSatiri, bosGunOnerileri, bugununPlaniSatirlari, gunSatiri, kisiAdlari, simdiEtiketi, simdiHedefi, varanlarMetni } from '@/features/gezi/seyahatV7';
 import { ustHaritaVerisi, type UstHaritaHali } from '@/features/gezi/ustHarita';
 import { programCizgileri } from '@/features/program/haritaVerisi';
 import {
+  BaglantiSatiri,
   Baslik,
   BolumBasligi,
   BugunBosV7,
   BugununPlaniV7,
+  GUN_SINIRI,
   GunlerV7,
   KisilerSatiri,
   ListemSatiriV7,
@@ -288,8 +290,8 @@ function GeziSayfasi({ seyahat, gunler, duraklar, mekanlar, konaklamalar, katild
       const alt = [adlar.join(', '), a.otelYok ? t('geziSayfasi.adim.otelDe') : ''].filter(Boolean).join(' · ');
       return { baslik: t('geziSayfasi.adim.dagit', { n: a.mekanIdleri.length }), alt: alt || null, dugme: t('geziSayfasi.adim.dagitDugme') };
     }
-    if (a.tur === 'otel') return { baslik: t('geziSayfasi.otelYok'), alt: t('geziSayfasi.adim.otelAlt'), dugme: t('geziSayfasi.adim.otelDugme') };
-    if (a.tur === 'davet') return { baslik: t('geziSayfasi.adim.davet'), alt: t('geziSayfasi.adim.davetAlt'), dugme: t('geziSayfasi.adim.davetDugme') };
+    if (a.tur === 'otel') return { baslik: t('geziSayfasi.adim.otel'), alt: t('geziSayfasi.adim.otelAlt'), dugme: t('geziSayfasi.adim.otelDugme') };
+    if (a.tur === 'davet') return { baslik: t('geziSayfasi.adim.davet'), alt: t('geziSayfasi.adim.davetAlt'), dugme: t('seyahatV7.arkadasCagir') };
     if (a.tur === 'yemek') return { baslik: t('geziSayfasi.adim.yemek', { gun: gunTarihi(a.gun) }), alt: t('geziSayfasi.adim.yemekAlt'), dugme: t('geziSayfasi.adim.yemekDugme') };
     if (a.tur === 'harcamaKapat') return { baslik: t('geziSayfasi.adim.harcamaKapat'), alt: t('geziSayfasi.adim.harcamaKapatAlt', { n: a.transfer }), dugme: t('geziSayfasi.adim.harcamaKapatDugme') };
     return {
@@ -378,7 +380,7 @@ function GeziSayfasi({ seyahat, gunler, duraklar, mekanlar, konaklamalar, katild
       ? acikOylama && oylamaMesaji
         ? { kim: adBul(acikOylama.olusturan), metin: t('seyahatV7.oylamaActi', { soru: acikOylama.soru }) }
         : (okunmamis.data ?? 0) > 0 && sonMesaj
-          ? { kim: adBul(sonMesaj.user_id), metin: sonMesaj.metin.trim() || t('seyahatV7.yeniMesaj') }
+          ? { kim: adBul(sonMesaj.user_id) ?? t('seyahatV7.adsiz'), metin: sonMesaj.metin.trim() || t('seyahatV7.yeniMesaj') }
           : null
       : null;
 
@@ -386,20 +388,23 @@ function GeziSayfasi({ seyahat, gunler, duraklar, mekanlar, konaklamalar, katild
   const gunSatirlari: GunSatiriV7[] = kartlar.map((k) => ({ id: String(k.gun.index), renk: k.renk, ...gunSatiri(k) }));
   const atananlar = useMemo(() => new Set(duraklar.map((d) => d.place_ref)), [duraklar]);
   const gunsuz = mekanlar.filter((m) => !atananlar.has(m.id)).length;
+  // #522 inceleme 3: duraktayken (`buradasin`) Şimdi bir sonraki durağı gösterir; durak kalmadıysa bölüm yok.
+  const simdiKart = simdiHedefi(odak, sonraki);
+  const simdiSonraki = simdiKart ? sonrakiKart(bugunKartlari, simdiKart.durakId) : null;
   const simdiAlt = (() => {
-    if (!odak) return null;
+    if (!simdiKart) return null;
     const parca: string[] = [];
-    if (odak.varisDk !== null) parca.push(t('seyahatV7.oradaOl', { saat: saatEkli(dakikaSaat(odak.varisDk), 'bulunma') }));
-    if (sonraki) parca.push(t('seyahatV7.sonra', { saat: sonraki.varisDk !== null ? dakikaSaat(sonraki.varisDk) : '', ad: sonraki.ad }).replace('  ', ' '));
+    if (simdiKart.varisDk !== null) parca.push(t('seyahatV7.oradaOl', { saat: saatEkli(dakikaSaat(simdiKart.varisDk), 'bulunma') }));
+    if (simdiSonraki) parca.push(t('seyahatV7.sonra', { saat: simdiSonraki.varisDk !== null ? dakikaSaat(simdiSonraki.varisDk) : '', ad: simdiSonraki.ad }).replace('  ', ' '));
     return parca.length > 0 ? parca.join(' · ') : null;
   })();
   const simdiDk = (() => {
-    if (!konum || !odak?.konum) return odak?.gelis?.dk ?? null;
-    const sn = odak.gelis?.mod === 'taksi' ? kestirimTaksiSn(konum, odak.konum) : kestirimYuruyusSn(konum, odak.konum);
+    if (!konum || !simdiKart?.konum) return simdiKart?.gelis?.dk ?? null;
+    const sn = simdiKart.gelis?.mod === 'taksi' ? kestirimTaksiSn(konum, simdiKart.konum) : kestirimYuruyusSn(konum, simdiKart.konum);
     return Math.max(1, Math.ceil(sn / 60));
   })();
-  const planSatirlari: PlanSatiriV7[] = bugunKartlari
-    .filter((k) => k.numara !== null)
+  // #522 inceleme 1: gezilenler ve sıradaki durak; kalanlar "Planı aç ›" ile.
+  const planSatirlari: PlanSatiriV7[] = bugununPlaniSatirlari(bugunKartlari)
     .map((k) => ({
       id: k.durakId,
       ad: k.ad,
@@ -452,7 +457,7 @@ function GeziSayfasi({ seyahat, gunler, duraklar, mekanlar, konaklamalar, katild
         <Baslik ad={seyahatAdi(seyahat)} alt={altSatir} />
         <KisilerSatiri kisiler={kisiYuzleri} sag={kisilerSag} sagYesil={!!varanMetni} onCagir={davet.paylas} onYuzler={() => setGrupAcik(true)} pasif={cevrimdisi} />
         {ipucu ? <SohbetIpucu kim={ipucu.kim} metin={ipucu.metin} onPress={sohbeteGit} /> : null}
-        {hatirlatmaVakti(seyahat, an) && mod !== 'plan' ? (
+        {hatirlatmaVakti(seyahat, an) && mod === 'gezi' ? (
           <View style={s.serit}>
             <HatirlatmaSatiri ozet={hOzet} k={kisiler} ibanlar={ibanlar.data} onBakiyeler={bakiyeler} />
           </View>
@@ -460,7 +465,7 @@ function GeziSayfasi({ seyahat, gunler, duraklar, mekanlar, konaklamalar, katild
 
         {hal === 'gezi' ? (
           <>
-            {odak && odak.durum === 'siradaki' ? <SimdiV7 etiket={simdiEtiketi(simdiDk, odak.gelis?.mod === 'taksi')} ad={odak.ad} alt={simdiAlt} onYolTarifi={() => yolTarifi(odak)} /> : null}
+            {simdiKart ? <SimdiV7 etiket={simdiEtiketi(simdiDk, simdiKart.gelis?.mod === 'taksi')} ad={simdiKart.ad} alt={simdiAlt} onYolTarifi={() => yolTarifi(simdiKart)} /> : null}
             <View style={s.bolum}>
               <BolumBasligi baslik={t('seyahatV7.bugununPlani')} baglanti={t('seyahatV7.planiAc')} onBaglanti={() => plan({ gun: String(bugunGun?.index ?? 1) })} />
               <BugununPlaniV7 satirlar={planSatirlari} />
@@ -469,12 +474,17 @@ function GeziSayfasi({ seyahat, gunler, duraklar, mekanlar, konaklamalar, katild
         ) : hal === 'bos' ? (
           <View style={s.bolum}>
             <BolumBasligi baslik={t('seyahatV7.bugunBos')} baglanti={sehir ? t('seyahatV7.rehber') : undefined} onBaglanti={() => router.push({ pathname: '/seyahat/[id]/rehber', params: { id: seyahat.id } })} />
-            <BugunBosV7
-              yerler={bosOneriler.map((y) => ({ id: y.place_id, ad: y.ad, foto: null, alt: [kategoriEtiketi(y.kategori), y.mesafeM !== null ? mesafeMetni(Math.round(y.mesafeM / 10) * 10) : null].filter(Boolean).join(' · ') }))}
-              eklenenler={eklenenler}
-              onEkle={bugunaEkle}
-              pasif={cevrimdisi}
-            />
+            {/* #522 inceleme 4: öneri yoksa ya da şehir bilinmiyorsa tek satır "Bugüne yer ekle ›" (Yer ekle sekmesi). */}
+            {bosOneriler.length > 0 && sehir ? (
+              <BugunBosV7
+                yerler={bosOneriler.map((y) => ({ id: y.place_id, ad: y.ad, foto: null, alt: [kategoriEtiketi(y.kategori), y.mesafeM !== null ? mesafeMetni(Math.round(y.mesafeM / 10) * 10) : null].filter(Boolean).join(' · ') }))}
+                eklenenler={eklenenler}
+                onEkle={bugunGun ? bugunaEkle : undefined}
+                pasif={cevrimdisi}
+              />
+            ) : (
+              <BaglantiSatiri metin={t('seyahatV7.bugunYerEkle')} onPress={() => sekme('kesfet')} />
+            )}
           </View>
         ) : (
           <>
@@ -482,8 +492,8 @@ function GeziSayfasi({ seyahat, gunler, duraklar, mekanlar, konaklamalar, katild
               <SiradakiAdimV7 baslik={metin.baslik} dugme={metin.dugme} mesgul={gorunenAdim.tur === 'planKur' && planUygula.isPending} onPress={() => void adimEylemi(gorunenAdim)} pasif={cevrimdisi} />
             ) : null}
             <View style={s.bolum}>
-              <BolumBasligi baslik={t('seyahatV7.gunler')} baglanti={t('seyahatV7.planiAc')} onBaglanti={() => plan()} />
-              <GunlerV7 satirlar={gunSatirlari} onGun={(gun) => plan({ gun })} />
+              <BolumBasligi baslik={t('seyahatV7.gunler')} baglanti={gunSatirlari.length > GUN_SINIRI ? t('seyahatV7.planiAc') : undefined} onBaglanti={() => plan()} />
+              <GunlerV7 satirlar={gunSatirlari.slice(0, GUN_SINIRI)} onGun={(gun) => plan({ gun })} />
               <ListemSatiriV7 alt={gunsuz > 0 ? t('seyahatV7.listemGunsuz', { n: gunsuz }) : null} onPress={() => listemiAc()} />
             </View>
           </>

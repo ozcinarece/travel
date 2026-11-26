@@ -939,10 +939,11 @@
   "seyahatV7": {
     "durakSayaci": "{x} / {y} durak",
     "tarihsiz": "Tarih belli değil",
-    "adsiz": "Gezgin",
+    "adsiz": "Bir arkadaşın",
     "ve": "ve",
     "senVe": "Sen ve {adlar}",
-    "sen": "Sen {yer}",
+    "senDa": "{yer}sın",
+    "senDe": "{yer}sin",
     "senOrada": "Sen oradasın",
     "vardilar": "{kisiler} {yer}",
     "orada": "{kisiler} orada",
@@ -975,7 +976,8 @@
     "rehber": "Rehber ›",
     "bugunEkle": "{ad}, bugüne ekle",
     "bugunEklendi": "{ad}, bugüne eklendi",
-    "yeniMesaj": "Yeni mesaj"
+    "yeniMesaj": "yeni mesaj gönderdi",
+    "bugunYerEkle": "Bugüne yer ekle ›"
   },
   "geziSayfasi": {
     "cevrimdisi": {
@@ -1001,10 +1003,10 @@
       "dagitDugme": "Dağıt",
       "otelDe": "otel de seçilmedi",
       "otelAlt": "Günlerin başlangıcı otelden hesaplanır",
+      "otel": "Otelini seç",
       "otelDugme": "Otel seç",
       "davet": "Şimdilik tek kişisin",
       "davetAlt": "Arkadaşlarını davet et, planı birlikte kurun",
-      "davetDugme": "Davet et",
       "yemek": "{gun} yemek durağı yok",
       "yemekAlt": "Öğle için yakında bir yer ekle",
       "yemekDugme": "Öğle yemeği ekle",
@@ -1017,7 +1019,6 @@
       "harcamaKapatDugme": "Bakiyeler"
     },
     "otel": "Otel",
-    "otelYok": "Otel seçilmedi",
     "bugun": "Bugün",
     "bugunTema": "Bugün · {tema}",
     "atla": "Atla",

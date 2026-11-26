@@ -332,14 +332,14 @@ describe('#183 KK6 Bakiyeler', () => {
 });
 
 describe('#183 Gezi sayfası (#308 v7: harcama kartı kalktı, KK6)', () => {
-  it('KK9 · KK7: gezi bitti ve açık borç var → "Harcamaları kapat" ve uygulama içi hatırlatma', async () => {
+  it('KK9 · KK7: gezi bitti ve açık borç var → "Harcamaları kapat"; hatırlatma satırı yok (#522 inceleme 6)', async () => {
     mockTablolar = fikstur(tarihEkle(yerelTarih(new Date(), IST), -5));
-    const { getByText, qc } = ciz(<GeziEkrani />);
+    const { getByText, queryByText, qc } = ciz(<GeziEkrani />);
     await waitFor(() => getByText('Gezi bitti · harcamaları kapat'));
     await sakinles(qc);
-    // #308: v7 Sıradaki adımında alt satır yok (kanvas); düğme tek dolu turuncu düğme.
-    expect(getByText('Gezi bitti · kim kime ne borçlu')).toBeTruthy();
-    expect(getByText('Sana borçlular: Ayşe 213,33 ₺ · Mert 123,33 ₺')).toBeTruthy();
+    // #522 inceleme 6: bitmiş gezide "Harcamaları kapat" adımı aynı işi yapıyor; hatırlatma yalnız gezi modunda.
+    expect(queryByText('Gezi bitti · kim kime ne borçlu')).toBeNull();
+    expect(queryByText('Sana borçlular: Ayşe 213,33 ₺ · Mert 123,33 ₺')).toBeNull();
     googleYok();
   });
 });

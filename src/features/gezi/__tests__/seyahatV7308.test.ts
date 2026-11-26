@@ -1,7 +1,7 @@
 // #308: seyahat sayfası v7 metinleri (kanvas `Sayfa_v7_Seyahat_*`).
 import { describe, expect, it } from '@jest/globals';
 
-import { baslikAltSatiri, bosGunOnerileri, gunSatiri, kisiAdlari, simdiEtiketi, varanlarMetni } from '../seyahatV7';
+import { baslikAltSatiri, bosGunOnerileri, bugununPlaniSatirlari, gunSatiri, kisiAdlari, simdiEtiketi, simdiHedefi, varanlarMetni } from '../seyahatV7';
 
 const seyahat = { start_date: '2026-11-24', end_date: '2026-11-29', tz: 'Europe/Istanbul' };
 const an = new Date('2026-11-20T09:00:00Z');
@@ -39,6 +39,31 @@ describe('seyahat v7 (#308)', () => {
     expect(varanlarMetni({ varanlar, benId: 'e', yerAdi: 'Sazova' })).toBe("Sen ve Mert Sazova'da");
     expect(varanlarMetni({ varanlar: [varanlar[1]], benId: 'e', yerAdi: 'Sazova Parkı' })).toBe("Mert Sazova Parkı'nda");
     expect(varanlarMetni({ varanlar: [], benId: 'e', yerAdi: 'Sazova' })).toBeNull();
+  });
+
+  it("#522 inceleme 9: yalnız sen → \"Sazova'dasın\"; adsız üye \"Bir arkadaşın\"", () => {
+    expect(varanlarMetni({ varanlar: [{ user_id: 'e', display_name: 'Ece' }], benId: 'e', yerAdi: 'Sazova' })).toBe("Sazova'dasın");
+    expect(varanlarMetni({ varanlar: [{ user_id: 'e', display_name: 'Ece' }], benId: 'e', yerAdi: 'Köprü' })).toBe("Köprü'desin");
+    expect(varanlarMetni({ varanlar: [{ user_id: 'm', display_name: '' }], benId: 'e', yerAdi: null })).toBe('Bir arkadaşın orada');
+  });
+
+  it('#522 inceleme 1: Bugünün planı gezilenler + sıradaki; kalanlar gizli', () => {
+    const k = (id: string, tamamlandi: boolean, numara: number | null = 1) => ({ id, tamamlandi, numara });
+    const kartlar = [k('a', true), k('otel', false, null), k('b', true), k('c', false), k('d', false), k('e', false)];
+    expect(bugununPlaniSatirlari(kartlar).map((x) => x.id)).toEqual(['a', 'b', 'c']);
+    expect(bugununPlaniSatirlari([k('a', true), k('b', true)]).map((x) => x.id)).toEqual(['a', 'b']);
+    expect(bugununPlaniSatirlari([k('a', false), k('b', false)]).map((x) => x.id)).toEqual(['a']);
+  });
+
+  it('#522 inceleme 3: Şimdi sıradakini, duraktayken bir sonrakini gösterir; durak kalmadıysa yok', () => {
+    const siradaki = { durum: 'siradaki' };
+    const burada = { durum: 'buradasin' };
+    const bitti = { durum: 'gezildi' };
+    expect(simdiHedefi(siradaki, null)).toBe(siradaki);
+    expect(simdiHedefi(burada, siradaki)).toBe(siradaki);
+    expect(simdiHedefi(burada, null)).toBeNull();
+    expect(simdiHedefi(bitti, null)).toBeNull();
+    expect(simdiHedefi(null, null)).toBeNull();
   });
 
   it('KK5 gün satırı: "1. gün · Salı" / "5 durak · 09:30 Kurşunlu Külliyesi"', () => {

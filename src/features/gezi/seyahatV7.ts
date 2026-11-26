@@ -59,7 +59,8 @@ export function varanlarMetni(p: { varanlar: Pick<Uye, 'user_id' | 'display_name
   const ben = p.varanlar.some((u) => u.user_id === p.benId);
   const digerleri = p.varanlar.filter((u) => u.user_id !== p.benId).map((u) => u.display_name?.trim() || t('seyahatV7.adsiz'));
   const yer = p.yerAdi ? bulunmaEkli(p.yerAdi) : null;
-  if (ben && digerleri.length === 0) return yer ? t('seyahatV7.sen', { yer }) : t('seyahatV7.senOrada');
+  // "Sazova'dasın", "Köprü'desin": ekin ünlüsüne göre -sın/-sin.
+  if (ben && digerleri.length === 0) return yer ? t(yer.endsWith('a') ? 'seyahatV7.senDa' : 'seyahatV7.senDe', { yer }) : t('seyahatV7.senOrada');
   const kisiler = ben ? t('seyahatV7.senVe', { adlar: birlestir(digerleri) }) : birlestir(digerleri);
   return yer ? t('seyahatV7.vardilar', { kisiler, yer }) : t('seyahatV7.orada', { kisiler });
 }
@@ -101,4 +102,18 @@ export function bosGunOnerileri<Y extends Pick<Yer, 'lat' | 'lng'> & { place_id:
     .map((y) => ({ ...y, mesafeM: merkez ? mesafeM(merkez, { lat: y.lat, lng: y.lng }) : null }))
     .sort((a, b) => (a.mesafeM ?? 0) - (b.mesafeM ?? 0))
     .slice(0, adet);
+}
+
+/** #522 inceleme 1 (kanvas `_GeziModu`): "Bugünün planı" gezilenleri ve sıradaki durağı gösterir; kalanlar "Planı aç ›". */
+export function bugununPlaniSatirlari<T extends { numara: number | null; tamamlandi: boolean }>(kartlar: T[]): T[] {
+  const numarali = kartlar.filter((k) => k.numara !== null);
+  const ilkKalan = numarali.findIndex((k) => !k.tamamlandi);
+  return numarali.filter((k, i) => k.tamamlandi || i === ilkKalan);
+}
+
+/** #522 inceleme 3: Şimdi bölümünün durağı. Sıradaki durak; duraktayken (`buradasin`) bir sonraki; durak kalmadıysa null. */
+export function simdiHedefi<T extends { durum: string | null }>(odak: T | null, sonraki: T | null): T | null {
+  if (odak?.durum === 'siradaki') return odak;
+  if (odak?.durum === 'buradasin') return sonraki;
+  return null;
 }

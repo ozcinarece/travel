@@ -126,7 +126,7 @@ export function SohbetIpucu({ kim, metin, onPress }: { kim: string | null; metin
   return (
     <Pressable accessibilityRole="button" accessibilityHint={t('seyahatV7.sohbetiAc')} onPress={onPress} style={s.ipucu}>
       <Ikon ad="sohbetV7" boyut={18} renk={renk.ana} kalinlik={2} />
-      <Text style={s.ipucuMetin} numberOfLines={1}>
+      <Text style={s.ipucuMetin} numberOfLines={2}>
         {kim ? <Text style={s.kalin}>{kim} </Text> : null}
         {metin}
       </Text>
@@ -145,13 +145,30 @@ export function BolumBasligi({ baslik, baglanti, onBaglanti }: { baslik: string;
         {baslik}
       </Text>
       {baglanti && onBaglanti ? (
-        <Pressable accessibilityRole="link" onPress={onBaglanti} hitSlop={12}>
+        <Pressable accessibilityRole="link" accessibilityLabel={okuyucuMetni(baglanti)} onPress={onBaglanti} hitSlop={12}>
           <Text style={s.baglanti}>{baglanti}</Text>
         </Pressable>
       ) : null}
     </View>
   );
 }
+
+/** Ekran okuyucu "›" işaretini okumasın (#522 inceleme 8). */
+function okuyucuMetni(metin: string): string {
+  return metin.replace(/\s*›\s*$/, '');
+}
+
+/** Bölüm altında tek başına bağlantı satırı ("Bugüne yer ekle ›"); biçimi başlıktaki "Rehber ›" ile aynı. */
+export function BaglantiSatiri({ metin, onPress }: { metin: string; onPress: () => void }) {
+  return (
+    <Pressable accessibilityRole="link" accessibilityLabel={okuyucuMetni(metin)} onPress={onPress} style={s.baglantiSatiri}>
+      <Text style={s.baglanti}>{metin}</Text>
+    </Pressable>
+  );
+}
+
+/** Plan modunda "Günler" en çok bu kadar satır (#522 inceleme 2); fazlası "Planı aç ›". */
+export const GUN_SINIRI = 3;
 
 /** Tek dolu turuncu düğme (52 pt). */
 function TuruncuDugme({ metin, ikon, onPress, pasif, mesgul }: { metin: string; ikon?: 'yolTarifiV7'; onPress: () => void; pasif?: boolean; mesgul?: boolean }) {
@@ -207,7 +224,7 @@ export function GunlerV7({ satirlar, onGun }: { satirlar: GunSatiriV7[]; onGun: 
             <Text style={s.satirBaslik} numberOfLines={1}>
               {g.ust}
             </Text>
-            <Text style={s.satirAlt} numberOfLines={1}>
+            <Text style={s.satirAlt} numberOfLines={2}>
               {g.alt}
             </Text>
           </View>
@@ -261,7 +278,8 @@ export function BugununPlaniV7({ satirlar }: { satirlar: PlanSatiriV7[] }) {
 export type BosGunYeri = { id: string; ad: string; alt: string; foto: string | null };
 
 /** Boş gün: yakındaki 3 yer, artıyla bugüne eklenir (turuncu düğme yok). */
-export function BugunBosV7({ yerler, eklenenler, onEkle, pasif }: { yerler: BosGunYeri[]; eklenenler: Set<string>; onEkle: (id: string) => void; pasif?: boolean }) {
+/** `onEkle` yoksa (bugünün günü bulunamadı) artı düğmesi gösterilmez. */
+export function BugunBosV7({ yerler, eklenenler, onEkle, pasif }: { yerler: BosGunYeri[]; eklenenler: Set<string>; onEkle?: (id: string) => void; pasif?: boolean }) {
   return (
     <>
       {yerler.map((y) => {
@@ -275,16 +293,18 @@ export function BugunBosV7({ yerler, eklenenler, onEkle, pasif }: { yerler: BosG
               </Text>
               <Text style={s.satirAlt}>{y.alt}</Text>
             </View>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={t(eklendi ? 'seyahatV7.bugunEklendi' : 'seyahatV7.bugunEkle', { ad: y.ad })}
-              accessibilityState={{ disabled: eklendi || !!pasif }}
-              disabled={eklendi || pasif}
-              onPress={() => onEkle(y.id)}
-              hitSlop={6}
-              style={[s.yerArti, pasif && s.pasif]}>
-              <Ikon ad={eklendi ? 'tik' : 'artiV7'} boyut={16} renk={eklendi ? renk.basari : renk.metin} kalinlik={2.2} />
-            </Pressable>
+            {onEkle ? (
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={t(eklendi ? 'seyahatV7.bugunEklendi' : 'seyahatV7.bugunEkle', { ad: y.ad })}
+                accessibilityState={{ disabled: eklendi || !!pasif }}
+                disabled={eklendi || pasif}
+                onPress={() => onEkle(y.id)}
+                hitSlop={6}
+                style={[s.yerArti, pasif && s.pasif]}>
+                <Ikon ad={eklendi ? 'tik' : 'artiV7'} boyut={16} renk={eklendi ? renk.basari : renk.metin} kalinlik={2.2} />
+              </Pressable>
+            ) : null}
           </View>
         );
       })}
@@ -322,21 +342,22 @@ const s = StyleSheet.create({
   kesikArti: { width: 32, height: 32, borderRadius: 16, borderWidth: 1.5, borderStyle: 'dashed', borderColor: seyahatV7.kesikKenar, alignItems: 'center', justifyContent: 'center', marginLeft: -4 },
   kisiMetin: { flexShrink: 1, fontFamily: yazi.normal, fontSize: 14, color: anaV5.ikincil },
   kisiYesil: { fontFamily: yazi.yari, color: renk.basariMetin },
-  cagir: { height: 36, paddingHorizontal: 14, borderRadius: 18, borderWidth: 1.5, borderColor: renk.ana, flexDirection: 'row', alignItems: 'center', gap: 6 },
-  cagirMetin: { fontFamily: yazi.kalin, fontSize: 14, color: renk.ana },
+  cagir: { minHeight: 36, paddingHorizontal: 14, paddingVertical: 6, borderRadius: 18, borderWidth: 1.5, borderColor: renk.ana, flexDirection: 'row', alignItems: 'center', gap: 6 },
+  cagirMetin: { flexShrink: 1, fontFamily: yazi.kalin, fontSize: 14, color: renk.ana },
   ipucu: { marginTop: 12, marginHorizontal: 16, paddingVertical: 10, paddingHorizontal: 12, minHeight: 44, borderRadius: 14, backgroundColor: anaV5.satirZemin, flexDirection: 'row', alignItems: 'center', gap: 10 },
   ipucuMetin: { flex: 1, fontFamily: yazi.normal, fontSize: 14, color: renk.metin },
   kalin: { fontFamily: yazi.kalin },
   bolumBaslik: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline', paddingTop: 18, paddingBottom: 4 },
   bolumMetin: { fontFamily: yazi.ekstra, fontSize: 19, color: renk.metin },
   baglanti: { fontFamily: yazi.kalin, fontSize: 14, color: renk.ana },
+  baglantiSatiri: { alignSelf: 'flex-start', minHeight: 44, justifyContent: 'center' },
   odak: { paddingTop: 18, paddingHorizontal: 16, gap: 4 },
   odakEtiket: { fontFamily: yazi.ekstra, fontSize: 13, letterSpacing: 0.26, color: anaV5.adim },
   odakBaslik: { fontFamily: yazi.ekstra, fontSize: 22, letterSpacing: -0.22, color: renk.metin },
   odakBaslikBosluk: { paddingBottom: 10 },
   odakAlt: { fontFamily: yazi.normal, fontSize: 14, color: anaV5.ikincil, paddingBottom: 10 },
-  turuncu: { height: 52, borderRadius: 26, backgroundColor: renk.vurgu, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 },
-  turuncuMetin: { fontFamily: yazi.kalin, fontSize: 16, color: renk.metin },
+  turuncu: { minHeight: 52, paddingVertical: 12, paddingHorizontal: 20, borderRadius: 26, backgroundColor: renk.vurgu, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 },
+  turuncuMetin: { flexShrink: 1, textAlign: 'center', fontFamily: yazi.kalin, fontSize: 16, color: renk.metin },
   pasif: { opacity: 0.4 },
   gunSatiri: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 12, minHeight: 44, borderBottomWidth: 1, borderBottomColor: anaV5.cizgi },
   gunCizgi: { width: 4, height: 34, borderRadius: 2 },
