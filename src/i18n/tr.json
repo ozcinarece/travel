@@ -936,6 +936,22 @@
     "rehberYokAlt": "Bu şehir için henüz rehber yazısı yok. Yer ekle sekmesinde bölgedeki öne çıkan mekanlara bakabilirsin.",
     "kesfeteGit": "Yer ekle"
   },
+  "seyahatV7": {
+    "durakSayaci": "{x} / {y} durak",
+    "tarihsiz": "Tarih belli değil",
+    "adsiz": "Gezgin",
+    "ve": "ve",
+    "senVe": "Sen ve {adlar}",
+    "sen": "Sen {yer}",
+    "senOrada": "Sen oradasın",
+    "vardilar": "{kisiler} {yer}",
+    "orada": "{kisiler} orada",
+    "durakN": "{n} durak",
+    "durakYok": "Durak yok",
+    "simdi": "Şimdi",
+    "simdiYuruyus": "Şimdi · {dk} dk yürüme",
+    "simdiTaksi": "Şimdi · {dk} dk araçla"
+  },
   "geziSayfasi": {
     "cevrimdisi": {
       "baslik": "Çevrimdışı · son güncelleme {saat}",
