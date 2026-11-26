@@ -28,14 +28,19 @@ export type AcikPaylasimOzeti = {
 export type PaylasimOzeti = AcikPaylasimOzeti | { kapali: true } | null;
 
 export const TOKEN_BICIMI = /^[A-Za-z0-9_-]{24}$/;
+/** #407 KK3: Arkadaşlar akışındaki kart alıcı ekranını paylaşımın kimliğiyle açar (`/r/g/{uuid}`); token istemciye gelmez. */
+export const KIMLIK_BICIMI = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+export const kimlikMi = (anahtar: string) => KIMLIK_BICIMI.test(anahtar);
 
 export function usePaylasimOzeti(token: string | undefined) {
   return useQuery({
     queryKey: ['paylasim_ozeti', token],
     // Biçimi bozuk token sunucuya gitmez; doğrudan "Bu link açılmıyor".
     queryFn: async (): Promise<PaylasimOzeti> => {
-      if (!token || !TOKEN_BICIMI.test(token)) return null;
-      const { data, error } = await supabase.rpc('paylasim_ozeti', { p_token: token });
+      if (!token || (!TOKEN_BICIMI.test(token) && !kimlikMi(token))) return null;
+      const { data, error } = kimlikMi(token)
+        ? await supabase.rpc('paylasim_ozeti_kimlik', { p_id: token })
+        : await supabase.rpc('paylasim_ozeti', { p_token: token });
       if (error) throw error;
       return (data as PaylasimOzeti) ?? null;
     },
@@ -50,7 +55,9 @@ export function usePaylasimOzeti(token: string | undefined) {
 
 /** "Haritada gör": günlük 200 yükleme sınırı sunucuda (Ürün kararı 2). false → gri satır, harita yüklenmez. */
 export async function haritaIzniAl(token: string): Promise<boolean> {
-  const { data, error } = await supabase.rpc('paylasim_harita_izni', { p_token: token });
+  const { data, error } = kimlikMi(token)
+    ? await supabase.rpc('paylasim_harita_izni_kimlik', { p_id: token })
+    : await supabase.rpc('paylasim_harita_izni', { p_token: token });
   if (error) return false;
   return data === true;
 }
@@ -60,7 +67,9 @@ export function usePaylasimdanAl() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (token: string): Promise<string> => {
-      const { data, error } = await supabase.rpc('paylasimdan_al', { p_token: token });
+      const { data, error } = kimlikMi(token)
+        ? await supabase.rpc('paylasimdan_al_kimlik', { p_id: token })
+        : await supabase.rpc('paylasimdan_al', { p_token: token });
       if (error) throw error;
       return data as string;
     },

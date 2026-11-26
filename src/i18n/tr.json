@@ -90,7 +90,27 @@
   "menu": {
     "kesfet": "Keşfet",
     "seyahatlerim": "Seyahatlerim",
+    "arkadaslar": "Arkadaşlar",
     "profil": "Profil"
+  },
+  "arkadaslar": {
+    "baslik": "Arkadaşlar",
+    "davetEt": "Davet et",
+    "davetMetin": "Tripmate'te gezileri birlikte planlayalım: {link}",
+    "paylasti": "{sehir} gezisini paylaştı",
+    "bos": "Arkadaşların gezilerini paylaşınca burada görünür.",
+    "begen": "Beğen",
+    "begendin": "Beğendin",
+    "kartEtiket": "{ad}, {sehir} gezisi. Açar",
+    "hata": "Arkadaşların yüklenemedi.",
+    "tekrarDene": "Tekrar dene",
+    "yukleniyor": "Arkadaşlar yükleniyor",
+    "azOnce": "az önce",
+    "saatOnce": "{n} saat önce",
+    "gunOnce": "{n} gün önce",
+    "haftaOnce": "{n} hafta önce",
+    "ayOnce": "{n} ay önce",
+    "yilOnce": "{n} yıl önce"
   },
   "profil": {
     "kesfet": "Keşfet",
