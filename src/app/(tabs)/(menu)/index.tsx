@@ -16,6 +16,7 @@ import { LogoYazi } from '@/components/ui/Logo';
 import { banaAcikBorc, GEZI_PAYLAS_KARTI, seritAdimMetni, useAcikBorc, useSeritAdimi } from '@/features/anasayfa/serit';
 import { aktifBanner, kesfetRaflari, type Banner as BannerVerisi, type Raf as RafVerisi } from '@/features/anasayfa/raflar';
 import { anaArama, kapakTonu, ustSatir } from '@/features/anasayfa/v5';
+import { bekleyenPaylasimiOku, bekleyenPaylasimiSil } from '@/features/paylasim/alici';
 import { bekleyenDavetiOku, bekleyenDavetiSil, useDavetKarsilama, useDavetKarsilandi } from '@/features/davet/sorgular';
 import { useKesfetAkisi, type AkisGezisi } from '@/features/icerik/kesfetAkisi';
 import { olayYaz, useSehirler } from '@/features/icerik/sorgular';
@@ -75,8 +76,16 @@ export default function AnaSayfa() {
         // kurulsa da Gezi'ye geri atılmaz.
         acilisKarariniKapat();
         router.replace({ pathname: '/r/[token]', params: { token } });
+        return;
       }
-      else setBekleyenDavet(null);
+      // #432 2/3b: girişsiz "Seyahatime al"a basan, girişten sonra paylaşılan geziye döner (tek seferlik).
+      return bekleyenPaylasimiOku().then((paylasim) => {
+        if (paylasim) {
+          acilisKarariniKapat();
+          void bekleyenPaylasimiSil();
+          router.replace({ pathname: '/r/g/[token]', params: { token: paylasim } });
+        } else setBekleyenDavet(null);
+      });
     });
   }, []);
   const karsilamaEtkin = bekleyenDavet === null && !!profil.data;

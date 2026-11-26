@@ -3944,7 +3944,11 @@ begin
   assert o ->> 'ad' = 'Paylaşılan Roma' and (o ->> 'gun_sayisi')::int = 2 and (o ->> 'durak_sayisi')::int = 3, '#432 KK2: ad, gün, durak: ' || m;
   assert (o ->> 'kisi_sayisi')::int = 2, '#432 KK2: N kişi gezdi';
   assert o -> 'kisi_adlari' = 'null'::jsonb or o -> 'kisi_adlari' is null, '#432 KK2: kişi adları kapalıyken dönmez';
-  assert position('Berk' in m) = 0 and position('Ece' in m) = 0, '#432 KK2: ad hiç geçmez';
+  -- 2/3b (Ürün kararı, 21 Kasım): anahtar kapalıyken yalnız paylaşanın (A, Ece) adı döner, diğer üyenin (B, Berk) adı dönmez.
+  assert o ->> 'paylasan' = 'Ece', '#432 2/3b: paylaşanın adı anahtar kapalıyken de döner: ' || m;
+  assert position('Berk' in m) = 0, '#432 2/3b: diğer üyenin adı anahtar kapalıyken dönmez';
+  assert (o ->> 'id')::uuid is not null, '#432 2/3b: olay hedefi (paylaşım kimliği) döner';
+  assert o #>> '{gunler,0,duraklar,0,dakika}' is not null, '#432 2/3b: durak süresi döner: ' || m;
   assert position('gizli not' in m) = 0, '#432 KK2: not dönmez';
   assert position('invite' in m) = 0, '#432: davet token anahtarı yok';
   assert position('ChIJ' in m) = 0, '#432: place_id dönmez';

@@ -94,6 +94,16 @@ export function gunUstuMetin(gunRengiHex: string): string {
   return gunRengiHex.toLowerCase() === '#f5a524' ? renk.metin : renk.zemin;
 }
 
+/**
+ * #432 2/3b (`Sos_v6_Alici`): alıcı ekranındaki gün çipi noktası ve durak numarası dairesi (kanvasta 1–3. gün). 4. günden
+ * sonra döner. Haritadaki pinler ikon sistemindeki gün renklerinde kalır (`gunRengi`).
+ */
+export const paylasimGunRenkleri = ['#2350C4', '#7A3FC0', '#B3305E'] as const;
+
+export function paylasimGunRengi(gunIndex: number): string {
+  return paylasimGunRenkleri[(gunIndex - 1) % paylasimGunRenkleri.length];
+}
+
 /** Rota tonu = gün renginin ~%20 koyusu (pinler gün renginde kalır). */
 export const rotaRenkleri = ['#2350c4', '#c4841d', '#128058', '#623fb3', '#b33762', '#0b84ba'] as const;
 

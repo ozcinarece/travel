@@ -1422,6 +1422,22 @@
     "kapatHata": "Paylaşım kapatılamadı, link hâlâ açık. Biraz sonra yeniden dene.",
     "okumaHata": "Paylaşım durumu alınamadı.",
     "tekrarDene": "Tekrar dene",
-    "kapatildi": "Paylaşım kapatıldı"
+    "kapatildi": "Paylaşım kapatıldı",
+    "paylasti": "{ad} paylaştı",
+    "durakNo": "Durak {n}",
+    "gunCip": "{n}. gün",
+    "gunBos": "Bu günde durak yok.",
+    "haritadaGor": "Haritada gör",
+    "haritaYok": "Harita şu an açılamıyor, duraklar aşağıda.",
+    "girisNot": "Giriş yapınca bu geziye geri dönersin",
+    "seyahatimeAl": "Seyahatime al",
+    "alHata": "Seyahat kurulamadı. Biraz sonra yeniden dene.",
+    "kapaliBaslik": "Bu paylaşım kapatıldı",
+    "kapaliMetin": "Linki gönderen kişi paylaşımı kapattı. Geziyi görmek için ondan yeni bir link isteyebilirsin.",
+    "gecersizBaslik": "Bu link açılmıyor",
+    "gecersizMetin": "Link eksik ya da hatalı olabilir.",
+    "hazirGeziler": "Hazır gezilere bak",
+    "agBaslik": "Bağlanamadık",
+    "agMetin": "Gezinin bilgileri yüklenemedi. Bağlantın düzelince tekrar dene."
   }
 }
