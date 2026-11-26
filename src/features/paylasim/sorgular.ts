@@ -30,8 +30,27 @@ export function useAcikPaylasim(tripId: string, etkin: boolean) {
   });
 }
 
-/** Açık link yoksa oluşturur (olay: paylasim_olustu), varsa döndürür. */
-export function usePaylasimOlustur(tripId: string) {
+/**
+ * #530 inceleme 2–3: bu seyahatte (kim açmış olursa olsun) hiç link açıldı mı. RLS başkasının linkini göstermez; sunucu yalnız
+ * evet/hayır döner (token yok). Sıradaki adım "Gezini paylaş" bununla düşer; kapatılan link adımı geri getirmez.
+ */
+export function usePaylasimYapildi(tripId: string, etkin: boolean) {
+  return useQuery({
+    queryKey: [...anahtar(tripId), 'yapildi'] as const,
+    enabled: etkin,
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc('paylasim_yapildi', { p_trip: tripId });
+      if (error) throw error;
+      return data === true;
+    },
+  });
+}
+
+/** #517 KK8: paylaşımın açıldığı yer (olay `meta.kaynak`). */
+export type PaylasimKaynagi = 'siradaki_adim' | 'menu';
+
+/** Açık link yoksa oluşturur (olay: paylasim_olustu, `meta.kaynak`), varsa döndürür. */
+export function usePaylasimOlustur(tripId: string, kaynak: PaylasimKaynagi = 'menu') {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (): Promise<GeziPaylasimi> => {
@@ -42,10 +61,13 @@ export function usePaylasimOlustur(tripId: string) {
         .single();
       if (error) throw error;
       const yeni = data as GeziPaylasimi;
-      void olayYaz('paylasim_olustu', yeni.id);
+      void olayYaz('paylasim_olustu', yeni.id, { kaynak });
       return yeni;
     },
-    onSuccess: (yeni) => qc.setQueryData(anahtar(tripId), yeni),
+    onSuccess: (yeni) => {
+      qc.setQueryData(anahtar(tripId), yeni);
+      qc.setQueryData([...anahtar(tripId), 'yapildi'], true);
+    },
   });
 }
 
@@ -58,6 +80,7 @@ export function usePaylasimGuncelle(tripId: string) {
       if (error) throw error;
       return degisiklik;
     },
+    // #530 inceleme 3: kapatmak "hiç paylaşıldı" bilgisini değiştirmez; adım geri gelmez.
     onSuccess: () => qc.setQueryData(anahtar(tripId), null),
   });
 }

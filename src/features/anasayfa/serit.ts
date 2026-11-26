@@ -53,6 +53,7 @@ export function seritAdimMetni(a: SiradakiAdim): string {
     if (a.tur === 'davet') return t('serit.adim.davet');
     if (a.tur === 'yemek') return t('serit.adim.yemek', { gun: gunTarihi(a.gun) });
     if (a.tur === 'harcamaKapat') return t('serit.adim.harcamaKapat');
+    if (a.tur === 'paylas') return t('serit.adim.paylas');
     return t('serit.adim.yarin', { saat: a.cikis });
   })();
   return t('serit.siradaki', { adim });

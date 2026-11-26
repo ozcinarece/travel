@@ -2,7 +2,7 @@ import { describe, expect, it } from '@jest/globals';
 
 import type { Degisiklik } from '@/lib/tipler';
 
-import { degisiklikGruplari, degisiklikYok, geriAlinabilir, geriAlmaYetkisi, grupMetni } from '../degisiklikMetni';
+import { degisiklikGruplari, degisiklikMetni, degisiklikYok, geriAlinabilir, geriAlmaYetkisi, grupMetni } from '../degisiklikMetni';
 
 const d = (id: number, ek: Partial<Degisiklik>): Degisiklik => ({ id, user_id: 'u1', entity: 'stops', entity_id: 's1', field: null, old: null, new: null, at: '2026-10-13T10:00:00Z', ...ek });
 
@@ -96,5 +96,17 @@ describe('#160 (#354 inceleme): boş hal', () => {
     expect(degisiklikYok([])).toBe(true);
     expect(degisiklikYok([d(9, { entity: 'members', entity_id: 'u3', field: 'display_name', old: 'Mert', new: 'Mert K.' })])).toBe(true);
     expect(degisiklikYok([d(9, { entity: 'members', entity_id: 'u3', field: 'display_name' }), d(8, { entity: 'members', entity_id: 'u3', field: 'role' })])).toBe(false);
+  });
+});
+
+describe('#517 KK1: paylaşım linki kaydı', () => {
+  const ad = () => '…';
+  it('link oluşunca ve kapanınca gri satır cümlesi; geri alınamaz', () => {
+    const acildi = d(1, { entity: 'gezi_paylasim', entity_id: 'g1', field: 'acik', old: null, new: true });
+    const kapandi = d(2, { entity: 'gezi_paylasim', entity_id: 'g1', field: 'acik', old: true, new: false });
+    expect(degisiklikMetni(acildi, ad)).toBe('geziyi linkle paylaştı');
+    expect(degisiklikMetni(kapandi, ad)).toBe('paylaşım linkini kapattı');
+    expect(geriAlinabilir(degisiklikGruplari([acildi])[0])).toBe(false);
+    expect(geriAlinabilir(degisiklikGruplari([kapandi])[0])).toBe(false);
   });
 });

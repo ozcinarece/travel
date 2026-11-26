@@ -5,6 +5,8 @@ import { Linking, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { GrupPenceresi } from '@/components/davet/GrupPenceresi';
 import { PaylasimCekmecesi } from '@/components/paylasim/PaylasimCekmecesi';
+import { kisiKipi } from '@/features/paylasim/baslik';
+import { usePaylasimYapildi, type PaylasimKaynagi } from '@/features/paylasim/sorgular';
 import { KatilimSayfasi } from '@/components/davet/KatilimSayfasi';
 import { ProfilOnayi } from '@/components/davet/ProfilOnayi';
 import { CevrimdisiSeridi } from '@/components/gezi/CevrimdisiSeridi';
@@ -148,7 +150,9 @@ function GeziSayfasi({ seyahat, gunler, duraklar, mekanlar, konaklamalar, katild
   }, [bildirim]);
   const [grupAcik, setGrupAcik] = useState(false);
   const [menuAcik, setMenuAcik] = useState(false);
-  const [paylasimAcik, setPaylasimAcik] = useState(false);
+  // #517 KK8: açık çekmecenin açıldığı yer (olay `meta.kaynak`); null: kapalı.
+  const [paylasimKaynagi, setPaylasimKaynagi] = useState<PaylasimKaynagi | null>(null);
+  const paylasimAcik = paylasimKaynagi !== null;
   const [karsilamaAcik, setKarsilamaAcik] = useState(katildin);
   const [durakMenu, setDurakMenu] = useState<DurakKarti | null>(null);
   const [gunSecDurak, setGunSecDurak] = useState<DurakKarti | null>(null);
@@ -171,6 +175,7 @@ function GeziSayfasi({ seyahat, gunler, duraklar, mekanlar, konaklamalar, katild
   const an = useSimdi(true);
   const kokGezinme = useNavigationContainerRef();
   const mod = geziModu(seyahat, an);
+  const paylasimKipi = kisiKipi(mod);
   const bugunIndex = kacinciGun(seyahat, an);
   const bugunGun = mod === 'gezi' ? gunler.find((g) => g.index === bugunIndex) : undefined;
   // KK13: ag=false — yürüyüş matrisi ve rota bacakları istenmez; Plan açıldıysa önbellektekiler, yoksa kuş uçuşu kestirimi.
@@ -213,6 +218,9 @@ function GeziSayfasi({ seyahat, gunler, duraklar, mekanlar, konaklamalar, katild
   const oylamaMesaji = acikOylama ? (mesajlar.data ?? []).find((m) => m.oylama_id === acikOylama.id && !m.silindi_at) : undefined;
   const sonMesaj = (mesajlar.data ?? []).find((m) => !m.silindi_at) ?? null;
   const sohbeteGit = () => router.navigate({ pathname: '/seyahat/[id]/(sekmeler)/sohbet', params: { id: seyahat.id } });
+  // #530 inceleme 2–3: seyahatte hiç link açıldıysa (kim açmış olursa olsun, kapatılmış olsa da) "Gezini paylaş" düşer.
+  // Yalnız bitmiş gezide sorulur.
+  const paylasildi = usePaylasimYapildi(seyahat.id, hesapli && mod === 'bitti');
   const adim = siradakiAdim({
     mod,
     gunler,
@@ -225,6 +233,10 @@ function GeziSayfasi({ seyahat, gunler, duraklar, mekanlar, konaklamalar, katild
     baslangic: seyahat.start_date,
     ilkGunCikis: saatKisa([...gunler].sort((a, b) => a.index - b.index)[0]?.start_time, saatKisa(seyahat.day_start, '09:00')),
     acikTransfer: harcamalar.data && odesmeler.data ? hOzet.transferler.length : 0,
+    // #517 KK8: misafir link paylaşamaz; harcama verisi gelmeden de "paylaş" önerilmez (açık borç varken yanıp sönmesin).
+    paylasabilir: hesapli && !!harcamalar.data && !!odesmeler.data,
+    // Cevap gelmeden (ya da hata) paylaşılmış sayılır: adım yalnız "hiç link açılmadı" kesinleşince çıkar.
+    paylasildi: paylasildi.data !== false,
     // #308: v7'de Plan özetinin otel satırı yok; otel adımı Sıradaki adımda görünür.
   });
   // Uye listesi gelmeden "Davet et" gösterilmez (tek kişi sanılmasın).
@@ -279,6 +291,7 @@ function GeziSayfasi({ seyahat, gunler, duraklar, mekanlar, konaklamalar, katild
     if (a.tur === 'davet') return davet.paylas();
     if (a.tur === 'yemek') return sekme('kesfet', { cip: 'yemek' });
     if (a.tur === 'harcamaKapat') return bakiyeler();
+    if (a.tur === 'paylas') return setPaylasimKaynagi('siradaki_adim');
     return plan({ gun: '1' });
   };
   const adimMetni = (a: SiradakiAdim): { baslik: string; alt: string | null; dugme: string } => {
@@ -299,6 +312,7 @@ function GeziSayfasi({ seyahat, gunler, duraklar, mekanlar, konaklamalar, katild
     if (a.tur === 'davet') return { baslik: t('geziSayfasi.adim.davet'), alt: t('geziSayfasi.adim.davetAlt'), dugme: t('seyahatV7.arkadasCagir') };
     if (a.tur === 'yemek') return { baslik: t('geziSayfasi.adim.yemek', { gun: gunTarihi(a.gun) }), alt: t('geziSayfasi.adim.yemekAlt'), dugme: t('geziSayfasi.adim.yemekDugme') };
     if (a.tur === 'harcamaKapat') return { baslik: t('geziSayfasi.adim.harcamaKapat'), alt: t('geziSayfasi.adim.harcamaKapatAlt', { n: a.transfer }), dugme: t('geziSayfasi.adim.harcamaKapatDugme') };
+    if (a.tur === 'paylas') return { baslik: t('geziSayfasi.adim.paylas', { sehir: seyahat.city_label }), alt: null, dugme: t('geziSayfasi.adim.paylasDugme') };
     return {
       baslik: t('geziSayfasi.adim.yarin'),
       alt: a.ilkMekanId ? t('geziSayfasi.adim.yarinAlt', { ad: adiYaDaKategori(a.ilkMekanId), saat: a.cikis }) : t('geziSayfasi.adim.yarinCikis', { saat: a.cikis }),
@@ -495,7 +509,7 @@ function GeziSayfasi({ seyahat, gunler, duraklar, mekanlar, konaklamalar, katild
           sigdir={ustHarita.sigdir}
           onHarita={() => plan(hal === 'plan' ? { harita: '1' } : { gun: String(bugunGun?.index ?? 1), harita: '1' })}
           onGeri={() => kesfeteDon(kokGezinme.getRootState() as Parameters<typeof kesfeteDon>[0])}
-          onPaylas={hesapli ? () => setPaylasimAcik(true) : undefined}
+          onPaylas={hesapli ? () => setPaylasimKaynagi('menu') : undefined}
           onMenu={() => setMenuAcik(true)}
         />
         {cevrimdisi ? (
@@ -570,17 +584,21 @@ function GeziSayfasi({ seyahat, gunler, duraklar, mekanlar, konaklamalar, katild
         sahip={benUye?.role === 'owner'}
         uyeSayisi={uyeListesi.length}
         onHata={setBildirim}
-        onPaylas={hesapli ? () => setPaylasimAcik(true) : undefined}
+        onPaylas={hesapli ? () => setPaylasimKaynagi('menu') : undefined}
       />
       {hesapli ? (
         <PaylasimCekmecesi
           acik={paylasimAcik}
-          onKapat={() => setPaylasimAcik(false)}
+          onKapat={() => setPaylasimKaynagi(null)}
           seyahat={seyahat}
           benimAdim={benUye?.display_name ?? null}
           gunSayisi={gunler.length}
           durakSayisi={duraklar.length}
-          kisiSayisi={uyeListesi.length || 1}
+          // #530 inceleme 5: üye listesi gelmeden null; "Linki gönder" pasif kalır (mesaj kişi sayısız gitmesin).
+          // #530 inceleme 3: liste gelene kadar düğme pasif; liste hata verirse mesaj kişi sayısı olmadan gider (1 = sayı yazılmaz).
+          kisiSayisi={uyeler.data ? uyeListesi.length || 1 : uyeler.isError ? 1 : null}
+          kisiKip={paylasimKipi}
+          kaynak={paylasimKaynagi ?? 'menu'}
           onArkadasEkle={() => setGrupAcik(true)}
           cevrimdisi={cevrimdisi}
         />

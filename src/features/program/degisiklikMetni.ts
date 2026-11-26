@@ -1,5 +1,6 @@
 // #137: Grup penceresi ve (#141) Son değişiklikler — `changes` satırını kısa Türkçe cümleye çevirir (eski grup.tsx'ten taşındı).
 import { paraMetni } from '@/features/harcama/hesap';
+import { t } from '@/i18n';
 import type { Degisiklik } from '@/lib/tipler';
 
 export function degisiklikMetni(d: Degisiklik, mekanAdi: (placesId: string | null | undefined) => string): string {
@@ -51,6 +52,9 @@ export function degisiklikMetni(d: Degisiklik, mekanAdi: (placesId: string | nul
     }
     case 'dagit_geri':
       return 'günlere dağıtımı geri aldı';
+    // #517 KK1: link oluştu (yeni true) ya da kapandı (yeni false); kayıtta token yok.
+    case 'gezi_paylasim':
+      return d.new === false ? t('degisiklik.paylasimKapandi') : t('degisiklik.paylasimAcildi');
     // #183: harcama ve ödeşme (paylar akışta ayrıca gösterilmez; harcamayla birlikte geri alınır).
     case 'harcamalar': {
       const satir = (yeni ?? eski) as { aciklama?: string; tl_kurus?: number } | null;

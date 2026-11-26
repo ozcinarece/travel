@@ -943,6 +943,7 @@
     "durakSayaci": "{x} / {y} durak",
     "tarihsiz": "Tarih belli değil",
     "adsiz": "Bir arkadaşın",
+    "sen": "Sen",
     "adsizKucuk": "bir arkadaşın",
     "ve": "ve",
     "senVe": "Sen ve {adlar}",
@@ -1022,7 +1023,9 @@
       "yarinDugme": "Gör",
       "harcamaKapat": "Gezi bitti · harcamaları kapat",
       "harcamaKapatAlt": "{n} transferle herkes ödeşir",
-      "harcamaKapatDugme": "Bakiyeler"
+      "harcamaKapatDugme": "Bakiyeler",
+      "paylas": "{sehir} gezini paylaş",
+      "paylasDugme": "Paylaş"
     },
     "otel": "Otel",
     "bugun": "Bugün",
@@ -1313,6 +1316,7 @@
       "davet": "arkadaşlarını davet et",
       "yemek": "{gun} için öğle yemeği ekle",
       "harcamaKapat": "harcamaları kapat",
+      "paylas": "gezini paylaş",
       "yarin": "yarın başlıyor, çıkış {saat}"
     },
     "bittiEtiket": "{sehir} GEZİSİ · BİTTİ",
@@ -1371,6 +1375,10 @@
     "listeYukleniyor": "Öneriler yükleniyor",
     "tekrarDene": "Tekrar dene"
   },
+  "degisiklik": {
+    "paylasimAcildi": "geziyi linkle paylaştı",
+    "paylasimKapandi": "paylaşım linkini kapattı"
+  },
   "paylasim": {
     "menu": "Geziyi paylaş",
     "baslik": "Geziyi paylaş",
@@ -1381,6 +1389,8 @@
     "gun": "{n} gün",
     "durak": "{n} durak",
     "kisi": "{n} kişi gezdi",
+    "kisiGidiyor": "{n} kişi gidiyor",
+    "kisiGeziyor": "{n} kişi geziyor",
     "adinGorunur": "Linkte senin adın görünür",
     "adinGorunurAlt": "Diğer üyelerin adı ve fotoğrafı görünmez",
     "gizli": "Notlar, harcamalar ve sohbet",

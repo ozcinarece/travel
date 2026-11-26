@@ -48,7 +48,10 @@ export function baslikAltSatiri(p: {
 export function kisiAdlari(uyeler: Pick<Uye, 'user_id' | 'display_name'>[], benId: string | null): string {
   const sirali = [...uyeler].sort((a, b) => Number(b.user_id === benId) - Number(a.user_id === benId));
   // #522 2. inceleme 3: liste içinde küçük harf ("Ece, bir arkadaşın"); başta büyük.
-  return sirali.map((u, i) => u.display_name?.trim() || t(i === 0 ? 'seyahatV7.adsiz' : 'seyahatV7.adsizKucuk')).join(', ');
+  // #517 (ek, #522 incelemesi): kendi adım boşsa "Sen"; yalnız başkalarının adsız kaydı "bir arkadaşın".
+  return sirali
+    .map((u, i) => u.display_name?.trim() || (u.user_id === benId ? t('seyahatV7.sen') : t(i === 0 ? 'seyahatV7.adsiz' : 'seyahatV7.adsizKucuk')))
+    .join(', ');
 }
 
 /**

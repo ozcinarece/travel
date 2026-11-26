@@ -84,6 +84,15 @@ describe('#432 2/3b alıcı ekranı', () => {
     expect(screen.getByText(t('paylasim.girisNot'))).toBeTruthy();
   });
 
+  it('#517 KK3–KK4: plandaki gezi "gidiyor"; tek kişilik seyahatte kişi sayısı yok', () => {
+    mockSorgu.data = { ...acik, kisi_kip: 'gidiyor' } as PaylasimOzeti;
+    const { rerender } = render(<PaylasimEkrani />);
+    expect(screen.getByText(`${t('paylasim.gun', { n: 2 })} · ${t('paylasim.durak', { n: 3 })} · ${t('paylasim.kisiGidiyor', { n: 3 })}`)).toBeTruthy();
+    mockSorgu.data = { ...acik, kisi_sayisi: 1, kisi_kip: 'gezdi' } as PaylasimOzeti;
+    rerender(<PaylasimEkrani />);
+    expect(screen.getByText(`${t('paylasim.gun', { n: 2 })} · ${t('paylasim.durak', { n: 3 })}`)).toBeTruthy();
+  });
+
   it('gün çipi listeyi değiştirir', () => {
     render(<PaylasimEkrani />);
     fireEvent.press(screen.getByText(t('paylasim.gunCip', { n: 2 })));

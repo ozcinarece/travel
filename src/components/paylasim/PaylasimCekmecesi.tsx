@@ -17,8 +17,8 @@ import { SeyahatKapagi } from '@/components/seyahatler/SeyahatKapagi';
 import { AltPencere } from '@/components/ui/AltPencere';
 import { Buton } from '@/components/ui/Buton';
 import { Ikon } from '@/components/ui/Ikon';
-import { aliciBasligi } from '@/features/paylasim/baslik';
-import { linkiGonder, paylasimLinki, useAcikPaylasim, usePaylasimGuncelle, usePaylasimOlustur } from '@/features/paylasim/sorgular';
+import { aliciBasligi, ilkAd, paylasimOzeti, type KisiKipi } from '@/features/paylasim/baslik';
+import { linkiGonder, paylasimLinki, useAcikPaylasim, usePaylasimGuncelle, usePaylasimOlustur, type PaylasimKaynagi } from '@/features/paylasim/sorgular';
 import { t } from '@/i18n';
 import { ilgiEkli } from '@/lib/ek';
 import { onayIste } from '@/lib/onay';
@@ -28,11 +28,16 @@ type Props = {
   acik: boolean;
   onKapat: () => void;
   seyahat: { id: string; city_label: string; name?: string | null };
-  /** Paylaşanın görünen adı (önizleme başlığı "Ayşe'nin …"). */
+  /** Paylaşanın görünen adı; kartta ve mesajda yalnız ilk adı kullanılır (#530 inceleme 1). */
   benimAdim: string | null;
   gunSayisi: number;
   durakSayisi: number;
-  kisiSayisi: number;
+  /** #530 inceleme 5: null = üye listesi yükleniyor; "Linki gönder" pasif. */
+  kisiSayisi: number | null;
+  /** #517 KK3: plan "gidiyor", gezi "geziyor", bitti "gezdi". */
+  kisiKip: KisiKipi;
+  /** #517 KK8: çekmece nereden açıldı (olay `meta.kaynak`). */
+  kaynak?: PaylasimKaynagi;
   /** KK9: "Arkadaş ekle ›" davet akışını açar. */
   onArkadasEkle: () => void;
   /** Bağlantı yokken "Linki gönder" ve "Paylaşımı kapat" pasif. */
@@ -48,26 +53,31 @@ export function paylasimBasligi(ad: string | null, sehir: string): string {
   return ekli ? t('paylasim.kimin', { ad: ekli, sehir }) : t('paylasim.kiminsiz', { sehir });
 }
 
-export function paylasimOzeti(gun: number, durak: number, kisi: number): string {
-  return [t('paylasim.gun', { n: gun }), t('paylasim.durak', { n: durak }), t('paylasim.kisi', { n: kisi })].join(' · ');
-}
+export { paylasimOzeti };
 
-export function PaylasimCekmecesi({ acik, onKapat, seyahat, benimAdim, gunSayisi, durakSayisi, kisiSayisi, onArkadasEkle, cevrimdisi }: Props) {
+export function PaylasimCekmecesi({ acik, onKapat, seyahat, benimAdim, gunSayisi, durakSayisi, kisiSayisi, kisiKip, kaynak = 'menu', onArkadasEkle, cevrimdisi }: Props) {
   const paylasim = useAcikPaylasim(seyahat.id, acik);
-  const olustur = usePaylasimOlustur(seyahat.id);
+  const olustur = usePaylasimOlustur(seyahat.id, kaynak);
   const guncelle = usePaylasimGuncelle(seyahat.id);
   const link = paylasim.data ?? null;
 
   // Paylaşım mesajındaki başlık ("Ayşe'nin Eskişehir gezisi") aynı kalır; kart alıcının göreceği gibidir.
-  const baslik = paylasimBasligi(benimAdim, seyahat.city_label);
+  // #530 inceleme 1: alıcı sunucudan yalnız ilk adı alır; kart ve mesaj da yalnız ilk adı kullanır.
+  const ad = ilkAd(benimAdim);
+  const baslik = paylasimBasligi(ad, seyahat.city_label);
   const kartBasligi = aliciBasligi({ ad: seyahat.name ?? null, sehir: seyahat.city_label });
-  const ozet = paylasimOzeti(gunSayisi, durakSayisi, kisiSayisi);
+  const kisiHazir = kisiSayisi !== null;
+  const ozet = paylasimOzeti(gunSayisi, durakSayisi, kisiSayisi ?? 1, kisiKip);
+  // #517 KK-ek1 (#515 incelemesi): adım yoksa linkte ad görünmez; "Linkte senin adın görünür" satırı da gösterilmez.
+  const adVar = !!ad;
   const mesgul = olustur.isPending || guncelle.isPending;
   // Link okunamadıysa "link yok" sanılmaz: yeni link denemesi tek açık link kısıtına takılır, "Paylaşımı kapat" görünmez.
   const okumaHatasi = paylasim.isError;
   const pasif = cevrimdisi || okumaHatasi;
   // Link okunurken "link yok" sanılmasın: durum satırının yerinde yükleniyor göstergesi.
   const linkYukleniyor = paylasim.isLoading;
+  // #530 inceleme 5: link ya da üye listesi gelmeden "Linki gönder" basılamaz (mesaj kişi sayısız gitmesin).
+  const gonderBekliyor = paylasim.isLoading || !kisiHazir;
   const ipucu = cevrimdisi ? t('geziSayfasi.cevrimdisi.baglantiYok') : undefined;
 
   // Hata ve bildirim çekmecenin içinde gösterilir (sayfa bildirimi Modal'ın altında kalır). Hata kırmızı kutuda, başarı düz satırda.
@@ -95,7 +105,7 @@ export function PaylasimCekmecesi({ acik, onKapat, seyahat, benimAdim, gunSayisi
     try {
       const hedef = link ?? (await olustur.mutateAsync());
       const url = paylasimLinki(hedef.token);
-      const sonuc = await linkiGonder(t('paylasim.mesaj', { baslik, ozet: [t('paylasim.gun', { n: gunSayisi }), t('paylasim.durak', { n: durakSayisi })].join(' · '), link: url }), url);
+      const sonuc = await linkiGonder(t('paylasim.mesaj', { baslik, ozet, link: url }), url);
       if (sonuc === 'kopyalandi') bilgi(t('davet.linkKopyalandi'));
     } catch {
       hata(t('paylasim.hata'));
@@ -137,7 +147,7 @@ export function PaylasimCekmecesi({ acik, onKapat, seyahat, benimAdim, gunSayisi
         <View style={s.kart}>
           <SeyahatKapagi kimlik={seyahat.id} yukseklik={112} kose={0} />
           <View style={s.kartGovde}>
-            {benimAdim ? <Text style={s.paylasti}>{t('paylasim.paylasti', { ad: benimAdim })}</Text> : null}
+            {adVar ? <Text style={s.paylasti}>{t('paylasim.paylasti', { ad: ad ?? '' })}</Text> : null}
             <Text style={s.kartBaslik} numberOfLines={2}>
               {kartBasligi}
             </Text>
@@ -147,21 +157,26 @@ export function PaylasimCekmecesi({ acik, onKapat, seyahat, benimAdim, gunSayisi
       </View>
 
       <View>
-        <View style={s.satir}>
-          <View style={s.satirMetin}>
-            <Text style={s.satirBaslik}>{t('paylasim.adinGorunur')}</Text>
-            <Text style={s.alt}>{t('paylasim.adinGorunurAlt')}</Text>
+        {adVar ? (
+          // #517 KK-ek2: ekran okuyucu satırı tek seferde okur.
+          <View testID="paylasim-ad-satiri" style={s.satir} accessible accessibilityLabel={`${t('paylasim.adinGorunur')}. ${t('paylasim.adinGorunurAlt')}`}>
+            <View style={s.satirMetin}>
+              <Text style={s.satirBaslik}>{t('paylasim.adinGorunur')}</Text>
+              <Text style={s.alt}>{t('paylasim.adinGorunurAlt')}</Text>
+            </View>
+            <Ikon ad="kisiV6" boyut={22} renk={anaV5.ikincil} kalinlik={2.2} />
           </View>
-          <Ikon ad="kisiV6" boyut={22} renk={anaV5.ikincil} kalinlik={2.2} />
-        </View>
-        <View style={[s.satir, s.satirCizgi]}>
+        ) : null}
+        <View
+          testID="paylasim-kilit-satiri"
+          style={[s.satir, adVar && s.satirCizgi]}
+          accessible
+          accessibilityLabel={`${t('paylasim.gizli')}. ${t('paylasim.gizliAlt')}. ${t('paylasim.kilitli')}`}>
           <View style={s.satirMetin}>
             <Text style={s.satirBaslik}>{t('paylasim.gizli')}</Text>
             <Text style={s.alt}>{t('paylasim.gizliAlt')}</Text>
           </View>
-          <View accessible accessibilityRole="image" accessibilityLabel={t('paylasim.kilitli')}>
-            <Ikon ad="kilitV6" boyut={22} renk={anaV5.ikincil} kalinlik={2.2} />
-          </View>
+          <Ikon ad="kilitV6" boyut={22} renk={anaV5.ikincil} kalinlik={2.2} />
         </View>
       </View>
 
@@ -190,10 +205,10 @@ export function PaylasimCekmecesi({ acik, onKapat, seyahat, benimAdim, gunSayisi
           accessibilityRole="button"
           accessibilityLabel={t('paylasim.linkiGonder')}
           accessibilityHint={ipucu}
-          accessibilityState={{ disabled: mesgul || paylasim.isLoading || pasif, busy: olustur.isPending }}
-          disabled={mesgul || paylasim.isLoading || pasif}
+          accessibilityState={{ disabled: mesgul || gonderBekliyor || pasif, busy: olustur.isPending }}
+          disabled={mesgul || gonderBekliyor || pasif}
           onPress={gonder}
-          style={[s.gonder, pasif && s.pasif]}>
+          style={[s.gonder, (pasif || gonderBekliyor) && s.pasif]}>
           {olustur.isPending ? <ActivityIndicator color={renk.metin} /> : <Text style={s.gonderMetin}>{t('paylasim.linkiGonder')}</Text>}
         </Pressable>
         {link ? (
