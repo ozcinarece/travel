@@ -16,6 +16,7 @@ import { SeyahatYukleme } from '@/components/seyahatler/SeyahatYukleme';
 import { useDavetPaylas } from '@/features/davet/paylas';
 import { useBilinenMekanlar } from '@/features/gezi/bilinenMekanlar';
 import { useGuneEkle } from '@/features/gezi/bugunEkle';
+import { REHBER_YAKIN_M } from '@/features/plan/planListesi';
 import { adayKonumu, AKSAM_DK, eklenenleriSabitle, yakindaAdaylari, yakindaGorunur, type YakinAday } from '@/features/gezi/yakinda';
 import { baslikAltSatiri, bugununPlaniSatirlari, durakSayaci, gezildiMi, gunSatiri, kisiAdlari, simdiEtiketi, simdiHedefi, varanlarMetni } from '@/features/gezi/seyahatV7';
 import { ustHaritaVerisi, type UstHaritaHali } from '@/features/gezi/ustHarita';
@@ -336,7 +337,7 @@ function GeziSayfasi({ seyahat, gunler, duraklar, mekanlar, konaklamalar, katild
   const yakinAdaylarHam = useMemo(
     () =>
       yakindaAcik
-        ? yakindaAdaylari({ mekanlar, duraklar, ilYerleri: ilYerleri.data ?? [], rehberYerleri: sehirYerleri.data ?? [], referans: referansNokta, aksam: aksamMi, adet: hal === 'bos' ? 3 : 2 })
+        ? yakindaAdaylari({ mekanlar, duraklar, ilYerleri: ilYerleri.data ?? [], rehberYerleri: sehirYerleri.data ?? [], referans: referansNokta, aksam: aksamMi, adet: hal === 'bos' ? 3 : 2, icerikSiniriM: REHBER_YAKIN_M })
         : [],
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [yakindaAcik, mekanlar, duraklar, ilYerleri.data, sehirYerleri.data, referansNokta?.lat, referansNokta?.lng, aksamMi, hal],
@@ -448,7 +449,8 @@ function GeziSayfasi({ seyahat, gunler, duraklar, mekanlar, konaklamalar, katild
   // #532 KK2: + soru sormadan bugünün sonuna ekler; bildirim "{ad}, bugüne eklendi", satır ✓.
   const bugunaEkle = (placeId: string) => {
     const a = yakinAdaylar.find((y) => y.place_id === placeId);
-    if (!a || !bugunGun) return;
+    // #536 inceleme 5: çift dokunuşta ikinci ekleme yok.
+    if (!a || !bugunGun || eklenenler.has(placeId)) return;
     setEklenenler((e) => new Set(e).add(placeId));
     setSabitYakinAdaylar((m) => new Map(m).set(placeId, { aday: a, sira: yakinAdaylar.indexOf(a) }));
     guneEkle.mutate(
@@ -516,10 +518,15 @@ function GeziSayfasi({ seyahat, gunler, duraklar, mekanlar, konaklamalar, katild
             <View style={s.bolum}>
               <BolumBasligi baslik={t('seyahatV7.bugununPlani')} baglanti={t('seyahatV7.planiAc')} onBaglanti={() => plan({ gun: String(bugunGun?.index ?? 1) })} />
               <BugununPlaniV7 satirlar={planSatirlari} />
-              {yakindaAcik && yakinSatirlari.length > 0 && bugunGun ? (
+              {/* #536 inceleme 1: aday yoksa başlık kalır, altında boş gündeki gibi tek satır "Bugüne yer ekle ›". */}
+              {yakindaAcik ? (
                 <>
                   <BolumBasligi baslik={t('seyahatV7.yakindaBugune')} baglanti={t('seyahatV7.tumu')} onBaglanti={bugunYerEkle} />
-                  <BugunBosV7 yerler={yakinSatirlari} eklenenler={eklenenler} onEkle={bugunaEkle} pasif={cevrimdisi} />
+                  {yakinSatirlari.length > 0 && bugunGun ? (
+                    <BugunBosV7 yerler={yakinSatirlari} eklenenler={eklenenler} onEkle={bugunaEkle} pasif={cevrimdisi} />
+                  ) : (
+                    <BaglantiSatiri metin={t('seyahatV7.bugunYerEkle')} onPress={bugunYerEkle} />
+                  )}
                 </>
               ) : null}
             </View>

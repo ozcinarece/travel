@@ -53,7 +53,7 @@ type Props = {
   onDurak: (mekanId: string) => void;
   onDurakUzunBas: (mekanId: string) => void;
   /** #532 KK3: "Akşam için yakında" — en çok 2 yer, + o günün sonuna ekler. */
-  aksam: { yerler: BosGunYeri[]; eklenenler: Set<string>; onEkle: (id: string) => void } | null;
+  aksam: { yerler: BosGunYeri[]; eklenenler: Set<string>; onEkle: (id: string) => void; pasif?: boolean } | null;
   bos: { metin: string; dugme: string; onPress: () => void } | null;
   uyari: string | null;
 };
@@ -177,7 +177,7 @@ export function PlanListesi(p: Props) {
         {p.aksam ? (
           <View style={s.aksam}>
             <BolumBasligi baslik={t('plan.aksamYakinda')} />
-            <BugunBosV7 yerler={p.aksam.yerler} eklenenler={p.aksam.eklenenler} onEkle={p.aksam.onEkle} />
+            <BugunBosV7 yerler={p.aksam.yerler} eklenenler={p.aksam.eklenenler} onEkle={p.aksam.onEkle} pasif={p.aksam.pasif} />
           </View>
         ) : null}
       </View>

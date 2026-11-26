@@ -38,7 +38,7 @@ import { useOylar } from '@/features/listem/sorgular';
 import { useMekanGuncelle, useMekanlar, useMekanSil, useUyeler } from '@/features/mekanlar/sorgular';
 import { aksamBoslugu, kmMetni, planSatirlari, REHBER_YAKIN_M, YEMEK_RENGI, yurumeMetresi } from '@/features/plan/planListesi';
 import { useGuneEkle } from '@/features/gezi/bugunEkle';
-import { AKSAM_DK, eklenenleriSabitle, yakindaAdaylari, type YakinAday } from '@/features/gezi/yakinda';
+import { eklenenleriSabitle, yakindaAdaylari, type YakinAday } from '@/features/gezi/yakinda';
 import { ilSlugu, kategoriAdi, useIlYerleri } from '@/features/icerik/ilOnerileri';
 import { bacakSecimi, hapCifti, hapPinId, seciciBasligi, seciciSecenekleri } from '@/features/program/bacakSecimi';
 import { kartKamerasi, kartListesi, odakKarti, type DurakKarti } from '@/features/program/durakKarti';
@@ -63,6 +63,7 @@ import { onayIste } from '@/lib/onay';
 import { useOturum } from '@/lib/oturum';
 import { AYLAR, GUNLER, haftaGunu, parcala, tarihEkle } from '@/lib/takvim';
 import type { Durak, Gun, Mekan, Seyahat } from '@/lib/tipler';
+import { useCevrimdisi } from '@/lib/baglanti';
 import { kacinciGun, saatEkli, yerelAn, yerelSaatDk, yerelTarih } from '@/lib/zaman';
 import { cizgiOrtasi, polylineCoz } from '@/lib/polyline';
 import { googleGunu } from '@/schedule/acilis';
@@ -1003,6 +1004,8 @@ function ProgramSekmesi({
   const ilYerleri = useIlYerleri(ilSlugu(sehir, seyahat.city_label));
   const guneEkleKanca = useGuneEkle(seyahat.id);
   const [aksamEklenenler, setAksamEklenenler] = useState<Set<string>>(() => new Set());
+  // #536 inceleme 5: çevrimdışıyken akşam satırlarının + düğmesi pasif.
+  const cevrimdisi = useCevrimdisi();
   const planSatir = useMemo(() => planSatirlari(gunDurak, mekanIle, satirlar), [gunDurak, mekanIle, satirlar]);
   const oySayisi = useMemo(() => {
     const n = new Map<string, number>();
@@ -1068,13 +1071,13 @@ function ProgramSekmesi({
   // yakında" başlığı ve en çok 2 satır. + o günün sonuna ekler; Güne ekle sayfası açılmaz. 17:00'den sonra (trips.tz) akşam
   // kuralı: doğa/manzara çıkar, yemek, tatlı-kahve, çarşı, müze öne.
   const aksamReferansi = useMemo(() => aksamBoslugu(planSatir), [planSatir]);
-  const aksamSaati = yerelSaatDk(an, seyahat.tz) >= AKSAM_DK;
+  // #536 inceleme 3: bölümün başlığı "Akşam için"; Plan'da akşam kuralı saatten bağımsız hep geçerli.
   const aksamAdaylariHam = useMemo(
     () =>
       aksamReferansi && gun
-        ? yakindaAdaylari({ mekanlar, duraklar, ilYerleri: ilYerleri.data ?? [], rehberYerleri: sehirYerleri.data ?? [], referans: aksamReferansi, aksam: aksamSaati, adet: 2, icerikSiniriM: REHBER_YAKIN_M })
+        ? yakindaAdaylari({ mekanlar, duraklar, ilYerleri: ilYerleri.data ?? [], rehberYerleri: sehirYerleri.data ?? [], referans: aksamReferansi, aksam: true, adet: 2, icerikSiniriM: REHBER_YAKIN_M })
         : [],
-    [aksamReferansi, gun, mekanlar, duraklar, ilYerleri.data, sehirYerleri.data, aksamSaati],
+    [aksamReferansi, gun, mekanlar, duraklar, ilYerleri.data, sehirYerleri.data],
   );
   // KK2: eklenen satır ✓ ile yerinde kalır (eklenince yeni hesapta düşer); eklenirken görünen sırası tutulur.
   const [sabitAksamAdaylari, setSabitAksamAdaylari] = useState<Map<string, { aday: YakinAday; sira: number }>>(() => new Map());
@@ -1082,7 +1085,8 @@ function ProgramSekmesi({
   const aksamAdi = (a: YakinAday) => (a.kaynak === 'liste' ? adGoster(a.mekan) : a.ad);
   const aksamEkle = (placeId: string) => {
     const a = aksamAdaylari.find((x) => x.place_id === placeId);
-    if (!a || !gun) return;
+    // #536 inceleme 5: çift dokunuşta ikinci ekleme yok.
+    if (!a || !gun || aksamEklenenler.has(placeId)) return;
     setAksamEklenenler((e) => new Set(e).add(placeId));
     setSabitAksamAdaylari((m) => new Map(m).set(placeId, { aday: a, sira: aksamAdaylari.indexOf(a) }));
     guneEkleKanca.mutate(
@@ -1186,7 +1190,7 @@ function ProgramSekmesi({
       satirlar={satirGorunumleri}
       onDurak={(mekanId) => setSeciliMekanId(mekanId)}
       onDurakUzunBas={uzunBas}
-      aksam={aksamSatirlari.length > 0 ? { yerler: aksamSatirlari, eklenenler: aksamEklenenler, onEkle: aksamEkle } : null}
+      aksam={aksamSatirlari.length > 0 ? { yerler: aksamSatirlari, eklenenler: aksamEklenenler, onEkle: aksamEkle, pasif: cevrimdisi } : null}
       // #532 KK4: günün içinden açılan Yer ekle o günü taşır.
       bos={gun && planSatir.length === 0 ? { metin: t('plan.gunBos'), dugme: t('plan.mekanEkle'), onPress: () => router.navigate({ pathname: '/seyahat/[id]/(sekmeler)/kesfet', params: { id: seyahat.id, gun: String(gun.index), n: String(Date.now()) } }) } : null}
       uyari={bugun && izin === 'reddedildi' ? t('program.konumIzni') : hata}

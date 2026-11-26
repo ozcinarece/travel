@@ -7,7 +7,7 @@ import type { Durak, Gun, Mekan, Yer } from '@/lib/tipler';
 import { gunBaglaminaGore } from '@/features/listem/listem';
 
 import { ustHaritaVerisi } from '../ustHarita';
-import { eklenenleriSabitle, geziKadraji, GUN_SONU_DK, yakindaAdaylari, yakindaGorunur } from '../yakinda';
+import { adayKonumu, eklenenleriSabitle, geziKadraji, GUN_SONU_DK, yakindaAdaylari, yakindaGorunur } from '../yakinda';
 
 const kart = (numara: number | null, gezildi: boolean, varisDk: number | null, dakika = 60) => ({ numara, gezildi, varisDk, dakika });
 
@@ -80,9 +80,16 @@ describe('yakindaAdaylari (KK2, KK3)', () => {
     expect(a.map((x) => x.place_id)).toEqual(['il-muze', 'il-aktivite']);
   });
 
-  it('içerik sınırı (KK3: 3 km) yalnız içerik adaylarına; adet sınırı', () => {
-    const a = yakindaAdaylari({ mekanlar: [mekan('uzak', 'museum', 40.2)], duraklar: [], ilYerleri: [il('uzak', 'muze', 40.2), il('yakin', 'muze', 39.775)], rehberYerleri: [], referans, aksam: false, adet: 2, icerikSiniriM: 3000 });
-    expect(a.map((x) => x.place_id)).toEqual(['p-uzak', 'il-yakin']);
+  it('uzaklık sınırı (3 km) Listem ve içerik adaylarına birlikte; adet sınırı', () => {
+    const a = yakindaAdaylari({ mekanlar: [mekan('uzak', 'museum', 40.2), mekan('yakin', 'museum', 39.776)], duraklar: [], ilYerleri: [il('uzak', 'muze', 40.2), il('yakin', 'muze', 39.775)], rehberYerleri: [], referans, aksam: false, adet: 2, icerikSiniriM: 3000 });
+    expect(a.map((x) => x.place_id)).toEqual(['p-yakin', 'il-yakin']);
+  });
+
+  it('#536 inceleme 2: 40 km\'deki Listem yeri ne adayda ne kadrajda (sigdir)', () => {
+    const a = yakindaAdaylari({ mekanlar: [mekan('uzak', 'museum', 40.13)], duraklar: [], ilYerleri: [il('muze', 'muze', 39.778)], rehberYerleri: [], referans, aksam: false, adet: 2, icerikSiniriM: 3000 });
+    expect(a.map((x) => x.place_id)).toEqual(['il-muze']);
+    const sigdir = geziKadraji({ duraklar: [referans], oneriler: a.map(adayKonumu).filter((k): k is NonNullable<typeof k> => k !== null), otel: null, konum: null });
+    expect(sigdir.some((k) => k.lat === 40.13)).toBe(false);
   });
 });
 

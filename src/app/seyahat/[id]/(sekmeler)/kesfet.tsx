@@ -1,6 +1,6 @@
 import { useQueryClient } from '@tanstack/react-query';
-import { useLocalSearchParams } from 'expo-router';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useFocusEffect, useLocalSearchParams } from 'expo-router';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AccessibilityInfo, ActivityIndicator, Linking, Platform, Pressable, StyleSheet, Text, TextInput, View, useWindowDimensions } from 'react-native';
 
 import { bolgeHesapla, zoomDelta } from '@/components/harita/geo';
@@ -95,6 +95,9 @@ function Kesfet({
     const no = gunIstegi ? Number(gunIstegi.split(':')[0]) : NaN;
     setGunBaglamiIndex(Number.isInteger(no) && no > 0 ? no : null);
   }
+  // #536 inceleme 4: gün bağlamı yapışkan olmasın. Sekmeden çıkınca (blur) temizlenir; sekme çubuğundan geri gelen kişi
+  // + ile yeri sessizce eski güne eklemez. Aynı istek tekrar uygulanmaz (`oncekiGunIstegi` değişmez), yeni istek yeni no taşır.
+  useFocusEffect(useCallback(() => () => setGunBaglamiIndex(null), []));
   const gunBaglami = gunBaglamiIndex !== null ? (gunler.data?.find((g) => g.index === gunBaglamiIndex) ?? null) : null;
   const [gunBildirimi, setGunBildirimi] = useState<string | null>(null);
   useEffect(() => {

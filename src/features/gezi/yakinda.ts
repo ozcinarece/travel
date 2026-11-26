@@ -76,7 +76,8 @@ export type YakinAday =
 /**
  * Adaylar: seyahatin listesinde olup hiçbir güne atanmamış yerler (önce), sonra il listesi ve rehber yerleri (listede
  * olmayanlar, place_id'ye göre tekil). Her grupta `referans`a uzaklık sırası; akşamsa doğa/manzara çıkar, akşamlık olanlar öne.
- * `icerikSiniriM` içerik adaylarını referansa uzaklıkla sınırlar (liste adayları sınırsız: kullanıcı kendisi eklemiş).
+ * `icerikSiniriM` bütün adayları (liste ve içerik) referansa uzaklıkla sınırlar; sınırı aşan yer ne satırda ne kadrajda olur
+ * (#536 inceleme 2: 40 km'deki bir Listem yeri kadrajı yeniden açmasın).
  */
 export function yakindaAdaylari(p: {
   mekanlar: Mekan[];
@@ -125,7 +126,7 @@ export function yakindaAdaylari(p: {
   };
   const uygun = (a: YakinAday) => !p.aksam || aksamSinifi(a.ilKategori, a.tip) !== 'disi';
   const sinirli = (a: YakinAday) => p.icerikSiniriM === undefined || (a.mesafeM !== null && a.mesafeM <= p.icerikSiniriM);
-  return [...liste.filter(uygun).sort(sirala), ...icerik.filter(uygun).filter(sinirli).sort(sirala)].slice(0, p.adet);
+  return [...liste.filter(uygun).filter(sinirli).sort(sirala), ...icerik.filter(uygun).filter(sinirli).sort(sirala)].slice(0, p.adet);
 }
 
 /**
