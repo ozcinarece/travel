@@ -1,0 +1,302 @@
+{
+  "il": "Elazığ",
+  "slug": "elazig",
+  "guncelleme": "2026-11-26",
+  "oneriler": [
+    {
+      "sira": 1,
+      "ad": "Harput Kalesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 5,
+      "neden": "Süt Kalesi de denen Urartu kökenli kale; harcına su yerine süt katıldığı anlatılır",
+      "osm": "way/97700117",
+      "place_id": "ChIJzUYPTUvHdkARW-8w2WCUJPg"
+    },
+    {
+      "sira": 2,
+      "ad": "Hazar Gölü",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Sivrice",
+      "merkeze_km": 30,
+      "neden": "Dicle'nin kaynağına yakın tektonik göl; kıyıda kamp alanları, yazın yüzme",
+      "place_id": "ChIJZx0b2DOcdkARGEgpx0JKvdA"
+    },
+    {
+      "sira": 3,
+      "ad": "Harput Ulu Camii",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 5,
+      "neden": "Artuklu Fahreddin Karaarslan'ın 1156-57'de yaptırdığı cami; tuğla minaresi eğik",
+      "osm": "way/97702342",
+      "place_id": "ChIJIQFrlErHdkARhs4nN6b3NE4"
+    },
+    {
+      "sira": 4,
+      "ad": "Elazığ Arkeoloji ve Etnografya Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "2026'da 1885 yapımı idadi binasında açıldı; yaklaşık 2 bin eser ve sikke",
+      "place_id": null
+    },
+    {
+      "sira": 5,
+      "ad": "Balakgazi Restoran",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 5,
+      "neden": "Harput'ta, ovaya bakan masalarda Harput köftesi, Harput çorbası ve içli köfte",
+      "place_id": "ChIJ-S9oXYjAdkARCiPfi8H4k_U"
+    },
+    {
+      "sira": 6,
+      "ad": "Meryem Ana Kilisesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 5,
+      "neden": "Harput Kalesi'nin doğusunda Süryani kilisesi; yapımı 2. yüzyıla tarihlenir",
+      "osm": "way/198798732",
+      "place_id": "ChIJSezPUrPAdkAR2wTdkbWPAps"
+    },
+    {
+      "sira": 7,
+      "ad": "Buzluk Mağarası",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 12,
+      "neden": "Harput'un kuzeyinde yazın içi buz tutan, kışın ılık kalan mağara",
+      "place_id": "ChIJ7byOrDPHdkARZRL2-QBGqTI"
+    },
+    {
+      "sira": 8,
+      "ad": "Keban Baraj Gölü",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Keban",
+      "merkeze_km": 45,
+      "neden": "Fırat'ın 1974'te tamamlanan barajla oluşan gölü; Keban'da kıyı ve tekne",
+      "place_id": null
+    },
+    {
+      "sira": 9,
+      "ad": "Amcanın Yeri",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "Köfteciler Sokağı'nda salçalı Elazığ köftesini ekmek arası, porsiyonla verir",
+      "place_id": null
+    },
+    {
+      "sira": 10,
+      "ad": "Palu Kalesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "doga"
+      ],
+      "ilce": "Palu",
+      "merkeze_km": 70,
+      "neden": "Murat Nehri'ne bakan kayalık; Urartu kralı Menua'nın çivi yazılı yazıtı burada",
+      "place_id": "ChIJ90GzNOv-c0ARgcR6aFNHjws"
+    },
+    {
+      "sira": 11,
+      "ad": "Divan Pastanesi",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet",
+        "cocuklu"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "Elazığ'ın vişneli dondurmasının bilinen adresi; yerel bir pastane",
+      "place_id": "ChIJYWfeh5vqdkAR-tIlyfLxjRA"
+    },
+    {
+      "sira": 12,
+      "ad": "Sara Hatun Camii",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 5,
+      "neden": "Akkoyunlu Uzun Hasan'ın annesi Sara Hatun'un 1465'te Harput'ta yaptırdığı cami",
+      "osm": "way/97700094",
+      "place_id": "ChIJneetQLXAdkARoXpWiYdt-MI"
+    },
+    {
+      "sira": 13,
+      "ad": "Kurşunlu Camii",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 5,
+      "neden": "Harput'ta Osmanlı dönemi camisi; adını kurşunla kaplı kubbesinden alır",
+      "place_id": null
+    },
+    {
+      "sira": 14,
+      "ad": "Arap Baba Mescidi ve Türbesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 5,
+      "neden": "Harput'ta 13. yüzyıl türbesi; içinde mumyalaşmış bir beden yattığı anlatılır",
+      "osm": "way/293241934",
+      "place_id": "ChIJjSvF-7TAdkARE65sLSHiUO4"
+    },
+    {
+      "sira": 15,
+      "ad": "Elazığ Kent Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "1896 yapımı eski valilik konağında 2024'ten beri; bakırcılık, dokuma, kent belleği",
+      "place_id": "ChIJV1yuPzPBdkARE861xfS3REw"
+    },
+    {
+      "sira": 16,
+      "ad": "Zertaşlar Et Lokantası ve Kahvaltı Salonu",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 4,
+      "neden": "Harput yolunda serpme Elazığ kahvaltısı: patila, tulum peyniri, kavurma",
+      "place_id": "ChIJuUBPD7HAdkARSuTOks0TJHs"
+    },
+    {
+      "sira": 17,
+      "ad": "Hazar Gölü Tabiat Parkı",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "cocuklu",
+        "yavas"
+      ],
+      "ilce": "Sivrice",
+      "merkeze_km": 30,
+      "neden": "Sivrice kıyısında piknik, kamp ve karavan alanı; gölü tekneyle gezmek buradan",
+      "place_id": "ChIJnWlT6UWbdkARR7VVyL3bWjs"
+    },
+    {
+      "sira": 18,
+      "ad": "Çırçır Şelalesi",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Keban",
+      "merkeze_km": 45,
+      "neden": "Keban Barajı'nın suyuyla oluşan genç şelale; çevresinde alabalık lokantaları",
+      "place_id": null
+    },
+    {
+      "sira": 19,
+      "ad": "Şefik Gül Kültür Evi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 5,
+      "neden": "Harput'un geleneksel ev planını odaları ve eşyalarıyla gösteren eski konak",
+      "osm": "node/13495587101",
+      "place_id": "ChIJOTX7l0rHdkARcRVvr5GpM0w"
+    },
+    {
+      "sira": 20,
+      "ad": "Karadaban Fırın",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "Elazığ'ın kat kat hamurlu tatlı peynirli ekmeğini fırından sıcak satar",
+      "place_id": "ChIJh5Og8qHqdkARrgObPhUuYO8"
+    },
+    {
+      "sira": 21,
+      "ad": "Ensar Mangal Vadisi",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 5,
+      "neden": "Harput'ta Harput kebabı, patlıcan söğürme ve fıstıklı dolanger tatlısı",
+      "osm": "node/13495812501",
+      "place_id": "ChIJ64Xdx43AdkARzN0V07RzceY"
+    },
+    {
+      "sira": 22,
+      "ad": "Kadayıfçı Murat Usta",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "Sürsürü'de künefe ve şerbeti hafif, soğuk yenen baklavasıyla bilinir",
+      "place_id": null
+    },
+    {
+      "sira": 23,
+      "ad": "Alacalı Camii",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 5,
+      "neden": "Harput'ta Artuklu dönemi mescidi; ilk Elazığ müzesi 1965'te burada kuruldu",
+      "osm": "way/1372897075",
+      "place_id": "ChIJz3wb0LXAdkARAN823YlgCpk"
+    }
+  ]
+}
