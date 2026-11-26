@@ -2,7 +2,7 @@ Pandeli, Mısır Çarşısı'nın Eminönü kapısının üstünde, merdivenle �
 
 Salonlarının duvarları baştan sona turkuaz çini ile kaplı; pencerelerden Yeni Cami'nin avlusu ve Eminönü meydanı görünür. Mutfak eski İstanbul lokantalarının çizgisinde: menünün bilinen yemeği patlıcan böreği. Yanına hünkâr beğendi ya da bir zeytinyağlı ekleyebilirsin; tatlıda ayva ya da kazandibi sor.
 
-Öğle yemeği için bir saat ayır. Lokanta öğle saatlerinde çalışır, akşam servisi yoktur; pazar günleri kapalıdır. Kalabalık gruplarla gideceksen önceden ara.
+Öğle yemeği için bir saat ayır. Lokanta akşamüstü erken kapanır, pazar günleri kapalıdır; akşam yemeğine değil öğleye göre planla. Kalabalık gruplarla gideceksen önceden ara.
 
 Yemekten sonra merdivenden indiğinde zaten Mısır Çarşısı'nın kapısındasın. Çarşıyı gezdikten sonra Rüstem Paşa Camii de iki sokak ötede, Hasırcılar Çarşısı'nın içinde; yemekten sonraki ilk durağın orası olabilir.
 

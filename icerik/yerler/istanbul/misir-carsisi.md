@@ -1,4 +1,4 @@
-Mısır Çarşısı, Yeni Cami külliyesinin bir parçası olarak yapıldı. Caminin inşaatını 1597'de Safiye Sultan başlattı, 1660'ta IV. Mehmed'in annesi Turhan Hadice Sultan bitirdi; çarşı da o yıllarda tamamlandı. Dükkânların kirası caminin giderlerine gidiyordu. Adı, yapımında Mısır'dan gelen vergilerin kullanılmasından geliyor.
+Mısır Çarşısı, Yeni Cami külliyesinin bir parçası olarak yapıldı. Caminin inşaatını 1597'de Safiye Sultan başlattı, IV. Mehmed'in annesi Turhan Hadice Sultan ise yarım kalan işi yeniden ele aldı: çarşı 1660'ta, cami 1665'te tamamlandı. Dükkânların kirası caminin giderlerine gidiyordu. Adı, yapımında Mısır'dan gelen vergilerin kullanılmasından geliyor.
 
 Çarşı L biçiminde: iki uzun kol, kubbeli ve tonozlu bir çatının altında birleşir. İki yanda baharatçı, kuruyemişçi, lokumcu, peynirci ve şarküterici sıralanır. Pul biber, isot, sumak ve kurutulmuş sebze görürsün; Kayseri pastırmasından Kars gravyerine kadar Anadolu'nun peynirleri ve kurutulmuş etleri de burada. Tezgâhların çoğu tadımlık verir.
 
