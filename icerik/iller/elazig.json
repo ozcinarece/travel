@@ -27,7 +27,7 @@
       ],
       "ilce": "Sivrice",
       "merkeze_km": 30,
-      "neden": "Dicle'nin kaynağına yakın tektonik göl; kıyıda kamp alanları, yazın yüzme",
+      "neden": "Dicle'nin kaynağına yakın tektonik göl; Sivrice kıyısında piknik ve kamp, yazın yüzme",
       "place_id": "ChIJZx0b2DOcdkARGEgpx0JKvdA"
     },
     {
@@ -77,7 +77,7 @@
       ],
       "ilce": "Merkez",
       "merkeze_km": 5,
-      "neden": "Harput Kalesi'nin doğusunda Süryani kilisesi; yapımı 2. yüzyıla tarihlenir",
+      "neden": "Harput Kalesi'nin doğusunda Süryani kilisesi; rivayete göre 2. yüzyıldan",
       "osm": "way/198798732",
       "place_id": "ChIJSezPUrPAdkAR2wTdkbWPAps"
     },
@@ -210,20 +210,6 @@
     },
     {
       "sira": 17,
-      "ad": "Hazar Gölü Tabiat Parkı",
-      "kategori": "doga",
-      "amaclar": [
-        "doga",
-        "cocuklu",
-        "yavas"
-      ],
-      "ilce": "Sivrice",
-      "merkeze_km": 30,
-      "neden": "Sivrice kıyısında piknik, kamp ve karavan alanı; gölü tekneyle gezmek buradan",
-      "place_id": "ChIJnWlT6UWbdkARR7VVyL3bWjs"
-    },
-    {
-      "sira": 18,
       "ad": "Çırçır Şelalesi",
       "kategori": "doga",
       "amaclar": [
@@ -236,7 +222,7 @@
       "place_id": null
     },
     {
-      "sira": 19,
+      "sira": 18,
       "ad": "Şefik Gül Kültür Evi",
       "kategori": "muze",
       "amaclar": [
@@ -249,7 +235,7 @@
       "place_id": "ChIJOTX7l0rHdkARcRVvr5GpM0w"
     },
     {
-      "sira": 20,
+      "sira": 19,
       "ad": "Karadaban Fırın",
       "kategori": "tatli_kahve",
       "amaclar": [
@@ -261,7 +247,7 @@
       "place_id": "ChIJh5Og8qHqdkARrgObPhUuYO8"
     },
     {
-      "sira": 21,
+      "sira": 20,
       "ad": "Ensar Mangal Vadisi",
       "kategori": "yemek",
       "amaclar": [
@@ -274,7 +260,7 @@
       "place_id": "ChIJ64Xdx43AdkARzN0V07RzceY"
     },
     {
-      "sira": 22,
+      "sira": 21,
       "ad": "Kadayıfçı Murat Usta",
       "kategori": "tatli_kahve",
       "amaclar": [
@@ -286,7 +272,7 @@
       "place_id": null
     },
     {
-      "sira": 23,
+      "sira": 22,
       "ad": "Alacalı Camii",
       "kategori": "tarih",
       "amaclar": [
