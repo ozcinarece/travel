@@ -15,6 +15,7 @@ import GeziEkrani from '../../../app/seyahat/[id]/(sekmeler)/gezi';
 jest.mock('react-native-safe-area-context', () => jest.requireActual<{ default: object }>('react-native-safe-area-context/jest/mock').default);
 // Sentry içe aktarılınca zamanlayıcı kurar (jest kapanmaz).
 jest.mock('@/lib/hataRaporu', () => ({ izBirak: () => undefined }));
+jest.mock('@/components/harita/Harita', () => ({ Harita: () => null }));
 jest.mock('@/lib/oturum', () => ({ useOturum: () => ({ session: { user: { id: 'ben', is_anonymous: false } }, hazir: true, hesapli: true }) }));
 // #243: bağlantı durumu testte elle verilir.
 let mockCevrimdisi = false;
@@ -200,63 +201,66 @@ const sakinles = async (qc: QueryClient) => {
   await waitFor(() => expect(qc.isFetching()).toBe(0));
 };
 
-describe('#181 KK13: Gezi sayfası açılışında Google isteği yok', () => {
-  it('plan modu: kapak, Sıradaki adım, plan özeti, Listem, rehberden öneriler — Edge Function ve fetch çağrılmaz', async () => {
+describe('#181 KK13 · #308 v7: Gezi sayfası açılışında Google isteği yok', () => {
+  it('plan modu: başlık, kişiler, Sıradaki adım, Günler, Listem — Edge Function ve fetch çağrılmaz', async () => {
     mockTablolar = fikstur(tarihEkle(bugun(), 12));
-    const { getByText, queryAllByText, qc } = ciz();
+    const { getByText, queryByText, queryAllByText, getAllByRole, qc } = ciz();
     await waitFor(() => getByText('Eskişehir Gezisi'));
     await sakinles(qc);
 
-    expect(getByText('12 gün kaldı')).toBeTruthy();
-    // KK5: park güne atanmamış (adı bilinmiyor). #200 KK1: otel eksiği yalnız Plan bölümündeki otel satırında (bir kez).
+    // KK2: "tarih · N gün kaldı".
+    expect(getByText(/· 12 gün kaldı$/)).toBeTruthy();
+    // KK3: grup → kişi adları (ben başta).
+    expect(getByText('Ece, Ayşe')).toBeTruthy();
+    // KK5: Sıradaki adım (park güne atanmamış) ve tek dolu turuncu düğme.
+    expect(getByText('SIRADAKİ ADIM')).toBeTruthy();
     expect(getByText('1 mekan güne atanmamış')).toBeTruthy();
-    expect(queryAllByText('otel de seçilmedi')).toHaveLength(0);
-    expect(queryAllByText('Otel seçilmedi')).toHaveLength(1);
-    expect(getByText('Dağıt')).toBeTruthy();
-    // KK6: gün kartı teması ilk durağın DB'deki adı; KK7: Google'da kalan ad yerine kategori.
-    expect(queryAllByText('Odunpazarı Evleri').length).toBeGreaterThan(0);
-    expect(getByText('Restoran')).toBeTruthy();
-    expect(getByText('Listem · 3')).toBeTruthy();
-    // KK8: rehberden öneri (listede olmayan öne çıkan yer), KK10 rehber ve önerilen gezi.
-    expect(getByText('Eti Arkeoloji Müzesi')).toBeTruthy();
-    expect(getByText('Eskişehir rehberi')).toBeTruthy();
-    expect(getByText("Eskişehir'de bir hafta sonu")).toBeTruthy();
+    expect(getAllByRole('button', { name: 'Dağıt' })).toHaveLength(1);
+    // Günler: ilk durağın DB'deki adı; Listem: günsüz yer sayısı.
+    expect(getByText('Günler')).toBeTruthy();
+    expect(queryAllByText(/Odunpazarı Evleri/).length).toBeGreaterThan(0);
+    expect(getByText('1 yer günsüz')).toBeTruthy();
+    // KK6: kalkan kartlar yok.
+    expect(queryByText('Eskişehir rehberi')).toBeNull();
+    expect(queryByText("Eskişehir'de bir hafta sonu")).toBeNull();
 
     expect(mockSayac.invoke).toEqual([]);
     expect(fetchSahte).not.toHaveBeenCalled();
-    // Adlar bizim veriden (DB) geldi.
     expect(mockSayac.rpc).toContain('icerik_mekan_bilgileri');
   });
 
-  it('başka ekranın önbelleğe aldığı ad istek atılmadan kullanılır', async () => {
-    mockTablolar = fikstur(tarihEkle(bugun(), 12));
-    hafifOnbellek.yaz([{ place_id: 'ChIJ-google-2', ad: 'Çibörek Evi', lat: 39.77, lng: 30.52, primary_type: 'restaurant', tz: null, puan: null, puan_sayisi: null, acik: null, ulke_kodu: null }], 'pro');
-    const { getByText, qc } = ciz();
-    await waitFor(() => getByText('Eskişehir Gezisi'));
-    await sakinles(qc);
-    expect(getByText('Çibörek Evi')).toBeTruthy();
-    expect(mockSayac.invoke).toEqual([]);
-  });
-
-  it('gezi modu: bugünün durak kartı ve grup kartı — yine istek yok', async () => {
+  it('gezi modu: Şimdi, Yol tarifi ve bugünün planı — yine istek yok', async () => {
     mockTablolar = fikstur(bugun());
-    // Gün şimdi başlasın: duraklar saatten bağımsız olarak "sıradaki" kalır (geçmiş saatte otomatik tamamlanmasın).
     const dk = Math.max(0, yerelSaatDk(new Date(), IST) - 5);
     (mockTablolar.days[0] as { start_time: string }).start_time = `${String(Math.floor(dk / 60)).padStart(2, '0')}:${String(dk % 60).padStart(2, '0')}:00`;
-    const { getByText, queryByText, qc } = ciz();
+    const { getByText, getAllByText, queryByText, getAllByRole, qc } = ciz();
     await waitFor(() => getByText('Eskişehir Gezisi'));
     await sakinles(qc);
-    expect(getByText('Bugün · 1. gün')).toBeTruthy();
-    expect(getByText('Bugün · Odunpazarı Evleri')).toBeTruthy();
-    expect(getByText('Yol tarifi')).toBeTruthy();
-    expect(getByText('Haritada gör')).toBeTruthy();
-    // KK11: gezi modunda Sıradaki adım satırı yok; KK12: Ayşe'nin varışı yok → konum paylaşmıyor.
-    expect(queryByText('Dağıt')).toBeNull();
-    expect(getByText('konumunu paylaşmıyor')).toBeTruthy();
-    // #243: bağlantı varken şerit yok.
+    // KK2: "1. gün · gün adı · 0 / 2 durak".
+    expect(getByText(/^1\. gün · .* · 0 \/ 2 durak$/)).toBeTruthy();
+    expect(getByText(/^ŞİMDİ/)).toBeTruthy();
+    expect(getAllByText('Odunpazarı Evleri').length).toBeGreaterThan(0);
+    expect(getAllByRole('button', { name: 'Yol tarifi' })).toHaveLength(1);
+    expect(getByText('Bugünün planı')).toBeTruthy();
+    // Gezi modunda Sıradaki adım yok; bağlantı varken şerit yok.
+    expect(queryByText('SIRADAKİ ADIM')).toBeNull();
     expect(queryByText(/Çevrimdışı/)).toBeNull();
     expect(mockSayac.invoke).toEqual([]);
     expect(fetchSahte).not.toHaveBeenCalled();
+  });
+
+  it('boş gün: "Bugün boş", rehberden listede olmayan yer, turuncu düğme yok', async () => {
+    mockTablolar = fikstur(bugun());
+    mockTablolar.stops = [];
+    const { getByText, queryByText, getByLabelText, qc } = ciz();
+    await waitFor(() => getByText('Eskişehir Gezisi'));
+    await sakinles(qc);
+    expect(getByText('Bugün boş')).toBeTruthy();
+    expect(getByText('Eti Arkeoloji Müzesi')).toBeTruthy();
+    expect(getByLabelText('Eti Arkeoloji Müzesi, bugüne ekle')).toBeTruthy();
+    expect(queryByText('Yol tarifi')).toBeNull();
+    expect(queryByText('SIRADAKİ ADIM')).toBeNull();
+    expect(mockSayac.invoke).toEqual([]);
   });
 });
 
@@ -281,58 +285,41 @@ describe('#243 çevrimdışı: son görülen hal okunur (kanvas 23c)', () => {
     expect(getByText('Plan okunur; bağlanınca kendiliğinden yenilenir')).toBeTruthy();
   });
 
-  it('KK4: düzenleme düğmeleri pasif; Yol tarifi ve Haritada gör çalışır', async () => {
+  it('KK4: davet pasif ("Bağlantı yok"); Yol tarifi çalışır', async () => {
     geziModuFiksturu();
     mockCevrimdisi = true;
-    const { getByText, getByLabelText, getByRole, qc } = ciz();
+    const { getByText, getByRole, qc } = ciz();
     await waitFor(() => getByText('Eskişehir Gezisi'));
     await sakinles(qc);
-    expect(pasif(getByLabelText('Davet linkini gönder'))).toBe(true);
-    expect(pasif(getByLabelText('Diğer: yeniden adlandır, tarihleri değiştir, seyahati sil'))).toBe(true);
-    expect(pasif(getByLabelText('Diğer: Atla, Başka güne al'))).toBe(true);
-    expect(pasif(getByRole('button', { name: 'Mesaj at' }))).toBe(true);
-    expect(pasif(getByRole('button', { name: 'Harcama ekle' }))).toBe(true);
+    const cagir = getByRole('button', { name: 'Arkadaş çağır' });
+    expect(pasif(cagir)).toBe(true);
+    expect(cagir.props.accessibilityHint).toBe('Bağlantı yok');
     expect(pasif(getByRole('button', { name: 'Yol tarifi' }))).toBe(false);
-    expect(pasif(getByRole('button', { name: 'Haritada gör' }))).toBe(false);
+    expect(getByRole('button', { name: 'Yol tarifi' }).props.accessibilityHint).toBeUndefined();
   });
 
   it('KK5: ad yalnız bizim içeriğimizden, yoksa kategori; oturumdaki Google adı kullanılmaz', async () => {
     geziModuFiksturu();
     hafifOnbellek.yaz([{ place_id: 'ChIJ-google-2', ad: 'Çibörek Evi', lat: 39.77, lng: 30.52, primary_type: 'restaurant', tz: null, puan: null, puan_sayisi: null, acik: null, ulke_kodu: null }], 'pro');
     mockCevrimdisi = true;
-    const { getByText, queryByText, qc } = ciz();
+    const { getByText, getAllByText, queryByText, qc } = ciz();
     await waitFor(() => getByText('Eskişehir Gezisi'));
     await sakinles(qc);
-    expect(getByText('Bugün · Odunpazarı Evleri')).toBeTruthy();
+    expect(getAllByText('Odunpazarı Evleri').length).toBeGreaterThan(0);
     expect(queryByText(/Çibörek Evi/)).toBeNull();
-    expect(getByText(/Restoran/)).toBeTruthy();
+    expect(getAllByText(/Restoran/).length).toBeGreaterThan(0);
   });
 
-  it('#293 KK6: plan modunda şerit görünür; Sıradaki adım, Listem oyu ve rehberden ekle pasif (KK7: "Bağlantı yok" ipucu)', async () => {
+  it('#293 KK6: plan modunda şerit görünür; Sıradaki adım pasif ("Bağlantı yok")', async () => {
     mockTablolar = fikstur(tarihEkle(bugun(), 12));
     mockCevrimdisi = true;
-    const { getByText, getByRole, getAllByRole, getAllByLabelText, qc } = ciz();
+    const { getByText, getByRole, qc } = ciz();
     await waitFor(() => getByText('Eskişehir Gezisi'));
     await sakinles(qc);
     expect(getByText(/Çevrimdışı · son güncelleme/)).toBeTruthy();
-    const ipucu = (el: { props: { accessibilityHint?: string } }) => el.props.accessibilityHint;
     const dagit = getByRole('button', { name: 'Dağıt' });
     expect(pasif(dagit)).toBe(true);
-    expect(ipucu(dagit)).toBe('Bağlantı yok');
-    const oylar = getAllByLabelText(/oy/i).filter((el) => el.props.accessibilityRole === 'button' && el.props.accessibilityState?.selected !== undefined);
-    expect(oylar.length).toBeGreaterThan(0);
-    for (const o of oylar) {
-      expect(pasif(o)).toBe(true);
-      expect(ipucu(o)).toBe('Bağlantı yok');
-    }
-    const ekle = getAllByRole('button', { name: 'Listeye ekle' });
-    expect(ekle.length).toBeGreaterThan(0);
-    for (const e of ekle) {
-      expect(pasif(e)).toBe(true);
-      expect(ipucu(e)).toBe('Bağlantı yok');
-    }
-    // Okuma eylemleri çalışır.
-    expect(pasif(getByRole('link', { name: 'Tümü' }))).toBe(false);
+    expect(dagit.props.accessibilityHint).toBe('Bağlantı yok');
   });
 
   it('#293 KK6: bağlantı varken plan modunda düğmeler etkin, ipucu yok', async () => {
@@ -343,17 +330,6 @@ describe('#243 çevrimdışı: son görülen hal okunur (kanvas 23c)', () => {
     const dagit = getByRole('button', { name: 'Dağıt' });
     expect(pasif(dagit)).toBe(false);
     expect(dagit.props.accessibilityHint).toBeUndefined();
-  });
-
-  it('#293 KK7: gezi modunda pasif düğmeler "Bağlantı yok" ipucunu taşır', async () => {
-    geziModuFiksturu();
-    mockCevrimdisi = true;
-    const { getByText, getByLabelText, getByRole, qc } = ciz();
-    await waitFor(() => getByText('Eskişehir Gezisi'));
-    await sakinles(qc);
-    for (const el of [getByLabelText('Davet linkini gönder'), getByLabelText('Diğer: Atla, Başka güne al'), getByRole('button', { name: 'Mesaj at' }), getByRole('button', { name: 'Harcama ekle' })])
-      expect(el.props.accessibilityHint).toBe('Bağlantı yok');
-    expect(getByRole('button', { name: 'Yol tarifi' }).props.accessibilityHint).toBeUndefined();
   });
 
   it('konaklamalar gelmese de (cihazda tutulmaz) sayfa açılır', async () => {
