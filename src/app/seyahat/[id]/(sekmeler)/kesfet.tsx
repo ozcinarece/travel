@@ -17,7 +17,9 @@ import { GeriAlBandi } from '@/components/listem/GeriAlBandi';
 import { MekanPaneli } from '@/components/mekan/MekanPaneli';
 import { useGeriAlinabilirSil } from '@/features/mekanlar/geriAlinabilirSil';
 import { geciciMi, useMekanEkle, useMekanGuncelle, useMekanlar, useUyeler, type EklemeKaynagi } from '@/features/mekanlar/sorgular';
+import { listedekiMekan } from '@/features/gezi/bugunEkle';
 import { geziyeGit } from '@/features/gezi/gezinti';
+import { useDuragaAta, useDuraklar, useGunler } from '@/features/gunler/sorgular';
 import { useSeyahatId } from '@/features/seyahatler/baglam';
 import { useSeyahat } from '@/features/seyahatler/sorgular';
 import { SeyahatYukleme } from '@/components/seyahatler/SeyahatYukleme';
@@ -45,7 +47,7 @@ import { izBirak } from '@/lib/hataRaporu';
 import { kategoriPini } from '@/lib/pinIkonu';
 import { varsayilanDakika } from '@/lib/kategori';
 import type { Mekan, Seyahat } from '@/lib/tipler';
-import { bosluk, renk, yazi, yuzRenkleri } from '@/theme';
+import { bosluk, gunRengi, gunUstuMetin, renk, yazi, yuzRenkleri } from '@/theme';
 import { haritaMerkezi, konumVar, YEDEK_ZOOM, yedekMerkezMi, yolTarifiHedefi } from '@/lib/konum';
 import { useSeyahatMerkezi } from '@/features/seyahatler/merkez';
 
@@ -55,17 +57,51 @@ export default function KesfetEkrani() {
   // #80 KK12: eski `mekan/[placeId]` derin linki buraya `mekan` parametresiyle yönlenir → panel açılır.
   // #142 KK4: Rehber sekmesindeki "Rehberdeki N mekan ›" → `cekmece=rehber` (çekmece tam halde "Rehberden" listesiyle açılır).
   // #181: Gezi sayfasının "Öğle yemeği ekle"si `cip=yemek` (+ her istekte yeni `n`) ile Yemek çipini seçer.
-  const { mekan, cekmece, cip, n } = useLocalSearchParams<{ mekan?: string | string[]; cekmece?: string; cip?: string; n?: string }>();
+  // #532 KK4: Gezi'nin "Tümü ›" / "Bugüne yer ekle ›" ve Plan'daki günün içi `gun` (gün sırası) taşır; + o güne ekler.
+  const { mekan, cekmece, cip, gun, n } = useLocalSearchParams<{ mekan?: string | string[]; cekmece?: string; cip?: string; gun?: string; n?: string }>();
   const seyahat = useSeyahat(id);
   const konaklamalar = useKonaklamalar(id);
   if (!seyahat.data || !konaklamalar.data || !id) return <SeyahatYukleme sorgular={[seyahat, konaklamalar]} kimlikYok={!id} />;
-  return <Kesfet key={id} seyahat={seyahat.data} konaklamalar={konaklamalar.data} ilkMekan={Array.isArray(mekan) ? mekan[0] : mekan} cekmeceIstegi={cekmece === 'rehber' ? 'rehber' : null} cipIstegi={cip === 'yemek' ? `yemek:${n ?? ''}` : null} />;
+  return <Kesfet key={id} seyahat={seyahat.data} konaklamalar={konaklamalar.data} ilkMekan={Array.isArray(mekan) ? mekan[0] : mekan} cekmeceIstegi={cekmece === 'rehber' ? 'rehber' : null} cipIstegi={cip === 'yemek' ? `yemek:${n ?? ''}` : null} gunIstegi={gun ? `${gun}:${n ?? ''}` : null} />;
 }
 
 const ILK_ZOOM = 13;
 
-function Kesfet({ seyahat, konaklamalar, ilkMekan, cekmeceIstegi, cipIstegi }: { seyahat: Seyahat; konaklamalar: Konaklama[]; ilkMekan?: string; cekmeceIstegi: 'rehber' | null; cipIstegi: string | null }) {
+function Kesfet({
+  seyahat,
+  konaklamalar,
+  ilkMekan,
+  cekmeceIstegi,
+  cipIstegi,
+  gunIstegi,
+}: {
+  seyahat: Seyahat;
+  konaklamalar: Konaklama[];
+  ilkMekan?: string;
+  cekmeceIstegi: 'rehber' | null;
+  cipIstegi: string | null;
+  /** #532 KK4: "{gün sırası}:{istek no}"; her yeni istekte gün bağlamı yeniden kurulur. */
+  gunIstegi: string | null;
+}) {
   const mekanlar = useMekanlar(seyahat.id);
+  // #532 KK4 (kanvas `YerEkle_Gunle`): gün bağlamı — "{n}. güne ekliyorsun ✕" hapı; + listeye ekler ve o günün sonuna koyar.
+  const gunler = useGunler(seyahat.id);
+  const duraklar = useDuraklar(seyahat.id);
+  const ata = useDuragaAta(seyahat.id);
+  const [gunBaglamiIndex, setGunBaglamiIndex] = useState<number | null>(null);
+  const [oncekiGunIstegi, setOncekiGunIstegi] = useState<string | null>(null);
+  if (oncekiGunIstegi !== gunIstegi) {
+    setOncekiGunIstegi(gunIstegi);
+    const no = gunIstegi ? Number(gunIstegi.split(':')[0]) : NaN;
+    setGunBaglamiIndex(Number.isInteger(no) && no > 0 ? no : null);
+  }
+  const gunBaglami = gunBaglamiIndex !== null ? (gunler.data?.find((g) => g.index === gunBaglamiIndex) ?? null) : null;
+  const [gunBildirimi, setGunBildirimi] = useState<string | null>(null);
+  useEffect(() => {
+    if (!gunBildirimi) return;
+    const z = setTimeout(() => setGunBildirimi(null), 2800);
+    return () => clearTimeout(z);
+  }, [gunBildirimi]);
   const queryClient = useQueryClient();
   const uyeler = useUyeler(seyahat.id);
   // #137 KK6: Grup penceresi (yüzlere dokununca; Grup sekmesi kalktı).
@@ -343,6 +379,13 @@ function Kesfet({ seyahat, konaklamalar, ilkMekan, cekmeceIstegi, cipIstegi }: {
         default_minutes: sureAyari[y.place_id],
         kaynak,
       });
+      // #532 KK4: gün bağlamı varsa yer o günün sonuna da eklenir (listedeki gerçek satırla).
+      if (gunBaglami) {
+        const hedef = gunBaglami;
+        const kayit = await listedekiMekan(seyahat.id, y.place_id);
+        await ata.mutateAsync({ mekan: kayit, gunId: hedef.id, mevcut: undefined, gunDuraklari: (duraklar.data ?? []).filter((d) => d.day_id === hedef.id) });
+        setGunBildirimi(t('kesfet.guneEklendi', { ad: y.ad, n: hedef.index }));
+      }
     } catch (e) {
       setHata(agHatasi(e) ? t('geziSayfasi.cevrimdisi.baglantiYok') : t('kesfet.ekleHata'));
     }
@@ -595,6 +638,14 @@ function Kesfet({ seyahat, konaklamalar, ilkMekan, cekmeceIstegi, cipIstegi }: {
           <>
             {/* #164 KK3 (kanvas 9): Turistik · Yemek · Kafe · Park · Alışveriş · Tümü; varsayılan Turistik, tek seçim (kategori
                 renginde glif). Öne çıkan / puan / yorum ve Müze · İbadet · Manzara alt seçenekleri filtre sayfasında. */}
+            {gunBaglami ? (
+              <View style={[s.gunHapi, s.golge, { backgroundColor: gunRengi(gunBaglami.index) }]}>
+                <Text style={[s.gunHapiMetin, { color: gunUstuMetin(gunRengi(gunBaglami.index)) }]}>{t('kesfet.guneEkliyorsun', { n: gunBaglami.index })}</Text>
+                <Pressable accessibilityRole="button" accessibilityLabel={t('kesfet.gunSeciminiKaldir')} hitSlop={10} onPress={() => setGunBaglamiIndex(null)} style={s.gunHapiKapat}>
+                  <Ikon ad="kapat" boyut={12} renk={gunUstuMetin(gunRengi(gunBaglami.index))} kalinlik={2.6} />
+                </Pressable>
+              </View>
+            ) : null}
             <HizliCipler filtre={filtre} onFiltre={filtreyiDegistir} />
             {filtreli && !varsayilan ? (
               // #69 KK5: filtre açıkken "Şehrin öne çıkanları · 9 mekan gizli" hapı (dokunulmaz).
@@ -687,6 +738,11 @@ function Kesfet({ seyahat, konaklamalar, ilkMekan, cekmeceIstegi, cipIstegi }: {
             onKapat={() => setSecim(null)}
           />
           ) : null}
+          {gunBildirimi ? (
+            <View style={s.gunBildirim} pointerEvents="none" accessibilityLiveRegion="polite">
+              <Text style={s.gunBildirimMetin}>{gunBildirimi}</Text>
+            </View>
+          ) : null}
           {geriAlinabilir.bekleyen ? <GeriAlBandi metin={geriAlinabilir.bekleyen.metin} olay={geriAlinabilir.bekleyen} onGeriAl={geriAlinabilir.geriAl} alt={16} /> : null}
         </>
       }
@@ -723,6 +779,12 @@ function secimKaynagi(k: 'oneri' | 'arama' | 'liste' | 'pin' | 'rehber'): Ekleme
 
 const s = StyleSheet.create({
   ekran: { flex: 1, backgroundColor: renk.yuzey },
+  // #532 KK4, kanvas `YerEkle_Gunle`: gün renginde 34 pt hap, 13 pt kalın metin, 24 pt ✕ dairesi.
+  gunHapi: { alignSelf: 'flex-start', height: 34, paddingLeft: 14, paddingRight: 8, borderRadius: 17, flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 10 },
+  gunHapiMetin: { fontFamily: yazi.ekstra, fontSize: 13 },
+  gunHapiKapat: { width: 24, height: 24, borderRadius: 12, backgroundColor: 'rgba(255,255,255,0.22)', alignItems: 'center', justifyContent: 'center' },
+  gunBildirim: { position: 'absolute', left: 12, right: 12, bottom: 16, minHeight: 56, paddingHorizontal: 16, borderRadius: 16, backgroundColor: renk.metin, justifyContent: 'center' },
+  gunBildirimMetin: { fontFamily: yazi.kalin, fontSize: 14, color: renk.zemin },
   ortala: { alignItems: 'center', justifyContent: 'center' },
   golge: {
     shadowColor: renk.metin,

@@ -95,7 +95,7 @@ function fikstur(baslangic: string): Tablolar {
     sehirler: [{ id: 's1', ad: 'Eskişehir', slug: 'eskisehir', kapak_url: null, lat: 39.7767, lng: 30.5206, ozet: null, geziler: [{ count: 1 }] }],
     // Rehber: listede olmayan yakın yer (akşam önerisi) ve 2. günün parkının rehber yazısı.
     yerler: [
-      { id: 'y1', sehir_id: 's1', place_id: 'ChIJ-rehber-1', ad: 'Sazova Parkı', kategori: 'park', rehber_md: null, kapak_url: null, one_cikan_sira: 1, lat: 39.775, lng: 30.521 },
+      { id: 'y1', sehir_id: 's1', place_id: 'ChIJ-rehber-1', ad: 'Sazova Bilim Müzesi', kategori: 'museum', rehber_md: null, kapak_url: null, one_cikan_sira: 1, lat: 39.775, lng: 30.521 },
       { id: 'y2', sehir_id: 's1', place_id: 'ChIJ-google-3', ad: 'Kent Parkı', kategori: 'park', rehber_md: 'Porsuk kıyısında…', kapak_url: null, one_cikan_sira: 2, lat: 39.774, lng: 30.52 },
     ],
   };
@@ -160,8 +160,8 @@ describe('#182 KK7: Plan sekmesi Google isteği doğurmaz', () => {
     await waitFor(() => getByText('Park'));
     await sakinles(qc);
     expect(queryByText('Restoran')).toBeNull();
-    // KK5: gün 17:00'den önce bitiyor → "Akşam boş" önerisi (listede olmayan yakın rehber yeri); kanvas 24 "Mekan rehberi var".
-    expect(getByText(/Sazova Parkı/)).toBeTruthy();
+    // KK5 / #532 KK3: gün 17:00'den önce bitiyor → "Akşam için yakında" (listede olmayan yakın rehber yeri); kanvas 24 "Mekan rehberi var".
+    expect(getByText('Sazova Bilim Müzesi')).toBeTruthy();
     expect(getByText('Mekan rehberi var')).toBeTruthy();
     fireEvent.press(getByText(gunEtiketi({ index: 3, date: tarihEkle(bas, 2) })));
     await waitFor(() => getByText(/Bu günde henüz durak yok/));

@@ -1,22 +1,35 @@
-// #308 KK5 boş gün: rehberdeki yer artıyla bugüne eklenir — önce seyahatin listesine (`useYereEkle`, yer_eklendi olayı), sonra
-// bugünün sonuna durak olarak (`useDuragaAta`). Google'a istek yok; koordinat ve tür bizim içerikten.
+// #308 KK5 boş gün + #532 KK2–KK4: bir yer artıyla bir günün sonuna eklenir. Listede olmayan (rehber ya da il listesi) yer
+// önce seyahatin listesine (`useYereEkle`, yer_eklendi olayı), sonra günün sonuna durak olarak (`useDuragaAta`); listede olan
+// yer doğrudan durak olur. Google'a istek yok; koordinat ve tür bizim içerikten ya da listeden.
 import { useMutation } from '@tanstack/react-query';
 
 import { useDuragaAta } from '@/features/gunler/sorgular';
 import { useYereEkle } from '@/features/icerik/yerEkle';
 import { supabase } from '@/lib/supabase';
-import type { Durak, Mekan, Yer } from '@/lib/tipler';
+import type { Durak, Mekan } from '@/lib/tipler';
 
-export function useBugunEkle(seyahatId: string) {
+/** Listede olmayan yer: içerikten (rehber `yerId` ile, il listesi `yerId` null). */
+export type IcerikYeri = { place_id: string; yerId: string | null; primary_type: string | null; lat: number; lng: number };
+
+export async function listedekiMekan(seyahatId: string, placeId: string): Promise<Mekan> {
+  const { data, error } = await supabase.from('places').select('*').eq('trip_id', seyahatId).eq('place_id', placeId).maybeSingle();
+  if (error) throw error;
+  if (!data) throw new Error('mekan bulunamadı');
+  return data as Mekan;
+}
+
+export function useGuneEkle(seyahatId: string) {
   const yereEkle = useYereEkle();
   const ata = useDuragaAta(seyahatId);
   return useMutation({
-    mutationFn: async ({ yer, gunId, gunDuraklari }: { yer: Yer & { place_id: string }; gunId: string; gunDuraklari: Durak[] }) => {
-      await yereEkle.mutateAsync({ seyahatId, yerId: yer.id, place_id: yer.place_id, primary_type: yer.kategori, lat: yer.lat, lng: yer.lng });
-      const { data, error } = await supabase.from('places').select('*').eq('trip_id', seyahatId).eq('place_id', yer.place_id).maybeSingle();
-      if (error) throw error;
-      if (!data) throw new Error('mekan bulunamadı');
-      await ata.mutateAsync({ mekan: data as Mekan, gunId, mevcut: undefined, gunDuraklari });
+    mutationFn: async ({ mekan, yer, gunId, gunDuraklari }: { mekan?: Mekan; yer?: IcerikYeri; gunId: string; gunDuraklari: Durak[] }) => {
+      let hedef = mekan;
+      if (!hedef) {
+        if (!yer) throw new Error('yer yok');
+        await yereEkle.mutateAsync({ seyahatId, yerId: yer.yerId, place_id: yer.place_id, primary_type: yer.primary_type, lat: yer.lat, lng: yer.lng });
+        hedef = await listedekiMekan(seyahatId, yer.place_id);
+      }
+      await ata.mutateAsync({ mekan: hedef, gunId, mevcut: undefined, gunDuraklari });
     },
   });
 }
