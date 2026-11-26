@@ -1,0 +1,348 @@
+{
+  "il": "Gümüşhane",
+  "slug": "gumushane",
+  "guncelleme": "2026-11-26",
+  "oneriler": [
+    {
+      "sira": 1,
+      "ad": "Karaca Mağarası",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Torul",
+      "merkeze_km": 11,
+      "neden": "Cebeli köyünde ak sarkıt, dikit ve travertenlerle dolu mağara; kasım–nisan kapalı",
+      "place_id": "ChIJof7xyMTiZEARWM4iQqMyxt4"
+    },
+    {
+      "sira": 2,
+      "ad": "Santa Harabeleri",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "doga"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 36,
+      "neden": "17. yüzyılda Rumların kurduğu 13 mahalleden 7'si duruyor; taş evler, kiliseler, yayla",
+      "place_id": "ChIJPaLIxJiuZUARE4T4rcirTfs"
+    },
+    {
+      "sira": 3,
+      "ad": "Torul Kalesi ve Cam Seyir Terası",
+      "kategori": "manzara",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Torul",
+      "merkeze_km": 19,
+      "neden": "Kale yanında 2018'de açılan cam teras; Harşit vadisine 200 metreden fazla yukarıdan bakar",
+      "osm": "node/7134032183"
+    },
+    {
+      "sira": 4,
+      "ad": "Tomara Şelalesi",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Şiran",
+      "merkeze_km": 45,
+      "neden": "Seydibaba köyünde su 40 ayrı gözeden çıkıp birleşiyor; yöre 'kırk gözeler' diyor",
+      "place_id": "ChIJ5zPdQ4fPekARUrR11Xqy_Y4"
+    },
+    {
+      "sira": 5,
+      "ad": "Süleymaniye Mahallesi (Eski Gümüşhane)",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 3,
+      "neden": "Gümüş madenli eski kent: Süleymaniye Camii ile kilise yan yana, camisiz minareler, hanlar",
+      "place_id": "ChIJp-N4L6seZUARLAI4S9FIB6s"
+    },
+    {
+      "sira": 6,
+      "ad": "Zigana Geçidi",
+      "kategori": "manzara",
+      "amaclar": [
+        "doga",
+        "kultur_tarih"
+      ],
+      "ilce": "Torul",
+      "merkeze_km": 22,
+      "neden": "2032 m'deki geçit; Ksenefon'un Onbinleri denizi buradan görüp 'Thalatta!' diye bağırmış",
+      "place_id": "ChIJiw_Nwbb7ZEARNTg-GfjclnU"
+    },
+    {
+      "sira": 7,
+      "ad": "Limni Gölü Tabiat Parkı",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "cocuklu",
+        "yavas"
+      ],
+      "ilce": "Torul",
+      "merkeze_km": 20,
+      "neden": "Zigana eteğinde ladin ormanıyla çevrili göl; 2011'de tabiat parkı oldu, piknik yeri",
+      "place_id": "ChIJX6JSDIv7ZEAROwAJsrptJyQ"
+    },
+    {
+      "sira": 8,
+      "ad": "Kov Kalesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "doga"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 18,
+      "neden": "1361'de Trabzon İmparatoru III. Aleksios'un yaptırdığı kale; 130 m'lik sarp kaya üstünde",
+      "osm": "way/961132485",
+      "place_id": "ChIJrU338toXZUARetQben2piUk"
+    },
+    {
+      "sira": 9,
+      "ad": "Satala Antik Kenti",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Kelkit",
+      "merkeze_km": 49,
+      "neden": "XV. Apollinaris lejyonunun kampı; 4 kemeri kalan su kemeri, hamam ve sur izleri",
+      "osm": "node/3361681697",
+      "place_id": "ChIJWwFWAlxTZUARUWZDHnV669o"
+    },
+    {
+      "sira": 10,
+      "ad": "Artabel Gölleri Tabiat Parkı",
+      "kategori": "doga",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 25,
+      "neden": "1998'de korunan buzul gölleri; Ahtabur'a düşen tabur efsanesi anlatılır; yalnız yazın",
+      "place_id": "ChIJ-7_P7SfaZEARIKwjw36TNbk"
+    },
+    {
+      "sira": 11,
+      "ad": "Örümcek Ormanları",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Kürtün",
+      "merkeze_km": 45,
+      "neden": "1998'den beri koruma alanı; 400-500 yaşında, anıt ağaç ilan edilmiş göknar ve ladinler",
+      "place_id": "ChIJr2cZPmyNZEARBRpRebNULcU"
+    },
+    {
+      "sira": 12,
+      "ad": "İmera Manastırı",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 22,
+      "neden": "Olucak köyünde 1859 kitabeli manastır; 2020'de çatısı ve sütunu kısmen onarıldı",
+      "place_id": "ChIJHZlc4ocDZUARrJt7piV8suM"
+    },
+    {
+      "sira": 13,
+      "ad": "Krom Vadisi (Kromni)",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "doga"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 25,
+      "neden": "Yağlıdere'de 34 kilise, 33 şapel, ~300 eski ev ve 50 çeşme kalmış maden vadisi"
+    },
+    {
+      "sira": 14,
+      "ad": "Gümüşhane Müzesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "İki eski konakta; Satala'dan çıkan dünyada tek örnek pullu Roma zırhı ve sikkeler",
+      "place_id": "ChIJN6JEtggcZUARDLdpNbkRoQA"
+    },
+    {
+      "sira": 15,
+      "ad": "Yeşildere Konakları Restoranı",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet",
+        "yavas"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 6,
+      "neden": "1914'te Rum ustaların yaptığı okul binası; menüde kuşburnu çorbası, pestil kavurması",
+      "place_id": "ChIJpdU4tiYdZUARFV6FjpP_S7Y"
+    },
+    {
+      "sira": 16,
+      "ad": "Almila Kadın Kooperatifi (Torul Teras)",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet",
+        "cocuklu"
+      ],
+      "ilce": "Torul",
+      "merkeze_km": 19,
+      "neden": "Cam teras yanında kadınların yöresel yemek pişirip pestil, köme, dut pekmezi sattığı yer"
+    },
+    {
+      "sira": 17,
+      "ad": "Özdenoğlu (Hacı İmam) Konağı",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet",
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "Konakta Zigana MTAL öğrencileri usta öğreticilerle siron ve yöre yemekleri pişiriyor",
+      "place_id": "ChIJVVVVFeIbZUARijctqKDJcw0"
+    },
+    {
+      "sira": 18,
+      "ad": "Ataç Konağı",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet",
+        "yavas"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "Cumhuriyet Caddesi'ndeki tarihi konakta bahçeli yöre mutfağı; konaklama da var",
+      "place_id": "ChIJq3qNm_cbZUAR0Kvm3ikAO_A"
+    },
+    {
+      "sira": 19,
+      "ad": "Zigana Kayak Merkezi",
+      "kategori": "aktivite",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Torul",
+      "merkeze_km": 22,
+      "neden": "1991'de turizm merkezi ilan edildi; 800 m ve 600 m iki pist, tek teleski, kar motoru turu"
+    },
+    {
+      "sira": 20,
+      "ad": "Çakırkaya Manastırı",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Şiran",
+      "merkeze_km": 45,
+      "neden": "13. yüzyılda 65 m'lik kaya kütlesine oyulmuş şapel; oyma sütunlar ve kubbe",
+      "osm": "node/11154413674",
+      "place_id": "ChIJY6YxzEDOekARcDMyKdHtcuE"
+    },
+    {
+      "sira": 21,
+      "ad": "Sarıçiçek Köy Odaları",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 30,
+      "neden": "Hacı Ömer Ağa'nın çağırdığı usta ve çırağın 1873'ten kündekariyle süslediği iki oda"
+    },
+    {
+      "sira": 22,
+      "ad": "Sarıçiçek Vadisi",
+      "kategori": "manzara",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 30,
+      "neden": "2080 m'de dört köylü vadi; haziran sonunda 20 gün 'at ayağı' ile sararır; yalnız yazın"
+    },
+    {
+      "sira": 23,
+      "ad": "Çakırgöl",
+      "kategori": "doga",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 30,
+      "neden": "Çorak köyü sınırında, 2553 m'de buzul gölü; yol yalnız yazın açık",
+      "place_id": "ChIJMUls1Q8HZUAR8XGRUY9iJyk"
+    },
+    {
+      "sira": 24,
+      "ad": "Kadırga Yaylası Otçu Şenliği",
+      "kategori": "aktivite",
+      "amaclar": [
+        "kultur_tarih",
+        "doga"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 35,
+      "neden": "Temmuzun 3. haftası Trabzon, Giresun ve Gümüşhane yaylacıları horonla buluşuyor"
+    },
+    {
+      "sira": 25,
+      "ad": "Kazıkbeli Yaylası Şenliği",
+      "kategori": "aktivite",
+      "amaclar": [
+        "kultur_tarih",
+        "doga"
+      ],
+      "ilce": "Kürtün",
+      "merkeze_km": 45,
+      "neden": "Söğüteli köyü yaylasında temmuz sonu hafta sonu binlerce kişi horon tepiyor"
+    },
+    {
+      "sira": 26,
+      "ad": "Çağlayandibi Şelalesi",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Kürtün",
+      "merkeze_km": 45,
+      "neden": "Kürtün Yeşilköy'de Örümcek Ormanı içinde 15 m'den dökülen şelale; tabiat parkı",
+      "place_id": "ChIJSzFnRGOSZEARH5IrEobuuek"
+    },
+    {
+      "sira": 27,
+      "ad": "Zigana Köyü Tarihi Camii",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Torul",
+      "merkeze_km": 20,
+      "neden": "Hicri 865'te (1460-61) Selçuklu üslubunda yapıldığı yazan Zigana köyü camisi"
+    }
+  ]
+}

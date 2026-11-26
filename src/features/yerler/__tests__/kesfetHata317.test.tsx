@@ -28,6 +28,8 @@ jest.mock('expo-router', () => ({
   router: { navigate: jest.fn(), push: jest.fn(), replace: jest.fn(), back: jest.fn(), canGoBack: () => false },
   useLocalSearchParams: () => mockParametre,
   useGlobalSearchParams: () => ({}),
+  // #536 inceleme 4: gün bağlamı blur'da temizlenir; testte odak olayı yok.
+  useFocusEffect: () => undefined,
 }));
 
 // Harita: pinler dokunulabilir satırlar (kimlik + tür).

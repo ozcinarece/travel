@@ -1,0 +1,357 @@
+{
+  "il": "Bitlis",
+  "slug": "bitlis",
+  "guncelleme": "2026-11-26",
+  "oneriler": [
+    {
+      "sira": 1,
+      "ad": "Nemrut Krater Gölü",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Tatvan",
+      "merkeze_km": 45,
+      "neden": "Kalderada tatlı ve sıcak su iki göl; yol genelde mayıs ortası açılıp ilk karda kapanır",
+      "place_id": "ChIJQSddzL9JDUAR4kZvq_n2M2I"
+    },
+    {
+      "sira": 2,
+      "ad": "Ahlat Selçuklu Meydan Mezarlığı",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Ahlat",
+      "merkeze_km": 67,
+      "neden": "Ejder ve geometrik motifli binlerce şahide; yazın gece müzeciliği yapılan ören yeri",
+      "osm": "way/240130069",
+      "place_id": "ChIJl_6Y35FWDUARqcg66TKkjEg"
+    },
+    {
+      "sira": 3,
+      "ad": "Emir Bayındır Kümbeti",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Ahlat",
+      "merkeze_km": 67,
+      "neden": "Akkoyunlu döneminden, dış yüzü sütunlu revakla açılan 'parmaklıklı' kümbet",
+      "osm": "way/1358000923",
+      "place_id": "ChIJ-1gz-4ZWDUARlRnO7BsRSlc"
+    },
+    {
+      "sira": 4,
+      "ad": "Büryancı Vahit Usta",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "Kuyu tandırında asılarak pişen, coğrafi işaretli Bitlis büryanını çarşıda tadın"
+    },
+    {
+      "sira": 5,
+      "ad": "Süphan Dağı",
+      "kategori": "aktivite",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Adilcevaz",
+      "merkeze_km": 120,
+      "neden": "4058 m'lik sönmüş volkan; yazın zirve tırmanışı, 3150 m'de piknik yapılan düzlükler",
+      "place_id": "ChIJ1xv8s-DJEkARRYsIvmWbr04"
+    },
+    {
+      "sira": 6,
+      "ad": "Bitlis Ulu Camii",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "1150'ye tarihlenen, kentin en eski camisi; kesme taş minaresi vadiden seçilir",
+      "osm": "way/364610435",
+      "place_id": "ChIJS4Cyq3IkDUARoCWieXR0L4Q"
+    },
+    {
+      "sira": 7,
+      "ad": "Adilcevaz Kalesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Adilcevaz",
+      "merkeze_km": 105,
+      "neden": "Göl kıyısında kayalık üstündeki kale; eteğinde Zal Paşa Camii ile tek kare verir",
+      "osm": "way/1540850603",
+      "place_id": "ChIJ-QifDWqlEkARueMta0-TMFs"
+    },
+    {
+      "sira": 8,
+      "ad": "Adilcevaz Van Gölü Plajı",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Adilcevaz",
+      "merkeze_km": 105,
+      "neden": "Sodalı Van Gölü suyunda yüzme; karşı kıyıda Süphan'ın karlı tepesi görünür",
+      "place_id": "ChIJk_PpufKlEkARTBEsBP2WcCQ"
+    },
+    {
+      "sira": 9,
+      "ad": "Şerefiye Camii ve Külliyesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "Bitlis beyi IV. Şeref Han'ın 1529'da yaptırdığı cami, türbe ve medrese topluluğu",
+      "osm": "way/300619545"
+    },
+    {
+      "sira": 10,
+      "ad": "Ulu Kümbet (Ahlat)",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Ahlat",
+      "merkeze_km": 67,
+      "neden": "Ahlat'ın en büyük kümbeti; tarlaların ortasında tek başına yükselen silindir gövde",
+      "osm": "way/1562271207",
+      "place_id": "ChIJ9-zAM5JWDUARjlvG8mzH220"
+    },
+    {
+      "sira": 11,
+      "ad": "Tarihi Bitlis Büryan Salonu",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "Bitlislilerin sabah avşor çorbası ve büryanla güne başladığı esnaf lokantası",
+      "place_id": "ChIJhTH4YmAhDUAR2T5pRJgTTBA"
+    },
+    {
+      "sira": 12,
+      "ad": "İhlasiye Medresesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "1589 tarihli medrese; kubbeli dershanesi ve taş işçiliği ayakta duruyor",
+      "osm": "way/364610428",
+      "place_id": "ChIJqaq_kasmDUARBxNeuXA9ONY"
+    },
+    {
+      "sira": 13,
+      "ad": "Bitlis Kalesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 2,
+      "neden": "Vadinin ortasındaki kayalıkta; 2004'ten beri süren kazıda Osmanlı yapıları çıktı",
+      "osm": "way/344737956",
+      "place_id": "ChIJJ2cUiVIhDUARou2ACjtxCxY"
+    },
+    {
+      "sira": 14,
+      "ad": "Çifte Kümbetler",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Ahlat",
+      "merkeze_km": 68,
+      "neden": "Bugatay Aka ile eşi Şirin Hatun'a ait yan yana iki İlhanlı kümbeti",
+      "place_id": "ChIJh0JhYmNWDUARY6SE5W1URwk"
+    },
+    {
+      "sira": 15,
+      "ad": "Başhan Hanı",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet",
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 12,
+      "neden": "16. yy kervansarayında büryan, tandır eti ve avşor çorbası sunan lokanta"
+    },
+    {
+      "sira": 16,
+      "ad": "Tatvan Sahil Parkı",
+      "kategori": "manzara",
+      "amaclar": [
+        "yavas",
+        "cocuklu"
+      ],
+      "ilce": "Tatvan",
+      "merkeze_km": 25,
+      "neden": "Van Gölü kıyısında iskele ve çay bahçeleri; arkada Nemrut'un silueti",
+      "osm": "way/965962635",
+      "place_id": "ChIJnb7x9bo-DUARKCP_nqCxh6o"
+    },
+    {
+      "sira": 17,
+      "ad": "Aygır Gölü",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Adilcevaz",
+      "merkeze_km": 115,
+      "neden": "Süphan eteğinde yaklaşık 2000 m'de krater gölü; alabalık yaşar",
+      "place_id": "ChIJz0lLdji6EkARl5Mbogdubaw"
+    },
+    {
+      "sira": 18,
+      "ad": "Zal Paşa (Tuğrul Bey) Camii",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Adilcevaz",
+      "merkeze_km": 105,
+      "neden": "Göl kıyısında 16. yy çok kubbeli cami; Mimar Sinan'a atfedilir",
+      "osm": "way/496588860",
+      "place_id": "ChIJVVVVVUSlEkAR2EIS_woECjo"
+    },
+    {
+      "sira": 19,
+      "ad": "Abdurrahman Gazi Türbesi",
+      "kategori": "manzara",
+      "amaclar": [
+        "yavas",
+        "kultur_tarih"
+      ],
+      "ilce": "Ahlat",
+      "merkeze_km": 68,
+      "neden": "Ahlat'ta tepe üstündeki türbe; kümbet ovası ile Van Gölü aynı bakışta"
+    },
+    {
+      "sira": 20,
+      "ad": "Nazik Gölü",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Ahlat",
+      "merkeze_km": 85,
+      "neden": "Ovakışla yakınında lavın set çektiği göl; aynalı sazanıyla bilinir",
+      "place_id": "ChIJ3eLvrddXbUARyRnRhrtgRcI"
+    },
+    {
+      "sira": 21,
+      "ad": "Arin (Sodalı) Gölü",
+      "kategori": "doga",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Adilcevaz",
+      "merkeze_km": 100,
+      "neden": "Van Gölü'nün yanında sodalı küçük göl; göçmen kuşların konaklama alanı",
+      "place_id": "ChIJU8iX4je-EkART9FNdmFZOcM"
+    },
+    {
+      "sira": 22,
+      "ad": "Bitlis Seyir Tepesi",
+      "kategori": "manzara",
+      "amaclar": [
+        "yavas"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 3,
+      "neden": "Dar vadideki kente, kaleye ve beş minareye yukarıdan bakılan nokta",
+      "place_id": "ChIJAzFtlk8hDUARpOkbOWLmjeY"
+    },
+    {
+      "sira": 23,
+      "ad": "Nemrut Kayak Merkezi",
+      "kategori": "aktivite",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Tatvan",
+      "merkeze_km": 40,
+      "neden": "Kalderanın dış yamacında, gölü gören pistler; kar bahara dek kalır"
+    },
+    {
+      "sira": 24,
+      "ad": "Hizan Taş Evleri",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Hizan",
+      "merkeze_km": 60,
+      "neden": "Yamaca kat kat dizilmiş, yaklaşık 300 yıllık taş köy evleri; güzün ayrı renk"
+    },
+    {
+      "sira": 25,
+      "ad": "Ahlat Sahil Kalesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Ahlat",
+      "merkeze_km": 70,
+      "neden": "Kanuni döneminde göl kıyısına kurulan sur; içinde Kadı Mahmud ve İskender Paşa camileri"
+    },
+    {
+      "sira": 26,
+      "ad": "Gökmeydan Camii",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "1801'de yapılmış, Gökmeydan mahallesinin kesme taş camisi",
+      "osm": "way/1376065847",
+      "place_id": "ChIJfVUQn7EnDUARlSePxpYEyM8"
+    },
+    {
+      "sira": 27,
+      "ad": "Sultaniye Camii",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "Bitlis Çayı kıyısında, Kalealtı'na yakın 16. yy kesme taş camisi",
+      "osm": "way/1375779022"
+    },
+    {
+      "sira": 28,
+      "ad": "Bitlis Kayak Merkezi",
+      "kategori": "aktivite",
+      "amaclar": [
+        "cocuklu",
+        "doga"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 4,
+      "neden": "Kent merkezine birkaç dakikalık pist; Bitlis'in bol karında gün içi kayak"
+    }
+  ]
+}

@@ -18,7 +18,6 @@ import { OtelSayfasi, OtelSeridi } from '@/components/program/OtelSayfasi';
 import { OtelUcSatiri } from '@/components/program/OtelUcSatiri';
 import { PlanHazirSayfasi, type PlanGunOzeti } from '@/components/program/PlanHazirSayfasi';
 import { HarcamaFormu } from '@/components/harcama/HarcamaFormu';
-import { GuneEkleSayfasi } from '@/components/listem/GuneEkleSayfasi';
 import { MekanPaneli } from '@/components/mekan/MekanPaneli';
 import { HaritaSeridi } from '@/components/plan/HaritaSeridi';
 import { PlanListesi, type PlanSatirGorunumu } from '@/components/plan/PlanListesi';
@@ -34,12 +33,13 @@ import { OTEL_SERIT_ONEKI } from '@/features/konaklama/otelSeridi';
 import { useGunOteliKaydet, useKonaklamalar, useTumGunlereOtel } from '@/features/konaklama/sorgular';
 import { useDuragaAta, useDuraklar, useDurakKaldir, useGunEkle, useGunler, useGunSil } from '@/features/gunler/sorgular';
 import { olayYaz, sehirEslestir, useSehirler, useSehirYerleri } from '@/features/icerik/sorgular';
-import { useYereEkle } from '@/features/icerik/yerEkle';
 import { useKonum, yakinDurakId } from '@/features/konum/useKonum';
-import { gunSecenekleri as listemGunSecenekleri, type GunSecenegi } from '@/features/listem/listem';
 import { useOylar } from '@/features/listem/sorgular';
 import { useMekanGuncelle, useMekanlar, useMekanSil, useUyeler } from '@/features/mekanlar/sorgular';
-import { aksamOnerisi, kmMetni, planSatirlari, YEMEK_RENGI, yurumeMetresi } from '@/features/plan/planListesi';
+import { aksamBoslugu, kmMetni, planSatirlari, REHBER_YAKIN_M, YEMEK_RENGI, yurumeMetresi } from '@/features/plan/planListesi';
+import { useGuneEkle } from '@/features/gezi/bugunEkle';
+import { eklenenleriSabitle, yakindaAdaylari, type YakinAday } from '@/features/gezi/yakinda';
+import { ilSlugu, kategoriAdi, useIlYerleri } from '@/features/icerik/ilOnerileri';
 import { bacakSecimi, hapCifti, hapPinId, seciciBasligi, seciciSecenekleri } from '@/features/program/bacakSecimi';
 import { kartKamerasi, kartListesi, odakKarti, type DurakKarti } from '@/features/program/durakKarti';
 import { gunHapiVerisi, pinDokunusu } from '@/features/program/gunHapi';
@@ -63,6 +63,7 @@ import { onayIste } from '@/lib/onay';
 import { useOturum } from '@/lib/oturum';
 import { AYLAR, GUNLER, haftaGunu, parcala, tarihEkle } from '@/lib/takvim';
 import type { Durak, Gun, Mekan, Seyahat } from '@/lib/tipler';
+import { useCevrimdisi } from '@/lib/baglanti';
 import { kacinciGun, saatEkli, yerelAn, yerelSaatDk, yerelTarih } from '@/lib/zaman';
 import { cizgiOrtasi, polylineCoz } from '@/lib/polyline';
 import { googleGunu } from '@/schedule/acilis';
@@ -999,35 +1000,12 @@ function ProgramSekmesi({
   const sehirler = useSehirler();
   const sehir = sehirEslestir(sehirler.data, { ad: seyahat.city_label, lat: seyahat.lat, lng: seyahat.lng });
   const sehirYerleri = useSehirYerleri(sehir?.id);
-  // Rehber yeri listeye `useYereEkle` ile (yer_eklendi olayı yazılır).
-  const yereEkle = useYereEkle();
-  // KK5: "Öner" → Güne ekle (13b). Rehberden gelen yer önce listeye eklenir; liste yenilenince sayfa onunla açılır.
-  const [guneEkleId, setGuneEkleId] = useState<string | null>(null);
-  const [bekleyenPlaceId, setBekleyenPlaceId] = useState<string | null>(null);
-  const guneEkleMekan = guneEkleId ? mekanIle.get(guneEkleId) : bekleyenPlaceId ? mekanlar.find((m) => m.place_id === bekleyenPlaceId) : undefined;
-  const guneEkleSecenekleri = useMemo(
-    () => (guneEkleMekan ? listemGunSecenekleri({ seyahat, mekan: guneEkleMekan, gunler, duraklar, mekanIle, gunUclari: verisi.gunUclari, yuruyus: verisi.yuruyus }) : []),
-    [guneEkleMekan, seyahat, gunler, duraklar, mekanIle, verisi.gunUclari, verisi.yuruyus],
-  );
-  const guneEkleKapat = () => {
-    setGuneEkleId(null);
-    setBekleyenPlaceId(null);
-  };
-  const guneEkle = async (o: GunSecenegi) => {
-    if (!guneEkleMekan) return;
-    try {
-      await ata.mutateAsync({
-        mekan: guneEkleMekan,
-        gunId: o.gun.id,
-        mevcut: durakIle.get(guneEkleMekan.id),
-        gunDuraklari: duraklar.filter((d) => d.day_id === o.gun.id),
-        ekleIndeksi: o.gun.order_manual ? o.ekleIndeksi : undefined,
-      });
-      guneEkleKapat();
-    } catch {
-      setHata(t('program.hata'));
-    }
-  };
+  // #532 KK3: "Akşam için yakında" — il listesi (#401) de aday kaynağı (kendi veritabanımız).
+  const ilYerleri = useIlYerleri(ilSlugu(sehir, seyahat.city_label));
+  const guneEkleKanca = useGuneEkle(seyahat.id);
+  const [aksamEklenenler, setAksamEklenenler] = useState<Set<string>>(() => new Set());
+  // #536 inceleme 5: çevrimdışıyken akşam satırlarının + düğmesi pasif.
+  const cevrimdisi = useCevrimdisi();
   const planSatir = useMemo(() => planSatirlari(gunDurak, mekanIle, satirlar), [gunDurak, mekanIle, satirlar]);
   const oySayisi = useMemo(() => {
     const n = new Map<string, number>();
@@ -1089,25 +1067,55 @@ function ProgramSekmesi({
     prog && planSatir.some((r) => r.numara !== null)
       ? t('plan.seritEtiket', { bas: dakikaSaat(prog.canli.baslangicDk), bit: dakikaSaat(prog.canli.bitisDk), km: kmMetni(yurumeMetresi(planSatir, prog.canli.oteleDonus)) })
       : null;
-  const aksam = useMemo(() => aksamOnerisi({ satirlar: planSatir, mekanlar, duraklar, yerler: sehirYerleri.data ?? [] }), [planSatir, mekanlar, duraklar, sehirYerleri.data]);
-  const aksamOner = async () => {
-    if (!aksam) return;
-    if (aksam.liste) return setGuneEkleId(aksam.liste.id);
-    const y = aksam.rehber!;
-    try {
-      await yereEkle.mutateAsync({ seyahatId: seyahat.id, yerId: y.id, place_id: y.place_id, primary_type: y.kategori, lat: y.lat, lng: y.lng });
-      setBekleyenPlaceId(y.place_id);
-    } catch {
-      setHata(t('program.hata'));
-    }
+  // #532 KK3: kesik çizgili "Akşam boş · Öner" kutusu kalktı; aynı koşulda (son durak 17:00'den önce bitiyor) "Akşam için
+  // yakında" başlığı ve en çok 2 satır. + o günün sonuna ekler; Güne ekle sayfası açılmaz. 17:00'den sonra (trips.tz) akşam
+  // kuralı: doğa/manzara çıkar, yemek, tatlı-kahve, çarşı, müze öne.
+  const aksamReferansi = useMemo(() => aksamBoslugu(planSatir), [planSatir]);
+  // #536 inceleme 3: bölümün başlığı "Akşam için"; Plan'da akşam kuralı saatten bağımsız hep geçerli.
+  const aksamAdaylariHam = useMemo(
+    () =>
+      aksamReferansi && gun
+        ? yakindaAdaylari({ mekanlar, duraklar, ilYerleri: ilYerleri.data ?? [], rehberYerleri: sehirYerleri.data ?? [], referans: aksamReferansi, aksam: true, adet: 2, icerikSiniriM: REHBER_YAKIN_M })
+        : [],
+    [aksamReferansi, gun, mekanlar, duraklar, ilYerleri.data, sehirYerleri.data],
+  );
+  // KK2: eklenen satır ✓ ile yerinde kalır (eklenince yeni hesapta düşer); eklenirken görünen sırası tutulur.
+  const [sabitAksamAdaylari, setSabitAksamAdaylari] = useState<Map<string, { aday: YakinAday; sira: number }>>(() => new Map());
+  const aksamAdaylari = useMemo(() => eklenenleriSabitle(sabitAksamAdaylari, aksamAdaylariHam, 2), [sabitAksamAdaylari, aksamAdaylariHam]);
+  const aksamAdi = (a: YakinAday) => (a.kaynak === 'liste' ? adGoster(a.mekan) : a.ad);
+  const aksamEkle = (placeId: string) => {
+    const a = aksamAdaylari.find((x) => x.place_id === placeId);
+    // #536 inceleme 5: çift dokunuşta ikinci ekleme yok.
+    if (!a || !gun || aksamEklenenler.has(placeId)) return;
+    setAksamEklenenler((e) => new Set(e).add(placeId));
+    setSabitAksamAdaylari((m) => new Map(m).set(placeId, { aday: a, sira: aksamAdaylari.indexOf(a) }));
+    guneEkleKanca.mutate(
+      a.kaynak === 'liste'
+        ? { mekan: a.mekan, gunId: gun.id, gunDuraklari: gunDurak }
+        : { yer: { place_id: a.place_id, yerId: a.yerId, primary_type: a.tip, lat: a.lat, lng: a.lng }, gunId: gun.id, gunDuraklari: gunDurak },
+      {
+        onError: () => {
+          setAksamEklenenler((e) => {
+            const y = new Set(e);
+            y.delete(placeId);
+            return y;
+          });
+          setSabitAksamAdaylari((m) => {
+            const y = new Map(m);
+            y.delete(placeId);
+            return y;
+          });
+          setHata(t('program.hata'));
+        },
+      },
+    );
   };
-  const aksamMetni = aksam
-    ? aksam.liste && aksam.rehber
-      ? t('plan.aksamIkisi', { rehber: aksam.rehber.ad, liste: adGoster(aksam.liste) })
-      : aksam.liste
-        ? t('plan.aksamListe', { liste: adGoster(aksam.liste) })
-        : t('plan.aksamRehber', { rehber: aksam.rehber!.ad })
-    : null;
+  const aksamSatirlari = aksamAdaylari.map((a) => ({
+    id: a.place_id,
+    ad: aksamAdi(a),
+    foto: a.kaynak === 'liste' ? bilinen.foto(a.place_id) : null,
+    alt: [a.ilKategori ? kategoriAdi(a.ilKategori) : kategoriEtiketi(a.tip), a.mesafeM !== null ? mesafeMetni(Math.round(a.mesafeM / 10) * 10) : null].filter(Boolean).join(' · '),
+  }));
   const gunTemasi = gun ? gunKartlari({ gunler: [gun], duraklar, mekanlar, tempolar: verisi.tempolar, ad: (m) => yerler.data?.[m.place_id]?.ad ?? bilinen.ad(m) })[0]?.tema : null;
   const gunAdiUzun = gun?.date ? GUNLER[haftaGunu(gun.date)] : gun ? t('geziSayfasi.gunNo', { n: gun.index }) : '';
   const haritayiAc = () => {
@@ -1182,8 +1190,9 @@ function ProgramSekmesi({
       satirlar={satirGorunumleri}
       onDurak={(mekanId) => setSeciliMekanId(mekanId)}
       onDurakUzunBas={uzunBas}
-      aksam={aksamMetni ? { kalin: t('plan.aksam'), metin: aksamMetni, onOner: () => void aksamOner() } : null}
-      bos={gun && planSatir.length === 0 ? { metin: t('plan.gunBos'), dugme: t('plan.mekanEkle'), onPress: () => router.navigate({ pathname: '/seyahat/[id]/(sekmeler)/kesfet', params: { id: seyahat.id } }) } : null}
+      aksam={aksamSatirlari.length > 0 ? { yerler: aksamSatirlari, eklenenler: aksamEklenenler, onEkle: aksamEkle, pasif: cevrimdisi } : null}
+      // #532 KK4: günün içinden açılan Yer ekle o günü taşır.
+      bos={gun && planSatir.length === 0 ? { metin: t('plan.gunBos'), dugme: t('plan.mekanEkle'), onPress: () => router.navigate({ pathname: '/seyahat/[id]/(sekmeler)/kesfet', params: { id: seyahat.id, gun: String(gun.index), n: String(Date.now()) } }) } : null}
       uyari={bugun && izin === 'reddedildi' ? t('program.konumIzni') : hata}
     />
   );
@@ -1340,21 +1349,6 @@ function ProgramSekmesi({
       )}
       {/* #182: listede mekan paneli ekranın üstünde (haritada `ustKatman` içinde). */}
       {!harita && mekanPaneli ? <View style={StyleSheet.absoluteFill}>{mekanPaneli}</View> : null}
-      <GuneEkleSayfasi
-        acik={!!guneEkleMekan}
-        ad={guneEkleMekan ? adGoster(guneEkleMekan) : ''}
-        foto={guneEkleMekan ? bilinen.foto(guneEkleMekan.place_id) : null}
-        dakika={guneEkleMekan?.default_minutes ?? 0}
-        secenekler={guneEkleSecenekleri}
-        ilkAd={(gunId) => {
-          const ilk = duraklar.filter((d) => d.day_id === gunId).sort((a, b) => (a.order_key < b.order_key ? -1 : 1))[0];
-          const m = ilk ? mekanIle.get(ilk.place_ref) : undefined;
-          return m ? adGoster(m) : null;
-        }}
-        mesgul={ata.isPending}
-        onSec={guneEkle}
-        onKapat={guneEkleKapat}
-      />
       <SecimMenusu acik={!!menuDurak} baslik={menuDurak ? adi(menuDurak.id) : undefined} secenekler={menuSecenekleri} onKapat={() => setMenuDurak(null)} />
       <SecimMenusu
         acik={!!uzunBasilan}

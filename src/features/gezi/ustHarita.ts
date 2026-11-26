@@ -6,6 +6,8 @@ import { konumu } from '@/lib/konum';
 import type { Durak, Gun, Mekan } from '@/lib/tipler';
 import { gunRengi, renk, rotaRengi } from '@/theme';
 
+import { geziKadraji } from './yakinda';
+
 export type UstHaritaHali = 'plan' | 'gezi' | 'bos';
 
 const sirayla = (a: Durak, b: Durak) => (a.order_key < b.order_key ? -1 : a.order_key > b.order_key ? 1 : 0);
@@ -33,11 +35,11 @@ export function ustHaritaVerisi(p: {
   bugunGunId: string | null;
   konum: Konum | null;
   otel: Konum | null;
-  /** Boş gün öneri pinleri (beyaz, lacivert kenarlı). */
+  /** Öneri pinleri (beyaz, lacivert kenarlı): boş gün ve #532 "Yakında, bugüne ekle". */
   oneriler: { id: string; konum: Konum }[];
   /** Gezi modunda bugünün yürüme çizgileri (önbellekten). */
   bugunCizgileri: HaritaCizgisi[];
-}): { pinler: HaritaPini[]; cizgiler: HaritaCizgisi[] } {
+}): { pinler: HaritaPini[]; cizgiler: HaritaCizgisi[]; /** #532 KK1: kadraja sığdırılacak noktalar; boşsa şehir merkezi. */ sigdir: Konum[] } {
   const mekanIle = new Map(p.mekanlar.map((m) => [m.id, m]));
   const pinler: HaritaPini[] = [];
   const cizgiler: HaritaCizgisi[] = [];
@@ -50,6 +52,7 @@ export function ustHaritaVerisi(p: {
   } else if (p.hal === 'gezi') {
     const bugun = p.gunler.find((g) => g.id === p.bugunGunId);
     if (bugun) pinler.push(...gununPinleri(bugun, p.duraklar, mekanIle).pinler);
+    for (const o of p.oneriler) pinler.push({ id: `ust:oneri:${o.id}`, tur: 'oneri', konum: o.konum, renk: renk.zemin, kategoriRenk: renk.ana });
     cizgiler.push(...p.bugunCizgileri);
   } else {
     if (p.otel) pinler.push({ id: 'ust:otel', tur: 'otel', konum: p.otel, renk: renk.ana });
@@ -57,5 +60,15 @@ export function ustHaritaVerisi(p: {
   }
   // KK1: konum izni yoksa konum noktası çizilmez (çağıran null verir).
   if (p.konum && p.hal !== 'plan') pinler.push({ id: 'ust:konum', tur: 'konum', konum: p.konum, renk: renk.ana });
-  return { pinler, cizgiler };
+  // #532 KK1: plan modu değişmez (bütün pinler); gezi ve boş günde kadraj bugüne odaklanır, uzaktaki konum kadrajı bozmaz.
+  const sigdir =
+    p.hal === 'plan'
+      ? pinler.map((x) => x.konum)
+      : geziKadraji({
+          duraklar: pinler.filter((x) => x.tur === 'durak').map((x) => x.konum),
+          oneriler: p.oneriler.map((o) => o.konum),
+          otel: p.hal === 'bos' ? p.otel : null,
+          konum: p.konum,
+        });
+  return { pinler, cizgiler, sigdir };
 }

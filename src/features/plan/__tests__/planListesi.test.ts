@@ -1,9 +1,9 @@
 import { describe, expect, it } from '@jest/globals';
 
-import type { Durak, Mekan, Yer } from '@/lib/tipler';
+import type { Durak, Mekan } from '@/lib/tipler';
 import type { ProgramSatiri } from '@/schedule/program';
 
-import { AKSAM_ESIGI_DK, aksamOnerisi, kmMetni, planSatirlari, seritProjeksiyonu, yurumeMetresi } from '../planListesi';
+import { AKSAM_ESIGI_DK, aksamBoslugu, kmMetni, planSatirlari, seritProjeksiyonu, yurumeMetresi } from '../planListesi';
 
 const mekan = (id: string, tip: string, lat = 39.77, lng = 30.52): Mekan => ({
   id,
@@ -87,23 +87,18 @@ describe('#182 KK3 şerit projeksiyonu', () => {
   });
 });
 
-describe('#182 KK5 akşam boş önerisi', () => {
-  const yer = (id: string, place_id: string | null, lat: number, lng: number): Yer => ({ id, sehir_id: 's', place_id, ad: `Yer ${id}`, kategori: 'park', rehber_md: null, kapak_url: null, one_cikan_sira: null, lat, lng });
+describe('#182 KK5 / #532 KK3 akşam boşluğu', () => {
   const son = mekan('son', 'museum', 39.77, 30.52);
-  const mekanlar = [son, mekan('yakin', 'park', 39.771, 30.521), mekan('uzak', 'park', 39.8, 30.6), mekan('gunde', 'cafe', 39.7701, 30.5201)];
-  const duraklar = [durak('d1', 'son', 'a0'), durak('d2', 'gunde', 'a0', false, 'g2')];
-  const satirlar = (ayrilis: number) => planSatirlari([duraklar[0]], new Map(mekanlar.map((m) => [m.id, m])), [satir(duraklar[0], ayrilis - 45, ayrilis)]);
+  const duraklar = [durak('d1', 'son', 'a0')];
+  const satirlar = (ayrilis: number) => planSatirlari(duraklar, new Map([[son.id, son]]), [satir(duraklar[0], ayrilis - 45, ayrilis)]);
 
-  it('son durak 17:00\'den önce bitiyorsa en yakın atanmamış liste mekanı ve listede olmayan yakın rehber yeri', () => {
-    const o = aksamOnerisi({ satirlar: satirlar(15 * 60), mekanlar, duraklar, yerler: [yer('r1', 'p-yakin', 39.77, 30.52), yer('r2', 'pr2', 39.772, 30.52), yer('kimliksiz', null, 39.77, 30.52), yer('cokuzak', 'pr3', 40.5, 31)] });
-    expect(o?.liste?.id).toBe('yakin');
-    expect(o?.rehber?.id).toBe('r2');
+  it('son durak 17:00\'den önce bitiyorsa referans son durağın konumu', () => {
+    expect(aksamBoslugu(satirlar(15 * 60))).toEqual({ lat: 39.77, lng: 30.52 });
   });
 
-  it('17:00 ve sonrası ya da aday yoksa öneri yok', () => {
-    expect(aksamOnerisi({ satirlar: satirlar(AKSAM_ESIGI_DK), mekanlar, duraklar, yerler: [] })).toBeNull();
-    expect(aksamOnerisi({ satirlar: satirlar(15 * 60), mekanlar: [son], duraklar, yerler: [] })).toBeNull();
-    expect(aksamOnerisi({ satirlar: [], mekanlar, duraklar, yerler: [] })).toBeNull();
+  it('17:00 ve sonrası ya da durak yoksa boşluk yok', () => {
+    expect(aksamBoslugu(satirlar(AKSAM_ESIGI_DK))).toBeNull();
+    expect(aksamBoslugu([])).toBeNull();
   });
 });
 
@@ -123,14 +118,10 @@ describe('#262 / #318: Google koordinatı boşalmış mekan', () => {
     ]);
   });
 
-  it('akşam önerisi son konumlu duraktan hesaplanır; koordinatsız aday önerilmez', () => {
-    const uzak = mekan('uzak', 'park', 39.9, 30.7);
-    const bosAday = { ...mekan('bosAday', 'park'), lat: null, lng: null } as Mekan;
+  it('akşam boşluğu son konumlu duraktan; günün bütün durakları koordinatsızsa null, çökme yok', () => {
     const satirlar = planSatirlari([d[0], d[1]], mekanIle, [satir(d[0], 600, 645), satir(d[1], 660, 705)]);
-    const o = aksamOnerisi({ satirlar, mekanlar: [a, bos, bosAday, uzak], duraklar: [d[0], d[1]], yerler: [] });
-    expect(o?.liste?.id).toBe('uzak');
-    // Günün bütün durakları koordinatsızsa yakınlık bilinmez: öneri yok, çökme yok.
+    expect(aksamBoslugu(satirlar)).toEqual({ lat: 39.77, lng: 30.52 });
     const yalnizBos = planSatirlari([d[1]], mekanIle, [satir(d[1], 660, 705)]);
-    expect(aksamOnerisi({ satirlar: yalnizBos, mekanlar: [bos, uzak], duraklar: [d[1]], yerler: [] })).toBeNull();
+    expect(aksamBoslugu(yalnizBos)).toBeNull();
   });
 });

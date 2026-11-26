@@ -180,3 +180,13 @@ export function gunSecenekleri(p: GunHesabi & { mekan: Mekan; gunler: Gun[]; dur
   // Önerilen en üstte, diğerleri gün sırasıyla.
   return [...secenekler.filter((x) => x.onerilen), ...secenekler.filter((x) => !x.onerilen)];
 }
+
+/**
+ * #532 KK4: Güne ekle bir gün bağlamıyla açıldıysa o gün en üstte ve vurgulu; "ÖNERİLEN" rozeti yalnız bağlamsız açılışta.
+ * Bağlamdaki gün yoksa liste değişmez. Vurgu `onerilen` alanıyla taşınır, rozet `rozet` ile ayrılır.
+ */
+export function gunBaglaminaGore(secenekler: GunSecenegi[], gunId: string | null | undefined): (GunSecenegi & { rozet: boolean })[] {
+  const hedef = gunId ? secenekler.find((x) => x.gun.id === gunId) : undefined;
+  if (!hedef) return secenekler.map((x) => ({ ...x, rozet: x.onerilen }));
+  return [hedef, ...secenekler.filter((x) => x !== hedef).sort((a, b) => a.gun.index - b.gun.index)].map((x) => ({ ...x, onerilen: x === hedef, rozet: false }));
+}
