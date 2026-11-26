@@ -1,0 +1,173 @@
+{
+  "surum": 1,
+  "sehir": {
+    "yeni": {
+      "ad": "İstanbul",
+      "slug": "istanbul",
+      "place_id": "ChIJawhoAASnyhQR0LABvJj-zOE"
+    }
+  },
+  "takvim": {
+    "ilk_gun": "cumartesi"
+  },
+  "gezi": {
+    "slug": "istanbulda-bir-gun",
+    "baslik": "İstanbul'da bir gün",
+    "ozet": "Sabah Sultanahmet'te üç yapı, öğleden sonra iki çarşı ve Süleymaniye",
+    "yazar_ad": "Tripmate ekibi",
+    "amaclar": [
+      "kultur_tarih",
+      "lezzet"
+    ],
+    "yazi_md": "İstanbul'u bir günde görmek mümkün değil, ama Tarihi Yarımada'nın bir gününü yürüyerek doldurmak mümkün. Bu plan seni sabah Sultanahmet'te Bizans'tan ve Osmanlı'dan kalan üç yapıya, öğlen Eminönü'ne, öğleden sonra iki çarşıya ve akşamüstü Süleymaniye'nin terasına götürüyor. Bütün gün yürüyeceksin; en uzun bacak Yerebatan'dan Eminönü'ne yirmi dakikalık bir iniş. Rahat ayakkabı giy, yanına başını örtecek bir şal al.\n\n> Camiler namaz vakitlerinde ziyarete kapanır, cuma öğlesi en uzun aradır. Plan cumartesiye göre kuruldu: Kapalıçarşı pazar günü, Pandeli de pazar kapalı. Topkapı Sarayı ve Boğaz vapuru için ikinci bir gün ayır.\n\n## 1. gün · Sultanahmet'ten Süleymaniye'ye\n\nGüne [Sultanahmet Camii](mekan:ChIJ4fRwZb25yhQRpHwVijb3LeU) ile başla. I. Ahmed'in 1617'de bitirdiği caminin altı minaresi, içinde de mavi ve yeşil ağırlıklı İznik çinileri var. Sabah erken saatte içerisi daha sakin; ayakkabını çıkar, yarım saat dolaş. Çıkışta caminin batısındaki [Sultanahmet Meydanı](mekan:ChIJ2XlLfO25yhQR8Hcxg0Af5V4)'na bak: Bizans hipodromunun yerinde Mısır'dan getirilen dikilitaş ile Yılanlı Sütun duruyor.\n\nMeydanın öbür ucunda [Ayasofya](mekan:ChIJJxwBkr65yhQRrk9EN29vbiM) seni bekliyor. 537'de bitirilen bu yapı bin yıl kilise, beş yüz yıla yakın cami, seksen yıl müze oldu; 2020'den beri yine cami. Ziyaretçiler ayrı bir kapıdan üst galeriye çıkar; kubbenin tabanındaki pencere dizisini ve güney galerisindeki Deesis mozaiğini oradan görürsün.\n\n::mekan[ChIJJxwBkr65yhQRrk9EN29vbiM]\n\nAyasofya'nın karşısında, sokağın altında [Yerebatan Sarnıcı](mekan:ChIJyWrG4L25yhQRcYRt7uEvwGA) var. 532'de yapılan su deposunda 336 sütunun arasında ahşap iskelelerde yürürsün; kuzeybatı köşesinde iki Medusa başı, biri yan, biri baş aşağı.\n\nSarnıçtan çıkınca Alemdar Caddesi'nden Sirkeci'ye, oradan Eminönü'ne in. Öğle yemeği Mısır Çarşısı'nın kapısının üstündeki [Pandeli](mekan:ChIJP2joPWa3yhQR-5rFKbT0saE)'de. Turkuaz çinili salonlarda patlıcan böreğini dene; masadan Yeni Cami'nin avlusu görünür.\n\nMerdivenden indiğinde [Mısır Çarşısı](mekan:ChIJn9t8b-u5yhQRXVCwl43vu0Q)'nın içindesin. 1660'ta Yeni Cami külliyesiyle tamamlanan L biçimli çarşıda baharat, kuruyemiş, lokum ve peynir tezgâhları var; tadım istemekten çekinme. Batı kapısından çıkıp iki sokak ileride Hasırcılar Çarşısı'nın içindeki [Rüstem Paşa Camii](mekan:ChIJqUoa9ey5yhQRdUxypVCNHQY)'ne merdivenle çık. Sinan'ın küçük camisi dükkânların üstüne oturuyor, duvarları baştan sona İznik çinisi; on dakika bile yeter.\n\nBuradan Uzunçarşı'nın yokuşunu tırmanarak [Kapalıçarşı](mekan:ChIJJwXXYpG5yhQRq5jBWgtoyGQ)'ya geç. Fatih'in 1460'larda yaptırdığı Cevahir Bedesteni'nin çevresinde büyüyen çarşıda altmıştan fazla sokak var. Kuyumcuların dizildiği Kalpakçılar Caddesi'ni yürü, bedestende eski gümüşlere bak, yorulursan bir hanın avlusunda çay iç.\n\n::mekan[ChIJJwXXYpG5yhQRq5jBWgtoyGQ]\n\nÇarşıdan Beyazıt Kapısı'ndan çık, Sahaflar Çarşısı'nın çınarlı avlusundan geçip yokuşu [Süleymaniye Camii](mekan:ChIJMRDAOo25yhQR7c9XIQT1zIo)'ne doğru çık. Mimar Sinan'ın 1557'de bitirdiği külliyenin içi sade ve aydınlık. Arkadaki mezarlıkta Kanuni'nin ve Hürrem Sultan'ın türbeleri var. Günü avlunun Haliç tarafındaki terasta bitir; karşında Galata Kulesi ve Haliç'in köprüleri.\n\nAkşam için acele etme. Süleymaniye'den on dakika yürüyünce Vefa'dasın; [Vefa Bozacısı](mekan:ChIJNRVgoIy5yhQRdNH4KPnjiTo) 1876'dan beri aynı dükkânda, bozayı leblebi ve tarçınla veriyor. Kış akşamı için bundan iyi bir kapanış zor."
+  },
+  "gunler": [
+    {
+      "baslik": "Sultanahmet'ten Süleymaniye'ye",
+      "duraklar": [
+        {
+          "place_id": "ChIJ4fRwZb25yhQRpHwVijb3LeU",
+          "osm": "relation/18055570",
+          "ad": "Sultanahmet Camii",
+          "sure_dk": 30,
+          "sure_gerekcesi": "varsayılan 45; cami içi ve avlu yarım saat",
+          "kapali_gunler": [],
+          "rehber": "sultanahmet-camii",
+          "amaclar": [
+            "kultur_tarih"
+          ]
+        },
+        {
+          "place_id": "ChIJJxwBkr65yhQRrk9EN29vbiM",
+          "osm": "relation/1555271",
+          "ad": "Ayasofya",
+          "sure_dk": 60,
+          "sure_gerekcesi": "varsayılan 45; ziyaretçi rampası ve üst galeri bir saat",
+          "kapali_gunler": [],
+          "rehber": "ayasofya",
+          "amaclar": [
+            "kultur_tarih"
+          ]
+        },
+        {
+          "place_id": "ChIJyWrG4L25yhQRcYRt7uEvwGA",
+          "osm": "way/1184924695",
+          "ad": "Yerebatan Sarnıcı",
+          "sure_dk": 45,
+          "sure_gerekcesi": "varsayılan 45; iskele boyunca tek tur",
+          "kapali_gunler": [],
+          "rehber": "yerebatan-sarnici",
+          "amaclar": [
+            "kultur_tarih",
+            "cocuklu"
+          ]
+        },
+        {
+          "place_id": "ChIJP2joPWa3yhQR-5rFKbT0saE",
+          "osm": "node/3079823142",
+          "ad": "Pandeli",
+          "sure_dk": 60,
+          "sure_gerekcesi": "varsayılan 75; öğle yemeği, tek ana yemek ve tatlı",
+          "kapali_gunler": [
+            "pazar"
+          ],
+          "rehber": "pandeli",
+          "amaclar": [
+            "lezzet"
+          ]
+        },
+        {
+          "place_id": "ChIJn9t8b-u5yhQRXVCwl43vu0Q",
+          "ad": "Mısır Çarşısı",
+          "sure_dk": 45,
+          "sure_gerekcesi": "varsayılan 45; iki kolu yürüyüp tadım yapmak",
+          "kapali_gunler": [],
+          "rehber": "misir-carsisi",
+          "amaclar": [
+            "lezzet"
+          ]
+        },
+        {
+          "place_id": "ChIJJwXXYpG5yhQRq5jBWgtoyGQ",
+          "osm": "way/303807317",
+          "ad": "Kapalıçarşı",
+          "sure_dk": 90,
+          "sure_gerekcesi": "varsayılan 45; bedesten, Kalpakçılar ve bir han avlusu bir buçuk saat",
+          "kapali_gunler": [
+            "pazar"
+          ],
+          "rehber": "kapalicarsi",
+          "amaclar": [
+            "kultur_tarih"
+          ]
+        },
+        {
+          "place_id": "ChIJMRDAOo25yhQR7c9XIQT1zIo",
+          "osm": "relation/1564032",
+          "ad": "Süleymaniye Camii",
+          "sure_dk": 45,
+          "sure_gerekcesi": "varsayılan 45; cami, türbeler ve teras",
+          "kapali_gunler": [],
+          "rehber": "suleymaniye-camii",
+          "amaclar": [
+            "kultur_tarih",
+            "yavas"
+          ]
+        }
+      ]
+    }
+  ],
+  "ek_mekanlar": [
+    {
+      "place_id": "ChIJ2XlLfO25yhQR8Hcxg0Af5V4",
+      "ad": "Sultanahmet Meydanı"
+    },
+    {
+      "place_id": "ChIJqUoa9ey5yhQRdUxypVCNHQY",
+      "ad": "Rüstem Paşa Camii"
+    },
+    {
+      "place_id": "ChIJNRVgoIy5yhQRdNH4KPnjiTo",
+      "ad": "Vefa Bozacısı"
+    }
+  ],
+  "notlar": {
+    "dogrulanacaklar": [
+      "[Plan · Sehir] · İstanbul şehri sehir.yeni ile açılıyor (#299, 19 Kasım kararı, büyük şehirler grubu); place_id 'İstanbul' kimlik sorgusundan (tek sonuç) · BO'da şehir satırı",
+      "[Plan · kapali_gunler] · Kapalıçarşı 'pazar' OSM opening_hours'tan (Mo-Sa 09:00-19:00). Pazar açılışı tartışılıyor (borsaningundemi 'pazar günleri de açık olacak' haberi); güncel durum · Kapalıçarşı Esnaf Derneği",
+      "[Plan · g1.d4] · Pandeli 'pazar' kapalı ve yalnız öğle servisi: kesin kaynakla doğrulanmadı (Time Out, Michelin sayfası arama sonucunda; içerik okunmadı) · pandeli.com.tr ya da telefon",
+      "[Plan · g1.d5] · Mısır Çarşısı OSM aday listesinde yok (2 km yarıçap, Sultanahmet-Beyazıt merkezi); osm boş, konum Google'dan 30 gün · OSM'e eklenebilir",
+      "[Rehber · Ayasofya] · Ziyaretçilerin ayrı girişle üst galeriye çıkması 15 Ocak 2024'ten beri (CNN Türk, TRT Haber, Lonely Planet). Türk vatandaşlarının galeriye girişi konusunda 2024'te değişen kurallar var (Türkiye Gazetesi haberleri); metne yazılmadı · muze.gov.tr / Ayasofya resmî duyuru",
+      "[Rehber · Ayasofya] · Deesis mozaiğinin güney galerisinde olduğu, Omphalion ve 40 pencere: genel kaynak bilgisi (tr.wikipedia 'Ayasofya'); bugün galeri rotasında Deesis'in görülebildiği doğrulanmadı · yerinde",
+      "[Rehber · Sultanahmet] · 1609–1617, Sedefkâr Mehmed Ağa, onarımdan sonra 2023 baharında açılış (Vakıflar). Ziyaretçi girişinin hangi kapıdan olduğu yazılmadı · Vakıflar Genel Müdürlüğü",
+      "[Rehber · Yerebatan] · 532, 336 sütun, yaklaşık 140×70 m, 2017–2022 onarım, sanat yerleştirmeleri (yerebatan.com, tr.wikipedia). Ölçüler kaynaklarda 138×65 olarak da geçiyor; metinde 'yaklaşık' · yerebatan.com",
+      "[Rehber · Pandeli] · 1901, Pandeli Çobanoğlu, 1950'lerde bugünkü yer, 2020'de yeniden açılış (Sözcü 'Pandeli yeniden açılıyor'; Milliyet, Aylin Öney Tan). Taşınma yılı kaynaklarda farklı · pandeli.com.tr",
+      "[Rehber · Mısır Çarşısı] · Safiye Sultan 1597, Turhan Hadice Sultan 1660, adın Mısır vergisinden geldiği (tr.wikipedia 'Mısır Çarşısı'). 'Her gün açık' bilgisi CNN Türk haberinden ('her gün 60 bine yakın ziyaretçi'); bayram günleri · İstanbul Mısır Çarşısı Esnaf Derneği",
+      "[Rehber · Kapalıçarşı] · Dinî bayramların ilk günü kapalı olduğu: genel bilgi, kaynakla eşleştirilmedi. 1894 depremi ve onarımlar tr.wikipedia 'Kapalıçarşı' · Kapalıçarşı Esnaf Derneği",
+      "[Rehber · Süleymaniye] · 1550–1557, Sinan'ın 'kalfalık eserim' sözü (Tezkiretü'l-Bünyan anlatısı olarak yaygın), hatlar Hasan Çelebi, is odası: tr.wikipedia 'Süleymaniye Camii'; kaynaklar arasında küçük farklar olabilir",
+      "[Yazı] · Vefa Bozacısı 1876 ve bozanın leblebi-tarçınla verilmesi: OSM website vefa.com.tr ve il listesi (istanbul.json, 45. sıra)",
+      "[Yazı · İl listesi] · İlk 5'ten Topkapı Sarayı (2.) ve Uzun Boğaz Turu (5.) bu gezide yok: bir günde Sultanahmet, iki çarşı ve Süleymaniye ile doluyor; ikisi İstanbul'un 2 günlük gezisine (sıradaki PR) kalıyor"
+    ],
+    "fotograf_onerileri": [
+      {
+        "ne": "Süleymaniye Camii, Haliç'ten",
+        "altyazi": "Süleymaniye, Haliç'in karşı kıyısından",
+        "arama": "commons:Category:Süleymaniye Mosque"
+      },
+      {
+        "ne": "Ayasofya ve Sultanahmet",
+        "altyazi": "Ayasofya, Sultanahmet Meydanı'ndan",
+        "arama": "commons:Category:Hagia Sophia (exterior)"
+      },
+      {
+        "ne": "Mısır Çarşısı içi",
+        "altyazi": "Mısır Çarşısı'nda baharat tezgâhları",
+        "arama": "commons:Category:Spice Bazaar"
+      }
+    ],
+    "varsayimlar": [
+      "1. gün cumartesi (Kapalıçarşı ve Pandeli pazar kapalı; Topkapı'nın salı kapanışı bu planı etkilemiyor)",
+      "Bütün gün yürüyerek; araç yok"
+    ]
+  }
+}
