@@ -1,7 +1,7 @@
 {
   "il": "İstanbul",
   "slug": "istanbul",
-  "guncelleme": "2026-11-20",
+  "guncelleme": "2026-11-26",
   "oneriler": [
     {
       "sira": 1,
@@ -339,7 +339,7 @@
       "merkeze_km": 4,
       "neden": "1923'te Beyoğlu'nda açıldı, 1961'den beri Kadıköy'de; karamelli, bademli kup griye",
       "osm": "node/1394941165",
-      "place_id": "ChIJYeZr6me4yhQRRtlqAlFv5_A"
+      "place_id": null
     },
     {
       "sira": 26,
@@ -572,19 +572,6 @@
     },
     {
       "sira": 43,
-      "ad": "Köfteci Arnavut",
-      "kategori": "yemek",
-      "amaclar": [
-        "lezzet"
-      ],
-      "ilce": "Fatih",
-      "merkeze_km": 4,
-      "neden": "1937'den beri Balat'ta, Haliç'e yakın; Balkan usulü köfte ve sütlü trileçe",
-      "osm": "node/8829968818",
-      "place_id": "ChIJ4Q0CdwO6yhQRYNXyxvghq2o"
-    },
-    {
-      "sira": 44,
       "ad": "Tarihi Haliç İşkembecisi",
       "kategori": "yemek",
       "amaclar": [
@@ -597,7 +584,7 @@
       "place_id": "ChIJ04dOxiO7yhQRdcdiTjGH9N8"
     },
     {
-      "sira": 45,
+      "sira": 44,
       "ad": "Vefa Bozacısı",
       "kategori": "tatli_kahve",
       "amaclar": [
@@ -611,7 +598,7 @@
       "place_id": "ChIJNRVgoIy5yhQRdNH4KPnjiTo"
     },
     {
-      "sira": 46,
+      "sira": 45,
       "ad": "Mandabatmaz",
       "kategori": "tatli_kahve",
       "amaclar": [
@@ -625,7 +612,7 @@
       "place_id": "ChIJey_CUGS3yhQR8We58TT5ifM"
     },
     {
-      "sira": 47,
+      "sira": 46,
       "ad": "Meşhur Bebek Badem Ezmesi",
       "kategori": "tatli_kahve",
       "amaclar": [
@@ -638,7 +625,7 @@
       "place_id": "ChIJLSBYMB22yhQRXQ-T77zbJBs"
     },
     {
-      "sira": 48,
+      "sira": 47,
       "ad": "Sahaflar Çarşısı",
       "kategori": "carsi",
       "amaclar": [
@@ -651,7 +638,7 @@
       "place_id": "ChIJi-brEJG5yhQRM-Yt0LMlpRw"
     },
     {
-      "sira": 49,
+      "sira": 48,
       "ad": "Çemberlitaş Hamamı",
       "kategori": "aktivite",
       "amaclar": [
@@ -665,7 +652,7 @@
       "place_id": "ChIJxXDLuZa5yhQRwgxFEF2R3E8"
     },
     {
-      "sira": 50,
+      "sira": 49,
       "ad": "Taksim–Tünel Nostaljik Tramvayı",
       "kategori": "aktivite",
       "amaclar": [
