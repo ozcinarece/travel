@@ -3602,6 +3602,46 @@ select pg_temp.hata_bekle($$select public.places_yenileme_artir(1, 8000)$$, '425
 select pg_temp.hata_bekle($$select public.places_koordinat_yenile('ChIJ_262_esik', 40, 30)$$, '42501');
 select pg_temp.hata_bekle($$select * from public.places_koordinat_bosalt()$$, '42501');
 reset role;
+-- ---------------------------------------------------------------- #516: gece koordinat temizliği (kapıdan bağımsız)
+-- Her kaynakta bir 31 günlük (boşalır) ve bir 29 günlük (kalır) koordinat; #262'nin satırları yeniden kullanılır.
+update public.places set lat = 40.3, lng = 30.3, google_fetched_at = now() - interval '31 days' where place_id = 'ChIJ_262_suresi';
+update public.places set lat = 40.4, lng = 30.4, google_fetched_at = now() - interval '29 days' where place_id = 'ChIJ_262_yok';
+update public.trips set lat = 40.0, lng = 30.0, google_fetched_at = now() - interval '31 days' where id = '26200000-0000-4000-8000-000000000010';
+update public.trips set lat = 40.2, lng = 30.2, google_fetched_at = now() - interval '29 days',
+  hotel_lat = 40.1, hotel_lng = 30.1, hotel_fetched_at = now() - interval '31 days' where id = '26200000-0000-4000-8000-000000000020';
+update public.stays set lat = 40.6, lng = 30.6, google_fetched_at = now() - interval '31 days' where place_id = 'ChIJ_262_otel';
+update public.stays set lat = 40.15, lng = 30.15, google_fetched_at = now() - interval '29 days' where place_id = 'ChIJ_262_eski';
+set role service_role;
+do $$
+declare k public.gece_temizligi_kayit;
+begin
+  k := public.gece_temizligi();
+  assert k.yer >= 1 and k.seyahat >= 1 and k.otel >= 1 and k.konaklama >= 1, '#516 KK1: dört kaynakta da boşaltır: ' || row_to_json(k)::text;
+  assert (select lat is null and lng is null and note = 'kalır' from public.places where place_id = 'ChIJ_262_suresi'), '#516 KK4: 31 günlük places boşalır, not kalır';
+  assert (select lat = 40.4 from public.places where place_id = 'ChIJ_262_yok'), '#516 KK4: 29 günlük places kalır';
+  assert (select lat is null and city_place_id = 'ChIJ_262_sehir' from public.trips where id = '26200000-0000-4000-8000-000000000010'), '#516 KK4: 31 günlük trips şehri boşalır';
+  assert (select lat = 40.2 and hotel_lat is null and hotel_place_id = 'ChIJ_262_eski' from public.trips where id = '26200000-0000-4000-8000-000000000020'),
+    '#516 KK4: 29 günlük trips şehri kalır, 31 günlük oteli boşalır';
+  assert (select lat is null and label = 'Otelim' from public.stays where place_id = 'ChIJ_262_otel'), '#516 KK4: 31 günlük stays boşalır';
+  assert (select lat = 40.15 from public.stays where place_id = 'ChIJ_262_eski'), '#516 KK4: 29 günlük stays kalır';
+  assert (select lat = 40.7 from public.stays where label = 'Pinim'), '#516: place_id''siz otel (kullanıcı pini) boşalmaz';
+  -- KK5: çalışma kaydı yalnız sayı tutar; ikinci çalışmada boşaltılacak bir şey kalmaz.
+  assert (select count(*) from public.gece_temizligi_kayit where id = k.id and yer = k.yer and seyahat = k.seyahat) = 1, '#516 KK5: kayıt yazılır';
+  k := public.gece_temizligi();
+  assert k.yer = 0 and k.seyahat = 0 and k.otel = 0 and k.konaklama = 0, '#516: ikinci çalışma boş: ' || row_to_json(k)::text;
+  assert not exists (select 1 from public.changes where trip_id::text like '26200000-%' and field in ('lat', 'lng', 'hotel_lat', 'hotel_lng')
+    and at > now() - interval '1 minute' and new = 'null'::jsonb), '#516: boşaltma akışa düşmez';
+end $$;
+reset role;
+set role authenticated;
+select pg_temp.as_email(:E, 'ozcinar.ece@gmail.com');
+select pg_temp.hata_bekle($$select public.gece_temizligi()$$, '42501');
+select pg_temp.hata_bekle($$select count(*) from public.gece_temizligi_kayit$$, '42501');
+reset role;
+set role anon;
+select pg_temp.hata_bekle($$select public.gece_temizligi()$$, '42501');
+select pg_temp.hata_bekle($$select count(*) from public.gece_temizligi_kayit$$, '42501');
+reset role;
 -- ---------------------------------------------------------------- #345 KK1: kapak atfı (geziler, sehirler, yerler)
 -- Okuma ve yazma satırın mevcut kuralıyla aynı: yayındaki satırın atfı herkese görünür, taslağınki görünmez; yalnız admin yazar.
 -- Biçim denetimi: yalnız yazar / lisans / kaynak_url, yazar zorunlu, kaynak https.
