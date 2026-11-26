@@ -1,0 +1,280 @@
+{
+  "il": "Niğde",
+  "slug": "nigde",
+  "guncelleme": "2026-11-26",
+  "oneriler": [
+    {
+      "sira": 1,
+      "ad": "Gümüşler Manastırı",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 10,
+      "neden": "10. yüzyıl kaya manastırı; avlu çevresinde odalar ve kilisede 'Gülen Meryem' freski",
+      "osm": "node/799495922",
+      "place_id": "ChIJVw22ZVPpKRUR6LslQqdxoDY"
+    },
+    {
+      "sira": 2,
+      "ad": "Aladağlar Millî Parkı",
+      "kategori": "doga",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Çamardı",
+      "merkeze_km": 75,
+      "neden": "1995'te millî park ilan edildi; zirvesi 3.756 m Demirkazık, 3.000 m üstü onlarca tepe"
+    },
+    {
+      "sira": 3,
+      "ad": "Tyana Antik Kenti ve Su Kemerleri",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Bor",
+      "merkeze_km": 22,
+      "neden": "Roma dönemi kemerlerinin 1,5 km'si Kemerhisar'da ayakta; Apollonius'un doğduğu kent",
+      "osm": "way/1510668508",
+      "place_id": "ChIJL0fEKGjXKRURHTNTwKsiS_U"
+    },
+    {
+      "sira": 4,
+      "ad": "Alaeddin Camii",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "1223'te Alaeddin Tepesi'nde yapıldı; yazın doğu kapısının gölgesi taçlı kız başına benzer",
+      "osm": "way/235332175",
+      "place_id": "ChIJjffOoebnKRURhpT_PIsvqdE"
+    },
+    {
+      "sira": 5,
+      "ad": "Andaval Kilisesi (Konstantin ve Helena Kilisesi)",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 8,
+      "neden": "Aktaş'ta 5.-6. yüzyıl bazilikası; kuruluşu Helena'ya bağlanır, 11.-13. yy duvar resimleri",
+      "osm": "node/4911455287",
+      "place_id": "ChIJiWGl2BHvKRURJrEfp6CnAik"
+    },
+    {
+      "sira": 6,
+      "ad": "Tabal Gastronomi Evi",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet",
+        "cocuklu"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Belediyenin kadınların işlettiği lokantası, Bib Gourmand; Niğde tavası ve mangır çorbası",
+      "place_id": "ChIJT0EuN3bnKRURypYZmxQCE60"
+    },
+    {
+      "sira": 7,
+      "ad": "Antik Roma Havuzu",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Bor",
+      "merkeze_km": 20,
+      "neden": "Bahçeli'de yeraltı kaynağı üstüne kurulu 65x22 m'lik havuz; Tyana'ya suyu buradan giderdi",
+      "osm": "way/208067099",
+      "place_id": "ChIJ2U218TzaKRUR6JEhLbMAsL4"
+    },
+    {
+      "sira": 8,
+      "ad": "Hüdavent Hatun Kümbeti",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "1312 Selçuklu kümbeti; pencerelerde insan başlı kuş ve çift başlı kartal kabartmaları",
+      "osm": "node/7208668965",
+      "place_id": "ChIJcayoCwDnKRUR89Cu1Jx1XN8"
+    },
+    {
+      "sira": 9,
+      "ad": "Sungurbey Camii",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "İlhanlı valisi Sungur Bey'in 1335 camisi; batı cephesinde Gotik pencereler, ahşap minber",
+      "osm": "way/235332098",
+      "place_id": "ChIJm-xsSuTnKRURcVSDg3nMXYo"
+    },
+    {
+      "sira": 10,
+      "ad": "Demirkazık Zirve Tırmanışı",
+      "kategori": "aktivite",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Çamardı",
+      "merkeze_km": 75,
+      "neden": "Çukurbağ'dan başlar; Sokullupınar'a 1,5 saat, kamptan zirveye gidiş-dönüş 10-12 saat",
+      "place_id": "ChIJHTiZQd2eKRURToCaSwWx5bE"
+    },
+    {
+      "sira": 11,
+      "ad": "Emli Vadisi",
+      "kategori": "aktivite",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Çamardı",
+      "merkeze_km": 80,
+      "neden": "Çukurbağ'ın 6 km ötesinde kamp alanı; yarım saatlik yürüyüşle Cımbar Kanyonu'na varılır"
+    },
+    {
+      "sira": 12,
+      "ad": "Bedesten Kent Müzesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Sokullu Mehmet Paşa'nın 16. yy bedesteninde etnografya eserleri ve balmumu heykeller",
+      "place_id": "ChIJfZ-_LuTnKRURtzUAxbCbWLM"
+    },
+    {
+      "sira": 13,
+      "ad": "Öküz Mehmet Paşa Külliyesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Ulukışla",
+      "merkeze_km": 80,
+      "neden": "1616'da bitirilen kervansaray, arasta, cami ve hamam; hamamın sıcak suyu yapıyı ısıtırmış",
+      "place_id": "ChIJvSAl5kDY1xQRhtXFMkNm6ew"
+    },
+    {
+      "sira": 14,
+      "ad": "Karagöl ve Çinili Göl",
+      "kategori": "doga",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Ulukışla",
+      "merkeze_km": 100,
+      "neden": "Bolkar Dağları'nda 2.650 m'deki buzul gölleri; yanındaki Pilot Tepe 2.973 m'ye yükselir"
+    },
+    {
+      "sira": 15,
+      "ad": "Niğde Kalesi ve Saat Kulesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Tepedeki kalenin üstü park; bir burcun üzerindeki 19. yüzyıl saat kulesi kentin simgesi",
+      "osm": "node/1757257426"
+    },
+    {
+      "sira": 16,
+      "ad": "Kale 100. Yıl Halk Kütüphanesi (Prodromos Kilisesi)",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "1861 tarihli Rum kilisesi 2023'te kütüphane oldu; içinde Müjde ve Göğe Yükseliş resimleri",
+      "place_id": "ChIJK_3hNJLnKRURWc_6WGE-Czw"
+    },
+    {
+      "sira": 17,
+      "ad": "Ak Medrese",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "1409'da Karamanoğulları döneminde yapılan medrese; Tabal'ın karşısında, kale eteğinde"
+    },
+    {
+      "sira": 18,
+      "ad": "Sofram Restaurant",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet",
+        "cocuklu",
+        "gece"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Michelin 2026 seçkisinde; ağır ateşte pişen kuzu gerdan yoğurt ve domatesle gelir"
+    },
+    {
+      "sira": 19,
+      "ad": "Yedigöller Yürüyüşü",
+      "kategori": "aktivite",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Çamardı",
+      "merkeze_km": 75,
+      "neden": "Çukurbağ çıkışlı 10-12 saatlik yürüyüş; Emler ve Kızılkaya zirvelerinin ana kampı"
+    },
+    {
+      "sira": 20,
+      "ad": "Çiftehan Kaplıcaları",
+      "kategori": "aktivite",
+      "amaclar": [
+        "yavas"
+      ],
+      "ilce": "Ulukışla",
+      "merkeze_km": 80,
+      "neden": "Romalıların 'sıcak sular' dediği köy; Selçuklu dönemi havuzları hâlâ duruyor"
+    },
+    {
+      "sira": 21,
+      "ad": "Akkaya Barajı",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 5,
+      "neden": "Üniversite kampüsü yanındaki baraj gölü; elmabaş ördek ve dikkuyruk dahil 225 kuş türü"
+    },
+    {
+      "sira": 22,
+      "ad": "Kınık Höyük",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Altunhisar",
+      "merkeze_km": 25,
+      "neden": "Bor Ovası'nın kuzeyindeki höyükte Pers dönemi ve Helenistik tapınaklar kazıyla çıkarıldı",
+      "osm": "way/279592603",
+      "place_id": "ChIJb4iUcKsl1hQRAmh68luW2Co"
+    }
+  ]
+}
