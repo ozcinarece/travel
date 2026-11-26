@@ -1,0 +1,400 @@
+{
+  "il": "Erzurum",
+  "slug": "erzurum",
+  "guncelleme": "2026-11-21",
+  "oneriler": [
+    {
+      "sira": 1,
+      "ad": "Çifte Minareli Medrese",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Yakutiye",
+      "merkeze_km": 0,
+      "neden": "İki farklı işlenmiş minare, dört eyvanlı avlu; arkada Üç Kümbetler",
+      "osm": "relation/11788485",
+      "place_id": "ChIJgUL3QgxfbkARLtIesf6YevY"
+    },
+    {
+      "sira": 2,
+      "ad": "Yakutiye Medresesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Yakutiye",
+      "merkeze_km": 0,
+      "neden": "İlhanlı dönemi 1310 yapısı; kapalı avlulu medrese bugün müze",
+      "osm": "way/1042989946",
+      "place_id": "ChIJ7bqjHg5fbkAR4K5pVeX4lTU"
+    },
+    {
+      "sira": 3,
+      "ad": "Cağ kebabı",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Yakutiye",
+      "merkeze_km": 0,
+      "neden": "Yatay şişte odun ateşinde pişer, şişle tabağa gelir; Erzurum'un kendi kebabı"
+    },
+    {
+      "sira": 4,
+      "ad": "Palandöken Kayak Merkezi",
+      "kategori": "aktivite",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Palandöken",
+      "merkeze_km": 6,
+      "neden": "Şehrin hemen üstünde; FIS onaylı pistler ve gece kayağı"
+    },
+    {
+      "sira": 5,
+      "ad": "Erzurum Kalesi ve Saat Kulesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Yakutiye",
+      "merkeze_km": 0,
+      "neden": "İç kale ve Saltuklu saat kulesi; ahşap merdivenle şehre tepeden bakılır",
+      "osm": "relation/15310579",
+      "place_id": "ChIJR6xhmF5fbkARITX6Oa5bLwY"
+    },
+    {
+      "sira": 6,
+      "ad": "Tortum Şelalesi",
+      "kategori": "doga",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Uzundere",
+      "merkeze_km": 110,
+      "neden": "Tortum Gölü'nün suyu 48 metreden döker; en coşkun hali ilkbaharda"
+    },
+    {
+      "sira": 7,
+      "ad": "Üç Kümbetler",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Yakutiye",
+      "merkeze_km": 0,
+      "neden": "Taşında hayvan ve bitki kabartmaları olan üç Selçuklu kümbeti",
+      "osm": "node/10765088083",
+      "place_id": "ChIJW1heQwlfbkAR41opo1baRa8"
+    },
+    {
+      "sira": 8,
+      "ad": "Ulu Cami",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Yakutiye",
+      "merkeze_km": 0,
+      "neden": "12. yüzyıl Saltuklu camisi; payelerle bölünmüş geniş ve alçak harim",
+      "osm": "way/230100864",
+      "place_id": "ChIJk1lmPgxfbkARhAQzOdUwVJU"
+    },
+    {
+      "sira": 9,
+      "ad": "Rüstem Paşa Bedesteni (Taşhan)",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Yakutiye",
+      "merkeze_km": 0,
+      "neden": "İki katlı han; dükkânlarında siyah Oltu taşı işlenip satılır",
+      "osm": "relation/4576274",
+      "place_id": "ChIJ2XvCZxJfbkARK_LULEWMBSc"
+    },
+    {
+      "sira": 10,
+      "ad": "Aziziye Tabyası ve Nene Hatun Mezarı",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Yakutiye",
+      "merkeze_km": 4,
+      "neden": "93 Harbi'nin simge tabyası; Nene Hatun'un mezarı önünde",
+      "osm": "way/1246706680"
+    },
+    {
+      "sira": 11,
+      "ad": "Kadayıf dolması",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Yakutiye",
+      "merkeze_km": 0,
+      "neden": "Cevizli iç sarılan kadayıf kızartılıp şerbete batırılır"
+    },
+    {
+      "sira": 12,
+      "ad": "Lala Mustafa Paşa Camii",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Yakutiye",
+      "merkeze_km": 0,
+      "neden": "1562 tarihli; şehrin ilk Osmanlı camilerinden, çinileri kısmen onarılmış",
+      "osm": "way/1042989947",
+      "place_id": "ChIJ8T0EDg5fbkAR9yOCf7RE-Lg"
+    },
+    {
+      "sira": 13,
+      "ad": "Atatürk Evi Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Yakutiye",
+      "merkeze_km": 0,
+      "neden": "Kongre günlerinde Atatürk'ün kaldığı üç katlı Erzurum evi",
+      "osm": "node/5620942576",
+      "place_id": "ChIJMURWsRFfbkARkSaBp5-ojdM"
+    },
+    {
+      "sira": 14,
+      "ad": "Erzurum Kongre Binası",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Yakutiye",
+      "merkeze_km": 1,
+      "neden": "1919 Erzurum Kongresi'nin toplandığı bina",
+      "osm": "node/5932740685",
+      "place_id": "ChIJrwOL_2tfbkAR_xQtI4piT7Y"
+    },
+    {
+      "sira": 15,
+      "ad": "Narman Peribacaları",
+      "kategori": "doga",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Narman",
+      "merkeze_km": 90,
+      "neden": "Kızıl toprak sütunlar; gün batımında renk en koyu halinde"
+    },
+    {
+      "sira": 16,
+      "ad": "Tortum Gölü",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Uzundere",
+      "merkeze_km": 105,
+      "neden": "Heyelanın vadiyi kapatmasıyla oluşan uzun göl; tekne gezisi yapılır"
+    },
+    {
+      "sira": 17,
+      "ad": "Öşk Vank (Çamlıyamaç Kilisesi)",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Uzundere",
+      "merkeze_km": 100,
+      "neden": "10. yüzyıl Gürcü kilisesi; renkli taş işçiliği ve fresk izleri",
+      "osm": "way/183863555"
+    },
+    {
+      "sira": 18,
+      "ad": "Erzurum Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Yakutiye",
+      "merkeze_km": 1,
+      "neden": "Urartu'dan Osmanlı'ya bölge buluntuları; arkeoloji ve etnografya bir arada",
+      "osm": "way/1112955574"
+    },
+    {
+      "sira": 19,
+      "ad": "Su böreği",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Yakutiye",
+      "merkeze_km": 0,
+      "neden": "Haşlanan yufka katları arasında Erzurum'un tel peyniri; kahvaltının yıldızı"
+    },
+    {
+      "sira": 20,
+      "ad": "Konaklı Kayak Merkezi",
+      "kategori": "aktivite",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Palandöken",
+      "merkeze_km": 17,
+      "neden": "Palandöken'den sakin; 2011 Üniversiteler Kış Oyunları pistleri"
+    },
+    {
+      "sira": 21,
+      "ad": "Hasankale (Pasinler Kalesi)",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Pasinler",
+      "merkeze_km": 36,
+      "neden": "Ovaya hâkim sarp tepede; Kanuni'nin onarttığı, iç kalesi ayakta"
+    },
+    {
+      "sira": 22,
+      "ad": "Pasinler Kaplıcaları",
+      "kategori": "aktivite",
+      "amaclar": [
+        "yavas"
+      ],
+      "ilce": "Pasinler",
+      "merkeze_km": 40,
+      "neden": "40 derece civarı termal su; Roma'dan beri kullanılan kaplıca"
+    },
+    {
+      "sira": 23,
+      "ad": "Kıtlama çay",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet",
+        "yavas"
+      ],
+      "ilce": "Yakutiye",
+      "merkeze_km": 0,
+      "neden": "Şeker bardağa atılmaz, dişte tutulup çay üstünden içilir"
+    },
+    {
+      "sira": 24,
+      "ad": "Erzurum ketesi",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Yakutiye",
+      "merkeze_km": 0,
+      "neden": "Katmerli, yağlı ve hafif tuzlu çörek; çayın ve kahvaltının yanında"
+    },
+    {
+      "sira": 25,
+      "ad": "Çobandede Köprüsü",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Köprüköy",
+      "merkeze_km": 60,
+      "neden": "Aras üzerinde 1298 tarihli yedi kemerli taş köprü"
+    },
+    {
+      "sira": 26,
+      "ad": "Haho (Bağbaşı) Kilisesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Tortum",
+      "merkeze_km": 85,
+      "neden": "10. yüzyıl sonu Gürcü manastır kilisesi; sonradan Taş Cami oldu"
+    },
+    {
+      "sira": 27,
+      "ad": "Çortutu pancarı",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Yakutiye",
+      "merkeze_km": 0,
+      "neden": "Yabani çortutu otuyla yapılan, 2022'de tescillenen yöresel yemek"
+    },
+    {
+      "sira": 28,
+      "ad": "Aşmalı yahni",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Yakutiye",
+      "merkeze_km": 0,
+      "neden": "Çortutu pancarıyla birlikte 2022'de tescillenen Erzurum yahnisi"
+    },
+    {
+      "sira": 29,
+      "ad": "Oltu Kalesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Oltu",
+      "merkeze_km": 120,
+      "neden": "Oltu Çayı'na tünelle inen iç kale; Oltu taşının memleketinde"
+    },
+    {
+      "sira": 30,
+      "ad": "Abdurrahman Gazi Türbesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Palandöken",
+      "merkeze_km": 5,
+      "neden": "Palandöken eteğinde türbe ve cami; şehrin geniş görüldüğü sırt",
+      "osm": "node/10984692728",
+      "place_id": "ChIJxTyqr9VfbkAR4NUudGZYSCM"
+    },
+    {
+      "sira": 31,
+      "ad": "Narman Adalı Göl",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Narman",
+      "merkeze_km": 121,
+      "neden": "Ortasında adacık olan yayla gölü; Otlutepe yaylasına yakın"
+    },
+    {
+      "sira": 32,
+      "ad": "Çoruh'ta rafting",
+      "kategori": "aktivite",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "İspir",
+      "merkeze_km": 150,
+      "neden": "İspir'de Çoruh Vadisi boyunca rafting ve kano"
+    },
+    {
+      "sira": 33,
+      "ad": "Lor dolması",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Yakutiye",
+      "merkeze_km": 0,
+      "neden": "Pazı yaprağına lor ve bulgurla sarılan ev yemeği"
+    }
+  ]
+}

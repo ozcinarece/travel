@@ -1,0 +1,159 @@
+{
+  "surum": 1,
+  "sehir": {
+    "yeni": {
+      "ad": "Edirne",
+      "slug": "edirne",
+      "place_id": "ChIJ4QRjoncvsxQRvDAcQ8rAz6A"
+    }
+  },
+  "takvim": {
+    "ilk_gun": "cumartesi"
+  },
+  "gezi": {
+    "slug": "edirnede-bir-gun",
+    "baslik": "Edirne'de bir gün",
+    "ozet": "Sabah Selimiye'nin kubbesi, öğlen tava ciğer, akşamüstü Meriç'te güneş",
+    "yazar_ad": "Tripmate ekibi",
+    "amaclar": [
+      "kultur_tarih",
+      "lezzet"
+    ],
+    "yazi_md": "Edirne'de bir gün, sabah Selimiye'nin kubbesinin altında başlar, akşamüstü Meriç'in üstünde biter. Bu plan, şehrin merkezini yürüyerek gezip öğleden sonra Tunca kıyısındaki darüşşifaya, akşamüstü de Karaağaç yolundaki köprüye uzanan bir gün. Merkezdeki duraklar birbirine beş on dakika yürüme mesafesinde; müzeye yürüyerek yirmi dakikada varılır, köprüye ise taksiyle ya da arabayla geçmek daha rahat.\n\n> Edirne'de üç cami aynı kilometrekarede duruyor ve ilkiyle sonuncusu arasında yüz altmış yıl var. Sırayla gezersen Osmanlı kubbesinin bu sürede nasıl büyüdüğünü kendi gözünle görürsün.\n\n## 1. gün · Selimiye'den Meriç'e\n\nGüne [Selimiye Camii](mekan:ChIJlbOvxnUvsxQReyK2HRS8dUU) ile başla. Mimar Sinan'ın II. Selim için yaptığı cami, şehrin en yüksek tepesinde duruyor ve dört minaresi kubbenin dört köşesine dikilmiş. İçeride tek kubbenin bütün alanı kesintisiz örtmesine bak, ardından müezzin mahfilinin altındaki mermer ayaklarda ters lale kabartmasını ara.\n\n::mekan[ChIJlbOvxnUvsxQReyK2HRS8dUU]\n\nCamiden batıya, merdivenlerden [Selimiye Arastası](mekan:ChIJ3cCG0XUvsxQRIccxh9UMIPI)'na in. Caminin gelir kaynağı olarak yapılan bu uzun çarşıda Edirne'nin meyve biçimli sabunlarını ve badem ezmesini bulursun. Hediye alacaksan dönüşte de buradan geçebilirsin.\n\nArastanın batı ucundan çıkınca [Üç Şerefeli Cami](mekan:ChIJC-d3XHEvsxQRdRvRs1A89rE) karşına çıkar. II. Murad döneminde yapılan caminin dört minaresinin her biri ayrı bir desende; üç şerefeli olanı, yapıldığı yıllarda Osmanlı'nın en yüksek minaresiydi. Revaklı avlusunda kırmızı ve beyaz taşların sırayla dizildiği kemerlere bak.\n\nOradan güneye birkaç dakika yürü ve [Eski Cami](mekan:ChIJ__8_lHcvsxQR0QsBO0kfpBI)'ye gir. Üçünün en eskisi olan bu cami dokuz kubbeyle örtülü ve duvarlarındaki dev hat yazılarıyla bilinir. Selimiye'yi gördükten sonra burada ölçek farkını hemen hissedersin.\n\nÖğle yemeği için çarşının içindeki [Ciğerci Niyazi Usta](mekan:ChIJ42xg9HAvsxQRCcSrmnF8AoU)'ya geç. Edirne tava ciğeri kâğıt inceliğinde dilimlenir, kızgın yağda kızartılır ve yanına çıtır kuru biber gelir. Biberi önce tek bir tane dene.\n\n::mekan[ChIJ42xg9HAvsxQRCcSrmnF8AoU]\n\nYemekten sonra yolun üstünde kalırsa Mimar Sinan'ın yaptığı uzun kapalı çarşı [Ali Paşa Çarşısı](mekan:ChIJZQxubS0vsxQROSCqjSs8Lgs)'ndan geç, sonra kuzeybatıya, Tunca Nehri'ne doğru yürü. Nehri taş köprüyle geçince [Sultan II. Bayezid Külliyesi Sağlık Müzesi](mekan:ChIJuYZ_VWsvsxQRBOMaJIJeVd0) karşına çıkar. Külliyenin darüşşifasında akıl hastalarının müzik, su sesi ve kokuyla tedavi edildiği anlatılıyor; altıgen kubbeli salonda bir süre dur ve fıskiyenin sesini dinle.\n\nMüzeden sonra taksiye ya da arabana bin ve güneye, Karaağaç yolundaki [Meriç Köprüsü](mekan:ChIJCzwgqoclsxQRqSB6reIpQTg)'ne git. Köprünün ortasındaki köşkten nehrin geniş yatağına bakılır ve Edirneliler buraya gün batımı için gelir. Kışın güneş erken batar, müzeden çıkınca vakit kaybetmeden yola çık; yazın ise müzeden sonra merkezde bir çay molası verip akşamüstü gel.\n\nAkşam yemeğini merkezde ya da köprünün altındaki kıyıda, nehre bakan lokantalardan birinde yiyebilirsin. Dönüşte arastaya uğramayı unutma; ezme ve sabun paketleri yolda kırılmaz, hediye olarak en kolay taşınan şeyler bunlar."
+  },
+  "gunler": [
+    {
+      "baslik": "Selimiye'den Meriç'e",
+      "duraklar": [
+        {
+          "place_id": "ChIJlbOvxnUvsxQReyK2HRS8dUU",
+          "osm": "relation/3376582",
+          "ad": "Selimiye Camii",
+          "sure_dk": 60,
+          "sure_gerekcesi": "varsayılan 30; büyük külliye, avlu ve iç mekân ayrıntıları",
+          "kapali_gunler": [],
+          "rehber": "selimiye-camii",
+          "amaclar": [
+            "kultur_tarih"
+          ]
+        },
+        {
+          "place_id": "ChIJ3cCG0XUvsxQRIccxh9UMIPI",
+          "ad": "Selimiye Arastası",
+          "sure_dk": 30,
+          "sure_gerekcesi": "varsayılan 45; yol üstünde tek sıra çarşı, alışveriş isteğe bağlı",
+          "kapali_gunler": [],
+          "rehber": "selimiye-arastasi",
+          "amaclar": [
+            "kultur_tarih",
+            "lezzet"
+          ]
+        },
+        {
+          "place_id": "ChIJC-d3XHEvsxQRdRvRs1A89rE",
+          "osm": "way/211425199",
+          "ad": "Üç Şerefeli Cami",
+          "sure_dk": 30,
+          "kapali_gunler": [],
+          "rehber": "uc-serefeli-cami",
+          "amaclar": [
+            "kultur_tarih"
+          ],
+          "sure_gerekcesi": "varsayılan 45; tek yapı, avlu ve iç mekân yarım saatte gezilir"
+        },
+        {
+          "place_id": "ChIJ__8_lHcvsxQR0QsBO0kfpBI",
+          "osm": "way/211425197",
+          "ad": "Eski Cami",
+          "sure_dk": 30,
+          "kapali_gunler": [],
+          "rehber": "eski-cami",
+          "amaclar": [
+            "kultur_tarih"
+          ],
+          "sure_gerekcesi": "varsayılan 45; tek yapı, avlu ve iç mekân yarım saatte gezilir"
+        },
+        {
+          "place_id": "ChIJ42xg9HAvsxQRCcSrmnF8AoU",
+          "osm": "node/9176373617",
+          "ad": "Ciğerci Niyazi Usta",
+          "sure_dk": 60,
+          "sure_gerekcesi": "varsayılan 75; tek yemekli ciğer lokantası, hızlı servis",
+          "kapali_gunler": [],
+          "rehber": "cigerci-niyazi-usta",
+          "amaclar": [
+            "lezzet"
+          ]
+        },
+        {
+          "place_id": "ChIJuYZ_VWsvsxQRBOMaJIJeVd0",
+          "osm": "node/11716355894",
+          "ad": "Sultan II. Bayezid Külliyesi Sağlık Müzesi",
+          "sure_dk": 90,
+          "sure_gerekcesi": "varsayılan 90 (müze tipi); darüşşifa, tıp medresesi ve avlular ayrı ayrı gezilir",
+          "kapali_gunler": [],
+          "rehber": "saglik-muzesi",
+          "amaclar": [
+            "kultur_tarih",
+            "yavas"
+          ]
+        },
+        {
+          "place_id": "ChIJCzwgqoclsxQRqSB6reIpQTg",
+          "osm": "way/170145203",
+          "ad": "Meriç Köprüsü",
+          "sure_dk": 45,
+          "sure_gerekcesi": "varsayılan 45; gün batımı beklemesi dahil",
+          "kapali_gunler": [],
+          "rehber": "meric-koprusu",
+          "amaclar": [
+            "yavas",
+            "kultur_tarih"
+          ]
+        }
+      ]
+    }
+  ],
+  "ek_mekanlar": [
+    {
+      "place_id": "ChIJZQxubS0vsxQROSCqjSs8Lgs",
+      "ad": "Ali Paşa Çarşısı"
+    }
+  ],
+  "notlar": {
+    "dogrulanacaklar": [
+      "[Plan · kapali_gunler] · Hiçbir durak için kapalı gün kaynağı bulunamadı, hepsi [] bırakıldı. Sağlık Müzesi'nin kapalı günü turkishmuseums.com ve Trakya Üniversitesi sayfasında yok (yaz gece müzeciliği: perşembe-cumartesi 22.30'a kadar, İşçi Haber 24.06.2025); Ciğerci Niyazi Usta için OSM'de opening_hours yok · müze, işletme",
+      "[Plan · Sehir] · Edirne şehri sehir.yeni ile açılıyor; place_id 'Edirne' kimlik sorgusundan (tek sonuç) · BO'da şehir satırı",
+      "[Plan · g1.d6–d7] · Müzeden köprüye araçla gidiliyor; #311 gelene kadar doğrulayıcı bu bacağı yürüme sayar ve gün süresi uyarısı verebilir",
+      "[Rehber · Selimiye] · 1568-1575, UNESCO 2011 (il listesi); ters lale kabartmasının müezzin mahfili ayağında olduğu ve lale bahçesi rivayeti; İznik çinileri mihrap tarafında · Vakıflar, KÜRE",
+      "[Rehber · Arasta] · Davud Ağa, 1580'ler; ortadaki merdivenin cami avlusuna çıktığı; pazar sabahı dükkânların geç açılması gözlem değil · KÜRE Selimiye Arastası, Edirne VDB çarşılar PDF",
+      "[Rehber · Üç Şerefeli] · 1438-1447 (il listesi); dört minarenin desenleri (burmalı, baklavalı, çubuklu, yivli) ve revak taş dizisi; karşısındaki Sokullu Hamamı'nın Sinan eseri olduğu · Vakıflar, TDV İA",
+      "[Rehber · Eski Cami] · Emir Süleyman başlattı, Çelebi Mehmed 1414'te bitirdi; hat yazılarının bir kısmının 19. yy'da yenilenmesi; Kâbe'den getirildiği anlatılan taş parçası; Bedesten'in caminin giderleri için yapılması · TDV İA, Vakıflar",
+      "[Rehber · Niyazi Usta] · 1983 kuruluş ve dondurmalı irmik tatlısı (il listesi); peynir helvası ve şalgam menüde mi · işletme",
+      "[Rehber · Sağlık Müzesi] · Mimar Hayreddin, 1484-1488; 1997 müze, 2004 Avrupa Konseyi Müze Ödülü (Wikipedia); altıgen salondaki fıskiye ve çalgıcı canlandırması · Trakya Üniversitesi",
+      "[Rehber · Meriç Köprüsü] · 1840'lar, Abdülmecid, 263 m (il listesi 1843); gün batımının köşkün batı tarafından görüldüğü; Lozan Müzesi'ne yaklaşık 1 km · KTB, yerinde",
+      "[Yazı] · 'Üç Şerefeli minare yapıldığı yıllarda Osmanlı'nın en yüksek minaresiydi' (il listesindeki ifadeye dayanıyor) · TDV İA"
+    ],
+    "fotograf_onerileri": [
+      {
+        "ne": "Selimiye Camii dış cephe, dört minare",
+        "altyazi": "Selimiye, Sinan'ın ustalık eseri",
+        "arama": "commons:Category:Selimiye Mosque, Edirne"
+      },
+      {
+        "ne": "Meriç Köprüsü gün batımında",
+        "altyazi": "Meriç'in üstünde akşamüstü",
+        "arama": "commons:Category:Meriç Bridge"
+      },
+      {
+        "ne": "Sağlık Müzesi altıgen salon",
+        "altyazi": "Darüşşifanın kubbeli salonu",
+        "arama": "commons:Category:Complex of Sultan Bayezid II Health Museum"
+      }
+    ],
+    "varsayimlar": [
+      "Tek gün, cumartesi; merkez yürüyerek, köprüye araçla",
+      "Edirne il listesinin ilk 5'i (Selimiye, Eski Cami, Üç Şerefeli, Sağlık Müzesi, Arasta) gezide; 6. ve 7. de (Meriç Köprüsü, Niyazi Usta). 8. Ali Paşa Çarşısı yazıda ek mekân. 9. Arkeoloji ve Etnografya Müzesi ile 10. Uzunköprü (46 km) Edirne'nin 2 günlük gezisine bırakıldı: bir günde üç cami ve bir müzeden sonra ikinci müze günü yorar, Uzunköprü araçla ayrı bir yarım gün"
+    ]
+  }
+}

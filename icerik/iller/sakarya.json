@@ -1,0 +1,472 @@
+{
+  "il": "Sakarya",
+  "slug": "sakarya",
+  "guncelleme": "2026-11-20",
+  "oneriler": [
+    {
+      "sira": 1,
+      "ad": "Sapanca Gölü",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Sapanca",
+      "merkeze_km": 13,
+      "neden": "16 km boyunda, 5 km eninde göl; kıyı yürüyüşü, kürek, yelken ve kamp alanları",
+      "place_id": "ChIJG8DpoyipzBQRLQbH-QV9tLY"
+    },
+    {
+      "sira": 2,
+      "ad": "Taraklı Evleri",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Taraklı",
+      "merkeze_km": 43,
+      "neden": "100'ü aşkın tescilli ahşap konak; 2021'de BM'nin turizm köyleri listesine girdi",
+      "place_id": "ChIJ3ziytIKVzBQRQZhK6SLSM-E"
+    },
+    {
+      "sira": 3,
+      "ad": "Justinianus Köprüsü (Beşköprü)",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Adapazarı",
+      "merkeze_km": 5,
+      "neden": "6. yy Bizans taş köprüsü, 12 kemerli; restorasyonun ardından Temmuz 2026'da açıldı",
+      "osm": "way/189584048",
+      "place_id": "ChIJ4SWSIpSzzBQRi0TK_I3-4-E"
+    },
+    {
+      "sira": 4,
+      "ad": "Acarlar Longozu",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Karasu",
+      "merkeze_km": 34,
+      "neden": "Ramsar alanı (2009) subasar orman; 235 kuş türü, ahşap yürüyüş yolu",
+      "place_id": "ChIJ6e28iXrfnUARhb2gdvpSUMA"
+    },
+    {
+      "sira": 5,
+      "ad": "Köfteci Mustafa",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Adapazarı",
+      "merkeze_km": 0,
+      "neden": "1912'den beri ıslama köfte; et suyuna batırılmış ekmek, közlenmiş biber, manda yoğurdu",
+      "place_id": "ChIJ-Rc5ezGzzBQRYwCEX4FuNnQ"
+    },
+    {
+      "sira": 6,
+      "ad": "Poyrazlar Gölü Tabiat Parkı",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Adapazarı",
+      "merkeze_km": 8,
+      "neden": "67 ha göl, 2,4 km kıyı, 153 kuş türü; gölde kano, kıyıda piknik alanları",
+      "place_id": "ChIJIUAQsTPxnUARCGzYhgOG-Co"
+    },
+    {
+      "sira": 7,
+      "ad": "Yunus Paşa Camii (Kurşunlu Cami)",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Taraklı",
+      "merkeze_km": 43,
+      "neden": "1517 tarihli, kurşun kaplı kubbeli cami; restorasyon sonrası yeniden ibadete açıldı",
+      "osm": "way/1253179777",
+      "place_id": "ChIJf-oA6Y2UzBQRBUnGXZEzOp4"
+    },
+    {
+      "sira": 8,
+      "ad": "Sakarya Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Adapazarı",
+      "merkeze_km": 0,
+      "neden": "1915 yapımı konakta arkeoloji ve etnografya; Atatürk annesiyle 1922'de burada buluştu",
+      "place_id": "ChIJB12e5i2zzBQReJ9L_3kjnHs"
+    },
+    {
+      "sira": 9,
+      "ad": "Karasu Sahili",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Karasu",
+      "merkeze_km": 43,
+      "neden": "İnce kumlu uzun plaj; yakınında Küçük Boğaz Gölü ve Acarlar Longozu",
+      "place_id": "ChIJ9ZEdRMPanUARA_zxN1RsryQ"
+    },
+    {
+      "sira": 10,
+      "ad": "Kocaali Sahili",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Kocaali",
+      "merkeze_km": 48,
+      "neden": "14 km doğal kumsal; kumullarda kum zambakları açar",
+      "place_id": "ChIJfdFquSLHnUAROQKgPBf9-bc"
+    },
+    {
+      "sira": 11,
+      "ad": "Tarihi Uzunçarşı",
+      "kategori": "carsi",
+      "amaclar": [
+        "kultur_tarih",
+        "lezzet"
+      ],
+      "ilce": "Adapazarı",
+      "merkeze_km": 0,
+      "neden": "18. yy kapalı çarşı, iki katta yaklaşık 100 dükkân; baharatçılar ve kahveciler",
+      "place_id": "ChIJi_YRmWf3nUARAHOl7IDLaE0"
+    },
+    {
+      "sira": 12,
+      "ad": "Kırantepe (yamaç paraşütü)",
+      "kategori": "aktivite",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Serdivan",
+      "merkeze_km": 11,
+      "neden": "1.235 m tepeden yamaç paraşütü; 2004'ten beri uçuluyor, yılda ~200 gün uygun hava",
+      "place_id": "ChIJQVWHaVqtzBQRV4B_Ation04"
+    },
+    {
+      "sira": 13,
+      "ad": "Sapanca Teleferik",
+      "kategori": "aktivite",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Sapanca",
+      "merkeze_km": 18,
+      "neden": "Kırkpınar–Mahmudiye arası 1,5 km hat; göl manzarası, üst istasyonda macera parkı",
+      "place_id": "ChIJ7Un0w1OpzBQRiBiZdjw6LPE"
+    },
+    {
+      "sira": 14,
+      "ad": "Rüstem Paşa Camii ve Hamamı",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Sapanca",
+      "merkeze_km": 15,
+      "neden": "Mimar Sinan'ın 1554'te bitirdiği külliyenin camii; 16. yy hamamı 2020'de ziyarete açıldı",
+      "osm": "way/1084007747",
+      "place_id": "ChIJHyxUxeyvzBQRbAQmsyO6phw"
+    },
+    {
+      "sira": 15,
+      "ad": "Çark Deresi",
+      "kategori": "doga",
+      "amaclar": [
+        "yavas",
+        "cocuklu"
+      ],
+      "ilce": "Adapazarı",
+      "merkeze_km": 2,
+      "neden": "Sapanca Gölü'nün suyunu Sakarya Nehri'ne taşır; kıyısı yürüyüş yolu ve parklar"
+    },
+    {
+      "sira": 16,
+      "ad": "Karagöl Yaylası",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Taraklı",
+      "merkeze_km": 47,
+      "neden": "1.200 m'de çam-kayın ormanı içinde yayla; ahşap yayla evleri, soğuk pınarlar",
+      "place_id": "ChIJYYNX7S3BzBQRSylp_Qeyun8"
+    },
+    {
+      "sira": 17,
+      "ad": "Doğançay Şelalesi",
+      "kategori": "doga",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Geyve",
+      "merkeze_km": 20,
+      "neden": "30 m'lik şelale ve doğal havuzlar; kanyonda iple iniş yapılır, yürüyüş parkurları",
+      "place_id": "ChIJxVW9cR67zBQRGwqD_zxnGps"
+    },
+    {
+      "sira": 18,
+      "ad": "Kuzuluk Kaplıcaları",
+      "kategori": "aktivite",
+      "amaclar": [
+        "yavas"
+      ],
+      "ilce": "Akyazı",
+      "merkeze_km": 14,
+      "neden": "Meşe ağaçları arasında kaplıca beldesi; termal tesisler ve küçük çarşı",
+      "place_id": "ChIJsUNGQ5vOzBQRmWS7-HhQClo"
+    },
+    {
+      "sira": 19,
+      "ad": "Hakiki Rumeli Köftecisi",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Adapazarı",
+      "merkeze_km": 0,
+      "neden": "1957'den beri üçüncü kuşak ıslama köfteci; yanında Hendek kabağından kabak tatlısı",
+      "place_id": "ChIJC2DmBSj2nUARqDB8iJu0Bcg"
+    },
+    {
+      "sira": 20,
+      "ad": "Adapazarı kabak tatlısı",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Adapazarı",
+      "neden": "2021'de tescillendi; beyaz kestane kabağından, üstüne tahin, kaymak ya da cevizle"
+    },
+    {
+      "sira": 21,
+      "ad": "Taraklı Çarşısı",
+      "kategori": "carsi",
+      "amaclar": [
+        "kultur_tarih",
+        "lezzet"
+      ],
+      "ilce": "Taraklı",
+      "merkeze_km": 43,
+      "neden": "Ahşap kaşık ve tarak ustaları; uğut tatlısı, tarhana, çam sakızı reçeli satılır",
+      "osm": "node/11017591105",
+      "place_id": "ChIJ43hbbqSVzBQRwTdkJP293lo"
+    },
+    {
+      "sira": 22,
+      "ad": "Eker Lokantası",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Sapanca",
+      "merkeze_km": 15,
+      "neden": "1976'dan beri esnaf lokantası; günlük tencere yemekleri ve ıslama köfte",
+      "place_id": "ChIJt8gxIjyvzBQR99Y-vWpOg9Y"
+    },
+    {
+      "sira": 23,
+      "ad": "Geyve Seyir Terası",
+      "kategori": "manzara",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Geyve",
+      "merkeze_km": 26,
+      "neden": "Hırka'da Geyve Boğazı'na bakan teras ve ahşap restoran",
+      "place_id": "ChIJNa7JyWaZzBQRQoxDHNbcAZY"
+    },
+    {
+      "sira": 24,
+      "ad": "II. Bayezid Köprüsü",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Geyve",
+      "merkeze_km": 30,
+      "neden": "1495–96'da yapılan köprü; kitabesi duruyor, orta kısmı yıkık",
+      "place_id": "ChIJyaVjUV-izBQRvGCgfnL1weQ"
+    },
+    {
+      "sira": 25,
+      "ad": "Kuva-yı Milliye ve Ali Fuat Cebesoy Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Geyve",
+      "merkeze_km": 32,
+      "neden": "1989'da açılan iki katlı müze; Kuva-yı Milliye ve Ali Fuat Cebesoy'a ait belgeler",
+      "place_id": "ChIJPTfLSl-izBQRO7Z86b6qZWE"
+    },
+    {
+      "sira": 26,
+      "ad": "Adapazarı Ticaret Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Adapazarı",
+      "merkeze_km": 0,
+      "neden": "1913'te kurulan İslam Ticaret Bankası binasında; para, çek ve ticaret eşyası",
+      "place_id": "ChIJl6nO79b3nUAR9ovLrQ2ZrWA"
+    },
+    {
+      "sira": 27,
+      "ad": "Şeyh Muslihiddin Camii",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Kaynarca",
+      "merkeze_km": 29,
+      "neden": "1486 tarihli ahşap cami; yarım minare, kiremit çatı, eski mezarlık",
+      "place_id": "ChIJpX5a2NMLnkARMrpBASrkuVQ"
+    },
+    {
+      "sira": 28,
+      "ad": "Uçak Kıraathanesi",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "cocuklu"
+      ],
+      "ilce": "Adapazarı",
+      "merkeze_km": 1,
+      "neden": "Emekli bir Airbus A300'ün içinde kafe ve kütüphane",
+      "osm": "way/1041058392",
+      "place_id": "ChIJUUInxlSzzBQRYEbzNQ24Kx8"
+    },
+    {
+      "sira": 29,
+      "ad": "Vagon Kıraathanesi",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "yavas",
+        "cocuklu"
+      ],
+      "ilce": "Adapazarı",
+      "merkeze_km": 2,
+      "neden": "İki tren vagonu: biri kafe, biri kütüphane; Çark Deresi kıyısında",
+      "place_id": "ChIJt1k0d_6zzBQRbOOePKrn6_8"
+    },
+    {
+      "sira": 30,
+      "ad": "Bayraktepe",
+      "kategori": "manzara",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Hendek",
+      "merkeze_km": 31,
+      "neden": "16 Türk devletinin bayrak ve rölyefleri; seyir terası, şehitlik ve amfi tiyatro",
+      "place_id": "ChIJ7SWVW3GOnUAR1H9O1ps6C5U"
+    },
+    {
+      "sira": 31,
+      "ad": "Karasu Yenimahalle Sahili",
+      "kategori": "manzara",
+      "amaclar": [
+        "yavas"
+      ],
+      "ilce": "Karasu",
+      "merkeze_km": 43,
+      "neden": "Sakarya Nehri'nin Karadeniz'e döküldüğü ağızda gün batımı",
+      "place_id": "ChIJJy7j9tHanUARMzDpkETv6f4"
+    },
+    {
+      "sira": 32,
+      "ad": "Çark Caddesi",
+      "kategori": "carsi",
+      "amaclar": [
+        "gece"
+      ],
+      "ilce": "Adapazarı",
+      "merkeze_km": 1,
+      "neden": "Yaya caddesi; mağazalar, kafeler ve restoranlar, akşamları kalabalık",
+      "place_id": "ChIJwUN_wNCyzBQRV1yXxJjXVT8"
+    },
+    {
+      "sira": 33,
+      "ad": "Pekara Balkan Restoranı",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Adapazarı",
+      "merkeze_km": 3,
+      "neden": "Közde pişen Boşnak böreği ve Boşnak mantısı; Balkan göçmen mutfağı",
+      "osm": "node/13647692069",
+      "place_id": "ChIJS51YDb6yzBQRy0SaS63ZQck"
+    },
+    {
+      "sira": 34,
+      "ad": "Büyük Akgöl",
+      "kategori": "doga",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Ferizli",
+      "merkeze_km": 24,
+      "neden": "19 km² sazlık göl; gözlem kulesi ve yürüyüş yolundan kuş izlenir",
+      "place_id": "ChIJO5lUZ6LdnUARE086K7G4gLE"
+    },
+    {
+      "sira": 35,
+      "ad": "Çiğdem Yaylası",
+      "kategori": "doga",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Hendek",
+      "merkeze_km": 43,
+      "neden": "1.500 m'de çayırlık yayla; temmuz ortasında yayla şenliği yapılır",
+      "place_id": "ChIJ5aBd0aOAnUARHk3sjqHsvko"
+    },
+    {
+      "sira": 36,
+      "ad": "Ayçiçeği Vadisi Bisiklet Parkı",
+      "kategori": "aktivite",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Adapazarı",
+      "merkeze_km": 12,
+      "neden": "4 km dağ bisikleti pisti ve BMX parkuru; UCI yarışlarına ev sahipliği yapar",
+      "osm": "way/629258383",
+      "place_id": "ChIJ5xNomJ35nUAR9nsg-w_W9_s"
+    },
+    {
+      "sira": 37,
+      "ad": "Orta Camii",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Adapazarı",
+      "merkeze_km": 0,
+      "neden": "1752'de Hacı Mustafa Ağa yaptırdı; alt katında dükkânlar olan iki katlı cami",
+      "osm": "way/1257332291",
+      "place_id": "ChIJ36DNZyj2nUARSAVAyVPyuVk"
+    }
+  ]
+}

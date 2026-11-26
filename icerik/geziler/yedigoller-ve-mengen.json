@@ -1,0 +1,135 @@
+{
+  "surum": 1,
+  "sehir": {
+    "slug": "bolu"
+  },
+  "takvim": {
+    "ilk_gun": "cumartesi"
+  },
+  "gezi": {
+    "slug": "yedigoller-ve-mengen",
+    "baslik": "Bolu'dan bir gün: Yedigöller ve Mengen",
+    "ozet": "Sabah Kapankaya ve göller, öğlen Mengen, akşamüstü Yeniçağa'da kuşlar",
+    "yazar_ad": "Tripmate ekibi",
+    "amaclar": [
+      "doga",
+      "lezzet"
+    ],
+    "yazi_md": "Bolu'ya gelenlerin çoğu Abant'ı görüp dönüyor; oysa ilin kuzeyinde, orman içindeki bir vadide yedi göl var. Bu plan tek günde o vadiye iniyor, öğlen Türkiye'ye aşçı yetiştiren Mengen'de sofraya oturuyor, akşamüstü de Yeniçağa Gölü'nün sazlıklarında kuşlara bakarak Bolu'ya dönüyor. Gün bir halka gibi kapanıyor: Bolu'dan kuzeye çıkıyor, Mengen üzerinden doğuya dönüyor, otoyolla geri geliyor.\n\n> Bu plan araçla gezilir; duraklar arasında toplu taşıma yok denecek kadar seyrek. Kışın Bolu'dan Yedigöller'e çıkan yol kar nedeniyle kapanabiliyor; o zaman halkayı ters çevir: önce Yeniçağa, sonra Mengen, göllere Yazıcık tarafından gir ve Kapankaya'yı atla.\n\n## 1. gün · Yedigöller ve Mengen\n\nSabah erken çık ve Yedigöller yolunun son kısmında [Kapankaya Seyir Terası](mekan:ChIJo-qtenIfnUARzgFNwg52KKk)'nda dur. Vadide sabah sisi varsa biraz bekle; sis kalkarken göller tek tek ortaya çıkar. Buradan aşağıda göreceğin bütün vadiyi bir arada görürsün.\n\nArdından vadiye in ve [Yedigöller Milli Parkı](mekan:ChIJ8dcXWBo_nUARM6kPTfod8vY)'nda arabayı Büyükgöl'ün yanında bırak. Göller arasındaki orman yollarında Deringöl'e, Seringöl'e ve şelalesiyle bilinen Nazlıgöl'e yürü. Sonbaharda kayın yaprakları suya düşer, kıyılar sarıya ve kırmızıya döner. Göller arasındaki yollar çoğunlukla düz, ama yağmurdan sonra çamurlu olur; bot ya da kalın tabanlı ayakkabı giy. Parkta market yok; suyunu ve atıştırmalığını yanına al. Hafta sonu öğleye doğru park kalabalıklaşır; göllerde ilk saatleri geçirip öğleden önce yola çıkarsan Mengen'e yemek saatinde varırsın.\n\n::mekan[ChIJ8dcXWBo_nUARM6kPTfod8vY]\n\nGöllerden Yazıcık üzerinden Mengen'e in. Öğle yemeğini [Mengen Lezzet Dünyası](mekan:ChIJKYTOiRjXnEARp9qpQE3PjnE)'nda ye; günün tencere yemeklerine bak, varsa Mengen pilavını iste. Bu küçük ilçede Türkiye'nin ilk aşçılık okulu açıldı ve bugün hâlâ ülkenin dört bir yanındaki mutfaklara şef yetiştiriyor.\n\nYemekten sonra ilçe girişindeki 15,5 metrelik [aşçı heykeli](mekan:ChIJC2uN_jnXnEARvkqX_5hJ1ZM)'nin önünde dur. Resmî adı Ustalara ve Mesleğe Saygı Anıtı; Mengen'in aşçılarına adanmış. Kadraja sığdırmak için birkaç on adım geri çekilmen gerekecek.\n\nDönüş yolunda güneye, Yeniçağa'ya geç ve [Yeniçağa Gölü](mekan:ChIJk5xTNFYsnUARvXXLBjmdiOo)'nün kıyısındaki [kuş gözlemevi](mekan:ChIJA3g-K2AtnUAR8zDNBzfJy1s)'ne çık. Sazlıklarda ördekler, balıkçıllar, mevsimine göre turnalar beslenir; kulede birkaç dakika kıpırdamadan durursan kuşlar açığa çıkar. Kule ilçe merkezine yakın; dönmeden önce kıyıdaki çay ocaklarından birinde ısınabilirsin. Buradan otoyola çıkıp Bolu'ya dönmek yarım saat kadar sürer.\n\n::mekan[ChIJA3g-K2AtnUAR8zDNBzfJy1s]\n\nPlan cumartesi için yazıldı. Gölleri en renkli hâliyle görmek istersen ekim ve kasımın ilk yarısını, kuşları görmek istersen ilkbaharı seç. Bolu'da iki günün daha varsa ilk planımızla Abant'ı, Gölcük'ü ve Mudurnu'yu ekle.\n"
+  },
+  "gunler": [
+    {
+      "baslik": "Yedigöller ve Mengen",
+      "duraklar": [
+        {
+          "place_id": "ChIJo-qtenIfnUARzgFNwg52KKk",
+          "ad": "Kapankaya Seyir Terası",
+          "sure_dk": 30,
+          "sure_gerekcesi": "varsayılan 45; tek seyir noktası",
+          "kapali_gunler": [],
+          "rehber": "kapankaya-seyir-terasi",
+          "amaclar": [
+            "doga"
+          ]
+        },
+        {
+          "place_id": "ChIJ8dcXWBo_nUARM6kPTfod8vY",
+          "ad": "Yedigöller Milli Parkı",
+          "sure_dk": 180,
+          "sure_gerekcesi": "varsayılan 45; göller arası orman yürüyüşü",
+          "kapali_gunler": [],
+          "rehber": "yedigoller",
+          "amaclar": [
+            "doga",
+            "yavas"
+          ]
+        },
+        {
+          "place_id": "ChIJKYTOiRjXnEARp9qpQE3PjnE",
+          "ad": "Mengen Lezzet Dünyası",
+          "sure_dk": 60,
+          "sure_gerekcesi": "varsayılan 45; oturarak öğle yemeği",
+          "kapali_gunler": [],
+          "rehber": "mengen-lezzet-dunyasi",
+          "amaclar": [
+            "lezzet"
+          ]
+        },
+        {
+          "place_id": "ChIJC2uN_jnXnEARvkqX_5hJ1ZM",
+          "osm": "node/5017444833",
+          "ad": "Mengen Aşçı Anıtı",
+          "sure_dk": 15,
+          "sure_gerekcesi": "varsayılan 45; tek heykel, fotoğraf molası",
+          "kapali_gunler": [],
+          "rehber": "mengen-asci-aniti",
+          "amaclar": [
+            "kultur_tarih"
+          ]
+        },
+        {
+          "place_id": "ChIJA3g-K2AtnUAR8zDNBzfJy1s",
+          "osm": "node/10075237734",
+          "ad": "Yeniçağa Kuş Gözlemevi",
+          "sure_dk": 60,
+          "sure_gerekcesi": "varsayılan 45; kule ve kıyı yürüyüşü",
+          "kapali_gunler": [],
+          "rehber": "yenicaga-kus-gozlemevi",
+          "amaclar": [
+            "doga",
+            "cocuklu"
+          ]
+        }
+      ]
+    }
+  ],
+  "ek_mekanlar": [
+    {
+      "place_id": "ChIJk5xTNFYsnUARvXXLBjmdiOo",
+      "ad": "Yeniçağa Gölü"
+    }
+  ],
+  "notlar": {
+    "dogrulanacaklar": [
+      "[Plan · Kapankaya, Yedigöller] · osm yok · bu bölge için osm aday sorgusunda (merkez 40.88/31.88, 25 km) iki yer de çıkmadı; aday sorgusu natural/boundary getirmiyor · osm yok; konum Google'dan (`google_30g`, 30 gün kuralı), OSM eşleşmesi yok (yalnız bilgi)",
+      "[Plan · Mengen Lezzet Dünyası] · kapali_gunler [] kaynaksız · OSM'de opening_hours yok, işletme sitesi otomatik okumaya kapalı · işletmeyi ara",
+      "[Plan · Mengen Aşçı Anıtı] · durağın kaydı ve OSM 'Ahçılar Heykeli' (node/5017444833) 15,5 m'lik Ustalara ve Mesleğe Saygı Anıtı mı, yoksa ilçedeki başka bir aşçı heykeli mi · haberlerde anıt 'ilçe girişinde'; OSM noktası merkeze yakın · Mengen Belediyesi, yerinde",
+      "[Plan · Yeniçağa Kuş Gözlemevi] · OSM'de kıyıda iki gözlem noktası var (node/11017292608 gözlemevi, node/10075237734 gözlem kulesi); node/11017292608 kuru yüklemede 150 m denetiminden geçmedi (567 m), gözlem kulesi node/10075237734 deneniyor · Doğa Koruma ve Milli Parklar 9. Bölge",
+      "[Plan · Mengen Lezzet Dünyası] · soru kapandı: OSM noktasında (node/11007075581) yapılan ücretsiz `kimlik` sorgusu aynı place_id'yi döndürdü (run 44695492776); işletme doğru · Google konumu OSM'deki lokantadan yaklaşık 14 km uzakta; osm yok, konum `google_30g` (30 gün) · yalnız bilgi",
+      "[Yazı · güzergâh] · Bolu → Kapankaya → Yedigöller → Yazıcık → Mengen → Yeniçağa → Bolu araç süreleri ölçülmedi; günün araç payı tahminen 3–3,5 saat; Yedigöller–Yazıcık kesiminin asfalt olup olmadığı bilinmiyor · harita, yerinde",
+      "[Yazı · kış] · \"Bolu'dan Yedigöller'e çıkan yol kar nedeniyle kapanabiliyor; Yeniçağa–Mengen–Yazıcık açık\" · KTB (EN-99786) ve Daily Sabah 2015; hangi aylar olduğu yazmıyor · Yedigöller Milli Park Müdürlüğü, Karayolları",
+      "[Yazı · Yeniçağa] · \"otoyola çıkıp Bolu'ya dönmek yarım saat kadar\" · Yeniçağa–Bolu 38 km'den tahmin · harita",
+      "[Rehber · Kapankaya] · \"seyir kulesi\" KTB'de var; \"sabah sisi\", \"kayın, köknar, meşe\" · genel bölge bilgisi, yerinde doğrulanmadı · yerinde",
+      "[Rehber · Yedigöller] · 1965, yedi gölün adları, iki düzlük, Deringöl–Büyükgöl bağlantısı, Nazlıgöl'ün şelalesi/Şelale Gölü · Habertürk 2018, bianet 2019, GoTürkiye; \"market yok\" bianet 2019 (güncel değil) · Yedigöller Milli Park Müdürlüğü",
+      "[Rehber · Mengen Lezzet Dünyası] · menü (bulgur çorbası, tencere yemekleri, Mengen pilavı, keşkek) · TripAdvisor menü özeti yalnız bulgur çorbası ve yahni gösteriyor; Mengen pilavı ve keşkeğin bu lokantada olduğu doğrulanmadı · işletme",
+      "[Rehber · Mengen] · \"ilk aşçılık okulu 1985\", \"gastronomi bölümü\" · Türkiye Gazetesi 2021 · Mengen Belediyesi, BAİBÜ Mengen MYO",
+      "[Rehber · Aşçı Anıtı] · 15,5 m, Metin Keleş, Eylül 2016, 31. festival, Mengenli Yakup Usta · Hürriyet/DHA 3 Eylül 2016, haberler.com · Mengen Belediyesi; festivalin her yıl eylülde olduğu doğrulanmadı",
+      "[Rehber · Yeniçağa] · ~990 m, 2014 ulusal öneme haiz sulak alan, 217 tür / 97 kuluçka, turna, şah kartal, akkuyruklu kartal · Tarım ve Orman 9. Bölge sayfası; \"ilkbahar ve kış en hareketli\" birdingplaces.eu; \"kıyıda düz yürüyüş yolu\" birdingplaces 'dairesel kolay patika' · DKMP 9. Bölge"
+    ],
+    "fotograf_onerileri": [
+      {
+        "ne": "Kapak (3:2): sonbaharda Yedigöller, kayınların suya yansıması",
+        "altyazi": "Yedigöller",
+        "arama": "Yedigöller Commons"
+      },
+      {
+        "ne": "Kapankaya'dan vadiye bakış",
+        "altyazi": "Kapankaya, Yedigöller",
+        "arama": "Kapankaya Yedigöller Commons"
+      },
+      {
+        "ne": "Yeniçağa Gölü sazlığı",
+        "altyazi": "Yeniçağa Gölü",
+        "arama": "Yeniçağa Lake Commons"
+      }
+    ],
+    "varsayimlar": [
+      "Tek gün, cumartesi; bütün gün araçla, halka güzergâh Bolu → Yedigöller → Mengen → Yeniçağa → Bolu",
+      "Bolu'nun olmazsa olmazları (icerik/iller/bolu.json ilk 12, #299 Ece kuralı): Abant Gölü, Yedigöller, Gölcük, Mudurnu Arasta, Kartalkaya, Mengen, Göynük, Taşhan, Yıldırım Bayezid Camii, Sünnet Gölü, Akkaya Travertenleri, Bolu Müzesi",
+      "Bu gezide: Yedigöller (il listesi 2), Mengen (6), Kapankaya (16). Abant, Gölcük, Mudurnu, Taşhan, Yıldırım Bayezid, Akkaya ve Bolu Müzesi ilk gezide (boluda-iki-gun). İki gezide de olmayanlar: Kartalkaya (5) kayak merkezi, kar mevsimine bağlı ve bu halkanın ters yönünde (güney); Göynük (7) ve Sünnet Gölü (10) merkeze 65–80 km, batıda, Mengen halkasına sığmıyor",
+      "İl listesinin ilk 5'inden bu gezide olmayanlar: Abant (1), Gölcük (3), Mudurnu (4) ilk gezide; Kartalkaya (5) yukarıdaki nedenle yok",
+      "Yeniçağa Gölü ve kuş gözlemevi il listesinde yok; il listesine eklenmesi önerilir (doga)",
+      "Google: 8 kimlik sorgusu (ücretsiz), 8 puan isteği; OSM aday sorgusu merkez 40.88/31.88, yarıçap 25 km (37 aday)"
+    ]
+  }
+}

@@ -48,7 +48,9 @@ export function bolumOzeti(
   const kaynakListe = icerikTuru(b.tur) === 'gezi' ? adlar.geziler.map((g) => ({ id: g.id, ad: g.baslik })) : icerikTuru(b.tur) === 'yer' ? adlar.yerler : adlar.sehirler;
   const ad = (id: string) => kaynakListe.find((x) => x.id === id)?.ad;
   const parcalar: string[] = [];
-  if (b.kaynak === 'otomatik') {
+  if (b.tur === 'banner' || b.tur === 'raf') {
+    parcalar.push(v6Ozeti(b, adlar, metin));
+  } else if (b.kaynak === 'otomatik') {
     parcalar.push(metin(`anaSayfa.otomatik.${b.tur}`));
   } else {
     const adlari = seciliIdler(b).map(ad).filter((x): x is string => !!x);
@@ -59,6 +61,25 @@ export function bolumOzeti(
   if (b.baslangic_at) parcalar.push(metin('anaSayfa.acilis', { tarih: kisaTarih(b.baslangic_at) }));
   if (b.bitis_at) parcalar.push(metin('anaSayfa.kapanis', { tarih: kisaTarih(b.bitis_at) }));
   return parcalar.join(' · ');
+}
+
+/** #406: banner ve raf satırının özeti ("Bu kış · hedef: raf", "amaç: Lezzet", "şehir: Bursa", "elle seçilmiş 4 gezi"). */
+function v6Ozeti(b: TaslakBolum, adlar: { sehirler: readonly Adli[] }, metin: (anahtar: string, degerler?: Record<string, string | number>) => string): string {
+  const i = b.icerik;
+  if (b.tur === 'banner') {
+    const hedef = i.hedef ? metin('anaSayfa.v6Ozet.bannerHedef', { hedef: metin(`anaSayfa.v6Ozet.hedef.${i.hedef.tur}`) }) : metin('anaSayfa.v6Ozet.bannerHedefsiz');
+    return [i.ust_yazi, hedef].filter(Boolean).join(' · ');
+  }
+  switch (i.raf_turu) {
+    case 'amac':
+      return metin('anaSayfa.v6Ozet.raf.amac', { amac: i.amac ?? '—' });
+    case 'sehir':
+      return metin('anaSayfa.v6Ozet.raf.sehir', { sehir: adlar.sehirler.find((x) => x.id === i.sehir_id)?.ad ?? '—' });
+    case 'arkadaslardan':
+      return metin('anaSayfa.v6Ozet.raf.arkadaslardan');
+    default:
+      return metin('anaSayfa.v6Ozet.raf.elle', { n: i.gezi_idler?.length ?? 0 });
+  }
 }
 
 /** Kanvastaki "Planlı yayın:" kutusu: tarihli bölümlerin satırları (yoksa boş). */

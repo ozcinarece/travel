@@ -1,0 +1,458 @@
+{
+  "il": "Aydın",
+  "slug": "aydin",
+  "guncelleme": "2026-11-21",
+  "oneriler": [
+    {
+      "sira": 1,
+      "ad": "Afrodisias Antik Kenti",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Karacasu",
+      "merkeze_km": 79,
+      "neden": "Afrodit'in kenti: Tetrapylon kapısı ve 30 bin kişilik stadyum; 2017'de UNESCO listesinde",
+      "place_id": "ChIJYfA_Ov5WxxQRebmCPvDRYmQ"
+    },
+    {
+      "sira": 2,
+      "ad": "Didyma Apollon Tapınağı",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "gece"
+      ],
+      "ilce": "Didim",
+      "merkeze_km": 73,
+      "neden": "Delphi'yle yarışan kehanet tapınağı; dev sütun kaideleri, Medusa başı, yazın gece açık",
+      "osm": "way/183316994",
+      "place_id": "ChIJNQ9tZi-BvhQRq9HdF9B5bcQ"
+    },
+    {
+      "sira": 3,
+      "ad": "Milet Antik Kenti",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Didim",
+      "merkeze_km": 61,
+      "neden": "Thales'in kenti; limana bakan büyük tiyatro, Faustina Hamamı ve İlyas Bey Camii",
+      "osm": "way/32255827",
+      "place_id": "ChIJPfHv3XibvhQRYLCNS2YK2CY"
+    },
+    {
+      "sira": 4,
+      "ad": "Priene Antik Kenti",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Söke",
+      "merkeze_km": 52,
+      "neden": "Mykale yamacına ızgara planla kurulmuş kent; Athena Tapınağı'nın beş sütunu ayakta",
+      "osm": "way/32255943",
+      "place_id": "ChIJQ8Uy1W6ivhQRu-oq8O00CTI"
+    },
+    {
+      "sira": 5,
+      "ad": "Dilek Yarımadası–Büyük Menderes Deltası Milli Parkı",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Kuşadası",
+      "merkeze_km": 62,
+      "neden": "Samsun Dağı'nın denize indiği park; Aydınlık, Kavaklıburun ve İçmeler koyları",
+      "place_id": "ChIJ4WvzNy6pvhQRNSN9Cfup0QY"
+    },
+    {
+      "sira": 6,
+      "ad": "Bafa Gölü Tabiat Parkı",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Söke",
+      "merkeze_km": 52,
+      "neden": "Menderes'in alüvyonuyla denizden ayrılmış eski körfez; arkasında Beşparmak kayaları",
+      "place_id": "ChIJ3z_oqAmXvhQR5XFrx6uHIyc"
+    },
+    {
+      "sira": 7,
+      "ad": "Çine köftesi",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Çine",
+      "merkeze_km": 32,
+      "neden": "Dağ otlarıyla beslenen sığırın eti kendi yağı ve kimyonla yoğrulur; tescilli köfte"
+    },
+    {
+      "sira": 8,
+      "ad": "Güvercinada",
+      "kategori": "manzara",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Kuşadası",
+      "merkeze_km": 52,
+      "neden": "Kıyıya setle bağlı ada kalesi; içinde Deniz Ticaret Tarihi sergisi, surdan gün batımı",
+      "osm": "way/740168986",
+      "place_id": "ChIJWTJ62TSpvhQR2aBvA9qXFLw"
+    },
+    {
+      "sira": 9,
+      "ad": "Arapapıştı Kanyonu tekne turu",
+      "kategori": "aktivite",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Bozdoğan",
+      "merkeze_km": 74,
+      "neden": "Kemer Barajı'nda belediye tekneleriyle Akçay'ın 6 km'lik dik kanyonuna girilir",
+      "place_id": "ChIJH81vsTJRvxQRo6TwPMBPmQ0"
+    },
+    {
+      "sira": 10,
+      "ad": "Nysa Antik Kenti",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Sultanhisar",
+      "merkeze_km": 27,
+      "neden": "Dereyi kentin altından geçiren tünel; Strabon'un okuduğu kentte tiyatro ve kütüphane",
+      "osm": "node/1482502689",
+      "place_id": "ChIJz4Po2onPuBQRzMTPW-kHn5g"
+    },
+    {
+      "sira": 11,
+      "ad": "Ortaklar çöp şiş",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Germencik",
+      "merkeze_km": 31,
+      "neden": "Dana but ve kuyruk yağı, metal şiş yerine kargı çubuklara dizilip közde pişer"
+    },
+    {
+      "sira": 12,
+      "ad": "Milet Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Didim",
+      "merkeze_km": 61,
+      "neden": "Milet, Priene ve Didyma buluntuları; bahçede aslan heykelleri, lahitler, yazıtlar",
+      "osm": "way/183310100",
+      "place_id": "ChIJmW7323ibvhQR4nVBg2ayYgs"
+    },
+    {
+      "sira": 13,
+      "ad": "Magnesia Antik Kenti",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Germencik",
+      "merkeze_km": 28,
+      "neden": "Mimar Hermogenes'in Artemis Leukophryene Tapınağı ve geniş agora; ova kıyısında",
+      "place_id": "ChIJzV77hpe1vhQRja1lTjC1NG8"
+    },
+    {
+      "sira": 14,
+      "ad": "Eski Doğanbey",
+      "kategori": "tarih",
+      "amaclar": [
+        "yavas",
+        "kultur_tarih"
+      ],
+      "ilce": "Söke",
+      "merkeze_km": 64,
+      "neden": "1923'e dek Rum köyü Domatia; yenilenen taş evler milli parkın yamacına dizili",
+      "place_id": "ChIJwSdMWyuevhQR9BAPRGpOaO8"
+    },
+    {
+      "sira": 15,
+      "ad": "Zeus Mağarası",
+      "kategori": "doga",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Kuşadası",
+      "merkeze_km": 59,
+      "neden": "Milli park girişinde kaya oyuğundaki soğuk, yeşil su havuzu; yazın içinde yüzülür",
+      "osm": "node/1920922126",
+      "place_id": "ChIJyS4sb_ygvhQRXER8ueAnp0Q"
+    },
+    {
+      "sira": 16,
+      "ad": "Söke pidesi",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Söke",
+      "merkeze_km": 40,
+      "neden": "Tescilli Söke pidesi ve tahinli pidesi; uzun kıymalı pideler odun fırınından"
+    },
+    {
+      "sira": 17,
+      "ad": "Aydın inciri",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "İncirliova",
+      "merkeze_km": 11,
+      "neden": "Türkiye kuru incirinin büyük kısmı bu ovadan; ağustos-eylülde dalda kuruyup toplanır"
+    },
+    {
+      "sira": 18,
+      "ad": "Nazilli kar helvası",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Nazilli",
+      "merkeze_km": 42,
+      "neden": "Madran Dağı'nda kışın saklanan kar, yazın karadut ya da koruk şerbetiyle tatlı olur"
+    },
+    {
+      "sira": 19,
+      "ad": "Öküz Mehmet Paşa Kervansarayı",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Kuşadası",
+      "merkeze_km": 51,
+      "neden": "1618'de yaptırılan surlu han; mazgallı duvarlar ve revaklı avlu, Kaleiçi'nin girişinde",
+      "osm": "relation/10232383"
+    },
+    {
+      "sira": 20,
+      "ad": "Tralleis Antik Kenti",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Efeler",
+      "merkeze_km": 2,
+      "neden": "Kentin kuzey sırtında \"Üç Gözler\" denen gymnasion kemerleri; ovaya bakan yamaç",
+      "osm": "way/183387218"
+    },
+    {
+      "sira": 21,
+      "ad": "Alinda Antik Kenti",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Karpuzlu",
+      "merkeze_km": 32,
+      "neden": "Karya Kraliçesi Ada'nın kenti; uzun, çok katlı çarşı binası tepenin yamacında ayakta"
+    },
+    {
+      "sira": 22,
+      "ad": "Alabanda Antik Kenti",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Çine",
+      "merkeze_km": 31,
+      "neden": "Doğanyurt köyünün evleri arasında Karya kentinin meclis binası ve tiyatrosu",
+      "osm": "way/116960340"
+    },
+    {
+      "sira": 23,
+      "ad": "Yörük Ali Efe Evi Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Yenipazar",
+      "merkeze_km": 31,
+      "neden": "Milli Mücadele efesinin Yenipazar'daki evi; eşyaları ve bahçesindeki mezarı",
+      "osm": "node/11459525713",
+      "place_id": "ChIJOyDfz7DOuBQRemHVg1SlvqE"
+    },
+    {
+      "sira": 24,
+      "ad": "Aydın Arkeoloji Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Efeler",
+      "merkeze_km": 1,
+      "neden": "Tralleis, Magnesia ve Nysa kazılarından heykeller; bahçede lahitler ve taş eserler",
+      "place_id": "ChIJezspOw4ruRQRYEFaT6H0YZA"
+    },
+    {
+      "sira": 25,
+      "ad": "Altınkum Plajı",
+      "kategori": "doga",
+      "amaclar": [
+        "cocuklu",
+        "doga"
+      ],
+      "ilce": "Didim",
+      "merkeze_km": 75,
+      "neden": "Didim'in sığ, ince kumlu koyu; dalgası az, çocukla denize rahat girilir",
+      "place_id": "ChIJk0T8uDeHvhQR167sJGZGhkg"
+    },
+    {
+      "sira": 26,
+      "ad": "Dalama tandırı",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Efeler",
+      "merkeze_km": 12,
+      "neden": "Süt kuzusu ya da oğlak, taş kuyu fırınında kille kapatılıp pişer; tescilli tandır"
+    },
+    {
+      "sira": 27,
+      "ad": "Cihanoğlu Camii",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Efeler",
+      "merkeze_km": 0,
+      "neden": "1756'da Cihanoğulları'nın yaptırdığı cami; barok etkili taş süslemeler",
+      "place_id": "ChIJJQf_IHsruRQR2IT8Tsdt29o"
+    },
+    {
+      "sira": 28,
+      "ad": "Bozdoğan cevizli sucuğu",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Bozdoğan",
+      "merkeze_km": 45,
+      "neden": "İpe dizilen cevizler üzüm pekmezi bulamacına batırılıp kurutulur; tescilli"
+    },
+    {
+      "sira": 29,
+      "ad": "Kuşadası Kaleiçi",
+      "kategori": "carsi",
+      "amaclar": [
+        "yavas",
+        "gece"
+      ],
+      "ilce": "Kuşadası",
+      "merkeze_km": 51,
+      "neden": "Kervansarayın arkasındaki eski mahalle; taş evler arasında dükkânlar ve Kaleiçi Camii",
+      "osm": "way/753045241"
+    },
+    {
+      "sira": 30,
+      "ad": "Karacasu çömlekçileri",
+      "kategori": "carsi",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Karacasu",
+      "merkeze_km": 68,
+      "neden": "Afrodisias'ın yakınında kırmızı topraktan çömlek; atölyelerde çark başında ustalar"
+    },
+    {
+      "sira": 31,
+      "ad": "Kuşadası semt pazarı",
+      "kategori": "carsi",
+      "amaclar": [
+        "lezzet",
+        "yavas"
+      ],
+      "ilce": "Kuşadası",
+      "merkeze_km": 51,
+      "neden": "Ova köylerinin zeytini, inciri, otu ve peyniri; haftanın birkaç günü kurulan pazar",
+      "place_id": "ChIJHekkqwKvvhQRDk1EJw6PyAM"
+    },
+    {
+      "sira": 32,
+      "ad": "Kuşadası Barlar Sokağı",
+      "kategori": "aktivite",
+      "amaclar": [
+        "gece"
+      ],
+      "ilce": "Kuşadası",
+      "merkeze_km": 52,
+      "neden": "Kaleiçi'nin dar sokağında yan yana barlar; yaz gecelerinde sabaha dek açık",
+      "place_id": "ChIJrx7xHS-pvhQRFNYrpQndbt0"
+    },
+    {
+      "sira": 33,
+      "ad": "Kuşadası tekne turu",
+      "kategori": "aktivite",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Kuşadası",
+      "merkeze_km": 52,
+      "neden": "Limandan kalkan günlük tekneler Dilek Yarımadası koylarında yüzme molası verir"
+    },
+    {
+      "sira": 34,
+      "ad": "Arpaz Beyler Konağı",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Nazilli",
+      "merkeze_km": 39,
+      "neden": "Arpaz köyünde taş kule-konak; Büyük Menderes ovasına bakan yamaçta",
+      "place_id": "ChIJiyclAf-2uBQRn195K4wcVnk"
+    },
+    {
+      "sira": 35,
+      "ad": "Madran Dağı",
+      "kategori": "manzara",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Bozdoğan",
+      "merkeze_km": 33,
+      "neden": "Bozdoğan'ın üstünde 1.800 metreye çıkan yayla; kar helvasının karı burada saklanır"
+    },
+    {
+      "sira": 36,
+      "ad": "Kurşunlu Manastırı",
+      "kategori": "manzara",
+      "amaclar": [
+        "kultur_tarih",
+        "doga"
+      ],
+      "ilce": "Kuşadası",
+      "merkeze_km": 50,
+      "neden": "Samsun Dağı yamacında Bizans manastırı kalıntısı; çamların arasından körfez",
+      "osm": "way/1076376139"
+    },
+    {
+      "sira": 37,
+      "ad": "Sümerbank Nazilli Basma Fabrikası Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Nazilli",
+      "merkeze_km": 43,
+      "neden": "1937'de Atatürk'ün açtığı basma fabrikası; lojmanları ve sosyal tesisleriyle"
+    }
+  ]
+}

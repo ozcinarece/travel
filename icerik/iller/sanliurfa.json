@@ -1,0 +1,508 @@
+{
+  "il": "Şanlıurfa",
+  "slug": "sanliurfa",
+  "guncelleme": "2026-11-21",
+  "oneriler": [
+    {
+      "sira": 1,
+      "ad": "Göbeklitepe",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Haliliye",
+      "merkeze_km": 15,
+      "neden": "Yaklaşık 12 bin yıllık T biçimli dikilitaşlar; tilki, yaban domuzu ve akbaba kabartmaları.",
+      "osm": "way/124331302",
+      "place_id": "ChIJ22rQHgpvNBURa7qfHWGI7tE"
+    },
+    {
+      "sira": 2,
+      "ad": "Balıklıgöl (Halil-ür Rahman Gölü)",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas",
+        "cocuklu"
+      ],
+      "ilce": "Eyyübiye",
+      "merkeze_km": 0,
+      "neden": "İbrahim'in atıldığı ateşin suya, odunların balığa döndüğü anlatılan havuz.",
+      "osm": "node/9469586305",
+      "place_id": "ChIJFyF0e21xNBURkwISPb2NH6g"
+    },
+    {
+      "sira": 3,
+      "ad": "Şanlıurfa Arkeoloji Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Haliliye",
+      "merkeze_km": 1,
+      "neden": "Balıklıgöl'de bulunan 11 bin yıllık Urfa Adamı heykeli ve Göbeklitepe buluntuları.",
+      "osm": "relation/7745955"
+    },
+    {
+      "sira": 4,
+      "ad": "Harran",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Harran",
+      "merkeze_km": 39,
+      "neden": "Kerpiçten konik kubbeli kümbet evler; ovanın ortasında höyük, sur ve kale kalıntısı.",
+      "osm": "node/5273819922"
+    },
+    {
+      "sira": 5,
+      "ad": "Haleplibahçe Mozaik Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Haliliye",
+      "merkeze_km": 0,
+      "neden": "Kazı alanının üstüne kurulu; Roma villasının tabanında Amazon kraliçeleri mozaiği.",
+      "osm": "way/193118073",
+      "place_id": "ChIJgfr9IJxxNBUR2iL1A5kQ9Zo"
+    },
+    {
+      "sira": 6,
+      "ad": "Karahantepe",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Haliliye",
+      "merkeze_km": 46,
+      "neden": "Göbeklitepe'nin çağdaşı; kayaya oyulmuş odanın duvarından bir insan başı uzanır.",
+      "osm": "way/989126381",
+      "place_id": "ChIJD-Mvp71UNBURPNHzEfVy5m0"
+    },
+    {
+      "sira": 7,
+      "ad": "Halfeti",
+      "kategori": "manzara",
+      "amaclar": [
+        "yavas",
+        "doga"
+      ],
+      "ilce": "Halfeti",
+      "merkeze_km": 82,
+      "neden": "Birecik Barajı'nın yarısını sular altında bıraktığı ilçe; taş evler Fırat'a iner.",
+      "osm": "node/7843146022",
+      "place_id": "ChIJt8ICQz8uMhURwHUV5whqEyk"
+    },
+    {
+      "sira": 8,
+      "ad": "Urfa ciğer kebabı",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Eyyübiye",
+      "merkeze_km": 0,
+      "neden": "Urfa'da sabah kahvaltısı: şişte kuzu ciğeri, isot ve maydanozla lavaşa sarılır."
+    },
+    {
+      "sira": 9,
+      "ad": "Mevlid-i Halil Camii ve Hz. İbrahim'in Mağarası",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Eyyübiye",
+      "merkeze_km": 0,
+      "neden": "Hz. İbrahim'in doğduğu anlatılan mağara; kadınlar ve erkekler ayrı kapıdan girer.",
+      "osm": "relation/8281200",
+      "place_id": "ChIJk_WurJtxNBUR56ktRLcVzC0"
+    },
+    {
+      "sira": 10,
+      "ad": "Kapalı Çarşı ve Kazzaz Pazarı (Bedesten)",
+      "kategori": "carsi",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Eyyübiye",
+      "merkeze_km": 0,
+      "neden": "Bedesten'de ipek, puşi ve yemeni satılır; Osmanlı'dan kalma çarşı dizisinin kalbi."
+    },
+    {
+      "sira": 11,
+      "ad": "Gümrük Hanı",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "yavas",
+        "kultur_tarih"
+      ],
+      "ilce": "Eyyübiye",
+      "merkeze_km": 0,
+      "neden": "1562'de yapılan hanın avlusunda tavla, demli çay ve mırra; çarşının ortasında.",
+      "osm": "relation/13773181",
+      "place_id": "ChIJe7sqUZdxNBURKDfNkt0rQJA"
+    },
+    {
+      "sira": 12,
+      "ad": "Harran Ulu Camii",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Harran",
+      "merkeze_km": 38,
+      "neden": "8. yüzyılda yapılan caminin kalıntısı; kare planlı yüksek minaresi ayakta.",
+      "osm": "way/300410166",
+      "place_id": "ChIJRdU6dDE9NBURWVCIUFL4dW8"
+    },
+    {
+      "sira": 13,
+      "ad": "Halfeti tekne turu",
+      "kategori": "aktivite",
+      "amaclar": [
+        "doga",
+        "yavas",
+        "cocuklu"
+      ],
+      "ilce": "Halfeti",
+      "merkeze_km": 82,
+      "neden": "İskeleden kalkan teknelerle Savaşan'ın batık camisine ve Rumkale'nin dibine gidilir."
+    },
+    {
+      "sira": 14,
+      "ad": "Urfa kebabı",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Eyyübiye",
+      "merkeze_km": 0,
+      "neden": "Acısız kıyma kebabı; közlenmiş patlıcan, soğan ve domatesle lavaşta gelir."
+    },
+    {
+      "sira": 15,
+      "ad": "Urfa çiğ köftesi",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Eyyübiye",
+      "merkeze_km": 0,
+      "neden": "İnce bulgur, isot ve baharatın uzun uzun yoğrulduğu çiğ köfte; marula sarılır."
+    },
+    {
+      "sira": 16,
+      "ad": "Şıllık tatlısı",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Eyyübiye",
+      "merkeze_km": 0,
+      "neden": "Sacda ince pişen hamur cevizle sarılır, üstüne şerbet dökülür."
+    },
+    {
+      "sira": 17,
+      "ad": "Savaşan batık camisi",
+      "kategori": "manzara",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Halfeti",
+      "merkeze_km": 84,
+      "neden": "Baraj gölünden yalnız minaresi çıkan köy camisi; tekneyle yanından geçilir.",
+      "osm": "node/7880948185",
+      "place_id": "ChIJ4Vxzk9IxMhURtlmAhVSBma8"
+    },
+    {
+      "sira": 18,
+      "ad": "Rızvaniye Camii ve Medresesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Eyyübiye",
+      "merkeze_km": 0,
+      "neden": "Balıklıgöl'ün kuzey kıyısını kaplayan revaklı cami ve medrese; 1716'da yapıldı.",
+      "osm": "way/193065801",
+      "place_id": "ChIJMUvtdZtxNBUR7br84LqK_AI"
+    },
+    {
+      "sira": 19,
+      "ad": "Ayn Zeliha Gölü",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas",
+        "cocuklu"
+      ],
+      "ilce": "Eyyübiye",
+      "merkeze_km": 0,
+      "neden": "Balıklıgöl'ün yanındaki ikinci havuz; Zeliha'nın gözyaşlarından oluştuğu anlatılır.",
+      "osm": "way/188882054",
+      "place_id": "ChIJPcBJt61xNBURwRWJ--OK8Jw"
+    },
+    {
+      "sira": 20,
+      "ad": "Urfa sıra gecesi",
+      "kategori": "aktivite",
+      "amaclar": [
+        "gece",
+        "lezzet"
+      ],
+      "ilce": "Eyyübiye",
+      "merkeze_km": 0,
+      "neden": "Konak odalarında saz, Urfa türküleri ve çiğ köfteyle geçen gece sohbeti."
+    },
+    {
+      "sira": 21,
+      "ad": "Soğmatar",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Haliliye",
+      "merkeze_km": 52,
+      "neden": "Sabiilerin gezegen tanrılarına adadığı tepe; kaya yüzünde Süryanice yazıtlar.",
+      "osm": "way/275053989",
+      "place_id": "ChIJMWy7ZnGtNRURymZa32NjlT8"
+    },
+    {
+      "sira": 22,
+      "ad": "Şuayb Şehri",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Haliliye",
+      "merkeze_km": 61,
+      "neden": "Kayaya oyulmuş evler ve mezarlar; Hz. Şuayb'ın yaşadığı anlatılan mağara.",
+      "osm": "node/599950253",
+      "place_id": "ChIJD73peL21NRUR2lPAxb6AdeY"
+    },
+    {
+      "sira": 23,
+      "ad": "Tektek Dağları Milli Parkı",
+      "kategori": "doga",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Haliliye",
+      "merkeze_km": 45,
+      "neden": "2007'de milli park olan bozkır tepeler; Soğmatar ve Şuayb Şehri bu alanda."
+    },
+    {
+      "sira": 24,
+      "ad": "Birecik Kelaynak Üretme İstasyonu",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Birecik",
+      "merkeze_km": 73,
+      "neden": "Nesli tükenmeye yüz tutmuş kelaynaklar Fırat kıyısındaki istasyonda yaşatılıyor.",
+      "place_id": "ChIJAQAAkOePMRUR4zP2y1Mvwno"
+    },
+    {
+      "sira": 25,
+      "ad": "Mırra",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet",
+        "gece"
+      ],
+      "ilce": "Eyyübiye",
+      "merkeze_km": 0,
+      "neden": "Saatlerce kaynatılıp koyulaşan acı kahve; kulpsuz fincanda bir iki yudum verilir."
+    },
+    {
+      "sira": 26,
+      "ad": "Urfa isotu",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Eyyübiye",
+      "merkeze_km": 0,
+      "neden": "Gündüz güneşte kurutulup gece sarılarak terletilen kara biber; her sofrada."
+    },
+    {
+      "sira": 27,
+      "ad": "Kurtuluş Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Haliliye",
+      "merkeze_km": 1,
+      "neden": "1903 tarihli konak; duvarlarında işgal yıllarından kalan top ve kurşun izleri.",
+      "osm": "node/5021751523",
+      "place_id": "ChIJFS0mX6NxNBURkUwyIKLMLnQ"
+    },
+    {
+      "sira": 28,
+      "ad": "Sipahi Pazarı",
+      "kategori": "carsi",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Eyyübiye",
+      "merkeze_km": 0,
+      "neden": "Kapalı Çarşı'nın içinde halı ve kilim satıcılarının toplandığı pazar."
+    },
+    {
+      "sira": 29,
+      "ad": "Atatürk Barajı Gölü",
+      "kategori": "manzara",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Bozova",
+      "merkeze_km": 55,
+      "neden": "Türkiye'nin en büyük barajının gölü; Bozova kıyısından geniş mavi bir düzlük."
+    },
+    {
+      "sira": 30,
+      "ad": "Eyyüp Peygamber Makamı",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Eyyübiye",
+      "merkeze_km": 2,
+      "neden": "Hz. Eyyüp'ün hastalığını geçirdiği anlatılan mağara; yanında şifalı sayılan kuyu.",
+      "osm": "way/550120569"
+    },
+    {
+      "sira": 31,
+      "ad": "Kızılkoyun Kaya Mezarları",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Eyyübiye",
+      "merkeze_km": 0,
+      "neden": "Balıklıgöl'ün batısındaki yamaçta Roma ve Bizans döneminden kaya mezarları.",
+      "osm": "node/9469538686",
+      "place_id": "ChIJNWJJQZxxNBURa7pxzyEU8K8"
+    },
+    {
+      "sira": 32,
+      "ad": "Balıklıgöl'de balık yemleme",
+      "kategori": "aktivite",
+      "amaclar": [
+        "cocuklu",
+        "yavas"
+      ],
+      "ilce": "Eyyübiye",
+      "merkeze_km": 0,
+      "neden": "Kutsal sayılan sazanlar tutulmaz; çocuklar kıyıdan aldıkları yemle besler."
+    },
+    {
+      "sira": 33,
+      "ad": "Bakırcılar Çarşısı",
+      "kategori": "carsi",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Eyyübiye",
+      "merkeze_km": 0,
+      "neden": "Kazan, sini ve ibriklerin hâlâ elde dövüldüğü çarşı; Kapalı Çarşı'nın yanında."
+    },
+    {
+      "sira": 34,
+      "ad": "Urfa Mutfak Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "lezzet",
+        "kultur_tarih"
+      ],
+      "ilce": "Eyyübiye",
+      "merkeze_km": 0,
+      "neden": "Hacıbanlar Konağı'nda eski mutfak gereçleri; avlulu evde yöresel yemek kursu.",
+      "osm": "way/748554782",
+      "place_id": "ChIJodZpm5dxNBUREdD8pbZATP0"
+    },
+    {
+      "sira": 35,
+      "ad": "Fırfırlı Camii",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Eyyübiye",
+      "merkeze_km": 0,
+      "neden": "Eski On İki Havari Kilisesi; taş cephesi kilise döneminden kalma.",
+      "osm": "way/1147760667",
+      "place_id": "ChIJQy569JhxNBURxRBK33_DvGc"
+    },
+    {
+      "sira": 36,
+      "ad": "Halfeti siyah gülü",
+      "kategori": "doga",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Halfeti",
+      "merkeze_km": 82,
+      "neden": "Koyu kırmızısı kara görünen gül; ilçenin bahçelerinde yetişir, mayısta açar."
+    },
+    {
+      "sira": 37,
+      "ad": "Bazda Mağaraları",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Harran",
+      "merkeze_km": 53,
+      "neden": "Harran'ın taşının çıkarıldığı eski taş ocağı; kayaya oyulmuş geniş galeriler.",
+      "osm": "node/599950243",
+      "place_id": "ChIJAb96LLQ2NBUR0kV4x0QUghc"
+    },
+    {
+      "sira": 38,
+      "ad": "Birecik Kalesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Birecik",
+      "merkeze_km": 73,
+      "neden": "Fırat'ın doğu kıyısındaki kayalığa yaslanan kale; köprüden bakınca görünür.",
+      "osm": "node/4889905042",
+      "place_id": "ChIJH0niQn1_MRURH5K8_XAypTY"
+    },
+    {
+      "sira": 39,
+      "ad": "Selahattin Eyyubi Camii",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Eyyübiye",
+      "merkeze_km": 0,
+      "neden": "Eski Ermeni Meryem Ana Kilisesi; 1990'larda camiye çevrildi.",
+      "osm": "way/190753500"
+    },
+    {
+      "sira": 40,
+      "ad": "Halil-ür Rahman Camii",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Eyyübiye",
+      "merkeze_km": 0,
+      "neden": "Balıklıgöl'ün güneybatı ucunda; 13. yüzyıl başından kalma kare minaresiyle.",
+      "osm": "way/193065803",
+      "place_id": "ChIJzT5es5txNBURKznMmoWKoks"
+    }
+  ]
+}

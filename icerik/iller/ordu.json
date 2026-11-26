@@ -1,0 +1,350 @@
+{
+  "il": "Ordu",
+  "slug": "ordu",
+  "guncelleme": "2026-11-21",
+  "oneriler": [
+    {
+      "sira": 1,
+      "ad": "Boztepe",
+      "kategori": "manzara",
+      "amaclar": [
+        "doga",
+        "gece"
+      ],
+      "ilce": "Altınordu",
+      "merkeze_km": 6,
+      "neden": "Tepeden şehir, liman ve kıyı şeridi tek karede; teleferikle de çıkılıyor",
+      "osm": "node/5332999824",
+      "place_id": "ChIJqXnHrGwgY0ARRc34znnr1Ik"
+    },
+    {
+      "sira": 2,
+      "ad": "Yason Burnu",
+      "kategori": "manzara",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Perşembe",
+      "merkeze_km": 28,
+      "neden": "Argonotlar efsanesine bağlanan burun; 19. yy'dan kalma kilise ve gün batımı için gelinir",
+      "osm": "node/5329589607"
+    },
+    {
+      "sira": 3,
+      "ad": "Ordu pancar çorbası (karalahana çorbası)",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Altınordu",
+      "merkeze_km": 0,
+      "neden": "Karalahana, barbunya ve mısır unuyla koyulaşan çorba, yanında mısır ekmeği; tescilli"
+    },
+    {
+      "sira": 4,
+      "ad": "Perşembe Yaylası menderesleri",
+      "kategori": "manzara",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Aybastı",
+      "merkeze_km": 105,
+      "neden": "Yayla düzlüğünde kıvrıla kıvrıla akan dereyi yukarıdan izlemek için; temmuzda şenlik var"
+    },
+    {
+      "sira": 5,
+      "ad": "Ulugöl Tabiat Parkı",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Gölköy",
+      "merkeze_km": 80,
+      "neden": "Ormanla çevrili gölün etrafında yürüyüş yolu ve piknik alanı; sonbaharda renkler dönüyor"
+    },
+    {
+      "sira": 6,
+      "ad": "Paşaoğlu Konağı ve Etnografya Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Altınordu",
+      "merkeze_km": 1,
+      "neden": "1896 yapımı üç katlı taş konak; boyalı ahşap tavan ve taş balkonlar müze olarak gezilir"
+    },
+    {
+      "sira": 7,
+      "ad": "Ünye Kalesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Ünye",
+      "merkeze_km": 78,
+      "neden": "Kaleköy'de kayalık tepede Pontus kalesi; giriş kapısının yanında kayaya oyulmuş mezar var"
+    },
+    {
+      "sira": 8,
+      "ad": "Çambaşı Yaylası",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Kabadüz",
+      "merkeze_km": 58,
+      "neden": "Kabadüz'ün güneyinde yüksek yayla; yazın serin otlaklar ve bungalovlar, kışın kar"
+    },
+    {
+      "sira": 9,
+      "ad": "Kurul Kalesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "doga"
+      ],
+      "ilce": "Altınordu",
+      "merkeze_km": 13,
+      "neden": "Mithridates dönemi kayalık kale; Kibele heykeli burada çıktı, tepeden Melet ırmağı görünür",
+      "osm": "way/242182072",
+      "place_id": "ChIJVVVVBWYkY0AROgvd2s0QzDM"
+    },
+    {
+      "sira": 10,
+      "ad": "Boztepe teleferiği",
+      "kategori": "aktivite",
+      "amaclar": [
+        "cocuklu"
+      ],
+      "ilce": "Altınordu",
+      "merkeze_km": 1,
+      "neden": "Sahildeki istasyondan Boztepe'ye çıkan kabinli hat; yürüyüş ya da araç gerektirmez"
+    },
+    {
+      "sira": 11,
+      "ad": "Ordu pidesi (Ordu yağlısı)",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Altınordu",
+      "merkeze_km": 0,
+      "neden": "Yarı açık pişen kıymalı, peynirli ya da kuşbaşılı pide; coğrafi işaretli"
+    },
+    {
+      "sira": 12,
+      "ad": "Gaga Gölü",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Fatsa",
+      "merkeze_km": 33,
+      "neden": "Heyelanla oluşmuş, ortasında adacık olan küçük göl; fındık bahçeleri arasında kano yapılır"
+    },
+    {
+      "sira": 13,
+      "ad": "Ordu fındıklı burma tatlısı",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Altınordu",
+      "merkeze_km": 0,
+      "neden": "Oklavaya sarılıp kıyılmış fındıkla pişirilen şerbetli burma; coğrafi işaretli"
+    },
+    {
+      "sira": 14,
+      "ad": "Ordu içli tava",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Altınordu",
+      "merkeze_km": 0,
+      "neden": "İki kat hamsi arasına üzümlü, fıstıklı pilav konup tavada çevrilir; coğrafi işaretli"
+    },
+    {
+      "sira": 15,
+      "ad": "Perşembe ceviz helvası",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Perşembe",
+      "merkeze_km": 13,
+      "neden": "Çöven köpüğü ve pancar şekeriyle çekilen cevizli beyaz helva; coğrafi işaretli"
+    },
+    {
+      "sira": 16,
+      "ad": "Taşbaşı Kültür Merkezi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "gece"
+      ],
+      "ilce": "Altınordu",
+      "merkeze_km": 1,
+      "neden": "Rum kilisesi olarak yapılmış, sonra cezaevi olmuş bina; bugün konser ve sergi mekânı"
+    },
+    {
+      "sira": 17,
+      "ad": "Rüsumat No:4 Gemisi ve Açık Hava Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Altınordu",
+      "merkeze_km": 1,
+      "neden": "Kurtuluş Savaşı'nda cephane taşıyan geminin sahilde kurulan gerçek boyutlu kopyası"
+    },
+    {
+      "sira": 18,
+      "ad": "Ordu tostu",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet",
+        "cocuklu"
+      ],
+      "ilce": "Altınordu",
+      "merkeze_km": 0,
+      "neden": "Fındık kabuğu ateşinde pişen iri somunla yapılan kaşarlı ya da sucuklu tost; tescilli"
+    },
+    {
+      "sira": 19,
+      "ad": "Yalıköy köftesi",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Fatsa",
+      "merkeze_km": 38,
+      "neden": "Fatsa Yalıköy'e özgü, küp doğranmış sığır etiyle yapılan köfte; coğrafi işaretli"
+    },
+    {
+      "sira": 20,
+      "ad": "Hoynat Adası",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Perşembe",
+      "merkeze_km": 12,
+      "neden": "Kıyıya yakın kayalık ada; tepeli karabatakların ürediği yer, kuş gözlemi için uygun",
+      "osm": "node/7803700408",
+      "place_id": "ChIJmxSh45joYkARoyooIUZwuA4"
+    },
+    {
+      "sira": 21,
+      "ad": "Boztepe'den yamaç paraşütü",
+      "kategori": "aktivite",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Altınordu",
+      "merkeze_km": 6,
+      "neden": "Boztepe'den kalkıp sahile inen tandem uçuşlar; sezon ilkbaharda hava izin verince açılıyor"
+    },
+    {
+      "sira": 22,
+      "ad": "Fındık Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Altınordu",
+      "merkeze_km": 1,
+      "neden": "Kahraman Sağra Konağı'nda fındığın bahçeden sofraya yolculuğu ve eski hasat aletleri"
+    },
+    {
+      "sira": 23,
+      "ad": "Kabataş helvası",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Kabataş",
+      "merkeze_km": 90,
+      "neden": "Armut ya da elma pekmezi, yumurta akı ve cevizle yapılan helva; coğrafi işaretli"
+    },
+    {
+      "sira": 24,
+      "ad": "Çambaşı Kayak Merkezi",
+      "kategori": "aktivite",
+      "amaclar": [
+        "cocuklu",
+        "doga"
+      ],
+      "ilce": "Kabadüz",
+      "merkeze_km": 54,
+      "neden": "Kıyıya yakın kayak merkezi; acemiler için yürüyen bant, kızak ve snowtube alanı var"
+    },
+    {
+      "sira": 25,
+      "ad": "Ünye Yaşayan Kültürel Miras Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "cocuklu",
+        "kultur_tarih"
+      ],
+      "ilce": "Ünye",
+      "merkeze_km": 72,
+      "neden": "Eski kaptan evinde dokunulabilen ev eşyaları, bahçede eski sokak oyunları, Karagöz odası"
+    },
+    {
+      "sira": 26,
+      "ad": "Ordu galdirik kavurması",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Altınordu",
+      "merkeze_km": 0,
+      "neden": "Yazın toplanan yabani galdirik sapları soğanla kavrulur; coğrafi işaretli"
+    },
+    {
+      "sira": 27,
+      "ad": "Küpkaya Kanyonu",
+      "kategori": "doga",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Ulubey",
+      "merkeze_km": 32,
+      "neden": "Ulubey Kardeşler köyünde dar kayalık vadi; kano için uygun bulunan bir dere yatağı"
+    },
+    {
+      "sira": 28,
+      "ad": "Topçam Yaylası",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Mesudiye",
+      "merkeze_km": 138,
+      "neden": "Mesudiye'nin iç kesiminde yayla obaları; Kızılağaç'ta zengin çiçek örtüsü, yaz şenliği"
+    },
+    {
+      "sira": 29,
+      "ad": "Cotyora (Bozukkale)",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Altınordu",
+      "merkeze_km": 2,
+      "neden": "Şehrin ilk yerleşim yeri sayılan kıyı tepesi; Bizans gözetleme kulesi kalıntısı",
+      "osm": "node/11081214190",
+      "place_id": "ChIJswSJm3UfY0ARxt4sYerogls"
+    }
+  ]
+}

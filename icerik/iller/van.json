@@ -1,0 +1,388 @@
+{
+  "il": "Van",
+  "slug": "van",
+  "guncelleme": "2026-11-20",
+  "oneriler": [
+    {
+      "sira": 1,
+      "ad": "Akdamar Adası ve Kilisesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "doga"
+      ],
+      "ilce": "Gevaş",
+      "merkeze_km": 45,
+      "neden": "915'te yapılan Kutsal Haç Kilisesi; dış duvarlar kabartmalı, adaya tekneyle geçilir",
+      "osm": "way/191563484",
+      "place_id": "ChIJAQAAwHyRDUARuFjRluyu_n8"
+    },
+    {
+      "sira": 2,
+      "ad": "Van Kalesi (Tuşpa)",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Tuşba",
+      "merkeze_km": 5,
+      "neden": "Urartu başkenti Tuşpa; kayaya oyulmuş kral mezarları ve göle bakan sırtta gün batımı",
+      "osm": "way/135564251",
+      "place_id": "ChIJkbfv4WJ6EkARMtmLDF8Tvws"
+    },
+    {
+      "sira": 3,
+      "ad": "Van Kahvaltıcılar Sokağı",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "İpekyolu",
+      "merkeze_km": 0,
+      "neden": "Otlu peynir, murtuğa, kavut ve cacıkla uzun Van kahvaltısının toplandığı sokak",
+      "osm": "node/4428686190",
+      "place_id": "ChIJdwQTeGhxEkAREWUz8bPbUR8"
+    },
+    {
+      "sira": 4,
+      "ad": "Hoşap Kalesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Gürpınar",
+      "merkeze_km": 55,
+      "neden": "1643'te bir Mahmudi beyinin yaptırdığı kale; köyün üstünde kayalığa oturur",
+      "osm": "node/1449289710",
+      "place_id": "ChIJ07olj_wDEkARm60rM1s6xhc"
+    },
+    {
+      "sira": 5,
+      "ad": "Muradiye Şelalesi",
+      "kategori": "doga",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Muradiye",
+      "merkeze_km": 80,
+      "neden": "Bendimahi Çayı'nın bazalt basamaklardan döküldüğü şelale; sert kışlarda donar",
+      "place_id": "ChIJicCZgyUSE0ARZDWuU4MRHuo"
+    },
+    {
+      "sira": 6,
+      "ad": "Çavuştepe Kalesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Gürpınar",
+      "merkeze_km": 25,
+      "neden": "II. Sarduri'nin MÖ 8. yüzyılda kurduğu Sardurihinili; tapınak ve saray temelleri",
+      "osm": "way/184072597",
+      "place_id": "ChIJp1abQWIKEkAR1KCESJRtrN8"
+    },
+    {
+      "sira": 7,
+      "ad": "Erçek Gölü",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Tuşba",
+      "merkeze_km": 30,
+      "neden": "Van Gölü'nün doğusunda sodalı göl; ilkbahar ve yaz aylarında flamingolar gelir",
+      "place_id": "ChIJ1Y0YUI9bEkARIHhwslGc_E4"
+    },
+    {
+      "sira": 8,
+      "ad": "Eski Van Şehri ve Hüsrev Paşa Külliyesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Tuşba",
+      "merkeze_km": 5,
+      "neden": "Kalenin güneyindeki terk edilmiş eski kent; 1567 tarihli külliye ayakta",
+      "osm": "way/134449359",
+      "place_id": "ChIJPYhQw3t6EkARjXcY-y5zcGI"
+    },
+    {
+      "sira": 9,
+      "ad": "Sütçü Kenan",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "İpekyolu",
+      "merkeze_km": 1,
+      "neden": "Van kahvaltısının bilinen salonlarından; hafta sonu sabahları erken git",
+      "osm": "node/5221106824",
+      "place_id": "ChIJI25ylxVwEkARcnY7k1y_lsk"
+    },
+    {
+      "sira": 10,
+      "ad": "Tarihi Peynirciler Çarşısı",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "İpekyolu",
+      "merkeze_km": 0,
+      "neden": "Otlu peynirin satıldığı eski çarşı; kahvaltıdan sonra yanına almak için uğra",
+      "place_id": null
+    },
+    {
+      "sira": 11,
+      "ad": "Van Kedi Evi",
+      "kategori": "aktivite",
+      "amaclar": [
+        "cocuklu"
+      ],
+      "ilce": "Tuşba",
+      "merkeze_km": 10,
+      "neden": "Yüzüncü Yıl Üniversitesi'nde bir gözü mavi bir gözü kehribar Van kedileri",
+      "osm": "node/5358434923",
+      "place_id": "ChIJe1qtLoF6EkARUTmXQTyqJq4"
+    },
+    {
+      "sira": 12,
+      "ad": "Edremit Seyir Tepesi",
+      "kategori": "manzara",
+      "amaclar": [
+        "yavas"
+      ],
+      "ilce": "Edremit",
+      "merkeze_km": 15,
+      "neden": "Van Gölü'ne ve kente yukarıdan bakan seyir noktası; akşamüstü çık",
+      "place_id": null
+    },
+    {
+      "sira": 13,
+      "ad": "Yedi Kilise (Varak Manastırı)",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "merkeze_km": 10,
+      "neden": "Erek Dağı eteğinde, bugün köyün içinde kalan Varak Manastırı'nın kalıntıları",
+      "osm": "way/763344264",
+      "place_id": "ChIJVVVVlUxyEkARMmSsQ3hyJFw"
+    },
+    {
+      "sira": 14,
+      "ad": "Halime Hatun Kümbeti",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Gevaş",
+      "merkeze_km": 40,
+      "neden": "1335'te yapılan kümbet; çevresindeki mezar taşlarının oymalarına da bak",
+      "osm": "way/1120968850",
+      "place_id": "ChIJdcC80pCRDUARNMGvBl9cgmM"
+    },
+    {
+      "sira": 15,
+      "ad": "Ayanis Kalesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Tuşba",
+      "merkeze_km": 27,
+      "neden": "Urartu kralı II. Rusa'nın göl kıyısındaki kalesi; MÖ 7. yüzyıldan",
+      "osm": "way/185622364",
+      "place_id": "ChIJq0Zsgq2NEkARJ8-8ERrTbuk"
+    },
+    {
+      "sira": 16,
+      "ad": "Atatürk Kültür Parkı",
+      "kategori": "manzara",
+      "amaclar": [
+        "yavas",
+        "cocuklu"
+      ],
+      "ilce": "Tuşba",
+      "merkeze_km": 4,
+      "neden": "Van Kalesi'nin karşısındaki yeşil alan; kalenin bütün silüeti buradan görünür",
+      "osm": "way/564928423",
+      "place_id": "ChIJ00R0Nod6EkARGAr7L3W79bw"
+    },
+    {
+      "sira": 17,
+      "ad": "Vanadokya (Yavuzlar Peri Bacaları)",
+      "kategori": "doga",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Başkale",
+      "merkeze_km": 120,
+      "neden": "Volkanik küllerin aşınmasıyla oluşmuş binlerce peri bacası ve kaya oyuğu",
+      "place_id": "ChIJ1VPSclLqEUARPF72jku0mDA"
+    },
+    {
+      "sira": 18,
+      "ad": "Edremit sahili",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Edremit",
+      "merkeze_km": 15,
+      "neden": "Van Gölü'nün sodalı suyunda yüzme; su ele kaygan gelir, yutma",
+      "osm": "way/1553169821",
+      "place_id": null
+    },
+    {
+      "sira": 19,
+      "ad": "Abalı Kayak Merkezi",
+      "kategori": "aktivite",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Gevaş",
+      "merkeze_km": 40,
+      "neden": "Van Gölü'ne bakan pistler; kentten günübirlik kayak için en yakın yer",
+      "place_id": null
+    },
+    {
+      "sira": 20,
+      "ad": "Bendimahi Çayı'nda inci kefali göçü",
+      "kategori": "aktivite",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Muradiye",
+      "merkeze_km": 80,
+      "neden": "İlkbaharda inci kefalinin akıntıya karşı sıçrayarak yumurtlamaya çıkışı",
+      "place_id": null
+    },
+    {
+      "sira": 21,
+      "ad": "Sardur Burcu",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Tuşba",
+      "merkeze_km": 5,
+      "neden": "Kalenin batı eteğinde MÖ 9. yüzyıl burcu; dev bloklarında çivi yazılı kitabe",
+      "place_id": null
+    },
+    {
+      "sira": 22,
+      "ad": "Şeytan Köprüsü",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "doga"
+      ],
+      "ilce": "Muradiye",
+      "merkeze_km": 80,
+      "neden": "Bendimahi Çayı'nın dar boğazını yaklaşık 17 m yükseklikten geçen taş köprü",
+      "place_id": "ChIJCUIG0NcRE0ARqKL3d_GWtsg"
+    },
+    {
+      "sira": 23,
+      "ad": "Erek Dağı",
+      "kategori": "manzara",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Tuşba",
+      "merkeze_km": 15,
+      "neden": "Kentin doğusundaki dağ; yazın yürüyerek çıkılır, Van Gölü ayağının altında kalır",
+      "place_id": "ChIJ_UZXe4NtEkAR3oIS_s_EGYA"
+    },
+    {
+      "sira": 24,
+      "ad": "Sütçü Fevzi",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Edremit",
+      "merkeze_km": 10,
+      "neden": "Edremit yolunda yöresel kahvaltı salonu; kavut ve murtuğayı burada dene",
+      "osm": "node/11201759546",
+      "place_id": null
+    },
+    {
+      "sira": 25,
+      "ad": "Kalecik Örnek Van Evleri",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Tuşba",
+      "merkeze_km": 8,
+      "neden": "Geleneksel Van evlerinin bir arada durduğu mahalle; kerpiç ve taş avlular",
+      "place_id": "ChIJz_5-YrVkEkARPd8Aa95V6WU"
+    },
+    {
+      "sira": 26,
+      "ad": "Zortul Kümbeti",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Erciş",
+      "merkeze_km": 95,
+      "neden": "Kitabesi olmadığı için Anonim Kümbet de denen, Erciş'te tek başına duran yapı",
+      "place_id": "ChIJUdZcLQAnE0ARn5kIkcdZUAQ"
+    },
+    {
+      "sira": 27,
+      "ad": "Çatak Vadisi",
+      "kategori": "doga",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Çatak",
+      "merkeze_km": 80,
+      "neden": "İki çayın birleştiği ormanlık vadi; Çatak Köprüsü ve kalesi yol üstünde",
+      "place_id": "ChIJj37wawTRDUARYRjnqaxTz40"
+    },
+    {
+      "sira": 28,
+      "ad": "Amik sahili",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "merkeze_km": 40,
+      "neden": "Süphan Dağı'na bakan sahil; meyve bahçeleri ve doğal kumsal",
+      "place_id": "ChIJFXTSNPntEkARMg9WNyT1c-w"
+    },
+    {
+      "sira": 29,
+      "ad": "Tendürek Dağı",
+      "kategori": "doga",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Çaldıran",
+      "merkeze_km": 110,
+      "neden": "İran sınırına yakın yanardağ; yamaçlarında geniş lav akıntıları",
+      "place_id": "ChIJT8BN1aZYE0ARtfRLM0lT26k"
+    },
+    {
+      "sira": 30,
+      "ad": "Bahçesaray",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Bahçesaray",
+      "merkeze_km": 110,
+      "neden": "Yazın yaylaları, dereleri ve balıyla bilinen dağ ilçesi; kışın yolu kapanabilir",
+      "place_id": "ChIJFaAEv5q2DUAR03018htgAlY"
+    }
+  ]
+}

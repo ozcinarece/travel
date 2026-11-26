@@ -1,0 +1,335 @@
+{
+  "il": "Kütahya",
+  "slug": "kutahya",
+  "guncelleme": "2026-11-21",
+  "oneriler": [
+    {
+      "sira": 1,
+      "ad": "Aizanoi Antik Kenti",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Çavdarhisar",
+      "merkeze_km": 50,
+      "neden": "Zeus Tapınağı, tiyatro-stadyum ve Diocletianus'un fiyat fermanının yazılı olduğu çarşı",
+      "osm": "relation/2317446",
+      "place_id": "ChIJ62NpA6niyBQRyyyAWshW6g8"
+    },
+    {
+      "sira": 2,
+      "ad": "Kütahya Çini Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Yakup Bey İmareti'nde; Germiyan beyinin türbesi ve yüzyıllık Kütahya çinileri",
+      "osm": "way/192214686",
+      "place_id": "ChIJxbYOpWxJyRQRVzUYtI4s3Dc"
+    },
+    {
+      "sira": 3,
+      "ad": "Kütahya Kalesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "Bizans ve Germiyan surları; tepeden şehir bir bakışta görülür",
+      "osm": "way/192214684",
+      "place_id": "ChIJ372bo-NHyRQRuberAbmDAoQ"
+    },
+    {
+      "sira": 4,
+      "ad": "Dumlupınar Şehitliği",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Dumlupınar",
+      "merkeze_km": 60,
+      "neden": "30 Ağustos 1922 Başkomutan Meydan Muharebesi alanı; Meçhul Asker Anıtı"
+    },
+    {
+      "sira": 5,
+      "ad": "Kütahya Arkeoloji ve Maden Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 3,
+      "neden": "Eylül 2026'da yeni binasında açıldı; Aizanoi buluntuları ve Amazon lahdi",
+      "osm": "way/1564688595",
+      "place_id": "ChIJzWMwwfFIyRQRrXQfkYo9Vo8"
+    },
+    {
+      "sira": 6,
+      "ad": "Gediz güveci",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Gediz",
+      "merkeze_km": 70,
+      "neden": "Coğrafi işaretli; et toprak güveçte taş fırında saatlerce pişer"
+    },
+    {
+      "sira": 7,
+      "ad": "Germiyan Sokağı",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Restore edilmiş Osmanlı konaklarının sıralandığı sokak; içinde kafeler var",
+      "osm": "node/11020544205",
+      "place_id": "ChIJAYlhTApIyRQRFdX7O8Ynqso"
+    },
+    {
+      "sira": 8,
+      "ad": "Çini atölyeleri",
+      "kategori": "aktivite",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "Coğrafi işaretli Kütahya çinisinin boyanması ve pişirilmesi atölyede izlenir"
+    },
+    {
+      "sira": 9,
+      "ad": "Murat Dağı",
+      "kategori": "doga",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Gediz",
+      "merkeze_km": 75,
+      "neden": "2.300 m'yi aşan dağ; yaylalar, karaçam ormanı ve kışın kar"
+    },
+    {
+      "sira": 10,
+      "ad": "Eynal Kaplıcaları",
+      "kategori": "aktivite",
+      "amaclar": [
+        "yavas"
+      ],
+      "ilce": "Simav",
+      "merkeze_km": 110,
+      "neden": "Simav'ın sıcak kaynakları; termal havuz ve otel bölgesi"
+    },
+    {
+      "sira": 11,
+      "ad": "Cimcik aşı",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Coğrafi işaretli; parmakla koparılan küçük hamurlar yoğurt ve tereyağıyla"
+    },
+    {
+      "sira": 12,
+      "ad": "Paşa helvası",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Coğrafi işaretli helva; Kütahya'da bayram ve misafir ikramı"
+    },
+    {
+      "sira": 13,
+      "ad": "Kütahya Ulu Camii",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Yıldırım Bayezid döneminde başlayıp II. Murad zamanında biten cami",
+      "osm": "way/192214685",
+      "place_id": "ChIJoxACtQlIyRQR-D_l6DZ5NvU"
+    },
+    {
+      "sira": 14,
+      "ad": "Kızılcık tarhanası",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Coğrafi işaretli; ekşisini kızılcıktan alan tarhana çorbası"
+    },
+    {
+      "sira": 15,
+      "ad": "Bitli helva",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Coğrafi işaretli; Kütahya'ya özgü helva, düğün ve misafir ikramı"
+    },
+    {
+      "sira": 16,
+      "ad": "Köpük helvası",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet",
+        "cocuklu"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Coğrafi işaretli; çöven köküyle çırpılıp köpürtülen beyaz helva"
+    },
+    {
+      "sira": 17,
+      "ad": "Kossuth Evi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Macar lider Lajos Kossuth'un 1850-51 sürgününde kaldığı ev",
+      "osm": "node/2967996766",
+      "place_id": "ChIJZ_4Xn-JHyRQRKljAqVN7evY"
+    },
+    {
+      "sira": 18,
+      "ad": "Yoncalı Kaplıcası",
+      "kategori": "aktivite",
+      "amaclar": [
+        "yavas"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 12,
+      "neden": "Şehre en yakın kaplıca; termal havuzlu oteller ve günübirlik hamamlar"
+    },
+    {
+      "sira": 19,
+      "ad": "Dönenler Camii (Mevlevihane)",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Germiyan döneminden Mevlevihane; ahşap semahane ve mahfil",
+      "osm": "way/374250683",
+      "place_id": "ChIJwfBoqQlIyRQR365xq0-QlFg"
+    },
+    {
+      "sira": 20,
+      "ad": "Evliya Çelebi Evi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Seyahatname yazarının ailesine ait konak; gezginin hayatı anlatılır",
+      "osm": "node/3776547694",
+      "place_id": "ChIJHXjCjxFIyRQRyuOgjT0whHo"
+    },
+    {
+      "sira": 21,
+      "ad": "Kütahya Kent Tarihi Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Germiyan Sokağı'nda; şehrin Frig'den Cumhuriyet'e tarihi",
+      "osm": "way/1433995046",
+      "place_id": "ChIJ7YwrbwtIyRQRpm90ge7qwtY"
+    },
+    {
+      "sira": 22,
+      "ad": "Domaniç yaylaları",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Domaniç",
+      "merkeze_km": 70,
+      "neden": "Çam ormanlarıyla kaplı yaylalar; yaz piknikleri ve serin hava"
+    },
+    {
+      "sira": 23,
+      "ad": "Haşhaşlı gözleme",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Haşhaş ezmesiyle doldurulan sac gözlemesi; kahvaltıda yenir"
+    },
+    {
+      "sira": 24,
+      "ad": "Enne Barajı",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 10,
+      "neden": "Şehre yakın baraj gölü; çevresinde yürüyüş ve piknik"
+    },
+    {
+      "sira": 25,
+      "ad": "Büyük Bedesten",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Osmanlı bedesteni; çevresindeki çarşı hâlâ alışveriş yeri",
+      "osm": "way/374297139",
+      "place_id": "ChIJH-CFOQpIyRQRFEbPhNFLIY0"
+    },
+    {
+      "sira": 26,
+      "ad": "Çinili Camii",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "İçi ve dışı Kütahya çinileriyle kaplı 20. yüzyıl camisi",
+      "osm": "way/312182027"
+    },
+    {
+      "sira": 27,
+      "ad": "Emet kaplıcaları",
+      "kategori": "aktivite",
+      "amaclar": [
+        "yavas"
+      ],
+      "ilce": "Emet",
+      "merkeze_km": 85,
+      "neden": "Emet'in termal suları; ilçe bor madeniyle de bilinir"
+    }
+  ]
+}

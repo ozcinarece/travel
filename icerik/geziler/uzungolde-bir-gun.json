@@ -1,0 +1,139 @@
+{
+  "surum": 1,
+  "sehir": {
+    "slug": "trabzon"
+  },
+  "takvim": {
+    "ilk_gun": "cumartesi"
+  },
+  "gezi": {
+    "slug": "uzungolde-bir-gun",
+    "baslik": "Uzungöl'de bir gün",
+    "ozet": "Müze, seyir terası ve göl kıyısı; dönüşte Sürmene'de pide",
+    "yazar_ad": "Tripmate ekibi",
+    "amaclar": [
+      "doga",
+      "yavas",
+      "lezzet"
+    ],
+    "yazi_md": "Uzungöl Trabzon'dan yaklaşık yüz kilometre uzakta; Of'tan sahili bırakıp Solaklı vadisi boyunca Çaykara'ya, oradan da Haldizen Deresi'nin vadisine çıkan bir yolun sonunda. Bu plan, göle bir sabah varıp öğleden sonra dönen, arabayla yapılan bir günlük gezi. Sabah müze ve seyir terası, öğleye doğru göl kıyısında yürüyüş, öğle yemeği kıyıda; dönüşte de sahil yolunda Sürmene'de pide var. Trabzon'dan erken, en geç sekiz buçukta çık; yol bir buçuk saati biraz geçer.\n\n> Uzungöl şehirden birkaç derece daha serin ve bulut vadiye çabuk iner. Yaz ortasında bile yanına bir hırka al; kışın gidiyorsan arabada zincir olsun.\n\n## 1. gün · Uzungöl ve Sürmene yolu\n\nGöle vardığında önce köyün doğu yakasındaki [Uzungöl Dursun Ali İnan Müzesi](mekan:ChIJD_SxR8aVZUAR5ahcsXxJKnI)'ne gir. Bölgede yıllardır otel işleten bir ailenin kurduğu bu özel müzede Uzungöl dağlarının kurdu, ayısı, vaşağı ve su samuru sergileniyor; yanında yöre ağaçlarının köklerinden oyulmuş eşyalar ve yaylaya göçü anlatan bir bölüm var. Göle çıkmadan önce vadide kimlerin yaşadığını burada öğrenirsin.\n\nMüzeden batıya, göle doğru birkaç dakika yürü ve [Uzungöl Seyir Terası](mekan:ChIJs7zIvCWVZUARDazwpTDxzP0)'na çık. Gölü, kıyıdaki köyü ve gölü kuşatan ladin ormanını burada tek karede görürsün. Sabah ışığı fotoğraf için en iyisi; sis varsa biraz bekle, Uzungöl'de bulut çabuk kalkar.\n\n::mekan[ChIJs7zIvCWVZUARDazwpTDxzP0]\n\nTerastan kıyıya in ve [Uzungöl](mekan:ChIJ57Ka5F2UZUARrUgKC8tak04)'ün çevresinde yürü. Göl, yamaçtan kopan bir heyelanın Haldizen Deresi'ni kesmesiyle oluştu; çevresi 1989'dan beri tabiat parkı. Kıyı boyunca güney ucuna, derenin göle girdiği yere kadar git. Bol yağmurdan sonra dere çamurlu su getirir ve göl o uçtan başlayarak renk değiştirir.\n\n::mekan[ChIJ57Ka5F2UZUARrUgKC8tak04]\n\nÖğle yemeğini gölün batı kıyısındaki [Uzungöl Ada Restaurant](mekan:ChIJ5xT-hbbGZUARB7dse0u88Dw)'ta ye. Vadinin derelerinde yetişen alabalığı ve yayla tereyağıyla, mısır unuyla yapılan kuymağı söyle; yanına karalahana çorbası iyi gider. Pideye yer bırakmak istiyorsan ortaya söyleyip paylaş.\n\nÖğleden sonra aynı yoldan Çaykara ve Of'a in, sahil yolunda batıya, Trabzon'a doğru dön. Yaz aylarında vaktin varsa gölün üstündeki yaylalara çıkmayı da düşünebilirsin; ama Demirkapı ve Şekersu yolları büyük ölçüde toprak ve eylülden sonra kar yağabilir, bu yüzden plana koymadık.\n\nSürmene'ye girmeden, sahil yolunun hemen kenarında, taş ve ahşap katlarıyla [Memiş Ağa Konağı](mekan:ChIJKdnuW03SZUARFqanoRByjNc)'nı göreceksin. 18. yüzyılın sonunda yapılan konak restorasyondan sonra ziyarete açıldı; bugün içinde bir lokanta var. Arabayı kenara çekip dışarıdan bakman bile yeter.\n\nGünü Sürmene'de [Yılmaz Pide](mekan:ChIJabrnJbzSZUAR5tSKo3bERCQ)'de bitir. Sürmene pidesi coğrafi işaretli: elle yuvarlak açılan şekersiz hamurun üstüne yöre ineklerinin sütünden yapılan köy peyniri konur, odun ateşli taş fırında pişer ve üstüne tereyağı gelir. Kenarlarını elle koparıp ortadaki peynire batırarak ye. Sürmene'den Trabzon'a sahil yolundan yarım saat sürer."
+  },
+  "gunler": [
+    {
+      "baslik": "Uzungöl ve Sürmene yolu",
+      "duraklar": [
+        {
+          "place_id": "ChIJD_SxR8aVZUAR5ahcsXxJKnI",
+          "osm": "way/732856004",
+          "ad": "Uzungöl Dursun Ali İnan Müzesi",
+          "sure_dk": 60,
+          "sure_gerekcesi": "varsayılan 90; tek binada iki bölümlü özel müze",
+          "kapali_gunler": [],
+          "rehber": "uzungol-dursun-ali-inan-muzesi",
+          "amaclar": [
+            "kultur_tarih",
+            "doga",
+            "cocuklu"
+          ]
+        },
+        {
+          "place_id": "ChIJs7zIvCWVZUARDazwpTDxzP0",
+          "osm": "node/5951855888",
+          "ad": "Uzungöl Seyir Terası",
+          "sure_dk": 30,
+          "sure_gerekcesi": "varsayılan 20; çıkış ve sisin kalkmasını bekleme payı",
+          "kapali_gunler": [],
+          "rehber": "uzungol-seyir-terasi",
+          "amaclar": [
+            "doga",
+            "yavas"
+          ]
+        },
+        {
+          "place_id": "ChIJ57Ka5F2UZUARrUgKC8tak04",
+          "ad": "Uzungöl",
+          "sure_dk": 90,
+          "sure_gerekcesi": "kıyı boyunca güney ucuna kadar yürüyüş ve dönüş",
+          "kapali_gunler": [],
+          "rehber": "uzungol",
+          "amaclar": [
+            "doga",
+            "yavas",
+            "cocuklu"
+          ]
+        },
+        {
+          "place_id": "ChIJ5xT-hbbGZUARB7dse0u88Dw",
+          "osm": "node/3753387903",
+          "ad": "Uzungöl Ada Restaurant",
+          "sure_dk": 60,
+          "sure_gerekcesi": "öğle yemeği; restoran varsayılanından kısa, dönüş yolu uzun",
+          "kapali_gunler": [],
+          "rehber": "uzungol-ada-restaurant",
+          "amaclar": [
+            "lezzet"
+          ]
+        },
+        {
+          "place_id": "ChIJabrnJbzSZUAR5tSKo3bERCQ",
+          "osm": "way/1364064011",
+          "ad": "Yılmaz Pide",
+          "sure_dk": 45,
+          "sure_gerekcesi": "pide salonu; tek pide ve çay",
+          "kapali_gunler": [],
+          "rehber": "surmene-yilmaz-pide",
+          "amaclar": [
+            "lezzet"
+          ]
+        }
+      ]
+    }
+  ],
+  "ek_mekanlar": [
+    {
+      "place_id": "ChIJKdnuW03SZUARFqanoRByjNc",
+      "ad": "Memiş Ağa Konağı"
+    }
+  ],
+  "notlar": {
+    "dogrulanacaklar": [
+      "[Plan · kapali_gunler] · Beş durağın hiçbiri için kapalı gün kaynağı bulunamadı (OSM'de opening_hours yok), [] bırakıldı. Özellikle müzenin kapalı günü ve kış düzeni · müze, işletmeler",
+      "[Yazı · giriş] · 'Of'tan Solaklı vadisi boyunca Çaykara'ya' ve 'bir buçuk saati biraz geçer' (Trabzon–Uzungöl 95–99 km: Vikipedi, uzungol.net) · harita",
+      "[Rehber · Uzungöl] · 17. yüzyıl heyelan tahmini (Hürriyet Daily News, 14.01.2026); Şerah/Şeraho eski adı (Vikipedi) · KTB, Çaykara Belediyesi",
+      "[Rehber · Uzungöl] · Göl çevresinde kesintisiz yürüyüş yolu olduğu ve güney ucuna yürünebildiği; gölün yüksekliği (KÜRE ~1.090 m, AI destekli madde, metne yazılmadı) · Çevre Bakanlığı Uzungöl yönetim planı, yerinde",
+      "[Rehber · Uzungöl] · Kışın zincir ve kış lastiği notu; en iyi dönem nisan–ekim (KTB) · Karayolları",
+      "[Rehber · Seyir Terası] · Köyün içinden yürünerek çıkıldığı; öğleden sonra gölün bir kısmının gölgede kaldığı; Haldizen'in göle girdiği yerin terastan göründüğü (ipucu) · yerinde",
+      "[Plan · Seyir Terası] · 'Uzungöl Seyir Terası' kimlik sorgusu iki id döndürdü; ikincisi 'Uzungol Gökyüzü Yürüyüşü' adlı ayrı bir yer. Yeni bir cam teras mı, yerinde bakılmalı; il listesine aday olabilir",
+      "[Rehber · Müze] · Hayvan listesi, kök işleri, KTÜ desteği, kurucunun 1974'ten beri otel/lokanta işlettiği (Hürriyet Daily News, 03.10.2024); açılış yılı bulunamadı, metne yazılmadı · müze",
+      "[Rehber · Ada Restaurant] · Göl kıyısında olduğu (OSM konumu gölün batısı); menüde alabalık, kuymak ve karalahana çorbası olduğu kaynaksız, yöre mutfağından yazıldı · işletme",
+      "[Plan · öğle durağı] · İlk aday Nuriye Gözleme (OSM'de her gün açık) Google'da geçici kapalı göründüğü için çıktı; Ada Restaurant yerine geçti",
+      "[Rehber · Yılmaz Pide] · Tescil ayrıntıları TÜRKPATENT Sürmene Pidesi belgesinden (No 553, 29.09.2020); işletmenin tescile uygun ürettiği ve Sürmene'de iki şubesi olduğu (kimlik sorgusu iki id döndürdü; il listesindeki id kullanıldı) · işletme",
+      "[Yazı · Memiş Ağa Konağı] · 18. yy sonu, ziyarete açılış ve lokanta olarak işletilmesi DHA'dan (18.05.2022); 'sahil yolunun hemen kenarında' (DHA: Trabzon–Rize yolu üstünde, Balıklı/Kastel mevkii) ve 'Sürmene'ye girmeden' (il listesi: Sürmene'nin 4 km doğusu); dönüş yönüne göre sıra · Sürmene Belediyesi",
+      "[Yazı · yaylalar] · Demirkapı yolu 12 km stabilize (uzungol.net, 2015), Şekersu yolu toprak (dangerousroads); eylülden sonra kar · Çaykara Belediyesi"
+    ],
+    "fotograf_onerileri": [
+      {
+        "ne": "Kapak (3:2): Uzungöl'ün yukarıdan görünüşü, köy ve ladin ormanı",
+        "altyazi": "Uzungöl",
+        "arama": "Uzungöl lake (Wikimedia Commons)"
+      },
+      {
+        "ne": "Gölün kıyısından, karşı yamacın suya yansıması",
+        "altyazi": "Uzungöl kıyısı",
+        "arama": "Uzungöl reflection (Wikimedia Commons)"
+      },
+      {
+        "ne": "Memiş Ağa Konağı'nın cephesi",
+        "altyazi": "Memiş Ağa Konağı, Sürmene",
+        "arama": "Memiş Ağa Konağı Sürmene (Wikimedia Commons)"
+      }
+    ],
+    "varsayimlar": [
+      "Tek gün, arabayla; Trabzon'dan sabah çıkış, akşam dönüş. 1. gün cumartesi",
+      "Trabzon 2/2. #299'daki çalışma adı 'Uzungöl ve yaylalar'dı; yayla yolları büyük ölçüde toprak ve mevsimlik olduğu, OSM'de de yayla adayı çıkmadığı için yaylalar durak olmadı, yazıda yaz seçeneği olarak anıldı. Başlık 'Uzungöl'de bir gün'",
+      "Trabzon il listesinin ilk 5'i: 2 Uzungöl bu gezide; 1 Sümela, 3 Ayasofya, 4 Boztepe, 5 Hamsiköy trabzonda-iki-gun'de. Bu gezide il listesinden ayrıca 25 Yılmaz Pide durak, 27 Memiş Ağa Konağı ek mekân; 16 Uzungöl Yamaç Paraşütü ve 17 Sultan Murat Yaylası mevsimlik olduğu için girmedi",
+      "Müzeden Ada Restaurant'a kadar dört durak yürüme mesafesinde (her biri 15 dakikadan kısa); Ada'dan Sürmene'ye araçla yaklaşık bir buçuk saat. Doğrulayıcı bu bacağı yürüme sayar (#311)",
+      "Google: kimlik 9 sorgu (0 $), puan 10, 2 kuru yükleme. OSM 4/5: Uzungöl'ün OSM noktası (node/6364833513, tourism=attraction) Google konumundan 508 m uzak çıktı; göl durağı google_30g, gölün OSM su alanı sonraki turda denenebilir"
+    ]
+  }
+}

@@ -1,0 +1,390 @@
+{
+  "il": "Afyonkarahisar",
+  "slug": "afyonkarahisar",
+  "guncelleme": "2026-11-21",
+  "oneriler": [
+    {
+      "sira": 1,
+      "ad": "Ayazini Köyü kaya yerleşimi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "doga"
+      ],
+      "ilce": "İhsaniye",
+      "merkeze_km": 30,
+      "neden": "Tüf kayalara oyulmuş evler, mezarlar ve Bizans dönemi kaya kilisesi aynı vadide",
+      "osm": "node/9961088742"
+    },
+    {
+      "sira": 2,
+      "ad": "Afyonkarahisar Kalesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Şehrin ortasında yükselen volkanik kayanın tepesinde; çıkış uzun bir merdivenle",
+      "osm": "way/1081351248",
+      "place_id": "ChIJwbWrQNQXzxQRYA3OgWwVZLY"
+    },
+    {
+      "sira": 3,
+      "ad": "Afyonkarahisar Ulu Camii",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "1272 Selçuklu camisi; ahşap direkli tavanıyla 2023'te UNESCO listesine girdi",
+      "osm": "way/310906499",
+      "place_id": "ChIJ_9ZvFdUXzxQRip_dg1F1sJg"
+    },
+    {
+      "sira": 4,
+      "ad": "Afyon sucuğu",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Coğrafi işaretli; sarımsağı bol, kurutularak yapılır, kahvaltıda sacda pişer"
+    },
+    {
+      "sira": 5,
+      "ad": "Kaymaklı ekmek kadayıfı",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Şerbetli ekmek kadayıfının üstüne kalın dilim Afyon kaymağı konur"
+    },
+    {
+      "sira": 6,
+      "ad": "Afyon kaymağı",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet",
+        "yavas"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Coğrafi işaretli kalın kaymak; kahvaltıda balla, tatlıda üstte"
+    },
+    {
+      "sira": 7,
+      "ad": "Kocatepe",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 15,
+      "neden": "26 Ağustos 1922 sabahı Büyük Taarruz'un buradan yönetildiği tepe; anıt ve şehitlik",
+      "osm": "way/1470129605",
+      "place_id": "ChIJe-JDjkw-zxQRDGAdakEDV7w"
+    },
+    {
+      "sira": 8,
+      "ad": "Hüdai Kaplıcası",
+      "kategori": "aktivite",
+      "amaclar": [
+        "yavas"
+      ],
+      "ilce": "Sandıklı",
+      "merkeze_km": 62,
+      "neden": "Sıcak çamur havuzlarıyla bilinen kaplıca; çamur banyosu ve termal havuzlar"
+    },
+    {
+      "sira": 9,
+      "ad": "Afyon lokumu",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet",
+        "cocuklu"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "İçine kaymak sarılan lokumuyla bilinir; şehirden en çok alınan hediyelik"
+    },
+    {
+      "sira": 10,
+      "ad": "Zafer Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Büyük Taarruz öncesi karargâh olarak kullanılan bina; Kurtuluş Savaşı eşyaları",
+      "osm": "way/310906811",
+      "place_id": "ChIJES0NydEXzxQR8Ree5BaYFgY"
+    },
+    {
+      "sira": 11,
+      "ad": "Afyonkarahisar Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 5,
+      "neden": "Yeni binasında Frig ve Roma buluntuları; Dokimeion mermerinden heykeller",
+      "osm": "way/1370713107",
+      "place_id": "ChIJr2HjVDUWzxQRjoovxDl-vRk"
+    },
+    {
+      "sira": 12,
+      "ad": "Gedik Ahmet Paşa Külliyesi (İmaret Camii)",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "1472 tarihli imaret camisi; burmalı minaresi ve çinili kapısıyla kale eteğinde",
+      "osm": "way/228391162"
+    },
+    {
+      "sira": 13,
+      "ad": "Mevlevihane ve Mevlevi Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Sultan Divani'nin büyüttüğü dergâh; semahane ve Mevlevi eşyaları",
+      "osm": "way/1451631239"
+    },
+    {
+      "sira": 14,
+      "ad": "Aslantaş ve Yılantaş",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "doga"
+      ],
+      "ilce": "İhsaniye",
+      "merkeze_km": 38,
+      "neden": "Girişinde dev aslan kabartmaları olan Frig kaya mezarları, köy yolunun kenarında",
+      "osm": "node/7883324185",
+      "place_id": "ChIJQfbC7IjdzhQRpz3ynPkK16U"
+    },
+    {
+      "sira": 15,
+      "ad": "Eber Gölü",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Bolvadin",
+      "merkeze_km": 45,
+      "neden": "Kamış adaları yüzen sığ göl; sazlıklar ve su kuşları"
+    },
+    {
+      "sira": 16,
+      "ad": "Arslankaya Frig kutsal alanı",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "doga"
+      ],
+      "ilce": "İhsaniye",
+      "merkeze_km": 40,
+      "neden": "Kybele nişinin iki yanında ayağa kalkmış dev aslan kabartmaları; Frig kaya anıtı",
+      "osm": "node/7883323985",
+      "place_id": "ChIJ6_Xd82fbzhQRp4LnrLRhSEw"
+    },
+    {
+      "sira": 17,
+      "ad": "Gazlıgöl",
+      "kategori": "aktivite",
+      "amaclar": [
+        "yavas"
+      ],
+      "ilce": "İhsaniye",
+      "merkeze_km": 20,
+      "neden": "Doğal gazlı maden suyu ve termal havuzlar; kasaba çeşmesinden maden suyu akar"
+    },
+    {
+      "sira": 18,
+      "ad": "Döğer Kervansarayı",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "İhsaniye",
+      "merkeze_km": 45,
+      "neden": "15. yüzyıl Osmanlı hanı; Frig Vadisi'nin kuzey ucunda, Döğer kasabasında"
+    },
+    {
+      "sira": 19,
+      "ad": "Emre Gölü",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "İhsaniye",
+      "merkeze_km": 45,
+      "neden": "Döğer yakınında, kaya yerleşimleriyle çevrili küçük göl; yürüyüş ve piknik"
+    },
+    {
+      "sira": 20,
+      "ad": "Kaleardı tarihi Afyon evleri",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Kalenin eteğinde cumbalı ahşap evler; yenilenen sokaklarda yürüyüş"
+    },
+    {
+      "sira": 21,
+      "ad": "Haşhaşlı bükme",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Haşhaş ezmesiyle katlanıp fırında pişen hamur işi; fırınlarda sabah çıkar"
+    },
+    {
+      "sira": 22,
+      "ad": "Ağzıaçık",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Ortası açık bırakılıp kıymalı harçla pişen küçük yöresel pide"
+    },
+    {
+      "sira": 23,
+      "ad": "Ömer-Gecek Kaplıcaları",
+      "kategori": "aktivite",
+      "amaclar": [
+        "yavas"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 15,
+      "neden": "Şehre en yakın termal bölge; otellerin çoğu bu kaplıca hattında"
+    },
+    {
+      "sira": 24,
+      "ad": "Frig Yolu",
+      "kategori": "aktivite",
+      "amaclar": [
+        "doga",
+        "kultur_tarih"
+      ],
+      "ilce": "İhsaniye",
+      "merkeze_km": 30,
+      "neden": "Afyon, Eskişehir, Kütahya ve Ankara'yı bağlayan işaretli yürüyüş rotası"
+    },
+    {
+      "sira": 25,
+      "ad": "Haşhaşlı çörek",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Haşhaş ezmesiyle yapılan tatlımsı çörek; çayın yanında yenir"
+    },
+    {
+      "sira": 26,
+      "ad": "İshaklı Kervansarayı",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Sultandağı",
+      "merkeze_km": 75,
+      "neden": "Selçuklu dönemi taş hanı; Konya yolunun konak yerlerinden",
+      "osm": "relation/2368710",
+      "place_id": "ChIJtyGjeei4zxQR-_3IdTVgmx4"
+    },
+    {
+      "sira": 27,
+      "ad": "Çay Taşmedrese",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Çay",
+      "merkeze_km": 50,
+      "neden": "13. yüzyıl Selçuklu medresesi; taç kapısındaki taş işçiliğiyle bilinir"
+    },
+    {
+      "sira": 28,
+      "ad": "Amorium Antik Kenti",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Emirdağ",
+      "merkeze_km": 70,
+      "neden": "Bizans'ın önemli şehirlerinden; Hisarköy'deki kazı alanı ve höyük"
+    },
+    {
+      "sira": 29,
+      "ad": "Karamık Gölü",
+      "kategori": "doga",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Çay",
+      "merkeze_km": 65,
+      "neden": "Sazlık ağırlıklı sulak alan; kuş gözlemcilerinin uğradığı Akarçay havzası gölü"
+    },
+    {
+      "sira": 30,
+      "ad": "Suçıkan Parkı",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Dinar",
+      "merkeze_km": 95,
+      "neden": "Kayadan çıkan kaynak suyu; Büyük Menderes'i besleyen sulardan"
+    },
+    {
+      "sira": 31,
+      "ad": "Akdağ Tabiat Parkı",
+      "kategori": "doga",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Sandıklı",
+      "merkeze_km": 75,
+      "neden": "Karaçam ormanı ve yaban hayatı; Sandıklı ile Dinar arasındaki dağlık alan"
+    },
+    {
+      "sira": 32,
+      "ad": "Dokimeion antik mermer ocakları",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "İscehisar",
+      "merkeze_km": 20,
+      "neden": "Roma'nın renkli mermerini veren ocaklar; kesim izleri hâlâ görünür"
+    }
+  ]
+}
