@@ -1,0 +1,287 @@
+{
+  "il": "Batman",
+  "slug": "batman",
+  "guncelleme": "2026-11-26",
+  "oneriler": [
+    {
+      "sira": 1,
+      "ad": "Hasankeyf Tekne Turu",
+      "kategori": "doga",
+      "amaclar": [
+        "kultur_tarih",
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Hasankeyf",
+      "merkeze_km": 37,
+      "neden": "Baraj gölünde tekneyle sular altındaki eski Hasankeyf koylarını ve köprü ayaklarını gör",
+      "place_id": "ChIJnwwUicMNC0ARQ4eV2Det-ys"
+    },
+    {
+      "sira": 2,
+      "ad": "Hasankeyf Müzesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Hasankeyf",
+      "merkeze_km": 37,
+      "neden": "Ilısu kurtarma kazılarından çıkan yaklaşık 4 bin eser, Paleolitik'ten Osmanlı'ya",
+      "place_id": "ChIJk5b_AxZzC0AR0JzWIEV_zYo"
+    },
+    {
+      "sira": 3,
+      "ad": "Zeynel Bey Türbesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Hasankeyf",
+      "merkeze_km": 37,
+      "neden": "Uzun Hasan'ın oğlu için yapılan çinili Akkoyunlu türbesi; baraj öncesi bütün taşındı",
+      "place_id": "ChIJS_gD45EMC0ARRKjCSLekXYc"
+    },
+    {
+      "sira": 4,
+      "ad": "Hasankeyf Kalesi ve Ören Yeri",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Hasankeyf",
+      "merkeze_km": 38,
+      "neden": "Dicle'ye bakan kayalık sırtta Büyük Saray kalıntıları; geceleri kale ışıklandırılıyor",
+      "place_id": "ChIJEVk6EIUMC0ARdINsRkAsUpI"
+    },
+    {
+      "sira": 5,
+      "ad": "Hasankeyf Tarihi Mağaraları",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Hasankeyf",
+      "merkeze_km": 38,
+      "neden": "Aralık 2025'te açılan 10 oyma mağara; içleri eski gündelik yaşama göre düzenlendi"
+    },
+    {
+      "sira": 6,
+      "ad": "Mor Kiryakus Manastırı",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Beşiri",
+      "merkeze_km": 30,
+      "neden": "5. yüzyıl Süryani manastırı; restorasyon sonrası 2025'te ziyarete açıldı",
+      "osm": "way/397273297",
+      "place_id": "ChIJqcy6ZyhDC0ARRYZ-sOSV2ks"
+    },
+    {
+      "sira": 7,
+      "ad": "Batman Müzesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 2,
+      "neden": "Başur ve Gusir höyüklerinin buluntuları; 49 parçalık Tunç Çağı oyun taşı seti",
+      "osm": "node/2778796806",
+      "place_id": "ChIJixzZ5-ZGC0AR-Ci5isNWvko"
+    },
+    {
+      "sira": 8,
+      "ad": "Çömçe Et Lokantası",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "Atatürk Bulvarı'nda kentin en eski lokantalarından sayılıyor; tandır ve kaburga",
+      "osm": "node/2573037399",
+      "place_id": "ChIJ8U55qSJHC0ARm1iXXlEg5uE"
+    },
+    {
+      "sira": 9,
+      "ad": "Ali Usta Et Lokantası",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 2,
+      "neden": "Gap Mahallesi'nde kemikli kuzu tandırı ve sulu ev yemekleriyle bilinen esnaf lokantası",
+      "place_id": "ChIJz15n9_pGC0AR0nM7Uqsrf9c"
+    },
+    {
+      "sira": 10,
+      "ad": "Mor Aho Manastırı",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Gercüş",
+      "merkeze_km": 60,
+      "neden": "Arıca köyü üstündeki tepede 6. yüzyıl manastırı; 2018'de onarıldı, konukevi var",
+      "place_id": "ChIJWdtNFAOvC0ARPwRn88SzoY0"
+    },
+    {
+      "sira": 11,
+      "ad": "Mereto Dağı",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Sason",
+      "merkeze_km": 115,
+      "neden": "İlin en yüksek zirvesi, yaklaşık 2.973 m; asfalt yol, kamp alanları, yürüyüş parkurları"
+    },
+    {
+      "sira": 12,
+      "ad": "Mereto Kar Tünelleri",
+      "kategori": "doga",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Sason",
+      "merkeze_km": 115,
+      "neden": "Yaz ortasında dağ eteğindeki yaklaşık 300 m'lik doğal kar tünellerinde yürüyüş"
+    },
+    {
+      "sira": 13,
+      "ad": "Mereto Meryem Ana Kilisesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "doga"
+      ],
+      "ilce": "Sason",
+      "merkeze_km": 118,
+      "neden": "Zirvedeki onarılmış Surp Asdvadzadzin kilisesi; 2026'da turizme açıldı"
+    },
+    {
+      "sira": 14,
+      "ad": "Er-Rızk Camii Minaresi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Hasankeyf",
+      "merkeze_km": 37,
+      "neden": "15. yüzyıl Eyyubi minaresi; eski çarşıdan taşınıp yeni yerleşimde yeniden dikildi",
+      "place_id": "ChIJf38oCXMNC0ARhriJd2skyFI"
+    },
+    {
+      "sira": 15,
+      "ad": "Geçit Büryan Gültepe",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 4,
+      "neden": "Kuyu fırında saatlerce pişen büryan kuzu; Gültepe'de Aşık Veysel Bulvarı üzerinde",
+      "place_id": "ChIJ9Y9jRZBHC0ARxnFTHfuOPlQ"
+    },
+    {
+      "sira": 16,
+      "ad": "Erzen Balıklı Göl",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "cocuklu",
+        "yavas"
+      ],
+      "ilce": "Kozluk",
+      "merkeze_km": 50,
+      "neden": "Erzen antik kentinin yanında, Garzan Çayı kıyısında balıklı kaynak gölü",
+      "place_id": "ChIJnw8hIAChDEARcNwHCzfzdD8"
+    },
+    {
+      "sira": 17,
+      "ad": "Hızır Bey Camii",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Kozluk",
+      "merkeze_km": 47,
+      "neden": "1512'de yaptırılan, hâlâ ibadete açık yerel taş işçilikli ilçe camisi",
+      "place_id": "ChIJM5q4m2WxDEARCXJRhUL1AG4"
+    },
+    {
+      "sira": 18,
+      "ad": "İmam Abdullah Türbesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Hasankeyf",
+      "merkeze_km": 37,
+      "neden": "Eski Hasankeyf'ten taşınan ziyaret yeri; haziran anmalarında kalabalıklaşıyor",
+      "place_id": "ChIJ2Z3mLpEMC0ARKzpzzYFCCPM"
+    },
+    {
+      "sira": 19,
+      "ad": "Mehmet Usta Ocakbaşı Et Lokantası",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet",
+        "gece"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 2,
+      "neden": "Gap Mahallesi'nde mangal başında şiş ve ciğer; akşam yemeği için ocakbaşı",
+      "osm": "node/9987655417",
+      "place_id": "ChIJ1Uu29eJGC0ARJKXLjm7CxZk"
+    },
+    {
+      "sira": 20,
+      "ad": "İbrahim Bey Camii",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Kozluk",
+      "merkeze_km": 47,
+      "neden": "1705 Garzan beyi camisi; beşgen minare kaidesi ve 100 ile 99 basamaklı iki merdiven",
+      "place_id": "ChIJtzIFEQSxDEARkmYnnTsZ8SY"
+    },
+    {
+      "sira": 21,
+      "ad": "Kırkat Göleti",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "cocuklu",
+        "yavas"
+      ],
+      "ilce": "Gercüş",
+      "merkeze_km": 65,
+      "neden": "Piknik ve olta balıkçılığı için ailelerin gittiği küçük gölet",
+      "place_id": "ChIJQ-a3aM-pC0ARtKc62SqA0Ek"
+    },
+    {
+      "sira": 22,
+      "ad": "Sevek Mesire Alanı",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas",
+        "cocuklu"
+      ],
+      "ilce": "Sason",
+      "merkeze_km": 85,
+      "neden": "Asırlık çınarların gölgesinde soğuk kaynak suları olan piknik yeri",
+      "place_id": "ChIJmddM6TJLc0ARClIYkpPJrkI"
+    }
+  ]
+}
