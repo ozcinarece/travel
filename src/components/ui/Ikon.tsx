@@ -58,6 +58,8 @@ export type IkonAdi =
   | 'kilit'
   // #432 (`Sos_v6_Paylas`): "Hiçbir zaman paylaşılmaz" satırındaki yuvarlak köşeli kilit.
   | 'kilitV6'
+  // #515 (`Sos_v6_Paylas` s.43): "Linkte senin adın görünür" satırındaki kişi.
+  | 'kisiV6'
   // #69: filtre düğmesi (kaydırıcılar) ve dolu yıldız (öne çıkan).
   | 'filtre'
   | 'yildiz'
@@ -278,6 +280,11 @@ export function Ikon({ ad, boyut = 24, renk, kalinlik = 2, dolgu }: Props) {
         <>
           <Rect x={5} y={11} width={14} height={10} rx={2} {...ortak} />
           <Path d="M8 11V7a4 4 0 0 1 8 0v4" {...ortak} />
+        </>
+      ) : ad === 'kisiV6' ? (
+        <>
+          <Circle cx={12} cy={8} r={4} {...ortak} />
+          <Path d="M4 21c0-4 3.6-7 8-7s8 3 8 7" {...ortak} />
         </>
       ) : ad === 'kitap' ? (
         <>
