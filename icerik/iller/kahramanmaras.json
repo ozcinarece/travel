@@ -1,0 +1,393 @@
+{
+  "il": "Kahramanmaraş",
+  "slug": "kahramanmaras",
+  "guncelleme": "2026-11-26",
+  "oneriler": [
+    {
+      "sira": 1,
+      "ad": "Kahramanmaraş Kalesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu",
+        "yavas"
+      ],
+      "ilce": "Dulkadiroğlu",
+      "merkeze_km": 1,
+      "neden": "Kurtuluş Savaşı'ndaki Bayrak Olayı'nın yeri; 2026'da onarılıp açıldı, şehri tepeden görür",
+      "place_id": "ChIJ4dWqvBHdLRURlHIPKr7aH6o"
+    },
+    {
+      "sira": 2,
+      "ad": "Kahramanmaraş Tarihi Kapalı Çarşı",
+      "kategori": "carsi",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Dulkadiroğlu",
+      "merkeze_km": 1,
+      "neden": "Depremde hasar gören 140 dükkân aslına uygun yenilendi; 2026'da esnaf geri döndü"
+    },
+    {
+      "sira": 3,
+      "ad": "Kahramanmaraş Ulu Camii",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Dulkadiroğlu",
+      "merkeze_km": 1,
+      "neden": "1442'de Dulkadiroğlu Süleyman Bey yaptırdı; Mart 2026'da 1135 gün sonra ibadete açıldı",
+      "place_id": "ChIJ0UVfBA7dLRURPZpHNegYQ3g"
+    },
+    {
+      "sira": 4,
+      "ad": "Kahramanmaraş Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Dulkadiroğlu",
+      "merkeze_km": 3,
+      "neden": "Anadolu fili iskeleti, Maraş aslanı, Domuztepe buluntuları; 2025'te yeniden açıldı"
+    },
+    {
+      "sira": 5,
+      "ad": "Emek Pastanesi",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet",
+        "cocuklu"
+      ],
+      "ilce": "Dulkadiroğlu",
+      "merkeze_km": 1,
+      "neden": "Maraş Çarşısı'nda dört kuşaktır keçi sütü ve salepten dövme dondurma yapılıyor",
+      "place_id": "ChIJ-_qpdWvhMRURMVUn_2SyJ3g"
+    },
+    {
+      "sira": 6,
+      "ad": "Eshab-ı Kehf Külliyesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Afşin",
+      "merkeze_km": 130,
+      "neden": "Yedi Uyurlar mağarası üstünde Selçuklu cami ve kervansarayı; UNESCO geçici listesinde",
+      "place_id": "ChIJtbeSI5MRLRURq-np4xDzpX4"
+    },
+    {
+      "sira": 7,
+      "ad": "Germanicia Mozaik Alanı",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Dulkadiroğlu",
+      "merkeze_km": 2,
+      "neden": "Roma kenti Germanicia'nın 4.-5. yüzyıl taban mozaikleri; yalnız hafta sonu açık"
+    },
+    {
+      "sira": 8,
+      "ad": "Ali Kayası Cam Teras",
+      "kategori": "manzara",
+      "amaclar": [
+        "doga",
+        "yavas",
+        "cocuklu"
+      ],
+      "ilce": "Onikişubat",
+      "merkeze_km": 20,
+      "neden": "Menzelet baraj gölünün 160 m üstünde cam teras; karşıda Güredil Kalesi görünür",
+      "place_id": "ChIJMU_7jwDPLRURelqNku61yfE"
+    },
+    {
+      "sira": 9,
+      "ad": "Cumhuriyet Lokantası",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Dulkadiroğlu",
+      "merkeze_km": 1,
+      "neden": "1923'ten beri aynı ailede; sabah paça çorbası, mumbar, içli köfte, ciğer kebabı",
+      "place_id": "ChIJR7JXPGrdLRURvAQ3fpBm_OE"
+    },
+    {
+      "sira": 10,
+      "ad": "Başkonuş Yaylası",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "cocuklu",
+        "yavas"
+      ],
+      "ilce": "Onikişubat",
+      "merkeze_km": 50,
+      "neden": "1325 m'de çam-sedir ormanı; bungalov, kır lokantası, kışın kızak ve ATV",
+      "place_id": "ChIJWx26BWyaLhURjiUS_Jzaq6g"
+    },
+    {
+      "sira": 11,
+      "ad": "Yeşilgöz",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Onikişubat",
+      "merkeze_km": 60,
+      "neden": "Tekir'de kaynağı hâlâ bilinmeyen göl; sonbaharda sarı-yeşil tonlara döner",
+      "place_id": "ChIJaY2260W1LRURuIP6b-Z_f2o"
+    },
+    {
+      "sira": 12,
+      "ad": "Menzelet Mesire Alanı",
+      "kategori": "aktivite",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Onikişubat",
+      "merkeze_km": 20,
+      "neden": "Belediye teknesiyle 1,5 saatlik baraj turu; Ali Kayası'nın dibinden geçer",
+      "place_id": "ChIJWVZf41zELRURNbMsniOhmEo"
+    },
+    {
+      "sira": 13,
+      "ad": "Hacı Milcan Et Lokantası",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Dulkadiroğlu",
+      "merkeze_km": 3,
+      "neden": "Asırlık et lokantası; eli böğründe, patlıcan kebabı ve yoğurtlu kebap",
+      "place_id": "ChIJeX_g5Z_dLRURA57FaSTLWeQ"
+    },
+    {
+      "sira": 14,
+      "ad": "Yaşar Pastanesi",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Dulkadiroğlu",
+      "merkeze_km": 1,
+      "neden": "1960'larda Maraş dondurmasının 25 m²'lik ilk atölyesi; kahvaltıda dondurma",
+      "place_id": "ChIJB49_EAzdLRURfbuc_5eL4Eg"
+    },
+    {
+      "sira": 15,
+      "ad": "Kuyumcular Çarşısı",
+      "kategori": "carsi",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Dulkadiroğlu",
+      "merkeze_km": 1,
+      "neden": "Maraş burması, hasır örgü, kafesli kordon gibi el işi altın işçiliği"
+    },
+    {
+      "sira": 16,
+      "ad": "Yedikuyular Kayak Merkezi",
+      "kategori": "aktivite",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Dulkadiroğlu",
+      "merkeze_km": 20,
+      "neden": "Şehre 20 km, zirvesi 2300 m, üç pistli kayak merkezi; günübirlik kayak",
+      "place_id": "ChIJacq-IsnpLRURz2ZjWpxUrf4"
+    },
+    {
+      "sira": 17,
+      "ad": "Kahramanmaraş Dondurma Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih",
+        "lezzet",
+        "cocuklu"
+      ],
+      "ilce": "Dulkadiroğlu",
+      "merkeze_km": 1,
+      "neden": "Kâtip Han'da Maraş dondurmasının dövülerek yapılışı anlatılıyor",
+      "place_id": "ChIJbenBaTndLRUR5BVIeKJQdg8"
+    },
+    {
+      "sira": 18,
+      "ad": "Taş Han",
+      "kategori": "carsi",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Dulkadiroğlu",
+      "merkeze_km": 1,
+      "neden": "Tarihi Taş Han'da Maraş abası diken ve satan son ustalar çalışıyor",
+      "place_id": "ChIJpR0Z0w3dLRURk8daQJ3OgzY"
+    },
+    {
+      "sira": 19,
+      "ad": "Çukur Hamamı",
+      "kategori": "aktivite",
+      "amaclar": [
+        "yavas",
+        "kultur_tarih"
+      ],
+      "ilce": "Dulkadiroğlu",
+      "merkeze_km": 1,
+      "neden": "15. yy Dulkadiroğlu hamamı; depremde sağlam raporu aldı, hâlâ yıkanılıyor",
+      "place_id": "ChIJg9SRHw7dLRURFHw_XVQvtRg"
+    },
+    {
+      "sira": 20,
+      "ad": "Saraçhane Camii",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Dulkadiroğlu",
+      "merkeze_km": 1,
+      "neden": "1730-1770 arası yapılan cami depremde çöktü; aslına uygun yapılıp 2026'da açıldı",
+      "place_id": "ChIJOVzIDg7dLRUR_UL4hqoWjz8"
+    },
+    {
+      "sira": 21,
+      "ad": "Kanlıbüvet Kanyonu",
+      "kategori": "doga",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Andırın",
+      "merkeze_km": 70,
+      "neden": "Köprüağzı Deresi'nin onlarca metrelik kaya duvarları arasında buz gibi mavi su",
+      "place_id": "ChIJc-4yXciCLhURRGQDxfhILwU"
+    },
+    {
+      "sira": 22,
+      "ad": "Geben Vadisi Milli Parkı",
+      "kategori": "doga",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Andırın",
+      "merkeze_km": 60,
+      "neden": "2025'te ilan edilen 50. milli park; saf kayın ormanı, Meryemçil Kalesi, Akyol",
+      "place_id": "ChIJDwN9JAA7LBUR4vqWCFAp-SQ"
+    },
+    {
+      "sira": 23,
+      "ad": "Andırın Minareli Asma Köprü",
+      "kategori": "manzara",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Andırın",
+      "merkeze_km": 80,
+      "neden": "2018'de açılan dört minare kuleli 360 m'lik köprü; vadiden 100 m yüksekte",
+      "place_id": "ChIJfcGm0ZGfLhUR-voFKJsgFLw"
+    },
+    {
+      "sira": 24,
+      "ad": "Döngel Şelalesi",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "cocuklu",
+        "yavas"
+      ],
+      "ilce": "Onikişubat",
+      "merkeze_km": 30,
+      "neden": "Ağaç köklerinden çıkan su; çınar altında suyun üstüne kurulu 70 çardak",
+      "place_id": "ChIJIQDUMQDLLRURq4FbzafeOpw"
+    },
+    {
+      "sira": 25,
+      "ad": "Alfi Çörek Dünyası",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Dulkadiroğlu",
+      "merkeze_km": 3,
+      "neden": "1998'den beri 25 çeşit Maraş çöreği ve tarhana; Maraş beşlisi paketi",
+      "place_id": "ChIJnYY5cgvdLRURdLbwKSUdtAg"
+    },
+    {
+      "sira": 26,
+      "ad": "Paşam Restaurant",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Onikişubat",
+      "merkeze_km": 4,
+      "neden": "Mercimek Tepesi'nde şehre bakan lokanta; bakır tepside yoğurtlu, ekşili kebap"
+    },
+    {
+      "sira": 27,
+      "ad": "Abdülhamid Han Camii",
+      "kategori": "manzara",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Onikişubat",
+      "merkeze_km": 4,
+      "neden": "Mercimek Tepe'de 2011'de biten dev cami; avlusundan şehir ve ova görünür",
+      "place_id": "ChIJDfaheFbcLRURVdyJH2jEc2I"
+    },
+    {
+      "sira": 28,
+      "ad": "Galgamaç Şelalesi",
+      "kategori": "doga",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Andırın",
+      "merkeze_km": 60,
+      "neden": "Andırın Alanlı'da çam-meşe arasından 15 m dökülen şelale; son kısmı patika",
+      "place_id": "ChIJX713rTiFLhUREGsN6rrQMIE"
+    },
+    {
+      "sira": 29,
+      "ad": "Elbistan Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Elbistan",
+      "merkeze_km": 155,
+      "neden": "1926-30'da yapılan hükümet konağında ilçe tarihi, mutfağı ve etnografyası",
+      "place_id": "ChIJnSlNuoVnLRURCmW_5743qsE"
+    },
+    {
+      "sira": 30,
+      "ad": "Çokran Şelalesi",
+      "kategori": "doga",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Onikişubat",
+      "merkeze_km": 35,
+      "neden": "Mavi Göl de denen şelale; yol sonundan 10 dk yürüyüş, çınarlar, soğuk su",
+      "place_id": "ChIJnXKdm2KHLhURUNXIxEqjuG0"
+    },
+    {
+      "sira": 31,
+      "ad": "Pancar Yaylası",
+      "kategori": "doga",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Andırın",
+      "merkeze_km": 90,
+      "neden": "1600 m'de saf kayın ormanı; sonbaharda yapraklar sarı-kızıla döner"
+    }
+  ]
+}

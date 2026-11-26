@@ -9,13 +9,26 @@ import { yonelmeEki } from '@/features/davet/katilim';
 import { t } from '@/i18n';
 import { renk, yazi } from '@/theme';
 
-export function HatirlatmaSatiri({ ozet, k, ibanlar, onBakiyeler }: { ozet: HarcamaOzeti; k: Kisiler; ibanlar: Map<string, string> | undefined; onBakiyeler: () => void }) {
+/** `kenarsiz`: seyahat sayfası v7'de (#308 kanvas) turuncu sol kenar yok (#522 2. inceleme 5). */
+export function HatirlatmaSatiri({
+  ozet,
+  k,
+  ibanlar,
+  onBakiyeler,
+  kenarsiz = false,
+}: {
+  ozet: HarcamaOzeti;
+  k: Kisiler;
+  ibanlar: Map<string, string> | undefined;
+  onBakiyeler: () => void;
+  kenarsiz?: boolean;
+}) {
   if (ozet.karsilar.length === 0) return null;
   const borclu = ozet.benimNet < 0;
   const satir = ozet.karsilar.map((x) => (borclu ? `${yonelmeEki(k.ad(x.id))} ${sayiBicimi(x.tutar)} ₺` : `${k.ad(x.id)} ${sayiBicimi(x.tutar)} ₺`)).join(' · ');
   const iban = borclu && ozet.karsilar.length === 1 ? ibanlar?.get(ozet.karsilar[0].id) : undefined;
   return (
-    <View style={s.kap}>
+    <View style={[s.kap, kenarsiz && s.kenarsiz]}>
       <View style={{ flex: 1, minWidth: 0, gap: 2 }}>
         <Text style={s.baslik}>{t('harcama.hatirlatma.baslik')}</Text>
         <Text style={s.metin}>{borclu ? t('harcama.hatirlatma.borcun', { liste: satir }) : t('harcama.hatirlatma.alacagin', { liste: satir })}</Text>
@@ -34,6 +47,7 @@ export function HatirlatmaSatiri({ ozet, k, ibanlar, onBakiyeler }: { ozet: Harc
 
 const s = StyleSheet.create({
   kap: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 12, paddingRight: 12, paddingLeft: 14, borderRadius: 14, backgroundColor: renk.zemin, borderLeftWidth: 3, borderLeftColor: renk.vurgu },
+  kenarsiz: { borderLeftWidth: 0, paddingLeft: 12 },
   baslik: { fontFamily: yazi.ekstra, fontSize: 14, color: renk.metin },
   metin: { fontFamily: yazi.normal, fontSize: 13, lineHeight: 18, color: renk.ikincil },
   iban: { fontFamily: yazi.kalin, fontSize: 12, color: renk.metin },

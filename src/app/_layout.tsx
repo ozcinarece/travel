@@ -104,6 +104,8 @@ function Kok() {
         <Stack.Screen name="profil-duzenle" />
       </Stack.Protected>
       <Stack.Screen name="r/[token]" />
+      {/* #432 2/3b: paylaşılan gezi (girişsiz de açılır). */}
+      <Stack.Screen name="r/g/[token]" />
     </Stack>
   );
 }

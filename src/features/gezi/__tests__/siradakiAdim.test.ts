@@ -80,9 +80,10 @@ describe('#181 KK5 Sıradaki adım: öncelik sırası', () => {
     expect(siradakiAdim({ ...tamam(), otelVar: false, otelErtelendi: true })).toBeNull();
   });
 
-  it('4 · tek kişi → Davet et (otelden sonra)', () => {
+  it('4 · tek kişi → Davet et, otelden önce (#308 KK5, #517 KK7)', () => {
     expect(siradakiAdim({ ...tamam(), uyeSayisi: 1 })).toEqual({ tur: 'davet' });
-    expect(siradakiAdim({ ...tamam(), uyeSayisi: 1, otelVar: false })).toEqual({ tur: 'otel' });
+    expect(siradakiAdim({ ...tamam(), uyeSayisi: 1, otelVar: false })).toEqual({ tur: 'davet' });
+    expect(siradakiAdim({ ...tamam(), uyeSayisi: 2, otelVar: false })).toEqual({ tur: 'otel' });
   });
 
   it('5 · durağı olan bir günde yemek durağı yok → o gün (boş gün ve atlanan yemek sayılmaz)', () => {
@@ -112,10 +113,10 @@ describe('#181 KK5 Sıradaki adım: öncelik sırası', () => {
     g.mekanlar.push(mekan('yeni', 'park'));
     expect(siradakiAdim(g)?.tur).toBe('dagit');
     g.mekanlar = g.mekanlar.filter((m) => m.id !== 'yeni');
-    expect(siradakiAdim(g)?.tur).toBe('otel');
-    g.otelVar = true;
     expect(siradakiAdim(g)?.tur).toBe('davet');
     g.uyeSayisi = 2;
+    expect(siradakiAdim(g)?.tur).toBe('otel');
+    g.otelVar = true;
     expect(siradakiAdim(g)?.tur).toBe('yarin');
   });
 });
@@ -135,7 +136,8 @@ describe('#200 Sıradaki adım: ekrandaki satırı tekrar etmez', () => {
   it('KK2 · genel kural: ekranda satırı olan her eksik atlanır', () => {
     const g = tamam();
     g.mekanlar.push(mekan('yeni', 'park'));
-    expect(siradakiAdim({ ...g, otelVar: false, uyeSayisi: 1, ekranda: ['dagit'] })?.tur).toBe('otel');
+    expect(siradakiAdim({ ...g, otelVar: false, uyeSayisi: 1, ekranda: ['dagit'] })?.tur).toBe('davet');
+    expect(siradakiAdim({ ...g, otelVar: false, uyeSayisi: 1, ekranda: ['dagit', 'davet'] })?.tur).toBe('otel');
     expect(siradakiAdim({ ...tamam(), uyeSayisi: 1, bugun: '2026-10-23', ekranda: ['davet'] })?.tur).toBe('yarin');
     expect(siradakiAdim({ ...tamam(), duraklar: [], ekranda: ['planKur'] })).toBeNull();
     expect(siradakiAdim({ ...tamam(), mod: 'bitti', acikTransfer: 2, ekranda: ['harcamaKapat'] })).toBeNull();

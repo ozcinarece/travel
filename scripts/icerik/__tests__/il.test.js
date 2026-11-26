@@ -45,6 +45,16 @@ describe('ilDenetle', () => {
     expect(hatalar).toContain('kategori tatli_kahve: en az 3 yer (1)');
   });
 
+  it('#504: yemek kategorisinde 2 yer yeter, 1 yer hata', () => {
+    const iki = liste();
+    iki.oneriler[15].kategori = 'doga'; // yemek: 1, 8 → 2 yer
+    expect(ilDenetle(iki).hatalar).toEqual([]);
+    const bir = liste();
+    bir.oneriler[8].kategori = 'doga';
+    bir.oneriler[15].kategori = 'doga'; // yemek: yalnız 1
+    expect(ilDenetle(bir).hatalar).toContain('kategori yemek: en az 2 yer (1)');
+  });
+
   it('sira tekil ve 1\'den ardışık', () => {
     const v = liste();
     v.oneriler[3].sira = 3;
