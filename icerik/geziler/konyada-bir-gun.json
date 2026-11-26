@@ -1,0 +1,158 @@
+{
+  "surum": 1,
+  "sehir": {
+    "yeni": {
+      "ad": "Konya",
+      "slug": "konya",
+      "place_id": "ChIJRfcV1miF0BQRZwkGCPzQDSQ"
+    }
+  },
+  "takvim": {
+    "ilk_gun": "cumartesi"
+  },
+  "gezi": {
+    "slug": "konyada-bir-gun",
+    "baslik": "Konya'da bir gün",
+    "ozet": "Mevlana'dan Alaeddin Tepesi'ne yürüyerek; öğlen tirit, akşam sema",
+    "yazar_ad": "Tripmate ekibi",
+    "amaclar": [
+      "kultur_tarih",
+      "lezzet"
+    ],
+    "yazi_md": "Mevlana'nın kabri, bir Selçuklu sultanının camisi ve iki medrese birbirine yirmi dakikalık yürüyüş uzaklığında. Konya'nın tarihi merkezi, doğuda Mevlana Müzesi'nden batıda Alaeddin Tepesi'ne uzanan tek bir caddenin iki ucunda toplanmış; arada çarşı var. Gündüz bu caddeyi bir uçtan öbür uca yürüyecek, akşam yeniden doğuya, semaya döneceksin.\n\n> Plan cumartesiye göre kuruldu, çünkü Mevlana Kültür Merkezi'ndeki haftalık sema cumartesi akşamı. Biletini önceden al. İnce Minareli Medrese restorasyonda; yalnız dıştan görülüyor. Camiler namaz vakitlerinde ziyarete kapanır.\n\n## 1. gün · Mevlana'dan Alaeddin'e, akşam sema\n\nGüne kalabalık başlamadan [Mevlana Müzesi](mekan:ChIJo7nXQRCF0BQREJS6hYaxO4Q)'nde başla. Yeşil kubbenin altındaki türbede Mevlana, babası ve oğluyla aynı salonda yatıyor; semahanede neyler ve eski Mesnevi nüshaları, avludaki hücrelerde dergâhın gündelik hayatı var.\n\n::mekan[ChIJo7nXQRCF0BQREJS6hYaxO4Q]\n\nMüzeden batıya, çarşıya yürü. [Bedesten](mekan:ChIJ0wjPtwWF0BQRk_6K1CqRVFo) dediği yer bugün tek bir bina değil, Aziziye Camii'nin çevresindeki sokaklar: bakırcılar, kuruyemişçiler, Mevlevi şekeri satan dükkânlar. Caminin yan duvarlarındaki beşer kapıyı say; çarşının her sokağından içeri girilebilsin diye böyle yapılmış.\n\nÖğlen çarşının içindeki [Tiritçi Mithat](mekan:ChIJ_yHtCAWF0BQRLwKriky_GXs)'a otur. Et suyunda yumuşamış ekmeğin üstüne didiklenmiş koyun eti, sarımsaklı yoğurt ve kızgın tereyağı: Konya'nın en eski tabaklarından biri. Ayranla iste; akşama kadar yürüyeceksen yarım porsiyon yeter.\n\nYemekten sonra Mevlana Caddesi boyunca batıya yürü; yolun üstünde, sağda Şems-i Tebrizi'nin türbesi var. Caddenin ucunda [Alaeddin Tepesi](mekan:ChIJrVKzKqiF0BQRsIbEwZy3HzY) yükseliyor. Tepenin kuzeyindeki camiyi I. Alâeddin Keykubad 1220'de tamamlattı; içerideki ceviz minber ondan da eski, 1155 tarihli. Kuzey yamaçta Selçuklu sarayından kalan tek duvar beton bir şemsiyenin altında duruyor.\n\nTepeden inince karşıdaki [Karatay Medresesi](mekan:ChIJqSxYOgiF0BQRBG6Co68sYfw)'ne geç. Kubbenin içi baştan sona lacivert ve firuze çini mozaik; yan odalarda Beyşehir kıyısındaki Kubadabad Sarayı'ndan gelen insan yüzlü, kuşlu çiniler sergileniyor. Müze kışın erken kapanıyor, bu yüzden öğleden sonranın ilk saatlerinde burada ol.\n\n::mekan[ChIJqSxYOgiF0BQRBG6Co68sYfw]\n\nTepenin batı tarafını dolaşıp [İnce Minareli Medrese](mekan:ChIJAQDAQqiF0BQRL9Azfc2VjF4)'nin önüne gel. Müze kapalı ama asıl görülecek şey dışarıda: taçkapının iki yanından yükselen yazı şeritleri kapının tam üstünde düğüm atıp birbirinin içinden geçiyor. Minarenin bugün yalnız alt kısmı duruyor; üstü 1901'de yıldırımla yıkıldı.\n\nAkşamüstü otelde ya da tepedeki parkta biraz dinlen, sonra tramvayla Mevlana'ya dön. Günün son durağı [Mevlana Kültür Merkezi](mekan:ChIJA8Ix7j2F0BQRpL5pOFKEfEI): her cumartesi akşamı burada sema mukabelesi yapılıyor. Ney taksimiyle başlayan ayin dört selam boyunca sürer; alkış yapılmaz, flaşla fotoğraf çekilmez. Salona yarım saat önce gir.\n\nSabah gördüğün yeşil kubbe akşam ışıklandırılmış olur; semadan çıkınca Mevlana Müzesi'nin önünden geçerek yürü. Aralık'ın ilk yarısında gelirsen 7–17 Aralık arası Şeb-i Arus haftası: törenler aynı salonda her akşam yapılır, biletler çok önceden tükenir."
+  },
+  "gunler": [
+    {
+      "baslik": "Mevlana'dan Alaeddin'e",
+      "duraklar": [
+        {
+          "place_id": "ChIJo7nXQRCF0BQREJS6hYaxO4Q",
+          "osm": "way/491583514",
+          "ad": "Mevlana Müzesi",
+          "sure_dk": 90,
+          "kapali_gunler": [],
+          "rehber": "mevlana-muzesi",
+          "amaclar": [
+            "kultur_tarih"
+          ]
+        },
+        {
+          "place_id": "ChIJ0wjPtwWF0BQRk_6K1CqRVFo",
+          "osm": "node/13202480946",
+          "ad": "Bedesten Çarşısı",
+          "sure_dk": 40,
+          "sure_gerekcesi": "varsayılan 60; çarşı sokaklarında kısa tur",
+          "kapali_gunler": [],
+          "rehber": "bedesten-carsisi",
+          "amaclar": [
+            "yavas"
+          ]
+        },
+        {
+          "place_id": "ChIJ_yHtCAWF0BQRLwKriky_GXs",
+          "osm": "node/6796545285",
+          "ad": "Tiritçi Mithat",
+          "sure_dk": 60,
+          "sure_gerekcesi": "varsayılan 75; esnaf lokantası, servis hızlı",
+          "kapali_gunler": [],
+          "rehber": "tiritci-mithat",
+          "amaclar": [
+            "lezzet"
+          ]
+        },
+        {
+          "place_id": "ChIJrVKzKqiF0BQRsIbEwZy3HzY",
+          "osm": "way/128082061",
+          "ad": "Alaeddin Tepesi ve Alaeddin Camii",
+          "sure_dk": 60,
+          "sure_gerekcesi": "varsayılan 45; cami, türbe ve park",
+          "kapali_gunler": [],
+          "rehber": "alaeddin-tepesi",
+          "amaclar": [
+            "kultur_tarih",
+            "cocuklu"
+          ]
+        },
+        {
+          "place_id": "ChIJqSxYOgiF0BQRBG6Co68sYfw",
+          "osm": "way/366443606",
+          "ad": "Karatay Medresesi",
+          "sure_dk": 50,
+          "sure_gerekcesi": "varsayılan 90; küçük müze, tek kubbe ve yan odalar",
+          "kapali_gunler": [],
+          "rehber": "karatay-medresesi",
+          "amaclar": [
+            "kultur_tarih"
+          ]
+        },
+        {
+          "place_id": "ChIJAQDAQqiF0BQRL9Azfc2VjF4",
+          "osm": "way/264740887",
+          "ad": "İnce Minareli Medrese",
+          "sure_dk": 20,
+          "sure_gerekcesi": "varsayılan 90; müze restorasyonda kapalı, yalnız taçkapı",
+          "kapali_gunler": [],
+          "rehber": "ince-minareli-medrese",
+          "amaclar": [
+            "kultur_tarih"
+          ]
+        },
+        {
+          "place_id": "ChIJA8Ix7j2F0BQRpL5pOFKEfEI",
+          "ad": "Mevlana Kültür Merkezi (sema)",
+          "sure_dk": 75,
+          "sure_gerekcesi": "varsayılan 60; mukabele yaklaşık 1 saat ve yerleşme",
+          "kapali_gunler": [],
+          "rehber": "mevlana-kultur-merkezi",
+          "amaclar": [
+            "kultur_tarih",
+            "yavas"
+          ]
+        }
+      ]
+    }
+  ],
+  "notlar": {
+    "dogrulanacaklar": [
+      "[Plan · Sehir] · Konya şehri sehir.yeni ile açılıyor (#299 ikinci dalga); place_id 'Konya' kimlik sorgusundan (tek sonuç, tip dönmedi) · BO'da şehir satırı ve kuru yukle",
+      "[Plan · g1.d1, g1.d5] · Mevlana ve Karatay müzelerinde haftalık kapalı gün yok: turkishmuseums sayfaları (önceki tur, #299 26 Kasım 14:25 notu); Karatay'ın kış kapanış saati · muze.gov.tr",
+      "[Plan · g1.d6] · İnce Minareli Medrese Ekim 2024'ten beri restorasyonda, müze kapalı (Hürriyet/AA; turkishmuseums 'Kapalı'); açılış tarihi yok · Vakıflar Konya",
+      "[Plan · g1.d7] · Sema her cumartesi akşamı, biletli (Sanat Cepte); saat ve mevsime göre değişip değişmediği okunamadı; yazıya saat yazılmadı · sanatcepte.gov.tr, konyattmtopluluk.ktb.gov.tr",
+      "[Plan · g1.d7] · Mevlana Kültür Merkezi OSM aday listesinde yok (4 km, tourism/historic süzgeci); osm boş, konum Google'dan 30 gün · OSM'de arts_centre olarak aranabilir",
+      "[Plan · g1.d3] · Tiritçi Mithat kapalı günü bilinmiyor, [] yazıldı; kaynak Habertürk 21 Ağustos 2016 ve Daily Sabah 21 Ocak 2022 · dükkân",
+      "[Yazı] · Şeb-i Arus 2026, 7–17 Aralık (KTB sebiarus.ktb.gov.tr, önceki tur); törenlerin her akşam aynı salonda olduğu · KTB programı",
+      "[Yazı] · Şems-i Tebrizi türbesinin Mevlana Caddesi üstünde, Mevlana'dan Alaeddin'e giderken sağda kaldığı: OSM konumu (37.8737, 32.4975); yön tahmini",
+      "[Yazı] · Alaeddin–Mevlana arası tramvay: genel bilgi · Konya Büyükşehir ulaşım",
+      "[Rehber · Mevlana] · 1274 Yeşil Türbe, 1926 müze, 1954 ad (turkishmuseums, Gazete Vatan); türbede Bahaeddin Veled ve Sultan Veled sandukaları, sarıkların dereceyi gösterdiği, ayakkabı poşeti: genel bilgi",
+      "[Rehber · Bedesten] · 1538 Mevlana Kadri Çelebi, 1898 yıkım, kitabe Mevlana Müzesi'nde (Baş & Bozkurt 2003, Selçuk Üniv. SBE Dergisi); Aziziye 1867 yangın, 1872, Abdülaziz ve Pertevniyal, beşer kapı (TDV İA 'Aziziye Camii'); kapıların çarşıya açılma gerekçesi yorum; pazar günü dükkânların kapalı olması · yerinde",
+      "[Rehber · Tirit] · Tarif Daily Sabah 2022 (ekmek et suyunda, koyun eti, sarımsaklı yoğurt); kızgın tereyağı ve ayran genel bilgi; Bolu Lokantası etli ekmek: Habertürk 2016",
+      "[Rehber · Alaeddin] · 1220 Keykubad, minber 1155 Ahlatlı Hacı Mengüberti (TDV İA); 'tarihi bilinen en eski ahşap minber' ve kündekari: genel bilgi; Selçuklu Köşkü kalıntısı ve beton şemsiye: genel bilgi; höyüğün Tunç Çağı katmanları · tr.wikipedia",
+      "[Rehber · Karatay] · 1251 Celaleddin Karatay, 1955 müze (TDV İA); Kubadabad çinileri, havuz ve kubbe açıklığı, astronomi anlatısı (efsane olarak yazıldı), Karatay'ın türbesi: genel bilgi · muze.gov.tr",
+      "[Rehber · İnce Minare] · 1265 Sahip Ata, 2002 yeniden açılış (TDV İA); 1901 yıldırım, taçkapıdaki düğümlü ayet şeritleri: genel bilgi · tr.wikipedia",
+      "[Rehber · MKM] · Konya TTM Topluluğu, Sanat Cepte bileti (önceki tur); mukabelenin sırası (na't, ney taksimi, dört selam) genel bilgi; alkış ve flaş kuralı · salon duyurusu"
+    ],
+    "fotograf_onerileri": [
+      {
+        "ne": "Mevlana Müzesi, yeşil kubbe",
+        "altyazi": "Mevlana Müzesi'nin yeşil kubbesi",
+        "arama": "commons:Category:Mevlana Museum"
+      },
+      {
+        "ne": "Karatay Medresesi kubbe çinileri",
+        "altyazi": "Karatay Medresesi'nin çini kubbesi",
+        "arama": "commons:Category:Karatay Madrasa"
+      },
+      {
+        "ne": "İnce Minareli Medrese taçkapısı",
+        "altyazi": "İnce Minareli Medrese taçkapısı",
+        "arama": "commons:Category:İnce Minareli Medrese"
+      }
+    ],
+    "varsayimlar": [
+      "1. gün cumartesi (haftalık sema cumartesi akşamı)",
+      "Bütün gün yürüyerek; akşam Alaeddin–Mevlana arası tramvay",
+      "İl listesinin ilk 5'inden Çatalhöyük (2) bu gezide yok: Çumra'da, 50 km'den uzak; Konya 2/2'ye kalıyor. İnce Minareli Medrese (5) yalnız dıştan",
+      "#376: gezi akşam semayla bitiyor; 'gece' etiketi konmadı, çünkü sema gece hayatı değil, bir ayin"
+    ]
+  }
+}
