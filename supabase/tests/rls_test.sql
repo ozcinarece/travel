@@ -3959,11 +3959,10 @@ begin
 end $$;
 reset role;
 do $$ begin assert (select acilma_sayisi from public.gezi_paylasim where token = current_setting('test.paylasim_token')) = 1, '#432 KK8: girişsiz açılış sayacı +1'; end $$;
--- #510: anahtar kalktı. Oluşturan da kolonu yazamaz; eski bir satırda kolon açık kalmış olsa bile adlar dönmez.
+-- #510: anahtar kalktı. Oluşturan kolonu güncelleyemez; kolon açık olsa bile (eski satır ya da eski uygulamanın insert'ü) adlar dönmez.
 set role authenticated;
 select pg_temp.as_user(:PA);
 select pg_temp.hata_bekle($$update public.gezi_paylasim set kisi_adlari_acik = true$$, '42501');
-select pg_temp.hata_bekle($$insert into public.gezi_paylasim (trip_id, kisi_adlari_acik) values ('43200000-0000-4000-8000-000000000001', true)$$, '42501');
 reset role;
 update public.gezi_paylasim set kisi_adlari_acik = true where token = current_setting('test.paylasim_token');
 set role anon;

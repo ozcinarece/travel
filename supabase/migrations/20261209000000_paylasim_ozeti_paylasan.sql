@@ -1,7 +1,7 @@
 -- #432 2/3b: alıcı ekranı (`Sos_v6_Alici`) için paylasim_ozeti'ne üç alan: `paylasan` (linki gönderenin adı; kişi adları
 -- anahtarı kapalıyken de, Ürün kararı 21 Kasım), `id` (girişli açılış olayının hedefi) ve durak başına `dakika`.
 -- #510 (Ece kararı, 26 Kasım): "Kişi adlarını göster" anahtarı kalktı, adlar hep gizli. Özet `kisi_adlari` alanını artık hiç
--- döndürmez; diğer üyelerin adı linki açana gitmez. İstemci `kisi_adlari_acik` kolonunu yazamaz (yetki aşağıda geri alınır).
+-- döndürmez; diğer üyelerin adı linki açana gitmez. İstemci `kisi_adlari_acik` kolonunu güncelleyemez (aşağıda).
 -- Kolonun kendisi veri silen bir migration'la ayrıca kalkacak (§4, elle çalıştırılır); burada otomatik migrate durmasın diye yok.
 -- Gövdenin geri kalanı 20261207000000 ile aynı; Google'a yeni istek yok, saklanan Google verisi değişmez.
 create or replace function public.paylasim_ozeti(p_token text) returns jsonb
@@ -57,5 +57,6 @@ begin
 end;
 $$;
 
--- #510: anahtar kalktı; istemci kolonu ne oluşturmada ne güncellemede yazabilir (varsayılan false kalır).
-revoke insert (kisi_adlari_acik), update (kisi_adlari_acik) on public.gezi_paylasim from authenticated;
+-- #510: anahtar kalktı; istemci kolonu artık güncelleyemez. Oluşturmadaki yetki kalıyor: OTA'yı henüz almamış uygulamalar
+-- `insert`'e kolonu koyuyor, kalkarsa "Linki gönder" bozulur. Değerin bir etkisi yok, özet onu okumuyor.
+revoke update (kisi_adlari_acik) on public.gezi_paylasim from authenticated;
