@@ -450,7 +450,7 @@ function GeziSayfasi({ seyahat, gunler, duraklar, mekanlar, konaklamalar, katild
           </View>
         ) : null}
         <Baslik ad={seyahatAdi(seyahat)} alt={altSatir} />
-        <KisilerSatiri kisiler={kisiYuzleri} sag={kisilerSag} sagYesil={!!varanMetni} onCagir={davet.paylas} onYuzler={() => setGrupAcik(true)} />
+        <KisilerSatiri kisiler={kisiYuzleri} sag={kisilerSag} sagYesil={!!varanMetni} onCagir={davet.paylas} onYuzler={() => setGrupAcik(true)} pasif={cevrimdisi} />
         {ipucu ? <SohbetIpucu kim={ipucu.kim} metin={ipucu.metin} onPress={sohbeteGit} /> : null}
         {hatirlatmaVakti(seyahat, an) && mod !== 'plan' ? (
           <View style={s.serit}>

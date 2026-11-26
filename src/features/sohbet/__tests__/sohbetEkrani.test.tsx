@@ -4,14 +4,13 @@ import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { act, fireEvent, render, waitFor, within } from '@testing-library/react-native';
 import type { ReactElement, ReactNode } from 'react';
-import { AppState, StyleSheet, type AppStateStatus } from 'react-native';
+import { AppState, type AppStateStatus } from 'react-native';
 
 import { SeyahatIdSaglayici } from '@/features/seyahatler/baglam';
 import { hafifOnbellek } from '@/features/yerler/api';
 import { tarihEkle } from '@/lib/takvim';
 import { yerelAn, yerelTarih } from '@/lib/zaman';
 
-import GeziEkrani from '../../../app/seyahat/[id]/(sekmeler)/gezi';
 import SohbetSekmesi from '../../../app/seyahat/[id]/(sekmeler)/sohbet';
 
 jest.mock('react-native-safe-area-context', () => jest.requireActual<{ default: object }>('react-native-safe-area-context/jest/mock').default);
@@ -366,19 +365,6 @@ describe('#184 Sohbet ekranı', () => {
   });
 });
 
-describe('#184 KK10 Gezi sayfası Sohbet kartı', () => {
-  it('açık oylama: soru, seçenek sayıları, "Oy ver", "Sohbete git · 2 yeni" — Google isteği yok', async () => {
-    const { getByText, qc } = ciz(<GeziEkrani />);
-    await waitFor(() => getByText('Sohbete git · 2 yeni'));
-    await sakinles(qc);
-    expect(getByText('Cumartesi akşam için oylama açtım:')).toBeTruthy();
-    expect(getByText('Çibörek · Hacı Baba · 2')).toBeTruthy();
-    expect(getByText('Balık · 0')).toBeTruthy();
-    expect(getByText('Oy ver')).toBeTruthy();
-    expect(mockKayit.invoke).toEqual([]);
-    expect(fetchSahte).not.toHaveBeenCalled();
-  });
-});
 
 // #248 inceleme 2 (UX Ş3): mekan seçeneğinin metni boş; ad listedeki mekan için de places-light'tan canlı gelir.
 describe('#248 Ş3 oylama seçenek adları', () => {
@@ -417,50 +403,15 @@ describe('#248 Ş3 oylama seçenek adları', () => {
     expect(mockKayit.invoke).toEqual([]);
   });
 
-  it('Gezi kartı da aynı adları gösterir', async () => {
-    ikiRestoran();
-    mockHafif = { 'ChIJ-r1': { ad: 'Lokanta Bir' }, 'ChIJ-r2': { ad: 'Lokanta İki' } };
-    const { getByText, qc } = ciz(<GeziEkrani />);
-    await waitFor(() => getByText('Lokanta Bir · 0'));
-    await sakinles(qc);
-    expect(getByText('Lokanta İki · 0')).toBeTruthy();
-  });
-
-  it('ad çekilemezse aynı kategori numaralanır: "Restoran 1 / Restoran 2" (Sohbet ve Gezi)', async () => {
+  it('ad çekilemezse aynı kategori numaralanır: "Restoran 1 / Restoran 2"', async () => {
     ikiRestoran();
     const sohbet = ciz(<SohbetSekmesi />);
     await waitFor(() => sohbet.getByText('Restoran 1'), { timeout: 4000 });
     await sakinles(sohbet.qc);
     expect(sohbet.getByText('Restoran 2')).toBeTruthy();
     expect(sohbet.queryByText('…')).toBeNull();
-    sohbet.unmount();
-    const gezi = ciz(<GeziEkrani />);
-    await waitFor(() => gezi.getByText('Restoran 1 · 0'), { timeout: 4000 });
-    expect(gezi.getByText('Restoran 2 · 0')).toBeTruthy();
   });
 
-  // #248 inceleme 3, madde 1: Gezi kartı yalnız açık oylamayı gösterir; kapanmış oylamanın mekanları için istek gitmez.
-  it('Gezi: kapanmış oylamanın mekanı istenmez, yalnız açık oylamanınki', async () => {
-    ikiRestoran();
-    mockTablolar.oylamalar.push({
-      id: 'o0',
-      trip_id: 't1',
-      soru: 'Dün nerede yedik?',
-      kapanis_at: an(dun, 12),
-      olusturan: 'ayse',
-      created_at: an(dun, 9),
-      oylama_secenekleri: [{ id: 'e1', oylama_id: 'o0', sira: 1, metin: '', place_id: 'ChIJ-eski' }],
-      oylama_oylari: [],
-    });
-    mockHafif = { 'ChIJ-r1': { ad: 'Lokanta Bir' }, 'ChIJ-r2': { ad: 'Lokanta İki' }, 'ChIJ-eski': { ad: 'Eski Yer' } };
-    const { getByText, qc } = ciz(<GeziEkrani />);
-    await waitFor(() => getByText('Lokanta Bir · 0'));
-    await sakinles(qc);
-    expect(mockHafifIstekleri.flat()).not.toContain('ChIJ-eski');
-    expect(mockHafifIstekleri.flat().sort()).toEqual(['ChIJ-r1', 'ChIJ-r2']);
-  });
-
-  // Madde 2: listede olmayan oylama mekanı Sohbet'te hem kart fotoğrafı hem ad için gerekir; tek istek gider.
   it('Sohbet: listede olmayan oylama mekanı için tek places-light isteği', async () => {
     (mockTablolar.oylamalar[0] as { oylama_secenekleri: unknown[] }).oylama_secenekleri = [
       { id: 'x1', oylama_id: 'o1', sira: 1, metin: '', place_id: 'ChIJ-disari' },
@@ -583,29 +534,5 @@ describe('#293 çevrimdışı: sohbet ekranı ve oylama adları', () => {
     expect(mockKayit.invoke).toEqual([]);
   });
 
-  it('KK4: Gezi kartı, çevrimdışı: oturumdaki Google adı gösterilmez (Bugün kartındaki kural)', async () => {
-    ikiRestoran();
-    oturumdaGoogleAdi();
-    mockCevrimdisi = true;
-    const { getByText, queryByText, qc } = ciz(<GeziEkrani />);
-    await waitFor(() => getByText('Restoran 1 · 0'), { timeout: 4000 });
-    await sakinles(qc);
-    expect(queryByText(/Lokanta Bir/)).toBeNull();
-    expect(mockKayit.invoke).toEqual([]);
-  });
-
-  it('KK5 (23c): Gezi kartında pasif "Oy ver" açık zeminli (#EEF2FF), lacivert yazılı, %40', async () => {
-    mockCevrimdisi = true;
-    const { getByText, getByRole, qc } = ciz(<GeziEkrani />);
-    await waitFor(() => getByText('Oy ver'));
-    await sakinles(qc);
-    const dugme = getByRole('button', { name: 'Oy ver' });
-    const stil = StyleSheet.flatten(dugme.props.style) as { backgroundColor?: string; opacity?: number };
-    expect(stil.backgroundColor?.toLowerCase()).toBe('#eef2ff');
-    expect(stil.opacity).toBe(0.4);
-    expect(dugme.props.accessibilityHint).toBe('Bağlantı yok');
-    const yazi = StyleSheet.flatten(getByText('Oy ver').props.style) as { color?: string };
-    expect(yazi.color?.toLowerCase()).toBe('#152a6b');
-  });
 });
 

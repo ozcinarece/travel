@@ -80,7 +80,12 @@ function Yuz({ k, i }: { k: KisiYuzu; i: number }) {
   );
 }
 
-export function KisilerSatiri(p: { kisiler: KisiYuzu[]; sag: string; sagYesil: boolean; onCagir: () => void; onYuzler: () => void }) {
+export function KisilerSatiri(p: { kisiler: KisiYuzu[]; sag: string; sagYesil: boolean; onCagir: () => void; onYuzler: () => void; /** Bağlantı yokken davet pasif. */ pasif?: boolean }) {
+  const cagirDurumu = {
+    accessibilityHint: p.pasif ? t('geziSayfasi.cevrimdisi.baglantiYok') : undefined,
+    accessibilityState: { disabled: !!p.pasif },
+    disabled: p.pasif,
+  };
   if (p.kisiler.length <= 1) {
     const ben = p.kisiler[0];
     return (
@@ -89,7 +94,7 @@ export function KisilerSatiri(p: { kisiler: KisiYuzu[]; sag: string; sagYesil: b
           {ben ? <Yuz k={ben} i={0} /> : null}
           <Text style={s.kisiMetin}>{t('seyahatV7.yalnizSen')}</Text>
         </View>
-        <Pressable accessibilityRole="button" onPress={p.onCagir} style={s.cagir} hitSlop={4}>
+        <Pressable accessibilityRole="button" accessibilityLabel={t('seyahatV7.arkadasCagir')} {...cagirDurumu} onPress={p.onCagir} style={[s.cagir, p.pasif && s.pasif]} hitSlop={4}>
           <Ikon ad="artiV7" boyut={16} renk={renk.ana} kalinlik={2.4} />
           <Text style={s.cagirMetin}>{t('seyahatV7.arkadasCagir')}</Text>
         </Pressable>
@@ -104,7 +109,7 @@ export function KisilerSatiri(p: { kisiler: KisiYuzu[]; sag: string; sagYesil: b
             <Yuz key={k.id} k={k} i={i} />
           ))}
         </Pressable>
-        <Pressable accessibilityRole="button" accessibilityLabel={t('seyahatV7.arkadasCagir')} onPress={p.onCagir} style={s.kesikArti} hitSlop={6}>
+        <Pressable accessibilityRole="button" accessibilityLabel={t('seyahatV7.arkadasCagir')} {...cagirDurumu} onPress={p.onCagir} style={[s.kesikArti, p.pasif && s.pasif]} hitSlop={6}>
           <Ikon ad="artiV7" boyut={16} renk={renk.ana} kalinlik={2.4} />
         </Pressable>
       </View>
@@ -151,7 +156,14 @@ export function BolumBasligi({ baslik, baglanti, onBaglanti }: { baslik: string;
 /** Tek dolu turuncu düğme (52 pt). */
 function TuruncuDugme({ metin, ikon, onPress, pasif, mesgul }: { metin: string; ikon?: 'yolTarifiV7'; onPress: () => void; pasif?: boolean; mesgul?: boolean }) {
   return (
-    <Pressable accessibilityRole="button" accessibilityState={{ disabled: !!pasif, busy: !!mesgul }} disabled={pasif || mesgul} onPress={onPress} style={[s.turuncu, pasif && s.pasif]}>
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={metin}
+      accessibilityHint={pasif ? t('geziSayfasi.cevrimdisi.baglantiYok') : undefined}
+      accessibilityState={{ disabled: !!pasif, busy: !!mesgul }}
+      disabled={pasif || mesgul}
+      onPress={onPress}
+      style={[s.turuncu, pasif && s.pasif]}>
       {ikon ? <Ikon ad={ikon} boyut={18} renk={renk.metin} kalinlik={2.4} /> : null}
       <Text style={s.turuncuMetin}>{metin}</Text>
     </Pressable>

@@ -8,10 +8,10 @@ import Svg, { Circle, Path, Rect } from 'react-native-svg';
 
 import { olayYaz } from '@/features/icerik/sorgular';
 import { t } from '@/i18n';
-import { renk, yazi } from '@/theme';
+import { altMenuRenk, renk, yazi } from '@/theme';
 
-/** Kanvastaki sekme renkleri. */
-export const altMenuRenk = { secili: renk.vurgu, pasif: '#8A91A3', cizgi: '#E4E7EE' } as const;
+/** Kanvastaki sekme renkleri (`theme.altMenuRenk`; seyahat içi menü de kullanır, #308 KK7). */
+export { altMenuRenk };
 
 export type MenuSekmesi = 'kesfet' | 'seyahatlerim' | 'profil';
 

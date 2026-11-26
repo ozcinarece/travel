@@ -331,24 +331,13 @@ describe('#183 KK6 Bakiyeler', () => {
   });
 });
 
-describe('#183 Gezi sayfası', () => {
-  it('KK8: plan modunda özet kartı (toplam, Sana borçlular) — Google isteği yok', async () => {
-    mockTablolar = fikstur(tarihEkle(yerelTarih(new Date(), IST), 10));
-    const { getByText, qc } = ciz(<GeziEkrani />);
-    await waitFor(() => getByText('Toplam harcama'));
-    await sakinles(qc);
-    expect(getByText('820 ₺')).toBeTruthy();
-    expect(getByText('Sana borçlular')).toBeTruthy();
-    expect(getByText('+336,66 ₺')).toBeTruthy();
-    googleYok();
-  });
-
+describe('#183 Gezi sayfası (#308 v7: harcama kartı kalktı, KK6)', () => {
   it('KK9 · KK7: gezi bitti ve açık borç var → "Harcamaları kapat" ve uygulama içi hatırlatma', async () => {
     mockTablolar = fikstur(tarihEkle(yerelTarih(new Date(), IST), -5));
     const { getByText, qc } = ciz(<GeziEkrani />);
     await waitFor(() => getByText('Gezi bitti · harcamaları kapat'));
     await sakinles(qc);
-    expect(getByText('2 transferle herkes ödeşir')).toBeTruthy();
+    // #308: v7 Sıradaki adımında alt satır yok (kanvas); düğme tek dolu turuncu düğme.
     expect(getByText('Gezi bitti · kim kime ne borçlu')).toBeTruthy();
     expect(getByText('Sana borçlular: Ayşe 213,33 ₺ · Mert 123,33 ₺')).toBeTruthy();
     googleYok();

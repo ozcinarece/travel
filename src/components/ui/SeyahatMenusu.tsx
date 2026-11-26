@@ -8,9 +8,8 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Circle, Path, Rect } from 'react-native-svg';
 
-import { altMenuRenk } from '@/components/menu/AltMenu';
 import { t } from '@/i18n';
-import { renk, yazi } from '@/theme';
+import { altMenuRenk, renk, yazi } from '@/theme';
 
 export type SeyahatSekmesi = 'gezi' | 'program' | 'kesfet' | 'harcama' | 'sohbet';
 

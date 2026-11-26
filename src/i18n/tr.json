@@ -974,7 +974,8 @@
     "bugunBos": "Bugün boş",
     "rehber": "Rehber ›",
     "bugunEkle": "{ad}, bugüne ekle",
-    "bugunEklendi": "{ad}, bugüne eklendi"
+    "bugunEklendi": "{ad}, bugüne eklendi",
+    "yeniMesaj": "Yeni mesaj"
   },
   "geziSayfasi": {
     "cevrimdisi": {

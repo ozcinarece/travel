@@ -68,6 +68,9 @@ export const anaV5 = {
   kapat: '#B42318',
 } as const;
 
+/** #405 alt menü sekme renkleri (`AltMenu`); #308 KK7 seyahat içi menü de aynı. */
+export const altMenuRenk = { secili: renk.vurgu, pasif: '#8A91A3', cizgi: '#E4E7EE' } as const;
+
 /** #308 (kanvas `Sayfa_v7_Seyahat_*`): seyahat sayfası v7. */
 export const seyahatV7 = {
   /** Harita yüklenene kadar 260 pt alanın zemini. */
