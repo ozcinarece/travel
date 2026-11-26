@@ -6,7 +6,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { gunAdi } from '@/components/program/PlanHazirSayfasi';
 import { AltPencere } from '@/components/ui/AltPencere';
-import type { GunSecenegi } from '@/features/listem/listem';
+import { gunBaglaminaGore, type GunSecenegi } from '@/features/listem/listem';
 import { t } from '@/i18n';
 import { sureMetni } from '@/lib/kategori';
 import { mesafeMetni } from '@/lib/mesafe';
@@ -22,13 +22,16 @@ type Props = {
   /** Günün ilk durağının adı ("Cumartesi · {ad} çevresi"). */
   ilkAd: (gunId: string) => string | null;
   mesgul: boolean;
+  /** #532 KK4: bir günün içinden açıldıysa o gün (en üstte, vurgulu, rozetsiz). */
+  baglamGunId?: string | null;
   onSec: (s: GunSecenegi) => void;
   onKapat: () => void;
 };
 
 const km = (m: number) => mesafeMetni(m >= 1000 ? m : Math.round(m / 10) * 10);
 
-export function GuneEkleSayfasi({ acik, ad, foto, dakika, secenekler, ilkAd, mesgul, onSec, onKapat }: Props) {
+export function GuneEkleSayfasi({ acik, ad, foto, dakika, secenekler, ilkAd, mesgul, baglamGunId, onSec, onKapat }: Props) {
+  const sirali = gunBaglaminaGore(secenekler, baglamGunId);
   return (
     <AltPencere acik={acik} onKapat={onKapat} kapatEtiketi={t('genel.vazgec')} kaydirilir stil={{ paddingHorizontal: 20, gap: 12 }}>
       <View style={s.ust}>
@@ -40,7 +43,7 @@ export function GuneEkleSayfasi({ acik, ad, foto, dakika, secenekler, ilkAd, mes
           <Text style={s.alt}>{t('listem.guneEkle.alt', { sure: sureMetni(dakika) })}</Text>
         </View>
       </View>
-      {secenekler.map((o) => {
+      {sirali.map((o) => {
         const rengi = gunRengi(o.gun.index);
         const ilk = ilkAd(o.gun.id);
         const baslik = ilk ? t('listem.gunBaslik', { gun: gunAdi(o.gun), ad: ilk }) : gunAdi(o.gun);
@@ -75,7 +78,7 @@ export function GuneEkleSayfasi({ acik, ad, foto, dakika, secenekler, ilkAd, mes
                 </Text>
               ))}
             </View>
-            {o.onerilen ? (
+            {o.rozet ? (
               <View style={s.rozet}>
                 <Text style={s.rozetMetin}>{t('listem.guneEkle.onerilen')}</Text>
               </View>

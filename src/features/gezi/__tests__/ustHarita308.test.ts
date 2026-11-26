@@ -23,9 +23,9 @@ describe('ustHaritaVerisi (#308 KK1)', () => {
     expect(v.pinler.some((p) => p.tur === 'konum')).toBe(false);
   });
 
-  it('gezi modu: yalnız bugünün durakları (gezilen tamam), konum noktası; koordinatsız durak yok', () => {
+  it('gezi modu: yalnız bugünün durakları (gezilen tamam), #532 öneri pini, konum noktası; koordinatsız durak yok', () => {
     const v = ustHaritaVerisi({ ...ortak, hal: 'gezi' });
-    expect(v.pinler.map((p) => p.id)).toEqual(['durak:1', 'durak:2', 'ust:konum']);
+    expect(v.pinler.map((p) => p.id)).toEqual(['durak:1', 'durak:2', 'ust:oneri:x', 'ust:konum']);
     expect(v.pinler[1].tamam).toBe(true);
   });
 

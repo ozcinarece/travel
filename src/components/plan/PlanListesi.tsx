@@ -6,6 +6,7 @@ import type { ReactNode } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { BolumBasligi, BugunBosV7, type BosGunYeri } from '@/components/gezi/SeyahatV7';
 import { GeriHapi } from '@/components/harita/HaritaEkrani';
 import { Avatar } from '@/components/ui/Avatar';
 import { Ikon } from '@/components/ui/Ikon';
@@ -51,7 +52,8 @@ type Props = {
   satirlar: PlanSatirGorunumu[];
   onDurak: (mekanId: string) => void;
   onDurakUzunBas: (mekanId: string) => void;
-  aksam: { kalin: string; metin: string; onOner: () => void } | null;
+  /** #532 KK3: "Akşam için yakında" — en çok 2 yer, + o günün sonuna ekler. */
+  aksam: { yerler: BosGunYeri[]; eklenenler: Set<string>; onEkle: (id: string) => void; pasif?: boolean } | null;
   bos: { metin: string; dugme: string; onPress: () => void } | null;
   uyari: string | null;
 };
@@ -174,14 +176,8 @@ export function PlanListesi(p: Props) {
         ) : null}
         {p.aksam ? (
           <View style={s.aksam}>
-            <Text style={s.aksamMetin}>
-              <Text style={{ fontFamily: yazi.ekstra, color: renk.metin }}>{`${p.aksam.kalin} `}</Text>
-              {p.aksam.metin}
-            </Text>
-            <Pressable accessibilityRole="button" onPress={p.aksam.onOner} style={({ pressed }) => [s.oner, pressed && { opacity: 0.85 }]}>
-              <Ikon ad="arti" boyut={16} renk={renk.metin} kalinlik={2.3} />
-              <Text style={s.onerMetin}>{t('plan.oner')}</Text>
-            </Pressable>
+            <BolumBasligi baslik={t('plan.aksamYakinda')} />
+            <BugunBosV7 yerler={p.aksam.yerler} eklenenler={p.aksam.eklenenler} onEkle={p.aksam.onEkle} pasif={p.aksam.pasif} />
           </View>
         ) : null}
       </View>
@@ -227,8 +223,5 @@ const s = StyleSheet.create({
   bos: { padding: 14, borderRadius: 16, backgroundColor: renk.zemin, gap: 8 },
   bosMetin: { fontFamily: yazi.normal, fontSize: 14, lineHeight: 20, color: renk.ikincil },
   bosDugme: { fontFamily: yazi.ekstra, fontSize: 14, color: renk.ana },
-  aksam: { marginTop: 8, padding: 12, borderRadius: 16, backgroundColor: '#fff6e6', borderWidth: 1.5, borderStyle: 'dashed', borderColor: '#ffd9bf', flexDirection: 'row', alignItems: 'center', gap: 10 },
-  aksamMetin: { flex: 1, fontFamily: yazi.normal, fontSize: 13, lineHeight: 18, color: renk.ikincil },
-  oner: { height: 34, paddingHorizontal: 14, borderRadius: 12, backgroundColor: renk.vurgu, flexDirection: 'row', alignItems: 'center', gap: 6 },
-  onerMetin: { fontFamily: yazi.ekstra, fontSize: 14, lineHeight: 16, color: renk.metin },
+  aksam: { marginTop: 4 },
 });

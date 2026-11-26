@@ -77,7 +77,9 @@ function Listem({ seyahat, gunler, duraklar, mekanlar, konaklamalar }: { seyahat
   // #200 KK3: sığmayan mekan varsa yazmadan önce seçenek penceresi.
   const [sigmayan, setSigmayan] = useState<DagitimHesabi | null>(null);
   // #144: Seyahatler'deki "N mekan güne atanmadı" çipi Atanmamış segmentiyle açar.
-  const { segment: segmentParam } = useLocalSearchParams<{ segment?: string }>();
+  // #532 KK4: bir günün içinden açılırsa (`gun` = gün sırası) Güne ekle o günü en üstte gösterir.
+  const { segment: segmentParam, gun: gunParam } = useLocalSearchParams<{ segment?: string; gun?: string }>();
+  const baglamGunId = gunParam ? (gunler.find((g) => String(g.index) === gunParam)?.id ?? null) : null;
   const [segment, setSegment] = useState<Segment>(segmentParam === 'atanmamis' ? 'atanmamis' : 'tumu');
   const [siralama, setSiralama] = useState<ListemSiralama>('plan');
   const [siralamaMenu, setSiralamaMenu] = useState(false);
@@ -363,6 +365,7 @@ function Listem({ seyahat, gunler, duraklar, mekanlar, konaklamalar }: { seyahat
         secenekler={secenekler}
         ilkAd={ilkAd}
         mesgul={ata.isPending}
+        baglamGunId={baglamGunId}
         onSec={guneEkle}
         onKapat={() => setGuneEkleId(null)}
       />

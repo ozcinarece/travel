@@ -1,0 +1,299 @@
+{
+  "il": "Bayburt",
+  "slug": "bayburt",
+  "guncelleme": "2026-11-26",
+  "oneriler": [
+    {
+      "sira": 1,
+      "ad": "Bayburt Kalesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "Çoruh'a bakan sarp tepede iki sur hattı; 2026'da kazı sürüyor, surlar dışarıdan gezilir",
+      "osm": "node/1296256638",
+      "place_id": "ChIJQR85BA-Hb0AR0qZvq8kcCMQ"
+    },
+    {
+      "sira": 2,
+      "ad": "Baksı Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 45,
+      "neden": "Bayraktar köyü tepesinde çağdaş sanat ve el sanatları; yalnız mayıs–ekim sezonunda açık",
+      "place_id": "ChIJPWFvSEl7b0ARtvukHFu85EI"
+    },
+    {
+      "sira": 3,
+      "ad": "Kenan Yavuz Etnografya Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu",
+        "yavas"
+      ],
+      "ilce": "Demirözü",
+      "merkeze_km": 50,
+      "neden": "Yıkık köy evlerinin taşıyla Beşpınar'da kurulmuş, Avrupa ödüllü köy yaşamı müzesi",
+      "place_id": "ChIJcypXiGz5b0AR2zKCCoZCfzU"
+    },
+    {
+      "sira": 4,
+      "ad": "Dede Korkut Kümbeti",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 32,
+      "neden": "Masat köyü yakınında Dede Korkut'a atfedilen küçük kümbet; temmuzda festival yapılır",
+      "place_id": "ChIJ952kRGifb0ARuZZMqql4GbQ"
+    },
+    {
+      "sira": 5,
+      "ad": "Bayburt Ulu Camii",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "13. yüzyıl Selçuklu camisi; kalenin hemen altında, çarşı içinde, ibadete açık",
+      "osm": "way/142870654",
+      "place_id": "ChIJgaX6-AiHb0ARoU1iSFJUics"
+    },
+    {
+      "sira": 6,
+      "ad": "Kop Dağı Müdafaası Tarihi Milli Parkı",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "doga"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 45,
+      "neden": "1916 Kop savunmasının siperleri ve zirvede 1963 yapımı şehitler anıtı, 2.400 m üstünde",
+      "place_id": "ChIJ2S5Tzvq7b0ARvDy6STK3TUg"
+    },
+    {
+      "sira": 7,
+      "ad": "Sırakayalar Şelalesi",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 25,
+      "neden": "Bozkırın ortasında iki kademeli şelale; kışın donar, 2026'da çevre düzenlemesi sürüyor",
+      "place_id": "ChIJW-pPyGWTb0ARMTTcaTszetc"
+    },
+    {
+      "sira": 8,
+      "ad": "Bayburt Müzesi (Dede Korkut Kent Müzesi)",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "Eylül 2026'da Bakanlığa devredilen kent müzesi; Dede Korkut ve kale buluntuları",
+      "place_id": "ChIJy-eirySHb0ARmJHPGGQtMzM"
+    },
+    {
+      "sira": 9,
+      "ad": "Saat Kulesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "1924'te biten 21 m'lik kule, Cumhuriyet Caddesi'nde şehrin buluşma noktası",
+      "place_id": "ChIJsR41hAiHb0ARiabVwc3rAac"
+    },
+    {
+      "sira": 10,
+      "ad": "Şehit Osman Türbeleri",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 2,
+      "neden": "Şehrin batısındaki tepede iki Selçuklu kümbeti; kaleyi ve Çoruh vadisini görür",
+      "place_id": "ChIJ8Vth_wmHb0ARnc2JiG8DZ2k"
+    },
+    {
+      "sira": 11,
+      "ad": "Zafer Lokantası",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Kadızade'de esnaf lokantası; tencere yemekleri ve yöresel tabaklar için bilinir",
+      "place_id": "ChIJPeB6gwiHb0AR_53Lo7VFW4c"
+    },
+    {
+      "sira": 12,
+      "ad": "Esnaf Köfte ve Çorba Salonu",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Izgara köfte ve Bayburt usulü kesme çorbasıyla anılan esnaf köftecisi",
+      "place_id": "ChIJBeFwF6mHb0ARbuD52gAlfnA"
+    },
+    {
+      "sira": 13,
+      "ad": "Bayburt Lokantası",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Merkezde ev usulü tencere yemekleri sunan esnaf lokantası"
+    },
+    {
+      "sira": 14,
+      "ad": "Loru Han Restoranı",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet",
+        "yavas"
+      ],
+      "ilce": "Demirözü",
+      "merkeze_km": 50,
+      "neden": "Kenan Yavuz Müzesi'nin hanında yöresel yemek; müze gezisine öğle molası",
+      "place_id": "ChIJNTdTVU34b0ARAl1V12czJto"
+    },
+    {
+      "sira": 15,
+      "ad": "Yakupabdal Tabiat Parkı",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Demirözü",
+      "merkeze_km": 40,
+      "neden": "Sarıçam ormanı içinde göletli park; piknik ve yürüyüş için Demirözü yolunda",
+      "place_id": "ChIJU8TJfNtWZUARO50ryNyMguA"
+    },
+    {
+      "sira": 16,
+      "ad": "Kaleardı Şehir Parkı",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "cocuklu",
+        "yavas"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "Kale eteğinde Çoruh kıyısı boyunca uzanan park; oyun alanı ve çay bahçeleri var",
+      "place_id": "ChIJR9CYJl2Hb0ARbwptaXQmclU"
+    },
+    {
+      "sira": 17,
+      "ad": "Koçbayır Tabiat Parkı",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 6,
+      "neden": "Şehre 6 km mesafede sarıçam ormanı; 2017'de tabiat parkı ilan edildi",
+      "place_id": "ChIJK5rgVSmEZUARdsaIBA_r328"
+    },
+    {
+      "sira": 18,
+      "ad": "Ferahşad Bey Camii",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Demirözü",
+      "merkeze_km": 55,
+      "neden": "Gökçedere'de (Pulur) 1517'de Akkoyunlu Ferahşad Bey'in yaptırdığı tek kubbeli cami",
+      "place_id": "ChIJc4DPJlBaZUARxdXrCu1pF7M"
+    },
+    {
+      "sira": 19,
+      "ad": "Sünür Kutlu Bey Türbesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 15,
+      "neden": "Çayıryolu köyünde 14. yüzyıldan kesme taş kümbet"
+    },
+    {
+      "sira": 20,
+      "ad": "Ahi Emir Ahmed Zencani Türbesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 2,
+      "neden": "Şingah tepesinde Ahi şeyhinin türbesi; yanından kale ve şehir panoraması",
+      "place_id": "ChIJ3Sxs-6eHb0AROQY1c6FCwpI"
+    },
+    {
+      "sira": 21,
+      "ad": "Korgan Köprüsü",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "doga"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 25,
+      "neden": "Akşar yakınında Çoruh üstünde iki gözlü taş köprü, eski İpek Yolu güzergâhında",
+      "place_id": "ChIJQR1ZZ0VwZUARB4D82of_u9U"
+    },
+    {
+      "sira": 22,
+      "ad": "Pamuktaş Tabiat Parkı",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Demirözü",
+      "merkeze_km": 36,
+      "neden": "Göletli küçük orman parkı; kuş gözlemi ve sessiz piknik için",
+      "place_id": "ChIJxQsK0lRxZUARUKy6uaHf2QM"
+    },
+    {
+      "sira": 23,
+      "ad": "Bayburt Evleri",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "Tuzcuzade ve Veysel'de taş-ahşap geleneksel evler; özel mülk, dışarıdan bakılır"
+    }
+  ]
+}
