@@ -1,7 +1,7 @@
 {
   "il": "Mardin",
   "slug": "mardin",
-  "guncelleme": "2026-11-19",
+  "guncelleme": "2026-11-21",
   "oneriler": [
     {
       "sira": 1,
@@ -80,7 +80,7 @@
       "ilce": "Artuklu",
       "merkeze_km": 24,
       "neden": "505'te Doğu Roma sınır garnizonu; Oğuz köyünün altındaki dev sarnıçlara inilebiliyor",
-      "place_id": "ChIJN4ZsuU1wCkARSEZbRG-ze1s"
+      "place_id": "ChIJVVVVVcqICkARO24LIgli-74"
     },
     {
       "sira": 7,
@@ -227,6 +227,19 @@
     },
     {
       "sira": 18,
+      "ad": "Cercis Murat Konağı",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Artuklu",
+      "merkeze_km": 0,
+      "neden": "Eski bir Süryani konağında kaburga dolması, alluciye ve irok; teraslardan ova görünür",
+      "osm": "node/4898005721",
+      "place_id": "ChIJWSv-brmICkARJ4dHgnOd8mg"
+    },
+    {
+      "sira": 19,
       "ad": "Zeynel Abidin Camii ve Türbesi",
       "kategori": "tarih",
       "amaclar": [
@@ -238,7 +251,7 @@
       "place_id": "ChIJ-c2_pqMPCkARGNtFXBTFvlM"
     },
     {
-      "sira": 19,
+      "sira": 20,
       "ad": "Mor Yakup Kilisesi (Nusaybin)",
       "kategori": "tarih",
       "amaclar": [
@@ -250,7 +263,7 @@
       "place_id": "ChIJ57R7BaMPCkAR5URcAGJ5tBA"
     },
     {
-      "sira": 20,
+      "sira": 21,
       "ad": "Midyat Telkari Çarşısı",
       "kategori": "carsi",
       "amaclar": [
@@ -262,7 +275,7 @@
       "place_id": "ChIJrXV5sbtNCkAR0v-bisj-TLI"
     },
     {
-      "sira": 21,
+      "sira": 22,
       "ad": "Leyli Muse Mutfak",
       "kategori": "yemek",
       "amaclar": [
@@ -274,7 +287,7 @@
       "place_id": "ChIJI65hAZGJCkARa39Hwd_SW34"
     },
     {
-      "sira": 22,
+      "sira": 23,
       "ad": "Latifiye (Abdüllatif) Camii",
       "kategori": "tarih",
       "amaclar": [
@@ -287,7 +300,7 @@
       "place_id": "ChIJmdJcG7-ICkARkLX_CZb5pac"
     },
     {
-      "sira": 23,
+      "sira": 24,
       "ad": "Anıtlı (Hah) Meryem Ana Kilisesi",
       "kategori": "tarih",
       "amaclar": [
@@ -300,7 +313,7 @@
       "place_id": "ChIJxVwXdh-3C0AR1vB3JGihO28"
     },
     {
-      "sira": 24,
+      "sira": 25,
       "ad": "Beyazsu (Ava Sıpi) Vadisi",
       "kategori": "aktivite",
       "amaclar": [
@@ -313,7 +326,7 @@
       "place_id": "ChIJucaVGAA_CkARW0p_nzdzgOc"
     },
     {
-      "sira": 25,
+      "sira": 26,
       "ad": "Emir Hamamı",
       "kategori": "aktivite",
       "amaclar": [
@@ -326,7 +339,7 @@
       "place_id": "ChIJOSijLMCICkARzImlurh2ltU"
     },
     {
-      "sira": 26,
+      "sira": 27,
       "ad": "Mezopotamya Çay Bahçesi",
       "kategori": "tatli_kahve",
       "amaclar": [
@@ -340,7 +353,7 @@
       "place_id": "ChIJVczPd-qICkARyQtKmkFG3dc"
     },
     {
-      "sira": 27,
+      "sira": 28,
       "ad": "Yay Konağı",
       "kategori": "yemek",
       "amaclar": [
@@ -353,7 +366,7 @@
       "place_id": "ChIJ481S3wiJCkAR6Rl5rJW4W_s"
     },
     {
-      "sira": 28,
+      "sira": 29,
       "ad": "Tarihi Gelüşke Hanı",
       "kategori": "yemek",
       "amaclar": [
@@ -366,7 +379,7 @@
       "place_id": "ChIJfXBVZsxNCkAROVe2Kdpg07k"
     },
     {
-      "sira": 29,
+      "sira": 30,
       "ad": "Savur Tarihi Yerleşimi",
       "kategori": "manzara",
       "amaclar": [
@@ -379,7 +392,7 @@
       "place_id": "ChIJselheUnlCkARMeyVLRUf1OI"
     },
     {
-      "sira": 30,
+      "sira": 31,
       "ad": "Dereiçi (Killit)",
       "kategori": "tarih",
       "amaclar": [
@@ -392,7 +405,7 @@
       "place_id": "ChIJVza77rjkCkARLnONKRuhbcQ"
     },
     {
-      "sira": 31,
+      "sira": 32,
       "ad": "Çağçağ Suyu ve Vadisi",
       "kategori": "doga",
       "amaclar": [
@@ -405,7 +418,7 @@
       "place_id": "ChIJo99LRAAPCkARobcFHI4ckLU"
     },
     {
-      "sira": 32,
+      "sira": 33,
       "ad": "Şehidiye Camii",
       "kategori": "tarih",
       "amaclar": [
@@ -418,7 +431,7 @@
       "place_id": "ChIJY7AjdOqICkARJxOYy-6lK5s"
     },
     {
-      "sira": 33,
+      "sira": 34,
       "ad": "Revaklı Çarşı (Sipahiler Çarşısı)",
       "kategori": "carsi",
       "amaclar": [
@@ -430,7 +443,7 @@
       "place_id": "ChIJ57QiJsCICkARE9ztVbUpdOM"
     },
     {
-      "sira": 34,
+      "sira": 35,
       "ad": "Midyat Telkari Müzesi",
       "kategori": "muze",
       "amaclar": [
@@ -443,7 +456,7 @@
       "place_id": "ChIJxRHLSABNCkARu-Fo7SJ2ZrM"
     },
     {
-      "sira": 35,
+      "sira": 36,
       "ad": "Midyat Kent Müzesi (Estel Han)",
       "kategori": "muze",
       "amaclar": [
@@ -456,7 +469,7 @@
       "place_id": "ChIJhZwVVXVSCkARs5e0h_ResIk"
     },
     {
-      "sira": 36,
+      "sira": 37,
       "ad": "Kebapçı Yusuf Usta",
       "kategori": "yemek",
       "amaclar": [
@@ -465,10 +478,11 @@
       "ilce": "Artuklu",
       "merkeze_km": 1,
       "neden": "Patlıcanla şişe dizilen Mardin kebabının yerel adreslerinden; Yalım Mahallesi",
+      "osm": "node/8648589017",
       "place_id": "ChIJVVVVVb6ICkARlMFo5FtmXhc"
     },
     {
-      "sira": 37,
+      "sira": 38,
       "ad": "Midyat Saray Lokantası",
       "kategori": "yemek",
       "amaclar": [
@@ -480,7 +494,7 @@
       "place_id": "ChIJJaPhzGFNCkARoMNKXJPjjYI"
     },
     {
-      "sira": 38,
+      "sira": 39,
       "ad": "Kana Cafe Shop",
       "kategori": "tatli_kahve",
       "amaclar": [
@@ -492,7 +506,7 @@
       "place_id": "ChIJkcH5J8mICkARJRwKATO6z8U"
     },
     {
-      "sira": 39,
+      "sira": 40,
       "ad": "Kültür Kafe",
       "kategori": "tatli_kahve",
       "amaclar": [
@@ -506,7 +520,7 @@
       "place_id": "ChIJEX0dSc1xCkARoJ30cFSSyqw"
     },
     {
-      "sira": 40,
+      "sira": 41,
       "ad": "Kızıltepe Ulu Camii",
       "kategori": "tarih",
       "amaclar": [
@@ -518,7 +532,7 @@
       "place_id": "ChIJ2f7ev93VShUR7uhdUXEQ1zw"
     },
     {
-      "sira": 41,
+      "sira": 42,
       "ad": "223. Tabiat Parkı GAP Şelalesi",
       "kategori": "doga",
       "amaclar": [
@@ -531,7 +545,7 @@
       "place_id": "ChIJmX-iLAChCkARj6G3KS5XfTg"
     },
     {
-      "sira": 42,
+      "sira": 43,
       "ad": "Rabat Kalesi",
       "kategori": "tarih",
       "amaclar": [
@@ -544,7 +558,7 @@
       "place_id": "ChIJhXin9VAncUARZ7X_NbO_IQ8"
     },
     {
-      "sira": 43,
+      "sira": 44,
       "ad": "Yardere Köyü Şelalesi",
       "kategori": "doga",
       "amaclar": [

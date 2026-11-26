@@ -125,8 +125,8 @@ const GOOGLE_CIP: Record<Exclude<OnerilenCipi, 'gormen' | 'rehber'>, OneriCipi> 
 const YARICAP_M = 15_000;
 const GUN_MS = 24 * 60 * 60 * 1000;
 
-/** Şehir merkezi etrafında bir çipin Google listesi (fotoğraflı); 24 sa önbellek. */
-function useGoogleListesi(anahtar: string, cip: OneriCipi, merkez: { lat: number; lng: number } | null, etkin: boolean) {
+/** Şehir merkezi etrafında bir çipin Google listesi (fotoğraflı); 24 sa önbellek. #401: il listesinin "Yakındaki diğer yerler"i de bunu kullanır. */
+export function useGoogleListesi(anahtar: string, cip: OneriCipi, merkez: { lat: number; lng: number } | null, etkin: boolean) {
   return useQuery({
     // #318: seyahat merkezinin koordinatı boşaldıysa Google listesi istenmez (rehber listesi çalışır).
     queryKey: ['sihirbaz-oneri', anahtar, cip, merkez?.lat.toFixed(3) ?? '-', merkez?.lng.toFixed(3) ?? '-'],

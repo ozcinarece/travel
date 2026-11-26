@@ -1,5 +1,6 @@
 // İçerik hattı doğrulayıcısı (docs/07): HATA yüklemeyi durdurur, UYARI rapora girer.
 import {
+  VARSAYILAN_DAKIKA,
   detayIdleri,
   mekanDurumuDenetle,
   dolarEtiketi,
@@ -27,6 +28,7 @@ import {
   yemekMi,
 } from '../dogrula.mjs';
 import { anahtarCifti, coz, sifrele } from '../sifre.mjs';
+import { VARSAYILAN_DAKIKA as UYGULAMA_DAKIKA } from '../../../src/lib/kategori';
 
 const ID = {
   kursunlu: 'ChIJkursunlu0001',
@@ -528,5 +530,22 @@ describe('#160 KK-ek4: kebapçı yemek sayılır', () => {
     expect(yemekMi('kebab_shop')).toBe(true);
     expect(yemekMi('turkish_restaurant')).toBe(true);
     expect(yemekMi('museum')).toBe(false);
+  });
+});
+
+describe('#440: cafeteria yemek durağı', () => {
+  it('cafeteria yemek; cafe ve coffee_shop değil', () => {
+    expect(yemekMi('cafeteria')).toBe(true);
+    expect(yemekMi('cafe')).toBe(false);
+    expect(yemekMi('coffee_shop')).toBe(false);
+  });
+});
+
+describe('VARSAYILAN_DAKIKA (#440)', () => {
+  it('içerik hattı tablosu uygulamanınkiyle aynı', () => {
+    expect(VARSAYILAN_DAKIKA).toEqual(UYGULAMA_DAKIKA);
+  });
+  it('lokanta restoran kadar sürer', () => {
+    expect(VARSAYILAN_DAKIKA.cafeteria).toBe(75);
   });
 });

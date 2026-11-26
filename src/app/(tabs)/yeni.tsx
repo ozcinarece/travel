@@ -3,12 +3,14 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ActivityIndicator, Linking, StyleSheet, Text, View } from 'react-native';
 
 import { MekanPaneli } from '@/components/mekan/MekanPaneli';
+import { AdimIlOnerileri } from '@/components/sihirbaz/AdimIlOnerileri';
 import { AdimKabugu } from '@/components/sihirbaz/AdimKabugu';
 import { AdimNereye } from '@/components/sihirbaz/AdimNereye';
 import { AdimNeZaman } from '@/components/sihirbaz/AdimNeZaman';
 import { AdimOnerilenler } from '@/components/sihirbaz/AdimOnerilenler';
 import { PlanCubugu } from '@/components/sihirbaz/PlanCubugu';
 import { useDuraklar, useGunler } from '@/features/gunler/sorgular';
+import { ilSlugu, useIlYerleri } from '@/features/icerik/ilOnerileri';
 import { icerikPlaceId, olayYaz, sehirEslestir, useSehirler, useYerlerIle } from '@/features/icerik/sorgular';
 import { useYerleriEkle } from '@/features/icerik/yerEkle';
 import { useMekanEkle, useMekanGuncelle, useMekanlar, useMekanSil } from '@/features/mekanlar/sorgular';
@@ -16,8 +18,8 @@ import { useProfil, useProfilGuncelle } from '@/features/profil/sorgular';
 import { useSeyahat, useSeyahatAdiKaydet, useSeyahatOlustur } from '@/features/seyahatler/sorgular';
 import { seyahatiKopyala, useIcerikSehirSecimi, useTekrarKaynagi } from '@/features/sihirbaz/girisler';
 import type { OnerilenMekan } from '@/features/sihirbaz/onerilenler';
-import { secimOzeti } from '@/features/sihirbaz/planKur';
-import { usePlaniUygula } from '@/features/sihirbaz/planUygula';
+import { gunDolulugu, secimOzeti } from '@/features/sihirbaz/planKur';
+import { planiHesapla, usePlaniUygula } from '@/features/sihirbaz/planUygula';
 import { oncekiAdim, seyahatAdiOner, sonrakiAdim, type Adim, type Aralik } from '@/features/sihirbaz/sihirbaz';
 import type { HafifYer } from '@/features/yerler/api';
 import { t } from '@/i18n';
@@ -124,6 +126,8 @@ export default function SihirbazEkrani() {
 
   const onerilenAd = seyahatAdiOner(sehir ? [sehir.ad] : []);
   const rehberSehir = sehirEslestir(sehirler.data, sehir);
+  // #401 KK5: ilin yayında listesi varsa 3. adım ondan dolar (seyahat açılınca önceden istenir; 2. adımda hazır olur).
+  const ilYerleri = useIlYerleri(tripId ? ilSlugu(rehberSehir, sehir?.ad ?? seyahat.data?.city_label) : null);
   const kilitli = !!tripId;
 
   const geri = () => {
@@ -214,6 +218,12 @@ export default function SihirbazEkrani() {
     }
   };
 
+  // #445 KK2: K, "Planı kur"un kullandığı aynı hesapla (planiKur ile aynı girdi); her render'da değil, veri değişince.
+  const sigmayanSayisi = useMemo(
+    () => (gunler.data && duraklar.data ? planiHesapla({ mekanlar: mekanlar.data ?? [], gunler: gunler.data, duraklar: duraklar.data }).atanmamis.length : 0),
+    [mekanlar.data, gunler.data, duraklar.data],
+  );
+
   if (adim === 'nereye') {
     return (
       <AdimKabugu adim={adim} baslik={t('sihirbaz.nereye.baslik')} onGeri={geri} hata={hata} devam={{ onPress: nereyeDevam, pasif: !sehir, yukleniyor: adKaydet.isPending }}>
@@ -226,7 +236,7 @@ export default function SihirbazEkrani() {
       <AdimKabugu
         adim={adim}
         baslik={t('sihirbaz.nezaman.baslik')}
-        ust={seyahat.data ? (seyahat.data.name ?? seyahat.data.city_label) : (ad ?? onerilenAd)}
+        alt={seyahat.data ? (seyahat.data.name ?? seyahat.data.city_label) : (ad ?? onerilenAd)}
         onGeri={geri}
         hata={hata}
         devam={{ onPress: () => seyahatiKur(false), pasif: !aralik && !kilitli, yukleniyor: olustur.isPending }}
@@ -275,17 +285,43 @@ export default function SihirbazEkrani() {
     if (!panel) return;
     Linking.openURL(`https://www.google.com/maps/dir/?api=1&destination=${panel.lat},${panel.lng}&destination_place_id=${encodeURIComponent(panel.place_id)}&travelmode=walking`);
   };
+  // #401: liste yoksa ya da alınamadıysa bugünkü akış (#400); istek sürerken Google'a gidilmez.
+  const ilListesi = ilYerleri.data && ilYerleri.data.length > 0 ? ilYerleri.data : null;
+  const ilBekliyor = ilYerleri.isLoading;
+  const secim = havuz.map((m) => ({ id: m.id, lat: m.lat, lng: m.lng, dakika: m.default_minutes }));
   return (
     <View style={{ flex: 1 }}>
       <AdimKabugu
         adim={adim}
         baslik={t('sihirbaz.onerilenler.baslik')}
-        alt={t('sihirbaz.onerilenler.alt')}
+        alt={ilListesi ? t('sihirbaz.onerilenler.altIl', { il: sehir?.ad ?? seyahat.data.city_label }) : t('sihirbaz.onerilenler.alt')}
         onGeri={geri}
         hata={hata}
         kaydirmasiz
-        altIcerik={<PlanCubugu ozet={secimOzeti(havuz.map((m) => ({ id: m.id, lat: m.lat, lng: m.lng, dakika: m.default_minutes })))} onPlaniKur={planiKur} onHaritayaGec={haritayaGec} yukleniyor={planUygula.isPending} />}>
-        <AdimOnerilenler seyahat={seyahat.data} rehberSehir={rehberSehir} havuz={havuz} tutulan={tutulan} onTut={tut} onHata={setHata} onAc={setPanel} />
+        altIcerik={
+          <PlanCubugu
+            ozet={secimOzeti(secim)}
+            doluluk={
+              ilListesi && gunler.data.length > 0
+                ? {
+                    gun: gunler.data.length,
+                    ...gunDolulugu(secim, gunler.data.length),
+                    sigmayan: sigmayanSayisi,
+                  }
+                : undefined
+            }
+            onPlaniKur={planiKur}
+            onHaritayaGec={haritayaGec}
+            yukleniyor={planUygula.isPending}
+          />
+        }>
+        {ilBekliyor ? (
+          <ActivityIndicator color={renk.ana} style={{ marginTop: 40 }} accessibilityLabel={t('ilOneri.listeYukleniyor')} />
+        ) : ilListesi ? (
+          <AdimIlOnerileri seyahat={seyahat.data} yerler={ilListesi} havuz={havuz} onTut={tut} onHata={setHata} onAc={setPanel} />
+        ) : (
+          <AdimOnerilenler seyahat={seyahat.data} rehberSehir={rehberSehir} havuz={havuz} tutulan={tutulan} onTut={tut} onHata={setHata} onAc={setPanel} />
+        )}
       </AdimKabugu>
       {panel ? (
         <MekanPaneli

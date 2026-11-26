@@ -1,0 +1,136 @@
+{
+  "surum": 1,
+  "sehir": {
+    "slug": "gaziantep"
+  },
+  "takvim": {
+    "ilk_gun": "cumartesi"
+  },
+  "gezi": {
+    "slug": "zeugmadan-duluke-bir-gun",
+    "baslik": "Zeugma'dan Dülük'e bir gün",
+    "ozet": "Sabah Fırat'ın üstündeki villalarda, akşamüstü Dülük'ün çam ormanında",
+    "yazar_ad": "Tripmate ekibi",
+    "amaclar": [
+      "kultur_tarih",
+      "doga"
+    ],
+    "yazi_md": "Gaziantep'te ikinci günün varsa ya da şehri bir kez gezdiysen, bu sefer mozaiklerin ve taşların geldiği yerlere git. Bu plan araçla: sabah Nizip'te, Fırat'ın üstündeki antik Zeugma'da başlıyor, öğlen şehre dönüp bir Antep lokantasında yemek yiyorsun, öğleden sonra müzede ilin kazılarına bakıp günü şehrin kuzeyinde, Dülük'ün kalıntıları ve çam ormanında bitiriyorsun. Toplam yol aşağı yukarı 110 kilometre.\n\n> Kasımdan şubata hava beş gibi kararıyor. Zeugma'ya erken çık, öğleden sonra müzede fazla oyalanma; Dülük açık arazi ve karanlıkta orada kalmak istemezsin.\n\n## 1. gün · Fırat kıyısından Dülük'e\n\nŞehirden sabah erken çık ve Nizip yönüne, yaklaşık 45 dakikalık yola koyul. [Zeugma Antik Kenti](mekan:ChIJh-OsLZSGMRUR6IPaLI4d7HA) Fırat'ın batı kıyısında, Belkıs köyünün üstündeki yamaçta. Kentin aşağı mahalleleri 2000'den beri Birecik Barajı'nın suları altında; yamacın yukarısında kazılan villalar ise çelik çatıların altında, yerinde duruyor. Avluların ve odaların planına bak, sonra akropol tepesine çıkıp suyun kapladığı vadiye doğru dön. [Zeugma Mozaik Müzesi](mekan:ChIJyaU5d6rmMRURVotkWaeUJ7E)'ni gördüysen, oradaki mozaiklerin hangi yamaçtan kaldırıldığını burada anlarsın. Pazartesi kapalı, gününü buna göre seç.\n\n::mekan[ChIJh-OsLZSGMRUR6IPaLI4d7HA]\n\nÖğlen şehre dön ve kale eteğindeki [Yesemek Gaziantep Mutfağı](mekan:ChIJ3VfQN_vnMRURviEfr03FeaY)'nda otur. Burada kebap değil tencere yemeği yenir: yoğurtlu suda pişen minik bulgur köfteleriyle yuvalama, ekşili suda iki boy içli köfteyle analı kızlı, kışın kuru patlıcan dolması. Ne çıktığını görmek için önce tezgâhtaki tencerelere bak, karar veremezsen yarım porsiyon iki çeşit iste.\n\nYemekten sonra Şehitkamil'deki [Gaziantep Arkeoloji Müzesi](mekan:ChIJHZtfDFLhMRURJx1s7F_Se0s)'ne geç. Depremden sonra güçlendirilen müze 2026 yazında yeniden açıldı ve ilin bütün kazılarını bir arada gösteriyor. Karkamış bölümünde yaklaşık 3.700 yıllık, üstünde gülümseyen bir yüz çizilmiş küçük bir matara var; Zeugma bölümünde sabah gezdiğin kentteki lejyonun miğferleri ve bir Mithras kabartması duruyor. Üst kattaki Dülük taşlarına da bak: birazdan yerlerini göreceksin. Bahçedeki bazalt kabartmaları atlama.\n\n::mekan[ChIJHZtfDFLhMRURJx1s7F_Se0s]\n\nMüzeden kuzeye, yaklaşık 10 kilometre sür. [Dülük Antik Kenti](mekan:ChIJFeQnHADjMRURht7r5fqZF_k), Roma askerlerinin Britanya'ya kadar taşıdığı Jupiter Dolichenus kültünün doğduğu yer. Keber Tepe'de kayaya oyulmuş iki Mithras mağarasını, çevredeki oda mezarlarını ve taşın blok blok kesildiği antik ocakları ara. Alan bir müze gibi düzenli değil; tabelalar az, yollar toprak. Mağaraların girişi kapalıysa dışarıdaki nişlere bakarak devam et.\n\nGünü şehre dönüş yolundaki [Dülükbaba Tabiat Parkı](mekan:ChIJh4ErWEfiMRURg0Ls88S0Q24)'nda bitir; Dülük'ten arabayla birkaç dakika. Bu kızılçam ormanı 1950'lerden beri dikildi; kayalıkların arasında Dülük'ün mezarları ormanın içine kadar uzanıyor. Ormanın kenarındaki açıklıklardan hava kararırken şehrin ışıklarının yanışını izle, sonra karanlık basmadan arabaya dön.\n"
+  },
+  "gunler": [
+    {
+      "baslik": "Fırat kıyısından Dülük'e",
+      "duraklar": [
+        {
+          "place_id": "ChIJh-OsLZSGMRUR6IPaLI4d7HA",
+          "osm": "way/692162182",
+          "ad": "Zeugma Antik Kenti",
+          "sure_dk": 90,
+          "sure_gerekcesi": "açık hava ören yeri, yamaç ve akropol; tarihî yer varsayılanı 45 kısa",
+          "kapali_gunler": [
+            "pazartesi"
+          ],
+          "rehber": "zeugma-antik-kenti",
+          "amaclar": [
+            "kultur_tarih",
+            "doga"
+          ]
+        },
+        {
+          "place_id": "ChIJ3VfQN_vnMRURviEfr03FeaY",
+          "osm": "node/11254595954",
+          "ad": "Yesemek Gaziantep Mutfağı",
+          "sure_dk": 75,
+          "sure_gerekcesi": "öğle yemeği; restoran varsayılanı 75",
+          "kapali_gunler": [],
+          "rehber": "yesemek-gaziantep-mutfagi",
+          "amaclar": [
+            "lezzet"
+          ]
+        },
+        {
+          "place_id": "ChIJHZtfDFLhMRURJx1s7F_Se0s",
+          "osm": "node/599901085",
+          "ad": "Gaziantep Arkeoloji Müzesi",
+          "sure_dk": 90,
+          "kapali_gunler": [],
+          "rehber": "gaziantep-arkeoloji-muzesi",
+          "amaclar": [
+            "kultur_tarih",
+            "cocuklu"
+          ]
+        },
+        {
+          "place_id": "ChIJFeQnHADjMRURht7r5fqZF_k",
+          "ad": "Dülük Antik Kenti",
+          "sure_dk": 60,
+          "kapali_gunler": [],
+          "rehber": "duluk-antik-kenti",
+          "amaclar": [
+            "kultur_tarih",
+            "doga"
+          ]
+        },
+        {
+          "place_id": "ChIJh4ErWEfiMRURg0Ls88S0Q24",
+          "ad": "Dülükbaba Tabiat Parkı",
+          "sure_dk": 45,
+          "kapali_gunler": [],
+          "rehber": "dulukbaba-tabiat-parki",
+          "amaclar": [
+            "doga",
+            "yavas",
+            "cocuklu"
+          ]
+        }
+      ]
+    }
+  ],
+  "ek_mekanlar": [
+    {
+      "place_id": "ChIJyaU5d6rmMRURVotkWaeUJ7E",
+      "ad": "Zeugma Mozaik Müzesi"
+    }
+  ],
+  "notlar": {
+    "dogrulanacaklar": [
+      "[Plan · Zeugma Antik Kenti] · kapali_gunler ['pazartesi'] turkishmuseums.com ören yeri sayfasından (kış 08:00–17:00, yaz 08:30–19:00, pazartesi kapalı); sayfa tarihsiz · Gaziantep Müze Müdürlüğü",
+      "[Rehber · Zeugma Antik Kenti] · I. Seleukos, MÖ ~300 kuruluş, Apameia, 'köprü/geçit' adı, MS 3. yy Sasani yıkımı (turkishmuseums, Vikipedi); çelik koruma çatısı (NTV/AA 2018), Muses Evi çatısının 2025'te tamamlandığı (Hürriyet Daily News, 20 Ekim 2025 — 'yakında ziyarete açılacak' deniyor, açıldığı doğrulanmadı); yerinde bırakılmış mozaik parçaları · yerinde, müze müdürlüğü",
+      "[Plan · Gaziantep Arkeoloji Müzesi] · kapali_gunler [] kaynaksız (KTB sayfasında saat yok); OSM 'Gaziantep Müzesi' (node/599901085) opening_hours Mo-Su 08:00-17:00; OSM nesnesinin arkeoloji müzesi olduğu ve Google konumuna 150 m içinde olduğu kuru yüklemede denetlenir · turkishmuseums.com",
+      "[Rehber · Gaziantep Arkeoloji Müzesi] · yeniden açılış: Daily Sabah 14 Ağustos 2026, Hürriyet Daily News 15 Ağustos 2026; 327 ilk kez sergilenen eser, Karkamış Salonu'nda ~3.700 yıllık gülümseyen yüzlü matara, Zeugma garnizonundan Mithras kabartması, lejyon miğfer/zırhı (Hürriyet Daily News 25 Mayıs 2026); kat düzeni (Dülük taş eserleri üst katta, bahçede Geç Hitit stelleri) KTB il müdürlüğü sayfasından, yeni sergi düzeninde değişmiş olabilir · yerinde",
+      "[Rehber · Dülük Antik Kenti] · bugünkü ziyaret düzeni doğrulanamadı: Gazete Ekspres 2020–2021 'bekçisiz, korkuluklar çalınmış'; Hakimiyet 12 Eylül 2025 master planın onaylandığını, Keber Tepe'de karşılama merkezinin planlandığını yazıyor. Mithras mağaralarının girişinin açık olup olmadığı bilinmiyor; yazı ve rehber 'kapalıysa dışarıdan bak' diyor · Gaziantep İl Kültür ve Turizm Müdürlüğü",
+      "[Rehber · Dülük Antik Kenti] · 'Anadolu'da bulunan ilk Mithras tapınağı', 1997–98 kazısı (Gazete Ekspres 2021); Münster Üniversitesi kazıları 2000'lerin başından · doliche.de (OSM'deki site), Vikipedi",
+      "[Rehber · Dülükbaba Tabiat Parkı] · 1950'lerden ağaçlandırma, ~300 hektar (il listesinde 306 ha), kızılçam; parkın içinde Dülük nekropolüne ait kaya mezarları; Dülük Baba türbesi rivayeti · Orman Genel Müdürlüğü / DKMP tabiat parkı sayfası",
+      "[Rehber · Yesemek Gaziantep Mutfağı] · işletmenin ev yemeği/tencere yemeği yaptığı il listesindeki satırdan ('her gün 15–20 çeşit ev yemeği'); yuvalama, analı kızlı ve kuru dolmanın burada çıktığı ve bulgur pilavı kaynaksız; adının Yesemek atölyesinden geldiği varsayım (rehber 'orayla ilgisi yok' diyor) · işletmeyi ara",
+      "[Yazı · genel] · 'toplam yol ~110 km' kuş uçuşu tahmini × yol payı; Gaziantep–Zeugma ~45 dk sürüş · harita",
+      "[Plan · Dülük Antik Kenti] · kimlik sorgusu 3 id döndü (antik kent, 'Dülük / Doliche Antik Kent', taş ocağı); il listesindeki ve ilk sıradaki id kullanıldı · BO'da harita konumu"
+    ],
+    "fotograf_onerileri": [
+      {
+        "ne": "Kapak (3:2): Zeugma Antik Kenti, koruma çatısı altındaki villa ve arkada Birecik Barajı",
+        "altyazi": "Zeugma Antik Kenti",
+        "arama": "Zeugma archaeological site Commons"
+      },
+      {
+        "ne": "Dülük, Keber Tepe'deki kaya oyma Mithras mağarası",
+        "altyazi": "Dülük Antik Kenti",
+        "arama": "Doliche Mithraeum Commons"
+      },
+      {
+        "ne": "Gaziantep Arkeoloji Müzesi bahçesinde Geç Hitit bazalt stel",
+        "altyazi": "Gaziantep Arkeoloji Müzesi",
+        "arama": "Gaziantep Archaeological Museum Commons"
+      }
+    ],
+    "varsayimlar": [
+      "1 gün, cumartesi; tamamı araçla. Zeugma (Nizip, merkeze ~43 km) → şehir merkezinde öğle → Şehitkamil'de müze → kuzeyde Dülük ve Dülükbaba (~10 km)",
+      "Bu gezi Gaziantep'in ikinci gezisi; klasik gezi gaziantepte-iki-gun. İkisi aynı durakları tekrar etmesin diye bu gezi şehir dışındaki ören yerlerine ayrıldı",
+      "İl listesinin ilk 5'inden hiçbiri bu gezide durak değil: 1 Zeugma Mozaik Müzesi (yazıda ek mekân olarak anılıyor), 3 Bakırcılar, 4 İmam Çağdaş, 5 Rumkale ilk gezide durak. 2 Gaziantep Kalesi: içinin ziyarete açıldığı hâlâ doğrulanmadı; Google kaydı bu turda 'geçici olarak kapalı' görünüyor",
+      "Bu gezideki il listesi yerleri: 15 Dülük, 16 Dülükbaba, 17 Zeugma Antik Kenti, 25 Yesemek Gaziantep Mutfağı, 31 Arkeoloji Müzesi",
+      "Gezide olmayanlar: Yesemek Açık Hava Heykel Atölyesi (İslahiye, 60 km, güneybatı; ters yön) ve Karkamış Arkeopark (62 km, sınırda, rehberle) — üçüncü bir Gaziantep gezisine",
+      "Google: 7 kimlik sorgusu (0 $), 10 puan isteği (2'si il listesi düzeltmesi için Kale)",
+      "Dülükbaba konumu Dülük durağından ~5 km (kuru yukle yürüme tahmini 86 dk); yazı arabayla geçişi söylüyor",
+      "OSM 3/5: Dülükbaba Tabiat Parkı merkez 12 km aday listesinde yok; Dülük Antik Kenti OSM alanı (way/466308695) geniş bir poligon, merkezi Google konumundan 2.888 m uzak çıktı (kuru yukle 44880892148), bu yüzden osm boş bırakıldı"
+    ]
+  }
+}

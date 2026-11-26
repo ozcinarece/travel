@@ -1,0 +1,351 @@
+{
+  "il": "Burdur",
+  "slug": "burdur",
+  "guncelleme": "2026-11-25",
+  "oneriler": [
+    {
+      "sira": 1,
+      "ad": "Salda Gölü",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas",
+        "cocuklu"
+      ],
+      "ilce": "Yeşilova",
+      "merkeze_km": 65,
+      "neden": "196 m derin göl; kıyısı Mars Jezero çalışmasına örnek oldu, Beyaz Adalar'da kuma basılmaz.",
+      "place_id": "ChIJEdvpaz3ExhQRi3PZRplBJ7A"
+    },
+    {
+      "sira": 2,
+      "ad": "Sagalassos Antik Kenti",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "doga"
+      ],
+      "ilce": "Ağlasun",
+      "merkeze_km": 48,
+      "neden": "Leuven ekibinin kazdığı dağ kenti; Antoninler Çeşmesi MS 160-180 yıllarından kalma.",
+      "osm": "way/172796805",
+      "place_id": "ChIJVVVVlQhKxBQR8zatY9X5jas"
+    },
+    {
+      "sira": 3,
+      "ad": "Kibyra Antik Kenti",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Gölhisar",
+      "merkeze_km": 110,
+      "neden": "Odeon zeminindeki 1. yy Medusa mozaiği kışın örtülür, nisan'dan itibaren açılır.",
+      "place_id": "ChIJqRBz0a8mwRQRaMV8BLp9I-M"
+    },
+    {
+      "sira": 4,
+      "ad": "Burdur Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "1956'da medrese kütüphanesinde başlayan koleksiyon; Hacılar ve Kuruçay Neolitik eserleri.",
+      "place_id": "ChIJCxd3_i8sxBQRVXwalPiliQ8"
+    },
+    {
+      "sira": 5,
+      "ad": "İnsuyu Mağarası",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 13,
+      "neden": "1966'da açılan ilk turistik mağara; 597 m gezilir, kuyular yüzünden gölleri çekildi.",
+      "osm": "node/294002736",
+      "place_id": "ChIJJWTcn7sxxBQRG43MHdEBHIQ"
+    },
+    {
+      "sira": 6,
+      "ad": "Şişçi Hasan",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 4,
+      "neden": "Sanayideki ocakta 1983'ten beri yalnız dana kıyma ve tuzla Burdur şiş pişiriliyor.",
+      "place_id": "ChIJxYnpLgktxBQR3o3XpctudCY"
+    },
+    {
+      "sira": 7,
+      "ad": "Taşoda Etnografya Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "17-18. yy konağı; kalem işi tavanları ve evi öven alçı yazılarıyla 1978'de onarıldı.",
+      "place_id": "ChIJg7K0si8sxBQRmkQdVI_7qXw"
+    },
+    {
+      "sira": 8,
+      "ad": "Burdur Doğa Tarihi Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "cocuklu",
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "Eski Rum kilisesinde; Elmacık'ta bulunan 5 milyon yıllık fil, gergedan ve at fosilleri.",
+      "place_id": "ChIJ-Zlt2SYsxBQRZ5O_eRs98L0"
+    },
+    {
+      "sira": 9,
+      "ad": "Leblebici şekercisi (Orhan Leblebici)",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "Dedenin 1930'da açtığı dükkânda ceviz, irmik ve şekerle ezme yapılıyor",
+      "place_id": null
+    },
+    {
+      "sira": 10,
+      "ad": "Burdur Gölü",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 8,
+      "neden": "Türkiye'nin 7. büyük gölü 50 yılda %46 küçüldü; eskiden dikkuyruk ördeğinin kışlağıydı.",
+      "place_id": "ChIJj4sw9YYpxBQREMjB7bJr2gg"
+    },
+    {
+      "sira": 11,
+      "ad": "Kremna Antik Kenti",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "doga"
+      ],
+      "ilce": "Bucak",
+      "merkeze_km": 55,
+      "neden": "Aksu vadisine bakan Roma kolonisi; MS 276'da Lydius'un üssü oldu, halkı Çamlık'a indi.",
+      "place_id": "ChIJRbDbaRVFxBQRcSLScEGaWXg"
+    },
+    {
+      "sira": 12,
+      "ad": "Burdur Ulu Camii",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "Hamitoğlu Dündar Bey'in 1300'de yaptırdığı cami; kent onun çevresinde büyüdü.",
+      "osm": "way/302373548",
+      "place_id": "ChIJb6NBji8sxBQRlEUy54D8paw"
+    },
+    {
+      "sira": 13,
+      "ad": "Bakibey (Koca Oda) Konağı",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "Kayıtlara göre 1830 yapımı konak; 1988'de Bakanlık alıp onardı, köşk tavanı bezemeli.",
+      "place_id": "ChIJ0-0RNy8sxBQR8xEmEoqwC-8"
+    },
+    {
+      "sira": 14,
+      "ad": "Susuz Han",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Bucak",
+      "merkeze_km": 50,
+      "neden": "II. Keyhüsrev döneminde (1237-46) yapılan han; taç kapıda melek ve ejder kabartması.",
+      "place_id": "ChIJU59R2jNrxBQRphTmpQqB3fs"
+    },
+    {
+      "sira": 15,
+      "ad": "Salda Kayak Merkezi",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Yeşilova",
+      "merkeze_km": 77,
+      "neden": "2012'de açılan merkezde 950 m telesiyej, 1.200 m pist var; tepeden Salda Gölü görünüyor.",
+      "place_id": "ChIJy-oGi6jHxhQRGAyg4HLw4jw"
+    },
+    {
+      "sira": 16,
+      "ad": "Kavurmacı Osman (Gölhisar kavurması)",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Gölhisar",
+      "merkeze_km": 110,
+      "neden": "Yaprak kesilen et kızgın sacda 7 saniyede pişiyor; Gölhisar kavurması 2023'te tescillendi.",
+      "place_id": "ChIJE18lZn4lwRQRe3Ykkuut-aU"
+    },
+    {
+      "sira": 17,
+      "ad": "Şişçi Mücahit",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 3,
+      "neden": "Burdur şişçilerinin toplandığı Küçük Sanayi Sitesi'nde, 2. Sokak'taki şiş ocağı",
+      "place_id": "ChIJKeUl5TUsxBQR0lQRzqbgpJw"
+    },
+    {
+      "sira": 18,
+      "ad": "İncir Han",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Bucak",
+      "merkeze_km": 42,
+      "neden": "1239'da II. Keyhüsrev'in yaptırdığı han; kubbesi çökmüş, kapalı salonu hâlâ ayakta.",
+      "place_id": "ChIJQ-WyNalAxBQR4dXWO0467DA"
+    },
+    {
+      "sira": 19,
+      "ad": "Tuğra Şekerleme (Avşar Ceviz Ezmesi)",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "Cumhuriyet Meydanı'ndaki İl Özel İdaresi binasında yöresel ceviz ezmesi satılan dükkân.",
+      "place_id": null
+    },
+    {
+      "sira": 20,
+      "ad": "Süreyya Ceviz Ezmesi",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 2,
+      "neden": "2003'te kurulan üretici; ceviz, irmik ve şekerle 2009 tescilli Burdur ezmesini yapıyor.",
+      "place_id": null
+    },
+    {
+      "sira": 21,
+      "ad": "Memiş Bilgin'in kahvehanesi (çörekotu kahvesi)",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet",
+        "yavas"
+      ],
+      "ilce": "Gölhisar",
+      "merkeze_km": 110,
+      "neden": "1975'te açılan kahvehanede kavrulmuş çörekotu ve nohuttan kahve pişiriliyor.",
+      "place_id": null
+    },
+    {
+      "sira": 22,
+      "ad": "Karanlıkdere Kanyonu",
+      "kategori": "doga",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Altınyayla",
+      "merkeze_km": 130,
+      "neden": "Ballık köyünden başlayan 6 km'lik kanyon; içinde Erken Bizans dönemi yapı kalıntıları var.",
+      "place_id": "ChIJsWiAakcBwRQREZkt5ELSMfs"
+    },
+    {
+      "sira": 23,
+      "ad": "Karacaören Barajı",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Bucak",
+      "merkeze_km": 60,
+      "neden": "Baraj gölünde Valilik 2026'da ikinci kez kano yarışlı su sporları şenliği düzenledi.",
+      "place_id": "ChIJdWK6I7ZZxBQRR3SD9goVOQ4"
+    },
+    {
+      "sira": 24,
+      "ad": "Remzi Tür'ün ceviz ezmesi dükkânı",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "Uzun Çarşı'da baba-oğul Remzi ve Alper Tür'ün ceviz ezmesi yapıp sattığı dükkân.",
+      "place_id": null
+    },
+    {
+      "sira": 25,
+      "ad": "Yarışlı Gölü",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Yeşilova",
+      "merkeze_km": 45,
+      "neden": "915 m'deki hafif tuzlu göl; kışın 1.736 angıtın konakladığı sayılmış.",
+      "place_id": "ChIJc-vibP6XxhQR6Vd9h_njGMY"
+    },
+    {
+      "sira": 26,
+      "ad": "Karataş Gölü",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Tefenni",
+      "merkeze_km": 75,
+      "neden": "1.053 m'deki tatlı su gölü; sazlıkları angıt ve dikkuyruk için kışlak sayılıyor.",
+      "place_id": "ChIJFYHsKyCwxhQRNIy4qWlDIiY"
+    },
+    {
+      "sira": 27,
+      "ad": "Hacılar Höyüğü",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 25,
+      "neden": "Mellaart'ın 1957-60'ta kazdığı Neolitik köy; boyalı çanakları ünlü, alanda az kalıntı var.",
+      "osm": "way/291656590",
+      "place_id": "ChIJj3I4eMOexhQR7f9CaVUTb1Q"
+    }
+  ]
+}

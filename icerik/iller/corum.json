@@ -1,0 +1,459 @@
+{
+  "il": "Çorum",
+  "slug": "corum",
+  "guncelleme": "2026-11-21",
+  "oneriler": [
+    {
+      "sira": 1,
+      "ad": "Hattuşa",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Boğazkale",
+      "merkeze_km": 82,
+      "neden": "Hitit başkentinin 6 km'lik surları; Aslanlı Kapı ve 71 m'lik Yerkapı tünelinden yürünür"
+    },
+    {
+      "sira": 2,
+      "ad": "Yazılıkaya Açık Hava Tapınağı",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Boğazkale",
+      "merkeze_km": 84,
+      "neden": "Hattuşa'nın açık hava tapınağı; kayada 12 yeraltı tanrısı ve IV. Tuthaliya kabartması"
+    },
+    {
+      "sira": 3,
+      "ad": "Çorum leblebisi",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Nohut meşe ateşinde kavrulup dinlendirilir, bu üç kez tekrarlanır; 2002'den beri tescilli"
+    },
+    {
+      "sira": 4,
+      "ad": "Alacahöyük Ören Yeri ve Müzesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Alaca",
+      "merkeze_km": 50,
+      "neden": "Sfenksli Kapı'nın Hitit kabartmaları ve MÖ 2500'lük kral mezarları; müzesi ören yerinde",
+      "place_id": "ChIJk9p-eNPlgEARkLj1ipMpDSI"
+    },
+    {
+      "sira": 5,
+      "ad": "Çorum Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "Çivi yazılı Hitit kılıcı, Hüseyindede vazoları; leblebici ve bakırcı dükkânı canlandırması",
+      "osm": "way/100647354",
+      "place_id": "ChIJv01Hxrsqh0AR902Am5RewXU"
+    },
+    {
+      "sira": 6,
+      "ad": "İncesu Kanyonu",
+      "kategori": "doga",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Ortaköy",
+      "merkeze_km": 71,
+      "neden": "Çekerek'in oyduğu 12 km'lik kanyon; 1,7 km'lik platform Kibele kabartmasına uzanır",
+      "place_id": "ChIJ5SB9EiSwgEAR7plG9zDFtkQ"
+    },
+    {
+      "sira": 7,
+      "ad": "İskilip dolması",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "İskilip",
+      "merkeze_km": 56,
+      "neden": "Osmancık pirinci ve et, ağzı hamurla kapalı bakır kazanda pişer, lengerde gelir; tescilli"
+    },
+    {
+      "sira": 8,
+      "ad": "Boğazköy Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Boğazkale",
+      "merkeze_km": 82,
+      "neden": "Berlin'den 2011'de dönen Boğazköy sfenksi ve Hattuşa'dan çıkan tabletler burada",
+      "place_id": "ChIJMXzpkb4qh0ARZzzC1J47TVM"
+    },
+    {
+      "sira": 9,
+      "ad": "Şapinuva Ören Yeri",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Ortaköy",
+      "merkeze_km": 53,
+      "neden": "Ortaköy'de 4.000'e yakın tablet çıkan Hitit kenti; kazı 2026 yazında da sürdü",
+      "place_id": "ChIJlRyhJES6gEARDVsungkFq_Q"
+    },
+    {
+      "sira": 10,
+      "ad": "Çorum Saat Kulesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "gece"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "II. Abdülhamid döneminde 1894'te yapılan 27,5 m'lik kule; Velipaşa Hanı ile aynı meydanda",
+      "place_id": "ChIJ4TVcMJgqh0ARpseKjkkjOPw"
+    },
+    {
+      "sira": 11,
+      "ad": "Çorum Şehir Müzesi (Velipaşa Hanı)",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "1865 yapımı ahşap Velipaşa Hanı'nda; 15 odada Çorum düğünü, mutfağı ve esnafı canlanır",
+      "osm": "way/1367377749"
+    },
+    {
+      "sira": 12,
+      "ad": "Çorum Ulu Camii",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Selçuklu temelli cami; Mimar Sinan onardı, 1306 tarihli abanoz minberi korunuyor",
+      "osm": "way/100653142",
+      "place_id": "ChIJqRJdB5kqh0ARrRiI7E2kDVc"
+    },
+    {
+      "sira": 13,
+      "ad": "Çorum baklavası",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Has türü en az 50 katlı; düğün sofrası 'Çorum beşlisi'nin tatlısı, 2025'te tescillendi"
+    },
+    {
+      "sira": 14,
+      "ad": "Kapılıkaya Kaya Mezarı",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Laçin",
+      "merkeze_km": 27,
+      "neden": "MÖ 2. yüzyıl kaya mezarı; kapısında 'İKEZİOS' yazar, basamaklarla önüne çıkılır",
+      "osm": "node/8406108550",
+      "place_id": "ChIJq1gzFJLEhkARtQ5lPL4aOUw"
+    },
+    {
+      "sira": 15,
+      "ad": "Çatak Tabiat Parkı",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 22,
+      "neden": "1984'ten beri korunan karaçam ormanı; mayıs–ekim arası yürüyüş ve piknik yapılır"
+    },
+    {
+      "sira": 16,
+      "ad": "Koyunbaba Köprüsü",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Osmancık",
+      "merkeze_km": 60,
+      "neden": "II. Bayezid'in 1484–1489'da Kızılırmak üstüne yaptırdığı 250 m'lik, 19 kemerli köprü",
+      "place_id": "ChIJJztr6i-RhkAR7WH9IJQ0dow"
+    },
+    {
+      "sira": 17,
+      "ad": "Kandiber Kalesi (Osmancık Kalesi)",
+      "kategori": "manzara",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Osmancık",
+      "merkeze_km": 60,
+      "neden": "Kızılırmak kıyısındaki kayalık; 272 taş basamakla Roma kaya mezarlarına ve surlara çıkılır",
+      "place_id": "ChIJQTm-9C-RhkARt3JSOLjJZLA"
+    },
+    {
+      "sira": 18,
+      "ad": "İskilip Kalesi ve Kaya Mezarları",
+      "kategori": "manzara",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "İskilip",
+      "merkeze_km": 56,
+      "neden": "100 m'lik kayanın tepesindeki kale; yamacında aslan figürlü kaya mezarları var"
+    },
+    {
+      "sira": 19,
+      "ad": "Hitit Yolu yürüyüşü",
+      "kategori": "aktivite",
+      "amaclar": [
+        "doga",
+        "kultur_tarih"
+      ],
+      "ilce": "Boğazkale",
+      "merkeze_km": 82,
+      "neden": "İşaretli Hitit Yolu'nun İbikçam–Boğazkale–Hattuşa etabı 9 km; tek günde yürünür"
+    },
+    {
+      "sira": 20,
+      "ad": "Çorum kuru mantısı",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Kıymalı 6–8 kulaklı mantı bakır tepside kızartılır, sarımsaklı yoğurtla gelir; tescilli"
+    },
+    {
+      "sira": 21,
+      "ad": "Elvan Çelebi Zaviyesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Mecitözü",
+      "merkeze_km": 30,
+      "neden": "Âşık Paşa'nın oğlu Elvan Çelebi'nin zaviyesi; dört eyvanlı avlunun ortasında şadırvan"
+    },
+    {
+      "sira": 22,
+      "ad": "Çorum şekerlemesi",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Tereyağlı hamur kalıpsız, bıçakla elde şekillenir; nişanda kız evinden gider, tescilli"
+    },
+    {
+      "sira": 23,
+      "ad": "Paşa Hamamı",
+      "kategori": "aktivite",
+      "amaclar": [
+        "yavas"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "1487'de Taceddin İbrahim Paşa'nın yaptırdığı Osmanlı hamamı; Saat Kulesi'ne yakın",
+      "place_id": "ChIJZy4Z-Zgqh0ARMFnoYWfYeig"
+    },
+    {
+      "sira": 24,
+      "ad": "Çorum simidi",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Halka hamur pekmezli suya batırılır, bol susamlı ve gevrek; ramazanda sahura dek satılır"
+    },
+    {
+      "sira": 25,
+      "ad": "Alaca hingali",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Alaca",
+      "merkeze_km": 50,
+      "neden": "Sekiz kulaklı kıymalı hamur haşlanır; tereyağı ve sarımsaklı yoğurtla yenir, tescilli"
+    },
+    {
+      "sira": 26,
+      "ad": "Çorum su böreği",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Yalnız kıymalı harçla yapılır; haşlanan yufkalar içte yumuşak kalır, 2026'da tescillendi"
+    },
+    {
+      "sira": 27,
+      "ad": "Hıdırlık Camii ve Türbeleri",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "Süheyb-i Rumi ve Ubeyd Gazi'nin türbeleri; cami II. Abdülhamid döneminde yenilendi",
+      "place_id": "ChIJn1AKWqEqh0AR86jXjGkQeXE"
+    },
+    {
+      "sira": 28,
+      "ad": "Abdullah Yaylası",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Kargı",
+      "merkeze_km": 114,
+      "neden": "Kargı'da ilin en yüksek dağı Köse Dağı'nın (2.050 m) yamacındaki yayla",
+      "place_id": "ChIJtS67jpUYhEAR134111sJUjw"
+    },
+    {
+      "sira": 29,
+      "ad": "Alaca yanıç böreği",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Alaca",
+      "merkeze_km": 50,
+      "neden": "Mayasız hamur peynir, kıyma ya da ıspanakla doldurulup sacda çevrilerek pişer; tescilli"
+    },
+    {
+      "sira": 30,
+      "ad": "Osmancık kaypak yemeği",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Osmancık",
+      "merkeze_km": 60,
+      "neden": "İnce hamur muska gibi katlanıp haşlanır; çökelek, ceviz ve tereyağıyla gelir, tescilli"
+    },
+    {
+      "sira": 31,
+      "ad": "Osmancık malak tatlısı",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Osmancık",
+      "merkeze_km": 60,
+      "neden": "Tereyağlı hamur şerbet yerine üzüm pekmeziyle tatlanır, cevizle yenir; 2025'te tescillendi"
+    },
+    {
+      "sira": 32,
+      "ad": "Çorumminia Minyatür Parkı",
+      "kategori": "aktivite",
+      "amaclar": [
+        "cocuklu"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 3,
+      "neden": "Millet Bahçesi yanında 26 anıt maketi; çevresi Hitit surlarını andıran duvarla çevrili",
+      "place_id": "ChIJcyV_XGgrh0ARoqJymm4qBU4"
+    },
+    {
+      "sira": 33,
+      "ad": "Çorum Millet Bahçesi",
+      "kategori": "aktivite",
+      "amaclar": [
+        "cocuklu",
+        "yavas"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 3,
+      "neden": "212 dönümlük park; bisiklet ve koşu yolları, arıtma göletinde pedallı tekne"
+    },
+    {
+      "sira": 34,
+      "ad": "Karayanık Şelalesi",
+      "kategori": "doga",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "İskilip",
+      "merkeze_km": 75,
+      "neden": "Sorkun köyünde Fındıklı Deresi'nin beş basamaklı şelalesi; köyden 7 km'lik rota var"
+    },
+    {
+      "sira": 35,
+      "ad": "Gölünyazı Sulak Alanı",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 20,
+      "neden": "Laçin yolunda şehre 20 km; yaban hayvanlarına sığınak olan sulak alan",
+      "place_id": "ChIJe8SZCe3EhkAROmMkE7WKY8M"
+    },
+    {
+      "sira": 36,
+      "ad": "Osmancık çeltik tarlaları",
+      "kategori": "manzara",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Osmancık",
+      "merkeze_km": 60,
+      "neden": "Kızılırmak boyunca uzanan çeltik tarlaları; İskilip dolmasının pirinci buradan gelir"
+    },
+    {
+      "sira": 37,
+      "ad": "İskilip tepsisi",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "İskilip",
+      "merkeze_km": 56,
+      "neden": "Kuzu eti, domates ve biber taş tabanlı fırında iki saat karıştırılarak pişer; tescilli"
+    },
+    {
+      "sira": 38,
+      "ad": "Elmabeli Yaylası",
+      "kategori": "doga",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "İskilip",
+      "merkeze_km": 69,
+      "neden": "İskilip'e 13 km uzaklıkta, çam ormanı içindeki yayla; yazın İskilip'in serinlik yeri",
+      "place_id": "ChIJLXDviHyyhkARI2oL8K5OEIU"
+    }
+  ]
+}

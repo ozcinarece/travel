@@ -1,0 +1,404 @@
+{
+  "il": "Bartın",
+  "slug": "bartin",
+  "guncelleme": "2026-11-25",
+  "oneriler": [
+    {
+      "sira": 1,
+      "ad": "Amasra Kalesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Amasra",
+      "merkeze_km": 13,
+      "neden": "Duvarların çoğu 14. yy Ceneviz yapımı; Zindan ve Sormagir kısımları iki limana bakar",
+      "osm": "way/1248905607",
+      "place_id": "ChIJWSuhA9ELm0AR5rqjUf75GJU"
+    },
+    {
+      "sira": 2,
+      "ad": "Güzelcehisar Lav Sütunları",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 13,
+      "neden": "Yaklaşık 80 milyon yıllık beşgen bazalt sütunlar; köyden ahşap yolla seyir terasına",
+      "osm": "way/1303441660",
+      "place_id": "ChIJTZeXaU12m0ARQiiaKnXcwCY"
+    },
+    {
+      "sira": 3,
+      "ad": "Kemere Köprüsü",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Amasra",
+      "merkeze_km": 13,
+      "neden": "Tek kemerli taş köprü, 9. yy Bizans; Kaleiçi'ne geçişi sağlar",
+      "osm": "way/108293247",
+      "place_id": "ChIJ9Q7As-cLm0ARGH6vezd9us8"
+    },
+    {
+      "sira": 4,
+      "ad": "Amasra Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Amasra",
+      "merkeze_km": 13,
+      "neden": "1884'te bahriye okulu diye başlanan binada Helenistik'ten Ceneviz'e eserler, ahşap kaplar",
+      "osm": "way/370875212",
+      "place_id": "ChIJh7Wn3ugLm0ARdsmzW2pOi7I"
+    },
+    {
+      "sira": 5,
+      "ad": "Canlı Balık Restaurant (Mustafa Amca'nın Yeri)",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet",
+        "gece"
+      ],
+      "ilce": "Amasra",
+      "merkeze_km": 13,
+      "neden": "1945'ten beri Küçük Liman'da; koruk ekşili Amasra salatası ve mevsim balığı",
+      "osm": "node/5014382856",
+      "place_id": "ChIJmbSeGOYLm0ARVgxZkgsHff4"
+    },
+    {
+      "sira": 6,
+      "ad": "Bakacak Seyir Terası",
+      "kategori": "manzara",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Amasra",
+      "merkeze_km": 12,
+      "neden": "Bartın–Amasra yolunda; Amasra'nın iki limanı ve yarımadası tek karede görülür",
+      "place_id": "ChIJ5YUAG5oLm0AR-B52Zk40VtA"
+    },
+    {
+      "sira": 7,
+      "ad": "Çekiciler Çarşısı",
+      "kategori": "carsi",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Amasra",
+      "merkeze_km": 13,
+      "neden": "Fındık ve ceviz ağacından tornada çekilmiş kaşık, kepçe ve salata takımları satılır",
+      "place_id": "ChIJFznfbOYLm0AR7JFfVJm_08k"
+    },
+    {
+      "sira": 8,
+      "ad": "Fatih Camii (Kilise Camii)",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Amasra",
+      "merkeze_km": 13,
+      "neden": "Kale içindeki Bizans kilisesi; Osmanlı fethinden sonra camiye çevrildi",
+      "osm": "way/370930881",
+      "place_id": "ChIJddAdReYLm0ARb942VRVxXTg"
+    },
+    {
+      "sira": 9,
+      "ad": "Küre Dağları Milli Parkı (Bartın kesimi)",
+      "kategori": "doga",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Ulus",
+      "merkeze_km": 34,
+      "neden": "2000'de ilan edildi, PAN Parks sertifikası aldı; Bartın'da Ulus'tan girilir",
+      "place_id": "ChIJXxrKBTwFm0ARVKktjwtuenA"
+    },
+    {
+      "sira": 10,
+      "ad": "Bartın Tarihi Ahşap Evleri",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Tanzimat sonrası ahşap konaklar; 1910 yapımı Settarlar Konağı gibi örnekler restore edildi"
+    },
+    {
+      "sira": 11,
+      "ad": "Kuşkayası Yol Anıtı",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Amasra",
+      "merkeze_km": 10,
+      "neden": "MS 41–54 Claudius dönemi; kayaya oyulmuş başsız heykel, kartal ve iki dilli yazıt",
+      "osm": "node/5014697485",
+      "place_id": "ChIJ0886QnsLm0ARm68f8fThyIM"
+    },
+    {
+      "sira": 12,
+      "ad": "İnkumu Plajı",
+      "kategori": "doga",
+      "amaclar": [
+        "cocuklu",
+        "doga"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 10,
+      "neden": "3 km kumsal; Mavi Bayraklı kesimleri var, akıntıya karşı can kurtaran görev yapıyor",
+      "place_id": "ChIJEWJjhtp1m0ARF26XJtjANSs"
+    },
+    {
+      "sira": 13,
+      "ad": "Galla Pazarı (Kadınlar Pazarı)",
+      "kategori": "carsi",
+      "amaclar": [
+        "lezzet",
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Köy kadınları peynir, pekmez, tarhana getirir; belediye 1905'te düzenledi",
+      "place_id": "ChIJxxAagMllm0ARZAd2ycFg-MU"
+    },
+    {
+      "sira": 14,
+      "ad": "Kurucaşile Ahşap Tekne Atölyeleri",
+      "kategori": "carsi",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Kurucaşile",
+      "merkeze_km": 36,
+      "neden": "Ovatekkeönü ve Kapısuyu'ndaki atölyelerde kestane ve meşeden tekne yapılıyor"
+    },
+    {
+      "sira": 15,
+      "ad": "Tarlaağzı Koyu",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Amasra",
+      "merkeze_km": 11,
+      "neden": "Amasra'ya 8 km; ormanla çevrili yaklaşık 300 m'lik kumsal ve küçük balıkçı barınağı",
+      "place_id": "ChIJA8PTlmoLm0ARjg1PM1hc7rM"
+    },
+    {
+      "sira": 16,
+      "ad": "Ulukaya Şelalesi ve Drahna Kanyonu",
+      "kategori": "doga",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Ulus",
+      "merkeze_km": 36,
+      "neden": "1 km'lik kanyonun sonunda kaya oyuğundan ~25 m düşer; 1998'den doğal sit alanı",
+      "osm": "node/2313850765",
+      "place_id": "ChIJe7vx15Q9m0ARPpiNaonUSts"
+    },
+    {
+      "sira": 17,
+      "ad": "Yukarı Alpı Seyir Terası",
+      "kategori": "manzara",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Ulus",
+      "merkeze_km": 33,
+      "neden": "Üç katlı terastan Drahna Vadisi'ne ve Ulus ormanlarına bakış",
+      "place_id": "ChIJucaTo48Vm0AReebEyyCWHTI"
+    },
+    {
+      "sira": 18,
+      "ad": "Kaf Konak Rukiye Restoran",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet",
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "1910 yapımı Settarlar Konağı'nda; ailenin bayram sofrası yemekleri",
+      "place_id": "ChIJVYuFTDBym0ARam9KBCC6uHg"
+    },
+    {
+      "sira": 19,
+      "ad": "Çınar Balık Restaurant",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Amasra",
+      "merkeze_km": 13,
+      "neden": "Küçük Liman girişinde çınar ağacının altında; karides güveci ve Amasra salatası",
+      "osm": "way/1562314541",
+      "place_id": "ChIJzeQ7UzkLm0ARj9ZS8GXIpP8"
+    },
+    {
+      "sira": 20,
+      "ad": "Amasra Sofrası",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet",
+        "cocuklu"
+      ],
+      "ilce": "Amasra",
+      "merkeze_km": 13,
+      "neden": "Pirinçli Bartın mantısı, pumpum çorbası, yumurtalı ısput ve Amasra pidesi",
+      "osm": "node/3745553877",
+      "place_id": "ChIJDQ60_eULm0ARtrkiRyudzTQ"
+    },
+    {
+      "sira": 21,
+      "ad": "Bartın ağda tatlısı",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "neden": "2020'de coğrafi işaret aldı; çöven kökü ve şekerle çırpılan beyaz, macun kıvamlı tatlı"
+    },
+    {
+      "sira": 22,
+      "ad": "Bartın beyaz baklavası",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Yalnız Bartın'da yapılan açık renkli baklava; 2020'de coğrafi işaret aldı"
+    },
+    {
+      "sira": 23,
+      "ad": "Ağlayan Ağaç Çay Bahçesi",
+      "kategori": "manzara",
+      "amaclar": [
+        "yavas"
+      ],
+      "ilce": "Amasra",
+      "merkeze_km": 14,
+      "neden": "Boztepe'nin kuzey ucunda yar başında banklar; karşıda Tavşan Adası",
+      "place_id": "ChIJ_amgUOcLm0ARnaUizxFCSbw"
+    },
+    {
+      "sira": 24,
+      "ad": "Bartın Kent Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Kaşka'dan bugüne kent tarihi; Galla Pazarı, gemi yapımı ve mutfak kültürü bölümleri",
+      "osm": "way/1151210000",
+      "place_id": "ChIJb3sowzNym0ARCOftl5So-Bk"
+    },
+    {
+      "sira": 25,
+      "ad": "Kemerköprü",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "1872 yapımı, iki kemerli taş köprü; harcına yumurta akı katıldığı anlatılır",
+      "place_id": "ChIJ3VdapZpzm0ARc1nFNz1LWAo"
+    },
+    {
+      "sira": 26,
+      "ad": "Kemal Samancıoğlu Etnografya Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Eski belediye başkanının bağışladığı evi; 2008'de açıldı, 700'den fazla eşya",
+      "osm": "node/12652320451",
+      "place_id": "ChIJV1fqIDdym0ARPsCSUa0a8s0"
+    },
+    {
+      "sira": 27,
+      "ad": "Türkan Hanımın Yeri",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet",
+        "cocuklu"
+      ],
+      "ilce": "Amasra",
+      "merkeze_km": 13,
+      "neden": "Ev usulü çöven ekmeği, kara lahana sarması, mısır çorbası ve ballı yoğurt",
+      "osm": "node/4614212130",
+      "place_id": "ChIJcxHX3ugLm0AR1146d2HxAqA"
+    },
+    {
+      "sira": 28,
+      "ad": "Kocagöz Konağı (Ulus Ziyaretçi Merkezi)",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Ulus",
+      "merkeze_km": 26,
+      "neden": "Küre Dağları Milli Parkı'na ayrılan konak; etnografya, el sanatları ve park bilgisi",
+      "place_id": "ChIJ35YgamlAm0ARcm-T9d8gqRc"
+    },
+    {
+      "sira": 29,
+      "ad": "Turgut Reis Cafe",
+      "kategori": "yemek",
+      "amaclar": [
+        "yavas"
+      ],
+      "ilce": "Amasra",
+      "merkeze_km": 13,
+      "neden": "Kaleiçi'nde denize bakan bahçe; bazlamayla gelen serpme kahvaltı",
+      "place_id": "ChIJaVZox-ULm0ARMZwVmjhWdeU"
+    },
+    {
+      "sira": 30,
+      "ad": "Bartın Tarihi Çarşısı",
+      "kategori": "carsi",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "1898 yangınından sonra Mühendis Ali Bey'in planıyla yeniden kurulan çarşı",
+      "place_id": "ChIJETbNnTRym0AR_6osDi7L2sc"
+    },
+    {
+      "sira": 31,
+      "ad": "Marina Cafe",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "yavas"
+      ],
+      "ilce": "Amasra",
+      "merkeze_km": 13,
+      "neden": "Büyük Liman kıyısında kahve, tatlı ve yöresel tavuklu börek",
+      "osm": "node/13833936701",
+      "place_id": "ChIJXYXkt-ULm0ARBeLgau4hyXs"
+    }
+  ]
+}

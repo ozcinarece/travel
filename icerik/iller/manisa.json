@@ -1,0 +1,434 @@
+{
+  "il": "Manisa",
+  "slug": "manisa",
+  "guncelleme": "2026-11-24",
+  "oneriler": [
+    {
+      "sira": 1,
+      "ad": "Sardes Antik Kenti",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Salihli",
+      "merkeze_km": 65,
+      "neden": "Lidya'nın başkenti; Artemis Tapınağı'nın sütunları ve 1962'de bulunan dev sinagog",
+      "place_id": "ChIJo6L7LUdRuBQRlgZXLDcbm60"
+    },
+    {
+      "sira": 2,
+      "ad": "Muradiye Külliyesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Şehzadeler",
+      "merkeze_km": 0,
+      "neden": "III. Murad için 1583'te başlandı; tasarımı Sinan'a atfedilir, çinileri ve ahşap işleri",
+      "place_id": "ChIJQ_Zby0GcuRQRnfN5iYVRRN8"
+    },
+    {
+      "sira": 3,
+      "ad": "Mesir macunu",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Şehzadeler",
+      "merkeze_km": 0,
+      "neden": "Onlarca baharatla karılan macun AB'de tescilli; çarşıdaki aktarlarda taze bulunur"
+    },
+    {
+      "sira": 4,
+      "ad": "Manisa Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Yunusemre",
+      "merkeze_km": 3,
+      "neden": "2025'te yeni binasında açıldı; Lidya kartal kabartmaları ve 2,6 m'lik Hestia heykeli",
+      "place_id": "ChIJDdnFEwCduRQRO1a5oIhsyks"
+    },
+    {
+      "sira": 5,
+      "ad": "Kula Divlit Volkan Parkı",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Kula",
+      "merkeze_km": 135,
+      "neden": "Kula-Salihli UNESCO Jeoparkı'nın kalbi; genç volkan konisi ve çevresindeki lav akıntıları"
+    },
+    {
+      "sira": 6,
+      "ad": "Spil Dağı Milli Parkı",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Şehzadeler",
+      "merkeze_km": 20,
+      "neden": "Şehrin üstündeki dağ; yayla yolundan Gediz ovasını görür, baharda yaban lalesi bulursun",
+      "place_id": "ChIJCf7lqwJ2uRQRwqigd_N9AIQ"
+    },
+    {
+      "sira": 7,
+      "ad": "Manisa kebabı",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Şehzadeler",
+      "merkeze_km": 0,
+      "neden": "Pide dilimlerinin üstünde ince şiş köfte, közlenmiş domates, tereyağı ve yoğurt"
+    },
+    {
+      "sira": 8,
+      "ad": "Aigai Antik Kenti",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "doga"
+      ],
+      "ilce": "Yunusemre",
+      "merkeze_km": 40,
+      "neden": "Yunt Dağı'nda 12 Aiol kentinden biri; tiyatro, stadyum ve Demeter Tapınağı, giriş ücretsiz",
+      "place_id": "ChIJqdM9o-2JuRQRaQOlO_OdLgc"
+    },
+    {
+      "sira": 9,
+      "ad": "Kula evleri",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Kula",
+      "merkeze_km": 135,
+      "neden": "Cumbalı, ahşap çıkmalı Osmanlı evleri; dar sokaklarda yürüyerek gezilen eski Kula"
+    },
+    {
+      "sira": 10,
+      "ad": "Sultan Camii",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Şehzadeler",
+      "merkeze_km": 0,
+      "neden": "Acem Ali'nin 1522 tarihli külliyesi; mesir her bahar buranın kubbesinden saçılır",
+      "place_id": "ChIJAWyr6EGcuRQR7TQUfO3k4R8"
+    },
+    {
+      "sira": 11,
+      "ad": "Kuladokya peri bacaları",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Kula",
+      "merkeze_km": 130,
+      "neden": "Volkan külünün aşınmasıyla şapka taşları kalan peri bacaları; jeopark rotası üstünde"
+    },
+    {
+      "sira": 12,
+      "ad": "Akhisar köftesi",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Akhisar",
+      "merkeze_km": 50,
+      "neden": "Izgarada pişen ince uzun köfte; Akhisar'a gelince öğle yemeğini köftecide ye"
+    },
+    {
+      "sira": 13,
+      "ad": "Ulu Cami ve Külliyesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Şehzadeler",
+      "merkeze_km": 0,
+      "neden": "İshak Çelebi'nin 1376 külliyesi; beylik dönemi planı ve oyma ahşap işçiliği",
+      "place_id": "ChIJTzKUWECcuRQRgrPR_aTxans"
+    },
+    {
+      "sira": 14,
+      "ad": "Thyateira (Tepe Mezarlığı Ören Yeri)",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Akhisar",
+      "merkeze_km": 50,
+      "neden": "İncil'deki yedi kiliseden Thyateira'nın kalıntıları, Akhisar'ın tam ortasında",
+      "place_id": "ChIJPekihgPSuRQR3xgaYSFivm0"
+    },
+    {
+      "sira": 15,
+      "ad": "Philadelphia (St. Jean Kilisesi)",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Alaşehir",
+      "merkeze_km": 105,
+      "neden": "Yedi kiliseden Philadelphia; Alaşehir'in ortasında yükselen dev tuğla ayaklar",
+      "place_id": "ChIJv2JgBGR7uBQR2sfnsIVnvzM"
+    },
+    {
+      "sira": 16,
+      "ad": "Bintepeler Lidya Tümülüsleri",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "doga"
+      ],
+      "ilce": "Salihli",
+      "merkeze_km": 60,
+      "neden": "Marmara Gölü kıyısında Lidya krallarının tümülüs tepeleri; en büyüğü Alyattes'e ait",
+      "place_id": "ChIJTeWn1WhNuBQRc9MSo6Cu-aE"
+    },
+    {
+      "sira": 17,
+      "ad": "Salihli odun köftesi",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Salihli",
+      "merkeze_km": 75,
+      "neden": "Salihli'ye özgü, odun parçası biçiminde köfte; Ticaret Odası'nın tescilli ürünü"
+    },
+    {
+      "sira": 18,
+      "ad": "Niobe (Ağlayan Kaya)",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "kultur_tarih"
+      ],
+      "ilce": "Şehzadeler",
+      "merkeze_km": 5,
+      "neden": "Spil eteğinde ağlayan kadına benzetilen kaya; mitolojideki Niobe'yle anılır",
+      "place_id": "ChIJH6wZV0ScuRQRc2innfEPvBM"
+    },
+    {
+      "sira": 19,
+      "ad": "Mesir Macunu Festivali",
+      "kategori": "aktivite",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Şehzadeler",
+      "merkeze_km": 0,
+      "neden": "Nevruz günlerinde Sultan Camii'nden kâğıda sarılı mesir saçılır; meydan kalabalık olur"
+    },
+    {
+      "sira": 20,
+      "ad": "Kula leblebisi",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Kula",
+      "merkeze_km": 135,
+      "neden": "Yüz yılı aşkın kavurma geleneği; 2019'dan beri coğrafi işaretli, çarşıda taze alınır"
+    },
+    {
+      "sira": 21,
+      "ad": "Akhisar Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Akhisar",
+      "merkeze_km": 50,
+      "neden": "1932'lik okul binasında; Yortan kapları ve Gökçeler tümülüsünün altın, gümüş eserleri",
+      "place_id": "ChIJ85i0fwTSuRQRArAfNFzWg9g"
+    },
+    {
+      "sira": 22,
+      "ad": "Adala Kanyonu",
+      "kategori": "doga",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Salihli",
+      "merkeze_km": 90,
+      "neden": "Gediz'in volkanik kayada açtığı kanyon; jeoparkın Salihli tarafındaki durağı"
+    },
+    {
+      "sira": 23,
+      "ad": "Marmara Gölü",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Gölmarmara",
+      "merkeze_km": 55,
+      "neden": "Gediz ovasında sığ göl; kıyısında kuş izlemek ve Bintepeler'e bakmak için",
+      "place_id": "ChIJ5X-wYRtMuBQRpbAe5AtInng"
+    },
+    {
+      "sira": 24,
+      "ad": "Kurşunlu Kaplıcaları",
+      "kategori": "aktivite",
+      "amaclar": [
+        "yavas"
+      ],
+      "ilce": "Salihli",
+      "merkeze_km": 80,
+      "neden": "Jeoparkın sıcak suları; Sardes ve Adala gezisinden sonra termal havuzda dinlenme"
+    },
+    {
+      "sira": 25,
+      "ad": "Kybele kabartması (Taş Suret)",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Şehzadeler",
+      "merkeze_km": 7,
+      "neden": "Spil eteğinde kayaya oyulmuş oturan tanrıça kabartması; Akpınar yakınında"
+    },
+    {
+      "sira": 26,
+      "ad": "Kırkağaç kavunu",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Kırkağaç",
+      "merkeze_km": 70,
+      "neden": "2008'den beri tescilli kavun; yaz sonunda ilçe yollarındaki tezgâhlarda"
+    },
+    {
+      "sira": 27,
+      "ad": "Şambali",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Şehzadeler",
+      "merkeze_km": 0,
+      "neden": "İrmik ve yoğurtla yapılan şerbetli tatlı; Manisa pastanelerinde çayın yanına"
+    },
+    {
+      "sira": 28,
+      "ad": "Kula güveci",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet",
+        "yavas"
+      ],
+      "ilce": "Kula",
+      "merkeze_km": 135,
+      "neden": "Toprak kapta dört saati aşkın pişen et ve sebze güveci; Kula'da öğle yemeği için"
+    },
+    {
+      "sira": 29,
+      "ad": "Çakırca bazalt sütunları",
+      "kategori": "doga",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Kula",
+      "merkeze_km": 140,
+      "neden": "Soğuyan lavın çatlayarak oluşturduğu altıgen bazalt sütunlar; jeopark durağı",
+      "place_id": "ChIJBdlrwe72xxQRG72BryaPz68"
+    },
+    {
+      "sira": 30,
+      "ad": "Kula tatlı pidesi",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Kula",
+      "merkeze_km": 135,
+      "neden": "Tahin ve şekerle fırınlanan tatlı pide; Kula fırınlarında sabah taze çıkar"
+    },
+    {
+      "sira": 31,
+      "ad": "Alaşehir kapaması",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Alaşehir",
+      "merkeze_km": 105,
+      "neden": "Hamur ve kıymayla kat kat hazırlanan, fırında pişen Alaşehir yemeği"
+    },
+    {
+      "sira": 32,
+      "ad": "Kula-Salihli Jeopark yürüyüş rotası",
+      "kategori": "aktivite",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Kula",
+      "merkeze_km": 135,
+      "neden": "Volkan konileri, peri bacaları ve Kula evleri arasında işaretli yürüyüş rotası"
+    },
+    {
+      "sira": 33,
+      "ad": "Gökeyüp çömlekçileri",
+      "kategori": "aktivite",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Salihli",
+      "merkeze_km": 95,
+      "neden": "Köyde çömlek hâlâ elde biçimlenip açık ateşte pişiriliyor; atölyeleri gezebilirsin"
+    },
+    {
+      "sira": 34,
+      "ad": "İvaz Paşa Camii",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Şehzadeler",
+      "merkeze_km": 0,
+      "neden": "1484 tarihli erken Osmanlı camisi; Muradiye ile Sultan Camii arasındaki yürüyüşte"
+    },
+    {
+      "sira": 35,
+      "ad": "Midire Hanım Kent Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Salihli",
+      "merkeze_km": 75,
+      "neden": "Salihli'nin kent müzesi; jeopark ve ilçe tarihini aynı yerde anlatır",
+      "place_id": "ChIJ1-CTqDlbuBQRozs3quWD6uI"
+    },
+    {
+      "sira": 36,
+      "ad": "Salihli kirazı",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Salihli",
+      "merkeze_km": 75,
+      "neden": "2008'de tescillenen ilk Salihli ürünü; mayıs-haziranda bahçe kenarlarında satılır"
+    }
+  ]
+}

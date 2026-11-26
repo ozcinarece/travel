@@ -1,0 +1,456 @@
+{
+  "il": "Amasya",
+  "slug": "amasya",
+  "guncelleme": "2026-11-21",
+  "oneriler": [
+    {
+      "sira": 1,
+      "ad": "Kral Kaya Mezarları",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "gece"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "Harşena'nın kayasına oyulmuş Pontus kral mezarları; yanlarına kaya merdivenle çıkılır",
+      "osm": "node/2014281226",
+      "place_id": "ChIJa-hlGUxuh0AR3OhUNWdc6vg"
+    },
+    {
+      "sira": 2,
+      "ad": "Yalıboyu Evleri",
+      "kategori": "manzara",
+      "amaclar": [
+        "gece",
+        "yavas",
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Yeşilırmak'a dizili 19. yüzyıl konakları; akşam ışıkları yanınca karşı kıyıdan izlenir",
+      "place_id": "ChIJnfTfcDZuh0ARpKI2d5IAJ2A"
+    },
+    {
+      "sira": 3,
+      "ad": "Amasya Kalesi (Harşena)",
+      "kategori": "manzara",
+      "amaclar": [
+        "kultur_tarih",
+        "doga"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 4,
+      "neden": "Şehrin 300 m üstündeki kayalık tepe; surlardan ırmak, köprüler ve kral mezarları görünür",
+      "osm": "node/3055260675",
+      "place_id": "ChIJS1fn00huh0ARa34e9Os6W2I"
+    },
+    {
+      "sira": 4,
+      "ad": "Sultan II. Bayezid Külliyesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "Şehzade Ahmed'in babası adına yaptırdığı külliye; avludaki çınarlar 500 yılı aşkın",
+      "osm": "way/301465779"
+    },
+    {
+      "sira": 5,
+      "ad": "Borabay Gölü",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Taşova",
+      "merkeze_km": 63,
+      "neden": "1.050 m'de kayın, çam ve kestane ormanıyla çevrili yeşil göl; çevresi yürünerek dolaşılır"
+    },
+    {
+      "sira": 6,
+      "ad": "Amasya Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "Bahçedeki Sultan Mesud Türbesi'nde İlhanlı mumyaları; salonlarda 12 dönemden eser",
+      "osm": "way/499528118",
+      "place_id": "ChIJq3ihO1Juh0ARZXLOOHcxTRA"
+    },
+    {
+      "sira": 7,
+      "ad": "Burmalı Amasya çöreği",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Nohut mayalı hamur haşhaş ve cevizle sarılıp burulur; 1925'ten beri yapılır, tescilli"
+    },
+    {
+      "sira": 8,
+      "ad": "Sabuncuoğlu Tıp ve Cerrahi Tarihi Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "1308'de yapılan İlhanlı darüşşifasında Sabuncuoğlu Şerefeddin'in cerrahi mirası",
+      "osm": "way/1299696621",
+      "place_id": "ChIJpR7cIktuh0ARFrCtKJlQUQY"
+    },
+    {
+      "sira": 9,
+      "ad": "Merzifon keşkeği",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merzifon",
+      "merkeze_km": 47,
+      "neden": "Buğday, nohut ve dana eti odun ateşli taş fırında 12 saate yakın pişer; tescilli"
+    },
+    {
+      "sira": 10,
+      "ad": "Ferhat Su Kanalı",
+      "kategori": "aktivite",
+      "amaclar": [
+        "kultur_tarih",
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 4,
+      "neden": "Kayaya oyulmuş Hellenistik ya da Roma dönemi kanal; Ferhatarası'nda 2 km boyunca izlenir",
+      "osm": "way/1544403609",
+      "place_id": "ChIJz56wbBxvh0AR2g7yBkk0GOw"
+    },
+    {
+      "sira": 11,
+      "ad": "Amasya baklalı dolması",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Bakla ve bulgur asma yaprağına altıgen sarılır, kuzu kaburgayla pişer; tescilli"
+    },
+    {
+      "sira": 12,
+      "ad": "Hazeranlar Konağı",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "1865'te Yalıboyu'nda yapılan konak; üst katlar etnografya müzesi, bodrum sanat galerisi",
+      "osm": "node/5363404321",
+      "place_id": "ChIJTVhOT0xuh0ARJ1KYM8m_jN0"
+    },
+    {
+      "sira": 13,
+      "ad": "Gökmedrese Camii",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "1267 tarihli Selçuklu yapısı; adını kubbe kasnağındaki mavi sırlı tuğlalardan alır",
+      "osm": "way/499102168",
+      "place_id": "ChIJE9X1FlFuh0ARfO_c4dJmr6o"
+    },
+    {
+      "sira": 14,
+      "ad": "Burmalı Minare Camii",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "13. yüzyıl Selçuklu camisi; 1730 yangınından sonra yapılan taş minaresi burgulu",
+      "osm": "way/301465789",
+      "place_id": "ChIJ2-chM01uh0ARL_OAt3yFVeg"
+    },
+    {
+      "sira": 15,
+      "ad": "Amasya misket elması",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "İnce kabuklu, kokulu elma; eylül sonu toplanır, iyi saklanırsa mayısa kadar dayanır"
+    },
+    {
+      "sira": 16,
+      "ad": "Büyük Ağa Medresesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "Sekizgen avlulu Osmanlı medresesi; II. Bayezid'in kapı ağası Hüseyin Ağa yaptırdı",
+      "osm": "relation/5694141",
+      "place_id": "ChIJAV5LaTZuh0AR19Fr8gqbFzE"
+    },
+    {
+      "sira": 17,
+      "ad": "Yedikır Barajı (Yedi Kuğular Kuş Cenneti)",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Suluova",
+      "merkeze_km": 35,
+      "neden": "100'ü aşkın kuş türü kaydedilen baraj gölü; ak pelikan ve kuğular için dürbün getirin"
+    },
+    {
+      "sira": 18,
+      "ad": "Aynalı Mağara",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 4,
+      "neden": "Yol kenarında MÖ 2. yüzyıl kaya mezarı; cilalı cephesi güneş vurunca parlar",
+      "place_id": "ChIJu9b2ktdxh0ARtrAgoPyAZgQ"
+    },
+    {
+      "sira": 19,
+      "ad": "Minyatür Amasya Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "II. Bayezid imaretinde, 1914 fotoğrafından yapılmış 1/150 ölçekli şehir maketi",
+      "osm": "way/1349617809",
+      "place_id": "ChIJQUrchU1uh0ARng9fw9fHvD4"
+    },
+    {
+      "sira": 20,
+      "ad": "Amasya etli çiçek bamyası",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Bir santimlik çiçek bamyası kesilmeden kuzu etiyle pişer; limon sümükleşmeyi önler"
+    },
+    {
+      "sira": 21,
+      "ad": "Kara Mustafa Paşa Camii",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merzifon",
+      "merkeze_km": 47,
+      "neden": "1666'da Merzifonlu Kara Mustafa Paşa yaptırdı; şadırvanda Zileli Emin'in resimleri"
+    },
+    {
+      "sira": 22,
+      "ad": "Saraydüzü Kışlası Milli Mücadele Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "Amasya Genelgesi'nin yazıldığı kışla aslına uygun yeniden yapıldı; giriş ücretsiz",
+      "osm": "node/10092210862",
+      "place_id": "ChIJwZ2xfTZuh0AREb9zlB-DZrY"
+    },
+    {
+      "sira": 23,
+      "ad": "Şehzadeler Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Dış kale surundaki ahşap evde, Amasya'da yetişmiş 12 şehzadenin heykeli",
+      "place_id": "ChIJ1U5cUExuh0ARFXqRs96z1DM"
+    },
+    {
+      "sira": 24,
+      "ad": "Amasya Bedesteni",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "1483'te Hüseyin Ağa'nın yaptırdığı dört kubbeli kapalı çarşı",
+      "osm": "way/301465777",
+      "place_id": "ChIJH4kv4Exuh0AR5dm1Nkmvwaw"
+    },
+    {
+      "sira": 25,
+      "ad": "Çakallar Tepesi",
+      "kategori": "manzara",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 6,
+      "neden": "Ferhat Dağı'nın arkasında, Osmanlı'da şehzade av sahası; şehre güneyden bakış"
+    },
+    {
+      "sira": 26,
+      "ad": "Amasya unutma beni tatlısı",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Bayat ekmek pekmezli şerbete batırılıp cevizle kapatılır; 2023'te tescillendi"
+    },
+    {
+      "sira": 27,
+      "ad": "Amasya patlıcan pehli",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Sütlü tuzlu suda bekletilip kızartılan patlıcan kuzu etiyle fırında pişer; tescilli"
+    },
+    {
+      "sira": 28,
+      "ad": "Abide Hatun Camii",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Merzifon",
+      "merkeze_km": 55,
+      "neden": "Kara Mustafa Paşa'nın annesinin köy camisi; boyalı ahşap tavan ve kündekari kapı"
+    },
+    {
+      "sira": 29,
+      "ad": "Ezinepazarı Hanı",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 35,
+      "neden": "Mahperi Hatun'un 13. yüzyıl Selçuklu hanı; 2007 onarımından beri gezilebiliyor",
+      "osm": "way/177553905",
+      "place_id": "ChIJ34wXokiJfUARQYxZDXQ5-kU"
+    },
+    {
+      "sira": 30,
+      "ad": "Arkutbey Kaplıcası",
+      "kategori": "aktivite",
+      "amaclar": [
+        "yavas"
+      ],
+      "ilce": "Hamamözü",
+      "merkeze_km": 90,
+      "neden": "42,5 °C suyu olan Hamamözü kaplıcası; adını Selçuklu beyi Arkut Bey'den alır"
+    },
+    {
+      "sira": 31,
+      "ad": "Terziköy Kaplıcası",
+      "kategori": "aktivite",
+      "amaclar": [
+        "yavas"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 36,
+      "neden": "Çivi köyünde 37–39 °C termal su; Göynücek yolu üstünde, çam ormanı içinde"
+    },
+    {
+      "sira": 32,
+      "ad": "Amasya kaypağı (piruhi)",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Süzme yoğurt ve maydanozlu üçgen hamur haşlanır; tereyağlı salçalı sosla gelir"
+    },
+    {
+      "sira": 33,
+      "ad": "Amasya yağlısı",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "40 cm'lik katlı yağlı ekmek; içi ceviz ve dövülmüş haşhaş, sacda pişer, tescilli"
+    },
+    {
+      "sira": 34,
+      "ad": "Haliliye Medresesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Gümüşhacıköy",
+      "merkeze_km": 70,
+      "neden": "1415'te Çelebi Mehmed'in beylerbeyi Halil Paşa'nın Gümüş'te yaptırdığı medrese"
+    },
+    {
+      "sira": 35,
+      "ad": "Ziyaret Gölü",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas",
+        "cocuklu"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 7,
+      "neden": "Ziyaret beldesinde sazan salınan küçük gölet; Aynalı Mağara dönüşü kısa mola",
+      "osm": "node/9908956517"
+    },
+    {
+      "sira": 36,
+      "ad": "Yenice Gölbaşı Parkı",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas",
+        "cocuklu"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 14,
+      "neden": "Anıt ağaç olarak tescilli çınarın gölgesinde göl kıyısı park"
+    }
+  ]
+}

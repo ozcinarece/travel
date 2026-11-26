@@ -1,0 +1,159 @@
+{
+  "surum": 1,
+  "sehir": {
+    "slug": "safranbolu"
+  },
+  "takvim": {
+    "ilk_gun": "cumartesi"
+  },
+  "gezi": {
+    "slug": "safranboluda-bir-gun",
+    "baslik": "Safranbolu'da bir gün",
+    "ozet": "Saat kulesi, demirci ocakları, peruhi ve Hıdırlık'ta gün batımı",
+    "yazar_ad": "Tripmate ekibi",
+    "amaclar": [
+      "kultur_tarih",
+      "yavas",
+      "lezzet"
+    ],
+    "yazi_md": "Safranbolu'ya yalnız bir günün varsa çarşıdan çıkmana gerek yok. Bu plan, kentin eski merkezini bir sabah müzesiyle başlatıyor, öğleye kadar arastalarda ve demirci ocaklarında geçiriyor, öğleden sonrayı bir konağa ve gün batımında Hıdırlık'a ayırıyor. Bütün duraklar yürüme mesafesinde; en uzun yürüyüş on dakikayı geçmiyor, yalnız Kale tepesi ve Hıdırlık'a çıkışlar yokuş. Arabayı çarşının dışındaki otoparkta bırak; dar taş sokaklarda park yeri yok.\n\n> Taş döşeli sokaklar yağmurdan sonra kaygan olur. Tabanı tutan bir ayakkabı giy ve çantana ince bir mont koy; Hıdırlık'ta akşamüstü rüzgâr eser.\n\n## 1. gün · Çarşı, demirciler, Hıdırlık\n\nGüne çarşının kuzeybatısındaki Kale tepesinde, [Kent Tarihi Müzesi](mekan:ChIJq6q6oitVg0ARzdNbTobor1E)'nde başla. Eski hükümet konağının zemin katındaki esnaf canlandırmalarında lokumcu, papuççu ve demirci dükkânlarını gör: birazdan gezeceğin sokakların küçük bir provası. Çıkışta yanındaki saat kulesine bak.\n\nTepeden çarşıya in. Yolda çarşının ortasındaki Cinci Hanı'nın taş kütlesini göreceksin; 1640'larda yapılmış iki katlı bir kervansaray. Önünden geçerken avlu kapısına bak, ama içine girmeyi plana koyma.\n\nArdından üstü örtülü [Yemeniciler Arastası](mekan:ChIJz-ao5ytVg0ARHUGCdn7R7-g)'na gir. Sokağın adı, ince deriden dikilen düz tabanlı yemeni ayakkabısından geliyor. Bugün dükkânlarda daha çok el işi, bakır ve ahşap satılıyor; yine de elle yemeni diken bir usta bulabilirsin. Arastanın bir ucunda [Köprülü Mehmet Paşa Camii](mekan:ChIJTURqXylVg0ARDqbPEA-UkI4) var.\n\nArastanın ortasında [Arasta Kahvesi](mekan:ChIJ58Xh5StVg0ARs6uXL5_Zdhs)'nde kısa bir mola ver. Kahve burada sıcak küle gömülmüş cezvede, közde pişiyor; köpüğü ocaktakinden koyu olur. Soğuk bir sabahsa salep de iyi gider.\n\n::mekan[ChIJ58Xh5StVg0ARs6uXL5_Zdhs]\n\nKahveden sonra çarşının doğu ucuna, Akçasu Deresi'ne doğru yürü ve [Demirciler Arastası](mekan:ChIJZUO5ZSlVg0AR6dr9BXW7U50)'na gir. Bir zamanlar yüzü aşkın dükkânın olduğu sokakta bugün yalnız birkaç usta örs başında. Kızgın demirin dövülmesini izle. Ustalar kentin konakları için kapı tokmağı, menteşe ve kilit yapıyor; konak kapılarındaki iki tokmaktan hangisinin kime ait olduğunu sor.\n\n::mekan[ChIJZUO5ZSlVg0AR6dr9BXW7U50]\n\nÖğle yemeği için çarşının ortasına dön; Cinci Hamamı'nın hemen arkasındaki [Safranbolu Sofrası](mekan:ChIJeRYIRD7EyhQRkTypUlagSNI)'na otur. Kentin yemeğini burada tat: tereyağı ve naneyle gelen peruhi, yanına bükme ya da sac tava. Tatlıya yer bıraktıysan safranlı zerde iste. Hafta sonu öğle saatlerinde çarşı kalabalık; masayı on ikiden önce tutmak daha kolay.\n\nÖğleden sonra çarşının doğu yamacına çık ve [Kaymakamlar Gezi Evi](mekan:ChIJ39VEFSlVg0AR1UwBDOvECew)'ni gez. Harem ve selamlığıyla bütün kalan bu konakta odaların dizilişine, yüklüklere ve ahşap tavanlara bak. Safranbolu evini dışarıdan yüzlerce kez görürsün; burada içeriden bir kez görmek yeter.\n\nGünü [Hıdırlık Tepesi](mekan:ChIJeQ9OAQpVg0ARcEMEeSh_MAk)'nde bitir. Kaymakamlar'dan güneye, dik bir yokuşla çıkılan tepede 1845 tarihli Hasan Paşa Türbesi var. Ama asıl manzara için gel: kiremit çatılar, minareler ve Cinci Hanı aynı karede. Kasımdan şubata güneş erken batar, bu yüzden tepeye batıştan en az yarım saat önce çık.\n\nÇarşıdan ayrılmadan önce bir lokumcuya uğra. Safranbolu lokumu 2014'ten beri coğrafi işaretli ve yalnız ilçenin içinde üretiliyor."
+  },
+  "gunler": [
+    {
+      "baslik": "Çarşı, demirciler, Hıdırlık",
+      "duraklar": [
+        {
+          "place_id": "ChIJq6q6oitVg0ARzdNbTobor1E",
+          "osm": "way/372728989",
+          "ad": "Kent Tarihi Müzesi",
+          "sure_dk": 60,
+          "sure_gerekcesi": "müze ve saat kulesi; tek günde kısa tutuldu, varsayılan 90",
+          "kapali_gunler": [],
+          "rehber": "kent-tarihi-muzesi",
+          "amaclar": [
+            "kultur_tarih",
+            "cocuklu"
+          ]
+        },
+        {
+          "place_id": "ChIJz-ao5ytVg0ARHUGCdn7R7-g",
+          "ad": "Yemeniciler Arastası",
+          "sure_dk": 45,
+          "sure_gerekcesi": "kısa örtülü sokak; dükkânlara bakmak",
+          "kapali_gunler": [],
+          "rehber": "yemeniciler-arastasi",
+          "amaclar": [
+            "kultur_tarih",
+            "yavas"
+          ]
+        },
+        {
+          "place_id": "ChIJ58Xh5StVg0ARs6uXL5_Zdhs",
+          "ad": "Arasta Kahvesi",
+          "sure_dk": 30,
+          "kapali_gunler": [],
+          "rehber": "arasta-kahvesi",
+          "amaclar": [
+            "yavas",
+            "lezzet"
+          ]
+        },
+        {
+          "place_id": "ChIJZUO5ZSlVg0AR6dr9BXW7U50",
+          "ad": "Demirciler Arastası",
+          "sure_dk": 45,
+          "sure_gerekcesi": "ocak başında ustaları izlemek; kısa sokak",
+          "kapali_gunler": [],
+          "rehber": "demirciler-arastasi",
+          "amaclar": [
+            "kultur_tarih",
+            "cocuklu"
+          ]
+        },
+        {
+          "place_id": "ChIJeRYIRD7EyhQRkTypUlagSNI",
+          "osm": "node/9735559774",
+          "ad": "Safranbolu Sofrası",
+          "sure_dk": 75,
+          "sure_gerekcesi": "öğle yemeği; restoran varsayılanı 75",
+          "kapali_gunler": [],
+          "rehber": "safranbolu-sofrasi",
+          "amaclar": [
+            "lezzet"
+          ]
+        },
+        {
+          "place_id": "ChIJ39VEFSlVg0AR1UwBDOvECew",
+          "osm": "node/4460520394",
+          "ad": "Kaymakamlar Gezi Evi",
+          "sure_dk": 60,
+          "sure_gerekcesi": "ev müze; varsayılan 90 uzun",
+          "kapali_gunler": [],
+          "rehber": "kaymakamlar-gezi-evi",
+          "amaclar": [
+            "kultur_tarih",
+            "cocuklu"
+          ]
+        },
+        {
+          "place_id": "ChIJeQ9OAQpVg0ARcEMEeSh_MAk",
+          "ad": "Hıdırlık Tepesi",
+          "sure_dk": 60,
+          "sure_gerekcesi": "gün batımını beklemek için; varsayılan 45",
+          "kapali_gunler": [],
+          "rehber": "hidirlik-tepesi",
+          "amaclar": [
+            "yavas",
+            "kultur_tarih"
+          ]
+        }
+      ]
+    }
+  ],
+  "ek_mekanlar": [
+    {
+      "place_id": "ChIJTURqXylVg0ARDqbPEA-UkI4",
+      "ad": "Köprülü Mehmet Paşa Camii"
+    }
+  ],
+  "notlar": {
+    "dogrulanacaklar": [
+      "[Plan · tüm duraklar] · kapali_gunler [] kaynaksız: resmî sayfalarda kapalı gün yazmıyor, OSM'de opening_hours yok; Kent Tarihi Müzesi ve Kaymakamlar Gezi Evi pazartesi kapalı olabilir · turkishmuseums.com, Safranbolu Kaymakamlığı",
+      "[Yazı · Cinci Hanı] · \"içine girmeyi plana koyma\" · hanın bugün ziyaretçiye açık olup olmadığı doğrulanamadı; Lonely Planet otel konuğu olmayanların avluya ve çatıya çıkabildiğini yazıyor ama tarihsiz · han işletmesi, yerinde. Açıksa avlu ve çatı yazıya eklenebilir; durak yapılmadı",
+      "[Yazı · Cinci Hanı] · '1640'lar' · TDV İslâm Ansiklopedisi: kitabesi yok, Cinci Hoca'nın (ö. 1648) Sultan İbrahim döneminde yaptırdığı kabul ediliyor · KVMGM",
+      "[Rehber · Demirciler] · '18. yüzyılın sonunda, İzzet Mehmet Paşa döneminde kurulduğu anlatılıyor' (NTV/İHA 2021: 1796) ; 'yüzü aşkın dükkân' (aynı kaynak: 1924'te 105) ; 'birkaç usta' (2021'de 4, Cumhuriyet/DHA 2024'te 4) · Safranbolu Belediyesi, yerinde",
+      "[Rehber · Demirciler] · Hüseyin Şahin Özdemir, 1978'de çırak, 'UNESCO çilingiri'; erkek/kadın tokmağı (Cumhuriyet/DHA, 13 Ağustos 2024) · usta hâlâ çalışıyor mu, yerinde",
+      "[Rehber · Demirciler] · arka tarafta antikacılar ve bakır tepsi oymacıları (Lonely Planet) · yerinde",
+      "[Rehber · Arasta Kahvesi] · közde kahve, salep, hafta sonu kahvaltısı: yemek.com (2019) · güncel mi, işletme",
+      "[Rehber · Arasta Kahvesi] · Safranbolu lokumu mahreç işareti 15 Temmuz 2014, tescil no 183 (KÜRE; Türk Patent'ten teyit edilmeli) · ci.turkpatent.gov.tr",
+      "[Yazı · Kaymakamlar → Hıdırlık] · 'güneye, dik bir yokuşla' ve 'en uzun yürüyüş on dakikayı geçmiyor' · OSM konumlarından kestirildi · harita",
+      "[Rehberler] · Kent Tarihi Müzesi, Yemeniciler, Kaymakamlar, Hıdırlık rehberleri safranboluda-iki-gun ile ortak; doğrulanacakları o planda",
+      "[Plan · g1.d5 Safranbolu Sofrası] · öğle durağı iki günlük geziyle ortak (Ürün kararı B, #449); rehberi ve doğrulanacakları safranboluda-iki-gun planında · Google birincil tipi `cafeteria` olduğu için kuru yüklemede öğle UYARISI çıkabilir"
+    ],
+    "fotograf_onerileri": [
+      {
+        "ne": "Kapak (3:2): Demirciler Arastası'nda ocak başında usta ya da tokmaklı bir konak kapısı",
+        "altyazi": "Demirciler Arastası",
+        "arama": "Safranbolu blacksmith / door knocker (Wikimedia Commons)"
+      },
+      {
+        "ne": "Yemeniciler Arastası'nın örtülü sokağı",
+        "altyazi": "Yemeniciler Arastası",
+        "arama": "Yemeniciler Arastası Safranbolu (Wikimedia Commons)"
+      },
+      {
+        "ne": "Hıdırlık'tan çarşı ve Cinci Hanı",
+        "altyazi": "Hıdırlık'tan Safranbolu",
+        "arama": "Safranbolu panorama Hıdırlık (Wikimedia Commons)"
+      }
+    ],
+    "varsayimlar": [
+      "Tek gün, cumartesi; bütün gün yürüyerek, çarşıda",
+      "Karabük il listesinin (icerik/iller/karabuk.json) ilk 5'inden 4'ü durak (1 Çarşı gezinin tamamı, 2 Hıdırlık, 4 Kaymakamlar, 5 Yemeniciler). 3 Cinci Hanı durak değil: hanın bugün içinin gezilebildiği doğrulanamadı; yazıda dışarıdan anılıyor",
+      "İlk 10'dan 10 Köprülü Mehmet Paşa Camii ek mekân, 11 Kent Tarihi Müzesi durak. 6–9 (Kristal Cam Teras, İncekaya, Yörük Köyü, Bulak) araç istediği için tek günlük yürüyüş planına girmedi; iki günlük gezide var",
+      "İki günlük gezinin 1. gününden farkı: Türkiye Kahve Müzesi ve İzzet Mehmet Paşa Camii yerine Arasta Kahvesi ve Demirciler Arastası; öğle durağı (Safranbolu Sofrası) ortak",
+      "Google: 5 puan isteği, kimlik sorgusu yok (place_id'ler il listesinden)",
+      "OSM oranı 3/7: Yemeniciler, Arasta Kahvesi, Demirciler ve Hıdırlık çarşı içinde Overpass'ta ad ve konumla eşleşen kayıt vermedi. Overpass erişimi olan bir turda bu dört durak yeniden denenecek"
+    ]
+  }
+}

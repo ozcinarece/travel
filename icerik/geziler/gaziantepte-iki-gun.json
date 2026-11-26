@@ -1,0 +1,239 @@
+{
+  "surum": 1,
+  "sehir": {
+    "yeni": {
+      "ad": "Gaziantep",
+      "slug": "gaziantep",
+      "place_id": "ChIJL4zx97TmMRUR0KprETWLLsA"
+    }
+  },
+  "takvim": {
+    "ilk_gun": "cumartesi"
+  },
+  "gezi": {
+    "slug": "gaziantepte-iki-gun",
+    "baslik": "Gaziantep'te iki gün",
+    "ozet": "Sabah Çingene Kızı'nın karşısında, ertesi akşamüstü Rumkale'de",
+    "yazar_ad": "Tripmate ekibi",
+    "amaclar": [
+      "kultur_tarih",
+      "lezzet"
+    ],
+    "yazi_md": "Gaziantep'i ilk kez görecek biri için iki gün yeter, ama acele etmemek şartıyla. Birinci gün kale eteğindeki eski çarşıda yürüyerek geçiyor: sabah bir mozaik müzesi, öğlen kebap ve baklava, öğleden sonra pazarlar, bedesten ve kahve. İkinci gün sabah Bey Mahallesi'nin taş sokaklarında başlıyor; öğleden sonra arabayla Fırat kıyısına, Rumkale'ye gidiyorsun.\n\n> Gaziantep'te yemek saatleri erken. Beyran sabah, kebap öğlen yenir; öğleden sonra kazanlar boşalmaya başlar. Gününü yemeklere göre kur, müzeleri araya sıkıştır.\n\n## 1. gün · Mozaikler ve kale eteği\n\nGüne [Zeugma Mozaik Müzesi](mekan:ChIJyaU5d6rmMRURVotkWaeUJ7E)'nde başla. Fırat kıyısındaki antik Zeugma'nın villalarından kaldırılan taban mozaikleri burada, çoğu ait olduğu odanın planıyla döşenmiş. Çingene Kızı üst kattaki karanlık odada; sıra varsa önce alt katı gez.\n\n::mekan[ChIJyaU5d6rmMRURVotkWaeUJ7E]\n\nMüzeden çıkınca güneye, kaleye doğru yürü. Gaziantep Kalesi 2023 depreminde ağır hasar gördü; restorasyonu bitti ama içinin ziyarete açılıp açılmadığını gitmeden önce sor. Açık değilse eteğinden dolaşarak geç; onarılmış burçları dışarıdan da görürsün.\n\nÖğle yemeği için Uzun Çarşı'daki [İmam Çağdaş](mekan:ChIJJfZ_PLrmMRURtQHmGRFj2-8)'a otur. 1887'den beri aynı ailenin işlettiği salonda ali nazik söyle: közlenmiş patlıcanlı yoğurdun üstünde tereyağlı et. Baklavayı da burada, ayrı bir tabakla ye.\n\n::mekan[ChIJJfZ_PLrmMRURtQHmGRFj2-8]\n\nYemekten sonra hemen yandaki [Almacı Pazarı](mekan:ChIJz6a-9LPmMRURO0G4lTp94rs)'na gir. İplere dizilmiş kuru patlıcanlar, salça kavanozları ve fıstık çuvalları Antep mutfağının kilerini gösteriyor. Oradan [Zincirli Bedesten](mekan:ChIJKcmetn3nMRUR-8gpVaFhTRw)'e geç; depremden sonra onarılan taş çarşıda bugün bakır, sedef ve kutnu kumaşı satılıyor.\n\nBedestenin güneyindeki [Bakırcılar Çarşısı](mekan:ChIJ51KvdbPmMRURjA_si3jDxR4)'nda çekiç seslerini takip et. Ustaların bazıları kapının hemen arkasında bakır döver; elde dövülmüş kabı iç yüzündeki düzensiz izlerden tanırsın.\n\nGünü [Tahmis Kahvesi](mekan:ChIJrTFmsLLmMRURDtSV5IhfEaU)'nde bitir. 1630'lardan kalma kahvehanede menengiç kahvesi iç: yabani fıstık meyvesinden, sütle pişirilen köpüklü bir içecek. Vaktin kalırsa kalenin batı eteğindeki [Hamam Müzesi](mekan:ChIJZ9201LLmMRURKVzGs8Dbmm0)'ne de bakabilirsin.\n\n## 2. gün · Bey Mahallesi ve Rumkale\n\nSabah [Kurtuluş Camii](mekan:ChIJWUtXKDbhMRURGAVeMIuaw1c)'nin önünden başla. 1892'de Meryem Ana Katedrali olarak yapılan binanın siyah bazalt ve beyaz taş şeritli cephesine bak, sonra yokuşu çıkıp Bey Mahallesi'nin taş kemerli kapılarının arasında yürü.\n\n::mekan[ChIJWUtXKDbhMRURGAVeMIuaw1c]\n\nKale tarafına inerken [Emine Göğüş Mutfak Müzesi](mekan:ChIJZ2vK00zhMRURI1f-QF51PbU)'ne uğra. Eski bir Antep evindeki küçük müzede bulgurun, salçanın ve kurutmalıkların nasıl hazırlandığını görürsün; bir gün önce pazarda gördüklerin burada yerine oturur.\n\nÖğle yemeğini çarşıdaki [Metanet Lokantası](mekan:ChIJRUABV7HmMRURaqHYf4SJqrc)'nda beyranla yap. Kuzu eti suyu, pirinç, sarımsak ve pul biberle bakır kâsede köpürerek gelir. Beyran öğleden sonra tükenir, geç kalma.\n\nArabaya bin ve şehirden çıkarken [Koçak Baklava](mekan:ChIJcwJvHl3hMRURgGwW0IoInzk)'da kısa bir mola ver; dün fıstıklı baklava yediysen bugün şöbiyet ya da dolama dene. Ardından Yavuzeli yönüne, yaklaşık bir saatlik yola çık.\n\nİlk durağın [Rumkale Cam Teras](mekan:ChIJm1WrMgAvMhUR4M9Drx9BVnA). Fırat'ın üstündeki yamaçtan uzanan cam terastan kaleyi suyla çevrili kayalığın üstünde bütün olarak görürsün. Sonra iskeleye in ve tekneyle [Rumkale](mekan:ChIJGZCmxv_gMRURX079o5Z8v6Y)'ye geç. Kalenin içinde Barşavma Manastırı'nın kalıntıları ve kayaya oyulmuş derin bir kuyu var. Çıkış dik; su ve rahat ayakkabı al.\n\n::mekan[ChIJGZCmxv_gMRURX079o5Z8v6Y]\n\nKasımdan şubata hava erken kararıyor. Rumkale'ye öğleden sonra üçten geç kalırsan teknelerin son seferini kaçırabilirsin; dönüş yolunu da gün ışığında sür.\n"
+  },
+  "gunler": [
+    {
+      "baslik": "Mozaikler ve kale eteği",
+      "duraklar": [
+        {
+          "place_id": "ChIJyaU5d6rmMRURVotkWaeUJ7E",
+          "osm": "way/322631331",
+          "ad": "Zeugma Mozaik Müzesi",
+          "sure_dk": 120,
+          "sure_gerekcesi": "koleksiyon büyük ve katlara yayılmış; varsayılan 90 kısa",
+          "kapali_gunler": [],
+          "rehber": "zeugma-mozaik-muzesi",
+          "amaclar": [
+            "kultur_tarih",
+            "cocuklu"
+          ]
+        },
+        {
+          "place_id": "ChIJJfZ_PLrmMRURtQHmGRFj2-8",
+          "osm": "node/3485983758",
+          "ad": "İmam Çağdaş",
+          "sure_dk": 75,
+          "sure_gerekcesi": "öğle yemeği ve baklava; restoran varsayılanı 75",
+          "kapali_gunler": [],
+          "rehber": "imam-cagdas",
+          "amaclar": [
+            "lezzet"
+          ]
+        },
+        {
+          "place_id": "ChIJz6a-9LPmMRURO0G4lTp94rs",
+          "ad": "Almacı Pazarı",
+          "sure_dk": 30,
+          "sure_gerekcesi": "kısa pazar sokağı; varsayılan 45 uzun",
+          "kapali_gunler": [],
+          "rehber": "almaci-pazari",
+          "amaclar": [
+            "lezzet",
+            "yavas"
+          ]
+        },
+        {
+          "place_id": "ChIJKcmetn3nMRUR-8gpVaFhTRw",
+          "osm": "way/237176143",
+          "ad": "Zincirli Bedesten",
+          "sure_dk": 30,
+          "sure_gerekcesi": "küçük kapalı çarşı; bir tur",
+          "kapali_gunler": [],
+          "rehber": "zincirli-bedesten",
+          "amaclar": [
+            "kultur_tarih"
+          ]
+        },
+        {
+          "place_id": "ChIJ51KvdbPmMRURjA_si3jDxR4",
+          "osm": "node/4889958236",
+          "ad": "Bakırcılar Çarşısı",
+          "sure_dk": 45,
+          "sure_gerekcesi": "çarşı yürüyüşü ve alışveriş",
+          "kapali_gunler": [],
+          "rehber": "bakircilar-carsisi",
+          "amaclar": [
+            "kultur_tarih",
+            "yavas"
+          ]
+        },
+        {
+          "place_id": "ChIJrTFmsLLmMRURDtSV5IhfEaU",
+          "osm": "way/237176907",
+          "ad": "Tahmis Kahvesi",
+          "sure_dk": 45,
+          "sure_gerekcesi": "kahve molası; kafe varsayılanı 30, mekânın kendisi de gezilir",
+          "kapali_gunler": [],
+          "rehber": "tahmis-kahvesi",
+          "amaclar": [
+            "lezzet",
+            "yavas"
+          ]
+        }
+      ]
+    },
+    {
+      "baslik": "Bey Mahallesi ve Rumkale",
+      "duraklar": [
+        {
+          "place_id": "ChIJWUtXKDbhMRURGAVeMIuaw1c",
+          "osm": "way/300646387",
+          "ad": "Kurtuluş Camii",
+          "sure_dk": 60,
+          "sure_gerekcesi": "cami ve çevresindeki Bey Mahallesi sokakları; ibadet yeri varsayılanı 30",
+          "kapali_gunler": [],
+          "rehber": "kurtulus-camii",
+          "amaclar": [
+            "kultur_tarih",
+            "yavas"
+          ]
+        },
+        {
+          "place_id": "ChIJZ2vK00zhMRURI1f-QF51PbU",
+          "ad": "Emine Göğüş Mutfak Müzesi",
+          "sure_dk": 45,
+          "sure_gerekcesi": "küçük ev müzesi; varsayılan 90 uzun",
+          "kapali_gunler": [],
+          "rehber": "emine-gogus-mutfak-muzesi",
+          "amaclar": [
+            "kultur_tarih",
+            "lezzet",
+            "cocuklu"
+          ]
+        },
+        {
+          "place_id": "ChIJRUABV7HmMRURaqHYf4SJqrc",
+          "osm": "node/12717921301",
+          "ad": "Metanet Lokantası",
+          "sure_dk": 60,
+          "sure_gerekcesi": "beyran tek kap; restoran varsayılanı 75 uzun",
+          "kapali_gunler": [],
+          "rehber": "metanet-lokantasi",
+          "amaclar": [
+            "lezzet"
+          ]
+        },
+        {
+          "place_id": "ChIJcwJvHl3hMRURgGwW0IoInzk",
+          "osm": "node/5020521122",
+          "ad": "Koçak Baklava",
+          "sure_dk": 30,
+          "sure_gerekcesi": "tatlı molası",
+          "kapali_gunler": [],
+          "rehber": "kocak-baklava",
+          "amaclar": [
+            "lezzet"
+          ]
+        },
+        {
+          "place_id": "ChIJm1WrMgAvMhUR4M9Drx9BVnA",
+          "ad": "Rumkale Cam Teras",
+          "sure_dk": 30,
+          "sure_gerekcesi": "seyir terası; varsayılan 20 kısa, terasa sıra olabilir",
+          "kapali_gunler": [],
+          "rehber": "rumkale-cam-teras",
+          "amaclar": [
+            "doga",
+            "yavas"
+          ]
+        },
+        {
+          "place_id": "ChIJGZCmxv_gMRURX079o5Z8v6Y",
+          "osm": "node/1065022600",
+          "ad": "Rumkale",
+          "sure_dk": 150,
+          "sure_gerekcesi": "tekneyle geçiş, dik çıkış ve kalenin içi; varsayılan 45 çok kısa",
+          "kapali_gunler": [],
+          "rehber": "rumkale",
+          "amaclar": [
+            "kultur_tarih",
+            "doga"
+          ]
+        }
+      ]
+    }
+  ],
+  "ek_mekanlar": [
+    {
+      "place_id": "ChIJZ9201LLmMRURKVzGs8Dbmm0",
+      "ad": "Gaziantep Hamam Müzesi"
+    }
+  ],
+  "notlar": {
+    "dogrulanacaklar": [
+      "[Plan · tüm duraklar] · kapali_gunler [] kaynaksız: resmî sayfalar (turkishmuseums, gaziantep.ktb.gov.tr) bu oturumdan okunamadı; OSM'de yalnız Zeugma Mozaik Müzesi (Mo-Sa) ve İmam Çağdaş (Mo-Su) için opening_hours var · Gaziantep İl Kültür ve Turizm Müdürlüğü, işletmeler",
+      "[Plan · Zeugma Mozaik Müzesi] · OSM opening_hours 'Mo-Sa 09:00-16:00' pazarı kapalı gösteriyor; Bakanlık müzeleri genelde her gün açık ve 2026 bayram haberleri (Aydınlık, Gazete Oksijen) pazar günleri de ziyaretçi bildiriyor. kapali_gunler [] bırakıldı; durak cumartesiye düşüyor · turkishmuseums.com müze sayfası",
+      "[Yazı · Gaziantep Kalesi] · restorasyon tamamlandı (TRT Haber, Hürriyet Daily News); 'ekimde ziyarete açılacak' haberleri (AA) var ama açıldığına dair kayıt bulunamadı. Kale durak değil; il listesindeki place_id ile bu oturumdaki kimlik sorgusu farklı iki kayıt veriyor; hangisinin doğru olduğu BO'da seçilmeli · Gaziantep Büyükşehir Belediyesi",
+      "[Rehber · Zeugma Mozaik Müzesi] · Seleukos I kuruluşu, 2000 Birecik Barajı kurtarma kazısı, bronz Mars heykeli, Çingene Kızı'nın ayrı odası; kaçırılan parçaların 2018'de ABD'den (Bowling Green State University) iadesi · müze, Vikipedi",
+      "[Rehber · İmam Çağdaş] · 1887 (il listesi kaynağı: işletmenin sitesi); ali nazik, baklava; il dışı şube yok · işletme",
+      "[Rehber · Antep baklavası] · AB coğrafi işaret tescili 2013 · Türk Patent",
+      "[Rehber · Tahmis Kahvesi] · 1630'lar yapım, 20. yy başında yangın ve yeniden yapım; menengiç kahvesinin coğrafi işaret yılı (2017 yazıldı) · Türk Patent, KVMGM",
+      "[Rehber · Zincirli Bedesten] · '18. yüzyılın sonu' (1781, Hüseyin Paşa olarak geçiyor); kasaplar çarşısı geçmişi; depremden sonra yeniden açıldığı Yeni Birlik haberinden; zincir halkalarının izi yerinde görülmedi · KVMGM, yerinde",
+      "[Rehber · Kurtuluş Camii] · 1892, mimar Sarkis Lole, 1986'da camiye çevrilme (Vikipedi, KÜRE); deprem sonrası onarım ve ibadete açılış (DHA, Bengütürk) · Gaziantep Vakıflar Bölge Müdürlüğü",
+      "[Rehber · Emine Göğüş Mutfak Müzesi] · restorasyonun tamamlandığı haber7 ve Timeturk başlıklarından; ziyarete açık olduğu ve kapalı günü doğrulanmadı · Gaziantep Büyükşehir Belediyesi",
+      "[Yazı · Metanet Lokantası] · beyranın öğleden sonra tükendiği ve pazar günü açık olduğu kaynaksız (gezi pazar öğlesi uğruyor) · işletmeyi ara",
+      "[Rehber · Koçak Baklava] · şöbiyet, dolama, havuç dilimi çeşitleri; il dışında şube olmadığı il listesi PR'ından (#425) · işletme",
+      "[Rehber · Rumkale Cam Teras] · teras Yavuzeli tarafında; yükseklik (2021 haberinde 150 m) metne girmedi; tekne iskelesine terastan nasıl inildiği bilinmiyor · Yavuzeli Kaymakamlığı",
+      "[Rehber · Rumkale] · Hromkla, Ermeni Katolikosluğu, Nerses Şnorhali, 1292 Memlük kuşatması (Vikipedi, KVMGM broşürü); Yuhanna rivayeti 'kesin değil' diye yazıldı; kuyu, sarnıç ve cami kalıntısı; tekne seferleri ve kışın son sefer saati · Gaziantep İl Kültür ve Turizm Müdürlüğü, yerinde",
+      "[Yazı · Rumkale] · 'öğleden sonra üçten geç kalırsan son sefer' tahmini; kış saatleri kaynaksız · yerinde",
+      "[Plan · sehir.yeni] · place_id 'Gaziantep' kimlik sorgusunun tek sonucu (5 km yanlılık); şehir kaydı (locality) olduğu yükleme anında doğrulanır",
+      "[Plan · Rumkale Cam Teras] · kimlik iki sonuç verdi: il listesindeki id (ChIJa-hQ…) bir restoran, burada 'Rumkale Cam Teras' adlı ikinci id kullanıldı; il listesi düzeltilmeli"
+    ],
+    "fotograf_onerileri": [
+      {
+        "ne": "Kapak (3:2): Zeugma Mozaik Müzesi, Çingene Kızı mozaiği ya da büyük taban mozaiği salonu",
+        "altyazi": "Zeugma Mozaik Müzesi",
+        "arama": "Zeugma Mosaic Museum Commons"
+      },
+      {
+        "ne": "Rumkale, Fırat'ın üstündeki kayalık ve surlar",
+        "altyazi": "Rumkale",
+        "arama": "Rumkale Commons"
+      },
+      {
+        "ne": "Bakırcılar Çarşısı'nda bakır dükkânı",
+        "altyazi": "Bakırcılar Çarşısı",
+        "arama": "Gaziantep coppersmiths bazaar Commons"
+      }
+    ],
+    "varsayimlar": [
+      "2 gün, cumartesi–pazar; 1. gün yürüyerek kale eteğinde, 2. gün sabah yürüyerek, öğleden sonra araçla Rumkale (merkezden ~46 km kuş uçuşu, yaklaşık 1 saat)",
+      "Gaziantep il listesinin (icerik/iller/gaziantep.json) ilk 10'undan gezide 9'u: 1 Zeugma Mozaik Müzesi, 3 Bakırcılar, 4 İmam Çağdaş, 5 Rumkale, 6 Almacı Pazarı, 7 Tahmis, 8 Koçak, 9 Metanet, 10 Zincirli Bedesten",
+      "İlk 5'ten gezide durak olmayan: 2 Gaziantep Kalesi. Neden: 2023 depreminden sonraki restorasyon bitti, ama içinin ziyarete açıldığına dair kayıt bulunamadı. Yazıda yalnız dışarıdan anılıyor; açıldığı doğrulanınca 1. güne durak olarak girer",
+      "Il listesinin 11. ve 13. sırası (Emine Göğüş Mutfak Müzesi, Bey Mahallesi) de gezide; Bey Mahallesi Kurtuluş Camii durağıyla",
+      "Gezide olmayanlar (sonraki Gaziantep gezisine): Dülük Antik Kenti ve Dülükbaba (9 km), Zeugma Antik Kenti (Nizip, 43 km), Yesemek (İslahiye, 60 km), Bayazhan Kent Müzesi (açık olup olmadığı doğrulanmadı)",
+      "Google: 18 kimlik sorgusu (ücretsiz), 22 puan isteği",
+      "OSM 9/12 (Ürün A ile kabul etti, #456): Almacı Pazarı ve Emine Göğüş Mutfak Müzesi merkez 10 km'lik Overpass aday listesinde yok; Rumkale Cam Teras, Rumkale çevresindeki 3 km'lik listede yok. Üçünün de OSM'de adlı kaydı bulunamadı (çarşı içi ve yeni açılan yerler, #449'daki sorunla aynı). Konumları Google'dan, 30 günde yenileniyor (#318). Emine Göğüş yemek ekseninde olduğu için Hamam Müzesi'yle değiştirilmedi"
+    ]
+  }
+}
