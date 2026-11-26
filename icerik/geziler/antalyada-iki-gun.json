@@ -24,7 +24,7 @@
       "duraklar": [
         {
           "place_id": "ChIJQwc3aqmBwxQRB7Tr2OhnhMY",
-          "osm": "way/131469283",
+          "osm": "way/321303544",
           "ad": "Perge Antik Kenti",
           "sure_dk": 120,
           "sure_gerekcesi": "varsayılan 90; geniş ören yeri, stadyum dahil",
@@ -117,7 +117,6 @@
         },
         {
           "place_id": "ChIJu3F7zgmGwxQRiKcatsput3I",
-          "osm": "node/1238850237",
           "ad": "Yukarı Düden Şelalesi",
           "sure_dk": 45,
           "sure_gerekcesi": "varsayılan 45",
@@ -160,7 +159,8 @@
       "[Rehber · Yukarı Düden] · Suyun mağara oyuklarından çıkışı ve ıslak geçit: NTV/AA 7 Eylül 2018; çayın yer altından geçtiği genel bilgi; giriş ücreti ve tabiat parkı statüsü bilinmiyor",
       "[Rehber · Aşağı Düden] · ~40 m: antalya.bel.tr 'Antalya'nın Şelaleleri' PDF; travertenden yar, gökkuşağı, tekne turlarının şelaleye gelmesi ve iki seyir noktası genel bilgi · yerinde; Lara'dan Kaleiçi'ne 15 dk taksi tahmin",
       "[Yazı · 2. gün] · Kaleiçi gece: Tuzcular Mahallesi'nde bar ve konser alanları, Üçkapılar–Hıdırlık arası (Posta 30 Haziran 2025); belirli mekân adı verilmedi",
-      "[Plan · g2.d4] · Aşağı Düden place_id il listesindekiyle aynı (ChIJCx42…); kimlik sorgusu 'Düden Parkı'nı da döndürdü, park değil şelale seçildi"
+      "[Plan · g2.d4] · Aşağı Düden place_id il listesindekiyle aynı (ChIJCx42…); kimlik sorgusu 'Düden Parkı'nı da döndürdü, park değil şelale seçildi",
+      "[Plan · g1.d1, g2.d3] · Perge'nin ören yeri alanı (way/131469283) Google konumundan 758 m uzak çıktı; osm Helenistik kapıya (way/321303544) alındı. Yukarı Düden'in OSM noktası (node/1238850237) 281 m uzak; osm boş, konum Google'dan 30 gün · OSM'de şelale noktası düzeltilebilir"
     ],
     "fotograf_onerileri": [
       {
