@@ -4,6 +4,7 @@
 // yeniden çalıştırmak güvenlidir, yalnızca yeni dosyalar uygulanır.
 import { readdir, readFile } from 'node:fs/promises';
 import path from 'node:path';
+import { veriSilebilir } from './veri-silen.mjs';
 
 const token = process.env.SUPABASE_ACCESS_TOKEN;
 const ref = process.env.SUPABASE_PROJECT_REF;
@@ -44,12 +45,12 @@ const dosyalar = (await readdir(klasor)).filter((d) => d.endsWith('.sql')).sort(
 // silebiliyorsa hiçbirini uygulamadan dur. §4: geri dönüşsüz iş Ece onayıyla, elle (workflow_dispatch) gider.
 // Yalnız bekleyen dosyalara bakılır; eskiden uygulanmış dosyalardaki kalıplar durdurmaz, önceki bir çalışmada
 // düşüp bekleyen dosya da atlanmaz.
-const VERI_SILEN = /\bdrop\s+table\b|\bdrop\s+column\b|\btruncate\b|\bdelete\s+from\b|\balter\s+column\s+\S+\s+(set\s+data\s+)?type\b/i;
+// Kalıplar: scripts/veri-silen.mjs (testi scripts/veri-silen.test.mjs).
 if (process.env.VERI_SILEN_DURDUR === '1') {
   const riskli = [];
   for (const dosya of dosyalar) {
     if (uygulanan.has(dosya.split('_')[0])) continue;
-    if (VERI_SILEN.test(await readFile(path.join(klasor, dosya), 'utf8'))) riskli.push(dosya);
+    if (veriSilebilir(await readFile(path.join(klasor, dosya), 'utf8'))) riskli.push(dosya);
   }
   if (riskli.length > 0) {
     console.error(

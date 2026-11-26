@@ -20,6 +20,9 @@ on:
     workflows: [supabase-migrate]
     types: [completed]
 
+permissions:
+  contents: read
+
 concurrency:
   group: web-yayin
   cancel-in-progress: true

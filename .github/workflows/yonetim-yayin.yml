@@ -18,6 +18,9 @@ on:
     workflows: [supabase-migrate]
     types: [completed]
 
+permissions:
+  contents: read
+
 concurrency:
   group: yonetim-yayin
   cancel-in-progress: true

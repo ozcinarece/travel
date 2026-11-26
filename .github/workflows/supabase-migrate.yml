@@ -23,6 +23,9 @@ concurrency:
   group: supabase-migrate
   cancel-in-progress: false
 
+permissions:
+  contents: read
+
 env:
   SUPABASE_PROJECT_REF: xwqeobelyeuzoxyuvauw
 
@@ -62,6 +65,9 @@ jobs:
           # Otomatik (push) çalışmada bekleyen migration'lardan biri veri silebiliyorsa iş durur (§4, ece-karari);
           # Ece onayından sonra elle (workflow_dispatch) çalıştırılır.
           VERI_SILEN_DURDUR: ${{ github.event_name == 'push' && '1' || '0' }}
+        # `shell: bash` = `bash -eo pipefail`: `| tee` olmadan da bekçinin ya da migration hatasının çıkış kodu işi
+        # kırmızı bitirsin; yoksa Edge Function dağıtımı ve web/BO yayını (workflow_run success) yine çalışır.
+        shell: bash
         run: node scripts/supabase-migrate.mjs | tee migrate.log
       - name: Edge Function'ları dağıt
         if: steps.kapsam.outputs.fonksiyonlar == 'true'
@@ -73,6 +79,8 @@ jobs:
           # Sürüm sabit: token sabitlenmemiş bir pakete görünmesin.
           npx --yes supabase@3.4.0 functions deploy --project-ref "$SUPABASE_PROJECT_REF" --use-api --yes
       - name: Özet
+        if: always()
+        shell: bash
         run: |
           echo "### Supabase" >> "$GITHUB_STEP_SUMMARY"
-          sed 's/^/- /' migrate.log >> "$GITHUB_STEP_SUMMARY"
+          if [ -f migrate.log ]; then sed 's/^/- /' migrate.log >> "$GITHUB_STEP_SUMMARY"; fi
