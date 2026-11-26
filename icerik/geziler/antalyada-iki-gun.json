@@ -1,0 +1,189 @@
+{
+  "surum": 1,
+  "sehir": {
+    "slug": "antalya"
+  },
+  "takvim": {
+    "ilk_gun": "cumartesi"
+  },
+  "gezi": {
+    "slug": "antalyada-iki-gun",
+    "baslik": "Antalya'da iki gün: ova, dağ ve şelaleler",
+    "ozet": "Perge, Aspendos, Side; ertesi gün Termessos ve iki Düden şelalesi",
+    "yazar_ad": "Tripmate ekibi",
+    "amaclar": [
+      "kultur_tarih",
+      "doga",
+      "gece"
+    ],
+    "yazi_md": "Antalya'nın en eski kentleri Kaleiçi'nin dışında, ovada ve dağda duruyor. İki günü bunlara ayır: ilk gün doğuya, Pamfilya ovasının üç antik kentine; ikinci gün batıdaki dağa, sonra Düden Çayı'nın iki şelalesine. Duraklar arası araçla on beş dakikadan bir saate kadar; ilk gün toplam yol yüz elli kilometreyi bulur, dönüşü akşam yaparsın.\n\n> Ören yerlerinde gölge azdır ve zemin taştır; rahat ayakkabı, şapka ve su al. Side'deki antik tiyatro 2024 sonundan beri onarım için kapalı, Antalya Müzesi de yeniden yapıldığı için kapalı; ikisi de bu planda yok.\n\n## 1. gün · Perge'den Side'ye\n\nKentten Aksu'ya sür ve güne [Perge](mekan:ChIJQwc3aqmBwxQRB7Tr2OhnhMY)'de başla. Helenistik kapının iki kulesinden girip ortasından su kanalı akan sütunlu caddede kuzeye yürü. Stadyumun basamakları neredeyse bütün olarak ayakta; çıkarken ona da uğra.\n\n::mekan[ChIJQwc3aqmBwxQRB7Tr2OhnhMY]\n\nPerge'den Serik yönüne devam et. [Aspendos Tiyatrosu](mekan:ChIJ3W73OHaexBQRtjbW352tqoI) MS 2. yüzyıldan kalma ve sahne binası bütün yüksekliğiyle duran ender Roma tiyatrolarından. Basamakları en üste kadar çık, sonra orkestraya inip sesinin yukarıya nasıl taşındığını dene. Eylülde gidiyorsan akşam festival programına bak.\n\n::mekan[ChIJ3W73OHaexBQRtjbW352tqoI]\n\nTiyatrodan çıkınca birkaç dakika geri dönüp [Köprüpazar Köprüsü](mekan:ChIJ114BdgdiwxQRJkgrK1vZvOo)'ne uğra. Selçuklular bu köprüyü Köprüçay'ın üstüne, eski bir Roma köprüsünün ayaklarına oturtarak yaptı; ortadaki kırılma oradan geliyor. Öğle yemeğini Serik ya da Manavgat yolunda, Side'ye varmadan ye.\n\nÖğleden sonra Side'ye geç. [Side Müzesi](mekan:ChIJB56FB9dbwxQRxXcFaZT1DsQ) bir Roma hamamının içinde; heykellere, lahitlere ve üstünde nar olan Side sikkelerine bak. Müzeden yarımadanın ucuna doğru ana caddeden yürü, Vespasianus Anıtı'nın önünden geç.\n\nGünü [Apollon Tapınağı](mekan:ChIJKwq8WDRZwxQRYhBDLNmnmXQ)'nda bitir. Beş sütunu deniz kıyısında duran tapınak Side'nin gün batımı yeridir; güneş sütunların arkasından denize iner. Akşam yemeğini limanın çevresinde ye, Antalya'ya dönüş bir saat.\n\n## 2. gün · Termessos'tan Düden'e\n\nSabah erkenden Korkuteli yoluna çık ve Güllük Dağı'na sür. [Termessos](mekan:ChIJOam7IwGMwxQRY8hKqb5xIlE) bin metrenin üstünde, ormanın içinde; İskender'in kuşatıp alamadığı kent. Otoparktan tiyatroya patika dik ve taşlı, iki buçuk saat ayır. Tiyatronun basamaklarından ova ve körfez aşağıda görünür.\n\n::mekan[ChIJOam7IwGMwxQRY8hKqb5xIlE]\n\nDağdan inince Konyaaltı'nın üstündeki Atatürk Kültür Parkı'na git. [7 Mehmet](mekan:ChIJz8XP05slwhQRASBCV1vS2Ec) 1937'den beri açık; tahinli piyaz, şiş köfte ve hibeşle Antalya sofrasını kur, tatlıda tahinli kabak tatlısı iste. Kalabalık gidiyorsan önceden yer ayırt.\n\nÖğleden sonra kentin kuzeyine, Kepez'e geç. [Yukarı Düden Şelalesi](mekan:ChIJu3F7zgmGwxQRiKcatsput3I)'nde suyun arkasındaki ıslak geçitten yürü ve şelaleyi içeriden gör.\n\nAynı çay kenti geçip Lara'da denize dökülür. Günün sonunda [Aşağı Düden Şelalesi](mekan:ChIJCx42HgCbwxQRr-WJXGvgAAQ)'ne in: Düden burada kırk metrelik yardan denize atlar. Gün batımında yarın kenarındaki parktan Beydağları'na ve körfeze bak.\n\n::mekan[ChIJCx42HgCbwxQRr-WJXGvgAAQ]\n\nAkşamı Kaleiçi'nde geçir. Lara'dan taksiyle on beş dakika. Kaleiçi'nin bar ve konser mekânları gece Tuzcular Mahallesi'nde, Üçkapılar ile Hıdırlık Kulesi arasındaki sokaklarda toplanır. Arkadaşlarınla iki günü bir kadehle orada kapat. Kaleiçi'ni gündüz de gezmek istersen Yivli Minare'den Hıdırlık'a yürüyen tek günlük planımıza bak."
+  },
+  "gunler": [
+    {
+      "baslik": "Perge'den Side'ye",
+      "duraklar": [
+        {
+          "place_id": "ChIJQwc3aqmBwxQRB7Tr2OhnhMY",
+          "ad": "Perge Antik Kenti",
+          "sure_dk": 120,
+          "sure_gerekcesi": "varsayılan 90; geniş ören yeri, stadyum dahil",
+          "kapali_gunler": [],
+          "rehber": "perge",
+          "amaclar": [
+            "kultur_tarih"
+          ]
+        },
+        {
+          "place_id": "ChIJ3W73OHaexBQRtjbW352tqoI",
+          "osm": "way/477089808",
+          "ad": "Aspendos Tiyatrosu",
+          "sure_dk": 75,
+          "sure_gerekcesi": "varsayılan 90; tiyatro, akropol isteğe bağlı",
+          "kapali_gunler": [],
+          "rehber": "aspendos-tiyatrosu",
+          "amaclar": [
+            "kultur_tarih",
+            "cocuklu"
+          ]
+        },
+        {
+          "place_id": "ChIJ114BdgdiwxQRJkgrK1vZvOo",
+          "osm": "way/80453805",
+          "ad": "Köprüpazar Köprüsü",
+          "sure_dk": 20,
+          "sure_gerekcesi": "varsayılan 30; köprünün üstünde kısa yürüyüş",
+          "kapali_gunler": [],
+          "rehber": "koprupazar-koprusu",
+          "amaclar": [
+            "kultur_tarih",
+            "yavas"
+          ]
+        },
+        {
+          "place_id": "ChIJB56FB9dbwxQRxXcFaZT1DsQ",
+          "osm": "way/484336466",
+          "ad": "Side Müzesi",
+          "sure_dk": 60,
+          "sure_gerekcesi": "varsayılan 90; tek yapıda küçük müze",
+          "kapali_gunler": [],
+          "rehber": "side-muzesi",
+          "amaclar": [
+            "kultur_tarih"
+          ]
+        },
+        {
+          "place_id": "ChIJKwq8WDRZwxQRYhBDLNmnmXQ",
+          "osm": "way/129747059",
+          "ad": "Apollon Tapınağı",
+          "sure_dk": 45,
+          "sure_gerekcesi": "varsayılan 45",
+          "kapali_gunler": [],
+          "rehber": "apollon-tapinagi",
+          "amaclar": [
+            "kultur_tarih",
+            "yavas"
+          ]
+        }
+      ]
+    },
+    {
+      "baslik": "Termessos'tan Düden'e",
+      "duraklar": [
+        {
+          "place_id": "ChIJOam7IwGMwxQRY8hKqb5xIlE",
+          "osm": "node/6130722001",
+          "ad": "Termessos",
+          "sure_dk": 150,
+          "sure_gerekcesi": "varsayılan 90; otoparktan tiyatroya dik patika",
+          "kapali_gunler": [],
+          "rehber": "termessos",
+          "amaclar": [
+            "kultur_tarih",
+            "doga"
+          ]
+        },
+        {
+          "place_id": "ChIJz8XP05slwhQRASBCV1vS2Ec",
+          "osm": "node/3569129293",
+          "ad": "7 Mehmet",
+          "sure_dk": 90,
+          "sure_gerekcesi": "varsayılan 75; kalabalık sofra, manzaralı teras",
+          "kapali_gunler": [],
+          "rehber": "yedi-mehmet",
+          "amaclar": [
+            "lezzet"
+          ]
+        },
+        {
+          "place_id": "ChIJu3F7zgmGwxQRiKcatsput3I",
+          "ad": "Yukarı Düden Şelalesi",
+          "sure_dk": 45,
+          "sure_gerekcesi": "varsayılan 45",
+          "kapali_gunler": [],
+          "rehber": "yukari-duden",
+          "amaclar": [
+            "doga",
+            "cocuklu"
+          ]
+        },
+        {
+          "place_id": "ChIJCx42HgCbwxQRr-WJXGvgAAQ",
+          "osm": "node/27597250",
+          "ad": "Aşağı Düden Şelalesi",
+          "sure_dk": 45,
+          "sure_gerekcesi": "varsayılan 45",
+          "kapali_gunler": [],
+          "rehber": "asagi-duden",
+          "amaclar": [
+            "doga",
+            "yavas"
+          ]
+        }
+      ]
+    }
+  ],
+  "notlar": {
+    "dogrulanacaklar": [
+      "[Plan · tüm duraklar] · kapali_gunler [] : Perge, Aspendos, Termessos, Side ören yeri ve Side Müzesi resmî sayfalarında (turkishmuseums.com 1969, 1963, 1974, 1971, 1959) kapalı gün yazmıyor, her gün için saat veriliyor; çıkarım · muze.gov.tr",
+      "[Plan · g2.d2, g2.d3, g2.d4] · 7 Mehmet, Yukarı ve Aşağı Düden kapalı gün bilinmiyor, [] yazıldı · işletme / Antalya Büyükşehir",
+      "[Yazı · 1. gün] · Öğle yemeği durağı yok (12–14 uyarısı). Aspendos–Side yolunda kaynaklı yerel lokanta bulamadık; OSM'deki iki aday kaynaksız. Ürün'e soru: kaynaklı bir yer bulunana dek yazıdaki genel cümle kalsın mı?",
+      "[Yazı · giriş] · Side Antik Tiyatrosu 29 Kasım 2024'ten beri onarım için kapalı (turkishmuseums.com/museum/detail/1971); Antalya Müzesi 16 Temmuz 2025'ten beri kapalı (Gazete Vatan 17 Temmuz 2025)",
+      "[Rehber · Perge] · Helenistik kuleler, Plancia Magna avlusu ve heykeller, Kestros çeşmesinden akan kanal: antalya.ktb.gov.tr/TR-310900/perge.html, Hürriyet Daily News 4 Ağustos 2026; stadyum ~12.000 kişi, tiyatro 2017'de açıldı (turkishmuseums.com 1969) ama bugünkü durumu bilinmiyor; 'iki saat' tahmin (turkeytravelplanner 2–3 saat)",
+      "[Rehber · Aspendos] · Marcus Aurelius dönemi, mimar Zenon, Selçuklu saray kullanımı, su kemeri ~1 km: antalya.ktb.gov.tr/TR-67535/aspendos.html. Sahne duvarındaki zikzak boyaların Selçuklu dönemi olduğu ve akustik deneme genel bilgi · yerinde. Festival: 33. Aspendos Opera ve Bale Festivali 12–26 Eylül 2026 (Gazete Vatan/İHA 19 Ağustos 2026). Kapasite kaynaklarda çelişkili (9–20 bin), metne yazılmadı",
+      "[Rehber · Köprüpazar] · Keykubad dönemi, Roma ayakları üstünde, zikzak çizgi: en.wikipedia 'Eurymedon Bridge (Aspendos)'; yaya köprüsü olduğu ve 'gemilerin buraya kadar çıktığı' genel bilgi · yerinde",
+      "[Rehber · Side Müzesi] · Agora Hamamı, 1962'den beri müze, Kasım 2024 yeniden açılış, 9.484 sikke: Gazete Vatan/AA 3 Mart 2025. Nar sikkeleri, 'Side = nar' ve hipokaust izleri genel bilgi · müze",
+      "[Rehber · Apollon] · MS 150 dolayı, beş sütunun 1984–1990 arasında dikilmesi: en.wikipedia 'Temple of Apollo (Side)'; Athena Tapınağı onarımı Kasım 2024 (Hürriyet Daily News 8 Mart 2025); Vespasianus Anıtı: turkisharchaeonews.net/node/61; frizdeki Medusa başları ve tapınak yanındaki bazilika (OSM 'Basilica at Side') genel bilgi. Apollon için yeni bir onarım 2025 sonu–2026'da başlayabilir; iskele kurulmuş olabilir",
+      "[Rehber · Termessos] · İskender MÖ 333 (turkishmuseums.com 1974), 1.050–1.200 m (haberler.com 6 Aralık 2025), milli park ve yaban keçisi (ktb.gov.tr EN-99776), 3–4 saat ve tekerlekli sandalyeye uygun değil (turkeytravelplanner). Otoparktan tiyatroya süre ve 'yukarıda büfe yok' doğrulanmadı",
+      "[Rehber · 7 Mehmet] · 1937, Mehmet Akdağ, alnındaki iz, 1997'den beri Atatürk Kültür Parkı: Para Dergi 1 Ağustos 2023; kabak tatlısı ve pilav: National Geographic 'best restaurants in Antalya'; hibeş tarifi aynı kaynak. 'Aynı ailenin elinde' Para Dergi'den çıkarım",
+      "[Rehber · Yukarı Düden] · Suyun mağara oyuklarından çıkışı ve ıslak geçit: NTV/AA 7 Eylül 2018; çayın yer altından geçtiği genel bilgi; giriş ücreti ve tabiat parkı statüsü bilinmiyor",
+      "[Rehber · Aşağı Düden] · ~40 m: antalya.bel.tr 'Antalya'nın Şelaleleri' PDF; travertenden yar, gökkuşağı, tekne turlarının şelaleye gelmesi ve iki seyir noktası genel bilgi · yerinde; Lara'dan Kaleiçi'ne 15 dk taksi tahmin",
+      "[Yazı · 2. gün] · Kaleiçi gece: Tuzcular Mahallesi'nde bar ve konser alanları, Üçkapılar–Hıdırlık arası (Posta 30 Haziran 2025); belirli mekân adı verilmedi",
+      "[Plan · g2.d4] · Aşağı Düden place_id il listesindekiyle aynı (ChIJCx42…); kimlik sorgusu 'Düden Parkı'nı da döndürdü, park değil şelale seçildi",
+      "[Plan · g1.d1, g2.d3] · Perge'nin ören yeri alanı (way/131469283) Google konumundan 758 m uzak çıktı; Helenistik kapı (way/321303544) 443 m; stadyum (relation/11916420) 202 m, tiyatro (relation/11916419) 166 m; osm boş, konum Google'dan 30 gün. Yukarı Düden'in OSM noktası (node/1238850237) 281 m uzak; osm boş, konum Google'dan 30 gün · OSM'de şelale noktası düzeltilebilir"
+    ],
+    "fotograf_onerileri": [
+      {
+        "ne": "Aspendos Tiyatrosu sahne binası",
+        "altyazi": "Aspendos'un sahne binası",
+        "arama": "commons:Category:Theatre of Aspendos"
+      },
+      {
+        "ne": "Side, Apollon Tapınağı gün batımında",
+        "altyazi": "Side'de Apollon Tapınağı",
+        "arama": "commons:Category:Temple of Apollo (Side)"
+      },
+      {
+        "ne": "Perge sütunlu cadde ve su kanalı",
+        "altyazi": "Perge'nin sütunlu caddesi",
+        "arama": "commons:Category:Perga"
+      }
+    ],
+    "varsayimlar": [
+      "1. gün cumartesi; duraklarda bilinen kapalı gün yok",
+      "İki gün de araçla; duraklar arası yürüme uyarıları araç bacakları (#311)",
+      "İl listesinin ilk 5'i: Aspendos (2), Perge (3), Aşağı Düden (4) ve Side (5) bu gezide; Kaleiçi (1) antalyada-bir-gun'da",
+      "Gece (#376): 2. gün Aşağı Düden'de gün batımı, sonra Kaleiçi'nde Tuzcular'da akşam; 1. gün Side'de gün batımı",
+      "Antalya şehri antalyada-bir-gun ile açıldı; burada sehir.slug"
+    ]
+  }
+}
