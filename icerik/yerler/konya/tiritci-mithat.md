@@ -4,6 +4,6 @@ Menüde birkaç çeşit var, ama buraya tirit için gelinir. Tabak geldiğinde e
 
 Lokanta öğle saatinde dolar ve servis hızlıdır; masada uzun oturulmaz. Bir saat yeter.
 
-Etli ekmek ya da fırın kebabı istersen çarşıda başka seçenekler de var: etli ekmek için Bolu Lokantası, fırın kebabı için Meram yolundaki fırınlar. Tiriti ise bu kadar yakında, bu kadar eski bir yerde bulmak zor.
+Etli ekmek istersen çarşıda Bolu Lokantası da var. Tiriti ise bu kadar yakında, bu kadar eski bir yerde bulmak zor.
 
 > Tabağı getirdiklerinde tereyağını sordur: kızgın tereyağı masada dökülürse yoğurtla etin arasında cızırdayarak erir.
