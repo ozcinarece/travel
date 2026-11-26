@@ -1,0 +1,287 @@
+{
+  "il": "Hakkari",
+  "slug": "hakkari",
+  "guncelleme": "2026-11-26",
+  "oneriler": [
+    {
+      "sira": 1,
+      "ad": "Cilo Buzulları ve Cennet Cehennem Vadisi",
+      "kategori": "doga",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 45,
+      "neden": "Toprak yolun ucundan iki saat yürüyüp buzul ve göllere çıkılır; buzulun üstüne basılmaz",
+      "place_id": "ChIJr7URUg-nD0ARbPNHcOU2Vbg"
+    },
+    {
+      "sira": 2,
+      "ad": "Meydan Medresesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "1700'lerden kalma medresede kent arşivi, etnografya bölümü ve mum figürler var",
+      "place_id": "ChIJ7xhXfloAD0ARe4v9V1yfC6w"
+    },
+    {
+      "sira": 3,
+      "ad": "Sat Buzul Gölleri",
+      "kategori": "aktivite",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Yüksekova",
+      "merkeze_km": 100,
+      "neden": "Varegöz Yaylası'ndan yürüyerek 3.000 m üstündeki buzul göllerine çıkılır; yalnız yaz",
+      "place_id": "ChIJESjaDQB3D0ARUM1P9zm-0bo"
+    },
+    {
+      "sira": 4,
+      "ad": "Berçelan Yaylası",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 25,
+      "neden": "Haziranda göçerlerin kara çadırları kurulur; karlı doruğun altında çiçekli çayırlar",
+      "place_id": "ChIJJXH_OCMBD0AR0q3ErDVmiWI"
+    },
+    {
+      "sira": 5,
+      "ad": "Mergabütan Kayak Merkezi",
+      "kategori": "aktivite",
+      "amaclar": [
+        "doga",
+        "cocuklu",
+        "gece"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 12,
+      "neden": "Kente 12 km'lik pistler aralık–nisan açık; ışıklı pistte akşam da kayılır",
+      "place_id": "ChIJuWHZaz8AD0ARg7I44hgKHDg"
+    },
+    {
+      "sira": 6,
+      "ad": "Zap Vadisi Seyir Tepesi",
+      "kategori": "manzara",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 5,
+      "neden": "Sere Solan'daki terastan Zap Vadisi, Sümbül Dağı ve kent bir arada görünür"
+    },
+    {
+      "sira": 7,
+      "ad": "Seyyid Taha-i Hakkari Türbesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Şemdinli",
+      "merkeze_km": 125,
+      "neden": "Nehri'de (Bağlar) Nakşibendi şeyhleri Seyyid Taha ve Seyyid Abdullah'ın türbeleri",
+      "place_id": "ChIJ7wKdFUl5BUARX0n5smsEM5I"
+    },
+    {
+      "sira": 8,
+      "ad": "Kayme Sarayı",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Şemdinli",
+      "merkeze_km": 125,
+      "neden": "Nehri şeyhlerinin taş konağı; 2018'de onarıldı, türbelerle aynı köyde",
+      "place_id": "ChIJj44ZqEl5BUARxWYzZdgCCZc"
+    },
+    {
+      "sira": 9,
+      "ad": "Nehil Sazlığı",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "cocuklu",
+        "yavas"
+      ],
+      "ilce": "Yüksekova",
+      "merkeze_km": 75,
+      "neden": "Ova ortasındaki sazlık baharda göçmen kuşlarla dolar; bazı leylekler kışı burada geçirir",
+      "place_id": "ChIJuy3RHmCXD0ARPu6-AAn3OOo"
+    },
+    {
+      "sira": 10,
+      "ad": "Firavîn & Şîv",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet",
+        "cocuklu"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Kadınların işlettiği aile lokantası; günlük menüde Hakkari ev yemekleri",
+      "place_id": "ChIJ5Y-7PAABD0ARH595yN0enYw"
+    },
+    {
+      "sira": 11,
+      "ad": "Hakkari Evi Kahvaltı",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet",
+        "yavas"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Emir Sultan Parkı içinde, ceviz reçelli ve kaymaklı yöresel kahvaltı"
+    },
+    {
+      "sira": 12,
+      "ad": "Nehri Taş Köprüsü",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "doga"
+      ],
+      "ilce": "Şemdinli",
+      "merkeze_km": 128,
+      "neden": "1898 yapımı tek kemerli köprü Şemdinli Çayı'nı 11 m yükseklikten aşar"
+    },
+    {
+      "sira": 13,
+      "ad": "Çukurca Kale Evleri ve Taş Değirmen",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "lezzet"
+      ],
+      "ilce": "Çukurca",
+      "merkeze_km": 50,
+      "neden": "Onarılan 400 yıllık taş evler; yanındaki değirmende Çukurca tahini çekilir"
+    },
+    {
+      "sira": 14,
+      "ad": "Efkar Dağı Seyir Tepesi",
+      "kategori": "manzara",
+      "amaclar": [
+        "yavas",
+        "cocuklu"
+      ],
+      "ilce": "Şemdinli",
+      "merkeze_km": 115,
+      "neden": "1.450 m'deki kameriyeli tepeden Şemdinli ilçesi kuşbakışı görünür"
+    },
+    {
+      "sira": 15,
+      "ad": "Uludoruk (Reşko) Tırmanışı",
+      "kategori": "aktivite",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Yüksekova",
+      "merkeze_km": 50,
+      "neden": "Cilo'nun 4.135 m'lik doruğu; çok günlük, deneyim ve rehber isteyen tırmanış",
+      "place_id": "ChIJcxaMZDSnD0AR00UXam0zXqQ"
+    },
+    {
+      "sira": 16,
+      "ad": "Zeynel Bey Medresesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "1560'larda yapılan en eski medrese onarıldı; arkeoloji müzesi olarak açılacak",
+      "place_id": "ChIJP5esP9MBD0ARIyHMnoDQHBM"
+    },
+    {
+      "sira": 17,
+      "ad": "Koçanis (Mar Şalita) Kilisesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 22,
+      "neden": "Konak köyünde, 1915'e dek Doğu Kilisesi patriklerinin merkezi olan taş kilise",
+      "osm": "node/4840369760",
+      "place_id": "ChIJWWScgV8BD0ARx7IeN0s0O7o"
+    },
+    {
+      "sira": 18,
+      "ad": "Ters Lale Alanı (Sütçüler Tepesi)",
+      "kategori": "doga",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 70,
+      "neden": "Mayısta Ceylanlı köyünden 4 km yürüyüp ters lalelerin açtığı yamaçlara varılır"
+    },
+    {
+      "sira": 19,
+      "ad": "Mencel Yaylası",
+      "kategori": "doga",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 70,
+      "neden": "Göllü yüksek yayla, uzun bir yasaktan sonra 2025'te ilk şenliğiyle yeniden açıldı"
+    },
+    {
+      "sira": 20,
+      "ad": "Cilo-Sat Kaya Resimleri",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "doga"
+      ],
+      "ilce": "Yüksekova",
+      "merkeze_km": 95,
+      "neden": "Gevaruk yaylasındaki kayalara dağ keçisi ve geyik figürleri kazınmış; rehberle gidilir"
+    },
+    {
+      "sira": 21,
+      "ad": "Zap Kahvaltı & Şarküteri",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "İstiklal Caddesi'nde yöresel bal, tahin ve peynir satan kahvaltılık dükkânı"
+    },
+    {
+      "sira": 22,
+      "ad": "Şabatan Seyir Tepesi",
+      "kategori": "manzara",
+      "amaclar": [
+        "yavas"
+      ],
+      "ilce": "Şemdinli",
+      "merkeze_km": 115,
+      "neden": "İlçe girişindeki 1.685 m'lik tepeye çay bahçeli ikinci seyir terası yapıldı"
+    },
+    {
+      "sira": 23,
+      "ad": "Derecik Balkaya Şelaleleri",
+      "kategori": "doga",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Derecik",
+      "merkeze_km": 150,
+      "neden": "Mart–nisanda kar suyuyla coşan şelaleler; aynı haftalarda bademler çiçek açar"
+    }
+  ]
+}
