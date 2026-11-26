@@ -2,7 +2,7 @@ Hıdırlık Kulesi, Kaleiçi'nin güney ucunda, denize bakan yarın kenarında d
 
 Kulenin önündeki küçük meydandan körfeze bak. Karşıda batıda Beydağları sıra halinde denize iniyor, aşağıda Kaleiçi'nin kayalık kıyısı ve limanın dalgakıranı var. Kulenin hemen doğusunda Karaalioğlu Parkı başlıyor: kentin en eski parklarından biri, palmiyeler ve yaşlı çamlar arasında yar boyunca uzanan bir yürüyüş yolu.
 
-Burası bir günbatımı yeri. Parkın banklarında oturup güneşin dağların arkasına inmesini izleyen Antalyalılar çoktur; kalabalık olsa da yer bulunur. Kule ve parkta kırk beş dakika geçirmek kolay. Parkın içinde çay bahçeleri de var.
+Burası bir günbatımı yeri. Parkın banklarında oturup güneşin dağların arkasına inmesini izleyen Antalyalılar çoktur; kalabalık olsa da yer bulunur. Kule ve parkta bir saat geçirmek kolay. Parkın içinde çay bahçeleri de var.
 
 Kuleden Kaleiçi'ne dönmek için Hesapçı Sokağı'na girmen yeter; sokak seni Kesik Minare'nin önünden geçirip kentin ortasına çıkarır.
 

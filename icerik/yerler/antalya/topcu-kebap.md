@@ -4,6 +4,6 @@ Antalya piyazı başka yerlerde bildiğin piyaza benzemez. Haşlanmış kuru fas
 
 Öğle saatinde masalar hızla dolar ve servis hızlıdır; bir saat yeter. Kaleiçi'nin turist lokantalarından farklı olarak burayı en çok Antalyalılar dolduruyor; yerel bir öğle yemeği için iyi bir yer.
 
-Yemekten sonra güneye, Kalekapısı'na yürü. Atatürk Caddesi boyunca on beş dakikada Karaalioğlu Parkı'na varırsın.
+Yemekten sonra Kaleiçi'ne dön; Hesapçı Sokağı'yla güneye inersen on beş dakikada Kesik Minare'den geçip Hıdırlık ve Karaalioğlu Parkı'na varırsın.
 
 > Piyazı köfteden önce iste ve ilk lokmayı ayrı tat: tahinli sos köftenin yanında başka, tek başına başka bir tat verir.
