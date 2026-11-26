@@ -24,6 +24,20 @@ const durdurur = [
   'drop view v cascade;',
   'delete from trips where true;',
   'alter foreign table uzak drop c;',
+  // #501 KK3
+  'update public.yerler set yayin = true;',
+  'UPDATE ONLY t AS x SET c = null WHERE x.id = 1;',
+  'update t x set c = 1;',
+  'drop extension if exists pg_trgm;',
+  // #501 KK1: `do` blokları migration sırasında çalışır, taranır.
+  'do $$ begin update changes set old = null where tablo = \'profiles\'; end $$;',
+  'do $$ begin delete from t; end $$;',
+  'do $x$ begin truncate t; end $x$;',
+  // `do` içinde dinamik SQL: ne yaptığı okunamaz, ihtiyaten durdurur.
+  "do $$ begin execute format('alter table %I drop constraint k', 't'); end $$;",
+  // Gövde dışındaki silme, fonksiyonla aynı dosyada olsa da yakalanır.
+  'create function f() returns void language plpgsql as $$ begin delete from t; end $$;\ndelete from u;',
+  'create or replace function f() returns void language sql as $$ select 1 $$;\ndrop table eski;',
 ];
 
 const durdurmaz = [
@@ -45,6 +59,20 @@ const durdurmaz = [
   'create type durum as enum (\'taslak\', \'yayinda\');',
   '-- eskiden drop table yapardık\ncreate table t (id int);',
   '/* truncate etmeyin */ create index i on t (id);',
+  // #501 KK3: tetikleyici, yetki ve upsert `update … set` sayılmaz.
+  'create trigger tr before update on public.t for each row execute function f();',
+  'create trigger tr after insert or update of c on t for each row execute function f();',
+  'grant update (ad) on public.profiles to authenticated;',
+  'create policy p on t for update using (true) with check (true);',
+  'insert into t (id, c) values (1, 2) on conflict (id) do update set c = excluded.c;',
+  // #501 KK1: fonksiyon/prosedür gövdesi çağrılınca çalışır, taranmaz.
+  'create function f() returns void language plpgsql as $$ begin delete from t; end $$;',
+  'create or replace function public.f(p uuid) returns void\nlanguage plpgsql security definer set search_path = \'\'\nas $$\nbegin\n  update changes set old = null where id = p;\nend;\n$$;',
+  'create procedure p() language plpgsql as $govde$ begin truncate t; drop table x; end $govde$;',
+  'create function f() returns void language plpgsql as $$ begin execute \'delete from t\'; end $$;',
+  // Fonksiyon gövdesinde `$$` dışında bir etiket ve içte `$1`.
+  'create function f(int) returns int language sql as $f$ select $1 + 1 $f$;\ncreate table t (id int);',
+  'do $$ begin raise notice \'tamam\'; end $$;',
 ];
 
 for (const sql of durdurur) {
