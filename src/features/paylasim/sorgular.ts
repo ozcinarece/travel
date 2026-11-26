@@ -31,15 +31,15 @@ export function useAcikPaylasim(tripId: string, etkin: boolean) {
 }
 
 /**
- * #530 inceleme 2: seyahatte (kim açmış olursa olsun) açık link var mı. RLS başkasının linkini göstermez; sunucu yalnız evet/hayır
- * döner (token yok). Sıradaki adım "Gezini paylaş" bununla düşer.
+ * #530 inceleme 2–3: bu seyahatte (kim açmış olursa olsun) hiç link açıldı mı. RLS başkasının linkini göstermez; sunucu yalnız
+ * evet/hayır döner (token yok). Sıradaki adım "Gezini paylaş" bununla düşer; kapatılan link adımı geri getirmez.
  */
-export function usePaylasimAcikVar(tripId: string, etkin: boolean) {
+export function usePaylasimYapildi(tripId: string, etkin: boolean) {
   return useQuery({
-    queryKey: [...anahtar(tripId), 'acikVar'] as const,
+    queryKey: [...anahtar(tripId), 'yapildi'] as const,
     enabled: etkin,
     queryFn: async () => {
-      const { data, error } = await supabase.rpc('paylasim_acik_var', { p_trip: tripId });
+      const { data, error } = await supabase.rpc('paylasim_yapildi', { p_trip: tripId });
       if (error) throw error;
       return data === true;
     },
@@ -66,7 +66,7 @@ export function usePaylasimOlustur(tripId: string, kaynak: PaylasimKaynagi = 'me
     },
     onSuccess: (yeni) => {
       qc.setQueryData(anahtar(tripId), yeni);
-      qc.setQueryData([...anahtar(tripId), 'acikVar'], true);
+      qc.setQueryData([...anahtar(tripId), 'yapildi'], true);
     },
   });
 }
@@ -80,11 +80,8 @@ export function usePaylasimGuncelle(tripId: string) {
       if (error) throw error;
       return degisiklik;
     },
-    onSuccess: () => {
-      qc.setQueryData(anahtar(tripId), null);
-      // Başka bir üyenin linki hâlâ açık olabilir: sunucudan yeniden sorulur.
-      void qc.invalidateQueries({ queryKey: [...anahtar(tripId), 'acikVar'] });
-    },
+    // #530 inceleme 3: kapatmak "hiç paylaşıldı" bilgisini değiştirmez; adım geri gelmez.
+    onSuccess: () => qc.setQueryData(anahtar(tripId), null),
   });
 }
 

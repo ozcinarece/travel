@@ -3,7 +3,7 @@
 // "Link açık · N kez açıldı" ve onaylı "Paylaşımı kapat", KK9'daki "Arkadaş ekle ›" satırı.
 import { beforeEach, describe, expect, it, jest } from '@jest/globals';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react-native';
-import { AccessibilityInfo, Platform } from 'react-native';
+import { AccessibilityInfo, Platform, StyleSheet } from 'react-native';
 
 import { t } from '@/i18n';
 
@@ -144,6 +144,8 @@ describe('PaylasimCekmecesi (#432 2/3)', () => {
     );
     const gonder = screen.getByRole('button', { name: t('paylasim.linkiGonder') });
     expect(gonder.props.accessibilityState.disabled).toBe(true);
+    // #530 3. inceleme 2: beklerken soluk görünür.
+    expect(StyleSheet.flatten(gonder.props.style).opacity).toBe(0.4);
     fireEvent.press(screen.getByText('Linki gönder'));
     expect(mockOlustur).not.toHaveBeenCalled();
     screen.rerender(

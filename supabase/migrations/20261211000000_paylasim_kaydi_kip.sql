@@ -4,7 +4,8 @@
 --      Bu kayıt geri alınamaz (degisikligi_geri_al `gezi_paylasim` varlığını tanımaz, 22023).
 -- KK3: özet seyahatin kipini döndürür (`kisi_kip`: 'gidiyor' | 'geziyor' | 'gezdi'); tarih döndürülmez.
 -- KK-ek1 (#515 incelemesi): linkte paylaşanın yalnız ilk adı döner (sekme, bölünmez boşluk dahil her boşlukta bölünür).
--- KK8 (#530 incelemesi 2): üye, seyahatte kim açmış olursa olsun açık link var mı öğrenir (`paylasim_acik_var`); token dönmez.
+-- KK8 (#530 incelemesi 2–3): üye, bu seyahatte hiç link açılmış mı öğrenir (`paylasim_yapildi`); token ya da kim açtı dönmez.
+-- #530 incelemesi 3: hesabını silen üyenin linki kapanır ve "kapandı" kaydı düşer (oluşturan null'a düşünce).
 -- KK-ek2 (#515 incelemesi): girişsiz açılış sayacı token başına günde en çok 500 artar.
 
 create function public.gezi_paylasim_log() returns trigger
@@ -30,8 +31,27 @@ end;
 $$;
 revoke execute on function public.gezi_paylasim_log() from public, anon, authenticated;
 
-create trigger gezi_paylasim_log after insert or update of acik on public.gezi_paylasim
+-- Sütun listesi yok: hesap silinince (FK `on delete set null`) güncelleme yalnız `olusturan`'ı yazar; `acik`'i aşağıdaki
+-- tetikleyici kapatır, kayıt yine düşmeli.
+create trigger gezi_paylasim_log after insert or update on public.gezi_paylasim
   for each row execute function public.gezi_paylasim_log();
+
+-- #530 incelemesi 3: oluşturan hesabını silince (`olusturan` null) açık link kapanır. Aksi halde üye çıkışı tetikleyicisi
+-- (gezi_paylasim_uye_cikti) satırı bulamaz ve link sonsuza dek "açık" kalır.
+create function public.gezi_paylasim_sahipsiz() returns trigger
+language plpgsql set search_path = ''
+as $$
+begin
+  if old.olusturan is not null and new.olusturan is null and new.acik then
+    new.acik := false;
+    new.kapatildi_at := now();
+  end if;
+  return new;
+end;
+$$;
+revoke execute on function public.gezi_paylasim_sahipsiz() from public, anon, authenticated;
+create trigger gezi_paylasim_sahipsiz before update of olusturan on public.gezi_paylasim
+  for each row execute function public.gezi_paylasim_sahipsiz();
 
 -- KK-ek2: günlük açılış tavanı (harita izninin kalıbı).
 alter table public.gezi_paylasim
@@ -68,9 +88,11 @@ begin
   select * into t from public.trips where id = g.trip_id;
   -- KK3: istemcideki geziModu ile aynı: tarihsiz ya da başlamamış "gidiyor", tarihler içinde "geziyor", dönüş geçtiyse "gezdi".
   bugun := (now() at time zone coalesce(t.tz, 'Europe/Istanbul'))::date;
-  -- KK-ek1: ilk boşluksuz parça. [[:space:]] C yerelinde U+00A0'ı kapsamadığı için açıkça eklendi; baştaki boşluk da atlanır.
+  -- KK-ek1: ilk boşluksuz parça; baştaki boşluk atlanır. [[:space:]] C yerelinde Unicode boşlukları kapsamadığı için
+  -- istemcideki JS `\s` ile aynı küme açıkça eklendi (#530 incelemesi 3): U+00A0, U+1680, U+2000–200A, U+2028, U+2029,
+  -- U+202F, U+205F, U+3000, U+FEFF.
   ad := (regexp_match((select m.display_name from public.members m where m.trip_id = t.id and m.user_id = g.olusturan),
-                      '[^[:space:]\u00a0]+'))[1];
+                      '[^[:space:]\u00a0\u1680\u2000-\u200a\u2028\u2029\u202f\u205f\u3000\ufeff]+'))[1];
   return jsonb_build_object(
     'kapali', false,
     'id', g.id,
@@ -107,11 +129,13 @@ begin
 end;
 $$;
 
--- KK8 (#530 incelemesi 2): seyahatte (kim açmış olursa olsun) açık link var mı. Yalnız üyeye true döner; token ya da kim açtı dönmez.
-create function public.paylasim_acik_var(p_trip uuid) returns boolean
+-- KK8 (#530 incelemesi 3, Ürün kararı): "Gezini paylaş" adımı yalnız bu seyahatte HİÇ link açılmamışsa çıkar; kapatılan link
+-- adımı geri getirmez. Kaynak `gezi_paylasim` satırının varlığı: satır silinmez (istemci silemez, kapatma `acik=false`,
+-- hesap silinince `olusturan` null olur); `changes`'taki açılış kaydıyla aynı bilgi. Yalnız üyeye true; token, kim açtı dönmez.
+create function public.paylasim_yapildi(p_trip uuid) returns boolean
 language sql stable security definer set search_path = ''
 as $$
-  select public.is_member(p_trip) and exists (select 1 from public.gezi_paylasim g where g.trip_id = p_trip and g.acik)
+  select public.is_member(p_trip) and exists (select 1 from public.gezi_paylasim g where g.trip_id = p_trip)
 $$;
-revoke execute on function public.paylasim_acik_var(uuid) from public, anon;
-grant execute on function public.paylasim_acik_var(uuid) to authenticated;
+revoke execute on function public.paylasim_yapildi(uuid) from public, anon;
+grant execute on function public.paylasim_yapildi(uuid) to authenticated;
