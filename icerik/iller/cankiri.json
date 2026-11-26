@@ -1,0 +1,362 @@
+{
+  "il": "Çankırı",
+  "slug": "cankiri",
+  "guncelleme": "2026-11-26",
+  "oneriler": [
+    {
+      "sira": 1,
+      "ad": "Çankırı Tuz Mağarası",
+      "kategori": "aktivite",
+      "amaclar": [
+        "cocuklu",
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 20,
+      "neden": "Hititlerden beri tuz çıkarılan ocak; kaya tuzu galerilerinde yürüyerek gezilir",
+      "place_id": "ChIJTyyFdgjfg0AR26TjDHRHxyo"
+    },
+    {
+      "sira": 2,
+      "ad": "Sultan Süleyman (Ulu) Camii",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Kanuni'nin emriyle 1558'de açıldı; orta kubbe dört yarım kubbeye oturur",
+      "osm": "way/274007424",
+      "place_id": "ChIJGQ0c0oPEg0ARoqqU2ABH9TQ"
+    },
+    {
+      "sira": 3,
+      "ad": "Taş Mescit (Cemaleddin Ferruh Darülhadisi)",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "1235'te Atabey Cemaleddin Ferruh yaptırdı; 1242'de darülhadis eklendi",
+      "osm": "way/1264105551",
+      "place_id": "ChIJp9JlanzEg0ARS-0LDPtrZ6o"
+    },
+    {
+      "sira": 4,
+      "ad": "Çankırı Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "1905 Hükümet Konağı'nda; kılıç dişli kedi fosili ve 1235'ten yılanlı kabartma",
+      "osm": "way/303662236",
+      "place_id": "ChIJv7AW0oPEg0ARUsLl_DK1lp8"
+    },
+    {
+      "sira": 5,
+      "ad": "Çankırı Kalesi ve Karatekin Türbesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "Kentin üstündeki tepe; Karatekin Bey'in türbesi ve cam seyir terası burada",
+      "osm": "node/881887842",
+      "place_id": "ChIJ0Yf_FH_Dg0ARg3T3OKgo888"
+    },
+    {
+      "sira": 6,
+      "ad": "Derya Lokantası (Sefer Usta'nın Yeri)",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Ulu Cami'nin yanında; sarımsaklı et, yaren güveci ve yumurta tatlısı",
+      "place_id": "ChIJ-2id_oHEg0ARsM1QiXHLWP8"
+    },
+    {
+      "sira": 7,
+      "ad": "Kadınçayırı Tabiat Parkı",
+      "kategori": "aktivite",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Ilgaz",
+      "merkeze_km": 70,
+      "neden": "Ilgaz Dağı'nın Çankırı yamacında 422 hektar orman; zipline hattı ve kır evleri",
+      "place_id": "ChIJASx7ZfRwhEARKFOYt7amFHk"
+    },
+    {
+      "sira": 8,
+      "ad": "Buğday Pazarı (Hazımiye) Medresesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "17. yüzyıl medresesi; bugün ebru, hat ve ney kursları, kaya tuzu ve helva satışı",
+      "place_id": "ChIJzf65EoLEg0ARTwJE9PB6Riw"
+    },
+    {
+      "sira": 9,
+      "ad": "Çankırı Evleri",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "Kalenin eteğinde ahşap ve kerpiç evler; yaklaşık 108'i tescilli",
+      "place_id": null
+    },
+    {
+      "sira": 10,
+      "ad": "Tarihi Çamaşırhane Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "1885'te yapılıp 1980'e dek kullanılan mahalle çamaşırhanesi; 2005'te onarıldı",
+      "place_id": "ChIJl909Ko3Fg0ARbHSR0LaSg2c"
+    },
+    {
+      "sira": 11,
+      "ad": "Yıldıztepe Kayak Merkezi",
+      "kategori": "aktivite",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Ilgaz",
+      "merkeze_km": 70,
+      "neden": "Ilgaz'ın Çankırı tarafında; 900 m'den 4,5 km'ye uzanan üç pist",
+      "place_id": "ChIJ61RDC_9whEARHle0D7zpmG8"
+    },
+    {
+      "sira": 12,
+      "ad": "Çankırı Kültür Evi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Kurtuluş Savaşı'nda revir olan konakta yüz yıllık ev eşyası ve gelin odası",
+      "place_id": null
+    },
+    {
+      "sira": 13,
+      "ad": "Saat Kulesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "II. Abdülhamid'in gönderdiği İsviçre saati İnebolu'dan taşındı; kule 15 m",
+      "place_id": "ChIJF3cV2H_Dg0ARePLuv8kwLtA"
+    },
+    {
+      "sira": 14,
+      "ad": "Taş Mektep",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "1893'te idadi olarak açıldı; Atatürk'ün 1925'te kaldığı oda korunuyor",
+      "place_id": null
+    },
+    {
+      "sira": 15,
+      "ad": "Hacı Ali Dinlenme Tesisleri",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 5,
+      "neden": "Ankara yolunda; sarımsaklı et ve irmikli dondurma helvası",
+      "place_id": "ChIJp_-3ycTEg0ARA-L9hRYom3o"
+    },
+    {
+      "sira": 16,
+      "ad": "Koca Meşe",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Yapraklı",
+      "merkeze_km": 27,
+      "neden": "Karacaözü'nde 2006'da tescillenen anıt meşe; gövde çevresi 12 m'yi aşar",
+      "place_id": "ChIJgSMzqzzvg0ARDctQ40sCrWg"
+    },
+    {
+      "sira": 17,
+      "ad": "Kırkpınar Yaylası",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Ilgaz",
+      "merkeze_km": 70,
+      "neden": "1.600 m'de çam ormanı ve gölet; adını sayısız pınarından alır",
+      "place_id": null
+    },
+    {
+      "sira": 18,
+      "ad": "Sakaeli Kaya Mezarları",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "doga"
+      ],
+      "ilce": "Orta",
+      "merkeze_km": 72,
+      "neden": "Devrez Çayı'na bakan yamaçta Roma ve Bizans dönemi kaya mezarları",
+      "place_id": "ChIJjek6vo-lg0ARIQs3yT-sY14"
+    },
+    {
+      "sira": 19,
+      "ad": "Ferit Akalın Radyo ve İletişim Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Karataş'ta onarılmış bir evde koleksiyoncu Ferit Akalın'ın eski radyoları",
+      "place_id": "ChIJF5W2BoDEg0AR8wGPHebSqVg"
+    },
+    {
+      "sira": 20,
+      "ad": "Ali Bey Camii ve Karataş Hamamı",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "1609 tarihli cami özgün kitabesiyle; yanında mütesellim Ali Bey'in hamamı",
+      "osm": "way/305689275",
+      "place_id": "ChIJDR4fEIDEg0ARdhE6DpTK69g"
+    },
+    {
+      "sira": 21,
+      "ad": "Hacı Murad-ı Veli Camii",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Eldivan",
+      "merkeze_km": 25,
+      "neden": "Seydiköy'de ahşap tavanlı cami; nakışları 1951'de Tosyalı Ali Usta yaptı",
+      "osm": "way/75531922",
+      "place_id": "ChIJJRpK3iXGg0ARi7WexEx6FyU"
+    },
+    {
+      "sira": 22,
+      "ad": "Hazım Dağlı Tabiat Parkı",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Yapraklı",
+      "merkeze_km": 40,
+      "neden": "1.600 m'de sarıçam ormanı; parkta kır evleri var",
+      "place_id": "ChIJvT6ovQbzg0AR8OpTYbrBf8E"
+    },
+    {
+      "sira": 23,
+      "ad": "Kurt Kardeşler",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Çerkeş",
+      "merkeze_km": 85,
+      "neden": "Çerkeş'te esnaf lokantası; güveç, et kavurma ve pide",
+      "place_id": null
+    },
+    {
+      "sira": 24,
+      "ad": "Bayramören Tarihi Ahşap Köprü",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Bayramören",
+      "merkeze_km": 95,
+      "neden": "Melan Çayı üstünde üç taş ayağa oturan 40 m'lik 19. yüzyıl ahşap köprüsü",
+      "place_id": "ChIJ1_2cKrpwg0ARN_Z2euWiMl4"
+    },
+    {
+      "sira": 25,
+      "ad": "Çivitçioğlu Medresesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Ulu Cami'nin doğusunda, ahşap revaklı eski medrese",
+      "place_id": "ChIJl-rkG37Dg0ARtGlKYMO92zA"
+    },
+    {
+      "sira": 26,
+      "ad": "Alpsarı Göleti",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Korgun",
+      "merkeze_km": 22,
+      "neden": "Yörenin en büyük göleti; kıyısında piknik alanı",
+      "place_id": "ChIJ0dgDP4K_g0AR6W8tgFHvoOA"
+    },
+    {
+      "sira": 27,
+      "ad": "Paşasultan Camii",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Şabanözü",
+      "merkeze_km": 55,
+      "neden": "Ahşap direkli 13. yüzyıl cami tipinin erken örneklerinden",
+      "place_id": null
+    },
+    {
+      "sira": 28,
+      "ad": "Hüyük Yeraltı Şehri",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Orta",
+      "merkeze_km": 50,
+      "neden": "2005'te bulunan, MS 2. yüzyıla tarihlenen kayaya oyulmuş yerleşim",
+      "place_id": "ChIJ9Rj2Fpuzg0ARPvfaJjnebWI"
+    }
+  ]
+}
