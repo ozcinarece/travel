@@ -9,6 +9,8 @@ export const IL_KATEGORILERI = ['doga', 'yemek', 'tatli_kahve', 'muze', 'tarih',
 export const IL_EN_AZ = 20;
 export const IL_EN_COK = 50;
 export const KATEGORI_EN_AZ = 3;
+/** #504 (Ürün kararı, #402): her il için en az 2 yöresel yemek yeri yeter (#401); öteki kategoriler 3. */
+export const KATEGORI_EN_AZ_OZEL = { yemek: 2 };
 export const NEDEN_EN_COK = 90;
 
 const UST_ALANLAR = new Set(['il', 'slug', 'guncelleme', 'oneriler']);
@@ -70,7 +72,10 @@ export function ilDenetle(veri, { dosyaSlug } = {}) {
   else if (sirali.some((s, i) => s !== i + 1)) hatalar.push('sira: 1’den başlayıp boşluksuz ardışık olmalı');
   const osmsuz = liste.filter((o) => o && !o.osm).length;
   if (osmsuz) uyarilar.push(`${osmsuz} yerde OSM kimliği yok; konumları boş kalır`);
-  for (const [k, n] of kategoriler) if (n < KATEGORI_EN_AZ) hatalar.push(`kategori ${k}: en az ${KATEGORI_EN_AZ} yer (${n})`);
+  for (const [k, n] of kategoriler) {
+    const enAz = KATEGORI_EN_AZ_OZEL[k] ?? KATEGORI_EN_AZ;
+    if (n < enAz) hatalar.push(`kategori ${k}: en az ${enAz} yer (${n})`);
+  }
   return { hatalar, uyarilar };
 }
 
