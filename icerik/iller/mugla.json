@@ -1,0 +1,607 @@
+{
+  "il": "Muğla",
+  "slug": "mugla",
+  "guncelleme": "2026-11-21",
+  "oneriler": [
+    {
+      "sira": 1,
+      "ad": "Ölüdeniz Tabiat Parkı",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Fethiye",
+      "merkeze_km": 100,
+      "neden": "Belcekız kumsalının ucunda dalgasız sığ lagün; Babadağ'dan kalkan paraşütler buraya iner",
+      "place_id": "ChIJPzXfdKJAwBQRgHss5u-rkr8"
+    },
+    {
+      "sira": 2,
+      "ad": "Kaunos Antik Kenti ve Kral Kaya Mezarları",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "doga"
+      ],
+      "ilce": "Köyceğiz",
+      "merkeze_km": 49,
+      "neden": "Dalyan'dan sandalla karşıya geçilir: tapınak cepheli kral mezarları, tiyatro ve liman",
+      "osm": "way/33752112",
+      "place_id": "ChIJf9o35IaIvxQR8jqJ658noY8"
+    },
+    {
+      "sira": 3,
+      "ad": "Bodrum Kalesi ve Sualtı Arkeoloji Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Bodrum",
+      "merkeze_km": 85,
+      "neden": "Saint Jean şövalyelerinin kalesinde MÖ 14. yüzyıldan Uluburun batığı ve bakır külçeleri",
+      "osm": "way/29094795"
+    },
+    {
+      "sira": 4,
+      "ad": "Saklıkent Kanyonu",
+      "kategori": "doga",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Seydikemer",
+      "merkeze_km": 124,
+      "neden": "Dar kaya duvarları arasında buz gibi suda yürünen kanyon; girişte dere üstü köşkler",
+      "osm": "node/310786309",
+      "place_id": "ChIJX4240qhKwBQRnYEHFRZezXM"
+    },
+    {
+      "sira": 5,
+      "ad": "Kayaköy",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Fethiye",
+      "merkeze_km": 96,
+      "neden": "1923 mübadelesinde boşalan Rum köyü Levissi; yamaca dizilmiş yüzlerce çatısız taş ev",
+      "osm": "relation/18226534",
+      "place_id": "ChIJ_dkctlhAwBQRSa2wQNHr16Y"
+    },
+    {
+      "sira": 6,
+      "ad": "İztuzu Plajı",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Ortaca",
+      "merkeze_km": 53,
+      "neden": "Denizle Dalyan deltası arasında 4,5 km kum şerit; Caretta caretta'nın yuva kumsalı"
+    },
+    {
+      "sira": 7,
+      "ad": "Babadağ'dan yamaç paraşütü",
+      "kategori": "aktivite",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Fethiye",
+      "merkeze_km": 104,
+      "neden": "1.969 metrelik Babadağ'dan tandem uçuş; Ölüdeniz lagününün üstünden kumsala süzülürsün"
+    },
+    {
+      "sira": 8,
+      "ad": "Knidos Antik Kenti",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Datça",
+      "merkeze_km": 106,
+      "neden": "Yarımadanın ucunda iki limanlı kent; Praksiteles'in Afrodit heykeli burada dururdu",
+      "place_id": "ChIJNZ2DDy-8vxQRhSjSNAdFUOc"
+    },
+    {
+      "sira": 9,
+      "ad": "Bodrum çökertme kebabı",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Bodrum",
+      "merkeze_km": 85,
+      "neden": "Kibrit gibi kızarmış patates, süzme yoğurt ve sote et: Bodrum'un tescilli kebabı"
+    },
+    {
+      "sira": 10,
+      "ad": "Fethiye Balık Pazarı",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet",
+        "gece"
+      ],
+      "ilce": "Fethiye",
+      "merkeze_km": 94,
+      "neden": "Ortadaki tezgâhtan aldığın balığı çevredeki lokantalar senin için pişirir"
+    },
+    {
+      "sira": 11,
+      "ad": "Akyaka ve Azmak Nehri",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Ula",
+      "merkeze_km": 18,
+      "neden": "Gökova'ya akan Azmak'ın soğuk, berrak suyu; kıyıda Nail Çakırhan tarzı ahşap evler"
+    },
+    {
+      "sira": 12,
+      "ad": "Sedir Adası",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "kultur_tarih"
+      ],
+      "ilce": "Marmaris",
+      "merkeze_km": 29,
+      "neden": "Kleopatra Plajı'nın yuvarlak taneli kumu ve Kedrai'nin tiyatrosu; tekneyle gidilir",
+      "place_id": "ChIJfVArq3-kvxQRzAs3C2BXrSQ"
+    },
+    {
+      "sira": 13,
+      "ad": "Stratonikeia Antik Kenti",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Yatağan",
+      "merkeze_km": 29,
+      "neden": "Roma kentinin kalıntıları Eskihisar köyünün Osmanlı evleriyle iç içe; anıtsal kent kapısı",
+      "osm": "way/117518723"
+    },
+    {
+      "sira": 14,
+      "ad": "Kelebekler Vadisi",
+      "kategori": "doga",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Fethiye",
+      "merkeze_km": 101,
+      "neden": "Ölüdeniz'den tekneyle varılan dik yarlı vadi; yazın kaplan kelebeği, dipte şelale",
+      "place_id": "ChIJLY5R-dY-wBQRZ1_zJFltil0"
+    },
+    {
+      "sira": 15,
+      "ad": "Fethiye 12 Adalar tekne turu",
+      "kategori": "aktivite",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Fethiye",
+      "merkeze_km": 93,
+      "neden": "Fethiye limanından kalkan günlük tekneler körfezdeki adalarda yüzme molası verir"
+    },
+    {
+      "sira": 16,
+      "ad": "Dalyan Kanalı tekne turu",
+      "kategori": "aktivite",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Ortaca",
+      "merkeze_km": 49,
+      "neden": "Kooperatif tekneleri sazlık kanaldan İztuzu'ya, kaya mezarlarına, çamur banyosuna gider"
+    },
+    {
+      "sira": 17,
+      "ad": "Gümüşlük",
+      "kategori": "manzara",
+      "amaclar": [
+        "yavas",
+        "lezzet",
+        "gece"
+      ],
+      "ilce": "Bodrum",
+      "merkeze_km": 102,
+      "neden": "Antik Myndos'un batık rıhtımı önünde gün batımı; Tavşan Adası'na sığ sudan yürünür",
+      "place_id": "ChIJAzsf6u10vhQRkgqBDems5do"
+    },
+    {
+      "sira": 18,
+      "ad": "Amintas Kaya Mezarı",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Fethiye",
+      "merkeze_km": 95,
+      "neden": "Telmessos'un MÖ 4. yüzyıl kaya mezarı; İon tapınağı cephesinde Amintas adı yazılı",
+      "osm": "way/834951468",
+      "place_id": "ChIJT2INUF5BwBQROqI6I92vvII"
+    },
+    {
+      "sira": 19,
+      "ad": "Lagina Hekate Kutsal Alanı",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Yatağan",
+      "merkeze_km": 35,
+      "neden": "Hekate tapınağının frizli blokları; Stratonikeia'ya uzanan kutsal yolun başlangıcı",
+      "osm": "way/257975372",
+      "place_id": "ChIJWXP8g18ZvxQRzDTRfMTeME0"
+    },
+    {
+      "sira": 20,
+      "ad": "Saburhane ve eski Muğla evleri",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Menteşe",
+      "merkeze_km": 0,
+      "neden": "Kabartmalı bacaları, avlu kapılarıyla beyaz badanalı Muğla evleri; dar taş sokaklar",
+      "place_id": "ChIJH7fTJPNtvxQRhGLpcp4gILk"
+    },
+    {
+      "sira": 21,
+      "ad": "Muğla Arastası",
+      "kategori": "carsi",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Menteşe",
+      "merkeze_km": 0,
+      "neden": "Yüz kadar dükkânlı eski çarşı: semerciler, bakırcılar, deri ve ayakkabı ustaları",
+      "place_id": "ChIJQeZruIttvxQRbic5Z9QZ4g0"
+    },
+    {
+      "sira": 22,
+      "ad": "Fethiye Salı Pazarı",
+      "kategori": "carsi",
+      "amaclar": [
+        "lezzet",
+        "yavas"
+      ],
+      "ilce": "Fethiye",
+      "merkeze_km": 94,
+      "neden": "Salı günleri kurulur: köy sebzesi, yaprak sarması, gözleme, reçel ve fırın ekmeği"
+    },
+    {
+      "sira": 23,
+      "ad": "Mausoleion (Halikarnassos Mozolesi)",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Bodrum",
+      "merkeze_km": 86,
+      "neden": "Yedi harikadan Mausolos'un anıt mezarı; temel çukuru, merdivenler ve friz kopyaları",
+      "place_id": "ChIJlwmXEkdsvhQR0fktlJphpF4"
+    },
+    {
+      "sira": 24,
+      "ad": "Tlos Antik Kenti",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Seydikemer",
+      "merkeze_km": 119,
+      "neden": "Likya'nın eski kentlerinden; akropol yamacında kaya mezarları, tepede Osmanlı kalesi",
+      "osm": "way/170597758",
+      "place_id": "ChIJv6N-xYNNwBQRJwP5Obd_7Ag"
+    },
+    {
+      "sira": 25,
+      "ad": "Eski Datça",
+      "kategori": "tarih",
+      "amaclar": [
+        "yavas",
+        "kultur_tarih"
+      ],
+      "ilce": "Datça",
+      "merkeze_km": 80,
+      "neden": "Begonvilli taş evli sokaklar; Can Yücel'in son yıllarını geçirdiği köy",
+      "place_id": "ChIJsb9C-b8kvhQRiL2XG6I_QQM"
+    },
+    {
+      "sira": 26,
+      "ad": "Marmaris Kalesi ve Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Marmaris",
+      "merkeze_km": 41,
+      "neden": "1522 Rodos seferinde Kanuni'nin yaptırdığı kale; salonlarda bölgenin kazı buluntuları",
+      "osm": "relation/9664338",
+      "place_id": "ChIJgaHLoN29vxQR2YBWDNbMgXE"
+    },
+    {
+      "sira": 27,
+      "ad": "Sakar Geçidi",
+      "kategori": "manzara",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Ula",
+      "merkeze_km": 16,
+      "neden": "Muğla–Marmaris yolunda Gökova Körfezi'ne ve Akyaka kıyısına yukarıdan bakılan yamaç",
+      "place_id": "ChIJgT4680ifvxQRVw5No7ZHh9Q"
+    },
+    {
+      "sira": 28,
+      "ad": "Orhaniye Kızkumu",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Marmaris",
+      "merkeze_km": 54,
+      "neden": "Koyun ortasına uzanan dar kum dili; denizin içinde bele kadar suda yürünür",
+      "place_id": "ChIJ8ZEOkjTGvxQR2bWKvUbuX5c"
+    },
+    {
+      "sira": 29,
+      "ad": "Muğla çam balı",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Marmaris",
+      "merkeze_km": 41,
+      "neden": "Dünya çam balının yüzde 90'dan fazlası Muğla'dan; Marmaris'in kızılçam ormanlarında"
+    },
+    {
+      "sira": 30,
+      "ad": "Muğla saraylısı",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Menteşe",
+      "merkeze_km": 0,
+      "neden": "Cevizli ince yufka katları ve şerbet: Yörüklerin bayram ve nişan tatlısı, tescilli"
+    },
+    {
+      "sira": 31,
+      "ad": "Datça bademi",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Datça",
+      "merkeze_km": 81,
+      "neden": "Coğrafi işaretli Datça nurlu bademi; çarşıda kavrulmuşu ve badem ezmesi satılır"
+    },
+    {
+      "sira": 32,
+      "ad": "Beçin Kalesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Milas",
+      "merkeze_km": 51,
+      "neden": "Menteşe Beyliği'nin başkenti; kayalık üstünde kale, aşağıda Ahmet Gazi Medresesi",
+      "osm": "way/179745298",
+      "place_id": "ChIJLfXiXnf5vhQRM8Zr-0VK7vc"
+    },
+    {
+      "sira": 33,
+      "ad": "Euromos Zeus Tapınağı",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Milas",
+      "merkeze_km": 64,
+      "neden": "Zeytinlikler arasında sütunlarının çoğu ayakta duran Korint düzeni Zeus Tapınağı"
+    },
+    {
+      "sira": 34,
+      "ad": "Herakleia (Kapıkırı)",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Milas",
+      "merkeze_km": 80,
+      "neden": "Bafa Gölü kıyısında köy evleri arasında Athena Tapınağı; arkada Latmos'un kayaları",
+      "place_id": "ChIJUxpo2V2TvhQR-D64L0ogvYg"
+    },
+    {
+      "sira": 35,
+      "ad": "Labranda",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Milas",
+      "merkeze_km": 54,
+      "neden": "Karyalıların Zeus kutsal alanı; Milas'ın kuzeyinde çamlı yamaçta teraslar ve andronlar",
+      "osm": "way/117453496",
+      "place_id": "ChIJ4yYmycPkvhQR-5RUKXhWZ3A"
+    },
+    {
+      "sira": 36,
+      "ad": "Letoon",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Seydikemer",
+      "merkeze_km": 128,
+      "neden": "Leto, Apollon ve Artemis'in yan yana üç tapınağı; Ksanthos'la birlikte UNESCO listesinde",
+      "osm": "way/1083787493",
+      "place_id": "ChIJc53BUd8xwBQRqlUKzJSY3dQ"
+    },
+    {
+      "sira": 37,
+      "ad": "Likya Yolu Ovacık–Faralya etabı",
+      "kategori": "aktivite",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Fethiye",
+      "merkeze_km": 101,
+      "neden": "Kırmızı-beyaz işaretli yolun ilk etabı; Faralya'ya yürürken yamaçtan Ölüdeniz görünür"
+    },
+    {
+      "sira": 38,
+      "ad": "Köyceğiz Gölü ve Sultaniye Kaplıcaları",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Köyceğiz",
+      "merkeze_km": 43,
+      "neden": "Kıyısında sığla ormanı olan göl; güneyindeki Sultaniye'de sıcak su ve çamur banyosu",
+      "place_id": "ChIJ5SRw-GCGvxQRD7T3q2rUbXk"
+    },
+    {
+      "sira": 39,
+      "ad": "Köyceğiz Pazartesi Pazarı",
+      "kategori": "carsi",
+      "amaclar": [
+        "lezzet",
+        "yavas"
+      ],
+      "ilce": "Köyceğiz",
+      "merkeze_km": 40,
+      "neden": "Pazartesi kurulur: çam balı, mantar, yabani otlar; Dalyan'dan tekneyle gelinir",
+      "place_id": "ChIJPfZ3S-5_wBQRdFtvkukmwvc"
+    },
+    {
+      "sira": 40,
+      "ad": "Zeki Müren Sanat Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Bodrum",
+      "merkeze_km": 85,
+      "neden": "Sanatçının Bodrum'daki evi: sahne kostümleri, plakları ve kişisel eşyaları",
+      "osm": "node/4942649709",
+      "place_id": "ChIJBQsjnm5svhQRJz_yDJJmtw0"
+    },
+    {
+      "sira": 41,
+      "ad": "Deniz Kaplumbağaları Müzesi (DEKAMER)",
+      "kategori": "muze",
+      "amaclar": [
+        "cocuklu",
+        "doga"
+      ],
+      "ilce": "Ortaca",
+      "merkeze_km": 49,
+      "neden": "İztuzu yakınındaki kurtarma merkezinde Caretta'nın yumurtadan erişkine yaşamı, iskeletler",
+      "place_id": "ChIJwRwSTiCJvxQRmeM4AVnZtsM"
+    },
+    {
+      "sira": 42,
+      "ad": "Palamutbükü",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas",
+        "lezzet"
+      ],
+      "ilce": "Datça",
+      "merkeze_km": 97,
+      "neden": "Knidos yolunda uzun çakıllı koy; küçük iskelenin çevresinde balık lokantaları",
+      "place_id": "ChIJT_xqXagfvhQRivvK0VmLHOM"
+    },
+    {
+      "sira": 43,
+      "ad": "Yuvarlakçay",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet",
+        "doga"
+      ],
+      "ilce": "Köyceğiz",
+      "merkeze_km": 41,
+      "neden": "Soğuk derenin kıyısında, çınar gölgesindeki masalarda alabalık ve gözleme"
+    },
+    {
+      "sira": 44,
+      "ad": "Muğla tarhanası",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Menteşe",
+      "merkeze_km": 0,
+      "neden": "İki türlü pişer: sade hamurlu ya da baklagilli, biberli kırmızı tarhana çorbası"
+    },
+    {
+      "sira": 45,
+      "ad": "Akyaka'da uçurtma sörfü",
+      "kategori": "aktivite",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Ula",
+      "merkeze_km": 20,
+      "neden": "Öğleden sonra düzenli esen Gökova rüzgârı ve sığ kıyı; uçurtma sörfü okulları burada"
+    },
+    {
+      "sira": 46,
+      "ad": "Bodrum Barlar Sokağı",
+      "kategori": "aktivite",
+      "amaclar": [
+        "gece"
+      ],
+      "ilce": "Bodrum",
+      "merkeze_km": 85,
+      "neden": "Kaleden Kumbahçe'ye uzanan sahil sokağı; barlar gece yarısından sonra da açık"
+    },
+    {
+      "sira": 47,
+      "ad": "Babadağ Teleferiği",
+      "kategori": "manzara",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Fethiye",
+      "merkeze_km": 105,
+      "neden": "Teleferikle 1.700 metredeki terasa çıkılır; Ölüdeniz lagünü ayağının altında kalır",
+      "osm": "node/811593926",
+      "place_id": "ChIJOw2EN8JBwBQR-h0UNjKazL0"
+    },
+    {
+      "sira": 48,
+      "ad": "Gemiler Adası",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "doga"
+      ],
+      "ilce": "Fethiye",
+      "merkeze_km": 96,
+      "neden": "Kayaköy kıyısındaki adada Bizans kiliseleri; bir görüşe göre Aziz Nikolaos'un ilk mezarı",
+      "osm": "way/185324443",
+      "place_id": "ChIJ55S91Io_wBQRmuGlN_Qzr1k"
+    }
+  ]
+}

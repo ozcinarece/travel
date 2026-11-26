@@ -1,0 +1,464 @@
+{
+  "il": "Kayseri",
+  "slug": "kayseri",
+  "guncelleme": "2026-11-21",
+  "oneriler": [
+    {
+      "sira": 1,
+      "ad": "Erciyes Kayak Merkezi",
+      "kategori": "aktivite",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": null,
+      "merkeze_km": 25,
+      "neden": "Kentten yarım saatlik yolda; Erciyes'in yamaçlarında uzun pistler ve teleferikler."
+    },
+    {
+      "sira": 2,
+      "ad": "Kayseri Kalesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Melikgazi",
+      "merkeze_km": 0,
+      "neden": "Kentin ortasında kara bazalt surlar; içinde bugün Arkeoloji Müzesi var.",
+      "osm": "relation/15045959",
+      "place_id": "ChIJExGkfAUSKxUR66v_O7i3N5Y"
+    },
+    {
+      "sira": 3,
+      "ad": "Gevher Nesibe Şifahanesi (Selçuklu Uygarlığı Müzesi)",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Melikgazi",
+      "merkeze_km": 0,
+      "neden": "1206'da kurulan darüşşifa ve tıp okulu; bugün Selçuklu Uygarlığı Müzesi.",
+      "osm": "relation/7641623",
+      "place_id": "ChIJvxogvRwSKxURdwF64dce-ak"
+    },
+    {
+      "sira": 4,
+      "ad": "Kültepe (Kaniş-Karum)",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Kocasinan",
+      "merkeze_km": 19,
+      "neden": "Asurlu tüccarların kil tabletleriyle Anadolu'da yazının ilk kullanıldığı yer.",
+      "osm": "way/13858887",
+      "place_id": "ChIJVYr0jHNBKxURm6rjYCAlR3Q"
+    },
+    {
+      "sira": 5,
+      "ad": "Kayseri mantısı",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Melikgazi",
+      "merkeze_km": 0,
+      "neden": "Bir kaşığa kırk tane sığacak kadar küçük; sarımsaklı yoğurt ve biberli tereyağıyla."
+    },
+    {
+      "sira": 6,
+      "ad": "Kayseri pastırması",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Melikgazi",
+      "merkeze_km": 0,
+      "neden": "Tuzlanıp kurutulan etin çemenle kaplandığı pastırma; Kapalı Çarşı çevresinde satılır."
+    },
+    {
+      "sira": 7,
+      "ad": "Soğanlı Vadisi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "doga"
+      ],
+      "ilce": "Yeşilhisar",
+      "merkeze_km": 61,
+      "neden": "Kayaya oyulmuş kiliseler ve güvercinlikler; köyde kadınların diktiği bez bebekler.",
+      "place_id": "ChIJLXeu95g7KhURVah7qV_QnQA"
+    },
+    {
+      "sira": 8,
+      "ad": "Sultan Sazlığı Milli Parkı",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Yeşilhisar",
+      "merkeze_km": 50,
+      "neden": "Bozkırın ortasında sazlık ve tuzlu göller; flamingo ve turnalar gözlem kulesinden."
+    },
+    {
+      "sira": 9,
+      "ad": "Hunat Hatun Külliyesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Melikgazi",
+      "merkeze_km": 0,
+      "neden": "1238'de Mahperi Hunat Hatun'un yaptırdığı cami, medrese ve hamam.",
+      "osm": "node/10980675711",
+      "place_id": "ChIJ37kQyA8SKxURoUyhi-bivM0"
+    },
+    {
+      "sira": 10,
+      "ad": "Ağırnas ve Mimar Sinan Evi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Melikgazi",
+      "merkeze_km": 22,
+      "neden": "Mimar Sinan'ın doğduğu köy; evinin altından yeraltı şehrine inilir.",
+      "osm": "way/537125574",
+      "place_id": "ChIJrU11buFCKxURfqxyenEWFQg"
+    },
+    {
+      "sira": 11,
+      "ad": "Kapalı Çarşı",
+      "kategori": "carsi",
+      "amaclar": [
+        "kultur_tarih",
+        "lezzet"
+      ],
+      "ilce": "Melikgazi",
+      "merkeze_km": 0,
+      "neden": "1870 yangınından sonra yeniden kurulan çarşı; halı, baharat ve kuyumcular.",
+      "osm": "way/253673626",
+      "place_id": "ChIJyYf_UwQSKxUR4mvslRvEizQ"
+    },
+    {
+      "sira": 12,
+      "ad": "Erciyes Dağı",
+      "kategori": "doga",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": null,
+      "merkeze_km": 21,
+      "neden": "3.917 metrelik sönmüş volkan; kentin her yerinden görünen karlı doruk.",
+      "osm": "node/2608015053"
+    },
+    {
+      "sira": 13,
+      "ad": "Yağlama",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Melikgazi",
+      "merkeze_km": 0,
+      "neden": "İnce yufkalar arasına kıymalı sos sürülür; pasta gibi dilimlenip yoğurtla yenir."
+    },
+    {
+      "sira": 14,
+      "ad": "Döner Kümbet",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Melikgazi",
+      "merkeze_km": 1,
+      "neden": "On iki köşeli Selçuklu kümbeti; cephesinde hurma ağacı, aslan ve kartal kabartmaları.",
+      "osm": "way/411678772",
+      "place_id": "ChIJobUfyAsSKxUR0hDmsk7zkJc"
+    },
+    {
+      "sira": 15,
+      "ad": "Kayseri Arkeoloji Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Melikgazi",
+      "merkeze_km": 0,
+      "neden": "Kalenin içine taşınan müze; Kültepe'den çıkan Asurca kil tabletler burada.",
+      "osm": "node/12025416061",
+      "place_id": "ChIJk9JwzwwSKxUR_OA4pxaG4wU"
+    },
+    {
+      "sira": 16,
+      "ad": "Kapuzbaşı Şelaleleri",
+      "kategori": "doga",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Yahyalı",
+      "merkeze_km": 106,
+      "neden": "Aladağlar'ın eteğinde kayadan fışkıran yedi şelale; kar suyuyla en gür baharda.",
+      "osm": "node/4849684651",
+      "place_id": "ChIJiVXtd_dtKRURwYitNW84HwE"
+    },
+    {
+      "sira": 17,
+      "ad": "Sultanhanı Kervansarayı",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Kocasinan",
+      "merkeze_km": 45,
+      "neden": "I. Alaeddin Keykubad'ın 1230'larda Sivas yolunda yaptırdığı kervansaray.",
+      "osm": "relation/7651516",
+      "place_id": "ChIJr1rl0XBVKxURJsQ0D7rWSNs"
+    },
+    {
+      "sira": 18,
+      "ad": "Kayseri Ulu Camii",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Melikgazi",
+      "merkeze_km": 0,
+      "neden": "Danişmendli Melik Mehmed Gazi'nin başlattığı cami; içi sık sütunlarla bölünür.",
+      "osm": "way/320806566",
+      "place_id": "ChIJl838pG4TKxURXZOfL8LC780"
+    },
+    {
+      "sira": 19,
+      "ad": "Talas eski evleri",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Talas",
+      "merkeze_km": 8,
+      "neden": "Ali Dağı'nın eteğinde Rum ve Ermeni taş konakları; eski Amerikan Koleji de burada."
+    },
+    {
+      "sira": 20,
+      "ad": "Ali Dağı yamaç paraşütü",
+      "kategori": "aktivite",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Talas",
+      "merkeze_km": 10,
+      "neden": "Talas'ın üstündeki dağdan tandem uçuşlar; altta kent, karşıda Erciyes."
+    },
+    {
+      "sira": 21,
+      "ad": "Germir",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Melikgazi",
+      "merkeze_km": 8,
+      "neden": "Eski Rum köyünün taş konakları ve Panagia Kilisesi; kente kısa bir yol."
+    },
+    {
+      "sira": 22,
+      "ad": "Nevzine tatlısı",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Melikgazi",
+      "merkeze_km": 0,
+      "neden": "İrmik, pekmez ve tahinle yapılan cevizli Kayseri tatlısı."
+    },
+    {
+      "sira": 23,
+      "ad": "Gilaburu suyu",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Melikgazi",
+      "merkeze_km": 0,
+      "neden": "Kırmızı gilaburu meyvesinin ekşi, kekremsi suyu; Kayseri'de kış içeceği."
+    },
+    {
+      "sira": 24,
+      "ad": "Tahinli pide",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Melikgazi",
+      "merkeze_km": 0,
+      "neden": "Üstüne tahin ve şeker sürülüp fırınlanan tatlı pide; çayın yanına."
+    },
+    {
+      "sira": 25,
+      "ad": "Develi cıvıklısı",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Develi",
+      "merkeze_km": 38,
+      "neden": "Kuşbaşı etli, çıtır hamurlu Develi pidesi; ilçenin fırınlarında."
+    },
+    {
+      "sira": 26,
+      "ad": "Kadir Has Kent Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Kocasinan",
+      "merkeze_km": 3,
+      "neden": "Kayseri'nin tarihini ve kentin tanınmış insanlarını anlatan kent müzesi.",
+      "osm": "way/403858215"
+    },
+    {
+      "sira": 27,
+      "ad": "Atatürk Evi Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Melikgazi",
+      "merkeze_km": 0,
+      "neden": "Atatürk'ün Kayseri ziyaretlerinde kaldığı konak; odaları dönem eşyalarıyla.",
+      "osm": "way/407744366",
+      "place_id": "ChIJffajFA8SKxURMg0hG0oLHGk"
+    },
+    {
+      "sira": 28,
+      "ad": "Seyyid Burhaneddin Türbesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Melikgazi",
+      "merkeze_km": 1,
+      "neden": "Mevlana'nın hocası Seyyid Burhaneddin'in türbesi; aynı adlı mezarlığın içinde.",
+      "osm": "way/847483962",
+      "place_id": "ChIJpaCh9AwSKxURN6yiqR79rDo"
+    },
+    {
+      "sira": 29,
+      "ad": "Kara Mustafa Paşa Kervansarayı",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "İncesu",
+      "merkeze_km": 29,
+      "neden": "Merzifonlu Kara Mustafa Paşa'nın 17. yüzyılda İncesu'da kurdurduğu külliyenin hanı.",
+      "osm": "relation/542651",
+      "place_id": "ChIJgfp40PFUKhURX9CSPXLirso"
+    },
+    {
+      "sira": 30,
+      "ad": "Tekgöz Köprüsü",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Kocasinan",
+      "merkeze_km": 30,
+      "neden": "Kızılırmak üstünde tek büyük kemerli Selçuklu köprüsü.",
+      "osm": "way/169202088",
+      "place_id": "ChIJW8rZ99ziKhURsdksIZAfH3I"
+    },
+    {
+      "sira": 31,
+      "ad": "Bedesten",
+      "kategori": "carsi",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Melikgazi",
+      "merkeze_km": 0,
+      "neden": "Kapalı Çarşı'nın çekirdeği; II. Bayezid döneminden kalma taş bedesten.",
+      "osm": "way/744281994",
+      "place_id": "ChIJO-OhTAQSKxUR4L5oEucxLpc"
+    },
+    {
+      "sira": 32,
+      "ad": "Vezir Hanı",
+      "kategori": "carsi",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Melikgazi",
+      "merkeze_km": 0,
+      "neden": "Kapalı Çarşı'nın yanındaki 18. yüzyıl hanı; yün ve halı tüccarlarının yeri.",
+      "osm": "way/406496628",
+      "place_id": "ChIJ3W_rXQATKxURZK_rwfuxFFY"
+    },
+    {
+      "sira": 33,
+      "ad": "Aladağlar Milli Parkı (Yahyalı)",
+      "kategori": "doga",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Yahyalı",
+      "merkeze_km": 95,
+      "neden": "Yahyalı yakasında kireçtaşı doruklar ve Zamantı vadisi; yürüyüş ve tırmanış."
+    },
+    {
+      "sira": 34,
+      "ad": "Erciyes zirve tırmanışı",
+      "kategori": "aktivite",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": null,
+      "merkeze_km": 25,
+      "neden": "Yazın Tekir'den başlayan uzun tırmanış; deneyim ve rehber ister."
+    },
+    {
+      "sira": 35,
+      "ad": "Sahabiye Medresesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Melikgazi",
+      "merkeze_km": 0,
+      "neden": "1267'de Sahip Ata'nın yaptırdığı medrese; taç kapısı kent meydanına bakar.",
+      "osm": "relation/7641697",
+      "place_id": "ChIJEbhDLAUSKxURvc5fjTWLG3s"
+    },
+    {
+      "sira": 36,
+      "ad": "Karabaş Kilisesi (Soğanlı)",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Yeşilhisar",
+      "merkeze_km": 61,
+      "neden": "Soğanlı'nın en bilinen kaya kiliselerinden; duvarlarında Bizans freskleri.",
+      "osm": "node/5188164523",
+      "place_id": "ChIJKw0uHwI7KhURfNRr5YUcf-U"
+    },
+    {
+      "sira": 37,
+      "ad": "Hacı Kılıç Camii",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Melikgazi",
+      "merkeze_km": 1,
+      "neden": "1249 tarihli Selçuklu camisi ve medresesi; iki oymalı taç kapısıyla.",
+      "osm": "way/254554664",
+      "place_id": "ChIJ34UsdhsSKxURbsBx6xLnFPg"
+    }
+  ]
+}

@@ -1,0 +1,362 @@
+{
+  "il": "Samsun",
+  "slug": "samsun",
+  "guncelleme": "2026-11-21",
+  "oneriler": [
+    {
+      "sira": 1,
+      "ad": "Bandırma Gemi-Müze ve Millî Mücadele Açık Hava Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "İlkadım",
+      "merkeze_km": 1,
+      "neden": "Vapurun aslına göre yapılan kopyası; 19 Mayıs 1919 çıkışının anlatısı",
+      "osm": "node/4352704449",
+      "place_id": "ChIJw6GBgxV2iEARhg-6rB1V1p8"
+    },
+    {
+      "sira": 2,
+      "ad": "Kızılırmak Deltası Kuş Cenneti",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Bafra",
+      "merkeze_km": 60,
+      "neden": "Karadeniz kıyısının en büyük sulak alanı; 300'ü aşkın kuş türü görülmüş"
+    },
+    {
+      "sira": 3,
+      "ad": "Bafra pidesi",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Bafra",
+      "merkeze_km": 50,
+      "neden": "Uzun ince, kayık biçimli; kıymalı ya da kuşbaşılı, tescilli Bafra pidesi"
+    },
+    {
+      "sira": 4,
+      "ad": "Amisos Tepesi ve tümülüsler",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "İlkadım",
+      "merkeze_km": 4,
+      "neden": "Teleferikle çıkılan tepede Helenistik mezar odaları ve şehir manzarası",
+      "osm": "node/4261654189",
+      "place_id": "ChIJtwEiV9Z5iEARG3_BXHcavM0"
+    },
+    {
+      "sira": 5,
+      "ad": "Şahinkaya Kanyonu",
+      "kategori": "doga",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Vezirköprü",
+      "merkeze_km": 120,
+      "neden": "Kızılırmak'ın baraj gölünde, tekneyle girilen dik duvarlı kanyon"
+    },
+    {
+      "sira": 6,
+      "ad": "Samsun kaz tiridi",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "merkeze_km": 0,
+      "neden": "Kaz eti suyuna yatırılmış yufka; kışın yenen tescilli yemek"
+    },
+    {
+      "sira": 7,
+      "ad": "Bafra nokulu",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Bafra",
+      "merkeze_km": 50,
+      "neden": "Cevizli ya da haşhaşlı sarılıp dilimlenen çörek; çayla yenir"
+    },
+    {
+      "sira": 8,
+      "ad": "Gazi Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "İlkadım",
+      "merkeze_km": 0,
+      "neden": "Mustafa Kemal'in 1919'da Samsun'da kaldığı Mıntıka Palas oteli",
+      "osm": "way/497867612",
+      "place_id": "ChIJwWj_j7h3iEARJcCX0zq754I"
+    },
+    {
+      "sira": 9,
+      "ad": "Onur Anıtı",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "İlkadım",
+      "merkeze_km": 0,
+      "neden": "Cumhuriyet Meydanı'nda atlı Atatürk heykeli; şehrin buluşma noktası",
+      "osm": "node/1979803579",
+      "place_id": "ChIJu1XJOrh3iEARGgExb0jCqLY"
+    },
+    {
+      "sira": 10,
+      "ad": "Samsun Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "İlkadım",
+      "merkeze_km": 2,
+      "neden": "Amisos hazinesi ve Kızılırmak havzası kazılarının buluntuları",
+      "osm": "way/1340524257"
+    },
+    {
+      "sira": 11,
+      "ad": "Samsun Kent Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "İlkadım",
+      "merkeze_km": 1,
+      "neden": "1928'de demiryolu için yapılan ahşap binalarda şehrin hikâyesi",
+      "osm": "way/498019647",
+      "place_id": "ChIJnc7uHbZ3iEARI2NdkX__Ig8"
+    },
+    {
+      "sira": 12,
+      "ad": "Atakum sahili",
+      "kategori": "aktivite",
+      "amaclar": [
+        "yavas",
+        "gece"
+      ],
+      "ilce": "Atakum",
+      "merkeze_km": 8,
+      "neden": "Kilometrelerce sahil yolu; yürüyüş, bisiklet ve akşam gün batımı"
+    },
+    {
+      "sira": 13,
+      "ad": "Batıpark ve Amazon Köyü",
+      "kategori": "aktivite",
+      "amaclar": [
+        "cocuklu"
+      ],
+      "ilce": "İlkadım",
+      "merkeze_km": 4,
+      "neden": "Amazon efsanesini canlandıran köy, heykeller ve deniz kıyısı park",
+      "osm": "way/499458265"
+    },
+    {
+      "sira": 14,
+      "ad": "Akdağ Kayak Merkezi",
+      "kategori": "aktivite",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Ladik",
+      "merkeze_km": 75,
+      "neden": "Samsun'un kış sporları yeri; yazın yayla havası"
+    },
+    {
+      "sira": 15,
+      "ad": "Ladik Gölü",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Ladik",
+      "merkeze_km": 70,
+      "neden": "Sazlıklarla çevrili sığ göl; kuş gözlemi ve sakin kıyı yürüyüşü"
+    },
+    {
+      "sira": 16,
+      "ad": "Çarşamba pidesi",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Çarşamba",
+      "merkeze_km": 35,
+      "neden": "Tescilli Çarşamba pidesi; ilçenin fırınlarında sıcak yenir"
+    },
+    {
+      "sira": 17,
+      "ad": "Terme pidesi",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Terme",
+      "merkeze_km": 55,
+      "neden": "Terme'ye özgü, tescilli pide; ilçede fırın fırın yapılır"
+    },
+    {
+      "sira": 18,
+      "ad": "Göğceli Camii",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Çarşamba",
+      "merkeze_km": 37,
+      "neden": "Çivi kullanılmadan geçme tekniğiyle kurulmuş eski ahşap cami",
+      "osm": "way/280420044",
+      "place_id": "ChIJAQAA6-EFiEAR5Kt20S8vUlc"
+    },
+    {
+      "sira": 19,
+      "ad": "Bekdemir Çivisiz Camii",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Kavak",
+      "merkeze_km": 45,
+      "neden": "Köyde çivisiz ahşap cami; oymalı tavan ve direkler",
+      "osm": "way/1378896307",
+      "place_id": "ChIJu6U75Ze_h0ARIXCqa-GUp6Q"
+    },
+    {
+      "sira": 20,
+      "ad": "Kavak Ortaköy Şelalesi",
+      "kategori": "doga",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Kavak",
+      "merkeze_km": 45,
+      "neden": "Orman içinde kısa yürüyüşle ulaşılan şelale",
+      "osm": "node/6762610592",
+      "place_id": "ChIJo6aXqBC_h0ARYe1debmtLGc"
+    },
+    {
+      "sira": 21,
+      "ad": "Simenlik Gölü",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Terme",
+      "merkeze_km": 60,
+      "neden": "Terme'de sazlık kıyılı doğal göl; kuş gözlemi ve sessiz kıyı"
+    },
+    {
+      "sira": 22,
+      "ad": "Havza kaplıcaları",
+      "kategori": "aktivite",
+      "amaclar": [
+        "yavas"
+      ],
+      "ilce": "Havza",
+      "merkeze_km": 85,
+      "neden": "Roma'dan beri kullanılan sıcak sular; ilçe merkezinde hamamlar"
+    },
+    {
+      "sira": 23,
+      "ad": "Havza Atatürk Evi Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Havza",
+      "merkeze_km": 85,
+      "neden": "Mustafa Kemal'in 1919'da Havza'da kaldığı ev"
+    },
+    {
+      "sira": 24,
+      "ad": "Tekkeköy Mağaraları",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Tekkeköy",
+      "merkeze_km": 14,
+      "neden": "Mezolitik dönemden izler taşıyan kaya sığınakları"
+    },
+    {
+      "sira": 25,
+      "ad": "İkiztepe",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Bafra",
+      "merkeze_km": 55,
+      "neden": "Kızılırmak deltasında Tunç Çağı höyükleri; uzun soluklu kazı alanı"
+    },
+    {
+      "sira": 26,
+      "ad": "Pazar Camii",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "İlkadım",
+      "merkeze_km": 0,
+      "neden": "Saathane çarşısının ortasındaki eski cami; şehrin ilk çekirdeğinde",
+      "osm": "way/499069930",
+      "place_id": "ChIJKzR61r13iEARtQvpWBHc_hA"
+    },
+    {
+      "sira": 27,
+      "ad": "Bafra kaymaklı lokumu",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Bafra",
+      "merkeze_km": 50,
+      "neden": "İçinde kaymak olan, tescilli Bafra lokumu; çayın yanına"
+    },
+    {
+      "sira": 28,
+      "ad": "Samsun simidi",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "İlkadım",
+      "merkeze_km": 0,
+      "neden": "Tescilli Samsun simidi; sabah çayının ve Saathane yürüyüşünün yanında"
+    },
+    {
+      "sira": 29,
+      "ad": "Kaz pilavı",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "merkeze_km": 50,
+      "neden": "Kışın kesilen kazın suyuyla pişen pilav; ova köylerinin sofrası"
+    },
+    {
+      "sira": 30,
+      "ad": "Çarşamba keşkeği",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Çarşamba",
+      "merkeze_km": 35,
+      "neden": "Buğdayla etin kazanda saatlerce pişip dövüldüğü, Çarşamba'ya tescilli keşkek"
+    }
+  ]
+}

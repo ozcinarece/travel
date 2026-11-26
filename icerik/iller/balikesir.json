@@ -1,0 +1,462 @@
+{
+  "il": "Balıkesir",
+  "slug": "balikesir",
+  "guncelleme": "2026-11-21",
+  "oneriler": [
+    {
+      "sira": 1,
+      "ad": "Cunda Adası",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas",
+        "lezzet"
+      ],
+      "ilce": "Ayvalık",
+      "merkeze_km": 111,
+      "neden": "Ayvalık'a köprüyle bağlı ada; taş Rum evleri, yel değirmeni tepesi ve meyhaneleri.",
+      "place_id": "ChIJk-rHXLt3uhQRK3S-Qfdmz1M"
+    },
+    {
+      "sira": 2,
+      "ad": "Ayvalık eski kent",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Ayvalık",
+      "merkeze_km": 109,
+      "neden": "Dar sokaklarda taş evler, kiliseden dönme camiler ve zeytinyağı fabrikası bacaları."
+    },
+    {
+      "sira": 3,
+      "ad": "Şeytan Sofrası",
+      "kategori": "manzara",
+      "amaclar": [
+        "yavas",
+        "doga"
+      ],
+      "ilce": "Ayvalık",
+      "merkeze_km": 114,
+      "neden": "Adalara bakan kayalık tepe; Ayvalık'ta gün batımı en çok buradan izlenir.",
+      "osm": "node/419853167"
+    },
+    {
+      "sira": 4,
+      "ad": "Kazdağı Milli Parkı",
+      "kategori": "doga",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Edremit",
+      "merkeze_km": 87,
+      "neden": "Edremit Körfezi'ne inen yamaçlarda göknar ormanları, dereler ve şelaleler.",
+      "place_id": "ChIJZ5YcmGbGsBQRWadWSqgJSlE"
+    },
+    {
+      "sira": 5,
+      "ad": "Hasanboğuldu",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Edremit",
+      "merkeze_km": 90,
+      "neden": "Kazdağı'nın eteğinde, Zeytinli Çayı'nın oluşturduğu gölet; efsanesi adını verir."
+    },
+    {
+      "sira": 6,
+      "ad": "Manyas Kuş Cenneti Milli Parkı",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Bandırma",
+      "merkeze_km": 61,
+      "neden": "Kuş Gölü kıyısında; gözlem kulesinden balıkçıl, karabatak ve pelikan izlenir.",
+      "place_id": "ChIJwdxHlqF4thQRMjbo_EEygv4"
+    },
+    {
+      "sira": 7,
+      "ad": "Taksiyarhis Anıt Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Ayvalık",
+      "merkeze_km": 109,
+      "neden": "Ayvalık'ın 19. yüzyıldan kalma kilisesi; balık pulu süslemeli ahşap ikonostası.",
+      "osm": "way/267142600",
+      "place_id": "ChIJj_s2S3x2uhQRfLN8TnQih8E"
+    },
+    {
+      "sira": 8,
+      "ad": "Ayvalık tostu",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Ayvalık",
+      "merkeze_km": 109,
+      "neden": "Sucuk, kaşar ve salamın turşu ve ketçapla doldurulduğu, uzun ekmekte tost."
+    },
+    {
+      "sira": 9,
+      "ad": "Sütüven Şelalesi",
+      "kategori": "doga",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Edremit",
+      "merkeze_km": 81,
+      "neden": "Kazdağı'nın eteğinde, Kızılkeçili yakınında ormanın içinden dökülen şelale.",
+      "osm": "node/875900667",
+      "place_id": "ChIJibMT-BvHsBQR1WUDoIIMmlE"
+    },
+    {
+      "sira": 10,
+      "ad": "Kyzikos Antik Kenti",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Erdek",
+      "merkeze_km": 82,
+      "neden": "Kapıdağ Yarımadası'nın boynunda; Hadrian Tapınağı'nın dev sütun parçaları burada.",
+      "osm": "node/13388465312",
+      "place_id": "ChIJr_4malEstBQRbeR80C3Q0t4"
+    },
+    {
+      "sira": 11,
+      "ad": "Rahmi M. Koç Müzesi Cunda",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Ayvalık",
+      "merkeze_km": 112,
+      "neden": "Cunda'daki Taksiyarhis Kilisesi'nde; ulaşım, sanayi ve oyuncak koleksiyonları.",
+      "osm": "node/10117200918",
+      "place_id": "ChIJ47JQAVN2uhQRDRrJozHwEd8"
+    },
+    {
+      "sira": 12,
+      "ad": "Susurluk tostu",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Susurluk",
+      "merkeze_km": 38,
+      "neden": "İstanbul–İzmir yolunun molası: kalın, mayalı ekmekte sucuklu ve kaşarlı tost."
+    },
+    {
+      "sira": 13,
+      "ad": "Sarıkız Tepesi",
+      "kategori": "manzara",
+      "amaclar": [
+        "doga",
+        "kultur_tarih"
+      ],
+      "ilce": "Edremit",
+      "merkeze_km": 86,
+      "neden": "Kazdağı'nın 1.700 metreyi aşan doruğu; ağustosta Tahtacı Türkmenleri'nin şenliği.",
+      "osm": "node/1326638191"
+    },
+    {
+      "sira": 14,
+      "ad": "Cennet Tepesi",
+      "kategori": "manzara",
+      "amaclar": [
+        "yavas"
+      ],
+      "ilce": "Ayvalık",
+      "merkeze_km": 109,
+      "neden": "Ayvalık'ın güneyinde, körfezi ve adaları yukarıdan gören tepe.",
+      "osm": "node/5444813734",
+      "place_id": "ChIJYSdHstl1uhQRUmfAM5oCeW4"
+    },
+    {
+      "sira": 15,
+      "ad": "Balıkesir höşmerimi",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Karesi",
+      "merkeze_km": 0,
+      "neden": "Peynir, un ve şekerle kazanda karıştırılarak yapılan, kaymaklı yenen tatlı."
+    },
+    {
+      "sira": 16,
+      "ad": "Antandros Antik Kenti",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Edremit",
+      "merkeze_km": 94,
+      "neden": "Altınoluk'un yamacında; duvar resimli Roma yamaç evi koruma çatısı altında.",
+      "osm": "node/10241336123",
+      "place_id": "ChIJtfVyQH-VsBQRP4-gfzKjMJg"
+    },
+    {
+      "sira": 17,
+      "ad": "Daskyleion",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Bandırma",
+      "merkeze_km": 54,
+      "neden": "Kuş Gölü kıyısındaki Ergili'de; Pers satraplığının başkenti olan höyük.",
+      "osm": "way/234159207",
+      "place_id": "ChIJQy9TP7p7thQR5I4LqtpIuxo"
+    },
+    {
+      "sira": 18,
+      "ad": "Kuva-yi Milliye Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Karesi",
+      "merkeze_km": 0,
+      "neden": "Atatürk'ün Balıkesir'de kaldığı konak; Kurtuluş Savaşı'nın batı cephesini anlatır.",
+      "osm": "way/232389727",
+      "place_id": "ChIJUROqNTMAtxQRoFkAHix0VXM"
+    },
+    {
+      "sira": 19,
+      "ad": "Zağanos Paşa Camii",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Karesi",
+      "merkeze_km": 0,
+      "neden": "15. yüzyılda kurulan külliyenin camisi; avlusunda Zağanos Paşa'nın türbesi.",
+      "osm": "way/211424804"
+    },
+    {
+      "sira": 20,
+      "ad": "Sarımsaklı Plajı",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Ayvalık",
+      "merkeze_km": 113,
+      "neden": "Ayvalık'ın güneyinde uzun, ince kumlu ve sığ sahil; çocuklu aileler için uygun.",
+      "place_id": "ChIJe6U7ySJxuhQRvAlq5GoNN2A"
+    },
+    {
+      "sira": 21,
+      "ad": "Ayvalık adaları tekne turu",
+      "kategori": "aktivite",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Ayvalık",
+      "merkeze_km": 109,
+      "neden": "Körfezdeki adalar arasında yüzme molalı günlük tekne turları limandan kalkar."
+    },
+    {
+      "sira": 22,
+      "ad": "Cunda'da balık ve ot mezeleri",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet",
+        "gece"
+      ],
+      "ilce": "Ayvalık",
+      "merkeze_km": 109,
+      "neden": "Deniz börülcesi, şevketi bostan ve ızgara balık; adanın kıyı lokantalarında."
+    },
+    {
+      "sira": 23,
+      "ad": "Bandırma Arkeoloji Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Bandırma",
+      "merkeze_km": 78,
+      "neden": "Daskyleion ve Kyzikos kazılarının buluntuları; Pers dönemi kabartmaları.",
+      "osm": "way/1111718273",
+      "place_id": "ChIJw3on-WvTtRQRlWd87bfxSzY"
+    },
+    {
+      "sira": 24,
+      "ad": "Avşa Adası",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "gece"
+      ],
+      "ilce": "Marmara",
+      "merkeze_km": 100,
+      "neden": "Feribotla gidilen kumsal adası; yazın Marmara'nın en kalabalık tatil yerlerinden.",
+      "place_id": "ChIJR7MDlssZtBQRbpSXLAW7SoQ"
+    },
+    {
+      "sira": 25,
+      "ad": "Marmara Adası mermer ocakları",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Marmara",
+      "merkeze_km": 110,
+      "neden": "Antik çağdan beri mermer çıkarılan ada; Saraylar'da açık hava mermer sergisi."
+    },
+    {
+      "sira": 26,
+      "ad": "Adramytteion",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Burhaniye",
+      "merkeze_km": 83,
+      "neden": "Ören'de, Edremit'e adını veren antik kentin kazısı ve liman kalıntıları.",
+      "osm": "way/522119273"
+    },
+    {
+      "sira": 27,
+      "ad": "Gönen kaplıcaları",
+      "kategori": "aktivite",
+      "amaclar": [
+        "yavas"
+      ],
+      "ilce": "Gönen",
+      "merkeze_km": 54,
+      "neden": "Roma döneminden beri kullanılan sıcak sular; ilçe merkezinde termal tesisler."
+    },
+    {
+      "sira": 28,
+      "ad": "Kazdağı yürüyüşü",
+      "kategori": "aktivite",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Edremit",
+      "merkeze_km": 88,
+      "neden": "Hasanboğuldu'dan Sütüven'e ya da Sarıkız'a çıkan işaretli patikalar."
+    },
+    {
+      "sira": 29,
+      "ad": "Zeytinli",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Edremit",
+      "merkeze_km": 80,
+      "neden": "Kazdağı eteğinde taş evli köy; zeytinyağı fabrikaları ve bayram yerleriyle.",
+      "osm": "way/378128244",
+      "place_id": "ChIJJ2w7hpnHsBQRnDNK8YpIFbE"
+    },
+    {
+      "sira": 30,
+      "ad": "Ayvalık zeytinyağı",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Ayvalık",
+      "merkeze_km": 109,
+      "neden": "Coğrafi işaretli, ayvalık zeytininden sıkılan yağ; fabrikaların satış yerlerinde tadılır."
+    },
+    {
+      "sira": 31,
+      "ad": "Balıkesir Saat Kulesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Karesi",
+      "merkeze_km": 0,
+      "neden": "Kent merkezinde, 19. yüzyılda yapılmış taş kule; Galata Kulesi'ne benzetilir.",
+      "osm": "way/319067030",
+      "place_id": "ChIJyfUnvUwAtxQR2JTAwGgbAo8"
+    },
+    {
+      "sira": 32,
+      "ad": "Lor tatlısı",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Ayvalık",
+      "merkeze_km": 109,
+      "neden": "Ayvalık'ın taze lorla yapılan şerbetli tatlısı; pastanelerde sorulur."
+    },
+    {
+      "sira": 33,
+      "ad": "Akçay",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Edremit",
+      "merkeze_km": 82,
+      "neden": "Kazdağı'nın denize indiği yerde serin sulu sahil kasabası; kıyı boyu yürüyüş yolu.",
+      "place_id": "ChIJ6TS6Ude-sBQRmDNDrtPYv0g"
+    },
+    {
+      "sira": 34,
+      "ad": "Erdek ve Kapıdağ koyları",
+      "kategori": "doga",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Erdek",
+      "merkeze_km": 84,
+      "neden": "Kapıdağ Yarımadası'nın çam ağaçlı koyları ve Erdek'in kumsalları."
+    },
+    {
+      "sira": 35,
+      "ad": "Karesi Bey Türbesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Karesi",
+      "merkeze_km": 1,
+      "neden": "Kente adını veren Karesi Beyliği'nin kurucusunun türbesi.",
+      "osm": "way/249165528",
+      "place_id": "ChIJj91Ix0oAtxQRIIet8HEk1ZI"
+    },
+    {
+      "sira": 36,
+      "ad": "Ayvalık dalış noktaları",
+      "kategori": "aktivite",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Ayvalık",
+      "merkeze_km": 109,
+      "neden": "Körfezdeki kayalıklarda kırmızı mercanlarıyla bilinen dalış noktaları."
+    },
+    {
+      "sira": 37,
+      "ad": "Susurluk ayranı",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Susurluk",
+      "merkeze_km": 38,
+      "neden": "Yayıkta çalkalanıp bakır taslarda köpüğüyle gelen ayran; tostun yanında içilir."
+    }
+  ]
+}

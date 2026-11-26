@@ -12,13 +12,67 @@ on:
       - 'icerik/**'
       - 'docs/**'
   workflow_dispatch:
+  # #494 KK6: migration getiren birleştirmede yayın, otomatik `supabase-migrate` BAŞARIYLA bitince yapılır
+  # (yeni sürüm eski şemayla birkaç dakika hata vermesin). Migration değişmeyen push'ta yayın beklemez.
+  workflow_run:
+    workflows: [supabase-migrate]
+    types: [completed]
+
+permissions:
+  contents: read
 
 concurrency:
   group: yonetim-yayin
   cancel-in-progress: true
 
 jobs:
+  karar:
+    runs-on: ubuntu-latest
+    outputs:
+      yayinla: ${{ steps.karar.outputs.yayinla }}
+    steps:
+      - uses: actions/checkout@v4
+        if: github.event_name == 'push'
+        with:
+          fetch-depth: 0
+      - name: Şimdi mi, migration'dan sonra mı
+        id: karar
+        env:
+          OLAY: ${{ github.event_name }}
+          ONCE: ${{ github.event.before }}
+          SONRA: ${{ github.sha }}
+          MIGRATE_OLAY: ${{ github.event.workflow_run.event }}
+          MIGRATE_DAL: ${{ github.event.workflow_run.head_branch }}
+          MIGRATE_SONUC: ${{ github.event.workflow_run.conclusion }}
+          MIGRATE_REPO: ${{ github.event.workflow_run.head_repository.full_name }}
+          REPO: ${{ github.repository }}
+        run: |
+          case "$OLAY" in
+            push)
+              # Push supabase-migrate'i de tetikliyorsa yayını ona bırak (workflow_run ile gelir).
+              if degisen=$(git diff --name-only "$ONCE" "$SONRA" 2>/dev/null) \
+                && printf '%s\n' "$degisen" | grep -qE '^supabase/(migrations|functions)/'; then
+                echo "Migration/fonksiyon değişti; yayın supabase-migrate bitince yapılacak."
+                echo "yayinla=false" >> "$GITHUB_OUTPUT"
+              else
+                echo "yayinla=true" >> "$GITHUB_OUTPUT"
+              fi ;;
+            workflow_run)
+              # Yalnız main push'uyla başlayan ve başarıyla biten migrate. Düşerse yayın yapılmaz.
+              if [ "$MIGRATE_OLAY" = "push" ] && [ "$MIGRATE_DAL" = "main" ] && [ "$MIGRATE_SONUC" = "success" ] \
+                && [ "$MIGRATE_REPO" = "$REPO" ]; then
+                echo "yayinla=true" >> "$GITHUB_OUTPUT"
+              else
+                echo "::warning::supabase-migrate ($MIGRATE_OLAY, $MIGRATE_DAL) sonucu: $MIGRATE_SONUC; yayın yapılmadı."
+                echo "yayinla=false" >> "$GITHUB_OUTPUT"
+              fi ;;
+            *)
+              echo "yayinla=true" >> "$GITHUB_OUTPUT" ;;
+          esac
+
   yayin:
+    needs: karar
+    if: needs.karar.outputs.yayinla == 'true'
     runs-on: ubuntu-latest
     environment:
       name: yonetim
@@ -47,6 +101,9 @@ jobs:
           fi
       - uses: actions/checkout@v4
         if: steps.kosul.outputs.hazir == '1'
+        with:
+          # workflow_run'da main'in o anki ucu yayınlanır: migrate beklerken birleşen daha yeni bir PR eski commit'le ezilmesin.
+          ref: ${{ github.event_name == 'workflow_run' && 'main' || github.sha }}
       - uses: actions/setup-node@v4
         if: steps.kosul.outputs.hazir == '1'
         with:

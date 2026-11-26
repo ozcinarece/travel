@@ -1,0 +1,407 @@
+{
+  "il": "Denizli",
+  "slug": "denizli",
+  "guncelleme": "2026-11-21",
+  "oneriler": [
+    {
+      "sira": 1,
+      "ad": "Pamukkale Travertenleri",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Pamukkale",
+      "merkeze_km": 16,
+      "neden": "Kireçli suyun bıraktığı bembeyaz teraslar; korunsun diye üstünde çıplak ayakla yürünür.",
+      "osm": "way/15494594"
+    },
+    {
+      "sira": 2,
+      "ad": "Hierapolis Antik Kenti",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Pamukkale",
+      "merkeze_km": 17,
+      "neden": "Travertenlerin hemen üstünde; büyük tiyatro, Frontinus Caddesi ve geniş bir nekropol.",
+      "osm": "way/116720710"
+    },
+    {
+      "sira": 3,
+      "ad": "Laodikeia Antik Kenti",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Pamukkale",
+      "merkeze_km": 7,
+      "neden": "Kazılarla ayağa kalkan iki tiyatro, sütunlu caddeler; Vahiy'de anılan yedi kiliseden biri.",
+      "osm": "way/145583478",
+      "place_id": "ChIJiVIn5rMVxxQRn-8p-18uftA"
+    },
+    {
+      "sira": 4,
+      "ad": "Hierapolis Arkeoloji Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Pamukkale",
+      "merkeze_km": 17,
+      "neden": "Roma hamamının içinde; Hierapolis'in lahitleri, heykelleri ve tiyatro kabartmaları.",
+      "osm": "way/52287241",
+      "place_id": "ChIJBasWfzASxxQRgC-JjjFJx10"
+    },
+    {
+      "sira": 5,
+      "ad": "Antik Havuz",
+      "kategori": "aktivite",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Pamukkale",
+      "merkeze_km": 17,
+      "neden": "Dibinde devrilmiş antik sütunların durduğu ılık termal suda yüzülür.",
+      "osm": "way/116720718"
+    },
+    {
+      "sira": 6,
+      "ad": "Denizli kebabı",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkezefendi",
+      "merkeze_km": 0,
+      "neden": "Kuzunun kuyu fırında pişip kâğıt üstünde, pideyle ve elle yendiği kentin kebabı."
+    },
+    {
+      "sira": 7,
+      "ad": "Karahayıt Kırmızı Su",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Pamukkale",
+      "merkeze_km": 21,
+      "neden": "Demirli termal suyun kırmızıya, yeşile boyadığı küçük bir traverten tepesi.",
+      "osm": "node/1764526453",
+      "place_id": "ChIJ030sa4UNxxQRk8hQ3lR0co4"
+    },
+    {
+      "sira": 8,
+      "ad": "Kaklık Mağarası",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Honaz",
+      "merkeze_km": 28,
+      "neden": "Tabanında beyaz travertenler ve sıcak su birikintileri olan mağara; küçük bir Pamukkale.",
+      "osm": "way/236460665"
+    },
+    {
+      "sira": 9,
+      "ad": "Denizli Teleferik ve Bağbaşı Yaylası",
+      "kategori": "aktivite",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Pamukkale",
+      "merkeze_km": 10,
+      "neden": "Teleferikle çıkılan yaylada çam ormanı, yürüyüş yolları ve aşağıda bütün kent."
+    },
+    {
+      "sira": 10,
+      "ad": "Honaz Dağı Milli Parkı",
+      "kategori": "doga",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Honaz",
+      "merkeze_km": 19,
+      "neden": "Ege'nin en yüksek doruklarından; kuzey yamaçta karaçam, sedir ve derin vadiler.",
+      "place_id": "ChIJ-3_K0oAjxxQRqW1WDYwtGFc"
+    },
+    {
+      "sira": 11,
+      "ad": "Tavas yanık yoğurdu",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Tavas",
+      "merkeze_km": 23,
+      "neden": "Sütün kazanda dibi tutturulana kadar kaynatılmasıyla yapılan, isli tatlı yoğurt."
+    },
+    {
+      "sira": 12,
+      "ad": "Ak Han",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Pamukkale",
+      "merkeze_km": 9,
+      "neden": "1253'te yapılan Selçuklu kervansarayı; taç kapısı ve avlu cephesi beyaz mermerden.",
+      "osm": "relation/2370401",
+      "place_id": "ChIJi6v0IhcWxxQRLDoQV9eMVZU"
+    },
+    {
+      "sira": 13,
+      "ad": "Kolossai Höyüğü",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Honaz",
+      "merkeze_km": 15,
+      "neden": "Pavlus'un mektup yazdığı Kolossai'nin yeri; ilk kazılar yakın zamanda başladı.",
+      "osm": "way/137828844"
+    },
+    {
+      "sira": 14,
+      "ad": "Atatürk ve Etnografya Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkezefendi",
+      "merkeze_km": 1,
+      "neden": "Atatürk'ün 1931'de konakladığı ev; üst katta Denizli dokumaları ve eski oda düzenleri.",
+      "osm": "node/4346936690",
+      "place_id": "ChIJZZieO7E_xxQREX1gU4gEn8c"
+    },
+    {
+      "sira": 15,
+      "ad": "Tripolis Antik Kenti",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Buldan",
+      "merkeze_km": 33,
+      "neden": "Büyük Menderes kıyısında; kazılarla açılan sütunlu cadde, tiyatro ve hamamlar.",
+      "place_id": "ChIJzcnYO4BxxxQRScULblVZdqo"
+    },
+    {
+      "sira": 16,
+      "ad": "Buldan",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Buldan",
+      "merkeze_km": 37,
+      "neden": "El tezgâhında dokunan Buldan bezinin ilçesi; eski evlerinde atölyeler hâlâ çalışıyor.",
+      "place_id": "ChIJz9wcScB6xxQRPofXGiF4Lyg"
+    },
+    {
+      "sira": 17,
+      "ad": "Keloğlan Mağarası",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Acıpayam",
+      "merkeze_km": 44,
+      "neden": "Dodurga köyünde; sarkıt ve dikitlerin arasında yürüyüş yolu döşenmiş mağara.",
+      "place_id": "ChIJM3-T8q3UxhQR13iOAoMTJXc"
+    },
+    {
+      "sira": 18,
+      "ad": "Güney Şelalesi",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Güney",
+      "merkeze_km": 42,
+      "neden": "Kireçli suyun yosun tutmuş kayalardan döküldüğü şelale; ilçenin hemen girişinde."
+    },
+    {
+      "sira": 19,
+      "ad": "Işıklı Gölü",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Çivril",
+      "merkeze_km": 88,
+      "neden": "Büyük Menderes'i besleyen sığ göl; sazlıklarında balıkçıl ve pelikan görülür."
+    },
+    {
+      "sira": 20,
+      "ad": "Beycesultan Höyüğü",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Çivril",
+      "merkeze_km": 75,
+      "neden": "Menderes kıyısında Tunç Çağı'ndan kalma bir saray kalıntısıyla bilinen höyük.",
+      "osm": "way/183385976",
+      "place_id": "ChIJzxX1iqtAxhQRYM43W3zcEuw"
+    },
+    {
+      "sira": 21,
+      "ad": "Denizli Kent Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Merkezefendi",
+      "merkeze_km": 0,
+      "neden": "Denizli'nin dokuma geçmişini ve kent yaşamını eşya ve canlandırmalarla anlatan müze.",
+      "osm": "way/519357353",
+      "place_id": "ChIJOwAeJu0_xxQRI1EAQmF-mhc"
+    },
+    {
+      "sira": 22,
+      "ad": "Pamukkale yamaç paraşütü",
+      "kategori": "aktivite",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Pamukkale",
+      "merkeze_km": 16,
+      "neden": "Travertenlerin üstünden pilotla ikili uçuş; Hierapolis'i havadan görürsün."
+    },
+    {
+      "sira": 23,
+      "ad": "Şahin Tepesi",
+      "kategori": "manzara",
+      "amaclar": [
+        "yavas"
+      ],
+      "ilce": "Pamukkale",
+      "merkeze_km": 9,
+      "neden": "Denizli ovasını ve Honaz Dağı'nı tek bakışta gösteren tepe; akşam ışıklarına git.",
+      "osm": "node/4312432532"
+    },
+    {
+      "sira": 24,
+      "ad": "Ulu Cami",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkezefendi",
+      "merkeze_km": 0,
+      "neden": "Kaleiçi'ne yakın kentin eski camisi; avlusu çarşının ortasında bir mola yeri.",
+      "osm": "way/518813017",
+      "place_id": "ChIJ_UicXLE_xxQR0OSqMB3eUUc"
+    },
+    {
+      "sira": 25,
+      "ad": "Çardak Han",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Çardak",
+      "merkeze_km": 52,
+      "neden": "Acıgöl kıyısındaki Hanbat'ta, 1230'larda yapılmış Selçuklu kervansarayı.",
+      "osm": "relation/17651679",
+      "place_id": "ChIJNRdYPrnxxhQRYSEwSbU2aaY"
+    },
+    {
+      "sira": 26,
+      "ad": "Honaz kirazı",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Honaz",
+      "merkeze_km": 16,
+      "neden": "Haziranda Honaz'ın bahçelerinden toplanan iri, koyu kiraz; yol kenarında satılır."
+    },
+    {
+      "sira": 27,
+      "ad": "Çal bağları",
+      "kategori": "manzara",
+      "amaclar": [
+        "yavas",
+        "lezzet"
+      ],
+      "ilce": "Çal",
+      "merkeze_km": 44,
+      "neden": "Çal karası üzümünün yetiştiği bağlarla kaplı yamaçlar; hasat eylülde."
+    },
+    {
+      "sira": 28,
+      "ad": "Servergazi Seyir Tepesi",
+      "kategori": "manzara",
+      "amaclar": [
+        "yavas",
+        "cocuklu"
+      ],
+      "ilce": "Merkezefendi",
+      "merkeze_km": 4,
+      "neden": "Kentin güneyinde, akşamüstü Denizli'yi ve ovayı yukarıdan gösteren seyir yeri.",
+      "osm": "node/3711082233"
+    },
+    {
+      "sira": 29,
+      "ad": "Gökpınar Göleti",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Merkezefendi",
+      "merkeze_km": 9,
+      "neden": "Kente yakın, kaynak suyuyla beslenen gölet; kıyısında yürüyüş ve piknik alanı.",
+      "place_id": "ChIJVczB6g8-xxQRLIqshQg-gv0"
+    },
+    {
+      "sira": 30,
+      "ad": "Server Gazi Türbesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkezefendi",
+      "merkeze_km": 4,
+      "neden": "Kentin güneyinde, adını semte veren Server Gazi'nin türbesi ve çevresindeki koruluk.",
+      "osm": "node/6169447761",
+      "place_id": "ChIJpf_NyKtAxxQRW-bnXi0acf8"
+    },
+    {
+      "sira": 31,
+      "ad": "Babadağ",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Babadağ",
+      "merkeze_km": 20,
+      "neden": "Dağ yamacına kurulmuş eski dokumacı kasabası; taş ve ahşap evleri yokuşlarda dizili.",
+      "place_id": "ChIJhYXdarRcxxQRUNyT-3Dcu0E"
+    },
+    {
+      "sira": 32,
+      "ad": "Kaleiçi Çarşısı",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Merkezefendi",
+      "merkeze_km": 0,
+      "neden": "Eski kale surlarının içinde kalan çarşı; havlu, bez ve bakır dükkânları."
+    }
+  ]
+}

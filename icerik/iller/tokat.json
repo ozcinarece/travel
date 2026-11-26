@@ -1,0 +1,383 @@
+{
+  "il": "Tokat",
+  "slug": "tokat",
+  "guncelleme": "2026-11-21",
+  "oneriler": [
+    {
+      "sira": 1,
+      "ad": "Tokat Kalesi",
+      "kategori": "manzara",
+      "amaclar": [
+        "kultur_tarih",
+        "gece"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Şehrin ortasındaki kayalık; onarılan surlardan eski çarşı ve Behzat Deresi görünür",
+      "osm": "way/231221316",
+      "place_id": "ChIJCXLpmGy3fUARfC9fe4KNL4Y"
+    },
+    {
+      "sira": 2,
+      "ad": "Tokat kebabı",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Kuzu eti, patlıcan ve Tokat biberi şişte odun fırınında dik pişer; tescilli"
+    },
+    {
+      "sira": 3,
+      "ad": "Ballıca Mağarası",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Pazar",
+      "merkeze_km": 26,
+      "neden": "Pazar'da sarkıt ve dikitlerle dolu mağara; içinde merdivenli gezi yolu var",
+      "osm": "node/2331729324",
+      "place_id": "ChIJifVDpObEfUARtiUa6dLxbAc"
+    },
+    {
+      "sira": 4,
+      "ad": "Gök Medrese",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Pervane Muineddin Süleyman'ın 13. yüzyıl medresesi; cephesi firuze sırlı tuğlalı",
+      "place_id": "ChIJd-kZMWu3fUAR0sni-Ne2KHE"
+    },
+    {
+      "sira": 5,
+      "ad": "Tokat Müzesi (Arasta Bedesteni)",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Osmanlı bedesteninde; Zile Maşat Höyük'ün Hitit buluntuları ve Tokat yazmaları",
+      "place_id": "ChIJQQt2HA63fUARTypqHR8wi8E"
+    },
+    {
+      "sira": 6,
+      "ad": "Latifoğlu Konağı",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "19. yüzyıl Tokat konağı; kalem işi tavanlı başoda ve haremlik gezilir",
+      "place_id": "ChIJHfM8HQ63fUARkZYjFLmDWKU"
+    },
+    {
+      "sira": 7,
+      "ad": "Taşhan (Voyvoda Hanı)",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "17. yüzyıl ortası iki katlı han; avludaki dükkânlarda yazma, bakır ve hediyelik satılır",
+      "place_id": "ChIJmZW8sRS3fUARebcHbKjikt8"
+    },
+    {
+      "sira": 8,
+      "ad": "Ali Paşa Camii",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "16. yüzyılda Ali Paşa'nın yaptırdığı kurşun kubbeli cami; avlusunda paşanın türbesi",
+      "osm": "way/313360265",
+      "place_id": "ChIJrQTs-RK3fUAR7qAuwXDgMfc"
+    },
+    {
+      "sira": 9,
+      "ad": "Sebastopolis Antik Kenti",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Sulusaray",
+      "merkeze_km": 68,
+      "neden": "Sulusaray'ın altındaki Roma kenti; kazıda hamam ve sütunlu yol açığa çıktı"
+    },
+    {
+      "sira": 10,
+      "ad": "Zile Kalesi",
+      "kategori": "manzara",
+      "amaclar": [
+        "kultur_tarih",
+        "doga"
+      ],
+      "ilce": "Zile",
+      "merkeze_km": 67,
+      "neden": "Sezar'ın 'Geldim, gördüm, yendim' dediği MÖ 47 zaferinin yaşandığı Zile'nin tepesi"
+    },
+    {
+      "sira": 11,
+      "ad": "Niksar Kalesi",
+      "kategori": "manzara",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Niksar",
+      "merkeze_km": 55,
+      "neden": "Danişmendlilerin ilk merkezi; kale içinde Melik Danişmend Gazi'nin türbesi var"
+    },
+    {
+      "sira": 12,
+      "ad": "Zile pekmezi",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Zile",
+      "merkeze_km": 67,
+      "neden": "Pekmez toprağıyla durultulup yumurta akıyla çırpılır, açık renkli olur; tescilli"
+    },
+    {
+      "sira": 13,
+      "ad": "Tokat Mevlevihanesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "Osmanlı dönemi ahşap mevlevihane; semahane ve derviş odaları müze olarak gezilir",
+      "osm": "node/6990384536",
+      "place_id": "ChIJ94Glzw-3fUARSrgurrS5Pk0"
+    },
+    {
+      "sira": 14,
+      "ad": "Hatuniye Camii ve Külliyesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "II. Bayezid'in annesi Gülbahar Hatun adına 1485'te yapılan külliye",
+      "osm": "way/382213475"
+    },
+    {
+      "sira": 15,
+      "ad": "Ali Paşa Hamamı",
+      "kategori": "aktivite",
+      "amaclar": [
+        "yavas"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Ali Paşa'nın 16. yüzyıl çifte hamamı hâlâ işler; kubbe camlarından ışık düşer",
+      "place_id": "ChIJEwC9qxO3fUAR9mh-ohjaonM"
+    },
+    {
+      "sira": 16,
+      "ad": "Erbaa narince yaprak sarması",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Erbaa",
+      "merkeze_km": 90,
+      "neden": "Erbaa'nın ince, tüysüz narince bağ yaprağıyla sarılır; yaprak tescilli"
+    },
+    {
+      "sira": 17,
+      "ad": "Hıdırlık Köprüsü",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "Yeşilırmak üstünde 1250 kitabeli Selçuklu köprüsü; akşamüstü yürüyüşüne uygun",
+      "place_id": "ChIJBXEUfkW3fUAROWgbYK6usps"
+    },
+    {
+      "sira": 18,
+      "ad": "Mahperi Hatun Kervansarayı (Hatun Han)",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Pazar",
+      "merkeze_km": 25,
+      "neden": "Pazar'da 1238'de Mahperi Hatun'un yaptırdığı Selçuklu hanı",
+      "osm": "relation/2368709",
+      "place_id": "ChIJwdMSZeDDfUARkwk-RElNn9E"
+    },
+    {
+      "sira": 19,
+      "ad": "Almus Baraj Gölü",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Almus",
+      "merkeze_km": 30,
+      "neden": "Çam yamaçlar arasındaki baraj gölü; kıyıda piknik yerleri ve alabalık lokantaları"
+    },
+    {
+      "sira": 20,
+      "ad": "Tokat batı",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Yeşil mercimek ve bulgur ince kıyılmış sebzeyle karılır, soğuk ve marulla yenir"
+    },
+    {
+      "sira": 21,
+      "ad": "Zile kömesi",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Zile",
+      "merkeze_km": 67,
+      "neden": "İpe dizilen ceviz pekmezli nişasta harcına batırılıp kurutulur; tescilli"
+    },
+    {
+      "sira": 22,
+      "ad": "Komana Antik Kenti",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 9,
+      "neden": "Gümenek'te Ma tanrıçasına adanmış Pontus tapınak kenti; kazı sürüyor",
+      "osm": "way/275298480",
+      "place_id": "ChIJl15-702wfUAR070zKE8aqvQ"
+    },
+    {
+      "sira": 23,
+      "ad": "Turhal yoğurtmacı",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Turhal",
+      "merkeze_km": 45,
+      "neden": "Cevizli iç harçla 10–12 kat katlanan hamur taş fırında pişer; tescilli"
+    },
+    {
+      "sira": 24,
+      "ad": "Niksar cevizi",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Niksar",
+      "merkeze_km": 55,
+      "neden": "Kelkit vadisinin yağlı cevizi; eylül–ekimde Niksar pazarında taze bulunur; tescilli"
+    },
+    {
+      "sira": 25,
+      "ad": "Yağıbasan Medresesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Danişmendli Melik Yağıbasan'ın 12. yüzyıl medresesi; erken kubbeli medreselerden",
+      "place_id": "ChIJZ5u8OG23fUARSXruVQUMXBY"
+    },
+    {
+      "sira": 26,
+      "ad": "Kaz Gölü",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 20,
+      "neden": "Kazova düzlüğünde sazlıklı göl; yaban hayatı sahası, kuş gözlemi için dürbün getirin"
+    },
+    {
+      "sira": 27,
+      "ad": "Zinav Gölü",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Reşadiye",
+      "merkeze_km": 100,
+      "neden": "Reşadiye'de orman içinde küçük göl; kıyısında kamp ve yürüyüş yapılır"
+    },
+    {
+      "sira": 28,
+      "ad": "Çamiçi Yaylası",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Niksar",
+      "merkeze_km": 80,
+      "neden": "Niksar'ın ormanlık yaylası; ahşap yayla evleri, yazın yayla şenliği"
+    },
+    {
+      "sira": 29,
+      "ad": "Gaziosmanpaşa Plevne Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Plevne kahramanı Gazi Osman Paşa'nın doğduğu şehirde ona adanmış müze",
+      "osm": "way/746061609",
+      "place_id": "ChIJqZ15YQS3fUARmd3WbdxRAxk"
+    },
+    {
+      "sira": 30,
+      "ad": "Sulusaray Çermik Kaplıcası",
+      "kategori": "aktivite",
+      "amaclar": [
+        "yavas"
+      ],
+      "ilce": "Sulusaray",
+      "merkeze_km": 68,
+      "neden": "Sebastopolis kazısının yanı başındaki termal kaynak; Roma döneminden beri kullanılır"
+    },
+    {
+      "sira": 31,
+      "ad": "Kelkit Çayı rafting",
+      "kategori": "aktivite",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Reşadiye",
+      "merkeze_km": 100,
+      "neden": "Reşadiye'de Kelkit Çayı'nın vadisinde rafting parkuru; ilkbahar–yaz sezonu"
+    }
+  ]
+}

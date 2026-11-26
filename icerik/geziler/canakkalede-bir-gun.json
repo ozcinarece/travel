@@ -1,0 +1,138 @@
+{
+  "surum": 1,
+  "sehir": {
+    "yeni": {
+      "ad": "Çanakkale",
+      "slug": "canakkale",
+      "place_id": "ChIJPy9KIdipsRQRfy_iAzfr64w"
+    }
+  },
+  "takvim": {
+    "ilk_gun": "cumartesi"
+  },
+  "gezi": {
+    "slug": "canakkalede-bir-gun",
+    "baslik": "Çanakkale'de bir gün",
+    "ozet": "Sabah Hisarlık'ta dokuz katlı Troya, akşam Boğaz'da gemiler ve güneş",
+    "yazar_ad": "Tripmate ekibi",
+    "amaclar": ["kultur_tarih", "lezzet"],
+    "yazi_md": "Çanakkale'de bir gün, sabah Hisarlık Tepesi'nde dört bin yıllık bir kentin katmanları arasında başlar, akşamüstü Boğaz kıyısında gemileri izleyerek biter. Bu plan güne kentin otuz kilometre güneyindeki Troya ile başlıyor, öğleden sonra da merkezde, birbirine birkaç dakika yürüme mesafesindeki duraklarla devam ediyor. Troya'ya gidip dönmek için araba gerekir; merkezdeki her yer yürünür.\n\n> Troya'ya sabah erken git. Ören yerinde gölge az, öğleye doğru hem sıcak hem kalabalık olur; dokuzda kapıda olursan tepeyi neredeyse kendin gezersin.\n\n## 1. gün · Troya'dan Boğaz'a\n\nGüne [Troya Antik Kenti](mekan:ChIJUSINQiVQsBQRE-r5LO-_c7U) ile başla. Hisarlık Tepesi'nde aynı noktaya üst üste kurulmuş dokuz yerleşim var ve işaretli yürüyüş yolu seni bunların arasında dolaştırır. Schliemann'ın tepeyi ortadan yardığı hendeğin başında dur; katmanların nasıl kesildiğini burada açıkça görürsün.\n\n::mekan[ChIJUSINQiVQsBQRE-r5LO-_c7U]\n\nÖren yerinden çıkınca yolun başındaki [Troya Müzesi](mekan:ChIJWR3fcgJRsBQR7zQ2_pr98D8)'ne geç. Az önce yalnızca duvarlarını gördüğün dönemlerin eserleri burada. Polyxena Lahdi'nin iki yüzüne de bak, sonra çatı terasına çıkıp Hisarlık'ı yukarıdan gör.\n\nMüzeden sonra arabana bin ve kente dön; yol yarım saat kadar sürer. Öğle yemeğini kordondaki [Yalova Restoran](mekan:ChIJd7UIl8ipsRQRfBN1LCaqhqk)'da ye. Meze tezgâhından füme kolyozu seç, ardından o gün Boğaz'dan ne çıktıysa onu iste. Üst kattaki pencere kenarından gemiler önünden geçer.\n\n::mekan[ChIJd7UIl8ipsRQRfBN1LCaqhqk]\n\nYemekten sonra kordondan içeri, eski çarşıya yürü. [Çanakkale Saat Kulesi](mekan:ChIJB3BmdrepsRQRt2RDXM-ivvc) 1897'den beri buranın buluşma noktası. Kuleden birkaç adım ötedeki [Aynalı Çarşı](mekan:ChIJC2K-l8WpsRQRuS0Gn_uzeI0)'nın taş kapısından içeri gir; dükkânlarda Çanakkale seramiğinin yeni yapılmış örneklerini ve yöresel ürünleri bulursun.\n\nÇarşının yakınındaki [Kadir Usta Peynir Helvası](mekan:ChIJb5ElqcWpsRQRoxf6YJ2_Dlg)'nda bir tatlı molası ver. Çanakkale'nin tatlısı peynir helvasını burada iki türlü yiyebilirsin: tavada pişmiş ılık hali ve fırında üstü kızartılmış hali. İlk kez geliyorsan ikisinden de yarım porsiyon iste.\n\nHelvadan sonra güneye, Boğaz'ın ucundaki [Çanakkale Deniz Müzesi ve Çimenlik Kalesi](mekan:ChIJtxwsncipsRQRqrRswVEC-mU)'ne yürü. Fatih'in 1462'de yaptırdığı kalenin bahçesinde 1915 savunmasında kullanılan toplar dizili. Kıyıdaki Nusret mayın gemisinin benzerine çık; 18 Mart 1915'teki deniz savaşının nasıl kazanıldığı bu küçük gemiyle anlatılır. Müze pazartesi ve perşembe kapalı, bu yüzden plan cumartesiye göre kuruldu.\n\nGünü [Kordon ve Tahta At](mekan:ChIJa34V2s2psRQRmLDTS9okB4I) ile bitir. Kaleden kuzeye, Boğaz kıyısı boyunca yürü; yolun kuzey ucunda Troy filminde kullanılan büyük ahşap at duruyor. Sabah ören yerinde gördüğün canlandırma atla bu film atını karşılaştırmak günün güzel bir kapanışı. Güneş Gelibolu yarımadasının tepelerinin arkasına inerken karşı yamaçtaki \"Dur Yolcu\" yazısını ara.\n\nAkşam yemeği için kordonda kalabilirsin; balıkçılar ve çay bahçeleri sabaha kadar olmasa da gece geç saate kadar açık. Kışın güneş erken battığı için Deniz Müzesi'nden sonra fazla oyalanma. Yazın ise gün batımına kadar kordonda oturup gemileri izlemeye vaktin olur.\n\nÇanakkale'nin öbür yarısı, Gelibolu yarımadasındaki şehitlikler ve anıtlar, Boğaz'ın karşı kıyısında. Onlar için ayrı bir gün ayır; feribot kordondan kalkar."
+  },
+  "gunler": [
+    {
+      "baslik": "Troya'dan Boğaz'a",
+      "duraklar": [
+        {
+          "place_id": "ChIJUSINQiVQsBQRE-r5LO-_c7U",
+          "osm": "way/423938794",
+          "ad": "Troya Antik Kenti",
+          "sure_dk": 120,
+          "sure_gerekcesi": "varsayılan 60; geniş ören yeri, işaretli yürüyüş yolu yaklaşık iki saat",
+          "kapali_gunler": [],
+          "rehber": "troya-antik-kenti",
+          "amaclar": ["kultur_tarih", "cocuklu"]
+        },
+        {
+          "place_id": "ChIJWR3fcgJRsBQR7zQ2_pr98D8",
+          "osm": "way/1033194996",
+          "ad": "Troya Müzesi",
+          "sure_dk": 90,
+          "kapali_gunler": [],
+          "rehber": "troya-muzesi",
+          "amaclar": ["kultur_tarih", "cocuklu"]
+        },
+        {
+          "place_id": "ChIJd7UIl8ipsRQRfBN1LCaqhqk",
+          "osm": "node/6506623986",
+          "ad": "Yalova Restoran",
+          "sure_dk": 75,
+          "kapali_gunler": [],
+          "rehber": "yalova-restoran",
+          "amaclar": ["lezzet"]
+        },
+        {
+          "place_id": "ChIJB3BmdrepsRQRt2RDXM-ivvc",
+          "osm": "node/1556176710",
+          "ad": "Çanakkale Saat Kulesi",
+          "sure_dk": 30,
+          "sure_gerekcesi": "varsayılan 45; kule dışarıdan görülür, yanındaki Aynalı Çarşı ile yarım saat",
+          "kapali_gunler": [],
+          "rehber": "saat-kulesi",
+          "amaclar": ["kultur_tarih"]
+        },
+        {
+          "place_id": "ChIJb5ElqcWpsRQRoxf6YJ2_Dlg",
+          "ad": "Kadir Usta Peynir Helvası",
+          "sure_dk": 30,
+          "kapali_gunler": [],
+          "rehber": "kadir-usta-peynir-helvasi",
+          "amaclar": ["lezzet"],
+          "sure_gerekcesi": "varsayılan 45; tek tatlı, oturup bir porsiyon yemek yarım saat"
+        },
+        {
+          "place_id": "ChIJtxwsncipsRQRqrRswVEC-mU",
+          "osm": "way/330206322",
+          "ad": "Çanakkale Deniz Müzesi ve Çimenlik Kalesi",
+          "sure_dk": 60,
+          "sure_gerekcesi": "varsayılan 90; bahçe, Nusret ve kale salonları bir saatte gezilir",
+          "kapali_gunler": ["pazartesi", "perşembe"],
+          "rehber": "deniz-muzesi-cimenlik-kalesi",
+          "amaclar": ["kultur_tarih", "cocuklu"]
+        },
+        {
+          "place_id": "ChIJa34V2s2psRQRmLDTS9okB4I",
+          "osm": "node/3153627490",
+          "ad": "Kordon ve Tahta At",
+          "sure_dk": 45,
+          "sure_gerekcesi": "varsayılan 60; kordon yürüyüşü ve gün batımı",
+          "kapali_gunler": [],
+          "rehber": "kordon-tahta-at",
+          "amaclar": ["yavas", "cocuklu"]
+        }
+      ]
+    }
+  ],
+  "ek_mekanlar": [
+    {
+      "place_id": "ChIJC2K-l8WpsRQRuS0Gn_uzeI0",
+      "ad": "Aynalı Çarşı"
+    }
+  ],
+  "notlar": {
+    "dogrulanacaklar": [
+      "[Plan · g1.d6 kapali_gunler] · Deniz Müzesi pazartesi ve perşembe kapalı yazıldı (bellekten; Wikipedia 'Çanakkale Naval Museum' ve turkishmuseums PDF'inde bakılmadı) · Deniz Kuvvetleri, müze girişi",
+      "[Plan · kapali_gunler] · Troya ören yeri ve müzesi her gün açık (canakkale.com.tr: 'Haftanın her günü'); öteki duraklarda kaynak yok, [] bırakıldı · KTB, işletme",
+      "[Plan · Sehir] · Çanakkale şehri sehir.yeni ile açılıyor; place_id 'Çanakkale' kimlik sorgusundan (tek sonuç) · BO'da şehir satırı",
+      "[Plan · g1.d2–d3] · Troya'dan kente araçla gidiliyor; #311 gelene kadar doğrulayıcı bu bacağı yürüme sayar, öğle yemeği ve gün süresi uyarısı verir",
+      "[Rehber · Troya] · Schliemann hendeği, Troia VI doğu kapısı ve odeion yürüyüş yolunda mı; giriş atının içine çıkılabildiği · KTB, yerinde",
+      "[Rehber · Troya Müzesi] · 2018 açılış ve 2020 Avrupa Yılın Müzesi özel ödülü (il listesi); Polyxena Lahdi'nin Biga yakınındaki tümülüste bulunduğu; çatı terası ve hazine anlatımı · müze, Wikipedia 'Troy Museum'",
+      "[Rehber · Yalova] · 1940 kuruluşu ve füme kolyoz-ahlat sirkesi (il listesi) · işletme",
+      "[Rehber · Saat Kulesi] · 1897 (il listesi); Emilio Vitalis vasiyeti ve dört kat · Çanakkale Belediyesi, Vikipedi",
+      "[Rehber · Kadir Usta] · 1979 ve koyun sütü yağı (il listesi); tava ve fırın helvasının ikisinin de satıldığı · işletme",
+      "[Rehber · Deniz Müzesi] · 1462 kuruluş; Nusret benzerinin bahçede olduğu ve güvertesine çıkılabildiği; topların 1915 bataryalarından getirildiği · Deniz Kuvvetleri",
+      "[Rehber · Kordon] · Tahta atın 2004 Troy filminden kaldığı ve kordonun kuzey ucunda olduğu (il listesi); 'Dur Yolcu' yazısının kordondan görüldüğü · yerinde"
+    ],
+    "fotograf_onerileri": [
+      {
+        "ne": "Troya ören yeri, surlar ve katmanlar",
+        "altyazi": "Hisarlık Tepesi'nde Troya surları",
+        "arama": "commons:Category:Troy (archaeological site)"
+      },
+      {
+        "ne": "Troya Müzesi binası",
+        "altyazi": "Ören yerinin girişindeki pas renkli müze",
+        "arama": "commons:Category:Troy Museum"
+      },
+      {
+        "ne": "Kordondaki Truva atı",
+        "altyazi": "Kordonun ucundaki film atı",
+        "arama": "commons:Category:Trojan Horse (Çanakkale)"
+      }
+    ],
+    "varsayimlar": [
+      "Tek gün cumartesi; Deniz Müzesi'nin kapalı günlerine (pazartesi, perşembe) denk gelmesin diye",
+      "Troya'ya araçla gidiliyor; merkezdeki duraklar yürünür",
+      "İl listesi ilk 5: İl listesinin ilk 5'inden Troya (1) ve Troya Müzesi (3) gezide. Şehitler Abidesi (2) ve 57. Alay Şehitliği (4) Boğaz'ın karşı kıyısında, Gelibolu yarımadasında; ikinci Çanakkale gezisine (Gelibolu günü) ayrıldı. Assos (5) merkeze 73 km, aynı güne Troya ile sığmıyor; ikinci gezide de yer alamazsa Ayvacık için ayrı gezi önerilecek."
+    ]
+  }
+}
