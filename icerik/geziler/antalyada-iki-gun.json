@@ -24,7 +24,6 @@
       "duraklar": [
         {
           "place_id": "ChIJQwc3aqmBwxQRB7Tr2OhnhMY",
-          "osm": "relation/11916419",
           "ad": "Perge Antik Kenti",
           "sure_dk": 120,
           "sure_gerekcesi": "varsayılan 90; geniş ören yeri, stadyum dahil",
@@ -160,7 +159,7 @@
       "[Rehber · Aşağı Düden] · ~40 m: antalya.bel.tr 'Antalya'nın Şelaleleri' PDF; travertenden yar, gökkuşağı, tekne turlarının şelaleye gelmesi ve iki seyir noktası genel bilgi · yerinde; Lara'dan Kaleiçi'ne 15 dk taksi tahmin",
       "[Yazı · 2. gün] · Kaleiçi gece: Tuzcular Mahallesi'nde bar ve konser alanları, Üçkapılar–Hıdırlık arası (Posta 30 Haziran 2025); belirli mekân adı verilmedi",
       "[Plan · g2.d4] · Aşağı Düden place_id il listesindekiyle aynı (ChIJCx42…); kimlik sorgusu 'Düden Parkı'nı da döndürdü, park değil şelale seçildi",
-      "[Plan · g1.d1, g2.d3] · Perge'nin ören yeri alanı (way/131469283) Google konumundan 758 m uzak çıktı; Helenistik kapı (way/321303544) 443 m; stadyum (relation/11916420) 202 m; osm tiyatroya (relation/11916419) alındı. Yukarı Düden'in OSM noktası (node/1238850237) 281 m uzak; osm boş, konum Google'dan 30 gün · OSM'de şelale noktası düzeltilebilir"
+      "[Plan · g1.d1, g2.d3] · Perge'nin ören yeri alanı (way/131469283) Google konumundan 758 m uzak çıktı; Helenistik kapı (way/321303544) 443 m; stadyum (relation/11916420) 202 m, tiyatro (relation/11916419) 166 m; osm boş, konum Google'dan 30 gün. Yukarı Düden'in OSM noktası (node/1238850237) 281 m uzak; osm boş, konum Google'dan 30 gün · OSM'de şelale noktası düzeltilebilir"
     ],
     "fotograf_onerileri": [
       {
