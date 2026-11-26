@@ -1,0 +1,381 @@
+{
+  "il": "Malatya",
+  "slug": "malatya",
+  "guncelleme": "2026-11-26",
+  "oneriler": [
+    {
+      "sira": 1,
+      "ad": "Arslantepe Höyüğü",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Battalgazi",
+      "merkeze_km": 7,
+      "neden": "UNESCO listesinde (2021); kerpiç saray, en eski kral mezarı; taht odası 2026'da açıldı"
+    },
+    {
+      "sira": 2,
+      "ad": "Malatya Arkeoloji Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Yeşilyurt",
+      "merkeze_km": 1,
+      "neden": "Alt katta Arslantepe buluntuları ve sikkeler, üst katta Yukarı Fırat kazılarından eserler",
+      "place_id": "ChIJ8XbC7ek2dkARiMqKs65Sfd0"
+    },
+    {
+      "sira": 3,
+      "ad": "Somuncu Baba Külliyesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Darende",
+      "merkeze_km": 110,
+      "neden": "Şeyh Hamid-i Veli'nin (ö. 1412) türbesi; cami, kütüphane, müze; Tohma Kanyonu kıyısında",
+      "place_id": "ChIJ_Yi4MpP5d0AROBNq_oOYwnk"
+    },
+    {
+      "sira": 4,
+      "ad": "Levent Vadisi",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Akçadağ",
+      "merkeze_km": 50,
+      "neden": "28 km'lik kanyon; 104 m'de cam zeminli seyir terası, kayaya oyulmuş sıralı mağaralar"
+    },
+    {
+      "sira": 5,
+      "ad": "Silahtar Mustafa Paşa Kervansarayı",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Battalgazi",
+      "merkeze_km": 11,
+      "neden": "1637'de IV. Murad'ın silahtarı Bosnalı Mustafa Paşa yaptırdı; revaklı avluda çay içilir",
+      "place_id": "ChIJVVVVVTZKdkARe869C5MxdUU"
+    },
+    {
+      "sira": 6,
+      "ad": "Bakırcılar Çarşısı",
+      "kategori": "carsi",
+      "amaclar": [
+        "lezzet",
+        "kultur_tarih"
+      ],
+      "ilce": "Battalgazi",
+      "merkeze_km": 0,
+      "neden": "Depremde yıkılan çarşı yeniden yapıldı; kuyumcular, mısırcılar, gastronomi sokağı açılıyor",
+      "place_id": "ChIJW97PhZ43dkARPVv_kzncnLk"
+    },
+    {
+      "sira": 7,
+      "ad": "Hacıbaba Et Lokantası",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Battalgazi",
+      "merkeze_km": 1,
+      "neden": "Taş fırında kâğıda sarılı pişen kâğıt kebabı ve kuzu dolmasıyla bilinen eski lokanta",
+      "place_id": "ChIJbXgOZcA2dkARlOyYTbTlVn4"
+    },
+    {
+      "sira": 8,
+      "ad": "Tohma Kanyonu",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Darende",
+      "merkeze_km": 110,
+      "neden": "Tohma Çayı'nın oyduğu sarp kanyon; Somuncu Baba Külliyesi'nin hemen yanından geçer",
+      "place_id": "ChIJxxP3_wP5d0ARsoiYCY43DhI"
+    },
+    {
+      "sira": 9,
+      "ad": "Arslantepe Karşılama Merkezi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Battalgazi",
+      "merkeze_km": 7,
+      "neden": "Höyüğün 7 bin yılını 3B panorama ve canlandırmalarla anlatan merkez; Ekim 2025'te açıldı"
+    },
+    {
+      "sira": 10,
+      "ad": "Battalgazi Ulu Camii",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Battalgazi",
+      "merkeze_km": 11,
+      "neden": "13. yüzyıl Selçuklu camisi, tuğla ve çini işçiliği; restorasyonda, dışarıdan bakılır",
+      "place_id": "ChIJVVVVVTZKdkAR2EMozBnTd08"
+    },
+    {
+      "sira": 11,
+      "ad": "Malatya Şire Pazarı",
+      "kategori": "carsi",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Battalgazi",
+      "merkeze_km": 0,
+      "neden": "Gün kurusu kayısı, pestil, kayısı kavurması ve dibek kahvesi alınan pazar; yeni çarşıda"
+    },
+    {
+      "sira": 12,
+      "ad": "Günpınar Şelalesi",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Darende",
+      "merkeze_km": 115,
+      "neden": "40 m'den dökülen şelale; 2,7 km'lik kanyon parkurunun sonunda, 2018'den beri tabiat parkı",
+      "place_id": "ChIJh5RcB_L4d0ARseRkwaURpLM"
+    },
+    {
+      "sira": 13,
+      "ad": "Kudret Havuzu",
+      "kategori": "aktivite",
+      "amaclar": [
+        "doga",
+        "cocuklu",
+        "yavas"
+      ],
+      "ilce": "Darende",
+      "merkeze_km": 110,
+      "neden": "Kanyon kayalarından çıkan, yaz kış 22 °C kaynak suyuyla dolan klorsuz üç havuz",
+      "place_id": "ChIJMWKC3Nf5d0ARVEK-Xco6XjM"
+    },
+    {
+      "sira": 14,
+      "ad": "Tavacı Şükrü",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Yeşilyurt",
+      "merkeze_km": 2,
+      "neden": "Kuzu, kuyruk yağı, patlıcan ve domatesin büyük tepside fırınlandığı Malatya tavası"
+    },
+    {
+      "sira": 15,
+      "ad": "Güngör Kebap",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet",
+        "gece"
+      ],
+      "ilce": "Battalgazi",
+      "merkeze_km": 1,
+      "neden": "Kebabı bakır tasta ayranla servis eden esnaf lokantası, eskiden Bakırcılar Çarşısı'ndaydı"
+    },
+    {
+      "sira": 16,
+      "ad": "Malatya Fotoğraf Makinesi Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Yeşilyurt",
+      "merkeze_km": 1,
+      "neden": "2017'de açılan müzede 2.023 fotoğraf makinesi ve 170 kadar casus kamera sergileniyor",
+      "place_id": "ChIJY_n8Nqw2dkARtsQc3ItAM9c"
+    },
+    {
+      "sira": 17,
+      "ad": "Malatya Yeni Cami",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Battalgazi",
+      "merkeze_km": 0,
+      "neden": "1912'de bitirilen cami 2023'te yıkıldı; aslına uygun yeniden yapılıyor, dışarıdan görülür"
+    },
+    {
+      "sira": 18,
+      "ad": "Levent Vadisi Kaya Mezarları",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "doga"
+      ],
+      "ilce": "Akçadağ",
+      "merkeze_km": 50,
+      "neden": "Küçükkürne'de Helenistik-Roma dönemine ait, kayaya oyulmuş onlarca mezar odası",
+      "place_id": "ChIJedn_XrTZd0ARNixEc092UKU"
+    },
+    {
+      "sira": 19,
+      "ad": "Hekimhan Taşhan",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Hekimhan",
+      "merkeze_km": 85,
+      "neden": "1218'de bir hekimin yaptırdığı Selçuklu hanı; üç dilde yazılmış kitabesi var",
+      "place_id": "ChIJVVVVFSqCd0AR5r_3_RWZiXM"
+    },
+    {
+      "sira": 20,
+      "ad": "Girmana Kanyonu",
+      "kategori": "doga",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Hekimhan",
+      "merkeze_km": 75,
+      "neden": "Kuru Çay'ın oyduğu kanyon; piknik, kamp ve ilkbaharda rafting yapılıyor",
+      "place_id": "ChIJyYvkaV6Zd0ARg8gs5RevQzM"
+    },
+    {
+      "sira": 21,
+      "ad": "Kayaarası Kanyonu",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Arapgir",
+      "merkeze_km": 115,
+      "neden": "Kozluk Çayı boyunca, Arapgir'e 7 km; yazın yüzülür, çevrede endemik bitkiler var",
+      "place_id": "ChIJxyX1dwBFd0ARVZHLMdszD-E"
+    },
+    {
+      "sira": 22,
+      "ad": "Arapgir Millet Han",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Arapgir",
+      "merkeze_km": 110,
+      "neden": "İpek Yolu üzerindeki tarihi han bugün butik otel; avlusunda oturup çay içilir"
+    },
+    {
+      "sira": 23,
+      "ad": "Arapgir Meydan Köprüsü",
+      "kategori": "tarih",
+      "amaclar": [
+        "yavas",
+        "doga"
+      ],
+      "ilce": "Arapgir",
+      "merkeze_km": 110,
+      "neden": "Kozluk Çayı üzerindeki restore taş köprü; yazın çevresi mor reyhan tarlalarıyla kaplı",
+      "place_id": "ChIJcxg8_EtFd0ARhWZmzVh1gGk"
+    },
+    {
+      "sira": 24,
+      "ad": "Malatya Atatürk Evi ve Etnografya Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Yeşilyurt",
+      "merkeze_km": 1,
+      "neden": "1926'da yapımı başlayan evde Atatürk'ün Malatya ziyaretleri ve I. Dünya Savaşı şehitleri",
+      "place_id": "ChIJkdd9TMI2dkARA4c_1dwaLqs"
+    },
+    {
+      "sira": 25,
+      "ad": "Darende Şire Pazarı",
+      "kategori": "carsi",
+      "amaclar": [
+        "lezzet",
+        "yavas"
+      ],
+      "ilce": "Darende",
+      "merkeze_km": 110,
+      "neden": "İslim kayısısı, gün kurusu, kayısı çekirdeği, pekmez, dut kurusu; hasat sonrası canlanır"
+    },
+    {
+      "sira": 26,
+      "ad": "Sultansuyu Tarım İşletmesi",
+      "kategori": "aktivite",
+      "amaclar": [
+        "cocuklu",
+        "doga"
+      ],
+      "ilce": "Akçadağ",
+      "merkeze_km": 50,
+      "neden": "1865'te kurulan Osmanlı çiftliğinde 500 civarında safkan Arap atı yetiştiriliyor",
+      "place_id": "ChIJfwS5KV7Sd0ARvPnqa2wX2wo"
+    },
+    {
+      "sira": 27,
+      "ad": "Turgut Özal Tabiat Parkı",
+      "kategori": "doga",
+      "amaclar": [
+        "cocuklu",
+        "yavas"
+      ],
+      "ilce": "Battalgazi",
+      "merkeze_km": 6,
+      "neden": "Göleti, yürüyüş yolları ve oyun parkıyla Türkiye'nin 37. tabiat parkı; yazın kentten serin",
+      "place_id": "ChIJIxy9Wp83dkARw4ZtXcpTt8g"
+    },
+    {
+      "sira": 28,
+      "ad": "Karakaya Baraj Gölü",
+      "kategori": "aktivite",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Kale",
+      "merkeze_km": 40,
+      "neden": "Fırat üzerindeki baraj gölünde Temmuz 2026'da yakala-bırak turna balığı yarışması yapıldı",
+      "place_id": "ChIJLbpqIqxddkARw3MuZ2NyKuQ"
+    },
+    {
+      "sira": 29,
+      "ad": "Kernek Parkı",
+      "kategori": "doga",
+      "amaclar": [
+        "gece",
+        "cocuklu",
+        "yavas"
+      ],
+      "ilce": "Yeşilyurt",
+      "merkeze_km": 3,
+      "neden": "Yaz gecelerinde ailelerin toplandığı park; 35 dönüme büyütülmesi, teleferik planlanıyor",
+      "place_id": "ChIJa0xgudo2dkAREgsfD5vU_mk"
+    },
+    {
+      "sira": 30,
+      "ad": "Kırkkardeşler Mezarlığı",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Battalgazi",
+      "merkeze_km": 10,
+      "neden": "13-15. yüzyıldan iki kümbet ve motifli lahit tipi mezar taşları; restorasyon sürüyor",
+      "place_id": "ChIJo8ZFWQBLdkARiEzy6Z22f1g"
+    }
+  ]
+}
