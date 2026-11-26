@@ -56,6 +56,8 @@ export type IkonAdi =
   | 'kitap'
   // #117: kilitli şehir çipi.
   | 'kilit'
+  // #432 (`Sos_v6_Paylas`): "Hiçbir zaman paylaşılmaz" satırındaki yuvarlak köşeli kilit.
+  | 'kilitV6'
   // #69: filtre düğmesi (kaydırıcılar) ve dolu yıldız (öne çıkan).
   | 'filtre'
   | 'yildiz'
@@ -271,6 +273,11 @@ export function Ikon({ ad, boyut = 24, renk, kalinlik = 2, dolgu }: Props) {
         <>
           <Path d="M6 11h12v10H6z" {...ortak} />
           <Path d="M8.5 11V7.5a3.5 3.5 0 0 1 7 0V11" {...ortak} />
+        </>
+      ) : ad === 'kilitV6' ? (
+        <>
+          <Rect x={5} y={11} width={14} height={10} rx={2} {...ortak} />
+          <Path d="M8 11V7a4 4 0 0 1 8 0v4" {...ortak} />
         </>
       ) : ad === 'kitap' ? (
         <>

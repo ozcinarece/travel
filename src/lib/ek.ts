@@ -48,3 +48,16 @@ export function bulunmaEkli(ad: string): string | null {
   if (UNLU.includes(son) && /\s/.test(temiz) && 'ıiuü'.includes(son)) return `${temiz}'n${'d' + unlu}`;
   return `${temiz}'${SERT.includes(son) ? 't' : 'd'}${unlu}`;
 }
+
+/**
+ * #432 KK9: özel adın ilgi eki — "Ayşe'nin", "Mert'in", "Okan'ın", "Burcu'nun", "Göktürk'ün". Son ünlüye göre -ın/-in/-un/-ün;
+ * ünlüyle biten adda kaynaştırma -n-. Harfle bitmeyen adda karar verilemez → null.
+ */
+export function ilgiEkli(ad: string): string | null {
+  const temiz = ad.trim();
+  const son = temiz.slice(-1).toLocaleLowerCase('tr');
+  if (!/\p{L}/u.test(son)) return null;
+  const sonUnlu = [...temiz.toLocaleLowerCase('tr')].reverse().find((h) => UNLU.includes(h)) ?? 'e';
+  const unlu = 'aı'.includes(sonUnlu) ? 'ı' : 'ei'.includes(sonUnlu) ? 'i' : 'ou'.includes(sonUnlu) ? 'u' : 'ü';
+  return `${temiz}'${UNLU.includes(son) ? 'n' : ''}${unlu}n`;
+}
