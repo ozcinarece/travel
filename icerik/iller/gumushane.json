@@ -39,7 +39,8 @@
       ],
       "ilce": "Torul",
       "merkeze_km": 19,
-      "neden": "Kale yanında 2018'de açılan cam teras; Harşit vadisine 200 metreden fazla yukarıdan bakar"
+      "neden": "Kale yanında 2018'de açılan cam teras; Harşit vadisine 200 metreden fazla yukarıdan bakar",
+      "osm": "node/7134032183"
     },
     {
       "sira": 4,
@@ -118,6 +119,7 @@
       "ilce": "Kelkit",
       "merkeze_km": 49,
       "neden": "XV. Apollinaris lejyonunun kampı; 4 kemeri kalan su kemeri, hamam ve sur izleri",
+      "osm": "node/3361681697",
       "place_id": "ChIJWwFWAlxTZUARUWZDHnV669o"
     },
     {
@@ -255,6 +257,7 @@
       "ilce": "Şiran",
       "merkeze_km": 45,
       "neden": "13. yüzyılda 65 m'lik kaya kütlesine oyulmuş şapel; oyma sütunlar ve kubbe",
+      "osm": "node/11154413674",
       "place_id": "ChIJY6YxzEDOekARcDMyKdHtcuE"
     },
     {
