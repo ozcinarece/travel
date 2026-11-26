@@ -208,7 +208,7 @@ export function PaylasimCekmecesi({ acik, onKapat, seyahat, benimAdim, gunSayisi
           accessibilityState={{ disabled: mesgul || gonderBekliyor || pasif, busy: olustur.isPending }}
           disabled={mesgul || gonderBekliyor || pasif}
           onPress={gonder}
-          style={[s.gonder, pasif && s.pasif]}>
+          style={[s.gonder, (pasif || gonderBekliyor) && s.pasif]}>
           {olustur.isPending ? <ActivityIndicator color={renk.metin} /> : <Text style={s.gonderMetin}>{t('paylasim.linkiGonder')}</Text>}
         </Pressable>
         {link ? (

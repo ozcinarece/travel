@@ -72,8 +72,8 @@ describe('#181 KK5 Sıradaki adım: öncelik sırası', () => {
     expect(siradakiAdim({ ...tamam(), mod: 'bitti', paylasabilir: false })).toBeNull();
     expect(siradakiAdim({ ...tamam(), mod: 'bitti', paylasabilir: true, ekranda: ['paylas'] })).toBeNull();
     // #530 inceleme 2: seyahatte açık link varsa (kim açmış olursa olsun) adım düşer.
-    expect(siradakiAdim({ ...tamam(), mod: 'bitti', paylasabilir: true, acikLinkVar: true })).toBeNull();
-    expect(siradakiAdim({ ...tamam(), mod: 'bitti', paylasabilir: true, acikLinkVar: false })).toEqual({ tur: 'paylas' });
+    expect(siradakiAdim({ ...tamam(), mod: 'bitti', paylasabilir: true, paylasildi: true })).toBeNull();
+    expect(siradakiAdim({ ...tamam(), mod: 'bitti', paylasabilir: true, paylasildi: false })).toEqual({ tur: 'paylas' });
     expect(siradakiAdim({ ...tamam(), mod: 'gezi', paylasabilir: true })).toBeNull();
   });
 
