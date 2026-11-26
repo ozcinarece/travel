@@ -31,7 +31,7 @@ jobs:
     outputs:
       yayinla: ${{ steps.karar.outputs.yayinla }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         if: github.event_name == 'push'
         with:
           fetch-depth: 0
@@ -50,8 +50,12 @@ jobs:
           case "$OLAY" in
             push)
               # Push supabase-migrate'i de tetikliyorsa yayını ona bırak (workflow_run ile gelir).
-              if degisen=$(git diff --name-only "$ONCE" "$SONRA" 2>/dev/null) \
-                && printf '%s\n' "$degisen" | grep -qE '^supabase/(migrations|functions)/'; then
+              # #501 KK5: `before` boş ya da sıfırsa (ilk push, force-push) ya da fark alınamazsa ne değiştiği
+              # bilinmez; güvenli taraf seçilir, yayın migrate'i bekler.
+              if [ -z "$ONCE" ] || [ -z "${ONCE//0/}" ] || ! degisen=$(git diff --name-only "$ONCE" "$SONRA" 2>/dev/null); then
+                echo "::warning::Önceki commit bilinmiyor ($OLAY); yayın supabase-migrate bitince yapılacak. Migrate çalışmazsa bu işi elle çalıştır."
+                echo "yayinla=false" >> "$GITHUB_OUTPUT"
+              elif printf '%s\n' "$degisen" | grep -qE '^supabase/(migrations|functions)/'; then
                 echo "Migration/fonksiyon değişti; yayın supabase-migrate bitince yapılacak."
                 echo "yayinla=false" >> "$GITHUB_OUTPUT"
               else
@@ -99,12 +103,12 @@ jobs:
           else
             echo "hazir=1" >> "$GITHUB_OUTPUT"
           fi
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         if: steps.kosul.outputs.hazir == '1'
         with:
           # workflow_run'da main'in o anki ucu yayınlanır: migrate beklerken birleşen daha yeni bir PR eski commit'le ezilmesin.
           ref: ${{ github.event_name == 'workflow_run' && 'main' || github.sha }}
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         if: steps.kosul.outputs.hazir == '1'
         with:
           node-version: 22
