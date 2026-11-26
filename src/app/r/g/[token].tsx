@@ -12,7 +12,7 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { Harita } from '@/components/harita/Harita';
 import type { HaritaCizgisi, HaritaPini, Konum } from '@/components/harita/tipler';
-import { paylasimOzeti } from '@/components/paylasim/PaylasimCekmecesi';
+import { paylasimOzeti } from '@/features/paylasim/baslik';
 import { SeyahatKapagi } from '@/components/seyahatler/SeyahatKapagi';
 import { Ikon, type IkonAdi } from '@/components/ui/Ikon';
 import { LogoYazi } from '@/components/ui/Logo';
@@ -131,7 +131,7 @@ function AcikEkran({ token, o, onKapandi }: { token: string; o: AcikPaylasimOzet
             <Text accessibilityRole="header" style={s.baslik}>
               {aliciBasligi(o)}
             </Text>
-            <Text style={s.ozet}>{paylasimOzeti(o.gun_sayisi, o.durak_sayisi, o.kisi_sayisi)}</Text>
+            <Text style={s.ozet}>{paylasimOzeti(o.gun_sayisi, o.durak_sayisi, o.kisi_sayisi, o.kisi_kip ?? 'gezdi')}</Text>
           </View>
         </View>
 

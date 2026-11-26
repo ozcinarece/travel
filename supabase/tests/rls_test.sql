@@ -3950,6 +3950,20 @@ begin
 end $$;
 -- Aynı kişi aynı seyahatte ikinci açık link açamaz (tek link).
 select pg_temp.hata_bekle($$insert into public.gezi_paylasim (trip_id) values ('43200000-0000-4000-8000-000000000001')$$, '23505');
+-- #517 KK1/KK5: link oluşunca seyahatin diğer üyesi (B) `changes`'ta satırı görür; başka seyahatin üyesi (X) görmez; token yok.
+select pg_temp.as_user(:PB);
+do $$
+declare c public.changes;
+begin
+  select * into c from public.changes where trip_id = '43200000-0000-4000-8000-000000000001' and entity = 'gezi_paylasim';
+  assert c.id is not null, '#517 KK1: B paylaşım kaydını görür';
+  assert c.field = 'acik' and c.old is null and c.new = 'true'::jsonb, '#517 KK1: kayıtta yalnız acik: ' || row_to_json(c)::text;
+  assert c.user_id = '43200000-0000-4000-8000-0000000000a1', '#517 KK1: kaydı A yazdı';
+end $$;
+select pg_temp.hata_bekle($$select public.degisikligi_geri_al((select id from public.changes where entity = 'gezi_paylasim' limit 1))$$, '22023');
+select pg_temp.as_user(:PX);
+do $$ begin assert not exists (select 1 from public.changes where entity = 'gezi_paylasim'), '#517 KK5: başka seyahatin üyesi kaydı görmez'; end $$;
+select pg_temp.as_user(:PA);
 -- Token, oluşturan ve sayaçlar istemciden yazılamaz.
 select pg_temp.hata_bekle($$insert into public.gezi_paylasim (trip_id, token) values ('43200000-0000-4000-8000-000000000001', 'aaaaaaaaaaaaaaaaaaaaaaaa')$$, '42501');
 select pg_temp.hata_bekle($$update public.gezi_paylasim set token = 'aaaaaaaaaaaaaaaaaaaaaaaa'$$, '42501');
@@ -3999,6 +4013,39 @@ begin
 end $$;
 reset role;
 do $$ begin assert (select acilma_sayisi from public.gezi_paylasim where token = current_setting('test.paylasim_token')) = 1, '#432 KK8: girişsiz açılış sayacı +1'; end $$;
+-- #517 KK-ek1: linkte paylaşanın yalnız ilk adı; KK3: kip (başlamış/bitmiş "gezdi", başlamamış ya da tarihsiz "gidiyor").
+update public.members set display_name = 'Ece Soyadıgizli' where trip_id = '43200000-0000-4000-8000-000000000001' and user_id = :PA;
+set role anon;
+do $$
+declare o jsonb := public.paylasim_ozeti(current_setting('test.paylasim_token'));
+begin
+  assert o ->> 'paylasan' = 'Ece' and position('Soyadıgizli' in o::text) = 0, '#517 KK-ek1: yalnız ilk ad: ' || o::text;
+  assert o ->> 'kisi_kip' = 'gezdi', '#517 KK3: geçmiş seyahat gezdi';
+  assert position('2026-10' in o::text) = 0, '#517 KK3: tarih dönmez';
+end $$;
+reset role;
+update public.trips set start_date = current_date + 10, end_date = current_date + 11 where id = '43200000-0000-4000-8000-000000000001';
+set role anon;
+do $$ begin assert public.paylasim_ozeti(current_setting('test.paylasim_token')) ->> 'kisi_kip' = 'gidiyor', '#517 KK3: başlamamış seyahat gidiyor'; end $$;
+reset role;
+update public.trips set start_date = null, end_date = null where id = '43200000-0000-4000-8000-000000000001';
+set role anon;
+do $$ begin assert public.paylasim_ozeti(current_setting('test.paylasim_token')) ->> 'kisi_kip' = 'gidiyor', '#517 KK3: tarihsiz seyahat gidiyor'; end $$;
+reset role;
+update public.trips set start_date = '2026-10-12', end_date = '2026-10-13' where id = '43200000-0000-4000-8000-000000000001';
+update public.members set display_name = 'Ece' where trip_id = '43200000-0000-4000-8000-000000000001' and user_id = :PA;
+-- #517 KK-ek2: sayaç token başına günde en çok 500 artar; ertesi gün yeniden sayar.
+update public.gezi_paylasim set acilma_gunu = current_date, acilma_gun_sayisi = 499, acilma_sayisi = 10 where token = current_setting('test.paylasim_token');
+set role anon;
+select public.paylasim_ozeti(current_setting('test.paylasim_token'));
+select public.paylasim_ozeti(current_setting('test.paylasim_token'));
+reset role;
+do $$ begin assert (select acilma_sayisi = 11 and acilma_gun_sayisi = 500 from public.gezi_paylasim where token = current_setting('test.paylasim_token')), '#517 KK-ek2: 500. açılıştan sonra sayaç durur'; end $$;
+update public.gezi_paylasim set acilma_gunu = current_date - 1 where token = current_setting('test.paylasim_token');
+set role anon;
+do $$ begin assert (public.paylasim_ozeti(current_setting('test.paylasim_token')) ->> 'kapali')::boolean is false, '#517 KK-ek2: tavanda da özet döner'; end $$;
+reset role;
+do $$ begin assert (select acilma_sayisi = 12 and acilma_gun_sayisi = 1 from public.gezi_paylasim where token = current_setting('test.paylasim_token')), '#517 KK-ek2: ertesi gün yeniden sayar'; end $$;
 -- #510: anahtar kalktı. Oluşturan kolonu güncelleyemez; kolon açık olsa bile (eski satır ya da eski uygulamanın insert'ü) adlar dönmez.
 set role authenticated;
 select pg_temp.as_user(:PA);
@@ -4022,9 +4069,14 @@ insert into public.harcama_paylari (harcama_id, trip_id, user_id, pay_kurus) sel
 insert into public.odeme_bilgileri (user_id, iban) values (:PA, 'TR515151515151515151515151');
 set role anon;
 do $$
-declare m text := public.paylasim_ozeti(current_setting('test.paylasim_token'))::text;
+declare
+  o jsonb := public.paylasim_ozeti(current_setting('test.paylasim_token'));
+  m text := o::text;
 begin
-  assert position('gizli harcama' in m) = 0 and position('51515' in m) = 0, '#515: harcama dönmez: ' || m;
+  -- #517 KK-ek3: önce özetin açık döndüğü doğrulanır (kapalı özet boş olduğu için aşağıdakiler kendiliğinden geçerdi).
+  assert o ->> 'kapali' = 'false', '#515: özet açık: ' || m;
+  -- Tutar uuid'lerde geçebilecek bir rakam dizisiyle değil, alan adlarıyla aranır (uuid'de 't', 'r', 'k' harfi olmaz).
+  assert position('gizli harcama' in m) = 0 and position('tutar' in m) = 0 and position('kurus' in m) = 0, '#515: harcama dönmez: ' || m;
   assert position('TR5151' in m) = 0 and position('iban' in lower(m)) = 0, '#515: IBAN dönmez: ' || m;
 end $$;
 reset role;
@@ -4149,6 +4201,17 @@ delete from public.members where trip_id = '43200000-0000-4000-8000-000000000001
 set role authenticated;
 select pg_temp.as_user(:PA);
 update public.gezi_paylasim set acik = false;
+-- #517 KK1/KK5: kapanınca da B satırı görür (eski true, yeni false); X görmez; satırda token yok.
+select pg_temp.as_user(:PB);
+do $$ begin assert exists (select 1 from public.changes where trip_id = '43200000-0000-4000-8000-000000000001' and entity = 'gezi_paylasim'
+  and field = 'acik' and old = 'true'::jsonb and new = 'false'::jsonb and user_id = '43200000-0000-4000-8000-0000000000a1'), '#517 KK1: B kapatma kaydını görür'; end $$;
+select pg_temp.as_user(:PX);
+do $$ begin assert not exists (select 1 from public.changes where entity = 'gezi_paylasim'), '#517 KK5: X kapatma kaydını görmez'; end $$;
+reset role;
+do $$ begin assert not exists (select 1 from public.changes c where c.entity = 'gezi_paylasim'
+  and position(current_setting('test.paylasim_token') in row_to_json(c)::text) > 0), '#517 KK1: kayıtta token yok'; end $$;
+set role authenticated;
+select pg_temp.as_user(:PA);
 do $$ begin assert (select kapatildi_at from public.gezi_paylasim where token = current_setting('test.paylasim_token')) is not null, '#432 KK3: kapatma damgası'; end $$;
 select pg_temp.hata_bekle($$update public.gezi_paylasim set acik = true$$, '42501');
 reset role;

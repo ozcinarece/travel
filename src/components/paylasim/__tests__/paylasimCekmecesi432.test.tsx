@@ -39,6 +39,7 @@ const cekmeceOgesi = (cevrimdisi = false, acik = true) => (
     gunSayisi={3}
     durakSayisi={12}
     kisiSayisi={3}
+    kisiKip="gezdi"
     onArkadasEkle={onArkadasEkle}
     cevrimdisi={cevrimdisi}
   />
@@ -53,6 +54,7 @@ const cekmece = (cevrimdisi = false) =>
       gunSayisi={3}
       durakSayisi={12}
       kisiSayisi={3}
+      kisiKip="gezdi"
       onArkadasEkle={onArkadasEkle}
       cevrimdisi={cevrimdisi}
     />,
@@ -76,12 +78,32 @@ describe('PaylasimCekmecesi (#432 2/3)', () => {
         gunSayisi={3}
         durakSayisi={12}
         kisiSayisi={3}
+        kisiKip="gezdi"
         onArkadasEkle={onArkadasEkle}
         cevrimdisi={false}
       />,
     );
     expect(screen.getByText('Kız kıza Eskişehir')).toBeTruthy();
     expect(screen.queryByText(/paylaştı/)).toBeNull();
+    // #517 KK-ek1: ad yoksa "Linkte senin adın görünür" satırı da yok.
+    expect(screen.queryByText('Linkte senin adın görünür')).toBeNull();
+    expect(screen.queryByTestId('paylasim-ad-satiri')).toBeNull();
+  });
+
+  it('#517 KK3–KK4, KK-ek2: plan kipinde "gidiyor", tek kişide sayı yok; bilgi ve kilit satırı tek seferde okunur', () => {
+    const { rerender } = render(
+      <PaylasimCekmecesi acik onKapat={onKapat} seyahat={{ id: 'T1', city_label: 'Eskişehir' }} benimAdim="Ayşe" gunSayisi={3} durakSayisi={12} kisiSayisi={3} kisiKip="gidiyor" onArkadasEkle={onArkadasEkle} cevrimdisi={false} />,
+    );
+    expect(screen.getByText('3 gün · 12 durak · 3 kişi gidiyor')).toBeTruthy();
+    expect(screen.getByTestId('paylasim-ad-satiri').props.accessible).toBe(true);
+    expect(screen.getByTestId('paylasim-ad-satiri').props.accessibilityLabel).toContain('Linkte senin adın görünür');
+    expect(screen.getByTestId('paylasim-kilit-satiri').props.accessible).toBe(true);
+    expect(screen.getByTestId('paylasim-kilit-satiri').props.accessibilityLabel).toContain('Hiçbir zaman paylaşılmaz');
+    rerender(
+      <PaylasimCekmecesi acik onKapat={onKapat} seyahat={{ id: 'T1', city_label: 'Eskişehir' }} benimAdim="Ayşe" gunSayisi={3} durakSayisi={12} kisiSayisi={1} kisiKip="gezdi" onArkadasEkle={onArkadasEkle} cevrimdisi={false} />,
+    );
+    expect(screen.getByText('3 gün · 12 durak')).toBeTruthy();
+    expect(screen.queryByText(/kişi/)).toBeNull();
   });
 
   it('önizleme alıcı ekranıyla aynı: "Ayşe paylaştı", "Eskişehir gezisi", "3 gün · 12 durak · 3 kişi gezdi"; ad bilgi satırı ve KK-ek satırı var, anahtar yok (#510, #515)', () => {
@@ -107,7 +129,8 @@ describe('PaylasimCekmecesi (#432 2/3)', () => {
     expect(mockOlustur).toHaveBeenCalledTimes(1);
     const [metin, link] = mockGonder.mock.calls[0];
     expect(link).toBe(`https://gezi-web.pages.dev/r/g/${'A'.repeat(24)}`);
-    expect(metin).toBe(`Ayşe'nin Eskişehir gezisi · 3 gün · 12 durak\n${link}`);
+    // #517 KK3: linkin mesajı önizlemeyle aynı metni kullanır.
+    expect(metin).toBe(`Ayşe'nin Eskişehir gezisi · 3 gün · 12 durak · 3 kişi gezdi\n${link}`);
   });
 
   it('link açıkken: durum satırı, aynı link gönderilir, "Paylaşımı kapat" onayla kapatır', async () => {

@@ -20,6 +20,8 @@ export type AcikPaylasimOzeti = {
   gun_sayisi: number;
   durak_sayisi: number;
   kisi_sayisi: number;
+  /** #517 KK3: başlamamış ya da tarihsiz seyahat "gidiyor", başlamış ya da bitmiş "gezdi" (sunucu `trips.tz` ile hesaplar). */
+  kisi_kip?: 'gidiyor' | 'gezdi';
   gunler: PaylasimGunu[];
 };
 /** null: bilinmeyen link ("Bu link açılmıyor"); `kapali`: "Bu paylaşım kapatıldı". */

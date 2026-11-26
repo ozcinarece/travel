@@ -30,8 +30,11 @@ export function useAcikPaylasim(tripId: string, etkin: boolean) {
   });
 }
 
-/** Açık link yoksa oluşturur (olay: paylasim_olustu), varsa döndürür. */
-export function usePaylasimOlustur(tripId: string) {
+/** #517 KK8: paylaşımın açıldığı yer (olay `meta.kaynak`). */
+export type PaylasimKaynagi = 'siradaki_adim' | 'menu';
+
+/** Açık link yoksa oluşturur (olay: paylasim_olustu, `meta.kaynak`), varsa döndürür. */
+export function usePaylasimOlustur(tripId: string, kaynak: PaylasimKaynagi = 'menu') {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (): Promise<GeziPaylasimi> => {
@@ -42,7 +45,7 @@ export function usePaylasimOlustur(tripId: string) {
         .single();
       if (error) throw error;
       const yeni = data as GeziPaylasimi;
-      void olayYaz('paylasim_olustu', yeni.id);
+      void olayYaz('paylasim_olustu', yeni.id, { kaynak });
       return yeni;
     },
     onSuccess: (yeni) => qc.setQueryData(anahtar(tripId), yeni),

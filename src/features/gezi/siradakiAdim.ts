@@ -22,7 +22,9 @@ export type SiradakiAdim =
   /** 6 Yarın başlıyor → İlk durak ve çıkış saati. */
   | { tur: 'yarin'; ilkMekanId: string | null; cikis: string }
   /** 8 Gezi bitti, açık borç var → Harcamaları kapat (Bakiyeler). `transfer`: herkesin ödeşmesi için gereken en az transfer. */
-  | { tur: 'harcamaKapat'; transfer: number };
+  | { tur: 'harcamaKapat'; transfer: number }
+  /** 9 (#517 KK8, #375) Gezi bitti, harcamalar kapandı ya da yok → Gezini paylaş (paylaşım çekmecesi). */
+  | { tur: 'paylas' };
 
 export type SiradakiGirdi = {
   mod: GeziModu;
@@ -43,6 +45,8 @@ export type SiradakiGirdi = {
   acikTransfer?: number;
   /** #200 KK2: ekranda kendi satırı olan eksikler — Sıradaki adım bunları önermez ve alt satırında anmaz. */
   ekranda?: readonly SiradakiAdim['tur'][];
+  /** #517 KK8: bu kişi link paylaşabilir mi (hesaplı üye; misafir paylaşamaz). Yoksa bitmiş gezide paylaş adımı çıkmaz. */
+  paylasabilir?: boolean;
 };
 
 const sira = (a: { order_key: string }, b: { order_key: string }) => (a.order_key < b.order_key ? -1 : a.order_key > b.order_key ? 1 : 0);
@@ -53,10 +57,14 @@ function ertesiGun(tarih: string): string {
   return new Date(Date.UTC(y, a - 1, g + 1)).toISOString().slice(0, 10);
 }
 
-/** Öncelik: plan kur → dağıt → davet (tek kişi; #308 KK5, #517 KK7) → otel → yemek → yarın. Gezi modunda null; bitmiş gezide yalnız harcamaları kapat. */
+/** Öncelik: plan kur → dağıt → davet (tek kişi; #308 KK5, #517 KK7) → otel → yemek → yarın. Gezi modunda null; bitmiş gezide harcamaları kapat, kapanınca gezini paylaş (#517 KK8). */
 export function siradakiAdim(g: SiradakiGirdi): SiradakiAdim | null {
   const ekranda = (tur: SiradakiAdim['tur']) => !!g.ekranda?.includes(tur);
-  if (g.mod === 'bitti') return g.acikTransfer && !ekranda('harcamaKapat') ? { tur: 'harcamaKapat', transfer: g.acikTransfer } : null;
+  if (g.mod === 'bitti') {
+    if (g.acikTransfer) return ekranda('harcamaKapat') ? null : { tur: 'harcamaKapat', transfer: g.acikTransfer };
+    // #517 KK8: harcamalar kapandıktan sonra (ya da harcama yoksa) Gezini paylaş.
+    return g.paylasabilir && !ekranda('paylas') ? { tur: 'paylas' } : null;
+  }
   if (g.mod !== 'plan') return null;
   const aktif = g.duraklar.filter((d) => !d.skipped);
   if (g.duraklar.length === 0) return ekranda('planKur') ? null : { tur: 'planKur', mekanSayisi: g.mekanlar.length };

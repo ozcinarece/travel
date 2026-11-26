@@ -65,9 +65,14 @@ describe('seyahat v7 (#308)', () => {
     expect(durakSayaci(oto)).toEqual({ gezilen: 2, toplam: 5 });
   });
 
+  it('#517 (ek): kendi adım boşsa "Sen", "Bir arkadaşın" değil', () => {
+    expect(kisiAdlari([{ user_id: 'a', display_name: 'Ayşe' }, { user_id: 'm', display_name: '' }], 'm')).toBe('Sen, Ayşe');
+    expect(kisiAdlari([{ user_id: 'm', display_name: ' ' }, { user_id: 'x', display_name: null as unknown as string }], 'm')).toBe('Sen, bir arkadaşın');
+  });
+
   it('#522 2. inceleme 3: adsız üye cümle içinde küçük harf', () => {
     expect(kisiAdlari([{ user_id: 'e', display_name: 'Ece' }, { user_id: 'm', display_name: '' }], 'e')).toBe('Ece, bir arkadaşın');
-    expect(kisiAdlari([{ user_id: 'm', display_name: '' }, { user_id: 'a', display_name: 'Ayşe' }], 'm')).toBe('Bir arkadaşın, Ayşe');
+    expect(kisiAdlari([{ user_id: 'm', display_name: '' }, { user_id: 'a', display_name: 'Ayşe' }], null)).toBe('Bir arkadaşın, Ayşe');
     const varanlar = [
       { user_id: 'e', display_name: 'Ece' },
       { user_id: 'm', display_name: ' ' },

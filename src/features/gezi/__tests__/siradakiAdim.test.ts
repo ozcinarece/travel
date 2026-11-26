@@ -63,6 +63,17 @@ describe('#181 KK5 Sıradaki adım: öncelik sırası', () => {
     expect(siradakiAdim({ ...tamam(), mod: 'bitti', acikTransfer: 0 })).toBeNull();
   });
 
+  it('#517 KK8 · 9 gezi bitti, borç kapandı ya da harcama yok → Gezini paylaş (yalnız paylaşabilene)', () => {
+    expect(siradakiAdim({ ...tamam(), mod: 'bitti', acikTransfer: 0, paylasabilir: true })).toEqual({ tur: 'paylas' });
+    expect(siradakiAdim({ ...tamam(), mod: 'bitti', paylasabilir: true })).toEqual({ tur: 'paylas' });
+    // Açık borç önce gelir; misafir (paylaşamaz) ya da ekranda zaten varsa satır yok; plan ve gezi kipinde hiç yok.
+    expect(siradakiAdim({ ...tamam(), mod: 'bitti', acikTransfer: 2, paylasabilir: true })).toEqual({ tur: 'harcamaKapat', transfer: 2 });
+    expect(siradakiAdim({ ...tamam(), mod: 'bitti', acikTransfer: 2, paylasabilir: true, ekranda: ['harcamaKapat'] })).toBeNull();
+    expect(siradakiAdim({ ...tamam(), mod: 'bitti', paylasabilir: false })).toBeNull();
+    expect(siradakiAdim({ ...tamam(), mod: 'bitti', paylasabilir: true, ekranda: ['paylas'] })).toBeNull();
+    expect(siradakiAdim({ ...tamam(), mod: 'gezi', paylasabilir: true })).toBeNull();
+  });
+
   it('1 · hiç durak yoksa Planı kur (listede kaç mekan var)', () => {
     expect(siradakiAdim({ ...tamam(), duraklar: [] })).toEqual({ tur: 'planKur', mekanSayisi: 5 });
     expect(siradakiAdim({ ...tamam(), duraklar: [], mekanlar: [] })).toEqual({ tur: 'planKur', mekanSayisi: 0 });
