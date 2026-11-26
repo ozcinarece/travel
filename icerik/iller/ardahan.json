@@ -253,16 +253,6 @@
     },
     {
       "sira": 25,
-      "ad": "Harosman mağaraları",
-      "kategori": "tarih",
-      "amaclar": ["kultur_tarih"],
-      "ilce": "Hanak",
-      "merkeze_km": 35,
-      "neden": "Kayaya oyulmuş ev ve şapeller; Sevimli Barajı suları altında kalabilir",
-      "place_id": "ChIJH3i6dnuBQkAR_RSrJJS-M5Q"
-    },
-    {
-      "sira": 26,
       "ad": "Putka Gölü",
       "kategori": "doga",
       "amaclar": ["doga", "yavas"],
@@ -272,7 +262,7 @@
       "place_id": "ChIJ9yivdCEpaEARrKxk44K2DVw"
     },
     {
-      "sira": 27,
+      "sira": 26,
       "ad": "Okçuoğlu (Köroğlu) Yaylası",
       "kategori": "doga",
       "amaclar": ["doga", "yavas"],
@@ -282,7 +272,7 @@
       "place_id": null
     },
     {
-      "sira": 28,
+      "sira": 27,
       "ad": "Kura Vadisi ve Türkeşen Boğazı",
       "kategori": "manzara",
       "amaclar": ["doga"],
@@ -292,7 +282,7 @@
       "place_id": null
     },
     {
-      "sira": 29,
+      "sira": 28,
       "ad": "Cak Kalesi",
       "kategori": "tarih",
       "amaclar": ["kultur_tarih"],
@@ -302,7 +292,7 @@
       "place_id": "ChIJWzI7WwC5QkARW6WAayq1O-g"
     },
     {
-      "sira": 30,
+      "sira": 29,
       "ad": "Ilgar Dağı",
       "kategori": "aktivite",
       "amaclar": ["doga"],
@@ -312,7 +302,7 @@
       "place_id": null
     },
     {
-      "sira": 31,
+      "sira": 30,
       "ad": "Ahali Tabyası",
       "kategori": "tarih",
       "amaclar": ["kultur_tarih"],
@@ -322,7 +312,7 @@
       "place_id": null
     },
     {
-      "sira": 32,
+      "sira": 31,
       "ad": "Ölçek köyü kalıntıları",
       "kategori": "tarih",
       "amaclar": ["kultur_tarih", "doga"],
