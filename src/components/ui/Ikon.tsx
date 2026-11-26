@@ -65,6 +65,8 @@ export type IkonAdi =
   | 'sohbetV7'
   | 'yolTarifiV7'
   | 'kalpV7'
+  // #515 (`Sos_v6_Paylas` s.43): "Linkte senin adın görünür" satırındaki kişi.
+  | 'kisiV6'
   // #69: filtre düğmesi (kaydırıcılar) ve dolu yıldız (öne çıkan).
   | 'filtre'
   | 'yildiz'
@@ -302,6 +304,11 @@ export function Ikon({ ad, boyut = 24, renk, kalinlik = 2, dolgu }: Props) {
         <Path d="M3 11l18-8-8 18-2-8z" {...ortak} />
       ) : ad === 'kalpV7' ? (
         <Path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z" {...ortak} />
+      ) : ad === 'kisiV6' ? (
+        <>
+          <Circle cx={12} cy={8} r={4} {...ortak} />
+          <Path d="M4 21c0-4 3.6-7 8-7s8 3 8 7" {...ortak} />
+        </>
       ) : ad === 'kitap' ? (
         <>
           <Path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" {...ortak} />
