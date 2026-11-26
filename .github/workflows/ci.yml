@@ -23,6 +23,8 @@ jobs:
         run: npm run lint
       - name: Birim testleri
         run: npm test -- --ci
+      - name: Betik testleri (migration bekçisi)
+        run: node --test scripts/*.test.mjs
 
   # #106 KK1: yönetim paneli mobil pakete girmez — android paketinde (yonetim) rotası ya da panel kodu olmamalı.
   mobil-paket:

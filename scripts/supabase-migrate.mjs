@@ -4,6 +4,7 @@
 // yeniden çalıştırmak güvenlidir, yalnızca yeni dosyalar uygulanır.
 import { readdir, readFile } from 'node:fs/promises';
 import path from 'node:path';
+import { veriSilebilir } from './veri-silen.mjs';
 
 const token = process.env.SUPABASE_ACCESS_TOKEN;
 const ref = process.env.SUPABASE_PROJECT_REF;
@@ -39,6 +40,26 @@ const uygulanan = new Set((await sorgu('select version from supabase_migrations.
 
 const klasor = path.resolve('supabase/migrations');
 const dosyalar = (await readdir(klasor)).filter((d) => d.endsWith('.sql')).sort();
+
+// #494 bekçi (otomatik çalışmada VERI_SILEN_DURDUR=1): bekleyen (henüz uygulanmamış) migration'lardan biri veri
+// silebiliyorsa hiçbirini uygulamadan dur. §4: geri dönüşsüz iş Ece onayıyla, elle (workflow_dispatch) gider.
+// Yalnız bekleyen dosyalara bakılır; eskiden uygulanmış dosyalardaki kalıplar durdurmaz, önceki bir çalışmada
+// düşüp bekleyen dosya da atlanmaz.
+// Kalıplar: scripts/veri-silen.mjs (testi scripts/veri-silen.test.mjs).
+if (process.env.VERI_SILEN_DURDUR === '1') {
+  const riskli = [];
+  for (const dosya of dosyalar) {
+    if (uygulanan.has(dosya.split('_')[0])) continue;
+    if (veriSilebilir(await readFile(path.join(klasor, dosya), 'utf8'))) riskli.push(dosya);
+  }
+  if (riskli.length > 0) {
+    console.error(
+      `::error::veri silen migration: ece-karari gerekli, Ece onayından sonra elle (workflow_dispatch) çalıştırın (${riskli.join(', ')})`,
+    );
+    process.exit(1);
+  }
+}
+
 let sayi = 0;
 for (const dosya of dosyalar) {
   const surum = dosya.split('_')[0];
@@ -50,15 +71,14 @@ for (const dosya of dosyalar) {
   const sql = await readFile(path.join(klasor, dosya), 'utf8');
   console.log(`uygulanıyor: ${dosya}`);
   try {
-    // Tek istek = tek işlem: dosya ya bütünüyle uygulanır ya da hiç.
-    await sorgu(sql);
+    // Tek istek = tek işlem: dosya ve schema_migrations kaydı ya birlikte uygulanır ya da hiçbiri.
+    await sorgu(
+      `${sql}\n;\ninsert into supabase_migrations.schema_migrations (version, name, statements) values ('${surum}', '${ad.replace(/'/g, "''")}', array[]::text[]);`,
+    );
   } catch (e) {
     console.error(`HATA ${dosya}: ${e.message}`);
     process.exit(1);
   }
-  await sorgu(
-    `insert into supabase_migrations.schema_migrations (version, name, statements) values ('${surum}', '${ad.replace(/'/g, "''")}', array[]::text[])`,
-  );
   sayi++;
 }
 console.log(sayi === 0 ? 'yeni migration yok' : `${sayi} migration uygulandı`);
