@@ -4,4 +4,4 @@ Asansörle yukarı çıkar, son katları merdivenle tırmanırsın. İç katlard
 
 Kule her gün açık ve giriş ücretli. Balkon dar olduğundan ziyaretçiler sırayla çıkarılır; sabah ilk saatlerde beklemen kısa olur. Sergiyi ve balkonu görmek için kırk beş dakika yeter; günbatımı saatleri en kalabalık zaman, sabahı bu yüzden seçtik. Aşağı inince Galata'nın taş sokaklarından Karaköy'e yürüyüp tramvaya binebilirsin.
 
-> Balkonda saat yönünde yürü; ziyaretçi akışı bu yönde, ters yürürsen dar yerde sıkışırsın.
+> Balkonda görevlinin gösterdiği yönde yürü; dar yerde durup geri dönersen arkandakiler sıkışır.

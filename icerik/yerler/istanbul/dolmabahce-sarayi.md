@@ -2,6 +2,6 @@ Dolmabahçe Sarayı'nı Sultan Abdülmecid, Topkapı'yı bırakıp Avrupa usulü
 
 Saray iki bölümde gezilir: devlet işlerinin yürüdüğü Selamlık ve ailenin yaşadığı Harem. Selamlık'ta kristal korkuluklu merdiveni ve sarayın en büyük salonu Muayede Salonu'nu göreceksin; kubbenin ortasından sarkan dev avize salonun ölçüsünü anlatır. Harem bölümünde Atatürk'ün son günlerini geçirdiği oda, eşyalarıyla korunuyor. Bahçeye ve rıhtıma da çık: Boğaz'a bakan cephe denizden görülmek için yapılmış.
 
-Saray pazartesi kapalı. İçeride fotoğraf çekmek yasak, ziyaret rehberli gruplarla yapılır. Selamlık ve Harem birlikte bir buçuk saat sürer; hafta sonu gruplar dolu olduğundan sabah erken gelmek işini kolaylaştırır. Galata'dan tramvayla Kabataş'a gelip birkaç dakika yürürsen saat kulesinin yanındaki gişeye varırsın.
+Saray pazartesi kapalı. İçeride fotoğraf çekmek yasak, ziyaret rehberli gruplarla yapılır. Bu plan bir buçuk saati Selamlık'a, bahçeye ve rıhtıma ayırıyor; Harem'i vaktin kalırsa ekle. Hafta sonu gruplar dolu olduğundan sabah erken gelmek işini kolaylaştırır. Galata'dan tramvayla Kabataş'a gelip birkaç dakika yürürsen saat kulesinin yanındaki gişeye varırsın.
 
-> Gişede Selamlık ile Harem'i birlikte gezdiren bileti iste; Atatürk'ün odası Harem tarafında.
+> Atatürk'ün odasını görmek istiyorsan gişede Selamlık ile Harem'i birlikte gezdiren bileti iste; oda Harem tarafında.
