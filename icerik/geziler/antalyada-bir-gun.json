@@ -1,0 +1,157 @@
+{
+  "surum": 1,
+  "sehir": {
+    "yeni": {
+      "ad": "Antalya",
+      "slug": "antalya",
+      "place_id": "ChIJwa2t3a6awxQRMy7j-XOfxpU"
+    }
+  },
+  "takvim": {
+    "ilk_gun": "cumartesi"
+  },
+  "gezi": {
+    "slug": "antalyada-bir-gun",
+    "baslik": "Antalya'da bir gün",
+    "ozet": "Kaleiçi'nde yürüyerek: Yivli Minare, eski liman, Hadrian, Hıdırlık",
+    "yazar_ad": "Tripmate ekibi",
+    "amaclar": [
+      "kultur_tarih",
+      "yavas"
+    ],
+    "yazi_md": "Antalya'ya çoğu kişi deniz için gelir, ama kentin kalbi iki bin yıldır aynı koyun çevresinde atıyor. Bu plan seni bir gün boyunca surlarla çevrili Kaleiçi'nde gezdiriyor: sabah Selçuklu minaresinin dibinden eski limana, öğlen Roma kapısından bir köfteciye, öğleden sonra yıkıntısından geri dönen bir camiden körfeze bakan bir Roma kulesine. Bütün gün yürüyeceksin, mesafeler kısa ama Kaleiçi'nin sokakları taş döşeli ve inişli çıkışlı.\n\n> Plan cumartesiye göre kuruldu: Kaleiçi Müzesi pazartesi kapalı. Camiler namaz vakitlerinde ziyarete kapanır. Antalya Müzesi yeniden yapım için kapalı olduğundan bu planda yok.\n\n## 1. gün · Kalekapısı'ndan Hıdırlık'a\n\nGüne Kalekapısı Meydanı'nda, saat kulesinin yanında başla. Karşında [Yivli Minare](mekan:ChIJbfZlcwSQwxQROK2m_tlcLzg) yükseliyor: Selçuklu Sultanı Alaeddin Keykubad'ın döneminden kalan tuğla minare kentin simgesi. Merdivenlerden külliyenin avlusuna in; eski Mevlevihane ve iki türbe aynı avluda.\n\n::mekan[ChIJbfZlcwSQwxQROK2m_tlcLzg]\n\nAvludan aşağı, dik sokaklardan [Kaleiçi Yat Limanı](mekan:ChIJZdud_ASQwxQRtxt_D0CAH0s)'na in. Attaleia'nın ilk limanı bu küçük koydu; bugün balıkçı tekneleri ve gezi tekneleri yan yana. Rıhtım boyunca yürü, dönüp surlarla evlerin üst üste dizildiği yamaca bak.\n\nLimandan yokuşu çıkıp Kaleiçi'nin iç sokaklarına gir. [Suna-İnan Kıraç Kaleiçi Müzesi](mekan:ChIJ73TP7QaQwxQRH0NU1AbB8TQ) iki yapıda: 19. yüzyıldan bir Rum kilisesinde Çanakkale seramikleri, yanındaki eski Antalya evinde eski kent hayatı.\n\nMüzeden doğuya yürüyünce Kaleiçi'nin doğu girişine, [Hadrian Kapısı](mekan:ChIJa4EKoSeRwxQROnU-MXMbKLM)'na çıkarsın. Roma imparatoru Hadrianus'un MS 130'daki ziyareti için yapılan üç kemerli kapının kasetli tonozlarına bak, sonra iki yanındaki kuleleri karşılaştır: güneydeki Roma'dan, kuzeydeki Selçuklu onarımı.\n\nÖğle yemeği için kapıdan kuzeye, Kazım Özalp Caddesi'ne yürü. [Topçu Kebap](mekan:ChIJq6qqqtqEwxQRVikFThT2iJQ)'ta Antalya'nın iki tabağını iste: şiş köfte ve tahinli piyaz. Piyazın sosu tahin, limon ve sirkeyle yapılır, başka kentlerdeki piyaza benzemez. Masalar öğle saatinde Antalyalılarla dolar, servis hızlıdır.\n\nYemekten sonra Kaleiçi'ne dön ve Hesapçı Sokağı'ndan güneye yürü. Yolun üstünde [Kesik Minare](mekan:ChIJe6Gj3QWQwxQRMe7tWO7euis) var: Roma tapınağı, Bizans kilisesi ve Selçuklu camisi olmuş, 1896 yangınından sonra yüz yılı aşkın yıkık kalmış yapı, onarımdan sonra yeniden açıldı. Minareye ahşap külahı geri takıldı; avluda kazıyla çıkarılan Roma kalıntıları açıkta duruyor.\n\nSokağın ucunda [Hıdırlık Kulesi](mekan:ChIJdSplng-QwxQRDoougW4Qa-g) seni bekliyor. 2. yüzyıldan kalan yuvarlak Roma kulesinin önünden körfeze ve Beydağları'na bak, sonra yanındaki Karaalioğlu Parkı'nın palmiyeleri arasında yar boyunca yürü. Kulenin çevresindeki kazı alanı ve yarın üstüne yapılan seyir terası 2026 yazında ziyarete açıldı. Vaktin varsa günbatımını burada, güneşin dağların arkasına indiği saatte bekle.\n\n::mekan[ChIJdSplng-QwxQRDoougW4Qa-g]\n\nAkşama doğru deniz istersen taksiyle Lara'ya git; Düden Çayı'nın yardan denize döküldüğü Aşağı Düden Şelalesi yarım saat uzakta."
+  },
+  "gunler": [
+    {
+      "baslik": "Kalekapısı'ndan Hıdırlık'a",
+      "duraklar": [
+        {
+          "place_id": "ChIJbfZlcwSQwxQROK2m_tlcLzg",
+          "osm": "way/154761774",
+          "ad": "Yivli Minare",
+          "sure_dk": 30,
+          "sure_gerekcesi": "varsayılan 30; minare, avlu ve türbeler",
+          "kapali_gunler": [],
+          "rehber": "yivli-minare",
+          "amaclar": [
+            "kultur_tarih"
+          ]
+        },
+        {
+          "place_id": "ChIJZdud_ASQwxQRtxt_D0CAH0s",
+          "ad": "Kaleiçi Yat Limanı",
+          "sure_dk": 30,
+          "sure_gerekcesi": "varsayılan 45; rıhtım boyunca yürüyüş, tekne turu yok",
+          "kapali_gunler": [],
+          "rehber": "kaleici-yat-limani",
+          "amaclar": [
+            "yavas",
+            "cocuklu"
+          ]
+        },
+        {
+          "place_id": "ChIJ73TP7QaQwxQRH0NU1AbB8TQ",
+          "osm": "node/4446644395",
+          "ad": "Suna-İnan Kıraç Kaleiçi Müzesi",
+          "sure_dk": 45,
+          "sure_gerekcesi": "varsayılan 90; küçük müze, iki yapı",
+          "kapali_gunler": [
+            "pazartesi"
+          ],
+          "rehber": "kaleici-muzesi",
+          "amaclar": [
+            "kultur_tarih"
+          ]
+        },
+        {
+          "place_id": "ChIJa4EKoSeRwxQROnU-MXMbKLM",
+          "osm": "way/91728341",
+          "ad": "Hadrian Kapısı",
+          "sure_dk": 15,
+          "sure_gerekcesi": "varsayılan 45; açık hava anıtı, geçerken",
+          "kapali_gunler": [],
+          "rehber": "hadrian-kapisi",
+          "amaclar": [
+            "kultur_tarih"
+          ]
+        },
+        {
+          "place_id": "ChIJq6qqqtqEwxQRVikFThT2iJQ",
+          "osm": "node/9630928920",
+          "ad": "Topçu Kebap",
+          "sure_dk": 60,
+          "sure_gerekcesi": "varsayılan 75; esnaf köftecisi, servis hızlı",
+          "kapali_gunler": [],
+          "rehber": "topcu-kebap",
+          "amaclar": [
+            "lezzet"
+          ]
+        },
+        {
+          "place_id": "ChIJe6Gj3QWQwxQRMe7tWO7euis",
+          "osm": "way/431519180",
+          "ad": "Kesik Minare",
+          "sure_dk": 20,
+          "sure_gerekcesi": "varsayılan 30; avlu ve iç mekân",
+          "kapali_gunler": [],
+          "rehber": "kesik-minare",
+          "amaclar": [
+            "kultur_tarih"
+          ]
+        },
+        {
+          "place_id": "ChIJdSplng-QwxQRDoougW4Qa-g",
+          "osm": "way/110321832",
+          "ad": "Hıdırlık Kulesi",
+          "sure_dk": 60,
+          "sure_gerekcesi": "varsayılan 45; kule, seyir terası ve Karaalioğlu Parkı",
+          "kapali_gunler": [],
+          "rehber": "hidirlik-kulesi",
+          "amaclar": [
+            "yavas",
+            "cocuklu"
+          ]
+        }
+      ]
+    }
+  ],
+  "notlar": {
+    "dogrulanacaklar": [
+      "[Plan · Sehir] · Antalya şehri sehir.yeni ile açılıyor (#299, 19 Kasım kararı, büyük şehirler grubu); place_id 'Antalya' kimlik sorgusundan (tek sonuç) · BO'da şehir satırı",
+      "[Plan · g1.d3] · Kaleiçi Müzesi 'pazartesi' kapalı, salı–pazar açık: AKMED duyurusu (akmed.ku.edu.tr/en/?p=5341, yılı yazmıyor) · akmed.ku.edu.tr",
+      "[Plan · g1.d5] · Topçu Kebap kapalı günü bilinmiyor, [] yazıldı; 1885 kuruluş il listesi kaynağından · dükkân",
+      "[Plan · g1.d2] · Kaleiçi Yat Limanı OSM aday listesinde ad olarak yok (4 km yarıçap); osm boş, konum Google'dan 30 gün · OSM'e eklenebilir",
+      "[Plan · Yazı] · Antalya (Arkeoloji) Müzesi 16 Temmuz 2025'ten beri deprem riski nedeniyle kapalı, yerine yenisi yapılıyor; 'tamamlanma 2026 sonu' 2025 tahmini (Hürriyet Daily News 18 Temmuz 2025, Gazete Vatan 17 Temmuz 2025). Açılırsa 2. geziye alınmalı",
+      "[Rehber · Yivli Minare] · Keykubad dönemi, cami 1373 Hamitoğulları yenilemesi (il listesi kaynağı, tr.wikipedia 'Yivli Minare'); Mevlevihane'nin bugün müze/galeri olduğu: OSM 'Antalya Mevlevihane Müzesi' kaydı; firuze sırlı tuğla parçaları genel bilgi",
+      "[Rehber · Liman] · Attaleia'nın II. Attalos tarafından MÖ 2. yüzyılda kurulduğu genel bilgi (tr.wikipedia 'Antalya'); tekne turlarının Aşağı Düden'e gittiği ve Mermerli tarafındaki yokuş: genel bilgi, yerinde",
+      "[Rehber · Kaleiçi Müzesi] · Aya Yorgi 1863 yeniden yapım ve 1996 açılış il listesi kaynağından; Çanakkale seramiklerinin 17.–20. yüzyıl aralığı ve evdeki canlandırma sahneleri (kına gecesi, sünnet odası, kahve) genel bilgi · akmed.ku.edu.tr",
+      "[Rehber · Hadrian Kapısı] · MS 130, Üçkapılar adı genel bilgi; kasetli tonoz blokları, güney kulenin (Julia Sancta) Roma dönemi, kuzey kulenin 1220 (H. 617) kitabeli Alaeddin Keykubad yeniden yapımı: KU AKMED yapı kaydı (akmed.ku.edu.tr/en/?p=7973). Döşeme, tekerlek izi ve yürüyüş yolu kaynakta yok, metinden çıkarıldı",
+      "[Rehber · Topçu] · Antalya piyazının tahin, limon, sirke ve yumurtayla yapıldığı genel bilgi; şiş köftenin kömür ateşinde pişmesi ve yanındakiler · dükkân",
+      "[Rehber · Kesik Minare] · Roma tapınağı → Bizans kilisesi → Selçuklu camisi → 1361 Kıbrıs dönemi kilise → Şehzade Korkut camisi, 1896 yangını (en.wikipedia 'Kesik Minare'); 2017 Vakıflar onarımı, 1300'den fazla numaralı taş (Türkiye Gazetesi 14 Mart 2025); avludaki Roma monopterosu (DHA 11 Ocak 2022). İbadete açılış tarihi çelişkili: Vikipedi 5 Mart 2021, DHA 10 Ocak 2022; metne tarih yazılmadı",
+      "[Rehber · Hıdırlık] · 2. yüzyıl ve yaklaşık 14 m il listesi kaynağından; işlevinin tartışmalı olduğu genel bilgi; kazı ve seyir terası Habertürk/DHA 21 Temmuz 2026 · antalya.bel.tr",
+      "[Yazı] · Hesapçı Sokağı'nın Kesik Minare'den Hıdırlık'a çıktığı ve Lara'ya taksiyle yarım saat: tahmin"
+    ],
+    "fotograf_onerileri": [
+      {
+        "ne": "Kaleiçi ve yat limanı, surların üstünden",
+        "altyazi": "Kaleiçi'nin eski limanı",
+        "arama": "commons:Category:Kaleiçi Marina"
+      },
+      {
+        "ne": "Yivli Minare",
+        "altyazi": "Yivli Minare, Kalekapısı'ndan",
+        "arama": "commons:Category:Yivli Minaret Mosque"
+      },
+      {
+        "ne": "Hadrian Kapısı",
+        "altyazi": "Hadrian Kapısı'nın üç kemeri",
+        "arama": "commons:Category:Hadrian's Gate (Antalya)"
+      }
+    ],
+    "varsayimlar": [
+      "1. gün cumartesi (Kaleiçi Müzesi pazartesi kapalı)",
+      "Bütün gün yürüyerek; Lara'ya isteğe bağlı taksi",
+      "İl listesinin ilk 5'inden Aspendos (2), Perge (3), Aşağı Düden (4) ve Side (5) bu gezide yok: Kaleiçi dışında, araçla gidiliyor; 2 günlük geziye kalıyor. Aşağı Düden yazıda akşam seçeneği olarak geçiyor"
+    ]
+  }
+}
