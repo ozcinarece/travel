@@ -695,7 +695,9 @@
       "araHata": "Arama şu an yapılamıyor. Tekrar dene.",
       "sonucYok": "Sonuç yok",
       "kaldir": "Şehri kaldır",
-      "kilitli": "Seyahat oluştu; şehir artık değiştirilemez. Başka şehir için Yeni'den yeni seyahat kur.",
+      "sehirDegisti": "Seçtiğin {n} yer listeden çıkar.",
+      "sehirDegistiDevam": "Devam et",
+      "sehirHata": "Şehir değiştirilemedi. Tekrar dener misin?",
       "oneriler": "ÖNERİLER",
       "onerilerNot": "Bu şehirlerde rehber, öne çıkan mekanlar ve hazır geziler var."
     },
@@ -703,7 +705,12 @@
       "baslik": "Ne zaman?",
       "atla": "Tarihim belli değil",
       "ozetYok": "Gidiş gününe dokun",
-      "kilitli": "Tarihler kaydedildi; tarihi Program'dan değiştir (gün ekle / sil).",
+      "donusIpucu": "Dönüş günü?",
+      "kacGun": "Kaç gün?",
+      "gunSayisi": "{n} gün",
+      "gunAzalt": "Bir gün azalt",
+      "gunArttir": "Bir gün arttır",
+      "tarihHata": "Tarihler kaydedilemedi. Tekrar dener misin?",
       "hata": "Seyahat oluşturulamadı. Tekrar dener misin?",
       "oncekiAy": "Önceki ay",
       "sonrakiAy": "Sonraki ay",
@@ -729,6 +736,8 @@
     "onerilenler": {
       "baslik": "Neleri görmek istersin?",
       "alt": "Seçtiklerini yakınlığa göre günlere biz dağıtalım.",
+      "veriHata": "Seyahatin bilgileri yüklenemedi.",
+      "tekrarDene": "Tekrar dene",
       "cip": {
         "gormen": "Görmen gerekenler",
         "yemek": "Yemek",

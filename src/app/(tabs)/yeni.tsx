@@ -1,6 +1,6 @@
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { ActivityIndicator, Linking, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, BackHandler, Linking, StyleSheet, Text, View } from 'react-native';
 
 import { MekanPaneli } from '@/components/mekan/MekanPaneli';
 import { AdimIlOnerileri } from '@/components/sihirbaz/AdimIlOnerileri';
@@ -9,6 +9,8 @@ import { AdimNereye } from '@/components/sihirbaz/AdimNereye';
 import { AdimNeZaman } from '@/components/sihirbaz/AdimNeZaman';
 import { AdimOnerilenler } from '@/components/sihirbaz/AdimOnerilenler';
 import { PlanCubugu } from '@/components/sihirbaz/PlanCubugu';
+import { SehirDegisimSayfasi } from '@/components/sihirbaz/SehirDegisimSayfasi';
+import { Buton } from '@/components/ui/Buton';
 import { useDuraklar, useGunler } from '@/features/gunler/sorgular';
 import { ilSlugu, useIlYerleri } from '@/features/icerik/ilOnerileri';
 import { icerikPlaceId, olayYaz, sehirEslestir, useSehirler, useYerlerIle } from '@/features/icerik/sorgular';
@@ -21,6 +23,7 @@ import type { OnerilenMekan } from '@/features/sihirbaz/onerilenler';
 import { gunDolulugu, secimOzeti } from '@/features/sihirbaz/planKur';
 import { planiHesapla, usePlaniUygula } from '@/features/sihirbaz/planUygula';
 import { oncekiAdim, seyahatAdiOner, sonrakiAdim, type Adim, type Aralik } from '@/features/sihirbaz/sihirbaz';
+import { gunSayisiSinirla, sehirDegisti, tarihDegisti, tarihSecimi, tarihsizGunleriKur, TARIHSIZ_VARSAYILAN, useTaslakSehri, useTaslakTarihi } from '@/features/sihirbaz/taslak';
 import type { HafifYer } from '@/features/yerler/api';
 import { t } from '@/i18n';
 import type { SehirSecimi } from '@/lib/tipler';
@@ -29,8 +32,10 @@ import { renk, yazi } from '@/theme';
 /**
  * #98 → #139 (kanvas 4 · 5 · 7 · 8): seyahat kurma sihirbazı — 3 adım: Nereye → Ne zaman → Neleri görmek istersin, sonra
  * "Planı kur" (seçilenler yakınlığa göre günlere dağıtılır) ve Program'da "Planın hazır". Otel Program'a, davet Plan hazır'a
- * taşındı. Şehir + ad + tarih yerelde tutulur; 2. adımdan çıkınca (Devam ya da "Tarihim belli değil") seyahat oluşturulur.
- * Geri: şehir ve tarihler oluşturulduktan sonra kilitlidir (ad değişir). Hedef: 3 dakikada saatlik rota (olay `plan_kuruldu`).
+ * taşındı. Şehir + ad + tarih yerelde tutulur; 2. adımdan çıkınca (Devam) seyahat taslak olarak oluşturulur.
+ * #581 KK3: şehir ve tarih kilitli değil; geri dönüp değiştirince Devam aynı taslağı günceller (`taslak.ts`). KK2: "Tarihim
+ * belli değil" → "Kaç gün?" sayacı (varsayılan 2). KK4: Android geri tuşu bir önceki adıma döner. KK5: 3. adımda veri hatası
+ * → "Tekrar dene". Hedef: 3 dakikada saatlik rota (olay `plan_kuruldu`).
  * #144 girişleri: `tekrar` (geçmiş seyahat → aynı şehir ve ad, 2. adımdan; seyahat oluşunca plan kopyalanır, Program açılır),
  * `sehir` + `yerler` (Kaydettiklerim → rehberli şehir seçili; seyahat oluşunca kaydedilen yerler listeye).
  */
@@ -39,6 +44,10 @@ export default function SihirbazEkrani() {
   const [sehir, setSehir] = useState<SehirSecimi | null>(null);
   const [ad, setAd] = useState<string | null>(null);
   const [aralik, setAralik] = useState<Aralik>(null);
+  // #581 KK2: "Tarihim belli değil" seçildiyse gün sayısı (null → tarihli).
+  const [tarihsizGun, setTarihsizGun] = useState<number | null>(null);
+  // #581 KK3b: şehir değişimi onayı bekleyen yer sayısı.
+  const [sehirOnayi, setSehirOnayi] = useState<number | null>(null);
   const [tripId, setTripId] = useState<string | null>(null);
   useFocusEffect(
     useCallback(() => {
@@ -102,6 +111,7 @@ export default function SihirbazEkrani() {
       setUygulananGiris(girisAnahtari);
       setTripId(null);
       setAralik(null);
+      setTarihsizGun(null);
       setHata(null);
       setTutulan(new Set());
       if (tekrarKaynagi.data && giris.tekrar) {
@@ -128,7 +138,43 @@ export default function SihirbazEkrani() {
   const rehberSehir = sehirEslestir(sehirler.data, sehir);
   // #401 KK5: ilin yayında listesi varsa 3. adım ondan dolar (seyahat açılınca önceden istenir; 2. adımda hazır olur).
   const ilYerleri = useIlYerleri(tripId ? ilSlugu(rehberSehir, sehir?.ad ?? seyahat.data?.city_label) : null);
-  const kilitli = !!tripId;
+  const taslakSehri = useTaslakSehri();
+  const taslakTarihi = useTaslakTarihi();
+  // Taslağın kayıtlı şehri (KK3b: Vazgeç'te şehir buna döner).
+  const kayitliSehir: SehirSecimi | null =
+    seyahat.data?.city_place_id && seyahat.data.lat != null && seyahat.data.lng != null
+      ? {
+          place_id: seyahat.data.city_place_id,
+          ad: seyahat.data.city_label,
+          ikincil: '',
+          lat: seyahat.data.lat,
+          lng: seyahat.data.lng,
+          tz: seyahat.data.tz,
+          country_code: seyahat.data.country_code,
+        }
+      : null;
+
+  // #581 KK4: Android geri tuşu sihirbazda bir önceki adıma döner (1. adımda sistem davranışı).
+  useFocusEffect(
+    useCallback(() => {
+      const abonelik = BackHandler.addEventListener('hardwareBackPress', () => {
+        if (sehirOnayi !== null) {
+          setSehirOnayi(null);
+          return true;
+        }
+        if (panel) {
+          setPanel(null);
+          return true;
+        }
+        const o = oncekiAdim(adim);
+        if (!o) return false;
+        setHata(null);
+        setAdim(o);
+        return true;
+      });
+      return () => abonelik.remove();
+    }, [adim, panel, sehirOnayi]),
+  );
 
   const geri = () => {
     setHata(null);
@@ -143,9 +189,34 @@ export default function SihirbazEkrani() {
     if (n) setAdim(n);
   };
 
+  // #581 KK3a–KK3b: taslağın şehri değişti → (yer seçildiyse onaydan sonra) aynı taslak güncellenir, yerler listeden çıkar.
+  const sehriKaydet = async (yerleriCikar: boolean) => {
+    if (!sehir || !tripId) return;
+    setSehirOnayi(null);
+    setHata(null);
+    try {
+      await taslakSehri.mutateAsync({ seyahatId: tripId, sehir, ad: ad ?? onerilenAd, yerleriCikar });
+      setTutulan(new Set());
+      setPanel(null);
+      ileri();
+    } catch {
+      setHata(t('sihirbaz.nereye.sehirHata'));
+    }
+  };
+  const sehirVazgec = () => {
+    setSehirOnayi(null);
+    if (kayitliSehir) setSehir(kayitliSehir);
+  };
+
   // 1 → 2: ad değiştiyse ve seyahat varsa kaydet.
   const nereyeDevam = async () => {
     if (!sehir) return;
+    if (tripId && seyahat.data && sehirDegisti(kayitliSehir, sehir)) {
+      const n = mekanlar.data?.length ?? 0;
+      if (n > 0) setSehirOnayi(n);
+      else await sehriKaydet(false);
+      return;
+    }
     if (tripId && seyahat.data && (ad ?? onerilenAd) !== (seyahat.data.name ?? onerilenAd)) {
       try {
         await adKaydet.mutateAsync(ad ?? onerilenAd);
@@ -156,18 +227,33 @@ export default function SihirbazEkrani() {
     }
     ileri();
   };
-  // 2 → 3: seyahat oluşturulur (tarihli ya da tarihsiz).
-  const seyahatiKur = async (tarihsiz: boolean) => {
-    if (!sehir) return;
-    if (tripId) return ileri();
+  // 2 → 3: seyahat oluşturulur (tarihli ya da tarihsiz N gün). #581 KK3a: taslak varsa yenisi açılmaz, tarihi güncellenir.
+  const seyahatiKur = async () => {
+    const secim = tarihSecimi(aralik, tarihsizGun);
+    if (!sehir || !secim) return;
     setHata(null);
+    if (tripId) {
+      if (!seyahat.data || !gunler.data) return;
+      const mevcut = { start_date: seyahat.data.start_date, end_date: seyahat.data.end_date, gunSayisi: gunler.data.length };
+      if (tarihDegisti(mevcut, secim)) {
+        try {
+          await taslakTarihi.mutateAsync({ seyahatId: tripId, secim });
+        } catch {
+          setHata(t('sihirbaz.nezaman.tarihHata'));
+          return;
+        }
+      }
+      return ileri();
+    }
     try {
       const id = await olustur.mutateAsync({
         sehir,
         name: ad ?? onerilenAd,
-        start_date: tarihsiz ? null : (aralik?.gidis ?? null),
-        end_date: tarihsiz ? null : (aralik?.donus ?? aralik?.gidis ?? null),
+        start_date: secim.tur === 'tarihli' ? secim.gidis : null,
+        end_date: secim.tur === 'tarihli' ? secim.donus : null,
       });
+      // KK2: tetikleyici tarihsiz seyahate 1 gün açar; sayaçtaki gün sayısına tamamlanır.
+      if (secim.tur === 'tarihsiz' && secim.gun > 1) await tarihsizGunleriKur(id, secim.gun);
       // #144 Tekrar kur: aynı plan yeni tarihe; plan hazır olduğundan öneriler atlanır, Program açılır.
       if (girisPlani?.tur === 'tekrar' && girisPlani.sehirId === sehir.place_id) {
         const n = await seyahatiKopyala(girisPlani.kaynak, id);
@@ -179,6 +265,7 @@ export default function SihirbazEkrani() {
         setSehir(null);
         setAd(null);
         setAralik(null);
+        setTarihsizGun(null);
         return;
       }
       // #144 Bu şehre seyahat kur: kaydedilen yerler listeye (3. adımda listede görünür).
@@ -226,9 +313,12 @@ export default function SihirbazEkrani() {
 
   if (adim === 'nereye') {
     return (
-      <AdimKabugu adim={adim} baslik={t('sihirbaz.nereye.baslik')} onGeri={geri} hata={hata} devam={{ onPress: nereyeDevam, pasif: !sehir, yukleniyor: adKaydet.isPending }}>
-        <AdimNereye key={ilkSorgu?.anahtar} ilkSorgu={ilkSorgu?.metin} sehir={sehir} onSehir={setSehir} ad={ad} onerilenAd={onerilenAd} onAd={setAd} sehirler={sehirler.data} kilitli={kilitli} />
-      </AdimKabugu>
+      <>
+        <AdimKabugu adim={adim} baslik={t('sihirbaz.nereye.baslik')} onGeri={geri} hata={hata} devam={{ onPress: nereyeDevam, pasif: !sehir, yukleniyor: adKaydet.isPending || taslakSehri.isPending }}>
+          <AdimNereye key={ilkSorgu?.anahtar} ilkSorgu={ilkSorgu?.metin} sehir={sehir} onSehir={setSehir} ad={ad} onerilenAd={onerilenAd} onAd={setAd} sehirler={sehirler.data} />
+        </AdimKabugu>
+        <SehirDegisimSayfasi yerSayisi={sehirOnayi} onDevam={() => sehriKaydet(true)} onVazgec={sehirVazgec} />
+      </>
     );
   }
   if (adim === 'nezaman') {
@@ -239,18 +329,48 @@ export default function SihirbazEkrani() {
         alt={seyahat.data ? (seyahat.data.name ?? seyahat.data.city_label) : (ad ?? onerilenAd)}
         onGeri={geri}
         hata={hata}
-        devam={{ onPress: () => seyahatiKur(false), pasif: !aralik && !kilitli, yukleniyor: olustur.isPending }}
-        atla={kilitli ? undefined : { baslik: t('sihirbaz.nezaman.atla'), onPress: () => seyahatiKur(true) }}
-        altNot={kilitli ? t('sihirbaz.nezaman.kilitli') : undefined}>
-        <AdimNeZaman aralik={aralik} onAralik={setAralik} kilitli={kilitli} />
+        devam={{ onPress: seyahatiKur, pasif: !aralik && tarihsizGun === null, yukleniyor: olustur.isPending || taslakTarihi.isPending }}
+        atla={
+          tarihsizGun === null
+            ? {
+                baslik: t('sihirbaz.nezaman.atla'),
+                onPress: () => {
+                  setAralik(null);
+                  setTarihsizGun(TARIHSIZ_VARSAYILAN);
+                },
+              }
+            : undefined
+        }>
+        <AdimNeZaman
+          aralik={aralik}
+          onAralik={(a) => {
+            setTarihsizGun(null);
+            setAralik(a);
+          }}
+          tarihsizGun={tarihsizGun}
+          onTarihsizGun={(n) => setTarihsizGun(gunSayisiSinirla(n))}
+        />
       </AdimKabugu>
     );
   }
-  // 3: seyahat, günler ve duraklar yüklenene kadar bekleme.
+  // 3: seyahat, günler ve duraklar yüklenene kadar bekleme. #581 KK5: biri hata verirse sonsuz çark yerine "Tekrar dene".
   if (!seyahat.data || !gunler.data || !duraklar.data) {
+    const veriHatasi = (!seyahat.data && seyahat.isError) || (!gunler.data && gunler.isError) || (!duraklar.data && duraklar.isError);
+    const tekrarDene = () => {
+      if (seyahat.isError) void seyahat.refetch();
+      if (gunler.isError) void gunler.refetch();
+      if (duraklar.isError) void duraklar.refetch();
+    };
     return (
       <AdimKabugu adim={adim} baslik="" onGeri={geri}>
-        {seyahat.isError || gunler.isError ? <Text style={s.hata}>{t('sihirbaz.nezaman.hata')}</Text> : <ActivityIndicator color={renk.ana} style={{ marginTop: 40 }} />}
+        {veriHatasi ? (
+          <View style={s.hataKutu}>
+            <Text style={s.hata}>{t('sihirbaz.onerilenler.veriHata')}</Text>
+            <Buton baslik={t('sihirbaz.onerilenler.tekrarDene')} onPress={tekrarDene} yukleniyor={seyahat.isFetching || gunler.isFetching || duraklar.isFetching} />
+          </View>
+        ) : (
+          <ActivityIndicator color={renk.ana} style={{ marginTop: 40 }} />
+        )}
       </AdimKabugu>
     );
   }
@@ -344,5 +464,6 @@ export default function SihirbazEkrani() {
 }
 
 const s = StyleSheet.create({
-  hata: { fontFamily: yazi.yari, fontSize: 12, textAlign: 'center', color: renk.uyari, paddingTop: 20 },
+  hataKutu: { gap: 16, paddingTop: 20 },
+  hata: { fontFamily: yazi.yari, fontSize: 14, lineHeight: 20, textAlign: 'center', color: renk.uyari },
 });
