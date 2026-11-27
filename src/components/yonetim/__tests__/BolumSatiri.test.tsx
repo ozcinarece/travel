@@ -5,6 +5,9 @@ import type { TaslakBolum } from '@/features/yonetim/anaSayfa';
 
 import { BolumSatiri } from '../anaSayfa/BolumSatiri';
 
+// #586: banner'ın "Görsel yükle"si Storage'a yazar; bu testler yüklemeye girmez.
+jest.mock('@/lib/supabase', () => ({ supabase: {} }));
+
 const bolum: TaslakBolum = { id: 'b1', tur: 'serit', baslik: 'Önerilen geziler', sira: 2, acik: true, kaynak: 'elle', icerik: { gezi_idler: ['g1'] }, baslangic_at: null, bitis_at: null };
 const secenekler = { geziler: [{ id: 'g1', baslik: 'Bursa' }, { id: 'g2', baslik: 'İzmir' }], yerler: [], sehirler: [] };
 

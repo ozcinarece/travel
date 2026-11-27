@@ -3,13 +3,13 @@ import { olcekle, SEHIR_FOTO } from './sehir';
 
 export type WebpKopyalari = { genislik: number; yukseklik: number; kopyalar: { boyut: number; blob: Blob }[] };
 
-/** Uzun kenar 1600 px'ten kısaysa `foto_kucuk`. Ana kopyanın ölçüsü döner (≤ 2400). */
-export async function webpUret(dosya: Blob, kalite = 0.86): Promise<WebpKopyalari> {
+/** Uzun kenar 1600 px'ten kısaysa `foto_kucuk`. Ana kopyanın ölçüsü döner (≤ 2400). `boyutlar`ın ilki ana kopya (#586: 2400 / 1200). */
+export async function webpUret(dosya: Blob, kalite = 0.86, boyutlar: readonly number[] = SEHIR_FOTO.boyutlar): Promise<WebpKopyalari> {
   const resim = await createImageBitmap(dosya);
   try {
     if (Math.max(resim.width, resim.height) < SEHIR_FOTO.enAzKenar) throw new Error('foto_kucuk');
     const kopyalar: WebpKopyalari['kopyalar'] = [];
-    for (const boyut of SEHIR_FOTO.boyutlar) {
+    for (const boyut of boyutlar) {
       const o = olcekle(resim.width, resim.height, boyut);
       const tuval = document.createElement('canvas');
       tuval.width = o.genislik;
@@ -19,7 +19,7 @@ export async function webpUret(dosya: Blob, kalite = 0.86): Promise<WebpKopyalar
       if (!blob) throw new Error('foto_cevirme');
       kopyalar.push({ boyut, blob });
     }
-    const ana = olcekle(resim.width, resim.height, SEHIR_FOTO.boyutlar[0]);
+    const ana = olcekle(resim.width, resim.height, boyutlar[0]);
     return { genislik: ana.genislik, yukseklik: ana.yukseklik, kopyalar };
   } finally {
     resim.close();

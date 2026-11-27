@@ -112,9 +112,9 @@ export function boyutYolu(yol: string, boyut: number): string {
   return boyut === SEHIR_FOTO.boyutlar[0] ? yol : yol.replace(/\.webp$/, `@${boyut}.webp`);
 }
 
-/** Yükleme yolu: `sehirler/<id>/<önek>-<ad>.webp` (ad sadeleşir). */
-export function sehirFotoYolu(sehirId: string, dosyaAdi: string, onek: string): string {
-  const kok = dosyaAdi
+/** Dosya adından yol parçası: uzantısız, küçük harf, Türkçe harfler sadeleşir, yalnız `a-z 0-9 -` (en çok 60). */
+export function sadeDosyaKoku(dosyaAdi: string): string {
+  return dosyaAdi
     .replace(/\.[^.]+$/, '')
     .toLocaleLowerCase('tr-TR')
     .replace(/ı/g, 'i')
@@ -123,6 +123,11 @@ export function sehirFotoYolu(sehirId: string, dosyaAdi: string, onek: string): 
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '')
     .slice(0, 60);
+}
+
+/** Yükleme yolu: `sehirler/<id>/<önek>-<ad>.webp` (ad sadeleşir). */
+export function sehirFotoYolu(sehirId: string, dosyaAdi: string, onek: string): string {
+  const kok = sadeDosyaKoku(dosyaAdi);
   return `sehirler/${sehirId}/${onek.slice(0, 8)}-${kok || 'foto'}.webp`;
 }
 
