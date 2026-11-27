@@ -3,10 +3,12 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import type { Konum } from '@/components/harita/tipler';
+import { ilSlugu } from '@/features/icerik/ilOnerileri';
+import { sehirEslestir } from '@/features/icerik/sorgular';
 import { hafifOnbellek } from '@/features/yerler/api';
 import { supabase } from '@/lib/supabase';
 import { haftaGunu } from '@/lib/takvim';
-import type { Durak, Gun, Mekan } from '@/lib/tipler';
+import type { Durak, Gun, Mekan, Sehir } from '@/lib/tipler';
 import { googleGunu, kapaliGunler, type Periyot } from '@/schedule/acilis';
 import { sonAnahtar } from '@/schedule/sira';
 
@@ -63,12 +65,51 @@ export function planiHesapla(p: { mekanlar: Mekan[]; gunler: Gun[]; duraklar: Du
   );
 }
 
+/** #582: "Planı kur"un saat okumasına süre sınırı; aşılırsa plan saatsiz (kapalı gün kuralı olmadan) kurulur. */
+export const SAAT_SURESI_MS = 4000;
+
+/** `ms` içinde bitmezse ya da hata verirse undefined. */
+export function sureli<T>(is: Promise<T>, ms: number): Promise<T | undefined> {
+  return new Promise((coz) => {
+    const z = setTimeout(() => coz(undefined), ms);
+    is.then(
+      (v) => {
+        clearTimeout(z);
+        coz(v);
+      },
+      () => {
+        clearTimeout(z);
+        coz(undefined);
+      },
+    );
+  });
+}
+
+/** Seyahatin il listesi anahtarı (uygulamadaki `ilSlugu` ile aynı: rehber şehri, yoksa şehir adı). Okunamazsa null. */
+async function seyahatIlSlugu(seyahatId: string): Promise<string | null> {
+  const [seyahat, sehirler] = await Promise.all([
+    supabase.from('trips').select('city_label, lat, lng').eq('id', seyahatId).maybeSingle(),
+    supabase.from('sehirler').select('id, ad, slug, lat, lng'),
+  ]);
+  const s = seyahat.data as { city_label: string | null; lat: number | null; lng: number | null } | null;
+  if (seyahat.error || !s) return null;
+  const sehir = sehirEslestir((sehirler.data ?? undefined) as Sehir[] | undefined, s.city_label ? { ad: s.city_label, lat: s.lat, lng: s.lng } : null);
+  return ilSlugu(sehir, s.city_label);
+}
+
 /**
- * #582: önceliği anlık okur. Oylar ve il listesi sırası DB'den; açılış saatleri ortak places-light önbelleğinden (Plan /
- * Listem bu oturumda istediyse Google'a yeni istek yok; yoksa yalnız atanmamış mekanlar, 25'lik parçalarla). Saatler yalnız
- * bellekte kalır. Her parça bağımsız: biri okunamazsa o kural uygulanmaz, plan yine kurulur.
+ * #582: önceliği anlık okur. Oylar ve il listesi sırası DB'den (yalnız seyahatin ilinin yayındaki listesi); açılış saatleri
+ * ortak places-light önbelleğinden (bu oturumda istendiyse Google'a yeni istek yok; yoksa tarihli seyahatte önbellekte saati
+ * olmayan atanmamış mekanlar için ⌈N/25⌉ istek). Saat okuması `SAAT_SURESI_MS` ile sınırlı. Saatler yalnız bellekte kalır.
+ * Her parça bağımsız: biri okunamazsa o kural uygulanmaz, plan yine kurulur. `ilSlug` verilmezse seyahatten çözülür.
  */
-export async function planOnceliginiOku(seyahatId: string, mekanlar: Mekan[], duraklar: Durak[], tarihli: boolean): Promise<PlanOnceligi> {
+export async function planOnceliginiOku(
+  seyahatId: string,
+  mekanlar: Mekan[],
+  duraklar: Durak[],
+  tarihli: boolean,
+  secenek: { ilSlug?: string | null; saatSuresiMs?: number } = {},
+): Promise<PlanOnceligi> {
   const atanmis = new Set(duraklar.map((d) => d.place_ref));
   const bos = mekanlar.filter((m) => !atanmis.has(m.id));
   if (bos.length === 0) return {};
@@ -83,9 +124,13 @@ export async function planOnceliginiOku(seyahatId: string, mekanlar: Mekan[], du
     })().catch(() => undefined),
     (async () => {
       if (placeIdler.length === 0) return undefined;
+      const slug = secenek.ilSlug !== undefined ? secenek.ilSlug : await seyahatIlSlugu(seyahatId);
+      // Başka ilin listesindeki sıra karışmaz: yalnız bu ilin listesi.
+      if (!slug) return undefined;
       const { data, error } = await supabase
         .from('il_oneriler')
         .select('place_id, sira, il_listeleri!inner(yayinda)')
+        .eq('il_slug', slug)
         .in('place_id', placeIdler)
         .eq('gorunur', true)
         .eq('il_listeleri.yayinda', true);
@@ -101,7 +146,8 @@ export async function planOnceliginiOku(seyahatId: string, mekanlar: Mekan[], du
     // Tarihsiz seyahatte hafta günü yok → saat istenmez.
     (async () => {
       if (!tarihli || placeIdler.length === 0) return undefined;
-      const yerler = await hafifOnbellek.getirHepsi(placeIdler, ['saat']);
+      const yerler = await sureli(hafifOnbellek.getirHepsi(placeIdler, ['saat']), secenek.saatSuresiMs ?? SAAT_SURESI_MS);
+      if (!yerler) return undefined;
       return new Map(placeIdler.map((id) => [id, yerler[id]?.periyotlar] as const));
     })().catch(() => undefined),
   ]);

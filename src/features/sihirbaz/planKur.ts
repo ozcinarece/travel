@@ -1,9 +1,10 @@
 // #139 KK5 "Planı kur": seçilen mekanları yakınlığa göre bölgelere ayırıp günlere SIRAYLA dağıtır (1. gün dolunca 2. gün).
 // Gün kapasitesi ≈ 10:00–19:00 (ziyaret + yol). Bölge sığmazsa kalanı ertesi güne geçer; hiçbir güne sığmayan "Listede,
-// güne atanmamış" kalır. Gün içi sıra otelden / ilk duraktan en yakın komşu. Yalnız kuş uçuşu tahmini (ek Google isteği yok).
+// güne atanmamış" kalır. Gün içi sıra otelden / ilk duraktan en yakın komşu. Yol kuş uçuşu tahmini (rota isteği yok).
 // Saf: ekrandan bağımsız, testli. #141 "Günlere dağıt" aynı fonksiyonu atanmamış mekanlarla çağırır (`mevcut` dolu günler).
 // #582: dağıtım sırası önce oy, sonra il listesi sırası, sonra yakınlık; açılış saatine göre kapalı günler atlanır. Oy, sıra ve
-// saatleri çağıran verir (planUygula); verilmezse eski davranış.
+// saatleri çağıran verir (planUygula); verilmezse eski davranış. Bu fonksiyon saf; "Planı kur" (planUygula) tarihli seyahatte
+// önbellekte saati olmayan mekanlar için ⌈N/25⌉ places-light 'saat' isteği atar (24 sa önbellek, 4 sn süre sınırı).
 import { mesafeM } from '@/components/harita/geo';
 import type { Konum } from '@/components/harita/tipler';
 import { konumu, konumVar } from '@/lib/konum';

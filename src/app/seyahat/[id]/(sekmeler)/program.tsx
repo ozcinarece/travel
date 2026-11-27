@@ -1032,6 +1032,7 @@ function ProgramSekmesi({
       atlandi,
       // #582 KK3: gezilen ya da atlanan durakta uyarı yok.
       kapali: !gecildi && !atlandi && !r.durak.completed_at ? kapaliUyarisi(gun?.date ?? null, periyotlari(r.mekan)) : null,
+      tasinabilir: !!gun && tasinabilirGunler(gunler, gun.id, periyotlari(r.mekan)).length > 0,
     };
   });
   // #532 KK3: kesik çizgili "Akşam boş · Öner" kutusu kalktı; aynı koşulda (son durak 17:00'den önce bitiyor) "Akşam için

@@ -2,10 +2,11 @@
 import { describe, expect, it, jest } from '@jest/globals';
 import { fireEvent, render } from '@testing-library/react-native';
 
-import { PlanListesi, type PlanSatirGorunumu } from '@/components/plan/PlanListesi';
+import { durakEtiketi, PlanListesi, TASI_EYLEMI, type PlanSatirGorunumu } from '@/components/plan/PlanListesi';
 import { kapaliGunKisa, tasinabilirGunler } from '@/features/plan/planListesi';
 import { gundeKapali, oncelikSirasi, planKur, type PlanMekani } from '@/features/sihirbaz/planKur';
-import { planiHesapla } from '@/features/sihirbaz/planUygula';
+import { planiHesapla, planOnceliginiOku, SAAT_SURESI_MS } from '@/features/sihirbaz/planUygula';
+import { hafifOnbellek, type HafifYer } from '@/features/yerler/api';
 import { t } from '@/i18n';
 import type { Durak, Gun, Mekan } from '@/lib/tipler';
 import type { Periyot } from '@/schedule/acilis';
@@ -13,7 +14,26 @@ import type { Periyot } from '@/schedule/acilis';
 jest.mock('react-native-safe-area-context', () => jest.requireActual<{ default: object }>('react-native-safe-area-context/jest/mock').default);
 jest.mock('@/components/ui/Foto', () => ({ Foto: () => null }));
 jest.mock('@/components/harita/Harita', () => ({ Harita: () => null }));
-jest.mock('@/lib/supabase', () => ({ supabase: {} }));
+// Zincirlenebilir sorgu taklidi: her çağrı `mockCagrilar`a yazılır; sonuç tabloya göre `mockVeri`den.
+const mockCagrilar: { tablo: string; yontem: string; arg: unknown[] }[] = [];
+const mockVeri: Record<string, unknown[]> = {};
+jest.mock('@/lib/supabase', () => ({
+  supabase: {
+    from: (tablo: string) => {
+      const sonuc = () => Promise.resolve({ data: mockVeri[tablo] ?? [], error: null });
+      const q: Record<string, unknown> = {};
+      for (const yontem of ['select', 'eq', 'in']) {
+        q[yontem] = (...arg: unknown[]) => {
+          mockCagrilar.push({ tablo, yontem, arg });
+          return q;
+        };
+      }
+      q.maybeSingle = () => Promise.resolve({ data: (mockVeri[tablo] ?? [])[0] ?? null, error: null });
+      q.then = (c: (v: unknown) => unknown, h?: (e: unknown) => unknown) => sonuc().then(c, h);
+      return q;
+    },
+  },
+}));
 
 // Eskişehir: Odunpazarı kümesi (birbirine yürüme mesafesi) ve ~5 km batıda Sazova.
 const m = (id: string, lat: number, lng: number, dakika = 60, ek: Partial<PlanMekani> = {}): PlanMekani => ({ id, lat, lng, dakika, ...ek });
@@ -196,7 +216,7 @@ describe('#582 KK3 Plan satırında kapalı gün uyarısı', () => {
 
   it('uyarı satırı "Pzt kapalı" #C25200; "Başka güne taşı" tek dokunuşla durağı verir', () => {
     const tasi = jest.fn();
-    const { getByText } = ciz([satir({ kapali: t('plan.kapaliGun', { gun: 'Pzt' }) })], tasi);
+    const { getByText } = ciz([satir({ kapali: t('plan.kapaliGun', { gun: 'Pzt' }), tasinabilir: true })], tasi);
     const uyari = getByText('Pzt kapalı');
     expect(uyari.props.style).toEqual(expect.objectContaining({ color: '#C25200', fontSize: 13 }));
     fireEvent.press(getByText(t('plan.baskaGuneTasi')));
@@ -207,5 +227,81 @@ describe('#582 KK3 Plan satırında kapalı gün uyarısı', () => {
     const { queryByText } = ciz([satir({ kapali: null })], () => undefined);
     expect(queryByText(/kapalı/)).toBeNull();
     expect(queryByText(t('plan.baskaGuneTasi'))).toBeNull();
+  });
+
+  it('ekran okuyucu: satırın "Başka güne taşı" özel eylemi durağı verir', () => {
+    const tasi = jest.fn();
+    const r = satir({ kapali: 'Pzt kapalı', tasinabilir: true });
+    const { getByLabelText } = ciz([r], tasi);
+    const dugme = getByLabelText(durakEtiketi(r));
+    expect(dugme.props.accessibilityActions).toEqual([{ name: TASI_EYLEMI, label: t('plan.baskaGuneTasi') }]);
+    fireEvent(dugme, 'accessibilityAction', { nativeEvent: { actionName: TASI_EYLEMI } });
+    expect(tasi).toHaveBeenCalledWith('d1');
+  });
+
+  it('"Başka güne taşı" dokunma alanı en az 44 pt (padding ile; hitSlop yok)', () => {
+    const { getByLabelText } = ciz([satir({ kapali: 'Pzt kapalı', tasinabilir: true })], () => undefined);
+    const baglanti = getByLabelText(`Pzt kapalı, ${t('plan.baskaGuneTasi')}`);
+    const stil = Object.assign({}, ...[baglanti.props.style].flat(Infinity).filter(Boolean));
+    expect(stil.minHeight).toBeGreaterThanOrEqual(44);
+    expect(stil.minWidth).toBeGreaterThanOrEqual(44);
+    expect(baglanti.props.hitSlop).toBeUndefined();
+  });
+
+  it('taşınacak gün yoksa bağlantı ve eylem yok; "Pzt kapalı" kalır', () => {
+    const r = satir({ kapali: 'Pzt kapalı', tasinabilir: false });
+    const { getByText, queryByText, getByLabelText } = ciz([r], () => undefined);
+    expect(getByText('Pzt kapalı')).toBeTruthy();
+    expect(queryByText(t('plan.baskaGuneTasi'))).toBeNull();
+    expect(getByLabelText(durakEtiketi(r)).props.accessibilityActions).toBeUndefined();
+    // Tek gün ya da diğer günlerin hepsi kapalı → taşınacak gün yok.
+    expect(tasinabilirGunler([{ id: 'pzt', index: 1, date: '2026-11-30' }], 'pzt', pztKapali)).toEqual([]);
+    expect(tasinabilirGunler([{ id: 'pzt', index: 1, date: '2026-11-30' }, { id: 'pzt2', index: 2, date: '2026-12-07' }], 'pzt', pztKapali)).toEqual([]);
+  });
+});
+
+describe('#582 planOnceliginiOku', () => {
+  const mekan = (id: string, place_id: string): Mekan =>
+    ({ id, trip_id: 't', place_id, primary_type: 'museum', lat: 39.76, lng: 30.52, google_fetched_at: '', default_minutes: 60, added_by: null, note: null, created_at: '' }) as Mekan;
+  const mekanlar = [mekan('m1', 'P1'), mekan('m2', 'P2')];
+
+  it('saat okuması süre sınırını (4 sn) aşarsa saatsiz kurulur; oy ve il sırası yine okunur', async () => {
+    expect(SAAT_SURESI_MS).toBe(4000);
+    const casus = jest.spyOn(hafifOnbellek, 'getirHepsi').mockReturnValue(new Promise(() => undefined));
+    mockVeri.oylar = [{ mekan: 'm2' }, { mekan: 'm2' }];
+    mockVeri.il_oneriler = [{ place_id: 'P1', sira: 4 }];
+    const o = await planOnceliginiOku('t', mekanlar, [], true, { ilSlug: 'eskisehir', saatSuresiMs: 20 });
+    expect(o.saatler).toBeUndefined();
+    expect(o.oylar?.get('m2')).toBe(2);
+    expect(o.ilSira?.get('P1')).toBe(4);
+    casus.mockRestore();
+  });
+
+  it('süre içinde gelen saatler kullanılır', async () => {
+    const yer = { place_id: 'P1', periyotlar: pztKapali } as unknown as HafifYer;
+    const casus = jest.spyOn(hafifOnbellek, 'getirHepsi').mockResolvedValue({ P1: yer });
+    const o = await planOnceliginiOku('t', mekanlar, [], true, { ilSlug: null });
+    expect(o.saatler?.get('P1')).toBe(pztKapali);
+    expect(o.saatler?.get('P2')).toBeUndefined();
+    casus.mockRestore();
+  });
+
+  it('il sırası yalnız seyahatin ilinin listesinden; il bilinmiyorsa il sırası yok', async () => {
+    mockCagrilar.length = 0;
+    mockVeri.il_oneriler = [{ place_id: 'P1', sira: 1 }];
+    await planOnceliginiOku('t', mekanlar, [], false, { ilSlug: 'eskisehir' });
+    expect(mockCagrilar).toContainEqual({ tablo: 'il_oneriler', yontem: 'eq', arg: ['il_slug', 'eskisehir'] });
+    mockCagrilar.length = 0;
+    const o = await planOnceliginiOku('t', mekanlar, [], false, { ilSlug: null });
+    expect(o.ilSira).toBeUndefined();
+    expect(mockCagrilar.some((c) => c.tablo === 'il_oneriler')).toBe(false);
+  });
+
+  it('il seyahatten çözülür: rehber şehri yoksa şehir adının slug\'ı', async () => {
+    mockCagrilar.length = 0;
+    mockVeri.trips = [{ city_label: 'Eskişehir, Türkiye', lat: 39.77, lng: 30.52 }];
+    mockVeri.sehirler = [];
+    await planOnceliginiOku('t', mekanlar, [], false);
+    expect(mockCagrilar).toContainEqual({ tablo: 'il_oneriler', yontem: 'eq', arg: ['il_slug', 'eskisehir'] });
   });
 });

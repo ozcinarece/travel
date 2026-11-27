@@ -11,6 +11,8 @@ import { t } from '@/i18n';
 import type { Gun } from '@/lib/tipler';
 import { altMenuRenk, anaV5, gunUstuMetin, renk, seyahatV7, yazi } from '@/theme';
 
+/** #582: satırın ekran okuyucu özel eylemi. */
+export const TASI_EYLEMI = 'baskaGuneTasi';
 /** Kanvas `Plan_v7p_*`: yuvarlak düğme zemini ("Atlandı" hapı da). */
 const DUGME_ZEMIN = '#F2F4F8';
 /** #554 (kanvas `Plan_v7p_Haller` 2): atlanan durağın kesik çizgili dairesi. */
@@ -36,6 +38,8 @@ export type PlanSatirGorunumu = {
   atlandi: boolean;
   /** #582 KK3: açılış saatine göre o gün kapalı — "Pzt kapalı"; değilse (ya da saat bilinmiyorsa) null. */
   kapali?: string | null;
+  /** #582: taşınabilecek (kapalı olmayan başka) gün var mı; yoksa "Başka güne taşı" gösterilmez, uyarı kalır. */
+  tasinabilir?: boolean;
 };
 
 type Props = {
@@ -155,6 +159,8 @@ export function PlanListesi(p: Props) {
           const soluk = r.gecildi || r.atlandi;
           const daire = daireTuru(r, p.bugun);
           const siradaki = r.vurgulu && !r.buradasin;
+          // #582 KK3: "Başka güne taşı" yalnız uyarı varsa ve taşınacak gün varsa.
+          const tasi = r.kapali && r.tasinabilir && p.onBaskaGuneTasi ? () => p.onBaskaGuneTasi?.(r.id) : null;
           return (
             <View key={r.id}>
               {/* #554 KK2 (pano 2): atlanan durağa bacak bilgisi yok; kısa kesik çizgi. */}
@@ -186,6 +192,15 @@ export function PlanListesi(p: Props) {
                 // #553 KK2: sıradaki/şu anki durak `selected` değil (seçim anlamı taşır); durum etiketin sonunda.
                 accessibilityRole="button"
                 accessibilityLabel={durakEtiketi(r)}
+                // #582: iç bağlantıya ekran okuyucu ulaşamaz (satır tek öğe) — "Başka güne taşı" satırın özel eylemi.
+                accessibilityActions={tasi ? [{ name: TASI_EYLEMI, label: t('plan.baskaGuneTasi') }] : undefined}
+                onAccessibilityAction={
+                  tasi
+                    ? (e) => {
+                        if (e.nativeEvent.actionName === TASI_EYLEMI) tasi();
+                      }
+                    : undefined
+                }
                 onPress={() => p.onDurak(r.mekanId)}
                 onLongPress={() => p.onDurakUzunBas(r.mekanId)}
                 style={({ pressed }) => [s.durak, pressed && { opacity: 0.85 }]}>
@@ -223,10 +238,11 @@ export function PlanListesi(p: Props) {
                       <Text style={s.kapali} numberOfLines={1}>
                         {r.kapali}
                       </Text>
-                      {p.onBaskaGuneTasi ? (
+                      {tasi ? (
                         <>
                           <Text style={s.kapali}> · </Text>
-                          <Pressable accessibilityRole="button" accessibilityLabel={`${r.kapali}, ${t('plan.baskaGuneTasi')}`} hitSlop={{ top: 12, bottom: 12, left: 6, right: 12 }} onPress={() => p.onBaskaGuneTasi?.(r.id)}>
+                          {/* Dokunma alanı ≥ 44 pt: padding ile (Android'de satır sınırını aşan hitSlop dokunmaz); sol pay negatif kenarla. */}
+                          <Pressable accessibilityRole="button" accessibilityLabel={`${r.kapali}, ${t('plan.baskaGuneTasi')}`} onPress={tasi} style={s.tasiAlani}>
                             <Text style={[s.kapali, s.tasi]} numberOfLines={1}>
                               {t('plan.baskaGuneTasi')}
                             </Text>
@@ -352,6 +368,7 @@ const s = StyleSheet.create({
   kapaliSatir: { flexDirection: 'row', alignItems: 'center' },
   kapali: { fontFamily: yazi.normal, fontSize: 13, color: anaV5.adim },
   tasi: { fontFamily: yazi.kalin },
+  tasiAlani: { minHeight: 44, minWidth: 44, justifyContent: 'center', paddingLeft: 12, marginLeft: -12, paddingRight: 12 },
   bacak: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   kesikSutun: { width: 28, height: 22, alignItems: 'center', gap: 3 },
   kesik: { width: 2, height: 3, backgroundColor: anaV5.cizgi },
