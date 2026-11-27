@@ -66,7 +66,6 @@
         },
         {
           "place_id": "ChIJPYhQw3t6EkARjXcY-y5zcGI",
-          "osm": "way/135585323",
           "ad": "Hüsrev Paşa Camii (Eski Van)",
           "sure_dk": 30,
           "sure_gerekcesi": "varsayılan 45; cami, türbe ve Eski Van düzlüğünden kısa yürüyüş",
@@ -113,7 +112,7 @@
       "[Plan · g1.d5] · Van Kalesi pazartesi kapalı; yaz 08:00–19:00, kış 08:00–18:00, gişe 17:30 (turkishmuseums.com). Lonely Planet kışın 17:00 diyor, çelişki · muze.gov.tr",
       "[Plan · g1.d3] · Akdamar kapalı gün yok; yaz 08:00–19:30, kış 08:30–17:30, gişe 17:00 (turkishmuseums.com). Tekne en az 15 kişiyle kalkıyor, kışın kiralama gerekebilir (Lonely Planet, tarihi eski) · iskele",
       "[Plan · g1.d1, g1.d2, g1.d4, g1.d6] · lokanta, kümbet ve caminin kapalı günü bilinmiyor, [] yazıldı · işletmeler, yerinde",
-      "[Plan · g1.d4] · Hüsrev Paşa'nın Google kimliği tipsiz ('premise', işletme durumu boş); 'Kurşunlu Camii' ve 'Eski Van Şehri' sorguları başka yerlere gitti. Konum OSM'den (way/135585323) · BO'da yer satırı",
+      "[Plan · g1.d4] · Hüsrev Paşa'nın Google kimliği tipsiz ('premise', işletme durumu boş); 'Kurşunlu Camii' ve 'Eski Van Şehri' sorguları başka yerlere gitti. OSM caminin alanı (way/135585323) Google noktasından 180 m uzak çıktı, bu yüzden osm alanı kaldırıldı; konum Google'dan 30 gün · BO'da haritada caminin üstüne elle işaretle",
       "[Plan · öğle] · 12:00–14:00 arasında yemek durağı yok: Van kahvaltısı geç ve uzun, Akdamar'da yemek yeri doğrulanmadı. Gevaş'taki Grand Deniz (Fodor's) ve iskeledeki Akdamar Restaurant (Lonely Planet, sayfa açılmadı) kaynak zayıf olduğu için durak yapılmadı",
       "[Yazı · Sütçü Kenan] · 1946, Kenan Coşkun, üç kuşak, yalnız kahvaltı, sabah erken açılış (CNN Travel 'Van, world capital of breakfasts'); otlu peynir, sirmo, murtuğa, kavut, sarımsaksız cacık, manda kaymağı (CNN, Daily Sabah); 2014 Guinness, 51.793 kişi (Daily Sabah) · işletme",
       "[Yazı · Halime Hatun] · 1335 Melik İzzeddin (GZT, NTV) ile 1358 Karakoyunlu (Lonely Planet) çelişiyor; yazıda '14. yüzyıl'. Usta Ahlatlı Pehlivan oğlu Esed (GZT); iki kat, kare cenazelik (GZT); 14–17. yy mezar taşları (LP); bitişik yurt binasının yıkılması (NTV). Kapı bezemesi ve yazıt kuşağı tarifi genel bilgi · van.ktb.gov.tr",
