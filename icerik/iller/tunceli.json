@@ -1,0 +1,330 @@
+{
+  "il": "Tunceli",
+  "slug": "tunceli",
+  "guncelleme": "2026-11-27",
+  "oneriler": [
+    {
+      "sira": 1,
+      "ad": "Munzur Vadisi Milli Parkı",
+      "kategori": "doga",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 25,
+      "neden": "1971'de ilan edilen 420 km²'lik park; kanyon, huş ağacı ve endemik bitkiler",
+      "place_id": "ChIJh9Kg-ARccEARKD_cIh1F0ck"
+    },
+    {
+      "sira": 2,
+      "ad": "Munzur Gözeleri",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "kultur_tarih"
+      ],
+      "ilce": "Ovacık",
+      "merkeze_km": 80,
+      "neden": "Munzur Çayı'nı besleyen kutsal kaynaklar; 2001'den beri 1. derece doğal sit",
+      "place_id": "ChIJcUD9cCiTcEARbUJhFe7eHXg"
+    },
+    {
+      "sira": 3,
+      "ad": "Pertek Kalesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Pertek",
+      "merkeze_km": 52,
+      "neden": "Keban gölünde adaya dönüşmüş Mengücekli kalesi; Pertek iskelesinden tekneyle gidilir",
+      "place_id": "ChIJ-WnVzHTOdkARptGs6VlkAiA"
+    },
+    {
+      "sira": 4,
+      "ad": "Mercan Vadisi",
+      "kategori": "doga",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Ovacık",
+      "merkeze_km": 60,
+      "neden": "Milli park içinde, 3 saatlik yürüyüşle buzul göllerine çıkılan vadi",
+      "place_id": "ChIJkZNJ12_tcEARmtR9bFMdXtQ"
+    },
+    {
+      "sira": 5,
+      "ad": "Munzur Çayı Rafting Parkuru",
+      "kategori": "aktivite",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 5,
+      "neden": "Kar suyuyla beslenen Munzur'da rafting; ulusal yarışlara da ev sahipliği yapıyor"
+    },
+    {
+      "sira": 6,
+      "ad": "Pülümür Vadisi",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Pülümür",
+      "merkeze_km": 30,
+      "neden": "Tunceli–Erzincan yolunun dar, sarp kayalıklı vadisi; baharda yeşil, güzün sarı"
+    },
+    {
+      "sira": 7,
+      "ad": "Çemişgezek İn Delikleri",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Çemişgezek",
+      "merkeze_km": 103,
+      "neden": "Tağar Çayı yamacında dört katlı 25 kaya odası; 40 m'lik asma köprüyle ulaşılıyor",
+      "place_id": "ChIJiQq43IUzd0AR5PiF8zRyAZc"
+    },
+    {
+      "sira": 8,
+      "ad": "Elti Hatun Camii ve Türbesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Mazgirt",
+      "merkeze_km": 50,
+      "neden": "Kitabesine göre 1252'de Elti Hatun yaptırmış; koyu mor taşlı Selçuklu dönemi yapı",
+      "osm": "way/1376392707"
+    },
+    {
+      "sira": 9,
+      "ad": "Yelmaniye Camii",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Çemişgezek",
+      "merkeze_km": 103,
+      "neden": "1404 tarihli; girişte kendi ekseninde dönebilen 'denge sütunları' var"
+    },
+    {
+      "sira": 10,
+      "ad": "Ovacık Kayak Merkezi",
+      "kategori": "aktivite",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Ovacık",
+      "merkeze_km": 65,
+      "neden": "Munzur eteklerinde küçük kayak tesisi; kar erken gelirse sezon Kasım'da açılıyor",
+      "place_id": "ChIJidR_TnuTcEARUOc8YxvDZLE"
+    },
+    {
+      "sira": 11,
+      "ad": "Karagöl Buzul Gölü Yürüyüşü",
+      "kategori": "aktivite",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Ovacık",
+      "merkeze_km": 75,
+      "neden": "Munzur Dağları'nın en büyük buzul gölü, 2500 m'de; saatler süren rehberli tırmanış",
+      "place_id": "ChIJU8wurzCQcEARvyHeKWgywAE"
+    },
+    {
+      "sira": 12,
+      "ad": "Düzgün Baba Dağı",
+      "kategori": "manzara",
+      "amaclar": [
+        "kultur_tarih",
+        "doga"
+      ],
+      "ilce": "Nazımiye",
+      "merkeze_km": 55,
+      "neden": "Alevilerin önemli inanç yeri; zirvedeki ziyaretgâhtan Tunceli dağları izleniyor"
+    },
+    {
+      "sira": 13,
+      "ad": "Ağlayan Kayalar",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Pülümür",
+      "merkeze_km": 50,
+      "neden": "Erzincan yolunun 50. km'sinde, kaynak suyu sızdıran 20 m'lik kayalar; yol kenarında"
+    },
+    {
+      "sira": 14,
+      "ad": "Çırtan Şelalesi",
+      "kategori": "doga",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 10,
+      "neden": "Uzuntarla'dan meşe ormanında 1 saatlik dik yürüyüşle varılan 60 m'lik şelale",
+      "place_id": "ChIJA7wkAW4bcUARNqTFHlRjV9c"
+    },
+    {
+      "sira": 15,
+      "ad": "Tağar (Aşağı) Köprüsü",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Çemişgezek",
+      "merkeze_km": 103,
+      "neden": "1807'de Tağar Çayı üzerine kurulan, 1856'da onarılan taş kemer köprü",
+      "place_id": "ChIJX3bSEwAzd0ARgBrjXiTlnM0"
+    },
+    {
+      "sira": 16,
+      "ad": "Pertek–Elazığ Feribotu",
+      "kategori": "manzara",
+      "amaclar": [
+        "yavas",
+        "cocuklu"
+      ],
+      "ilce": "Pertek",
+      "merkeze_km": 52,
+      "neden": "Keban Baraj Gölü'nü 15 dakikada geçen araç feribotu; güvertede kale manzarası"
+    },
+    {
+      "sira": 17,
+      "ad": "Çelebi Ağa ve Sungur Bey Camileri",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Pertek",
+      "merkeze_km": 50,
+      "neden": "16. yy'dan iki cami; Keban suları basmadan eski Pertek'ten taşınıp yeniden kuruldu",
+      "osm": "way/338937335"
+    },
+    {
+      "sira": 18,
+      "ad": "Uzun Hasan Türbesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Çemişgezek",
+      "merkeze_km": 103,
+      "neden": "Çemişgezek'in tarihî yapı grubundan bir türbe; ilçe merkezinde diğer yapılara yakın",
+      "place_id": "ChIJLc3zmjwzd0ARmGvYwwpUlVQ"
+    },
+    {
+      "sira": 19,
+      "ad": "Sağman Camii ve Külliyesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Pertek",
+      "merkeze_km": 45,
+      "neden": "Sancak beyi Keykusrev'in 16. yy'da yaptırdığı cami, türbe ve tekke; kale kalıntısı"
+    },
+    {
+      "sira": 20,
+      "ad": "Su Sporları Merkezi (Zipline)",
+      "kategori": "aktivite",
+      "amaclar": [
+        "cocuklu",
+        "doga"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 2,
+      "neden": "Munzur üzerinde 330 m'lik zipline; kano ve rafting bilgisi de veriliyor"
+    },
+    {
+      "sira": 21,
+      "ad": "Kırk Merdiven Şelaleleri",
+      "kategori": "doga",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Ovacık",
+      "merkeze_km": 62,
+      "neden": "Mercan yakınında dar bir vadide art arda dizilen şelaleler; en coşkun hâli baharda"
+    },
+    {
+      "sira": 22,
+      "ad": "Mazgirt Kalesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Mazgirt",
+      "merkeze_km": 50,
+      "neden": "Kasabanın batısındaki kaya platformu; 13. yy surlarından parçalar ve kaya oyuğu",
+      "osm": "way/372816120",
+      "place_id": "ChIJT5jNqjI8cUAR8nhSQfz8zcc"
+    },
+    {
+      "sira": 23,
+      "ad": "Kanoğlu Et ve Balık Lokantası",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 5,
+      "neden": "Elazığ yolunda; güveçte Munzur alabalığı ve et kavurmasıyla biliniyor",
+      "place_id": "ChIJ_UBt0ew7cUAR2HHlKHaFKJI"
+    },
+    {
+      "sira": 24,
+      "ad": "Cuba Cafe",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet",
+        "yavas"
+      ],
+      "ilce": "Ovacık",
+      "merkeze_km": 63,
+      "neden": "Menüde gulik, kenger ve patila gibi Dersim yemekleri; merkezde de şubesi var",
+      "place_id": "ChIJRbJkhw6TcEARy5FT95knva4"
+    },
+    {
+      "sira": 25,
+      "ad": "Uzunçayır Baraj Gölü",
+      "kategori": "manzara",
+      "amaclar": [
+        "yavas"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 3,
+      "neden": "Munzur ile Pülümür çaylarının buluştuğu baraj gölü; kent kıyısında kısa mola",
+      "place_id": "ChIJ8ULJeR07cUARtpVDPBQbnMw"
+    },
+    {
+      "sira": 26,
+      "ad": "Hamam-ı Atik",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Çemişgezek",
+      "merkeze_km": 103,
+      "neden": "Çemişgezek'in eski hamamı; restorasyon bekleyen yapı dışarıdan görülebiliyor",
+      "place_id": "ChIJgYzR6bEzd0ARwysqjQVkrmA"
+    },
+    {
+      "sira": 27,
+      "ad": "Mahsume Hatun Türbesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Pertek",
+      "merkeze_km": 50,
+      "neden": "16. yy türbesi; halk Besime Hatun da diyor, yaptıranı kesin bilinmiyor"
+    }
+  ]
+}
