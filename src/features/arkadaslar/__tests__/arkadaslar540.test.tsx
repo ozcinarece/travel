@@ -85,5 +85,6 @@ describe('#540', () => {
     expect(screen.getByTestId('arkadas-begen-11111111-1111-4111-8111-111111111111').props.accessibilityLabel).toBe('Beğen');
     expect(screen.getByTestId('arkadas-begen-22222222-2222-4222-8222-222222222222').props.accessibilityLabel).toBe('Beğeniyi geri al');
     expect(screen.getAllByRole('button', { name: 'Beğeniyi geri al' })).toHaveLength(1);
+    expect(screen.getByTestId('arkadas-begen-22222222-2222-4222-8222-222222222222').props.accessibilityState?.selected).toBeUndefined();
   });
 });

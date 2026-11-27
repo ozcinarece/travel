@@ -198,7 +198,6 @@ function PaylasimKarti({ p, ad, foto, renk: zemin, onBegen }: { p: ArkadasPaylas
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={t(p.begendim ? 'arkadaslar.begeniGeriAl' : 'arkadaslar.begen')}
-          accessibilityState={{ selected: p.begendim }}
           onPress={onBegen}
           hitSlop={7}
           style={s.kalp}

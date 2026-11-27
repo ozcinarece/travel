@@ -99,7 +99,7 @@ describe('#407 Arkadaşlar', () => {
     render(<ArkadaslarEkrani />);
     fireEvent.press(screen.getByTestId('arkadas-begen-11111111-1111-4111-8111-111111111111'));
     expect(mockBegen).toHaveBeenCalledWith({ id: '11111111-1111-4111-8111-111111111111', begen: true }, expect.anything());
-    expect(screen.getByTestId('arkadas-begen-22222222-2222-4222-8222-222222222222').props.accessibilityState).toMatchObject({ selected: true });
+    expect(screen.getByTestId('arkadas-begen-22222222-2222-4222-8222-222222222222').props.accessibilityLabel).toBe('Beğeniyi geri al');
     fireEvent.press(screen.getByTestId('arkadas-begen-22222222-2222-4222-8222-222222222222'));
     expect(mockBegen).toHaveBeenLastCalledWith({ id: '22222222-2222-4222-8222-222222222222', begen: false }, expect.anything());
   });

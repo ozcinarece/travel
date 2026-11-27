@@ -4470,7 +4470,7 @@ select pg_temp.as_user(:FD);
 select public.paylasim_ozeti_kimlik(current_setting('test.l3')::uuid);
 reset role;
 do $$ begin assert (select acilma_sayisi = 1 from public.gezi_paylasim where id = current_setting('test.l3')::uuid), '#540 KK4: ertesi gün bir kez daha sayılır'; end $$;
-do $$ begin assert (select gun = current_date from public.paylasim_acilisi where user_id = '40700000-0000-4000-8000-0000000000b2'), '#540 KK4: gün ilerler'; end $$;
+do $$ begin assert (select gun = current_date from public.paylasim_acilisi where user_id = '40700000-0000-4000-8000-0000000000b2' and paylasim_id = current_setting('test.l3')::uuid), '#540 KK4: gün ilerler'; end $$;
 -- #540 KK4: açılış kaydı istemciye kapalı (okuma, yazma, silme yok).
 set role authenticated;
 select pg_temp.as_user(:FB);
