@@ -4636,6 +4636,12 @@ begin
   assert (select count(*) from public.istek_iller where user_id = '57800000-0000-4000-8000-0000000000b2') = 0
     and (select count(*) from public.istek_iller where user_id = auth.uid()) = 2, '#600: gizli haritada istek tablosu da kapalı';
 end $$;
+-- #600: sahibi "yalnız ben"de kendi isteklerini okumaya devam eder.
+select pg_temp.as_user(:PB);
+do $$ begin
+  assert (select array_agg(plaka order by plaka) from public.istek_iller where user_id = auth.uid()) = array[48, 61]::smallint[],
+    '#600: sahibi gizli haritada kendi isteklerini okur';
+end $$;
 -- Birlikte gezmeyen ve misafir profili göremez.
 select pg_temp.as_user(:PC);
 do $$ begin assert public.profil_ozeti('57800000-0000-4000-8000-0000000000b2') is null, '#578: birlikte gezmeyen göremez'; end $$;

@@ -227,7 +227,7 @@ grant insert (plaka) on public.istek_iller to authenticated;
 -- #600: sahibi haritasını "yalnız ben" (`me`) yaptıysa arkadaşı okumaz (`profil_ozeti` ile aynı kural).
 create policy istek_iller_select on public.istek_iller for select to authenticated
   using (not public.is_anonymous() and (user_id = auth.uid() or (public.ortak_seyahat_var(user_id)
-    and exists (select 1 from public.profiles p where p.id = user_id and p.map_visibility <> 'me'))));
+    and exists (select 1 from public.profiles p where p.id = istek_iller.user_id and p.map_visibility <> 'me'))));
 -- Yalnız sahibi, hesaplı oturumla yazar (misafir oturum yazmaz).
 create policy istek_iller_insert on public.istek_iller for insert to authenticated
   with check (user_id = auth.uid() and not public.is_anonymous());

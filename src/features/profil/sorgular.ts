@@ -109,7 +109,8 @@ export function useProfilGuncelle() {
     onSuccess: (profil) => {
       qc.setQueryData(profilAnahtari(profil.id), profil);
       // #600: Ayarlar'da değişen gizlilik (ad, foto) Profil v12'ye de yansısın.
-      return qc.invalidateQueries({ queryKey: profilOzetiAnahtari(profil.id) });
+      // Beklenmez: Kaydet ve geri dönüş ağır özet çekimini beklemesin.
+      void qc.invalidateQueries({ queryKey: profilOzetiAnahtari(profil.id) });
     },
   });
 }
