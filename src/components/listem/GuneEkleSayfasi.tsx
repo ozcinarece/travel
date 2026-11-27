@@ -1,17 +1,18 @@
-// #141 KK5 (kanvas 13b · Güne ekle): "{Mekan} · Hangi güne ekleyelim?" — önerilen gün en üstte Mandalina çerçeve + "ÖNERİLEN"
-// ("Yakınında 2 mekan · 1,1 km", "4 mekan · biter 15:20 → 17:40"); diğer günler en yakın mesafe / boş gün bilgisiyle.
-// Dokun = ekle (saatler Program'da yeniden hesaplanır). Mesafe koordinattan; istek yok.
+// #534 KK8 (UX önerileri kanvası `Plan_v7p_HangiGune`): "{Mekan} · Hangi güne? · ~45 dk". Bağlamdaki gün en üstte (#532 KK4);
+// bağlam yoksa bugün. Her satırda gün renginde 4 pt dikey çizgi ve iki satır metin; en yakın güne küçük turuncu "EN YAKIN".
+// Geçmiş günler en altta, %50 soluk. Alt bağlantı "Şimdilik listede kalsın". Dokun = ekle (saatler yeniden hesaplanır).
+// Mesafe koordinattan; istek yok.
 import { Foto } from '@/components/ui/Foto';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
-import { gunAdi } from '@/components/program/PlanHazirSayfasi';
 import { AltPencere } from '@/components/ui/AltPencere';
-import { gunBaglaminaGore, type GunSecenegi } from '@/features/listem/listem';
+import { Ikon } from '@/components/ui/Ikon';
+import { hangiGuneSirasi, type GunSecenegi } from '@/features/listem/listem';
 import { t } from '@/i18n';
 import { sureMetni } from '@/lib/kategori';
 import { mesafeMetni } from '@/lib/mesafe';
-import { dakikaSaat } from '@/schedule/tempo';
-import { baslikStili, gunRengi, gunUstuMetin, olcek, renk, yazi } from '@/theme';
+import { GUNLER, haftaGunu, parcala } from '@/lib/takvim';
+import { anaV5, gunRengi, renk, yazi } from '@/theme';
 
 type Props = {
   acik: boolean;
@@ -19,91 +20,84 @@ type Props = {
   foto: string | null;
   dakika: number;
   secenekler: GunSecenegi[];
-  /** Günün ilk durağının adı ("Cumartesi · {ad} çevresi"). */
-  ilkAd: (gunId: string) => string | null;
   mesgul: boolean;
-  /** #532 KK4: bir günün içinden açıldıysa o gün (en üstte, vurgulu, rozetsiz). */
+  /** #532 KK4: bir günün içinden açıldıysa o gün (en üstte). */
   baglamGunId?: string | null;
+  /** Gezi modunda bugünün gün sırası (yoksa null): bağlam yoksa bugün en üstte, öncekiler "Geçti". */
+  bugunIndex: number | null;
   onSec: (s: GunSecenegi) => void;
   onKapat: () => void;
 };
 
 const km = (m: number) => mesafeMetni(m >= 1000 ? m : Math.round(m / 10) * 10);
 
-export function GuneEkleSayfasi({ acik, ad, foto, dakika, secenekler, ilkAd, mesgul, baglamGunId, onSec, onKapat }: Props) {
-  const sirali = gunBaglaminaGore(secenekler, baglamGunId);
+function gunBasligi(o: GunSecenegi, bugun: boolean): string {
+  const g = o.gun;
+  if (!g.date) return t('geziSayfasi.gunNo', { n: g.index });
+  const gunAdi = GUNLER[haftaGunu(g.date)];
+  return bugun ? t('listem.guneEkle.bugun', { gun: gunAdi }) : `${gunAdi} ${parcala(g.date).gun}`;
+}
+
+function gunAlti(o: GunSecenegi, gecti: boolean): string {
+  if (gecti) return t('listem.guneEkle.gecti');
+  if (o.durakSayisi === 0) return t(o.sonGun ? 'listem.guneEkle.bosDonus' : 'listem.guneEkle.bos');
+  return [t('listem.guneEkle.durak', { n: o.durakSayisi }), o.enYakinM !== null ? t('listem.guneEkle.enYakin', { mesafe: km(o.enYakinM) }) : null].filter(Boolean).join(' · ');
+}
+
+export function GuneEkleSayfasi({ acik, ad, foto, dakika, secenekler, mesgul, baglamGunId, bugunIndex, onSec, onKapat }: Props) {
+  const sirali = hangiGuneSirasi(secenekler, { baglamGunId, bugunIndex });
   return (
-    <AltPencere acik={acik} onKapat={onKapat} kapatEtiketi={t('genel.vazgec')} kaydirilir stil={{ paddingHorizontal: 20, gap: 12 }}>
+    <AltPencere acik={acik} onKapat={onKapat} kapatEtiketi={t('genel.vazgec')} kaydirilir stil={{ paddingHorizontal: 16 }}>
       <View style={s.ust}>
-        <View style={s.foto}>{foto ? <Foto source={{ uri: foto }} style={StyleSheet.absoluteFill} contentFit="cover" /> : null}</View>
-        <View style={{ flex: 1, minWidth: 0 }}>
+        <View style={s.foto}>{foto ? <Foto source={{ uri: foto }} style={StyleSheet.absoluteFill} contentFit="cover" /> : <Ikon ad="kamera" boyut={22} renk={anaV5.ok} kalinlik={1.8} />}</View>
+        <View style={{ flex: 1, minWidth: 0, gap: 2 }}>
           <Text accessibilityRole="header" style={s.ad} numberOfLines={2}>
             {ad}
           </Text>
           <Text style={s.alt}>{t('listem.guneEkle.alt', { sure: sureMetni(dakika) })}</Text>
         </View>
       </View>
-      {sirali.map((o) => {
-        const rengi = gunRengi(o.gun.index);
-        const ilk = ilkAd(o.gun.id);
-        const baslik = ilk ? t('listem.gunBaslik', { gun: gunAdi(o.gun), ad: ilk }) : gunAdi(o.gun);
-        const biter = o.bitisDk !== null ? t('listem.guneEkle.biter', { bas: dakikaSaat(o.bitisDk), bit: dakikaSaat(o.yeniBitisDk) }) : null;
-        const satirlar =
-          o.durakSayisi === 0
-            ? [t(o.sonGun ? 'listem.guneEkle.bosDonus' : 'listem.guneEkle.bos')]
-            : o.onerilen
-              ? [t('listem.guneEkle.mekan', { n: o.durakSayisi }) + (biter ? ` · ${biter}` : '')]
-              : [[t('listem.guneEkle.mekan', { n: o.durakSayisi }), o.enYakinM !== null ? t('listem.guneEkle.enYakin', { mesafe: km(o.enYakinM) }) : null, biter].filter(Boolean).join(' · ')];
+      {sirali.map(({ secenek: o, gecti, enYakin }) => {
+        const baslik = gunBasligi(o, o.gun.index === bugunIndex);
+        const alt = gunAlti(o, gecti);
         return (
           <Pressable
             key={o.gun.id}
             accessibilityRole="button"
-            accessibilityLabel={`${baslik} · ${satirlar.join(' · ')}`}
+            accessibilityLabel={[baslik, alt, enYakin ? t('listem.guneEkle.enYakinRozet') : null].filter(Boolean).join(' · ')}
             disabled={mesgul}
             onPress={() => onSec(o)}
-            style={({ pressed }) => [s.secenek, o.onerilen && s.onerilen, pressed && { opacity: 0.8 }]}>
-            <View style={[s.kare, { backgroundColor: rengi }]}>
-              <Text style={[s.kareMetin, { color: gunUstuMetin(rengi) }]}>{o.gun.index}</Text>
-            </View>
-            <View style={{ flex: 1, gap: 2 }}>
+            style={({ pressed }) => [s.secenek, gecti && { opacity: 0.5 }, pressed && { opacity: gecti ? 0.4 : 0.8 }]}>
+            <View style={[s.cizgi, { backgroundColor: gunRengi(o.gun.index) }]} />
+            <View style={{ flex: 1, minWidth: 0, gap: 1 }}>
               <Text style={s.gunBaslik} numberOfLines={1}>
                 {baslik}
               </Text>
-              {o.onerilen && o.durakSayisi > 0 && o.enYakinM !== null ? (
-                <Text style={s.yakin}>{o.yakindaki > 0 ? t('listem.guneEkle.yakininda', { n: o.yakindaki, mesafe: km(o.enYakinM) }) : t('listem.guneEkle.enYakin', { mesafe: km(o.enYakinM) })}</Text>
-              ) : null}
-              {satirlar.map((x) => (
-                <Text key={x} style={s.bilgi}>
-                  {x}
-                </Text>
-              ))}
+              <Text style={s.bilgi} numberOfLines={1}>
+                {alt}
+              </Text>
             </View>
-            {o.rozet ? (
-              <View style={s.rozet}>
-                <Text style={s.rozetMetin}>{t('listem.guneEkle.onerilen')}</Text>
-              </View>
-            ) : null}
+            {enYakin ? <Text style={s.enYakin}>{t('listem.guneEkle.enYakinRozet')}</Text> : null}
           </Pressable>
         );
       })}
-      <Text style={s.not}>{t('listem.guneEkle.not')}</Text>
+      <Pressable accessibilityRole="button" onPress={onKapat} style={s.kalsin}>
+        <Text style={s.kalsinMetin}>{t('listem.guneEkle.kalsin')}</Text>
+      </Pressable>
     </AltPencere>
   );
 }
 
 const s = StyleSheet.create({
-  ust: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  foto: { width: 48, height: 48, borderRadius: 14, overflow: 'hidden', backgroundColor: renk.yuzey },
-  ad: { ...baslikStili(olcek.bolum), color: renk.metin },
-  alt: { fontFamily: yazi.normal, fontSize: 13, color: renk.ikincil },
-  secenek: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 12, borderRadius: 18, borderWidth: 1.5, borderColor: renk.ayrac, backgroundColor: renk.zemin },
-  onerilen: { borderWidth: 2, borderColor: renk.vurgu, backgroundColor: '#fff4ec' },
-  kare: { width: 38, height: 38, borderRadius: 11, alignItems: 'center', justifyContent: 'center' },
-  kareMetin: { fontFamily: yazi.ekstra, fontSize: 15 },
-  gunBaslik: { fontFamily: yazi.ekstra, fontSize: 15, color: renk.metin },
-  yakin: { fontFamily: yazi.ekstra, fontSize: 13, color: '#b5520a' },
-  bilgi: { fontFamily: yazi.normal, fontSize: 12, color: renk.ikincil },
-  rozet: { height: 24, paddingHorizontal: 8, borderRadius: 8, backgroundColor: renk.vurgu, justifyContent: 'center' },
-  rozetMetin: { fontFamily: yazi.ekstra, fontSize: 11, color: renk.metin },
-  not: { fontFamily: yazi.normal, fontSize: 12, color: renk.ikincil, textAlign: 'center' },
+  ust: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingBottom: 8 },
+  foto: { width: 56, height: 56, borderRadius: 12, overflow: 'hidden', backgroundColor: anaV5.fotoYok, alignItems: 'center', justifyContent: 'center' },
+  ad: { fontFamily: yazi.ekstra, fontSize: 18, color: renk.metin },
+  alt: { fontFamily: yazi.normal, fontSize: 14, color: anaV5.ikincil },
+  secenek: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: anaV5.cizgi, minHeight: 44 },
+  cizgi: { width: 4, height: 36, borderRadius: 2 },
+  gunBaslik: { fontFamily: yazi.kalin, fontSize: 15, color: renk.metin },
+  bilgi: { fontFamily: yazi.normal, fontSize: 13, color: anaV5.ikincil },
+  enYakin: { fontFamily: yazi.ekstra, fontSize: 12, color: anaV5.adim },
+  kalsin: { paddingTop: 12, minHeight: 44, alignItems: 'center' },
+  kalsinMetin: { fontFamily: yazi.kalin, fontSize: 15, color: renk.ana },
 });
