@@ -22,6 +22,9 @@ export type SeyahatOzet = {
   /** #98 KK2: seyahatin adı ("Eskişehir Gezisi"); boşsa şehir etiketi gösterilir. */
   name: string | null;
   city_label: string;
+  /** #569: şehir merkezi (Google, ≤ 30 gün; boşalmış olabilir) — ana sayfa kartında şehrin BO kapağını bulmak için. */
+  lat?: number | null;
+  lng?: number | null;
   start_date: string | null;
   end_date: string | null;
   tz: string;
