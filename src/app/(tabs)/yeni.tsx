@@ -157,7 +157,7 @@ export default function SihirbazEkrani() {
         }
       : null;
 
-  const kayitSuruyor = kuruluyor || taslakTarihi.isPending || taslakSehri.isPending || adKaydet.isPending;
+  const kayitSuruyor = kuruluyor || taslakTarihi.isPending || taslakSehri.isPending || adKaydet.isPending || planUygula.isPending;
 
   // #581 KK4: Android geri tuşu sihirbazda bir önceki adıma döner (1. adımda sistem davranışı).
   useFocusEffect(
@@ -273,28 +273,31 @@ export default function SihirbazEkrani() {
         if (gunler.isError) void gunler.refetch();
         return;
       }
-      const mevcut = { start_date: seyahat.data.start_date, end_date: seyahat.data.end_date, gunSayisi: gunler.data.length };
-      if (tarihDegisti(mevcut, secim)) {
-        try {
-          await taslakTarihi.mutateAsync({ seyahatId: tripId, secim });
-        } catch {
-          setHata(t('sihirbaz.nezaman.tarihHata'));
+      // Kilit dalın başında: aynı karede ikinci Devam tarihi ya da kopyayı iki kez çalıştırmasın.
+      kuruluyorRef.current = true;
+      setKuruluyor(true);
+      try {
+        const mevcut = { start_date: seyahat.data.start_date, end_date: seyahat.data.end_date, gunSayisi: gunler.data.length };
+        if (tarihDegisti(mevcut, secim)) {
+          try {
+            await taslakTarihi.mutateAsync({ seyahatId: tripId, secim });
+          } catch {
+            setHata(t('sihirbaz.nezaman.tarihHata'));
+            return;
+          }
+        }
+        // #581: "Tekrar kur"da kopya düştüyse yeniden deneme kopyayı tekrar çalıştırır (boş taslakla 3. adıma düşülmez).
+        if (girisPlani?.tur === 'tekrar' && girisPlani.sehirId === sehir.place_id) {
+          try {
+            await tekrarKopyala(girisPlani.kaynak, tripId);
+          } catch {
+            setHata(t('sihirbaz.nezaman.hata'));
+          }
           return;
         }
-      }
-      // #581: "Tekrar kur"da kopya düştüyse yeniden deneme kopyayı tekrar çalıştırır (boş taslakla 3. adıma düşülmez).
-      if (girisPlani?.tur === 'tekrar' && girisPlani.sehirId === sehir.place_id) {
-        kuruluyorRef.current = true;
-        setKuruluyor(true);
-        try {
-          await tekrarKopyala(girisPlani.kaynak, tripId);
-        } catch {
-          setHata(t('sihirbaz.nezaman.hata'));
-        } finally {
-          kuruluyorRef.current = false;
-          setKuruluyor(false);
-        }
-        return;
+      } finally {
+        kuruluyorRef.current = false;
+        setKuruluyor(false);
       }
       return ileri();
     }

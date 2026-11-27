@@ -2,7 +2,7 @@
 // (boş taslakla 3. adıma düşülmez). Ayrıca kayıt sürerken üstteki "‹" pasif.
 import { describe, expect, it, jest } from '@jest/globals';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react-native';
-import { Pressable, Text } from 'react-native';
+import { BackHandler, Pressable, Text } from 'react-native';
 
 import { AdimKabugu } from '@/components/sihirbaz/AdimKabugu';
 import { t } from '@/i18n';
@@ -28,6 +28,7 @@ jest.mock('@/features/sihirbaz/girisler', () => ({
   useIcerikSehirSecimi: () => ({ data: undefined }),
 }));
 const mockOlustur = jest.fn(async () => 'yeni');
+const mockTarih = { mutateAsync: jest.fn<() => Promise<void>>(async () => undefined), isPending: false };
 const mockBos = { data: undefined };
 const mockMut = { mutate: jest.fn(), mutateAsync: jest.fn(async () => undefined), isPending: false };
 jest.mock('@/features/seyahatler/sorgular', () => ({
@@ -61,7 +62,7 @@ jest.mock('@/features/sihirbaz/planUygula', () => ({ ...jest.requireActual<objec
 jest.mock('@/features/sihirbaz/taslak', () => ({
   ...jest.requireActual<object>('@/features/sihirbaz/taslak'),
   useTaslakSehri: () => mockMut,
-  useTaslakTarihi: () => mockMut,
+  useTaslakTarihi: () => mockTarih,
 }));
 jest.mock('@/components/mekan/MekanPaneli', () => ({ MekanPaneli: () => null }));
 jest.mock('@/components/sihirbaz/AdimIlOnerileri', () => ({ AdimIlOnerileri: () => null }));
@@ -72,9 +73,14 @@ jest.mock('@/components/sihirbaz/AdimNeZaman', () => {
   const { Pressable: P, Text: T } = jest.requireActual<typeof import('react-native')>('react-native');
   return {
     AdimNeZaman: ({ onAralik }: { onAralik: (a: { gidis: string; donus: string }) => void }) => (
-      <P onPress={() => onAralik({ gidis: '2026-12-10', donus: '2026-12-11' })}>
-        <T>tarih-sec</T>
-      </P>
+      <>
+        <P onPress={() => onAralik({ gidis: '2026-12-10', donus: '2026-12-11' })}>
+          <T>tarih-sec</T>
+        </P>
+        <P onPress={() => onAralik({ gidis: '2026-12-20', donus: '2026-12-21' })}>
+          <T>tarih-degistir</T>
+        </P>
+      </>
     ),
   };
 });
@@ -93,11 +99,33 @@ describe('#581 Tekrar kur: kopya yeniden denenir', () => {
     await waitFor(() => expect(mockRouter.replace).toHaveBeenCalledWith({ pathname: '/seyahat/[id]/(sekmeler)/program', params: { id: 'yeni' } }));
     // Yeni seyahat açılmadı; kopya aynı taslağa yeniden yapıldı.
     expect(mockOlustur).toHaveBeenCalledTimes(1);
+    expect(mockKopyala).toHaveBeenCalledTimes(2);
     expect(mockKopyala).toHaveBeenLastCalledWith('kaynak', 'yeni');
   });
 });
 
 describe('#581 kayıt sürerken geri pasif', () => {
+  it('tarih kaydedilirken Android geri tuşu yutulur, "‹" pasif', async () => {
+    const dinleyiciler: Parameters<typeof BackHandler.addEventListener>[1][] = [];
+    jest.spyOn(BackHandler, 'addEventListener').mockImplementation((_o, f) => {
+      dinleyiciler.push(f);
+      return { remove: () => undefined };
+    });
+    mockKopyala.mockRejectedValueOnce(new Error('ağ'));
+    render(<SihirbazEkrani />);
+    fireEvent.press(await screen.findByText('tarih-sec'));
+    fireEvent.press(screen.getByText(t('sihirbaz.devam')));
+    await screen.findByText(t('sihirbaz.nezaman.hata'));
+    // Taslak var; tarih değişti → kayıt sürüyor (bitmeyen istek).
+    mockTarih.mutateAsync.mockImplementationOnce(() => new Promise(() => undefined));
+    fireEvent.press(screen.getByText('tarih-degistir'));
+    fireEvent.press(screen.getByText(t('sihirbaz.devam')));
+    await waitFor(() => expect(screen.getByLabelText(t('sihirbaz.geri')).props.accessibilityState).toMatchObject({ disabled: true }));
+    expect(dinleyiciler[dinleyiciler.length - 1]({} as never)).toBe(true);
+    expect(screen.getByText('tarih-sec')).toBeTruthy();
+    expect(mockTarih.mutateAsync).toHaveBeenCalledTimes(1);
+  });
+
   it('geriPasif iken "‹" dokunuşu yutulur', () => {
     const onGeri = jest.fn();
     render(
