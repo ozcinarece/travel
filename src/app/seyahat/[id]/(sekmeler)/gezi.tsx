@@ -154,6 +154,8 @@ function GeziSayfasi({ seyahat, gunler, duraklar, mekanlar, konaklamalar, katild
   useEffect(() => {
     if (!davetAc || davetAcildi.current || cevrimdisi) return;
     davetAcildi.current = true;
+    // Parametre temizlenir: sayfa yeniden kurulunca (sekme dönüşü, yeniden yükleme) paylaşım tekrar açılmaz.
+    router.setParams({ davet: undefined });
     void davet.paylas();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [davetAc, cevrimdisi]);

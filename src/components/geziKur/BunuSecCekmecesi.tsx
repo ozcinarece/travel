@@ -23,7 +23,7 @@ import type { AkisGezisi } from '@/features/icerik/kesfetAkisi';
 import { useGezi, useSehirler } from '@/features/icerik/sorgular';
 import { usePaylasimdanAl } from '@/features/paylasim/alici';
 import { useIcerikSehirSecimi } from '@/features/sihirbaz/girisler';
-import { gunSayisiSinirla, type Aralik } from '@/features/sihirbaz/sihirbaz';
+import { gunSayisiSinirla, tarihDokun, type Aralik } from '@/features/sihirbaz/sihirbaz';
 import { useTaslakTarihi } from '@/features/sihirbaz/taslak';
 import { t } from '@/i18n';
 import { minDokunma, renk, yazi } from '@/theme';
@@ -135,7 +135,11 @@ export function BunuSecCekmecesi({ rota, onKapat, yolArkadasi, onYolArkadasiKald
         ) : null}
       </View>
       <AdimNeZaman
-        aralik={aralik}
+        // Kanvas: dönüş seçilmediyse rotanın gün sayısıyla hesaplanan dönüş de seçili ve arası bantlı görünür. Dokunuşlar gerçek
+        // seçimle hesaplanır (gidişten sonraki güne dokunmak dönüşü seçer); "Dönüş günü?" yalnız dönüş seçimi beklenirken.
+        aralik={secim?.tur === 'tarihli' ? { gidis: secim.gidis, donus: secim.donus } : aralik}
+        dokun={(_g, gun) => tarihDokun(aralik, gun)}
+        donusBekleniyor={!!aralik && !aralik.donus && rotaGun > 1}
         onAralik={(a) => {
           setTarihsizGun(null);
           setAralik(a);
@@ -145,22 +149,41 @@ export function BunuSecCekmecesi({ rota, onKapat, yolArkadasi, onYolArkadasiKald
         ozetSatiri={secim?.tur === 'tarihli' ? tarihSatiri(secim) : null}
       />
 
-      <View style={s.kimler}>
-        <Text style={[s.bolum, { marginRight: 4 }]}>{t('geziKur.kimlerle')}</Text>
-        {yolArkadasi ? (
-          <Pressable accessibilityRole="button" accessibilityLabel={t('geziKur.yolArkadasi', { ad: yolArkadasi.ad })} accessibilityState={{ selected: true }} onPress={onYolArkadasiKaldir} testID="yol-arkadasi">
-            <Secili>
-              <Avatar ad={yolArkadasi.ad} url={yolArkadasi.foto} boyut={40} arkaPlan={kurRenk.acikMavi} harfRengi={kurRenk.lacivert} harfBoyutu={14} yuvarlak />
-            </Secili>
-          </Pressable>
-        ) : null}
+      <KimlerleSatiri yolArkadasi={yolArkadasi} onYolArkadasiKaldir={onYolArkadasiKaldir} davet={davet} onDavet={() => setDavet((d) => !d)} />
+
+      {hata ? <Text style={s.hata}>{hata}</Text> : null}
+      <View style={{ paddingTop: 16 }}>
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel={davet ? t('geziKur.davetSecili') : t('geziKur.davetEkle')}
-          accessibilityState={{ selected: davet }}
-          onPress={() => setDavet((d) => !d)}
-          hitSlop={2}
-          testID="davet-arti">
+          accessibilityState={{ disabled: !secim || mesgul || veriBekliyor, busy: mesgul || veriBekliyor }}
+          disabled={!secim || mesgul || veriBekliyor}
+          onPress={olustur}
+          testID="geziyi-olustur"
+          style={({ pressed }) => [s.olustur, !secim && s.pasif, pressed && { opacity: 0.85 }]}>
+          {mesgul || (veriBekliyor && !!secim) ? <ActivityIndicator color={kurRenk.metin} /> : <Text style={s.olusturMetin}>{t('geziKur.olustur')}</Text>}
+        </Pressable>
+      </View>
+    </AltPencere>
+  );
+}
+
+/**
+ * KK6 · KK-ek1: "Kimlerle?" satırı — girişteki yol arkadaşı (seçili yuvarlak; dokununca kalkar, dokunma alanı 44 pt) ve
+ * isteğe bağlı "+" (davet linki). Sihirbaz da aynı satırı kullanır (yalnız yol arkadaşı).
+ */
+export function KimlerleSatiri({ yolArkadasi, onYolArkadasiKaldir, davet, onDavet }: { yolArkadasi: YolArkadasi | null; onYolArkadasiKaldir: () => void; davet?: boolean; onDavet?: () => void }) {
+  return (
+    <View style={s.kimler}>
+      <Text style={[s.bolum, { marginRight: 4 }]}>{t('geziKur.kimlerle')}</Text>
+      {yolArkadasi ? (
+        <Pressable accessibilityRole="button" accessibilityLabel={t('geziKur.yolArkadasi', { ad: yolArkadasi.ad })} accessibilityState={{ selected: true }} onPress={onYolArkadasiKaldir} hitSlop={4} testID="yol-arkadasi">
+          <Secili>
+            <Avatar ad={yolArkadasi.ad} url={yolArkadasi.foto} boyut={40} arkaPlan={kurRenk.acikMavi} harfRengi={kurRenk.lacivert} harfBoyutu={14} yuvarlak />
+          </Secili>
+        </Pressable>
+      ) : null}
+      {onDavet ? (
+        <Pressable accessibilityRole="button" accessibilityLabel={davet ? t('geziKur.davetSecili') : t('geziKur.davetEkle')} accessibilityState={{ selected: !!davet }} onPress={onDavet} hitSlop={2} testID="davet-arti">
           {davet ? (
             <Secili>
               <Arti />
@@ -169,20 +192,8 @@ export function BunuSecCekmecesi({ rota, onKapat, yolArkadasi, onYolArkadasiKald
             <Arti />
           )}
         </Pressable>
-      </View>
-
-      {hata ? <Text style={s.hata}>{hata}</Text> : null}
-      <View style={{ paddingTop: 16 }}>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityState={{ disabled: !secim || mesgul, busy: mesgul || veriBekliyor }}
-          disabled={!secim || mesgul}
-          onPress={olustur}
-          style={({ pressed }) => [s.olustur, !secim && s.pasif, pressed && { opacity: 0.85 }]}>
-          {mesgul ? <ActivityIndicator color={kurRenk.metin} /> : <Text style={s.olusturMetin}>{t('geziKur.olustur')}</Text>}
-        </Pressable>
-      </View>
-    </AltPencere>
+      ) : null}
+    </View>
   );
 }
 

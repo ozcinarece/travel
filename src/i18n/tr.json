@@ -1636,7 +1636,7 @@
     "kimlerle": "Kimlerle?",
     "davetEkle": "Davet linki gönder",
     "davetSecili": "Davet linki gezi oluşunca gönderilecek",
-    "yolArkadasi": "{ad} yol arkadaşın, kaldırmak için dokun",
+    "yolArkadasi": "{ad} seçili: gezi oluşunca davet linki paylaşılır. Kaldırmak için dokun",
     "olustur": "Geziyi oluştur",
     "rotasindan": "{ad} rotasından",
     "kapat": "Kapat"

@@ -16,7 +16,7 @@ import {
   gidenArkadaslar,
   gittiMetni,
   kaynakRotaMetni,
-  sehirBul,
+  sehirEslesmesi,
   sehirGezileri,
   secimGunVeBaslangic,
   tarihSatiri,
@@ -78,6 +78,7 @@ const paylasim = (id: string, paylasan: string, ad: string, sehir: string, isim:
   begendim: false,
 });
 let mockPaylasimlar: ArkadasPaylasimi[] = [];
+let mockGeziYukleniyor = false;
 jest.mock('@/features/icerik/kesfetAkisi', () => ({ useKesfetAkisi: () => ({ data: mockGeziler, isLoading: false, isError: false }) }));
 jest.mock('@/features/arkadaslar/sorgular', () => ({
   useArkadasPaylasimlari: () => ({ data: mockPaylasimlar }),
@@ -87,7 +88,7 @@ const mockGeziDetay = { ...mockGeziler[0], gezi_gunleri: [] };
 const mockSehirSecimi = { place_id: 'p-izm', ad: 'İzmir', ikincil: '', lat: 38.4, lng: 27.1, tz: 'Europe/Istanbul', country_code: 'TR' };
 jest.mock('@/features/icerik/sorgular', () => ({
   useSehirler: () => ({ data: mockSehirListesi }),
-  useGezi: (slug?: string) => ({ data: slug ? { ...mockGeziDetay, slug } : undefined, isError: false }),
+  useGezi: (slug?: string) => ({ data: slug && !mockGeziYukleniyor ? { ...mockGeziDetay, slug } : undefined, isError: false }),
 }));
 jest.mock('@/features/sihirbaz/girisler', () => ({ useIcerikSehirSecimi: (k?: unknown) => ({ data: k ? mockSehirSecimi : undefined, isError: false }) }));
 const mockYeni = jest.fn(async (_: unknown) => ({ seyahatId: 'yeni-gezi' as string | null, gun: 2, eklenenDurak: 8, eklenenMekan: 8, cozumsuz: 0, cozumsuzler: [] }));
@@ -100,8 +101,19 @@ jest.mock('@/features/sihirbaz/taslak', () => ({ useTaslakTarihi: () => ({ mutat
 jest.mock('@/components/sihirbaz/AdimNeZaman', () => {
   const { Pressable: P, Text: T } = jest.requireActual<typeof import('react-native')>('react-native');
   return {
-    AdimNeZaman: (p: { onAralik: (a: { gidis: string; donus: string | null }) => void; tarihsizGun: number | null; ozetSatiri?: string | null }) => (
+    AdimNeZaman: (p: {
+      aralik: { gidis: string; donus: string | null } | null;
+      onAralik: (a: { gidis: string; donus: string | null } | null) => void;
+      dokun?: (a: { gidis: string; donus: string | null } | null, gun: string) => { gidis: string; donus: string | null } | null;
+      donusBekleniyor?: boolean;
+      tarihsizGun: number | null;
+      ozetSatiri?: string | null;
+    }) => (
       <>
+        <P onPress={() => p.onAralik(p.dokun!(p.aralik, '2026-12-07'))}>
+          <T>donus-dokun</T>
+        </P>
+        <T testID="takvim-aralik">{p.aralik ? `${p.aralik.gidis}/${p.aralik.donus ?? '-'}/${p.donusBekleniyor ? 'ipucu' : 'ipucusuz'}` : '-'}</T>
         <P onPress={() => p.onAralik({ gidis: '2026-12-05', donus: null })}>
           <T>gidis-sec</T>
         </P>
@@ -116,6 +128,7 @@ jest.mock('@/components/sihirbaz/AdimNeZaman', () => {
 
 beforeEach(() => {
   mockPaylasimlar = [];
+  mockGeziYukleniyor = false;
   jest.clearAllMocks();
 });
 
@@ -131,12 +144,14 @@ describe('#574 saf yardımcılar', () => {
   });
 
   it('KK3: şehir aksansız ve harf harf bulunur; o şehrin gezileri ve arkadaş rotaları', () => {
-    expect(sehirBul('eski', mockSehirListesi)?.id).toBe('s-esk');
-    expect(sehirBul('Eskisehir', mockSehirListesi)?.id).toBe('s-esk');
-    expect(sehirBul('izm', mockSehirListesi)?.id).toBe('s-izm');
-    expect(sehirBul('Kars', mockSehirListesi)).toBeUndefined();
-    expect(sehirBul('  ', mockSehirListesi)).toBeUndefined();
-    expect(sehirGezileri(mockGeziler, { id: 's-esk' }).map((g) => g.id)).toEqual(['esk3', 'esk2']);
+    // Tam eşleşme (aksansız) şehri verir; önek yalnız listeyi süzer, şehir adı vermez.
+    expect(sehirEslesmesi('Eskisehir', mockSehirListesi).tam?.id).toBe('s-esk');
+    expect(sehirEslesmesi('eski', mockSehirListesi)).toEqual({ tam: undefined, sehirler: [expect.objectContaining({ id: 's-esk' })] });
+    expect(sehirEslesmesi('İz', mockSehirListesi).tam).toBeUndefined();
+    expect(sehirEslesmesi('İz', mockSehirListesi).sehirler.map((x) => x.id)).toEqual(['s-izm']);
+    expect(sehirEslesmesi('Kars', mockSehirListesi)).toEqual({ tam: undefined, sehirler: [] });
+    expect(sehirEslesmesi('  ', mockSehirListesi)).toEqual({ tam: undefined, sehirler: [] });
+    expect(sehirGezileri(mockGeziler, [{ id: 's-esk' }]).map((g) => g.id)).toEqual(['esk3', 'esk2']);
     const p = [paylasim('p1', 'u1', 'Ayşe', 'Eskişehir', null), paylasim('p2', 'u2', 'Mert', 'Mardin', null)];
     expect(arkadasRotalari(p, 'eski', { ad: 'Eskişehir' }).map((x) => x.id)).toEqual(['p1']);
     expect(arkadasRotalari(p, 'Mar', undefined).map((x) => x.id)).toEqual(['p2']);
@@ -198,7 +213,7 @@ describe('#574 KK2 açılış', () => {
     fireEvent.press(screen.getByText(t('anasayfa.tumu')));
     expect(mockRouter.navigate).toHaveBeenCalledWith('/(tabs)/arkadaslar');
     fireEvent.press(screen.getByText('Kendi rotanı kur'));
-    expect(onKendi).toHaveBeenCalledWith(null);
+    expect(onKendi).toHaveBeenCalledWith(null, undefined);
   });
 
   it('gün çipi gün sayısıyla, amaç çipi amaçlarla süzer; ikinci dokunuş kaldırır', () => {
@@ -223,9 +238,14 @@ describe('#574 KK3 şehir yazılınca', () => {
     const onKendi = jest.fn();
     render(<GeziKurEkrani onKendiRota={onKendi} />);
     const kutu = screen.getByLabelText(t('geziKur.sehirEtiket'));
-    fireEvent.changeText(kutu, 'E');
-    expect(screen.getByText('Eskişehir için kendi rotanı kur')).toBeTruthy();
+    // Önek: liste süzülür ama satır ve başlık yazılan metni gösterir (tam eşleşme yok).
     fireEvent.changeText(kutu, 'Eski');
+    expect(screen.getByText('Eski için kendi rotanı kur')).toBeTruthy();
+    expect(screen.getByText('Eski rotaları')).toBeTruthy();
+    expect(kartlar()).toEqual(['rota-esk3', 'rota-esk2']);
+    fireEvent.press(screen.getByTestId('kendi-rota'));
+    expect(onKendi).toHaveBeenLastCalledWith({ metin: 'Eski' }, undefined);
+    fireEvent.changeText(kutu, 'Eskişehir');
     expect(screen.getByText('Eskişehir için kendi rotanı kur')).toBeTruthy();
     expect(screen.getByText('Eskişehir rotaları')).toBeTruthy();
     expect(kartlar()).toEqual(['rota-esk3', 'rota-esk2']);
@@ -240,8 +260,10 @@ describe('#574 KK3 şehir yazılınca', () => {
     expect(i('Eskişehir için kendi rotanı kur')).toBeLessThan(i('Eskişehir rotaları'));
     expect(i('Eskişehir rotaları')).toBeLessThan(i('Arkadaşlarından'));
     fireEvent.press(screen.getByTestId('kendi-rota'));
-    expect(onKendi).toHaveBeenCalledWith({ sehirId: 's-esk' });
-    fireEvent.changeText(kutu, 'Izm');
+    expect(onKendi).toHaveBeenLastCalledWith({ sehirId: 's-esk' }, undefined);
+    fireEvent.changeText(kutu, 'İz');
+    expect(screen.getByText('İz için kendi rotanı kur')).toBeTruthy();
+    expect(screen.getByText('İz rotaları')).toBeTruthy();
     expect(kartlar()).toEqual(['rota-urla']);
     expect(screen.queryByTestId('arkadaslardan')).toBeNull();
   });
@@ -254,7 +276,7 @@ describe('#574 KK3 şehir yazılınca', () => {
     expect(screen.getByText('Bu şehir için hazır rota yok, kendi rotanı kur')).toBeTruthy();
     expect(kartlar()).toEqual([]);
     fireEvent.press(screen.getByTestId('kendi-rota'));
-    expect(onKendi).toHaveBeenCalledWith({ metin: 'Kars' });
+    expect(onKendi).toHaveBeenCalledWith({ metin: 'Kars' }, undefined);
     // ✕ kutuyu boşaltır; açılış geri gelir.
     fireEvent.press(screen.getByLabelText(t('geziKur.sehirTemizle')));
     expect(kartlar()).toHaveLength(4);
@@ -293,6 +315,31 @@ describe('#574 KK5–KK7 çekmece ve Geziyi oluştur', () => {
     await waitFor(() => expect(mockRouter.replace).toHaveBeenCalledWith({ pathname: '/seyahat/[id]/(sekmeler)/gezi', params: { id: 'yeni-gezi' } }));
     expect(mockYeni).toHaveBeenCalledWith(expect.objectContaining({ sehir: mockSehirSecimi, gunSayisi: 2, baslangic: '2026-12-05', secim: { tur: 'plan' } }));
     expect((mockYeni.mock.calls[0][0] as { gezi: { id: string } }).gezi.id).toBe('urla');
+  });
+
+  it('takvim hesaplanan dönüşle bantlı seçili görünür; dönüş günü dokunuşu gerçek seçimle; ipucu yalnız dönüş beklenirken', () => {
+    render(<GeziKurEkrani onKendiRota={jest.fn()} />);
+    fireEvent.press(within(screen.getByTestId('rota-esk3')).getByText('Bunu seç'));
+    expect(screen.getByTestId('takvim-aralik').props.children).toBe('-');
+    fireEvent.press(screen.getByText('gidis-sec'));
+    // 3 günlük rota: 5 → 7 Aralık seçili görünür; dönüş henüz seçilmedi → ipucu.
+    expect(screen.getByTestId('takvim-aralik').props.children).toBe('2026-12-05/2026-12-07/ipucu');
+    // Gösterilen aralık dönüşlü olsa da dokunuş gerçek seçimle hesaplanır: 7 Aralık dönüş olur (yeni gidiş değil).
+    fireEvent.press(screen.getByText('donus-dokun'));
+    expect(screen.getByTestId('takvim-aralik').props.children).toBe('2026-12-05/2026-12-07/ipucusuz');
+    expect(screen.getByTestId('takvim-durum').props.children).toBe('tarihli:5–7 Aralık · Cumartesi–Pazartesi · 3 gün');
+  });
+
+  it('gezi verisi yüklenirken Geziyi oluştur meşgul; hata yazmaz, istek gitmez', () => {
+    mockGeziYukleniyor = true;
+    render(<GeziKurEkrani onKendiRota={jest.fn()} />);
+    fireEvent.press(within(screen.getByTestId('rota-urla')).getByText('Bunu seç'));
+    fireEvent.press(screen.getByText('gidis-sec'));
+    const dugme = screen.getByTestId('geziyi-olustur');
+    expect(dugme.props.accessibilityState).toMatchObject({ disabled: true, busy: true });
+    fireEvent.press(dugme);
+    expect(screen.queryByText(t('sihirbaz.nezaman.hata'))).toBeNull();
+    expect(mockYeni).not.toHaveBeenCalled();
   });
 
   it('"Tarihim belli değil" gün sayacını açar (varsayılan rotanın gün sayısı); tarihsiz seyahat', async () => {
@@ -369,6 +416,9 @@ describe('#574 KK6 Kimlerle? · KK-ek1 yol arkadaşı', () => {
     const yuz = screen.getByTestId('yol-arkadasi');
     expect(yuz.props.accessibilityLabel).toBe(t('geziKur.yolArkadasi', { ad: 'Ayşe' }));
     expect(yuz.props.accessibilityState).toMatchObject({ selected: true });
+    expect(yuz.props.accessibilityLabel).toContain('davet linki paylaşılır');
+    // 40 pt yuvarlak + 4 pt hitSlop = 48 pt dokunma alanı.
+    expect(yuz.props.hitSlop).toBe(4);
     fireEvent.press(yuz);
     expect(screen.queryByTestId('yol-arkadasi')).toBeNull();
   });
@@ -384,6 +434,9 @@ describe('#574 KK5 takvim bileşeni: özet satırı', () => {
     expect(screen.getByText('5–6 Aralık · Cumartesi–Pazar · 2 gün')).toBeTruthy();
     // Dalga 1 dönüş günü ipucu da gelir.
     expect(screen.getByText(t('sihirbaz.nezaman.donusIpucu'))).toBeTruthy();
+    // Çekmece: aralık dönüşlü verilir (bant), ipucu yalnız istenirse.
+    rerender(<Gercek {...ortak} aralik={{ gidis: '2026-12-05', donus: '2026-12-06' }} donusBekleniyor={false} ozetSatiri="5–6 Aralık · Cumartesi–Pazar · 2 gün" />);
+    expect(screen.queryByText(t('sihirbaz.nezaman.donusIpucu'))).toBeNull();
   });
 });
 

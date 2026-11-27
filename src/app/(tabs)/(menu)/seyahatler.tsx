@@ -8,6 +8,7 @@ import { Buton } from '@/components/ui/Buton';
 import { KisaBildirim, useKisaBildirim } from '@/components/ui/KisaBildirim';
 import { biten, bitmemis, siniflandir } from '@/features/seyahatler/siniflandir';
 import { useSeyahatler } from '@/features/seyahatler/sorgular';
+import { yeniGirisNo } from '@/features/sihirbaz/girisler';
 import { t } from '@/i18n';
 import { renk, yazi } from '@/theme';
 
@@ -25,7 +26,8 @@ export default function SeyahatlerimEkrani() {
     const sinif = siniflandir(seyahatler.data ?? []);
     return { yaklasan: bitmemis(sinif), gecmis: biten(sinif) };
   }, [seyahatler.data]);
-  const yeni = () => router.push('/(tabs)/yeni');
+  // #574 KK1: her girişte "Nasıl bir gezi?" temiz açılır (yeni `n`).
+  const yeni = () => router.push({ pathname: '/(tabs)/yeni', params: { n: yeniGirisNo() } });
   return (
     <SafeAreaView style={s.ekran} edges={['top']}>
       <ScrollView contentContainerStyle={s.icerik} refreshControl={<RefreshControl refreshing={seyahatler.isRefetching} onRefresh={() => seyahatler.refetch()} />}>

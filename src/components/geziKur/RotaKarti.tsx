@@ -18,7 +18,7 @@ import type { KapakAtfi as Atif } from '@/features/icerik/kapakAtfi';
 import { ilkAd } from '@/features/paylasim/baslik';
 import { t } from '@/i18n';
 import { ilgiEkli } from '@/lib/ek';
-import { arkadasRenkleri, renk, yazi } from '@/theme';
+import { renk, yazi } from '@/theme';
 
 /** Kanvastaki renkler (`Kur_v11_*`). */
 export const kurRenk = {
@@ -31,10 +31,11 @@ export const kurRenk = {
   beyaz: '#FFFFFF',
 } as const;
 
-/** Kanvas: yüzlerin zemini ve harfi sırayla (A lacivert/beyaz, M açık mavi/lacivert). */
-const YUZLER: readonly (readonly [string, string])[] = [
+/** Kanvas: arkadaş yüzlerinin zemini ve harfi sırayla (A #152A6B/beyaz, M #C9D2F2/#152A6B, D #E3F4EC/#0E7A52). */
+export const YUZLER: readonly (readonly [string, string])[] = [
   [kurRenk.lacivert, kurRenk.beyaz],
   [kurRenk.acikMavi, kurRenk.lacivert],
+  ['#E3F4EC', '#0E7A52'],
 ];
 
 export type Kapak = { uri: string | null; atif: Atif | null };
@@ -121,6 +122,7 @@ export function ArkadasRotaKarti({ p, sira, onSec }: { p: ArkadasPaylasimi; sira
   const ad = ilkAd(p.paylasan_ad) ?? t('seyahatV7.adsiz');
   const baslik = t('geziKur.arkadasBaslik', { sehir: p.sehir, n: p.gun_sayisi });
   const alt = arkadasRotasiMetni(p);
+  const [zemin, harf] = YUZLER[sira % YUZLER.length];
   return (
     <Pressable
       accessibilityRole="button"
@@ -131,7 +133,7 @@ export function ArkadasRotaKarti({ p, sira, onSec }: { p: ArkadasPaylasimi; sira
     >
       <SeyahatKapagi kimlik={p.id} yukseklik={ARKADAS_KAPAK} kose={14} />
       <View style={s.arkadasSatir}>
-        <Avatar ad={ad} url={p.foto} boyut={26} arkaPlan={arkadasRenkleri[sira % arkadasRenkleri.length]} yuvarlak harfBoyutu={11} />
+        <Avatar ad={ad} url={p.foto} boyut={26} arkaPlan={zemin} harfRengi={harf} yuvarlak harfBoyutu={11} />
         <View style={{ flex: 1 }}>
           <Text style={s.arkadasBaslik} numberOfLines={1}>
             {baslik}

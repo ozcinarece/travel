@@ -36,9 +36,13 @@ type Props = {
    * null → seçim yok ("Gidiş gününe dokun"). Verilmezse sihirbazdaki özet kartı.
    */
   ozetSatiri?: string | null;
+  /** #574: dokunuşun yeni aralığı (verilmezse `tarihDokun(aralik, gun)`); çekmece gösterilenden farklı gerçek seçimle hesaplar. */
+  dokun?: (aralik: Aralik, gun: string) => Aralik;
+  /** "Dönüş günü?" ipucu (verilmezse yalnız gidiş seçiliyken). */
+  donusBekleniyor?: boolean;
 };
 
-export function AdimNeZaman({ aralik, onAralik, tarihsizGun, onTarihsizGun, ozetSatiri }: Props) {
+export function AdimNeZaman({ aralik, onAralik, tarihsizGun, onTarihsizGun, ozetSatiri, dokun = tarihDokun, donusBekleniyor }: Props) {
   const bugun = yerelTarih(new Date(), Intl.DateTimeFormat().resolvedOptions().timeZone);
   const ilk = parcala(aralik?.gidis ?? bugun);
   const [ay, setAy] = useState({ yil: ilk.yil, ay: ilk.ay });
@@ -50,7 +54,7 @@ export function AdimNeZaman({ aralik, onAralik, tarihsizGun, onTarihsizGun, ozet
   return (
     <View style={s.kap}>
       <Text style={s.ipucu} accessibilityLiveRegion="polite">
-        {aralik && !aralik.donus ? t('sihirbaz.nezaman.donusIpucu') : ''}
+        {(donusBekleniyor ?? (!!aralik && !aralik.donus)) ? t('sihirbaz.nezaman.donusIpucu') : ''}
       </Text>
       <View style={s.kart}>
         <View style={s.ayBasi}>
@@ -88,7 +92,7 @@ export function AdimNeZaman({ aralik, onAralik, tarihsizGun, onTarihsizGun, ozet
                 accessibilityLabel={gun}
                 accessibilityState={{ selected: sec, disabled: gecmis }}
                 disabled={gecmis}
-                onPress={() => onAralik(tarihDokun(aralik, gun))}
+                onPress={() => onAralik(dokun(aralik, gun))}
                 style={[s.hucre, bandi && s.band, basBand && s.bandBas, sonBand && s.bandSon]}>
                 <View style={[s.gunKutu, sec && s.gunSecili, gun === bugun && !sec && s.bugun]}>
                   <Text style={[s.gunSayi, gecmis && s.gecmis, bandi && !sec && { color: renk.ana }, sec && s.gunSayiSecili]}>{parcala(gun).gun}</Text>

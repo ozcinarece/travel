@@ -22,7 +22,7 @@ import {
   gidenArkadaslar,
   GUN_SUZGECLERI,
   sehirAdi,
-  sehirBul,
+  sehirEslesmesi,
   sehirGezileri,
   type Suzgec,
 } from '@/features/geziKur/geziKur';
@@ -41,18 +41,21 @@ export type KendiRotaGirisi = { sehirId: string } | { metin: string } | null;
 type Props = {
   /** KK1 · KK-ek2: ana sayfa aramasından ya da profilden gelen rehberli şehir (kutu dolu açılır). */
   sehirId?: string;
+  /** KK1: ana sayfa metin aramasından gelen metin (kutu bu metinle dolu açılır). */
+  ilkMetin?: string;
   /** KK-ek1: yol arkadaşı olarak seçili gelecek kişi. */
   arkadas?: string;
-  onKendiRota: (g: KendiRotaGirisi) => void;
+  /** `arkadas`: seçili kalan yol arkadaşı (sihirbazda da seçili gelir). */
+  onKendiRota: (g: KendiRotaGirisi, arkadas?: string) => void;
 };
 
-export function GeziKurEkrani({ sehirId, arkadas, onKendiRota }: Props) {
+export function GeziKurEkrani({ sehirId, ilkMetin, arkadas, onKendiRota }: Props) {
   const akis = useKesfetAkisi();
   const paylasimlar = useArkadasPaylasimlari();
   const sehirler = useSehirler();
   const [yazilan, setYazilan] = useState<string | null>(null);
   const baslangicSehri = sehirId ? sehirler.data?.find((s) => s.id === sehirId) : undefined;
-  const sorgu = yazilan ?? baslangicSehri?.ad ?? '';
+  const sorgu = yazilan ?? baslangicSehri?.ad ?? ilkMetin ?? '';
   const [suzgec, setSuzgec] = useState<Suzgec>(BOS_SUZGEC);
   const [secilen, setSecilen] = useState<SecilenRota | null>(null);
   const [arkadasId, setArkadasId] = useState<string | null>(arkadas ?? null);
@@ -65,8 +68,9 @@ export function GeziKurEkrani({ sehirId, arkadas, onKendiRota }: Props) {
   const geziler = useMemo(() => akis.data ?? [], [akis.data]);
   const arkadasListesi = useMemo(() => paylasimlar.data ?? [], [paylasimlar.data]);
   const yazili = sorgu.trim().length > 0;
-  const sehir = useMemo(() => (yazili ? sehirBul(sorgu, sehirler.data) : undefined), [yazili, sorgu, sehirler.data]);
-  const gorunenGeziler = useMemo(() => (yazili ? sehirGezileri(geziler, sehir) : geziSuz(geziler, suzgec)), [yazili, geziler, sehir, suzgec]);
+  const eslesme = useMemo(() => sehirEslesmesi(yazili ? sorgu : '', sehirler.data), [yazili, sorgu, sehirler.data]);
+  const sehir = eslesme.tam;
+  const gorunenGeziler = useMemo(() => (yazili ? sehirGezileri(geziler, eslesme.sehirler) : geziSuz(geziler, suzgec)), [yazili, geziler, eslesme, suzgec]);
   const gorunenArkadaslar = useMemo(() => arkadasRotalari(arkadasListesi, yazili ? sorgu : '', sehir), [arkadasListesi, yazili, sorgu, sehir]);
   // Arkadaşın yüz rengi kişiye göre sabit (aynı kişinin kartları aynı renkte; ana sayfa rafıyla aynı kural).
   const kisiSirasi = useMemo(() => {
@@ -81,8 +85,10 @@ export function GeziKurEkrani({ sehirId, arkadas, onKendiRota }: Props) {
   };
   const geri = () => (router.canGoBack() ? router.back() : router.replace('/(tabs)'));
   const kendiRota = () => {
-    if (!yazili) return onKendiRota(null);
-    onKendiRota(sehir ? { sehirId: sehir.id } : { metin: sorgu.trim() });
+    const a = arkadasId ?? undefined;
+    if (!yazili) return onKendiRota(null, a);
+    // Yalnız tam eşleşmede şehir dolu 2. adım; değilse yazılan metin Nereye'de aranmış.
+    onKendiRota(sehir ? { sehirId: sehir.id } : { metin: sorgu.trim() }, a);
   };
   const arkadasSec = (p: ArkadasPaylasimi) => setSecilen({ tur: 'arkadas', paylasim: p, baslik: p.ad?.trim() || t('geziKur.arkadasBaslik', { sehir: p.sehir, n: p.gun_sayisi }) });
 

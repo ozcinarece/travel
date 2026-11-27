@@ -98,7 +98,11 @@ describe('Seyahatlerim (#405 KK2)', () => {
     // İnceleme 1: satırda "Tekrar kur" düğmesi yok (iç içe düğme kalktı), kanvastaki ok var.
     expect(ekran.queryByText('Tekrar kur')).toBeNull();
     fireEvent.press(ekran.getByRole('button', { name: 'Yeni seyahat' }));
-    expect(mockRouter.push).toHaveBeenCalledWith('/(tabs)/yeni');
+    // #574 KK1: her girişte yeni `n` → "Nasıl bir gezi?" temiz açılır.
+    expect(mockRouter.push).toHaveBeenLastCalledWith({ pathname: '/(tabs)/yeni', params: { n: expect.any(String) } });
+    const ilk = mockRouter.push.mock.calls.at(-1)![0] as { params: { n: string } };
+    fireEvent.press(ekran.getByRole('button', { name: 'Yeni seyahat' }));
+    expect((mockRouter.push.mock.calls.at(-1)![0] as { params: { n: string } }).params.n).not.toBe(ilk.params.n);
   });
 
   it('KK5: seyahat yoksa tek satır yazı ve "+ Seyahat"', async () => {

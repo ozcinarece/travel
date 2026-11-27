@@ -25,9 +25,13 @@ const { router: mockRouter } = jest.requireMock<{ router: { back: jest.Mock } }>
 jest.mock('@/components/geziKur/GeziKurEkrani', () => {
   const { Pressable: P, Text: T } = jest.requireActual<typeof import('react-native')>('react-native');
   return {
-    GeziKurEkrani: (p: { sehirId?: string; arkadas?: string; onKendiRota: (g: unknown) => void }) => (
+    GeziKurEkrani: (p: { sehirId?: string; ilkMetin?: string; arkadas?: string; onKendiRota: (g: unknown, a?: string) => void }) => (
       <>
         <T>{`kur:${p.sehirId ?? '-'}:${p.arkadas ?? '-'}`}</T>
+        <T>{`kutu:${p.ilkMetin ?? '-'}`}</T>
+        <P onPress={() => p.onKendiRota({ metin: 'Kars' }, p.arkadas)}>
+          <T>kendi-arkadasla</T>
+        </P>
         <P onPress={() => p.onKendiRota({ sehirId: 's-mugla' })}>
           <T>kendi-sehirle</T>
         </P>
@@ -38,6 +42,8 @@ jest.mock('@/components/geziKur/GeziKurEkrani', () => {
     ),
   };
 });
+
+jest.mock('@/features/arkadaslar/sorgular', () => ({ useArkadaslarim: () => ({ data: [{ user_id: 'u-deniz', ad: 'Deniz', foto: null }] }) }));
 
 const mockSehirler = [
   { id: 's-mugla', ad: 'Muğla', slug: 'mugla', kapak_url: null, lat: 37.2, lng: 28.4 },
@@ -96,6 +102,13 @@ describe('#574 KK1 giriş', () => {
     expect(screen.queryByText(/^nereye:/)).toBeNull();
   });
 
+  it('ana sayfa metin araması (il yok) "Nasıl bir gezi?"yi kutu dolu açar; eski sihirbaz açılmaz', () => {
+    mockParams = { metin: 'Mardin', n: '2' };
+    render(<YeniEkrani />);
+    expect(screen.getByText('kutu:Mardin')).toBeTruthy();
+    expect(screen.queryByText(/^nereye:/)).toBeNull();
+  });
+
   it('ana sayfa aramasından şehirle gelinirse şehir kutusu dolu açılır', () => {
     mockParams = { sehir: 's-esk', n: '1' };
     render(<YeniEkrani />);
@@ -129,11 +142,24 @@ describe('#574 KK-ek1 · KK-ek2 Profil v12 girişleri (`il`, `arkadas`)', () => 
     expect(screen.getByText('kur:s-mugla:u-deniz')).toBeTruthy();
   });
 
-  it('rehberli olmayan il + arkadaş: Nereye\'de aranmış gelir (bugünkü davranış)', () => {
+  it('rehberli olmayan il + arkadaş: Nereye\'de aranmış gelir ve kişi yol arkadaşı olarak seçili (kaldırılabilir)', () => {
     mockParams = geziOlusturParametreleri(mockSehirler, { plaka: 36, arkadas: 'u-deniz' });
     expect(mockParams).toMatchObject({ metin: 'Kars', il: '36', arkadas: 'u-deniz' });
     render(<YeniEkrani />);
     expect(screen.getByText('nereye:Kars:-')).toBeTruthy();
+    const yuz = screen.getByTestId('yol-arkadasi');
+    expect(yuz.props.accessibilityLabel).toBe(t('geziKur.yolArkadasi', { ad: 'Deniz' }));
+    expect(yuz.props.accessibilityState).toMatchObject({ selected: true });
+    fireEvent.press(yuz);
+    expect(screen.queryByTestId('yol-arkadasi')).toBeNull();
+  });
+
+  it('"Nasıl bir gezi?"de seçili yol arkadaşı "Kendi rotanı kur" sihirbazına da taşınır', () => {
+    mockParams = { arkadas: 'u-deniz', n: '3' };
+    render(<YeniEkrani />);
+    fireEvent.press(screen.getByText('kendi-arkadasla'));
+    expect(screen.getByText('nereye:Kars:-')).toBeTruthy();
+    expect(screen.getByTestId('yol-arkadasi')).toBeTruthy();
   });
 
   it('yalnız arkadaş: "Nasıl bir gezi?" boş şehirle, kişi seçili', () => {

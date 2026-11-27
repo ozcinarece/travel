@@ -32,31 +32,33 @@ export function geziSuz<T extends Pick<AkisGezisi, 'gun_sayisi' | 'amaclar'>>(ge
   return geziler.filter((g) => (!s.gun || gunUyar(s.gun, g.gun_sayisi)) && (!s.amac || !!g.amaclar?.includes(s.amac)));
 }
 
-/**
- * KK3: yazılan metnin rehberli şehri — adı aynıysa o, değilse adı yazılanla başlayan ilk şehir (aksansız, Türkçe küçük harf:
- * "eskis" → Eskişehir). Boş metin ya da eşleşme yoksa undefined.
- */
-export function sehirBul(sorgu: string, sehirler: readonly Pick<Sehir, 'id' | 'ad'>[] | undefined): Pick<Sehir, 'id' | 'ad'> | undefined {
+/** KK3: yazılan metnin rehberli şehirleri. `tam`: adı aynen yazılan şehir (aksansız, Türkçe küçük harf: "eskisehir" →
+ * Eskişehir); `sehirler`: tam eşleşme varsa yalnız o, yoksa adı yazılanla başlayan şehirler ("iz" → İzmir). Boş metinde ikisi de boş. */
+export type SehirEslesmesi = { tam: Pick<Sehir, 'id' | 'ad'> | undefined; sehirler: Pick<Sehir, 'id' | 'ad'>[] };
+
+export function sehirEslesmesi(sorgu: string, sehirler: readonly Pick<Sehir, 'id' | 'ad'>[] | undefined): SehirEslesmesi {
   const q = sade(sorgu);
-  if (!q || !sehirler) return undefined;
-  return sehirler.find((s) => sade(s.ad) === q) ?? sehirler.find((s) => sade(s.ad).startsWith(q));
+  if (!q || !sehirler) return { tam: undefined, sehirler: [] };
+  const tam = sehirler.find((s) => sade(s.ad) === q);
+  return { tam, sehirler: tam ? [tam] : sehirler.filter((s) => sade(s.ad).startsWith(q)) };
 }
 
-/** Lacivert satırdaki ve başlıktaki şehir adı: eşleşen rehberli şehir, yoksa yazılan metin (kırpılmış). */
-export function sehirAdi(sorgu: string, sehir: Pick<Sehir, 'ad'> | undefined): string {
-  return sehir?.ad ?? sorgu.trim();
+/** Lacivert satırdaki ve başlıktaki şehir adı: yalnız tam eşleşmede rehberli şehrin adı, yoksa yazılan metin (kırpılmış). */
+export function sehirAdi(sorgu: string, tam: Pick<Sehir, 'ad'> | undefined): string {
+  return tam?.ad ?? sorgu.trim();
 }
 
-/** KK3: o şehrin hazır gezileri (şehir kimliğiyle; Keşfet sırası). */
-export function sehirGezileri<T extends Pick<AkisGezisi, 'sehir_id'>>(geziler: readonly T[], sehir: Pick<Sehir, 'id'> | undefined): T[] {
-  return sehir ? geziler.filter((g) => g.sehir_id === sehir.id) : [];
+/** KK3: eşleşen şehirlerin hazır gezileri (şehir kimliğiyle; Keşfet sırası). Her harfte süzülür. */
+export function sehirGezileri<T extends Pick<AkisGezisi, 'sehir_id'>>(geziler: readonly T[], sehirler: readonly Pick<Sehir, 'id'>[]): T[] {
+  const idler = new Set(sehirler.map((x) => x.id));
+  return geziler.filter((g) => idler.has(g.sehir_id));
 }
 
-/** KK3: arkadaşların o şehirdeki rotaları — eşleşen şehrin adı, yoksa yazılanla başlayan şehir etiketi. Boş metinde hepsi. */
-export function arkadasRotalari(paylasimlar: readonly ArkadasPaylasimi[], sorgu: string, sehir: Pick<Sehir, 'ad'> | undefined): ArkadasPaylasimi[] {
+/** KK3: arkadaşların o şehirdeki rotaları — tam eşleşmede şehrin adı, yoksa yazılanla başlayan şehir etiketi. Boş metinde hepsi. */
+export function arkadasRotalari(paylasimlar: readonly ArkadasPaylasimi[], sorgu: string, tam: Pick<Sehir, 'ad'> | undefined): ArkadasPaylasimi[] {
   const q = sade(sorgu);
   if (!q) return [...paylasimlar];
-  if (sehir) return paylasimlar.filter((p) => sade(p.sehir) === sade(sehir.ad));
+  if (tam) return paylasimlar.filter((p) => sade(p.sehir) === sade(tam.ad));
   return paylasimlar.filter((p) => sade(p.sehir).startsWith(q));
 }
 

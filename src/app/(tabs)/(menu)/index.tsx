@@ -26,6 +26,7 @@ import { useProfil } from '@/features/profil/sorgular';
 import { acilisDurumu, siniflandir } from '@/features/seyahatler/siniflandir';
 import { useSeyahatler } from '@/features/seyahatler/sorgular';
 import { seyahatAdi } from '@/features/sihirbaz/sihirbaz';
+import { yeniGirisNo } from '@/features/sihirbaz/girisler';
 import { t } from '@/i18n';
 import { useAnaSayfaBolumleri } from '@/lib/anaSayfa';
 import { ACILIS_BEKLEME_MS, acilisKarariAcik, acilisKarariAl, acilisKarariniKapat, acilisKarariniYenile } from '@/lib/acilis';
@@ -213,7 +214,8 @@ export default function AnaSayfa() {
     );
   }
 
-  const yeni = () => router.push('/(tabs)/yeni');
+  // #574 KK1: her girişte "Nasıl bir gezi?" temiz açılır (yeni `n`).
+  const yeni = () => router.push({ pathname: '/(tabs)/yeni', params: { n: yeniGirisNo() } });
   const geziyiAc = (g: AkisGezisi) => router.push({ pathname: '/gezi/[slug]', params: { slug: g.slug } });
   const aramaGezisi = (g: AkisGezisi) => {
     aramaSonucYazildi.current = true;
