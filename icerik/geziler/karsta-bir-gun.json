@@ -75,7 +75,6 @@
         },
         {
           "place_id": "ChIJexWYzxEWakARyS5E2mqaTqc",
-          "osm": "way/157441696",
           "ad": "Ani Ören Yeri",
           "sure_dk": 150,
           "sure_gerekcesi": "geniş açık alan; Aslanlı Kapı'dan katedral, Tigran Honents ve Menuçehr Camii'ne yürüyüş",
@@ -105,8 +104,8 @@
     "dogrulanacaklar": [
       "[Plan · Sehir] · Kars şehri sehir.yeni ile açılıyor (#299, 19 Kasım Ece kararı: Karadeniz ve doğu grubu); place_id 'Kars' kimlik sorgusundan (tek sonuç) · BO'da şehir satırı",
       "[Plan · tüm duraklar] · kapali_gunler [] yazıldı. Ani: turkishmuseums.com her gün için saat veriyor (kış 08:00–17:00, gişe 16:00), kapalı gün yok. Kale ve köprü açık alan (OSM Kars Kalesi 24/7). Cami namaz vakitlerinde kapalı. İki lokantanın kapalı günü bilinmiyor · lokantalar, kars.ktb.gov.tr",
-      "[Plan · g1.d2, g1.d4] · OSM'siz: Taş Köprü ve Kars Kaz Evi OSM aday listesinde yok (köprü tourism/historic süzgecine girmiyor, lokanta OSM'de yok); konum Google'dan 30 gün",
-      "[Plan · g1.d6] · OSM'de iki 'Hanımeli Kars Mutfağı' noktası var (node/6274157795 ve node/14259164001, aralarında ~600 m); yenisi seçildi, kuru yukle'deki 150 m denetimi hangisinin doğru olduğunu gösterir · lokanta taşınmış olabilir",
+      "[Plan · g1.d2, g1.d4, g1.d5] · OSM'siz, konum Google'dan 30 gün. Taş Köprü ve Kars Kaz Evi OSM aday listesinde yok (köprü tourism/historic süzgecine girmiyor, lokanta OSM'de yok). Ani'nin OSM alanı (way/157441696, ören yerinin tamamı) merkezi Google noktasından 539 m uzak çıktı; büyük alanın merkezi girişe denk gelmiyor · BO'da Aslanlı Kapı'ya elle işaretlenebilir",
+      "[Plan · g1.d6] · OSM'de iki 'Hanımeli Kars Mutfağı' noktası var (node/6274157795 ve node/14259164001, aralarında ~600 m); yenisi seçildi ve kuru yukle'de Google noktasına 150 m içinde çıktı; eski nokta OSM'de silinmeli",
       "[Yazı · Kümbet] · 930'lar ve I. Abbas (en.wikipedia 'Cathedral of Kars': 930–937/943; ktb.gov.tr: 932–937); 1579 cami, 1877 sonrası Rus kilisesi, 1964–1993 müze, 1993'ten beri cami (en.wikipedia). KTB 1064'te camiye çevrildiğini de yazıyor, çelişki var; yazıda 1579 kullanıldı · kars.ktb.gov.tr",
       "[Yazı · Rehber Kümbet] · haç plan, konik külah ve Rus döneminde eklenen giriş revakları genel bilgi, kaynakta okunmadı · kulturenvanteri.com",
       "[Yazı · Taş Köprü] · 1725 (en.wikipedia 'Kars'); 'üç kemer' ve 'kesme bazalt' icerik/iller/kars.json'dan, bu turda kaynakla teyit edilmedi; yanındaki üç eski hamam (en.wikipedia 'Kars') · kars.ktb.gov.tr",
