@@ -19,8 +19,8 @@
     "google": "Google ile devam et",
     "kosullar": "Devam ederek Kullanım Koşulları'nı kabul edersin.",
     "hata": "Giriş tamamlanamadı. Tekrar dener misin?",
-    "depolamaYok": "Bu tarayıcı girişe izin vermiyor. Linki başka bir tarayıcıda ya da gizli veya özel olmayan normal bir sekmede aç.",
-    "gomuluTarayici": "Instagram ya da Facebook gibi bir uygulamanın içinden giriş yapılamıyor. Linki uygulamanın menüsünden tarayıcıda aç ya da kopyalayıp Chrome veya Safari'ye yapıştır.",
+    "depolamaYok": "Bu tarayıcının ayarları girişe izin vermiyor. Linki başka bir tarayıcıda aç.",
+    "gomuluTarayici": "Instagram ya da Facebook gibi bir uygulamanın içinden giriş yapılamıyor. Linki uygulamanın menüsünden tarayıcıda aç ya da sohbetteki linke basılı tutup kopyala, Chrome veya Safari'ye yapıştır.",
     "onizleme": {
       "durum": "● Şu an seyahatte",
       "durak1": "Forum Romanum",
@@ -191,8 +191,8 @@
     "gozAt": "Tripmate'e göz at",
     "anaSayfa": "Ana sayfaya git",
     "hata": "Katılım tamamlanamadı. Tekrar dene.",
-    "depolamaYok": "Bu tarayıcı girişe izin vermiyor. Linki başka bir tarayıcıda ya da gizli veya özel olmayan normal bir sekmede aç.",
-    "gomuluTarayici": "Instagram ya da Facebook gibi bir uygulamanın içinden giriş yapılamıyor. Linki uygulamanın menüsünden tarayıcıda aç ya da kopyalayıp Chrome veya Safari'ye yapıştır.",
+    "depolamaYok": "Bu tarayıcının ayarları girişe izin vermiyor. Linki başka bir tarayıcıda aç.",
+    "gomuluTarayici": "Instagram ya da Facebook gibi bir uygulamanın içinden giriş yapılamıyor. Linki uygulamanın menüsünden tarayıcıda aç ya da sohbetteki linke basılı tutup kopyala, Chrome veya Safari'ye yapıştır.",
     "webNot": "Uygulaman yoksa da sorun yok: burada katıl; sonra indirirsen aynı hesapla doğrudan seyahate düşersin.",
     "webAcilis": {
       "baslik": "Davetin açılıyor",

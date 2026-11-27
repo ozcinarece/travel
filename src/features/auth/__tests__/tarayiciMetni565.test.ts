@@ -1,4 +1,4 @@
-// #565: gömülü tarayıcıda menü ipucu, depolaması kapalı gerçek tarayıcıda başka tarayıcı / gizli olmayan pencere.
+// #565: gömülü tarayıcıda menü ipucu, depolaması kapalı gerçek tarayıcıda başka tarayıcı.
 import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals';
 import { Platform } from 'react-native';
 
@@ -19,13 +19,15 @@ jest.mock('@/lib/supabase', () => ({
 
 const UA = {
   instagram: 'Mozilla/5.0 (Linux; Android 14; Pixel 8 Build/AP2A; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/131.0.6778.39 Mobile Safari/537.36 Instagram 357.0.0.25.101 Android',
+  // iOS Instagram: `; wv)` içermez; yalnız `Instagram` deseniyle tanınır.
+  instagramIos: 'Mozilla/5.0 (iPhone; CPU iPhone OS 18_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 Instagram 357.0.0.25.101 (iPhone15,2; iOS 18_1; tr_TR; tr; scale=3.00; 1179x2556; 654321)',
   facebook: 'Mozilla/5.0 (iPhone; CPU iPhone OS 18_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 [FBAN/FBIOS;FBAV/489.0.0.40.108;FBBV/123]',
   webview: 'Mozilla/5.0 (Linux; Android 13; SM-A536B; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/130.0.0.0 Mobile Safari/537.36',
   chrome: 'Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Mobile Safari/537.36',
   safari: 'Mozilla/5.0 (iPhone; CPU iPhone OS 18_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.1 Mobile/15E148 Safari/604.1',
 };
-const KK1 = 'Instagram ya da Facebook gibi bir uygulamanın içinden giriş yapılamıyor. Linki uygulamanın menüsünden tarayıcıda aç ya da kopyalayıp Chrome veya Safari\'ye yapıştır.';
-const KK2 = 'Bu tarayıcı girişe izin vermiyor. Linki başka bir tarayıcıda ya da gizli veya özel olmayan normal bir sekmede aç.';
+const KK1 = 'Instagram ya da Facebook gibi bir uygulamanın içinden giriş yapılamıyor. Linki uygulamanın menüsünden tarayıcıda aç ya da sohbetteki linke basılı tutup kopyala, Chrome veya Safari\'ye yapıştır.';
+const KK2 = 'Bu tarayıcının ayarları girişe izin vermiyor. Linki başka bir tarayıcıda aç.';
 
 const os = Platform.OS;
 const nav = Object.getOwnPropertyDescriptor(globalThis, 'navigator');
@@ -61,6 +63,7 @@ describe('#565 tarayıcı metni duruma göre', () => {
 
   it.each([
     ['Instagram', UA.instagram],
+    ['iOS Instagram', UA.instagramIos],
     ['Facebook', UA.facebook],
     ['; wv) WebView', UA.webview],
   ])('KK1/KK3: %s → GomuluTarayici, menü metni; Google\'a gidilmez (depolama kapalı olsa da)', async (_ad, deger) => {
