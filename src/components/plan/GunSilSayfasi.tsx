@@ -14,16 +14,19 @@ type Props = {
   gun: Gun | null;
   baslik: string;
   durakSayisi: number;
+  /** #570 KK1: silinen gün son gün mü (sonraki gün yoksa kayma cümlesi çıkmaz). */
+  sonGun: boolean;
   onSil: (g: Gun) => void;
   onKapat: () => void;
 };
 
-/** #554 KK5: onay metni (saf; test edilir). */
-export function gunSilMetni(durakSayisi: number): string {
-  return durakSayisi > 0 ? t('gunler.gunSilMetin', { n: durakSayisi }) : t('gunler.gunSilMetinBos');
+/** #554 KK5, #570 KK1: onay metni (saf; test edilir). Silinen gün son gün değilse sonraki günlerin kaydığı da söylenir. */
+export function gunSilMetni(durakSayisi: number, sonGun: boolean): string {
+  const ilk = durakSayisi > 0 ? t('gunler.gunSilMetin', { n: durakSayisi }) : t('gunler.gunSilMetinBos');
+  return sonGun ? ilk : `${ilk} ${t('gunler.gunSilKayma')}`;
 }
 
-export function GunSilSayfasi({ gun, baslik, durakSayisi, onSil, onKapat }: Props) {
+export function GunSilSayfasi({ gun, baslik, durakSayisi, sonGun, onSil, onKapat }: Props) {
   return (
     <Modal visible={!!gun} transparent animationType="fade" onRequestClose={onKapat}>
       <GestureHandlerRootView style={modalKokuStili}>
@@ -34,7 +37,7 @@ export function GunSilSayfasi({ gun, baslik, durakSayisi, onSil, onKapat }: Prop
             <Text accessibilityRole="header" style={v7pCekmece.baslik}>
               {t('gunler.gunSilBaslik', { gun: baslik })}
             </Text>
-            <Text style={s.metin}>{gunSilMetni(durakSayisi)}</Text>
+            <Text style={s.metin}>{gunSilMetni(durakSayisi, sonGun)}</Text>
             <Pressable accessibilityRole="button" onPress={() => gun && onSil(gun)} style={({ pressed }) => [s.sil, pressed && { opacity: 0.7 }]}>
               <Text style={s.silMetin}>{t('gunler.gunuSil')}</Text>
             </Pressable>
