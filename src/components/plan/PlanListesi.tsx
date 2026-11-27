@@ -346,6 +346,14 @@ export const SEKME_YUKSEKLIK = 44;
 
 /** #562 KK3: Program'daki "Haritaya dön" düğmesinin dokunma alanı (görünen hap 36 pt kalır; üst kap hitSlop'a izin vermez). */
 export const HARITAYA_DON_ALAN = 44;
+/** #562 KK3: görünen hap (kanvas 11: 36 pt) dokunma alanının üstüne yaslı; fazladan 8 pt dokunma alanı hapın altında. */
+export const HARITAYA_DON_HAP = 36;
+/** #562 KK3: "Kaydedildi" hapın alt kenarından 4 pt aşağıda (kanvas 11'deki `gap: 4`). */
+export const KAYDEDILDI_UST = HARITAYA_DON_HAP + 4;
+export const KAYDEDILDI_SATIR = 13;
+/** #140 (kanvas 11): Program liste başlığı satırı; "Kaydedildi" bu satırın dışına taşmaz. */
+export const LISTE_BASLIK_YUKSEKLIK = 58;
+export const LISTE_BASLIK_UST_BOSLUK = 2;
 
 /** #553 KK2: ekran okuyucu etiketi — saat, ad, alt satır; vurgulu durakta "şu an buradasın" ya da "sıradaki durak";
  * #554 KK2: atlananda "Atlandı" hapı da okunur (alt satırdaki "· atlandı" kalktı). */

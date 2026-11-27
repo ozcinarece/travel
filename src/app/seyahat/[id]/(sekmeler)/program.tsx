@@ -18,7 +18,18 @@ import { OtelUcSatiri } from '@/components/program/OtelUcSatiri';
 import { PlanHazirSayfasi, type PlanGunOzeti } from '@/components/program/PlanHazirSayfasi';
 import { HarcamaFormu } from '@/components/harcama/HarcamaFormu';
 import { MekanPaneli } from '@/components/mekan/MekanPaneli';
-import { durakOzeti, HARITAYA_DON_ALAN, ListemBekliyorSatiri, PlanListesi, type PlanSatirGorunumu } from '@/components/plan/PlanListesi';
+import {
+  durakOzeti,
+  HARITAYA_DON_ALAN,
+  HARITAYA_DON_HAP,
+  KAYDEDILDI_SATIR,
+  KAYDEDILDI_UST,
+  LISTE_BASLIK_UST_BOSLUK,
+  LISTE_BASLIK_YUKSEKLIK,
+  ListemBekliyorSatiri,
+  PlanListesi,
+  type PlanSatirGorunumu,
+} from '@/components/plan/PlanListesi';
 import { PuanSayfasi } from '@/components/program/PuanSayfasi';
 import { SecimMenusu, type SecimSecenegi } from '@/components/program/SecimMenusu';
 import { GunSilSayfasi } from '@/components/plan/GunSilSayfasi';
@@ -932,7 +943,11 @@ function ProgramSekmesi({
                 <Text style={s.haritayaDonMetin}>{t('program.liste.haritayaDon')}</Text>
               </View>
             </Pressable>
-            {kaydedildi ? <Text style={s.kaydedildi}>{t('program.liste.kaydedildi')}</Text> : null}
+            {kaydedildi ? (
+              <View pointerEvents="none" style={s.kaydedildiKap}>
+                <Text style={s.kaydedildi}>{t('program.liste.kaydedildi')}</Text>
+              </View>
+            ) : null}
           </View>
         </View>
       )}
@@ -1509,16 +1524,18 @@ const s = StyleSheet.create({
   katliMetin: { flex: 1, fontFamily: yazi.ekstra, fontSize: 15, color: renk.metin },
   puanlaSatir: { alignItems: 'flex-start', paddingHorizontal: 16, paddingBottom: 8 },
   // #140 (kanvas 11): liste başlığı.
-  listeBaslik: { minHeight: 58, flexDirection: 'row', alignItems: 'center', gap: 10, paddingTop: 2, paddingBottom: 4 },
+  listeBaslik: { minHeight: LISTE_BASLIK_YUKSEKLIK, flexDirection: 'row', alignItems: 'center', gap: 10, paddingTop: LISTE_BASLIK_UST_BOSLUK, paddingBottom: 4 },
   gunKare: { width: 40, height: 40, borderRadius: kose.alan, alignItems: 'center', justifyContent: 'center' },
   gunKareMetin: { ...baslikStili(16) },
   listeGun: { ...baslikStili(19), color: renk.metin },
   listeOzet: { fontFamily: yazi.normal, fontSize: 13, color: renk.ikincil },
-  // #562 KK3: 44 pt alanın içinde 36 pt hap; hapın altındaki 4 pt boşluk eski `gap: 4`'ün yerini tutar.
-  haritayaDonKap: { alignItems: 'flex-end' },
-  haritayaDonAlan: { height: HARITAYA_DON_ALAN, justifyContent: 'center' },
-  haritayaDon: { height: 36, paddingHorizontal: 12, borderRadius: kose.alan, backgroundColor: renk.yuzey, justifyContent: 'center' },
+  // #562 KK3 (kanvas 11): hap ve "Kaydedildi" sütunu satırın üstüne yaslı; 44 pt dokunma alanında 36 pt hap üstte,
+  // fazladan 8 pt altta. "Kaydedildi" hapın 4 pt altında: 2 + 40 + 13 = 55 ≤ 58, başlık satırından taşmaz.
+  haritayaDonKap: { alignSelf: 'flex-start', alignItems: 'flex-end' },
+  haritayaDonAlan: { height: HARITAYA_DON_ALAN, justifyContent: 'flex-start' },
+  haritayaDon: { height: HARITAYA_DON_HAP, paddingHorizontal: 12, borderRadius: kose.alan, backgroundColor: renk.yuzey, justifyContent: 'center' },
   haritayaDonMetin: { fontFamily: yazi.ekstra, fontSize: 13, color: renk.ana },
-  // #562 KK3: "Kaydedildi" hapın hemen altında, akışın dışında; 44 pt alan başlık satırını büyütüp zıplatmasın.
-  kaydedildi: { position: 'absolute', top: HARITAYA_DON_ALAN - 4, right: 0, fontFamily: yazi.ekstra, fontSize: 11, lineHeight: 13, color: renk.basariMetin },
+  // #562 KK3: "Kaydedildi" akışın dışında (başlık satırı zıplamasın); dokunmaları alttaki 44 pt alana bırakır.
+  kaydedildiKap: { position: 'absolute', top: KAYDEDILDI_UST, right: 0 },
+  kaydedildi: { fontFamily: yazi.ekstra, fontSize: 11, lineHeight: KAYDEDILDI_SATIR, color: renk.basariMetin },
 });

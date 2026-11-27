@@ -4,7 +4,16 @@ import { render } from '@testing-library/react-native';
 import { StyleSheet } from 'react-native';
 
 import { gunAlti, gunSatiriEtiketi } from '@/components/listem/GuneEkleSayfasi';
-import { durakEtiketi, HARITAYA_DON_ALAN, ListemBekliyorSatiri } from '@/components/plan/PlanListesi';
+import {
+  durakEtiketi,
+  HARITAYA_DON_ALAN,
+  HARITAYA_DON_HAP,
+  KAYDEDILDI_SATIR,
+  KAYDEDILDI_UST,
+  LISTE_BASLIK_UST_BOSLUK,
+  LISTE_BASLIK_YUKSEKLIK,
+  ListemBekliyorSatiri,
+} from '@/components/plan/PlanListesi';
 import { AKSAM_BITIS_DK, bugunDurumu, type GunSecenegi } from '@/features/listem/listem';
 import { t } from '@/i18n';
 import { okunurAyrac } from '@/lib/okunur';
@@ -47,6 +56,18 @@ describe('Plan gün v7p küçükleri 2 (#562)', () => {
 
   it('KK3: "Haritaya dön" dokunma alanı en az 44 pt', () => {
     expect(HARITAYA_DON_ALAN).toBeGreaterThanOrEqual(44);
+    // Görünen hap kanvastaki gibi 36 pt ve dokunma alanının üstünde.
+    expect(HARITAYA_DON_HAP).toBe(36);
+    expect(HARITAYA_DON_HAP).toBeLessThan(HARITAYA_DON_ALAN);
+  });
+
+  it('KK3: "Kaydedildi" hapın alt kenarından 4 pt aşağıda ve başlık satırından taşmıyor', () => {
+    // Hap alanın üstüne yaslı (justifyContent: flex-start) → hapın alt kenarı = HARITAYA_DON_HAP.
+    expect(KAYDEDILDI_UST).toBe(HARITAYA_DON_HAP + 4);
+    // Kap satırın üstüne yaslı (alignSelf: flex-start) → "Kaydedildi"nin alt kenarı satırın içinde kalır.
+    expect(LISTE_BASLIK_UST_BOSLUK + KAYDEDILDI_UST + KAYDEDILDI_SATIR).toBeLessThanOrEqual(LISTE_BASLIK_YUKSEKLIK);
+    // 44 pt dokunma alanı da satırın içinde.
+    expect(LISTE_BASLIK_UST_BOSLUK + HARITAYA_DON_ALAN).toBeLessThanOrEqual(LISTE_BASLIK_YUKSEKLIK);
   });
 
   it('KK4: harita panelinin boş gün halinde Listem satırı kendi üst boşluğunu eklemez (tek boşluk, tek çizgi)', () => {
