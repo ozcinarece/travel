@@ -157,6 +157,8 @@ export default function SihirbazEkrani() {
         }
       : null;
 
+  const kayitSuruyor = kuruluyor || taslakTarihi.isPending || taslakSehri.isPending || adKaydet.isPending;
+
   // #581 KK4: Android geri tuşu sihirbazda bir önceki adıma döner (1. adımda sistem davranışı).
   useFocusEffect(
     useCallback(() => {
@@ -167,7 +169,8 @@ export default function SihirbazEkrani() {
           if (kayitliSehir) setSehir(kayitliSehir);
           return true;
         }
-        if (kuruluyor) return true;
+        // Kayıt sürerken geri yutulur: iş bitince kapanıştaki ileri() kişiyi yine öne atardı.
+        if (kayitSuruyor) return true;
         if (panel) {
           setPanel(null);
           return true;
@@ -180,10 +183,11 @@ export default function SihirbazEkrani() {
       });
       return () => abonelik.remove();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [adim, panel, sehirOnayi, kuruluyor, seyahat.data]),
+    }, [adim, panel, sehirOnayi, kayitSuruyor, seyahat.data]),
   );
 
   const geri = () => {
+    if (kayitSuruyor) return;
     setHata(null);
     const o = oncekiAdim(adim);
     if (o) setAdim(o);
@@ -243,6 +247,20 @@ export default function SihirbazEkrani() {
     }
     ileri();
   };
+  // #144 Tekrar kur: aynı plan yeni tarihe kopyalanır, Program açılır. Düşerse hata yukarı gider; taslak ve giriş korunur.
+  const tekrarKopyala = async (kaynak: string, id: string) => {
+    const n = await seyahatiKopyala(kaynak, id);
+    setGirisPlani(null);
+    olayYaz('sihirbaz_bitti', id, { tekrar: kaynak, durak: n });
+    router.replace({ pathname: '/seyahat/[id]/(sekmeler)/program', params: { id } });
+    // Sekme açık kalır: bir sonraki "+" baştan başlasın.
+    setAdim('nereye');
+    setSehir(null);
+    setAd(null);
+    setAralik(null);
+    setTarihsizGun(null);
+    setTripId(null);
+  };
   // 2 → 3: seyahat oluşturulur (tarihli ya da tarihsiz N gün). #581 KK3a: taslak varsa yenisi açılmaz, tarihi güncellenir.
   const seyahatiKur = async () => {
     const secim = tarihSecimi(aralik, tarihsizGun);
@@ -264,6 +282,20 @@ export default function SihirbazEkrani() {
           return;
         }
       }
+      // #581: "Tekrar kur"da kopya düştüyse yeniden deneme kopyayı tekrar çalıştırır (boş taslakla 3. adıma düşülmez).
+      if (girisPlani?.tur === 'tekrar' && girisPlani.sehirId === sehir.place_id) {
+        kuruluyorRef.current = true;
+        setKuruluyor(true);
+        try {
+          await tekrarKopyala(girisPlani.kaynak, tripId);
+        } catch {
+          setHata(t('sihirbaz.nezaman.hata'));
+        } finally {
+          kuruluyorRef.current = false;
+          setKuruluyor(false);
+        }
+        return;
+      }
       return ileri();
     }
     kuruluyorRef.current = true;
@@ -281,17 +313,7 @@ export default function SihirbazEkrani() {
       if (secim.tur === 'tarihsiz' && secim.gun > 1) await tarihsizGunleriKur(id, secim.gun);
       // #144 Tekrar kur: aynı plan yeni tarihe; plan hazır olduğundan öneriler atlanır, Program açılır.
       if (girisPlani?.tur === 'tekrar' && girisPlani.sehirId === sehir.place_id) {
-        const n = await seyahatiKopyala(girisPlani.kaynak, id);
-        setGirisPlani(null);
-        olayYaz('sihirbaz_bitti', id, { tekrar: girisPlani.kaynak, durak: n });
-        router.replace({ pathname: '/seyahat/[id]/(sekmeler)/program', params: { id } });
-        // Sekme açık kalır: bir sonraki "+" baştan başlasın.
-        setAdim('nereye');
-        setSehir(null);
-        setAd(null);
-        setAralik(null);
-        setTarihsizGun(null);
-        setTripId(null);
+        await tekrarKopyala(girisPlani.kaynak, id);
         return;
       }
       // #144 Bu şehre seyahat kur: kaydedilen yerler listeye (3. adımda listede görünür).
@@ -342,7 +364,7 @@ export default function SihirbazEkrani() {
   if (adim === 'nereye') {
     return (
       <>
-        <AdimKabugu adim={adim} baslik={t('sihirbaz.nereye.baslik')} onGeri={geri} hata={hata} devam={{ onPress: nereyeDevam, pasif: !sehir, yukleniyor: adKaydet.isPending || taslakSehri.isPending }}>
+        <AdimKabugu adim={adim} baslik={t('sihirbaz.nereye.baslik')} onGeri={geri} geriPasif={kayitSuruyor} hata={hata} devam={{ onPress: nereyeDevam, pasif: !sehir, yukleniyor: adKaydet.isPending || taslakSehri.isPending }}>
           <AdimNereye key={ilkSorgu?.anahtar} ilkSorgu={ilkSorgu?.metin} sehir={sehir} onSehir={setSehir} ad={ad} onerilenAd={onerilenAd} onAd={setAd} sehirler={sehirler.data} />
         </AdimKabugu>
         <SehirDegisimSayfasi yerSayisi={sehirOnayi} sehir={sehir?.ad ?? ''} onDevam={sehriKaydet} onVazgec={sehirVazgec} />
@@ -355,7 +377,7 @@ export default function SihirbazEkrani() {
         adim={adim}
         baslik={t('sihirbaz.nezaman.baslik')}
         alt={seyahat.data ? (seyahat.data.name ?? seyahat.data.city_label) : (ad ?? onerilenAd)}
-        onGeri={geri}
+        onGeri={geri} geriPasif={kayitSuruyor}
         hata={hata}
         devam={{ onPress: seyahatiKur, pasif: !aralik && tarihsizGun === null, yukleniyor: kuruluyor || taslakTarihi.isPending }}
         atla={
@@ -390,7 +412,7 @@ export default function SihirbazEkrani() {
       if (duraklar.isError) void duraklar.refetch();
     };
     return (
-      <AdimKabugu adim={adim} baslik="" onGeri={geri}>
+      <AdimKabugu adim={adim} baslik="" onGeri={geri} geriPasif={kayitSuruyor}>
         {veriHatasi ? (
           <View style={s.hataKutu}>
             <Text style={s.hata}>{t('sihirbaz.onerilenler.veriHata')}</Text>
@@ -443,7 +465,7 @@ export default function SihirbazEkrani() {
         adim={adim}
         baslik={t('sihirbaz.onerilenler.baslik')}
         alt={ilListesi ? t('sihirbaz.onerilenler.altIl', { il: sehir?.ad ?? seyahat.data.city_label }) : t('sihirbaz.onerilenler.alt')}
-        onGeri={geri}
+        onGeri={geri} geriPasif={kayitSuruyor}
         hata={hata}
         kaydirmasiz
         altIcerik={
