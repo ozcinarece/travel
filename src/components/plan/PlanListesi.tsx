@@ -28,6 +28,8 @@ export type PlanSatirGorunumu = {
   gelis: { metin: string; araba: boolean } | null;
   /** Gezi modunda şu anki (buradasın / sıradaki) durak. */
   vurgulu: boolean;
+  /** #558: vurgulu durak "buradasın" durumunda (sıradaki değil). */
+  buradasin: boolean;
   gecildi: boolean;
   atlandi: boolean;
 };
@@ -87,8 +89,6 @@ export function PlanListesi(p: Props) {
                 accessibilityState={{ selected: secili }}
                 onPress={() => p.onGunSec(g)}
                 onLongPress={() => p.onGunUzunBas(g)}
-                // #553 KK1: görünen 42 pt (kanvas), dokunma alanı 44 pt.
-                hitSlop={SEKME_HIT_SLOP}
                 style={[s.sekme, secili && s.sekmeSecili]}>
                 <View style={[s.nokta, { backgroundColor: p.gunRengi(g) }]} />
                 <Text style={[s.sekmeMetin, secili && s.sekmeMetinSecili]} numberOfLines={1}>
@@ -211,11 +211,13 @@ export function ListemBekliyorSatiri({ n, onPress }: { n: number; onPress: () =>
   );
 }
 
-export const SEKME_HIT_SLOP = { top: 1, bottom: 1 } as const;
+/** #553 KK1 (#558): sekme kutusu 44 pt — `hitSlop` üst kabı aşamadığı için dokunma alanı kutunun kendisi. */
+export const SEKME_YUKSEKLIK = 44;
 
-/** #553 KK2: ekran okuyucu etiketi — saat, ad, alt satır; sıradaki ya da şu anki durakta "sıradaki durak". */
-export function durakEtiketi(r: { saat: string | null; ad: string; alt: string | null; vurgulu: boolean }): string {
-  return [r.saat, r.ad, r.alt, r.vurgulu ? t('plan.siradakiDurak') : null].filter(Boolean).join(', ');
+/** #553 KK2: ekran okuyucu etiketi — saat, ad, alt satır; vurgulu durakta "şu an buradasın" ya da "sıradaki durak". */
+export function durakEtiketi(r: { saat: string | null; ad: string; alt: string | null; vurgulu: boolean; buradasin?: boolean }): string {
+  const durum = r.vurgulu ? t(r.buradasin ? 'plan.buradasinDurak' : 'plan.siradakiDurak') : null;
+  return [r.saat, r.ad, r.alt, durum].filter(Boolean).join(', ');
 }
 
 const s = StyleSheet.create({
@@ -238,7 +240,7 @@ const s = StyleSheet.create({
   },
   sekmeAlani: { borderBottomWidth: 1, borderBottomColor: altMenuRenk.cizgi },
   sekmeler: { paddingHorizontal: 16, gap: 20 },
-  sekme: { height: 42, flexDirection: 'row', alignItems: 'center', gap: 6, borderBottomWidth: 2.5, borderBottomColor: 'transparent' },
+  sekme: { height: SEKME_YUKSEKLIK, flexDirection: 'row', alignItems: 'center', gap: 6, borderBottomWidth: 2.5, borderBottomColor: 'transparent' },
   sekmeSecili: { borderBottomColor: renk.vurgu },
   nokta: { width: 7, height: 7, borderRadius: 4 },
   sekmeMetin: { fontFamily: yazi.orta, fontSize: 15, color: anaV5.ikincil },

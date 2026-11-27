@@ -1012,6 +1012,7 @@ function ProgramSekmesi({
       alt,
       gelis: r.gelis ? { metin: t('plan.bacak', { dk: `${r.gelis.kestirim ? '~' : ''}${dk}`, mesafe: kmMetni(r.gelis.m) }), araba: r.gelis.mod === 'taksi' } : null,
       vurgulu: !!prog?.bugun && (r.durum === 'buradasin' || r.durum === 'siradaki'),
+      buradasin: !!prog?.bugun && r.durum === 'buradasin',
       gecildi,
       atlandi,
     };

@@ -1085,7 +1085,8 @@
     "tumu": "Tümü ›",
     "listem": "Listem",
     "listemBekliyor": "{n} yer gün bekliyor",
-    "siradakiDurak": "sıradaki durak"
+    "siradakiDurak": "sıradaki durak",
+    "buradasinDurak": "şu an buradasın"
   },
   "listem": {
     "baslik": "Listem",

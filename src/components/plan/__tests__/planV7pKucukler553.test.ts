@@ -3,15 +3,15 @@ import { describe, expect, it, jest } from '@jest/globals';
 
 import { gunAlti, gunSatiriEtiketi } from '@/components/listem/GuneEkleSayfasi';
 import { bugunDurumu, type GunSecenegi } from '@/features/listem/listem';
-import { durakEtiketi, SEKME_HIT_SLOP } from '@/components/plan/PlanListesi';
+import { durakEtiketi, SEKME_YUKSEKLIK } from '@/components/plan/PlanListesi';
 import { t } from '@/i18n';
 
 jest.mock('@/components/ui/Foto', () => ({ Foto: () => null }));
 jest.mock('@/components/harita/Harita', () => ({ Harita: () => null }));
 
 describe('Plan v7p küçükleri (#553)', () => {
-  it('KK1: 42 pt sekme + hitSlop = 44 pt dokunma alanı', () => {
-    expect(42 + SEKME_HIT_SLOP.top + SEKME_HIT_SLOP.bottom).toBeGreaterThanOrEqual(44);
+  it('KK1: sekme kutusunun kendisi 44 pt (hitSlop üst kabı aşamaz)', () => {
+    expect(SEKME_YUKSEKLIK).toBeGreaterThanOrEqual(44);
   });
 
   it('KK2: sıradaki durak etiketin sonunda "sıradaki durak"; diğerlerinde yok', () => {
@@ -19,6 +19,9 @@ describe('Plan v7p küçükleri (#553)', () => {
     expect(durakEtiketi(r)).toBe(`10:42, Pantheon, Müze · 1 sa, ${t('plan.siradakiDurak')}`);
     expect(durakEtiketi({ ...r, vurgulu: false })).toBe('10:42, Pantheon, Müze · 1 sa');
     expect(durakEtiketi({ ...r, saat: null, vurgulu: false })).toBe('Pantheon, Müze · 1 sa');
+    // #558 madde 2: "buradasın" durumundaki durak "sıradaki" diye okunmaz.
+    expect(durakEtiketi({ ...r, buradasin: true })).toBe(`10:42, Pantheon, Müze · 1 sa, ${t('plan.buradasinDurak')}`);
+    expect(durakEtiketi({ ...r, buradasin: true })).not.toContain(t('plan.siradakiDurak'));
   });
 
   it('KK4: geçmiş gün "…, geçti" diye okunur; diğer günler alt satırla', () => {
