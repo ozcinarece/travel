@@ -4,8 +4,13 @@ import { Platform } from 'react-native';
 
 import { supabase } from '@/lib/supabase';
 
-// Web'de OAuth dönüşünde açılan pencereyi kapatır.
-WebBrowser.maybeCompleteAuthSession();
+// Web'de OAuth dönüşünde açılan pencereyi kapatır. Depolaması kapalı tarayıcıda localStorage okuması hata verir;
+// modül düzeyinde olduğu için korumasız kalırsa /r/{token} dahil bütün sayfa hata ekranına düşer (#537).
+try {
+  WebBrowser.maybeCompleteAuthSession();
+} catch {
+  // depolama yok: kapatılacak giriş penceresi de yok
+}
 
 // Apple girişi kod olarak hazır; Apple Developer hesabı gelene kadar bayrakla kapalı.
 const APPLE_ACIK = process.env.EXPO_PUBLIC_APPLE_SIGN_IN === '1';
