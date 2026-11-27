@@ -89,7 +89,8 @@ import { konumu, yolTarifiHedefi } from '@/lib/konum';
 export default function GeziEkrani() {
   const id = useSeyahatId();
   // #181 KK14: davetle gelen kullanıcı doğrudan buraya iner ("Katıldın ✓" alt sayfası bir kez).
-  const { katildin } = useLocalSearchParams<{ katildin?: string }>();
+  // #573: uygulama içi davetle gelende "Katıldın" başlığındaki ad davet edenin adıdır (sahip olmayabilir).
+  const { katildin, davetEden } = useLocalSearchParams<{ katildin?: string; davetEden?: string }>();
   const seyahat = useSeyahat(id);
   const gunler = useGunler(id);
   const duraklar = useDuraklar(id);
@@ -112,6 +113,7 @@ export default function GeziEkrani() {
       mekanlar={mekanlar.data}
       konaklamalar={konaklamaVerisi}
       katildin={katildin === '1'}
+      davetEden={davetEden || undefined}
       cevrimdisi={cevrimdisi}
       guncellendi={guncellendi}
     />
@@ -127,13 +129,15 @@ type SayfaProps = {
   mekanlar: Mekan[];
   konaklamalar: Konaklama[];
   katildin: boolean;
+  /** #573: "Katıldın" çekmecesindeki davet edenin adı (uygulama içi davet); yoksa seyahatin sahibi. */
+  davetEden?: string;
   /** #243: bağlantı yok — şerit görünür, düzenleme düğmeleri pasif, Google içeriği gösterilmez. */
   cevrimdisi: boolean;
   /** Planın son başarılı güncellemesi (ms). */
   guncellendi: number;
 };
 
-function GeziSayfasi({ seyahat, gunler, duraklar, mekanlar, konaklamalar, katildin, cevrimdisi, guncellendi }: SayfaProps) {
+function GeziSayfasi({ seyahat, gunler, duraklar, mekanlar, konaklamalar, katildin, davetEden, cevrimdisi, guncellendi }: SayfaProps) {
   const { session, hesapli } = useOturum();
   const benId = session?.user.id ?? null;
   const uyeler = useUyeler(seyahat.id);
@@ -641,6 +645,7 @@ function GeziSayfasi({ seyahat, gunler, duraklar, mekanlar, konaklamalar, katild
         acik={karsilamaAcik && !!uyeler.data}
         seyahat={seyahat}
         uyeler={uyeListesi}
+        davetEden={davetEden}
         gunSayisi={gunler.length}
         mekanSayisi={mekanlar.length}
         onProgram={() => {
