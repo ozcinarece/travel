@@ -32,19 +32,6 @@
     },
     {
       "sira": 3,
-      "ad": "Toprakkale Kalesi",
-      "kategori": "tarih",
-      "amaclar": [
-        "kultur_tarih"
-      ],
-      "ilce": "Toprakkale",
-      "merkeze_km": 12,
-      "neden": "Çukurova–Suriye yolunu tutan 12 kuleli kale; 786'da kara taşla yeniden örüldü",
-      "osm": "way/274440582",
-      "place_id": "ChIJO-tqkU0kLxURPRDAk9s0t5I"
-    },
-    {
-      "sira": 4,
       "ad": "Kadirli Ala Cami",
       "kategori": "tarih",
       "amaclar": [
@@ -57,7 +44,7 @@
       "place_id": "ChIJu3irDUvFLhURU79_t-pzBXY"
     },
     {
-      "sira": 5,
+      "sira": 4,
       "ad": "Zorkun Yaylası",
       "kategori": "doga",
       "amaclar": [
@@ -71,7 +58,7 @@
       "place_id": "ChIJT8OHztAbLxURbtdePe-VIss"
     },
     {
-      "sira": 6,
+      "sira": 5,
       "ad": "Karaçay Şelalesi",
       "kategori": "doga",
       "amaclar": [
@@ -85,7 +72,7 @@
       "place_id": "ChIJr0kd1MUeLxUROv38mGW9WeQ"
     },
     {
-      "sira": 7,
+      "sira": 6,
       "ad": "Harun Reşit Kalesi",
       "kategori": "tarih",
       "amaclar": [
@@ -97,6 +84,19 @@
       "neden": "Halife Harun Reşit için 8. yy sonunda yapıldı; çevresi Adana çiğdemi için doğal sit",
       "osm": "relation/4867564",
       "place_id": "ChIJdSA5qcnzLhURoCZKFJ7pDG8"
+    },
+    {
+      "sira": 7,
+      "ad": "Toprakkale Kalesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Toprakkale",
+      "merkeze_km": 12,
+      "neden": "Çukurova–Suriye yolunu tutan 12 kuleli kale; 786'da kara taşla yeniden örüldü",
+      "osm": "way/274440582",
+      "place_id": "ChIJO-tqkU0kLxURPRDAk9s0t5I"
     },
     {
       "sira": 8,
