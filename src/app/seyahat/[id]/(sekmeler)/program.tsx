@@ -20,10 +20,11 @@ import { HarcamaFormu } from '@/components/harcama/HarcamaFormu';
 import { MekanPaneli } from '@/components/mekan/MekanPaneli';
 import {
   durakOzeti,
-  HARITAYA_DON_ALAN,
   HARITAYA_DON_HAP,
+  haritayaDonYerlesimi,
   KAYDEDILDI_SATIR,
   KAYDEDILDI_UST,
+  KAYDEDILDI_YAZI_CARPANI,
   LISTE_BASLIK_UST_BOSLUK,
   LISTE_BASLIK_YUKSEKLIK,
   ListemBekliyorSatiri,
@@ -936,16 +937,18 @@ function ProgramSekmesi({
           <Pressable accessibilityRole="button" accessibilityLabel={t('program.diger')} onPress={() => setListeMenuAcik(true)} style={s.ikonDugme}>
             <Ikon ad="daha" boyut={20} renk={renk.ana} kalinlik={2.4} />
           </Pressable>
-          <View style={s.haritayaDonKap}>
+          <View style={haritayaDonYerlesimi(kaydedildi > 0).kap}>
             {/* #562 KK3: dokunma alanı 44 pt (üst kap hitSlop'a izin vermez); görünen hap kanvastaki gibi 36 pt. */}
-            <Pressable testID="haritayaDon" accessibilityRole="button" onPress={() => setPanel('katli')} style={({ pressed }) => [s.haritayaDonAlan, pressed && { opacity: 0.8 }]}>
+            <Pressable testID="haritayaDon" accessibilityRole="button" onPress={() => setPanel('katli')} style={({ pressed }) => [haritayaDonYerlesimi(kaydedildi > 0).alan, pressed && { opacity: 0.8 }]}>
               <View style={s.haritayaDon}>
                 <Text style={s.haritayaDonMetin}>{t('program.liste.haritayaDon')}</Text>
               </View>
             </Pressable>
             {kaydedildi ? (
               <View pointerEvents="none" style={s.kaydedildiKap}>
-                <Text style={s.kaydedildi}>{t('program.liste.kaydedildi')}</Text>
+                <Text style={s.kaydedildi} accessibilityLiveRegion="polite" maxFontSizeMultiplier={KAYDEDILDI_YAZI_CARPANI}>
+                  {t('program.liste.kaydedildi')}
+                </Text>
               </View>
             ) : null}
           </View>
@@ -1529,13 +1532,11 @@ const s = StyleSheet.create({
   gunKareMetin: { ...baslikStili(16) },
   listeGun: { ...baslikStili(19), color: renk.metin },
   listeOzet: { fontFamily: yazi.normal, fontSize: 13, color: renk.ikincil },
-  // #562 KK3 (kanvas 11): hap ve "Kaydedildi" sütunu satırın üstüne yaslı; 44 pt dokunma alanında 36 pt hap üstte,
-  // fazladan 8 pt altta. "Kaydedildi" hapın 4 pt altında: 2 + 40 + 13 = 55 ≤ 58, başlık satırından taşmaz.
-  haritayaDonKap: { alignSelf: 'flex-start', alignItems: 'flex-end' },
-  haritayaDonAlan: { height: HARITAYA_DON_ALAN, justifyContent: 'flex-start' },
+  // #562 KK3 (kanvas 11): 44 pt dokunma alanı ve hizası `haritayaDonYerlesimi`'nde. "Kaydedildi" varken hap üstte:
+  // 2 + 40 + 13 = 55 ≤ 58, başlık satırından taşmaz; yokken hap ortalı.
   haritayaDon: { height: HARITAYA_DON_HAP, paddingHorizontal: 12, borderRadius: kose.alan, backgroundColor: renk.yuzey, justifyContent: 'center' },
   haritayaDonMetin: { fontFamily: yazi.ekstra, fontSize: 13, color: renk.ana },
-  // #562 KK3: "Kaydedildi" akışın dışında (başlık satırı zıplamasın); dokunmaları alttaki 44 pt alana bırakır.
+  // #562 KK3: "Kaydedildi" akışın dışında (başlık satırı büyümesin); dokunmaları alttaki 44 pt alana bırakır.
   kaydedildiKap: { position: 'absolute', top: KAYDEDILDI_UST, right: 0 },
   kaydedildi: { fontFamily: yazi.ekstra, fontSize: 11, lineHeight: KAYDEDILDI_SATIR, color: renk.basariMetin },
 });

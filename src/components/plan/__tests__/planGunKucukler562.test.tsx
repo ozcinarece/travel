@@ -8,8 +8,10 @@ import {
   durakEtiketi,
   HARITAYA_DON_ALAN,
   HARITAYA_DON_HAP,
+  haritayaDonYerlesimi,
   KAYDEDILDI_SATIR,
   KAYDEDILDI_UST,
+  KAYDEDILDI_YAZI_CARPANI,
   LISTE_BASLIK_UST_BOSLUK,
   LISTE_BASLIK_YUKSEKLIK,
   ListemBekliyorSatiri,
@@ -62,10 +64,14 @@ describe('Plan gün v7p küçükleri 2 (#562)', () => {
   });
 
   it('KK3: "Kaydedildi" hapın alt kenarından 4 pt aşağıda ve başlık satırından taşmıyor', () => {
-    // Hap alanın üstüne yaslı (justifyContent: flex-start) → hapın alt kenarı = HARITAYA_DON_HAP.
     expect(KAYDEDILDI_UST).toBe(HARITAYA_DON_HAP + 4);
-    // Kap satırın üstüne yaslı (alignSelf: flex-start) → "Kaydedildi"nin alt kenarı satırın içinde kalır.
-    expect(LISTE_BASLIK_UST_BOSLUK + KAYDEDILDI_UST + KAYDEDILDI_SATIR).toBeLessThanOrEqual(LISTE_BASLIK_YUKSEKLIK);
+    // "Kaydedildi" varken kap satırın, hap alanın üstüne yaslı → alt kenarı (büyük yazıda da) satırın içinde kalır.
+    expect(haritayaDonYerlesimi(true).kap.alignSelf).toBe('flex-start');
+    expect(haritayaDonYerlesimi(true).alan).toEqual({ height: HARITAYA_DON_ALAN, justifyContent: 'flex-start' });
+    expect(LISTE_BASLIK_UST_BOSLUK + KAYDEDILDI_UST + KAYDEDILDI_SATIR * KAYDEDILDI_YAZI_CARPANI).toBeLessThanOrEqual(LISTE_BASLIK_YUKSEKLIK);
+    // Yokken kanvastaki gibi ortalı: hap gün karesiyle aynı merkezde.
+    expect(haritayaDonYerlesimi(false).kap.alignSelf).toBe('center');
+    expect(haritayaDonYerlesimi(false).alan.justifyContent).toBe('center');
     // 44 pt dokunma alanı da satırın içinde.
     expect(LISTE_BASLIK_UST_BOSLUK + HARITAYA_DON_ALAN).toBeLessThanOrEqual(LISTE_BASLIK_YUKSEKLIK);
   });

@@ -346,7 +346,7 @@ export const SEKME_YUKSEKLIK = 44;
 
 /** #562 KK3: Program'daki "Haritaya dön" düğmesinin dokunma alanı (görünen hap 36 pt kalır; üst kap hitSlop'a izin vermez). */
 export const HARITAYA_DON_ALAN = 44;
-/** #562 KK3: görünen hap (kanvas 11: 36 pt) dokunma alanının üstüne yaslı; fazladan 8 pt dokunma alanı hapın altında. */
+/** #562 KK3: görünen hap (kanvas 11: 36 pt); "Kaydedildi" varken 44 pt alanın üstüne yaslı. */
 export const HARITAYA_DON_HAP = 36;
 /** #562 KK3: "Kaydedildi" hapın alt kenarından 4 pt aşağıda (kanvas 11'deki `gap: 4`). */
 export const KAYDEDILDI_UST = HARITAYA_DON_HAP + 4;
@@ -354,6 +354,17 @@ export const KAYDEDILDI_SATIR = 13;
 /** #140 (kanvas 11): Program liste başlığı satırı; "Kaydedildi" bu satırın dışına taşmaz. */
 export const LISTE_BASLIK_YUKSEKLIK = 58;
 export const LISTE_BASLIK_UST_BOSLUK = 2;
+/** #562 KK3: "Kaydedildi" büyük sistem yazısında da başlık satırından taşmasın (2 + 40 + 13 × 1,2 ≤ 58). */
+export const KAYDEDILDI_YAZI_CARPANI = 1.2;
+/** #562 KK3 (kanvas 11'deki flex davranışı): "Kaydedildi" yokken hap satırda ortalı (gün karesiyle aynı merkez); varken
+ * sütun satırın üstüne, hap 44 pt alanın üstüne yaslanır ve "Kaydedildi" hapın 4 pt altında satırın içinde kalır. */
+export function haritayaDonYerlesimi(kaydedildiVar: boolean): {
+  kap: { alignItems: 'flex-end'; alignSelf: 'center' | 'flex-start' };
+  alan: { height: number; justifyContent: 'center' | 'flex-start' };
+} {
+  const hiza = kaydedildiVar ? 'flex-start' : 'center';
+  return { kap: { alignItems: 'flex-end', alignSelf: hiza }, alan: { height: HARITAYA_DON_ALAN, justifyContent: hiza } };
+}
 
 /** #553 KK2: ekran okuyucu etiketi — saat, ad, alt satır; vurgulu durakta "şu an buradasın" ya da "sıradaki durak";
  * #554 KK2: atlananda "Atlandı" hapı da okunur (alt satırdaki "· atlandı" kalktı). */
