@@ -19,13 +19,11 @@ type Props = {
   onerilenAd: string;
   onAd: (ad: string | null) => void;
   sehirler: Sehir[] | undefined;
-  /** Seyahat oluşturulduysa şehir değiştirilemez (ad değişir). */
-  kilitli: boolean;
   /** #361 KK5: ana aramadan gelen metin; arama kutusu bununla dolu açılır. */
   ilkSorgu?: string;
 };
 
-export function AdimNereye({ sehir, onSehir, ad, onerilenAd, onAd, sehirler, kilitli, ilkSorgu }: Props) {
+export function AdimNereye({ sehir, onSehir, ad, onerilenAd, onAd, sehirler, ilkSorgu }: Props) {
   const [sorgu, setSorgu] = useState(ilkSorgu ?? '');
   const [jeton, setJeton] = useState(yeniOturumJetonu);
   const [mesgul, setMesgul] = useState<string | null>(null);
@@ -52,7 +50,6 @@ export function AdimNereye({ sehir, onSehir, ad, onerilenAd, onAd, sehirler, kil
   const oneriSec = (o: Oneri) => sec(o.place_id, o.ana, o.ikincil, jeton);
   // Popüler karo: içerik tablosunda Google kimliği yok → adıyla Autocomplete (cities), ilk öneri.
   const karoSec = async (k: Sehir) => {
-    if (kilitli) return;
     setHata(null);
     setMesgul(k.id);
     try {
@@ -78,16 +75,10 @@ export function AdimNereye({ sehir, onSehir, ad, onerilenAd, onAd, sehirler, kil
             <Text style={s.cipMetin} numberOfLines={1}>
               {sehir.ad}
             </Text>
-            {!kilitli ? (
-              // #117 KK1: × 28 px dokunma hedefi; seyahat oluşmadan serbest.
-              <Pressable accessibilityRole="button" accessibilityLabel={t('sihirbaz.nereye.kaldir')} onPress={() => onSehir(null)} hitSlop={10} style={s.cipKapatHedef}>
-                <Text style={s.cipKapat}>×</Text>
-              </Pressable>
-            ) : (
-              <View style={s.cipKapatHedef}>
-                <Ikon ad="kilit" boyut={13} renk={renk.zemin} kalinlik={2.2} />
-              </View>
-            )}
+            {/* #117 KK1: × 28 px dokunma hedefi. #581 KK3: seyahat oluştuktan sonra da serbest (kilit kalktı). */}
+            <Pressable accessibilityRole="button" accessibilityLabel={t('sihirbaz.nereye.kaldir')} onPress={() => onSehir(null)} hitSlop={10} style={s.cipKapatHedef}>
+              <Text style={s.cipKapat}>×</Text>
+            </Pressable>
           </View>
         ) : (
           <TextInput
@@ -104,7 +95,6 @@ export function AdimNereye({ sehir, onSehir, ad, onerilenAd, onAd, sehirler, kil
         )}
         {listeAcik && oneriler.isFetching ? <ActivityIndicator color={renk.ikincil} /> : null}
       </View>
-      {kilitli ? <Text style={s.not}>{t('sihirbaz.nereye.kilitli')}</Text> : null}
       {listeAcik ? (
         <View style={s.liste}>
           {oneriler.isError ? <Text style={s.hata}>{placesHatasi(oneriler.error, t('sihirbaz.nereye.araHata'))}</Text> : null}
@@ -137,10 +127,10 @@ export function AdimNereye({ sehir, onSehir, ad, onerilenAd, onAd, sehirler, kil
                 <Pressable
                   key={k.id}
                   accessibilityRole="button"
-                  accessibilityState={{ selected: secili, disabled: kilitli }}
-                  disabled={!!mesgul || kilitli || secili}
+                  accessibilityState={{ selected: secili }}
+                  disabled={!!mesgul || secili}
                   onPress={() => karoSec(k)}
-                  style={({ pressed }) => [s.oneri, secili && s.oneriSecili, (pressed || (kilitli && !secili)) && { opacity: 0.6 }]}>
+                  style={({ pressed }) => [s.oneri, secili && s.oneriSecili, pressed && { opacity: 0.6 }]}>
                   <View style={[s.oneriIkon, { backgroundColor: secili ? renk.anaAcik : ONERI_ZEMINLERI[i % ONERI_ZEMINLERI.length] }]}>
                     {mesgul === k.id ? <ActivityIndicator color={renk.ana} /> : secili ? <Ikon ad="tik" boyut={14} renk={renk.ana} kalinlik={3} /> : <Text style={s.oneriHarf}>{k.ad.charAt(0).toLocaleUpperCase('tr')}</Text>}
                   </View>

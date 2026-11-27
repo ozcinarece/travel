@@ -18,6 +18,8 @@ type Props = {
   /** Başlığın altındaki satır (2. adımda seyahat adı, 3. adımda "Bolu · …"). */
   alt?: string;
   onGeri: () => void;
+  /** #581: kayıt sürerken "‹" pasif (geri tuşu da yutulur); uygulamanın pasif dili, opaklık 0.4. */
+  geriPasif?: boolean;
   children: ReactNode;
   /** Alt düğme; `devam` yoksa alt alan yalnız `altIcerik`ten oluşur. */
   devam?: { baslik?: string; onPress: () => void; pasif?: boolean; yukleniyor?: boolean };
@@ -31,13 +33,13 @@ type Props = {
   kaydirmasiz?: boolean;
 };
 
-export function AdimKabugu({ adim, baslik, alt, onGeri, children, devam, atla, altIcerik, hata, kaydirmasiz, altNot }: Props) {
+export function AdimKabugu({ adim, baslik, alt, onGeri, geriPasif, children, devam, atla, altIcerik, hata, kaydirmasiz, altNot }: Props) {
   const aktif = adimIndeksi(adim);
   return (
     <SafeAreaView style={s.ekran} edges={['top']}>
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <View style={s.ust}>
-          <Pressable accessibilityRole="button" accessibilityLabel={aktif === 0 ? t('sihirbaz.kapat') : t('sihirbaz.geri')} onPress={onGeri} hitSlop={8} style={s.geri}>
+          <Pressable accessibilityRole="button" accessibilityLabel={aktif === 0 ? t('sihirbaz.kapat') : t('sihirbaz.geri')} accessibilityState={{ disabled: !!geriPasif }} disabled={!!geriPasif} onPress={onGeri} hitSlop={8} style={[s.geri, geriPasif && s.geriPasif]}>
             {aktif === 0 ? <Text style={s.kapat}>×</Text> : <Ikon ad="geri" boyut={22} renk={renk.metin} kalinlik={2.4} />}
           </Pressable>
           <View style={s.noktalar} accessibilityLabel={t('sihirbaz.adim', { n: aktif + 1 })}>
@@ -81,6 +83,7 @@ const s = StyleSheet.create({
   ekran: { flex: 1, backgroundColor: renk.zemin },
   ust: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: bosluk.kenar, paddingTop: 8 },
   geri: { width: minDokunma, height: minDokunma, marginLeft: -10, alignItems: 'center', justifyContent: 'center' },
+  geriPasif: { opacity: 0.4 },
   kapat: { fontFamily: yazi.ekstra, fontSize: 24, lineHeight: 26, color: renk.metin },
   noktalar: { flex: 1, flexDirection: 'row', gap: 6, alignItems: 'center' },
   nokta: { width: 8, height: 8, borderRadius: 4, backgroundColor: renk.ayrac },
