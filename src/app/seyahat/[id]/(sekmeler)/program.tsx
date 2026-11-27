@@ -21,6 +21,7 @@ import { MekanPaneli } from '@/components/mekan/MekanPaneli';
 import { ListemBekliyorSatiri, PlanListesi, type PlanSatirGorunumu } from '@/components/plan/PlanListesi';
 import { PuanSayfasi } from '@/components/program/PuanSayfasi';
 import { SecimMenusu, type SecimSecenegi } from '@/components/program/SecimMenusu';
+import { GunSilSayfasi } from '@/components/plan/GunSilSayfasi';
 import { SiralaListesi, type SiralaSatiri } from '@/components/program/SiralaListesi';
 import { SeyahatYukleme } from '@/components/seyahatler/SeyahatYukleme';
 import { Avatar } from '@/components/ui/Avatar';
@@ -154,6 +155,11 @@ export default function ProgramEkrani() {
 }
 
 /** "Pazartesi 12 Ekim" / "1. gün". */
+/** #554 KK5: "Cuma 27" (tarihsizse "Gün 3"). */
+function gunSilBasligi(gun: Gun): string {
+  return gun.date ? `${GUNLER[haftaGunu(gun.date)]} ${parcala(gun.date).gun}` : t('geziSayfasi.gunNo', { n: gun.index });
+}
+
 function gunBasligi(gun: Gun): string {
   if (!gun.date) return t('program.altTarihsiz');
   const { ay, gun: g } = parcala(gun.date);
@@ -522,23 +528,19 @@ function ProgramSekmesi({
     const yeni = Math.min(480, Math.max(15, m.default_minutes + fark));
     if (yeni !== m.default_minutes) guvenli(() => mekanGuncelle.mutateAsync({ id: m.id, default_minutes: yeni }));
   };
+  // #554 KK4–KK5: ⋯ → "Günü sil" ve sekmeye uzun basma aynı onay çekmecesini açar (sistem uyarısı yerine).
+  const [silinecekGun, setSilinecekGun] = useState<Gun | null>(null);
   const gunuSil = (g: Gun) => {
     if (gunler.length <= 1) {
       Alert.alert(t('gunler.sonGun'));
       return;
     }
-    const n = duraklar.filter((d) => d.day_id === g.id).length;
-    Alert.alert(t('gunler.gunSilBaslik', { gun: gunBasligi(g) }), n > 0 ? t('gunler.gunSilMetin', { n }) : t('gunler.gunSilMetinBos'), [
-      { text: t('genel.vazgec'), style: 'cancel' },
-      {
-        text: t('gunler.gunuSil'),
-        style: 'destructive',
-        onPress: () => {
-          if (seciliGunId === g.id) setSeciliGunId(null);
-          guvenli(() => gunSil.mutateAsync({ gun: g, gunler, startDate: seyahat.start_date }));
-        },
-      },
-    ]);
+    setSilinecekGun(g);
+  };
+  const gunuSilOnayla = (g: Gun) => {
+    setSilinecekGun(null);
+    if (seciliGunId === g.id) setSeciliGunId(null);
+    guvenli(() => gunSil.mutateAsync({ gun: g, gunler, startDate: seyahat.start_date }));
   };
 
   // #140 KK10 "Gerideyiz": yalnız konum açıkken. Buradaysan gerçek varış (arrived_at), yoldaysan şu an + kalan yol (kuş uçuşu
@@ -998,7 +1000,8 @@ function ProgramSekmesi({
     const adBilinen = !!(yerler.data?.[r.mekan.place_id]?.ad ?? bilinen.ad(r.mekan));
     const gecildi = !!prog?.bugun && r.durum === 'gecildi';
     const atlandi = r.numara === null;
-    const alt = [adBilinen ? kategoriEtiketi(r.mekan.primary_type) : null, sureMetni(r.durak.minutes), gecildi ? t('plan.gezildi') : atlandi ? t('listem.atlandi') : null]
+    // #554 KK2: atlanan durakta "· atlandı" yok; sağdaki "Atlandı" hapı söyler.
+    const alt = [adBilinen ? kategoriEtiketi(r.mekan.primary_type) : null, sureMetni(r.durak.minutes), gecildi ? t('plan.gezildi') : null]
       .filter(Boolean)
       .join(' · ');
     const dk = r.gelis ? yuruyusDk(r.gelis) : 0;
@@ -1105,7 +1108,8 @@ function ProgramSekmesi({
   const gunOzeti = gun
     ? {
         baslik: gun.date ? `${GUNLER[haftaGunu(gun.date)]} · ${parcala(gun.date).gun} ${AYLAR[parcala(gun.date).ay - 1]}` : t('geziSayfasi.gunNo', { n: gun.index }),
-        alt: [
+        // #554 KK3: hiç durak yoksa alt başlık yalnız "Boş gün" ("0 durak" yok).
+        alt: planSatir.length === 0 ? t('plan.bosGun') : [
           gunTemasi,
           prog && etkinDurak > 0 ? t('plan.saatAraligi', { bas: dakikaSaat(prog.canli.baslangicDk), bit: dakikaSaat(prog.canli.bitisDk) }) : null,
           t('plan.durakSayisi', { n: etkinDurak }),
@@ -1117,6 +1121,8 @@ function ProgramSekmesi({
 
   const listeGorunumu = harita ? null : (
     <PlanListesi
+      bugun={!!prog?.bugun}
+      bosGun={gun && planSatir.length === 0 ? { baslik: t('plan.bosGunBaslik', { gun: gun.date ? GUNLER[haftaGunu(gun.date)] : t('geziSayfasi.gunNo', { n: gun.index }) }) } : null}
       onHarita={haritayiAc}
       onDaha={() => setListeMenuAcik(true)}
       gunler={[...gunler].sort((a, b) => a.index - b.index)}
@@ -1306,6 +1312,8 @@ function ProgramSekmesi({
       <SecimMenusu acik={!!gunSecDurak} baslik={t('mekan.gunSecBaslik')} secenekler={gunSecenekleri} onKapat={() => setGunSecDurak(null)} />
       <SecimMenusu
         acik={listeMenuAcik}
+        gorunus="v7p"
+        baslik={gunOzeti?.baslik}
         secenekler={
           gun
             ? [
@@ -1315,10 +1323,19 @@ function ProgramSekmesi({
                 { etiket: t('program.kisaRota'), onPress: enKisaRotayaDiz, pasif: !gun.order_manual },
                 { etiket: t('program.liste.baslangic'), onPress: () => setBaslangicMenu(true) },
                 { etiket: t('gunOteli.menu'), onPress: otelAc },
+                // #554 KK4: en altta çizgiyle ayrık, kırmızı "Günü sil".
+                { etiket: t('gunler.gunuSil'), onPress: () => gunuSil(gun), tehlike: true, ayrac: true },
               ]
             : []
         }
         onKapat={() => setListeMenuAcik(false)}
+      />
+      <GunSilSayfasi
+        gun={silinecekGun}
+        baslik={silinecekGun ? gunSilBasligi(silinecekGun) : ''}
+        durakSayisi={silinecekGun ? duraklar.filter((d) => d.day_id === silinecekGun.id).length : 0}
+        onSil={gunuSilOnayla}
+        onKapat={() => setSilinecekGun(null)}
       />
       {/* #140: başlangıç saati — 15 dk adımla (kalış süresi gibi); saatler yuvarlanmadan yeniden akar. */}
       <SecimMenusu

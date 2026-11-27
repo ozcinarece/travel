@@ -484,7 +484,7 @@
     "durakYok": "0",
     "gunEkle": "+ gün",
     "gunSilBaslik": "{gun} silinsin mi?",
-    "gunSilMetin": "{n} durak boşa düşer; mekanlar silinmez.",
+    "gunSilMetin": "{n} durak Listem'e döner; yerler silinmez.",
     "gunSilMetinBos": "Bu günde durak yok.",
     "sil": "Sil",
     "sonGun": "Son gün silinemez.",
@@ -1095,7 +1095,11 @@
     "listem": "Listem",
     "listemBekliyor": "{n} yer gün bekliyor",
     "siradakiDurak": "sıradaki durak",
-    "buradasinDurak": "şu an buradasın"
+    "buradasinDurak": "şu an buradasın",
+    "siradakiRozet": "SIRADAKİ",
+    "bosGun": "Boş gün",
+    "bosGunBaslik": "{gun} henüz boş",
+    "bosGunMetin": "Listenden ya da yakındaki yerlerden seç; saatler kendiliğinden dizilir."
   },
   "listem": {
     "baslik": "Listem",

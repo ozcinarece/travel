@@ -176,9 +176,19 @@ describe('#182 KK7: Plan sekmesi Google isteği doğurmaz', () => {
     expect(getByText('Sazova Bilim Müzesi')).toBeTruthy();
     expect(getByText('Tümü ›')).toBeTruthy();
     fireEvent.press(getByText(gunEtiketi({ index: 3, date: tarihEkle(bas, 2) })));
-    await waitFor(() => getByText(/· 0 durak$|^0 durak$/));
-    expect(getByText('Bu güne yer ekle')).toBeTruthy();
+    // #554 KK3: boş gün — "Boş gün", "{gün} henüz boş", açıklama ve tek "+ Bu güne yer ekle"; "0 durak" yok.
+    await waitFor(() => getByText(t('plan.bosGun')));
+    expect(queryByText(/0 durak/)).toBeNull();
+    expect(getByText(/ henüz boş$/)).toBeTruthy();
+    expect(getByText(t('plan.bosGunMetin'))).toBeTruthy();
+    expect(getAllByText('Bu güne yer ekle').length).toBe(1);
     await sakinles(qc);
+    // #554 KK4–KK5: ⋯ → en altta "Günü sil" → onay çekmecesi (sistem uyarısı değil); boş günde "Bu günde durak yok.".
+    fireEvent.press(getByLabelText('Sırayı düzenle ve gün ayarları'));
+    fireEvent.press(getByText(t('gunler.gunuSil')));
+    await waitFor(() => getByText(/ silinsin mi\?$/));
+    expect(getByText(t('gunler.gunSilMetinBos'))).toBeTruthy();
+    fireEvent.press(getAllByText(t('genel.vazgec')).at(-1)!);
 
     expect(sahte.invoke).toEqual([]);
     expect(fetchSahte).not.toHaveBeenCalled();

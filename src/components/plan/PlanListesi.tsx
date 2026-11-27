@@ -11,8 +11,10 @@ import { t } from '@/i18n';
 import type { Gun } from '@/lib/tipler';
 import { altMenuRenk, anaV5, gunUstuMetin, renk, seyahatV7, yazi } from '@/theme';
 
-/** Kanvas `Plan_v7p_*`: yuvarlak düğme zemini. */
+/** Kanvas `Plan_v7p_*`: yuvarlak düğme zemini ("Atlandı" hapı da). */
 const DUGME_ZEMIN = '#F2F4F8';
+/** #554 (kanvas `Plan_v7p_Haller` 2): atlanan durağın kesik çizgili dairesi. */
+const ATLANAN_KENAR = anaV5.ok;
 
 export type PlanSatirGorunumu = {
   id: string;
@@ -35,6 +37,8 @@ export type PlanSatirGorunumu = {
 };
 
 type Props = {
+  /** #554 KK1: gezi günü (bugün) — sıradakinden sonraki duraklar çerçeveli daire. */
+  bugun: boolean;
   onHarita: () => void;
   onDaha: () => void;
   gunler: Gun[];
@@ -58,6 +62,8 @@ type Props = {
   /** KK7: "Listem · N yer gün bekliyor ›". */
   listem: { n: number; onPress: () => void } | null;
   uyari: string | null;
+  /** #554 KK3: günde hiç durak yoksa boş gün hali ("{gün} henüz boş" + turuncu "+ Bu güne yer ekle"). */
+  bosGun: { baslik: string } | null;
 };
 
 export function PlanListesi(p: Props) {
@@ -129,10 +135,35 @@ export function PlanListesi(p: Props) {
             <Ikon ad="okV7p" boyut={18} renk={anaV5.ok} kalinlik={2.4} />
           </Pressable>
         ) : null}
-        {p.satirlar.map((r) => {
+        {p.bosGun ? (
+          <View style={s.bos}>
+            <Text style={s.bosBaslik}>{p.bosGun.baslik}</Text>
+            <Text style={s.bosMetin}>{t('plan.bosGunMetin')}</Text>
+          </View>
+        ) : null}
+        {p.bosGun && p.onEkle ? (
+          <Pressable accessibilityRole="button" onPress={p.onEkle} style={({ pressed }) => [s.bosDugme, pressed && { opacity: 0.85 }]}>
+            <Ikon ad="artiV7" boyut={18} renk={renk.metin} kalinlik={2.4} />
+            <Text style={s.bosDugmeMetin}>{t('plan.buGuneEkle')}</Text>
+          </Pressable>
+        ) : null}
+        {p.satirlar.map((r, i) => {
           const soluk = r.gecildi || r.atlandi;
+          const daire = daireTuru(r, p.bugun);
+          const siradaki = r.vurgulu && !r.buradasin;
           return (
             <View key={r.id}>
+              {/* #554 KK2 (pano 2): atlanan durağa bacak bilgisi yok; kısa kesik çizgi. */}
+              {!r.gelis && r.atlandi && i > 0 ? (
+                <View style={s.bacak}>
+                  <View style={s.saatSutunu} />
+                  <View style={[s.kesikSutun, { height: 12 }]}>
+                    {[0, 1].map((i) => (
+                      <View key={i} style={s.kesik} />
+                    ))}
+                  </View>
+                </View>
+              ) : null}
               {r.gelis ? (
                 <View style={s.bacak} accessible accessibilityLabel={`${t(r.gelis.araba ? 'plan.bacakArac' : 'plan.bacakYuru')} ${r.gelis.metin}`}>
                   <View style={s.saatSutunu} />
@@ -154,17 +185,26 @@ export function PlanListesi(p: Props) {
                 onPress={() => p.onDurak(r.mekanId)}
                 onLongPress={() => p.onDurakUzunBas(r.mekanId)}
                 style={({ pressed }) => [s.durak, pressed && { opacity: 0.85 }]}>
-                <Text style={s.saat}>{r.saat ?? ''}</Text>
-                {r.gecildi ? (
+                <Text style={[s.saat, r.vurgulu && { color: renk.metin }]}>{r.saat ?? ''}</Text>
+                {daire === 'tik' ? (
                   <View style={[s.no, { backgroundColor: seyahatV7.tikZemin }]}>
                     <Ikon ad="tik" boyut={15} renk={renk.basari} kalinlik={2.4} />
                   </View>
+                ) : daire === 'kesik' ? (
+                  <View style={[s.no, s.noKesik]}>
+                    <Text style={[s.noMetin, { color: anaV5.ikincil }]}>{r.numara ?? '–'}</Text>
+                  </View>
+                ) : daire === 'cerceve' ? (
+                  <View style={[s.no, s.noCerceve, { borderColor: r.numaraRengi }]}>
+                    <Text style={[s.noMetin, { color: renk.metin }]}>{r.numara ?? '–'}</Text>
+                  </View>
                 ) : (
-                  <View style={[s.no, { backgroundColor: r.atlandi ? anaV5.cizgi : r.numaraRengi }]}>
-                    <Text style={[s.noMetin, { color: r.atlandi ? anaV5.ikincil : gunUstuMetin(r.numaraRengi) }]}>{r.numara ?? '–'}</Text>
+                  <View style={[s.no, { backgroundColor: r.numaraRengi }]}>
+                    <Text style={[s.noMetin, { color: gunUstuMetin(r.numaraRengi) }]}>{r.numara ?? '–'}</Text>
                   </View>
                 )}
                 <View style={{ flex: 1, minWidth: 0, gap: 1 }}>
+                  {siradaki ? <Text style={s.rozet}>{t('plan.siradakiRozet')}</Text> : null}
                   <Text style={[s.ad, soluk && { color: anaV5.ikincil }]} numberOfLines={2}>
                     {r.ad}
                   </Text>
@@ -174,11 +214,16 @@ export function PlanListesi(p: Props) {
                     </Text>
                   ) : null}
                 </View>
+                {r.atlandi ? (
+                  <View style={s.hap}>
+                    <Text style={s.hapMetin}>{t('plan.atlandi')}</Text>
+                  </View>
+                ) : null}
               </Pressable>
             </View>
           );
         })}
-        {p.onEkle ? (
+        {p.onEkle && !p.bosGun ? (
           <Pressable accessibilityRole="button" onPress={p.onEkle} style={({ pressed }) => [s.ekle, pressed && { opacity: 0.8 }]}>
             <View style={s.saatSutunu} />
             <View style={s.ekleDaire}>
@@ -193,16 +238,16 @@ export function PlanListesi(p: Props) {
             <BugunBosV7 yerler={p.aksam.yerler} eklenenler={p.aksam.eklenenler} onEkle={p.aksam.onEkle} pasif={p.aksam.pasif} />
           </View>
         ) : null}
-        {p.listem ? <ListemBekliyorSatiri n={p.listem.n} onPress={p.listem.onPress} /> : null}
+        {p.listem ? <ListemBekliyorSatiri n={p.listem.n} onPress={p.listem.onPress} bosGun={!!p.bosGun} /> : null}
       </View>
     </ScrollView>
   );
 }
 
 /** #534 KK7: "Listem · N yer gün bekliyor ›"; liste ve (#553 KK5) harita görünümünün paneli ortak kullanır. */
-export function ListemBekliyorSatiri({ n, onPress }: { n: number; onPress: () => void }) {
+export function ListemBekliyorSatiri({ n, onPress, bosGun }: { n: number; onPress: () => void; bosGun?: boolean }) {
   return (
-    <Pressable accessibilityRole="button" onPress={onPress} style={({ pressed }) => [s.listem, pressed && { opacity: 0.8 }]}>
+    <Pressable accessibilityRole="button" onPress={onPress} style={({ pressed }) => [s.listem, bosGun && { marginTop: 22 }, pressed && { opacity: 0.8 }]}>
       <Ikon ad="kalpV7" boyut={20} renk={renk.ana} kalinlik={2} />
       <Text style={s.listemBaslik}>{t('plan.listem')}</Text>
       <Text style={s.listemAlt}>{t('plan.listemBekliyor', { n })}</Text>
@@ -214,10 +259,22 @@ export function ListemBekliyorSatiri({ n, onPress }: { n: number; onPress: () =>
 /** #553 KK1 (#558): sekme kutusu 44 pt — `hitSlop` üst kabı aşamadığı için dokunma alanı kutunun kendisi. */
 export const SEKME_YUKSEKLIK = 44;
 
-/** #553 KK2: ekran okuyucu etiketi — saat, ad, alt satır; vurgulu durakta "şu an buradasın" ya da "sıradaki durak". */
-export function durakEtiketi(r: { saat: string | null; ad: string; alt: string | null; vurgulu: boolean; buradasin?: boolean }): string {
-  const durum = r.vurgulu ? t(r.buradasin ? 'plan.buradasinDurak' : 'plan.siradakiDurak') : null;
+/** #553 KK2: ekran okuyucu etiketi — saat, ad, alt satır; vurgulu durakta "şu an buradasın" ya da "sıradaki durak";
+ * #554 KK2: atlananda "Atlandı" hapı da okunur (alt satırdaki "· atlandı" kalktı). */
+export function durakEtiketi(r: { saat: string | null; ad: string; alt: string | null; vurgulu: boolean; buradasin?: boolean; atlandi?: boolean }): string {
+  const durum = r.vurgulu ? t(r.buradasin ? 'plan.buradasinDurak' : 'plan.siradakiDurak') : r.atlandi ? t('plan.atlandi') : null;
   return [r.saat, r.ad, r.alt, durum].filter(Boolean).join(', ');
+}
+
+/**
+ * #554 KK1–KK2 (kanvas `Plan_v7p_Haller` 1–2): numara dairesi. Gezilen yeşil ✓; atlanan kesik çizgili gri; bugünde şu anki /
+ * sıradaki durak gün renginde dolu, sonrakiler gün rengi çerçeveli beyaz; plan gününde hepsi dolu (`Plan_v7p_Gun`).
+ */
+export function daireTuru(r: { gecildi: boolean; atlandi: boolean; vurgulu: boolean }, bugun: boolean): 'tik' | 'kesik' | 'dolu' | 'cerceve' {
+  if (r.gecildi) return 'tik';
+  if (r.atlandi) return 'kesik';
+  if (bugun && !r.vurgulu) return 'cerceve';
+  return 'dolu';
 }
 
 const s = StyleSheet.create({
@@ -258,6 +315,16 @@ const s = StyleSheet.create({
   saat: { width: 44, fontFamily: yazi.kalin, fontSize: 14, color: anaV5.ikincil, fontVariant: ['tabular-nums'] },
   no: { width: 28, height: 28, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
   noMetin: { fontFamily: yazi.ekstra, fontSize: 13 },
+  noKesik: { borderWidth: 1.5, borderStyle: 'dashed', borderColor: ATLANAN_KENAR, backgroundColor: renk.zemin },
+  noCerceve: { borderWidth: 2, backgroundColor: renk.zemin },
+  rozet: { fontFamily: yazi.ekstra, fontSize: 12, letterSpacing: 0.24, color: anaV5.adim },
+  hap: { height: 24, paddingHorizontal: 10, borderRadius: 12, backgroundColor: DUGME_ZEMIN, justifyContent: 'center' },
+  hapMetin: { fontFamily: yazi.kalin, fontSize: 12, color: anaV5.ikincil },
+  bos: { paddingTop: 22, paddingBottom: 18, gap: 6 },
+  bosBaslik: { fontFamily: yazi.ekstra, fontSize: 19, color: renk.metin },
+  bosMetin: { fontFamily: yazi.normal, fontSize: 15, lineHeight: 21, color: anaV5.ikincil },
+  bosDugme: { height: 52, borderRadius: 26, backgroundColor: renk.vurgu, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 },
+  bosDugmeMetin: { fontFamily: yazi.kalin, fontSize: 16, color: renk.metin },
   ad: { fontFamily: yazi.kalin, fontSize: 16, color: renk.metin },
   alt: { fontFamily: yazi.normal, fontSize: 13, color: anaV5.ikincil },
   bacak: { flexDirection: 'row', alignItems: 'center', gap: 12 },
