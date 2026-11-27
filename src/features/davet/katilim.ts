@@ -23,7 +23,8 @@ const INCE = 'eiöü';
 
 /**
  * "{Ad}'e / 'a / 'ne / 'na / 'ye / 'ya": ünlü uyumu + kaynaştırma. Son ünlü ince → e, kalın → a. Ünlüyle bitiyorsa
- * iyelik görünümlü (i, ı, u, ü) sonlar n ("Gezisi'ne"), diğerleri y ("Ankara'ya") alır. Son ünlü yoksa "'e".
+ * iyelik ekiyle bitenler n ("Gezisi'ne", "Kuşadası'na", "Roma Turu'na"), diğerleri y ("Ankara'ya", "Denizli'ye", "Baku'ya")
+ * alır. Son ünlü yoksa "'e".
  */
 export function yonelmeEki(ad: string): string {
   const temiz = ad.trim();
@@ -38,8 +39,21 @@ export function yonelmeEki(ad: string): string {
   }
   const unlu = sonUnlu && !INCE.includes(sonUnlu) ? 'a' : 'e';
   const son = kucuk[kucuk.length - 1];
-  const kaynastirma = ON.includes(son) ? ('ıiuü'.includes(son) ? 'n' : 'y') : '';
+  const kaynastirma = ON.includes(son) ? (iyelikliMi(kucuk) ? 'n' : 'y') : '';
   return `${temiz}'${kaynastirma}${unlu}`;
+}
+
+/**
+ * #573 inceleme 1: iyelik eki (3. tekil) mi? Son kelime ünlü + s + ı/i/u/ü ile bitiyorsa ("gezisi", "rotası", "kuşadası") ya da
+ * çok kelimeli adın son kelimesi ı/i/u/ü ile bitiyorsa (tamlama: "Roma Turu", "Salda Gölü"). Tek kelimelik "Denizli", "Bali",
+ * "Baku" iyelikli değildir.
+ */
+function iyelikliMi(kucuk: string): boolean {
+  const kelimeler = kucuk.split(/\s+/).filter(Boolean);
+  const son = kelimeler[kelimeler.length - 1] ?? '';
+  if (!'ıiuü'.includes(son[son.length - 1] ?? '')) return false;
+  if (son.length >= 3 && son[son.length - 2] === 's' && ON.includes(son[son.length - 3])) return true;
+  return kelimeler.length > 1;
 }
 
 /**

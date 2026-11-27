@@ -310,7 +310,34 @@
       "vardi": "vardı: {ad} · {zaman}"
     },
     "tekrarDene": "Tekrar dene",
-    "paylasMetin": "{ad} için seyahat planına katıl: {link}"
+    "paylasMetin": "{ad} için seyahat planına katıl: {link}",
+    "kutu": {
+      "rozet": "DAVET",
+      "bolum": "DAVETLER",
+      "baslik": "{ad} seni {yerEk} çağırıyor",
+      "etiket": "Davet: {baslik}",
+      "hayir": "Hayır",
+      "katil": "Katıl",
+      "hayirIpucu": "{sehir} davetini geri çevirir",
+      "katilIpucu": "{sehir} gezisine katılırsın",
+      "geliyorBir": "{ad} {de} geliyor",
+      "geliyorIki": "{ad} ve {ad2} {de} geliyor",
+      "geliyorCok": "{ad} ve {n} kişi daha geliyor",
+      "geriCevirdin": "Daveti geri çevirdin",
+      "gecersiz": "Bu davet artık geçerli değil"
+    },
+    "gonderildi": {
+      "baslik": "{gezi} hazır",
+      "gitti": "{adlar} davet gitti.",
+      "ve": "ve",
+      "durum": {
+        "bekliyor": "Bekliyor",
+        "katildi": "Katıldı",
+        "reddetti": "Geri çevirdi"
+      },
+      "geziyeGit": "Geziye git",
+      "linkiPaylas": "Linki de paylaş"
+    }
   },
   "harita": {
     "anahtarYok": "Harita anahtarı tanımlı değil"
@@ -1636,9 +1663,10 @@
     "kimlerle": "Kimlerle?",
     "davetEkle": "Davet linki gönder",
     "davetSecili": "Davet linki gezi oluşunca gönderilecek",
-    "yolArkadasi": "{ad} seçili: gezi oluşunca davet linki paylaşılır. Kaldırmak için dokun",
+    "yolArkadasi": "{ad} seçili, gezi oluşunca davet gider. Kaldırmak için dokun",
     "olustur": "Geziyi oluştur",
     "rotasindan": "{ad} rotasından",
-    "kapat": "Kapat"
+    "kapat": "Kapat",
+    "kisiSec": "{ad}: davet etmek için dokun"
   }
 }

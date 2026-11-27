@@ -2,26 +2,33 @@
 // "N gün · M durak" 14 #5B6178); "Ne zaman?" (15/800) ve sağda "Tarihim belli değil" (14/700 Gece); sihirbazın takvimi
 // (`AdimNeZaman`, dönüş günü ipucuyla) ve altında "5–6 Aralık · Cumartesi–Pazar · 2 gün" satırı. Yalnız gidiş seçiliyken dönüş
 // rotanın gün sayısından gelir (Bunu seç → tarih → Geziyi oluştur = 3 dokunuş). "Tarihim belli değil" sayacı açar (varsayılan
-// rotanın gün sayısı). "Kimlerle?" satırı: girişte verilen yol arkadaşı (seçili yuvarlak, dokununca kalkar) ve "+" (davet
-// linki; seçilince gezi oluşunca paylaşım açılır). #573 gelene kadar son gezilen arkadaşlar listelenmez. Turuncu "Geziyi oluştur".
+// rotanın gün sayısı). "Kimlerle?" satırı: son gezilen arkadaşlar (en çok 3, seçilebilir; girişteki kişi seçili) ve "+" (davet
+// linki; seçilince gezi oluşunca link paylaşımı açılır). Turuncu "Geziyi oluştur"dan sonra seçilenlere #573 uygulama içi daveti
+// gider ve "{Gezi} hazır" çekmecesi (`DavetGonderildi`) açılır; davet gitmezse seyahat yine açılır, hata bildirilir.
 // KK7: hazır gezi mevcut "Seyahatime al" aktarımıyla (`geziden_seyahat_ac`), arkadaş rotası mevcut "Seyahatime al"la
 // (`paylasimdan_al_kimlik`; tarih seçildiyse ardından tarih kurulur). Bitince seyahatin Gezi sayfası açılır.
 import { router } from 'expo-router';
 import { useRef, useState, type ReactNode } from 'react';
-import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 
+import { DavetGonderildi } from '@/components/davet/DavetGonderildi';
+import { ProfilOnayi } from '@/components/davet/ProfilOnayi';
 import { AdimNeZaman } from '@/components/sihirbaz/AdimNeZaman';
 import { SeyahatKapagi } from '@/components/seyahatler/SeyahatKapagi';
 import { AltPencere } from '@/components/ui/AltPencere';
 import { Avatar } from '@/components/ui/Avatar';
 import { Foto } from '@/components/ui/Foto';
 import type { ArkadasPaylasimi } from '@/features/arkadaslar/sorgular';
+import { useDavetPaylas } from '@/features/davet/paylas';
+import { kisiDurumu, useDavetGonder, useGonderilenDavetler } from '@/features/davet/uygulamaIci';
 import { cekmeceSecimi, durakSayisi, secimGunVeBaslangic, tarihSatiri } from '@/features/geziKur/geziKur';
+import type { Kimlerle, KimlerleKisi } from '@/features/geziKur/kimlerle';
 import { useGezidenSeyahatAc } from '@/features/icerik/aktarSorgu';
 import type { AkisGezisi } from '@/features/icerik/kesfetAkisi';
 import { useGezi, useSehirler } from '@/features/icerik/sorgular';
 import { usePaylasimdanAl } from '@/features/paylasim/alici';
+import { useSeyahat } from '@/features/seyahatler/sorgular';
 import { useIcerikSehirSecimi } from '@/features/sihirbaz/girisler';
 import { gunSayisiSinirla, tarihDokun, type Aralik } from '@/features/sihirbaz/sihirbaz';
 import { useTaslakTarihi } from '@/features/sihirbaz/taslak';
@@ -32,17 +39,17 @@ import { kurRenk, type Kapak } from './RotaKarti';
 
 export type SecilenRota = { tur: 'gezi'; gezi: AkisGezisi; kapak: Kapak } | { tur: 'arkadas'; paylasim: ArkadasPaylasimi; baslik: string };
 
-export type YolArkadasi = { id: string; ad: string; foto: string | null };
-
 type Props = {
   rota: SecilenRota;
   onKapat: () => void;
-  /** KK-ek1: girişte verilen yol arkadaşı (yoksa null). */
-  yolArkadasi: YolArkadasi | null;
-  onYolArkadasiKaldir: () => void;
+  /** KK6 · KK-ek1: "Kimlerle?" seçimi (ekranın; çekmece kapanıp açılınca korunur). */
+  kimlerle: Kimlerle;
 };
 
-export function BunuSecCekmecesi({ rota, onKapat, yolArkadasi, onYolArkadasiKaldir }: Props) {
+/** Kanvasta karşılığı olmayan davet hatası: genel hata metni (yeni metin yok). */
+const davetHatasi = () => Alert.alert(t('genel.hataBaslik'), t('genel.hataMetin'));
+
+export function BunuSecCekmecesi({ rota, onKapat, kimlerle }: Props) {
   const rotaGun = rota.tur === 'gezi' ? rota.gezi.gun_sayisi : rota.paylasim.gun_sayisi;
   const durak = rota.tur === 'gezi' ? durakSayisi(rota.gezi) : rota.paylasim.durak_sayisi;
   const baslik = rota.tur === 'gezi' ? rota.gezi.baslik : rota.baslik;
@@ -62,6 +69,16 @@ export function BunuSecCekmecesi({ rota, onKapat, yolArkadasi, onYolArkadasiKald
   const yeni = useGezidenSeyahatAc();
   const al = usePaylasimdanAl();
   const tarih = useTaslakTarihi();
+  const davetGonder = useDavetGonder();
+  // #573 KK5: davet gittiyse "{Gezi} hazır" çekmecesi; kişiler ve durumları.
+  const [gonderildi, setGonderildi] = useState<{ id: string; kisiler: KimlerleKisi[] } | null>(null);
+  const gonderilen = useGonderilenDavetler(gonderildi?.id);
+  const yeniSeyahat = useSeyahat(gonderildi?.id);
+  const linkPaylas = useDavetPaylas(yeniSeyahat.data ?? { id: '', invite_token: '', city_label: '' });
+  const geziyeGit = (id: string, link: boolean) => {
+    onKapat();
+    router.replace({ pathname: '/seyahat/[id]/(sekmeler)/gezi', params: { id, ...(link ? { davet: '1' } : {}) } });
+  };
 
   const secim = cekmeceSecimi(aralik, tarihsizGun, rotaGun);
   const veriBekliyor = rota.tur === 'gezi' && (!gezi.data || !sehir.data) && !gezi.isError && !sehir.isError;
@@ -94,8 +111,18 @@ export function BunuSecCekmecesi({ rota, onKapat, yolArkadasi, onYolArkadasiKald
         // Seyahat açıldı: tarih kurulamazsa da Gezi sayfası açılır (tarih oradan değişir; ikinci seyahat açılmaz).
         if (secim.tur === 'tarihli' || secim.gun !== rota.paylasim.gun_sayisi) await tarih.mutateAsync({ seyahatId: id, secim }).catch(() => undefined);
       }
-      onKapat();
-      router.replace({ pathname: '/seyahat/[id]/(sekmeler)/gezi', params: { id, ...(davet || yolArkadasi ? { davet: '1' } : {}) } });
+      // KK6: seçilen arkadaşlara uygulama içi davet. Düşerse seyahat yine açılır, kullanıcıya hata söylenir.
+      const kisiler = kimlerle.secilenler;
+      if (kisiler.length > 0) {
+        try {
+          await davetGonder.mutateAsync({ tripId: id, kisiler: kisiler.map((k) => k.id) });
+          setGonderildi({ id, kisiler });
+          return;
+        } catch {
+          davetHatasi();
+        }
+      }
+      geziyeGit(id, davet);
     } catch {
       setHata(t('sihirbaz.nezaman.hata'));
     } finally {
@@ -103,6 +130,25 @@ export function BunuSecCekmecesi({ rota, onKapat, yolArkadasi, onYolArkadasiKald
       setMesgul(false);
     }
   };
+
+  if (gonderildi) {
+    const kisiler = gonderildi.kisiler.map((k) => ({ ...k, durum: kisiDurumu(gonderilen.data?.get(k.id), false) }));
+    return (
+      <>
+        <DavetGonderildi
+          acik
+          gezi={baslik}
+          kisiler={kisiler}
+          onGeziyeGit={() => geziyeGit(gonderildi.id, false)}
+          onKapat={() => geziyeGit(gonderildi.id, false)}
+          onLinkiPaylas={() => {
+            if (yeniSeyahat.data) void linkPaylas.paylas();
+          }}
+        />
+        {linkPaylas.onayAcik ? <ProfilOnayi acik onKapat={linkPaylas.onayKapat} onGonder={linkPaylas.onayla} /> : null}
+      </>
+    );
+  }
 
   return (
     <AltPencere acik onKapat={onKapat} kapatEtiketi={t('geziKur.kapat')} gorunus="v11" kaydirilir>
@@ -149,7 +195,7 @@ export function BunuSecCekmecesi({ rota, onKapat, yolArkadasi, onYolArkadasiKald
         ozetSatiri={secim?.tur === 'tarihli' ? tarihSatiri(secim) : null}
       />
 
-      <KimlerleSatiri yolArkadasi={yolArkadasi} onYolArkadasiKaldir={onYolArkadasiKaldir} davet={davet} onDavet={() => setDavet((d) => !d)} />
+      <KimlerleSatiri kimlerle={kimlerle} davet={davet} onDavet={() => setDavet((d) => !d)} />
 
       {hata ? <Text style={s.hata}>{hata}</Text> : null}
       <View style={{ paddingTop: 16 }}>
@@ -167,21 +213,38 @@ export function BunuSecCekmecesi({ rota, onKapat, yolArkadasi, onYolArkadasiKald
   );
 }
 
+/** Kanvas (`Kur_v11_Cekmece`): yuvarlakların zemini ve harfi sırayla (M #C9D2F2/#152A6B, A #152A6B/beyaz, D #E3F4EC/#0E7A52). */
+const KIMLER_YUZ: readonly (readonly [string, string])[] = [
+  [kurRenk.acikMavi, kurRenk.lacivert],
+  [kurRenk.lacivert, kurRenk.beyaz],
+  ['#E3F4EC', '#0E7A52'],
+];
+
 /**
- * KK6 · KK-ek1: "Kimlerle?" satırı — girişteki yol arkadaşı (seçili yuvarlak; dokununca kalkar, dokunma alanı 44 pt) ve
- * isteğe bağlı "+" (davet linki). Sihirbaz da aynı satırı kullanır (yalnız yol arkadaşı).
+ * KK6 · KK-ek1: "Kimlerle?" satırı — son gezilen arkadaşlar (40 pt yuvarlak, en çok 3; seçili olan Mandalina halka + tik;
+ * dokunma alanı 44 pt) ve isteğe bağlı "+" (davet linki). Sihirbaz da aynı satırı kullanır ("+" yok).
  */
-export function KimlerleSatiri({ yolArkadasi, onYolArkadasiKaldir, davet, onDavet }: { yolArkadasi: YolArkadasi | null; onYolArkadasiKaldir: () => void; davet?: boolean; onDavet?: () => void }) {
+export function KimlerleSatiri({ kimlerle, davet, onDavet }: { kimlerle: Pick<Kimlerle, 'kisiler' | 'secili' | 'degistir'>; davet?: boolean; onDavet?: () => void }) {
   return (
     <View style={s.kimler}>
       <Text style={[s.bolum, { marginRight: 4 }]}>{t('geziKur.kimlerle')}</Text>
-      {yolArkadasi ? (
-        <Pressable accessibilityRole="button" accessibilityLabel={t('geziKur.yolArkadasi', { ad: yolArkadasi.ad })} accessibilityState={{ selected: true }} onPress={onYolArkadasiKaldir} hitSlop={4} testID="yol-arkadasi">
-          <Secili>
-            <Avatar ad={yolArkadasi.ad} url={yolArkadasi.foto} boyut={40} arkaPlan={kurRenk.acikMavi} harfRengi={kurRenk.lacivert} harfBoyutu={14} yuvarlak />
-          </Secili>
-        </Pressable>
-      ) : null}
+      {kimlerle.kisiler.map((k, i) => {
+        const sec = kimlerle.secili.has(k.id);
+        const [zemin, harf] = KIMLER_YUZ[i % KIMLER_YUZ.length];
+        const yuz = <Avatar ad={k.ad} url={k.foto} boyut={40} arkaPlan={zemin} harfRengi={harf} harfBoyutu={14} yuvarlak />;
+        return (
+          <Pressable
+            key={k.id}
+            accessibilityRole="button"
+            accessibilityLabel={t(sec ? 'geziKur.yolArkadasi' : 'geziKur.kisiSec', { ad: k.ad })}
+            accessibilityState={{ selected: sec }}
+            onPress={() => kimlerle.degistir(k.id)}
+            hitSlop={4}
+            testID={`kimlerle-${k.id}`}>
+            {sec ? <Secili>{yuz}</Secili> : yuz}
+          </Pressable>
+        );
+      })}
       {onDavet ? (
         <Pressable accessibilityRole="button" accessibilityLabel={davet ? t('geziKur.davetSecili') : t('geziKur.davetEkle')} accessibilityState={{ selected: !!davet }} onPress={onDavet} hitSlop={2} testID="davet-arti">
           {davet ? (

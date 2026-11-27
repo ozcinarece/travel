@@ -3,7 +3,7 @@
 // metinler (KK8) ve girişteki yol arkadaşı (KK-ek1).
 import { beforeEach, describe, expect, it, jest } from '@jest/globals';
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react-native';
-import { Text } from 'react-native';
+import { Alert, Text } from 'react-native';
 
 import { Baslik } from '@/components/gezi/SeyahatV7';
 import { GeziKurEkrani } from '@/components/geziKur/GeziKurEkrani';
@@ -21,6 +21,7 @@ import {
   secimGunVeBaslangic,
   tarihSatiri,
 } from '@/features/geziKur/geziKur';
+import { giristekiler, kimlerleKisileri } from '@/features/geziKur/kimlerle';
 import type { AkisGezisi } from '@/features/icerik/kesfetAkisi';
 import { t } from '@/i18n';
 import tr from '@/i18n/tr.json';
@@ -82,7 +83,15 @@ let mockGeziYukleniyor = false;
 jest.mock('@/features/icerik/kesfetAkisi', () => ({ useKesfetAkisi: () => ({ data: mockGeziler, isLoading: false, isError: false }) }));
 jest.mock('@/features/arkadaslar/sorgular', () => ({
   useArkadasPaylasimlari: () => ({ data: mockPaylasimlar }),
-  useArkadaslarim: () => ({ data: [{ user_id: 'u-ayse', ad: 'Ayşe', foto: null }] }),
+  // arkadaslarim(): en son birlikte gezilen önde.
+  useArkadaslarim: () => ({
+    data: [
+      { user_id: 'u-ayse', ad: 'Ayşe', foto: null },
+      { user_id: 'u-mert', ad: 'Mert', foto: null },
+      { user_id: 'u-deniz', ad: 'Deniz', foto: null },
+      { user_id: 'u-can', ad: 'Can', foto: null },
+    ],
+  }),
 }));
 const mockGeziDetay = { ...mockGeziler[0], gezi_gunleri: [] };
 const mockSehirSecimi = { place_id: 'p-izm', ad: 'İzmir', ikincil: '', lat: 38.4, lng: 27.1, tz: 'Europe/Istanbul', country_code: 'TR' };
@@ -97,6 +106,14 @@ const mockAl = jest.fn(async (_: string) => 'arkadastan');
 jest.mock('@/features/paylasim/alici', () => ({ usePaylasimdanAl: () => ({ mutateAsync: mockAl }) }));
 const mockTarih = jest.fn(async (_: unknown) => undefined);
 jest.mock('@/features/sihirbaz/taslak', () => ({ useTaslakTarihi: () => ({ mutateAsync: mockTarih }) }));
+// #573: uygulama içi davet (gönderim ve gönderilenlerin durumu).
+const mockGonder = jest.fn(async (_: { tripId: string; kisiler: string[] }) => 1);
+jest.mock('@/features/davet/uygulamaIci', () => ({
+  ...jest.requireActual<object>('@/features/davet/uygulamaIci'),
+  useDavetGonder: () => ({ mutateAsync: mockGonder }),
+  useGonderilenDavetler: () => ({ data: new Map([['u-mert', 'katildi']]) }),
+}));
+jest.mock('@/features/seyahatler/sorgular', () => ({ useSeyahat: () => ({ data: undefined }) }));
 // Takvim: sihirbazın bileşeni olduğu gibi kullanılır; burada dokunuşlar ve özet satırı gözlenir.
 jest.mock('@/components/sihirbaz/AdimNeZaman', () => {
   const { Pressable: P, Text: T } = jest.requireActual<typeof import('react-native')>('react-native');
@@ -395,32 +412,79 @@ describe('#574 KK5–KK7 çekmece ve Geziyi oluştur', () => {
 });
 
 describe('#574 KK6 Kimlerle? · KK-ek1 yol arkadaşı', () => {
-  it('#573 gelene kadar yalnız "+"; "+" seçilince gezi oluşunca davet paylaşımı açılır', async () => {
+  it('kimlerleKisileri: son gezilen en çok 3; girişteki kişi ilk 3\'te değilse başa gelir; tanınmayan kişi eklenmez', () => {
+    const a = ['ayse', 'mert', 'deniz', 'can'].map((x) => ({ user_id: x, ad: x, foto: null }));
+    expect(kimlerleKisileri(a, []).map((k) => k.id)).toEqual(['ayse', 'mert', 'deniz']);
+    expect(kimlerleKisileri(a, ['mert']).map((k) => k.id)).toEqual(['ayse', 'mert', 'deniz']);
+    expect(kimlerleKisileri(a, ['can']).map((k) => k.id)).toEqual(['can', 'ayse', 'mert']);
+    expect(kimlerleKisileri(a, ['yabanci']).map((k) => k.id)).toEqual(['ayse', 'mert', 'deniz']);
+    expect(kimlerleKisileri(undefined, ['can'])).toEqual([]);
+    expect(giristekiler('a, b,')).toEqual(['a', 'b']);
+  });
+
+  it('son gezilen 3 arkadaş seçilebilir + "+"; Geziyi oluştur seçilenlere davet gönderir ve "{Gezi} hazır" çekmecesi açılır', async () => {
     render(<GeziKurEkrani onKendiRota={jest.fn()} />);
     fireEvent.press(within(screen.getByTestId('rota-urla')).getByText('Bunu seç'));
-    expect(screen.queryByTestId('yol-arkadasi')).toBeNull();
-    const arti = screen.getByTestId('davet-arti');
-    expect(arti.props.accessibilityState).toMatchObject({ selected: false });
-    fireEvent.press(arti);
+    for (const id of ['u-ayse', 'u-mert', 'u-deniz']) expect(screen.getByTestId(`kimlerle-${id}`).props.accessibilityState).toMatchObject({ selected: false });
+    expect(screen.queryByTestId('kimlerle-u-can')).toBeNull();
+    expect(screen.getByTestId('davet-arti')).toBeTruthy();
+    const mert = screen.getByTestId('kimlerle-u-mert');
+    // 40 pt yuvarlak + 4 pt hitSlop = 48 pt dokunma alanı.
+    expect(mert.props.hitSlop).toBe(4);
+    fireEvent.press(mert);
+    expect(screen.getByTestId('kimlerle-u-mert').props.accessibilityState).toMatchObject({ selected: true });
+    expect(screen.getByTestId('kimlerle-u-mert').props.accessibilityLabel).toBe(t('geziKur.yolArkadasi', { ad: 'Mert' }));
+    fireEvent.press(screen.getByText('gidis-sec'));
+    fireEvent.press(screen.getByText('Geziyi oluştur'));
+    await waitFor(() => expect(mockGonder).toHaveBeenCalledWith({ tripId: 'yeni-gezi', kisiler: ['u-mert'] }));
+    // #573 KK5: davet eden taraf çekmecesi — kişiler ve durumları.
+    await waitFor(() => expect(screen.getByText(t('davet.gonderildi.baslik', { gezi: 'Urla bağ rotası' }))).toBeTruthy());
+    expect(within(screen.getByTestId('gonderilen-u-mert')).getByText('Katıldı')).toBeTruthy();
+    expect(mockRouter.replace).not.toHaveBeenCalled();
+    fireEvent.press(screen.getByTestId('davet-geziye-git'));
+    expect(mockRouter.replace).toHaveBeenCalledWith({ pathname: '/seyahat/[id]/(sekmeler)/gezi', params: { id: 'yeni-gezi' } });
+  });
+
+  it('davet gönderilemezse seyahat yine açılır ve hata söylenir', async () => {
+    const uyari = jest.spyOn(Alert, 'alert').mockImplementation(() => undefined);
+    mockGonder.mockRejectedValueOnce(new Error('ağ'));
+    render(<GeziKurEkrani arkadas="u-ayse" onKendiRota={jest.fn()} />);
+    fireEvent.press(within(screen.getByTestId('rota-urla')).getByText('Bunu seç'));
+    fireEvent.press(screen.getByText('gidis-sec'));
+    fireEvent.press(screen.getByText('Geziyi oluştur'));
+    await waitFor(() => expect(mockRouter.replace).toHaveBeenCalledWith({ pathname: '/seyahat/[id]/(sekmeler)/gezi', params: { id: 'yeni-gezi' } }));
+    expect(mockGonder).toHaveBeenCalledWith({ tripId: 'yeni-gezi', kisiler: ['u-ayse'] });
+    expect(uyari).toHaveBeenCalledWith(t('genel.hataBaslik'), t('genel.hataMetin'));
+    expect(mockYeni).toHaveBeenCalledTimes(1);
+  });
+
+  it('yalnız "+" seçilirse davet gitmez; Gezi sayfası link paylaşımıyla açılır', async () => {
+    render(<GeziKurEkrani onKendiRota={jest.fn()} />);
+    fireEvent.press(within(screen.getByTestId('rota-urla')).getByText('Bunu seç'));
+    fireEvent.press(screen.getByTestId('davet-arti'));
     expect(screen.getByTestId('davet-arti').props.accessibilityState).toMatchObject({ selected: true });
     fireEvent.press(screen.getByText('gidis-sec'));
     fireEvent.press(screen.getByText('Geziyi oluştur'));
     await waitFor(() => expect(mockRouter.replace).toHaveBeenCalledWith({ pathname: '/seyahat/[id]/(sekmeler)/gezi', params: { id: 'yeni-gezi', davet: '1' } }));
+    expect(mockGonder).not.toHaveBeenCalled();
   });
 
-  it('`arkadas` verilmişse o kişi seçili gelir, dokununca kalkar; şehir kutusu `sehir` ile dolu açılır', () => {
-    render(<GeziKurEkrani sehirId="s-esk" arkadas="u-ayse" onKendiRota={jest.fn()} />);
+  it('`arkadas` verilmişse o kişi yuvarlaklarda seçili gelir (ilk 3\'te değilse başa), dokununca kalkar; şehir kutusu dolu', () => {
+    render(<GeziKurEkrani sehirId="s-esk" arkadas="u-can" onKendiRota={jest.fn()} />);
     expect(screen.getByLabelText(t('geziKur.sehirEtiket')).props.value).toBe('Eskişehir');
-    expect(screen.getByText('Eskişehir için kendi rotanı kur')).toBeTruthy();
     fireEvent.press(within(screen.getByTestId('rota-esk3')).getByText('Bunu seç'));
-    const yuz = screen.getByTestId('yol-arkadasi');
-    expect(yuz.props.accessibilityLabel).toBe(t('geziKur.yolArkadasi', { ad: 'Ayşe' }));
-    expect(yuz.props.accessibilityState).toMatchObject({ selected: true });
-    expect(yuz.props.accessibilityLabel).toContain('davet linki paylaşılır');
-    // 40 pt yuvarlak + 4 pt hitSlop = 48 pt dokunma alanı.
-    expect(yuz.props.hitSlop).toBe(4);
-    fireEvent.press(yuz);
-    expect(screen.queryByTestId('yol-arkadasi')).toBeNull();
+    const ids = screen.getAllByTestId(/^kimlerle-/).map((x) => x.props.testID as string);
+    expect(ids).toEqual(['kimlerle-u-can', 'kimlerle-u-ayse', 'kimlerle-u-mert']);
+    const can = screen.getByTestId('kimlerle-u-can');
+    expect(can.props.accessibilityState).toMatchObject({ selected: true });
+    expect(can.props.accessibilityLabel).toBe(t('geziKur.yolArkadasi', { ad: 'Can' }));
+    fireEvent.press(can);
+    expect(screen.getByTestId('kimlerle-u-can').props.accessibilityState).toMatchObject({ selected: false });
+    // Seçim ekranda tutulur: çekmece kapanıp açılınca korunur.
+    fireEvent.press(screen.getByTestId('kimlerle-u-ayse'));
+    fireEvent.press(screen.getByLabelText(t('geziKur.kapat')));
+    fireEvent.press(within(screen.getByTestId('rota-esk3')).getByText('Bunu seç'));
+    expect(screen.getByTestId('kimlerle-u-ayse').props.accessibilityState).toMatchObject({ selected: true });
   });
 });
 

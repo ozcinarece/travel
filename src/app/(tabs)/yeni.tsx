@@ -1,9 +1,8 @@
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { ActivityIndicator, BackHandler, Linking, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Alert, BackHandler, Linking, StyleSheet, Text, View } from 'react-native';
 
-import { ProfilOnayi } from '@/components/davet/ProfilOnayi';
-import { KimlerleSatiri, type YolArkadasi } from '@/components/geziKur/BunuSecCekmecesi';
+import { KimlerleSatiri } from '@/components/geziKur/BunuSecCekmecesi';
 import { GeziKurEkrani, type KendiRotaGirisi } from '@/components/geziKur/GeziKurEkrani';
 import { MekanPaneli } from '@/components/mekan/MekanPaneli';
 import { AdimIlOnerileri } from '@/components/sihirbaz/AdimIlOnerileri';
@@ -14,8 +13,8 @@ import { AdimOnerilenler } from '@/components/sihirbaz/AdimOnerilenler';
 import { PlanCubugu } from '@/components/sihirbaz/PlanCubugu';
 import { SehirDegisimSayfasi } from '@/components/sihirbaz/SehirDegisimSayfasi';
 import { Buton } from '@/components/ui/Buton';
-import { useArkadaslarim } from '@/features/arkadaslar/sorgular';
-import { useDavetPaylas } from '@/features/davet/paylas';
+import { useDavetGonder } from '@/features/davet/uygulamaIci';
+import { useKimlerle } from '@/features/geziKur/kimlerle';
 import { useDuraklar, useGunler } from '@/features/gunler/sorgular';
 import { ilSlugu, useIlYerleri } from '@/features/icerik/ilOnerileri';
 import { icerikPlaceId, olayYaz, sehirEslestir, useSehirler, useYerlerIle } from '@/features/icerik/sorgular';
@@ -114,15 +113,10 @@ export function Sihirbaz({ giris, onCik }: { giris: YeniGirisi; /** #574: 1. ad�
     }, [tripId]),
   );
   const [hata, setHata] = useState<string | null>(null);
-  // #574 KK-ek1: Profil'den (`arkadas`) ya da "Nasıl bir gezi?"den gelen yol arkadaşı seçili gelir, kaldırılabilir. #573 gelene
-  // kadar kişi seyahate doğrudan eklenemez: seyahat oluşunca davet linki paylaşımı açılır.
-  const [yolArkadasiId, setYolArkadasiId] = useState<string | null>(giris.arkadas ?? null);
-  const arkadaslar = useArkadaslarim(!!yolArkadasiId);
-  const yolArkadasi: YolArkadasi | null = useMemo(() => {
-    const a = yolArkadasiId ? arkadaslar.data?.find((k) => k.user_id === yolArkadasiId) : undefined;
-    return a ? { id: a.user_id, ad: a.ad, foto: a.foto } : null;
-  }, [yolArkadasiId, arkadaslar.data]);
-  const davetBekliyor = useRef(false);
+  // #574 KK6 · KK-ek1: "Kimlerle?" — çekmeceyle aynı yol: son gezilen arkadaşlar (en çok 3), Profil'den (`arkadas`) ya da
+  // "Nasıl bir gezi?"den gelen kişi seçili; seyahat oluşunca seçilenlere #573 uygulama içi daveti gider.
+  const kimlerle = useKimlerle(giris.arkadas);
+  const davetGonder = useDavetGonder();
   // KK8: sihirbaz başlangıcı → plan yazılana kadar süre (ölçüm: < 3 dk). Seyahat henüz kurulmadıysa ekran her odağa
   // geldiğinde sıfırlanır (sekmeden çıkıp dönünce süre uzun ölçülmesin).
   const baslangicAni = useRef(0);
@@ -181,7 +175,7 @@ export function Sihirbaz({ giris, onCik }: { giris: YeniGirisi; /** #574: 1. ad�
       setTarihsizGun(null);
       setHata(null);
       setTutulan(new Set());
-      setYolArkadasiId(giris.arkadas ?? null);
+      kimlerle.sifirla(giris.arkadas);
       if (tekrarKaynagi.data && giris.tekrar) {
         setSehir(tekrarKaynagi.data.sehir);
         setAd(tekrarKaynagi.data.ad);
@@ -222,14 +216,6 @@ export function Sihirbaz({ giris, onCik }: { giris: YeniGirisi; /** #574: 1. ad�
           country_code: seyahat.data.country_code,
         }
       : null;
-
-  const davetPaylas = useDavetPaylas(seyahat.data ?? BOS_DAVET);
-  useEffect(() => {
-    if (!davetBekliyor.current || !seyahat.data) return;
-    davetBekliyor.current = false;
-    void davetPaylas.paylas();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tripId, seyahat.data]);
 
   const kayitSuruyor = kuruluyor || taslakTarihi.isPending || taslakSehri.isPending || adKaydet.isPending || planUygula.isPending;
 
@@ -391,7 +377,9 @@ export function Sihirbaz({ giris, onCik }: { giris: YeniGirisi; /** #574: 1. ad�
       });
       // Seyahat oluştu: sonraki adımlardan biri düşse de yeniden deneme aynı taslağı günceller (kopya seyahat açılmaz).
       setTripId(id);
-      if (yolArkadasi) davetBekliyor.current = true;
+      // KK6: seçilenlere uygulama içi davet; düşerse seyahat yine kurulur, genel hata söylenir (sihirbaz sürer).
+      const davetliler = kimlerle.secilenler.map((k) => k.id);
+      if (davetliler.length > 0) davetGonder.mutateAsync({ tripId: id, kisiler: davetliler }).catch(() => Alert.alert(t('genel.hataBaslik'), t('genel.hataMetin')));
       // KK2: tetikleyici tarihsiz seyahate 1 gün açar; sayaçtaki gün sayısına tamamlanır.
       if (secim.tur === 'tarihsiz' && secim.gun > 1) await tarihsizGunleriKur(id, secim.gun);
       // #144 Tekrar kur: aynı plan yeni tarihe; plan hazır olduğundan öneriler atlanır, Program açılır.
@@ -444,12 +432,13 @@ export function Sihirbaz({ giris, onCik }: { giris: YeniGirisi; /** #574: 1. ad�
     [mekanlar.data, gunler.data, duraklar.data],
   );
 
-  const kimlerle = yolArkadasi ? <KimlerleSatiri yolArkadasi={yolArkadasi} onYolArkadasiKaldir={() => setYolArkadasiId(null)} /> : undefined;
+  // Seyahat kurulduktan sonra (geri dönülse de) davet gitmiş olur: satır yalnız seyahat kurulmadan görünür.
+  const kimlerSatiri = !tripId && kimlerle.kisiler.length > 0 ? <KimlerleSatiri kimlerle={kimlerle} /> : undefined;
 
   if (adim === 'nereye') {
     return (
       <>
-        <AdimKabugu adim={adim} baslik={t('sihirbaz.nereye.baslik')} onGeri={geri} geriPasif={kayitSuruyor} hata={hata} altIcerik={kimlerle} devam={{ onPress: nereyeDevam, pasif: !sehir, yukleniyor: adKaydet.isPending || taslakSehri.isPending }}>
+        <AdimKabugu adim={adim} baslik={t('sihirbaz.nereye.baslik')} onGeri={geri} geriPasif={kayitSuruyor} hata={hata} altIcerik={kimlerSatiri} devam={{ onPress: nereyeDevam, pasif: !sehir, yukleniyor: adKaydet.isPending || taslakSehri.isPending }}>
           <AdimNereye key={ilkSorgu?.anahtar} ilkSorgu={ilkSorgu?.metin} sehir={sehir} onSehir={setSehir} ad={ad} onerilenAd={onerilenAd} onAd={setAd} sehirler={sehirler.data} />
         </AdimKabugu>
         <SehirDegisimSayfasi yerSayisi={sehirOnayi} sehir={sehir?.ad ?? ''} onDevam={sehriKaydet} onVazgec={sehirVazgec} />
@@ -464,7 +453,7 @@ export function Sihirbaz({ giris, onCik }: { giris: YeniGirisi; /** #574: 1. ad�
         alt={seyahat.data ? (seyahat.data.name ?? seyahat.data.city_label) : (ad ?? onerilenAd)}
         onGeri={geri} geriPasif={kayitSuruyor}
         hata={hata}
-        altIcerik={kimlerle}
+        altIcerik={kimlerSatiri}
         devam={{ onPress: seyahatiKur, pasif: !aralik && tarihsizGun === null, yukleniyor: kuruluyor || taslakTarihi.isPending }}
         atla={
           tarihsizGun === null
@@ -595,12 +584,9 @@ export function Sihirbaz({ giris, onCik }: { giris: YeniGirisi; /** #574: 1. ad�
           onKapat={() => setPanel(null)}
         />
       ) : null}
-      <ProfilOnayi acik={davetPaylas.onayAcik} onKapat={davetPaylas.onayKapat} onGonder={davetPaylas.onayla} />
     </View>
   );
 }
-
-const BOS_DAVET = { id: '', invite_token: '', city_label: '' };
 
 const s = StyleSheet.create({
   hataKutu: { gap: 16, paddingTop: 20 },

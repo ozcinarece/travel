@@ -3,9 +3,12 @@ import { useMemo } from 'react';
 import { ActivityIndicator, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { DavetlerBolumu } from '@/components/davet/DavetlerBolumu';
+import { GeriAlBandi } from '@/components/listem/GeriAlBandi';
 import { SeyahatlerimListesi } from '@/components/seyahatler/SeyahatlerimListesi';
 import { Buton } from '@/components/ui/Buton';
 import { KisaBildirim, useKisaBildirim } from '@/components/ui/KisaBildirim';
+import { useDavetEylemleri } from '@/features/davet/uygulamaIci';
 import { biten, bitmemis, siniflandir } from '@/features/seyahatler/siniflandir';
 import { useSeyahatler } from '@/features/seyahatler/sorgular';
 import { yeniGirisNo } from '@/features/sihirbaz/girisler';
@@ -16,10 +19,12 @@ import { renk, yazi } from '@/theme';
  * #275 KK4 → #405 KK2 (UX önerileri kanvası, `Ana_v6_Seyahatlerim`): alt menünün Seyahatlerim sekmesi. Üstte "Seyahatlerim"
  * (28 px 800) ve turuncu "+ Seyahat"; altında YAKLAŞAN (en yakını büyük kapakla) ve GEÇMİŞ. Profil › Gezilerim buraya taşındı;
  * eski `/seyahatler` derin bağlantısı da bu sekmeyi açar.
+ * #573 KK3 (kanvas `Davet_v1_Gezilerim`): bekleyen davet varsa en üstte DAVETLER bölümü; yoksa bölüm yok.
  */
 export default function SeyahatlerimEkrani() {
   const seyahatler = useSeyahatler();
   const bildirim = useKisaBildirim();
+  const davet = useDavetEylemleri(bildirim.goster);
   // Bitmemiş = bugün süren + yaklaşan + planlanan (tarihsiz taslak dahil); tarih sırası, taslaklar sonda.
   // #276 KK1: GEÇMİŞ = yeniBiten + geçmiş (seyahat bitişin ertesi günü iner).
   const { yaklasan, gecmis } = useMemo(() => {
@@ -30,7 +35,7 @@ export default function SeyahatlerimEkrani() {
   const yeni = () => router.push({ pathname: '/(tabs)/yeni', params: { n: yeniGirisNo() } });
   return (
     <SafeAreaView style={s.ekran} edges={['top']}>
-      <ScrollView contentContainerStyle={s.icerik} refreshControl={<RefreshControl refreshing={seyahatler.isRefetching} onRefresh={() => seyahatler.refetch()} />}>
+      <ScrollView contentContainerStyle={s.icerik} refreshControl={<RefreshControl refreshing={seyahatler.isRefetching} onRefresh={() => Promise.all([seyahatler.refetch(), davet.yenile()])} />}>
         <View style={s.ust}>
           <Text accessibilityRole="header" style={s.baslik}>
             {t('seyahatlerim.baslik')}
@@ -40,6 +45,7 @@ export default function SeyahatlerimEkrani() {
             <Text style={s.seyahatMetin}>{t('anasayfa.v5.seyahat')}</Text>
           </Pressable>
         </View>
+        <DavetlerBolumu davetler={davet.davetler} onHayir={davet.reddet} onKatil={davet.katil} katilan={davet.katilan} />
         {seyahatler.data ? (
           <SeyahatlerimListesi yaklasan={yaklasan} gecmis={gecmis} onBildirim={bildirim.goster} />
         ) : seyahatler.isError ? (
@@ -52,7 +58,7 @@ export default function SeyahatlerimEkrani() {
           <ActivityIndicator color={renk.ana} style={s.yukleniyor} accessibilityLabel={t('seyahatlerim.yukleniyor')} />
         )}
       </ScrollView>
-      <KisaBildirim metin={bildirim.metin} />
+      {davet.bekleyen ? <GeriAlBandi metin={t('davet.kutu.geriCevirdin')} olay={davet.bekleyen} onGeriAl={davet.geriAl} /> : <KisaBildirim metin={bildirim.metin} />}
     </SafeAreaView>
   );
 }

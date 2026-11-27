@@ -8,6 +8,8 @@ import { KurSatiri } from '@/components/ortak/KurSatiri';
 import { KartKaydirici } from '@/components/anasayfa/KartKaydirici';
 import { ArkadasRotalari, RafV9 } from '@/components/anasayfa/RafV9';
 import { ArtiIkonu, GeziOncesiKarti, GeziSirasiKarti, GeziYokKarti } from '@/components/anasayfa/SeyahatKarti';
+import { DavetKarti } from '@/components/davet/DavetKarti';
+import { GeriAlBandi } from '@/components/listem/GeriAlBandi';
 import { Avatar } from '@/components/ui/Avatar';
 import { Buton } from '@/components/ui/Buton';
 import { Ikon } from '@/components/ui/Ikon';
@@ -20,6 +22,7 @@ import { bugunSatiri, geziOncesiAlt, kartGenisligi, kartSeyahatleri, kartYuzleri
 import { useArkadasPaylasimlari } from '@/features/arkadaslar/sorgular';
 import { bekleyenPaylasimiOku, bekleyenPaylasimiSil } from '@/features/paylasim/alici';
 import { bekleyenDavetiOku, bekleyenDavetiSil, useDavetKarsilama, useDavetKarsilandi } from '@/features/davet/sorgular';
+import { useDavetEylemleri } from '@/features/davet/uygulamaIci';
 import { useKesfetAkisi, type AkisGezisi } from '@/features/icerik/kesfetAkisi';
 import { olayYaz, useSehirler } from '@/features/icerik/sorgular';
 import { useProfil } from '@/features/profil/sorgular';
@@ -51,6 +54,8 @@ import { anaV5, minDokunma, renk, yazi } from '@/theme';
  * gezi öncesinde kartın altında "+ Yeni gezi oluştur" (KK6); "Nereye gitmek istersin?" araması (KK7); "Arkadaşlarının
  * rotaları" ve BO rafları (KK8). Banner, Planlamaya devam ve Harcamaları kapat kanvasta yok, kalktı. ♥ Kaydettiklerim kanvasta yok ama tek giriş olduğu
  * için kaldı (tasarım bekliyor).
+ * #573 KK2 (kanvas `Davet_v1_AnaSayfa`): bekleyen uygulama içi davet varsa şeridin ilk kartları davet kartlarıdır; seyahat
+ * kartları (ya da gezisi olmayan kart) yanında kalır. Hayır → kart kalkar, altta 5 sn "Daveti geri çevirdin · Geri al".
  */
 export default function AnaSayfa() {
   const profil = useProfil();
@@ -67,9 +72,11 @@ export default function AnaSayfa() {
   // #291 KK6: aşağı çekip yenileme gezileri de çeker; veri varken yenileme hata verirse kartlar kalır ve bir kez
   // "Güncellenemedi".
   const bildirim = useKisaBildirim();
+  const davet = useDavetEylemleri(bildirim.goster);
   const yenile = () =>
     Promise.all([
       seyahatler.refetch(),
+      davet.yenile(),
       bolumler.refetch(),
       paylasimlar.refetch(),
       akis.refetch().then((r) => {
@@ -184,7 +191,9 @@ export default function AnaSayfa() {
   const siniflar = seyahatler.data ? siniflandir(seyahatler.data) : null;
   const kartlar = siniflar ? kartSeyahatleri(siniflar) : [];
   const geziSirasinda = !!siniflar && siniflar.aktif.length > 0;
-  const kartGenislik = kartGenisligi(ekran, kartlar.length);
+  // #573 KK2: davet kartları şeridin başında; seyahat yoksa yanında gezisi olmayan kart.
+  const davetler = davet.davetler;
+  const kartGenislik = kartGenisligi(ekran, davetler.length + (kartlar.length > 0 ? kartlar.length : seyahatler.data ? 1 : 0));
 
   // KK5: arama.
   const [sorgu, setSorgu] = useState('');
@@ -273,13 +282,32 @@ export default function AnaSayfa() {
         </View>
 
         {/* KK2–KK5: seyahat kartları ya da gezisi olmayan kart. Liste gelmeden kart alanı çizilmez (zıplamasın). */}
-        {seyahatler.data && kartlar.length > 0 ? (
-          <KartKaydirici genislik={kartGenislik}>{kartlar.map(kart)}</KartKaydirici>
+        {davetler.length > 0 || (seyahatler.data && kartlar.length > 0) ? (
+          <KartKaydirici genislik={kartGenislik}>
+            {[
+              ...davetler.map((d) => (
+                <DavetKarti
+                  key={`davet-${d.id}`}
+                  davet={d}
+                  kapak={seyahatKapagi({ city_label: d.sehir }, sehirler.data)}
+                  genislik={kartGenislik}
+                  katiliyor={davet.katilan === d.id}
+                  onHayir={() => davet.reddet(d)}
+                  onKatil={() => davet.katil(d)}
+                />
+              )),
+              ...kartlar.map(kart),
+              ...(kartlar.length === 0 && seyahatler.data
+                ? [<Karsilama key="karsilama" bolumler={bolumler.data} bekleniyor={bolumler.isPending} sehirler={sehirler.data} genislik={kartGenislik} onYeni={yeni} />]
+                : []),
+            ]}
+          </KartKaydirici>
         ) : seyahatler.data ? (
           <View style={s.kenar}>
             <Karsilama bolumler={bolumler.data} bekleniyor={bolumler.isPending} sehirler={sehirler.data} genislik={kartGenislik} onYeni={yeni} />
           </View>
-        ) : seyahatler.isError ? (
+        ) : null}
+        {!seyahatler.data && seyahatler.isError ? (
           // Liste okunamadıysa "gezin yok" denmez; Gezilerim'deki hata kalıbı (#388, ham hata gösterilmez).
           <View style={[s.kenar, s.seyahatHata]} testID="ana-seyahat-hata">
             <Text style={s.seyahatHataMetin}>{t('seyahatlerim.hata')}</Text>
@@ -371,7 +399,11 @@ export default function AnaSayfa() {
           </>
         )}
       </ScrollView>
-      <KisaBildirim metin={gelenBildirim ?? bildirim.metin} alt={Math.max(24, altBosluk + 8)} />
+      {davet.bekleyen ? (
+        <GeriAlBandi metin={t('davet.kutu.geriCevirdin')} olay={davet.bekleyen} onGeriAl={davet.geriAl} alt={Math.max(24, altBosluk + 8)} />
+      ) : (
+        <KisaBildirim metin={gelenBildirim ?? bildirim.metin} alt={Math.max(24, altBosluk + 8)} />
+      )}
     </SafeAreaView>
   );
 }

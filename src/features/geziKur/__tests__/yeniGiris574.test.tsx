@@ -2,7 +2,7 @@
 // şehirle gelen giriş "Nasıl bir gezi?"yi açar; "Kendi rotanı kur" sihirbazı şehir dolu, 2. adımdan açar, 1. adımda geri
 // "Nasıl bir gezi?"ye döner. Profil v12'nin iki parametresi (`il`, `arkadas`): rehberli il seçili, değilse Nereye'de aranmış.
 import { beforeEach, describe, expect, it, jest } from '@jest/globals';
-import { fireEvent, render, screen } from '@testing-library/react-native';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react-native';
 
 import { geziOlusturParametreleri } from '@/components/profil/ProfilV12';
 import { t } from '@/i18n';
@@ -29,6 +29,9 @@ jest.mock('@/components/geziKur/GeziKurEkrani', () => {
       <>
         <T>{`kur:${p.sehirId ?? '-'}:${p.arkadas ?? '-'}`}</T>
         <T>{`kutu:${p.ilkMetin ?? '-'}`}</T>
+        <P onPress={() => p.onKendiRota({ sehirId: 's-mugla' }, p.arkadas)}>
+          <T>kendi-sehirle-arkadasla</T>
+        </P>
         <P onPress={() => p.onKendiRota({ metin: 'Kars' }, p.arkadas)}>
           <T>kendi-arkadasla</T>
         </P>
@@ -45,6 +48,9 @@ jest.mock('@/components/geziKur/GeziKurEkrani', () => {
 
 jest.mock('@/features/arkadaslar/sorgular', () => ({ useArkadaslarim: () => ({ data: [{ user_id: 'u-deniz', ad: 'Deniz', foto: null }] }) }));
 
+const mockGonder = jest.fn(async (_: unknown) => 1);
+jest.mock('@/features/davet/uygulamaIci', () => ({ useDavetGonder: () => ({ mutateAsync: mockGonder }) }));
+
 const mockSehirler = [
   { id: 's-mugla', ad: 'Muğla', slug: 'mugla', kapak_url: null, lat: 37.2, lng: 28.4 },
   { id: 's-esk', ad: 'Eskişehir', slug: 'eskisehir', kapak_url: null, lat: 39.8, lng: 30.5 },
@@ -59,7 +65,7 @@ jest.mock('@/features/sihirbaz/girisler', () => ({
 const mockBos = { data: undefined };
 const mockMut = { mutate: jest.fn(), mutateAsync: jest.fn(async () => undefined), isPending: false };
 jest.mock('@/features/seyahatler/sorgular', () => ({
-  useSeyahatOlustur: () => ({ mutateAsync: jest.fn(), isPending: false }),
+  useSeyahatOlustur: () => ({ mutateAsync: async () => 'yeni-s', isPending: false }),
   useSeyahatAdiKaydet: () => mockMut,
   useSeyahat: () => mockBos,
 }));
@@ -87,7 +93,15 @@ jest.mock('@/components/sihirbaz/AdimNereye', () => {
 });
 jest.mock('@/components/sihirbaz/AdimNeZaman', () => {
   const { Text: T } = jest.requireActual<typeof import('react-native')>('react-native');
-  return { AdimNeZaman: () => <T>nezaman-adimi</T> };
+  const { Pressable: P } = jest.requireActual<typeof import('react-native')>('react-native');
+  return {
+    AdimNeZaman: (p: { onAralik: (a: { gidis: string; donus: string }) => void }) => (
+      <P onPress={() => p.onAralik({ gidis: '2026-12-10', donus: '2026-12-11' })}>
+        <T>nezaman-adimi</T>
+        <T>tarih-sec</T>
+      </P>
+    ),
+  };
 });
 
 beforeEach(() => {
@@ -147,11 +161,11 @@ describe('#574 KK-ek1 · KK-ek2 Profil v12 girişleri (`il`, `arkadas`)', () => 
     expect(mockParams).toMatchObject({ metin: 'Kars', il: '36', arkadas: 'u-deniz' });
     render(<YeniEkrani />);
     expect(screen.getByText('nereye:Kars:-')).toBeTruthy();
-    const yuz = screen.getByTestId('yol-arkadasi');
+    const yuz = screen.getByTestId('kimlerle-u-deniz');
     expect(yuz.props.accessibilityLabel).toBe(t('geziKur.yolArkadasi', { ad: 'Deniz' }));
     expect(yuz.props.accessibilityState).toMatchObject({ selected: true });
     fireEvent.press(yuz);
-    expect(screen.queryByTestId('yol-arkadasi')).toBeNull();
+    expect(screen.getByTestId('kimlerle-u-deniz').props.accessibilityState).toMatchObject({ selected: false });
   });
 
   it('"Nasıl bir gezi?"de seçili yol arkadaşı "Kendi rotanı kur" sihirbazına da taşınır', () => {
@@ -159,7 +173,17 @@ describe('#574 KK-ek1 · KK-ek2 Profil v12 girişleri (`il`, `arkadas`)', () => 
     render(<YeniEkrani />);
     fireEvent.press(screen.getByText('kendi-arkadasla'));
     expect(screen.getByText('nereye:Kars:-')).toBeTruthy();
-    expect(screen.getByTestId('yol-arkadasi')).toBeTruthy();
+    expect(screen.getByTestId('kimlerle-u-deniz').props.accessibilityState).toMatchObject({ selected: true });
+  });
+
+  it('KK6: sihirbaz da aynı yolu kullanır — seyahat oluşunca seçilen kişiye uygulama içi davet gider', async () => {
+    mockParams = { arkadas: 'u-deniz', n: '4' };
+    render(<YeniEkrani />);
+    fireEvent.press(screen.getByText('kendi-sehirle-arkadasla'));
+    expect(screen.getByTestId('kimlerle-u-deniz').props.accessibilityState).toMatchObject({ selected: true });
+    fireEvent.press(screen.getByText('tarih-sec'));
+    fireEvent.press(screen.getByText(t('sihirbaz.devam')));
+    await waitFor(() => expect(mockGonder).toHaveBeenCalledWith({ tripId: 'yeni-s', kisiler: ['u-deniz'] }));
   });
 
   it('yalnız arkadaş: "Nasıl bir gezi?" boş şehirle, kişi seçili', () => {

@@ -12,7 +12,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import Svg, { Circle, Path } from 'react-native-svg';
 
 import { Buton } from '@/components/ui/Buton';
-import { useArkadaslarim, useArkadasPaylasimlari, type ArkadasPaylasimi } from '@/features/arkadaslar/sorgular';
+import { useArkadasPaylasimlari, type ArkadasPaylasimi } from '@/features/arkadaslar/sorgular';
 import {
   AMAC_SUZGECLERI,
   arkadasRotalari,
@@ -26,13 +26,14 @@ import {
   sehirGezileri,
   type Suzgec,
 } from '@/features/geziKur/geziKur';
+import { useKimlerle } from '@/features/geziKur/kimlerle';
 import { kapakVeAtif } from '@/features/icerik/kapakAtfi';
 import { useKesfetAkisi, type AkisGezisi } from '@/features/icerik/kesfetAkisi';
 import { useSehirler } from '@/features/icerik/sorgular';
 import { t } from '@/i18n';
 import { minDokunma, renk, yazi } from '@/theme';
 
-import { BunuSecCekmecesi, type SecilenRota, type YolArkadasi } from './BunuSecCekmecesi';
+import { BunuSecCekmecesi, type SecilenRota } from './BunuSecCekmecesi';
 import { ArkadasRotaKarti, kurRenk, RotaKarti, type Kapak } from './RotaKarti';
 
 /** "Kendi rotanı kur": rehberli şehir seçiliyse sihirbaz 2. adımdan, değilse yazılan metin Nereye'de aranmış ya da boş. */
@@ -58,12 +59,8 @@ export function GeziKurEkrani({ sehirId, ilkMetin, arkadas, onKendiRota }: Props
   const sorgu = yazilan ?? baslangicSehri?.ad ?? ilkMetin ?? '';
   const [suzgec, setSuzgec] = useState<Suzgec>(BOS_SUZGEC);
   const [secilen, setSecilen] = useState<SecilenRota | null>(null);
-  const [arkadasId, setArkadasId] = useState<string | null>(arkadas ?? null);
-  const arkadaslar = useArkadaslarim(!!arkadasId);
-  const yolArkadasi: YolArkadasi | null = useMemo(() => {
-    const a = arkadasId ? arkadaslar.data?.find((k) => k.user_id === arkadasId) : undefined;
-    return a ? { id: a.user_id, ad: a.ad, foto: a.foto } : null;
-  }, [arkadasId, arkadaslar.data]);
+  // KK6 · KK-ek1: "Kimlerle?" seçimi ekranda tutulur (çekmece kapanıp açılınca korunur); `arkadas` seçili başlar.
+  const kimlerle = useKimlerle(arkadas);
 
   const geziler = useMemo(() => akis.data ?? [], [akis.data]);
   const arkadasListesi = useMemo(() => paylasimlar.data ?? [], [paylasimlar.data]);
@@ -85,7 +82,7 @@ export function GeziKurEkrani({ sehirId, ilkMetin, arkadas, onKendiRota }: Props
   };
   const geri = () => (router.canGoBack() ? router.back() : router.replace('/(tabs)'));
   const kendiRota = () => {
-    const a = arkadasId ?? undefined;
+    const a = kimlerle.secilenler.map((k) => k.id).join(',') || undefined;
     if (!yazili) return onKendiRota(null, a);
     // Yalnız tam eşleşmede şehir dolu 2. adım; değilse yazılan metin Nereye'de aranmış.
     onKendiRota(sehir ? { sehirId: sehir.id } : { metin: sorgu.trim() }, a);
@@ -205,7 +202,7 @@ export function GeziKurEkrani({ sehirId, ilkMetin, arkadas, onKendiRota }: Props
           </>
         )}
       </ScrollView>
-      {secilen ? <BunuSecCekmecesi rota={secilen} onKapat={() => setSecilen(null)} yolArkadasi={yolArkadasi} onYolArkadasiKaldir={() => setArkadasId(null)} /> : null}
+      {secilen ? <BunuSecCekmecesi rota={secilen} onKapat={() => setSecilen(null)} kimlerle={kimlerle} /> : null}
     </SafeAreaView>
   );
 }
