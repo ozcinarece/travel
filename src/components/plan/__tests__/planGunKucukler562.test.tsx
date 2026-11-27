@@ -1,0 +1,61 @@
+// #562 (#558 takibi): akşam geçince "akşam boş" yok, ekran okuyucu ayıracı ", ", "Haritaya dön" 44 pt, boş günde tek boşluk.
+import { describe, expect, it, jest } from '@jest/globals';
+import { render } from '@testing-library/react-native';
+import { StyleSheet } from 'react-native';
+
+import { gunAlti, gunSatiriEtiketi } from '@/components/listem/GuneEkleSayfasi';
+import { durakEtiketi, HARITAYA_DON_ALAN, ListemBekliyorSatiri } from '@/components/plan/PlanListesi';
+import { AKSAM_BITIS_DK, bugunDurumu, type GunSecenegi } from '@/features/listem/listem';
+import { t } from '@/i18n';
+import { okunurAyrac } from '@/lib/okunur';
+
+jest.mock('@/components/ui/Foto', () => ({ Foto: () => null }));
+jest.mock('@/components/harita/Harita', () => ({ Harita: () => null }));
+
+const satir = (durum: string, ayrilisDk: number) => ({ durum, ayrilisDk }) as never;
+
+describe('Plan gün v7p küçükleri 2 (#562)', () => {
+  it('KK1: seyahat saatiyle 21:00 ve sonrasında "akşam boş" yok; öncesinde 17:00 eşiği aynen', () => {
+    const canli = { satirlar: [satir('gecildi', 600), satir('gecildi', 700)] };
+    expect(AKSAM_BITIS_DK).toBe(21 * 60);
+    expect(bugunDurumu(canli)).toEqual({ gezilen: 2, aksamBos: true });
+    expect(bugunDurumu(canli, 20 * 60 + 59)).toEqual({ gezilen: 2, aksamBos: true });
+    expect(bugunDurumu(canli, 21 * 60)).toEqual({ gezilen: 2, aksamBos: false });
+    expect(bugunDurumu(canli, 23 * 60 + 30)).toEqual({ gezilen: 2, aksamBos: false });
+    // Akşam doluysa saat ne olursa olsun boş değil (#532 eşiği).
+    expect(bugunDurumu({ satirlar: [satir('gecildi', 600), satir('siradaki', 1140)] }, 18 * 60)).toEqual({ gezilen: 1, aksamBos: false });
+    // 21:00 sonrası alt satır yalnız "N durak gezildi".
+    const o = { gun: { id: 'g', index: 2, date: '2026-11-27' }, durakSayisi: 3, enYakinM: 400, sonGun: false } as unknown as GunSecenegi;
+    expect(gunAlti(o, false, bugunDurumu(canli, 21 * 60 + 5))).toBe(t('listem.guneEkle.gezildi', { n: 2 }));
+  });
+
+  it('KK2: ekran okuyucu etiketlerinde " · " yok, ", " var; görünen alt satır değişmez', () => {
+    expect(okunurAyrac('Müze · 1 sa · Pzt kapalı')).toBe('Müze, 1 sa, Pzt kapalı');
+    const r = { saat: '10:42', ad: 'Pantheon', alt: 'Müze · 1 sa', vurgulu: false };
+    expect(durakEtiketi(r)).toBe('10:42, Pantheon, Müze, 1 sa');
+    expect(r.alt).toBe('Müze · 1 sa');
+
+    const o = { gun: { id: 'g', index: 2, date: '2026-11-27' }, durakSayisi: 3, enYakinM: 400, sonGun: false } as unknown as GunSecenegi;
+    const alt = gunAlti(o, false, { gezilen: 2, aksamBos: true });
+    expect(alt).toContain(' · ');
+    const etiket = gunSatiriEtiketi('Cum 27', alt, { gecti: false, enYakin: true });
+    expect(etiket).not.toContain('·');
+    expect(etiket).toBe(`Cum 27, ${t('listem.guneEkle.gezildi', { n: 2 })}, ${t('listem.guneEkle.aksamBos')}, ${t('listem.guneEkle.enYakinRozet')}`);
+  });
+
+  it('KK3: "Haritaya dön" dokunma alanı en az 44 pt', () => {
+    expect(HARITAYA_DON_ALAN).toBeGreaterThanOrEqual(44);
+  });
+
+  it('KK4: harita panelinin boş gün halinde Listem satırı kendi üst boşluğunu eklemez (tek boşluk, tek çizgi)', () => {
+    const ust = (props: { bosGun?: boolean; kapBosluklu?: boolean }) => {
+      const { getByTestId } = render(<ListemBekliyorSatiri n={2} onPress={() => undefined} {...props} />);
+      const stil = getByTestId('listemBekliyor').props.style;
+      return StyleSheet.flatten(typeof stil === 'function' ? stil({ pressed: false }) : stil);
+    };
+    expect(ust({ kapBosluklu: true }).marginTop).toBe(0);
+    expect(ust({ kapBosluklu: true }).borderTopWidth).toBe(1);
+    expect(ust({}).marginTop).toBe(10);
+    expect(ust({ bosGun: true }).marginTop).toBe(22);
+  });
+});

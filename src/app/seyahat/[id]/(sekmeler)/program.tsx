@@ -18,7 +18,7 @@ import { OtelUcSatiri } from '@/components/program/OtelUcSatiri';
 import { PlanHazirSayfasi, type PlanGunOzeti } from '@/components/program/PlanHazirSayfasi';
 import { HarcamaFormu } from '@/components/harcama/HarcamaFormu';
 import { MekanPaneli } from '@/components/mekan/MekanPaneli';
-import { durakOzeti, ListemBekliyorSatiri, PlanListesi, type PlanSatirGorunumu } from '@/components/plan/PlanListesi';
+import { durakOzeti, HARITAYA_DON_ALAN, ListemBekliyorSatiri, PlanListesi, type PlanSatirGorunumu } from '@/components/plan/PlanListesi';
 import { PuanSayfasi } from '@/components/program/PuanSayfasi';
 import { SecimMenusu, type SecimSecenegi } from '@/components/program/SecimMenusu';
 import { GunSilSayfasi } from '@/components/plan/GunSilSayfasi';
@@ -875,7 +875,8 @@ function ProgramSekmesi({
     : null;
   // #140 KK4: güne atanmamış mekanlar haritada yok → Listem (#141). #553 KK5: kesikli kutu yerine listedeki satır (#534 KK7).
   const atanmamisSayisi = mekanlar.filter((m) => !durakIle.has(m.id)).length;
-  const atanmamisKutusu = atanmamisSayisi > 0 ? <ListemBekliyorSatiri n={atanmamisSayisi} onPress={() => router.navigate({ pathname: '/seyahat/[id]/listem', params: { id: seyahat.id } })} /> : null;
+  const listemeGit = () => router.navigate({ pathname: '/seyahat/[id]/listem', params: { id: seyahat.id } });
+  const atanmamisKutusu = atanmamisSayisi > 0 ? <ListemBekliyorSatiri n={atanmamisSayisi} onPress={listemeGit} /> : null;
 
   // #55 §B7 → #140 (kanvas 11): alt sayfa üst şeridi. Katlı: ilerleme çizgisi + "Sırayı gör ve düzenle ˄". Açık: gün karesi
   // (gün rengi) · "Cuma, 16 Ekim" · "09:45 – 13:00 · 3 durak · 26 dk yol" · ··· · [Haritaya dön] + "Kaydedildi ✓".
@@ -925,8 +926,11 @@ function ProgramSekmesi({
             <Ikon ad="daha" boyut={20} renk={renk.ana} kalinlik={2.4} />
           </Pressable>
           <View style={s.haritayaDonKap}>
-            <Pressable accessibilityRole="button" onPress={() => setPanel('katli')} style={({ pressed }) => [s.haritayaDon, pressed && { opacity: 0.8 }]}>
-              <Text style={s.haritayaDonMetin}>{t('program.liste.haritayaDon')}</Text>
+            {/* #562 KK3: dokunma alanı 44 pt (üst kap hitSlop'a izin vermez); görünen hap kanvastaki gibi 36 pt. */}
+            <Pressable testID="haritayaDon" accessibilityRole="button" onPress={() => setPanel('katli')} style={({ pressed }) => [s.haritayaDonAlan, pressed && { opacity: 0.8 }]}>
+              <View style={s.haritayaDon}>
+                <Text style={s.haritayaDonMetin}>{t('program.liste.haritayaDon')}</Text>
+              </View>
             </Pressable>
             {kaydedildi ? <Text style={s.kaydedildi}>{t('program.liste.kaydedildi')}</Text> : null}
           </View>
@@ -945,7 +949,8 @@ function ProgramSekmesi({
           <View style={{ gap: 10 }}>
             {basOtelSatiri}
             <Text style={s.uyariMetin}>{t('program.ozetGunBos', { gun: gunEtiketKisa(gun) })}</Text>
-            {atanmamisKutusu}
+            {/* #562 KK4: kabın `gap: 10`'u tek boşluk; satır kendi üst boşluğunu eklemez. */}
+            {atanmamisSayisi > 0 ? <ListemBekliyorSatiri n={atanmamisSayisi} onPress={listemeGit} kapBosluklu /> : null}
           </View>
         ) : (
           <SiralaListesi
@@ -1509,7 +1514,9 @@ const s = StyleSheet.create({
   gunKareMetin: { ...baslikStili(16) },
   listeGun: { ...baslikStili(19), color: renk.metin },
   listeOzet: { fontFamily: yazi.normal, fontSize: 13, color: renk.ikincil },
-  haritayaDonKap: { alignItems: 'flex-end', gap: 4 },
+  // #562 KK3: 44 pt alanın içinde 36 pt hap; hapın altındaki 4 pt boşluk eski `gap: 4`'ün yerini tutar.
+  haritayaDonKap: { alignItems: 'flex-end' },
+  haritayaDonAlan: { height: HARITAYA_DON_ALAN, justifyContent: 'center' },
   haritayaDon: { height: 36, paddingHorizontal: 12, borderRadius: kose.alan, backgroundColor: renk.yuzey, justifyContent: 'center' },
   haritayaDonMetin: { fontFamily: yazi.ekstra, fontSize: 13, color: renk.ana },
   kaydedildi: { fontFamily: yazi.ekstra, fontSize: 11, color: renk.basariMetin },

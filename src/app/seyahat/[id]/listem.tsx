@@ -147,7 +147,7 @@ function Listem({ seyahat, gunler, duraklar, mekanlar, konaklamalar }: { seyahat
   const an = useSimdi(!!guneEkleMekan && !!bugunGun);
   const bugunUclar = useMemo(() => (bugunGun ? verisi.gunUclari.get(bugunGun.id) : undefined) ?? BOS_UCLAR, [bugunGun, verisi.gunUclari]);
   const bugunProg = useGunProgrami({ seyahat, gun: guneEkleMekan ? bugunGun : undefined, duraklar, mekanlar, yuruyus: verisi.yuruyus, an, uclar: bugunUclar, saatler: yerler.data });
-  const bugun = useMemo(() => (bugunProg?.bugun ? bugunDurumu(bugunProg.canli) : null), [bugunProg]);
+  const bugun = useMemo(() => (bugunProg?.bugun ? bugunDurumu(bugunProg.canli, bugunProg.simdiDk) : null), [bugunProg]);
   const secenekler = useMemo(
     () => (guneEkleMekan ? gunSecenekleri({ seyahat, mekan: guneEkleMekan, gunler, duraklar, mekanIle, gunUclari: verisi.gunUclari, yuruyus: verisi.yuruyus, saatler: yerler.data }) : []),
     [guneEkleMekan, seyahat, gunler, duraklar, mekanIle, verisi.gunUclari, verisi.yuruyus, yerler.data],
