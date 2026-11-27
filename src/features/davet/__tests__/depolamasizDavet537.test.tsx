@@ -61,6 +61,7 @@ function guvenlikHatasi(): never {
 // Ekran yüklenirken localStorage null: düzeltmeden önce giris.ts modül düzeyinde hata verip sayfayı düşürüyordu.
 Object.defineProperty(globalThis, 'localStorage', { configurable: true, value: null });
 const Ekran = (require('@/app/r/[token]') as { default: React.ComponentType }).default;
+const GirisEkrani = (require('@/app/(auth)/giris') as { default: React.ComponentType }).default;
 const { t } = require('@/i18n') as typeof import('@/i18n');
 
 describe('depolamasız tarayıcıda davet sayfası (#537)', () => {
@@ -80,16 +81,37 @@ describe('depolamasız tarayıcıda davet sayfası (#537)', () => {
   });
 
   // #552: bellekteki PKCE doğrulayıcısı Google'a tam sayfa yönlendirmede silinir; dönüşte bağlamsız giriş ekranı ve
-  // döngü. Yönlendirme hiç başlamaz, sayfa davet hatasını gösterir; düğme çarkta kalmaz.
-  it('web, depo bellekte: "Google ile katıl" yönlendirmez, davet.hata görünür', async () => {
+  // döngü. Yönlendirme hiç başlamaz; düğme çarkta kalmaz. #557: tekrar denemek işe yaramaz, kişi linki tarayıcıda
+  // açmaya yönlendirilir (davet.depolamaYok, davet.hata değil).
+  it('web, depo bellekte: "Google ile katıl" yönlendirmez, davet.depolamaYok görünür', async () => {
     const os = Platform.OS;
     Object.defineProperty(Platform, 'OS', { configurable: true, get: () => 'web' });
     try {
       render(<Ekran />);
       fireEvent.press(screen.getByText(t('davet.katilGoogle')));
-      await waitFor(() => expect(screen.getByText(t('davet.hata'))).toBeTruthy());
+      await waitFor(() => expect(screen.getByText(t('davet.depolamaYok'))).toBeTruthy());
+      expect(screen.queryByText(t('davet.hata'))).toBeNull();
       expect(mockGetSession).not.toHaveBeenCalled();
     } finally {
+      Object.defineProperty(Platform, 'OS', { configurable: true, get: () => os });
+    }
+  });
+
+  // #557 KK2: /giris'te doğrudan Google'a basınca da aynı yönlendirme (genel giris.hata değil).
+  it('web, depo bellekte: /giris\'te Google davet.depolamaYok gösterir', async () => {
+    const os = Platform.OS;
+    Object.defineProperty(Platform, 'OS', { configurable: true, get: () => 'web' });
+    // RN jest ortamında window.location yok; giriş ekranı web'de dönüş parametresine bakar.
+    const w = globalThis as { location?: unknown };
+    const konum = w.location;
+    w.location = { search: '', origin: 'https://ornek.test' };
+    try {
+      render(<GirisEkrani />);
+      fireEvent.press(screen.getByText(t('giris.google')));
+      await waitFor(() => expect(screen.getByText(t('davet.depolamaYok'))).toBeTruthy());
+      expect(screen.queryByText(t('giris.hata'))).toBeNull();
+    } finally {
+      w.location = konum;
       Object.defineProperty(Platform, 'OS', { configurable: true, get: () => os });
     }
   });

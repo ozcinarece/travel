@@ -1,5 +1,5 @@
 import { Component, type ErrorInfo, type ReactNode } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { t } from '@/i18n';
 import { hataBildir } from '@/lib/hataRaporu';
@@ -47,7 +47,8 @@ export function HataKarti({ hata, bilesen, onYenidenDene }: { hata: Error; biles
     <View style={s.ekran}>
       <View style={s.kart}>
         <Text style={s.baslik}>{t('genel.hataBaslik')}</Text>
-        <Text style={s.metin}>{t('genel.hataMetin')}</Text>
+        {/* #557: web'de "uygulamayı kapatıp aç" yerine "sayfayı yenile". */}
+        <Text style={s.metin}>{t(Platform.OS === 'web' ? 'genel.hataMetinWeb' : 'genel.hataMetin')}</Text>
         <Text style={s.kod} selectable testID="hata-kodu">
           {hataOzeti(hata)}
           {bilesen ? ` · ${bilesen}` : ''}

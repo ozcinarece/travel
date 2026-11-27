@@ -104,8 +104,8 @@ export default function DavetEkrani() {
     try {
       await giris();
     } catch (e) {
-      // #552: depolamasız tarayıcıda Google dönüşü kurulamaz; sonsuz döngü yerine davet hatası.
-      if (!iptalMi(e)) setHata(t(e instanceof DepolamaYok ? 'davet.hata' : 'giris.hata'));
+      // #552/#557: depolamasız tarayıcıda Google dönüşü kurulamaz; tekrar denemek işe yaramaz, linki tarayıcıda açmaya yönlendir.
+      if (!iptalMi(e)) setHata(t(e instanceof DepolamaYok ? 'davet.depolamaYok' : 'giris.hata'));
     } finally {
       setMesgul(null);
     }
