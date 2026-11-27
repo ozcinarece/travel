@@ -2,7 +2,7 @@
 import { describe, expect, it, jest } from '@jest/globals';
 import { Platform } from 'react-native';
 
-import { DepolamaYok, googleIleGiris } from '@/features/auth/giris';
+import { GomuluTarayici, googleIleGiris } from '@/features/auth/giris';
 import { gomuluTarayici } from '@/features/auth/gomuluTarayici';
 
 const mockGetSession = jest.fn();
@@ -37,13 +37,13 @@ describe('gomuluTarayici (#561 KK1)', () => {
     ['yok', null],
   ])('%s gömülü sayılmaz', (_ad, ua) => expect(gomuluTarayici(ua)).toBe(false));
 
-  it("web + Instagram: googleIleGiris Google'a yönlendirmeden DepolamaYok verir", async () => {
+  it("web + Instagram: googleIleGiris Google'a yönlendirmeden GomuluTarayici verir (#565 KK3)", async () => {
     const os = Platform.OS;
     Object.defineProperty(Platform, 'OS', { configurable: true, get: () => 'web' });
     const nav = Object.getOwnPropertyDescriptor(globalThis, 'navigator');
     Object.defineProperty(globalThis, 'navigator', { configurable: true, value: { userAgent: UA.instagram } });
     try {
-      await expect(googleIleGiris()).rejects.toBeInstanceOf(DepolamaYok);
+      await expect(googleIleGiris()).rejects.toBeInstanceOf(GomuluTarayici);
       expect(mockGetSession).not.toHaveBeenCalled();
     } finally {
       if (nav) Object.defineProperty(globalThis, 'navigator', nav);

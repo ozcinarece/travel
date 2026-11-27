@@ -22,10 +22,7 @@ function yonlendirmeAdresi(): string {
   return makeRedirectUri({ scheme: 'gezi', path: 'giris' });
 }
 
-/**
- * #552: depolaması kapalı tarayıcı; Google'a yönlendirilmez (dönüşte doğrulayıcı ve davet kaybolur).
- * #561: gömülü tarayıcı (Instagram, Facebook, WebView) da bu hatayla durur; kullanıcıya aynı metin gösterilir.
- */
+/** #552: depolaması kapalı tarayıcı; Google'a yönlendirilmez (dönüşte doğrulayıcı ve davet kaybolur). */
 export class DepolamaYok extends Error {
   constructor() {
     super('Bu tarayıcıda Google girişi tamamlanamaz');
@@ -33,13 +30,37 @@ export class DepolamaYok extends Error {
   }
 }
 
+/** #561 / #565 KK3: gömülü tarayıcı (Instagram, Facebook, WebView); Google'a yönlendirilmez, ayrı metinle linki tarayıcıda açtırır. */
+export class GomuluTarayici extends Error {
+  constructor() {
+    super('Uygulama içi tarayıcıda Google girişi tamamlanamaz');
+    this.name = 'GomuluTarayici';
+  }
+}
+
+/**
+ * #565: giriş hatasının metin anahtarı (saf; test edilir). Gömülü tarayıcı → `{yer}.gomuluTarayici` (menüden tarayıcıda aç);
+ * depolaması kapalı gerçek tarayıcı → `{yer}.depolamaYok` (başka tarayıcı ya da gizli olmayan pencere); diğerleri `giris.hata`.
+ */
+export function girisHataAnahtari(e: unknown, yer: 'davet' | 'giris'): string {
+  if (e instanceof GomuluTarayici) return `${yer}.gomuluTarayici`;
+  if (e instanceof DepolamaYok) return `${yer}.depolamaYok`;
+  return 'giris.hata';
+}
+
+/** #565: tekrar denemenin işe yaramadığı, linki başka yerde açmayı gerektiren hata. */
+export function tarayiciUygunDegilMi(e: unknown): boolean {
+  return e instanceof GomuluTarayici || e instanceof DepolamaYok;
+}
+
 /** PRD 0.1 KK1. Misafir (anonim) oturum varsa hesap ona bağlanır; user_id değişmez (PRD 3.10 KK3). */
 export async function googleIleGiris(): Promise<void> {
   // Bellekteki PKCE doğrulayıcısı tam sayfa yönlendirmede silinir: dönüşte oturum kurulmaz, kullanıcı bağlamsız giriş
   // ekranına düşer ve her denemede aynı döngüye girer. Yönlendirmeden önce dur, sayfa hata gösterir.
+  // #561/#565: Instagram/Facebook gömülü tarayıcısında Google `disallowed_useragent` sayfası açar. Gömülü tarayıcı önce
+  // bakılır (depolaması da kapalı olabilir; doğru yol yine menüden tarayıcıda açmak).
+  if (Platform.OS === 'web' && gomuluTarayici(typeof navigator === 'undefined' ? null : navigator.userAgent)) throw new GomuluTarayici();
   if (Platform.OS === 'web' && !oturumKalici) throw new DepolamaYok();
-  // #561: Instagram/Facebook gömülü tarayıcısında Google `disallowed_useragent` sayfası açar; aynı yönlendirme metni.
-  if (Platform.OS === 'web' && gomuluTarayici(typeof navigator === 'undefined' ? null : navigator.userAgent)) throw new DepolamaYok();
   const redirectTo = yonlendirmeAdresi();
   const options = { redirectTo, skipBrowserRedirect: Platform.OS !== 'web' };
   const {
