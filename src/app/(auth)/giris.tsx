@@ -36,8 +36,8 @@ export default function GirisEkrani() {
     try {
       await giris();
     } catch (e) {
-      // #557: depolamasız tarayıcıda tekrar denemek işe yaramaz; davet sayfasıyla aynı yönlendirme.
-      if (!iptalMi(e)) setHata(t(e instanceof DepolamaYok ? 'davet.depolamaYok' : 'giris.hata'));
+      // #557/#561: depolamasız ya da gömülü tarayıcıda tekrar denemek işe yaramaz; sayfayı tarayıcıda açmaya yönlendir.
+      if (!iptalMi(e)) setHata(t(e instanceof DepolamaYok ? 'giris.depolamaYok' : 'giris.hata'));
     } finally {
       setMesgul(null);
     }
@@ -64,7 +64,11 @@ export default function GirisEkrani() {
         </Text>
         <Text style={s.alt}>{t('giris.alt')}</Text>
         <View style={s.dugmeler}>
-          {hata ? <Text style={s.hata}>{hata}</Text> : null}
+          {hata ? (
+            <Text accessibilityRole="alert" accessibilityLiveRegion="polite" style={s.hata}>
+              {hata}
+            </Text>
+          ) : null}
           {appleVar ? <Buton baslik={t('giris.apple')} boy="buyuk" onPress={() => calistir('apple', appleIleGiris)} yukleniyor={mesgul === 'apple'} pasif={mesgul !== null && mesgul !== 'apple'} /> : null}
           <Buton
             baslik={t('giris.google')}

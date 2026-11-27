@@ -92,13 +92,18 @@ describe('depolamasız tarayıcıda davet sayfası (#537)', () => {
       await waitFor(() => expect(screen.getByText(t('davet.depolamaYok'))).toBeTruthy());
       expect(screen.queryByText(t('davet.hata'))).toBeNull();
       expect(mockGetSession).not.toHaveBeenCalled();
+      // #561 KK3–KK4: çelişen "burada katıl" notu gizlenir; hata satırı ekran okuyucuya duyurulur.
+      expect(screen.queryByText(t('davet.webNot'))).toBeNull();
+      const satir = screen.getByText(t('davet.depolamaYok'));
+      expect(satir.props.accessibilityRole).toBe('alert');
+      expect(satir.props.accessibilityLiveRegion).toBe('polite');
     } finally {
       Object.defineProperty(Platform, 'OS', { configurable: true, get: () => os });
     }
   });
 
-  // #557 KK2: /giris'te doğrudan Google'a basınca da aynı yönlendirme (genel giris.hata değil).
-  it('web, depo bellekte: /giris\'te Google davet.depolamaYok gösterir', async () => {
+  // #557 KK2, #561 KK2: /giris'te doğrudan Google'a basınca kendi anahtarı (davet.* değil, genel giris.hata değil).
+  it('web, depo bellekte: /giris\'te Google giris.depolamaYok gösterir', async () => {
     const os = Platform.OS;
     Object.defineProperty(Platform, 'OS', { configurable: true, get: () => 'web' });
     // RN jest ortamında window.location yok; giriş ekranı web'de dönüş parametresine bakar.
@@ -108,8 +113,9 @@ describe('depolamasız tarayıcıda davet sayfası (#537)', () => {
     try {
       render(<GirisEkrani />);
       fireEvent.press(screen.getByText(t('giris.google')));
-      await waitFor(() => expect(screen.getByText(t('davet.depolamaYok'))).toBeTruthy());
+      await waitFor(() => expect(screen.getByText(t('giris.depolamaYok'))).toBeTruthy());
       expect(screen.queryByText(t('giris.hata'))).toBeNull();
+      expect(screen.getByText(t('giris.depolamaYok')).props.accessibilityRole).toBe('alert');
     } finally {
       w.location = konum;
       Object.defineProperty(Platform, 'OS', { configurable: true, get: () => os });

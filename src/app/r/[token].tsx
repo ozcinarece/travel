@@ -32,6 +32,8 @@ export default function DavetEkrani() {
   const [appleVar, setAppleVar] = useState(false);
   const [mesgul, setMesgul] = useState<Saglayici | null>(null);
   const [hata, setHata] = useState<string | null>(null);
+  // #561 KK3: "Tarayıcıda aç" metni görünürken altındaki "burada katıl" notu çelişir; gizlenir.
+  const [tarayiciUygunDegil, setTarayiciUygunDegil] = useState(false);
   // Katılım sırasında token yenilendiyse (P0002) ya da ağ hatası: sonsuz bekleme yok — geçersiz ekranı ya da "Tekrar dene".
   const [katilimHatasi, setKatilimHatasi] = useState<'gecersiz' | 'ag' | null>(null);
   const [deneme, setDeneme] = useState(0);
@@ -99,13 +101,18 @@ export default function DavetEkrani() {
   const girisYap = async (saglayici: Saglayici, giris: () => Promise<void>) => {
     if (!token) return;
     setHata(null);
+    setTarayiciUygunDegil(false);
     setMesgul(saglayici);
     await bekleyenDavetiYaz(token);
     try {
       await giris();
     } catch (e) {
       // #552/#557: depolamasız tarayıcıda Google dönüşü kurulamaz; tekrar denemek işe yaramaz, linki tarayıcıda açmaya yönlendir.
-      if (!iptalMi(e)) setHata(t(e instanceof DepolamaYok ? 'davet.depolamaYok' : 'giris.hata'));
+      if (!iptalMi(e)) {
+        const depolamaYok = e instanceof DepolamaYok;
+        setTarayiciUygunDegil(depolamaYok);
+        setHata(t(depolamaYok ? 'davet.depolamaYok' : 'giris.hata'));
+      }
     } finally {
       setMesgul(null);
     }
@@ -183,7 +190,11 @@ export default function DavetEkrani() {
         </View>
 
         <View style={s.altKisim}>
-          {hata ? <Text style={s.hata}>{hata}</Text> : null}
+          {hata ? (
+            <Text accessibilityRole="alert" accessibilityLiveRegion="polite" style={s.hata}>
+              {hata}
+            </Text>
+          ) : null}
           {katilimHatasi === 'ag' ? (
             <Buton baslik={t('davet.tekrarDene')} onPress={tekrarDene} />
           ) : katiliyor || adim === 'profil' ? (
@@ -196,7 +207,7 @@ export default function DavetEkrani() {
             <>
               {appleVar ? <Buton baslik={t('davet.katilApple')} boy="buyuk" onPress={() => girisYap('apple', appleIleGiris)} yukleniyor={mesgul === 'apple'} pasif={mesgul !== null && mesgul !== 'apple'} /> : null}
               <Buton baslik={t('davet.katilGoogle')} tur={appleVar ? 'cerceveli' : 'birincil'} boy="buyuk" onPress={() => girisYap('google', googleIleGiris)} yukleniyor={mesgul === 'google'} pasif={mesgul !== null && mesgul !== 'google'} />
-              {Platform.OS === 'web' ? <Text style={s.not}>{t('davet.webNot')}</Text> : null}
+              {Platform.OS === 'web' && !tarayiciUygunDegil ? <Text style={s.not}>{t('davet.webNot')}</Text> : null}
               <Text style={s.not}>{t('giris.kosullar')}</Text>
             </>
           )}
