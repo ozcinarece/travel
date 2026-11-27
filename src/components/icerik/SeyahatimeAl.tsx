@@ -50,6 +50,7 @@ import {
   type MekanGrubu,
 } from '@/features/icerik/seyahateAl';
 import { useSehirler } from '@/features/icerik/sorgular';
+import { baslangicHedefi, farkliSehir } from '@/features/icerik/yerEkle';
 import { useMekanlar } from '@/features/mekanlar/sorgular';
 import { useIcerikSehirSecimi } from '@/features/sihirbaz/girisler';
 import { seyahatAdi } from '@/features/sihirbaz/sihirbaz';
@@ -94,8 +95,9 @@ type Props = {
 const YENI = 'yeni';
 
 export function SeyahatimeAl({ gezi, seyahatler, ilkHedefId, kimlik, foto, onKapat, onAl, onYeni, hata }: Props) {
-  const [hedefId, setHedefId] = useState<string>(ilkHedefId ?? seyahatler[0]?.id ?? YENI);
-  const hedef = hedefId === YENI ? null : (seyahatler.find((s) => s.id === hedefId) ?? seyahatler[0] ?? null);
+  // #583 KK1: hedef verilmediyse (aynı şehirde seyahat yok) "Yeni seyahat" seçili gelir; ilk seyahate düşülmez.
+  const [hedefId, setHedefId] = useState<string>(() => baslangicHedefi(seyahatler, ilkHedefId) ?? YENI);
+  const hedef = hedefId === YENI ? null : (seyahatler.find((s) => s.id === hedefId) ?? null);
   const [sekme, setSekme] = useState<Sekme>('plan');
   const [form, setForm] = useState<Form>(() => ({ gunSayisi: gunSiniri(gezi.gezi_gunleri.length || gezi.gun_sayisi || 1), baslangic: null, tarihsiz: false }));
   return (
@@ -119,7 +121,7 @@ export function SeyahatimeAl({ gezi, seyahatler, ilkHedefId, kimlik, foto, onKap
                     return (
                       <Pressable key={sy.id} accessibilityRole="button" accessibilityState={{ selected: secili }} onPress={() => setHedefId(sy.id)} style={[s.cip, secili && s.cipSecili]}>
                         <Text style={[s.cipMetin, secili && s.cipMetinSecili]} numberOfLines={1}>
-                          {`${seyahatAdi(sy)}${sy.start_date && sy.end_date ? ` · ${tarihAraligi(sy.start_date, sy.end_date)}` : ''}`}
+                          {`${seyahatAdi(sy)}${sy.start_date && sy.end_date ? ` · ${tarihAraligi(sy.start_date, sy.end_date)}` : ''}${farkliSehir(sy, gezi.sehirler?.ad) ? ` · ${t('gezi.farkliSehir')}` : ''}`}
                         </Text>
                       </Pressable>
                     );
