@@ -1,0 +1,323 @@
+{
+  "il": "Kırıkkale",
+  "slug": "kirikkale",
+  "guncelleme": "2026-11-27",
+  "oneriler": [
+    {
+      "sira": 1,
+      "ad": "Çeşnigir Köprüsü",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Karakeçili",
+      "merkeze_km": 32,
+      "neden": "12 kemerli, 110 m'lik Selçuklu köprüsü; 1989'dan beri yalnız yayalar geçer",
+      "place_id": "ChIJz7JQY4W_1BQR1eiOCbG1S3w"
+    },
+    {
+      "sira": 2,
+      "ad": "Sulu Mağara",
+      "kategori": "aktivite",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Keskin",
+      "merkeze_km": 25,
+      "neden": "Eski kurşun madeni olan 285 m'lik üç katlı mağara; 2019'da ziyarete açıldı",
+      "place_id": "ChIJtWCAr83P1BQR_LrCM2aWonM"
+    },
+    {
+      "sira": 3,
+      "ad": "Hasandede Camii ve Türbesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 12,
+      "neden": "1605 tarihli kesme taş cami ve sekizgen türbeler; ağustostaki anmada çok kalabalık",
+      "place_id": "ChIJU4EDc8bL1BQRq8vhZS3M1P0"
+    },
+    {
+      "sira": 4,
+      "ad": "MKE Silah Sanayi Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "14. yüzyıldan bugüne yaklaşık 300 silah; fabrika alanında, gitmeden izin sor",
+      "place_id": "ChIJp-DwIdPK1BQRPwjwQDfKacM"
+    },
+    {
+      "sira": 5,
+      "ad": "Karaahmetli Tabiat Parkı",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas",
+        "cocuklu"
+      ],
+      "ilce": "Bahşılı",
+      "merkeze_km": 16,
+      "neden": "Kapulukaya Baraj Gölü kıyısında piknik ve yürüyüş; şansın varsa su samuru görürsün",
+      "place_id": "ChIJJ4rCrILH1BQRThcT6l9MbLA"
+    },
+    {
+      "sira": 6,
+      "ad": "Çeşnigir Kanyonu Seyir Terası",
+      "kategori": "manzara",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Karakeçili",
+      "merkeze_km": 32,
+      "neden": "Köprünün üstündeki kanyona bakan teras; köprüye inen yürüyüş yolu buradan başlar",
+      "place_id": "ChIJOQs8Yim_1BQRmCKENu2hHSk"
+    },
+    {
+      "sira": 7,
+      "ad": "Keskin Gastronomi Evi",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Keskin",
+      "merkeze_km": 25,
+      "neden": "Coğrafi işaretli Keskin tavasını, yöresinde, kendi fırınından tadarsın"
+    },
+    {
+      "sira": 8,
+      "ad": "Ballı Camii ve Türbesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Balışeyh",
+      "merkeze_km": 21,
+      "neden": "Ahşap tavan işçiliğiyle bilinen köy camisi; Ballı Baba türbesi yanı başında",
+      "place_id": "ChIJITMrZujEgUARnyCOeeIGvj4"
+    },
+    {
+      "sira": 9,
+      "ad": "Hasandede Peribacaları",
+      "kategori": "manzara",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 12,
+      "neden": "Kırmızı tonlu kaya kuleleri; gün batımında git, göletle birlikte halka rota yap",
+      "place_id": "ChIJ--JIVY7N1BQRCBuBobMbASU"
+    },
+    {
+      "sira": 10,
+      "ad": "Nur Camii",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Selimiye örnek alınarak 2015'te bitti; dört minare, 32 m'lik kubbe, kentin simgesi",
+      "place_id": "ChIJP7Yr23TfgUARNizXg-W-yys"
+    },
+    {
+      "sira": 11,
+      "ad": "Obaköy Yeşil Vadi",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "cocuklu",
+        "yavas"
+      ],
+      "ilce": "Yahşihan",
+      "merkeze_km": 8,
+      "neden": "Kızılırmak kıyısında asma köprü, şelale ve iskeleli mesire; çocuklu aileye uygun",
+      "place_id": "ChIJT4Znl1rhgUARbC1qeTP4-Ic"
+    },
+    {
+      "sira": 12,
+      "ad": "Yahşihan Tarihi Demir Köprü",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Yahşihan",
+      "merkeze_km": 6,
+      "neden": "1903'te Kızılırmak üzerine kurulan demir köprü; bugün yalnız yürüyerek geçilir",
+      "place_id": "ChIJH-3nfQDfgUARX44uGckYgko"
+    },
+    {
+      "sira": 13,
+      "ad": "Rahmi Pehlivanlı Müze Evi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Keskin",
+      "merkeze_km": 25,
+      "neden": "20'den çok hükümdarın portresini yapan ressamın doğduğu konak",
+      "place_id": "ChIJHReex9TP1BQRj5u9cpmzlVU"
+    },
+    {
+      "sira": 14,
+      "ad": "Haydar Sultan Külliyesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Keskin",
+      "merkeze_km": 35,
+      "neden": "Bizans manastırı üstüne kurulu cami ve türbe; kükürt kokulu 'Deliler Kuyusu' burada",
+      "place_id": "ChIJuWqq5j3B1BQRhm5ReLxQoFU"
+    },
+    {
+      "sira": 15,
+      "ad": "Sultan Sofrası",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Keskin",
+      "merkeze_km": 25,
+      "neden": "Keskin'de fırın lokantası; tava ve sulu yemek için öğlen uğra",
+      "place_id": "ChIJmdc0udXP1BQRMFRUle7LRNA"
+    },
+    {
+      "sira": 16,
+      "ad": "Koçubaba Camii ve Türbesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Balışeyh",
+      "merkeze_km": 40,
+      "neden": "Evliya Çelebi'nin andığı, en erken 14. yüzyıla giden sekizgen türbe",
+      "place_id": "ChIJhUp8b_67gUAR-0ah9NBiR0c"
+    },
+    {
+      "sira": 17,
+      "ad": "Kapulukaya Baraj Gölü",
+      "kategori": "manzara",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Bahşılı",
+      "merkeze_km": 18,
+      "neden": "Kızılırmak'ın göle döndüğü yer; kıyıda piknik, kamp ve olta",
+      "place_id": "ChIJMZwSGQjJ1BQRCt0TEmL3D00"
+    },
+    {
+      "sira": 18,
+      "ad": "Taş Mektep (Hacı Taşan Kültür Merkezi)",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Keskin",
+      "merkeze_km": 25,
+      "neden": "Ankara taşından okul binası; bozlak ve Abdal müziği burada yaşatılıyor",
+      "place_id": "ChIJkyPJotbP1BQRL78n43kRYno"
+    },
+    {
+      "sira": 19,
+      "ad": "Dinek Dağı",
+      "kategori": "aktivite",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Balışeyh",
+      "merkeze_km": 15,
+      "neden": "Eteklerinde rehberli at turu, zipline ve okçuluk yapılıyor; sezonu sor",
+      "place_id": "ChIJPZVvYtfS1BQR_GF8f3GXF3Y"
+    },
+    {
+      "sira": 20,
+      "ad": "Ceritkale Kaya Mezarları",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "doga"
+      ],
+      "ilce": "Keskin",
+      "merkeze_km": 22,
+      "neden": "Demir Çağı kaya mezarları; yanındaki kanyonda 10 km'lik yürüyüş parkuru var",
+      "place_id": "ChIJG1prqYXE1BQR2rFQ2S-uMbI"
+    },
+    {
+      "sira": 21,
+      "ad": "İzzet'i İkram Sofrası",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Şehir merkezinde Keskin tavası ve ev usulü sulu yemekler",
+      "place_id": "ChIJE7quZwrfgUARlc_cki3onlU"
+    },
+    {
+      "sira": 22,
+      "ad": "Hasandede Göleti",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 12,
+      "neden": "Köyden 2 km'lik yürüyüşle varılan gölet; peribacası rotasının ikinci yarısı",
+      "place_id": "ChIJsTOA2a_N1BQRRlPYigWVT3Q"
+    },
+    {
+      "sira": 23,
+      "ad": "Yahşihan Gar Binası",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Yahşihan",
+      "merkeze_km": 6,
+      "neden": "1924 yapımı istasyon; Kurtuluş Savaşı'nda Ankara'ya cephane buradan aktarıldı",
+      "place_id": "ChIJLfHJBYjfgUARVwxeLABATeI"
+    },
+    {
+      "sira": 24,
+      "ad": "Turkuaz Bisiklet Yolu",
+      "kategori": "aktivite",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Yahşihan",
+      "merkeze_km": 8,
+      "neden": "Kızılırmak boyunca Yeşil Vadi'den Obaköy'e 8 km'lik bisiklet yolu"
+    },
+    {
+      "sira": 25,
+      "ad": "Kırıkkale Millet Bahçesi",
+      "kategori": "doga",
+      "amaclar": [
+        "cocuklu",
+        "yavas"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "Merkezde yürüyüş yolları ve amfi tiyatro; akşam serinliğinde aileyle dolaş",
+      "place_id": "ChIJacN_ot7K1BQR9bHMwkmKYjk"
+    }
+  ]
+}
