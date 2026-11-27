@@ -8,7 +8,7 @@
     "yukleniyor": "Yükleniyor…",
     "hataBaslik": "Bir şeyler ters gitti",
     "hataMetin": "Beklenmedik bir hata oldu. Yeniden deneyebilirsin; sorun sürerse uygulamayı kapatıp aç.",
-    "hataMetinWeb": "Bir şeyler ters gitti. Sayfayı yenileyip tekrar dene.",
+    "hataMetinWeb": "Sayfayı yenileyip tekrar dene.",
     "yenidenDene": "Yeniden dene",
     "bolumHata": "Bu bölüm şu an açılamadı; sayfanın geri kalanı çalışıyor."
   },
@@ -19,6 +19,7 @@
     "google": "Google ile devam et",
     "kosullar": "Devam ederek Kullanım Koşulları'nı kabul edersin.",
     "hata": "Giriş tamamlanamadı. Tekrar dener misin?",
+    "depolamaYok": "Bu tarayıcı girişe izin vermiyor. Sayfayı Chrome ya da Safari'de aç.",
     "onizleme": {
       "durum": "● Şu an seyahatte",
       "durak1": "Forum Romanum",
@@ -189,7 +190,7 @@
     "gozAt": "Tripmate'e göz at",
     "anaSayfa": "Ana sayfaya git",
     "hata": "Katılım tamamlanamadı. Tekrar dene.",
-    "depolamaYok": "Bu tarayıcı girişini saklayamıyor. Linki Chrome ya da Safari'de aç.",
+    "depolamaYok": "Bu tarayıcı girişe izin vermiyor. Sağ üstteki ⋯ menüsünden \"Tarayıcıda aç\"ı seç.",
     "webNot": "Uygulaman yoksa da sorun yok: burada katıl; sonra indirirsen aynı hesapla doğrudan seyahate düşersin.",
     "webAcilis": {
       "baslik": "Davetin açılıyor",
