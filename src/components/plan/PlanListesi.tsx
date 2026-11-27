@@ -145,8 +145,11 @@ export function PlanListesi(p: Props) {
         ) : null}
         {p.bosGun ? (
           <View style={s.bos}>
-            <Text style={s.bosBaslik}>{p.bosGun.baslik}</Text>
-            <Text style={s.bosMetin}>{t('plan.bosGunMetin')}</Text>
+            <Text accessibilityRole="header" style={s.bosBaslik}>
+              {p.bosGun.baslik}
+            </Text>
+            {/* #570 KK5: Listem boşken (Listem satırı da yok) "Listenden" demeyen metin. */}
+            <Text style={s.bosMetin}>{t(p.listem ? 'plan.bosGunMetin' : 'plan.bosGunMetinListemBos')}</Text>
           </View>
         ) : null}
         {p.bosGun && p.onEkle ? (
@@ -158,7 +161,8 @@ export function PlanListesi(p: Props) {
         {p.satirlar.map((r, i) => {
           const soluk = r.gecildi || r.atlandi;
           const daire = daireTuru(r, p.bugun);
-          const siradaki = r.vurgulu && !r.buradasin;
+          // #570 KK3: vurgulu durakta SIRADAKİ ya da BURADASIN (aynı biçim, yalnız biri).
+          const rozet = rozetAnahtari(r);
           // #582 KK3: "Başka güne taşı" yalnız uyarı varsa ve taşınacak gün varsa.
           const tasi = r.kapali && r.tasinabilir && p.onBaskaGuneTasi ? () => p.onBaskaGuneTasi?.(r.id) : null;
           return (
@@ -210,9 +214,8 @@ export function PlanListesi(p: Props) {
                     <Ikon ad="tik" boyut={15} renk={renk.basari} kalinlik={2.4} />
                   </View>
                 ) : daire === 'kesik' ? (
-                  <View style={[s.no, s.noKesik]}>
-                    <Text style={[s.noMetin, { color: anaV5.ikincil }]}>{r.numara ?? '–'}</Text>
-                  </View>
+                  // #570 KK2 (pano 2, sürüm 54): atlanan durak numarasız; kesik dairenin içi boş.
+                  <View style={[s.no, s.noKesik]} />
                 ) : daire === 'cerceve' ? (
                   <View style={[s.no, s.noCerceve, { borderColor: r.numaraRengi }]}>
                     <Text style={[s.noMetin, { color: renk.metin }]}>{r.numara ?? '–'}</Text>
@@ -223,7 +226,7 @@ export function PlanListesi(p: Props) {
                   </View>
                 )}
                 <View style={{ flex: 1, minWidth: 0, gap: 1 }}>
-                  {siradaki ? <Text style={s.rozet}>{t('plan.siradakiRozet')}</Text> : null}
+                  {rozet ? <Text style={s.rozet}>{t(rozet)}</Text> : null}
                   <Text style={[s.ad, soluk && { color: anaV5.ikincil }]} numberOfLines={2}>
                     {r.ad}
                   </Text>
@@ -302,6 +305,18 @@ export const SEKME_YUKSEKLIK = 44;
 export function durakEtiketi(r: { saat: string | null; ad: string; alt: string | null; vurgulu: boolean; buradasin?: boolean; atlandi?: boolean; kapali?: string | null }): string {
   const durum = r.vurgulu ? t(r.buradasin ? 'plan.buradasinDurak' : 'plan.siradakiDurak') : r.atlandi ? t('plan.atlandi') : null;
   return [r.saat, r.ad, r.alt, r.kapali, durum].filter(Boolean).join(', ');
+}
+
+/** #570 KK6: gün özetinin durak parçası — bütün duraklar atlandıysa (atlanan numarasız) "Hepsi atlandı", yoksa numaralı durak sayısı. */
+export function durakOzeti(satirlar: { numara: number | null }[]): string {
+  const n = satirlar.filter((r) => r.numara !== null).length;
+  return satirlar.length > 0 && n === 0 ? t('plan.hepsiAtlandi') : t('plan.durakSayisi', { n });
+}
+
+/** #570 KK3: vurgulu durağın üst etiketi; ekran okuyucu metni `durakEtiketi`'nde kalır. */
+export function rozetAnahtari(r: { vurgulu: boolean; buradasin: boolean }): 'plan.buradasinRozet' | 'plan.siradakiRozet' | null {
+  if (!r.vurgulu) return null;
+  return r.buradasin ? 'plan.buradasinRozet' : 'plan.siradakiRozet';
 }
 
 /**
