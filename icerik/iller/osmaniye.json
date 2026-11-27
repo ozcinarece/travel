@@ -1,0 +1,341 @@
+{
+  "il": "Osmaniye",
+  "slug": "osmaniye",
+  "guncelleme": "2026-11-27",
+  "oneriler": [
+    {
+      "sira": 1,
+      "ad": "Karatepe-Aslantaş Açık Hava Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih",
+        "doga"
+      ],
+      "ilce": "Kadirli",
+      "merkeze_km": 33,
+      "neden": "MÖ 8. yy Geç Hitit kenti; Fenike-Luvi çift yazıtı hiyeroglifin çözülmesine yardım etti",
+      "osm": "node/723107094",
+      "place_id": "ChIJ48D8sYnCLhURaR90D7_SQYg"
+    },
+    {
+      "sira": 2,
+      "ad": "Kastabala (Hierapolis) Antik Kenti",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 15,
+      "neden": "Sütunlu cadde, tiyatro ve hamam kalıntıları; tepede Orta Çağ Bodrum Kalesi",
+      "osm": "way/353549847",
+      "place_id": "ChIJSWTdVNfeLhURpBTD2jMZkHM"
+    },
+    {
+      "sira": 3,
+      "ad": "Kadirli Ala Cami",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Kadirli",
+      "merkeze_km": 42,
+      "neden": "Roma bazilikası, sonra kilise; 1489'da camiye çevrildi, 2020'de 96 yıl sonra açıldı",
+      "osm": "way/302554973",
+      "place_id": "ChIJu3irDUvFLhURU79_t-pzBXY"
+    },
+    {
+      "sira": 4,
+      "ad": "Zorkun Yaylası",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas",
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 26,
+      "neden": "Nur Dağları'nda çam-ardıç arasında ahşap evli yayla; kasap fırınında Zorkun tava",
+      "place_id": "ChIJT8OHztAbLxURbtdePe-VIss"
+    },
+    {
+      "sira": 5,
+      "ad": "Karaçay Şelalesi",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 7,
+      "neden": "Amanos eteğinde 30 m'lik çağlayan; mesire alanından ahşap yol ve asma köprüyle",
+      "osm": "way/1139166060",
+      "place_id": "ChIJr0kd1MUeLxUROv38mGW9WeQ"
+    },
+    {
+      "sira": 6,
+      "ad": "Harun Reşit Kalesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "doga"
+      ],
+      "ilce": "Düziçi",
+      "merkeze_km": 35,
+      "neden": "Halife Harun Reşit için 8. yy sonunda yapıldı; çevresi Adana çiğdemi için doğal sit",
+      "osm": "relation/4867564",
+      "place_id": "ChIJdSA5qcnzLhURoCZKFJ7pDG8"
+    },
+    {
+      "sira": 7,
+      "ad": "Toprakkale Kalesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Toprakkale",
+      "merkeze_km": 12,
+      "neden": "Çukurova–Suriye yolunu tutan 12 kuleli kale; 786'da kara taşla yeniden örüldü",
+      "osm": "way/274440582",
+      "place_id": "ChIJO-tqkU0kLxURPRDAk9s0t5I"
+    },
+    {
+      "sira": 8,
+      "ad": "Osmaniye Kent Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "Kaşıkçı, semerci, nalbant gibi unutulan meslekler balmumu figürlerle; Milli Mücadele odası",
+      "place_id": "ChIJdWQgFIshLxUR7LxWFSRQzQ0"
+    },
+    {
+      "sira": 9,
+      "ad": "Hemite (Amuda) Kalesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "doga"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 22,
+      "neden": "Gökçedam'da kaya kütlesi üstünde kale; köy Yaşar Kemal'in doğduğu yer, Ceyhan'da parkı var",
+      "place_id": "ChIJRZNndRLZLhURc5eF0e8HrGs"
+    },
+    {
+      "sira": 10,
+      "ad": "Kırmıtlı Kuş Cenneti",
+      "kategori": "aktivite",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 15,
+      "neden": "Kastabala Vadisi'nde Ceyhan kıyısı; yıl boyunca 100'ü aşkın kuş türü gözlenebiliyor",
+      "place_id": "ChIJ_zMLGGLYLhUR2ntdDqnWfr8"
+    },
+    {
+      "sira": 11,
+      "ad": "Domuztepe Ören Yeri",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Kadirli",
+      "merkeze_km": 35,
+      "neden": "Karatepe'nin Ceyhan'daki karşı kıyısında höyük; Karatepe kapıları buradan görülür",
+      "osm": "way/171207266",
+      "place_id": "ChIJF1wJJCkMLhURtozJeaDm6bs"
+    },
+    {
+      "sira": 12,
+      "ad": "Haruniye Kaplıcaları",
+      "kategori": "aktivite",
+      "amaclar": [
+        "yavas"
+      ],
+      "ilce": "Düziçi",
+      "merkeze_km": 45,
+      "neden": "Kuşçu köyünde 32°C'lik kükürtlü, bikarbonatlı su; Düziçi'nin 15 km kuzeyi",
+      "place_id": "ChIJl4TenGONLhURUhyUL7kdA0s"
+    },
+    {
+      "sira": 13,
+      "ad": "Aslantaş Baraj Gölü",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Kadirli",
+      "merkeze_km": 35,
+      "neden": "Ceyhan üzerinde 1984'te açılan 95 m'lik barajın 49 km²'lik gölü; kıyıda milli park",
+      "place_id": "ChIJuVcikJnDLhURKZFafzi6u2s"
+    },
+    {
+      "sira": 14,
+      "ad": "Düziçi Köy Enstitüsü Eğitim Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Düziçi",
+      "merkeze_km": 30,
+      "neden": "1940'ta açılan köy enstitüsü; eski ders kitapları ve piyanosuyla 2005'ten beri müze",
+      "place_id": "ChIJsThw26_xLhURzveolI_jQd4"
+    },
+    {
+      "sira": 15,
+      "ad": "Buluş Lokantası",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "25 yılı aşkın esnaf lokantası; güveç, kavurma, kuru fasulye ve fırın yemekleri",
+      "place_id": "ChIJeTo9ZC0gLxURPzvjXoDwmiI"
+    },
+    {
+      "sira": 16,
+      "ad": "Kebapçı Ali Usta",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 2,
+      "neden": "Hacı Osmanlı'da pasaj içinde; 40 yıllık ustadan kuzu etiyle Adana usulü kebap",
+      "place_id": "ChIJtc9mobghLxURgXUJFWAhXCw"
+    },
+    {
+      "sira": 17,
+      "ad": "Maksutoğlu Yaylası",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas",
+        "kultur_tarih"
+      ],
+      "ilce": "Kadirli",
+      "merkeze_km": 85,
+      "neden": "Sedir-göknar ormanında yayla; Yaşar Kemal'in İnce Memed'i burada geçer, ev kiralanabiliyor",
+      "place_id": "ChIJwSnxWwChLhURyJtkXBzMU54"
+    },
+    {
+      "sira": 18,
+      "ad": "Karasu Şelalesi",
+      "kategori": "doga",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Düziçi",
+      "merkeze_km": 37,
+      "neden": "Düldül Dağı eteğinde, Sabun Çayı'nda yaklaşık 10 m'den dökülen şelale",
+      "place_id": "ChIJu7MUiUjyLhURFVnCgzfWha8"
+    },
+    {
+      "sira": 19,
+      "ad": "Anıtkabir Mozole Taşı",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "Anıtkabir'e giden Osmaniye kırmızısı mermerin öteki yarısı; Ticaret Odası bahçesinde"
+    },
+    {
+      "sira": 20,
+      "ad": "Kadirli Kent Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Kadirli",
+      "merkeze_km": 42,
+      "neden": "60 yıllık cezaevi binası; kilim dokuma, yufka açma sahneleri ve Halet Çambel bölümü",
+      "place_id": "ChIJX_osKoHFLhURaIn0k7zU6Hc"
+    },
+    {
+      "sira": 21,
+      "ad": "Almanpınarı Yaylası",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Hasanbeyli",
+      "merkeze_km": 34,
+      "neden": "Hasanbeyli'ye 4 km, meyve bahçeleri ve bağlar arasında eski dağ köyü; kamp serbest",
+      "place_id": "ChIJIStfoWv4LhURVDtLi8m-vvg"
+    },
+    {
+      "sira": 22,
+      "ad": "Mitisin Kalesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "doga"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 29,
+      "neden": "Zorkun'a 3 km, Nur Dağları'nda gözetleme kulesi; Orta Çağ'da yeniden kullanılmış",
+      "place_id": "ChIJUeBrpuAbLxURMhvrdPJWGps"
+    },
+    {
+      "sira": 23,
+      "ad": "Düziçi Taş Köprü",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Düziçi",
+      "merkeze_km": 34,
+      "neden": "Sabun Çayı üzerinde 30 m uzunluk, 6 m genişlikte taş köprü; ilçeye 4 km",
+      "place_id": "ChIJKxtEnSbzLhUR2oa-LZaMNCA"
+    },
+    {
+      "sira": 24,
+      "ad": "Çığşar Yaylası Kayalıkları",
+      "kategori": "aktivite",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Kadirli",
+      "merkeze_km": 105,
+      "neden": "Dibek Dağları'nda Deli Öbek ve Harman Kaya tırmanış kayaları; Savrun kıyısında kamp",
+      "place_id": "ChIJRxoiHwakLhURisSnsLW_LyY"
+    },
+    {
+      "sira": 25,
+      "ad": "Heçkeren Kalesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Kadirli",
+      "merkeze_km": 50,
+      "neden": "Ada gibi yükselen kayanın üstünde tek girişli Orta Çağ kalesi; Kadirli'ye 12 km",
+      "place_id": "ChIJzRU2uAW1LhURtk0F2fVf_5U"
+    },
+    {
+      "sira": 26,
+      "ad": "Olukbaşı Yaylası",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 16,
+      "neden": "Zorkun yolunda, kente 16 km'lik çamlık yayla; fırın ve bakkalı olan yakın serinlik",
+      "place_id": "ChIJ3UZdldwYLxURjqeib8sbLNE"
+    }
+  ]
+}

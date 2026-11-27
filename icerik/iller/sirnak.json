@@ -1,0 +1,356 @@
+{
+  "il": "Şırnak",
+  "slug": "sirnak",
+  "guncelleme": "2026-11-27",
+  "oneriler": [
+    {
+      "sira": 1,
+      "ad": "Cizre Ulu Camii",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Cizre",
+      "merkeze_km": 50,
+      "neden": "Dağkapı'daki cami; ejder motifli tunç kapı tokmaklarından biri bugün İstanbul'da müzede",
+      "osm": "relation/13945533",
+      "place_id": "ChIJdyWG3hlkCUARxWf3vKeFMXY"
+    },
+    {
+      "sira": 2,
+      "ad": "Kırmızı Medrese (Medreseya Sor)",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Cizre",
+      "merkeze_km": 50,
+      "neden": "1508'de Mir Şerefxan'ın yaptırdığı medrese; Melayê Cizîrî ters kubbenin altında yatıyor",
+      "osm": "way/285872103",
+      "place_id": "ChIJK2bsIRtkCUARdm50jJESvJE"
+    },
+    {
+      "sira": 3,
+      "ad": "Cudi Dağı ve Sefine",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 40,
+      "neden": "Geminin Sefine'de (2114 m) durduğuna inanılır; izinle ve organize turla çıkılır",
+      "place_id": "ChIJh-TgrxxdCUARrKICqWeiYLc"
+    },
+    {
+      "sira": 4,
+      "ad": "Nuh Peygamber Türbesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Cizre",
+      "merkeze_km": 50,
+      "neden": "Cizrelilerin Hz. Nuh'un kabri saydığı türbe; aynı adı taşıyan camiyle birlikte gezilir",
+      "osm": "way/285872108",
+      "place_id": "ChIJwbI46BpkCUARPZ6zDu4MXuc"
+    },
+    {
+      "sira": 5,
+      "ad": "Cehennem Deresi Cam Seyir Terası",
+      "kategori": "manzara",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "İdil",
+      "merkeze_km": 75,
+      "neden": "Sulak köyü üstünde 365 m²'lik cam teras; kanyonun Dicle'ye açıldığı yere bakıyor",
+      "osm": "node/12545826497",
+      "place_id": "ChIJ7eXIMoXbC0ARhMQdFwmP6C8"
+    },
+    {
+      "sira": 6,
+      "ad": "Mem û Zîn Türbesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Cizre",
+      "merkeze_km": 50,
+      "neden": "Ehmedê Xanî'nin 1692 tarihli destanındaki iki âşıkla anılan, Abdaliye içindeki türbe",
+      "osm": "way/951495108",
+      "place_id": "ChIJ6dze5xBkCUARZR3us4IxK3I"
+    },
+    {
+      "sira": 7,
+      "ad": "Abdaliye Medresesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Cizre",
+      "merkeze_km": 50,
+      "neden": "Sur dibinde mescit, eyvan ve türbeden oluşan Mir Abdal medresesi; Mem û Zîn'in sahnesi",
+      "osm": "way/951495109",
+      "place_id": "ChIJ-61q6xBkCUAR81Ja38Yvy1Q"
+    },
+    {
+      "sira": 8,
+      "ad": "Sinan Lokantası",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Cizre",
+      "merkeze_km": 50,
+      "neden": "Yeni Çarşı'da kömür ateşinde küçük porsiyonlar; acılı bulgur pilavı ve karışık dolma",
+      "place_id": "ChIJO3QR_hpkCUAR1yJE2nmScKA"
+    },
+    {
+      "sira": 9,
+      "ad": "Finik Kalesi ve Ören Yeri",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "doga"
+      ],
+      "ilce": "Güçlükonak",
+      "merkeze_km": 80,
+      "neden": "Gabar eteğinde, Damlarca köyündeki kale; kayaya oyulmuş evler ve insan figürlü kabartmalar",
+      "osm": "node/2647288554",
+      "place_id": "ChIJd8DbPOTeC0ARRF0C1yQPuQY"
+    },
+    {
+      "sira": 10,
+      "ad": "Kasrik Boğazı",
+      "kategori": "manzara",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 20,
+      "neden": "Şırnak–Cizre yolunun geçtiği, Kızılsu'nun Dicle'ye kavuştuğu boğaz; 2020'de koruma alanı",
+      "place_id": "ChIJW_gH6RZgCUARK04LGWj1ZD8"
+    },
+    {
+      "sira": 11,
+      "ad": "Faraşin Yaylası",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Beytüşşebap",
+      "merkeze_km": 140,
+      "neden": "Arıcıların ve küçükbaş sürülerinin yaz yurdu; Faraşin karakovan balı buradan çıkıyor",
+      "place_id": "ChIJGw6qmpv1DkARv3LXVJxbD94"
+    },
+    {
+      "sira": 12,
+      "ad": "Kasrik Köprüsü ve Kaya Kabartması",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 20,
+      "neden": "Cizre beylerine atfedilen üç kemerli Han Mahmut Köprüsü ve yakınında atlı figür kabartması",
+      "place_id": "ChIJ4Q0tKRRgCUARVvc03XVj7pM"
+    },
+    {
+      "sira": 13,
+      "ad": "Kahveci Celo'nun Çay Ocağı",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "yavas",
+        "kultur_tarih"
+      ],
+      "ilce": "Cizre",
+      "merkeze_km": 50,
+      "neden": "67 yıldır çay demleyen Celal Çazım'ın ocağı; günde 5 bin bardak çay veriyor",
+      "place_id": "ChIJwWG9wxtkCUAR15R6Q4jQh20"
+    },
+    {
+      "sira": 14,
+      "ad": "Cizre Eski Çarşı",
+      "kategori": "carsi",
+      "amaclar": [
+        "kultur_tarih",
+        "lezzet"
+      ],
+      "ilce": "Cizre",
+      "merkeze_km": 50,
+      "neden": "Gıras-fistan kumaşı, tescilli memilheva kurabiyesi ve şımşıpe için gezilen tarihi çarşı",
+      "place_id": "ChIJoUeJxBtkCUARFPPhZ37ym58"
+    },
+    {
+      "sira": 15,
+      "ad": "Seriro Yaylası",
+      "kategori": "doga",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Uludere",
+      "merkeze_km": 70,
+      "neden": "Bulakbaşı köyü üstündeki yayla; baharda kısa süre endemik ters lale tarlalarına dönüşür",
+      "place_id": "ChIJk8xfxqxNCUARcB4GUHIO0Bs"
+    },
+    {
+      "sira": 16,
+      "ad": "Sinan 2 Lokantası",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 2,
+      "neden": "Aydınlıkevler'de; kutlık, şımşıpe ve perde pilavı gibi Şırnak yemeklerini pişiriyor",
+      "place_id": "ChIJi4lA0MxVCUARJJo-SBqLvkY"
+    },
+    {
+      "sira": 17,
+      "ad": "Habur Çayı Rafting",
+      "kategori": "aktivite",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Beytüşşebap",
+      "merkeze_km": 90,
+      "neden": "Kar suyuyla kabaran Habur'da baharda Ayvalık köyü önünde yapılan rafting inişleri",
+      "place_id": "ChIJqU561M3WDkARUUIu_JuGSFE"
+    },
+    {
+      "sira": 18,
+      "ad": "Cizre Limonatası (Fettah Usta)",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Cizre",
+      "merkeze_km": 50,
+      "neden": "1955'ten beri süt ve vanilyayla yapılan limonata; 2025'te coğrafi işaret aldı"
+    },
+    {
+      "sira": 19,
+      "ad": "Gabar Dağı ve 7 Katlı Mağara",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "kultur_tarih"
+      ],
+      "ilce": "Güçlükonak",
+      "merkeze_km": 60,
+      "neden": "Akdizgin'deki yedi katlı kaya yerleşimi; izinle ve organize turla çıkılır",
+      "place_id": "ChIJ8d5CypDdC0ARth3IAXDEBhg"
+    },
+    {
+      "sira": 20,
+      "ad": "Kumçatı Tahin Değirmeni",
+      "kategori": "carsi",
+      "amaclar": [
+        "lezzet",
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 25,
+      "neden": "1850'lerden kalma su değirmeninde elektriksiz, taşta öğütülen coğrafi işaretli tahin",
+      "place_id": "ChIJGRW8h_FZCUARGOrcTvZqxMs"
+    },
+    {
+      "sira": 21,
+      "ad": "Balveren Menengiç Kahvesi",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 25,
+      "neden": "Balveren beldesinde elde yapılan, birkaç çeşidi olan menengiç kahvesi; Irak'a da gidiyor",
+      "place_id": "ChIJFVeBophVCUAR-4YzzjaWCgQ"
+    },
+    {
+      "sira": 22,
+      "ad": "Belkıs Ana Kaplıcaları",
+      "kategori": "aktivite",
+      "amaclar": [
+        "yavas"
+      ],
+      "ilce": "Güçlükonak",
+      "merkeze_km": 85,
+      "neden": "Düğünyurdu'nda 60°C kükürtlü su; tek havuz sabah kadınlara, akşam erkeklere ayrılıyor",
+      "place_id": "ChIJAQAAAFTAC0AR70fp6NaQmTI"
+    },
+    {
+      "sira": 23,
+      "ad": "Cehennem Deresi – Dicle Yürüyüşü",
+      "kategori": "aktivite",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "İdil",
+      "merkeze_km": 75,
+      "neden": "Yarbaşı'ndan kanyona inip Sulak köyü ve Bafe kalesinden geçerek Dicle kıyısına varan rota"
+    },
+    {
+      "sira": 24,
+      "ad": "Çalyan Gölü",
+      "kategori": "manzara",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Beytüşşebap",
+      "merkeze_km": 160,
+      "neden": "Faraşin'de 3000 m dolayında, kar suyuyla dolan göl; Şırnak, Hakkari ve Van sınırında",
+      "place_id": "ChIJs4OIlpdhDkARehGXbDp1QNM"
+    },
+    {
+      "sira": 25,
+      "ad": "Mağara Köyü (Kiwax)",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "İdil",
+      "merkeze_km": 90,
+      "neden": "Evleri mağaralara oyulmuş ya da onlara bitiştirilmiş eski Ezidi köyü; bugün boş",
+      "place_id": "ChIJ1VLZwAgxCkARjoJnw64dMZI"
+    },
+    {
+      "sira": 26,
+      "ad": "Nuh Nebi Camii ve Medresesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Silopi",
+      "merkeze_km": 80,
+      "neden": "Birlik (Cuma) köyündeki cami-medrese; halk arasında Nuh Nebi diye anılan ziyaretgâh",
+      "place_id": "ChIJk9KCIAAVCUARrtCRrb6nJNE"
+    },
+    {
+      "sira": 27,
+      "ad": "Şal û Şepik Atölyesi",
+      "kategori": "carsi",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 5,
+      "neden": "Şırnak Üniversitesi'ndeki atölyede yörenin şal û şepik giysileri yerinde satılıyor",
+      "place_id": "ChIJEziJ6D0VCUARwQJVz22gC8s"
+    },
+    {
+      "sira": 28,
+      "ad": "Zümrüt Kaplıcası",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Beytüşşebap",
+      "merkeze_km": 105,
+      "neden": "Ilıca köyünde kayadan çıkan 39°C su; havuzlara asma köprüyle dere geçilerek ulaşılıyor",
+      "place_id": "ChIJU1uX8GvrDkAR0XkTb4QVvOk"
+    }
+  ]
+}
