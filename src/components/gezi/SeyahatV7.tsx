@@ -55,13 +55,15 @@ export function UstHarita(p: {
 
 // ---------------------------------------------------------------- KK2 başlık
 
-export function Baslik({ ad, alt }: { ad: string; alt: string }) {
+/** #574 KK7: `kaynak` — arkadaş rotasından kurulan seyahatte alt satırın altında "Ayşe'nin rotasından" (aynı stil). */
+export function Baslik({ ad, alt, kaynak }: { ad: string; alt: string; kaynak?: string | null }) {
   return (
     <View style={s.baslikKap}>
       <Text style={s.baslik} numberOfLines={2} accessibilityRole="header">
         {ad}
       </Text>
       <Text style={s.baslikAlt}>{alt}</Text>
+      {kaynak ? <Text style={s.baslikAlt}>{kaynak}</Text> : null}
     </View>
   );
 }

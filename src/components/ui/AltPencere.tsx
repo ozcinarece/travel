@@ -21,7 +21,11 @@ type Props = {
    * #432 (`Sos_v6_Paylas`): v6 çekmece — perde Lacivert %50, üst köşeler 24, tutamaç 40 × 5 `#E4E7EE` üstte 10 px, kenar payı
    * 16, alt 30, öğeler arası 16.
    */
-  gorunus?: 'v5' | 'v6';
+  /**
+   * #574 (`Kur_v11_Cekmece`): perde Lacivert %38, üst köşeler 22, tutamaç 40 × 5 `#D5DAE5` üstte 10 px ve altında 12, kenar payı
+   * 16, alt 30; öğeler arası boşluk içerikte.
+   */
+  gorunus?: 'v5' | 'v6' | 'v11';
 };
 
 /**
@@ -31,19 +35,20 @@ type Props = {
 export function AltPencere({ acik, onKapat, children, kaydirilir, kapatEtiketi, stil, gorunus }: Props) {
   const v5 = gorunus === 'v5';
   const v6 = gorunus === 'v6';
+  const v11 = gorunus === 'v11';
   return (
     <Modal visible={acik} transparent animationType="slide" onRequestClose={onKapat}>
       <GestureHandlerRootView style={modalKokuStili}>
-        <View style={[s.perde, v5 && s.perdeYok, v6 && s.perdeV6]}>
+        <View style={[s.perde, v5 && s.perdeYok, v6 && s.perdeV6, v11 && s.perdeV11]}>
           <Pressable style={StyleSheet.absoluteFill} onPress={onKapat} accessibilityLabel={kapatEtiketi} />
-          <CekilenSayfa onKapat={onKapat} style={[s.sayfa, v5 && s.sayfaV5, v6 && s.sayfaV6, kaydirilir && s.sinirli]}>
-            <View style={[s.tutamac, (v5 || v6) && s.tutamacV5, v6 && s.tutamacV6]} />
+          <CekilenSayfa onKapat={onKapat} style={[s.sayfa, v5 && s.sayfaV5, v6 && s.sayfaV6, v11 && s.sayfaV11, kaydirilir && s.sinirli]}>
+            <View style={[s.tutamac, (v5 || v6) && s.tutamacV5, v6 && s.tutamacV6, v11 && s.tutamacV11]} />
             {kaydirilir ? (
-              <SayfaKaydirici contentContainerStyle={[s.icerik, v6 && s.icerikV6, stil]} showsVerticalScrollIndicator={false}>
+              <SayfaKaydirici contentContainerStyle={[s.icerik, v6 && s.icerikV6, v11 && s.icerikV11, stil]} showsVerticalScrollIndicator={false}>
                 {children}
               </SayfaKaydirici>
             ) : (
-              <View style={[s.icerik, v6 && s.icerikV6, stil]}>{children}</View>
+              <View style={[s.icerik, v6 && s.icerikV6, v11 && s.icerikV11, stil]}>{children}</View>
             )}
           </CekilenSayfa>
         </View>
@@ -65,4 +70,8 @@ const s = StyleSheet.create({
   sayfaV6: { borderTopLeftRadius: 24, borderTopRightRadius: 24, paddingTop: 10 },
   tutamacV6: { marginBottom: 0 },
   icerikV6: { paddingHorizontal: 16, paddingTop: 16, paddingBottom: 30 },
+  perdeV11: { backgroundColor: 'rgba(14,20,48,0.38)' },
+  sayfaV11: { borderTopLeftRadius: 22, borderTopRightRadius: 22, paddingTop: 10 },
+  tutamacV11: { width: 40, backgroundColor: '#D5DAE5', marginBottom: 12 },
+  icerikV11: { paddingHorizontal: 16, paddingTop: 0, paddingBottom: 30, gap: 0 },
 });

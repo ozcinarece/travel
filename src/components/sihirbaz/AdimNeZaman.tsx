@@ -31,9 +31,14 @@ type Props = {
   /** KK2: tarihsiz seçimde gün sayısı; null → tarihli seçim. */
   tarihsizGun: number | null;
   onTarihsizGun: (n: number) => void;
+  /**
+   * #574 KK5 (`Kur_v11_Cekmece`): verilirse özet kartı yerine tek satır ("5–6 Aralık · Cumartesi–Pazar · 2 gün", 14/700);
+   * null → seçim yok ("Gidiş gününe dokun"). Verilmezse sihirbazdaki özet kartı.
+   */
+  ozetSatiri?: string | null;
 };
 
-export function AdimNeZaman({ aralik, onAralik, tarihsizGun, onTarihsizGun }: Props) {
+export function AdimNeZaman({ aralik, onAralik, tarihsizGun, onTarihsizGun, ozetSatiri }: Props) {
   const bugun = yerelTarih(new Date(), Intl.DateTimeFormat().resolvedOptions().timeZone);
   const ilk = parcala(aralik?.gidis ?? bugun);
   const [ay, setAy] = useState({ yil: ilk.yil, ay: ilk.ay });
@@ -120,6 +125,8 @@ export function AdimNeZaman({ aralik, onAralik, tarihsizGun, onTarihsizGun }: Pr
             </Pressable>
           </View>
         </View>
+      ) : ozetSatiri !== undefined ? (
+        <Text style={ozetSatiri ? s.ozetSatir : s.not}>{ozetSatiri ?? t('sihirbaz.nezaman.ozetYok')}</Text>
       ) : aralik && son ? (
         <View style={s.ozet}>
           <View style={{ flex: 1, gap: 2 }}>
@@ -140,6 +147,7 @@ export function AdimNeZaman({ aralik, onAralik, tarihsizGun, onTarihsizGun }: Pr
 const s = StyleSheet.create({
   kap: { gap: 16 },
   not: { fontFamily: yazi.normal, fontSize: 13, color: renk.ikincil },
+  ozetSatir: { fontFamily: yazi.kalin, fontSize: 14, color: renk.metin, paddingTop: 6 },
   // KK1: yeri hep ayrılı (boşken de); ipucu çıkınca takvim kaymaz.
   ipucu: { fontFamily: yazi.kalin, fontSize: 15, lineHeight: 20, minHeight: 20, color: renk.ana, marginBottom: -8 },
   kart: { borderWidth: 1, borderColor: renk.ayrac, borderRadius: kose.kart, paddingTop: 14, paddingHorizontal: 12, paddingBottom: 10, gap: 8 },

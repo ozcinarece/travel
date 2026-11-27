@@ -1603,5 +1603,42 @@
     "hazirGeziler": "Hazır gezilere bak",
     "agBaslik": "Bağlanamadık",
     "agMetin": "Gezinin bilgileri yüklenemedi. Bağlantın düzelince tekrar dene."
+  },
+  "geziKur": {
+    "baslik": "Nasıl bir gezi?",
+    "sehirYer": "Hangi şehir?",
+    "sehirEtiket": "Şehir",
+    "sehirTemizle": "Şehri temizle",
+    "suzgec": {
+      "iki": "2 gün",
+      "ucBes": "3–5 gün",
+      "lezzet": "Lezzet",
+      "doga": "Doğa",
+      "kultur_tarih": "Kültür"
+    },
+    "kendiKur": "Kendi rotanı kur",
+    "sehirleKur": "{sehir} için kendi rotanı kur",
+    "kendiAlt": "Tarihi seç, yerleri sen ekle",
+    "sehirRotalari": "{sehir} rotaları",
+    "hazirYok": "Bu şehir için hazır rota yok, kendi rotanı kur",
+    "suzgecBos": "Bu seçimle hazır rota yok",
+    "rotaHata": "Hazır rotalar yüklenemedi.",
+    "arkadaslardan": "Arkadaşlarından",
+    "kartAlt": "{gun} gün · {durak} durak · Editör seçimi",
+    "bunuSec": "Bunu seç",
+    "bunuSecEtiket": "{ad} rotasını seç",
+    "gitti1": "{a} bu rotayla gitti",
+    "gitti2": "{a} ve {b} bu rotayla gitti",
+    "gittiCok": "{a}, {b} ve {n} kişi daha bu rotayla gitti",
+    "arkadasBaslik": "{sehir}, {n} gün",
+    "arkadasAlt": "{ad} rotası",
+    "cekmeceAlt": "{gun} gün · {durak} durak",
+    "kimlerle": "Kimlerle?",
+    "davetEkle": "Davet linki gönder",
+    "davetSecili": "Davet linki gezi oluşunca gönderilecek",
+    "yolArkadasi": "{ad} yol arkadaşın, kaldırmak için dokun",
+    "olustur": "Geziyi oluştur",
+    "rotasindan": "{ad} rotasından",
+    "kapat": "Kapat"
   }
 }

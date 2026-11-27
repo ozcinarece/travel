@@ -2,8 +2,8 @@
 // Üstte geri oku ve kendi profilinde "Düzenle"; 76 pt yuvarlak yüz, 26/800 ad, "N il · N yol arkadaşı"; #F6F7FA kartta
 // "N / 81 il" ve il il Türkiye haritası (KK2, KK3), lejant; kendi profilinde gizlilik satırı (KK6); gitmek istenen il çipleri
 // (KK4); rozetler (KK5); geziler (KK6: arkadaşta yalnız geçmiş); arkadaşta altta sabit turuncu "{Ad} ile gezi planla" (KK7).
-// Gezi oluşturma (#574) bugünkü sihirbazla açılır: il `sehir` (rehberli şehir) ya da `metin` olarak, ayrıca `il` ve `arkadas`
-// parametreleri geçer (#574 bağlayacak). Google'a istek yok.
+// Gezi oluşturma (#574): il rehberli bir şehirse `sehir` ("Nasıl bir gezi?" şehir kutusu dolu), değilse `metin` (sihirbazın
+// Nereye adımında aranmış); `il` ve `arkadas` (yol arkadaşı seçili) parametreleri de geçer. Google'a istek yok.
 import { router } from 'expo-router';
 import { useState, type ReactNode } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
@@ -69,8 +69,8 @@ const ILK_GEZI = 2;
 type GeziGirisi = { plaka?: number; arkadas?: string };
 
 /**
- * KK4 · KK7: gezi oluşturma. #574 gelene kadar bugünkü sihirbaz açılır: il rehberli bir şehirse seçili (`sehir`), değilse
- * Nereye adımında aranmış (`metin`) gelir; `il` ve `arkadas` parametreleri de geçer.
+ * KK4 · KK7: gezi oluşturma (#574 "Nasıl bir gezi?"): il rehberli bir şehirse seçili (`sehir`), değilse sihirbazın Nereye
+ * adımında aranmış (`metin`) gelir; `il` ve `arkadas` (yol arkadaşı seçili, #574 KK-ek1) parametreleri de geçer.
  */
 export function geziOlusturParametreleri(sehirler: Sehir[] | undefined, { plaka, arkadas }: GeziGirisi): Record<string, string> {
   const p: Record<string, string> = { n: yeniGirisNo() };
