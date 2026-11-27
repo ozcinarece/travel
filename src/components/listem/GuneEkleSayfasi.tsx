@@ -16,9 +16,10 @@ import { anaV5, gunRengi, renk, yazi } from '@/theme';
 
 type Props = {
   acik: boolean;
-  ad: string;
-  foto: string | null;
-  dakika: number;
+  /** Eklenecek yerin adı; #579 KK2: Yer ekle'nin "Değiştir"inden açılınca yer yok (null): başlık yalnız "Hangi güne?". */
+  ad: string | null;
+  foto?: string | null;
+  dakika?: number;
   secenekler: GunSecenegi[];
   mesgul: boolean;
   /** #532 KK4: bir günün içinden açıldıysa o gün (en üstte). */
@@ -29,6 +30,8 @@ type Props = {
   bugun?: { gezilen: number; aksamBos: boolean } | null;
   onSec: (s: GunSecenegi) => void;
   onKapat: () => void;
+  /** #579 KK2: gün seçerken (yer eklemeden) "Şimdilik listede kalsın" anlamsız; false ise gösterilmez. */
+  kalsin?: boolean;
 };
 
 const km = (m: number) => mesafeMetni(m >= 1000 ? m : Math.round(m / 10) * 10);
@@ -54,19 +57,27 @@ export function gunSatiriEtiketi(baslik: string, alt: string, o: { gecti: boolea
   return o.gecti ? `${metin}, ${t('listem.guneEkle.gectiOkunus')}` : metin;
 }
 
-export function GuneEkleSayfasi({ acik, ad, foto, dakika, secenekler, mesgul, baglamGunId, bugunIndex, bugun, onSec, onKapat }: Props) {
+export function GuneEkleSayfasi({ acik, ad, foto = null, dakika = 0, secenekler, mesgul, baglamGunId, bugunIndex, bugun, onSec, onKapat, kalsin = true }: Props) {
   const sirali = hangiGuneSirasi(secenekler, { baglamGunId, bugunIndex });
   return (
     <AltPencere acik={acik} onKapat={onKapat} kapatEtiketi={t('genel.vazgec')} kaydirilir stil={{ paddingHorizontal: 16 }}>
-      <View style={s.ust}>
-        <View style={s.foto}>{foto ? <Foto source={{ uri: foto }} style={StyleSheet.absoluteFill} contentFit="cover" /> : <Ikon ad="kamera" boyut={22} renk={anaV5.ok} kalinlik={1.8} />}</View>
-        <View style={{ flex: 1, minWidth: 0, gap: 2 }}>
-          <Text accessibilityRole="header" style={s.ad} numberOfLines={2}>
-            {ad}
+      {ad === null ? (
+        <View style={s.ust}>
+          <Text accessibilityRole="header" style={s.ad}>
+            {t('mekan.gunSecBaslik')}
           </Text>
-          <Text style={s.alt}>{t('listem.guneEkle.alt', { sure: sureMetni(dakika) })}</Text>
         </View>
-      </View>
+      ) : (
+        <View style={s.ust}>
+          <View style={s.foto}>{foto ? <Foto source={{ uri: foto }} style={StyleSheet.absoluteFill} contentFit="cover" /> : <Ikon ad="kamera" boyut={22} renk={anaV5.ok} kalinlik={1.8} />}</View>
+          <View style={{ flex: 1, minWidth: 0, gap: 2 }}>
+            <Text accessibilityRole="header" style={s.ad} numberOfLines={2}>
+              {ad}
+            </Text>
+            <Text style={s.alt}>{t('listem.guneEkle.alt', { sure: sureMetni(dakika) })}</Text>
+          </View>
+        </View>
+      )}
       {sirali.map(({ secenek: o, gecti, enYakin }) => {
         const bugunMu = o.gun.index === bugunIndex;
         const baslik = gunBasligi(o, bugunMu);
@@ -92,9 +103,11 @@ export function GuneEkleSayfasi({ acik, ad, foto, dakika, secenekler, mesgul, ba
           </Pressable>
         );
       })}
-      <Pressable accessibilityRole="button" onPress={onKapat} style={s.kalsin}>
-        <Text style={s.kalsinMetin}>{t('listem.guneEkle.kalsin')}</Text>
-      </Pressable>
+      {kalsin ? (
+        <Pressable accessibilityRole="button" onPress={onKapat} style={s.kalsin}>
+          <Text style={s.kalsinMetin}>{t('listem.guneEkle.kalsin')}</Text>
+        </Pressable>
+      ) : null}
     </AltPencere>
   );
 }

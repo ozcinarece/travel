@@ -14,9 +14,10 @@ import type { Konaklama } from '@/features/konaklama/plan';
 import { useKonaklamalar } from '@/features/konaklama/sorgular';
 import { GrupPenceresi } from '@/components/davet/GrupPenceresi';
 import { GeriAlBandi } from '@/components/listem/GeriAlBandi';
+import { GuneEkleSayfasi } from '@/components/listem/GuneEkleSayfasi';
 import { MekanPaneli } from '@/components/mekan/MekanPaneli';
 import { useGeriAlinabilirSil } from '@/features/mekanlar/geriAlinabilirSil';
-import { geciciMi, useMekanEkle, useMekanGuncelle, useMekanlar, useUyeler, type EklemeKaynagi } from '@/features/mekanlar/sorgular';
+import { geciciMi, useMekanEkle, useMekanGuncelle, useMekanlar, useMekanSil, useUyeler, type EklemeKaynagi } from '@/features/mekanlar/sorgular';
 import { listedekiMekan } from '@/features/gezi/bugunEkle';
 import { geziyeGit } from '@/features/gezi/gezinti';
 import { useDuragaAta, useDuraklar, useGunler } from '@/features/gunler/sorgular';
@@ -37,6 +38,7 @@ import { aramaSecimi, linkCoz, linkGibiMi, useHafifYerler, useOneriler, useYerFo
 import { aktifFiltreSayisi, filtreAktif, filtredenGecer, filtreOzeti, varsayilanMi, type Filtre } from '@/features/yerler/filtre';
 import { useOneCikanlar } from '@/features/yerler/oneCikan';
 import { useKesfetOnerileri } from '@/features/yerler/kesfetYukleme';
+import { baglamGunSecenekleri, bugununGunSirasi, etkinGunSirasi, GUN_BILDIRIMI_MS, gunEklendiMetni, gunEkleEtiketi, gunHapiMetni } from '@/features/yerler/gunBaglami';
 import { alanCipi, alandaAraGorunur, alanIcinde, gorunumAlani, gorunurOneriler, sehirCipleri } from '@/features/yerler/sehirListesi';
 import { kesfetDurumunuAl, useKesfetDurumu } from '@/features/yerler/kesfetDurumu';
 import { useGeciciGorunur } from '@/features/yerler/geciciHata';
@@ -97,14 +99,36 @@ function Kesfet({
   }
   // #536 inceleme 4: gün bağlamı yapışkan olmasın. Sekmeden çıkınca (blur) temizlenir; sekme çubuğundan geri gelen kişi
   // + ile yeri sessizce eski güne eklemez. Aynı istek tekrar uygulanmaz (`oncekiGunIstegi` değişmez), yeni istek yeni no taşır.
-  useFocusEffect(useCallback(() => () => setGunBaglamiIndex(null), []));
-  const gunBaglami = gunBaglamiIndex !== null ? (gunler.data?.find((g) => g.index === gunBaglamiIndex) ?? null) : null;
+  // #579 KK1: gezi günlerinde (seyahat saat dilimiyle, `trips.tz`) açıkça seçilmiş gün yoksa bugün seçili gelir. Blur'da seçim
+  // temizlenir; sekmeye dönünce yine bugün. "Şimdi" sekme her açıldığında alınır (sekme arka planda kurulu kalır, #79: dakikalık
+  // saat haritalı ekranı boşuna yeniden çizmesin).
+  const [an, setAn] = useState(() => new Date());
+  useFocusEffect(
+    useCallback(() => {
+      setAn(new Date());
+      return () => setGunBaglamiIndex(null);
+    }, []),
+  );
+  const bugunSirasi = bugununGunSirasi(seyahat, an);
+  const etkinIndex = etkinGunSirasi(gunBaglamiIndex, bugunSirasi);
+  const gunBaglami = etkinIndex !== null ? (gunler.data?.find((g) => g.index === etkinIndex) ?? null) : null;
+  // #579 KK2: "Değiştir" → Hangi güne? çekmecesi.
+  const [gunSecimiAcik, setGunSecimiAcik] = useState(false);
+  const gunSecenekleri = useMemo(() => (gunSecimiAcik ? baglamGunSecenekleri(gunler.data ?? [], duraklar.data ?? []) : []), [gunSecimiAcik, gunler.data, duraklar.data]);
   const [gunBildirimi, setGunBildirimi] = useState<string | null>(null);
   useEffect(() => {
     if (!gunBildirimi) return;
     const z = setTimeout(() => setGunBildirimi(null), 2800);
     return () => clearTimeout(z);
   }, [gunBildirimi]);
+  // #579 KK3: gezi günlerinde eklenince 4 sn Gece bildirim + "Geri al" (eklenen yer listeden ve günden geri çıkar).
+  const [eklendiBildirimi, setEklendiBildirimi] = useState<{ metin: string; mekanId: string; sayac: number } | null>(null);
+  useEffect(() => {
+    if (!eklendiBildirimi) return;
+    const z = setTimeout(() => setEklendiBildirimi(null), GUN_BILDIRIMI_MS);
+    return () => clearTimeout(z);
+  }, [eklendiBildirimi]);
+  const mekanSil = useMekanSil(seyahat.id);
   const queryClient = useQueryClient();
   const uyeler = useUyeler(seyahat.id);
   // #137 KK6: Grup penceresi (yüzlere dokununca; Grup sekmesi kalktı).
@@ -383,15 +407,29 @@ function Kesfet({
         kaynak,
       });
       // #532 KK4: gün bağlamı varsa yer o günün sonuna da eklenir (listedeki gerçek satırla).
+      // #579 KK3: gezi günlerinde de (bugün ya da "Değiştir"le seçilen gün) sonuna; bildirim "{ad} bugüne eklendi · Geri al".
       if (gunBaglami) {
         const hedef = gunBaglami;
         const kayit = await listedekiMekan(seyahat.id, y.place_id);
         await ata.mutateAsync({ mekan: kayit, gunId: hedef.id, mevcut: undefined, gunDuraklari: (duraklar.data ?? []).filter((d) => d.day_id === hedef.id) });
-        setGunBildirimi(t('kesfet.guneEklendi', { ad: y.ad, n: hedef.index }));
+        if (bugunSirasi !== null) {
+          setGunBildirimi(null);
+          setEklendiBildirimi((o) => ({ metin: gunEklendiMetni(y.ad, hedef, bugunSirasi), mekanId: kayit.id, sayac: (o?.sayac ?? 0) + 1 }));
+        } else setGunBildirimi(t('kesfet.guneEklendi', { ad: y.ad, n: hedef.index }));
       }
     } catch (e) {
       setHata(agHatasi(e) ? t('geziSayfasi.cevrimdisi.baglantiYok') : t('kesfet.ekleHata'));
     }
+  };
+  // #579 KK3: "Geri al" — az önce eklenen yer listeden silinir; durağı da (stops → places `on delete cascade`) gider.
+  const eklemeyiGeriAl = () => {
+    const b = eklendiBildirimi;
+    if (!b) return;
+    setEklendiBildirimi(null);
+    mekanSil.mutate(b.mekanId, {
+      onSuccess: () => queryClient.invalidateQueries({ queryKey: ['duraklar', seyahat.id] }),
+      onError: () => setHata(t('kesfet.ekleHata')),
+    });
   };
   // #387 KK1: hemen silinmez; 5 sn "Geri al" bandı, silme bant kapanınca (hata olursa katmanda `listem.hata`).
   const listedenCikar = async (m: Mekan) => {
@@ -498,6 +536,8 @@ function Kesfet({
     onCikar: cekmecedenCikar,
     onAc: cekmecedenAc,
     azMetni: genisletildi ? t('kesfet.cekmece.genis') : azOneri ? t('kesfet.cekmece.az') : null,
+    // #579 KK3: gün bağlamında "+" "Bugüne ekle" / "Cuma'ya ekle" diye okunur.
+    ekleEtiketi: gunBaglami ? gunEkleEtiketi(gunBaglami, bugunSirasi) : null,
   };
   // #165 KK10: süre mekanın varsayılan kalış süresi (listedeyse kendi süresi — Program'la aynı kaynak); puan ve fotoğraf
   // çekmecenin elindeki veriden (ek Google isteği yok).
@@ -641,7 +681,8 @@ function Kesfet({
           <>
             {/* #164 KK3 (kanvas 9): Turistik · Yemek · Kafe · Park · Alışveriş · Tümü; varsayılan Turistik, tek seçim (kategori
                 renginde glif). Öne çıkan / puan / yorum ve Müze · İbadet · Manzara alt seçenekleri filtre sayfasında. */}
-            {gunBaglami ? (
+            {/* #579 KK2 (kanvas `Dalga1_BuguneEkle`) hap aşağıda, çiplerin altında; gezi günü dışında #532 hapı. */}
+            {gunBaglami && bugunSirasi === null ? (
               <View style={[s.gunHapi, s.golge, { backgroundColor: gunRengi(gunBaglami.index) }]}>
                 <Text style={[s.gunHapiMetin, { color: gunUstuMetin(gunRengi(gunBaglami.index)) }]}>{t('kesfet.guneEkliyorsun', { n: gunBaglami.index })}</Text>
                 <Pressable accessibilityRole="button" accessibilityLabel={t('kesfet.gunSeciminiKaldir')} hitSlop={10} onPress={() => setGunBaglamiIndex(null)} style={s.gunHapiKapat}>
@@ -650,6 +691,17 @@ function Kesfet({
               </View>
             ) : null}
             <HizliCipler filtre={filtre} onFiltre={filtreyiDegistir} />
+            {gunBaglami && bugunSirasi !== null ? (
+              <View testID="gun-hapi" style={s.beyazHap}>
+                <View style={[s.hapNokta, { backgroundColor: gunRengi(gunBaglami.index) }]} />
+                <Text style={s.beyazHapMetin} numberOfLines={1}>
+                  {gunHapiMetni(gunBaglami)}
+                </Text>
+                <Pressable accessibilityRole="button" accessibilityLabel={t('kesfet.gunDegistirEtiket')} onPress={() => setGunSecimiAcik(true)} style={({ pressed }) => [s.degistir, pressed && { opacity: 0.7 }]}>
+                  <Text style={s.degistirMetin}>{t('kesfet.gunDegistir')}</Text>
+                </Pressable>
+              </View>
+            ) : null}
             {filtreli && !varsayilan ? (
               // #69 KK5: filtre açıkken "Şehrin öne çıkanları · 9 mekan gizli" hapı (dokunulmaz).
               <View style={s.yukleniyorSatir} pointerEvents="none">
@@ -746,7 +798,25 @@ function Kesfet({
               <Text style={s.gunBildirimMetin}>{gunBildirimi}</Text>
             </View>
           ) : null}
-          {geriAlinabilir.bekleyen ? <GeriAlBandi metin={geriAlinabilir.bekleyen.metin} olay={geriAlinabilir.bekleyen} onGeriAl={geriAlinabilir.geriAl} alt={16} /> : null}
+          {geriAlinabilir.bekleyen ? (
+            <GeriAlBandi metin={geriAlinabilir.bekleyen.metin} olay={geriAlinabilir.bekleyen} onGeriAl={geriAlinabilir.geriAl} alt={16} />
+          ) : eklendiBildirimi ? (
+            <GeriAlBandi metin={eklendiBildirimi.metin} olay={eklendiBildirimi.sayac} onGeriAl={eklemeyiGeriAl} alt={16} yazili />
+          ) : null}
+          <GuneEkleSayfasi
+            acik={gunSecimiAcik}
+            ad={null}
+            secenekler={gunSecenekleri}
+            mesgul={false}
+            baglamGunId={gunBaglami?.id ?? null}
+            bugunIndex={bugunSirasi}
+            kalsin={false}
+            onSec={(o) => {
+              setGunBaglamiIndex(o.gun.index);
+              setGunSecimiAcik(false);
+            }}
+            onKapat={() => setGunSecimiAcik(false)}
+          />
         </>
       }
       // #317 KK1: hatalar (ekleme, öneri, 429) ve "Bağlantı yok" çekmecenin ve panelin her halinde görünür.
@@ -786,6 +856,13 @@ const s = StyleSheet.create({
   gunHapi: { alignSelf: 'flex-start', height: 34, paddingLeft: 14, paddingRight: 8, borderRadius: 17, flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 10 },
   gunHapiMetin: { fontFamily: yazi.ekstra, fontSize: 13 },
   gunHapiKapat: { width: 24, height: 24, borderRadius: 12, backgroundColor: 'rgba(255,255,255,0.22)', alignItems: 'center', justifyContent: 'center' },
+  // #579 KK2 (kanvas `Dalga1_BuguneEkle`): beyaz hap, en az 44 pt, köşe 22, sol 14 / sağ 6, gün renginde 8 pt nokta, 14/700 metin,
+  // 44 pt "Değiştir" (14/800 Gece). Çiplerin altında 10 pt.
+  beyazHap: { alignSelf: 'flex-start', maxWidth: '100%', minHeight: 44, borderRadius: 22, backgroundColor: renk.zemin, paddingLeft: 14, paddingRight: 6, flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 10, shadowColor: renk.metin, shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.12, shadowRadius: 8, elevation: 3 },
+  hapNokta: { width: 8, height: 8, borderRadius: 4 },
+  beyazHapMetin: { flexShrink: 1, fontFamily: yazi.kalin, fontSize: 14, color: renk.metin },
+  degistir: { minHeight: 44, minWidth: 44, paddingHorizontal: 10, justifyContent: 'center', alignItems: 'center' },
+  degistirMetin: { fontFamily: yazi.ekstra, fontSize: 14, color: renk.ana },
   gunBildirim: { position: 'absolute', left: 12, right: 12, bottom: 16, minHeight: 56, paddingHorizontal: 16, borderRadius: 16, backgroundColor: renk.metin, justifyContent: 'center' },
   gunBildirimMetin: { fontFamily: yazi.kalin, fontSize: 14, color: renk.zemin },
   ortala: { alignItems: 'center', justifyContent: 'center' },

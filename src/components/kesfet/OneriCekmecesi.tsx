@@ -39,6 +39,8 @@ type Ortak = {
   onAc: (placeId: string) => void;
   /** #189 KK3: görünür alanda az öneri kaldıysa listenin altındaki (boşsa yerindeki) yönlendirme satırı. */
   azMetni?: string | null;
+  /** #579 KK3: gün bağlamında "+" düğmesinin ekran okuyucu etiketi ("Bugüne ekle", "Cuma'ya ekle"). */
+  ekleEtiketi?: string | null;
 };
 
 /** #165 KK3/KK7: "Kategori · ★ 4,7 · 1 sa". */
@@ -168,7 +170,7 @@ export function CekmeceSatirlari({ liste, yukseklik, ...o }: Ortak & { liste: Ce
                 </Text>
               </View>
               {/* #136 KK5: tek EkleDugmesi — listedeyse açık yeşil ✓, dokununca çıkar. */}
-              <EkleDugmesi listede={listede} mesgul={o.mesgulId === y.place_id} onPress={() => (listede ? o.onCikar(y.place_id) : o.onEkle(y.yer))} />
+              <EkleDugmesi listede={listede} etiket={o.ekleEtiketi} mesgul={o.mesgulId === y.place_id} onPress={() => (listede ? o.onCikar(y.place_id) : o.onEkle(y.yer))} />
             </Pressable>
           );
         }}
@@ -258,7 +260,7 @@ function OneriKarti({ oge, genislik, ...o }: Ortak & { oge: CekmeceOgesi; genisl
           </View>
         ) : null}
         <View style={s.kartEkle}>
-          <EkleDugmesi listede={listede} mesgul={o.mesgulId === oge.place_id} onPress={() => (listede ? o.onCikar(oge.place_id) : o.onEkle(oge.yer))} />
+          <EkleDugmesi listede={listede} etiket={o.ekleEtiketi} mesgul={o.mesgulId === oge.place_id} onPress={() => (listede ? o.onCikar(oge.place_id) : o.onEkle(oge.yer))} />
         </View>
       </View>
       <Text style={s.kartAd} numberOfLines={2}>

@@ -24,6 +24,7 @@ import { baslikAltSatiri, bugununPlaniSatirlari, durakSayaci, gezildiMi, gunSati
 import { ustHaritaVerisi, type UstHaritaHali } from '@/features/gezi/ustHarita';
 import { programCizgileri } from '@/features/program/haritaVerisi';
 import {
+  ArtiSatiri,
   BaglantiSatiri,
   Baslik,
   BolumBasligi,
@@ -496,7 +497,7 @@ function GeziSayfasi({ seyahat, gunler, duraklar, mekanlar, konaklamalar, katild
     foto: null,
     alt: [a.ilKategori ? kategoriAdi(a.ilKategori) : kategoriEtiketi(a.tip), a.mesafeM !== null ? mesafeMetni(Math.round(a.mesafeM / 10) * 10) : null].filter(Boolean).join(' · '),
   }));
-  // #532 KK4: "Tümü ›" ve "Bugüne yer ekle ›" Yer ekle'yi bugün seçili açar.
+  // #532 KK4: "Tümü ›" ve "Bugüne yer ekle ›" Yer ekle'yi bugün seçili açar. #579 KK4: Yol tarifi'nin altındaki satır da.
   const bugunYerEkle = () => sekme('kesfet', bugunGun ? { gun: String(bugunGun.index) } : {});
 
   return (
@@ -528,19 +529,24 @@ function GeziSayfasi({ seyahat, gunler, duraklar, mekanlar, konaklamalar, katild
 
         {hal === 'gezi' ? (
           <>
-            {simdiKart ? <SimdiV7 etiket={simdiEtiketi(simdiDk, simdiKart.gelis?.mod === 'taksi')} ad={simdiKart.ad} alt={simdiAlt} onYolTarifi={() => yolTarifi(simdiKart)} /> : null}
+            {/* #579 KK4 (kanvas `Dalga1_GeziModu`): Yol tarifi'nin hemen altında "Bugüne yer ekle", gün boyu her zaman. Şimdi yoksa
+                (bugünün durakları bitti) satır aynı yerde tek başına. */}
+            {simdiKart ? (
+              <SimdiV7 etiket={simdiEtiketi(simdiDk, simdiKart.gelis?.mod === 'taksi')} ad={simdiKart.ad} alt={simdiAlt} onYolTarifi={() => yolTarifi(simdiKart)} onBugunEkle={bugunYerEkle} />
+            ) : (
+              <View style={s.bolum}>
+                <ArtiSatiri metin={t('seyahatV7.bugunYerEkleSatiri')} onPress={bugunYerEkle} />
+              </View>
+            )}
             <View style={s.bolum}>
               <BolumBasligi baslik={t('seyahatV7.bugununPlani')} baglanti={t('seyahatV7.planiAc')} onBaglanti={() => plan({ gun: String(bugunGun?.index ?? 1) })} />
               <BugununPlaniV7 satirlar={planSatirlari} />
-              {/* #536 inceleme 1: aday yoksa başlık kalır, altında boş gündeki gibi tek satır "Bugüne yer ekle ›". */}
-              {yakindaAcik ? (
+              {/* #579 KK4: "Bugüne yer ekle" artık hep yukarıda; aday yoksa "Yakında, bugüne ekle" bölümü çıkmaz (aynı eylem iki yerde
+                  olmasın; #536 inceleme 1'deki tek satırın yerini o aldı). */}
+              {yakindaAcik && yakinSatirlari.length > 0 && bugunGun ? (
                 <>
                   <BolumBasligi baslik={t('seyahatV7.yakindaBugune')} baglanti={t('seyahatV7.tumu')} onBaglanti={bugunYerEkle} />
-                  {yakinSatirlari.length > 0 && bugunGun ? (
-                    <BugunBosV7 yerler={yakinSatirlari} eklenenler={eklenenler} onEkle={bugunaEkle} pasif={cevrimdisi} />
-                  ) : (
-                    <BaglantiSatiri metin={t('seyahatV7.bugunYerEkle')} onPress={bugunYerEkle} />
-                  )}
+                  <BugunBosV7 yerler={yakinSatirlari} eklenenler={eklenenler} onEkle={bugunaEkle} pasif={cevrimdisi} />
                 </>
               ) : null}
             </View>

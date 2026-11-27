@@ -201,7 +201,7 @@ export function SiradakiAdimV7(p: { baslik: string; dugme: string; onPress: () =
   );
 }
 
-export function SimdiV7(p: { etiket: string; ad: string; alt: string | null; onYolTarifi: () => void }) {
+export function SimdiV7(p: { etiket: string; ad: string; alt: string | null; onYolTarifi: () => void; /** #579 KK4: Yol tarifi'nin hemen altında "Bugüne yer ekle". */ onBugunEkle?: () => void }) {
   return (
     <View style={s.odak}>
       <Text style={s.odakEtiket}>{p.etiket}</Text>
@@ -210,7 +210,23 @@ export function SimdiV7(p: { etiket: string; ad: string; alt: string | null; onY
       </Text>
       {p.alt ? <Text style={s.odakAlt}>{p.alt}</Text> : <View style={s.odakBaslikBosluk} />}
       <TuruncuDugme metin={t('seyahatV7.yolTarifi')} ikon="yolTarifiV7" onPress={p.onYolTarifi} />
+      {p.onBugunEkle ? <ArtiSatiri metin={t('seyahatV7.bugunYerEkleSatiri')} onPress={p.onBugunEkle} /> : null}
     </View>
+  );
+}
+
+/**
+ * #579 KK4 (kanvas `Dalga1_GeziModu`): "Bugüne yer ekle" satırı — Plan'daki "Bu güne yer ekle" ile aynı biçim (`PlanListesi`
+ * `ekle`): 28 pt çerçeveli (1,5 Gece) daire içinde 15 pt +, 15/700 Gece metin, aralık 12; dokunma alanı en az 48 pt.
+ */
+export function ArtiSatiri({ metin, onPress }: { metin: string; onPress: () => void }) {
+  return (
+    <Pressable accessibilityRole="button" accessibilityLabel={metin} onPress={onPress} style={({ pressed }) => [s.artiSatiri, pressed && { opacity: 0.8 }]}>
+      <View style={s.artiDaire}>
+        <Ikon ad="artiV7" boyut={15} renk={renk.ana} kalinlik={2.4} />
+      </View>
+      <Text style={s.artiMetin}>{metin}</Text>
+    </Pressable>
   );
 }
 
@@ -354,6 +370,9 @@ const s = StyleSheet.create({
   baglanti: { fontFamily: yazi.kalin, fontSize: 14, color: renk.ana },
   baglantiSatiri: { alignSelf: 'flex-start', minHeight: 44, justifyContent: 'center' },
   odak: { paddingTop: 18, paddingHorizontal: 16, gap: 4 },
+  artiSatiri: { marginTop: 8, minHeight: 48, flexDirection: 'row', alignItems: 'center', gap: 12, alignSelf: 'stretch' },
+  artiDaire: { width: 28, height: 28, borderRadius: 14, borderWidth: 1.5, borderColor: renk.ana, alignItems: 'center', justifyContent: 'center' },
+  artiMetin: { fontFamily: yazi.kalin, fontSize: 15, color: renk.ana },
   odakEtiket: { fontFamily: yazi.ekstra, fontSize: 13, letterSpacing: 0.26, color: anaV5.adim },
   odakBaslik: { fontFamily: yazi.ekstra, fontSize: 22, letterSpacing: -0.22, color: renk.metin },
   odakBaslikBosluk: { paddingBottom: 10 },
