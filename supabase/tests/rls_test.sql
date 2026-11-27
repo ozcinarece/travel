@@ -4471,6 +4471,25 @@ select public.paylasim_ozeti_kimlik(current_setting('test.l3')::uuid);
 reset role;
 do $$ begin assert (select acilma_sayisi = 1 from public.gezi_paylasim where id = current_setting('test.l3')::uuid), '#540 KK4: ertesi gün bir kez daha sayılır'; end $$;
 do $$ begin assert (select gun = current_date from public.paylasim_acilisi where user_id = '40700000-0000-4000-8000-0000000000b2' and paylasim_id = current_setting('test.l3')::uuid), '#540 KK4: gün ilerler'; end $$;
+-- #540 KK4 (Ürün kararı): sayaç kısa ömürlü; ertesi gün açılınca önceki günün satırları (başka paylaşım ve kişininki de)
+-- silinir, tabloda yalnız bugünün satırları kalır. Dünkü iki satır eklenir: D'nin Bursa'sı (bu paylaşım değil) ve D'nin
+-- Antalya'sı (bu paylaşım, dün); B bugün Antalya'yı açar.
+update public.paylasim_acilisi set gun = current_date - 1 where user_id = :FD;
+insert into public.paylasim_acilisi (paylasim_id, user_id, gun) values (current_setting('test.l1')::uuid, :FD, current_date - 1);
+do $$ begin assert (select count(*) from public.paylasim_acilisi where gun < current_date) = 2, '#540 KK4 ön koşul: dünün iki satırı'; end $$;
+set role authenticated;
+select pg_temp.as_user(:FB);
+select public.paylasim_ozeti_kimlik(current_setting('test.l3')::uuid);
+reset role;
+do $$ begin assert not exists (select 1 from public.paylasim_acilisi where gun < current_date), '#540 KK4: ertesi gün önceki günün satırı kalmaz'; end $$;
+do $$ begin assert (select array_agg(user_id) from public.paylasim_acilisi) = array['40700000-0000-4000-8000-0000000000b2'::uuid], '#540 KK4: yalnız bugünün satırı kalır'; end $$;
+do $$ begin assert (select acilma_sayisi = 1 from public.gezi_paylasim where id = current_setting('test.l3')::uuid), '#540 KK4: B bugün ikinci kez sayılmaz'; end $$;
+-- D bugün yeniden açar: dünkü satırı silindiği için bir kez sayılır.
+set role authenticated;
+select pg_temp.as_user(:FD);
+select public.paylasim_ozeti_kimlik(current_setting('test.l3')::uuid);
+reset role;
+do $$ begin assert (select acilma_sayisi = 2 from public.gezi_paylasim where id = current_setting('test.l3')::uuid), '#540 KK4: dünkü satırı silinen D bugün bir kez sayılır'; end $$;
 -- #540 KK4: açılış kaydı istemciye kapalı (okuma, yazma, silme yok).
 set role authenticated;
 select pg_temp.as_user(:FB);

@@ -1,12 +1,14 @@
 -- #540 (#533 incelemesi): akış sorgusu izleyenden başlar (KK3), kimlikle açılış sayacı kişi başına günde bir (KK4), sahipsiz
--- paylaşım hiçbir şey döndürmez (KK5). Yeni tablo: paylasim_acilisi. Veri silme yok; Google'a istek yok.
+-- paylaşım hiçbir şey döndürmez (KK5). Yeni tablo: paylasim_acilisi. Migration veri silmez (yalnız
+-- `paylasim_ozeti_kimlik` çalışırken sayacın eski günlerini siler, aşağıda); Google'a istek yok.
 
 -- KK3: akış sorgusunun son adımı; arkadaşın açık ve akışa açık linkleri.
 create index gezi_paylasim_olusturan_akista on public.gezi_paylasim (olusturan) where acik and akista;
 
--- KK4: kimlikle açılışta kim, hangi paylaşımı, en son hangi gün açtı. Satır (paylaşım, kişi) başına bir tane; gün ilerledikçe
--- üzerine yazılır, böylece tablo günle büyümez ve geçmiş açılışlar tutulmaz. Paylaşım ya da kişi silinince satır da gider.
--- İstemciye kapalı: yalnız `paylasim_ozeti_kimlik` (security definer) yazar.
+-- KK4: kısa ömürlü günlük sayaç: bugün kim hangi paylaşımı kimlikle açtı. Yalnız aynı gün tekrar sayımı engeller;
+-- okuma kaydı değildir. Satır (paylaşım, kişi) başına bir tane; `paylasim_ozeti_kimlik` her yazışta bugünden eski bütün
+-- satırları siler, böylece tabloda yalnız bugünün satırları kalır. Gün UTC'dir (`current_date`, Supabase oturumu UTC).
+-- Paylaşım ya da kişi silinince satır da gider. İstemciye kapalı: yalnız `paylasim_ozeti_kimlik` (security definer) yazar.
 create table public.paylasim_acilisi (
   paylasim_id uuid not null references public.gezi_paylasim (id) on delete cascade,
   user_id uuid not null references auth.users (id) on delete cascade,
@@ -55,7 +57,8 @@ as $$
 $$;
 
 -- KK4: açılış `acilma_sayisi`'nı kişi başına günde en çok bir kez artırır (gün: `paylasim_ozeti`'ndeki `acilma_gunu` gibi
--- `current_date`). KK5: oluşturanı silinmiş (null) paylaşımda null döner; "kapalı" bilgisi de dönmez. Gerisi aynı.
+-- `current_date`; gün UTC'dir). Önce bugünden eski sayaç satırları (bütün tablo) silinir; kalan satır yalnız bugünün
+-- olabilir, satır yoksa açılış sayılır. KK5: oluşturanı silinmiş (null) paylaşımda null döner; "kapalı" bilgisi de dönmez. Gerisi aynı.
 create or replace function public.paylasim_ozeti_kimlik(p_id uuid) returns jsonb
 language plpgsql volatile security definer set search_path = ''
 as $$
@@ -77,8 +80,9 @@ begin
       select b.display_name from public.members a join public.members b on b.trip_id = a.trip_id
       where a.user_id = auth.uid() and b.user_id = g.olusturan order by b.joined_at desc limit 1)));
   end if;
-  insert into public.paylasim_acilisi as a (paylasim_id, user_id, gun) values (p_id, auth.uid(), current_date)
-    on conflict (paylasim_id, user_id) do update set gun = excluded.gun where a.gun < excluded.gun;
+  delete from public.paylasim_acilisi a where a.gun < current_date;
+  insert into public.paylasim_acilisi (paylasim_id, user_id, gun) values (p_id, auth.uid(), current_date)
+    on conflict (paylasim_id, user_id) do nothing;
   if found then
     update public.gezi_paylasim x set acilma_sayisi = x.acilma_sayisi + 1 where x.id = p_id;
   end if;
