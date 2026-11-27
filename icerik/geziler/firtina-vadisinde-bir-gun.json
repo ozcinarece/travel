@@ -1,0 +1,134 @@
+{
+  "surum": 1,
+  "sehir": {
+    "yeni": {
+      "ad": "Rize",
+      "slug": "rize",
+      "place_id": "ChIJN0Ky98N6ZkARVJv7mbgAWQE"
+    }
+  },
+  "takvim": {
+    "ilk_gun": "cumartesi"
+  },
+  "gezi": {
+    "slug": "firtina-vadisinde-bir-gun",
+    "baslik": "Fırtına Vadisi'nde bir gün",
+    "ozet": "Şenyuva Köprüsü ve Zil Kale, öğlen alabalık, akşamüstü Ayder",
+    "yazar_ad": "Tripmate ekibi",
+    "amaclar": [
+      "doga",
+      "yavas"
+    ],
+    "yazi_md": "Fırtına Deresi Kaçkar'ın sırtlarından inip Ardeşen'de denize dökülüyor ve yolun çoğu onun kıyısından gidiyor. Rize'den doğuya, sahil yolundan Ardeşen'e kadar yarım saat; oradan dere boyunca içeri dönünce bir saat içinde Çamlıhemşin'e varırsın. Gün iki vadiye ayrılıyor: sabah Fırtına'nın kendisi, Şenyuva ve Zil Kale; öğleden sonra kolu olan Hala Deresi boyunca Ayder. Rize'den sekiz buçukta çık.\n\n> Vadide hava sahildekinden serin ve sis öğleye kadar inip kalkar; yanına hırka al. Zil Kale yolu dar ve yer yer tek şerit, karşıdan gelen araçlara yol vermek için yavaş sür. Kışın zincirsiz yola çıkma.\n\n## 1. gün · Fırtına Vadisi ve Ayder\n\nÇamlıhemşin'in çarşısını geçince yol dereyle birlikte güneye kıvrılır. Birkaç kilometre sonra, Şenyuva köyünde, dere taş bir kemerin altından akar: [Şenyuva Köprüsü](mekan:ChIJLSXzvucVZkAR9FkxIbv_Rk8). Kitabesi 1946 selinde kaybolan köprünün 1696 ya da 1699'da yapıldığı biliniyor. Üstünden yürü, ama fotoğrafı dere kıyısından çek; köy halkı kemerin üstündeki kalabalıktan kaygılı.\n\nKöprüden sonra yol daralır ve vadi derinleşir. Yaklaşık yarım saat sonra, bir dönemeçte, sağdaki kaya sırtının üstünde [Zil Kale](mekan:ChIJizZrBAIXZkARP5yPXjObNzQ) belirir. Arabayı yol kenarına bırak, kısa ve dik patikadan çık. Kale üç kat halinde yükseliyor; en üstteki baş kuleden vadi iki yöne açılır. 14. ya da 15. yüzyıldan kaldığı düşünülüyor, kimin yaptırdığı kesin değil.\n\n::mekan[ChIJizZrBAIXZkARP5yPXjObNzQ]\n\nKaleden aynı yoldan Çamlıhemşin'e dön ve Ayder tabelasını izle. Yol bu kez Hala Deresi'nin vadisine girer. Ayder'e birkaç kilometre kala, dere kıyısındaki [Ayder Alabalık Çiftliği](mekan:ChIJH-80_fcXZkARuo_rM8pPFjI)'nde öğle yemeğine otur. Havuzlardan alınan alabalığı tavada iste, yanına mısır ekmeği ve muhlama söyle; muhlama sıcakken yenir, balıktan önce gelsin.\n\nYemekten sonra on dakikada Ayder'e çıkarsın. Arabayı köyün girişindeki otoparka bırak ve doğu ucundaki seyir noktasına yürü. Vadinin karşısında, yamaç boyunca basamak basamak dökülen [Gelintülü Şelalesi](mekan:ChIJ6zdeLHIYZkARaLJOmXIZ07I) görünür. Şelaleye yürüyerek gidilmez, buradan izlenir; adı uzaktan gelin duvağına benzemesinden geliyor.\n\nGünün kalanını [Ayder Yaylası](mekan:ChIJkz3I-A0YZkAR_t6nEjiL4dg)'na ayır. Deniz seviyesinden 1350 metre yüksekteki köyün içinden yukarı yürü: alt katı taş, üst katı ahşap eski yayla evleri, dik çatılar, arkada Kaçkar'ın sırtları. Son yıllardaki yenilemeyle vadideki kaçak yapılar kaldırıldı, köyün içi yayalara kaldı. Bir çay bahçesinde otur; dükkânlarda yöre balı ve tereyağı bulunur.\n\n::mekan[ChIJkz3I-A0YZkAR_t6nEjiL4dg]\n\nAyder'den Rize'ye dönüş bir buçuk saati biraz geçer; hava kararmadan yola çık. Vaktin ve gücün kalırsa ertesi gün Pokut ya da Huser yaylasına çıkmayı düşün: Ayder'den daha yukarıda, yolları toprak ve yazın açık."
+  },
+  "gunler": [
+    {
+      "baslik": "Fırtına Vadisi ve Ayder",
+      "duraklar": [
+        {
+          "place_id": "ChIJLSXzvucVZkAR9FkxIbv_Rk8",
+          "ad": "Şenyuva Köprüsü",
+          "sure_dk": 30,
+          "sure_gerekcesi": "varsayılan 45; tek kemer, kısa duruş",
+          "kapali_gunler": [],
+          "rehber": "senyuva-koprusu",
+          "amaclar": [
+            "kultur_tarih",
+            "doga"
+          ]
+        },
+        {
+          "place_id": "ChIJizZrBAIXZkARP5yPXjObNzQ",
+          "osm": "way/297314092",
+          "ad": "Zil Kale",
+          "sure_dk": 60,
+          "sure_gerekcesi": "varsayılan 45; patikayla çıkış ve kule",
+          "kapali_gunler": [],
+          "rehber": "zil-kale",
+          "amaclar": [
+            "kultur_tarih",
+            "doga"
+          ]
+        },
+        {
+          "place_id": "ChIJH-80_fcXZkARuo_rM8pPFjI",
+          "ad": "Ayder Alabalık Çiftliği",
+          "sure_dk": 60,
+          "sure_gerekcesi": "varsayılan 75; tek tabak alabalık ve muhlama",
+          "kapali_gunler": [],
+          "rehber": "ayder-alabalik-ciftligi",
+          "amaclar": [
+            "lezzet",
+            "cocuklu"
+          ]
+        },
+        {
+          "place_id": "ChIJ6zdeLHIYZkARaLJOmXIZ07I",
+          "ad": "Gelintülü Şelalesi",
+          "sure_dk": 30,
+          "sure_gerekcesi": "varsayılan 45; seyir noktasından izlenir",
+          "kapali_gunler": [],
+          "rehber": "gelintulu-selalesi",
+          "amaclar": [
+            "doga"
+          ]
+        },
+        {
+          "place_id": "ChIJkz3I-A0YZkAR_t6nEjiL4dg",
+          "ad": "Ayder Yaylası",
+          "sure_dk": 100,
+          "sure_gerekcesi": "varsayılan 60; köyün içinde yürüyüş ve çay molası",
+          "kapali_gunler": [],
+          "rehber": "ayder-yaylasi",
+          "amaclar": [
+            "doga",
+            "yavas"
+          ]
+        }
+      ]
+    }
+  ],
+  "notlar": {
+    "dogrulanacaklar": [
+      "[Plan · Sehir] · Rize şehri sehir.yeni ile açılıyor (#299, 19 Kasım Ece kararı: Karadeniz ve doğu grubu); place_id 'Rize' kimlik sorgusundan (tek sonuç) · BO'da şehir satırı ve kuru yukle",
+      "[Plan · tüm duraklar] · kapali_gunler [] yazıldı: köprü, kale, şelale ve yayla açık alan; alabalık tesisinin kapalı günü bilinmiyor · yerinde ya da tesis",
+      "[Plan · g1.d1, g1.d3, g1.d4, g1.d5] · OSM'siz, konum Google'dan 30 gün. Şenyuva Köprüsü ve Ayder Yaylası OSM aday listesinde yok (16 km, tourism/historic süzgeci). Alabalık tesisinin OSM noktası (node/3969385380, 'Alabalik Çiftligi') Google kaydından 3142 m uzak çıktı: aynı yol üstünde iki ayrı tesis olabilir, rehber yolun adını verdiği için ikisine de uyuyor; hangisinin durak olduğu yerinde bakılmalı. Gelintülü'nün OSM noktası (node/4868117722) 154 m uzak, sınırın 4 m dışında · OSM'de köprü way'i, place=village ve şelalenin konumu düzeltilebilir",
+      "[Yazı · Rehber Şenyuva] · 1696/1699 tarihi ve 1946 selinde kaybolan kitabe (en.wikipedia 'Fırtına River bridges'; Hürriyet Daily News); 'Cin Civa' adı (Wikipedia); 40 m boy ve kemer altına konan destek (Hürriyet Daily News, tarih okunamadı); 'yirmiden fazla köprü' (Wikipedia) · Rize Kültür Turizm",
+      "[Yazı · Rehber Zil Kale] · 14–15. yüzyıl, vadi tabanından ~100 m, üç bölüm (dış sur, orta avlu, iç kale ve baş kule), Çamlıhemşin'e ~12 km: KÜRE Ansiklopedisi (yapay zekâ destekli madde, resmî kaynakla teyit edilmeli); 'kimin yaptırdığı kesin değil' genel bilgi; taşların dereden toplandığı cümlesi yorum · ktb.gov.tr, rize.ktb.gov.tr",
+      "[Yazı · Rehber Zil Kale] · Şenyuva'dan Zil Kale'ye 'yaklaşık yarım saat' sürüş tahmini; yolun kışın buzlanması genel bilgi · Çamlıhemşin Belediyesi",
+      "[Yazı · Rehber Alabalık] · Tesisin menüsü (tava alabalık, mısır ekmeği, muhlama, kara lahana çorbası) doğrulanmadı; Fırtına havzasında alabalık (en.wikipedia 'Ayder'); muhlama ve kara lahana çorbası Rize yemekleri (KÜRE 'Ayder Yaylası'; Rize Tarım ve Orman İl Md. Kültür sayfası) · tesis",
+      "[Yazı · Rehber Gelintülü] · Yürüyerek gidilmediği, Ayder'in doğu ucundaki seyir noktasından izlendiği (Lonely Planet); 'yüz metreyi aşan' yükseklik (GoTürkiye 'Ayder Plateau 2-Day Route'); adın gelin duvağından geldiği (Turkey Travel Centre, GoTürkiye); kışın donduğu (Turkey Travel Centre); 2020'de yapımı süren cam seyir terası şu an var mı bilinmiyor, yazıya girmedi · Çamlıhemşin Belediyesi",
+      "[Yazı · Rehber Ayder] · 1350 m (en.wikipedia, ktb.gov.tr; KÜRE 1267 m diyor), Çamlıhemşin'e 17 km (Wikipedia; KTB 19 km), 1987 turizm merkezi (Wikipedia, KÜRE); yenileme projesi, kaçak yapı ve salıncakların kaldırılması, 1650 araçlık otopark (Türkiye Gazetesi, 29 Ekim 2024); 'köyün içi yayalara kaldı' ifadesi otopark haberinden çıkarım; Kavrun yaylası genel bilgi, Huser ve Avusor GoTürkiye · yerinde",
+      "[Yazı] · Ayder'in yeni kaplıca tesisi (Tenzile Erdoğan) 2025 sonunda açılacaktı (DHA, 28 Kasım 2025); açıldığı doğrulanamadı, durak ve yazıya girmedi · Çamlıhemşin Belediyesi. Açıksa günün son durağı olabilir (#376 grup durağı: kaplıca/hamam)",
+      "[Yazı] · Yolun Ayder kolundaki derenin adı 'Hala Deresi' (OSM'de yol üstündeki Ĥala Camii; harita) · OSM waterway",
+      "[Yazı] · Rize–Ardeşen yarım saat, Ardeşen–Çamlıhemşin bir saat içinde, Ayder–Rize bir buçuk saati biraz geçer: yol tahmini (Wikipedia: Ayder–Rize 88 km) · harita",
+      "[Yazı] · Alabalık tesisinin Ayder'e 'birkaç kilometre' ve 'on dakika' uzaklığı kuru yukle'nin mesafe tahmininden (kuş uçuşu ~3 km) · harita"
+    ],
+    "fotograf_onerileri": [
+      {
+        "ne": "Zil Kale, kaya sırtında kale ve vadi",
+        "altyazi": "Fırtına Vadisi'nin üstünde Zil Kale",
+        "arama": "commons:Category:Zilkale"
+      },
+      {
+        "ne": "Şenyuva Köprüsü'nün taş kemeri",
+        "altyazi": "Şenyuva'da Fırtına Deresi'nin üstündeki taş köprü",
+        "arama": "commons:Category:Fırtına River bridges"
+      },
+      {
+        "ne": "Ayder'in ahşap yayla evleri",
+        "altyazi": "Ayder Yaylası",
+        "arama": "commons:Category:Ayder"
+      }
+    ],
+    "varsayimlar": [
+      "Tek gün, arabayla; Rize'den sabah çıkış, akşam dönüş. 1. gün cumartesi",
+      "Rize 1/2 (#299 ikinci dalga, şehir başına 1 günlük + 2 günlük). 2/2 Rize merkezi (Ziraat Çay Bahçesi, Rize Kalesi) ve Pokut/Palovit yaylalarıyla 2 günlük; #376 akşam kuralı 2/2'de (Rize'de akşam yemeği ve çay bahçesi)",
+      "İl listesinin ilk 5'i (icerik/iller/rize.json): 1 Ayder, 3 Zil Kale bu gezide durak; 2 Fırtına Vadisi güzergâhın kendisi, yazıda baştan sona anılıyor (vadi bir doğal alan, durak noktası yok); 4 Palovit Şelalesi ve 5 Pokut Yaylası durak değil: Ayder'den toprak ve mevsimlik yollarla ayrı bir yarım gün, aynı güne sığmıyor, 2/2'ye kalıyor. Ayrıca 7 Şenyuva Köprüsü ve 21 Gelintülü durak",
+      "il listesindeki Zil Kale place_id'si (ChIJhRHLuN4QZkAR4EM5ordKnoM) tipsiz bir kayıt çıktı; gezide kimlik sorgusunun döndürdüğü ChIJizZrBAIXZkARP5yPXjObNzQ kullanıldı. rize.json'daki kimlik ayrı bir il PR'ında düzeltilmeli",
+      "Duraklar arası araçla (kuş uçuşu: Şenyuva–Zil Kale ~4,5 km, Zil Kale–alabalık ~10 km, yolla Çamlıhemşin üzerinden ~25 km; alabalık–Gelintülü ~3 km). Doğrulayıcı bu bacakları yürüme sayar (#311): 'yürüme 313 dk', 'öğlen yemek durağı yok' ve 'bitiş 19:23' uyarıları bundan; araçla öğle yemeği 12:30 civarı",
+      "Ayder'in yeni kaplıcası açıldığı doğrulanamadığı için durak değil",
+      "Google: kimlik 20 sorgu (0 $), puan 22, 2 kuru yükleme. OSM 1/5 (#299 KK2'nin %80'inin altında): vadide OSM kaydı seyrek; nedenler doğrulanacaklarda"
+    ]
+  }
+}
