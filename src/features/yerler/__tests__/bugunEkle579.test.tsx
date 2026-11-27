@@ -255,12 +255,12 @@ describe('#579 Yer ekle: gezi sırasında bugüne ekle', () => {
     fireEvent.press(hap.getByRole('button', { name: t('kesfet.gunDegistirEtiket') }));
     expect(await screen.findByText(t('mekan.gunSecBaslik'))).toBeTruthy();
     // Bugün (seçili gün) en üstte; dünkü gün "Geçti" en altta.
-    const gunSatirlari = screen.getAllByRole('button').filter((b) => / · Boş gün|, geçti$/.test(String(b.props.accessibilityLabel)));
-    expect(String(gunSatirlari[0].props.accessibilityLabel)).toMatch(/^Bugün · /);
+    const gunSatirlari = screen.getAllByRole('button').filter((b) => /, Boş gün|, geçti$/.test(String(b.props.accessibilityLabel)));
+    expect(String(gunSatirlari[0].props.accessibilityLabel)).toMatch(/^Bugün, /);
     expect(String(gunSatirlari[gunSatirlari.length - 1].props.accessibilityLabel)).toMatch(/, geçti$/);
     expect(gunSatirlari).toHaveLength(4);
     expect(screen.queryByText(t('listem.guneEkle.kalsin'))).toBeNull();
-    const gun4 = screen.getAllByRole('button').find((b) => /^\S+ \d+ · Boş gün · dönüş$/.test(String(b.props.accessibilityLabel)));
+    const gun4 = screen.getAllByRole('button').find((b) => /^\S+ \d+, Boş gün, dönüş$/.test(String(b.props.accessibilityLabel)));
     expect(gun4).toBeTruthy();
     fireEvent.press(gun4!);
     await waitFor(() => expect(within(screen.getByTestId('gun-hapi')).getByText(`4. gün · ${gunYonelmesi(4)} ekleniyor`)).toBeTruthy());

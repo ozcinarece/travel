@@ -31,6 +31,8 @@ describe('Plan gün v7p küçükleri 2 (#562)', () => {
 
   it('KK2: ekran okuyucu etiketlerinde " · " yok, ", " var; görünen alt satır değişmez', () => {
     expect(okunurAyrac('Müze · 1 sa · Pzt kapalı')).toBe('Müze, 1 sa, Pzt kapalı');
+    expect(okunurAyrac('Paral·lel')).toBe('Paral·lel');
+    expect(durakEtiketi({ saat: null, ad: 'Col·legi', alt: 'Müze · 1 sa', vurgulu: false })).toBe('Col·legi, Müze, 1 sa');
     const r = { saat: '10:42', ad: 'Pantheon', alt: 'Müze · 1 sa', vurgulu: false };
     expect(durakEtiketi(r)).toBe('10:42, Pantheon, Müze, 1 sa');
     expect(r.alt).toBe('Müze · 1 sa');

@@ -1519,5 +1519,6 @@ const s = StyleSheet.create({
   haritayaDonAlan: { height: HARITAYA_DON_ALAN, justifyContent: 'center' },
   haritayaDon: { height: 36, paddingHorizontal: 12, borderRadius: kose.alan, backgroundColor: renk.yuzey, justifyContent: 'center' },
   haritayaDonMetin: { fontFamily: yazi.ekstra, fontSize: 13, color: renk.ana },
-  kaydedildi: { fontFamily: yazi.ekstra, fontSize: 11, color: renk.basariMetin },
+  // #562 KK3: "Kaydedildi" hapın hemen altında, akışın dışında; 44 pt alan başlık satırını büyütüp zıplatmasın.
+  kaydedildi: { position: 'absolute', top: HARITAYA_DON_ALAN - 4, right: 0, fontFamily: yazi.ekstra, fontSize: 11, lineHeight: 13, color: renk.basariMetin },
 });
