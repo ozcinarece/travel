@@ -1,13 +1,13 @@
 import { Figtree_400Regular, Figtree_500Medium, Figtree_600SemiBold, Figtree_700Bold, Figtree_800ExtraBold, useFonts } from '@expo-google-fonts/figtree';
 import { QueryClient } from '@tanstack/react-query';
 import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
-import { Stack } from 'expo-router';
+import { Stack, type ErrorBoundaryProps } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
-import { HataSiniri } from '@/components/ui/HataSiniri';
+import { HataKarti, HataSiniri } from '@/components/ui/HataSiniri';
 import { Buton } from '@/components/ui/Buton';
 import { useProfil, useProfilHazirla } from '@/features/profil/sorgular';
 import { GunlukSinir } from '@/features/yerler/api';
@@ -18,6 +18,7 @@ import { baglantiyiIzle } from '@/lib/baglanti';
 import { hataRaporunuBaslat, hataRaporuyla } from '@/lib/hataRaporu';
 import { kaliciSecenekler, profilKilitli, saklananlariAyarla } from '@/lib/kaliciOnbellek';
 import { OturumSaglayici, useOturum } from '@/lib/oturum';
+import { webAcilisiKaldir } from '@/lib/webAcilis';
 
 hataRaporunuBaslat();
 SplashScreen.preventAutoHideAsync();
@@ -68,7 +69,9 @@ function Kok() {
   const profilBekleniyor = hesapli && (profil.isPending || (profilYok && !hazirla.isError));
   const yuklendi = (fontlar || !!fontHatasi) && hazir && (!profilBekleniyor || hataEkrani);
   useEffect(() => {
-    if (yuklendi) SplashScreen.hideAsync();
+    if (!yuklendi) return;
+    SplashScreen.hideAsync();
+    webAcilisiKaldir();
   }, [yuklendi]);
   if (!yuklendi) return null;
   if (hataEkrani) {
@@ -127,6 +130,15 @@ function KokLayout() {
 }
 
 export default hataRaporuyla(KokLayout);
+
+// #552: kök düzenin kendisi (sağlayıcılar, HataSiniri'nin dışı) çökerse Expo Router bunu gösterir. Web davet
+// katmanı (#549) kaldırılır; yoksa "Sayfayı kapatma" notu hata kartının üstünde sonsuza dek kalır.
+export function ErrorBoundary({ error, retry }: ErrorBoundaryProps) {
+  useEffect(() => {
+    webAcilisiKaldir();
+  }, []);
+  return <HataKarti hata={error} onYenidenDene={() => void retry()} />;
+}
 
 const k = StyleSheet.create({
   kok: { flex: 1 },

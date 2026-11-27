@@ -131,6 +131,8 @@ jobs:
           npx expo export --platform web --output-dir dist
           test -f dist/index.html
           test -f "dist/r/[token].html"
+          # #549: davet sayfaları JS gelmeden de açılış halini (kanvas 3e) gösterir; kopyalardan önce yazılır.
+          node scripts/web-davet-acilis.mjs dist
           # Dinamik rotalar: "[x]" sayfaları köşeli parantezsiz kopyalanır, Pages yeniden yazar (istemci rotayı adres çubuğundan çözer).
           node scripts/web-yonlendirmeler.js dist
           # Universal / App Link doğrulama dosyaları (varsa).

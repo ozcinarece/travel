@@ -189,6 +189,11 @@
     "anaSayfa": "Ana sayfaya git",
     "hata": "Katılım tamamlanamadı. Tekrar dene.",
     "webNot": "Uygulaman yoksa da sorun yok: burada katıl; sonra indirirsen aynı hesapla doğrudan seyahate düşersin.",
+    "webAcilis": {
+      "baslik": "Davetin açılıyor",
+      "metin": "Arkadaşının gezi planı birazdan burada.",
+      "uzun": "Biraz uzun sürüyor. Sayfayı kapatma, plan açılınca burada görünecek."
+    },
     "linkKopyalandi": "Link kopyalandı",
     "katildin": {
       "rozet": "Katıldın ✓",

@@ -7,9 +7,16 @@ export type Depolama = {
   removeItem(anahtar: string): void;
 };
 
+const bellekte = new WeakSet<Depolama>();
+
+/** Depo bellek içi mi (sayfa yenilenince ya da tam sayfa yönlendirmede silinir)? #552 */
+export function bellekMi(d: Depolama): boolean {
+  return bellekte.has(d);
+}
+
 export function bellekDepolama(): Depolama {
   const kayit = new Map<string, string>();
-  return {
+  const d: Depolama = {
     getItem: (a) => kayit.get(a) ?? null,
     setItem: (a, d) => {
       kayit.set(a, d);
@@ -18,6 +25,8 @@ export function bellekDepolama(): Depolama {
       kayit.delete(a);
     },
   };
+  bellekte.add(d);
+  return d;
 }
 
 /** Yazılabilir `localStorage` varsa onu, yoksa bellek içi depoyu döndürür. Hiçbir durumda hata fırlatmaz. */

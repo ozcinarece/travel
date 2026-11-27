@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Platform, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Svg, { Path } from 'react-native-svg';
 
@@ -11,12 +11,20 @@ import { baslikStili, haritaGolgesi, kose, renk, yazi } from '@/theme';
 
 type Saglayici = 'google' | 'apple';
 
+// #552: Google dönüşü (?code= / ?error=) bu ekranda açıldıysa oturum kurulamamıştır (kök düzen oturumu bekler; kurulsaydı
+// bu ekran açılmazdı). Sessizce boş giriş ekranı kalmasın, hata görünsün.
+function donusHatasi(): string | null {
+  if (Platform.OS !== 'web' || typeof window === 'undefined') return null;
+  const q = new URLSearchParams(window.location.search);
+  return q.has('code') || q.has('error') ? t('giris.hata') : null;
+}
+
 // PRD 0.1 Karşılama + hesap → #138 (kanvas 1 · Giriş): üstte Gece "harita" (süs yollar, kesik Mandalina rota, kare duraklar,
 // "Şu an seyahatte" önizleme kartı), altta beyaz sayfa: başlık, metin, Apple (Gece) / Google (çerçeveli). Profil adımı yok.
 export default function GirisEkrani() {
   const [appleVar, setAppleVar] = useState(false);
   const [mesgul, setMesgul] = useState<Saglayici | null>(null);
-  const [hata, setHata] = useState<string | null>(null);
+  const [hata, setHata] = useState<string | null>(donusHatasi);
 
   useEffect(() => {
     appleKullanilabilir().then(setAppleVar);

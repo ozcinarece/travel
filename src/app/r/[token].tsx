@@ -9,7 +9,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Avatar } from '@/components/ui/Avatar';
 import { Ikon } from '@/components/ui/Ikon';
 import { Buton } from '@/components/ui/Buton';
-import { appleIleGiris, appleKullanilabilir, googleIleGiris, iptalMi } from '@/features/auth/giris';
+import { DepolamaYok, appleIleGiris, appleKullanilabilir, googleIleGiris, iptalMi } from '@/features/auth/giris';
 import { davetAdimi, davetSeyahatAdi, yonelmeEki } from '@/features/davet/katilim';
 import { DAVET_KANALI, bekleyenDavetiSil, bekleyenDavetiYaz, useDavetKarsilandi, useDavetOzeti, useDavetleKatil } from '@/features/davet/sorgular';
 import { olayYaz } from '@/features/icerik/sorgular';
@@ -104,7 +104,8 @@ export default function DavetEkrani() {
     try {
       await giris();
     } catch (e) {
-      if (!iptalMi(e)) setHata(t('giris.hata'));
+      // #552: depolamasız tarayıcıda Google dönüşü kurulamaz; sonsuz döngü yerine davet hatası.
+      if (!iptalMi(e)) setHata(t(e instanceof DepolamaYok ? 'davet.hata' : 'giris.hata'));
     } finally {
       setMesgul(null);
     }

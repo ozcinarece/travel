@@ -1,7 +1,7 @@
 // #537: depolaması kapalı tarayıcıda (localStorage null ya da SecurityError) oturum deposu bellekte kalır, hata fırlatmaz.
 import { describe, expect, it } from '@jest/globals';
 
-import { webDepolama } from '../depolama';
+import { bellekMi, webDepolama } from '../depolama';
 
 function guvenlikHatasi(): never {
   const e = new Error('Access is denied for this document.');
@@ -47,5 +47,10 @@ describe('webDepolama (#537)', () => {
     } as unknown as Storage;
     expect(webDepolama({ localStorage: ls })).toBe(ls);
     expect(Object.keys(kayit)).toHaveLength(0);
+    expect(bellekMi(ls)).toBe(false);
+  });
+
+  it('bellek deposu bellekMi ile ayırt edilir (#552)', () => {
+    expect(bellekMi(webDepolama({ localStorage: null }))).toBe(true);
   });
 });

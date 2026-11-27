@@ -4,6 +4,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { t } from '@/i18n';
 import { hataBildir } from '@/lib/hataRaporu';
 import { hataOzeti, ilkBilesen, sonHatayiSakla, sonIzler } from '@/lib/izler';
+import { webAcilisiKaldir } from '@/lib/webAcilis';
 import { baslikStili, bosluk, renk, yazi } from '@/theme';
 
 type Props = { children: ReactNode };
@@ -21,6 +22,8 @@ export class HataSiniri extends Component<Props, Durum> {
   }
 
   componentDidCatch(hata: Error, bilgi: ErrorInfo) {
+    // #552: açılış kararından önce çökerse web davet katmanı (#549) kartın üstünde sonsuza dek kalmasın.
+    webAcilisiKaldir();
     const bilesen = ilkBilesen(bilgi.componentStack);
     this.setState({ bilesen });
     hataBildir(hata, `hata-siniri${bilesen ? `: ${bilesen}` : ''}`);
@@ -32,29 +35,34 @@ export class HataSiniri extends Component<Props, Durum> {
 
   render() {
     if (!this.state.hata) return this.props.children;
-    // #85: DSN yokken tek kanıt bu kart — hata mesajı + bileşen + son 5 iz (küçük gri yazı; ekran görüntüsüyle iletilir).
-    const izler = sonIzler(8);
-    return (
-      <View style={s.ekran}>
-        <View style={s.kart}>
-          <Text style={s.baslik}>{t('genel.hataBaslik')}</Text>
-          <Text style={s.metin}>{t('genel.hataMetin')}</Text>
-          <Text style={s.kod} selectable testID="hata-kodu">
-            {hataOzeti(this.state.hata)}
-            {this.state.bilesen ? ` · ${this.state.bilesen}` : ''}
-          </Text>
-          {izler.length > 0 ? (
-            <Text style={s.izler} selectable testID="hata-izler">
-              {izler.map((i) => `${new Date(i.zaman).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit', second: '2-digit' })} ${i.kategori}: ${i.mesaj}`).join('\n')}
-            </Text>
-          ) : null}
-          <Pressable accessibilityRole="button" onPress={this.yenidenDene} style={({ pressed }) => [s.dugme, pressed && { opacity: 0.85 }]}>
-            <Text style={s.dugmeMetin}>{t('genel.yenidenDene')}</Text>
-          </Pressable>
-        </View>
-      </View>
-    );
+    return <HataKarti hata={this.state.hata} bilesen={this.state.bilesen} onYenidenDene={this.yenidenDene} />;
   }
+}
+
+/** Hata kartı; kök hata sınırı ve kök düzenin `ErrorBoundary`'si (#552) ortak kullanır. */
+export function HataKarti({ hata, bilesen, onYenidenDene }: { hata: Error; bilesen?: string | null; onYenidenDene: () => void }) {
+  // #85: DSN yokken tek kanıt bu kart — hata mesajı + bileşen + son 5 iz (küçük gri yazı; ekran görüntüsüyle iletilir).
+  const izler = sonIzler(8);
+  return (
+    <View style={s.ekran}>
+      <View style={s.kart}>
+        <Text style={s.baslik}>{t('genel.hataBaslik')}</Text>
+        <Text style={s.metin}>{t('genel.hataMetin')}</Text>
+        <Text style={s.kod} selectable testID="hata-kodu">
+          {hataOzeti(hata)}
+          {bilesen ? ` · ${bilesen}` : ''}
+        </Text>
+        {izler.length > 0 ? (
+          <Text style={s.izler} selectable testID="hata-izler">
+            {izler.map((i) => `${new Date(i.zaman).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit', second: '2-digit' })} ${i.kategori}: ${i.mesaj}`).join('\n')}
+          </Text>
+        ) : null}
+        <Pressable accessibilityRole="button" onPress={onYenidenDene} style={({ pressed }) => [s.dugme, pressed && { opacity: 0.85 }]}>
+          <Text style={s.dugmeMetin}>{t('genel.yenidenDene')}</Text>
+        </Pressable>
+      </View>
+    </View>
+  );
 }
 
 const s = StyleSheet.create({
