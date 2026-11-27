@@ -1,10 +1,13 @@
 // #98 KK3 → #139 (kanvas 5): 2. adım "Ne zaman?" — tek ay kartı (önceki / sonraki ay), iki dokunuş = aralık (gidiş · dönüş
 // Gece kare, arası Buz şerit, bugün Mandalina çerçeve); altta Gece özet kartı "16 – 19 Ekim · Cuma – Pazartesi" + "4 gün · 3 gece".
+// #581 KK1: ilk dokunuştan sonra üstte "Dönüş günü?" ipucu (satır yeri hep ayrılı; takvim parmağın altında kaymaz).
+// #581 KK2: "Tarihim belli değil" seçilince özet kartının yerinde "Kaç gün? − N +" sayacı (#583 "Seyahatime al" sayacıyla
+// aynı dil); takvimde bir güne dokunmak tarihli seçime döner. #581 KK3: tarih kilidi kalktı.
 import { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { Ikon } from '@/components/ui/Ikon';
-import { gunFarki, tarihDokun, type Aralik } from '@/features/sihirbaz/sihirbaz';
+import { gunFarki, tarihDokun, TARIHSIZ_EN_AZ, TARIHSIZ_EN_COK, type Aralik } from '@/features/sihirbaz/sihirbaz';
 import { t } from '@/i18n';
 import { AYLAR, GUNLER, ayIzgarasi, ayKaydir, haftaGunu, parcala } from '@/lib/takvim';
 import { yerelTarih } from '@/lib/zaman';
@@ -22,7 +25,15 @@ function aralikBasligi(a: NonNullable<Aralik>): string {
   return `${g.gun} ${AYLAR[g.ay - 1]} – ${d.gun} ${AYLAR[d.ay - 1]}`;
 }
 
-export function AdimNeZaman({ aralik, onAralik, kilitli }: { aralik: Aralik; onAralik: (a: Aralik) => void; kilitli: boolean }) {
+type Props = {
+  aralik: Aralik;
+  onAralik: (a: Aralik) => void;
+  /** KK2: tarihsiz seçimde gün sayısı; null → tarihli seçim. */
+  tarihsizGun: number | null;
+  onTarihsizGun: (n: number) => void;
+};
+
+export function AdimNeZaman({ aralik, onAralik, tarihsizGun, onTarihsizGun }: Props) {
   const bugun = yerelTarih(new Date(), Intl.DateTimeFormat().resolvedOptions().timeZone);
   const ilk = parcala(aralik?.gidis ?? bugun);
   const [ay, setAy] = useState({ yil: ilk.yil, ay: ilk.ay });
@@ -33,7 +44,9 @@ export function AdimNeZaman({ aralik, onAralik, kilitli }: { aralik: Aralik; onA
   const hucreler = ayIzgarasi(ay.yil, ay.ay);
   return (
     <View style={s.kap}>
-      {kilitli ? <Text style={s.not}>{t('sihirbaz.nezaman.kilitli')}</Text> : null}
+      <Text style={s.ipucu} accessibilityLiveRegion="polite">
+        {aralik && !aralik.donus ? t('sihirbaz.nezaman.donusIpucu') : ''}
+      </Text>
       <View style={s.kart}>
         <View style={s.ayBasi}>
           <Pressable accessibilityRole="button" accessibilityLabel={t('sihirbaz.nezaman.oncekiAy')} onPress={() => setAy(ayKaydir(ay.yil, ay.ay, -1))} style={s.ok}>
@@ -68,8 +81,8 @@ export function AdimNeZaman({ aralik, onAralik, kilitli }: { aralik: Aralik; onA
                 key={gun}
                 accessibilityRole="button"
                 accessibilityLabel={gun}
-                accessibilityState={{ selected: sec, disabled: kilitli || gecmis }}
-                disabled={kilitli || gecmis}
+                accessibilityState={{ selected: sec, disabled: gecmis }}
+                disabled={gecmis}
                 onPress={() => onAralik(tarihDokun(aralik, gun))}
                 style={[s.hucre, bandi && s.band, basBand && s.bandBas, sonBand && s.bandSon]}>
                 <View style={[s.gunKutu, sec && s.gunSecili, gun === bugun && !sec && s.bugun]}>
@@ -80,7 +93,34 @@ export function AdimNeZaman({ aralik, onAralik, kilitli }: { aralik: Aralik; onA
           })}
         </View>
       </View>
-      {aralik && son ? (
+      {tarihsizGun !== null ? (
+        <View style={s.sayacKart}>
+          <Text style={s.sayacEtiket}>{t('sihirbaz.nezaman.kacGun')}</Text>
+          <View style={s.sayac}>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={t('sihirbaz.nezaman.gunAzalt')}
+              accessibilityState={{ disabled: tarihsizGun <= TARIHSIZ_EN_AZ }}
+              disabled={tarihsizGun <= TARIHSIZ_EN_AZ}
+              onPress={() => onTarihsizGun(tarihsizGun - 1)}
+              style={[s.sayacDugme, tarihsizGun <= TARIHSIZ_EN_AZ && s.sayacPasif]}
+              hitSlop={8}>
+              <Text style={s.sayacIsaret}>−</Text>
+            </Pressable>
+            <Text style={s.sayacDeger}>{t('sihirbaz.nezaman.gunSayisi', { n: tarihsizGun })}</Text>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={t('sihirbaz.nezaman.gunArttir')}
+              accessibilityState={{ disabled: tarihsizGun >= TARIHSIZ_EN_COK }}
+              disabled={tarihsizGun >= TARIHSIZ_EN_COK}
+              onPress={() => onTarihsizGun(tarihsizGun + 1)}
+              style={[s.sayacDugme, tarihsizGun >= TARIHSIZ_EN_COK && s.sayacPasif]}
+              hitSlop={8}>
+              <Text style={s.sayacIsaret}>+</Text>
+            </Pressable>
+          </View>
+        </View>
+      ) : aralik && son ? (
         <View style={s.ozet}>
           <View style={{ flex: 1, gap: 2 }}>
             <Text style={s.ozetBaslik}>{aralikBasligi(aralik)}</Text>
@@ -100,6 +140,8 @@ export function AdimNeZaman({ aralik, onAralik, kilitli }: { aralik: Aralik; onA
 const s = StyleSheet.create({
   kap: { gap: 16 },
   not: { fontFamily: yazi.normal, fontSize: 13, color: renk.ikincil },
+  // KK1: yeri hep ayrılı (boşken de); ipucu çıkınca takvim kaymaz.
+  ipucu: { fontFamily: yazi.kalin, fontSize: 15, lineHeight: 20, minHeight: 20, color: renk.ana, marginBottom: -8 },
   kart: { borderWidth: 1, borderColor: renk.ayrac, borderRadius: kose.kart, paddingTop: 14, paddingHorizontal: 12, paddingBottom: 10, gap: 8 },
   ayBasi: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 4 },
   ok: { width: 40, height: 40, borderRadius: kose.alan, backgroundColor: renk.yuzey, alignItems: 'center', justifyContent: 'center' },
@@ -122,4 +164,12 @@ const s = StyleSheet.create({
   ozetAlt: { fontFamily: yazi.yari, fontSize: 14, color: renk.anaAcik },
   rozet: { height: 30, paddingHorizontal: 10, borderRadius: kose.rozet, backgroundColor: renk.vurgu, justifyContent: 'center' },
   rozetMetin: { fontFamily: yazi.ekstra, fontSize: 13, color: renk.metin },
+  // KK2: #583 "Seyahatime al" gün sayacıyla aynı ölçüler.
+  sayacKart: { paddingVertical: 10, paddingHorizontal: 16, borderRadius: 18, backgroundColor: renk.yuzey, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12 },
+  sayacEtiket: { ...baslikStili(17), color: renk.metin },
+  sayac: { flexDirection: 'row', alignItems: 'center', gap: 4, padding: 3, borderRadius: 12, backgroundColor: renk.zemin },
+  sayacDugme: { width: 30, height: 30, borderRadius: 9, backgroundColor: renk.yuzey, alignItems: 'center', justifyContent: 'center' },
+  sayacPasif: { opacity: 0.4 },
+  sayacIsaret: { fontFamily: yazi.ekstra, fontSize: 18, color: renk.ana, lineHeight: 22 },
+  sayacDeger: { minWidth: 56, textAlign: 'center', fontFamily: yazi.ekstra, fontSize: 15, color: renk.metin },
 });

@@ -27,6 +27,15 @@ export function seyahatAdi(s: { name?: string | null; city_label: string }): str
   return s.name?.trim() || s.city_label;
 }
 
+/** #581 KK2: "Kaç gün?" sayacı. Varsayılan 2; üst sınır veritabanının sınırı (seyahat_tarihlerini_degistir: en çok 60 gün). */
+export const TARIHSIZ_VARSAYILAN = 2;
+export const TARIHSIZ_EN_AZ = 1;
+export const TARIHSIZ_EN_COK = 60;
+
+export function gunSayisiSinirla(n: number): number {
+  return Math.min(TARIHSIZ_EN_COK, Math.max(TARIHSIZ_EN_AZ, Math.round(n)));
+}
+
 /** KK3: takvimde iki dokunuş = aralık (ilk gidiş, ikinci dönüş; dönüş gidişten önceyse gidiş yeniden başlar; aynı güne iki kez = tek gün). */
 export type Aralik = { gidis: Tarih; donus: Tarih | null } | null;
 export function tarihDokun(aralik: Aralik, gun: Tarih): Aralik {
