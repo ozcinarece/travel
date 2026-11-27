@@ -1101,7 +1101,9 @@
     "siradakiRozet": "SIRADAKİ",
     "bosGun": "Boş gün",
     "bosGunBaslik": "{gun} henüz boş",
-    "bosGunMetin": "Listenden ya da yakındaki yerlerden seç; saatler kendiliğinden dizilir."
+    "bosGunMetin": "Listenden ya da yakındaki yerlerden seç; saatler kendiliğinden dizilir.",
+    "kapaliGun": "{gun} kapalı",
+    "baskaGuneTasi": "Başka güne taşı"
   },
   "listem": {
     "baslik": "Listem",

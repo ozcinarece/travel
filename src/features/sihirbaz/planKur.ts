@@ -2,16 +2,22 @@
 // Gün kapasitesi ≈ 10:00–19:00 (ziyaret + yol). Bölge sığmazsa kalanı ertesi güne geçer; hiçbir güne sığmayan "Listede,
 // güne atanmamış" kalır. Gün içi sıra otelden / ilk duraktan en yakın komşu. Yalnız kuş uçuşu tahmini (ek Google isteği yok).
 // Saf: ekrandan bağımsız, testli. #141 "Günlere dağıt" aynı fonksiyonu atanmamış mekanlarla çağırır (`mevcut` dolu günler).
+// #582: dağıtım sırası önce oy, sonra il listesi sırası, sonra yakınlık; açılış saatine göre kapalı günler atlanır. Oy, sıra ve
+// saatleri çağıran verir (planUygula); verilmezse eski davranış.
 import { mesafeM } from '@/components/harita/geo';
 import type { Konum } from '@/components/harita/tipler';
 import { konumu, konumVar } from '@/lib/konum';
 import { kestirimTaksiSn, kestirimYuruyusSn, TAKSI_ESIGI_SN } from '@/schedule/tempo';
 
-/** #318: `lat`/`lng` null = Google koordinatı boşalmış mekan; yol hesabına girmez, sıranın sonuna eklenir. */
-export type PlanMekani = { id: string; lat: number | null; lng: number | null; dakika: number; ad?: string };
+/**
+ * #318: `lat`/`lng` null = Google koordinatı boşalmış mekan; yol hesabına girmez, sıranın sonuna eklenir.
+ * #582 KK1: `oy` grubun "ben de isterim" oy sayısı, `ilSira` il listesindeki sırası (1 = en önemli). KK2: `kapaliGunler`
+ * açılış saatine göre kapalı olduğu Google hafta günleri (0 = Pazar); verilmezse (saat yok) kural uygulanmaz.
+ */
+export type PlanMekani = { id: string; lat: number | null; lng: number | null; dakika: number; ad?: string; oy?: number; ilSira?: number | null; kapaliGunler?: number[] };
 export type KonumluMekan = PlanMekani & Konum;
-/** #200: `kapasiteDk` verilirse o günün penceresi (başlangıç–bitiş); yoksa ortak kapasite. */
-export type PlanGunu = { id: string; index: number; kapasiteDk?: number };
+/** #200: `kapasiteDk` verilirse o günün penceresi (başlangıç–bitiş); yoksa ortak kapasite. #582: `haftaGunu` Google hafta günü (0 = Pazar); tarihsiz günde yok. */
+export type PlanGunu = { id: string; index: number; kapasiteDk?: number; haftaGunu?: number | null };
 
 /** 10:00–19:00. */
 export const GUN_KAPASITESI_DK = 9 * 60;
@@ -177,6 +183,24 @@ export function gunEki(sayi: number): string {
   return `${metin}${BIRLER[son]}`;
 }
 
+/** #582 KK2: mekan o gün kapalı mı (saat ya da tarih yoksa hayır). */
+export function gundeKapali(m: Pick<PlanMekani, 'kapaliGunler'>, gun: Pick<PlanGunu, 'haftaGunu'>): boolean {
+  return gun.haftaGunu != null && !!m.kapaliGunler?.includes(gun.haftaGunu);
+}
+
+/**
+ * #582 KK1: dağıtım sırası — önce oy (çok → az), sonra il listesi sırası (listede olmayan sonda), eşitlikte gezme sırası
+ * (yakınlık). Oy da il sırası da yoksa sıra değişmez (eski davranış).
+ */
+export function oncelikSirasi(sira: PlanMekani[]): { sira: PlanMekani[]; degisti: boolean } {
+  const etkin = sira.some((m) => (m.oy ?? 0) > 0 || m.ilSira != null);
+  if (!etkin) return { sira, degisti: false };
+  const yer = new Map(sira.map((m, i) => [m.id, i]));
+  const il = (m: PlanMekani) => m.ilSira ?? Infinity;
+  const yeni = [...sira].sort((a, b) => (b.oy ?? 0) - (a.oy ?? 0) || il(a) - il(b) || yer.get(a.id)! - yer.get(b.id)!);
+  return { sira: yeni, degisti: yeni.some((m, i) => m !== sira[i]) };
+}
+
 /**
  * KK5: dağıtım. `mevcut`: günlerde zaten olan duraklar (sırasıyla; kapasiteyi doldurur, yeni mekanlar arkalarına eklenir).
  * `baslangic`: günün başladığı otel (yoksa ilk duraktan başlar, ilk bacak yok).
@@ -200,13 +224,22 @@ export function planKur(
     });
     return { dk, son: sonKonum(liste, bas) };
   });
-  const { sira, bolgeSayisi } = gezmeSirasi(mekanlar, bas);
+  const gezme = gezmeSirasi(mekanlar, bas);
+  const { bolgeSayisi } = gezme;
+  const { sira, degisti } = oncelikSirasi(gezme.sira);
   const atanmamis: PlanMekani[] = [];
+  const gunBasi = dolu.map((d) => d.son);
   let g = 0;
   for (const m of sira) {
     let yerlesti = false;
     // İmleç yalnız mekan yerleşince ilerler: sığmayan mekan (boş güne bile) önceki günün kalan kapasitesini boşa harcatmaz.
+    // #582 KK2: kapalı olduğu gün atlanır ama imleci ilerletmez (o gün başka mekanlara açık kalır).
+    let ilkKapali = -1;
     for (let k = g; k < sonuc.length; k++) {
+      if (gundeKapali(m, sirali[k])) {
+        if (ilkKapali < 0) ilkKapali = k;
+        continue;
+      }
       const onceki = dolu[k].son;
       const bacak = onceki ? bacakVarsa(onceki, m) : { dk: 0, araba: false };
       if (dolu[k].dk + bacak.dk + m.dakika <= (sirali[k].kapasiteDk ?? kapasite)) {
@@ -217,7 +250,7 @@ export function planKur(
         s.yolDk += bacak.dk;
         if (bacak.araba) s.arabaBacagi += 1;
         yerlesti = true;
-        g = k;
+        g = ilkKapali >= 0 ? ilkKapali : k;
         break;
       }
       // Boş güne bile sığmıyorsa bu mekan hiçbir güne sığmaz → atanmamış.
@@ -225,7 +258,35 @@ export function planKur(
     }
     if (!yerlesti) atanmamis.push(m);
   }
+  // #582 KK1: öncelik sırası yakınlığı bozduysa gün içi sıra yeniden en yakın komşu (günün son noktasından); kapasiteyi
+  // aşarsa öncelik sırası kalır.
+  if (degisti) sonuc.forEach((s, k) => gunIciYakinlik(s, gunBasi[k], sirali[k].kapasiteDk ?? kapasite, dolu[k].dk));
   return { gunler: sonuc, atanmamis, bolgeSayisi };
+}
+
+/** Yeni mekanları en yakın komşu sırasına dizer; yol yeniden hesaplanır. Toplam `kapasite`yi aşarsa dokunulmaz. */
+function gunIciYakinlik(s: PlanGunSonucu, bas: Konum | null, kapasite: number, doluDk: number) {
+  if (s.mekanlar.length < 2) return;
+  const konumlu = s.mekanlar.filter((m): m is KonumluMekan => konumVar(m));
+  const yeni = [...enYakinKomsu(konumlu, bas), ...s.mekanlar.filter((m) => !konumVar(m))];
+  const yol = (liste: PlanMekani[]) => {
+    let dk = 0;
+    let araba = 0;
+    let onceki: Konum | null = bas;
+    for (const m of liste) {
+      const b = onceki ? bacakVarsa(onceki, m) : { dk: 0, araba: false };
+      dk += b.dk;
+      if (b.araba) araba += 1;
+      onceki = konumu(m) ?? onceki;
+    }
+    return { dk, araba };
+  };
+  const eski = yol(s.mekanlar);
+  const y = yol(yeni);
+  if (doluDk - eski.dk + y.dk > kapasite) return;
+  s.mekanlar = yeni;
+  s.yolDk = y.dk;
+  s.arabaBacagi = y.araba;
 }
 
 /** stops.minutes 15–480 (DB kısıtı); #140: 15'in katına yuvarlanmaz, tam dakika. */

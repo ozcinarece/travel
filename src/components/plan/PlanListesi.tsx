@@ -34,6 +34,8 @@ export type PlanSatirGorunumu = {
   buradasin: boolean;
   gecildi: boolean;
   atlandi: boolean;
+  /** #582 KK3: açılış saatine göre o gün kapalı — "Pzt kapalı"; değilse (ya da saat bilinmiyorsa) null. */
+  kapali?: string | null;
 };
 
 type Props = {
@@ -55,6 +57,8 @@ type Props = {
   satirlar: PlanSatirGorunumu[];
   onDurak: (mekanId: string) => void;
   onDurakUzunBas: (mekanId: string) => void;
+  /** #582 KK3: kapalı gün uyarısındaki "Başka güne taşı" (durak kimliği). */
+  onBaskaGuneTasi?: (durakId: string) => void;
   /** KK7: "+ Bu güne yer ekle" (Yer ekle o gün seçili açılır). */
   onEkle: (() => void) | null;
   /** #532 KK3: "Akşam için yakında" — en çok 2 yer, + o günün sonuna ekler. */
@@ -213,6 +217,24 @@ export function PlanListesi(p: Props) {
                       {r.alt}
                     </Text>
                   ) : null}
+                  {/* #582 KK3: kapalı gün uyarısı alt satır dilinde (13 px, #C25200); yanında tek dokunuşla "Başka güne taşı". */}
+                  {r.kapali ? (
+                    <View style={s.kapaliSatir}>
+                      <Text style={s.kapali} numberOfLines={1}>
+                        {r.kapali}
+                      </Text>
+                      {p.onBaskaGuneTasi ? (
+                        <>
+                          <Text style={s.kapali}> · </Text>
+                          <Pressable accessibilityRole="button" accessibilityLabel={`${r.kapali}, ${t('plan.baskaGuneTasi')}`} hitSlop={{ top: 12, bottom: 12, left: 6, right: 12 }} onPress={() => p.onBaskaGuneTasi?.(r.id)}>
+                            <Text style={[s.kapali, s.tasi]} numberOfLines={1}>
+                              {t('plan.baskaGuneTasi')}
+                            </Text>
+                          </Pressable>
+                        </>
+                      ) : null}
+                    </View>
+                  ) : null}
                 </View>
                 {r.atlandi ? (
                   <View style={s.hap}>
@@ -261,9 +283,9 @@ export const SEKME_YUKSEKLIK = 44;
 
 /** #553 KK2: ekran okuyucu etiketi — saat, ad, alt satır; vurgulu durakta "şu an buradasın" ya da "sıradaki durak";
  * #554 KK2: atlananda "Atlandı" hapı da okunur (alt satırdaki "· atlandı" kalktı). */
-export function durakEtiketi(r: { saat: string | null; ad: string; alt: string | null; vurgulu: boolean; buradasin?: boolean; atlandi?: boolean }): string {
+export function durakEtiketi(r: { saat: string | null; ad: string; alt: string | null; vurgulu: boolean; buradasin?: boolean; atlandi?: boolean; kapali?: string | null }): string {
   const durum = r.vurgulu ? t(r.buradasin ? 'plan.buradasinDurak' : 'plan.siradakiDurak') : r.atlandi ? t('plan.atlandi') : null;
-  return [r.saat, r.ad, r.alt, durum].filter(Boolean).join(', ');
+  return [r.saat, r.ad, r.alt, r.kapali, durum].filter(Boolean).join(', ');
 }
 
 /**
@@ -327,6 +349,9 @@ const s = StyleSheet.create({
   bosDugmeMetin: { fontFamily: yazi.kalin, fontSize: 16, color: renk.metin },
   ad: { fontFamily: yazi.kalin, fontSize: 16, color: renk.metin },
   alt: { fontFamily: yazi.normal, fontSize: 13, color: anaV5.ikincil },
+  kapaliSatir: { flexDirection: 'row', alignItems: 'center' },
+  kapali: { fontFamily: yazi.normal, fontSize: 13, color: anaV5.adim },
+  tasi: { fontFamily: yazi.kalin },
   bacak: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   kesikSutun: { width: 28, height: 22, alignItems: 'center', gap: 3 },
   kesik: { width: 2, height: 3, backgroundColor: anaV5.cizgi },
