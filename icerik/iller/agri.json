@@ -1,0 +1,319 @@
+{
+  "il": "Ağrı",
+  "slug": "agri",
+  "guncelleme": "2026-11-27",
+  "oneriler": [
+    {
+      "sira": 1,
+      "ad": "İshak Paşa Sarayı",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Doğubayazıt",
+      "merkeze_km": 102,
+      "neden": "1685'te başlayıp 1784'te biten saray; cami, harem ve medrese aynı avluların çevresinde",
+      "osm": "relation/1382693",
+      "place_id": "ChIJayEHJZO5FEARoeocQbMhgdc"
+    },
+    {
+      "sira": 2,
+      "ad": "Ağrı Dağı",
+      "kategori": "aktivite",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Doğubayazıt",
+      "merkeze_km": 110,
+      "neden": "5.137 m'lik doruğa Eli köyünden üç günde çıkılır; yalnız izin ve rehberle, yaz aylarında"
+    },
+    {
+      "sira": 3,
+      "ad": "Nuh'un Gemisi İzi (Durupınar)",
+      "kategori": "doga",
+      "amaclar": [
+        "kultur_tarih",
+        "doga"
+      ],
+      "ilce": "Doğubayazıt",
+      "merkeze_km": 120,
+      "neden": "Telçeker ile Üzengili arasında gemi biçimli toprak sırt; 1959'da uçaktan fark edildi",
+      "osm": "way/144047151",
+      "place_id": "ChIJa6zLbfK9FEAR86N3rF_gKDc"
+    },
+    {
+      "sira": 4,
+      "ad": "Ahmed-i Hani Türbesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Doğubayazıt",
+      "merkeze_km": 101,
+      "neden": "Mem û Zin şairinin 1707'den beri yattığı tepe; saraya yaklaşık 500 m yürüme mesafesinde",
+      "osm": "way/361317175",
+      "place_id": "ChIJP8nSe5S5FEARVIqW4kwlVfc"
+    },
+    {
+      "sira": 5,
+      "ad": "Doğubayazıt Kalesi (Urartu Kalesi)",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "doga"
+      ],
+      "ilce": "Doğubayazıt",
+      "merkeze_km": 102,
+      "neden": "Sarayın arkasındaki sarp kayalıkta Urartu kaya mezarı; surlar 18. yüzyılda onarılmış",
+      "osm": "node/1502162942",
+      "place_id": "ChIJd8lgUJO5FEARyXpenbqy8Jk"
+    },
+    {
+      "sira": 6,
+      "ad": "Eski Bayezid Camii",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Doğubayazıt",
+      "merkeze_km": 102,
+      "neden": "İç kalenin altında tek kubbeli cami; kitabesi 1687'yi verir, halk Selim Camii der",
+      "osm": "way/304043708",
+      "place_id": "ChIJSU_VoJS5FEARMzEIq0pLzF4"
+    },
+    {
+      "sira": 7,
+      "ad": "Balık Gölü",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Taşlıçay",
+      "merkeze_km": 75,
+      "neden": "2.241 m'de adalı göl; kışın donar, buz üstünde paten ve buz balıkçılığı yapılır",
+      "place_id": "ChIJVaenkDRqa0ARZer8OWDlcrQ"
+    },
+    {
+      "sira": 8,
+      "ad": "Diyadin (Murat) Kanyonu",
+      "kategori": "doga",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Diyadin",
+      "merkeze_km": 55,
+      "neden": "Murat Nehri'nin oyduğu 30 km'lik kanyon; 2021'de doğal sit, kışın kayalardan buz sarkar"
+    },
+    {
+      "sira": 9,
+      "ad": "Diyadin Kaplıcaları",
+      "kategori": "aktivite",
+      "amaclar": [
+        "yavas",
+        "doga"
+      ],
+      "ilce": "Diyadin",
+      "merkeze_km": 65,
+      "neden": "70°C'yi aşan sıcak sular; Yılanlı ve Köprü kaynaklarında havuz ve konaklama var",
+      "place_id": "ChIJ1UJlAGNVa0AR0l1BIiwhP9c"
+    },
+    {
+      "sira": 10,
+      "ad": "Ergül's Mutfağı",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Doğubayazıt",
+      "merkeze_km": 95,
+      "neden": "Ergül Sümeli'nin yöre mutfağı; taşta dövülen abdigör köftesi burada sipariş edilir",
+      "place_id": "ChIJH4r3Qzy3FEARA6AYcf0WgbQ"
+    },
+    {
+      "sira": 11,
+      "ad": "Meteor Çukuru",
+      "kategori": "doga",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Doğubayazıt",
+      "merkeze_km": 128,
+      "neden": "Gürbulak kapısı yakınında 35 m çaplı, 60 m derin çukur; bazı jeologlara göre obruk",
+      "place_id": "ChIJR8cZUgC3FEARv6LU5_CtZjA"
+    },
+    {
+      "sira": 12,
+      "ad": "Meya Antik Kenti (Meya Mağaraları)",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "doga"
+      ],
+      "ilce": "Diyadin",
+      "merkeze_km": 70,
+      "neden": "Günbuldu köyünde volkanik kayaya oyulmuş odalar, kaya mezarları ve haç işaretli taşlar",
+      "place_id": "ChIJe_PgqgqrbEARCd2wGzBGraQ"
+    },
+    {
+      "sira": 13,
+      "ad": "Ahmed-i Hani Kent Müzesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Doğubayazıt",
+      "merkeze_km": 95,
+      "neden": "2017'de açıldı; on kubbeli medresede Hani'nin hayatı, kerpiç evde eski Bayezid yaşamı"
+    },
+    {
+      "sira": 14,
+      "ad": "Kudret Köprüsü",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Diyadin",
+      "merkeze_km": 62,
+      "neden": "Murat Nehri'nin üstünde 30 m yükseklikte doğal taş kemer; Evliya Çelebi de anlatır",
+      "place_id": "ChIJ36Fm20xUa0AR6QfrE3gp15M"
+    },
+    {
+      "sira": 15,
+      "ad": "Tendürek Lav Akıntıları",
+      "kategori": "doga",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Doğubayazıt",
+      "merkeze_km": 115,
+      "neden": "Sönmüş Tendürek yanardağının kara lav alanı; Doğubayazıt–Çaldıran yolu boyunca uzanır",
+      "place_id": "ChIJT8BN1aZYE0ARtfRLM0lT26k"
+    },
+    {
+      "sira": 16,
+      "ad": "Küçük Ağrı Dağı",
+      "kategori": "aktivite",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Doğubayazıt",
+      "merkeze_km": 125,
+      "neden": "3.896 m'lik sivri volkan; Güngören Yaylası'ndan 18 km'lik zor rotayla izinle çıkılır",
+      "place_id": "ChIJt4FNQP_aFEARotrAuuVTmkw"
+    },
+    {
+      "sira": 17,
+      "ad": "Hamur Kümbeti",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Hamur",
+      "merkeze_km": 30,
+      "neden": "1812–13'te bir paşa ailesi için yapılan bazalt bantlı kümbet; onarılıp 2025'te açıldı",
+      "place_id": "ChIJ0ScMbiiQbEARL15dy6apa00"
+    },
+    {
+      "sira": 18,
+      "ad": "Sultan Sofrası",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "Coğrafi işaretli Ağrı yaprak dönerini yemek için kentte önerilen adreslerden",
+      "place_id": "ChIJ8SyAftmDbEARqjCX6bBglEk"
+    },
+    {
+      "sira": 19,
+      "ad": "Toprakkale Camii",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Eleşkirt",
+      "merkeze_km": 35,
+      "neden": "Urartu höyüğünün eteğinde 1688 tarihli tek kubbeli köy camii; kitabesi dört satır",
+      "place_id": "ChIJTyDhSgB5bEARa3h6HG7YJ2k"
+    },
+    {
+      "sira": 20,
+      "ad": "Aznavur (Anzavur) Kalesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Patnos",
+      "merkeze_km": 78,
+      "neden": "Patnos'un kuzeyindeki tepede Urartu kalesi; kazıda doruğunda Haldi tapınağı bulundu"
+    },
+    {
+      "sira": 21,
+      "ad": "Günbuldu (Meya) Şelalesi",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Diyadin",
+      "merkeze_km": 70,
+      "neden": "Murat'ın kolunda; kışın donar, ilkbahar ve yazda piknik ve balık tutmak için gelinir",
+      "place_id": "ChIJD1VVldurbEARoXBDUc6H7AU"
+    },
+    {
+      "sira": 22,
+      "ad": "Küpkıran Kayak Merkezi",
+      "kategori": "aktivite",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 3,
+      "neden": "Kente 2 km; başlangıç pisti, kızak alanı ve bungalovlar var, kar az olursa sezon kayar",
+      "place_id": "ChIJlU6zypODbEARysEW_vS5B7k"
+    },
+    {
+      "sira": 23,
+      "ad": "Köse Dağı",
+      "kategori": "aktivite",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Eleşkirt",
+      "merkeze_km": 60,
+      "neden": "3.433 m; Gözaydın köyünden Zozan Yaylası üzerinden 14 km'lik tırmanış rotası"
+    },
+    {
+      "sira": 24,
+      "ad": "Şoşik Kalesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "doga"
+      ],
+      "ilce": "Hamur",
+      "merkeze_km": 22,
+      "neden": "Karlıca köyü yakınında uçurum üstünde; Evliya Çelebi Akkoyunlu yapısı olarak anar",
+      "place_id": "ChIJdX9UC-mPbEARY73aLd8MaCU"
+    },
+    {
+      "sira": 25,
+      "ad": "Toklucak Kalesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Diyadin",
+      "merkeze_km": 75,
+      "neden": "Doğal kayaya oyulmuş yeraltı kalesi; 13 basamak ve üç kapıdan geçilerek girilir",
+      "place_id": "ChIJl0gDX6ypbEAR6vBbrxG1G7E"
+    }
+  ]
+}
