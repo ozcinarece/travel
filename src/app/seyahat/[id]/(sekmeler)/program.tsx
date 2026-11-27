@@ -35,6 +35,7 @@ import { olayYaz, sehirEslestir, useSehirler, useSehirYerleri } from '@/features
 import { useKonum, yakinDurakId } from '@/features/konum/useKonum';
 import { useMekanGuncelle, useMekanlar, useMekanSil, useUyeler } from '@/features/mekanlar/sorgular';
 import { aksamBoslugu, kmMetni, planSatirlari, REHBER_YAKIN_M, YEMEK_RENGI } from '@/features/plan/planListesi';
+import { useModalKapaninca } from '@/features/plan/modalKapaninca';
 import { useGuneEkle } from '@/features/gezi/bugunEkle';
 import { eklenenleriSabitle, yakindaAdaylari, type YakinAday } from '@/features/gezi/yakinda';
 import { ilSlugu, kategoriAdi, useIlYerleri } from '@/features/icerik/ilOnerileri';
@@ -536,17 +537,13 @@ function ProgramSekmesi({
     if (tekGun) return;
     setSilinecekGun(g);
   };
-  // #570 KK8: iOS'ta kapanmakta olan ⋯ Modal'ının üstüne ikinci Modal açılmayabilir; onay, ilk Modal'ın `onDismiss`'inde açılır.
-  const bekleyenSilGun = useRef<Gun | null>(null);
+  // #570 KK8: iOS'ta kapanmakta olan ⋯ Modal'ının üstüne ikinci Modal açılmayabilir; onay, ilk Modal'ın `onDismiss`'inde
+  // açılır. `onDismiss` 500 ms içinde gelmezse yedek zamanlayıcı açar (tek bayrak, ikisi birden açmaz).
+  const silOnayi = useModalKapaninca(setSilinecekGun);
   const menudenGunuSil = (g: Gun) => {
     if (tekGun) return;
-    if (Platform.OS === 'ios') bekleyenSilGun.current = g;
+    if (Platform.OS === 'ios') silOnayi.iste(g);
     else setSilinecekGun(g);
-  };
-  const listeMenusuKapandi = () => {
-    const g = bekleyenSilGun.current;
-    bekleyenSilGun.current = null;
-    if (g) setSilinecekGun(g);
   };
   const gunuSilOnayla = (g: Gun) => {
     setSilinecekGun(null);
@@ -1336,12 +1333,12 @@ function ProgramSekmesi({
                 { etiket: t('program.liste.baslangic'), onPress: () => setBaslangicMenu(true) },
                 { etiket: t('gunOteli.menu'), onPress: otelAc },
                 // #554 KK4: en altta çizgiyle ayrık, kırmızı "Günü sil".
-                { etiket: t('gunler.gunuSil'), onPress: () => menudenGunuSil(gun), tehlike: true, ayrac: true, pasif: tekGun },
+                { etiket: t('gunler.gunuSil'), onPress: () => menudenGunuSil(gun), tehlike: true, ayrac: true, pasif: tekGun, ipucu: tekGun ? t('gunler.sonGun') : undefined },
               ]
             : []
         }
         onKapat={() => setListeMenuAcik(false)}
-        onKapandi={listeMenusuKapandi}
+        onKapandi={silOnayi.kapandi}
       />
       <GunSilSayfasi
         gun={silinecekGun}

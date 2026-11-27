@@ -80,13 +80,21 @@ describe('Plan v7p takip (#570)', () => {
     expect(durakEtiketi({ ...satir('1'), vurgulu: true, buradasin: true })).toMatch(/, şu an buradasın$/);
   });
 
-  it('KK4: son günde "Günü sil" pasif (0.4), dokunulmaz ve devre dışı okunur', () => {
+  it('KK4: son günde "Günü sil" pasif (0.4), dokunulmaz, devre dışı okunur ve sebebi ipucunda', () => {
     const sil = jest.fn();
     const { getByText } = render(
-      <SecimMenusu acik gorunus="v7p" baslik="Cuma · 27 Kasım" secenekler={[{ etiket: t('gunler.gunuSil'), onPress: sil, tehlike: true, ayrac: true, pasif: true }]} onKapat={() => undefined} />,
+      <SecimMenusu
+        acik
+        gorunus="v7p"
+        baslik="Cuma · 27 Kasım"
+        secenekler={[{ etiket: t('gunler.gunuSil'), onPress: sil, tehlike: true, ayrac: true, pasif: true, ipucu: t('gunler.sonGun') }]}
+        onKapat={() => undefined}
+      />,
     );
     const satirEl = getByText(t('gunler.gunuSil')).parent!.parent!;
     expect(satirEl.props.accessibilityState).toMatchObject({ disabled: true });
+    expect(t('gunler.sonGun')).toBe('Son gün silinemez.');
+    expect(satirEl.props.accessibilityHint).toBe('Son gün silinemez.');
     expect(JSON.stringify(satirEl.props.style)).toContain('"opacity":0.4');
     expect(sil).not.toHaveBeenCalled();
   });

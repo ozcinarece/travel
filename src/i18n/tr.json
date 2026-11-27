@@ -507,7 +507,8 @@
     "taksi": "{sure} araba",
     "durakYokKart": "durak yok",
     "bosKisa": "boş",
-    "gunuSil": "Günü sil"
+    "gunuSil": "Günü sil",
+    "sonGun": "Son gün silinemez."
   },
   "program": {
     "altTarihsiz": "tarih yok",

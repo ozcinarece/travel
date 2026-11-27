@@ -5,8 +5,8 @@ import { CekilenSayfa, modalKokuStili } from '@/components/ui/sayfaCekme';
 import { t } from '@/i18n';
 import { minDokunma, renk, yazi } from '@/theme';
 
-/** `ayrac`: satırın üstünde ince çizgi (#554 KK4: ⋯ menüsünde "Günü sil"). */
-export type SecimSecenegi = { etiket: string; onPress: () => void; tehlike?: boolean; pasif?: boolean; ayrac?: boolean };
+/** `ayrac`: satırın üstünde ince çizgi (#554 KK4: ⋯ menüsünde "Günü sil"). `ipucu`: ekran okuyucu ipucu (#570: pasif satırın sebebi). */
+export type SecimSecenegi = { etiket: string; onPress: () => void; tehlike?: boolean; pasif?: boolean; ayrac?: boolean; ipucu?: string };
 
 /** `v7p` (#554, kanvas `Plan_v7p_Haller` 4a): Plan çekmecesi — perde %38, 22 köşe, tutamak, 18/800 başlık, 48 px satırlar. */
 /** `onKapandi`: Modal tamamen kapandıktan sonra (iOS `onDismiss`; diğerlerinde kapanır kapanmaz) — #570 KK8: kapanan Modal'ın
@@ -45,6 +45,7 @@ export function SecimMenusu({ acik, baslik, secenekler, onKapat, gorunus, onKapa
                 disabled={o.pasif}
                 // #570 KK4: pasif satır "…, devre dışı" okunur.
                 accessibilityState={o.pasif ? { disabled: true } : undefined}
+                accessibilityHint={o.ipucu}
                 onPress={() => {
                   onKapat();
                   o.onPress();
