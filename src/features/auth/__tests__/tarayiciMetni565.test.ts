@@ -24,8 +24,8 @@ const UA = {
   chrome: 'Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Mobile Safari/537.36',
   safari: 'Mozilla/5.0 (iPhone; CPU iPhone OS 18_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.1 Mobile/15E148 Safari/604.1',
 };
-const KK1 = 'Bu uygulamanın içinden giriş yapılamıyor. Sağ üstteki menüden linki tarayıcıda aç.';
-const KK2 = 'Bu tarayıcı girişe izin vermiyor. Linki başka bir tarayıcıda ya da gizli olmayan bir pencerede aç.';
+const KK1 = 'Instagram ya da Facebook gibi bir uygulamanın içinden giriş yapılamıyor. Linki uygulamanın menüsünden tarayıcıda aç ya da kopyalayıp Chrome veya Safari\'ye yapıştır.';
+const KK2 = 'Bu tarayıcı girişe izin vermiyor. Linki başka bir tarayıcıda ya da gizli veya özel olmayan normal bir sekmede aç.';
 
 const os = Platform.OS;
 const nav = Object.getOwnPropertyDescriptor(globalThis, 'navigator');
