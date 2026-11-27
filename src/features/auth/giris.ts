@@ -59,7 +59,9 @@ export async function googleIleGiris(): Promise<void> {
   // ekranına düşer ve her denemede aynı döngüye girer. Yönlendirmeden önce dur, sayfa hata gösterir.
   // #561/#565: Instagram/Facebook gömülü tarayıcısında Google `disallowed_useragent` sayfası açar. Gömülü tarayıcı önce
   // bakılır (depolaması da kapalı olabilir; doğru yol yine menüden tarayıcıda açmak).
-  if (Platform.OS === 'web' && gomuluTarayici(typeof navigator === 'undefined' ? null : navigator.userAgent)) throw new GomuluTarayici();
+  // #577 KK3: ana ekrana eklenmiş iOS web uygulaması (`navigator.standalone`) gömülü sayılmaz.
+  const nav = typeof navigator === 'undefined' ? null : (navigator as Navigator & { standalone?: boolean });
+  if (Platform.OS === 'web' && gomuluTarayici(nav?.userAgent, nav?.standalone === true)) throw new GomuluTarayici();
   if (Platform.OS === 'web' && !oturumKalici) throw new DepolamaYok();
   const redirectTo = yonlendirmeAdresi();
   const options = { redirectTo, skipBrowserRedirect: Platform.OS !== 'web' };
