@@ -8,7 +8,7 @@ import type { ReactNode } from 'react';
 import { StyleSheet } from 'react-native';
 
 import { SeyahatIdSaglayici } from '@/features/seyahatler/baglam';
-import { kesfetDurumunuSifirla } from '@/features/yerler/kesfetDurumu';
+import { kesfetDurumunuAl, kesfetDurumunuSifirla } from '@/features/yerler/kesfetDurumu';
 import { hafifOnbellek, type HafifYer } from '@/features/yerler/api';
 import { t } from '@/i18n';
 import { yonelmeEkli } from '@/lib/ek';
@@ -108,6 +108,8 @@ const mockSilinen: Record<string, unknown>[] = [];
 /** Günler sorgusu bekletilebilir (#579 inceleme 6). */
 const mockGunKapisi: { bekle: Promise<void> | null } = { bekle: null };
 const mockEklenen: { tablo: string; satir: unknown }[] = [];
+/** #598: durak eklemesi (ata) hata verebilir. */
+const mockDurakEkleme: { hata: unknown } = { hata: null };
 jest.mock('@/lib/supabase', () => {
   const zincir = (tablo: string): unknown =>
     new Proxy(
@@ -144,6 +146,7 @@ jest.mock('@/lib/supabase', () => {
                 return { error: null };
               }
               if (mockEkleme.bekle) await mockEkleme.bekle;
+              if (tablo === 'stops' && mockDurakEkleme.hata) return { error: mockDurakEkleme.hata };
               mockEklenen.push({ tablo, satir });
               // Eklenen mekan listede bulunsun (listedekiMekan `places`'ın ilk satırını okur). 23505: aynı yeri az önce başkası eklemiş.
               if (tablo === 'places' && !mockEkleme.hata) (mockTablolar.places ??= []).unshift({ id: 'yeni1', ...(satir as object) });
@@ -201,6 +204,7 @@ beforeEach(() => {
   mockSilinen.length = 0;
   mockEklenen.length = 0;
   mockGunKapisi.bekle = null;
+  mockDurakEkleme.hata = null;
   mockCevrimdisi = false;
   mockYakin = { hata: false, sinir: false };
   mockParametre = {};
@@ -405,5 +409,80 @@ describe('#579 inceleme 4: gece yarısı', () => {
     const bant = within(await screen.findByTestId('geri-al-bandi'));
     expect(bant.getByText(' bugüne eklendi')).toBeTruthy();
     expect((mockEklenen.find((e) => e.tablo === 'stops')?.satir as { day_id: string }).day_id).toBe('g3');
+  });
+});
+
+describe('#598 değişiklik: listedeki yer güne atanır, yarım kalan ekleme tekrar denenir', () => {
+  const LISTEDEKI = { id: 'm1', trip_id: 't1', place_id: ONERI.place_id, primary_type: 'museum', lat: ONERI.lat, lng: ONERI.lng, default_minutes: 60, added_by: 'ayse', created_at: '2026-10-01T00:00:00Z' };
+
+  it('1: listedeki yer gün bağlamında panelde "Bugüne ekle"; dokununca güne eklenir, listeden çıkmaz; Geri al yalnız durağı siler', async () => {
+    mockTablolar.places = [LISTEDEKI];
+    ciz();
+    await screen.findByTestId('gun-hapi');
+    fireEvent.press(await screen.findByTestId(`pin-m:${ONERI.place_id}`));
+    expect((await screen.findByTestId('panel-cta-metni')).props.children).toBe(t('kesfet.bugunEkle'));
+    fireEvent.press(screen.getByTestId('panel-cta'));
+    const bant = within(await screen.findByTestId('geri-al-bandi'));
+    expect(bant.getByText(' bugüne eklendi')).toBeTruthy();
+    // Yeni `ekle` yok; durak listedeki satırla bugünün sonuna.
+    expect(mockEklenen.filter((e) => e.tablo === 'places')).toEqual([]);
+    const durak = mockEklenen.find((e) => e.tablo === 'stops')?.satir as { day_id: string; place_ref: string; order_key: string };
+    expect(durak).toMatchObject({ day_id: 'g2', place_ref: 'm1' });
+    fireEvent.press(bant.getByRole('button', { name: t('listem.geriAl') }));
+    await waitFor(() => expect(mockSilinen).toEqual([{ tablo: 'stops', trip_id: 't1', day_id: 'g2', place_ref: 'm1', order_key: durak.order_key }]));
+    await new Promise((c) => setTimeout(c, 20));
+    expect(mockSilinen.some((x) => x.tablo === 'places')).toBe(false);
+  });
+
+  it('1: yer zaten seçili gündeyse panel "Listeden çıkar" (gün metni yok), atama yapılmaz', async () => {
+    mockTablolar.places = [LISTEDEKI];
+    mockTablolar.stops = [{ id: 'd1', trip_id: 't1', day_id: 'g2', place_ref: 'm1', order_key: 'a0', skipped: false }];
+    ciz();
+    await screen.findByTestId('gun-hapi');
+    fireEvent.press(await screen.findByTestId(`pin-m:${ONERI.place_id}`));
+    await screen.findByTestId('panel-cta');
+    await waitFor(() => expect(screen.queryByTestId('panel-cta-metni')).toBeNull());
+    expect(screen.getByText('cikar')).toBeTruthy();
+  });
+
+  it('1–2: çekmecede ✓ gün bağlamında listeden çıkarmaz; ata hata verince "Güne eklenemedi", ikinci dokunuş güne ekler', async () => {
+    mockDurakEkleme.hata = { message: 'durak eklenemedi' };
+    // Görünür bölge öneriyi içerir (çekmece satırları bölgeye göre süzülür).
+    kesfetDurumunuAl('t1').bolge = { merkez: { lat: ONERI.lat, lng: ONERI.lng }, yaricapM: 3000, latDelta: 0.05, lngDelta: 0.05, zoom: 13 };
+    ciz();
+    await screen.findByTestId('gun-hapi');
+    // Çekmece ekran ölçülünce çizilir.
+    const kok = screen.UNSAFE_root.findAll((n) => typeof n.props.onLayout === 'function')[0];
+    fireEvent(kok, 'layout', { nativeEvent: { layout: { x: 0, y: 0, width: 390, height: 844 } } });
+    fireEvent.press(await screen.findByRole('button', { name: t('kesfet.cekmece.ac') }));
+    fireEvent.press(await screen.findByLabelText(t('kesfet.bugunEkle')));
+    expect(await screen.findByText(t('kesfet.guneEklenemedi'))).toBeTruthy();
+    expect(mockEklenen.filter((e) => e.tablo === 'places')).toHaveLength(1);
+    expect(mockEklenen.some((e) => e.tablo === 'stops')).toBe(false);
+    // Yer listede ✓ kaldı; ✓ atamayı tekrar dener (listeden çıkarma bandı yok, yeni `ekle` yok).
+    mockDurakEkleme.hata = null;
+    fireEvent.press(await screen.findByLabelText(t('ui.ekle.listede')));
+    const bant = within(await screen.findByTestId('geri-al-bandi'));
+    expect(bant.getByText(' bugüne eklendi')).toBeTruthy();
+    expect(mockEklenen.filter((e) => e.tablo === 'places')).toHaveLength(1);
+    expect((mockEklenen.find((e) => e.tablo === 'stops')?.satir as { day_id: string; place_ref: string })).toMatchObject({ day_id: 'g2', place_ref: 'yeni1' });
+    expect(mockSilinen).toEqual([]);
+  });
+
+  it('2: panelden ekleme yarıda kalırsa yer listede kalır; panel yine "Bugüne ekle", ikinci dokunuş güne ekler', async () => {
+    mockDurakEkleme.hata = { message: 'durak eklenemedi' };
+    ciz();
+    await screen.findByTestId('gun-hapi');
+    fireEvent.press(await screen.findByTestId(`pin-o:${ONERI.place_id}`));
+    fireEvent.press(await screen.findByTestId('panel-cta'));
+    expect(await screen.findByText(t('kesfet.guneEklenemedi'))).toBeTruthy();
+    await waitFor(() => expect(screen.getByText('cikar')).toBeTruthy());
+    expect(screen.getByTestId('panel-cta-metni').props.children).toBe(t('kesfet.bugunEkle'));
+    mockDurakEkleme.hata = null;
+    fireEvent.press(screen.getByTestId('panel-cta'));
+    await screen.findByTestId('geri-al-bandi');
+    expect(mockEklenen.filter((e) => e.tablo === 'places')).toHaveLength(1);
+    expect((mockEklenen.find((e) => e.tablo === 'stops')?.satir as { place_ref: string }).place_ref).toBe('yeni1');
+    expect(mockSilinen).toEqual([]);
   });
 });
