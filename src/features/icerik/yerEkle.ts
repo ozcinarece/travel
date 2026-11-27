@@ -28,6 +28,19 @@ export function varsayilanHedef(adaylar: SeyahatOzet[], sehirAdi: string | null 
   return adaylar.find((s) => ayniSehir(s.city_label, sehirAdi)) ?? null;
 }
 
+/**
+ * #583 KK1: "Seyahatime al" açılışındaki hedef. Açıkça verilen ve listede olan seyahat seçili gelir; verilmediyse
+ * (aynı şehirde seyahat yok) "Yeni seyahat" (null) — başka şehirdeki ilk seyahate düşülmez.
+ */
+export function baslangicHedefi(adaylar: SeyahatOzet[], ilkHedefId: string | null | undefined): string | null {
+  return ilkHedefId && adaylar.some((s) => s.id === ilkHedefId) ? ilkHedefId : null;
+}
+
+/** #583 KK2: hedef çipi bu seyahat için "Farklı şehir" demeli mi (içerik şehri biliniyor ve seyahatinki değil). */
+export function farkliSehir(seyahat: Pick<SeyahatOzet, 'city_label'>, sehirAdi: string | null | undefined): boolean {
+  return !!sehirAdi?.trim() && !ayniSehir(seyahat.city_label, sehirAdi);
+}
+
 export type YerEklemeIstegi = { seyahatId: string; yerId: string | null; place_id: string; primary_type: string | null; lat: number; lng: number; /** #143: gezi durağının süresi; yoksa kategori varsayılanı. */ dakika?: number };
 
 export function useYereEkle() {

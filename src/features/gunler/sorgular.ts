@@ -64,7 +64,7 @@ export function useDuragaAta(seyahatId: string) {
           .update({ day_id: gunId, order_key, arrived_at: null, arrived_by: null, completed_at: null, completed_by: null, auto_completed: false })
           .eq('id', mevcut.id);
         if (error) throw error;
-        return;
+        return { order_key };
       }
       const { error } = await supabase.from('stops').insert({
         trip_id: seyahatId,
@@ -74,6 +74,8 @@ export function useDuragaAta(seyahatId: string) {
         minutes: mekan.default_minutes,
       });
       if (error) throw error;
+      // #579 inceleme 1: Geri al yalnız bu durağı (gün + mekan + sıra anahtarı) silebilsin.
+      return { order_key };
     },
     onSettled: () => qc.invalidateQueries({ queryKey: ['duraklar', seyahatId] }),
   });

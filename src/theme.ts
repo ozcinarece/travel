@@ -87,6 +87,8 @@ export const seyahatV7 = {
   yuzler: ['#FF7A1A', '#C9D2F2', '#152A6B'],
   /** Boş gün öneri satırındaki "+" dairesinin kenarı. */
   artiKenar: '#C3C9D6',
+  /** #579 (kanvas `Dalga1_BuguneEkle`): Gece bildirimdeki "Geri al" yazı düğmesi (açık Mandalina; Gece üstünde ≥ 4,5:1). */
+  geriAl: '#FFB27A',
 } as const;
 
 /**

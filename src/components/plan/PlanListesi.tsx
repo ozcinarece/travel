@@ -11,6 +11,8 @@ import { t } from '@/i18n';
 import type { Gun } from '@/lib/tipler';
 import { altMenuRenk, anaV5, gunUstuMetin, renk, seyahatV7, yazi } from '@/theme';
 
+/** #582: satırın ekran okuyucu özel eylemi. */
+export const TASI_EYLEMI = 'baskaGuneTasi';
 /** Kanvas `Plan_v7p_*`: yuvarlak düğme zemini ("Atlandı" hapı da). */
 const DUGME_ZEMIN = '#F2F4F8';
 /** #554 (kanvas `Plan_v7p_Haller` 2): atlanan durağın kesik çizgili dairesi. */
@@ -26,6 +28,8 @@ export type PlanSatirGorunumu = {
   ad: string;
   /** "tür · süre" (gezildiyse "· gezildi"). */
   alt: string;
+  /** #582: `alt`'ın başındaki tür parçası (yoksa null) — uyarılı satırda sığmazsa önce bu "…" ile kısalır. */
+  altTur?: string | null;
   /** Önceki noktadan bacak: "9 dk · 3,2 km"; yoksa null. */
   gelis: { metin: string; araba: boolean } | null;
   /** Gezi modunda şu anki (buradasın / sıradaki) durak. */
@@ -34,6 +38,12 @@ export type PlanSatirGorunumu = {
   buradasin: boolean;
   gecildi: boolean;
   atlandi: boolean;
+  /** #582 KK3: açılış saatine göre o gün kapalı — "Pzt kapalı"; değilse (ya da saat bilinmiyorsa) null. */
+  kapali?: string | null;
+  /** #582: ekran okuyucu için gün adı tam — "Pazartesi kapalı". */
+  kapaliUzun?: string | null;
+  /** #582: taşınabilecek (kapalı olmayan başka) gün var mı; yoksa "Başka güne taşı" gösterilmez, uyarı kalır. */
+  tasinabilir?: boolean;
 };
 
 type Props = {
@@ -55,6 +65,8 @@ type Props = {
   satirlar: PlanSatirGorunumu[];
   onDurak: (mekanId: string) => void;
   onDurakUzunBas: (mekanId: string) => void;
+  /** #582 KK3: kapalı gün uyarısındaki "Başka güne taşı" (durak kimliği). */
+  onBaskaGuneTasi?: (durakId: string) => void;
   /** KK7: "+ Bu güne yer ekle" (Yer ekle o gün seçili açılır). */
   onEkle: (() => void) | null;
   /** #532 KK3: "Akşam için yakında" — en çok 2 yer, + o günün sonuna ekler. */
@@ -155,6 +167,9 @@ export function PlanListesi(p: Props) {
           const daire = daireTuru(r, p.bugun);
           // #570 KK3: vurgulu durakta SIRADAKİ ya da BURADASIN (aynı biçim, yalnız biri).
           const rozet = rozetAnahtari(r);
+          // #582 KK3: "Başka güne taşı" yalnız uyarı varsa ve taşınacak gün varsa.
+          const tasi = r.kapali && r.tasinabilir && p.onBaskaGuneTasi ? () => p.onBaskaGuneTasi?.(r.id) : null;
+          const parca = r.kapali ? altParcala(r) : null;
           return (
             <View key={r.id}>
               {/* #554 KK2 (pano 2): atlanan durağa bacak bilgisi yok; kısa kesik çizgi. */}
@@ -186,6 +201,17 @@ export function PlanListesi(p: Props) {
                 // #553 KK2: sıradaki/şu anki durak `selected` değil (seçim anlamı taşır); durum etiketin sonunda.
                 accessibilityRole="button"
                 accessibilityLabel={durakEtiketi(r)}
+                // #582: iç bağlantıya ekran okuyucu ulaşamaz (satır tek öğe) — "Başka güne taşı" satırın özel eylemi.
+                accessibilityActions={tasi ? [{ name: TASI_EYLEMI, label: t('plan.baskaGuneTasi') }] : undefined}
+                // #582: eylem menüsünü açmayan kullanıcı da "Başka güne taşı"yı duysun.
+                accessibilityHint={tasi ? t('plan.baskaGuneTasi') : undefined}
+                onAccessibilityAction={
+                  tasi
+                    ? (e) => {
+                        if (e.nativeEvent.actionName === TASI_EYLEMI) tasi();
+                      }
+                    : undefined
+                }
                 onPress={() => p.onDurak(r.mekanId)}
                 onLongPress={() => p.onDurakUzunBas(r.mekanId)}
                 style={({ pressed }) => [s.durak, pressed && { opacity: 0.85 }]}>
@@ -206,12 +232,47 @@ export function PlanListesi(p: Props) {
                     <Text style={[s.noMetin, { color: gunUstuMetin(r.numaraRengi) }]}>{r.numara ?? '–'}</Text>
                   </View>
                 )}
-                <View style={{ flex: 1, minWidth: 0, gap: 1 }}>
+                {/* #582: bağlantının hitSlop'u Android'de üst kabı aşamaz — uyarılı satırda sütun durağın tam yüksekliğine uzar (görünüş aynı). */}
+                <View style={[s.icerik, tasi && s.icerikTam]}>
                   {rozet ? <Text style={s.rozet}>{t(rozet)}</Text> : null}
                   <Text style={[s.ad, soluk && { color: anaV5.ikincil }]} numberOfLines={2}>
                     {r.ad}
                   </Text>
-                  {r.alt ? (
+                  {r.kapali && parca ? (
+                    // #582 (Ürün değişiklik 1; kanvas emsali `Ekran24Plan` "Müze · Pzt kapalı"): uyarı alt satırın içinde, tek satır —
+                    // "{tür} · {süre} · Pzt kapalı · Başka güne taşı ›". Sığmazsa önce tür, sonra süre "…" ile kısalır; uyarı ve bağlantı kesilmez.
+                    <View style={s.altSatir}>
+                      {parca.tur ? (
+                        <Text style={[s.alt, s.kisalir]} numberOfLines={1}>
+                          {parca.tur}
+                        </Text>
+                      ) : null}
+                      {parca.ara ? (
+                        <Text style={[s.alt, s.araKisalir]} numberOfLines={1}>
+                          {parca.ara}
+                        </Text>
+                      ) : null}
+                      <Text style={[s.alt, s.sabit, s.kapali]} numberOfLines={1}>
+                        {r.kapali}
+                      </Text>
+                      {tasi ? (
+                        <>
+                          <Text style={[s.alt, s.sabit]}>{AYRAC}</Text>
+                          {/* Dokunma alanı 44 pt: satır yüksekliği değişmesin diye hitSlop ile. */}
+                          <Pressable
+                            accessibilityRole="button"
+                            accessibilityLabel={t('plan.kapaliTasiEtiket', { uyari: r.kapaliUzun ?? r.kapali })}
+                            onPress={tasi}
+                            hitSlop={TASI_HITSLOP}
+                            style={s.sabit}>
+                            <Text style={[s.alt, s.kapali, s.tasi]} numberOfLines={1}>
+                              {t('plan.baskaGuneTasiBag')}
+                            </Text>
+                          </Pressable>
+                        </>
+                      ) : null}
+                    </View>
+                  ) : r.alt ? (
                     <Text style={s.alt} numberOfLines={1}>
                       {r.alt}
                     </Text>
@@ -259,14 +320,39 @@ export function ListemBekliyorSatiri({ n, onPress, bosGun }: { n: number; onPres
   );
 }
 
+/** #582: alt satır ayracı (kanvas "Müze · Pzt kapalı"). */
+const AYRAC = ' · ';
+/** #582: alt satırın satır yüksekliği (uyarılı ve uyarısız aynı). */
+export const ALT_SATIR_YUKSEKLIK = 18;
+/** #582: "Başka güne taşı ›" dokunma alanı — 18 + 18 + 8 = 44 pt; satır yüksekliği değişmez. Altta durağın 8 pt dolgusu var
+ * (Android'de hitSlop üst kabı aşamaz), fazlası üstte (ad satırının üzerinde; bağlantı z-sırasında sonra gelir). */
+export const TASI_HITSLOP = { top: 18, bottom: 8, left: 8, right: 8 };
+
+/** #582: uyarılı alt satırın parçaları — kısalabilen tür ve sabit kalan "· süre ·" ara metni. */
+export function altParcala(r: { alt: string; altTur?: string | null }): { tur: string | null; ara: string } {
+  const tur = r.altTur && r.alt.startsWith(r.altTur) ? r.altTur : null;
+  const kalan = (tur ? r.alt.slice(tur.length) : r.alt).replace(/^ · /, '');
+  return { tur, ara: `${tur ? AYRAC : ''}${kalan ? kalan + AYRAC : ''}` };
+}
+
 /** #553 KK1 (#558): sekme kutusu 44 pt — `hitSlop` üst kabı aşamadığı için dokunma alanı kutunun kendisi. */
 export const SEKME_YUKSEKLIK = 44;
 
 /** #553 KK2: ekran okuyucu etiketi — saat, ad, alt satır; vurgulu durakta "şu an buradasın" ya da "sıradaki durak";
  * #554 KK2: atlananda "Atlandı" hapı da okunur (alt satırdaki "· atlandı" kalktı). */
-export function durakEtiketi(r: { saat: string | null; ad: string; alt: string | null; vurgulu: boolean; buradasin?: boolean; atlandi?: boolean }): string {
+export function durakEtiketi(r: {
+  saat: string | null;
+  ad: string;
+  alt: string | null;
+  vurgulu: boolean;
+  buradasin?: boolean;
+  atlandi?: boolean;
+  kapali?: string | null;
+  kapaliUzun?: string | null;
+}): string {
   const durum = r.vurgulu ? t(r.buradasin ? 'plan.buradasinDurak' : 'plan.siradakiDurak') : r.atlandi ? t('plan.atlandi') : null;
-  return [r.saat, r.ad, r.alt, durum].filter(Boolean).join(', ');
+  // #582: ekran okuyucu gün adını tam okur ("Pazartesi kapalı").
+  return [r.saat, r.ad, r.alt, r.kapaliUzun ?? r.kapali, durum].filter(Boolean).join(', ');
 }
 
 /** #570 KK6: gün özetinin durak parçası — bütün duraklar atlandıysa (atlanan numarasız) "Hepsi atlandı", yoksa numaralı durak sayısı. */
@@ -341,7 +427,17 @@ const s = StyleSheet.create({
   bosDugme: { height: 52, borderRadius: 26, backgroundColor: renk.vurgu, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 },
   bosDugmeMetin: { fontFamily: yazi.kalin, fontSize: 16, color: renk.metin },
   ad: { fontFamily: yazi.kalin, fontSize: 16, color: renk.metin },
-  alt: { fontFamily: yazi.normal, fontSize: 13, color: anaV5.ikincil },
+  alt: { fontFamily: yazi.normal, fontSize: 13, lineHeight: ALT_SATIR_YUKSEKLIK, color: anaV5.ikincil },
+  icerik: { flex: 1, minWidth: 0, gap: 1 },
+  icerikTam: { alignSelf: 'stretch', justifyContent: 'center', marginVertical: -8, paddingVertical: 8 },
+  // #582: uyarılı alt satır — boyut alt satırla aynı; "Pzt kapalı" normal, "Başka güne taşı ›" yarı kalın, ikisi #C25200.
+  altSatir: { flexDirection: 'row', alignItems: 'center', minWidth: 0 },
+  // Kısalma sırası: önce tür (çok yüksek ağırlık), sonra süre; uyarı ve bağlantı hiç.
+  kisalir: { flexShrink: 1000 },
+  araKisalir: { flexShrink: 1 },
+  sabit: { flexShrink: 0 },
+  kapali: { color: anaV5.adim },
+  tasi: { fontFamily: yazi.yari },
   bacak: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   kesikSutun: { width: 28, height: 22, alignItems: 'center', gap: 3 },
   kesik: { width: 2, height: 3, backgroundColor: anaV5.cizgi },

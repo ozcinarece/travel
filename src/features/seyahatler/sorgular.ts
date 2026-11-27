@@ -19,7 +19,7 @@ export function useSeyahatler() {
       const { data, error } = await supabase
         .from('trips')
         .select(
-          'id, name, city_label, start_date, end_date, tz, hotel_place_id, created_at, members(user_id, role, display_name, guest), places(count), stays(count)',
+          'id, name, city_label, lat, lng, start_date, end_date, tz, hotel_place_id, created_at, members(user_id, role, display_name, guest), places(count), stays(count)',
         )
         .order('start_date', { ascending: true, nullsFirst: false })
         .order('created_at', { ascending: false });

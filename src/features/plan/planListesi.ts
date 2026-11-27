@@ -4,7 +4,9 @@
 import type { Konum } from '@/components/harita/tipler';
 import { konumu, konumVar } from '@/lib/konum';
 import { pinKategorisi } from '@/lib/pinIkonu';
-import type { Durak, Mekan } from '@/lib/tipler';
+import { GUNLER_KISA, haftaGunu } from '@/lib/takvim';
+import type { Durak, Gun, Mekan } from '@/lib/tipler';
+import { googleGunu, kapaliGunler, type Periyot } from '@/schedule/acilis';
 import type { ProgramSatiri, Yuruyus } from '@/schedule/program';
 
 /** Yemek durağının numarası Yemek turuncusu (kanvas 24); diğerleri gün rengi. */
@@ -95,4 +97,19 @@ export function aksamBoslugu(satirlar: PlanSatiri[]): Konum | null {
   const son = etkin[etkin.length - 1];
   if (!son || son.ayrilisDk! >= AKSAM_ESIGI_DK) return null;
   return konumu([...etkin].reverse().find((s) => konumVar(s.mekan))?.mekan);
+}
+
+/**
+ * #582 KK3: mekan, günün tarihine düşen hafta gününde açılış saatine göre kapalıysa o günün kısa adı ("Pzt"); tarihsiz gün ya
+ * da saat bilinmiyorsa null (kural uygulanmaz). Saatler anlık okunur, saklanmaz.
+ */
+export function kapaliGunKisa(tarih: string | null, periyotlar: Periyot[] | null | undefined): string | null {
+  if (!tarih || !periyotlar) return null;
+  const gun = haftaGunu(tarih);
+  return kapaliGunler(periyotlar).includes(googleGunu(gun)) ? GUNLER_KISA[gun] : null;
+}
+
+/** #582 KK3 "Başka güne taşı": durağın kendi günü ve mekanın kapalı olduğu günler dışındaki günler (sırasıyla). */
+export function tasinabilirGunler<G extends Pick<Gun, 'id' | 'index' | 'date'>>(gunler: G[], buGunId: string, periyotlar: Periyot[] | null | undefined): G[] {
+  return [...gunler].sort((a, b) => a.index - b.index).filter((g) => g.id !== buGunId && !kapaliGunKisa(g.date, periyotlar));
 }
