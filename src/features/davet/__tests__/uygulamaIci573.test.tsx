@@ -127,6 +127,24 @@ describe('#573 KK4 eylemler', () => {
     expect(mockRpc.mock.calls.filter(([ad]) => ad === 'daveti_reddet')).toHaveLength(0);
   });
 
+  it('#605 inceleme 2: Hayır\'a çift dokunuş ilk reddi göndermez; Geri al daveti geri getirir, daveti_reddet çağrılmaz', async () => {
+    const { result } = renderHook(() => useDavetEylemleri(jest.fn()), { wrapper: sarmal(qc) });
+    await waitFor(() => expect(result.current.davetler).toHaveLength(1));
+    jest.useFakeTimers();
+    // Aynı karede iki dokunuş: ikinci çağrı yeniden çizimden önce, aynı `reddet` ile.
+    act(() => {
+      result.current.reddet(urla);
+      result.current.reddet(urla);
+    });
+    expect(mockRpc.mock.calls.filter(([ad]) => ad === 'daveti_reddet')).toHaveLength(0);
+    expect(result.current.bekleyen?.id).toBe('d1');
+    act(() => result.current.geriAl());
+    expect(result.current.davetler).toHaveLength(1);
+    act(() => jest.advanceTimersByTime(GERI_CEVIR_MS + 100));
+    expect(mockRpc.mock.calls.filter(([ad]) => ad === 'daveti_reddet')).toHaveLength(0);
+    expect(qc.getQueryData<GelenDavet[]>(DAVETLERIM)?.map((d) => d.id)).toEqual(['d1']);
+  });
+
   it('Hayır: 5 sn sonra daveti_reddet (yalnız bir kez); davet edene bildirim yok (olay da yazılmaz)', async () => {
     const { result } = renderHook(() => useDavetEylemleri(jest.fn()), { wrapper: sarmal(qc) });
     await waitFor(() => expect(result.current.davetler).toHaveLength(1));

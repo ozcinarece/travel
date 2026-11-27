@@ -195,7 +195,8 @@ export function useGonderilenDavetler(tripId: string | undefined) {
         .order('created_at', { ascending: true });
       if (error) throw error;
       const harita = new Map<string, DavetDurumu>();
-      for (const r of (data ?? []) as { davet_edilen: string; durum: DavetDurumu }[]) harita.set(r.davet_edilen, r.durum);
+      // #605 inceleme 1: sunucunun kapattığı davet (`iptal`: link yenilendi ya da üye çıktı) durum listesinde yok sayılır.
+      for (const r of (data ?? []) as { davet_edilen: string; durum: DavetDurumu | 'iptal' }[]) if (r.durum !== 'iptal') harita.set(r.davet_edilen, r.durum);
       return harita;
     },
   });
@@ -245,7 +246,7 @@ export function useReddiBekleyenler(): readonly string[] {
  * KK4 · Hayır: satır hemen kalkar (kutu önbelleğinden çıkar ve ortak "reddi bekleyen" listesine girer; ana sayfa ve Gezilerim
  * ikisi de görür), altta 5 sn "Daveti geri çevirdin · Geri al". "Geri al" satırı geri koyar, sunucuya bir şey gitmez. Bant
  * kapanınca (5 sn, ekrandan çıkış ya da uygulama arka plana gidince) `daveti_reddet` çağrılır; davet edene bildirim gitmez. Aynı
- * anda tek bekleyen; ikinci "Hayır" öncekini hemen kesinleştirir. Hata olursa kutu yeniden okunur (davet geri gelir) ve bir kez
+ * anda tek bekleyen; başka bir davete "Hayır" öncekini hemen kesinleştirir, aynı davete ikinci dokunuş bir şey yapmaz. Hata olursa kutu yeniden okunur (davet geri gelir) ve bir kez
  * `onHata` (ekranın kısa bildirimi).
  */
 export function useDavetGeriCevir(onHata?: () => void) {
@@ -280,6 +281,8 @@ export function useDavetGeriCevir(onHata?: () => void) {
 
   const reddet = useCallback(
     (davet: GelenDavet) => {
+      // #605 inceleme 2: aynı davete ikinci dokunuş (aynı karede çift dokunuş) ilk reddi kesinleştirmesin; "Geri al" geçerli kalır.
+      if (ref.current?.davet.id === davet.id) return;
       kesinlestir();
       reddiBekleyenleriDegistir((l) => [...l.filter((id) => id !== davet.id), davet.id]);
       qc.setQueryData<GelenDavet[]>(DAVETLERIM, (eski) => eski?.filter((d) => d.id !== davet.id));

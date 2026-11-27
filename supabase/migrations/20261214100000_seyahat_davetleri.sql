@@ -1,6 +1,6 @@
 -- #573 Uygulama içi davet: Davetler kutusu (UX önerileri kanvası, "Uygulama içi davet (#573)"; not `nDavet1`).
 -- Yeni tablo: seyahat_davetleri. Veri silme yok; Google'a istek yok.
--- KK1: satırda davet eden, davet edilen, seyahat ve durum (`bekliyor` | `katildi` | `reddetti`).
+-- KK1: satırda davet eden, davet edilen, seyahat ve durum (`bekliyor` | `katildi` | `reddetti` | `iptal`).
 --   - Satırı yalnız davet eden ve davet edilen görür (select kuralı).
 --   - Davet yalnız ortak seyahat geçmişi olan kişiye: şu an başka bir seyahatin ortak üyesi (`birlikte_gezdik`, #407 ile aynı
 --     küme, v11 "Kimlerle?" yuvarlakları `arkadaslarim()`'dan gelir). Sunucuda `davet_gonder` denetler.
@@ -10,13 +10,18 @@
 -- KK4: Katıl, davet linkiyle katılmanın üyelik yolunu (`davetle_katil`, #137) aynen kullanır. Hayır yalnız durumu yazar;
 --   davet edene bildirim yok (KK6).
 -- Misafir (anonim) oturum davet gönderemez, alamaz, kutuyu görmez.
+-- #605 inceleme 1: bekleyen davet üyeliğe ikinci bir kapı olmasın (çıkarılan kişi eski davetle geri girmesin).
+--   - Kişi herhangi bir yoldan (link, davet, sahip devri…) üye olunca o seyahatteki bekleyen davetleri `katildi` olur.
+--   - Link yenilenince (`rotate_invite_token`) seyahatin bütün bekleyen davetleri `iptal` olur.
+--   - Üye çıkınca (sahip çıkarır ya da kendisi ayrılır) ona gelen ve onun gönderdiği bekleyen davetler `iptal` olur.
+--   Tetikleyiciler yalnız `bekliyor` satırın durumunu değiştirir; satır silinmez.
 
 create table public.seyahat_davetleri (
   id uuid primary key default gen_random_uuid(),
   trip_id uuid not null references public.trips (id) on delete cascade,
   davet_eden uuid not null references auth.users (id) on delete cascade,
   davet_edilen uuid not null references auth.users (id) on delete cascade,
-  durum text not null default 'bekliyor' check (durum in ('bekliyor', 'katildi', 'reddetti')),
+  durum text not null default 'bekliyor' check (durum in ('bekliyor', 'katildi', 'reddetti', 'iptal')),
   created_at timestamptz not null default now(),
   yanitlandi timestamptz,
   constraint kendine_davet_yok check (davet_eden <> davet_edilen)
@@ -115,7 +120,7 @@ as $$
   limit 20
 $$;
 
--- KK4 · Katıl: davet linkiyle katılmanın üyelik yolu (`davetle_katil`, kanal app) aynen; sonra durum `katildi`.
+-- KK4 · Katıl: önce durum `katildi`, sonra davet linkiyle katılmanın üyelik yolu (`davetle_katil`, kanal app) aynen.
 -- Dönen, `davetle_katil`'in cevabı (seyahat kimliği, zaten_uye…). Davet bana değilse ya da artık bekliyor değilse P0002.
 create function public.davete_katil(p_davet uuid) returns jsonb
 language plpgsql volatile security definer set search_path = ''
@@ -136,12 +141,13 @@ begin
   if not found then
     raise exception 'davet yok' using errcode = 'P0002';
   end if;
-  sonuc := public.davetle_katil((select t.invite_token from public.trips t where t.id = d.trip_id), 'app');
+  -- Yalnız hâlâ bekleyen davet `katildi` olur; bu arada reddedildiyse (ya da başka bir istek yanıtladıysa) üyelik hiç
+  -- yazılmaz. Önce durum, sonra üyelik: üyelik tetikleyicisi (`davet_uye_oldu`) bu satırı bekliyor bulmasın.
   update public.seyahat_davetleri x set durum = 'katildi', yanitlandi = now() where x.id = d.id and x.durum = 'bekliyor';
   if not found then
-    -- Bu arada reddedildi (ya da başka bir istek yanıtladı): üyelik de geri alınır (işlem bütün olarak düşer).
     raise exception 'davet yok' using errcode = 'P0002';
   end if;
+  sonuc := public.davetle_katil((select t.invite_token from public.trips t where t.id = d.trip_id), 'app');
   return sonuc;
 end;
 $$;
@@ -161,6 +167,50 @@ begin
   end if;
 end;
 $$;
+
+-- #605 inceleme 1: bekleyen davet yalnız üye olmayan kişiye ve yalnız güncel link dönemi için geçerlidir.
+-- Üye olunca (hangi yoldan olursa olsun) o seyahatteki bekleyen davetler kapanır.
+create function public.davet_uye_oldu() returns trigger
+language plpgsql security definer set search_path = ''
+as $$
+begin
+  update public.seyahat_davetleri set durum = 'katildi', yanitlandi = now()
+   where trip_id = new.trip_id and davet_edilen = new.user_id and durum = 'bekliyor';
+  return new;
+end;
+$$;
+create trigger seyahat_davetleri_uye_oldu after insert on public.members
+  for each row execute function public.davet_uye_oldu();
+
+-- Üye çıkınca ona gelen ve onun gönderdiği bekleyen davetler kapanır; yeniden üye olsa da eski davetler canlanmaz.
+create function public.davet_uye_cikti() returns trigger
+language plpgsql security definer set search_path = ''
+as $$
+begin
+  update public.seyahat_davetleri set durum = 'iptal', yanitlandi = now()
+   where trip_id = old.trip_id and (davet_edilen = old.user_id or davet_eden = old.user_id) and durum = 'bekliyor';
+  return old;
+end;
+$$;
+create trigger seyahat_davetleri_uye_cikti after delete on public.members
+  for each row execute function public.davet_uye_cikti();
+
+-- Link yenilenince (`rotate_invite_token`) seyahatin bütün bekleyen davetleri kapanır: eski davet yeni linkle katılamaz.
+create function public.davet_link_yenilendi() returns trigger
+language plpgsql security definer set search_path = ''
+as $$
+begin
+  update public.seyahat_davetleri set durum = 'iptal', yanitlandi = now()
+   where trip_id = new.id and durum = 'bekliyor';
+  return new;
+end;
+$$;
+create trigger seyahat_davetleri_link_yenilendi after update of invite_token on public.trips
+  for each row when (old.invite_token is distinct from new.invite_token)
+  execute function public.davet_link_yenilendi();
+
+revoke all on function public.davet_uye_oldu(), public.davet_uye_cikti(), public.davet_link_yenilendi()
+  from public, anon, authenticated;
 
 revoke all on function public.davet_gonder(uuid, uuid[]), public.davet_gecerli(uuid), public.davetlerim(),
   public.davete_katil(uuid), public.daveti_reddet(uuid)

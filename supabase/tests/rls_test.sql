@@ -4671,6 +4671,73 @@ set role authenticated;
 select pg_temp.as_user(:SD);
 do $$ begin assert (select count(*) from public.davetlerim()) = 0, '#573: davet eden çıkınca davet düşer'; end $$;
 select pg_temp.hata_bekle($$select public.davete_katil(current_setting('test.d3')::uuid)$$, 'P0002');
+-- #605 inceleme 1: bekleyen davet üyeliğe ikinci bir kapı değildir. Urla'da şimdi A (sahip) ve B var; A, Bursa'dan birlikte
+-- gezdiği D'yi çağırır, D davet linkiyle katılır (davet `katildi` olur), A onu çıkarır; link yenilense de eski davetle dönemez.
+select pg_temp.as_user(:SA);
+do $$ begin assert public.davet_gonder(current_setting('test.urla')::uuid, array['57300000-0000-4000-8000-0000000000d4']::uuid[]) = 1, '#605 1: D''ye davet'; end $$;
+reset role;
+select set_config('test.d4', (select id::text from public.seyahat_davetleri where davet_edilen = :SD and durum = 'bekliyor'), false);
+select set_config('test.tok', (select invite_token from public.trips where id = '57300000-0000-4000-8000-000000000002'), false);
+select set_config('test.davet_sayisi', (select count(*)::text from public.seyahat_davetleri), false);
+set role authenticated;
+select pg_temp.as_user(:SD);
+select public.davetle_katil(current_setting('test.tok'), 'app');
+do $$ begin assert (select durum from public.seyahat_davetleri where id = current_setting('test.d4')::uuid) = 'katildi', '#605 1: linkle üye olunca bekleyen davet kapanır'; end $$;
+select pg_temp.as_user(:SA);
+delete from public.members where trip_id = current_setting('test.urla')::uuid and user_id = '57300000-0000-4000-8000-0000000000d4';
+select pg_temp.as_user(:SD);
+do $$ begin assert (select count(*) from public.davetlerim()) = 0, '#605 1: çıkarılan kişinin kutusunda eski davet yok'; end $$;
+select pg_temp.hata_bekle($$select public.davete_katil(current_setting('test.d4')::uuid)$$, 'P0002');
+select pg_temp.as_user(:SA);
+select public.rotate_invite_token(current_setting('test.urla')::uuid) is not null;
+select pg_temp.as_user(:SD);
+do $$ begin assert (select count(*) from public.davetlerim()) = 0, '#605 1: link yenilense de eski davet kutuya dönmez'; end $$;
+select pg_temp.hata_bekle($$select public.davete_katil(current_setting('test.d4')::uuid)$$, 'P0002');
+do $$ begin assert (select count(*) from public.trips where id = current_setting('test.urla')::uuid) = 0, '#605 1: çıkarılan kişi seyahate dönmez'; end $$;
+-- Kendisi ayrılan da eski davetle dönemez: yeni davet, linkle katılım, ayrılma.
+select pg_temp.as_user(:SA);
+do $$ begin assert public.davet_gonder(current_setting('test.urla')::uuid, array['57300000-0000-4000-8000-0000000000d4']::uuid[]) = 1, '#605 1: D''ye yeni davet'; end $$;
+reset role;
+select set_config('test.d5', (select id::text from public.seyahat_davetleri where davet_edilen = :SD and durum = 'bekliyor'), false);
+select set_config('test.tok', (select invite_token from public.trips where id = '57300000-0000-4000-8000-000000000002'), false);
+set role authenticated;
+select pg_temp.as_user(:SD);
+select public.davetle_katil(current_setting('test.tok'), 'app');
+delete from public.members where trip_id = current_setting('test.urla')::uuid and user_id = auth.uid();
+do $$ begin assert (select count(*) from public.davetlerim()) = 0, '#605 1: kendisi ayrılanın kutusunda eski davet yok'; end $$;
+select pg_temp.hata_bekle($$select public.davete_katil(current_setting('test.d5')::uuid)$$, 'P0002');
+-- Link yenilenince seyahatin bekleyen davetleri `iptal` olur ve kutudan düşer.
+select pg_temp.as_user(:SA);
+do $$ begin assert public.davet_gonder(current_setting('test.urla')::uuid, array['57300000-0000-4000-8000-0000000000d4']::uuid[]) = 1, '#605 1: D''ye üçüncü davet'; end $$;
+select pg_temp.as_user(:SD);
+do $$ begin assert (select count(*) from public.davetlerim()) = 1, '#605 1: bekleyen davet kutuda'; end $$;
+select set_config('test.d6', (select id::text from public.davetlerim()), false);
+select pg_temp.as_user(:SA);
+select public.rotate_invite_token(current_setting('test.urla')::uuid) is not null;
+select pg_temp.as_user(:SD);
+do $$ begin assert (select count(*) from public.davetlerim()) = 0, '#605 1: link yenilenince bekleyen davet kutudan düşer'; end $$;
+do $$ begin assert (select durum from public.seyahat_davetleri where id = current_setting('test.d6')::uuid) = 'iptal', '#605 1: durum iptal'; end $$;
+select pg_temp.hata_bekle($$select public.davete_katil(current_setting('test.d6')::uuid)$$, 'P0002');
+-- Davet eden ayrılınca gönderdiği bekleyen davet `iptal` olur; seyahate geri dönse de canlanmaz.
+select pg_temp.as_user(:SB);
+do $$ begin assert public.davet_gonder(current_setting('test.urla')::uuid, array['57300000-0000-4000-8000-0000000000d4']::uuid[]) = 1, '#605 1: B''den D''ye davet'; end $$;
+select set_config('test.d7', (select id::text from public.seyahat_davetleri where davet_eden = auth.uid() and durum = 'bekliyor'), false);
+delete from public.members where trip_id = current_setting('test.urla')::uuid and user_id = auth.uid();
+reset role;
+select set_config('test.tok', (select invite_token from public.trips where id = '57300000-0000-4000-8000-000000000002'), false);
+set role authenticated;
+select pg_temp.as_user(:SB);
+select public.davetle_katil(current_setting('test.tok'), 'app');
+select pg_temp.as_user(:SD);
+do $$ begin assert (select count(*) from public.davetlerim()) = 0, '#605 1: davet eden geri dönse de eski davet canlanmaz'; end $$;
+select pg_temp.hata_bekle($$select public.davete_katil(current_setting('test.d7')::uuid)$$, 'P0002');
+reset role;
+do $$ begin assert (select durum from public.seyahat_davetleri where id = current_setting('test.d7')::uuid) = 'iptal', '#605 1: davet edenin ayrılmasıyla iptal'; end $$;
+do $$ begin assert (select count(*) from public.seyahat_davetleri) = current_setting('test.davet_sayisi')::integer + 3, '#605 1: tetikleyiciler satır silmez'; end $$;
+-- Tetikleyici fonksiyonları istemciye açık değil.
+set role authenticated;
+select pg_temp.as_user(:SA);
+select pg_temp.hata_bekle($$select public.davet_link_yenilendi()$$, '42501');
 -- Yardımcı fonksiyon istemciye açık değil; anon rolü hiçbir davet fonksiyonunu ve tabloyu kullanamaz.
 select pg_temp.hata_bekle($$select public.davet_gecerli(current_setting('test.d3')::uuid)$$, '42501');
 reset role;
