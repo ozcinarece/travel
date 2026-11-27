@@ -117,7 +117,7 @@ export function SeyahatimeAl({ gezi, seyahatler, ilkHedefId, kimlik, foto, onKap
               <Text style={s.altBaslik}>{`${gezi.baslik} · ${t('gezi.gunMekan', { gun: gezi.gun_sayisi, mekan: gezi.mekan_sayisi })}`}</Text>
             </View>
             {yukleniyor ? (
-              <View style={s.yukleniyor} accessibilityRole="progressbar">
+              <View style={s.yukleniyor} accessibilityRole="progressbar" accessibilityLabel={t('seyahatlerim.yukleniyor')} accessibilityState={{ busy: true }}>
                 <ActivityIndicator color={renk.ana} />
               </View>
             ) : (
@@ -610,7 +610,7 @@ const s = StyleSheet.create({
   cipAd: { flexShrink: 1 },
   cipEk: { flexShrink: 0 },
   yukleniyor: { minHeight: 120, alignItems: 'center', justifyContent: 'center' },
-  cipYeni: { flexDirection: 'row', alignItems: 'center', gap: 5 },
+  cipYeni: { gap: 5 },
   cipSecili: { backgroundColor: renk.ana, borderColor: renk.ana },
   cipMetin: { fontFamily: yazi.ekstra, fontSize: 14, color: renk.ana },
   cipMetinSecili: { color: renk.zemin },

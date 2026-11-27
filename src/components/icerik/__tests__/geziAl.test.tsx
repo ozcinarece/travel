@@ -421,6 +421,20 @@ describe('#587 inceleme: seyahat listesi geç gelir, "Farklı şehir" kesilmez',
     expect(seciliCip()).toHaveLength(1);
   });
 
+  it('hedef verilmediyse (aynı şehir varsayılanı) liste geç gelince aynı şehirdeki seyahat seçili olur', async () => {
+    mevcutSeyahat();
+    mockDb.seyahatYukleniyor = true;
+    ac(undefined);
+    expect(screen.getByLabelText('Seyahatler yükleniyor')).toBeTruthy();
+    mockDb.seyahatYukleniyor = false;
+    screen.rerender(
+      <QueryClientProvider client={qc}>
+        <GeziAl gezi={gezi} kimlik={kimlik} onKapat={jest.fn()} />
+      </QueryClientProvider>,
+    );
+    await waitFor(() => expect(screen.getByRole('button', { selected: true, name: /Eskişehir Gezisi/ })).toBeTruthy());
+  });
+
   it('kullanıcı "Yeni seyahat"e dokunduysa liste yenilense de seçim korunur', async () => {
     mevcutSeyahat();
     ac('t1');
@@ -437,5 +451,6 @@ describe('#587 inceleme: seyahat listesi geç gelir, "Farklı şehir" kesilmez',
     expect(ek.props.children).toBe(' · Farklı şehir');
     expect(screen.getByText(/^Kapadokya Hafta Sonu Balon ve Vadiler Gezisi/).props.children).not.toContain('Farklı şehir');
     expect(StyleSheet.flatten(ek.props.style).flexShrink).toBe(0);
+    expect(StyleSheet.flatten(screen.getByText(/^Kapadokya/).props.style).flexShrink).toBe(1);
   });
 });
