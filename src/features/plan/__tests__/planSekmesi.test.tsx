@@ -2,7 +2,8 @@
 // sahte; Edge Function çağrıları ve fetch sayılır). Harita "Haritayı aç" ile açılınca istek beklenir (yalnız orada).
 import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { fireEvent, render, waitFor, within } from '@testing-library/react-native';
+import { act, fireEvent, render, waitFor, within } from '@testing-library/react-native';
+import { Modal, Platform } from 'react-native';
 import type { ReactNode } from 'react';
 
 import { gunEtiketi } from '@/features/gezi/geziOzeti';
@@ -142,7 +143,7 @@ describe('#182 KK7: Plan sekmesi Google isteği doğurmaz', () => {
   it('açılış ve günler arasında gezinme: Edge Function ve fetch çağrılmaz; adlar DB / kategori, öneren, oy', async () => {
     const bas = tarihEkle(yerelTarih(new Date(), IST), 12);
     sahteSifirla(fikstur(bas), { 'ChIJ-db-1': { ad: 'Eti Arkeoloji Müzesi', kategori: 'museum' } });
-    const { getByText, getByLabelText, getAllByText, queryByText, qc } = ciz();
+    const { getByText, getByLabelText, getAllByText, queryByText, qc, UNSAFE_root } = ciz();
     await waitFor(() => getByLabelText('Haritada gör'));
     await sakinles(qc);
 
@@ -180,13 +181,20 @@ describe('#182 KK7: Plan sekmesi Google isteği doğurmaz', () => {
     await waitFor(() => getByText(t('plan.bosGun')));
     expect(queryByText(/0 durak/)).toBeNull();
     expect(getByText(/ henüz boş$/)).toBeTruthy();
-    expect(getByText(t('plan.bosGunMetin'))).toBeTruthy();
+    expect(getByText(t('plan.bosGunMetinListemBos'))).toBeTruthy();
     expect(getAllByText('Bu güne yer ekle').length).toBe(1);
     await sakinles(qc);
     // #554 KK4–KK5: ⋯ → en altta "Günü sil" → onay çekmecesi (sistem uyarısı değil); boş günde "Bu günde durak yok.".
     fireEvent.press(getByLabelText('Sırayı düzenle ve gün ayarları'));
     fireEvent.press(getByText(t('gunler.gunuSil')));
+    // #570 KK8: iOS'ta onay, ⋯ Modal'ı kapandıktan sonra (`onDismiss`) açılır; jest'in Modal'ı onDismiss'i kendisi çağırmaz.
+    if (Platform.OS === 'ios') {
+      act(() => {
+        for (const m of UNSAFE_root.findAllByType(Modal)) (m.props as { onDismiss?: () => void }).onDismiss?.();
+      });
+    }
     await waitFor(() => getByText(/ silinsin mi\?$/));
+    // #570 KK1: boş gün son gün → kayma cümlesi yok.
     expect(getByText(t('gunler.gunSilMetinBos'))).toBeTruthy();
     fireEvent.press(getAllByText(t('genel.vazgec')).at(-1)!);
 

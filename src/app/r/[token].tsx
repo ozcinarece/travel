@@ -9,7 +9,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Avatar } from '@/components/ui/Avatar';
 import { Ikon } from '@/components/ui/Ikon';
 import { Buton } from '@/components/ui/Buton';
-import { DepolamaYok, appleIleGiris, appleKullanilabilir, googleIleGiris, iptalMi } from '@/features/auth/giris';
+import { appleIleGiris, appleKullanilabilir, girisHataAnahtari, googleIleGiris, iptalMi, tarayiciUygunDegilMi } from '@/features/auth/giris';
 import { davetAdimi, davetSeyahatAdi, yonelmeEki } from '@/features/davet/katilim';
 import { DAVET_KANALI, bekleyenDavetiSil, bekleyenDavetiYaz, useDavetKarsilandi, useDavetOzeti, useDavetleKatil } from '@/features/davet/sorgular';
 import { olayYaz } from '@/features/icerik/sorgular';
@@ -107,11 +107,10 @@ export default function DavetEkrani() {
     try {
       await giris();
     } catch (e) {
-      // #552/#557: depolamasız tarayıcıda Google dönüşü kurulamaz; tekrar denemek işe yaramaz, linki tarayıcıda açmaya yönlendir.
+      // #552/#557/#565: depolamasız ya da gömülü tarayıcıda Google dönüşü kurulamaz; tekrar denemek işe yaramaz, duruma göre yönlendir.
       if (!iptalMi(e)) {
-        const depolamaYok = e instanceof DepolamaYok;
-        setTarayiciUygunDegil(depolamaYok);
-        setHata(t(depolamaYok ? 'davet.depolamaYok' : 'giris.hata'));
+        setTarayiciUygunDegil(tarayiciUygunDegilMi(e));
+        setHata(t(girisHataAnahtari(e, 'davet')));
       }
     } finally {
       setMesgul(null);

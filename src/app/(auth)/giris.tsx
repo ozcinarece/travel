@@ -5,7 +5,7 @@ import Svg, { Path } from 'react-native-svg';
 
 import { Buton } from '@/components/ui/Buton';
 import { LogoYazi } from '@/components/ui/Logo';
-import { DepolamaYok, appleIleGiris, appleKullanilabilir, googleIleGiris, iptalMi } from '@/features/auth/giris';
+import { appleIleGiris, appleKullanilabilir, girisHataAnahtari, googleIleGiris, iptalMi } from '@/features/auth/giris';
 import { t } from '@/i18n';
 import { baslikStili, haritaGolgesi, kose, renk, yazi } from '@/theme';
 
@@ -36,8 +36,8 @@ export default function GirisEkrani() {
     try {
       await giris();
     } catch (e) {
-      // #557/#561: depolamasız ya da gömülü tarayıcıda tekrar denemek işe yaramaz; sayfayı tarayıcıda açmaya yönlendir.
-      if (!iptalMi(e)) setHata(t(e instanceof DepolamaYok ? 'giris.depolamaYok' : 'giris.hata'));
+      // #557/#561/#565: depolamasız ya da gömülü tarayıcıda tekrar denemek işe yaramaz; duruma göre yönlendir.
+      if (!iptalMi(e)) setHata(t(girisHataAnahtari(e, 'giris')));
     } finally {
       setMesgul(null);
     }

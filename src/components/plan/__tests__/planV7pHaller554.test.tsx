@@ -81,7 +81,7 @@ describe('Plan v7p halleri (#554)', () => {
 
   it('KK3: boş gün — başlık, açıklama ve tek turuncu "+ Bu güne yer ekle"', () => {
     const onEkle = jest.fn();
-    const { getByText, getAllByText } = ciz({ bosGun: { baslik: t('plan.bosGunBaslik', { gun: 'Cumartesi' }) }, onEkle });
+    const { getByText, getAllByText } = ciz({ bosGun: { baslik: t('plan.bosGunBaslik', { gun: 'Cumartesi' }) }, onEkle, listem: { n: 2, onPress: () => undefined } });
     expect(getByText('Cumartesi henüz boş')).toBeTruthy();
     expect(getByText(t('plan.bosGunMetin'))).toBeTruthy();
     expect(getAllByText(t('plan.buGuneEkle')).length).toBe(1);
@@ -111,11 +111,11 @@ describe('Plan v7p halleri (#554)', () => {
   });
 
   it('KK5: onay çekmecesi — "{Gün} {no} silinsin mi?", durak sayısına göre metin; Günü sil ve Vazgeç', () => {
-    expect(gunSilMetni(2)).toBe("2 durak Listem'e döner; yerler silinmez.");
-    expect(gunSilMetni(0)).toBe('Bu günde durak yok.');
+    expect(gunSilMetni(2, true)).toBe("2 durak Listem'e döner; yerler silinmez.");
+    expect(gunSilMetni(0, true)).toBe('Bu günde durak yok.');
     const onSil = jest.fn();
     const onKapat = jest.fn();
-    const { getByText } = render(<GunSilSayfasi gun={gun} baslik="Cuma 27" durakSayisi={2} onSil={onSil} onKapat={onKapat} />);
+    const { getByText } = render(<GunSilSayfasi gun={gun} baslik="Cuma 27" durakSayisi={2} sonGun onSil={onSil} onKapat={onKapat} />);
     expect(getByText('Cuma 27 silinsin mi?')).toBeTruthy();
     expect(getByText("2 durak Listem'e döner; yerler silinmez.")).toBeTruthy();
     fireEvent.press(getByText(t('gunler.gunuSil')));
