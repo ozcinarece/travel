@@ -50,3 +50,12 @@ test('metin HTML kaçırılır', () => {
 test('body yoksa hata', () => {
   assert.throws(() => katmanEkle('<html></html>', metin));
 });
+
+test('eski motor: inset ve flex gap yok (Android 9 WebView = Chrome 74, #552)', () => {
+  const stil = katmanHtml(metin).match(/<style[^>]*>(.*?)<\/style>/)[1];
+  assert.doesNotMatch(stil, /inset\s*:/);
+  assert.doesNotMatch(stil, /(^|[;{])\s*(row-|column-)?gap\s*:/);
+  assert.match(stil, /position:fixed;top:0;right:0;bottom:0;left:0/);
+  assert.match(stil, /\.da-noktalar span\+span\{margin-left:8px\}/);
+  assert.match(stil, /\.da-satir\{margin:6px 0 0;/);
+});

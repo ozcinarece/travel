@@ -19,15 +19,17 @@ const kacir = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g
 // İçerik BELIRME_MS sonra görünür: hızlı ağda uygulama o süreden önce açılır, 3e-A hiç görünmez (KK3); o ana kadar
 // katman yalnız beyaz zemin (uygulamanın kendi zemini de beyaz, kare atlaması yok).
 // Not görünmeden yer kaplamasın (A'da içerik ortada kalsın) diye `gap` yerine margin; not kapalıyken yüksekliği 0.
+// #552: eski motor (Android 9 WebView = Chrome 74): `inset` (Chrome 87) ve flex `gap` (Chrome 84) kullanılmaz.
 const STIL = `
-#${KATMAN_ID}{position:fixed;inset:0;z-index:2147483647;box-sizing:border-box;padding:0 32px;background:#FFFFFF;color:#0E1430;font-family:Figtree,system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+#${KATMAN_ID}{position:fixed;top:0;right:0;bottom:0;left:0;z-index:2147483647;box-sizing:border-box;padding:0 32px;background:#FFFFFF;color:#0E1430;font-family:Figtree,system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
 #${KATMAN_ID} *{box-sizing:border-box}
 #${KATMAN_ID} .da-icerik{width:100%;display:flex;flex-direction:column;align-items:center;animation:da-belir 0s linear ${BELIRME_MS}ms both}
 @keyframes da-belir{from{visibility:hidden}to{visibility:visible}}
-#${KATMAN_ID} .da-metinler{margin-top:20px;display:flex;flex-direction:column;align-items:center;gap:6px}
+#${KATMAN_ID} .da-metinler{margin-top:20px;display:flex;flex-direction:column;align-items:center}
 #${KATMAN_ID} h1{margin:0;font-size:22px;font-weight:800;letter-spacing:-0.02em}
-#${KATMAN_ID} .da-satir{margin:0;font-size:15px;line-height:1.45;color:#4A5274}
-#${KATMAN_ID} .da-noktalar{margin-top:20px;display:flex;gap:8px}
+#${KATMAN_ID} .da-satir{margin:6px 0 0;font-size:15px;line-height:1.45;color:#4A5274}
+#${KATMAN_ID} .da-noktalar{margin-top:20px;display:flex}
+#${KATMAN_ID} .da-noktalar span+span{margin-left:8px}
 #${KATMAN_ID} .da-noktalar span{width:10px;height:10px;border-radius:5px;background:#FF7A1A;animation:da-nokta 1.2s linear infinite}
 #${KATMAN_ID} .da-noktalar span:nth-child(2){background:#FFC9A1;animation-delay:-0.8s}
 #${KATMAN_ID} .da-noktalar span:nth-child(3){background:#FFE4D1;animation-delay:-0.4s}

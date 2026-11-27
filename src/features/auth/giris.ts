@@ -2,7 +2,7 @@ import { makeRedirectUri } from 'expo-auth-session';
 import * as WebBrowser from 'expo-web-browser';
 import { Platform } from 'react-native';
 
-import { supabase } from '@/lib/supabase';
+import { oturumKalici, supabase } from '@/lib/supabase';
 
 // Web'de OAuth dönüşünde açılan pencereyi kapatır. Depolaması kapalı tarayıcıda localStorage okuması hata verir;
 // modül düzeyinde olduğu için korumasız kalırsa /r/{token} dahil bütün sayfa hata ekranına düşer (#537).
@@ -21,8 +21,19 @@ function yonlendirmeAdresi(): string {
   return makeRedirectUri({ scheme: 'gezi', path: 'giris' });
 }
 
+/** #552: depolaması kapalı tarayıcı; Google'a yönlendirilmez (dönüşte doğrulayıcı ve davet kaybolur). */
+export class DepolamaYok extends Error {
+  constructor() {
+    super('Tarayıcı depolaması kapalı; tam sayfa giriş dönüşü tamamlanamaz');
+    this.name = 'DepolamaYok';
+  }
+}
+
 /** PRD 0.1 KK1. Misafir (anonim) oturum varsa hesap ona bağlanır; user_id değişmez (PRD 3.10 KK3). */
 export async function googleIleGiris(): Promise<void> {
+  // Bellekteki PKCE doğrulayıcısı tam sayfa yönlendirmede silinir: dönüşte oturum kurulmaz, kullanıcı bağlamsız giriş
+  // ekranına düşer ve her denemede aynı döngüye girer. Yönlendirmeden önce dur, sayfa hata gösterir.
+  if (Platform.OS === 'web' && !oturumKalici) throw new DepolamaYok();
   const redirectTo = yonlendirmeAdresi();
   const options = { redirectTo, skipBrowserRedirect: Platform.OS !== 'web' };
   const {

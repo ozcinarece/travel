@@ -3,7 +3,8 @@
 // localStorage okur; taklit aynısını yapar. Ekran ve giris.ts gerçek modüllerle yüklenir.
 /* eslint-disable @typescript-eslint/no-require-imports -- localStorage modül yüklenmeden önce bozulmalı */
 import { describe, expect, it, jest } from '@jest/globals';
-import { render, screen } from '@testing-library/react-native';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react-native';
+import { Platform } from 'react-native';
 
 import type { DavetOzeti } from '@/lib/tipler';
 
@@ -35,7 +36,8 @@ jest.mock('expo-web-browser', () => ({
   openAuthSessionAsync: jest.fn(),
 }));
 jest.mock('expo-auth-session', () => ({ makeRedirectUri: () => 'gezi://giris' }));
-jest.mock('@/lib/supabase', () => ({ supabase: { auth: {} } }));
+const mockGetSession = jest.fn();
+jest.mock('@/lib/supabase', () => ({ supabase: { auth: { getSession: () => mockGetSession() } }, oturumKalici: false }));
 jest.mock('@/lib/oturum', () => ({ useOturum: () => ({ hazir: true, hesapli: false }) }));
 jest.mock('@/lib/acilis', () => ({ acilisKarariniKapat: jest.fn() }));
 jest.mock('@/features/icerik/sorgular', () => ({ olayYaz: jest.fn() }));
@@ -75,5 +77,20 @@ describe('depolamasız tarayıcıda davet sayfası (#537)', () => {
     expect(screen.getByText(t('davet.katilGoogle'))).toBeTruthy();
     expect(screen.getByText(t('davet.planBaslik'))).toBeTruthy();
     expect(screen.getByText(t('davet.davetEden', { ad: 'Ayşe' }))).toBeTruthy();
+  });
+
+  // #552: bellekteki PKCE doğrulayıcısı Google'a tam sayfa yönlendirmede silinir; dönüşte bağlamsız giriş ekranı ve
+  // döngü. Yönlendirme hiç başlamaz, sayfa davet hatasını gösterir; düğme çarkta kalmaz.
+  it('web, depo bellekte: "Google ile katıl" yönlendirmez, davet.hata görünür', async () => {
+    const os = Platform.OS;
+    Object.defineProperty(Platform, 'OS', { configurable: true, get: () => 'web' });
+    try {
+      render(<Ekran />);
+      fireEvent.press(screen.getByText(t('davet.katilGoogle')));
+      await waitFor(() => expect(screen.getByText(t('davet.hata'))).toBeTruthy());
+      expect(mockGetSession).not.toHaveBeenCalled();
+    } finally {
+      Object.defineProperty(Platform, 'OS', { configurable: true, get: () => os });
+    }
   });
 });

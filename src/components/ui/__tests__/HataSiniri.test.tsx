@@ -6,6 +6,8 @@ import { HataSiniri } from '../HataSiniri';
 
 const mockHataBildir = jest.fn();
 jest.mock('@/lib/hataRaporu', () => ({ hataBildir: (...a: unknown[]) => mockHataBildir(...a), izBirak: jest.fn() }));
+const mockKatmaniKaldir = jest.fn();
+jest.mock('@/lib/webAcilis', () => ({ webAcilisiKaldir: () => mockKatmaniKaldir() }));
 
 function Patlayan({ patla }: { patla: boolean }) {
   if (patla) throw new Error('deneme hatası');
@@ -31,6 +33,8 @@ describe('HataSiniri (#85)', () => {
     const { getByText, queryByText, rerender } = render(<Sarmal />);
     expect(getByText('Bir şeyler ters gitti')).toBeTruthy();
     expect(mockHataBildir).toHaveBeenCalledTimes(1);
+    // #552: web davet açılış katmanı (#549) kartın üstünde kalmaz.
+    expect(mockKatmaniKaldir).toHaveBeenCalledTimes(1);
     expect(String((mockHataBildir.mock.calls[0] as unknown[])[1])).toContain('hata-siniri');
     patla = false;
     rerender(<Sarmal />);
