@@ -182,11 +182,17 @@ export function gunSecenekleri(p: GunHesabi & { mekan: Mekan; gunler: Gun[]; dur
 }
 
 /**
- * #532 KK4: Güne ekle bir gün bağlamıyla açıldıysa o gün en üstte ve vurgulu; "ÖNERİLEN" rozeti yalnız bağlamsız açılışta.
- * Bağlamdaki gün yoksa liste değişmez. Vurgu `onerilen` alanıyla taşınır, rozet `rozet` ile ayrılır.
+ * #534 KK8 (`Plan_v7p_HangiGune`): "Hangi güne?" sırası. Bağlamdaki gün en üstte (#532 KK4); bağlam yoksa bugün (gezi modunda).
+ * Kalan günler gün sırasıyla, geçmiş günler (bugünden önce) en altta ve `gecti`. "EN YAKIN" yalnız durağı olan önerilen günde
+ * (gunSecenekleri'nin en yakın günü); bağlam ya da bugün olsa da yerinde kalır.
  */
-export function gunBaglaminaGore(secenekler: GunSecenegi[], gunId: string | null | undefined): (GunSecenegi & { rozet: boolean })[] {
-  const hedef = gunId ? secenekler.find((x) => x.gun.id === gunId) : undefined;
-  if (!hedef) return secenekler.map((x) => ({ ...x, rozet: x.onerilen }));
-  return [hedef, ...secenekler.filter((x) => x !== hedef).sort((a, b) => a.gun.index - b.gun.index)].map((x) => ({ ...x, onerilen: x === hedef, rozet: false }));
+export function hangiGuneSirasi(
+  secenekler: GunSecenegi[],
+  { baglamGunId, bugunIndex }: { baglamGunId?: string | null; bugunIndex: number | null },
+): { secenek: GunSecenegi; gecti: boolean; enYakin: boolean }[] {
+  const gunSirali = [...secenekler].sort((a, b) => a.gun.index - b.gun.index);
+  const ust = (baglamGunId ? gunSirali.find((x) => x.gun.id === baglamGunId) : undefined) ?? (bugunIndex !== null ? gunSirali.find((x) => x.gun.index === bugunIndex) : undefined);
+  const gecti = (x: GunSecenegi) => bugunIndex !== null && x.gun.index < bugunIndex && x !== ust;
+  const sira = [...(ust ? [ust] : []), ...gunSirali.filter((x) => x !== ust && !gecti(x)), ...gunSirali.filter(gecti)];
+  return sira.map((x) => ({ secenek: x, gecti: gecti(x), enYakin: x.onerilen && x.enYakinM !== null }));
 }

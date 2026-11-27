@@ -1,31 +1,30 @@
-// #182 KK1–KK6 (kanvas 24): Plan sekmesi "liste önce" — üstte "‹ {seyahat}" + kişiler, "Plan" + Sırayı düzenle, gün çipleri
-// (+ gün ekle), 112 px harita şeridi, seçili günün başlığı (çıkış saati), duraklar ve aralarında bacak satırları (yürüme / araç
-// ikonu + süre), gün sonunda boşluk varsa sessiz "Akşam boş" önerisi. Durağa dokununca mekan paneli (mevcut).
-import { Foto } from '@/components/ui/Foto';
-import type { ReactNode } from 'react';
+// #534 Plan gün ekranı v7p (UX önerileri kanvası `Plan_v7p_Bugun` · `Plan_v7p_Gun`): liste önde, üst harita yok. Üstte "Plan"
+// 28/800 + iki yuvarlak düğme (harita → tam harita, ⋯ → Sırayı düzenle ve gün ayarları), altı çizili gün sekmeleri (gün renginde
+// 7 px nokta, etkin çizgi turuncu), gün özeti, tek "Otel ekle" satırı (otel varsa çıkış saati), saat sütunlu durak satırları,
+// aralarında tek gri bacak satırı, "+ Bu güne yer ekle", bugünde "Akşam için yakında", en altta "Listem · N yer gün bekliyor ›".
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { BolumBasligi, BugunBosV7, type BosGunYeri } from '@/components/gezi/SeyahatV7';
-import { GeriHapi } from '@/components/harita/HaritaEkrani';
-import { Avatar } from '@/components/ui/Avatar';
 import { Ikon } from '@/components/ui/Ikon';
 import { t } from '@/i18n';
-import type { Gun, Uye } from '@/lib/tipler';
-import { baslikStili, gunUstuMetin, renk, yazi, yuzRenkleri } from '@/theme';
+import type { Gun } from '@/lib/tipler';
+import { altMenuRenk, anaV5, gunUstuMetin, renk, seyahatV7, yazi } from '@/theme';
+
+/** Kanvas `Plan_v7p_*`: yuvarlak düğme zemini. */
+const DUGME_ZEMIN = '#F2F4F8';
 
 export type PlanSatirGorunumu = {
   id: string;
   mekanId: string;
   numara: number | null;
   numaraRengi: string;
+  /** Varış saati ("09:00"); atlananda null. */
   saat: string | null;
-  sure: string;
   ad: string;
+  /** "tür · süre" (gezildiyse "· gezildi"). */
   alt: string;
-  foto: string | null;
-  fotoZemin: string;
-  /** Önceki noktadan bacak: "12 dk" / "~6 dk · otelden"; yoksa null. */
+  /** Önceki noktadan bacak: "9 dk · 3,2 km"; yoksa null. */
   gelis: { metin: string; araba: boolean } | null;
   /** Gezi modunda şu anki (buradasın / sıradaki) durak. */
   vurgulu: boolean;
@@ -34,27 +33,28 @@ export type PlanSatirGorunumu = {
 };
 
 type Props = {
-  baslik: string;
-  uyeler: Uye[];
-  onGeri: () => void;
-  onGrup: () => void;
-  onSirala: () => void;
+  onHarita: () => void;
+  onDaha: () => void;
   gunler: Gun[];
   seciliGunId: string | undefined;
-  gunEtiketi: (g: Gun) => string;
+  /** Sekme metni: bugün "Bugün", diğerleri "Cum 27". */
+  sekmeEtiketi: (g: Gun) => string;
   gunRengi: (g: Gun) => string;
-  durakSayisi: (g: Gun) => number;
   onGunSec: (g: Gun) => void;
   onGunUzunBas: (g: Gun) => void;
-  onGunEkle: () => void;
-  serit: ReactNode;
-  gun: { renk: string; index: number; baslik: string; cikis: string; onCikis: () => void } | null;
+  /** KK3: "Perşembe · 26 Kasım" ve "Kurşunlu · 09:00–12:58 · 2 durak". */
+  ozet: { baslik: string; alt: string } | null;
+  /** KK4: otel yoksa "Otel ekle"; varsa otelden çıkış saati. */
+  otel: { baslik: string; alt: string; onPress: () => void } | null;
   satirlar: PlanSatirGorunumu[];
   onDurak: (mekanId: string) => void;
   onDurakUzunBas: (mekanId: string) => void;
+  /** KK7: "+ Bu güne yer ekle" (Yer ekle o gün seçili açılır). */
+  onEkle: (() => void) | null;
   /** #532 KK3: "Akşam için yakında" — en çok 2 yer, + o günün sonuna ekler. */
-  aksam: { yerler: BosGunYeri[]; eklenenler: Set<string>; onEkle: (id: string) => void; pasif?: boolean } | null;
-  bos: { metin: string; dugme: string; onPress: () => void } | null;
+  aksam: { yerler: BosGunYeri[]; eklenenler: Set<string>; onEkle: (id: string) => void; pasif?: boolean; onTumu: () => void } | null;
+  /** KK7: "Listem · N yer gün bekliyor ›". */
+  listem: { n: number; onPress: () => void } | null;
   uyari: string | null;
 };
 
@@ -63,32 +63,23 @@ export function PlanListesi(p: Props) {
   return (
     <ScrollView style={s.ekran} contentContainerStyle={{ paddingTop: ust + 8, paddingBottom: 28 }} showsVerticalScrollIndicator={false}>
       <View style={s.ust}>
-        <View style={s.satirArasi}>
-          <View style={{ flexShrink: 1 }}>
-            <GeriHapi baslik={p.baslik} onPress={p.onGeri} duz />
-          </View>
-          <Pressable accessibilityRole="button" accessibilityLabel={t('geziSayfasi.seyahattekiler')} onPress={p.onGrup} hitSlop={6} style={{ flexDirection: 'row' }}>
-            {p.uyeler.slice(0, 4).map((u, i) => (
-              <View key={u.user_id} style={[s.yuz, i > 0 && { marginLeft: -8 }]}>
-                <Avatar ad={u.display_name} url={u.photo_url} boyut={28} arkaPlan={yuzRenkleri[i % yuzRenkleri.length]} />
-              </View>
-            ))}
+        <Text accessibilityRole="header" style={s.baslik}>
+          {t('plan.baslik')}
+        </Text>
+        <View style={s.dugmeler}>
+          <Pressable accessibilityRole="button" accessibilityLabel={t('plan.haritada')} onPress={p.onHarita} hitSlop={4} style={({ pressed }) => [s.yuvarlak, pressed && { opacity: 0.8 }]}>
+            <Ikon ad="haritaV7p" boyut={19} renk={renk.metin} kalinlik={2} />
+          </Pressable>
+          <Pressable accessibilityRole="button" accessibilityLabel={t('plan.diger')} onPress={p.onDaha} hitSlop={4} style={({ pressed }) => [s.yuvarlak, pressed && { opacity: 0.8 }]}>
+            <Ikon ad="dahaV7" boyut={18} renk={renk.metin} kalinlik={2.2} />
           </Pressable>
         </View>
-        <View style={[s.satirArasi, { alignItems: 'baseline' }]}>
-          <Text accessibilityRole="header" style={s.baslik}>
-            {t('plan.baslik')}
-          </Text>
-          <Pressable accessibilityRole="button" onPress={p.onSirala} hitSlop={6} style={({ pressed }) => [s.sirala, pressed && { opacity: 0.8 }]}>
-            <Ikon ad="sirala" boyut={14} renk={renk.ana} kalinlik={2.3} />
-            <Text style={s.siralaMetin}>{t('plan.sirayiDuzenle')}</Text>
-          </Pressable>
-        </View>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginHorizontal: -20 }} contentContainerStyle={s.cipler}>
+      </View>
+
+      <View style={s.sekmeAlani}>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={s.sekmeler}>
           {p.gunler.map((g) => {
             const secili = g.id === p.seciliGunId;
-            const renkGun = p.gunRengi(g);
-            const dolu = p.durakSayisi(g) > 0;
             return (
               <Pressable
                 key={g.id}
@@ -96,89 +87,116 @@ export function PlanListesi(p: Props) {
                 accessibilityState={{ selected: secili }}
                 onPress={() => p.onGunSec(g)}
                 onLongPress={() => p.onGunUzunBas(g)}
-                style={[s.cip, secili && { backgroundColor: renkGun }]}>
-                {!secili && dolu ? <View style={[s.nokta, { backgroundColor: renkGun }]} /> : null}
-                <Text style={[s.cipMetin, secili ? { color: gunUstuMetin(renkGun) } : !dolu && { color: renk.ikincil }]}>{p.gunEtiketi(g)}</Text>
+                style={[s.sekme, secili && s.sekmeSecili]}>
+                <View style={[s.nokta, { backgroundColor: p.gunRengi(g) }]} />
+                <Text style={[s.sekmeMetin, secili && s.sekmeMetinSecili]} numberOfLines={1}>
+                  {p.sekmeEtiketi(g)}
+                </Text>
               </Pressable>
             );
           })}
-          <Pressable accessibilityRole="button" accessibilityLabel={t('plan.gunEkle')} onPress={p.onGunEkle} style={s.ekle}>
-            <Ikon ad="arti" boyut={16} renk={renk.ana} kalinlik={3} />
-          </Pressable>
         </ScrollView>
       </View>
 
-      <View style={s.serit}>{p.serit}</View>
+      {p.ozet ? (
+        <View style={s.ozet}>
+          <Text style={s.ozetBaslik} numberOfLines={1}>
+            {p.ozet.baslik}
+          </Text>
+          {p.ozet.alt ? (
+            <Text style={s.ozetAlt} numberOfLines={1}>
+              {p.ozet.alt}
+            </Text>
+          ) : null}
+        </View>
+      ) : null}
 
       <View style={s.liste}>
         {p.uyari ? <Text style={s.uyari}>{p.uyari}</Text> : null}
-        {p.gun ? (
-          <View style={s.gunBaslik}>
-            <View style={[s.gunNo, { backgroundColor: p.gun.renk }]}>
-              <Text style={[s.gunNoMetin, { color: gunUstuMetin(p.gun.renk) }]}>{p.gun.index}</Text>
+        {p.otel ? (
+          <Pressable accessibilityRole="button" onPress={p.otel.onPress} style={({ pressed }) => [s.otel, pressed && { opacity: 0.8 }]}>
+            <Ikon ad="yatakV7p" boyut={20} renk={renk.ana} kalinlik={2} />
+            <View style={{ flex: 1, minWidth: 0 }}>
+              <Text style={s.otelBaslik} numberOfLines={1}>
+                {p.otel.baslik}
+              </Text>
+              <Text style={s.otelAlt} numberOfLines={1}>
+                {p.otel.alt}
+              </Text>
             </View>
-            <Text style={s.gunBaslikMetin} numberOfLines={1}>
-              {p.gun.baslik}
-            </Text>
-            <Pressable accessibilityRole="button" onPress={p.gun.onCikis} hitSlop={8} style={{ marginLeft: 'auto' }}>
-              <Text style={s.cikis}>{p.gun.cikis}</Text>
-            </Pressable>
-          </View>
+            <Ikon ad="okV7p" boyut={18} renk={anaV5.ok} kalinlik={2.4} />
+          </Pressable>
         ) : null}
-        {p.satirlar.map((r) => (
-          <View key={r.id} style={{ gap: 4 }}>
-            {r.gelis ? (
-              <View style={s.bacak}>
-                <View style={s.bacakCizgi} />
-                <Ikon ad={r.gelis.araba ? 'araba' : 'yuru'} boyut={14} renk={renk.ana} kalinlik={2.4} />
-                <Text style={s.bacakMetin}>{r.gelis.metin}</Text>
-              </View>
-            ) : null}
-            <Pressable
-              accessibilityState={{ selected: r.vurgulu }}
-              accessibilityRole="button"
-              onPress={() => p.onDurak(r.mekanId)}
-              onLongPress={() => p.onDurakUzunBas(r.mekanId)}
-              style={({ pressed }) => [s.durak, r.vurgulu && s.durakVurgulu, r.atlandi && { opacity: 0.55 }, pressed && { opacity: 0.85 }]}>
-              <View
-                style={[
-                  s.no,
-                  { backgroundColor: r.gecildi ? renk.basari : r.vurgulu ? renk.vurgu : r.numaraRengi },
-                  r.vurgulu && { borderWidth: 2.5, borderColor: renk.ana },
-                ]}>
-                <Text style={[s.noMetin, { color: r.vurgulu ? renk.metin : r.gecildi ? renk.zemin : gunUstuMetin(r.numaraRengi) }]}>{r.gecildi ? '✓' : (r.numara ?? '–')}</Text>
-              </View>
-              <View style={{ flex: 1, minWidth: 0 }}>
-                <View style={s.saatSatiri}>
-                  <Text style={s.saat}>{r.atlandi ? t('plan.atlandi') : r.saat}</Text>
-                  <Text style={s.sure}>{r.sure}</Text>
+        {p.satirlar.map((r) => {
+          const soluk = r.gecildi || r.atlandi;
+          return (
+            <View key={r.id}>
+              {r.gelis ? (
+                <View style={s.bacak} accessible accessibilityLabel={`${t(r.gelis.araba ? 'plan.bacakArac' : 'plan.bacakYuru')} ${r.gelis.metin}`}>
+                  <View style={s.saatSutunu} />
+                  <View style={s.kesikSutun}>
+                    {[0, 1, 2, 3].map((i) => (
+                      <View key={i} style={s.kesik} />
+                    ))}
+                  </View>
+                  <View style={s.bacakBilgi}>
+                    <Ikon ad={r.gelis.araba ? 'arabaV7p' : 'yuruV7p'} boyut={14} renk={anaV5.ikincil} kalinlik={1.8} />
+                    <Text style={s.bacakMetin}>{r.gelis.metin}</Text>
+                  </View>
                 </View>
-                <Text style={[s.ad, r.atlandi && s.cizili]} numberOfLines={2}>
-                  {r.ad}
-                </Text>
-                {r.alt ? (
-                  <Text style={s.alt} numberOfLines={1}>
-                    {r.alt}
+              ) : null}
+              <Pressable
+                accessibilityState={{ selected: r.vurgulu }}
+                accessibilityRole="button"
+                onPress={() => p.onDurak(r.mekanId)}
+                onLongPress={() => p.onDurakUzunBas(r.mekanId)}
+                style={({ pressed }) => [s.durak, pressed && { opacity: 0.85 }]}>
+                <Text style={s.saat}>{r.saat ?? ''}</Text>
+                {r.gecildi ? (
+                  <View style={[s.no, { backgroundColor: seyahatV7.tikZemin }]}>
+                    <Ikon ad="tik" boyut={15} renk={renk.basari} kalinlik={2.4} />
+                  </View>
+                ) : (
+                  <View style={[s.no, { backgroundColor: r.atlandi ? anaV5.cizgi : r.numaraRengi }]}>
+                    <Text style={[s.noMetin, { color: r.atlandi ? anaV5.ikincil : gunUstuMetin(r.numaraRengi) }]}>{r.numara ?? '–'}</Text>
+                  </View>
+                )}
+                <View style={{ flex: 1, minWidth: 0, gap: 1 }}>
+                  <Text style={[s.ad, soluk && { color: anaV5.ikincil }]} numberOfLines={2}>
+                    {r.ad}
                   </Text>
-                ) : null}
-              </View>
-              <View style={[s.foto, { backgroundColor: r.fotoZemin }]}>{r.foto ? <Foto source={{ uri: r.foto }} style={StyleSheet.absoluteFill} contentFit="cover" transition={150} /> : null}</View>
-            </Pressable>
-          </View>
-        ))}
-        {p.bos ? (
-          <View style={s.bos}>
-            <Text style={s.bosMetin}>{p.bos.metin}</Text>
-            <Pressable accessibilityRole="button" onPress={p.bos.onPress} hitSlop={6}>
-              <Text style={s.bosDugme}>{p.bos.dugme}</Text>
-            </Pressable>
-          </View>
+                  {r.alt ? (
+                    <Text style={s.alt} numberOfLines={1}>
+                      {r.alt}
+                    </Text>
+                  ) : null}
+                </View>
+              </Pressable>
+            </View>
+          );
+        })}
+        {p.onEkle ? (
+          <Pressable accessibilityRole="button" onPress={p.onEkle} style={({ pressed }) => [s.ekle, pressed && { opacity: 0.8 }]}>
+            <View style={s.saatSutunu} />
+            <View style={s.ekleDaire}>
+              <Ikon ad="artiV7" boyut={15} renk={renk.ana} kalinlik={2.4} />
+            </View>
+            <Text style={s.ekleMetin}>{t('plan.buGuneEkle')}</Text>
+          </Pressable>
         ) : null}
         {p.aksam ? (
           <View style={s.aksam}>
-            <BolumBasligi baslik={t('plan.aksamYakinda')} />
+            <BolumBasligi baslik={t('plan.aksamYakinda')} baglanti={t('plan.tumu')} onBaglanti={p.aksam.onTumu} />
             <BugunBosV7 yerler={p.aksam.yerler} eklenenler={p.aksam.eklenenler} onEkle={p.aksam.onEkle} pasif={p.aksam.pasif} />
           </View>
+        ) : null}
+        {p.listem ? (
+          <Pressable accessibilityRole="button" onPress={p.listem.onPress} style={({ pressed }) => [s.listem, pressed && { opacity: 0.8 }]}>
+            <Ikon ad="kalpV7" boyut={20} renk={renk.ana} kalinlik={2} />
+            <Text style={s.listemBaslik}>{t('plan.listem')}</Text>
+            <Text style={s.listemAlt}>{t('plan.listemBekliyor', { n: p.listem.n })}</Text>
+            <Ikon ad="okV7p" boyut={18} renk={anaV5.ok} kalinlik={2.4} />
+          </Pressable>
         ) : null}
       </View>
     </ScrollView>
@@ -186,42 +204,55 @@ export function PlanListesi(p: Props) {
 }
 
 const s = StyleSheet.create({
-  ekran: { flex: 1, backgroundColor: renk.haritaZemin },
-  ust: { paddingHorizontal: 20, gap: 12 },
-  satirArasi: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 10 },
-  yuz: { borderWidth: 2, borderColor: renk.zemin, borderRadius: 10 },
-  baslik: { ...baslikStili(28), color: renk.metin },
-  sirala: { height: 32, paddingHorizontal: 10, borderRadius: 10, backgroundColor: renk.yuzey, flexDirection: 'row', alignItems: 'center', gap: 5 },
-  siralaMetin: { fontFamily: yazi.ekstra, fontSize: 13, color: renk.ana },
-  cipler: { paddingHorizontal: 20, gap: 6 },
-  cip: { height: 36, paddingHorizontal: 12, borderRadius: 11, backgroundColor: renk.zemin, flexDirection: 'row', alignItems: 'center', gap: 6 },
-  nokta: { width: 8, height: 8, borderRadius: 4 },
-  cipMetin: { fontFamily: yazi.ekstra, fontSize: 13, color: renk.metin },
-  ekle: { width: 36, height: 36, borderRadius: 11, backgroundColor: renk.zemin, alignItems: 'center', justifyContent: 'center' },
-  serit: { marginTop: 14, marginHorizontal: 20 },
-  liste: { paddingTop: 14, paddingHorizontal: 20, gap: 4 },
-  uyari: { fontFamily: yazi.normal, fontSize: 13, color: renk.ikincil, paddingBottom: 6 },
-  gunBaslik: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingTop: 2, paddingBottom: 8 },
-  gunNo: { width: 24, height: 24, borderRadius: 7, alignItems: 'center', justifyContent: 'center' },
-  gunNoMetin: { fontFamily: yazi.ekstra, fontSize: 12 },
-  gunBaslikMetin: { flexShrink: 1, fontFamily: yazi.ekstra, fontSize: 14, color: renk.metin },
-  cikis: { fontFamily: yazi.normal, fontSize: 12, color: renk.ikincil },
-  bacak: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingVertical: 2, paddingLeft: 16 },
-  bacakCizgi: { width: 2, height: 18, backgroundColor: renk.ayrac, marginRight: 6 },
-  bacakMetin: { fontFamily: yazi.ekstra, fontSize: 12, color: renk.ana },
-  durak: { flexDirection: 'row', alignItems: 'flex-start', gap: 12, padding: 12, borderRadius: 16, backgroundColor: renk.zemin },
-  durakVurgulu: { borderWidth: 2, borderColor: renk.vurgu, padding: 10 },
-  no: { width: 30, height: 30, borderRadius: 9, alignItems: 'center', justifyContent: 'center' },
+  ekran: { flex: 1, backgroundColor: renk.zemin },
+  ust: { paddingHorizontal: 16, paddingBottom: 6, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  baslik: { fontFamily: yazi.ekstra, fontSize: 28, letterSpacing: -0.28, color: renk.metin },
+  dugmeler: { flexDirection: 'row', gap: 10 },
+  yuvarlak: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: DUGME_ZEMIN,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: renk.metin,
+    shadowOpacity: 0.12,
+    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 1 },
+    elevation: 2,
+  },
+  sekmeAlani: { borderBottomWidth: 1, borderBottomColor: altMenuRenk.cizgi },
+  sekmeler: { paddingHorizontal: 16, gap: 20 },
+  sekme: { height: 42, flexDirection: 'row', alignItems: 'center', gap: 6, borderBottomWidth: 2.5, borderBottomColor: 'transparent' },
+  sekmeSecili: { borderBottomColor: renk.vurgu },
+  nokta: { width: 7, height: 7, borderRadius: 4 },
+  sekmeMetin: { fontFamily: yazi.orta, fontSize: 15, color: anaV5.ikincil },
+  sekmeMetinSecili: { fontFamily: yazi.kalin, color: renk.metin },
+  ozet: { paddingTop: 16, paddingHorizontal: 16, paddingBottom: 6, gap: 2 },
+  ozetBaslik: { fontFamily: yazi.ekstra, fontSize: 20, color: renk.metin },
+  ozetAlt: { fontFamily: yazi.normal, fontSize: 14, color: anaV5.ikincil },
+  liste: { paddingHorizontal: 16 },
+  uyari: { fontFamily: yazi.normal, fontSize: 13, color: anaV5.ikincil, paddingVertical: 6 },
+  otel: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: anaV5.cizgi, marginBottom: 6, minHeight: 44 },
+  otelBaslik: { fontFamily: yazi.kalin, fontSize: 15, color: renk.metin },
+  otelAlt: { fontFamily: yazi.normal, fontSize: 13, color: anaV5.ikincil },
+  saatSutunu: { width: 44 },
+  durak: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 8, minHeight: 44 },
+  saat: { width: 44, fontFamily: yazi.kalin, fontSize: 14, color: anaV5.ikincil, fontVariant: ['tabular-nums'] },
+  no: { width: 28, height: 28, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
   noMetin: { fontFamily: yazi.ekstra, fontSize: 13 },
-  saatSatiri: { flexDirection: 'row', alignItems: 'baseline', gap: 8 },
-  saat: { ...baslikStili(15), color: renk.metin },
-  sure: { fontFamily: yazi.ekstra, fontSize: 12, color: renk.ikincil },
-  ad: { fontFamily: yazi.ekstra, fontSize: 15, lineHeight: 18, color: renk.metin, marginTop: 2 },
-  cizili: { textDecorationLine: 'line-through' },
-  alt: { fontFamily: yazi.normal, fontSize: 12, color: renk.ikincil, marginTop: 2 },
-  foto: { width: 52, height: 52, borderRadius: 12, overflow: 'hidden' },
-  bos: { padding: 14, borderRadius: 16, backgroundColor: renk.zemin, gap: 8 },
-  bosMetin: { fontFamily: yazi.normal, fontSize: 14, lineHeight: 20, color: renk.ikincil },
-  bosDugme: { fontFamily: yazi.ekstra, fontSize: 14, color: renk.ana },
-  aksam: { marginTop: 4 },
+  ad: { fontFamily: yazi.kalin, fontSize: 16, color: renk.metin },
+  alt: { fontFamily: yazi.normal, fontSize: 13, color: anaV5.ikincil },
+  bacak: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  kesikSutun: { width: 28, height: 22, alignItems: 'center', gap: 3 },
+  kesik: { width: 2, height: 3, backgroundColor: anaV5.cizgi },
+  bacakBilgi: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  bacakMetin: { fontFamily: yazi.normal, fontSize: 13, color: anaV5.ikincil },
+  ekle: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 10, minHeight: 44 },
+  ekleDaire: { width: 28, height: 28, borderRadius: 14, borderWidth: 1.5, borderColor: renk.ana, alignItems: 'center', justifyContent: 'center' },
+  ekleMetin: { fontFamily: yazi.kalin, fontSize: 15, color: renk.ana },
+  aksam: {},
+  listem: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 14, marginTop: 10, borderTopWidth: 1, borderTopColor: anaV5.cizgi },
+  listemBaslik: { flex: 1, fontFamily: yazi.kalin, fontSize: 15, color: renk.metin },
+  listemAlt: { fontFamily: yazi.normal, fontSize: 13, color: anaV5.ikincil },
 });
