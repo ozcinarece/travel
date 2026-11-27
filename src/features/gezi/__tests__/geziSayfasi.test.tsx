@@ -252,6 +252,9 @@ describe('#181 KK13 · #308 v7: Gezi sayfası açılışında Google isteği yok
   it('boş gün: "Bugün boş", rehberden listede olmayan yer, turuncu düğme yok', async () => {
     mockTablolar = fikstur(bugun());
     mockTablolar.stops = [];
+    // #548: listedeki atanmamış yerler adaylarda önce gelir. Gündüz (akşam kuralı yokken) iki satırı onlar doldurup rehber yerini
+    // düşürüyordu; test günün saatine bağlıydı. Liste boş: aday yalnız rehberden, her saatte aynı.
+    mockTablolar.places = [];
     const { getByText, queryByText, getByLabelText, qc } = ciz();
     await waitFor(() => getByText('Eskişehir Gezisi'));
     await sakinles(qc);

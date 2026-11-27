@@ -34,6 +34,7 @@ import { useSeyahat } from '@/features/seyahatler/sorgular';
 import { seyahatAdi } from '@/features/sihirbaz/sihirbaz';
 import { useHafifYerler } from '@/features/yerler/api';
 import { t } from '@/i18n';
+import { kacinciGun } from '@/lib/zaman';
 import { kategoriEtiketi, sureMetni } from '@/lib/kategori';
 import { useOturum } from '@/lib/oturum';
 import type { Durak, Gun, Mekan, Seyahat } from '@/lib/tipler';
@@ -363,7 +364,7 @@ function Listem({ seyahat, gunler, duraklar, mekanlar, konaklamalar }: { seyahat
         foto={guneEkleMekan ? (yerler.data?.[guneEkleMekan.place_id]?.foto_uri ?? null) : null}
         dakika={guneEkleMekan?.default_minutes ?? 0}
         secenekler={secenekler}
-        ilkAd={ilkAd}
+        bugunIndex={kacinciGun(seyahat)}
         mesgul={ata.isPending}
         baglamGunId={baglamGunId}
         onSec={guneEkle}

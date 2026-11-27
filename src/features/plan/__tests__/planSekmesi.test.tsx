@@ -141,30 +141,42 @@ describe('#182 KK7: Plan sekmesi Google isteği doğurmaz', () => {
   it('açılış ve günler arasında gezinme: Edge Function ve fetch çağrılmaz; adlar DB / kategori, öneren, oy', async () => {
     const bas = tarihEkle(yerelTarih(new Date(), IST), 12);
     sahteSifirla(fikstur(bas), { 'ChIJ-db-1': { ad: 'Eti Arkeoloji Müzesi', kategori: 'museum' } });
-    const { getByText, queryByText, qc } = ciz();
-    await waitFor(() => getByText('Sırayı düzenle'));
+    const { getByText, getByLabelText, getAllByText, queryByText, qc } = ciz();
+    await waitFor(() => getByLabelText('Haritada gör'));
     await sakinles(qc);
 
-    // KK1–KK2: 1. gün listesi — DB'deki ad, Google'da kalan ad yerine kategori; "Ayşe önerdi", "1 oy".
+    // #534 KK1: "Plan" + harita ve ⋯ düğmeleri; üst harita şeridi, Sırayı düzenle hapı ve avatarlar yok.
+    expect(getByText('Plan')).toBeTruthy();
+    expect(getByLabelText('Sırayı düzenle ve gün ayarları')).toBeTruthy();
+    expect(queryByText('Haritayı aç')).toBeNull();
+    expect(queryByText('Sırayı düzenle')).toBeNull();
+    // KK3: gün özeti — saat aralığı ve durak sayısı.
+    expect(getByText(/09:30–\d\d:\d\d · 2 durak$/)).toBeTruthy();
+    // KK4: otel yok → tek "Otel ekle" satırı.
+    expect(getByText('Otel ekle')).toBeTruthy();
+    expect(getByText('Gün otelden başlasın, saatler ona göre')).toBeTruthy();
+    // KK5: saat sütunu; DB'deki ad, Google'da kalan ad yerine kategori; alt satır "tür · süre".
+    expect(getByText('09:30')).toBeTruthy();
     expect(getByText('Eti Arkeoloji Müzesi')).toBeTruthy();
     expect(getByText('Restoran')).toBeTruthy();
-    expect(getByText('Müze · 1 oy')).toBeTruthy();
-    // Adı bilinmeyen mekanın alt satırı kategoriyi tekrar etmez.
-    expect(getByText('Ayşe önerdi')).toBeTruthy();
-    // KK3: şerit etiketi ve "Haritayı aç".
-    expect(getByText(/09:30 – \d\d:\d\d · .* yürüme/)).toBeTruthy();
-    expect(getByText('Haritayı aç')).toBeTruthy();
+    expect(getByText(/^Müze · \d+ (dk|sa)/)).toBeTruthy();
+    expect(queryByText('Ayşe önerdi')).toBeNull();
+    // KK6: bacak "süre · mesafe". KK7: "+ Bu güne yer ekle"; listede güne atanmamış yer yok → Listem satırı yok.
+    expect(getAllByText(/^~?\d+ dk · [\d,]+ (m|km)$/).length).toBe(1);
+    expect(getByText('Bu güne yer ekle')).toBeTruthy();
+    expect(queryByText(/gün bekliyor/)).toBeNull();
 
-    // Günler arasında gezinme.
+    // KK2: günler arasında gezinme (sekme "Cum 27" biçimi).
     fireEvent.press(getByText(gunEtiketi({ index: 2, date: tarihEkle(bas, 1) })));
     await waitFor(() => getByText('Park'));
     await sakinles(qc);
     expect(queryByText('Restoran')).toBeNull();
-    // KK5 / #532 KK3: gün 17:00'den önce bitiyor → "Akşam için yakında" (listede olmayan yakın rehber yeri); kanvas 24 "Mekan rehberi var".
+    // #532 KK3: gün 17:00'den önce bitiyor → "Akşam için yakında" (listede olmayan yakın rehber yeri) + "Tümü ›".
     expect(getByText('Sazova Bilim Müzesi')).toBeTruthy();
-    expect(getByText('Mekan rehberi var')).toBeTruthy();
+    expect(getByText('Tümü ›')).toBeTruthy();
     fireEvent.press(getByText(gunEtiketi({ index: 3, date: tarihEkle(bas, 2) })));
-    await waitFor(() => getByText(/Bu günde henüz durak yok/));
+    await waitFor(() => getByText(/· 0 durak$|^0 durak$/));
+    expect(getByText('Bu güne yer ekle')).toBeTruthy();
     await sakinles(qc);
 
     expect(sahte.invoke).toEqual([]);
@@ -180,11 +192,13 @@ describe('#182 KK7: Plan sekmesi Google isteği doğurmaz', () => {
       durak('d3', 'g2', 'm333', 'a0'),
     ];
     sahteSifirla(f, { 'ChIJ-db-1': { ad: 'Eti Arkeoloji Müzesi', kategori: 'museum' } });
-    const { getByText, getAllByText, getAllByRole, qc } = ciz();
-    await waitFor(() => getByText('Sırayı düzenle'));
+    const { getByText, getByLabelText, getAllByRole, qc } = ciz();
+    await waitFor(() => getByLabelText('Haritada gör'));
     await sakinles(qc);
+    // #534 KK2: bugünün sekmesinde "Bugün"; KK5: gezilen durağın alt satırında "· gezildi".
+    expect(getByText('Bugün')).toBeTruthy();
     expect(getByText('Eti Arkeoloji Müzesi')).toBeTruthy();
-    expect(getAllByText('✓').length).toBeGreaterThan(0);
+    expect(getByText(/^Müze · .* · gezildi$/)).toBeTruthy();
     const vurgulu = getAllByRole('button').filter((b) => b.props.accessibilityState?.selected === true);
     expect(vurgulu.some((b) => within(b).queryByText('Restoran'))).toBe(true);
     expect(sahte.invoke).toEqual([]);

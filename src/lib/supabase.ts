@@ -5,17 +5,19 @@ import { createClient } from '@supabase/supabase-js';
 import { Platform } from 'react-native';
 
 import { agFetch } from './agFetch';
+import { webDepolama } from './depolama';
 
 const url = process.env.EXPO_PUBLIC_SUPABASE_URL ?? '';
 const anonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY ?? '';
 
-// Web'de oturum localStorage'da kalır (PRD 3.10 KK3: misafir aynı tarayıcıda tekrar ad girmez).
+// Web'de oturum localStorage'da kalır (PRD 3.10 KK3: misafir aynı tarayıcıda tekrar ad girmez);
+// depolama kapalıysa bellekte (#537).
 // PKCE: OAuth dönüşü ?code= ile gelir, tarayıcı geçmişinde token kalmaz.
 // #293 KK3: 15 sn zaman aşımı; giriş sayfası (HTML) ağ hatası sayılır.
 export const supabase = createClient(url, anonKey, {
   global: { fetch: agFetch() },
   auth: {
-    storage: Platform.OS === 'web' ? undefined : AsyncStorage,
+    storage: Platform.OS === 'web' ? webDepolama() : AsyncStorage,
     autoRefreshToken: true,
     persistSession: true,
     detectSessionInUrl: Platform.OS === 'web',

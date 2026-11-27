@@ -1,0 +1,252 @@
+{
+  "il": "Iğdır",
+  "slug": "igdir",
+  "guncelleme": "2026-11-26",
+  "oneriler": [
+    {
+      "sira": 1,
+      "ad": "Iğdır Soykırım Anıtı ve Müzesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 2,
+      "neden": "43,5 m'lik kılıç biçimli kulelerin altındaki salonda 1915–1920 belgeleri sergilenir",
+      "place_id": "ChIJoXcpkzDfakARr27jSH_KhF8"
+    },
+    {
+      "sira": 2,
+      "ad": "Tuzluca Tuz Mağaraları",
+      "kategori": "aktivite",
+      "amaclar": [
+        "doga",
+        "yavas",
+        "cocuklu"
+      ],
+      "ilce": "Tuzluca",
+      "merkeze_km": 42,
+      "neden": "Yerin 80 m kadar altında, yıl boyu 12°C'deki tuz galerilerinde yürünür",
+      "place_id": "ChIJXyB4eFQBa0AR1cX3TYoq3sE"
+    },
+    {
+      "sira": 3,
+      "ad": "Ağrı Dağı (Iğdır yüzü)",
+      "kategori": "aktivite",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Aralık",
+      "merkeze_km": 30,
+      "neden": "5.137 m'lik doruğa yalnız izin ve rehberle çıkılır; kuzey yüzü ovanın her yerinden görünür",
+      "place_id": "ChIJrUKDYzLSFEARfCSxtlT6pqo"
+    },
+    {
+      "sira": 4,
+      "ad": "Harmandöven (Ejder) Kervansarayı",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 30,
+      "neden": "Tebriz kervan yolundaki Selçuklu hanı; 2010'da onarıldı, 2026'da sergiye açıldı",
+      "place_id": "ChIJ--i8zMI9a0AROuHWIHpyawk"
+    },
+    {
+      "sira": 5,
+      "ad": "Gökkuşağı Tepeleri",
+      "kategori": "manzara",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Tuzluca",
+      "merkeze_km": 45,
+      "neden": "Kırmızı, sarı ve yeşil katmanlı çıplak tepeler; yazın gölge yok, sabah erken git"
+    },
+    {
+      "sira": 6,
+      "ad": "Karakoyunlu Koçbaşlı Açık Hava Müzesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Karakoyunlu",
+      "merkeze_km": 13,
+      "neden": "Bazalttan oyulmuş koç başlı Karakoyunlu mezar taşları açık alanda sergileniyor"
+    },
+    {
+      "sira": 7,
+      "ad": "Aras Kuş Cenneti",
+      "kategori": "aktivite",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Tuzluca",
+      "merkeze_km": 35,
+      "neden": "Yukarı Çıyrıklı'daki istasyonda bahar ve güz göçünde kuş halkalama izlenebilir",
+      "place_id": "ChIJ_Svp3FGqa0ARmH08S1nZvnw"
+    },
+    {
+      "sira": 8,
+      "ad": "Üçkaya Gölü",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Tuzluca",
+      "merkeze_km": 55,
+      "neden": "1.500 m'de adacıklı küçük göl; kıyıda kamp yapılır, kışın yüzeyi donar"
+    },
+    {
+      "sira": 9,
+      "ad": "İranlılar Saray Lokantası",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Kentin en eski lokantalarından; nohutlu, kuzu incikli bozbaşıyla bilinir",
+      "place_id": "ChIJ0ZfG58Aga0ARTU6Yxi_HSKY"
+    },
+    {
+      "sira": 10,
+      "ad": "Iğdır Ovası Kayısı Bahçeleri",
+      "kategori": "manzara",
+      "amaclar": [
+        "doga",
+        "yavas",
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 10,
+      "neden": "Nisanda ova beyaz çiçeğe keser; haziran sonunda coğrafi işaretli şalak toplanır"
+    },
+    {
+      "sira": 11,
+      "ad": "Karasu Sulak Alanı",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Aralık",
+      "merkeze_km": 20,
+      "neden": "Ağrı Dağı eteğindeki sazlıkta kışın bile 35'ten fazla kuş türü sayıldı"
+    },
+    {
+      "sira": 12,
+      "ad": "Kul Yusuf Kümbeti",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 15,
+      "neden": "Çakırtaş köyünde sekizgen gövdeli taş kümbet; ovanın az bilinen anıtlarından",
+      "place_id": "ChIJ954ujlPnakARV7DoS29K-YQ"
+    },
+    {
+      "sira": 13,
+      "ad": "Ahora Vadisi",
+      "kategori": "doga",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Aralık",
+      "merkeze_km": 30,
+      "neden": "Ağrı Dağı'nın kuzey yüzünü yaran derin vadi; milli park içinde, izin kuralı geçerli",
+      "place_id": "ChIJ89XSrqXVFEARxROR5InONNo"
+    },
+    {
+      "sira": 14,
+      "ad": "Ağırkaya Tesisleri",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet",
+        "cocuklu"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 3,
+      "neden": "Alikamerli'de aile işletmesi; bozbaş, yoğurt çorbası ve tandır ekmeği var"
+    },
+    {
+      "sira": 15,
+      "ad": "Serdarbulak Yaylası",
+      "kategori": "manzara",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Aralık",
+      "merkeze_km": 60,
+      "neden": "İki Ağrı doruğu arasındaki eyerden Büyük ve Küçük Ağrı yan yana görünür"
+    },
+    {
+      "sira": 16,
+      "ad": "Tekelti Dağı",
+      "kategori": "aktivite",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Tuzluca",
+      "merkeze_km": 50,
+      "neden": "2.552 m'lik piramit biçimli doruk; tırmanış ve kamp için yerel dağcıların rotası",
+      "place_id": "ChIJmatjbQ8Ha0ARs1guc9TcdcA"
+    },
+    {
+      "sira": 17,
+      "ad": "Küçük Ağrı Dağı",
+      "kategori": "aktivite",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Aralık",
+      "merkeze_km": 55,
+      "neden": "3.896 m'lik doruk; Büyük Ağrı'dan Serdarbulak eyeriyle ayrılır, izinle çıkılır",
+      "place_id": "ChIJt4FNQP_aFEARotrAuuVTmkw"
+    },
+    {
+      "sira": 18,
+      "ad": "Korhan Kalesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "doga"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 42,
+      "neden": "Korhan Yaylası'ndaki tepede kale kalıntısı; üstünden Aras ovası açılır",
+      "place_id": "ChIJA8ZvCpora0ARxJYkxF-PP90"
+    },
+    {
+      "sira": 19,
+      "ad": "Göktaş ve Uğruca Şelaleleri",
+      "kategori": "doga",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Tuzluca",
+      "merkeze_km": 50,
+      "neden": "Kar erimesinde, ilkbahar ve erken yazda akan mevsimlik şelaleler; yazın kurur"
+    },
+    {
+      "sira": 20,
+      "ad": "Ortaköy Hamamı",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Aralık",
+      "merkeze_km": 50,
+      "neden": "Aralık'ın Ortaköy köyündeki eski hamam, ilçenin kayıtlı tarihî yapılarından"
+    }
+  ]
+}

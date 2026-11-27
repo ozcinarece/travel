@@ -65,6 +65,12 @@ export type IkonAdi =
   | 'sohbetV7'
   | 'yolTarifiV7'
   | 'kalpV7'
+  // #534 (UX önerileri kanvası `Plan_v7p_*`): Plan gün ekranının üst harita düğmesi, otel satırı, bacak ikonları ve satır oku.
+  | 'haritaV7p'
+  | 'yatakV7p'
+  | 'arabaV7p'
+  | 'yuruV7p'
+  | 'okV7p'
   // #515 (`Sos_v6_Paylas` s.43): "Linkte senin adın görünür" satırındaki kişi.
   | 'kisiV6'
   // #69: filtre düğmesi (kaydırıcılar) ve dolu yıldız (öne çıkan).
@@ -302,6 +308,26 @@ export function Ikon({ ad, boyut = 24, renk, kalinlik = 2, dolgu }: Props) {
         <Path d="M4 5h16v11H9l-5 4z" {...ortak} />
       ) : ad === 'yolTarifiV7' ? (
         <Path d="M3 11l18-8-8 18-2-8z" {...ortak} />
+      ) : ad === 'haritaV7p' ? (
+        <>
+          <Path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2z" {...ortak} />
+          <Path d="M9 4v14M15 6v14" {...ortak} />
+        </>
+      ) : ad === 'yatakV7p' ? (
+        <Path d="M4 18V8M4 13h16v5M8 13v-2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v2" {...ortak} />
+      ) : ad === 'arabaV7p' ? (
+        <>
+          <Path d="M5 16h14v-4l-2-5H7l-2 5z" {...ortak} />
+          <Circle cx={8} cy={17} r={1.6} {...ortak} />
+          <Circle cx={16} cy={17} r={1.6} {...ortak} />
+        </>
+      ) : ad === 'yuruV7p' ? (
+        <>
+          <Circle cx={13} cy={4} r={1.6} {...ortak} />
+          <Path d="M10 21l2-6 3 3v4M8 12l2-4 4 1 2 3M10 8l-2 6" {...ortak} />
+        </>
+      ) : ad === 'okV7p' ? (
+        <Path d="M9 6l6 6-6 6" {...ortak} />
       ) : ad === 'kalpV7' ? (
         <Path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z" {...ortak} />
       ) : ad === 'kisiV6' ? (
