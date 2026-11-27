@@ -1,7 +1,7 @@
 {
   "il": "Rize",
   "slug": "rize",
-  "guncelleme": "2026-11-20",
+  "guncelleme": "2026-11-27",
   "oneriler": [
     {
       "sira": 1,
@@ -41,7 +41,7 @@
       "merkeze_km": 80,
       "neden": "Fırtına'ya bakan kayalığın üstünde, ormandan yükselen kulesiyle orta çağ kalesi",
       "osm": "way/297314092",
-      "place_id": "ChIJhRHLuN4QZkAR4EM5ordKnoM"
+      "place_id": "ChIJizZrBAIXZkARP5yPXjObNzQ"
     },
     {
       "sira": 4,
@@ -104,7 +104,7 @@
       "merkeze_km": 2,
       "neden": "Bizans'tan kalan iç kale tepede; içindeki çay bahçesinden kent ve liman görülür",
       "osm": "way/247789320",
-      "place_id": "ChIJoaZ6Svt6ZkARBMPfVkix2Ck"
+      "place_id": "ChIJQaq73ON6ZkARWgEg2jcHm30"
     },
     {
       "sira": 9,
@@ -231,7 +231,7 @@
       "ilce": "Çamlıhemşin",
       "merkeze_km": 92,
       "neden": "Pokut'un yanındaki sırtta sık dizili ahşap evler; iki yayla patikayla birbirine bağlı",
-      "place_id": "ChIJCeyOt6oXZkAR-s3HorqZKZg"
+      "place_id": "ChIJQTeqVCoXZkARA_N9z_XqdhQ"
     },
     {
       "sira": 19,
