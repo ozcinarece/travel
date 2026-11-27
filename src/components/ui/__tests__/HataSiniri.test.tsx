@@ -1,6 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals';
 import { fireEvent, render } from '@testing-library/react-native';
-import { Text } from 'react-native';
+import { Platform, Text } from 'react-native';
+
+import { t } from '@/i18n';
 
 import { HataSiniri } from '../HataSiniri';
 
@@ -41,5 +43,25 @@ describe('HataSiniri (#85)', () => {
     fireEvent.press(getByText('Yeniden dene'));
     expect(getByText('iyi')).toBeTruthy();
     expect(queryByText('Bir şeyler ters gitti')).toBeNull();
+  });
+
+  // #557 KK3: web'de "uygulamayı kapatıp aç" değil "sayfayı yenile"; native'de metin aynen kalır.
+  const durumlar: [string, string][] = [
+    ['ios', 'genel.hataMetin'],
+    ['web', 'genel.hataMetinWeb'],
+  ];
+  it.each(durumlar)('%s: kart metni %s', (platform, anahtar) => {
+    const os = Platform.OS;
+    Object.defineProperty(Platform, 'OS', { configurable: true, get: () => platform });
+    try {
+      const { getByText } = render(
+        <HataSiniri>
+          <Patlayan patla />
+        </HataSiniri>,
+      );
+      expect(getByText(t(anahtar))).toBeTruthy();
+    } finally {
+      Object.defineProperty(Platform, 'OS', { configurable: true, get: () => os });
+    }
   });
 });

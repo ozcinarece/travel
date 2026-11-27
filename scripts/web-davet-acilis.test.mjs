@@ -2,7 +2,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { BELIRME_MS, KATMAN_ID, katmanEkle, katmanHtml } from './web-davet-acilis.mjs';
+import { BELIRME_MS, KATMAN_ID, YENILE_SN, katmanEkle, katmanHtml } from './web-davet-acilis.mjs';
 
 const metin = JSON.parse(readFileSync(new URL('../src/i18n/tr.json', import.meta.url), 'utf8'));
 const sayfa = '<!DOCTYPE html><html><head><title>x</title></head><body class="b"><div id="root"></div><script src="/a.js"></script></body></html>';
@@ -40,11 +40,12 @@ test('not 8 sn gecikmeli; hareket azaltılınca noktalar durur, not kalır', () 
 });
 
 test('metin HTML kaçırılır', () => {
-  const kirli = { ...metin, davet: { ...metin.davet, webAcilis: { baslik: '<b>', metin: 'a & b', uzun: '"x"' } } };
+  const kirli = { ...metin, davet: { ...metin.davet, webAcilis: { baslik: '<b>', metin: 'a & b', uzun: '"x"', yenile: '<i>' } } };
   const html = katmanHtml(kirli);
   assert.ok(html.includes('<h1>&lt;b&gt;</h1>'));
   assert.ok(html.includes('a &amp; b'));
   assert.ok(html.includes('&quot;x&quot;'));
+  assert.ok(html.includes('&lt;i&gt;'));
 });
 
 test('body yoksa hata', () => {
@@ -58,4 +59,18 @@ test('eski motor: inset ve flex gap yok (Android 9 WebView = Chrome 74, #552)', 
   assert.match(stil, /position:fixed;top:0;right:0;bottom:0;left:0/);
   assert.match(stil, /\.da-noktalar span\+span\{margin-left:8px\}/);
   assert.match(stil, /\.da-satir\{margin:6px 0 0;/);
+});
+
+test('30 sn\'de not "sayfayı yenile"ye döner; yalnız CSS, hareket azaltılınca da (#557)', () => {
+  assert.equal(YENILE_SN, 30);
+  const html = katmanHtml(metin);
+  assert.ok(html.includes(metin.davet.webAcilis.yenile));
+  const stil = html.match(/<style[^>]*>(.*?)<\/style>/)[1];
+  assert.match(stil, /\.da-uzun-ilk\{overflow:hidden;animation:da-gizle 0s linear 30s forwards\}/);
+  assert.match(stil, /\.da-uzun-yenile\{[^}]*visibility:hidden;animation:da-goster 0s linear 30s forwards\}/);
+  // Hareket azaltma kuralı yalnız noktaları durdurur; metin değişimine dokunmaz.
+  const azalt = stil.match(/@media \(prefers-reduced-motion:reduce\)\{(.*)\}$/)[1];
+  assert.doesNotMatch(azalt, /da-uzun/);
+  // Katmanda betik yok: JS'ye bağlı değil.
+  assert.doesNotMatch(html, /<script/i);
 });

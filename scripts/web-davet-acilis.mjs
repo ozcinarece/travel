@@ -1,7 +1,8 @@
 // #549: web davet sayfası (/r/{token}, /r/g/{token}) JS gelmeden de bir şey gösterir (kanvas 3e A–B).
 // `expo export -p web` çıktısındaki davet HTML'lerine, #root'un dışına, sabit bir açılış katmanı yazar. Metinler
 // src/i18n/tr.json `davet.webAcilis.*` ve `marka.ad`'dan gelir. Katman yalnız CSS: üç nokta sırayla yanar, 8 sn
-// sonra "Biraz uzun sürüyor" notu açılır (`animation-delay`), `prefers-reduced-motion`'da noktalar durur.
+// sonra "Biraz uzun sürüyor" notu açılır (`animation-delay`), 30 sn'de "sayfayı yenile"ye döner (#557),
+// `prefers-reduced-motion`'da noktalar durur.
 // Uygulama açılış kararını verince (`src/lib/webAcilis.ts`, kök `_layout`) katman kaldırılır.
 // Kullanım: node scripts/web-davet-acilis.mjs dist   (web-yayin'de web-yonlendirmeler.js'ten ÖNCE: kopyalar da alsın)
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
@@ -10,6 +11,8 @@ import { fileURLToPath } from 'node:url';
 
 export const KATMAN_ID = 'davet-acilis';
 export const BELIRME_MS = 600;
+/** #557: JS paketi hiç gelmezse 3e-B notu bu süreden sonra "sayfayı yenile" der (yalnız CSS). */
+export const YENILE_SN = 30;
 export const DAVET_SAYFALARI = ['r/[token].html', 'r/g/[token].html'];
 
 const kacir = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
@@ -36,13 +39,18 @@ const STIL = `
 @keyframes da-nokta{0%,100%{background:#FF7A1A}33.3%{background:#FFE4D1}66.6%{background:#FFC9A1}}
 #${KATMAN_ID} .da-uzun{width:100%;max-width:326px;margin:0;max-height:0;padding:0 16px;overflow:hidden;visibility:hidden;border-radius:16px;background:#EEF2FF;font-size:14px;font-weight:700;line-height:1.4;animation:da-uzun 0s linear 8s forwards}
 @keyframes da-uzun{to{margin-top:20px;max-height:240px;padding:14px 16px;visibility:visible}}
+#${KATMAN_ID} .da-uzun span{display:block}
+#${KATMAN_ID} .da-uzun-ilk{overflow:hidden;animation:da-gizle 0s linear ${YENILE_SN}s forwards}
+#${KATMAN_ID} .da-uzun-yenile{max-height:0;overflow:hidden;visibility:hidden;animation:da-goster 0s linear ${YENILE_SN}s forwards}
+@keyframes da-gizle{to{max-height:0;visibility:hidden}}
+@keyframes da-goster{to{max-height:240px;visibility:visible}}
 @media (prefers-reduced-motion:reduce){#${KATMAN_ID} .da-noktalar span{animation:none}}
 `
   .trim()
   .replace(/\n/g, '');
 
 export function katmanHtml(metin) {
-  const { baslik, metin: satir, uzun } = metin.davet.webAcilis;
+  const { baslik, metin: satir, uzun, yenile } = metin.davet.webAcilis;
   const marka = metin.marka.ad;
   return (
     `<style id="${KATMAN_ID}-stil">${STIL}</style>` +
@@ -50,7 +58,7 @@ export function katmanHtml(metin) {
     `<svg width="80" height="48" viewBox="0 0 80 48" role="img" aria-label="${kacir(marka)}"><circle cx="24" cy="14" r="7" fill="#FF7A1A"></circle><circle cx="56" cy="14" r="7" fill="#152A6B"></circle><path d="M20 30 Q40 48 60 30" stroke="#FF7A1A" stroke-width="7" fill="none" stroke-dasharray="7 4.5"></path></svg>` +
     `<div class="da-metinler"><h1>${kacir(baslik)}</h1><p class="da-satir">${kacir(satir)}</p></div>` +
     `<div class="da-noktalar" aria-hidden="true"><span></span><span></span><span></span></div>` +
-    `<p class="da-uzun">${kacir(uzun)}</p>` +
+    `<p class="da-uzun"><span class="da-uzun-ilk">${kacir(uzun)}</span><span class="da-uzun-yenile">${kacir(yenile)}</span></p>` +
     `</div></div>`
   );
 }

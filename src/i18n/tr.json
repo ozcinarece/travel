@@ -8,6 +8,7 @@
     "yukleniyor": "Yükleniyor…",
     "hataBaslik": "Bir şeyler ters gitti",
     "hataMetin": "Beklenmedik bir hata oldu. Yeniden deneyebilirsin; sorun sürerse uygulamayı kapatıp aç.",
+    "hataMetinWeb": "Bir şeyler ters gitti. Sayfayı yenileyip tekrar dene.",
     "yenidenDene": "Yeniden dene",
     "bolumHata": "Bu bölüm şu an açılamadı; sayfanın geri kalanı çalışıyor."
   },
@@ -188,11 +189,13 @@
     "gozAt": "Tripmate'e göz at",
     "anaSayfa": "Ana sayfaya git",
     "hata": "Katılım tamamlanamadı. Tekrar dene.",
+    "depolamaYok": "Bu tarayıcı girişini saklayamıyor. Linki Chrome ya da Safari'de aç.",
     "webNot": "Uygulaman yoksa da sorun yok: burada katıl; sonra indirirsen aynı hesapla doğrudan seyahate düşersin.",
     "webAcilis": {
       "baslik": "Davetin açılıyor",
       "metin": "Arkadaşının gezi planı birazdan burada.",
-      "uzun": "Biraz uzun sürüyor. Sayfayı kapatma, plan açılınca burada görünecek."
+      "uzun": "Biraz uzun sürüyor. Sayfayı kapatma, plan açılınca burada görünecek.",
+      "yenile": "Açılmadıysa sayfayı yenile."
     },
     "linkKopyalandi": "Link kopyalandı",
     "katildin": {
