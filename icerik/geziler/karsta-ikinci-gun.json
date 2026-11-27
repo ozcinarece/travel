@@ -1,0 +1,126 @@
+{
+  "surum": 1,
+  "sehir": {
+    "slug": "kars"
+  },
+  "takvim": {
+    "ilk_gun": "pazar"
+  },
+  "gezi": {
+    "slug": "karsta-ikinci-gun",
+    "baslik": "Kars'ta ikinci gün: tabyadan peynire",
+    "ozet": "Kanlı Tabya'da Kafkas Cephesi, Rus caddeleri, peynir müzesi, ali nazik",
+    "yazar_ad": "Tripmate ekibi",
+    "amaclar": [
+      "kultur_tarih",
+      "lezzet",
+      "yavas",
+      "cocuklu"
+    ],
+    "yazi_md": "Kars'ın kaleyle Ani'den sonraki katmanı savaşlar ve Rus dönemi. Kent 1878'den 1918'e kırk yıl Rus yönetiminde kaldı; güneydeki düz caddeler, bazalt cepheli tek katlı binalar ve bir Ortodoks katedralinden dönme cami o yılların izi. Kentin çevresindeki tabyalar da aynı yüzyılın savaşlarından kalma. Bu gün hepsini yürüyerek bağlar: güneydeki bir tabyadan merkeze, oradan kuzeydoğudaki müzeye. Arada Kars'ın peyniri ve bir ocakbaşında öğle yemeği var. Duraklar müze ağırlıklı ve kapalı mekân; kışın soğukta uzun yürümek istemeyenler için iyi bir gün.\n\n> Kafkas Cephesi Müzesi sabah erken açılır; güne orada başla ki öğlene kadar merkezde olasın. Durakların arası 15–25 dakika yürüyüş, son bacak en uzunu; karda ya da ayazda bu bacağı taksiyle geç.\n\n## 1. gün · Tabyadan Rus caddelerine\n\nGüne kentin güneyinde, Kars Çayı'na bakan sırttaki [Kafkas Cephesi Harp Tarihi Müzesi](mekan:ChIJJywOlSyPaUARTwcZoNSNWCU) ile başla. Müze, 1828'deki Osmanlı-Rus savaşında ağır çatışmalar görmüş Kanlı Tabya'nın içinde, 2018'de açıldı. Silikon figürlerle kurulmuş revir ve asker mutfağının ardından aynalı bir odada mumların yandığı çarıklar Sarıkamış'ta donan askerleri anar.\n\n::mekan[ChIJJywOlSyPaUARTwcZoNSNWCU]\n\nTabyadan kuzeye, merkeze yürü. [Fethiye Camii](mekan:ChIJsYjnOdeOaUARma2ZAnj3uHw) Rus döneminde Ortodoks katedrali olarak yapıldı, Kars Türkiye'ye geçtikten sonra camiye çevrildi. Çevresindeki caddeler bu dönemin ızgara planı; kalenin eteğindeki eğri sokaklarla farkı hemen görürsün.\n\nBuradan batıya, [Kars Peynir Müzesi](mekan:ChIJAUDhUx-PaUARLS5rBqLx9YA)'ne geç. 2022'de eski bir tabya binasında açılan müze gravyer, kaşar ve tulumun nasıl yapıldığını kazanları ve kalıplarıyla anlatır. Çocuklar için günün en kolay durağı.\n\nÖğle yemeği için Kazım Paşa Caddesi'ne, [Ani Ocakbaşı](mekan:ChIJ9XQOwM6OaUAREWUjVAbQKR4)'na yürü. Burada ali nazik söyle: köz patlıcanlı sarımsaklı yoğurdun üstünde tereyağında kavrulmuş et. Yöresel tencere yemeklerinin çoğu öğlen çıkar, gelince vitrine bak.\n\n::mekan[ChIJ9XQOwM6OaUAREWUjVAbQKR4]\n\nYemekten sonra doğuya, istasyon tarafına yürü ve Cumhuriyet Caddesi'nden [Kars Müzesi](mekan:ChIJS1x7ybiOaUARbtkPi7-hho0)'ne çık. Arkeoloji salonu taş devrinden Selçuklu dönemine uzanıyor; asma katta Kars halıları, kilimleri ve gümüş kemerler var. Bahçedeki koç ve koyun biçimli mezar taşlarını kaçırma.\n\nMüzeden sonra hava izin veriyorsa merkeze dönerken Haydar Aliyev, Atatürk ve Faik Bey caddelerinde yürü; Rus döneminden kalan bazalt cepheli binaların çoğu bu caddelerde ve bugün valilik, konservatuvar ya da otel olarak kullanılıyor.\n\nBu gezi ilk günün ardından iyi gider: önce kaleyi ve Ani'yi gör, ikinci gün müzelere ve Rus dönemi Kars'ına ayır. Üçüncü bir günün varsa Sarıkamış'ın sarıçam ormanı ya da kışın donan Çıldır Gölü seni bekler."
+  },
+  "gunler": [
+    {
+      "baslik": "Tabyadan Rus caddelerine",
+      "duraklar": [
+        {
+          "place_id": "ChIJJywOlSyPaUARTwcZoNSNWCU",
+          "osm": "way/1058901042",
+          "ad": "Kafkas Cephesi Harp Tarihi Müzesi",
+          "sure_dk": 75,
+          "sure_gerekcesi": "varsayılan 90; tek yapı ve tabya bahçesi",
+          "kapali_gunler": [],
+          "rehber": "kafkas-cephesi-harp-tarihi-muzesi",
+          "amaclar": [
+            "kultur_tarih"
+          ]
+        },
+        {
+          "place_id": "ChIJsYjnOdeOaUARma2ZAnj3uHw",
+          "osm": "way/547018532",
+          "ad": "Fethiye Camii",
+          "sure_dk": 20,
+          "sure_gerekcesi": "varsayılan 30; dıştan bakış ve kısa iç ziyaret",
+          "kapali_gunler": [],
+          "rehber": "fethiye-camii",
+          "amaclar": [
+            "kultur_tarih"
+          ]
+        },
+        {
+          "place_id": "ChIJAUDhUx-PaUARLS5rBqLx9YA",
+          "osm": "node/9860883418",
+          "ad": "Kars Peynir Müzesi",
+          "sure_dk": 45,
+          "sure_gerekcesi": "varsayılan 90; küçük tematik müze",
+          "kapali_gunler": [],
+          "rehber": "kars-peynir-muzesi",
+          "amaclar": [
+            "lezzet",
+            "cocuklu"
+          ]
+        },
+        {
+          "place_id": "ChIJ9XQOwM6OaUAREWUjVAbQKR4",
+          "osm": "node/5896875485",
+          "ad": "Ani Ocakbaşı",
+          "sure_dk": 75,
+          "kapali_gunler": [],
+          "rehber": "ani-ocakbasi",
+          "amaclar": [
+            "lezzet"
+          ]
+        },
+        {
+          "place_id": "ChIJS1x7ybiOaUARbtkPi7-hho0",
+          "osm": "way/455450081",
+          "ad": "Kars Müzesi",
+          "sure_dk": 75,
+          "sure_gerekcesi": "varsayılan 90; iki salon ve bahçe",
+          "kapali_gunler": [],
+          "rehber": "kars-muzesi",
+          "amaclar": [
+            "kultur_tarih",
+            "cocuklu"
+          ]
+        }
+      ]
+    }
+  ],
+  "notlar": {
+    "dogrulanacaklar": [
+      "[Plan · tüm duraklar] · kapali_gunler [] yazıldı. Kafkas Cephesi ve Kars Müzesi: turkishmuseums.com saat tablosunda (08:00–17:00) haftalık kapalı gün görünmüyor, ama hafta içi satırları sayfadan tam okunamadı. Peynir Müzesi ve Ani Ocakbaşı'nın kapalı günü bilinmiyor; cami namaz vakitlerinde kapalı · turkishmuseums.com, kars.ktb.gov.tr, lokanta",
+      "[Plan · takvim] · ilk_gun pazar: karsta-bir-gun (cumartesi) ile art arda yapılsın diye · Ece",
+      "[Yazı · Kafkas Cephesi] · Kanlı Tabya, 2018 açılış (TRT Haber 24.05.2018: 'bir ay önce'), bölümler, silikon figürlü revir/ameliyathane/koğuş/mutfak, kar enstalasyonu, Beyaz Vagon (turkishmuseums.com); aynalı oda ve 90 çarık, 13 m vagon, 1921 Kars Antlaşması sonrası Kızıl Ordu heyetinin hediyesi (Hürriyet Seyahat 2023). TRT 1828 savaşını '1928' yazmış; 1827–28 Hürriyet'ten. 'Kars Çayı'na bakan sırt' OSM konumundan yorum · kars.ktb.gov.tr",
+      "[Yazı · Fethiye] · Rus Ortodoks katedrali ve 'Aleksandr Nevski' adı SALT Araştırma arşiv kaydı başlığından; '19. yüzyıl Rus Ortodoks kilisesi, camiye çevrilmiş' (Stanford, Latombe 2018). Yapım yılı, mimarı ve camiye çevrilme tarihi bulunamadı, bu yüzden metne girmedi. 'Planını koruyor, eklemeler sonradan' gözleme dayalı genel ifade · kulturenvanteri.com, kars.ktb.gov.tr",
+      "[Yazı · Rus dönemi] · 1878–1918, Yusufpaşa/Ortakapı/Cumhuriyet mahalleleri, kesme bazalt, tek katlı, valilik/konservatuvar/otel kullanımı, Haydar Aliyev Caddesi (haberler.com/AA, 20.10.2025). Atatürk ve Faik Bey caddeleri icerik/iller/kars.json'dan. AA haberindeki '1706' ve 'Hollandalı mimarlar' çelişkili, kullanılmadı",
+      "[Yazı · Peynir Müzesi] · 2022, Türkiye'nin ilk tematik peynir müzesi, 1734 tarihli Süvari Tabya binası, gravyer/tulum/kaşar ve aletler (Gazete Vatan haberi). Kaşar: yazın doğal maya, en az 45 gün (CNN Türk 2018). 'İsviçreli ustalar 19. yüzyılda, Boğatepe' genel bilgi, bu turda kaynakla teyit edilmedi; müzede satış/tadım olup olmadığı bilinmiyor · müze, kars.ktb.gov.tr",
+      "[Yazı · Ani Ocakbaşı] · Kazım Paşa Caddesi, ızgara, Akçaabat köftesi, ali nazik, haşlanmış kuzu incik, vejetaryen mezeler, yerel yemeklerin çoğu öğlen (Fodor's). Adın ören yerinden geldiği yorum. Kaynak Fodor's'un tek sayfası; lokantanın bugün aynı menüyle açık olduğu puan adımında bakıldı, menü teyit edilmedi · lokanta",
+      "[Yazı · Kars Müzesi] · 1959 kuruluş, 1980 bugünkü bina, Cumhuriyet Cad. No: 385, arkeoloji ve etnografya salonları, Akkoyunlu/Karakoyunlu koç-koyun mezar taşları, Kars-Ardahan-Ağrı-Iğdır (turkishmuseums.com). en.wikipedia müzenin 1964–1993 Kümbet'te olduğunu yazıyor, çelişki var; metinde 'bir dönem' denildi. 'Ani kazılarından parçalar' icerik/iller/kars.json'dan, teyit edilmedi · kars.ktb.gov.tr",
+      "[Yazı · son paragraf] · Sarıkamış sarıçam ormanı ve Çıldır Gölü icerik/iller/kars.json'dan (4., 5. ve 11. sıra)"
+    ],
+    "fotograf_onerileri": [
+      {
+        "ne": "Fethiye Camii dıştan, karlı",
+        "altyazi": "Rus döneminin Ortodoks katedrali, bugün Fethiye Camii",
+        "arama": "Commons: Category:Fethiye Mosque (Kars)"
+      },
+      {
+        "ne": "Rus dönemi bazalt cepheli binalar",
+        "altyazi": "Kars'ta Rus döneminden kalan bazalt cepheler",
+        "arama": "Commons: Category:Russian architecture in Kars"
+      },
+      {
+        "ne": "Kars Müzesi bahçesindeki koçbaşı mezar taşları",
+        "altyazi": "Kars Müzesi'nin bahçesinde koç biçimli mezar taşları",
+        "arama": "Commons: Category:Kars Museum"
+      }
+    ],
+    "varsayimlar": [
+      "1. gün pazar; karsta-bir-gun'un ertesi günü",
+      "Bütün gün yürüyerek; son bacak (lokanta → Kars Müzesi) kışın taksiyle",
+      "#376: şehrin akşam planı 1/2'de (Hanımeli, gece); bu gün öğleden sonra biter, gece amacı yok",
+      "İl listesinin (icerik/iller/kars.json) ilk 5'inden Ani, Kars Kalesi ve Kümbet Camii 1/2'de. Sarıkamış Kayak Merkezi (4.) ve Çıldır Gölü (5.) bu gezide yok: Sarıkamış için OSM'de yalnız 4 aday çıktı (kayak merkezi kafeleri ve bir kilise kalıntısı), ilçede kaynaklı bir öğle yemeği yeri ve ziyarete açıklığı bilinen bir durak bulunamadı (Katerina Köşkü 2015'te otel projesine girdi, bugünkü durumu belirsiz). Çıldır'ın göl kıyısı Ardahan'da ve buz etkinliği yalnız ocak–şubat. İkisi yazının sonunda anıldı; bu gezi kentin ikinci katmanına ayrıldı"
+    ]
+  }
+}
