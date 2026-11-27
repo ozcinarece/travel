@@ -486,8 +486,8 @@
     "gunSilBaslik": "{gun} silinsin mi?",
     "gunSilMetin": "{n} durak Listem'e döner; yerler silinmez.",
     "gunSilMetinBos": "Bu günde durak yok.",
+    "gunSilKayma": "Sonraki günler bir gün öne kayar.",
     "sil": "Sil",
-    "sonGun": "Son gün silinemez.",
     "tempo": {
       "rahat": "Rahat",
       "normal": "Normal",
@@ -1097,9 +1097,12 @@
     "siradakiDurak": "sıradaki durak",
     "buradasinDurak": "şu an buradasın",
     "siradakiRozet": "SIRADAKİ",
+    "buradasinRozet": "BURADASIN",
+    "hepsiAtlandi": "Hepsi atlandı",
     "bosGun": "Boş gün",
     "bosGunBaslik": "{gun} henüz boş",
-    "bosGunMetin": "Listenden ya da yakındaki yerlerden seç; saatler kendiliğinden dizilir."
+    "bosGunMetin": "Listenden ya da yakındaki yerlerden seç; saatler kendiliğinden dizilir.",
+    "bosGunMetinListemBos": "Yakındaki yerlerden seç; saatler kendiliğinden dizilir."
   },
   "listem": {
     "baslik": "Listem",

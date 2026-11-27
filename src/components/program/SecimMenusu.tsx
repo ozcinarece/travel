@@ -9,7 +9,9 @@ import { minDokunma, renk, yazi } from '@/theme';
 export type SecimSecenegi = { etiket: string; onPress: () => void; tehlike?: boolean; pasif?: boolean; ayrac?: boolean };
 
 /** `v7p` (#554, kanvas `Plan_v7p_Haller` 4a): Plan çekmecesi — perde %38, 22 köşe, tutamak, 18/800 başlık, 48 px satırlar. */
-type Props = { acik: boolean; baslik?: string; secenekler: SecimSecenegi[]; onKapat: () => void; gorunus?: 'v7p' };
+/** `onKapandi`: Modal tamamen kapandıktan sonra (iOS `onDismiss`; diğerlerinde kapanır kapanmaz) — #570 KK8: kapanan Modal'ın
+ * üstüne ikinci Modal açmak için. */
+type Props = { acik: boolean; baslik?: string; secenekler: SecimSecenegi[]; onKapat: () => void; gorunus?: 'v7p'; onKapandi?: () => void };
 
 /** Kanvas `Plan_v7p_Haller` 4a–4b ortak çekmece ölçüleri (`GunSilSayfasi` da kullanır). */
 export const v7pCekmece = StyleSheet.create({
@@ -22,10 +24,10 @@ export const v7pCekmece = StyleSheet.create({
 });
 
 /** Alttan açılan seçenek menüsü (3.7 KK4 uzun basma menüsü, gün seçimi). Web ve mobilde aynı. #164: aşağı çekilerek kapanır. */
-export function SecimMenusu({ acik, baslik, secenekler, onKapat, gorunus }: Props) {
+export function SecimMenusu({ acik, baslik, secenekler, onKapat, gorunus, onKapandi }: Props) {
   const v = gorunus === 'v7p';
   return (
-    <Modal visible={acik} transparent animationType="fade" onRequestClose={onKapat}>
+    <Modal visible={acik} transparent animationType="fade" onRequestClose={onKapat} onDismiss={onKapandi}>
       <GestureHandlerRootView style={modalKokuStili}>
         <View style={v ? v7pCekmece.perde : s.perde}>
           <Pressable style={StyleSheet.absoluteFill} onPress={onKapat} accessibilityLabel={t('genel.vazgec')} />
@@ -41,6 +43,8 @@ export function SecimMenusu({ acik, baslik, secenekler, onKapat, gorunus }: Prop
                 key={o.etiket}
                 accessibilityRole="button"
                 disabled={o.pasif}
+                // #570 KK4: pasif satır "…, devre dışı" okunur.
+                accessibilityState={o.pasif ? { disabled: true } : undefined}
                 onPress={() => {
                   onKapat();
                   o.onPress();

@@ -2,7 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useQueryClient } from '@tanstack/react-query';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Alert, BackHandler, LayoutAnimation, Linking, Pressable, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
+import { BackHandler, LayoutAnimation, Linking, Platform, Pressable, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 
 import { GrupPenceresi } from '@/components/davet/GrupPenceresi';
 import { KatilimSayfasi } from '@/components/davet/KatilimSayfasi';
@@ -18,7 +18,7 @@ import { OtelUcSatiri } from '@/components/program/OtelUcSatiri';
 import { PlanHazirSayfasi, type PlanGunOzeti } from '@/components/program/PlanHazirSayfasi';
 import { HarcamaFormu } from '@/components/harcama/HarcamaFormu';
 import { MekanPaneli } from '@/components/mekan/MekanPaneli';
-import { ListemBekliyorSatiri, PlanListesi, type PlanSatirGorunumu } from '@/components/plan/PlanListesi';
+import { durakOzeti, ListemBekliyorSatiri, PlanListesi, type PlanSatirGorunumu } from '@/components/plan/PlanListesi';
 import { PuanSayfasi } from '@/components/program/PuanSayfasi';
 import { SecimMenusu, type SecimSecenegi } from '@/components/program/SecimMenusu';
 import { GunSilSayfasi } from '@/components/plan/GunSilSayfasi';
@@ -529,13 +529,24 @@ function ProgramSekmesi({
     if (yeni !== m.default_minutes) guvenli(() => mekanGuncelle.mutateAsync({ id: m.id, default_minutes: yeni }));
   };
   // #554 KK4–KK5: ⋯ → "Günü sil" ve sekmeye uzun basma aynı onay çekmecesini açar (sistem uyarısı yerine).
+  // #570 KK4: tek gün kaldıysa silme yok — ⋯ satırı pasif, uzun basma bir şey yapmaz (sistem uyarısı kalktı).
   const [silinecekGun, setSilinecekGun] = useState<Gun | null>(null);
+  const tekGun = gunler.length <= 1;
   const gunuSil = (g: Gun) => {
-    if (gunler.length <= 1) {
-      Alert.alert(t('gunler.sonGun'));
-      return;
-    }
+    if (tekGun) return;
     setSilinecekGun(g);
+  };
+  // #570 KK8: iOS'ta kapanmakta olan ⋯ Modal'ının üstüne ikinci Modal açılmayabilir; onay, ilk Modal'ın `onDismiss`'inde açılır.
+  const bekleyenSilGun = useRef<Gun | null>(null);
+  const menudenGunuSil = (g: Gun) => {
+    if (tekGun) return;
+    if (Platform.OS === 'ios') bekleyenSilGun.current = g;
+    else setSilinecekGun(g);
+  };
+  const listeMenusuKapandi = () => {
+    const g = bekleyenSilGun.current;
+    bekleyenSilGun.current = null;
+    if (g) setSilinecekGun(g);
   };
   const gunuSilOnayla = (g: Gun) => {
     setSilinecekGun(null);
@@ -1109,10 +1120,11 @@ function ProgramSekmesi({
     ? {
         baslik: gun.date ? `${GUNLER[haftaGunu(gun.date)]} · ${parcala(gun.date).gun} ${AYLAR[parcala(gun.date).ay - 1]}` : t('geziSayfasi.gunNo', { n: gun.index }),
         // #554 KK3: hiç durak yoksa alt başlık yalnız "Boş gün" ("0 durak" yok).
+        // #570 KK6: bütün duraklar atlandıysa "0 durak" yerine "Hepsi atlandı" (liste olduğu gibi kalır).
         alt: planSatir.length === 0 ? t('plan.bosGun') : [
           gunTemasi,
           prog && etkinDurak > 0 ? t('plan.saatAraligi', { bas: dakikaSaat(prog.canli.baslangicDk), bit: dakikaSaat(prog.canli.bitisDk) }) : null,
-          t('plan.durakSayisi', { n: etkinDurak }),
+          durakOzeti(planSatir),
         ]
           .filter(Boolean)
           .join(' · '),
@@ -1324,16 +1336,18 @@ function ProgramSekmesi({
                 { etiket: t('program.liste.baslangic'), onPress: () => setBaslangicMenu(true) },
                 { etiket: t('gunOteli.menu'), onPress: otelAc },
                 // #554 KK4: en altta çizgiyle ayrık, kırmızı "Günü sil".
-                { etiket: t('gunler.gunuSil'), onPress: () => gunuSil(gun), tehlike: true, ayrac: true },
+                { etiket: t('gunler.gunuSil'), onPress: () => menudenGunuSil(gun), tehlike: true, ayrac: true, pasif: tekGun },
               ]
             : []
         }
         onKapat={() => setListeMenuAcik(false)}
+        onKapandi={listeMenusuKapandi}
       />
       <GunSilSayfasi
         gun={silinecekGun}
         baslik={silinecekGun ? gunSilBasligi(silinecekGun) : ''}
         durakSayisi={silinecekGun ? duraklar.filter((d) => d.day_id === silinecekGun.id).length : 0}
+        sonGun={silinecekGun ? !gunler.some((g) => g.index > silinecekGun.index) : true}
         onSil={gunuSilOnayla}
         onKapat={() => setSilinecekGun(null)}
       />
