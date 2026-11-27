@@ -13,19 +13,21 @@ type Props = {
   pasif?: boolean;
   /** Ekran okuyucu ipucu (#388: çevrimdışıyken neden pasif). */
   ipucu?: string;
+  /** #579 KK3: "+" halinin ekran okuyucu etiketi (gün bağlamında "Bugüne ekle"); yoksa "Listeye ekle". */
+  etiket?: string | null;
 };
 
 /**
  * #136 KK5 (kanvas Temel): "Listeye ekle / Listende" her ekranda TEK bileşen — 38 px kare, köşe 11:
  * turuncu + (Mandalina, Lacivert çizgi 3) ↔ açık yeşil ✓ (Başarı zemini, koyu yeşil çizgi 3,2; dokununca listeden çıkar).
  */
-export function EkleDugmesi({ listede, onPress, mesgul, boyut = 38, pasif, ipucu }: Props) {
+export function EkleDugmesi({ listede, onPress, mesgul, boyut = 38, pasif, ipucu, etiket }: Props) {
   const r = Math.round(boyut * 0.29);
   const glif = Math.round(boyut * 0.42);
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={listede ? t('ui.ekle.listede') : t('ui.ekle.ekle')}
+      accessibilityLabel={listede ? t('ui.ekle.listede') : (etiket ?? t('ui.ekle.ekle'))}
       accessibilityState={{ selected: listede, busy: !!mesgul, disabled: !!pasif }}
       accessibilityHint={ipucu}
       disabled={!!mesgul || !!pasif}
