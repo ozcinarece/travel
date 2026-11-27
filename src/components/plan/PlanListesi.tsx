@@ -203,6 +203,8 @@ export function PlanListesi(p: Props) {
                 accessibilityLabel={durakEtiketi(r)}
                 // #582: iç bağlantıya ekran okuyucu ulaşamaz (satır tek öğe) — "Başka güne taşı" satırın özel eylemi.
                 accessibilityActions={tasi ? [{ name: TASI_EYLEMI, label: t('plan.baskaGuneTasi') }] : undefined}
+                // #582: eylem menüsünü açmayan kullanıcı da "Başka güne taşı"yı duysun.
+                accessibilityHint={tasi ? t('plan.baskaGuneTasi') : undefined}
                 onAccessibilityAction={
                   tasi
                     ? (e) => {
@@ -238,7 +240,7 @@ export function PlanListesi(p: Props) {
                   </Text>
                   {r.kapali && parca ? (
                     // #582 (Ürün değişiklik 1; kanvas emsali `Ekran24Plan` "Müze · Pzt kapalı"): uyarı alt satırın içinde, tek satır —
-                    // "{tür} · {süre} · Pzt kapalı · Başka güne taşı ›". Sığmazsa yalnız tür "…" ile kısalır; uyarı ve bağlantı kesilmez.
+                    // "{tür} · {süre} · Pzt kapalı · Başka güne taşı ›". Sığmazsa önce tür, sonra süre "…" ile kısalır; uyarı ve bağlantı kesilmez.
                     <View style={s.altSatir}>
                       {parca.tur ? (
                         <Text style={[s.alt, s.kisalir]} numberOfLines={1}>
@@ -246,7 +248,7 @@ export function PlanListesi(p: Props) {
                         </Text>
                       ) : null}
                       {parca.ara ? (
-                        <Text style={[s.alt, s.sabit]} numberOfLines={1}>
+                        <Text style={[s.alt, s.araKisalir]} numberOfLines={1}>
                           {parca.ara}
                         </Text>
                       ) : null}
@@ -255,7 +257,7 @@ export function PlanListesi(p: Props) {
                       </Text>
                       {tasi ? (
                         <>
-                          <Text style={[s.alt, s.sabit, s.kapali]}>{AYRAC}</Text>
+                          <Text style={[s.alt, s.sabit]}>{AYRAC}</Text>
                           {/* Dokunma alanı 44 pt: satır yüksekliği değişmesin diye hitSlop ile. */}
                           <Pressable
                             accessibilityRole="button"
@@ -320,8 +322,11 @@ export function ListemBekliyorSatiri({ n, onPress, bosGun }: { n: number; onPres
 
 /** #582: alt satır ayracı (kanvas "Müze · Pzt kapalı"). */
 const AYRAC = ' · ';
-/** #582: "Başka güne taşı ›" dokunma alanı — 13 px metin satırı (~18) + 2×13 = 44 pt; satır yüksekliği değişmez. */
-export const TASI_HITSLOP = { top: 13, bottom: 13, left: 8, right: 8 };
+/** #582: alt satırın satır yüksekliği (uyarılı ve uyarısız aynı). */
+export const ALT_SATIR_YUKSEKLIK = 18;
+/** #582: "Başka güne taşı ›" dokunma alanı — 18 + 18 + 8 = 44 pt; satır yüksekliği değişmez. Altta durağın 8 pt dolgusu var
+ * (Android'de hitSlop üst kabı aşamaz), fazlası üstte (ad satırının üzerinde; bağlantı z-sırasında sonra gelir). */
+export const TASI_HITSLOP = { top: 18, bottom: 8, left: 8, right: 8 };
 
 /** #582: uyarılı alt satırın parçaları — kısalabilen tür ve sabit kalan "· süre ·" ara metni. */
 export function altParcala(r: { alt: string; altTur?: string | null }): { tur: string | null; ara: string } {
@@ -422,12 +427,14 @@ const s = StyleSheet.create({
   bosDugme: { height: 52, borderRadius: 26, backgroundColor: renk.vurgu, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 },
   bosDugmeMetin: { fontFamily: yazi.kalin, fontSize: 16, color: renk.metin },
   ad: { fontFamily: yazi.kalin, fontSize: 16, color: renk.metin },
-  alt: { fontFamily: yazi.normal, fontSize: 13, color: anaV5.ikincil },
+  alt: { fontFamily: yazi.normal, fontSize: 13, lineHeight: ALT_SATIR_YUKSEKLIK, color: anaV5.ikincil },
   icerik: { flex: 1, minWidth: 0, gap: 1 },
   icerikTam: { alignSelf: 'stretch', justifyContent: 'center', marginVertical: -8, paddingVertical: 8 },
   // #582: uyarılı alt satır — boyut alt satırla aynı; "Pzt kapalı" normal, "Başka güne taşı ›" yarı kalın, ikisi #C25200.
   altSatir: { flexDirection: 'row', alignItems: 'center', minWidth: 0 },
-  kisalir: { flexShrink: 1 },
+  // Kısalma sırası: önce tür (çok yüksek ağırlık), sonra süre; uyarı ve bağlantı hiç.
+  kisalir: { flexShrink: 1000 },
+  araKisalir: { flexShrink: 1 },
   sabit: { flexShrink: 0 },
   kapali: { color: anaV5.adim },
   tasi: { fontFamily: yazi.yari },

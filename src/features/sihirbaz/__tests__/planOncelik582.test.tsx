@@ -2,7 +2,7 @@
 import { describe, expect, it, jest } from '@jest/globals';
 import { fireEvent, render } from '@testing-library/react-native';
 
-import { altParcala, durakEtiketi, PlanListesi, TASI_EYLEMI, TASI_HITSLOP, type PlanSatirGorunumu } from '@/components/plan/PlanListesi';
+import { ALT_SATIR_YUKSEKLIK, altParcala, durakEtiketi, PlanListesi, TASI_EYLEMI, TASI_HITSLOP, type PlanSatirGorunumu } from '@/components/plan/PlanListesi';
 import { kapaliGunKisa, tasinabilirGunler } from '@/features/plan/planListesi';
 import { gundeKapali, oncelikSirasi, planKur, type PlanMekani } from '@/features/sihirbaz/planKur';
 import { planiHesapla, planOnceliginiOku, SAAT_SURESI_MS } from '@/features/sihirbaz/planUygula';
@@ -245,16 +245,53 @@ describe('#582 KK3 Plan satırında kapalı gün uyarısı', () => {
     const bag = duz(getByText(t('plan.baskaGuneTasiBag')).props.style);
     expect(uyari).toEqual(expect.objectContaining({ color: '#C25200', fontFamily: 'Figtree_400Regular', fontSize: altBoyut }));
     expect(bag).toEqual(expect.objectContaining({ color: '#C25200', fontFamily: 'Figtree_600SemiBold', fontSize: altBoyut }));
+    // Ayraçlar gri (alt satır rengi); turuncu yalnız uyarı ve bağlantı.
+    expect(duz(getByText(' · ', { exact: true }).props.style).color).not.toBe('#C25200');
   });
 
-  it('tek satır; sığmazsa yalnız tür kısalır (flexShrink 1, numberOfLines 1), uyarı ve bağlantı kesilmez (flexShrink 0)', () => {
+  it('tek satır; kısalma sırası önce tür, sonra süre (numberOfLines 1); uyarı ve bağlantı kesilmez (flexShrink 0)', () => {
     const { getByText, getByLabelText } = ciz([pzt({ ad: 'Eti Arkeoloji', alt: 'Arkeoloji müzesi ve sanat galerisi · 1 sa 30 dk', altTur: 'Arkeoloji müzesi ve sanat galerisi' })], () => undefined);
     const tur = getByText('Arkeoloji müzesi ve sanat galerisi');
+    const ara = getByText(' · 1 sa 30 dk · ');
     expect(tur.props.numberOfLines).toBe(1);
-    expect(duz(tur.props.style).flexShrink).toBe(1);
-    expect(duz(getByText(' · 1 sa 30 dk · ').props.style).flexShrink).toBe(0);
+    expect(ara.props.numberOfLines).toBe(1);
+    expect(duz(tur.props.style).flexShrink).toBeGreaterThanOrEqual(1000);
+    expect(duz(ara.props.style).flexShrink).toBe(1);
     expect(duz(getByText('Pzt kapalı').props.style).flexShrink).toBe(0);
     expect(duz(getByLabelText('Pazartesi kapalı. Başka güne taşı').props.style).flexShrink).toBe(0);
+  });
+
+  it('320 dp: tür önce tükenir, süre kısalır, "Pzt kapalı" ve bağlantı tam genişlikte kalır', () => {
+    // Yoga'nın flex-shrink payı: taşma, (flexShrink × doğal genişlik) oranında dağıtılır; 0'a inen dondurulur.
+    const kucult = (alan: number, ogeler: { w: number; shrink: number }[]) => {
+      const w = ogeler.map((o) => o.w);
+      for (let tur = 0; tur < ogeler.length; tur++) {
+        const tasma = w.reduce((a, b) => a + b, 0) - alan;
+        const etkin = ogeler.map((o, i) => (o.shrink > 0 && w[i] > 0 ? o.shrink * o.w : 0));
+        const top = etkin.reduce((a, b) => a + b, 0);
+        if (tasma <= 0 || top === 0) break;
+        ogeler.forEach((_, i) => (w[i] = Math.max(0, w[i] - (tasma * etkin[i]) / top)));
+      }
+      return w;
+    };
+    const { getByText, getByLabelText } = ciz([pzt({ alt: 'Tarihî yer · 1 sa 30 dk', altTur: 'Tarihî yer' })], () => undefined);
+    const shrink = (n: { props: { [k: string]: unknown } }) => (duz(n.props.style).flexShrink as number) ?? 0;
+    const px = (m: string) => m.length * 6.6; // 13 px Figtree için kaba ortalama
+    // 320 − 2×16 kenar − 44 saat − 12 − 28 daire − 12 = 192 px içerik.
+    const alan = 320 - 32 - 44 - 12 - 28 - 12;
+    const ogeler = [
+      { w: px('Tarihî yer'), shrink: shrink(getByText('Tarihî yer')) },
+      { w: px(' · 1 sa 30 dk · '), shrink: shrink(getByText(' · 1 sa 30 dk · ')) },
+      { w: px('Pzt kapalı'), shrink: shrink(getByText('Pzt kapalı')) },
+      { w: px(' · '), shrink: 0 },
+      { w: px('Başka güne taşı ›'), shrink: shrink(getByLabelText('Pazartesi kapalı. Başka güne taşı')) },
+    ];
+    const [tur, ara, uyari, ayrac, bag] = kucult(alan, ogeler);
+    expect(tur).toBeLessThan(1);
+    expect(ara).toBeLessThan(ogeler[1].w);
+    expect(uyari).toBe(ogeler[2].w);
+    expect(ayrac).toBe(ogeler[3].w);
+    expect(bag).toBe(ogeler[4].w);
   });
 
   it('altParcala: tür ayrı, "· süre ·" sabit; tür yoksa yalnız süre', () => {
@@ -279,16 +316,23 @@ describe('#582 KK3 Plan satırında kapalı gün uyarısı', () => {
     expect(durakEtiketi(r)).toContain('Pazartesi kapalı');
     const dugme = getByLabelText(durakEtiketi(r));
     expect(dugme.props.accessibilityActions).toEqual([{ name: TASI_EYLEMI, label: t('plan.baskaGuneTasi') }]);
+    // Eylem menüsünü açmayan kullanıcı da duyar.
+    expect(dugme.props.accessibilityHint).toBe(t('plan.baskaGuneTasi'));
     fireEvent(dugme, 'accessibilityAction', { nativeEvent: { actionName: TASI_EYLEMI } });
     expect(tasi).toHaveBeenCalledWith('d1');
   });
 
   it('dokunma alanı hitSlop ile 44 pt; bağlantıda dolgu yok (satır yüksekliği uyarısız satırla aynı)', () => {
-    const { getByLabelText } = ciz([pzt()], () => undefined);
+    const uyarisiz = ciz([satir({ id: 'd2' })]);
+    expect(duz(uyarisiz.getByText('Müze · 1 sa').props.style).lineHeight).toBe(ALT_SATIR_YUKSEKLIK);
+    uyarisiz.unmount();
+    const { getByLabelText, getByText } = ciz([pzt()], () => undefined);
     const baglanti = getByLabelText('Pazartesi kapalı. Başka güne taşı');
     expect(baglanti.props.hitSlop).toEqual(TASI_HITSLOP);
-    // 13 px metin satırı ~18 pt + üst/alt hitSlop ≥ 44.
-    expect(18 + TASI_HITSLOP.top + TASI_HITSLOP.bottom).toBeGreaterThanOrEqual(44);
+    // Alt satır 18 pt + üst/alt hitSlop ≥ 44; altta durağın 8 pt dolgusunu aşmaz (Android).
+    expect(ALT_SATIR_YUKSEKLIK + TASI_HITSLOP.top + TASI_HITSLOP.bottom).toBeGreaterThanOrEqual(44);
+    expect(TASI_HITSLOP.bottom).toBeLessThanOrEqual(8);
+    expect(duz(getByText(t('plan.baskaGuneTasiBag')).props.style).lineHeight).toBe(ALT_SATIR_YUKSEKLIK);
     const stil = duz(baglanti.props.style);
     for (const k of ['padding', 'paddingVertical', 'paddingTop', 'paddingBottom', 'minHeight', 'height', 'marginVertical']) expect(stil[k]).toBeUndefined();
   });
