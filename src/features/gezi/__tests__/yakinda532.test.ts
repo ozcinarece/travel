@@ -4,7 +4,7 @@ import { describe, expect, it } from '@jest/globals';
 import type { IlYeri } from '@/features/icerik/ilOnerileri';
 import type { Durak, Gun, Mekan, Yer } from '@/lib/tipler';
 
-import { gunBaglaminaGore } from '@/features/listem/listem';
+import { hangiGuneSirasi } from '@/features/listem/listem';
 
 import { ustHaritaVerisi } from '../ustHarita';
 import { adayKonumu, eklenenleriSabitle, geziKadraji, GUN_SONU_DK, yakindaAdaylari, yakindaGorunur } from '../yakinda';
@@ -124,20 +124,40 @@ describe('üst harita kadrajı (KK1)', () => {
   });
 });
 
-describe('Güne ekle gün bağlamı (KK4)', () => {
-  const sec = (id: string, index: number, onerilen = false) => ({ gun: { id, index } as Gun, durakSayisi: 1, enYakinM: 100, yakindaki: 0, bitisDk: 900, yeniBitisDk: 960, ekleIndeksi: 1, onerilen, sonGun: false });
-  it('bağlam yoksa önerilen rozetli kalır; bağlam varsa o gün en üstte, vurgulu, rozetsiz', () => {
+describe('Hangi güne sırası (#532 KK4, #534 KK8)', () => {
+  const sec = (id: string, index: number, onerilen = false, enYakinM: number | null = 100) => ({ gun: { id, index } as Gun, durakSayisi: enYakinM === null ? 0 : 1, enYakinM, yakindaki: 0, bitisDk: 900, yeniBitisDk: 960, ekleIndeksi: 1, onerilen, sonGun: false });
+  const ozet = (x: ReturnType<typeof hangiGuneSirasi>) => x.map((v) => [v.secenek.gun.id, v.gecti, v.enYakin]);
+  it('bağlam ve bugün yoksa gün sırası; en yakın gün rozetli', () => {
     const liste = [sec('g2', 2, true), sec('g1', 1), sec('g3', 3)];
-    expect(gunBaglaminaGore(liste, null).map((x) => [x.gun.id, x.rozet])).toEqual([
-      ['g2', true],
-      ['g1', false],
-      ['g3', false],
+    expect(ozet(hangiGuneSirasi(liste, { bugunIndex: null }))).toEqual([
+      ['g1', false, false],
+      ['g2', false, true],
+      ['g3', false, false],
     ]);
-    const b = gunBaglaminaGore(liste, 'g3');
-    expect(b.map((x) => [x.gun.id, x.onerilen, x.rozet])).toEqual([
-      ['g3', true, false],
+  });
+  it('bağlamdaki gün en üstte; rozet en yakın günde kalır', () => {
+    const liste = [sec('g2', 2, true), sec('g1', 1), sec('g3', 3)];
+    expect(ozet(hangiGuneSirasi(liste, { baglamGunId: 'g3', bugunIndex: null }))).toEqual([
+      ['g3', false, false],
+      ['g1', false, false],
+      ['g2', false, true],
+    ]);
+  });
+  it('bağlam yoksa bugün en üstte; geçmiş günler en altta ve geçti', () => {
+    const liste = [sec('g1', 1), sec('g2', 2), sec('g3', 3, true), sec('g4', 4)];
+    expect(ozet(hangiGuneSirasi(liste, { bugunIndex: 3 }))).toEqual([
+      ['g3', false, true],
+      ['g4', false, false],
+      ['g1', true, false],
+      ['g2', true, false],
+    ]);
+  });
+  it('bağlam geçmiş bir günse en üstte ve soluk değil; durağı olmayan önerilen gün rozetsiz', () => {
+    const liste = [sec('g1', 1), sec('g2', 2, true, null), sec('g3', 3)];
+    expect(ozet(hangiGuneSirasi(liste, { baglamGunId: 'g1', bugunIndex: 2 }))).toEqual([
       ['g1', false, false],
       ['g2', false, false],
+      ['g3', false, false],
     ]);
   });
 });
