@@ -9,7 +9,7 @@ import Svg, { Path } from 'react-native-svg';
 
 import { AltPencere } from '@/components/ui/AltPencere';
 import { Avatar } from '@/components/ui/Avatar';
-import { durumMetni, gittiMetni, type DavetDurumu } from '@/features/davet/uygulamaIci';
+import { durumMetni, gittiMetni, type GosterilenDurum } from '@/features/davet/uygulamaIci';
 import { t } from '@/i18n';
 import { anaV5, renk, yazi } from '@/theme';
 
@@ -19,7 +19,7 @@ const YUZLER = [
   { zemin: '#E3F4EC', harf: '#0E7A52' },
 ] as const;
 
-export type GonderilenKisi = { id: string; ad: string; foto?: string | null; durum: DavetDurumu };
+export type GonderilenKisi = { id: string; ad: string; foto?: string | null; durum: GosterilenDurum };
 
 type Props = {
   acik: boolean;

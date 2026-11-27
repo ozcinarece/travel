@@ -36,7 +36,10 @@ export type GelenDavet = {
   olusturuldu: string;
 };
 
-export type DavetDurumu = 'bekliyor' | 'katildi' | 'reddetti';
+/** Sunucudaki durum. `iptal`: sunucu kapattı (link yenilendi ya da üye çıktı; #605). */
+export type DavetDurumu = 'bekliyor' | 'katildi' | 'reddetti' | 'iptal';
+/** Davet edene gösterilen durum. `iptal` gösterilmez (kanvasta karşılığı yok): kişi listeden çıkar. */
+export type GosterilenDurum = Exclude<DavetDurumu, 'iptal'>;
 
 export const DAVETLERIM = ['davetlerim'] as const;
 /** KK5: Davet eden taraf (gönderildi çekmecesi) kişi durumları. */
@@ -128,13 +131,26 @@ export function gittiMetni(adlar: readonly string[]): string {
 /**
  * KK5: kişi durumu. Davet linkiyle katılmış kişi (üye) davet satırı hâlâ `bekliyor` olsa da "Katıldı" sayılır.
  */
-export function kisiDurumu(durum: DavetDurumu | undefined, uye: boolean): DavetDurumu {
+export function kisiDurumu(durum: GosterilenDurum | undefined, uye: boolean): GosterilenDurum {
   if (uye || durum === 'katildi') return 'katildi';
   return durum ?? 'bekliyor';
 }
 
-export function durumMetni(d: DavetDurumu): string {
+export function durumMetni(d: GosterilenDurum): string {
   return t(`davet.gonderildi.durum.${d}`);
+}
+
+/**
+ * KK5: kişi → en yeni davet satırının durumu (satırlar eskiden yeniye). En yeni satırı `iptal` olan kişi haritada yok
+ * (#605 öz-inceleme 2): daha eski bir `katildi`/`reddetti` satırı öne çıkmaz.
+ */
+export function gonderilenDurumlari(satirlar: readonly { davet_edilen: string; durum: DavetDurumu }[]): Map<string, GosterilenDurum> {
+  const harita = new Map<string, GosterilenDurum>();
+  for (const r of satirlar) {
+    if (r.durum === 'iptal') harita.delete(r.davet_edilen);
+    else harita.set(r.davet_edilen, r.durum);
+  }
+  return harita;
 }
 
 // ---------------------------------------------------------------- sorgular
@@ -186,7 +202,7 @@ export function useGonderilenDavetler(tripId: string | undefined) {
     queryKey: gonderilenAnahtari(tripId),
     enabled: !!session && !!tripId,
     staleTime: 30_000,
-    queryFn: async (): Promise<Map<string, DavetDurumu>> => {
+    queryFn: async (): Promise<Map<string, GosterilenDurum>> => {
       const { data, error } = await supabase
         .from('seyahat_davetleri')
         .select('davet_edilen, durum, created_at')
@@ -194,10 +210,7 @@ export function useGonderilenDavetler(tripId: string | undefined) {
         .eq('davet_eden', session!.user.id)
         .order('created_at', { ascending: true });
       if (error) throw error;
-      const harita = new Map<string, DavetDurumu>();
-      // #605 inceleme 1: sunucunun kapattığı davet (`iptal`: link yenilendi ya da üye çıktı) durum listesinde yok sayılır.
-      for (const r of (data ?? []) as { davet_edilen: string; durum: DavetDurumu | 'iptal' }[]) if (r.durum !== 'iptal') harita.set(r.davet_edilen, r.durum);
-      return harita;
+      return gonderilenDurumlari((data ?? []) as { davet_edilen: string; durum: DavetDurumu }[]);
     },
   });
 }

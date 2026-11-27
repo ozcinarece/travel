@@ -127,11 +127,20 @@ language plpgsql volatile security definer set search_path = ''
 as $$
 declare
   d public.seyahat_davetleri;
+  seyahat uuid;
   sonuc jsonb;
 begin
   if auth.uid() is null or public.is_anonymous() then
     raise exception 'oturum gerekli' using errcode = '42501';
   end if;
+  -- Kilit sırası seyahat → davet satırı (#605 öz-inceleme 1). `rotate_invite_token` önce seyahat satırını (FOR UPDATE)
+  -- sonra tetikleyiciyle davet satırlarını kilitler; burada da önce seyahat: ters sırada kilitlenip kilitlenme olmaz.
+  -- KEY SHARE yalnız token yenileme ve seyahat silmeyle çakışır (üyelik insert'ünün yabancı anahtar kilidiyle aynı).
+  select x.trip_id into seyahat from public.seyahat_davetleri x where x.id = p_davet and x.davet_edilen = auth.uid();
+  if seyahat is null then
+    raise exception 'davet yok' using errcode = 'P0002';
+  end if;
+  perform 1 from public.trips t where t.id = seyahat for key share;
   d := public.davet_gecerli(p_davet);
   if d.id is null then
     raise exception 'davet yok' using errcode = 'P0002';

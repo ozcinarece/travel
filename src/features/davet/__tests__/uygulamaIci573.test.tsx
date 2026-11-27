@@ -18,6 +18,7 @@ import {
   gezilerimBasligi,
   gittiMetni,
   kisiDurumu,
+  gonderilenDurumlari,
   useDavetEylemleri,
   useDavetGonder,
   type GelenDavet,
@@ -84,6 +85,18 @@ describe('#573 metinler', () => {
     expect(kisiDurumu('bekliyor', true)).toBe('katildi');
     expect(kisiDurumu('reddetti', false)).toBe('reddetti');
     expect(kisiDurumu(undefined, false)).toBe('bekliyor');
+  });
+
+  it('#605 öz-inceleme 2: kişinin en yeni satırı iptal ise kişi durum listesinde yok; eski satır öne çıkmaz', () => {
+    const h = gonderilenDurumlari([
+      { davet_edilen: 'd', durum: 'katildi' },
+      { davet_edilen: 'd', durum: 'iptal' },
+      { davet_edilen: 'm', durum: 'reddetti' },
+      { davet_edilen: 'm', durum: 'bekliyor' },
+      { davet_edilen: 'b', durum: 'iptal' },
+      { davet_edilen: 'b', durum: 'bekliyor' },
+    ]);
+    expect([...h.entries()]).toEqual([['m', 'bekliyor'], ['b', 'bekliyor']]);
   });
 });
 

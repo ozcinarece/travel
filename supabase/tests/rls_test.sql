@@ -4738,6 +4738,34 @@ do $$ begin assert (select count(*) from public.seyahat_davetleri) = current_set
 set role authenticated;
 select pg_temp.as_user(:SA);
 select pg_temp.hata_bekle($$select public.davet_link_yenilendi()$$, '42501');
+-- #605 öz-inceleme 4: çıkma tetikleyicisinin "davet edilen çıktı" dalı doğrudan: üye olan D'ye (süper kullanıcıyla) bekleyen
+-- davet satırı kurulur, D çıkınca davet `iptal`.
+reset role;
+insert into public.members (trip_id, user_id, display_name, guest) values ('57300000-0000-4000-8000-000000000002', :SD, 'Deniz', false);
+insert into public.seyahat_davetleri (trip_id, davet_eden, davet_edilen) values ('57300000-0000-4000-8000-000000000002', :SA, :SD);
+select set_config('test.d8', (select id::text from public.seyahat_davetleri where davet_edilen = :SD and durum = 'bekliyor'), false);
+delete from public.members where trip_id = '57300000-0000-4000-8000-000000000002' and user_id = :SD;
+do $$ begin assert (select durum from public.seyahat_davetleri where id = current_setting('test.d8')::uuid) = 'iptal', '#605 öz-inceleme 4: davet edilen çıkınca daveti iptal'; end $$;
+-- Sahip, davet edeni (B) çıkarınca B'nin gönderdiği bekleyen davet `iptal`.
+set role authenticated;
+select pg_temp.as_user(:SB);
+do $$ begin assert public.davet_gonder(current_setting('test.urla')::uuid, array['57300000-0000-4000-8000-0000000000d4']::uuid[]) = 1, '#605 öz-inceleme 4: B''den D''ye davet'; end $$;
+select set_config('test.d9', (select id::text from public.seyahat_davetleri where davet_eden = auth.uid() and durum = 'bekliyor'), false);
+select pg_temp.as_user(:SA);
+delete from public.members where trip_id = current_setting('test.urla')::uuid and user_id = '57300000-0000-4000-8000-0000000000b2';
+select pg_temp.as_user(:SD);
+do $$ begin assert (select count(*) from public.davetlerim()) = 0, '#605 öz-inceleme 4: sahip davet edeni çıkarınca davet kutudan düşer'; end $$;
+select pg_temp.hata_bekle($$select public.davete_katil(current_setting('test.d9')::uuid)$$, 'P0002');
+reset role;
+do $$ begin assert (select durum from public.seyahat_davetleri where id = current_setting('test.d9')::uuid) = 'iptal', '#605 öz-inceleme 4: sahip davet edeni çıkarınca iptal'; end $$;
+-- #605 öz-inceleme 1: `davete_katil` kilit sırası `rotate_invite_token` ile aynı: önce seyahat, sonra davet satırı.
+do $$
+declare g text := pg_get_functiondef('public.davete_katil(uuid)'::regprocedure);
+begin
+  assert position('for key share' in g) > 0 and position('for key share' in g) < position('for update' in g), '#605 öz-inceleme 1: önce seyahat kilidi';
+end $$;
+set role authenticated;
+select pg_temp.as_user(:SD);
 -- Yardımcı fonksiyon istemciye açık değil; anon rolü hiçbir davet fonksiyonunu ve tabloyu kullanamaz.
 select pg_temp.hata_bekle($$select public.davet_gecerli(current_setting('test.d3')::uuid)$$, '42501');
 reset role;
