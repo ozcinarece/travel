@@ -134,7 +134,7 @@ function Kesfet({
     ag: false,
   });
   const bugunProg = useGunProgrami({ seyahat, gun: cekmeceGunu, duraklar: duraklar.data ?? BOS_DURAKLAR, mekanlar: mekanlar.data ?? BOS_MEKANLAR, yuruyus: programVerisi.yuruyus, an, uclar: programVerisi.seciliUclar });
-  const bugunCekmece = useMemo(() => (bugunProg?.bugun ? bugunDurumu(bugunProg.canli) : null), [bugunProg]);
+  const bugunCekmece = useMemo(() => (bugunProg?.bugun ? bugunDurumu(bugunProg.canli, bugunProg.simdiDk) : null), [bugunProg]);
   const [gunBildirimi, setGunBildirimi] = useState<string | null>(null);
   useEffect(() => {
     if (!gunBildirimi) return;

@@ -11,6 +11,7 @@ import { hangiGuneSirasi, type GunSecenegi } from '@/features/listem/listem';
 import { t } from '@/i18n';
 import { sureMetni } from '@/lib/kategori';
 import { mesafeMetni } from '@/lib/mesafe';
+import { okunurAyrac } from '@/lib/okunur';
 import { GUNLER, haftaGunu, parcala } from '@/lib/takvim';
 import { anaV5, gunRengi, renk, yazi } from '@/theme';
 
@@ -53,7 +54,8 @@ export function gunAlti(o: GunSecenegi, gecti: boolean, bugun?: { gezilen: numbe
 
 /** #553 KK4: geçmiş gün "…, geçti" diye okunur (satır dokunulabilir kalır). */
 export function gunSatiriEtiketi(baslik: string, alt: string, o: { gecti: boolean; enYakin: boolean }): string {
-  const metin = [baslik, o.gecti ? null : alt, o.enYakin ? t('listem.guneEkle.enYakinRozet') : null].filter(Boolean).join(' · ');
+  // #562 KK2: ekran okuyucu " · " yerine ", " okur; alt satırın içindeki ayıraç da (görünen metin değişmez).
+  const metin = okunurAyrac([baslik, o.gecti ? null : alt, o.enYakin ? t('listem.guneEkle.enYakinRozet') : null].filter(Boolean).join(', '));
   return o.gecti ? `${metin}, ${t('listem.guneEkle.gectiOkunus')}` : metin;
 }
 

@@ -9,6 +9,7 @@ import { BolumBasligi, BugunBosV7, type BosGunYeri } from '@/components/gezi/Sey
 import { Ikon } from '@/components/ui/Ikon';
 import { t } from '@/i18n';
 import type { Gun } from '@/lib/tipler';
+import { okunurAyrac } from '@/lib/okunur';
 import { altMenuRenk, anaV5, gunUstuMetin, renk, seyahatV7, yazi } from '@/theme';
 
 /** #582: satırın ekran okuyucu özel eylemi. */
@@ -308,10 +309,15 @@ export function PlanListesi(p: Props) {
   );
 }
 
-/** #534 KK7: "Listem · N yer gün bekliyor ›"; liste ve (#553 KK5) harita görünümünün paneli ortak kullanır. */
-export function ListemBekliyorSatiri({ n, onPress, bosGun }: { n: number; onPress: () => void; bosGun?: boolean }) {
+/** #534 KK7: "Listem · N yer gün bekliyor ›"; liste ve (#553 KK5) harita görünümünün paneli ortak kullanır. #562 KK4: `kapBosluklu`
+ * — üst kap boşluğu zaten veriyorsa (harita panelinin boş gün hali, `gap: 10`) satır kendi üst boşluğunu eklemez; boşluk tek kalır. */
+export function ListemBekliyorSatiri({ n, onPress, bosGun, kapBosluklu }: { n: number; onPress: () => void; bosGun?: boolean; kapBosluklu?: boolean }) {
   return (
-    <Pressable accessibilityRole="button" onPress={onPress} style={({ pressed }) => [s.listem, bosGun && { marginTop: 22 }, pressed && { opacity: 0.8 }]}>
+    <Pressable
+      testID="listemBekliyor"
+      accessibilityRole="button"
+      onPress={onPress}
+      style={({ pressed }) => [s.listem, bosGun && { marginTop: 22 }, kapBosluklu && { marginTop: 0 }, pressed && { opacity: 0.8 }]}>
       <Ikon ad="kalpV7" boyut={20} renk={renk.ana} kalinlik={2} />
       <Text style={s.listemBaslik}>{t('plan.listem')}</Text>
       <Text style={s.listemAlt}>{t('plan.listemBekliyor', { n })}</Text>
@@ -338,6 +344,28 @@ export function altParcala(r: { alt: string; altTur?: string | null }): { tur: s
 /** #553 KK1 (#558): sekme kutusu 44 pt — `hitSlop` üst kabı aşamadığı için dokunma alanı kutunun kendisi. */
 export const SEKME_YUKSEKLIK = 44;
 
+/** #562 KK3: Program'daki "Haritaya dön" düğmesinin dokunma alanı (görünen hap 36 pt kalır; üst kap hitSlop'a izin vermez). */
+export const HARITAYA_DON_ALAN = 44;
+/** #562 KK3: görünen hap (kanvas 11: 36 pt); "Kaydedildi" varken 44 pt alanın üstüne yaslı. */
+export const HARITAYA_DON_HAP = 36;
+/** #562 KK3: "Kaydedildi" hapın alt kenarından 4 pt aşağıda (kanvas 11'deki `gap: 4`). */
+export const KAYDEDILDI_UST = HARITAYA_DON_HAP + 4;
+export const KAYDEDILDI_SATIR = 13;
+/** #140 (kanvas 11): Program liste başlığı satırı; "Kaydedildi" bu satırın dışına taşmaz. */
+export const LISTE_BASLIK_YUKSEKLIK = 58;
+export const LISTE_BASLIK_UST_BOSLUK = 2;
+/** #562 KK3: "Kaydedildi" büyük sistem yazısında da başlık satırından taşmasın (2 + 40 + 13 × 1,2 ≤ 58). */
+export const KAYDEDILDI_YAZI_CARPANI = 1.2;
+/** #562 KK3 (kanvas 11'deki flex davranışı): "Kaydedildi" yokken hap satırda ortalı (gün karesiyle aynı merkez); varken
+ * sütun satırın üstüne, hap 44 pt alanın üstüne yaslanır ve "Kaydedildi" hapın 4 pt altında satırın içinde kalır. */
+export function haritayaDonYerlesimi(kaydedildiVar: boolean): {
+  kap: { alignItems: 'flex-end'; alignSelf: 'center' | 'flex-start' };
+  alan: { height: number; justifyContent: 'center' | 'flex-start' };
+} {
+  const hiza = kaydedildiVar ? 'flex-start' : 'center';
+  return { kap: { alignItems: 'flex-end', alignSelf: hiza }, alan: { height: HARITAYA_DON_ALAN, justifyContent: hiza } };
+}
+
 /** #553 KK2: ekran okuyucu etiketi — saat, ad, alt satır; vurgulu durakta "şu an buradasın" ya da "sıradaki durak";
  * #554 KK2: atlananda "Atlandı" hapı da okunur (alt satırdaki "· atlandı" kalktı). */
 export function durakEtiketi(r: {
@@ -352,7 +380,7 @@ export function durakEtiketi(r: {
 }): string {
   const durum = r.vurgulu ? t(r.buradasin ? 'plan.buradasinDurak' : 'plan.siradakiDurak') : r.atlandi ? t('plan.atlandi') : null;
   // #582: ekran okuyucu gün adını tam okur ("Pazartesi kapalı").
-  return [r.saat, r.ad, r.alt, r.kapaliUzun ?? r.kapali, durum].filter(Boolean).join(', ');
+  return okunurAyrac([r.saat, r.ad, r.alt, r.kapaliUzun ?? r.kapali, durum].filter(Boolean).join(', '));
 }
 
 /** #570 KK6: gün özetinin durak parçası — bütün duraklar atlandıysa (atlanan numarasız) "Hepsi atlandı", yoksa numaralı durak sayısı. */

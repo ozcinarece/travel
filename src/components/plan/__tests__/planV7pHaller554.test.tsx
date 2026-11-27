@@ -76,7 +76,7 @@ describe('Plan v7p halleri (#554)', () => {
     const dugme = getByLabelText(durakEtiketi(r));
     expect(within(dugme).getByText(t('plan.atlandi'))).toBeTruthy();
     expect(within(dugme).queryByText(/· atlandı/)).toBeNull();
-    expect(durakEtiketi(r)).toBe(`Durak 2, Müze · 45 dk, ${t('plan.atlandi')}`);
+    expect(durakEtiketi(r)).toBe(`Durak 2, Müze, 45 dk, ${t('plan.atlandi')}`);
   });
 
   it('KK3: boş gün — başlık, açıklama ve tek turuncu "+ Bu güne yer ekle"', () => {

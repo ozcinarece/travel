@@ -198,10 +198,15 @@ export function hangiGuneSirasi(
   return sira.map((x) => ({ secenek: x, gecti: gecti(x), enYakin: x.onerilen && x.enYakinM !== null }));
 }
 
+/** #562 KK1: seyahatin saatiyle (`trips.tz`) bu dakikadan sonra "akşam boş" eki gösterilmez; akşam geçmiştir. */
+export const AKSAM_BITIS_DK = 21 * 60;
+
 /** #553 KK3: "Hangi güne?"de bugünün alt satırı için canlı programdan gezilen durak sayısı ve akşamın boş olup olmadığı
- * (son atlanmamış durak 17:00'den önce bitiyor; #532'deki "Akşam için yakında" ile aynı eşik). */
-export function bugunDurumu(canli: Pick<Program, 'satirlar'>): { gezilen: number; aksamBos: boolean } {
+ * (son atlanmamış durak 17:00'den önce bitiyor; #532'deki "Akşam için yakında" ile aynı eşik). #562 KK1: `simdiDk`
+ * (seyahat saat diliminde, `useGunProgrami`) 21:00 ya da sonrasıysa akşam boş sayılmaz. */
+export function bugunDurumu(canli: Pick<Program, 'satirlar'>, simdiDk: number | null = null): { gezilen: number; aksamBos: boolean } {
   const etkin = canli.satirlar.filter((x) => x.durum !== 'atlandi');
   const son = etkin[etkin.length - 1];
-  return { gezilen: etkin.filter((x) => x.durum === 'gecildi').length, aksamBos: !son || son.ayrilisDk < AKSAM_ESIGI_DK };
+  const aksamGecti = simdiDk !== null && simdiDk >= AKSAM_BITIS_DK;
+  return { gezilen: etkin.filter((x) => x.durum === 'gecildi').length, aksamBos: !aksamGecti && (!son || son.ayrilisDk < AKSAM_ESIGI_DK) };
 }
