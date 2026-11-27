@@ -10,7 +10,12 @@
 //   çağırıyorsa (`select`, `perform`, `call`, varsayılan, politika…) ya da `create trigger … on t … execute function
 //   ad` varken aynı dosya `t`ye yazıyorsa gövde de taranır. `drop/grant/revoke/comment/alter function ad(…)` çağrı
 //   sayılmaz.
-// - Önceki bir migration'da tanımlanmış fonksiyonun gövdesi bu dosyada görünmez; o çağrı bu bekçinin dışında.
+// - #526: fonksiyon haritası bütün migration'lardan kurulur (`fonksiyonHaritasi`, `bekciSonuclari`). Bir dosya
+//   değerlendirilirken kendisinden önceki dosyaların tanımları geçerlidir; aynı ad ve imzanın birden çok tanımı
+//   varsa son tanım kalır. Önceki bir dosyada tanımlanmış silen fonksiyonu çağıran yeni dosya da durdurur.
+// - Bilinen sınırlar (tehdit modeli kazara yazılan hata; kasıtlı atlatma kapsam dışı): `execute` ile dinamik
+//   kurulan ya da dolar tırnağı dışında (`as 'gövde'`) yazılmış fonksiyon gövdeleri haritaya girmez; çağrılar
+//   şemadan bağımsız, sade adla eşleşir; `standard_conforming_strings = off` (düz `'…'` içinde `\'`) varsayılmaz.
 
 // `alter table … drop …`: `column` kelimesi Postgres'te isteğe bağlı. Kısıt, varsayılan, not null, identity ve
 // üretilen ifade kaldırmak veri silmez; bunlar hariç her `drop` sayılır. `[^;]*?` aynı ifadedeki sonraki `drop`'a da
@@ -31,7 +36,10 @@ const KALIPLAR = [
   /\bdelete\s+from\b/,
   // `update [only] t [[as] takma] set …`: var olan satırı ezer. Tetikleyici (`before update on`), yetki
   // (`grant update`) ve upsert (`do update set`, tablo adı yok) sayılmaz.
-  new RegExp(String.raw`\bupdate\s+(?:only\s+)?(?!set\b)${NITELIKLI}\s+(?:(?:as\s+)?(?!set\b)\w+\s+)?set\b`),
+  // #526 KK2: `update t * set`, `update t as "x" set`, `update "t" "x" set`.
+  new RegExp(
+    String.raw`\bupdate\s+(?:only\s+)?(?!set\b)${NITELIKLI}(?:\s*\*)?\s+(?:(?:as\s+)?(?!set\b)${ID}\s+)?set\b`,
+  ),
   // `merge into … when matched then delete | update set`.
   /\bmerge\s+into\b/,
   // `drop … cascade` bağlı nesneleri de siler. Yabancı anahtardaki `on delete/update cascade` sayılmaz.
@@ -39,7 +47,10 @@ const KALIPLAR = [
 ];
 
 const ETIKET = /\$([a-z_][a-z0-9_]*)?\$/y;
-const FONKSIYON_BASI = new RegExp(String.raw`\bcreate\s+(?:or\s+replace\s+)?(?:function|procedure)\s+(${NITELIKLI})`);
+// Ad ve (tek düzey iç içe parantezli, ör. `numeric(10, 2)`) argüman listesi: imza.
+const FONKSIYON_BASI = new RegExp(
+  String.raw`\bcreate\s+(?:or\s+replace\s+)?(?:function|procedure)\s+(${NITELIKLI})\s*(\((?:[^()]|\([^()]*\))*\))?`,
+);
 const DO_BASI = /\bdo(?:\s+language\s+\w+)?\s*$/;
 const DINAMIK = /\bexecute\b(?!\s+(?:function|procedure)\b)/;
 
@@ -76,8 +87,10 @@ function parcala(sql) {
       }
       duz += ' ';
     } else if (c === "'" || c === '"') {
+      // #526 KK3: `E'…'` (kaçışlı metin) içinde `\'` metni bitirmez.
+      const kacisli = c === "'" && sql[i - 1] === 'e' && !/[\w$]/.test(sql[i - 2] ?? '');
       let j = i + 1;
-      while (j < n && !(sql[j] === c && sql[j + 1] !== c)) j += sql[j] === c ? 2 : 1;
+      while (j < n && !(sql[j] === c && sql[j + 1] !== c)) j += sql[j] === c || (kacisli && sql[j] === '\\') ? 2 : 1;
       duz += sql.slice(i, j + 1).replaceAll(';', ',');
       i = j + 1;
     } else if (c === '$' && !/[\w$]/.test(sql[i - 1] ?? '')) {
@@ -108,6 +121,18 @@ function sadeAd(ad) {
   return ad.split('.').pop().replaceAll('"', '');
 }
 
+/** `(p uuid, n  int)` → `(p uuid,n int)`: aynı imzanın tanımları üst üste yazılsın diye. */
+function imza(argumanlar) {
+  return (argumanlar ?? '()').replace(/\s+/g, ' ').replace(/\s*([(),])\s*/g, '$1');
+}
+
+/** `fonksiyonlar`: ad → imza → gövdeler. Aynı dosyadaki tanımlar birikir (ihtiyatlı). */
+function ekle(fonksiyonlar, ad, imz, govde) {
+  const imzalar = fonksiyonlar.get(ad) ?? new Map();
+  imzalar.set(imz, [...(imzalar.get(imz) ?? []), govde]);
+  fonksiyonlar.set(ad, imzalar);
+}
+
 /**
  * Migration sırasında çalışan metni (`ust`) çıkarır: fonksiyon gövdeleri `fonksiyonlar`a ayrılır, `do` gövdeleri
  * yerinde açılır, diğer dolar tırnaklı metinler olduğu gibi kalır.
@@ -126,8 +151,7 @@ function analiz(sql, fonksiyonlar) {
     const bas = ust.slice(ifadeBasi);
     const fonksiyon = FONKSIYON_BASI.exec(bas);
     if (fonksiyon) {
-      const ad = sadeAd(fonksiyon[1]);
-      fonksiyonlar.set(ad, [...(fonksiyonlar.get(ad) ?? []), p.dolar]);
+      ekle(fonksiyonlar, sadeAd(fonksiyon[1]), imza(fonksiyon[2]), p.dolar);
       ust += ' ';
     } else if (DO_BASI.test(bas)) {
       const ic = analiz(p.dolar, fonksiyonlar);
@@ -156,7 +180,7 @@ const ANAN_IFADELER =
 function cagriliyor(metin, ad) {
   const a = `"?${kacir(ad)}"?`;
   // Metin içindeki ad (ör. `cron.schedule('…', 'select ad()')`) migration sırasında çalışmaz.
-  const temiz = metin.replace(/'(?:[^']|'')*'/g, "''").replace(ANAN_IFADELER, ' ');
+  const temiz = metin.replace(/\be'(?:[^'\\]|\\[\s\S]|'')*'|'(?:[^']|'')*'/g, "''").replace(ANAN_IFADELER, ' ');
   // Başlangıç bir tanıtıcının ortasında ya da `şema.`dan sonra olamaz; önündeki `function|procedure` tanım ya da
   // tetikleyici bağlantısıdır (aşağıda ayrıca bakılır).
   const cagri = new RegExp(
@@ -177,19 +201,59 @@ function cagriliyor(metin, ad) {
   return false;
 }
 
-/** Migration metni veri silebilecek bir ifade içeriyorsa true. */
-export function veriSilebilir(sql) {
-  const fonksiyonlar = new Map();
+/** Haritanın kopyası (iç `Map`ler de); `veriSilebilir` kopyaya yazar, verilen harita değişmez. */
+function kopya(harita) {
+  return new Map([...harita].map(([ad, imzalar]) => [ad, new Map(imzalar)]));
+}
+
+/**
+ * #526 KK1: sıralı migration metinlerinden fonksiyon haritası (ad → imza → gövdeler). Her dosyanın tanımları
+ * öncekileri aynı ad ve imzada ezer: son tanım geçerlidir.
+ */
+export function fonksiyonHaritasi(sqller, harita = new Map()) {
+  const sonuc = kopya(harita);
+  for (const sql of sqller) {
+    const dosya = new Map();
+    analiz(sql.toLowerCase(), dosya);
+    for (const [ad, imzalar] of dosya) {
+      const hedef = sonuc.get(ad) ?? new Map();
+      for (const [imz, govdeler] of imzalar) hedef.set(imz, govdeler);
+      sonuc.set(ad, hedef);
+    }
+  }
+  return sonuc;
+}
+
+/**
+ * Sıralı `[{ ad, sql }]` listesindeki her dosyanın bekçi sonucu (ad → true: durdur). Her dosya kendisinden önceki
+ * dosyaların fonksiyon haritasıyla değerlendirilir.
+ */
+export function bekciSonuclari(dosyalar) {
+  const sonuc = new Map();
+  let harita = new Map();
+  for (const { ad, sql } of dosyalar) {
+    sonuc.set(ad, veriSilebilir(sql, harita));
+    harita = fonksiyonHaritasi([sql], harita);
+  }
+  return sonuc;
+}
+
+/**
+ * Migration metni veri silebilecek bir ifade içeriyorsa true. `onceki`: önceki migration'ların fonksiyon haritası
+ * (`fonksiyonHaritasi`); bu dosyadaki tanımlar ona eklenir (çağrı yeniden tanımdan önce olabilir, ikisi de taranır).
+ */
+export function veriSilebilir(sql, onceki = new Map()) {
+  const fonksiyonlar = kopya(onceki);
   let { ust: calisan, dinamik } = analiz(sql.toLowerCase(), fonksiyonlar);
   const taranan = new Set();
   let degisti = true;
   while (degisti) {
     degisti = false;
-    for (const [ad, govdeler] of fonksiyonlar) {
+    for (const [ad, imzalar] of fonksiyonlar) {
       if (taranan.has(ad) || !cagriliyor(calisan, ad)) continue;
       taranan.add(ad);
       degisti = true;
-      for (const govde of govdeler) {
+      for (const govde of [...imzalar.values()].flat()) {
         const ic = analiz(govde, fonksiyonlar);
         if (ic.dinamik || DINAMIK.test(ic.ust)) dinamik = true;
         calisan += ` ; ${ic.ust} ; `;

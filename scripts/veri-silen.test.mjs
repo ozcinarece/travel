@@ -2,7 +2,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readdir, readFile } from 'node:fs/promises';
-import { veriSilebilir } from './veri-silen.mjs';
+import { bekciSonuclari, fonksiyonHaritasi, veriSilebilir } from './veri-silen.mjs';
 
 const durdurur = [
   'drop table trips;',
@@ -65,6 +65,16 @@ const durdurur = [
   'update "Trip Table" set c = 1;',
   'update public."Trip Table" t set c = 1;',
   'drop owned by eski_rol;',
+  // #526 KK2: `*` (alt tablolar dahil) ve tırnaklı takma ad.
+  'update t * set c = 1;',
+  'update public.t * as x set c = 1;',
+  'update t as "x" set c = 1;',
+  'update "t" "x" set c = 1;',
+  'UPDATE ONLY "T" AS "Takma Ad" SET c = 1;',
+  // #526 KK3: E-string içindeki `\'` metni bitirmez; ardından gelen `--` yorum değildir.
+  "select E'\\' -- ' ; delete from t;",
+  // E-string içindeki `/*` yorum başlatmaz.
+  "select e'a\\'b /* ' ; truncate t; select ' */';",
 ];
 
 const durdurmaz = [
@@ -117,6 +127,11 @@ const durdurmaz = [
   "create function f() returns void language plpgsql as $$ begin -- otel'i taşı\n perform 1; end $$;\nselect f();",
   "do language plpgsql $$ begin raise notice 'tamam'; end $$;",
   "insert into n values ('a--b'), ('/* yorum değil */');",
+  // #526 KK2: `update … set` olmayanlar.
+  'create trigger tr after update of c on t * for each row execute function f();',
+  // #526 KK3: `E'\\'` (kaçışlı ters bölü) metni bitirir; ardından gelen `--` yorumdur.
+  "select E'\\\\' -- '; delete from t;\n;",
+  "select pg_size_pretty(1) as e, 'x';",
 ];
 
 for (const sql of durdurur) {
@@ -126,9 +141,61 @@ for (const sql of durdurmaz) {
   test(`durdurmaz: ${sql.split('\n')[0]}`, () => assert.equal(veriSilebilir(sql), false));
 }
 
+// #526 KK1: fonksiyon haritası bütün migration'lardan kurulur.
+const SILEN = 'create function public.eski_fn() returns void language sql as $$ delete from t $$;';
+const OKUYAN = 'create or replace function public.eski_fn() returns void language sql as $$ select 1 $$;';
+
+test('KK1: önceki migration\'da tanımlanmış silen fonksiyon çağrılırsa durdurur', () => {
+  assert.equal(veriSilebilir('select public.eski_fn();'), false);
+  assert.equal(veriSilebilir('select public.eski_fn();', fonksiyonHaritasi([SILEN])), true);
+  assert.equal(veriSilebilir('do $$ begin perform eski_fn(); end $$;', fonksiyonHaritasi([SILEN])), true);
+});
+
+test('KK1: aynı fonksiyonun son tanımı geçerlidir', () => {
+  assert.equal(veriSilebilir('select public.eski_fn();', fonksiyonHaritasi([SILEN, OKUYAN])), false);
+  assert.equal(veriSilebilir('select public.eski_fn();', fonksiyonHaritasi([OKUYAN, SILEN])), true);
+  // Farklı imza (aşırı yükleme) üst üste yazmaz.
+  const baska = 'create function public.eski_fn(n int) returns void language sql as $$ select n $$;';
+  assert.equal(veriSilebilir('select public.eski_fn();', fonksiyonHaritasi([SILEN, baska])), true);
+});
+
+test('KK1: önceki dosyadaki silen fonksiyona bağlanan tetikleyici, yazmada durdurur', () => {
+  const tf = 'create function tf() returns trigger language plpgsql as $$ begin delete from eski; return new; end $$;';
+  const harita = fonksiyonHaritasi([tf]);
+  assert.equal(
+    veriSilebilir('create trigger tr after insert on t for each row execute function tf();\ninsert into t values (1);', harita),
+    true,
+  );
+  assert.equal(veriSilebilir('create trigger tr after insert on t for each row execute function tf();', harita), false);
+});
+
+test('KK1: bekciSonuclari her dosyayı kendisinden önceki dosyaların haritasıyla değerlendirir', () => {
+  const sonuc = bekciSonuclari([
+    { ad: '1.sql', sql: SILEN },
+    { ad: '2.sql', sql: 'select public.eski_fn();' },
+    { ad: '3.sql', sql: OKUYAN },
+    { ad: '4.sql', sql: 'select public.eski_fn();' },
+  ]);
+  assert.deepEqual(Object.fromEntries(sonuc), { '1.sql': false, '2.sql': true, '3.sql': false, '4.sql': false });
+});
+
+test('fonksiyonHaritasi verilen haritayı değiştirmez', () => {
+  const harita = fonksiyonHaritasi([SILEN]);
+  fonksiyonHaritasi([OKUYAN], harita);
+  veriSilebilir(OKUYAN, harita);
+  assert.equal(veriSilebilir('select eski_fn();', harita), true);
+});
+
 test('supabase/migrations içindeki hiçbir dosyada okunamayan kalıp yok (çökme yok)', async () => {
   const klasor = new URL('../supabase/migrations/', import.meta.url);
   for (const ad of (await readdir(klasor)).filter((a) => a.endsWith('.sql'))) {
     assert.equal(typeof veriSilebilir(await readFile(new URL(ad, klasor), 'utf8')), 'boolean', ad);
   }
+});
+
+test('supabase/migrations bütünüyle haritalı değerlendirilir (çökme yok)', async () => {
+  const klasor = new URL('../supabase/migrations/', import.meta.url);
+  const adlar = (await readdir(klasor)).filter((a) => a.endsWith('.sql')).sort();
+  const dosyalar = await Promise.all(adlar.map(async (ad) => ({ ad, sql: await readFile(new URL(ad, klasor), 'utf8') })));
+  assert.equal(bekciSonuclari(dosyalar).size, adlar.length);
 });
