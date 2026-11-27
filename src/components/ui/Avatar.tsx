@@ -14,13 +14,15 @@ type Props = {
   yuvarlak?: boolean;
   /** Baş harfin punto boyutu (verilmezse yukarıdaki kural). */
   harfBoyutu?: number;
+  /** #578 (`Profil_v12_*`): baş harf rengi (verilmezse zemine göre Gece ya da beyaz). */
+  harfRengi?: string;
 };
 
 /** Açık zeminlerde (Mandalina, Buz, açık mavi) baş harf Gece; koyularda beyaz. */
 const ACIK_ZEMINLER = new Set<string>([renk.vurgu, renk.yuzey, renk.anaAcik, renk.zemin, renk.basariZemin, '#f5a524']);
 
 /** #136 (kanvas): köşeli yuvarlak kare avatar (köşe ≈ %32), Figtree 800 baş harf; fotoğraf varsa o. Varsayılan zemin Gece. */
-export function Avatar({ ad, url, boyut = 30, arkaPlan = renk.ana, kucukHarf = false, yuvarlak = false, harfBoyutu }: Props) {
+export function Avatar({ ad, url, boyut = 30, arkaPlan = renk.ana, kucukHarf = false, yuvarlak = false, harfBoyutu, harfRengi }: Props) {
   const kutu = { width: boyut, height: boyut, borderRadius: yuvarlak ? boyut / 2 : Math.round(boyut * 0.32) };
   if (url) {
     return <Foto source={{ uri: url }} style={kutu} contentFit="cover" accessibilityLabel={ad} />;
@@ -28,7 +30,7 @@ export function Avatar({ ad, url, boyut = 30, arkaPlan = renk.ana, kucukHarf = f
   const harf = ad.trim().charAt(0).toLocaleUpperCase('tr') || '?';
   const zemin = arkaPlan.toLowerCase();
   // #290 KK8 (25c · 29c): açık mavi (#C9D2F2) zeminde harf Lacivert (#152A6B).
-  const metin = zemin === renk.anaAcik ? renk.ana : ACIK_ZEMINLER.has(zemin) ? renk.metin : renk.zemin;
+  const metin = harfRengi ?? (zemin === renk.anaAcik ? renk.ana : ACIK_ZEMINLER.has(zemin) ? renk.metin : renk.zemin);
   return (
     <View style={[s.kap, kutu, { backgroundColor: arkaPlan }]} accessibilityLabel={ad}>
       <Text style={[s.harf, harfBoyutu ? { fontSize: harfBoyutu } : kucukHarf ? s.kucukHarf : { fontSize: boyut * 0.4 }, { color: metin }]}>{harf}</Text>

@@ -134,8 +134,23 @@ export function GrupPenceresi({ acik, onKapat, seyahat, uyeler, mekanlar }: Prop
           const n = eklediSayisi(u.user_id);
           const parcalar = [u.role === 'owner' ? t('davet.grup.kurdu') : null, n > 0 ? t('davet.grup.mekanEkledi', { n }) : null].filter(Boolean);
           const varis = sonVaris(u.user_id);
+          // #578 KK1: gezi ve sohbetteki yüzler bu pencereyi açar; kişiye dokununca profili (Profil v12) açılır. Misafirin
+          // profili yok; kendin için Profil sekmesi.
+          const profilAc = u.guest
+            ? undefined
+            : () => {
+                onKapat();
+                if (benim(u.user_id)) router.navigate('/(tabs)/profil');
+                else router.push({ pathname: '/kisi/[id]', params: { id: u.user_id } });
+              };
           return (
-            <View key={u.user_id} style={s.uye}>
+            <Pressable
+              key={u.user_id}
+              accessibilityRole={profilAc ? 'button' : undefined}
+              disabled={!profilAc}
+              onPress={profilAc}
+              style={({ pressed }) => [s.uye, pressed && { opacity: 0.8 }]}
+              testID={`grup-uye-${u.user_id}`}>
               <Avatar ad={u.display_name} url={u.photo_url} boyut={44} arkaPlan={yuzRenkleri[i % yuzRenkleri.length]} />
               <View style={{ flex: 1, gap: 1 }}>
                 <Text style={s.uyeAd}>
@@ -153,7 +168,7 @@ export function GrupPenceresi({ acik, onKapat, seyahat, uyeler, mekanlar }: Prop
                   </Text>
                 ) : null}
               </View>
-            </View>
+            </Pressable>
           );
         })}
       </View>
