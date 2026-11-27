@@ -34,7 +34,7 @@ import { useDuragaAta, useDuraklar, useDurakKaldir, useGunEkle, useGunler, useGu
 import { olayYaz, sehirEslestir, useSehirler, useSehirYerleri } from '@/features/icerik/sorgular';
 import { useKonum, yakinDurakId } from '@/features/konum/useKonum';
 import { useMekanGuncelle, useMekanlar, useMekanSil, useUyeler } from '@/features/mekanlar/sorgular';
-import { aksamBoslugu, kmMetni, planSatirlari, REHBER_YAKIN_M, YEMEK_RENGI } from '@/features/plan/planListesi';
+import { aksamBoslugu, kapaliGunKisa, kmMetni, planSatirlari, REHBER_YAKIN_M, tasinabilirGunler, YEMEK_RENGI } from '@/features/plan/planListesi';
 import { useModalKapaninca } from '@/features/plan/modalKapaninca';
 import { useGuneEkle } from '@/features/gezi/bugunEkle';
 import { eklenenleriSabitle, yakindaAdaylari, type YakinAday } from '@/features/gezi/yakinda';
@@ -52,7 +52,7 @@ import { geziyeGit } from '@/features/gezi/gezinti';
 import { useSeyahatId } from '@/features/seyahatler/baglam';
 import { useSeyahat } from '@/features/seyahatler/sorgular';
 import { usePuanKaydet, usePuanlar } from '@/features/puanlar/sorgular';
-import { useHafifYerler, useOnizleme } from '@/features/yerler/api';
+import { hafifOnbellek, useHafifYerler, useOnizleme } from '@/features/yerler/api';
 import { t } from '@/i18n';
 import { kategoriEtiketi, sureMetni } from '@/lib/kategori';
 import { mesafeMetni } from '@/lib/mesafe';
@@ -64,7 +64,7 @@ import type { Durak, Gun, Mekan, Seyahat } from '@/lib/tipler';
 import { useCevrimdisi } from '@/lib/baglanti';
 import { kacinciGun, saatEkli, yerelAn, yerelSaatDk, yerelTarih } from '@/lib/zaman';
 import { cizgiOrtasi } from '@/lib/polyline';
-import { googleGunu } from '@/schedule/acilis';
+import { googleGunu, type Periyot } from '@/schedule/acilis';
 import { gecikme } from '@/schedule/kaydir';
 import { enUcuzEklemeIndeksi, yuruyusDk } from '@/schedule/program';
 import { arasindaAnahtar } from '@/schedule/sira';
@@ -159,6 +159,13 @@ export default function ProgramEkrani() {
 /** #554 KK5: "Cuma 27" (tarihsizse "Gün 3"). */
 function gunSilBasligi(gun: Gun): string {
   return gun.date ? `${GUNLER[haftaGunu(gun.date)]} ${parcala(gun.date).gun}` : t('geziSayfasi.gunNo', { n: gun.index });
+}
+
+/** #582 KK3: "Pzt kapalı" (gün kısaltması günün tarihinden) ve ekran okuyucu için "Pazartesi kapalı"; kapalı değilse ya da saat
+ * bilinmiyorsa null (Ürün kararı: KK3 yalnız saat biliniyorsa; liste saat için Google'a istek atmaz). */
+function kapaliUyarisi(tarih: string | null, periyotlar: Periyot[] | null | undefined): { kisa: string; uzun: string } | null {
+  const gun = kapaliGunKisa(tarih, periyotlar);
+  return gun && tarih ? { kisa: t('plan.kapaliGun', { gun }), uzun: t('plan.kapaliGun', { gun: GUNLER[haftaGunu(tarih)] }) } : null;
 }
 
 function gunBasligi(gun: Gun): string {
@@ -318,6 +325,10 @@ function ProgramSekmesi({
     harita ? mekanlar.map((m) => m.place_id) : [],
     { puan: true, saatler: true },
   );
+  // #582 KK3: kapalı gün uyarısının saatleri — harita açıksa yukarıdaki saatli sorgudan; listede yalnız ortak oturum
+  // önbelleğinden (Planı kur, Listem ya da harita bu oturumda istediyse). Liste Google'a istek atmaz (#182 KK7); saat yoksa
+  // uyarı yok. Saatler yalnız bellekte (PRD §7).
+  const periyotlari = (m: Mekan) => (yerler.data?.[m.place_id] ?? hafifOnbellek.oku(m.place_id, ['saat']))?.periyotlar;
   // #182 KK7: listede ad kaynağı (istek yok): harita açıldıysa places-light cevabı, değilse DB / oturum önbelleği, yoksa kategori.
   const bilinen = useBilinenMekanlar(useMemo(() => mekanlar.map((m) => m.place_id), [mekanlar]));
   const adGoster = (m: Mekan) => yerler.data?.[m.place_id]?.ad ?? bilinen.ad(m) ?? kategoriEtiketi(m.primary_type);
@@ -588,9 +599,11 @@ function ProgramSekmesi({
         { etiket: t('program.menuCikar'), onPress: () => gundenCikar(menuDurak), tehlike: true },
       ]
     : [];
+  // #582 KK3: "Başka güne taşı" — mekanın kapalı olduğu günler listede yok (saat bilinmiyorsa hepsi).
+  const gunSecMekan = gunSecDurak ? mekanIle.get(gunSecDurak.place_ref) : undefined;
   const gunSecenekleri: SecimSecenegi[] =
     gunSecDurak && gun
-      ? gunler.filter((g) => g.id !== gun.id).map((g) => ({ etiket: `${t('program.guneAl', { n: g.index })} · ${gunBasligi(g)}`, onPress: () => baskaGuneAl(gunSecDurak, g) }))
+      ? tasinabilirGunler(gunler, gun.id, gunSecMekan ? periyotlari(gunSecMekan) : undefined).map((g) => ({ etiket: `${t('program.guneAl', { n: g.index })} · ${gunBasligi(g)}`, onPress: () => baskaGuneAl(gunSecDurak, g) }))
       : [];
 
   // #55 §C10: planlama aşamasında (Bitti'ye basılmamış) durağa ya da pine uzun bas → Başka güne al · Günden çıkar ·
@@ -1009,9 +1022,12 @@ function ProgramSekmesi({
     const gecildi = !!prog?.bugun && r.durum === 'gecildi';
     const atlandi = r.numara === null;
     // #554 KK2: atlanan durakta "· atlandı" yok; sağdaki "Atlandı" hapı söyler.
-    const alt = [adBilinen ? kategoriEtiketi(r.mekan.primary_type) : null, sureMetni(r.durak.minutes), gecildi ? t('plan.gezildi') : null]
+    const altTur = adBilinen ? kategoriEtiketi(r.mekan.primary_type) : null;
+    const alt = [altTur, sureMetni(r.durak.minutes), gecildi ? t('plan.gezildi') : null]
       .filter(Boolean)
       .join(' · ');
+    // #582 KK3: gezilen ya da atlanan durakta uyarı yok.
+    const kapali = !gecildi && !atlandi && !r.durak.completed_at ? kapaliUyarisi(gun?.date ?? null, periyotlari(r.mekan)) : null;
     const dk = r.gelis ? yuruyusDk(r.gelis) : 0;
     return {
       id: r.durak.id,
@@ -1021,11 +1037,15 @@ function ProgramSekmesi({
       saat: r.varisDk !== null ? dakikaSaat(r.varisDk) : null,
       ad: adGoster(r.mekan),
       alt,
+      altTur,
       gelis: r.gelis ? { metin: t('plan.bacak', { dk: `${r.gelis.kestirim ? '~' : ''}${dk}`, mesafe: kmMetni(r.gelis.m) }), araba: r.gelis.mod === 'taksi' } : null,
       vurgulu: !!prog?.bugun && (r.durum === 'buradasin' || r.durum === 'siradaki'),
       buradasin: !!prog?.bugun && r.durum === 'buradasin',
       gecildi,
       atlandi,
+      kapali: kapali?.kisa ?? null,
+      kapaliUzun: kapali?.uzun ?? null,
+      tasinabilir: !!gun && tasinabilirGunler(gunler, gun.id, periyotlari(r.mekan)).length > 0,
     };
   });
   // #532 KK3: kesik çizgili "Akşam boş · Öner" kutusu kalktı; aynı koşulda (son durak 17:00'den önce bitiyor) "Akşam için
@@ -1152,6 +1172,7 @@ function ProgramSekmesi({
       satirlar={satirGorunumleri}
       onDurak={(mekanId) => setSeciliMekanId(mekanId)}
       onDurakUzunBas={uzunBas}
+      onBaskaGuneTasi={(durakId) => setGunSecDurak(gunDurak.find((d) => d.id === durakId) ?? null)}
       onEkle={gun ? yerEkleAc : null}
       aksam={aksamSatirlari.length > 0 ? { yerler: aksamSatirlari, eklenenler: aksamEklenenler, onEkle: aksamEkle, pasif: cevrimdisi, onTumu: yerEkleAc } : null}
       listem={atanmamisSayisi > 0 ? { n: atanmamisSayisi, onPress: listemAc } : null}

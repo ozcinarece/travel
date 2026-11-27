@@ -1142,7 +1142,11 @@
     "bosGun": "Boş gün",
     "bosGunBaslik": "{gun} henüz boş",
     "bosGunMetin": "Listenden ya da yakındaki yerlerden seç; saatler kendiliğinden dizilir.",
-    "bosGunMetinListemBos": "Yakındaki yerlerden seç; saatler kendiliğinden dizilir."
+    "bosGunMetinListemBos": "Yakındaki yerlerden seç; saatler kendiliğinden dizilir.",
+    "kapaliGun": "{gun} kapalı",
+    "baskaGuneTasi": "Başka güne taşı",
+    "baskaGuneTasiBag": "Başka güne taşı ›",
+    "kapaliTasiEtiket": "{uyari}. Başka güne taşı"
   },
   "listem": {
     "baslik": "Listem",
