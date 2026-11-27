@@ -90,7 +90,7 @@ describe('#407 Arkadaşlar', () => {
     expect(screen.getByText('2 gün önce')).toBeTruthy();
     expect(screen.getByText('2 gün · 9 durak · 3 kişi gezdi', { includeHiddenElements: true })).toBeTruthy();
     expect(screen.queryByText('Arkadaşların gezilerini paylaşınca burada görünür.')).toBeNull();
-    fireEvent.press(screen.getByRole('button', { name: 'Ayşe, Bursa gezisi. Açar' }));
+    fireEvent.press(screen.getByRole('button', { name: 'Ayşe Bursa gezisini paylaştı, 2 gün önce. 2 gün · 9 durak · 3 kişi gezdi' }));
     expect(mockPush).toHaveBeenCalledWith({ pathname: '/r/g/[token]', params: { token: '11111111-1111-4111-8111-111111111111' } });
   });
 

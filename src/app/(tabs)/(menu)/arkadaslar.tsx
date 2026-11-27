@@ -5,6 +5,7 @@
 // cümle (KK4). Google'a istek yok.
 // #533 incelemesi: kartın tamamı dokunulabilir (♥ ayrı); sekmeye dönünce bayat akış tazelenir; "Davet et" etkin ya da yaklaşan
 // seyahatin davetini paylaşır, yoksa "Yeni seyahat" açılır; veri varken yenileme hatası listeyi silmez; ♥ hatası genel uyarı.
+// #540: misafire hesap cümlesi (KK1); kart etiketi zaman ve özeti de okur, ♥ etiketi beğenilmişken "Beğeniyi geri al" (KK2).
 import { router } from 'expo-router';
 import { useState } from 'react';
 import { ActivityIndicator, Alert, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
@@ -82,6 +83,7 @@ export default function ArkadaslarEkrani() {
   const akis = useArkadasPaylasimlari();
   const begeni = useBegeni();
   const davet = useDavetEt();
+  const { hesapli } = useOturum();
   useOdaktaTazele();
   const yenile = () => {
     void kisiler.refetch();
@@ -124,7 +126,10 @@ export default function ArkadaslarEkrani() {
                 <Text style={s.davetYazi}>{t('arkadaslar.davetEt')}</Text>
               </Pressable>
             </ScrollView>
-            {liste.length === 0 ? (
+            {/* #540 KK1: sunucu misafire akışı hiç döndürmez; boş cümle yerine hesap cümlesi. */}
+            {!hesapli ? (
+              <Text style={s.bos}>{t('arkadaslar.misafir')}</Text>
+            ) : liste.length === 0 ? (
               <Text style={s.bos}>{t('arkadaslar.bosKisi')}</Text>
             ) : akis.data.length === 0 ? (
               <Text style={s.bos}>{t('arkadaslar.bos')}</Text>
@@ -168,16 +173,23 @@ function KisiOgesi({ kisi, renk: zemin }: { kisi: Arkadas; renk: string }) {
 
 function PaylasimKarti({ p, ad, foto, renk: zemin, onBegen }: { p: ArkadasPaylasimi; ad: string; foto: string | null; renk: string; onBegen: () => void }) {
   const ac = () => router.push({ pathname: '/r/g/[token]', params: { token: p.id } });
+  const zaman = gecenZaman(p.olusturuldu);
+  const ozet = paylasimOzeti(p.gun_sayisi, p.durak_sayisi, p.kisi_sayisi, p.kisi_kip);
   // #533 incelemesi 7: başlık satırı, kapak ve özet aynı ekranı açar; ♥ kapağın üstünde ayrı Pressable. Ekran okuyucu için kart
   // tek düğme (başlık satırı), kapak ve özet ikinci kez okunmaz.
   return (
     <View style={s.kart} testID={`arkadas-paylasim-${p.id}`}>
-      <Pressable accessibilityRole="button" accessibilityLabel={t('arkadaslar.kartEtiket', { ad, sehir: p.sehir })} onPress={ac} style={s.kartUst}>
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={t('arkadaslar.kartEtiket', { ad, sehir: p.sehir, zaman, ozet })}
+        accessibilityHint={t('arkadaslar.kartIpucu')}
+        onPress={ac}
+        style={s.kartUst}>
         <Avatar ad={ad} url={foto} boyut={32} arkaPlan={zemin} yuvarlak harfBoyutu={13} />
         <Text style={s.kartMetin} numberOfLines={2}>
           <Text style={s.kalin}>{ad}</Text> {t('arkadaslar.paylasti', { sehir: p.sehir })}
         </Text>
-        <Text style={s.zaman}>{gecenZaman(p.olusturuldu)}</Text>
+        <Text style={s.zaman}>{zaman}</Text>
       </Pressable>
       <View>
         <Pressable onPress={ac} accessible={false} accessibilityElementsHidden importantForAccessibility="no-hide-descendants" testID={`arkadas-kapak-${p.id}`}>
@@ -185,7 +197,7 @@ function PaylasimKarti({ p, ad, foto, renk: zemin, onBegen }: { p: ArkadasPaylas
         </Pressable>
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel={t('arkadaslar.begen')}
+          accessibilityLabel={t(p.begendim ? 'arkadaslar.begeniGeriAl' : 'arkadaslar.begen')}
           accessibilityState={{ selected: p.begendim }}
           onPress={onBegen}
           hitSlop={7}
@@ -198,7 +210,7 @@ function PaylasimKarti({ p, ad, foto, renk: zemin, onBegen }: { p: ArkadasPaylas
         </Pressable>
       </View>
       <Pressable onPress={ac} accessible={false} accessibilityElementsHidden importantForAccessibility="no-hide-descendants" testID={`arkadas-ozet-${p.id}`}>
-        <Text style={s.ozet}>{paylasimOzeti(p.gun_sayisi, p.durak_sayisi, p.kisi_sayisi, p.kisi_kip)}</Text>
+        <Text style={s.ozet}>{ozet}</Text>
       </Pressable>
     </View>
   );
