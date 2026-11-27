@@ -13,6 +13,8 @@
 // - #526: fonksiyon haritası bütün migration'lardan kurulur (`fonksiyonHaritasi`, `bekciSonuclari`). Bir dosya
 //   değerlendirilirken kendisinden önceki dosyaların tanımları geçerlidir; aynı ad ve imzanın birden çok tanımı
 //   varsa son tanım kalır. Önceki bir dosyada tanımlanmış silen fonksiyonu çağıran yeni dosya da durdurur.
+//   Tetikleyiciler de haritada (`ad on tablo` → ifade, son tanım): önceki dosyada silen fonksiyona bağlanmış
+//   tabloya yazan yeni dosya durdurur. Sonraki `drop trigger|function` haritadan düşürmez (ihtiyatlı).
 // - Bilinen sınırlar (tehdit modeli kazara yazılan hata; kasıtlı atlatma kapsam dışı): `execute` ile dinamik
 //   kurulan ya da dolar tırnağı dışında (`as 'gövde'`) yazılmış fonksiyon gövdeleri haritaya girmez; çağrılar
 //   şemadan bağımsız, sade adla eşleşir; `standard_conforming_strings = off` (düz `'…'` içinde `\'`) varsayılmaz.
@@ -38,7 +40,7 @@ const KALIPLAR = [
   // (`grant update`) ve upsert (`do update set`, tablo adı yok) sayılmaz.
   // #526 KK2: `update t * set`, `update t as "x" set`, `update "t" "x" set`.
   new RegExp(
-    String.raw`\bupdate\s+(?:only\s+)?(?!set\b)${NITELIKLI}(?:\s*\*)?\s+(?:(?:as\s+)?(?!set\b)${ID}\s+)?set\b`,
+    String.raw`\bupdate\s+(?:only\s+)?(?!set\b)${NITELIKLI}(?:\s*\*\s*|\s+)(?:(?:as\s+)?(?!set\b)${ID}\s+)?set\b`,
   ),
   // `merge into … when matched then delete | update set`.
   /\bmerge\s+into\b/,
@@ -47,10 +49,8 @@ const KALIPLAR = [
 ];
 
 const ETIKET = /\$([a-z_][a-z0-9_]*)?\$/y;
-// Ad ve (tek düzey iç içe parantezli, ör. `numeric(10, 2)`) argüman listesi: imza.
-const FONKSIYON_BASI = new RegExp(
-  String.raw`\bcreate\s+(?:or\s+replace\s+)?(?:function|procedure)\s+(${NITELIKLI})\s*(\((?:[^()]|\([^()]*\))*\))?`,
-);
+// Ad; argüman listesi (imza) `argumanListesi` ile dengeli parantezle okunur.
+const FONKSIYON_BASI = new RegExp(String.raw`\bcreate\s+(?:or\s+replace\s+)?(?:function|procedure)\s+(${NITELIKLI})\s*`);
 const DO_BASI = /\bdo(?:\s+language\s+\w+)?\s*$/;
 const DINAMIK = /\bexecute\b(?!\s+(?:function|procedure)\b)/;
 
@@ -121,9 +121,25 @@ function sadeAd(ad) {
   return ad.split('.').pop().replaceAll('"', '');
 }
 
-/** `(p uuid, n  int)` → `(p uuid,n int)`: aynı imzanın tanımları üst üste yazılsın diye. */
-function imza(argumanlar) {
-  return (argumanlar ?? '()').replace(/\s+/g, ' ').replace(/\s*([(),])\s*/g, '$1');
+let benzersiz = 0;
+
+/**
+ * `metin[i]`den başlayan dengeli parantezli argüman listesi (`(a int default coalesce(1, abs(2)))`), boşlukları
+ * sadeleşmiş: aynı imzanın tanımları üst üste yazılsın diye. Okunamazsa benzersiz bir anahtar döner; tanım hiçbir
+ * öncekini ezmez (ihtiyatlı).
+ */
+function argumanListesi(metin, i) {
+  if (metin[i] === '(') {
+    let derinlik = 0;
+    for (let j = i; j < metin.length; j += 1) {
+      if (metin[j] === '(') derinlik += 1;
+      else if (metin[j] === ')' && --derinlik === 0) {
+        return metin.slice(i, j + 1).replace(/\s+/g, ' ').replace(/\s*([(),])\s*/g, '$1');
+      }
+    }
+  }
+  benzersiz += 1;
+  return `?${benzersiz}`;
 }
 
 /** `fonksiyonlar`: ad → imza → gövdeler. Aynı dosyadaki tanımlar birikir (ihtiyatlı). */
@@ -151,7 +167,8 @@ function analiz(sql, fonksiyonlar) {
     const bas = ust.slice(ifadeBasi);
     const fonksiyon = FONKSIYON_BASI.exec(bas);
     if (fonksiyon) {
-      ekle(fonksiyonlar, sadeAd(fonksiyon[1]), imza(fonksiyon[2]), p.dolar);
+      const imza = argumanListesi(bas, fonksiyon.index + fonksiyon[0].length);
+      ekle(fonksiyonlar, sadeAd(fonksiyon[1]), imza, p.dolar);
       ust += ' ';
     } else if (DO_BASI.test(bas)) {
       const ic = analiz(p.dolar, fonksiyonlar);
@@ -172,15 +189,24 @@ function kacir(s) {
 const ANAN_IFADELER =
   /\b(?:grant|revoke)\b[^;]*|\b(?:drop|alter|comment\s+on)\s+(?:function|procedure|routine)\b[^;]*/g;
 
+/** Metin içindeki ad (ör. `cron.schedule('…', 'select ad()')`) migration sırasında çalışmaz; anan ifadeler atılır. */
+function temizle(metin) {
+  return metin.replace(/\be'(?:[^'\\]|\\[\s\S]|'')*'|'(?:[^']|'')*'/g, "''").replace(ANAN_IFADELER, ' ');
+}
+
+const TETIKLEYICI_TANIMI = new RegExp(
+  String.raw`\bcreate\s+(?:or\s+replace\s+)?(?:constraint\s+)?trigger\s+(${ID})[^;]*?\bon\s+(${NITELIKLI})[^;]*`,
+  'g',
+);
+
 /**
  * Çalışan metin `ad` fonksiyonunu çalıştırıyor mu? Doğrudan çağrı (`select|perform|call ad(`, varsayılan, politika…)
  * ya da `create trigger … on tablo … execute function ad()` ile aynı metinde o tabloya yazma
  * (`insert|update|delete|merge|copy`).
  */
-function cagriliyor(metin, ad) {
+function cagriliyor(metin, ad, oncekiTetikleyiciler = '') {
   const a = `"?${kacir(ad)}"?`;
-  // Metin içindeki ad (ör. `cron.schedule('…', 'select ad()')`) migration sırasında çalışmaz.
-  const temiz = metin.replace(/\be'(?:[^'\\]|\\[\s\S]|'')*'|'(?:[^']|'')*'/g, "''").replace(ANAN_IFADELER, ' ');
+  const temiz = temizle(metin);
   // Başlangıç bir tanıtıcının ortasında ya da `şema.`dan sonra olamaz; önündeki `function|procedure` tanım ya da
   // tetikleyici bağlantısıdır (aşağıda ayrıca bakılır).
   const cagri = new RegExp(
@@ -191,7 +217,8 @@ function cagriliyor(metin, ad) {
     String.raw`\bcreate\s+(?:or\s+replace\s+)?(?:constraint\s+)?trigger\b[^;]*?\bon\s+(${NITELIKLI})[^;]*?\bexecute\s+(?:function|procedure)\s+(?:${ID}\.)?${a}\s*\(`,
     'g',
   );
-  for (const t of temiz.matchAll(tetikleyici)) {
+  // Önceki dosyalardaki tetikleyici tanımları da bağlantı sayılır; yazma yine bu dosyada aranır.
+  for (const t of `${oncekiTetikleyiciler} ; ${temiz}`.matchAll(tetikleyici)) {
     const tablo = `(?:${ID}\\.)?"?${kacir(sadeAd(t[1]))}"?`;
     const yazma = new RegExp(
       String.raw`\b(?:insert\s+into|update(?:\s+only)?|delete\s+from|merge\s+into|copy)\s+${tablo}(?![\w"])`,
@@ -201,24 +228,33 @@ function cagriliyor(metin, ad) {
   return false;
 }
 
+const BOS_HARITA = { fonksiyonlar: new Map(), tetikleyiciler: new Map() };
+
 /** Haritanın kopyası (iç `Map`ler de); `veriSilebilir` kopyaya yazar, verilen harita değişmez. */
 function kopya(harita) {
-  return new Map([...harita].map(([ad, imzalar]) => [ad, new Map(imzalar)]));
+  return {
+    fonksiyonlar: new Map([...harita.fonksiyonlar].map(([ad, imzalar]) => [ad, new Map(imzalar)])),
+    tetikleyiciler: new Map(harita.tetikleyiciler),
+  };
 }
 
 /**
- * #526 KK1: sıralı migration metinlerinden fonksiyon haritası (ad → imza → gövdeler). Her dosyanın tanımları
- * öncekileri aynı ad ve imzada ezer: son tanım geçerlidir.
+ * #526 KK1: sıralı migration metinlerinden harita: `fonksiyonlar` (ad → imza → gövdeler) ve `tetikleyiciler`
+ * (`ad on tablo` → `create trigger` ifadesi). Her dosyanın tanımları öncekileri aynı anahtarda ezer: son tanım
+ * geçerlidir.
  */
-export function fonksiyonHaritasi(sqller, harita = new Map()) {
+export function fonksiyonHaritasi(sqller, harita = BOS_HARITA) {
   const sonuc = kopya(harita);
   for (const sql of sqller) {
     const dosya = new Map();
-    analiz(sql.toLowerCase(), dosya);
+    const { ust } = analiz(sql.toLowerCase(), dosya);
     for (const [ad, imzalar] of dosya) {
-      const hedef = sonuc.get(ad) ?? new Map();
+      const hedef = sonuc.fonksiyonlar.get(ad) ?? new Map();
       for (const [imz, govdeler] of imzalar) hedef.set(imz, govdeler);
-      sonuc.set(ad, hedef);
+      sonuc.fonksiyonlar.set(ad, hedef);
+    }
+    for (const t of temizle(ust).matchAll(TETIKLEYICI_TANIMI)) {
+      sonuc.tetikleyiciler.set(`${sadeAd(t[1])} on ${sadeAd(t[2])}`, t[0]);
     }
   }
   return sonuc;
@@ -230,7 +266,7 @@ export function fonksiyonHaritasi(sqller, harita = new Map()) {
  */
 export function bekciSonuclari(dosyalar) {
   const sonuc = new Map();
-  let harita = new Map();
+  let harita = BOS_HARITA;
   for (const { ad, sql } of dosyalar) {
     sonuc.set(ad, veriSilebilir(sql, harita));
     harita = fonksiyonHaritasi([sql], harita);
@@ -242,15 +278,16 @@ export function bekciSonuclari(dosyalar) {
  * Migration metni veri silebilecek bir ifade içeriyorsa true. `onceki`: önceki migration'ların fonksiyon haritası
  * (`fonksiyonHaritasi`); bu dosyadaki tanımlar ona eklenir (çağrı yeniden tanımdan önce olabilir, ikisi de taranır).
  */
-export function veriSilebilir(sql, onceki = new Map()) {
-  const fonksiyonlar = kopya(onceki);
+export function veriSilebilir(sql, onceki = BOS_HARITA) {
+  const { fonksiyonlar, tetikleyiciler } = kopya(onceki);
+  const oncekiTetikleyiciler = [...tetikleyiciler.values()].join(' ; ');
   let { ust: calisan, dinamik } = analiz(sql.toLowerCase(), fonksiyonlar);
   const taranan = new Set();
   let degisti = true;
   while (degisti) {
     degisti = false;
     for (const [ad, imzalar] of fonksiyonlar) {
-      if (taranan.has(ad) || !cagriliyor(calisan, ad)) continue;
+      if (taranan.has(ad) || !cagriliyor(calisan, ad, oncekiTetikleyiciler)) continue;
       taranan.add(ad);
       degisti = true;
       for (const govde of [...imzalar.values()].flat()) {

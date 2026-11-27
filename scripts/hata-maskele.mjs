@@ -1,12 +1,16 @@
 // #526 KK5: Supabase Yönetim API hata gövdesindeki satır değerlerini loga basmadan önce maskeler.
-// Hata kodu ve mesajın ilk satırı kalır; `Key (…)=(…)` değeri ve `DETAIL:` satırının geri kalanı `***` olur.
+// Tasarım gereği hata kodu ve mesajın ilk satırı (ör. `ERROR: 23505: duplicate key … "kisit_adi"`) kalır; teşhis
+// için gereklidir. `Key (…)=(…)` değeri satır sonuna kadar, `DETAIL:`, `HINT:`, `CONTEXT:` ve `WHERE:` değerleri
+// bir sonraki büyük harfli başlığa (`\nBASLIK:`) ya da metin sonuna kadar (çok satırlı değer dahil) `***` olur.
 // Gövde JSON ise metin alanları ayrı ayrı maskelenir (satır sonları orada kaçışsız `\n` olur), değilse düz metin.
 
 const KEY = /\bKey \(.*?\)=\(.*/g;
-const DETAIL = /\bDETAIL:.*/g;
+const BASLIKLI = /\b(DETAIL|HINT|CONTEXT|WHERE):[\s\S]*?(?=\n[A-Z][A-Z0-9 ]*:|$)/g;
 
 function metniMaskele(metin) {
-  return metin.replace(KEY, (s) => `${s.slice(0, s.indexOf(')=(') + 2)}(***)`).replace(DETAIL, 'DETAIL: ***');
+  return metin
+    .replace(KEY, (s) => `${s.slice(0, s.indexOf(')=(') + 2)}(***)`)
+    .replace(BASLIKLI, (_, baslik) => `${baslik}: ***`);
 }
 
 function degerMaskele(deger) {

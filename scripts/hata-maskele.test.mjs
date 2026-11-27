@@ -24,13 +24,13 @@ test('düz metinde Key (…)=(…) DETAIL dışında da maskelenir', () => {
   );
 });
 
-test('DETAIL: Failing row contains (…) maskelenir, sonraki satır kalır', () => {
+test('DETAIL: Failing row contains (…) ve CONTEXT maskelenir', () => {
   const sonuc = hataMaskele(
     'ERROR: 23502: null value in column "ad" violates not-null constraint\nDETAIL: Failing row contains (1, null, gizli@ornek.com).\nCONTEXT: SQL statement',
   );
   assert.equal(
     sonuc,
-    'ERROR: 23502: null value in column "ad" violates not-null constraint\nDETAIL: ***\nCONTEXT: SQL statement',
+    'ERROR: 23502: null value in column "ad" violates not-null constraint\nDETAIL: ***\nCONTEXT: ***',
   );
 });
 
@@ -44,4 +44,27 @@ test('değer içindeki kaçışlı tırnak maskeyi erken bitirmez', () => {
 test('değer yoksa metin değişmez', () => {
   const metin = '{"message":"Failed to run sql query: ERROR:  42601: syntax error at or near \\"selec\\""}';
   assert.equal(hataMaskele(metin), metin);
+});
+
+test('çok satırlı DETAIL değeri bir sonraki başlığa kadar maskelenir', () => {
+  const sonuc = hataMaskele(
+    'ERROR: P0001: x\nDETAIL: birinci gizli\nikinci gizli satır\nHINT: ipucu gizli\nQUERY: select 1',
+  );
+  assert.equal(sonuc, 'ERROR: P0001: x\nDETAIL: ***\nHINT: ***\nQUERY: select 1');
+});
+
+test('HINT, CONTEXT ve WHERE değerleri maskelenir; JSON gövdede de', () => {
+  const govde = JSON.stringify({
+    message:
+      "ERROR:  P0001: kural\nHINT:  gizli@ornek.com dene\nCONTEXT:  PL/pgSQL function f(text) line 3 at RAISE 'gizli'\nWHERE: gizli değer",
+  });
+  const sonuc = JSON.parse(hataMaskele(govde)).message;
+  assert.equal(sonuc, 'ERROR:  P0001: kural\nHINT: ***\nCONTEXT: ***\nWHERE: ***');
+});
+
+test('ilk satır tasarım gereği kalır', () => {
+  assert.equal(
+    hataMaskele('ERROR: 23505: duplicate key value violates unique constraint "k"'),
+    'ERROR: 23505: duplicate key value violates unique constraint "k"',
+  );
 });

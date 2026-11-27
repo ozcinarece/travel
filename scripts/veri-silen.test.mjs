@@ -71,6 +71,9 @@ const durdurur = [
   'update t as "x" set c = 1;',
   'update "t" "x" set c = 1;',
   'UPDATE ONLY "T" AS "Takma Ad" SET c = 1;',
+  'update t*set c=1;',
+  'update t *set c=1;',
+  'update t* x set c=1;',
   // #526 KK3: E-string içindeki `\'` metni bitirmez; ardından gelen `--` yorum değildir.
   "select E'\\' -- ' ; delete from t;",
   // E-string içindeki `/*` yorum başlatmaz.
@@ -129,6 +132,7 @@ const durdurmaz = [
   "insert into n values ('a--b'), ('/* yorum değil */');",
   // #526 KK2: `update … set` olmayanlar.
   'create trigger tr after update of c on t * for each row execute function f();',
+  'create trigger tr after update of c on t* for each row execute function f();',
   // #526 KK3: `E'\\'` (kaçışlı ters bölü) metni bitirir; ardından gelen `--` yorumdur.
   "select E'\\\\' -- '; delete from t;\n;",
   "select pg_size_pretty(1) as e, 'x';",
@@ -167,6 +171,34 @@ test('KK1: önceki dosyadaki silen fonksiyona bağlanan tetikleyici, yazmada dur
     true,
   );
   assert.equal(veriSilebilir('create trigger tr after insert on t for each row execute function tf();', harita), false);
+});
+
+test('KK1: önceki dosyada silen fonksiyona bağlanmış tetikleyici, yeni dosyada o tabloya yazılınca durdurur', () => {
+  const onceki = fonksiyonHaritasi([
+    'create function tf() returns trigger language plpgsql as $$ begin delete from eski; return new; end $$;\ncreate trigger tr after insert on public.t for each row execute function tf();',
+  ]);
+  assert.equal(veriSilebilir('insert into t values (1);', onceki), true);
+  assert.equal(veriSilebilir('insert into u values (1);', onceki), false);
+  // Tetikleyici fonksiyonunun sonraki (silmeyen) tanımı geçerlidir.
+  const sonra = fonksiyonHaritasi(
+    ['create or replace function tf() returns trigger language plpgsql as $$ begin return new; end $$;'],
+    onceki,
+  );
+  assert.equal(veriSilebilir('insert into t values (1);', sonra), false);
+});
+
+test('KK1: iki düzey iç içe parantezli varsayılan imzayı bozmaz, önceki `f()`yi ezmez', () => {
+  const harita = fonksiyonHaritasi([
+    'create function f() returns void language sql as $$ delete from t $$;',
+    'create function f(a int default coalesce(1, abs(2))) returns void language sql as $$ select a $$;',
+  ]);
+  assert.equal(veriSilebilir('select f();', harita), true);
+  // Aynı iç içe imzanın sonraki tanımı öncekini ezer.
+  const ezilen = fonksiyonHaritasi([
+    'create function f(a int default coalesce(1, abs(2))) returns void language sql as $$ delete from t $$;',
+    'create or replace function f(a int default coalesce(1, abs(2))) returns void language sql as $$ select a $$;',
+  ]);
+  assert.equal(veriSilebilir('select f(1);', ezilen), false);
 });
 
 test('KK1: bekciSonuclari her dosyayı kendisinden önceki dosyaların haritasıyla değerlendirir', () => {
