@@ -18,6 +18,7 @@ import { baglantiyiIzle } from '@/lib/baglanti';
 import { hataRaporunuBaslat, hataRaporuyla } from '@/lib/hataRaporu';
 import { kaliciSecenekler, profilKilitli, saklananlariAyarla } from '@/lib/kaliciOnbellek';
 import { OturumSaglayici, useOturum } from '@/lib/oturum';
+import { webAcilisiKaldir } from '@/lib/webAcilis';
 
 hataRaporunuBaslat();
 SplashScreen.preventAutoHideAsync();
@@ -68,7 +69,9 @@ function Kok() {
   const profilBekleniyor = hesapli && (profil.isPending || (profilYok && !hazirla.isError));
   const yuklendi = (fontlar || !!fontHatasi) && hazir && (!profilBekleniyor || hataEkrani);
   useEffect(() => {
-    if (yuklendi) SplashScreen.hideAsync();
+    if (!yuklendi) return;
+    SplashScreen.hideAsync();
+    webAcilisiKaldir();
   }, [yuklendi]);
   if (!yuklendi) return null;
   if (hataEkrani) {
