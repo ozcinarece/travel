@@ -103,7 +103,7 @@ export function GeziAl({ gezi, kimlik, ilkHedefId, onKapat, gecis = 'replace', f
       setHata(eklemeHatasi(e, 'gezi-al-yeni', () => void yeniSeyahat(istek)));
     }
   };
-  return <SeyahatimeAl gezi={gezi} seyahatler={hedefler} ilkHedefId={ilk} kimlik={kimlik} foto={foto} onKapat={onKapat} onAl={al} onYeni={yeniSeyahat} hata={hata} />;
+  return <SeyahatimeAl gezi={gezi} seyahatler={hedefler} ilkHedefId={ilk} kimlik={kimlik} foto={foto} onKapat={onKapat} onAl={al} onYeni={yeniSeyahat} hata={hata} yukleniyor={seyahatler.isLoading} />;
 }
 
 /** #144 KK2: slug'dan gezi detayı ve durakların Google kimlikleri yüklenir, sonra aynı alt sayfa. */

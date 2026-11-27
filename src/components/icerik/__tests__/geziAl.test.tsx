@@ -5,6 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react-native';
 import { router } from 'expo-router';
+import { StyleSheet } from 'react-native';
 
 import { kisaTarih, tarihEkle } from '@/lib/takvim';
 import type { GeziDetay, GeziDuragi } from '@/lib/tipler';
@@ -25,6 +26,8 @@ const mockDb = {
   rpc: [] as { ad: string; args: Record<string, unknown> }[],
   rpcHata: null as null | { message: string; code: string },
   sayac: 0,
+  /** #587: `useSeyahatler` daha gelmedi. */
+  seyahatYukleniyor: false,
 };
 const mockOlay = jest.fn();
 
@@ -51,7 +54,7 @@ jest.mock('@/features/yerler/api', () => ({
   yeniOturumJetonu: () => 'oturum-jetonu-1',
 }));
 jest.mock('@/features/seyahatler/sorgular', () => ({
-  useSeyahatler: () => ({ data: mockDb.tablolar.ozet ?? [] }),
+  useSeyahatler: () => ({ data: mockDb.seyahatYukleniyor ? undefined : (mockDb.tablolar.ozet ?? []), isLoading: mockDb.seyahatYukleniyor }),
 }));
 jest.mock('@/features/gunler/sorgular', () => ({
   useGunler: (id: string) => ({ data: (mockDb.tablolar.days ?? []).filter((g) => g.trip_id === id), isPending: false }),
@@ -188,6 +191,7 @@ beforeEach(() => {
   mockDb.yazilan = [];
   mockDb.rpc = [];
   mockDb.rpcHata = null;
+  mockDb.seyahatYukleniyor = false;
   mockRouter.replace.mockClear();
   mockRouter.push.mockClear();
   mockOlay.mockClear();
@@ -381,5 +385,57 @@ describe('#193 Mevcut seyahat (KK5–KK9)', () => {
     expect(mockDb.yazilan.filter((y) => y.tablo === 'places').map((y) => y.satir.place_id)).toEqual(['PA', 'PY']);
     expect(mockDb.yazilan.filter((y) => y.tablo === 'stops')).toEqual([]);
     expect(mockRouter.replace).toHaveBeenCalledWith({ pathname: '/seyahat/[id]/(sekmeler)/gezi', params: { id: 't1' } });
+  });
+});
+
+describe('#587 inceleme: seyahat listesi geç gelir, "Farklı şehir" kesilmez', () => {
+  const yeniden = () =>
+    screen.rerender(
+      <QueryClientProvider client={qc}>
+        <GeziAl gezi={gezi} kimlik={kimlik} ilkHedefId="t1" onKapat={jest.fn()} />
+      </QueryClientProvider>,
+    );
+  const seciliCip = () => screen.getAllByRole('button', { selected: true }).map((b) => b.props.accessibilityLabel ?? '');
+
+  it('liste yüklenirken "Yeni seyahat" formu açılmaz; liste gelince verilen hedef seçili olur', async () => {
+    mevcutSeyahat();
+    mockDb.seyahatYukleniyor = true;
+    ac('t1');
+    expect(screen.queryByText('HANGİ SEYAHATE?')).toBeNull();
+    expect(screen.queryByText('Yeni seyahat')).toBeNull();
+    mockDb.seyahatYukleniyor = false;
+    yeniden();
+    await waitFor(() => expect(screen.getByText('HANGİ SEYAHATE?')).toBeTruthy());
+    expect(screen.getByRole('button', { selected: true, name: /Eskişehir Gezisi/ })).toBeTruthy();
+    expect(screen.getByRole('button', { selected: false, name: /Yeni seyahat/ })).toBeTruthy();
+  });
+
+  it('liste önce boş, sonra dolu gelirse verilen hedef yine seçili olur (kalıcı "Yeni seyahat" yok)', async () => {
+    mevcutSeyahat();
+    const dolu = mockDb.tablolar.ozet;
+    mockDb.tablolar.ozet = [];
+    ac('t1');
+    mockDb.tablolar.ozet = dolu;
+    yeniden();
+    await waitFor(() => expect(screen.getByRole('button', { selected: true, name: /Eskişehir Gezisi/ })).toBeTruthy());
+    expect(seciliCip()).toHaveLength(1);
+  });
+
+  it('kullanıcı "Yeni seyahat"e dokunduysa liste yenilense de seçim korunur', async () => {
+    mevcutSeyahat();
+    ac('t1');
+    fireEvent.press(screen.getByRole('button', { name: /Yeni seyahat/ }));
+    yeniden();
+    await waitFor(() => expect(screen.getByRole('button', { selected: true, name: /Yeni seyahat/ })).toBeTruthy());
+  });
+
+  it('uzun adlı başka şehir seyahatinde "Farklı şehir" ayrı ve kısalmayan bir metin', async () => {
+    mevcutSeyahat();
+    mockDb.tablolar.ozet = [{ ...mockDb.tablolar.ozet[0], id: 't2', name: 'Kapadokya Hafta Sonu Balon ve Vadiler Gezisi', city_label: 'Nevşehir' }];
+    ac(null);
+    const ek = screen.getByTestId('farkli-sehir');
+    expect(ek.props.children).toBe(' · Farklı şehir');
+    expect(screen.getByText(/^Kapadokya Hafta Sonu Balon ve Vadiler Gezisi/).props.children).not.toContain('Farklı şehir');
+    expect(StyleSheet.flatten(ek.props.style).flexShrink).toBe(0);
   });
 });
