@@ -104,15 +104,18 @@ export async function taslakSehriniKur(seyahatId: string, sehir: SehirSecimi, ad
       lat: sehir.lat,
       lng: sehir.lng,
       tz: sehir.tz,
+      // CLAUDE.md: Google'dan gelen koordinatın damgası (≤ 30 gün, gece temizliği buna bakar).
+      google_fetched_at: new Date().toISOString(),
     })
     .eq('id', seyahatId);
   if (error) throw error;
 }
 
+/** 3. adım eski günlerle açılmasın diye yenilemeler beklenir (mutateAsync onSettled bitince döner). */
 function yenile(qc: ReturnType<typeof useQueryClient>, seyahatId: string) {
-  for (const k of ['seyahat', 'gunler', 'duraklar', 'mekanlar']) qc.invalidateQueries({ queryKey: [k, seyahatId] });
-  qc.invalidateQueries({ queryKey: ['seyahatler'] });
-  qc.invalidateQueries({ queryKey: ['seyahat-durumlari'] });
+  void qc.invalidateQueries({ queryKey: ['seyahatler'] });
+  void qc.invalidateQueries({ queryKey: ['seyahat-durumlari'] });
+  return Promise.all(['seyahat', 'gunler', 'duraklar', 'mekanlar'].map((k) => qc.invalidateQueries({ queryKey: [k, seyahatId] })));
 }
 
 export function useTaslakTarihi() {
