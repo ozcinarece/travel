@@ -18,7 +18,7 @@ import { OtelUcSatiri } from '@/components/program/OtelUcSatiri';
 import { PlanHazirSayfasi, type PlanGunOzeti } from '@/components/program/PlanHazirSayfasi';
 import { HarcamaFormu } from '@/components/harcama/HarcamaFormu';
 import { MekanPaneli } from '@/components/mekan/MekanPaneli';
-import { PlanListesi, type PlanSatirGorunumu } from '@/components/plan/PlanListesi';
+import { ListemBekliyorSatiri, PlanListesi, type PlanSatirGorunumu } from '@/components/plan/PlanListesi';
 import { PuanSayfasi } from '@/components/program/PuanSayfasi';
 import { SecimMenusu, type SecimSecenegi } from '@/components/program/SecimMenusu';
 import { SiralaListesi, type SiralaSatiri } from '@/components/program/SiralaListesi';
@@ -850,20 +850,9 @@ function ProgramSekmesi({
   const gunMerkezi = gunKonumlari.length
     ? { lat: gunKonumlari.reduce((a, m) => a + m.lat, 0) / gunKonumlari.length, lng: gunKonumlari.reduce((a, m) => a + m.lng, 0) / gunKonumlari.length }
     : null;
-  // #140 KK4: güne atanmamış mekanlar haritada yok — listenin altında kesikli kutu → Listem (#141).
+  // #140 KK4: güne atanmamış mekanlar haritada yok → Listem (#141). #553 KK5: kesikli kutu yerine listedeki satır (#534 KK7).
   const atanmamisSayisi = mekanlar.filter((m) => !durakIle.has(m.id)).length;
-  const atanmamisKutusu =
-    atanmamisSayisi > 0 ? (
-      <Pressable accessibilityRole="button" onPress={() => router.navigate({ pathname: '/seyahat/[id]/listem', params: { id: seyahat.id } })} style={({ pressed }) => [s.atanmamis, pressed && { opacity: 0.7 }]}>
-        <View style={{ flex: 1, gap: 2 }}>
-          <Text style={s.atanmamisBaslik}>{t('program.liste.atanmamis', { n: atanmamisSayisi })}</Text>
-          <Text style={s.atanmamisAlt}>{t('program.liste.atanmamisAlt')}</Text>
-        </View>
-        <View style={s.ileri}>
-          <Ikon ad="geri" boyut={18} renk={renk.ana} kalinlik={2.6} />
-        </View>
-      </Pressable>
-    ) : null;
+  const atanmamisKutusu = atanmamisSayisi > 0 ? <ListemBekliyorSatiri n={atanmamisSayisi} onPress={() => router.navigate({ pathname: '/seyahat/[id]/listem', params: { id: seyahat.id } })} /> : null;
 
   // #55 §B7 → #140 (kanvas 11): alt sayfa üst şeridi. Katlı: ilerleme çizgisi + "Sırayı gör ve düzenle ˄". Açık: gün karesi
   // (gün rengi) · "Cuma, 16 Ekim" · "09:45 – 13:00 · 3 durak · 26 dk yol" · ··· · [Haritaya dön] + "Kaydedildi ✓".
@@ -1474,8 +1463,4 @@ const s = StyleSheet.create({
   haritayaDon: { height: 36, paddingHorizontal: 12, borderRadius: kose.alan, backgroundColor: renk.yuzey, justifyContent: 'center' },
   haritayaDonMetin: { fontFamily: yazi.ekstra, fontSize: 13, color: renk.ana },
   kaydedildi: { fontFamily: yazi.ekstra, fontSize: 11, color: renk.basariMetin },
-  atanmamis: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 12, paddingHorizontal: 14, borderRadius: 16, borderWidth: 1.5, borderStyle: 'dashed', borderColor: '#b4bbd3' },
-  atanmamisBaslik: { fontFamily: yazi.ekstra, fontSize: 14, color: renk.metin },
-  atanmamisAlt: { fontFamily: yazi.normal, fontSize: 12, color: renk.ikincil },
-  ileri: { transform: [{ rotate: '180deg' }] },
 });

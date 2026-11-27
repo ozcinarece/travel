@@ -20,14 +20,15 @@ import { Ikon } from '@/components/ui/Ikon';
 import { SegmentSecici } from '@/components/ui/SegmentSecici';
 import { geriYaDaGezi } from '@/features/gezi/gezinti';
 import { useDuragaAta, useDuraklar, useDurakKaldir, useGunler } from '@/features/gunler/sorgular';
-import type { Konaklama } from '@/features/konaklama/plan';
+import type { GunUcNoktalari, Konaklama } from '@/features/konaklama/plan';
 import { useKonaklamalar } from '@/features/konaklama/sorgular';
-import { gunProgramlari, gunSecenekleri, listemGruplari, type GunSecenegi, type ListemSatiri, type ListemSiralama } from '@/features/listem/listem';
+import { bugunDurumu, gunProgramlari, gunSecenekleri, listemGruplari, type GunSecenegi, type ListemSatiri, type ListemSiralama } from '@/features/listem/listem';
 import { dagitimSecenekleri, type DagitimHesabi, type DagitimSecenegi } from '@/features/listem/sigmayanlar';
 import { useGunlereDagit, useOylar, useOyVer } from '@/features/listem/sorgular';
 import { useGeriAlinabilirSil } from '@/features/mekanlar/geriAlinabilirSil';
 import { useMekanGuncelle, useMekanlar, useUyeler } from '@/features/mekanlar/sorgular';
 import { useDurakGuncelle } from '@/features/program/sorgular';
+import { useGunProgrami, useSimdi } from '@/features/program/useProgram';
 import { useProgramVerisi } from '@/features/program/useProgramVerisi';
 import { useSeyahatId } from '@/features/seyahatler/baglam';
 import { useSeyahat } from '@/features/seyahatler/sorgular';
@@ -140,6 +141,13 @@ function Listem({ seyahat, gunler, duraklar, mekanlar, konaklamalar }: { seyahat
 
   // KK5: Güne ekle alt sayfası — seçenekler yalnız açıkken hesaplanır.
   const guneEkleMekan = guneEkleId ? mekanIle.get(guneEkleId) : undefined;
+  // #553 KK3: "Hangi güne?"de bugünün alt satırı (gezilen durak, akşam boş mu); istek yok, eldeki programdan.
+  const bugunIndex = kacinciGun(seyahat);
+  const bugunGun = bugunIndex !== null ? gunler.find((g) => g.index === bugunIndex) : undefined;
+  const an = useSimdi(!!guneEkleMekan && !!bugunGun);
+  const bugunUclar = useMemo(() => (bugunGun ? verisi.gunUclari.get(bugunGun.id) : undefined) ?? BOS_UCLAR, [bugunGun, verisi.gunUclari]);
+  const bugunProg = useGunProgrami({ seyahat, gun: guneEkleMekan ? bugunGun : undefined, duraklar, mekanlar, yuruyus: verisi.yuruyus, an, uclar: bugunUclar, saatler: yerler.data });
+  const bugun = useMemo(() => (bugunProg?.bugun ? bugunDurumu(bugunProg.canli) : null), [bugunProg]);
   const secenekler = useMemo(
     () => (guneEkleMekan ? gunSecenekleri({ seyahat, mekan: guneEkleMekan, gunler, duraklar, mekanIle, gunUclari: verisi.gunUclari, yuruyus: verisi.yuruyus, saatler: yerler.data }) : []),
     [guneEkleMekan, seyahat, gunler, duraklar, mekanIle, verisi.gunUclari, verisi.yuruyus, yerler.data],
@@ -364,7 +372,8 @@ function Listem({ seyahat, gunler, duraklar, mekanlar, konaklamalar }: { seyahat
         foto={guneEkleMekan ? (yerler.data?.[guneEkleMekan.place_id]?.foto_uri ?? null) : null}
         dakika={guneEkleMekan?.default_minutes ?? 0}
         secenekler={secenekler}
-        bugunIndex={kacinciGun(seyahat)}
+        bugunIndex={bugunIndex}
+        bugun={bugun}
         mesgul={ata.isPending}
         baglamGunId={baglamGunId}
         onSec={guneEkle}
@@ -425,3 +434,5 @@ const s = StyleSheet.create({
   bosDugme: { marginTop: 6, height: 44, paddingHorizontal: 16, borderRadius: kose.dugme, backgroundColor: renk.ana, justifyContent: 'center' },
   bosDugmeMetin: { fontFamily: yazi.ekstra, fontSize: 14, color: renk.zemin },
 });
+
+const BOS_UCLAR: GunUcNoktalari = { baslangic: null, bitis: null };

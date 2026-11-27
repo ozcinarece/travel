@@ -25,6 +25,8 @@ type Props = {
   baglamGunId?: string | null;
   /** Gezi modunda bugünün gün sırası (yoksa null): bağlam yoksa bugün en üstte, öncekiler "Geçti". */
   bugunIndex: number | null;
+  /** #553 KK3: bugün gezilen durak sayısı ve akşam boş mu (gezi modunda; yoksa null). */
+  bugun?: { gezilen: number; aksamBos: boolean } | null;
   onSec: (s: GunSecenegi) => void;
   onKapat: () => void;
 };
@@ -38,13 +40,21 @@ function gunBasligi(o: GunSecenegi, bugun: boolean): string {
   return bugun ? t('listem.guneEkle.bugun', { gun: gunAdi }) : `${gunAdi} ${parcala(g.date).gun}`;
 }
 
-function gunAlti(o: GunSecenegi, gecti: boolean): string {
+export function gunAlti(o: GunSecenegi, gecti: boolean, bugun?: { gezilen: number; aksamBos: boolean } | null): string {
   if (gecti) return t('listem.guneEkle.gecti');
+  // #553 KK3 (kanvas `Plan_v7p_HangiGune`): bugün en az bir durak gezildiyse "N durak gezildi · akşam boş".
+  if (bugun && bugun.gezilen > 0) return [t('listem.guneEkle.gezildi', { n: bugun.gezilen }), bugun.aksamBos ? t('listem.guneEkle.aksamBos') : null].filter(Boolean).join(' · ');
   if (o.durakSayisi === 0) return t(o.sonGun ? 'listem.guneEkle.bosDonus' : 'listem.guneEkle.bos');
   return [t('listem.guneEkle.durak', { n: o.durakSayisi }), o.enYakinM !== null ? t('listem.guneEkle.enYakin', { mesafe: km(o.enYakinM) }) : null].filter(Boolean).join(' · ');
 }
 
-export function GuneEkleSayfasi({ acik, ad, foto, dakika, secenekler, mesgul, baglamGunId, bugunIndex, onSec, onKapat }: Props) {
+/** #553 KK4: geçmiş gün "…, geçti" diye okunur (satır dokunulabilir kalır). */
+export function gunSatiriEtiketi(baslik: string, alt: string, o: { gecti: boolean; enYakin: boolean }): string {
+  const metin = [baslik, o.gecti ? null : alt, o.enYakin ? t('listem.guneEkle.enYakinRozet') : null].filter(Boolean).join(' · ');
+  return o.gecti ? `${metin}, ${t('listem.guneEkle.gectiOkunus')}` : metin;
+}
+
+export function GuneEkleSayfasi({ acik, ad, foto, dakika, secenekler, mesgul, baglamGunId, bugunIndex, bugun, onSec, onKapat }: Props) {
   const sirali = hangiGuneSirasi(secenekler, { baglamGunId, bugunIndex });
   return (
     <AltPencere acik={acik} onKapat={onKapat} kapatEtiketi={t('genel.vazgec')} kaydirilir stil={{ paddingHorizontal: 16 }}>
@@ -58,13 +68,14 @@ export function GuneEkleSayfasi({ acik, ad, foto, dakika, secenekler, mesgul, ba
         </View>
       </View>
       {sirali.map(({ secenek: o, gecti, enYakin }) => {
-        const baslik = gunBasligi(o, o.gun.index === bugunIndex);
-        const alt = gunAlti(o, gecti);
+        const bugunMu = o.gun.index === bugunIndex;
+        const baslik = gunBasligi(o, bugunMu);
+        const alt = gunAlti(o, gecti, bugunMu ? bugun : null);
         return (
           <Pressable
             key={o.gun.id}
             accessibilityRole="button"
-            accessibilityLabel={[baslik, alt, enYakin ? t('listem.guneEkle.enYakinRozet') : null].filter(Boolean).join(' · ')}
+            accessibilityLabel={gunSatiriEtiketi(baslik, alt, { gecti, enYakin })}
             disabled={mesgul}
             onPress={() => onSec(o)}
             style={({ pressed }) => [s.secenek, gecti && { opacity: 0.5 }, pressed && { opacity: gecti ? 0.4 : 0.8 }]}>

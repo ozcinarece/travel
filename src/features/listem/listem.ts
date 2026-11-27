@@ -3,6 +3,7 @@
 import { mesafeM } from '@/components/harita/geo';
 import type { Konum } from '@/components/harita/tipler';
 import type { GunUcNoktalari } from '@/features/konaklama/plan';
+import { AKSAM_ESIGI_DK } from '@/features/plan/planListesi';
 import { saatKisa } from '@/features/program/useProgram';
 import { haftaGunu } from '@/lib/takvim';
 import { konumu } from '@/lib/konum';
@@ -195,4 +196,12 @@ export function hangiGuneSirasi(
   const gecti = (x: GunSecenegi) => bugunIndex !== null && x.gun.index < bugunIndex && x !== ust;
   const sira = [...(ust ? [ust] : []), ...gunSirali.filter((x) => x !== ust && !gecti(x)), ...gunSirali.filter(gecti)];
   return sira.map((x) => ({ secenek: x, gecti: gecti(x), enYakin: x.onerilen && x.enYakinM !== null }));
+}
+
+/** #553 KK3: "Hangi güne?"de bugünün alt satırı için canlı programdan gezilen durak sayısı ve akşamın boş olup olmadığı
+ * (son atlanmamış durak 17:00'den önce bitiyor; #532'deki "Akşam için yakında" ile aynı eşik). */
+export function bugunDurumu(canli: Pick<Program, 'satirlar'>): { gezilen: number; aksamBos: boolean } {
+  const etkin = canli.satirlar.filter((x) => x.durum !== 'atlandi');
+  const son = etkin[etkin.length - 1];
+  return { gezilen: etkin.filter((x) => x.durum === 'gecildi').length, aksamBos: !son || son.ayrilisDk < AKSAM_ESIGI_DK };
 }

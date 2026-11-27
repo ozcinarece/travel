@@ -6,6 +6,7 @@ import { fireEvent, render, waitFor, within } from '@testing-library/react-nativ
 import type { ReactNode } from 'react';
 
 import { gunEtiketi } from '@/features/gezi/geziOzeti';
+import { t } from '@/i18n';
 import { SeyahatIdSaglayici } from '@/features/seyahatler/baglam';
 import { hafifOnbellek } from '@/features/yerler/api';
 import { tarihEkle } from '@/lib/takvim';
@@ -199,8 +200,10 @@ describe('#182 KK7: Plan sekmesi Google isteği doğurmaz', () => {
     expect(getByText('Bugün')).toBeTruthy();
     expect(getByText('Eti Arkeoloji Müzesi')).toBeTruthy();
     expect(getByText(/^Müze · .* · gezildi$/)).toBeTruthy();
-    const vurgulu = getAllByRole('button').filter((b) => b.props.accessibilityState?.selected === true);
-    expect(vurgulu.some((b) => within(b).queryByText('Restoran'))).toBe(true);
+    // #553 KK2: sıradaki durak `selected` değil, etiketin sonunda "sıradaki durak".
+    const vurgulu = getAllByRole('button').filter((b) => String(b.props.accessibilityLabel ?? '').endsWith(`, ${t('plan.siradakiDurak')}`));
+    expect(vurgulu.length).toBe(1);
+    expect(within(vurgulu[0]).queryByText('Restoran')).toBeTruthy();
     expect(sahte.invoke).toEqual([]);
     expect(fetchSahte).not.toHaveBeenCalled();
   });
