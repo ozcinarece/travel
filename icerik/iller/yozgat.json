@@ -1,0 +1,313 @@
+{
+  "il": "Yozgat",
+  "slug": "yozgat",
+  "guncelleme": "2026-11-27",
+  "oneriler": [
+    {
+      "sira": 1,
+      "ad": "Yozgat Çamlığı Milli Parkı",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "cocuklu",
+        "yavas"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 3,
+      "neden": "1958'de ilan edilen ilk millî park; yaşlı karaçamlar arasında gölet ve seyir kulesi",
+      "place_id": "ChIJqd780MtwgEARD0cqKiza8cM"
+    },
+    {
+      "sira": 2,
+      "ad": "Sarıkaya Roma Hamamı (Basilica Therma)",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Sarıkaya",
+      "merkeze_km": 80,
+      "neden": "2. yüzyıl Roma hamamı; termal su hâlâ havuzlara akar, 2025'te restorasyonla yenilendi",
+      "place_id": "ChIJBb8M13yif0ARJI-o7ze_Z58"
+    },
+    {
+      "sira": 3,
+      "ad": "Kerkenes Ören Yeri",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "doga"
+      ],
+      "ilce": "Sorgun",
+      "merkeze_km": 40,
+      "neden": "Şahmuratlı üstünde MÖ 6. yüzyıl kenti; yaklaşık 7 km sur, kazı mevsimi yazın",
+      "osm": "way/137698584",
+      "place_id": "ChIJUUVnhYjQf0AR4PmJpBeznho"
+    },
+    {
+      "sira": 4,
+      "ad": "Çapanoğlu Camii",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "1779'da Çapanoğlu Mustafa Bey yaptırdı; kesme taş gövde, mermer minber, geniş avlu",
+      "osm": "way/317779883",
+      "place_id": "ChIJmV81gJdwgEARdI9RAKY1Cx4"
+    },
+    {
+      "sira": 5,
+      "ad": "Kazankaya Kanyonu",
+      "kategori": "doga",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Aydıncık",
+      "merkeze_km": 95,
+      "neden": "Çekerek Irmağı'nın oyduğu 12 km'lik kanyon; yürüyüş yolu ve cam seyir terasları var",
+      "place_id": "ChIJgR9HKBGlgEAR2t_hJJ-MKsc"
+    },
+    {
+      "sira": 6,
+      "ad": "Nizamoğlu Konağı (Yozgat Müzesi)",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "1871'de biten konak; elle boyanmış tavanlar. Aralık 2023'te bakıma girdi, açık mı sorun",
+      "place_id": "ChIJ_cmmiplwgEAR8tCrG0ZwzMg"
+    },
+    {
+      "sira": 7,
+      "ad": "Saat Kulesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "1908 yapımı altıgen gövdeli kule; Cumhuriyet Meydanı'nda kentin buluşma noktası",
+      "osm": "node/1925889510",
+      "place_id": "ChIJw9lqNphwgEARF0gJshCWX-M"
+    },
+    {
+      "sira": 8,
+      "ad": "Sorgun Kaplıcaları",
+      "kategori": "aktivite",
+      "amaclar": [
+        "yavas"
+      ],
+      "ilce": "Sorgun",
+      "merkeze_km": 37,
+      "neden": "İlçe merkezindeki termal otellerde sıcak su havuzları; kış hafta sonları kalabalık"
+    },
+    {
+      "sira": 9,
+      "ad": "Uşaklı Höyük",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Sorgun",
+      "merkeze_km": 50,
+      "neden": "Hitit kutsal kenti Zippalanda sanılan höyük; 2024 kazısında taş döşeme mozaik çıktı",
+      "osm": "way/278615085",
+      "place_id": "ChIJ3_Ra_v7Xf0ARxG0Vzx1SA8M"
+    },
+    {
+      "sira": 10,
+      "ad": "Sürmeli Mangal Keyfi",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "Emre Tokat'ın yeri; kuzu kuşbaşı testi kebabı bol sarımsakla közde pişer"
+    },
+    {
+      "sira": 11,
+      "ad": "Meşhur Desti Kebapçısı",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "Lise Caddesi'nde desti ve tandır kebabı; yanında yayık ayranı ve tandır ekmeği",
+      "osm": "node/1985090357",
+      "place_id": "ChIJgedgNaBwgEARhuXfM5pRrpk"
+    },
+    {
+      "sira": 12,
+      "ad": "Yayla Lokantası",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Eski Üzüm Pazarı'nda; Yozgat tandır kebabını tandır lavaşıyla verir",
+      "place_id": "ChIJewxs45lwgEARiipPJ05e3HI"
+    },
+    {
+      "sira": 13,
+      "ad": "Zafer Türk Mutfağı",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 2,
+      "neden": "Yeni Adliye karşısında; testi kebabı, incir kebabı ve tencere yemekleri",
+      "osm": "node/4502918304",
+      "place_id": "ChIJHwMXjpdwgEAR_qN3yP9gwWY"
+    },
+    {
+      "sira": 14,
+      "ad": "Gelingüllü Barajı",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Yerköy",
+      "merkeze_km": 45,
+      "neden": "Bahardan aralığa dek flamingo ve kuş göçü; kıyısında piknik ve olta balıkçılığı"
+    },
+    {
+      "sira": 15,
+      "ad": "Sarıkaya Termal Tesisleri",
+      "kategori": "aktivite",
+      "amaclar": [
+        "yavas"
+      ],
+      "ilce": "Sarıkaya",
+      "merkeze_km": 80,
+      "neden": "Roma hamamının yanındaki kaplıca otelleri; kaynak suyu 44–47 °C çıkar"
+    },
+    {
+      "sira": 16,
+      "ad": "Yerköy Kaplıcası",
+      "kategori": "aktivite",
+      "amaclar": [
+        "yavas"
+      ],
+      "ilce": "Yerköy",
+      "merkeze_km": 55,
+      "neden": "Ankara yolundaki küçük kaplıca; romatizmaya iyi geldiğine inanılan sıcak su"
+    },
+    {
+      "sira": 17,
+      "ad": "Saklı Bahçe Çekerek Rafting Alanı",
+      "kategori": "aktivite",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Çekerek",
+      "merkeze_km": 85,
+      "neden": "Çekerek Barajı altında 850 m yapay parkur ve 4,5 km doğal rafting hattı"
+    },
+    {
+      "sira": 18,
+      "ad": "Tavium Antik Kenti",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 30,
+      "neden": "Büyüknefes köyünde Galat kenti; az kazılmış höyük, köyde devşirme taşlar görülür"
+    },
+    {
+      "sira": 19,
+      "ad": "Başçavuş Camii",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Merkezde küçük mahalle camisi; ahşap tavan ve kapıdaki çiçek oymalarıyla bilinir",
+      "osm": "way/317779884",
+      "place_id": "ChIJLbAInpBwgEARMnDB6H_oUNU"
+    },
+    {
+      "sira": 20,
+      "ad": "Hamidiye Saatli Çeşmesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Çapanoğlu Camii yanında; II. Abdülhamid'in tahttaki 25. yılı için yapılmış saatli çeşme",
+      "place_id": "ChIJr9tTCgBxgEARykqzu5_u0Ck"
+    },
+    {
+      "sira": 21,
+      "ad": "Şah Sultan Hatun Türbesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Çandır",
+      "merkeze_km": 70,
+      "neden": "1499–1500'de Dulkadirli Şahruh Bey eşi için yaptırdı; sarı-kızıl kesme taş türbe"
+    },
+    {
+      "sira": 22,
+      "ad": "Tiftik Han (Akdağmadeni İlçe Halk Kütüphanesi)",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Akdağmadeni",
+      "merkeze_km": 95,
+      "neden": "19. yüzyıl hanı, 1980'e dek cezaevi; 2011'den beri revaklı avlulu kütüphane",
+      "place_id": "ChIJwxHw9ib_fkARtRgnGxjilAU"
+    },
+    {
+      "sira": 23,
+      "ad": "İstanbulluoğlu Camii",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Akdağmadeni",
+      "merkeze_km": 95,
+      "neden": "Kilise olarak yapılıp camiye çevrilmiş taş yapı; madenci kasabası Akdağmadeni'nde",
+      "place_id": "ChIJDUfedx__fkARmPbC1civhOs"
+    },
+    {
+      "sira": 24,
+      "ad": "Akdağmadeni Eski PTT Binası",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Akdağmadeni",
+      "merkeze_km": 95,
+      "neden": "Rum ustaların yaptığı taş ev; sonra askerlik şubesi ve PTT olarak kullanıldı"
+    },
+    {
+      "sira": 25,
+      "ad": "İnönü Mağarası",
+      "kategori": "doga",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Aydıncık",
+      "merkeze_km": 80,
+      "neden": "Sarkıt ve dikitli mağara; belli bir noktaya dek girilir, çevrede tesis yok"
+    }
+  ]
+}

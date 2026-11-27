@@ -1,0 +1,392 @@
+{
+  "il": "Karaman",
+  "slug": "karaman",
+  "guncelleme": "2026-11-27",
+  "oneriler": [
+    {
+      "sira": 1,
+      "ad": "Binbirkilise",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 42,
+      "neden": "Karadağ eteğinde Madenşehri'nde 4.–9. yüzyıl kilise ve manastır kalıntıları",
+      "osm": "way/244499577",
+      "place_id": "ChIJJQEFUkT42RQRtaYkaJAvY8M"
+    },
+    {
+      "sira": 2,
+      "ad": "Taşkale Tahıl Ambarları",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 45,
+      "neden": "Kireçtaşı yamaca oyulmuş 250'yi aşkın ambar; 60 cm'lik ağızlara taş basamakla çıkılır",
+      "place_id": "ChIJSykc1THG2RQRA1QFP7OAeJU"
+    },
+    {
+      "sira": 3,
+      "ad": "Aktekke Camii (Mader-i Mevlana)",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "1370'te Alaaddin Bey yaptırdı; Mevlana'nın annesi Mümine Hatun burada yatar",
+      "osm": "way/311388803",
+      "place_id": "ChIJK7sg3P-M2RQRYn634FDeNq4"
+    },
+    {
+      "sira": 4,
+      "ad": "Manazan Mağaraları",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "doga"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 40,
+      "neden": "Yeşildere–Taşkale arasında kayaya oyulmuş beş katlı yerleşim ve şapeller",
+      "place_id": "ChIJDza37AHH2RQRoGmIJzSHRk8"
+    },
+    {
+      "sira": 5,
+      "ad": "Karaman Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "Hatuniye'nin arkasında 1980'den beri; Manazan'da bulunan Bizans dönemi mumya sergide",
+      "osm": "way/998973655",
+      "place_id": "ChIJH_GrkP-M2RQRjZpD7r-MM3c"
+    },
+    {
+      "sira": 6,
+      "ad": "Hatuniye Medresesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "1382'de Nefise Sultan yaptırdı; oymalı taç kapı sokaktan görülür, içi için sorun",
+      "osm": "way/1350635300",
+      "place_id": "ChIJ5Wsomf-M2RQR9FsfRhdwugI"
+    },
+    {
+      "sira": 7,
+      "ad": "Karaman Kalesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Laranda höyüğü üstünde 11.–12. yüzyıl kalesi; 1465'te Osmanlı onardı, iç kalede kazı",
+      "osm": "relation/2344934",
+      "place_id": "ChIJjUPsSFaM2RQR6qt9cLuYW64"
+    },
+    {
+      "sira": 8,
+      "ad": "Ermenek Baraj Gölü (Nadire Kanyonu)",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Ermenek",
+      "merkeze_km": 150,
+      "neden": "Turkuaz gölde tekneyle 9 km'lik Nadire Kanyonu; yer yer 250 m'lik dik yamaçlar",
+      "place_id": "ChIJ3Un9Ds_z2xQRrd2Cw_iIKdc"
+    },
+    {
+      "sira": 9,
+      "ad": "İncesu Mağarası",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 54,
+      "neden": "Taşkale'nin 9 km güneyinde 1.356 m mağara; 1.050 m'si ışıklı, mantar biçimli dikitler",
+      "place_id": "ChIJb77YX83J2RQR5yDJMQVXkFo"
+    },
+    {
+      "sira": 10,
+      "ad": "Yunus Emre Camii ve Türbesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "Kirişçi'de; Yunus Emre ve Taptuk Emre'ye atfedilen sandukalar, yanında şiir parkı",
+      "osm": "way/658653249",
+      "place_id": "ChIJ18i5xgaN2RQRR4qTpBtg1XA"
+    },
+    {
+      "sira": 11,
+      "ad": "Hürrem Dayı Evi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "Koçakdede'de 300 yıllık ev müze; kalem işi tavanlar ve oymalı dolap kapakları",
+      "place_id": "ChIJ3X_O6qmN2RQRFtjy9Hgei8Y"
+    },
+    {
+      "sira": 12,
+      "ad": "Tartan Konağı",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "1810'da Tartanzade Hacı Ahmet Efendi yaptırdı; sekizgen tavanda İstanbul resimleri",
+      "place_id": "ChIJWwLeCKqN2RQRS93-3UJAX28"
+    },
+    {
+      "sira": 13,
+      "ad": "İmaret Camii",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "1433'te II. İbrahim Bey'in külliyesi; çinili mihrabı bugün İstanbul'da sergilenir",
+      "osm": "way/245811072",
+      "place_id": "ChIJX4ZsQFWM2RQR_Yd-tewuLF0"
+    },
+    {
+      "sira": 14,
+      "ad": "Tol Medrese",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Ermenek",
+      "merkeze_km": 150,
+      "neden": "1339'da Emir Musa yaptırdı; açık avlulu tek katlı medrese, türbede firuze çini",
+      "place_id": "ChIJW4rRdADp2xQRmTUdYsZEU10"
+    },
+    {
+      "sira": 15,
+      "ad": "Ermenek Ahmet Keleşoğlu Arkeoloji ve Etnografya Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Ermenek",
+      "merkeze_km": 150,
+      "neden": "Haziran 2026'da açıldı; Karamanoğlu dönemi eşyası ve Roma-Bizans buluntuları",
+      "place_id": "ChIJO1JTFQDp2xQRGePTRwVVfR4"
+    },
+    {
+      "sira": 16,
+      "ad": "Zeyve Pazarı",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "lezzet",
+        "yavas"
+      ],
+      "ilce": "Ermenek",
+      "merkeze_km": 135,
+      "neden": "Yaylapazarı'nda 700 yıllık çınarlar altında hafta sonu köylü pazarı ve çağlayanlar",
+      "place_id": "ChIJtVSQgVT62xQRQuf9duMkUlk"
+    },
+    {
+      "sira": 17,
+      "ad": "Değle Ören Yeri",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "doga"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 50,
+      "neden": "Karadağ'ın yüksek kesiminde yıkık Bizans kiliseleri; Binbirkilise ile birlikte gezilir",
+      "osm": "way/175789840",
+      "place_id": "ChIJzdBhDwD52RQRuVgn40dgWZU"
+    },
+    {
+      "sira": 18,
+      "ad": "Çeşmeli Kilise",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "Tapucak'ta 1727 tarihli Ermeni kilisesi; 1980'lere dek cezaeviydi, freskler duruyor",
+      "osm": "way/309886991",
+      "place_id": "ChIJD13eFqqN2RQR42o9xN2AfGQ"
+    },
+    {
+      "sira": 19,
+      "ad": "Ermenek Ulu Camii",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Ermenek",
+      "merkeze_km": 150,
+      "neden": "1302'de Karamanoğlu Mehmet Bey yaptırdı; ilçenin en eski büyük beylik yapısı",
+      "place_id": "ChIJJw9cZ6bo2xQRN9aofbdBGT8"
+    },
+    {
+      "sira": 20,
+      "ad": "Hacıbeyler Camii",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "1356'da yapılıp 1496'da yenilenen cami; küçük taç kapıda kufi yazı ve çiçek motifi",
+      "place_id": "ChIJ14av1f-M2RQRG03RQ9yGeMU"
+    },
+    {
+      "sira": 21,
+      "ad": "Divle Obruk Mağarası",
+      "kategori": "doga",
+      "amaclar": [
+        "lezzet",
+        "doga"
+      ],
+      "ilce": "Ayrancı",
+      "merkeze_km": 70,
+      "neden": "Ayrancı'nın güneyinde 40 m derin obruk; tulum peyniri burada aylarca olgunlaşır"
+    },
+    {
+      "sira": 22,
+      "ad": "Gökçe Çamlığı Mesire Alanı",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 18,
+      "neden": "Şehre yakın çam ormanı; kamp alanı, macera parkı ve ATV parkuru",
+      "place_id": "ChIJp89-AgaQ2RQRIpL1fuc9YDY"
+    },
+    {
+      "sira": 23,
+      "ad": "Derbe Ören Yeri",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 27,
+      "neden": "Ekinözü yakınında höyük; Pavlus'un uğradığı antik Derbe olduğu düşünülür"
+    },
+    {
+      "sira": 24,
+      "ad": "Ermenek Kalesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "doga"
+      ],
+      "ilce": "Ermenek",
+      "merkeze_km": 150,
+      "neden": "Kasabanın üstündeki kayalıkta; eteğinde Germanikopolis'in kaya mezarları",
+      "place_id": "ChIJJw9cZ6bo2xQROWgVKtdSveg"
+    },
+    {
+      "sira": 25,
+      "ad": "Güldere Gödet Saklı Cennet",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 25,
+      "neden": "Güldere köyünde dereli küçük kanyon; yürüyüş yolu ve gün batımı noktası var",
+      "place_id": "ChIJRcLwTX-92RQRXbJLkCgRe9A"
+    },
+    {
+      "sira": 26,
+      "ad": "Birtat Lokantası",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "Külhan'da eski esnaf lokantası; fırın kebabı, calla güveç ve tandır kebabı",
+      "place_id": "ChIJcyqHMQCN2RQRXZubYLq4mxw"
+    },
+    {
+      "sira": 27,
+      "ad": "Köşebaşı Yemek Evi",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "İstasyon Caddesi'nde ev yemeği; fırında kuru fasulye ve patlıcan musakka"
+    },
+    {
+      "sira": 28,
+      "ad": "Mim Lokantası",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "Şamkapı Caddesi'nde kuzu kavurma ve kuru fasulye-pilav; öğleden sonra yemek biter",
+      "place_id": "ChIJdYpVIAeN2RQRXAWIc6HLdXc"
+    },
+    {
+      "sira": 29,
+      "ad": "Karaman Tandır Evi",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet",
+        "gece"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "Tandırda pişen ekmekle kavurma; akşam aile sofraları için tercih edilen yer",
+      "place_id": "ChIJsSFTdb6N2RQRrD_TJuTcKHo"
+    },
+    {
+      "sira": 30,
+      "ad": "Zeyve Yörem Lokantası",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet",
+        "doga"
+      ],
+      "ilce": "Ermenek",
+      "merkeze_km": 135,
+      "neden": "Zeyve Pazarı'nda köy kahvaltısı, taş fırın börek ve keş salatası",
+      "place_id": "ChIJPwJ9kFP62xQRUk_6_R_xzUs"
+    }
+  ]
+}
