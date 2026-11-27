@@ -120,18 +120,6 @@
     },
     {
       "sira": 10,
-      "ad": "Nur Camii",
-      "kategori": "tarih",
-      "amaclar": [
-        "kultur_tarih"
-      ],
-      "ilce": "Merkez",
-      "merkeze_km": 0,
-      "neden": "Selimiye örnek alınarak 2015'te bitti; dört minare, 32 m'lik kubbe, kentin simgesi",
-      "place_id": "ChIJP7Yr23TfgUARNizXg-W-yys"
-    },
-    {
-      "sira": 11,
       "ad": "Obaköy Yeşil Vadi",
       "kategori": "doga",
       "amaclar": [
@@ -145,7 +133,7 @@
       "place_id": "ChIJT4Znl1rhgUARbC1qeTP4-Ic"
     },
     {
-      "sira": 12,
+      "sira": 11,
       "ad": "Yahşihan Tarihi Demir Köprü",
       "kategori": "tarih",
       "amaclar": [
@@ -158,7 +146,7 @@
       "place_id": "ChIJH-3nfQDfgUARX44uGckYgko"
     },
     {
-      "sira": 13,
+      "sira": 12,
       "ad": "Rahmi Pehlivanlı Müze Evi",
       "kategori": "muze",
       "amaclar": [
@@ -171,7 +159,7 @@
       "place_id": "ChIJHReex9TP1BQRj5u9cpmzlVU"
     },
     {
-      "sira": 14,
+      "sira": 13,
       "ad": "Haydar Sultan Külliyesi",
       "kategori": "tarih",
       "amaclar": [
@@ -183,7 +171,7 @@
       "place_id": "ChIJuWqq5j3B1BQRhm5ReLxQoFU"
     },
     {
-      "sira": 15,
+      "sira": 14,
       "ad": "Sultan Sofrası",
       "kategori": "yemek",
       "amaclar": [
@@ -195,7 +183,7 @@
       "place_id": "ChIJmdc0udXP1BQRMFRUle7LRNA"
     },
     {
-      "sira": 16,
+      "sira": 15,
       "ad": "Koçubaba Camii ve Türbesi",
       "kategori": "tarih",
       "amaclar": [
@@ -208,7 +196,7 @@
       "place_id": "ChIJhUp8b_67gUAR-0ah9NBiR0c"
     },
     {
-      "sira": 17,
+      "sira": 16,
       "ad": "Kapulukaya Baraj Gölü",
       "kategori": "manzara",
       "amaclar": [
@@ -221,7 +209,7 @@
       "place_id": "ChIJMZwSGQjJ1BQRCt0TEmL3D00"
     },
     {
-      "sira": 18,
+      "sira": 17,
       "ad": "Taş Mektep (Hacı Taşan Kültür Merkezi)",
       "kategori": "muze",
       "amaclar": [
@@ -233,7 +221,7 @@
       "place_id": "ChIJkyPJotbP1BQRL78n43kRYno"
     },
     {
-      "sira": 19,
+      "sira": 18,
       "ad": "Dinek Dağı",
       "kategori": "aktivite",
       "amaclar": [
@@ -245,7 +233,7 @@
       "place_id": "ChIJPZVvYtfS1BQR_GF8f3GXF3Y"
     },
     {
-      "sira": 20,
+      "sira": 19,
       "ad": "Ceritkale Kaya Mezarları",
       "kategori": "tarih",
       "amaclar": [
@@ -258,7 +246,7 @@
       "place_id": "ChIJG1prqYXE1BQR2rFQ2S-uMbI"
     },
     {
-      "sira": 21,
+      "sira": 20,
       "ad": "İzzet'i İkram Sofrası",
       "kategori": "yemek",
       "amaclar": [
@@ -270,7 +258,7 @@
       "place_id": "ChIJE7quZwrfgUARlc_cki3onlU"
     },
     {
-      "sira": 22,
+      "sira": 21,
       "ad": "Hasandede Göleti",
       "kategori": "doga",
       "amaclar": [
@@ -283,7 +271,7 @@
       "place_id": "ChIJsTOA2a_N1BQRRlPYigWVT3Q"
     },
     {
-      "sira": 23,
+      "sira": 22,
       "ad": "Yahşihan Gar Binası",
       "kategori": "tarih",
       "amaclar": [
@@ -293,6 +281,18 @@
       "merkeze_km": 6,
       "neden": "1924 yapımı istasyon; Kurtuluş Savaşı'nda Ankara'ya cephane buradan aktarıldı",
       "place_id": "ChIJLfHJBYjfgUARVwxeLABATeI"
+    },
+    {
+      "sira": 23,
+      "ad": "Nur Camii",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Selimiye örnek alınarak 2015'te bitti; dört minare, 32 m'lik kubbe, kentin simgesi",
+      "place_id": "ChIJP7Yr23TfgUARNizXg-W-yys"
     },
     {
       "sira": 24,
