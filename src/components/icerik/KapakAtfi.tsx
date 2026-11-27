@@ -12,17 +12,18 @@ import { renk, yazi } from '@/theme';
 export const ATIF_BASLIK_BOSLUGU = 44;
 
 /**
+ * #569 KK2: `sade` — kutusuz, 10 px beyaz %85 yazı (kanvas `Ana_v9_*` seyahat kartı, sağ üst); dokunma ve pencere aynı.
  * #345 KK4 (kanvas 29i · A/B/C/E): kapak fotoğrafının atfı — 22 px kutu, köşe 8, #0E1430 %62, beyaz Figtree 600 12 px;
  * en çok 220 px, yazar "…" ile kısalır, lisans kesilmez. Commons fotoğrafında dokununca "Fotoğraf hakkında" (E) açılır;
  * "Foto: Tripmate" dokunulmaz. Dokunma alanı 44 pt (görünmez dolgu).
  */
-export function KapakAtfi({ atif, stil }: { atif: Atif; stil?: StyleProp<ViewStyle> }) {
+export function KapakAtfi({ atif, stil, sade = false }: { atif: Atif; stil?: StyleProp<ViewStyle>; sade?: boolean }) {
   const [acik, setAcik] = useState(false);
   if (tripmateMi(atif)) {
     return (
       <View style={[s.konum, stil]} accessible accessibilityLabel={t('kapak.erisimTripmate')}>
-        <View style={s.kutu}>
-          <Text style={s.metin} numberOfLines={1}>
+        <View style={sade ? s.sadeKutu : s.kutu}>
+          <Text style={sade ? s.sadeMetin : s.metin} numberOfLines={1}>
             {t('kapak.atifTripmate')}
           </Text>
         </View>
@@ -31,7 +32,7 @@ export function KapakAtfi({ atif, stil }: { atif: Atif; stil?: StyleProp<ViewSty
   }
   const kisa = lisansKisaAdi(atif.lisans);
   const temel = atif.lisans ? t('kapak.erisim', { yazar: atif.yazar, lisans: atif.lisans }) : t('kapak.erisimLisanssiz', { yazar: atif.yazar });
-  const kutu = <AtifKutusu yazar={atif.yazar} ek={kisa ? t('kapak.atifLisans', { lisans: kisa }) : null} />;
+  const kutu = <AtifKutusu yazar={atif.yazar} ek={kisa ? t('kapak.atifLisans', { lisans: kisa }) : null} sade={sade} />;
   if (!atif.kaynak_url) {
     return (
       <View style={[s.konum, stil]} accessible accessibilityLabel={temel}>
@@ -118,13 +119,14 @@ export function GoogleFotoAtfi({ yazar, uri, stil }: { yazar: string | null | un
   );
 }
 
-function AtifKutusu({ yazar, ek }: { yazar: string; ek: string | null }) {
+function AtifKutusu({ yazar, ek, sade = false }: { yazar: string; ek: string | null; sade?: boolean }) {
+  const metin = sade ? s.sadeMetin : s.metin;
   return (
-    <View style={s.kutu}>
-      <Text style={[s.metin, s.yazar]} numberOfLines={1} ellipsizeMode="tail">
+    <View style={sade ? s.sadeKutu : s.kutu}>
+      <Text style={[metin, s.yazar]} numberOfLines={1} ellipsizeMode="tail">
         {t('kapak.atif', { yazar })}
       </Text>
-      {ek ? <Text style={[s.metin, s.ek]}>{ek}</Text> : null}
+      {ek ? <Text style={[metin, s.ek]}>{ek}</Text> : null}
     </View>
   );
 }
@@ -133,6 +135,9 @@ const s = StyleSheet.create({
   konum: { position: 'absolute', right: 16, bottom: 12 },
   kutu: { height: 22, maxWidth: 220, paddingHorizontal: 8, borderRadius: 8, backgroundColor: 'rgba(14,20,48,0.62)', flexDirection: 'row', alignItems: 'center', gap: 4 },
   metin: { fontFamily: yazi.yari, fontSize: 12, lineHeight: 16, color: renk.zemin },
+  // #569 KK2 (kanvas `Ana_v9_*`): seyahat kartında kutusuz atıf — 10 px, beyaz %85, kartın sağ üstünde (konumu çağıran verir).
+  sadeKutu: { maxWidth: 220, flexDirection: 'row', alignItems: 'center', gap: 3 },
+  sadeMetin: { fontFamily: yazi.normal, fontSize: 10, lineHeight: 13, color: 'rgba(255,255,255,0.85)' },
   yazar: { flexShrink: 1, minWidth: 0 },
   ek: { flexShrink: 0 },
   pencereBaslik: { fontFamily: yazi.ekstra, fontSize: 18, color: renk.metin },

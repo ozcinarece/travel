@@ -48,6 +48,10 @@ jest.mock('@/features/anasayfa/serit', () => ({
   useAcikBorc: (sy: unknown) => (sy ? mockBorc : null),
   useSeritAdimi: (sy: unknown) => (sy ? mockAdim : undefined),
 }));
+// #569: v9 kartlarının ve arkadaş rafının sorguları (testte boş).
+jest.mock('@/features/arkadaslar/sorgular', () => ({ useArkadasPaylasimlari: () => ({ data: [], refetch: async () => ({}) }) }));
+jest.mock('@/features/sohbet/sorgular', () => ({ useOkunmamis: () => ({ data: 0 }) }));
+jest.mock('@/components/anasayfa/SiradakiSatiri', () => ({ SiradakiSatiri: () => null }));
 // #291 KK6: ana ekran Keşfet akışı sorgusunu da tutar (yenileme için).
 const mockAkis = { data: [] as unknown[], isPending: false, isError: false, isFetching: false, refetch: jest.fn(async () => ({ isError: false, data: [] as unknown[] })) };
 jest.mock('@/lib/anaSayfa', () => ({ useAnaSayfaBolumleri: () => ({ data: undefined, refetch: async () => ({}) }) }));
@@ -118,14 +122,14 @@ describe('Açılış kuralı (#276 KK2)', () => {
     await waitFor(() => expect(router.push).toHaveBeenCalledTimes(1));
     ilk.unmount();
     const ikinci = render(<AnaSayfa />);
-    await waitFor(() => expect(ikinci.getByRole('button', { name: 'Kaydettiklerim' })).toBeTruthy());
+    await waitFor(() => expect(ikinci.getByRole('button', { name: 'Profil' })).toBeTruthy());
     expect(router.push).toHaveBeenCalledTimes(1);
   });
 
   it('yaklaşan, planlanan ya da biten seyahatte Keşfet açık kalır', async () => {
     mockSeyahatler = [sy('yakin', gun(3), gun(5)), sy('taslak', null, null), sy('bitti', gun(-4), gun(-2))];
     const ekran = render(<AnaSayfa />);
-    await waitFor(() => expect(ekran.getByRole('button', { name: 'Kaydettiklerim' })).toBeTruthy());
+    await waitFor(() => expect(ekran.getByRole('button', { name: 'Profil' })).toBeTruthy());
     expect(router.push).not.toHaveBeenCalledWith(expect.objectContaining({ pathname: '/seyahat/[id]/(sekmeler)/gezi' }));
   });
 
@@ -146,14 +150,14 @@ describe('Açılış kuralı (#276 KK2)', () => {
     // Katılım bitti (bekleyen davet silindi); "‹ Keşfet" ana ekranı sıfırdan kurar.
     mockDavet = null;
     const ikinci = render(<AnaSayfa />);
-    await waitFor(() => expect(ikinci.getByRole('button', { name: 'Kaydettiklerim' })).toBeTruthy(), { timeout: 3000 });
+    await waitFor(() => expect(ikinci.getByRole('button', { name: 'Profil' })).toBeTruthy(), { timeout: 3000 });
     expect(router.push).not.toHaveBeenCalled();
   });
 
   it('aktif seyahat yokken bayrak tüketilmez (#283 inceleme 2 · 5)', async () => {
     mockSeyahatler = [sy('yakin', gun(3), gun(5))];
     const ekran = render(<AnaSayfa />);
-    await waitFor(() => expect(ekran.getByRole('button', { name: 'Kaydettiklerim' })).toBeTruthy());
+    await waitFor(() => expect(ekran.getByRole('button', { name: 'Profil' })).toBeTruthy());
     expect(acilisKarariAcik()).toBe(true);
   });
 
@@ -161,7 +165,7 @@ describe('Açılış kuralı (#276 KK2)', () => {
     mockSeyahatler = [sy('aktif', gun(-1), gun(1))];
     mockListe = { data: undefined, isPending: false, isError: true };
     const ekran = render(<AnaSayfa />);
-    await waitFor(() => expect(ekran.getByRole('button', { name: 'Kaydettiklerim' })).toBeTruthy());
+    await waitFor(() => expect(ekran.getByRole('button', { name: 'Profil' })).toBeTruthy());
     expect(router.push).not.toHaveBeenCalled();
     expect(acilisKarariAcik()).toBe(true);
     mockListe = null;
@@ -173,8 +177,8 @@ describe('Açılış kuralı (#276 KK2)', () => {
     mockListe = { data: undefined, isPending: true, isError: false };
     const ekran = render(<AnaSayfa />);
     await waitFor(() => expect(router.replace).not.toHaveBeenCalled());
-    expect(ekran.queryByRole('button', { name: 'Kaydettiklerim' })).toBeNull();
-    await waitFor(() => expect(ekran.getByRole('button', { name: 'Kaydettiklerim' })).toBeTruthy(), { timeout: 3000 });
+    expect(ekran.queryByRole('button', { name: 'Profil' })).toBeNull();
+    await waitFor(() => expect(ekran.getByRole('button', { name: 'Profil' })).toBeTruthy(), { timeout: 3000 });
     expect(router.push).not.toHaveBeenCalled();
   });
 
@@ -193,7 +197,7 @@ describe('Açılış kuralı (#276 KK2)', () => {
     mockSeyahatler = [sy('aktif', gun(-1), gun(1))];
     mockListe = { data: undefined, isPending: true, isError: false };
     const ekran = render(<AnaSayfa />);
-    await waitFor(() => expect(ekran.getByRole('button', { name: 'Kaydettiklerim' })).toBeTruthy(), { timeout: 3000 });
+    await waitFor(() => expect(ekran.getByRole('button', { name: 'Profil' })).toBeTruthy(), { timeout: 3000 });
     expect(acilisKarariAcik()).toBe(false);
     // Liste 2. saniyede gelir: aktif seyahat var ama otomatik geçiş yok.
     await act(() => new Promise((r) => setTimeout(r, 500)));
@@ -211,7 +215,7 @@ describe('Açılış kuralı (#276 KK2)', () => {
     expect(acilisKarariAcik()).toBe(false);
     davet.unmount();
     const ekran = render(<AnaSayfa />);
-    await waitFor(() => expect(ekran.getByRole('button', { name: 'Kaydettiklerim' })).toBeTruthy());
+    await waitFor(() => expect(ekran.getByRole('button', { name: 'Profil' })).toBeTruthy());
     expect(router.push).not.toHaveBeenCalled();
   });
 });
@@ -248,7 +252,7 @@ describe('Ön plana geliş (#276 KK-ek3)', () => {
     // Akşam: seyahat yarın başlıyor (yaklaşan), Keşfet açık.
     mockSeyahatler = [sy('gezi', gun(1), gun(3))];
     const ekran = render(<AnaSayfa />);
-    await waitFor(() => expect(ekran.getByRole('button', { name: 'Kaydettiklerim' })).toBeTruthy());
+    await waitFor(() => expect(ekran.getByRole('button', { name: 'Profil' })).toBeTruthy());
     expect(router.push).not.toHaveBeenCalled();
     // Ertesi sabah ön plana gelir.
     jest.setSystemTime(simdi + 86_400_000);

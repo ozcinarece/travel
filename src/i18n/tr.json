@@ -92,7 +92,7 @@
   },
   "menu": {
     "kesfet": "Keşfet",
-    "seyahatlerim": "Seyahatlerim",
+    "seyahatlerim": "Gezilerim",
     "arkadaslar": "Arkadaşlar",
     "profil": "Profil"
   },
@@ -847,6 +847,31 @@
         "gece": "Gece hayatı için",
         "cocuklu": "Çocuklarla"
       }
+    },
+    "v9": {
+      "profilEtiket": "Profil",
+      "kalanKisi": "{n} gün kaldı · {k} kişi",
+      "kalanBugunKisi": "Bugün · {k} kişi",
+      "kisi": "{k} kişi",
+      "bugunGun": "Bugün {n}. gün",
+      "siradaki": "Sıradaki: {ad} · {saat}",
+      "siradakiSaatsiz": "Sıradaki: {ad}",
+      "ac": "Aç",
+      "kartEtiket": "{ad}, {alt}",
+      "sohbet": "Sohbet",
+      "sohbetEtiket": "Sohbet, {n} okunmamış mesaj",
+      "harcama": "Harcama",
+      "yokBaslik": "Sıradaki rota neresi?",
+      "yokAlt": "Arkadaşlarını çağır, planı birlikte çıkar",
+      "yeniGezi": "Yeni gezi oluştur",
+      "ara": "Nereye gitmek istersin?",
+      "sehirleKurOnce": "",
+      "sehirleKurSon": " için gezi kur",
+      "metinleKur": "“{metin}” için gezi kur",
+      "arkadasRotalari": "Arkadaşlarının rotaları",
+      "arkadasAlt": "{ad} · {n} gün",
+      "arkadasEtiket": "{sehir}, {ad} · {n} gün",
+      "sayfa": "{i}. seyahat, toplam {n}"
     }
   },
   "ara": {
