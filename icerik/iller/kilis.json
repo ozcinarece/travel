@@ -1,0 +1,293 @@
+{
+  "il": "Kilis",
+  "slug": "kilis",
+  "guncelleme": "2026-11-27",
+  "oneriler": [
+    {
+      "sira": 1,
+      "ad": "Ravanda Kalesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "doga"
+      ],
+      "ilce": "Polateli",
+      "merkeze_km": 28,
+      "neden": "Afrin vadisine bakan konik tepede; Selahaddin'in onardığı surlar ve iki büyük sarnıç",
+      "place_id": "ChIJQWXQ8ZAzLhUR_Oc_Hyq7XSM"
+    },
+    {
+      "sira": 2,
+      "ad": "Oylum Höyük",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 5,
+      "neden": "Kalkolitik'ten Demir Çağı'na yerleşim; 1987'den beri kazılıyor, 2026'da 38. sezon",
+      "place_id": "ChIJY9QdOXvRLxURzgz97Dnu4eA"
+    },
+    {
+      "sira": 3,
+      "ad": "Tavacı İzzet Usta",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Coğrafi işaretli Kilis tavası taş fırında yarım saatte pişer; 1993'ten beri",
+      "place_id": "ChIJOzwxUhvOLxUR-y7PuW-QiPY"
+    },
+    {
+      "sira": 4,
+      "ad": "Tekke Camii (Canbolat Paşa Camii)",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "1553'te külliyenin merkezi olarak yapıldı; 14,4 m'lik kubbesi kentin en büyüğü",
+      "place_id": "ChIJzQHjbwPOLxURucLDOK_Ak00"
+    },
+    {
+      "sira": 5,
+      "ad": "Kilis Ulu Camii",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Memlük döneminden kalan, kentin en eski ve en büyük camisi",
+      "place_id": "ChIJnX18WBfOLxURo1jBiqLOOhg"
+    },
+    {
+      "sira": 6,
+      "ad": "Şeyh Muhammed Bedevi Camii ve Türbesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 2,
+      "neden": "Kalleş Tepesi'nde 14. yüzyıl türbesi; tepeden kent ve Suriye ovası görünür",
+      "place_id": "ChIJ5dvRNFrOLxURAxMPURxCJU8"
+    },
+    {
+      "sira": 7,
+      "ad": "Katmerci Bekanlar",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Dört kuşaktır tatlıcı; şerbetli Kilis katmeri ve cennet çamurunu burada dene",
+      "place_id": "ChIJo5xD7RrOLxURjYI2POzZz2M"
+    },
+    {
+      "sira": 8,
+      "ad": "Alaeddin Yavaşca Müzesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Klasik Türk müziği ustasının 1910'larda yapılmış doğduğu ev; sekiz oda",
+      "place_id": "ChIJW_2yeTPPLxURGSfL-3KaLL4"
+    },
+    {
+      "sira": 9,
+      "ad": "Mevlevihane (Ak Tekke)",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "1525 tarihli beyaz taş tekkenin mescidi ve semahanesi; depremden sonra onarıldı",
+      "place_id": "ChIJS3KOCdPPLxURXubS9X91xpk"
+    },
+    {
+      "sira": 10,
+      "ad": "Resul Osman Dağı Mesire Alanı",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 6,
+      "neden": "950 m'lik zirvede yürüyüş ve bisiklet yolları; açık havada Halep yönü görünür",
+      "place_id": "ChIJ7dG9iRfNLxURLoD4VcrFqlw"
+    },
+    {
+      "sira": 11,
+      "ad": "Salih Efendi Sokağı",
+      "kategori": "aktivite",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Restore edilmiş taş evlerin dizildiği sokak; eski Kilis'i yürüyerek gör",
+      "place_id": "ChIJ-1MlxgTOLxURwuWPP_-Z4xE"
+    },
+    {
+      "sira": 12,
+      "ad": "Hoca Hamamı",
+      "kategori": "aktivite",
+      "amaclar": [
+        "yavas"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "1545'te Canbolat'ın yaptırdığı hamam bugün de çalışıyor",
+      "place_id": "ChIJaYK0FxvOLxURch2XmBED2yU"
+    },
+    {
+      "sira": 13,
+      "ad": "Yaren Tarihi Taş Mekanlar",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Taş odalarda kübbülmüşviye, firik pilavı ve oruk; Cüneyne Camii'nin yanında",
+      "place_id": "ChIJFXNluRvOLxURJqw2DxYBxXs"
+    },
+    {
+      "sira": 14,
+      "ad": "Şurahbil bin Hasene Türbesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "Karataş Tepesi'nde mescit, zaviye ve türbeden oluşan avlulu külliye",
+      "place_id": "ChIJk06NDwHOLxURQzk7u6N-GHk"
+    },
+    {
+      "sira": 15,
+      "ad": "Cüneyne Camii",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Adı 'küçük cennet' demek; kentin ikinci en eski camisi sayılır",
+      "place_id": "ChIJYzYluRvOLxURk0sXdZI1J5k"
+    },
+    {
+      "sira": 16,
+      "ad": "Akcurun Çarşısı",
+      "kategori": "aktivite",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Akcurun Camii'nin bulunduğu eski çarşı caddesi; 250 yıllık tescilli çınarı gör",
+      "place_id": "ChIJ00MzJwXOLxURpBVFJsqq-SE"
+    },
+    {
+      "sira": 17,
+      "ad": "Hisar Çamlığı Tabiat Parkı",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 35,
+      "neden": "16 hektarlık çam ormanı; piknik ve kamp alanı var",
+      "place_id": "ChIJXwsCihauLxUR4BRLJb36Ss0"
+    },
+    {
+      "sira": 18,
+      "ad": "Eski Hamam Restoran",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Kilis kebabı, içli köfte ve menengiç kahvesi; 1562 tarihli Eski Hamam'ın yanında",
+      "place_id": "ChIJ9_RxvRvOLxURHBqIZ8Dbq30"
+    },
+    {
+      "sira": 19,
+      "ad": "Hacıfadıloğulları Baklava",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Sıcak Kilis katmeri ve cennet çamuru için ikinci adres",
+      "place_id": "ChIJs2zGgBDOLxUR0dMGcGPVlXo"
+    },
+    {
+      "sira": 20,
+      "ad": "Şeyh Mansur Türbesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 2,
+      "neden": "Gaziantep yolunda ak taştan sivri kubbeli türbe; cuma günleri piknikçilerle dolar",
+      "place_id": "ChIJx7CCHCjOLxURwP7wgGM2u_0"
+    },
+    {
+      "sira": 21,
+      "ad": "Söğütlüdere Mesire Alanı",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 8,
+      "neden": "Kentin sulu, yeşil piknik alanı; ailece mangal ve gölge için",
+      "place_id": "ChIJI1QJE3_RLxUR25HCp8Q5Zyg"
+    },
+    {
+      "sira": 22,
+      "ad": "Kurdağa Kasteli",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "1635'te yapılmış yeraltı çeşmesi; hayvanlar için ayrı su deposu var",
+      "place_id": "ChIJHdViYRbOLxURb5UwzywhKr8"
+    },
+    {
+      "sira": 23,
+      "ad": "Kabaltı Cafe",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet",
+        "yavas"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 0,
+      "neden": "Menengiç kahvesi için merkezde bir mola; konak binasında",
+      "place_id": "ChIJxXXFvaXPLxURKWcYWBWPX7o"
+    }
+  ]
+}
