@@ -4628,6 +4628,13 @@ declare
   o jsonb := public.profil_ozeti('57800000-0000-4000-8000-0000000000b2');
 begin
   assert not (o ->> 'harita_acik')::boolean and o -> 'gidilen' = 'null'::jsonb and o -> 'geziler' = '[]'::jsonb, '#578 KK6: gizli harita: ' || o::text;
+  -- #600: istekler, yol arkadaşı sayısı ve rozetler de dönmez (gezi sıklığı); ad, foto ve izleyenin kendi istekleri kalır.
+  assert o -> 'istek' = '[]'::jsonb, '#600: gizli haritada istek boş: ' || (o -> 'istek')::text;
+  assert o -> 'yol_arkadasi' = 'null'::jsonb, '#600: gizli haritada yol arkadaşı null: ' || (o -> 'yol_arkadasi')::text;
+  assert o -> 'rozetler' = '{}'::jsonb, '#600: gizli haritada rozet yok: ' || (o -> 'rozetler')::text;
+  assert o ->> 'ad' = 'Deniz Kaya' and jsonb_typeof(o -> 'benim_istek') = 'array', '#600: ad ve izleyenin istekleri kalır: ' || o::text;
+  assert (select count(*) from public.istek_iller where user_id = '57800000-0000-4000-8000-0000000000b2') = 0
+    and (select count(*) from public.istek_iller where user_id = auth.uid()) = 2, '#600: gizli haritada istek tablosu da kapalı';
 end $$;
 -- Birlikte gezmeyen ve misafir profili göremez.
 select pg_temp.as_user(:PC);

@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import * as ImagePicker from 'expo-image-picker';
 
+import { profilOzetiAnahtari } from './profilV12';
 import { gecerliKullaniciAdi } from '@/lib/kullaniciAdi';
 import { useOturum } from '@/lib/oturum';
 import { supabase } from '@/lib/supabase';
@@ -105,7 +106,11 @@ export function useProfilGuncelle() {
       if (error) throw error;
       return data as Profil;
     },
-    onSuccess: (profil) => qc.setQueryData(profilAnahtari(profil.id), profil),
+    onSuccess: (profil) => {
+      qc.setQueryData(profilAnahtari(profil.id), profil);
+      // #600: Ayarlar'da değişen gizlilik (ad, foto) Profil v12'ye de yansısın.
+      return qc.invalidateQueries({ queryKey: profilOzetiAnahtari(profil.id) });
+    },
   });
 }
 

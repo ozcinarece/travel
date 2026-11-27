@@ -179,9 +179,12 @@ describe('#578 arkadaşın profili (`Profil_v12_Arkadas`)', () => {
   });
 
   it('KK6: harita kapalıysa harita ve geziler yok', async () => {
-    const e = ciz({ ...arkadas, harita_acik: false, gidilen: null, geziler: [] });
+    // #600: sunucu "yalnız ben"de istekleri, yol arkadaşı sayısını ve rozetleri de boş döner.
+    const e = ciz({ ...arkadas, harita_acik: false, gidilen: null, geziler: [], istek: [], yol_arkadasi: null, rozetler: {} });
     await waitFor(() => expect(e.getByText('Deniz Kaya')).toBeTruthy());
-    expect(e.getByText('6 yol arkadaşı')).toBeTruthy();
+    expect(e.queryByText(/yol arkadaşı/)).toBeNull();
+    expect(e.queryByText('Gitmek istediği yerler')).toBeNull();
+    expect(e.queryByText('Rozetler')).toBeNull();
     expect(e.queryByTestId('profil-harita')).toBeNull();
     expect(e.queryByText('Gezileri')).toBeNull();
     expect(e.getByText('Deniz ile gezi planla')).toBeTruthy();

@@ -11,13 +11,15 @@
 --   konform izdüşümünde çizilmiş: n = 0.5531, merkez boylam 32.8563°, ardından ölçek, dönme ve öteleme (`il_noktasi`).
 --   Parametreler 81 il merkezine uydurularak bulundu; harita kıyıda ±2 km kaba olduğundan sınırın 8 birim (~14 km)
 --   yakınındaki nokta en yakın ile sayılır (kıyı, ada). Yalnız Türkiye seyahatleri (country_code TR ya da boş) sayılır.
--- KK4 · `istek_iller(user_id, plaka)`: sahibi yazar ve siler; birlikte gezdiği kişiler (arkadaşları) okur.
+-- KK4 · `istek_iller(user_id, plaka)`: sahibi yazar ve siler; birlikte gezdiği kişiler (arkadaşları) okur (haritası `me`
+--   değilse, #600).
 -- KK5 · rozetler sunucuda bir görünümle (`profil_rozetleri`): gezilen durak = bitmiş seyahatte güne atanmış, atlanmamış
 --   durak (`seyahat_durumlari` ile aynı kural). Lezzet (yemek, tatlı-kahve), Doğa (doğa), Kültür (müze, tarih): il
 --   listesinde (`il_oneriler`) o kategoride olan gezilen yer sayısı. Ekip: aynı kişilerle (aynı yol arkadaşı kümesiyle)
 --   yapılan bitmiş gezi sayısının en büyüğü. Plancı: kurduğu ve en az bir kişinin katıldığı gezi sayısı. Eşik 3.
 -- KK6 · arkadaşın profilinde yalnız geçmiş geziler; harita ve geziler `profiles.map_visibility` ile ('me' ise arkadaş
---   görmez). Okuma yalnız `profil_ozeti` (security definer) ile; görünümler ve sınır tablosu istemciye kapalı.
+--   görmez; #600: istekler, yol arkadaşı sayısı ve rozetler de; yalnız ad ve foto kalır). Okuma yalnız `profil_ozeti`
+--   (security definer) ile; görünümler ve sınır tablosu istemciye kapalı.
 
 -- ---------------------------------------------------------------- iller ve sınırları
 
@@ -222,8 +224,10 @@ revoke all on public.istek_iller from public, anon, authenticated;
 grant select, delete on public.istek_iller to authenticated;
 grant insert (plaka) on public.istek_iller to authenticated;
 -- Sahibi ve birlikte gezdiği kişiler (arkadaşları; `ortak_seyahat_var`, 20261119010000) okur; misafir oturum okumaz.
+-- #600: sahibi haritasını "yalnız ben" (`me`) yaptıysa arkadaşı okumaz (`profil_ozeti` ile aynı kural).
 create policy istek_iller_select on public.istek_iller for select to authenticated
-  using (not public.is_anonymous() and (user_id = auth.uid() or public.ortak_seyahat_var(user_id)));
+  using (not public.is_anonymous() and (user_id = auth.uid() or (public.ortak_seyahat_var(user_id)
+    and exists (select 1 from public.profiles p where p.id = user_id and p.map_visibility <> 'me'))));
 -- Yalnız sahibi, hesaplı oturumla yazar (misafir oturum yazmaz).
 create policy istek_iller_insert on public.istek_iller for insert to authenticated
   with check (user_id = auth.uid() and not public.is_anonymous());
@@ -288,7 +292,8 @@ revoke all on public.profil_rozetleri from public, anon, authenticated;
 -- ---------------------------------------------------------------- profil özeti
 
 -- Kendi profilin ya da birlikte gezdiğin kişinin profili; başkası için null.
--- Arkadaşta: harita ve geziler `map_visibility = 'me'` ise yok; geziler yalnız bitmiş olanlar (KK6); kazanılmamış rozetin
+-- Arkadaşta: `map_visibility = 'me'` ise yalnız ad ve foto döner; harita, istekler, yol arkadaşı sayısı, rozetler ve geziler
+-- yok (#600: gezi sıklığını açığa vurmasın); geziler yalnız bitmiş olanlar (KK6); kazanılmamış rozetin
 -- sayısı dönmez (KK5). Gezideki diğer kişilerden yalnız baş harf; fotoğraf yalnız izleyenin de birlikte gezdiği kişininki.
 create function public.profil_ozeti(p_kisi uuid) returns jsonb
 language plpgsql stable security definer set search_path = ''
@@ -321,18 +326,19 @@ begin
     'harita_acik', acik,
     'gidilen', case when acik then coalesce((
       select jsonb_agg(g.plaka order by g.plaka) from public.gidilen_iller g where g.user_id = p_kisi), '[]'::jsonb) end,
-    'istek', coalesce((select jsonb_agg(i.plaka order by i.created_at, i.plaka) from public.istek_iller i where i.user_id = p_kisi), '[]'::jsonb),
+    'istek', case when not acik then '[]'::jsonb else coalesce((
+      select jsonb_agg(i.plaka order by i.created_at, i.plaka) from public.istek_iller i where i.user_id = p_kisi), '[]'::jsonb) end,
     'benim_istek', case when kendi then null else coalesce((
       select jsonb_agg(i.plaka order by i.plaka) from public.istek_iller i where i.user_id = ben), '[]'::jsonb) end,
-    'yol_arkadasi', (
+    'yol_arkadasi', case when acik then (
       select count(distinct o.user_id) from public.members m join public.members o on o.trip_id = m.trip_id and o.user_id <> m.user_id
-      where m.user_id = p_kisi),
-    'rozetler', jsonb_strip_nulls(jsonb_build_object(
+      where m.user_id = p_kisi) end,
+    'rozetler', case when not acik then '{}'::jsonb else jsonb_strip_nulls(jsonb_build_object(
       'lezzet', case when kendi or r.lezzet >= 3 then r.lezzet end,
       'doga', case when kendi or r.doga >= 3 then r.doga end,
       'kultur', case when kendi or r.kultur >= 3 then r.kultur end,
       'ekip', case when kendi or r.ekip >= 3 then r.ekip end,
-      'planci', case when kendi or r.planci >= 3 then r.planci end)),
+      'planci', case when kendi or r.planci >= 3 then r.planci end)) end,
     'geziler', case when not acik then '[]'::jsonb else coalesce((
       select jsonb_agg(jsonb_build_object(
           'id', t.id,

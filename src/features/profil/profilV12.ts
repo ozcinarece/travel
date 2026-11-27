@@ -46,7 +46,8 @@ export type ProfilOzeti = {
   istek: number[];
   /** Arkadaşın profilinde izleyenin istekleri ("İKİNİZ DE"); kendi profilinde null. */
   benim_istek: number[] | null;
-  yol_arkadasi: number;
+  /** Arkadaşın haritası kapalıysa (`me`) null; `istek` boş, `rozetler` boş da döner (#600). */
+  yol_arkadasi: number | null;
   rozetler: RozetSayilari;
   geziler: ProfilGezisi[];
 };

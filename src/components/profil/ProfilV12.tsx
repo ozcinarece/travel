@@ -4,7 +4,6 @@
 // (KK4); rozetler (KK5); geziler (KK6: arkadaşta yalnız geçmiş); arkadaşta altta sabit turuncu "{Ad} ile gezi planla" (KK7).
 // Gezi oluşturma (#574) bugünkü sihirbazla açılır: il `sehir` (rehberli şehir) ya da `metin` olarak, ayrıca `il` ve `arkadas`
 // parametreleri geçer (#574 bağlayacak). Google'a istek yok.
-import { useQueryClient } from '@tanstack/react-query';
 import { router } from 'expo-router';
 import { useState, type ReactNode } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
@@ -145,7 +144,6 @@ function UstSatir({ kendi }: { kendi: boolean }) {
 function ProfilIcerigi({ o }: { o: ProfilOzeti }) {
   const kenar = useSafeAreaInsets();
   const { width } = useWindowDimensions();
-  const qc = useQueryClient();
   const sehirler = useSehirler();
   const istekDegistir = useIstekDegistir(o.id);
   const profilGuncelle = useProfilGuncelle();
@@ -157,15 +155,15 @@ function ProfilIcerigi({ o }: { o: ProfilOzeti }) {
 
   const ad = ilkAd(o.ad) ?? o.ad;
   const gidilen = o.gidilen ?? [];
-  const altParcalar = [o.harita_acik ? t('profilV12.ilSayisi', { n: gidilen.length }) : null, t('profilV12.yolArkadasi', { n: o.yol_arkadasi })].filter(Boolean);
+  const altParcalar = [o.harita_acik ? t('profilV12.ilSayisi', { n: gidilen.length }) : null, o.yol_arkadasi === null ? null : t('profilV12.yolArkadasi', { n: o.yol_arkadasi })].filter(Boolean);
   const istekler = istekSirasi(o.istek, o.benim_istek);
   const rozetler = rozetListesi(o.rozetler, o.kendi);
   const geziler = tumu ? o.geziler : o.geziler.slice(0, ILK_GEZI);
   const tumuVar = o.kendi ? o.geziler.length > 0 : o.geziler.length > ILK_GEZI && !tumu;
 
   const geziOlustur = (giris: GeziGirisi) => router.push({ pathname: '/(tabs)/yeni', params: geziOlusturParametreleri(sehirler.data, giris) });
-  const gizlilikSec = (g: HaritaGizliligi) =>
-    profilGuncelle.mutate({ map_visibility: g }, { onSuccess: () => void qc.invalidateQueries({ queryKey: ['profil_ozeti', o.id] }) });
+  // Profil özeti önbelleğini `useProfilGuncelle` geçersiz kılar (Ayarlar'dan değişince de).
+  const gizlilikSec = (g: HaritaGizliligi) => profilGuncelle.mutate({ map_visibility: g });
   const altBosluk = o.kendi ? 40 : 52 + 12 + Math.max(30, kenar.bottom) + 16;
 
   return (
@@ -187,9 +185,11 @@ function ProfilIcerigi({ o }: { o: ProfilOzeti }) {
             <Text accessibilityRole="header" style={s.ad} numberOfLines={1}>
               {o.ad}
             </Text>
-            <Text style={s.kimlikAlt} numberOfLines={1}>
-              {altParcalar.join(' · ')}
-            </Text>
+            {altParcalar.length > 0 ? (
+              <Text style={s.kimlikAlt} numberOfLines={1}>
+                {altParcalar.join(' · ')}
+              </Text>
+            ) : null}
           </View>
         </View>
 
@@ -226,7 +226,8 @@ function ProfilIcerigi({ o }: { o: ProfilOzeti }) {
           </Pressable>
         ) : null}
 
-        {o.kendi || istekler.length > 0 ? (
+        {/* #600: arkadaş haritasını "yalnız ben"e çektiyse istekler, rozetler ve yol arkadaşı sayısı da gizli (sunucu boş döner). */}
+        {o.kendi || (o.harita_acik && istekler.length > 0) ? (
           <>
             <Bolum
               baslik={t(o.kendi ? 'profilV12.istek.baslikKendi' : 'profilV12.istek.baslik')}
@@ -256,7 +257,7 @@ function ProfilIcerigi({ o }: { o: ProfilOzeti }) {
           </>
         ) : null}
 
-        {rozetler.length > 0 ? (
+        {(o.kendi || o.harita_acik) && rozetler.length > 0 ? (
           <>
             <Bolum baslik={t(o.kendi ? 'profilV12.rozet.baslikKendi' : 'profilV12.rozet.baslik')} />
             <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={s.rozetler}>

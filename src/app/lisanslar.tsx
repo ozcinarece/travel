@@ -8,7 +8,8 @@ import { bosluk, renk, yazi } from '@/theme';
 
 /**
  * #578 KK2: üçüncü taraf verilerin lisansları (Ayarlar › Lisanslar). Profil haritasındaki 81 il yolu turkey-map-react
- * paketinin MIT lisanslı verisidir; paket eklenmedi, yalnız yollar `src/assets/turkiye-iller.json`'da. Kanvasta bu ekranın
+ * paketinin MIT lisanslı verisidir (o da svg-turkiye-haritasi'ndan, MIT); paket eklenmedi, yalnız yollar
+ * `src/assets/turkiye-iller.json`'da (bildirimler yanında `turkiye-iller.LICENSE.md`). Kanvasta bu ekranın
  * çizimi yok (tasarım bekliyor): mevcut ekran başlığı ve metin stilleriyle.
  */
 export default function LisanslarEkrani() {
@@ -25,6 +26,14 @@ export default function LisanslarEkrani() {
             {t('lisanslar.haritaMetin')}
           </Text>
         </View>
+        {/* #600: turkey-map-react yolları svg-turkiye-haritasi'ndan türetir; MIT bildirimi zincirin tamamında korunur. */}
+        <View style={s.blok}>
+          <Text style={s.kaynak}>{t('lisanslar.nomakKaynak')}</Text>
+          <Text style={s.metin} selectable>
+            {t('lisanslar.nomakMetin')}
+          </Text>
+        </View>
+        <Text style={s.kaynak}>{t('lisanslar.altlik')}</Text>
       </ScrollView>
     </SafeAreaView>
   );
