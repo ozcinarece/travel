@@ -83,9 +83,9 @@ as $$
     and not exists (select 1 from public.members m where m.trip_id = d.trip_id and m.user_id = auth.uid())
 $$;
 
--- KK2 · KK3: bekleyen davetlerim, yeniden eskiye. Davet edenin ilk adı ve fotoğrafı (birlikte gezdik); seyahatin adı, şehri,
--- tarihleri, gün sayısı; kişiler = üyeler, davet eden önde, sonra katılış sırası (ilk ad; fotoğraf yalnız benimle ortak seyahati
--- olan kişininki, #229). Token, mekanlar ve Google verisi dönmez.
+-- KK2 · KK3: bekleyen davetlerim, yeniden eskiye. Davet edenin ilk adı ve fotoğrafı; seyahatin adı, şehri, tarihleri, gün
+-- sayısı; kişiler = üyeler, davet eden önde, sonra katılış sırası (ilk ad; sıra numarası, kullanıcı kimliği dönmez). Fotoğraf,
+-- davet edeninki dahil, yalnız benimle ortak seyahati olan kişininki (#229). Token, mekanlar ve Google verisi dönmez.
 create function public.davetlerim() returns table (
   id uuid, trip_id uuid, davet_eden_ad text, davet_eden_foto text, ad text, sehir text,
   start_date date, end_date date, gun_sayisi integer, kisiler jsonb, olusturuldu timestamptz)
@@ -93,16 +93,16 @@ language sql stable security definer set search_path = ''
 as $$
   select d.id, d.trip_id,
     public.ilk_kelime((select m.display_name from public.members m where m.trip_id = d.trip_id and m.user_id = d.davet_eden)),
-    (select p.photo_url from public.profiles p where p.id = d.davet_eden),
+    case when public.ortak_seyahat_var(d.davet_eden) then (select p.photo_url from public.profiles p where p.id = d.davet_eden) end,
     t.name, t.city_label, t.start_date, t.end_date,
     (select count(*) from public.days g where g.trip_id = t.id)::integer,
     coalesce((
-      select jsonb_agg(jsonb_build_object(
-        'id', m.user_id,
-        'ad', public.ilk_kelime(m.display_name),
-        'foto', case when public.ortak_seyahat_var(m.user_id) then (select p.photo_url from public.profiles p where p.id = m.user_id) end)
-        order by (m.user_id = d.davet_eden) desc, m.joined_at, m.user_id)
-      from public.members m where m.trip_id = t.id), '[]'::jsonb),
+      select jsonb_agg(jsonb_build_object('sira', x.sira, 'ad', x.ad, 'foto', x.foto) order by x.sira)
+      from (
+        select row_number() over (order by (m.user_id = d.davet_eden) desc, m.joined_at, m.user_id)::integer as sira,
+          public.ilk_kelime(m.display_name) as ad,
+          case when public.ortak_seyahat_var(m.user_id) then (select p.photo_url from public.profiles p where p.id = m.user_id) end as foto
+        from public.members m where m.trip_id = t.id) x), '[]'::jsonb),
     d.created_at
   from public.seyahat_davetleri d
   join public.trips t on t.id = d.trip_id
@@ -131,8 +131,17 @@ begin
   if d.id is null then
     raise exception 'davet yok' using errcode = 'P0002';
   end if;
+  -- Satırı kilitle: eşzamanlı `daveti_reddet` beklesin; kilit alınca hâlâ bekliyor mu bak.
+  perform 1 from public.seyahat_davetleri x where x.id = d.id and x.durum = 'bekliyor' for update;
+  if not found then
+    raise exception 'davet yok' using errcode = 'P0002';
+  end if;
   sonuc := public.davetle_katil((select t.invite_token from public.trips t where t.id = d.trip_id), 'app');
-  update public.seyahat_davetleri x set durum = 'katildi', yanitlandi = now() where x.id = d.id;
+  update public.seyahat_davetleri x set durum = 'katildi', yanitlandi = now() where x.id = d.id and x.durum = 'bekliyor';
+  if not found then
+    -- Bu arada reddedildi (ya da başka bir istek yanıtladı): üyelik de geri alınır (işlem bütün olarak düşer).
+    raise exception 'davet yok' using errcode = 'P0002';
+  end if;
   return sonuc;
 end;
 $$;

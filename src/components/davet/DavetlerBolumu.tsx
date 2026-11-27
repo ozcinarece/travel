@@ -6,7 +6,7 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { Avatar } from '@/components/ui/Avatar';
-import { davetEtiketi, gezilerimAlt, gezilerimBasligi, type GelenDavet } from '@/features/davet/uygulamaIci';
+import { davetEtiketi, dugmeIpuclari, gezilerimAlt, gezilerimBasligi, type GelenDavet } from '@/features/davet/uygulamaIci';
 import { t } from '@/i18n';
 import { anaV5, renk, yazi } from '@/theme';
 
@@ -32,6 +32,8 @@ export function DavetlerBolumu({ davetler, onHayir, onKatil, katilan }: Props) {
         {davetler.map((d) => {
           const mesgul = katilan === d.id;
           const alt = gezilerimAlt(d);
+          const baslik = gezilerimBasligi(d);
+          const ipucu = dugmeIpuclari(d);
           return (
             <View key={d.id} style={s.kutu} testID={`davet-satiri-${d.id}`}>
               <View style={s.ust}>
@@ -39,19 +41,20 @@ export function DavetlerBolumu({ davetler, onHayir, onKatil, katilan }: Props) {
                   <Avatar ad={d.davet_eden_ad ?? '?'} url={d.davet_eden_foto} boyut={44} arkaPlan={renk.ana} yuvarlak harfBoyutu={14} />
                 </View>
                 <View style={s.metinler}>
-                  <Text style={s.baslik} accessibilityLabel={davetEtiketi(d)}>
-                    {gezilerimBasligi(d)}
+                  <Text style={s.baslik} accessibilityLabel={davetEtiketi(d, baslik)}>
+                    {baslik}
                   </Text>
                   {alt ? <Text style={s.alt}>{alt}</Text> : null}
                 </View>
               </View>
               <View style={s.dugmeler}>
-                <Pressable accessibilityRole="button" accessibilityLabel={t('davet.kutu.hayir')} onPress={() => onHayir(d)} disabled={mesgul} style={({ pressed }) => [s.hayir, pressed && s.basili]} testID="davet-hayir">
+                <Pressable accessibilityRole="button" accessibilityLabel={t('davet.kutu.hayir')} accessibilityHint={ipucu.hayir} accessibilityState={{ disabled: mesgul }} onPress={() => onHayir(d)} disabled={mesgul} style={({ pressed }) => [s.hayir, pressed && s.basili]} testID="davet-hayir">
                   <Text style={s.hayirMetin}>{t('davet.kutu.hayir')}</Text>
                 </Pressable>
                 <Pressable
                   accessibilityRole="button"
                   accessibilityLabel={t('davet.kutu.katil')}
+                  accessibilityHint={ipucu.katil}
                   accessibilityState={{ busy: mesgul, disabled: mesgul }}
                   onPress={() => onKatil(d)}
                   disabled={mesgul}

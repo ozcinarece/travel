@@ -15,6 +15,8 @@ type Props = {
   acik: boolean;
   seyahat: { name: string | null; city_label: string };
   uyeler: Uye[];
+  /** #573: uygulama içi davette davet edenin adı; yoksa seyahatin sahibi (davet linki). */
+  davetEden?: string;
   gunSayisi: number;
   mekanSayisi: number;
   onProgram: () => void;
@@ -22,8 +24,8 @@ type Props = {
 };
 
 
-export function KatilimSayfasi({ acik, seyahat, uyeler, gunSayisi, mekanSayisi, onProgram, onMekanEkle }: Props) {
-  const davetEden = uyeler.find((u) => u.role === 'owner')?.display_name ?? t('davet.biri');
+export function KatilimSayfasi({ acik, seyahat, uyeler, davetEden: davetEdenAdi, gunSayisi, mekanSayisi, onProgram, onMekanEkle }: Props) {
+  const davetEden = davetEdenAdi?.trim() || uyeler.find((u) => u.role === 'owner')?.display_name || t('davet.biri');
   const gorunen = uyeler.slice(0, 2);
   const kalan = uyeler.length - gorunen.length;
   return (

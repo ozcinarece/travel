@@ -244,6 +244,8 @@
       "etiket": "Davet: {baslik}",
       "hayir": "Hayır",
       "katil": "Katıl",
+      "hayirIpucu": "{sehir} davetini geri çevirir",
+      "katilIpucu": "{sehir} gezisine katılırsın",
       "geliyorBir": "{ad} {de} geliyor",
       "geliyorIki": "{ad} ve {ad2} {de} geliyor",
       "geliyorCok": "{ad} ve {n} kişi daha geliyor",

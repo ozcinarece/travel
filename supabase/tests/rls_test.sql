@@ -4599,8 +4599,9 @@ begin
   assert r.id = current_setting('test.d1')::uuid and r.trip_id = current_setting('test.urla')::uuid, '#573: kimlikler: ' || m;
   assert r.davet_eden_ad = 'Ayşe' and r.davet_eden_foto = 'https://example.com/ayse.jpg', '#573 KK2: davet eden: ' || m;
   assert r.ad = 'Urla bağ rotası' and r.sehir = 'Urla' and r.start_date = '2026-12-05' and r.end_date = '2026-12-06' and r.gun_sayisi = 2, '#573 KK2: gezi: ' || m;
-  assert r.kisiler = '[{"id": "57300000-0000-4000-8000-0000000000a1", "ad": "Ayşe", "foto": "https://example.com/ayse.jpg"}, {"id": "57300000-0000-4000-8000-0000000000f6", "ad": "Mert", "foto": null}]'::jsonb, '#573 KK2: yüzler: ' || m;
+  assert r.kisiler = '[{"sira": 1, "ad": "Ayşe", "foto": "https://example.com/ayse.jpg"}, {"sira": 2, "ad": "Mert", "foto": null}]'::jsonb, '#573 KK2: yüzler: ' || m;
   assert m not like '%invite_token%', '#573: token dönmez';
+  assert m not like '%57300000-0000-4000-8000-0000000000f6%' and r.kisiler::text not like '%57300000%', '#573 inceleme 6: kişilerin kullanıcı kimliği dönmez';
 end $$;
 -- B seyahati hâlâ göremez (davet üyelik değildir).
 do $$ begin assert (select count(*) from public.trips where id = current_setting('test.urla')::uuid) = 0, '#573: davet seyahati açmaz'; end $$;
@@ -4609,6 +4610,7 @@ select public.daveti_reddet(current_setting('test.d1')::uuid);
 do $$ begin assert (select count(*) from public.davetlerim()) = 0, '#573 KK4: reddedilen kutudan düşer'; end $$;
 select pg_temp.hata_bekle($$select public.daveti_reddet(current_setting('test.d1')::uuid)$$, 'P0002');
 select pg_temp.hata_bekle($$select public.davete_katil(current_setting('test.d1')::uuid)$$, 'P0002');
+do $$ begin assert not exists (select 1 from public.members where trip_id = current_setting('test.urla')::uuid and user_id = auth.uid()), '#573 inceleme 7: reddedilen davetle üye olunmaz'; end $$;
 select pg_temp.as_user(:SA);
 do $$ begin assert (select durum from public.seyahat_davetleri where id = current_setting('test.d1')::uuid) = 'reddetti', '#573 KK5: davet eden durumu görür'; end $$;
 -- Reddedilen davetten sonra yeniden davet edilebilir (bekleyen yok).
@@ -4635,9 +4637,32 @@ do $$ begin assert public.davet_gonder(current_setting('test.urla')::uuid, array
 select pg_temp.as_user(:SM);
 do $$ begin assert public.davet_gonder(current_setting('test.urla')::uuid, array['57300000-0000-4000-8000-0000000000d4']::uuid[]) = 1, '#573: üye olan herkes davet eder'; end $$;
 select pg_temp.as_user(:SD);
-do $$ begin assert (select count(*) from public.davetlerim()) = 1, '#573: D davetini görür'; end $$;
+do $$
+declare r record;
+begin
+  select * into r from public.davetlerim();
+  assert r.davet_eden_ad = 'Mert' and r.davet_eden_foto = 'https://example.com/mert.jpg', '#573: D davetini görür, birlikte gezdiği M''nin fotoğrafıyla';
+end $$;
 select set_config('test.d3', (select id::text from public.seyahat_davetleri), false);
 reset role;
+-- #573 inceleme 5: D artık M ile hiçbir seyahatte değilse davet edenin fotoğrafı da dönmez (#229).
+delete from public.members where trip_id = '57300000-0000-4000-8000-000000000004' and user_id = :SD;
+set role authenticated;
+select pg_temp.as_user(:SD);
+do $$
+declare r record;
+begin
+  select * into r from public.davetlerim();
+  assert r.davet_eden_ad = 'Mert' and r.davet_eden_foto is null, '#573 inceleme 5: ortak seyahat yoksa davet edenin fotoğrafı yok';
+  assert r.kisiler -> 0 ->> 'foto' is null and r.kisiler -> 1 ->> 'foto' = 'https://example.com/ayse.jpg', '#573 inceleme 5: fotoğraf yalnız ortak seyahati olan üyenin: ' || r.kisiler::text;
+end $$;
+reset role;
+-- #573 inceleme 7: katılım satırı kilitler ve yalnız bekleyen daveti katildi yapar (eşzamanlı reddetle yarış).
+do $$
+declare g text := pg_get_functiondef('public.davete_katil(uuid)'::regprocedure);
+begin
+  assert g like '%for update%' and g like '%x.durum = ''bekliyor''%', '#573 inceleme 7: kilit ve durum koşulu';
+end $$;
 -- KK1: aynı kişiye ikinci bekleyen davet dizinde de engellenir.
 select pg_temp.hata_bekle(format($$insert into public.seyahat_davetleri (trip_id, davet_eden, davet_edilen) values (%L, %L, %L)$$, '57300000-0000-4000-8000-000000000002', '57300000-0000-4000-8000-0000000000a1', '57300000-0000-4000-8000-0000000000d4'), '23505');
 select pg_temp.hata_bekle(format($$insert into public.seyahat_davetleri (trip_id, davet_eden, davet_edilen, durum) values (%L, %L, %L, 'gitti')$$, '57300000-0000-4000-8000-000000000002', '57300000-0000-4000-8000-0000000000a1', '57300000-0000-4000-8000-0000000000c3'), '23514');

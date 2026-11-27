@@ -4,6 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { act, renderHook, waitFor } from '@testing-library/react-native';
 import type { ReactNode } from 'react';
+import { AppState } from 'react-native';
 
 import {
   adaYonelme,
@@ -41,8 +42,8 @@ const urla: GelenDavet = {
   end_date: '2026-12-06',
   gun_sayisi: 2,
   kisiler: [
-    { id: 'a', ad: 'Ayşe', foto: null },
-    { id: 'm', ad: 'Mert', foto: null },
+    { sira: 1, ad: 'Ayşe', foto: null },
+    { sira: 2, ad: 'Mert', foto: null },
   ],
   olusturuldu: '2026-11-27T12:00:00Z',
 };
@@ -65,8 +66,8 @@ describe('#573 metinler', () => {
   it('KK3: alt satırda diğer katılanlar ("Mert de geliyor")', () => {
     expect(gezilerimAlt(urla)).toBe('5–6 Aralık · 2 gün · Mert de geliyor');
     expect(gezilerimAlt({ ...urla, kisiler: [urla.kisiler[0]] })).toBe('5–6 Aralık · 2 gün');
-    expect(gezilerimAlt({ ...urla, kisiler: [...urla.kisiler, { id: 'c', ad: 'Can', foto: null }] })).toBe('5–6 Aralık · 2 gün · Mert ve Can da geliyor');
-    expect(gezilerimAlt({ ...urla, kisiler: [...urla.kisiler, { id: 'c', ad: 'Can', foto: null }, { id: 'd', ad: 'Deniz', foto: null }] })).toBe('5–6 Aralık · 2 gün · Mert ve 2 kişi daha geliyor');
+    expect(gezilerimAlt({ ...urla, kisiler: [...urla.kisiler, { sira: 3, ad: 'Can', foto: null }] })).toBe('5–6 Aralık · 2 gün · Mert ve Can da geliyor');
+    expect(gezilerimAlt({ ...urla, kisiler: [...urla.kisiler, { sira: 3, ad: 'Can', foto: null }, { sira: 4, ad: 'Deniz', foto: null }] })).toBe('5–6 Aralık · 2 gün · Mert ve 2 kişi daha geliyor');
     expect(deBaglaci('Ayşe')).toBe('de');
     expect(deBaglaci('Okan')).toBe('da');
   });
@@ -144,7 +145,7 @@ describe('#573 KK4 eylemler', () => {
     await act(() => result.current.katil(urla));
     expect(mockRpc).toHaveBeenCalledWith('davete_katil', { p_davet: 'd1' });
     expect(mockOlay).toHaveBeenCalledWith('davet_katildi', 't1', { kanal: 'app', kaynak: 'uygulama_ici' });
-    expect(mockPush).toHaveBeenCalledWith({ pathname: '/seyahat/[id]/(sekmeler)/gezi', params: { id: 't1', katildin: '1' } });
+    expect(mockPush).toHaveBeenCalledWith({ pathname: '/seyahat/[id]/(sekmeler)/gezi', params: { id: 't1', katildin: '1', davetEden: 'Ayşe' } });
   });
 
   it('Katıl: davet artık geçerli değilse kısa bildirim, gezi açılmaz', async () => {
@@ -155,6 +156,60 @@ describe('#573 KK4 eylemler', () => {
     await act(() => result.current.katil(urla));
     expect(bildirim).toHaveBeenCalledWith('Bu davet artık geçerli değil');
     expect(mockPush).not.toHaveBeenCalled();
+  });
+
+  it('#573 inceleme 3 · KK6: uygulama arka plandan dönünce kutu yeniden okunur', async () => {
+    const dinleyiciler: ((d: string) => void)[] = [];
+    // AppState jest'te zaten taklit; asıl işlevi saklayıp geri koy (spyOn + mockRestore taklidin dönüşünü siler).
+    const asil = AppState.addEventListener;
+    AppState.addEventListener = ((_t: string, f: (d: string) => void) => {
+      dinleyiciler.push(f);
+      return { remove: () => undefined };
+    }) as never;
+    const { result } = renderHook(() => useDavetEylemleri(jest.fn()), { wrapper: sarmal(qc) });
+    await waitFor(() => expect(result.current.davetler).toHaveLength(1));
+    const once = mockRpc.mock.calls.filter(([ad]) => ad === 'davetlerim').length;
+    await act(async () => dinleyiciler.forEach((f) => f('active')));
+    await waitFor(() => expect(mockRpc.mock.calls.filter(([ad]) => ad === 'davetlerim').length).toBeGreaterThan(once));
+    AppState.addEventListener = asil;
+  });
+
+  it('#573 inceleme 10: reddi bekleyen davet öbür ekranda yenilemede de görünmez; Geri al ikisinde de geri koyar', async () => {
+    const ana = renderHook(() => useDavetEylemleri(jest.fn()), { wrapper: sarmal(qc) });
+    const gezilerim = renderHook(() => useDavetEylemleri(jest.fn()), { wrapper: sarmal(qc) });
+    await waitFor(() => expect(gezilerim.result.current.davetler).toHaveLength(1));
+    act(() => ana.result.current.reddet(urla));
+    await act(async () => {
+      await gezilerim.result.current.yenile();
+    });
+    expect(qc.getQueryData<GelenDavet[]>(DAVETLERIM)).toHaveLength(1);
+    expect(gezilerim.result.current.davetler).toHaveLength(0);
+    expect(gezilerim.result.current.bekleyen).toBeNull();
+    act(() => ana.result.current.geriAl());
+    expect(gezilerim.result.current.davetler).toHaveLength(1);
+    expect(ana.result.current.davetler).toHaveLength(1);
+  });
+
+  it('#573 inceleme 11: daveti_reddet düşerse bir kez "Güncellenemedi", kutu yeniden okunur', async () => {
+    const bildirim = jest.fn();
+    mockRpc.mockImplementation(async (ad) => (ad === 'davetlerim' ? { data: [urla], error: null } : { data: null, error: { message: 'ağ' } }));
+    const { result } = renderHook(() => useDavetEylemleri(bildirim), { wrapper: sarmal(qc) });
+    await waitFor(() => expect(result.current.davetler).toHaveLength(1));
+    jest.useFakeTimers();
+    act(() => result.current.reddet(urla));
+    await act(async () => {
+      jest.advanceTimersByTime(GERI_CEVIR_MS);
+    });
+    // Sorgu bildirimlerinin (react-query toplu bildirim zamanlayıcısı) sahte saatte kalanlarını boşalt.
+    for (let i = 0; i < 5; i++) {
+      await act(async () => {
+        jest.runOnlyPendingTimers();
+      });
+    }
+    jest.useRealTimers();
+    await waitFor(() => expect(bildirim).toHaveBeenCalledWith('Güncellenemedi'));
+    expect(bildirim).toHaveBeenCalledTimes(1);
+    await waitFor(() => expect(result.current.davetler).toHaveLength(1));
   });
 
   it('KK1: davet_gonder kişileri tek çağrıda gönderir (#574 kullanır)', async () => {

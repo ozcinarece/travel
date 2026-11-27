@@ -46,6 +46,15 @@ describe('yonelmeEki', () => {
     expect(yonelmeEki('Bodrum ')).toBe("Bodrum'a");
     expect(yonelmeEki('')).toBe('');
   });
+  it('#573: tek kelimelik ünlüyle biten ad y alır; n yalnız iyelik ekiyle bitende', () => {
+    expect(yonelmeEki('Denizli')).toBe("Denizli'ye");
+    expect(yonelmeEki('Bali')).toBe("Bali'ye");
+    expect(yonelmeEki('Baku')).toBe("Baku'ya");
+    expect(yonelmeEki('Urla')).toBe("Urla'ya");
+    expect(yonelmeEki('Kuşadası')).toBe("Kuşadası'na");
+    expect(yonelmeEki('Urla bağ rotası')).toBe("Urla bağ rotası'na");
+    expect(yonelmeEki('Salda Gölü')).toBe("Salda Gölü'ne");
+  });
 });
 
 describe('#181 bulunmaEki', () => {

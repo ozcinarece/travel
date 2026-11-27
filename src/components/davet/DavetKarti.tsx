@@ -12,7 +12,7 @@ import { SeyahatKapagi } from '@/components/seyahatler/SeyahatKapagi';
 import { Avatar } from '@/components/ui/Avatar';
 import { Foto } from '@/components/ui/Foto';
 import { KART_KOSE, KART_YUKSEKLIK, type Kapak } from '@/features/anasayfa/v9';
-import { anaSayfaBasligi, davetAlt, davetEtiketi, type GelenDavet } from '@/features/davet/uygulamaIci';
+import { anaSayfaBasligi, davetAlt, davetEtiketi, dugmeIpuclari, type GelenDavet } from '@/features/davet/uygulamaIci';
 import { t } from '@/i18n';
 import { renk, yazi } from '@/theme';
 
@@ -32,6 +32,7 @@ type Props = {
 export function DavetKarti({ davet, kapak, genislik, onHayir, onKatil, katiliyor }: Props) {
   const alt = davetAlt(davet);
   const yuzler = davet.kisiler.slice(0, YUZ_SAYISI);
+  const ipucu = dugmeIpuclari(davet);
   return (
     <View style={[s.kart, { width: genislik }]} testID={`davet-karti-${davet.id}`}>
       {kapak ? (
@@ -61,18 +62,19 @@ export function DavetKarti({ davet, kapak, genislik, onHayir, onKatil, katiliyor
         <View style={s.altSira}>
           <View style={s.yuzler} accessible={false} importantForAccessibility="no-hide-descendants" accessibilityElementsHidden>
             {yuzler.map((k, i) => (
-              <View key={k.id} style={[s.yuzKenar, i > 0 && s.yuzBinme]}>
+              <View key={k.sira} style={[s.yuzKenar, i > 0 && s.yuzBinme]}>
                 <Avatar ad={k.ad ?? '?'} url={k.foto} boyut={32} arkaPlan={YUZ_RENKLERI[i % YUZ_RENKLERI.length]} yuvarlak harfBoyutu={12} />
               </View>
             ))}
           </View>
           <View style={s.dugmeler}>
-            <Pressable accessibilityRole="button" accessibilityLabel={t('davet.kutu.hayir')} onPress={onHayir} disabled={katiliyor} style={({ pressed }) => [s.hayir, pressed && s.basili]} testID="davet-hayir">
+            <Pressable accessibilityRole="button" accessibilityLabel={t('davet.kutu.hayir')} accessibilityHint={ipucu.hayir} accessibilityState={{ disabled: !!katiliyor }} onPress={onHayir} disabled={katiliyor} style={({ pressed }) => [s.hayir, pressed && s.basili]} testID="davet-hayir">
               <Text style={s.hayirMetin}>{t('davet.kutu.hayir')}</Text>
             </Pressable>
             <Pressable
               accessibilityRole="button"
               accessibilityLabel={t('davet.kutu.katil')}
+              accessibilityHint={ipucu.katil}
               accessibilityState={{ busy: !!katiliyor, disabled: !!katiliyor }}
               onPress={onKatil}
               disabled={katiliyor}

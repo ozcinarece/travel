@@ -1,10 +1,10 @@
 // #573 Uygulama içi davet: Davetler kutusu (UX önerileri kanvası, "Uygulama içi davet (#573)"; not `nDavet1`).
-// Sunucu: `supabase/migrations/20261214000000_seyahat_davetleri.sql`. Yazma yalnız `security definer` fonksiyonlarla (istemci
+// Sunucu: `supabase/migrations/20261214100000_seyahat_davetleri.sql`. Yazma yalnız `security definer` fonksiyonlarla (istemci
 // tabloya doğrudan yazamaz); gelen kutusu `davetlerim()`, davet edenin durum listesi tablodan (RLS: yalnız kendi satırları).
 // Bildirim yok (KK6): davet yalnız uygulama açılınca (ya da yenileyince) görünür.
 // Google'a istek yok.
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import { router } from 'expo-router';
 import { AppState } from 'react-native';
 
@@ -17,7 +17,8 @@ import type { DavetKatilim } from '@/lib/tipler';
 
 import { davetSeyahatAdi, yonelmeEki } from './katilim';
 
-export type DavetKisi = { id: string; ad: string | null; foto: string | null };
+/** Seyahatin bir üyesi; kullanıcı kimliği yerine sıra numarası (yalnız liste anahtarı). */
+export type DavetKisi = { sira: number; ad: string | null; foto: string | null };
 
 /** `davetlerim()` satırı: bana gelen bekleyen davet. */
 export type GelenDavet = {
@@ -73,9 +74,14 @@ export function gezilerimBasligi(d: Pick<GelenDavet, 'davet_eden_ad' | 'ad' | 's
   return t('davet.kutu.baslik', { ad: davetEden(d), yerEk: adaYonelme(davetSeyahatAdi({ name: d.ad, city_label: d.sehir })) });
 }
 
-/** KK8: ekran okuyucu "Davet: {Ad} seni {şehir}'e çağırıyor". */
-export function davetEtiketi(d: Pick<GelenDavet, 'davet_eden_ad' | 'sehir'>): string {
-  return t('davet.kutu.etiket', { baslik: anaSayfaBasligi(d) });
+/** KK8: ekran okuyucu "Davet: {görünen başlık}" — ana sayfada "Davet: {Ad} seni {şehir}'e çağırıyor". */
+export function davetEtiketi(d: Pick<GelenDavet, 'davet_eden_ad' | 'sehir'>, baslik: string = anaSayfaBasligi(d)): string {
+  return t('davet.kutu.etiket', { baslik });
+}
+
+/** #573 inceleme 9: Hayır / Katıl düğmelerinin bağlamı (şehir). */
+export function dugmeIpuclari(d: Pick<GelenDavet, 'sehir'>): { hayir: string; katil: string } {
+  return { hayir: t('davet.kutu.hayirIpucu', { sehir: d.sehir }), katil: t('davet.kutu.katilIpucu', { sehir: d.sehir }) };
 }
 
 /** KK2: "{tarih} · {n} gün"; tarih yoksa yalnız gün. Gün sayısı yoksa (0) yalnız tarih; ikisi de yoksa boş. */
@@ -136,6 +142,15 @@ export function durumMetni(d: DavetDurumu): string {
 /** KK2 · KK3: bekleyen davetlerim. Misafir oturumda sorulmaz (sunucu da boş döner). */
 export function useDavetlerim() {
   const { hesapli } = useOturum();
+  const qc = useQueryClient();
+  // KK6: bildirim yok; uygulama arka plandan dönünce kutu yeniden okunur (yeni davet görünür).
+  useEffect(() => {
+    if (!hesapli) return;
+    const abonelik = AppState.addEventListener('change', (durum) => {
+      if (durum === 'active') qc.invalidateQueries({ queryKey: DAVETLERIM });
+    });
+    return () => abonelik.remove();
+  }, [hesapli, qc]);
   return useQuery({
     queryKey: DAVETLERIM,
     enabled: hesapli,
@@ -207,16 +222,40 @@ export function useDaveteKatil() {
   });
 }
 
+// #573 inceleme 10: reddi bekleyen davet kimlikleri ekranlar arası ortak (modül düzeyi). Ana sayfada "Hayır"a basılıp 5 sn
+// içinde Gezilerim'de kutu yeniden okunsa da satır orada da görünmez.
+let reddiBekleyenler: readonly string[] = [];
+const dinleyiciler = new Set<() => void>();
+function reddiBekleyenleriDegistir(f: (eski: readonly string[]) => readonly string[]) {
+  reddiBekleyenler = f(reddiBekleyenler);
+  dinleyiciler.forEach((d) => d());
+}
+function abone(d: () => void) {
+  dinleyiciler.add(d);
+  return () => {
+    dinleyiciler.delete(d);
+  };
+}
+/** Reddi bekleyen (Geri al süresindeki) davet kimlikleri; bütün ekranlar aynı listeyi görür. */
+export function useReddiBekleyenler(): readonly string[] {
+  return useSyncExternalStore(abone, () => reddiBekleyenler, () => reddiBekleyenler);
+}
+
 /**
- * KK4 · Hayır: satır hemen kalkar (kutu önbelleğinden çıkar; ana sayfa ve Gezilerim ikisi de görür), altta 5 sn "Daveti geri
- * çevirdin · Geri al". "Geri al" satırı geri koyar, sunucuya bir şey gitmez. Bant kapanınca (5 sn, ekrandan çıkış ya da uygulama
- * arka plana gidince) `daveti_reddet` çağrılır; davet edene bildirim gitmez. Aynı anda tek bekleyen; ikinci "Hayır" öncekini
- * hemen kesinleştirir. Hata olursa kutu yeniden okunur (davet geri gelir).
+ * KK4 · Hayır: satır hemen kalkar (kutu önbelleğinden çıkar ve ortak "reddi bekleyen" listesine girer; ana sayfa ve Gezilerim
+ * ikisi de görür), altta 5 sn "Daveti geri çevirdin · Geri al". "Geri al" satırı geri koyar, sunucuya bir şey gitmez. Bant
+ * kapanınca (5 sn, ekrandan çıkış ya da uygulama arka plana gidince) `daveti_reddet` çağrılır; davet edene bildirim gitmez. Aynı
+ * anda tek bekleyen; ikinci "Hayır" öncekini hemen kesinleştirir. Hata olursa kutu yeniden okunur (davet geri gelir) ve bir kez
+ * `onHata` (ekranın kısa bildirimi).
  */
-export function useDavetGeriCevir() {
+export function useDavetGeriCevir(onHata?: () => void) {
   const qc = useQueryClient();
   const [bekleyen, setBekleyen] = useState<GelenDavet | null>(null);
   const ref = useRef<{ davet: GelenDavet; zaman: ReturnType<typeof setTimeout> } | null>(null);
+  const onHataRef = useRef(onHata);
+  useEffect(() => {
+    onHataRef.current = onHata;
+  });
 
   const kesinlestir = useCallback(() => {
     const b = ref.current;
@@ -226,17 +265,23 @@ export function useDavetGeriCevir() {
     setBekleyen(null);
     // Bant sürerken kutu yeniden okunduysa satır önbelleğe geri gelmiş olabilir: kesinleşince yine çıkar.
     qc.setQueryData<GelenDavet[]>(DAVETLERIM, (eski) => eski?.filter((d) => d.id !== b.davet.id));
+    const bitti = (hata: boolean) => {
+      reddiBekleyenleriDegistir((l) => l.filter((id) => id !== b.davet.id));
+      if (hata) {
+        qc.invalidateQueries({ queryKey: DAVETLERIM });
+        onHataRef.current?.();
+      }
+    };
     supabase.rpc('daveti_reddet', { p_davet: b.davet.id }).then(
-      ({ error }) => {
-        if (error) qc.invalidateQueries({ queryKey: DAVETLERIM });
-      },
-      () => qc.invalidateQueries({ queryKey: DAVETLERIM }),
+      ({ error }) => bitti(!!error),
+      () => bitti(true),
     );
   }, [qc]);
 
   const reddet = useCallback(
     (davet: GelenDavet) => {
       kesinlestir();
+      reddiBekleyenleriDegistir((l) => [...l.filter((id) => id !== davet.id), davet.id]);
       qc.setQueryData<GelenDavet[]>(DAVETLERIM, (eski) => eski?.filter((d) => d.id !== davet.id));
       ref.current = { davet, zaman: setTimeout(kesinlestir, GERI_CEVIR_MS) };
       setBekleyen(davet);
@@ -250,6 +295,7 @@ export function useDavetGeriCevir() {
     clearTimeout(b.zaman);
     ref.current = null;
     setBekleyen(null);
+    reddiBekleyenleriDegistir((l) => l.filter((id) => id !== b.davet.id));
     qc.setQueryData<GelenDavet[]>(DAVETLERIM, (eski) => {
       const liste = (eski ?? []).filter((d) => d.id !== b.davet.id);
       return [...liste, b.davet].sort((x, y) => y.olusturuldu.localeCompare(x.olusturuldu));
@@ -270,23 +316,23 @@ export function useDavetGeriCevir() {
 /**
  * KK2 · KK3 · KK4: ana sayfa ve Gezilerim'in ortak davet eylemleri. `davetler` geri alınabilir "Hayır" bekleyenini içermez
  * (bu sürede kutu yeniden okunsa da satır geri gelmez). Katıl: üyelik, sonra seyahatin içi (Gezi) 3c "Katıldın" çekmecesiyle
- * (`katildin: '1'`, davet linkiyle aynı). Davet artık geçerli değilse (P0002) satır kalkar ve kısa bildirim; ağ hatasında
+ * (`katildin: '1'`, davet linkiyle aynı; başlıktaki ad davet edenin adı: `davetEden`). Davet artık geçerli değilse (P0002) satır kalkar ve kısa bildirim; ağ hatasında
  * #137'nin hata metni.
  */
 export function useDavetEylemleri(onBildirim: (metin: string) => void) {
   const liste = useDavetlerim();
   const katil = useDaveteKatil();
-  const geriCevir = useDavetGeriCevir();
+  const geriCevir = useDavetGeriCevir(() => onBildirim(t('kesfetAkisi.guncellenemedi')));
+  const reddiBekleyenler = useReddiBekleyenler();
   const [katilan, setKatilan] = useState<string | null>(null);
-  const bekleyenId = geriCevir.bekleyen?.id;
-  const davetler = (liste.data ?? []).filter((d) => d.id !== bekleyenId);
+  const davetler = (liste.data ?? []).filter((d) => !reddiBekleyenler.includes(d.id));
   const katilVer = useCallback(
     async (d: GelenDavet) => {
       if (katilan) return;
       setKatilan(d.id);
       try {
         const sonuc = await katil.mutateAsync(d.id);
-        router.push({ pathname: '/seyahat/[id]/(sekmeler)/gezi', params: { id: sonuc.trip_id, katildin: '1' } });
+        router.push({ pathname: '/seyahat/[id]/(sekmeler)/gezi', params: { id: sonuc.trip_id, katildin: '1', davetEden: d.davet_eden_ad ?? '' } });
       } catch (e) {
         onBildirim((e as { code?: string } | null)?.code === 'P0002' ? t('davet.kutu.gecersiz') : t('davet.hata'));
       } finally {

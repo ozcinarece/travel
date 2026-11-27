@@ -9,6 +9,7 @@ import type { GelenDavet } from '@/features/davet/uygulamaIci';
 
 import { DavetGonderildi } from '../DavetGonderildi';
 import { DavetKarti } from '../DavetKarti';
+import { KatilimSayfasi } from '../KatilimSayfasi';
 import { DavetlerBolumu } from '../DavetlerBolumu';
 
 jest.mock('@/lib/supabase', () => ({ supabase: {} }));
@@ -25,8 +26,8 @@ const urla: GelenDavet = {
   end_date: '2026-12-06',
   gun_sayisi: 2,
   kisiler: [
-    { id: 'a', ad: 'Ayşe', foto: null },
-    { id: 'm', ad: 'Mert', foto: null },
+    { sira: 1, ad: 'Ayşe', foto: null },
+    { sira: 2, ad: 'Mert', foto: null },
   ],
   olusturuldu: '2026-11-27T12:00:00Z',
 };
@@ -81,6 +82,12 @@ describe('KK2 · DavetKarti (Davet_v1_AnaSayfa)', () => {
     expect(onHayir).toHaveBeenCalledTimes(1);
     expect(onKatil).toHaveBeenCalledTimes(1);
   });
+  it('#573 inceleme 9: bağlam ipuçları; katılırken Hayır da devre dışı (ekran okuyucuya söylenir)', () => {
+    const ekran = render(<DavetKarti davet={urla} kapak={null} genislik={318} onHayir={() => {}} onKatil={() => {}} katiliyor />);
+    expect(ekran.getByTestId('davet-hayir').props.accessibilityHint).toBe('Urla davetini geri çevirir');
+    expect(ekran.getByTestId('davet-hayir').props.accessibilityState).toEqual(expect.objectContaining({ disabled: true }));
+    expect(ekran.getByTestId('davet-katil').props.accessibilityState).toEqual(expect.objectContaining({ disabled: true, busy: true }));
+  });
   it('tarih yoksa yalnız gün', () => {
     const ekran = render(<DavetKarti davet={{ ...urla, start_date: null, end_date: null }} kapak={null} genislik={318} onHayir={() => {}} onKatil={() => {}} />);
     expect(ekran.getByText('2 gün')).toBeTruthy();
@@ -103,8 +110,10 @@ describe('KK3 · DavetlerBolumu (Davet_v1_Gezilerim)', () => {
     expect(kutu.borderRadius).toBe(18);
     expect(kutu.padding).toBe(14);
     const baslik = ekran.getByText('Ayşe seni Urla bağ rotasına çağırıyor');
-    expect(baslik.props.accessibilityLabel).toBe("Davet: Ayşe seni Urla'ya çağırıyor");
+    expect(baslik.props.accessibilityLabel).toBe('Davet: Ayşe seni Urla bağ rotasına çağırıyor');
     expect(ekran.getByText('5–6 Aralık · 2 gün · Mert de geliyor')).toBeTruthy();
+    expect(ekran.getByTestId('davet-hayir').props.accessibilityHint).toBe('Urla davetini geri çevirir');
+    expect(ekran.getByTestId('davet-katil').props.accessibilityHint).toBe('Urla gezisine katılırsın');
     expect(dugmeStili(ekran.getByTestId('davet-hayir')).height).toBe(44);
     expect(dugmeStili(ekran.getByTestId('davet-katil')).height).toBe(44);
     expect(dugmeStili(ekran.getByTestId('davet-katil')).backgroundColor).toBe('#ff7a1a');
@@ -153,5 +162,18 @@ describe('KK5 · DavetGonderildi (Davet_v1_Gonderildi) — #574 bağlayacak', ()
     fireEvent.press(ekran.getByText('Linki de paylaş'));
     expect(onGeziyeGit).toHaveBeenCalledTimes(1);
     expect(onLinkiPaylas).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('#573 inceleme 2 · KatilimSayfasi: davet edenin adı', () => {
+  const uyeler = [
+    { trip_id: 't1', user_id: 'o', display_name: 'Okan', role: 'owner', guest: false, joined_at: '', photo_url: null },
+    { trip_id: 't1', user_id: 'a', display_name: 'Ayşe', role: 'member', guest: false, joined_at: '', photo_url: null },
+  ] as never;
+  it('uygulama içi davette ad davet edenden; verilmezse sahipten (davet linki)', () => {
+    const ekran = render(<KatilimSayfasi acik seyahat={{ name: null, city_label: 'Urla' }} uyeler={uyeler} davetEden="Ayşe" gunSayisi={2} mekanSayisi={0} onProgram={() => {}} onMekanEkle={() => {}} />);
+    expect(ekran.getByText("Ayşe seni Urla'ya ekledi")).toBeTruthy();
+    const link = render(<KatilimSayfasi acik seyahat={{ name: null, city_label: 'Urla' }} uyeler={uyeler} gunSayisi={2} mekanSayisi={0} onProgram={() => {}} onMekanEkle={() => {}} />);
+    expect(link.getByText("Okan seni Urla'ya ekledi")).toBeTruthy();
   });
 });
