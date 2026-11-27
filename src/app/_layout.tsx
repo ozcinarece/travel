@@ -105,6 +105,10 @@ function Kok() {
         <Stack.Screen name="yerler" />
         {/* #138: Profil › Düzenle. */}
         <Stack.Screen name="profil-duzenle" />
+        {/* #578: arkadaşın profili (Profil v12), Profil › Düzenle (ayarlar) ve Lisanslar. */}
+        <Stack.Screen name="kisi/[id]" />
+        <Stack.Screen name="ayarlar" />
+        <Stack.Screen name="lisanslar" />
       </Stack.Protected>
       <Stack.Screen name="r/[token]" />
       {/* #432 2/3b: paylaşılan gezi (girişsiz de açılır). */}

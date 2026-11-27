@@ -4467,4 +4467,171 @@ delete from public.olaylar where user_id in (:FA, :FB, :FC, :FD, :FG);
 delete from auth.users where id in (:FA, :FB, :FC, :FD, :FG);
 do $$ begin assert (select count(*) from public.paylasim_begeni) = 0, '#407: hesap silinince beğeniler de silinir'; end $$;
 
+-- #578 Profil v12: il il harita (KK3), gitmek istenen iller ve RLS'si (KK4), rozetler (KK5), gizlilik (KK6).
+-- PA (Ece) ile PB (Deniz) birlikte gezdi; PC kimseyle gezmedi; PG misafir.
+\set PA '''57800000-0000-4000-8000-0000000000a1'''
+\set PB '''57800000-0000-4000-8000-0000000000b2'''
+\set PC '''57800000-0000-4000-8000-0000000000c3'''
+\set PG '''57800000-0000-4000-8000-0000000000e5'''
+reset role;
+-- KK3: 81 il merkezi kendi ilinde bulunur (koordinat → harita izdüşümü → il sınırı içinde-mi).
+do $$
+declare
+  r record;
+  yanlis text := '';
+begin
+  for r in select * from (values
+    (1,37.00,35.32),(2,37.76,38.28),(3,38.76,30.54),(4,39.72,43.05),(5,40.65,35.83),(6,39.93,32.86),(7,36.89,30.71),(8,41.18,41.82),
+    (9,37.85,27.85),(10,39.65,27.88),(11,40.14,29.98),(12,38.88,40.50),(13,38.40,42.11),(14,40.74,31.61),(15,37.72,30.29),
+    (16,40.19,29.06),(17,40.15,26.41),(18,40.60,33.62),(19,40.55,34.95),(20,37.78,29.09),(21,37.91,40.24),(22,41.68,26.56),
+    (23,38.68,39.22),(24,39.75,39.49),(25,39.90,41.27),(26,39.78,30.52),(27,37.07,37.38),(28,40.91,38.39),(29,40.46,39.48),
+    (30,37.58,43.74),(31,36.20,36.16),(32,37.76,30.55),(33,36.80,34.63),(34,41.01,28.98),(35,38.42,27.14),(36,40.60,43.10),
+    (37,41.38,33.78),(38,38.73,35.48),(39,41.73,27.22),(40,39.15,34.16),(41,40.77,29.92),(42,37.87,32.48),(43,39.42,29.98),
+    (44,38.35,38.31),(45,38.61,27.43),(46,37.58,36.94),(47,37.31,40.74),(48,37.22,28.36),(49,38.75,41.49),(50,38.62,34.71),
+    (51,37.97,34.68),(52,40.98,37.88),(53,41.02,40.52),(54,40.78,30.40),(55,41.29,36.33),(56,37.93,41.94),(57,42.03,35.15),
+    (58,39.75,37.02),(59,40.98,27.51),(60,40.31,36.55),(61,41.00,39.72),(62,39.11,39.55),(63,37.16,38.79),(64,38.68,29.41),
+    (65,38.49,43.38),(66,39.82,34.81),(67,41.45,31.79),(68,38.37,34.03),(69,40.26,40.23),(70,37.18,33.22),(71,39.85,33.51),
+    (72,37.89,41.13),(73,37.52,42.46),(74,41.63,32.34),(75,41.11,42.70),(76,39.92,44.04),(77,40.65,29.27),(78,41.20,32.62),
+    (79,36.72,37.12),(80,37.07,36.25),(81,40.84,31.16)) v (plaka, lat, lng)
+  loop
+    if public.il_bul(r.lat, r.lng) is distinct from r.plaka then
+      yanlis := yanlis || format(' %s→%s', r.plaka, public.il_bul(r.lat, r.lng));
+    end if;
+  end loop;
+  assert yanlis = '', '#578 KK3: il merkezi başka ilde:' || yanlis;
+  assert (select count(*) from public.iller) = 81 and (select count(distinct plaka) from public.il_sinirlari) = 81, '#578 KK2: 81 il';
+  -- Kıyı, ada ve göl: Boğaz'ın iki yakası, Büyükada, Bozcaada (haritada çizili değil, en yakın il), Akdamar, Eğirdir.
+  assert public.il_bul(41.005, 28.977) = 34 and public.il_bul(40.990, 29.029) = 34 and public.il_bul(40.858, 29.120) = 34, '#578 KK3: İstanbul';
+  assert public.il_bul(39.920, 32.854) = 6 and public.il_bul(38.419, 27.128) = 35 and public.il_bul(38.501, 43.373) = 65, '#578 KK3: Ankara, İzmir, Van';
+  assert public.il_bul(39.834, 26.070) = 17 and public.il_bul(38.341, 43.034) = 65 and public.il_bul(37.874, 30.850) = 32, '#578 KK3: ada ve göl';
+  assert public.il_bul(36.737, 27.687) = 48 and public.il_bul(38.643, 34.829) = 50, '#578 KK3: Datça, Göreme';
+  assert public.il_bul(41.9, 12.49) is null and public.il_bul(37.98, 23.73) is null and public.il_bul(null, null) is null, '#578 KK3: yurt dışı ve boş koordinat';
+  assert public.il_adi_sade('Hakkâri, Türkiye') = 'hakkari' and public.il_adi_sade('IĞDIR') = 'igdir', '#578 KK3: il adı sadeleşir';
+end $$;
+
+insert into auth.users (id, is_anonymous) values (:PA, false), (:PB, false), (:PC, false), (:PG, true);
+insert into public.profiles (id, name, username, photo_url) values
+  (:PA, 'Ece Özçınar', 'ece578', 'https://lh3.googleusercontent.com/a/ece578'), (:PB, 'Deniz Kaya', 'deniz578', null),
+  (:PC, 'Can', 'can578', null);
+-- T1 Bolu (PA kurdu, PB katıldı), bitti; T2 Kapadokya (PB kurdu, PA katıldı), yaklaşıyor; T3 PB yalnız, bitti, şehrin
+-- koordinatı boşalmış (Hakkâri); T4 PB yalnız, bitti, Roma (yurt dışı); T5–T6 PB ile PA, bitti (Ekip ve Plancı için);
+-- T7 PB yalnız, tarihsiz taslak.
+insert into public.trips (id, owner_id, city_place_id, city_label, country_code, lat, lng, tz, start_date, end_date) values
+  ('57800000-0000-4000-8000-000000000001', :PA, 'ChIJ-bolu-578', 'Bolu', 'TR', 40.735, 31.608, 'Europe/Istanbul', current_date - 40, current_date - 39),
+  ('57800000-0000-4000-8000-000000000002', :PB, 'ChIJ-kapadokya-578', 'Kapadokya', 'TR', 38.643, 34.829, 'Europe/Istanbul', current_date + 10, current_date + 11),
+  ('57800000-0000-4000-8000-000000000003', :PB, 'ChIJ-hakkari-578', 'Hakkâri', 'TR', null, null, 'Europe/Istanbul', current_date - 90, current_date - 88),
+  ('57800000-0000-4000-8000-000000000004', :PB, 'ChIJ-roma-578', 'Roma', 'IT', 41.9, 12.49, 'Europe/Rome', current_date - 200, current_date - 198),
+  ('57800000-0000-4000-8000-000000000005', :PB, 'ChIJ-izmir-578', 'İzmir', 'TR', 38.419, 27.128, 'Europe/Istanbul', current_date - 300, current_date - 299),
+  ('57800000-0000-4000-8000-000000000006', :PB, 'ChIJ-datca-578', 'Datça', 'TR', 36.737, 27.687, 'Europe/Istanbul', current_date - 400, current_date - 399);
+insert into public.trips (id, owner_id, city_place_id, city_label, country_code, lat, lng, tz) values
+  ('57800000-0000-4000-8000-000000000007', :PB, 'ChIJ-van-578', 'Van', 'TR', 38.501, 43.373, 'Europe/Istanbul');
+insert into public.members (trip_id, user_id, display_name) values
+  ('57800000-0000-4000-8000-000000000001', :PB, 'Deniz Kaya'), ('57800000-0000-4000-8000-000000000002', :PA, 'Ece'),
+  ('57800000-0000-4000-8000-000000000005', :PA, 'Ece'), ('57800000-0000-4000-8000-000000000006', :PA, 'Ece');
+-- T1'in durakları: Ankara (gezildi), Van (atlandı), koordinatı boşalmış yer; T2'de (yaklaşan) Muğla durağı sayılmaz.
+insert into public.places (id, trip_id, place_id, lat, lng) values
+  ('57800000-0000-4000-8000-0000000000f1', '57800000-0000-4000-8000-000000000001', 'ChIJ-578-ankara', 39.92, 32.854),
+  ('57800000-0000-4000-8000-0000000000f2', '57800000-0000-4000-8000-000000000001', 'ChIJ-578-van', 38.501, 43.373),
+  ('57800000-0000-4000-8000-0000000000f3', '57800000-0000-4000-8000-000000000001', 'ChIJ-578-bos', null, null),
+  ('57800000-0000-4000-8000-0000000000f4', '57800000-0000-4000-8000-000000000002', 'ChIJ-578-mugla', 37.035, 27.430),
+  ('57800000-0000-4000-8000-0000000000f5', '57800000-0000-4000-8000-000000000005', 'ChIJ-578-yemek2', 38.42, 27.13),
+  ('57800000-0000-4000-8000-0000000000f6', '57800000-0000-4000-8000-000000000006', 'ChIJ-578-yemek3', 36.74, 27.69);
+insert into public.stops (trip_id, day_id, place_ref, order_key, minutes, skipped)
+select p.trip_id, (select d.id from public.days d where d.trip_id = p.trip_id order by d.index limit 1), p.id, 'a' || right(p.id::text, 1), 60,
+  p.id = '57800000-0000-4000-8000-0000000000f2'
+from public.places p where p.id::text like '57800000-0000-4000-8000-0000000000f%';
+-- Lezzet: üç gezilen yer il listesinde "yemek" (biri gizli satırda da olsa görünür satırı sayılır); Van atlandığı için sayılmaz.
+insert into public.il_listeleri (il_slug, il) values ('il-578', 'Deneme');
+insert into public.il_oneriler (il_slug, sira, ad, kategori, place_id, gorunur) values
+  ('il-578', 1, 'A', 'yemek', 'ChIJ-578-ankara', true), ('il-578', 2, 'B', 'tatli_kahve', 'ChIJ-578-yemek2', true),
+  ('il-578', 3, 'C', 'yemek', 'ChIJ-578-yemek3', true), ('il-578', 4, 'D', 'doga', 'ChIJ-578-van', true),
+  ('il-578', 5, 'E', 'muze', 'ChIJ-578-yemek3', false);
+
+set role authenticated;
+-- KK4: sahibi yazar; arkadaşı okur; başkası ve misafir göremez, yazamaz.
+select pg_temp.as_user(:PA);
+insert into public.istek_iller (plaka) values (36), (48);
+select pg_temp.hata_bekle($$insert into public.istek_iller (user_id, plaka) values ('57800000-0000-4000-8000-0000000000b2', 61)$$, '42501');
+select pg_temp.hata_bekle($$insert into public.istek_iller (plaka) values (99)$$, '23503');
+select pg_temp.hata_bekle($$insert into public.istek_iller (plaka) values (36)$$, '23505');
+select pg_temp.hata_bekle($$update public.istek_iller set plaka = 1$$, '42501');
+select pg_temp.as_user(:PB);
+insert into public.istek_iller (plaka) values (61), (48);
+do $$
+begin
+  assert (select array_agg(plaka order by plaka) from public.istek_iller where user_id = '57800000-0000-4000-8000-0000000000a1') = array[36, 48]::smallint[], '#578 KK4: arkadaş okur';
+end $$;
+delete from public.istek_iller where user_id = '57800000-0000-4000-8000-0000000000a1';
+select pg_temp.as_user(:PC);
+do $$ begin assert (select count(*) from public.istek_iller) = 0, '#578 KK4: birlikte gezmeyen okuyamaz'; end $$;
+select pg_temp.hata_bekle($$insert into public.istek_iller (user_id, plaka) values ('57800000-0000-4000-8000-0000000000a1', 1)$$, '42501');
+select pg_temp.as_user(:PG, true);
+select pg_temp.hata_bekle($$insert into public.istek_iller (plaka) values (1)$$, '42501');
+select pg_temp.as_user(:PA);
+do $$ begin assert (select count(*) from public.istek_iller where user_id = auth.uid()) = 2, '#578 KK4: arkadaş başkasınınkini silemez'; end $$;
+select pg_temp.hata_bekle($$select * from public.gidilen_iller$$, '42501');
+select pg_temp.hata_bekle($$select * from public.profil_rozetleri$$, '42501');
+select pg_temp.hata_bekle($$select * from public.il_sinirlari$$, '42501');
+do $$ begin assert (select count(*) from public.iller) = 81, '#578: il listesi herkese açık'; end $$;
+
+-- KK3, KK5, KK6: PA, PB'nin profiline bakar.
+do $$
+declare
+  o jsonb := public.profil_ozeti('57800000-0000-4000-8000-0000000000b2');
+begin
+  assert o ->> 'ad' = 'Deniz Kaya' and not (o ->> 'kendi')::boolean and (o ->> 'harita_acik')::boolean, '#578: arkadaşın profili: ' || o::text;
+  assert o -> 'gizlilik' = 'null'::jsonb, '#578 KK6: arkadaşın gizlilik ayarı dönmez';
+  -- Bolu (şehir), Ankara (gezilen durak), Hakkâri (koordinatsız şehir, adıyla), İzmir, Muğla (Datça). Van atlandı, Kapadokya
+  -- yaklaşıyor, Roma yurt dışı, koordinatı boş durak sayılmaz.
+  assert o -> 'gidilen' = '[6, 14, 30, 35, 48]'::jsonb, '#578 KK3: gittiği iller: ' || (o -> 'gidilen')::text;
+  assert o -> 'istek' = '[48, 61]'::jsonb or o -> 'istek' = '[61, 48]'::jsonb, '#578 KK4: istek';
+  assert o -> 'benim_istek' = '[36, 48]'::jsonb, '#578 KK4: ortak iller için benim isteklerim';
+  assert (o ->> 'yol_arkadasi')::integer = 1, '#578: yol arkadaşı';
+  -- KK6: yalnız bitmiş geziler (Kapadokya ve tarihsiz Van yok); yeniden eskiye.
+  assert (select array_agg(g ->> 'sehir' order by i) from jsonb_array_elements(o -> 'geziler') with ordinality x (g, i)) = array['Bolu', 'Hakkâri', 'Roma', 'İzmir', 'Datça'],
+    '#578 KK6: arkadaşın yalnız geçmiş gezileri: ' || (o -> 'geziler')::text;
+  assert (o -> 'geziler' -> 0 -> 'kisiler') = '[{"harf": "E", "foto": "https://lh3.googleusercontent.com/a/ece578"}]'::jsonb, '#578: gezideki diğer kişi: ' || (o -> 'geziler' -> 0 -> 'kisiler')::text;
+  assert (o -> 'geziler' -> 0 ->> 'uyesiyim')::boolean and not (o -> 'geziler' -> 1 ->> 'uyesiyim')::boolean, '#578: izleyen üyesi mi';
+  -- KK5: Lezzet 3 (Ankara, İzmir, Datça; gizli müze satırı sayılmaz), Ekip 3 (PA ile Bolu, İzmir, Datça), Plancı 3 (PA'nın
+  -- katıldığı Kapadokya, İzmir, Datça). Kazanılmamış Doğa ve Kültür arkadaşa dönmez.
+  assert o -> 'rozetler' = '{"lezzet": 3, "ekip": 3, "planci": 3}'::jsonb, '#578 KK5: rozetler: ' || (o -> 'rozetler')::text;
+end $$;
+-- Kendi profilinde: yaklaşan gezi de var, kazanılmamış rozetin sayısı da döner, gizlilik ayarı döner.
+select pg_temp.as_user(:PB);
+do $$
+declare
+  o jsonb := public.profil_ozeti('57800000-0000-4000-8000-0000000000b2');
+begin
+  assert (o ->> 'kendi')::boolean and o ->> 'gizlilik' = 'friends' and o -> 'benim_istek' = 'null'::jsonb, '#578: kendi profilin';
+  assert o -> 'geziler' -> 0 ->> 'sehir' = 'Kapadokya' and jsonb_array_length(o -> 'geziler') = 6, '#578: kendi profilinde yaklaşan gezi önde';
+  assert o -> 'rozetler' = '{"lezzet": 3, "doga": 0, "kultur": 0, "ekip": 3, "planci": 3}'::jsonb, '#578 KK5: kendi rozetlerin: ' || (o -> 'rozetler')::text;
+end $$;
+-- KK6: harita "yalnız ben" → arkadaş haritayı ve gezileri görmez.
+update public.profiles set map_visibility = 'me' where id = auth.uid();
+select pg_temp.as_user(:PA);
+do $$
+declare
+  o jsonb := public.profil_ozeti('57800000-0000-4000-8000-0000000000b2');
+begin
+  assert not (o ->> 'harita_acik')::boolean and o -> 'gidilen' = 'null'::jsonb and o -> 'geziler' = '[]'::jsonb, '#578 KK6: gizli harita: ' || o::text;
+end $$;
+-- Birlikte gezmeyen ve misafir profili göremez.
+select pg_temp.as_user(:PC);
+do $$ begin assert public.profil_ozeti('57800000-0000-4000-8000-0000000000b2') is null, '#578: birlikte gezmeyen göremez'; end $$;
+select pg_temp.as_user(:PG, true);
+do $$ begin assert public.profil_ozeti('57800000-0000-4000-8000-0000000000b2') is null, '#578: misafir göremez'; end $$;
+reset role;
+set role anon;
+select pg_temp.as_user(null);
+select pg_temp.hata_bekle($$select public.profil_ozeti('57800000-0000-4000-8000-0000000000b2')$$, '42501');
+select pg_temp.hata_bekle($$select * from public.istek_iller$$, '42501');
+select pg_temp.hata_bekle($$select public.il_bul(41, 29)$$, '42501');
+reset role;
+delete from public.il_oneriler where il_slug = 'il-578';
+delete from public.il_listeleri where il_slug = 'il-578';
+delete from public.trips where id::text like '57800000-0000-4000-8000-00000000000%';
+delete from public.olaylar where user_id in (:PA, :PB, :PC, :PG);
+delete from auth.users where id in (:PA, :PB, :PC, :PG);
+do $$ begin assert (select count(*) from public.istek_iller) = 0, '#578: hesap silinince istekler de silinir'; end $$;
+
 \echo 'rls_test: TÜM TESTLER GEÇTİ'

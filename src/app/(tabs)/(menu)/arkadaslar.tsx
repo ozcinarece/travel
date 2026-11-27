@@ -148,15 +148,21 @@ export default function ArkadaslarEkrani() {
   );
 }
 
+/** #578 KK1: yüze dokununca arkadaşın profili (Profil v12) açılır. */
 function KisiOgesi({ kisi, renk: zemin }: { kisi: Arkadas; renk: string }) {
   const ad = ilkAd(kisi.ad) ?? t('seyahatV7.adsiz');
   return (
-    <View style={s.kisi} accessible accessibilityLabel={ad}>
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={ad}
+      onPress={() => router.push({ pathname: '/kisi/[id]', params: { id: kisi.user_id } })}
+      style={({ pressed }) => [s.kisi, pressed && { opacity: 0.8 }]}
+      testID={`arkadas-kisi-${kisi.user_id}`}>
       <Avatar ad={ad} url={kisi.foto} boyut={56} arkaPlan={zemin} yuvarlak harfBoyutu={20} />
       <Text style={s.kisiAd} numberOfLines={1}>
         {ad}
       </Text>
-    </View>
+    </Pressable>
   );
 }
 
