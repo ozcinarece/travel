@@ -15,7 +15,7 @@ jest.mock('expo-router', () => ({
 let mockOzet: ProfilOzeti | null = null;
 jest.mock('@/lib/supabase', () => ({
   supabase: {
-    rpc: jest.fn(async () => ({ data: mockOzet, error: null })),
+    rpc: jest.fn(async () => (mockHata ? { data: null, error: new Error('ağ') } : { data: mockOzet, error: null })),
     from: jest.fn(),
     functions: { invoke: jest.fn() },
   },
@@ -23,6 +23,8 @@ jest.mock('@/lib/supabase', () => ({
 jest.mock('@/features/icerik/sorgular', () => ({ useSehirler: () => ({ data: [{ id: 'sehir-mugla', ad: 'Muğla' }] }) }));
 jest.mock('@/features/profil/sorgular', () => ({ useProfilGuncelle: () => ({ mutate: jest.fn() }) }));
 jest.mock('@/lib/baglanti', () => ({ useCevrimdisi: () => false }));
+jest.mock('@/lib/oturum', () => ({ useOturum: () => ({ session: { user: { id: 'ece' } } }) }));
+let mockHata = false;
 jest.mock('@/components/paylasim/PaylasimCekmecesi', () => ({ PaylasimCekmecesi: () => null }));
 
 const { router: mockRouter } = jest.requireMock<{ router: Record<'push' | 'navigate', jest.Mock> }>('expo-router');
@@ -41,8 +43,8 @@ const gezi = (p: Partial<ProfilGezisi>): ProfilGezisi => ({
   bitti: true,
   uyesiyim: false,
   kisiler: [
-    { harf: 'E', foto: null },
-    { harf: 'M', foto: null },
+    { harf: 'E', foto: null, renk: 0 },
+    { harf: 'M', foto: null, renk: 1 },
   ],
   ...p,
 });
@@ -59,7 +61,7 @@ const arkadas: ProfilOzeti = {
   benim_istek: [36, 48, 31],
   yol_arkadasi: 6,
   rozetler: { lezzet: 12, doga: 5, ekip: 3, planci: 4 },
-  geziler: [gezi({}), gezi({ id: 'g2', sehir: 'Datça', gun_sayisi: 4, start_date: '2026-10-03', end_date: '2026-10-06', uyesiyim: true, kisiler: [{ harf: 'A', foto: null }] })],
+  geziler: [gezi({}), gezi({ id: 'g2', sehir: 'Datça', gun_sayisi: 4, start_date: '2026-10-03', end_date: '2026-10-06', uyesiyim: true, kisiler: [{ harf: 'A', foto: null, renk: 2 }] })],
 };
 
 const kendi: ProfilOzeti = {
@@ -78,6 +80,7 @@ let istemci: QueryClient | undefined;
 afterEach(() => {
   istemci?.clear();
   mockOzet = null;
+  mockHata = false;
   jest.clearAllMocks();
 });
 
@@ -217,5 +220,38 @@ describe('#578 kendi profilin (`Profil_v12_Kendi`)', () => {
     expect(mockRouter.push.mock.calls.at(-1)?.[0]).not.toHaveProperty('params.arkadas');
     fireEvent.press(e.getByText('Tümü'));
     expect(mockRouter.navigate).toHaveBeenLastCalledWith('/(tabs)/seyahatler');
+  });
+});
+
+describe('#578 inceleme', () => {
+  it('kendi profilin yüklenemezse de "Düzenle" görünür', async () => {
+    mockHata = true;
+    const e = ciz(kendi);
+    await waitFor(() => expect(e.getByText('Profil yüklenemedi.')).toBeTruthy());
+    fireEvent.press(e.getByText('Düzenle'));
+    expect(mockRouter.push).toHaveBeenLastCalledWith('/ayarlar');
+  });
+
+  it('arkadaşın profili yüklenemezse "Düzenle" yok', async () => {
+    mockHata = true;
+    const e = ciz(arkadas);
+    await waitFor(() => expect(e.getByText('Profil yüklenemedi.')).toBeTruthy());
+    expect(e.queryByText('Düzenle')).toBeNull();
+  });
+
+  it('geziler 2 satır ve "Tümü"; arkadaşta Tümü hepsini açar', async () => {
+    const uc = [gezi({ id: 'a' }), gezi({ id: 'b', sehir: 'Datça' }), gezi({ id: 'c', sehir: 'Kars' })];
+    const e = ciz({ ...arkadas, geziler: uc });
+    await waitFor(() => expect(e.getByText('Bolu · 2 gün')).toBeTruthy());
+    expect(e.queryByText('Kars · 2 gün')).toBeNull();
+    fireEvent.press(e.getByText('Tümü'));
+    expect(e.getByText('Kars · 2 gün')).toBeTruthy();
+  });
+
+  it('kendi profilinde de 2 satır', async () => {
+    const e = ciz({ ...kendi, geziler: [gezi({ id: 'a' }), gezi({ id: 'b', sehir: 'Datça' }), gezi({ id: 'c', sehir: 'Kars' })] });
+    await waitFor(() => expect(e.getByText('Bolu · 2 gün')).toBeTruthy());
+    expect(e.queryByText('Kars · 2 gün')).toBeNull();
+    expect(e.getByText('Tümü')).toBeTruthy();
   });
 });

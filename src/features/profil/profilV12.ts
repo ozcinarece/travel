@@ -28,7 +28,7 @@ export type ProfilGezisi = {
   /** İzleyen bu gezinin üyesi mi (arkadaşın gezisinde "Rotayı al" yalnız o zaman). */
   uyesiyim: boolean;
   /** Profil sahibi dışındaki kişiler: baş harf, fotoğraf yalnız izleyenin de birlikte gezdiği kişininki. */
-  kisiler: { harf: string; foto: string | null }[];
+  kisiler: { harf: string; foto: string | null; /** Kişiye bağlı sabit yüz rengi sırası (0–2). */ renk: number }[];
 };
 
 export type RozetSayilari = Partial<Record<RozetAdi, number>>;

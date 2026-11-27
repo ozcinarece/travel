@@ -4567,11 +4567,21 @@ do $$ begin assert (select count(*) from public.istek_iller) = 0, '#578 KK4: bir
 select pg_temp.hata_bekle($$insert into public.istek_iller (user_id, plaka) values ('57800000-0000-4000-8000-0000000000a1', 1)$$, '42501');
 select pg_temp.as_user(:PG, true);
 select pg_temp.hata_bekle($$insert into public.istek_iller (plaka) values (1)$$, '42501');
+reset role;
+-- Misafir, PA ile aynı seyahatte olsa da istekleri okuyamaz.
+insert into public.members (trip_id, user_id, display_name, guest) values ('57800000-0000-4000-8000-000000000001', :PG, 'Misafir', true);
+set role authenticated;
+select pg_temp.as_user(:PG, true);
+do $$ begin assert (select count(*) from public.istek_iller) = 0, '#578 KK4: misafir istekleri okuyamaz'; end $$;
+reset role;
+delete from public.members where trip_id = '57800000-0000-4000-8000-000000000001' and user_id = :PG;
+set role authenticated;
 select pg_temp.as_user(:PA);
 do $$ begin assert (select count(*) from public.istek_iller where user_id = auth.uid()) = 2, '#578 KK4: arkadaş başkasınınkini silemez'; end $$;
 select pg_temp.hata_bekle($$select * from public.gidilen_iller$$, '42501');
 select pg_temp.hata_bekle($$select * from public.profil_rozetleri$$, '42501');
 select pg_temp.hata_bekle($$select * from public.il_sinirlari$$, '42501');
+select pg_temp.hata_bekle($$select public.il_bul(41, 29)$$, '42501');
 do $$ begin assert (select count(*) from public.iller) = 81, '#578: il listesi herkese açık'; end $$;
 
 -- KK3, KK5, KK6: PA, PB'nin profiline bakar.
@@ -4590,7 +4600,11 @@ begin
   -- KK6: yalnız bitmiş geziler (Kapadokya ve tarihsiz Van yok); yeniden eskiye.
   assert (select array_agg(g ->> 'sehir' order by i) from jsonb_array_elements(o -> 'geziler') with ordinality x (g, i)) = array['Bolu', 'Hakkâri', 'Roma', 'İzmir', 'Datça'],
     '#578 KK6: arkadaşın yalnız geçmiş gezileri: ' || (o -> 'geziler')::text;
-  assert (o -> 'geziler' -> 0 -> 'kisiler') = '[{"harf": "E", "foto": "https://lh3.googleusercontent.com/a/ece578"}]'::jsonb, '#578: gezideki diğer kişi: ' || (o -> 'geziler' -> 0 -> 'kisiler')::text;
+  assert (o -> 'geziler' -> 0 -> 'kisiler') - 0 = '[]'::jsonb and (o -> 'geziler' -> 0 -> 'kisiler' -> 0) - 'renk' = '{"harf": "E", "foto": "https://lh3.googleusercontent.com/a/ece578"}'::jsonb,
+    '#578: gezideki diğer kişi: ' || (o -> 'geziler' -> 0 -> 'kisiler')::text;
+  -- Yüz rengi kişiye bağlı: aynı kişi her gezide aynı renkte (0–2).
+  assert (o -> 'geziler' -> 0 -> 'kisiler' -> 0 ->> 'renk')::integer between 0 and 2
+    and (o -> 'geziler' -> 0 -> 'kisiler' -> 0 -> 'renk') = (o -> 'geziler' -> 3 -> 'kisiler' -> 0 -> 'renk'), '#578: yüz rengi kişiye bağlı';
   assert (o -> 'geziler' -> 0 ->> 'uyesiyim')::boolean and not (o -> 'geziler' -> 1 ->> 'uyesiyim')::boolean, '#578: izleyen üyesi mi';
   -- KK5: Lezzet 3 (Ankara, İzmir, Datça; gizli müze satırı sayılmaz), Ekip 3 (PA ile Bolu, İzmir, Datça), Plancı 3 (PA'nın
   -- katıldığı Kapadokya, İzmir, Datça). Kazanılmamış Doğa ve Kültür arkadaşa dönmez.

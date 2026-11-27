@@ -3,8 +3,9 @@
 --
 -- KK3 · gittiği iller kendi verimizden: bitmiş seyahatin şehri ve gezilen durakların ili. İl, saklı koordinattan il sınırı
 --   içinde-mi testiyle bulunur (`il_bul`); koordinatı olmayan durak sayılmaz. Şehrin koordinatı boşaldıysa (gece temizliği,
---   20261210000000) yalnız il adıyla birebir eşleşen şehir etiketi sayılır. Saklanan tek şey il plakasıdır (bizim verimiz);
---   Google'dan gelen yeni bir alan yazılmaz (PRD §7).
+--   20261210000000) yalnız il adıyla birebir eşleşen şehir etiketi sayılır. Hiçbir şey saklanmaz: il her okumada canlı
+--   koordinattan hesaplanır; Google'dan gelen yeni bir alan yazılmaz (PRD §7). Sonuç: gece temizliği 30 günü geçen
+--   koordinatı boşalttığında o durağın ili haritadan düşer (il plakasını saklamak Ürün kararı bekliyor, PR #600).
 --   Sınırlar: `src/assets/turkiye-iller.json` (turkey-map-react 2.4.6, MIT, © 2020 Erdi Gökçe) yollarından
 --   `scripts/il-sinirlari.mjs` ile üretildi; haritanın SVG biriminde (viewBox 0 0 1050 585 civarı). Yollar Lambert konik
 --   konform izdüşümünde çizilmiş: n = 0.5531, merkez boylam 32.8563°, ardından ölçek, dönme ve öteleme (`il_noktasi`).
@@ -206,7 +207,7 @@ $$;
 
 revoke all on function public.il_noktasi(double precision, double precision), public.il_bul(double precision, double precision),
   public.il_adi_sade(text) from public, anon, authenticated;
-grant execute on function public.il_bul(double precision, double precision) to authenticated;
+-- Yalnız bu dosyadaki görünüm ve fonksiyonlar çağırır; istemciye açık değil.
 
 -- ---------------------------------------------------------------- KK4 · gitmek istenen iller
 
@@ -220,9 +221,9 @@ alter table public.istek_iller enable row level security;
 revoke all on public.istek_iller from public, anon, authenticated;
 grant select, delete on public.istek_iller to authenticated;
 grant insert (plaka) on public.istek_iller to authenticated;
--- Sahibi ve birlikte gezdiği kişiler (arkadaşları; `ortak_seyahat_var`, 20261119010000) okur.
+-- Sahibi ve birlikte gezdiği kişiler (arkadaşları; `ortak_seyahat_var`, 20261119010000) okur; misafir oturum okumaz.
 create policy istek_iller_select on public.istek_iller for select to authenticated
-  using (user_id = auth.uid() or public.ortak_seyahat_var(user_id));
+  using (not public.is_anonymous() and (user_id = auth.uid() or public.ortak_seyahat_var(user_id)));
 -- Yalnız sahibi, hesaplı oturumla yazar (misafir oturum yazmaz).
 create policy istek_iller_insert on public.istek_iller for insert to authenticated
   with check (user_id = auth.uid() and not public.is_anonymous());
@@ -348,6 +349,8 @@ begin
           'kisiler', coalesce((
             select jsonb_agg(jsonb_build_object(
                 'harf', left(btrim(o.display_name), 1),
+                -- Yüz rengi kişiye bağlı ve sabit; kimlik dönmez.
+                'renk', (abs(hashtext(o.user_id::text)::bigint) % 3)::integer,
                 'foto', case when o.user_id = ben or public.ortak_seyahat_var(o.user_id) then (
                   select f.photo_url from public.profiles f where f.id = o.user_id) end)
               order by o.joined_at, o.user_id)

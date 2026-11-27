@@ -33,6 +33,7 @@ import { yeniGirisNo } from '@/features/sihirbaz/girisler';
 import { gunFarki } from '@/features/sihirbaz/sihirbaz';
 import { t } from '@/i18n';
 import { useCevrimdisi } from '@/lib/baglanti';
+import { useOturum } from '@/lib/oturum';
 import { ayAdi } from '@/lib/takvim';
 import type { HaritaGizliligi, Sehir } from '@/lib/tipler';
 import { yerelTarih } from '@/lib/zaman';
@@ -55,7 +56,7 @@ export const profilRenk = {
   arkadasHarf: '#0E7A52',
 } as const;
 
-/** Gezideki kişi yüzleri sırası: [zemin, harf] (kanvas: E turuncu, M açık mavi, A lacivert). */
+/** Gezideki kişi yüzleri: [zemin, harf] (kanvas: E turuncu, M açık mavi, A lacivert). Sunucu kişiye bağlı sabit sırayı (`renk`) verir. */
 const YUZLER: readonly (readonly [string, string])[] = [
   [profilRenk.turuncu, profilRenk.metin],
   [profilRenk.istekZemin, profilRenk.lacivert],
@@ -63,8 +64,8 @@ const YUZLER: readonly (readonly [string, string])[] = [
 ];
 
 const GIZLILIKLER: HaritaGizliligi[] = ['friends', 'everyone', 'me'];
-/** Arkadaşın gezileri ilk açılışta bu kadar; "Tümü" hepsini açar. */
-const ILK_GEZI = 3;
+/** Kanvas: 2 satır ve "Tümü" (kendi profilinde Seyahatlerim'e gider, arkadaşta hepsini açar). */
+const ILK_GEZI = 2;
 
 type GeziGirisi = { plaka?: number; arkadas?: string };
 
@@ -96,6 +97,9 @@ export function geziAltMetni(g: ProfilGezisi, an: Date = new Date()): string {
 export function ProfilV12({ kisi }: { kisi: string }) {
   const ozet = useProfilOzeti(kisi);
   const kenar = useSafeAreaInsets();
+  // Hata ya da çevrimdışıyken de kendi profilinde "Düzenle" (Ayarlar, Çıkış, Hesabı sil) kalır.
+  const { session } = useOturum();
+  const kendiMi = !!session && session.user.id === kisi;
   if (ozet.isPending) {
     return (
       <View style={[s.ekran, s.orta]}>
@@ -106,7 +110,7 @@ export function ProfilV12({ kisi }: { kisi: string }) {
   if (ozet.isError || !ozet.data) {
     return (
       <View style={[s.ekran, { paddingTop: kenar.top + 8 }]}>
-        <UstSatir kendi={false} />
+        <UstSatir kendi={kendiMi} />
         <View style={s.hata}>
           <Text style={s.hataMetin}>{ozet.isError ? t('profilV12.hata') : t('profilV12.yok')}</Text>
           {ozet.isError ? <Buton baslik={t('profilV12.tekrarDene')} tur="ikincil" onPress={() => void ozet.refetch()} yukleniyor={ozet.isFetching} /> : null}
@@ -156,7 +160,7 @@ function ProfilIcerigi({ o }: { o: ProfilOzeti }) {
   const altParcalar = [o.harita_acik ? t('profilV12.ilSayisi', { n: gidilen.length }) : null, t('profilV12.yolArkadasi', { n: o.yol_arkadasi })].filter(Boolean);
   const istekler = istekSirasi(o.istek, o.benim_istek);
   const rozetler = rozetListesi(o.rozetler, o.kendi);
-  const geziler = o.kendi || tumu ? o.geziler : o.geziler.slice(0, ILK_GEZI);
+  const geziler = tumu ? o.geziler : o.geziler.slice(0, ILK_GEZI);
   const tumuVar = o.kendi ? o.geziler.length > 0 : o.geziler.length > ILK_GEZI && !tumu;
 
   const geziOlustur = (giris: GeziGirisi) => router.push({ pathname: '/(tabs)/yeni', params: geziOlusturParametreleri(sehirler.data, giris) });
@@ -237,6 +241,7 @@ function ProfilIcerigi({ o }: { o: ProfilOzeti }) {
                   accessibilityRole="button"
                   accessibilityLabel={t(ortak ? 'profilV12.istek.cipOrtakEtiket' : 'profilV12.istek.cipEtiket', { il: ilAdi(plaka) })}
                   onPress={() => geziOlustur({ plaka, arkadas: o.kendi ? undefined : o.id })}
+                  hitSlop={{ top: 3, bottom: 3 }}
                   style={({ pressed }) => [s.cip, ortak ? s.cipOrtak : s.cipBos, pressed && { opacity: 0.8 }]}
                   testID={`istek-${plaka}`}>
                   <Svg width={15} height={15} viewBox="0 0 24 24" fill="none" stroke={ortak ? profilRenk.beyaz : profilRenk.lacivert} strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round">
@@ -355,7 +360,7 @@ function Bolum({ baslik, sag, sagEtiket, onSag }: { baslik: string; sag?: string
         {baslik}
       </Text>
       {sag ? (
-        <Pressable accessibilityRole="button" accessibilityLabel={sagEtiket} onPress={onSag} hitSlop={12}>
+        <Pressable accessibilityRole="button" accessibilityLabel={sagEtiket} onPress={onSag} hitSlop={{ left: 12, right: 12 }} style={s.dokunma}>
           <Text style={s.bolumSag}>{sag}</Text>
         </Pressable>
       ) : null}
@@ -386,7 +391,7 @@ function GeziSatiri({ g, kendi, onAc, onPaylas, onRotayiAl }: { g: ProfilGezisi;
             <View style={s.yuzler}>
               {g.kisiler.slice(0, 3).map((k, i) => (
                 <View key={i} style={[s.yuz, i > 0 && { marginLeft: -6 }]}>
-                  <Avatar ad={k.harf} url={k.foto} boyut={22} yuvarlak harfBoyutu={10} arkaPlan={YUZLER[i % YUZLER.length][0]} harfRengi={YUZLER[i % YUZLER.length][1]} />
+                  <Avatar ad={k.harf} url={k.foto} boyut={22} yuvarlak harfBoyutu={10} arkaPlan={YUZLER[k.renk % YUZLER.length][0]} harfRengi={YUZLER[k.renk % YUZLER.length][1]} />
                 </View>
               ))}
             </View>
@@ -408,7 +413,7 @@ function GeziSatiri({ g, kendi, onAc, onPaylas, onRotayiAl }: { g: ProfilGezisi;
         </View>
       )}
       {eylem ? (
-        <Pressable accessibilityRole="button" onPress={eylem.onPress} hitSlop={12}>
+        <Pressable accessibilityRole="button" onPress={eylem.onPress} hitSlop={{ left: 12, right: 12 }} style={s.dokunmaSatir}>
           <Text style={s.geziEylem}>{eylem.metin}</Text>
         </Pressable>
       ) : null}
@@ -482,6 +487,9 @@ const s = StyleSheet.create({
   bolum: { paddingTop: 24, paddingHorizontal: 16, paddingBottom: 10, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline' },
   bolumBaslik: { fontFamily: yazi.ekstra, fontSize: 19, color: profilRenk.metin },
   bolumSag: { fontFamily: yazi.kalin, fontSize: 14, color: profilRenk.lacivert },
+  /** 44 pt dokunma alanı; satır yüksekliği değişmesin diye taşan kısım negatif payla geri alınır. */
+  dokunma: { minHeight: 44, justifyContent: 'center', marginVertical: -10 },
+  dokunmaSatir: { minHeight: 44, justifyContent: 'center' },
   cipler: { gap: 8, paddingHorizontal: 16 },
   cip: { height: 38, paddingHorizontal: 14, borderRadius: 19, flexDirection: 'row', alignItems: 'center', gap: 6 },
   cipOrtak: { backgroundColor: profilRenk.lacivert },
