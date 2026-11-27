@@ -77,6 +77,12 @@ describe('#407 Arkadaşlar', () => {
     expect(screen.getByText('Arkadaşların gezilerini paylaşınca burada görünür.')).toBeTruthy();
   });
 
+  it('#578 KK1: kişinin yüzüne dokununca profili açılır', () => {
+    render(<ArkadaslarEkrani />);
+    fireEvent.press(screen.getByRole('button', { name: 'Mert' }));
+    expect(mockPush).toHaveBeenCalledWith({ pathname: '/kisi/[id]', params: { id: 'M' } });
+  });
+
   it('KK2: kart "{Ad} {şehir} gezisini paylaştı · zaman", özet; dokununca alıcı ekranı kimlikle açılır', () => {
     mockDurum.akis = [paylasim()];
     render(<ArkadaslarEkrani />);

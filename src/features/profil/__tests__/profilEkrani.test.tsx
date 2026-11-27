@@ -7,7 +7,7 @@ import { Linking } from 'react-native';
 
 import type { SeyahatOzet } from '@/lib/tipler';
 
-import ProfilEkrani from '../../../app/(tabs)/(menu)/profil';
+import ProfilEkrani from '../../../app/ayarlar';
 
 jest.mock('react-native-safe-area-context', () => jest.requireActual<{ default: object }>('react-native-safe-area-context/jest/mock').default);
 jest.mock('expo-location', () => ({ getForegroundPermissionsAsync: async () => ({ status: 'granted' }) }));
