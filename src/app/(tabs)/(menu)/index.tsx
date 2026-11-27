@@ -14,6 +14,7 @@ import { Ikon } from '@/components/ui/Ikon';
 import { KisaBildirim, useGelenBildirim, useKisaBildirim } from '@/components/ui/KisaBildirim';
 import { LogoYazi } from '@/components/ui/Logo';
 import { kesfetRaflari, type Raf as RafVerisi } from '@/features/anasayfa/raflar';
+import { karsilamaKapaklari, useKarsilamaKapagi } from '@/features/anasayfa/karsilama';
 import { anaArama, kapakTonu } from '@/features/anasayfa/v5';
 import { bugunSatiri, geziOncesiAlt, kartGenisligi, kartSeyahatleri, kartYuzleri, seyahatKapagi, yedekKapak } from '@/features/anasayfa/v9';
 import { useArkadasPaylasimlari } from '@/features/arkadaslar/sorgular';
@@ -29,7 +30,7 @@ import { t } from '@/i18n';
 import { useAnaSayfaBolumleri } from '@/lib/anaSayfa';
 import { ACILIS_BEKLEME_MS, acilisKarariAcik, acilisKarariAl, acilisKarariniKapat, acilisKarariniYenile } from '@/lib/acilis';
 import { useOturum } from '@/lib/oturum';
-import type { SeyahatOzet } from '@/lib/tipler';
+import type { Sehir, SeyahatOzet } from '@/lib/tipler';
 import { aktifMi } from '@/lib/zaman';
 import { anaV5, minDokunma, renk, yazi } from '@/theme';
 
@@ -274,7 +275,7 @@ export default function AnaSayfa() {
           <KartKaydirici genislik={kartGenislik}>{kartlar.map(kart)}</KartKaydirici>
         ) : seyahatler.data ? (
           <View style={s.kenar}>
-            <GeziYokKarti kapak={yedekKapak(sehirler.data)} genislik={kartGenislik} onYeni={yeni} />
+            <Karsilama bolumler={bolumler.data} bekleniyor={bolumler.isPending} sehirler={sehirler.data} genislik={kartGenislik} onYeni={yeni} />
           </View>
         ) : seyahatler.isError ? (
           // Liste okunamadıysa "gezin yok" denmez; Gezilerim'deki hata kalıbı (#388, ham hata gösterilmez).
@@ -380,6 +381,30 @@ function KaydettiklerimDugmesi() {
       <Ikon ad="kalp" boyut={22} renk={renk.ana} kalinlik={2.4} />
     </Pressable>
   );
+}
+
+/**
+ * KK5: gezisi olmayan kart. Görsel BO'nun `karsilama` bölümünden (#586), her açılışta sıradaki; bölüm yoksa ya da boşsa
+ * Eskişehir'in BO kapağı. Bölümler gelene kadar yer tutucu (önce Eskişehir görünüp sonra değişmesin). Sıra yalnız bu kart
+ * gösterildiğinde ilerler.
+ */
+function Karsilama({
+  bolumler,
+  bekleniyor,
+  sehirler,
+  genislik,
+  onYeni,
+}: {
+  bolumler: readonly { tur: string; icerik: unknown }[] | undefined;
+  bekleniyor: boolean;
+  sehirler: Sehir[] | undefined;
+  genislik: number;
+  onYeni: () => void;
+}) {
+  const kapaklar = useMemo(() => karsilamaKapaklari(bolumler), [bolumler]);
+  const secilen = useKarsilamaKapagi(kapaklar);
+  const kapak = bekleniyor ? null : kapaklar.length > 0 ? secilen : yedekKapak(sehirler);
+  return <GeziYokKarti kapak={kapak} genislik={genislik} onYeni={onYeni} />;
 }
 
 const s = StyleSheet.create({

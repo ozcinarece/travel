@@ -274,6 +274,19 @@ describe('#569 KK5 gezisi olmayan', () => {
     expect(e.queryByTestId('seyahat-karti-yok')).toBeNull();
   });
 
+  it('#586 bekler: BO karşılama görseli varsa o (Eskişehir yerine); bölümler gelene kadar yer tutucu', async () => {
+    const KARSILAMA = 'https://x.supabase.co/storage/v1/object/public/icerik/anasayfa/k1.webp';
+    mockBolumler = [{ id: 'k', tur: 'karsilama', baslik: '', sira: 0, kaynak: 'elle', icerik: { kapaklar: [{ url: KARSILAMA, atif: { yazar: 'Tripmate' } }] }, baslangic_at: null, bitis_at: null }];
+    mockBolumlerBekliyor = true;
+    const e = render(<AnaSayfa />);
+    const kart = await waitFor(() => e.getByTestId('seyahat-karti-yok'));
+    expect(within(kart).queryByTestId('kart-kapak')).toBeNull();
+    mockBolumlerBekliyor = false;
+    e.rerender(<AnaSayfa />);
+    await waitFor(() => expect(within(e.getByTestId('seyahat-karti-yok')).getByTestId('kart-kapak').props.source).toEqual([{ uri: KARSILAMA }]));
+    expect(within(e.getByTestId('seyahat-karti-yok')).getByText('Foto: Tripmate')).toBeTruthy();
+  });
+
   it('seyahat listesi gelmeden kart alanı çizilmez', async () => {
     mockSeyahatler = undefined;
     const e = render(<AnaSayfa />);

@@ -55,3 +55,15 @@ export function Foto(props: FotoProps) {
 export function GoogleFoto(props: FotoProps) {
   return <Image {...props} cachePolicy="memory" />;
 }
+
+/**
+ * #569 KK5: fotoğrafı önceden indirir (sıradaki karşılama görseli). Önbellek politikası `Foto` ile aynı kuraldan: Google ya da
+ * tanınmayan adres diske yazılmaz. Hata yutulur (görsel açılışta yine indirilir).
+ */
+export function fotoOnceYukle(uri: string): void {
+  try {
+    void Image.prefetch(uri, { cachePolicy: adresPolitikasi(uri) }).catch(() => undefined);
+  } catch {
+    // Web ya da test ortamında `prefetch` olmayabilir.
+  }
+}
