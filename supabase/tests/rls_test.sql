@@ -4520,4 +4520,146 @@ delete from public.olaylar where user_id in (:FA, :FB, :FC, :FD, :FG);
 delete from auth.users where id in (:FA, :FB, :FC, :FD, :FG);
 do $$ begin assert (select count(*) from public.paylasim_begeni) = 0, '#407: hesap silinince beğeniler de silinir'; end $$;
 
+-- #573 Uygulama içi davet (KK1): seyahat_davetleri. A: Bursa (A, B, D, misafir G) ve Urla (A, M; 5–6 Aralık). C: İzmir (yalnız).
+-- M ve D ayrıca Mardin'de birlikte. B, M ile hiç birlikte gezmedi (M'nin fotoğrafı B'ye dönmez, #229).
+\set SA '''57300000-0000-4000-8000-0000000000a1'''
+\set SB '''57300000-0000-4000-8000-0000000000b2'''
+\set SC '''57300000-0000-4000-8000-0000000000c3'''
+\set SD '''57300000-0000-4000-8000-0000000000d4'''
+\set SG '''57300000-0000-4000-8000-0000000000e5'''
+\set SM '''57300000-0000-4000-8000-0000000000f6'''
+reset role;
+insert into auth.users (id, is_anonymous) values (:SA, false), (:SB, false), (:SC, false), (:SD, false), (:SG, true), (:SM, false);
+insert into public.profiles (id, name, username, photo_url) values
+  (:SA, 'Ayşe Yılmaz', 'ayse573', 'https://example.com/ayse.jpg'), (:SB, 'Berk', 'berk573', null),
+  (:SM, 'Mert Can', 'mert573', 'https://example.com/mert.jpg');
+insert into public.trips (id, owner_id, name, city_place_id, city_label, country_code, lat, lng, tz, start_date, end_date) values
+  ('57300000-0000-4000-8000-000000000001', :SA, null, 'ChIJ-bursa-573', 'Bursa', 'TR', 40.18, 29.06, 'Europe/Istanbul', null, null),
+  ('57300000-0000-4000-8000-000000000002', :SA, 'Urla bağ rotası', 'ChIJ-urla-573', 'Urla', 'TR', 38.32, 26.76, 'Europe/Istanbul', '2026-12-05', '2026-12-06'),
+  ('57300000-0000-4000-8000-000000000003', :SC, null, 'ChIJ-izmir-573', 'İzmir', 'TR', 38.42, 27.14, 'Europe/Istanbul', null, null),
+  ('57300000-0000-4000-8000-000000000004', :SM, null, 'ChIJ-mardin-573', 'Mardin', 'TR', 37.31, 40.73, 'Europe/Istanbul', null, null);
+insert into public.members (trip_id, user_id, display_name, guest) values
+  ('57300000-0000-4000-8000-000000000001', :SB, 'Berk', false), ('57300000-0000-4000-8000-000000000001', :SD, 'Deniz', false),
+  ('57300000-0000-4000-8000-000000000001', :SG, 'Misafir', true), ('57300000-0000-4000-8000-000000000002', :SM, 'Mert Can', false),
+  ('57300000-0000-4000-8000-000000000004', :SD, 'Deniz', false);
+select set_config('test.urla', '57300000-0000-4000-8000-000000000002', false);
+set role authenticated;
+
+-- KK1: A, birlikte gezdiği B'yi Urla'ya davet eder; aynı kişiye ikinci bekleyen davet yazılmaz.
+select pg_temp.as_user(:SA);
+do $$
+begin
+  assert public.davet_gonder(current_setting('test.urla')::uuid, array['57300000-0000-4000-8000-0000000000b2']::uuid[]) = 1, '#573 KK1: davet yazılır';
+  assert public.davet_gonder(current_setting('test.urla')::uuid, array['57300000-0000-4000-8000-0000000000b2', '57300000-0000-4000-8000-0000000000b2']::uuid[]) = 0, '#573 KK1: en çok bir bekleyen davet';
+  -- Kendine, zaten üye olana (M) davet yazılmaz; boş liste bir şey yazmaz.
+  assert public.davet_gonder(current_setting('test.urla')::uuid, array['57300000-0000-4000-8000-0000000000a1', '57300000-0000-4000-8000-0000000000f6']::uuid[]) = 0, '#573 KK1: kendine ve üyeye davet yok';
+  assert public.davet_gonder(current_setting('test.urla')::uuid, array[]::uuid[]) = 0, '#573 KK1: boş liste';
+  assert (select count(*) from public.seyahat_davetleri) = 1, '#573 KK1: tek satır';
+  assert (select durum from public.seyahat_davetleri) = 'bekliyor', '#573 KK1: durum bekliyor';
+end $$;
+-- KK1: ortak seyahat geçmişi olmayan (C) ve misafir hesap (G) davet edilemez; biri tutmazsa hiçbiri yazılmaz (D de yazılmaz).
+select pg_temp.hata_bekle($$select public.davet_gonder(current_setting('test.urla')::uuid, array['57300000-0000-4000-8000-0000000000c3']::uuid[])$$, '42501');
+select pg_temp.hata_bekle($$select public.davet_gonder(current_setting('test.urla')::uuid, array['57300000-0000-4000-8000-0000000000e5']::uuid[])$$, '42501');
+select pg_temp.hata_bekle($$select public.davet_gonder(current_setting('test.urla')::uuid, array['57300000-0000-4000-8000-0000000000d4', '57300000-0000-4000-8000-0000000000c3']::uuid[])$$, '42501');
+select pg_temp.hata_bekle($$select public.davet_gonder(current_setting('test.urla')::uuid, (select array_agg(gen_random_uuid()) from generate_series(1, 21)))$$, '22023');
+do $$ begin assert (select count(*) from public.seyahat_davetleri) = 1, '#573 KK1: reddedilen çağrı hiç satır yazmaz'; end $$;
+-- KK1: istemci tabloya doğrudan yazamaz, durumu doğrudan değiştiremez, silemez.
+select pg_temp.hata_bekle($$insert into public.seyahat_davetleri (trip_id, davet_eden, davet_edilen) values (current_setting('test.urla')::uuid, '57300000-0000-4000-8000-0000000000a1', '57300000-0000-4000-8000-0000000000d4')$$, '42501');
+select pg_temp.hata_bekle($$update public.seyahat_davetleri set durum = 'katildi'$$, '42501');
+select pg_temp.hata_bekle($$delete from public.seyahat_davetleri$$, '42501');
+-- KK1: davet eden, davet edilenin yerine cevap veremez; kendi davetini kutusunda görmez.
+select pg_temp.hata_bekle($$select public.daveti_reddet((select id from public.seyahat_davetleri))$$, 'P0002');
+select pg_temp.hata_bekle($$select public.davete_katil((select id from public.seyahat_davetleri))$$, 'P0002');
+do $$ begin assert (select count(*) from public.davetlerim()) = 0, '#573: davet eden kutusunda görmez'; end $$;
+select set_config('test.d1', (select id::text from public.seyahat_davetleri), false);
+-- KK1: seyahatin üyesi olmayan (B, C) ya da misafir oturum davet gönderemez.
+select pg_temp.as_user(:SC);
+select pg_temp.hata_bekle($$select public.davet_gonder(current_setting('test.urla')::uuid, array['57300000-0000-4000-8000-0000000000b2']::uuid[])$$, '42501');
+select pg_temp.as_user(:SB);
+select pg_temp.hata_bekle($$select public.davet_gonder(current_setting('test.urla')::uuid, array['57300000-0000-4000-8000-0000000000d4']::uuid[])$$, '42501');
+select pg_temp.as_user(:SG, true);
+select pg_temp.hata_bekle($$select public.davet_gonder('57300000-0000-4000-8000-000000000001'::uuid, array['57300000-0000-4000-8000-0000000000b2']::uuid[])$$, '42501');
+do $$ begin assert (select count(*) from public.davetlerim()) = 0 and (select count(*) from public.seyahat_davetleri) = 0, '#573: misafir hiçbir daveti görmez'; end $$;
+-- KK1: satırı yalnız davet eden ve davet edilen görür (seyahatin diğer üyesi M ve C görmez).
+select pg_temp.as_user(:SM);
+do $$ begin assert (select count(*) from public.seyahat_davetleri) = 0, '#573 KK1: diğer üye görmez'; end $$;
+select pg_temp.as_user(:SC);
+do $$ begin assert (select count(*) from public.seyahat_davetleri) = 0, '#573 KK1: dışarıdan biri görmez'; end $$;
+select pg_temp.hata_bekle($$select public.daveti_reddet(current_setting('test.d1')::uuid)$$, 'P0002');
+select pg_temp.hata_bekle($$select public.davete_katil(current_setting('test.d1')::uuid)$$, 'P0002');
+-- KK2 · KK3: B'nin kutusu: davet edenin ilk adı ve fotoğrafı, gezinin adı, şehri, tarihleri, gün sayısı; kişiler davet eden
+-- önde, ilk ad; B ile hiç gezmemiş M'nin fotoğrafı dönmez. Token dönmez.
+select pg_temp.as_user(:SB);
+do $$
+declare r record; m text;
+begin
+  select * into r from public.davetlerim();
+  m := row_to_json(r)::text;
+  assert (select count(*) from public.seyahat_davetleri) = 1, '#573 KK1: davet edilen görür';
+  assert r.id = current_setting('test.d1')::uuid and r.trip_id = current_setting('test.urla')::uuid, '#573: kimlikler: ' || m;
+  assert r.davet_eden_ad = 'Ayşe' and r.davet_eden_foto = 'https://example.com/ayse.jpg', '#573 KK2: davet eden: ' || m;
+  assert r.ad = 'Urla bağ rotası' and r.sehir = 'Urla' and r.start_date = '2026-12-05' and r.end_date = '2026-12-06' and r.gun_sayisi = 2, '#573 KK2: gezi: ' || m;
+  assert r.kisiler = '[{"id": "57300000-0000-4000-8000-0000000000a1", "ad": "Ayşe", "foto": "https://example.com/ayse.jpg"}, {"id": "57300000-0000-4000-8000-0000000000f6", "ad": "Mert", "foto": null}]'::jsonb, '#573 KK2: yüzler: ' || m;
+  assert m not like '%invite_token%', '#573: token dönmez';
+end $$;
+-- B seyahati hâlâ göremez (davet üyelik değildir).
+do $$ begin assert (select count(*) from public.trips where id = current_setting('test.urla')::uuid) = 0, '#573: davet seyahati açmaz'; end $$;
+-- KK4 · Hayır: durum reddetti; kutudan düşer; ikinci cevap yok. Davet eden "Geri çevirdi" görür.
+select public.daveti_reddet(current_setting('test.d1')::uuid);
+do $$ begin assert (select count(*) from public.davetlerim()) = 0, '#573 KK4: reddedilen kutudan düşer'; end $$;
+select pg_temp.hata_bekle($$select public.daveti_reddet(current_setting('test.d1')::uuid)$$, 'P0002');
+select pg_temp.hata_bekle($$select public.davete_katil(current_setting('test.d1')::uuid)$$, 'P0002');
+select pg_temp.as_user(:SA);
+do $$ begin assert (select durum from public.seyahat_davetleri where id = current_setting('test.d1')::uuid) = 'reddetti', '#573 KK5: davet eden durumu görür'; end $$;
+-- Reddedilen davetten sonra yeniden davet edilebilir (bekleyen yok).
+do $$ begin assert public.davet_gonder(current_setting('test.urla')::uuid, array['57300000-0000-4000-8000-0000000000b2']::uuid[]) = 1, '#573: yeniden davet'; end $$;
+select set_config('test.d2', (select id::text from public.seyahat_davetleri where durum = 'bekliyor'), false);
+-- KK4 · Katıl: davet linkinin üyelik yolu (davetle_katil, kanal app); durum katildi; seyahat açılır.
+select pg_temp.as_user(:SB);
+do $$
+declare o jsonb := public.davete_katil(current_setting('test.d2')::uuid);
+begin
+  assert (o ->> 'trip_id')::uuid = current_setting('test.urla')::uuid and not (o ->> 'zaten_uye')::boolean, '#573 KK4: katılım cevabı: ' || o::text;
+  assert (select joined_via from public.members where trip_id = current_setting('test.urla')::uuid and user_id = auth.uid()) = 'app', '#573 KK4: davetle_katil yolu (app)';
+  assert (select landed_at from public.members where trip_id = current_setting('test.urla')::uuid and user_id = auth.uid()) is not null, '#573 KK4: karşılama damgası';
+  assert (select display_name from public.members where trip_id = current_setting('test.urla')::uuid and user_id = auth.uid()) = 'Berk', '#573 KK4: ad profilden';
+  assert (select count(*) from public.trips where id = current_setting('test.urla')::uuid) = 1, '#573 KK4: seyahat açılır';
+  assert (select durum from public.seyahat_davetleri where id = current_setting('test.d2')::uuid) = 'katildi', '#573 KK4: durum katildi';
+  assert (select count(*) from public.davetlerim()) = 0, '#573 KK4: katılınca kutudan düşer';
+end $$;
+select pg_temp.hata_bekle($$select public.davete_katil(current_setting('test.d2')::uuid)$$, 'P0002');
+-- Üye olan B'ye yeni davet yazılmaz.
+select pg_temp.as_user(:SA);
+do $$ begin assert public.davet_gonder(current_setting('test.urla')::uuid, array['57300000-0000-4000-8000-0000000000b2']::uuid[]) = 0, '#573: üyeye davet yok'; end $$;
+-- Davet eden seyahatten çıkınca bekleyen daveti geçersizdir: M, Mardin'den birlikte gezdiği D'yi Urla'ya çağırır, sonra çıkar.
+select pg_temp.as_user(:SM);
+do $$ begin assert public.davet_gonder(current_setting('test.urla')::uuid, array['57300000-0000-4000-8000-0000000000d4']::uuid[]) = 1, '#573: üye olan herkes davet eder'; end $$;
+select pg_temp.as_user(:SD);
+do $$ begin assert (select count(*) from public.davetlerim()) = 1, '#573: D davetini görür'; end $$;
+select set_config('test.d3', (select id::text from public.seyahat_davetleri), false);
+reset role;
+-- KK1: aynı kişiye ikinci bekleyen davet dizinde de engellenir.
+select pg_temp.hata_bekle(format($$insert into public.seyahat_davetleri (trip_id, davet_eden, davet_edilen) values (%L, %L, %L)$$, '57300000-0000-4000-8000-000000000002', '57300000-0000-4000-8000-0000000000a1', '57300000-0000-4000-8000-0000000000d4'), '23505');
+select pg_temp.hata_bekle(format($$insert into public.seyahat_davetleri (trip_id, davet_eden, davet_edilen, durum) values (%L, %L, %L, 'gitti')$$, '57300000-0000-4000-8000-000000000002', '57300000-0000-4000-8000-0000000000a1', '57300000-0000-4000-8000-0000000000c3'), '23514');
+delete from public.members where trip_id = '57300000-0000-4000-8000-000000000002' and user_id = :SM;
+set role authenticated;
+select pg_temp.as_user(:SD);
+do $$ begin assert (select count(*) from public.davetlerim()) = 0, '#573: davet eden çıkınca davet düşer'; end $$;
+select pg_temp.hata_bekle($$select public.davete_katil(current_setting('test.d3')::uuid)$$, 'P0002');
+-- Yardımcı fonksiyon istemciye açık değil; anon rolü hiçbir davet fonksiyonunu ve tabloyu kullanamaz.
+select pg_temp.hata_bekle($$select public.davet_gecerli(current_setting('test.d3')::uuid)$$, '42501');
+reset role;
+set role anon;
+select pg_temp.as_user(null);
+select pg_temp.hata_bekle($$select count(*) from public.seyahat_davetleri$$, '42501');
+select pg_temp.hata_bekle($$select * from public.davetlerim()$$, '42501');
+select pg_temp.hata_bekle($$select public.davet_gonder(current_setting('test.urla')::uuid, array[]::uuid[])$$, '42501');
+select pg_temp.hata_bekle($$select public.davete_katil(current_setting('test.d3')::uuid)$$, '42501');
+select pg_temp.hata_bekle($$select public.daveti_reddet(current_setting('test.d3')::uuid)$$, '42501');
+reset role;
+delete from public.trips where owner_id in (:SA, :SB, :SC, :SD, :SG, :SM);
+delete from public.olaylar where user_id in (:SA, :SB, :SC, :SD, :SG, :SM);
+delete from auth.users where id in (:SA, :SB, :SC, :SD, :SG, :SM);
+do $$ begin assert (select count(*) from public.seyahat_davetleri) = 0, '#573: seyahat ve hesap silinince davetler de silinir'; end $$;
+
 \echo 'rls_test: TÜM TESTLER GEÇTİ'
