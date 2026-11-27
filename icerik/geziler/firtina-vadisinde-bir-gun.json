@@ -52,7 +52,6 @@
         },
         {
           "place_id": "ChIJH-80_fcXZkARuo_rM8pPFjI",
-          "osm": "node/3969385380",
           "ad": "Ayder Alabalık Çiftliği",
           "sure_dk": 60,
           "sure_gerekcesi": "varsayılan 75; tek tabak alabalık ve muhlama",
@@ -65,7 +64,6 @@
         },
         {
           "place_id": "ChIJ6zdeLHIYZkARaLJOmXIZ07I",
-          "osm": "node/4868117722",
           "ad": "Gelintülü Şelalesi",
           "sure_dk": 30,
           "sure_gerekcesi": "varsayılan 45; seyir noktasından izlenir",
@@ -94,7 +92,7 @@
     "dogrulanacaklar": [
       "[Plan · Sehir] · Rize şehri sehir.yeni ile açılıyor (#299, 19 Kasım Ece kararı: Karadeniz ve doğu grubu); place_id 'Rize' kimlik sorgusundan (tek sonuç) · BO'da şehir satırı ve kuru yukle",
       "[Plan · tüm duraklar] · kapali_gunler [] yazıldı: köprü, kale, şelale ve yayla açık alan; alabalık tesisinin kapalı günü bilinmiyor · yerinde ya da tesis",
-      "[Plan · g1.d1, g1.d5] · Şenyuva Köprüsü ve Ayder Yaylası OSM aday listesinde yok (16 km, tourism/historic süzgeci); konum Google'dan 30 gün · OSM'de köprü way'i (bridge=yes) ve place=village aranabilir",
+      "[Plan · g1.d1, g1.d3, g1.d4, g1.d5] · OSM'siz, konum Google'dan 30 gün. Şenyuva Köprüsü ve Ayder Yaylası OSM aday listesinde yok (16 km, tourism/historic süzgeci). Alabalık tesisinin OSM noktası (node/3969385380, 'Alabalik Çiftligi') Google kaydından 3142 m uzak çıktı: aynı yol üstünde iki ayrı tesis olabilir, rehber yolun adını verdiği için ikisine de uyuyor; hangisinin durak olduğu yerinde bakılmalı. Gelintülü'nün OSM noktası (node/4868117722) 154 m uzak, sınırın 4 m dışında · OSM'de köprü way'i, place=village ve şelalenin konumu düzeltilebilir",
       "[Yazı · Rehber Şenyuva] · 1696/1699 tarihi ve 1946 selinde kaybolan kitabe (en.wikipedia 'Fırtına River bridges'; Hürriyet Daily News); 'Cin Civa' adı (Wikipedia); 40 m boy ve kemer altına konan destek (Hürriyet Daily News, tarih okunamadı); 'yirmiden fazla köprü' (Wikipedia) · Rize Kültür Turizm",
       "[Yazı · Rehber Zil Kale] · 14–15. yüzyıl, vadi tabanından ~100 m, üç bölüm (dış sur, orta avlu, iç kale ve baş kule), Çamlıhemşin'e ~12 km: KÜRE Ansiklopedisi (yapay zekâ destekli madde, resmî kaynakla teyit edilmeli); 'kimin yaptırdığı kesin değil' genel bilgi; taşların dereden toplandığı cümlesi yorum · ktb.gov.tr, rize.ktb.gov.tr",
       "[Yazı · Rehber Zil Kale] · Şenyuva'dan Zil Kale'ye 'yaklaşık yarım saat' sürüş tahmini; yolun kışın buzlanması genel bilgi · Çamlıhemşin Belediyesi",
@@ -129,7 +127,7 @@
       "il listesindeki Zil Kale place_id'si (ChIJhRHLuN4QZkAR4EM5ordKnoM) tipsiz bir kayıt çıktı; gezide kimlik sorgusunun döndürdüğü ChIJizZrBAIXZkARP5yPXjObNzQ kullanıldı. rize.json'daki kimlik ayrı bir il PR'ında düzeltilmeli",
       "Duraklar arası araçla (Şenyuva–Zil Kale ~8 km, Zil Kale–alabalık ~20 km, alabalık–Ayder ~10 km). Doğrulayıcı bu bacakları yürüme sayar (#311)",
       "Ayder'in yeni kaplıcası açıldığı doğrulanamadığı için durak değil",
-      "Google: kimlik 20 sorgu (0 $), puan 22, 1 kuru yükleme. OSM 3/5"
+      "Google: kimlik 20 sorgu (0 $), puan 22, 2 kuru yükleme. OSM 1/5 (#299 KK2'nin %80'inin altında): vadide OSM kaydı seyrek; nedenler doğrulanacaklarda"
     ]
   }
 }
