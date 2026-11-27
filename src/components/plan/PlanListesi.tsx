@@ -28,6 +28,8 @@ export type PlanSatirGorunumu = {
   ad: string;
   /** "tür · süre" (gezildiyse "· gezildi"). */
   alt: string;
+  /** #582: `alt`'ın başındaki tür parçası (yoksa null) — uyarılı satırda sığmazsa önce bu "…" ile kısalır. */
+  altTur?: string | null;
   /** Önceki noktadan bacak: "9 dk · 3,2 km"; yoksa null. */
   gelis: { metin: string; araba: boolean } | null;
   /** Gezi modunda şu anki (buradasın / sıradaki) durak. */
@@ -38,6 +40,8 @@ export type PlanSatirGorunumu = {
   atlandi: boolean;
   /** #582 KK3: açılış saatine göre o gün kapalı — "Pzt kapalı"; değilse (ya da saat bilinmiyorsa) null. */
   kapali?: string | null;
+  /** #582: ekran okuyucu için gün adı tam — "Pazartesi kapalı". */
+  kapaliUzun?: string | null;
   /** #582: taşınabilecek (kapalı olmayan başka) gün var mı; yoksa "Başka güne taşı" gösterilmez, uyarı kalır. */
   tasinabilir?: boolean;
 };
@@ -165,6 +169,7 @@ export function PlanListesi(p: Props) {
           const rozet = rozetAnahtari(r);
           // #582 KK3: "Başka güne taşı" yalnız uyarı varsa ve taşınacak gün varsa.
           const tasi = r.kapali && r.tasinabilir && p.onBaskaGuneTasi ? () => p.onBaskaGuneTasi?.(r.id) : null;
+          const parca = r.kapali ? altParcala(r) : null;
           return (
             <View key={r.id}>
               {/* #554 KK2 (pano 2): atlanan durağa bacak bilgisi yok; kısa kesik çizgi. */}
@@ -225,34 +230,50 @@ export function PlanListesi(p: Props) {
                     <Text style={[s.noMetin, { color: gunUstuMetin(r.numaraRengi) }]}>{r.numara ?? '–'}</Text>
                   </View>
                 )}
-                <View style={{ flex: 1, minWidth: 0, gap: 1 }}>
+                {/* #582: bağlantının hitSlop'u Android'de üst kabı aşamaz — uyarılı satırda sütun durağın tam yüksekliğine uzar (görünüş aynı). */}
+                <View style={[s.icerik, tasi && s.icerikTam]}>
                   {rozet ? <Text style={s.rozet}>{t(rozet)}</Text> : null}
                   <Text style={[s.ad, soluk && { color: anaV5.ikincil }]} numberOfLines={2}>
                     {r.ad}
                   </Text>
-                  {r.alt ? (
-                    <Text style={s.alt} numberOfLines={1}>
-                      {r.alt}
-                    </Text>
-                  ) : null}
-                  {/* #582 KK3: kapalı gün uyarısı alt satır dilinde (13 px, #C25200); yanında tek dokunuşla "Başka güne taşı". */}
-                  {r.kapali ? (
-                    <View style={s.kapaliSatir}>
-                      <Text style={s.kapali} numberOfLines={1}>
+                  {r.kapali && parca ? (
+                    // #582 (Ürün değişiklik 1; kanvas emsali `Ekran24Plan` "Müze · Pzt kapalı"): uyarı alt satırın içinde, tek satır —
+                    // "{tür} · {süre} · Pzt kapalı · Başka güne taşı ›". Sığmazsa yalnız tür "…" ile kısalır; uyarı ve bağlantı kesilmez.
+                    <View style={s.altSatir}>
+                      {parca.tur ? (
+                        <Text style={[s.alt, s.kisalir]} numberOfLines={1}>
+                          {parca.tur}
+                        </Text>
+                      ) : null}
+                      {parca.ara ? (
+                        <Text style={[s.alt, s.sabit]} numberOfLines={1}>
+                          {parca.ara}
+                        </Text>
+                      ) : null}
+                      <Text style={[s.alt, s.sabit, s.kapali]} numberOfLines={1}>
                         {r.kapali}
                       </Text>
                       {tasi ? (
                         <>
-                          <Text style={s.kapali}> · </Text>
-                          {/* Dokunma alanı ≥ 44 pt: padding ile (Android'de satır sınırını aşan hitSlop dokunmaz); sol pay negatif kenarla. */}
-                          <Pressable accessibilityRole="button" accessibilityLabel={`${r.kapali}, ${t('plan.baskaGuneTasi')}`} onPress={tasi} style={s.tasiAlani}>
-                            <Text style={[s.kapali, s.tasi]} numberOfLines={1}>
-                              {t('plan.baskaGuneTasi')}
+                          <Text style={[s.alt, s.sabit, s.kapali]}>{AYRAC}</Text>
+                          {/* Dokunma alanı 44 pt: satır yüksekliği değişmesin diye hitSlop ile. */}
+                          <Pressable
+                            accessibilityRole="button"
+                            accessibilityLabel={t('plan.kapaliTasiEtiket', { uyari: r.kapaliUzun ?? r.kapali })}
+                            onPress={tasi}
+                            hitSlop={TASI_HITSLOP}
+                            style={s.sabit}>
+                            <Text style={[s.alt, s.kapali, s.tasi]} numberOfLines={1}>
+                              {t('plan.baskaGuneTasiBag')}
                             </Text>
                           </Pressable>
                         </>
                       ) : null}
                     </View>
+                  ) : r.alt ? (
+                    <Text style={s.alt} numberOfLines={1}>
+                      {r.alt}
+                    </Text>
                   ) : null}
                 </View>
                 {r.atlandi ? (
@@ -297,14 +318,36 @@ export function ListemBekliyorSatiri({ n, onPress, bosGun }: { n: number; onPres
   );
 }
 
+/** #582: alt satır ayracı (kanvas "Müze · Pzt kapalı"). */
+const AYRAC = ' · ';
+/** #582: "Başka güne taşı ›" dokunma alanı — 13 px metin satırı (~18) + 2×13 = 44 pt; satır yüksekliği değişmez. */
+export const TASI_HITSLOP = { top: 13, bottom: 13, left: 8, right: 8 };
+
+/** #582: uyarılı alt satırın parçaları — kısalabilen tür ve sabit kalan "· süre ·" ara metni. */
+export function altParcala(r: { alt: string; altTur?: string | null }): { tur: string | null; ara: string } {
+  const tur = r.altTur && r.alt.startsWith(r.altTur) ? r.altTur : null;
+  const kalan = (tur ? r.alt.slice(tur.length) : r.alt).replace(/^ · /, '');
+  return { tur, ara: `${tur ? AYRAC : ''}${kalan ? kalan + AYRAC : ''}` };
+}
+
 /** #553 KK1 (#558): sekme kutusu 44 pt — `hitSlop` üst kabı aşamadığı için dokunma alanı kutunun kendisi. */
 export const SEKME_YUKSEKLIK = 44;
 
 /** #553 KK2: ekran okuyucu etiketi — saat, ad, alt satır; vurgulu durakta "şu an buradasın" ya da "sıradaki durak";
  * #554 KK2: atlananda "Atlandı" hapı da okunur (alt satırdaki "· atlandı" kalktı). */
-export function durakEtiketi(r: { saat: string | null; ad: string; alt: string | null; vurgulu: boolean; buradasin?: boolean; atlandi?: boolean; kapali?: string | null }): string {
+export function durakEtiketi(r: {
+  saat: string | null;
+  ad: string;
+  alt: string | null;
+  vurgulu: boolean;
+  buradasin?: boolean;
+  atlandi?: boolean;
+  kapali?: string | null;
+  kapaliUzun?: string | null;
+}): string {
   const durum = r.vurgulu ? t(r.buradasin ? 'plan.buradasinDurak' : 'plan.siradakiDurak') : r.atlandi ? t('plan.atlandi') : null;
-  return [r.saat, r.ad, r.alt, r.kapali, durum].filter(Boolean).join(', ');
+  // #582: ekran okuyucu gün adını tam okur ("Pazartesi kapalı").
+  return [r.saat, r.ad, r.alt, r.kapaliUzun ?? r.kapali, durum].filter(Boolean).join(', ');
 }
 
 /** #570 KK6: gün özetinin durak parçası — bütün duraklar atlandıysa (atlanan numarasız) "Hepsi atlandı", yoksa numaralı durak sayısı. */
@@ -380,10 +423,14 @@ const s = StyleSheet.create({
   bosDugmeMetin: { fontFamily: yazi.kalin, fontSize: 16, color: renk.metin },
   ad: { fontFamily: yazi.kalin, fontSize: 16, color: renk.metin },
   alt: { fontFamily: yazi.normal, fontSize: 13, color: anaV5.ikincil },
-  kapaliSatir: { flexDirection: 'row', alignItems: 'center' },
-  kapali: { fontFamily: yazi.normal, fontSize: 13, color: anaV5.adim },
-  tasi: { fontFamily: yazi.kalin },
-  tasiAlani: { minHeight: 44, minWidth: 44, justifyContent: 'center', paddingLeft: 12, marginLeft: -12, paddingRight: 12 },
+  icerik: { flex: 1, minWidth: 0, gap: 1 },
+  icerikTam: { alignSelf: 'stretch', justifyContent: 'center', marginVertical: -8, paddingVertical: 8 },
+  // #582: uyarılı alt satır — boyut alt satırla aynı; "Pzt kapalı" normal, "Başka güne taşı ›" yarı kalın, ikisi #C25200.
+  altSatir: { flexDirection: 'row', alignItems: 'center', minWidth: 0 },
+  kisalir: { flexShrink: 1 },
+  sabit: { flexShrink: 0 },
+  kapali: { color: anaV5.adim },
+  tasi: { fontFamily: yazi.yari },
   bacak: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   kesikSutun: { width: 28, height: 22, alignItems: 'center', gap: 3 },
   kesik: { width: 2, height: 3, backgroundColor: anaV5.cizgi },

@@ -2,7 +2,7 @@
 import { describe, expect, it, jest } from '@jest/globals';
 import { fireEvent, render } from '@testing-library/react-native';
 
-import { durakEtiketi, PlanListesi, TASI_EYLEMI, type PlanSatirGorunumu } from '@/components/plan/PlanListesi';
+import { altParcala, durakEtiketi, PlanListesi, TASI_EYLEMI, TASI_HITSLOP, type PlanSatirGorunumu } from '@/components/plan/PlanListesi';
 import { kapaliGunKisa, tasinabilirGunler } from '@/features/plan/planListesi';
 import { gundeKapali, oncelikSirasi, planKur, type PlanMekani } from '@/features/sihirbaz/planKur';
 import { planiHesapla, planOnceliginiOku, SAAT_SURESI_MS } from '@/features/sihirbaz/planUygula';
@@ -180,6 +180,7 @@ describe('#582 KK3 Plan satırında kapalı gün uyarısı', () => {
     saat: '10:00',
     ad: 'Müze',
     alt: 'Müze · 1 sa',
+    altTur: 'Müze',
     gelis: null,
     vurgulu: false,
     buradasin: false,
@@ -214,38 +215,82 @@ describe('#582 KK3 Plan satırında kapalı gün uyarısı', () => {
       />,
     );
 
-  it('uyarı satırı "Pzt kapalı" #C25200; "Başka güne taşı" tek dokunuşla durağı verir', () => {
+  const duz = (stil: unknown) => Object.assign({}, ...[stil].flat(Infinity).filter(Boolean)) as Record<string, unknown>;
+  const pzt = (ek: Partial<PlanSatirGorunumu> = {}) => satir({ kapali: t('plan.kapaliGun', { gun: 'Pzt' }), kapaliUzun: t('plan.kapaliGun', { gun: 'Pazartesi' }), tasinabilir: true, ...ek });
+
+  it('uyarı alt satırın içinde: "Müze · 1 sa · Pzt kapalı · Başka güne taşı ›"; ayrı ikinci satır yok', () => {
     const tasi = jest.fn();
-    const { getByText } = ciz([satir({ kapali: t('plan.kapaliGun', { gun: 'Pzt' }), tasinabilir: true })], tasi);
+    const { getByText, queryByText } = ciz([pzt({ ad: 'Eti Arkeoloji' })], tasi);
+    // Alt satır tek başına (uyarısız biçimde) çizilmez; parçalar aynı satırda.
+    expect(queryByText('Müze · 1 sa')).toBeNull();
+    const tur = getByText('Müze', { exact: true });
+    const ara = getByText(' · 1 sa · ');
     const uyari = getByText('Pzt kapalı');
-    expect(uyari.props.style).toEqual(expect.objectContaining({ color: '#C25200', fontSize: 13 }));
-    fireEvent.press(getByText(t('plan.baskaGuneTasi')));
+    const bag = getByText(t('plan.baskaGuneTasiBag'));
+    expect(t('plan.baskaGuneTasiBag')).toBe('Başka güne taşı ›');
+    // Hepsi aynı satır kabında (flexDirection row).
+    const satirKabi = tur.parent?.parent;
+    expect(duz(satirKabi?.props.style).flexDirection).toBe('row');
+    for (const n of [ara, uyari]) expect(n.parent?.parent).toBe(satirKabi);
+    fireEvent.press(bag);
     expect(tasi).toHaveBeenCalledWith('d1');
   });
 
-  it('saat yoksa (kapali null) uyarı satırı yok', () => {
-    const { queryByText } = ciz([satir({ kapali: null })], () => undefined);
-    expect(queryByText(/kapalı/)).toBeNull();
-    expect(queryByText(t('plan.baskaGuneTasi'))).toBeNull();
+  it('renk ve ağırlık: "Pzt kapalı" #C25200 normal, "Başka güne taşı ›" #C25200 yarı kalın; boyut alt satırla aynı', () => {
+    const uyarisiz = ciz([satir({ id: 'd2' })]);
+    const altBoyut = duz(uyarisiz.getByText('Müze · 1 sa').props.style).fontSize;
+    uyarisiz.unmount();
+    const { getByText } = ciz([pzt()], () => undefined);
+    const uyari = duz(getByText('Pzt kapalı').props.style);
+    const bag = duz(getByText(t('plan.baskaGuneTasiBag')).props.style);
+    expect(uyari).toEqual(expect.objectContaining({ color: '#C25200', fontFamily: 'Figtree_400Regular', fontSize: altBoyut }));
+    expect(bag).toEqual(expect.objectContaining({ color: '#C25200', fontFamily: 'Figtree_600SemiBold', fontSize: altBoyut }));
   });
 
-  it('ekran okuyucu: satırın "Başka güne taşı" özel eylemi durağı verir', () => {
+  it('tek satır; sığmazsa yalnız tür kısalır (flexShrink 1, numberOfLines 1), uyarı ve bağlantı kesilmez (flexShrink 0)', () => {
+    const { getByText, getByLabelText } = ciz([pzt({ ad: 'Eti Arkeoloji', alt: 'Arkeoloji müzesi ve sanat galerisi · 1 sa 30 dk', altTur: 'Arkeoloji müzesi ve sanat galerisi' })], () => undefined);
+    const tur = getByText('Arkeoloji müzesi ve sanat galerisi');
+    expect(tur.props.numberOfLines).toBe(1);
+    expect(duz(tur.props.style).flexShrink).toBe(1);
+    expect(duz(getByText(' · 1 sa 30 dk · ').props.style).flexShrink).toBe(0);
+    expect(duz(getByText('Pzt kapalı').props.style).flexShrink).toBe(0);
+    expect(duz(getByLabelText('Pazartesi kapalı. Başka güne taşı').props.style).flexShrink).toBe(0);
+  });
+
+  it('altParcala: tür ayrı, "· süre ·" sabit; tür yoksa yalnız süre', () => {
+    expect(altParcala({ alt: 'Müze · 1 sa', altTur: 'Müze' })).toEqual({ tur: 'Müze', ara: ' · 1 sa · ' });
+    expect(altParcala({ alt: '1 sa', altTur: null })).toEqual({ tur: null, ara: '1 sa · ' });
+    expect(altParcala({ alt: 'Müze', altTur: 'Müze' })).toEqual({ tur: 'Müze', ara: ' · ' });
+    expect(altParcala({ alt: '', altTur: null })).toEqual({ tur: null, ara: '' });
+  });
+
+  it('saat yoksa (kapali null) uyarı yok; alt satır eskisi gibi', () => {
+    const { queryByText, getByText } = ciz([satir({ kapali: null })], () => undefined);
+    expect(queryByText(/kapalı/)).toBeNull();
+    expect(queryByText(t('plan.baskaGuneTasiBag'))).toBeNull();
+    expect(getByText('Müze · 1 sa')).toBeTruthy();
+  });
+
+  it('ekran okuyucu: bağlantı "Pazartesi kapalı. Başka güne taşı"; satır gün adını tam okur ve özel eylemi durağı verir', () => {
     const tasi = jest.fn();
-    const r = satir({ kapali: 'Pzt kapalı', tasinabilir: true });
+    const r = pzt();
     const { getByLabelText } = ciz([r], tasi);
+    expect(getByLabelText('Pazartesi kapalı. Başka güne taşı')).toBeTruthy();
+    expect(durakEtiketi(r)).toContain('Pazartesi kapalı');
     const dugme = getByLabelText(durakEtiketi(r));
     expect(dugme.props.accessibilityActions).toEqual([{ name: TASI_EYLEMI, label: t('plan.baskaGuneTasi') }]);
     fireEvent(dugme, 'accessibilityAction', { nativeEvent: { actionName: TASI_EYLEMI } });
     expect(tasi).toHaveBeenCalledWith('d1');
   });
 
-  it('"Başka güne taşı" dokunma alanı en az 44 pt (padding ile; hitSlop yok)', () => {
-    const { getByLabelText } = ciz([satir({ kapali: 'Pzt kapalı', tasinabilir: true })], () => undefined);
-    const baglanti = getByLabelText(`Pzt kapalı, ${t('plan.baskaGuneTasi')}`);
-    const stil = Object.assign({}, ...[baglanti.props.style].flat(Infinity).filter(Boolean));
-    expect(stil.minHeight).toBeGreaterThanOrEqual(44);
-    expect(stil.minWidth).toBeGreaterThanOrEqual(44);
-    expect(baglanti.props.hitSlop).toBeUndefined();
+  it('dokunma alanı hitSlop ile 44 pt; bağlantıda dolgu yok (satır yüksekliği uyarısız satırla aynı)', () => {
+    const { getByLabelText } = ciz([pzt()], () => undefined);
+    const baglanti = getByLabelText('Pazartesi kapalı. Başka güne taşı');
+    expect(baglanti.props.hitSlop).toEqual(TASI_HITSLOP);
+    // 13 px metin satırı ~18 pt + üst/alt hitSlop ≥ 44.
+    expect(18 + TASI_HITSLOP.top + TASI_HITSLOP.bottom).toBeGreaterThanOrEqual(44);
+    const stil = duz(baglanti.props.style);
+    for (const k of ['padding', 'paddingVertical', 'paddingTop', 'paddingBottom', 'minHeight', 'height', 'marginVertical']) expect(stil[k]).toBeUndefined();
   });
 
   it('taşınacak gün yoksa bağlantı ve eylem yok; "Pzt kapalı" kalır', () => {

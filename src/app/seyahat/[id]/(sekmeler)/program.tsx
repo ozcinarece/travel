@@ -161,10 +161,11 @@ function gunSilBasligi(gun: Gun): string {
   return gun.date ? `${GUNLER[haftaGunu(gun.date)]} ${parcala(gun.date).gun}` : t('geziSayfasi.gunNo', { n: gun.index });
 }
 
-/** #582 KK3: "Pzt kapalı" (gün kısaltması günün tarihinden); kapalı değilse ya da saat bilinmiyorsa null. */
-function kapaliUyarisi(tarih: string | null, periyotlar: Periyot[] | null | undefined): string | null {
+/** #582 KK3: "Pzt kapalı" (gün kısaltması günün tarihinden) ve ekran okuyucu için "Pazartesi kapalı"; kapalı değilse ya da saat
+ * bilinmiyorsa null (Ürün kararı: KK3 yalnız saat biliniyorsa; liste saat için Google'a istek atmaz). */
+function kapaliUyarisi(tarih: string | null, periyotlar: Periyot[] | null | undefined): { kisa: string; uzun: string } | null {
   const gun = kapaliGunKisa(tarih, periyotlar);
-  return gun ? t('plan.kapaliGun', { gun }) : null;
+  return gun && tarih ? { kisa: t('plan.kapaliGun', { gun }), uzun: t('plan.kapaliGun', { gun: GUNLER[haftaGunu(tarih)] }) } : null;
 }
 
 function gunBasligi(gun: Gun): string {
@@ -1021,9 +1022,12 @@ function ProgramSekmesi({
     const gecildi = !!prog?.bugun && r.durum === 'gecildi';
     const atlandi = r.numara === null;
     // #554 KK2: atlanan durakta "· atlandı" yok; sağdaki "Atlandı" hapı söyler.
-    const alt = [adBilinen ? kategoriEtiketi(r.mekan.primary_type) : null, sureMetni(r.durak.minutes), gecildi ? t('plan.gezildi') : null]
+    const altTur = adBilinen ? kategoriEtiketi(r.mekan.primary_type) : null;
+    const alt = [altTur, sureMetni(r.durak.minutes), gecildi ? t('plan.gezildi') : null]
       .filter(Boolean)
       .join(' · ');
+    // #582 KK3: gezilen ya da atlanan durakta uyarı yok.
+    const kapali = !gecildi && !atlandi && !r.durak.completed_at ? kapaliUyarisi(gun?.date ?? null, periyotlari(r.mekan)) : null;
     const dk = r.gelis ? yuruyusDk(r.gelis) : 0;
     return {
       id: r.durak.id,
@@ -1033,13 +1037,14 @@ function ProgramSekmesi({
       saat: r.varisDk !== null ? dakikaSaat(r.varisDk) : null,
       ad: adGoster(r.mekan),
       alt,
+      altTur,
       gelis: r.gelis ? { metin: t('plan.bacak', { dk: `${r.gelis.kestirim ? '~' : ''}${dk}`, mesafe: kmMetni(r.gelis.m) }), araba: r.gelis.mod === 'taksi' } : null,
       vurgulu: !!prog?.bugun && (r.durum === 'buradasin' || r.durum === 'siradaki'),
       buradasin: !!prog?.bugun && r.durum === 'buradasin',
       gecildi,
       atlandi,
-      // #582 KK3: gezilen ya da atlanan durakta uyarı yok.
-      kapali: !gecildi && !atlandi && !r.durak.completed_at ? kapaliUyarisi(gun?.date ?? null, periyotlari(r.mekan)) : null,
+      kapali: kapali?.kisa ?? null,
+      kapaliUzun: kapali?.uzun ?? null,
       tasinabilir: !!gun && tasinabilirGunler(gunler, gun.id, periyotlari(r.mekan)).length > 0,
     };
   });
