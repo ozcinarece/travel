@@ -227,7 +227,8 @@
       "mozaik": "foto mozaiği",
       "sehir_seckisi": "şehir seçkisi",
       "banner": "banner",
-      "raf": "raf"
+      "raf": "raf",
+      "karsilama": "karşılama görselleri"
     },
     "turAd": {
       "tek_kart": "Tek kart",
@@ -327,7 +328,27 @@
     "turDegisOnay": "Tür değişince içerik silinir; değiştirmek için yeniden seç",
     "gezilerYukleniyor": "Geziler yükleniyor",
     "onizlemeHata": "Geziler okunamadı; önizleme eksik olabilir.",
-    "onizlemeAmacNotu": "Rafların görünmüyor; uygulamanın amaç rafları gösteriliyor"
+    "onizlemeAmacNotu": "Rafların görünmüyor; uygulamanın amaç rafları gösteriliyor",
+    "gorselYukle": "Görsel yükle",
+    "karsilama": {
+      "baslik": "Karşılama görselleri",
+      "ozet": "{n} / {en} görsel · uygulama her açılışta sıradakini gösterir",
+      "ozetBos": "Görsel yok · uygulama Eskişehir'in kapağını gösterir",
+      "ekle": "Görsel ekle",
+      "kural": "Görsel ekle: sürükle ya da seç · JPG/PNG/WebP, en az 1600 px, en çok 8 MB · {n} yer kaldı ·",
+      "dolu": "{en} görsel doldu. Yenisini eklemek için birini sil.",
+      "atif": "Atıf",
+      "atifKaydet": "Atfı kaydet",
+      "onizleEtiket": "{ad} önizle",
+      "onizleKapat": "Önizlemeyi kapat",
+      "onizlemeSira": "{i} / {n}",
+      "sonraki": "Sonraki görsel",
+      "not": "Sıra sürükleyerek değişir. Kendi kendine kayan slayt yok: her açılışta bir sonraki görsel gelir. Uygulama \"Yayınla\"dan sonra görür.",
+      "kartBaslik": "Sıradaki rota neresi?",
+      "kartAlt": "Arkadaşlarını çağır, planı birlikte çıkar",
+      "kartDugme": "Yeni gezi oluştur",
+      "arama": "Nereye gitmek istersin?"
+    }
   },
   "genel": {
     "ust": "GENEL BAKIŞ · {tarih}",

@@ -4,18 +4,25 @@ import { useQuery } from '@tanstack/react-query';
 
 import { supabase } from './supabase';
 
-/** #406: `banner` ve `raf` v6 Keşfet'in bölümleri; eski dört tür (#109) uygulamada artık çizilmez, panelde kalır. */
-export type BolumTuru = 'tek_kart' | 'serit' | 'mozaik' | 'sehir_seckisi' | 'banner' | 'raf';
+/**
+ * #406: `banner` ve `raf` v6 Keşfet'in bölümleri; eski dört tür (#109) uygulamada artık çizilmez, panelde kalır.
+ * #586: `karsilama` ana sayfanın "Sıradaki rota neresi?" kartının görselleri (tek satır).
+ */
+export type BolumTuru = 'tek_kart' | 'serit' | 'mozaik' | 'sehir_seckisi' | 'banner' | 'raf' | 'karsilama';
 export type BolumKaynagi = 'otomatik' | 'elle';
 
 /** #406 KK2: banner'ın dokununca açtığı yer. */
 export type BannerHedefi = { tur: 'gezi' | 'sehir' | 'raf'; id: string };
+/** #586 KK1: karşılama görseli. `atif` {yazar, lisans?, kaynak_url?}; `kaynak` BO'nun foto kaynağı (#111). */
+export type KarsilamaKapagi = { url: string; atif?: unknown; kaynak?: 'kendi' | 'telifsiz' | 'izinli' };
+
 /** #406 KK3 · KK5: raf türü (`arkadaslardan` 26 Kasım paylaşımından sonra dolar; şimdilik çizilmez). */
 export type RafTuru = 'amac' | 'sehir' | 'elle' | 'arkadaslardan';
 
 /**
  * tek_kart: {gezi_id} · serit: {gezi_idler} · mozaik: {yer_idler} · sehir_seckisi: {sehir_idler}. Otomatikte liste boş olabilir.
  * #406 banner: {ust_yazi, kapak_url, kapak_atif, hedef} · raf: {raf_turu, amac | sehir_id | gezi_idler}.
+ * #586 karsilama: {kapaklar}.
  */
 export type BolumIcerigi = {
   gezi_id?: string | null;
@@ -29,6 +36,7 @@ export type BolumIcerigi = {
   raf_turu?: RafTuru;
   amac?: string;
   sehir_id?: string;
+  kapaklar?: KarsilamaKapagi[];
 };
 
 export type AnaSayfaBolumu = {
@@ -121,7 +129,8 @@ export function bolumKimlikleri(
       return varOlan(b.icerik.sehir_idler, kaynak.sehirler).slice(0, enFazla);
     case 'banner':
     case 'raf':
-      // #406: v6 bölümleri `features/anasayfa/raflar.ts` ile çözülür.
+    case 'karsilama':
+      // #406: v6 bölümleri `features/anasayfa/raflar.ts` ile çözülür; #586 karşılama görselleri kimlik değil.
       return [];
   }
 }

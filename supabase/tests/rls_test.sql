@@ -728,6 +728,59 @@ delete from public.ana_sayfa_bolumleri where sira between 20 and 24;
 select public.ana_sayfa_yayinla();
 reset role;
 
+-- #586 KK1: karşılama görselleri (`karsilama`). Yazma yalnız admin (mevcut kural); tek satır; içerik CHECK ile denetlenir.
+set role authenticated;
+select pg_temp.as_email(:B, 'b@ornek.com');
+select pg_temp.hata_bekle($$insert into public.ana_sayfa_bolumleri (tur, baslik, sira, icerik) values ('karsilama', 'x', 40, '{"kapaklar": []}')$$, '42501');
+select pg_temp.as_email(:E, 'ozcinar.ece@gmail.com');
+insert into public.ana_sayfa_bolumleri (tur, baslik, sira, icerik) values
+  ('karsilama', 'Karşılama görselleri', 40, '{"kapaklar": [
+    {"url": "https://xwqeobelyeuzoxyuvauw.supabase.co/storage/v1/object/public/icerik/anasayfa/1a2b3c4d-kis.webp", "kaynak": "kendi"},
+    {"url": "https://upload.wikimedia.org/wikipedia/commons/a/ab/K.jpg", "atif": {"yazar": "Ali", "lisans": "CC BY 4.0"}, "kaynak": "telifsiz"}]}');
+-- İkinci karşılama satırı olmaz.
+select pg_temp.hata_bekle($$insert into public.ana_sayfa_bolumleri (tur, baslik, sira, icerik) values ('karsilama', 'x', 41, '{"kapaklar": []}')$$, '23505');
+-- Biçim: fazladan anahtar, dizi olmayan kapaklar, Google adresi, yol hilesi, bozuk atıf, bilinmeyen kaynak, atıfsız Commons, aynı görsel iki kez, 9 görsel.
+select pg_temp.hata_bekle($$update public.ana_sayfa_bolumleri set icerik = '{"kapaklar": [], "baska": 1}' where tur = 'karsilama'$$, '23514');
+select pg_temp.hata_bekle($$update public.ana_sayfa_bolumleri set icerik = '{}' where tur = 'karsilama'$$, '23514');
+select pg_temp.hata_bekle($$update public.ana_sayfa_bolumleri set icerik = '{"kapaklar": {"url": "x"}}' where tur = 'karsilama'$$, '23514');
+select pg_temp.hata_bekle($$update public.ana_sayfa_bolumleri set icerik = '{"kapaklar": [{"url": "https://lh3.googleusercontent.com/p/abc"}]}' where tur = 'karsilama'$$, '23514');
+select pg_temp.hata_bekle($$update public.ana_sayfa_bolumleri set icerik = '{"kapaklar": [{"url": "https://xwqeobelyeuzoxyuvauw.supabase.co/storage/v1/object/public/icerik/../avatars/u1/a.jpg"}]}' where tur = 'karsilama'$$, '23514');
+select pg_temp.hata_bekle($$update public.ana_sayfa_bolumleri set icerik = '{"kapaklar": [{"url": "https://xwqeobelyeuzoxyuvauw.supabase.co/storage/v1/object/public/icerik/anasayfa/a.webp", "atif": {"lisans": "CC0"}}]}' where tur = 'karsilama'$$, '23514');
+select pg_temp.hata_bekle($$update public.ana_sayfa_bolumleri set icerik = '{"kapaklar": [{"url": "https://xwqeobelyeuzoxyuvauw.supabase.co/storage/v1/object/public/icerik/anasayfa/a.webp", "kaynak": "google"}]}' where tur = 'karsilama'$$, '23514');
+select pg_temp.hata_bekle($$update public.ana_sayfa_bolumleri set icerik = '{"kapaklar": [{"url": "https://xwqeobelyeuzoxyuvauw.supabase.co/storage/v1/object/public/icerik/anasayfa/a.webp", "baska": 1}]}' where tur = 'karsilama'$$, '23514');
+select pg_temp.hata_bekle($$update public.ana_sayfa_bolumleri set icerik = '{"kapaklar": [{"url": "https://upload.wikimedia.org/wikipedia/commons/a/ab/K.jpg"}]}' where tur = 'karsilama'$$, '23514');
+select pg_temp.hata_bekle($$update public.ana_sayfa_bolumleri set icerik = '{"kapaklar": [{"url": "https://xwqeobelyeuzoxyuvauw.supabase.co/storage/v1/object/public/icerik/anasayfa/a.webp"}, {"url": "https://xwqeobelyeuzoxyuvauw.supabase.co/storage/v1/object/public/icerik/anasayfa/a.webp"}]}' where tur = 'karsilama'$$, '23514');
+select pg_temp.hata_bekle($$update public.ana_sayfa_bolumleri set icerik = jsonb_build_object('kapaklar', (select jsonb_agg(jsonb_build_object('url', 'https://xwqeobelyeuzoxyuvauw.supabase.co/storage/v1/object/public/icerik/anasayfa/' || n || '.webp')) from generate_series(1, 9) n)) where tur = 'karsilama'$$, '23514');
+-- 8 görsel geçer.
+update public.ana_sayfa_bolumleri set icerik = jsonb_build_object('kapaklar', (select jsonb_agg(jsonb_build_object('url', 'https://xwqeobelyeuzoxyuvauw.supabase.co/storage/v1/object/public/icerik/anasayfa/' || n || '.webp') order by n) from generate_series(1, 8) n)) where tur = 'karsilama';
+update public.ana_sayfa_bolumleri set icerik = '{"kapaklar": [
+    {"url": "https://xwqeobelyeuzoxyuvauw.supabase.co/storage/v1/object/public/icerik/anasayfa/1a2b3c4d-kis.webp", "kaynak": "kendi"},
+    {"url": "https://upload.wikimedia.org/wikipedia/commons/a/ab/K.jpg", "atif": {"yazar": "Ali", "lisans": "CC BY 4.0"}, "kaynak": "telifsiz"}]}' where tur = 'karsilama';
+-- Yayından önce uygulama görmez; yayından sonra anon karşılama görsellerini sırayla okur.
+set role anon;
+do $$ begin assert not exists (select 1 from public.ana_sayfa_gorunen where tur = 'karsilama'), '#586: yayın öncesi karşılama görünmez'; end $$;
+set role authenticated;
+select pg_temp.as_email(:E, 'ozcinar.ece@gmail.com');
+select public.ana_sayfa_yayinla();
+set role anon;
+do $$
+begin
+  assert (select jsonb_array_length(icerik -> 'kapaklar') from public.ana_sayfa_gorunen where tur = 'karsilama') = 2, '#586: anon karşılama görsellerini okur';
+  assert (select icerik -> 'kapaklar' -> 1 -> 'atif' ->> 'yazar' from public.ana_sayfa_gorunen where tur = 'karsilama') = 'Ali', '#586: atıf okunur';
+end $$;
+-- Kapalı karşılama uygulamada görünmez.
+set role authenticated;
+select pg_temp.as_email(:E, 'ozcinar.ece@gmail.com');
+update public.ana_sayfa_bolumleri set acik = false where tur = 'karsilama';
+select public.ana_sayfa_yayinla();
+set role anon;
+do $$ begin assert not exists (select 1 from public.ana_sayfa_gorunen where tur = 'karsilama'), '#586: kapalı karşılama görünmez'; end $$;
+set role authenticated;
+select pg_temp.as_email(:E, 'ozcinar.ece@gmail.com');
+delete from public.ana_sayfa_bolumleri where tur = 'karsilama';
+select public.ana_sayfa_yayinla();
+reset role;
+
 -- ---------------------------------------------------------------- #110: genel bakış (sayaç, ayarlar, özet)
 reset role;
 -- Sayaç yalnız service_role ile artar; aynı gün aynı işlev birikir.

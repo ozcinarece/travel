@@ -3,8 +3,10 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useCallback } from 'react';
 
+import { icerikFotoUrl } from '@/lib/markdown';
 import { supabase } from '@/lib/supabase';
 
+import { anaSayfaGorselYolu } from './anaSayfa';
 import { fotoDenetle, fotoYolu } from './gezi';
 import { hataVer } from './geziSorgulari';
 import { boyutYolu, SEHIR_FOTO, sehirFotoDenetle, sehirFotoYolu } from './sehir';
@@ -93,6 +95,26 @@ export function useFotoIslemleri(tur: SahipTuru, sahipId: string) {
         if (error) throw error;
       }),
   };
+}
+
+/** #586: ana sayfa görselinin kopyaları (ana 2400; uygulama küçük ekranda `@1200`ü seçebilir). */
+export const ANA_SAYFA_BOYUTLARI = [2400, 1200] as const;
+
+/**
+ * #586 KK2 · KK4: karşılama ve banner görseli yükler; şehir fotoğrafı deseniyle (tür/boyut denetimi, tarayıcıda WebP, 2400 /
+ * 1200 kopya) `icerik/anasayfa/` altına. `icerik_fotolari`'na satır yazılmaz: görsel bölümün içeriğinde durur. Herkese açık
+ * adres döner (banner adres kuralına uyar). Listeden çıkarılan görselin dosyası kovada kalır: son yayın onu hâlâ gösterebilir.
+ */
+export async function anaSayfaGorseliYukle(dosya: File): Promise<string> {
+  const sorun = sehirFotoDenetle(dosya);
+  if (sorun) throw new Error(`foto_${sorun}`);
+  const yol = anaSayfaGorselYolu(dosya.name, globalThis.crypto.randomUUID());
+  const w = await webpUret(dosya, undefined, ANA_SAYFA_BOYUTLARI);
+  for (const k of w.kopyalar) {
+    const { error } = await supabase.storage.from('icerik').upload(boyutYolu(yol, k.boyut), k.blob, { contentType: 'image/webp', upsert: false });
+    if (error) throw error;
+  }
+  return icerikFotoUrl(yol);
 }
 
 /** Yükleme hatası → kullanıcı metni anahtarı. */

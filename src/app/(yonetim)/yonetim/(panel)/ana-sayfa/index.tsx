@@ -6,10 +6,12 @@ import { Hap } from '@/components/yonetim/Hap';
 import { YonetimSayfasi } from '@/components/yonetim/Kabuk';
 import { AnaSayfaOnizleme, ANA_SAYFA_TELEFON } from '@/components/yonetim/anaSayfa/AnaSayfaOnizleme';
 import { BolumSatiri } from '@/components/yonetim/anaSayfa/BolumSatiri';
+import { KarsilamaGorselleri } from '@/components/yonetim/anaSayfa/KarsilamaGorselleri';
 import { yRenk } from '@/components/yonetim/tema';
 import { RAF_EN_AZ, rafGezileri } from '@/features/anasayfa/raflar';
-import { bannerUyarisi, paneldeSirala, planliSatirlar, yayindanFarkli, yeniBolum } from '@/features/yonetim/anaSayfa';
+import { bannerUyarisi, karsilamaEkle, karsilamaKapaklari, paneldeSirala, planliSatirlar, sabitSatirSayisi, yayindanFarkli, yeniBolum, yeniKarsilama } from '@/features/yonetim/anaSayfa';
 import { useBolumIslemleri, useSonYayin, useTaslakBolumler, useYayindakiAkis } from '@/features/yonetim/anaSayfaSorgulari';
+import { anaSayfaGorseliYukle, fotoHataAnahtari } from '@/features/yonetim/fotolar';
 import { saatMetni, tasi } from '@/features/yonetim/gezi';
 import { useYonetimGezileri, useYonetimSehirleri } from '@/features/yonetim/geziSorgulari';
 import { ty } from '@/features/yonetim/metin';
@@ -38,7 +40,10 @@ export default function AnaSayfaDuzeniSayfasi() {
   const [kirliler, setKirliler] = useState<ReadonlySet<string>>(new Set());
   const bolumler = taslak.data ?? [];
   const liste = useMemo(() => paneldeSirala(bolumler), [bolumler]);
-  const bannerSayisi = liste.filter((b) => b.tur === 'banner').length;
+  // #586 KK2: karşılama + banner'lar başta sabit; raflar onların üstüne bırakılamaz.
+  const sabitSayisi = sabitSatirSayisi(liste);
+  const karsilama = liste.find((b) => b.tur === 'karsilama') ?? null;
+  const kapaklar = karsilamaKapaklari(karsilama);
   const akis = useYayindakiAkis();
   const gorunen = useMemo(() => gorunenBolumler(bolumler), [bolumler]);
   const rafSayilari = useMemo(
@@ -86,6 +91,28 @@ export default function AnaSayfaDuzeniSayfasi() {
       setHata(ty('gezi.islemHata'));
     }
   };
+  /** #586 KK2: seçilen görseller sırayla yüklenir, sonra tek yazımla sona eklenir; ilk görselde karşılama satırı kurulur. */
+  const karsilamaYukle = async (dosyalar: File[]) => {
+    setHata(null);
+    const yeni: { url: string }[] = [];
+    let sorun: unknown = null;
+    for (const d of dosyalar) {
+      try {
+        yeni.push({ url: await anaSayfaGorseliYukle(d) });
+      } catch (e) {
+        sorun = e;
+      }
+    }
+    try {
+      if (yeni.length) {
+        if (karsilama) await is.guncelle(karsilama.id, { icerik: { kapaklar: karsilamaEkle(kapaklar, yeni) } });
+        else await is.ekle(yeniKarsilama(bolumler, ty('anaSayfa.karsilama.baslik'), karsilamaEkle([], yeni)));
+      }
+      if (sorun) setHata(ty(`sehir.fotoHata.${fotoHataAnahtari(sorun)}`));
+    } catch {
+      setHata(ty('gezi.islemHata'));
+    }
+  };
   const durumMetni = farkli ? ty('anaSayfa.bekleyen') : yayin.data ? ty('anaSayfa.yayinlandi', { saat: saatMetni(new Date(yayin.data.yayinlandi_at)) }) : null;
 
   return (
@@ -106,25 +133,34 @@ export default function AnaSayfaDuzeniSayfasi() {
             <Text style={s.hata}>{hata}</Text>
           </Pressable>
         ) : null}
-        {liste.map((b, i) => (
-          <BolumSatiri
-            key={b.id}
-            bolum={b}
-            indeks={i}
-            secenekler={secenekler}
-            acik={acikId === b.id}
-            uyari={uyari(b)}
-            onKirli={(k) => kirliDegis(b.id, k)}
-            onAcKapa={() => setAcikId(acikId === b.id ? null : b.id)}
-            onGuncelle={(alanlar) => dene(is.guncelle(b.id, alanlar))}
-            onSil={() => {
-              kirliDegis(b.id, false);
-              return dene(is.sil(b.id));
-            }}
-            // Banner'lar başta sabit: raf onların üstüne bırakılamaz.
-            onBirak={(k, h) => dene(is.sirala(tasi(liste, k, Math.max(h, bannerSayisi))))}
-          />
-        ))}
+        <KarsilamaGorselleri
+          bolum={karsilama}
+          kapaklar={kapaklar}
+          onYukle={karsilamaYukle}
+          onYaz={(k) => karsilama && dene(is.guncelle(karsilama.id, { icerik: { kapaklar: k } }))}
+          onAcik={(acik) => karsilama && dene(is.guncelle(karsilama.id, { acik }))}
+        />
+        {liste.map((b, i) =>
+          b.tur === 'karsilama' ? null : (
+            <BolumSatiri
+              key={b.id}
+              bolum={b}
+              indeks={i}
+              secenekler={secenekler}
+              acik={acikId === b.id}
+              uyari={uyari(b)}
+              onKirli={(k) => kirliDegis(b.id, k)}
+              onAcKapa={() => setAcikId(acikId === b.id ? null : b.id)}
+              onGuncelle={(alanlar) => dene(is.guncelle(b.id, alanlar))}
+              onSil={() => {
+                kirliDegis(b.id, false);
+                return dene(is.sil(b.id));
+              }}
+              // Karşılama ve banner'lar başta sabit: raf onların üstüne bırakılamaz.
+              onBirak={(k, h) => dene(is.sirala(tasi(liste, k, Math.max(h, sabitSayisi))))}
+            />
+          ),
+        )}
         <View style={s.ekleSatiri}>
           <Pressable accessibilityRole="button" onPress={() => ekle('raf')} style={s.ekle}>
             <Text style={s.ekleMetin}>{ty('anaSayfa.ekleRaf')}</Text>

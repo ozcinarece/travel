@@ -1,7 +1,9 @@
 // #109 ana sayfa düzeni — panelin saf kuralları: satır özeti, planlı yayın metni, yeni bölüm, taslak/yayın farkı. Testli.
 import { t } from '@/i18n';
-import type { AnaSayfaBolumu, BannerHedefi, BolumTuru, RafTuru } from '@/lib/anaSayfa';
+import type { AnaSayfaBolumu, BannerHedefi, BolumTuru, KarsilamaKapagi, RafTuru } from '@/lib/anaSayfa';
 import { AYLAR_KISA } from '@/lib/takvim';
+
+import { sadeDosyaKoku } from './sehir';
 
 /** Taslak satırı (tablo): görünümdeki alanlar + açık/kapalı. */
 export type TaslakBolum = AnaSayfaBolumu & { acik: boolean };
@@ -16,7 +18,7 @@ export const BANNER_HEDEF_TURLERI = ['gezi', 'sehir', 'raf'] as const satisfies 
 
 /** v6 Keşfet'te çizilmeyen eski tür mü (panelde gri, "v6'da görünmez"). */
 export function eskiTurMu(tur: BolumTuru): boolean {
-  return tur !== 'banner' && tur !== 'raf';
+  return tur !== 'banner' && tur !== 'raf' && tur !== 'karsilama';
 }
 
 /** v6 türünün boş içeriği (tür değişince eski alanlar düşer). Raf elle ve boş başlar; banner hedefsiz. */
@@ -171,7 +173,63 @@ export function icerikDoluMu(b: Pick<AnaSayfaBolumu, 'tur' | 'icerik'>): boolean
  */
 export function paneldeSirala<T extends Pick<AnaSayfaBolumu, 'tur' | 'sira'>>(bolumler: readonly T[]): T[] {
   const sirali = [...bolumler].sort((a, c) => a.sira - c.sira);
-  return [...sirali.filter((b) => b.tur === 'banner'), ...sirali.filter((b) => b.tur !== 'banner')];
+  // #586 KK2: karşılama görselleri en üstte, sabit.
+  const sabit = (b: T) => b.tur === 'karsilama' || b.tur === 'banner';
+  return [...sirali.filter((b) => b.tur === 'karsilama'), ...sirali.filter((b) => b.tur === 'banner'), ...sirali.filter((b) => !sabit(b))];
+}
+
+/** Listenin başındaki sabit satırlar (karşılama + banner'lar): sürüklenen bölüm bunların üstüne bırakılamaz. */
+export function sabitSatirSayisi(bolumler: readonly Pick<AnaSayfaBolumu, 'tur'>[]): number {
+  return bolumler.filter((b) => b.tur === 'karsilama' || b.tur === 'banner').length;
+}
+
+// ---------------------------------------------------------------- #586 karşılama görselleri
+
+/** KK1: en çok bu kadar karşılama görseli (DB kuralı). */
+export const KARSILAMA_EN_COK = 8;
+
+/** Karşılama satırının görselleri (bozuk öğe düşer). */
+export function karsilamaKapaklari(b: Pick<AnaSayfaBolumu, 'icerik'> | null | undefined): KarsilamaKapagi[] {
+  const k = b?.icerik.kapaklar;
+  return Array.isArray(k) ? k.filter((x): x is KarsilamaKapagi => !!x && typeof x.url === 'string') : [];
+}
+
+/** Kaç görsel daha eklenebilir (en çok 8). */
+export function karsilamaKalan(kapaklar: readonly KarsilamaKapagi[]): number {
+  return Math.max(0, KARSILAMA_EN_COK - kapaklar.length);
+}
+
+/** Yeni görselleri sona ekler: aynı adres iki kez girmez, 8'i aşan düşer (DB kuralı). */
+export function karsilamaEkle(kapaklar: readonly KarsilamaKapagi[], yeni: readonly KarsilamaKapagi[]): KarsilamaKapagi[] {
+  const sonuc = [...kapaklar];
+  for (const k of yeni) {
+    if (sonuc.length >= KARSILAMA_EN_COK) break;
+    if (!sonuc.some((x) => x.url === k.url)) sonuc.push(k);
+  }
+  return sonuc;
+}
+
+/** Bir görselin atfını ya da kaynağını değiştirir; boş alan silinir (DB fazladan ya da boş anahtar kabul etmez). */
+export function karsilamaGuncelle(kapaklar: readonly KarsilamaKapagi[], url: string, degisen: Partial<Omit<KarsilamaKapagi, 'url'>>): KarsilamaKapagi[] {
+  return kapaklar.map((k) => {
+    if (k.url !== url) return k;
+    const yeni: KarsilamaKapagi = { url: k.url };
+    const atif = 'atif' in degisen ? degisen.atif : k.atif;
+    const kaynak = 'kaynak' in degisen ? degisen.kaynak : k.kaynak;
+    if (atif) yeni.atif = atif;
+    if (kaynak) yeni.kaynak = kaynak;
+    return yeni;
+  });
+}
+
+/** İlk görsel eklenince kurulan karşılama satırı: açık, elle; sırası sonda (panel onu yine en üstte gösterir). */
+export function yeniKarsilama(bolumler: readonly { sira: number }[], baslik: string, kapaklar: KarsilamaKapagi[]): Omit<TaslakBolum, 'id'> {
+  return { tur: 'karsilama', baslik, sira: Math.max(0, ...bolumler.map((b) => b.sira)) + 1, acik: true, kaynak: 'elle', icerik: { kapaklar }, baslangic_at: null, bitis_at: null };
+}
+
+/** Yükleme yolu: `anasayfa/<önek>-<ad>.webp` (ad sadeleşir; `icerik` kovası, banner adres kuralına uyar). */
+export function anaSayfaGorselYolu(dosyaAdi: string, onek: string): string {
+  return `anasayfa/${onek.slice(0, 8)}-${sadeDosyaKoku(dosyaAdi) || 'gorsel'}.webp`;
 }
 
 export type BannerUyarisi = 'hedefYayinda' | 'rafAz' | 'ikinci';

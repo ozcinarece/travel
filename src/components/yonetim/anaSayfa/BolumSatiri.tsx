@@ -3,7 +3,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 
 import { AKIS_AMACLARI } from '@/features/icerik/amaclar';
-import { kapakAtfiOku } from '@/features/icerik/kapakAtfi';
+import { kapakAtfiOku, TRIPMATE } from '@/features/icerik/kapakAtfi';
 import {
   BANNER_HEDEF_TURLERI,
   bannerAdresiGecerli,
@@ -22,6 +22,7 @@ import {
   type BannerUyarisi,
   type TaslakBolum,
 } from '@/features/yonetim/anaSayfa';
+import { anaSayfaGorseliYukle, fotoHataAnahtari } from '@/features/yonetim/fotolar';
 import { tasi, yerelTarihGirdisi, yerelTarihtenIso } from '@/features/yonetim/gezi';
 import { ty } from '@/features/yonetim/metin';
 import { t } from '@/i18n';
@@ -30,7 +31,7 @@ import { yazi } from '@/theme';
 
 import { Alan, AlanSatiri, MetinKutusu, SecimKutusu, TarihKutusu } from '../Form';
 import { Hap } from '../Hap';
-import { useSuruklenen } from '../surukle';
+import { dosyaSec, useSuruklenen } from '../surukle';
 import { yRenk } from '../tema';
 
 type Adli = { id: string; ad: string };
@@ -355,6 +356,23 @@ function BannerAlanlari({
     setGorselHata(null);
     yaz({ kapak_url: a, kapak_atif: { yazar: yazar.trim(), ...(lisans.trim() ? { lisans: lisans.trim() } : {}), ...(k ? { kaynak_url: k } : {}) } });
   };
+  // #586 KK4: "Görsel yükle" dosyayı `icerik/anasayfa/`e yükler, adresi alana yazar; atıf boşsa kendi fotoğrafımız
+  // ("Tripmate"). Kayıt yine "Görseli kaydet" ile (kaydedilmeden "Görsel kaydedilmedi" uyarısı görünür).
+  const [yukleniyor, setYukleniyor] = useState(false);
+  const gorselYukle = () =>
+    dosyaSec(false, async ([dosya]) => {
+      if (!dosya) return;
+      setYukleniyor(true);
+      setGorselHata(null);
+      try {
+        setAdres(await anaSayfaGorseliYukle(dosya));
+        if (!yazar.trim()) setYazar(TRIPMATE);
+      } catch (e) {
+        setGorselHata({ alan: 'adres', metin: ty(`sehir.fotoHata.${fotoHataAnahtari(e)}`) });
+      } finally {
+        setYukleniyor(false);
+      }
+    });
   const gorselKaldir = () => {
     setAdres('');
     setYazar('');
@@ -427,6 +445,7 @@ function BannerAlanlari({
         </Text>
       ) : null}
       <View style={s.gorselEylem}>
+        <Hap kucuk baslik={ty('anaSayfa.gorselYukle')} onPress={gorselYukle} yukleniyor={yukleniyor} />
         <Hap kucuk baslik={ty('anaSayfa.gorselKaydet')} onPress={gorselKaydet} />
         {/* #438 inceleme 3 (3. tur): Yayınla uyarısı bu düğmeyi gösteriyor; kaydedilmemiş görsel varken de görünür. */}
         {i.kapak_url || kirli ? <Hap kucuk baslik={ty('anaSayfa.gorselKaldir')} onPress={gorselKaldir} /> : null}
