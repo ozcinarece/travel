@@ -7,6 +7,7 @@ import { Alert } from 'react-native';
 import ArkadaslarEkrani from '@/app/(tabs)/(menu)/arkadaslar';
 import type { Arkadas, ArkadasPaylasimi } from '@/features/arkadaslar/sorgular';
 import { gecenZaman } from '@/features/arkadaslar/zaman';
+import { yerelTarih } from '@/lib/zaman';
 
 jest.mock('react-native-safe-area-context', () => jest.requireActual<{ default: object }>('react-native-safe-area-context/jest/mock').default);
 jest.mock('@/components/seyahatler/SeyahatKapagi', () => ({ SeyahatKapagi: () => null }));
@@ -156,7 +157,8 @@ describe('#407 Arkadaşlar', () => {
     expect(mockPush).toHaveBeenCalledWith('/(tabs)/yeni');
     expect(mockPaylas).not.toHaveBeenCalled();
 
-    const bugun = new Date().toISOString().slice(0, 10);
+    // Seyahat günü trips.tz ile hesaplanır; UTC tarihi İstanbul gece yarısından sonra bir gün geride kalır.
+    const bugun = yerelTarih(new Date(), 'Europe/Istanbul');
     mockDurum.seyahatler = [{ id: 'T1', name: null, city_label: 'Bursa', start_date: bugun, end_date: bugun, tz: 'Europe/Istanbul' }];
     mockPush.mockClear();
     render(<ArkadaslarEkrani />);
