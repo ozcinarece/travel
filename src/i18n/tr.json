@@ -148,6 +148,80 @@
     "ibanNot": "Yalnız sana borcu olan seyahat arkadaşların görür; Bakiyeler'de yanında yazılır.",
     "ibanGecersiz": "Bu IBAN geçerli görünmüyor."
   },
+  "profilV12": {
+    "geri": "Geri",
+    "duzenle": "Düzenle",
+    "ilSayisi": "{n} il",
+    "yolArkadasi": "{n} yol arkadaşı",
+    "haritaSayi": "/ 81 il",
+    "haritaEtiket": "Türkiye haritası: {gidilen} il gidildi, {istek} il gitmek isteniyor",
+    "lejant": {
+      "gittigi": "Gittiği",
+      "istedigi": "Gitmek istediği",
+      "gittigin": "Gittiğin",
+      "istedigin": "Gitmek istediğin"
+    },
+    "gizlilik": {
+      "friends": "Haritanı arkadaşların görüyor",
+      "everyone": "Haritanı birlikte gezdiğin kişiler görüyor",
+      "me": "Haritanı yalnız sen görüyorsun",
+      "degistir": "Değiştir"
+    },
+    "istek": {
+      "baslik": "Gitmek istediği yerler",
+      "baslikKendi": "Gitmek istediğin yerler",
+      "ekle": "+ Ekle",
+      "ekleEtiket": "Gitmek istediğin il ekle",
+      "ikinizDe": "İKİNİZ DE",
+      "cipEtiket": "{il}, gezi planla",
+      "cipOrtakEtiket": "{il}, ikiniz de gitmek istiyorsunuz, gezi planla"
+    },
+    "rozet": {
+      "baslik": "Rozetler",
+      "baslikKendi": "Rozetlerin",
+      "lezzet": "Lezzet",
+      "doga": "Doğa",
+      "kultur": "Kültür",
+      "ekip": "Ekip",
+      "planci": "Plancı",
+      "lezzetAlt": "{n} yöresel durak",
+      "dogaAlt": "{n} doğa rotası",
+      "kulturAlt": "{n} kültür durağı",
+      "ekipAlt": "Aynı ekiple {n} gezi",
+      "planciAlt": "{n} geziyi kurdu",
+      "henuzYok": "Henüz yok"
+    },
+    "geziler": {
+      "baslik": "Gezileri",
+      "baslikKendi": "Gezilerin",
+      "tumu": "Tümü",
+      "satir": "{sehir} · {n} gün",
+      "kaldi": "{n} gün kaldı",
+      "bugun": "Bugün · {n}. gün",
+      "ac": "Aç",
+      "paylas": "Paylaş",
+      "rotayiAl": "Rotayı al"
+    },
+    "planla": "{ad} ile gezi planla",
+    "ilSecici": {
+      "baslik": "Gitmek istediğin yerler",
+      "ara": "İl ara"
+    },
+    "yukleniyor": "Profil yükleniyor",
+    "hata": "Profil yüklenemedi.",
+    "tekrarDene": "Tekrar dene",
+    "yok": "Bu profili göremiyorsun.",
+    "lisanslar": "Lisanslar"
+  },
+  "lisanslar": {
+    "baslik": "Lisanslar",
+    "haritaBaslik": "Türkiye il haritası",
+    "haritaKaynak": "turkey-map-react 2.4.6 · MIT Lisansı",
+    "haritaMetin": "MIT License\n\nCopyright (c) 2020 Erdi Gökçe\n\nPermission is hereby granted, free of charge, to any person obtaining a copy\nof this software and associated documentation files (the \"Software\"), to deal\nin the Software without restriction, including without limitation the rights\nto use, copy, modify, merge, publish, distribute, sublicense, and/or sell\ncopies of the Software, and to permit persons to whom the Software is\nfurnished to do so, subject to the following conditions:\n\nThe above copyright notice and this permission notice shall be included in all\ncopies or substantial portions of the Software.\n\nTHE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\nIMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,\nFITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE\nAUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\nLIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\nOUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE\nSOFTWARE.",
+    "nomakKaynak": "svg-turkiye-haritasi · MIT Lisansı",
+    "nomakMetin": "The MIT License (MIT)\n\nCopyright (c) 2015 - Doğukan Güven Nomak\n\nPermission is hereby granted, free of charge, to any person obtaining a copy\nof this software and associated documentation files (the \"Software\"), to deal\nin the Software without restriction, including without limitation the rights\nto use, copy, modify, merge, publish, distribute, sublicense, and/or sell\ncopies of the Software, and to permit persons to whom the Software is\nfurnished to do so, subject to the following conditions:\n\nThe above copyright notice and this permission notice shall be included in all\ncopies or substantial portions of the Software.\n\nTHE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\nIMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,\nFITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE\nAUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\nLIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\nOUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE\nSOFTWARE.",
+    "altlik": "Harita altlığı: Wikimedia Commons, Turkey_provinces_blank_gray.svg"
+  },
   "hesapSil": {
     "baslik": "Hesabı sil",
     "aciklama": "Hesabın, profilin ve fotoğrafın kalıcı olarak silinir. Bu işlem geri alınamaz.",
@@ -705,7 +779,11 @@
       "araHata": "Arama şu an yapılamıyor. Tekrar dene.",
       "sonucYok": "Sonuç yok",
       "kaldir": "Şehri kaldır",
-      "kilitli": "Seyahat oluştu; şehir artık değiştirilemez. Başka şehir için Yeni'den yeni seyahat kur.",
+      "sehirDegistiBaslik": "Şehir {sehir} olsun mu?",
+      "sehirDegisti": "Seçtiğin {n} yer listeden çıkar.",
+      "veriBekleniyor": "Seyahatin bilgileri henüz gelmedi. Birazdan tekrar dene.",
+      "sehirDegistiDevam": "Devam et",
+      "sehirHata": "Şehir değiştirilemedi. Tekrar dener misin?",
       "oneriler": "ÖNERİLER",
       "onerilerNot": "Bu şehirlerde rehber, öne çıkan mekanlar ve hazır geziler var."
     },
@@ -713,7 +791,12 @@
       "baslik": "Ne zaman?",
       "atla": "Tarihim belli değil",
       "ozetYok": "Gidiş gününe dokun",
-      "kilitli": "Tarihler kaydedildi; tarihi Program'dan değiştir (gün ekle / sil).",
+      "donusIpucu": "Dönüş günü?",
+      "kacGun": "Kaç gün?",
+      "gunSayisi": "{n} gün",
+      "gunAzalt": "Bir gün azalt",
+      "gunArttir": "Bir gün artır",
+      "tarihHata": "Tarihler kaydedilemedi. Tekrar dener misin?",
       "hata": "Seyahat oluşturulamadı. Tekrar dener misin?",
       "oncekiAy": "Önceki ay",
       "sonrakiAy": "Sonraki ay",
@@ -739,6 +822,8 @@
     "onerilenler": {
       "baslik": "Neleri görmek istersin?",
       "alt": "Seçtiklerini yakınlığa göre günlere biz dağıtalım.",
+      "veriHata": "Seyahatin bilgileri yüklenemedi.",
+      "tekrarDene": "Tekrar dene",
       "cip": {
         "gormen": "Görmen gerekenler",
         "yemek": "Yemek",

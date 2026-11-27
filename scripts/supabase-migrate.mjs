@@ -4,7 +4,8 @@
 // yeniden çalıştırmak güvenlidir, yalnızca yeni dosyalar uygulanır.
 import { readdir, readFile } from 'node:fs/promises';
 import path from 'node:path';
-import { veriSilebilir } from './veri-silen.mjs';
+import { hataMaskele } from './hata-maskele.mjs';
+import { bekciSonuclari } from './veri-silen.mjs';
 
 const token = process.env.SUPABASE_ACCESS_TOKEN;
 const ref = process.env.SUPABASE_PROJECT_REF;
@@ -20,7 +21,8 @@ async function sorgu(sql) {
     body: JSON.stringify({ query: sql }),
   });
   const metin = await cevap.text();
-  if (!cevap.ok) throw new Error(`HTTP ${cevap.status}: ${metin.slice(0, 1000)}`);
+  // #526 KK5: gövdedeki satır değerleri (`Key (…)=(…)`, `DETAIL:`) loga girmeden maskelenir.
+  if (!cevap.ok) throw new Error(`HTTP ${cevap.status}: ${hataMaskele(metin).slice(0, 1000)}`);
   try {
     return JSON.parse(metin);
   } catch {
@@ -46,12 +48,13 @@ const dosyalar = (await readdir(klasor)).filter((d) => d.endsWith('.sql')).sort(
 // Yalnız bekleyen dosyalara bakılır; eskiden uygulanmış dosyalardaki kalıplar durdurmaz, önceki bir çalışmada
 // düşüp bekleyen dosya da atlanmaz.
 // Kalıplar: scripts/veri-silen.mjs (testi scripts/veri-silen.test.mjs).
+// #526: her dosya kendisinden önceki bütün migration'ların fonksiyon haritasıyla değerlendirilir; önceki bir
+// dosyada tanımlanmış silen fonksiyonu çağıran bekleyen dosya da durdurur.
 if (process.env.VERI_SILEN_DURDUR === '1') {
-  const riskli = [];
-  for (const dosya of dosyalar) {
-    if (uygulanan.has(dosya.split('_')[0])) continue;
-    if (veriSilebilir(await readFile(path.join(klasor, dosya), 'utf8'))) riskli.push(dosya);
-  }
+  const metinler = [];
+  for (const dosya of dosyalar) metinler.push({ ad: dosya, sql: await readFile(path.join(klasor, dosya), 'utf8') });
+  const sonuclar = bekciSonuclari(metinler);
+  const riskli = dosyalar.filter((dosya) => !uygulanan.has(dosya.split('_')[0]) && sonuclar.get(dosya));
   if (riskli.length > 0) {
     console.error(
       `::error::veri silen migration: ece-karari gerekli, Ece onayından sonra elle (workflow_dispatch) çalıştırın (${riskli.join(', ')})`,
