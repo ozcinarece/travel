@@ -347,7 +347,8 @@
       "kartBaslik": "Sıradaki rota neresi?",
       "kartAlt": "Arkadaşlarını çağır, planı birlikte çıkar",
       "kartDugme": "Yeni gezi oluştur",
-      "arama": "Nereye gitmek istersin?"
+      "arama": "Nereye gitmek istersin?",
+      "fazla": "{n} dosya eklenmedi: en çok {en} görsel olabilir."
     }
   },
   "genel": {

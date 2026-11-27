@@ -54,10 +54,13 @@ export function KarsilamaGorselleri({ bolum, kapaklar, onYukle, onYaz, onAcik }:
   const [mesgul, setMesgul] = useState(false);
   const [onizleme, setOnizleme] = useState(false);
   const [onizlenen, setOnizlenen] = useState(0);
+  // Sınırı aşan dosyalar yüklenmez; kaçının alındığı söylenir.
+  const [fazla, setFazla] = useState(0);
   const yukleAlani = useRef<View>(null);
   const kalan = karsilamaKalan(kapaklar);
   const yukle = async (dosyalar: File[]) => {
     if (!dosyalar.length || mesgul || !kalan) return;
+    setFazla(Math.max(0, dosyalar.length - kalan));
     setMesgul(true);
     try {
       await onYukle(dosyalar.slice(0, kalan));
@@ -100,21 +103,29 @@ export function KarsilamaGorselleri({ bolum, kapaklar, onYukle, onYaz, onAcik }:
             {kalan && !mesgul ? <Text style={s.kod}>{' icerik/anasayfa/'}</Text> : null}
           </Text>
         </Pressable>
-        {kapaklar.map((k, i) => (
-          <KapakSatiri
-            key={k.url}
-            kapak={k}
-            indeks={i}
-            onBirak={(kaynak, hedef) => onYaz(tasi(kapaklar, kaynak, hedef))}
-            onKaynak={(kaynak) => onYaz(karsilamaGuncelle(kapaklar, k.url, { kaynak }))}
-            onAtif={(atif) => onYaz(karsilamaGuncelle(kapaklar, k.url, { atif }))}
-            onSil={() => onYaz(kapaklar.filter((x) => x.url !== k.url))}
-            onOnizle={() => {
-              setOnizlenen(i);
-              setOnizleme(true);
-            }}
-          />
-        ))}
+        {fazla ? (
+          <Text accessibilityRole="alert" style={s.hata}>
+            {ty('anaSayfa.karsilama.fazla', { n: fazla, en: KARSILAMA_EN_COK })}
+          </Text>
+        ) : null}
+        {/* Yükleme sürerken satırlar kilitli: yükleme bitince liste tek yazımla güncellenir, araya giren düzenleme kaybolmasın. */}
+        <View style={[s.liste, mesgul && s.kilitli]} aria-disabled={mesgul}>
+          {kapaklar.map((k, i) => (
+            <KapakSatiri
+              key={k.url}
+              kapak={k}
+              indeks={i}
+              onBirak={(kaynak, hedef) => onYaz(tasi(kapaklar, kaynak, hedef))}
+              onKaynak={(kaynak) => onYaz(karsilamaGuncelle(kapaklar, k.url, { kaynak }))}
+              onAtif={(atif) => onYaz(karsilamaGuncelle(kapaklar, k.url, { atif }))}
+              onSil={() => onYaz(kapaklar.filter((x) => x.url !== k.url))}
+              onOnizle={() => {
+                setOnizlenen(i);
+                setOnizleme(true);
+              }}
+            />
+          ))}
+        </View>
         {onizleme ? (
           <View style={s.onizlemeKap}>
             <KarsilamaKarti kapak={gosterilen} />
@@ -323,6 +334,8 @@ const s = StyleSheet.create({
   govde: { gap: 10, paddingHorizontal: 14, paddingBottom: 14, borderTopWidth: 1, borderTopColor: yRenk.ayrac, paddingTop: 12 },
   yukle: { height: 64, borderRadius: 12, borderWidth: 1.5, borderStyle: 'dashed', borderColor: yRenk.cerceve, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10 },
   pasif: { opacity: 0.5 },
+  liste: { gap: 10 },
+  kilitli: { opacity: 0.5, pointerEvents: 'none' },
   yukleMetin: { fontFamily: yazi.kalin, fontSize: 12.5, color: yRenk.ikincil },
   kod: { fontFamily: 'ui-monospace, Menlo, monospace', fontSize: 12 },
   kapak: { borderRadius: 10, borderWidth: 1, borderColor: yRenk.ayrac },
@@ -337,7 +350,8 @@ const s = StyleSheet.create({
   onizlemeKap: { gap: 8, alignItems: 'flex-start' },
   onizlemeEylem: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   // Uygulama ekranı (#569, kanvas `Ana_v9_GeziYok`): 390 genişlik, üst güvenli alan 54.
-  telefon: { width: 390, paddingTop: 54, paddingBottom: 18, borderRadius: 28, overflow: 'hidden', borderWidth: 1, borderColor: renk.ayrac, backgroundColor: renk.zemin },
+  // 1 px çerçeve içte kalsın diye 392: içerik 390, kart 16 + 358 + 16.
+  telefon: { width: 392, paddingTop: 54, paddingBottom: 18, borderRadius: 28, overflow: 'hidden', borderWidth: 1, borderColor: renk.ayrac, backgroundColor: renk.zemin },
   ust: { paddingHorizontal: 16, paddingBottom: 12, flexDirection: 'row', alignItems: 'center' },
   kart: { marginHorizontal: 16, width: KART.genislik, height: KART.yukseklik, borderRadius: 20, overflow: 'hidden', backgroundColor: ZEMIN[1] },
   kartMetin: { position: 'absolute', left: 16, right: 16, bottom: 16, gap: 10 },
