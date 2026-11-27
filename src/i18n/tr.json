@@ -637,8 +637,6 @@
       "otelCikis": "{ad} · çıkış",
       "otelDonus": "{ad} · dönüş",
       "otelVaris": "{ad} · varış",
-      "atanmamis": "Listede, güne atanmamış · {n}",
-      "atanmamisAlt": "Listem'de bir güne ekle",
       "baslangic": "Başlangıç saati",
       "baslangicSec": "{saat} ({fark})"
     },
@@ -1095,7 +1093,9 @@
     "buGuneEkle": "Bu güne yer ekle",
     "tumu": "Tümü ›",
     "listem": "Listem",
-    "listemBekliyor": "{n} yer gün bekliyor"
+    "listemBekliyor": "{n} yer gün bekliyor",
+    "siradakiDurak": "sıradaki durak",
+    "buradasinDurak": "şu an buradasın"
   },
   "listem": {
     "baslik": "Listem",
@@ -1132,11 +1132,14 @@
       "alt": "Hangi güne? · ~{sure}",
       "bugun": "Bugün · {gun}",
       "durak": "{n} durak",
+      "gezildi": "{n} durak gezildi",
+      "aksamBos": "akşam boş",
       "enYakin": "en yakını {mesafe}",
       "enYakinRozet": "EN YAKIN",
       "bos": "Boş gün",
       "bosDonus": "Boş gün · dönüş",
       "gecti": "Geçti",
+      "gectiOkunus": "geçti",
       "kalsin": "Şimdilik listede kalsın",
       "eklendi": "{ad} {gun}. güne eklendi"
     },

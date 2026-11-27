@@ -28,6 +28,8 @@ export type PlanSatirGorunumu = {
   gelis: { metin: string; araba: boolean } | null;
   /** Gezi modunda şu anki (buradasın / sıradaki) durak. */
   vurgulu: boolean;
+  /** #558: vurgulu durak "buradasın" durumunda (sıradaki değil). */
+  buradasin: boolean;
   gecildi: boolean;
   atlandi: boolean;
 };
@@ -146,8 +148,9 @@ export function PlanListesi(p: Props) {
                 </View>
               ) : null}
               <Pressable
-                accessibilityState={{ selected: r.vurgulu }}
+                // #553 KK2: sıradaki/şu anki durak `selected` değil (seçim anlamı taşır); durum etiketin sonunda.
                 accessibilityRole="button"
+                accessibilityLabel={durakEtiketi(r)}
                 onPress={() => p.onDurak(r.mekanId)}
                 onLongPress={() => p.onDurakUzunBas(r.mekanId)}
                 style={({ pressed }) => [s.durak, pressed && { opacity: 0.85 }]}>
@@ -190,17 +193,31 @@ export function PlanListesi(p: Props) {
             <BugunBosV7 yerler={p.aksam.yerler} eklenenler={p.aksam.eklenenler} onEkle={p.aksam.onEkle} pasif={p.aksam.pasif} />
           </View>
         ) : null}
-        {p.listem ? (
-          <Pressable accessibilityRole="button" onPress={p.listem.onPress} style={({ pressed }) => [s.listem, pressed && { opacity: 0.8 }]}>
-            <Ikon ad="kalpV7" boyut={20} renk={renk.ana} kalinlik={2} />
-            <Text style={s.listemBaslik}>{t('plan.listem')}</Text>
-            <Text style={s.listemAlt}>{t('plan.listemBekliyor', { n: p.listem.n })}</Text>
-            <Ikon ad="okV7p" boyut={18} renk={anaV5.ok} kalinlik={2.4} />
-          </Pressable>
-        ) : null}
+        {p.listem ? <ListemBekliyorSatiri n={p.listem.n} onPress={p.listem.onPress} /> : null}
       </View>
     </ScrollView>
   );
+}
+
+/** #534 KK7: "Listem · N yer gün bekliyor ›"; liste ve (#553 KK5) harita görünümünün paneli ortak kullanır. */
+export function ListemBekliyorSatiri({ n, onPress }: { n: number; onPress: () => void }) {
+  return (
+    <Pressable accessibilityRole="button" onPress={onPress} style={({ pressed }) => [s.listem, pressed && { opacity: 0.8 }]}>
+      <Ikon ad="kalpV7" boyut={20} renk={renk.ana} kalinlik={2} />
+      <Text style={s.listemBaslik}>{t('plan.listem')}</Text>
+      <Text style={s.listemAlt}>{t('plan.listemBekliyor', { n })}</Text>
+      <Ikon ad="okV7p" boyut={18} renk={anaV5.ok} kalinlik={2.4} />
+    </Pressable>
+  );
+}
+
+/** #553 KK1 (#558): sekme kutusu 44 pt — `hitSlop` üst kabı aşamadığı için dokunma alanı kutunun kendisi. */
+export const SEKME_YUKSEKLIK = 44;
+
+/** #553 KK2: ekran okuyucu etiketi — saat, ad, alt satır; vurgulu durakta "şu an buradasın" ya da "sıradaki durak". */
+export function durakEtiketi(r: { saat: string | null; ad: string; alt: string | null; vurgulu: boolean; buradasin?: boolean }): string {
+  const durum = r.vurgulu ? t(r.buradasin ? 'plan.buradasinDurak' : 'plan.siradakiDurak') : null;
+  return [r.saat, r.ad, r.alt, durum].filter(Boolean).join(', ');
 }
 
 const s = StyleSheet.create({
@@ -223,7 +240,7 @@ const s = StyleSheet.create({
   },
   sekmeAlani: { borderBottomWidth: 1, borderBottomColor: altMenuRenk.cizgi },
   sekmeler: { paddingHorizontal: 16, gap: 20 },
-  sekme: { height: 42, flexDirection: 'row', alignItems: 'center', gap: 6, borderBottomWidth: 2.5, borderBottomColor: 'transparent' },
+  sekme: { height: SEKME_YUKSEKLIK, flexDirection: 'row', alignItems: 'center', gap: 6, borderBottomWidth: 2.5, borderBottomColor: 'transparent' },
   sekmeSecili: { borderBottomColor: renk.vurgu },
   nokta: { width: 7, height: 7, borderRadius: 4 },
   sekmeMetin: { fontFamily: yazi.orta, fontSize: 15, color: anaV5.ikincil },
