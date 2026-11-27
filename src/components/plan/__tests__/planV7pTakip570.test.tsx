@@ -93,8 +93,8 @@ describe('Plan v7p takip (#570)', () => {
     );
     const satirEl = getByText(t('gunler.gunuSil')).parent!.parent!;
     expect(satirEl.props.accessibilityState).toMatchObject({ disabled: true });
-    expect(t('gunler.sonGun')).toBe('Son gün silinemez.');
-    expect(satirEl.props.accessibilityHint).toBe('Son gün silinemez.');
+    expect(t('gunler.sonGun')).toBe('Tek gün silinemez.');
+    expect(satirEl.props.accessibilityHint).toBe('Tek gün silinemez.');
     expect(JSON.stringify(satirEl.props.style)).toContain('"opacity":0.4');
     expect(sil).not.toHaveBeenCalled();
   });
