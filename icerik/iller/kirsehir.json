@@ -1,0 +1,399 @@
+{
+  "il": "Kırşehir",
+  "slug": "kirsehir",
+  "guncelleme": "2026-11-27",
+  "oneriler": [
+    {
+      "sira": 1,
+      "ad": "Kaman-Kalehöyük Arkeoloji Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Kaman",
+      "merkeze_km": 48,
+      "neden": "Çağırkan'da Japon kazı ekibinin höyüğü yanında; 2010'da açıldı, yedi uygarlığın buluntusu",
+      "osm": "way/170316520"
+    },
+    {
+      "sira": 2,
+      "ad": "Cacabey Medresesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "Nureddin Caca Bey 1272'de gökbilim okulu olarak yaptırdı; gözlem kuyusu bugün camide",
+      "osm": "way/195742012",
+      "place_id": "ChIJQbmns8ly1RQRTeon8HnOR_4"
+    },
+    {
+      "sira": 3,
+      "ad": "Ahi Evran Camii ve Türbesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "Ahilik'in kurucusu burada yatar; türbeye caminin içinden merdivenle çıkılır",
+      "osm": "way/448737988"
+    },
+    {
+      "sira": 4,
+      "ad": "Seyfe Gölü Kuş Cenneti",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Mucur",
+      "merkeze_km": 35,
+      "neden": "Sığ tuzlu göl, flamingo üreme alanı; 1. derece doğal sit, yaz sonu suyu çekilebilir",
+      "place_id": "ChIJh-Vd6w1n1RQRYBQtOddSeNM"
+    },
+    {
+      "sira": 5,
+      "ad": "Terme Kaplıcası",
+      "kategori": "aktivite",
+      "amaclar": [
+        "yavas",
+        "cocuklu"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 2,
+      "neden": "Şehrin içinde 40–56 °C su; havuz, hamam ve günübirlik kullanım",
+      "place_id": "ChIJLTrVTCsN1RQRRKIGWNxecP4"
+    },
+    {
+      "sira": 6,
+      "ad": "Japon Bahçesi (Mikasanomiya Anı Bahçesi)",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas",
+        "cocuklu"
+      ],
+      "ilce": "Kaman",
+      "merkeze_km": 48,
+      "neden": "Prens Mikasa 1993'te açtı; sazan havuzları, taş fenerler ve nisanda kiraz çiçeği",
+      "osm": "way/170316514"
+    },
+    {
+      "sira": 7,
+      "ad": "Ahilik Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "2023'te Ahi külliyesinde açıldı; şed kuşanma töreni ve esnaf loncaları canlandırılıyor",
+      "place_id": "ChIJnT9xk2Jz1RQROnU9-uRgHn4"
+    },
+    {
+      "sira": 8,
+      "ad": "Neşet Ertaş Gönül Sultanları Kültür Evi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "Eski vali konağında; Neşet Ertaş'ın bağlamaları ve türkü söyleyen androidi",
+      "place_id": "ChIJNcOA581y1RQRNd4KNgv9dzI"
+    },
+    {
+      "sira": 9,
+      "ad": "Kesikköprü Kervansarayı ve Köprüsü",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 20,
+      "neden": "Kızılırmak üstünde 1248 tarihli 13 gözlü köprü ve Cacabey'in 1268 hanı yan yana",
+      "osm": "relation/2370426"
+    },
+    {
+      "sira": 10,
+      "ad": "Aşık Paşa Türbesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "Garipname'nin şairi 1332'de öldü; tepedeki türbeyi II. Bayezid 1481'de onarttı",
+      "place_id": "ChIJbVMlvaRy1RQRb9maLLYyxK8"
+    },
+    {
+      "sira": 11,
+      "ad": "Kırşehir Müzesi",
+      "kategori": "muze",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "Ahi Evran Caddesi'nde; altta Kalehöyük ve Büklükale buluntuları, üstte etnografya",
+      "place_id": "ChIJZQ-bUMgN1RQRTzhob0xk5kM"
+    },
+    {
+      "sira": 12,
+      "ad": "Mucur Yeraltı Şehri",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "cocuklu"
+      ],
+      "ilce": "Mucur",
+      "merkeze_km": 28,
+      "neden": "İlçenin altında iki katta 42 oda; 2024'te çökme riskiyle kapandı, açık mı sor",
+      "place_id": "ChIJ8cWbCAJ71RQReIKUOs1v-RM"
+    },
+    {
+      "sira": 13,
+      "ad": "Kepez Yeraltı Şehri",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Mucur",
+      "merkeze_km": 40,
+      "neden": "Köyün tepesinde 1 km'lik galeriler; 14 girişi yuvarlak taş kapılarla kapanır",
+      "place_id": "ChIJS9LSTgB51RQRCzfbbx4s5bA"
+    },
+    {
+      "sira": 14,
+      "ad": "Dulkadirli İnlimurat Yeraltı Şehri",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 48,
+      "neden": "22 m'lik tünel 20 m duvarlı açık avluya çıkar; kervansaray planına benzer",
+      "place_id": "ChIJ4XuPbcNJ1RQRg0IsOwd2Euk"
+    },
+    {
+      "sira": 15,
+      "ad": "Üçayak Bizans Kilisesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 35,
+      "neden": "10.–11. yüzyıl tuğla çift kilise; kubbeleri 1938 depreminde çöktü, kırda tek başına",
+      "osm": "node/3724219972",
+      "place_id": "ChIJaT1_znNH1RQRMaTzYspU3LQ"
+    },
+    {
+      "sira": 16,
+      "ad": "Melikgazi Kümbeti ve Lale Camii",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "Kale eteğinde 13. yüzyıl sekizgen kümbet; yanındaki caminin darphane olduğu düşünülür",
+      "osm": "way/448810227"
+    },
+    {
+      "sira": 17,
+      "ad": "Kırşehir Kalesi ve Alaaddin Camii",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "Surları kalmamış höyükte 1230 tarihli cami ve çay bahçesi; şehri tepeden görürsün",
+      "osm": "way/1328903494",
+      "place_id": "ChIJPzT_J8py1RQRs81rD7iLbBM"
+    },
+    {
+      "sira": 18,
+      "ad": "Ağalar Konağı Kültür Evi",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet",
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "Belediyenin işlettiği Cumhuriyet dönemi konak; çullama, madımak ve köy kahvaltısı",
+      "place_id": "ChIJrSH6HTUN1RQRRHxIlqtCc2o"
+    },
+    {
+      "sira": 19,
+      "ad": "Tandırcı Usta",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "Ahi Evran Caddesi'nde tandır yemekleri, çorbalar ve çömlekte kuru fasulye",
+      "place_id": "ChIJRd7awMZz1RQRv-cM_QOKI3Q"
+    },
+    {
+      "sira": 20,
+      "ad": "Savcılı Plajı (Hirfanlı Baraj Gölü)",
+      "kategori": "aktivite",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Kaman",
+      "merkeze_km": 60,
+      "neden": "Hirfanlı kıyısında 3 km'lik kum; yazın kabin, duş ve çay bahçeleri açık",
+      "place_id": "ChIJP4qij3f41BQRTMVi0WbyrF0"
+    },
+    {
+      "sira": 21,
+      "ad": "Karakurt Kaplıcası",
+      "kategori": "aktivite",
+      "amaclar": [
+        "yavas",
+        "kultur_tarih"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 16,
+      "neden": "Koçhisar yolunda; eski kubbeli ılıca, cami ve kümbetle külliye oluşturur",
+      "place_id": "ChIJ5VPtpI8I1RQR3iAgqel1Vfo"
+    },
+    {
+      "sira": 22,
+      "ad": "Aşıkpaşa Tabiat Parkı",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "cocuklu"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 3,
+      "neden": "Şehrin hemen kuzeyinde çamlık; 2010'dan beri korumada, yürüyüş yolları ve piknik",
+      "place_id": "ChIJPVLYUqNz1RQRflp3mZ2W8Qs"
+    },
+    {
+      "sira": 23,
+      "ad": "Mucur Obruk Gölü",
+      "kategori": "doga",
+      "amaclar": [
+        "doga",
+        "yavas"
+      ],
+      "ilce": "Mucur",
+      "merkeze_km": 40,
+      "neden": "Kayalık duvarla çevrili yuvarlak volkanik göl; doğal sit, fotoğraf için gidilir"
+    },
+    {
+      "sira": 24,
+      "ad": "Hacıbey Lokantası",
+      "kategori": "yemek",
+      "amaclar": [
+        "lezzet"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 1,
+      "neden": "Aşıkpaşa Mahallesi'nde çorbacı; öğlen tencere ve ev yemekleri"
+    },
+    {
+      "sira": 25,
+      "ad": "Ceviz Kafe",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet",
+        "yavas"
+      ],
+      "ilce": "Kaman",
+      "merkeze_km": 48,
+      "neden": "Kalehöyük müzesi ile Japon Bahçesi arasında 2025'te açıldı; Kaman cevizli ikramlar"
+    },
+    {
+      "sira": 26,
+      "ad": "Kütük Ev (Hılla Gölü)",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet",
+        "cocuklu"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 4,
+      "neden": "Hılla Gölü kıyısındaki parkta yöresel tatlılar; yanında çocuk oyun alanı",
+      "osm": "node/13942734404",
+      "place_id": "ChIJC0Z8b0gN1RQRHqu8U4fYFIk"
+    },
+    {
+      "sira": 27,
+      "ad": "Has Bahçe Cafe (Güzler Parkı)",
+      "kategori": "tatli_kahve",
+      "amaclar": [
+        "lezzet",
+        "doga"
+      ],
+      "ilce": "Merkez",
+      "merkeze_km": 4,
+      "neden": "Dere kenarındaki piknik alanında serpme kahvaltı; sucuklu yumurta, kaymak, bal",
+      "place_id": "ChIJH9xhEa1z1RQRoY17r2KMP2E"
+    },
+    {
+      "sira": 28,
+      "ad": "Bulamaçlı Kaplıcası",
+      "kategori": "aktivite",
+      "amaclar": [
+        "yavas"
+      ],
+      "ilce": "Çiçekdağı",
+      "merkeze_km": 67,
+      "neden": "İlçenin 5 km doğusunda 38–42 °C su; küçük pansiyon ve termal havuz",
+      "place_id": "ChIJayplb_4EgEARnl09-FEEYno"
+    },
+    {
+      "sira": 29,
+      "ad": "Aflak Baba Türbesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih"
+      ],
+      "ilce": "Mucur",
+      "merkeze_km": 38,
+      "neden": "Altınyazı (Aflak) köyünde Selçuklu kümbet planında; 1968'de yeniden yapıldı",
+      "place_id": "ChIJ86WWz9Z_1RQRiUaLO3M37lI"
+    },
+    {
+      "sira": 30,
+      "ad": "Derefakılı Kilisesi",
+      "kategori": "tarih",
+      "amaclar": [
+        "kultur_tarih",
+        "yavas"
+      ],
+      "ilce": "Akçakent",
+      "merkeze_km": 70,
+      "neden": "Bizans dönemi tuğla kilise; yalnız bir bölümü ayakta, köy içinde",
+      "place_id": "ChIJm62qsCU01RQRNLrSXkDyLj8"
+    },
+    {
+      "sira": 31,
+      "ad": "Kanlıgöl Kanyonu",
+      "kategori": "doga",
+      "amaclar": [
+        "doga"
+      ],
+      "ilce": "Akpınar",
+      "merkeze_km": 55,
+      "neden": "Hacıselim köyünde küçük göletler ve şelaleler; yürüyüş için ilçenin 12 km dışında"
+    }
+  ]
+}
