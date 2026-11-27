@@ -12,16 +12,18 @@ import { renk, yazi } from '@/theme';
 export const ATIF_BASLIK_BOSLUGU = 44;
 
 /**
- * #569 KK2: `sade` — kutusuz, 10 px beyaz %85 yazı (kanvas `Ana_v9_*` seyahat kartı, sağ üst); dokunma ve pencere aynı.
+ * #569 KK2: `sade` — kutusuz, 10 px beyaz %85 yazı (kanvas `Ana_v9_*` seyahat kartı, sağ üst, sağdan 12 · üstten 10);
+ * dokunma alanı 44 pt (iç boşlukla), pencere aynı.
  * #345 KK4 (kanvas 29i · A/B/C/E): kapak fotoğrafının atfı — 22 px kutu, köşe 8, #0E1430 %62, beyaz Figtree 600 12 px;
  * en çok 220 px, yazar "…" ile kısalır, lisans kesilmez. Commons fotoğrafında dokununca "Fotoğraf hakkında" (E) açılır;
  * "Foto: Tripmate" dokunulmaz. Dokunma alanı 44 pt (görünmez dolgu).
  */
 export function KapakAtfi({ atif, stil, sade = false }: { atif: Atif; stil?: StyleProp<ViewStyle>; sade?: boolean }) {
   const [acik, setAcik] = useState(false);
+  const konum = [s.konum, sade && s.sadeKonum, stil];
   if (tripmateMi(atif)) {
     return (
-      <View style={[s.konum, stil]} accessible accessibilityLabel={t('kapak.erisimTripmate')}>
+      <View style={konum} accessible accessibilityLabel={t('kapak.erisimTripmate')}>
         <View style={sade ? s.sadeKutu : s.kutu}>
           <Text style={sade ? s.sadeMetin : s.metin} numberOfLines={1}>
             {t('kapak.atifTripmate')}
@@ -35,14 +37,14 @@ export function KapakAtfi({ atif, stil, sade = false }: { atif: Atif; stil?: Sty
   const kutu = <AtifKutusu yazar={atif.yazar} ek={kisa ? t('kapak.atifLisans', { lisans: kisa }) : null} sade={sade} />;
   if (!atif.kaynak_url) {
     return (
-      <View style={[s.konum, stil]} accessible accessibilityLabel={temel}>
+      <View style={konum} accessible accessibilityLabel={temel}>
         {kutu}
       </View>
     );
   }
   return (
     <>
-      <Pressable accessibilityRole="button" accessibilityLabel={t('kapak.erisimKaynak', { atif: temel })} onPress={() => setAcik(true)} hitSlop={{ top: 11, bottom: 11, left: 8, right: 8 }} style={[s.konum, stil]} testID="kapak-atfi">
+      <Pressable accessibilityRole="button" accessibilityLabel={t('kapak.erisimKaynak', { atif: temel })} onPress={() => setAcik(true)} hitSlop={sade ? undefined : { top: 11, bottom: 11, left: 8, right: 8 }} style={konum} testID="kapak-atfi">
         {kutu}
       </Pressable>
       <AltPencere acik={acik} onKapat={() => setAcik(false)} kapatEtiketi={t('kapak.kapat')}>
@@ -136,6 +138,9 @@ const s = StyleSheet.create({
   kutu: { height: 22, maxWidth: 220, paddingHorizontal: 8, borderRadius: 8, backgroundColor: 'rgba(14,20,48,0.62)', flexDirection: 'row', alignItems: 'center', gap: 4 },
   metin: { fontFamily: yazi.yari, fontSize: 12, lineHeight: 16, color: renk.zemin },
   // #569 KK2 (kanvas `Ana_v9_*`): seyahat kartında kutusuz atıf — 10 px, beyaz %85, kartın sağ üstünde (konumu çağıran verir).
+  // Dokunma alanı 44 pt kartın içinde kalır (Android'de kart dışına taşan hitSlop dokunmaz): kutu kartın sağ üst köşesinde,
+  // yazı içeride sağdan 12, üstten 10.
+  sadeKonum: { right: 0, top: 0, bottom: undefined, minHeight: 44, minWidth: 44, paddingTop: 10, paddingRight: 12, paddingLeft: 12, alignItems: 'flex-end' },
   sadeKutu: { maxWidth: 220, flexDirection: 'row', alignItems: 'center', gap: 3 },
   sadeMetin: { fontFamily: yazi.normal, fontSize: 10, lineHeight: 13, color: 'rgba(255,255,255,0.85)' },
   yazar: { flexShrink: 1, minWidth: 0 },

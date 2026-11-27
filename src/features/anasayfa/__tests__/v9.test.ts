@@ -1,11 +1,13 @@
 // #569 ana sayfa v9 saf kuralları: kart kümesi ve ölçüsü (KK2), kalan gün `trips.tz` ile (KK3), "Bugün N. gün" ve Sıradaki
 // metni (KK4), kapak sırası (KK2) ve yedek görsel (KK5), yüzler.
-import { describe, expect, it } from '@jest/globals';
+import { describe, expect, it, jest } from '@jest/globals';
 
 import { siniflandir } from '@/features/seyahatler/siniflandir';
 import type { SeyahatOzet } from '@/lib/tipler';
 
 import { bugunSatiri, geziOncesiAlt, gorunenKart, kartGenisligi, kartSeyahatleri, kartYuzleri, seyahatKapagi, siradakiMetni, yedekKapak } from '../v9';
+
+jest.mock('@/lib/supabase', () => ({ supabase: {} }));
 
 const uye = (user_id: string, display_name: string) => ({ user_id, role: 'member' as const, display_name, guest: false });
 const sy = (id: string, start: string | null, end: string | null, tz = 'Europe/Istanbul', city_label = id): SeyahatOzet => ({
@@ -68,8 +70,10 @@ describe('KK3 · KK4 satırlar (trips.tz)', () => {
 
 describe('KK2 · KK5 kapak', () => {
   const sehirler = [
-    { ad: 'Eskişehir', slug: 'eskisehir', kapak_url: 'https://x/esk.jpg', kapak_atif: { yazar: 'Ali', lisans: 'CC BY 4.0' } },
-    { ad: 'İzmir', slug: 'izmir', kapak_url: null, kapak_atif: null },
+    { id: 's1', ad: 'Eskişehir', slug: 'eskisehir', lat: 39.7767, lng: 30.5206, kapak_url: 'https://x/esk.jpg', kapak_atif: { yazar: 'Ali', lisans: 'CC BY 4.0' } },
+    { id: 's2', ad: 'İzmir', slug: 'izmir', lat: 38.42, lng: 27.14, kapak_url: null, kapak_atif: null },
+    { id: 's3', ad: 'İstanbul', slug: 'istanbul', lat: 41.01, lng: 28.98, kapak_url: 'https://x/ist.jpg', kapak_atif: null },
+    { id: 's4', ad: 'Nevşehir', slug: 'nevsehir', lat: 38.62, lng: 34.71, kapak_url: 'https://x/nev.jpg', kapak_atif: null },
   ];
   it('seyahatin kendi kapağı önce; yoksa şehrin BO kapağı (ad, Türkçe küçük harf); ikisi de yoksa null', () => {
     expect(seyahatKapagi({ city_label: 'Eskişehir', kapak_url: 'https://x/kendi.jpg', kapak_atif: { yazar: 'Tripmate' } }, sehirler)).toEqual({ url: 'https://x/kendi.jpg', atif: { yazar: 'Tripmate', lisans: null, kaynak_url: null } });
@@ -77,6 +81,13 @@ describe('KK2 · KK5 kapak', () => {
     expect(seyahatKapagi({ city_label: 'İzmir' }, sehirler)).toBeNull();
     expect(seyahatKapagi({ city_label: 'Van' }, sehirler)).toBeNull();
     expect(seyahatKapagi({ city_label: 'Eskişehir' }, undefined)).toBeNull();
+  });
+
+  it('sehirEslestir yedeği: aksansız ad ("Istanbul", "Eskisehir") ve merkeze 25 km ("Kapadokya" → Nevşehir)', () => {
+    expect(seyahatKapagi({ city_label: 'Istanbul' }, sehirler)?.url).toBe('https://x/ist.jpg');
+    expect(seyahatKapagi({ city_label: 'Eskisehir', lat: null, lng: null }, sehirler)?.url).toBe('https://x/esk.jpg');
+    expect(seyahatKapagi({ city_label: 'Kapadokya', lat: 38.64, lng: 34.83 }, sehirler)?.url).toBe('https://x/nev.jpg');
+    expect(seyahatKapagi({ city_label: 'Kapadokya', lat: null, lng: null }, sehirler)).toBeNull();
   });
 
   it('gezisi olmayan kartın yedeği Eskişehir kapağı', () => {

@@ -59,7 +59,7 @@ jest.mock('@/features/icerik/kesfetAkisi', () => ({
   ...jest.requireActual<object>('@/features/icerik/kesfetAkisi'),
   useKesfetAkisi: () => mockAkis,
 }));
-jest.mock('@/features/icerik/sorgular', () => ({ useGeziler: () => ({ data: [], refetch: jest.fn() }), useSehirler: () => ({ data: [] }), useKaydedilenler: () => ({ data: [] }), useKaydet: () => ({ mutate: jest.fn() }), olayYaz: jest.fn() }));
+jest.mock('@/features/icerik/sorgular', () => ({ sehirEslestir: jest.requireActual<{ sehirEslestir: unknown }>('@/features/icerik/sorgular').sehirEslestir, useGeziler: () => ({ data: [], refetch: jest.fn() }), useSehirler: () => ({ data: [] }), useKaydedilenler: () => ({ data: [] }), useKaydet: () => ({ mutate: jest.fn() }), olayYaz: jest.fn() }));
 jest.mock('expo-router', () => ({
   router: { push: jest.fn(), navigate: jest.fn(), replace: jest.fn(), setParams: jest.fn(), dismissTo: jest.fn(), dismissAll: jest.fn() },
   useLocalSearchParams: () => ({ token: 'x' }),

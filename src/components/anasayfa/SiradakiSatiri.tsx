@@ -3,7 +3,7 @@
 // Gezi sayfası açılışındaki gibi `ag: false`: yürüyüş matrisi ve rota bacakları istenmez (önbellekte varsa o, yoksa kuş uçuşu
 // kestirimi); mekan adı bizim içeriğimizden ya da oturum önbelleğinden, yoksa kategori. Google'a istek yok. Konum izlenmez
 // (ana sayfada konum izni istenmez); Gezi sayfasının konumsuz hali.
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { Text, type StyleProp, type TextStyle } from 'react-native';
 
 import { siradakiMetni } from '@/features/anasayfa/v9';
@@ -23,10 +23,11 @@ import type { Durak, Gun, Mekan, Seyahat } from '@/lib/tipler';
 import { kacinciGun } from '@/lib/zaman';
 import { dakikaSaat } from '@/schedule/tempo';
 
-type Props = { seyahatId: string; stil?: StyleProp<TextStyle> };
+/** `onMetin`: gösterilen metin (yoksa null) — kartın ekran okuyucu etiketi için. */
+type Props = { seyahatId: string; stil?: StyleProp<TextStyle>; onMetin?: (metin: string | null) => void };
 
 /** Veri gelene kadar (ya da sıradaki durak yoksa) satır çizilmez. */
-export function SiradakiSatiri({ seyahatId, stil }: Props) {
+export function SiradakiSatiri({ seyahatId, stil, onMetin }: Props) {
   const seyahat = useSeyahat(seyahatId);
   const gunler = useGunler(seyahatId);
   const duraklar = useDuraklar(seyahatId);
@@ -34,8 +35,12 @@ export function SiradakiSatiri({ seyahatId, stil }: Props) {
   const konaklamalar = useKonaklamalar(seyahatId);
   const cevrimdisi = useCevrimdisi();
   const konaklamaVerisi = konaklamalar.data ?? (cevrimdisi ? BOS_KONAKLAMA : undefined);
+  const hazir = !!(seyahat.data && gunler.data && duraklar.data && mekanlar.data && konaklamaVerisi);
+  useEffect(() => {
+    if (!hazir) onMetin?.(null);
+  }, [hazir, onMetin]);
   if (!seyahat.data || !gunler.data || !duraklar.data || !mekanlar.data || !konaklamaVerisi) return null;
-  return <Hesap seyahat={seyahat.data} gunler={gunler.data} duraklar={duraklar.data} mekanlar={mekanlar.data} konaklamalar={konaklamaVerisi} cevrimdisi={cevrimdisi} stil={stil} />;
+  return <Hesap seyahat={seyahat.data} gunler={gunler.data} duraklar={duraklar.data} mekanlar={mekanlar.data} konaklamalar={konaklamaVerisi} cevrimdisi={cevrimdisi} stil={stil} onMetin={onMetin} />;
 }
 
 const BOS_KONAKLAMA: Konaklama[] = [];
@@ -48,6 +53,7 @@ function Hesap({
   konaklamalar,
   cevrimdisi,
   stil,
+  onMetin,
 }: {
   seyahat: Seyahat;
   gunler: Gun[];
@@ -56,6 +62,7 @@ function Hesap({
   konaklamalar: Konaklama[];
   cevrimdisi: boolean;
   stil?: StyleProp<TextStyle>;
+  onMetin?: (metin: string | null) => void;
 }) {
   const an = useSimdi(true);
   const bugunIndex = kacinciGun(seyahat, an);
@@ -78,10 +85,14 @@ function Hesap({
   }, [mekanlar, bilinen, bugunDuraklari, mekanIle, prog]);
   const odak = odakKarti(kartlar, true);
   const hedef = simdiHedefi(odak, odak ? sonrakiKart(kartlar, odak.durakId) : null);
-  if (!hedef) return null;
+  const metin = hedef ? siradakiMetni(hedef.ad, hedef.varisDk !== null ? dakikaSaat(hedef.varisDk) : null) : null;
+  useEffect(() => {
+    onMetin?.(metin);
+  }, [metin, onMetin]);
+  if (!metin) return null;
   return (
     <Text style={stil} numberOfLines={1} testID="kart-siradaki">
-      {siradakiMetni(hedef.ad, hedef.varisDk !== null ? dakikaSaat(hedef.varisDk) : null)}
+      {metin}
     </Text>
   );
 }

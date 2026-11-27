@@ -17,8 +17,17 @@ jest.mock('@/lib/supabase', () => ({ supabase: {} }));
 jest.mock('@/lib/oturum', () => ({ useOturum: () => ({ session: { user: { id: 'ben' } }, hazir: true, hesapli: true }) }));
 jest.mock('@/features/profil/sorgular', () => ({ useProfil: () => ({ data: { name: 'Ece Ö', photo_url: null } }) }));
 let mockSeyahatler: SeyahatOzet[] | undefined = [];
+let mockSeyahatHata = false;
+const mockSeyahatRefetch = jest.fn();
 jest.mock('@/features/seyahatler/sorgular', () => ({
-  useSeyahatler: () => ({ data: mockSeyahatler, isPending: mockSeyahatler === undefined, isError: false, isRefetching: false, refetch: jest.fn() }),
+  useSeyahatler: () => ({
+    data: mockSeyahatler,
+    isPending: mockSeyahatler === undefined && !mockSeyahatHata,
+    isError: mockSeyahatHata,
+    isFetching: false,
+    isRefetching: false,
+    refetch: mockSeyahatRefetch,
+  }),
 }));
 type G = { id: string; slug: string; baslik: string; ozet: string | null; kapak_url: string | null; gun_sayisi: number; mekan_sayisi: number; amaclar: string[]; sehirler: { ad: string; slug: string }; gunDuraklari: number[] };
 const gezi = (id: string, amaclar: string[], sehir = 'Eskişehir', kapak: string | null = null): G => ({
@@ -48,6 +57,7 @@ const mockSehirler = [
   { id: 's-van', ad: 'Van', slug: 'van', gezi_sayisi: 0, kapak_url: null, kapak_atif: null },
 ];
 jest.mock('@/features/icerik/sorgular', () => ({
+  sehirEslestir: jest.requireActual<{ sehirEslestir: unknown }>('@/features/icerik/sorgular').sehirEslestir,
   useSehirler: () => ({ data: mockSehirler }),
   useKaydedilenler: () => ({ data: [] }),
   useKaydet: () => ({ mutate: jest.fn() }),
@@ -66,7 +76,14 @@ jest.mock('@/features/sohbet/sorgular', () => ({ useOkunmamis: () => ({ data: mo
 // KK4: "Sıradaki" satırı Gezi sayfasının hesabıyla kendi bileşeninde (`siradakiSatiri.test.tsx`); burada yalnız yerleşim.
 jest.mock('@/components/anasayfa/SiradakiSatiri', () => {
   const { Text } = jest.requireActual<typeof import('react-native')>('react-native');
-  return { SiradakiSatiri: ({ seyahatId }: { seyahatId: string }) => <Text testID="kart-siradaki">{`Sıradaki: ${seyahatId} durağı · 14:30`}</Text> };
+  const { useEffect } = jest.requireActual<typeof import('react')>('react');
+  return {
+    SiradakiSatiri: ({ seyahatId, onMetin }: { seyahatId: string; onMetin?: (m: string | null) => void }) => {
+      const metin = `Sıradaki: ${seyahatId} durağı · 14:30`;
+      useEffect(() => onMetin?.(metin), [metin, onMetin]);
+      return <Text testID="kart-siradaki">{metin}</Text>;
+    },
+  };
 });
 let mockParametre: { bildirim?: string } = {};
 jest.mock('expo-router', () => ({
@@ -103,6 +120,8 @@ beforeEach(async () => {
   router.navigate.mockClear();
   mockOlayYaz.mockClear();
   mockSeyahatler = [];
+  mockSeyahatHata = false;
+  mockSeyahatRefetch.mockClear();
   mockParametre = {};
   mockAkis.data = [];
   mockBolumler = undefined;
@@ -122,8 +141,18 @@ describe('#569 KK1 üst kısım', () => {
     expect(duz(within(dugme).getByLabelText('Ece Ö').props.style)).toMatchObject({ width: 36, height: 36, borderRadius: 18, backgroundColor: '#ff7a1a' });
     fireEvent.press(dugme);
     expect(router.navigate).toHaveBeenLastCalledWith('/(tabs)/profil');
-    expect(e.queryByRole('button', { name: 'Kaydettiklerim' })).toBeNull();
     expect(e.queryByText('Seyahat')).toBeNull();
+  });
+
+  it('♥ Kaydettiklerim (tasarım bekliyor) profilin solunda, eski görünümüyle; Kaydettiklerim açılır', async () => {
+    const e = render(<AnaSayfa />);
+    await profil(e);
+    const kalp = e.getByRole('button', { name: 'Kaydettiklerim' });
+    expect(duz(kalp.props.style)).toMatchObject({ width: 36, height: 36, borderRadius: 18 });
+    const sira = e.UNSAFE_root.findAll((n) => typeof n.type === 'string' && (n.props.accessibilityLabel === 'Kaydettiklerim' || n.props.testID === 'ana-profil')).map((n) => n.props.accessibilityLabel ?? n.props.testID);
+    expect(sira).toEqual(['Kaydettiklerim', 'Profil']);
+    fireEvent.press(kalp);
+    expect(router.push).toHaveBeenLastCalledWith('/(tabs)/kaydettiklerim');
   });
 });
 
@@ -139,7 +168,7 @@ describe('#569 KK2 · KK3 gezi öncesi kart', () => {
     expect(within(kart).getByText('Aç')).toBeTruthy();
     expect(within(kart).getAllByText(/^[EMA]$/, { includeHiddenElements: true }).map((x) => x.props.children)).toEqual(['E', 'M', 'A']);
     expect(within(kart).getByText('Foto: Ali Veli')).toBeTruthy();
-    expect(duz(within(kart).getByTestId('kapak-atfi').props.style)).toMatchObject({ right: 12, top: 10 });
+    expect(duz(within(kart).getByTestId('kapak-atfi').props.style)).toMatchObject({ right: 0, top: 0, paddingRight: 12, paddingTop: 10, minHeight: 44, minWidth: 44 });
     fireEvent.press(within(kart).getByRole('button', { name: 'Esk Gezisi, 2 gün kaldı · 3 kişi' }));
     expect(router.push).toHaveBeenLastCalledWith({ pathname: '/seyahat/[id]/(sekmeler)/gezi', params: { id: 'Esk' } });
     // Tek kartta tam genişlik (750 − 32), sayfa noktası yok.
@@ -205,7 +234,7 @@ describe('#569 KK4 gezi sırasındaki kart', () => {
     expect(router.push).toHaveBeenLastCalledWith({ pathname: '/seyahat/[id]/(sekmeler)/sohbet', params: { id: 'Bursa' } });
     fireEvent.press(within(kart).getByRole('button', { name: 'Harcama' }));
     expect(router.push).toHaveBeenLastCalledWith({ pathname: '/seyahat/[id]/(sekmeler)/harcama', params: { id: 'Bursa' } });
-    fireEvent.press(within(kart).getByRole('button', { name: 'Bursa Gezisi, Bugün 3. gün' }));
+    fireEvent.press(within(kart).getByRole('button', { name: 'Bursa Gezisi, Bugün 3. gün, Sıradaki: Bursa durağı · 14:30' }));
     expect(router.push).toHaveBeenLastCalledWith({ pathname: '/seyahat/[id]/(sekmeler)/gezi', params: { id: 'Bursa' } });
     expect(within(kart).queryByText('Aç')).toBeNull();
   });
@@ -232,6 +261,17 @@ describe('#569 KK5 gezisi olmayan', () => {
     expect(router.push).toHaveBeenLastCalledWith('/(tabs)/yeni');
     // KK6: bağlantı yalnız gezi öncesinde.
     expect(e.queryByTestId('ana-yeni-gezi')).toBeNull();
+  });
+
+  it('seyahat listesi okunamazsa "Sıradaki rota neresi?" yok; hata satırı ve Tekrar dene', async () => {
+    mockSeyahatHata = true;
+    mockSeyahatler = undefined;
+    const e = render(<AnaSayfa />);
+    const hata = await waitFor(() => e.getByTestId('ana-seyahat-hata'));
+    expect(within(hata).getByText('Seyahatler yüklenemedi.')).toBeTruthy();
+    fireEvent.press(within(hata).getByRole('button', { name: 'Tekrar dene' }));
+    expect(mockSeyahatRefetch).toHaveBeenCalled();
+    expect(e.queryByTestId('seyahat-karti-yok')).toBeNull();
   });
 
   it('seyahat listesi gelmeden kart alanı çizilmez', async () => {

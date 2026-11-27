@@ -1,6 +1,7 @@
 // #569 ana sayfa v9 (UX önerileri kanvası, "Ana sayfa v9 · ONAYLI": `Ana_v9_GeziOncesi` · `Ana_v9_GeziSirasi` ·
 // `Ana_v9_GeziYok`): saf kurallar. Hepsi bizim veritabanımızdan; Google isteği yok, Google fotoğrafı kullanılmaz.
 import { kapakAtfiOku, type KapakAtfi } from '@/features/icerik/kapakAtfi';
+import { sehirEslestir } from '@/features/icerik/sorgular';
 import { bitmemis, type Siniflar } from '@/features/seyahatler/siniflandir';
 import { gunFarki } from '@/features/sihirbaz/sihirbaz';
 import { t } from '@/i18n';
@@ -58,18 +59,29 @@ export function siradakiMetni(ad: string, saat: string | null): string {
 
 export type Kapak = { url: string; atif: KapakAtfi | null };
 
+/** Ad karşılaştırması için: Türkçe küçük harf, ı → i, aksanlar atılır ("Istanbul" = "İstanbul", "Eskisehir" = "Eskişehir"). */
+function sade(ad: string): string {
+  return ad
+    .trim()
+    .toLocaleLowerCase('tr')
+    .replace(/ı/g, 'i')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '');
+}
+
 /**
- * KK2: kartın kapağı. Seyahatin kendi kapağı (varsa) önce; yoksa şehrin BO kapağı (yayınlı şehirle ad eşleşmesi). İkisi de
+ * KK2: kartın kapağı. Seyahatin kendi kapağı (varsa) önce; yoksa şehrin BO kapağı. Şehir `sehirEslestir` ile bulunur (ad
+ * eşitliği, yoksa merkeze 25 km — "Kapadokya" gibi etiketler, Göreme/Nevşehir koordinatı); o da yoksa aksansız ad. İkisi de
  * yoksa null (kanvastaki yer tutucu zemin). Google fotoğrafı hiçbir durumda kullanılmaz.
  */
 export function seyahatKapagi(
-  sy: Pick<SeyahatOzet, 'city_label'> & { kapak_url?: string | null; kapak_atif?: unknown },
-  sehirler: readonly Pick<Sehir, 'ad' | 'kapak_url' | 'kapak_atif'>[] | undefined,
+  sy: Pick<SeyahatOzet, 'city_label' | 'lat' | 'lng'> & { kapak_url?: string | null; kapak_atif?: unknown },
+  sehirler: readonly Sehir[] | undefined,
 ): Kapak | null {
   if (sy.kapak_url) return { url: sy.kapak_url, atif: kapakAtfiOku(sy.kapak_atif) };
-  // `sehirEslestir` ile aynı ad kuralı (Türkçe küçük harf, tam eşitlik); listede seyahatin koordinatı yok.
-  const ad = sy.city_label.trim().toLocaleLowerCase('tr');
-  const sehir = sehirler?.find((x) => x.ad.trim().toLocaleLowerCase('tr') === ad);
+  if (!sehirler) return null;
+  const ad = sade(sy.city_label);
+  const sehir = sehirEslestir([...sehirler], { ad: sy.city_label, lat: sy.lat ?? null, lng: sy.lng ?? null }) ?? sehirler.find((x) => sade(x.ad) === ad);
   return sehir?.kapak_url ? { url: sehir.kapak_url, atif: kapakAtfiOku(sehir.kapak_atif) } : null;
 }
 

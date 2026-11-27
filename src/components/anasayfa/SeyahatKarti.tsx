@@ -2,7 +2,7 @@
 // ana sayfanın seyahat kartı. 214 pt, köşe 20, tam fotoğraf ve alttan koyulaşan geçiş (#0E1430 %0 → %72, üst %25'ten sonra);
 // içerik soldan, sağdan ve alttan 16. Kapak: seyahatin kapağı, yoksa şehrin BO kapağı (`seyahatKapagi`); ikisi de yoksa
 // kanvastaki yer tutucu. Atıf sağ üstte (sağdan 12, üstten 10). Google fotoğrafı kullanılmaz.
-import type { ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import Svg, { Defs, LinearGradient, Path, Rect, Stop } from 'react-native-svg';
 
@@ -45,7 +45,7 @@ export function GeziOncesiKarti({ id, ad, alt, yuzler, kapak, genislik, onAc }: 
           </View>
         </View>
       </Pressable>
-      {kapak?.atif ? <KapakAtfi atif={kapak.atif} sade stil={s.atif} /> : null}
+      {kapak?.atif ? <KapakAtfi atif={kapak.atif} sade /> : null}
     </View>
   );
 }
@@ -76,9 +76,12 @@ export function GeziSirasiKarti({
   onHarcama: () => void;
 }) {
   const okunmamis = useOkunmamis(id).data ?? 0;
+  // Ekran okuyucu etiketi "Sıradaki: …" satırını da okur (satır gelince).
+  const [siradaki, setSiradaki] = useState<string | null>(null);
+  const alt = siradaki ? `${ust}, ${siradaki}` : ust;
   return (
     <View style={[s.kart, { width: genislik }]} testID={`seyahat-karti-${id}`}>
-      <Pressable accessibilityRole="button" accessibilityLabel={t('anasayfa.v9.kartEtiket', { ad, alt: ust })} onPress={onAc} style={({ pressed }) => [StyleSheet.absoluteFill, pressed && s.basili]}>
+      <Pressable accessibilityRole="button" accessibilityLabel={t('anasayfa.v9.kartEtiket', { ad, alt })} onPress={onAc} style={({ pressed }) => [StyleSheet.absoluteFill, pressed && s.basili]}>
         <KartZemini kimlik={id} kapak={kapak} />
         <View style={[s.icerik, s.icerikHapli]}>
           <View style={s.metinler}>
@@ -86,7 +89,7 @@ export function GeziSirasiKarti({
             <Text style={s.baslik} numberOfLines={1}>
               {ad}
             </Text>
-            <SiradakiSatiri seyahatId={id} stil={s.alt} />
+            <SiradakiSatiri seyahatId={id} stil={s.alt} onMetin={setSiradaki} />
           </View>
         </View>
         <View style={s.ustYuzler}>
@@ -106,7 +109,7 @@ export function GeziSirasiKarti({
           </Svg>
         </Hap>
       </View>
-      {kapak?.atif ? <KapakAtfi atif={kapak.atif} sade stil={s.atif} /> : null}
+      {kapak?.atif ? <KapakAtfi atif={kapak.atif} sade /> : null}
     </View>
   );
 }
@@ -128,7 +131,7 @@ export function GeziYokKarti({ kapak, genislik, onYeni }: { kapak: Kapak | null;
           <Text style={s.yeniMetin}>{t('anasayfa.v9.yeniGezi')}</Text>
         </Pressable>
       </View>
-      {kapak?.atif ? <KapakAtfi atif={kapak.atif} sade stil={s.atif} /> : null}
+      {kapak?.atif ? <KapakAtfi atif={kapak.atif} sade /> : null}
     </View>
   );
 }
@@ -214,5 +217,4 @@ const s = StyleSheet.create({
   rozetMetin: { fontFamily: yazi.ekstra, fontSize: 11, color: renk.metin },
   yeniDugme: { height: 48, borderRadius: 24, backgroundColor: renk.vurgu, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6 },
   yeniMetin: { fontFamily: yazi.kalin, fontSize: 16, color: renk.metin },
-  atif: { right: 12, top: 10, bottom: undefined },
 });

@@ -47,7 +47,8 @@ import { anaV5, minDokunma, renk, yazi } from '@/theme';
  * #569 v9 (kanvas "Ana sayfa v9 · ONAYLI": `Ana_v9_GeziOncesi` · `_GeziSirasi` · `_GeziYok`; `Ana_v6_Kesfet` ve `Ana_v5_*`
  * yerine): üstte logo ve profil yuvarlağı (KK1); kayan seyahat kartları ya da "Sıradaki rota neresi?" kartı (KK2–KK5);
  * gezi öncesinde kartın altında "+ Yeni gezi oluştur" (KK6); "Nereye gitmek istersin?" araması (KK7); "Arkadaşlarının
- * rotaları" ve BO rafları (KK8). Banner, Planlamaya devam, Harcamaları kapat ve ♥ Kaydettiklerim kanvasta yok, kalktı.
+ * rotaları" ve BO rafları (KK8). Banner, Planlamaya devam ve Harcamaları kapat kanvasta yok, kalktı. ♥ Kaydettiklerim kanvasta yok ama tek giriş olduğu
+ * için kaldı (tasarım bekliyor).
  */
 export default function AnaSayfa() {
   const profil = useProfil();
@@ -259,17 +260,27 @@ export default function AnaSayfa() {
         {/* #569 KK1: logo solda, profil yuvarlağı sağda (36 pt Mandalina, 14/800 baş harf; dokunma 44). */}
         <View style={s.ust}>
           <LogoYazi boyut={36} />
-          <Pressable accessibilityRole="button" accessibilityLabel={t('anasayfa.v9.profilEtiket')} onPress={() => router.navigate('/(tabs)/profil')} hitSlop={4} style={({ pressed }) => pressed && s.basili} testID="ana-profil">
-            <Avatar ad={profilAd} url={profil.data?.photo_url} boyut={36} arkaPlan={renk.vurgu} yuvarlak harfBoyutu={14} />
-          </Pressable>
+          <View style={s.ustDugmeler}>
+            {/* Kanvasta yok (tasarım bekliyor): Kaydettiklerim'in tek girişi; eski ♥ düğmesi olduğu gibi. */}
+            <KaydettiklerimDugmesi />
+            <Pressable accessibilityRole="button" accessibilityLabel={t('anasayfa.v9.profilEtiket')} onPress={() => router.navigate('/(tabs)/profil')} hitSlop={4} style={({ pressed }) => pressed && s.basili} testID="ana-profil">
+              <Avatar ad={profilAd} url={profil.data?.photo_url} boyut={36} arkaPlan={renk.vurgu} yuvarlak harfBoyutu={14} />
+            </Pressable>
+          </View>
         </View>
 
         {/* KK2–KK5: seyahat kartları ya da gezisi olmayan kart. Liste gelmeden kart alanı çizilmez (zıplamasın). */}
         {seyahatler.data && kartlar.length > 0 ? (
           <KartKaydirici genislik={kartGenislik}>{kartlar.map(kart)}</KartKaydirici>
-        ) : seyahatler.data || seyahatler.isError ? (
+        ) : seyahatler.data ? (
           <View style={s.kenar}>
             <GeziYokKarti kapak={yedekKapak(sehirler.data)} genislik={kartGenislik} onYeni={yeni} />
+          </View>
+        ) : seyahatler.isError ? (
+          // Liste okunamadıysa "gezin yok" denmez; Gezilerim'deki hata kalıbı (#388, ham hata gösterilmez).
+          <View style={[s.kenar, s.seyahatHata]} testID="ana-seyahat-hata">
+            <Text style={s.seyahatHataMetin}>{t('seyahatlerim.hata')}</Text>
+            <Buton baslik={t('seyahatlerim.tekrarDene')} tur="ikincil" onPress={() => seyahatler.refetch()} yukleniyor={seyahatler.isFetching} />
           </View>
         ) : null}
 
@@ -362,6 +373,15 @@ export default function AnaSayfa() {
   );
 }
 
+/** #361 KK2: ♥ → Kaydettiklerim (22 px, Gece, 2,4 çizgi; 36 px daire, 44 px dokunma). v9 kanvasında yok; tasarım bekliyor. */
+function KaydettiklerimDugmesi() {
+  return (
+    <Pressable accessibilityRole="button" accessibilityLabel={t('anasayfa.kaydettiklerim')} onPress={() => router.push('/(tabs)/kaydettiklerim')} hitSlop={4} style={({ pressed }) => [s.daire, pressed && s.basili]}>
+      <Ikon ad="kalp" boyut={22} renk={renk.ana} kalinlik={2.4} />
+    </Pressable>
+  );
+}
+
 const s = StyleSheet.create({
   ekran: { flex: 1, backgroundColor: renk.zemin },
   ortala: { alignItems: 'center', justifyContent: 'center' },
@@ -369,6 +389,10 @@ const s = StyleSheet.create({
   // Kanvas: üst çubuk durum çubuğunun altında, alttan 12; 36 pt öğeler.
   ust: { paddingHorizontal: 16, paddingTop: 6, paddingBottom: 12, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   basili: { opacity: 0.85 },
+  ustDugmeler: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  daire: { width: 36, height: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center' },
+  seyahatHata: { gap: 12, alignItems: 'flex-start' },
+  seyahatHataMetin: { fontFamily: yazi.normal, fontSize: 15, lineHeight: 21, color: renk.metin },
   // KK6: kartın altında (üstten 12): 18 px artı (Gece, 2,6) + 15/700 Gece, aralık 8.
   yeniBag: { alignSelf: 'flex-start', marginTop: 12, marginLeft: 16, flexDirection: 'row', alignItems: 'center', gap: 8, minHeight: 18 },
   yeniBagMetin: { fontFamily: yazi.kalin, fontSize: 15, color: renk.ana },
