@@ -17,8 +17,11 @@ import { GeriAlBandi } from '@/components/listem/GeriAlBandi';
 import { GuneEkleSayfasi } from '@/components/listem/GuneEkleSayfasi';
 import { MekanPaneli } from '@/components/mekan/MekanPaneli';
 import { useGeriAlinabilirSil } from '@/features/mekanlar/geriAlinabilirSil';
-import { geciciMi, useMekanEkle, useMekanGuncelle, useMekanlar, useMekanSil, useUyeler, type EklemeKaynagi } from '@/features/mekanlar/sorgular';
-import { listedekiMekan } from '@/features/gezi/bugunEkle';
+import { geciciMi, useMekanEkle, useMekanGuncelle, useMekanlar, useUyeler, type EklemeKaynagi } from '@/features/mekanlar/sorgular';
+import { listedekiMekan, useGunEklemesiniGeriAl, type GunEklemesi } from '@/features/gezi/bugunEkle';
+import { bugunDurumu } from '@/features/listem/listem';
+import { useGunProgrami } from '@/features/program/useProgram';
+import { useProgramVerisi } from '@/features/program/useProgramVerisi';
 import { geziyeGit } from '@/features/gezi/gezinti';
 import { useDuragaAta, useDuraklar, useGunler } from '@/features/gunler/sorgular';
 import { useSeyahatId } from '@/features/seyahatler/baglam';
@@ -48,7 +51,7 @@ import { agHatasi, useCevrimdisi } from '@/lib/baglanti';
 import { izBirak } from '@/lib/hataRaporu';
 import { kategoriPini } from '@/lib/pinIkonu';
 import { varsayilanDakika } from '@/lib/kategori';
-import type { Mekan, Seyahat } from '@/lib/tipler';
+import type { Durak, Gun, Mekan, Seyahat } from '@/lib/tipler';
 import { bosluk, gunRengi, gunUstuMetin, renk, yazi, yuzRenkleri } from '@/theme';
 import { haritaMerkezi, konumVar, YEDEK_ZOOM, yedekMerkezMi, yolTarifiHedefi } from '@/lib/konum';
 import { useSeyahatMerkezi } from '@/features/seyahatler/merkez';
@@ -68,6 +71,9 @@ export default function KesfetEkrani() {
 }
 
 const ILK_ZOOM = 13;
+const BOS_GUNLER: Gun[] = [];
+const BOS_DURAKLAR: Durak[] = [];
+const BOS_MEKANLAR: Mekan[] = [];
 
 function Kesfet({
   seyahat,
@@ -115,6 +121,20 @@ function Kesfet({
   // #579 KK2: "Değiştir" → Hangi güne? çekmecesi.
   const [gunSecimiAcik, setGunSecimiAcik] = useState(false);
   const gunSecenekleri = useMemo(() => (gunSecimiAcik ? baglamGunSecenekleri(gunler.data ?? [], duraklar.data ?? []) : []), [gunSecimiAcik, gunler.data, duraklar.data]);
+  // #579 inceleme 5 (#553 KK3): çekmecede bugünün alt satırı "N durak gezildi · akşam boş" — Plan'la aynı canlı program; yalnız
+  // çekmece açıkken, ağ isteği yok (önbellekteki yürüyüş ya da kestirim).
+  const cekmeceGunu = gunSecimiAcik && bugunSirasi !== null ? gunler.data?.find((g) => g.index === bugunSirasi) : undefined;
+  const programVerisi = useProgramVerisi({
+    seyahat,
+    gunler: gunler.data ?? BOS_GUNLER,
+    duraklar: duraklar.data ?? BOS_DURAKLAR,
+    mekanlar: mekanlar.data ?? BOS_MEKANLAR,
+    seciliGun: cekmeceGunu,
+    konaklamalar,
+    ag: false,
+  });
+  const bugunProg = useGunProgrami({ seyahat, gun: cekmeceGunu, duraklar: duraklar.data ?? BOS_DURAKLAR, mekanlar: mekanlar.data ?? BOS_MEKANLAR, yuruyus: programVerisi.yuruyus, an, uclar: programVerisi.seciliUclar });
+  const bugunCekmece = useMemo(() => (bugunProg?.bugun ? bugunDurumu(bugunProg.canli) : null), [bugunProg]);
   const [gunBildirimi, setGunBildirimi] = useState<string | null>(null);
   useEffect(() => {
     if (!gunBildirimi) return;
@@ -122,13 +142,13 @@ function Kesfet({
     return () => clearTimeout(z);
   }, [gunBildirimi]);
   // #579 KK3: gezi günlerinde eklenince 4 sn Gece bildirim + "Geri al" (eklenen yer listeden ve günden geri çıkar).
-  const [eklendiBildirimi, setEklendiBildirimi] = useState<{ metin: string; mekanId: string; sayac: number } | null>(null);
+  const [eklendiBildirimi, setEklendiBildirimi] = useState<{ metin: string; ad: string; ekleme: GunEklemesi; sayac: number } | null>(null);
   useEffect(() => {
     if (!eklendiBildirimi) return;
     const z = setTimeout(() => setEklendiBildirimi(null), GUN_BILDIRIMI_MS);
     return () => clearTimeout(z);
   }, [eklendiBildirimi]);
-  const mekanSil = useMekanSil(seyahat.id);
+  const eklemeyiGeriAlMut = useGunEklemesiniGeriAl(seyahat.id);
   const queryClient = useQueryClient();
   const uyeler = useUyeler(seyahat.id);
   // #137 KK6: Grup penceresi (yüzlere dokununca; Grup sekmesi kalktı).
@@ -398,7 +418,19 @@ function Kesfet({
     // #387: bant açıkken aynı mekan yeniden eklenirse çıkarma geri alınır (silinmemişti).
     if (geriAlinabilir.bekleyen?.placeId === y.place_id) return geriAlinabilir.geriAl();
     try {
-      await ekle.mutateAsync({
+      // #579 inceleme 4: "bugün" ekleme anında yeniden hesaplanır (sekme gece yarısını geçerek açık kalmış olabilir); Değiştir ya da
+      // Plan ile açıkça seçilen gün olduğu gibi kalır.
+      const simdi = new Date();
+      const bugunNo = bugununGunSirasi(seyahat, simdi);
+      if (bugunNo !== bugunSirasi) setAn(simdi);
+      const hedefNo = etkinGunSirasi(gunBaglamiIndex, bugunNo);
+      // #579 inceleme 6: gezi gününde günler (ya da duraklar) henüz yüklenmediyse önce onlar beklenir; yer sessizce yalnız listeye
+      // düşmesin. Gelmezlerse ekleme hata verir.
+      const gunListesi = hedefNo !== null && !gunler.data ? (await gunler.refetch()).data : gunler.data;
+      const durakListesi = hedefNo !== null && !duraklar.data ? (await duraklar.refetch()).data : duraklar.data;
+      if (hedefNo !== null && (!gunListesi || !durakListesi)) throw new Error('gunler_yok');
+      const hedef = hedefNo !== null ? (gunListesi?.find((g) => g.index === hedefNo) ?? null) : null;
+      const eklenen = await ekle.mutateAsync({
         place_id: y.place_id,
         primary_type: y.primary_type,
         lat: y.lat,
@@ -408,28 +440,29 @@ function Kesfet({
       });
       // #532 KK4: gün bağlamı varsa yer o günün sonuna da eklenir (listedeki gerçek satırla).
       // #579 KK3: gezi günlerinde de (bugün ya da "Değiştir"le seçilen gün) sonuna; bildirim "{ad} bugüne eklendi · Geri al".
-      if (gunBaglami) {
-        const hedef = gunBaglami;
+      if (hedef) {
         const kayit = await listedekiMekan(seyahat.id, y.place_id);
-        await ata.mutateAsync({ mekan: kayit, gunId: hedef.id, mevcut: undefined, gunDuraklari: (duraklar.data ?? []).filter((d) => d.day_id === hedef.id) });
-        if (bugunSirasi !== null) {
+        const { order_key } = await ata.mutateAsync({ mekan: kayit, gunId: hedef.id, mevcut: undefined, gunDuraklari: (durakListesi ?? []).filter((d) => d.day_id === hedef.id) });
+        if (bugunNo !== null) {
           setGunBildirimi(null);
-          setEklendiBildirimi((o) => ({ metin: gunEklendiMetni(y.ad, hedef, bugunSirasi), mekanId: kayit.id, sayac: (o?.sayac ?? 0) + 1 }));
+          setEklendiBildirimi((o) => ({
+            metin: gunEklendiMetni(y.ad, hedef, bugunNo),
+            ad: y.ad,
+            ekleme: { mekanId: kayit.id, gunId: hedef.id, orderKey: order_key, yeniMekan: eklenen.yeni },
+            sayac: (o?.sayac ?? 0) + 1,
+          }));
         } else setGunBildirimi(t('kesfet.guneEklendi', { ad: y.ad, n: hedef.index }));
       }
     } catch (e) {
       setHata(agHatasi(e) ? t('geziSayfasi.cevrimdisi.baglantiYok') : t('kesfet.ekleHata'));
     }
   };
-  // #579 KK3: "Geri al" — az önce eklenen yer listeden silinir; durağı da (stops → places `on delete cascade`) gider.
+  // #579 KK3 · inceleme 1: "Geri al" — yalnız bu eklemenin durağı silinir; mekan satırı yalnız bu ekleme oluşturduysa.
   const eklemeyiGeriAl = () => {
     const b = eklendiBildirimi;
     if (!b) return;
     setEklendiBildirimi(null);
-    mekanSil.mutate(b.mekanId, {
-      onSuccess: () => queryClient.invalidateQueries({ queryKey: ['duraklar', seyahat.id] }),
-      onError: () => setHata(t('kesfet.ekleHata')),
-    });
+    eklemeyiGeriAlMut.mutate(b.ekleme, { onError: () => setHata(t('kesfet.ekleHata')) });
   };
   // #387 KK1: hemen silinmez; 5 sn "Geri al" bandı, silme bant kapanınca (hata olursa katmanda `listem.hata`).
   const listedenCikar = async (m: Mekan) => {
@@ -789,6 +822,8 @@ function Kesfet({
             icinde={!!seciliMekan}
             mesgul={!!seciliMekan && geciciMi(seciliMekan)}
             onCta={() => (seciliMekan ? listedenCikar(seciliMekan) : seciliHafif && listeyeEkle(seciliHafif, secimKaynagi(secim.kaynak)))}
+            // #579 inceleme 2: gün bağlamında düğme "Bugüne ekle" / "Cuma'ya ekle" der.
+            ctaMetni={gunBaglami ? gunEkleEtiketi(gunBaglami, bugunSirasi) : null}
             onYolTarifi={yolTarifi}
             onKapat={() => setSecim(null)}
           />
@@ -801,7 +836,8 @@ function Kesfet({
           {geriAlinabilir.bekleyen ? (
             <GeriAlBandi metin={geriAlinabilir.bekleyen.metin} olay={geriAlinabilir.bekleyen} onGeriAl={geriAlinabilir.geriAl} alt={16} />
           ) : eklendiBildirimi ? (
-            <GeriAlBandi metin={eklendiBildirimi.metin} olay={eklendiBildirimi.sayac} onGeriAl={eklemeyiGeriAl} alt={16} yazili />
+            // #579 inceleme 7 (kanvas `Dalga1_BuguneEkle`): sekme çubuğunun 12 pt üstünde.
+            <GeriAlBandi metin={eklendiBildirimi.metin} kesilen={eklendiBildirimi.ad} olay={eklendiBildirimi.sayac} onGeriAl={eklemeyiGeriAl} alt={12} yazili />
           ) : null}
           <GuneEkleSayfasi
             acik={gunSecimiAcik}
@@ -810,6 +846,7 @@ function Kesfet({
             mesgul={false}
             baglamGunId={gunBaglami?.id ?? null}
             bugunIndex={bugunSirasi}
+            bugun={bugunCekmece}
             kalsin={false}
             onSec={(o) => {
               setGunBaglamiIndex(o.gun.index);

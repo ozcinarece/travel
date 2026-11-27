@@ -60,6 +60,8 @@ export type MekanPaneliProps = {
   pasif?: boolean;
   ipucu?: string;
   onCta: () => void;
+  /** #579 inceleme 2: Keşfet'te gün bağlamında "Listeye ekle" yerine "Bugüne ekle" / "Cuma'ya ekle" (yalnız metin). */
+  ctaMetni?: string | null;
   onYolTarifi: () => void;
   onKapat: () => void;
   /** KK12 (Program): "Gün" satırı — günler halka, atanmış gün dolu. */
@@ -249,7 +251,7 @@ export function MekanPaneli(p: MekanPaneliProps) {
                     disabled={!!p.mesgul || !!p.pasif}
                     onPress={p.onCta}
                     style={({ pressed }) => [s.eylem, s.eylemBirincil, (pressed || p.mesgul) && { opacity: 0.8 }, p.pasif && { opacity: 0.4 }]}>
-                    <Text style={[s.eylemMetin, { color: renk.zemin }]}>{t(`mekan.panel.${ctaAd}`)}</Text>
+                    <Text style={[s.eylemMetin, { color: renk.zemin }]}>{ctaAd === 'listeyeEkle' && p.ctaMetni ? p.ctaMetni : t(`mekan.panel.${ctaAd}`)}</Text>
                   </Pressable>
                   <Pressable accessibilityRole="button" onPress={p.onYolTarifi} style={({ pressed }) => [s.eylem, s.eylemIkincil, pressed && { opacity: 0.8 }]}>
                     <Text style={s.eylemMetin}>{t('mekan.panel.yolTarifi')}</Text>

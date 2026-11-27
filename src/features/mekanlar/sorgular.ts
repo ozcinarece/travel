@@ -73,6 +73,8 @@ export function useMekanEkle(seyahatId: string, secenek: { iyimser?: boolean } =
       });
       if (error && error.code !== '23505') throw error;
       if (!error && yeni.kaynak) await olayYaz('yer_eklendi', yeni.yerId ?? null, { seyahat: seyahatId, place_id: yeni.place_id, kaynak: yeni.kaynak });
+      // #579 inceleme 1: satırı bu çağrı mı ekledi (23505: başkası ya da önceki istek eklemiş)? Geri al yalnız yeniyi siler.
+      return { yeni: !error };
     },
     onMutate: async (yeni) => {
       if (!secenek.iyimser) return undefined;
