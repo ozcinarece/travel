@@ -1,0 +1,144 @@
+{
+  "surum": 1,
+  "sehir": {
+    "yeni": {
+      "ad": "Kars",
+      "slug": "kars",
+      "place_id": "ChIJZyJzzdmOaUARFtKE6RdRbQQ"
+    }
+  },
+  "takvim": {
+    "ilk_gun": "cumartesi"
+  },
+  "gezi": {
+    "slug": "karsta-bir-gun",
+    "baslik": "Kars'ta bir gün: kale eteğinden Ani'ye",
+    "ozet": "Sabah Kümbet Camii ve kale, öğlen kaz, öğleden sonra Ani, akşam piti",
+    "yazar_ad": "Tripmate ekibi",
+    "amaclar": [
+      "kultur_tarih",
+      "lezzet",
+      "gece"
+    ],
+    "yazi_md": "Kars'ı bir günde görmek iki ayrı kenti görmek demek. Sabah kalenin eteğindeki eski Kars: bazalt taştan bir kilise-cami, dere üstünde bir köprü, tepede surlar. Öğleden sonra 42 kilometre doğudaki Ani: Arpaçay'ın kıyısında, kubbeleri çökmüş kiliseleriyle boşalmış bir orta çağ başkenti. İkisinin arasında öğle yemeği kaz, akşam yemeği piti. Sabah duraklarının arası yürüyerek birkaç dakika; Ani'ye gidiş ve dönüş için araç gerekir.\n\n> Ani'de gişe ekimden nisana 16:00'da kapanır; öğle yemeğinden sonra oyalanma, en geç 13:30'da yola çık. Kars'ın kışı sert ve Ani'de rüzgârı kesecek bir şey yok: bere, eldiven ve kalın ayakkabı al.\n\n## 1. gün · Kale eteğinden Ani'ye\n\nGüne [Kümbet Camii](mekan:ChIJy5OufOiOaUARMoxjaCWg0AY) ile başla. 930'larda Bagratlı Kral I. Abbas'ın kilise olarak yaptırdığı yapı, bin yılda cami, Rus kilisesi, müze ve yeniden cami oldu. Kasnağının dışındaki on iki figür, ona Havariler Kilisesi adını veren kabartmalar.\n\n::mekan[ChIJy5OufOiOaUARMoxjaCWg0AY]\n\nCamiden dereye doğru in. [Taş Köprü](mekan:ChIJKxBcoeiOaUARLTGyZSzPo0A) Kars Çayı'nı kalenin hemen altında geçer; bugünkü hali 1725'ten. Kıyıda artık çalışmayan eski hamamlar sıralanır. Köprüden geç ve yokuşu tırmanarak [Kars Kalesi](mekan:ChIJT1wZLOmOaUARbaTrzYlpMZs)'ne çık. Surların üstünde dolaş: aşağıda Kümbet'in konik külahı, dere boyunca eski mahalle ve güneyde Rus döneminin dik açılı caddeleri görünür.\n\nKaleden merkeze in ve öğle yemeğini [Kars Kaz Evi](mekan:ChIJdeFZkdmOaUARxQ5XeyQ7C3I)'nde ye. Kars kazı 2023'ten beri coğrafi işaretli; fırından çıkan kaz bulgur pilavının üstünde gelir. Yanına ayran aşı çorbası söyle. Öğleden sonra yürüyeceksin, porsiyonu paylaşmak yeter.\n\nYemekten sonra doğuya, Ani'ye sür; yol bozkırın içinden kırk beş dakika kadar sürer. [Ani Ören Yeri](mekan:ChIJexWYzxEWakARyS5E2mqaTqc)'ne Aslanlı Kapı'dan girersin; kapının üstündeki Kufi yazıt Alparslan'ın 1064 fethini anar. İçeride yapılar geniş bir yaylaya dağılmış: II. Sembat'ın 990'da başlattığı, kubbesi çökmüş katedral; bir tüccarın 1215'te yaptırdığı, freskleri duran Tigran Honents Kilisesi; minaresi uzaktan seçilen Ebul Menuçehr Camii. Arpaçay'ın karşı yakası Ermenistan.\n\n::mekan[ChIJexWYzxEWakARyS5E2mqaTqc]\n\nGişe kapanmadan önce çık ve hava kararırken Kars'a dön. Akşam yemeği için [Hanımeli Kars Mutfağı](mekan:ChIJWUd6BdyOaUAR39N0xCTj0vw)'na git. Lokanta Faik Bey Caddesi'nde, Rus döneminden kalan bazalt cepheli binaların arasında; yemekten önce caddede biraz yürü. Burada piti söyle: toprak çömlekte nohutlu kuzu, suyu ekmeğin üstüne dökülerek iki aşamada yenir. Tatlıya revani köftesi ya da umaç helvası. Bazı akşamlar canlı müzik oluyor; kalabalık bir masayla gelmek için iyi bir yer.\n\nKars'ta bir gün daha kalırsan güneybatıdaki Sarıkamış'ın sarıçam ormanlarına ya da kuzeydeki Çıldır Gölü'ne git; kışın göl donar ve buzun üstünde atlı kızak yapılır."
+  },
+  "gunler": [
+    {
+      "baslik": "Kale eteğinden Ani'ye",
+      "duraklar": [
+        {
+          "place_id": "ChIJy5OufOiOaUARMoxjaCWg0AY",
+          "osm": "way/547018564",
+          "ad": "Kümbet Camii",
+          "sure_dk": 25,
+          "sure_gerekcesi": "varsayılan 30; dış kabartmalar ve kısa iç ziyaret",
+          "kapali_gunler": [],
+          "rehber": "kumbet-camii",
+          "amaclar": [
+            "kultur_tarih"
+          ]
+        },
+        {
+          "place_id": "ChIJKxBcoeiOaUARLTGyZSzPo0A",
+          "ad": "Taş Köprü",
+          "sure_dk": 20,
+          "sure_gerekcesi": "varsayılan 45; köprüden geçiş ve kıyıdan bakış",
+          "kapali_gunler": [],
+          "rehber": "tas-kopru",
+          "amaclar": [
+            "kultur_tarih",
+            "yavas"
+          ]
+        },
+        {
+          "place_id": "ChIJT1wZLOmOaUARbaTrzYlpMZs",
+          "osm": "way/189989602",
+          "ad": "Kars Kalesi",
+          "sure_dk": 60,
+          "sure_gerekcesi": "yokuşla çıkış ve sur üstü tur",
+          "kapali_gunler": [],
+          "rehber": "kars-kalesi",
+          "amaclar": [
+            "kultur_tarih"
+          ]
+        },
+        {
+          "place_id": "ChIJdeFZkdmOaUARxQ5XeyQ7C3I",
+          "ad": "Kars Kaz Evi",
+          "sure_dk": 60,
+          "sure_gerekcesi": "varsayılan 75; öğleden sonra Ani'ye yetişmek için kısa öğle",
+          "kapali_gunler": [],
+          "rehber": "kars-kaz-evi",
+          "amaclar": [
+            "lezzet"
+          ]
+        },
+        {
+          "place_id": "ChIJexWYzxEWakARyS5E2mqaTqc",
+          "ad": "Ani Ören Yeri",
+          "sure_dk": 150,
+          "sure_gerekcesi": "geniş açık alan; Aslanlı Kapı'dan katedral, Tigran Honents ve Menuçehr Camii'ne yürüyüş",
+          "kapali_gunler": [],
+          "rehber": "ani-oren-yeri",
+          "amaclar": [
+            "kultur_tarih"
+          ]
+        },
+        {
+          "place_id": "ChIJWUd6BdyOaUAR39N0xCTj0vw",
+          "osm": "node/14259164001",
+          "ad": "Hanımeli Kars Mutfağı",
+          "sure_dk": 90,
+          "sure_gerekcesi": "varsayılan 75; akşam yemeği, piti iki aşamada yenir",
+          "kapali_gunler": [],
+          "rehber": "hanimeli-kars-mutfagi",
+          "amaclar": [
+            "lezzet",
+            "gece"
+          ]
+        }
+      ]
+    }
+  ],
+  "notlar": {
+    "dogrulanacaklar": [
+      "[Plan · Sehir] · Kars şehri sehir.yeni ile açılıyor (#299, 19 Kasım Ece kararı: Karadeniz ve doğu grubu); place_id 'Kars' kimlik sorgusundan (tek sonuç) · BO'da şehir satırı",
+      "[Plan · tüm duraklar] · kapali_gunler [] yazıldı. Ani: turkishmuseums.com her gün için saat veriyor (kış 08:00–17:00, gişe 16:00), kapalı gün yok. Kale ve köprü açık alan (OSM Kars Kalesi 24/7). Cami namaz vakitlerinde kapalı. İki lokantanın kapalı günü bilinmiyor · lokantalar, kars.ktb.gov.tr",
+      "[Plan · g1.d2, g1.d4, g1.d5] · OSM'siz, konum Google'dan 30 gün. Taş Köprü ve Kars Kaz Evi OSM aday listesinde yok (köprü tourism/historic süzgecine girmiyor, lokanta OSM'de yok). Ani'nin OSM alanı (way/157441696, ören yerinin tamamı) merkezi Google noktasından 539 m uzak çıktı; büyük alanın merkezi girişe denk gelmiyor · BO'da Aslanlı Kapı'ya elle işaretlenebilir",
+      "[Plan · g1.d6] · OSM'de iki 'Hanımeli Kars Mutfağı' noktası var (node/6274157795 ve node/14259164001, aralarında ~600 m); yenisi seçildi ve kuru yukle'de Google noktasına 150 m içinde çıktı; eski nokta OSM'de silinmeli",
+      "[Yazı · Kümbet] · 930'lar ve I. Abbas (en.wikipedia 'Cathedral of Kars': 930–937/943; ktb.gov.tr: 932–937); 1579 cami, 1877 sonrası Rus kilisesi, 1964–1993 müze, 1993'ten beri cami (en.wikipedia). KTB 1064'te camiye çevrildiğini de yazıyor, çelişki var; yazıda 1579 kullanıldı · kars.ktb.gov.tr",
+      "[Yazı · Rehber Kümbet] · haç plan, konik külah ve Rus döneminde eklenen giriş revakları genel bilgi, kaynakta okunmadı · kulturenvanteri.com",
+      "[Yazı · Taş Köprü] · 1725 (en.wikipedia 'Kars'); 'üç kemer' ve 'kesme bazalt' icerik/iller/kars.json'dan, bu turda kaynakla teyit edilmedi; yanındaki üç eski hamam (en.wikipedia 'Kars') · kars.ktb.gov.tr",
+      "[Yazı · Kale] · Bagratlı ilk sur, 1153 Firuz Akay, 1386 Timur, 1579 Lala Mustafa Paşa, Celal Baba türbesi (en.wikipedia 'Castle of Kars'). en.wikipedia 'Kars' surların bugünkü biçimini 13. yüzyıl Zakarid dönemine bağlıyor · kars.ktb.gov.tr",
+      "[Yazı · Kaz Evi] · Nuran Özyılmaz ve 2023 coğrafi işaret (Hürriyet Daily News, 19.12.2023); bulgur üstünde kaz ve kaz ciğeri sotesi (Lonely Planet); ayran aşı, hangel, umaç helvası (yemek.com, 2019). 'Sonbaharda otlakta beslenir, kışın kesilir, tuzlanıp kurutulur' genel bilgi (gazetevatan haberi yalnız başlıktan) · lokanta menüsü",
+      "[Yazı · Ani] · 961 başkent (Daily Sabah, foto altı 961–1045); 4,5 km sur ve 7 kapı, Aslanlı Kapı'da 1064 Kufi yazıtı, katedrali 990'da II. Sembat başlattı, mimar Trdat, 9. yy İpek Yolu köprüsü (Habertürk, 2020); 1215 Tigran Honents ve freskler (Lonely Planet, Daily Sabah); Menuçehr 'Anadolu'da ilk Türk camisi' (Habertürk, Daily Sabah: iddia olarak yazıldı); UNESCO 2016 ve 42 km (turkishmuseums.com) · muze.gov.tr",
+      "[Yazı · gezi] · Kars–Ani arası 'kırk beş dakika kadar' sürüş tahmini; gişe 16:00 kış saati (turkishmuseums.com) · yerinde",
+      "[Yazı · Hanımeli] · Faik Bey Caddesi adresi, menü (kaz, yaprak sarması, piti, erişte aşı, revani köftesi, umaç helvası) ve 'canlı müzik olabilir' yemek.com'dan (son güncelleme 2019); 'Kafkas etkili ev yemekleri' Lonely Planet. Canlı müziğin bugün sürüp sürmediği doğrulanmadı · lokanta",
+      "[Yazı · Hanımeli] · Baltık binaları: 1878–1918 Rus dönemi ve Pamuk'un Kar'daki 'Baltık' adlandırması (en.wikipedia 'Kars'); Faik Bey ve Atatürk caddeleri icerik/iller/kars.json'dan",
+      "[Yazı · son paragraf] · Çıldır Gölü'nde buz üstünde atlı kızak (icerik/iller/kars.json, 5. sıra)"
+    ],
+    "fotograf_onerileri": [
+      {
+        "ne": "Ani katedrali, karlı ya da gün batımında",
+        "altyazi": "Ani'de 990'da başlanan katedral, kubbesiz",
+        "arama": "Commons: Category:Cathedral of Ani"
+      },
+      {
+        "ne": "Kümbet Camii kasnağındaki on iki figür",
+        "altyazi": "Kümbet Camii'nin kasnağında havari kabartmaları",
+        "arama": "Commons: Category:Kümbet Mosque (Kars)"
+      },
+      {
+        "ne": "Kars Kalesi ve Taş Köprü aynı karede",
+        "altyazi": "Kalenin eteğinde Kars Çayı ve Taş Köprü",
+        "arama": "Commons: Category:Kars Castle"
+      }
+    ],
+    "varsayimlar": [
+      "1. gün cumartesi",
+      "Ani'ye gidiş-dönüş araçla (kiralık araç ya da taksi); sabah durakları yürüyerek",
+      "#376: şehrin akşam planı bu gezide (Hanımeli, gece amacı); 2/2 Sarıkamış ya da Çıldır olabilir",
+      "İl listesinin (icerik/iller/kars.json) ilk 5'inden Sarıkamış Kayak Merkezi ve Çıldır Gölü bu gezide yok: Ani ile aynı güne sığmıyorlar (Sarıkamış 54 km batı, Çıldır 70 km kuzey); 2/2'ye kaldı, yazının sonunda anıldı"
+    ]
+  }
+}
