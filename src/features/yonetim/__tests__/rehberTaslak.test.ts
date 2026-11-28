@@ -10,7 +10,10 @@ import {
   mekanBaskaBolumde,
   onizlemeSatirlari,
   rehberMekanSayisi,
+  gorunenBilinen,
+  saklanacakBilinen,
   taslakDegisti,
+  yayinAdlari,
   yeniBolum,
   type TaslakBolum,
 } from '../rehberTaslak';
@@ -73,4 +76,36 @@ describe('rehber taslağı (#156)', () => {
     expect(yeniBolum('n', 'Yeni bölüm')).toEqual({ id: 'n', baslik: 'Yeni bölüm', ozet: null, govde: '', gizli: false, bolum: null });
   });
 
+});
+
+// #642 KK2: Google'dan gelen ad taslağa yazılmaz; koordinat damgasıyla saklanır; yeni yerin adı yalnız oturumdan.
+describe('#642 bilinen mekanlar', () => {
+  const secilen = { ad: 'Google Adı', kategori: 'museum', lat: 39.7, lng: 30.5, google_fetched_at: '2026-11-28T10:00:00.000Z' };
+
+  it('kayda giden öğede ad yok, damga var', () => {
+    expect(saklanacakBilinen({ 'ChIJ-cam-sanat-0003': secilen })).toEqual({
+      'ChIJ-cam-sanat-0003': { kategori: 'museum', lat: 39.7, lng: 30.5, google_fetched_at: '2026-11-28T10:00:00.000Z' },
+    });
+  });
+
+  it('görünen: adı bilinenler (oturum taslağı ezer); adsız taslak öğesi çizilmez', () => {
+    const taslak = {
+      'ChIJ-adsiz-00000001': { kategori: 'park', lat: 1, lng: 2, google_fetched_at: '2026-11-01T00:00:00.000Z' },
+      'ChIJ-eski-bicim-001': { ad: 'Eski', kategori: null, lat: 3, lng: 4 },
+      'ChIJ-cam-sanat-0003': { kategori: 'museum', lat: 39.7, lng: 30.5 },
+    };
+    expect(gorunenBilinen(taslak, { 'ChIJ-cam-sanat-0003': secilen })).toEqual({
+      'ChIJ-eski-bicim-001': { ad: 'Eski', kategori: null, lat: 3, lng: 4 },
+      'ChIJ-cam-sanat-0003': { ad: 'Google Adı', kategori: 'museum', lat: 39.7, lng: 30.5 },
+    });
+  });
+
+  it('yayın adları: yazıdaki mekanlardan adı bilinenler', () => {
+    const adlar = new Map([
+      ['ChIJ-cam-sanat-0003', ' Cam Evi '],
+      ['ChIJ-met-helva-00002', 'Met'],
+      ['ChIJ-yazida-yok-0001', 'Yok'],
+    ]);
+    expect(yayinAdlari(bolumler, (id) => adlar.get(id))).toEqual({ 'ChIJ-cam-sanat-0003': 'Cam Evi', 'ChIJ-met-helva-00002': 'Met' });
+  });
 });

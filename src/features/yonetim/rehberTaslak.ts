@@ -4,9 +4,50 @@ import { mekanBaglari, rehberGovdesi, rehberYazisi, type BolumTuru, type RehberB
 /** Taslaktaki bölüm (sehir_rehberi_taslak.bolumler öğesi). `bolum` yalnız eski 4 bölümde dolu. */
 export type TaslakBolum = { id: string; baslik: string; ozet: string | null; govde: string; gizli: boolean; bolum: BolumTuru | null };
 
-export type BilinenMekan = { ad: string; kategori: string | null; lat: number | null; lng: number | null };
+/**
+ * #642 KK2: taslakta saklanan öğe (`sehir_rehberi_taslak.bilinen`): kategori, koordinat ve koordinatın alınma anı. Google'dan gelen
+ * ad saklanmaz; eski kayıtta `ad` durabilir (temizlik migration'ı atar).
+ */
+export type BilinenMekan = { ad?: string; kategori: string | null; lat: number | null; lng: number | null; google_fetched_at?: string | null };
+
+/** Bu oturumda seçilen mekan: ad yalnız bellekte (editörde çizmek ve yayında yeni yerin adı için). */
+export type SecilenMekan = { ad: string; kategori: string | null; lat: number | null; lng: number | null; google_fetched_at: string };
 
 export type RehberTaslagi = { bolumler: TaslakBolum[]; bilinen: Record<string, BilinenMekan>; updated_at: string; yayinlandi_at: string | null };
+
+/** #642 KK2: kayda giden öğe — ad atılır, koordinatın damgası kalır. */
+export function saklanacakBilinen(secilenler: Readonly<Record<string, SecilenMekan>>): Record<string, BilinenMekan> {
+  return Object.fromEntries(
+    Object.entries(secilenler).map(([id, m]) => [id, { kategori: m.kategori, lat: m.lat, lng: m.lng, google_fetched_at: m.google_fetched_at }]),
+  );
+}
+
+/** Editörün ve önizlemenin çizdiği mekanlar: adı bilinenler (eski taslak öğesi ya da bu oturumda seçilen). */
+export function gorunenBilinen(
+  taslak: Readonly<Record<string, BilinenMekan>> | undefined,
+  oturum: Readonly<Record<string, SecilenMekan>>,
+): Record<string, { ad: string; kategori: string | null; lat: number | null; lng: number | null }> {
+  const sonuc: Record<string, { ad: string; kategori: string | null; lat: number | null; lng: number | null }> = {};
+  for (const [id, m] of Object.entries({ ...(taslak ?? {}), ...oturum })) {
+    if (m.ad) sonuc[id] = { ad: m.ad, kategori: m.kategori, lat: m.lat, lng: m.lng };
+  }
+  return sonuc;
+}
+
+/**
+ * #642: yayında yeni yerin adı (`rehber_yayinla.p_adlar`): yazıdaki mekanlardan adı bu oturumda bilinenler. `ad`: önbellekteki
+ * ad (Google'a sorulmaz). Saklanmaz; sunucu yalnız yeni açılan yerin adı için kullanır.
+ */
+export function yayinAdlari(bolumler: readonly TaslakBolum[], ad: (placeId: string) => string | null | undefined): Record<string, string> {
+  const sonuc: Record<string, string> = {};
+  for (const b of bolumler) {
+    for (const m of mekanBaglari(b.govde)) {
+      const a = ad(m.place_id)?.trim();
+      if (a && !sonuc[m.place_id]) sonuc[m.place_id] = a;
+    }
+  }
+  return sonuc;
+}
 
 export type CanliBolum = RehberBolumu & { gizli?: boolean };
 

@@ -3,7 +3,7 @@
 import { useQueryClient } from '@tanstack/react-query';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-import type { HafifYer } from '@/features/yerler/api';
+import { hafifOnbellek, type HafifYer } from '@/features/yerler/api';
 
 import {
   bolumCogalt,
@@ -14,7 +14,10 @@ import {
   canlidanTaslak,
   taslakDegisti,
   yeniBolum,
-  type BilinenMekan,
+  gorunenBilinen,
+  saklanacakBilinen,
+  yayinAdlari,
+  type SecilenMekan,
   type TaslakBolum,
 } from './rehberTaslak';
 import { rehberAnahtari, rehberTaslakKaydet, rehberYayinla, surumAnahtari, taslakAnahtari, useRehberBolumleri, useRehberTaslagi, type RehberSurumu } from './sehirSorgulari';
@@ -57,9 +60,11 @@ export function useRehberYazari(sehirId: string, bekleme = 2000) {
   const zaman = zamanYerel ?? (t ? { updated_at: t.updated_at, yayinlandi_at: t.yayinlandi_at } : null);
   const [silinen, setSilinen] = useState<Silinen | null>(null);
   const son = useRef<TaslakBolum[] | null>(null);
-  const yeniBilinen = useRef<Record<string, BilinenMekan>>({});
+  // #642 KK2: kayda giden seçimler; ad kayda gitmez (`saklanacakBilinen`), damga seçim anı.
+  const yeniBilinen = useRef<Record<string, SecilenMekan>>({});
   // #172 KK7: editör ve önizleme kart adlarını taslağın bildiği mekanlardan çizer (Google'a sorulmaz); bu oturumda seçilenler de.
-  const [oturumBilinen, setOturumBilinen] = useState<Record<string, BilinenMekan>>({});
+  // #642: Google adı yalnız bu oturumun belleğinde.
+  const [oturumBilinen, setOturumBilinen] = useState<Record<string, SecilenMekan>>({});
   const kirli = useRef(false);
   const zamanlayici = useRef<ReturnType<typeof setTimeout> | null>(null);
   // Düzenlemenin dayandığı taslak damgası (sunucu metni, mikrosaniyeli; Date'e çevrilmez). undefined = henüz alınmadı.
@@ -90,7 +95,7 @@ export function useRehberYazari(sehirId: string, bekleme = 2000) {
         kirli.current = false;
         setDurum((d) => ({ ...d, kaydediliyor: true, hata: false }));
         try {
-          const updated_at = await rehberTaslakKaydet(sehirId, b, yeniBilinen.current, neden, tabanAl());
+          const updated_at = await rehberTaslakKaydet(sehirId, b, saklanacakBilinen(yeniBilinen.current), neden, tabanAl());
           taban.current = updated_at;
           yeniBilinen.current = {};
           setZamanYerel((z) => ({ updated_at, yayinlandi_at: z?.yayinlandi_at ?? guncel.current.taslak?.yayinlandi_at ?? null }));
@@ -152,7 +157,7 @@ export function useRehberYazari(sehirId: string, bekleme = 2000) {
   };
 
   const taslakBilinen = t?.bilinen;
-  const bilinen = useMemo(() => ({ ...(taslakBilinen ?? {}), ...oturumBilinen }), [taslakBilinen, oturumBilinen]);
+  const bilinen = useMemo(() => gorunenBilinen(taslakBilinen, oturumBilinen), [taslakBilinen, oturumBilinen]);
   const bolumGuncelle = (id: string, alan: Partial<TaslakBolum>) => degistir((b) => b.map((x) => (x.id === id ? { ...x, ...alan } : x)));
 
   return {
@@ -168,7 +173,8 @@ export function useRehberYazari(sehirId: string, bekleme = 2000) {
     bolumGuncelle,
     bilinen,
     mekanSecildi: (y: HafifYer) => {
-      const m = { ad: y.ad, kategori: y.primary_type, lat: y.lat, lng: y.lng };
+      // #642 KK2: koordinatın damgası seçim anı (cevap Google'dan şimdi geldi).
+      const m: SecilenMekan = { ad: y.ad, kategori: y.primary_type, lat: y.lat, lng: y.lng, google_fetched_at: new Date().toISOString() };
       yeniBilinen.current[y.place_id] = m;
       setOturumBilinen((x) => ({ ...x, [y.place_id]: m }));
     },
@@ -220,7 +226,10 @@ export function useRehberYazari(sehirId: string, bekleme = 2000) {
     yayinla: async () => {
       if (!(await sunucuyuGuncelle())) throw new Error('kayit');
       try {
-        const acilan = await rehberYayinla(sehirId, tabanAl()!);
+        // #642: yeni yerin adı bu oturumda bilinen addan (seçim ya da önbellek; saklanmaz, Google'a sorulmaz).
+        const yazilan = son.current ?? guncel.current.ilk ?? [];
+        const adlar = yayinAdlari(yazilan, (id) => oturumBilinen[id]?.ad ?? hafifOnbellek.oku(id)?.ad);
+        const acilan = await rehberYayinla(sehirId, tabanAl()!, adlar);
         setZamanYerel(null);
         await Promise.all([
           qc.invalidateQueries({ queryKey: rehberAnahtari(sehirId) }),

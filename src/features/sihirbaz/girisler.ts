@@ -21,8 +21,10 @@ export async function sehirSecimi(placeId: string, adi: string, ikincil: string,
  * ilk öneri, sonra hafif yer (saat dilimi, ülke kodu). #205 Parça 1: şehrin konumu boşaldıysa (gece temizliği) seçim konumsuz
  * gelir (Google'a gidilmez); seyahat #318'deki gibi şehir koordinatı boş açılır.
  */
-export async function icerikSehirSecimi(k: Pick<Sehir, 'ad' | 'lat' | 'lng' | 'place_id' | 'tz' | 'ulke_kodu'>): Promise<SehirSecimi> {
-  if (k.place_id && k.tz) return { place_id: k.place_id, ad: k.ad, ikincil: '', lat: k.lat, lng: k.lng, tz: k.tz, country_code: k.ulke_kodu ?? null };
+export async function icerikSehirSecimi(k: Pick<Sehir, 'ad' | 'lat' | 'lng' | 'place_id' | 'tz' | 'ulke_kodu' | 'google_fetched_at'>): Promise<SehirSecimi> {
+  // #642 KK3: koordinat tablodan geliyorsa damgası da (seyahat now() ile değil, şehrin damgasıyla yazılır).
+  if (k.place_id && k.tz)
+    return { place_id: k.place_id, ad: k.ad, ikincil: '', lat: k.lat, lng: k.lng, tz: k.tz, country_code: k.ulke_kodu ?? null, google_fetched_at: k.google_fetched_at ?? null };
   const oturum = yeniOturumJetonu();
   const [o] = await otomatikTamamla({ girdi: k.ad, oturum, tur: 'cities', limit: 1, merkez: aramaMerkezi(k, 50_000) });
   if (!o) throw new Error('öneri yok');

@@ -1492,6 +1492,11 @@ begin
     '{"ChIJ-cam-sanat-0003": {"ad": "Cam Sanatları Evi", "kategori": "museum", "lat": 39.76, "lng": 30.52},
       "ChIJ-yeni-dukkan-0004": {"ad": "Yeni Dükkân (Google)", "kategori": "store", "lat": 39.77, "lng": 30.51}}');
   assert v_zaman is not null, 'taslak kaydedildi';
+  -- #642 KK2: Google'dan gelen ad saklanmaz (eski istemci gönderse de); damgasız gelen koordinat kayıt anının damgasını alır.
+  assert (select not (bilinen -> 'ChIJ-cam-sanat-0003' ? 'ad') and not (bilinen -> 'ChIJ-yeni-dukkan-0004' ? 'ad')
+      and (bilinen -> 'ChIJ-cam-sanat-0003' ->> 'lat')::float = 39.76 and bilinen -> 'ChIJ-cam-sanat-0003' ->> 'kategori' = 'museum'
+      and (bilinen -> 'ChIJ-cam-sanat-0003' ->> 'google_fetched_at')::timestamptz > now() - interval '1 minute'
+    from public.sehir_rehberi_taslak where sehir_id = '11111111-1111-4111-8111-000000000001'), '#642 KK2: bilinen adsız ve damgalı';
   assert (select count(*) from public.sehir_rehberi_surum where sehir_id = '11111111-1111-4111-8111-000000000001') = 0, 'ilk kayıtta sürüm yok (önceki hâl yok)';
   begin
     perform public.rehber_taslak_kaydet('11111111-1111-4111-8111-000000000001', '[]');
@@ -1530,7 +1535,9 @@ begin
   exception when serialization_failure then null;
   end;
   assert exists (select 1 from public.sehir_rehberi where id = r.ulasim), 'reddedilen yayın canlıya dokunmaz';
-  assert public.rehber_yayinla('11111111-1111-4111-8111-000000000001', v_zaman) = 2, 'yayın: bilinmeyen kart ve satır mekanı taslak yer açar';
+  -- #642: yeni yerin adı editörün bu oturumda seçtiği addan (`p_adlar`, saklanmaz); bilinen öğesiyle yalnız place_id eşleşir.
+  assert public.rehber_yayinla('11111111-1111-4111-8111-000000000001', v_zaman,
+    '{"ChIJ-cam-sanat-0003": "Cam Sanatları Evi", "ChIJ-yeni-dukkan-0004": "Yeni Dükkân (Google)"}') = 2, 'yayın: bilinmeyen kart ve satır mekanı taslak yer açar';
   assert (select count(*) from public.sehir_rehberi where sehir_id = '11111111-1111-4111-8111-000000000001') = 4, 'canlı = taslak (4 bölüm; admin gizliyi de görür)';
   assert not exists (select 1 from public.sehir_rehberi where id = r.ulasim), 'taslakta olmayan bölüm silinir';
   assert (select string_agg(baslik, ',' order by sira) from public.sehir_rehberi where sehir_id = '11111111-1111-4111-8111-000000000001') = 'Ne yenir,Mahalleler,Akşam ne yapılır,İpuçları', 'sıra taslaktan';
@@ -1538,8 +1545,11 @@ begin
   assert (select yazi_md like E'# Ne yenir\n\nTatlı için%' from public.sehir_rehberi where id = r.yemek), 'yazı: # başlık + gövde';
   assert (select string_agg(place_id || ':' || bicim, ',' order by sira) from public.icerik_mekanlari where sahip_id = r.yemek)
     = 'ChIJ-met-helva-00002:satir,ChIJ-yeni-dukkan-0004:satir,ChIJ-cam-sanat-0003:kart', 'mekanlar yazı sırasıyla';
-  assert (select ad from public.yerler where place_id = 'ChIJ-cam-sanat-0003') = 'Cam Sanatları Evi', 'kart mekanının adı bilinen listesinden';
-  assert (select ad from public.yerler where place_id = 'ChIJ-yeni-dukkan-0004') = 'Yeni Dükkân (Google)', 'satır içi mekanın adı önce bilinen (Google) ad, bağlantı metni değil';
+  assert (select ad from public.yerler where place_id = 'ChIJ-cam-sanat-0003') = 'Cam Sanatları Evi', 'kart mekanının adı editörün seçiminden';
+  assert (select ad from public.yerler where place_id = 'ChIJ-yeni-dukkan-0004') = 'Yeni Dükkân (Google)', 'satır içi mekanın adı önce seçilen ad, bağlantı metni değil';
+  -- #642 KK2 · KK5: taze damga yere taşınır, koordinat kalır.
+  assert (select lat = 39.76 and google_fetched_at between now() - interval '1 minute' and now()
+    from public.yerler where place_id = 'ChIJ-cam-sanat-0003'), '#642 KK5: taze damgalı bilinen öğesinden açılan yer damgasını ve koordinatını korur';
   assert (select yayinlandi_at >= updated_at from public.sehir_rehberi_taslak where sehir_id = '11111111-1111-4111-8111-000000000001'), 'taslak yayınlandı damgası';
   assert (select count(*) from public.sehir_rehberi_surum where sehir_id = '11111111-1111-4111-8111-000000000001' and neden = 'yayin') = 1, 'yayın sürümü';
   -- Başka şehrin bölüm kimliğiyle yayın reddedilir (Taslak Şehir'in taslağında Eskişehir'in Ne yenir'i).
@@ -1581,6 +1591,58 @@ end $$;
 select pg_temp.hata_bekle($$select public.rehber_taslak_kaydet('11111111-1111-4111-8111-000000000001', '[]')$$, '42501');
 select pg_temp.hata_bekle($$select public.rehber_yayinla('11111111-1111-4111-8111-000000000001', now())$$, '42501');
 reset role;
+
+-- #642 KK2 · KK5: `bilinen` öğesi damgasıyla saklanır ve yayında damga `yerler`'e taşınır. 30 günü geçen ya da damgasız koordinat
+-- yazılmaz (yer koordinatsız açılır); taze damga korunur (now() olmaz); gelecek tarihli damga now()'a iner. Eski biçimdeki öğedeki
+-- Google adı kullanılmaz (yalnız place_id ile eşleşir; ad seçimden ya da bağlantı metninden). KK4: temizlik kuralı.
+set role authenticated;
+select pg_temp.as_email(:E, 'ozcinar.ece@gmail.com');
+do $$
+declare
+  v timestamptz := (select updated_at from public.sehir_rehberi_taslak where sehir_id = '22222222-2222-4222-8222-000000000002');
+begin
+  v := public.rehber_taslak_kaydet('22222222-2222-4222-8222-000000000002',
+    jsonb_build_array(jsonb_build_object('id', '64200000-0000-4000-8000-000000000001', 'baslik', 'Damga', 'gizli', false, 'govde',
+      E'::mekan[ChIJ-642-eski-000001]\n\n[Taze Yer](mekan:ChIJ-642-taze-000002)\n\n::mekan[ChIJ-642-gelecek-03]\n\n[Eski Biçim](mekan:ChIJ-642-eski-bicim4)')),
+    jsonb_build_object(
+      'ChIJ-642-eski-000001', jsonb_build_object('kategori', 'museum', 'lat', 40.1, 'lng', 30.1, 'google_fetched_at', now() - interval '31 days'),
+      'ChIJ-642-taze-000002', jsonb_build_object('ad', 'Google Taze', 'kategori', 'park', 'lat', 40.2, 'lng', 30.2, 'google_fetched_at', now() - interval '5 days'),
+      'ChIJ-642-gelecek-03', jsonb_build_object('kategori', 'cafe', 'lat', 40.3, 'lng', 30.3, 'google_fetched_at', now() + interval '10 days')),
+    'kayit', v);
+  assert (select (bilinen -> 'ChIJ-642-gelecek-03' ->> 'google_fetched_at')::timestamptz <= now() and not (bilinen -> 'ChIJ-642-taze-000002' ? 'ad')
+    from public.sehir_rehberi_taslak where sehir_id = '22222222-2222-4222-8222-000000000002'), '#642 KK2: gelecek damga now()''a iner, ad saklanmaz';
+  perform set_config('test.t642', v::text, false);
+end $$;
+reset role;
+-- Temizlikten (20261219100000) önceki biçimde bir öğe: Google adı ve damgasız koordinat (updated_at değişmez).
+update public.sehir_rehberi_taslak
+  set bilinen = bilinen || '{"ChIJ-642-eski-bicim4": {"ad": "Google Adı", "kategori": "store", "lat": 40.4, "lng": 30.4}}'
+  where sehir_id = '22222222-2222-4222-8222-000000000002';
+set role authenticated;
+select pg_temp.as_email(:E, 'ozcinar.ece@gmail.com');
+do $$
+begin
+  assert public.rehber_yayinla('22222222-2222-4222-8222-000000000002', current_setting('test.t642')::timestamptz,
+    '{"ChIJ-642-eski-000001": "Eski Kart", "ChIJ-642-gelecek-03": "Gelecek Kart"}') = 4, '#642: dört yer açılır';
+  assert (select lat is null and lng is null and google_fetched_at < now() - interval '30 days' and ad = 'Eski Kart'
+    from public.yerler where place_id = 'ChIJ-642-eski-000001'), '#642 KK5: eski damgalı bilinen öğesinden yayınlanan yer koordinatsız açılır';
+  assert (select lat = 40.2 and ad = 'Taze Yer'
+      and google_fetched_at between now() - interval '5 days 1 minute' and now() - interval '4 days 23 hours'
+    from public.yerler where place_id = 'ChIJ-642-taze-000002'), '#642 KK5: taze damgalı öğe damgasını korur';
+  assert (select lat = 40.3 and google_fetched_at <= now() from public.yerler where place_id = 'ChIJ-642-gelecek-03'), '#642 KK2: gelecek damga now()';
+  assert (select lat is null and ad = 'Eski Biçim' from public.yerler where place_id = 'ChIJ-642-eski-bicim4'),
+    '#642 KK2: damgasız koordinat yazılmaz; eski öğedeki Google adı kullanılmaz';
+  -- KK4: temizlik kuralı — ad atılır, damgasız koordinat boşalır, damgalı öğe aynı kalır; ikinci geçiş bir şey değiştirmez.
+  assert public.bilinen_temizle('{"a": {"ad": "G", "kategori": "park", "lat": 1, "lng": 2}}', null)
+    = '{"a": {"kategori": "park", "lat": null, "lng": null, "google_fetched_at": null}}', '#642 KK4: eski öğe temizlenir';
+  -- Geçersiz damga metni işlemi düşürmez: damgasız sayılır (varsayılan ya da koordinat boş).
+  assert public.bilinen_temizle('{"a": {"kategori": "park", "lat": 1, "lng": 2, "google_fetched_at": "bozuk"}}', null)
+    = '{"a": {"kategori": "park", "lat": null, "lng": null, "google_fetched_at": null}}', '#642: geçersiz damga damgasız sayılır';
+  assert (select bilinen = public.bilinen_temizle(bilinen, null) from public.sehir_rehberi_taslak where sehir_id = '11111111-1111-4111-8111-000000000001'),
+    '#642 KK4: yeni biçimdeki taslağa temizlik dokunmaz';
+end $$;
+reset role;
+delete from public.yerler where place_id like 'ChIJ-642-%';
 
 -- ---------------------------------------------------------------- İçerik hattı (docs/07): taslak yükle / sil, şehirler, kontrol, bütçe
 -- Yalnız postgres (Yönetim API) çalıştırır; yayin=false zorlanır; yayındaki geziye dokunulmaz; slug çakışması reddedilir;
@@ -3844,7 +3906,86 @@ set role service_role;
 select pg_temp.hata_bekle($$select * from public.icerik_koordinat_bosalt(30)$$, '42501');
 select pg_temp.hata_bekle($$select public.konum_kaynagi_kontrol()$$, '42501');
 reset role;
+-- #642 (#640 incelemesi, M-G): `gece_temizligi_icerik` tetikleyicisi içerik adımının hatasını yutar. İçerik adımı düşer (burada
+-- bir satırı boşalttıktan sonra) → yalnız o adım geri alınır; places adımı kalır, içerik sayıları 0, `konum_kontrol` boş (null).
+begin;
+create or replace function public.icerik_koordinat_bosalt(p_gun integer default 30)
+returns table (sehir integer, yer integer, durak integer)
+language plpgsql security definer set search_path = ''
+as $$
+begin
+  update public.yerler set lat = null, lng = null where id = '20590000-0000-4000-8000-000000000012';
+  raise exception 'test: içerik adımı düştü';
+end;
+$$;
+update public.places set lat = 40.31, lng = 30.31, google_fetched_at = now() - interval '31 days' where place_id = 'ChIJ_262_suresi';
+set role service_role;
+do $$
+declare k public.gece_temizligi_kayit;
+begin
+  k := public.gece_temizligi();
+  assert k.yer >= 1, '#642: içerik adımı düşünce places adımı kalır: ' || row_to_json(k)::text;
+  assert k.icerik_sehir = 0 and k.icerik_yer = 0 and k.icerik_durak = 0, '#642: içerik sayıları 0: ' || row_to_json(k)::text;
+  assert k.konum_kontrol is null, '#642: konum_kontrol boş yazılır';
+end $$;
+reset role;
+do $$
+begin
+  assert (select lat is null from public.places where place_id = 'ChIJ_262_suresi'), '#642: places boşaltması kalır';
+  assert (select lat = 40.2 from public.yerler where id = '20590000-0000-4000-8000-000000000012'), '#642: düşen içerik adımının yazdığı geri alınır';
+  assert (select count(*) from public.gece_temizligi_kayit k
+    where k.id = (select max(id) from public.gece_temizligi_kayit) and k.konum_kontrol is null and k.yer >= 1) = 1, '#642: kayıt yazılır, konum_kontrol boş';
+end $$;
+rollback;
 delete from public.sehirler where id in ('20590000-0000-4000-8000-000000000001', '20590000-0000-4000-8000-000000000002', '20590000-0000-4000-8000-000000000003');
+-- #642 KK3 · KK5: içerik şehrinden kurulan seyahatte şehir koordinatının damgası şehrin kendi damgasıdır, now() değil. Eski istemci
+-- damga göndermese de sunucu aynı Google kimlikli içerik şehrinden bulur; istemcinin daha taze damgası şehrinkini geçemez. 30 günü
+-- geçen damgada şehir koordinatı boş yazılır.
+insert into public.sehirler (id, ad, slug, lat, lng, yayin, place_id, tz, google_fetched_at) values
+  ('64200000-0000-4000-8000-000000000011', 'Damgalı Şehir', 'damgali-sehir-642', 41.1, 29.1, true, 'ChIJ_642_sehir_taze', 'Europe/Istanbul', now() - interval '10 days'),
+  ('64200000-0000-4000-8000-000000000012', 'Eski Damgalı Şehir', 'eski-damgali-sehir-642', 41.2, 29.2, true, 'ChIJ_642_sehir_eski', 'Europe/Istanbul', now() - interval '31 days');
+set role authenticated;
+select pg_temp.as_user(:YS);
+do $$
+declare
+  v uuid;
+  t public.trips;
+begin
+  v := public.geziden_seyahat_ac(
+    '{"name": "Damga 642", "city_place_id": "ChIJ_642_sehir_taze", "city_label": "Damgalı Şehir", "lat": 41.1, "lng": 29.1, "tz": "Europe/Istanbul"}', 1, '[]', '[]');
+  select * into t from public.trips where id = v;
+  assert t.lat = 41.1 and t.google_fetched_at between now() - interval '10 days 1 minute' and now() - interval '9 days 23 hours',
+    '#642 KK3: seyahat şehri şehrin damgasını alır: ' || t.google_fetched_at::text;
+  delete from public.trips where id = v;
+  v := public.geziden_seyahat_ac(jsonb_build_object('name', 'Damga 642', 'city_place_id', 'ChIJ_642_sehir_taze', 'city_label', 'Damgalı Şehir',
+    'lat', 41.1, 'lng', 29.1, 'tz', 'Europe/Istanbul', 'google_fetched_at', now()), 1, '[]', '[]');
+  assert (select google_fetched_at < now() - interval '9 days' from public.trips where id = v), '#642 KK3: istemcinin taze damgası şehrinkini geçemez';
+  delete from public.trips where id = v;
+  v := public.geziden_seyahat_ac(
+    '{"name": "Damga 642", "city_place_id": "ChIJ_642_sehir_eski", "city_label": "Eski Damgalı Şehir", "lat": 41.2, "lng": 29.2, "tz": "Europe/Istanbul"}', 1, '[]', '[]');
+  assert (select lat is null and lng is null and google_fetched_at < now() - interval '30 days' from public.trips where id = v),
+    '#642 KK3: 30 günü geçen şehir damgasında koordinat boş';
+  delete from public.trips where id = v;
+  -- Eşleşen içerik şehri yoksa istemcinin damgası (gelecek tarihli olamaz); o da yoksa now().
+  v := public.geziden_seyahat_ac(jsonb_build_object('name', 'Damga 642', 'city_place_id', 'ChIJ_642_baska', 'city_label', 'Başka',
+    'lat', 41.3, 'lng', 29.3, 'tz', 'Europe/Istanbul', 'google_fetched_at', now() - interval '3 days'), 1, '[]', '[]');
+  assert (select lat = 41.3 and google_fetched_at between now() - interval '3 days 1 minute' and now() - interval '2 days 23 hours'
+    from public.trips where id = v), '#642 KK3: istemcinin gönderdiği şehir damgası';
+  delete from public.trips where id = v;
+  v := public.geziden_seyahat_ac(jsonb_build_object('name', 'Damga 642', 'city_place_id', 'ChIJ_642_baska', 'city_label', 'Başka',
+    'lat', 41.3, 'lng', 29.3, 'tz', 'Europe/Istanbul', 'google_fetched_at', now() + interval '10 days'), 1, '[]', '[]');
+  assert (select google_fetched_at <= now() from public.trips where id = v), '#642 KK3: gelecek tarihli damga now()''a iner';
+  delete from public.trips where id = v;
+  -- Geçersiz damga metni işlemi düşürmez: damgasız sayılır (now()); mekanın geçersiz damgası da.
+  v := public.geziden_seyahat_ac(jsonb_build_object('name', 'Damga 642', 'city_place_id', 'ChIJ_642_baska', 'city_label', 'Başka',
+    'lat', 41.3, 'lng', 29.3, 'tz', 'Europe/Istanbul', 'google_fetched_at', 'bozuk'), 1,
+    '[{"place_id": "ChIJ_642_mekan", "lat": 41.3, "lng": 29.3, "google_fetched_at": "bozuk"}]', '[]');
+  assert (select lat = 41.3 and google_fetched_at > now() - interval '1 minute' from public.trips where id = v), '#642: geçersiz şehir damgası now()';
+  assert (select google_fetched_at > now() - interval '1 minute' from public.places where trip_id = v), '#642: geçersiz mekan damgası now()';
+  delete from public.trips where id = v;
+end $$;
+reset role;
+delete from public.sehirler where id in ('64200000-0000-4000-8000-000000000011', '64200000-0000-4000-8000-000000000012');
 -- ---------------------------------------------------------------- #345 KK1: kapak atfı (geziler, sehirler, yerler)
 -- Okuma ve yazma satırın mevcut kuralıyla aynı: yayındaki satırın atfı herkese görünür, taslağınki görünmez; yalnız admin yazar.
 -- Biçim denetimi: yalnız yazar / lisans / kaynak_url, yazar zorunlu, kaynak https.
