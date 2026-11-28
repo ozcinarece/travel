@@ -154,11 +154,11 @@ describe('#603 KK3 60 gün sınırı', () => {
     const onAralik = jest.fn();
     // Sınır görünen ayın içinde kalsın diye 1 gün (60 günlük sınırın kendisi yukarıdaki saf testte).
     render(<AdimNeZaman aralik={{ gidis, donus: null }} onAralik={onAralik} tarihsizGun={null} onTarihsizGun={jest.fn()} enCokGun={1} />);
-    const ikinci = screen.getByLabelText(`${bugun.getFullYear() + 1}-01-02`);
+    const ikinci = screen.getByTestId(`gun-${bugun.getFullYear() + 1}-01-02`);
     expect(ikinci.props.accessibilityState).toMatchObject({ disabled: true });
     fireEvent.press(ikinci);
     expect(onAralik).not.toHaveBeenCalled();
     // Gidiş günü seçilebilir kalır (aynı güne ikinci dokunuş seçimi sıfırlar).
-    expect(screen.getByLabelText(gidis).props.accessibilityState).toMatchObject({ disabled: false });
+    expect(screen.getByTestId(`gun-${gidis}`).props.accessibilityState).toMatchObject({ disabled: false });
   });
 });

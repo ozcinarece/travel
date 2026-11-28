@@ -193,6 +193,8 @@ export function BunuSecCekmecesi({ rota, onKapat, kimlerle }: Props) {
         // #649 KK1: sınır gerçek seçimden (yalnız gidiş seçiliyken gidişten itibaren `enCok` gün; sonrası geçmiş gün gibi pasif).
         sinirAraligi={aralik}
         enCokGun={enCok}
+        // #648 KK2: hazır gezide "bugün" gezinin şehrinin diliminde (arkadaş rotasında varsayılan dilim).
+        tz={sehir.data?.tz}
         dokun={(_g, gun) => tarihDokun(aralik, gun)}
         donusBekleniyor={!!aralik && !aralik.donus && rotaGun > 1}
         onAralik={(a) => {
