@@ -72,7 +72,8 @@ export function oturum() {
 
 const PROFIL = { id: KULLANICI, name: 'Test Kişi', username: 'testkisi', photo_url: null, map_visibility: 'arkadaslar', onboarding_done_at: '2026-11-01T00:00:00Z', created_at: '2026-11-01T00:00:00Z' };
 
-export type Cagri = { yol: string; govde: unknown };
+/** `yetki`: Authorization başlığı (#643: erken özet isteği uygulamanınkiyle aynı yetkiyle mi). */
+export type Cagri = { yol: string; govde: unknown; yetki?: string };
 type Yanit = { status: number; headers: Record<string, string>; body: string };
 
 const CORS = { 'access-control-allow-origin': '*' };
@@ -139,7 +140,7 @@ export async function supabaseTaklidi(page: Page, { gecikmeMs = 0 }: { gecikmeMs
   await page.route(`${SUPABASE}/**`, async (route: Route) => {
     const istek = route.request();
     const govde = govdeOku(istek.postData());
-    if (istek.method() !== 'OPTIONS') cagrilar.push({ yol: new URL(istek.url()).pathname + new URL(istek.url()).search, govde });
+    if (istek.method() !== 'OPTIONS') cagrilar.push({ yol: new URL(istek.url()).pathname + new URL(istek.url()).search, govde, yetki: istek.headers()['authorization'] });
     if (gecikmeMs && istek.method() !== 'OPTIONS') await new Promise((r) => setTimeout(r, gecikmeMs));
     const y = yanitla(istek.method(), istek.url(), istek.headers(), govde);
     return route.fulfill({ status: y.status, headers: y.headers, body: y.body });

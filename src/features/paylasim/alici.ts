@@ -6,6 +6,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { t } from '@/i18n';
+import { erkenOzetiAl } from '@/lib/erkenOzet';
 import { kategoriEtiketi, sureMetni } from '@/lib/kategori';
 import { supabase } from '@/lib/supabase';
 
@@ -45,6 +46,12 @@ export function usePaylasimOzeti(token: string | undefined, hesapli: boolean, ot
     queryFn: async (): Promise<PaylasimOzeti> => {
       if (!token || (!TOKEN_BICIMI.test(token) && !kimlikMi(token))) return null;
       if (kimlikMi(token) && !hesapli) return null;
+      // #643 KK1 (web): HTML'deki betiğin başlattığı istek varsa onun sonucu; ikinci istek (ikinci açılış sayımı) yok.
+      // `paylasim_ozeti` oturuma bağlı değil; kimlikli link erken başlatılmaz.
+      if (!kimlikMi(token)) {
+        const erken = await erkenOzetiAl('paylasim_ozeti', { p_token: token });
+        if (erken) return (erken.data as PaylasimOzeti) ?? null;
+      }
       const { data, error } = kimlikMi(token)
         ? await supabase.rpc('paylasim_ozeti_kimlik', { p_id: token })
         : await supabase.rpc('paylasim_ozeti', { p_token: token });
