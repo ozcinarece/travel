@@ -47,16 +47,21 @@ export function useDuragaAta(seyahatId: string) {
       mevcut,
       gunDuraklari,
       ekleIndeksi,
+      sonrasi,
     }: {
       mekan: Mekan;
       gunId: string;
       mevcut: Durak | undefined;
       gunDuraklari: Durak[];
       ekleIndeksi?: number;
+      /** #621 KK2: sona eklerken anahtar bundan da sonra gelir (eldeki durak listesi eski kalmış olabilir). */
+      sonrasi?: string;
     }) => {
       const sirali = [...gunDuraklari].sort((a, b) => (a.order_key < b.order_key ? -1 : 1));
       const order_key =
-        ekleIndeksi === undefined ? sonAnahtar(sirali.map((d) => d.order_key)) : arasindaAnahtar(sirali[ekleIndeksi - 1]?.order_key, sirali[ekleIndeksi]?.order_key);
+        ekleIndeksi === undefined
+          ? sonAnahtar([...sirali.map((d) => d.order_key), ...(sonrasi ? [sonrasi] : [])])
+          : arasindaAnahtar(sirali[ekleIndeksi - 1]?.order_key, sirali[ekleIndeksi]?.order_key);
       if (mevcut) {
         // Gün değişince varış/tamamlanma sıfırlanır (#43).
         const { error } = await supabase
