@@ -1,24 +1,21 @@
-// #97 B KK2 → #143 KK2 (kanvas 17 · Rota & plan): gün çipleri ("1. gün · 6"; seçili gün renginde dolu, diğerleri çerçeveli +
-// renk noktası), seçili günün mini haritası (büyüt), gün özeti ("5 sa 40 dk · 3,4 km yürüyüş"), numaralı duraklar (foto 46,
-// ad, kategori · süre, EkleDugmesi) ve aralarında noktalı çizgiyle "N dk yürüyüş". #192: süreler ve çizgi gerçek yoldan
-// (gezi_rota_onbellek; gün başına bir kez hesaplanır, 30 gün saklanır); yol gelene kadar kestirim ve özet "~" ile.
+// #97 B → #143 → #408 KK3 (UX önerileri kanvası `Sayfa_v6_HazirGezi_Harita` · `Sayfa_v5_HazirGezi_Kayik`): hazır gezinin
+// Plan sekmesi. Bütün günler alt alta; ilk gün başlıksız başlar (gün düğmeleri haritanın altında), sonraki günlerin başında
+// "2. gün · Sazova ve Porsuk" (17/800) ve sağda "6 durak". Durak satırı: gün renginde 24 px numara dairesi (#310 yeni gün
+// renkleri), 52 px foto ya da kamera, ad (15/700), "tür · süre" (13), sağda ince "+" ya da tik (`InceEkle`). Satırlar arasında
+// 2 × 16 px çizgi ve "6 dk yürüyüş" / "12 dk araçla" (12). #192: süreler gerçek yoldan (gezi_rota_onbellek; gün başına bir kez
+// hesaplanır, 30 gün saklanır); yol gelene kadar kestirim. Mini harita, gün çipleri ve gün özeti kalktı (harita üstte, KK1).
 import { Foto } from '@/components/ui/Foto';
 import { useMemo } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 
-import { BolumSiniri } from '@/components/ui/BolumSiniri';
-import { EkleDugmesi } from '@/components/ui/EkleDugmesi';
+import { InceEkle, Kamera } from '@/components/ortak/YerSatiri';
 import type { IcerikCanli } from '@/features/icerik/fotolar';
-import { geziGunOzeti, type GeziGunOzeti } from '@/features/icerik/gezi';
+import { geziGunOzeti } from '@/features/icerik/gezi';
 import { useGeziRotasi } from '@/features/icerik/geziRota';
 import { t } from '@/i18n';
 import { kategoriEtiketi, sureMetni } from '@/lib/kategori';
-import { mesafeMetni } from '@/lib/mesafe';
-import { kategoriPini } from '@/lib/pinIkonu';
-import type { GeziDetay, GeziDuragi } from '@/lib/tipler';
-import { gunRengi, gunUstuMetin, renk, yazi } from '@/theme';
-
-import { MiniHarita } from './MiniHarita';
+import type { GeziDetay, GeziDuragi, GeziGunu } from '@/lib/tipler';
+import { anaV5, renk, yazi, yeniGunRengi } from '@/theme';
 
 type Props = {
   gezi: GeziDetay;
@@ -30,114 +27,85 @@ type Props = {
   eklePasif?: boolean;
   /** Satıra dokunuldu (mekan rehberi). */
   onDurak?: (d: GeziDuragi) => void;
-  /** Seçili gün (sıra indeksi); sayfada tutulur, sekme değişince korunur. */
-  gunSira: number;
-  onGunSira: (i: number) => void;
 };
 
-export function GeziPlani({ gezi, canli, listede, mesgulId, onDurakEkle, eklePasif, onDurak, gunSira, onGunSira }: Props) {
-  const gun = gezi.gezi_gunleri[gunSira] ?? gezi.gezi_gunleri[0];
-  const { rotalar } = useGeziRotasi(gun);
-  const ozet = useMemo(() => geziGunOzeti(gun?.gezi_duraklari ?? [], rotalar), [gun, rotalar]);
-  if (!gun) return null;
-  const rengi = gunRengi(gun.sira);
+export function GeziPlani({ gezi, ...p }: Props) {
   return (
     <View style={s.kap}>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={s.cipler} style={s.ciplerSerit}>
-        {gezi.gezi_gunleri.map((g, i) => {
-          const secili = i === gunSira;
-          const r = gunRengi(g.sira);
-          return (
-            <Pressable key={g.id} accessibilityRole="button" accessibilityState={{ selected: secili }} onPress={() => onGunSira(i)} style={[s.cip, secili ? { backgroundColor: r, borderColor: r } : null]}>
-              {secili ? null : <View style={[s.cipNokta, { backgroundColor: r }]} />}
-              <Text style={[s.cipMetin, secili && { color: gunUstuMetin(r) }]}>{t('gezi.gunCip', { n: g.sira, mekan: g.gezi_duraklari.length })}</Text>
-            </Pressable>
-          );
-        })}
-      </ScrollView>
-      {/* #199 KK3: harita hata verirse yalnız harita kutusu "açılamadı" kartına döner; durak listesi çalışır. */}
-      <BolumSiniri ad="gezi-harita" sifirla={gun.id}>
-        <MiniHarita duraklar={gun.gezi_duraklari} gunIndex={gun.sira} rotalar={rotalar} baslik={`${t('gezi.gunKisa', { n: gun.sira })}${gun.baslik ? ` · ${gun.baslik}` : ''}`} />
-      </BolumSiniri>
-      <View style={s.liste}>
-        {gun.gezi_duraklari.length > 1 ? <Text style={s.ozet}>{ozetMetni(ozet)}</Text> : null}
-        {gun.gezi_duraklari.map((d, i) => {
-          const c = canli?.get(d.id);
-          const icinde = listede(d);
-          return (
-            <View key={d.id}>
-              {i > 0 && ozet.bacakDk[i - 1] === null ? (
-                // #205 Parça 1 (kanvas 24b-A): bir ucu konumsuz bacak — kesik çizgi, "Yol süresi bilinmiyor", süre yok.
-                <View style={s.bacak} testID="gezi-bacak-bilinmiyor">
-                  <View style={s.noktalar}>
-                    {[0, 1, 2].map((k) => (
-                      <View key={k} style={s.kesik} />
-                    ))}
-                  </View>
-                  <Text style={s.bacakBilinmiyor}>{t('gezi.yolBilinmiyor')}</Text>
-                </View>
-              ) : i > 0 ? (
-                <View style={s.bacak}>
-                  <View style={s.noktalar}>
-                    {[0, 1, 2, 3].map((k) => (
-                      <View key={k} style={s.nokta} />
-                    ))}
-                  </View>
-                  <Text style={s.bacakMetin}>{t(ozet.bacakMod[i - 1] === 'DRIVE' ? 'gezi.arac' : 'gezi.yuruyus', { n: ozet.bacakDk[i - 1] ?? 0 })}</Text>
-                </View>
-              ) : null}
-              {/* #172 KK7: satır DB'den çizilir; panel için yalnız Google kimliği gerekir. */}
-              <Pressable accessibilityRole="button" disabled={!onDurak || !c?.place_id} onPress={() => onDurak?.(d)} style={({ pressed }) => [s.satir, pressed && { opacity: 0.85 }]}>
-                <View style={[s.numara, { backgroundColor: rengi }]}>
-                  <Text style={[s.numaraMetin, { color: gunUstuMetin(rengi) }]}>{i + 1}</Text>
-                </View>
-                <View style={[s.foto, { backgroundColor: kategoriPini(d.kategori).kategoriRenk }]}>{c?.foto_uri ? <Foto source={{ uri: c.foto_uri }} style={StyleSheet.absoluteFill} contentFit="cover" transition={120} /> : null}</View>
-                <View style={{ flex: 1, minWidth: 0 }}>
-                  <Text style={s.ad} numberOfLines={1}>
-                    {d.ad}
-                  </Text>
-                  <Text style={s.meta} numberOfLines={1}>
-                    {`${kategoriEtiketi(d.kategori)} · ${sureMetni(d.sure_dk)}`}
-                  </Text>
-                </View>
-                <EkleDugmesi listede={icinde} mesgul={mesgulId === d.id} pasif={eklePasif} ipucu={eklePasif ? t('ekleme.baglantiYokIpucu') : undefined} onPress={() => onDurakEkle(d)} />
-              </Pressable>
-            </View>
-          );
-        })}
-      </View>
+      {gezi.gezi_gunleri.map((g, i) => (
+        <GunBolumu key={g.id} gun={g} ilk={i === 0} {...p} />
+      ))}
     </View>
   );
 }
 
-/** Gün özeti: "~5 sa 40 dk · 3,4 km yürüyüş"; #205 Parça 1: yürüyüş mesafesi 0 ise (ör. bütün duraklar konumsuz) yalnız süre. */
-function ozetMetni(o: GeziGunOzeti) {
-  const sure = sureMetni(o.toplamDk);
-  if (Math.round(o.yuruyusM) <= 0) return t(o.kestirim ? 'gezi.gunOzetiSure' : 'gezi.gunOzetiSureGercek', { sure });
-  return t(o.kestirim ? 'gezi.gunOzeti' : 'gezi.gunOzetiGercek', { sure, mesafe: mesafeMetni(o.yuruyusM) });
+function GunBolumu({ gun, ilk, canli, listede, mesgulId, onDurakEkle, eklePasif, onDurak }: Omit<Props, 'gezi'> & { gun: GeziGunu; ilk: boolean }) {
+  const { rotalar } = useGeziRotasi(gun);
+  const ozet = useMemo(() => geziGunOzeti(gun.gezi_duraklari, rotalar), [gun, rotalar]);
+  const rengi = yeniGunRengi(gun.sira);
+  return (
+    <View>
+      {ilk ? null : (
+        <View style={s.gunBaslik}>
+          <Text style={s.gunAd} accessibilityRole="header" numberOfLines={1}>
+            {`${t('gezi.gunKisa', { n: gun.sira })}${gun.baslik ? ` · ${gun.baslik}` : ''}`}
+          </Text>
+          <Text style={s.gunSayi}>{t('gezi.v6.gunDurak', { n: gun.gezi_duraklari.length })}</Text>
+        </View>
+      )}
+      {gun.gezi_duraklari.map((d, i) => {
+        const c = canli?.get(d.id);
+        const dk = i > 0 ? ozet.bacakDk[i - 1] : undefined;
+        return (
+          <View key={d.id}>
+            {i > 0 ? (
+              // #205 Parça 1: bir ucu konumsuz bacak — süre yok, "Yol süresi bilinmiyor".
+              <View style={s.bacak} testID={dk === null ? 'gezi-bacak-bilinmiyor' : undefined}>
+                <View style={s.bacakCizgi} />
+                <Text style={s.bacakMetin}>{dk === null ? t('gezi.yolBilinmiyor') : t(ozet.bacakMod[i - 1] === 'DRIVE' ? 'gezi.arac' : 'gezi.yuruyus', { n: dk ?? 0 })}</Text>
+              </View>
+            ) : null}
+            {/* #172 KK7: satır DB'den çizilir; panel için yalnız Google kimliği gerekir. */}
+            <Pressable accessibilityRole="button" disabled={!onDurak || !c?.place_id} onPress={() => onDurak?.(d)} style={({ pressed }) => [s.satir, pressed && { opacity: 0.85 }]}>
+              <View style={[s.numara, { backgroundColor: rengi }]}>
+                <Text style={s.numaraMetin}>{i + 1}</Text>
+              </View>
+              <View style={s.foto}>{c?.foto_uri ? <Foto source={{ uri: c.foto_uri }} style={StyleSheet.absoluteFill} contentFit="cover" transition={120} /> : <Kamera />}</View>
+              <View style={s.metin}>
+                <Text style={s.ad} numberOfLines={1}>
+                  {d.ad}
+                </Text>
+                <Text style={s.meta} numberOfLines={1}>
+                  {`${kategoriEtiketi(d.kategori)} · ${sureMetni(d.sure_dk)}`}
+                </Text>
+              </View>
+              <View style={s.dugmeAlani}>
+                <InceEkle listede={listede(d)} mesgul={mesgulId === d.id} pasif={eklePasif} ipucu={eklePasif ? t('ekleme.baglantiYokIpucu') : undefined} onPress={() => onDurakEkle(d)} />
+              </View>
+            </Pressable>
+          </View>
+        );
+      })}
+    </View>
+  );
 }
 
 const s = StyleSheet.create({
-  kap: { gap: 12 },
-  ciplerSerit: { marginHorizontal: -20 },
-  cipler: { gap: 8, paddingHorizontal: 20 },
-  cip: { flexDirection: 'row', alignItems: 'center', gap: 6, height: 38, paddingHorizontal: 14, borderRadius: 12, borderWidth: 1.5, borderColor: renk.ayrac, backgroundColor: renk.zemin },
-  cipNokta: { width: 8, height: 8, borderRadius: 4 },
-  cipMetin: { fontFamily: yazi.ekstra, fontSize: 14, color: renk.metin },
-  liste: { gap: 8, paddingTop: 2 },
-  ozet: { fontFamily: yazi.normal, fontSize: 13, color: renk.ikincil },
-  satir: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 4 },
-  numara: { width: 28, height: 28, borderRadius: 8, alignItems: 'center', justifyContent: 'center' },
-  numaraMetin: { fontFamily: yazi.ekstra, fontSize: 13 },
-  foto: { width: 46, height: 46, borderRadius: 12, overflow: 'hidden' },
-  ad: { fontFamily: yazi.ekstra, fontSize: 15, color: renk.metin },
-  meta: { fontFamily: yazi.normal, fontSize: 12, color: renk.ikincil },
-  // Kanvas 17: 28 px numaranın ortasından noktalı çizgi (13 px içeride), yazı 26 px sağında.
-  bacak: { flexDirection: 'row', alignItems: 'center', height: 26, paddingLeft: 13 },
-  noktalar: { width: 2, height: 26, justifyContent: 'space-between', paddingVertical: 1 },
-  nokta: { width: 2, height: 2, borderRadius: 1, backgroundColor: '#b4bbd3' },
-  bacakMetin: { marginLeft: 24, fontFamily: yazi.ekstra, fontSize: 12, color: renk.ana },
-  // Kanvas 24b-A: konumsuz uçlu bacak — #B4BBD3 kesik çizgi, yazı 12 px kalın ikincil.
-  kesik: { width: 2, height: 6, backgroundColor: '#b4bbd3' },
-  bacakBilinmiyor: { marginLeft: 24, fontFamily: yazi.kalin, fontSize: 12, color: renk.ikincil },
+  kap: { paddingTop: 8 },
+  gunBaslik: { paddingTop: 16, flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between', gap: 8 },
+  gunAd: { flexShrink: 1, fontFamily: yazi.ekstra, fontSize: 17, color: renk.metin },
+  gunSayi: { fontFamily: yazi.normal, fontSize: 13, color: anaV5.ikincil },
+  satir: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 10 },
+  numara: { width: 24, height: 24, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
+  numaraMetin: { fontFamily: yazi.ekstra, fontSize: 12, color: renk.zemin },
+  foto: { width: 52, height: 52, borderRadius: 12, overflow: 'hidden', backgroundColor: anaV5.fotoYok },
+  metin: { flex: 1, minWidth: 0, gap: 1 },
+  ad: { fontFamily: yazi.kalin, fontSize: 15, color: renk.metin },
+  meta: { fontFamily: yazi.normal, fontSize: 13, color: anaV5.ikincil },
+  // 32 px ince "+" 44 px dokunma alanında; görünür kenar satırın sağına hizalı.
+  dugmeAlani: { width: 44, height: 44, marginRight: -6, alignItems: 'center', justifyContent: 'center' },
+  // Kanvas: 24 px numaranın ortasından 2 × 16 px çizgi (11 px içeride), yazı 22 px sağında.
+  bacak: { flexDirection: 'row', alignItems: 'center', gap: 22, paddingLeft: 11 },
+  bacakCizgi: { width: 2, height: 16, backgroundColor: anaV5.cizgi },
+  bacakMetin: { fontFamily: yazi.normal, fontSize: 12, color: anaV5.ikincil },
 });

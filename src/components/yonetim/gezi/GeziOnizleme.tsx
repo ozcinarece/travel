@@ -1,5 +1,4 @@
 import { Foto } from '@/components/ui/Foto';
-import { useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 
@@ -85,7 +84,6 @@ function YaziSayfasi({ gezi, sehirAdi }: { gezi: GeziDetay; sehirAdi: string }) 
 }
 
 function PlanSayfasi({ gezi, sehirAdi }: { gezi: GeziDetay; sehirAdi: string }) {
-  const [gunSira, setGunSira] = useState(0);
   return (
     <>
       <ScrollView style={s.govde} contentContainerStyle={s.planIc}>
@@ -99,7 +97,7 @@ function PlanSayfasi({ gezi, sehirAdi }: { gezi: GeziDetay; sehirAdi: string }) 
             <Text style={s.altOzet}>{t('gezi.sayfa2', { gun: gezi.gun_sayisi, mekan: gezi.mekan_sayisi })}</Text>
           </View>
         </View>
-        <GeziPlani gezi={gezi} gunSira={gunSira} onGunSira={setGunSira} canli={undefined} onDurakEkle={() => {}} listede={() => false} mesgulId={null} />
+        <GeziPlani gezi={gezi} canli={undefined} onDurakEkle={() => {}} listede={() => false} mesgulId={null} />
       </ScrollView>
       <View style={s.altCubuk}>
         <View style={[s.siyahDugme, { flex: 1 }]}>

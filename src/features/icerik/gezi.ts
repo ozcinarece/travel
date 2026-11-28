@@ -2,11 +2,11 @@
 // yürüyüş"). #192: gerçek yol varsa (gezi_rota_onbellek) süre ve mesafe ondan; yoksa kestirim (kuş uçuşu × 1,3 ÷ 4,5 km/sa) ve özet
 // "~" ile.
 import { mesafeM } from '@/components/harita/geo';
-import type { HaritaCizgisi } from '@/components/harita/tipler';
+import type { HaritaCizgisi, HaritaPini } from '@/components/harita/tipler';
 import { rotaNoktalari } from '@/features/program/haritaVerisi';
-import type { GeziDuragi } from '@/lib/tipler';
+import type { GeziDetay, GeziDuragi } from '@/lib/tipler';
 import { kestirimYuruyusSn } from '@/schedule/tempo';
-import { gunRengi, rotaRengi } from '@/theme';
+import { gunRengi, rotaRengi, yeniGunRengi } from '@/theme';
 
 import { bacakAnahtari, type GeziRotaBacagi, type GeziRotalari } from './geziRota';
 
@@ -74,8 +74,12 @@ export function geziGunOzeti(duraklar: OzetDuragi[], rotalar?: GeziRotalari): Ge
  * #192 KK3: mini haritanın çizgileri. Gerçek yürüyüş yolu rota tonunda düz çizgi (Program'la aynı dil); araç bacağı kuş uçuşu
  * kesik (#136); yolu henüz gelmemiş ya da hesaplanamamış bacak bugünkü gibi gün renginde ince kesik kuş uçuşu. Kimlik bacak
  * bazlı ve rota gelsin gelmesin aynı (#77: çizgi yeniden kurulmaz, güncellenir).
+ *
+ * #408: `renk` verilirse (hazır gezi sayfası, #310 yeni gün renkleri) üç çizgi türü de o renkte; pin ve rota aynı ton.
  */
-export function geziGunCizgileri(duraklar: Pick<GeziDuragi, 'id' | 'lat' | 'lng'>[], gunIndex: number, rotalar?: GeziRotalari): HaritaCizgisi[] {
+export function geziGunCizgileri(duraklar: Pick<GeziDuragi, 'id' | 'lat' | 'lng'>[], gunIndex: number, rotalar?: GeziRotalari, renk?: string): HaritaCizgisi[] {
+  const rota = renk ?? rotaRengi(gunIndex);
+  const kusUcusu = renk ?? gunRengi(gunIndex);
   // #199 KK2: konumu bozuk durağın bacakları çizilmez (harita NaN koordinatla düşmesin); yolu bozuk bacak kuş uçuşuna düşer.
   return duraklar.slice(1).flatMap((d, i): HaritaCizgisi[] => {
     const onceki = duraklar[i];
@@ -84,8 +88,24 @@ export function geziGunCizgileri(duraklar: Pick<GeziDuragi, 'id' | 'lat' | 'lng'
     const z = { lat: d.lat, lng: d.lng };
     const id = `gc:${onceki.id}>${d.id}`;
     const r = rotalar?.get(bacakAnahtari(onceki.id, d.id));
-    if (r && bacakGecerli(r) && aracGecerli(r)) return [{ id, noktalar: [a, z], renk: rotaRengi(gunIndex), opaklik: 0.9, kesik: true, arac: true }];
-    if (r && bacakGecerli(r)) return [{ id, noktalar: rotaNoktalari(typeof r.polyline === 'string' ? r.polyline : '', a, z), renk: rotaRengi(gunIndex), opaklik: 0.9 }];
-    return [{ id, noktalar: [a, z], renk: gunRengi(gunIndex), opaklik: 0.9, kesik: true, ince: true }];
+    if (r && bacakGecerli(r) && aracGecerli(r)) return [{ id, noktalar: [a, z], renk: rota, opaklik: 0.9, kesik: true, arac: true }];
+    if (r && bacakGecerli(r)) return [{ id, noktalar: rotaNoktalari(typeof r.polyline === 'string' ? r.polyline : '', a, z), renk: rota, opaklik: 0.9 }];
+    return [{ id, noktalar: [a, z], renk: kusUcusu, opaklik: 0.9, kesik: true, ince: true }];
+  });
+}
+
+// ---------------------------------------------------------------- #408 KK1: hazır gezi sayfasının üst haritası
+
+/** Diğer günlerin noktası (docs/05 §2: %45 opak). */
+const SOLUK = 0.45;
+
+/** #408 KK1 (`Sayfa_v6_HazirGezi_Harita`) haritanın pinleri: seçili gün numaralı, diğer günler numarasız soluk nokta. Konumu bozuk durak girmez (#199 KK2). */
+export function hazirGeziPinleri(gezi: Pick<GeziDetay, 'gezi_gunleri'>, gunSira: number): HaritaPini[] {
+  return gezi.gezi_gunleri.flatMap((g, gi) => {
+    const secili = gi === gunSira;
+    const rengi = yeniGunRengi(g.sira);
+    return g.gezi_duraklari.flatMap((d, i): HaritaPini[] =>
+      konumGecerli(d) ? [{ id: `gd:${d.id}`, tur: 'durak', konum: { lat: d.lat, lng: d.lng }, renk: rengi, ...(secili ? { etiket: String(i + 1), ad: d.ad } : { opaklik: SOLUK }) }] : [],
+    );
   });
 }

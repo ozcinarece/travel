@@ -139,6 +139,28 @@ export function paylasimGunRengi(gunIndex: number): string {
   return paylasimGunRenkleri[(gunIndex - 1) % paylasimGunRenkleri.length];
 }
 
+/**
+ * #408 · #310 KK7 (UX önerileri kanvası `Harita_GunRenkleri` → YENİ; Ece #309'da onayladı): yeni gün renkleri. Hazır gezi
+ * sayfasında (`Sayfa_v6_HazirGezi_Harita`) pin, rota ve durak numarası aynı renkte; üstünde beyaz numara (≥ 6:1). Turuncu ve
+ * yeşil yalnız "sıradaki" ve "gezildi" anlamına ayrıldığı için listede yok. İlk üçü `paylasimGunRenkleri` ile aynı. Uygulamanın
+ * geri kalanı #310 birleşene kadar `gunRenkleri` / `rotaRenkleri`'nde kalır.
+ */
+export const yeniGunRenkleri = ['#2350c4', '#7a3fc0', '#b3305e', '#0e6a85', '#6b5a1e', '#3e4a63'] as const;
+
+export function yeniGunRengi(gunIndex: number): string {
+  return yeniGunRenkleri[(gunIndex - 1) % yeniGunRenkleri.length];
+}
+
+/** #408 (UX önerileri kanvası `Sayfa_v6_HazirGezi_Harita` · `Sayfa_v5_HazirGezi_Kayik` · `Sayfa_v5_SeyahatimeAl`). */
+export const hazirGeziV6 = {
+  /** Üstteki harita (durum çubuğu dahil). */
+  haritaBoy: 330,
+  /** Harita üstündeki gün düğmelerinin gölgesi (dairelerinki `seyahatV7.golge`). */
+  cipGolge: 'rgba(14,20,48,0.14)',
+  /** Çekmecedeki ikinci kişi yüzü (ilki Gece). */
+  yuzIkinci: '#8A91A3',
+} as const;
+
 /** Rota tonu = gün renginin ~%20 koyusu (pinler gün renginde kalır). */
 export const rotaRenkleri = ['#2350c4', '#c4841d', '#128058', '#623fb3', '#b33762', '#0b84ba'] as const;
 

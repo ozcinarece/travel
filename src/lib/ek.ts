@@ -11,7 +11,37 @@ export function iyelikEkli(n: number): string {
   return `${n}'${ek}`;
 }
 
+// #408: sayının yönelme ve belirtme ekleri — "Cuma 16'ya", "Cumartesi 17'ye", "pazar 18'i ekler", "2'yi". Son okunan sayıya
+// göre (birler basamağı varsa onun, yoksa onlar basamağının; tam yüzler "yüz", tam binler "bin").
+const YONELME_BIR = ['', 'e', 'ye', 'e', 'e', 'e', 'ya', 'ye', 'e', 'a'];
+const YONELME_ON = ['', 'a', 'ye', 'a', 'a', 'ye', 'a', 'e', 'e', 'a'];
+const BELIRTME_BIR = ['', 'i', 'yi', 'ü', 'ü', 'i', 'yı', 'yi', 'i', 'u'];
+const BELIRTME_ON = ['', 'u', 'yi', 'u', 'ı', 'yi', 'ı', 'i', 'i', 'ı'];
+
+function sayiEki(n: number, bir: string[], on: string[], yuz: string, bin: string, sifir: string): string {
+  const b = n % 10;
+  const o = Math.floor(n / 10) % 10;
+  const ek = b ? bir[b] : o ? on[o] : n % 1000 === 0 && n > 0 ? bin : n > 0 ? yuz : sifir;
+  return `${n}'${ek}`;
+}
+
+/** "16'ya" · "17'ye" · "18'e" · "10'a" · "20'ye" · "100'e". */
+export function yonelmeSayi(n: number): string {
+  return sayiEki(n, YONELME_BIR, YONELME_ON, 'e', 'e', 'a');
+}
+
+/** "18'i" · "2'yi" · "3'ü" · "9'u" · "6'yı" · "30'u" · "100'ü". */
+export function belirtmeSayi(n: number): string {
+  return sayiEki(n, BELIRTME_BIR, BELIRTME_ON, 'ü', 'i', 'ı');
+}
+
 const KALIN = 'aıou';
+
+/** #408: "de / da" bağlacı, önündeki kelimenin son ünlüsüne göre — "Mert de", "Okan da", "bir arkadaşın da". */
+export function dahiBaglaci(onceki: string): 'de' | 'da' {
+  const sonUnlu = [...onceki.trim().toLocaleLowerCase('tr')].reverse().find((h) => 'aeıioöuü'.includes(h));
+  return sonUnlu && KALIN.includes(sonUnlu) ? 'da' : 'de';
+}
 const UNLU = 'aeıioöuü';
 
 /**

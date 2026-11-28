@@ -1,6 +1,6 @@
 // #193 KK12: "Seyahatime al" uçtan uca (sayfa + gerçek mutasyonlar, Supabase sahte): yeni seyahat tek işlemde açılır ve Plan'a
-// (1. gün) dönülür, başarısızlıkta seyahat oluşmaz; eksik gün seyahatin sonuna eklenir; "Yalnız mekanlar"da seçilenler eklenir,
-// listede olan atlanır ve Gezi sayfasına dönülür.
+// (1. gün) dönülür, başarısızlıkta seyahat oluşmaz; eksik gün seyahatin sonuna eklenir. #408 KK6 (kanvas `Sayfa_v5_SeyahatimeAl`):
+// seyahat satırı, onay daireli gün satırları, "1'i zaten listende", tek "N durağı al"; "Yalnız mekanlar" sekmesi yok.
 import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react-native';
@@ -205,7 +205,10 @@ describe('#193 Yeni seyahat akışın içinde (KK2–KK4)', () => {
     expect(screen.getByText('Sihirbaza gitmez; bitince yeni seyahatin Plan\'ı açılır.')).toBeTruthy();
     // #277 KK4: seyahati yoksa "Hangi seyahate?" adımı atlanır; yalnız tarih sorulur.
     expect(screen.queryByText('HANGİ SEYAHATE?')).toBeNull();
-    expect(screen.getAllByText(/Eskişehir'de üç gün/).length).toBeGreaterThan(0);
+    expect(screen.queryByText('Yeni seyahat')).toBeNull();
+    // #408 KK6: sekme ve açıklama paragrafı yok.
+    expect(screen.queryByText('Yalnız mekanlar')).toBeNull();
+    expect(screen.queryByText(/adıyla yeni seyahat açılır/)).toBeNull();
     // Tarih seçilmeden düğme pasif; başlangıç gününe dokununca 3 gün.
     const bugun = yerelTarih(new Date(), Intl.DateTimeFormat().resolvedOptions().timeZone);
     fireEvent.press(screen.getByLabelText(kisaTarih(tarihEkle(bugun, 2))));
@@ -331,32 +334,25 @@ describe('#193 Yeni seyahat akışın içinde (KK2–KK4)', () => {
     fireEvent.press(screen.getByText('Tarih sonra'));
     expect(screen.getByRole('button', { name: 'Seyahati aç ve planı al' }).props.accessibilityHint).toBe('Bağlantı yok; bağlanınca eklenebilir.');
   });
-
-  it('KK10: "Yalnız mekanlar" + yeni seyahat — boş günler, seçilen mekanlar atanmamış; Gezi sayfasına dönülür', async () => {
-    ac(null);
-    await sehirHazir();
-    fireEvent.press(screen.getByText('Yalnız mekanlar'));
-    fireEvent.press(screen.getByText('Tarih sonra'));
-    // Varsayılan: yemek (Yer y) hariç 4 mekan.
-    fireEvent.press(screen.getByText('Seyahati aç ve 4 mekanı ekle'));
-    await waitFor(() => expect(mockRouter.replace).toHaveBeenCalled());
-    const args = mockDb.rpc.find((r) => r.ad === 'geziden_seyahat_ac')!.args;
-    expect((args.p_mekanlar as { place_id: string }[]).map((m) => m.place_id)).toEqual(['PA', 'PC', 'PD', 'PE']);
-    expect(args.p_duraklar).toEqual([]);
-    expect(mockRouter.replace).toHaveBeenCalledWith({ pathname: '/seyahat/[id]/(sekmeler)/gezi', params: { id: 'yeni-trip' } });
-    expect(mockOlay).not.toHaveBeenCalledWith('plan_kuruldu', expect.anything(), expect.anything());
-  });
 });
 
 describe('#193 Mevcut seyahat (KK5–KK9)', () => {
-  it('KK5: fazla gün varsayılan seçilmez ("Paz 19 +"); seçilince seyahatin sonuna gün eklenir, durakları oraya; Plan, ilk gün', async () => {
+  it('KK5 · #408 KK6: eşleme sırayla, fazla gün varsayılan seçilmez ("Seyahate pazar 19\'u ekler"); seçilince sona gün eklenir, durakları oraya; Plan, ilk gün', async () => {
     mevcutSeyahat();
     ac('t1');
-    expect(screen.getByText('→ Paz 19 +')).toBeTruthy();
-    expect(screen.getByText(/3\. günü seçersen seyahate/)).toBeTruthy();
+    // Gün satırları: hedef gün ve durak sayısı; seyahatte olmayan gün eklenecek tarihle.
+    expect(screen.getByText("Cuma 17'ye · 2 durak")).toBeTruthy();
+    expect(screen.getByText("Cumartesi 18'e · 1 durak")).toBeTruthy();
+    expect(screen.getByText("Seyahate pazar 19'u ekler")).toBeTruthy();
     expect(screen.getByLabelText('3. gün · Sazova').props.accessibilityState).toEqual(expect.objectContaining({ checked: false }));
+    // PC listede (atanmamış): "1'i zaten listende"; güne taşınacağı için durak sayısına girer.
+    expect(screen.getByText("1'i zaten listende")).toBeTruthy();
+    expect(screen.getByText('3 durağı al')).toBeTruthy();
+    // Tarih eşleme çipleri ve açıklama paragrafı yok.
+    expect(screen.queryByText(/→/)).toBeNull();
+    expect(screen.queryByText(/seçersen seyahate/)).toBeNull();
     fireEvent.press(screen.getByLabelText('3. gün · Sazova'));
-    const dugme = await screen.findByText('5 yeni durağı al · Cum 17, Cmt 18, Paz 19');
+    const dugme = await screen.findByText('5 durağı al');
     fireEvent.press(dugme);
     await waitFor(() => expect(mockRouter.replace).toHaveBeenCalled());
     // Tarihli seyahat: bitiş bir gün uzar (mevcut gün sayısından sayılır, gün silinmez).
@@ -369,22 +365,38 @@ describe('#193 Mevcut seyahat (KK5–KK9)', () => {
     expect(mockRouter.replace).toHaveBeenCalledWith({ pathname: '/seyahat/[id]/(sekmeler)/program', params: expect.objectContaining({ id: 't1', gun: '1', eklenenDurak: '5' }) });
   });
 
-  it('KK8–KK9: listede olan "Listende" (seçilemez); yemek hariç seçili; "Hepsini kaldır"; seçilenler eklenir, güne atanmaz; Gezi sayfası', async () => {
+  it('#408 KK6: bir günün dairesi kaldırılınca o gün alınmaz; hiç gün seçili değilse düğme pasif', async () => {
     mevcutSeyahat();
     ac('t1');
-    fireEvent.press(screen.getByText('Yalnız mekanlar'));
-    expect(screen.getByText('Listende')).toBeTruthy();
-    expect(screen.getByText('LİSTENE EKLENECEKLER · 3 / 4')).toBeTruthy();
-    // 1. günde yemek seçili değil ("Hepsini seç"); 2. günde seçilebilen yok; 3. günün ikisini kaldır, 1. günün yemeğini ekle.
-    expect(screen.getAllByText('Hepsini seç')).toHaveLength(1);
-    fireEvent.press(screen.getByText('Hepsini kaldır'));
-    fireEvent.press(screen.getByLabelText('Yer y'));
-    expect(screen.getByText('LİSTENE EKLENECEKLER · 2 / 4')).toBeTruthy();
-    fireEvent.press(screen.getByText('2 mekanı listeme ekle'));
-    await waitFor(() => expect(mockRouter.replace).toHaveBeenCalled());
-    expect(mockDb.yazilan.filter((y) => y.tablo === 'places').map((y) => y.satir.place_id)).toEqual(['PA', 'PY']);
-    expect(mockDb.yazilan.filter((y) => y.tablo === 'stops')).toEqual([]);
-    expect(mockRouter.replace).toHaveBeenCalledWith({ pathname: '/seyahat/[id]/(sekmeler)/gezi', params: { id: 't1' } });
+    fireEvent.press(screen.getByLabelText('1. gün · Odunpazarı'));
+    expect(screen.getByText('1 durağı al')).toBeTruthy();
+    fireEvent.press(screen.getByLabelText('2. gün · Porsuk'));
+    const dugme = screen.getByRole('button', { name: 'Bir gün seç' });
+    expect(dugme.props.accessibilityState).toEqual(expect.objectContaining({ disabled: true }));
+    expect(screen.queryByText(/zaten listende/)).toBeNull();
+  });
+
+  it('#408 KK6: seyahat satırı ad · tarih ve "Ayşe ve Mert de görecek"; dokununca seyahat seçici açılır; "Yalnız mekanlar" yok', async () => {
+    mevcutSeyahat();
+    mockDb.tablolar.ozet[0].members = [
+      { user_id: 'ben', role: 'owner', display_name: 'Ece', guest: false },
+      { user_id: 'a', role: 'member', display_name: 'Ayşe', guest: false },
+      { user_id: 'm', role: 'member', display_name: 'Mert', guest: false },
+    ];
+    ac('t1');
+    expect(screen.getByText('Eskişehir Gezisi · 17–18 May')).toBeTruthy();
+    expect(screen.getByText('Ayşe ve Mert de görecek')).toBeTruthy();
+    expect(screen.getByText('A')).toBeTruthy();
+    expect(screen.getByText('M')).toBeTruthy();
+    expect(screen.queryByText('Yalnız mekanlar')).toBeNull();
+    expect(screen.queryByText('Planı al')).toBeNull();
+    expect(screen.queryByText('HANGİ SEYAHATE?')).toBeNull();
+    fireEvent.press(screen.getByRole('button', { name: /Eskişehir Gezisi · 17–18 May/ }));
+    expect(screen.getByRole('button', { selected: true, name: /Eskişehir Gezisi/ })).toBeTruthy();
+    // Yeni seyahat seçilince seçici kapanır, satır "Yeni seyahat" olur ve form açılır.
+    fireEvent.press(screen.getByRole('button', { name: /Yeni seyahat/ }));
+    expect(screen.getByText('Seyahati aç ve planı al')).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Yeni seyahat' }).props.accessibilityState).toEqual(expect.objectContaining({ expanded: false }));
   });
 });
 
@@ -396,16 +408,19 @@ describe('#587 inceleme: seyahat listesi geç gelir, "Farklı şehir" kesilmez',
       </QueryClientProvider>,
     );
   const seciliCip = () => screen.getAllByRole('button', { selected: true }).map((b) => b.props.accessibilityLabel ?? '');
+  /** #408 KK6: seyahat çipleri seyahat satırının arkasında. */
+  const seciciyiAc = () => fireEvent.press(screen.getByHintText('Seyahati değiştir'));
 
   it('liste yüklenirken "Yeni seyahat" formu açılmaz; liste gelince verilen hedef seçili olur', async () => {
     mevcutSeyahat();
     mockDb.seyahatYukleniyor = true;
     ac('t1');
-    expect(screen.queryByText('HANGİ SEYAHATE?')).toBeNull();
+    expect(screen.queryByText(/Eskişehir Gezisi/)).toBeNull();
     expect(screen.queryByText('Yeni seyahat')).toBeNull();
     mockDb.seyahatYukleniyor = false;
     yeniden();
-    await waitFor(() => expect(screen.getByText('HANGİ SEYAHATE?')).toBeTruthy());
+    await waitFor(() => expect(screen.getByText(/^Eskişehir Gezisi/)).toBeTruthy());
+    seciciyiAc();
     expect(screen.getByRole('button', { selected: true, name: /Eskişehir Gezisi/ })).toBeTruthy();
     expect(screen.getByRole('button', { selected: false, name: /Yeni seyahat/ })).toBeTruthy();
   });
@@ -417,7 +432,9 @@ describe('#587 inceleme: seyahat listesi geç gelir, "Farklı şehir" kesilmez',
     ac('t1');
     mockDb.tablolar.ozet = dolu;
     yeniden();
-    await waitFor(() => expect(screen.getByRole('button', { selected: true, name: /Eskişehir Gezisi/ })).toBeTruthy());
+    await waitFor(() => expect(screen.getByText(/^Eskişehir Gezisi/)).toBeTruthy());
+    seciciyiAc();
+    expect(screen.getByRole('button', { selected: true, name: /Eskişehir Gezisi/ })).toBeTruthy();
     expect(seciliCip()).toHaveLength(1);
   });
 
@@ -432,21 +449,27 @@ describe('#587 inceleme: seyahat listesi geç gelir, "Farklı şehir" kesilmez',
         <GeziAl gezi={gezi} kimlik={kimlik} onKapat={jest.fn()} />
       </QueryClientProvider>,
     );
-    await waitFor(() => expect(screen.getByRole('button', { selected: true, name: /Eskişehir Gezisi/ })).toBeTruthy());
+    await waitFor(() => expect(screen.getByText(/^Eskişehir Gezisi/)).toBeTruthy());
+    seciciyiAc();
+    expect(screen.getByRole('button', { selected: true, name: /Eskişehir Gezisi/ })).toBeTruthy();
   });
 
   it('kullanıcı "Yeni seyahat"e dokunduysa liste yenilense de seçim korunur', async () => {
     mevcutSeyahat();
     ac('t1');
+    seciciyiAc();
     fireEvent.press(screen.getByRole('button', { name: /Yeni seyahat/ }));
     yeniden();
-    await waitFor(() => expect(screen.getByRole('button', { selected: true, name: /Yeni seyahat/ })).toBeTruthy());
+    await waitFor(() => expect(screen.getByText('Seyahati aç ve planı al')).toBeTruthy());
+    seciciyiAc();
+    expect(screen.getByRole('button', { selected: true, name: /Yeni seyahat/ })).toBeTruthy();
   });
 
   it('uzun adlı başka şehir seyahatinde "Farklı şehir" ayrı ve kısalmayan bir metin', async () => {
     mevcutSeyahat();
     mockDb.tablolar.ozet = [{ ...mockDb.tablolar.ozet[0], id: 't2', name: 'Kapadokya Hafta Sonu Balon ve Vadiler Gezisi', city_label: 'Nevşehir' }];
     ac(null);
+    seciciyiAc();
     const ek = screen.getByTestId('farkli-sehir');
     expect(ek.props.children).toBe(' · Farklı şehir');
     expect(screen.getByText(/^Kapadokya Hafta Sonu Balon ve Vadiler Gezisi/).props.children).not.toContain('Farklı şehir');

@@ -19,19 +19,25 @@ export const AMAC_IKON_YOLLARI: Record<AmacTonu, string> = {
 /** Tepe deseni (358×230 görünüm kutusu, kartla birlikte esner). */
 const TEPE = 'M0 230 L0 138 L70 87 L140 143 L220 69 L300 127 L358 97 L358 230 Z';
 
-export function AmacKapagi({ ton, yukseklik = 230 }: { ton: AmacTonu; yukseklik?: number }) {
+/**
+ * #408 KK2 · KK4: hazır gezi başlığındaki 64 / 36 px kare kapakta `kose` küçülür ve `daire` yok (44 px daire o kutuya sığmaz);
+ * zemin ve tepe deseni aynı.
+ */
+export function AmacKapagi({ ton, yukseklik = 230, kose = 16, daire = true }: { ton: AmacTonu; yukseklik?: number; kose?: number; daire?: boolean }) {
   const r = amacTonlari[ton];
   return (
-    <View testID={`amac-kapagi-${ton}`} style={[s.kutu, { height: yukseklik }]} accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
+    <View testID={`amac-kapagi-${ton}`} style={[s.kutu, { height: yukseklik, borderRadius: kose }]} accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
       <Svg width="100%" height={yukseklik} viewBox="0 0 358 230" preserveAspectRatio="none">
         <Rect width={358} height={230} fill={r.zemin} />
         <Path d={TEPE} fill={r.tepe} opacity={0.85} />
       </Svg>
-      <View style={[s.daire, { backgroundColor: r.daire }]}>
-        <Svg width={26} height={26} viewBox="0 0 24 24" fill="none" stroke={renk.zemin} strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round">
-          <Path d={AMAC_IKON_YOLLARI[ton]} />
-        </Svg>
-      </View>
+      {daire ? (
+        <View style={[s.daire, { backgroundColor: r.daire }]}>
+          <Svg width={26} height={26} viewBox="0 0 24 24" fill="none" stroke={renk.zemin} strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round">
+            <Path d={AMAC_IKON_YOLLARI[ton]} />
+          </Svg>
+        </View>
+      ) : null}
     </View>
   );
 }

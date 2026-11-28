@@ -4,16 +4,18 @@
 // ipuçsuz `gezi_duraklari(…)` gömmesi PGRST201 döner — 14 Ekim akşamı telefonda olan buydu.
 import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { act, fireEvent, render, screen, waitFor } from '@testing-library/react-native';
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react-native';
 import fs from 'fs';
 import path from 'path';
-import { Linking } from 'react-native';
+import { Linking, ScrollView } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 
 import type { GeziDetay } from '@/lib/tipler';
 
 import GeziEkrani from '@/app/gezi/[slug]';
 import { MekanPaneli } from '@/components/mekan/MekanPaneli';
+import { InceEkle } from '@/components/ortak/YerSatiri';
+import { Foto } from '@/components/ui/Foto';
 
 type Satir = Record<string, unknown>;
 const mockDurum = {
@@ -30,6 +32,11 @@ const mockDurum = {
   haritaCizgileri: 0,
   /** Haritaya giden pinlerin etiketleri (durak numarası). */
   haritaPinleri: [] as string[],
+  /** #408: haritaya giden pinler (renk, opaklık) ve çizgi renkleri. */
+  haritaPinDetay: [] as { etiket?: string; renk: string; opaklik?: number }[],
+  haritaCizgiRenkleri: [] as string[],
+  /** #408 KK2: places-light durak fotoğrafı döner (Google). */
+  fotolu: false,
   cevrimdisi: false,
 };
 
@@ -48,13 +55,15 @@ jest.mock('@/components/harita/Harita', () => {
   const { View } = jest.requireActual<typeof import('react-native')>('react-native');
   const R = jest.requireActual<typeof import('react')>('react');
   return {
-    Harita: (p: { pinler?: { konum: { lat: number; lng: number }; etiket?: string }[]; cizgiler?: { noktalar: { lat: number; lng: number }[] }[] }) => {
+    Harita: (p: { pinler?: { konum: { lat: number; lng: number }; etiket?: string; renk: string; opaklik?: number }[]; cizgiler?: { noktalar: { lat: number; lng: number }[]; renk: string }[] }) => {
       if (mockDurum.haritaPatlasin) throw new Error('harita bozuk');
       for (const k of [...(p.pinler ?? []).map((x) => x.konum), ...(p.cizgiler ?? []).flatMap((c) => c.noktalar)]) {
         if (!Number.isFinite(k.lat) || !Number.isFinite(k.lng)) throw new Error('NaN koordinat');
       }
       mockDurum.haritaCizgileri = p.cizgiler?.length ?? 0;
       mockDurum.haritaPinleri = (p.pinler ?? []).map((x) => x.etiket ?? '');
+      mockDurum.haritaPinDetay = (p.pinler ?? []).map((x) => ({ etiket: x.etiket, renk: x.renk, opaklik: x.opaklik }));
+      mockDurum.haritaCizgiRenkleri = (p.cizgiler ?? []).map((c) => c.renk);
       return R.createElement(View, { testID: 'harita' });
     },
   };
@@ -109,7 +118,11 @@ jest.mock('@/lib/supabase', () => {
       rpc: async (ad: string) => ({ data: ad === 'gezi_alinma_sayisi' ? 2 : [], error: null }),
       functions: {
         // gezi-rota: sunucu gibi günün bacakları (biri araç, biri yolu boş — KK2); diğer fonksiyonlar (Google) kapalı.
-        invoke: async (ad: string, { body }: { body: { gezi_gun_id?: string } }) => {
+        invoke: async (ad: string, { body }: { body: { gezi_gun_id?: string; ids?: string[] } }) => {
+          // #408 KK2: durak fotoğrafı (Google) — kapağa gerilmez, yalnız 52 px satırda.
+          if (ad === 'places-light' && mockDurum.fotolu) {
+            return { data: { yerler: (body.ids ?? []).map((id) => ({ place_id: id, ad: id, lat: 39.7, lng: 30.5, primary_type: null, tz: null, puan: null, puan_sayisi: null, acik: null, ulke_kodu: null, foto_uri: `https://foto.test/${id}.jpg`, foto_yazar: 'Biri' })) }, error: null };
+          }
           if (ad !== 'gezi-rota') return { data: null, error: new Error('kapalı') };
           const gun = Object.values(mockDurum.geziler)
             .flatMap((g) => g.gezi_gunleri)
@@ -210,26 +223,28 @@ describe('#199 önerilen gezi ekranı', () => {
     mockDurum.haritaPatlasin = false;
     mockDurum.yaziPatlasin = false;
     mockDurum.cevrimdisi = false;
+    mockDurum.fotolu = false;
     // Hata sınırı testlerinde React'in beklenen hata günlüğü.
     konsol = jest.spyOn(console, 'error').mockImplementation(() => {});
   });
   afterEach(() => konsol.mockRestore());
 
   for (const slug of Object.keys(GEZILER)) {
-    it(`KK1/KK4: ${slug} — Rota & plan (her gün) ve Gezi yazısı açılır, görüntülenme yazılır`, async () => {
+    it(`KK1/KK4: ${slug} — Plan (bütün günler, gün düğmeleri) ve Yazı açılır, görüntülenme yazılır`, async () => {
       const g = mockDurum.geziler[slug];
       ac(slug);
       expect(await screen.findByText(g.baslik)).toBeTruthy();
-      // Gün 1 durakları + harita; gerçek yol gelir (gezi-rota), bozuk / boş yollu bacak kuş uçuşunda kalır.
-      expect(screen.getByText(g.gezi_gunleri[0].gezi_duraklari[0].ad)).toBeTruthy();
+      // #408: bütün günlerin durakları alt alta; harita üstte; gerçek yol gelir (gezi-rota), bozuk / boş yollu bacak kuş uçuşunda.
+      for (const gun of g.gezi_gunleri) expect(screen.getAllByText(gun.gezi_duraklari[gun.gezi_duraklari.length - 1].ad).length).toBeGreaterThan(0);
       expect(screen.getByTestId('harita')).toBeTruthy();
-      await waitFor(() => expect(screen.getByText(/dk araç/)).toBeTruthy());
+      await waitFor(() => expect(screen.getAllByText(/dk araçla/).length).toBeGreaterThan(0));
       for (const gun of g.gezi_gunleri.slice(1)) {
-        fireEvent.press(screen.getByText(`${gun.sira}. gün · ${gun.gezi_duraklari.length}`));
-        expect(await screen.findByText(gun.gezi_duraklari[gun.gezi_duraklari.length - 1].ad)).toBeTruthy();
+        // Gün düğmesi haritada o günü öne çıkarır: numaralı pinler ve rotası o günün.
+        fireEvent.press(screen.getByRole('tab', { name: `${gun.sira}. gün` }));
+        await waitFor(() => expect(mockDurum.haritaPinleri.filter(Boolean)).toHaveLength(gun.gezi_duraklari.length));
         expect(mockDurum.haritaCizgileri).toBe(gun.gezi_duraklari.length - 1);
       }
-      fireEvent.press(screen.getByText('Gezi yazısı'));
+      fireEvent.press(screen.getByText('Yazı'));
       await bekle();
       expect(screen.getAllByText(/dk okuma/).length).toBeGreaterThan(0);
       expect(screen.queryByTestId(/^bolum-hata/)).toBeNull();
@@ -256,7 +271,7 @@ describe('#199 önerilen gezi ekranı', () => {
     expect(await screen.findByText(mockDurum.geziler['eskisehirde-uc-gun'].baslik)).toBeTruthy();
   });
 
-  it('KK3: harita hata verirse yalnız harita bölümü kart olur; başlık, gün çipleri ve duraklar çalışır', async () => {
+  it('KK3: harita hata verirse yalnız harita bölümü kart olur; başlık, geri, gün düğmeleri ve duraklar çalışır', async () => {
     mockDurum.haritaPatlasin = true;
     const g = mockDurum.geziler['odunpazarindan-sazovaya-uc-gun'];
     ac(g.slug);
@@ -268,21 +283,23 @@ describe('#199 önerilen gezi ekranı', () => {
     expect(screen.getByText(g.baslik).props.ellipsizeMode).toBe('tail');
     expect(screen.getByText(g.gezi_gunleri[0].gezi_duraklari[6].ad)).toBeTruthy();
     expect(screen.getByText('Seyahatime al')).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Geri' })).toBeTruthy();
+    expect(screen.getByRole('tab', { name: '2. gün' })).toBeTruthy();
     // Harita düzelince "Yeniden dene" bölümü geri getirir.
     mockDurum.haritaPatlasin = false;
     fireEvent.press(screen.getByText('Yeniden dene'));
     expect(await screen.findByTestId('harita')).toBeTruthy();
   });
 
-  it('KK3: gezi yazısı hata verirse yalnız yazı bölümü kart olur; Rota & plan sekmesi çalışır', async () => {
+  it('KK3: gezi yazısı hata verirse yalnız yazı bölümü kart olur; Plan sekmesi çalışır', async () => {
     mockDurum.yaziPatlasin = true;
     const g = mockDurum.geziler['eskisehirde-uc-gun'];
     ac(g.slug);
     await screen.findByText(g.baslik);
-    fireEvent.press(screen.getByText('Gezi yazısı'));
+    fireEvent.press(screen.getByText('Yazı'));
     expect(await screen.findByTestId('bolum-hata:gezi-yazi')).toBeTruthy();
     expect(screen.getByText(g.baslik)).toBeTruthy();
-    fireEvent.press(screen.getByText('Rota & plan'));
+    fireEvent.press(screen.getByText('Plan'));
     expect(await screen.findByText(g.gezi_gunleri[0].gezi_duraklari[0].ad)).toBeTruthy();
     expect(screen.queryByTestId('bolum-hata:gezi-plan')).toBeNull();
   });
@@ -333,7 +350,7 @@ describe('#199 önerilen gezi ekranı', () => {
     expect(String(ac2.mock.calls[0][0])).not.toContain('null');
     ac2.mockRestore();
   });
-  it('#205 Parça 1: konumsuz uçlu bacak "Yol süresi bilinmiyor" (kanvas 24b-A), toplama ve mesafeye katılmaz; mesafe 0 ise özette yok', async () => {
+  it('#205 Parça 1: konumsuz uçlu bacak "Yol süresi bilinmiyor" (kanvas 24b-A); gerçek yollu bacak süresiyle', async () => {
     const duraklar = [
       { place_id: 'ChIJkaleTest01', ad: 'Kale', sure_dk: 45 },
       { place_id: 'ChIJcarsiTest01', ad: 'Çarşı', sure_dk: 30 },
@@ -357,15 +374,15 @@ describe('#199 önerilen gezi ekranı', () => {
     expect(screen.getByText('9 dk yürüyüş')).toBeTruthy();
     expect(screen.queryByText(/^1 dk /)).toBeNull();
     expect(screen.queryByText(/dk araç/)).toBeNull();
-    expect(screen.getByText('~2 sa 14 dk · 700 m yürüyüş')).toBeTruthy();
+    // #408 (kanvas v6): gün özeti satırı yok.
+    expect(screen.queryByText(/700 m yürüyüş/)).toBeNull();
     r1.unmount();
 
     ac('hep-konumsuz');
     expect(await screen.findByText('Park')).toBeTruthy();
     await bekle();
     expect(screen.getAllByText('Yol süresi bilinmiyor')).toHaveLength(2);
-    // Bütün duraklar konumsuz: özet yalnız süre ("0 m yürüyüş" yok).
-    expect(screen.getByText('~1 sa 45 dk')).toBeTruthy();
+    // Bütün duraklar konumsuz: yürüyüş süresi hiç yok.
     expect(screen.queryByText(/yürüyüş/)).toBeNull();
   });
   it('#388 KK5: çevrimdışıyken Gezi yazısındaki mekan kartı ve mekan panelindeki ekleme düğmesi pasif, ipucu var', async () => {
@@ -377,7 +394,7 @@ describe('#199 önerilen gezi ekranı', () => {
     mockDurum.cevrimdisi = true;
     ac('cevrimdisi-gezi');
     expect(await screen.findByText('Çevrimdışı gezi')).toBeTruthy();
-    fireEvent.press(screen.getByText('Gezi yazısı'));
+    fireEvent.press(screen.getByText('Yazı'));
     await bekle();
     const ipucu = 'Bağlantı yok; bağlanınca eklenebilir.';
     const kartDugmesi = screen.getAllByHintText(ipucu).find((d) => d.props.accessibilityLabel === 'Listeye ekle');
@@ -393,5 +410,117 @@ describe('#199 önerilen gezi ekranı', () => {
     const sonra = screen.getAllByHintText(ipucu);
     expect(sonra.length).toBe(once + 1);
     expect(sonra.every((d) => d.props.accessibilityState?.disabled === true)).toBe(true);
+  });
+});
+
+describe('#408 hazır gezi v6 (kanvas Sayfa_v6_HazirGezi_Harita · Sayfa_v5_HazirGezi_Kayik)', () => {
+  const SLUG = 'odunpazarindan-sazovaya-uc-gun';
+  beforeEach(() => {
+    mockDurum.geziler = Object.fromEntries(Object.entries(GEZILER).map(([slug, j]) => [slug, geziKur(slug, j)]));
+    mockDurum.belirsizSema = true;
+    mockDurum.hataVer = 0;
+    mockDurum.haritaPatlasin = false;
+    mockDurum.yaziPatlasin = false;
+    mockDurum.cevrimdisi = false;
+    mockDurum.fotolu = false;
+  });
+
+  it('KK1: harita üstte; bütün günler pinli, seçili gün numaralı ve yeni gün renginde, diğerleri soluk; gün düğmesi seçimi değiştirir', async () => {
+    const g = mockDurum.geziler[SLUG];
+    ac(SLUG);
+    await screen.findByText(g.baslik);
+    await waitFor(() => expect(mockDurum.haritaCizgiRenkleri.length).toBeGreaterThan(0));
+    const toplam = g.gezi_gunleri.reduce((n, x) => n + x.gezi_duraklari.length, 0);
+    expect(mockDurum.haritaPinDetay).toHaveLength(toplam);
+    const secili = mockDurum.haritaPinDetay.filter((p) => p.etiket);
+    expect(secili).toHaveLength(g.gezi_gunleri[0].gezi_duraklari.length);
+    // #310 yeni gün renkleri: 1 #2350c4 · 2 #7a3fc0 · 3 #b3305e; pin ve rota aynı renk.
+    expect(new Set(secili.map((p) => p.renk))).toEqual(new Set(['#2350c4']));
+    expect(new Set(mockDurum.haritaCizgiRenkleri)).toEqual(new Set(['#2350c4']));
+    expect(mockDurum.haritaPinDetay.filter((p) => !p.etiket).every((p) => p.opaklik === 0.45)).toBe(true);
+    expect(screen.getByRole('button', { name: 'Geri' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Paylaş' })).toBeTruthy();
+    expect(screen.getByRole('togglebutton', { name: 'Kaydet' })).toBeTruthy();
+    expect(screen.getByRole('tab', { name: '1. gün' }).props.accessibilityState).toEqual(expect.objectContaining({ selected: true }));
+    fireEvent.press(screen.getByRole('tab', { name: '2. gün' }));
+    await waitFor(() => expect(new Set(mockDurum.haritaPinDetay.filter((p) => p.etiket).map((p) => p.renk))).toEqual(new Set(['#7a3fc0'])));
+    expect(new Set(mockDurum.haritaCizgiRenkleri)).toEqual(new Set(['#7a3fc0']));
+    expect(screen.getByRole('tab', { name: '2. gün' }).props.accessibilityState).toEqual(expect.objectContaining({ selected: true }));
+  });
+
+  it('KK2: kapak yoksa amacın kapağı; Google durak fotoğrafı kapağa gerilmez, yalnız satırda; ad ve iki gri satır', async () => {
+    mockDurum.fotolu = true;
+    const g = mockDurum.geziler[SLUG];
+    ac(SLUG);
+    await screen.findByText(g.baslik);
+    const ilkFoto = `https://foto.test/${g.gezi_gunleri[0].gezi_duraklari[0].place_id}.jpg`;
+    const fotolar = () => screen.UNSAFE_root.findAll((n) => n.type === Foto && (n.props as { source?: { uri?: string } }).source?.uri === ilkFoto);
+    await waitFor(() => expect(fotolar().length).toBeGreaterThan(0), { timeout: 3000 });
+    expect(screen.getByTestId('amac-kapagi-yok', { includeHiddenElements: true })).toBeTruthy();
+    // Durak fotoğrafı yalnız kendi satırında (kapak, yedek olarak ilk durağın fotoğrafını almaz).
+    expect(fotolar()).toHaveLength(1);
+    expect(screen.queryByText(/Google Maps/)).toBeNull();
+    const durak = g.gezi_gunleri.reduce((n, x) => n + x.gezi_duraklari.length, 0);
+    expect(screen.getByText('özet')).toBeTruthy();
+    expect(screen.getByText(`${g.gezi_gunleri.length} gün · ${durak} durak · Tripmate rehberi`)).toBeTruthy();
+  });
+
+  it('KK3: alt çizgili Plan · Yazı; günler alt alta (ilk gün başlıksız); "tür · süre", ince "+"; rozet ve kesikli bağlam kutusu yok', async () => {
+    const g = mockDurum.geziler[SLUG];
+    ac(SLUG);
+    await screen.findByText(g.baslik);
+    expect(screen.getByRole('tab', { name: 'Plan' }).props.accessibilityState).toEqual(expect.objectContaining({ selected: true }));
+    expect(screen.getByRole('tab', { name: 'Yazı' })).toBeTruthy();
+    expect(screen.queryByText(`1. gün · ${g.gezi_gunleri[0].baslik}`)).toBeNull();
+    for (const gun of g.gezi_gunleri.slice(1)) {
+      expect(screen.getByText(`${gun.sira}. gün · ${gun.baslik}`)).toBeTruthy();
+    }
+    expect(screen.getAllByText(`${g.gezi_gunleri[1].gezi_duraklari.length} durak`).length).toBeGreaterThan(0);
+    await waitFor(() => expect(screen.getAllByText(/^\d+ dk yürüyüş$/).length).toBeGreaterThan(0));
+    expect(screen.getAllByText(/ · \d+ (dk|sa)/).length).toBeGreaterThan(0);
+    expect(screen.UNSAFE_getAllByType(InceEkle)).toHaveLength(g.gezi_gunleri.reduce((n, x) => n + x.gezi_duraklari.length, 0));
+    expect(screen.queryByText(/GÜNLÜK GEZİ/)).toBeNull();
+    expect(screen.queryByText(/listene göre/)).toBeNull();
+    expect(screen.queryByText('Değiştir')).toBeNull();
+  });
+
+  it('KK4: kaydırınca üstte sabit satır (geri, kapak, ad, "N gün · N durak", paylaş, ♥) ve sekmeler', async () => {
+    const g = mockDurum.geziler[SLUG];
+    ac(SLUG);
+    await screen.findByText(g.baslik);
+    expect(screen.queryByTestId('gezi-yapisik')).toBeNull();
+    // Sekmelerin yeri ölçülür (420), sonra sayfa sekmeler sabit satırın altına gelene kadar kaydırılır.
+    let olcen = screen.getByRole('tab', { name: 'Plan' }).parent;
+    while (olcen && typeof olcen.props.onLayout !== 'function') olcen = olcen.parent;
+    fireEvent(olcen!, 'layout', { nativeEvent: { layout: { x: 0, y: 420, width: 390, height: 43 } } });
+    const sayfa = screen.UNSAFE_getAllByType(ScrollView)[0];
+    fireEvent.scroll(sayfa, { nativeEvent: { contentOffset: { x: 0, y: 380 } } });
+    const ust = await screen.findByTestId('gezi-yapisik');
+    const durak = g.gezi_gunleri.reduce((n, x) => n + x.gezi_duraklari.length, 0);
+    expect(within(ust).getByText(g.baslik)).toBeTruthy();
+    expect(within(ust).getByText(`${g.gezi_gunleri.length} gün · ${durak} durak`)).toBeTruthy();
+    expect(within(ust).getByRole('button', { name: 'Geri' })).toBeTruthy();
+    expect(within(ust).getByRole('button', { name: 'Paylaş' })).toBeTruthy();
+    expect(within(ust).getByRole('togglebutton', { name: 'Kaydet' })).toBeTruthy();
+    expect(within(ust).getByRole('tab', { name: 'Plan' })).toBeTruthy();
+    fireEvent.scroll(sayfa, { nativeEvent: { contentOffset: { x: 0, y: 0 } } });
+    await waitFor(() => expect(screen.queryByTestId('gezi-yapisik')).toBeNull());
+  });
+
+  it('KK5: alt çubukta "Tek bir gününü de alabilirsin" ve turuncu "Seyahatime al"; tek günlük gezide yalnız düğme', async () => {
+    const g = mockDurum.geziler[SLUG];
+    const r1 = ac(SLUG);
+    await screen.findByText(g.baslik);
+    expect(screen.getByText('Tek bir gününü de alabilirsin')).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Seyahatime al' })).toBeTruthy();
+    r1.unmount();
+    const tek = geziKur('tek-gun', { gezi: { baslik: 'Tek gün', yazi_md: '' }, gunler: [{ baslik: 'Gün', duraklar: [{ place_id: 'ChIJkaleTest01', ad: 'Kale', sure_dk: 45 }] }] });
+    mockDurum.geziler = { 'tek-gun': tek };
+    ac('tek-gun');
+    await screen.findByText('Tek gün');
+    expect(screen.queryByText('Tek bir gününü de alabilirsin')).toBeNull();
+    expect(screen.getByRole('button', { name: 'Seyahatime al' })).toBeTruthy();
+    // Yazısız gezide sekme yok.
+    expect(screen.queryByRole('tab', { name: 'Yazı' })).toBeNull();
   });
 });

@@ -1053,18 +1053,18 @@
     "gunKisa": "{n}. gün",
     "rozetGun": "{n} GÜNLÜK GEZİ",
     "alindi": "{n} kez alındı",
-    "sekmePlan": "Rota & plan",
-    "sekmeYazi": "Gezi yazısı",
+    "sekmePlan": "Plan",
+    "sekmeYazi": "Yazı",
     "hedefSatir": "+ ve ✓ **{seyahat}** listene göre",
     "degistir": "Değiştir",
-    "altAlt": "İstersen yalnız bir gününü al",
+    "altAlt": "Tek bir gününü de alabilirsin",
     "gunOzeti": "~{sure} · {mesafe} yürüyüş",
     "gunOzetiGercek": "{sure} · {mesafe} yürüyüş",
     "gunOzetiSure": "~{sure}",
     "gunOzetiSureGercek": "{sure}",
     "yolBilinmiyor": "Yol süresi bilinmiyor",
     "yuruyus": "{n} dk yürüyüş",
-    "arac": "{n} dk araç",
+    "arac": "{n} dk araçla",
     "hangiSeyahate": "HANGİ SEYAHATE?",
     "hangiGunler": "HANGİ GÜNLER, HANGİ TARİHE?",
     "zatenListende": "{n} zaten listende",
@@ -1118,7 +1118,19 @@
     "mekanNotu": "Mekanlar güne atanmaz; Listem'e “atanmamış” olarak girer, sonra “Günlere dağıt”.",
     "mekanlariEkle": "{n} mekanı listeme ekle",
     "mekanSecin": "Mekan seç",
-    "mekanSec": "{ad} — listeye ekle"
+    "mekanSec": "{ad} — listeye ekle",
+    "v6": {
+      "ozet": "{gun} gün · {durak} durak",
+      "gunDurak": "{n} durak",
+      "gunler": "Günler",
+      "hedefGun": "{gun} · {durak} durak",
+      "gunNoYonelme": "{n}. güne",
+      "gunNoBelirtme": "{n}. günü",
+      "ekler": "Seyahate {gun} ekler",
+      "gorecek": "{kisiler} {de} görecek",
+      "durakAl": "{n} durağı al",
+      "seyahatDegistir": "Seyahati değiştir"
+    }
   },
   "ui": {
     "ekle": {

@@ -72,6 +72,8 @@ jest.mock('@/components/icerik/GeziPlani', () => {
   };
 });
 jest.mock('@/components/icerik/Kalp', () => ({ Kalp: () => null }));
+// #408: hazır gezinin üst haritası ve ♥ (sorgu istemcisi ister) bu testin konusu değil.
+jest.mock('@/components/icerik/HazirGeziHaritasi', () => ({ HazirGeziHaritasi: () => null, KalpDugmesi: () => null }));
 const YER = { id: 'y1', ad: 'Atlıhan', sehir_id: 's1', kategori: 'museum', lat: 39.7, lng: 30.5, kapak_url: null, sehirler: { ad: 'Eskişehir' } };
 jest.mock('@/features/icerik/sorgular', () => ({
   useSehirler: () => ({ data: [] }),

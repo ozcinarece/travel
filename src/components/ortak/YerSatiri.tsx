@@ -23,17 +23,21 @@ export function Kamera() {
   );
 }
 
-/** #397 KK5: ince "+" (32 px daire, 1,5 kenar) ↔ tik (satır zemini, yeşil). Etiketler `EkleDugmesi` ile aynı; dokunma alanı 44. */
-export function InceEkle({ listede, mesgul, onPress, etiket }: { listede: boolean; mesgul: boolean; onPress: () => void; etiket?: string }) {
+/**
+ * #397 KK5: ince "+" (32 px daire, 1,5 kenar) ↔ tik (satır zemini, yeşil). Etiketler `EkleDugmesi` ile aynı; dokunma alanı 44.
+ * #408: `pasif` (#388 KK5, çevrimdışı) %40 ve dokunulmaz; `ipucu` nedeni ekran okuyucuya söyler.
+ */
+export function InceEkle({ listede, mesgul, onPress, etiket, pasif, ipucu }: { listede: boolean; mesgul: boolean; onPress: () => void; etiket?: string; pasif?: boolean; ipucu?: string }) {
   return (
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={etiket ?? (listede ? t('ui.ekle.listede') : t('ui.ekle.ekle'))}
-      accessibilityState={{ selected: listede, busy: mesgul }}
-      disabled={mesgul}
+      accessibilityState={{ selected: listede, busy: mesgul, disabled: !!pasif }}
+      accessibilityHint={ipucu}
+      disabled={mesgul || !!pasif}
       onPress={onPress}
       hitSlop={6}
-      style={({ pressed }) => [s.ince, listede ? s.inceListede : s.inceBos, pressed && { opacity: 0.7 }]}>
+      style={({ pressed }) => [s.ince, listede ? s.inceListede : s.inceBos, pressed && { opacity: 0.7 }, pasif && { opacity: 0.4 }]}>
       {mesgul ? (
         <ActivityIndicator size="small" color={renk.metin} />
       ) : (
