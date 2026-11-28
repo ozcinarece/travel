@@ -2816,7 +2816,7 @@ begin
   update public.sehirler set google_fetched_at = now() - interval '40 days' where id = s;
   k := public.konum_kaynagi_kontrol();
   assert (k -> 'sehirler' ->> 'suresi_gecen')::int >= 1, 'süresi geçen sayılır';
-  assert (select array_agg(x order by x) from jsonb_object_keys(k -> 'sehirler') x) = array['elle', 'google_30g', 'osm', 'suresi_gecen', 'toplam'], 'yalnız sayılar';
+  assert (select array_agg(x order by x) from jsonb_object_keys(k -> 'sehirler') x) = array['elle', 'google_30g', 'konumsuz', 'osm', 'suresi_gecen', 'toplam'], 'yalnız sayılar (#205 Parça 1: konumsuz)';
   update public.sehirler set lat = 40.1 where id = s;
   assert (select google_fetched_at > now() - interval '1 minute' from public.sehirler where id = s), 'yeni Google konumu = yeni damga';
   begin
@@ -3707,6 +3707,144 @@ set role anon;
 select pg_temp.hata_bekle($$select public.gece_temizligi()$$, '42501');
 select pg_temp.hata_bekle($$select count(*) from public.gece_temizligi_kayit$$, '42501');
 reset role;
+-- ---------------------------------------------------------------- #205 Parça 1: içerik tablolarında 30 günü geçen Google koordinatı
+-- KK1: gece temizliği `sehirler`, `yerler`, `gezi_duraklari`'ndaki 30 günü geçen google_30g satırın lat/lng'sini boşaltır; satır,
+-- ad, place_id ve damga kalır; 29 günlük, osm ve elle satıra dokunmaz. KK3: `konum_kaynagi_kontrol()` gece kaydına yalnız sayı
+-- olarak yazılır ve boşaltmadan sonra `suresi_gecen` her tabloda 0. KK2: "Seyahatime al" konumsuz durağı konumsuz mekan olarak
+-- kopyalar. Yetki: boşaltma fonksiyonunu yalnız postgres (gece işi) çalıştırır.
+-- KK4: ilk boşaltma (20261218100000) bir gece işi çalışması olarak kaydedilir; sayılar `gece_temizligi_kayit`'ın ilk satırında.
+do $$
+begin
+  assert (select konum_kontrol is not null and icerik_sehir >= 0 and icerik_yer >= 0 and icerik_durak >= 0
+    from public.gece_temizligi_kayit order by id limit 1), 'P1 KK4: ilk boşaltmanın sayıları gece kaydında';
+end $$;
+insert into public.sehirler (id, ad, slug, lat, lng, yayin, google_fetched_at) values
+  ('20590000-0000-4000-8000-000000000001', 'Eski Şehir P1', 'eski-sehir-p1', 40, 30, true, now() - interval '31 days'),
+  ('20590000-0000-4000-8000-000000000002', 'Taze Şehir P1', 'taze-sehir-p1', 41, 31, true, now() - interval '29 days');
+insert into public.sehirler (id, ad, slug, lat, lng, yayin, konum_kaynagi, osm_id) values
+  ('20590000-0000-4000-8000-000000000003', 'OSM Şehir P1', 'osm-sehir-p1', 42, 32, true, 'osm', 'relation/205');
+insert into public.yerler (id, sehir_id, ad, place_id, lat, lng, yayin, google_fetched_at) values
+  ('20590000-0000-4000-8000-000000000011', '20590000-0000-4000-8000-000000000001', 'Eski Yer P1', 'ChIJ_p1_eski_yer', 40.1, 30.1, true, now() - interval '31 days'),
+  ('20590000-0000-4000-8000-000000000012', '20590000-0000-4000-8000-000000000001', 'Taze Yer P1', 'ChIJ_p1_taze_yer', 40.2, 30.2, true, now() - interval '29 days');
+insert into public.yerler (id, sehir_id, ad, lat, lng, yayin, konum_kaynagi) values
+  ('20590000-0000-4000-8000-000000000013', '20590000-0000-4000-8000-000000000001', 'Elle Yer P1', 40.3, 30.3, true, 'elle');
+insert into public.geziler (id, sehir_id, baslik, slug, yayin) values
+  ('20590000-0000-4000-8000-000000000021', '20590000-0000-4000-8000-000000000001', 'Parça 1 gezisi', 'parca-1-gezisi', true);
+insert into public.gezi_gunleri (id, gezi_id, sira) values ('20590000-0000-4000-8000-000000000022', '20590000-0000-4000-8000-000000000021', 1);
+insert into public.gezi_duraklari (id, gezi_gun_id, sira, ad, place_id, lat, lng, google_fetched_at) values
+  ('20590000-0000-4000-8000-000000000031', '20590000-0000-4000-8000-000000000022', 1, 'Eski Durak P1', 'ChIJ_p1_eski_durak', 40.4, 30.4, now() - interval '31 days'),
+  ('20590000-0000-4000-8000-000000000032', '20590000-0000-4000-8000-000000000022', 2, 'Taze Durak P1', 'ChIJ_p1_taze_durak', 40.5, 30.5, now() - interval '29 days');
+insert into public.gezi_duraklari (id, gezi_gun_id, sira, ad, lat, lng, konum_kaynagi, osm_id) values
+  ('20590000-0000-4000-8000-000000000033', '20590000-0000-4000-8000-000000000022', 3, 'OSM Durak P1', 40.6, 30.6, 'osm', 'node/205');
+do $$
+begin
+  -- Ön koşul: kontrol 30 günü geçen dolu koordinatı sayar.
+  assert (public.konum_kaynagi_kontrol() -> 'gezi_duraklari' ->> 'suresi_gecen')::int >= 1, 'ön koşul: süresi geçen durak sayılır';
+  -- Koordinat ikisi birlikte boş olur.
+  begin
+    update public.yerler set lat = null where id = '20590000-0000-4000-8000-000000000012';
+    raise exception 'P1: yalnız lat boşaltılabildi';
+  exception when check_violation then null;
+  end;
+  -- Gün 30–60.
+  begin
+    perform public.icerik_koordinat_bosalt(29);
+    raise exception 'P1: 29 gün kabul edildi';
+  exception when invalid_parameter_value then null;
+  end;
+end $$;
+set role service_role;
+do $$
+declare
+  k public.gece_temizligi_kayit;
+  t text;
+  a text;
+begin
+  -- KK1 · KK3: gece işi (#516 `gece_temizligi()`) içerik adımını da çalıştırır; sayılar aynı kayıtta.
+  k := public.gece_temizligi();
+  assert k.icerik_sehir >= 1 and k.icerik_yer >= 1 and k.icerik_durak >= 1, 'P1 KK1: üç tabloda da boşaltır: ' || row_to_json(k)::text;
+  -- KK3: kontrol gece kaydında, yalnız sayı; boşaltmadan sonra süresi geçen dolu koordinat yok.
+  assert (select array_agg(x order by x) from jsonb_object_keys(k.konum_kontrol) x) = array['gezi_duraklari', 'sehirler', 'yerler'], 'P1 KK3: üç tablo: ' || k.konum_kontrol::text;
+  for t in select jsonb_object_keys(k.konum_kontrol) loop
+    assert (select array_agg(x order by x) from jsonb_object_keys(k.konum_kontrol -> t) x)
+      = array['elle', 'google_30g', 'konumsuz', 'osm', 'suresi_gecen', 'toplam'], 'P1 KK3: yalnız sayaçlar: ' || t;
+    for a in select jsonb_object_keys(k.konum_kontrol -> t) loop
+      assert jsonb_typeof(k.konum_kontrol -> t -> a) = 'number', 'P1 KK3: yalnız sayı: ' || t || '.' || a;
+    end loop;
+    assert (k.konum_kontrol -> t ->> 'suresi_gecen')::int = 0, 'P1 KK3: boşaltmadan sonra süresi geçen 0: ' || t;
+    assert (k.konum_kontrol -> t ->> 'konumsuz')::int >= 1, 'P1 KK3: konumsuz sayılır: ' || t;
+  end loop;
+  assert (select count(*) from public.gece_temizligi_kayit where id = k.id and konum_kontrol is not null) = 1, 'P1 KK3: kayıt yazılır';
+  -- İkinci gece: boşaltılacak bir şey kalmaz.
+  k := public.gece_temizligi();
+  assert k.icerik_sehir = 0 and k.icerik_yer = 0 and k.icerik_durak = 0, 'P1: ikinci çalışma boş: ' || row_to_json(k)::text;
+end $$;
+reset role;
+do $$
+begin
+  -- KK1: satır silinmez; ad, place_id, kaynak ve damga kalır (damga boşaltmayla yenilenmez).
+  assert (select lat is null and lng is null and ad = 'Eski Şehir P1' and yayin and konum_kaynagi = 'google_30g'
+    and google_fetched_at < now() - interval '30 days' from public.sehirler where id = '20590000-0000-4000-8000-000000000001'), 'P1 KK1: eski şehir boşalır, damga kalır';
+  assert (select lat = 41 from public.sehirler where id = '20590000-0000-4000-8000-000000000002'), 'P1 KK1: 29 günlük şehir kalır';
+  assert (select lat = 42 and konum_kaynagi = 'osm' from public.sehirler where id = '20590000-0000-4000-8000-000000000003'), 'P1 KK1: osm şehre dokunulmaz';
+  assert (select lat is null and lng is null and place_id = 'ChIJ_p1_eski_yer' and google_fetched_at < now() - interval '30 days'
+    from public.yerler where id = '20590000-0000-4000-8000-000000000011'), 'P1 KK1: eski yer boşalır';
+  assert (select lat = 40.2 from public.yerler where id = '20590000-0000-4000-8000-000000000012'), 'P1 KK1: 29 günlük yer kalır';
+  assert (select lat = 40.3 and konum_kaynagi = 'elle' from public.yerler where id = '20590000-0000-4000-8000-000000000013'), 'P1 KK1: elle yere dokunulmaz';
+  assert (select lat is null and lng is null and ad = 'Eski Durak P1' and sira = 1 and place_id = 'ChIJ_p1_eski_durak'
+    from public.gezi_duraklari where id = '20590000-0000-4000-8000-000000000031'), 'P1 KK1: eski durak boşalır, sırası kalır';
+  assert (select lat = 40.5 from public.gezi_duraklari where id = '20590000-0000-4000-8000-000000000032'), 'P1 KK1: 29 günlük durak kalır';
+  assert (select lat = 40.6 from public.gezi_duraklari where id = '20590000-0000-4000-8000-000000000033'), 'P1 KK1: osm durağa dokunulmaz';
+  assert (select count(*) from public.gezi_duraklari where gezi_gun_id = '20590000-0000-4000-8000-000000000022') = 3, 'P1 KK1: durak silinmez';
+  -- Yeni koordinat (hat yeniden yükleme) yeni damga alır.
+  update public.gezi_duraklari set lat = 40.41, lng = 30.41 where id = '20590000-0000-4000-8000-000000000031';
+  assert (select google_fetched_at > now() - interval '1 minute' from public.gezi_duraklari where id = '20590000-0000-4000-8000-000000000031'),
+    'P1: yeni koordinat yeni damga';
+end $$;
+-- KK2: yayındaki konumsuz durak herkese okunur (çökmez: lat/lng null döner).
+set role anon;
+do $$
+begin
+  assert (select lat is null and lng is null from public.sehirler where id = '20590000-0000-4000-8000-000000000001'), 'P1 KK2: anon konumsuz şehri okur';
+  assert (select lat is null from public.yerler where id = '20590000-0000-4000-8000-000000000011'), 'P1 KK2: anon konumsuz yeri okur';
+end $$;
+reset role;
+-- KK2: "Seyahatime al" konumsuz durağı konumsuz mekan (#318/#329 "konumu güncellenemeyen") ve durak olarak kopyalar; damga taşınır.
+set role authenticated;
+select pg_temp.as_user(:YS);
+do $$
+declare
+  v uuid;
+  p public.places;
+begin
+  v := public.geziden_seyahat_ac(
+    '{"name": "Konumsuz", "city_place_id": "ChIJ_p1_sehir", "city_label": "Eski Şehir P1", "lat": null, "lng": null, "tz": "Europe/Istanbul"}', 1,
+    jsonb_build_array(
+      jsonb_build_object('place_id', 'ChIJ_p1_eski_durak', 'lat', null, 'lng', null, 'google_fetched_at', now() - interval '31 days', 'dk', 45),
+      jsonb_build_object('place_id', 'ChIJ_p1_taze_durak', 'lat', 40.5, 'lng', 30.5, 'google_fetched_at', now() - interval '29 days', 'dk', 45)),
+    '[{"gun": 1, "place_id": "ChIJ_p1_eski_durak", "order_key": "a"}, {"gun": 1, "place_id": "ChIJ_p1_taze_durak", "order_key": "b"}]');
+  select * into p from public.places where trip_id = v and place_id = 'ChIJ_p1_eski_durak';
+  assert p.lat is null and p.lng is null, 'P1 KK2: konumsuz mekan';
+  assert p.google_fetched_at < now() - interval '30 days', 'P1 KK2: damga taşınır';
+  assert (select count(*) from public.stops where trip_id = v) = 2, 'P1 KK2: iki durak da güne girer';
+  assert (select lat is null from public.trips where id = v), 'P1 KK2: şehir konumu boşsa seyahat konumsuz açılır';
+  assert (select lat = 40.5 from public.places where trip_id = v and place_id = 'ChIJ_p1_taze_durak'), 'P1 KK2: konumlu mekan aynı';
+  delete from public.trips where id = v;
+end $$;
+-- Yetki: boşaltma ve kontrol yalnız postgres.
+select pg_temp.hata_bekle($$select * from public.icerik_koordinat_bosalt(30)$$, '42501');
+select pg_temp.as_email(:E, 'ozcinar.ece@gmail.com');
+select pg_temp.hata_bekle($$select * from public.icerik_koordinat_bosalt(30)$$, '42501');
+select pg_temp.hata_bekle($$select public.konum_kaynagi_kontrol()$$, '42501');
+reset role;
+set role anon;
+select pg_temp.hata_bekle($$select * from public.icerik_koordinat_bosalt(30)$$, '42501');
+reset role;
+set role service_role;
+select pg_temp.hata_bekle($$select * from public.icerik_koordinat_bosalt(30)$$, '42501');
+select pg_temp.hata_bekle($$select public.konum_kaynagi_kontrol()$$, '42501');
+reset role;
+delete from public.sehirler where id in ('20590000-0000-4000-8000-000000000001', '20590000-0000-4000-8000-000000000002', '20590000-0000-4000-8000-000000000003');
 -- ---------------------------------------------------------------- #345 KK1: kapak atfı (geziler, sehirler, yerler)
 -- Okuma ve yazma satırın mevcut kuralıyla aynı: yayındaki satırın atfı herkese görünür, taslağınki görünmez; yalnız admin yazar.
 -- Biçim denetimi: yalnız yazar / lisans / kaynak_url, yazar zorunlu, kaynak https.

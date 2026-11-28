@@ -120,8 +120,8 @@ export type SehirSecimi = {
   place_id: string;
   ad: string;
   ikincil: string;
-  lat: number;
-  lng: number;
+  lat: number | null;
+  lng: number | null;
   tz: string;
   country_code: string | null;
 };
@@ -142,8 +142,9 @@ export type Sehir = {
   kapak_url: string | null;
   /** #345: {yazar, lisans, kaynak_url} (`features/icerik/kapakAtfi`); sorgu seçmediyse yok. */
   kapak_atif?: unknown;
-  lat: number;
-  lng: number;
+  /** #205 Parça 1: google_30g konum 30 günde boşalır (gece temizliği). */
+  lat: number | null;
+  lng: number | null;
   /** #97: yayınlı gezi sayısı ("N gezi"). */
   gezi_sayisi?: number;
   /** #100: rehber sayfası özeti (2 cümle). */
@@ -180,7 +181,10 @@ export type Gezi = {
   /** Gömülü şehir (liste kartlarında "Eskişehir"). */
   sehirler?: { ad: string; slug: string; kapak_url?: string | null; kapak_atif?: unknown } | null;
 };
-export type GeziDuragi = { id: string; gezi_gun_id: string; sira: number; place_id: string | null; ad: string; kategori: string | null; sure_dk: number; lat: number; lng: number;
+export type GeziDuragi = { id: string; gezi_gun_id: string; sira: number; place_id: string | null; ad: string; kategori: string | null; sure_dk: number;
+  /** #205 Parça 1: google_30g konum 30 günde boşalır (gece temizliği); durak listede kalır, haritada pin olmaz. */
+  lat: number | null;
+  lng: number | null;
   /** #205 KK7: koordinat Google'dan geldiyse alınma anı (osm/elle durakta null); "Seyahatime al" places'a taşır. */
   google_fetched_at?: string | null;
 };
@@ -241,8 +245,9 @@ export type Yer = {
   /** #345: {yazar, lisans, kaynak_url} (`features/icerik/kapakAtfi`); sorgu seçmediyse yok. */
   kapak_atif?: unknown;
   one_cikan_sira: number | null;
-  lat: number;
-  lng: number;
+  /** #205 Parça 1: google_30g konum 30 günde boşalır (gece temizliği); yer listede kalır, haritada pin olmaz. */
+  lat: number | null;
+  lng: number | null;
 };
 
 // account_deletion_preview() satırı

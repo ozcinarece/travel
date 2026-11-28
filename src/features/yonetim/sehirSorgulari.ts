@@ -73,7 +73,7 @@ export function useRehberBolumleri(sehirId: string | undefined) {
   });
 }
 
-export type MekanAdi = { ad: string; kategori: string | null; lat: number; lng: number };
+export type MekanAdi = { ad: string; kategori: string | null; lat: number | null; lng: number | null };
 
 /**
  * Kayıtta yazıdaki mekanlar `icerik_mekanlari`na (yazı sırasıyla); `yerler`de olmayanlar taslak yer olarak açılır

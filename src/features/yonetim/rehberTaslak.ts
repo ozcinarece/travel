@@ -4,7 +4,7 @@ import { mekanBaglari, rehberGovdesi, rehberYazisi, type BolumTuru, type RehberB
 /** Taslaktaki bölüm (sehir_rehberi_taslak.bolumler öğesi). `bolum` yalnız eski 4 bölümde dolu. */
 export type TaslakBolum = { id: string; baslik: string; ozet: string | null; govde: string; gizli: boolean; bolum: BolumTuru | null };
 
-export type BilinenMekan = { ad: string; kategori: string | null; lat: number; lng: number };
+export type BilinenMekan = { ad: string; kategori: string | null; lat: number | null; lng: number | null };
 
 export type RehberTaslagi = { bolumler: TaslakBolum[]; bilinen: Record<string, BilinenMekan>; updated_at: string; yayinlandi_at: string | null };
 

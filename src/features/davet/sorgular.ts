@@ -5,6 +5,7 @@ import { useCallback } from 'react';
 import { Platform } from 'react-native';
 
 import { olayYaz } from '@/features/icerik/sorgular';
+import { erkenOzetiAl } from '@/lib/erkenOzet';
 import { useOturum } from '@/lib/oturum';
 import { supabase } from '@/lib/supabase';
 import type { DavetKarsilama, DavetKatilim, DavetOzeti } from '@/lib/tipler';
@@ -23,6 +24,10 @@ export function useDavetOzeti(token: string | undefined) {
     staleTime: 60 * 1000,
     retry: 1,
     queryFn: async () => {
+      // #643 KK1 (web): HTML'deki betiğin başlattığı istek (aynı token ve oturumla) varsa onun sonucu; ikinci istek yok.
+      // `uye` alanı oturuma bağlı: erken istek uygulamanın şu anki erişim anahtarıyla atılmış olmalı.
+      const erken = await erkenOzetiAl('davet_ozeti', { token: token! }, async () => (await supabase.auth.getSession()).data.session?.access_token ?? null);
+      if (erken) return (erken.data as DavetOzeti | null) ?? null;
       const { data, error } = await supabase.rpc('davet_ozeti', { token: token! });
       if (error) throw error;
       return (data as DavetOzeti | null) ?? null;

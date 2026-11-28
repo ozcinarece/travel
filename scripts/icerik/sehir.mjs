@@ -4,9 +4,11 @@ import { sehirKimligi } from './dogrula.mjs';
 
 /**
  * `google`: icerik-google çağıran fonksiyon (gövde → JSON; hata fırlatır). Şehir başına en çok 1 kimlik araması ve 1 Details.
- * Google'ın şehri bizimkinden 50 km'den uzaksa ya da eşleşme yoksa null.
+ * Google'ın şehri bizimkinden 50 km'den uzaksa ya da eşleşme yoksa null. #205 Parça 1: şehrin konumu boşaldıysa (gece
+ * temizliği; `Number(null)` 0 olurdu) Google'a gidilmez, null: 50 km denetimi konumsuz yapılamaz (önce BO'da elle konum).
  */
 export async function sehirKimligiCoz(google, sehir, placeId) {
+  if (sehir.lat == null || sehir.lng == null) return null;
   const lat = Number(sehir.lat);
   const lng = Number(sehir.lng);
   const govde = { islem: 'sehir', ad: sehir.ad, merkez: { lat, lng }, ...(placeId ? { place_id: placeId } : {}) };

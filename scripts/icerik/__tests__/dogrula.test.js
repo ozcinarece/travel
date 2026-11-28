@@ -404,6 +404,8 @@ describe('#197 şehir kimliği', () => {
     expect(sehirKimligi(sehir, { ...yer, tz: "Europe/Istanbul'; drop" })).toBeNull();
     expect(sehirKimligi(sehir, { ...yer, place_id: 'kisa' })).toBeNull();
     expect(sehirKimligi(sehir, null)).toBeNull();
+    // #205 Parça 1: şehrimizin konumu boşaldıysa 50 km denetimi yapılamaz; yazılmaz.
+    expect(sehirKimligi({ lat: null, lng: null }, yer)).toBeNull();
   });
   test('SQL yalnız doğrulanmış değerlerle', () => {
     expect(sehirKimligiSql('eskisehir', { place_id: 'ChIJ_eskisehir_1', tz: 'Europe/Istanbul', ulke_kodu: 'TR' })).toBe(
@@ -481,6 +483,8 @@ describe('#205 KK3: OSM eşleştirmesi (ad + 150 m)', () => {
     expect(eslemeYaricapi(m, [])).toBe(1000);
     expect(eslemeYaricapi(m, [{ lat: 39.7967, lng: 30.5256 }])).toBeGreaterThan(3800);
     expect(eslemeYaricapi(m, [{ lat: 41, lng: 30.5256 }])).toBe(30000);
+    // #205 Parça 1: konumu boşalmış satır yarıçapa girmez.
+    expect(eslemeYaricapi(m, [{ lat: null, lng: null }, { lat: 39.7967, lng: 30.5256 }])).toBe(eslemeYaricapi(m, [{ lat: 39.7967, lng: 30.5256 }]));
   });
 });
 

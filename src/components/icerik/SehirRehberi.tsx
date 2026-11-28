@@ -14,14 +14,14 @@ import { Sekme, SekmeSatiri } from '@/components/ortak/Sekme';
 import { Buton } from '@/components/ui/Buton';
 import { Foto } from '@/components/ui/Foto';
 import { kapakTonu } from '@/features/anasayfa/v5';
-import { icerikHafif } from '@/features/icerik/fotolar';
+import { icerikHafif, type IcerikHafif } from '@/features/icerik/fotolar';
 import { kapakVeAtif } from '@/features/icerik/kapakAtfi';
 import { useIcerikMekanlari, type BilinenMekanlar } from '@/features/icerik/mekanBilgileri';
 import { bolumYazisi, doluBolumler, rehberKartIdleri, rehberMekanIdleri } from '@/features/icerik/rehber';
 import { useGeziler, useSehirRehberi, useSehirYerleri } from '@/features/icerik/sorgular';
 import { useGeriAlinabilirSil } from '@/features/mekanlar/geriAlinabilirSil';
 import { useMekanEkle, useMekanGuncelle, useMekanlar } from '@/features/mekanlar/sorgular';
-import type { HafifYer } from '@/features/yerler/api';
+import { yolTarifiHedefi } from '@/lib/konum';
 import { t } from '@/i18n';
 import { bilinenKategori, varsayilanDakika } from '@/lib/kategori';
 import type { Sehir } from '@/lib/tipler';
@@ -60,7 +60,7 @@ export function SehirRehberi({ sehir, sehirlerYukleniyor, onGeri, seyahat, onReh
   // puan gösterilmez. Panel saat / puan için Google'a yalnız açılınca gider (places-full, KK10).
   const kartIdleri = useMemo(() => rehberKartIdleri(bolumler.map((b) => b.yazi_md)), [bolumler]);
   const icerik = useIcerikMekanlari(mekanIdleri, { kartlar: kartIdleri, bilinen });
-  const hafifYeri = (placeId: string): HafifYer | undefined => {
+  const hafifYeri = (placeId: string): IcerikHafif | undefined => {
     const m = icerik.mekan(placeId);
     return m ? icerikHafif(placeId, m) : undefined;
   };
@@ -81,7 +81,7 @@ export function SehirRehberi({ sehir, sehirlerYukleniyor, onGeri, seyahat, onReh
   const cikanId = geriAlinabilir.bekleyen?.mekanId;
   const listedeki = (placeId: string) => mekanlar.data?.find((m) => m.place_id === placeId && m.id !== cikanId);
   const [mesgulId, setMesgulId] = useState<string | null>(null);
-  const degistir = async (y: HafifYer) => {
+  const degistir = async (y: IcerikHafif) => {
     if (!seyahat) return;
     const m = listedeki(y.place_id);
     // #387 KK1: ✓ hemen silmez (bant kapanınca silinir); bant açıkken aynı mekana + basılırsa çıkarma geri alınır.
@@ -222,7 +222,7 @@ export function SehirRehberi({ sehir, sehirlerYukleniyor, onGeri, seyahat, onReh
             mesgul={mesgulId === panelId}
             onCta={() => (seyahat ? degistir(panelYeri) : undefined)}
             onYolTarifi={() =>
-              Linking.openURL(`https://www.google.com/maps/dir/?api=1&destination=${panelYeri.lat},${panelYeri.lng}&destination_place_id=${encodeURIComponent(panelId)}&travelmode=walking`)
+              Linking.openURL(`https://www.google.com/maps/dir/?api=1&destination=${yolTarifiHedefi(panelYeri, panelYeri.ad)}&destination_place_id=${encodeURIComponent(panelId)}&travelmode=walking`)
             }
             onKapat={() => setPanelId(null)}
           />

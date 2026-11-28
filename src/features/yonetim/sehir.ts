@@ -8,8 +8,9 @@ import type { IcerikFotosu } from './fotolar';
 export type SehirAlanlari = {
   ad: string;
   slug: string;
-  lat: number;
-  lng: number;
+  /** #205 Parça 1: google_30g konum 30 günde boşalır (gece temizliği). */
+  lat: number | null;
+  lng: number | null;
   ozet: string | null;
   yayin: boolean;
   kapak_url: string | null;

@@ -99,7 +99,7 @@ function dosyalar(dizin) {
 /** Sayfanın `<head>`'ine font ön yüklemesi yazar (aynı köken; FontFace CORS kipinde ister → `crossorigin`). */
 export function fontOnYukle(html, fontlar) {
   if (!fontlar.length || html.includes('rel="preload" as="font"')) return html;
-  const satirlar = fontlar.map((f) => `<link rel="preload" as="font" type="font/ttf" crossorigin href="${f}"/>`).join('');
+  const satirlar = fontlar.map((f) => `<link rel="preload" as="font" type="font/woff2" crossorigin href="${f}"/>`).join('');
   const yer = html.indexOf('</head>');
   if (yer < 0) throw new Error('</head> bulunamadı');
   return html.slice(0, yer) + satirlar + html.slice(yer);
@@ -150,8 +150,8 @@ export async function birlestir(dist, davet) {
   const fontlar = [];
   if (existsSync(varlik)) {
     for (const kaynak of dosyalar(varlik)) {
-      // Yalnız açılış kapısının beklediği Figtree fontları ön yüklenir.
-      if (/[\\/]Figtree_[^\\/]+\.ttf$/.test(kaynak)) fontlar.push('/' + path.relative(davet, kaynak).split(path.sep).join('/'));
+      // Yalnız açılış kapısının beklediği Figtree fontları ön yüklenir (#643: web woff2 alt küme, src/components/kok/fontlar.web.ts).
+      if (/[\\/]Figtree_[^\\/]+\.woff2$/.test(kaynak)) fontlar.push('/' + path.relative(davet, kaynak).split(path.sep).join('/'));
       const hedef = path.join(dist, path.relative(davet, kaynak));
       if (existsSync(hedef)) continue;
       mkdirSync(path.dirname(hedef), { recursive: true });

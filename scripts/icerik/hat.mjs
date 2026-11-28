@@ -258,6 +258,8 @@ async function sehirMerkezi(istek) {
   if (!SEHIR_SLUG.test(istek.sehir ?? '')) throw new HatHatasi('istek.sehir (slug) ya da istek.merkez gerekli');
   const satir = (await sql(`select lat, lng from public.sehirler where slug = '${istek.sehir}'`))[0];
   if (!satir) throw new HatHatasi(`şehir bulunamadı: ${istek.sehir}; istek.merkez ver`);
+  // #205: konumu boşalmış şehirde merkez (0,0) olmasın; kimlik sorguları yanlış bölgeye yönelirdi.
+  if (satir.lat == null || satir.lng == null) throw new HatHatasi(`şehrin konumu boş: ${istek.sehir}; istek.merkez ver`);
   return { lat: Number(satir.lat), lng: Number(satir.lng) };
 }
 
@@ -365,17 +367,21 @@ async function eslemeAdaylari(merkez, yaricap, bitis, ilerleme) {
   return [...adaylar.values()];
 }
 
-/** Konumu Google'dan (google_30g) olan içerik satırları, şehirleriyle. Ad ve konum yalnız bellekte kalır, yazdırılmaz. */
+/**
+ * Konumu Google'dan (google_30g) olan içerik satırları, şehirleriyle. Ad ve konum yalnız bellekte kalır, yazdırılmaz.
+ * #205 Parça 1: konumu boşalmış (gece temizliği) satır eşleştirilemez (150 m denetimi konum ister), alınmaz; sayısı
+ * `konum_kaynagi_kontrol()`'ün `konumsuz`unda. Konumu boşalmış şehrin merkezi yok sayılır (`Number(null)` 0 olurdu).
+ */
 async function googleSatirlari() {
   const satirlar = await sql(`
-    select 'sehirler' as tablo, s.id, s.id as sehir_id, s.ad, s.lat, s.lng from public.sehirler s where s.konum_kaynagi = 'google_30g'
+    select 'sehirler' as tablo, s.id, s.id as sehir_id, s.ad, s.lat, s.lng from public.sehirler s where s.konum_kaynagi = 'google_30g' and s.lat is not null
     union all
-    select 'yerler', y.id, y.sehir_id, y.ad, y.lat, y.lng from public.yerler y where y.konum_kaynagi = 'google_30g'
+    select 'yerler', y.id, y.sehir_id, y.ad, y.lat, y.lng from public.yerler y where y.konum_kaynagi = 'google_30g' and y.lat is not null
     union all
     select 'gezi_duraklari', d.id, g.sehir_id, d.ad, d.lat, d.lng
       from public.gezi_duraklari d join public.gezi_gunleri gg on gg.id = d.gezi_gun_id join public.geziler g on g.id = gg.gezi_id
-     where d.konum_kaynagi = 'google_30g'`);
-  const merkezler = new Map((await sql('select id, slug, lat, lng from public.sehirler')).map((s) => [s.id, { slug: s.slug, lat: Number(s.lat), lng: Number(s.lng) }]));
+     where d.konum_kaynagi = 'google_30g' and d.lat is not null`);
+  const merkezler = new Map((await sql('select id, slug, lat, lng from public.sehirler')).map((s) => [s.id, { slug: s.slug, lat: s.lat == null ? Number.NaN : Number(s.lat), lng: s.lng == null ? Number.NaN : Number(s.lng) }]));
   return { satirlar: satirlar.map((s) => ({ ...s, lat: Number(s.lat), lng: Number(s.lng) })), merkezler };
 }
 

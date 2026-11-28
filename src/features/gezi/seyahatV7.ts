@@ -3,6 +3,7 @@
 import { mesafeM } from '@/components/harita/geo';
 import { t } from '@/i18n';
 import { bulunmaEkli } from '@/lib/ek';
+import { konumVar, type KonumNoktasi } from '@/lib/konum';
 import { GUNLER, haftaGunu, tarihAraligi } from '@/lib/takvim';
 import type { Mekan, Seyahat, Uye, Yer } from '@/lib/tipler';
 import { gunSayisi, yerelTarih } from '@/lib/zaman';
@@ -105,7 +106,8 @@ export function bosGunOnerileri<Y extends Pick<Yer, 'lat' | 'lng'> & { place_id:
 ): (Y & { place_id: string; mesafeM: number | null })[] {
   const listede = new Set(mekanlar.map((m) => m.place_id));
   return yerler
-    .filter((y): y is Y & { place_id: string } => !!y.place_id && !listede.has(y.place_id) && Number.isFinite(y.lat) && Number.isFinite(y.lng))
+    // #205 Parça 1: konumu boşalmış yer (gece temizliği) öneriye girmez.
+    .filter((y): y is Y & { place_id: string } & KonumNoktasi => !!y.place_id && !listede.has(y.place_id) && konumVar(y))
     .map((y) => ({ ...y, mesafeM: merkez ? mesafeM(merkez, { lat: y.lat, lng: y.lng }) : null }))
     .sort((a, b) => (a.mesafeM ?? 0) - (b.mesafeM ?? 0))
     .slice(0, adet);

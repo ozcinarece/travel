@@ -41,7 +41,7 @@ export function farkliSehir(seyahat: Pick<SeyahatOzet, 'city_label'>, sehirAdi: 
   return !!sehirAdi?.trim() && !ayniSehir(seyahat.city_label, sehirAdi);
 }
 
-export type YerEklemeIstegi = { seyahatId: string; yerId: string | null; place_id: string; primary_type: string | null; lat: number; lng: number; /** #143: gezi durağının süresi; yoksa kategori varsayılanı. */ dakika?: number };
+export type YerEklemeIstegi = { seyahatId: string; yerId: string | null; place_id: string; primary_type: string | null; /** #205 Parça 1: null = içerik satırının konumu boşalmış; mekan listede, haritada yok. */ lat: number | null; lng: number | null; /** #143: gezi durağının süresi; yoksa kategori varsayılanı. */ dakika?: number };
 
 export function useYereEkle() {
   const { session } = useOturum();
@@ -70,7 +70,7 @@ export function useYerleriEkle() {
   const { session } = useOturum();
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async ({ seyahatId, yerler }: { seyahatId: string; yerler: { yerId: string; place_id: string | null; primary_type: string | null; lat: number; lng: number }[] }): Promise<CokluEklemeSonucu> => {
+    mutationFn: async ({ seyahatId, yerler }: { seyahatId: string; yerler: { yerId: string; place_id: string | null; primary_type: string | null; lat: number | null; lng: number | null }[] }): Promise<CokluEklemeSonucu> => {
       if (!session) throw new Error('oturum yok');
       const { data, error } = await supabase.from('places').select('place_id').eq('trip_id', seyahatId);
       if (error) throw error;

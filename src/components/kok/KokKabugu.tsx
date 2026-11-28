@@ -2,12 +2,6 @@
 // girişi (`src/davet-web/_layout.tsx`, yalnız /r/{token} ve /r/g/{token}) aynı sağlayıcıları, aynı açılış kapısını ve aynı
 // hata ekranını buradan alır; iki girişte görünen hiçbir şey ayrışmaz. Gesture-handler, Reanimated ve gezinme yığını
 // burada değil, uygulamanın kendi kök düzeninde kalır (davet girişine girmesinler).
-// Ağırlıklar alt yollardan: paketin kökü kullanılmayan 9 ağırlığı ve meta verisini de pakete katar (#550).
-import { Figtree_400Regular } from '@expo-google-fonts/figtree/400Regular';
-import { Figtree_500Medium } from '@expo-google-fonts/figtree/500Medium';
-import { Figtree_600SemiBold } from '@expo-google-fonts/figtree/600SemiBold';
-import { Figtree_700Bold } from '@expo-google-fonts/figtree/700Bold';
-import { Figtree_800ExtraBold } from '@expo-google-fonts/figtree/800ExtraBold';
 import { useFonts } from '@expo-google-fonts/figtree/useFonts';
 import { QueryClient } from '@tanstack/react-query';
 import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
@@ -26,6 +20,8 @@ import { baglantiyiIzle } from '@/lib/baglanti';
 import { kaliciSecenekler, profilKilitli, saklananlariAyarla } from '@/lib/kaliciOnbellek';
 import { OturumSaglayici, useOturum } from '@/lib/oturum';
 import { webAcilisiKaldir } from '@/lib/webAcilis';
+
+import { FIGTREE } from './fontlar';
 
 let queryClient: QueryClient | null = null;
 
@@ -62,13 +58,8 @@ export function KokSaglayicilari({ children }: { children: ReactNode }) {
 export function AcilisKapisi({ children }: { children: (girisTamam: boolean) => ReactNode }) {
   // #307: tek aile Figtree (metin 400–600, düğme 700, başlık 800). JS varlığı — OTA ile gider, yerel derleme gerekmez.
   // Logo yazısı "tripmate" font değil, SVG yolu (Logo.tsx).
-  const [fontlar, fontHatasi] = useFonts({
-    Figtree_400Regular,
-    Figtree_500Medium,
-    Figtree_600SemiBold,
-    Figtree_700Bold,
-    Figtree_800ExtraBold,
-  });
+  // #643: native paketin TTF'leri (`fontlar.ts`), web woff2 alt küme (`fontlar.web.ts`); aile adları aynı.
+  const [fontlar, fontHatasi] = useFonts(FIGTREE);
   const { hazir, hesapli, session } = useOturum();
   const profil = useProfil();
   // #138 KK1: "Profilini kur" ekranı yok — hesap var, profil yoksa sunucu kendiliğinden oluşturur (ad/foto sağlayıcıdan).

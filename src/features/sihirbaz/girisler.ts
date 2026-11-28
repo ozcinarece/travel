@@ -4,6 +4,7 @@
 import { useQuery } from '@tanstack/react-query';
 
 import { birKezDene, hafifYerler, otomatikTamamla, yeniOturumJetonu } from '@/features/yerler/api';
+import { aramaMerkezi } from '@/lib/konum';
 import { useOturum } from '@/lib/oturum';
 import { supabase } from '@/lib/supabase';
 import type { Sehir, SehirSecimi } from '@/lib/tipler';
@@ -17,12 +18,13 @@ export async function sehirSecimi(placeId: string, adi: string, ikincil: string,
 
 /**
  * Rehberli şehir → seçim. #197: tabloda Google kimliği ve saat dilimi varsa Google'a gidilmez; yoksa adıyla Autocomplete (cities),
- * ilk öneri, sonra hafif yer (saat dilimi, ülke kodu).
+ * ilk öneri, sonra hafif yer (saat dilimi, ülke kodu). #205 Parça 1: şehrin konumu boşaldıysa (gece temizliği) seçim konumsuz
+ * gelir (Google'a gidilmez); seyahat #318'deki gibi şehir koordinatı boş açılır.
  */
 export async function icerikSehirSecimi(k: Pick<Sehir, 'ad' | 'lat' | 'lng' | 'place_id' | 'tz' | 'ulke_kodu'>): Promise<SehirSecimi> {
   if (k.place_id && k.tz) return { place_id: k.place_id, ad: k.ad, ikincil: '', lat: k.lat, lng: k.lng, tz: k.tz, country_code: k.ulke_kodu ?? null };
   const oturum = yeniOturumJetonu();
-  const [o] = await otomatikTamamla({ girdi: k.ad, oturum, tur: 'cities', limit: 1, merkez: { lat: k.lat, lng: k.lng, yaricapM: 50_000 } });
+  const [o] = await otomatikTamamla({ girdi: k.ad, oturum, tur: 'cities', limit: 1, merkez: aramaMerkezi(k, 50_000) });
   if (!o) throw new Error('öneri yok');
   return sehirSecimi(o.place_id, k.ad, o.ikincil, oturum);
 }

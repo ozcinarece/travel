@@ -52,7 +52,11 @@ export function yeniSeyahatPlani(gezi: Pick<GeziDetay, 'gezi_gunleri'>, gunSayis
   return { gunler, plan, ozet: { gun: plan.atamalar.length, durak: plan.atamalar.reduce((n, a) => n + a.duraklar.length, 0), listeye: plan.listeyeKalan.length } };
 }
 
-export type YeniSeyahatMekani = { place_id: string; primary_type: string | null; lat: number; lng: number; google_fetched_at: string | null; dk: number };
+/**
+ * #205 Parça 1: `lat`/`lng` null = durağın konumu boşalmış (gece temizliği). Mekan ve durak yine kopyalanır; seyahatte #318/#329'daki
+ * "konumu güncellenemeyen" mekan olur (listede, haritada yok; place_id ve damga kalır).
+ */
+export type YeniSeyahatMekani = { place_id: string; primary_type: string | null; lat: number | null; lng: number | null; google_fetched_at: string | null; dk: number };
 export type YeniSeyahatDuragi = { gun: number; place_id: string; order_key: string; dk: number };
 
 /**

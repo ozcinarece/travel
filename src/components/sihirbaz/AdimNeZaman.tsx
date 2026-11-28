@@ -7,7 +7,7 @@ import { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { Ikon } from '@/components/ui/Ikon';
-import { gunFarki, tarihDokun, TARIHSIZ_EN_AZ, TARIHSIZ_EN_COK, type Aralik } from '@/features/sihirbaz/sihirbaz';
+import { donusSinirDisi, gunFarki, tarihDokun, TARIHSIZ_EN_AZ, TARIHSIZ_EN_COK, type Aralik } from '@/features/sihirbaz/sihirbaz';
 import { t } from '@/i18n';
 import { AYLAR, GUNLER, ayIzgarasi, ayKaydir, haftaGunu, parcala } from '@/lib/takvim';
 import { yerelTarih } from '@/lib/zaman';
@@ -40,9 +40,11 @@ type Props = {
   dokun?: (aralik: Aralik, gun: string) => Aralik;
   /** "Dönüş günü?" ipucu (verilmezse yalnız gidiş seçiliyken). */
   donusBekleniyor?: boolean;
+  /** #603 KK3: verilirse dönüş beklenirken gidişten itibaren bu kadar günden sonrası seçilemez (geçmiş günler gibi soluk). */
+  enCokGun?: number;
 };
 
-export function AdimNeZaman({ aralik, onAralik, tarihsizGun, onTarihsizGun, ozetSatiri, dokun = tarihDokun, donusBekleniyor }: Props) {
+export function AdimNeZaman({ aralik, onAralik, tarihsizGun, onTarihsizGun, ozetSatiri, dokun = tarihDokun, donusBekleniyor, enCokGun }: Props) {
   const bugun = yerelTarih(new Date(), Intl.DateTimeFormat().resolvedOptions().timeZone);
   const ilk = parcala(aralik?.gidis ?? bugun);
   const [ay, setAy] = useState({ yil: ilk.yil, ay: ilk.ay });
@@ -84,7 +86,7 @@ export function AdimNeZaman({ aralik, onAralik, tarihsizGun, onTarihsizGun, ozet
             const bandi = arada(gun);
             const basBand = bandi && gun === aralik!.gidis;
             const sonBand = bandi && gun === aralik!.donus;
-            const gecmis = gun < bugun;
+            const gecmis = gun < bugun || (enCokGun !== undefined && donusSinirDisi(aralik, gun, enCokGun));
             return (
               <Pressable
                 key={gun}

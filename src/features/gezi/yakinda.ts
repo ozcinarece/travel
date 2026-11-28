@@ -105,7 +105,8 @@ export function yakindaAdaylari(p: {
     icerik.push({ kaynak: 'icerik', place_id: y.place_id, yerId: null, ad: y.ad, tip: y.primary_type, ilKategori: y.kategori, lat: y.lat, lng: y.lng, mesafeM: uzaklik(y) });
   }
   for (const y of p.rehberYerleri) {
-    if (!y.place_id || listede.has(y.place_id) || !Number.isFinite(y.lat) || !Number.isFinite(y.lng)) continue;
+    // #205 Parça 1: konumu boşalmış rehber yeri (gece temizliği) yakındakilere girmez.
+    if (!y.place_id || listede.has(y.place_id) || !konumVar(y)) continue;
     if (gorulen.has(y.place_id)) {
       // Aynı yer il listesinde de var: olay için rehber kimliği taşınır, il kategorisi kalır.
       const i = icerik.findIndex((a) => a.place_id === y.place_id);

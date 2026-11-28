@@ -739,7 +739,12 @@
       "simdiDegil": "Şimdi değil",
       "kaydet": "Kaydet",
       "hata": "Otel kaydedilemedi. Tekrar dene.",
-      "geceler": "Geceleri seç"
+      "geceler": "Geceleri seç",
+      "adEkle": "Ad ekle",
+      "adDegistir": "Adı değiştir",
+      "adEtiket": "Otele verdiğin ad",
+      "adIpucu": "Boş bırakırsan otelin adı görünür",
+      "adSayac": "{n}/80"
     },
     "bugunChip": "Bugün · {n}. gün",
     "gerideyiz": "Plana göre {dk} dk gerideyiz",
@@ -1055,6 +1060,9 @@
     "altAlt": "İstersen yalnız bir gününü al",
     "gunOzeti": "~{sure} · {mesafe} yürüyüş",
     "gunOzetiGercek": "{sure} · {mesafe} yürüyüş",
+    "gunOzetiSure": "~{sure}",
+    "gunOzetiSureGercek": "{sure}",
+    "yolBilinmiyor": "Yol süresi bilinmiyor",
     "yuruyus": "{n} dk yürüyüş",
     "arac": "{n} dk araç",
     "hangiSeyahate": "HANGİ SEYAHATE?",

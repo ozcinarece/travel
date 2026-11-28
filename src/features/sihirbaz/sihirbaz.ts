@@ -36,6 +36,15 @@ export function gunSayisiSinirla(n: number): number {
   return Math.min(TARIHSIZ_EN_COK, Math.max(TARIHSIZ_EN_AZ, Math.round(n)));
 }
 
+/**
+ * #603 KK3: tarihli seyahat de en çok 60 gün (taslak RPC'si `seyahat_tarihlerini_degistir` daha uzununu reddeder).
+ * Dönüş beklenirken gidişten itibaren 60. günden sonraki günler seçilemez.
+ */
+export const TARIH_EN_COK_GUN = TARIHSIZ_EN_COK;
+export function donusSinirDisi(aralik: Aralik, gun: Tarih, enCok: number = TARIH_EN_COK_GUN): boolean {
+  return !!aralik && !aralik.donus && gun > aralik.gidis && gunFarki(aralik.gidis, gun) + 1 > enCok;
+}
+
 /** KK3: takvimde iki dokunuş = aralık (ilk gidiş, ikinci dönüş; dönüş gidişten önceyse gidiş yeniden başlar; aynı güne iki kez = tek gün). */
 export type Aralik = { gidis: Tarih; donus: Tarih | null } | null;
 export function tarihDokun(aralik: Aralik, gun: Tarih): Aralik {
