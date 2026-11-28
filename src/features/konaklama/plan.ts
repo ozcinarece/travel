@@ -10,8 +10,25 @@ export type Konaklama = {
   /** #318: Google koordinatı 30 günde yenilenemezse null; otel haritada ve rota hesabında yok sayılır. */
   lat: number | null;
   lng: number | null;
+  /**
+   * Görünen ad. DB'den okununca yalnız `place_id`'siz noktanın adı (`satirdanKonaklama`); `adlarlaKonaklamalar` sonrası
+   * takma ad ya da (place_id'li otelde) canlı Google adı. Google adı DB'ye hiç yazılmaz (#248, #584 KK1).
+   */
   label: string | null;
+  /** #584 KK2: kullanıcının otele verdiği ad (stays.takma_ad); kullanıcı verisi, saklanır. */
+  takma_ad?: string | null;
 };
+
+/** `stays` okunan alanlar. */
+export const KONAKLAMA_ALANLARI = 'id, trip_id, place_id, lat, lng, label, takma_ad';
+
+/**
+ * #584 KK1: DB satırı → Konaklama. `place_id`'li satırın `label`'ı okunmaz: eski satırlarda Google adı olabilir (#250
+ * temizliği elle çalışana kadar); ad ekranda canlı gelir.
+ */
+export function satirdanKonaklama(satir: Konaklama): Konaklama {
+  return { ...satir, label: satir.place_id ? null : satir.label, takma_ad: satir.takma_ad?.trim() || null };
+}
 
 /**
  * #248 KK1: yeni `stays` satırı. `place_id` varsa Google'dan gelen ad `label`'a yazılmaz (PRD §7, T1); ad ekranda
@@ -28,13 +45,22 @@ export function yeniKonaklamaSatiri(seyahatId: string, secim: { place_id: string
   };
 }
 
-/** #248 KK1: `label`'ı boş, `place_id`'li otellere ad yalnız bellekte (places-light) eklenir; DB'ye yazılmaz. */
+/**
+ * Görünen ad (`label`): takma ad (#584 KK2) > place_id'siz noktanın adı > place_id'li otelin canlı Google adı. Canlı ad
+ * yalnız bellekte (places-light) eklenir; DB'ye yazılmaz (#248, #584 KK1).
+ */
 export function adlarlaKonaklamalar(liste: Konaklama[], canliAd: (placeId: string) => string | null | undefined): Konaklama[] {
-  return liste.map((k) => (k.label || !k.place_id ? k : { ...k, label: canliAd(k.place_id) ?? null }));
+  return liste.map((k) => {
+    if (k.takma_ad) return { ...k, label: k.takma_ad };
+    return k.place_id ? { ...k, label: canliAd(k.place_id) ?? null } : k;
+  });
 }
 
-/** Canlı adı gereken kimlikler (label boş, place_id dolu). */
-export const adiEksikKimlikler = (liste: Konaklama[]) => [...new Set(liste.filter((k) => !k.label && k.place_id).map((k) => k.place_id!))];
+/** Canlı adı gereken kimlikler (takma adı yok, place_id dolu). Takma adlı otel için Google'a istek yok. */
+export const adiEksikKimlikler = (liste: Konaklama[]) => [...new Set(liste.filter((k) => !k.takma_ad && k.place_id).map((k) => k.place_id!))];
+
+/** #584 KK2: girilen takma ad → `stays.takma_ad` (kırpılır, ≤ 80; boşsa null = takma ad yok). */
+export const takmaAdDegeri = (metin: string) => metin.trim().slice(0, 80).trim() || null;
 
 /** Matris / rota anahtarı (walk_cache): otel başına ayrı, konum değişince yeni otel = yeni anahtar. */
 export const konaklamaAnahtari = (id: string) => `stay:${id}`;
