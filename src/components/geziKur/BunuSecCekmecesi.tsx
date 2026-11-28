@@ -22,7 +22,7 @@ import { Foto } from '@/components/ui/Foto';
 import type { ArkadasPaylasimi } from '@/features/arkadaslar/sorgular';
 import { useDavetPaylas } from '@/features/davet/paylas';
 import { kisiDurumu, useDavetGonder, useGonderilenDavetler } from '@/features/davet/uygulamaIci';
-import { cekmeceSecimi, durakSayisi, secimGunVeBaslangic, tarihSatiri } from '@/features/geziKur/geziKur';
+import { cekmeceEnCokGun, cekmeceSecimi, durakSayisi, secimGunVeBaslangic, tarihSatiri } from '@/features/geziKur/geziKur';
 import type { Kimlerle, KimlerleKisi } from '@/features/geziKur/kimlerle';
 import { useGezidenSeyahatAc } from '@/features/icerik/aktarSorgu';
 import type { AkisGezisi } from '@/features/icerik/kesfetAkisi';
@@ -48,11 +48,16 @@ type Props = {
 
 /** Kanvasta karşılığı olmayan davet hatası: genel hata metni (yeni metin yok). */
 const davetHatasi = () => Alert.alert(t('genel.hataBaslik'), t('genel.hataMetin'));
+/** #649 KK2: tarih kurulamadı (seyahat yine açılır); sihirbazdaki tarih uyarısının metni. */
+const tarihHatasi = () => Alert.alert(t('genel.hataBaslik'), t('sihirbaz.nezaman.tarihHata'));
 
 export function BunuSecCekmecesi({ rota, onKapat, kimlerle }: Props) {
   const rotaGun = rota.tur === 'gezi' ? rota.gezi.gun_sayisi : rota.paylasim.gun_sayisi;
   const durak = rota.tur === 'gezi' ? durakSayisi(rota.gezi) : rota.paylasim.durak_sayisi;
   const baslik = rota.tur === 'gezi' ? rota.gezi.baslik : rota.baslik;
+  // #649 KK1: hazır gezi en çok 30, arkadaş rotası en çok 60 gün (iki RPC'nin sınırı).
+  const enCok = cekmeceEnCokGun(rota.tur);
+  const sayiSinirla = (n: number) => Math.min(enCok, gunSayisiSinirla(n));
   const [aralik, setAralik] = useState<Aralik>(null);
   const [tarihsizGun, setTarihsizGun] = useState<number | null>(null);
   const [davet, setDavet] = useState(false);
@@ -80,7 +85,7 @@ export function BunuSecCekmecesi({ rota, onKapat, kimlerle }: Props) {
     router.replace({ pathname: '/seyahat/[id]/(sekmeler)/gezi', params: { id, ...(link ? { davet: '1' } : {}) } });
   };
 
-  const secim = cekmeceSecimi(aralik, tarihsizGun, rotaGun);
+  const secim = cekmeceSecimi(aralik, tarihsizGun, rotaGun, enCok);
   const veriBekliyor = rota.tur === 'gezi' && (!gezi.data || !sehir.data) && !gezi.isError && !sehir.isError;
 
   const olustur = async () => {
@@ -108,8 +113,8 @@ export function BunuSecCekmecesi({ rota, onKapat, kimlerle }: Props) {
       } else {
         id = await al.mutateAsync(rota.paylasim.id);
         // Paylaşımdan alınan seyahat tarihsiz ve rotanın gün sayısıyla açılır; seçim farklıysa taslağın tarihi kurulur.
-        // Seyahat açıldı: tarih kurulamazsa da Gezi sayfası açılır (tarih oradan değişir; ikinci seyahat açılmaz).
-        if (secim.tur === 'tarihli' || secim.gun !== rota.paylasim.gun_sayisi) await tarih.mutateAsync({ seyahatId: id, secim }).catch(() => undefined);
+        // Seyahat açıldı: tarih kurulamazsa da Gezi sayfası açılır (tarih oradan değişir; ikinci seyahat açılmaz). #649 KK2: hata söylenir.
+        if (secim.tur === 'tarihli' || secim.gun !== rota.paylasim.gun_sayisi) await tarih.mutateAsync({ seyahatId: id, secim }).catch(tarihHatasi);
       }
       // KK6: seçilen arkadaşlara uygulama içi davet. Düşerse seyahat yine açılır, kullanıcıya hata söylenir.
       const kisiler = kimlerle.secilenler;
@@ -174,7 +179,7 @@ export function BunuSecCekmecesi({ rota, onKapat, kimlerle }: Props) {
             accessibilityRole="button"
             onPress={() => {
               setAralik(null);
-              setTarihsizGun(gunSayisiSinirla(rotaGun));
+              setTarihsizGun(sayiSinirla(rotaGun));
             }}
             hitSlop={12}>
             <Text style={s.baglanti}>{t('sihirbaz.nezaman.atla')}</Text>
@@ -185,6 +190,9 @@ export function BunuSecCekmecesi({ rota, onKapat, kimlerle }: Props) {
         // Kanvas: dönüş seçilmediyse rotanın gün sayısıyla hesaplanan dönüş de seçili ve arası bantlı görünür. Dokunuşlar gerçek
         // seçimle hesaplanır (gidişten sonraki güne dokunmak dönüşü seçer); "Dönüş günü?" yalnız dönüş seçimi beklenirken.
         aralik={secim?.tur === 'tarihli' ? { gidis: secim.gidis, donus: secim.donus } : aralik}
+        // #649 KK1: sınır gerçek seçimden (yalnız gidiş seçiliyken gidişten itibaren `enCok` gün; sonrası geçmiş gün gibi pasif).
+        sinirAraligi={aralik}
+        enCokGun={enCok}
         dokun={(_g, gun) => tarihDokun(aralik, gun)}
         donusBekleniyor={!!aralik && !aralik.donus && rotaGun > 1}
         onAralik={(a) => {
@@ -192,7 +200,7 @@ export function BunuSecCekmecesi({ rota, onKapat, kimlerle }: Props) {
           setAralik(a);
         }}
         tarihsizGun={tarihsizGun}
-        onTarihsizGun={(n) => setTarihsizGun(gunSayisiSinirla(n))}
+        onTarihsizGun={(n) => setTarihsizGun(sayiSinirla(n))}
         ozetSatiri={secim?.tur === 'tarihli' ? tarihSatiri(secim) : null}
       />
 
