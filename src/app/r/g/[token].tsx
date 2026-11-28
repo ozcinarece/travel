@@ -10,7 +10,8 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { Harita } from '@/components/harita/Harita';
+// #550: yerelde doğrudan Harita; web'de ayrı parça (PaylasimHaritasi.web.tsx).
+import { PaylasimHaritasi as Harita } from '@/components/paylasim/PaylasimHaritasi';
 import type { HaritaCizgisi, HaritaPini, Konum } from '@/components/harita/tipler';
 import { paylasimOzeti } from '@/features/paylasim/baslik';
 import { SeyahatKapagi } from '@/components/seyahatler/SeyahatKapagi';

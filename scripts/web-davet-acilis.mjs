@@ -4,6 +4,8 @@
 // sonra "Biraz uzun sürüyor" notu açılır (`animation-delay`), 30 sn'de "sayfayı yenile"ye döner (#557),
 // `prefers-reduced-motion`'da noktalar durur.
 // Uygulama açılış kararını verince (`src/lib/webAcilis.ts`, kök `_layout`) katman kaldırılır.
+// #550: davet girişinden tam uygulamaya geçiş tam yeniden yüklemedir (`src/davet-web/+not-found.tsx`); Google dönüşü
+// (/giris), katılım → seyahat (/seyahat/{id}/gezi) ve ana sayfa (/) da aynı katmanı gösterir (Ürün kararı, kanvas 3e aynen).
 // Kullanım: node scripts/web-davet-acilis.mjs dist   (web-yayin'de web-yonlendirmeler.js'ten ÖNCE: kopyalar da alsın)
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import path from 'node:path';
@@ -14,6 +16,8 @@ export const BELIRME_MS = 600;
 /** #557: JS paketi hiç gelmezse 3e-B notu bu süreden sonra "sayfayı yenile" der (yalnız CSS). */
 export const YENILE_SN = 30;
 export const DAVET_SAYFALARI = ['r/[token].html', 'r/g/[token].html'];
+/** #550: davet ekranlarının tam yeniden yüklemeyle geçtiği tam uygulama sayfaları (Google dönüşü, katılım → seyahat, ana sayfa). */
+export const GECIS_SAYFALARI = ['giris.html', 'index.html', 'seyahat/[id]/gezi.html', 'seyahat/[id]/(sekmeler)/gezi.html'];
 
 const kacir = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
@@ -54,11 +58,12 @@ export function katmanHtml(metin) {
   const marka = metin.marka.ad;
   return (
     `<style id="${KATMAN_ID}-stil">${STIL}</style>` +
-    `<div id="${KATMAN_ID}" role="status"><div class="da-icerik">` +
+    // #550 KK-ek2: canlı bölge kapsayıcıda değil, yalnız 8 sn notunda: not açılınca (ve 30 sn'de metni değişince) duyurulur.
+    `<div id="${KATMAN_ID}"><div class="da-icerik">` +
     `<svg width="80" height="48" viewBox="0 0 80 48" role="img" aria-label="${kacir(marka)}"><circle cx="24" cy="14" r="7" fill="#FF7A1A"></circle><circle cx="56" cy="14" r="7" fill="#152A6B"></circle><path d="M20 30 Q40 48 60 30" stroke="#FF7A1A" stroke-width="7" fill="none" stroke-dasharray="7 4.5"></path></svg>` +
     `<div class="da-metinler"><h1>${kacir(baslik)}</h1><p class="da-satir">${kacir(satir)}</p></div>` +
     `<div class="da-noktalar" aria-hidden="true"><span></span><span></span><span></span></div>` +
-    `<p class="da-uzun"><span class="da-uzun-ilk">${kacir(uzun)}</span><span class="da-uzun-yenile">${kacir(yenile)}</span></p>` +
+    `<p class="da-uzun" role="status"><span class="da-uzun-ilk">${kacir(uzun)}</span><span class="da-uzun-yenile">${kacir(yenile)}</span></p>` +
     `</div></div>`
   );
 }
@@ -74,10 +79,10 @@ export function katmanEkle(html, metin) {
 
 function calistir(kok) {
   const metin = JSON.parse(readFileSync(new URL('../src/i18n/tr.json', import.meta.url), 'utf8'));
-  for (const sayfa of DAVET_SAYFALARI) {
+  for (const sayfa of [...DAVET_SAYFALARI, ...GECIS_SAYFALARI]) {
     const dosya = path.join(kok, sayfa);
     if (!existsSync(dosya)) {
-      console.error(`davet sayfası yok: ${sayfa}`);
+      console.error(`sayfa yok: ${sayfa}`);
       process.exit(1);
     }
     writeFileSync(dosya, katmanEkle(readFileSync(dosya, 'utf8'), metin));
