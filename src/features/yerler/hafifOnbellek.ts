@@ -65,6 +65,9 @@ export class HafifOnbellek {
   private ucustaki = new Map<string, Promise<unknown>>();
   private kuyruk: Is[] = [];
   private zamanlayici: ReturnType<typeof setTimeout> | null = null;
+  /** #595 KK4: saat grubu her yazıldığında artar; ekranlar `abone` ile dinler (yalnız saat; foto ve puan yeniden çizdirmez). */
+  private saatSurumu = 0;
+  private dinleyiciler = new Set<() => void>();
 
   constructor(
     private readonly getir: (ids: string[], seviye: Seviye) => Promise<HafifYer[]>,
@@ -83,9 +86,22 @@ export class HafifOnbellek {
     return gerek.every((g) => this.taze(k, g)) ? k.yer : undefined;
   }
 
+  /** #595 KK4: saat grubu yazılınca haber verir (useSyncExternalStore ile). Dönen işlev aboneliği kaldırır. */
+  abone = (dinleyici: () => void): (() => void) => {
+    this.dinleyiciler.add(dinleyici);
+    return () => {
+      this.dinleyiciler.delete(dinleyici);
+    };
+  };
+
+  /** #595 KK4: saat grubunun sürümü; değişmesi önbelleğe yeni açılış saati girdiği anlamına gelir. */
+  saatAnlik = (): number => this.saatSurumu;
+
   /** Tüm kayıtları atar (oturum değişince ya da testte başka bir cihazı taklit ederken). */
   temizle() {
     this.kayitlar.clear();
+    this.saatSurumu += 1;
+    for (const d of [...this.dinleyiciler]) d();
   }
 
   /** Dışarıdan gelen cevabı (ör. otomatik tamamlama seçimi, pin paneli) önbelleğe yazar. */
@@ -103,6 +119,10 @@ export class HafifOnbellek {
         this.kayitlar.set(id, { yer: birlestir(gecerliEski?.yer, y, gruplar), zaman });
       }
     });
+    if (gruplar.includes('saat') && yerler.some(Boolean)) {
+      this.saatSurumu += 1;
+      for (const d of [...this.dinleyiciler]) d();
+    }
   }
 
   /**
