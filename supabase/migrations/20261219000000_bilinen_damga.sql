@@ -12,6 +12,21 @@
 --   geçtiyse şehir koordinatı boş yazılır (emsal: `seyahat_paylasimdan_kopyala`).
 
 -- ---------------------------------------------------------------- yardımcı
+-- İstemciden gelen damga metni: boş ya da geçersizse null (geçersiz metin bütün işlemi düşürmesin). plpgsql: SQL fonksiyonu
+-- satır içine alınıp sabit katlamada cast'i erken çalıştırabilir.
+create function public.damga_oku(p_metin text) returns timestamptz
+language plpgsql stable set search_path = ''
+as $$
+begin
+  if nullif(p_metin, '') is null or not pg_input_is_valid(p_metin, 'timestamptz') then
+    return null;
+  end if;
+  return p_metin::timestamptz;
+end;
+$$;
+revoke execute on function public.damga_oku(text) from public, anon;
+grant execute on function public.damga_oku(text) to authenticated;
+
 -- `bilinen` öğelerini saklanabilir biçime getirir: `ad` atılır; koordinatlı öğe damga taşır. `p_varsayilan`: damgası olmayan
 -- koordinatlı öğenin damgası (yeni seçim: now()); null ise damgasız koordinat boşaltılır (eski kayıt). Gelecek tarihli damga
 -- now()'a iner (istemci bir koordinata süresiz ömür veremez). Tanınmayan biçimdeki öğe atılır.
@@ -30,7 +45,7 @@ as $$
   cross join lateral (
     -- least() null'ı atlar: damgasız ve varsayılansız öğe burada null kalmalı (now() olmamalı).
     select case when o.konumlu and v.damga is not null then least(v.damga, now()) end as damga
-    from (select coalesce(nullif(e.value ->> 'google_fetched_at', '')::timestamptz, p_varsayilan) as damga) v
+    from (select coalesce(public.damga_oku(e.value ->> 'google_fetched_at'), p_varsayilan) as damga) v
   ) d
   where jsonb_typeof(e.value) = 'object';
 $$;
@@ -118,9 +133,9 @@ begin
     from jsonb_array_elements(coalesce(p_mekanlar, '[]'::jsonb)) with ordinality as e(m, i);
   with yeni as (
     select distinct on (m ->> 'place_id') m,
-      -- least() null'ı atlar: damgasız öğe null kalır (now() olmaz).
-      case when nullif(m ->> 'google_fetched_at', '') is not null
-        then least((m ->> 'google_fetched_at')::timestamptz, now()) end as damga,
+      -- least() null'ı atlar: damgasız (ya da geçersiz damgalı) öğe null kalır (now() olmaz).
+      case when public.damga_oku(m ->> 'google_fetched_at') is not null
+        then least(public.damga_oku(m ->> 'google_fetched_at'), now()) end as damga,
       (m ->> 'lat')::double precision as lat,
       (m ->> 'lng')::double precision as lng
     from jsonb_array_elements(coalesce(p_mekanlar, '[]'::jsonb)) m
@@ -261,7 +276,7 @@ begin
 
   -- KK3: least() null'ı atlar; eşleşen içerik şehri yoksa istemcinin damgası, o da yoksa now().
   v_damga := least(
-    coalesce(nullif(p_seyahat ->> 'google_fetched_at', '')::timestamptz, now()),
+    coalesce(public.damga_oku(p_seyahat ->> 'google_fetched_at'), now()),
     now(),
     (select min(s.google_fetched_at) from public.sehirler s
       where s.place_id = p_seyahat ->> 'city_place_id' and s.konum_kaynagi = 'google_30g'));
@@ -293,7 +308,7 @@ begin
   -- eski istemci) now(); gelecek tarihli damga now()'a indirilir — istemci bir koordinata süresiz ömür veremez.
   insert into public.places (trip_id, place_id, primary_type, lat, lng, google_fetched_at, default_minutes, added_by)
   select v_trip, m ->> 'place_id', nullif(m ->> 'primary_type', ''), (m ->> 'lat')::double precision, (m ->> 'lng')::double precision,
-         least(coalesce(nullif(m ->> 'google_fetched_at', '')::timestamptz, now()), now()),
+         least(coalesce(public.damga_oku(m ->> 'google_fetched_at'), now()), now()),
          least(480, greatest(15, coalesce((m ->> 'dk')::integer, 45))), auth.uid()
   from jsonb_array_elements(coalesce(p_mekanlar, '[]')) m
   on conflict (trip_id, place_id) do nothing;

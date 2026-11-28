@@ -145,5 +145,12 @@ export async function rehberTaslakKaydet(
  * (#642: taslakta saklanmaz). Döner: açılan taslak yer sayısı.
  */
 export async function rehberYayinla(sehirId: string, beklenen: string, adlar: Record<string, string> = {}): Promise<number> {
-  return (await hataVer(supabase.rpc('rehber_yayinla', { p_sehir: sehirId, p_beklenen: beklenen, p_adlar: adlar }))) as number;
+  const temel = { p_sehir: sehirId, p_beklenen: beklenen };
+  // #642 yayın sırası: yeni BO, `p_adlar`'lı migration canlıya girmeden (bekçide beklerken) yayına çıkabilir. Ad yoksa parametre
+  // hiç gönderilmez; eski fonksiyon bulunamadı (PGRST202) derse bir kez iki argümanla denenir (adlar o zaman eski taslaktan).
+  if (Object.keys(adlar).length === 0) return (await hataVer(supabase.rpc('rehber_yayinla', temel))) as number;
+  const { data, error } = await supabase.rpc('rehber_yayinla', { ...temel, p_adlar: adlar });
+  if (!error) return data as number;
+  if ((error as { code?: unknown }).code !== 'PGRST202') throw error;
+  return (await hataVer(supabase.rpc('rehber_yayinla', temel))) as number;
 }

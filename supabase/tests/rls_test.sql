@@ -1635,6 +1635,9 @@ begin
   -- KK4: temizlik kuralı — ad atılır, damgasız koordinat boşalır, damgalı öğe aynı kalır; ikinci geçiş bir şey değiştirmez.
   assert public.bilinen_temizle('{"a": {"ad": "G", "kategori": "park", "lat": 1, "lng": 2}}', null)
     = '{"a": {"kategori": "park", "lat": null, "lng": null, "google_fetched_at": null}}', '#642 KK4: eski öğe temizlenir';
+  -- Geçersiz damga metni işlemi düşürmez: damgasız sayılır (varsayılan ya da koordinat boş).
+  assert public.bilinen_temizle('{"a": {"kategori": "park", "lat": 1, "lng": 2, "google_fetched_at": "bozuk"}}', null)
+    = '{"a": {"kategori": "park", "lat": null, "lng": null, "google_fetched_at": null}}', '#642: geçersiz damga damgasız sayılır';
   assert (select bilinen = public.bilinen_temizle(bilinen, null) from public.sehir_rehberi_taslak where sehir_id = '11111111-1111-4111-8111-000000000001'),
     '#642 KK4: yeni biçimdeki taslağa temizlik dokunmaz';
 end $$;
@@ -3972,6 +3975,13 @@ begin
   v := public.geziden_seyahat_ac(jsonb_build_object('name', 'Damga 642', 'city_place_id', 'ChIJ_642_baska', 'city_label', 'Başka',
     'lat', 41.3, 'lng', 29.3, 'tz', 'Europe/Istanbul', 'google_fetched_at', now() + interval '10 days'), 1, '[]', '[]');
   assert (select google_fetched_at <= now() from public.trips where id = v), '#642 KK3: gelecek tarihli damga now()''a iner';
+  delete from public.trips where id = v;
+  -- Geçersiz damga metni işlemi düşürmez: damgasız sayılır (now()); mekanın geçersiz damgası da.
+  v := public.geziden_seyahat_ac(jsonb_build_object('name', 'Damga 642', 'city_place_id', 'ChIJ_642_baska', 'city_label', 'Başka',
+    'lat', 41.3, 'lng', 29.3, 'tz', 'Europe/Istanbul', 'google_fetched_at', 'bozuk'), 1,
+    '[{"place_id": "ChIJ_642_mekan", "lat": 41.3, "lng": 29.3, "google_fetched_at": "bozuk"}]', '[]');
+  assert (select lat = 41.3 and google_fetched_at > now() - interval '1 minute' from public.trips where id = v), '#642: geçersiz şehir damgası now()';
+  assert (select google_fetched_at > now() - interval '1 minute' from public.places where trip_id = v), '#642: geçersiz mekan damgası now()';
   delete from public.trips where id = v;
 end $$;
 reset role;
