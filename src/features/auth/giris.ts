@@ -1,4 +1,3 @@
-import { makeRedirectUri } from 'expo-auth-session';
 import * as WebBrowser from 'expo-web-browser';
 import { Platform } from 'react-native';
 
@@ -17,9 +16,16 @@ try {
 const APPLE_ACIK = process.env.EXPO_PUBLIC_APPLE_SIGN_IN === '1';
 
 // Supabase → Auth → URL Configuration → Redirect URLs listesinde olmalı: gezi://giris ve web kökü/giris
+// #550: expo-auth-session yalnız yerelde gerekir; `process.env.EXPO_OS` derlemede sabitlenir, web paketinde bu dal ve
+// paket (expo-crypto dahil) hiç yer almaz.
 function yonlendirmeAdresi(): string {
   if (Platform.OS === 'web') return `${window.location.origin}/giris`;
-  return makeRedirectUri({ scheme: 'gezi', path: 'giris' });
+  if (process.env.EXPO_OS !== 'web') {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports -- yalnız yerel dal (yukarıdaki not)
+    const { makeRedirectUri } = require('expo-auth-session') as typeof import('expo-auth-session');
+    return makeRedirectUri({ scheme: 'gezi', path: 'giris' });
+  }
+  return `${window.location.origin}/giris`;
 }
 
 /** #552: depolaması kapalı tarayıcı; Google'a yönlendirilmez (dönüşte doğrulayıcı ve davet kaybolur). */

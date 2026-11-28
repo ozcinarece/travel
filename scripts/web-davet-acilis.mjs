@@ -54,11 +54,12 @@ export function katmanHtml(metin) {
   const marka = metin.marka.ad;
   return (
     `<style id="${KATMAN_ID}-stil">${STIL}</style>` +
-    `<div id="${KATMAN_ID}" role="status"><div class="da-icerik">` +
+    // #550 KK-ek2: canlı bölge kapsayıcıda değil, yalnız 8 sn notunda: not açılınca (ve 30 sn'de metni değişince) duyurulur.
+    `<div id="${KATMAN_ID}"><div class="da-icerik">` +
     `<svg width="80" height="48" viewBox="0 0 80 48" role="img" aria-label="${kacir(marka)}"><circle cx="24" cy="14" r="7" fill="#FF7A1A"></circle><circle cx="56" cy="14" r="7" fill="#152A6B"></circle><path d="M20 30 Q40 48 60 30" stroke="#FF7A1A" stroke-width="7" fill="none" stroke-dasharray="7 4.5"></path></svg>` +
     `<div class="da-metinler"><h1>${kacir(baslik)}</h1><p class="da-satir">${kacir(satir)}</p></div>` +
     `<div class="da-noktalar" aria-hidden="true"><span></span><span></span><span></span></div>` +
-    `<p class="da-uzun"><span class="da-uzun-ilk">${kacir(uzun)}</span><span class="da-uzun-yenile">${kacir(yenile)}</span></p>` +
+    `<p class="da-uzun" role="status"><span class="da-uzun-ilk">${kacir(uzun)}</span><span class="da-uzun-yenile">${kacir(yenile)}</span></p>` +
     `</div></div>`
   );
 }

@@ -4,9 +4,12 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import iller from '../../assets/turkiye-iller.json';
+import { profilOzetiAnahtari } from './anahtarlar';
 import { t } from '@/i18n';
 import { supabase } from '@/lib/supabase';
 import type { HaritaGizliligi } from '@/lib/tipler';
+
+export { profilOzetiAnahtari };
 
 export type Il = { plaka: number; ad: string; slug: string; d: string };
 /** 81 il yolu (turkey-map-react 2.4.6, MIT); plaka sırasıyla. */
@@ -52,7 +55,6 @@ export type ProfilOzeti = {
   geziler: ProfilGezisi[];
 };
 
-export const profilOzetiAnahtari = (kisi: string | undefined) => ['profil_ozeti', kisi] as const;
 
 export function useProfilOzeti(kisi: string | undefined) {
   return useQuery({

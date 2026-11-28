@@ -45,6 +45,7 @@
     "react-native-worklets": "0.10.1"
   },
   "devDependencies": {
+    "@playwright/test": "1.63.0",
     "@testing-library/react-native": "^13.3.3",
     "@types/react": "~19.2.2",
     "eslint": "^9.0.0",
@@ -62,14 +63,17 @@
     "lint": "expo lint",
     "typecheck": "tsc --noEmit",
     "test": "jest",
-    "db:test": "bash supabase/tests/run.sh"
+    "db:test": "bash supabase/tests/run.sh",
+    "web:derle": "bash scripts/web-derle.sh",
+    "e2e": "playwright test"
   },
   "private": true,
   "jest": {
     "preset": "jest-expo",
     "testPathIgnorePatterns": [
       "/node_modules/",
-      "/supabase/"
+      "/supabase/",
+      "/e2e/"
     ],
     "setupFiles": [
       "<rootDir>/jest.setup.js"

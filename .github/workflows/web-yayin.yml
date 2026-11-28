@@ -128,13 +128,18 @@ jobs:
       - name: Web çıktısı
         if: steps.kosul.outputs.hazir == '1'
         run: |
-          npx expo export --platform web --output-dir dist
+          # #550: iki derleme (uygulama + yalnız /r/ sayfalarının küçük davet girişi), davet girişinin dist'e katılması,
+          # #549 açılış katmanı ve `_redirects` (#137) tek betikte; uçtan uca testler (ci › web-e2e) de aynı betiği kullanır.
+          bash scripts/web-derle.sh dist
           test -f dist/index.html
           test -f "dist/r/[token].html"
-          # #549: davet sayfaları JS gelmeden de açılış halini (kanvas 3e) gösterir; kopyalardan önce yazılır.
-          node scripts/web-davet-acilis.mjs dist
-          # Dinamik rotalar: "[x]" sayfaları köşeli parantezsiz kopyalanır, Pages yeniden yazar (istemci rotayı adres çubuğundan çözer).
-          node scripts/web-yonlendirmeler.js dist
+          test -f "dist/r/_token.html"
+          test -f "dist/r/g/_token.html"
+          # Davet sayfaları küçük girişi yükler (uygulamanın tam paketini değil).
+          davet_js=$(grep -o '/_expo/static/js/web/entry-[0-9a-f]*\.js' dist/r/_token.html)
+          uygulama_js=$(grep -o '/_expo/static/js/web/entry-[0-9a-f]*\.js' dist/index.html)
+          test -n "$davet_js" && test "$davet_js" != "$uygulama_js"
+          echo "davet girişi: $davet_js ($(gzip -6c "dist$davet_js" | wc -c) bayt gzip)"
           # Universal / App Link doğrulama dosyaları (varsa).
           mkdir -p dist/.well-known
           if [ -n "$APPLE_TEAM_ID" ] && [ -n "$IOS_BUNDLE_ID" ]; then

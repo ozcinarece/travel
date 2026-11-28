@@ -46,6 +46,28 @@ jobs:
             echo "::error::Yönetim paneli android paketine girdi (#106 KK1)"; exit 1
           fi
 
+  # #550 KK3: web davet (/r/{token}) ve paylaşım (/r/g/{token}) yolları uçtan uca; Supabase taklit (e2e/), gerçek veri yok.
+  web-e2e:
+    runs-on: ubuntu-latest
+    env:
+      EXPO_PUBLIC_SUPABASE_URL: https://ornek.supabase.co
+      EXPO_PUBLIC_SUPABASE_ANON_KEY: ornek
+      EXPO_PUBLIC_APPLE_SIGN_IN: '0'
+      APP_DOMAIN: 127.0.0.1:4310
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Web çıktısı (uygulama + davet girişi)
+        run: npm run web:derle
+      - name: Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Uçtan uca
+        run: npm run e2e
+
   veritabani:
     runs-on: ubuntu-latest
     services:

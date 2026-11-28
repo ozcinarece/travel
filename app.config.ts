@@ -10,6 +10,9 @@ const easProjectId = process.env.EAS_PROJECT_ID ?? 'ce63656a-1090-42c8-9de9-8c9a
 // EAS Update: EXPO_GO_UPDATE=1 ile yayınlanan güncelleme Expo Go'nun çalışma zamanına (exposdk:57.0.0) gider;
 // yerel derlemeler uygulama sürümüne bağlı çalışma zamanı kullanır.
 const expoGoIcin = process.env.EXPO_GO_UPDATE === '1';
+// #550: `WEB_GIRIS=davet` yalnız web yayınındaki ikinci `expo export -p web` içindir: rota kökü `src/davet-web` (yalnız
+// /r/{token} ve /r/g/{token}). Değişken yokken (uygulama, EAS build, eas-update, ilk web derlemesi) yapılandırma aynı kalır.
+const davetWebGirisi = process.env.WEB_GIRIS === 'davet';
 
 const config: ExpoConfig = {
   // #136 KK7: görünen ad çalışma adı Tripmate (mağaza adı sonra); slug/EAS projesi değişmez.
@@ -51,7 +54,7 @@ const config: ExpoConfig = {
     favicon: './assets/images/favicon.png',
   },
   plugins: [
-    'expo-router',
+    davetWebGirisi ? ['expo-router', { root: './src/davet-web', sitemap: false }] : 'expo-router',
     'expo-localization',
     [
       'expo-splash-screen',
@@ -89,7 +92,8 @@ const config: ExpoConfig = {
     ...(appleAcik ? ['expo-apple-authentication'] : []),
   ],
   experiments: {
-    typedRoutes: true,
+    // #550: davet girişi derlemesi uygulamanın rota tiplerini (.expo/types) kendi küçük rota ağacıyla ezmesin.
+    typedRoutes: !davetWebGirisi,
     reactCompiler: true,
   },
   // #98: `appDomain` davet linkinin alan adı (istemci lib/davetLinki okur).

@@ -74,3 +74,11 @@ test('30 sn\'de not "sayfayı yenile"ye döner; yalnız CSS, hareket azaltılın
   // Katmanda betik yok: JS'ye bağlı değil.
   assert.doesNotMatch(html, /<script/i);
 });
+
+test('#550 KK-ek2: role="status" kapsayıcıda değil, yalnız 8 sn notunda', () => {
+  const html = katmanHtml(metin);
+  assert.ok(html.includes(`<div id="${KATMAN_ID}">`));
+  const roller = html.match(/role="status"/g) ?? [];
+  assert.equal(roller.length, 1);
+  assert.match(html, /<p class="da-uzun" role="status">/);
+});
