@@ -1,6 +1,7 @@
-// #139 KK5 "Planı kur": seçilen mekanları yakınlığa göre bölgelere ayırıp günlere SIRAYLA dağıtır (1. gün dolunca 2. gün).
-// Gün kapasitesi ≈ 10:00–19:00 (ziyaret + yol). Bölge sığmazsa kalanı ertesi güne geçer; hiçbir güne sığmayan "Listede,
-// güne atanmamış" kalır. Gün içi sıra otelden / ilk duraktan en yakın komşu. Yol kuş uçuşu tahmini (rota isteği yok).
+// #139 KK5 "Planı kur": seçilen mekanları yakınlığa göre bölgelere ayırıp gezme sırasıyla günlere dağıtır. #665: her günün
+// durak kotası var (mevcut + yeni duraklar günlere eşit bölünür; fark en çok 1), gün kotası ya da kapasitesi dolunca ertesi
+// güne geçilir. Gün kapasitesi ≈ 10:00–19:00 (ziyaret + yol). Hiçbir güne sığmayan "Listede, güne atanmamış" kalır.
+// Gün içi sıra otelden / ilk duraktan en yakın komşu. Yol kuş uçuşu tahmini (rota isteği yok).
 // Saf: ekrandan bağımsız, testli. #141 "Günlere dağıt" aynı fonksiyonu atanmamış mekanlarla çağırır (`mevcut` dolu günler).
 // #582: dağıtım sırası önce oy, sonra il listesi sırası, sonra yakınlık; açılış saatine göre kapalı günler atlanır. Oy, sıra ve
 // saatleri çağıran verir (planUygula); verilmezse eski davranış. Bu fonksiyon saf; "Planı kur" (planUygula) tarihli seyahatte
@@ -230,26 +231,38 @@ export function planKur(
   const { sira, degisti } = oncelikSirasi(gezme.sira);
   const atanmamis: PlanMekani[] = [];
   const gunBasi = dolu.map((d) => d.son);
+  const sayi = sirali.map((g) => secenek.mevcut?.get(g.id)?.length ?? 0);
+  // #665: kota, hiçbir güne tek başına sığmayan mekanı saymaz (o atanmamış kalır, başka günden yer kapmaz).
+  const enGenis = Math.max(0, ...sirali.map((g) => g.kapasiteDk ?? kapasite));
+  const kota = gunKotalari(sayi, sira.filter((m) => m.dakika <= enGenis).length);
+  /** Sığıyorsa `k`. güne ekler. */
+  const yerlestir = (m: PlanMekani, k: number): boolean => {
+    const onceki = dolu[k].son;
+    const bacak = onceki ? bacakVarsa(onceki, m) : { dk: 0, araba: false };
+    if (dolu[k].dk + bacak.dk + m.dakika > (sirali[k].kapasiteDk ?? kapasite)) return false;
+    dolu[k] = { dk: dolu[k].dk + bacak.dk + m.dakika, son: konumu(m) ?? onceki };
+    const s = sonuc[k];
+    s.mekanlar.push(m);
+    s.ziyaretDk += m.dakika;
+    s.yolDk += bacak.dk;
+    if (bacak.araba) s.arabaBacagi += 1;
+    sayi[k] += 1;
+    return true;
+  };
   let g = 0;
   for (const m of sira) {
     let yerlesti = false;
     // İmleç yalnız mekan yerleşince ilerler: sığmayan mekan (boş güne bile) önceki günün kalan kapasitesini boşa harcatmaz.
     // #582 KK2: kapalı olduğu gün atlanır ama imleci ilerletmez (o gün başka mekanlara açık kalır).
+    // #665: kotası dolan gün atlanır (gezme sırası günlere ardışık bölünür; küme günlere yayılır).
     let ilkKapali = -1;
     for (let k = g; k < sonuc.length; k++) {
       if (gundeKapali(m, sirali[k])) {
         if (ilkKapali < 0) ilkKapali = k;
         continue;
       }
-      const onceki = dolu[k].son;
-      const bacak = onceki ? bacakVarsa(onceki, m) : { dk: 0, araba: false };
-      if (dolu[k].dk + bacak.dk + m.dakika <= (sirali[k].kapasiteDk ?? kapasite)) {
-        dolu[k] = { dk: dolu[k].dk + bacak.dk + m.dakika, son: konumu(m) ?? onceki };
-        const s = sonuc[k];
-        s.mekanlar.push(m);
-        s.ziyaretDk += m.dakika;
-        s.yolDk += bacak.dk;
-        if (bacak.araba) s.arabaBacagi += 1;
+      if (sayi[k] >= kota[k]) continue;
+      if (yerlestir(m, k)) {
         yerlesti = true;
         g = ilkKapali >= 0 ? ilkKapali : k;
         break;
@@ -257,12 +270,34 @@ export function planKur(
       // Boş güne bile sığmıyorsa bu mekan hiçbir güne sığmaz → atanmamış.
       if (dolu[k].dk === 0) break;
     }
+    // #665: kotalı günlere (kapalı gün ya da kapasite yüzünden) giremediyse kota aşılır: açık ve sığan, en az duraklı gün.
+    if (!yerlesti && m.dakika <= enGenis) {
+      const adaylar = sirali.map((_, k) => k).filter((k) => !gundeKapali(m, sirali[k])).sort((a, b) => sayi[a] - sayi[b] || a - b);
+      yerlesti = adaylar.some((k) => yerlestir(m, k));
+    }
     if (!yerlesti) atanmamis.push(m);
   }
   // #582 KK1: öncelik sırası yakınlığı bozduysa gün içi sıra yeniden en yakın komşu (günün son noktasından); kapasiteyi
   // aşarsa öncelik sırası kalır.
   if (degisti) sonuc.forEach((s, k) => gunIciYakinlik(s, gunBasi[k], sirali[k].kapasiteDk ?? kapasite, dolu[k].dk));
   return { gunler: sonuc, atanmamis, bolgeSayisi };
+}
+
+/**
+ * #665: günlerin durak kotası (mevcut dahil son sayı üst sınırı). `yeni` durak sırayla en az duraklı güne (eşitlikte erken
+ * gün) yazılır: 7 / 4 gün → 2-2-2-1, 10 / 3 → 4-3-3. Mevcut durağı çok olan güne yeni kota düşmez.
+ */
+export function gunKotalari(mevcutSayi: number[], yeni: number): number[] {
+  const kota = [...mevcutSayi];
+  if (kota.length === 0) return kota;
+  for (let i = 0; i < yeni; i++) {
+    let en = 0;
+    kota.forEach((n, k) => {
+      if (n < kota[en]) en = k;
+    });
+    kota[en] += 1;
+  }
+  return kota;
 }
 
 /** Yeni mekanları en yakın komşu sırasına dizer; yol yeniden hesaplanır. Toplam `kapasite`yi aşarsa dokunulmaz. */

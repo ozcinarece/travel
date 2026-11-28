@@ -112,9 +112,11 @@ describe('#582 KK2 kapalı gün atlama', () => {
 
   it('kapalı gün imleci ilerletmez: sonraki mekanlar yine Pazartesi gününe girebilir', () => {
     const muze = { ...o1, kapaliGunler: [PZT] };
+    // #665: günler dengeli (3 mekan / 3 gün → birer); müze Salı'ya, ardından gelen o2 yine Pazartesi'ye.
     const p = planKur([muze, o2, s1], gunlerTarihli);
-    expect(ids(p.gunler[0].mekanlar).sort()).toEqual(['o2', 's1']);
+    expect(ids(p.gunler[0].mekanlar)).toEqual(['o2']);
     expect(ids(p.gunler[1].mekanlar)).toEqual(['o1']);
+    expect(ids(p.gunler[2].mekanlar)).toEqual(['s1']);
   });
 
   it('bütün günlerde kapalıysa atanmamış kalır', () => {
@@ -128,7 +130,8 @@ describe('#582 KK2 kapalı gün atlama', () => {
     const saatsiz = planKur([o1, o2], gunlerTarihli);
     const eski = planKur([o1, o2], gunlerTarihli.map(({ id, index }) => ({ id, index })));
     expect(saatsiz).toEqual(eski);
-    expect(ids(saatsiz.gunler[0].mekanlar).sort()).toEqual(['o1', 'o2']);
+    // #665: 2 mekan / 3 gün → 1-1-0 (gezme sırasıyla).
+    expect(saatsiz.gunler.map((g) => g.mekanlar.length)).toEqual([1, 1, 0]);
     const tarihsiz = planKur([{ ...o1, kapaliGunler: [PZT] }, o2], gunlerTarihli.map(({ id, index }) => ({ id, index })));
     expect(tarihsiz.gunler.map((g) => ids(g.mekanlar))).toEqual(eski.gunler.map((g) => ids(g.mekanlar)));
     expect(tarihsiz.atanmamis).toEqual([]);
