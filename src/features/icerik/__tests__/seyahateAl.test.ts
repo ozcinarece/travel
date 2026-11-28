@@ -78,6 +78,26 @@ describe('#193 KK2–KK3 yeni seyahat planı', () => {
       ['PO', null],
     ]);
   });
+  it('#205 Parça 1 KK2: konumu boşalmış durak (lat/lng null) da kopyalanır — mekan konumsuz ("konumu güncellenemeyen"), damgasıyla, günündeki sırasında', () => {
+    const g1 = {
+      id: 'G1',
+      gezi_id: 'z',
+      sira: 1,
+      baslik: null,
+      gezi_duraklari: [durak('a', 'G1', 1, 'PA'), { ...durak('k', 'G1', 2, 'PK'), lat: null, lng: null, google_fetched_at: '2026-10-01T10:00:00Z' }, durak('c', 'G1', 3, 'PC')],
+    };
+    const { gunler, plan, ozet } = yeniSeyahatPlani({ gezi_gunleri: [g1] }, 1, null);
+    expect(ozet).toEqual({ gun: 1, durak: 3, listeye: 0 });
+    const g = yeniSeyahatGovdesi(plan, gunler, new Map(plan.duraklar.map((d) => [d.id, d.place_id])));
+    expect(g.mekanlar.find((m) => m.place_id === 'PK')).toEqual({ place_id: 'PK', primary_type: 'museum', lat: null, lng: null, google_fetched_at: '2026-10-01T10:00:00Z', dk: 60 });
+    expect(g.duraklar.map((d) => [d.gun, d.place_id])).toEqual([
+      [1, 'PA'],
+      [1, 'PK'],
+      [1, 'PC'],
+    ]);
+    // JSON gövdesinde null kalır (RPC `places.lat`'a null yazar; 0 ya da NaN değil).
+    expect(JSON.parse(JSON.stringify(g.mekanlar[1]))).toEqual(expect.objectContaining({ lat: null, lng: null }));
+  });
   it('bilgi satırı: "{ad} adıyla yeni seyahat açılır, 3 günün 5 durağı aynı sırayla gelir."', () => {
     expect(yeniSeyahatBilgisi("Eskişehir'de üç gün", { gun: 3, durak: 5, listeye: 0 })).toBe("**Eskişehir'de üç gün** adıyla yeni seyahat açılır, 3 günün 5 durağı aynı sırayla gelir. Otel ve davet sonra.");
     expect(yeniSeyahatBilgisi('X', { gun: 2, durak: 4, listeye: 1 })).toBe("**X** adıyla yeni seyahat açılır, 2 günün 4 durağı aynı sırayla gelir. Kalan **1 mekan** Listem'e girer. Otel ve davet sonra.");

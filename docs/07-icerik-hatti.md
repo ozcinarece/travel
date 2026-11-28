@@ -289,16 +289,25 @@ Dal silinemezse: `inputs[islem]=temizle`, `inputs[istek]=<run_id>` (ya da `hepsi
 - **Konumun kaynağı (#205).** `sehirler`, `yerler` ve `gezi_duraklari`'nda `konum_kaynagi` sütunu var. Değerleri:
   - `osm`: OSM adayının konumu, `osm_id` ile (ODbL, atıfla süresiz).
   - `elle`: BO'da haritadan işaretlenmiş konum.
-  - `google_30g`: Google'dan gelen konum; `google_fetched_at` ile birlikte tutulur. Google koşulu gereği en çok 30 gün saklanır, sonra yenilenir.
+  - `google_30g`: Google'dan gelen konum; `google_fetched_at` ile birlikte tutulur. Google koşulu gereği en çok 30 gün saklanır; Google ile yenilenmez (#220 kararı B), 30. günden sonra gece temizliği koordinatı boşaltır (aşağıda).
 
   Kaynağı verilmeyen yeni satır `google_30g` sayılır ve damgası yazıldığı an olur. Konum değiştiğinde damga yenilenir. `osm` ya da `elle` satırda (eklenirken de) damga tutulmaz.
   `osm` ya da `elle` satırda koordinatı değiştiren yazım kaynağı da (`konum_kaynagi` ya da `osm_id`, değeri aynı olsa bile) aynı UPDATE'te yazmalı; yazmazsa satır `google_30g`'ye düşer ve damga alır. Damga gelecekte olamaz (1 gün pay). Koordinatı yeniden yazan iş damgayı da açıkça yazar: aynı koordinat yeniden yazılınca tetikleyici damgayı yenilemez.
   "Seyahatime al" damgayı durağından `places`'a taşır (damgasız durakta `now()`). `konum_kaynagi_kontrol()`'ü yalnız `postgres` çağırır (hat, `supabase-sql`).
   `yukle`'nin yazdığı damga (`now()`) Google'dan alınma anıdır: hat koordinatı araştırmadan değil, her yüklemede önbelleksiz yapılan detay çağrısından alır (`hat.mjs` `yukle` → `google({ islem: 'detay' })`, `dogrula.mjs`). Detay çağrısı önbelleğe alınırsa ya da koordinat araştırmadan alınırsa #205 KK8 yeniden açılır.
-  `konum_kaynagi_kontrol()` tablo başına yalnız sayıları verir (`toplam`, `osm`, `elle`, `google_30g`, `suresi_gecen`). Hedef: `suresi_gecen = 0`.
+  `konum_kaynagi_kontrol()` tablo başına yalnız sayıları verir (`toplam`, `osm`, `elle`, `google_30g`, `suresi_gecen`, `konumsuz`). `suresi_gecen` yalnız koordinatı dolu satırı sayar; `konumsuz` koordinatı boşalmış `google_30g` satırdır (BO'da elle işaretlenecekler). Hedef: `suresi_gecen = 0`.
   Yeni duraklar ve `yukle`'nin açtığı yeni yer satırları, planda `osm` varsa `osm` kaynağıyla yazılır (#205 KK2). Mevcut
   satırlar `osm-esle` ile OSM'e taşınır (#205 KK3; önce kuru, tekrar çalıştırmak güvenli: yalnız `google_30g` satıra dokunur).
-  Eşleşmeyenler `google_30g` kalır; #220 kararı B ile BO'da elle işaretlenir. Günlük yenileme işi ayrı PR'da.
+  Eşleşmeyenler `google_30g` kalır; #220 kararı B ile BO'da elle işaretlenir (BO ekranı #205 Parça 2, tasarım bekliyor).
+  **Gece temizliği (#205 Parça 1):** her gece (`gece_temizligi()`, #516, 03:15 İstanbul) `icerik_koordinat_bosalt(30)` 30 günü
+  geçen `google_30g` satırın lat/lng'sini boşaltır (gün `google_fetched_at`'tan, yoksa `created_at`'tan; durakta gezininkinden).
+  Satır silinmez; ad, place_id, damga, sıra kalır; damga boşaltmayla yenilenmez. Uygulama konumsuz durağı listede gösterir,
+  haritaya koymaz; "Seyahatime al" onu konumsuz mekan olarak kopyalar. Gece kaydına (`gece_temizligi_kayit`) tablo başına
+  boşaltılan satır sayısı (`icerik_sehir`, `icerik_yer`, `icerik_durak`) ve `konum_kaynagi_kontrol()` çıktısı (`konum_kontrol`,
+  yalnız sayı) yazılır. Bağlantı `gece_temizligi_kayit` üzerindeki BEFORE INSERT tetikleyicisidir (`gece_temizligi_icerik`):
+  `gece_temizligi()` yeniden tanımlansa da (ör. #330) içerik adımı çalışmaya devam eder. Konumu boşalmış satırı `osm-esle`
+  eşleştiremez (150 m denetimi konum ister); bu yüzden `osm-esle` boşaltmadan önce çalıştırılmalı. Kuru sayım:
+  `scripts/icerik-koordinat-kuru.sql`.
   Mekan rehberi editörün kendi metnidir (Google verisi değil).
 - **OSM verisi** (ODbL) saklanabilir; kullanıldığı yerde atıf: "© OpenStreetMap katkıda bulunanlar".
 - **Maliyet.** Alan maskeleri en dar; geniş aday listesi OSM'den, place_id eşleme ücretsiz (IDs Only); puan yalnız kısa

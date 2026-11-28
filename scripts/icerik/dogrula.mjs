@@ -517,6 +517,8 @@ export const SEHIR_KIMLIK_YARICAP_M = 50_000;
  */
 export function sehirKimligi(sehir, yer) {
   if (!yer || !PLACE_ID.test(yer.place_id ?? '') || !TZ_ADI.test(yer.tz ?? '')) return null;
+  // #205 Parça 1: şehrimizin konumu boşaldıysa (gece temizliği) mesafe NaN olur ve denetim atlanırdı; yazılmaz.
+  if (typeof sehir?.lat !== 'number' || typeof sehir?.lng !== 'number' || !Number.isFinite(sehir.lat) || !Number.isFinite(sehir.lng)) return null;
   if (!Number.isFinite(yer.lat) || !Number.isFinite(yer.lng) || mesafeM(sehir, yer) > SEHIR_KIMLIK_YARICAP_M) return null;
   return { place_id: yer.place_id, tz: yer.tz, ulke_kodu: ULKE_KODU.test(yer.ulke_kodu ?? '') ? yer.ulke_kodu : null };
 }
@@ -606,8 +608,9 @@ export function eslemeKareleri({ lat, lng }, yaricap, kenarM = 6000) {
   return kareler;
 }
 
-/** Bir şehrin satırlarını kapsayan Overpass yarıçapı (m): en uzak satır + 500 m; 1–30 km. */
+/** Bir şehrin satırlarını kapsayan Overpass yarıçapı (m): en uzak satır + 500 m; 1–30 km. #205 Parça 1: konumu boşalmış satır sayılmaz. */
 export function eslemeYaricapi(merkez, satirlar) {
-  const uzak = satirlar.reduce((m, s) => Math.max(m, mesafeM(merkez, s)), 0);
+  const konumlu = satirlar.filter((s) => typeof s?.lat === 'number' && typeof s?.lng === 'number' && Number.isFinite(s.lat) && Number.isFinite(s.lng));
+  const uzak = konumlu.reduce((m, s) => Math.max(m, mesafeM(merkez, s)), 0);
   return Math.min(Math.max(Math.ceil(uzak + 500), 1000), 30000);
 }

@@ -7,6 +7,7 @@ import { createClient } from 'npm:@supabase/supabase-js@2';
 
 import { GoogleHatasi } from '../_shared/google.ts';
 import { govde, hata, json, onKontrol } from '../_shared/http.ts';
+import { geziRotaCiftleri, type GeziDuraklari } from '../_shared/geziRotaCiftleri.ts';
 import { gunRotasi, rotaBacagi, type Nokta } from '../_shared/routes.ts';
 import { sayacli } from '../_shared/sayac.ts';
 
@@ -57,8 +58,8 @@ Deno.serve(sayacli('gezi-rota', async (istek) => {
     if (admin !== true) return hata('gün bulunamadı', 404);
   }
 
-  const duraklar = ((gun.gezi_duraklari ?? []) as { id: string; sira: number; lat: number; lng: number }[]).sort((a, b) => a.sira - b.sira);
-  const ciftler = duraklar.slice(1).map((b, i) => ({ a: duraklar[i], b }));
+  // #205 Parça 1: konumu boşalmış durak (gece temizliği) rotaya girmez; yalnız iki ucu da konumlu ardışık çiftler hesaplanır.
+  const { konumlu, ciftler } = geziRotaCiftleri((gun.gezi_duraklari ?? []) as GeziDuraklari[]);
   if (ciftler.length === 0) return json({ bacaklar: [] });
 
   // Önbellek. Hesap gerekmez: (a) bütün bacaklar taze, ya da (b) gün bu 30 gün içinde hesaplanmış — satırların hepsi taze ve
@@ -80,12 +81,12 @@ Deno.serve(sayacli('gezi-rota', async (istek) => {
   // yolu yine yazılır; Program'daki route-legs araç yolunu sonra tamamlar).
   try {
     const nokta = (d: { id: string; lat: number; lng: number }): Nokta => ({ key: d.id, lat: d.lat, lng: d.lng });
-    const yuruyus = await gunRotasi(duraklar.map(nokta), 'WALK');
+    const yuruyus = await gunRotasi(konumlu.map(nokta), 'WALK');
     const simdi = new Date().toISOString();
     const satirlar = (
       await Promise.all(
-        ciftler.map(async ({ a, b }, i): Promise<Satir | null> => {
-          const w = yuruyus[i];
+        ciftler.map(async ({ a, b, bacak }): Promise<Satir | null> => {
+          const w = yuruyus[bacak];
           if (!w) return null;
           const uzun = w.seconds > TAKSI_ESIGI_SN;
           let arac: Awaited<ReturnType<typeof rotaBacagi>> = null;

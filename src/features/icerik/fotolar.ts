@@ -7,7 +7,7 @@ import { hafifOnbellek, type HafifYer } from '../yerler/api';
 import { googleYazarBaglantisi, kapakAtfiOku, type FotoAtfi } from './kapakAtfi';
 import { icerikPlaceId } from './sorgular';
 
-export type IcerikSatiri = { id: string; place_id: string | null; ad: string; lat: number; lng: number; kapak_url?: string | null; kapak_atif?: unknown };
+export type IcerikSatiri = { id: string; place_id: string | null; ad: string; lat: number | null; lng: number | null; kapak_url?: string | null; kapak_atif?: unknown };
 /** #348: `foto_atif` fotoğrafın geldiği yerden (satırın kendi kapağı ya da Google); fotoğraf yoksa null. */
 export type IcerikCanli = { place_id: string | null; foto_uri: string | null; foto_atif: FotoAtfi | null };
 
@@ -39,7 +39,11 @@ export function useIcerikCanli(satirlar: IcerikSatiri[], sehirAdi: (s: IcerikSat
   });
 }
 
-/** Mekan panelinin yedek verisi (places-full gelene kadar): DB'deki ad, kategori ve konumla; puan yok (KK9–KK10). */
-export function icerikHafif(placeId: string, satir: { ad: string; kategori: string | null; lat: number; lng: number }): HafifYer {
+/**
+ * Mekan panelinin yedek verisi (places-full gelene kadar): DB'deki ad, kategori ve konumla; puan yok (KK9–KK10).
+ * #205 Parça 1: konum boşalmış olabilir (gece temizliği); panel konumu kullanmaz, yol tarifi `yolTarifiHedefi` ile ada düşer.
+ */
+export type IcerikHafif = Omit<HafifYer, 'lat' | 'lng'> & { lat: number | null; lng: number | null };
+export function icerikHafif(placeId: string, satir: { ad: string; kategori: string | null; lat: number | null; lng: number | null }): IcerikHafif {
   return { place_id: placeId, ad: satir.ad, lat: satir.lat, lng: satir.lng, primary_type: satir.kategori, tz: null, puan: null, puan_sayisi: null, acik: null, ulke_kodu: null };
 }

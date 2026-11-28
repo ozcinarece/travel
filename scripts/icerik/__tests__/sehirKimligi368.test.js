@@ -46,6 +46,12 @@ describe('hat: sehirKimligiCoz (#368)', () => {
     await expect(sehirKimligiCoz(sahteHat({ yer: yer({ lat: 39.9, lng: 32.8 }) }).google, IZMIR)).resolves.toBeNull();
   });
 
+  it('#205 Parça 1: şehrin konumu boşaldıysa Google\'a gidilmez → null', async () => {
+    const h = sahteHat({ islem: 'sehir', yer: yer() });
+    await expect(sehirKimligiCoz(h.google, { ad: 'İzmir', lat: null, lng: null })).resolves.toBeNull();
+    expect(h.istekler).toHaveLength(0);
+  });
+
   it('icerik-google hatası yutulmaz (çağırana fırlar)', async () => {
     const google = async () => {
       throw new Error('icerik-google 429: bütçe');

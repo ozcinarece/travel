@@ -110,7 +110,10 @@ describe('gezi bozuk veri (#199 KK2)', () => {
   it('konumu bozuk durak: özet sayı kalır, çizgisi çizilmez, öbür bacaklar çizilir', () => {
     const X = { id: 'X', lat: Number.NaN, lng: 30.5, sure_dk: 30 };
     const o = geziGunOzeti([A, X, C]);
-    expect(o.bacakDk).toEqual([1, 1]);
+    // #205 Parça 1: bacak süresi bilinmiyor (null), toplama ve mesafeye katılmaz.
+    expect(o.bacakDk).toEqual([null, null]);
+    expect(o.toplamDk).toBe(A.sure_dk + X.sure_dk + C.sure_dk);
+    expect(o.yuruyusM).toBe(0);
     expect(Number.isFinite(o.toplamDk) && Number.isFinite(o.yuruyusM)).toBe(true);
     expect(geziGunCizgileri([A, X, C], 0)).toEqual([]);
     expect(geziGunCizgileri([A, X, B, C], 0).map((c) => c.id)).toEqual(['gc:B>C']);

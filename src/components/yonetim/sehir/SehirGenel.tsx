@@ -1,3 +1,4 @@
+import { useRef } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { slugUret } from '@/features/yonetim/gezi';
@@ -15,6 +16,7 @@ type Props = {
 };
 
 const sayi = (m: string) => {
+  if (!m.trim()) return null;
   const n = Number(m.replace(',', '.'));
   return Number.isFinite(n) ? n : null;
 };
@@ -25,6 +27,13 @@ const sayi = (m: string) => {
  */
 export function SehirGenel({ taslak, degistir, tekilHatasi }: Props) {
   const engel = yayinEngeli(taslak);
+  // #205: konum boş olabilir; enlem ve boylam yalnız ikisi birlikte doluyken yazılır (`sehirler_konum_birlikte`).
+  const konum = useRef({ lat: taslak.lat, lng: taslak.lng });
+  const konumYaz = (alan: { lat?: number | null; lng?: number | null }) => {
+    konum.current = { ...konum.current, ...alan };
+    const { lat, lng } = konum.current;
+    if (lat !== null && lng !== null) degistir({ lat, lng });
+  };
   return (
     <View style={s.kap}>
       <AlanSatiri>
@@ -57,10 +66,10 @@ export function SehirGenel({ taslak, degistir, tekilHatasi }: Props) {
       {engel && taslak.yayin ? <Text style={s.hata}>{ty('sehir.kapakUyari')}</Text> : null}
       <AlanSatiri>
         <Alan etiket={ty('sehir.alan.lat')} genislik={160}>
-          <MetinKutusu defaultValue={String(taslak.lat)} onChangeText={(m) => sayi(m) !== null && degistir({ lat: sayi(m)! })} inputMode="decimal" accessibilityLabel={ty('sehir.alan.lat')} />
+          <MetinKutusu defaultValue={taslak.lat == null ? '' : String(taslak.lat)} onChangeText={(m) => konumYaz({ lat: sayi(m) })} inputMode="decimal" accessibilityLabel={ty('sehir.alan.lat')} />
         </Alan>
         <Alan etiket={ty('sehir.alan.lng')} genislik={160}>
-          <MetinKutusu defaultValue={String(taslak.lng)} onChangeText={(m) => sayi(m) !== null && degistir({ lng: sayi(m)! })} inputMode="decimal" accessibilityLabel={ty('sehir.alan.lng')} />
+          <MetinKutusu defaultValue={taslak.lng == null ? '' : String(taslak.lng)} onChangeText={(m) => konumYaz({ lng: sayi(m) })} inputMode="decimal" accessibilityLabel={ty('sehir.alan.lng')} />
         </Alan>
       </AlanSatiri>
       <Alan etiket={ty('sehir.alan.ozet')}>

@@ -9,7 +9,7 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { BolumSiniri } from '@/components/ui/BolumSiniri';
 import { EkleDugmesi } from '@/components/ui/EkleDugmesi';
 import type { IcerikCanli } from '@/features/icerik/fotolar';
-import { geziGunOzeti } from '@/features/icerik/gezi';
+import { geziGunOzeti, type GeziGunOzeti } from '@/features/icerik/gezi';
 import { useGeziRotasi } from '@/features/icerik/geziRota';
 import { t } from '@/i18n';
 import { kategoriEtiketi, sureMetni } from '@/lib/kategori';
@@ -60,20 +60,30 @@ export function GeziPlani({ gezi, canli, listede, mesgulId, onDurakEkle, eklePas
         <MiniHarita duraklar={gun.gezi_duraklari} gunIndex={gun.sira} rotalar={rotalar} baslik={`${t('gezi.gunKisa', { n: gun.sira })}${gun.baslik ? ` · ${gun.baslik}` : ''}`} />
       </BolumSiniri>
       <View style={s.liste}>
-        {gun.gezi_duraklari.length > 1 ? <Text style={s.ozet}>{t(ozet.kestirim ? 'gezi.gunOzeti' : 'gezi.gunOzetiGercek', { sure: sureMetni(ozet.toplamDk), mesafe: mesafeMetni(ozet.yuruyusM) })}</Text> : null}
+        {gun.gezi_duraklari.length > 1 ? <Text style={s.ozet}>{ozetMetni(ozet)}</Text> : null}
         {gun.gezi_duraklari.map((d, i) => {
           const c = canli?.get(d.id);
           const icinde = listede(d);
           return (
             <View key={d.id}>
-              {i > 0 ? (
+              {i > 0 && ozet.bacakDk[i - 1] === null ? (
+                // #205 Parça 1 (kanvas 24b-A): bir ucu konumsuz bacak — kesik çizgi, "Yol süresi bilinmiyor", süre yok.
+                <View style={s.bacak} testID="gezi-bacak-bilinmiyor">
+                  <View style={s.noktalar}>
+                    {[0, 1, 2].map((k) => (
+                      <View key={k} style={s.kesik} />
+                    ))}
+                  </View>
+                  <Text style={s.bacakBilinmiyor}>{t('gezi.yolBilinmiyor')}</Text>
+                </View>
+              ) : i > 0 ? (
                 <View style={s.bacak}>
                   <View style={s.noktalar}>
                     {[0, 1, 2, 3].map((k) => (
                       <View key={k} style={s.nokta} />
                     ))}
                   </View>
-                  <Text style={s.bacakMetin}>{t(ozet.bacakMod[i - 1] === 'DRIVE' ? 'gezi.arac' : 'gezi.yuruyus', { n: ozet.bacakDk[i - 1] })}</Text>
+                  <Text style={s.bacakMetin}>{t(ozet.bacakMod[i - 1] === 'DRIVE' ? 'gezi.arac' : 'gezi.yuruyus', { n: ozet.bacakDk[i - 1] ?? 0 })}</Text>
                 </View>
               ) : null}
               {/* #172 KK7: satır DB'den çizilir; panel için yalnız Google kimliği gerekir. */}
@@ -100,6 +110,13 @@ export function GeziPlani({ gezi, canli, listede, mesgulId, onDurakEkle, eklePas
   );
 }
 
+/** Gün özeti: "~5 sa 40 dk · 3,4 km yürüyüş"; #205 Parça 1: yürüyüş mesafesi 0 ise (ör. bütün duraklar konumsuz) yalnız süre. */
+function ozetMetni(o: GeziGunOzeti) {
+  const sure = sureMetni(o.toplamDk);
+  if (Math.round(o.yuruyusM) <= 0) return t(o.kestirim ? 'gezi.gunOzetiSure' : 'gezi.gunOzetiSureGercek', { sure });
+  return t(o.kestirim ? 'gezi.gunOzeti' : 'gezi.gunOzetiGercek', { sure, mesafe: mesafeMetni(o.yuruyusM) });
+}
+
 const s = StyleSheet.create({
   kap: { gap: 12 },
   ciplerSerit: { marginHorizontal: -20 },
@@ -120,4 +137,7 @@ const s = StyleSheet.create({
   noktalar: { width: 2, height: 26, justifyContent: 'space-between', paddingVertical: 1 },
   nokta: { width: 2, height: 2, borderRadius: 1, backgroundColor: '#b4bbd3' },
   bacakMetin: { marginLeft: 24, fontFamily: yazi.ekstra, fontSize: 12, color: renk.ana },
+  // Kanvas 24b-A: konumsuz uçlu bacak — #B4BBD3 kesik çizgi, yazı 12 px kalın ikincil.
+  kesik: { width: 2, height: 6, backgroundColor: '#b4bbd3' },
+  bacakBilinmiyor: { marginLeft: 24, fontFamily: yazi.kalin, fontSize: 12, color: renk.ikincil },
 });

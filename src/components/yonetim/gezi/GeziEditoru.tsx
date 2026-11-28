@@ -15,6 +15,7 @@ import {
 } from '@/features/yonetim/geziSorgulari';
 import { useOtomatikKayit } from '@/features/yonetim/otomatikKayit';
 import { ty } from '@/features/yonetim/metin';
+import { aramaMerkezi } from '@/lib/konum';
 import type { GeziDetay } from '@/lib/tipler';
 import { yazi } from '@/theme';
 
@@ -50,7 +51,7 @@ export function GeziEditoru({ gezi, sehirler, liste }: { gezi: YonetimGezi; sehi
   const [sayfa, setSayfa] = useState<0 | 1>(0);
   const [hata, setHata] = useState<string | null>(null);
   const sehir = sehirler.find((sh) => sh.id === taslak.sehir_id);
-  const merkez = sehir ? { lat: sehir.lat, lng: sehir.lng, yaricapM: 20000 } : undefined;
+  const merkez = sehir ? aramaMerkezi(sehir, 20000) : undefined;
   const onizleme = useMemo(() => onizlemeGezisi(gezi, taslak), [gezi, taslak]);
   const islemHatasi = () => setHata(ty('gezi.islemHata'));
   // #314 KK3: taslak gezi yayına girerken durak yerleri de açılacaksa sor (window.confirm, BO'daki diğer onaylar gibi).

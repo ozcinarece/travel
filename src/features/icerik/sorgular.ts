@@ -2,6 +2,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
+import { aramaMerkezi, konumVar } from '@/lib/konum';
 import { useOturum } from '@/lib/oturum';
 import { supabase } from '@/lib/supabase';
 import type { Gezi, GeziDetay, Kaydedilen, KaydedilenTuru, OlayTuru, Sehir, SehirRehberi, Yer } from '@/lib/tipler';
@@ -50,7 +51,7 @@ export function useTumYerler() {
     queryFn: async () => {
       const { data, error } = await supabase.from('yerler').select(`${YER_ALANLARI}, sehirler(ad, slug, lat, lng)`).order('one_cikan_sira', { ascending: true, nullsFirst: false }).order('ad');
       if (error) throw error;
-      return data as unknown as (Yer & { sehirler: { ad: string; slug: string; lat: number; lng: number } | null })[];
+      return data as unknown as (Yer & { sehirler: { ad: string; slug: string; lat: number | null; lng: number | null } | null })[];
     },
   });
 }
@@ -115,7 +116,8 @@ export function sehirEslestir(sehirler: Sehir[] | undefined, secim: { ad: string
   // #318: seyahat koordinatı boşaldıysa yalnız adla eşleşir.
   const { lat, lng } = secim;
   if (lat === null || lng === null) return undefined;
-  return sehirler.find((s) => Math.hypot((s.lat - lat) * 111, (s.lng - lng) * 111 * Math.cos((lat * Math.PI) / 180)) <= 25);
+  // #205 Parça 1: şehrin konumu boşaldıysa (gece temizliği) yalnız adla eşleşir.
+  return sehirler.find((s) => konumVar(s) && Math.hypot((s.lat - lat) * 111, (s.lng - lng) * 111 * Math.cos((lat * Math.PI) / 180)) <= 25);
 }
 
 const cozulen = new Map<string, Promise<string | null>>();
@@ -154,14 +156,14 @@ function cozumuSakla(id: string, place_id: string) {
   AsyncStorage.setItem(COZUM_ONEKI + id, JSON.stringify({ place_id, zaman: Date.now() })).catch(() => {});
 }
 
-export function icerikPlaceId(satir: { id: string; place_id: string | null; ad: string; lat: number; lng: number }, sehirAdi: string): Promise<string | null> {
+export function icerikPlaceId(satir: { id: string; place_id: string | null; ad: string; lat: number | null; lng: number | null }, sehirAdi: string): Promise<string | null> {
   if (satir.place_id) return Promise.resolve(satir.place_id);
   let p = cozulen.get(satir.id);
   if (!p) {
     p = kayitliCozum(satir.id)
       .then(async (kayitli) => {
         if (kayitli) return kayitli;
-        const oneriler = await otomatikTamamla({ girdi: `${satir.ad}, ${sehirAdi}`, oturum: yeniOturumJetonu(), merkez: { lat: satir.lat, lng: satir.lng, yaricapM: 5000 }, aramaYedegi: true });
+        const oneriler = await otomatikTamamla({ girdi: `${satir.ad}, ${sehirAdi}`, oturum: yeniOturumJetonu(), merkez: aramaMerkezi(satir, 5000), aramaYedegi: true });
         const pid = oneriler[0]?.place_id ?? null;
         if (!pid) {
           cozumSebepleri.set(satir.id, 'bulunamadi');
@@ -268,7 +270,7 @@ export function useYerlerIle(ids: string[], { oncekiniTut = false }: { oncekiniT
     queryFn: async () => {
       const { data, error } = await supabase.from('yerler').select(`${YER_ALANLARI}, sehirler(ad, slug, lat, lng)`).in('id', ids);
       if (error) throw error;
-      return data as unknown as (Yer & { sehirler: { ad: string; slug: string; lat: number; lng: number } | null })[];
+      return data as unknown as (Yer & { sehirler: { ad: string; slug: string; lat: number | null; lng: number | null } | null })[];
     },
   });
 }

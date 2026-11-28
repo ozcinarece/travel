@@ -5,6 +5,7 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Ikon } from '@/components/ui/Ikon';
 import type { YonetimSehri } from '@/features/yonetim/geziSorgulari';
 import { ty } from '@/features/yonetim/metin';
+import { aramaMerkezi } from '@/lib/konum';
 import type { YonetimYeri } from '@/features/yonetim/yerSorgulari';
 import type { HafifYer, Merkez } from '@/features/yerler/api';
 import { kategoriPini, pinKategorisi } from '@/lib/pinIkonu';
@@ -44,7 +45,7 @@ export function YerListesi({ yerler, sehirler, sehirId, onSehir, seciliId, onSec
   const [ekle, setEkle] = useState(false);
   const gorunen = useMemo(() => yerler.filter((y) => !sehirId || y.sehir_id === sehirId), [yerler, sehirId]);
   const sehir = sehirler.find((s) => s.id === sehirId);
-  const merkez: Merkez | undefined = sehir ? { lat: sehir.lat, lng: sehir.lng, yaricapM: 20000 } : undefined;
+  const merkez: Merkez | undefined = sehir ? aramaMerkezi(sehir, 20000) : undefined;
 
   return (
     <View style={s.kap}>
