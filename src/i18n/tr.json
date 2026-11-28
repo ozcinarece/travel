@@ -739,7 +739,12 @@
       "simdiDegil": "Şimdi değil",
       "kaydet": "Kaydet",
       "hata": "Otel kaydedilemedi. Tekrar dene.",
-      "geceler": "Geceleri seç"
+      "geceler": "Geceleri seç",
+      "adEkle": "Ad ekle",
+      "adDegistir": "Adı değiştir",
+      "adEtiket": "Otele verdiğin ad",
+      "adIpucu": "Boş bırakırsan otelin adı görünür",
+      "adSayac": "{n}/80"
     },
     "bugunChip": "Bugün · {n}. gün",
     "gerideyiz": "Plana göre {dk} dk gerideyiz",
