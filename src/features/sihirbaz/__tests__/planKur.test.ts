@@ -27,23 +27,25 @@ describe('planKur (#139 KK5)', () => {
     expect(bacakDk(odunpazari[0], { lat: 39.9, lng: 30.6 }).araba).toBe(true);
   });
 
-  it('günler sırayla dolar: ilk bölge 1. güne, sığmayan kalan ertesi güne; boş günler boş kalır', () => {
-    // Kapasite 200 dk: Odunpazarı 3 × 60 + yürüme ≈ 190 → 1. gün; Sazova 90 + 120 + yol 2. güne sığmaz → Odunpazarı'na yakın s2 2. gün, s1 3. gün.
+  it('#665: gezme sırası günlere ardışık ve dengeli bölünür (5 mekan / 3 gün → 2-2-1); en kalabalık bölge önce', () => {
+    // Kapasite 200 dk: Odunpazarı önce (en kalabalık bölge), kotası dolan gün atlanır. Sazova 90 + 120 tek güne sığmadığı
+    // için gün sınırı bölge sınırına kaydırılmaz (kaydırılsa s1 atanmamış kalırdı); o3 ile s2 aynı gün.
     const p = planKur([...sazova, ...odunpazari], gunler, { kapasiteDk: 200 });
     expect(p.bolgeSayisi).toBe(2);
-    expect(p.gunler[0].mekanlar.map((x) => x.id).sort()).toEqual(['o1', 'o2', 'o3']);
-    expect(p.gunler[1].mekanlar.map((x) => x.id)).toEqual(['s2']);
+    expect(p.gunler.map((g) => g.mekanlar.length)).toEqual([2, 2, 1]);
+    expect(p.gunler[0].mekanlar.map((x) => x.id).sort()).toEqual(['o1', 'o2']);
+    expect(p.gunler[1].mekanlar.map((x) => x.id)).toEqual(['o3', 's2']);
     expect(p.gunler[2].mekanlar.map((x) => x.id)).toEqual(['s1']);
     expect(p.atanmamis).toEqual([]);
   });
 
-  it('tam günde (9 sa) hepsi 1. güne; bölge geçişi araç sayılmaz (5 km yürüme < 40 dk değil → araç)', () => {
+  it('#665: tam günde (9 sa) bile tek güne yığılmaz; gün sınırı bölge sınırına kayar (araç bacağı yok)', () => {
     const p = planKur([...odunpazari, ...sazova], gunler);
-    expect(p.gunler[0].mekanlar).toHaveLength(5);
-    expect(p.gunler[0].ziyaretDk).toBe(390);
-    expect(p.gunler[0].ziyaretDk + p.gunler[0].yolDk).toBeLessThanOrEqual(GUN_KAPASITESI_DK);
-    expect(p.gunler[0].arabaBacagi).toBe(1);
-    expect(p.gunler[1].mekanlar).toHaveLength(0);
+    expect(p.gunler.map((g) => g.mekanlar.length)).toEqual([2, 1, 2]);
+    expect(p.gunler[2].mekanlar.map((x) => x.id).sort()).toEqual(['s1', 's2']);
+    expect(p.gunler.reduce((t, g) => t + g.ziyaretDk, 0)).toBe(390);
+    p.gunler.forEach((g) => expect(g.ziyaretDk + g.yolDk).toBeLessThanOrEqual(GUN_KAPASITESI_DK));
+    expect(p.gunler.every((g) => g.arabaBacagi === 0)).toBe(true);
   });
 
   it('günler biterse kalanlar atanmamış; tek başına güne sığmayan mekan atanmamış', () => {
@@ -56,15 +58,18 @@ describe('planKur (#139 KK5)', () => {
   });
 
   it('mevcut duraklar kapasiteyi doldurur; yeni mekanlar arkalarına eklenir (#141 Günlere dağıt)', () => {
+    // 1. gün 500 dk dolu: yeni mekan sığmaz; #665 kota 1. günü sayar, kalan 3 mekan 2. ve 3. güne bölünür (kota aşımı en az duraklıya).
     const mevcut = new Map([['g1', [m('x', 39.7637, 30.5243, 500)]]]);
     const p = planKur(odunpazari, gunler, { mevcut });
     expect(p.gunler[0].mekanlar).toHaveLength(0);
-    expect(p.gunler[1].mekanlar).toHaveLength(3);
+    expect(p.gunler[1].mekanlar.length + p.gunler[2].mekanlar.length).toBe(3);
+    expect(p.gunler[2].mekanlar.length).toBeGreaterThanOrEqual(1);
+    expect(p.atanmamis).toEqual([]);
   });
 
   it('hiçbir güne sığmayan mekan önceki günün kalan kapasitesini boşa harcatmaz', () => {
-    // 1. gün 8 saat dolu (mevcut); 10 saatlik mekan hiçbir güne sığmaz; ardından gelen 30 dk'lık mekan 1. günün kalanına girer.
-    const mevcut = new Map([['g1', [m('dolu', 39.7637, 30.5243, 480)]]]);
+    // Her gün 8 saat dolu (mevcut); 10 saatlik mekan hiçbir güne sığmaz ve kota kapmaz; 30 dk'lık mekan 1. günün kalanına girer.
+    const mevcut = new Map(gunler.map((g) => [g.id, [m(`dolu-${g.id}`, 39.7637, 30.5243, 480)]]));
     const p = planKur([m('dev', 39.7637, 30.5243, 600), m('kucuk', 39.7638, 30.5244, 30)], gunler, { mevcut });
     expect(p.atanmamis.map((x) => x.id)).toEqual(['dev']);
     expect(p.gunler[0].mekanlar.map((x) => x.id)).toEqual(['kucuk']);

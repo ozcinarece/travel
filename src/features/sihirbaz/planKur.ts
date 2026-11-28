@@ -1,6 +1,7 @@
-// #139 KK5 "Planı kur": seçilen mekanları yakınlığa göre bölgelere ayırıp günlere SIRAYLA dağıtır (1. gün dolunca 2. gün).
-// Gün kapasitesi ≈ 10:00–19:00 (ziyaret + yol). Bölge sığmazsa kalanı ertesi güne geçer; hiçbir güne sığmayan "Listede,
-// güne atanmamış" kalır. Gün içi sıra otelden / ilk duraktan en yakın komşu. Yol kuş uçuşu tahmini (rota isteği yok).
+// #139 KK5 "Planı kur": seçilen mekanları yakınlığa göre bölgelere ayırıp gezme sırasıyla günlere dağıtır. #665: her günün
+// durak kotası var (mevcut + yeni duraklar günlere eşit bölünür; fark en çok 1), gün kotası ya da kapasitesi dolunca ertesi
+// güne geçilir. Gün kapasitesi ≈ 10:00–19:00 (ziyaret + yol). Hiçbir güne sığmayan "Listede, güne atanmamış" kalır.
+// Gün içi sıra otelden / ilk duraktan en yakın komşu. Yol kuş uçuşu tahmini (rota isteği yok).
 // Saf: ekrandan bağımsız, testli. #141 "Günlere dağıt" aynı fonksiyonu atanmamış mekanlarla çağırır (`mevcut` dolu günler).
 // #582: dağıtım sırası önce oy, sonra il listesi sırası, sonra yakınlık; açılış saatine göre kapalı günler atlanır. Oy, sıra ve
 // saatleri çağıran verir (planUygula); verilmezse eski davranış. Bu fonksiyon saf; "Planı kur" (planUygula) tarihli seyahatte
@@ -211,6 +212,19 @@ export function planKur(
   gunler: PlanGunu[],
   secenek: { kapasiteDk?: number; baslangic?: Konum | null; mevcut?: Map<string, PlanMekani[]> } = {},
 ): PlanSonucu {
+  // #665: gün sınırını bölge sınırına kaydırmak bir mekanı atanmamış bırakırsa (kapasite) düz kota bölmesi kullanılır.
+  const sinirli = dagit(mekanlar, gunler, secenek, true);
+  if (sinirli.atanmamis.length === 0) return sinirli;
+  const duz = dagit(mekanlar, gunler, secenek, false);
+  return duz.atanmamis.length < sinirli.atanmamis.length ? duz : sinirli;
+}
+
+function dagit(
+  mekanlar: PlanMekani[],
+  gunler: PlanGunu[],
+  secenek: { kapasiteDk?: number; baslangic?: Konum | null; mevcut?: Map<string, PlanMekani[]> },
+  bolgeSiniri: boolean,
+): PlanSonucu {
   const kapasite = secenek.kapasiteDk ?? GUN_KAPASITESI_DK;
   const bas = secenek.baslangic ?? null;
   const sirali = [...gunler].sort((a, b) => a.index - b.index);
@@ -230,26 +244,71 @@ export function planKur(
   const { sira, degisti } = oncelikSirasi(gezme.sira);
   const atanmamis: PlanMekani[] = [];
   const gunBasi = dolu.map((d) => d.son);
+  const sayi = sirali.map((g) => secenek.mevcut?.get(g.id)?.length ?? 0);
+  /** Mekan, mevcut durakların ardına en az bir açık güne sığıyor mu (kapalı gün ve kapasite). */
+  const girebilir = (m: PlanMekani) =>
+    sirali.some((gun, k) => {
+      if (gundeKapali(m, gun)) return false;
+      const onceki = dolu[k].son;
+      return dolu[k].dk + (onceki ? bacakVarsa(onceki, m).dk : 0) + m.dakika <= (gun.kapasiteDk ?? kapasite);
+    });
+  // #665: kota yalnız en az bir güne girebilecek mekanları sayar (her gün kapalı ya da hiçbir güne sığmayan atanmamış
+  // kalır, başka günden yer kapmaz).
+  const yerlesebilir = new Set(sira.filter(girebilir).map((m) => m.id));
+  const kota = gunKotalari(sayi, yerlesebilir.size);
+  // #665: bölge (yakınlık kümesi) numarası ve büyüklüğü — gün sınırı mümkünse bölge sınırına kayar.
+  const bolgeNo = new Map<string, number>();
+  const bolgeBoyu: number[] = [];
+  bolgeler(mekanlar.filter((m): m is KonumluMekan => konumVar(m))).forEach((grup, i) => {
+    bolgeBoyu.push(grup.length);
+    grup.forEach((x) => bolgeNo.set(x.id, i));
+  });
+  /**
+   * #665: gün, kotasının bir eksiğinde bölge sınırında kapanır mı. Yeni bölge (en az 2 mekanlı) bu günün son durağının
+   * bölgesinden farklıysa ve ertesi gün var ve mekana açıksa evet; boşalan yer ertesi günün kotasına geçer (fark ≤ 2 korunur).
+   */
+  const bolgeSinirindaKapat = (m: PlanMekani, k: number): boolean => {
+    if (k + 1 >= sirali.length || sayi[k] !== kota[k] - 1 || gundeKapali(m, sirali[k + 1])) return false;
+    const son = sonuc[k].mekanlar[sonuc[k].mekanlar.length - 1];
+    const b = bolgeNo.get(m.id);
+    const bSon = son ? bolgeNo.get(son.id) : undefined;
+    return b != null && bSon != null && b !== bSon && bolgeBoyu[b] >= 2;
+  };
+  /** Kota aşımıyla eklenen günler: gün içi sıra sonunda en yakın komşuyla düzeltilir. */
+  const tasanGunler = new Set<number>();
+  /** Sığıyorsa `k`. güne ekler. */
+  const yerlestir = (m: PlanMekani, k: number): boolean => {
+    const onceki = dolu[k].son;
+    const bacak = onceki ? bacakVarsa(onceki, m) : { dk: 0, araba: false };
+    if (dolu[k].dk + bacak.dk + m.dakika > (sirali[k].kapasiteDk ?? kapasite)) return false;
+    dolu[k] = { dk: dolu[k].dk + bacak.dk + m.dakika, son: konumu(m) ?? onceki };
+    const s = sonuc[k];
+    s.mekanlar.push(m);
+    s.ziyaretDk += m.dakika;
+    s.yolDk += bacak.dk;
+    if (bacak.araba) s.arabaBacagi += 1;
+    sayi[k] += 1;
+    return true;
+  };
   let g = 0;
   for (const m of sira) {
     let yerlesti = false;
     // İmleç yalnız mekan yerleşince ilerler: sığmayan mekan (boş güne bile) önceki günün kalan kapasitesini boşa harcatmaz.
     // #582 KK2: kapalı olduğu gün atlanır ama imleci ilerletmez (o gün başka mekanlara açık kalır).
+    // #665: kotası dolan gün atlanır (gezme sırası günlere ardışık bölünür; küme günlere yayılır).
     let ilkKapali = -1;
     for (let k = g; k < sonuc.length; k++) {
       if (gundeKapali(m, sirali[k])) {
         if (ilkKapali < 0) ilkKapali = k;
         continue;
       }
-      const onceki = dolu[k].son;
-      const bacak = onceki ? bacakVarsa(onceki, m) : { dk: 0, araba: false };
-      if (dolu[k].dk + bacak.dk + m.dakika <= (sirali[k].kapasiteDk ?? kapasite)) {
-        dolu[k] = { dk: dolu[k].dk + bacak.dk + m.dakika, son: konumu(m) ?? onceki };
-        const s = sonuc[k];
-        s.mekanlar.push(m);
-        s.ziyaretDk += m.dakika;
-        s.yolDk += bacak.dk;
-        if (bacak.araba) s.arabaBacagi += 1;
+      if (sayi[k] >= kota[k]) continue;
+      if (bolgeSiniri && bolgeSinirindaKapat(m, k)) {
+        kota[k] -= 1;
+        kota[k + 1] += 1;
+        continue;
+      }
+      if (yerlestir(m, k)) {
         yerlesti = true;
         g = ilkKapali >= 0 ? ilkKapali : k;
         break;
@@ -257,12 +316,47 @@ export function planKur(
       // Boş güne bile sığmıyorsa bu mekan hiçbir güne sığmaz → atanmamış.
       if (dolu[k].dk === 0) break;
     }
+    // #665: kotalı günlere (kapalı gün ya da kapasite yüzünden) giremediyse kota aşılır: açık ve sığan, en az duraklı gün;
+    // eşitlikte son noktası mekana en yakın gün.
+    if (!yerlesti && yerlesebilir.has(m.id)) {
+      const km = konumu(m);
+      const uzaklik = (k: number) => (km && dolu[k].son ? mesafeM(dolu[k].son!, km) : Infinity);
+      const adaylar = sirali
+        .map((_, k) => k)
+        .filter((k) => !gundeKapali(m, sirali[k]))
+        .sort((a, b) => sayi[a] - sayi[b] || uzaklik(a) - uzaklik(b) || a - b);
+      const k = adaylar.find((x) => yerlestir(m, x));
+      if (k != null) {
+        yerlesti = true;
+        tasanGunler.add(k);
+      }
+    }
     if (!yerlesti) atanmamis.push(m);
   }
   // #582 KK1: öncelik sırası yakınlığı bozduysa gün içi sıra yeniden en yakın komşu (günün son noktasından); kapasiteyi
   // aşarsa öncelik sırası kalır.
-  if (degisti) sonuc.forEach((s, k) => gunIciYakinlik(s, gunBasi[k], sirali[k].kapasiteDk ?? kapasite, dolu[k].dk));
+  // #665: kota aşımıyla mekan eklenen gün de yeniden dizilir.
+  sonuc.forEach((s, k) => {
+    if (degisti || tasanGunler.has(k)) gunIciYakinlik(s, gunBasi[k], sirali[k].kapasiteDk ?? kapasite, dolu[k].dk);
+  });
   return { gunler: sonuc, atanmamis, bolgeSayisi };
+}
+
+/**
+ * #665: günlerin durak kotası (mevcut dahil son sayı üst sınırı). `yeni` durak sırayla en az duraklı güne (eşitlikte erken
+ * gün) yazılır: 7 / 4 gün → 2-2-2-1, 10 / 3 → 4-3-3. Mevcut durağı çok olan güne yeni kota düşmez.
+ */
+export function gunKotalari(mevcutSayi: number[], yeni: number): number[] {
+  const kota = [...mevcutSayi];
+  if (kota.length === 0) return kota;
+  for (let i = 0; i < yeni; i++) {
+    let en = 0;
+    kota.forEach((n, k) => {
+      if (n < kota[en]) en = k;
+    });
+    kota[en] += 1;
+  }
+  return kota;
 }
 
 /** Yeni mekanları en yakın komşu sırasına dizer; yol yeniden hesaplanır. Toplam `kapasite`yi aşarsa dokunulmaz. */
