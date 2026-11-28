@@ -307,7 +307,8 @@ export default function AnaSayfa() {
             <Karsilama bolumler={bolumler.data} bekleniyor={bolumler.isPending} sehirler={sehirler.data} genislik={kartGenislik} onYeni={yeni} />
           </View>
         ) : !seyahatler.isError ? (
-          // #594 KK3: liste gelene kadar kartın yerinde aynı boyda düz yer tutucu; arama ve raflar kaymaz.
+          // #594 KK3: liste gelene kadar kartın yerinde aynı boyda düz yer tutucu (214 pt kayma yok). Birden çok kartta sayfa
+          // noktaları ve gezi öncesindeki "+ Yeni gezi" satırı liste gelince eklenir.
           <View style={s.kenar}>
             <KartYerTutucu genislik={kartGenislik} />
           </View>

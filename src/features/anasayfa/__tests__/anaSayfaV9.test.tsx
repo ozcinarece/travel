@@ -259,6 +259,14 @@ describe('#569 KK4 gezi sırasındaki kart', () => {
     expect(yazar.props.ellipsizeMode).toBe('tail');
   });
 
+  it('#594 KK1: birden çok kartta sınır dar karta göre (678 − 104 − 8)', async () => {
+    mockSeyahatler = [sy('Bursa', gun(-2), gun(1), 'Eskişehir'), sy('Van', gun(5), gun(6), 'Eskişehir')];
+    const e = render(<AnaSayfa />);
+    const kart = await waitFor(() => e.getByTestId('seyahat-karti-Bursa'));
+    expect(duz(kart.props.style).width).toBe(750 - 32 - 40);
+    expect(duz(within(kart).getByTestId('kapak-atfi').props.style)).toMatchObject({ maxWidth: 678 - 104 - 8 });
+  });
+
   it('okunmamış yoksa rozet yok', async () => {
     mockSeyahatler = [sy('Bursa', gun(0), gun(1))];
     const e = render(<AnaSayfa />);
