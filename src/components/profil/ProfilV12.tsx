@@ -120,18 +120,17 @@ export function ProfilV12({ kisi }: { kisi: string }) {
   return <ProfilIcerigi o={ozet.data} />;
 }
 
+// #624 KK4: yığında önceki ekran varsa ona; yoksa (bağlantıyla ya da yeniden başlatmayla doğrudan profilde açılış) Keşfet'e.
+export const profilGeri = () => (router.canGoBack() ? router.back() : router.replace('/(tabs)'));
+
 function UstSatir({ kendi }: { kendi: boolean }) {
   return (
     <View style={s.ust}>
-      {router.canGoBack() ? (
-        <Pressable accessibilityRole="button" accessibilityLabel={t('profilV12.geri')} onPress={() => router.back()} hitSlop={11} testID="profil-geri">
-          <Svg width={22} height={22} viewBox="0 0 24 24" fill="none" stroke={profilRenk.metin} strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round">
-            <Path d="M15 5l-7 7 7 7" />
-          </Svg>
-        </Pressable>
-      ) : (
-        <View />
-      )}
+      <Pressable accessibilityRole="button" accessibilityLabel={t('profilV12.geri')} onPress={profilGeri} hitSlop={11} testID="profil-geri">
+        <Svg width={22} height={22} viewBox="0 0 24 24" fill="none" stroke={profilRenk.metin} strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round">
+          <Path d="M15 5l-7 7 7 7" />
+        </Svg>
+      </Pressable>
       {kendi ? (
         <Pressable accessibilityRole="button" onPress={() => router.push('/ayarlar')} hitSlop={12} testID="profil-duzenle">
           <Text style={s.duzenle}>{t('profilV12.duzenle')}</Text>
