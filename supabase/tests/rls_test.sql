@@ -295,7 +295,7 @@ do $$ begin assert (select count(*) from public.stays) = 1, 'X yalnız kendi sey
 select pg_temp.hata_bekle(format($$update public.days set start_stay_id = %L where index = 1$$, :'lstay'), '23503');
 
 -- Otel silinince günler otelsiz kalır.
-delete from public.stays where label = 'Ibis';
+delete from public.stays where place_id = 'ChIJ-ibis';
 do $$ begin assert (select count(*) from public.days where start_stay_id is not null or end_stay_id is not null) = 0, 'otel silinince günler null'; end $$;
 reset role;
 
@@ -306,7 +306,8 @@ do $$
 declare nice uuid := (select id from public.trips where city_label = 'Nice');
 begin
   assert public.stays_tasi_eski_oteller() = 1, 'yalnız Nice taşınır (Lyon''un oteli zaten var, Paris''in hotel_* boş)';
-  assert (select label from public.stays where trip_id = nice) = 'Eski otel', 'Nice için eski otel';
+  -- #584 KK1: place_id'li eski otelin Google adı taşınmaz (trips_google_otel_adi_tutma, stays_google_adi_tutma).
+  assert (select place_id = 'ChIJ-eski' and label is null from public.stays where trip_id = nice), 'Nice için eski otel, adsız';
   assert (select count(*) from public.days where trip_id = nice and start_stay_id = end_stay_id and start_stay_id is not null) = 3, 'tüm günler eski otelde';
   assert not exists (select 1 from public.changes where trip_id = nice and entity = 'days' and field = 'start_stay_id'), 'taşıma akışa yazılmaz';
   assert public.stays_tasi_eski_oteller() = 0, 'ikinci çağrı etkisiz';
@@ -3523,6 +3524,8 @@ insert into public.stays (trip_id, place_id, lat, lng, label, google_fetched_at)
   ('26200000-0000-4000-8000-000000000010', 'ChIJ_262_otel', 40.6, 30.6, 'Otelim', now() - interval '29 days'),
   ('26200000-0000-4000-8000-000000000010', null, 40.7, 30.7, 'Pinim', now() - interval '90 days'),
   ('26200000-0000-4000-8000-000000000020', 'ChIJ_262_eski', 40.1, 30.1, 'Aynı yer', now() - interval '32 days');
+-- #584: place_id'li otelin adı label'da tutulmaz; kullanıcının adı takma_ad'dadır.
+update public.stays set takma_ad = 'Otelim' where place_id = 'ChIJ_262_otel';
 delete from public.changes where trip_id::text like '26200000-%';
 set role service_role;
 do $$
@@ -3588,7 +3591,7 @@ begin
     where id = '26200000-0000-4000-8000-000000000010'), '#262 30 gün: trips şehri boşalır, place_id ve ad kalır';
   assert (select hotel_lat is null and hotel_lng is null and hotel_place_id = 'ChIJ_262_eski' from public.trips
     where id = '26200000-0000-4000-8000-000000000020'), '#262 30 gün: trips oteli boşalır';
-  assert (select lat is null and label = 'Otelim' from public.stays where place_id = 'ChIJ_262_otel'), '#262 30 gün: stays boşalır, ad kalır';
+  assert (select lat is null and takma_ad = 'Otelim' from public.stays where place_id = 'ChIJ_262_otel'), '#262 30 gün: stays boşalır, ad kalır';
   assert (select lat = 40.7 from public.stays where label = 'Pinim'), '#262: place_id''siz otel (kullanıcı pini) boşalmaz';
   assert (select count(*) from public.places where place_id in ('ChIJ_262_eski', 'ChIJ_262_esik', 'ChIJ_262_taze') and lat is not null) = 4,
     '#262 30 gün: taze koordinat kalır';
@@ -3675,7 +3678,7 @@ begin
   assert (select lat is null and city_place_id = 'ChIJ_262_sehir' from public.trips where id = '26200000-0000-4000-8000-000000000010'), '#516 KK4: 31 günlük trips şehri boşalır';
   assert (select lat = 40.2 and hotel_lat is null and hotel_place_id = 'ChIJ_262_eski' from public.trips where id = '26200000-0000-4000-8000-000000000020'),
     '#516 KK4: 29 günlük trips şehri kalır, 31 günlük oteli boşalır';
-  assert (select lat is null and label = 'Otelim' from public.stays where place_id = 'ChIJ_262_otel'), '#516 KK4: 31 günlük stays boşalır';
+  assert (select lat is null and takma_ad = 'Otelim' from public.stays where place_id = 'ChIJ_262_otel'), '#516 KK4: 31 günlük stays boşalır';
   assert (select lat = 40.15 from public.stays where place_id = 'ChIJ_262_eski'), '#516 KK4: 29 günlük stays kalır';
   assert (select lat = 40.7 from public.stays where label = 'Pinim'), '#516: place_id''siz otel (kullanıcı pini) boşalmaz';
   -- KK5: çalışma kaydı yalnız sayı tutar; ikinci çalışmada boşaltılacak bir şey kalmaz.
@@ -5069,5 +5072,63 @@ delete from public.trips where id::text like '57800000-0000-4000-8000-0000000000
 delete from public.olaylar where user_id in (:PA, :PB, :PC, :PG);
 delete from auth.users where id in (:PA, :PB, :PC, :PG);
 do $$ begin assert (select count(*) from public.istek_iller) = 0, '#578: hesap silinince istekler de silinir'; end $$;
+
+-- ---------------------------------------------------------------- #584: otel adı Google'dan saklanmaz; takma ad
+-- KK1: place_id'li otelin adı yazılmaz (stays.label, trips.hotel_label; tetikleyici, istemciden bağımsız).
+-- KK2: takma ad seyahatin üyesince yazılır (stays_update), dışarıdan biri yazamaz; boş ya da 80'den uzun olamaz.
+-- KK3: temizlik migration'ı (veri siler, elle çalışır) eski Google adlarını stays, trips ve değişiklik akışından siler;
+-- place_id'siz noktanın adı ve takma ad kalır; tekrar çalıştırmak güvenli; akışa yeni kayıt düşmez.
+\set O584 '''58400000-0000-4000-8000-000000000001'''
+\set M584 '''58400000-0000-4000-8000-000000000002'''
+\set Y584 '''58400000-0000-4000-8000-000000000003'''
+reset role;
+insert into auth.users (id, is_anonymous) values (:O584, false), (:M584, false), (:Y584, false);
+insert into public.trips (id, owner_id, city_place_id, city_label, lat, lng, tz, start_date, end_date) values
+  ('58400000-0000-4000-8000-000000000010', :O584, 'ChIJ-584-sehir', 'Şehir 584', 40, 30, 'Europe/Istanbul', current_date + 5, current_date + 6),
+  ('58400000-0000-4000-8000-000000000020', :O584, 'ChIJ-584-sehir', 'Şehir 584b', 40, 30, 'Europe/Istanbul', current_date + 5, current_date + 6);
+insert into public.members (trip_id, user_id, display_name) values ('58400000-0000-4000-8000-000000000010', :M584, 'Üye');
+
+-- KK1: üye yeni otel ekler; place_id varsa gelen ad tutulmaz, place_id'siz noktanın adı tutulur.
+set role authenticated;
+select pg_temp.as_user(:M584);
+insert into public.stays (trip_id, place_id, lat, lng, label, created_by) values
+  ('58400000-0000-4000-8000-000000000010', 'ChIJ-584-otel', 40.1, 30.1, 'Yeni Google 584', :M584),
+  ('58400000-0000-4000-8000-000000000010', null, 40.2, 30.2, 'Pin 584', :M584);
+update public.stays set label = 'Yine Google 584' where place_id = 'ChIJ-584-otel';
+do $$ begin
+  assert (select label is null from public.stays where place_id = 'ChIJ-584-otel'), '#584 KK1: place_id''li otelin adı yazılmaz';
+  assert (select label = 'Pin 584' from public.stays where place_id is null and trip_id = '58400000-0000-4000-8000-000000000010'),
+    '#584 KK1: place_id''siz noktanın adı kalır';
+  assert not exists (select 1 from public.changes where trip_id = '58400000-0000-4000-8000-000000000010'
+    and (old::text like '%Google 584%' or new::text like '%Google 584%')), '#584 KK1: Google adı akışa da düşmez';
+end $$;
+select pg_temp.as_user(:O584);
+update public.trips set hotel_place_id = 'ChIJ-584-otel', hotel_lat = 40.1, hotel_lng = 30.1, hotel_label = 'Yeni Google 584'
+  where id = '58400000-0000-4000-8000-000000000010';
+do $$ begin
+  assert (select hotel_label is null from public.trips where id = '58400000-0000-4000-8000-000000000010'),
+    '#584 KK1: trips.hotel_label place_id varken yazılmaz';
+end $$;
+
+-- KK2: takma ad.
+select pg_temp.as_user(:M584);
+update public.stays set takma_ad = 'Bizim otel' where place_id = 'ChIJ-584-otel';
+do $$ begin
+  assert (select takma_ad = 'Bizim otel' from public.stays where place_id = 'ChIJ-584-otel'), '#584 KK2: üye takma ad verir';
+  assert exists (select 1 from public.changes where entity = 'stays' and field = 'takma_ad' and new = '"Bizim otel"'),
+    '#584 KK2: takma ad değişikliği akışa yazılır';
+end $$;
+select pg_temp.hata_bekle($$update public.stays set takma_ad = '   ' where place_id = 'ChIJ-584-otel'$$, '23514');
+select pg_temp.hata_bekle(format($$update public.stays set takma_ad = %L where place_id = 'ChIJ-584-otel'$$, repeat('x', 81)), '23514');
+select pg_temp.as_user(:Y584);
+update public.stays set takma_ad = 'Yabancı' where place_id = 'ChIJ-584-otel';
+do $$ begin assert (select count(*) from public.stays where place_id = 'ChIJ-584-otel') = 0, '#584 KK2: dışarıdan biri oteli görmez'; end $$;
+reset role;
+do $$ begin
+  assert (select takma_ad = 'Bizim otel' from public.stays where place_id = 'ChIJ-584-otel'), '#584 KK2: dışarıdan biri takma ad yazamaz';
+end $$;
+
+delete from public.trips where id::text like '58400000-%';
+delete from auth.users where id in (:O584, :M584, :Y584);
 
 \echo 'rls_test: TÜM TESTLER GEÇTİ'
