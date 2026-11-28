@@ -1,11 +1,12 @@
 // #589 (#587 küçükleri): "Seyahatime al" → HANGİ SEYAHATE? çip şeridi. SeyahatimeAl.tsx'ten ayrıldı; görünüm aynı (kanvas 19).
 // KK1: açılışta seçili çip görünür alana kaydırılır ("Yeni seyahat" seçiliyse şeridin sonuna); çiplerin sırası değişmez.
 // KK2: her hedef çipin açık ekran okuyucu etiketi var; "·" ayırıcıları okunmaz.
+// #620: etiketteki tarih okunur biçimde ("12 ile 14 Aralık arası"); "Yeni seyahat" kaydırması da şerit genişliğini bekler.
 import { useEffect, useRef } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, type LayoutChangeEvent } from 'react-native';
 
 import { Ikon } from '@/components/ui/Ikon';
-import { hedefCipEtiketi, SERIT_KENAR, seritKaydirma, type SeritOlcusu } from '@/features/icerik/hedefSeridi';
+import { hedefCipEtiketi, hedefCipTarihi, SERIT_KENAR, seritKaydirma, type SeritOlcusu } from '@/features/icerik/hedefSeridi';
 import { farkliSehir } from '@/features/icerik/yerEkle';
 import { seyahatAdi } from '@/features/sihirbaz/sihirbaz';
 import { t } from '@/i18n';
@@ -66,12 +67,13 @@ export function HedefSeridi({ seyahatler, hedefId, sehirAdi, onSec }: Props) {
       {seyahatler.map((sy) => {
         const secili = hedefId === sy.id;
         const tarih = sy.start_date && sy.end_date ? tarihAraligi(sy.start_date, sy.end_date) : null;
+        const okunurTarih = sy.start_date && sy.end_date ? hedefCipTarihi(sy.start_date, sy.end_date) : null;
         const farkli = farkliSehir(sy, sehirAdi);
         return (
           <Pressable
             key={sy.id}
             accessibilityRole="button"
-            accessibilityLabel={hedefCipEtiketi(seyahatAdi(sy), tarih, farkli)}
+            accessibilityLabel={hedefCipEtiketi(seyahatAdi(sy), okunurTarih, farkli)}
             accessibilityState={{ selected: secili }}
             onPress={() => sec(sy.id)}
             onLayout={(e: LayoutChangeEvent) => {

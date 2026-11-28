@@ -1034,7 +1034,8 @@
     "hedefCipOkunur": {
       "tam": "{ad}, {tarih}, farklı şehir",
       "tarihli": "{ad}, {tarih}",
-      "farkli": "{ad}, farklı şehir"
+      "farkli": "{ad}, farklı şehir",
+      "aralik": "{bas} ile {bit} arası"
     },
     "listeye": "Listeye",
     "cozumYok": "{n} mekan eklenemedi.",
