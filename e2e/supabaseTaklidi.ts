@@ -86,7 +86,10 @@ function yanitla(yontem: string, adres: string, basliklar: Record<string, string
   // Google girişi: sağlayıcıya gitmeden ?code= ile uygulamaya döner (PKCE).
   if (yol === '/auth/v1/authorize') {
     const donus = url.searchParams.get('redirect_to') ?? '/';
-    return { status: 302, headers: { location: `${donus}${donus.includes('?') ? '&' : '?'}code=taklit-kod` }, body: '' };
+    const hedef = `${donus}${donus.includes('?') ? '&' : '?'}code=taklit-kod`;
+    // 302 yerine anında yönlendiren sayfa: WebKit'te `route.fulfill` yönlendirme durum kodu kabul etmiyor (#637).
+    const nitelik = hedef.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+    return { status: 200, headers: { 'content-type': 'text/html; charset=utf-8' }, body: `<!doctype html><meta http-equiv="refresh" content="0;url=${nitelik}">` };
   }
   if (yol === '/auth/v1/token') return json(oturum());
   if (yol === '/auth/v1/user') return json(oturum().user);
