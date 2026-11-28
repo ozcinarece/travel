@@ -1,6 +1,7 @@
 // Places çağrıları — hepsi Supabase Edge Function üzerinden (PRD §7; Autocomplete dahil, ürün onayı PR #4).
 // İstemci Google anahtarı taşımaz; oturum token'ı burada üretilir, seçimdeki places-full ile kapanır (#316 KK2).
 import { useQuery, type QueryClient } from '@tanstack/react-query';
+import { useSyncExternalStore } from 'react';
 
 import { t } from '@/i18n';
 import { supabase } from '@/lib/supabase';
@@ -165,6 +166,14 @@ export const hafifOnbellek = new HafifOnbellek(
   // #316 KK1: Nearby fotoğraf adını verdiyse çekmece yalnız Place Photo ister (ayrıca Details yok); 400 px, ≤ 12'lik parça.
   async (adlar) => (await cagir<{ uriler: (string | null)[] }>('places-photo', { adlar, genislik: 400 })).uriler,
 );
+
+/**
+ * #595 KK4: ortak önbelleğe açılış saati girdikçe yeniden çizdirir (istek atmaz). Dönen sayı önbelleğin saat sürümü;
+ * `hafifOnbellek.oku(id, ['saat'])` okuyan hesaplar bunu bağımlılık olarak kullanabilir.
+ */
+export function useSaatOnbellegi(): number {
+  return useSyncExternalStore(hafifOnbellek.abone, hafifOnbellek.saatAnlik, hafifOnbellek.saatAnlik);
+}
 
 /** Ekranın gösterdiği alanlar → önbellek grupları. `puan`: puan ya da "şu an açık" gösteriliyor mu (KK3). */
 export type HafifIhtiyac = { puan: boolean; saatler?: boolean; foto?: boolean };

@@ -64,7 +64,7 @@ import { geziyeGit } from '@/features/gezi/gezinti';
 import { useSeyahatId } from '@/features/seyahatler/baglam';
 import { useSeyahat } from '@/features/seyahatler/sorgular';
 import { usePuanKaydet, usePuanlar } from '@/features/puanlar/sorgular';
-import { hafifOnbellek, useHafifYerler, useOnizleme } from '@/features/yerler/api';
+import { hafifOnbellek, useHafifYerler, useOnizleme, useSaatOnbellegi } from '@/features/yerler/api';
 import { t } from '@/i18n';
 import { kategoriEtiketi, sureMetni } from '@/lib/kategori';
 import { mesafeMetni } from '@/lib/mesafe';
@@ -340,6 +340,8 @@ function ProgramSekmesi({
   // #582 KK3: kapalı gün uyarısının saatleri — harita açıksa yukarıdaki saatli sorgudan; listede yalnız ortak oturum
   // önbelleğinden (Planı kur, Listem ya da harita bu oturumda istediyse). Liste Google'a istek atmaz (#182 KK7); saat yoksa
   // uyarı yok. Saatler yalnız bellekte (PRD §7).
+  // #595 KK4: önbelleğe saat girince (Planı kur, Listem) yeniden çizilir; uyarı bir sonraki çizimi beklemez.
+  useSaatOnbellegi();
   const periyotlari = (m: Mekan) => (yerler.data?.[m.place_id] ?? hafifOnbellek.oku(m.place_id, ['saat']))?.periyotlar;
   // #182 KK7: listede ad kaynağı (istek yok): harita açıldıysa places-light cevabı, değilse DB / oturum önbelleği, yoksa kategori.
   const bilinen = useBilinenMekanlar(useMemo(() => mekanlar.map((m) => m.place_id), [mekanlar]));

@@ -25,7 +25,7 @@ import { useSeyahat, useSeyahatAdiKaydet, useSeyahatOlustur } from '@/features/s
 import { seyahatiKopyala, useIcerikSehirSecimi, useTekrarKaynagi, yeniGirisNo } from '@/features/sihirbaz/girisler';
 import type { OnerilenMekan } from '@/features/sihirbaz/onerilenler';
 import { gunDolulugu, secimOzeti } from '@/features/sihirbaz/planKur';
-import { planiHesapla, usePlaniUygula } from '@/features/sihirbaz/planUygula';
+import { planiHesapla, usePlaniUygula, usePlanOnizlemeOnceligi } from '@/features/sihirbaz/planUygula';
 import { oncekiAdim, seyahatAdiOner, sonrakiAdim, type Adim, type Aralik } from '@/features/sihirbaz/sihirbaz';
 import { gunSayisiSinirla, sehirDegisti, tarihDegisti, tarihSecimi, tarihsizGunleriKur, TARIHSIZ_VARSAYILAN, useTaslakSehri, useTaslakTarihi } from '@/features/sihirbaz/taslak';
 import type { HafifYer } from '@/features/yerler/api';
@@ -427,9 +427,14 @@ export function Sihirbaz({ giris, onCik }: { giris: YeniGirisi; /** #574: 1. ad�
   };
 
   // #445 KK2: K, "Planı kur"un kullandığı aynı hesapla (planiKur ile aynı girdi); her render'da değil, veri değişince.
+  // #595 KK3: aynı öncelikle (oy, il sırası, önbellekte saat varsa kapalı günler); önizleme Google'a istek atmaz.
+  const onizlemeOnceligi = usePlanOnizlemeOnceligi(tripId, mekanlar.data, duraklar.data, !!gunler.data?.some((g) => !!g.date));
   const sigmayanSayisi = useMemo(
-    () => (gunler.data && duraklar.data ? planiHesapla({ mekanlar: mekanlar.data ?? [], gunler: gunler.data, duraklar: duraklar.data }).atanmamis.length : 0),
-    [mekanlar.data, gunler.data, duraklar.data],
+    () =>
+      gunler.data && duraklar.data
+        ? planiHesapla({ mekanlar: mekanlar.data ?? [], gunler: gunler.data, duraklar: duraklar.data, oncelik: onizlemeOnceligi }).atanmamis.length
+        : 0,
+    [mekanlar.data, gunler.data, duraklar.data, onizlemeOnceligi],
   );
 
   // Seyahat kurulduktan sonra (geri dönülse de) davet gitmiş olur: satır yalnız seyahat kurulmadan görünür.

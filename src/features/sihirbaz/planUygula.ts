@@ -1,18 +1,19 @@
 // #139 KK5: "Planı kur" — planKur sonucunu stops'a yazar (tek toplu insert). Yalnız güne atanmamış mekanlar dağıtılır;
 // günlerde zaten olan duraklar yerinde kalır ve kapasiteyi doldurur. #141 "Günlere dağıt" aynı kancayı kullanır.
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMemo } from 'react';
 
 import type { Konum } from '@/components/harita/tipler';
 import { ilSlugu } from '@/features/icerik/ilOnerileri';
 import { sehirEslestir } from '@/features/icerik/sorgular';
-import { hafifOnbellek } from '@/features/yerler/api';
+import { hafifOnbellek, useSaatOnbellegi } from '@/features/yerler/api';
 import { supabase } from '@/lib/supabase';
 import { haftaGunu } from '@/lib/takvim';
 import type { Durak, Gun, Mekan, Sehir } from '@/lib/tipler';
 import { googleGunu, kapaliGunler, type Periyot } from '@/schedule/acilis';
 import { sonAnahtar } from '@/schedule/sira';
 
-import { durakDakikasi, planKur, type PlanMekani, type PlanSonucu } from './planKur';
+import { durakDakikasi, oncelikSirasi, planKur, type PlanMekani, type PlanSonucu } from './planKur';
 
 /**
  * #582: dağıtım önceliği ve kapalı günler. `oylar`: mekan (places.id) → oy sayısı; `ilSira`: place_id → il listesi sırası;
@@ -97,11 +98,81 @@ async function seyahatIlSlugu(seyahatId: string): Promise<string | null> {
   return ilSlugu(sehir, s.city_label);
 }
 
+/** #595 KK1: "Planı kur" başına en çok bu kadar yer için açılış saati istenir (Place Details). Önbellekteki saat sayılmaz. */
+export const SAAT_TAVANI = 15;
+
+/** Seyahatin oyları: mekan (places.id) → oy sayısı. Okunamazsa undefined. */
+async function oylariOku(seyahatId: string): Promise<Map<string, number> | undefined> {
+  const { data, error } = await supabase.from('oylar').select('mekan').eq('seyahat_id', seyahatId);
+  if (error) return undefined;
+  const say = new Map<string, number>();
+  for (const o of (data ?? []) as { mekan: string }[]) say.set(o.mekan, (say.get(o.mekan) ?? 0) + 1);
+  return say;
+}
+
+/** İl listesi sırası: place_id → sıra (yalnız seyahatin ilinin yayındaki listesi). `ilSlug` verilmezse seyahatten çözülür. */
+async function ilSirasiniOku(seyahatId: string, placeIdler: string[], ilSlug: string | null | undefined): Promise<Map<string, number> | undefined> {
+  if (placeIdler.length === 0) return undefined;
+  const slug = ilSlug !== undefined ? ilSlug : await seyahatIlSlugu(seyahatId);
+  // Başka ilin listesindeki sıra karışmaz: yalnız bu ilin listesi.
+  if (!slug) return undefined;
+  const { data, error } = await supabase
+    .from('il_oneriler')
+    .select('place_id, sira, il_listeleri!inner(yayinda)')
+    .eq('il_slug', slug)
+    .in('place_id', placeIdler)
+    .eq('gorunur', true)
+    .eq('il_listeleri.yayinda', true);
+  if (error) return undefined;
+  const sira = new Map<string, number>();
+  for (const r of (data ?? []) as { place_id: string | null; sira: number }[]) {
+    if (!r.place_id) continue;
+    const eski = sira.get(r.place_id);
+    if (eski === undefined || r.sira < eski) sira.set(r.place_id, r.sira);
+  }
+  return sira;
+}
+
+/** Atanmamış mekanların tekil place_id'leri. */
+function bosYerler(mekanlar: Mekan[], duraklar: Durak[]): { bos: Mekan[]; placeIdler: string[] } {
+  const atanmis = new Set(duraklar.map((d) => d.place_ref));
+  const bos = mekanlar.filter((m) => !atanmis.has(m.id));
+  return { bos, placeIdler: [...new Set(bos.map((m) => m.place_id).filter(Boolean))] };
+}
+
+/** #595 KK3: yalnız ortak oturum önbelleğindeki saatler (istek yok). Hiçbiri yoksa undefined (kural uygulanmaz). */
+export function onbellektekiSaatler(placeIdler: string[]): Map<string, Periyot[] | null | undefined> | undefined {
+  const saatler = new Map<string, Periyot[] | null | undefined>();
+  for (const id of placeIdler) {
+    const y = hafifOnbellek.oku(id, ['saat']);
+    if (y) saatler.set(id, y.periyotlar);
+  }
+  return saatler.size > 0 ? saatler : undefined;
+}
+
+/**
+ * #595 KK1: saati istenecek yerler — önbellekte saati olmayanlardan dağıtım sırasıyla (önce oy, sonra il sırası; #582 KK1)
+ * ilk `SAAT_TAVANI` tanesi.
+ */
+export function saatIstenecekler(bos: Mekan[], oncelik: Pick<PlanOnceligi, 'oylar' | 'ilSira'>, onbellekte: ReadonlySet<string>): string[] {
+  const sira = oncelikSirasi(bos.map((m) => oncelikli(m, oncelik))).sira;
+  const placeId = new Map(bos.map((m) => [m.id, m.place_id]));
+  const secilen: string[] = [];
+  for (const pm of sira) {
+    const id = placeId.get(pm.id);
+    if (!id || onbellekte.has(id) || secilen.includes(id)) continue;
+    secilen.push(id);
+    if (secilen.length === SAAT_TAVANI) break;
+  }
+  return secilen;
+}
+
 /**
  * #582: önceliği anlık okur. Oylar ve il listesi sırası DB'den (yalnız seyahatin ilinin yayındaki listesi); açılış saatleri
- * ortak places-light önbelleğinden (bu oturumda istendiyse Google'a yeni istek yok; yoksa tarihli seyahatte önbellekte saati
- * olmayan atanmamış mekanlar için ⌈N/25⌉ istek). Saat okuması `SAAT_SURESI_MS` ile sınırlı. Saatler yalnız bellekte kalır.
- * Her parça bağımsız: biri okunamazsa o kural uygulanmaz, plan yine kurulur. `ilSlug` verilmezse seyahatten çözülür.
+ * ortak places-light önbelleğinden. #595 KK1: önbellekte saati olmayan yerlerden dağıtım sırasıyla en çok `SAAT_TAVANI`
+ * tanesi istenir (tarihli seyahatte; ⌈N/25⌉ = 1 istek, en çok 15 Details). Saat okuması `SAAT_SURESI_MS` ile sınırlı;
+ * aşılırsa yalnız önbellektekiler kullanılır. Saatler yalnız bellekte kalır. Her parça bağımsız: biri okunamazsa o kural
+ * uygulanmaz, plan yine kurulur. `ilSlug` verilmezse seyahatten çözülür.
  */
 export async function planOnceliginiOku(
   seyahatId: string,
@@ -110,48 +181,53 @@ export async function planOnceliginiOku(
   tarihli: boolean,
   secenek: { ilSlug?: string | null; saatSuresiMs?: number } = {},
 ): Promise<PlanOnceligi> {
-  const atanmis = new Set(duraklar.map((d) => d.place_ref));
-  const bos = mekanlar.filter((m) => !atanmis.has(m.id));
+  const { bos, placeIdler } = bosYerler(mekanlar, duraklar);
   if (bos.length === 0) return {};
-  const placeIdler = [...new Set(bos.map((m) => m.place_id).filter(Boolean))];
-  const [oylar, ilSira, saatler] = await Promise.all([
-    (async () => {
-      const { data, error } = await supabase.from('oylar').select('mekan').eq('seyahat_id', seyahatId);
-      if (error) return undefined;
-      const say = new Map<string, number>();
-      for (const o of (data ?? []) as { mekan: string }[]) say.set(o.mekan, (say.get(o.mekan) ?? 0) + 1);
-      return say;
-    })().catch(() => undefined),
-    (async () => {
-      if (placeIdler.length === 0) return undefined;
-      const slug = secenek.ilSlug !== undefined ? secenek.ilSlug : await seyahatIlSlugu(seyahatId);
-      // Başka ilin listesindeki sıra karışmaz: yalnız bu ilin listesi.
-      if (!slug) return undefined;
-      const { data, error } = await supabase
-        .from('il_oneriler')
-        .select('place_id, sira, il_listeleri!inner(yayinda)')
-        .eq('il_slug', slug)
-        .in('place_id', placeIdler)
-        .eq('gorunur', true)
-        .eq('il_listeleri.yayinda', true);
-      if (error) return undefined;
-      const sira = new Map<string, number>();
-      for (const r of (data ?? []) as { place_id: string | null; sira: number }[]) {
-        if (!r.place_id) continue;
-        const eski = sira.get(r.place_id);
-        if (eski === undefined || r.sira < eski) sira.set(r.place_id, r.sira);
-      }
-      return sira;
-    })().catch(() => undefined),
-    // Tarihsiz seyahatte hafta günü yok → saat istenmez.
-    (async () => {
-      if (!tarihli || placeIdler.length === 0) return undefined;
-      const yerler = await sureli(hafifOnbellek.getirHepsi(placeIdler, ['saat']), secenek.saatSuresiMs ?? SAAT_SURESI_MS);
-      if (!yerler) return undefined;
-      return new Map(placeIdler.map((id) => [id, yerler[id]?.periyotlar] as const));
-    })().catch(() => undefined),
+  // Saat isteğinin sırası oy ve il sırasına bağlı (KK1): önce bu ikisi.
+  const [oylar, ilSira] = await Promise.all([
+    oylariOku(seyahatId).catch(() => undefined),
+    ilSirasiniOku(seyahatId, placeIdler, secenek.ilSlug).catch(() => undefined),
   ]);
+  // Tarihsiz seyahatte hafta günü yok → saat istenmez.
+  const saatler = await (async () => {
+    if (!tarihli || placeIdler.length === 0) return undefined;
+    const onbellek = onbellektekiSaatler(placeIdler);
+    const istenecek = saatIstenecekler(bos, { oylar, ilSira }, new Set(onbellek?.keys() ?? []));
+    const gelen = istenecek.length ? await sureli(hafifOnbellek.getirHepsi(istenecek, ['saat']), secenek.saatSuresiMs ?? SAAT_SURESI_MS) : undefined;
+    const sonuc = new Map(onbellek ?? []);
+    for (const id of istenecek) if (gelen?.[id]) sonuc.set(id, gelen[id].periyotlar);
+    return sonuc.size > 0 ? sonuc : undefined;
+  })().catch(() => undefined);
   return { oylar, ilSira, saatler };
+}
+
+/**
+ * #595 KK3: sihirbazın "K yer sığmıyor" önizlemesi "Planı kur" ile aynı kuralla — oy, il sırası ve (önbellekte varsa)
+ * kapalı günler. Google'a istek atmaz: oy ve il sırası DB'den, saat yalnız ortak önbellekten (geldikçe yeniden hesaplanır).
+ */
+export function usePlanOnizlemeOnceligi(seyahatId: string | null, mekanlar: Mekan[] | undefined, duraklar: Durak[] | undefined, tarihli: boolean, ilSlug?: string | null): PlanOnceligi | undefined {
+  const { placeIdler } = useMemo(() => bosYerler(mekanlar ?? [], duraklar ?? []), [mekanlar, duraklar]);
+  const db = useQuery({
+    queryKey: ['plan-onceligi', seyahatId, ilSlug ?? null, placeIdler],
+    enabled: !!seyahatId && placeIdler.length > 0,
+    staleTime: 30 * 1000,
+    placeholderData: (onceki) => onceki,
+    queryFn: async () => {
+      const [oylar, ilSira] = await Promise.all([
+        oylariOku(seyahatId!).catch(() => undefined),
+        ilSirasiniOku(seyahatId!, placeIdler, ilSlug).catch(() => undefined),
+      ]);
+      return { oylar, ilSira };
+    },
+  });
+  const saatSurumu = useSaatOnbellegi();
+  return useMemo(() => {
+    if (!mekanlar || !duraklar) return undefined;
+    // saatSurumu: önbelleğe saat girince yeniden oku.
+    void saatSurumu;
+    const saatler = tarihli ? onbellektekiSaatler(placeIdler) : undefined;
+    return { oylar: db.data?.oylar, ilSira: db.data?.ilSira, saatler };
+  }, [mekanlar, duraklar, tarihli, placeIdler, db.data, saatSurumu]);
 }
 
 export function usePlaniUygula(seyahatId: string) {
