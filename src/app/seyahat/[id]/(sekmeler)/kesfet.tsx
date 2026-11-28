@@ -62,7 +62,7 @@ export default function KesfetEkrani() {
   // #80 KK12: eski `mekan/[placeId]` derin linki buraya `mekan` parametresiyle yönlenir → panel açılır.
   // #142 KK4: Rehber sekmesindeki "Rehberdeki N mekan ›" → `cekmece=rehber` (çekmece tam halde "Rehberden" listesiyle açılır).
   // #181: Gezi sayfasının "Öğle yemeği ekle"si `cip=yemek` (+ her istekte yeni `n`) ile Yemek çipini seçer.
-  // #532 KK4: Gezi'nin "Tümü ›" / "Bugüne yer ekle ›" ve Plan'daki günün içi `gun` (gün sırası) taşır; + o güne ekler.
+  // #532 KK4: Gezi'nin "Tümü ›" ve Plan'daki günün içi `gun` (gün sırası) taşır; + o güne ekler.
   const { mekan, cekmece, cip, gun, n } = useLocalSearchParams<{ mekan?: string | string[]; cekmece?: string; cip?: string; gun?: string; n?: string }>();
   const seyahat = useSeyahat(id);
   const konaklamalar = useKonaklamalar(id);
@@ -455,10 +455,11 @@ function Kesfet({
     const durakListesi = hedefNo !== null && !duraklar.data ? (await duraklar.refetch()).data : duraklar.data;
     if (hedefNo !== null && (!gunListesi || !durakListesi)) throw new Error('gunler_yok');
     const hedef = hedefNo !== null ? (gunListesi?.find((g) => g.index === hedefNo) ?? null) : null;
-    return { bugunNo, hedefNo, hedef, durakListesi: durakListesi ?? [], nesil, bant, seyahatId: seyahat.id };
+    return { bugunNo, hedefNo, hedef, durakListesi: durakListesi ?? [], nesil, bant };
   };
-  // #621 KK6: ekleme sürerken seyahat değişirse (ekran yeniden kurulur ya da başka seyahati gösterir) eski eklemenin bildirimi
-  // açılmaz. Bildirim yalnız ekleme başladığında açık olan seyahat hâlâ bu ekrandaysa gösterilir.
+  // #621 KK6: ekleme sürerken seyahat değişirse eski eklemenin bildirimi yeni seyahatte açılmaz. `Kesfet` `key={id}` ile
+  // çizildiği için seyahat değişince bu örnek kaldırılır; biten eski ekleme bildirim ve bant yan etkisi (`kisaBildirim`,
+  // `cikarmaBandiniKapat`) çalıştırmaz.
   const ekranAcik = useRef(true);
   useEffect(() => {
     ekranAcik.current = true;
@@ -466,7 +467,6 @@ function Kesfet({
       ekranAcik.current = false;
     };
   }, []);
-  const seyahatAcik = (seyahatId: string) => ekranAcik.current && seyahatRef.current.id === seyahatId;
   // #599 KK2: "+"ya dokunulduğu anda açık olan "Geri al" bandı, ekleme bildirimi açılırken kapanır (bekleyen çıkarma
   // kesinleşir); aynı anda iki bant yok. #599 değişiklik 1: bant ekleme sürerken (dokunmadan sonra) açıldıysa kalır ve ekleme
   // bildirimi gösterilmez — kullanıcı bir şey yapmadan çıkarma kesinleşmez. Bu durumda eklemenin "Geri al"ı da gösterilmez
@@ -518,8 +518,8 @@ function Kesfet({
       });
     atamaKuyrugu.current = is;
     return is.then(({ order_key }) => {
-      // #621 KK6: bildirim yalnız eklemenin başladığı seyahat hâlâ açıksa.
-      if (!seyahatAcik(h.seyahatId)) return;
+      // #621 KK6: ekran (bu seyahat) kapandıysa bildirim yok.
+      if (!ekranAcik.current) return;
       if (h.bugunNo === null) return kisaBildirim(t('kesfet.guneEklendi', { ad, n: hedef.index }), h.bant);
       if (!cikarmaBandiniKapat(h.bant)) return;
       setGunBildirimi(null);
@@ -553,7 +553,7 @@ function Kesfet({
       // #579 KK3: gezi günlerinde de (bugün ya da "Değiştir"le seçilen gün) sonuna.
       if (h.hedef) await guneAta(await listedekiMekan(seyahat.id, y.place_id), y.ad, { ...h, hedef: h.hedef }, eklenen.yeni);
       // #599 KK5: bugünün sırası var ama o gün `days`'te yok (hap görünmez): yer yalnız listeye girer, bunu söyleyen bildirim.
-      else if (h.hedefNo !== null && seyahatAcik(h.seyahatId)) kisaBildirim(t('kesfet.listeneEklendi', { ad: y.ad }), h.bant);
+      else if (h.hedefNo !== null && ekranAcik.current) kisaBildirim(t('kesfet.listeneEklendi', { ad: y.ad }), h.bant);
     } catch (e) {
       setHata(listede ? t('kesfet.guneEklenemedi') : agHatasi(e) ? t('geziSayfasi.cevrimdisi.baglantiYok') : t('kesfet.ekleHata'));
     }

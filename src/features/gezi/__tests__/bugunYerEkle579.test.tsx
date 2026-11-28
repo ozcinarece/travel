@@ -257,6 +257,7 @@ describe('#579 KK4 Gezi sayfası: Bugüne yer ekle', () => {
     const satir = getByRole('button', { name: t('seyahatV7.bugunYerEkleSatiri') });
     expect(StyleSheet.flatten(satir.props.style).minHeight).toBeGreaterThanOrEqual(48);
     expect(StyleSheet.flatten(getByText(t('seyahatV7.bugunYerEkleSatiri')).props.style).color).toBe(renk.ana);
+    // #621 KK4: metnin anahtarı (`seyahatV7.bugunYerEkle`) silindi; eski bağlantının metni elle aranır.
     expect(queryByText('Bugüne yer ekle ›')).toBeNull();
     fireEvent.press(satir);
     expect(router.navigate).toHaveBeenLastCalledWith(
