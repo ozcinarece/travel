@@ -4219,6 +4219,17 @@ end $$;
 insert into public.olaylar (tur) values ('paylasim_acildi');
 reset role;
 do $$ begin assert (select kaynak_paylasim from public.trips where id = current_setting('test.alinan')::uuid) = (select id from public.gezi_paylasim where token = current_setting('test.paylasim_token')), '#432 KK6: kaynak_paylasim doğru paylaşım'; end $$;
+-- #330 KK1: "Seyahatime al" koordinatlı places satırlarını kopyalar, ama değişiklik geçmişine koordinat yazılmaz.
+do $$
+declare v uuid := current_setting('test.alinan')::uuid;
+begin
+  assert exists (select 1 from public.places where trip_id = v and lat is not null), 'ön koşul: kopyalanan mekanda koordinat var';
+  assert exists (select 1 from public.changes where trip_id = v and entity = 'places' and old is null), 'ön koşul: kopya akışa yazıldı';
+  assert not exists (select 1 from public.changes where trip_id = v
+    and (new ?| array['lat', 'lng', 'hotel_lat', 'hotel_lng'] or old ?| array['lat', 'lng', 'hotel_lat', 'hotel_lng']
+         or field in ('lat', 'lng', 'hotel_lat', 'hotel_lng'))),
+    '#330 KK1: Seyahatime al kopyası changes''a koordinat yazmaz';
+end $$;
 
 -- PRD §7: 30 günü geçen Google koordinatı girişsiz özette dönmez, Seyahatime al'da kopyalanmaz (place_id ve damga kalır).
 reset role;
@@ -5082,13 +5093,14 @@ do $$ begin assert (select count(*) from public.istek_iller) = 0, '#578: hesap s
 -- ---------------------------------------------------------------- #330: değişiklik geçmişinde (`changes`) Google koordinatı yok
 -- KK1: `log_change` koordinatı yazmaz. KK2: eski satırda koordinat boşalır, satır silinmez. KK3: gece işi 30 günü jsonb'deki
 -- damgadan (yoksa `at`'tan) sayar; "Seyahatime al" kopyası (eski damga, yeni `at`) 30 günü geçmiş sayılır.
--- Dosyanın sonunda: yukarıdaki bütün testlerin (paylasimdan_al dahil) tetikleyiciyle yazdığı satırlarda da koordinat yok.
+-- Dosyanın sonunda: yukarıdaki testlerin tetikleyiciyle yazıp hâlâ duran satırlarında da koordinat yok. (Silinen
+-- seyahatlerin satırları cascade ile gitti; "Seyahatime al" kopyası #432 bloğunda, seyahat silinmeden önce denetlenir.)
 do $$
 begin
   assert not exists (select 1 from public.changes c
     where (c.field in ('lat', 'lng', 'hotel_lat', 'hotel_lng') and (c.old is not null or c.new is not null))
        or c.old ?| array['lat', 'lng', 'hotel_lat', 'hotel_lng'] or c.new ?| array['lat', 'lng', 'hotel_lat', 'hotel_lng']),
-    '#330 KK1: hiçbir test akışı (Seyahatime al dahil) changes''a koordinat yazmadı';
+    '#330 KK1: kalan hiçbir changes satırında koordinat yok';
 end $$;
 insert into auth.users (id, is_anonymous) values ('33000000-0000-4000-8000-000000000001', false);
 select pg_temp.as_user('33000000-0000-4000-8000-000000000001');
@@ -5124,6 +5136,19 @@ begin
   assert (select count(*) from public.changes c where c.trip_id = t and c.entity = 'stays') = 2
     and exists (select 1 from public.changes c where c.trip_id = t and c.entity = 'stays' and c.old is null and c.new ->> 'label' = 'Konak'),
     '#330 KK1: stays ekleme ve silme yazılır, yalnız koordinat güncellemesi yazılmaz';
+end $$;
+-- #330 bugünkü davranış (Ürün'e soruldu): mekan silinip hemen geri alınınca satır geri gelir, ama silme kaydında koordinat
+-- olmadığı için lat/lng boş döner (#329 "Konumu yenile" hali; koordinat yenileme işiyle gelir).
+set role authenticated;
+select pg_temp.as_user('33000000-0000-4000-8000-000000000001');
+select public.degisikligi_geri_al((select id from public.changes where trip_id = '33000000-0000-4000-8000-000000000010'
+  and entity = 'places' and entity_id = '33000000-0000-4000-8000-000000000020' and field is null and new is null));
+reset role;
+do $$
+begin
+  assert (select lat is null and lng is null and place_id = 'ChIJ_330_yer' and note = 'yeni not' and google_fetched_at is not null
+    from public.places where id = '33000000-0000-4000-8000-000000000020'),
+    '#330: hemen geri alınan silme mekanı geri getirir, koordinat boş (bugünkü davranış)';
 end $$;
 -- KK2/KK3: tetikleyicinin eski sürümünün yazdığı satırlar (elle).
 insert into public.changes (trip_id, user_id, entity, entity_id, field, old, new, at) values
