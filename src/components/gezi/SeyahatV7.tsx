@@ -174,6 +174,9 @@ export function BaglantiSatiri({ metin, onPress }: { metin: string; onPress: () 
 /** Plan modunda "Günler" en çok bu kadar satır (#522 inceleme 2); fazlası "Planı aç ›". */
 export const GUN_SINIRI = 3;
 
+/** #580 değişiklik 3: "Gezdim" ✓ çizgisi (kanvas `Dalga1_DurakCekmecesi`). */
+export const TIK_KALINLIK = 2.8;
+
 /** Tek dolu turuncu düğme (52 pt). #580: durak çekmecesindeki "Gezdim" de bu düğme (✓, kanvasta çizgi 2,8). */
 export function TuruncuDugme({ metin, ikon, onPress, pasif, mesgul }: { metin: string; ikon?: 'yolTarifiV7' | 'tik'; onPress: () => void; pasif?: boolean; mesgul?: boolean }) {
   return (
@@ -185,7 +188,7 @@ export function TuruncuDugme({ metin, ikon, onPress, pasif, mesgul }: { metin: s
       disabled={pasif || mesgul}
       onPress={onPress}
       style={[s.turuncu, pasif && s.pasif]}>
-      {ikon ? <Ikon ad={ikon} boyut={18} renk={renk.metin} kalinlik={ikon === 'tik' ? 2.2 : 2.4} /> : null}
+      {ikon ? <Ikon ad={ikon} boyut={18} renk={renk.metin} kalinlik={ikon === 'tik' ? TIK_KALINLIK : 2.4} /> : null}
       <Text style={s.turuncuMetin}>{metin}</Text>
     </Pressable>
   );

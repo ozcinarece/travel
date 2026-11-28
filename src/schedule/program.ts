@@ -10,6 +10,15 @@ import { acilisDurumu, type Periyot } from './acilis';
 import { bacakModu, dakikaSaat, kestirimYuruyusSn, saatDakika, type BacakSecimi } from './tempo';
 
 export const UZUN_KALMA_PAYI_DK = 10;
+
+/**
+ * #580 değişiklik 2: açık "gezilmedi" kaydı — mevcut sütunlarla, şemasız: tamamlanma yok (`completed_at` boş) ama
+ * `auto_completed = true`. Başka hiçbir yazım bu ikiliyi üretmez (otomatik tamamlanma `completed_at` ile birlikte yazılır;
+ * Gezdim / Tamamlandı / başka güne taşıma `auto_completed = false` yazar).
+ */
+export function gezilmediMi(d: { completed_at: string | null; auto_completed: boolean }): boolean {
+  return !d.completed_at && d.auto_completed;
+}
 /** #140 KK1: varıştan sonra en çok bu kadar içinde açılan mekan beklenir; daha uzunsa bekleme yazılmaz (plan kaymaz). */
 export const ACILIS_BEKLEME_DK = 60;
 
@@ -23,6 +32,11 @@ export type ProgramDuragi = {
   /** #43: tamamlanma anı (seyahat dilimine göre gün başından dakika); yoksa null. */
   tamamlandiDk: number | null;
   skipped: boolean;
+  /**
+   * #580 değişiklik 2: "Gezilmedi say" — kendiliğinden geçildi sayılan durak için açık "gezilmedi" kaydı
+   * (`stops.completed_at` boş + `auto_completed = true`, `gezilmediMi`). Pay geçse de otomatik tamamlanmaz.
+   */
+  gezilmedi?: boolean;
 };
 
 /** Bacak: `mod` yürüyüş ya da (#33, 40 dk üstü) taksi; sn/m seçilen moda ait. */
@@ -155,7 +169,7 @@ export function programHesapla(secenek: {
       // hesaplanan başlangıçtan önceyse (art arda "Bitti") ayrılış başlangıca sabitlenir, saat geriye gitmez.
       ayrilisDk = Math.max(varisDk, d.tamamlandiDk);
       durum = 'gecildi';
-    } else if (simdiDk !== null && simdiDk > planAyrilis + UZUN_KALMA_PAYI_DK) {
+    } else if (simdiDk !== null && simdiDk > planAyrilis + UZUN_KALMA_PAYI_DK && !d.gezilmedi) {
       // KK8: dokunulmadı, pay da geçti → planlanan bitişle otomatik tamamlanmış sayılır; program plana göre akar.
       durum = 'gecildi';
       otomatik = true;

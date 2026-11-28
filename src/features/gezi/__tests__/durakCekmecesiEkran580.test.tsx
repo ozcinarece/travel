@@ -6,6 +6,8 @@ import { fireEvent, render, waitFor } from '@testing-library/react-native';
 import type { ReactNode } from 'react';
 import { StyleSheet } from 'react-native';
 
+import { TIK_KALINLIK } from '@/components/gezi/SeyahatV7';
+import { GERI_AL_MS } from '@/features/mekanlar/geriAlinabilirSil';
 import { t } from '@/i18n';
 import { durakCekmecesi } from '@/theme';
 
@@ -414,10 +416,11 @@ describe('#580 KK1 · KK6 Bugünün planı satırları ve çekmece', () => {
     fireEvent.press(await waitFor(() => r.getByRole('button', { name: t('durakCekmecesi.gezilmediSay') })));
     expect(r.queryByRole('button', { name: t('durakCekmecesi.gezdim') })).toBeNull();
     await waitFor(() => expect(durakYazimi()).toBeGreaterThan(-1));
+    // Vakti (bitiş + pay) geçtiği için açık gezilmedi kaydı da yazılır; yoksa program yine kendiliğinden geçildi sayardı.
     expect(mockSayac.yazim[durakYazimi()].args[0]).toEqual({
       completed_at: null,
       completed_by: null,
-      auto_completed: false,
+      auto_completed: true,
     });
   });
 
@@ -453,36 +456,81 @@ describe('#580 KK1 · KK6 Bugünün planı satırları ve çekmece', () => {
     expect(mockSayac.yazim[durakYazimi()].args[0]).toEqual(expect.objectContaining({ day_id: 'g2', completed_at: null }));
   });
 
-  it('KK1: Çıkar mevcut "Geri al" bandını gösterir; satır gizlenir, Geri al geri getirir', async () => {
+  it('değişiklik 1: Çıkar yalnız günden çıkarır — bant "{ad} bugünden çıktı · Geri al"; Geri al ile hiçbir şey yazılmaz', async () => {
     mockTablolar = fikstur(bugun());
     baslat();
     const r = ciz();
     await hazir(r);
     satiriAc(r, ODUN);
     fireEvent.press(await waitFor(() => r.getByRole('button', { name: t('durakCekmecesi.cikar') })));
-    await waitFor(() => r.getByText(t('listem.gundenCikti', { ad: ODUN, n: 1 })));
+    await waitFor(() => r.getByText(t('durakCekmecesi.bugundenCikti', { ad: ODUN })));
+    expect(t('durakCekmecesi.bugundenCikti', { ad: ODUN })).toBe('Odunpazarı Evleri bugünden çıktı');
     expect(r.queryByRole('button', { name: new RegExp(`^${ODUN}, `) })).toBeNull();
     fireEvent.press(r.getByRole('button', { name: t('listem.geriAl') }));
     await waitFor(() => r.getByRole('button', { name: new RegExp(`^${ODUN}, `) }));
+    await new Promise((c) => setTimeout(c, GERI_AL_MS + 200));
+    expect(mockSayac.yazim.some((y) => y.ad === 'delete')).toBe(false);
+  }, 15000);
+
+  it('değişiklik 1: 5 sn sonra Plan\'daki "Günden çıkar" mutasyonu — yalnız durak silinir, mekan listede kalır', async () => {
+    mockTablolar = fikstur(bugun());
+    baslat();
+    const r = ciz();
+    await hazir(r);
+    satiriAc(r, ODUN);
+    fireEvent.press(await waitFor(() => r.getByRole('button', { name: t('durakCekmecesi.cikar') })));
+    await waitFor(() => r.getByText(t('durakCekmecesi.bugundenCikti', { ad: ODUN })));
+    expect(mockSayac.yazim.some((y) => y.ad === 'delete')).toBe(false);
+    // Sunucu: silme yazılınca yenileme d1'siz gelir.
+    mockTablolar.stops = mockTablolar.stops.filter((x) => (x as { id: string }).id !== 'd1');
+    await waitFor(() => expect(mockSayac.yazim.some((y) => y.ad === 'delete')).toBe(true), { timeout: GERI_AL_MS + 2000 });
+    const i = mockSayac.yazim.findIndex((y) => y.ad === 'delete');
+    expect(mockSayac.yazim[i].tablo).toBe('stops');
+    expect(mockSayac.yazim[i + 1].args).toEqual(['id', 'd1']);
     expect(mockSayac.yazim.some((y) => y.tablo === 'places' && y.ad === 'delete')).toBe(false);
+    // Bant kapanınca satır (yenileme gelmeden) geri görünmez.
+    await waitFor(() => expect(r.queryByText(t('durakCekmecesi.bugundenCikti', { ad: ODUN }))).toBeNull());
+    const satirlar = r.queryAllByRole('button', { name: new RegExp(`^${ODUN}, `) });
+    expect(satirlar.filter((b) => b.props.accessibilityHint === t('durakCekmecesi.satirIpucu'))).toHaveLength(0);
+    // Mekan listede kaldı: artık güne atanmamış aday olarak "bugüne ekle" satırında.
+    expect(satirlar.map((b) => b.props.accessibilityLabel)).toContain(t('seyahatV7.bugunEkle', { ad: ODUN }));
+  }, 15000);
+
+  it('değişiklik 3: Gezdim ✓ çizgisi 2,8; Gezilmedi say ✓\'siz', async () => {
+    mockTablolar = fikstur(bugun());
+    baslat();
+    const r = ciz();
+    await hazir(r);
+    satiriAc(r, ODUN);
+    const gezdim = await waitFor(() => r.getByRole('button', { name: t('durakCekmecesi.gezdim') }));
+    const ikonlar = gezdim.findAll((n) => typeof n.props.kalinlik === 'number');
+    expect(ikonlar.length).toBeGreaterThan(0);
+    expect(ikonlar[0].props).toEqual(expect.objectContaining({ ad: 'tik', kalinlik: 2.8 }));
+    expect(TIK_KALINLIK).toBe(2.8);
   });
 });
 
 describe('#580 öz-inceleme', () => {
-  it('1: kendiliğinden geçilmiş durakta (kayıt yok) düğme "Gezdim"; şimdinin değil planlanan ayrılışın anını yazar', async () => {
+  it('değişiklik 2: kendiliğinden geçilmiş durakta (kayıt yok, satır ✓) düğme "Gezilmedi say" (✓\'siz); açık gezilmedi kaydı yazar, durak gezilmemiş olur', async () => {
     mockTablolar = fikstur(bugun());
     // Gün 3 sa önce başladı; 1. durak (60 dk) çoktan bitti, kayıt yok → program "gecildi" (otomatik) sayar.
     baslat(180);
     const r = ciz();
     await hazir(r);
+    expect(r.getByRole('button', { name: new RegExp(`^${ODUN}, `) }).props.accessibilityLabel).toMatch(/gezildi/i);
     satiriAc(r, ODUN);
-    expect(r.queryByRole('button', { name: t('durakCekmecesi.gezilmediSay') })).toBeNull();
-    fireEvent.press(await waitFor(() => r.getByRole('button', { name: t('durakCekmecesi.gezdim') })));
+    expect(r.queryByRole('button', { name: t('durakCekmecesi.gezdim') })).toBeNull();
+    const dugme = await waitFor(() => r.getByRole('button', { name: t('durakCekmecesi.gezilmediSay') }));
+    expect(dugme.findAll((n) => typeof n.props.kalinlik === 'number')).toHaveLength(0);
+    fireEvent.press(dugme);
     await waitFor(() => expect(durakYazimi()).toBeGreaterThan(-1));
-    const yazilan = mockSayac.yazim[durakYazimi()].args[0] as { completed_at: string };
-    // Planlanan ayrılış ≈ başlangıç + 60 dk ≈ 2 sa önce; şimdinin saati değil.
-    expect(Date.now() - Date.parse(yazilan.completed_at)).toBeGreaterThan(60 * 60_000);
+    expect(mockSayac.yazim[durakYazimi()].args[0]).toEqual({ completed_at: null, completed_by: null, auto_completed: true });
     expect(mockSayac.yazim[durakYazimi() + 1].args).toEqual(['id', 'd1']);
+    // Kayıt yazılınca (sunucudaki hal) satır artık gezildi değil.
+    Object.assign(mockTablolar.stops[0] as object, { auto_completed: true });
+    await r.qc.invalidateQueries({ queryKey: ['duraklar', 't1'] });
+    await sakinles(r.qc);
+    await waitFor(() => expect(r.getByRole('button', { name: new RegExp(`^${ODUN}, `) }).props.accessibilityLabel).not.toMatch(/gezildi/i));
   });
 
   it('2: Geri al bandı açıkken gelen hata kaybolmaz; bant kapanınca gösterilir, silme kesinleşmez', async () => {
@@ -494,7 +542,7 @@ describe('#580 öz-inceleme', () => {
     await hazir(r);
     satiriAc(r, ODUN);
     fireEvent.press(await waitFor(() => r.getByRole('button', { name: t('durakCekmecesi.cikar') })));
-    await waitFor(() => r.getByText(t('listem.gundenCikti', { ad: ODUN, n: 1 })));
+    await waitFor(() => r.getByText(t('durakCekmecesi.bugundenCikti', { ad: ODUN })));
     // Bant açıkken kalan durağın çekmecesinden Atla → yazım hatası ("Kaydedilemedi").
     const satir = r.getAllByRole('button').find((b) => b.props.accessibilityHint === t('durakCekmecesi.satirIpucu'))!;
     fireEvent.press(satir);
@@ -502,8 +550,8 @@ describe('#580 öz-inceleme', () => {
     await waitFor(() => expect(durakYazimi()).toBeGreaterThan(-1));
     // Normal bildirim süresinden (2,8 sn) uzun bekle: bant hâlâ açık, silme kesinleşmedi.
     await new Promise((c) => setTimeout(c, 3200));
-    expect(r.getByText(t('listem.gundenCikti', { ad: ODUN, n: 1 }))).toBeTruthy();
-    expect(mockSayac.yazim.some((y) => y.tablo === 'places' && y.ad === 'delete')).toBe(false);
+    expect(r.getByText(t('durakCekmecesi.bugundenCikti', { ad: ODUN }))).toBeTruthy();
+    expect(mockSayac.yazim.some((y) => y.ad === 'delete')).toBe(false);
     fireEvent.press(r.getByRole('button', { name: t('listem.geriAl') }));
     await waitFor(() => r.getByText(t('geziSayfasi.kaydedilemedi')));
   }, 15000);

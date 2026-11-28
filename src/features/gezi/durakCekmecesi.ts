@@ -3,7 +3,8 @@
 import { t } from '@/i18n';
 import { sureMetni } from '@/lib/kategori';
 import type { Gun } from '@/lib/tipler';
-import { saatEkli, yerelAn } from '@/lib/zaman';
+import { saatEkli } from '@/lib/zaman';
+import { UZUN_KALMA_PAYI_DK } from '@/schedule/program';
 import { dakikaSaat } from '@/schedule/tempo';
 
 import { gezildiMi, gunAdi } from './seyahatV7';
@@ -43,31 +44,33 @@ export function yarinAltSatiri(hedef: Pick<Gun, 'index' | 'date'> | null): strin
 }
 
 /**
- * KK2: birincil düğme. Gezildi diye kaydedilmiş durakta (Gezdim ya da otomatik tamamlanma yazıldı) "Gezilmedi say";
- * değilse "Gezdim".
+ * KK2: birincil düğme. Gezildi görünen durakta (Gezdim, yazılmış otomatik tamamlanma ya da programın kendiliğinden geçildi
+ * sayması) "Gezilmedi say" (✓'siz); değilse "Gezdim" (✓).
  */
-export function gezdimDugmesi(tamamlandi: boolean): {
+export function gezdimDugmesi(gezildi: boolean): {
   metin: string;
   geriAl: boolean;
 } {
-  return tamamlandi ? { metin: t('durakCekmecesi.gezilmediSay'), geriAl: true } : { metin: t('durakCekmecesi.gezdim'), geriAl: false };
+  return gezildi ? { metin: t('durakCekmecesi.gezilmediSay'), geriAl: true } : { metin: t('durakCekmecesi.gezdim'), geriAl: false };
 }
 
+export type GezdimYazimi = { id: string; completed_at: string | null; completed_by: string | null; auto_completed: boolean };
+
 /**
- * KK2 (#580 öz-inceleme 1): çekmece düğmesinin kararı ve yazımı — satırla aynı tanım (`gezildiMi`).
- * - Elle (ya da yazılmış otomatik) gezildi kaydı var → "Gezilmedi say", tamamlanma silinir.
- * - Program kendiliğinden geçildi saydı (kayıt yok) → geri alınacak kayıt yok: "Gezdim" kalır, ama şimdinin saati yerine
- *   planlanan ayrılış anı (`trips.tz`) yazılır; sonraki saatler ileri kaymaz.
+ * KK2 (#580 değişiklik 2): çekmece düğmesinin kararı ve yazımı — satırla aynı tanım (`gezildiMi`).
+ * - Gezildi görünüyor → "Gezilmedi say": tamamlanma silinir. Durağın vakti (planlanan bitiş + pay) geçtiyse program onu yine
+ *   kendiliğinden geçildi sayacağından açık "gezilmedi" kaydı da yazılır (`auto_completed = true`, `gezilmediMi`).
  * - Gezilmemiş → "Gezdim", şimdinin anı.
  */
 export function gezdimEylemi(
-  k: { durakId: string; tamamlandi: boolean; durum: string | null; ayrilisDk: number | null },
-  p: { gunTarihi: string | null; tz: string; an: Date; benId: string | null },
-): { metin: string; geriAl: boolean; yazim: { id: string; completed_at: string | null; completed_by: string | null; auto_completed: false } } {
-  if (k.tamamlandi) return { ...gezdimDugmesi(true), yazim: { id: k.durakId, completed_at: null, completed_by: null, auto_completed: false } };
-  const kendiliginden = gezildiMi(k) && k.ayrilisDk !== null && !!p.gunTarihi;
-  const an = kendiliginden ? yerelAn(p.gunTarihi!, k.ayrilisDk!, p.tz) : p.an;
-  return { ...gezdimDugmesi(false), yazim: { id: k.durakId, completed_at: an.toISOString(), completed_by: p.benId, auto_completed: false } };
+  k: { durakId: string; tamamlandi: boolean; durum: string | null; varisDk: number | null; dakika: number },
+  p: { simdiDk: number | null; an: Date; benId: string | null },
+): { metin: string; geriAl: boolean; yazim: GezdimYazimi } {
+  if (gezildiMi(k)) {
+    const vaktiGecti = !k.tamamlandi || (p.simdiDk !== null && k.varisDk !== null && p.simdiDk > k.varisDk + k.dakika + UZUN_KALMA_PAYI_DK);
+    return { ...gezdimDugmesi(true), yazim: { id: k.durakId, completed_at: null, completed_by: null, auto_completed: vaktiGecti } };
+  }
+  return { ...gezdimDugmesi(false), yazim: { id: k.durakId, completed_at: p.an.toISOString(), completed_by: p.benId, auto_completed: false } };
 }
 
 /** KK4: "25 dk gerideyiz". */

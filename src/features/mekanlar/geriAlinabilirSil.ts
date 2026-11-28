@@ -24,43 +24,42 @@ export function cikarMetni(mekanId: string, ad: string, duraklar: readonly Pick<
   return gun ? t('listem.gundenCikti', { ad, n: gun.index }) : t('listem.cikti', { ad });
 }
 
-export function useGeriAlinabilirSil(seyahatId: string | undefined, onHata?: () => void) {
-  const sil = useMekanSil(seyahatId ?? '');
-  const gunler = useGunler(seyahatId);
-  const duraklar = useDuraklar(seyahatId);
-  const [bekleyenDurum, setBekleyenDurum] = useState<BekleyenSilme | null>(null);
+/**
+ * #580 değişiklik 1: ertelenmiş, geri alınabilir işlemin ortak çekirdeği (Listem'in mekan silmesi ve Gezi'nin "Çıkar"ı).
+ * `baslat` bandı açar; işlem ancak bant kapanınca (5 sn, ekrandan çıkış, arka plan, ikinci işlem ya da `kapat`) bir kez çalışır.
+ * "Geri al" basılırsa hiçbir şey yazılmaz.
+ */
+export function useGeriAlinabilirIslem<B extends { metin: string }>(seyahatId: string | undefined, calistir: (b: B) => void) {
+  const [bekleyenDurum, setBekleyenDurum] = useState<B | null>(null);
   // #599 değişiklik 1: o anki bant, durumla aynı anda yazılır (zamanlayıcı kapattığında bile çizimi beklemeden okunur).
-  const bantRef = useRef<BekleyenSilme | null>(null);
-  const setBekleyen = useCallback((b: BekleyenSilme | null) => {
+  const bantRef = useRef<B | null>(null);
+  const setBekleyen = useCallback((b: B | null) => {
     bantRef.current = b;
     setBekleyenDurum(b);
   }, []);
   const bekleyen = bekleyenDurum;
-  // Seyahat değişince eski bant kalkar (silme aşağıdaki etkinin temizliğinde yapılır). "Önceki render" deseni.
+  // Seyahat değişince eski bant kalkar (işlem aşağıdaki etkinin temizliğinde yapılır). "Önceki render" deseni.
   const [bantSeyahati, setBantSeyahati] = useState(seyahatId);
   if (bantSeyahati !== seyahatId) {
     setBantSeyahati(seyahatId);
     setBekleyenDurum(null);
   }
-  const bekleyenRef = useRef<{ id: string; zaman: ReturnType<typeof setTimeout> } | null>(null);
-  const silMutate = sil.mutate;
-  const silRef = useRef(silMutate);
-  const onHataRef = useRef(onHata);
+  const bekleyenRef = useRef<{ b: B; zaman: ReturnType<typeof setTimeout> } | null>(null);
+  const calistirRef = useRef(calistir);
   useEffect(() => {
-    silRef.current = silMutate;
-    onHataRef.current = onHata;
+    calistirRef.current = calistir;
   });
 
-  // Bekleyeni (varsa) siler. Ref önce boşaltılır: aynı silme iki kez çalışmaz (KK3).
+  // Bekleyeni (varsa) çalıştırır. Ref önce boşaltılır: aynı işlem iki kez çalışmaz (KK3).
   const kesinlestir = useCallback(() => {
     const b = bekleyenRef.current;
     if (!b) return;
     clearTimeout(b.zaman);
     bekleyenRef.current = null;
-    silRef.current(b.id, { onError: () => onHataRef.current?.() });
+    calistirRef.current(b.b);
   }, []);
 
-  // KK3: ekrandan çıkınca (ya da seyahat değişince) bekleyen silinir.
+  // KK3: ekrandan çıkınca (ya da seyahat değişince) bekleyen çalışır.
   useEffect(() => () => kesinlestir(), [seyahatId, kesinlestir]);
   // KK3: uygulama arka plana giderse de.
   useEffect(() => {
@@ -72,19 +71,17 @@ export function useGeriAlinabilirSil(seyahatId: string | undefined, onHata?: () 
     return () => abonelik.remove();
   }, [kesinlestir, setBekleyen]);
 
-  const duraklarVeri = duraklar.data;
-  const gunlerVeri = gunler.data;
-  const cikar = useCallback(
-    (m: Pick<Mekan, 'id' | 'place_id'>, ad: string) => {
+  const baslat = useCallback(
+    (b: B) => {
       kesinlestir();
       const zaman = setTimeout(() => {
         kesinlestir();
         setBekleyen(null);
       }, GERI_AL_MS);
-      bekleyenRef.current = { id: m.id, zaman };
-      setBekleyen({ mekanId: m.id, placeId: m.place_id, metin: cikarMetni(m.id, ad, duraklarVeri, gunlerVeri) });
+      bekleyenRef.current = { b, zaman };
+      setBekleyen(b);
     },
-    [kesinlestir, setBekleyen, duraklarVeri, gunlerVeri],
+    [kesinlestir, setBekleyen],
   );
   const geriAl = useCallback(() => {
     const b = bekleyenRef.current;
@@ -93,13 +90,30 @@ export function useGeriAlinabilirSil(seyahatId: string | undefined, onHata?: () 
     setBekleyen(null);
   }, [setBekleyen]);
 
-  // #599 KK2: başka bir bant açılacaksa bu bant kapanır; bekleyen silme hemen kesinleşir (iki bant aynı anda görünmez).
+  // #599 KK2: başka bir bant açılacaksa bu bant kapanır; bekleyen işlem hemen kesinleşir (iki bant aynı anda görünmez).
   const kapat = useCallback(() => {
     kesinlestir();
     setBekleyen(null);
   }, [kesinlestir, setBekleyen]);
   /** #599 değişiklik 1: şu an açık bant (çizimi beklemeden). Seyahat değişiminde ekran zaten yenilenir. */
   const simdikiBant = useCallback(() => (bantRef.current && bekleyenRef.current ? bantRef.current : null), []);
+
+  return { bekleyen, baslat, geriAl, kapat, simdikiBant };
+}
+
+export function useGeriAlinabilirSil(seyahatId: string | undefined, onHata?: () => void) {
+  const sil = useMekanSil(seyahatId ?? '');
+  const gunler = useGunler(seyahatId);
+  const duraklar = useDuraklar(seyahatId);
+  const silMutate = sil.mutate;
+  const { bekleyen, baslat, geriAl, kapat, simdikiBant } = useGeriAlinabilirIslem<BekleyenSilme>(seyahatId, (b) => silMutate(b.mekanId, { onError: () => onHata?.() }));
+
+  const duraklarVeri = duraklar.data;
+  const gunlerVeri = gunler.data;
+  const cikar = useCallback(
+    (m: Pick<Mekan, 'id' | 'place_id'>, ad: string) => baslat({ mekanId: m.id, placeId: m.place_id, metin: cikarMetni(m.id, ad, duraklarVeri, gunlerVeri) }),
+    [baslat, duraklarVeri, gunlerVeri],
+  );
 
   return { bekleyen, cikar, geriAl, kapat, simdikiBant };
 }
