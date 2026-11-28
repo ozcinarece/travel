@@ -6,10 +6,12 @@
 // #515 inceleme: girişli açılışta bekleyen link silinir (girişten sonra ana sayfa bir daha buraya atmasın); logo dokunulabilir,
 // girişliyi ana sayfaya, girişsizi girişe götürür (uygulama kapalıyken açılan linkte yığında başka ekran yok).
 import { router, useLocalSearchParams } from 'expo-router';
-import { Suspense, lazy, useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
+// #550: yerelde doğrudan Harita; web'de ayrı parça (PaylasimHaritasi.web.tsx).
+import { PaylasimHaritasi as Harita } from '@/components/paylasim/PaylasimHaritasi';
 import type { HaritaCizgisi, HaritaPini, Konum } from '@/components/harita/tipler';
 import { paylasimOzeti } from '@/features/paylasim/baslik';
 import { SeyahatKapagi } from '@/components/seyahatler/SeyahatKapagi';
@@ -32,10 +34,6 @@ import { t } from '@/i18n';
 import { acilisKarariniKapat } from '@/lib/acilis';
 import { useOturum } from '@/lib/oturum';
 import { anaV5, gunRengi, paylasimGunRengi, renk, rotaRengi, yazi } from '@/theme';
-
-// #550: harita yalnız "Haritada gör"e basınca gerekir; ayrı parça olarak o an iner (web davet girişinin ilk paketine girmez).
-// Parça inene kadar 220 px'lik harita kutusu kendi zemin rengiyle görünür (görünüm aynı).
-const Harita = lazy(() => import('@/components/harita/Harita').then((m) => ({ default: m.Harita })));
 
 type HaritaDurumu = 'kapali' | 'soruluyor' | 'acik' | 'yok';
 
@@ -147,11 +145,7 @@ function AcikEkran({ token, o, onKapandi }: { token: string; o: AcikPaylasimOzet
         {haritaVar ? (
           harita === 'acik' ? (
             <View style={s.harita} testID="paylasim-harita">
-              {pinler.length > 0 ? (
-                <Suspense fallback={null}>
-                  <Harita merkez={pinler[0].konum} zoom={13} pinler={pinler} cizgiler={cizgiler} sigdir={{ noktalar: pinler.map((p) => p.konum), ust: 24, alt: 24 }} />
-                </Suspense>
-              ) : null}
+              {pinler.length > 0 ? <Harita merkez={pinler[0].konum} zoom={13} pinler={pinler} cizgiler={cizgiler} sigdir={{ noktalar: pinler.map((p) => p.konum), ust: 24, alt: 24 }} /> : null}
             </View>
           ) : harita === 'yok' ? (
             <Text style={s.haritaYok}>{t('paylasim.haritaYok')}</Text>

@@ -136,8 +136,8 @@ jobs:
           test -f "dist/r/_token.html"
           test -f "dist/r/g/_token.html"
           # Davet sayfaları küçük girişi yükler (uygulamanın tam paketini değil).
-          davet_js=$(grep -o '/_expo/static/js/web/entry-[0-9a-f]*\.js' dist/r/_token.html)
-          uygulama_js=$(grep -o '/_expo/static/js/web/entry-[0-9a-f]*\.js' dist/index.html)
+          davet_js=$(grep -o 'src="/_expo/static/js/web/entry-[0-9a-f]*\.js"' dist/r/_token.html | cut -d'"' -f2)
+          uygulama_js=$(grep -o 'src="/_expo/static/js/web/entry-[0-9a-f]*\.js"' dist/index.html | cut -d'"' -f2)
           test -n "$davet_js" && test "$davet_js" != "$uygulama_js"
           echo "davet girişi: $davet_js ($(gzip -6c "dist$davet_js" | wc -c) bayt gzip)"
           # Universal / App Link doğrulama dosyaları (varsa).

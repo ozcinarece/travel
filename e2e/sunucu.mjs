@@ -1,9 +1,11 @@
 // #550: web çıktısını Cloudflare Pages gibi sunan yerel sunucu (uçtan uca testler ve ölçüm). gzip (seviye 6), `_redirects`
-// 200 kuralları (`/r/:token /r/_token 200`), uzantısız yol → `.html`, bilinmeyen yol → index.html (Pages SPA davranışı).
+// 200 kuralları (`/r/:token /r/_token 200`), uzantısız yol → `.html`, bilinmeyen yol → index.html (Pages SPA davranışı),
+// Pages'in önbellek başlıkları (`public, max-age=0, must-revalidate` + ETag, eşleşen istekte 304).
 // Kullanım: node e2e/sunucu.mjs [dist] [port]   (ya da WEB_DIST / PORT)
 import { createServer } from 'node:http';
 import { existsSync, readFileSync, statSync } from 'node:fs';
 import path from 'node:path';
+import { createHash } from 'node:crypto';
 import { gzipSync } from 'node:zlib';
 
 const kok = path.resolve(process.argv[2] ?? process.env.WEB_DIST ?? 'dist');
@@ -54,7 +56,12 @@ createServer((istek, yanit) => {
   }
   const uzanti = path.extname(dosya);
   let govde = readFileSync(dosya);
-  const basliklar = { 'content-type': TUR[uzanti] ?? 'application/octet-stream', 'cache-control': 'no-store' };
+  const etiket = `"${createHash('sha1').update(govde).digest('hex')}"`;
+  const basliklar = { 'content-type': TUR[uzanti] ?? 'application/octet-stream', 'cache-control': 'public, max-age=0, must-revalidate', etag: etiket };
+  if (istek.headers['if-none-match'] === etiket) {
+    yanit.writeHead(304, basliklar).end();
+    return;
+  }
   if (SIKISIR.has(uzanti) && /\bgzip\b/.test(String(istek.headers['accept-encoding'] ?? ''))) {
     govde = gzipSync(govde, { level: 6 });
     basliklar['content-encoding'] = 'gzip';

@@ -27,18 +27,28 @@ import { kaliciSecenekler, profilKilitli, saklananlariAyarla } from '@/lib/kalic
 import { OturumSaglayici, useOturum } from '@/lib/oturum';
 import { webAcilisiKaldir } from '@/lib/webAcilis';
 
-// #226 KK4: günlük Places sınırı (429) yeniden denenmez; diğer hatalarda varsayılan (3 deneme).
-const queryClient = new QueryClient({ defaultOptions: { queries: { retry: (n, e) => !(e instanceof GunlukSinir) && n < 3 } } });
-// #243 KK1: profil, seyahatler, günler, duraklar ve kendi içeriğimiz cihazda 7 gün tutulur (`src/lib/kaliciOnbellek.ts`).
-saklananlariAyarla(queryClient);
-// #243 KK3: bağlantı durumu sorgu sonuçlarından (NetInfo yok); geri gelince sorgular yenilenir.
-baglantiyiIzle(queryClient);
+let queryClient: QueryClient | null = null;
+
+/**
+ * Sorgu istemcisini kurar (bir kez). Kök düzen modül düzeyinde, main'deki sırayla çağırır: hata raporu ve açılış ekranı
+ * hazırlandıktan sonra (#550 öz-inceleme 3).
+ */
+export function kokuBaslat(): QueryClient {
+  if (queryClient) return queryClient;
+  // #226 KK4: günlük Places sınırı (429) yeniden denenmez; diğer hatalarda varsayılan (3 deneme).
+  queryClient = new QueryClient({ defaultOptions: { queries: { retry: (n, e) => !(e instanceof GunlukSinir) && n < 3 } } });
+  // #243 KK1: profil, seyahatler, günler, duraklar ve kendi içeriğimiz cihazda 7 gün tutulur (`src/lib/kaliciOnbellek.ts`).
+  saklananlariAyarla(queryClient);
+  // #243 KK3: bağlantı durumu sorgu sonuçlarından (NetInfo yok); geri gelince sorgular yenilenir.
+  baglantiyiIzle(queryClient);
+  return queryClient;
+}
 
 /** #85 KK3: hata sınırı en dışta — yakalanmamış render hatasında gri ekran yerine "Yeniden dene" kartı. */
 export function KokSaglayicilari({ children }: { children: ReactNode }) {
   return (
     <HataSiniri>
-      <PersistQueryClientProvider client={queryClient} persistOptions={kaliciSecenekler}>
+      <PersistQueryClientProvider client={kokuBaslat()} persistOptions={kaliciSecenekler}>
         <OturumSaglayici>{children}</OturumSaglayici>
       </PersistQueryClientProvider>
     </HataSiniri>

@@ -6,7 +6,7 @@ import { devices, expect, test, type Page } from '@playwright/test';
 
 import tr from '../src/i18n/tr.json';
 import { ANDROID9_WEBVIEW, chrome74Yaklasimi } from './eskiTarayici';
-import { DAVET_TOKENI, PAYLASIM_TOKENI, supabaseTaklidi } from './supabaseTaklidi';
+import { DAVET_TOKENI, PAYLASIM_TOKENI, supabaseTaklidi, supabaseTaklidiCdp } from './supabaseTaklidi';
 
 test.skip(!process.env.OLCUM, 'yalnız ölçüm: OLCUM=1');
 test.setTimeout(10 * 60_000);
@@ -70,6 +70,47 @@ test('açılış süreleri', async ({ browser }) => {
       satirlar.push(
         `| ${sayfa.ad} | ${d.ag} · ${d.tarayici} | ${sn(ortanca(olcumler.map((o) => o.ilkMetin)))} | ${sn(ortanca(olcumler.map((o) => o.hazir)))} | ${Math.round(ortanca(olcumler.map((o) => o.js)) / 1024)} KB |`,
       );
+    }
+  }
+  console.log('\n' + satirlar.join('\n') + '\n');
+});
+
+/**
+ * Öz-inceleme 1: davet girişinden tam uygulamaya geçiş ("Seyahatime al" → giriş ekranı), hızlı 3G. Özet göründükten sonra
+ * kullanıcı `bekleme` kadar sayfada kalır, sonra basar. "Önden indirme yok" satırında sayfadaki meta çıkarılır (önceki hal).
+ * Sunucu Pages gibi `max-age=0, must-revalidate` + ETag verir: önden inen dosya geçişte 304 ile yeniden doğrulanır.
+ */
+test('geçiş süresi: Seyahatime al → giriş', async ({ browser }) => {
+  const ag = AG['Hızlı 3G (1,6 Mb/s, 562 ms)'];
+  const satirlar: string[] = ['| Geçiş (hızlı 3G, Pixel 7) | Özette bekleme | Basıştan giriş ekranına |', '|---|---|---|'];
+  for (const onYukleme of [false, true]) {
+    for (const bekleme of [3000, 10_000]) {
+      const sureler: number[] = [];
+      for (let i = 0; i < 3; i++) {
+        const baglam = await browser.newContext({ ...devices['Pixel 7'] });
+        const page = await baglam.newPage();
+        // page.route HTTP önbelleğini kapatır; taklit CDP ile (önden indirilen dosya önbellekte kalsın).
+        await supabaseTaklidiCdp(page, { gecikmeMs: ag.gecikme });
+        // Önceki hal: sayfadaki meta kaldırılır (önden indirme tetiklenmez). Ertelenmiş betikler bundan önce çalışır, ama
+        // önden indirme özet çizildikten sonra meta'yı okuduğundan yeterince erken.
+        if (!onYukleme) {
+          await page.addInitScript(() =>
+            document.addEventListener('DOMContentLoaded', () => document.querySelector('meta[name="tripmate-uygulama-js"]')?.remove()),
+          );
+        }
+        const cdp = await baglam.newCDPSession(page);
+        await cdp.send('Network.enable');
+        await cdp.send('Network.emulateNetworkConditions', { offline: false, latency: ag.gecikme, downloadThroughput: ag.indir, uploadThroughput: ag.yukle });
+        await page.goto(`/r/g/${PAYLASIM_TOKENI}`, { waitUntil: 'commit' });
+        await expect(page.getByText(tr.paylasim.seyahatimeAl)).toBeVisible({ timeout: 120_000 });
+        await page.waitForTimeout(bekleme);
+        const bas = Date.now();
+        await page.getByText(tr.paylasim.seyahatimeAl).click();
+        await expect(page.getByText(tr.giris.google)).toBeVisible({ timeout: 120_000 });
+        sureler.push(Date.now() - bas);
+        await baglam.close();
+      }
+      satirlar.push(`| ${onYukleme ? 'önden indirme var' : 'önden indirme yok (önce)'} | ${bekleme / 1000} sn | ${(ortanca(sureler) / 1000).toFixed(1).replace('.', ',')} sn |`);
     }
   }
   console.log('\n' + satirlar.join('\n') + '\n');

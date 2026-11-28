@@ -5,7 +5,7 @@ import { mkdirSync, mkdtempSync, readFileSync, writeFileSync, existsSync } from 
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 
-import { JS_DIZINI, ayristirilabilir, birlestir, fontOnYukle, sozdizimiDusur } from './web-davet-girisi.mjs';
+import { JS_DIZINI, UYGULAMA_JS_META, ayristirilabilir, birlestir, fontOnYukle, sozdizimiDusur, uygulamaJsYaz } from './web-davet-girisi.mjs';
 
 test('KK4: ?., ??, ??=, sınıf alanları ve statik blok ES2019 karşılığına düşer', async () => {
   const kaynak = 'var a={b:{c:1}};var x=a?.b?.c??2;a.d??=3;a.e||=4;class K{#g=1;static s=2;static{this.t=3}h=()=>this.#g;get g(){return this.#g}}';
@@ -45,10 +45,11 @@ test('birleştirme: JS ve davet sayfaları dist\'e, eksik varlık kopyalanır, v
   yaz(path.join(davet, JS_DIZINI, 'entry-b.js.map'), '{}');
   yaz(path.join(davet, 'assets/ortak.ttf'), 'davet');
   yaz(path.join(davet, 'assets/yeni.png'), 'png');
+  yaz(path.join(davet, 'assets/f/Figtree_400Regular.abc.ttf'), 'font');
 
   const yazilan = await birlestir(dist, davet);
   assert.deepEqual(yazilan, ['entry-b.js']);
-  const onYukleme = '<link rel="preload" as="font" type="font/ttf" crossorigin href="/assets/ortak.ttf"/>';
+  const onYukleme = '<link rel="preload" as="font" type="font/ttf" crossorigin href="/assets/f/Figtree_400Regular.abc.ttf"/>';
   assert.equal(readFileSync(path.join(dist, 'r/[token].html'), 'utf8'), `<html lang="tr"><head>${onYukleme}</head>davet</html>`);
   assert.equal(readFileSync(path.join(dist, 'r/g/[token].html'), 'utf8'), `<html lang="tr"><head>${onYukleme}</head>paylasim</html>`);
   ayristirilabilir(readFileSync(path.join(dist, JS_DIZINI, 'entry-b.js'), 'utf8'));
@@ -59,6 +60,8 @@ test('birleştirme: JS ve davet sayfaları dist\'e, eksik varlık kopyalanır, v
   assert.ok(!existsSync(path.join(dist, JS_DIZINI, 'entry-b.js.map')));
   assert.equal(readFileSync(path.join(dist, 'assets/ortak.ttf'), 'utf8'), 'dist');
   assert.equal(readFileSync(path.join(dist, 'assets/yeni.png'), 'utf8'), 'png');
+  // Figtree dışındaki font (ortak.ttf) ön yüklenmez.
+  assert.ok(!readFileSync(path.join(dist, 'r/[token].html'), 'utf8').includes('ortak.ttf'));
 
   // İkinci kez çalışmak (aynı ad) hata verir: eski çıktıya karışmasın.
   await assert.rejects(() => birlestir(dist, davet), /çakışıyor/);
@@ -70,4 +73,24 @@ test('font ön yüklemesi bir kez yazılır', () => {
   assert.ok(bir.indexOf('a.ttf') < bir.indexOf('</head>'));
   assert.equal(fontOnYukle(bir, ['/assets/a.ttf']), bir);
   assert.equal(fontOnYukle('<head></head>', []), '<head></head>');
+});
+
+test('tam uygulamanın giriş JS\'i davet sayfasına meta olarak yazılır (bir kez)', async () => {
+  const kok = mkdtempSync(path.join(tmpdir(), 'davet-girisi-meta-'));
+  const dist = path.join(kok, 'dist');
+  const davet = path.join(kok, 'dist-davet');
+  const yaz = (dosya, icerik) => {
+    mkdirSync(path.dirname(dosya), { recursive: true });
+    writeFileSync(dosya, icerik);
+  };
+  yaz(path.join(dist, 'index.html'), '<html><head></head><body><script src="/_expo/static/js/web/entry-abc123.js" defer></script></body></html>');
+  for (const sayfa of ['r/[token].html', 'r/g/[token].html']) yaz(path.join(davet, sayfa), '<html><head></head><body></body></html>');
+  yaz(path.join(davet, JS_DIZINI, 'entry-def456.js'), 'var a=1;');
+  await birlestir(dist, davet);
+  const html = readFileSync(path.join(dist, 'r/[token].html'), 'utf8');
+  assert.ok(html.includes(`<meta name="${UYGULAMA_JS_META}" content="/_expo/static/js/web/entry-abc123.js"/>`));
+  // İlk açılışta indirilmez: prefetch/preload bağlantısı yok, yalnız meta.
+  assert.doesNotMatch(html, /rel="prefetch"/);
+  assert.equal(uygulamaJsYaz(html, '/x.js'), html);
+  assert.equal(uygulamaJsYaz('<head></head>', null), '<head></head>');
 });

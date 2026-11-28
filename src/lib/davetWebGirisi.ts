@@ -7,8 +7,15 @@ type Parametreler = Record<string, string | string[] | undefined>;
 
 export function tamUygulamaAdresi(yol: string, parametreler: Parametreler = {}): string | null {
   if (!yol.startsWith('/') || yol.startsWith('//')) return null;
+  let cozuk: string;
+  try {
+    cozuk = decodeURIComponent(yol);
+  } catch {
+    // Bozuk `%` dizisi: yeniden yüklenecek güvenilir bir adres yok.
+    return null;
+  }
   const temiz =
-    decodeURIComponent(yol)
+    cozuk
       .split('/')
       .filter((parca) => parca && !/^\(.*\)$/.test(parca))
       .map(encodeURIComponent)
@@ -23,4 +30,25 @@ export function tamUygulamaAdresi(yol: string, parametreler: Parametreler = {}):
   }
   const s = sorgu.toString();
   return s ? `${tam}?${s}` : tam;
+}
+
+/** Davet sayfasına derlemede yazılan meta: tam uygulamanın giriş JS'i (scripts/web-davet-girisi.mjs). */
+export const UYGULAMA_JS_META = 'tripmate-uygulama-js';
+
+/**
+ * #550: davet özeti çizildikten sonra tam uygulamanın giriş JS'ini boşta önden indirir (`<link rel="prefetch">`, bir kez).
+ * Giriş, seyahat ya da ana sayfaya geçişteki tam yeniden yükleme paketi beklemesin. Meta yoksa (ör. geliştirme sunucusu)
+ * hiçbir şey yapmaz.
+ */
+export function uygulamayiOnYukle(belge: Document | undefined = typeof document === 'undefined' ? undefined : document): boolean {
+  if (!belge) return false;
+  const adres = belge.querySelector(`meta[name="${UYGULAMA_JS_META}"]`)?.getAttribute('content');
+  if (!adres || !adres.startsWith('/') || adres.startsWith('//')) return false;
+  if (belge.querySelector(`link[rel="prefetch"][href="${adres}"]`)) return false;
+  const bag = belge.createElement('link');
+  bag.rel = 'prefetch';
+  bag.as = 'script';
+  bag.href = adres;
+  belge.head.appendChild(bag);
+  return true;
 }
