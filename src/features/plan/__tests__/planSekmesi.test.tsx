@@ -1,21 +1,27 @@
-// #182 KK7: Plan sekmesini açıp günler arasında gezinmek Google isteği doğurmaz — sekme gerçek kancalarıyla çizilir (Supabase
+// #182 KK7 · #667: Plan sekmesini açıp genel bakıştan günlere girip çıkmak Google isteği doğurmaz — sekme gerçek kancalarıyla çizilir (Supabase
 // sahte; Edge Function çağrıları ve fetch sayılır). Harita "Haritayı aç" ile açılınca istek beklenir (yalnız orada).
 import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { act, fireEvent, render, waitFor, within } from '@testing-library/react-native';
-import { Modal, Platform } from 'react-native';
+import { router } from 'expo-router';
+import { Modal, Platform, StyleSheet } from 'react-native';
 import type { ReactNode } from 'react';
 
 import { gunEtiketi } from '@/features/gezi/geziOzeti';
+import { gunBasligiV13 } from '@/features/plan/genelBakis';
 import { t } from '@/i18n';
 import { SeyahatIdSaglayici } from '@/features/seyahatler/baglam';
 import { hafifOnbellek } from '@/features/yerler/api';
 import { tarihEkle } from '@/lib/takvim';
 import { yerelTarih } from '@/lib/zaman';
+import { gunRengi } from '@/theme';
 import { sahte, sahteSifirla, type Tablolar } from '@/testYardim/sahteSupabase';
 
 import ProgramEkrani from '../../../app/seyahat/[id]/(sekmeler)/program';
 
+let mockParametreler: Record<string, string> = {};
+let mockOdakKaybi: (() => void) | null = null;
+let mockSekmeBasma: (() => void) | null = null;
 jest.mock('@/lib/supabase', () => jest.requireActual('@/testYardim/sahteSupabase'));
 jest.mock('react-native-safe-area-context', () => jest.requireActual<{ default: object }>('react-native-safe-area-context/jest/mock').default);
 jest.mock('@/lib/hataRaporu', () => ({ izBirak: () => undefined }));
@@ -25,10 +31,25 @@ jest.mock('@/lib/oturum', () => ({ useOturum: () => ({ session: { user: { id: 'b
 jest.mock('@/features/konum/useKonum', () => ({ useKonum: () => ({ konum: null, izin: 'yok' }), yakinDurakId: () => null }));
 jest.mock('expo-router', () => ({
   router: { navigate: jest.fn(), push: jest.fn(), replace: jest.fn(), back: jest.fn(), canGoBack: () => false },
-  useLocalSearchParams: () => ({}),
+  useLocalSearchParams: () => mockParametreler,
   useGlobalSearchParams: () => ({}),
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
-  useFocusEffect: (cb: () => void) => require('react').useEffect(cb, [cb]),
+  // #667: odak kaybı (sekmeden çıkış) testten tetiklenir — temizleme işlevi `mockOdakKaybi`'na yazılır.
+  useFocusEffect: (cb: () => void | (() => void)) =>
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    require('react').useEffect(() => {
+      const temizle = cb();
+      mockOdakKaybi = temizle ?? null;
+      return temizle;
+    }, [cb]),
+  // #667: açık sekmeye yeniden basma (`tabPress`) testten tetiklenir.
+  useNavigation: () => ({
+    addListener: (olay: string, f: () => void) => {
+      if (olay === 'tabPress') mockSekmeBasma = f;
+      return () => {
+        if (mockSekmeBasma === f) mockSekmeBasma = null;
+      };
+    },
+  }),
 }));
 
 const IST = 'Europe/Istanbul';
@@ -139,53 +160,103 @@ const sakinles = async (qc: QueryClient) => {
   await waitFor(() => expect(qc.isFetching()).toBe(0));
 };
 
-describe('#182 KK7: Plan sekmesi Google isteği doğurmaz', () => {
-  it('açılış ve günler arasında gezinme: Edge Function ve fetch çağrılmaz; adlar DB / kategori, öneren, oy', async () => {
+describe('#182 KK7 · #667: Plan sekmesi (genel bakış → gün detayı) Google isteği doğurmaz', () => {
+  it('genel bakış: başlık, ⋯, gün lejantı, gün kartları (K durak · X / 8 sa, dolgu), boş gün + Doldur', async () => {
     const bas = tarihEkle(yerelTarih(new Date(), IST), 12);
-    sahteSifirla(fikstur(bas), { 'ChIJ-db-1': { ad: 'Eti Arkeoloji Müzesi', kategori: 'museum' } });
-    const { getByText, getByLabelText, getAllByText, queryByText, qc, UNSAFE_root } = ciz();
-    await waitFor(() => getByLabelText('Haritada gör'));
+    const f = fikstur(bas);
+    // Güne konmamış bir yer: "Güne konmamış 1 yer · Yerleştir ›".
+    f.places = [...f.places, mekan('m4444', 'ChIJ-google-4', 'cafe')];
+    sahteSifirla(f, { 'ChIJ-db-1': { ad: 'Eti Arkeoloji Müzesi', kategori: 'museum' } });
+    const { getByText, getByLabelText, getByTestId, queryByText, qc } = ciz();
+    await waitFor(() => getByLabelText(t('plan.diger')));
     await sakinles(qc);
 
-    // #534 KK1: "Plan" + harita ve ⋯ düğmeleri; üst harita şeridi, Sırayı düzenle hapı ve avatarlar yok.
+    // KK3 üst: "Plan", yüzler (Grup penceresi) ve ⋯; v7p'nin gün sekmeleri ve harita düğmesi yok.
     expect(getByText('Plan')).toBeTruthy();
-    expect(getByLabelText('Sırayı düzenle ve gün ayarları')).toBeTruthy();
-    expect(queryByText('Haritayı aç')).toBeNull();
-    expect(queryByText('Sırayı düzenle')).toBeNull();
-    // KK3: gün özeti — saat aralığı ve durak sayısı.
-    expect(getByText(/09:30–\d\d:\d\d · 2 durak$/)).toBeTruthy();
-    // KK4: otel yok → tek "Otel ekle" satırı.
-    expect(getByText('Otel ekle')).toBeTruthy();
-    expect(getByText('Gün otelden başlasın, saatler ona göre')).toBeTruthy();
-    // KK5: saat sütunu; DB'deki ad, Google'da kalan ad yerine kategori; alt satır "tür · süre".
+    expect(getByLabelText(t('seyahat.grup.baslik'))).toBeTruthy();
+    expect(queryByText(gunEtiketi({ index: 2, date: tarihEkle(bas, 1) }))).toBeNull();
+    expect(queryByText('Haritada gör')).toBeNull();
+    // Harita: lejantta yalnız durağı olan günler; dokununca tam harita.
+    expect(getByText('1. gün')).toBeTruthy();
+    expect(getByText('2. gün')).toBeTruthy();
+    expect(queryByText('3. gün')).toBeNull();
+    expect(getByLabelText(t('planV13.haritayiAc'))).toBeTruthy();
+    // "Güne konmamış N yer · Yerleştir ›" → Listem.
+    expect(getByText('Güne konmamış 1 yer')).toBeTruthy();
+    fireEvent.press(getByLabelText('Güne konmamış 1 yer. Yerleştir'));
+    expect(router.navigate).toHaveBeenCalledWith({ pathname: '/seyahat/[id]/listem', params: { id: 't1' } });
+
+    // Gün kartları: "1. gün · Per 7 Ocak", "2 durak · X / 8 sa" ve dolgu çubuğu (gün renginde).
+    expect(getByText(gunBasligiV13({ index: 1, date: bas }))).toBeTruthy();
+    expect(getByText(/^2 durak · [\d,]+ \/ 8 sa$/)).toBeTruthy();
+    expect(getByText(/^1 durak · [\d,]+ \/ 8 sa$/)).toBeTruthy();
+    const dolgu = StyleSheet.flatten(getByTestId('dolgu:g1').props.style);
+    expect(dolgu.backgroundColor).toBe(gunRengi(1));
+    expect(String(dolgu.width)).toMatch(/^\d+%$/);
+    // Boş gün: kesik çerçeve, "Boş gün" ve "+ Doldur" → Yer ekle o gün seçili.
+    expect(getByText(t('planV13.bosGun'))).toBeTruthy();
+    fireEvent.press(getByText(t('planV13.doldur')));
+    expect(router.navigate).toHaveBeenCalledWith({ pathname: '/seyahat/[id]/(sekmeler)/kesfet', params: expect.objectContaining({ id: 't1', gun: '3' }) });
+
+    expect(sahte.invoke).toEqual([]);
+    expect(fetchSahte).not.toHaveBeenCalled();
+  });
+
+  it('gün detayı: geri, başlık, Düzenle, özet satırı, otel satırı, saatli satırlar, ekleyenin yüzü, + Durak ekle', async () => {
+    const bas = tarihEkle(yerelTarih(new Date(), IST), 12);
+    sahteSifirla(fikstur(bas), { 'ChIJ-db-1': { ad: 'Eti Arkeoloji Müzesi', kategori: 'museum' } });
+    const { getByText, getByLabelText, getAllByText, queryByText, getAllByRole, qc, UNSAFE_root } = ciz();
+    await waitFor(() => getByLabelText(t('plan.diger')));
+    await sakinles(qc);
+    const baslik1 = gunBasligiV13({ index: 1, date: bas });
+    fireEvent.press(getByLabelText(new RegExp(`^${baslik1}, 2 durak`)));
+    await waitFor(() => getByText(t('planV13.duzenle')));
+    await sakinles(qc);
+
+    // KK4 üst: geri + "1. gün · …" + "Düzenle".
+    expect(getByLabelText(t('planV13.geri'))).toBeTruthy();
+    expect(getByText(baslik1)).toBeTruthy();
+    // Özet: "2 durak · 09:30–HH:MM · km".
+    expect(getByText(/^2 durak · 09:30–\d\d:\d\d · [\d,]+ (m|km)$/)).toBeTruthy();
+    // Otel yok → "Otel ekle" satırı.
+    expect(getByText(t('plan.otelEkle'))).toBeTruthy();
+    // Satırlar: saat sütunu, DB'deki ad, Google'da kalan ad yerine kategori; alt satır "tür · süre".
     expect(getByText('09:30')).toBeTruthy();
     expect(getByText('Eti Arkeoloji Müzesi')).toBeTruthy();
     expect(getByText('Restoran')).toBeTruthy();
     expect(getByText(/^Müze · \d+ (dk|sa)/)).toBeTruthy();
-    expect(queryByText('Ayşe önerdi')).toBeNull();
-    // KK6: bacak "süre · mesafe". KK7: "+ Bu güne yer ekle"; listede güne atanmamış yer yok → Listem satırı yok.
+    // Bacak "süre · mesafe" (yürüme).
     expect(getAllByText(/^~?\d+ dk · [\d,]+ (m|km)$/).length).toBe(1);
-    expect(getByText('Bu güne yer ekle')).toBeTruthy();
-    expect(queryByText(/gün bekliyor/)).toBeNull();
+    // Sağda ekleyenin yüzü: ekran okuyucu "Sen ekledin" / "Ayşe ekledi".
+    const etiketler = getAllByRole('button').map((b) => String(b.props.accessibilityLabel ?? ''));
+    expect(etiketler.some((e) => e.includes('Eti Arkeoloji Müzesi') && e.endsWith(t('planV13.sen')))).toBe(true);
+    expect(etiketler.some((e) => e.includes('Restoran') && e.endsWith('Ayşe ekledi'))).toBe(true);
+    // Sabit turuncu "+ Durak ekle" → Yer ekle bu gün seçili; v7p'nin "Bu güne yer ekle" satırı yok.
+    expect(queryByText(t('plan.buGuneEkle'))).toBeNull();
+    fireEvent.press(getByText(t('planV13.durakEkle')));
+    expect(router.navigate).toHaveBeenCalledWith({ pathname: '/seyahat/[id]/(sekmeler)/kesfet', params: expect.objectContaining({ id: 't1', gun: '1' }) });
 
-    // KK2: günler arasında gezinme (sekme "Cum 27" biçimi).
-    fireEvent.press(getByText(gunEtiketi({ index: 2, date: tarihEkle(bas, 1) })));
+    // Bugün olmayan gün: "Akşam için yakında" yok (KK4: yalnız bugünün detayında).
+    fireEvent.press(getByLabelText(t('planV13.geri')));
+    fireEvent.press(getByLabelText(new RegExp(`^${gunBasligiV13({ index: 2, date: tarihEkle(bas, 1) })}, 1 durak`)));
     await waitFor(() => getByText('Park'));
     await sakinles(qc);
     expect(queryByText('Restoran')).toBeNull();
-    // #532 KK3: gün 17:00'den önce bitiyor → "Akşam için yakında" (listede olmayan yakın rehber yeri) + "Tümü ›".
-    expect(getByText('Sazova Bilim Müzesi')).toBeTruthy();
-    expect(getByText('Tümü ›')).toBeTruthy();
-    fireEvent.press(getByText(gunEtiketi({ index: 3, date: tarihEkle(bas, 2) })));
-    // #554 KK3: boş gün — "Boş gün", "{gün} henüz boş", açıklama ve tek "+ Bu güne yer ekle"; "0 durak" yok.
-    await waitFor(() => getByText(t('plan.bosGun')));
+    expect(queryByText(t('plan.aksamYakinda'))).toBeNull();
+
+    // Boş gün detayı: "{gün} henüz boş" ve açıklama; Düzenle yok, "+ Durak ekle" var.
+    fireEvent.press(getByLabelText(t('planV13.geri')));
+    fireEvent.press(getByLabelText(new RegExp(`^${gunBasligiV13({ index: 3, date: tarihEkle(bas, 2) })}, Boş gün`)));
+    await waitFor(() => getByText(/ henüz boş$/));
     expect(queryByText(/0 durak/)).toBeNull();
-    expect(getByText(/ henüz boş$/)).toBeTruthy();
     expect(getByText(t('plan.bosGunMetinListemBos'))).toBeTruthy();
-    expect(getAllByText('Bu güne yer ekle').length).toBe(1);
+    expect(queryByText(t('planV13.duzenle'))).toBeNull();
+    expect(getByText(t('planV13.durakEkle'))).toBeTruthy();
     await sakinles(qc);
-    // #554 KK4–KK5: ⋯ → en altta "Günü sil" → onay çekmecesi (sistem uyarısı değil); boş günde "Bu günde durak yok.".
-    fireEvent.press(getByLabelText('Sırayı düzenle ve gün ayarları'));
+
+    // ⋯ (genel bakış) → en altta "Günü sil" → onay çekmecesi; seçili gün (boş 3. gün) → "Bu günde durak yok.".
+    fireEvent.press(getByLabelText(t('planV13.geri')));
+    fireEvent.press(getByLabelText(t('plan.diger')));
     fireEvent.press(getByText(t('gunler.gunuSil')));
     // #570 KK8: iOS'ta onay, ⋯ Modal'ı kapandıktan sonra (`onDismiss`) açılır; jest'in Modal'ı onDismiss'i kendisi çağırmaz.
     if (Platform.OS === 'ios') {
@@ -194,7 +265,6 @@ describe('#182 KK7: Plan sekmesi Google isteği doğurmaz', () => {
       });
     }
     await waitFor(() => getByText(/ silinsin mi\?$/));
-    // #570 KK1: boş gün son gün → kayma cümlesi yok.
     expect(getByText(t('gunler.gunSilMetinBos'))).toBeTruthy();
     fireEvent.press(getAllByText(t('genel.vazgec')).at(-1)!);
 
@@ -202,7 +272,7 @@ describe('#182 KK7: Plan sekmesi Google isteği doğurmaz', () => {
     expect(fetchSahte).not.toHaveBeenCalled();
   });
 
-  it('gezi modu: bugün seçili açılır; geçilen durak ✓, sıradaki vurgulu — yine Google isteği yok', async () => {
+  it('gezi modu: bugünün detayında geçilen durak ✓, sıradaki vurgulu; durağa dokununca durak çekmecesi — yine Google isteği yok', async () => {
     const bas = yerelTarih(new Date(), IST);
     const f = fikstur(bas);
     f.stops = [
@@ -212,17 +282,103 @@ describe('#182 KK7: Plan sekmesi Google isteği doğurmaz', () => {
     ];
     sahteSifirla(f, { 'ChIJ-db-1': { ad: 'Eti Arkeoloji Müzesi', kategori: 'museum' } });
     const { getByText, getByLabelText, getAllByRole, qc } = ciz();
-    await waitFor(() => getByLabelText('Haritada gör'));
+    await waitFor(() => getByLabelText(t('plan.diger')));
     await sakinles(qc);
-    // #534 KK2: bugünün sekmesinde "Bugün"; KK5: gezilen durağın alt satırında "· gezildi".
-    expect(getByText('Bugün')).toBeTruthy();
+    fireEvent.press(getByLabelText(new RegExp(`^${gunBasligiV13({ index: 1, date: bas })}, `)));
+    await waitFor(() => getByText(t('planV13.duzenle')));
+    await sakinles(qc);
+    // KK5: gezilen durağın alt satırında "· gezildi".
     expect(getByText('Eti Arkeoloji Müzesi')).toBeTruthy();
     expect(getByText(/^Müze · .* · gezildi$/)).toBeTruthy();
-    // #553 KK2: sıradaki durak `selected` değil, etiketin sonunda "sıradaki durak".
-    const vurgulu = getAllByRole('button').filter((b) => String(b.props.accessibilityLabel ?? '').endsWith(`, ${t('plan.siradakiDurak')}`));
+    // #553 KK2: sıradaki durak etiketinde "sıradaki durak".
+    const vurgulu = getAllByRole('button').filter((b) => String(b.props.accessibilityLabel ?? '').includes(`, ${t('plan.siradakiDurak')}`));
     expect(vurgulu.length).toBe(1);
     expect(within(vurgulu[0]).queryByText('Restoran')).toBeTruthy();
+    // KK5: durağa dokununca #580 durak çekmecesi (Gezdim · Yol tarifi · Atla · Yarına taşı · Çıkar).
+    fireEvent.press(vurgulu[0]);
+    await waitFor(() => getByText(t('durakCekmecesi.gezdim')));
+    expect(getByText(t('durakCekmecesi.yolTarifi'))).toBeTruthy();
+    expect(getByText(t('durakCekmecesi.atla'))).toBeTruthy();
+    expect(getByText(t('durakCekmecesi.yarinaTasi'))).toBeTruthy();
+    expect(getByText(t('durakCekmecesi.cikar'))).toBeTruthy();
     expect(sahte.invoke).toEqual([]);
     expect(fetchSahte).not.toHaveBeenCalled();
+  });
+
+  it('Gezi sayfasının gün kartından (gun parametresi) doğrudan o günün detayı açılır', async () => {
+    const bas = tarihEkle(yerelTarih(new Date(), IST), 12);
+    sahteSifirla(fikstur(bas), { 'ChIJ-db-1': { ad: 'Eti Arkeoloji Müzesi', kategori: 'museum' } });
+    mockParametreler = { gun: '2' };
+    const { getByText, qc } = ciz();
+    await waitFor(() => getByText(gunBasligiV13({ index: 2, date: tarihEkle(bas, 1) })));
+    await sakinles(qc);
+    expect(getByText(t('planV13.duzenle'))).toBeTruthy();
+    expect(getByText('Park')).toBeTruthy();
+    mockParametreler = {};
+  });
+  it('KK3: sekmeden çıkınca ve açık sekmeye yeniden basınca gün detayı kapanır, Plan genel bakışla açılır', async () => {
+    const bas = tarihEkle(yerelTarih(new Date(), IST), 12);
+    sahteSifirla(fikstur(bas), { 'ChIJ-db-1': { ad: 'Eti Arkeoloji Müzesi', kategori: 'museum' } });
+    const { getByText, getByLabelText, queryByText, qc } = ciz();
+    await waitFor(() => getByLabelText(t('plan.diger')));
+    await sakinles(qc);
+    const kart = new RegExp(`^${gunBasligiV13({ index: 1, date: bas })}, 2 durak`);
+    fireEvent.press(getByLabelText(kart));
+    await waitFor(() => getByText(t('planV13.duzenle')));
+    // Sekmeden çıkış (odak kaybı) → genel bakış.
+    act(() => mockOdakKaybi?.());
+    await waitFor(() => getByLabelText(t('plan.diger')));
+    expect(queryByText(t('planV13.duzenle'))).toBeNull();
+    // Açık Plan sekmesine yeniden basma → genel bakış.
+    fireEvent.press(getByLabelText(kart));
+    await waitFor(() => getByText(t('planV13.duzenle')));
+    act(() => mockSekmeBasma?.());
+    await waitFor(() => getByLabelText(t('plan.diger')));
+    expect(queryByText(t('planV13.duzenle'))).toBeNull();
+    await sakinles(qc);
+  });
+
+  it('boş gün kartında "Doldur" ayrı bir düğme (ekran okuyucu ayrı odaklanır); "+ Durak ekle" etiketi "Durak ekle"', async () => {
+    const bas = tarihEkle(yerelTarih(new Date(), IST), 12);
+    sahteSifirla(fikstur(bas), { 'ChIJ-db-1': { ad: 'Eti Arkeoloji Müzesi', kategori: 'museum' } });
+    const { getByText, getByLabelText, qc } = ciz();
+    await waitFor(() => getByLabelText(t('plan.diger')));
+    await sakinles(qc);
+    const baslik3 = gunBasligiV13({ index: 3, date: tarihEkle(bas, 2) });
+    const doldur = getByLabelText(t('planV13.doldurEtiket', { gun: baslik3 }));
+    const kart = getByLabelText(new RegExp(`^${baslik3}, Boş gün`));
+    // İç içe değil: Doldur kartın torunu değil.
+    expect(within(kart).queryByText(t('planV13.doldur'))).toBeNull();
+    expect(within(doldur).getByText(t('planV13.doldur'))).toBeTruthy();
+    fireEvent.press(kart);
+    await waitFor(() => getByText(t('planV13.durakEkle')));
+    expect(getByLabelText(t('planV13.durakEkleEtiket'))).toBeTruthy();
+    // Başlık geri düğmesinden ayrı, başlık rolüyle.
+    expect(getByText(baslik3).props.accessibilityRole).toBe('header');
+    await sakinles(qc);
+  });
+
+  it('gün detayı açıkken gün silinince genel bakışa döner (başka günün detayına düşmez)', async () => {
+    const bas = tarihEkle(yerelTarih(new Date(), IST), 12);
+    sahteSifirla(fikstur(bas), { 'ChIJ-db-1': { ad: 'Eti Arkeoloji Müzesi', kategori: 'museum' } });
+    const { getByText, getByLabelText, getAllByText, queryByText, qc } = ciz();
+    await waitFor(() => getByLabelText(t('plan.diger')));
+    // 2. günün detayı açılır.
+    // 2. günün detayı açılır, genel bakışa dönmeden aynı gün seçili kalır; ⋯ genel bakışta, detay durumu korunarak sil.
+    fireEvent.press(getByLabelText(new RegExp(`^${gunBasligiV13({ index: 2, date: tarihEkle(bas, 1) })}, 1 durak`)));
+    await waitFor(() => getByText('Park'));
+    await sakinles(qc);
+    // Detaydan "Düzenle" → sıralama haritası; gün seçicide 2. güne uzun bas → "Günü sil" onayı (gün detayı durumu açıkken).
+    fireEvent.press(getByText(t('planV13.duzenle')));
+    await waitFor(() => getByLabelText('2. gün · 1 durak'));
+    fireEvent(getByLabelText('2. gün · 1 durak'), 'longPress');
+    await waitFor(() => getByText(/ silinsin mi\?$/));
+    fireEvent.press(getAllByText(t('gunler.gunuSil')).at(-1)!);
+    await waitFor(() => expect(queryByText(/ silinsin mi\?$/)).toBeNull());
+    // Haritadan listeye dönünce genel bakış (silinen günün yerine başka günün detayı değil).
+    fireEvent.press(getByLabelText(t('genel.geri')));
+    await waitFor(() => getByLabelText(t('plan.diger')));
+    expect(queryByText(t('planV13.duzenle'))).toBeNull();
+    // Harita açıldığı için Google istekleri (sahte, başarısız) burada beklenir; sakinleşme beklenmez.
   });
 });

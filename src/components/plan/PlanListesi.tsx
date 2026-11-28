@@ -6,6 +6,7 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { BolumBasligi, BugunBosV7, type BosGunYeri } from '@/components/gezi/SeyahatV7';
+import { Avatar } from '@/components/ui/Avatar';
 import { Ikon } from '@/components/ui/Ikon';
 import { t } from '@/i18n';
 import type { Gun } from '@/lib/tipler';
@@ -45,6 +46,8 @@ export type PlanSatirGorunumu = {
   kapaliUzun?: string | null;
   /** #582: taşınabilecek (kapalı olmayan başka) gün var mı; yoksa "Başka güne taşı" gösterilmez, uyarı kalır. */
   tasinabilir?: boolean;
+  /** #667 KK4: durağı ekleyen üye (`places.added_by`); ekran okuyucu etiketin sonunda "{ad} ekledi". */
+  yuz?: { ad: string; url: string | null; zemin: string; harf: string; etiket: string } | null;
 };
 
 type Props = {
@@ -163,131 +166,7 @@ export function PlanListesi(p: Props) {
             <Text style={s.bosDugmeMetin}>{t('plan.buGuneEkle')}</Text>
           </Pressable>
         ) : null}
-        {p.satirlar.map((r, i) => {
-          const soluk = r.gecildi || r.atlandi;
-          const daire = daireTuru(r, p.bugun);
-          // #570 KK3: vurgulu durakta SIRADAKİ ya da BURADASIN (aynı biçim, yalnız biri).
-          const rozet = rozetAnahtari(r);
-          // #582 KK3: "Başka güne taşı" yalnız uyarı varsa ve taşınacak gün varsa.
-          const tasi = r.kapali && r.tasinabilir && p.onBaskaGuneTasi ? () => p.onBaskaGuneTasi?.(r.id) : null;
-          const parca = r.kapali ? altParcala(r) : null;
-          return (
-            <View key={r.id}>
-              {/* #554 KK2 (pano 2): atlanan durağa bacak bilgisi yok; kısa kesik çizgi. */}
-              {!r.gelis && r.atlandi && i > 0 ? (
-                <View style={s.bacak}>
-                  <View style={s.saatSutunu} />
-                  <View style={[s.kesikSutun, { height: 12 }]}>
-                    {[0, 1].map((i) => (
-                      <View key={i} style={s.kesik} />
-                    ))}
-                  </View>
-                </View>
-              ) : null}
-              {r.gelis ? (
-                <View style={s.bacak} accessible accessibilityLabel={`${t(r.gelis.araba ? 'plan.bacakArac' : 'plan.bacakYuru')} ${r.gelis.metin}`}>
-                  <View style={s.saatSutunu} />
-                  <View style={s.kesikSutun}>
-                    {[0, 1, 2, 3].map((i) => (
-                      <View key={i} style={s.kesik} />
-                    ))}
-                  </View>
-                  <View style={s.bacakBilgi}>
-                    <Ikon ad={r.gelis.araba ? 'arabaV7p' : 'yuruV7p'} boyut={14} renk={anaV5.ikincil} kalinlik={1.8} />
-                    <Text style={s.bacakMetin}>{r.gelis.metin}</Text>
-                  </View>
-                </View>
-              ) : null}
-              <Pressable
-                // #553 KK2: sıradaki/şu anki durak `selected` değil (seçim anlamı taşır); durum etiketin sonunda.
-                accessibilityRole="button"
-                accessibilityLabel={durakEtiketi(r)}
-                // #582: iç bağlantıya ekran okuyucu ulaşamaz (satır tek öğe) — "Başka güne taşı" satırın özel eylemi.
-                accessibilityActions={tasi ? [{ name: TASI_EYLEMI, label: t('plan.baskaGuneTasi') }] : undefined}
-                // #582: eylem menüsünü açmayan kullanıcı da "Başka güne taşı"yı duysun.
-                accessibilityHint={tasi ? t('plan.baskaGuneTasi') : undefined}
-                onAccessibilityAction={
-                  tasi
-                    ? (e) => {
-                        if (e.nativeEvent.actionName === TASI_EYLEMI) tasi();
-                      }
-                    : undefined
-                }
-                onPress={() => p.onDurak(r.mekanId)}
-                onLongPress={() => p.onDurakUzunBas(r.mekanId)}
-                style={({ pressed }) => [s.durak, pressed && { opacity: 0.85 }]}>
-                <Text style={[s.saat, r.vurgulu && { color: renk.metin }]}>{r.saat ?? ''}</Text>
-                {daire === 'tik' ? (
-                  <View style={[s.no, { backgroundColor: seyahatV7.tikZemin }]}>
-                    <Ikon ad="tik" boyut={15} renk={renk.basari} kalinlik={2.4} />
-                  </View>
-                ) : daire === 'kesik' ? (
-                  // #570 KK2 (pano 2, sürüm 54): atlanan durak numarasız; kesik dairenin içi boş.
-                  <View style={[s.no, s.noKesik]} />
-                ) : daire === 'cerceve' ? (
-                  <View style={[s.no, s.noCerceve, { borderColor: r.numaraRengi }]}>
-                    <Text style={[s.noMetin, { color: renk.metin }]}>{r.numara ?? '–'}</Text>
-                  </View>
-                ) : (
-                  <View style={[s.no, { backgroundColor: r.numaraRengi }]}>
-                    <Text style={[s.noMetin, { color: gunUstuMetin(r.numaraRengi) }]}>{r.numara ?? '–'}</Text>
-                  </View>
-                )}
-                {/* #582: bağlantının hitSlop'u Android'de üst kabı aşamaz — uyarılı satırda sütun durağın tam yüksekliğine uzar (görünüş aynı). */}
-                <View style={[s.icerik, tasi && s.icerikTam]}>
-                  {rozet ? <Text style={s.rozet}>{t(rozet)}</Text> : null}
-                  <Text style={[s.ad, soluk && { color: anaV5.ikincil }]} numberOfLines={2}>
-                    {r.ad}
-                  </Text>
-                  {r.kapali && parca ? (
-                    // #582 (Ürün değişiklik 1; kanvas emsali `Ekran24Plan` "Müze · Pzt kapalı"): uyarı alt satırın içinde, tek satır —
-                    // "{tür} · {süre} · Pzt kapalı · Başka güne taşı ›". Sığmazsa önce tür, sonra süre "…" ile kısalır; uyarı ve bağlantı kesilmez.
-                    <View style={s.altSatir}>
-                      {parca.tur ? (
-                        <Text style={[s.alt, s.kisalir]} numberOfLines={1}>
-                          {parca.tur}
-                        </Text>
-                      ) : null}
-                      {parca.ara ? (
-                        <Text style={[s.alt, s.araKisalir]} numberOfLines={1}>
-                          {parca.ara}
-                        </Text>
-                      ) : null}
-                      <Text style={[s.alt, s.sabit, s.kapali]} numberOfLines={1}>
-                        {r.kapali}
-                      </Text>
-                      {tasi ? (
-                        <>
-                          <Text style={[s.alt, s.sabit]}>{AYRAC}</Text>
-                          {/* Dokunma alanı 44 pt: satır yüksekliği değişmesin diye hitSlop ile. */}
-                          <Pressable
-                            accessibilityRole="button"
-                            accessibilityLabel={t('plan.kapaliTasiEtiket', { uyari: r.kapaliUzun ?? r.kapali })}
-                            onPress={tasi}
-                            hitSlop={TASI_HITSLOP}
-                            style={s.sabit}>
-                            <Text style={[s.alt, s.kapali, s.tasi]} numberOfLines={1}>
-                              {t('plan.baskaGuneTasiBag')}
-                            </Text>
-                          </Pressable>
-                        </>
-                      ) : null}
-                    </View>
-                  ) : r.alt ? (
-                    <Text style={s.alt} numberOfLines={1}>
-                      {r.alt}
-                    </Text>
-                  ) : null}
-                </View>
-                {r.atlandi ? (
-                  <View style={s.hap}>
-                    <Text style={s.hapMetin}>{t('plan.atlandi')}</Text>
-                  </View>
-                ) : null}
-              </Pressable>
-            </View>
-          );
-        })}
+        <DurakSatirlari satirlar={p.satirlar} bugun={p.bugun} onDurak={p.onDurak} onDurakUzunBas={p.onDurakUzunBas} onBaskaGuneTasi={p.onBaskaGuneTasi} />
         {p.onEkle && !p.bosGun ? (
           <Pressable accessibilityRole="button" onPress={p.onEkle} style={({ pressed }) => [s.ekle, pressed && { opacity: 0.8 }]}>
             <View style={s.saatSutunu} />
@@ -306,6 +185,148 @@ export function PlanListesi(p: Props) {
         {p.listem ? <ListemBekliyorSatiri n={p.listem.n} onPress={p.listem.onPress} bosGun={!!p.bosGun} /> : null}
       </View>
     </ScrollView>
+  );
+}
+
+/** #667: durak ve bacak satırları — v7p listesi ve v13 gün detayı (`PlanGunDetayi`) ortak kullanır. `yuz` verilen satırın
+ * sağında durağı ekleyenin yüzü (KK4). */
+export function DurakSatirlari(p: {
+  satirlar: PlanSatirGorunumu[];
+  bugun: boolean;
+  onDurak: (mekanId: string) => void;
+  onDurakUzunBas: (mekanId: string) => void;
+  onBaskaGuneTasi?: (durakId: string) => void;
+}) {
+  return (
+    <>
+      {p.satirlar.map((r, i) => {
+        const soluk = r.gecildi || r.atlandi;
+        const daire = daireTuru(r, p.bugun);
+        // #570 KK3: vurgulu durakta SIRADAKİ ya da BURADASIN (aynı biçim, yalnız biri).
+        const rozet = rozetAnahtari(r);
+        // #582 KK3: "Başka güne taşı" yalnız uyarı varsa ve taşınacak gün varsa.
+        const tasi = r.kapali && r.tasinabilir && p.onBaskaGuneTasi ? () => p.onBaskaGuneTasi?.(r.id) : null;
+        const parca = r.kapali ? altParcala(r) : null;
+        return (
+          <View key={r.id}>
+            {/* #554 KK2 (pano 2): atlanan durağa bacak bilgisi yok; kısa kesik çizgi. */}
+            {!r.gelis && r.atlandi && i > 0 ? (
+              <View style={s.bacak}>
+                <View style={s.saatSutunu} />
+                <View style={[s.kesikSutun, { height: 12 }]}>
+                  {[0, 1].map((i) => (
+                    <View key={i} style={s.kesik} />
+                  ))}
+                </View>
+              </View>
+            ) : null}
+            {r.gelis ? (
+              <View style={s.bacak} accessible accessibilityLabel={`${t(r.gelis.araba ? 'plan.bacakArac' : 'plan.bacakYuru')} ${r.gelis.metin}`}>
+                <View style={s.saatSutunu} />
+                <View style={s.kesikSutun}>
+                  {[0, 1, 2, 3].map((i) => (
+                    <View key={i} style={s.kesik} />
+                  ))}
+                </View>
+                <View style={s.bacakBilgi}>
+                  <Ikon ad={r.gelis.araba ? 'arabaV7p' : 'yuruV7p'} boyut={14} renk={anaV5.ikincil} kalinlik={1.8} />
+                  <Text style={s.bacakMetin}>{r.gelis.metin}</Text>
+                </View>
+              </View>
+            ) : null}
+            <Pressable
+              // #553 KK2: sıradaki/şu anki durak `selected` değil (seçim anlamı taşır); durum etiketin sonunda.
+              accessibilityRole="button"
+              accessibilityLabel={r.yuz ? okunurAyrac(`${durakEtiketi(r)}, ${r.yuz.etiket}`) : durakEtiketi(r)}
+              // #582: iç bağlantıya ekran okuyucu ulaşamaz (satır tek öğe) — "Başka güne taşı" satırın özel eylemi.
+              accessibilityActions={tasi ? [{ name: TASI_EYLEMI, label: t('plan.baskaGuneTasi') }] : undefined}
+              // #582: eylem menüsünü açmayan kullanıcı da "Başka güne taşı"yı duysun.
+              accessibilityHint={tasi ? t('plan.baskaGuneTasi') : undefined}
+              onAccessibilityAction={
+                tasi
+                  ? (e) => {
+                      if (e.nativeEvent.actionName === TASI_EYLEMI) tasi();
+                    }
+                  : undefined
+              }
+              onPress={() => p.onDurak(r.mekanId)}
+              onLongPress={() => p.onDurakUzunBas(r.mekanId)}
+              style={({ pressed }) => [s.durak, pressed && { opacity: 0.85 }]}>
+              <Text style={[s.saat, r.vurgulu && { color: renk.metin }]}>{r.saat ?? ''}</Text>
+              {daire === 'tik' ? (
+                <View style={[s.no, { backgroundColor: seyahatV7.tikZemin }]}>
+                  <Ikon ad="tik" boyut={15} renk={renk.basari} kalinlik={2.4} />
+                </View>
+              ) : daire === 'kesik' ? (
+                // #570 KK2 (pano 2, sürüm 54): atlanan durak numarasız; kesik dairenin içi boş.
+                <View style={[s.no, s.noKesik]} />
+              ) : daire === 'cerceve' ? (
+                <View style={[s.no, s.noCerceve, { borderColor: r.numaraRengi }]}>
+                  <Text style={[s.noMetin, { color: renk.metin }]}>{r.numara ?? '–'}</Text>
+                </View>
+              ) : (
+                <View style={[s.no, { backgroundColor: r.numaraRengi }]}>
+                  <Text style={[s.noMetin, { color: gunUstuMetin(r.numaraRengi) }]}>{r.numara ?? '–'}</Text>
+                </View>
+              )}
+              {/* #582: bağlantının hitSlop'u Android'de üst kabı aşamaz — uyarılı satırda sütun durağın tam yüksekliğine uzar (görünüş aynı). */}
+              <View style={[s.icerik, tasi && s.icerikTam]}>
+                {rozet ? <Text style={s.rozet}>{t(rozet)}</Text> : null}
+                <Text style={[s.ad, soluk && { color: anaV5.ikincil }]} numberOfLines={2}>
+                  {r.ad}
+                </Text>
+                {r.kapali && parca ? (
+                  // #582 (Ürün değişiklik 1; kanvas emsali `Ekran24Plan` "Müze · Pzt kapalı"): uyarı alt satırın içinde, tek satır —
+                  // "{tür} · {süre} · Pzt kapalı · Başka güne taşı ›". Sığmazsa önce tür, sonra süre "…" ile kısalır; uyarı ve bağlantı kesilmez.
+                  <View style={s.altSatir}>
+                    {parca.tur ? (
+                      <Text style={[s.alt, s.kisalir]} numberOfLines={1}>
+                        {parca.tur}
+                      </Text>
+                    ) : null}
+                    {parca.ara ? (
+                      <Text style={[s.alt, s.araKisalir]} numberOfLines={1}>
+                        {parca.ara}
+                      </Text>
+                    ) : null}
+                    <Text style={[s.alt, s.sabit, s.kapali]} numberOfLines={1}>
+                      {r.kapali}
+                    </Text>
+                    {tasi ? (
+                      <>
+                        <Text style={[s.alt, s.sabit]}>{AYRAC}</Text>
+                        {/* Dokunma alanı 44 pt: satır yüksekliği değişmesin diye hitSlop ile. */}
+                        <Pressable
+                          accessibilityRole="button"
+                          accessibilityLabel={t('plan.kapaliTasiEtiket', { uyari: r.kapaliUzun ?? r.kapali })}
+                          onPress={tasi}
+                          hitSlop={TASI_HITSLOP}
+                          style={s.sabit}>
+                          <Text style={[s.alt, s.kapali, s.tasi]} numberOfLines={1}>
+                            {t('plan.baskaGuneTasiBag')}
+                          </Text>
+                        </Pressable>
+                      </>
+                    ) : null}
+                  </View>
+                ) : r.alt ? (
+                  <Text style={s.alt} numberOfLines={1}>
+                    {r.alt}
+                  </Text>
+                ) : null}
+              </View>
+              {r.atlandi ? (
+                <View style={s.hap}>
+                  <Text style={s.hapMetin}>{t('plan.atlandi')}</Text>
+                </View>
+              ) : null}
+              {/* #667 KK4 (kanvas `Plan_v13_Gun`): sağda durağı ekleyenin 24 pt yüzü (10/800). */}
+              {r.yuz ? <Avatar ad={r.yuz.ad} url={r.yuz.url} boyut={24} yuvarlak arkaPlan={r.yuz.zemin} harfRengi={r.yuz.harf} harfBoyutu={10} /> : null}
+            </Pressable>
+          </View>
+        );
+      })}
+    </>
   );
 }
 
