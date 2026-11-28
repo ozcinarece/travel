@@ -4430,15 +4430,29 @@ begin
   assert not public.paylasim_harita_izni_kimlik(current_setting('test.l2')::uuid), '#533 8c: birlikte gezilmeyenin haritası kimlikle açılmaz';
   assert not public.paylasim_harita_izni_kimlik(current_setting('test.l4')::uuid), '#533 8c: eski linkin haritası kimlikle açılmaz';
 end $$;
+-- #540 KK3: akış izleyenden başlar (kısmi indeks); A ile iki ortak seyahat olsa da kart bir kez gelir.
+do $$ begin assert (select indexdef like '%(olusturan) WHERE (acik AND akista)' from pg_indexes where indexname = 'gezi_paylasim_olusturan_akista'), '#540 KK3: kısmi indeks'; end $$;
+reset role;
+insert into public.trips (id, owner_id, name, city_place_id, city_label, country_code, lat, lng, tz) values
+  ('40700000-0000-4000-8000-000000000005', :FA, null, 'ChIJ-bolu-407', 'Bolu', 'TR', 40.73, 31.61, 'Europe/Istanbul');
+insert into public.members (trip_id, user_id, display_name, guest) values ('40700000-0000-4000-8000-000000000005', :FB, 'Berk', false);
+set role authenticated;
+select pg_temp.as_user(:FB);
+do $$ begin assert (select array_agg(id) from public.arkadas_paylasimlari()) = array[current_setting('test.l3')::uuid], '#540 KK3: iki ortak seyahatte kart bir kez'; end $$;
+reset role;
+delete from public.trips where id = '40700000-0000-4000-8000-000000000005';
+set role authenticated;
+select pg_temp.as_user(:FB);
 select pg_temp.hata_bekle($$select public.paylasimdan_al_kimlik(current_setting('test.l2')::uuid)$$, 'P0002');
 select pg_temp.hata_bekle($$select public.paylasimdan_al_kimlik(current_setting('test.l4')::uuid)$$, 'P0002');
 select pg_temp.hata_bekle($$insert into public.paylasim_begeni (paylasim_id) values (current_setting('test.l4')::uuid)$$, '42501');
 do $$ begin assert public.paylasimdan_al_kimlik(current_setting('test.l3')::uuid) is not null, '#407 KK3: Seyahatime al kimlikle'; end $$;
 -- Soru 4: kimlikle açılış `acilma_sayisi`'na sayılır ama 500/gün tavanına sayılmaz; tavan dolu olsa da sayaç artar.
+-- (#540 KK4: B bugün zaten açtı; bugün ilk kez açan D.)
 reset role;
 update public.gezi_paylasim set acilma_sayisi = 0, acilma_gunu = current_date, acilma_gun_sayisi = 500 where id = current_setting('test.l3')::uuid;
 set role authenticated;
-select pg_temp.as_user(:FB);
+select pg_temp.as_user(:FD);
 select public.paylasim_ozeti_kimlik(current_setting('test.l3')::uuid);
 reset role;
 do $$ begin assert (select acilma_sayisi = 1 and acilma_gun_sayisi = 500 from public.gezi_paylasim where id = current_setting('test.l3')::uuid), '#533 soru 4: akıştan açılış tavana sayılmaz'; end $$;
@@ -4448,6 +4462,59 @@ select pg_temp.as_user(null);
 select public.paylasim_ozeti(current_setting('test.l3_token'));
 reset role;
 do $$ begin assert (select acilma_sayisi = 1 from public.gezi_paylasim where id = current_setting('test.l3')::uuid), '#517 KK-ek2: linkle açılış tavanı sürüyor'; end $$;
+-- #540 KK4: kimlikle açılış kişi başına günde en çok bir kez sayılır. B ve D bugün açtı: yeniden açışları sayılmaz.
+update public.gezi_paylasim set acilma_sayisi = 0 where id = current_setting('test.l3')::uuid;
+set role authenticated;
+select pg_temp.as_user(:FB);
+select public.paylasim_ozeti_kimlik(current_setting('test.l3')::uuid);
+select public.paylasim_ozeti_kimlik(current_setting('test.l3')::uuid);
+select pg_temp.as_user(:FD);
+select public.paylasim_ozeti_kimlik(current_setting('test.l3')::uuid);
+reset role;
+do $$ begin assert (select acilma_sayisi = 0 from public.gezi_paylasim where id = current_setting('test.l3')::uuid), '#540 KK4: aynı gün ikinci açılış sayılmaz'; end $$;
+do $$ begin assert (select count(*) from public.paylasim_acilisi where paylasim_id = current_setting('test.l3')::uuid) = 2, '#540 KK4: (paylaşım, kişi) başına tek satır'; end $$;
+-- Ertesi gün (B'nin son açılışı dün): ilk açılış sayılır, ikincisi sayılmaz; D'ninki yine sayılmaz.
+update public.paylasim_acilisi set gun = current_date - 1 where user_id = :FB;
+set role authenticated;
+select pg_temp.as_user(:FB);
+select public.paylasim_ozeti_kimlik(current_setting('test.l3')::uuid);
+select public.paylasim_ozeti_kimlik(current_setting('test.l3')::uuid);
+select pg_temp.as_user(:FD);
+select public.paylasim_ozeti_kimlik(current_setting('test.l3')::uuid);
+reset role;
+do $$ begin assert (select acilma_sayisi = 1 from public.gezi_paylasim where id = current_setting('test.l3')::uuid), '#540 KK4: ertesi gün bir kez daha sayılır'; end $$;
+do $$ begin assert (select gun = current_date from public.paylasim_acilisi where user_id = '40700000-0000-4000-8000-0000000000b2' and paylasim_id = current_setting('test.l3')::uuid), '#540 KK4: gün ilerler'; end $$;
+-- #540 KK4 (Ürün kararı): sayaç kısa ömürlü; ertesi gün açılınca önceki günün satırları (başka paylaşım ve kişininki de)
+-- silinir, tabloda yalnız bugünün satırları kalır. Dünkü iki satır eklenir: D'nin Bursa'sı (bu paylaşım değil) ve D'nin
+-- Antalya'sı (bu paylaşım, dün); B bugün Antalya'yı açar.
+update public.paylasim_acilisi set gun = current_date - 1 where user_id = :FD;
+insert into public.paylasim_acilisi (paylasim_id, user_id, gun) values (current_setting('test.l1')::uuid, :FD, current_date - 1);
+do $$ begin assert (select count(*) from public.paylasim_acilisi where gun < current_date) = 2, '#540 KK4 ön koşul: dünün iki satırı'; end $$;
+set role authenticated;
+select pg_temp.as_user(:FB);
+select public.paylasim_ozeti_kimlik(current_setting('test.l3')::uuid);
+reset role;
+do $$ begin assert not exists (select 1 from public.paylasim_acilisi where gun < current_date), '#540 KK4: ertesi gün önceki günün satırı kalmaz'; end $$;
+do $$ begin assert (select array_agg(user_id) from public.paylasim_acilisi) = array['40700000-0000-4000-8000-0000000000b2'::uuid], '#540 KK4: yalnız bugünün satırı kalır'; end $$;
+do $$ begin assert (select acilma_sayisi = 1 from public.gezi_paylasim where id = current_setting('test.l3')::uuid), '#540 KK4: B bugün ikinci kez sayılmaz'; end $$;
+-- D bugün yeniden açar: dünkü satırı silindiği için bir kez sayılır.
+set role authenticated;
+select pg_temp.as_user(:FD);
+select public.paylasim_ozeti_kimlik(current_setting('test.l3')::uuid);
+reset role;
+do $$ begin assert (select acilma_sayisi = 2 from public.gezi_paylasim where id = current_setting('test.l3')::uuid), '#540 KK4: dünkü satırı silinen D bugün bir kez sayılır'; end $$;
+-- #540 KK4: açılış kaydı istemciye kapalı (okuma, yazma, silme yok).
+set role authenticated;
+select pg_temp.as_user(:FB);
+select pg_temp.hata_bekle($$select * from public.paylasim_acilisi$$, '42501');
+select pg_temp.hata_bekle($$insert into public.paylasim_acilisi (paylasim_id, user_id, gun) values (current_setting('test.l3')::uuid, auth.uid(), current_date + 1)$$, '42501');
+select pg_temp.hata_bekle($$update public.paylasim_acilisi set gun = current_date - 1$$, '42501');
+select pg_temp.hata_bekle($$delete from public.paylasim_acilisi$$, '42501');
+reset role;
+set role anon;
+select pg_temp.as_user(null);
+select pg_temp.hata_bekle($$select * from public.paylasim_acilisi$$, '42501');
+reset role;
 set role authenticated;
 -- A kendi paylaşımını akışta görmez; D, B ile aynı: Bursa (kendi seyahati) yok, Antalya var.
 select pg_temp.as_user(:FA);
@@ -4513,7 +4580,21 @@ end $$;
 select pg_temp.hata_bekle($$select public.paylasimdan_al_kimlik(current_setting('test.l3')::uuid)$$, 'P0002');
 select pg_temp.as_user(:FC);
 do $$ begin assert public.paylasim_ozeti_kimlik(current_setting('test.l3')::uuid) is null, '#533 4: birlikte gezmeyene kapalı link de görünmez'; end $$;
+-- #540 KK5: oluşturanı silinmiş (null) paylaşım: açık da kapalı da olsa null; "kapalı" bilgisi dönmez, sayaç artmaz.
+select pg_temp.as_user(:FB);
+do $$ begin assert (public.paylasim_ozeti_kimlik(current_setting('test.l1')::uuid) ->> 'kapali')::boolean is false, '#540 KK5 ön koşul: Bursa linki açılır'; end $$;
 reset role;
+update public.gezi_paylasim set olusturan = null, acilma_sayisi = 0 where id in (current_setting('test.l1')::uuid, current_setting('test.l3')::uuid);
+update public.paylasim_acilisi set gun = current_date - 1;
+set role authenticated;
+select pg_temp.as_user(:FB);
+do $$
+begin
+  assert public.paylasim_ozeti_kimlik(current_setting('test.l3')::uuid) is null, '#540 KK5: sahipsiz kapalı link null, "kapalı" yok';
+  assert public.paylasim_ozeti_kimlik(current_setting('test.l1')::uuid) is null, '#540 KK5: sahipsiz açık link null';
+end $$;
+reset role;
+do $$ begin assert (select sum(acilma_sayisi) from public.gezi_paylasim where id in (current_setting('test.l1')::uuid, current_setting('test.l3')::uuid)) = 0, '#540 KK5: sahipsiz linkte sayaç artmaz'; end $$;
 -- #533 8c: anon rolü hiçbir arkadaş fonksiyonunu çağıramaz.
 set role anon;
 select pg_temp.as_user(null);

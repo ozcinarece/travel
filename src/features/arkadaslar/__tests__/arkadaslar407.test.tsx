@@ -92,7 +92,7 @@ describe('#407 Arkadaşlar', () => {
     expect(screen.getByText('2 gün önce')).toBeTruthy();
     expect(screen.getByText('2 gün · 9 durak · 3 kişi gezdi', { includeHiddenElements: true })).toBeTruthy();
     expect(screen.queryByText('Arkadaşların gezilerini paylaşınca burada görünür.')).toBeNull();
-    fireEvent.press(screen.getByRole('button', { name: 'Ayşe, Bursa gezisi. Açar' }));
+    fireEvent.press(screen.getByRole('button', { name: 'Ayşe Bursa gezisini paylaştı, 2 gün önce. 2 gün · 9 durak · 3 kişi gezdi' }));
     expect(mockPush).toHaveBeenCalledWith({ pathname: '/r/g/[token]', params: { token: '11111111-1111-4111-8111-111111111111' } });
   });
 
@@ -101,7 +101,7 @@ describe('#407 Arkadaşlar', () => {
     render(<ArkadaslarEkrani />);
     fireEvent.press(screen.getByTestId('arkadas-begen-11111111-1111-4111-8111-111111111111'));
     expect(mockBegen).toHaveBeenCalledWith({ id: '11111111-1111-4111-8111-111111111111', begen: true }, expect.anything());
-    expect(screen.getByTestId('arkadas-begen-22222222-2222-4222-8222-222222222222').props.accessibilityState).toMatchObject({ selected: true });
+    expect(screen.getByTestId('arkadas-begen-22222222-2222-4222-8222-222222222222').props.accessibilityLabel).toBe('Beğeniyi geri al');
     fireEvent.press(screen.getByTestId('arkadas-begen-22222222-2222-4222-8222-222222222222'));
     expect(mockBegen).toHaveBeenLastCalledWith({ id: '22222222-2222-4222-8222-222222222222', begen: false }, expect.anything());
   });
