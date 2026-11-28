@@ -16,17 +16,17 @@ describe('Plan v7p küçükleri (#553)', () => {
 
   it('KK2: sıradaki durak etiketin sonunda "sıradaki durak"; diğerlerinde yok', () => {
     const r = { saat: '10:42', ad: 'Pantheon', alt: 'Müze · 1 sa', vurgulu: true };
-    expect(durakEtiketi(r)).toBe(`10:42, Pantheon, Müze · 1 sa, ${t('plan.siradakiDurak')}`);
-    expect(durakEtiketi({ ...r, vurgulu: false })).toBe('10:42, Pantheon, Müze · 1 sa');
-    expect(durakEtiketi({ ...r, saat: null, vurgulu: false })).toBe('Pantheon, Müze · 1 sa');
+    expect(durakEtiketi(r)).toBe(`10:42, Pantheon, Müze, 1 sa, ${t('plan.siradakiDurak')}`);
+    expect(durakEtiketi({ ...r, vurgulu: false })).toBe('10:42, Pantheon, Müze, 1 sa');
+    expect(durakEtiketi({ ...r, saat: null, vurgulu: false })).toBe('Pantheon, Müze, 1 sa');
     // #558 madde 2: "buradasın" durumundaki durak "sıradaki" diye okunmaz.
-    expect(durakEtiketi({ ...r, buradasin: true })).toBe(`10:42, Pantheon, Müze · 1 sa, ${t('plan.buradasinDurak')}`);
+    expect(durakEtiketi({ ...r, buradasin: true })).toBe(`10:42, Pantheon, Müze, 1 sa, ${t('plan.buradasinDurak')}`);
     expect(durakEtiketi({ ...r, buradasin: true })).not.toContain(t('plan.siradakiDurak'));
   });
 
   it('KK4: geçmiş gün "…, geçti" diye okunur; diğer günler alt satırla', () => {
     expect(gunSatiriEtiketi('Çar 25', t('listem.guneEkle.gecti'), { gecti: true, enYakin: false })).toBe(`Çar 25, ${t('listem.guneEkle.gectiOkunus')}`);
-    expect(gunSatiriEtiketi('Cum 27', '2 durak', { gecti: false, enYakin: true })).toBe(`Cum 27 · 2 durak · ${t('listem.guneEkle.enYakinRozet')}`);
+    expect(gunSatiriEtiketi('Cum 27', '2 durak', { gecti: false, enYakin: true })).toBe(`Cum 27, 2 durak, ${t('listem.guneEkle.enYakinRozet')}`);
   });
 
   it('KK3: bugünün alt satırı — gezildiyse "N durak gezildi · akşam boş", akşam doluysa yalnız gezilen; hiç gezilmediyse eski metin', () => {
