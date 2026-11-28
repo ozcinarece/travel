@@ -853,7 +853,7 @@
     },
     "onerilenler": {
       "baslik": "Neleri görmek istersin?",
-      "alt": "Seçtiklerini yakınlığa göre günlere biz dağıtalım.",
+      "alt": "Seçtiklerini grubun oylarına ve yakınlığa göre günlere biz dağıtalım.",
       "veriHata": "Seyahatin bilgileri yüklenemedi.",
       "tekrarDene": "Tekrar dene",
       "cip": {
@@ -1031,6 +1031,11 @@
     "alBaslik": "Seyahatime al",
     "yeniSeyahat": "Yeni seyahat",
     "farkliSehir": "Farklı şehir",
+    "hedefCipOkunur": {
+      "tam": "{ad}, {tarih}, farklı şehir",
+      "tarihli": "{ad}, {tarih}",
+      "farkli": "{ad}, farklı şehir"
+    },
     "listeye": "Listeye",
     "cozumYok": "{n} mekan eklenemedi.",
     "hicEklenmedi": "Hiçbir mekan eklenemedi.",
@@ -1187,7 +1192,7 @@
     "gunNo": "{n}. gün",
     "adim": {
       "planKur": "Plan henüz kurulmadı",
-      "planKurAlt": "Listendeki {n} mekanı günlere yakınlığa göre dağıtalım",
+      "planKurAlt": "Listendeki {n} mekanı günlere oylara ve yakınlığa göre dağıtalım",
       "planKurBosAlt": "Önce görmek istediğin yerleri seç",
       "planKurDugme": "Planı kur",
       "dagit": "{n} mekan güne atanmamış",

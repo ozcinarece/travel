@@ -240,14 +240,15 @@ function ciz() {
 describe('#579 Yer ekle: gezi sırasında bugüne ekle', () => {
   it('KK1–KK2: gezi gününde bugün seçili; beyaz hap "2. gün · …\'ya ekleniyor" ve Değiştir (44 pt)', async () => {
     ciz();
-    const hap = within(await screen.findByTestId('gun-hapi'));
+    // Dosyanın ilk çizimi CI'da modülleri soğuk yüklüyor; varsayılan 1 sn bekleme yetmiyor (main b43bfec, #612 86392df).
+    const hap = within(await screen.findByTestId('gun-hapi', {}, { timeout: 8000 }));
     expect(hap.getByText(`2. gün · ${gunYonelmesi(2)} ekleniyor`)).toBeTruthy();
     const degistir = hap.getByRole('button', { name: t('kesfet.gunDegistirEtiket') });
     expect(hap.getByText(t('kesfet.gunDegistir'))).toBeTruthy();
     expect(StyleSheet.flatten(degistir.props.style).minHeight).toBeGreaterThanOrEqual(44);
     // Gezi gününde eski renkli "{n}. güne ekliyorsun ✕" hapı yok.
     expect(screen.queryByText(t('kesfet.guneEkliyorsun', { n: 2 }))).toBeNull();
-  });
+  }, 15000);
 
   it('KK2: Değiştir → Hangi güne? (bugün en üstte, "listede kalsın" yok) → 4. gün seçilince hap o güne döner', async () => {
     ciz();
