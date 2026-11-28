@@ -5556,9 +5556,8 @@ delete from auth.users where id = '33000000-0000-4000-8000-000000000001';
 
 -- ---------------------------------------------------------------- #584: otel adı Google'dan saklanmaz; takma ad
 -- KK1: place_id'li otelin adı yazılmaz (stays.label, trips.hotel_label; tetikleyici, istemciden bağımsız).
--- KK2: takma ad seyahatin üyesince yazılır (stays_update), dışarıdan biri yazamaz; boş ya da 80'den uzun olamaz.
--- KK3: temizlik migration'ı (veri siler, elle çalışır) eski Google adlarını stays, trips ve değişiklik akışından siler;
--- place_id'siz noktanın adı ve takma ad kalır; tekrar çalıştırmak güvenli; akışa yeni kayıt düşmez.
+-- KK2: takma ad seyahatin üyesince yazılır (stays_update), dışarıdan biri yazamaz; boş ya da 80'den uzun olamaz
+-- (#630 KK1: ham değer ölçülür, 80 karakter + boşluklar da reddedilir).
 \set O584 '''58400000-0000-4000-8000-000000000001'''
 \set M584 '''58400000-0000-4000-8000-000000000002'''
 \set Y584 '''58400000-0000-4000-8000-000000000003'''
@@ -5601,6 +5600,13 @@ do $$ begin
 end $$;
 select pg_temp.hata_bekle($$update public.stays set takma_ad = '   ' where place_id = 'ChIJ-584-otel'$$, '23514');
 select pg_temp.hata_bekle(format($$update public.stays set takma_ad = %L where place_id = 'ChIJ-584-otel'$$, repeat('x', 81)), '23514');
+-- #630 KK1: kırpılınca 80 olan ama ham hali uzun değer de reddedilir; tam 80 karakter kabul edilir.
+select pg_temp.hata_bekle(format($$update public.stays set takma_ad = %L where place_id = 'ChIJ-584-otel'$$, '  ' || repeat('x', 80) || '  '), '23514');
+update public.stays set takma_ad = repeat('y', 80) where place_id = 'ChIJ-584-otel';
+do $$ begin
+  assert (select char_length(takma_ad) = 80 from public.stays where place_id = 'ChIJ-584-otel'), '#630 KK1: tam 80 karakter kabul edilir';
+end $$;
+update public.stays set takma_ad = 'Bizim otel' where place_id = 'ChIJ-584-otel';
 select pg_temp.as_user(:Y584);
 update public.stays set takma_ad = 'Yabancı' where place_id = 'ChIJ-584-otel';
 do $$ begin assert (select count(*) from public.stays where place_id = 'ChIJ-584-otel') = 0, '#584 KK2: dışarıdan biri oteli görmez'; end $$;
