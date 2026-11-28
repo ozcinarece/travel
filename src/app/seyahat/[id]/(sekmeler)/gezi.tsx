@@ -12,14 +12,17 @@ import { usePaylasimYapildi, type PaylasimKaynagi } from '@/features/paylasim/so
 import { KatilimSayfasi } from '@/components/davet/KatilimSayfasi';
 import { ProfilOnayi } from '@/components/davet/ProfilOnayi';
 import { CevrimdisiSeridi } from '@/components/gezi/CevrimdisiSeridi';
+import { DurakCekmecesi } from '@/components/gezi/DurakCekmecesi';
 import { GeziMenusu } from '@/components/gezi/GeziMenusu';
 import { HarcamaFormu } from '@/components/harcama/HarcamaFormu';
 import { HatirlatmaSatiri } from '@/components/harcama/HatirlatmaSatiri';
-import { SecimMenusu } from '@/components/program/SecimMenusu';
+import { GeriAlBandi } from '@/components/listem/GeriAlBandi';
 import { SeyahatYukleme } from '@/components/seyahatler/SeyahatYukleme';
 import { useDavetPaylas } from '@/features/davet/paylas';
 import { useBilinenMekanlar } from '@/features/gezi/bilinenMekanlar';
+import { useGeriAlinabilirDurakKaldir } from '@/features/gezi/durakCikar';
 import { useGuneEkle } from '@/features/gezi/bugunEkle';
+import { cekmeceAltSatiri, gecikmeBandiGorunur, gecikmeliSimdiAlti, gecikmeMetni, gezdimEylemi, yarinAltSatiri, yarinHedefi, yolAltSatiri } from '@/features/gezi/durakCekmecesi';
 import { REHBER_YAKIN_M } from '@/features/plan/planListesi';
 import { adayKonumu, AKSAM_DK, eklenenleriSabitle, yakindaAdaylari, yakindaGorunur, type YakinAday } from '@/features/gezi/yakinda';
 import { baslikAltSatiri, bugununPlaniSatirlari, durakSayaci, gezildiMi, gunSatiri, kisiAdlari, simdiEtiketi, simdiHedefi, varanlarMetni } from '@/features/gezi/seyahatV7';
@@ -58,7 +61,8 @@ import { useKonaklamalar } from '@/features/konaklama/sorgular';
 import { useKonum, yakinDurakId } from '@/features/konum/useKonum';
 import { useMekanlar, useUyeler } from '@/features/mekanlar/sorgular';
 import { kartListesi, odakKarti, sonrakiKart, type DurakKarti } from '@/features/program/durakKarti';
-import { useDurakGuncelle } from '@/features/program/sorgular';
+import { geriKalmaHesapla, kaydirmaYazimi } from '@/features/program/geriKalma';
+import { useDurakGuncelle, useGunGuncelle } from '@/features/program/sorgular';
 import { gunDuraklari, saatKisa, useGunProgrami, useSimdi } from '@/features/program/useProgram';
 import { useProgramVerisi } from '@/features/program/useProgramVerisi';
 import { useSeyahatId } from '@/features/seyahatler/baglam';
@@ -147,6 +151,7 @@ function GeziSayfasi({ seyahat, gunler, duraklar, mekanlar, konaklamalar, katild
   const benId = session?.user.id ?? null;
   const uyeler = useUyeler(seyahat.id);
   const durakGuncelle = useDurakGuncelle(seyahat.id);
+  const gunGuncelle = useGunGuncelle(seyahat.id);
   const ata = useDuragaAta(seyahat.id);
   const planUygula = usePlaniUygula(seyahat.id);
   const [bildirim, setBildirim] = useState<string | null>(null);
@@ -165,19 +170,28 @@ function GeziSayfasi({ seyahat, gunler, duraklar, mekanlar, konaklamalar, katild
   // #574 KK7: arkadaş rotasından kurulduysa "Ayşe'nin rotasından" (yeni veri yok: paylaşımın kimliği ve #533 akışındaki adı).
   const kaynakPaylasimlar = useArkadasPaylasimlari(!!seyahat.kaynak_paylasim && hesapli);
   const kaynakMetni = useMemo(() => kaynakRotaMetni(seyahat.kaynak_paylasim, kaynakPaylasimlar.data), [seyahat.kaynak_paylasim, kaynakPaylasimlar.data]);
-  useEffect(() => {
-    if (!bildirim) return;
-    const z = setTimeout(() => setBildirim(null), 2800);
-    return () => clearTimeout(z);
-  }, [bildirim]);
   const [grupAcik, setGrupAcik] = useState(false);
   const [menuAcik, setMenuAcik] = useState(false);
   // #517 KK8: açık çekmecenin açıldığı yer (olay `meta.kaynak`); null: kapalı.
   const [paylasimKaynagi, setPaylasimKaynagi] = useState<PaylasimKaynagi | null>(null);
   const paylasimAcik = paylasimKaynagi !== null;
   const [karsilamaAcik, setKarsilamaAcik] = useState(katildin);
-  const [durakMenu, setDurakMenu] = useState<DurakKarti | null>(null);
-  const [gunSecDurak, setGunSecDurak] = useState<DurakKarti | null>(null);
+  // #580 KK1: durak çekmecesi — seçili durak (kapanırken içerik kalsın diye açık bayrağı ayrı).
+  const [cekmeceDurakId, setCekmeceDurakId] = useState<string | null>(null);
+  const [cekmeceAcik, setCekmeceAcik] = useState(false);
+  // #580 KK1 · değişiklik 1: "Çıkar" yalnız günden çıkarır (Plan'daki "Günden çıkar" mutasyonu); mevcut 5 sn "Geri al"
+  // bandıyla ertelenir, bant açıkken durak planda gizli.
+  const geriAlinabilir = useGeriAlinabilirDurakKaldir(seyahat.id, () => setBildirim(t('listem.hata')));
+  const gizliDurak = geriAlinabilir.bekleyen?.durakId ?? null;
+  // #580 öz-inceleme 2: Çıkar'ın Geri al bandı açıkken gelen bildirim (ör. "Kaydedilemedi") kaybolmaz; bant kapanınca gösterilir
+  // ve süresi o zaman başlar. Bekleyen silmeye dokunulmaz (ne kesinleşir ne iptal olur).
+  const bantAcik = !!geriAlinabilir.bekleyen;
+  useEffect(() => {
+    if (!bildirim || bantAcik) return;
+    const z = setTimeout(() => setBildirim(null), 2800);
+    return () => clearTimeout(z);
+  }, [bildirim, bantAcik]);
+  const gorunenDuraklar = useMemo(() => (gizliDurak ? duraklar.filter((d) => d.id !== gizliDurak) : duraklar), [duraklar, gizliDurak]);
   const [eklenenler, setEklenenler] = useState<Set<string>>(() => new Set());
   const [otelErtelendi, setOtelErtelendi] = useState(false);
   const [harcamaFormu, setHarcamaFormu] = useState(false);
@@ -268,12 +282,12 @@ function GeziSayfasi({ seyahat, gunler, duraklar, mekanlar, konaklamalar, katild
 
   // ---------------------------------------------------------------- gezi modu: bugünün kartı ve grup
   const { konum } = useKonum(mod === 'gezi' && odakta);
-  const bugunDuraklari = useMemo(() => (bugunGun ? gunDuraklari(bugunGun, duraklar) : []), [bugunGun, duraklar]);
+  const bugunDuraklari = useMemo(() => (bugunGun ? gunDuraklari(bugunGun, gorunenDuraklar) : []), [bugunGun, gorunenDuraklar]);
   const buradaId = useMemo(
     () => (konum ? yakinDurakId(konum, bugunDuraklari.filter((d) => !d.skipped && !d.completed_at).map((d) => ({ id: d.id, konum: konumu(mekanIle.get(d.place_ref)) }))) : null),
     [konum, bugunDuraklari, mekanIle],
   );
-  const prog = useGunProgrami({ seyahat, gun: bugunGun, duraklar, mekanlar, yuruyus: verisi.yuruyus, an, buradaId: konum ? buradaId : undefined, uclar: verisi.seciliUclar });
+  const prog = useGunProgrami({ seyahat, gun: bugunGun, duraklar: gorunenDuraklar, mekanlar, yuruyus: verisi.yuruyus, an, buradaId: konum ? buradaId : undefined, uclar: verisi.seciliUclar });
   const bugunKartlari = useMemo(() => {
     // Ad kaynağı: DB ya da oturum önbelleği; bilinmiyorsa kartta kategori.
     const adlar: Record<string, HafifYer> = {};
@@ -347,11 +361,13 @@ function GeziSayfasi({ seyahat, gunler, duraklar, mekanlar, konaklamalar, katild
       `https://www.google.com/maps/dir/?api=1&destination=${yolTarifiHedefi(k.konum, k.ad)}&destination_place_id=${encodeURIComponent(k.placeId)}&travelmode=${k.gelis?.mod === 'taksi' ? 'driving' : 'walking'}`,
     );
   };
+  const kaydedilemedi = () => setBildirim(t('geziSayfasi.kaydedilemedi'));
+  // #580 KK1 · KK3: "Yarına taşı" — hedef günün sonuna (mevcut atama mutasyonu; sıra anahtarı günün sonu).
   const durakTasi = (k: DurakKarti, hedef: Gun) => {
     const mekan = mekanIle.get(k.mekanId);
     const mevcut = duraklar.find((d) => d.id === k.durakId);
     if (!mekan || !mevcut) return;
-    ata.mutate({ mekan, gunId: hedef.id, mevcut, gunDuraklari: duraklar.filter((d) => d.day_id === hedef.id) }, { onError: () => setBildirim(t('geziSayfasi.kaydedilemedi')) });
+    ata.mutate({ mekan, gunId: hedef.id, mevcut, gunDuraklari: duraklar.filter((d) => d.day_id === hedef.id) }, { onError: kaydedilemedi });
   };
 
   const benUye = uyeListesi.find((u) => u.user_id === benId);
@@ -466,6 +482,22 @@ function GeziSayfasi({ seyahat, gunler, duraklar, mekanlar, konaklamalar, katild
     const sn = simdiKart.gelis?.mod === 'taksi' ? kestirimTaksiSn(konum, simdiKart.konum) : kestirimYuruyusSn(konum, simdiKart.konum);
     return Math.max(1, Math.ceil(sn / 60));
   })();
+  // #580 KK4 · KK5: gecikme Plan'daki hesapla (#140 KK10, yalnız konum açıkken); 15 dk'yı geçince Şimdi'nin üstünde bant ve
+  // alt satır "Planda 14:10 · şimdi 14:35'te varırsın". "Saatleri kaydır" Plan'daki kaydırmayı yazar; yazılırken bant gizli,
+  // yazılınca program yeniden hesaplanır ve gecikme kalkar.
+  const geriKalma = mod === 'gezi' ? geriKalmaHesapla({ prog, konum, gunDurak: bugunDuraklari, buradaId: konum ? buradaId : null, tz: seyahat.tz }) : null;
+  const [kaydiriliyor, setKaydiriliyor] = useState<string | null>(null);
+  const gecikmeDk = geriKalma && kaydiriliyor !== geriKalma.hedefId && gecikmeBandiGorunur(geriKalma.dk) ? geriKalma.dk : null;
+  const saatleriKaydir = () => {
+    if (!geriKalma || !bugunGun || kaydiriliyor) return;
+    const y = kaydirmaYazimi(geriKalma, bugunGun, seyahat.tz, benId);
+    setKaydiriliyor(geriKalma.hedefId);
+    const bitti = { onError: kaydedilemedi, onSettled: () => setKaydiriliyor(null) };
+    if (y.tur === 'durak') durakGuncelle.mutate({ id: y.id, completed_at: y.completed_at, completed_by: y.completed_by, auto_completed: false }, bitti);
+    else gunGuncelle.mutate({ id: y.id, start_time: y.start_time }, bitti);
+  };
+  const simdiAltSatiri = simdiKart && gecikmeDk !== null && simdiKart.varisDk !== null ? gecikmeliSimdiAlti(simdiKart.varisDk, gecikmeDk) : simdiAlt;
+
   // #522 inceleme 1 + 2. inceleme 1: Şimdi'nin durağında kesilir; en çok 3 satır (son gezilenler + sıradaki).
   const planSatirlari: PlanSatiriV7[] = bugununPlaniSatirlari(bugunKartlari, simdiKart?.durakId ?? null)
     .map((k) => ({
@@ -480,6 +512,39 @@ function GeziSayfasi({ seyahat, gunler, duraklar, mekanlar, konaklamalar, katild
           : t('seyahatV7.gezildiSaatsiz')
         : [k.varisDk !== null ? dakikaSaat(k.varisDk) : null, sureMetni(k.dakika)].filter(Boolean).join(' · '),
     }));
+  // ---------------------------------------------------------------- #580 KK1–KK3: durak çekmecesi
+  const cekmeceKart = cekmeceDurakId ? (bugunKartlari.find((k) => k.durakId === cekmeceDurakId) ?? null) : null;
+  const cekmeceSimdi = !!cekmeceKart && cekmeceKart.durakId === simdiKart?.durakId;
+  const yarin = yarinHedefi(gunler, bugunGun);
+  const cekmeceyiAc = (durakId: string) => {
+    setCekmeceDurakId(durakId);
+    setCekmeceAcik(true);
+  };
+  const cekmeceyiKapat = () => setCekmeceAcik(false);
+  // KK2: Gezdim → gezildi (Plan'daki "Tamamlandı" ile aynı yazım); sıradaki durak program yeniden hesaplanınca Şimdi'ye gelir.
+  // Gezildi görünen durakta (kayıtlı ya da kendiliğinden geçilmiş) "Gezilmedi say" durağı gezilmemiş yapar (`gezdimEylemi`).
+  const gezdimKarari = (k: DurakKarti) => gezdimEylemi(k, { an: new Date(), benId });
+  const gezdim = (k: DurakKarti) => {
+    cekmeceyiKapat();
+    durakGuncelle.mutate(gezdimKarari(k).yazim, { onError: kaydedilemedi });
+  };
+  const atla = (k: DurakKarti) => {
+    cekmeceyiKapat();
+    durakGuncelle.mutate({ id: k.durakId, skipped: true }, { onError: kaydedilemedi });
+  };
+  const yarinaTasi = (k: DurakKarti) => {
+    if (!yarin) return;
+    cekmeceyiKapat();
+    durakTasi(k, yarin);
+  };
+  const cikar = (k: DurakKarti) => {
+    cekmeceyiKapat();
+    // #599 KK2: aynı anda iki bant yok.
+    setBildirim(null);
+    geriAlinabilir.cikar(k.durakId, k.ad);
+  };
+  const cekmeceYolDk = cekmeceKart ? (cekmeceSimdi ? simdiDk : (cekmeceKart.gelis?.dk ?? null)) : null;
+
   const guneEkle = useGuneEkle(seyahat.id);
   const adayAdi = (a: YakinAday) => (a.kaynak === 'liste' ? adiYaDaKategori(a.mekan.id) : a.ad);
   // #532 KK2: + soru sormadan bugünün sonuna ekler; bildirim "{ad}, bugüne eklendi", satır ✓.
@@ -553,7 +618,14 @@ function GeziSayfasi({ seyahat, gunler, duraklar, mekanlar, konaklamalar, katild
             {/* #579 KK4 (kanvas `Dalga1_GeziModu`): Yol tarifi'nin hemen altında "Bugüne yer ekle", gün boyu her zaman. Şimdi yoksa
                 (bugünün durakları bitti) satır aynı yerde tek başına. */}
             {simdiKart ? (
-              <SimdiV7 etiket={simdiEtiketi(simdiDk, simdiKart.gelis?.mod === 'taksi')} ad={simdiKart.ad} alt={simdiAlt} onYolTarifi={() => yolTarifi(simdiKart)} onBugunEkle={bugunYerEkle} />
+              <SimdiV7
+                etiket={simdiEtiketi(simdiDk, simdiKart.gelis?.mod === 'taksi')}
+                ad={simdiKart.ad}
+                alt={simdiAltSatiri}
+                onYolTarifi={() => yolTarifi(simdiKart)}
+                onBugunEkle={bugunYerEkle}
+                gecikme={gecikmeDk !== null ? { metin: gecikmeMetni(gecikmeDk), onKaydir: saatleriKaydir, pasif: cevrimdisi } : null}
+              />
             ) : (
               <View style={s.bolum}>
                 <ArtiSatiri metin={t('seyahatV7.bugunYerEkleSatiri')} onPress={bugunYerEkle} />
@@ -561,7 +633,7 @@ function GeziSayfasi({ seyahat, gunler, duraklar, mekanlar, konaklamalar, katild
             )}
             <View style={s.bolum}>
               <BolumBasligi baslik={t('seyahatV7.bugununPlani')} baglanti={t('seyahatV7.planiAc')} onBaglanti={() => plan({ gun: String(bugunGun?.index ?? 1) })} />
-              <BugununPlaniV7 satirlar={planSatirlari} />
+              <BugununPlaniV7 satirlar={planSatirlari} onSatir={cekmeceyiAc} />
               {/* #579 KK4: "Bugüne yer ekle" artık hep yukarıda; aday yoksa "Yakında, bugüne ekle" bölümü çıkmaz (aynı eylem iki yerde
                   olmasın; #536 inceleme 1'deki tek satırın yerini o aldı). */}
               {yakindaAcik && yakinSatirlari.length > 0 && bugunGun ? (
@@ -597,7 +669,9 @@ function GeziSayfasi({ seyahat, gunler, duraklar, mekanlar, konaklamalar, katild
         )}
       </ScrollView>
 
-      {bildirim ? (
+      {geriAlinabilir.bekleyen ? (
+        <GeriAlBandi metin={geriAlinabilir.bekleyen.metin} olay={geriAlinabilir.bekleyen} onGeriAl={geriAlinabilir.geriAl} />
+      ) : bildirim ? (
         <View style={s.bildirim} pointerEvents="none">
           <Text style={s.bildirimMetin}>{bildirim}</Text>
         </View>
@@ -631,31 +705,20 @@ function GeziSayfasi({ seyahat, gunler, duraklar, mekanlar, konaklamalar, katild
           cevrimdisi={cevrimdisi}
         />
       ) : null}
-      <SecimMenusu
-        acik={!!durakMenu}
-        baslik={durakMenu?.ad}
-        onKapat={() => setDurakMenu(null)}
-        secenekler={
-          durakMenu
-            ? [
-                { etiket: t('geziSayfasi.atla'), onPress: () => durakGuncelle.mutate({ id: durakMenu.durakId, skipped: true }, { onError: () => setBildirim(t('geziSayfasi.kaydedilemedi')) }) },
-                { etiket: t('geziSayfasi.baskaGune'), onPress: () => setGunSecDurak(durakMenu), pasif: gunler.length < 2 },
-              ]
-            : []
-        }
-      />
-      <SecimMenusu
-        acik={!!gunSecDurak}
-        baslik={t('geziSayfasi.hangiGune')}
-        onKapat={() => setGunSecDurak(null)}
-        secenekler={
-          gunSecDurak
-            ? gunler
-                .filter((g) => g.id !== bugunGun?.id)
-                .sort((a, b) => a.index - b.index)
-                .map((g) => ({ etiket: `${t('geziSayfasi.gunNo', { n: g.index })} · ${gunTarihi(g)}`, onPress: () => durakTasi(gunSecDurak, g) }))
-            : []
-        }
+      <DurakCekmecesi
+        acik={cekmeceAcik && !!cekmeceKart}
+        onKapat={cekmeceyiKapat}
+        durak={cekmeceKart ? { numara: cekmeceKart.numara, ad: cekmeceKart.ad, alt: cekmeceAltSatiri(cekmeceKart, cekmeceSimdi), renk: gunRengi(bugunGun?.index ?? 1) } : null}
+        gezdim={cekmeceKart ? gezdimKarari(cekmeceKart) : { metin: '', geriAl: false }}
+        yolAlt={yolAltSatiri(cekmeceYolDk, cekmeceKart?.gelis?.mod === 'taksi')}
+        yarinAlt={yarinAltSatiri(yarin)}
+        yarinPasif={!yarin}
+        pasif={cevrimdisi}
+        onGezdim={() => cekmeceKart && gezdim(cekmeceKart)}
+        onYolTarifi={() => cekmeceKart && yolTarifi(cekmeceKart)}
+        onAtla={() => cekmeceKart && atla(cekmeceKart)}
+        onYarina={() => cekmeceKart && yarinaTasi(cekmeceKart)}
+        onCikar={() => cekmeceKart && cikar(cekmeceKart)}
       />
       <GrupPenceresi acik={grupAcik} onKapat={() => setGrupAcik(false)} seyahat={seyahat} uyeler={uyeListesi} mekanlar={mekanlar} />
       <ProfilOnayi acik={davet.onayAcik} onKapat={davet.onayKapat} onGonder={davet.onayla} />

@@ -9,7 +9,7 @@ import { konumu } from '@/lib/konum';
 import { yerelSaatDk, yerelTarih } from '@/lib/zaman';
 import { googleGunu, type Periyot } from '@/schedule/acilis';
 import { miniCubuk, type MiniCubuk } from '@/schedule/kaydir';
-import { programHesapla, type Program, type ProgramDuragi, type YuruyusKaynagi } from '@/schedule/program';
+import { gezilmediMi, programHesapla, type Program, type ProgramDuragi, type YuruyusKaynagi } from '@/schedule/program';
 
 /** Postgres time "09:00:00" → "09:00". */
 export const saatKisa = (tm: string | null | undefined, varsayilan: string) => (tm ? tm.slice(0, 5) : varsayilan);
@@ -85,6 +85,7 @@ export function useGunProgrami(secenek: {
           dakika: d.minutes,
           tamamlandiDk: tamamlanmayla && d.completed_at ? yerelSaatDk(new Date(d.completed_at), seyahat.tz) : null,
           skipped: d.skipped,
+          gezilmedi: tamamlanmayla && gezilmediMi(d),
         }));
     const baslangic = saatKisa(gun.start_time, saatKisa(seyahat.day_start, '09:00'));
     const plan = programHesapla({ baslangic, duraklar: yap(false), ...uc, yuruyus, simdiDk: null });

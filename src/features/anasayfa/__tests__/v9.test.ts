@@ -5,7 +5,7 @@ import { describe, expect, it, jest } from '@jest/globals';
 import { siniflandir } from '@/features/seyahatler/siniflandir';
 import type { SeyahatOzet } from '@/lib/tipler';
 
-import { bugunSatiri, geziOncesiAlt, gorunenKart, kartGenisligi, kartSeyahatleri, kartYuzleri, seyahatKapagi, siradakiMetni, yedekKapak } from '../v9';
+import { atifEnGenis, bugunSatiri, geziOncesiAlt, gorunenKart, kartGenisligi, kartSeyahatleri, kartYuzleri, seyahatKapagi, siradakiMetni, yedekKapak } from '../v9';
 
 jest.mock('@/lib/supabase', () => ({ supabase: {} }));
 
@@ -93,5 +93,14 @@ describe('KK2 · KK5 kapak', () => {
   it('gezisi olmayan kartın yedeği Eskişehir kapağı', () => {
     expect(yedekKapak(sehirler)).toEqual({ url: 'https://x/esk.jpg', atif: { yazar: 'Ali', lisans: 'CC BY 4.0', kaynak_url: null } });
     expect(yedekKapak([])).toBeNull();
+  });
+});
+
+describe('#594 KK1 atıf genişliği', () => {
+  it('yüzlerin bittiği yerin 8 pt sağında biter; yüz yoksa sınır yok', () => {
+    expect(atifEnGenis(318, 1)).toBe(318 - (14 + 36) - 8);
+    expect(atifEnGenis(318, 3)).toBe(318 - (14 + 36 + 27 + 27) - 8);
+    expect(atifEnGenis(318, 0)).toBeUndefined();
+    expect(atifEnGenis(40, 3)).toBe(0);
   });
 });

@@ -7,11 +7,24 @@ import { useOturum } from '@/lib/oturum';
 import { supabase } from '@/lib/supabase';
 import type { Gun, OtelSecimi } from '@/lib/tipler';
 
-import { adiEksikKimlikler, adlarlaKonaklamalar, otelPlani, ucNoktalari, yeniKonaklamaSatiri, type GunUcNoktalari, type Konaklama, type OtelKapsami } from './plan';
+import {
+  adiEksikKimlikler,
+  adlarlaKonaklamalar,
+  KONAKLAMA_ALANLARI,
+  otelPlani,
+  satirdanKonaklama,
+  takmaAdDegeri,
+  ucNoktalari,
+  yeniKonaklamaSatiri,
+  type GunUcNoktalari,
+  type Konaklama,
+  type OtelKapsami,
+} from './plan';
 
 /**
  * Seyahatin otelleri. #248 KK1: `place_id`'li otelin adı DB'de tutulmaz; ekranda places-light (Pro maske, puansız; istemcide
  * 24 sa önbellek) ile canlı doldurulur. Ad gelene kadar `label` null kalır, ekranlar mevcut yedek metni gösterir (KK3).
+ * #584: takma adı olan otel takma adıyla görünür, canlı ad istenmez.
  */
 export function useKonaklamalar(seyahatId: string | undefined) {
   const sorgu = useKonaklamaSatirlari(seyahatId);
@@ -28,10 +41,25 @@ export function useKonaklamaSatirlari(seyahatId: string | undefined) {
     queryKey: ['konaklamalar', seyahatId],
     enabled: !!session && !!seyahatId,
     queryFn: async () => {
-      const { data, error } = await supabase.from('stays').select('id, trip_id, place_id, lat, lng, label').eq('trip_id', seyahatId!).order('created_at');
+      const { data, error } = await supabase.from('stays').select(KONAKLAMA_ALANLARI).eq('trip_id', seyahatId!).order('created_at');
       if (error) throw error;
-      return data as Konaklama[];
+      return (data as Konaklama[]).map(satirdanKonaklama);
     },
+  });
+}
+
+/**
+ * #584 KK2: otelin takma adı (kullanıcı verisi; boş metin = takma ad yok, görünen ad yine canlı Google adı). Yetki
+ * `stays_update` (seyahatin üyesi).
+ */
+export function useOtelTakmaAdi(seyahatId: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (g: { stayId: string; takmaAd: string }) => {
+      const { error } = await supabase.from('stays').update({ takma_ad: takmaAdDegeri(g.takmaAd) }).eq('id', g.stayId).eq('trip_id', seyahatId);
+      if (error) throw error;
+    },
+    onSettled: () => qc.invalidateQueries({ queryKey: ['konaklamalar', seyahatId] }),
   });
 }
 
@@ -107,12 +135,12 @@ export function useTumGunlereOtel(seyahatId: string) {
 /** 3.3 Otel ekranı: seçilen otel (ya da otel yok) tüm günlere uygulanır. */
 export async function tumGunlereOtel(seyahatId: string, otel: OtelSecimi | { stayId: string } | null) {
   const [{ data: mevcut, error: e1 }, { data: gunler, error: e2 }] = await Promise.all([
-    supabase.from('stays').select('id, trip_id, place_id, lat, lng, label').eq('trip_id', seyahatId),
+    supabase.from('stays').select(KONAKLAMA_ALANLARI).eq('trip_id', seyahatId),
     supabase.from('days').select('id').eq('trip_id', seyahatId),
   ]);
   if (e1) throw e1;
   if (e2) throw e2;
-  const id = otel ? await konaklamaKimligi(seyahatId, otel, (mevcut ?? []) as Konaklama[]) : null;
+  const id = otel ? await konaklamaKimligi(seyahatId, otel, ((mevcut ?? []) as Konaklama[]).map(satirdanKonaklama)) : null;
   if ((gunler ?? []).length === 0) return;
   const { error } = await supabase.from('days').update({ start_stay_id: id, end_stay_id: id }).eq('trip_id', seyahatId);
   if (error) throw error;

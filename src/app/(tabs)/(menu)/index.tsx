@@ -7,7 +7,7 @@ import { AnaGeziKarti } from '@/components/ortak/AnaGeziKarti';
 import { KurSatiri } from '@/components/ortak/KurSatiri';
 import { KartKaydirici } from '@/components/anasayfa/KartKaydirici';
 import { ArkadasRotalari, RafV9 } from '@/components/anasayfa/RafV9';
-import { ArtiIkonu, GeziOncesiKarti, GeziSirasiKarti, GeziYokKarti } from '@/components/anasayfa/SeyahatKarti';
+import { ArtiIkonu, GeziOncesiKarti, GeziSirasiKarti, GeziYokKarti, KartYerTutucu } from '@/components/anasayfa/SeyahatKarti';
 import { DavetKarti } from '@/components/davet/DavetKarti';
 import { GeriAlBandi } from '@/components/listem/GeriAlBandi';
 import { Avatar } from '@/components/ui/Avatar';
@@ -281,7 +281,7 @@ export default function AnaSayfa() {
           </View>
         </View>
 
-        {/* KK2–KK5: seyahat kartları ya da gezisi olmayan kart. Liste gelmeden kart alanı çizilmez (zıplamasın). */}
+        {/* KK2–KK5: seyahat kartları ya da gezisi olmayan kart. Liste gelmeden yer tutucu (#594 KK3). */}
         {davetler.length > 0 || (seyahatler.data && kartlar.length > 0) ? (
           <KartKaydirici genislik={kartGenislik}>
             {[
@@ -305,6 +305,12 @@ export default function AnaSayfa() {
         ) : seyahatler.data ? (
           <View style={s.kenar}>
             <Karsilama bolumler={bolumler.data} bekleniyor={bolumler.isPending} sehirler={sehirler.data} genislik={kartGenislik} onYeni={yeni} />
+          </View>
+        ) : !seyahatler.isError ? (
+          // #594 KK3: liste gelene kadar kartın yerinde aynı boyda düz yer tutucu (214 pt kayma yok). Birden çok kartta sayfa
+          // noktaları ve gezi öncesindeki "+ Yeni gezi" satırı liste gelince eklenir.
+          <View style={s.kenar}>
+            <KartYerTutucu genislik={kartGenislik} />
           </View>
         ) : null}
         {!seyahatler.data && seyahatler.isError ? (

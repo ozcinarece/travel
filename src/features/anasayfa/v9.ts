@@ -104,3 +104,23 @@ export function kartYuzleri(uyeler: readonly { user_id: string; display_name: st
     .slice(0, KART_YUZ_SAYISI)
     .map((u) => ({ id: u.user_id, ad: u.display_name.trim() }));
 }
+
+/** Yüz ölçüleri (kanvas): 36 pt daire (32 + 2 px kenar), üst üste 9 pt biner; gezi sırası kartında soldan 14. */
+export const YUZ_CAP = 36;
+export const YUZ_BINME = 9;
+export const YUZ_SOL = 14;
+/** #594 KK1: atıfla yüzler arasında bırakılan boşluk. */
+export const ATIF_YUZ_ARALIK = 8;
+
+/**
+ * #594 KK1: gezi sırası kartında atfın (dokunma alanı dahil) en çok genişliği — sağ üstteki atıf, sol üstteki yüzlerin
+ * bittiği yerin 8 pt sağında biter. Yüz yoksa sınır yok (`undefined`; atfın kendi 220 sınırı kalır).
+ */
+export function atifEnGenis(kartGenislik: number, yuzSayisi: number): number | undefined {
+  if (yuzSayisi <= 0) return undefined;
+  const yuzBitis = YUZ_SOL + YUZ_CAP + (yuzSayisi - 1) * (YUZ_CAP - YUZ_BINME);
+  return Math.max(0, kartGenislik - yuzBitis - ATIF_YUZ_ARALIK);
+}
+
+/** #594 KK3: seyahat listesi gelene kadar kartın yerindeki düz yer tutucu (kart ölçüsünde). */
+export const KART_YER_TUTUCU = '#EEF0F5';
