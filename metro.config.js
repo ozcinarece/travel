@@ -5,6 +5,9 @@ const { getDefaultConfig } = require('expo/metro-config');
 
 const config = getDefaultConfig(__dirname);
 
+// #643 KK2: web fontları woff2 alt küme (src/components/kok/fontlar.web.ts). Yalnız web paketi içe aktarır; native paket TTF.
+if (!config.resolver.assetExts.includes('woff2')) config.resolver.assetExts = [...config.resolver.assetExts, 'woff2'];
+
 if (process.env.YONETIM !== '1') {
   const mevcut = config.resolver.blockList;
   config.resolver.blockList = [
