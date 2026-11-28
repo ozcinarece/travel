@@ -8,7 +8,7 @@ import { birKezDene, hafifOnbellek, oneriSirala, yakinYerler, type HafifYer, typ
 import { varsayilanDakika } from '@/lib/kategori';
 import { konaklamaMi } from '@/lib/pinIkonu';
 import type { Sehir, Yer } from '@/lib/tipler';
-import { konumu } from '@/lib/konum';
+import { konumu, konumVar } from '@/lib/konum';
 
 import { useSehirYerleri, yerPlaceId } from '../icerik/sorgular';
 
@@ -32,10 +32,11 @@ export type OnerilenMekan = {
 
 /**
  * Rehber yeri → kart satırı. #172 KK7–KK9: ad, kategori ve konum DB'den; puan gösterilmez (kendi içeriğimiz); fotoğraf
- * önce bizim kapağımız, yoksa Google fotoğrafı. place_id çözülemediyse null (kart çizilmez; listeye eklenemez).
+ * önce bizim kapağımız, yoksa Google fotoğrafı. place_id çözülemediyse null (kart çizilmez; listeye eklenemez). #205 Parça 1:
+ * konumu boşalmış yer (gece temizliği) de null: öneri kartı haritada ve mesafede konum ister.
  */
 export function rehberMekani(yer: Yer, placeId: string | null, googleFoto: string | null | undefined): OnerilenMekan | null {
-  if (!placeId) return null;
+  if (!placeId || !konumVar(yer)) return null;
   return {
     place_id: placeId,
     ad: yer.ad,

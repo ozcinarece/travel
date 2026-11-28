@@ -5,6 +5,7 @@ import Svg, { Circle, Path } from 'react-native-svg';
 import { fotoHataAnahtari, useFotoIslemleri, useIcerikFotolari } from '@/features/yonetim/fotolar';
 import { saatMetni } from '@/features/yonetim/gezi';
 import { ty } from '@/features/yonetim/metin';
+import { aramaMerkezi } from '@/lib/konum';
 import { useOtomatikKayit } from '@/features/yonetim/otomatikKayit';
 import { rolAta } from '@/features/yonetim/sehir';
 import { sehirAlanlari, sehirAnahtari, SEHIR_LISTESI, SEHIR_SECICI, type YonetimSehirDetayi } from '@/features/yonetim/sehirSorgulari';
@@ -41,7 +42,8 @@ export function SehirEditoru({ sehir, sehirler, liste, sekme, onSekme }: Props) 
   const fotoIs = useFotoIslemleri('sehir', sehir.id);
   const [hata, setHata] = useState<string | null>(null);
   const islemHatasi = () => setHata(ty('gezi.islemHata'));
-  const merkez = { lat: taslak.lat, lng: taslak.lng, yaricapM: 20000 };
+  // #205 Parça 1: şehrin konumu boşaldıysa (gece temizliği) arama yanlılıksız.
+  const merkez = aramaMerkezi(taslak, 20000);
   const gezi = sehir.geziler?.[0]?.count ?? 0;
   const komsuSehir = sehirler.find((s) => s.id !== sehir.id);
 

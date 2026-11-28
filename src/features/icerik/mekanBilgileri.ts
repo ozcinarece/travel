@@ -9,11 +9,12 @@ import { useYerFotolari } from '@/features/yerler/api';
 import { icerikFotoUrl } from '@/lib/markdown';
 import { supabase } from '@/lib/supabase';
 
-export type IcerikMekani = { place_id: string; ad: string; kategori: string | null; lat: number; lng: number; foto: string | null };
+/** #205 Parça 1: `lat`/`lng` null = google_30g konumu 30 günde boşalmış yer (gece temizliği). */
+export type IcerikMekani = { place_id: string; ad: string; kategori: string | null; lat: number | null; lng: number | null; foto: string | null };
 /** BO taslağının bildiği mekanlar (yayından önce; editörün seçtiği ad, kategori, konum). */
-export type BilinenMekanlar = Record<string, { ad: string; kategori?: string | null; lat: number; lng: number }>;
+export type BilinenMekanlar = Record<string, { ad: string; kategori?: string | null; lat: number | null; lng: number | null }>;
 
-type Satir = { place_id: string; ad: string; kategori: string | null; lat: number; lng: number; kapak_url: string | null; foto_yol: string | null };
+type Satir = { place_id: string; ad: string; kategori: string | null; lat: number | null; lng: number | null; kapak_url: string | null; foto_yol: string | null };
 
 const GUN_MS = 24 * 60 * 60 * 1000;
 

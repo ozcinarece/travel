@@ -6,6 +6,7 @@ import { fotoHataAnahtari, useFotoIslemleri, useIcerikFotolari } from '@/feature
 import { blokEkle, gorselSatiri, kapakDegisikligi, saatMetni } from '@/features/yonetim/gezi';
 import type { YonetimSehri } from '@/features/yonetim/geziSorgulari';
 import { ty } from '@/features/yonetim/metin';
+import { aramaMerkezi } from '@/lib/konum';
 import { useOtomatikKayit } from '@/features/yonetim/otomatikKayit';
 import { mekanBaglari } from '@/features/yonetim/sehir';
 import { mekanlariYaz, type MekanAdi } from '@/features/yonetim/sehirSorgulari';
@@ -50,7 +51,8 @@ export function YerEditoru({ yer, sehirler, liste }: { yer: YonetimYeri; sehirle
   const [sekme, setSekme] = useState<Sekme>('rehber');
   const [hata, setHata] = useState<string | null>(null);
   const sehir = sehirler.find((sh) => sh.id === taslak.sehir_id);
-  const merkez = { lat: taslak.lat, lng: taslak.lng, yaricapM: sehir ? 20000 : 5000 };
+  // #205 Parça 1: yerin konumu boşaldıysa (gece temizliği) arama yanlılıksız.
+  const merkez = aramaMerkezi(taslak, sehir ? 20000 : 5000);
   // #172: BO yer önizlemesi Google'ın canlı ★ puanını ve yorum sayısını gösterir (tek kimlik, önbellekten).
   const canli = useHafifYerler(gecerliPlaceId(taslak.place_id) ? [taslak.place_id!] : [], { puan: true });
   const islemHatasi = () => setHata(ty('gezi.islemHata'));

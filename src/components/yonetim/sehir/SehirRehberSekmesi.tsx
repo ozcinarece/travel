@@ -23,7 +23,7 @@ type Props = {
   sehirId: string;
   sehir: SehirAlanlari;
   sekmeler: SekmeTanimi<string>;
-  merkez: Merkez;
+  merkez: Merkez | undefined;
   fotoYukle: (dosya: File) => Promise<string>;
   onOzet: (ozet: string | null) => void;
   onFotolar: () => void;

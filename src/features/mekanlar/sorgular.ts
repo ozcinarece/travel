@@ -40,7 +40,8 @@ export function useUyeler(seyahatId: string | undefined, secenek: { retry?: numb
 }
 
 /** #80 KK7: `default_minutes` verilirse (panelde ayarlanan süre) §6 varsayılanı yerine o yazılır. */
-export type YeniMekan = { place_id: string; primary_type: string | null; lat: number; lng: number; default_minutes?: number };
+/** #205 Parça 1: `lat`/`lng` null = içerik satırının konumu boşalmış (gece temizliği); mekan listede kalır, haritada yok. */
+export type YeniMekan = { place_id: string; primary_type: string | null; lat: number | null; lng: number | null; default_minutes?: number };
 
 /** #317 KK4: `yer_eklendi` olayının `meta.kaynak` değeri — eklemenin yapıldığı yer. */
 export type EklemeKaynagi = 'oneri' | 'arama' | 'rehber' | 'pin' | 'kaydettiklerim';

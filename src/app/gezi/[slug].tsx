@@ -20,7 +20,7 @@ import { Logo } from '@/components/ui/Logo';
 import { SegmentSecici } from '@/components/ui/SegmentSecici';
 import { cevrimdisiDurumu, eklemeHatasi, type EklemeDurumu } from '@/features/ekleme/eklemeDurumu';
 import { kalinParcalar } from '@/features/icerik/aktar';
-import { icerikHafif, useIcerikCanli } from '@/features/icerik/fotolar';
+import { icerikHafif, useIcerikCanli, type IcerikHafif } from '@/features/icerik/fotolar';
 import { useIcerikMekanlari } from '@/features/icerik/mekanBilgileri';
 import { rehberKartIdleri, rehberMekanIdleri } from '@/features/icerik/rehber';
 import { cozumSebebi, olayYaz, useGezi, useGeziAlinma } from '@/features/icerik/sorgular';
@@ -29,7 +29,7 @@ import { useGeriAlinabilirSil } from '@/features/mekanlar/geriAlinabilirSil';
 import { useMekanGuncelle, useMekanlar } from '@/features/mekanlar/sorgular';
 import { useSeyahatler } from '@/features/seyahatler/sorgular';
 import { seyahatAdi } from '@/features/sihirbaz/sihirbaz';
-import type { HafifYer } from '@/features/yerler/api';
+import { yolTarifiHedefi } from '@/lib/konum';
 import { ATIF_BASLIK_BOSLUGU, GoogleFotoAtfi, KapakAtfi } from '@/components/icerik/KapakAtfi';
 import { ilkFoto, kapakVeAtif, kapakYuksekligi, type FotoAtfi } from '@/features/icerik/kapakAtfi';
 import { t } from '@/i18n';
@@ -44,7 +44,8 @@ import { baslikStili, bosluk, renk, yazi } from '@/theme';
 
 type Sekme = 'plan' | 'yazi';
 /** Eklenecek / çıkarılacak mekan (durak satırı ya da yazıdaki mekan kartı). */
-type Yer = { anahtar: string; place_id: string; ad: string; primary_type: string | null; lat: number; lng: number; dakika?: number };
+/** #205 Parça 1: `lat`/`lng` null = durağın konumu boşalmış (gece temizliği); listeye konumsuz eklenir. */
+type Yer = { anahtar: string; place_id: string; ad: string; primary_type: string | null; lat: number | null; lng: number | null; dakika?: number };
 
 /**
  * #97 B → #143 (kanvas 17 · 18 · 19): önerilen gezi tek sayfa — kapak (geri / kalp / paylaş, "2 GÜNLÜK GEZİ", "N kez alındı",
@@ -100,7 +101,7 @@ export default function GeziEkrani() {
   const yaziIdleri = useMemo(() => rehberMekanIdleri([gezi.data?.yazi_md ?? '']), [gezi.data?.yazi_md]);
   const yaziKartlari = useMemo(() => rehberKartIdleri([gezi.data?.yazi_md ?? '']), [gezi.data?.yazi_md]);
   const yaziMekan = useIcerikMekanlari(yaziIdleri, { kartlar: yaziKartlari });
-  const [panel, setPanel] = useState<{ placeId: string; hafif: HafifYer; dakika: number } | null>(null);
+  const [panel, setPanel] = useState<{ placeId: string; hafif: IcerikHafif; dakika: number } | null>(null);
 
   useEffect(() => {
     if (gezi.data) olayYaz('gezi_goruntulendi', gezi.data.id, { slug });
@@ -185,7 +186,7 @@ export default function GeziEkrani() {
     const pid = kimlik(d);
     return !!pid && !!listedeki(pid);
   };
-  const paneliAc = (placeId: string, hafif: HafifYer | null | undefined, dakika?: number) => {
+  const paneliAc = (placeId: string, hafif: IcerikHafif | null | undefined, dakika?: number) => {
     if (hafif) setPanel({ placeId, hafif, dakika: dakika ?? varsayilanDakika(hafif.primary_type) });
   };
 
@@ -212,7 +213,7 @@ export default function GeziEkrani() {
   };
 
   /** Yazıdaki mekanın DB verisi (yazının yer satırı, yoksa aynı mekanın gezi durağı) — panelin yedeği, kart, listeye ekleme. */
-  const yaziYeri = (placeId: string): { hafif: HafifYer; durak: GeziDuragi | undefined } | null => {
+  const yaziYeri = (placeId: string): { hafif: IcerikHafif; durak: GeziDuragi | undefined } | null => {
     const durak = duraklar.find((d) => kimlik(d) === placeId);
     const m = yaziMekan.mekan(placeId) ?? (durak ? { ad: durak.ad, kategori: durak.kategori, lat: durak.lat, lng: durak.lng } : null);
     return m ? { hafif: icerikHafif(placeId, m), durak } : null;
@@ -402,7 +403,7 @@ export default function GeziEkrani() {
               ipucu={cevrimdisi ? t('ekleme.baglantiYokIpucu') : undefined}
               onCta={() => degistir({ anahtar: panel.placeId, place_id: panel.placeId, ad: panel.hafif.ad, primary_type: panel.hafif.primary_type, lat: panel.hafif.lat, lng: panel.hafif.lng, dakika: panel.dakika })}
               onYolTarifi={() =>
-                Linking.openURL(`https://www.google.com/maps/dir/?api=1&destination=${panel.hafif.lat},${panel.hafif.lng}&destination_place_id=${encodeURIComponent(panel.placeId)}&travelmode=walking`)
+                Linking.openURL(`https://www.google.com/maps/dir/?api=1&destination=${yolTarifiHedefi(panel.hafif, panel.hafif.ad)}&destination_place_id=${encodeURIComponent(panel.placeId)}&travelmode=walking`)
               }
               onKapat={() => setPanel(null)}
             />

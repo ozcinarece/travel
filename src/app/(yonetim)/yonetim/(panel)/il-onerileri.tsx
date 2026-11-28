@@ -24,6 +24,7 @@ import {
   type IlOneriAlanlari,
 } from '@/features/yonetim/ilOneriSorgulari';
 import { ty } from '@/features/yonetim/metin';
+import { konumu } from '@/lib/konum';
 import { yazi } from '@/theme';
 
 // #401 KK4 (kanvas BO_IlOnerileri): /yonetim/il-onerileri?il=<slug>. İl seç, kategori ve ilçe süzgeci, sürükleyerek sırala,
@@ -176,7 +177,7 @@ export default function IlOnerileriSayfasi() {
         <View style={s.govde}>
           {aramaAcik ? (
             <View style={s.arama}>
-              <MekanArama merkez={sehir ? { lat: sehir.lat, lng: sehir.lng } : undefined} onKimlik={sec} onKimlikBirak={secimiBirak} seciliKimlik={secilen?.place_id ?? null} etiket={ty('ilOneri.ara')} />
+              <MekanArama merkez={konumu(sehir) ?? undefined} onKimlik={sec} onKimlikBirak={secimiBirak} seciliKimlik={secilen?.place_id ?? null} etiket={ty('ilOneri.ara')} />
             </View>
           ) : null}
           {secilen ? (

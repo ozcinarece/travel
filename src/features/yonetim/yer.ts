@@ -14,8 +14,9 @@ export type YerAlanlari = {
   kapak_atif: KapakAtfi | null;
   rehber_md: string | null;
   yayin: boolean;
-  lat: number;
-  lng: number;
+  /** #205 Parça 1: google_30g konum 30 günde boşalır (gece temizliği). */
+  lat: number | null;
+  lng: number | null;
   /** #300 KK3: amaç etiketleri (`public.amac_listesi()` değerleri). */
   amaclar: string[];
 };

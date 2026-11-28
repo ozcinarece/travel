@@ -10,7 +10,7 @@ import type { GeziDuragi, GeziGunu } from '@/lib/tipler';
 
 import { slugUret, type GeziAlanlari } from './gezi';
 
-export type YonetimSehri = { id: string; ad: string; slug: string; lat: number; lng: number; yayin: boolean };
+export type YonetimSehri = { id: string; ad: string; slug: string; lat: number | null; lng: number | null; yayin: boolean };
 export type YonetimGeziOzeti = {
   id: string;
   baslik: string;

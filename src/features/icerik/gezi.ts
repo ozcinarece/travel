@@ -27,7 +27,9 @@ type OzetDuragi = Pick<GeziDuragi, 'lat' | 'lng' | 'sure_dk'> & { id?: string };
 
 const sayi = (x: unknown): x is number => typeof x === 'number' && Number.isFinite(x);
 /** #199 KK2: konumu geçerli durak (haritaya pin / çizgi olarak girer). */
-export const konumGecerli = (d: Pick<GeziDuragi, 'lat' | 'lng'>) => sayi(d.lat) && sayi(d.lng) && Math.abs(d.lat) <= 90 && Math.abs(d.lng) <= 180;
+/** #205 Parça 1: gece temizliği 30 günü geçen Google konumunu boşaltır (lat/lng null); böyle durak da burada elenir. */
+export const konumGecerli = <T extends { lat: number | null; lng: number | null }>(d: T): d is T & { lat: number; lng: number } =>
+  sayi(d.lat) && sayi(d.lng) && Math.abs(d.lat) <= 90 && Math.abs(d.lng) <= 180;
 /** #199 KK2: bacak satırı kullanılabilir mi (süre / mesafe sayı); değilse o bacak kestirimde / kuş uçuşunda kalır. */
 const bacakGecerli = (r: GeziRotaBacagi) => sayi(r.saniye) && r.saniye > 0 && sayi(r.metre);
 const aracGecerli = (r: GeziRotaBacagi) => r.mod === 'DRIVE' && sayi(r.arac_saniye) && r.arac_saniye > 0;

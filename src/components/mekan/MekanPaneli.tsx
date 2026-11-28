@@ -45,7 +45,7 @@ export type MekanPaneliProps = {
   /** Seyahatin saat dilimi ("Bugün" satırı ve kapanış saati için). */
   tz?: string;
   /** Tam veri gelene kadar başlık için eldeki hafif veri (ad, puan, kategori). */
-  hafif?: HafifYer | null;
+  hafif?: Omit<HafifYer, 'lat' | 'lng'> | null;
   oneCikan?: boolean;
   /** "{ad} ekledi" — listedeyse. */
   ekleyenAd?: string;

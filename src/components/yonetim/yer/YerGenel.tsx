@@ -6,6 +6,7 @@ import { ty } from '@/features/yonetim/metin';
 import { gecerliPlaceId, oneCikanSirasi, type YerAlanlari } from '@/features/yonetim/yer';
 import { hafifYerler, useHafifYerler } from '@/features/yerler/api';
 import { kategoriEtiketi } from '@/lib/kategori';
+import { konumu, type KonumNoktasi } from '@/lib/konum';
 import { yorumKisa } from '@/lib/pinIkonu';
 import { yazi } from '@/theme';
 
@@ -105,7 +106,7 @@ export function YerGenel({ taslak, sehirler, degistir, tekilHatasi }: Props) {
         <SaltOkunur etiket={ty('yer.alan.kategori')} deger={kategoriEtiketi(g?.primary_type ?? taslak.kategori)} />
         <SaltOkunur etiket={ty('yer.alan.puan')} deger={g?.puan != null ? `★ ${g.puan.toLocaleString('tr-TR')}` : '—'} genislik={100} />
         <SaltOkunur etiket={ty('yer.alan.yorum')} deger={yorumKisa(g?.puan_sayisi) ?? '—'} genislik={100} />
-        <SaltOkunur etiket={ty('yer.alan.konum')} deger={`${(g?.lat ?? taslak.lat).toFixed(5)}, ${(g?.lng ?? taslak.lng).toFixed(5)}`} genislik={200} />
+        <SaltOkunur etiket={ty('yer.alan.konum')} deger={konumMetni(konumu(g) ?? konumu(taslak))} genislik={200} />
       </AlanSatiri>
     </View>
   );
@@ -131,3 +132,8 @@ const s = StyleSheet.create({
   hata: { fontFamily: yazi.yari, fontSize: 11, color: yRenk.hata },
   bilgi: { fontFamily: yazi.yari, fontSize: 11, color: yRenk.ikincil },
 });
+
+/** #205 Parça 1: konum boşalmış olabilir (gece temizliği): "—". */
+function konumMetni(k: KonumNoktasi | null): string {
+  return k ? `${k.lat.toFixed(5)}, ${k.lng.toFixed(5)}` : '—';
+}

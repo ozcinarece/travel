@@ -7,6 +7,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react-native';
 import fs from 'fs';
 import path from 'path';
+import { Linking } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 
 import type { GeziDetay } from '@/lib/tipler';
@@ -27,6 +28,8 @@ const mockDurum = {
   haritaPatlasin: false,
   yaziPatlasin: false,
   haritaCizgileri: 0,
+  /** Haritaya giden pinlerin etiketleri (durak numarası). */
+  haritaPinleri: [] as string[],
   cevrimdisi: false,
 };
 
@@ -45,12 +48,13 @@ jest.mock('@/components/harita/Harita', () => {
   const { View } = jest.requireActual<typeof import('react-native')>('react-native');
   const R = jest.requireActual<typeof import('react')>('react');
   return {
-    Harita: (p: { pinler?: { konum: { lat: number; lng: number } }[]; cizgiler?: { noktalar: { lat: number; lng: number }[] }[] }) => {
+    Harita: (p: { pinler?: { konum: { lat: number; lng: number }; etiket?: string }[]; cizgiler?: { noktalar: { lat: number; lng: number }[] }[] }) => {
       if (mockDurum.haritaPatlasin) throw new Error('harita bozuk');
       for (const k of [...(p.pinler ?? []).map((x) => x.konum), ...(p.cizgiler ?? []).flatMap((c) => c.noktalar)]) {
         if (!Number.isFinite(k.lat) || !Number.isFinite(k.lng)) throw new Error('NaN koordinat');
       }
       mockDurum.haritaCizgileri = p.cizgiler?.length ?? 0;
+      mockDurum.haritaPinleri = (p.pinler ?? []).map((x) => x.etiket ?? '');
       return R.createElement(View, { testID: 'harita' });
     },
   };
@@ -290,6 +294,44 @@ describe('#199 önerilen gezi ekranı', () => {
     expect(await screen.findByText(g.gezi_gunleri[0].gezi_duraklari[2].ad)).toBeTruthy();
     expect(screen.getByTestId('harita')).toBeTruthy();
     expect(screen.queryByTestId(/^bolum-hata/)).toBeNull();
+  });
+  it('#205 Parça 1 KK2: konumu boşalmış durak (lat/lng null) haritaya girmez, listede numarasıyla kalır; yol tarifi adla açılır', async () => {
+    const g = geziKur('konumsuz-gezi', {
+      gezi: { baslik: 'Konumsuz gezi', yazi_md: 'Kaleye çık.' },
+      gunler: [
+        {
+          baslik: 'Gün',
+          duraklar: [
+            { place_id: 'ChIJkaleTest01', ad: 'Kale', sure_dk: 45 },
+            { place_id: 'ChIJcarsiTest01', ad: 'Çarşı', sure_dk: 30 },
+            { place_id: 'ChIJparkTest001', ad: 'Park', sure_dk: 30 },
+          ],
+        },
+      ],
+    });
+    const d = g.gezi_gunleri[0].gezi_duraklari;
+    d[1] = { ...d[1], lat: null, lng: null };
+    mockDurum.geziler = { 'konumsuz-gezi': g };
+    const ac2 = jest.spyOn(Linking, 'openURL').mockResolvedValue(true);
+    ac('konumsuz-gezi');
+    expect(await screen.findByText('Çarşı')).toBeTruthy();
+    await bekle();
+    // Harita açılır; konumsuz 2. durağın pini ve iki yanındaki bacağın çizgisi yok, öbür duraklar numaralarını korur.
+    expect(screen.getByTestId('harita')).toBeTruthy();
+    expect(mockDurum.haritaPinleri).toEqual(['1', '3']);
+    expect(mockDurum.haritaCizgileri).toBe(0);
+    expect(screen.getByText('Kale')).toBeTruthy();
+    expect(screen.getByText('Park')).toBeTruthy();
+    expect(screen.queryByTestId(/^bolum-hata/)).toBeNull();
+    // Durağa dokununca panel açılır; yol tarifi koordinat yerine adla (place_id ayrıca) gider, "null,null" olmaz.
+    fireEvent.press(screen.getByText('Çarşı'));
+    await bekle();
+    const panelKok = screen.UNSAFE_getByType(MekanPaneli).findAll((n) => typeof (n.props as { onLayout?: unknown }).onLayout === 'function')[0];
+    act(() => (panelKok.props as { onLayout: (e: unknown) => void }).onLayout({ nativeEvent: { layout: { width: 400, height: 800 } } }));
+    fireEvent.press(screen.getByText('Yol tarifi'));
+    expect(ac2).toHaveBeenCalledWith(expect.stringContaining(`destination=${encodeURIComponent('Çarşı')}&destination_place_id=ChIJcarsiTest01`));
+    expect(String(ac2.mock.calls[0][0])).not.toContain('null');
+    ac2.mockRestore();
   });
   it('#388 KK5: çevrimdışıyken Gezi yazısındaki mekan kartı ve mekan panelindeki ekleme düğmesi pasif, ipucu var', async () => {
     const g = geziKur('cevrimdisi-gezi', {
