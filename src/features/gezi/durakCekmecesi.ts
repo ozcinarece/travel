@@ -3,10 +3,10 @@
 import { t } from '@/i18n';
 import { sureMetni } from '@/lib/kategori';
 import type { Gun } from '@/lib/tipler';
-import { saatEkli } from '@/lib/zaman';
+import { saatEkli, yerelAn } from '@/lib/zaman';
 import { dakikaSaat } from '@/schedule/tempo';
 
-import { gunAdi } from './seyahatV7';
+import { gezildiMi, gunAdi } from './seyahatV7';
 
 /** KK4: gecikme bu kadar dakikayı GEÇİNCE (> 15) Gezi sayfasında bant çıkar. */
 export const GECIKME_BANDI_ESIGI_DK = 15;
@@ -51,6 +51,23 @@ export function gezdimDugmesi(tamamlandi: boolean): {
   geriAl: boolean;
 } {
   return tamamlandi ? { metin: t('durakCekmecesi.gezilmediSay'), geriAl: true } : { metin: t('durakCekmecesi.gezdim'), geriAl: false };
+}
+
+/**
+ * KK2 (#580 öz-inceleme 1): çekmece düğmesinin kararı ve yazımı — satırla aynı tanım (`gezildiMi`).
+ * - Elle (ya da yazılmış otomatik) gezildi kaydı var → "Gezilmedi say", tamamlanma silinir.
+ * - Program kendiliğinden geçildi saydı (kayıt yok) → geri alınacak kayıt yok: "Gezdim" kalır, ama şimdinin saati yerine
+ *   planlanan ayrılış anı (`trips.tz`) yazılır; sonraki saatler ileri kaymaz.
+ * - Gezilmemiş → "Gezdim", şimdinin anı.
+ */
+export function gezdimEylemi(
+  k: { durakId: string; tamamlandi: boolean; durum: string | null; ayrilisDk: number | null },
+  p: { gunTarihi: string | null; tz: string; an: Date; benId: string | null },
+): { metin: string; geriAl: boolean; yazim: { id: string; completed_at: string | null; completed_by: string | null; auto_completed: false } } {
+  if (k.tamamlandi) return { ...gezdimDugmesi(true), yazim: { id: k.durakId, completed_at: null, completed_by: null, auto_completed: false } };
+  const kendiliginden = gezildiMi(k) && k.ayrilisDk !== null && !!p.gunTarihi;
+  const an = kendiliginden ? yerelAn(p.gunTarihi!, k.ayrilisDk!, p.tz) : p.an;
+  return { ...gezdimDugmesi(false), yazim: { id: k.durakId, completed_at: an.toISOString(), completed_by: p.benId, auto_completed: false } };
 }
 
 /** KK4: "25 dk gerideyiz". */

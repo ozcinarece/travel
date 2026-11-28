@@ -8,7 +8,7 @@ import type { GunProgrami } from '@/features/program/useProgram';
 import { programHesapla, type ProgramDuragi } from '@/schedule/program';
 import { yerelAn } from '@/lib/zaman';
 
-import { cekmeceAltSatiri, GECIKME_BANDI_ESIGI_DK, gecikmeBandiGorunur, gecikmeliSimdiAlti, gecikmeMetni, gezdimDugmesi, yarinAltSatiri, yarinHedefi, yolAltSatiri } from '../durakCekmecesi';
+import { cekmeceAltSatiri, GECIKME_BANDI_ESIGI_DK, gecikmeBandiGorunur, gecikmeliSimdiAlti, gecikmeMetni, gezdimDugmesi, gezdimEylemi, yarinAltSatiri, yarinHedefi, yolAltSatiri } from '../durakCekmecesi';
 
 const IST = 'Europe/Istanbul';
 const otel = { lat: 41.9, lng: 12.5 };
@@ -102,6 +102,27 @@ describe('#580 KK2 Gezdim', () => {
         }),
       ),
     ).toBe('d1');
+  });
+});
+
+describe('#580 öz-inceleme 1: gezdimEylemi', () => {
+  const an = new Date('2026-11-25T10:00:00Z');
+  const p = { gunTarihi: '2026-11-25', tz: IST, an, benId: 'ben' };
+  it('elle gezildi kaydı → "Gezilmedi say", tamamlanma silinir', () => {
+    const e = gezdimEylemi({ durakId: 'd1', tamamlandi: true, durum: 'gecildi', ayrilisDk: 640 }, p);
+    expect(e.metin).toBe('Gezilmedi say');
+    expect(e.yazim).toEqual({ id: 'd1', completed_at: null, completed_by: null, auto_completed: false });
+  });
+  it('kendiliğinden geçilmiş (kayıt yok) → "Gezdim", planlanan ayrılış (trips.tz) yazılır', () => {
+    const e = gezdimEylemi({ durakId: 'd1', tamamlandi: false, durum: 'gecildi', ayrilisDk: 640 }, p);
+    expect(e.metin).toBe('Gezdim');
+    expect(e.geriAl).toBe(false);
+    expect(e.yazim.completed_at).toBe('2026-11-25T07:40:00.000Z');
+  });
+  it('gezilmemiş → "Gezdim", şimdinin anı', () => {
+    const e = gezdimEylemi({ durakId: 'd2', tamamlandi: false, durum: 'siradaki', ayrilisDk: 700 }, p);
+    expect(e.metin).toBe('Gezdim');
+    expect(e.yazim).toEqual({ id: 'd2', completed_at: an.toISOString(), completed_by: 'ben', auto_completed: false });
   });
 });
 

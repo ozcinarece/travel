@@ -55,6 +55,8 @@ type Tablolar = Record<string, unknown[]>;
 let mockTablolar: Tablolar = {};
 /** #243: bu tabloların sorgusu hiç yanıt vermez (bağlantı yok, cihazda kopya yok). */
 const mockAsili = new Set<string>();
+/** #580 öz-inceleme 2: `stops` yazımı hata döner. */
+let mockYazimHatasi = false;
 const mockSayac = {
   invoke: [] as string[],
   rpc: [] as string[],
@@ -64,12 +66,14 @@ const mockSayac = {
 /** PostgREST zincirini taklit eder: her çağrı aynı nesneyi döner; `await` tablonun satırlarını, `.single()` ilk satırı verir. */
 function mockSorgu(tablo: string) {
   let tek = false;
+  let yazim = false;
   const zincir: Record<string | symbol, unknown> = new Proxy(
     {},
     {
       get(_hedef, ad) {
         if (ad === 'then') {
           if (mockAsili.has(tablo)) return () => undefined;
+          if (yazim && mockYazimHatasi && tablo === 'stops') return (coz: (v: unknown) => unknown) => Promise.resolve({ data: null, error: { message: 'hata' } }).then(coz);
           const satirlar = mockTablolar[tablo] ?? [];
           const sonuc = tek
             ? {
@@ -86,6 +90,7 @@ function mockSorgu(tablo: string) {
           };
         }
         return (...args: unknown[]) => {
+          if (ad === 'update') yazim = true;
           if (ad === 'update' || ad === 'insert' || ad === 'delete' || ad === 'eq') mockSayac.yazim.push({ tablo, ad: String(ad), args });
           return zincir;
         };
@@ -297,6 +302,7 @@ beforeEach(() => {
   mockSayac.tablolar = [];
   mockSayac.yazim = [];
   mockKonum = null;
+  mockYazimHatasi = false;
   fetchSahte.mockClear();
   globalThis.fetch = fetchSahte as unknown as typeof fetch;
   hafifOnbellek.temizle();
@@ -460,6 +466,47 @@ describe('#580 KK1 · KK6 Bugünün planı satırları ve çekmece', () => {
     await waitFor(() => r.getByRole('button', { name: new RegExp(`^${ODUN}, `) }));
     expect(mockSayac.yazim.some((y) => y.tablo === 'places' && y.ad === 'delete')).toBe(false);
   });
+});
+
+describe('#580 öz-inceleme', () => {
+  it('1: kendiliğinden geçilmiş durakta (kayıt yok) düğme "Gezdim"; şimdinin değil planlanan ayrılışın anını yazar', async () => {
+    mockTablolar = fikstur(bugun());
+    // Gün 3 sa önce başladı; 1. durak (60 dk) çoktan bitti, kayıt yok → program "gecildi" (otomatik) sayar.
+    baslat(180);
+    const r = ciz();
+    await hazir(r);
+    satiriAc(r, ODUN);
+    expect(r.queryByRole('button', { name: t('durakCekmecesi.gezilmediSay') })).toBeNull();
+    fireEvent.press(await waitFor(() => r.getByRole('button', { name: t('durakCekmecesi.gezdim') })));
+    await waitFor(() => expect(durakYazimi()).toBeGreaterThan(-1));
+    const yazilan = mockSayac.yazim[durakYazimi()].args[0] as { completed_at: string };
+    // Planlanan ayrılış ≈ başlangıç + 60 dk ≈ 2 sa önce; şimdinin saati değil.
+    expect(Date.now() - Date.parse(yazilan.completed_at)).toBeGreaterThan(60 * 60_000);
+    expect(mockSayac.yazim[durakYazimi() + 1].args).toEqual(['id', 'd1']);
+  });
+
+  it('2: Geri al bandı açıkken gelen hata kaybolmaz; bant kapanınca gösterilir, silme kesinleşmez', async () => {
+    mockTablolar = fikstur(bugun());
+    baslat(90);
+    (mockTablolar.stops[0] as { completed_at: string | null }).completed_at = dakikaOnce(20);
+    mockYazimHatasi = true;
+    const r = ciz();
+    await hazir(r);
+    satiriAc(r, ODUN);
+    fireEvent.press(await waitFor(() => r.getByRole('button', { name: t('durakCekmecesi.cikar') })));
+    await waitFor(() => r.getByText(t('listem.gundenCikti', { ad: ODUN, n: 1 })));
+    // Bant açıkken kalan durağın çekmecesinden Atla → yazım hatası ("Kaydedilemedi").
+    const satir = r.getAllByRole('button').find((b) => b.props.accessibilityHint === t('durakCekmecesi.satirIpucu'))!;
+    fireEvent.press(satir);
+    fireEvent.press(await waitFor(() => r.getByRole('button', { name: t('durakCekmecesi.atla') })));
+    await waitFor(() => expect(durakYazimi()).toBeGreaterThan(-1));
+    // Normal bildirim süresinden (2,8 sn) uzun bekle: bant hâlâ açık, silme kesinleşmedi.
+    await new Promise((c) => setTimeout(c, 3200));
+    expect(r.getByText(t('listem.gundenCikti', { ad: ODUN, n: 1 }))).toBeTruthy();
+    expect(mockSayac.yazim.some((y) => y.tablo === 'places' && y.ad === 'delete')).toBe(false);
+    fireEvent.press(r.getByRole('button', { name: t('listem.geriAl') }));
+    await waitFor(() => r.getByText(t('geziSayfasi.kaydedilemedi')));
+  }, 15000);
 });
 
 describe('#580 KK4 · KK5 gecikme bandı', () => {

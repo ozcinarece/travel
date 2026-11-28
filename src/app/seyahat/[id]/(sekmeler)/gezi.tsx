@@ -21,7 +21,7 @@ import { SeyahatYukleme } from '@/components/seyahatler/SeyahatYukleme';
 import { useDavetPaylas } from '@/features/davet/paylas';
 import { useBilinenMekanlar } from '@/features/gezi/bilinenMekanlar';
 import { useGuneEkle } from '@/features/gezi/bugunEkle';
-import { cekmeceAltSatiri, gecikmeBandiGorunur, gecikmeliSimdiAlti, gecikmeMetni, gezdimDugmesi, yarinAltSatiri, yarinHedefi, yolAltSatiri } from '@/features/gezi/durakCekmecesi';
+import { cekmeceAltSatiri, gecikmeBandiGorunur, gecikmeliSimdiAlti, gecikmeMetni, gezdimEylemi, yarinAltSatiri, yarinHedefi, yolAltSatiri } from '@/features/gezi/durakCekmecesi';
 import { REHBER_YAKIN_M } from '@/features/plan/planListesi';
 import { adayKonumu, AKSAM_DK, eklenenleriSabitle, yakindaAdaylari, yakindaGorunur, type YakinAday } from '@/features/gezi/yakinda';
 import { baslikAltSatiri, bugununPlaniSatirlari, durakSayaci, gezildiMi, gunSatiri, kisiAdlari, simdiEtiketi, simdiHedefi, varanlarMetni } from '@/features/gezi/seyahatV7';
@@ -170,11 +170,6 @@ function GeziSayfasi({ seyahat, gunler, duraklar, mekanlar, konaklamalar, katild
   // #574 KK7: arkadaş rotasından kurulduysa "Ayşe'nin rotasından" (yeni veri yok: paylaşımın kimliği ve #533 akışındaki adı).
   const kaynakPaylasimlar = useArkadasPaylasimlari(!!seyahat.kaynak_paylasim && hesapli);
   const kaynakMetni = useMemo(() => kaynakRotaMetni(seyahat.kaynak_paylasim, kaynakPaylasimlar.data), [seyahat.kaynak_paylasim, kaynakPaylasimlar.data]);
-  useEffect(() => {
-    if (!bildirim) return;
-    const z = setTimeout(() => setBildirim(null), 2800);
-    return () => clearTimeout(z);
-  }, [bildirim]);
   const [grupAcik, setGrupAcik] = useState(false);
   const [menuAcik, setMenuAcik] = useState(false);
   // #517 KK8: açık çekmecenin açıldığı yer (olay `meta.kaynak`); null: kapalı.
@@ -187,6 +182,14 @@ function GeziSayfasi({ seyahat, gunler, duraklar, mekanlar, konaklamalar, katild
   // #580 KK1: "Çıkar" mevcut 5 sn "Geri al" bandıyla (Listem'deki ortak kanca); bant açıkken durak planda gizli.
   const geriAlinabilir = useGeriAlinabilirSil(seyahat.id, () => setBildirim(t('listem.hata')));
   const gizliMekan = geriAlinabilir.bekleyen?.mekanId ?? null;
+  // #580 öz-inceleme 2: Çıkar'ın Geri al bandı açıkken gelen bildirim (ör. "Kaydedilemedi") kaybolmaz; bant kapanınca gösterilir
+  // ve süresi o zaman başlar. Bekleyen silmeye dokunulmaz (ne kesinleşir ne iptal olur).
+  const bantAcik = !!geriAlinabilir.bekleyen;
+  useEffect(() => {
+    if (!bildirim || bantAcik) return;
+    const z = setTimeout(() => setBildirim(null), 2800);
+    return () => clearTimeout(z);
+  }, [bildirim, bantAcik]);
   const gorunenDuraklar = useMemo(() => (gizliMekan ? duraklar.filter((d) => d.place_ref !== gizliMekan) : duraklar), [duraklar, gizliMekan]);
   const [eklenenler, setEklenenler] = useState<Set<string>>(() => new Set());
   const [otelErtelendi, setOtelErtelendi] = useState(false);
@@ -518,15 +521,12 @@ function GeziSayfasi({ seyahat, gunler, duraklar, mekanlar, konaklamalar, katild
   };
   const cekmeceyiKapat = () => setCekmeceAcik(false);
   // KK2: Gezdim → gezildi (Plan'daki "Tamamlandı" ile aynı yazım); sıradaki durak program yeniden hesaplanınca Şimdi'ye gelir.
-  // Gezilmiş durakta "Gezilmedi say" tamamlanmayı geri alır.
+  // Elle gezildi kaydı olan durakta "Gezilmedi say" tamamlanmayı geri alır; kendiliğinden geçilmiş durakta Gezdim planlanan
+  // ayrılışı yazar (`gezdimEylemi`).
+  const gezdimKarari = (k: DurakKarti) => gezdimEylemi(k, { gunTarihi: bugunGun?.date ?? null, tz: seyahat.tz, an: new Date(), benId });
   const gezdim = (k: DurakKarti) => {
     cekmeceyiKapat();
-    durakGuncelle.mutate(
-      k.tamamlandi
-        ? { id: k.durakId, completed_at: null, completed_by: null, auto_completed: false }
-        : { id: k.durakId, completed_at: new Date().toISOString(), completed_by: benId, auto_completed: false },
-      { onError: kaydedilemedi },
-    );
+    durakGuncelle.mutate(gezdimKarari(k).yazim, { onError: kaydedilemedi });
   };
   const atla = (k: DurakKarti) => {
     cekmeceyiKapat();
@@ -711,7 +711,7 @@ function GeziSayfasi({ seyahat, gunler, duraklar, mekanlar, konaklamalar, katild
         acik={cekmeceAcik && !!cekmeceKart}
         onKapat={cekmeceyiKapat}
         durak={cekmeceKart ? { numara: cekmeceKart.numara, ad: cekmeceKart.ad, alt: cekmeceAltSatiri(cekmeceKart, cekmeceSimdi), renk: gunRengi(bugunGun?.index ?? 1) } : null}
-        gezdim={gezdimDugmesi(!!cekmeceKart?.tamamlandi)}
+        gezdim={cekmeceKart ? gezdimKarari(cekmeceKart) : { metin: '', geriAl: false }}
         yolAlt={yolAltSatiri(cekmeceYolDk, cekmeceKart?.gelis?.mod === 'taksi')}
         yarinAlt={yarinAltSatiri(yarin)}
         yarinPasif={!yarin}
