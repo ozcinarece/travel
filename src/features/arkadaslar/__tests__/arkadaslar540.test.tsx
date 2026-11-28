@@ -46,7 +46,7 @@ const paylasim = (p: Partial<ArkadasPaylasimi> = {}): ArkadasPaylasimi => ({
 
 beforeEach(() => {
   mockOturum.hesapli = true;
-  mockDurum.kisiler = [{ user_id: 'A', ad: 'Ayşe Yılmaz', foto: null }];
+  mockDurum.kisiler = [{ user_id: 'A', ad: 'Ayşe Yılmaz', foto: null, misafir: false }];
   mockDurum.akis = [];
 });
 
