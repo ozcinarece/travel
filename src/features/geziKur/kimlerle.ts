@@ -18,9 +18,10 @@ export function giristekiler(arkadas: string | null | undefined): string[] {
 /**
  * Yuvarlaklar: `arkadaslarim()` sırası (en son birlikte gezilen önde), en çok 3. Girişteki kişiler listedeyse önce gelir
  * (kalan yerler sırayla dolar). Birlikte gezilenlerden olmayan girişteki kişi eklenmez (sunucu da davet yazmaz).
+ * Misafir (anonim) hesaplar hiç gösterilmez: `davet_gonder` onlara davet yazmaz ve biri tutmazsa hiçbirini yazmaz (PR #612).
  */
 export function kimlerleKisileri(arkadaslar: readonly Arkadas[] | undefined, giristeki: readonly string[]): KimlerleKisi[] {
-  const liste = (arkadaslar ?? []).map((a) => ({ id: a.user_id, ad: a.ad, foto: a.foto }));
+  const liste = (arkadaslar ?? []).filter((a) => !a.misafir).map((a) => ({ id: a.user_id, ad: a.ad, foto: a.foto }));
   const one = giristeki.map((id) => liste.find((k) => k.id === id)).filter((k): k is KimlerleKisi => !!k);
   const ilk3 = liste.slice(0, KIMLERLE_EN_COK);
   // Girişteki kişi zaten ilk 3'teyse sıra bozulmaz.

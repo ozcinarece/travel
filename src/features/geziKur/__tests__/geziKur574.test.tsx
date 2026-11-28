@@ -2,12 +2,13 @@
 // (KK3), rota kartı ve "bu rotayla gitti" (KK4), "Bunu seç" çekmecesi (KK5), "Kimlerle?" (KK6), "Geziyi oluştur" (KK7),
 // metinler (KK8) ve girişteki yol arkadaşı (KK-ek1).
 import { beforeEach, describe, expect, it, jest } from '@jest/globals';
-import { fireEvent, render, screen, waitFor, within } from '@testing-library/react-native';
-import { Alert, Text } from 'react-native';
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react-native';
+import { Alert, Modal, Text } from 'react-native';
 
 import { Baslik } from '@/components/gezi/SeyahatV7';
 import { GeziKurEkrani } from '@/components/geziKur/GeziKurEkrani';
 import { AdimNeZaman } from '@/components/sihirbaz/AdimNeZaman';
+import { CekilenSayfa } from '@/components/ui/sayfaCekme';
 import type { ArkadasPaylasimi } from '@/features/arkadaslar/sorgular';
 import {
   arkadasRotalari,
@@ -86,10 +87,12 @@ jest.mock('@/features/arkadaslar/sorgular', () => ({
   // arkadaslarim(): en son birlikte gezilen önde.
   useArkadaslarim: () => ({
     data: [
-      { user_id: 'u-ayse', ad: 'Ayşe', foto: null },
-      { user_id: 'u-mert', ad: 'Mert', foto: null },
-      { user_id: 'u-deniz', ad: 'Deniz', foto: null },
-      { user_id: 'u-can', ad: 'Can', foto: null },
+      // Misafir (anonim) yol arkadaşı: davet alamaz, "Kimlerle?"de görünmez (PR #612 inceleme 1).
+      { user_id: 'u-misafir', ad: 'Misafir', foto: null, misafir: true },
+      { user_id: 'u-ayse', ad: 'Ayşe', foto: null, misafir: false },
+      { user_id: 'u-mert', ad: 'Mert', foto: null, misafir: false },
+      { user_id: 'u-deniz', ad: 'Deniz', foto: null, misafir: false },
+      { user_id: 'u-can', ad: 'Can', foto: null, misafir: false },
     ],
   }),
 }));
@@ -413,13 +416,60 @@ describe('#574 KK5–KK7 çekmece ve Geziyi oluştur', () => {
 
 describe('#574 KK6 Kimlerle? · KK-ek1 yol arkadaşı', () => {
   it('kimlerleKisileri: son gezilen en çok 3; girişteki kişi ilk 3\'te değilse başa gelir; tanınmayan kişi eklenmez', () => {
-    const a = ['ayse', 'mert', 'deniz', 'can'].map((x) => ({ user_id: x, ad: x, foto: null }));
+    const a = ['ayse', 'mert', 'deniz', 'can'].map((x) => ({ user_id: x, ad: x, foto: null, misafir: false }));
     expect(kimlerleKisileri(a, []).map((k) => k.id)).toEqual(['ayse', 'mert', 'deniz']);
     expect(kimlerleKisileri(a, ['mert']).map((k) => k.id)).toEqual(['ayse', 'mert', 'deniz']);
     expect(kimlerleKisileri(a, ['can']).map((k) => k.id)).toEqual(['can', 'ayse', 'mert']);
     expect(kimlerleKisileri(a, ['yabanci']).map((k) => k.id)).toEqual(['ayse', 'mert', 'deniz']);
     expect(kimlerleKisileri(undefined, ['can'])).toEqual([]);
     expect(giristekiler('a, b,')).toEqual(['a', 'b']);
+  });
+
+  it('PR #612 inceleme 1: misafir yol arkadaşı yuvarlaklarda yok; girişte verilse de eklenmez, yeri sonrakine kalır', () => {
+    const a = [
+      { user_id: 'misafir', ad: 'Misafir', foto: null, misafir: true },
+      ...['ayse', 'mert', 'deniz', 'can'].map((x) => ({ user_id: x, ad: x, foto: null, misafir: false })),
+    ];
+    expect(kimlerleKisileri(a, []).map((k) => k.id)).toEqual(['ayse', 'mert', 'deniz']);
+    expect(kimlerleKisileri(a, ['misafir']).map((k) => k.id)).toEqual(['ayse', 'mert', 'deniz']);
+    expect(kimlerleKisileri(a, ['misafir', 'can']).map((k) => k.id)).toEqual(['can', 'ayse', 'mert']);
+  });
+
+  it('PR #612 inceleme 1: misafir girişte verilse de seçili gelmez ve davet listesine girmez', async () => {
+    render(<GeziKurEkrani arkadas="u-misafir,u-ayse" onKendiRota={jest.fn()} />);
+    fireEvent.press(within(screen.getByTestId('rota-urla')).getByText('Bunu seç'));
+    expect(screen.queryByTestId('kimlerle-u-misafir')).toBeNull();
+    fireEvent.press(screen.getByText('gidis-sec'));
+    fireEvent.press(screen.getByText('Geziyi oluştur'));
+    await waitFor(() => expect(mockGonder).toHaveBeenCalledWith({ tripId: 'yeni-gezi', kisiler: ['u-ayse'] }));
+  });
+
+  it('PR #612 inceleme 2: gönderim sürerken arka plan, kaydırma ve geri tuşu çekmeceyi kapatmaz; bitince Gezi sayfası açılır', async () => {
+    let bitir: (v: Awaited<ReturnType<typeof mockYeni>>) => void = () => undefined;
+    mockYeni.mockImplementationOnce(() => new Promise((r) => (bitir = r)));
+    render(<GeziKurEkrani onKendiRota={jest.fn()} />);
+    fireEvent.press(within(screen.getByTestId('rota-urla')).getByText('Bunu seç'));
+    fireEvent.press(screen.getByText('gidis-sec'));
+    fireEvent.press(screen.getByText('Geziyi oluştur'));
+    await waitFor(() => expect(mockYeni).toHaveBeenCalledTimes(1));
+    expect(screen.getByTestId('geziyi-olustur').props.accessibilityState).toMatchObject({ busy: true });
+    // Arka plan (perde), aşağı kaydırma (`CekilenSayfa`) ve Android geri tuşu (`onRequestClose`) aynı `onKapat`'ı çağırır.
+    fireEvent.press(screen.getByLabelText(t('geziKur.kapat')));
+    act(() => screen.UNSAFE_getByType(CekilenSayfa).props.onKapat());
+    act(() => screen.UNSAFE_getByType(Modal).props.onRequestClose());
+    expect(screen.getByText('Ne zaman?')).toBeTruthy();
+    expect(screen.getByTestId('takvim-durum').props.children).toBe('tarihli:5–6 Aralık · Cumartesi–Pazar · 2 gün');
+    expect(mockRouter.replace).not.toHaveBeenCalled();
+    await act(async () => bitir({ seyahatId: 'yeni-gezi', gun: 2, eklenenDurak: 8, eklenenMekan: 8, cozumsuz: 0, cozumsuzler: [] }));
+    await waitFor(() => expect(mockRouter.replace).toHaveBeenCalledWith({ pathname: '/seyahat/[id]/(sekmeler)/gezi', params: { id: 'yeni-gezi' } }));
+  });
+
+  it('PR #612 inceleme 2: gönderim yokken arka plan çekmeceyi kapatır', () => {
+    render(<GeziKurEkrani onKendiRota={jest.fn()} />);
+    fireEvent.press(within(screen.getByTestId('rota-urla')).getByText('Bunu seç'));
+    expect(screen.getByText('Ne zaman?')).toBeTruthy();
+    fireEvent.press(screen.getByLabelText(t('geziKur.kapat')));
+    expect(screen.queryByText('Ne zaman?')).toBeNull();
   });
 
   it('son gezilen 3 arkadaş seçilebilir + "+"; Geziyi oluştur seçilenlere davet gönderir ve "{Gezi} hazır" çekmecesi açılır', async () => {

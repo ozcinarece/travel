@@ -151,7 +151,8 @@ export function BunuSecCekmecesi({ rota, onKapat, kimlerle }: Props) {
   }
 
   return (
-    <AltPencere acik onKapat={onKapat} kapatEtiketi={t('geziKur.kapat')} gorunus="v11" kaydirilir>
+    // PR #612 inceleme 2: gönderim sürerken kaydırma, arka plan ve geri tuşu çekmeceyi kapatmaz (yarım kalan seçim kaybolmasın).
+    <AltPencere acik onKapat={() => (kilit.current ? undefined : onKapat())} kapatEtiketi={t('geziKur.kapat')} gorunus="v11" kaydirilir>
       <View style={s.ozet}>
         {rota.tur === 'gezi' && rota.kapak.uri ? (
           <Foto source={{ uri: rota.kapak.uri }} style={s.kucukKapak} contentFit="cover" accessible={false} />

@@ -4400,6 +4400,19 @@ begin
   assert (select array_agg(user_id order by user_id) from public.arkadaslarim()) = array['40700000-0000-4000-8000-0000000000a1', '40700000-0000-4000-8000-0000000000d4', '40700000-0000-4000-8000-0000000000e5']::uuid[], '#407 KK1: birlikte gezdiklerin';
   assert (select ad from public.arkadaslarim() where user_id = '40700000-0000-4000-8000-0000000000a1') = 'Ayşe', '#533 8a: kişi satırında ilk ad (U+00A0)';
   assert (select ad from public.arkadaslarim() where user_id = '40700000-0000-4000-8000-0000000000d4') = 'Deniz', '#533 8a: kişi satırında ilk ad';
+  -- PR #612 inceleme 1: misafir hesap `misafir = true`, diğerleri false; Arkadaşlar sekmesinin kümesi, sırası, adı ve fotoğrafı aynı.
+  assert (select misafir from public.arkadaslarim() where user_id = '40700000-0000-4000-8000-0000000000e5'), '#574: misafir yol arkadaşı işaretli';
+  assert (select bool_and(not misafir) from public.arkadaslarim() where user_id <> '40700000-0000-4000-8000-0000000000e5'), '#574: normal arkadaş misafir değil';
+  assert (select array_agg(row(user_id, ad, foto)::text) from public.arkadaslarim())
+    = array['(40700000-0000-4000-8000-0000000000d4,Deniz,)', '(40700000-0000-4000-8000-0000000000e5,Misafir,)',
+            '(40700000-0000-4000-8000-0000000000a1,Ayşe,https://lh3.googleusercontent.com/a/ayse407)'],
+    '#574: Arkadaşlar sekmesinin sonuç kümesi ve sırası değişmedi: ' || (select array_agg(row(user_id, ad, foto)::text) from public.arkadaslarim())::text;
+  assert pg_get_function_result('public.arkadaslarim()'::regprocedure) = 'TABLE(user_id uuid, ad text, foto text, misafir boolean)',
+    '#574: dönüş kolonları';
+  assert (select prosecdef and proconfig @> array['search_path=""'] from pg_proc where oid = 'public.arkadaslarim()'::regprocedure),
+    '#574: arkadaslarim security definer ve search_path korunur';
+  assert has_function_privilege('authenticated', 'public.arkadaslarim()', 'execute')
+    and not has_function_privilege('anon', 'public.arkadaslarim()', 'execute'), '#574: yetkiler korunur';
   assert (select count(*) from public.arkadas_paylasimlari()) = 1, '#407 KK2 + #533 1, 2: yalnız birlikte gezilen kişinin, kendi seyahatin olmayan, yeni linki';
   select * into r from public.arkadas_paylasimlari();
   m := row_to_json(r)::text;
