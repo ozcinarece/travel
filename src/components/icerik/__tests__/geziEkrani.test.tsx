@@ -333,6 +333,41 @@ describe('#199 önerilen gezi ekranı', () => {
     expect(String(ac2.mock.calls[0][0])).not.toContain('null');
     ac2.mockRestore();
   });
+  it('#205 Parça 1: konumsuz uçlu bacak "Yol süresi bilinmiyor" (kanvas 24b-A), toplama ve mesafeye katılmaz; mesafe 0 ise özette yok', async () => {
+    const duraklar = [
+      { place_id: 'ChIJkaleTest01', ad: 'Kale', sure_dk: 45 },
+      { place_id: 'ChIJcarsiTest01', ad: 'Çarşı', sure_dk: 30 },
+      { place_id: 'ChIJparkTest001', ad: 'Park', sure_dk: 30 },
+      { place_id: 'ChIJkopruTest01', ad: 'Köprü', sure_dk: 20 },
+    ];
+    const g = geziKur('yarim-konumsuz', { gezi: { baslik: 'Yarım konumsuz', yazi_md: 'x' }, gunler: [{ baslik: 'Gün', duraklar }] });
+    const d = g.gezi_gunleri[0].gezi_duraklari;
+    // 3. durağın konumu boşaldı; sahte gezi-rota önbellekte o bacakların eski yolunu yine döndürür (kullanılmamalı).
+    d[2] = { ...d[2], lat: null, lng: null };
+    const h = geziKur('hep-konumsuz', { gezi: { baslik: 'Hep konumsuz', yazi_md: 'x' }, gunler: [{ baslik: 'Gün', duraklar: duraklar.slice(0, 3) }] });
+    h.gezi_gunleri[0].gezi_duraklari = h.gezi_gunleri[0].gezi_duraklari.map((x) => ({ ...x, lat: null, lng: null }));
+    mockDurum.geziler = { 'yarim-konumsuz': g, 'hep-konumsuz': h };
+
+    const r1 = ac('yarim-konumsuz');
+    expect(await screen.findByText('Köprü')).toBeTruthy();
+    await bekle();
+    // 1→2 gerçek yol (9 dk · 700 m); 2→3 ve 3→4 bilinmiyor: "1 dk yürüyüş" yok, süre ve mesafeye eklenmez.
+    expect(screen.getAllByText('Yol süresi bilinmiyor')).toHaveLength(2);
+    expect(screen.getAllByTestId('gezi-bacak-bilinmiyor')).toHaveLength(2);
+    expect(screen.getByText('9 dk yürüyüş')).toBeTruthy();
+    expect(screen.queryByText(/^1 dk /)).toBeNull();
+    expect(screen.queryByText(/dk araç/)).toBeNull();
+    expect(screen.getByText('~2 sa 14 dk · 700 m yürüyüş')).toBeTruthy();
+    r1.unmount();
+
+    ac('hep-konumsuz');
+    expect(await screen.findByText('Park')).toBeTruthy();
+    await bekle();
+    expect(screen.getAllByText('Yol süresi bilinmiyor')).toHaveLength(2);
+    // Bütün duraklar konumsuz: özet yalnız süre ("0 m yürüyüş" yok).
+    expect(screen.getByText('~1 sa 45 dk')).toBeTruthy();
+    expect(screen.queryByText(/yürüyüş/)).toBeNull();
+  });
   it('#388 KK5: çevrimdışıyken Gezi yazısındaki mekan kartı ve mekan panelindeki ekleme düğmesi pasif, ipucu var', async () => {
     const g = geziKur('cevrimdisi-gezi', {
       gezi: { baslik: 'Çevrimdışı gezi', yazi_md: 'Kaleye çık.\n\n::mekan[ChIJkaleTest01]' },

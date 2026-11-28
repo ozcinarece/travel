@@ -3712,6 +3712,12 @@ reset role;
 -- ad, place_id ve damga kalır; 29 günlük, osm ve elle satıra dokunmaz. KK3: `konum_kaynagi_kontrol()` gece kaydına yalnız sayı
 -- olarak yazılır ve boşaltmadan sonra `suresi_gecen` her tabloda 0. KK2: "Seyahatime al" konumsuz durağı konumsuz mekan olarak
 -- kopyalar. Yetki: boşaltma fonksiyonunu yalnız postgres (gece işi) çalıştırır.
+-- KK4: ilk boşaltma (20261218100000) bir gece işi çalışması olarak kaydedilir; sayılar `gece_temizligi_kayit`'ın ilk satırında.
+do $$
+begin
+  assert (select konum_kontrol is not null and icerik_sehir >= 0 and icerik_yer >= 0 and icerik_durak >= 0
+    from public.gece_temizligi_kayit order by id limit 1), 'P1 KK4: ilk boşaltmanın sayıları gece kaydında';
+end $$;
 insert into public.sehirler (id, ad, slug, lat, lng, yayin, google_fetched_at) values
   ('20590000-0000-4000-8000-000000000001', 'Eski Şehir P1', 'eski-sehir-p1', 40, 30, true, now() - interval '31 days'),
   ('20590000-0000-4000-8000-000000000002', 'Taze Şehir P1', 'taze-sehir-p1', 41, 31, true, now() - interval '29 days');

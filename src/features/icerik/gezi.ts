@@ -15,8 +15,9 @@ export type GeziGunOzeti = {
   toplamDk: number;
   /** Toplam yürüyüş mesafesi (m; gerçek yol ya da dolambaç payıyla kestirim). */
   yuruyusM: number;
-  /** i. durağa gelen bacak, dakika (ilk durak için yok). */
-  bacakDk: number[];
+  /** i. durağa gelen bacak, dakika (ilk durak için yok). #205 Parça 1: null = bir ucu konumsuz, yol süresi bilinmiyor (kanvas
+   * 24b-A); toplama ve mesafeye katılmaz. */
+  bacakDk: (number | null)[];
   /** i. durağa gelen bacağın modu (yürüyüşü 40 dk'yı aşan bacak araçla — mevcut bacak modu kuralı). */
   bacakMod: ('WALK' | 'DRIVE')[];
   /** En az bir bacak kestirim (gerçek yolu henüz yok) → özet "~" ile. */
@@ -35,13 +36,21 @@ const bacakGecerli = (r: GeziRotaBacagi) => sayi(r.saniye) && r.saniye > 0 && sa
 const aracGecerli = (r: GeziRotaBacagi) => r.mod === 'DRIVE' && sayi(r.arac_saniye) && r.arac_saniye > 0;
 
 export function geziGunOzeti(duraklar: OzetDuragi[], rotalar?: GeziRotalari): GeziGunOzeti {
-  const bacakDk: number[] = [];
+  const bacakDk: (number | null)[] = [];
   const bacakMod: ('WALK' | 'DRIVE')[] = [];
   let yuruyusM = 0;
   let kestirim = false;
   for (let i = 1; i < duraklar.length; i++) {
     const a = duraklar[i - 1];
     const b = duraklar[i];
+    // #205 Parça 1: konumu bozuk ya da boşalmış uçta süre bilinmez (önbellekte eski yol kalmış olsa da kullanılmaz): bacak
+    // "Yol süresi bilinmiyor", toplama ve mesafeye eklenmez; özet "~" ile (eksik).
+    if (!konumGecerli(a) || !konumGecerli(b)) {
+      kestirim = true;
+      bacakDk.push(null);
+      bacakMod.push('WALK');
+      continue;
+    }
     const r = a.id && b.id ? rotalar?.get(bacakAnahtari(a.id, b.id)) : undefined;
     if (r && bacakGecerli(r)) {
       const araba = aracGecerli(r);
@@ -52,17 +61,12 @@ export function geziGunOzeti(duraklar: OzetDuragi[], rotalar?: GeziRotalari): Ge
     }
     kestirim = true;
     bacakMod.push('WALK');
-    // Konumu bozuk durakta kestirim de yapılamaz: bacak 1 dk, mesafeye eklenmez (özet NaN olmasın).
-    if (!konumGecerli(a) || !konumGecerli(b)) {
-      bacakDk.push(1);
-      continue;
-    }
     const ka = { lat: a.lat, lng: a.lng };
     const kb = { lat: b.lat, lng: b.lng };
     bacakDk.push(Math.max(1, Math.round(kestirimYuruyusSn(ka, kb) / 60)));
     yuruyusM += mesafeM(ka, kb) * 1.3;
   }
-  const toplamDk = duraklar.reduce((n, d) => n + (sayi(d.sure_dk) ? d.sure_dk : 0), 0) + bacakDk.reduce((n, d) => n + d, 0);
+  const toplamDk = duraklar.reduce((n, d) => n + (sayi(d.sure_dk) ? d.sure_dk : 0), 0) + bacakDk.reduce<number>((n, d) => n + (d ?? 0), 0);
   return { toplamDk, yuruyusM, bacakDk, bacakMod, kestirim };
 }
 

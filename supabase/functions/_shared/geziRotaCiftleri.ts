@@ -1,5 +1,6 @@
 // #205 Parça 1: önerilen gezi gününün rota çiftleri. Gece temizliği 30 günü geçen Google konumunu boşaltır (lat/lng null);
-// konumsuz durak rotaya girmez ve bacağı hesaplanmaz (istemci o bacağı kestirimle gösterir, `features/icerik/gezi.ts`).
+// konumsuz durak rotaya girmez (Routes isteğine hiç konmaz) ve bacağı hesaplanmaz (istemcide "Yol süresi bilinmiyor", kanvas
+// 24b-A; toplama katılmaz, `features/icerik/gezi.ts`).
 // Google isteği artmaz: rota yine konumlu durakların tek listesiyle (aynı parça sınırıyla) istenir; konumsuz durağın iki
 // yanındaki konumlu duraklar arasındaki bacak (listede ardışık değiller) kullanılmaz.
 
