@@ -128,9 +128,13 @@ jobs:
             "/ /yonetim 302" \
             "/yonetim/geziler/:id/onizle /yonetim/geziler/_onizle 200" \
             "/yonetim/yerler/:id/onizle /yonetim/yerler/_onizle 200" > dist/_redirects
+          # #542: Cloudflare Pages `node_modules` klasörlerini yüklemez; varlıklar `assets/nm/...`'ye taşınır, adresler yeniden yazılır.
+          node scripts/web-node-modules.mjs dist
       - name: Cloudflare Pages
         if: steps.kosul.outputs.hazir == '1'
         run: |
+          # #542 KK3: dist'te `node_modules` klasörü ya da adresi kaldıysa yayın düşer (Pages o klasörü yüklemez).
+          node scripts/web-node-modules.mjs --denetle dist
           npx --yes wrangler@4 pages project create "$PROJE" --production-branch=main 2>/dev/null || true
           npx --yes wrangler@4 pages deploy dist --project-name="$PROJE" --branch=main --commit-dirty=true
           echo "### Yönetim paneli" >> "$GITHUB_STEP_SUMMARY"

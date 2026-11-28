@@ -164,6 +164,41 @@ test.describe('paylaşım /r/g/{token}', () => {
   });
 });
 
+// #542 KK2: Cloudflare Pages `node_modules` klasörlerini yüklemez (yerel sunucu da öyle davranır, e2e/sunucu.mjs). Bütün
+// font istekleri font döner; yedek HTML (OTS "invalid sfntVersion") değil.
+test.describe('web fontları (#542)', () => {
+  for (const [ad, yol, metin] of [
+    ['davet', `/r/${DAVET_TOKENI}`, tr.davet.katilGoogle],
+    ['paylaşım', `/r/g/${PAYLASIM_TOKENI}`, tr.paylasim.seyahatimeAl],
+  ] as const) {
+    test(`${ad}: bütün font istekleri 200 ve font türüyle döner, FontFace hatasız yüklenir`, async ({ page }) => {
+      await supabaseTaklidi(page);
+      const fontlar: { url: string; durum: number; tur: string }[] = [];
+      page.on('response', (r) => {
+        const adres = new URL(r.url()).pathname;
+        if (r.request().resourceType() === 'font' || /\.(ttf|otf|woff2?)$/.test(adres))
+          fontlar.push({ url: adres, durum: r.status(), tur: r.headers()['content-type'] ?? '' });
+      });
+      await page.goto(yol);
+      await expect(page.getByText(metin)).toBeVisible();
+      const yuzler = await page.evaluate(async () => {
+        await document.fonts.ready;
+        return [...document.fonts].map((f) => ({ aile: f.family, durum: f.status }));
+      });
+      expect(fontlar.length).toBeGreaterThan(0);
+      for (const f of fontlar) {
+        expect(f.url).not.toContain('node_modules');
+        // Ön yükleme ile FontFace aynı dosyayı iki kez isteyebilir; ikincisi önbellekten doğrulanır (304, ETag).
+        expect([200, 304], `${f.url} ${f.durum}`).toContain(f.durum);
+        if (f.durum === 200) expect(f.tur, f.url).toMatch(/^(font\/|application\/octet-stream)/);
+      }
+      for (const url of new Set(fontlar.map((f) => f.url))) expect(fontlar.some((f) => f.url === url && f.durum === 200), url).toBe(true);
+      expect(yuzler.filter((y) => y.durum === 'error')).toEqual([]);
+      expect(yuzler.some((y) => /Figtree/.test(y.aile) && y.durum === 'loaded')).toBe(true);
+    });
+  }
+});
+
 // KK4 / KK-ek3: Chrome 74 yaklaşımı: UA + Chrome 75+ yerleşikleri yok (e2e/eskiTarayici.ts).
 test.describe('Android 9 WebView (Chrome 74 yaklaşımı)', () => {
   test.use({ userAgent: ANDROID9_WEBVIEW });
