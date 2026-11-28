@@ -86,5 +86,11 @@ export function useGeriAlinabilirSil(seyahatId: string | undefined, onHata?: () 
     setBekleyen(null);
   }, []);
 
-  return { bekleyen, cikar, geriAl };
+  // #599 KK2: başka bir bant açılacaksa bu bant kapanır; bekleyen silme hemen kesinleşir (iki bant aynı anda görünmez).
+  const kapat = useCallback(() => {
+    kesinlestir();
+    setBekleyen(null);
+  }, [kesinlestir]);
+
+  return { bekleyen, cikar, geriAl, kapat };
 }

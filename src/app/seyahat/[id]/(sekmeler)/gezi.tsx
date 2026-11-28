@@ -27,7 +27,6 @@ import { ustHaritaVerisi, type UstHaritaHali } from '@/features/gezi/ustHarita';
 import { programCizgileri } from '@/features/program/haritaVerisi';
 import {
   ArtiSatiri,
-  BaglantiSatiri,
   Baslik,
   BolumBasligi,
   BugunBosV7,
@@ -576,11 +575,12 @@ function GeziSayfasi({ seyahat, gunler, duraklar, mekanlar, konaklamalar, katild
         ) : hal === 'bos' ? (
           <View style={s.bolum}>
             <BolumBasligi baslik={t('seyahatV7.bugunBos')} baglanti={sehir ? t('seyahatV7.rehber') : undefined} onBaglanti={() => router.push({ pathname: '/seyahat/[id]/rehber', params: { id: seyahat.id } })} />
-            {/* #522 inceleme 4 + 2. inceleme 4: öneri yoksa, şehir bilinmiyorsa ya da bugünün günü yoksa tek satır "Bugüne yer ekle ›". */}
+            {/* #522 inceleme 4 + 2. inceleme 4: öneri yoksa, şehir bilinmiyorsa ya da bugünün günü yoksa tek satır. #599 KK3: gezi
+                modundaki `ArtiSatiri` ile aynı biçim ve metin (#579 KK4). */}
             {yakinSatirlari.length > 0 && bugunGun ? (
               <BugunBosV7 yerler={yakinSatirlari} eklenenler={eklenenler} onEkle={bugunaEkle} pasif={cevrimdisi} />
             ) : (
-              <BaglantiSatiri metin={t('seyahatV7.bugunYerEkle')} onPress={bugunYerEkle} />
+              <ArtiSatiri metin={t('seyahatV7.bugunYerEkleSatiri')} onPress={bugunYerEkle} />
             )}
           </View>
         ) : (
