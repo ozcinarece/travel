@@ -172,7 +172,7 @@ Her yerde `X sa Y dk` / `Y dk`; ondalık saat yok. Yorum sayısı `1,2K`, `312K`
 v0.2 tablosu aynen, tek değişiklik: **kafe / kahveci (`cafe`, `coffee_shop`) 30 dk** (#83; 45 uzun geliyordu). Kullanıcı −/+ ile 15 dk adımlarla değiştirir (min 15 dk, maks 8 sa).
 
 ## 7. Google Places ve Routes kısıtları
-- Veritabanında yalnız `place_id` ve enlem/boylam (≤ 30 gün); ad, puan, saat, fotoğraf saklanmaz. `stays.label` kullanıcı metnidir.
+- Veritabanında yalnız `place_id` ve enlem/boylam (≤ 30 gün); ad, puan, saat, fotoğraf saklanmaz. `stays.label` kullanıcı metnidir, yalnız `place_id`'siz noktalar için (`place_id`'li otelin adı saklanmaz, canlı okunur; #584). Kullanıcının otele verdiği ad `stays.takma_ad`'dadır.
 - Hafif Details (seçim, listeler, pin paneli); **tam** Details yalnız 3.8. `editorialSummary` daha pahalı SKU: yalnız pin paneli açılınca, 24 sa önbellek.
 - Fotoğraflar: önizleme/sıradaki kart 1 adet, 3.8'de en fazla 10, tembel; atıf zorunlu.
 - Nearby: Keşfet önerileri ve 3.3 oteller, yalnız "Bu bölgede ara" ile.
@@ -188,7 +188,7 @@ trips        id, owner_id, city_place_id, city_label, country_code, lat, lng, tz
              (hotel_* sütunları okunmuyor; bir sürüm sonra kaldırılacak)
 members      trip_id, user_id, guest, display_name, joined_at, role(owner|member)
 places       id, trip_id, place_id, primary_type, lat, lng, google_fetched_at, default_minutes, added_by, note, created_at
-stays        id, trip_id, place_id, lat, lng, label(≤80), google_fetched_at, created_by, created_at
+stays        id, trip_id, place_id, lat, lng, label(≤80, yalnız place_id'siz), takma_ad(≤80), google_fetched_at, created_by, created_at
 days         id, trip_id, index, date, start_time, end_time, order_manual, start_stay_id→stays, end_stay_id→stays
 stops        id, trip_id, day_id, place_ref→places(unique), order_key, minutes, arrived_at, arrived_by,
              completed_at, completed_by, auto_completed, skipped

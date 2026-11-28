@@ -12,7 +12,7 @@ import { GoogleAtfi } from '@/components/yerler/GoogleAtfi';
 import { useGunler } from '@/features/gunler/sorgular';
 import { haritaSeciminiTeslimEt } from '@/features/konaklama/haritaSecimi';
 import type { Konaklama } from '@/features/konaklama/plan';
-import { useKonaklamalar } from '@/features/konaklama/sorgular';
+import { useKonaklamaSatirlari } from '@/features/konaklama/sorgular';
 import { useOtelKaydet, useSeyahat } from '@/features/seyahatler/sorgular';
 import {
   hafifYerler,
@@ -24,6 +24,7 @@ import {
   type HafifYer,
   placesHatasi,
   type Oneri,
+  useHafifYerler,
 } from '@/features/yerler/api';
 import { t } from '@/i18n';
 import { puanMetni } from '@/lib/puan';
@@ -50,8 +51,15 @@ export default function OtelEkrani() {
   const { trip, secim } = useLocalSearchParams<{ trip: string; secim?: string }>();
   const seyahat = useSeyahat(trip);
   const gunler = useGunler(trip);
-  const konaklamalar = useKonaklamalar(trip);
+  // #630 KK3: ham satırlar (takma ad görünen ada karışmaz); arama kutusu yalnız otelin kendi adıyla açılır.
+  const konaklamalar = useKonaklamaSatirlari(trip);
   const secimModu = secim === '1';
+  const ilk = secimModu ? null : ilkGununKonaklamasi(gunler.data ?? [], konaklamalar.data ?? []);
+  // place_id'li otelin adı DB'de yok (#248): canlı ad places-light'tan (oturum önbelleği, puansız). Takma adlı otelde
+  // program ekranı bu adı istemez; form açılınca otel başına en çok 1 istek (önbellekte yoksa).
+  // #318: koordinatı boşalmış otel form başlangıcı olmaz; onun adı da istenmez.
+  const canli = useHafifYerler(ilk?.place_id && konumVar(ilk) ? [ilk.place_id] : [], { puan: false });
+  const canliAd = ilk?.place_id ? (canli.data?.[ilk.place_id]?.ad ?? null) : null;
 
   if (seyahat.isPending || (!secimModu && (gunler.isPending || konaklamalar.isPending))) {
     return (
@@ -70,21 +78,37 @@ export default function OtelEkrani() {
     );
   }
   // Form, seyahat yüklendikten sonra kurulur: mevcut otel (KK5) başlangıç durumu olur, effect gerekmez.
-  const mevcut = secimModu ? null : ilkGununOteli(gunler.data ?? [], konaklamalar.data ?? []);
-  return <OtelFormu key={trip} trip={trip} sehir={seyahat.data} mevcut={mevcut} secimModu={secimModu} />;
+  // #318: koordinatı boşalmış otel form başlangıcı olmaz (yeniden seçilir).
+  const mevcut: OtelGorunumu | null =
+    ilk && konumVar(ilk) ? { place_id: ilk.place_id, ad: ilk.place_id ? '' : (ilk.label ?? ''), lat: ilk.lat, lng: ilk.lng } : null;
+  return <OtelFormu key={trip} trip={trip} sehir={seyahat.data} mevcut={mevcut} canliAd={canliAd} secimModu={secimModu} />;
 }
 
 /** #56: KK5 mevcut otel = ilk günün başlangıç oteli (trips.hotel_* artık okunmaz). */
-function ilkGununOteli(gunler: Gun[], konaklamalar: Konaklama[]): OtelGorunumu | null {
+function ilkGununKonaklamasi(gunler: Gun[], konaklamalar: Konaklama[]): Konaklama | null {
   const ilk = [...gunler].sort((a, b) => a.index - b.index)[0];
-  const k = ilk?.start_stay_id ? konaklamalar.find((x) => x.id === ilk.start_stay_id) : undefined;
-  // #318: koordinatı boşalmış otel form başlangıcı olmaz (yeniden seçilir).
-  return k && konumVar(k) ? { place_id: k.place_id, ad: k.label ?? t('otel.adsiz'), lat: k.lat, lng: k.lng } : null;
+  return (ilk?.start_stay_id ? konaklamalar.find((x) => x.id === ilk.start_stay_id) : undefined) ?? null;
 }
 
-function OtelFormu({ trip, sehir, mevcut, secimModu }: { trip: string; sehir: Seyahat; mevcut: OtelGorunumu | null; secimModu: boolean }) {
+function OtelFormu({
+  trip,
+  sehir,
+  mevcut,
+  canliAd,
+  secimModu,
+}: {
+  trip: string;
+  sehir: Seyahat;
+  mevcut: OtelGorunumu | null;
+  /** #630 KK3: place_id'li mevcut otelin canlı Google adı; gelene kadar null (kutu boş başlar). */
+  canliAd: string | null;
+  secimModu: boolean;
+}) {
   const kaydet = useOtelKaydet(trip);
-  const [sorgu, setSorgu] = useState(mevcut?.ad ?? '');
+  // #630 KK3: null = kullanıcı henüz yazmadı/seçmedi. Kutu "Otelim" ya da takma adla açılmaz: place_id'li otelde
+  // canlı ad gelince onu gösterir, gelene kadar boştur; place_id'siz noktada kendi adı.
+  const [yazilan, setSorgu] = useState<string | null>(mevcut && !mevcut.place_id ? mevcut.ad : null);
+  const sorgu = yazilan ?? (mevcut?.place_id ? (canliAd ?? '') : '');
   const [jeton, setJeton] = useState(yeniOturumJetonu);
   const [otel, setOtel] = useState<OtelGorunumu | null>(mevcut);
   const [odak, setOdak] = useState<HaritaOdagi | undefined>();
@@ -181,6 +205,8 @@ function OtelFormu({ trip, sehir, mevcut, secimModu }: { trip: string; sehir: Se
     }
   };
 
+  // Mevcut place_id'li otelin adı formda boş tutulur (#630 KK3); kartta canlı ad, gelene kadar yedek metin.
+  const otelAdi = otel ? otel.ad || canliAd || t('otel.adsiz') : '';
   const listeAcik = !otel && !linkMi && sorgu.trim().length >= 2;
   const aday = adaylar.find((a) => a.place_id === adayId) ?? null;
   const uzaklasti = !!aramaBolgesi && !!bolge && bolgedenUzaklasti(bolge, aramaBolgesi);
@@ -264,7 +290,7 @@ function OtelFormu({ trip, sehir, mevcut, secimModu }: { trip: string; sehir: Se
             <View style={s.kartSatir}>
               <View style={s.kartMetinler}>
                 <Text style={s.kartAd} numberOfLines={2}>
-                  {otel.ad}
+                  {otelAdi}
                 </Text>
                 <Text style={s.kartAlt} numberOfLines={2}>
                   {[puanMetni(otel.puan) ? `★ ${puanMetni(otel.puan)}` : null, t('otel.daire'), t('otel.surukleNot')].filter(Boolean).join(' · ')}
@@ -311,7 +337,7 @@ function OtelFormu({ trip, sehir, mevcut, secimModu }: { trip: string; sehir: Se
           ) : null}
 
           {hata ? <Text style={s.hata}>{hata}</Text> : null}
-          <Buton baslik={secimModu ? t('gunOteli.bunuKullan') : t('otel.devam')} onPress={() => bitir(otel)} pasif={!otel} yukleniyor={kaydet.isPending} stil={s.devam} />
+          <Buton baslik={secimModu ? t('gunOteli.bunuKullan') : t('otel.devam')} onPress={() => bitir(otel && { ...otel, ad: otelAdi })} pasif={!otel} yukleniyor={kaydet.isPending} stil={s.devam} />
         </>
       }
       harita={{
