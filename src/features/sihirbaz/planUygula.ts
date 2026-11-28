@@ -205,13 +205,15 @@ export async function planOnceliginiOku(
 /**
  * #595 KK3: sihirbazın "K yer sığmıyor" önizlemesi "Planı kur" ile aynı kuralla — oy, il sırası ve (önbellekte varsa)
  * kapalı günler. Google'a istek atmaz: oy ve il sırası DB'den, saat yalnız ortak önbellekten (geldikçe yeniden hesaplanır).
+ * Oy ve il sırası ilk kez yüklenirken `undefined` döner (#617 KK3): önizleme o sırada sayı göstermez.
  */
 export function usePlanOnizlemeOnceligi(seyahatId: string | null, mekanlar: Mekan[] | undefined, duraklar: Durak[] | undefined, tarihli: boolean, ilSlug?: string | null): PlanOnceligi | undefined {
   const { placeIdler } = useMemo(() => bosYerler(mekanlar ?? [], duraklar ?? []), [mekanlar, duraklar]);
+  const sorguAcik = !!seyahatId && placeIdler.length > 0;
   const db = useQuery({
     // 'oylar' önekiyle: oy verilince (Listem, gerçek zamanlı) ['oylar', seyahatId] geçersiz sayılır, bu da onunla yenilenir.
     queryKey: ['oylar', seyahatId, 'plan-onceligi', ilSlug === undefined ? 'seyahatten' : ilSlug, placeIdler],
-    enabled: !!seyahatId && placeIdler.length > 0,
+    enabled: sorguAcik,
     staleTime: 30 * 1000,
     placeholderData: (onceki) => onceki,
     queryFn: async () => {
@@ -225,11 +227,14 @@ export function usePlanOnizlemeOnceligi(seyahatId: string | null, mekanlar: Meka
   const saatSurumu = useSaatOnbellegi(tarihli);
   return useMemo(() => {
     if (!mekanlar || !duraklar) return undefined;
+    // #617 KK3: oy ve il sırası ilk kez gelmeden önceliksiz sayı gösterilmez (sonra zıplamasın). Anahtar değişince
+    // placeholderData önceki değeri tuttuğu için yalnız ilk yükleme bekler.
+    if (sorguAcik && db.data === undefined && !db.isError) return undefined;
     // saatSurumu: önbelleğe saat girince yeniden oku.
     void saatSurumu;
     const saatler = tarihli ? onbellektekiSaatler(placeIdler) : undefined;
     return { oylar: db.data?.oylar, ilSira: db.data?.ilSira, saatler };
-  }, [mekanlar, duraklar, tarihli, placeIdler, db.data, saatSurumu]);
+  }, [mekanlar, duraklar, tarihli, placeIdler, sorguAcik, db.data, db.isError, saatSurumu]);
 }
 
 export function usePlaniUygula(seyahatId: string) {
