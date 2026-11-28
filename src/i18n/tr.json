@@ -1297,6 +1297,28 @@
     "baskaGuneTasiBag": "Başka güne taşı ›",
     "kapaliTasiEtiket": "{uyari}. Başka güne taşı"
   },
+  "planV13": {
+    "gunNo": "{n}. gün",
+    "gunBaslik": "{n}. gün · {tarih}",
+    "kartAlt": "{n} durak · {saat} / {kapasite} sa",
+    "kartEtiket": "{baslik}, {alt}. Gün detayını açar",
+    "bosGun": "Boş gün",
+    "doldur": "Doldur",
+    "doldurEtiket": "{gun} boş. Doldur: Yer ekle bu gün seçili açılır",
+    "gunsuz": "Güne konmamış {n} yer",
+    "yerlestir": "Yerleştir ›",
+    "yerlestirEtiket": "Güne konmamış {n} yer. Yerleştir",
+    "haritayiAc": "Haritayı aç",
+    "geri": "Plana dön",
+    "duzenle": "Düzenle",
+    "duzenleEtiket": "Düzenle: sırala, çıkar",
+    "durakEkle": "+ Durak ekle",
+    "durakEkleEtiket": "Durak ekle",
+    "otel": "Otel: {ad}",
+    "bacakArac": "{dk} dk · {mesafe} araçla",
+    "sen": "Sen ekledin",
+    "ekledi": "{ad} ekledi"
+  },
   "listem": {
     "baslik": "Listem",
     "sirala": "Sırala: {ne}",

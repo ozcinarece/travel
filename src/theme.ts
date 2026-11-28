@@ -91,6 +91,28 @@ export const seyahatV7 = {
   geriAl: '#FFB27A',
 } as const;
 
+/** #667 (UX önerileri kanvası `Plan_v13_Genel` · `Plan_v13_Gun`): Plan genel bakışı ve gün detayı. */
+export const planV13 = {
+  /** Gün kartı zemini. */
+  kartZemin: '#F6F7FA',
+  /** Dolgu çubuğunun izi. */
+  cubukIz: '#E1E5EE',
+  /** Boş günün kesik çerçevesi. */
+  bosKenar: '#9AA6C8',
+  /** ⋯ düğmesi ve otel satırının yatak dairesi. */
+  dugmeZemin: '#F2F4F8',
+  /** Harita yüklenene kadar zemin. */
+  haritaZemin: '#EEF0F4',
+  /** Kart sağındaki ›. */
+  ok: '#9AA1B2',
+  /** Kişi yüzleri sırası (kanvas E · M · A): zemin ve baş harf. */
+  yuzler: [
+    { zemin: '#FFE3CC', harf: '#0E1430' },
+    { zemin: '#C9D2F2', harf: '#152A6B' },
+    { zemin: '#152A6B', harf: '#FFFFFF' },
+  ],
+} as const;
+
 /** #580 (UX önerileri kanvası `Dalga1_DurakCekmecesi` · `Dalga1_GecikmeBandi`): durak çekmecesi ve gecikme bandı. */
 export const durakCekmecesi = {
   /** Satır ikonlarının 36 pt dairesi. */
