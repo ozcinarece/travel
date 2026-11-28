@@ -56,6 +56,9 @@ jest.mock('@/features/icerik/sorgular', () => ({
   useSehirler: () => ({ data: [] }),
   useYerlerIle: () => ({ data: [] }),
 }));
+// #574 KK-ek1: sihirbaz yol arkadaşını okur (bu girişte yok).
+jest.mock('@/features/arkadaslar/sorgular', () => ({ useArkadaslarim: () => ({ data: [] }) }));
+jest.mock('@/features/davet/uygulamaIci', () => ({ useDavetGonder: () => ({ mutateAsync: jest.fn() }) }));
 jest.mock('@/features/icerik/yerEkle', () => ({ useYerleriEkle: () => mockMut }));
 jest.mock('@/features/icerik/ilOnerileri', () => ({ ilSlugu: () => null, useIlYerleri: () => mockBos }));
 jest.mock('@/features/sihirbaz/planUygula', () => ({ ...jest.requireActual<object>('@/features/sihirbaz/planUygula'), usePlaniUygula: () => mockMut }));

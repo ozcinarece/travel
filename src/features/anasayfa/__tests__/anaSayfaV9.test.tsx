@@ -212,7 +212,12 @@ describe('#569 KK6 "+ Yeni gezi oluştur" bağlantısı', () => {
     mockSeyahatler = [sy('Bir', gun(3), gun(4))];
     const e = render(<AnaSayfa />);
     fireEvent.press(await waitFor(() => e.getByTestId('ana-yeni-gezi')));
-    expect(router.push).toHaveBeenLastCalledWith('/(tabs)/yeni');
+    // #574 KK1: her girişte yeni `n` → "Nasıl bir gezi?" temiz açılır.
+    expect(router.push).toHaveBeenLastCalledWith({ pathname: '/(tabs)/yeni', params: { n: expect.any(String) } });
+    const ilk = (router.push as jest.Mock).mock.calls.at(-1)![0] as { params: { n: string } };
+    fireEvent.press(e.getByTestId('ana-yeni-gezi'));
+    const ikinci = (router.push as jest.Mock).mock.calls.at(-1)![0] as { params: { n: string } };
+    expect(ikinci.params.n).not.toBe(ilk.params.n);
     expect(within(e.getByTestId('ana-yeni-gezi')).getByText('Yeni gezi oluştur')).toBeTruthy();
   });
 
@@ -262,7 +267,7 @@ describe('#569 KK5 gezisi olmayan', () => {
     const dugme = within(kart).getByRole('button', { name: 'Yeni gezi oluştur' });
     expect(duz(dugme.props.style)).toMatchObject({ height: 48, borderRadius: 24, backgroundColor: '#ff7a1a' });
     fireEvent.press(dugme);
-    expect(router.push).toHaveBeenLastCalledWith('/(tabs)/yeni');
+    expect(router.push).toHaveBeenLastCalledWith({ pathname: '/(tabs)/yeni', params: { n: expect.any(String) } });
     // KK6: bağlantı yalnız gezi öncesinde.
     expect(e.queryByTestId('ana-yeni-gezi')).toBeNull();
   });

@@ -8,7 +8,13 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { KisiKipi } from '@/features/paylasim/baslik';
 import { supabase } from '@/lib/supabase';
 
-export type Arkadas = { user_id: string; ad: string; foto: string | null };
+export type Arkadas = {
+  user_id: string;
+  ad: string;
+  foto: string | null;
+  /** Hesabı misafir (anonim) mi. Arkadaşlar sekmesi göstermeye devam eder; #574 "Kimlerle?" süzer (davet alamaz). */
+  misafir: boolean;
+};
 
 export type ArkadasPaylasimi = {
   id: string;

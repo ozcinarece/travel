@@ -25,7 +25,10 @@ type Props = {
    * #573 (`Davet_v1_Gonderildi`): perde Lacivert %38, üst köşeler 22, tutamaç 40 × 5 `#D5DAE5` üstte 10 px ve altında 16, kenar
    * payı 16, alt 30; öğeler kendi aralığını verir (gap yok).
    */
-  gorunus?: 'v5' | 'v6' | 'davet';
+  /**
+   * #574 (`Kur_v11_Cekmece`): `davet` ile aynı, yalnız tutamacın altı 12 (kanvas).
+   */
+  gorunus?: 'v5' | 'v6' | 'davet' | 'v11';
 };
 
 /**
@@ -35,14 +38,15 @@ type Props = {
 export function AltPencere({ acik, onKapat, children, kaydirilir, kapatEtiketi, stil, gorunus }: Props) {
   const v5 = gorunus === 'v5';
   const v6 = gorunus === 'v6';
-  const dv = gorunus === 'davet';
+  const v11 = gorunus === 'v11';
+  const dv = gorunus === 'davet' || v11;
   return (
     <Modal visible={acik} transparent animationType="slide" onRequestClose={onKapat}>
       <GestureHandlerRootView style={modalKokuStili}>
         <View style={[s.perde, v5 && s.perdeYok, v6 && s.perdeV6, dv && s.perdeDavet]}>
           <Pressable style={StyleSheet.absoluteFill} onPress={onKapat} accessibilityLabel={kapatEtiketi} />
           <CekilenSayfa onKapat={onKapat} style={[s.sayfa, v5 && s.sayfaV5, v6 && s.sayfaV6, dv && s.sayfaDavet, kaydirilir && s.sinirli]}>
-            <View style={[s.tutamac, (v5 || v6) && s.tutamacV5, v6 && s.tutamacV6, dv && s.tutamacDavet]} />
+            <View style={[s.tutamac, (v5 || v6) && s.tutamacV5, v6 && s.tutamacV6, dv && s.tutamacDavet, v11 && s.tutamacV11]} />
             {kaydirilir ? (
               <SayfaKaydirici contentContainerStyle={[s.icerik, v6 && s.icerikV6, dv && s.icerikDavet, stil]} showsVerticalScrollIndicator={false}>
                 {children}
@@ -74,4 +78,5 @@ const s = StyleSheet.create({
   sayfaDavet: { borderTopLeftRadius: 22, borderTopRightRadius: 22, paddingTop: 10 },
   tutamacDavet: { width: 40, backgroundColor: '#D5DAE5', marginBottom: 16 },
   icerikDavet: { paddingHorizontal: 16, paddingTop: 0, paddingBottom: 30, gap: 0 },
+  tutamacV11: { marginBottom: 12 },
 });
