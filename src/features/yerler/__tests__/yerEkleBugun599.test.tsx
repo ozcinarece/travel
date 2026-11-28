@@ -335,6 +335,39 @@ describe('#599 Yer ekle bugün bağlamı takibi', () => {
     expect(iki.order_key > bir.order_key).toBe(true);
   });
 
+  it('KK2 (değişiklik 1): ekleme sürerken ✓ ile çıkarma → ekleme biter → çıkarma bandı açık kalır, silme gitmez', async () => {
+    let ac: () => void = () => undefined;
+    mockDurakEkleme.bekle = new Promise<void>((c) => (ac = c));
+    mockTablolar.places = [{ id: 'm1', trip_id: 't1', place_id: 'ChIJ-liste-1', primary_type: 'museum', lat: 39.779, lng: 30.479, default_minutes: 60, added_by: 'ben', created_at: '2026-10-01T00:00:00Z' }];
+    // m1 bugünde: panel düğmesi "Listeden çıkar".
+    mockTablolar.stops = [{ id: 'd1', trip_id: 't1', day_id: 'g2', place_ref: 'm1', order_key: 'a0', skipped: false }];
+    ciz();
+    await screen.findByTestId('gun-hapi', {}, ILK);
+    // "+" basılır, bant yokken; durak eklemesi bekletilir.
+    await pindenEkle(ONERI);
+    await waitFor(() => expect(mockEklenen.filter((e) => e.tablo === 'places')).toHaveLength(1));
+    fireEvent.press(screen.getByTestId('panel-kapat'));
+    // Ekleme sürerken m1 ✓ ile çıkarılır: Geri al bandı açılır.
+    fireEvent.press(await screen.findByTestId('pin-m:ChIJ-liste-1'));
+    await waitFor(() => expect(screen.getByText('cikar')).toBeTruthy());
+    await waitFor(() => expect(screen.queryByTestId('panel-cta-metni')).toBeNull());
+    fireEvent.press(screen.getByTestId('panel-cta'));
+    await screen.findByTestId('geri-al-bandi');
+    mockDurakEkleme.bekle = null;
+    ac();
+    await waitFor(() => expect(mockEklenen.filter((e) => e.tablo === 'stops')).toHaveLength(1));
+    await act(async () => {
+      await new Promise((c) => setTimeout(c, 20));
+    });
+    // Çıkarma bandı kaldı, ekleme bildirimi yok, silme gönderilmedi; Geri al hâlâ çıkarmayı geri alır.
+    expect(screen.getAllByTestId('geri-al-bandi')).toHaveLength(1);
+    expect(screen.queryByText(' bugüne eklendi')).toBeNull();
+    expect(mockSilinen).toEqual([]);
+    fireEvent.press(within(screen.getByTestId('geri-al-bandi')).getByRole('button', { name: t('listem.geriAl') }));
+    await waitFor(() => expect(screen.queryByTestId('geri-al-bandi')).toBeNull());
+    expect(mockSilinen).toEqual([]);
+  });
+
   it('KK2: kısa bildirim açıkken ✓ ile çıkarma → bildirim kapanır, yalnız çıkarma bandı', async () => {
     mockTablolar.days = (mockTablolar.days as { index: number }[]).filter((g) => g.index !== 2);
     mockTablolar.places = [{ id: 'm1', trip_id: 't1', place_id: 'ChIJ-liste-1', primary_type: 'museum', lat: 39.779, lng: 30.479, default_minutes: 60, added_by: 'ben', created_at: '2026-10-01T00:00:00Z' }];

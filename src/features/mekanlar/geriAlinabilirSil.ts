@@ -28,12 +28,19 @@ export function useGeriAlinabilirSil(seyahatId: string | undefined, onHata?: () 
   const sil = useMekanSil(seyahatId ?? '');
   const gunler = useGunler(seyahatId);
   const duraklar = useDuraklar(seyahatId);
-  const [bekleyen, setBekleyen] = useState<BekleyenSilme | null>(null);
+  const [bekleyenDurum, setBekleyenDurum] = useState<BekleyenSilme | null>(null);
+  // #599 değişiklik 1: o anki bant, durumla aynı anda yazılır (zamanlayıcı kapattığında bile çizimi beklemeden okunur).
+  const bantRef = useRef<BekleyenSilme | null>(null);
+  const setBekleyen = useCallback((b: BekleyenSilme | null) => {
+    bantRef.current = b;
+    setBekleyenDurum(b);
+  }, []);
+  const bekleyen = bekleyenDurum;
   // Seyahat değişince eski bant kalkar (silme aşağıdaki etkinin temizliğinde yapılır). "Önceki render" deseni.
   const [bantSeyahati, setBantSeyahati] = useState(seyahatId);
   if (bantSeyahati !== seyahatId) {
     setBantSeyahati(seyahatId);
-    setBekleyen(null);
+    setBekleyenDurum(null);
   }
   const bekleyenRef = useRef<{ id: string; zaman: ReturnType<typeof setTimeout> } | null>(null);
   const silMutate = sil.mutate;
@@ -63,7 +70,7 @@ export function useGeriAlinabilirSil(seyahatId: string | undefined, onHata?: () 
       setBekleyen(null);
     });
     return () => abonelik.remove();
-  }, [kesinlestir]);
+  }, [kesinlestir, setBekleyen]);
 
   const duraklarVeri = duraklar.data;
   const gunlerVeri = gunler.data;
@@ -77,20 +84,22 @@ export function useGeriAlinabilirSil(seyahatId: string | undefined, onHata?: () 
       bekleyenRef.current = { id: m.id, zaman };
       setBekleyen({ mekanId: m.id, placeId: m.place_id, metin: cikarMetni(m.id, ad, duraklarVeri, gunlerVeri) });
     },
-    [kesinlestir, duraklarVeri, gunlerVeri],
+    [kesinlestir, setBekleyen, duraklarVeri, gunlerVeri],
   );
   const geriAl = useCallback(() => {
     const b = bekleyenRef.current;
     if (b) clearTimeout(b.zaman);
     bekleyenRef.current = null;
     setBekleyen(null);
-  }, []);
+  }, [setBekleyen]);
 
   // #599 KK2: başka bir bant açılacaksa bu bant kapanır; bekleyen silme hemen kesinleşir (iki bant aynı anda görünmez).
   const kapat = useCallback(() => {
     kesinlestir();
     setBekleyen(null);
-  }, [kesinlestir]);
+  }, [kesinlestir, setBekleyen]);
+  /** #599 değişiklik 1: şu an açık bant (çizimi beklemeden). Seyahat değişiminde ekran zaten yenilenir. */
+  const simdikiBant = useCallback(() => (bantRef.current && bekleyenRef.current ? bantRef.current : null), []);
 
-  return { bekleyen, cikar, geriAl, kapat };
+  return { bekleyen, cikar, geriAl, kapat, simdikiBant };
 }

@@ -16,7 +16,7 @@ import { GrupPenceresi } from '@/components/davet/GrupPenceresi';
 import { GeriAlBandi } from '@/components/listem/GeriAlBandi';
 import { GuneEkleSayfasi } from '@/components/listem/GuneEkleSayfasi';
 import { MekanPaneli } from '@/components/mekan/MekanPaneli';
-import { useGeriAlinabilirSil } from '@/features/mekanlar/geriAlinabilirSil';
+import { type BekleyenSilme, useGeriAlinabilirSil } from '@/features/mekanlar/geriAlinabilirSil';
 import { geciciMi, useMekanEkle, useMekanGuncelle, useMekanlar, useUyeler, type EklemeKaynagi } from '@/features/mekanlar/sorgular';
 import { listedekiMekan, useGunEklemesiniGeriAl, type GunEklemesi } from '@/features/gezi/bugunEkle';
 import { bugunDurumu } from '@/features/listem/listem';
@@ -436,6 +436,8 @@ function Kesfet({
   // olabilir; Değiştir ya da Plan ile açıkça seçilen gün olduğu gibi kalır), günler ya da duraklar henüz yüklenmediyse beklenir
   // (yer sessizce yalnız listeye düşmesin; gelmezlerse hata).
   const hedefGunuBul = async (nesil: number) => {
+    // #599 değişiklik 1: "+"ya dokunulduğu andaki çıkarma bandı (ilk `await`ten önce, eşzamanlı okunur).
+    const bant = geriAlinabilir.simdikiBant();
     const simdi = new Date();
     const bugunNo = bugununGunSirasi(seyahat, simdi);
     if (bugunNo !== bugunSirasi) setAn(simdi);
@@ -444,13 +446,20 @@ function Kesfet({
     const durakListesi = hedefNo !== null && !duraklar.data ? (await duraklar.refetch()).data : duraklar.data;
     if (hedefNo !== null && (!gunListesi || !durakListesi)) throw new Error('gunler_yok');
     const hedef = hedefNo !== null ? (gunListesi?.find((g) => g.index === hedefNo) ?? null) : null;
-    return { bugunNo, hedefNo, hedef, durakListesi: durakListesi ?? [], nesil };
+    return { bugunNo, hedefNo, hedef, durakListesi: durakListesi ?? [], nesil, bant };
   };
-  // #599 KK2: yeni bildirim açılırken Listem'in "Geri al" bandı kapanır (bekleyen çıkarma kesinleşir); aynı anda iki bant yok.
-  // Koşulsuz: ekleme sürerken açılan çıkarma bandı da kapanır (kanca bekleyen yoksa bir şey yapmaz).
-  const cikarmaBandiniKapat = () => geriAlinabilir.kapat();
-  const kisaBildirim = (metin: string) => {
-    cikarmaBandiniKapat();
+  // #599 KK2: "+"ya dokunulduğu anda açık olan "Geri al" bandı, ekleme bildirimi açılırken kapanır (bekleyen çıkarma
+  // kesinleşir); aynı anda iki bant yok. #599 değişiklik 1: bant ekleme sürerken (dokunmadan sonra) açıldıysa kalır ve ekleme
+  // bildirimi gösterilmez — kullanıcı bir şey yapmadan çıkarma kesinleşmez. Bu durumda eklemenin "Geri al"ı da gösterilmez
+  // (yer ✓ ile işaretli kalır). Bildirim gösterilebilirse true.
+  const cikarmaBandiniKapat = (dokunmadaki: BekleyenSilme | null) => {
+    const simdiki = geriAlinabilir.simdikiBant();
+    if (simdiki && simdiki !== dokunmadaki) return false;
+    if (simdiki) geriAlinabilir.kapat();
+    return true;
+  };
+  const kisaBildirim = (metin: string, dokunmadaki: BekleyenSilme | null) => {
+    if (!cikarmaBandiniKapat(dokunmadaki)) return;
     setEklendiBildirimi(null);
     setGunBildirimi(metin);
   };
@@ -479,8 +488,8 @@ function Kesfet({
       });
     atamaKuyrugu.current = is;
     return is.then(({ order_key }) => {
-      if (h.bugunNo === null) return kisaBildirim(t('kesfet.guneEklendi', { ad, n: hedef.index }));
-      cikarmaBandiniKapat();
+      if (h.bugunNo === null) return kisaBildirim(t('kesfet.guneEklendi', { ad, n: hedef.index }), h.bant);
+      if (!cikarmaBandiniKapat(h.bant)) return;
       setGunBildirimi(null);
       setEklendiBildirimi((o) => ({
         metin: gunEklendiMetni(ad, hedef, h.bugunNo),
@@ -512,7 +521,7 @@ function Kesfet({
       // #579 KK3: gezi günlerinde de (bugün ya da "Değiştir"le seçilen gün) sonuna.
       if (h.hedef) await guneAta(await listedekiMekan(seyahat.id, y.place_id), y.ad, { ...h, hedef: h.hedef }, eklenen.yeni);
       // #599 KK5: bugünün sırası var ama o gün `days`'te yok (hap görünmez): yer yalnız listeye girer, bunu söyleyen bildirim.
-      else if (h.hedefNo !== null) kisaBildirim(t('kesfet.listeneEklendi', { ad: y.ad }));
+      else if (h.hedefNo !== null) kisaBildirim(t('kesfet.listeneEklendi', { ad: y.ad }), h.bant);
     } catch (e) {
       setHata(listede ? t('kesfet.guneEklenemedi') : agHatasi(e) ? t('geziSayfasi.cevrimdisi.baglantiYok') : t('kesfet.ekleHata'));
     }
