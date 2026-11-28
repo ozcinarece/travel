@@ -5128,6 +5128,53 @@ do $$ begin
   assert (select takma_ad = 'Bizim otel' from public.stays where place_id = 'ChIJ-584-otel'), '#584 KK2: dışarıdan biri takma ad yazamaz';
 end $$;
 
+-- KK3: #248/#268 öncesi yazılmış satırlar (tetikleyiciler kapalıyken, akış kayıtlarıyla birlikte).
+alter table public.stays disable trigger stays_google_adi_tutma;
+alter table public.trips disable trigger trips_google_otel_adi_tutma;
+insert into public.stays (trip_id, place_id, lat, lng, label) values
+  ('58400000-0000-4000-8000-000000000020', 'ChIJ-584-eski', 40.3, 30.3, 'Eski Google 584'),
+  ('58400000-0000-4000-8000-000000000020', 'ChIJ-584-silinen', 40.4, 30.4, 'Silinen Google 584');
+update public.stays set label = 'Değişen Google 584' where place_id = 'ChIJ-584-eski';
+delete from public.stays where place_id = 'ChIJ-584-silinen';
+update public.stays set label = 'Eski Google 584' where place_id = 'ChIJ-584-otel';
+update public.trips set hotel_place_id = 'ChIJ-584-eski', hotel_lat = 40.3, hotel_lng = 30.3, hotel_label = 'Eski Google 584'
+  where id = '58400000-0000-4000-8000-000000000020';
+update public.trips set hotel_label = 'Aynı yer Google 584' where id = '58400000-0000-4000-8000-000000000020';
+update public.trips set hotel_place_id = null, hotel_label = 'Teyze 584' where id = '58400000-0000-4000-8000-000000000010';
+alter table public.stays enable trigger stays_google_adi_tutma;
+alter table public.trips enable trigger trips_google_otel_adi_tutma;
+do $$ begin
+  assert (select count(*) from public.changes where trip_id::text like '58400000-%'
+    and (old::text like '%Google 584%' or new::text like '%Google 584%')) >= 6, '#584 KK3: hazırlık, akışta eski adlar var';
+end $$;
+select count(*) as akis584 from public.changes where trip_id::text like '58400000-%' \gset
+
+\ir ../migrations/20261216100000_otel_google_adi_temizligi.sql
+-- Tekrar çalıştırmak güvenli.
+\ir ../migrations/20261216100000_otel_google_adi_temizligi.sql
+
+do $$ begin
+  assert not exists (select 1 from public.stays where place_id is not null and label is not null), '#584 KK3: stays.label temiz';
+  assert not exists (select 1 from public.trips where hotel_place_id is not null and hotel_label is not null), '#584 KK3: trips.hotel_label temiz';
+  assert not exists (select 1 from public.changes where old::text like '%Google 584%' or new::text like '%Google 584%'),
+    '#584 KK3: değişiklik akışında Google adı kalmaz';
+  assert (select takma_ad = 'Bizim otel' from public.stays where place_id = 'ChIJ-584-otel'), '#584 KK3: takma ad kalır';
+  assert (select label = 'Pin 584' from public.stays where place_id is null and trip_id = '58400000-0000-4000-8000-000000000010'),
+    '#584 KK3: place_id''siz noktanın adı kalır';
+  assert (select hotel_label = 'Teyze 584' from public.trips where id = '58400000-0000-4000-8000-000000000010'),
+    '#584 KK3: place_id''siz eski otelin adı kalır';
+  assert exists (select 1 from public.changes where new ->> 'label' = 'Pin 584'), '#584 KK3: akışta kullanıcının nokta adı kalır';
+  assert exists (select 1 from public.changes where field = 'hotel_label' and new = '"Teyze 584"'), '#584 KK3: akışta kullanıcının otel adı kalır';
+  assert (select count(*) from public.changes where entity = 'stays' and field is null and new ->> 'place_id' = 'ChIJ-584-eski'
+    and new ? 'label' and new -> 'label' = 'null') = 1, '#584 KK3: ekleme kaydı kalır, yalnız ad boşalır';
+  assert (select bool_and(tgenabled = 'O') from pg_trigger where tgname in ('stays_log', 'trips_log')), '#584 KK3: akış tetikleyicileri yeniden açık';
+end $$;
+select (select count(*) from public.changes where trip_id::text like '58400000-%') = :akis584 as akis_ayni \gset
+\if :akis_ayni
+\else
+  \echo '#584 KK3: temizlik akışa yeni kayıt yazmamalı'
+  select 1/0;
+\endif
 delete from public.trips where id::text like '58400000-%';
 delete from auth.users where id in (:O584, :M584, :Y584);
 
