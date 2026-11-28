@@ -65,7 +65,6 @@ import { bacakAnahtari, useBacakModlari, useBacakModuKaydet, useDurakGuncelle, u
 import { gunDuraklari, saatKisa, useGunProgrami, useSimdi } from '@/features/program/useProgram';
 import { useProgramVerisi } from '@/features/program/useProgramVerisi';
 import { useBilinenMekanlar } from '@/features/gezi/bilinenMekanlar';
-import { gunKartlari } from '@/features/gezi/geziOzeti';
 import { geziyeGit } from '@/features/gezi/gezinti';
 import { useSeyahatId } from '@/features/seyahatler/baglam';
 import { useSeyahat } from '@/features/seyahatler/sorgular';
@@ -1121,7 +1120,6 @@ function ProgramSekmesi({
     foto: a.kaynak === 'liste' ? bilinen.foto(a.place_id) : null,
     alt: [a.ilKategori ? kategoriAdi(a.ilKategori) : kategoriEtiketi(a.tip), a.mesafeM !== null ? mesafeMetni(Math.round(a.mesafeM / 10) * 10) : null].filter(Boolean).join(' · '),
   }));
-  const gunTemasi = gun ? gunKartlari({ gunler: [gun], duraklar, mekanlar, tempolar: verisi.tempolar, ad: (m) => yerler.data?.[m.place_id]?.ad ?? bilinen.ad(m) })[0]?.tema : null;
   const haritayiAc = () => {
     setHaritaGezidenAcildi(false);
     setGorunum('harita');
@@ -1165,22 +1163,7 @@ function ProgramSekmesi({
     if (gun) router.navigate({ pathname: '/seyahat/[id]/(sekmeler)/kesfet', params: { id: seyahat.id, gun: String(gun.index), n: String(Date.now()) } });
   };
   const listemAc = () => router.navigate({ pathname: '/seyahat/[id]/listem', params: { id: seyahat.id } });
-  // #534 KK3: "Perşembe · 26 Kasım"; alt satır bölge (varsa) · saat aralığı · durak sayısı.
   const etkinDurak = planSatir.filter((r) => r.numara !== null).length;
-  const gunOzeti = gun
-    ? {
-        baslik: gun.date ? `${GUNLER[haftaGunu(gun.date)]} · ${parcala(gun.date).gun} ${AYLAR[parcala(gun.date).ay - 1]}` : t('geziSayfasi.gunNo', { n: gun.index }),
-        // #554 KK3: hiç durak yoksa alt başlık yalnız "Boş gün" ("0 durak" yok).
-        // #570 KK6: bütün duraklar atlandıysa "0 durak" yerine "Hepsi atlandı" (liste olduğu gibi kalır).
-        alt: planSatir.length === 0 ? t('plan.bosGun') : [
-          gunTemasi,
-          prog && etkinDurak > 0 ? t('plan.saatAraligi', { bas: dakikaSaat(prog.canli.baslangicDk), bit: dakikaSaat(prog.canli.bitisDk) }) : null,
-          durakOzeti(planSatir),
-        ]
-          .filter(Boolean)
-          .join(' · '),
-      }
-    : null;
 
   // ---------------------------------------------------------------- #667 Plan v13: genel bakış (KK3) ve gün detayı (KK4)
   const uyeListesi = useMemo(() => uyeler.data ?? [], [uyeler.data]);
@@ -1503,7 +1486,8 @@ function ProgramSekmesi({
       <SecimMenusu
         acik={listeMenuAcik}
         gorunus="v7p"
-        baslik={gunOzeti?.baslik}
+        // #667: ⋯ genel bakışta da açılır; başlık hangi günün ayarı olduğunu söyler ("1. gün · Per 7 Ocak").
+        baslik={gun ? gunBasligiV13(gun) : undefined}
         secenekler={
           gun
             ? [
