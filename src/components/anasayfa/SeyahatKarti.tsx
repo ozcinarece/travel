@@ -10,7 +10,7 @@ import { KapakAtfi } from '@/components/icerik/KapakAtfi';
 import { SeyahatKapagi } from '@/components/seyahatler/SeyahatKapagi';
 import { Avatar } from '@/components/ui/Avatar';
 import { Foto } from '@/components/ui/Foto';
-import { KART_KOSE, KART_YUKSEKLIK, type Kapak } from '@/features/anasayfa/v9';
+import { atifEnGenis, KART_KOSE, KART_YER_TUTUCU, KART_YUKSEKLIK, YUZ_BINME, YUZ_CAP, YUZ_SOL, type Kapak } from '@/features/anasayfa/v9';
 import { useOkunmamis } from '@/features/sohbet/sorgular';
 import { t } from '@/i18n';
 import { renk, yazi } from '@/theme';
@@ -109,9 +109,15 @@ export function GeziSirasiKarti({
           </Svg>
         </Hap>
       </View>
-      {kapak?.atif ? <KapakAtfi atif={kapak.atif} sade /> : null}
+      {/* #594 KK1: atıf (dokunma alanı dahil) yüzlerin 8 pt sağında biter; yazar tek satır, sonu "…". */}
+      {kapak?.atif ? <KapakAtfi atif={kapak.atif} sade stil={{ maxWidth: atifEnGenis(genislik, yuzler.length) }} /> : null}
     </View>
   );
+}
+
+/** #594 KK3: seyahat listesi gelene kadar kartın yerinde aynı boyda düz yer tutucu (alan zıplamasın). */
+export function KartYerTutucu({ genislik }: { genislik: number }) {
+  return <View style={[s.kart, s.yerTutucu, { width: genislik }]} testID="seyahat-karti-yer-tutucu" />;
 }
 
 /** KK5: gezisi olmayan — "Sıradaki rota neresi?", alt satır ve turuncu tam genişlik "+ Yeni gezi oluştur" (sihirbaz). */
@@ -206,10 +212,11 @@ const s = StyleSheet.create({
   baslik: { fontFamily: yazi.ekstra, fontSize: 24, letterSpacing: -0.24, color: renk.zemin },
   alt: { fontFamily: yazi.yari, fontSize: 14, color: renk.zemin },
   altSira: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  ustYuzler: { position: 'absolute', left: 14, top: 14 },
+  ustYuzler: { position: 'absolute', left: YUZ_SOL, top: 14 },
+  yerTutucu: { backgroundColor: KART_YER_TUTUCU },
   yuzler: { flexDirection: 'row' },
-  yuzKenar: { width: 36, height: 36, borderRadius: 18, borderWidth: 2, borderColor: renk.zemin, overflow: 'hidden' },
-  yuzBinme: { marginLeft: -9 },
+  yuzKenar: { width: YUZ_CAP, height: YUZ_CAP, borderRadius: YUZ_CAP / 2, borderWidth: 2, borderColor: renk.zemin, overflow: 'hidden' },
+  yuzBinme: { marginLeft: -YUZ_BINME },
   haplar: { position: 'absolute', left: 16, bottom: 16, flexDirection: 'row', gap: 8 },
   hap: { height: 36, paddingHorizontal: 12, borderRadius: 18, backgroundColor: renk.zemin, flexDirection: 'row', alignItems: 'center', gap: 6 },
   hapMetin: { fontFamily: yazi.kalin, fontSize: 14, color: renk.metin },

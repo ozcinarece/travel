@@ -168,6 +168,26 @@ describe('#407 Arkadaşlar', () => {
     expect(mockPaylas).toHaveBeenCalledWith(mockSeyahatSatiri);
   });
 
+  it('#611: İstanbul 00:30 iken (UTC 21:30, UTC tarihi bir gün geride) bugünkü seyahatin daveti paylaşılır', async () => {
+    // Yalnız Date sahte; zamanlayıcılar gerçek kalır ki render ve act değişmesin.
+    jest.useFakeTimers({
+      now: new Date('2026-11-27T21:30:00Z'),
+      doNotFake: ['hrtime', 'nextTick', 'performance', 'queueMicrotask', 'requestAnimationFrame', 'cancelAnimationFrame', 'requestIdleCallback', 'cancelIdleCallback', 'setImmediate', 'clearImmediate', 'setInterval', 'clearInterval', 'setTimeout', 'clearTimeout'],
+    });
+    try {
+      expect(new Date().toISOString().slice(0, 10)).toBe('2026-11-27');
+      const bugun = yerelTarih(new Date(), 'Europe/Istanbul');
+      expect(bugun).toBe('2026-11-28');
+      mockDurum.seyahatler = [{ id: 'T1', name: null, city_label: 'Bursa', start_date: bugun, end_date: bugun, tz: 'Europe/Istanbul' }];
+      render(<ArkadaslarEkrani />);
+      await act(async () => fireEvent.press(screen.getAllByRole('button', { name: 'Davet et' }).at(-1)!));
+      expect(mockPush).not.toHaveBeenCalled();
+      expect(mockPaylas).toHaveBeenCalledWith(mockSeyahatSatiri);
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
   it('geçen zaman', () => {
     const an = new Date('2026-11-26T12:00:00Z');
     expect(gecenZaman('2026-11-26T11:30:00Z', an)).toBe('az önce');

@@ -16,7 +16,6 @@ const routes = [
   { key: 'k1', name: 'index', params: undefined },
   { key: 'k2', name: 'seyahatler', params: undefined },
   { key: 'k4', name: 'arkadaslar', params: undefined },
-  { key: 'k3', name: 'profil', params: undefined },
 ];
 
 function ciz(index: number) {

@@ -71,6 +71,12 @@ export type IkonAdi =
   | 'arabaV7p'
   | 'yuruV7p'
   | 'okV7p'
+  // #580 (UX önerileri kanvası `Dalga1_DurakCekmecesi` · `Dalga1_GecikmeBandi`): çekmecede Atla, Yarına taşı, Çıkar; gecikme
+  // bandındaki saat.
+  | 'atlaD1'
+  | 'yarinaD1'
+  | 'copD1'
+  | 'saatD1'
   // #515 (`Sos_v6_Paylas` s.43): "Linkte senin adın görünür" satırındaki kişi.
   | 'kisiV6'
   // #69: filtre düğmesi (kaydırıcılar) ve dolu yıldız (öne çıkan).
@@ -328,6 +334,20 @@ export function Ikon({ ad, boyut = 24, renk, kalinlik = 2, dolgu }: Props) {
         </>
       ) : ad === 'okV7p' ? (
         <Path d="M9 6l6 6-6 6" {...ortak} />
+      ) : ad === 'atlaD1' ? (
+        <Path d="M5 12h11M12 7l5 5-5 5M20 5v14" {...ortak} />
+      ) : ad === 'yarinaD1' ? (
+        <>
+          <Rect x={4} y={5} width={16} height={15} rx={2} {...ortak} />
+          <Path d="M4 10h16M9 3v4M15 3v4M10 15h5M13 13l2 2-2 2" {...ortak} />
+        </>
+      ) : ad === 'copD1' ? (
+        <Path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13" {...ortak} />
+      ) : ad === 'saatD1' ? (
+        <>
+          <Circle cx={12} cy={12} r={8.5} {...ortak} />
+          <Path d="M12 7.5V12l3 2" {...ortak} />
+        </>
       ) : ad === 'kalpV7' ? (
         <Path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z" {...ortak} />
       ) : ad === 'kisiV6' ? (

@@ -77,7 +77,7 @@
     }
   },
   "seyahatlerim": {
-    "baslik": "Seyahatlerim",
+    "baslik": "Gezilerim",
     "bosOnce": "Henüz seyahatin yok. ",
     "bosVurgu": "+ Seyahat",
     "bosSonra": " ile ilkini başlat.",
@@ -1174,6 +1174,25 @@
     "bugunYerEkleSatiri": "Bugüne yer ekle",
     "yakindaBugune": "Yakında, bugüne ekle",
     "tumu": "Tümü ›"
+  },
+  "durakCekmecesi": {
+    "simdi": "Şimdi",
+    "gezdim": "Gezdim",
+    "gezilmediSay": "Gezilmedi say",
+    "yolTarifi": "Yol tarifi",
+    "yolYuruyus": "{dk} dk yürüme",
+    "yolTaksi": "{dk} dk araçla",
+    "atla": "Atla",
+    "yarinaTasi": "Yarına taşı",
+    "yarinAlt": "{gun}, günün sonuna",
+    "sonGun": "Son gün",
+    "cikar": "Çıkar",
+    "bugundenCikti": "{ad} bugünden çıktı",
+    "kapat": "Kapat",
+    "satirIpucu": "Durak seçeneklerini açar",
+    "gerideyiz": "{dk} dk gerideyiz",
+    "saatleriKaydir": "Saatleri kaydır",
+    "plandaVarirsin": "Planda {plan} · şimdi {simdi} varırsın"
   },
   "geziSayfasi": {
     "cevrimdisi": {

@@ -91,6 +91,18 @@ export const seyahatV7 = {
   geriAl: '#FFB27A',
 } as const;
 
+/** #580 (UX önerileri kanvası `Dalga1_DurakCekmecesi` · `Dalga1_GecikmeBandi`): durak çekmecesi ve gecikme bandı. */
+export const durakCekmecesi = {
+  /** Satır ikonlarının 36 pt dairesi. */
+  ikonZemin: '#F2F4F8',
+  /** "Çıkar" metni ve ikonu. */
+  cikar: '#B42318',
+  /** Gecikme bandı zemini, saat ikonu ve "N dk gerideyiz" metni (zeminde ≥ 4,5:1). */
+  bantZemin: '#FFF4EB',
+  bantIkon: '#C25200',
+  bantMetin: '#8A3A00',
+} as const;
+
 /**
  * #361 KK7 (UX önerileri kanvası, `Ana_v5_Amaclar`): kapaksız gezi kartının amaca göre zemini, tepesi (%85 opak) ve
  * dairesi; daire üstünde beyaz ikon. Anahtarlar `features/icerik/amaclar.ts` ile aynı; `yok` = amacı olmayan gezi.
