@@ -23,6 +23,10 @@ jest.mock('@/features/seyahatler/sorgular', () => ({
   useSeyahatler: () => ({ ...(mockListe ?? { data: mockSeyahatler, isPending: false, isError: false }), isRefetching: false, refetch: jest.fn() }),
 }));
 let mockDavet: string | null = null;
+// #573: uygulama içi davet kutusu bu testte boş.
+jest.mock('@/features/davet/uygulamaIci', () => ({
+  useDavetEylemleri: () => ({ davetler: [], yenile: async () => undefined, katil: async () => undefined, katilan: null, reddet: () => undefined, geriAl: () => undefined, bekleyen: null }),
+}));
 jest.mock('@/features/davet/sorgular', () => ({
   bekleyenDavetiOku: async () => mockDavet,
   bekleyenDavetiSil: async () => undefined,

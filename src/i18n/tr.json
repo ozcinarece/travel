@@ -313,7 +313,34 @@
       "vardi": "vardı: {ad} · {zaman}"
     },
     "tekrarDene": "Tekrar dene",
-    "paylasMetin": "{ad} için seyahat planına katıl: {link}"
+    "paylasMetin": "{ad} için seyahat planına katıl: {link}",
+    "kutu": {
+      "rozet": "DAVET",
+      "bolum": "DAVETLER",
+      "baslik": "{ad} seni {yerEk} çağırıyor",
+      "etiket": "Davet: {baslik}",
+      "hayir": "Hayır",
+      "katil": "Katıl",
+      "hayirIpucu": "{sehir} davetini geri çevirir",
+      "katilIpucu": "{sehir} gezisine katılırsın",
+      "geliyorBir": "{ad} {de} geliyor",
+      "geliyorIki": "{ad} ve {ad2} {de} geliyor",
+      "geliyorCok": "{ad} ve {n} kişi daha geliyor",
+      "geriCevirdin": "Daveti geri çevirdin",
+      "gecersiz": "Bu davet artık geçerli değil"
+    },
+    "gonderildi": {
+      "baslik": "{gezi} hazır",
+      "gitti": "{adlar} davet gitti.",
+      "ve": "ve",
+      "durum": {
+        "bekliyor": "Bekliyor",
+        "katildi": "Katıldı",
+        "reddetti": "Geri çevirdi"
+      },
+      "geziyeGit": "Geziye git",
+      "linkiPaylas": "Linki de paylaş"
+    }
   },
   "harita": {
     "anahtarYok": "Harita anahtarı tanımlı değil"
@@ -1606,5 +1633,43 @@
     "hazirGeziler": "Hazır gezilere bak",
     "agBaslik": "Bağlanamadık",
     "agMetin": "Gezinin bilgileri yüklenemedi. Bağlantın düzelince tekrar dene."
+  },
+  "geziKur": {
+    "baslik": "Nasıl bir gezi?",
+    "sehirYer": "Hangi şehir?",
+    "sehirEtiket": "Şehir",
+    "sehirTemizle": "Şehri temizle",
+    "suzgec": {
+      "iki": "2 gün",
+      "ucBes": "3–5 gün",
+      "lezzet": "Lezzet",
+      "doga": "Doğa",
+      "kultur_tarih": "Kültür"
+    },
+    "kendiKur": "Kendi rotanı kur",
+    "sehirleKur": "{sehir} için kendi rotanı kur",
+    "kendiAlt": "Tarihi seç, yerleri sen ekle",
+    "sehirRotalari": "{sehir} rotaları",
+    "hazirYok": "Bu şehir için hazır rota yok, kendi rotanı kur",
+    "suzgecBos": "Bu seçimle hazır rota yok",
+    "rotaHata": "Hazır rotalar yüklenemedi.",
+    "arkadaslardan": "Arkadaşlarından",
+    "kartAlt": "{gun} gün · {durak} durak · Editör seçimi",
+    "bunuSec": "Bunu seç",
+    "bunuSecEtiket": "{ad} rotasını seç",
+    "gitti1": "{a} bu rotayla gitti",
+    "gitti2": "{a} ve {b} bu rotayla gitti",
+    "gittiCok": "{a}, {b} ve {n} kişi daha bu rotayla gitti",
+    "arkadasBaslik": "{sehir}, {n} gün",
+    "arkadasAlt": "{ad} rotası",
+    "cekmeceAlt": "{gun} gün · {durak} durak",
+    "kimlerle": "Kimlerle?",
+    "davetEkle": "Davet linki gönder",
+    "davetSecili": "Davet linki gezi oluşunca gönderilecek",
+    "yolArkadasi": "{ad} seçili, gezi oluşunca davet gider. Kaldırmak için dokun",
+    "olustur": "Geziyi oluştur",
+    "rotasindan": "{ad} rotasından",
+    "kapat": "Kapat",
+    "kisiSec": "{ad}: davet etmek için dokun"
   }
 }

@@ -1,10 +1,12 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router, useFocusEffect, useLocalSearchParams, useNavigationContainerRef } from 'expo-router';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Linking, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { GrupPenceresi } from '@/components/davet/GrupPenceresi';
 import { PaylasimCekmecesi } from '@/components/paylasim/PaylasimCekmecesi';
+import { useArkadasPaylasimlari } from '@/features/arkadaslar/sorgular';
+import { kaynakRotaMetni } from '@/features/geziKur/geziKur';
 import { kisiKipi } from '@/features/paylasim/baslik';
 import { usePaylasimYapildi, type PaylasimKaynagi } from '@/features/paylasim/sorgular';
 import { KatilimSayfasi } from '@/components/davet/KatilimSayfasi';
@@ -89,7 +91,9 @@ import { konumu, yolTarifiHedefi } from '@/lib/konum';
 export default function GeziEkrani() {
   const id = useSeyahatId();
   // #181 KK14: davetle gelen kullanıcı doğrudan buraya iner ("Katıldın ✓" alt sayfası bir kez).
-  const { katildin } = useLocalSearchParams<{ katildin?: string }>();
+  // #573: uygulama içi davetle gelende "Katıldın" başlığındaki ad davet edenin adıdır (sahip olmayabilir).
+  // #574: `davet=1` — "Geziyi oluştur"da "+" (davet linki) seçildi; sayfa açılınca link paylaşımı bir kez açılır.
+  const { katildin, davetEden, davet } = useLocalSearchParams<{ katildin?: string; davetEden?: string; davet?: string }>();
   const seyahat = useSeyahat(id);
   const gunler = useGunler(id);
   const duraklar = useDuraklar(id);
@@ -112,6 +116,8 @@ export default function GeziEkrani() {
       mekanlar={mekanlar.data}
       konaklamalar={konaklamaVerisi}
       katildin={katildin === '1'}
+      davetEden={davetEden || undefined}
+      davetAc={davet === '1'}
       cevrimdisi={cevrimdisi}
       guncellendi={guncellendi}
     />
@@ -127,13 +133,17 @@ type SayfaProps = {
   mekanlar: Mekan[];
   konaklamalar: Konaklama[];
   katildin: boolean;
+  /** #573: "Katıldın" çekmecesindeki davet edenin adı (uygulama içi davet); yoksa seyahatin sahibi. */
+  davetEden?: string;
+  /** #574: açılışta davet linki paylaşımı bir kez açılır. */
+  davetAc?: boolean;
   /** #243: bağlantı yok — şerit görünür, düzenleme düğmeleri pasif, Google içeriği gösterilmez. */
   cevrimdisi: boolean;
   /** Planın son başarılı güncellemesi (ms). */
   guncellendi: number;
 };
 
-function GeziSayfasi({ seyahat, gunler, duraklar, mekanlar, konaklamalar, katildin, cevrimdisi, guncellendi }: SayfaProps) {
+function GeziSayfasi({ seyahat, gunler, duraklar, mekanlar, konaklamalar, katildin, davetEden, davetAc, cevrimdisi, guncellendi }: SayfaProps) {
   const { session, hesapli } = useOturum();
   const benId = session?.user.id ?? null;
   const uyeler = useUyeler(seyahat.id);
@@ -144,6 +154,18 @@ function GeziSayfasi({ seyahat, gunler, duraklar, mekanlar, konaklamalar, katild
   const davet = useDavetPaylas(seyahat, (sonuc) => {
     if (sonuc === 'kopyalandi') setBildirim(t('davet.linkKopyalandi'));
   });
+  const davetAcildi = useRef(false);
+  useEffect(() => {
+    if (!davetAc || davetAcildi.current || cevrimdisi) return;
+    davetAcildi.current = true;
+    // Parametre temizlenir: sayfa yeniden kurulunca (sekme dönüşü, yeniden yükleme) paylaşım tekrar açılmaz.
+    router.setParams({ davet: undefined });
+    void davet.paylas();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [davetAc, cevrimdisi]);
+  // #574 KK7: arkadaş rotasından kurulduysa "Ayşe'nin rotasından" (yeni veri yok: paylaşımın kimliği ve #533 akışındaki adı).
+  const kaynakPaylasimlar = useArkadasPaylasimlari(!!seyahat.kaynak_paylasim && hesapli);
+  const kaynakMetni = useMemo(() => kaynakRotaMetni(seyahat.kaynak_paylasim, kaynakPaylasimlar.data), [seyahat.kaynak_paylasim, kaynakPaylasimlar.data]);
   useEffect(() => {
     if (!bildirim) return;
     const z = setTimeout(() => setBildirim(null), 2800);
@@ -518,7 +540,7 @@ function GeziSayfasi({ seyahat, gunler, duraklar, mekanlar, konaklamalar, katild
             <CevrimdisiSeridi guncellendi={guncellendi} tz={seyahat.tz} an={an} />
           </View>
         ) : null}
-        <Baslik ad={seyahatAdi(seyahat)} alt={altSatir} />
+        <Baslik ad={seyahatAdi(seyahat)} alt={altSatir} kaynak={kaynakMetni} />
         <KisilerSatiri kisiler={kisiYuzleri} sag={kisilerSag} sagYesil={!!varanMetni} onCagir={davet.paylas} onYuzler={() => setGrupAcik(true)} pasif={cevrimdisi} />
         {ipucu ? <SohbetIpucu kim={ipucu.kim} metin={ipucu.metin} onPress={sohbeteGit} /> : null}
         {hatirlatmaVakti(seyahat, an) && mod === 'gezi' ? (
@@ -641,6 +663,7 @@ function GeziSayfasi({ seyahat, gunler, duraklar, mekanlar, konaklamalar, katild
         acik={karsilamaAcik && !!uyeler.data}
         seyahat={seyahat}
         uyeler={uyeListesi}
+        davetEden={davetEden}
         gunSayisi={gunler.length}
         mekanSayisi={mekanlar.length}
         onProgram={() => {

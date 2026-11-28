@@ -31,9 +31,18 @@ type Props = {
   /** KK2: tarihsiz seçimde gün sayısı; null → tarihli seçim. */
   tarihsizGun: number | null;
   onTarihsizGun: (n: number) => void;
+  /**
+   * #574 KK5 (`Kur_v11_Cekmece`): verilirse özet kartı yerine tek satır ("5–6 Aralık · Cumartesi–Pazar · 2 gün", 14/700);
+   * null → seçim yok ("Gidiş gününe dokun"). Verilmezse sihirbazdaki özet kartı.
+   */
+  ozetSatiri?: string | null;
+  /** #574: dokunuşun yeni aralığı (verilmezse `tarihDokun(aralik, gun)`); çekmece gösterilenden farklı gerçek seçimle hesaplar. */
+  dokun?: (aralik: Aralik, gun: string) => Aralik;
+  /** "Dönüş günü?" ipucu (verilmezse yalnız gidiş seçiliyken). */
+  donusBekleniyor?: boolean;
 };
 
-export function AdimNeZaman({ aralik, onAralik, tarihsizGun, onTarihsizGun }: Props) {
+export function AdimNeZaman({ aralik, onAralik, tarihsizGun, onTarihsizGun, ozetSatiri, dokun = tarihDokun, donusBekleniyor }: Props) {
   const bugun = yerelTarih(new Date(), Intl.DateTimeFormat().resolvedOptions().timeZone);
   const ilk = parcala(aralik?.gidis ?? bugun);
   const [ay, setAy] = useState({ yil: ilk.yil, ay: ilk.ay });
@@ -45,7 +54,7 @@ export function AdimNeZaman({ aralik, onAralik, tarihsizGun, onTarihsizGun }: Pr
   return (
     <View style={s.kap}>
       <Text style={s.ipucu} accessibilityLiveRegion="polite">
-        {aralik && !aralik.donus ? t('sihirbaz.nezaman.donusIpucu') : ''}
+        {(donusBekleniyor ?? (!!aralik && !aralik.donus)) ? t('sihirbaz.nezaman.donusIpucu') : ''}
       </Text>
       <View style={s.kart}>
         <View style={s.ayBasi}>
@@ -83,7 +92,7 @@ export function AdimNeZaman({ aralik, onAralik, tarihsizGun, onTarihsizGun }: Pr
                 accessibilityLabel={gun}
                 accessibilityState={{ selected: sec, disabled: gecmis }}
                 disabled={gecmis}
-                onPress={() => onAralik(tarihDokun(aralik, gun))}
+                onPress={() => onAralik(dokun(aralik, gun))}
                 style={[s.hucre, bandi && s.band, basBand && s.bandBas, sonBand && s.bandSon]}>
                 <View style={[s.gunKutu, sec && s.gunSecili, gun === bugun && !sec && s.bugun]}>
                   <Text style={[s.gunSayi, gecmis && s.gecmis, bandi && !sec && { color: renk.ana }, sec && s.gunSayiSecili]}>{parcala(gun).gun}</Text>
@@ -120,6 +129,8 @@ export function AdimNeZaman({ aralik, onAralik, tarihsizGun, onTarihsizGun }: Pr
             </Pressable>
           </View>
         </View>
+      ) : ozetSatiri !== undefined ? (
+        <Text style={ozetSatiri ? s.ozetSatir : s.not}>{ozetSatiri ?? t('sihirbaz.nezaman.ozetYok')}</Text>
       ) : aralik && son ? (
         <View style={s.ozet}>
           <View style={{ flex: 1, gap: 2 }}>
@@ -140,6 +151,7 @@ export function AdimNeZaman({ aralik, onAralik, tarihsizGun, onTarihsizGun }: Pr
 const s = StyleSheet.create({
   kap: { gap: 16 },
   not: { fontFamily: yazi.normal, fontSize: 13, color: renk.ikincil },
+  ozetSatir: { fontFamily: yazi.kalin, fontSize: 14, color: renk.metin, paddingTop: 6 },
   // KK1: yeri hep ayrılı (boşken de); ipucu çıkınca takvim kaymaz.
   ipucu: { fontFamily: yazi.kalin, fontSize: 15, lineHeight: 20, minHeight: 20, color: renk.ana, marginBottom: -8 },
   kart: { borderWidth: 1, borderColor: renk.ayrac, borderRadius: kose.kart, paddingTop: 14, paddingHorizontal: 12, paddingBottom: 10, gap: 8 },

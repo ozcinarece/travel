@@ -56,6 +56,8 @@ export type Seyahat = {
   day_end: string;
   /** #98 adım 4: davet linki (PRD 3.10, 8 karakter base62). */
   invite_token: string;
+  /** #432 KK6: "Seyahatime al" ile bir arkadaş paylaşımından kurulduysa paylaşımın kimliği (#574 KK7). */
+  kaynak_paylasim?: string | null;
 };
 
 /** days satırı (PRD §8). Tarihsiz seyahatte date null. */

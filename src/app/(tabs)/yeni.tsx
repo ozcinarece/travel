@@ -1,7 +1,9 @@
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { ActivityIndicator, BackHandler, Linking, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Alert, BackHandler, Linking, StyleSheet, Text, View } from 'react-native';
 
+import { KimlerleSatiri } from '@/components/geziKur/BunuSecCekmecesi';
+import { GeziKurEkrani, type KendiRotaGirisi } from '@/components/geziKur/GeziKurEkrani';
 import { MekanPaneli } from '@/components/mekan/MekanPaneli';
 import { AdimIlOnerileri } from '@/components/sihirbaz/AdimIlOnerileri';
 import { AdimKabugu } from '@/components/sihirbaz/AdimKabugu';
@@ -11,6 +13,8 @@ import { AdimOnerilenler } from '@/components/sihirbaz/AdimOnerilenler';
 import { PlanCubugu } from '@/components/sihirbaz/PlanCubugu';
 import { SehirDegisimSayfasi } from '@/components/sihirbaz/SehirDegisimSayfasi';
 import { Buton } from '@/components/ui/Buton';
+import { useDavetGonder } from '@/features/davet/uygulamaIci';
+import { useKimlerle } from '@/features/geziKur/kimlerle';
 import { useDuraklar, useGunler } from '@/features/gunler/sorgular';
 import { ilSlugu, useIlYerleri } from '@/features/icerik/ilOnerileri';
 import { icerikPlaceId, olayYaz, sehirEslestir, useSehirler, useYerlerIle } from '@/features/icerik/sorgular';
@@ -18,7 +22,7 @@ import { useYerleriEkle } from '@/features/icerik/yerEkle';
 import { useMekanEkle, useMekanGuncelle, useMekanlar, useMekanSil } from '@/features/mekanlar/sorgular';
 import { useProfil, useProfilGuncelle } from '@/features/profil/sorgular';
 import { useSeyahat, useSeyahatAdiKaydet, useSeyahatOlustur } from '@/features/seyahatler/sorgular';
-import { seyahatiKopyala, useIcerikSehirSecimi, useTekrarKaynagi } from '@/features/sihirbaz/girisler';
+import { seyahatiKopyala, useIcerikSehirSecimi, useTekrarKaynagi, yeniGirisNo } from '@/features/sihirbaz/girisler';
 import type { OnerilenMekan } from '@/features/sihirbaz/onerilenler';
 import { gunDolulugu, secimOzeti } from '@/features/sihirbaz/planKur';
 import { planiHesapla, usePlaniUygula } from '@/features/sihirbaz/planUygula';
@@ -28,6 +32,57 @@ import type { HafifYer } from '@/features/yerler/api';
 import { t } from '@/i18n';
 import type { SehirSecimi } from '@/lib/tipler';
 import { renk, yazi } from '@/theme';
+
+/** Ekranın giriş parametreleri. */
+type YeniGirisi = {
+  tekrar?: string;
+  sehir?: string;
+  yerler?: string;
+  n?: string;
+  metin?: string;
+  /** #578 Profil v12: ilin plakası (bilgi; şehir `sehir` ya da `metin` ile gelir). */
+  il?: string;
+  /** #578 Profil v12 → #574 KK-ek1: yol arkadaşı olarak seçili gelecek kişi. */
+  arkadas?: string;
+  /** #574: "Kendi rotanı kur" sihirbazı şehir dolu, 2. adımdan açar. */
+  adim?: string;
+};
+
+/**
+ * #574 Gezi oluşturma v11 (KK1): "Yeni gezi oluştur" (ana sayfa), Gezilerim'deki "+" ve ana sayfa aramasından şehirle gelen
+ * giriş "Nasıl bir gezi?" ekranını açar (`GeziKurEkrani`; şehir kutusu dolu, `arkadas` yol arkadaşı seçili). Eski sihirbazın
+ * girişi kalmadı: "Kendi rotanı kur" onu rehberli şehir seçiliyse şehir dolu, 2. adımdan; değilse yazılan metin Nereye'de aranmış
+ * açar; 1. adımda geri bu ekrana döner. Ana sayfa metin araması (`metin`) da bu ekranı kutu dolu açar. Sihirbaza doğrudan giden
+ * girişler: `tekrar` (Tekrar kur), `sehir` + `yerler` (Kaydettiklerim) ve Profil'in rehberli olmayan ili (`metin` + `il`, KK-ek2:
+ * Nereye'de aranmış; `arkadas` sihirbazda da yol arkadaşı seçili gelir, KK-ek1).
+ */
+export default function YeniEkrani() {
+  const giris = useLocalSearchParams<YeniGirisi>();
+  const anahtar = [giris.tekrar, giris.sehir, giris.yerler, giris.metin, giris.il, giris.arkadas, giris.n].map((x) => x ?? '').join('|');
+  const [uygulanan, setUygulanan] = useState(anahtar);
+  const [kendi, setKendi] = useState<YeniGirisi | null>(null);
+  // Yeni parametreyle gelindiyse (sekme açık kalır) "Kendi rotanı kur"dan açılan sihirbaz kapanır.
+  if (uygulanan !== anahtar) {
+    setUygulanan(anahtar);
+    setKendi(null);
+  }
+  // KK-ek2: Profil'den rehberli olmayan il (`metin` + `il`) Nereye'de aranmış gelir; ana sayfa metin araması (`il` yok) KK1 gereği
+  // "Nasıl bir gezi?"yi kutu dolu açar.
+  if (giris.tekrar || giris.yerler || (giris.metin && giris.il)) return <Sihirbaz giris={giris} />;
+  const kendiRota = (g: KendiRotaGirisi, arkadas?: string) => {
+    const ek = arkadas ? { arkadas } : {};
+    setKendi(g === null ? ek : 'sehirId' in g ? { sehir: g.sehirId, adim: 'nezaman', n: yeniGirisNo(), ...ek } : { metin: g.metin, n: yeniGirisNo(), ...ek });
+  };
+  // Sihirbaz açıkken "Nasıl bir gezi?" gizli ama kurulu kalır: 1. adımdan geri dönünce yazılan şehir ve süzgeçler yerinde.
+  return (
+    <>
+      <View style={{ flex: 1, display: kendi ? 'none' : 'flex' }}>
+        <GeziKurEkrani key={anahtar} sehirId={giris.sehir} ilkMetin={giris.metin} arkadas={giris.arkadas} onKendiRota={kendiRota} />
+      </View>
+      {kendi ? <Sihirbaz giris={kendi} onCik={() => setKendi(null)} /> : null}
+    </>
+  );
+}
 
 /**
  * #98 → #139 (kanvas 4 · 5 · 7 · 8): seyahat kurma sihirbazı — 3 adım: Nereye → Ne zaman → Neleri görmek istersin, sonra
@@ -39,7 +94,7 @@ import { renk, yazi } from '@/theme';
  * #144 girişleri: `tekrar` (geçmiş seyahat → aynı şehir ve ad, 2. adımdan; seyahat oluşunca plan kopyalanır, Program açılır),
  * `sehir` + `yerler` (Kaydettiklerim → rehberli şehir seçili; seyahat oluşunca kaydedilen yerler listeye).
  */
-export default function SihirbazEkrani() {
+export function Sihirbaz({ giris, onCik }: { giris: YeniGirisi; /** #574: 1. adımda geri "Nasıl bir gezi?"ye döner. */ onCik?: () => void }) {
   const [adim, setAdim] = useState<Adim>('nereye');
   const [sehir, setSehir] = useState<SehirSecimi | null>(null);
   const [ad, setAd] = useState<string | null>(null);
@@ -58,13 +113,16 @@ export default function SihirbazEkrani() {
     }, [tripId]),
   );
   const [hata, setHata] = useState<string | null>(null);
+  // #574 KK6 · KK-ek1: "Kimlerle?" — çekmeceyle aynı yol: son gezilen arkadaşlar (en çok 3), Profil'den (`arkadas`) ya da
+  // "Nasıl bir gezi?"den gelen kişi seçili; seyahat oluşunca seçilenlere #573 uygulama içi daveti gider.
+  const kimlerle = useKimlerle(giris.arkadas);
+  const davetGonder = useDavetGonder();
   // KK8: sihirbaz başlangıcı → plan yazılana kadar süre (ölçüm: < 3 dk). Seyahat henüz kurulmadıysa ekran her odağa
   // geldiğinde sıfırlanır (sekmeden çıkıp dönünce süre uzun ölçülmesin).
   const baslangicAni = useRef(0);
 
   const sehirler = useSehirler();
   // #144: dışarıdan giriş parametreleri bir kez uygulanır (sekme ekranı açık kalır; aynı parametreyle tekrar uygulanmaz).
-  const giris = useLocalSearchParams<{ tekrar?: string; sehir?: string; yerler?: string; n?: string; metin?: string }>();
   const tekrarKaynagi = useTekrarKaynagi(giris.tekrar);
   const girisSehri = useIcerikSehirSecimi(giris.tekrar ? undefined : sehirler.data?.find((k) => k.id === giris.sehir));
   const girisYerIdleri = useMemo(() => (giris.tekrar ? [] : (giris.yerler?.split(',').filter(Boolean) ?? [])), [giris.tekrar, giris.yerler]);
@@ -75,7 +133,7 @@ export default function SihirbazEkrani() {
   const girisAnahtari = giris.tekrar
     ? `tekrar:${giris.tekrar}:${giris.n ?? ''}`
     : giris.sehir
-      ? `sehir:${giris.sehir}:${giris.yerler ?? ''}:${giris.n ?? ''}`
+      ? `sehir:${giris.sehir}:${giris.yerler ?? ''}:${giris.adim ?? ''}:${giris.n ?? ''}`
       : giris.metin
         ? `metin:${giris.metin}:${giris.n ?? ''}`
         : null;
@@ -117,6 +175,7 @@ export default function SihirbazEkrani() {
       setTarihsizGun(null);
       setHata(null);
       setTutulan(new Set());
+      kimlerle.sifirla(giris.arkadas);
       if (tekrarKaynagi.data && giris.tekrar) {
         setSehir(tekrarKaynagi.data.sehir);
         setAd(tekrarKaynagi.data.ad);
@@ -126,7 +185,8 @@ export default function SihirbazEkrani() {
         setSehir(girisSehri.data);
         setAd(null);
         setGirisPlani({ tur: 'yerler', sehirId: girisSehri.data.place_id });
-        setAdim('nereye');
+        // #574 KK1: "Kendi rotanı kur" şehir dolu, 2. adımdan açar.
+        setAdim(giris.adim === 'nezaman' ? 'nezaman' : 'nereye');
       } else if (giris.metin) {
         setSehir(null);
         setAd(null);
@@ -176,14 +236,18 @@ export default function SihirbazEkrani() {
           return true;
         }
         const o = oncekiAdim(adim);
-        if (!o) return false;
+        if (!o) {
+          if (!onCik) return false;
+          onCik();
+          return true;
+        }
         setHata(null);
         setAdim(o);
         return true;
       });
       return () => abonelik.remove();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [adim, panel, sehirOnayi, kayitSuruyor, seyahat.data]),
+    }, [adim, panel, sehirOnayi, kayitSuruyor, seyahat.data, onCik]),
   );
 
   const geri = () => {
@@ -191,6 +255,7 @@ export default function SihirbazEkrani() {
     setHata(null);
     const o = oncekiAdim(adim);
     if (o) setAdim(o);
+    else if (onCik) onCik();
     else if (router.canGoBack()) router.back();
     else router.replace('/(tabs)');
   };
@@ -312,6 +377,9 @@ export default function SihirbazEkrani() {
       });
       // Seyahat oluştu: sonraki adımlardan biri düşse de yeniden deneme aynı taslağı günceller (kopya seyahat açılmaz).
       setTripId(id);
+      // KK6: seçilenlere uygulama içi davet; düşerse seyahat yine kurulur, genel hata söylenir (sihirbaz sürer).
+      const davetliler = kimlerle.secilenler.map((k) => k.id);
+      if (davetliler.length > 0) davetGonder.mutateAsync({ tripId: id, kisiler: davetliler }).catch(() => Alert.alert(t('genel.hataBaslik'), t('genel.hataMetin')));
       // KK2: tetikleyici tarihsiz seyahate 1 gün açar; sayaçtaki gün sayısına tamamlanır.
       if (secim.tur === 'tarihsiz' && secim.gun > 1) await tarihsizGunleriKur(id, secim.gun);
       // #144 Tekrar kur: aynı plan yeni tarihe; plan hazır olduğundan öneriler atlanır, Program açılır.
@@ -364,10 +432,13 @@ export default function SihirbazEkrani() {
     [mekanlar.data, gunler.data, duraklar.data],
   );
 
+  // Seyahat kurulduktan sonra (geri dönülse de) davet gitmiş olur: satır yalnız seyahat kurulmadan görünür.
+  const kimlerSatiri = !tripId && kimlerle.kisiler.length > 0 ? <KimlerleSatiri kimlerle={kimlerle} /> : undefined;
+
   if (adim === 'nereye') {
     return (
       <>
-        <AdimKabugu adim={adim} baslik={t('sihirbaz.nereye.baslik')} onGeri={geri} geriPasif={kayitSuruyor} hata={hata} devam={{ onPress: nereyeDevam, pasif: !sehir, yukleniyor: adKaydet.isPending || taslakSehri.isPending }}>
+        <AdimKabugu adim={adim} baslik={t('sihirbaz.nereye.baslik')} onGeri={geri} geriPasif={kayitSuruyor} hata={hata} altIcerik={kimlerSatiri} devam={{ onPress: nereyeDevam, pasif: !sehir, yukleniyor: adKaydet.isPending || taslakSehri.isPending }}>
           <AdimNereye key={ilkSorgu?.anahtar} ilkSorgu={ilkSorgu?.metin} sehir={sehir} onSehir={setSehir} ad={ad} onerilenAd={onerilenAd} onAd={setAd} sehirler={sehirler.data} />
         </AdimKabugu>
         <SehirDegisimSayfasi yerSayisi={sehirOnayi} sehir={sehir?.ad ?? ''} onDevam={sehriKaydet} onVazgec={sehirVazgec} />
@@ -382,6 +453,7 @@ export default function SihirbazEkrani() {
         alt={seyahat.data ? (seyahat.data.name ?? seyahat.data.city_label) : (ad ?? onerilenAd)}
         onGeri={geri} geriPasif={kayitSuruyor}
         hata={hata}
+        altIcerik={kimlerSatiri}
         devam={{ onPress: seyahatiKur, pasif: !aralik && tarihsizGun === null, yukleniyor: kuruluyor || taslakTarihi.isPending }}
         atla={
           tarihsizGun === null

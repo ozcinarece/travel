@@ -57,8 +57,9 @@ const paylasim = (p: Partial<ArkadasPaylasimi> = {}): ArkadasPaylasimi => ({
 
 beforeEach(() => {
   mockDurum.kisiler = [
-    { user_id: 'A', ad: 'Ayşe Yılmaz', foto: null },
-    { user_id: 'M', ad: 'Mert', foto: null },
+    { user_id: 'A', ad: 'Ayşe Yılmaz', foto: null, misafir: false },
+    // Misafir hesap Arkadaşlar sekmesinde görünmeye devam eder (yalnız #574 "Kimlerle?" süzer; PR #612).
+    { user_id: 'M', ad: 'Mert', foto: null, misafir: true },
   ];
   mockDurum.akis = [];
   mockDurum.hata = false;

@@ -60,7 +60,7 @@ export function siradakiMetni(ad: string, saat: string | null): string {
 export type Kapak = { url: string; atif: KapakAtfi | null };
 
 /** Ad karşılaştırması için: Türkçe küçük harf, ı → i, aksanlar atılır ("Istanbul" = "İstanbul", "Eskisehir" = "Eskişehir"). */
-function sade(ad: string): string {
+export function sade(ad: string): string {
   return ad
     .trim()
     .toLocaleLowerCase('tr')
