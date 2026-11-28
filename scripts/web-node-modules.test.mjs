@@ -53,10 +53,16 @@ test('dist: dosyalar taşınır, js/html/css/json yeniden yazılır, node_module
     'r/[token].html': '<link href="/assets/node_modules/@expo-google-fonts/figtree/400Regular/F.abc.ttf"><img src="/assets/node_modules/expo-router/assets/node_modules/derin/x.png">',
     'stil.css': 'url("/assets/node_modules/expo-router/assets/node_modules/derin/x.png")',
     'metadata.json': '{"a":"assets/node_modules/expo-router/assets/node_modules/derin/x.png"}',
-    'not.txt': '/assets/node_modules/dokunulmaz',
+    'not.txt': '/assets/node_modules/a/F.abc.ttf',
+    _headers: '/assets/node_modules/*\n  Cache-Control: max-age=31536000\n',
+    _redirects: '/eski.ttf /assets/node_modules/a/F.abc.ttf 301\n',
+    'ikon.svg': '<svg><image href="/assets/node_modules/a/x.png"/></svg>',
+    'manifest.webmanifest': '{"icons":[{"src":"/assets/node_modules/a/i.png"}]}',
+    'sw.mjs': 'export const u="/assets/node_modules/a/F.abc.ttf";',
+    'ikili.bin': '/assets/node_modules/dokunulmaz',
   });
-  assert.equal(denetle(dist).length, 7); // 2 klasör + 5 adres (html iki ayrı adres)
-  assert.deepEqual(duzelt(dist), { tasinan: 2, degisen: 4 });
+  assert.equal(denetle(dist).length, 13); // 2 klasör + 11 adres (html iki ayrı adres)
+  assert.deepEqual(duzelt(dist), { tasinan: 2, degisen: 10 });
   assert.deepEqual(denetle(dist), []);
   assert.equal(readFileSync(path.join(dist, 'assets/nm/@expo-google-fonts/figtree/400Regular/F.abc.ttf'), 'utf8'), 'FONT');
   assert.equal(readFileSync(path.join(dist, 'assets/nm/expo-router/assets/nm/derin/x.png'), 'utf8'), 'PNG');
@@ -66,7 +72,14 @@ test('dist: dosyalar taşınır, js/html/css/json yeniden yazılır, node_module
   assert.ok(readFileSync(path.join(dist, 'r/[token].html'), 'utf8').includes('src="/assets/nm/expo-router/assets/nm/derin/x.png"'));
   assert.ok(readFileSync(path.join(dist, 'stil.css'), 'utf8').includes('/assets/nm/expo-router/assets/nm/derin/x.png'));
   assert.ok(readFileSync(path.join(dist, 'metadata.json'), 'utf8').includes('assets/nm/expo-router/assets/nm/derin/x.png'));
-  assert.equal(readFileSync(path.join(dist, 'not.txt'), 'utf8'), '/assets/node_modules/dokunulmaz');
+  assert.equal(readFileSync(path.join(dist, 'not.txt'), 'utf8'), '/assets/nm/a/F.abc.ttf');
+  assert.ok(readFileSync(path.join(dist, '_headers'), 'utf8').startsWith('/assets/nm/*\n'));
+  assert.equal(readFileSync(path.join(dist, '_redirects'), 'utf8'), '/eski.ttf /assets/nm/a/F.abc.ttf 301\n');
+  assert.ok(readFileSync(path.join(dist, 'ikon.svg'), 'utf8').includes('/assets/nm/a/x.png'));
+  assert.ok(readFileSync(path.join(dist, 'manifest.webmanifest'), 'utf8').includes('/assets/nm/a/i.png'));
+  assert.ok(readFileSync(path.join(dist, 'sw.mjs'), 'utf8').includes('/assets/nm/a/F.abc.ttf'));
+  // Metin sayılmayan dosyaya dokunulmaz.
+  assert.equal(readFileSync(path.join(dist, 'ikili.bin'), 'utf8'), '/assets/node_modules/dokunulmaz');
   // İkinci çalıştırma bir şey değiştirmez.
   assert.deepEqual(duzelt(dist), { tasinan: 0, degisen: 0 });
 });
@@ -77,6 +90,19 @@ test('denetim (KK3): node_modules klasörü ya da adresi varsa hata', () => {
   const adres = distKur({ 'index.html': '<link href="/assets/node_modules/a.ttf">' });
   assert.deepEqual(denetle(adres), ['adres: index.html → assets/node_modules/a.ttf']);
   assert.deepEqual(denetle(distKur({ 'index.html': 'node_modules hakkında bir metin' })), []);
+});
+
+test('denetim güvenlik ağı: kaçışlı ve %2F adresler, node_modules adlı dosya', () => {
+  const kacisli = distKur({ 'a.js': 'var u="\\/assets\\/node_modules\\/a\\/F.ttf";' });
+  assert.deepEqual(denetle(kacisli), ['adres: a.js → assets\\/node_modules\\/a\\/F.ttf']);
+  // duzelt kaçışlı biçimi yeniden yazmaz; denetim düşürür.
+  assert.throws(() => duzelt(kacisli), /node_modules kaldı/);
+  const yuzde = distKur({ 'a.json': '{"u":"assets%2Fnode_modules%2Fa%2FF.ttf"}', 'b.html': '<a href="/assets/x%2fnode_modules/y">' });
+  assert.deepEqual(denetle(yuzde).sort(), ['adres: a.json → assets%2Fnode_modules%2Fa%2FF.ttf', 'adres: b.html → assets/x%2fnode_modules/y']);
+  assert.deepEqual(denetle(distKur({ 'baska/node_modules': 'dosya' })), ['dosya: baska/node_modules']);
+  // Benzer adlar ve varlık yolu olmayan metin sorun değil.
+  const temiz = distKur({ 'a.js': 'x="assets\\/node_modules_x\\/a";y="assets%2Fmy_node_modules";z="require(\'node_modules/a\')"' });
+  assert.deepEqual(denetle(temiz), []);
 });
 
 test('hedef zaten varsa üzerine yazılmaz, hata verilir', () => {

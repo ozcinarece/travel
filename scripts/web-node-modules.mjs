@@ -14,7 +14,17 @@ import { fileURLToPath } from 'node:url';
 
 export const YASAK = 'node_modules';
 export const YENI = 'nm';
-const METIN_UZANTILARI = new Set(['.js', '.html', '.css', '.json']);
+const METIN_UZANTILARI = new Set(['.js', '.mjs', '.html', '.css', '.json', '.svg', '.webmanifest', '.txt']);
+// Pages yapılandırma dosyaları (uzantısız).
+const METIN_ADLARI = new Set(['_headers', '_redirects']);
+/** Taranan (yeniden yazılan ve denetlenen) metin dosyası mı. */
+export function metinDosyasi(dosya) {
+  return METIN_UZANTILARI.has(path.extname(dosya)) || METIN_ADLARI.has(path.basename(dosya));
+}
+// Denetim güvenlik ağı: `assets` sonrası düz (`/`), kaçışlı (`\/`) ya da yüzde kodlu (`%2F`) ayraçlı yol; içinde ayraçla
+// sınırlı bir `node_modules` bölümü varsa sorun sayılır.
+const SUPHELI_YOL = /(?<![A-Za-z0-9_-])assets(?:\/|\\\/|%2F)[A-Za-z0-9@._~%+\-/\\]*/gi;
+const SUPHELI_BOLUM = /(?:\/|\\\/|%2F)node_modules(?=\/|\\\/|%2F|[^A-Za-z0-9_-]|$)/i;
 // `assets/` ile başlayan bir URL yolu (tırnak, boşluk, parantez, `?`/`#` gibi sınırlara kadar). Önünde harf/rakam olmamalı.
 const VARLIK_YOLU = /(?<![A-Za-z0-9_-])assets\/[A-Za-z0-9@._~%+\-/]*/g;
 const BOLUM = /(^|\/)node_modules(?=\/|$)/g;
@@ -37,22 +47,28 @@ function* gez(dizin) {
   }
 }
 
-/** dist'te kalan sorunları listeler: `node_modules` adlı klasörler ve metin dosyalarındaki `assets/…/node_modules/` adresleri. */
+/** Metinde kalan `assets…node_modules` adresleri (düz, `\/` kaçışlı ya da `%2F` kodlu). */
+export function supheliAdresler(metin) {
+  return [...new Set((metin.match(SUPHELI_YOL) ?? []).filter((y) => SUPHELI_BOLUM.test(y)))];
+}
+
+/**
+ * dist'te kalan sorunları listeler: `node_modules` adlı klasörler ve dosyalar, metin dosyalarındaki `assets…node_modules`
+ * adresleri (düz, kaçışlı, yüzde kodlu).
+ */
 export function denetle(dist) {
   const sorunlar = [];
   const klasorler = (dizin) => {
     for (const giris of readdirSync(dizin, { withFileTypes: true })) {
-      if (!giris.isDirectory()) continue;
       const tam = path.join(dizin, giris.name);
-      if (giris.name === YASAK) sorunlar.push(`klasör: ${path.relative(dist, tam)}`);
-      klasorler(tam);
+      if (giris.name === YASAK) sorunlar.push(`${giris.isDirectory() ? 'klasör' : 'dosya'}: ${path.relative(dist, tam)}`);
+      if (giris.isDirectory()) klasorler(tam);
     }
   };
   klasorler(dist);
   for (const dosya of gez(dist)) {
-    if (!METIN_UZANTILARI.has(path.extname(dosya))) continue;
-    const kalan = (readFileSync(dosya, 'utf8').match(VARLIK_YOLU) ?? []).filter((y) => y !== yeniYol(y));
-    for (const y of new Set(kalan)) sorunlar.push(`adres: ${path.relative(dist, dosya)} → ${y}`);
+    if (!metinDosyasi(dosya)) continue;
+    for (const y of supheliAdresler(readFileSync(dosya, 'utf8'))) sorunlar.push(`adres: ${path.relative(dist, dosya)} → ${y}`);
   }
   return sorunlar;
 }
@@ -78,7 +94,7 @@ export function duzelt(dist) {
     if (existsSync(d) && readdirSync(d).length === 0) rmdirSync(d);
   }
   for (const dosya of gez(dist)) {
-    if (!METIN_UZANTILARI.has(path.extname(dosya))) continue;
+    if (!metinDosyasi(dosya)) continue;
     const eski = readFileSync(dosya, 'utf8');
     const yeni = metniYenidenYaz(eski);
     if (yeni === eski) continue;
