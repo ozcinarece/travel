@@ -584,6 +584,8 @@ describe('#649 çekmecede sınır kaynağa göre, tarih hatası söylenir', () =
     render(<GeziKurEkrani onKendiRota={jest.fn()} />);
     fireEvent.press(screen.getByTestId('arkadas-rotasi-p1'));
     expect(screen.getByTestId('takvim-sinir').props.children).toBe('60/-');
+    fireEvent.press(screen.getByText('gidis-sec'));
+    expect(screen.getByTestId('takvim-sinir').props.children).toBe('60/2026-12-05/-');
   });
 
   it('KK2: arkadaş rotasında tarih kaydı düşerse uyarı çıkar ve seyahat yine açılır', async () => {

@@ -7,6 +7,7 @@ import { AdimNeZaman } from '@/components/sihirbaz/AdimNeZaman';
 import { cekmeceEnCokGun, cekmeceSecimi, HAZIR_GEZI_EN_COK_GUN } from '@/features/geziKur/geziKur';
 import { TARIH_EN_COK_GUN } from '@/features/sihirbaz/sihirbaz';
 import { t } from '@/i18n';
+import { tarihEkle } from '@/lib/takvim';
 
 jest.mock('react-native-safe-area-context', () => jest.requireActual<{ default: object }>('react-native-safe-area-context/jest/mock').default);
 jest.mock('@/lib/supabase', () => ({ supabase: {} }));
@@ -60,15 +61,20 @@ describe('#649 KK1/KK3 hazır gezi: takvim 30 gün', () => {
 });
 
 describe('#649 KK1/KK3 arkadaş rotası: takvim 60 gün', () => {
-  it('60. gün (1 Mart) seçilebilir, 61. gün (2 Mart) pasif; 31. gün açık', () => {
+  it('60. gün seçilebilir, 61. gün pasif; 31. gün açık', () => {
     const onAralik = takvim(TARIH_EN_COK_GUN);
     expect(durum(`${yil}-01-31`)).toMatchObject({ disabled: false });
-    fireEvent.press(screen.getByLabelText(t('sihirbaz.nezaman.sonrakiAy')));
-    fireEvent.press(screen.getByLabelText(t('sihirbaz.nezaman.sonrakiAy')));
-    expect(durum(`${yil}-03-01`)).toMatchObject({ disabled: false });
-    expect(durum(`${yil}-03-02`)).toMatchObject({ disabled: true });
-    fireEvent.press(screen.getByLabelText(`${yil}-03-02`));
-    expect(onAralik).not.toHaveBeenCalled();
+    // 60. gün artık yılda 29 Şubat, değilse 1 Mart: tarihten hesaplanır, görünen ay oraya kaydırılır.
+    const son = tarihEkle(gidis, TARIH_EN_COK_GUN - 1);
+    const sonraki = tarihEkle(gidis, TARIH_EN_COK_GUN);
+    for (let i = 1; i < Number(son.slice(5, 7)); i++) fireEvent.press(screen.getByLabelText(t('sihirbaz.nezaman.sonrakiAy')));
+    expect(durum(son)).toMatchObject({ disabled: false });
+    fireEvent.press(screen.getByLabelText(son));
+    expect(onAralik).toHaveBeenCalledTimes(1);
+    if (sonraki.slice(5, 7) !== son.slice(5, 7)) fireEvent.press(screen.getByLabelText(t('sihirbaz.nezaman.sonrakiAy')));
+    expect(durum(sonraki)).toMatchObject({ disabled: true });
+    fireEvent.press(screen.getByLabelText(sonraki));
+    expect(onAralik).toHaveBeenCalledTimes(1);
   });
 });
 
