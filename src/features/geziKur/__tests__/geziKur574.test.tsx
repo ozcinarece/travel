@@ -550,10 +550,10 @@ describe('#574 KK5 takvim bileşeni: özet satırı', () => {
     rerender(<Gercek {...ortak} aralik={{ gidis: '2026-12-05', donus: null }} ozetSatiri="5–6 Aralık · Cumartesi–Pazar · 2 gün" />);
     expect(screen.getByText('5–6 Aralık · Cumartesi–Pazar · 2 gün')).toBeTruthy();
     // Dalga 1 dönüş günü ipucu da gelir.
-    expect(screen.getByText(t('sihirbaz.nezaman.donusIpucu'))).toBeTruthy();
+    expect(screen.getByText(t('sihirbaz.nezaman.donusIpucu', { n: 60 }))).toBeTruthy();
     // Çekmece: aralık dönüşlü verilir (bant), ipucu yalnız istenirse.
     rerender(<Gercek {...ortak} aralik={{ gidis: '2026-12-05', donus: '2026-12-06' }} donusBekleniyor={false} ozetSatiri="5–6 Aralık · Cumartesi–Pazar · 2 gün" />);
-    expect(screen.queryByText(t('sihirbaz.nezaman.donusIpucu'))).toBeNull();
+    expect(screen.queryByText(t('sihirbaz.nezaman.donusIpucu', { n: 60 }))).toBeNull();
   });
 });
 

@@ -47,11 +47,26 @@ type Props = {
   enCokGun?: number;
   /** #649 KK1: sınırın hesaplandığı gerçek seçim (verilmezse `aralik`); çekmece hesaplanan dönüşü gösterirken gidişi verir. */
   sinirAraligi?: Aralik;
+  /**
+   * #648 KK2: "bugün"ün hesaplandığı IANA dilimi (seyahatin ya da seçilen şehrin `tz`'si); cihaz saati kullanılmaz (CLAUDE.md).
+   * Verilmezse `Europe/Istanbul`.
+   */
+  tz?: string | null;
 };
 
-export function AdimNeZaman({ aralik, onAralik, tarihsizGun, onTarihsizGun, ozetSatiri, dokun = tarihDokun, donusBekleniyor, enCokGun, sinirAraligi = aralik }: Props) {
+/** #648 KK2: şehir bilinmezken "bugün"ün dilimi. */
+export const VARSAYILAN_TZ = 'Europe/Istanbul';
+
+/** #648 KK1: gün hücresinin ekran okuyucu etiketi, "16 Ekim Cuma"; pasif gün "16 Ekim Cuma, seçilemez". */
+export function gunEtiketi(gun: string, secilemez: boolean): string {
+  const p = parcala(gun);
+  const tarih = `${p.gun} ${AYLAR[p.ay - 1]} ${GUNLER[haftaGunu(gun)]}`;
+  return secilemez ? t('sihirbaz.nezaman.secilemez', { tarih }) : tarih;
+}
+
+export function AdimNeZaman({ aralik, onAralik, tarihsizGun, onTarihsizGun, ozetSatiri, dokun = tarihDokun, donusBekleniyor, enCokGun, sinirAraligi = aralik, tz }: Props) {
   const sayacEnCok = enCokGun ?? TARIHSIZ_EN_COK;
-  const bugun = yerelTarih(new Date(), Intl.DateTimeFormat().resolvedOptions().timeZone);
+  const bugun = yerelTarih(new Date(), tz || VARSAYILAN_TZ);
   const ilk = parcala(aralik?.gidis ?? bugun);
   const [ay, setAy] = useState({ yil: ilk.yil, ay: ilk.ay });
   const secili = (g: string) => !!aralik && (g === aralik.gidis || g === aralik.donus);
@@ -62,7 +77,7 @@ export function AdimNeZaman({ aralik, onAralik, tarihsizGun, onTarihsizGun, ozet
   return (
     <View style={s.kap}>
       <Text style={s.ipucu} accessibilityLiveRegion="polite">
-        {(donusBekleniyor ?? (!!aralik && !aralik.donus)) ? t('sihirbaz.nezaman.donusIpucu') : ''}
+        {(donusBekleniyor ?? (!!aralik && !aralik.donus)) ? t('sihirbaz.nezaman.donusIpucu', { n: sayacEnCok }) : ''}
       </Text>
       <View style={s.kart}>
         <View style={s.ayBasi}>
@@ -97,7 +112,8 @@ export function AdimNeZaman({ aralik, onAralik, tarihsizGun, onTarihsizGun, ozet
               <Pressable
                 key={gun}
                 accessibilityRole="button"
-                accessibilityLabel={gun}
+                accessibilityLabel={gunEtiketi(gun, gecmis)}
+                testID={`gun-${gun}`}
                 accessibilityState={{ selected: sec, disabled: gecmis }}
                 disabled={gecmis}
                 onPress={() => onAralik(dokun(aralik, gun))}

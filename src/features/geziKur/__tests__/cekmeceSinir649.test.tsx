@@ -30,7 +30,7 @@ function takvim(enCok: number, onAralik = jest.fn()) {
   );
   return onAralik;
 }
-const durum = (gun: string) => screen.getByLabelText(gun).props.accessibilityState as { disabled: boolean };
+const durum = (gun: string) => screen.getByTestId(`gun-${gun}`).props.accessibilityState as { disabled: boolean };
 
 describe('#649 KK1 saf: sınır kaynağa göre', () => {
   it('hazır gezi 30, arkadaş rotası 60', () => {
@@ -52,10 +52,10 @@ describe('#649 KK1/KK3 hazır gezi: takvim 30 gün', () => {
   it('30. gün seçilebilir, 31. gün pasif ve dokunuş seçim yapmaz', () => {
     const onAralik = takvim(HAZIR_GEZI_EN_COK_GUN);
     expect(durum(`${yil}-01-30`)).toMatchObject({ disabled: false });
-    fireEvent.press(screen.getByLabelText(`${yil}-01-30`));
+    fireEvent.press(screen.getByTestId(`gun-${yil}-01-30`));
     expect(onAralik).toHaveBeenCalledTimes(1);
     expect(durum(`${yil}-01-31`)).toMatchObject({ disabled: true });
-    fireEvent.press(screen.getByLabelText(`${yil}-01-31`));
+    fireEvent.press(screen.getByTestId(`gun-${yil}-01-31`));
     expect(onAralik).toHaveBeenCalledTimes(1);
   });
 });
@@ -69,11 +69,11 @@ describe('#649 KK1/KK3 arkadaş rotası: takvim 60 gün', () => {
     const sonraki = tarihEkle(gidis, TARIH_EN_COK_GUN);
     for (let i = 1; i < Number(son.slice(5, 7)); i++) fireEvent.press(screen.getByLabelText(t('sihirbaz.nezaman.sonrakiAy')));
     expect(durum(son)).toMatchObject({ disabled: false });
-    fireEvent.press(screen.getByLabelText(son));
+    fireEvent.press(screen.getByTestId(`gun-${son}`));
     expect(onAralik).toHaveBeenCalledTimes(1);
     if (sonraki.slice(5, 7) !== son.slice(5, 7)) fireEvent.press(screen.getByLabelText(t('sihirbaz.nezaman.sonrakiAy')));
     expect(durum(sonraki)).toMatchObject({ disabled: true });
-    fireEvent.press(screen.getByLabelText(sonraki));
+    fireEvent.press(screen.getByTestId(`gun-${sonraki}`));
     expect(onAralik).toHaveBeenCalledTimes(1);
   });
 });

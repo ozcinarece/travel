@@ -332,6 +332,18 @@ export function Sihirbaz({ giris, onCik }: { giris: YeniGirisi; /** #574: 1. ad�
     setTarihsizGun(null);
     setTripId(null);
   };
+  // #144 Bu şehre seyahat kur: kaydedilen yerler listeye (3. adımda listede görünür). #648 KK3: ilk kurulum yarıda düştüyse
+  // yeniden denemede de eklenir; listede zaten olan yer ikinci kez eklenmez. Ekleme düşerse sessiz (bugünkü davranış).
+  const girisYerleriniEkle = async (id: string, mevcut: readonly { place_id: string | null }[]) => {
+    if (girisPlani?.tur !== 'yerler' || !sehir || girisPlani.sehirId !== sehir.place_id || !girisYerleri.data?.length) return;
+    const satirlar = await Promise.all(
+      girisYerleri.data.map(async (y) => ({ yerId: y.id, place_id: await icerikPlaceId(y, y.sehirler?.ad ?? sehir.ad), primary_type: y.kategori, lat: y.lat, lng: y.lng })),
+    );
+    const listede = new Set(mevcut.map((m) => m.place_id).filter((x): x is string => !!x));
+    const yeniler = satirlar.filter((x) => !x.place_id || !listede.has(x.place_id));
+    if (yeniler.length) await yerleriEkle.mutateAsync({ seyahatId: id, yerler: yeniler }).catch(() => undefined);
+    setTutulan(new Set(satirlar.map((x) => x.place_id).filter((x): x is string => !!x)));
+  };
   // 2 → 3: seyahat oluşturulur (tarihli ya da tarihsiz N gün). #581 KK3a: taslak varsa yenisi açılmaz, tarihi güncellenir.
   const seyahatiKur = async () => {
     const secim = tarihSecimi(aralik, tarihsizGun);
@@ -371,6 +383,16 @@ export function Sihirbaz({ giris, onCik }: { giris: YeniGirisi; /** #574: 1. ad�
           }
           return;
         }
+        // #648 KK3: ilk kurulum yerler eklenmeden düştüyse (gün kurma, yer kimliği) yeniden deneme de ekler.
+        if (girisPlani?.tur === 'yerler') {
+          try {
+            await girisYerleriniEkle(tripId, mekanlar.data ?? []);
+            setGirisPlani(null);
+          } catch {
+            setHata(t('sihirbaz.nezaman.hata'));
+            return;
+          }
+        }
       } finally {
         kuruluyorRef.current = false;
         setKuruluyor(false);
@@ -406,14 +428,7 @@ export function Sihirbaz({ giris, onCik }: { giris: YeniGirisi; /** #574: 1. ad�
         await tekrarKopyala(girisPlani.kaynak, id);
         return;
       }
-      // #144 Bu şehre seyahat kur: kaydedilen yerler listeye (3. adımda listede görünür).
-      if (girisPlani?.tur === 'yerler' && girisPlani.sehirId === sehir.place_id && girisYerleri.data?.length) {
-        const satirlar = await Promise.all(
-          girisYerleri.data.map(async (y) => ({ yerId: y.id, place_id: await icerikPlaceId(y, y.sehirler?.ad ?? sehir.ad), primary_type: y.kategori, lat: y.lat, lng: y.lng })),
-        );
-        await yerleriEkle.mutateAsync({ seyahatId: id, yerler: satirlar }).catch(() => undefined);
-        setTutulan(new Set(satirlar.map((x) => x.place_id).filter((x): x is string => !!x)));
-      }
+      await girisYerleriniEkle(id, []);
       setGirisPlani(null);
       setAdim('onerilenler');
     } catch {
@@ -500,6 +515,8 @@ export function Sihirbaz({ giris, onCik }: { giris: YeniGirisi; /** #574: 1. ad�
           tarihsizGun={tarihsizGun}
           onTarihsizGun={(n) => setTarihsizGun(gunSayisiSinirla(n))}
           enCokGun={TARIH_EN_COK_GUN}
+          // #648 KK2: "bugün" seyahatin, seyahat yokken seçilen şehrin diliminde.
+          tz={seyahat.data?.tz ?? sehir?.tz}
         />
       </AdimKabugu>
     );
