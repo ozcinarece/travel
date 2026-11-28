@@ -107,28 +107,23 @@ describe('#580 KK2 Gezdim', () => {
 
 describe('#580 değişiklik 2: gezdimEylemi', () => {
   const an = new Date('2026-11-25T10:00:00Z');
-  // Şu an 13:00 (780); d1 10:00–11:00 (vakti geçti), d2 12:50–13:50 (sürüyor).
-  const p = { simdiDk: 780, an, benId: 'ben' };
-  it('elle gezildi kaydı, vakti sürüyor → "Gezilmedi say" (✓\'siz), yalnız tamamlanma silinir', () => {
-    const e = gezdimEylemi({ durakId: 'd2', tamamlandi: true, durum: 'gecildi', varisDk: 770, dakika: 60 }, p);
+  const p = { an, benId: 'ben' };
+  const GEZILMEDI = { completed_at: null, completed_by: null, auto_completed: true };
+  it('elle gezildi kaydı → "Gezilmedi say" (✓\'siz) + açık gezilmedi kaydı (inceleme N3: vakti sürerken de kalıcı)', () => {
+    const e = gezdimEylemi({ durakId: 'd2', tamamlandi: true, durum: 'gecildi' }, p);
     expect(e.metin).toBe('Gezilmedi say');
     expect(e.geriAl).toBe(true);
-    expect(e.yazim).toEqual({ id: 'd2', completed_at: null, completed_by: null, auto_completed: false });
-  });
-  it('elle gezildi kaydı, vakti geçmiş → "Gezilmedi say" + açık gezilmedi kaydı', () => {
-    const e = gezdimEylemi({ durakId: 'd1', tamamlandi: true, durum: 'gecildi', varisDk: 600, dakika: 60 }, p);
-    expect(e.metin).toBe('Gezilmedi say');
-    expect(e.yazim).toEqual({ id: 'd1', completed_at: null, completed_by: null, auto_completed: true });
+    expect(e.yazim).toEqual({ id: 'd2', ...GEZILMEDI });
   });
   it('kendiliğinden geçilmiş (kayıt yok, satırda ✓) → "Gezilmedi say" (✓\'siz) + açık gezilmedi kaydı', () => {
-    const e = gezdimEylemi({ durakId: 'd1', tamamlandi: false, durum: 'gecildi', varisDk: 600, dakika: 60 }, p);
+    const e = gezdimEylemi({ durakId: 'd1', tamamlandi: false, durum: 'gecildi' }, p);
     expect(e.metin).toBe('Gezilmedi say');
     expect(e.geriAl).toBe(true);
-    expect(e.yazim).toEqual({ id: 'd1', completed_at: null, completed_by: null, auto_completed: true });
+    expect(e.yazim).toEqual({ id: 'd1', ...GEZILMEDI });
     expect(gezilmediMi(e.yazim)).toBe(true);
   });
   it('gezilmemiş → "Gezdim" (✓), şimdinin anı', () => {
-    const e = gezdimEylemi({ durakId: 'd2', tamamlandi: false, durum: 'siradaki', varisDk: 770, dakika: 60 }, p);
+    const e = gezdimEylemi({ durakId: 'd2', tamamlandi: false, durum: 'siradaki' }, p);
     expect(e.metin).toBe('Gezdim');
     expect(e.geriAl).toBe(false);
     expect(e.yazim).toEqual({ id: 'd2', completed_at: an.toISOString(), completed_by: 'ben', auto_completed: false });
@@ -137,14 +132,36 @@ describe('#580 değişiklik 2: gezdimEylemi', () => {
 });
 
 describe('#580 değişiklik 2: açık "gezilmedi" kaydı programda', () => {
-  // 09:00 otel → d1 09:10–10:10 → d2 10:20–11:20; şu an 12:00: ikisinin de payı geçti.
-  const hesap = (ek: Partial<ProgramDuragi>) =>
-    programHesapla({ baslangic: '09:00', duraklar: [d('d1', 60, ek), d('d2', 60)], otel, yuruyus: sabit, simdiDk: 720 }).satirlar.map((x) => x.durum);
+  // 09:00 otel → d1 09:10–10:10 → d2 10:20–11:20 → d3 11:30–14:30.
+  const duraklar = (ek: Partial<ProgramDuragi>) => [d('d1', 60, ek), d('d2', 60), d('d3', 180)];
+  const prog = (ek: Partial<ProgramDuragi>, simdiDk: number) => programHesapla({ baslangic: '09:00', duraklar: duraklar(ek), otel, yuruyus: sabit, simdiDk });
+  const durumlar = (ek: Partial<ProgramDuragi>, simdiDk: number) => prog(ek, simdiDk).satirlar.map((x) => x.durum);
   it('kayıt yoksa pay geçince kendiliğinden geçildi', () => {
-    expect(hesap({})).toEqual(['gecildi', 'gecildi']);
+    expect(durumlar({}, 720)).toEqual(['gecildi', 'gecildi', 'siradaki']);
   });
-  it('gezilmedi kaydı olan durak kendiliğinden geçildi sayılmaz (sıradaki olur)', () => {
-    expect(hesap({ gezilmedi: true })).toEqual(['siradaki', 'gecildi']);
+  it('inceleme D1: vakti geçmiş gezilmedi durak ✓\'siz (bekliyor) ama sıradaki olmaz; Şimdi d3, gecikme d1\'i hedeflemez', () => {
+    // 12:00'de d1'e "Gezilmedi say".
+    expect(durumlar({ gezilmedi: true }, 720)).toEqual(['bekliyor', 'gecildi', 'siradaki']);
+    const p = prog({ gezilmedi: true }, 720);
+    const plan = programHesapla({ baslangic: '09:00', duraklar: duraklar({ gezilmedi: true }), otel, yuruyus: sabit, simdiDk: null });
+    const g = geriKalmaHesapla({
+      prog: { gun: { id: 'g1' } as GunProgrami['gun'], bugun: true, simdiDk: 720, plan, canli: p, cubuk: null, otel, bitisOtel: otel },
+      konum: otel,
+      gunDurak: [],
+      buradaId: null,
+      tz: IST,
+    });
+    // d3 11:30'da planlı; 12:00'de aynı noktada → 30 dk geride, hedef d3, önceki d2 (d1 değil, gün başlangıcı yazılmaz).
+    expect(g?.hedefId).toBe('d3');
+    expect(g?.oncekiId).toBe('d2');
+    expect(g!.dk).toBeLessThan(60);
+  });
+  it('inceleme N3: vakti sürerken gezilmedi durak olağan sıradaki (buradasın da olur)', () => {
+    // 09:30 — d1'in vakti sürüyor.
+    expect(durumlar({ gezilmedi: true }, 570)).toEqual(['siradaki', 'bekliyor', 'bekliyor']);
+    expect(programHesapla({ baslangic: '09:00', duraklar: duraklar({ gezilmedi: true }), otel, yuruyus: sabit, simdiDk: 570, buradaId: 'd1' }).satirlar[0].durum).toBe('buradasin');
+    // Vakti geçince ✓ almaz (bekliyor), Şimdi bir sonrakine geçer.
+    expect(durumlar({ gezilmedi: true }, 640)).toEqual(['bekliyor', 'siradaki', 'bekliyor']);
   });
   it('kaydın tanımı: completed_at boş + auto_completed', () => {
     expect(gezilmediMi({ completed_at: null, auto_completed: true })).toBe(true);

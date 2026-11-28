@@ -169,10 +169,14 @@ export function programHesapla(secenek: {
       // hesaplanan başlangıçtan önceyse (art arda "Bitti") ayrılış başlangıca sabitlenir, saat geriye gitmez.
       ayrilisDk = Math.max(varisDk, d.tamamlandiDk);
       durum = 'gecildi';
-    } else if (simdiDk !== null && simdiDk > planAyrilis + UZUN_KALMA_PAYI_DK && !d.gezilmedi) {
-      // KK8: dokunulmadı, pay da geçti → planlanan bitişle otomatik tamamlanmış sayılır; program plana göre akar.
-      durum = 'gecildi';
-      otomatik = true;
+    } else if (simdiDk !== null && simdiDk > planAyrilis + UZUN_KALMA_PAYI_DK) {
+      if (!d.gezilmedi) {
+        // KK8: dokunulmadı, pay da geçti → planlanan bitişle otomatik tamamlanmış sayılır; program plana göre akar.
+        durum = 'gecildi';
+        otomatik = true;
+      }
+      // #580 inceleme D1: vakti geçmiş "gezilmedi" durak ✓'siz kalır (bekliyor) ama sıradaki olmaz — Şimdi, odak kartı ve
+      // gecikme onu atlar; program plana göre akar.
     } else if (simdiDk !== null && !siradakiVerildi) {
       durum = buradaId === d.id ? 'buradasin' : 'siradaki';
       siradakiVerildi = true;

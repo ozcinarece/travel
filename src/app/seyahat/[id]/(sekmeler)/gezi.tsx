@@ -523,7 +523,7 @@ function GeziSayfasi({ seyahat, gunler, duraklar, mekanlar, konaklamalar, katild
   const cekmeceyiKapat = () => setCekmeceAcik(false);
   // KK2: Gezdim → gezildi (Plan'daki "Tamamlandı" ile aynı yazım); sıradaki durak program yeniden hesaplanınca Şimdi'ye gelir.
   // Gezildi görünen durakta (kayıtlı ya da kendiliğinden geçilmiş) "Gezilmedi say" durağı gezilmemiş yapar (`gezdimEylemi`).
-  const gezdimKarari = (k: DurakKarti) => gezdimEylemi(k, { simdiDk: prog?.simdiDk ?? null, an: new Date(), benId });
+  const gezdimKarari = (k: DurakKarti) => gezdimEylemi(k, { an: new Date(), benId });
   const gezdim = (k: DurakKarti) => {
     cekmeceyiKapat();
     durakGuncelle.mutate(gezdimKarari(k).yazim, { onError: kaydedilemedi });

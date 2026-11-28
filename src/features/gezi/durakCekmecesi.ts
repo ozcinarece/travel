@@ -4,7 +4,6 @@ import { t } from '@/i18n';
 import { sureMetni } from '@/lib/kategori';
 import type { Gun } from '@/lib/tipler';
 import { saatEkli } from '@/lib/zaman';
-import { UZUN_KALMA_PAYI_DK } from '@/schedule/program';
 import { dakikaSaat } from '@/schedule/tempo';
 
 import { gezildiMi, gunAdi } from './seyahatV7';
@@ -58,18 +57,16 @@ export type GezdimYazimi = { id: string; completed_at: string | null; completed_
 
 /**
  * KK2 (#580 değişiklik 2): çekmece düğmesinin kararı ve yazımı — satırla aynı tanım (`gezildiMi`).
- * - Gezildi görünüyor → "Gezilmedi say": tamamlanma silinir. Durağın vakti (planlanan bitiş + pay) geçtiyse program onu yine
- *   kendiliğinden geçildi sayacağından açık "gezilmedi" kaydı da yazılır (`auto_completed = true`, `gezilmediMi`).
+ * - Gezildi görünüyor → "Gezilmedi say": tamamlanma silinir ve açık "gezilmedi" kaydı yazılır (`auto_completed = true`,
+ *   `gezilmediMi`; #580 inceleme N3: vakti sürerken de, bitiş + pay geçince program yine ✓ vermesin). Vakti sürerken durak
+ *   olağan sıradaki olur; vakti geçmişse ✓'siz kalır, Şimdi'nin hedefi olmaz (`programHesapla`).
  * - Gezilmemiş → "Gezdim", şimdinin anı.
  */
 export function gezdimEylemi(
-  k: { durakId: string; tamamlandi: boolean; durum: string | null; varisDk: number | null; dakika: number },
-  p: { simdiDk: number | null; an: Date; benId: string | null },
+  k: { durakId: string; tamamlandi: boolean; durum: string | null },
+  p: { an: Date; benId: string | null },
 ): { metin: string; geriAl: boolean; yazim: GezdimYazimi } {
-  if (gezildiMi(k)) {
-    const vaktiGecti = !k.tamamlandi || (p.simdiDk !== null && k.varisDk !== null && p.simdiDk > k.varisDk + k.dakika + UZUN_KALMA_PAYI_DK);
-    return { ...gezdimDugmesi(true), yazim: { id: k.durakId, completed_at: null, completed_by: null, auto_completed: vaktiGecti } };
-  }
+  if (gezildiMi(k)) return { ...gezdimDugmesi(true), yazim: { id: k.durakId, completed_at: null, completed_by: null, auto_completed: true } };
   return { ...gezdimDugmesi(false), yazim: { id: k.durakId, completed_at: p.an.toISOString(), completed_by: p.benId, auto_completed: false } };
 }
 
