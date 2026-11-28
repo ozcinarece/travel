@@ -739,6 +739,7 @@
       "simdiDegil": "Şimdi değil",
       "kaydet": "Kaydet",
       "hata": "Otel kaydedilemedi. Tekrar dene.",
+      "adHata": "Otel kaydedildi, ad kaydedilemedi. Tekrar dene.",
       "geceler": "Geceleri seç",
       "adEkle": "Ad ekle",
       "adDegistir": "Adı değiştir",
