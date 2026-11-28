@@ -58,12 +58,14 @@ const mockKaydedilenler = [
   { id: 'y1', kategori: 'museum', lat: 40.7, lng: 31.6, sehirler: { ad: 'Bolu' } },
   { id: 'y2', kategori: 'park', lat: 40.71, lng: 31.61, sehirler: { ad: 'Bolu' } },
 ];
+let mockYerlerGeldi = true;
+const mockYerVerisi = () => (mockYerlerGeldi ? mockKaydedilenler : undefined);
 jest.mock('@/features/icerik/sorgular', () => ({
   icerikPlaceId: async (y: { id: string }) => `pid-${y.id}`,
   olayYaz: jest.fn(),
   sehirEslestir: () => null,
   useSehirler: () => ({ data: [] }),
-  useYerlerIle: (idler: string[]) => ({ data: idler.length ? mockKaydedilenler : [] }),
+  useYerlerIle: (idler: string[]) => ({ data: idler.length ? mockYerVerisi() : [] }),
 }));
 jest.mock('@/features/arkadaslar/sorgular', () => ({ useArkadaslarim: () => ({ data: [] }) }));
 jest.mock('@/features/davet/uygulamaIci', () => ({ useDavetGonder: () => ({ mutateAsync: jest.fn() }) }));
@@ -96,6 +98,7 @@ beforeEach(() => {
   mockParams = {};
   mockKaynakSehir = mockSehir;
   mockMekanlar = [];
+  mockYerlerGeldi = true;
   mockOlustur.mockImplementation(async () => 'yeni');
   mockGunKur.mockImplementation(async () => undefined);
   mockSehriKur.mutateAsync.mockImplementation(async () => undefined);
@@ -189,6 +192,28 @@ describe('#648 KK3 "Bu şehre seyahat kur" yeniden denemesi', () => {
     fireEvent.press(screen.getByText(t('sihirbaz.devam')));
     await waitFor(() => expect(mockYerEkle.mutateAsync).toHaveBeenCalledTimes(1));
     expect(mockYerEkle.mutateAsync).toHaveBeenCalledWith({ seyahatId: 'yeni', yerler: [expect.objectContaining({ place_id: 'pid-y2' })] });
+  });
+});
+
+describe('#648 KK3 kaydedilen yerler henüz gelmediyse', () => {
+  it('yeniden deneme planı silmez, "bilgiler gelmedi" der; yerler gelince ekler', async () => {
+    mockYerlerGeldi = false;
+    mockParams = { sehir: 's-bolu', yerler: 'y1,y2', n: '1' };
+    mockGunKur.mockRejectedValueOnce(new Error('ağ'));
+    const ekran = render(<SihirbazEkrani />);
+    fireEvent.press(await screen.findByText(t('sihirbaz.devam')));
+    fireEvent.press(await screen.findByText(t('sihirbaz.nezaman.atla')));
+    fireEvent.press(screen.getByLabelText(t('sihirbaz.nezaman.gunArttir')));
+    fireEvent.press(screen.getByText(t('sihirbaz.devam')));
+    await screen.findByText(t('sihirbaz.nezaman.tarihHata'));
+    fireEvent.press(screen.getByText(t('sihirbaz.devam')));
+    expect(await screen.findByText(t('sihirbaz.nereye.veriBekleniyor'))).toBeTruthy();
+    expect(screen.queryByText(t('sihirbaz.nezaman.hata'))).toBeNull();
+    expect(mockYerEkle.mutateAsync).not.toHaveBeenCalled();
+    mockYerlerGeldi = true;
+    ekran.rerender(<SihirbazEkrani />);
+    fireEvent.press(screen.getByText(t('sihirbaz.devam')));
+    await waitFor(() => expect(mockYerEkle.mutateAsync).toHaveBeenCalledTimes(1));
   });
 });
 

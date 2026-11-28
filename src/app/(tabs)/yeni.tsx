@@ -333,9 +333,12 @@ export function Sihirbaz({ giris, onCik }: { giris: YeniGirisi; /** #574: 1. ad�
     setTripId(null);
   };
   // #144 Bu şehre seyahat kur: kaydedilen yerler listeye (3. adımda listede görünür). #648 KK3: ilk kurulum yarıda düştüyse
-  // yeniden denemede de eklenir; listede zaten olan yer ikinci kez eklenmez. Ekleme düşerse sessiz (bugünkü davranış).
-  const girisYerleriniEkle = async (id: string, mevcut: readonly { place_id: string | null }[]) => {
-    if (girisPlani?.tur !== 'yerler' || !sehir || girisPlani.sehirId !== sehir.place_id || !girisYerleri.data?.length) return;
+  // yeniden denemede de eklenir; listede zaten olan yer ikinci kez eklenmez (`useYerleriEkle` de tekrarı eler). Ekleme düşerse
+  // sessiz (bugünkü davranış). Kaydedilen yerler henüz gelmediyse false: plan temizlenmez, sonraki Devam yine dener.
+  const girisYerleriniEkle = async (id: string, mevcut: readonly { place_id: string | null }[]): Promise<boolean> => {
+    if (girisPlani?.tur !== 'yerler' || !sehir || girisPlani.sehirId !== sehir.place_id) return true;
+    if (girisYerIdleri.length > 0 && !girisYerleri.data) return false;
+    if (!girisYerleri.data?.length) return true;
     const satirlar = await Promise.all(
       girisYerleri.data.map(async (y) => ({ yerId: y.id, place_id: await icerikPlaceId(y, y.sehirler?.ad ?? sehir.ad), primary_type: y.kategori, lat: y.lat, lng: y.lng })),
     );
@@ -343,6 +346,7 @@ export function Sihirbaz({ giris, onCik }: { giris: YeniGirisi; /** #574: 1. ad�
     const yeniler = satirlar.filter((x) => !x.place_id || !listede.has(x.place_id));
     if (yeniler.length) await yerleriEkle.mutateAsync({ seyahatId: id, yerler: yeniler }).catch(() => undefined);
     setTutulan(new Set(satirlar.map((x) => x.place_id).filter((x): x is string => !!x)));
+    return true;
   };
   // 2 → 3: seyahat oluşturulur (tarihli ya da tarihsiz N gün). #581 KK3a: taslak varsa yenisi açılmaz, tarihi güncellenir.
   const seyahatiKur = async () => {
@@ -385,13 +389,19 @@ export function Sihirbaz({ giris, onCik }: { giris: YeniGirisi; /** #574: 1. ad�
         }
         // #648 KK3: ilk kurulum yerler eklenmeden düştüyse (gün kurma, yer kimliği) yeniden deneme de ekler.
         if (girisPlani?.tur === 'yerler') {
+          // Seyahat zaten var: "Seyahat oluşturulamadı" değil, bilgiler gelmedi uyarısı (#603 KK1 ile aynı ilke).
+          let tamam = false;
           try {
-            await girisYerleriniEkle(tripId, mekanlar.data ?? []);
-            setGirisPlani(null);
+            tamam = await girisYerleriniEkle(tripId, mekanlar.data ?? []);
           } catch {
-            setHata(t('sihirbaz.nezaman.hata'));
+            tamam = false;
+          }
+          if (!tamam) {
+            setHata(t('sihirbaz.nereye.veriBekleniyor'));
+            if (girisYerleri.isError) void girisYerleri.refetch();
             return;
           }
+          setGirisPlani(null);
         }
       } finally {
         kuruluyorRef.current = false;
@@ -428,8 +438,8 @@ export function Sihirbaz({ giris, onCik }: { giris: YeniGirisi; /** #574: 1. ad�
         await tekrarKopyala(girisPlani.kaynak, id);
         return;
       }
-      await girisYerleriniEkle(id, []);
-      setGirisPlani(null);
+      // Kaydedilen yerler henüz gelmediyse plan kalır: 3. adımdan geri dönüp Devam yeniden dener.
+      if (await girisYerleriniEkle(id, [])) setGirisPlani(null);
       setAdim('onerilenler');
     } catch {
       setHata(t('sihirbaz.nezaman.hata'));
