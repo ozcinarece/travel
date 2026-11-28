@@ -2,10 +2,13 @@
 // bugüne ekleme bandı kapatır (çıkarma kesinleşir), tek bant; KK4 sekme açıkken gece yarısı geçince hap yeni günü gösterir;
 // KK5 bugünün sırası `days`'te yoksa hap yok, ekleme listeye, bildirim "{ad} listene eklendi"; KK6 art arda iki ekleme aynı güne
 // farklı `order_key` alır. Düzen #579 testiyle aynı (bugunEkle579.test.tsx).
+// #621 (#618 küçükleri): KK1 Değiştir çekmecesinin saati; KK2 durak yenilemesi düşse de sıradaki "+" yeni `order_key`; KK3 aynı
+// kısa bildirim iki kez → iki duyuru, süre baştan; KK6 seyahat değişince eski eklemenin bildirimi yok; KK7 bastırma yolları.
 import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react-native';
 import type { ReactNode } from 'react';
+import { AccessibilityInfo } from 'react-native';
 
 import { SeyahatIdSaglayici } from '@/features/seyahatler/baglam';
 import { kesfetDurumunuSifirla } from '@/features/yerler/kesfetDurumu';
@@ -84,7 +87,9 @@ const ONERI: HafifYer = { place_id: 'ChIJ-oneri-1', ad: 'Eti Arkeoloji Müzesi',
 let mockYakin = { hata: false, sinir: false };
 // Liste kimliği sabit (ekran liste değişince çekmece durumunu sıfırlar).
 const IKINCI: HafifYer = { ...ONERI, place_id: 'ChIJ-oneri-2', ad: 'Kurşunlu Külliyesi', lat: 39.79, lng: 30.5 };
-const mockYerler = [ONERI, IKINCI];
+// #621 KK3: adı ONERI ile aynı başka bir yer (aynı bildirim metni).
+const ADASI: HafifYer = { ...ONERI, place_id: 'ChIJ-oneri-3', lat: 39.77, lng: 30.49 };
+const mockYerler = [ONERI, IKINCI, ADASI];
 const mockArananlar: never[] = [];
 jest.mock('@/features/yerler/kesfetYukleme', () => ({
   useKesfetOnerileri: () => ({
@@ -111,6 +116,8 @@ const mockGunKapisi: { bekle: Promise<void> | null } = { bekle: null };
 const mockEklenen: { tablo: string; satir: unknown }[] = [];
 /** #598: durak eklemesi (ata) hata verebilir. #599 KK6: bekletilebilir; eklenen durak `stops`'a yazılır (yeniden okumada görünsün). */
 const mockDurakEkleme: { hata: unknown; bekle: Promise<void> | null } = { hata: null, bekle: null };
+/** #621 KK2: durak okuması (yenileme) hata verebilir. */
+const mockDurakOkuma: { hata: unknown } = { hata: null };
 /** #599 KK1: silme hata verebilir. */
 const mockSilme: { hata: unknown } = { hata: null };
 jest.mock('@/lib/supabase', () => {
@@ -122,7 +129,7 @@ jest.mock('@/lib/supabase', () => {
           if (ad === 'then')
             return (coz: (v: unknown) => unknown) =>
               (tablo === 'days' && mockGunKapisi.bekle ? mockGunKapisi.bekle : Promise.resolve())
-                .then(() => ({ data: mockTablolar[tablo] ?? [], error: null }))
+                .then(() => (tablo === 'stops' && mockDurakOkuma.hata ? { data: null, error: mockDurakOkuma.hata } : { data: [...(mockTablolar[tablo] ?? [])], error: null }))
                 .then(coz);
           if (ad === 'single' || ad === 'maybeSingle')
             return () => ({ then: (coz: (v: unknown) => unknown) => Promise.resolve({ data: (mockTablolar[tablo] ?? [])[0] ?? null, error: null }).then(coz) });
@@ -213,6 +220,8 @@ beforeEach(() => {
   mockDurakEkleme.hata = null;
   mockDurakEkleme.bekle = null;
   mockSilme.hata = null;
+  mockDurakOkuma.hata = null;
+  mockSeyahatId = 't1';
   mockCevrimdisi = false;
   mockYakin = { hata: false, sinir: false };
   mockParametre = {};
@@ -231,11 +240,13 @@ afterEach(async () => {
   globalThis.fetch = eskiFetch;
 });
 
+/** #621 KK6: açık seyahat (yeniden çizimde değiştirilebilir). */
+let mockSeyahatId = 't1';
 function ciz() {
   const qc = new QueryClient({ defaultOptions: { queries: { retry: false, gcTime: Infinity }, mutations: { retry: false, gcTime: 0 } } });
   const sarmal = ({ children }: { children: ReactNode }) => (
     <QueryClientProvider client={qc}>
-      <SeyahatIdSaglayici id="t1">{children}</SeyahatIdSaglayici>
+      <SeyahatIdSaglayici id={mockSeyahatId}>{children}</SeyahatIdSaglayici>
     </QueryClientProvider>
   );
   const r = render(<KesfetEkrani />, { wrapper: sarmal });
@@ -407,5 +418,184 @@ describe('#599 KK4: gece yarısı, sekme açıkken', () => {
     expect(within(await screen.findByTestId('gun-hapi', {}, ILK)).getByText(`4. gün · ${g4} ekleniyor`)).toBeTruthy();
     act(() => jest.advanceTimersByTime(180_000));
     expect(within(screen.getByTestId('gun-hapi')).getByText(`4. gün · ${g4} ekleniyor`)).toBeTruthy();
+  });
+});
+
+// #621: ortak fikstür — listede, bugünde (2. gün) duran m1 (panel düğmesi "Listeden çıkar").
+const M1 = { id: 'm1', trip_id: 't1', place_id: 'ChIJ-liste-1', primary_type: 'museum', lat: 39.779, lng: 30.479, default_minutes: 60, added_by: 'ben', created_at: '2026-10-01T00:00:00Z' };
+const M1_DURAK = { id: 'd1', trip_id: 't1', day_id: 'g2', place_ref: 'm1', order_key: 'a0', skipped: false };
+const bekle = (ms: number) =>
+  act(async () => {
+    await new Promise((c) => setTimeout(c, ms));
+  });
+/** m1'i ✓ ile çıkarır: 5 sn'lik Geri al bandı açılır. */
+const m1Cikar = async () => {
+  fireEvent.press(await screen.findByTestId('pin-m:ChIJ-liste-1'));
+  await waitFor(() => expect(screen.getByText('cikar')).toBeTruthy());
+  await waitFor(() => expect(screen.queryByTestId('panel-cta-metni')).toBeNull());
+  fireEvent.press(screen.getByTestId('panel-cta'));
+  await screen.findByTestId('geri-al-bandi');
+};
+
+describe('#621 Yer ekle bugün takibi 2', () => {
+  it('KK2: durak yenilemesi düşse de sıradaki "+" aynı order_key\'i almaz (son verilenin ardından)', async () => {
+    ciz();
+    await screen.findByTestId('gun-hapi', {}, ILK);
+    // Duraklar yüklendi (boş); bundan sonra her yenileme düşer — eldeki liste eski kalır.
+    mockDurakOkuma.hata = { message: 'yenilenemedi' };
+    await pindenEkle(ONERI);
+    await waitFor(() => expect(mockEklenen.filter((e) => e.tablo === 'stops')).toHaveLength(1));
+    await screen.findByTestId('geri-al-bandi');
+    fireEvent.press(screen.getByTestId('panel-kapat'));
+    await pindenEkle(IKINCI);
+    await waitFor(() => expect(mockEklenen.filter((e) => e.tablo === 'stops')).toHaveLength(2));
+    const [bir, iki] = mockEklenen.filter((e) => e.tablo === 'stops').map((e) => e.satir as { day_id: string; order_key: string });
+    expect(iki.day_id).toBe(bir.day_id);
+    expect(iki.order_key > bir.order_key).toBe(true);
+  });
+
+  it('KK3: aynı kısa bildirim 2,8 sn içinde iki kez → iki iOS duyurusu, süre ikinciden başlar', async () => {
+    // jest-expo'da duyuru zaten bir jest.fn (spyOn aynısını döndürür): önceki testlerin çağrıları silinir.
+    const duyuru = jest.spyOn(AccessibilityInfo, 'announceForAccessibility').mockImplementation(() => undefined);
+    duyuru.mockClear();
+    try {
+      mockTablolar.days = (mockTablolar.days as { index: number }[]).filter((g) => g.index !== 2);
+      const metin = t('kesfet.listeneEklendi', { ad: ONERI.ad });
+      ciz();
+      await pindenEkle(ONERI);
+      await screen.findByText(metin, {}, ILK);
+      const sayi = () => duyuru.mock.calls.filter(([m]) => m === metin).length;
+      expect(sayi()).toBe(1);
+      fireEvent.press(screen.getByTestId('panel-kapat'));
+      await bekle(1500);
+      // Aynı adlı başka yer: aynı metin, ilki hâlâ ekranda.
+      await pindenEkle(ADASI);
+      await waitFor(() => expect(sayi()).toBe(2));
+      // İlk bildirimden 2,8 sn sonra hâlâ görünür (zamanlayıcı ikinciyle baştan başladı); sonra kalkar.
+      await bekle(1700);
+      expect(screen.getByText(metin)).toBeTruthy();
+      await waitFor(() => expect(screen.queryByText(metin)).toBeNull(), { timeout: 3000 });
+    } finally {
+      duyuru.mockRestore();
+    }
+  }, 15000);
+
+  it('KK6: ekleme sürerken seyahat değişirse eski eklemenin bildirimi yeni seyahatte açılmaz', async () => {
+    let ac: () => void = () => undefined;
+    mockDurakEkleme.bekle = new Promise<void>((c) => (ac = c));
+    const r = ciz();
+    await screen.findByTestId('gun-hapi', {}, ILK);
+    await pindenEkle(ONERI);
+    await waitFor(() => expect(mockEklenen.filter((e) => e.tablo === 'places')).toHaveLength(1));
+    // Başka seyahate geçilir (aynı ekran, yeni kimlik); eski eklemenin durağı sonra biter.
+    mockTablolar.trips = [{ ...(mockTablolar.trips as object[])[0], id: 't2', name: 'Ankara Gezisi' }];
+    mockSeyahatId = 't2';
+    r.rerender(<KesfetEkrani />);
+    await screen.findByTestId('gun-hapi', {}, ILK);
+    mockDurakEkleme.bekle = null;
+    ac();
+    await waitFor(() => expect(mockEklenen.filter((e) => e.tablo === 'stops')).toHaveLength(1));
+    await bekle(50);
+    expect(screen.queryByTestId('geri-al-bandi')).toBeNull();
+    expect(screen.queryByText(' bugüne eklendi')).toBeNull();
+  });
+
+  it('KK7: tarihsiz günde bant ekleme sürerken açıldıysa kalır; "{n}. güne eklendi" gösterilmez, silme gitmez', async () => {
+    fikstur(false);
+    mockParametre = { gun: '2', n: '1' };
+    mockTablolar.places = [M1];
+    mockTablolar.stops = [M1_DURAK];
+    let ac: () => void = () => undefined;
+    mockDurakEkleme.bekle = new Promise<void>((c) => (ac = c));
+    ciz();
+    await screen.findByText(t('kesfet.guneEkliyorsun', { n: 2 }), {}, ILK);
+    await pindenEkle(ONERI);
+    await waitFor(() => expect(mockEklenen.filter((e) => e.tablo === 'places')).toHaveLength(1));
+    fireEvent.press(screen.getByTestId('panel-kapat'));
+    await m1Cikar();
+    mockDurakEkleme.bekle = null;
+    ac();
+    await waitFor(() => expect(mockEklenen.filter((e) => e.tablo === 'stops')).toHaveLength(1));
+    await bekle(20);
+    expect(screen.getAllByTestId('geri-al-bandi')).toHaveLength(1);
+    expect(screen.queryByText(t('kesfet.guneEklendi', { ad: ONERI.ad, n: 2 }))).toBeNull();
+    expect(mockSilinen).toEqual([]);
+  });
+
+  it('KK7: "listene eklendi" yolunda bant ekleme sürerken açıldıysa kalır; bildirim gösterilmez, silme gitmez', async () => {
+    mockTablolar.days = (mockTablolar.days as { index: number }[]).filter((g) => g.index !== 2);
+    mockTablolar.places = [M1];
+    ciz();
+    await screen.findByTestId('pin-m:ChIJ-liste-1', {}, ILK);
+    let ac: () => void = () => undefined;
+    mockEkleme.bekle = new Promise<void>((c) => (ac = c));
+    await pindenEkle(ONERI);
+    fireEvent.press(screen.getByTestId('panel-kapat'));
+    await m1Cikar();
+    mockEkleme.bekle = null;
+    ac();
+    await waitFor(() => expect(mockEklenen.filter((e) => e.tablo === 'places')).toHaveLength(1));
+    await bekle(20);
+    expect(screen.getAllByTestId('geri-al-bandi')).toHaveLength(1);
+    expect(screen.queryByText(t('kesfet.listeneEklendi', { ad: ONERI.ad }))).toBeNull();
+    expect(mockSilinen).toEqual([]);
+  });
+
+  it('KK7: ekleme sürerken açılan bant 5 sn dolup kapanırsa ekleme bitince bildirim görünür', async () => {
+    mockTablolar.places = [M1];
+    mockTablolar.stops = [M1_DURAK];
+    let ac: () => void = () => undefined;
+    mockDurakEkleme.bekle = new Promise<void>((c) => (ac = c));
+    ciz();
+    await screen.findByTestId('gun-hapi', {}, ILK);
+    await pindenEkle(ONERI);
+    await waitFor(() => expect(mockEklenen.filter((e) => e.tablo === 'places')).toHaveLength(1));
+    fireEvent.press(screen.getByTestId('panel-kapat'));
+    await m1Cikar();
+    // 5 sn dolar: çıkarma kesinleşir, bant kapanır.
+    await waitFor(() => expect(mockSilinen).toEqual([{ tablo: 'places', id: 'm1' }]), { timeout: 7000 });
+    await waitFor(() => expect(screen.queryByTestId('geri-al-bandi')).toBeNull());
+    mockDurakEkleme.bekle = null;
+    ac();
+    await waitFor(() => expect(within(screen.getByTestId('geri-al-bandi')).getByText(' bugüne eklendi')).toBeTruthy());
+  }, 15000);
+});
+
+describe('#621 KK1: Değiştir çekmecesinin saati', () => {
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+  /** Bugün (2. gün) sabah gezilmiş tek durak: çekmecede "1 durak gezildi" (21.00'e kadar "· akşam boş"). */
+  const gezilenDurak = () => {
+    mockTablolar.places = [{ ...M1, id: 'm9', place_id: 'ChIJ-gezilen', default_minutes: 30 }];
+    mockTablolar.stops = [{ id: 'd9', trip_id: 't1', day_id: 'g2', place_ref: 'm9', order_key: 'a0', skipped: false, completed_at: `${bugun()}T07:00:00Z`, completed_by: 'ben', arrived_at: null, arrived_by: null, auto_completed: false, minutes: 30 }];
+  };
+  const gezildi = t('listem.guneEkle.gezildi', { n: 1 });
+  const aksamBos = `${gezildi} · ${t('listem.guneEkle.aksamBos')}`;
+
+  it('çekmece açıkken dakikalık yenileme alt satırı günceller (20.59 "akşam boş" → 21.00 yalnız "gezildi")', async () => {
+    gezilenDurak();
+    // 20.59 İstanbul (UTC+3).
+    jest.useFakeTimers({ now: new Date(`${bugun()}T17:59:00Z`) });
+    ciz();
+    fireEvent.press(within(await screen.findByTestId('gun-hapi', {}, ILK)).getByRole('button', { name: t('kesfet.gunDegistirEtiket') }));
+    await screen.findByText(t('mekan.gunSecBaslik'));
+    await waitFor(() => expect(screen.getByText(aksamBos)).toBeTruthy());
+    act(() => jest.advanceTimersByTime(60_000));
+    await waitFor(() => expect(screen.getByText(gezildi)).toBeTruthy());
+    expect(screen.queryByText(aksamBos)).toBeNull();
+  });
+
+  it('çekmece kapalıyken saat ilerlerse Değiştir\'e basınca saat tazelenir', async () => {
+    gezilenDurak();
+    // 20.50'de sekme açılır; çekmece kapalıyken (gün değişmediği için ekran saati yenilenmez) 21.05 olur.
+    jest.useFakeTimers({ now: new Date(`${bugun()}T17:50:00Z`) });
+    ciz();
+    const hap = within(await screen.findByTestId('gun-hapi', {}, ILK));
+    act(() => jest.advanceTimersByTime(15 * 60_000));
+    fireEvent.press(hap.getByRole('button', { name: t('kesfet.gunDegistirEtiket') }));
+    await screen.findByText(t('mekan.gunSecBaslik'));
+    await waitFor(() => expect(screen.getByText(gezildi)).toBeTruthy());
+    expect(screen.queryByText(aksamBos)).toBeNull();
   });
 });

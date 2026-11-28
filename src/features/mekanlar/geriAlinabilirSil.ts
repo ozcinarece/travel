@@ -59,8 +59,15 @@ export function useGeriAlinabilirIslem<B extends { metin: string }>(seyahatId: s
     calistirRef.current(b.b);
   }, []);
 
-  // KK3: ekrandan çıkınca (ya da seyahat değişince) bekleyen çalışır.
-  useEffect(() => () => kesinlestir(), [seyahatId, kesinlestir]);
+  // KK3: ekrandan çıkınca (ya da seyahat değişince) bekleyen çalışır. #621 KK5: o anki bant da boşalır (yukarıdaki
+  // `setBekleyenDurum(null)` ref'e dokunmaz; `simdikiBant` eski seyahatin bandını görmesin).
+  useEffect(
+    () => () => {
+      kesinlestir();
+      bantRef.current = null;
+    },
+    [seyahatId, kesinlestir],
+  );
   // KK3: uygulama arka plana giderse de.
   useEffect(() => {
     const abonelik = AppState.addEventListener('change', (durum) => {

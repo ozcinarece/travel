@@ -853,7 +853,7 @@
     },
     "onerilenler": {
       "baslik": "Neleri görmek istersin?",
-      "alt": "Seçtiklerini grubun oylarına ve yakınlığa göre günlere biz dağıtalım.",
+      "alt": "Seçtiklerini oylara ve yakınlığa göre günlere biz dağıtalım.",
       "veriHata": "Seyahatin bilgileri yüklenemedi.",
       "tekrarDene": "Tekrar dene",
       "cip": {
@@ -1170,7 +1170,6 @@
     "bugunEkle": "{ad}, bugüne ekle",
     "bugunEklendi": "{ad}, bugüne eklendi",
     "yeniMesaj": "yeni mesaj gönderdi",
-    "bugunYerEkle": "Bugüne yer ekle ›",
     "bugunYerEkleSatiri": "Bugüne yer ekle",
     "yakindaBugune": "Yakında, bugüne ekle",
     "tumu": "Tümü ›"
@@ -1211,7 +1210,7 @@
     "gunNo": "{n}. gün",
     "adim": {
       "planKur": "Plan henüz kurulmadı",
-      "planKurAlt": "Listendeki {n} mekanı günlere oylara ve yakınlığa göre dağıtalım",
+      "planKurAlt": "Listendeki {n} mekanı oylara ve yakınlığa göre günlere dağıtalım",
       "planKurBosAlt": "Önce görmek istediğin yerleri seç",
       "planKurDugme": "Planı kur",
       "dagit": "{n} mekan güne atanmamış",
