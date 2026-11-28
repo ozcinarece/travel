@@ -103,8 +103,9 @@ describe('#595 KK1 tarihsiz seyahat', () => {
 
 describe('#595 KK2 metinler oyları da söyler', () => {
   it('sihirbaz ve Gezi adımı', () => {
-    expect(t('sihirbaz.onerilenler.alt')).toBe('Seçtiklerini grubun oylarına ve yakınlığa göre günlere biz dağıtalım.');
-    expect(t('geziSayfasi.adim.planKurAlt', { n: 4 })).toBe('Listendeki 4 mekanı günlere oylara ve yakınlığa göre dağıtalım');
+    // #617 KK1–KK2: akıcı sıra; sihirbazda grup olmayabilir.
+    expect(t('sihirbaz.onerilenler.alt')).toBe('Seçtiklerini oylara ve yakınlığa göre günlere biz dağıtalım.');
+    expect(t('geziSayfasi.adim.planKurAlt', { n: 4 })).toBe('Listendeki 4 mekanı oylara ve yakınlığa göre günlere dağıtalım');
   });
 });
 
@@ -146,9 +147,35 @@ describe('#595 KK3 önizleme = Planı kur (aynı girdi)', () => {
   it('önbelleğe saat girince önizleme yeniden hesaplanır', async () => {
     const mekanlar = [mekan(1)];
     const { result } = renderHook(() => usePlanOnizlemeOnceligi('t', mekanlar, [], true, null), { wrapper: sarici() });
+    await waitFor(() => expect(result.current).toBeDefined());
     expect(result.current?.saatler).toBeUndefined();
     act(() => hafifOnbellek.yaz([yer('P1')], 'saatli'));
     expect(result.current?.saatler?.get('P1')).toEqual(pztKapali);
+  });
+});
+
+describe('#617 KK3 önizleme sayısı ilk yüklemede zıplamaz', () => {
+  const sarici = () => {
+    const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    const Sarici = ({ children }: { children: ReactNode }) => <QueryClientProvider client={qc}>{children}</QueryClientProvider>;
+    return Sarici;
+  };
+
+  it('oy ve il sırası sorgusu yüklenirken öncelik (dolayısıyla sayı) yok; ilk değer öncelikli hesaptan', async () => {
+    const mekanlar = Array.from({ length: 3 }, (_, i) => mekan(i));
+    mockVeri.oylar = [{ mekan: 'm2' }];
+    const { result } = renderHook(() => usePlanOnizlemeOnceligi('t', mekanlar, [], false, null), { wrapper: sarici() });
+    // İlk çizim: sorgu henüz gelmedi → undefined (yeni.tsx bu sırada "K yer sığmıyor" satırını göstermez).
+    expect(result.current).toBeUndefined();
+    await waitFor(() => expect(result.current).toBeDefined());
+    expect(result.current?.oylar?.get('m2')).toBe(1);
+  });
+
+  it('boş yer yoksa sorgu çalışmaz, beklemeden döner', () => {
+    const m = mekan(1);
+    const durak = { id: 'd1', trip_id: 't', day_id: 'g1', place_ref: m.id, order_key: 'a', minutes: 60 } as never;
+    const { result } = renderHook(() => usePlanOnizlemeOnceligi('t', [m], [durak], false, null), { wrapper: sarici() });
+    expect(result.current).toEqual({ oylar: undefined, ilSira: undefined, saatler: undefined });
   });
 });
 

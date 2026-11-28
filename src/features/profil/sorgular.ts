@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import * as ImagePicker from 'expo-image-picker';
 
-import { profilOzetiAnahtari } from './profilV12';
+import { profilOzetiAnahtari } from './anahtarlar';
 import { gecerliKullaniciAdi } from '@/lib/kullaniciAdi';
 import { useOturum } from '@/lib/oturum';
 import { supabase } from '@/lib/supabase';

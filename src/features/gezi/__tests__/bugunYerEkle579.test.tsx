@@ -241,7 +241,7 @@ describe('#579 KK4 Gezi sayfası: Bugüne yer ekle', () => {
     expect(queryByText(/^ŞİMDİ/)).toBeNull();
     expect(getByRole('button', { name: t('seyahatV7.bugunYerEkleSatiri') })).toBeTruthy();
     // Aynı eylem iki kez yazılmaz: eski "Bugüne yer ekle ›" bağlantısı yok.
-    expect(queryByText(t('seyahatV7.bugunYerEkle'))).toBeNull();
+    expect(queryByText('Bugüne yer ekle ›')).toBeNull();
   });
 
   it('#599 KK3: boş günde (bugün durak yok) eski bağlantı yerine aynı + satırı; dokununca Yer ekle bugün seçili', async () => {
@@ -257,7 +257,8 @@ describe('#579 KK4 Gezi sayfası: Bugüne yer ekle', () => {
     const satir = getByRole('button', { name: t('seyahatV7.bugunYerEkleSatiri') });
     expect(StyleSheet.flatten(satir.props.style).minHeight).toBeGreaterThanOrEqual(48);
     expect(StyleSheet.flatten(getByText(t('seyahatV7.bugunYerEkleSatiri')).props.style).color).toBe(renk.ana);
-    expect(queryByText(t('seyahatV7.bugunYerEkle'))).toBeNull();
+    // #621 KK4: metnin anahtarı (`seyahatV7.bugunYerEkle`) silindi; eski bağlantının metni elle aranır.
+    expect(queryByText('Bugüne yer ekle ›')).toBeNull();
     fireEvent.press(satir);
     expect(router.navigate).toHaveBeenLastCalledWith(
       expect.objectContaining({ pathname: '/seyahat/[id]/(sekmeler)/kesfet', params: expect.objectContaining({ id: 't1', gun: '1' }) }),

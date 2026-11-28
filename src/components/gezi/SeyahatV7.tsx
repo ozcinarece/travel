@@ -162,15 +162,6 @@ function okuyucuMetni(metin: string): string {
   return metin.replace(/\s*›\s*$/, '');
 }
 
-/** Bölüm altında tek başına bağlantı satırı ("Bugüne yer ekle ›"); biçimi başlıktaki "Rehber ›" ile aynı. */
-export function BaglantiSatiri({ metin, onPress }: { metin: string; onPress: () => void }) {
-  return (
-    <Pressable accessibilityRole="link" accessibilityLabel={okuyucuMetni(metin)} onPress={onPress} style={s.baglantiSatiri}>
-      <Text style={s.baglanti}>{metin}</Text>
-    </Pressable>
-  );
-}
-
 /** Plan modunda "Günler" en çok bu kadar satır (#522 inceleme 2); fazlası "Planı aç ›". */
 export const GUN_SINIRI = 3;
 
@@ -419,7 +410,6 @@ const s = StyleSheet.create({
   bolumBaslik: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline', paddingTop: 18, paddingBottom: 4 },
   bolumMetin: { fontFamily: yazi.ekstra, fontSize: 19, color: renk.metin },
   baglanti: { fontFamily: yazi.kalin, fontSize: 14, color: renk.ana },
-  baglantiSatiri: { alignSelf: 'flex-start', minHeight: 44, justifyContent: 'center' },
   odak: { paddingTop: 18, paddingHorizontal: 16, gap: 4 },
   artiSatiri: { marginTop: 8, minHeight: 48, flexDirection: 'row', alignItems: 'center', gap: 12, alignSelf: 'stretch' },
   artiDaire: { width: 28, height: 28, borderRadius: 14, borderWidth: 1.5, borderColor: renk.ana, alignItems: 'center', justifyContent: 'center' },

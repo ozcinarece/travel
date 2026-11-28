@@ -2,7 +2,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { BELIRME_MS, KATMAN_ID, YENILE_SN, katmanEkle, katmanHtml } from './web-davet-acilis.mjs';
+import { BELIRME_MS, DAVET_SAYFALARI, GECIS_SAYFALARI, KATMAN_ID, YENILE_SN, katmanEkle, katmanHtml } from './web-davet-acilis.mjs';
 
 const metin = JSON.parse(readFileSync(new URL('../src/i18n/tr.json', import.meta.url), 'utf8'));
 const sayfa = '<!DOCTYPE html><html><head><title>x</title></head><body class="b"><div id="root"></div><script src="/a.js"></script></body></html>';
@@ -73,4 +73,21 @@ test('30 sn\'de not "sayfayı yenile"ye döner; yalnız CSS, hareket azaltılın
   assert.doesNotMatch(azalt, /da-uzun/);
   // Katmanda betik yok: JS'ye bağlı değil.
   assert.doesNotMatch(html, /<script/i);
+});
+
+test('#550 KK-ek2: role="status" kapsayıcıda değil, yalnız 8 sn notunda', () => {
+  const html = katmanHtml(metin);
+  assert.ok(html.includes(`<div id="${KATMAN_ID}">`));
+  const roller = html.match(/role="status"/g) ?? [];
+  assert.equal(roller.length, 1);
+  assert.match(html, /<p class="da-uzun" role="status">/);
+});
+
+test('#550: tam uygulamaya geçiş sayfaları (giriş, ana sayfa, seyahat gezi) da katmanı alır', () => {
+  assert.deepEqual(DAVET_SAYFALARI, ['r/[token].html', 'r/g/[token].html']);
+  for (const sayfa of ['giris.html', 'index.html', 'seyahat/[id]/gezi.html', 'seyahat/[id]/(sekmeler)/gezi.html']) {
+    assert.ok(GECIS_SAYFALARI.includes(sayfa), sayfa);
+  }
+  // Köşeli parantezsiz kopyalar (`seyahat/_id/gezi.html`) web-yonlendirmeler.js'te bunlardan üretilir.
+  assert.ok(GECIS_SAYFALARI.every((s) => !s.includes('_id')));
 });

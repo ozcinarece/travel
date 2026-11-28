@@ -31,6 +31,8 @@ describe('#589 KK1: seçili çip açılışta görünür', () => {
 
   it('saf kural: "Yeni seyahat" → son; dışarı taşan çip → sağ kenarı görünecek kadar; görünen çip → kaydırma yok', () => {
     expect(seritKaydirma(true, { genislik: null, cip: null, icerikHazir: false })).toEqual({ tur: 'bekle' });
+    // #620 KK2: "son" da şerit genişliğini bekler.
+    expect(seritKaydirma(true, { genislik: null, cip: null, icerikHazir: true })).toEqual({ tur: 'bekle' });
     expect(seritKaydirma(true, { genislik: 390, cip: null, icerikHazir: true })).toEqual({ tur: 'son' });
     expect(seritKaydirma(false, { genislik: 390, cip: null, icerikHazir: true })).toEqual({ tur: 'bekle' });
     // İçerik ölçülmeden kaydırılmaz (Android'de kırpılmasın).
@@ -53,13 +55,21 @@ describe('#589 KK1: seçili çip açılışta görünür', () => {
     fireEvent(serit, 'layout', katman(0, 390));
     expect(proto.scrollTo).toHaveBeenCalledTimes(1);
     const sira = screen.getAllByRole('button').map((b) => b.props.accessibilityLabel ?? 'yeni');
-    expect(sira).toEqual(['Bolu Gezisi, 12–14 Aralık, farklı şehir', 'Kapadokya Hafta Sonu, farklı şehir', 'Eskişehir Gezisi, 3–5 Ocak', 'yeni']);
+    expect(sira).toEqual(['Bolu Gezisi, 12 ile 14 Aralık arası, farklı şehir', 'Kapadokya Hafta Sonu, farklı şehir', 'Eskişehir Gezisi, 3 ile 5 Ocak arası', 'yeni']);
   });
 
-  it('"Yeni seyahat" seçiliyse içerik ölçülünce sona, animasyonsuz kaydırılır', () => {
+  it('"Yeni seyahat" seçiliyse içerik ve şerit ölçülünce sona, animasyonsuz kaydırılır', () => {
     render(<HedefSeridi seyahatler={SEYAHATLER} hedefId={null} sehirAdi="Eskişehir" onSec={jest.fn()} />);
-    fireEvent(screen.getByTestId('hedef-seridi'), 'contentSizeChange', 800, 44);
+    const serit = screen.getByTestId('hedef-seridi');
+    fireEvent(serit, 'contentSizeChange', 800, 44);
+    // #620 KK2: şerit genişliği ölçülmeden kaydırılmaz.
+    expect(proto.scrollToEnd).not.toHaveBeenCalled();
+    fireEvent(serit, 'layout', katman(0, 390));
+    expect(proto.scrollToEnd).toHaveBeenCalledTimes(1);
     expect(proto.scrollToEnd).toHaveBeenCalledWith({ animated: false });
+    // Yalnız bir kez.
+    fireEvent(serit, 'contentSizeChange', 820, 44);
+    expect(proto.scrollToEnd).toHaveBeenCalledTimes(1);
     expect(proto.scrollTo).not.toHaveBeenCalled();
   });
 
@@ -113,6 +123,6 @@ describe('#589 KK2: ekran okuyucu etiketi', () => {
     expect(screen.getByText('Bolu Gezisi · 12–14 Aralık')).toBeTruthy();
     expect(screen.getAllByTestId('farkli-sehir')).toHaveLength(2);
     for (const b of screen.getAllByRole('button')) expect(b.props.accessibilityLabel ?? '').not.toContain('·');
-    expect(screen.getByRole('button', { name: 'Eskişehir Gezisi, 3–5 Ocak', selected: true })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Eskişehir Gezisi, 3 ile 5 Ocak arası', selected: true })).toBeTruthy();
   });
 });

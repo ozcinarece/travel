@@ -429,9 +429,10 @@ export function Sihirbaz({ giris, onCik }: { giris: YeniGirisi; /** #574: 1. ad�
   // #445 KK2: K, "Planı kur"un kullandığı aynı hesapla (planiKur ile aynı girdi); her render'da değil, veri değişince.
   // #595 KK3: aynı öncelikle (oy, il sırası, önbellekte saat varsa kapalı günler); önizleme Google'a istek atmaz.
   const onizlemeOnceligi = usePlanOnizlemeOnceligi(tripId, mekanlar.data, duraklar.data, !!gunler.data?.some((g) => !!g.date));
+  // #617 KK3: öncelik ilk kez yüklenirken (undefined) "K yer sığmıyor" satırı gösterilmez; ilk sayı öncelikli hesaptan.
   const sigmayanSayisi = useMemo(
     () =>
-      gunler.data && duraklar.data
+      gunler.data && duraklar.data && onizlemeOnceligi
         ? planiHesapla({ mekanlar: mekanlar.data ?? [], gunler: gunler.data, duraklar: duraklar.data, oncelik: onizlemeOnceligi }).atanmamis.length
         : 0,
     [mekanlar.data, gunler.data, duraklar.data, onizlemeOnceligi],
