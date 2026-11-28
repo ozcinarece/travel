@@ -1,12 +1,13 @@
 import { describe, expect, it, jest } from '@jest/globals';
 import { act, fireEvent, render, waitFor } from '@testing-library/react-native';
 import type { ReactNode } from 'react';
+import { StyleSheet } from 'react-native';
 
 import { OtelSayfasi } from '@/components/program/OtelSayfasi';
 import { takmaAdDegeri } from '@/features/konaklama/plan';
 import { t } from '@/i18n';
 import type { Seyahat } from '@/lib/tipler';
-import { renk } from '@/theme';
+import { renk, yazi } from '@/theme';
 
 const mockAdYaz = jest.fn<(g: { stayId: string; takmaAd: string }) => Promise<void>>();
 
@@ -99,8 +100,58 @@ describe('Otele ad ver (#631, kanvas 6b)', () => {
     // Yalnız boşluk da gönderilir; `useOtelTakmaAdi` bunu `takmaAdDegeri` ile null'a çevirir.
     expect(mockAdYaz).toHaveBeenLastCalledWith({ stayId: 'stay-1', takmaAd: '   ' });
     expect(e.onKaydet).toHaveBeenCalledTimes(1);
-    expect(e.getByText(t('program.otelSayfa.hata'))).toBeTruthy();
+    expect(e.getByText(t('program.otelSayfa.adHata'))).toBeTruthy();
     expect(e.onKapat).not.toHaveBeenCalled();
+  });
+
+  it('#652 KK1: ad yazılamazsa ayrı metin görünür; tekrar Kaydet adı aynı kayda yazar', async () => {
+    mockAdYaz.mockReset();
+    const e = kur();
+    await oteliSec(e);
+    fireEvent.press(e.getByText(t('program.otelSayfa.adEkle')));
+    fireEvent.changeText(e.getByLabelText(t('program.otelSayfa.adEtiket')), 'Bizim otel');
+    mockAdYaz.mockRejectedValueOnce(new Error('ağ'));
+    await act(async () => {
+      fireEvent.press(e.getByText(t('program.otelSayfa.kaydet')));
+    });
+    expect(e.getByText('Otel kaydedildi, ad kaydedilemedi. Tekrar dene.')).toBeTruthy();
+    expect(e.queryByText(t('program.otelSayfa.hata'))).toBeNull();
+    mockAdYaz.mockResolvedValueOnce(undefined);
+    await act(async () => {
+      fireEvent.press(e.getByText(t('program.otelSayfa.kaydet')));
+    });
+    // Ad iki denemede de aynı kayda gitti; tek `insert` kanıtı `konaklamaTekrar652.test.ts`'te.
+    expect(e.onKaydet).toHaveBeenCalledTimes(2);
+    expect(mockAdYaz).toHaveBeenCalledTimes(2);
+    expect(mockAdYaz).toHaveBeenNthCalledWith(1, { stayId: 'stay-1', takmaAd: 'Bizim otel' });
+    expect(mockAdYaz).toHaveBeenNthCalledWith(2, { stayId: 'stay-1', takmaAd: 'Bizim otel' });
+    expect(e.onKapat).toHaveBeenCalledTimes(1);
+  });
+
+  it('#652 KK1: otelin kendisi yazılamazsa eski metin kalır, tekrar Kaydet oteli yeniden dener', async () => {
+    mockAdYaz.mockReset();
+    const onKaydet = jest.fn<() => Promise<string | null>>().mockRejectedValueOnce(new Error('ağ')).mockResolvedValueOnce('stay-1');
+    const e = kur(onKaydet);
+    await oteliSec(e);
+    await act(async () => {
+      fireEvent.press(e.getByText(t('program.otelSayfa.kaydet')));
+    });
+    expect(e.getByText(t('program.otelSayfa.hata'))).toBeTruthy();
+    await act(async () => {
+      fireEvent.press(e.getByText(t('program.otelSayfa.kaydet')));
+    });
+    expect(onKaydet).toHaveBeenCalledTimes(2);
+    expect(e.onKapat).toHaveBeenCalledTimes(1);
+  });
+
+  it('#652 KK2: ad alanının metni 400 ağırlıkta', async () => {
+    const e = kur();
+    await oteliSec(e);
+    fireEvent.press(e.getByText(t('program.otelSayfa.adEkle')));
+    const stil = StyleSheet.flatten(e.getByLabelText(t('program.otelSayfa.adEtiket')).props.style);
+    expect(stil.fontFamily).toBe(yazi.normal);
+    // Arama kutusu değişmedi.
+    expect(StyleSheet.flatten(e.getByLabelText(t('program.otelSayfa.ara')).props.style).fontFamily).toBe(yazi.yari);
   });
 
   it('KK4: ad verilince kart takma adı ve "{Google adı} · {semt}" gösterir; "Adı değiştir" alanı dolu açar', async () => {

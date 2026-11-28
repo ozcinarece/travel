@@ -86,8 +86,11 @@ export function OtelSayfasi({ acik, seyahat, geceSayisi, konaklamalar, onKapat, 
     if (!secim) return;
     setHata(null);
     setKaydediliyor(true);
+    let otelYazildi = false;
     try {
+      // #652 KK1: tekrar Kaydet oteli yeniden yazar; `konaklamaKimligi` aynı oteli DB'den bulur, çift kayıt olmaz.
       const stayId = await onKaydet(secim);
+      otelYazildi = true;
       // #631 KK3: ad yazımı otel kaydından sonra; başarısızsa otel kaydı geri alınmaz, sayfa açık kalır.
       if (adDokunuldu && stayId) await takmaAdYaz.mutateAsync({ stayId, takmaAd });
       // Sayfa (Modal) ayakta kalır: yeniden açılınca eski ad yeniden yazılmasın.
@@ -95,7 +98,7 @@ export function OtelSayfasi({ acik, seyahat, geceSayisi, konaklamalar, onKapat, 
       setAdAlani(false);
       onKapat();
     } catch {
-      setHata(t('program.otelSayfa.hata'));
+      setHata(t(otelYazildi ? 'program.otelSayfa.adHata' : 'program.otelSayfa.hata'));
     } finally {
       setKaydediliyor(false);
     }
@@ -179,7 +182,7 @@ export function OtelSayfasi({ acik, seyahat, geceSayisi, konaklamalar, onKapat, 
               onFocus={alanaKaydir}
               returnKeyType="done"
               onSubmitEditing={() => setAdAlani(false)}
-              style={s.girdi}
+              style={[s.girdi, s.adGirdi]}
             />
           </View>
           <View style={s.adAlt}>
@@ -245,6 +248,8 @@ const s = StyleSheet.create({
   metin: { fontFamily: yazi.normal, fontSize: 15, lineHeight: 22, color: renk.ikincil },
   arama: { height: 52, paddingHorizontal: 16, borderRadius: kose.dugme, backgroundColor: renk.yuzey, flexDirection: 'row', alignItems: 'center', gap: 10 },
   girdi: { flex: 1, fontFamily: yazi.yari, fontSize: 15, color: renk.metin, paddingVertical: 0 },
+  // #652 KK2: ad alanının metni kanvas 6b'deki gibi 400.
+  adGirdi: { fontFamily: yazi.normal },
   oneri: { paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: renk.ayrac, gap: 2 },
   oneriAd: { fontFamily: yazi.ekstra, fontSize: 15, color: renk.metin },
   oneriAlt: { fontFamily: yazi.normal, fontSize: 12, color: renk.ikincil },
