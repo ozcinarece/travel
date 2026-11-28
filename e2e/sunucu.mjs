@@ -1,6 +1,7 @@
 // #550: web çıktısını Cloudflare Pages gibi sunan yerel sunucu (uçtan uca testler ve ölçüm). gzip (seviye 6), `_redirects`
 // 200 kuralları (`/r/:token /r/_token 200`), uzantısız yol → `.html`, bilinmeyen yol → index.html (Pages SPA davranışı),
-// Pages'in önbellek başlıkları (`public, max-age=0, must-revalidate` + ETag, eşleşen istekte 304).
+// Pages'in önbellek başlıkları (`public, max-age=0, must-revalidate` + ETag, eşleşen istekte 304). #542: Pages `node_modules`
+// adlı klasörleri yüklemez; burada da o yollardaki dosyalar yok sayılır (istek SPA yedeğine, index.html'e düşer).
 // Kullanım: node e2e/sunucu.mjs [dist] [port]   (ya da WEB_DIST / PORT)
 import { createServer } from 'node:http';
 import { existsSync, readFileSync, statSync } from 'node:fs';
@@ -40,6 +41,7 @@ const kurallar = existsSync(path.join(kok, '_redirects'))
 function dosyaBul(yol) {
   const aday = (p) => {
     const tam = path.join(kok, p);
+    if (path.relative(kok, tam).split(path.sep).includes('node_modules')) return null;
     return tam.startsWith(kok) && existsSync(tam) && statSync(tam).isFile() ? tam : null;
   };
   const cozuk = decodeURIComponent(yol);

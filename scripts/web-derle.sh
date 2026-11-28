@@ -22,3 +22,5 @@ node scripts/web-davet-ozet.mjs "$cikti"
 # Dinamik rotalar: "[x]" sayfaları köşeli parantezsiz kopyalanır, Pages yeniden yazar (istemci rotayı adres çubuğundan çözer).
 node scripts/web-yonlendirmeler.js "$cikti"
 rm -rf "$davet"
+# #542: Cloudflare Pages `node_modules` klasörlerini yüklemez; varlıklar `assets/nm/...`'ye taşınır, adresler yeniden yazılır.
+node scripts/web-node-modules.mjs "$cikti"
