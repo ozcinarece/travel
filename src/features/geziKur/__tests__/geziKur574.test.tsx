@@ -128,6 +128,8 @@ jest.mock('@/components/sihirbaz/AdimNeZaman', () => {
       donusBekleniyor?: boolean;
       tarihsizGun: number | null;
       ozetSatiri?: string | null;
+      enCokGun?: number;
+      sinirAraligi?: { gidis: string; donus: string | null } | null;
     }) => (
       <>
         <P onPress={() => p.onAralik(p.dokun!(p.aralik, '2026-12-07'))}>
@@ -140,6 +142,7 @@ jest.mock('@/components/sihirbaz/AdimNeZaman', () => {
         <P onPress={() => p.onAralik({ gidis: '2026-12-05', donus: '2026-12-08' })}>
           <T>aralik-sec</T>
         </P>
+        <T testID="takvim-sinir">{`${p.enCokGun ?? '-'}/${p.sinirAraligi ? `${p.sinirAraligi.gidis}/${p.sinirAraligi.donus ?? '-'}` : '-'}`}</T>
         <T testID="takvim-durum">{p.tarihsizGun === null ? `tarihli:${p.ozetSatiri ?? '-'}` : `tarihsiz:${p.tarihsizGun}`}</T>
       </>
     ),
@@ -565,5 +568,47 @@ describe('#574 KK7 Gezi sayfasında "Ayşe\'nin rotasından"', () => {
     expect(screen.getByText("Ayşe'nin rotasından")).toBeTruthy();
     rerender(<Baslik ad="Mardin taş evler" alt="Tarih yok · 3 gün" kaynak={null} />);
     expect(screen.queryByText(/rotasından/)).toBeNull();
+  });
+});
+
+describe('#649 çekmecede sınır kaynağa göre, tarih hatası söylenir', () => {
+  it('KK1: hazır gezide takvim 30, arkadaş rotasında 60 gün sınırıyla; sınır gerçek seçimden (yalnız gidiş)', () => {
+    mockPaylasimlar = [paylasim('p1', 'u-ayse', 'Ayşe', 'Mardin', 'Mardin taş evler', 3)];
+    const { unmount } = render(<GeziKurEkrani onKendiRota={jest.fn()} />);
+    fireEvent.press(within(screen.getByTestId('rota-urla')).getByText('Bunu seç'));
+    expect(screen.getByTestId('takvim-sinir').props.children).toBe('30/-');
+    fireEvent.press(screen.getByText('gidis-sec'));
+    // Takvim hesaplanan dönüşü gösterir, sınır gerçek seçimden (dönüş bekleniyor) hesaplanır.
+    expect(screen.getByTestId('takvim-sinir').props.children).toBe('30/2026-12-05/-');
+    unmount();
+    render(<GeziKurEkrani onKendiRota={jest.fn()} />);
+    fireEvent.press(screen.getByTestId('arkadas-rotasi-p1'));
+    expect(screen.getByTestId('takvim-sinir').props.children).toBe('60/-');
+  });
+
+  it('KK2: arkadaş rotasında tarih kaydı düşerse uyarı çıkar ve seyahat yine açılır', async () => {
+    const uyari = jest.spyOn(Alert, 'alert').mockImplementation(() => undefined);
+    mockTarih.mockRejectedValueOnce(new Error('gün sayısı'));
+    mockPaylasimlar = [paylasim('p1', 'u-ayse', 'Ayşe', 'Mardin', 'Mardin taş evler', 3)];
+    render(<GeziKurEkrani onKendiRota={jest.fn()} />);
+    fireEvent.press(screen.getByTestId('arkadas-rotasi-p1'));
+    fireEvent.press(screen.getByText('aralik-sec'));
+    fireEvent.press(screen.getByText('Geziyi oluştur'));
+    await waitFor(() => expect(mockRouter.replace).toHaveBeenCalledWith({ pathname: '/seyahat/[id]/(sekmeler)/gezi', params: { id: 'arkadastan' } }));
+    expect(uyari).toHaveBeenCalledWith(t('genel.hataBaslik'), t('sihirbaz.nezaman.tarihHata'));
+    expect(mockAl).toHaveBeenCalledTimes(1);
+    uyari.mockRestore();
+  });
+
+  it('KK2: tarih kaydı başarılıysa uyarı çıkmaz', async () => {
+    const uyari = jest.spyOn(Alert, 'alert').mockImplementation(() => undefined);
+    mockPaylasimlar = [paylasim('p1', 'u-ayse', 'Ayşe', 'Mardin', 'Mardin taş evler', 3)];
+    render(<GeziKurEkrani onKendiRota={jest.fn()} />);
+    fireEvent.press(screen.getByTestId('arkadas-rotasi-p1'));
+    fireEvent.press(screen.getByText('aralik-sec'));
+    fireEvent.press(screen.getByText('Geziyi oluştur'));
+    await waitFor(() => expect(mockRouter.replace).toHaveBeenCalled());
+    expect(uyari).not.toHaveBeenCalled();
+    uyari.mockRestore();
   });
 });

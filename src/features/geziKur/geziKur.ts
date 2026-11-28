@@ -6,7 +6,7 @@ import type { ArkadasPaylasimi } from '@/features/arkadaslar/sorgular';
 import type { Amac } from '@/features/icerik/amaclar';
 import type { AkisGezisi } from '@/features/icerik/kesfetAkisi';
 import { ilkAd } from '@/features/paylasim/baslik';
-import { gunFarki, gunSayisiSinirla, type Aralik } from '@/features/sihirbaz/sihirbaz';
+import { gunFarki, gunSayisiSinirla, TARIH_EN_COK_GUN, type Aralik } from '@/features/sihirbaz/sihirbaz';
 import type { TarihSecimi } from '@/features/sihirbaz/taslak';
 import { t } from '@/i18n';
 import { ilgiEkli } from '@/lib/ek';
@@ -106,10 +106,21 @@ export function gittiMetni(adlar: readonly string[]): string | null {
  * KK5: çekmecenin tarih seçimi. Yalnız gidiş seçiliyken dönüş rotanın gün sayısından gelir (3 dokunuş: Bunu seç → tarih →
  * Geziyi oluştur); dönüş gününe dokunulursa o. "Tarihim belli değil" → sayaçtaki gün sayısı.
  */
-export function cekmeceSecimi(aralik: Aralik, tarihsizGun: number | null, rotaGun: number): TarihSecimi | null {
-  if (tarihsizGun !== null) return { tur: 'tarihsiz', gun: gunSayisiSinirla(tarihsizGun) };
+/**
+ * #649 KK1: çekmecede seçilebilecek en uzun gezi, rotanın kaynağına göre. Hazır gezi `geziden_seyahat_ac`'a gider (en çok 30 gün,
+ * `20261115000000_konum_kaynagi_korumalari.sql`); arkadaş rotası taslak tarih RPC'sine (`seyahat_tarihlerini_degistir`, en çok 60).
+ */
+export const HAZIR_GEZI_EN_COK_GUN = 30;
+export function cekmeceEnCokGun(tur: 'gezi' | 'arkadas'): number {
+  return tur === 'gezi' ? HAZIR_GEZI_EN_COK_GUN : TARIH_EN_COK_GUN;
+}
+
+/** #649 KK1: `enCok` rotanın kaynağının sınırı (`cekmeceEnCokGun`); tarihsiz sayı ve hesaplanan dönüş bunu aşmaz. */
+export function cekmeceSecimi(aralik: Aralik, tarihsizGun: number | null, rotaGun: number, enCok: number = TARIH_EN_COK_GUN): TarihSecimi | null {
+  const sinirla = (n: number) => Math.min(enCok, gunSayisiSinirla(n));
+  if (tarihsizGun !== null) return { tur: 'tarihsiz', gun: sinirla(tarihsizGun) };
   if (!aralik) return null;
-  return { tur: 'tarihli', gidis: aralik.gidis, donus: aralik.donus ?? tarihEkle(aralik.gidis, gunSayisiSinirla(rotaGun) - 1) };
+  return { tur: 'tarihli', gidis: aralik.gidis, donus: aralik.donus ?? tarihEkle(aralik.gidis, sinirla(rotaGun) - 1) };
 }
 
 /** Seçimin gün sayısı ve başlangıcı (`geziden_seyahat_ac` girdisi). */

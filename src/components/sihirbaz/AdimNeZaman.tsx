@@ -40,11 +40,17 @@ type Props = {
   dokun?: (aralik: Aralik, gun: string) => Aralik;
   /** "Dönüş günü?" ipucu (verilmezse yalnız gidiş seçiliyken). */
   donusBekleniyor?: boolean;
-  /** #603 KK3: verilirse dönüş beklenirken gidişten itibaren bu kadar günden sonrası seçilemez (geçmiş günler gibi soluk). */
+  /**
+   * #603 KK3: verilirse dönüş beklenirken gidişten itibaren bu kadar günden sonrası seçilemez (geçmiş günler gibi soluk).
+   * #649 KK1: "Kaç gün?" sayacının üst sınırı da budur (verilmezse `TARIHSIZ_EN_COK`).
+   */
   enCokGun?: number;
+  /** #649 KK1: sınırın hesaplandığı gerçek seçim (verilmezse `aralik`); çekmece hesaplanan dönüşü gösterirken gidişi verir. */
+  sinirAraligi?: Aralik;
 };
 
-export function AdimNeZaman({ aralik, onAralik, tarihsizGun, onTarihsizGun, ozetSatiri, dokun = tarihDokun, donusBekleniyor, enCokGun }: Props) {
+export function AdimNeZaman({ aralik, onAralik, tarihsizGun, onTarihsizGun, ozetSatiri, dokun = tarihDokun, donusBekleniyor, enCokGun, sinirAraligi = aralik }: Props) {
+  const sayacEnCok = enCokGun ?? TARIHSIZ_EN_COK;
   const bugun = yerelTarih(new Date(), Intl.DateTimeFormat().resolvedOptions().timeZone);
   const ilk = parcala(aralik?.gidis ?? bugun);
   const [ay, setAy] = useState({ yil: ilk.yil, ay: ilk.ay });
@@ -86,7 +92,7 @@ export function AdimNeZaman({ aralik, onAralik, tarihsizGun, onTarihsizGun, ozet
             const bandi = arada(gun);
             const basBand = bandi && gun === aralik!.gidis;
             const sonBand = bandi && gun === aralik!.donus;
-            const gecmis = gun < bugun || (enCokGun !== undefined && donusSinirDisi(aralik, gun, enCokGun));
+            const gecmis = gun < bugun || (enCokGun !== undefined && donusSinirDisi(sinirAraligi, gun, enCokGun));
             return (
               <Pressable
                 key={gun}
@@ -122,10 +128,10 @@ export function AdimNeZaman({ aralik, onAralik, tarihsizGun, onTarihsizGun, ozet
             <Pressable
               accessibilityRole="button"
               accessibilityLabel={t('sihirbaz.nezaman.gunArttir')}
-              accessibilityState={{ disabled: tarihsizGun >= TARIHSIZ_EN_COK }}
-              disabled={tarihsizGun >= TARIHSIZ_EN_COK}
+              accessibilityState={{ disabled: tarihsizGun >= sayacEnCok }}
+              disabled={tarihsizGun >= sayacEnCok}
               onPress={() => onTarihsizGun(tarihsizGun + 1)}
-              style={[s.sayacDugme, tarihsizGun >= TARIHSIZ_EN_COK && s.sayacPasif]}
+              style={[s.sayacDugme, tarihsizGun >= sayacEnCok && s.sayacPasif]}
               hitSlop={8}>
               <Text style={s.sayacIsaret}>+</Text>
             </Pressable>
