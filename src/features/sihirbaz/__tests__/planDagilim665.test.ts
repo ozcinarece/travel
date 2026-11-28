@@ -75,6 +75,39 @@ describe('#665 KK2 günlere dengeli dağıtım', () => {
     expect(sayilar(p)).toEqual([0, 1, 1]);
   });
 
+  it('kota yalnız girebilecek mekanları sayar: her gün kapalı mekan atanmamış, kalan 3 mekan 1-1-1', () => {
+    const hepKapali = { ...aizanoi, kapaliGunler: [4, 5, 6] };
+    const p = planKur([...merkez.slice(0, 3), hepKapali], gunler(3, [4, 5, 6]));
+    expect(sayilar(p)).toEqual([1, 1, 1]);
+    expect(p.atanmamis.map((x) => x.id)).toEqual(['aizanoi']);
+  });
+
+  it('gün sınırı bölge sınırına kayar: iki uzak bölge 3 + 3 / 4 gün → [a1,a2][a3][b1,b2][b3]', () => {
+    const a = merkez.slice(0, 3).map((x) => ({ ...x, dakika: 90 }));
+    const b = [m('b1', 39.2, 29.61), m('b2', 39.201, 29.611), m('b3', 39.202, 29.612)];
+    expect(bolgeler([...a, ...b])).toHaveLength(2);
+    const p = planKur([...a, ...b], gunler(4));
+    const bolgesi = (id: string) => (id.startsWith('b') ? 'b' : 'a');
+    expect(sayilar(p)).toEqual([2, 1, 2, 1]);
+    // Hiçbir gün iki bölgeyi karıştırmaz.
+    p.gunler.forEach((g) => expect(new Set(g.mekanlar.map((x) => bolgesi(x.id))).size).toBe(1));
+    expect(p.gunler[2].mekanlar.every((x) => bolgesi(x.id) === 'b')).toBe(true);
+  });
+
+  it('kota aşımında eşit duraklı günlerden mekana en yakın gün seçilir; gün içi en yakın komşu', () => {
+    // Cumartesi hepsi kapalı: 3. güne kimse giremez. b2 taşar; 1. ve 2. gün 2'şer duraklı, b1 olan 2. gün seçilir.
+    const cmtKapali = (x: KonumluMekan) => ({ ...x, kapaliGunler: [6] });
+    const a = merkez.slice(0, 3).map(cmtKapali);
+    const b = [m('b1', 39.2, 29.61), m('b2', 39.201, 29.611)].map(cmtKapali);
+    const p = planKur([...a, ...b], gunler(3, [4, 5, 6]));
+    expect(p.atanmamis).toEqual([]);
+    expect(sayilar(p)).toEqual([2, 3, 0]);
+    const ikinci = p.gunler[1].mekanlar.map((x) => x.id);
+    expect([...ikinci].sort()).toEqual(['b1', 'b2', 'cini']);
+    // En yakın komşu: b1 ile b2 yan yana, merkezdeki durak bir uçta.
+    expect([0, 2]).toContain(ikinci.indexOf('cini'));
+  });
+
   it('tek gün: kapasite yettiğince hepsi o güne (eski davranış)', () => {
     const p = planKur([...merkez], gunler(1));
     expect(sayilar(p)).toEqual([6]);

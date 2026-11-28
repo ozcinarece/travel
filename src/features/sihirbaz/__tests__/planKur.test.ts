@@ -28,7 +28,8 @@ describe('planKur (#139 KK5)', () => {
   });
 
   it('#665: gezme sırası günlere ardışık ve dengeli bölünür (5 mekan / 3 gün → 2-2-1); en kalabalık bölge önce', () => {
-    // Kapasite 200 dk: Odunpazarı önce (en kalabalık bölge), kotası dolan gün atlanır; Sazova'ya geçiş araç bacağı.
+    // Kapasite 200 dk: Odunpazarı önce (en kalabalık bölge), kotası dolan gün atlanır. Sazova 90 + 120 tek güne sığmadığı
+    // için gün sınırı bölge sınırına kaydırılmaz (kaydırılsa s1 atanmamış kalırdı); o3 ile s2 aynı gün.
     const p = planKur([...sazova, ...odunpazari], gunler, { kapasiteDk: 200 });
     expect(p.bolgeSayisi).toBe(2);
     expect(p.gunler.map((g) => g.mekanlar.length)).toEqual([2, 2, 1]);
@@ -38,12 +39,13 @@ describe('planKur (#139 KK5)', () => {
     expect(p.atanmamis).toEqual([]);
   });
 
-  it('#665: tam günde (9 sa) bile tek güne yığılmaz; bölge geçişi araç sayılır (5 km yürüme 40 dk\'yı aşar)', () => {
+  it('#665: tam günde (9 sa) bile tek güne yığılmaz; gün sınırı bölge sınırına kayar (araç bacağı yok)', () => {
     const p = planKur([...odunpazari, ...sazova], gunler);
-    expect(p.gunler.map((g) => g.mekanlar.length)).toEqual([2, 2, 1]);
+    expect(p.gunler.map((g) => g.mekanlar.length)).toEqual([2, 1, 2]);
+    expect(p.gunler[2].mekanlar.map((x) => x.id).sort()).toEqual(['s1', 's2']);
     expect(p.gunler.reduce((t, g) => t + g.ziyaretDk, 0)).toBe(390);
     p.gunler.forEach((g) => expect(g.ziyaretDk + g.yolDk).toBeLessThanOrEqual(GUN_KAPASITESI_DK));
-    expect(p.gunler[1].arabaBacagi).toBe(1);
+    expect(p.gunler.every((g) => g.arabaBacagi === 0)).toBe(true);
   });
 
   it('günler biterse kalanlar atanmamış; tek başına güne sığmayan mekan atanmamış', () => {
