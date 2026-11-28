@@ -53,6 +53,7 @@ import { eklenenleriSabitle, yakindaAdaylari, type YakinAday } from '@/features/
 import { ilSlugu, kategoriAdi, useIlYerleri } from '@/features/icerik/ilOnerileri';
 import { bacakSecimi, hapCifti, hapPinId, seciciBasligi, seciciSecenekleri } from '@/features/program/bacakSecimi';
 import { kartKamerasi, kartListesi, odakKarti, type DurakKarti } from '@/features/program/durakKarti';
+import { geriKalmaHesapla, kaydirmaYazimi } from '@/features/program/geriKalma';
 import { gunHapiVerisi, pinDokunusu } from '@/features/program/gunHapi';
 import { programCizgileri, programPinleri } from '@/features/program/haritaVerisi';
 import { bacakAnahtari, useBacakModlari, useBacakModuKaydet, useDurakGuncelle, useGunGuncelle, useSiraYaz, varislariTemizle, type MatrisNoktasi } from '@/features/program/sorgular';
@@ -74,10 +75,9 @@ import { useOturum } from '@/lib/oturum';
 import { AYLAR, GUNLER, haftaGunu, parcala, tarihEkle } from '@/lib/takvim';
 import type { Durak, Gun, Mekan, Seyahat } from '@/lib/tipler';
 import { useCevrimdisi } from '@/lib/baglanti';
-import { kacinciGun, saatEkli, yerelAn, yerelSaatDk, yerelTarih } from '@/lib/zaman';
+import { kacinciGun, saatEkli, yerelAn, yerelTarih } from '@/lib/zaman';
 import { cizgiOrtasi } from '@/lib/polyline';
 import { googleGunu, type Periyot } from '@/schedule/acilis';
-import { gecikme } from '@/schedule/kaydir';
 import { enUcuzEklemeIndeksi, yuruyusDk } from '@/schedule/program';
 import { arasindaAnahtar } from '@/schedule/sira';
 import { varsayilanSira } from '@/schedule/siralama';
@@ -579,25 +579,14 @@ function ProgramSekmesi({
 
   // #140 KK10 "Gerideyiz": yalnız konum açıkken. Buradaysan gerçek varış (arrived_at), yoldaysan şu an + kalan yol (kuş uçuşu
   // kestirimi, seçilen mod). "Saatleri kaydır": önceki durağın ayrılışı (ilk durakta günün başlangıcı) geri çekilir.
-  const geriKalma = useMemo(() => {
-    if (!prog?.bugun || prog.simdiDk === null || !konum) return null;
-    const hedef = prog.canli.satirlar.find((x) => x.durum === 'siradaki' || x.durum === 'buradasin');
-    if (!hedef || !hedef.durak.konum) return null;
-    const d = gunDurak.find((x) => x.id === hedef.durak.id);
-    const varisDk = d?.arrived_at ? yerelSaatDk(new Date(d.arrived_at), seyahat.tz) : null;
-    const hedefKonum = hedef.durak.konum;
-    const kalanSn = hedef.yuruyus?.mod === 'taksi' ? kestirimTaksiSn(konum, hedefKonum) : kestirimYuruyusSn(konum, hedefKonum);
-    const g = gecikme(prog.canli, { simdiDk: prog.simdiDk, buradaId: buradaId ?? null, varisDk, kalanDk: kalanSn / 60 });
-    return g ? { ...g, burada: hedef.durum === 'buradasin' } : null;
-  }, [prog, konum, gunDurak, buradaId, seyahat.tz]);
+  const geriKalma = useMemo(() => geriKalmaHesapla({ prog, konum, gunDurak, buradaId: buradaId ?? null, tz: seyahat.tz }), [prog, konum, gunDurak, buradaId, seyahat.tz]);
   const saatleriKaydir = () => {
     if (!geriKalma || !gun) return;
-    const yeni = Math.round(geriKalma.yeniAyrilisDk);
-    if (geriKalma.oncekiId && gun.date) {
-      const id = geriKalma.oncekiId;
-      guvenli(() => durakGuncelle.mutateAsync({ id, completed_at: yerelAn(gun.date!, yeni, seyahat.tz).toISOString(), completed_by: session?.user.id ?? null, auto_completed: false }));
+    const y = kaydirmaYazimi(geriKalma, gun, seyahat.tz, session?.user.id ?? null);
+    if (y.tur === 'durak') {
+      guvenli(() => durakGuncelle.mutateAsync({ id: y.id, completed_at: y.completed_at, completed_by: y.completed_by, auto_completed: false }));
     } else {
-      guvenli(() => gunGuncelle.mutateAsync({ id: gun.id, start_time: `${dakikaSaat(Math.max(0, yeni))}:00` }));
+      guvenli(() => gunGuncelle.mutateAsync({ id: y.id, start_time: y.start_time }));
     }
   };
 
