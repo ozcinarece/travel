@@ -2,8 +2,7 @@
 // `#E4E7EE` çizgi, üstten 10 px; her sekmede 24 px çizgi ikon (2 px) ve 11 px yazı, aralarında 3 px. Seçili sekmede ikon
 // Mandalina, yazı Gece 700; diğerleri `#8A91A3` 500. Sekmeye dokununca `sekme_acildi` olayı (meta: sekme) yazılır.
 // #407 KK5 (`Ana_v6_Arkadaslar`): Keşfet · Seyahatlerim · Arkadaşlar · Profil.
-// #569 KK1 (`Ana_v9_*`): üç sekme — Keşfet · Gezilerim · Arkadaşlar. Profil sekmesi kalktı; rota durur, ana sayfanın sağ
-// üstündeki profil yuvarlağından açılır (menüde çizilmez).
+// #569 KK1 (`Ana_v9_*`): üç sekme — Keşfet · Gezilerim · Arkadaşlar. #624: profil `(tabs)` yığınında, sekme gezgininde değil.
 import type { BottomTabBarProps } from 'expo-router/js-tabs';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
