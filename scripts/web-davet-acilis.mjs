@@ -4,6 +4,8 @@
 // sonra "Biraz uzun sürüyor" notu açılır (`animation-delay`), 30 sn'de "sayfayı yenile"ye döner (#557),
 // `prefers-reduced-motion`'da noktalar durur.
 // Uygulama açılış kararını verince (`src/lib/webAcilis.ts`, kök `_layout`) katman kaldırılır.
+// #550: davet girişinden tam uygulamaya geçiş tam yeniden yüklemedir (`src/davet-web/+not-found.tsx`); Google dönüşü
+// (/giris), katılım → seyahat (/seyahat/{id}/gezi) ve ana sayfa (/) da aynı katmanı gösterir (Ürün kararı, kanvas 3e aynen).
 // Kullanım: node scripts/web-davet-acilis.mjs dist   (web-yayin'de web-yonlendirmeler.js'ten ÖNCE: kopyalar da alsın)
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import path from 'node:path';
@@ -14,6 +16,8 @@ export const BELIRME_MS = 600;
 /** #557: JS paketi hiç gelmezse 3e-B notu bu süreden sonra "sayfayı yenile" der (yalnız CSS). */
 export const YENILE_SN = 30;
 export const DAVET_SAYFALARI = ['r/[token].html', 'r/g/[token].html'];
+/** #550: davet ekranlarının tam yeniden yüklemeyle geçtiği tam uygulama sayfaları (Google dönüşü, katılım → seyahat, ana sayfa). */
+export const GECIS_SAYFALARI = ['giris.html', 'index.html', 'seyahat/[id]/gezi.html', 'seyahat/[id]/(sekmeler)/gezi.html'];
 
 const kacir = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
@@ -75,10 +79,10 @@ export function katmanEkle(html, metin) {
 
 function calistir(kok) {
   const metin = JSON.parse(readFileSync(new URL('../src/i18n/tr.json', import.meta.url), 'utf8'));
-  for (const sayfa of DAVET_SAYFALARI) {
+  for (const sayfa of [...DAVET_SAYFALARI, ...GECIS_SAYFALARI]) {
     const dosya = path.join(kok, sayfa);
     if (!existsSync(dosya)) {
-      console.error(`davet sayfası yok: ${sayfa}`);
+      console.error(`sayfa yok: ${sayfa}`);
       process.exit(1);
     }
     writeFileSync(dosya, katmanEkle(readFileSync(dosya, 'utf8'), metin));

@@ -23,6 +23,31 @@ async function sayfaGirisi(page: Page, yol: string): Promise<string> {
   return html.match(/src="\/_expo\/static\/js\/web\/(entry-[0-9a-f]+\.js)"/)![1];
 }
 
+/**
+ * Tam uygulamanın giriş JS'ini `birak()` çağrılana kadar bekletir (yavaş ağ / önden indirmesiz tarayıcı benzetimi).
+ * Davet girişi bekletilmez; önden indirme isteği de bekler, zararı yok.
+ */
+function paketiBeklet(page: Page, giris: string): { birak: () => void } {
+  let birak = () => {};
+  const bekle = new Promise<void>((r) => (birak = r));
+  void page.route(`**/_expo/static/js/web/${giris}`, async (r) => {
+    await bekle;
+    await r.continue();
+  });
+  return { birak: () => birak() };
+}
+
+/** #549 açılış katmanı (kanvas 3e-A; `uzunNot` ile 8 sn sonra 3e-B notu) görünür. */
+async function acilisKatmaniGorunur(page: Page, { uzunNot = false } = {}) {
+  const katman = page.locator('#davet-acilis');
+  await expect(katman.getByRole('heading', { name: tr.davet.webAcilis.baslik })).toBeVisible();
+  await expect(katman.getByText(tr.davet.webAcilis.metin)).toBeVisible();
+  await expect(katman.getByRole('img', { name: tr.marka.ad })).toBeVisible();
+  if (!uzunNot) return;
+  await expect(katman.getByText(tr.davet.webAcilis.uzun)).toBeVisible({ timeout: 12_000 });
+  await expect(katman.getByRole('status')).toContainText(tr.davet.webAcilis.uzun);
+}
+
 async function girisliAc(page: Page) {
   const o = oturum();
   await page.addInitScript(([anahtar, deger]) => window.localStorage.setItem(anahtar, deger), [DEPO_ANAHTARI, JSON.stringify(o)] as const);
@@ -50,13 +75,20 @@ test.describe('davet /r/{token}', () => {
     expect([...girisler]).toEqual([davetGirisi]);
   });
 
-  test('Google ile katıl → Google dönüşü → davetle_katil → seyahate geçiş', async ({ page }) => {
+  test('Google ile katıl → Google dönüşü → davetle_katil → seyahate geçiş @webkit', async ({ page }) => {
     const cagrilar = await supabaseTaklidi(page);
+    // Tam uygulamanın paketi yavaş gelir (önden indirme işe yaramadı, ör. Safari): geçişte sayfa boş kalmaz (Ürün, #637).
+    const paket = paketiBeklet(page, await sayfaGirisi(page, '/'));
     await page.goto(`/r/${DAVET_TOKENI}`);
     await expect(page.getByText(tr.davet.katilGoogle)).toBeVisible();
     await page.getByText(tr.davet.katilGoogle).click();
     // Dönüş /giris?code=… (tam uygulama) → oturum → ana sayfa bekleyen daveti açar → katılım → seyahat.
-    await page.waitForURL(/\/giris\?code=/);
+    // Paket bekletildiği için sayfanın `load` olayı gelmez: adresin değişmesi yeter.
+    await page.waitForURL(/\/giris\?code=/, { waitUntil: 'commit' });
+    // Paket gelene kadar /giris'in statik HTML'i kanvas 3e-A'yı, 8 sn sonra 3e-B notunu gösterir.
+    await acilisKatmaniGorunur(page, { uzunNot: true });
+    paket.birak();
+    await expect(page.locator('#davet-acilis')).toHaveCount(0, { timeout: 30_000 });
     await expect.poll(() => cagrilar.find((c) => c.yol === '/rest/v1/rpc/davetle_katil')?.govde, { timeout: 30_000 }).toEqual({ token: DAVET_TOKENI, kanal: 'web' });
     expect(cagrilar.some((c) => c.yol.startsWith('/auth/v1/token?grant_type=pkce'))).toBe(true);
     // Katılımdan sonra davet ekranından çıkılır, seyahatin verisi istenir. (Taklit boş seyahatte web'deki seyahat ekranı
@@ -65,14 +97,19 @@ test.describe('davet /r/{token}', () => {
     await expect(page).not.toHaveURL(/\/r\//);
   });
 
-  test('girişli açılış: küçük girişte katılır, seyahat tam uygulamayla açılır', async ({ page }) => {
+  test('girişli açılış: küçük girişte katılır, seyahat tam uygulamayla açılır @webkit', async ({ page }) => {
     await girisliAc(page);
     const cagrilar = await supabaseTaklidi(page);
     const girisler = girisleriIzle(page);
     const uygulamaGirisi = await sayfaGirisi(page, '/');
+    const paket = paketiBeklet(page, uygulamaGirisi);
     await page.goto(`/r/${DAVET_TOKENI}`);
-    await page.waitForURL(new RegExp(`/seyahat/${SEYAHAT}/gezi\\?katildin=1`), { timeout: 30_000 });
+    await page.waitForURL(new RegExp(`/seyahat/${SEYAHAT}/gezi\\?katildin=1`), { timeout: 30_000, waitUntil: 'commit' });
     expect(cagrilar.filter((c) => c.yol === '/rest/v1/rpc/davetle_katil')).toHaveLength(1);
+    // Katıl → seyahat yeniden yüklemesinde de paket gelene kadar kanvas 3e-A (#637).
+    await acilisKatmaniGorunur(page);
+    paket.birak();
+    await expect(page.locator('#davet-acilis')).toHaveCount(0, { timeout: 30_000 });
     await expect.poll(() => [...girisler, ...girisler.onden].includes(uygulamaGirisi)).toBe(true);
   });
 

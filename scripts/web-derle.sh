@@ -14,7 +14,8 @@ WEB_GIRIS=davet npx expo export --platform web --output-dir "$davet"
 test -f "$cikti/index.html"
 test -f "$cikti/r/[token].html"
 node scripts/web-davet-girisi.mjs "$cikti" "$davet"
-# #549: davet sayfaları JS gelmeden de açılış halini (kanvas 3e) gösterir; kopyalardan önce yazılır.
+# #549: davet sayfaları JS gelmeden de açılış halini (kanvas 3e) gösterir; kopyalardan önce yazılır. #550: tam uygulamaya
+# geçiş sayfaları (/giris, /, /seyahat/{id}/gezi) da aynı katmanı alır: yeniden yüklemede boş sayfa yok.
 node scripts/web-davet-acilis.mjs "$cikti"
 # Dinamik rotalar: "[x]" sayfaları köşeli parantezsiz kopyalanır, Pages yeniden yazar (istemci rotayı adres çubuğundan çözer).
 node scripts/web-yonlendirmeler.js "$cikti"

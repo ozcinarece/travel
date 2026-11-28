@@ -74,8 +74,8 @@ jobs:
           if [ "$boyut" -gt 512000 ]; then
             echo "::error::Davet girişi $((boyut / 1024)) KB gzip; bütçe 500 KB (#550 KK2)"; exit 1
           fi
-      - name: Chromium
-        run: npx playwright install --with-deps chromium
+      - name: Chromium ve WebKit
+        run: npx playwright install --with-deps chromium webkit
       - name: Uçtan uca
         run: npm run e2e
 
