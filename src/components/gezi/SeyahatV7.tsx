@@ -169,11 +169,11 @@ export const GUN_SINIRI = 3;
 export const TIK_KALINLIK = 2.8;
 
 /** Tek dolu turuncu düğme (52 pt). #580: durak çekmecesindeki "Gezdim" de bu düğme (✓, kanvasta çizgi 2,8). */
-export function TuruncuDugme({ metin, ikon, onPress, pasif, mesgul }: { metin: string; ikon?: 'yolTarifiV7' | 'tik'; onPress: () => void; pasif?: boolean; mesgul?: boolean }) {
+export function TuruncuDugme({ metin, ikon, onPress, pasif, mesgul, etiket }: { metin: string; ikon?: 'yolTarifiV7' | 'tik'; onPress: () => void; pasif?: boolean; mesgul?: boolean; /** Ekran okuyucu etiketi (verilmezse `metin`; #667 "+ Durak ekle" → "Durak ekle"). */ etiket?: string }) {
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={metin}
+      accessibilityLabel={etiket ?? metin}
       accessibilityHint={pasif ? t('geziSayfasi.cevrimdisi.baglantiYok') : undefined}
       accessibilityState={{ disabled: !!pasif, busy: !!mesgul }}
       disabled={pasif || mesgul}

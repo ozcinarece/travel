@@ -1,6 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useQueryClient } from '@tanstack/react-query';
-import { router, useLocalSearchParams } from 'expo-router';
+import { router, useFocusEffect, useLocalSearchParams, useNavigation } from 'expo-router';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { BackHandler, LayoutAnimation, Linking, Platform, Pressable, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 
@@ -581,6 +581,8 @@ function ProgramSekmesi({
   };
   const gunuSilOnayla = (g: Gun) => {
     setSilinecekGun(null);
+    // #667: gün detayından silinen gün başka bir günün detayına düşürmesin; genel bakışa dönülür.
+    setGunDetayi(false);
     if (seciliGunId === g.id) setSeciliGunId(null);
     guvenli(() => gunSil.mutateAsync({ gun: g, gunler, startDate: seyahat.start_date }));
   };
@@ -1148,6 +1150,15 @@ function ProgramSekmesi({
     return () => abonelik.remove();
   }, [harita, haritaKapat]);
 
+  // #667 KK3: Plan sekmesi genel bakışla açılır — sekmeden çıkınca ve açık sekmeye yeniden basınca gün detayı kapanır. Gezi
+  // sayfasının gün kartından (`gun` + `n`) gelince istek deseni detayı yeniden açar.
+  useFocusEffect(useCallback(() => () => setGunDetayi(false), []));
+  const sekmeGezinme = useNavigation();
+  useEffect(() => {
+    const kaldir = sekmeGezinme.addListener('tabPress' as never, () => setGunDetayi(false));
+    return kaldir;
+  }, [sekmeGezinme]);
+
   // #667 KK4: Android geri tuşu gün detayından genel bakışa döner.
   useEffect(() => {
     if (harita || !gunDetayi) return;
@@ -1172,8 +1183,8 @@ function ProgramSekmesi({
   // KK3: her günün rotası kendi renginde (kuş uçuşu, Google'a istek yok); lejant yalnız durağı olan günler.
   const genelHarita = useMemo(() => genelHaritaVerisi({ gunler, duraklar, mekanlar }), [gunler, duraklar, mekanlar]);
   const genelKartlar = siraliGunler.map((g) => {
-    const o = gunKartiOzeti(g, verisi.tempolar.get(g.id));
-    return { id: g.id, renk: gunRengi(g.index), baslik: gunBasligiV13(g), alt: o.bos ? '' : gunKartiAlt(o), oran: o.oran, bos: o.bos };
+    const o = gunKartiOzeti(g, verisi.tempolar.get(g.id), duraklar.filter((d) => d.day_id === g.id).length);
+    return { id: g.id, renk: gunRengi(g.index), baslik: gunBasligiV13(g), alt: o.bos ? '' : o.hepsiAtlandi ? t('plan.hepsiAtlandi') : gunKartiAlt(o), oran: o.oran, bos: o.bos };
   });
   const gunDetayiniAc = (gunId: string) => {
     setSeciliGunId(gunId);

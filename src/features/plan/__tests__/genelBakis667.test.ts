@@ -39,7 +39,7 @@ const durak = (id: string, day_id: string, place_ref: string, order_key: string,
 describe('#667 KK3: gün kartı — "K durak · X / 8 sa" ve dolgu', () => {
   it('kanvas örneği: 09:30–14:25 → 5 sa, çubuk 5/8; 3,5 sa → %44', () => {
     const o = gunKartiOzeti(gun(1), { durakSayisi: 4, baslangic: '09:30', bitis: '14:25' });
-    expect(o).toEqual({ gunId: 'g1', index: 1, durak: 4, saat: 5, oran: 5 / 8, bos: false });
+    expect(o).toEqual({ gunId: 'g1', index: 1, durak: 4, saat: 5, oran: 5 / 8, bos: false, hepsiAtlandi: false });
     expect(gunKartiAlt(o)).toBe('4 durak · 5 / 8 sa');
     const o2 = gunKartiOzeti(gun(2), { durakSayisi: 3, baslangic: '10:00', bitis: '13:35' });
     expect(o2.saat).toBe(3.5);
@@ -59,6 +59,13 @@ describe('#667 KK3: gün kartı — "K durak · X / 8 sa" ve dolgu', () => {
   it('boş gün: tempo yok ya da durak 0 → bos, oran 0', () => {
     expect(gunKartiOzeti(gun(3), undefined)).toMatchObject({ bos: true, durak: 0, oran: 0 });
     expect(gunKartiOzeti(gun(3), { durakSayisi: 0, baslangic: '09:00', bitis: '09:00' })).toMatchObject({ bos: true });
+    expect(gunKartiOzeti(gun(3), { durakSayisi: 0, baslangic: '09:00', bitis: '09:00' }, 0)).toMatchObject({ bos: true, hepsiAtlandi: false });
+  });
+
+  it('bütün durakları atlanmış gün boş gün değil: "Hepsi atlandı", sayı atlanmayanlar (0), çubuk boş', () => {
+    expect(gunKartiOzeti(gun(2), { durakSayisi: 0, baslangic: '09:00', bitis: '09:00' }, 3)).toEqual({ gunId: 'g2', index: 2, durak: 0, saat: 0, oran: 0, bos: false, hepsiAtlandi: true });
+    // Bir kısmı atlanmış: sayı atlanmayanlar (tempo), gün detayındaki numaralı satırlarla aynı.
+    expect(gunKartiOzeti(gun(2), { durakSayisi: 2, baslangic: '09:00', bitis: '11:00' }, 3)).toMatchObject({ durak: 2, bos: false, hepsiAtlandi: false });
   });
 
   it('saat sayısı Türkçe ondalık', () => {

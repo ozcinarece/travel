@@ -24,20 +24,28 @@ export type GunKartiOzeti = {
   saat: number;
   /** 0–1: `saat / GUN_KAPASITE_SA` (8 saati aşan gün dolu). */
   oran: number;
-  /** Hiç (atlanmamış) durak yok: kesik çerçeve + "Boş gün" + "Doldur". */
+  /** Günde hiç durak yok: kesik çerçeve + "Boş gün" + "Doldur". */
   bos: boolean;
+  /** Durak var ama hepsi atlandı: kart dolu biçimde, alt satır "Hepsi atlandı" (gün detayındaki özetle aynı), çubuk boş. */
+  hepsiAtlandi: boolean;
 };
 
 /**
- * KK3: gün kartının sayıları. Süre tempo hesabının başlangıç–bitiş aralığı (yürüyüş ve araç dahil; kanvasta 09:30–14:25 →
- * "5 / 8 sa", çubuk %62). Tempo yoksa ya da durak yoksa boş gün.
+ * KK3: gün kartının sayıları. Durak sayısı atlanmamış duraklar (tempo hesabı; gün detayındaki numaralı satırlarla aynı). Süre
+ * tempo hesabının başlangıç–bitiş aralığı (yürüyüş ve araç dahil; kanvasta 09:30–14:25 → "5 / 8 sa", çubuk %62). `toplamDurak`
+ * atlananlar dahil günün bütün durakları: hiç yoksa boş gün; var ama hepsi atlandıysa "Hepsi atlandı" (boş gün değil).
  */
-export function gunKartiOzeti(gun: Pick<Gun, 'id' | 'index'>, tempo: { durakSayisi: number; baslangic: string; bitis: string } | undefined): GunKartiOzeti {
+export function gunKartiOzeti(
+  gun: Pick<Gun, 'id' | 'index'>,
+  tempo: { durakSayisi: number; baslangic: string; bitis: string } | undefined,
+  toplamDurak: number = tempo?.durakSayisi ?? 0,
+): GunKartiOzeti {
   const durak = tempo?.durakSayisi ?? 0;
-  if (!tempo || durak === 0) return { gunId: gun.id, index: gun.index, durak: 0, saat: 0, oran: 0, bos: true };
+  const temel = { gunId: gun.id, index: gun.index };
+  if (!tempo || durak === 0) return { ...temel, durak: 0, saat: 0, oran: 0, bos: toplamDurak === 0, hepsiAtlandi: toplamDurak > 0 };
   const dk = Math.max(0, saatDakika(tempo.bitis) - saatDakika(tempo.baslangic));
   const saat = Math.round(dk / 30) / 2;
-  return { gunId: gun.id, index: gun.index, durak, saat, oran: Math.min(1, saat / GUN_KAPASITE_SA), bos: false };
+  return { ...temel, durak, saat, oran: Math.min(1, saat / GUN_KAPASITE_SA), bos: false, hepsiAtlandi: false };
 }
 
 /** "5" · "3,5" (Türkçe ondalık). */

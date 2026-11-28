@@ -19,7 +19,16 @@ export default function SeyahatSekmeleri() {
       detachInactiveScreens={false}
       screenOptions={{ headerShown: false }}
       tabBar={({ state, navigation }) => (
-        <SeyahatMenusu aktif={state.routes[state.index]?.name ?? 'gezi'} onSec={(ad: SeyahatSekmesi) => navigation.navigate(ad)} rozetler={{ sohbet: okunmamis }} />
+        <SeyahatMenusu
+          aktif={state.routes[state.index]?.name ?? 'gezi'}
+          onSec={(ad: SeyahatSekmesi) => {
+            // #667 KK3: zaten açık sekmeye yeniden basma ekrana `tabPress` olarak iletilir (Plan gün detayından genel bakışa döner).
+            const hedef = state.routes.find((r) => r.name === ad);
+            if (hedef) navigation.emit({ type: 'tabPress', target: hedef.key, canPreventDefault: true });
+            navigation.navigate(ad);
+          }}
+          rozetler={{ sohbet: okunmamis }}
+        />
       )}>
       <Tabs.Screen name="gezi" />
       <Tabs.Screen name="program" />

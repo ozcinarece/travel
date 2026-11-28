@@ -108,24 +108,31 @@ export function PlanGenel(p: {
         ) : null}
         {p.kartlar.map((k) =>
           k.bos ? (
-            <Pressable
-              key={k.id}
-              accessibilityRole="button"
-              accessibilityLabel={t('planV13.kartEtiket', { baslik: k.baslik, alt: t('planV13.bosGun') })}
-              onPress={() => p.onKart(k.id)}
-              style={({ pressed }) => [s.kart, s.bosKart, pressed && { opacity: 0.85 }]}>
-              <View style={[s.kartNokta, { backgroundColor: k.renk }]} />
-              <View style={s.bosMetinler}>
-                <Text style={s.kartBaslik} numberOfLines={1}>
-                  {k.baslik}
-                </Text>
-                <Text style={s.kartAlt}>{t('planV13.bosGun')}</Text>
-              </View>
-              <Pressable accessibilityRole="button" accessibilityLabel={t('planV13.doldurEtiket', { gun: k.baslik })} onPress={() => p.onDoldur(k.id)} hitSlop={12} style={s.doldur}>
+            // Kart gövdesi ve "+ Doldur" kardeş iki düğme: ekran okuyucu ikisine ayrı odaklanır (iç içe düğme okunmaz).
+            <View key={k.id} style={[s.kart, s.bosKart]}>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={t('planV13.kartEtiket', { baslik: k.baslik, alt: t('planV13.bosGun') })}
+                onPress={() => p.onKart(k.id)}
+                style={({ pressed }) => [s.bosGovde, pressed && { opacity: 0.85 }]}>
+                <View style={[s.kartNokta, { backgroundColor: k.renk }]} />
+                <View style={s.bosMetinler}>
+                  <Text style={s.kartBaslik} numberOfLines={1}>
+                    {k.baslik}
+                  </Text>
+                  <Text style={s.kartAlt}>{t('planV13.bosGun')}</Text>
+                </View>
+              </Pressable>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={t('planV13.doldurEtiket', { gun: k.baslik })}
+                onPress={() => p.onDoldur(k.id)}
+                hitSlop={12}
+                style={({ pressed }) => [s.doldur, pressed && { opacity: 0.8 }]}>
                 <Ikon ad="artiV7" boyut={16} renk={renk.ana} kalinlik={2.4} />
                 <Text style={s.doldurMetin}>{t('planV13.doldur')}</Text>
               </Pressable>
-            </Pressable>
+            </View>
           ) : (
             <Pressable
               key={k.id}
@@ -178,12 +185,14 @@ export function PlanGunDetayi(p: {
     <View style={s.ekran}>
       <ScrollView contentContainerStyle={{ paddingTop: ust + 8, paddingBottom: ALT_DUGME_PAYI }} showsVerticalScrollIndicator={false}>
         <View style={s.gunUst}>
-          <Pressable accessibilityRole="button" accessibilityLabel={t('planV13.geri')} onPress={p.onGeri} hitSlop={8} style={s.geri}>
-            <Ikon ad="geri" boyut={22} renk={renk.metin} kalinlik={2.4} />
+          <View style={s.geri}>
+            <Pressable accessibilityRole="button" accessibilityLabel={t('planV13.geri')} onPress={p.onGeri} hitSlop={11} style={s.geriDugme}>
+              <Ikon ad="geri" boyut={22} renk={renk.metin} kalinlik={2.4} />
+            </Pressable>
             <Text accessibilityRole="header" style={s.gunBaslik} numberOfLines={1}>
               {p.baslik}
             </Text>
-          </Pressable>
+          </View>
           {p.onDuzenle ? (
             <Pressable accessibilityRole="button" accessibilityLabel={t('planV13.duzenleEtiket')} onPress={p.onDuzenle} hitSlop={12}>
               <Text style={s.duzenle}>{t('planV13.duzenle')}</Text>
@@ -224,7 +233,7 @@ export function PlanGunDetayi(p: {
       </ScrollView>
       {/* KK4: sabit turuncu "+ Durak ekle" — alt menünün 12 pt üstünde (kanvas: 84 + 12). */}
       <View style={s.altDugme}>
-        <TuruncuDugme metin={t('planV13.durakEkle')} onPress={p.onDurakEkle} />
+        <TuruncuDugme metin={t('planV13.durakEkle')} etiket={t('planV13.durakEkleEtiket')} onPress={p.onDurakEkle} />
       </View>
     </View>
   );
@@ -281,6 +290,7 @@ const s = StyleSheet.create({
   kart: { marginTop: 10, padding: 14, borderRadius: 16 },
   doluKart: { backgroundColor: planV13.kartZemin, gap: 8 },
   bosKart: { borderWidth: 1.5, borderStyle: 'dashed', borderColor: planV13.bosKenar, flexDirection: 'row', alignItems: 'center', gap: 12 },
+  bosGovde: { flex: 1, minWidth: 0, flexDirection: 'row', alignItems: 'center', gap: 12, minHeight: 44 },
   kartSatir: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   kartNokta: { width: 10, height: 10, borderRadius: 5 },
   kartBaslik: { fontFamily: yazi.kalin, fontSize: 16, color: renk.metin },
@@ -288,11 +298,14 @@ const s = StyleSheet.create({
   cubukIz: { height: 6, borderRadius: 3, backgroundColor: planV13.cubukIz, overflow: 'hidden', marginLeft: 22 },
   cubukDolu: { height: 6 },
   bosMetinler: { flex: 1, minWidth: 0 },
+  // Dokunma alanı hitSlop 12 ile ≥ 44 pt; kartın 14 pt dolgusunun içinde kalır (Android'de üst kabı aşmaz).
   doldur: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   doldurMetin: { fontFamily: yazi.kalin, fontSize: 15, color: renk.ana },
   // KK4 üst: padding 52 16 8.
   gunUst: { paddingHorizontal: 16, paddingBottom: 8, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12 },
   geri: { flexDirection: 'row', alignItems: 'center', gap: 6, minHeight: 44, flexShrink: 1 },
+  // 22 pt ikon + 11 pt hitSlop her yandan = 44 pt.
+  geriDugme: { width: 22, height: 22, alignItems: 'center', justifyContent: 'center' },
   gunBaslik: { flexShrink: 1, fontFamily: yazi.ekstra, fontSize: 20, color: renk.metin },
   duzenle: { fontFamily: yazi.kalin, fontSize: 15, color: renk.ana },
   gunGovde: { paddingTop: 10, paddingHorizontal: 16 },
