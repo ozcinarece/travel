@@ -16,7 +16,7 @@ import { GrupPenceresi } from '@/components/davet/GrupPenceresi';
 import { GeriAlBandi } from '@/components/listem/GeriAlBandi';
 import { GuneEkleSayfasi } from '@/components/listem/GuneEkleSayfasi';
 import { MekanPaneli } from '@/components/mekan/MekanPaneli';
-import { useGeriAlinabilirSil } from '@/features/mekanlar/geriAlinabilirSil';
+import { type BekleyenSilme, useGeriAlinabilirSil } from '@/features/mekanlar/geriAlinabilirSil';
 import { geciciMi, useMekanEkle, useMekanGuncelle, useMekanlar, useUyeler, type EklemeKaynagi } from '@/features/mekanlar/sorgular';
 import { listedekiMekan, useGunEklemesiniGeriAl, type GunEklemesi } from '@/features/gezi/bugunEkle';
 import { bugunDurumu } from '@/features/listem/listem';
@@ -71,6 +71,7 @@ export default function KesfetEkrani() {
 }
 
 const ILK_ZOOM = 13;
+const DAKIKA_MS = 60_000;
 const BOS_GUNLER: Gun[] = [];
 const BOS_DURAKLAR: Durak[] = [];
 const BOS_MEKANLAR: Mekan[] = [];
@@ -120,6 +121,22 @@ function Kesfet({
   const gunBaglami = etkinIndex !== null ? (gunler.data?.find((g) => g.index === etkinIndex) ?? null) : null;
   // #579 KK2: "Değiştir" → Hangi güne? çekmecesi.
   const [gunSecimiAcik, setGunSecimiAcik] = useState(false);
+  // #599 KK4 (+ #609 eki): sekme açıkken gün değişirse hap yeni günü gösterir; Değiştir çekmecesi açıkken bugünün alt satırı
+  // ("akşam boş") da dakikasında güncellenir. Dakikada bir bakılır ama ekran yalnız gün değişince ya da çekmece açıkken yeniden
+  // çizilir (#79: haritalı ekran boşuna çizilmesin). Açıkça seçilmiş gün (Değiştir, Plan) olduğu gibi kalır (`etkinGunSirasi`).
+  const seyahatRef = useRef(seyahat);
+  const gunSecimiAcikRef = useRef(gunSecimiAcik);
+  useEffect(() => {
+    seyahatRef.current = seyahat;
+    gunSecimiAcikRef.current = gunSecimiAcik;
+  });
+  useEffect(() => {
+    const z = setInterval(() => {
+      const simdi = new Date();
+      setAn((o) => (gunSecimiAcikRef.current || bugununGunSirasi(seyahatRef.current, o) !== bugununGunSirasi(seyahatRef.current, simdi) ? simdi : o));
+    }, DAKIKA_MS);
+    return () => clearInterval(z);
+  }, []);
   const gunSecenekleri = useMemo(() => (gunSecimiAcik ? baglamGunSecenekleri(gunler.data ?? [], duraklar.data ?? []) : []), [gunSecimiAcik, gunler.data, duraklar.data]);
   // #579 inceleme 5 (#553 KK3): çekmecede bugünün alt satırı "N durak gezildi · akşam boş" — Plan'la aynı canlı program; yalnız
   // çekmece açıkken, ağ isteği yok (önbellekteki yürüyüş ya da kestirim).
@@ -138,6 +155,8 @@ function Kesfet({
   const [gunBildirimi, setGunBildirimi] = useState<string | null>(null);
   useEffect(() => {
     if (!gunBildirimi) return;
+    // #599 KK5: iOS'ta canlı bölge yok; kısa bildirim VoiceOver'a duyurulur (Android `accessibilityLiveRegion` ile okur).
+    if (Platform.OS === 'ios') AccessibilityInfo.announceForAccessibility(gunBildirimi);
     const z = setTimeout(() => setGunBildirimi(null), 2800);
     return () => clearTimeout(z);
   }, [gunBildirimi]);
@@ -416,7 +435,9 @@ function Kesfet({
   // #579 inceleme 4 · 6: hedef gün ekleme anında bulunur — "bugün" yeniden hesaplanır (sekme gece yarısını geçerek açık kalmış
   // olabilir; Değiştir ya da Plan ile açıkça seçilen gün olduğu gibi kalır), günler ya da duraklar henüz yüklenmediyse beklenir
   // (yer sessizce yalnız listeye düşmesin; gelmezlerse hata).
-  const hedefGunuBul = async () => {
+  const hedefGunuBul = async (nesil: number) => {
+    // #599 değişiklik 1: "+"ya dokunulduğu andaki çıkarma bandı (ilk `await`ten önce, eşzamanlı okunur).
+    const bant = geriAlinabilir.simdikiBant();
     const simdi = new Date();
     const bugunNo = bugununGunSirasi(seyahat, simdi);
     if (bugunNo !== bugunSirasi) setAn(simdi);
@@ -425,14 +446,50 @@ function Kesfet({
     const durakListesi = hedefNo !== null && !duraklar.data ? (await duraklar.refetch()).data : duraklar.data;
     if (hedefNo !== null && (!gunListesi || !durakListesi)) throw new Error('gunler_yok');
     const hedef = hedefNo !== null ? (gunListesi?.find((g) => g.index === hedefNo) ?? null) : null;
-    return { bugunNo, hedef, durakListesi: durakListesi ?? [] };
+    return { bugunNo, hedefNo, hedef, durakListesi: durakListesi ?? [], nesil, bant };
   };
+  // #599 KK2: "+"ya dokunulduğu anda açık olan "Geri al" bandı, ekleme bildirimi açılırken kapanır (bekleyen çıkarma
+  // kesinleşir); aynı anda iki bant yok. #599 değişiklik 1: bant ekleme sürerken (dokunmadan sonra) açıldıysa kalır ve ekleme
+  // bildirimi gösterilmez — kullanıcı bir şey yapmadan çıkarma kesinleşmez. Bu durumda eklemenin "Geri al"ı da gösterilmez
+  // (yer ✓ ile işaretli kalır). Bildirim gösterilebilirse true.
+  const cikarmaBandiniKapat = (dokunmadaki: BekleyenSilme | null) => {
+    const simdiki = geriAlinabilir.simdikiBant();
+    if (simdiki && simdiki !== dokunmadaki) return false;
+    if (simdiki) geriAlinabilir.kapat();
+    return true;
+  };
+  const kisaBildirim = (metin: string, dokunmadaki: BekleyenSilme | null) => {
+    if (!cikarmaBandiniKapat(dokunmadaki)) return;
+    setEklendiBildirimi(null);
+    setGunBildirimi(metin);
+  };
+  // #599 KK6: art arda iki "+" aynı güne aynı `order_key`'i almasın. Atamalar sıraya girer; önceki atama sürerken gelen atama
+  // onun bitmesini bekler. Önceki atama sürüyorsa ya da gün okunduktan (`hedefGunuBul`) sonra bir atama bittiyse günün durakları
+  // yeniden okunur (sıra anahtarı yeni son durağın ardından).
+  const atamaKuyrugu = useRef<Promise<unknown>>(Promise.resolve());
+  const bekleyenAtama = useRef(0);
+  // Biten atamaların sayısı: gün listesinin hangi atamadan sonra okunduğu (`hedefGunuBul`'a verilir).
+  const biten = useRef(0);
   // #532 KK4 · #579 KK3: listedeki gerçek satır günün sonuna durak olur; gezi günlerinde bildirim "{ad} bugüne eklendi · Geri al"
   // (Geri al yalnız bu durağı siler; mekan satırını yalnız bu eylem eklediyse).
-  const guneAta = async (kayit: Mekan, ad: string, h: Awaited<ReturnType<typeof hedefGunuBul>> & { hedef: Gun }, yeniMekan: boolean) => {
+  const guneAta = (kayit: Mekan, ad: string, h: Awaited<ReturnType<typeof hedefGunuBul>> & { hedef: Gun }, yeniMekan: boolean) => {
     const hedef = h.hedef;
-    const { order_key } = await ata.mutateAsync({ mekan: kayit, gunId: hedef.id, mevcut: undefined, gunDuraklari: h.durakListesi.filter((d) => d.day_id === hedef.id) });
-    if (h.bugunNo !== null) {
+    const sirada = bekleyenAtama.current > 0 || biten.current !== h.nesil;
+    bekleyenAtama.current += 1;
+    const is = atamaKuyrugu.current
+      .catch(() => undefined)
+      .then(async () => {
+        const gunDuraklari = sirada ? ((await duraklar.refetch()).data ?? h.durakListesi) : h.durakListesi;
+        return ata.mutateAsync({ mekan: kayit, gunId: hedef.id, mevcut: undefined, gunDuraklari: gunDuraklari.filter((d) => d.day_id === hedef.id) });
+      })
+      .finally(() => {
+        bekleyenAtama.current -= 1;
+        biten.current += 1;
+      });
+    atamaKuyrugu.current = is;
+    return is.then(({ order_key }) => {
+      if (h.bugunNo === null) return kisaBildirim(t('kesfet.guneEklendi', { ad, n: hedef.index }), h.bant);
+      if (!cikarmaBandiniKapat(h.bant)) return;
       setGunBildirimi(null);
       setEklendiBildirimi((o) => ({
         metin: gunEklendiMetni(ad, hedef, h.bugunNo),
@@ -440,7 +497,7 @@ function Kesfet({
         ekleme: { mekanId: kayit.id, gunId: hedef.id, orderKey: order_key, yeniMekan },
         sayac: (o?.sayac ?? 0) + 1,
       }));
-    } else setGunBildirimi(t('kesfet.guneEklendi', { ad, n: hedef.index }));
+    });
   };
   const listeyeEkle = async (y: HafifYer, kaynak: EklemeKaynagi) => {
     setHata(null);
@@ -450,7 +507,7 @@ function Kesfet({
     // tekrar dener (`listedekiniGuneAta`).
     let listede = false;
     try {
-      const h = await hedefGunuBul();
+      const h = await hedefGunuBul(biten.current);
       const eklenen = await ekle.mutateAsync({
         place_id: y.place_id,
         primary_type: y.primary_type,
@@ -463,6 +520,8 @@ function Kesfet({
       // #532 KK4: gün bağlamı varsa yer o günün sonuna da eklenir (listedeki gerçek satırla).
       // #579 KK3: gezi günlerinde de (bugün ya da "Değiştir"le seçilen gün) sonuna.
       if (h.hedef) await guneAta(await listedekiMekan(seyahat.id, y.place_id), y.ad, { ...h, hedef: h.hedef }, eklenen.yeni);
+      // #599 KK5: bugünün sırası var ama o gün `days`'te yok (hap görünmez): yer yalnız listeye girer, bunu söyleyen bildirim.
+      else if (h.hedefNo !== null) kisaBildirim(t('kesfet.listeneEklendi', { ad: y.ad }), h.bant);
     } catch (e) {
       setHata(listede ? t('kesfet.guneEklenemedi') : agHatasi(e) ? t('geziSayfasi.cevrimdisi.baglantiYok') : t('kesfet.ekleHata'));
     }
@@ -477,7 +536,7 @@ function Kesfet({
     setHata(null);
     setAtanan(m.place_id);
     try {
-      const h = await hedefGunuBul();
+      const h = await hedefGunuBul(biten.current);
       const hedef = h.hedef;
       if (!hedef || h.durakListesi.some((d) => d.day_id === hedef.id && d.place_ref === m.id)) return;
       await guneAta(m, ad, { ...h, hedef }, false);
@@ -493,13 +552,17 @@ function Kesfet({
     const b = eklendiBildirimi;
     if (!b) return;
     setEklendiBildirimi(null);
-    eklemeyiGeriAlMut.mutate(b.ekleme, { onError: () => setHata(t('kesfet.ekleHata')) });
+    // #599 KK1: geri alma hatası kendi metniyle (ekleme hatası değil).
+    eklemeyiGeriAlMut.mutate(b.ekleme, { onError: () => setHata(t('kesfet.geriAlinamadi')) });
   };
   // #387 KK1: hemen silinmez; 5 sn "Geri al" bandı, silme bant kapanınca (hata olursa katmanda `listem.hata`).
   const listedenCikar = async (m: Mekan) => {
     // #317 KK3: iyimser satır henüz sunucuda değil; ekleme bitmeden çıkarılamaz.
     if (geciciMi(m)) return;
     setHata(null);
+    // #599 KK2: aynı anda iki bant yok — kısa bildirim ve (gizlenecek) ekleme bandı kapanır.
+    setGunBildirimi(null);
+    setEklendiBildirimi(null);
     geriAlinabilir.cikar(m, havuzAdlari.data?.[m.place_id]?.ad ?? seciliHafif?.ad ?? '');
   };
 
@@ -770,7 +833,10 @@ function Kesfet({
                 <Text style={s.beyazHapMetin} numberOfLines={1}>
                   {gunHapiMetni(gunBaglami)}
                 </Text>
-                <Pressable accessibilityRole="button" accessibilityLabel={t('kesfet.gunDegistirEtiket')} onPress={() => setGunSecimiAcik(true)} style={({ pressed }) => [s.degistir, pressed && { opacity: 0.7 }]}>
+                <Pressable accessibilityRole="button" accessibilityLabel={t('kesfet.gunDegistirEtiket')} onPress={() => {
+                    setAn(new Date());
+                    setGunSecimiAcik(true);
+                  }} style={({ pressed }) => [s.degistir, pressed && { opacity: 0.7 }]}>
                   <Text style={s.degistirMetin}>{t('kesfet.gunDegistir')}</Text>
                 </Pressable>
               </View>

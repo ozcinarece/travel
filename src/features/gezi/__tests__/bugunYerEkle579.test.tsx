@@ -244,6 +244,26 @@ describe('#579 KK4 Gezi sayfası: Bugüne yer ekle', () => {
     expect(queryByText(t('seyahatV7.bugunYerEkle'))).toBeNull();
   });
 
+  it('#599 KK3: boş günde (bugün durak yok) eski bağlantı yerine aynı + satırı; dokununca Yer ekle bugün seçili', async () => {
+    mockTablolar = fikstur(bugun());
+    // Yakında aday yok: listedeki tek yer başka günde, şehrin rehber yeri yok.
+    mockTablolar.places = mockTablolar.places.slice(0, 1);
+    mockTablolar.yerler = [];
+    mockTablolar.stops = [durak('d3', 'g2', 'm1', 'a0')];
+    const { getByText, queryByText, getByRole, qc } = ciz();
+    await waitFor(() => getByText('Eskişehir Gezisi'));
+    await sakinles(qc);
+    expect(getByText(t('seyahatV7.bugunBos'))).toBeTruthy();
+    const satir = getByRole('button', { name: t('seyahatV7.bugunYerEkleSatiri') });
+    expect(StyleSheet.flatten(satir.props.style).minHeight).toBeGreaterThanOrEqual(48);
+    expect(StyleSheet.flatten(getByText(t('seyahatV7.bugunYerEkleSatiri')).props.style).color).toBe(renk.ana);
+    expect(queryByText(t('seyahatV7.bugunYerEkle'))).toBeNull();
+    fireEvent.press(satir);
+    expect(router.navigate).toHaveBeenLastCalledWith(
+      expect.objectContaining({ pathname: '/seyahat/[id]/(sekmeler)/kesfet', params: expect.objectContaining({ id: 't1', gun: '1' }) }),
+    );
+  });
+
   it('plan modunda (gezi başlamadan) satır yok', async () => {
     mockTablolar = fikstur(tarihEkle(bugun(), 12));
     const { getByText, queryByText, qc } = ciz();
