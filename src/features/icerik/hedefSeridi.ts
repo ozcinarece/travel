@@ -21,7 +21,9 @@ export type SeritKaydirma = { tur: 'son' } | { tur: 'x'; x: number } | { tur: 'g
  * taşıyorsa sağ kenarı (boşluğuyla) görünecek kadar; zaten görünüyorsa hiç. Ölçü eksikse bekle.
  */
 export function seritKaydirma(yeniSecili: boolean, o: SeritOlcusu): SeritKaydirma {
-  if (yeniSecili) return o.icerikHazir ? { tur: 'son' } : { tur: 'bekle' };
+  // İçerik ölçülmeden kaydırılırsa (Android) `scrollTo` eski içerik genişliğine kırpılabilir; her iki yol da içeriği bekler.
+  if (!o.icerikHazir) return { tur: 'bekle' };
+  if (yeniSecili) return { tur: 'son' };
   if (o.genislik == null || !o.cip) return { tur: 'bekle' };
   const sag = o.cip.x + o.cip.genislik + SERIT_KENAR;
   return sag > o.genislik ? { tur: 'x', x: sag - o.genislik } : { tur: 'gerekmez' };

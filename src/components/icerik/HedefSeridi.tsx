@@ -1,7 +1,7 @@
 // #589 (#587 küçükleri): "Seyahatime al" → HANGİ SEYAHATE? çip şeridi. SeyahatimeAl.tsx'ten ayrıldı; görünüm aynı (kanvas 19).
 // KK1: açılışta seçili çip görünür alana kaydırılır ("Yeni seyahat" seçiliyse şeridin sonuna); çiplerin sırası değişmez.
 // KK2: her hedef çipin açık ekran okuyucu etiketi var; "·" ayırıcıları okunmaz.
-import { useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, type LayoutChangeEvent } from 'react-native';
 
 import { Ikon } from '@/components/ui/Ikon';
@@ -26,16 +26,19 @@ export function HedefSeridi({ seyahatler, hedefId, sehirAdi, onSec }: Props) {
   const ref = useRef<ScrollView>(null);
   // Yalnız açılışta bir kez kaydırılır; kullanıcı çipe dokunduktan ya da kaydırdıktan sonra şerit kendi kendine oynamaz.
   const bitti = useRef(false);
-  const olcu = useRef<SeritOlcusu>({ genislik: null, cip: null, icerikHazir: false });
+  const olcu = useRef<Omit<SeritOlcusu, 'cip'>>({ genislik: null, icerikHazir: false });
+  // Bütün çiplerin yeri: seçim ölçüm bitmeden değişirse (liste arkada yenilenir) yeni seçilen çipin yeri de elde olur.
+  const cipler = useRef(new Map<string, { x: number; genislik: number }>());
 
   const dene = () => {
     if (bitti.current) return;
-    const k = seritKaydirma(hedefId == null, olcu.current);
+    const k = seritKaydirma(hedefId == null, { ...olcu.current, cip: hedefId == null ? null : (cipler.current.get(hedefId) ?? null) });
     if (k.tur === 'bekle') return;
     bitti.current = true;
     if (k.tur === 'son') ref.current?.scrollToEnd({ animated: false });
     else if (k.tur === 'x') ref.current?.scrollTo({ x: k.x, animated: false });
   };
+  useEffect(dene);
   const sec = (id: string | null) => {
     bitti.current = true;
     onSec(id);
@@ -71,14 +74,10 @@ export function HedefSeridi({ seyahatler, hedefId, sehirAdi, onSec }: Props) {
             accessibilityLabel={hedefCipEtiketi(seyahatAdi(sy), tarih, farkli)}
             accessibilityState={{ selected: secili }}
             onPress={() => sec(sy.id)}
-            onLayout={
-              secili
-                ? (e: LayoutChangeEvent) => {
-                    olcu.current.cip = { x: e.nativeEvent.layout.x, genislik: e.nativeEvent.layout.width };
-                    dene();
-                  }
-                : undefined
-            }
+            onLayout={(e: LayoutChangeEvent) => {
+              cipler.current.set(sy.id, { x: e.nativeEvent.layout.x, genislik: e.nativeEvent.layout.width });
+              dene();
+            }}
             style={[s.cip, secili && s.cipSecili]}>
             {/* #587 inceleme: ad ve tarih kısalır, "Farklı şehir" kesilmez. */}
             <Text style={[s.cipMetin, s.cipAd, secili && s.cipMetinSecili]} numberOfLines={1}>

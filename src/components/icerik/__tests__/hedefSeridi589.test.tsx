@@ -33,6 +33,8 @@ describe('#589 KK1: seçili çip açılışta görünür', () => {
     expect(seritKaydirma(true, { genislik: null, cip: null, icerikHazir: false })).toEqual({ tur: 'bekle' });
     expect(seritKaydirma(true, { genislik: 390, cip: null, icerikHazir: true })).toEqual({ tur: 'son' });
     expect(seritKaydirma(false, { genislik: 390, cip: null, icerikHazir: true })).toEqual({ tur: 'bekle' });
+    // İçerik ölçülmeden kaydırılmaz (Android'de kırpılmasın).
+    expect(seritKaydirma(false, { genislik: 390, cip: { x: 520, genislik: 180 }, icerikHazir: false })).toEqual({ tur: 'bekle' });
     expect(seritKaydirma(false, { genislik: 390, cip: { x: 20, genislik: 200 }, icerikHazir: true })).toEqual({ tur: 'gerekmez' });
     // 520 + 180 + 20 kenar = 720 → 720 − 390 = 330.
     expect(seritKaydirma(false, { genislik: 390, cip: { x: 520, genislik: 180 }, icerikHazir: true })).toEqual({ tur: 'x', x: 330 });
@@ -42,8 +44,9 @@ describe('#589 KK1: seçili çip açılışta görünür', () => {
     render(<HedefSeridi seyahatler={SEYAHATLER} hedefId="c" sehirAdi="Eskişehir" onSec={jest.fn()} />);
     const serit = screen.getByTestId('hedef-seridi');
     fireEvent(serit, 'layout', katman(0, 390));
-    expect(proto.scrollTo).not.toHaveBeenCalled();
     fireEvent(screen.getByRole('button', { selected: true }), 'layout', katman(520, 180));
+    expect(proto.scrollTo).not.toHaveBeenCalled();
+    fireEvent(serit, 'contentSizeChange', 740, 44);
     expect(proto.scrollTo).toHaveBeenCalledTimes(1);
     expect(proto.scrollTo).toHaveBeenCalledWith({ x: 330, animated: false });
     // Yalnız bir kez: sonraki ölçümler şeridi oynatmaz.
@@ -60,14 +63,40 @@ describe('#589 KK1: seçili çip açılışta görünür', () => {
     expect(proto.scrollTo).not.toHaveBeenCalled();
   });
 
-  it('görünen ilk çip seçiliyse kaydırma yok; kullanıcı dokunduktan sonra şerit kendi kendine kaymaz', () => {
+  it('görünen ilk çip seçiliyse kaydırma yok', () => {
     const onSec = jest.fn();
     render(<HedefSeridi seyahatler={SEYAHATLER} hedefId="a" sehirAdi="Eskişehir" onSec={onSec} />);
-    fireEvent(screen.getByTestId('hedef-seridi'), 'layout', katman(0, 390));
+    const serit = screen.getByTestId('hedef-seridi');
+    fireEvent(serit, 'layout', katman(0, 390));
     fireEvent(screen.getByRole('button', { selected: true }), 'layout', katman(20, 220));
+    fireEvent(serit, 'contentSizeChange', 740, 44);
     expect(proto.scrollTo).not.toHaveBeenCalled();
-    fireEvent.press(screen.getByRole('button', { name: /Yeni seyahat/ }));
-    expect(onSec).toHaveBeenCalledWith(null);
+    expect(proto.scrollToEnd).not.toHaveBeenCalled();
+  });
+
+  it('ölçüm bitmeden kullanıcı dokunursa sonraki ölçümler şeridi kaydırmaz', () => {
+    const onSec = jest.fn();
+    render(<HedefSeridi seyahatler={SEYAHATLER} hedefId={null} sehirAdi="Eskişehir" onSec={onSec} />);
+    fireEvent.press(screen.getByRole('button', { name: /Kapadokya/ }));
+    expect(onSec).toHaveBeenCalledWith('b');
+    const serit = screen.getByTestId('hedef-seridi');
+    fireEvent(serit, 'layout', katman(0, 390));
+    fireEvent(serit, 'contentSizeChange', 740, 44);
+    expect(proto.scrollTo).not.toHaveBeenCalled();
+    expect(proto.scrollToEnd).not.toHaveBeenCalled();
+  });
+
+  it('seçim ölçüm bitmeden değişirse (liste arkada yenilendi) yeni seçili çipin yerine kaydırılır', () => {
+    const onSec = jest.fn();
+    render(<HedefSeridi seyahatler={SEYAHATLER} hedefId="a" sehirAdi="Eskişehir" onSec={onSec} />);
+    const butonlar = screen.getAllByRole('button');
+    fireEvent(butonlar[0], 'layout', katman(20, 220));
+    fireEvent(butonlar[2], 'layout', katman(520, 180));
+    fireEvent(screen.getByTestId('hedef-seridi'), 'layout', katman(0, 390));
+    screen.rerender(<HedefSeridi seyahatler={SEYAHATLER} hedefId="c" sehirAdi="Eskişehir" onSec={onSec} />);
+    expect(proto.scrollTo).not.toHaveBeenCalled();
+    fireEvent(screen.getByTestId('hedef-seridi'), 'contentSizeChange', 740, 44);
+    expect(proto.scrollTo).toHaveBeenCalledWith({ x: 330, animated: false });
   });
 });
 
