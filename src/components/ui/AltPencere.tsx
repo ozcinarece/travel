@@ -1,5 +1,5 @@
-import type { ReactNode } from 'react';
-import { Modal, Pressable, StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
+import type { ReactNode, Ref } from 'react';
+import { KeyboardAvoidingView, Modal, Platform, Pressable, StyleSheet, View, type ScrollView, type StyleProp, type ViewStyle } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 import { CekilenSayfa, modalKokuStili, SayfaKaydirici } from '@/components/ui/sayfaCekme';
@@ -11,6 +11,12 @@ type Props = {
   children: ReactNode;
   /** İçerik uzunsa kaydırılır (en çok ekranın %88'i). */
   kaydirilir?: boolean;
+  /**
+   * #631 KK2: sayfada yazı alanı var; klavye açılınca sayfa klavyenin üstüne çıkar (iOS `padding`), klavye açıkken dokunuşlar
+   * geçer. `kaydiriciRef` ile içerik yazı alanına kaydırılabilir (yalnız `kaydirilir`).
+   */
+  klavye?: boolean;
+  kaydiriciRef?: Ref<ScrollView>;
   kapatEtiketi: string;
   stil?: StyleProp<ViewStyle>;
   /**
@@ -38,7 +44,7 @@ type Props = {
  * #136 (kanvas 2 · 3c · 16): tutamaçlı alt sayfa — beyaz, üst köşeler 30, perde Lacivert %45; dışına dokununca kapanır.
  * #164 KK7: tutamaktan ya da içeriğin herhangi bir yerinden aşağı çekilerek de kapanır (kaydırılan içerik en üstteyken).
  */
-export function AltPencere({ acik, onKapat, children, kaydirilir, kapatEtiketi, stil, gorunus }: Props) {
+export function AltPencere({ acik, onKapat, children, kaydirilir, klavye, kaydiriciRef, kapatEtiketi, stil, gorunus }: Props) {
   const v5 = gorunus === 'v5';
   const v6 = gorunus === 'v6';
   const v11 = gorunus === 'v11';
@@ -47,25 +53,28 @@ export function AltPencere({ acik, onKapat, children, kaydirilir, kapatEtiketi, 
   return (
     <Modal visible={acik} transparent animationType="slide" onRequestClose={onKapat}>
       <GestureHandlerRootView style={modalKokuStili}>
-        <View style={[s.perde, v5 && s.perdeYok, v6 && s.perdeV6, dv && s.perdeDavet]}>
-          <Pressable style={StyleSheet.absoluteFill} onPress={onKapat} accessibilityLabel={kapatEtiketi} />
-          <CekilenSayfa onKapat={onKapat} style={[s.sayfa, v5 && s.sayfaV5, v6 && s.sayfaV6, dv && s.sayfaDavet, kaydirilir && s.sinirli]}>
-            <View style={[s.tutamac, (v5 || v6) && s.tutamacV5, v6 && s.tutamacV6, dv && s.tutamacDavet, v11 && s.tutamacV11, durak && s.tutamacDurak]} />
-            {kaydirilir ? (
-              <SayfaKaydirici contentContainerStyle={[s.icerik, v6 && s.icerikV6, dv && s.icerikDavet, stil]} showsVerticalScrollIndicator={false}>
-                {children}
-              </SayfaKaydirici>
-            ) : (
-              <View style={[s.icerik, v6 && s.icerikV6, dv && s.icerikDavet, stil]}>{children}</View>
-            )}
-          </CekilenSayfa>
-        </View>
+        <KeyboardAvoidingView style={s.klavye} enabled={!!klavye} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+          <View style={[s.perde, v5 && s.perdeYok, v6 && s.perdeV6, dv && s.perdeDavet]}>
+            <Pressable style={StyleSheet.absoluteFill} onPress={onKapat} accessibilityLabel={kapatEtiketi} />
+            <CekilenSayfa onKapat={onKapat} style={[s.sayfa, v5 && s.sayfaV5, v6 && s.sayfaV6, dv && s.sayfaDavet, kaydirilir && s.sinirli]}>
+              <View style={[s.tutamac, (v5 || v6) && s.tutamacV5, v6 && s.tutamacV6, dv && s.tutamacDavet, v11 && s.tutamacV11, durak && s.tutamacDurak]} />
+              {kaydirilir ? (
+                <SayfaKaydirici ref={kaydiriciRef} keyboardShouldPersistTaps={klavye ? 'handled' : undefined} contentContainerStyle={[s.icerik, v6 && s.icerikV6, dv && s.icerikDavet, stil]} showsVerticalScrollIndicator={false}>
+                  {children}
+                </SayfaKaydirici>
+              ) : (
+                <View style={[s.icerik, v6 && s.icerikV6, dv && s.icerikDavet, stil]}>{children}</View>
+              )}
+            </CekilenSayfa>
+          </View>
+        </KeyboardAvoidingView>
       </GestureHandlerRootView>
     </Modal>
   );
 }
 
 const s = StyleSheet.create({
+  klavye: { flex: 1 },
   perde: { flex: 1, backgroundColor: 'rgba(14,20,48,0.45)', justifyContent: 'flex-end' },
   sayfa: { backgroundColor: renk.zemin, borderTopLeftRadius: 30, borderTopRightRadius: 30, paddingTop: 12 },
   sinirli: { maxHeight: '88%' },

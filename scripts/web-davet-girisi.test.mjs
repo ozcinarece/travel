@@ -45,11 +45,13 @@ test('birleştirme: JS ve davet sayfaları dist\'e, eksik varlık kopyalanır, v
   yaz(path.join(davet, JS_DIZINI, 'entry-b.js.map'), '{}');
   yaz(path.join(davet, 'assets/ortak.ttf'), 'davet');
   yaz(path.join(davet, 'assets/yeni.png'), 'png');
-  yaz(path.join(davet, 'assets/f/Figtree_400Regular.abc.ttf'), 'font');
+  yaz(path.join(davet, 'assets/f/Figtree_400Regular.abc.woff2'), 'font');
+  // #643: web artık woff2 kullanır; pakette kalan TTF ön yüklenmez.
+  yaz(path.join(davet, 'assets/f/Figtree_500Medium.abc.ttf'), 'eski');
 
   const yazilan = await birlestir(dist, davet);
   assert.deepEqual(yazilan, ['entry-b.js']);
-  const onYukleme = '<link rel="preload" as="font" type="font/ttf" crossorigin href="/assets/f/Figtree_400Regular.abc.ttf"/>';
+  const onYukleme = '<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/f/Figtree_400Regular.abc.woff2"/>';
   assert.equal(readFileSync(path.join(dist, 'r/[token].html'), 'utf8'), `<html lang="tr"><head>${onYukleme}</head>davet</html>`);
   assert.equal(readFileSync(path.join(dist, 'r/g/[token].html'), 'utf8'), `<html lang="tr"><head>${onYukleme}</head>paylasim</html>`);
   ayristirilabilir(readFileSync(path.join(dist, JS_DIZINI, 'entry-b.js'), 'utf8'));

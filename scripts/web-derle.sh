@@ -17,6 +17,8 @@ node scripts/web-davet-girisi.mjs "$cikti" "$davet"
 # #549: davet sayfaları JS gelmeden de açılış halini (kanvas 3e) gösterir; kopyalardan önce yazılır. #550: tam uygulamaya
 # geçiş sayfaları (/giris, /, /seyahat/{id}/gezi) da aynı katmanı alır: yeniden yüklemede boş sayfa yok.
 node scripts/web-davet-acilis.mjs "$cikti"
+# #643 KK1: davet ve paylaşım sayfalarında özet RPC'si sayfa JS'i gelmeden, HTML'deki satır içi betikle başlar.
+node scripts/web-davet-ozet.mjs "$cikti"
 # Dinamik rotalar: "[x]" sayfaları köşeli parantezsiz kopyalanır, Pages yeniden yazar (istemci rotayı adres çubuğundan çözer).
 node scripts/web-yonlendirmeler.js "$cikti"
 rm -rf "$davet"

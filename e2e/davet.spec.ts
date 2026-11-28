@@ -4,7 +4,7 @@ import { expect, test, type Page } from '@playwright/test';
 
 import tr from '../src/i18n/tr.json';
 import { ANDROID9_CHROME74, ANDROID9_WEBVIEW, chrome74Yaklasimi } from './eskiTarayici';
-import { DAVET_TOKENI, DEPO_ANAHTARI, PAYLASIM_HARITALI, PAYLASIM_TOKENI, SEYAHAT, YENI_SEYAHAT, oturum, supabaseTaklidi } from './supabaseTaklidi';
+import { DAVET_TOKENI, DEPO_ANAHTARI, PAYLASIM_HARITALI, PAYLASIM_TOKENI, SEYAHAT, YENI_SEYAHAT, oturum, supabaseTaklidi, type Cagri } from './supabaseTaklidi';
 
 /** Sayfanın indirdiği giriş (entry) JS dosyaları; önden indirme (prefetch) ayrı listede. */
 function girisleriIzle(page: Page): string[] & { onden: string[] } {
@@ -197,6 +197,55 @@ test.describe('web fontları (#542)', () => {
       expect(yuzler.some((y) => /Figtree/.test(y.aile) && y.durum === 'loaded')).toBe(true);
     });
   }
+});
+
+// #643 KK1: özet RPC'si HTML'deki satır içi betikle (scripts/web-davet-ozet.mjs) sayfa JS'i gelmeden başlar; uygulama
+// gelince aynı isteğin sonucunu kullanır, ikinci istek atmaz.
+test.describe('erken özet (#643)', () => {
+  const ozetCagrilari = (cagrilar: Cagri[], rpc: string) => cagrilar.filter((c) => c.yol === `/rest/v1/rpc/${rpc}`);
+
+  test('davet: özet isteği davet JS\'i gelmeden başlar, uygulama ikinci istek atmaz @webkit', async ({ page }) => {
+    const cagrilar = await supabaseTaklidi(page);
+    // Davet girişinin JS'i bekletilir: istek ancak HTML'deki betikten gelebilir.
+    const paket = paketiBeklet(page, await sayfaGirisi(page, `/r/${DAVET_TOKENI}`));
+    await page.goto(`/r/${DAVET_TOKENI}`, { waitUntil: 'commit' });
+    await expect.poll(() => ozetCagrilari(cagrilar, 'davet_ozeti').length).toBe(1);
+    expect(ozetCagrilari(cagrilar, 'davet_ozeti')[0]).toMatchObject({ govde: { token: DAVET_TOKENI }, yetki: 'Bearer ornek' });
+    paket.birak();
+    await expect(page.getByText(/^Deneme seni Test · davet-550.* davet etti$/)).toBeVisible();
+    await expect(page.getByText(tr.davet.katilGoogle)).toBeVisible();
+    expect(ozetCagrilari(cagrilar, 'davet_ozeti')).toHaveLength(1);
+  });
+
+  test('paylaşım: özet isteği JS gelmeden başlar, tek istek (açılış bir kez sayılır)', async ({ page }) => {
+    const cagrilar = await supabaseTaklidi(page);
+    const paket = paketiBeklet(page, await sayfaGirisi(page, `/r/g/${PAYLASIM_TOKENI}`));
+    await page.goto(`/r/g/${PAYLASIM_TOKENI}`, { waitUntil: 'commit' });
+    await expect.poll(() => ozetCagrilari(cagrilar, 'paylasim_ozeti').length).toBe(1);
+    expect(ozetCagrilari(cagrilar, 'paylasim_ozeti')[0].govde).toEqual({ p_token: PAYLASIM_TOKENI });
+    paket.birak();
+    await expect(page.getByText('Test · paylaşım-550')).toBeVisible();
+    await expect(page.getByText(tr.paylasim.seyahatimeAl)).toBeVisible();
+    expect(ozetCagrilari(cagrilar, 'paylasim_ozeti')).toHaveLength(1);
+  });
+
+  test('girişli davet: erken istek oturumun anahtarıyla, tek istek', async ({ page }) => {
+    await girisliAc(page);
+    const cagrilar = await supabaseTaklidi(page);
+    const paket = paketiBeklet(page, await sayfaGirisi(page, `/r/${DAVET_TOKENI}`));
+    await page.goto(`/r/${DAVET_TOKENI}`, { waitUntil: 'commit' });
+    await expect.poll(() => ozetCagrilari(cagrilar, 'davet_ozeti').length).toBe(1);
+    paket.birak();
+    await page.waitForURL(new RegExp(`/seyahat/${SEYAHAT}/gezi\\?katildin=1`), { timeout: 30_000, waitUntil: 'commit' });
+    // Katılımdan önce tek özet isteği. (Katılım sonrası `davet-ozeti` geçersiz kılınır ve bir kez daha çekilir: main'de de
+    // böyle, açılış isteği değil.)
+    const katilim = cagrilar.findIndex((c) => c.yol === '/rest/v1/rpc/davetle_katil');
+    expect(katilim).toBeGreaterThan(-1);
+    const ozet = ozetCagrilari(cagrilar.slice(0, katilim), 'davet_ozeti');
+    expect(ozet).toHaveLength(1);
+    // Oturumun erişim anahtarı (JWT), anon anahtar değil: `uye` alanı oturuma bağlı.
+    expect(ozet[0].yetki).toMatch(/^Bearer eyJ/);
+  });
 });
 
 // KK4 / KK-ek3: Chrome 74 yaklaşımı: UA + Chrome 75+ yerleşikleri yok (e2e/eskiTarayici.ts).

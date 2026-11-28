@@ -132,8 +132,8 @@ export function useTumGunlereOtel(seyahatId: string) {
   });
 }
 
-/** 3.3 Otel ekranı: seçilen otel (ya da otel yok) tüm günlere uygulanır. */
-export async function tumGunlereOtel(seyahatId: string, otel: OtelSecimi | { stayId: string } | null) {
+/** 3.3 Otel ekranı: seçilen otel (ya da otel yok) tüm günlere uygulanır. Dönen değer otelin `stays.id`'si (#631: takma ad yazımı). */
+export async function tumGunlereOtel(seyahatId: string, otel: OtelSecimi | { stayId: string } | null): Promise<string | null> {
   const [{ data: mevcut, error: e1 }, { data: gunler, error: e2 }] = await Promise.all([
     supabase.from('stays').select(KONAKLAMA_ALANLARI).eq('trip_id', seyahatId),
     supabase.from('days').select('id').eq('trip_id', seyahatId),
@@ -141,9 +141,10 @@ export async function tumGunlereOtel(seyahatId: string, otel: OtelSecimi | { sta
   if (e1) throw e1;
   if (e2) throw e2;
   const id = otel ? await konaklamaKimligi(seyahatId, otel, ((mevcut ?? []) as Konaklama[]).map(satirdanKonaklama)) : null;
-  if ((gunler ?? []).length === 0) return;
+  if ((gunler ?? []).length === 0) return id;
   const { error } = await supabase.from('days').update({ start_stay_id: id, end_stay_id: id }).eq('trip_id', seyahatId);
   if (error) throw error;
+  return id;
 }
 
 /** #56: tek günün başlangıç / bitiş noktaları (anasayfa "Sıradaki", mekan detayı). */

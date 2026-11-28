@@ -1,6 +1,7 @@
 // #550 KK2 / KK-ek3: davet ve paylaşım sayfalarının açılış süresi (yalnız ölçüm; OLCUM=1 ile çalışır, CI'da atlanır).
 // Kurulum #537'deki gibi: gzip'li yerel sunucu (e2e/sunucu.mjs), Supabase taklidi (yanıt ağ gecikmesi kadar bekletilir;
 // taklit edilen istek tarayıcının ağ kısıtına girmez), Chrome DevTools ağ profili (CDP). Her satır 3 ölçümün ortancası.
+// #643 KK3: "CPU 4×" satırı ayrıca işlemciyi 4 kat yavaşlatır (CDP `Emulation.setCPUThrottlingRate`; gerçek Android 9'a yakın).
 //   OLCUM=1 npx playwright test e2e/olcum.spec.ts
 import { devices, expect, test, type Page } from '@playwright/test';
 
@@ -15,21 +16,26 @@ const AG = {
   'Hızlı 3G (1,6 Mb/s, 562 ms)': { indir: (1.6e6 / 8) * 0.9, yukle: (750e3 / 8) * 0.9, gecikme: 562.5 },
   'Yavaş 3G (400 kb/s, 2 sn)': { indir: (400e3 / 8) * 0.9, yukle: (400e3 / 8) * 0.9, gecikme: 2000 },
 } as const;
-type Sonuc = { ilkMetin: number; hazir: number; js: number };
+type Sonuc = { ilkMetin: number; hazir: number; js: number; font: number; rpc: number };
 
-async function olc(page: Page, yol: string, hazirMetin: string, ag: (typeof AG)[keyof typeof AG]): Promise<Sonuc> {
-  await supabaseTaklidi(page, { gecikmeMs: ag.gecikme });
+async function olc(page: Page, yol: string, hazirMetin: string, ag: (typeof AG)[keyof typeof AG], cpu = 1): Promise<Sonuc> {
+  const cagrilar = await supabaseTaklidi(page, { gecikmeMs: ag.gecikme });
   const cdp = await page.context().newCDPSession(page);
   await cdp.send('Network.enable');
   await cdp.send('Network.setCacheDisabled', { cacheDisabled: true });
   await cdp.send('Network.emulateNetworkConditions', { offline: false, latency: ag.gecikme, downloadThroughput: ag.indir, uploadThroughput: ag.yukle });
+  if (cpu > 1) await cdp.send('Emulation.setCPUThrottlingRate', { rate: cpu });
   const jsIstekleri = new Set<string>();
+  const fontIstekleri = new Set<string>();
   let js = 0;
+  let font = 0;
   cdp.on('Network.responseReceived', (e) => {
     if (/\/_expo\/static\/js\//.test(e.response.url)) jsIstekleri.add(e.requestId);
+    if (/\.(ttf|woff2)(\?|$)/.test(e.response.url)) fontIstekleri.add(e.requestId);
   });
   cdp.on('Network.loadingFinished', (e) => {
     if (jsIstekleri.has(e.requestId)) js += e.encodedDataLength;
+    if (fontIstekleri.has(e.requestId)) font += e.encodedDataLength;
   });
   const bas = Date.now();
   await page.goto(yol, { waitUntil: 'commit' });
@@ -39,22 +45,24 @@ async function olc(page: Page, yol: string, hazirMetin: string, ag: (typeof AG)[
   await expect(page.getByText(hazirMetin)).toBeVisible({ timeout: 120_000 });
   const hazir = Date.now() - bas;
   await cdp.detach();
-  return { ilkMetin, hazir, js };
+  const rpc = cagrilar.filter((c) => /\/rpc\/(davet_ozeti|paylasim_ozeti)$/.test(c.yol)).length;
+  return { ilkMetin, hazir, js, font, rpc };
 }
 
 const ortanca = (d: number[]) => [...d].sort((a, b) => a - b)[Math.floor(d.length / 2)];
 
 test('açılış süreleri', async ({ browser }) => {
-  const satirlar: string[] = ['| Sayfa | Ağ · tarayıcı | İlk görünen metin | Özet + düğme | İnen JS (aktarım) |', '|---|---|---|---|---|'];
+  const satirlar: string[] = ['| Sayfa | Ağ · tarayıcı | İlk görünen metin | Özet + düğme | İnen JS (aktarım) | İnen font (aktarım) | Özet RPC çağrısı |', '|---|---|---|---|---|---|---|'];
   const sayfalar = [
     { ad: `/r/{token}`, yol: `/r/${DAVET_TOKENI}`, metin: tr.davet.katilGoogle },
     { ad: `/r/g/{token}`, yol: `/r/g/${PAYLASIM_TOKENI}`, metin: tr.paylasim.seyahatimeAl },
   ];
   const durumlar = [
-    { ag: 'Hızlı 3G (1,6 Mb/s, 562 ms)', tarayici: 'Pixel 7 Chromium', ua: undefined },
-    { ag: 'Yavaş 3G (400 kb/s, 2 sn)', tarayici: 'Pixel 7 Chromium', ua: undefined },
-    { ag: 'Hızlı 3G (1,6 Mb/s, 562 ms)', tarayici: 'Android 9 WebView (Chrome 74 yaklaşımı)', ua: ANDROID9_WEBVIEW },
-    { ag: 'Yavaş 3G (400 kb/s, 2 sn)', tarayici: 'Android 9 WebView (Chrome 74 yaklaşımı)', ua: ANDROID9_WEBVIEW },
+    { ag: 'Hızlı 3G (1,6 Mb/s, 562 ms)', tarayici: 'Pixel 7 Chromium', ua: undefined, cpu: 1 },
+    { ag: 'Hızlı 3G (1,6 Mb/s, 562 ms)', tarayici: 'Pixel 7 Chromium · CPU 4×', ua: undefined, cpu: 4 },
+    { ag: 'Yavaş 3G (400 kb/s, 2 sn)', tarayici: 'Pixel 7 Chromium', ua: undefined, cpu: 1 },
+    { ag: 'Hızlı 3G (1,6 Mb/s, 562 ms)', tarayici: 'Android 9 WebView (Chrome 74 yaklaşımı)', ua: ANDROID9_WEBVIEW, cpu: 1 },
+    { ag: 'Yavaş 3G (400 kb/s, 2 sn)', tarayici: 'Android 9 WebView (Chrome 74 yaklaşımı)', ua: ANDROID9_WEBVIEW, cpu: 1 },
   ] as const;
   for (const sayfa of sayfalar) {
     for (const d of durumlar) {
@@ -63,12 +71,12 @@ test('açılış süreleri', async ({ browser }) => {
         const baglam = await browser.newContext({ viewport: { width: 412, height: 915 }, isMobile: true, hasTouch: true, deviceScaleFactor: 2.625, userAgent: d.ua ?? devices['Pixel 7'].userAgent });
         if (d.ua) await chrome74Yaklasimi(baglam);
         const page = await baglam.newPage();
-        olcumler.push(await olc(page, sayfa.yol, sayfa.metin, AG[d.ag]));
+        olcumler.push(await olc(page, sayfa.yol, sayfa.metin, AG[d.ag], d.cpu));
         await baglam.close();
       }
       const sn = (ms: number) => `${(ms / 1000).toFixed(1).replace('.', ',')} sn`;
       satirlar.push(
-        `| ${sayfa.ad} | ${d.ag} · ${d.tarayici} | ${sn(ortanca(olcumler.map((o) => o.ilkMetin)))} | ${sn(ortanca(olcumler.map((o) => o.hazir)))} | ${Math.round(ortanca(olcumler.map((o) => o.js)) / 1024)} KB |`,
+        `| ${sayfa.ad} | ${d.ag} · ${d.tarayici} | ${sn(ortanca(olcumler.map((o) => o.ilkMetin)))} | ${sn(ortanca(olcumler.map((o) => o.hazir)))} | ${Math.round(ortanca(olcumler.map((o) => o.js)) / 1024)} KB | ${Math.round(ortanca(olcumler.map((o) => o.font)) / 1024)} KB | ${Math.max(...olcumler.map((o) => o.rpc))} |`,
       );
     }
   }
