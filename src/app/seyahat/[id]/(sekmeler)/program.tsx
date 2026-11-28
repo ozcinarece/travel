@@ -1455,14 +1455,13 @@ function ProgramSekmesi({
         acik={nereKaliyorAcik}
         seyahat={seyahat}
         geceSayisi={Math.max(1, gunler.length - 1)}
+        konaklamalar={konaklamalar}
         onKapat={() => setNereKaliyorAcik(false)}
         onSimdiDegil={() => {
           setNereKaliyorAcik(false);
           otelSeridiniGizle();
         }}
-        onKaydet={async (otel) => {
-          await tumGunlereOtel.mutateAsync(otel);
-        }}
+        onKaydet={(otel) => tumGunlereOtel.mutateAsync(otel)}
         onAyriSec={() => {
           setNereKaliyorAcik(false);
           router.push({ pathname: '/seyahat/[id]/geceler', params: { id: seyahat.id } });

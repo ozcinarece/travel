@@ -2,7 +2,7 @@
 // yakaladığı için (özellikle Android) sayfa yalnız tutamaktan iniyordu. Çözüm: sayfa gövdesinde gesture-handler Pan'ı, içteki
 // kaydırma görünümünün yerel jestiyle EŞZAMANLI çalışır; içerik en üstteyken aşağı çekiş sayfayı taşır, değilse önce içerik kayar.
 // Sayfada aşağı çekmeyi kullanan başka bir işlev (ör. Program'da ≡ ile sıralama) `useSayfaKilidi` ile önceliği alır.
-import { createContext, useContext, useEffect, useMemo, useRef, useState, type ReactElement, type ReactNode } from 'react';
+import { createContext, useContext, useEffect, useMemo, useRef, useState, type ReactElement, type ReactNode, type Ref } from 'react';
 import { Animated, ScrollView, StyleSheet, TextInput, type LayoutChangeEvent, type NativeScrollEvent, type NativeSyntheticEvent, type ScrollViewProps, type StyleProp, type TextInputProps, type ViewStyle } from 'react-native';
 import { Gesture, GestureDetector, type NativeGesture, type PanGesture } from 'react-native-gesture-handler';
 
@@ -108,12 +108,13 @@ export function SayfaKaydirmasi({ children }: { children: ReactElement }) {
 }
 
 /** Sayfa gövdesinin dikey ScrollView'u: konumunu bildirir ve sayfanın çekiş jestine bağlıdır (en üstteyken aşağı çekiş sayfayı taşır). */
-export function SayfaKaydirici({ onScroll, ...p }: ScrollViewProps) {
+export function SayfaKaydirici({ onScroll, ref, ...p }: ScrollViewProps & { ref?: Ref<ScrollView> }) {
   const kaydirma = useSayfaKaydirma();
   return (
     <SayfaKaydirmasi>
       <ScrollView
         {...p}
+        ref={ref}
         onScroll={(e) => {
           kaydirma(e);
           onScroll?.(e);
