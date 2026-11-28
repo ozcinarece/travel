@@ -3634,12 +3634,12 @@ reset role;
 select pg_temp.hata_bekle($$update public.places set lat = null where place_id = 'ChIJ_262_taze'$$, '23514');
 select pg_temp.hata_bekle($$update public.trips set lng = null where id = '26200000-0000-4000-8000-000000000020'$$, '23514');
 select pg_temp.hata_bekle($$update public.stays set lat = null where label = 'Pinim'$$, '23514');
--- Kullanıcının kendi koordinat değişikliği akışa yine düşer (işaret yalnız sistem yenilemesinde).
+-- #330: kullanıcının kendi koordinat değişikliği de artık akışa düşmez (koordinat `changes`'a hiç yazılmaz).
 update public.places set lat = 40.25 where place_id = 'ChIJ_262_esik';
 do $$
 begin
-  assert exists (select 1 from public.changes where trip_id::text like '26200000-%' and entity = 'places' and field = 'lat'),
-    '#262: normal koordinat değişikliği akışa düşer';
+  assert not exists (select 1 from public.changes where trip_id::text like '26200000-%' and entity = 'places' and field = 'lat'),
+    '#330: kullanıcının koordinat değişikliği akışa düşmez';
 end $$;
 set role authenticated;
 select pg_temp.as_user('26200000-0000-4000-8000-000000000001');
@@ -5078,5 +5078,117 @@ delete from public.trips where id::text like '57800000-0000-4000-8000-0000000000
 delete from public.olaylar where user_id in (:PA, :PB, :PC, :PG);
 delete from auth.users where id in (:PA, :PB, :PC, :PG);
 do $$ begin assert (select count(*) from public.istek_iller) = 0, '#578: hesap silinince istekler de silinir'; end $$;
+
+-- ---------------------------------------------------------------- #330: değişiklik geçmişinde (`changes`) Google koordinatı yok
+-- KK1: `log_change` koordinatı yazmaz. KK2: eski satırda koordinat boşalır, satır silinmez. KK3: gece işi 30 günü jsonb'deki
+-- damgadan (yoksa `at`'tan) sayar; "Seyahatime al" kopyası (eski damga, yeni `at`) 30 günü geçmiş sayılır.
+-- Dosyanın sonunda: yukarıdaki bütün testlerin (paylasimdan_al dahil) tetikleyiciyle yazdığı satırlarda da koordinat yok.
+do $$
+begin
+  assert not exists (select 1 from public.changes c
+    where (c.field in ('lat', 'lng', 'hotel_lat', 'hotel_lng') and (c.old is not null or c.new is not null))
+       or c.old ?| array['lat', 'lng', 'hotel_lat', 'hotel_lng'] or c.new ?| array['lat', 'lng', 'hotel_lat', 'hotel_lng']),
+    '#330 KK1: hiçbir test akışı (Seyahatime al dahil) changes''a koordinat yazmadı';
+end $$;
+insert into auth.users (id, is_anonymous) values ('33000000-0000-4000-8000-000000000001', false);
+select pg_temp.as_user('33000000-0000-4000-8000-000000000001');
+insert into public.trips (id, owner_id, city_place_id, city_label, lat, lng, tz, google_fetched_at) values
+  ('33000000-0000-4000-8000-000000000010', '33000000-0000-4000-8000-000000000001', 'ChIJ_330_sehir', 'Geçmiş şehri', 40, 30, 'Europe/Istanbul', now());
+-- KK1: ekleme, güncelleme ve silme; places, trips (şehir + otel) ve stays.
+insert into public.places (id, trip_id, place_id, lat, lng, note) values
+  ('33000000-0000-4000-8000-000000000020', '33000000-0000-4000-8000-000000000010', 'ChIJ_330_yer', 40.1, 30.1, 'not');
+update public.places set lat = 40.2, lng = 30.2, note = 'yeni not' where id = '33000000-0000-4000-8000-000000000020';
+update public.trips set lat = 40.3, lng = 30.3, hotel_place_id = 'ChIJ_330_otel', hotel_lat = 40.4, hotel_lng = 30.4, hotel_fetched_at = now()
+  where id = '33000000-0000-4000-8000-000000000010';
+insert into public.stays (trip_id, place_id, lat, lng, label, google_fetched_at) values
+  ('33000000-0000-4000-8000-000000000010', 'ChIJ_330_konak', 40.5, 30.5, 'Konak', now());
+update public.stays set lat = 40.55, lng = 30.55 where place_id = 'ChIJ_330_konak';
+delete from public.stays where place_id = 'ChIJ_330_konak';
+delete from public.places where id = '33000000-0000-4000-8000-000000000020';
+do $$
+declare
+  t constant uuid := '33000000-0000-4000-8000-000000000010';
+  k constant text[] := array['lat', 'lng', 'hotel_lat', 'hotel_lng'];
+begin
+  assert not exists (select 1 from public.changes c where c.trip_id = t and (c.field = any (k) or c.old ?| k or c.new ?| k)),
+    '#330 KK1: tetikleyici koordinatı changes''a yazmaz';
+  assert exists (select 1 from public.changes c where c.trip_id = t and c.entity = 'places' and c.field is null and c.old is null
+    and c.new ->> 'place_id' = 'ChIJ_330_yer' and c.new ->> 'note' = 'not' and c.new ? 'google_fetched_at'),
+    '#330 KK1: eklemenin geri kalanı yazılır';
+  assert exists (select 1 from public.changes c where c.trip_id = t and c.entity = 'places' and c.field is null and c.new is null
+    and c.old ->> 'note' = 'yeni not'), '#330 KK1: silme kaydı kalır';
+  assert exists (select 1 from public.changes c where c.trip_id = t and c.entity = 'places' and c.field = 'note'),
+    '#330 KK1: aynı güncellemedeki başka alan yazılır';
+  assert exists (select 1 from public.changes c where c.trip_id = t and c.entity = 'trips' and c.field = 'hotel_place_id'),
+    '#330 KK1: otel değişikliği akışa düşer (koordinatsız)';
+  assert (select count(*) from public.changes c where c.trip_id = t and c.entity = 'stays') = 2
+    and exists (select 1 from public.changes c where c.trip_id = t and c.entity = 'stays' and c.old is null and c.new ->> 'label' = 'Konak'),
+    '#330 KK1: stays ekleme ve silme yazılır, yalnız koordinat güncellemesi yazılmaz';
+end $$;
+-- KK2/KK3: tetikleyicinin eski sürümünün yazdığı satırlar (elle).
+insert into public.changes (trip_id, user_id, entity, entity_id, field, old, new, at) values
+  -- a: 31 günlük alan satırı → gece boşalır.
+  ('33000000-0000-4000-8000-000000000010', '33000000-0000-4000-8000-000000000001', 'places', 'k330-a', 'lat', '40.1', '40.2', now() - interval '31 days'),
+  -- b: 29 günlük alan satırı → gece kalır, tek seferlik temizlik boşaltır.
+  ('33000000-0000-4000-8000-000000000010', '33000000-0000-4000-8000-000000000001', 'trips', 'k330-b', 'hotel_lat', '40.1', '40.2', now() - interval '29 days'),
+  -- c: "Seyahatime al" kopyası: `at` bugün, kopyalanan google_fetched_at 31 gün → gece boşalır.
+  ('33000000-0000-4000-8000-000000000010', '33000000-0000-4000-8000-000000000001', 'places', 'k330-c', null, null,
+    jsonb_build_object('place_id', 'ChIJ_330_kopya', 'lat', 40.6, 'lng', 30.6, 'google_fetched_at', now() - interval '31 days', 'note', 'kopya'), now()),
+  -- d: kopya, damga 29 gün → gece kalır.
+  ('33000000-0000-4000-8000-000000000010', '33000000-0000-4000-8000-000000000001', 'places', 'k330-d', null, null,
+    jsonb_build_object('place_id', 'ChIJ_330_taze', 'lat', 40.7, 'lng', 30.7, 'google_fetched_at', now() - interval '29 days'), now()),
+  -- e: damgasız silme satırı, `at` 31 gün → gece boşalır (`at` yedeği).
+  ('33000000-0000-4000-8000-000000000010', '33000000-0000-4000-8000-000000000001', 'stays', 'k330-e', null,
+    jsonb_build_object('label', 'Pin', 'lat', 40.8, 'lng', 30.8), null, now() - interval '31 days'),
+  -- f: şehir damgası taze, otel damgası 31 gün → yalnız otel anahtarları çıkar.
+  ('33000000-0000-4000-8000-000000000010', '33000000-0000-4000-8000-000000000001', 'trips', 'k330-f', null, null,
+    jsonb_build_object('lat', 40.9, 'lng', 30.9, 'google_fetched_at', now(), 'hotel_lat', 41, 'hotel_lng', 31, 'hotel_fetched_at', now() - interval '31 days'), now()),
+  -- g: koordinatsız eski satır → dokunulmaz.
+  ('33000000-0000-4000-8000-000000000010', '33000000-0000-4000-8000-000000000001', 'members', 'k330-g', null, null, '{"role": "editor"}', now() - interval '40 days');
+set role service_role;
+do $$
+declare
+  t constant uuid := '33000000-0000-4000-8000-000000000010';
+  k constant text[] := array['lat', 'lng', 'hotel_lat', 'hotel_lng'];
+  g public.gece_temizligi_kayit;
+  satir_once bigint := (select count(*) from public.changes where trip_id = t);
+  g_once jsonb := (select new from public.changes where entity_id = 'k330-g');
+begin
+  -- KK3: gece işi.
+  g := public.gece_temizligi();
+  assert g.degisiklik = 4, '#330 KK3: gece a, c, e, f''yi boşaltır: ' || row_to_json(g)::text;
+  assert (select old is null and new is null and field = 'lat' from public.changes where entity_id = 'k330-a'), '#330 KK3: 31 günlük alan satırı boşalır';
+  assert (select old = '40.1'::jsonb from public.changes where entity_id = 'k330-b'), '#330 KK3: 29 günlük alan satırı kalır';
+  assert (select not new ?| k and new ->> 'note' = 'kopya' and new ->> 'place_id' = 'ChIJ_330_kopya' from public.changes where entity_id = 'k330-c'),
+    '#330 KK3: Seyahatime al kopyası (eski damga, yeni at) 30 günü geçmiş sayılır; koordinat dışı kalır';
+  assert (select new ? 'lat' from public.changes where entity_id = 'k330-d'), '#330 KK3: 29 günlük damgalı kopya kalır';
+  assert (select not old ?| k and old ->> 'label' = 'Pin' and new is null from public.changes where entity_id = 'k330-e'),
+    '#330 KK3: damgasız satır at''tan sayılır';
+  assert (select new ? 'lat' and new ? 'lng' and not new ? 'hotel_lat' and not new ? 'hotel_lng' from public.changes where entity_id = 'k330-f'),
+    '#330 KK3: otel kendi damgasıyla, şehir kendi damgasıyla';
+  assert (select count(*) from public.changes where trip_id = t) = satir_once, '#330 KK2: gece işi satır silmez';
+  -- KK2: tek seferlik temizlik (20261217100000 ile aynı çağrı): yaşa bakmadan kalanlar (b, d, f) boşalır.
+  assert public.changes_koordinat_bosalt(null) = 3, '#330 KK2: tek seferlik temizlik kalan üç satırı boşaltır';
+  assert not exists (select 1 from public.changes c
+    where (c.field = any (k) and (c.old is not null or c.new is not null)) or c.old ?| k or c.new ?| k), '#330 KK2: hiçbir satırda koordinat kalmaz';
+  assert (select old is null and new is null and field = 'hotel_lat' from public.changes where entity_id = 'k330-b'), '#330 KK2: alan satırı kalır, değeri boş';
+  assert (select new ->> 'place_id' = 'ChIJ_330_taze' from public.changes where entity_id = 'k330-d'), '#330 KK2: kopya satırının geri kalanı kalır';
+  assert (select new = g_once from public.changes where entity_id = 'k330-g'), '#330 KK2: koordinatsız satıra dokunulmaz';
+  assert (select count(*) from public.changes where trip_id = t) = satir_once, '#330 KK2: satır sayısı aynı (Sohbet)';
+  assert public.changes_koordinat_bosalt(null) = 0 and public.changes_koordinat_bosalt(30) = 0, '#330: ikinci çalışma boş';
+end $$;
+select pg_temp.hata_bekle($$select public.changes_koordinat_bosalt(29)$$, '22023');
+select pg_temp.hata_bekle($$select public.changes_koordinat_bosalt(61)$$, '22023');
+reset role;
+set role authenticated;
+select pg_temp.as_user('33000000-0000-4000-8000-000000000001');
+select pg_temp.hata_bekle($$select public.changes_koordinat_bosalt(30)$$, '42501');
+select pg_temp.hata_bekle($$select public.changes_koordinat_suz('{}'::jsonb, now(), null)$$, '42501');
+reset role;
+set role anon;
+select pg_temp.hata_bekle($$select public.changes_koordinat_bosalt(30)$$, '42501');
+reset role;
+delete from public.trips where id = '33000000-0000-4000-8000-000000000010';
+delete from auth.users where id = '33000000-0000-4000-8000-000000000001';
 
 \echo 'rls_test: TÜM TESTLER GEÇTİ'
