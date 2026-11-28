@@ -8,7 +8,7 @@ import { yeniGunUclari } from '@/features/konaklama/plan';
 import { supabase } from '@/lib/supabase';
 import type { SehirSecimi } from '@/lib/tipler';
 
-import { gunFarki, gunSayisiSinirla, type Aralik } from './sihirbaz';
+import { gunFarki, gunSayisiSinirla, sehirKonumu, type Aralik } from './sihirbaz';
 
 export { gunSayisiSinirla, TARIHSIZ_EN_AZ, TARIHSIZ_EN_COK, TARIHSIZ_VARSAYILAN } from './sihirbaz';
 
@@ -101,11 +101,10 @@ export async function taslakSehriniKur(seyahatId: string, sehir: SehirSecimi, ad
       city_place_id: sehir.place_id,
       city_label: sehir.ad.slice(0, 80),
       country_code: sehir.country_code,
-      lat: sehir.lat,
-      lng: sehir.lng,
       tz: sehir.tz,
-      // CLAUDE.md: Google'dan gelen koordinatın damgası (≤ 30 gün, gece temizliği buna bakar).
-      google_fetched_at: new Date().toISOString(),
+      // CLAUDE.md: Google'dan gelen koordinatın damgası (≤ 30 gün, gece temizliği buna bakar). #642 KK3: içerik şehrinde şehrin
+      // kendi damgası, now() değil.
+      ...sehirKonumu(sehir),
     })
     .eq('id', seyahatId);
   if (error) throw error;

@@ -73,7 +73,8 @@ export function useRehberBolumleri(sehirId: string | undefined) {
   });
 }
 
-export type MekanAdi = { ad: string; kategori: string | null; lat: number | null; lng: number | null };
+/** #642 KK2: `google_fetched_at` koordinatın alınma anı; damgasız ya da 30 günü geçmiş koordinat yeni yere yazılmaz. */
+export type MekanAdi = { ad: string; kategori: string | null; lat: number | null; lng: number | null; google_fetched_at: string };
 
 /**
  * Kayıtta yazıdaki mekanlar `icerik_mekanlari`na (yazı sırasıyla); `yerler`de olmayanlar taslak yer olarak açılır
@@ -82,7 +83,11 @@ export type MekanAdi = { ad: string; kategori: string | null; lat: number | null
 export async function mekanlariYaz(sahipTur: 'rehber' | 'gezi' | 'yer', sahipId: string, baglar: MekanBagi[], bilinen: Record<string, MekanAdi>): Promise<number> {
   const mekanlar = baglar.map((b) => {
     const y = bilinen[b.place_id];
-    return { place_id: b.place_id, bicim: b.bicim, ...(y ? { ad: b.ad || y.ad, kategori: y.kategori, lat: y.lat, lng: y.lng } : {}) };
+    return {
+      place_id: b.place_id,
+      bicim: b.bicim,
+      ...(y ? { ad: b.ad || y.ad, kategori: y.kategori, lat: y.lat, lng: y.lng, google_fetched_at: y.google_fetched_at } : {}),
+    };
   });
   return (await hataVer(supabase.rpc('icerik_mekanlari_yaz', { p_sahip_tur: sahipTur, p_sahip_id: sahipId, p_mekanlar: mekanlar }))) as number;
 }
@@ -135,7 +140,10 @@ export async function rehberTaslakKaydet(
   return (await hataVer(supabase.rpc('rehber_taslak_kaydet', { p_sehir: sehirId, p_bolumler: bolumler, p_bilinen: bilinen, p_neden: neden, p_onceki: onceki }))) as string;
 }
 
-/** Yayınla: `beklenen` damgalı taslak canlıya (değiştiyse 40001); mekan bağlantıları yazılır. Döner: açılan taslak yer sayısı. */
-export async function rehberYayinla(sehirId: string, beklenen: string): Promise<number> {
-  return (await hataVer(supabase.rpc('rehber_yayinla', { p_sehir: sehirId, p_beklenen: beklenen }))) as number;
+/**
+ * Yayınla: `beklenen` damgalı taslak canlıya (değiştiyse 40001); mekan bağlantıları yazılır. `adlar`: yeni açılacak yerin adı
+ * (#642: taslakta saklanmaz). Döner: açılan taslak yer sayısı.
+ */
+export async function rehberYayinla(sehirId: string, beklenen: string, adlar: Record<string, string> = {}): Promise<number> {
+  return (await hataVer(supabase.rpc('rehber_yayinla', { p_sehir: sehirId, p_beklenen: beklenen, p_adlar: adlar }))) as number;
 }

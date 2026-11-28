@@ -1,6 +1,6 @@
 // #98: seyahat kurma sihirbazı — saf yardımcılar (ekrandan bağımsız; test edilir). Kanvas TripWizard14.
 import { AYLAR, GUNLER_KISA, haftaGunu, parcala, tarihEkle, type Tarih } from '@/lib/takvim';
-import type { Gun } from '@/lib/tipler';
+import type { Gun, SehirSecimi } from '@/lib/tipler';
 
 // #139 KK1: 3 adım — Nereye → Ne zaman → Neleri görmek istersin. Otel Program'a, davet Plan hazır'a taşındı.
 export const ADIMLAR = ['nereye', 'nezaman', 'onerilenler'] as const;
@@ -116,4 +116,21 @@ export function geceninOteli(gece: Gece): string | null {
 /** KK1 ilerleme: 5 nokta, aktif uzun. */
 export function adimIndeksi(a: Adim): number {
   return ADIMLAR.indexOf(a);
+}
+
+const OTUZ_GUN_MS = 30 * 24 * 60 * 60 * 1000;
+
+/**
+ * #642 KK3: seyahatin şehir koordinatı ve damgası. İçerik şehrinden seçimde damga şehrinki (`now()` değil); Google'dan yeni seçimde
+ * ve damgasız (osm/elle) şehirde şimdi. Gelecek tarihli damga şimdiye iner; 30 günü geçmiş damgada koordinat boş yazılır (seyahat
+ * #318'deki gibi şehir koordinatı boş açılır). `geziden_seyahat_ac` aynı kuralı sunucuda uygular.
+ */
+export function sehirKonumu(
+  sehir: Pick<SehirSecimi, 'lat' | 'lng' | 'google_fetched_at'>,
+  simdi: Date = new Date(),
+): { lat: number | null; lng: number | null; google_fetched_at: string } {
+  const damga = sehir.google_fetched_at ? new Date(sehir.google_fetched_at) : null;
+  const ms = damga && !Number.isNaN(damga.getTime()) ? Math.min(damga.getTime(), simdi.getTime()) : simdi.getTime();
+  const taze = ms > simdi.getTime() - OTUZ_GUN_MS;
+  return { lat: taze ? sehir.lat : null, lng: taze ? sehir.lng : null, google_fetched_at: new Date(ms).toISOString() };
 }

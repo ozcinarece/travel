@@ -113,7 +113,7 @@ export function YerEditoru({ yer, sehirler, liste }: { yer: YonetimYeri; sehirle
             fotoYukle={fotoYukle}
             onHata={setHata}
             onMekanSecildi={(y) => {
-              bilinen.current[y.place_id] = { ad: y.ad, kategori: y.primary_type, lat: y.lat, lng: y.lng };
+              bilinen.current[y.place_id] = { ad: y.ad, kategori: y.primary_type, lat: y.lat, lng: y.lng, google_fetched_at: new Date().toISOString() };
             }}
           />
         ) : null}

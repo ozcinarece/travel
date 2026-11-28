@@ -3,6 +3,7 @@
 import { type QueryClient, useMutation, useQueryClient } from '@tanstack/react-query';
 
 import { yeniGunUclari } from '@/features/konaklama/plan';
+import { sehirKonumu } from '@/features/sihirbaz/sihirbaz';
 import { useOturum } from '@/lib/oturum';
 import { supabase } from '@/lib/supabase';
 import { tarihEkle } from '@/lib/takvim';
@@ -252,7 +253,8 @@ export function useGezidenSeyahatAc() {
       // #118 KK4: hiçbir mekan çözülemediyse boş seyahat açılmaz; sayfa açık kalır ve sebep söylenir.
       if (govde.mekanlar.length === 0) return { seyahatId: null, gun: gunler.length, eklenenDurak: 0, eklenenMekan: 0, cozumsuz: cozumsuzler.length, cozumsuzler };
       const { data, error } = await supabase.rpc('geziden_seyahat_ac', {
-        p_seyahat: { name: gezi.baslik, city_place_id: sehir.place_id, city_label: sehir.ad, country_code: sehir.country_code, lat: sehir.lat, lng: sehir.lng, tz: sehir.tz, ...yeniSeyahatTarihleri(baslangic, gunSayisi) },
+        // #642 KK3: şehir koordinatı şehrin damgasıyla (sunucu da aynı Google kimlikli içerik şehrinin damgasına bakar).
+        p_seyahat: { name: gezi.baslik, city_place_id: sehir.place_id, city_label: sehir.ad, country_code: sehir.country_code, ...sehirKonumu(sehir), tz: sehir.tz, ...yeniSeyahatTarihleri(baslangic, gunSayisi) },
         p_gun_sayisi: gunler.length,
         p_mekanlar: govde.mekanlar,
         p_duraklar: govde.duraklar,

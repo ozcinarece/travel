@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { useOturum } from '@/lib/oturum';
 import { tumGunlereOtel } from '@/features/konaklama/sorgular';
+import { sehirKonumu } from '@/features/sihirbaz/sihirbaz';
 import { supabase } from '@/lib/supabase';
 import type { OtelSecimi, Seyahat, SeyahatOzet, YeniSeyahat } from '@/lib/tipler';
 
@@ -48,8 +49,8 @@ export function useSeyahatOlustur() {
           city_place_id: yeni.sehir.place_id,
           city_label: yeni.sehir.ad.slice(0, 80),
           country_code: yeni.sehir.country_code,
-          lat: yeni.sehir.lat,
-          lng: yeni.sehir.lng,
+          // #642 KK3: içerik şehrinde koordinat şehrin kendi damgasıyla (now() değil).
+          ...sehirKonumu(yeni.sehir),
           tz: yeni.sehir.tz,
           start_date: yeni.start_date,
           end_date: yeni.end_date,

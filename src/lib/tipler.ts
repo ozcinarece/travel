@@ -124,6 +124,11 @@ export type SehirSecimi = {
   lng: number | null;
   tz: string;
   country_code: string | null;
+  /**
+   * #642 KK3: içerik şehrinden seçimde şehrin koordinat damgası (`sehirler.google_fetched_at`; osm/elle şehirde null). Google'dan
+   * yeni seçimde yok (koordinat şimdi alındı). Seyahat bu damgayla yazılır (`sihirbaz.sehirKonumu`).
+   */
+  google_fetched_at?: string | null;
 };
 
 export type YeniSeyahat = {
@@ -153,6 +158,8 @@ export type Sehir = {
   place_id?: string | null;
   tz?: string | null;
   ulke_kodu?: string | null;
+  /** #642 KK3: google_30g koordinatın alınma anı (osm/elle şehirde null); seyahat şehri bu damgayı alır. */
+  google_fetched_at?: string | null;
 };
 
 /** #100 B: şehir rehberi bölümü (backoffice yazar; yayınlı şehir okunur). */
