@@ -2,7 +2,7 @@
 # #550: uygulamanın web çıktısı. İki derleme:
 #   1. uygulamanın tamamı (rota kökü src/app),
 #   2. web davet girişi: yalnız /r/{token} ve /r/g/{token} (WEB_GIRIS=davet → rota kökü src/davet-web; app.config.ts).
-# Sonra küçük giriş dist'e katılır (JS'i Chrome 74 / Safari 14 için düşürülür), davet sayfalarına açılış katmanı yazılır
+# Sonra küçük giriş dist'e katılır (iki girişin de JS'i Chrome 74 / Safari 14 için düşürülür), davet sayfalarına açılış katmanı yazılır
 # (#549) ve dinamik rotalar `_redirects` ile kopyalanır (#137). web-yayin ve uçtan uca testler (e2e/) bunu kullanır.
 # Kullanım: bash scripts/web-derle.sh [dist]
 set -euo pipefail

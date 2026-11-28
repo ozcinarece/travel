@@ -1,8 +1,11 @@
-// #550: web davet girişini (/r/{token}, /r/g/{token}) uygulamanın web çıktısına katar.
+// #550: web davet girişini (/r/{token}, /r/g/{token}) uygulamanın web çıktısına katar ve web çıktısının tüm JS'ini eski
+// tarayıcılar için düşürür.
 // Web yayını iki `expo export -p web` yapar: uygulamanın tamamı (dist) ve yalnız davet rotalarını içeren küçük giriş
 // (`WEB_GIRIS=davet`, rota kökü src/davet-web; dist-davet). Bu betik:
-//   1. küçük girişin JS'ini eski tarayıcılar için düşürür (KK4: Chrome 74 = Android 9 WebView, Safari 14; `?.`, `??`,
-//      `??=`/`||=`/`&&=`, sınıf alanları) ve her dosyanın ES2019 olarak ayrıştırıldığını doğrular,
+//   1. iki girişin de JS'ini eski tarayıcılar için düşürür (KK4: Chrome 74 = Android 9 WebView, Safari 14; `?.`, `??`,
+//      `??=`/`||=`/`&&=`, sınıf alanları) ve her dosyanın o tarayıcılarda ayrıştırıldığını doğrular. Uygulama girişi de
+//      düşürülür: davetten Google dönüşü (/giris) ve seyahat tam uygulamada açılır; düşürmek paketi büyütmüyor (terser
+//      yeniden küçülttüğü için gzip ~%2 küçülüyor),
 //   2. JS parçalarını ve eksik varlıkları dist'e kopyalar (adlar içerik özetli; çakışma olmaz),
 //   3. dist'teki davet sayfalarını küçük girişin sayfalarıyla değiştirir; sayfalara girişin fontları için `preload` yazar
 //      (KK2: fontlar JS'ten sonra değil, JS ile birlikte iner; açılış kapısı fontları bekler).
@@ -20,11 +23,15 @@ const presetGerek = createRequire(createRequire(import.meta.url).resolve('babel-
 const babel = presetGerek('@babel/core');
 const gerek = createRequire(import.meta.url);
 const acorn = gerek('acorn');
+const walk = gerek('acorn-walk');
 // Metro'nun kendi küçültücüsü (metro-minify-terser); Babel'in açtığı yardımcı değişkenleri yeniden sıkıştırır.
 const { minify } = gerek('terser');
 
 export const JS_DIZINI = '_expo/static/js/web';
-/** Chrome 74 ve Safari 14'ün ikisinin de tam ayrıştırdığı sürüm (ES2020'nin `?.`/`??`'u Chrome 80'de geldi). */
+/**
+ * Chrome 74 ve Safari 14'ün ikisinin de ayrıştırdığı sözdizimi: ES2019 artı BigInt değişmezi (`5000n`; Chrome 67, Safari 14).
+ * ES2020'nin `?.`/`??`'u Chrome 80'de geldi: ES2020 olarak ayrıştırılır, bu ikisi ayrıca reddedilir.
+ */
 export const HEDEF_ES = 2019;
 
 const EKLENTILER = [
@@ -37,14 +44,22 @@ const EKLENTILER = [
   ['@babel/plugin-transform-private-property-in-object', { loose: true }],
 ].map(([ad, secenek]) => [presetGerek(ad), secenek]);
 
-/** Kod ES2019 olarak ayrıştırılamıyorsa hatayı (konumuyla) fırlatır. */
+/** Kod Chrome 74 / Safari 14'te (ES2019 + BigInt değişmezi) ayrıştırılamıyorsa hatayı (konumuyla) fırlatır. */
 export function ayristirilabilir(kod, ad = 'kod') {
+  const hata = (mesaj, pos) => {
+    const konum = typeof pos === 'number' ? ` …${kod.slice(Math.max(0, pos - 40), pos + 40)}…` : '';
+    return new Error(`${ad}: ES${HEDEF_ES} olarak ayrıştırılamadı (${mesaj})${konum}`);
+  };
+  let agac;
   try {
-    acorn.parse(kod, { ecmaVersion: HEDEF_ES, sourceType: 'script', allowHashBang: true });
+    agac = acorn.parse(kod, { ecmaVersion: 2020, sourceType: 'script', allowHashBang: true });
   } catch (e) {
-    const konum = typeof e.pos === 'number' ? ` …${kod.slice(Math.max(0, e.pos - 40), e.pos + 40)}…` : '';
-    throw new Error(`${ad}: ES${HEDEF_ES} olarak ayrıştırılamadı (${e.message})${konum}`);
+    throw hata(e.message, e.pos);
   }
+  walk.full(agac, (dugum) => {
+    if (dugum.type === 'ChainExpression') throw hata('`?.` (ES2020)', dugum.start);
+    if (dugum.type === 'LogicalExpression' && dugum.operator === '??') throw hata('`??` (ES2020)', dugum.start);
+  });
 }
 
 /** Yeni sözdizimini eski karşılığına çevirir, ES2019 hedefiyle yeniden küçültür ve ES2019 ayrıştırmasını doğrular. */
@@ -82,7 +97,7 @@ export function fontOnYukle(html, fontlar) {
   return html.slice(0, yer) + satirlar + html.slice(yer);
 }
 
-/** Küçük girişi dist'e katar; yazılan JS dosyalarını döner. */
+/** Küçük girişi dist'e katar, uygulamanın JS'ini de düşürür; davet girişinden yazılan JS dosyalarını döner. */
 export async function birlestir(dist, davet) {
   const jsKaynak = path.join(davet, JS_DIZINI);
   if (!existsSync(jsKaynak)) throw new Error(`davet girişinde JS yok: ${jsKaynak}`);
@@ -91,6 +106,12 @@ export async function birlestir(dist, davet) {
   }
   const jsHedef = path.join(dist, JS_DIZINI);
   mkdirSync(jsHedef, { recursive: true });
+  // KK4: uygulamanın kendi JS'i (giriş + tembel parçalar) yerinde düşürülür.
+  for (const ad of readdirSync(jsHedef)) {
+    if (!ad.endsWith('.js')) continue;
+    const dosya = path.join(jsHedef, ad);
+    writeFileSync(dosya, await sozdizimiDusur(readFileSync(dosya, 'utf8'), ad));
+  }
   const yazilan = [];
   for (const ad of readdirSync(jsKaynak)) {
     if (!ad.endsWith('.js')) continue; // kaynak haritaları yayına girmez

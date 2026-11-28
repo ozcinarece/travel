@@ -5,6 +5,7 @@
 import { devices, expect, test, type Page } from '@playwright/test';
 
 import tr from '../src/i18n/tr.json';
+import { ANDROID9_WEBVIEW, chrome74Yaklasimi } from './eskiTarayici';
 import { DAVET_TOKENI, PAYLASIM_TOKENI, supabaseTaklidi } from './supabaseTaklidi';
 
 test.skip(!process.env.OLCUM, 'yalnız ölçüm: OLCUM=1');
@@ -14,9 +15,6 @@ const AG = {
   'Hızlı 3G (1,6 Mb/s, 562 ms)': { indir: (1.6e6 / 8) * 0.9, yukle: (750e3 / 8) * 0.9, gecikme: 562.5 },
   'Yavaş 3G (400 kb/s, 2 sn)': { indir: (400e3 / 8) * 0.9, yukle: (400e3 / 8) * 0.9, gecikme: 2000 },
 } as const;
-const ANDROID9_WEBVIEW =
-  'Mozilla/5.0 (Linux; Android 9; SM-G960F Build/PPR1.180610.011; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/74.0.3729.157 Mobile Safari/537.36';
-
 type Sonuc = { ilkMetin: number; hazir: number; js: number };
 
 async function olc(page: Page, yol: string, hazirMetin: string, ag: (typeof AG)[keyof typeof AG]): Promise<Sonuc> {
@@ -55,14 +53,15 @@ test('açılış süreleri', async ({ browser }) => {
   const durumlar = [
     { ag: 'Hızlı 3G (1,6 Mb/s, 562 ms)', tarayici: 'Pixel 7 Chromium', ua: undefined },
     { ag: 'Yavaş 3G (400 kb/s, 2 sn)', tarayici: 'Pixel 7 Chromium', ua: undefined },
-    { ag: 'Hızlı 3G (1,6 Mb/s, 562 ms)', tarayici: 'Android 9 WebView UA', ua: ANDROID9_WEBVIEW },
-    { ag: 'Yavaş 3G (400 kb/s, 2 sn)', tarayici: 'Android 9 WebView UA', ua: ANDROID9_WEBVIEW },
+    { ag: 'Hızlı 3G (1,6 Mb/s, 562 ms)', tarayici: 'Android 9 WebView (Chrome 74 yaklaşımı)', ua: ANDROID9_WEBVIEW },
+    { ag: 'Yavaş 3G (400 kb/s, 2 sn)', tarayici: 'Android 9 WebView (Chrome 74 yaklaşımı)', ua: ANDROID9_WEBVIEW },
   ] as const;
   for (const sayfa of sayfalar) {
     for (const d of durumlar) {
       const olcumler: Sonuc[] = [];
       for (let i = 0; i < 3; i++) {
         const baglam = await browser.newContext({ viewport: { width: 412, height: 915 }, isMobile: true, hasTouch: true, deviceScaleFactor: 2.625, userAgent: d.ua ?? devices['Pixel 7'].userAgent });
+        if (d.ua) await chrome74Yaklasimi(baglam);
         const page = await baglam.newPage();
         olcumler.push(await olc(page, sayfa.yol, sayfa.metin, AG[d.ag]));
         await baglam.close();

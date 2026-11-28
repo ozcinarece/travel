@@ -18,6 +18,15 @@ test('KK4: ?., ??, ??=, sınıf alanları ve statik blok ES2019 karşılığına
   assert.deepEqual(sonuc, [1, 3, 4, 1, 2, 3]);
 });
 
+test('KK4: BigInt değişmezi (Chrome 67, Safari 14) kabul edilir; ?. ve ?? reddedilir', async () => {
+  ayristirilabilir('var b=(BigInt(1)*5000n)/10000n;');
+  assert.throws(() => ayristirilabilir('var a={};var x=a?.b;'), /\?\./);
+  assert.throws(() => ayristirilabilir('var a=null;var x=a??1;'), /\?\?/);
+  assert.throws(() => ayristirilabilir('var a={};a.b??=1;'), /ES2019/);
+  const cikti = await sozdizimiDusur('var a={b:2};var x=a?.b??0n;');
+  ayristirilabilir(cikti);
+});
+
 test('birleştirme: JS ve davet sayfaları dist\'e, eksik varlık kopyalanır, var olan korunur', async () => {
   const kok = mkdtempSync(path.join(tmpdir(), 'davet-girisi-'));
   const dist = path.join(kok, 'dist');
@@ -28,7 +37,7 @@ test('birleştirme: JS ve davet sayfaları dist\'e, eksik varlık kopyalanır, v
   };
   yaz(path.join(dist, 'r/[token].html'), 'eski');
   yaz(path.join(dist, 'r/g/[token].html'), 'eski');
-  yaz(path.join(dist, JS_DIZINI, 'entry-a.js'), 'var buyuk=1;');
+  yaz(path.join(dist, JS_DIZINI, 'entry-a.js'), 'var buyuk=window.a?.b??1;');
   yaz(path.join(dist, 'assets/ortak.ttf'), 'dist');
   yaz(path.join(davet, 'r/[token].html'), '<html lang="tr"><head></head>davet</html>');
   yaz(path.join(davet, 'r/g/[token].html'), '<html lang="tr"><head></head>paylasim</html>');
@@ -43,7 +52,10 @@ test('birleştirme: JS ve davet sayfaları dist\'e, eksik varlık kopyalanır, v
   assert.equal(readFileSync(path.join(dist, 'r/[token].html'), 'utf8'), `<html lang="tr"><head>${onYukleme}</head>davet</html>`);
   assert.equal(readFileSync(path.join(dist, 'r/g/[token].html'), 'utf8'), `<html lang="tr"><head>${onYukleme}</head>paylasim</html>`);
   ayristirilabilir(readFileSync(path.join(dist, JS_DIZINI, 'entry-b.js'), 'utf8'));
-  assert.equal(readFileSync(path.join(dist, JS_DIZINI, 'entry-a.js'), 'utf8'), 'var buyuk=1;');
+  // Uygulamanın kendi JS'i de yerinde düşürülür (KK4: Google dönüşü /giris tam uygulamada açılır).
+  const uygulama = readFileSync(path.join(dist, JS_DIZINI, 'entry-a.js'), 'utf8');
+  ayristirilabilir(uygulama);
+  assert.doesNotMatch(uygulama, /\?\.|\?\?/);
   assert.ok(!existsSync(path.join(dist, JS_DIZINI, 'entry-b.js.map')));
   assert.equal(readFileSync(path.join(dist, 'assets/ortak.ttf'), 'utf8'), 'dist');
   assert.equal(readFileSync(path.join(dist, 'assets/yeni.png'), 'utf8'), 'png');

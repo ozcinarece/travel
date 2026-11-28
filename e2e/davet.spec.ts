@@ -3,6 +3,7 @@
 import { expect, test, type Page } from '@playwright/test';
 
 import tr from '../src/i18n/tr.json';
+import { ANDROID9_CHROME74, ANDROID9_WEBVIEW, chrome74Yaklasimi } from './eskiTarayici';
 import { DAVET_TOKENI, DEPO_ANAHTARI, PAYLASIM_HARITALI, PAYLASIM_TOKENI, SEYAHAT, YENI_SEYAHAT, oturum, supabaseTaklidi } from './supabaseTaklidi';
 
 /** Sayfanın indirdiği giriş (entry) JS dosyaları. */
@@ -118,5 +119,38 @@ test.describe('paylaşım /r/g/{token}', () => {
     await page.getByText(tr.paylasim.haritadaGor).click();
     await expect(page.getByTestId('paylasim-harita')).toBeVisible();
     await expect.poll(() => parcalar.length).toBe(1);
+  });
+});
+
+// KK4 / KK-ek3: Chrome 74 yaklaşımı: UA + Chrome 75+ yerleşikleri yok (e2e/eskiTarayici.ts).
+test.describe('Android 9 WebView (Chrome 74 yaklaşımı)', () => {
+  test.use({ userAgent: ANDROID9_WEBVIEW });
+
+  test('davet ve paylaşım özetleri hatasız açılır', async ({ page, context }) => {
+    await chrome74Yaklasimi(context);
+    const hatalar: string[] = [];
+    page.on('pageerror', (e) => hatalar.push(e.message));
+    await supabaseTaklidi(page);
+    await page.goto(`/r/g/${PAYLASIM_TOKENI}`);
+    await expect(page.getByText(tr.paylasim.seyahatimeAl)).toBeVisible();
+    await page.goto(`/r/${DAVET_TOKENI}`);
+    await expect(page.getByText(tr.davet.katilGoogle)).toBeVisible();
+    expect(hatalar).toEqual([]);
+  });
+});
+
+test.describe('Android 9 Chrome 74 tarayıcısı (yaklaşım)', () => {
+  test.use({ userAgent: ANDROID9_CHROME74 });
+
+  test('Google ile katıl → Google dönüşü (/giris, tam uygulama) → davetle_katil, hatasız', async ({ page, context }) => {
+    await chrome74Yaklasimi(context);
+    const hatalar: string[] = [];
+    page.on('pageerror', (e) => hatalar.push(e.message));
+    const cagrilar = await supabaseTaklidi(page);
+    await page.goto(`/r/${DAVET_TOKENI}`);
+    await page.getByText(tr.davet.katilGoogle).click();
+    await page.waitForURL(/\/giris\?code=/);
+    await expect.poll(() => cagrilar.some((c) => c.yol === '/rest/v1/rpc/davetle_katil'), { timeout: 30_000 }).toBe(true);
+    expect(hatalar).toEqual([]);
   });
 });
