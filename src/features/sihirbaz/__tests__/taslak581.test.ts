@@ -6,6 +6,8 @@ import { beforeEach, describe, expect, it, jest } from '@jest/globals';
 type Satir = Record<string, unknown>;
 const mockDb: Record<string, Satir[]> = { trips: [], days: [], places: [], stops: [] };
 const mockRpc: { ad: string; arg: Satir }[] = [];
+/** #603 KK4: verilen tablo + işlem bir kez hata döner (ağ düşmesi). */
+const mockDusur: { tablo: string; tur: string } | { tablo: null } = { tablo: null };
 
 /** Bellekte küçük bir Supabase sorgu kurucusu: eq / gt / not(is null) / order, select · insert · update · delete. */
 function mockSorgu(tablo: string) {
@@ -21,7 +23,11 @@ function mockSorgu(tablo: string) {
     gt: (k: string, v: number) => (suzgecler.push((r) => (r[k] as number) > v), q),
     not: (k: string, _op: 'is', _v: null) => (suzgecler.push((r) => r[k] !== null), q),
     order: (k: string) => ((sira = k), q),
-    then: (coz: (s: { data: unknown; error: null }) => unknown) => {
+    then: (coz: (s: { data: unknown; error: unknown }) => unknown) => {
+      if (mockDusur.tablo === tablo && 'tur' in mockDusur && mockDusur.tur === islem.tur) {
+        Object.assign(mockDusur, { tablo: null });
+        return Promise.resolve(coz({ data: null, error: new Error('ağ') }));
+      }
       const uyan = (r: Satir) => suzgecler.every((f) => f(r));
       let data: unknown = null;
       if (islem.tur === 'insert') mockDb[tablo].push(...islem.satirlar.map((s) => ({ ...s })));
@@ -78,6 +84,7 @@ function taslakKur() {
 beforeEach(() => {
   taslakKur();
   mockRpc.length = 0;
+  Object.assign(mockDusur, { tablo: null });
 });
 
 describe('#581 KK2 "Kaç gün?" sayacı', () => {
@@ -167,5 +174,20 @@ describe('#581 KK3b: şehir değişimi', () => {
     mockDb.places = [{ id: 'p1', trip_id: 't1' }];
     await taslakSehriniKur('t1', KARS, 'Kars Gezisi', false);
     expect(mockDb.places).toHaveLength(1);
+  });
+});
+
+describe('#603 KK4 şehir değişimi yarıda düşerse yeniden deneme düzeltir', () => {
+  it('yerler silinip şehir yazılamazsa hata; ikinci deneme şehri yazar, yeni seyahat açılmaz', async () => {
+    mockDb.places = [{ id: 'p1', trip_id: 't1' }];
+    Object.assign(mockDusur, { tablo: 'trips', tur: 'update' });
+    await expect(taslakSehriniKur('t1', KARS, 'Kars Gezisi', true)).rejects.toThrow('ağ');
+    // Yarım hal: yerler gitti, şehir eski.
+    expect(mockDb.places).toEqual([]);
+    expect(mockDb.trips[0]).toMatchObject({ city_place_id: 'bolu' });
+    // Sihirbaz aynı Devam'da listeyi boş görür, onaysız aynı çağrıyı yapar.
+    await taslakSehriniKur('t1', KARS, 'Kars Gezisi', true);
+    expect(mockDb.trips).toHaveLength(1);
+    expect(mockDb.trips[0]).toMatchObject({ city_place_id: 'kars', city_label: 'Kars', name: 'Kars Gezisi' });
   });
 });

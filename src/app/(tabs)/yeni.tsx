@@ -26,8 +26,8 @@ import { seyahatiKopyala, useIcerikSehirSecimi, useTekrarKaynagi, yeniGirisNo } 
 import type { OnerilenMekan } from '@/features/sihirbaz/onerilenler';
 import { gunDolulugu, secimOzeti } from '@/features/sihirbaz/planKur';
 import { planiHesapla, usePlaniUygula, usePlanOnizlemeOnceligi } from '@/features/sihirbaz/planUygula';
-import { oncekiAdim, seyahatAdiOner, sonrakiAdim, type Adim, type Aralik } from '@/features/sihirbaz/sihirbaz';
-import { gunSayisiSinirla, sehirDegisti, tarihDegisti, tarihSecimi, tarihsizGunleriKur, TARIHSIZ_VARSAYILAN, useTaslakSehri, useTaslakTarihi } from '@/features/sihirbaz/taslak';
+import { oncekiAdim, seyahatAdiOner, sonrakiAdim, TARIH_EN_COK_GUN, type Adim, type Aralik } from '@/features/sihirbaz/sihirbaz';
+import { gunSayisiSinirla, secimGunSayisi, sehirDegisti, tarihDegisti, tarihSecimi, tarihsizGunleriKur, TARIHSIZ_VARSAYILAN, useTaslakSehri, useTaslakTarihi } from '@/features/sihirbaz/taslak';
 import type { HafifYer } from '@/features/yerler/api';
 import { t } from '@/i18n';
 import type { SehirSecimi } from '@/lib/tipler';
@@ -266,8 +266,12 @@ export function Sihirbaz({ giris, onCik }: { giris: YeniGirisi; /** #574: 1. ad�
   };
 
   // #581 KK3a–KK3b: taslağın şehri değişti → (yer seçildiyse onaydan sonra) aynı taslak güncellenir, yerler listeden çıkar.
+  // #603 KK2: kayıt sürerken ikinci "Devam et" (sayfadan ya da alttan) yok sayılır; şehir iki kez yazılmaz.
+  // #603 KK4: yerler silinip şehir yazılamazsa taslağın şehri eski kalır; aynı Devam yeniden denediğinde liste boş
+  // olduğundan onay sorulmadan buraya gelinir ve şehir yazılır (taslak581 testi).
   const sehriKaydet = async () => {
-    if (!sehir || !tripId) return;
+    if (!sehir || !tripId || kuruluyorRef.current) return;
+    kuruluyorRef.current = true;
     setSehirOnayi(null);
     setHata(null);
     try {
@@ -277,6 +281,8 @@ export function Sihirbaz({ giris, onCik }: { giris: YeniGirisi; /** #574: 1. ad�
       ileri();
     } catch {
       setHata(t('sihirbaz.nereye.sehirHata'));
+    } finally {
+      kuruluyorRef.current = false;
     }
   };
   const sehirVazgec = () => {
@@ -331,6 +337,11 @@ export function Sihirbaz({ giris, onCik }: { giris: YeniGirisi; /** #574: 1. ad�
     const secim = tarihSecimi(aralik, tarihsizGun);
     if (!sehir || !secim || kuruluyorRef.current) return;
     setHata(null);
+    // #603 KK3: takvim 60 günden uzununu seçtirmez; yine de gelirse istek atılmadan Ne zaman uyarısı.
+    if (secimGunSayisi(secim) > TARIH_EN_COK_GUN) {
+      setHata(t('sihirbaz.nezaman.tarihHata'));
+      return;
+    }
     if (tripId) {
       if (!seyahat.data || !gunler.data) {
         setHata(t('sihirbaz.nereye.veriBekleniyor'));
@@ -381,7 +392,15 @@ export function Sihirbaz({ giris, onCik }: { giris: YeniGirisi; /** #574: 1. ad�
       const davetliler = kimlerle.secilenler.map((k) => k.id);
       if (davetliler.length > 0) davetGonder.mutateAsync({ tripId: id, kisiler: davetliler }).catch(() => Alert.alert(t('genel.hataBaslik'), t('genel.hataMetin')));
       // KK2: tetikleyici tarihsiz seyahate 1 gün açar; sayaçtaki gün sayısına tamamlanır.
-      if (secim.tur === 'tarihsiz' && secim.gun > 1) await tarihsizGunleriKur(id, secim.gun);
+      // #603 KK1: seyahat oluştu ama günler kurulamadıysa "Seyahat oluşturulamadı" değil, tarih uyarısı (Devam aynı taslağı dener).
+      if (secim.tur === 'tarihsiz' && secim.gun > 1) {
+        try {
+          await tarihsizGunleriKur(id, secim.gun);
+        } catch {
+          setHata(t('sihirbaz.nezaman.tarihHata'));
+          return;
+        }
+      }
       // #144 Tekrar kur: aynı plan yeni tarihe; plan hazır olduğundan öneriler atlanır, Program açılır.
       if (girisPlani?.tur === 'tekrar' && girisPlani.sehirId === sehir.place_id) {
         await tekrarKopyala(girisPlani.kaynak, id);
@@ -480,6 +499,7 @@ export function Sihirbaz({ giris, onCik }: { giris: YeniGirisi; /** #574: 1. ad�
           }}
           tarihsizGun={tarihsizGun}
           onTarihsizGun={(n) => setTarihsizGun(gunSayisiSinirla(n))}
+          enCokGun={TARIH_EN_COK_GUN}
         />
       </AdimKabugu>
     );
