@@ -2,8 +2,9 @@
 -- koordinatı boşalır; satır silinmez (ad, place_id, damga, rehber, sıra kalır). Google ile yenileme yok; kalıcı konum OSM ya da
 -- BO'da elle işaretlenendir (Parça 2). Google'a istek yok.
 --
--- Bu dosya YALNIZ TANIM: veri değiştirmez, `supabase-migrate` ile kendiliğinden gider. Veri değiştiren her şey (ilk boşaltma
--- ve gece işine bağlama) 20261218100000'de; bekçi (`scripts/veri-silen.mjs`) o dosyayı durdurur, Ece onayıyla elle çalışır.
+-- Bu dosya YALNIZ TANIM: veri değiştirmez. Veri değiştiren her şey (ilk boşaltma ve gece işine bağlama) 20261218100000'de;
+-- bekçi (`scripts/veri-silen.mjs`) o dosyayı durdurur. Bekçi bekleyen dosyalardan biri eşleşince hiçbirini uygulamadığı için
+-- bu dosya da 20261218100000 ile birlikte, Ece onayıyla elle (`workflow_dispatch`) gider.
 --
 -- 1. `lat`/`lng` boş olabilir (ikisi birlikte), `places`/`trips`/`stays` ile aynı (#318, 20261127000000).
 -- 2. `konum_kaynagi_yaz()`: koordinat BOŞALINCA damga yenilenmez (yalnız yeni bir koordinat yeni 30 gün kazanır). Yoksa

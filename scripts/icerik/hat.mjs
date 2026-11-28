@@ -258,6 +258,8 @@ async function sehirMerkezi(istek) {
   if (!SEHIR_SLUG.test(istek.sehir ?? '')) throw new HatHatasi('istek.sehir (slug) ya da istek.merkez gerekli');
   const satir = (await sql(`select lat, lng from public.sehirler where slug = '${istek.sehir}'`))[0];
   if (!satir) throw new HatHatasi(`şehir bulunamadı: ${istek.sehir}; istek.merkez ver`);
+  // #205: konumu boşalmış şehirde merkez (0,0) olmasın; kimlik sorguları yanlış bölgeye yönelirdi.
+  if (satir.lat == null || satir.lng == null) throw new HatHatasi(`şehrin konumu boş: ${istek.sehir}; istek.merkez ver`);
   return { lat: Number(satir.lat), lng: Number(satir.lng) };
 }
 
