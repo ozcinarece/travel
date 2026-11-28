@@ -3,12 +3,14 @@ import * as SplashScreen from 'expo-splash-screen';
 import { StyleSheet } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
-import { AcilisKapisi, KokHataEkrani, KokSaglayicilari } from '@/components/kok/KokKabugu';
+import { AcilisKapisi, KokHataEkrani, KokSaglayicilari, kokuBaslat } from '@/components/kok/KokKabugu';
 import { acilisGecisi } from '@/lib/acilis';
 import { hataRaporunuBaslat, hataRaporuyla } from '@/lib/hataRaporu';
 
 hataRaporunuBaslat();
 SplashScreen.preventAutoHideAsync();
+// Sorgu istemcisi, kalıcı önbellek ve bağlantı izleme: main'deki sırayla, hata raporu ve açılış ekranından sonra.
+kokuBaslat();
 
 // #550: sağlayıcılar, açılış kapısı ve kök hata ekranı `KokKabugu`'nda; web davet girişi (`src/davet-web`) de onları kullanır.
 function Kok() {

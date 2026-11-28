@@ -82,6 +82,20 @@ export function fontOnYukle(html, fontlar) {
   return html.slice(0, yer) + satirlar + html.slice(yer);
 }
 
+/** Davet sayfalarının tam uygulamanın giriş JS'ini bulduğu meta (src/lib/davetWebGirisi.ts `UYGULAMA_JS_META`). */
+export const UYGULAMA_JS_META = 'tripmate-uygulama-js';
+
+/**
+ * Tam uygulamanın giriş JS'inin adresini sayfaya meta olarak yazar. Davet girişi özeti çizdikten sonra bunu boşta önden
+ * indirir (prefetch); "Seyahatime al", giriş ya da seyahate geçişteki tam yeniden yükleme beklemesin. İlk açılışta inmez.
+ */
+export function uygulamaJsYaz(html, adres) {
+  if (!adres || html.includes(`name="${UYGULAMA_JS_META}"`)) return html;
+  const yer = html.indexOf('</head>');
+  if (yer < 0) throw new Error('</head> bulunamadı');
+  return html.slice(0, yer) + `<meta name="${UYGULAMA_JS_META}" content="${adres}"/>` + html.slice(yer);
+}
+
 /** Küçük girişi dist'e katar; yazılan JS dosyalarını döner. */
 export async function birlestir(dist, davet) {
   const jsKaynak = path.join(davet, JS_DIZINI);
@@ -91,6 +105,9 @@ export async function birlestir(dist, davet) {
   }
   const jsHedef = path.join(dist, JS_DIZINI);
   mkdirSync(jsHedef, { recursive: true });
+  // Tam uygulamanın giriş JS'i (kök sayfadan; yoksa önden indirme yazılmaz).
+  const kokSayfa = path.join(dist, 'index.html');
+  const uygulamaJs = existsSync(kokSayfa) ? (readFileSync(kokSayfa, 'utf8').match(/src="(\/_expo\/static\/js\/web\/entry-[0-9a-f]+\.js)"/)?.[1] ?? null) : null;
   const yazilan = [];
   for (const ad of readdirSync(jsKaynak)) {
     if (!ad.endsWith('.js')) continue; // kaynak haritaları yayına girmez
@@ -104,7 +121,8 @@ export async function birlestir(dist, davet) {
   const fontlar = [];
   if (existsSync(varlik)) {
     for (const kaynak of dosyalar(varlik)) {
-      if (kaynak.endsWith('.ttf')) fontlar.push('/' + path.relative(davet, kaynak).split(path.sep).join('/'));
+      // Yalnız açılış kapısının beklediği Figtree fontları ön yüklenir.
+      if (/[\\/]Figtree_[^\\/]+\.ttf$/.test(kaynak)) fontlar.push('/' + path.relative(davet, kaynak).split(path.sep).join('/'));
       const hedef = path.join(dist, path.relative(davet, kaynak));
       if (existsSync(hedef)) continue;
       mkdirSync(path.dirname(hedef), { recursive: true });
@@ -114,7 +132,7 @@ export async function birlestir(dist, davet) {
   for (const sayfa of DAVET_SAYFALARI) {
     const hedef = path.join(dist, sayfa);
     mkdirSync(path.dirname(hedef), { recursive: true });
-    writeFileSync(hedef, fontOnYukle(readFileSync(path.join(davet, sayfa), 'utf8'), fontlar.sort()));
+    writeFileSync(hedef, uygulamaJsYaz(fontOnYukle(readFileSync(path.join(davet, sayfa), 'utf8'), fontlar.sort()), uygulamaJs));
   }
   return yazilan;
 }

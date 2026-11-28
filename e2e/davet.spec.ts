@@ -5,19 +5,21 @@ import { expect, test, type Page } from '@playwright/test';
 import tr from '../src/i18n/tr.json';
 import { DAVET_TOKENI, DEPO_ANAHTARI, PAYLASIM_HARITALI, PAYLASIM_TOKENI, SEYAHAT, YENI_SEYAHAT, oturum, supabaseTaklidi } from './supabaseTaklidi';
 
-/** Sayfanın indirdiği giriş (entry) JS dosyaları. */
-function girisleriIzle(page: Page): string[] {
-  const liste: string[] = [];
-  page.on('request', (r) => {
+/** Sayfanın indirdiği giriş (entry) JS dosyaları; önden indirme (prefetch) ayrı listede. */
+function girisleriIzle(page: Page): string[] & { onden: string[] } {
+  const liste = Object.assign([] as string[], { onden: [] as string[] });
+  page.on('request', async (r) => {
     const ad = new URL(r.url()).pathname.match(/\/_expo\/static\/js\/web\/(entry-[0-9a-f]+\.js)$/)?.[1];
-    if (ad) liste.push(ad);
+    if (!ad) return;
+    const amac = (await r.allHeaders())['sec-purpose'] ?? '';
+    (amac.includes('prefetch') ? liste.onden : liste).push(ad);
   });
   return liste;
 }
 
 async function sayfaGirisi(page: Page, yol: string): Promise<string> {
   const html = await (await page.request.get(yol)).text();
-  return html.match(/\/_expo\/static\/js\/web\/(entry-[0-9a-f]+\.js)/)![1];
+  return html.match(/src="\/_expo\/static\/js\/web\/(entry-[0-9a-f]+\.js)"/)![1];
 }
 
 async function girisliAc(page: Page) {
@@ -40,8 +42,11 @@ test.describe('davet /r/{token}', () => {
     await expect(page.locator('html')).toHaveAttribute('lang', 'tr');
     // #549 açılış katmanı kalkar.
     await expect(page.locator('#davet-acilis')).toHaveCount(0);
-    // KK1: yalnız davet girişi indi.
-    expect(girisler).toEqual([davetGirisi]);
+    // KK1: çalıştırılan tek giriş davet girişi.
+    expect([...girisler]).toEqual([davetGirisi]);
+    // Öz-inceleme 1: özet çizildikten sonra tam uygulamanın girişi boşta önden iner (çalıştırılmaz).
+    await expect.poll(() => girisler.onden).toEqual([uygulamaGirisi]);
+    expect([...girisler]).toEqual([davetGirisi]);
   });
 
   test('Google ile katıl → Google dönüşü → davetle_katil → seyahate geçiş', async ({ page }) => {
@@ -67,7 +72,7 @@ test.describe('davet /r/{token}', () => {
     await page.goto(`/r/${DAVET_TOKENI}`);
     await page.waitForURL(new RegExp(`/seyahat/${SEYAHAT}/gezi\\?katildin=1`), { timeout: 30_000 });
     expect(cagrilar.filter((c) => c.yol === '/rest/v1/rpc/davetle_katil')).toHaveLength(1);
-    await expect.poll(() => girisler.includes(uygulamaGirisi)).toBe(true);
+    await expect.poll(() => [...girisler, ...girisler.onden].includes(uygulamaGirisi)).toBe(true);
   });
 
   test('bilinmeyen davet: "Bu davet geçersiz"', async ({ page }) => {
@@ -86,7 +91,7 @@ test.describe('paylaşım /r/g/{token}', () => {
     await expect(page.getByText('Test · paylaşım-550')).toBeVisible();
     await expect(page.getByText(tr.paylasim.girisNot)).toBeVisible();
     await expect(page.locator('html')).toHaveAttribute('lang', 'tr');
-    expect(girisler).toEqual([davetGirisi]);
+    expect([...girisler]).toEqual([davetGirisi]);
 
     await page.getByText(tr.paylasim.seyahatimeAl).click();
     await page.waitForURL(/\/giris$/);

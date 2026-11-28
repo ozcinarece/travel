@@ -15,6 +15,9 @@ describe('#550 davet girişinden tam uygulamaya', () => {
     expect(tamUygulamaAdresi('/r/g/x')).toBeNull();
     expect(tamUygulamaAdresi('//kotu.example/giris')).toBeNull();
     expect(tamUygulamaAdresi('https://kotu.example')).toBeNull();
+    // Bozuk yüzde kodlaması hata fırlatmaz.
+    expect(tamUygulamaAdresi('/giris%E0%A4%A')).toBeNull();
+    expect(tamUygulamaAdresi('/%')).toBeNull();
   });
 
   it('bulunamayan yolun parçaları ve dizi parametreler sorguya girmez', () => {

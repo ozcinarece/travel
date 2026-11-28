@@ -13,6 +13,10 @@ const expoGoIcin = process.env.EXPO_GO_UPDATE === '1';
 // #550: `WEB_GIRIS=davet` yalnız web yayınındaki ikinci `expo export -p web` içindir: rota kökü `src/davet-web` (yalnız
 // /r/{token} ve /r/g/{token}). Değişken yokken (uygulama, EAS build, eas-update, ilk web derlemesi) yapılandırma aynı kalır.
 const davetWebGirisi = process.env.WEB_GIRIS === 'davet';
+if (process.env.WEB_GIRIS && process.env.EAS_BUILD) {
+  // Güvence: davet girişinin rota kökü yalnız web derlemesi içindir; yerel pakete asla girmesin.
+  throw new Error('WEB_GIRIS yalnız web derlemesinde kullanılır; EAS build ile birlikte tanımlanamaz.');
+}
 
 const config: ExpoConfig = {
   // #136 KK7: görünen ad çalışma adı Tripmate (mağaza adı sonra); slug/EAS projesi değişmez.

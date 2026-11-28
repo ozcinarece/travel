@@ -49,6 +49,7 @@ jobs:
   # #550 KK3: web davet (/r/{token}) ve paylaşım (/r/g/{token}) yolları uçtan uca; Supabase taklit (e2e/), gerçek veri yok.
   web-e2e:
     runs-on: ubuntu-latest
+    timeout-minutes: 25
     env:
       EXPO_PUBLIC_SUPABASE_URL: https://ornek.supabase.co
       EXPO_PUBLIC_SUPABASE_ANON_KEY: ornek
@@ -63,6 +64,16 @@ jobs:
       - run: npm ci
       - name: Web çıktısı (uygulama + davet girişi)
         run: npm run web:derle
+      - name: Davet girişi boyut bütçesi (≤ 500 KB gzip, #550 KK2)
+        run: |
+          davet_js=$(grep -o 'src="/_expo/static/js/web/entry-[0-9a-f]*\.js"' dist/r/_token.html | cut -d'"' -f2)
+          uygulama_js=$(grep -o 'src="/_expo/static/js/web/entry-[0-9a-f]*\.js"' dist/index.html | cut -d'"' -f2)
+          test -n "$davet_js" && test "$davet_js" != "$uygulama_js"
+          boyut=$(gzip -9c "dist$davet_js" | wc -c)
+          echo "davet girişi: $davet_js · $((boyut / 1024)) KB gzip" | tee -a "$GITHUB_STEP_SUMMARY"
+          if [ "$boyut" -gt 512000 ]; then
+            echo "::error::Davet girişi $((boyut / 1024)) KB gzip; bütçe 500 KB (#550 KK2)"; exit 1
+          fi
       - name: Chromium
         run: npx playwright install --with-deps chromium
       - name: Uçtan uca
