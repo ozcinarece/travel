@@ -747,6 +747,15 @@ select pg_temp.hata_bekle($$update public.ana_sayfa_bolumleri set icerik = '{"ka
 select pg_temp.hata_bekle($$update public.ana_sayfa_bolumleri set icerik = '{"kapaklar": [{"url": "https://xwqeobelyeuzoxyuvauw.supabase.co/storage/v1/object/public/icerik/../avatars/u1/a.jpg"}]}' where tur = 'karsilama'$$, '23514');
 select pg_temp.hata_bekle($$update public.ana_sayfa_bolumleri set icerik = '{"kapaklar": [{"url": "https://xwqeobelyeuzoxyuvauw.supabase.co/storage/v1/object/public/icerik/anasayfa/a.webp", "atif": {"lisans": "CC0"}}]}' where tur = 'karsilama'$$, '23514');
 select pg_temp.hata_bekle($$update public.ana_sayfa_bolumleri set icerik = '{"kapaklar": [{"url": "https://xwqeobelyeuzoxyuvauw.supabase.co/storage/v1/object/public/icerik/anasayfa/a.webp", "kaynak": "google"}]}' where tur = 'karsilama'$$, '23514');
+-- #596: kaynak JSON null ya da metin olmayan bir değer olamaz (yoksa hiç yazılmaz).
+select pg_temp.hata_bekle($$update public.ana_sayfa_bolumleri set icerik = '{"kapaklar": [{"url": "https://xwqeobelyeuzoxyuvauw.supabase.co/storage/v1/object/public/icerik/anasayfa/a.webp", "kaynak": null}]}' where tur = 'karsilama'$$, '23514');
+select pg_temp.hata_bekle($$update public.ana_sayfa_bolumleri set icerik = '{"kapaklar": [{"url": "https://xwqeobelyeuzoxyuvauw.supabase.co/storage/v1/object/public/icerik/anasayfa/a.webp", "kaynak": 5}]}' where tur = 'karsilama'$$, '23514');
+do $$ begin
+  assert not public.ana_sayfa_icerik_gecerli('karsilama', '{"kapaklar": [{"url": "https://xwqeobelyeuzoxyuvauw.supabase.co/storage/v1/object/public/icerik/anasayfa/a.webp", "kaynak": ["kendi"]}]}'), '#596: dizi kaynak reddedilir';
+  assert public.ana_sayfa_icerik_gecerli('karsilama', '{"kapaklar": [{"url": "https://xwqeobelyeuzoxyuvauw.supabase.co/storage/v1/object/public/icerik/anasayfa/a.webp", "kaynak": "izinli"}]}'), '#596: geçerli kaynak kabul edilir';
+  assert public.ana_sayfa_icerik_gecerli('karsilama', '{"kapaklar": [{"url": "https://xwqeobelyeuzoxyuvauw.supabase.co/storage/v1/object/public/icerik/anasayfa/a.webp"}]}'), '#596: kaynaksız görsel kabul edilir';
+end $$;
+update public.ana_sayfa_bolumleri set icerik = '{"kapaklar": [{"url": "https://xwqeobelyeuzoxyuvauw.supabase.co/storage/v1/object/public/icerik/anasayfa/a.webp", "kaynak": "izinli"}]}' where tur = 'karsilama';
 select pg_temp.hata_bekle($$update public.ana_sayfa_bolumleri set icerik = '{"kapaklar": [{"url": "https://xwqeobelyeuzoxyuvauw.supabase.co/storage/v1/object/public/icerik/anasayfa/a.webp", "baska": 1}]}' where tur = 'karsilama'$$, '23514');
 select pg_temp.hata_bekle($$update public.ana_sayfa_bolumleri set icerik = '{"kapaklar": [{"url": "https://upload.wikimedia.org/wikipedia/commons/a/ab/K.jpg"}]}' where tur = 'karsilama'$$, '23514');
 select pg_temp.hata_bekle($$update public.ana_sayfa_bolumleri set icerik = '{"kapaklar": [{"url": "https://xwqeobelyeuzoxyuvauw.supabase.co/storage/v1/object/public/icerik/anasayfa/a.webp"}, {"url": "https://xwqeobelyeuzoxyuvauw.supabase.co/storage/v1/object/public/icerik/anasayfa/a.webp"}]}' where tur = 'karsilama'$$, '23514');
