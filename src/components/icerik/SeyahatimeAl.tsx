@@ -8,6 +8,7 @@ import { ActivityIndicator, Modal, Pressable, ScrollView, StyleSheet, Text, View
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 import { FotoKutusu } from '@/components/gezi/GeziParcalari';
+import { HedefSeridi } from '@/components/icerik/HedefSeridi';
 import { gunHucresi } from '@/components/program/GunKartlari';
 import { Buton } from '@/components/ui/Buton';
 import { EklemeDurumSatiri } from '@/components/ui/EklemeDurumSatiri';
@@ -50,15 +51,14 @@ import {
   type MekanGrubu,
 } from '@/features/icerik/seyahateAl';
 import { useSehirler } from '@/features/icerik/sorgular';
-import { baslangicHedefi, farkliSehir } from '@/features/icerik/yerEkle';
+import { baslangicHedefi } from '@/features/icerik/yerEkle';
 import { useMekanlar } from '@/features/mekanlar/sorgular';
 import { useIcerikSehirSecimi } from '@/features/sihirbaz/girisler';
-import { seyahatAdi } from '@/features/sihirbaz/sihirbaz';
 import { t } from '@/i18n';
 import { useCevrimdisi } from '@/lib/baglanti';
 import { iyelikEkli } from '@/lib/ek';
 import { kategoriEtiketi, sureMetni } from '@/lib/kategori';
-import { AYLAR, GUNLER_KISA, haftaGunu, kisaTarih, parcala, tarihAraligi, tarihEkle } from '@/lib/takvim';
+import { AYLAR, GUNLER_KISA, haftaGunu, kisaTarih, parcala, tarihEkle } from '@/lib/takvim';
 import type { GeziDetay, GeziDuragi, SehirSecimi, SeyahatOzet } from '@/lib/tipler';
 import { yerelTarih } from '@/lib/zaman';
 import { baslikStili, gunRengi, gunUstuMetin, renk, yazi } from '@/theme';
@@ -126,28 +126,7 @@ export function SeyahatimeAl({ gezi, seyahatler, ilkHedefId, kimlik, foto, onKap
                 {seyahatler.length > 0 ? (
                   <View style={{ gap: 8 }}>
                     <Text style={s.bolum}>{t('gezi.hangiSeyahate')}</Text>
-                    <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={s.cipler} style={s.ciplerSerit}>
-                      {seyahatler.map((sy) => {
-                        const secili = hedef?.id === sy.id;
-                        return (
-                          <Pressable key={sy.id} accessibilityRole="button" accessibilityState={{ selected: secili }} onPress={() => setHedefId(sy.id)} style={[s.cip, secili && s.cipSecili]}>
-                            {/* #587 inceleme: ad ve tarih kısalır, "Farklı şehir" kesilmez. */}
-                            <Text style={[s.cipMetin, s.cipAd, secili && s.cipMetinSecili]} numberOfLines={1}>
-                              {`${seyahatAdi(sy)}${sy.start_date && sy.end_date ? ` · ${tarihAraligi(sy.start_date, sy.end_date)}` : ''}`}
-                            </Text>
-                            {farkliSehir(sy, gezi.sehirler?.ad) ? (
-                              <Text testID="farkli-sehir" style={[s.cipMetin, s.cipEk, secili && s.cipMetinSecili]} numberOfLines={1}>
-                                {` · ${t('gezi.farkliSehir')}`}
-                              </Text>
-                            ) : null}
-                          </Pressable>
-                        );
-                      })}
-                      <Pressable accessibilityRole="button" accessibilityState={{ selected: !hedef }} onPress={() => setHedefId(YENI)} style={[s.cip, s.cipYeni, !hedef && s.cipSecili]}>
-                        <Ikon ad="arti" boyut={14} renk={!hedef ? renk.zemin : renk.ana} kalinlik={3} />
-                        <Text style={[s.cipMetin, !hedef && s.cipMetinSecili]}>{t('gezi.yeniSeyahat')}</Text>
-                      </Pressable>
-                    </ScrollView>
+                    <HedefSeridi seyahatler={seyahatler} hedefId={hedef?.id ?? null} sehirAdi={gezi.sehirler?.ad} onSec={(id) => setHedefId(id ?? YENI)} />
                   </View>
                 ) : null}
                 {/* KK1: seyahat seçicinin altında iki sekme. */}
@@ -604,15 +583,8 @@ const s = StyleSheet.create({
   baslik: { ...baslikStili(24), color: renk.metin },
   altBaslik: { fontFamily: yazi.normal, fontSize: 14, color: renk.ikincil },
   bolum: { fontFamily: yazi.ekstra, fontSize: 12, letterSpacing: 0.48, color: renk.ikincil },
-  ciplerSerit: { marginHorizontal: -20, flexGrow: 0 },
-  cipler: { gap: 8, paddingHorizontal: 20 },
-  cip: { height: 44, paddingHorizontal: 14, borderRadius: 13, borderWidth: 1.5, borderColor: renk.ayrac, backgroundColor: renk.zemin, flexDirection: 'row', alignItems: 'center', maxWidth: 280 },
-  cipAd: { flexShrink: 1 },
-  cipEk: { flexShrink: 0 },
   yukleniyor: { minHeight: 120, alignItems: 'center', justifyContent: 'center' },
-  cipYeni: { gap: 5 },
   cipSecili: { backgroundColor: renk.ana, borderColor: renk.ana },
-  cipMetin: { fontFamily: yazi.ekstra, fontSize: 14, color: renk.ana },
   cipMetinSecili: { color: renk.zemin },
   sekmeler: { flexDirection: 'row', gap: 4, padding: 4, borderRadius: 14, backgroundColor: renk.yuzey },
   sekme: { flex: 1, height: 36, borderRadius: 11, alignItems: 'center', justifyContent: 'center' },

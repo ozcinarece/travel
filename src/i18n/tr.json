@@ -1029,6 +1029,11 @@
     "alBaslik": "Seyahatime al",
     "yeniSeyahat": "Yeni seyahat",
     "farkliSehir": "Farklı şehir",
+    "hedefCipOkunur": {
+      "tam": "{ad}, {tarih}, farklı şehir",
+      "tarihli": "{ad}, {tarih}",
+      "farkli": "{ad}, farklı şehir"
+    },
     "listeye": "Listeye",
     "cozumYok": "{n} mekan eklenemedi.",
     "hicEklenmedi": "Hiçbir mekan eklenemedi.",
