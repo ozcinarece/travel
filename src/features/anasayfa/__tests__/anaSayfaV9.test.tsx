@@ -248,6 +248,17 @@ describe('#569 KK4 gezi sırasındaki kart', () => {
     expect(within(kart).queryByText('Aç')).toBeNull();
   });
 
+  it('#594 KK1: atıf (dokunma alanı dahil) yüzlerin 8 pt sağında biter; yazar tek satır, sonu "…"', async () => {
+    mockSeyahatler = [sy('Bursa', gun(-2), gun(1), 'Eskişehir')];
+    const e = render(<AnaSayfa />);
+    const kart = await waitFor(() => e.getByTestId('seyahat-karti-Bursa'));
+    // Tek kart 750 − 32 = 718; 3 yüz soldan 14 + 36 + 2 × 27 = 104'te biter; atıf en çok 718 − 104 − 8.
+    expect(duz(within(kart).getByTestId('kapak-atfi').props.style)).toMatchObject({ right: 0, top: 0, maxWidth: 718 - 104 - 8 });
+    const yazar = within(kart).getByText('Foto: Ali Veli');
+    expect(yazar.props.numberOfLines).toBe(1);
+    expect(yazar.props.ellipsizeMode).toBe('tail');
+  });
+
   it('okunmamış yoksa rozet yok', async () => {
     mockSeyahatler = [sy('Bursa', gun(0), gun(1))];
     const e = render(<AnaSayfa />);
@@ -296,11 +307,25 @@ describe('#569 KK5 gezisi olmayan', () => {
     expect(within(e.getByTestId('seyahat-karti-yok')).getByText('Foto: Tripmate')).toBeTruthy();
   });
 
-  it('seyahat listesi gelmeden kart alanı çizilmez', async () => {
+  it('#594 KK3: seyahat listesi gelene kadar kartın yerinde aynı boyda düz yer tutucu; liste boş gelince boş hal kartı', async () => {
     mockSeyahatler = undefined;
     const e = render(<AnaSayfa />);
     await profil(e);
     expect(e.queryByTestId('seyahat-karti-yok')).toBeNull();
+    const yer = e.getByTestId('seyahat-karti-yer-tutucu');
+    expect(duz(yer.props.style)).toMatchObject({ height: 214, borderRadius: 20, backgroundColor: '#EEF0F5', width: 750 - 32 });
+    mockSeyahatler = [];
+    e.rerender(<AnaSayfa />);
+    await waitFor(() => e.getByTestId('seyahat-karti-yok'));
+    expect(e.queryByTestId('seyahat-karti-yer-tutucu')).toBeNull();
+  });
+
+  it('#594 KK3: liste okunamazsa yer tutucu yok, hata satırı', async () => {
+    mockSeyahatHata = true;
+    mockSeyahatler = undefined;
+    const e = render(<AnaSayfa />);
+    await waitFor(() => e.getByTestId('ana-seyahat-hata'));
+    expect(e.queryByTestId('seyahat-karti-yer-tutucu')).toBeNull();
   });
 });
 

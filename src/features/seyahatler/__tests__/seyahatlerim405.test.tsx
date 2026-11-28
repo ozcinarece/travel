@@ -83,7 +83,8 @@ describe('Seyahatlerim (#405 KK2)', () => {
     ];
     const ekran = ciz();
     await waitFor(() => expect(istemci?.isFetching()).toBe(0));
-    expect(ekran.getByRole('header', { name: 'Seyahatlerim' })).toBeTruthy();
+    // #594 KK2: başlık sekmeyle aynı, "Gezilerim".
+    expect(ekran.getByRole('header', { name: 'Gezilerim' })).toBeTruthy();
     const metinler = ekran.getAllByText(/./).map((n) => ([] as unknown[]).concat(n.props.children).join(''));
     const konumlar = ['YAKLAŞAN', 'Bursa', 'Mardin', 'İzmir', 'GEÇMİŞ', 'Eskişehir'].map((m) => metinler.indexOf(m));
     expect(konumlar.every((k) => k >= 0)).toBe(true);
