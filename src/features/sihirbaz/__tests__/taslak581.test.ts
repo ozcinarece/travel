@@ -84,6 +84,7 @@ function taslakKur() {
 beforeEach(() => {
   taslakKur();
   mockRpc.length = 0;
+  Object.assign(mockDusur, { tablo: null });
 });
 
 describe('#581 KK2 "Kaç gün?" sayacı', () => {

@@ -31,6 +31,7 @@ const mockOlustur = jest.fn<() => Promise<string>>(async () => 'yeni');
 const mockBos = { data: undefined };
 const mockMut = { mutate: jest.fn(), mutateAsync: jest.fn(async () => undefined), isPending: false };
 const mockSehriKur = { mutateAsync: jest.fn<() => Promise<void>>(async () => undefined), isPending: false };
+const mockTarihKur = { mutateAsync: jest.fn<(a: { seyahatId: string; secim: unknown }) => Promise<void>>(async () => undefined), isPending: false };
 const mockGunKur = jest.fn<(id: string, n: number) => Promise<void>>(async () => undefined);
 jest.mock('@/features/seyahatler/sorgular', () => ({
   useSeyahatOlustur: () => ({ mutateAsync: mockOlustur, isPending: false }),
@@ -65,7 +66,7 @@ jest.mock('@/features/sihirbaz/taslak', () => ({
   ...jest.requireActual<object>('@/features/sihirbaz/taslak'),
   tarihsizGunleriKur: (id: string, n: number) => mockGunKur(id, n),
   useTaslakSehri: () => mockSehriKur,
-  useTaslakTarihi: () => mockMut,
+  useTaslakTarihi: () => mockTarihKur,
 }));
 jest.mock('@/components/mekan/MekanPaneli', () => ({ MekanPaneli: () => null }));
 jest.mock('@/components/sihirbaz/AdimIlOnerileri', () => ({ AdimIlOnerileri: () => null }));
@@ -101,6 +102,10 @@ describe('#603 KK1 gün kurma düşerse doğru metin', () => {
     expect(mockOlustur).toHaveBeenCalledTimes(1);
     expect(mockGunKur).toHaveBeenCalledWith('yeni', 3);
     expect(mockKopyala).not.toHaveBeenCalled();
+    // İkinci Devam aynı taslağın günlerini kurar; yeni seyahat açılmaz.
+    fireEvent.press(screen.getByText(t('sihirbaz.devam')));
+    await waitFor(() => expect(mockTarihKur.mutateAsync).toHaveBeenCalledWith({ seyahatId: 'yeni', secim: { tur: 'tarihsiz', gun: 3 } }));
+    expect(mockOlustur).toHaveBeenCalledTimes(1);
   });
 
   it('seyahat oluşmadan düşerse bugünkü metin kalır', async () => {
