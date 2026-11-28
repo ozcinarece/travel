@@ -7,7 +7,7 @@ import { Harita } from '@/components/harita/Harita';
 import type { HaritaCizgisi, HaritaPini, Konum } from '@/components/harita/tipler';
 import { Ikon } from '@/components/ui/Ikon';
 import { t } from '@/i18n';
-import { anaV5, renk, seyahatV7, yazi } from '@/theme';
+import { anaV5, durakCekmecesi, renk, seyahatV7, yazi } from '@/theme';
 
 // ---------------------------------------------------------------- KK1 üst harita (260 pt, köşesiz)
 
@@ -174,8 +174,8 @@ export function BaglantiSatiri({ metin, onPress }: { metin: string; onPress: () 
 /** Plan modunda "Günler" en çok bu kadar satır (#522 inceleme 2); fazlası "Planı aç ›". */
 export const GUN_SINIRI = 3;
 
-/** Tek dolu turuncu düğme (52 pt). */
-function TuruncuDugme({ metin, ikon, onPress, pasif, mesgul }: { metin: string; ikon?: 'yolTarifiV7'; onPress: () => void; pasif?: boolean; mesgul?: boolean }) {
+/** Tek dolu turuncu düğme (52 pt). #580: durak çekmecesindeki "Gezdim" de bu düğme (✓, kanvasta çizgi 2,8). */
+export function TuruncuDugme({ metin, ikon, onPress, pasif, mesgul }: { metin: string; ikon?: 'yolTarifiV7' | 'tik'; onPress: () => void; pasif?: boolean; mesgul?: boolean }) {
   return (
     <Pressable
       accessibilityRole="button"
@@ -185,7 +185,7 @@ function TuruncuDugme({ metin, ikon, onPress, pasif, mesgul }: { metin: string; 
       disabled={pasif || mesgul}
       onPress={onPress}
       style={[s.turuncu, pasif && s.pasif]}>
-      {ikon ? <Ikon ad={ikon} boyut={18} renk={renk.metin} kalinlik={2.4} /> : null}
+      {ikon ? <Ikon ad={ikon} boyut={18} renk={renk.metin} kalinlik={ikon === 'tik' ? 2.2 : 2.4} /> : null}
       <Text style={s.turuncuMetin}>{metin}</Text>
     </Pressable>
   );
@@ -203,9 +203,19 @@ export function SiradakiAdimV7(p: { baslik: string; dugme: string; onPress: () =
   );
 }
 
-export function SimdiV7(p: { etiket: string; ad: string; alt: string | null; onYolTarifi: () => void; /** #579 KK4: Yol tarifi'nin hemen altında "Bugüne yer ekle". */ onBugunEkle?: () => void }) {
+export function SimdiV7(p: {
+  etiket: string;
+  ad: string;
+  alt: string | null;
+  onYolTarifi: () => void;
+  /** #579 KK4: Yol tarifi'nin hemen altında "Bugüne yer ekle". */
+  onBugunEkle?: () => void;
+  /** #580 KK4: gecikme bandı (Şimdi bloğunun hemen üstünde). */
+  gecikme?: { metin: string; onKaydir: () => void; pasif?: boolean } | null;
+}) {
   return (
     <View style={s.odak}>
+      {p.gecikme ? <GecikmeBandi metin={p.gecikme.metin} onKaydir={p.gecikme.onKaydir} pasif={p.gecikme.pasif} /> : null}
       <Text style={s.odakEtiket}>{p.etiket}</Text>
       <Text style={s.odakBaslik} numberOfLines={2}>
         {p.ad}
@@ -213,6 +223,30 @@ export function SimdiV7(p: { etiket: string; ad: string; alt: string | null; onY
       {p.alt ? <Text style={s.odakAlt}>{p.alt}</Text> : <View style={s.odakBaslikBosluk} />}
       <TuruncuDugme metin={t('seyahatV7.yolTarifi')} ikon="yolTarifiV7" onPress={p.onYolTarifi} />
       {p.onBugunEkle ? <ArtiSatiri metin={t('seyahatV7.bugunYerEkleSatiri')} onPress={p.onBugunEkle} /> : null}
+    </View>
+  );
+}
+
+/**
+ * #580 KK4 (kanvas `Dalga1_GecikmeBandi`): Şimdi'nin üstünde en az 44 pt bant — zemin #FFF4EB, köşe 12, sol 12 / sağ 6, saat
+ * ikonu (18, #C25200), "N dk gerideyiz" 14/700 #8A3A00, sağda Gece "Saatleri kaydır" 14/800 (44 pt), altında 10.
+ */
+export function GecikmeBandi({ metin, onKaydir, pasif }: { metin: string; onKaydir: () => void; pasif?: boolean }) {
+  return (
+    <View style={s.gecikme}>
+      <Ikon ad="saatD1" boyut={18} renk={durakCekmecesi.bantIkon} kalinlik={2.2} />
+      <Text style={s.gecikmeMetin} accessibilityRole="text">
+        {metin}
+      </Text>
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={t('durakCekmecesi.saatleriKaydir')}
+        accessibilityState={{ disabled: !!pasif }}
+        disabled={pasif}
+        onPress={onKaydir}
+        style={({ pressed }) => [s.gecikmeDugme, pasif && s.pasif, pressed && { opacity: 0.7 }]}>
+        <Text style={s.gecikmeDugmeMetin}>{t('durakCekmecesi.saatleriKaydir')}</Text>
+      </Pressable>
     </View>
   );
 }
@@ -268,12 +302,23 @@ export function ListemSatiriV7({ alt, onPress }: { alt: string | null; onPress: 
 
 export type PlanSatiriV7 = { id: string; ad: string; alt: string; gezildi: boolean; sira: number | null; renk: string };
 
-/** "Bugünün planı": gezilenler yeşil tikli ve soluk, sıradaki gün renginde numaralı. */
-export function BugununPlaniV7({ satirlar }: { satirlar: PlanSatiriV7[] }) {
+/**
+ * "Bugünün planı": gezilenler yeşil tikli ve soluk, sıradaki gün renginde numaralı. #580 KK1 (kanvas `Dalga1_GeziModu`): her
+ * satır dokunulur (en az 44 pt), sağda › (18, #9AA1B2); dokununca durak çekmecesi.
+ */
+export function BugununPlaniV7({ satirlar, onSatir }: { satirlar: PlanSatiriV7[]; onSatir?: (id: string) => void }) {
   return (
     <>
       {satirlar.map((d) => (
-        <View key={d.id} style={s.planSatiri} accessible accessibilityLabel={`${d.ad}, ${d.alt}`}>
+        <Pressable
+          key={d.id}
+          style={({ pressed }) => [s.planSatiri, pressed && onSatir && { opacity: 0.7 }]}
+          accessible
+          accessibilityRole={onSatir ? 'button' : undefined}
+          accessibilityLabel={`${d.ad}, ${d.alt}`}
+          accessibilityHint={onSatir ? t('durakCekmecesi.satirIpucu') : undefined}
+          disabled={!onSatir}
+          onPress={onSatir ? () => onSatir(d.id) : undefined}>
           {d.gezildi ? (
             <View style={[s.planDaire, { backgroundColor: seyahatV7.tikZemin }]}>
               <Ikon ad="tik" boyut={14} renk={renk.basari} kalinlik={2.4} />
@@ -289,7 +334,8 @@ export function BugununPlaniV7({ satirlar }: { satirlar: PlanSatiriV7[] }) {
             </Text>
             <Text style={s.satirAlt}>{d.alt}</Text>
           </View>
-        </View>
+          {onSatir ? <Ikon ad="okV7p" boyut={18} renk={anaV5.ok} kalinlik={2.4} /> : null}
+        </Pressable>
       ))}
     </>
   );
@@ -389,10 +435,14 @@ const s = StyleSheet.create({
   satirBaslik: { fontFamily: yazi.kalin, fontSize: 15, color: renk.metin },
   satirAlt: { fontFamily: yazi.normal, fontSize: 13, color: anaV5.ikincil },
   soluk: { color: anaV5.ikincil },
-  planSatiri: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 9 },
+  planSatiri: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 9, minHeight: 44 },
   planDaire: { width: 24, height: 24, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
   planNo: { fontFamily: yazi.ekstra, fontSize: 12, color: renk.zemin },
   yerSatiri: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 8 },
   yerFoto: { width: 52, height: 52, borderRadius: 12, overflow: 'hidden', backgroundColor: anaV5.fotoYok, alignItems: 'center', justifyContent: 'center' },
+  gecikme: { marginBottom: 10, minHeight: 44, borderRadius: 12, backgroundColor: durakCekmecesi.bantZemin, paddingLeft: 12, paddingRight: 6, flexDirection: 'row', alignItems: 'center', gap: 10 },
+  gecikmeMetin: { flex: 1, fontFamily: yazi.kalin, fontSize: 14, color: durakCekmecesi.bantMetin },
+  gecikmeDugme: { minHeight: 44, paddingHorizontal: 10, justifyContent: 'center' },
+  gecikmeDugmeMetin: { fontFamily: yazi.ekstra, fontSize: 14, color: renk.ana },
   yerArti: { width: 32, height: 32, borderRadius: 16, borderWidth: 1.5, borderColor: seyahatV7.artiKenar, alignItems: 'center', justifyContent: 'center' },
 });
