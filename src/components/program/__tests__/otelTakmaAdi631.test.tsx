@@ -123,6 +123,13 @@ describe('Otele ad ver (#631, kanvas 6b)', () => {
     expect(e.getByText(t('program.otelSayfa.adDegistir'))).toBeTruthy();
   });
 
+  it('"Her gece aynı otel" kapalıyken ad alanı gösterilmez (geceler ekranında ad kaybolmasın)', async () => {
+    const e = kur();
+    await oteliSec(e);
+    fireEvent(e.getByRole('switch'), 'valueChange', false);
+    expect(e.queryByText(t('program.otelSayfa.adEkle'))).toBeNull();
+  });
+
   it('takma ad değeri: dolu kırpılır, boş → null, 80 sınırı', () => {
     expect(takmaAdDegeri('  Bizim otel ')).toBe('Bizim otel');
     expect(takmaAdDegeri('   ')).toBeNull();

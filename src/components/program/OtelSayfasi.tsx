@@ -70,7 +70,7 @@ export function OtelSayfasi({ acik, seyahat, geceSayisi, konaklamalar, onKapat, 
       setSeciliSemt(semt);
       setSeciliAlt([semt, puan ? `★ ${puan}` : null].filter(Boolean).join(' · ') || null);
       // Başka otel seçilince ad o otele aittir: kayıtlı otelse onun takma adı, değilse boş.
-      setTakmaAd(konaklamalar?.find((k) => k.place_id === yer.place_id)?.takma_ad ?? '');
+      setTakmaAd(konaklamalar?.find((k) => k.place_id === yer.place_id || (k.lat === yer.lat && k.lng === yer.lng))?.takma_ad ?? '');
       setAdAlani(false);
       setAdDokunuldu(false);
       setSorgu('');
@@ -90,6 +90,9 @@ export function OtelSayfasi({ acik, seyahat, geceSayisi, konaklamalar, onKapat, 
       const stayId = await onKaydet(secim);
       // #631 KK3: ad yazımı otel kaydından sonra; başarısızsa otel kaydı geri alınmaz, sayfa açık kalır.
       if (adDokunuldu && stayId) await takmaAdYaz.mutateAsync({ stayId, takmaAd });
+      // Sayfa (Modal) ayakta kalır: yeniden açılınca eski ad yeniden yazılmasın.
+      setAdDokunuldu(false);
+      setAdAlani(false);
       onKapat();
     } catch {
       setHata(t('program.otelSayfa.hata'));
@@ -155,14 +158,15 @@ export function OtelSayfasi({ acik, seyahat, geceSayisi, konaklamalar, onKapat, 
             </View>
             <Ikon ad="tik" boyut={22} renk={renk.basari} kalinlik={3} />
           </View>
-          {adAlani ? null : (
+          {/* "Her gece aynı otel" kapalıyken Kaydet geceler ekranına gider; ad orada yazılmadığından alan gösterilmez (kayıp olmasın). */}
+          {adAlani || !hepsiAyni ? null : (
             <Pressable accessibilityRole="button" onPress={adAc} hitSlop={{ left: 8, right: 8 }} style={({ pressed }) => [s.adBaglanti, pressed && { opacity: 0.6 }]}>
               <Text style={s.baglantiMetin}>{adVar ? t('program.otelSayfa.adDegistir') : t('program.otelSayfa.adEkle')}</Text>
             </Pressable>
           )}
         </View>
       ) : null}
-      {secim && adAlani ? (
+      {secim && adAlani && hepsiAyni ? (
         <View style={{ gap: 6 }}>
           <Text style={s.adEtiket}>{t('program.otelSayfa.adEtiket')}</Text>
           <View style={s.adKutu}>
