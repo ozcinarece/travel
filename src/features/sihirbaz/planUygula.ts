@@ -13,7 +13,7 @@ import type { Durak, Gun, Mekan, Sehir } from '@/lib/tipler';
 import { googleGunu, kapaliGunler, type Periyot } from '@/schedule/acilis';
 import { sonAnahtar } from '@/schedule/sira';
 
-import { durakDakikasi, oncelikSirasi, planKur, type PlanMekani, type PlanSonucu } from './planKur';
+import { durakDakikasi, gezmeSirasi, oncelikSirasi, planKur, type PlanMekani, type PlanSonucu } from './planKur';
 
 /**
  * #582: dağıtım önceliği ve kapalı günler. `oylar`: mekan (places.id) → oy sayısı; `ilSira`: place_id → il listesi sırası;
@@ -155,7 +155,8 @@ export function onbellektekiSaatler(placeIdler: string[]): Map<string, Periyot[]
  * ilk `SAAT_TAVANI` tanesi.
  */
 export function saatIstenecekler(bos: Mekan[], oncelik: Pick<PlanOnceligi, 'oylar' | 'ilSira'>, onbellekte: ReadonlySet<string>): string[] {
-  const sira = oncelikSirasi(bos.map((m) => oncelikli(m, oncelik))).sira;
+  // planKur'la aynı sıra: önce gezme (yakınlık) sırası, üstüne oy ve il sırası.
+  const sira = oncelikSirasi(gezmeSirasi(bos.map((m) => oncelikli(m, oncelik))).sira).sira;
   const placeId = new Map(bos.map((m) => [m.id, m.place_id]));
   const secilen: string[] = [];
   for (const pm of sira) {
@@ -208,7 +209,8 @@ export async function planOnceliginiOku(
 export function usePlanOnizlemeOnceligi(seyahatId: string | null, mekanlar: Mekan[] | undefined, duraklar: Durak[] | undefined, tarihli: boolean, ilSlug?: string | null): PlanOnceligi | undefined {
   const { placeIdler } = useMemo(() => bosYerler(mekanlar ?? [], duraklar ?? []), [mekanlar, duraklar]);
   const db = useQuery({
-    queryKey: ['plan-onceligi', seyahatId, ilSlug ?? null, placeIdler],
+    // 'oylar' önekiyle: oy verilince (Listem, gerçek zamanlı) ['oylar', seyahatId] geçersiz sayılır, bu da onunla yenilenir.
+    queryKey: ['oylar', seyahatId, 'plan-onceligi', ilSlug === undefined ? 'seyahatten' : ilSlug, placeIdler],
     enabled: !!seyahatId && placeIdler.length > 0,
     staleTime: 30 * 1000,
     placeholderData: (onceki) => onceki,
@@ -220,7 +222,7 @@ export function usePlanOnizlemeOnceligi(seyahatId: string | null, mekanlar: Meka
       return { oylar, ilSira };
     },
   });
-  const saatSurumu = useSaatOnbellegi();
+  const saatSurumu = useSaatOnbellegi(tarihli);
   return useMemo(() => {
     if (!mekanlar || !duraklar) return undefined;
     // saatSurumu: önbelleğe saat girince yeniden oku.

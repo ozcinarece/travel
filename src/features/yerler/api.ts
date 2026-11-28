@@ -167,12 +167,15 @@ export const hafifOnbellek = new HafifOnbellek(
   async (adlar) => (await cagir<{ uriler: (string | null)[] }>('places-photo', { adlar, genislik: 400 })).uriler,
 );
 
+const aboneYok = () => () => undefined;
+const sifir = () => 0;
+
 /**
  * #595 KK4: ortak önbelleğe açılış saati girdikçe yeniden çizdirir (istek atmaz). Dönen sayı önbelleğin saat sürümü;
  * `hafifOnbellek.oku(id, ['saat'])` okuyan hesaplar bunu bağımlılık olarak kullanabilir.
  */
-export function useSaatOnbellegi(): number {
-  return useSyncExternalStore(hafifOnbellek.abone, hafifOnbellek.saatAnlik, hafifOnbellek.saatAnlik);
+export function useSaatOnbellegi(etkin = true): number {
+  return useSyncExternalStore(etkin ? hafifOnbellek.abone : aboneYok, etkin ? hafifOnbellek.saatAnlik : sifir, etkin ? hafifOnbellek.saatAnlik : sifir);
 }
 
 /** Ekranın gösterdiği alanlar → önbellek grupları. `puan`: puan ya da "şu an açık" gösteriliyor mu (KK3). */

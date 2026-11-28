@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { act, renderHook, waitFor } from '@testing-library/react-native';
 import type { ReactNode } from 'react';
 
+import { gezmeSirasi } from '@/features/sihirbaz/planKur';
 import { planiHesapla, planOnceliginiOku, SAAT_TAVANI, usePlanOnizlemeOnceligi } from '@/features/sihirbaz/planUygula';
 import { hafifOnbellek, useSaatOnbellegi, type HafifYer } from '@/features/yerler/api';
 import { HafifOnbellek } from '@/features/yerler/hafifOnbellek';
@@ -55,7 +56,9 @@ describe('#595 KK1 saat isteğine tavan', () => {
     const istenen = casus.mock.calls[0][0];
     expect(istenen).toHaveLength(15);
     expect(istenen.slice(0, 4)).toEqual(['P39', 'P38', 'P30', 'P20']);
-    expect(istenen.slice(4)).toEqual(['P0', 'P1', 'P2', 'P3', 'P4', 'P5', 'P6', 'P7', 'P8', 'P9', 'P10']);
+    // Oyu ve il sırası olmayanlar planKur'un gezme (yakınlık) sırasıyla.
+    const gezme = gezmeSirasi(mekanlar.map((x) => ({ id: x.place_id, lat: x.lat, lng: x.lng, dakika: 120 }))).sira.map((x) => x.id);
+    expect(istenen.slice(4)).toEqual(gezme.filter((id) => !['P39', 'P38', 'P30', 'P20'].includes(id)).slice(0, 11));
     // Kalan 25 yerde saat yok → kural uygulanmaz.
     expect(o.saatler?.size).toBe(15);
     expect(o.saatler?.has('P11')).toBe(false);
@@ -69,7 +72,7 @@ describe('#595 KK1 saat isteğine tavan', () => {
     const istenen = casus.mock.calls[0][0];
     expect(istenen).toHaveLength(15);
     expect(istenen).not.toContain('P0');
-    expect(istenen[0]).toBe('P5');
+    expect(istenen.some((id) => ['P0', 'P1', 'P2', 'P3', 'P4'].includes(id))).toBe(false);
     expect(o.saatler?.size).toBe(20);
     expect(o.saatler?.get('P0')).toEqual(pztKapali);
   });
@@ -86,6 +89,15 @@ describe('#595 KK1 saat isteğine tavan', () => {
     hafifOnbellek.yaz([yer('P2')], 'saatli');
     await planOnceliginiOku('t', mekanlar, [], true, { ilSlug: null });
     expect(casus).not.toHaveBeenCalled();
+  });
+});
+
+describe('#595 KK1 tarihsiz seyahat', () => {
+  it('hafta günü yok → saat istenmez', async () => {
+    const casus = jest.spyOn(hafifOnbellek, 'getirHepsi');
+    const o = await planOnceliginiOku('t', [mekan(1), mekan(2)], [], false, { ilSlug: null });
+    expect(casus).not.toHaveBeenCalled();
+    expect(o.saatler).toBeUndefined();
   });
 });
 
@@ -125,8 +137,10 @@ describe('#595 KK3 önizleme = Planı kur (aynı girdi)', () => {
     const plan = planiHesapla({ mekanlar, gunler, duraklar: [], oncelik: gercek });
     expect(onizleme.atanmamis.map((m) => m.id)).toEqual(plan.atanmamis.map((m) => m.id));
     expect(onizleme.gunler.map((g) => g.mekanlar.map((m) => m.id))).toEqual(plan.gunler.map((g) => g.mekanlar.map((m) => m.id)));
-    // Pazartesi kapalı P5 (en çok oy) Salı'ya düşer; önceliksiz hesap bunu bilmez.
+    // Pazartesi kapalı P5 (en çok oy) Salı'ya düşer; önceliksiz (eski önizleme) hesap bunu bilmez.
     expect(plan.gunler.find((g) => g.gunId === 'g2')?.mekanlar.map((m) => m.id)).toContain('m5');
+    const onceliksiz = planiHesapla({ mekanlar, gunler, duraklar: [] });
+    expect(onceliksiz.gunler.map((g) => g.mekanlar.map((m) => m.id))).not.toEqual(plan.gunler.map((g) => g.mekanlar.map((m) => m.id)));
   });
 
   it('önbelleğe saat girince önizleme yeniden hesaplanır', async () => {

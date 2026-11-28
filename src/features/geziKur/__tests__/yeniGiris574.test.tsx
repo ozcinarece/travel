@@ -81,7 +81,7 @@ jest.mock('@/features/icerik/sorgular', () => ({
 }));
 jest.mock('@/features/icerik/yerEkle', () => ({ useYerleriEkle: () => mockMut }));
 jest.mock('@/features/icerik/ilOnerileri', () => ({ ilSlugu: () => null, useIlYerleri: () => mockBos }));
-jest.mock('@/features/sihirbaz/planUygula', () => ({ ...jest.requireActual<object>('@/features/sihirbaz/planUygula'), usePlaniUygula: () => mockMut }));
+jest.mock('@/features/sihirbaz/planUygula', () => ({ ...jest.requireActual<object>('@/features/sihirbaz/planUygula'), usePlaniUygula: () => mockMut, usePlanOnizlemeOnceligi: () => undefined }));
 jest.mock('@/features/sihirbaz/taslak', () => ({ ...jest.requireActual<object>('@/features/sihirbaz/taslak'), useTaslakSehri: () => mockMut, useTaslakTarihi: () => mockMut }));
 jest.mock('@/components/mekan/MekanPaneli', () => ({ MekanPaneli: () => null }));
 jest.mock('@/components/sihirbaz/AdimIlOnerileri', () => ({ AdimIlOnerileri: () => null }));
